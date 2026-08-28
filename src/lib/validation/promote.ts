@@ -7,11 +7,29 @@ import { loadCatalogFromDir } from '../repository/load.ts';
 import type { Catalog } from '../domain/catalog.ts';
 import { findDuplicateEvents } from './duplicates.ts';
 import { findReferenceIssues } from './references.ts';
-import { errorIssue, makeReport, type ValidationReport } from './report.ts';
+import { errorIssue, makeReport, type ValidationIssue, type ValidationReport } from './report.ts';
 
 export type PromoteResult = {
   report: ValidationReport;
   written: string[];
+};
+
+export type FileToWrite = {
+  relativePath: string;
+  value: unknown;
+};
+
+export type CandidateMerge = {
+  catalog: Catalog;
+  filesToWrite: FileToWrite[];
+  issues: ValidationIssue[];
+};
+
+const ENTITY_KIND_LABEL: Record<string, string> = {
+  venue: 'lugar',
+  organizer: 'organizador',
+  series: 'serie',
+  source: 'fuente',
 };
 
 export async function promoteCandidateFile(
@@ -55,7 +73,7 @@ export async function promoteCandidate(
     };
   }
   const merged = mergeCandidate(existing, candidate);
-  const issues = [...findReferenceIssues(merged.catalog), ...findDuplicateEvents(merged.catalog)];
+  const issues = [...merged.issues, ...findReferenceIssues(merged.catalog), ...findDuplicateEvents(merged.catalog)];
   const report = makeReport(issues);
   if (!report.ok) {
     return { report, written: [] };
@@ -70,13 +88,7 @@ export async function promoteCandidate(
   return { report, written };
 }
 
-export function mergeCandidate(
-  existing: Catalog,
-  candidate: Candidate,
-): {
-  catalog: Catalog;
-  filesToWrite: { relativePath: string; value: unknown }[];
-} {
+export function mergeCandidate(existing: Catalog, candidate: Candidate): CandidateMerge {
   const catalog: Catalog = {
     events: [...existing.events],
     venues: [...existing.venues],
@@ -84,24 +96,78 @@ export function mergeCandidate(
     series: [...existing.series],
     sources: [...existing.sources],
   };
-  const filesToWrite: { relativePath: string; value: unknown }[] = [];
+  const filesToWrite: FileToWrite[] = [];
+  const issues: ValidationIssue[] = [];
 
-  const addIfNew = <T extends { id: string }>(list: T[], incoming: T | undefined, folder: string): T[] => {
+  const reconcile = <T extends { id: string }>(
+    list: T[],
+    incoming: T | undefined,
+    kind: 'venue' | 'organizer' | 'series' | 'source',
+    folder: string,
+  ): T[] => {
     if (!incoming) return list;
-    if (list.some((item) => item.id === incoming.id)) return list;
-    filesToWrite.push({ relativePath: `${folder}/${incoming.id}.json`, value: incoming });
-    return [...list, incoming];
+    const current = list.find((item) => item.id === incoming.id);
+    if (!current) {
+      filesToWrite.push({ relativePath: `${folder}/${incoming.id}.json`, value: incoming });
+      return [...list, incoming];
+    }
+    const diffs = canonicalFieldDiffs(current, incoming);
+    if (diffs.length > 0) {
+      const label = ENTITY_KIND_LABEL[kind] ?? kind;
+      issues.push(
+        errorIssue(
+          'entity-conflict',
+          `${label} ${incoming.id}: el candidato no coincide con la entidad canónica existente (${diffs.join('; ')})`,
+          `${folder}/${incoming.id}.json`,
+        ),
+      );
+    }
+    return list;
   };
 
-  catalog.venues = addIfNew(catalog.venues, candidate.venue, 'venues');
+  catalog.venues = reconcile(catalog.venues, candidate.venue, 'venue', 'venues');
   for (const organizer of candidate.organizers ?? []) {
-    catalog.organizers = addIfNew(catalog.organizers, organizer, 'organizers');
+    catalog.organizers = reconcile(catalog.organizers, organizer, 'organizer', 'organizers');
   }
-  catalog.series = addIfNew(catalog.series, candidate.series, 'series');
+  catalog.series = reconcile(catalog.series, candidate.series, 'series', 'series');
   for (const source of candidate.sources ?? []) {
-    catalog.sources = addIfNew(catalog.sources, source, 'sources');
+    catalog.sources = reconcile(catalog.sources, source, 'source', 'sources');
   }
   catalog.events = [...catalog.events, candidate.event];
   filesToWrite.push({ relativePath: `events/${candidate.event.id}.json`, value: candidate.event });
-  return { catalog, filesToWrite };
+  return { catalog, filesToWrite, issues };
+}
+
+/** Deterministic field-by-field comparison of canonical entity JSON. Missing vs present optional fields is a conflict. */
+export function canonicalFieldDiffs(existing: object, incoming: object): string[] {
+  const left = existing as Record<string, unknown>;
+  const right = incoming as Record<string, unknown>;
+  const keys = [...new Set([...Object.keys(left), ...Object.keys(right)])].sort();
+  const diffs: string[] = [];
+  for (const key of keys) {
+    if (!canonicalValuesEqual(left[key], right[key])) {
+      diffs.push(`${key}: catálogo ${formatCanonicalValue(left[key])}, candidato ${formatCanonicalValue(right[key])}`);
+    }
+  }
+  return diffs;
+}
+
+export function canonicalValuesEqual(left: unknown, right: unknown): boolean {
+  if (Object.is(left, right)) return true;
+  if (left === undefined || right === undefined) return left === right;
+  if (left === null || right === null) return left === right;
+  if (Array.isArray(left) || Array.isArray(right)) {
+    if (!Array.isArray(left) || !Array.isArray(right) || left.length !== right.length) return false;
+    return left.every((item, index) => canonicalValuesEqual(item, right[index]));
+  }
+  if (typeof left === 'object' && typeof right === 'object') {
+    return canonicalFieldDiffs(left, right).length === 0;
+  }
+  return false;
+}
+
+function formatCanonicalValue(value: unknown): string {
+  if (value === undefined) return 'ausente';
+  if (typeof value === 'string') return `«${value}»`;
+  return JSON.stringify(value);
 }

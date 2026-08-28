@@ -52,7 +52,9 @@ Promoción a datos canónicos:
 npm run ingest:promote -- ingestion/inbox/mi-evento.json
 ```
 
-El script valida el candidato, lo fusiona en memoria con `data/`, aplica las mismas reglas de referencias y duplicados, y sólo entonces escribe ficheros nuevos. No sobrescribe un evento que ya exista. Los duplicados de alta confianza (mismo lugar + fecha + hora + título normalizado, o misma URL de fuente + fecha) se rechazan; los casos ambiguos quedan para revisión humana.
+El script valida el candidato, lo fusiona en memoria con `data/`, aplica las mismas reglas de referencias y duplicados, y sólo entonces escribe ficheros nuevos. No sobrescribe un evento que ya exista. Si el candidato incluye un lugar, organizador, serie o fuente cuyo ID ya está en el catálogo, la entidad candidata debe coincidir campo a campo con la canónica (incluidos los opcionales ausentes o presentes). Cualquier diferencia es un conflicto explícito: la promoción falla y no escribe ningún fichero. Nunca reutiliza en silencio un ID existente con datos distintos, ni pisa una entidad canónica.
+
+Los duplicados de alta confianza (mismo lugar + fecha + hora + título normalizado, o misma URL de fuente + fecha) se rechazan; los casos ambiguos quedan para revisión humana.
 
 ## Descubrimiento futuro
 

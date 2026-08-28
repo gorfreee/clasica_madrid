@@ -1,6 +1,11 @@
 import type { Catalog } from '../domain/catalog.ts';
-import { formatMadridDate, madridDateTimeIso } from '../domain/dates.ts';
-import { findPublicEventBySlug, listPublicEvents, type Clock, systemClock } from '../domain/index.ts';
+import {
+  formatMadridDate,
+  hasUpcomingOccurrence,
+  madridDateTimeIso,
+  nextUpcomingOccurrence,
+} from '../domain/dates.ts';
+import { findEventBySlug, listCanonicalEvents, type Clock, systemClock } from '../domain/index.ts';
 import type { ResolvedEvent } from '../domain/resolve.ts';
 import { isMadridMunicipality } from '../domain/normalize.ts';
 import {
@@ -33,6 +38,7 @@ export type EventPageModel = {
   canonicalPath: string;
   slug: string;
   statusLabel: string;
+  isPast: boolean;
   venueName: string;
   venueHref: string;
   venueAddress: string | null;
@@ -60,8 +66,8 @@ export type EventPageModel = {
   jsonLd: Record<string, unknown>[];
 };
 
-export function listEventPageSlugs(catalog: Catalog, clock: Clock = systemClock): string[] {
-  return listPublicEvents(catalog, clock).map((resolved) => resolved.event.slug);
+export function listEventPageSlugs(catalog: Catalog): string[] {
+  return listCanonicalEvents(catalog).map((resolved) => resolved.event.slug);
 }
 
 export function buildEventPageModel(
@@ -69,21 +75,24 @@ export function buildEventPageModel(
   slug: string,
   clock: Clock = systemClock,
 ): EventPageModel | null {
-  const resolved = findPublicEventBySlug(catalog, slug, clock);
+  const resolved = findEventBySlug(catalog, slug);
   if (!resolved) return null;
-  return toEventPageModel(resolved);
+  return toEventPageModel(resolved, clock);
 }
 
-export function toEventPageModel(resolved: ResolvedEvent): EventPageModel {
+export function toEventPageModel(resolved: ResolvedEvent, clock: Clock = systemClock): EventPageModel {
   const { event, venue, series, organizers, citations } = resolved;
-  const next = nextScheduledOccurrence(event.occurrences);
-  const description = buildEventDescription(resolved, next);
+  const now = clock.now();
+  const next = nextUpcomingOccurrence(event.occurrences, now);
+  const isPast = event.status === 'scheduled' && !hasUpcomingOccurrence(event.occurrences, now);
+  const description = buildEventDescription(resolved, next, isPast);
   return {
     title: event.title,
     description,
     canonicalPath: `/eventos/${event.slug}`,
     slug: event.slug,
     statusLabel: eventStatusLabel(event.status),
+    isPast,
     venueName: venue.name,
     venueHref: `/lugares/${venue.slug}`,
     venueAddress: venue.address ?? null,
@@ -129,15 +138,17 @@ export function toEventPageModel(resolved: ResolvedEvent): EventPageModel {
   };
 }
 
-function nextScheduledOccurrence(occurrences: Occurrence[]): Occurrence | undefined {
+function lastScheduledOccurrence(occurrences: Occurrence[]): Occurrence | undefined {
   return occurrences
     .filter((occurrence) => occurrence.status === 'scheduled')
-    .sort((a, b) => a.date.localeCompare(b.date) || (a.time ?? '').localeCompare(b.time ?? ''))[0];
+    .sort((a, b) => a.date.localeCompare(b.date) || (a.time ?? '').localeCompare(b.time ?? ''))
+    .at(-1);
 }
 
-function buildEventDescription(resolved: ResolvedEvent, next?: Occurrence): string {
-  const when = next
-    ? `${formatMadridDate(next.date)}${next.time ? ` a las ${next.time}` : ''}`
+function buildEventDescription(resolved: ResolvedEvent, next?: Occurrence, isPast = false): string {
+  const whenOccurrence = next ?? (isPast ? lastScheduledOccurrence(resolved.event.occurrences) : undefined);
+  const when = whenOccurrence
+    ? `${formatMadridDate(whenOccurrence.date)}${whenOccurrence.time ? ` a las ${whenOccurrence.time}` : ''}`
     : null;
   const parts = [resolved.event.title, resolved.venue.name];
   if (!isMadridMunicipality(resolved.venue.municipality)) {
@@ -202,4 +213,3 @@ function buildMusicEventJsonLd(resolved: ResolvedEvent): Record<string, unknown>
       return data;
     });
 }
-

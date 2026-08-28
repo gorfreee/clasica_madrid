@@ -1,4 +1,19 @@
-export { compareDateTime, fromMadridLocal, formatMadridDate, isUpcomingOccurrence, madridDateTimeIso, madridNowTime, madridToday, MADRID_TIME_ZONE, systemClock, type Clock } from './dates.ts';
+export {
+  compareDateTime,
+  fromMadridLocal,
+  formatMadridDate,
+  hasUpcomingOccurrence,
+  isScheduledUpcoming,
+  isUpcomingOccurrence,
+  madridDateTimeIso,
+  madridNowTime,
+  madridToday,
+  MADRID_TIME_ZONE,
+  nextUpcomingOccurrence,
+  systemClock,
+  type Clock,
+  type DatedOccurrence,
+} from './dates.ts';
 export { emptyCatalog, type Catalog } from './catalog.ts';
 export {
   filterFilterable,
@@ -6,15 +21,16 @@ export {
   filtersToSearchParams,
   hasActiveFilters,
   parseAgendaFilters,
+  selectVisibleOccurrences,
   toFilterable,
   type AgendaFilters,
   type FilterableOccurrence,
 } from './filters.ts';
 export { isMadridMunicipality, normalizeText, textMatchesQuery } from './normalize.ts';
 export {
-  findPublicEventBySlug,
+  findEventBySlug,
   findVenueBySlug,
-  listPublicEvents,
+  listCanonicalEvents,
   listUpcomingOccurrences,
   listVenuesWithUpcoming,
   sortOccurrences,

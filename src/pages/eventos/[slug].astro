@@ -13,14 +13,14 @@ if (!slug) {
 }
 const model = await loadEventPage(slug);
 if (!model) {
-  throw new Error(`Evento público no encontrado: ${slug}`);
+  throw new Error(`Evento no encontrado: ${slug}`);
 }
 ---
 
 <Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath} jsonLd={model.jsonLd}>
   <article class="detail">
     <header class="page-header">
-      <p class="eyebrow">Evento</p>
+      <p class="eyebrow">{model.isPast ? 'Evento pasado' : 'Evento'}</p>
       <h1>{model.title}</h1>
       <p class="lede">
         <a href={model.venueHref}>{model.venueName}</a>
@@ -32,6 +32,7 @@ if (!model) {
           </span>
         )}
       </p>
+      {model.isPast && <p class="lede">Este evento ya ha tenido lugar.</p>}
     </header>
 
     <dl class="fact-list">

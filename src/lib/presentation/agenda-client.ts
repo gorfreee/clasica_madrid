@@ -1,10 +1,11 @@
 import {
-  filterFilterable,
   hasActiveFilters,
   parseAgendaFilters,
+  selectVisibleOccurrences,
   type AgendaFilters,
   type FilterableOccurrence,
 } from '../domain/filters.ts';
+import { occurrenceCountLabel } from './labels.ts';
 
 export function initAgendaFilters(): void {
   const dataNode = document.getElementById('agenda-filter-data');
@@ -19,7 +20,8 @@ export function initAgendaFilters(): void {
 
   const apply = () => {
     const filters = parseAgendaFilters(new URLSearchParams(window.location.search));
-    const visible = new Set(filterFilterable(items, filters).map((item) => item.occurrenceId));
+    const visibleItems = selectVisibleOccurrences(items, filters, new Date());
+    const visible = new Set(visibleItems.map((item) => item.occurrenceId));
     const active = hasActiveFilters(filters);
 
     for (const article of list.querySelectorAll<HTMLElement>('[data-occurrence-id]')) {
@@ -34,8 +36,7 @@ export function initAgendaFilters(): void {
     }
 
     if (count) {
-      count.textContent =
-        visible.size === 1 ? '1 representación próxima' : `${visible.size} representaciones próximas`;
+      count.textContent = occurrenceCountLabel(visible.size);
       count.hidden = visible.size === 0;
     }
     if (noResults) noResults.hidden = visible.size > 0;

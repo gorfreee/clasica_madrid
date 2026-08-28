@@ -46,6 +46,30 @@ export function isUpcomingOccurrence(
   return time >= madridNowTime(now);
 }
 
+export type DatedOccurrence = {
+  date: string;
+  time: string | null;
+  status: string;
+};
+
+export function isScheduledUpcoming(occurrence: DatedOccurrence, now = new Date()): boolean {
+  return occurrence.status === 'scheduled' && isUpcomingOccurrence(occurrence.date, occurrence.time, now);
+}
+
+/** Next future scheduled occurrence relative to `now`, or undefined if none remain. */
+export function nextUpcomingOccurrence<T extends DatedOccurrence>(
+  occurrences: readonly T[],
+  now = new Date(),
+): T | undefined {
+  return occurrences
+    .filter((occurrence) => isScheduledUpcoming(occurrence, now))
+    .sort((left, right) => compareDateTime(left.date, left.time, right.date, right.time))[0];
+}
+
+export function hasUpcomingOccurrence(occurrences: readonly DatedOccurrence[], now = new Date()): boolean {
+  return occurrences.some((occurrence) => isScheduledUpcoming(occurrence, now));
+}
+
 /** Convert a Madrid civil date+time into an ISO-8601 string with offset. */
 export function madridDateTimeIso(date: string, time: string | null): string {
   if (time === null) return date;

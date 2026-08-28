@@ -72,7 +72,7 @@ Los esquemas exactos podrán evolucionar, pero todo dato publicado debe:
 - poder validarse de forma determinista;
 - evitar duplicados y referencias rotas.
 
-Los eventos pasados se conservan en el repositorio para disponer de histórico y permitir futuras estadísticas. La web está orientada principalmente a presente y futuro; no es obligatorio generar para siempre una página pública individual para cada evento histórico.
+Los eventos pasados se conservan en el repositorio para disponer de histórico y permitir futuras estadísticas. La agenda pública está orientada a presente y futuro; cada evento canónico conserva una página pública estable `/eventos/{slug}` aunque todas sus representaciones hayan pasado.
 
 ## Build y publicación
 

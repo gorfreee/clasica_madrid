@@ -4,7 +4,7 @@ import { toFilterable } from '../domain/filters.ts';
 import { formatMadridDate } from '../domain/dates.ts';
 import { listUpcomingOccurrences, type Clock, systemClock } from '../domain/index.ts';
 import type { ResolvedOccurrence } from '../domain/resolve.ts';
-import { accessLabels, areaLabels, eraLabels, formatLabels, kindLabels } from './labels.ts';
+import { accessLabels, areaLabels, eraLabels, formatLabels, kindLabels, occurrenceCountLabel } from './labels.ts';
 import { ACCESS_MODES, AREAS, ERAS, EVENT_KINDS, FORMATS } from '../schemas/taxonomies.ts';
 import { isMadridMunicipality } from '../domain/normalize.ts';
 
@@ -56,6 +56,7 @@ export type AgendaPageModel = {
   description: string;
   canonicalPath: string;
   isEmptyCatalog: boolean;
+  hasUpcoming: boolean;
   query: string;
   from: string;
   to: string;
@@ -69,9 +70,7 @@ export type AgendaPageModel = {
   filterIndex: FilterableOccurrence[];
 };
 
-export function occurrenceCountLabel(count: number): string {
-  return count === 1 ? '1 representación próxima' : `${count} representaciones próximas`;
-}
+export { occurrenceCountLabel } from './labels.ts';
 
 export function buildAgendaPageModel(
   catalog: Catalog,
@@ -85,7 +84,8 @@ export function buildAgendaPageModel(
     description:
       'Conciertos y eventos de música clásica en Madrid y su entorno inmediato, con fuente original.',
     canonicalPath: '/',
-    isEmptyCatalog: upcoming.length === 0,
+    isEmptyCatalog: catalog.events.length === 0,
+    hasUpcoming: upcoming.length > 0,
     query: '',
     from: '',
     to: '',

@@ -4,6 +4,7 @@ import FilterForm from '../components/FilterForm.astro';
 import AgendaList from '../components/AgendaList.astro';
 import EmptyState from '../components/EmptyState.astro';
 import { loadAgendaPage } from '../lib/presentation/site.ts';
+import { serializeJsonForScript } from '../lib/util/json-script.ts';
 
 const model = await loadAgendaPage(Astro.url);
 ---
@@ -24,6 +25,11 @@ const model = await loadAgendaPage(Astro.url);
         title="Todavía no hay conciertos publicados"
         body="Estamos construyendo el catálogo. Cuando haya eventos verificados, aparecerán aquí en orden cronológico."
       />
+    ) : !model.hasUpcoming ? (
+      <EmptyState
+        title="No hay conciertos próximos"
+        body="El catálogo conserva eventos que ya han tenido lugar, pero ahora mismo no hay representaciones vigentes en la agenda."
+      />
     ) : (
       <>
         <FilterForm model={model} />
@@ -37,7 +43,12 @@ const model = await loadAgendaPage(Astro.url);
             body="Prueba a quitar algún filtro o ampliar las fechas."
           />
         </div>
-        <script id="agenda-filter-data" type="application/json" is:inline set:html={JSON.stringify(model.filterIndex).replaceAll('<', '\\u003c')} />
+        <script
+          id="agenda-filter-data"
+          type="application/json"
+          is:inline
+          set:html={serializeJsonForScript(model.filterIndex)}
+        />
         <script>
           import { initAgendaFilters } from '../lib/presentation/agenda-client.ts';
           initAgendaFilters();
