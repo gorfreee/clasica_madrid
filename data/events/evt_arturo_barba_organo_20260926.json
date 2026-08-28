@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_arturo_barba_organo_20260926",
+  "slug": "arturo-barba-organo-medinaceli",
+  "title": "Arturo Barba — I Ciclo Internacional de Conciertos de Órgano",
+  "status": "scheduled",
+  "venueId": "ven_basilica_jesus_medinaceli",
+  "organizerIds": [
+    "org_hermanos_capuchinos"
+  ],
+  "seriesId": "ser_ciclo_organo_medinaceli_2026",
+  "occurrences": [
+    {
+      "id": "occ_arturo_barba_organo_20260926_01",
+      "date": "2026-09-26",
+      "time": "12:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Arturo Barba",
+      "role": "soloist"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "organ"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_hermanos_capuchinos",
+      "url": "https://hermanoscapuchinos.org/actualidad/587/i-ciclo-internacional-de-conciertos-de-organo",
+      "checkedAt": "2026-08-28"
+    }
+  ],
+  "primarySourceId": "src_hermanos_capuchinos",
+  "lastVerifiedAt": "2026-08-28"
+}

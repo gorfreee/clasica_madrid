@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_contendientes_leipzig_20260918",
+  "slug": "los-contendientes-de-leipzig",
+  "title": "Los contendientes de Leipzig",
+  "status": "scheduled",
+  "venueId": "ven_museo_prado_auditorio",
+  "organizerIds": [
+    "org_museo_prado"
+  ],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_contendientes_leipzig_20260918_01",
+      "date": "2026-09-18",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Georg Philipp Telemann"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concerto Polonois, TWV 43:G7",
+      "composerName": "Georg Philipp Telemann"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "chamber",
+    "early-music"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_museo_prado",
+      "url": "https://www.museodelprado.es/actualidad/actividad/los-contendientes-de-leipzig/66464ede-ca10-4edd-bd63-2e45ff67572b",
+      "checkedAt": "2026-08-28"
+    }
+  ],
+  "primarySourceId": "src_museo_prado",
+  "lastVerifiedAt": "2026-08-28"
+}

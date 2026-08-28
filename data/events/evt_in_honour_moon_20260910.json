@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_in_honour_moon_20260910",
+  "slug": "in-honour-of-the-moon",
+  "title": "In Honour of the Moon",
+  "status": "scheduled",
+  "venueId": "ven_circulo_bellas_artes_sala_columnas",
+  "organizerIds": [
+    "org_circulo_bellas_artes",
+    "org_embajada_irlanda"
+  ],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_in_honour_moon_20260910_01",
+      "date": "2026-09-10",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Gerard O'Donnell",
+      "role": "soloist"
+    },
+    {
+      "name": "The Balor Piano Trio",
+      "role": "ensemble"
+    },
+    {
+      "name": "Pavle Marinković",
+      "role": "soloist"
+    },
+    {
+      "name": "Marta Tobar",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Gerard O'Donnell"
+    }
+  ],
+  "works": [
+    {
+      "title": "In Honour of the Moon",
+      "composerName": "Gerard O'Donnell"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_circulo_bellas_artes",
+      "url": "https://www.circulobellasartes.com/espectaculos/in-honour-of-the-moon/",
+      "checkedAt": "2026-08-28"
+    }
+  ],
+  "primarySourceId": "src_circulo_bellas_artes",
+  "lastVerifiedAt": "2026-08-28"
+}

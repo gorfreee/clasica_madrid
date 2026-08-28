@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_jose_fiumara_clasico_pop_20260926",
+  "slug": "jose-fiumara-de-clasico-a-lo-pop",
+  "title": "José Fiumara: De clásico a lo Pop",
+  "status": "scheduled",
+  "venueId": "ven_jardin_bulevar_pena_gorbea",
+  "organizerIds": [],
+  "seriesId": "ser_bulevarte_2026",
+  "occurrences": [
+    {
+      "id": "occ_jose_fiumara_clasico_pop_20260926_01",
+      "date": "2026-09-26",
+      "time": "20:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "José Fiumara",
+      "role": "soloist"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital",
+    "other"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Vicalvaro/Jose-Fiumara-De-clasico-a-lo-Pop/?vgnextchannel=f4c1ca5d5fb96010VgnVCM100000dc0ca8c0RCRD&vgnextfmt=default&vgnextoid=1bfc56066dbdf910VgnVCM100000891ecb1aRCRD",
+      "checkedAt": "2026-08-28"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-08-28"
+}

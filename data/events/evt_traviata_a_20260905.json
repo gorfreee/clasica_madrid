@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_traviata_a_20260905",
+  "slug": "la-traviata-diana-rosa-cardenas-pablo-rossi",
+  "title": "La traviata — Diana Rosa Cárdenas y Pablo Rossi",
+  "status": "scheduled",
+  "venueId": "ven_teatro_la_latina",
+  "organizerIds": [
+    "org_loperamore"
+  ],
+  "seriesId": "ser_zarzuela_latina_2026",
+  "occurrences": [
+    {
+      "id": "occ_traviata_a_20260905_01",
+      "date": "2026-09-05",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro y Orquesta L'Operamore",
+      "role": "ensemble"
+    },
+    {
+      "name": "Javier Corcuera",
+      "role": "conductor"
+    },
+    {
+      "name": "Diana Rosa Cárdenas",
+      "role": "soloist"
+    },
+    {
+      "name": "Pablo Rossi",
+      "role": "soloist"
+    },
+    {
+      "name": "Julio Morales",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Giuseppe Verdi"
+    }
+  ],
+  "works": [
+    {
+      "title": "La traviata",
+      "composerName": "Giuseppe Verdi"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "opera"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_teatro_la_latina",
+      "url": "https://www.teatrolalatina.es/obra-de-teatro/la-traviata/",
+      "checkedAt": "2026-08-28"
+    }
+  ],
+  "primarySourceId": "src_teatro_la_latina",
+  "lastVerifiedAt": "2026-08-28"
+}

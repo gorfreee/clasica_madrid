@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_teatro_zarzuela",
+  "slug": "teatro-de-la-zarzuela",
+  "name": "Teatro de la Zarzuela",
+  "municipality": "Madrid",
+  "area": "madrid",
+  "address": "Calle de Jovellanos, 4, 28014 Madrid",
+  "url": "https://teatrodelazarzuela.inaem.gob.es/",
+  "lastVerifiedAt": "2026-08-28"
+}

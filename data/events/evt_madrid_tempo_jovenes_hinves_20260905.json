@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_tempo_jovenes_hinves_20260905",
+  "slug": "madrid-a-tempo-jovenes-talentos-hinves",
+  "title": "Madrid a Tempo: Concierto de Jóvenes Talentos — Hinves Pianos",
+  "status": "scheduled",
+  "venueId": "ven_hinves_pianos",
+  "organizerIds": [
+    "org_madrid_a_tempo"
+  ],
+  "seriesId": "ser_festival_madrid_a_tempo_2026",
+  "occurrences": [
+    {
+      "id": "occ_madrid_tempo_jovenes_hinves_20260905_01",
+      "date": "2026-09-05",
+      "time": "13:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_madrid_a_tempo",
+      "url": "https://www.madridatempo.com/programacion-2023",
+      "checkedAt": "2026-08-28"
+    }
+  ],
+  "primarySourceId": "src_madrid_a_tempo",
+  "lastVerifiedAt": "2026-08-28"
+}

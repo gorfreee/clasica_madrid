@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "id": "src_esmadrid",
+  "slug": "esmadrid",
+  "name": "esMadrid",
+  "kind": "aggregator",
+  "url": "https://www.esmadrid.com/"
+}

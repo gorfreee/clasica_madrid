@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_paraisos_nocturnos_20260930",
+  "slug": "paraisos-nocturnos-nectar-project-music",
+  "title": "Paraísos nocturnos",
+  "status": "scheduled",
+  "venueId": "ven_real_academia_bellas_artes_salon_actos",
+  "organizerIds": [
+    "org_real_academia_bellas_artes_san_fernando"
+  ],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_paraisos_nocturnos_20260930_01",
+      "date": "2026-09-30",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Nectar Project Music",
+      "role": "ensemble"
+    },
+    {
+      "name": "Miguel Ángel Egido",
+      "role": "soloist"
+    },
+    {
+      "name": "Ana María Alonso",
+      "role": "soloist"
+    },
+    {
+      "name": "Duncan Gifford",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Tomás Marco"
+    },
+    {
+      "name": "Laura Vega"
+    },
+    {
+      "name": "José Luis Greco"
+    },
+    {
+      "name": "David del Puerto"
+    },
+    {
+      "name": "Jesús Torres"
+    }
+  ],
+  "works": [
+    {
+      "title": "Desgarradura",
+      "composerName": "Tomás Marco"
+    },
+    {
+      "title": "Paraísos perdidos",
+      "composerName": "Laura Vega"
+    },
+    {
+      "title": "Desnudez",
+      "composerName": "José Luis Greco"
+    },
+    {
+      "title": "En la piel de la noche",
+      "composerName": "David del Puerto"
+    },
+    {
+      "title": "To sleep with night",
+      "composerName": "José Luis Greco"
+    },
+    {
+      "title": "Trío para saxo soprano, viola y piano",
+      "composerName": "Jesús Torres"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_real_academia_bellas_artes_san_fernando",
+      "url": "https://www.realacademiabellasartessanfernando.com/actividades/conciertos/paraisos-nocturnos/",
+      "checkedAt": "2026-08-28"
+    }
+  ],
+  "primarySourceId": "src_real_academia_bellas_artes_san_fernando",
+  "lastVerifiedAt": "2026-08-28"
+}

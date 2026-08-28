@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_ateneo_madrid",
+  "slug": "ateneo-de-madrid",
+  "name": "Ateneo de Madrid",
+  "municipality": "Madrid",
+  "area": "madrid",
+  "address": "Calle del Prado, 21, 28014 Madrid",
+  "url": "https://www.ateneodemadrid.com/",
+  "lastVerifiedAt": "2026-08-28"
+}

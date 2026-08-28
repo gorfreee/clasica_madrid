@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_musica_que_nos_une_20260926",
+  "slug": "musica-que-nos-une-capilla-musical-san-antonio",
+  "title": "Música que nos une",
+  "status": "scheduled",
+  "venueId": "ven_iglesia_san_antonio_alemanes",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_musica_que_nos_une_20260926_01",
+      "date": "2026-09-26",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Capilla Musical San Antonio",
+      "role": "ensemble"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "chamber",
+    "organ"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_real_hermandad_refugio",
+      "url": "https://realhermandaddelrefugio.org/calendario-de-eventos/musica-que-nos-une-concierto/",
+      "checkedAt": "2026-08-28"
+    }
+  ],
+  "primarySourceId": "src_real_hermandad_refugio",
+  "lastVerifiedAt": "2026-08-28"
+}

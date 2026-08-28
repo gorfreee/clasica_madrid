@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_manon_lescaut_reparto_a_202609",
+  "slug": "manon-lescaut-reparto-sondra-radvanovsky",
+  "title": "Manon Lescaut — reparto Sondra Radvanovsky",
+  "status": "scheduled",
+  "venueId": "ven_teatro_real",
+  "organizerIds": [
+    "org_teatro_real"
+  ],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_manon_lescaut_reparto_a_202609_01",
+      "date": "2026-09-23",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_manon_lescaut_reparto_a_202609_02",
+      "date": "2026-09-26",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_manon_lescaut_reparto_a_202609_03",
+      "date": "2026-09-29",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Nicola Luisotti",
+      "role": "conductor"
+    },
+    {
+      "name": "Coro Titular del Teatro Real",
+      "role": "choir"
+    },
+    {
+      "name": "Orquesta Titular del Teatro Real",
+      "role": "orchestra"
+    },
+    {
+      "name": "Sondra Radvanovsky",
+      "role": "soloist"
+    },
+    {
+      "name": "Brian Jagde",
+      "role": "soloist"
+    },
+    {
+      "name": "Lucas Meachem",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Giacomo Puccini"
+    }
+  ],
+  "works": [
+    {
+      "title": "Manon Lescaut",
+      "composerName": "Giacomo Puccini"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "opera"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_teatro_real",
+      "url": "https://www.teatroreal.es/es/espectaculo/manon-lescaut",
+      "checkedAt": "2026-08-28"
+    }
+  ],
+  "primarySourceId": "src_teatro_real",
+  "lastVerifiedAt": "2026-08-28"
+}

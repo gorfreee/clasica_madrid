@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_coma_spanish_brass_20260930",
+  "slug": "coma-26-spanish-brass",
+  "title": "COMA'26: Spanish Brass",
+  "status": "scheduled",
+  "venueId": "ven_teatros_canal_sala_negra",
+  "organizerIds": [
+    "org_amcc"
+  ],
+  "seriesId": "ser_coma_2026",
+  "occurrences": [
+    {
+      "id": "occ_coma_spanish_brass_20260930_01",
+      "date": "2026-09-30",
+      "time": null,
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Spanish Brass",
+      "role": "ensemble"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_teatros_canal",
+      "url": "https://www.teatroscanal.com/espectaculo/festival-coma-2026/",
+      "checkedAt": "2026-08-28"
+    }
+  ],
+  "primarySourceId": "src_teatros_canal",
+  "lastVerifiedAt": "2026-08-28"
+}

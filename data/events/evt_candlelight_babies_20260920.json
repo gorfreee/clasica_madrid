@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_candlelight_babies_20260920",
+  "slug": "candlelight-babies-clasicos",
+  "title": "Candlelight Babies: Clásicos para los más pequeños",
+  "status": "scheduled",
+  "venueId": "ven_hotel_wellington",
+  "organizerIds": [
+    "org_fever"
+  ],
+  "seriesId": "ser_candlelight_madrid",
+  "occurrences": [
+    {
+      "id": "occ_candlelight_babies_20260920_01",
+      "date": "2026-09-20",
+      "time": "10:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_candlelight_babies_20260920_02",
+      "date": "2026-09-20",
+      "time": "12:15",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Dúo de cuerdas",
+      "role": "ensemble"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antonio Vivaldi"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Luigi Boccherini"
+    },
+    {
+      "name": "Johannes Brahms"
+    },
+    {
+      "name": "Camille Saint-Saëns"
+    }
+  ],
+  "works": [
+    {
+      "title": "Las cuatro estaciones: Primavera, primer movimiento",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "Las cuatro estaciones: Invierno, segundo movimiento",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "Air on the G String",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Marcha turca de Las ruinas de Atenas",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Eine kleine Nachtmusik",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Quinteto de cuerda en do mayor, núm. 6, op. 30: Passacalle",
+      "composerName": "Luigi Boccherini"
+    },
+    {
+      "title": "Wiegenlied, op. 49 núm. 4",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Ah vous dirai-je, Maman",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "El carnaval de los animales: El cisne",
+      "composerName": "Camille Saint-Saëns"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_fever",
+      "url": "https://feverup.com/m/467701",
+      "checkedAt": "2026-08-28"
+    }
+  ],
+  "primarySourceId": "src_fever",
+  "lastVerifiedAt": "2026-08-28"
+}

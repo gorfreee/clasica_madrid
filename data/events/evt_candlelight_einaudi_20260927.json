@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_candlelight_einaudi_20260927",
+  "slug": "candlelight-ludovico-einaudi",
+  "title": "Candlelight: Tributo a Ludovico Einaudi",
+  "status": "scheduled",
+  "venueId": "ven_circulo_bellas_artes",
+  "organizerIds": [
+    "org_fever"
+  ],
+  "seriesId": "ser_candlelight_madrid",
+  "occurrences": [
+    {
+      "id": "occ_candlelight_einaudi_20260927_01",
+      "date": "2026-09-27",
+      "time": "21:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Esther Toledano",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ludovico Einaudi"
+    }
+  ],
+  "works": [
+    {
+      "title": "I Giorni",
+      "composerName": "Ludovico Einaudi"
+    },
+    {
+      "title": "Le Onde",
+      "composerName": "Ludovico Einaudi"
+    },
+    {
+      "title": "Primavera",
+      "composerName": "Ludovico Einaudi"
+    },
+    {
+      "title": "Elegy for the Arctic",
+      "composerName": "Ludovico Einaudi"
+    },
+    {
+      "title": "In un'altra vita",
+      "composerName": "Ludovico Einaudi"
+    },
+    {
+      "title": "Nuvole Bianche",
+      "composerName": "Ludovico Einaudi"
+    },
+    {
+      "title": "Una Mattina",
+      "composerName": "Ludovico Einaudi"
+    },
+    {
+      "title": "Divenire",
+      "composerName": "Ludovico Einaudi"
+    },
+    {
+      "title": "Fly",
+      "composerName": "Ludovico Einaudi"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_fever",
+      "url": "https://feverup.com/m/135802",
+      "checkedAt": "2026-08-28"
+    }
+  ],
+  "primarySourceId": "src_fever",
+  "lastVerifiedAt": "2026-08-28"
+}

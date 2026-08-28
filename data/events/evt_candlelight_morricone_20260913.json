@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_candlelight_morricone_20260913",
+  "slug": "candlelight-ennio-morricone",
+  "title": "Candlelight: Ennio Morricone",
+  "status": "scheduled",
+  "venueId": "ven_ateneo_madrid",
+  "organizerIds": [
+    "org_fever"
+  ],
+  "seriesId": "ser_candlelight_madrid",
+  "occurrences": [
+    {
+      "id": "occ_candlelight_morricone_20260913_01",
+      "date": "2026-09-13",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Ennio Morricone"
+    }
+  ],
+  "works": [
+    {
+      "title": "Rabbia e Tarantella — Inglourious Basterds"
+    },
+    {
+      "title": "Totò e Alfredo — Cinema Paradiso"
+    },
+    {
+      "title": "Love Theme — Cinema Paradiso"
+    },
+    {
+      "title": "La vita è bella"
+    },
+    {
+      "title": "Amapola — Once Upon a Time in America"
+    },
+    {
+      "title": "Suite The Untouchables"
+    },
+    {
+      "title": "Once Upon a Time in the West (tema principal)"
+    },
+    {
+      "title": "La Califfa"
+    },
+    {
+      "title": "Gabriel's Oboe — The Mission"
+    },
+    {
+      "title": "Amarcord Theme"
+    },
+    {
+      "title": "La Dolce Vita Theme"
+    },
+    {
+      "title": "Les Beatitudes — La grande bellezza"
+    },
+    {
+      "title": "Il Padrino"
+    },
+    {
+      "title": "L'ultima diligenza di Red Rock — The Hateful Eight"
+    }
+  ],
+  "eras": [
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_fever",
+      "url": "https://feverup.com/m/395277",
+      "checkedAt": "2026-08-28"
+    }
+  ],
+  "primarySourceId": "src_fever",
+  "lastVerifiedAt": "2026-08-28"
+}

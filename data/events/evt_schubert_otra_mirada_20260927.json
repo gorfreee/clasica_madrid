@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_schubert_otra_mirada_20260927",
+  "slug": "schubert-desde-otra-mirada",
+  "title": "Schubert desde otra mirada",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_fundacion_canal",
+  "organizerIds": [
+    "org_fundacion_canal"
+  ],
+  "seriesId": "ser_ciclo_camara_fundacion_canal_2026",
+  "occurrences": [
+    {
+      "id": "occ_schubert_otra_mirada_20260927_01",
+      "date": "2026-09-27",
+      "time": null,
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Felipe Rodríguez",
+      "role": "soloist"
+    },
+    {
+      "name": "Bálint Váray",
+      "role": "soloist"
+    },
+    {
+      "name": "Marco Ramírez",
+      "role": "soloist"
+    },
+    {
+      "name": "Rocío López",
+      "role": "soloist"
+    },
+    {
+      "name": "José A. Jiménez",
+      "role": "soloist"
+    },
+    {
+      "name": "Víctor Díaz",
+      "role": "soloist"
+    },
+    {
+      "name": "Rosario Martínez",
+      "role": "soloist"
+    },
+    {
+      "name": "Iván Carrascosa",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Franz Schubert"
+    }
+  ],
+  "works": [
+    {
+      "title": "Octeto en fa mayor, D 803",
+      "composerName": "Franz Schubert"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_canal",
+      "url": "https://www.fundacioncanal.com/ciclo-musica-camara/schubert-desde-otra-mirada/",
+      "checkedAt": "2026-08-28"
+    },
+    {
+      "sourceId": "src_fundacion_canal",
+      "url": "https://www.fundacioncanal.com/ciclo-musica-camara/",
+      "checkedAt": "2026-08-28"
+    }
+  ],
+  "primarySourceId": "src_fundacion_canal",
+  "lastVerifiedAt": "2026-08-28"
+}

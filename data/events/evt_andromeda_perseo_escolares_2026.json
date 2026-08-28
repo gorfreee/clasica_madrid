@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_andromeda_perseo_escolares_2026",
+  "slug": "andromeda-y-perseo-escolares",
+  "title": "Andrómeda y Perseo — funciones escolares",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [
+    "org_fundacion_juan_march",
+    "org_teatro_zarzuela",
+    "org_cntc"
+  ],
+  "seriesId": "ser_teatro_musical_camara",
+  "occurrences": [
+    {
+      "id": "occ_andromeda_perseo_escolares_2026_01",
+      "date": "2026-09-29",
+      "time": "11:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_andromeda_perseo_escolares_2026_02",
+      "date": "2026-10-02",
+      "time": "11:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_andromeda_perseo_escolares_2026_03",
+      "date": "2026-10-06",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Joven Compañía Nacional de Teatro Clásico",
+      "role": "ensemble"
+    },
+    {
+      "name": "Aarón Zapico",
+      "role": "conductor"
+    },
+    {
+      "name": "Pilar Alva-Martín",
+      "role": "soloist"
+    },
+    {
+      "name": "Maëlys Robinne",
+      "role": "soloist"
+    },
+    {
+      "name": "Javier Blanco",
+      "role": "soloist"
+    },
+    {
+      "name": "Gabriel Díaz",
+      "role": "soloist"
+    },
+    {
+      "name": "Rita Filipe",
+      "role": "soloist"
+    },
+    {
+      "name": "Belén Herrero",
+      "role": "soloist"
+    },
+    {
+      "name": "Andrea Rey",
+      "role": "soloist"
+    },
+    {
+      "name": "Tamar Lalo",
+      "role": "soloist"
+    },
+    {
+      "name": "Rita Rógar",
+      "role": "soloist"
+    },
+    {
+      "name": "María Saturno",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Juan Hidalgo"
+    }
+  ],
+  "works": [
+    {
+      "title": "Andrómeda y Perseo",
+      "composerName": "Juan Hidalgo"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "early-music",
+    "opera",
+    "other"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_teatro_zarzuela",
+      "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/nuevos-publicos-2026-2027/andromeda-y-perseo-escolares",
+      "checkedAt": "2026-08-28"
+    }
+  ],
+  "primarySourceId": "src_teatro_zarzuela",
+  "lastVerifiedAt": "2026-08-28"
+}

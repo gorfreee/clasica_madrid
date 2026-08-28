@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_uam_raices_sinfonicas_20260926",
+  "slug": "uam-raices-sinfonicas-gran-fiesta-canaria",
+  "title": "UAM. Raíces Sinfónicas. Gran Fiesta Canaria",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [
+    "org_uam"
+  ],
+  "seriesId": "ser_ciclo_grandes_autores_uam",
+  "occurrences": [
+    {
+      "id": "occ_uam_raices_sinfonicas_20260926_01",
+      "date": "2026-09-26",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Los Sabandeños",
+      "role": "ensemble"
+    },
+    {
+      "name": "Joven Orquesta de Canarias",
+      "role": "orchestra"
+    },
+    {
+      "name": "Víctor Pablo Pérez",
+      "role": "conductor"
+    },
+    {
+      "name": "Juan Pérez Floristán",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Camille Saint-Saëns"
+    },
+    {
+      "name": "Manuel de Falla"
+    },
+    {
+      "name": "R. Gil Roldán"
+    },
+    {
+      "name": "Elfidio Alonso"
+    },
+    {
+      "name": "Braulio"
+    },
+    {
+      "name": "Silvio Rodríguez"
+    },
+    {
+      "name": "Carmelo Larrea"
+    },
+    {
+      "name": "Ernesto Lecuona"
+    },
+    {
+      "name": "Benito Cabrera"
+    }
+  ],
+  "works": [
+    {
+      "title": "Campanas de Las Palmas. 6 Estudios, op. 111: núm. 4",
+      "composerName": "Camille Saint-Saëns"
+    },
+    {
+      "title": "Vals canariote",
+      "composerName": "Camille Saint-Saëns"
+    },
+    {
+      "title": "Noches en los jardines de España",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "La Cantata del Mencey Loco (selección)",
+      "composerName": "R. Gil Roldán"
+    },
+    {
+      "title": "Llamarme Guanche",
+      "composerName": "Elfidio Alonso"
+    },
+    {
+      "title": "La Leyenda de San Borondón",
+      "composerName": "Elfidio Alonso"
+    },
+    {
+      "title": "Pescador de Morenas",
+      "composerName": "Elfidio Alonso"
+    },
+    {
+      "title": "Tenerife",
+      "composerName": "Braulio"
+    },
+    {
+      "title": "Unicornio",
+      "composerName": "Silvio Rodríguez"
+    },
+    {
+      "title": "Dos Cruces",
+      "composerName": "Carmelo Larrea"
+    },
+    {
+      "title": "Aquella Tarde",
+      "composerName": "Ernesto Lecuona"
+    },
+    {
+      "title": "Voces del Meridiano",
+      "composerName": "Benito Cabrera"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "symphonic",
+    "other"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/uam-raices-sinfonicas-gran-fiesta-canaria",
+      "checkedAt": "2026-08-28"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-28"
+}

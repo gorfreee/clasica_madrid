@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_tabernera_c_20260904",
+  "slug": "la-tabernera-del-puerto-camila-oria-marco-moncloa",
+  "title": "La tabernera del puerto — Camila Oria y Marco Moncloa",
+  "status": "scheduled",
+  "venueId": "ven_teatro_la_latina",
+  "organizerIds": [
+    "org_loperamore"
+  ],
+  "seriesId": "ser_zarzuela_latina_2026",
+  "occurrences": [
+    {
+      "id": "occ_tabernera_c_20260904_01",
+      "date": "2026-09-04",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro y Orquesta L'Operamore",
+      "role": "ensemble"
+    },
+    {
+      "name": "Javier Corcuera",
+      "role": "conductor"
+    },
+    {
+      "name": "Camila Oria",
+      "role": "soloist"
+    },
+    {
+      "name": "Marco Moncloa",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Pablo Sorozábal"
+    }
+  ],
+  "works": [
+    {
+      "title": "La tabernera del puerto",
+      "composerName": "Pablo Sorozábal"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "zarzuela"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_teatro_la_latina",
+      "url": "https://www.teatrolalatina.es/obra-de-teatro/la-tabernera-del-puerto/",
+      "checkedAt": "2026-08-28"
+    }
+  ],
+  "primarySourceId": "src_teatro_la_latina",
+  "lastVerifiedAt": "2026-08-28"
+}

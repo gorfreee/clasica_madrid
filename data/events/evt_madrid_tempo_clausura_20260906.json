@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_tempo_clausura_20260906",
+  "slug": "madrid-a-tempo-concierto-clausura",
+  "title": "Madrid a Tempo: Concierto de clausura de alumnos",
+  "status": "scheduled",
+  "venueId": "ven_casa_vacas_retiro",
+  "organizerIds": [
+    "org_madrid_a_tempo"
+  ],
+  "seriesId": "ser_festival_madrid_a_tempo_2026",
+  "occurrences": [
+    {
+      "id": "occ_madrid_tempo_clausura_20260906_01",
+      "date": "2026-09-06",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_madrid_a_tempo",
+      "url": "https://www.madridatempo.com/programacion-2023",
+      "checkedAt": "2026-08-28"
+    }
+  ],
+  "primarySourceId": "src_madrid_a_tempo",
+  "lastVerifiedAt": "2026-08-28"
+}

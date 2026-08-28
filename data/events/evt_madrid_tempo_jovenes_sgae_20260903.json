@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_tempo_jovenes_sgae_20260903",
+  "slug": "madrid-a-tempo-jovenes-talentos-sgae",
+  "title": "Madrid a Tempo: Concierto de Jóvenes Talentos — Sala Manuel de Falla",
+  "status": "scheduled",
+  "venueId": "ven_sala_manuel_falla_sgae",
+  "organizerIds": [
+    "org_madrid_a_tempo"
+  ],
+  "seriesId": "ser_festival_madrid_a_tempo_2026",
+  "occurrences": [
+    {
+      "id": "occ_madrid_tempo_jovenes_sgae_20260903_01",
+      "date": "2026-09-03",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_madrid_a_tempo",
+      "url": "https://www.madridatempo.com/programacion-2023",
+      "checkedAt": "2026-08-28"
+    }
+  ],
+  "primarySourceId": "src_madrid_a_tempo",
+  "lastVerifiedAt": "2026-08-28"
+}

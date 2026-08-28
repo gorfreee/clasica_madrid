@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_coma_atlantida_20260922",
+  "slug": "coma-26-atlantida-chamber-orchestra",
+  "title": "COMA'26: Atlántida Chamber Orchestra",
+  "status": "scheduled",
+  "venueId": "ven_teatros_canal_sala_verde",
+  "organizerIds": [
+    "org_amcc"
+  ],
+  "seriesId": "ser_coma_2026",
+  "occurrences": [
+    {
+      "id": "occ_coma_atlantida_20260922_01",
+      "date": "2026-09-22",
+      "time": null,
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Atlántida Chamber Orchestra",
+      "role": "orchestra"
+    },
+    {
+      "name": "Manuel Tévar",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_teatros_canal",
+      "url": "https://www.teatroscanal.com/espectaculo/festival-coma-2026/",
+      "checkedAt": "2026-08-28"
+    }
+  ],
+  "primarySourceId": "src_teatros_canal",
+  "lastVerifiedAt": "2026-08-28"
+}

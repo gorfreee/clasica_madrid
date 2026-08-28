@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_organo_realejo_man_20260927",
+  "slug": "organo-realejo-man-septiembre",
+  "title": "Concierto de órgano realejo en el Museo Arqueológico Nacional",
+  "status": "scheduled",
+  "venueId": "ven_man_salas_nobles",
+  "organizerIds": [
+    "org_museo_arqueologico_nacional"
+  ],
+  "seriesId": "ser_organo_realejo_man_2026",
+  "occurrences": [
+    {
+      "id": "occ_organo_realejo_man_20260927_01",
+      "date": "2026-09-27",
+      "time": "13:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "organ"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_museo_arqueologico_nacional",
+      "url": "https://www.man.es/man/actividades/musica-teatro/conciertos-organo.html",
+      "checkedAt": "2026-08-28"
+    }
+  ],
+  "primarySourceId": "src_museo_arqueologico_nacional",
+  "lastVerifiedAt": "2026-08-28"
+}

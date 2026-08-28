@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_teatro_real",
+  "slug": "teatro-real",
+  "name": "Teatro Real",
+  "municipality": "Madrid",
+  "area": "madrid",
+  "address": "Plaza de Isabel II, s/n, 28013 Madrid",
+  "url": "https://www.teatroreal.es/es",
+  "lastVerifiedAt": "2026-08-28"
+}
