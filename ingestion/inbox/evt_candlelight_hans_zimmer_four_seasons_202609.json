@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "event": {
+    "schemaVersion": 1,
+    "id": "evt_candlelight_hans_zimmer_four_seasons_202609",
+    "slug": "candlelight-hans-zimmer-four-seasons",
+    "title": "Candlelight: Lo mejor de Hans Zimmer",
+    "status": "scheduled",
+    "venueId": "ven_four_seasons_madrid",
+    "organizerIds": [
+      "org_fever"
+    ],
+    "seriesId": "ser_candlelight_madrid",
+    "occurrences": [
+      {
+        "id": "occ_candlelight_hans_zimmer_four_seasons_202609_01",
+        "date": "2026-09-06",
+        "time": "17:00",
+        "status": "scheduled"
+      },
+      {
+        "id": "occ_candlelight_hans_zimmer_four_seasons_202609_02",
+        "date": "2026-09-26",
+        "time": "17:00",
+        "status": "scheduled"
+      }
+    ],
+    "performers": [
+      {
+        "name": "Cuarteto Caramuel",
+        "role": "ensemble"
+      }
+    ],
+    "composers": [
+      {
+        "name": "Hans Zimmer"
+      }
+    ],
+    "works": [
+      {
+        "title": "Time — Origen",
+        "composerName": "Hans Zimmer"
+      },
+      {
+        "title": "This Land — El rey león",
+        "composerName": "Hans Zimmer"
+      },
+      {
+        "title": "Zooster's Breakout — Madagascar",
+        "composerName": "Hans Zimmer"
+      },
+      {
+        "title": "Supermarine — Dunkerque",
+        "composerName": "Hans Zimmer"
+      },
+      {
+        "title": "Honor — The Pacific",
+        "composerName": "Hans Zimmer"
+      },
+      {
+        "title": "A Dark Knight — Batman, el caballero oscuro",
+        "composerName": "Hans Zimmer"
+      },
+      {
+        "title": "Wonder Woman Suite",
+        "composerName": "Hans Zimmer"
+      },
+      {
+        "title": "Gladiator Suite",
+        "composerName": "Hans Zimmer"
+      },
+      {
+        "title": "Cornfield Chase — Interstellar",
+        "composerName": "Hans Zimmer"
+      },
+      {
+        "title": "Dune Suite",
+        "composerName": "Hans Zimmer"
+      },
+      {
+        "title": "Discombobulate — Sherlock Holmes",
+        "composerName": "Hans Zimmer"
+      },
+      {
+        "title": "Pirates of the Caribbean Suite",
+        "composerName": "Hans Zimmer"
+      }
+    ],
+    "eras": [
+      "contemporary"
+    ],
+    "formats": [
+      "chamber"
+    ],
+    "kind": "established",
+    "access": "paid",
+    "citations": [
+      {
+        "sourceId": "src_fever",
+        "url": "https://feverup.com/m/118384",
+        "checkedAt": "2026-08-28"
+      }
+    ],
+    "primarySourceId": "src_fever",
+    "lastVerifiedAt": "2026-08-28"
+  },
+  "venue": {
+    "schemaVersion": 1,
+    "id": "ven_four_seasons_madrid",
+    "slug": "four-seasons-hotel-madrid",
+    "name": "Four Seasons Hotel Madrid",
+    "municipality": "Madrid",
+    "area": "madrid",
+    "address": "Calle de Alcalá, 12, 28014 Madrid",
+    "url": "https://www.fourseasons.com/madrid/",
+    "lastVerifiedAt": "2026-08-28"
+  },
+  "organizers": [
+    {
+      "schemaVersion": 1,
+      "id": "org_fever",
+      "slug": "fever",
+      "name": "Fever",
+      "url": "https://feverup.com/es/madrid"
+    }
+  ],
+  "series": {
+    "schemaVersion": 1,
+    "id": "ser_candlelight_madrid",
+    "slug": "candlelight-madrid",
+    "name": "Candlelight Madrid",
+    "kind": "series",
+    "url": "https://feverup.com/es/madrid/candlelight"
+  },
+  "sources": [
+    {
+      "schemaVersion": 1,
+      "id": "src_fever",
+      "slug": "fever",
+      "name": "Fever",
+      "kind": "official",
+      "url": "https://feverup.com/es/madrid"
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "event": {
+    "schemaVersion": 1,
+    "id": "evt_arturo_barba_organo_20260926",
+    "slug": "arturo-barba-organo-medinaceli",
+    "title": "Arturo Barba — I Ciclo Internacional de Conciertos de Órgano",
+    "status": "scheduled",
+    "venueId": "ven_basilica_jesus_medinaceli",
+    "organizerIds": [
+      "org_hermanos_capuchinos"
+    ],
+    "seriesId": "ser_ciclo_organo_medinaceli_2026",
+    "occurrences": [
+      {
+        "id": "occ_arturo_barba_organo_20260926_01",
+        "date": "2026-09-26",
+        "time": "12:30",
+        "status": "scheduled"
+      }
+    ],
+    "performers": [
+      {
+        "name": "Arturo Barba",
+        "role": "soloist"
+      }
+    ],
+    "composers": [],
+    "works": [],
+    "eras": [],
+    "formats": [
+      "organ"
+    ],
+    "kind": "established",
+    "access": "free",
+    "citations": [
+      {
+        "sourceId": "src_hermanos_capuchinos",
+        "url": "https://hermanoscapuchinos.org/actualidad/587/i-ciclo-internacional-de-conciertos-de-organo",
+        "checkedAt": "2026-08-28"
+      }
+    ],
+    "primarySourceId": "src_hermanos_capuchinos",
+    "lastVerifiedAt": "2026-08-28"
+  },
+  "venue": {
+    "schemaVersion": 1,
+    "id": "ven_basilica_jesus_medinaceli",
+    "slug": "basilica-jesus-de-medinaceli",
+    "name": "Basílica de Jesús de Medinaceli",
+    "municipality": "Madrid",
+    "area": "madrid",
+    "address": "Plaza de Jesús, 2, 28014 Madrid",
+    "url": "https://hermanoscapuchinos.org/",
+    "lastVerifiedAt": "2026-08-28"
+  },
+  "organizers": [
+    {
+      "schemaVersion": 1,
+      "id": "org_hermanos_capuchinos",
+      "slug": "hermanos-capuchinos",
+      "name": "Hermanos Capuchinos",
+      "url": "https://hermanoscapuchinos.org/"
+    }
+  ],
+  "series": {
+    "schemaVersion": 1,
+    "id": "ser_ciclo_organo_medinaceli_2026",
+    "slug": "ciclo-internacional-organo-medinaceli-2026",
+    "name": "I Ciclo Internacional de Conciertos de Órgano",
+    "kind": "cycle",
+    "url": "https://hermanoscapuchinos.org/actualidad/587/i-ciclo-internacional-de-conciertos-de-organo"
+  },
+  "sources": [
+    {
+      "schemaVersion": 1,
+      "id": "src_hermanos_capuchinos",
+      "slug": "hermanos-capuchinos",
+      "name": "Hermanos Capuchinos",
+      "kind": "official",
+      "url": "https://hermanoscapuchinos.org/"
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "event": {
+    "schemaVersion": 1,
+    "id": "evt_pagagnini_20260906",
+    "slug": "pagagnini",
+    "title": "PaGAGnini",
+    "status": "scheduled",
+    "venueId": "ven_gran_teatro_principe_pio",
+    "organizerIds": [
+      "org_yllana"
+    ],
+    "seriesId": null,
+    "occurrences": [
+      {
+        "id": "occ_pagagnini_20260906_01",
+        "date": "2026-09-06",
+        "time": "13:00",
+        "status": "scheduled"
+      }
+    ],
+    "performers": [
+      {
+        "name": "Eduardo Ortega",
+        "role": "soloist"
+      },
+      {
+        "name": "Thomas Potiron",
+        "role": "soloist"
+      },
+      {
+        "name": "Fernando Clemente",
+        "role": "soloist"
+      },
+      {
+        "name": "Gueorgui Foudnajev",
+        "role": "soloist"
+      }
+    ],
+    "composers": [],
+    "works": [],
+    "eras": [],
+    "formats": [
+      "chamber",
+      "other"
+    ],
+    "kind": "established",
+    "access": "paid",
+    "citations": [
+      {
+        "sourceId": "src_yllana",
+        "url": "https://yllana.com/eventos/category/pagagnini/",
+        "checkedAt": "2026-08-28"
+      },
+      {
+        "sourceId": "src_esmadrid",
+        "url": "https://www.esmadrid.com/agenda/pagagnini-gran-teatro-caixabank-principe-pio",
+        "checkedAt": "2026-08-28"
+      }
+    ],
+    "primarySourceId": "src_yllana",
+    "lastVerifiedAt": "2026-08-28"
+  },
+  "venue": {
+    "schemaVersion": 1,
+    "id": "ven_gran_teatro_principe_pio",
+    "slug": "gran-teatro-caixabank-principe-pio",
+    "name": "Gran Teatro CaixaBank Príncipe Pío",
+    "municipality": "Madrid",
+    "area": "madrid",
+    "address": "Cuesta de San Vicente, 44, 28008 Madrid",
+    "url": "https://www.lagranimprenta.com/",
+    "lastVerifiedAt": "2026-08-28"
+  },
+  "organizers": [
+    {
+      "schemaVersion": 1,
+      "id": "org_yllana",
+      "slug": "yllana",
+      "name": "Yllana",
+      "url": "https://yllana.com/"
+    }
+  ],
+  "sources": [
+    {
+      "schemaVersion": 1,
+      "id": "src_yllana",
+      "slug": "yllana",
+      "name": "Yllana",
+      "kind": "official",
+      "url": "https://yllana.com/"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "src_esmadrid",
+      "slug": "esmadrid",
+      "name": "esMadrid",
+      "kind": "official",
+      "url": "https://www.esmadrid.com/"
+    }
+  ]
+}

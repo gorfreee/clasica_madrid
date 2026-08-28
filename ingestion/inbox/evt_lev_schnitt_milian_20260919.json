@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "event": {
+    "schemaVersion": 1,
+    "id": "evt_lev_schnitt_milian_20260919",
+    "slug": "lev-schnitt-aoi-yamaguchi-milian-mori",
+    "title": "L.E.V. 2026: Schnitt & Aoi Yamaguchi y Milian Mori",
+    "status": "scheduled",
+    "venueId": "ven_centro_danza_matadero_nave_11",
+    "organizerIds": [
+      "org_centro_danza_matadero"
+    ],
+    "seriesId": "ser_lev_matadero_2026",
+    "occurrences": [
+      {
+        "id": "occ_lev_schnitt_milian_20260919_01",
+        "date": "2026-09-19",
+        "time": "20:30",
+        "status": "scheduled"
+      }
+    ],
+    "performers": [
+      {
+        "name": "Schnitt",
+        "role": "ensemble"
+      },
+      {
+        "name": "Aoi Yamaguchi",
+        "role": "other"
+      },
+      {
+        "name": "Milian Mori",
+        "role": "other"
+      }
+    ],
+    "composers": [
+      {
+        "name": "Amelie Duchow"
+      },
+      {
+        "name": "Marco Monfardini"
+      },
+      {
+        "name": "Milian Mori"
+      }
+    ],
+    "works": [],
+    "eras": [
+      "contemporary"
+    ],
+    "formats": [
+      "other"
+    ],
+    "kind": "alternative",
+    "access": "paid",
+    "citations": [
+      {
+        "sourceId": "src_centro_danza_matadero",
+        "url": "https://www.centrodanzamatadero.es/actividades/lev-2026-conciertos-sabado-19-septiembre-schnitt-aoi-yamaguchi-calligraton-y-milian",
+        "checkedAt": "2026-08-28"
+      }
+    ],
+    "primarySourceId": "src_centro_danza_matadero",
+    "lastVerifiedAt": "2026-08-28"
+  },
+  "venue": {
+    "schemaVersion": 1,
+    "id": "ven_centro_danza_matadero_nave_11",
+    "slug": "centro-danza-matadero-nave-11",
+    "name": "Centro Danza Matadero — Nave 11",
+    "municipality": "Madrid",
+    "area": "madrid",
+    "address": "Paseo de la Chopera, 14, 28045 Madrid",
+    "url": "https://www.centrodanzamatadero.es/",
+    "lastVerifiedAt": "2026-08-28"
+  },
+  "organizers": [
+    {
+      "schemaVersion": 1,
+      "id": "org_centro_danza_matadero",
+      "slug": "centro-danza-matadero",
+      "name": "Centro Danza Matadero",
+      "url": "https://www.centrodanzamatadero.es/"
+    }
+  ],
+  "series": {
+    "schemaVersion": 1,
+    "id": "ser_lev_matadero_2026",
+    "slug": "lev-matadero-2026",
+    "name": "L.E.V. Matadero 2026",
+    "kind": "festival",
+    "url": "https://www.mataderomadrid.org/programacion/lev-matadero-2026"
+  },
+  "sources": [
+    {
+      "schemaVersion": 1,
+      "id": "src_centro_danza_matadero",
+      "slug": "centro-danza-matadero",
+      "name": "Centro Danza Matadero",
+      "kind": "official",
+      "url": "https://www.centrodanzamatadero.es/"
+    }
+  ]
+}

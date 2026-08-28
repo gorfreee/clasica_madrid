@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "event": {
+    "schemaVersion": 1,
+    "id": "evt_madrid_tempo_jovenes_iie_20260904",
+    "slug": "madrid-a-tempo-jovenes-talentos-instituto-internacional",
+    "title": "Madrid a Tempo: Concierto de Jóvenes Talentos — Instituto Internacional",
+    "status": "scheduled",
+    "venueId": "ven_instituto_internacional_auditorio",
+    "organizerIds": [
+      "org_madrid_a_tempo"
+    ],
+    "seriesId": "ser_festival_madrid_a_tempo_2026",
+    "occurrences": [
+      {
+        "id": "occ_madrid_tempo_jovenes_iie_20260904_01",
+        "date": "2026-09-04",
+        "time": "19:00",
+        "status": "scheduled"
+      }
+    ],
+    "performers": [],
+    "composers": [],
+    "works": [],
+    "eras": [],
+    "formats": [
+      "recital"
+    ],
+    "kind": "alternative",
+    "access": "unknown",
+    "citations": [
+      {
+        "sourceId": "src_madrid_a_tempo",
+        "url": "https://www.madridatempo.com/programacion-2023",
+        "checkedAt": "2026-08-28"
+      }
+    ],
+    "primarySourceId": "src_madrid_a_tempo",
+    "lastVerifiedAt": "2026-08-28"
+  },
+  "venue": {
+    "schemaVersion": 1,
+    "id": "ven_instituto_internacional_auditorio",
+    "slug": "instituto-internacional-auditorio",
+    "name": "Instituto Internacional — Auditorio",
+    "municipality": "Madrid",
+    "area": "madrid",
+    "address": "Calle de Miguel Ángel, 8, 28010 Madrid",
+    "url": "https://www.iie.es/",
+    "lastVerifiedAt": "2026-08-28"
+  },
+  "organizers": [
+    {
+      "schemaVersion": 1,
+      "id": "org_madrid_a_tempo",
+      "slug": "madrid-a-tempo",
+      "name": "Madrid a Tempo",
+      "url": "https://www.madridatempo.com/"
+    }
+  ],
+  "series": {
+    "schemaVersion": 1,
+    "id": "ser_festival_madrid_a_tempo_2026",
+    "slug": "festival-internacional-piano-madrid-a-tempo-2026",
+    "name": "II Festival Internacional de Piano Madrid a Tempo",
+    "kind": "festival",
+    "url": "https://www.madridatempo.com/programacion-2023"
+  },
+  "sources": [
+    {
+      "schemaVersion": 1,
+      "id": "src_madrid_a_tempo",
+      "slug": "madrid-a-tempo",
+      "name": "Madrid a Tempo",
+      "kind": "official",
+      "url": "https://www.madridatempo.com/"
+    }
+  ]
+}

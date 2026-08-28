@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "event": {
+    "schemaVersion": 1,
+    "id": "evt_coma_atlantida_20260922",
+    "slug": "coma-26-atlantida-chamber-orchestra",
+    "title": "COMA'26: Atlántida Chamber Orchestra",
+    "status": "scheduled",
+    "venueId": "ven_teatros_canal_sala_verde",
+    "organizerIds": [
+      "org_amcc"
+    ],
+    "seriesId": "ser_coma_2026",
+    "occurrences": [
+      {
+        "id": "occ_coma_atlantida_20260922_01",
+        "date": "2026-09-22",
+        "time": null,
+        "status": "scheduled"
+      }
+    ],
+    "performers": [
+      {
+        "name": "Atlántida Chamber Orchestra",
+        "role": "orchestra"
+      },
+      {
+        "name": "Manuel Tévar",
+        "role": "conductor"
+      }
+    ],
+    "composers": [],
+    "works": [],
+    "eras": [
+      "contemporary"
+    ],
+    "formats": [
+      "chamber"
+    ],
+    "kind": "established",
+    "access": "free",
+    "citations": [
+      {
+        "sourceId": "src_teatros_canal",
+        "url": "https://www.teatroscanal.com/espectaculo/festival-coma-2026/",
+        "checkedAt": "2026-08-28"
+      }
+    ],
+    "primarySourceId": "src_teatros_canal",
+    "lastVerifiedAt": "2026-08-28"
+  },
+  "venue": {
+    "schemaVersion": 1,
+    "id": "ven_teatros_canal_sala_verde",
+    "slug": "teatros-del-canal-sala-verde",
+    "name": "Teatros del Canal — Sala Verde",
+    "municipality": "Madrid",
+    "area": "madrid",
+    "address": "Calle de Cea Bermúdez, 1, 28003 Madrid",
+    "url": "https://www.teatroscanal.com/",
+    "lastVerifiedAt": "2026-08-28"
+  },
+  "organizers": [
+    {
+      "schemaVersion": 1,
+      "id": "org_amcc",
+      "slug": "asociacion-madrilena-de-compositores",
+      "name": "Asociación Madrileña de Compositores",
+      "url": "https://amcc.es/"
+    }
+  ],
+  "series": {
+    "schemaVersion": 1,
+    "id": "ser_coma_2026",
+    "slug": "festival-coma-2026",
+    "name": "XXVIII Festival Internacional de Música Contemporánea de Madrid COMA'26",
+    "kind": "festival",
+    "url": "https://www.teatroscanal.com/espectaculo/festival-coma-2026/"
+  },
+  "sources": [
+    {
+      "schemaVersion": 1,
+      "id": "src_teatros_canal",
+      "slug": "teatros-del-canal",
+      "name": "Teatros del Canal",
+      "kind": "official",
+      "url": "https://www.teatroscanal.com/"
+    }
+  ]
+}

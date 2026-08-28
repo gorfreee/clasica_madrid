@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "event": {
+    "schemaVersion": 1,
+    "id": "evt_tabernera_a_20260902",
+    "slug": "la-tabernera-del-puerto-raquel-albarran-marco-moncloa",
+    "title": "La tabernera del puerto — Raquel Albarrán y Marco Moncloa",
+    "status": "scheduled",
+    "venueId": "ven_teatro_la_latina",
+    "organizerIds": [
+      "org_loperamore"
+    ],
+    "seriesId": "ser_zarzuela_latina_2026",
+    "occurrences": [
+      {
+        "id": "occ_tabernera_a_20260902_01",
+        "date": "2026-09-02",
+        "time": "20:00",
+        "status": "scheduled"
+      }
+    ],
+    "performers": [
+      {
+        "name": "Coro y Orquesta L'Operamore",
+        "role": "ensemble"
+      },
+      {
+        "name": "Javier Corcuera",
+        "role": "conductor"
+      },
+      {
+        "name": "Raquel Albarrán",
+        "role": "soloist"
+      },
+      {
+        "name": "Marco Moncloa",
+        "role": "soloist"
+      }
+    ],
+    "composers": [
+      {
+        "name": "Pablo Sorozábal"
+      }
+    ],
+    "works": [
+      {
+        "title": "La tabernera del puerto",
+        "composerName": "Pablo Sorozábal"
+      }
+    ],
+    "eras": [
+      "twentieth"
+    ],
+    "formats": [
+      "zarzuela"
+    ],
+    "kind": "established",
+    "access": "paid",
+    "citations": [
+      {
+        "sourceId": "src_teatro_la_latina",
+        "url": "https://www.teatrolalatina.es/obra-de-teatro/la-tabernera-del-puerto/",
+        "checkedAt": "2026-08-28"
+      }
+    ],
+    "primarySourceId": "src_teatro_la_latina",
+    "lastVerifiedAt": "2026-08-28"
+  },
+  "venue": {
+    "schemaVersion": 1,
+    "id": "ven_teatro_la_latina",
+    "slug": "teatro-la-latina",
+    "name": "Teatro La Latina",
+    "municipality": "Madrid",
+    "area": "madrid",
+    "address": "Plaza de la Cebada, 2, 28005 Madrid",
+    "url": "https://www.teatrolalatina.es/",
+    "lastVerifiedAt": "2026-08-28"
+  },
+  "organizers": [
+    {
+      "schemaVersion": 1,
+      "id": "org_loperamore",
+      "slug": "loperamore",
+      "name": "L'Operamore"
+    }
+  ],
+  "series": {
+    "schemaVersion": 1,
+    "id": "ser_zarzuela_latina_2026",
+    "slug": "zarzuela-en-la-latina-2026",
+    "name": "Zarzuela en La Latina 2026",
+    "kind": "season",
+    "url": "https://www.teatrolalatina.es/zarzuela/"
+  },
+  "sources": [
+    {
+      "schemaVersion": 1,
+      "id": "src_teatro_la_latina",
+      "slug": "teatro-la-latina",
+      "name": "Teatro La Latina",
+      "kind": "official",
+      "url": "https://www.teatrolalatina.es/"
+    }
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "event": {
+    "schemaVersion": 1,
+    "id": "evt_ocne_sinfonico_02_202609",
+    "slug": "ocne-sinfonico-02",
+    "title": "OCNE. Sinfónico 02",
+    "status": "scheduled",
+    "venueId": "ven_auditorio_nacional_sala_sinfonica",
+    "organizerIds": [
+      "org_ocne"
+    ],
+    "seriesId": null,
+    "occurrences": [
+      {
+        "id": "occ_ocne_sinfonico_02_202609_01",
+        "date": "2026-09-25",
+        "time": "19:30",
+        "status": "scheduled"
+      },
+      {
+        "id": "occ_ocne_sinfonico_02_202609_02",
+        "date": "2026-09-26",
+        "time": "19:30",
+        "status": "scheduled"
+      },
+      {
+        "id": "occ_ocne_sinfonico_02_202609_03",
+        "date": "2026-09-27",
+        "time": "11:30",
+        "status": "scheduled"
+      }
+    ],
+    "performers": [
+      {
+        "name": "Orquesta Nacional de España",
+        "role": "orchestra"
+      },
+      {
+        "name": "Kent Nagano",
+        "role": "conductor"
+      },
+      {
+        "name": "Veronika Eberle",
+        "role": "soloist"
+      }
+    ],
+    "composers": [
+      {
+        "name": "Jean Sibelius"
+      },
+      {
+        "name": "Núria Giménez-Comas"
+      },
+      {
+        "name": "Ludwig van Beethoven"
+      }
+    ],
+    "works": [
+      {
+        "title": "Concierto para violín en re menor, op. 47",
+        "composerName": "Jean Sibelius"
+      },
+      {
+        "title": "Nostalgia of light, Yearning for…",
+        "composerName": "Núria Giménez-Comas"
+      },
+      {
+        "title": "Sinfonía núm. 7 en la mayor, op. 92",
+        "composerName": "Ludwig van Beethoven"
+      }
+    ],
+    "eras": [
+      "classical",
+      "romantic",
+      "contemporary"
+    ],
+    "formats": [
+      "symphonic"
+    ],
+    "kind": "established",
+    "access": "paid",
+    "citations": [
+      {
+        "sourceId": "src_auditorio_nacional",
+        "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-02-1",
+        "checkedAt": "2026-08-28"
+      }
+    ],
+    "primarySourceId": "src_auditorio_nacional",
+    "lastVerifiedAt": "2026-08-28"
+  },
+  "venue": {
+    "schemaVersion": 1,
+    "id": "ven_auditorio_nacional_sala_sinfonica",
+    "slug": "auditorio-nacional-sala-sinfonica",
+    "name": "Auditorio Nacional de Música — Sala Sinfónica",
+    "municipality": "Madrid",
+    "area": "madrid",
+    "address": "Calle del Príncipe de Vergara, 146, 28002 Madrid",
+    "url": "https://auditorionacional.inaem.gob.es/es",
+    "lastVerifiedAt": "2026-08-28"
+  },
+  "organizers": [
+    {
+      "schemaVersion": 1,
+      "id": "org_ocne",
+      "slug": "orquesta-y-coro-nacionales-de-espana",
+      "name": "Orquesta y Coro Nacionales de España",
+      "url": "https://ocne.inaem.gob.es/"
+    }
+  ],
+  "sources": [
+    {
+      "schemaVersion": 1,
+      "id": "src_auditorio_nacional",
+      "slug": "auditorio-nacional-de-musica",
+      "name": "Auditorio Nacional de Música",
+      "kind": "official",
+      "url": "https://auditorionacional.inaem.gob.es/es"
+    }
+  ]
+}

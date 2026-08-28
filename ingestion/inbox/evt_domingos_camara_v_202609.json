@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "event": {
+    "schemaVersion": 1,
+    "id": "evt_domingos_camara_v_202609",
+    "slug": "domingos-de-camara-v",
+    "title": "Domingos de Cámara V 25-26",
+    "status": "scheduled",
+    "venueId": "ven_teatro_real",
+    "organizerIds": [
+      "org_teatro_real"
+    ],
+    "seriesId": "ser_domingos_camara_teatro_real",
+    "occurrences": [
+      {
+        "id": "occ_domingos_camara_v_202609_01",
+        "date": "2026-09-13",
+        "time": "12:00",
+        "status": "scheduled"
+      }
+    ],
+    "performers": [
+      {
+        "name": "Solistas de la Orquesta Titular del Teatro Real",
+        "role": "ensemble"
+      }
+    ],
+    "composers": [],
+    "works": [],
+    "eras": [],
+    "formats": [
+      "chamber"
+    ],
+    "kind": "established",
+    "access": "paid",
+    "citations": [
+      {
+        "sourceId": "src_teatro_real",
+        "url": "https://www.teatroreal.es/es/espectaculo/domingos-camara-v",
+        "checkedAt": "2026-08-28"
+      }
+    ],
+    "primarySourceId": "src_teatro_real",
+    "lastVerifiedAt": "2026-08-28"
+  },
+  "venue": {
+    "schemaVersion": 1,
+    "id": "ven_teatro_real",
+    "slug": "teatro-real",
+    "name": "Teatro Real",
+    "municipality": "Madrid",
+    "area": "madrid",
+    "address": "Plaza de Isabel II, s/n, 28013 Madrid",
+    "url": "https://www.teatroreal.es/es",
+    "lastVerifiedAt": "2026-08-28"
+  },
+  "organizers": [
+    {
+      "schemaVersion": 1,
+      "id": "org_teatro_real",
+      "slug": "teatro-real",
+      "name": "Teatro Real",
+      "url": "https://www.teatroreal.es/es"
+    }
+  ],
+  "series": {
+    "schemaVersion": 1,
+    "id": "ser_domingos_camara_teatro_real",
+    "slug": "domingos-de-camara-teatro-real",
+    "name": "Domingos de Cámara",
+    "kind": "cycle"
+  },
+  "sources": [
+    {
+      "schemaVersion": 1,
+      "id": "src_teatro_real",
+      "slug": "teatro-real",
+      "name": "Teatro Real",
+      "kind": "official",
+      "url": "https://www.teatroreal.es/es"
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "event": {
+    "schemaVersion": 1,
+    "id": "evt_bayreuth_wagner_20260903",
+    "slug": "gira-orquesta-festival-bayreuth-wagner",
+    "title": "Gira de la Orquesta del Festival de Bayreuth: El anillo del nibelungo (selección)",
+    "status": "scheduled",
+    "venueId": "ven_teatro_real",
+    "organizerIds": [
+      "org_teatro_real"
+    ],
+    "seriesId": null,
+    "occurrences": [
+      {
+        "id": "occ_bayreuth_wagner_20260903_01",
+        "date": "2026-09-03",
+        "time": "19:30",
+        "status": "scheduled"
+      }
+    ],
+    "performers": [
+      {
+        "name": "Orquesta del Festival de Bayreuth",
+        "role": "orchestra"
+      },
+      {
+        "name": "Pablo Heras-Casado",
+        "role": "conductor"
+      },
+      {
+        "name": "Catherine Foster",
+        "role": "soloist"
+      },
+      {
+        "name": "Klaus Florian Vogt",
+        "role": "soloist"
+      },
+      {
+        "name": "Nicholas Brownlee",
+        "role": "soloist"
+      }
+    ],
+    "composers": [
+      {
+        "name": "Richard Wagner"
+      }
+    ],
+    "works": [
+      {
+        "title": "El anillo del nibelungo (selección de fragmentos y escenas)",
+        "composerName": "Richard Wagner"
+      }
+    ],
+    "eras": [
+      "romantic"
+    ],
+    "formats": [
+      "symphonic",
+      "opera"
+    ],
+    "kind": "established",
+    "access": "paid",
+    "citations": [
+      {
+        "sourceId": "src_teatro_real",
+        "url": "https://www.teatroreal.es/es/espectaculo/gira-orquesta-del-festival-bayreuth",
+        "checkedAt": "2026-08-28"
+      }
+    ],
+    "primarySourceId": "src_teatro_real",
+    "lastVerifiedAt": "2026-08-28"
+  },
+  "venue": {
+    "schemaVersion": 1,
+    "id": "ven_teatro_real",
+    "slug": "teatro-real",
+    "name": "Teatro Real",
+    "municipality": "Madrid",
+    "area": "madrid",
+    "address": "Plaza de Isabel II, s/n, 28013 Madrid",
+    "url": "https://www.teatroreal.es/es",
+    "lastVerifiedAt": "2026-08-28"
+  },
+  "organizers": [
+    {
+      "schemaVersion": 1,
+      "id": "org_teatro_real",
+      "slug": "teatro-real",
+      "name": "Teatro Real",
+      "url": "https://www.teatroreal.es/es"
+    }
+  ],
+  "sources": [
+    {
+      "schemaVersion": 1,
+      "id": "src_teatro_real",
+      "slug": "teatro-real",
+      "name": "Teatro Real",
+      "kind": "official",
+      "url": "https://www.teatroreal.es/es"
+    }
+  ]
+}
