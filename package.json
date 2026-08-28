@@ -9,12 +9,12 @@
     "preview": "astro preview"
   },
   "dependencies": {
-    "@tailwindcss/vite": "4.3.3",
-    "astro": "7.2.9",
-    "tailwindcss": "4.3.3"
+    "@tailwindcss/vite": "^4.0.0",
+    "astro": "^5.0.0",
+    "tailwindcss": "^4.0.0"
   },
   "devDependencies": {
-    "@astrojs/check": "0.9.10",
-    "typescript": "6.0.3"
+    "@astrojs/check": "^0.9.0",
+    "typescript": "^5.7.0"
   }
 }
