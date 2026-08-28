@@ -9,7 +9,7 @@ const { item } = Astro.props;
 const timeLabel = item.time ?? 'Hora no indicada';
 ---
 
-<article class="agenda-item">
+<article class="agenda-item" data-occurrence-id={item.occurrenceId}>
   <p class="agenda-item__when">
     <time datetime={`${item.date}${item.time ? `T${item.time}` : ''}`}>{item.date}</time>
     <span aria-label={item.time ? `A las ${item.time}` : 'Hora no indicada'}>{timeLabel}</span>

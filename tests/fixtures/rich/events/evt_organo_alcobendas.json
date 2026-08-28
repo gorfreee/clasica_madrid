@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_organo_alcobendas",
+  "slug": "recital-de-organo",
+  "title": "Recital de órgano",
+  "status": "scheduled",
+  "venueId": "ven_san_manuel",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_organo_1",
+      "date": "2026-09-10",
+      "time": null,
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ana Ruiz",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "organ"
+  ],
+  "kind": "community",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_parroquia",
+      "url": "https://example.org/san-manuel/organo",
+      "checkedAt": "2026-08-21"
+    }
+  ],
+  "primarySourceId": "src_parroquia",
+  "lastVerifiedAt": "2026-08-21"
+}

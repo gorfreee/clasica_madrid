@@ -197,9 +197,15 @@ a:hover {
   border-color: #171717;
 }
 
-.filters__clear {
+.filters__noscript {
+  margin: 0.75rem 0 0;
   font-family: var(--font-sans);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+[hidden] {
+  display: none !important;
 }
 
 .result-count,

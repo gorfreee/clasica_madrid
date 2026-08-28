@@ -1,6 +1,6 @@
 import type { AccessMode, Area, Era, EventKind, Format } from '../schemas/taxonomies.ts';
 import { ACCESS_MODES, AREAS, ERAS, EVENT_KINDS, FORMATS } from '../schemas/taxonomies.ts';
-import { isRealIsoDate } from '../schemas/common.ts';
+import { isRealIsoDate } from '../util/iso-date.ts';
 import type { ResolvedOccurrence } from './resolve.ts';
 import { textMatchesQuery } from './normalize.ts';
 
@@ -16,6 +16,22 @@ export type AgendaFilters = {
   venue?: string;
   composer?: string;
   q?: string;
+};
+
+/** Shape the static agenda page can serialize for client-side URL filters. */
+export type FilterableOccurrence = {
+  occurrenceId: string;
+  date: string;
+  access: AccessMode;
+  formats: Format[];
+  eras: Era[];
+  kind: EventKind;
+  area: Area;
+  municipality: string;
+  venueSlug: string;
+  venueId: string;
+  composerNames: string[];
+  searchHaystack: string;
 };
 
 export function parseAgendaFilters(params: URLSearchParams): AgendaFilters {
@@ -51,47 +67,91 @@ export function hasActiveFilters(filters: AgendaFilters): boolean {
   return Object.values(filters).some((value) => value !== undefined && value !== '');
 }
 
+export function toFilterable(item: ResolvedOccurrence): FilterableOccurrence {
+  const { event, venue, series, organizers } = item.resolved;
+  const composerNames = [
+    ...event.composers.map((composer) => composer.name),
+    ...event.works.map((work) => work.composerName).filter((name): name is string => Boolean(name)),
+  ];
+  const searchHaystack = [
+    event.title,
+    venue.name,
+    venue.municipality,
+    series?.name ?? '',
+    ...organizers.map((organizer) => organizer.name),
+    ...event.performers.map((performer) => performer.name),
+    ...composerNames,
+    ...event.works.map((work) => work.title),
+  ].join(' ');
+  return {
+    occurrenceId: item.occurrence.id,
+    date: item.occurrence.date,
+    access: event.access,
+    formats: event.formats,
+    eras: event.eras,
+    kind: event.kind,
+    area: venue.area,
+    municipality: venue.municipality,
+    venueSlug: venue.slug,
+    venueId: venue.id,
+    composerNames,
+    searchHaystack,
+  };
+}
+
 export function filterOccurrences(
   items: ResolvedOccurrence[],
   filters: AgendaFilters,
 ): ResolvedOccurrence[] {
+  return items.filter((item) => matchesFilters(toFilterable(item), filters));
+}
+
+export function filterFilterable(
+  items: FilterableOccurrence[],
+  filters: AgendaFilters,
+): FilterableOccurrence[] {
   return items.filter((item) => matchesFilters(item, filters));
 }
 
-export function matchesFilters(item: ResolvedOccurrence, filters: AgendaFilters): boolean {
-  const { event, venue, series, organizers } = item.resolved;
-  if (filters.from && item.occurrence.date < filters.from) return false;
-  if (filters.to && item.occurrence.date > filters.to) return false;
-  if (filters.area && venue.area !== filters.area) return false;
-  if (filters.municipality && !textMatchesQuery(venue.municipality, filters.municipality)) {
+export function matchesFilters(item: FilterableOccurrence, filters: AgendaFilters): boolean {
+  if (filters.from && item.date < filters.from) return false;
+  if (filters.to && item.date > filters.to) return false;
+  if (filters.area && item.area !== filters.area) return false;
+  if (filters.municipality && !textMatchesQuery(item.municipality, filters.municipality)) {
     return false;
   }
-  if (filters.access && event.access !== filters.access) return false;
-  if (filters.format && !event.formats.includes(filters.format)) return false;
-  if (filters.era && !event.eras.includes(filters.era)) return false;
-  if (filters.kind && event.kind !== filters.kind) return false;
-  if (filters.venue && venue.slug !== filters.venue && venue.id !== filters.venue) return false;
+  if (filters.access && item.access !== filters.access) return false;
+  if (filters.format && !item.formats.includes(filters.format)) return false;
+  if (filters.era && !item.eras.includes(filters.era)) return false;
+  if (filters.kind && item.kind !== filters.kind) return false;
+  if (filters.venue && item.venueSlug !== filters.venue && item.venueId !== filters.venue) {
+    return false;
+  }
   if (filters.composer) {
-    const composerHit = event.composers.some((composer) =>
-      textMatchesQuery(composer.name, filters.composer ?? ''),
-    );
-    const workHit = event.works.some((work) =>
-      work.composerName ? textMatchesQuery(work.composerName, filters.composer ?? '') : false,
-    );
-    if (!composerHit && !workHit) return false;
+    const hit = item.composerNames.some((name) => textMatchesQuery(name, filters.composer ?? ''));
+    if (!hit) return false;
   }
-  if (filters.q) {
-    const haystacks = [
-      event.title,
-      venue.name,
-      venue.municipality,
-      series?.name ?? '',
-      ...organizers.map((organizer) => organizer.name),
-      ...event.performers.map((performer) => performer.name),
-      ...event.composers.map((composer) => composer.name),
-      ...event.works.map((work) => work.title),
-    ];
-    if (!haystacks.some((value) => textMatchesQuery(value, filters.q ?? ''))) return false;
-  }
+  if (filters.q && !textMatchesQuery(item.searchHaystack, filters.q)) return false;
   return true;
+}
+
+export function filtersToSearchParams(filters: AgendaFilters): URLSearchParams {
+  const params = new URLSearchParams();
+  const entries: [keyof AgendaFilters, string | undefined][] = [
+    ['q', filters.q],
+    ['from', filters.from],
+    ['to', filters.to],
+    ['area', filters.area],
+    ['municipality', filters.municipality],
+    ['access', filters.access],
+    ['format', filters.format],
+    ['era', filters.era],
+    ['kind', filters.kind],
+    ['venue', filters.venue],
+    ['composer', filters.composer],
+  ];
+  for (const [key, value] of entries) {
+    if (value) params.set(key, value);
+  }
+  return params;
 }

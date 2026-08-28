@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_matinees_otono",
+  "slug": "matinees-de-otono",
+  "title": "Matinées de otoño",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional",
+  "organizerIds": [
+    "org_ocne"
+  ],
+  "seriesId": "ser_ciclo_camara",
+  "occurrences": [
+    {
+      "id": "occ_matinees_1",
+      "date": "2026-09-15",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "OCNE",
+      "role": "orchestra"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sinfonía n.º 7",
+      "composerName": "Ludwig van Beethoven"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "institutional",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio",
+      "url": "https://www.auditorionacional.mcu.es/eventos/matinees",
+      "checkedAt": "2026-08-20"
+    }
+  ],
+  "primarySourceId": "src_auditorio",
+  "lastVerifiedAt": "2026-08-20"
+}

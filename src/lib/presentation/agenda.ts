@@ -1,6 +1,6 @@
 import type { Catalog } from '../domain/catalog.ts';
-import type { AgendaFilters } from '../domain/filters.ts';
-import { filterOccurrences, hasActiveFilters, parseAgendaFilters } from '../domain/filters.ts';
+import type { FilterableOccurrence } from '../domain/filters.ts';
+import { toFilterable } from '../domain/filters.ts';
 import { formatMadridDate } from '../domain/dates.ts';
 import { listUpcomingOccurrences, type Clock, systemClock } from '../domain/index.ts';
 import type { ResolvedOccurrence } from '../domain/resolve.ts';
@@ -56,45 +56,47 @@ export type AgendaPageModel = {
   description: string;
   canonicalPath: string;
   isEmptyCatalog: boolean;
-  hasMatches: boolean;
-  filtersActive: boolean;
   query: string;
   from: string;
   to: string;
   days: AgendaDayModel[];
   resultCount: number;
   upcomingCount: number;
+  resultCountLabel: string;
   selectFilters: FilterFieldModel[];
   composer: string;
   composerSuggestions: string[];
+  filterIndex: FilterableOccurrence[];
 };
+
+export function occurrenceCountLabel(count: number): string {
+  return count === 1 ? '1 representación próxima' : `${count} representaciones próximas`;
+}
 
 export function buildAgendaPageModel(
   catalog: Catalog,
-  url: URL,
+  _url?: URL,
   clock: Clock = systemClock,
 ): AgendaPageModel {
-  const filters = parseAgendaFilters(url.searchParams);
   const upcoming = listUpcomingOccurrences(catalog, clock);
-  const filtered = filterOccurrences(upcoming, filters);
-  const days = groupByDate(filtered.map(toAgendaItem));
+  const days = groupByDate(upcoming.map(toAgendaItem));
   return {
     title: 'Agenda de música clásica en Madrid',
     description:
       'Conciertos y eventos de música clásica en Madrid y su entorno inmediato, con fuente original.',
-    canonicalPath: agendaCanonicalPath(filters),
+    canonicalPath: '/',
     isEmptyCatalog: upcoming.length === 0,
-    hasMatches: filtered.length > 0,
-    filtersActive: hasActiveFilters(filters),
-    query: filters.q ?? '',
-    from: filters.from ?? '',
-    to: filters.to ?? '',
+    query: '',
+    from: '',
+    to: '',
     days,
-    resultCount: filtered.length,
+    resultCount: upcoming.length,
     upcomingCount: upcoming.length,
-    selectFilters: buildSelectFilters(filters, upcoming),
-    composer: filters.composer ?? '',
+    resultCountLabel: occurrenceCountLabel(upcoming.length),
+    selectFilters: buildSelectFilters(upcoming),
+    composer: '',
     composerSuggestions: unique(upcoming.flatMap((item) => item.resolved.event.composers.map((c) => c.name))),
+    filterIndex: upcoming.map(toFilterable),
   };
 }
 
@@ -139,7 +141,7 @@ function groupByDate(items: AgendaItemModel[]): AgendaDayModel[] {
   return days;
 }
 
-function buildSelectFilters(filters: AgendaFilters, upcoming: ResolvedOccurrence[]): FilterFieldModel[] {
+function buildSelectFilters(upcoming: ResolvedOccurrence[]): FilterFieldModel[] {
   const venues = uniqueMap(
     upcoming.map((item) => item.resolved.venue),
     (venue) => venue.slug,
@@ -149,7 +151,7 @@ function buildSelectFilters(filters: AgendaFilters, upcoming: ResolvedOccurrence
     {
       name: 'area',
       label: 'Ámbito',
-      value: filters.area ?? '',
+      value: '',
       options: [
         { value: '', label: 'Madrid y alrededores' },
         ...AREAS.map((id) => ({ value: id, label: areaLabels[id] })),
@@ -158,7 +160,7 @@ function buildSelectFilters(filters: AgendaFilters, upcoming: ResolvedOccurrence
     {
       name: 'access',
       label: 'Acceso',
-      value: filters.access ?? '',
+      value: '',
       options: [
         { value: '', label: 'Cualquier acceso' },
         ...ACCESS_MODES.map((id) => ({ value: id, label: accessLabels[id] })),
@@ -167,7 +169,7 @@ function buildSelectFilters(filters: AgendaFilters, upcoming: ResolvedOccurrence
     {
       name: 'format',
       label: 'Formato',
-      value: filters.format ?? '',
+      value: '',
       options: [
         { value: '', label: 'Cualquier formato' },
         ...FORMATS.map((id) => ({ value: id, label: formatLabels[id] })),
@@ -176,7 +178,7 @@ function buildSelectFilters(filters: AgendaFilters, upcoming: ResolvedOccurrence
     {
       name: 'era',
       label: 'Época',
-      value: filters.era ?? '',
+      value: '',
       options: [
         { value: '', label: 'Cualquier época' },
         ...ERAS.map((id) => ({ value: id, label: eraLabels[id] })),
@@ -185,7 +187,7 @@ function buildSelectFilters(filters: AgendaFilters, upcoming: ResolvedOccurrence
     {
       name: 'kind',
       label: 'Contexto',
-      value: filters.kind ?? '',
+      value: '',
       options: [
         { value: '', label: 'Cualquier contexto' },
         ...EVENT_KINDS.map((id) => ({ value: id, label: kindLabels[id] })),
@@ -194,32 +196,10 @@ function buildSelectFilters(filters: AgendaFilters, upcoming: ResolvedOccurrence
     {
       name: 'venue',
       label: 'Lugar',
-      value: filters.venue ?? '',
+      value: '',
       options: [{ value: '', label: 'Cualquier lugar' }, ...venues],
     },
   ];
-}
-
-function agendaCanonicalPath(filters: AgendaFilters): string {
-  const params = new URLSearchParams();
-  const entries: [keyof AgendaFilters, string | undefined][] = [
-    ['q', filters.q],
-    ['from', filters.from],
-    ['to', filters.to],
-    ['area', filters.area],
-    ['municipality', filters.municipality],
-    ['access', filters.access],
-    ['format', filters.format],
-    ['era', filters.era],
-    ['kind', filters.kind],
-    ['venue', filters.venue],
-    ['composer', filters.composer],
-  ];
-  for (const [key, value] of entries) {
-    if (value) params.set(key, value);
-  }
-  const query = params.toString();
-  return query ? `/?${query}` : '/';
 }
 
 function unique(values: string[]): string[] {

@@ -9,10 +9,10 @@ type Props = {
 const { days } = Astro.props;
 ---
 
-<div class="agenda">
+<div class="agenda" data-agenda-list>
   {
     days.map((day) => (
-      <section class="agenda-day" aria-labelledby={`dia-${day.date}`}>
+      <section class="agenda-day" data-agenda-day={day.date} aria-labelledby={`dia-${day.date}`}>
         <h2 id={`dia-${day.date}`} class="agenda-day__title">
           <time datetime={day.date}>{day.dateLabel}</time>
         </h2>

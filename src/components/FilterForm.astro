@@ -10,7 +10,7 @@ const { model } = Astro.props;
 
 <section class="filters" aria-labelledby="filtros-titulo">
   <h2 id="filtros-titulo" class="filters__title">Filtrar</h2>
-  <form class="filters__form" method="get" action="/">
+  <form class="filters__form" method="get" action="/" data-agenda-filters>
     <div class="filters__grid">
       <label class="field">
         <span>Buscar</span>
@@ -54,13 +54,12 @@ const { model } = Astro.props;
     </div>
     <div class="filters__actions">
       <button type="submit">Aplicar filtros</button>
-      {
-        model.filtersActive && (
-          <a class="filters__clear" href="/">
-            Quitar filtros
-          </a>
-        )
-      }
+      <a class="filters__clear" href="/" data-clear-filters hidden>
+        Quitar filtros
+      </a>
     </div>
   </form>
+  <noscript>
+    <p class="filters__noscript">Los filtros de la URL se aplican con JavaScript.</p>
+  </noscript>
 </section>

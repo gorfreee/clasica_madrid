@@ -113,6 +113,12 @@ describe('referencias y estructura', () => {
     expect(validateRawFiles(filesFromCatalog(richCatalog())).ok).toBe(true);
   });
 
+  it('valida el catálogo rico en disco', async () => {
+    const { validateDataDir } = await import('../src/lib/validation/validate-dir.ts');
+    const report = await validateDataDir('tests/fixtures/rich');
+    expect(report.ok).toBe(true);
+  });
+
   it('acepta un catálogo vacío', () => {
     expect(validateRawFiles([]).ok).toBe(true);
   });

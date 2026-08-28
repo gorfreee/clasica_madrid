@@ -12,6 +12,9 @@ export type RawEntityFile = {
 };
 
 export function defaultDataDir(): string {
+  if (process.env.DATA_DIR) {
+    return path.resolve(process.env.DATA_DIR);
+  }
   const here = path.dirname(fileURLToPath(import.meta.url));
   return path.resolve(here, '../../../data');
 }

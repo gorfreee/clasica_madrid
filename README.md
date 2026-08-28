@@ -40,7 +40,13 @@ data/sources/
 
 Hoy el catálogo de producción está vacío a propósito: la web muestra un estado vacío válido. Cómo modelar y añadir eventos: [`docs/data-model.md`](docs/data-model.md).
 
-Los ejemplos usados en tests viven en `tests/`, no en `data/`.
+Los ejemplos usados en tests viven en `tests/` (incluidas copias JSON en `tests/fixtures/`), no en `data/`.
+
+Para previsualizar la UI con fixtures:
+
+```bash
+DATA_DIR=tests/fixtures/rich npm run dev
+```
 
 ## Capas
 
@@ -59,6 +65,8 @@ src/pages y src/components
 ```
 
 Se puede sustituir la UI sin cambiar esquemas, validación ni consultas.
+
+Los filtros de la agenda viven en la URL (`/?access=free&area=madrid`) y se aplican en el cliente sobre el listado estático generado en build, para no introducir SSR.
 
 ## CI
 

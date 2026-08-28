@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { ID_PREFIX, SCHEMA_VERSION } from './taxonomies.ts';
+import { isRealIsoDate } from '../util/iso-date.ts';
 
 export const schemaVersionSchema = z.literal(SCHEMA_VERSION);
 
@@ -53,16 +54,4 @@ export const httpUrlSchema = z
 
 export const nonEmptyStringSchema = z.string().trim().min(1).max(300);
 
-export function isRealIsoDate(value: string): boolean {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-  if (!match) return false;
-  const year = Number(match[1]);
-  const month = Number(match[2]);
-  const day = Number(match[3]);
-  const date = new Date(Date.UTC(year, month - 1, day));
-  return (
-    date.getUTCFullYear() === year &&
-    date.getUTCMonth() === month - 1 &&
-    date.getUTCDate() === day
-  );
-}
+export { isRealIsoDate };

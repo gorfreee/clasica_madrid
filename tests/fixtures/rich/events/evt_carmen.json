@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_carmen",
+  "slug": "carmen",
+  "title": "Carmen",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional",
+  "organizerIds": [
+    "org_ocne"
+  ],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_carmen_1",
+      "date": "2026-09-10",
+      "time": "19:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_carmen_2",
+      "date": "2026-09-12",
+      "time": "19:00",
+      "status": "cancelled"
+    },
+    {
+      "id": "occ_carmen_3",
+      "date": "2026-09-14",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro del Teatro",
+      "role": "choir"
+    },
+    {
+      "name": "Orquesta titular",
+      "role": "orchestra"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Georges Bizet"
+    }
+  ],
+  "works": [
+    {
+      "title": "Carmen",
+      "composerName": "Georges Bizet"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "opera"
+  ],
+  "kind": "institutional",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio",
+      "url": "https://www.auditorionacional.mcu.es/eventos/carmen",
+      "checkedAt": "2026-08-18"
+    }
+  ],
+  "primarySourceId": "src_auditorio",
+  "lastVerifiedAt": "2026-08-20"
+}

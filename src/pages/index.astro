@@ -18,27 +18,30 @@ const model = await loadAgendaPage(Astro.url);
     </p>
   </header>
 
-  <FilterForm model={model} />
-
   {
     model.isEmptyCatalog ? (
       <EmptyState
         title="Todavía no hay conciertos publicados"
         body="Estamos construyendo el catálogo. Cuando haya eventos verificados, aparecerán aquí en orden cronológico."
       />
-    ) : !model.hasMatches ? (
-      <EmptyState
-        title="Ningún concierto coincide con esos filtros"
-        body="Prueba a quitar algún filtro o ampliar las fechas."
-      />
     ) : (
       <>
-        <p class="result-count">
-          {model.resultCount === 1
-            ? '1 representación próxima'
-            : `${model.resultCount} representaciones próximas`}
+        <FilterForm model={model} />
+        <p class="result-count" data-result-count aria-live="polite">
+          {model.resultCountLabel}
         </p>
         <AgendaList days={model.days} />
+        <div data-no-results hidden>
+          <EmptyState
+            title="Ningún concierto coincide con esos filtros"
+            body="Prueba a quitar algún filtro o ampliar las fechas."
+          />
+        </div>
+        <script id="agenda-filter-data" type="application/json" is:inline set:html={JSON.stringify(model.filterIndex).replaceAll('<', '\\u003c')} />
+        <script>
+          import { initAgendaFilters } from '../lib/presentation/agenda-client.ts';
+          initAgendaFilters();
+        </script>
       </>
     )
   }

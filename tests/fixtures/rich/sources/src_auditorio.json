@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "id": "src_auditorio",
+  "slug": "auditorio-nacional",
+  "name": "Auditorio Nacional",
+  "kind": "official",
+  "url": "https://www.auditorionacional.mcu.es/"
+}

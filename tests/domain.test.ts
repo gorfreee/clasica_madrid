@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { compareDateTime, isUpcomingOccurrence, madridDateTimeIso } from '../src/lib/domain/dates.ts';
-import { filterOccurrences, parseAgendaFilters } from '../src/lib/domain/filters.ts';
+import { filterFilterable, filterOccurrences, filtersToSearchParams, parseAgendaFilters } from '../src/lib/domain/filters.ts';
 import { listPublicEvents, listUpcomingOccurrences } from '../src/lib/domain/queries.ts';
 import { mergeCandidate } from '../src/lib/validation/promote.ts';
 import { candidateSchema } from '../src/lib/schemas/candidate.ts';
@@ -100,15 +100,17 @@ describe('filtros', () => {
     expect(filtered).toHaveLength(1);
   });
 
-  it('expone los filtros en la URL canónica', () => {
-    const model = buildAgendaPageModel(
-      richCatalog(),
-      new URL('https://clasicamadrid.com/?area=madrid&access=paid'),
-      testClock,
+  it('serializa filtros compartibles y aplica el mismo matching que el cliente', () => {
+    const params = filtersToSearchParams(
+      parseAgendaFilters(new URLSearchParams('area=madrid&access=paid')),
     );
-    expect(model.canonicalPath).toBe('/?area=madrid&access=paid');
-    expect(model.filtersActive).toBe(true);
-    expect(model.days.length).toBeGreaterThan(0);
+    expect(params.toString()).toBe('area=madrid&access=paid');
+    const model = buildAgendaPageModel(richCatalog(), new URL('https://clasicamadrid.com/'), testClock);
+    const filtered = filterFilterable(
+      model.filterIndex,
+      parseAgendaFilters(new URLSearchParams('access=free')),
+    );
+    expect(filtered.map((item) => item.occurrenceId)).toEqual(['occ_organo_1']);
   });
 });
 
@@ -124,13 +126,11 @@ describe('modelos de presentación', () => {
   it('distingue catálogo vacío de filtros sin resultados', () => {
     const empty = buildAgendaPageModel(emptyCatalog(), new URL('https://clasicamadrid.com/'), testClock);
     expect(empty.isEmptyCatalog).toBe(true);
-    const none = buildAgendaPageModel(
-      richCatalog(),
-      new URL('https://clasicamadrid.com/?access=free&format=opera'),
-      testClock,
-    );
-    expect(none.isEmptyCatalog).toBe(false);
-    expect(none.hasMatches).toBe(false);
+    const none = filterOccurrences(listUpcomingOccurrences(richCatalog(), testClock), {
+      access: 'free',
+      format: 'opera',
+    });
+    expect(none).toHaveLength(0);
   });
 
   it('construye JSON-LD MusicEvent por función activa', () => {
