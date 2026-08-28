@@ -1,0 +1,26 @@
+---
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const links = [
+  { href: '/', label: 'Agenda', current: path === '/' },
+  { href: '/lugares', label: 'Lugares', current: path === '/lugares' || path.startsWith('/lugares/') },
+];
+---
+
+<header class="site-header">
+  <div class="site-header__inner">
+    <a class="site-mark" href="/">Clásica Madrid</a>
+    <nav aria-label="Principal">
+      <ul class="nav-list">
+        {
+          links.map((link) => (
+            <li>
+              <a href={link.href} aria-current={link.current ? 'page' : undefined}>
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</header>

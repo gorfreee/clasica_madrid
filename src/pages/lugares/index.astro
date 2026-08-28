@@ -1,0 +1,39 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import EmptyState from '../../components/EmptyState.astro';
+import { loadVenuesIndex } from '../../lib/presentation/site.ts';
+import { venueUpcomingSummary } from '../../lib/presentation/venue.ts';
+
+const model = await loadVenuesIndex();
+---
+
+<Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath}>
+  <header class="page-header">
+    <p class="eyebrow">Lugares</p>
+    <h1>Dónde suena</h1>
+    <p class="lede">Espacios con conciertos próximos. El listado crece con el catálogo.</p>
+  </header>
+
+  {
+    model.isEmpty ? (
+      <EmptyState
+        title="Todavía no hay lugares con conciertos publicados"
+        body="Cuando el catálogo tenga eventos verificados, sus espacios aparecerán aquí."
+      />
+    ) : (
+      <ul class="venue-list">
+        {model.venues.map((venue) => (
+          <li>
+            <a href={venue.href}>
+              <span class="venue-list__name">{venue.name}</span>
+              <span class="venue-list__meta">
+                {venue.showMunicipality ? `${venue.municipality} · ` : ''}
+                {venueUpcomingSummary(venue.upcomingCount)}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</Layout>

@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_verano",
+  "slug": "concierto-de-verano",
+  "title": "Concierto de verano",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional",
+  "organizerIds": [
+    "org_ocne"
+  ],
+  "seriesId": "ser_ciclo_camara",
+  "occurrences": [
+    {
+      "id": "occ_verano_1",
+      "date": "2026-07-01",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "OCNE",
+      "role": "orchestra"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sinfonía n.º 7",
+      "composerName": "Ludwig van Beethoven"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "institutional",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio",
+      "url": "https://www.auditorionacional.mcu.es/eventos/verano",
+      "checkedAt": "2026-06-01"
+    }
+  ],
+  "primarySourceId": "src_auditorio",
+  "lastVerifiedAt": "2026-06-01"
+}

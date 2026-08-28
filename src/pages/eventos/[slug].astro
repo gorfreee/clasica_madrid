@@ -1,0 +1,162 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { loadEventPage, loadEventSlugs } from '../../lib/presentation/site.ts';
+
+export async function getStaticPaths() {
+  const slugs = await loadEventSlugs();
+  return slugs.map((slug) => ({ params: { slug } }));
+}
+
+const { slug } = Astro.params;
+if (!slug) {
+  throw new Error('Falta el slug del evento');
+}
+const model = await loadEventPage(slug);
+if (!model) {
+  throw new Error(`Evento público no encontrado: ${slug}`);
+}
+---
+
+<Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath} jsonLd={model.jsonLd}>
+  <article class="detail">
+    <header class="page-header">
+      <p class="eyebrow">Evento</p>
+      <h1>{model.title}</h1>
+      <p class="lede">
+        <a href={model.venueHref}>{model.venueName}</a>
+        {model.showMunicipality && <span> · {model.municipality}</span>}
+        {model.seriesName && (
+          <span>
+            {' '}
+            · {model.seriesKind}: {model.seriesName}
+          </span>
+        )}
+      </p>
+    </header>
+
+    <dl class="fact-list">
+      <div>
+        <dt>Acceso</dt>
+        <dd>{model.access.label}</dd>
+      </div>
+      <div>
+        <dt>Contexto</dt>
+        <dd>{model.kind.label}</dd>
+      </div>
+      {
+        model.formats.length > 0 && (
+          <div>
+            <dt>Formato</dt>
+            <dd>{model.formats.map((item) => item.label).join(', ')}</dd>
+          </div>
+        )
+      }
+      {
+        model.eras.length > 0 && (
+          <div>
+            <dt>Época</dt>
+            <dd>{model.eras.map((item) => item.label).join(', ')}</dd>
+          </div>
+        )
+      }
+      {
+        model.organizers.length > 0 && (
+          <div>
+            <dt>Organiza</dt>
+            <dd>{model.organizers.join(', ')}</dd>
+          </div>
+        )
+      }
+    </dl>
+
+    {
+      model.venueAddress && (
+        <p class="detail__address">
+          {model.venueAddress}
+          {model.showMunicipality ? `, ${model.municipality}` : ''}
+        </p>
+      )
+    }
+
+    <section aria-labelledby="fechas-titulo">
+      <h2 id="fechas-titulo">Fechas</h2>
+      <ol class="occurrence-list">
+        {
+          model.occurrences.map((occurrence) => (
+            <li class:list={[{ 'is-cancelled': occurrence.isCancelled }]}>
+              <time datetime={occurrence.startIso}>{occurrence.dateLabel}</time>
+              <span>{occurrence.time ?? 'Hora no indicada'}</span>
+              {occurrence.isCancelled && <span> · {occurrence.status}</span>}
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    {
+      model.performers.length > 0 && (
+        <section aria-labelledby="interpretes-titulo">
+          <h2 id="interpretes-titulo">Intérpretes</h2>
+          <ul>
+            {model.performers.map((performer) => (
+              <li>
+                {performer.name}
+                {performer.role ? ` (${performer.role})` : ''}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    {
+      model.composers.length > 0 && (
+        <section aria-labelledby="compositores-titulo">
+          <h2 id="compositores-titulo">Compositores</h2>
+          <ul>
+            {model.composers.map((composer) => (
+              <li>{composer}</li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    {
+      model.works.length > 0 && (
+        <section aria-labelledby="obras-titulo">
+          <h2 id="obras-titulo">Programa</h2>
+          <ul>
+            {model.works.map((work) => (
+              <li>
+                {work.title}
+                {work.composerName ? ` — ${work.composerName}` : ''}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <section aria-labelledby="fuentes-titulo">
+      <h2 id="fuentes-titulo">Fuentes</h2>
+      <ul class="source-list">
+        {
+          model.sources.map((source) => (
+            <li>
+              <a href={source.url} rel="noopener noreferrer">
+                {source.name}
+              </a>
+              <span>
+                {' '}
+                · {source.kind}
+                {source.isPrimary ? ' · principal' : ''} · comprobada {source.checkedAt}
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="verified">Última verificación: {model.lastVerifiedAt}</p>
+    </section>
+  </article>
+</Layout>

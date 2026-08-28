@@ -1,0 +1,43 @@
+---
+import type { AgendaItemModel } from '../lib/presentation/agenda.ts';
+
+type Props = {
+  item: AgendaItemModel;
+};
+
+const { item } = Astro.props;
+const timeLabel = item.time ?? 'Hora no indicada';
+---
+
+<article class="agenda-item" data-occurrence-id={item.occurrenceId}>
+  <p class="agenda-item__when">
+    <time datetime={`${item.date}${item.time ? `T${item.time}` : ''}`}>{item.date}</time>
+    <span aria-label={item.time ? `A las ${item.time}` : 'Hora no indicada'}>{timeLabel}</span>
+  </p>
+  <h3 class="agenda-item__title">
+    <a href={item.href}>{item.title}</a>
+  </h3>
+  <p class="agenda-item__meta">
+    <a href={item.venueHref}>{item.venueName}</a>
+    {item.showMunicipality && <span> · {item.municipality}</span>}
+    {item.seriesName && <span> · {item.seriesName}</span>}
+  </p>
+  {
+    (item.performers.length > 0 || item.composers.length > 0) && (
+      <p class="agenda-item__people">
+        {item.performers.length > 0 && <span>{item.performers.join(', ')}</span>}
+        {item.performers.length > 0 && item.composers.length > 0 && <span> · </span>}
+        {item.composers.length > 0 && <span>{item.composers.join(', ')}</span>}
+      </p>
+    )
+  }
+  <ul class="chip-list">
+    {item.formats.map((format) => <li>{format.label}</li>)}
+    {item.eras.map((era) => <li>{era.label}</li>)}
+    <li>{item.kind.label}</li>
+    <li>{item.access.label}</li>
+  </ul>
+  <p class="agenda-item__source">
+    <a href={item.sourceUrl} rel="noopener noreferrer">Fuente: {item.sourceLabel}</a>
+  </p>
+</article>

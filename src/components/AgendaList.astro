@@ -1,0 +1,27 @@
+---
+import type { AgendaDayModel } from '../lib/presentation/agenda.ts';
+import AgendaItem from './AgendaItem.astro';
+
+type Props = {
+  days: AgendaDayModel[];
+};
+
+const { days } = Astro.props;
+---
+
+<div class="agenda" data-agenda-list>
+  {
+    days.map((day) => (
+      <section class="agenda-day" data-agenda-day={day.date} aria-labelledby={`dia-${day.date}`}>
+        <h2 id={`dia-${day.date}`} class="agenda-day__title">
+          <time datetime={day.date}>{day.dateLabel}</time>
+        </h2>
+        <div class="agenda-day__list">
+          {day.items.map((item) => (
+            <AgendaItem item={item} />
+          ))}
+        </div>
+      </section>
+    ))
+  }
+</div>

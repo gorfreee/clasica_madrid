@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_auditorio_nacional",
+  "slug": "auditorio-nacional",
+  "name": "Auditorio Nacional de Música",
+  "municipality": "Madrid",
+  "area": "madrid",
+  "address": "Príncipe de Vergara, 146",
+  "url": "https://www.auditorionacional.mcu.es/"
+}

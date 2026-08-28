@@ -1,0 +1,49 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import AgendaItem from '../../components/AgendaItem.astro';
+import { loadVenuePage, loadVenueSlugs } from '../../lib/presentation/site.ts';
+
+export async function getStaticPaths() {
+  const slugs = await loadVenueSlugs();
+  return slugs.map((slug) => ({ params: { slug } }));
+}
+
+const { slug } = Astro.params;
+if (!slug) {
+  throw new Error('Falta el slug del lugar');
+}
+const model = await loadVenuePage(slug);
+if (!model) {
+  throw new Error(`Lugar público no encontrado: ${slug}`);
+}
+---
+
+<Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath}>
+  <article class="detail">
+    <header class="page-header">
+      <p class="eyebrow">Lugar</p>
+      <h1>{model.name}</h1>
+      <p class="lede">
+        {model.showMunicipality ? `${model.municipality} · ` : ''}
+        {model.areaLabel}
+      </p>
+      {model.address && <p class="detail__address">{model.address}</p>}
+      {
+        model.url && (
+          <p>
+            <a href={model.url} rel="noopener noreferrer">
+              Sitio del espacio
+            </a>
+          </p>
+        )
+      }
+    </header>
+
+    <section aria-labelledby="proximos-titulo">
+      <h2 id="proximos-titulo">Próximos conciertos</h2>
+      <div class="agenda-day__list">
+        {model.upcoming.map((item) => <AgendaItem item={item} />)}
+      </div>
+    </section>
+  </article>
+</Layout>

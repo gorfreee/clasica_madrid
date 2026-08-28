@@ -1,0 +1,65 @@
+---
+import type { AgendaPageModel } from '../lib/presentation/agenda.ts';
+
+type Props = {
+  model: AgendaPageModel;
+};
+
+const { model } = Astro.props;
+---
+
+<section class="filters" aria-labelledby="filtros-titulo">
+  <h2 id="filtros-titulo" class="filters__title">Filtrar</h2>
+  <form class="filters__form" method="get" action="/" data-agenda-filters>
+    <div class="filters__grid">
+      <label class="field">
+        <span>Buscar</span>
+        <input type="search" name="q" value={model.query} placeholder="Título, compositor, lugar…" />
+      </label>
+      <label class="field">
+        <span>Desde</span>
+        <input type="date" name="from" value={model.from} />
+      </label>
+      <label class="field">
+        <span>Hasta</span>
+        <input type="date" name="to" value={model.to} />
+      </label>
+      {
+        model.selectFilters.map((field) => (
+          <label class="field">
+            <span>{field.label}</span>
+            <select name={field.name}>
+              {field.options.map((option) => (
+                <option value={option.value} selected={option.value === field.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        ))
+      }
+      <label class="field">
+        <span>Compositor</span>
+        <input
+          type="text"
+          name="composer"
+          value={model.composer}
+          list="composer-suggestions"
+          autocomplete="off"
+        />
+        <datalist id="composer-suggestions">
+          {model.composerSuggestions.map((name) => <option value={name} />)}
+        </datalist>
+      </label>
+    </div>
+    <div class="filters__actions">
+      <button type="submit">Aplicar filtros</button>
+      <a class="filters__clear" href="/" data-clear-filters hidden>
+        Quitar filtros
+      </a>
+    </div>
+  </form>
+  <noscript>
+    <p class="filters__noscript">Los filtros de la URL se aplican con JavaScript.</p>
+  </noscript>
+</section>
