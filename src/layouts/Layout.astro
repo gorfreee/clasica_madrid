@@ -44,7 +44,7 @@ const jsonLdScript = jsonLd ? serializeJsonForScript(jsonLd) : null;
     <meta name="twitter:description" content={description} />
     {
       jsonLdScript && (
-        <script is:inline type="application/ld+json" set:html={jsonLdScript} />
+        <script is:inline type="application/ld+json" set:html={jsonLdScript}></script>
       )
     }
   </head>

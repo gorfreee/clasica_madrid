@@ -40,17 +40,7 @@ export const isoTimeSchema = z
   .string()
   .regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'hora debe ser HH:mm (24h)');
 
-export const httpUrlSchema = z
-  .string()
-  .url('URL inválida')
-  .refine((value) => {
-    try {
-      const url = new URL(value);
-      return url.protocol === 'http:' || url.protocol === 'https:';
-    } catch {
-      return false;
-    }
-  }, 'la URL de fuente debe ser http o https');
+export const httpUrlSchema = z.httpUrl({ error: 'URL inválida' });
 
 export const nonEmptyStringSchema = z.string().trim().min(1).max(300);
 
