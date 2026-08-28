@@ -1,6 +1,7 @@
 import type { AccessMode, Area, Era, EventKind, Format } from '../schemas/taxonomies.ts';
 import { ACCESS_MODES, AREAS, ERAS, EVENT_KINDS, FORMATS } from '../schemas/taxonomies.ts';
 import { isRealIsoDate } from '../util/iso-date.ts';
+import { isUpcomingOccurrence } from './dates.ts';
 import type { ResolvedOccurrence } from './resolve.ts';
 import { textMatchesQuery } from './normalize.ts';
 
@@ -22,6 +23,7 @@ export type AgendaFilters = {
 export type FilterableOccurrence = {
   occurrenceId: string;
   date: string;
+  time: string | null;
   access: AccessMode;
   formats: Format[];
   eras: Era[];
@@ -86,6 +88,7 @@ export function toFilterable(item: ResolvedOccurrence): FilterableOccurrence {
   return {
     occurrenceId: item.occurrence.id,
     date: item.occurrence.date,
+    time: item.occurrence.time,
     access: event.access,
     formats: event.formats,
     eras: event.eras,
@@ -111,6 +114,19 @@ export function filterFilterable(
   filters: AgendaFilters,
 ): FilterableOccurrence[] {
   return items.filter((item) => matchesFilters(item, filters));
+}
+
+/**
+ * Client and tests share this: drop representations that have already passed
+ * in Europe/Madrid, then apply URL filters. `now` is injectable for tests.
+ */
+export function selectVisibleOccurrences(
+  items: FilterableOccurrence[],
+  filters: AgendaFilters,
+  now = new Date(),
+): FilterableOccurrence[] {
+  const upcoming = items.filter((item) => isUpcomingOccurrence(item.date, item.time, now));
+  return filterFilterable(upcoming, filters);
 }
 
 export function matchesFilters(item: FilterableOccurrence, filters: AgendaFilters): boolean {

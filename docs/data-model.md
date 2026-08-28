@@ -97,4 +97,4 @@ No inventes eventos de producción. Los ejemplos de tests están en `tests/`, no
 
 ## Histórico
 
-Los eventos pasados se conservan. La web pública lista presente y futuro; las páginas individuales se generan sólo para eventos con alguna representación activa próxima.
+Los eventos pasados se conservan. La agenda lista presente y futuro (y el navegador oculta representaciones que ya hayan pasado desde el último build, en zona `Europe/Madrid`). Cada evento canónico tiene una página pública `/eventos/{slug}` que permanece tras haber pasado: `getStaticPaths()` no exige una representación futura.

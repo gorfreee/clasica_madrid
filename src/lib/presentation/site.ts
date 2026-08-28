@@ -20,8 +20,8 @@ export async function loadEventPage(
   return buildEventPageModel(await getPublishedCatalog(), slug, clock);
 }
 
-export async function loadEventSlugs(clock: Clock = systemClock): Promise<string[]> {
-  return listEventPageSlugs(await getPublishedCatalog(), clock);
+export async function loadEventSlugs(): Promise<string[]> {
+  return listEventPageSlugs(await getPublishedCatalog());
 }
 
 export async function loadVenuesIndex(clock: Clock = systemClock): Promise<VenuesIndexModel> {
