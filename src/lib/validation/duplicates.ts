@@ -1,9 +1,11 @@
 /**
  * Conservative duplicate detection. Ambiguous near-matches are not auto-merged.
+ * Same venue + date + time + normalized title is a high-confidence error.
+ * Same source URL + date is informational only and must not block validation.
  */
 
 import type { Catalog } from '../domain/catalog.ts';
-import { errorIssue, type ValidationIssue } from './report.ts';
+import { errorIssue, warningIssue, type ValidationIssue } from './report.ts';
 import { normalizeText } from '../domain/normalize.ts';
 
 export function findDuplicateEvents(catalog: Catalog): ValidationIssue[] {
@@ -39,7 +41,7 @@ export function findDuplicateEvents(catalog: Catalog): ValidationIssue[] {
         const previous = seenUrls.get(urlKey);
         if (previous && previous !== event.id) {
           issues.push(
-            errorIssue(
+            warningIssue(
               'duplicate-source-url',
               `posible duplicado de ${previous}: misma URL de fuente y fecha`,
               `events/${event.id}.json`,

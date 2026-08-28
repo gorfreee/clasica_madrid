@@ -130,7 +130,7 @@ describe('filtros', () => {
       access: 'free',
       format: 'organ',
       era: 'baroque',
-      kind: 'community',
+      kind: 'alternative',
       area: 'nearby',
     });
     expect(filtered).toHaveLength(1);

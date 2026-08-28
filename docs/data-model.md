@@ -38,15 +38,15 @@ Campos principales:
 - `composers[]`: `{ name }`
 - `works[]`: `{ title, composerName? }` (opcional, puede ir vacío)
 - `eras[]`, `formats[]` (taxonomías; pueden ir vacíos si aún no hay clasificación)
-- `kind`: contexto, no ranking de calidad
+- `kind`: contexto, no ranking de calidad. `established` | `alternative`
 - `access`: `free` | `paid` | `unknown` (sin precios)
-- `citations[]`: al menos una. `{ sourceId, url, checkedAt }`
+- `citations[]`: al menos una. `{ sourceId, url, checkedAt, externalId? }`
 - `primarySourceId`: debe estar en `citations`
 - `lastVerifiedAt`: `YYYY-MM-DD`, no anterior a ningún `checkedAt`
 
 Un evento no puede publicarse sin procedencia. Si está `cancelled`, todas las representaciones deben estarlo.
 
-Varias funciones de una ópera o un programa repetido son **un** evento con varias `occurrences`. La agenda aplana esas representaciones en filas cronológicas.
+Una misma entidad `Event` solo agrupa `occurrences` cuando comparten los atributos musicales y contextuales esenciales. Cuando lugar, programa, reparto relevante o condiciones cambian sustancialmente, se consideran eventos separados. `Occurrence` permanece simple (`id`, `date`, `time`, `status`): no hay overrides por función. Varias funciones de una ópera o un programa repetido en las mismas condiciones son **un** evento. La agenda aplana esas representaciones en filas cronológicas.
 
 ## Lugar
 
@@ -64,7 +64,7 @@ La entidad `sources/` describe el origen (nombre, tipo, URL de la sede). Cada ev
 - `aggregator`: agenda de terceros
 - `secondary`: prensa, redes, mención indirecta
 
-`citations[].url` es la página que respalda ese evento. `checkedAt` es cuándo se comprobó.
+`citations[].url` es la página que respalda ese evento. `checkedAt` es cuándo se comprobó. `externalId` es opcional: el identificador estable del evento en la fuente original cuando exista (texto no vacío). No vive a nivel de `Event`.
 
 ## Taxonomías
 
@@ -72,15 +72,12 @@ La entidad `sources/` describe el origen (nombre, tipo, URL de la sede). Cada ev
 
 **Formatos (`formats`)**: `symphonic`, `chamber`, `recital`, `choral`, `organ`, `early-music`, `opera`, `zarzuela`, `lied`, `other`.
 
-**Contexto (`kind`)** — no es calidad:
+**Contexto (`kind`)** — no es calidad; dos valores excluyentes:
 
-- `institutional`: grandes instituciones / programación principal
-- `independent`: alternativa o independiente
-- `amateur`: amateur
-- `community`: comunitaria / hiperlocal
-- `educational`: formativa / estudiantil
+- `established`: programación profesional o estable dentro del circuito habitual de música clásica/cultural
+- `alternative`: fuera de ese circuito estable, incluidas propuestas amateur, comunitarias, educativas o conciertos puntuales en espacios no dedicados habitualmente a programación musical
 
-Un coro parroquial puede ser `community` o `amateur`. Una audición infantil de escuela de música, si se incluye, sería `educational`; no es contenido principal por defecto.
+Un coro parroquial, una audición de escuela de música o un concierto ocasional en una iglesia no especializada son `alternative`. La temporada de un auditorio o un ciclo institucional estable es `established`.
 
 **Series (`kind`)**: `festival`, `cycle`, `season`, `series`.
 

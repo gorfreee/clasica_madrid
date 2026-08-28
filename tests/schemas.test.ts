@@ -63,6 +63,15 @@ describe('schemas', () => {
     expect(result.success).toBe(false);
   });
 
+  it('rechaza un kind fuera de taxonomía', () => {
+    const result = eventSchema.safeParse(makeEvent({ kind: 'community' as never }));
+    expect(result.success).toBe(false);
+  });
+
+  it('acepta kind alternative', () => {
+    expect(eventSchema.parse(makeEvent({ kind: 'alternative' })).kind).toBe('alternative');
+  });
+
   it('exige al menos una fuente', () => {
     const result = eventSchema.safeParse(makeEvent({ citations: [] }));
     expect(result.success).toBe(false);
@@ -72,6 +81,38 @@ describe('schemas', () => {
     const result = eventSchema.safeParse(
       makeEvent({
         citations: [{ sourceId: 'src_auditorio', url: 'ftp://example.org/x', checkedAt: '2026-08-20' }],
+      }),
+    );
+    expect(result.success).toBe(false);
+  });
+
+  it('acepta externalId opcional en una citación', () => {
+    const parsed = eventSchema.parse(
+      makeEvent({
+        citations: [
+          {
+            sourceId: 'src_auditorio',
+            url: 'https://www.auditorionacional.mcu.es/eventos/matinees',
+            checkedAt: '2026-08-20',
+            externalId: 'matinees-2026',
+          },
+        ],
+      }),
+    );
+    expect(parsed.citations[0]?.externalId).toBe('matinees-2026');
+  });
+
+  it('rechaza un externalId vacío', () => {
+    const result = eventSchema.safeParse(
+      makeEvent({
+        citations: [
+          {
+            sourceId: 'src_auditorio',
+            url: 'https://www.auditorionacional.mcu.es/eventos/matinees',
+            checkedAt: '2026-08-20',
+            externalId: '   ',
+          },
+        ],
       }),
     );
     expect(result.success).toBe(false);
@@ -179,6 +220,32 @@ describe('duplicados', () => {
       ],
     });
     expect(findDuplicateEvents(catalog)).toEqual([]);
+  });
+
+  it('no trata la misma URL de fuente y fecha como error', () => {
+    const catalog = makeCatalog({
+      events: [
+        makeEvent(),
+        makeEvent({
+          id: 'evt_otro',
+          slug: 'otro-programa',
+          title: 'Otro programa',
+          occurrences: [{ id: 'occ_otro_1', date: '2026-09-15', time: '19:30', status: 'scheduled' }],
+          citations: [
+            {
+              sourceId: 'src_auditorio',
+              url: 'https://www.auditorionacional.mcu.es/eventos/matinees',
+              checkedAt: '2026-08-20',
+            },
+          ],
+        }),
+      ],
+    });
+    const issues = findDuplicateEvents(catalog);
+    expect(issues.some((issue) => issue.code === 'duplicate-event')).toBe(false);
+    const urlIssue = issues.find((issue) => issue.code === 'duplicate-source-url');
+    expect(urlIssue?.severity).toBe('warning');
+    expect(validateRawFiles(filesFromCatalog(catalog)).ok).toBe(true);
   });
 });
 

@@ -46,15 +46,11 @@ export type Format = (typeof FORMATS)[number];
 
 /**
  * Context of the event, not a quality ranking.
- * A parish amateur choir is a valid community/amateur event.
+ * established: professional/stable programming in the usual classical/cultural circuit.
+ * alternative: outside that circuit (amateur, community, educational, or one-off concerts
+ * in spaces not usually dedicated to music programming).
  */
-export const EVENT_KINDS = [
-  'institutional',
-  'independent',
-  'amateur',
-  'community',
-  'educational',
-] as const;
+export const EVENT_KINDS = ['established', 'alternative'] as const;
 export type EventKind = (typeof EVENT_KINDS)[number];
 
 export const SERIES_KINDS = ['festival', 'cycle', 'season', 'series'] as const;

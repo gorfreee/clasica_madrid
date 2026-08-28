@@ -54,7 +54,9 @@ npm run ingest:promote -- ingestion/inbox/mi-evento.json
 
 El script valida el candidato, lo fusiona en memoria con `data/`, aplica las mismas reglas de referencias y duplicados, y sólo entonces escribe ficheros nuevos. No sobrescribe un evento que ya exista. Si el candidato incluye un lugar, organizador, serie o fuente cuyo ID ya está en el catálogo, la entidad candidata debe coincidir campo a campo con la canónica (incluidos los opcionales ausentes o presentes). Cualquier diferencia es un conflicto explícito: la promoción falla y no escribe ningún fichero. Nunca reutiliza en silencio un ID existente con datos distintos, ni pisa una entidad canónica.
 
-Los duplicados de alta confianza (mismo lugar + fecha + hora + título normalizado, o misma URL de fuente + fecha) se rechazan; los casos ambiguos quedan para revisión humana.
+Los duplicados de alta confianza (mismo lugar + fecha + hora + título normalizado) se rechazan. La misma URL de fuente + la misma fecha no bloquea la validación ni la promoción: si aparece, es sólo un aviso informativo. Los casos ambiguos quedan para revisión humana.
+
+Al extraer, una misma entidad `Event` solo agrupa `occurrences` cuando comparten los atributos musicales y contextuales esenciales. Si cambian de forma sustancial el lugar, el programa, el reparto relevante o las condiciones, son eventos separados.
 
 ## Descubrimiento futuro
 

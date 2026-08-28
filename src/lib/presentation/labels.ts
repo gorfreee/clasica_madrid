@@ -45,11 +45,8 @@ export const formatLabels: Record<Format, string> = {
 };
 
 export const kindLabels: Record<EventKind, string> = {
-  institutional: 'Institucional',
-  independent: 'Independiente',
-  amateur: 'Amateur',
-  community: 'Comunitario',
-  educational: 'Formativo',
+  established: 'Establecido',
+  alternative: 'Alternativo',
 };
 
 export const seriesKindLabels: Record<SeriesKind, string> = {

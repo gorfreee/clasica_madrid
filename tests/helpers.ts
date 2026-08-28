@@ -70,7 +70,7 @@ export function makeEvent(overrides: Partial<Event> = {}): Event {
     works: [{ title: 'Sinfonía n.º 7', composerName: 'Ludwig van Beethoven' }],
     eras: ['classical', 'romantic'],
     formats: ['symphonic'],
-    kind: 'institutional',
+    kind: 'established',
     access: 'paid',
     citations: [
       {
@@ -132,7 +132,7 @@ export function richCatalog(): Catalog {
     works: [{ title: 'Carmen', composerName: 'Georges Bizet' }],
     eras: ['romantic'],
     formats: ['opera'],
-    kind: 'institutional',
+    kind: 'established',
     access: 'paid',
     citations: [
       {
@@ -156,7 +156,7 @@ export function richCatalog(): Catalog {
     works: [],
     eras: ['baroque'],
     formats: ['organ'],
-    kind: 'community',
+    kind: 'alternative',
     access: 'free',
     citations: [
       {

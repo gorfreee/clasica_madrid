@@ -57,6 +57,7 @@ export const citationSchema = z
     sourceId: sourceIdSchema,
     url: httpUrlSchema,
     checkedAt: isoDateSchema,
+    externalId: nonEmptyStringSchema.optional(),
   })
   .strict();
 
