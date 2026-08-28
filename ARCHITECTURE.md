@@ -8,8 +8,9 @@ Este documento define la arquitectura técnica base del proyecto. Debe manteners
 2. **GitHub es la fuente de verdad**. Los datos publicados viven en ficheros versionados dentro del repositorio, no en una base de datos en producción.
 3. **Sitio estático por defecto**. La web se genera en build time y se sirve como HTML/CSS/JS estático.
 4. **Rendimiento y usabilidad primero**. La experiencia debe ser excelente en móvil y escritorio, con poco JavaScript, HTML semántico y diseño responsive.
-5. **Automatización auditable**. Los agentes de IA proponen cambios mediante PR; la validación determinista decide si un cambio es estructuralmente válido.
-6. **Añadir infraestructura sólo cuando sea necesaria**. No introducir bases de datos, APIs, colas, servidores o servicios externos antes de que exista un problema concreto que los requiera.
+5. **Interfaz desacoplada del dominio**. La presentación debe poder rediseñarse o reemplazarse ampliamente sin modificar los datos canónicos, la ingestión ni la lógica de negocio.
+6. **Automatización auditable**. Los agentes de IA proponen cambios mediante PR; la validación determinista decide si un cambio es estructuralmente válido.
+7. **Añadir infraestructura sólo cuando sea necesaria**. No introducir bases de datos, APIs, colas, servidores o servicios externos antes de que exista un problema concreto que los requiera.
 
 ## Stack base
 
@@ -24,6 +25,33 @@ Este documento define la arquitectura técnica base del proyecto. Debe manteners
 - **Vitest** para lógica y validadores; **Playwright** sólo para recorridos críticos de la interfaz.
 
 No usar inicialmente una base de datos, backend, SSR, API propia, CMS, sistema de autenticación ni servicios de búsqueda externos.
+
+## Separación entre interfaz y dominio
+
+La interfaz es una capa reemplazable. Debe ser posible experimentar con diseños, componentes, librerías o implementaciones generadas por distintos modelos de IA sin afectar al núcleo del proyecto.
+
+La arquitectura debe mantener separadas, como mínimo, estas capas:
+
+```text
+datos canónicos + esquemas
+          ↓
+lógica de dominio / consultas
+          ↓
+modelos de presentación
+          ↓
+componentes y estilos de interfaz
+```
+
+Reglas:
+
+- los componentes visuales no deben contener lógica de ingestión, normalización o validación de datos;
+- la UI no debe depender directamente de la estructura física de los ficheros del repositorio;
+- las páginas y componentes deben consumir contratos o modelos de presentación estables;
+- los cambios puramente visuales no deben exigir modificar esquemas ni datos;
+- la lógica reutilizable de fechas, filtros, búsqueda, agrupaciones y transformación de datos debe vivir fuera de los componentes visuales;
+- evitar acoplar el dominio a Tailwind, Astro o a una librería concreta de componentes.
+
+El objetivo es que una futura sustitución completa del diseño afecte principalmente a la capa de presentación y no obligue a reconstruir el resto del sistema.
 
 ## Datos
 
