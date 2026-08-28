@@ -1,35 +1,45 @@
 ---
-import '../styles/global.css';
+import Layout from '../layouts/Layout.astro';
+import FilterForm from '../components/FilterForm.astro';
+import AgendaList from '../components/AgendaList.astro';
+import EmptyState from '../components/EmptyState.astro';
+import { loadAgendaPage } from '../lib/presentation/site.ts';
 
-const title = 'Clásica Madrid — Agenda de música clásica en Madrid';
-const description = 'Una agenda pública para descubrir conciertos y eventos de música clásica en Madrid y su entorno.';
+const model = await loadAgendaPage(Astro.url);
 ---
 
-<!doctype html>
-<html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <meta name="description" content={description} />
-    <link rel="canonical" href="https://clasicamadrid.com/" />
-    <title>{title}</title>
-  </head>
-  <body>
-    <main class="mx-auto flex min-h-screen max-w-3xl items-center px-6 py-16 sm:px-10">
-      <section aria-labelledby="page-title" class="w-full border-y border-black/15 py-12 sm:py-16">
-        <p class="mb-5 font-sans text-xs font-semibold uppercase tracking-[0.22em] text-black/55">
-          Próximamente
+<Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath}>
+  <header class="page-header">
+    <p class="eyebrow">Agenda</p>
+    <h1>Música clásica en Madrid</h1>
+    <p class="lede">
+      Conciertos y eventos con fuente original. El catálogo cubre el municipio de Madrid y, cuando
+      tiene sentido, municipios próximos.
+    </p>
+  </header>
+
+  <FilterForm model={model} />
+
+  {
+    model.isEmptyCatalog ? (
+      <EmptyState
+        title="Todavía no hay conciertos publicados"
+        body="Estamos construyendo el catálogo. Cuando haya eventos verificados, aparecerán aquí en orden cronológico."
+      />
+    ) : !model.hasMatches ? (
+      <EmptyState
+        title="Ningún concierto coincide con esos filtros"
+        body="Prueba a quitar algún filtro o ampliar las fechas."
+      />
+    ) : (
+      <>
+        <p class="result-count">
+          {model.resultCount === 1
+            ? '1 representación próxima'
+            : `${model.resultCount} representaciones próximas`}
         </p>
-        <h1 id="page-title" class="max-w-2xl text-5xl leading-[0.95] tracking-tight sm:text-7xl">
-          Clásica Madrid
-        </h1>
-        <p class="mt-7 max-w-xl text-xl leading-relaxed text-black/70 sm:text-2xl">
-          Una agenda para descubrir la música clásica que suena en Madrid.
-        </p>
-        <p class="mt-10 font-sans text-sm leading-relaxed text-black/50">
-          Estamos preparando el catálogo.
-        </p>
-      </section>
-    </main>
-  </body>
-</html>
+        <AgendaList days={model.days} />
+      </>
+    )
+  }
+</Layout>

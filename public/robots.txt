@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://clasicamadrid.com/sitemap-index.xml

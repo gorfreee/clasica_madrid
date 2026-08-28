@@ -1,0 +1,57 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { DEFAULT_DESCRIPTION, DEFAULT_TITLE, SITE_NAME, SITE_ORIGIN } from '../lib/presentation/constants.ts';
+
+type Props = {
+  title?: string;
+  description?: string;
+  canonicalPath?: string;
+  jsonLd?: Record<string, unknown>[] | Record<string, unknown>;
+};
+
+const {
+  title = DEFAULT_TITLE,
+  description = DEFAULT_DESCRIPTION,
+  canonicalPath = '/',
+  jsonLd,
+} = Astro.props;
+
+const pageTitle = title === DEFAULT_TITLE || title.includes(SITE_NAME) ? title : `${title} — ${SITE_NAME}`;
+const canonical = new URL(canonicalPath, SITE_ORIGIN).toString();
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="light" />
+    <link rel="canonical" href={canonical} />
+    <title>{pageTitle}</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_ES" />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    {
+      jsonLd && (
+        <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+      )
+    }
+  </head>
+  <body>
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+    <Header />
+    <main id="contenido" class="page">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

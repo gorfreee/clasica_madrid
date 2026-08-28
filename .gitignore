@@ -18,3 +18,11 @@ yarn-error.log*
 
 # macOS
 .DS_Store
+
+# ingestion working directories (candidates never go straight to production)
+ingestion/inbox/**
+!ingestion/inbox/.gitkeep
+ingestion/rejected/**
+!ingestion/rejected/.gitkeep
+ingestion/work/**
+!ingestion/work/.gitkeep

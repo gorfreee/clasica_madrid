@@ -1,0 +1,97 @@
+import type { Catalog } from '../domain/catalog.ts';
+import {
+  findVenueBySlug,
+  listUpcomingOccurrences,
+  listVenuesWithUpcoming,
+  type Clock,
+  systemClock,
+} from '../domain/index.ts';
+import { isMadridMunicipality } from '../domain/normalize.ts';
+import { areaLabels } from './labels.ts';
+import { toAgendaItem, type AgendaItemModel } from './agenda.ts';
+
+export type VenueListItemModel = {
+  name: string;
+  slug: string;
+  href: string;
+  municipality: string;
+  showMunicipality: boolean;
+  areaLabel: string;
+  upcomingCount: number;
+};
+
+export type VenuePageModel = {
+  title: string;
+  description: string;
+  canonicalPath: string;
+  name: string;
+  slug: string;
+  municipality: string;
+  showMunicipality: boolean;
+  areaLabel: string;
+  address: string | null;
+  url: string | null;
+  upcoming: AgendaItemModel[];
+};
+
+export type VenuesIndexModel = {
+  title: string;
+  description: string;
+  canonicalPath: string;
+  isEmpty: boolean;
+  venues: VenueListItemModel[];
+};
+
+export function buildVenuesIndexModel(catalog: Catalog, clock: Clock = systemClock): VenuesIndexModel {
+  const venues = listVenuesWithUpcoming(catalog, clock).map(({ venue, occurrences }) => ({
+    name: venue.name,
+    slug: venue.slug,
+    href: `/lugares/${venue.slug}`,
+    municipality: venue.municipality,
+    showMunicipality: !isMadridMunicipality(venue.municipality),
+    areaLabel: areaLabels[venue.area],
+    upcomingCount: occurrences.length,
+  }));
+  return {
+    title: 'Lugares',
+    description: 'Espacios con conciertos de música clásica próximos en Madrid y su entorno.',
+    canonicalPath: '/lugares',
+    isEmpty: venues.length === 0,
+    venues,
+  };
+}
+
+export function listVenuePageSlugs(catalog: Catalog, clock: Clock = systemClock): string[] {
+  return listVenuesWithUpcoming(catalog, clock).map(({ venue }) => venue.slug);
+}
+
+export function buildVenuePageModel(
+  catalog: Catalog,
+  slug: string,
+  clock: Clock = systemClock,
+): VenuePageModel | null {
+  const venue = findVenueBySlug(catalog, slug);
+  if (!venue) return null;
+  const upcoming = listUpcomingOccurrences(catalog, clock)
+    .filter((item) => item.resolved.venue.id === venue.id)
+    .map(toAgendaItem);
+  if (upcoming.length === 0) return null;
+  return {
+    title: venue.name,
+    description: `Próximos conciertos en ${venue.name}${isMadridMunicipality(venue.municipality) ? '' : `, ${venue.municipality}`}.`,
+    canonicalPath: `/lugares/${venue.slug}`,
+    name: venue.name,
+    slug: venue.slug,
+    municipality: venue.municipality,
+    showMunicipality: !isMadridMunicipality(venue.municipality),
+    areaLabel: areaLabels[venue.area],
+    address: venue.address ?? null,
+    url: venue.url ?? null,
+    upcoming,
+  };
+}
+
+export function venueUpcomingSummary(count: number): string {
+  if (count === 1) return '1 concierto próximo';
+  return `${count} conciertos próximos`;
+}
