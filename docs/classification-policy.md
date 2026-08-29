@@ -324,6 +324,8 @@ deterministic facts/rules → knowledge → AI cuando eligibility=uncertain → 
 
 La IA interpreta `ObservedFacts`. No inventa performers, composers, works, fechas, horas, venue, organizadores, precios, acceso ni URLs. Puede usar conocimiento musical general. `uncertain` es una salida válida.
 
+El prompt versionado del fallback está en `src/ingestion/classification/ai-prompt.ts` (`AI_CLASSIFIER_PROMPT_VERSION`). Resume esta política de forma compacta; no es una copia literal. Subir la versión permite distinguir resultados de prompts distintos.
+
 Contrato de salida: objeto JSON validado con Zod (`eligibility` obligatorio; `formats` / `eras` / `kind` / `evidence` opcionales). Valores fuera de taxonomía → inválido → `uncertain`.
 
 Degradación: provider ausente, API key ausente, timeout, error HTTP, excepción, respuesta vacía, JSON inválido o schema inválido conservan `eligibility = uncertain` y no tumbaron el resto del lote. El `ruleId` interno (`ai-unavailable`, `ai-timeout`, `ai-error`, `ai-malformed-output`, `ai-invalid-output`) permite diagnosticar el fallo.
