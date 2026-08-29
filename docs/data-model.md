@@ -90,7 +90,7 @@ Los valores canónicos están en `src/lib/schemas/taxonomies.ts`. Las etiquetas 
 1. Crea o reutiliza venue, organizer, series y source en sus carpetas.
 2. Añade `data/events/{id}.json` con al menos una representación y una citación.
 3. Ejecuta `npm run validate`.
-4. Si el cambio es de ingestión automática, usa el formato candidato y `npm run ingest:promote` (ver `docs/ingestion.md`).
+4. El flujo de ingestión **actualmente implementado** usa candidatos y `npm run ingest:promote` (ver [`docs/ingestion.md`](ingestion.md)). No lo tomes como el diseño futuro: la arquitectura objetivo está en [`docs/ingestion-v3-plan.md`](ingestion-v3-plan.md).
 
 No inventes eventos de producción. Los ejemplos de tests están en `tests/`, no en `data/`.
 

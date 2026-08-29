@@ -1,6 +1,12 @@
 # Ingestión — investigación e inspiración externa
 
-> Estado: **documento de investigación**. Complementa `docs/ingestion-v2-plan.md` y recoge patrones observados en proyectos open source que resuelven problemas relacionados con ingestión, crawling, normalización, sincronización incremental, deduplicación y publicación de datos heterogéneos.
+> **Documentación histórica.** Este documento **no** representa la arquitectura vigente y **no** debe usarse como especificación de implementación.
+>
+> La referencia actual para la evolución de la ingestión es [`docs/ingestion-v3-plan.md`](../ingestion-v3-plan.md). El estado operativo de lo que hay implementado hoy está en [`docs/ingestion.md`](../ingestion.md).
+>
+> Consérvese como investigación de fondo. Sólo úsalo como requisito si una tarea pide explícitamente investigar decisiones o patrones anteriores.
+
+> Estado original: **documento de investigación**. Complementa [`docs/archive/ingestion-v2-plan.md`](ingestion-v2-plan.md) y recoge patrones observados en proyectos open source que resuelven problemas relacionados con ingestión, crawling, normalización, sincronización incremental, deduplicación y publicación de datos heterogéneos.
 >
 > No es una especificación de implementación. Las ideas se valoran por su utilidad para Clásica Madrid, no porque debamos adoptar las tecnologías completas de los proyectos estudiados.
 
@@ -980,7 +986,7 @@ Para páginas dinámicas pueden guardarse fragmentos HTML/JSON representativos, 
 
 # 4. Propuesta de arquitectura refinada a partir de la investigación
 
-La investigación refuerza y concreta la dirección de `ingestion-v2-plan.md`.
+La investigación refuerza y concreta la dirección de [`ingestion-v2-plan.md`](ingestion-v2-plan.md) (histórico; la arquitectura objetivo vigente está en [`docs/ingestion-v3-plan.md`](../ingestion-v3-plan.md)).
 
 ## Capa 1 — Source Registry
 

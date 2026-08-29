@@ -98,6 +98,8 @@ Los datos fuente del repositorio no tienen por qué copiarse íntegramente al de
 
 La ingestión está separada de la web pública.
 
+La implementación **actual** (candidatos JSON y `ingest:promote`) está descrita en [`docs/ingestion.md`](docs/ingestion.md). La arquitectura **objetivo** vigente de la ingestión está en [`docs/ingestion-v3-plan.md`](docs/ingestion-v3-plan.md). El flujo legacy no debe interpretarse como el diseño futuro.
+
 ```text
 fuentes conocidas + búsqueda con agentes de IA
                   ↓
@@ -118,13 +120,13 @@ Los agentes de IA pueden utilizar ChatGPT, Cursor u otras herramientas disponibl
 
 Siempre que sea posible, las fuentes conocidas deben procesarse mediante mecanismos deterministas (feeds, JSON, ICS, HTML estructurado, etc.). La IA se reserva especialmente para descubrimiento, extracción ambigua, clasificación y resolución de casos difíciles.
 
-Un agente nunca debe escribir directamente en producción. Su salida debe convertirse primero en datos candidatos sometidos al mismo esquema y validaciones que cualquier cambio manual.
+Un agente nunca debe escribir directamente los datos canónicos publicados. Cualquier salida debe someterse al mismo esquema y validaciones deterministas que un cambio manual antes de fusionarse. En el diseño objetivo, los candidatos pueden existir sólo en memoria durante una ejecución automática; `ingestion/inbox/` no es una cola obligatoria del flujo rutinario.
 
 ## PR automáticas
 
-El objetivo es que las actualizaciones fiables puedan llegar a producción sin intervención manual.
+El **objetivo** (arquitectura v3) es que las actualizaciones rutinarias y válidas lleguen a producción sin intervención humana ordinaria.
 
-Una PR automática sólo podrá autoaprobarse/automergearse cuando pase todas las comprobaciones requeridas, entre ellas:
+Eso **no** está implementado todavía: la CI actual no aprueba ni fusiona PRs. Una PR automática sólo podrá autoaprobarse/automergearse cuando pase todas las comprobaciones requeridas, entre ellas:
 
 - esquema válido;
 - IDs y referencias válidos;
@@ -134,7 +136,7 @@ Una PR automática sólo podrá autoaprobarse/automergearse cuando pase todas la
 - build correcto;
 - reglas de confianza que se definan para la fuente o el tipo de cambio.
 
-Los cambios ambiguos, fuentes nuevas o casos con baja confianza deben quedar pendientes de revisión humana.
+Cuando un caso no pueda resolverse con seguridad, el comportamiento preferido en el diseño objetivo es **degradar o excluir ese dato concreto**, no convertir la revisión humana en un paso ordinario del pipeline ni bloquear el resto de una ejecución sana. El detalle está en [`docs/ingestion-v3-plan.md`](docs/ingestion-v3-plan.md).
 
 ## Rendimiento y experiencia de usuario
 

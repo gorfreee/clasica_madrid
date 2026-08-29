@@ -1,6 +1,10 @@
 # Ingestión v3 — arquitectura pragmática y automatizada
 
-> Estado: **propuesta de diseño objetivo**. Este documento define la dirección recomendada para evolucionar la ingestión de Clásica Madrid a una v3 simple, mantenible, automatizada y preparada para usar IA de forma pragmática. Toma como base `docs/ingestion-v2-plan.md`, `docs/ingestion-inspiration.md`, `docs/ingestion.md`, el modelo de datos actual y las lecciones de las primeras cargas reales.
+> Estado: **diseño objetivo vigente y fuente de verdad autoritativa** para la evolución de la ingestión. Este documento define la dirección recomendada para evolucionar la ingestión de Clásica Madrid a una v3 simple, mantenible, automatizada y preparada para usar IA de forma pragmática.
+>
+> [`docs/ingestion.md`](ingestion.md) es la puerta de entrada operativa (qué hay implementado hoy). Los documentos en [`docs/archive/`](archive/) son investigación y planes históricos: no son requisitos vigentes.
+>
+> Toma como base la investigación histórica en [`docs/archive/ingestion-v2-plan.md`](archive/ingestion-v2-plan.md) y [`docs/archive/ingestion-inspiration.md`](archive/ingestion-inspiration.md), el modelo de datos actual y las lecciones de las primeras cargas reales.
 >
 > La v3 no pretende construir una plataforma de datos genérica. Pretende mantener una agenda de descubrimiento de música clásica con buena cobertura, trazabilidad y calidad, minimizando infraestructura, coste y mantenimiento.
 

@@ -1,6 +1,12 @@
 # Ingestión v2 — plan de evolución
 
-> Estado: **propuesta de diseño**. Este documento describe la dirección recomendada para evolucionar la ingestión de Clásica Madrid a partir de lo aprendido con la primera carga real de eventos. No sustituye todavía a `docs/ingestion.md` ni implica que el flujo v1 deje de ser válido mientras no se implemente la v2.
+> **Documentación histórica.** Este documento **no** representa la arquitectura vigente y **no** debe usarse como especificación de implementación.
+>
+> La referencia actual para la evolución de la ingestión es [`docs/ingestion-v3-plan.md`](../ingestion-v3-plan.md). El estado operativo de lo que hay implementado hoy está en [`docs/ingestion.md`](../ingestion.md).
+>
+> Consérvese como contexto de decisiones anteriores. Sólo úsalo como requisito si una tarea pide explícitamente investigar ese historial.
+
+> Estado original: **propuesta de diseño**. Este documento describe la dirección recomendada para evolucionar la ingestión de Clásica Madrid a partir de lo aprendido con la primera carga real de eventos. No sustituye todavía a `docs/ingestion.md` ni implica que el flujo v1 deje de ser válido mientras no se implemente la v2.
 
 ## 1. Contexto
 

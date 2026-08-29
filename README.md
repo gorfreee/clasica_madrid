@@ -21,7 +21,7 @@ npm run build        # sitio estático en dist/
 npm run preview      # sirve dist/
 ```
 
-Ingestión de un candidato (ver [`docs/ingestion.md`](docs/ingestion.md)):
+Ingestión **actual** de un candidato (implementación vigente, no el diseño v3; ver [`docs/ingestion.md`](docs/ingestion.md)):
 
 ```bash
 npm run ingest:promote -- ingestion/inbox/evento.json

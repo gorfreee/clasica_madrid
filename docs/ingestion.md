@@ -1,32 +1,43 @@
 # Ingestión de eventos
 
+Este documento es la **puerta de entrada operativa** a la ingestión: qué hay implementado hoy y hacia dónde ir.
+
+No es la especificación de arquitectura objetivo.
+
+| Qué necesitas | Dónde |
+|---|---|
+| Diseño objetivo vigente (fuente de verdad para evolucionar la ingestión) | [`docs/ingestion-v3-plan.md`](ingestion-v3-plan.md) |
+| Estado operativo actual (este documento) | `docs/ingestion.md` |
+| Modelo de datos canónico | [`docs/data-model.md`](data-model.md) |
+| Investigación y planes anteriores (histórico, no requisitos) | [`docs/archive/`](archive/) |
+
 La web no escribe datos. Todo lo publicado entra por Git, pasa validación determinista y CI, y entonces se fusiona.
 
-```text
-discovery
-   ↓
-candidate data          ingestion/inbox/   (gitignored)
-   ↓
-normalization
-   ↓
-deterministic validation
-   ↓
-duplicate checks
-   ↓
-PR
-   ↓
-CI                      .github/workflows/ci.yml
-   ↓
-merge
+## Estado actualmente implementado
+
+Hoy la ingestión es un flujo **manual de candidatos JSON**, anterior a la v3.
+
+1. Un agente o una persona extrae un evento y lo escribe como candidato (`src/lib/schemas/candidate.ts`).
+2. El fichero se deja en `ingestion/inbox/` (gitignored).
+3. `npm run ingest:promote` valida, fusiona en memoria con `data/` y, si todo es correcto, escribe ficheros nuevos.
+
+```bash
+npm run ingest:promote -- ingestion/inbox/mi-evento.json
 ```
 
-Un agente de IA puede descubrir, extraer y clasificar. Nunca debe saltarse la validación ni escribir directo en `data/` de producción sin el mismo esquema que un cambio manual.
+El script no sobrescribe un evento que ya exista. Si el candidato incluye un lugar, organizador, serie o fuente cuyo ID ya está en el catálogo, la entidad candidata debe coincidir campo a campo con la canónica. Cualquier diferencia es un conflicto: la promoción falla y no escribe ningún fichero.
 
-## Candidatos
+Los duplicados de alta confianza (mismo lugar + fecha + hora + título normalizado) se rechazan. La misma URL de fuente + la misma fecha no bloquea: si aparece, es sólo un aviso. Los casos ambiguos quedan para revisión.
 
-Formato: `src/lib/schemas/candidate.ts`.
+Al extraer, una misma entidad `Event` solo agrupa `occurrences` cuando comparten los atributos musicales y contextuales esenciales. Si cambian de forma sustancial el lugar, el programa, el reparto relevante o las condiciones, son eventos separados.
 
-Un candidato incluye el evento y, si aún no existen, el lugar / organizadores / serie / fuentes a crear. Ejemplo mínimo:
+Directorios de trabajo (ignorados por Git):
+
+- `ingestion/inbox/` — candidatos pendientes
+- `ingestion/work/` — normalización en curso
+- `ingestion/rejected/` — descartados, para inspección
+
+Formato mínimo de un candidato:
 
 ```json
 {
@@ -40,44 +51,41 @@ Un candidato incluye el evento y, si aún no existen, el lugar / organizadores /
 }
 ```
 
-Directorios de trabajo (ignorados por Git):
+Un agente de IA puede descubrir, extraer y clasificar. Nunca debe saltarse la validación ni escribir directo en `data/` de producción sin el mismo esquema que un cambio manual.
 
-- `ingestion/inbox/` — candidatos pendientes
-- `ingestion/work/` — normalización en curso
-- `ingestion/rejected/` — descartados, para inspección
+## Infraestructura legacy durante la migración
 
-Promoción a datos canónicos:
+Mientras se implementa la v3, puede seguir existiendo esta infraestructura:
 
-```bash
-npm run ingest:promote -- ingestion/inbox/mi-evento.json
-```
+- `ingest:promote`
+- `ingestion/inbox/`
+- `ingestion/work/`
+- `ingestion/rejected/`
+- el esquema `Candidate` como fichero JSON en disco
 
-El script valida el candidato, lo fusiona en memoria con `data/`, aplica las mismas reglas de referencias y duplicados, y sólo entonces escribe ficheros nuevos. No sobrescribe un evento que ya exista. Si el candidato incluye un lugar, organizador, serie o fuente cuyo ID ya está en el catálogo, la entidad candidata debe coincidir campo a campo con la canónica (incluidos los opcionales ausentes o presentes). Cualquier diferencia es un conflicto explícito: la promoción falla y no escribe ningún fichero. Nunca reutiliza en silencio un ID existente con datos distintos, ni pisa una entidad canónica.
+Eso es el **estado actual**, no el diseño futuro. No lo interpretes automáticamente como arquitectura objetivo ni lo tomes como requisito para nuevas piezas de ingestión.
 
-Los duplicados de alta confianza (mismo lugar + fecha + hora + título normalizado) se rechazan. La misma URL de fuente + la misma fecha no bloquea la validación ni la promoción: si aparece, es sólo un aviso informativo. Los casos ambiguos quedan para revisión humana.
+La v3 prevé que, en el flujo automático normal, los candidatos puedan existir sólo en memoria; `ingestion/inbox/` queda como herramienta de imports manuales, debugging y casos excepcionales. Ver [`docs/ingestion-v3-plan.md`](ingestion-v3-plan.md).
 
-Al extraer, una misma entidad `Event` solo agrupa `occurrences` cuando comparten los atributos musicales y contextuales esenciales. Si cambian de forma sustancial el lugar, el programa, el reparto relevante o las condiciones, son eventos separados.
+## Arquitectura objetivo
 
-## Descubrimiento futuro
+La fuente de verdad para cualquier trabajo de evolución de la ingestión es [`docs/ingestion-v3-plan.md`](ingestion-v3-plan.md).
 
-La búsqueda periódica combinará, sin acoplar la web a un proveedor de IA:
+Principio rector de la v3: *el código obtiene y controla los hechos; la IA ayuda a interpretar, enriquecer, descubrir y reparar; Git valida y publica.*
 
-- fuentes institucionales conocidas
-- festivales y ciclos
-- auditorios y teatros
-- iglesias
-- conservatorios y universidades
-- asociaciones
-- búsquedas abiertas para lo difícil de encontrar
+El flujo normal previsto (harvesting con adapters, `RawEvent`, normalización, enrichment, reconciliación, PR y auto-merge, cadencia ~10 días, ventana de 120 días) está especificado allí. No se duplica en este documento.
 
-Preferir mecanismos deterministas (ICS, JSON, HTML estable) cuando existan. Reservar la IA para extracción ambigua, clasificación y deduplicación tentativa.
+Hoy **no** están implementados adapters, `RawEvent`, discovery automático, enrichment, reconciliación ni el workflow programado en GitHub Actions. No los añadas salvo que una tarea pida explícitamente implementar una fase de la v3.
 
-## Auto-merge
+## CI y auto-merge (hoy vs objetivo)
 
-La CI de este repositorio **no** aprueba PRs. Para que actualizaciones de datos de alta confianza puedan auto-fusionarse hace falta configuración de GitHub que no vive en el código:
+La CI actual (`.github/workflows/ci.yml`) valida, testea, typecheckea y construye. **No** aprueba PRs ni fusiona sola.
 
-1. Activar auto-merge en el repositorio.
-2. Branch protection / ruleset en `main` que exija el check `CI / verify`.
-3. (Opcional, más adelante) limitar el auto-merge a PRs que sólo toquen `data/**` y procedan de un actor de confianza.
+El objetivo de la v3 es que una ejecución sana llegue a merge sin intervención humana ordinaria, con auto-merge sólo si los checks están verdes. Eso requiere configuración de GitHub que no vive en el código y **no** forma parte de la implementación actual. No añadas branch protection, required checks ni workflows de ingestión a menos que una tarea lo pida.
 
-No añadir bots que aprueben reviews automáticamente. Los cambios ambiguos, fuentes nuevas o fallos de duplicados deben seguir revisándose a mano.
+## Documentación histórica
+
+No usar como especificación vigente, salvo que una tarea pida investigar decisiones anteriores:
+
+- [`docs/archive/ingestion-v2-plan.md`](archive/ingestion-v2-plan.md) — plan de evolución v2
+- [`docs/archive/ingestion-inspiration.md`](archive/ingestion-inspiration.md) — investigación de patrones externos
