@@ -4,7 +4,7 @@ Política editorial y operativa para el enrichment de ingestión v3 (fase 2).
 
 No es un campo del schema canónico `Event`. La elegibilidad es metadata interna del pipeline. `formats`, `eras`, `kind` y `access` sí son campos canónicos; esta política dice cómo derivarlos.
 
-La implementación de la fase 2.2 (classifier determinista) vive en `src/ingestion/classification/`. La fase 2.3 (IA) y la 2.4 (puerta de publicación) aún no existen. Este documento y el golden set en `tests/fixtures/ingestion/golden/` son la especificación contra la que se mide.
+La implementación de la fase 2.2 (classifier determinista) vive en `src/ingestion/classification/`. La fase 2.3 (fallback de IA, `classifyObserved`) existe y sólo se activa si el determinista deja `uncertain`. La fase 2.4 (puerta de publicación) aún no existe: `runIngest` no usa esta capa. Este documento y el golden set en `tests/fixtures/ingestion/golden/` son la especificación contra la que se mide.
 
 ## Principio
 
@@ -13,11 +13,13 @@ precision > coverage
 observed facts → deterministic rules → musical knowledge → AI → safe uncertain
 ```
 
-En la fase 2.2 no hay IA. El comportamiento correcto es:
+En la fase 2.2 no hay IA. El comportamiento correcto del núcleo determinista es:
 
 ```text
 observed facts → deterministic rules → musical knowledge → safe uncertain
 ```
+
+La fase 2.3 añade el fallback de IA **sólo** sobre `uncertain`. Un `include` o `exclude` determinista no se reabre. Si la IA no está disponible o falla, el resultado sigue siendo `uncertain`.
 
 Preferimos perder temporalmente un evento antes que publicar un falso positivo.
 
@@ -39,7 +41,7 @@ Candidate
 
 Un `exclude` no debe consumir trabajo innecesario de clasificación posterior. Un `uncertain` degrada de forma segura: no se publica automáticamente.
 
-La fase 2.1 implementa la hidratación de fichas y el contrato de hechos observados. La fase 2.2 implementa el classifier determinista (`classify(observed)`), todavía **sin** conectarlo a `runIngest` como puerta de publicación.
+La fase 2.1 implementa la hidratación de fichas y el contrato de hechos observados. La fase 2.2 implementa el classifier determinista (`classify(observed)`). La fase 2.3 implementa `classifyObserved` (IA sólo si `uncertain`). Ninguna de las dos está conectada a `runIngest` como puerta de publicación.
 
 ## Lo que no es esta política
 
@@ -297,14 +299,20 @@ La implementación no debe inventar performers, composers, works, fechas, venues
 Arquitectura:
 
 ```text
-deterministic facts/rules → knowledge → AI cuando aporte valor → safe fallback
+deterministic facts/rules → knowledge → AI cuando eligibility=uncertain → safe fallback
 ```
 
-Si la IA no está disponible, hace timeout, devuelve algo inválido o tiene baja confianza: degradación segura. CI no llama a un LLM.
+La IA interpreta `ObservedFacts`. No inventa performers, composers, works, fechas, horas, venue, organizadores, precios, acceso ni URLs. Puede usar conocimiento musical general. `uncertain` es una salida válida.
+
+Contrato de salida: objeto JSON validado con Zod (`eligibility` obligatorio; `formats` / `eras` / `kind` / `evidence` opcionales). Valores fuera de taxonomía → inválido → `uncertain`.
+
+Degradación: provider ausente, API key ausente, timeout, error HTTP, excepción, respuesta vacía, JSON inválido o schema inválido conservan `eligibility = uncertain` y no tumbaron el resto del lote. El `ruleId` interno (`ai-unavailable`, `ai-timeout`, `ai-error`, `ai-malformed-output`, `ai-invalid-output`) permite diagnosticar el fallo.
+
+CI no llama a un LLM. Tests usan fakes. **Esta capa todavía no gobierna la publicación de `runIngest` (fase 2.4).**
 
 ### Tests
 
-El golden set valida el contrato de los fixtures. La fase 2.2 ejecuta el classifier determinista sobre `golden.observed`. CI no llama a un LLM. Sin IA, la cobertura de `include` no es un objetivo de recall.
+El golden set valida el contrato de los fixtures. La fase 2.2 ejecuta el classifier determinista sobre `golden.observed`. La fase 2.3 evalúa el mismo set con un fake de IA cuando el determinista es `uncertain`. CI no llama a un LLM. Sin IA, la cobertura de `include` no es un objetivo de recall.
 
 ---
 

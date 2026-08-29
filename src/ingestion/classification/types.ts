@@ -1,7 +1,7 @@
 import type { AccessMode, Era, EventKind, Format } from '../../lib/schemas/taxonomies.ts';
 import type { Eligibility } from './golden-case.ts';
 
-export type ResolutionMethod = 'rule' | 'knowledge' | 'fallback';
+export type ResolutionMethod = 'rule' | 'knowledge' | 'fallback' | 'ai';
 
 /**
  * Internal pipeline evidence. Not part of the canonical Event schema.

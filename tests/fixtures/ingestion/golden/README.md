@@ -1,6 +1,6 @@
 # Golden evaluation set — Ingestion v3 Phase 2
 
-Dataset de evaluación para la Classification Policy. Phase 2.2 ejecuta `golden.observed → classify()` sobre estos casos. **No es una tabla de lookup:** las reglas deben ser generales.
+Dataset de evaluación para la Classification Policy. Phase 2.2 ejecuta `golden.observed → classify()` sobre estos casos. Phase 2.3 evalúa el mismo set con un fake de IA cuando el determinista deja `uncertain`. **No es una tabla de lookup:** las reglas deterministas deben ser generales. El fake de IA de tests no es un modelo real.
 
 Política: [`docs/classification-policy.md`](../../../docs/classification-policy.md).
 
@@ -40,7 +40,7 @@ Consulta de las URLs oficiales enlazadas desde el smoke o el catálogo (2026-08-
 
 No se usó conocimiento general para rellenar obras ausentes. Si la ficha no lista el programa, `composers`/`works` quedan vacíos y, si hace falta, `uncertain`.
 
-HTML completo no se guarda: el golden set es la capa de *observed facts*. Fixtures HTML de parser viven en `../detail/` (pocos excerpts representativos por source). Phase 2.1 hidrata fichas. Phase 2.2 clasifica esos hechos. Phase 2.3 añadirá IA; Phase 2.4 conectará el classifier al pipeline.
+HTML completo no se guarda: el golden set es la capa de *observed facts*. Fixtures HTML de parser viven en `../detail/` (pocos excerpts representativos por source). Phase 2.1 hidrata fichas. Phase 2.2 clasifica esos hechos. Phase 2.3 añade fallback de IA (tests con fake; CI no llama a un LLM). Phase 2.4 conectará el classifier al pipeline.
 
 ## Datos deliberadamente unknown / vacíos
 

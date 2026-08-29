@@ -12,6 +12,9 @@ import type { ClassificationResult } from './types.ts';
  *
  * Short-circuit: exclude and uncertain skip formats / eras / kind / access.
  * Field resolvers remain independently testable.
+ *
+ * AI fallback lives in enrich.ts (`classifyObserved`). This function stays
+ * the publication-agnostic rule layer; runIngest does not call either yet (PR 2.4).
  */
 export function classify(facts: ObservedFacts): ClassificationResult {
   const eligibility = resolveEligibility(facts);
