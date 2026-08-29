@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_riccardo_primo",
+  "origin": "phase1-smoke",
+  "sourceId": "teatro-real",
+  "sourceUrl": "https://www.teatroreal.es/es/espectaculo/riccardo-primo-re-dinghilterra",
+  "listingTitle": "Riccardo Primo, re d'Inghilterra",
+  "observed": {
+    "title": "Riccardo Primo, re d'Inghilterra",
+    "description": "Ópera en tres actos, HWV 23. Música de Georg Friedrich Händel (1685-1759). Les Arts Florissants, bajo la batuta de Paul Agnew. Ópera en versión de concierto.",
+    "categoryText": "Ópera",
+    "venueText": "Sala Principal",
+    "accessText": "Compra tus entradas",
+    "performers": [
+      {
+        "name": "Les Arts Florissants"
+      },
+      {
+        "name": "Paul Agnew",
+        "roleText": "dirección"
+      },
+      {
+        "name": "Hugh Cutting",
+        "roleText": "contratenor"
+      }
+    ],
+    "composers": [
+      {
+        "name": "Georg Friedrich Händel"
+      }
+    ],
+    "works": [
+      {
+        "title": "Riccardo Primo, re d'Inghilterra",
+        "composerName": "Georg Friedrich Händel"
+      }
+    ]
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": [
+      "opera",
+      "early-music"
+    ],
+    "eras": [
+      "baroque"
+    ],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "Ópera barroca de Handel, incluso en versión de concierto.",
+  "checkedAt": "2026-08-29"
+}

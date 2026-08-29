@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_paco_de_lucia",
+  "origin": "phase1-smoke",
+  "sourceId": "auditorio-nacional",
+  "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-homenaje-a-paco-de-lucia-5",
+  "listingTitle": "Excelentia. Homenaje a Paco de Lucía",
+  "observed": {
+    "title": "Excelentia. Homenaje a Paco de Lucía",
+    "venueText": "Sala de Cámara",
+    "programText": "Andrés Barrios, piano. Alejandro Hurtado, guitarra. Programa: A Fernanda (Rondeña); Meraki (Bulerías); Ecdysis (Farruca); Marea viva (Seguiriya); El Vito; La Tarara; Callejón del Muro (Minera).",
+    "performers": [
+      {
+        "name": "Andrés Barrios",
+        "roleText": "piano"
+      },
+      {
+        "name": "Alejandro Hurtado",
+        "roleText": "guitarra"
+      }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "exclude",
+    "formats": [
+      "recital"
+    ],
+    "eras": [],
+    "kind": "established",
+    "access": "unknown"
+  },
+  "reason": "Homenaje flamenco a Paco de Lucía. El flamenco queda fuera del alcance.",
+  "checkedAt": "2026-08-29"
+}

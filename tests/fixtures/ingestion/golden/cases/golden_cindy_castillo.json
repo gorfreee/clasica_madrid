@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_cindy_castillo",
+  "origin": "phase1-smoke",
+  "sourceId": "auditorio-nacional",
+  "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-cindy-castillo",
+  "listingTitle": "CNDM. Cindy Castillo",
+  "observed": {
+    "title": "CNDM. Cindy Castillo",
+    "categoryText": "Bach Vermut",
+    "venueText": "Sala Sinfónica",
+    "programText": "CINDY CASTILLO órgano. Bach: Toccata y fuga en re menor, BWV 565; Concierto en re menor BWV 596. César Franck: Prière, op. 20. Joseph Jongen: Toccata en re bemol mayor, op. 104 (1937). Jean-Pierre Deleuze: La neige tombe (2004). Bach: Ricercar a 6 de La ofrenda musical, BWV 1079.",
+    "performers": [
+      {
+        "name": "Cindy Castillo",
+        "roleText": "órgano"
+      }
+    ],
+    "composers": [
+      {
+        "name": "Johann Sebastian Bach"
+      },
+      {
+        "name": "César Franck"
+      },
+      {
+        "name": "Joseph Jongen"
+      },
+      {
+        "name": "Jean-Pierre Deleuze"
+      }
+    ],
+    "works": [
+      {
+        "title": "Toccata y fuga en re menor, BWV 565",
+        "composerName": "Johann Sebastian Bach"
+      },
+      {
+        "title": "Prière, op. 20",
+        "composerName": "César Franck"
+      },
+      {
+        "title": "Toccata en re bemol mayor, op. 104",
+        "composerName": "Joseph Jongen"
+      },
+      {
+        "title": "La neige tombe",
+        "composerName": "Jean-Pierre Deleuze"
+      }
+    ]
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": [
+      "organ",
+      "recital"
+    ],
+    "eras": [
+      "baroque",
+      "romantic",
+      "twentieth",
+      "contemporary"
+    ],
+    "kind": "established",
+    "access": "unknown"
+  },
+  "reason": "Recital de órgano de tradición clásica. Jongen (1937) → twentieth; Deleuze (2004) → contemporary.",
+  "checkedAt": "2026-08-29"
+}

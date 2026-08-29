@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_concierto_navidad_teatro_real",
+  "origin": "phase1-smoke",
+  "sourceId": "teatro-real",
+  "sourceUrl": "https://www.teatroreal.es/es/espectaculo/concierto-navidad-0",
+  "listingTitle": "CONCIERTO DE NAVIDAD",
+  "observed": {
+    "title": "CONCIERTO DE NAVIDAD",
+    "description": "Vive un concierto único con solistas y orquesta sinfónica que interpretarán los villancicos más famosos del mundo y melodías populares.",
+    "categoryText": "También en el Real",
+    "venueText": "Sala Principal",
+    "programText": "ORQUESTA CLÁSICA SANTA CECILIA. Director: Kynan Johns. 1. Sleigh Ride (L. Anderson); 2. Ay para Navidad (M. Sosa); 4. Hallelujah (L. Cohen); 5. Happy Christmas. War is Over (J. Lennon, Y. Ono); 8. White Christmas (I. Berlin); 11. Feliz Navidad (J. Feliciano); 17. New York, New York (F. Sinatra).",
+    "performers": [
+      {
+        "name": "Orquesta Clásica Santa Cecilia",
+        "roleText": "orquesta"
+      },
+      {
+        "name": "Kynan Johns",
+        "roleText": "director"
+      },
+      {
+        "name": "Francesco Castoro",
+        "roleText": "tenor"
+      },
+      {
+        "name": "Eduardo Sandoval",
+        "roleText": "tenor"
+      },
+      {
+        "name": "Miguel Borrallo",
+        "roleText": "tenor"
+      }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "exclude",
+    "formats": [
+      "symphonic"
+    ],
+    "eras": [],
+    "kind": "established",
+    "access": "unknown"
+  },
+  "reason": "El título genérico exigía ficha. El programa es una gala popular navideña (Lennon, Sinatra, Feliciano, Anderson), no un concierto de repertorio clásico.",
+  "notes": "Trampa de título: «Concierto de Navidad» en el Teatro Real parecía uncertain o include; la ficha oficial demuestra exclude.",
+  "checkedAt": "2026-08-29"
+}

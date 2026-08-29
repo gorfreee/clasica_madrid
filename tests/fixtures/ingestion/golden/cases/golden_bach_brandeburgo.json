@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_bach_brandeburgo",
+  "origin": "phase1-smoke",
+  "sourceId": "auditorio-nacional",
+  "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-bach-conciertos-de-brandeburgo-1",
+  "listingTitle": "Excelentia. Bach: Conciertos de Brandeburgo",
+  "observed": {
+    "title": "Excelentia. Bach: Conciertos de Brandeburgo",
+    "venueText": "Sala de Cámara",
+    "programText": "Orquesta Clásica Santa Cecilia. Luis Sánchez, trompeta. J. S. Bach: Suite orquestal n.º 1 en do mayor, BWV 1066; Concierto de Brandeburgo n.º 2 en fa mayor, BWV 1047; Concierto de Brandeburgo n.º 4 en sol mayor, BWV 1049; Concierto de Brandeburgo n.º 5 en re mayor, BWV 1050.",
+    "performers": [
+      {
+        "name": "Orquesta Clásica Santa Cecilia",
+        "roleText": "orquesta"
+      },
+      {
+        "name": "Luis Sánchez",
+        "roleText": "trompeta"
+      }
+    ],
+    "composers": [
+      {
+        "name": "J. S. Bach"
+      }
+    ],
+    "works": [
+      {
+        "title": "Suite orquestal n.º 1 en do mayor, BWV 1066",
+        "composerName": "J. S. Bach"
+      },
+      {
+        "title": "Concierto de Brandeburgo n.º 2 en fa mayor, BWV 1047",
+        "composerName": "J. S. Bach"
+      },
+      {
+        "title": "Concierto de Brandeburgo n.º 4 en sol mayor, BWV 1049",
+        "composerName": "J. S. Bach"
+      },
+      {
+        "title": "Concierto de Brandeburgo n.º 5 en re mayor, BWV 1050",
+        "composerName": "J. S. Bach"
+      }
+    ]
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": [
+      "symphonic",
+      "early-music"
+    ],
+    "eras": [
+      "baroque"
+    ],
+    "kind": "established",
+    "access": "unknown"
+  },
+  "reason": "Programa explícito de Bach. Un solo compositor, Barroco.",
+  "checkedAt": "2026-08-29"
+}

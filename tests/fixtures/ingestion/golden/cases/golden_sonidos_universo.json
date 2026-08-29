@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_sonidos_universo",
+  "origin": "published-catalog",
+  "sourceId": "madrid-datos",
+  "sourceUrl": "https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Ciudad-Lineal/Retransmision-del-Pleno-en-directo/Actuacion-musica-Musica-clasica/?vgnextchannel=cd0a32e941f22610VgnVCM1000008a4a900aRCRD&vgnextfmt=default&vgnextoid=aab47760175ff910VgnVCM100000891ecb1aRCRD",
+  "listingTitle": "Los sonidos del universo",
+  "observed": {
+    "title": "Los sonidos del universo",
+    "categoryText": "Actuación música / Música clásica",
+    "venueText": "Parque Lineal de Palomeras",
+    "performers": [],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "uncertain",
+    "formats": [],
+    "eras": [],
+    "kind": "alternative",
+    "access": "unknown"
+  },
+  "reason": "Título poético. La categoría municipal dice «Música clásica», pero eso no es un programa. No se asume include por la etiqueta del Ayuntamiento ni free por ser municipal.",
+  "missingEvidence": "Faltan descripción, intérpretes, obras y condiciones de acceso en la ficha consultada.",
+  "checkedAt": "2026-08-29"
+}

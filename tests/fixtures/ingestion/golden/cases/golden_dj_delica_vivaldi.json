@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_dj_delica_vivaldi",
+  "origin": "phase1-smoke",
+  "sourceId": "auditorio-nacional",
+  "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-dj-delica-las-cuatro-estaciones-de-vivaldi",
+  "listingTitle": "Excelentia. DJ Délica. Las Cuatro Estaciones de Vivaldi",
+  "observed": {
+    "title": "Excelentia. DJ Délica. Las Cuatro Estaciones de Vivaldi",
+    "venueText": "Sala de Cámara",
+    "programText": "DJ Délica. Délica Chamber Orchestra. Programa: Antonio Vivaldi — Las cuatro estaciones; Johann Sebastian Bach — Toccata y fuga en re menor; Samuel Barber — Adagio for Strings; Johann Pachelbel — Canon en re mayor; Isaac Albéniz — Asturias; Georges Bizet — Carmen; Jacques Offenbach — Can-Can.",
+    "performers": [
+      {
+        "name": "DJ Délica"
+      },
+      {
+        "name": "Délica Chamber Orchestra",
+        "roleText": "orquesta"
+      }
+    ],
+    "composers": [
+      {
+        "name": "Antonio Vivaldi"
+      },
+      {
+        "name": "Johann Sebastian Bach"
+      },
+      {
+        "name": "Samuel Barber"
+      },
+      {
+        "name": "Johann Pachelbel"
+      },
+      {
+        "name": "Isaac Albéniz"
+      },
+      {
+        "name": "Georges Bizet"
+      },
+      {
+        "name": "Jacques Offenbach"
+      }
+    ],
+    "works": [
+      {
+        "title": "Las cuatro estaciones",
+        "composerName": "Antonio Vivaldi"
+      }
+    ]
+  },
+  "expected": {
+    "eligibility": "exclude",
+    "formats": [
+      "other"
+    ],
+    "eras": [],
+    "kind": "established",
+    "access": "unknown"
+  },
+  "reason": "El título cita a Vivaldi, pero la identidad del evento es un producto DJ/crossover. No es un concierto de música clásica.",
+  "notes": "Trampa de título: Vivaldi en el nombre no implica include si el formato es DJ.",
+  "checkedAt": "2026-08-29"
+}

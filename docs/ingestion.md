@@ -8,6 +8,8 @@ No es la especificación de arquitectura objetivo.
 |---|---|
 | Diseño objetivo vigente (fuente de verdad para evolucionar la ingestión) | [`docs/ingestion-v3-plan.md`](ingestion-v3-plan.md) |
 | Estado operativo actual (este documento) | `docs/ingestion.md` |
+| Classification Policy v1 y criterios de Phase 2 | [`docs/classification-policy.md`](classification-policy.md) |
+| Golden evaluation set (fixtures, no classifier) | [`tests/fixtures/ingestion/golden/`](../tests/fixtures/ingestion/golden/) |
 | Modelo de datos canónico | [`docs/data-model.md`](data-model.md) |
 | Investigación y planes anteriores (histórico, no requisitos) | [`docs/archive/`](archive/) |
 
@@ -115,7 +117,7 @@ Principio rector de la v3: *el código obtiene y controla los hechos; la IA ayud
 
 El flujo normal previsto (harvesting con adapters, `RawEvent`, normalización, enrichment, reconciliación, PR y auto-merge, cadencia ~10 días, ventana de 120 días) está especificado allí. No se duplica en este documento.
 
-Hoy **sí** están implementados (fase 1): adapters con interpretación estricta, `RawEvent`, registry mínimo (referencia a Source canónica + seed), normalización común, lote validate-then-write atómico, contrato async-compatible de `extract` y CLI local. **No** están implementados discovery automático, enrichment (incluidos `kind` definitivo, elegibilidad y fichas de detalle), reconciliación fuzzy, política de desapariciones, GitHub Actions de ingestión ni auto-merge. No los añadas salvo que una tarea pida explícitamente la fase correspondiente.
+Hoy **sí** están implementados (fase 1): adapters con interpretación estricta, `RawEvent`, registry mínimo (referencia a Source canónica + seed), normalización común, lote validate-then-write atómico, contrato async-compatible de `extract` y CLI local. La **Classification Policy v1** y el golden set existen como especificación de evaluación; no hay classifier productivo. **No** están implementados discovery automático, enrichment (incluidos `kind` definitivo, elegibilidad y fichas de detalle), reconciliación fuzzy, política de desapariciones, GitHub Actions de ingestión ni auto-merge. No los añadas salvo que una tarea pida explícitamente la fase correspondiente.
 
 ## CI y auto-merge (hoy vs objetivo)
 

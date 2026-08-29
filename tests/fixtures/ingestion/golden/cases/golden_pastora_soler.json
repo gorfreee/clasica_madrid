@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_pastora_soler",
+  "origin": "phase1-smoke",
+  "sourceId": "teatro-real",
+  "sourceUrl": "https://www.teatroreal.es/es/espectaculo/pastora-soler-concierto",
+  "listingTitle": "PASTORA SOLER EN CONCIERTO",
+  "observed": {
+    "title": "PASTORA SOLER EN CONCIERTO",
+    "description": "Tras dos años de gira celebrando sus 30 años de carrera, Pastora Soler encara el tramo final de Rosas y Espinas. Galardonada con el Premio Ondas a la Trayectoria.",
+    "categoryText": "También en el Real",
+    "venueText": "Sala Principal",
+    "accessText": "Compra tus entradas",
+    "performers": [
+      {
+        "name": "Pastora Soler"
+      }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "exclude",
+    "formats": [
+      "other"
+    ],
+    "eras": [],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "Concierto de canción popular contemporánea. Venue institucional irrelevante para eligibility.",
+  "checkedAt": "2026-08-29"
+}

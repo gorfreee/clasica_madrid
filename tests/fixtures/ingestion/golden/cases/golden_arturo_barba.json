@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_arturo_barba",
+  "origin": "published-catalog",
+  "sourceId": "hermanos-capuchinos",
+  "sourceUrl": "https://hermanoscapuchinos.org/actualidad/587/i-ciclo-internacional-de-conciertos-de-organo",
+  "listingTitle": "Arturo Barba — I Ciclo Internacional de Conciertos de Órgano",
+  "observed": {
+    "title": "I Ciclo Internacional de Conciertos de Órgano",
+    "description": "La Basílica de Jesús de Medinaceli ha acogido la presentación del I Ciclo Internacional de Conciertos de Órgano, una nueva propuesta cultural que reunirá en Madrid a destacados organistas nacionales e internacionales entre los meses de abril y octubre de 2026.",
+    "venueText": "Basílica de Jesús de Medinaceli",
+    "performers": [
+      {
+        "name": "Arturo Barba",
+        "roleText": "órgano"
+      }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": [
+      "organ",
+      "recital"
+    ],
+    "eras": [],
+    "kind": "established",
+    "access": "unknown"
+  },
+  "reason": "Ciclo internacional de órgano: interpretación de repertorio de órgano de tradición clásica. No se inventan compositores ni se asume gratuidad por ser iglesia.",
+  "notes": "La página consultada presenta el ciclo, no el programa de la sesión de Arturo Barba. eras vacío a propósito.",
+  "checkedAt": "2026-08-29"
+}

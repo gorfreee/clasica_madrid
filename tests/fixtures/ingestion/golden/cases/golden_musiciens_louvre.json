@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_musiciens_louvre",
+  "origin": "phase1-smoke",
+  "sourceId": "auditorio-nacional",
+  "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-les-musiciens-du-louvre-1",
+  "listingTitle": "CNDM. Les Musiciens du Louvre",
+  "observed": {
+    "title": "CNDM. Les Musiciens du Louvre",
+    "categoryText": "Universo Barroco",
+    "venueText": "Sala Sinfónica",
+    "accessText": "50, 40, 32, 24 y 18 €",
+    "programText": "LES MUSICIENS DU LOUVRE. MARC MINKOWSKI director. George Frideric Haendel (1685-1759) Concerti grossi, op. 3 (1710-1718).",
+    "performers": [
+      {
+        "name": "Les Musiciens du Louvre",
+        "roleText": "ensemble"
+      },
+      {
+        "name": "Marc Minkowski",
+        "roleText": "director"
+      }
+    ],
+    "composers": [
+      {
+        "name": "George Frideric Haendel"
+      }
+    ],
+    "works": [
+      {
+        "title": "Concerti grossi, op. 3",
+        "composerName": "George Frideric Haendel"
+      }
+    ]
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": [
+      "early-music",
+      "symphonic"
+    ],
+    "eras": [
+      "baroque"
+    ],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "Ensemble de música antigua con repertorio de Handel explícito.",
+  "checkedAt": "2026-08-29"
+}

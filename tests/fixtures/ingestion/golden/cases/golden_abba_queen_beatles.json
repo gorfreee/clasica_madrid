@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_abba_queen_beatles",
+  "origin": "phase1-smoke",
+  "sourceId": "auditorio-nacional",
+  "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-abba-queen-beatles-y-otros-grandes-del-pop",
+  "listingTitle": "Excelentia. Abba, Queen, Beatles y Otros Grandes del Pop",
+  "observed": {
+    "title": "Excelentia. Abba, Queen, Beatles y Otros Grandes del Pop",
+    "venueText": "Sala de Cámara",
+    "programText": "Délica Pop Orchestra. Programa: Queen – Somebody to love; Abba – Chiquitita; Abba – Money, money money; Mamma Mia; Beatles – Come together, Let it be, Yesterday; Dalla – Caruso; Sinatra – My Way; Presley – Can’t help falling in love.",
+    "performers": [
+      {
+        "name": "Délica Pop Orchestra",
+        "roleText": "orquesta"
+      }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "exclude",
+    "formats": [
+      "symphonic"
+    ],
+    "eras": [],
+    "kind": "established",
+    "access": "unknown"
+  },
+  "reason": "Homenaje pop con ensemble de cuerda/orquesta. El formato no cambia la elegibilidad.",
+  "checkedAt": "2026-08-29"
+}

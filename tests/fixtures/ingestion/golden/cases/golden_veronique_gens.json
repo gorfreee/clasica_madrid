@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_veronique_gens",
+  "origin": "phase1-smoke",
+  "sourceId": "teatro-real",
+  "sourceUrl": "https://www.teatroreal.es/es/espectaculo/veronique-gens",
+  "listingTitle": "Véronique Gens",
+  "observed": {
+    "title": "Véronique Gens",
+    "description": "Reines. Arias, danzas y coros de las óperas Hippolyte et Aricie, Zoroastre, Dardanus de Jean-Philippe Rameau; Hercule Mourant y Canente de Antoine Dauvergne; Le Ballet de la paix de François Francœur; Armide de Henry Desmarets; Médée et Jason de Joseph-François Salomon.",
+    "categoryText": "Conciertos",
+    "venueText": "Sala Principal",
+    "accessText": "Compra tus entradas",
+    "performers": [
+      {
+        "name": "Véronique Gens",
+        "roleText": "soprano"
+      },
+      {
+        "name": "Louis-Noël Bestion de Camboulas",
+        "roleText": "dirección musical"
+      },
+      {
+        "name": "Ensemble Les Surprises"
+      }
+    ],
+    "composers": [
+      {
+        "name": "Jean-Philippe Rameau"
+      },
+      {
+        "name": "Antoine Dauvergne"
+      },
+      {
+        "name": "François Francœur"
+      },
+      {
+        "name": "Henry Desmarets"
+      },
+      {
+        "name": "Joseph-François Salomon"
+      }
+    ],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": [
+      "opera",
+      "early-music",
+      "recital"
+    ],
+    "eras": [
+      "baroque"
+    ],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "El listado sólo tenía el nombre. La ficha declara arias barrocas francesas con ensemble especializado.",
+  "notes": "Trampa de título: nombre de intérprete; el detalle es include. Conservado junto a Xabier Anduaga.",
+  "checkedAt": "2026-08-29"
+}

@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_jeanette",
+  "origin": "phase1-smoke",
+  "sourceId": "teatro-real",
+  "sourceUrl": "https://www.teatroreal.es/es/espectaculo/jeanette-50-aniversario",
+  "listingTitle": "JEANETTE 50 ANIVERSARIO",
+  "observed": {
+    "title": "JEANETTE 50 ANIVERSARIO",
+    "description": "Jeanette celebra sus 50 años de carrera con un concierto inolvidable. Ícono del pop melódico en español. Canciones como «Soy rebelde», «Por qué te vas», «El muchacho de los ojos tristes» o «Corazón de poeta».",
+    "categoryText": "También en el Real",
+    "venueText": "Sala Principal",
+    "accessText": "Compra tus entradas",
+    "performers": [
+      {
+        "name": "Jeanette"
+      }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "exclude",
+    "formats": [
+      "other"
+    ],
+    "eras": [],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "Concierto de pop. El Teatro Real como sede no implica elegibilidad.",
+  "checkedAt": "2026-08-29"
+}

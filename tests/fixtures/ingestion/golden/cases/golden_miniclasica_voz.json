@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_miniclasica_voz",
+  "origin": "published-catalog",
+  "sourceId": "teatro-real",
+  "sourceUrl": "https://www.teatroreal.es/es/espectaculo/miniclasica-descubriendo-voz-y-guitarra",
+  "listingTitle": "Miniclásica: Descubriendo la voz y la guitarra",
+  "observed": {
+    "title": "Miniclásica: descubriendo la voz y la guitarra",
+    "description": "El concierto se estructura en torno a la historia de dos personajes que buscan a Fígaro, el gato de la cantante. La voz de una mezzo y un guitarrista interpretarán los temas de zarzuela, ópera y canciones favoritos de Victoria de los Ángeles.",
+    "categoryText": "El Real Junior",
+    "venueText": "HALL Real Teatro de Retiro",
+    "accessText": "Bebés de 0 a 2 años: 1€. General: 8€",
+    "performers": [
+      {
+        "name": "Cristina Segura",
+        "roleText": "mezzo soprano"
+      },
+      {
+        "name": "Bernardo Rambeaud",
+        "roleText": "guitarra"
+      }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": [
+      "recital"
+    ],
+    "eras": [],
+    "kind": "alternative",
+    "access": "paid"
+  },
+  "reason": "Es un concierto (no un taller) de repertorio de ópera, zarzuela y canción clásica. Contrasta con Miniclásica jazz y con ¿Te suena…?. Eras vacío: la fuente no lista obras concretas.",
+  "checkedAt": "2026-08-29"
+}

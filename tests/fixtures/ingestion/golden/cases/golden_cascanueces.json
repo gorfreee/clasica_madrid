@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_cascanueces",
+  "origin": "phase1-smoke",
+  "sourceId": "teatro-real",
+  "sourceUrl": "https://www.teatroreal.es/es/espectaculo/cascanueces-1",
+  "listingTitle": "El Cascanueces",
+  "observed": {
+    "title": "El Cascanueces",
+    "description": "África Guzmán Dance Project. Danza. Todo un clásico navideño, el Cascanueces de Chaikovski en una adaptación de África Guzmán Dance Project en colaboración con la Escuela de ballet África Guzmán.",
+    "categoryText": "Danza",
+    "venueText": "Real Teatro de Retiro",
+    "accessText": "Compra tus entradas Desde 15 euros",
+    "performers": [
+      {
+        "name": "África Guzmán Dance Project"
+      }
+    ],
+    "composers": [
+      {
+        "name": "Chaikovski"
+      }
+    ],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "exclude",
+    "formats": [
+      "other"
+    ],
+    "eras": [],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "Representación de danza/ballet. Chaikovski en la música no convierte el espectáculo en un evento musical de la agenda.",
+  "checkedAt": "2026-08-29"
+}

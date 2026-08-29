@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_myra_melford",
+  "origin": "phase1-smoke",
+  "sourceId": "auditorio-nacional",
+  "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-myra-melford2019s-fire-and-water-quintet",
+  "listingTitle": "CNDM. Myra Melford’s Fire And Water Quintet",
+  "observed": {
+    "title": "CNDM. Myra Melford’s Fire And Water Quintet",
+    "categoryText": "Jazz en el Auditorio",
+    "venueText": "Sala de Cámara",
+    "accessText": "36, 27 y 18 €",
+    "programText": "MYRA MELFORD piano y melódica; INGRID LAUBROCK saxos tenor y soprano; MARY HALVORSON guitarra; TOMEKA REID violonchelo; LESLEY MOK batería.",
+    "performers": [
+      {
+        "name": "Myra Melford",
+        "roleText": "piano y melódica"
+      },
+      {
+        "name": "Ingrid Laubrock",
+        "roleText": "saxos tenor y soprano"
+      },
+      {
+        "name": "Mary Halvorson",
+        "roleText": "guitarra"
+      },
+      {
+        "name": "Tomeka Reid",
+        "roleText": "violonchelo"
+      },
+      {
+        "name": "Lesley Mok",
+        "roleText": "batería"
+      }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "exclude",
+    "formats": [
+      "other"
+    ],
+    "eras": [],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "Ciclo «Jazz en el Auditorio» del CNDM. Identidad principal jazz. CNDM ≠ include.",
+  "checkedAt": "2026-08-29"
+}

@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_navidad_canciones",
+  "origin": "phase1-smoke",
+  "sourceId": "teatro-real",
+  "sourceUrl": "https://www.teatroreal.es/es/espectaculo/concierto-navidad-dia-canciones",
+  "listingTitle": "Concierto de Navidad: Un día en canciones",
+  "observed": {
+    "title": "Concierto de Navidad: Un día en canciones",
+    "description": "Los Pequeños Cantores de la JORCAM vuelven al Real Teatro de Retiro para ofrecer un nuevo repertorio. Versiones de clásicos navideños, temas musicales de todo el mundo y composiciones realizadas para la agrupación.",
+    "categoryText": "Música",
+    "venueText": "SALA PRINCIPAL Real Teatro de Retiro",
+    "accessText": "Bebés de 0 a 2 años: 3€. De 3 a 15 años: 15€. A partir de 16 años: 20€",
+    "performers": [
+      {
+        "name": "Pequeños cantores de la ORCAM",
+        "roleText": "coro"
+      }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "uncertain",
+    "formats": [
+      "choral"
+    ],
+    "eras": [],
+    "kind": "alternative",
+    "access": "paid"
+  },
+  "reason": "Concierto coral infantil de Navidad. «Clásicos navideños» y «temas de todo el mundo» no identifican repertorio de ámbito clásico ni popular.",
+  "missingEvidence": "Falta el listado de obras. No se puede decidir si el contenido principal es villancicos populares, repertorio coral clásico o un híbrido.",
+  "checkedAt": "2026-08-29"
+}

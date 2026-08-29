@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_cineclasica_caligari",
+  "origin": "phase1-smoke",
+  "sourceId": "teatro-real",
+  "sourceUrl": "https://www.teatroreal.es/es/espectaculo/cineclasica-cine-halloween-gabinete-del-doctor-caligari",
+  "listingTitle": "Cineclásica: Cine Halloween. El gabinete del doctor Caligari",
+  "observed": {
+    "title": "Cineclásica: Cine Halloween. El gabinete del doctor Caligari",
+    "description": "El Real Teatro de Retiro celebra Halloween con una de las películas más influyentes del cine mudo: El gabinete del doctor Caligari. La música de Elisa Caliza conferirá a las imágenes una expresividad impactante.",
+    "categoryText": "Cine mudo con música en vivo",
+    "venueText": "SALA PRINCIPAL Real Teatro de Retiro",
+    "accessText": "De 0 a 2 años: 3€. De 3 a 15 años: 15€. A partir de 16 años: 20€",
+    "performers": [
+      {
+        "name": "Elisa Caliza",
+        "roleText": "intérprete"
+      }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "exclude",
+    "formats": [
+      "other"
+    ],
+    "eras": [],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "Ciclo de cine. La actividad principal es ver una película, aunque haya música en vivo. No es un concierto de repertorio clásico.",
+  "checkedAt": "2026-08-29"
+}

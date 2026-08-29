@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_dj_symphonic",
+  "origin": "phase1-smoke",
+  "sourceId": "auditorio-nacional",
+  "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-dj-symphonic",
+  "listingTitle": "Excelentia. DJ Symphonic",
+  "observed": {
+    "title": "Excelentia. DJ Symphonic",
+    "venueText": "Sala Sinfónica",
+    "programText": "DJ Symphonic. Royal Film Concert Orchestra. Director, Fernando Furones. Programa: Pont Aeri – Flying Free; David Guetta – Titanium; Avicii – Wake me up; Daft Punk – Get Lucky, One more time; Coldplay – Viva la vida; Darude – Sandstorm; DJ Tiësto – Adagio for strings; Queen – Bohemian rhapsody; Europe – The Final Countdown.",
+    "performers": [
+      {
+        "name": "DJ Symphonic"
+      },
+      {
+        "name": "Royal Film Concert Orchestra",
+        "roleText": "orquesta"
+      },
+      {
+        "name": "Fernando Furones",
+        "roleText": "director"
+      }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "exclude",
+    "formats": [
+      "symphonic"
+    ],
+    "eras": [],
+    "kind": "established",
+    "access": "unknown"
+  },
+  "reason": "Crossover DJ + electrónica + éxitos pop con orquesta. Eligibility exclude pese a format symphonic.",
+  "checkedAt": "2026-08-29"
+}

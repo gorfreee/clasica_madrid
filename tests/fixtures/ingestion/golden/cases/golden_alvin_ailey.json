@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_alvin_ailey",
+  "origin": "phase1-smoke",
+  "sourceId": "teatro-real",
+  "sourceUrl": "https://www.teatroreal.es/es/espectaculo/alvin-ailey-american-dance-theater",
+  "listingTitle": "Alvin Ailey American Dance Theater",
+  "observed": {
+    "title": "Alvin Ailey American Dance Theater",
+    "categoryText": "Danza",
+    "venueText": "Sala Principal",
+    "accessText": "Compra tus entradas",
+    "performers": [
+      {
+        "name": "Alvin Ailey American Dance Theater"
+      }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "exclude",
+    "formats": [
+      "other"
+    ],
+    "eras": [],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "Espectáculo de danza. La agenda cubre eventos musicales, no artes escénicas en general.",
+  "checkedAt": "2026-08-29"
+}

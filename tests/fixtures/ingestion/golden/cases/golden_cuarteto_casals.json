@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_cuarteto_casals",
+  "origin": "phase1-smoke",
+  "sourceId": "auditorio-nacional",
+  "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-cuarteto-casals-4",
+  "listingTitle": "CNDM. Cuarteto Casals",
+  "observed": {
+    "title": "CNDM. Cuarteto Casals",
+    "categoryText": "Liceo de Cámara XXI",
+    "venueText": "Sala de Cámara",
+    "programText": "CUARTETO CASALS. Franz Joseph Haydn (1732-1809) Cuarteto de cuerda en fa menor, op. 20, n.º 5 (1772). Raquel García-Tomás (1984) Estreno absoluto. Obra encargo del CNDM (2026). Felix Mendelssohn (1809-1847) Cuarteto de cuerda n.º 3 en re mayor, op. 44, n.º 1 (1838).",
+    "performers": [
+      {
+        "name": "Cuarteto Casals",
+        "roleText": "cuarteto"
+      }
+    ],
+    "composers": [
+      {
+        "name": "Franz Joseph Haydn"
+      },
+      {
+        "name": "Raquel García-Tomás"
+      },
+      {
+        "name": "Felix Mendelssohn"
+      }
+    ],
+    "works": [
+      {
+        "title": "Cuarteto de cuerda en fa menor, op. 20, n.º 5",
+        "composerName": "Franz Joseph Haydn"
+      },
+      {
+        "title": "Obra encargo del CNDM (estreno absoluto 2026)",
+        "composerName": "Raquel García-Tomás"
+      },
+      {
+        "title": "Cuarteto de cuerda n.º 3 en re mayor, op. 44, n.º 1",
+        "composerName": "Felix Mendelssohn"
+      }
+    ]
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": [
+      "chamber"
+    ],
+    "eras": [
+      "classical",
+      "romantic",
+      "contemporary"
+    ],
+    "kind": "established",
+    "access": "unknown"
+  },
+  "reason": "Cámara con programa multiera explícito. No inventar el título de la obra de García-Tomás más allá de lo que la fuente declara.",
+  "checkedAt": "2026-08-29"
+}

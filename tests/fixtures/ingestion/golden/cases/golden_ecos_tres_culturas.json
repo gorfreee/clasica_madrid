@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_ecos_tres_culturas",
+  "origin": "published-catalog",
+  "sourceId": "museo-arqueologico-nacional",
+  "sourceUrl": "https://www.man.es/man/exposiciones/novedades-arqueologicas/20260217-imagenes-corte-medieval-toledo/20260912-entrebescant.html",
+  "listingTitle": "Ecos de las Tres Culturas",
+  "observed": {
+    "title": "Ecos de las Tres Culturas. Entrebescant",
+    "venueText": "Museo Arqueológico Nacional",
+    "performers": [
+      {
+        "name": "Entrebescant",
+        "roleText": "ensemble"
+      }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": [
+      "early-music",
+      "chamber"
+    ],
+    "eras": [
+      "early"
+    ],
+    "kind": "established",
+    "access": "unknown"
+  },
+  "reason": "Concierto de música antigua (ensemble Entrebescant) en un museo. El título y el grupo bastan para el ámbito; no se copian obras desde el catálogo publicado si la extracción de la ficha no las aisló de forma limpia.",
+  "notes": "El catálogo publicado sí lista cantigas y estampies. El golden set no las marca como observed aquí para no mezclar hechos de otra pasada editorial con lo extraído de esta consulta.",
+  "checkedAt": "2026-08-29"
+}

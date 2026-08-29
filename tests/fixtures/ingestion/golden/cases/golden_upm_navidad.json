@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_upm_navidad",
+  "origin": "phase1-smoke",
+  "sourceId": "auditorio-nacional",
+  "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/upm-concierto-de-navidad-7",
+  "listingTitle": "UPM. Concierto de Navidad",
+  "observed": {
+    "title": "UPM. Concierto de Navidad",
+    "categoryText": "Ciclo Sinfónico de la Universidad Politécnica de Madrid",
+    "venueText": "Sala Sinfónica",
+    "accessText": "35, 29, 21 y 9'50 €",
+    "programText": "ORQUESTA FILARMÓNICA ESPAÑOLA. CORO DE LA UNIVERSIDAD POLITÉCNICA DE MADRID. Director: Javier Corcuera Martínez. PROGRAMA J.S. Bach Oratorio de Navidad BWV 248 Cantatas IV, V y VI.",
+    "performers": [
+      {
+        "name": "Orquesta Filarmónica Española",
+        "roleText": "orquesta"
+      },
+      {
+        "name": "Coro de la Universidad Politécnica de Madrid",
+        "roleText": "coro"
+      },
+      {
+        "name": "Javier Corcuera Martínez",
+        "roleText": "director"
+      },
+      {
+        "name": "Camila Oria",
+        "roleText": "soprano"
+      },
+      {
+        "name": "Giselle Fundora",
+        "roleText": "mezzosoprano"
+      },
+      {
+        "name": "Juan Antonio Sanabria",
+        "roleText": "tenor"
+      },
+      {
+        "name": "Alejandro Von Büren",
+        "roleText": "barítono"
+      }
+    ],
+    "composers": [
+      {
+        "name": "J.S. Bach"
+      }
+    ],
+    "works": [
+      {
+        "title": "Oratorio de Navidad BWV 248 Cantatas IV, V y VI",
+        "composerName": "J.S. Bach"
+      }
+    ]
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": [
+      "choral",
+      "symphonic"
+    ],
+    "eras": [
+      "baroque"
+    ],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "El título genérico «Concierto de Navidad» exigía ficha. El programa es el Oratorio de Navidad de Bach, no una gala popular.",
+  "notes": "Trampa de título inversa a golden_concierto_navidad_teatro_real.",
+  "checkedAt": "2026-08-29"
+}

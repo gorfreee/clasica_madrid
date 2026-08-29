@@ -2,9 +2,9 @@
 
 > Estado: **diseño objetivo vigente y fuente de verdad autoritativa** para la evolución de la ingestión. Este documento define la dirección recomendada para evolucionar la ingestión de Clásica Madrid a una v3 simple, mantenible, automatizada y preparada para usar IA de forma pragmática.
 >
-> La **fase 1** (contratos + vertical slice + hardening) está implementada en `src/ingestion/` y se opera con `npm run ingest:sync`. Las fases 2–6 siguen siendo diseño objetivo, no código.
+> La **fase 1** (contratos + vertical slice + hardening) está implementada en `src/ingestion/` y se opera con `npm run ingest:sync`. La **Classification Policy v1** y el golden set de evaluación están preparados; las fases 2–6 siguen siendo diseño objetivo, no código de pipeline.
 >
-> [`docs/ingestion.md`](ingestion.md) es la puerta de entrada operativa (qué hay implementado hoy). Los documentos en [`docs/archive/`](archive/) son investigación y planes históricos: no son requisitos vigentes.
+> [`docs/classification-policy.md`](classification-policy.md) es la política editorial de enrichment. [`docs/ingestion.md`](ingestion.md) es la puerta de entrada operativa (qué hay implementado hoy). Los documentos en [`docs/archive/`](archive/) son investigación y planes históricos: no son requisitos vigentes.
 >
 > Toma como base la investigación histórica en [`docs/archive/ingestion-v2-plan.md`](archive/ingestion-v2-plan.md) y [`docs/archive/ingestion-inspiration.md`](archive/ingestion-inspiration.md), el modelo de datos actual y las lecciones de las primeras cargas reales.
 >
@@ -400,6 +400,24 @@ Un extractor determinista puede conocer perfectamente que un concierto incluye a
 Por eso el pipeline incluye una fase de **enriquecimiento** posterior a la normalización.
 
 ```text
+listing harvest
+      ↓
+detail-page hydration / observed facts
+      ↓
+eligibility
+      ↓
+formats / eras / kind / access
+      ↓
+confidence / evidence
+      ↓
+Candidate
+```
+
+La fase 1 se queda en el listado. A partir de la fase 2, el enrichment no debe clasificar sólo con el título del calendario cuando exista una ficha.
+
+Eligibility tiene prioridad: un `exclude` no debe consumir trabajo innecesario de clasificación posterior. Un `uncertain` degrada de forma segura y **no se publica automáticamente**.
+
+```text
 RawEvent
    ↓
 Normalize
@@ -450,12 +468,14 @@ Una source válida puede mezclar música clásica, danza, charlas, actividades e
 
 Esta puerta de elegibilidad es responsabilidad de la **fase 2** (enrichment), no del harvesting. El harvesting debe extraer hechos; el enrichment decide si el evento es publicable.
 
-La política objetivo debe contemplar internamente algo equivalente a:
+La política vigente es [`docs/classification-policy.md`](classification-policy.md) (v1). El golden set de evaluación está en `tests/fixtures/ingestion/golden/`.
+
+Tri-state interno (no es un campo del schema canónico `Event`):
 
 ```text
-include
-exclude
-uncertain
+include   → puede continuar hacia Candidate
+exclude   → se descarta
+uncertain → no se publica automáticamente
 ```
 
 Principios:
@@ -465,7 +485,8 @@ Principios:
 - no inventar;
 - un caso incierto debe degradar de forma segura (no publicar como si fuera un sí);
 - un evento claramente fuera de ámbito no debe publicarse;
-- una source no determina por sí sola la elegibilidad.
+- una source no determina por sí sola la elegibilidad;
+- `eligibility ≠ format ≠ kind ≠ source`.
 
 ---
 
@@ -473,7 +494,7 @@ Principios:
 
 La consistencia de la agenda depende más de una política editorial estable que del modelo concreto utilizado.
 
-La v3 debe acompañarse de una **Classification Policy** implementada como reglas, documentación y tests.
+La v3 debe acompañarse de una **Classification Policy** implementada como reglas, documentación y tests. La v1 humana está en [`docs/classification-policy.md`](classification-policy.md). Los casos de evaluación están en `tests/fixtures/ingestion/golden/`. La implementación ejecutable (reglas, knowledge, IA) pertenece a la fase 2.
 
 ### 12.1 `formats[]`
 
@@ -542,7 +563,7 @@ Bach + Mozart + Brahms
 → baroque + classical + romantic
 ```
 
-La frontera exacta entre `twentieth` y `contemporary`, y otros casos musicológicamente ambiguos, debe quedar documentada de forma explícita para que reglas, IA y tests utilicen el mismo criterio.
+La frontera exacta entre `twentieth` y `contemporary`, y otros casos musicológicamente ambiguos, está documentada de forma operativa en [`docs/classification-policy.md`](classification-policy.md). No se cambia el schema para resolver esa ambigüedad.
 
 ### 12.3 Knowledge base musical
 
@@ -1113,15 +1134,17 @@ Especialmente:
 
 ### 27.3 Tests de Classification Policy
 
-Casos conocidos deben fijar el comportamiento esperado de:
+El contrato del golden set (`tests/ingestion-golden.test.ts`) valida ahora el dataset: schema, IDs únicos, tri-state, `uncertain` con evidencia faltante, y que source/venue no determinan eligibility.
 
-- `eras`;
-- `formats`;
+Cuando se implemente la fase 2, tests parametrizados sobre esos mismos casos deben fijar:
+
+- `eligibility` (`include` / `exclude` / `uncertain`);
+- `eras` y `formats`;
 - combinaciones múltiples;
-- fallbacks;
-- ausencia de evidencia.
+- fallbacks y ausencia de evidencia;
+- que ningún `exclude`/`uncertain` sea publicable automáticamente.
 
-La IA no debe ser la única definición ejecutable de la política.
+La IA no debe ser la única definición ejecutable de la política. CI no llama a un LLM.
 
 ### 27.4 Tests de reconciliación
 
@@ -1191,18 +1214,20 @@ Una ejecución completa debería parecerse aproximadamente a esto:
 4. extract RawEvent[] per source
 5. isolate source failures
 6. normalize all healthy RawEvent[]
-7. enrich eras/formats/etc.
-8. run optional AI enrichment
-9. reconcile entities and deduplicate globally
-10. compare with current 120-day catalog
-11. construct resulting catalog in memory
-12. validate schemas + references + domain rules
-13. write coherent changes
-14. run tests/build/validation
-15. create or update ingestion PR
-16. CI
-17. auto-merge if green
-18. emit run summary
+7. hydrate detail pages / observed facts when needed
+8. eligibility gate (include / exclude / uncertain)
+9. enrich formats / eras / kind / access
+10. run optional AI enrichment with safe fallback
+11. reconcile entities and deduplicate globally
+12. compare with current 120-day catalog
+13. construct resulting catalog in memory
+14. validate schemas + references + domain rules
+15. write coherent changes
+16. run tests/build/validation
+17. create or update ingestion PR
+18. CI
+19. auto-merge if green
+20. emit run summary
 ```
 
 Discovery puede ejecutarse antes del paso 6 o como job independiente que produce nuevos `RawEvent[]` para el mismo pipeline.
@@ -1260,15 +1285,38 @@ Elegir fuentes diferentes entre sí ayuda a validar la abstracción, por ejemplo
 
 ### Fase 2 — enrichment
 
-- documentar Classification Policy inicial;
+**Preparación (hecha, aún sin classifier productivo):** Classification Policy v1 y golden evaluation set. Phase 2 se mide contra esos casos, no contra una impresión subjetiva posterior.
+
+Flujo que debe implementar esta fase:
+
+```text
+listing harvest
+      ↓
+detail-page hydration / observed facts
+      ↓
+eligibility
+      ↓
+formats / eras / kind / access
+      ↓
+confidence / evidence
+      ↓
+Candidate
+```
+
+- hidratar fichas de detalle cuando el listado no traiga performers, composers, works u otros hechos;
+- puerta de elegibilidad (`include` / `exclude` / `uncertain`) **antes** del resto del enrichment editorial;
+- un `exclude` no consume clasificación posterior innecesaria;
+- un `uncertain` no se publica automáticamente;
 - reglas deterministas básicas de `formats`;
-- knowledge base mínima para `eras`;
+- knowledge base mínima para `eras` (a partir de compositores/obras **observados**);
 - clasificar `kind` como propiedad del evento, no de la source;
-- puerta de elegibilidad / relevancia (`include` / `exclude` / `uncertain`);
-- consultar páginas de detalle cuando el listado no traiga performers, composers, works u otros hechos;
-- interfaz de enrichment con IA;
+- `access` sólo cuando la fuente lo soporte;
+- interfaz de enrichment con IA, con degradación segura;
 - confidence/evidence internos;
-- métricas de campos no clasificados.
+- métricas de campos no clasificados;
+- tests parametrizados sobre el golden set; CI sin llamadas live a LLM.
+
+Acceptance criteria: [`docs/classification-policy.md`](classification-policy.md) §7.
 
 ### Fase 3 — reconciliation
 
