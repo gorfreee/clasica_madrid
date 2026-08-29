@@ -34,6 +34,46 @@ describe('eligibility — exclusiones de identidad', () => {
     expect(result.eligibility.value).toBe('exclude');
   });
 
+  it('excluye flamenco musical real: zambomba, recital y Paco de Lucía', () => {
+    expect(
+      classify(facts({ title: 'CNDM. Zambomba Flamenca de Jerez' })).eligibility.value,
+    ).toBe('exclude');
+    expect(
+      classify(facts({ title: 'Recital de flamenco', description: 'Cante y guitarra.' })).eligibility
+        .value,
+    ).toBe('exclude');
+    expect(
+      classify(
+        facts({
+          title: 'Excelentia. Homenaje a Paco de Lucía',
+          programText: 'A Fernanda (Rondeña); Meraki (Bulerías); Ecdysis (Farruca).',
+        }),
+      ).eligibility.value,
+    ).toBe('exclude');
+  });
+
+  it('no excluye por flamenco la escuela franco-flamenca ni el Códice de Chigi', () => {
+    const chigi = classify(
+      facts({
+        title: 'OCNE. Satélite 08. Chigi Codex',
+        description: 'Música de compositores flamencos del Códice de Chigi (ca. 1498).',
+        categoryText: 'OCNE Satélite',
+        performers: [{ name: 'Coro Nacional de España' }],
+      }),
+    );
+    expect(chigi.eligibility.value).not.toBe('exclude');
+    expect(chigi.eligibility.ruleId).not.toBe('flamenco-identity');
+
+    const franco = classify(
+      facts({
+        title: 'Polifonía de la escuela franco-flamenca',
+        description: 'Programa de polifonía flamenca del Renacimiento.',
+      }),
+    );
+    expect(franco.eligibility.value).not.toBe('exclude');
+    expect(franco.eligibility.ruleId).not.toBe('flamenco-identity');
+  });
+
   it('excluye danza como espectáculo, no una suite de ballet en un concierto', () => {
     const dance = classify(
       facts({

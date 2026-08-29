@@ -181,32 +181,76 @@ function flamencoIdentity(
   title: string,
   haystack: string,
 ): Exclusion | undefined {
+  if (!hasMusicalFlamencoIdentity(facts, haystack)) return undefined;
+
   const titleOrCategory =
     /flamenc/.test(category) ||
     /flamenc/.test(title) ||
     hasPhrase(title, 'paco de lucia') ||
-    hasPhrase(category, 'andalucia flamenca');
-  const roleOrProgram =
-    facts.performers.some(
-      (item) =>
-        /flamenc/.test(fieldFolded(item.roleText)) ||
-        hasWord(fieldFolded(item.roleText), 'cante'),
-    ) ||
-    /flamenc/.test(haystack) ||
-    hasFlamencoPalo(haystack);
-
+    hasPhrase(category, 'andalucia flamenca') ||
+    hasPhrase(title, 'zambomba') ||
+    hasPhrase(category, 'zambomba');
   if (titleOrCategory) {
     return exclusion('flamenco-identity', [facts.categoryText ?? facts.title], true);
   }
-  if (roleOrProgram) {
-    const classicalCue =
-      /barroc/.test(haystack) ||
-      hasWord(haystack, 'opera') ||
-      hasWord(haystack, 'zarzuela') ||
-      knownClassicalNames(facts).length > 0;
-    return exclusion('flamenco-identity', ['flamenco'], false, classicalCue);
+  const classicalCue =
+    /barroc/.test(haystack) ||
+    hasWord(haystack, 'opera') ||
+    hasWord(haystack, 'zarzuela') ||
+    knownClassicalNames(facts).length > 0;
+  return exclusion('flamenco-identity', ['flamenco'], false, classicalCue);
+}
+
+/**
+ * Musical flamenco (cante, palos, Paco de Lucía, zambomba, etc.), not Flemish /
+ * franco-flemish Renaissance vocabulary such as "compositores flamencos del
+ * Códice de Chigi".
+ */
+function hasMusicalFlamencoIdentity(facts: ObservedFacts, haystack: string): boolean {
+  if (hasPhrase(haystack, 'paco de lucia')) return true;
+  if (hasPhrase(haystack, 'zambomba')) return true;
+  if (hasPhrase(haystack, 'jovenes flamencos') || hasPhrase(haystack, 'joven flamenco')) return true;
+  if (hasPhrase(haystack, 'guitarra flamenca')) return true;
+  if (hasPhrase(haystack, 'cante flamenco') || hasPhrase(haystack, 'baile flamenco')) return true;
+  if (hasPhrase(haystack, 'recital de flamenco') || hasPhrase(haystack, 'concierto de flamenco')) {
+    return true;
   }
-  return undefined;
+  if (hasPhrase(haystack, 'gala de flamenco') || hasPhrase(haystack, 'gala flamenca')) return true;
+  if (hasPhrase(haystack, 'espectaculo de flamenco') || hasPhrase(haystack, 'noche flamenca')) {
+    return true;
+  }
+  if (hasFlamencoPalo(haystack)) return true;
+  if (
+    facts.performers.some(
+      (item) =>
+        /flamenc/.test(fieldFolded(item.roleText)) || hasWord(fieldFolded(item.roleText), 'cante'),
+    )
+  ) {
+    return true;
+  }
+
+  if (!/flamenc/.test(haystack)) return false;
+  return flamencoTokenRemainsAfterFlemishGuards(haystack);
+}
+
+const FLEMISH_SCHOOL_PATTERNS: RegExp[] = [
+  /franco[\s-]*flamenc\w*/,
+  /escuela flamenc\w*/,
+  /polifonia flamenc\w*/,
+  /compositores? flamenc\w* renacent\w*/,
+  /flamenc\w* renacent\w*/,
+  /flamenc\w* del codice\w*/,
+  /flamenc\w* del renacim\w*/,
+  /codice de chigi/,
+  /chigi codex/,
+];
+
+function flamencoTokenRemainsAfterFlemishGuards(haystack: string): boolean {
+  let stripped = haystack;
+  for (const pattern of FLEMISH_SCHOOL_PATTERNS) {
+    stripped = stripped.replace(new RegExp(pattern.source, 'g'), ' ');
+  }
+  return /flamenc/.test(stripped);
 }
 
 function danceIdentity(facts: ObservedFacts, category: string, haystack: string): Exclusion | undefined {

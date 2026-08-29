@@ -113,13 +113,26 @@ describe('adapter Madrid datos (JSON-LD)', () => {
   it('se queda solo con música puntual que tiene título, URL, fecha, hora y lugar', async () => {
     const body = await readFile(path.join(fixtures, 'madrid-agenda.json'), 'utf8');
     const events = madridDatosAdapter.extract(body, 'https://datos.madrid.es/agenda.json', ctx('madrid-datos'));
-    expect(events).toHaveLength(1);
-    expect(events[0]?.observed.title).toContain('Teatro Real');
-    expect(events[0]?.externalId).toBe('50390001');
-    expect(events[0]?.sourceUrl.startsWith('https://')).toBe(true);
-    expect(events[0]?.observed.occurrences[0]?.date).toBe('2026-09-15');
-    expect(events[0]?.observed.occurrences[0]?.time).toBe('19:30');
-    expect(events[0]?.observed.accessText).toBe('paid');
+    expect(events).toHaveLength(6);
+    const teatro = events.find((event) => event.externalId === '50390001');
+    expect(teatro?.observed.title).toContain('Teatro Real');
+    expect(teatro?.sourceUrl.startsWith('https://')).toBe(true);
+    expect(teatro?.observed.occurrences[0]?.date).toBe('2026-09-15');
+    expect(teatro?.observed.occurrences[0]?.time).toBe('19:30');
+    expect(teatro?.observed.accessText).toBe('paid');
+    expect(teatro?.observed.venueText).toBe('Teatro Real');
+
+    const casaVacas = events.find((event) => event.externalId === '50322790');
+    expect(casaVacas?.observed.venueText).toBe('Centro Cultural Casa de Vacas (Retiro)');
+    expect(casaVacas?.venueFacilityId).toBe('1945');
+
+    const sameFacility = events.find((event) => event.externalId === '50322791');
+    expect(sameFacility?.venueFacilityId).toBe('1945');
+    expect(sameFacility?.observed.venueText).toBe('Centro Cultural Casa de Vacas');
+
+    const condeduque = events.find((event) => event.externalId === '50234843');
+    expect(condeduque?.observed.venueText).toBe('Centro de Cultura Contemporánea CondeDuque');
+    expect(condeduque?.venueFacilityId).toBe('1916');
   });
 
   it('falla si no hay @graph', () => {

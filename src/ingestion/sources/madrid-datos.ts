@@ -6,6 +6,10 @@ import type { AdapterContext, RawEvent, SourceAdapter, SourceDefinition } from '
  * Madrid Datos JSON-LD already carries title, description, date/time, venue
  * and free/paid. The `link` field points at a municipal page that does not add
  * a stable, parseable program. Phase 2.1 does not hydrate this source.
+ *
+ * Venue identity (when present): `event-location` name, plus `relation.@id`
+ * (municipal facility). Resolution is source-aware in `matchVenue`; this
+ * adapter does not invent catalog venues.
  */
 
 const MUSICA_TYPE = /\/actividades\/Musica(\/|$)/i;
@@ -22,6 +26,7 @@ type GraphEvent = {
   'event-location'?: unknown;
   free?: unknown;
   recurrence?: unknown;
+  relation?: unknown;
 };
 
 export const madridDatosAdapter: SourceAdapter = {
@@ -75,10 +80,12 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
   const time = asNonEmptyString(item.time) ? parseObservedTime(String(item.time)) : parsed.time;
   if (!time) return undefined;
   const httpsUrl = link.replace(/^http:\/\//i, 'https://');
+  const venueFacilityId = facilityIdFromRelation(item.relation);
   return {
     sourceId: ctx.source.id,
     sourceUrl: httpsUrl,
     externalId: id,
+    ...(venueFacilityId ? { venueFacilityId } : {}),
     observed: {
       title,
       description: asNonEmptyString(item.description),
@@ -88,6 +95,15 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
       ...emptyObservedLists(),
     },
   };
+}
+
+/** Numeric id from `…/entidadesyorganismos/{id}-….json`. */
+export function facilityIdFromRelation(value: unknown): string | undefined {
+  if (!value || typeof value !== 'object' || !('@id' in value)) return undefined;
+  const href = asNonEmptyString((value as { '@id': unknown })['@id']);
+  if (!href) return undefined;
+  const match = /\/entidadesyorganismos\/(\d+)/.exec(href);
+  return match?.[1];
 }
 
 function asNonEmptyString(value: unknown): string | undefined {
