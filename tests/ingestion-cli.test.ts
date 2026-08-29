@@ -17,12 +17,26 @@ describe('parseIngestArgs', () => {
       dryRun: true,
       dataDir: 'tmp/data',
     });
+    expect(
+      parseIngestArgs(['sync', '--dry-run', '--report', 'ingestion/reports/sync.json'], sources),
+    ).toEqual({
+      ok: true,
+      command: 'sync',
+      dryRun: true,
+      reportPath: 'ingestion/reports/sync.json',
+    });
   });
 
   it('rechaza --data-dir sin valor', () => {
     const parsed = parseIngestArgs(['sync', '--data-dir'], sources);
     expect(parsed.ok).toBe(false);
     if (!parsed.ok) expect(parsed.message).toMatch(/--data-dir requiere una ruta/);
+  });
+
+  it('rechaza --report sin valor', () => {
+    const parsed = parseIngestArgs(['sync', '--report'], sources);
+    expect(parsed.ok).toBe(false);
+    if (!parsed.ok) expect(parsed.message).toMatch(/--report requiere una ruta/);
   });
 
   it('rechaza flags desconocidas', () => {

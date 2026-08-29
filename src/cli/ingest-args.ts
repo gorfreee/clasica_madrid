@@ -1,6 +1,13 @@
+export type IngestCliSuccess = {
+  ok: true;
+  dryRun: boolean;
+  dataDir?: string;
+  reportPath?: string;
+};
+
 export type IngestCliCommand =
-  | { ok: true; command: 'sync'; dryRun: boolean; dataDir?: string }
-  | { ok: true; command: 'source'; sourceId: string; dryRun: boolean; dataDir?: string }
+  | (IngestCliSuccess & { command: 'sync' })
+  | (IngestCliSuccess & { command: 'source'; sourceId: string })
   | { ok: false; message: string };
 
 export function parseIngestArgs(argv: string[], knownSources: string[]): IngestCliCommand {
@@ -18,6 +25,7 @@ export function parseIngestArgs(argv: string[], knownSources: string[]): IngestC
 
   let dryRun = false;
   let dataDir: string | undefined;
+  let reportPath: string | undefined;
   const positionals: string[] = [];
   const rest = argv.slice(1);
 
@@ -36,6 +44,15 @@ export function parseIngestArgs(argv: string[], knownSources: string[]): IngestC
       index += 1;
       continue;
     }
+    if (arg === '--report') {
+      const value = rest[index + 1];
+      if (!value || value.startsWith('--')) {
+        return { ok: false, message: '--report requiere una ruta' };
+      }
+      reportPath = value;
+      index += 1;
+      continue;
+    }
     if (arg.startsWith('--')) {
       return { ok: false, message: `flag desconocida: ${arg}` };
     }
@@ -49,13 +66,13 @@ export function parseIngestArgs(argv: string[], knownSources: string[]): IngestC
         message: `ingest:sync no admite argumentos posicionales: ${positionals.join(', ')}`,
       };
     }
-    return { ok: true, command: 'sync', dryRun, dataDir };
+    return { ok: true, command: 'sync', ...successFlags(dryRun, dataDir, reportPath) };
   }
 
   if (positionals.length === 0) {
     return {
       ok: false,
-      message: `Uso: npm run ingest:source -- <fuente> [--dry-run] [--data-dir <ruta>]\nFuentes: ${knownSources.join(', ')}`,
+      message: `Uso: npm run ingest:source -- <fuente> [--dry-run] [--data-dir <ruta>] [--report <fichero.json>]\nFuentes: ${knownSources.join(', ')}`,
     };
   }
   if (positionals.length > 1) {
@@ -72,7 +89,19 @@ export function parseIngestArgs(argv: string[], knownSources: string[]): IngestC
       message: `fuente desconocida: ${sourceId}. Disponibles: ${knownSources.join(', ')}`,
     };
   }
-  return { ok: true, command: 'source', sourceId, dryRun, dataDir };
+  return { ok: true, command: 'source', sourceId, ...successFlags(dryRun, dataDir, reportPath) };
+}
+
+function successFlags(
+  dryRun: boolean,
+  dataDir: string | undefined,
+  reportPath: string | undefined,
+): { dryRun: boolean; dataDir?: string; reportPath?: string } {
+  return {
+    dryRun,
+    ...(dataDir ? { dataDir } : {}),
+    ...(reportPath ? { reportPath } : {}),
+  };
 }
 
 export function ingestExitCode(run: {
@@ -86,8 +115,8 @@ export function ingestExitCode(run: {
 
 export function ingestUsage(knownSources: string[]): string {
   return `Uso:
-  npm run ingest:sync [-- --dry-run] [-- --data-dir <ruta>]
-  npm run ingest:source -- <fuente> [--dry-run] [--data-dir <ruta>]
+  npm run ingest:sync [-- --dry-run] [-- --data-dir <ruta>] [-- --report <fichero.json>]
+  npm run ingest:source -- <fuente> [--dry-run] [--data-dir <ruta>] [--report <fichero.json>]
 
 Fuentes: ${knownSources.join(', ')}`;
 }

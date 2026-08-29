@@ -26,6 +26,8 @@ ingestion/rejected/**
 !ingestion/rejected/.gitkeep
 ingestion/work/**
 !ingestion/work/.gitkeep
+ingestion/reports/**
+!ingestion/reports/.gitkeep
 
 # leftover ingest batch temp dirs (normally cleaned up after each write)
 .ingest-tmp-*
