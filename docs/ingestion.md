@@ -9,7 +9,7 @@ No es la especificación de arquitectura objetivo.
 | Diseño objetivo vigente (fuente de verdad para evolucionar la ingestión) | [`docs/ingestion-v3-plan.md`](ingestion-v3-plan.md) |
 | Estado operativo actual (este documento) | `docs/ingestion.md` |
 | Classification Policy v1 y criterios de Phase 2 | [`docs/classification-policy.md`](classification-policy.md) |
-| Golden evaluation set (fixtures, no classifier) | [`tests/fixtures/ingestion/golden/`](../tests/fixtures/ingestion/golden/) |
+| Golden evaluation set | [`tests/fixtures/ingestion/golden/`](../tests/fixtures/ingestion/golden/) |
 | Modelo de datos canónico | [`docs/data-model.md`](data-model.md) |
 | Investigación y planes anteriores (histórico, no requisitos) | [`docs/archive/`](archive/) |
 
@@ -37,7 +37,7 @@ Flujo:
 3. Aísla fuentes fallidas; las sanas siguen.
 4. Hidrata fichas de detalle cuando el adapter implementa `hydrate` (Auditorio Nacional y Teatro Real). Un fallo de ficha (404, 403, HTML inesperado) es local al evento: se conservan los hechos del listing. Madrid Datos no hidrata: el JSON-LD ya trae los hechos disponibles.
 5. Normaliza hechos (textos, fechas, horas, URLs, performers/composers/works observados). Las URLs usadas en identidad, citas y matching ignoran trailing slash, fragment y casing del hostname; no se eliminan query params.
-6. Transforma a `Candidate` en memoria (mismo esquema que `ingest:promote`). Copia nombres observados; no clasifica eligibility/formats/eras.
+6. Transforma a `Candidate` en memoria (mismo esquema que `ingest:promote`). Copia nombres observados; **no** aplica todavía el classifier de eligibility como puerta de publicación (fase 2.4). `kind` sigue el fallback `provisionalKind` de la fase 1. `access` se resuelve desde `accessText` con el resolver de classification (hechos, no venue/source).
 7. Construye y valida el lote completo.
 8. Escribe sólo archivos nuevos, primero a un temporal y después al destino. Un fallo no deja el lote a medias. No actualiza eventos ya publicados.
 9. Imprime un resumen (fuentes, RawEvents, hidratación de fichas, candidatos, escritos).
@@ -56,7 +56,7 @@ Fuentes de la fase 1:
 
 Un adapter que reconoce la estructura general pero no consigue interpretar ningún evento (extracción vacía sospechosa) falla de forma visible; esa fuente se aísla y las demás continúan. Un calendario genuinamente vacío no es un error.
 
-No hay GitHub Actions de ingestión, enrichment con IA, ni auto-merge. Un evento nuevo sale con `eras`/`formats` vacíos. Performers, composers y works se copian cuando la ficha los declara; no se infieren. `kind` es un fallback provisional de la fase 1; la clasificación real pertenece al enrichment y no se deduce de forma permanente de la source. Sólo se publica si el lugar se reconoce de forma inequívoca (catálogo o alias conocidos). Los eventos ya citados por URL o `externalId` se dejan igual. La elegibilidad editorial (un evento de una source clásica no es automáticamente publicable) se documenta para la fase 2.2 y no se aplica todavía.
+No hay GitHub Actions de ingestión, enrichment con IA, ni auto-merge. Un evento nuevo sale con `eras`/`formats` vacíos. Performers, composers y works se copian cuando la ficha los declara; no se infieren. `kind` es un fallback provisional de la fase 1 (`source.provisionalKind`); el classifier determinista de la fase 2.2 ya existe y se testea sobre el golden set, pero **no** alimenta todavía el Candidate publicado. Sólo se publica si el lugar se reconoce de forma inequívoca (catálogo o alias conocidos). Los eventos ya citados por URL o `externalId` se dejan igual. La elegibilidad editorial se aplica en tests del classifier; el pipeline productivo de `runIngest` todavía no descarta `exclude`/`uncertain`.
 
 ### Candidatos JSON (legacy)
 
@@ -118,7 +118,7 @@ Principio rector de la v3: *el código obtiene y controla los hechos; la IA ayud
 
 El flujo normal previsto (harvesting con adapters, `RawEvent`, normalización, enrichment, reconciliación, PR y auto-merge, cadencia ~10 días, ventana de 120 días) está especificado allí. No se duplica en este documento.
 
-Hoy **sí** están implementados (fase 1 + fase 2.1): adapters con interpretación estricta, `RawEvent` de hechos observados, hidratación de fichas (Auditorio Nacional y Teatro Real; Madrid Datos no la necesita), registry mínimo (referencia a Source canónica + seed), normalización común, lote validate-then-write atómico, contrato async-compatible de `extract`/`hydrate` y CLI local. La **Classification Policy v1** y el golden set existen como especificación de evaluación; no hay classifier productivo. **No** están implementados discovery automático, enrichment (eligibility, `kind` definitivo, formats/eras, IA), reconciliación fuzzy, política de desapariciones, GitHub Actions de ingestión ni auto-merge. No los añadas salvo que una tarea pida explícitamente la fase correspondiente.
+Hoy **sí** están implementados (fase 1 + fase 2.1 + fase 2.2): adapters con interpretación estricta, `RawEvent` de hechos observados, hidratación de fichas (Auditorio Nacional y Teatro Real; Madrid Datos no la necesita), registry mínimo (referencia a Source canónica + seed), normalización común (hechos, sin inferir access), lote validate-then-write atómico, contrato async-compatible de `extract`/`hydrate`, CLI local, Classification Policy v1, golden set, y el **classifier determinista** (`src/ingestion/classification/`, knowledge base en `src/ingestion/knowledge/`). El classifier **no** es todavía la puerta de publicación de `runIngest`. **No** están implementados el fallback de IA (2.3), la integración del classifier al Candidate (2.4), discovery automático, reconciliación fuzzy, política de desapariciones, GitHub Actions de ingestión ni auto-merge. No los añadas salvo que una tarea pida explícitamente la fase correspondiente.
 
 ## CI y auto-merge (hoy vs objetivo)
 

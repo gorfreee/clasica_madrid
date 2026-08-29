@@ -1,0 +1,27 @@
+import { describe, expect, it } from 'vitest';
+import { matchComposer } from '../src/ingestion/knowledge/composers.ts';
+
+describe('composer knowledge base', () => {
+  it('resuelve Bach, Mozart y Mahler a las épocas canónicas', () => {
+    expect(matchComposer('Johann Sebastian Bach')?.eras).toEqual(['baroque']);
+    expect(matchComposer('J. S. Bach')?.eras).toEqual(['baroque']);
+    expect(matchComposer('J.S. Bach')?.eras).toEqual(['baroque']);
+    expect(matchComposer('Wolfgang Amadeus Mozart')?.eras).toEqual(['classical']);
+    expect(matchComposer('Mozart')?.eras).toEqual(['classical']);
+    expect(matchComposer('Gustav Mahler')?.eras).toEqual(['romantic']);
+    expect(matchComposer('Mahler')?.eras).toEqual(['romantic']);
+  });
+
+  it('acepta variantes de Handel y Puccini observadas en el golden set', () => {
+    expect(matchComposer('Georg Friedrich Händel')?.canonicalName).toBe('Georg Friedrich Händel');
+    expect(matchComposer('George Frideric Haendel')?.canonicalName).toBe('Georg Friedrich Händel');
+    expect(matchComposer('G. Puccini')?.canonicalName).toBe('Giacomo Puccini');
+    expect(matchComposer('Chaikovski')?.eras).toEqual(['romantic']);
+  });
+
+  it('no hace fuzzy matching agresivo', () => {
+    expect(matchComposer('Bax')).toBeUndefined();
+    expect(matchComposer('Mahlerian Ensemble')).toBeUndefined();
+    expect(matchComposer('Bach Family Tribute')).toBeUndefined();
+  });
+});

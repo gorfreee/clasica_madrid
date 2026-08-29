@@ -1,4 +1,3 @@
-import type { AccessMode } from '../lib/schemas/index.ts';
 import { collapseWhitespace } from './html.ts';
 import { collapseOccurrences, parseObservedDateTime, parseObservedTime } from './dates.ts';
 import {
@@ -19,7 +18,8 @@ export type NormalizedOccurrence = {
 
 /**
  * Observed facts in a common representation. Still no editorial/musical
- * interpretation: no eligibility, formats, eras, kind or confidence.
+ * interpretation: no eligibility, formats, eras, kind, access or confidence.
+ * Access is resolved later by the classifier from `accessText`.
  */
 export type NormalizedEvent = {
   sourceId: string;
@@ -32,7 +32,6 @@ export type NormalizedEvent = {
   organizerText?: string;
   seriesText?: string;
   accessText?: string;
-  access: AccessMode;
   categoryText?: string;
   programText?: string;
   performers: ObservedPerson[];
@@ -81,7 +80,6 @@ export function normalizeRawEvent(raw: RawEvent): NormalizedEvent | undefined {
     organizerText: optionalText(raw.observed.organizerText),
     seriesText: optionalText(raw.observed.seriesText),
     accessText,
-    access: inferAccess(accessText),
     categoryText: optionalText(raw.observed.categoryText),
     programText: optionalText(raw.observed.programText),
     performers: normalizePersonList(raw.observed.performers),
@@ -112,17 +110,4 @@ function parseOccurrence(occurrence: RawOccurrence): { date: string; time: strin
     return { date: fromRaw.date, time: time ?? fromRaw.time };
   }
   return fromRaw;
-}
-
-export function inferAccess(accessText: string | undefined): AccessMode {
-  if (!accessText) return 'unknown';
-  const text = collapseWhitespace(accessText).toLowerCase();
-  if (!text) return 'unknown';
-  if (text === '1' || text === 'true' || text === 'free' || /\bgratis\b|\bgratuito\b|entrada libre/.test(text)) {
-    return 'free';
-  }
-  if (text === '0' || text === 'false' || text === 'paid' || /\bde pago\b|\bentradas\b/.test(text)) {
-    return 'paid';
-  }
-  return 'unknown';
 }

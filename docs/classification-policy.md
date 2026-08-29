@@ -4,13 +4,19 @@ Política editorial y operativa para el enrichment de ingestión v3 (fase 2).
 
 No es un campo del schema canónico `Event`. La elegibilidad es metadata interna del pipeline. `formats`, `eras`, `kind` y `access` sí son campos canónicos; esta política dice cómo derivarlos.
 
-La implementación de la fase 2 aún no existe. Este documento y el golden set en `tests/fixtures/ingestion/golden/` son la especificación contra la que se medirá.
+La implementación de la fase 2.2 (classifier determinista) vive en `src/ingestion/classification/`. La fase 2.3 (IA) y la 2.4 (puerta de publicación) aún no existen. Este documento y el golden set en `tests/fixtures/ingestion/golden/` son la especificación contra la que se mide.
 
 ## Principio
 
 ```text
 precision > coverage
-observed facts > deterministic interpretation > knowledge > AI > safe unknown
+observed facts → deterministic rules → musical knowledge → AI → safe uncertain
+```
+
+En la fase 2.2 no hay IA. El comportamiento correcto es:
+
+```text
+observed facts → deterministic rules → musical knowledge → safe uncertain
 ```
 
 Preferimos perder temporalmente un evento antes que publicar un falso positivo.
@@ -26,14 +32,14 @@ eligibility          ← puerta de publicación
       ↓
 formats / eras / kind / access
       ↓
-confidence / evidence
+evidence (interna)
       ↓
 Candidate
 ```
 
 Un `exclude` no debe consumir trabajo innecesario de clasificación posterior. Un `uncertain` degrada de forma segura: no se publica automáticamente.
 
-La fase 2 **implementa** la hidratación de fichas y el contrato de hechos observados (PR 2.1). El harvesting extrae hechos; el classifier de eligibility/formats/eras/kind (PR 2.2) todavía no existe.
+La fase 2.1 implementa la hidratación de fichas y el contrato de hechos observados. La fase 2.2 implementa el classifier determinista (`classify(observed)`), todavía **sin** conectarlo a `runIngest` como puerta de publicación.
 
 ## Lo que no es esta política
 
@@ -218,10 +224,17 @@ El schema no define fechas. Criterio operativo v1 (conservador):
 
 Contexto del evento, **no** ranking de calidad y **no** elegibilidad.
 
+Para un evento con `eligibility = include`, `kind` **siempre** tiene valor. No existe `unknown` / `undefined` / `uncertain` para un evento publicable.
+
 | Valor | Criterio |
 |---|---|
-| `established` | Programación profesional o estable del circuito habitual: teatros, auditorios, ópera/zarzuela, ciclos institucionales, orquestas/ensembles profesionales, festivales estables de ese circuito |
-| `alternative` | Fuera de ese circuito: amateur, comunitario, parroquial puntual, educativo no institucional de temporada, municipal al aire libre, one-off en espacios no dedicados habitualmente a programación musical |
+| `established` | Evidencia clara de circuito profesional/estable: venue reconocido, organizer institucional, serie/ciclo estable, programación profesional estable, festival estable de ese circuito |
+| `alternative` | Cualquier otro caso. No significa que sepamos que el evento es amateur: significa que no hay evidencia suficiente para etiquetarlo como circuito established |
+
+```text
+include + clearly established → established
+include + otherwise → alternative
+```
 
 No deducir de forma permanente:
 
@@ -230,7 +243,7 @@ Auditorio Nacional → established
 Madrid Datos → alternative
 ```
 
-Eso era un fallback provisional de la fase 1.
+Eso era un fallback provisional de la fase 1. `kind` no es una propiedad de la source. El classifier no lee `source.provisionalKind`.
 
 Un concierto de pop en el Teatro Real puede ser `established` + `exclude`. Un recital de órgano en una basílica, si forma parte de un ciclo concertístico estable, puede ser `established` + `include`. Un open-piano en un puente es `alternative`.
 
@@ -291,7 +304,7 @@ Si la IA no está disponible, hace timeout, devuelve algo inválido o tiene baja
 
 ### Tests
 
-El golden set valida el contrato de los fixtures ahora. Los tests parametrizados del classifier se añadirán en la implementación de la fase 2; no se implementa un classifier en esta preparación para hacer pasar expected outputs.
+El golden set valida el contrato de los fixtures. La fase 2.2 ejecuta el classifier determinista sobre `golden.observed`. CI no llama a un LLM. Sin IA, la cobertura de `include` no es un objetivo de recall.
 
 ---
 

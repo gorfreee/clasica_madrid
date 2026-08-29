@@ -2,7 +2,7 @@
 
 > Estado: **diseño objetivo vigente y fuente de verdad autoritativa** para la evolución de la ingestión. Este documento define la dirección recomendada para evolucionar la ingestión de Clásica Madrid a una v3 simple, mantenible, automatizada y preparada para usar IA de forma pragmática.
 >
-> La **fase 1** (contratos + vertical slice + hardening) y la **fase 2.1** (hechos observados + hidratación de fichas) están implementadas en `src/ingestion/` y se operan con `npm run ingest:sync`. La **Classification Policy v1** y el golden set de evaluación están preparados; el classifier de la fase 2.2 y las fases 3–6 siguen siendo diseño objetivo, no código de pipeline.
+> La **fase 1** (contratos + vertical slice + hardening), la **fase 2.1** (hechos observados + hidratación de fichas) y la **fase 2.2** (núcleo de clasificación determinista) están implementadas en `src/ingestion/`. Se operan con `npm run ingest:sync`. El classifier **no** es todavía la puerta de publicación del pipeline: eso es la fase 2.4, después del fallback de IA (fase 2.3). Las fases 3–6 siguen siendo diseño objetivo.
 >
 > [`docs/classification-policy.md`](classification-policy.md) es la política editorial de enrichment. [`docs/ingestion.md`](ingestion.md) es la puerta de entrada operativa (qué hay implementado hoy). Los documentos en [`docs/archive/`](archive/) son investigación y planes históricos: no son requisitos vigentes.
 >
@@ -1134,15 +1134,9 @@ Especialmente:
 
 ### 27.3 Tests de Classification Policy
 
-El contrato del golden set (`tests/ingestion-golden.test.ts`) valida ahora el dataset: schema, IDs únicos, tri-state, `uncertain` con evidencia faltante, y que source/venue no determinan eligibility.
+El contrato del golden set (`tests/ingestion-golden.test.ts`) valida el dataset: schema, IDs únicos, tri-state, `uncertain` con evidencia faltante, y que source/venue no determinan eligibility.
 
-Cuando se implemente la fase 2, tests parametrizados sobre esos mismos casos deben fijar:
-
-- `eligibility` (`include` / `exclude` / `uncertain`);
-- `eras` y `formats`;
-- combinaciones múltiples;
-- fallbacks y ausencia de evidencia;
-- que ningún `exclude`/`uncertain` sea publicable automáticamente.
+La fase 2.2 ejecuta `golden.observed → classify()` (`tests/ingestion-golden-classify.test.ts`) con invariantes duros: cero `include` sobre expected exclude/uncertain; ningún expected include puede ser `exclude`. Sin IA, un include verdadero puede quedar `uncertain`. Las métricas viven en `src/ingestion/classification/metrics.ts`.
 
 La IA no debe ser la única definición ejecutable de la política. CI no llama a un LLM.
 
@@ -1285,11 +1279,13 @@ Elegir fuentes diferentes entre sí ayuda a validar la abstracción, por ejemplo
 
 ### Fase 2 — enrichment
 
-**Preparación (hecha, aún sin classifier productivo):** Classification Policy v1 y golden evaluation set. Phase 2 se mide contra esos casos, no contra una impresión subjetiva posterior.
+**Preparación (hecha):** Classification Policy v1 y golden evaluation set. Phase 2 se mide contra esos casos, no contra una impresión subjetiva posterior.
 
-**2.1 Observed facts + detail hydration (hecha):** `RawEvent.observed` alineado con el golden set; hidratación orquestada fuera de `extract()`; parsers de ficha para Auditorio Nacional y Teatro Real; un fallo de ficha es local al evento. Madrid Datos no hidrata (el JSON-LD ya trae los hechos). Todavía no hay eligibility ni clasificación musical.
+**2.1 Observed facts + detail hydration (hecha):** `RawEvent.observed` alineado con el golden set; hidratación orquestada fuera de `extract()`; parsers de ficha para Auditorio Nacional y Teatro Real; un fallo de ficha es local al evento. Madrid Datos no hidrata (el JSON-LD ya trae los hechos).
 
-Flujo que debe implementar el resto de esta fase (2.2+):
+**2.2 Deterministic classification core (hecha):** `ObservedFacts → classify()` en `src/ingestion/classification/`. Eligibility conservadora (`include` / `exclude` / `uncertain`) con short-circuit; formats/eras/kind/access sólo si `include`; knowledge base mínima de compositores en `src/ingestion/knowledge/composers.ts`; `access` se resuelve sólo desde `accessText`. Evidence interna (`Resolution`), no confidence numérica. **No** está conectado como puerta de publicación de `runIngest`.
+
+Flujo objetivo del resto de esta fase (2.3–2.4):
 
 ```text
 listing harvest
@@ -1300,23 +1296,14 @@ eligibility
       ↓
 formats / eras / kind / access
       ↓
-confidence / evidence
+AI fallback (2.3)
       ↓
-Candidate
+Candidate + publication gate (2.4)
 ```
 
-- hidratar fichas de detalle cuando el listado no traiga performers, composers, works u otros hechos;
-- puerta de elegibilidad (`include` / `exclude` / `uncertain`) **antes** del resto del enrichment editorial;
-- un `exclude` no consume clasificación posterior innecesaria;
-- un `uncertain` no se publica automáticamente;
-- reglas deterministas básicas de `formats`;
-- knowledge base mínima para `eras` (a partir de compositores/obras **observados**);
-- clasificar `kind` como propiedad del evento, no de la source;
-- `access` sólo cuando la fuente lo soporte;
-- interfaz de enrichment con IA, con degradación segura;
-- confidence/evidence internos;
-- métricas de campos no clasificados;
-- tests parametrizados sobre el golden set; CI sin llamadas live a LLM.
+**2.3 AI fallback (pendiente):** interfaz de enrichment con IA y degradación segura. Sin IA, `uncertain` es el comportamiento correcto.
+
+**2.4 Pipeline integration (pendiente):** `classify` → Candidate → no publicar `exclude`/`uncertain`; sustituir `source.provisionalKind`.
 
 Acceptance criteria: [`docs/classification-policy.md`](classification-policy.md) §7.
 

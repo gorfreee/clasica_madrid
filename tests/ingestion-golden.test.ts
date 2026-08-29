@@ -63,6 +63,7 @@ describe('golden classification dataset', () => {
 
     for (const item of include) {
       expect(isAutomaticallyPublishable(item.expected.eligibility)).toBe(true);
+      expect(item.expected.kind).toBeDefined();
     }
     for (const item of exclude) {
       expect(isAutomaticallyPublishable(item.expected.eligibility)).toBe(false);

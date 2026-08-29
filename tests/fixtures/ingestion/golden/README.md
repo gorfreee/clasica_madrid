@@ -1,6 +1,6 @@
 # Golden evaluation set — Ingestion v3 Phase 2
 
-Dataset de evaluación para la Classification Policy. **No es un classifier.** Phase 2 se implementará después contra estos casos.
+Dataset de evaluación para la Classification Policy. Phase 2.2 ejecuta `golden.observed → classify()` sobre estos casos. **No es una tabla de lookup:** las reglas deben ser generales.
 
 Política: [`docs/classification-policy.md`](../../../docs/classification-policy.md).
 
@@ -17,6 +17,8 @@ missingEvidence  → obligatorio si eligibility=uncertain
 `eligibility` es metadata interna. No es un campo del schema canónico `Event`.
 
 Sólo `include` es publicable automáticamente.
+
+Si `expected.eligibility === include`, `kind` debe estar resuelto (`established` o `alternative`). Si el caso no tiene evidencia clara de circuito established, `expected.kind = alternative`. `kind` puede omitirse en `exclude`/`uncertain` porque el classifier hace short-circuit.
 
 ## Composición
 
@@ -38,14 +40,14 @@ Consulta de las URLs oficiales enlazadas desde el smoke o el catálogo (2026-08-
 
 No se usó conocimiento general para rellenar obras ausentes. Si la ficha no lista el programa, `composers`/`works` quedan vacíos y, si hace falta, `uncertain`.
 
-HTML completo no se guarda: el golden set es la capa de *observed facts*. Fixtures HTML de parser viven en `../detail/` (pocos excerpts representativos por source). El pipeline de Phase 2.1 hidrata fichas y extrae hechos; todavía no ejecuta `golden.observed → classifier → golden.expected`.
+HTML completo no se guarda: el golden set es la capa de *observed facts*. Fixtures HTML de parser viven en `../detail/` (pocos excerpts representativos por source). Phase 2.1 hidrata fichas. Phase 2.2 clasifica esos hechos. Phase 2.3 añadirá IA; Phase 2.4 conectará el classifier al pipeline.
 
 ## Datos deliberadamente unknown / vacíos
 
-- `access=unknown` cuando no hay precio ni «gratuito»/«entrada libre».
+- `access=unknown` cuando no hay precio ni «gratuito»/«entrada libre» en `accessText`. No se asume iglesia=gratis, Auditorio=de pago, Fever=paid, municipal=gratis.
 - `eras=[]` cuando no hay obras ni compositores observables.
-- `kind` omitido si el circuito no se puede decidir (p. ej. concierto parroquial sin ficha).
-- No se asume iglesia=gratis, Auditorio=de pago, municipal=gratis.
+- `kind` omitido si eligibility no es `include` y el circuito no se puede decidir (p. ej. concierto parroquial sin ficha).
+- Para `include` sin evidencia established, `kind=alternative`.
 
 ## Trampas de título (ficha ≠ listado)
 
@@ -61,6 +63,6 @@ HTML completo no se guarda: el golden set es la capa de *observed facts*. Fixtur
 
 ## Qué no hace este dataset
 
-- No implementa el classifier.
 - No publica los ~134 eventos del sandbox.
 - No llama a un LLM.
+- No es un lookup `caseId → resultado`.
