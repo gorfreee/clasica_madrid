@@ -74,8 +74,8 @@ const uncertainFacts = facts({ title: 'Concierto extraordinario' });
 describe('AI classifier prompt v2', () => {
   const prompt = AI_CLASSIFIER_SYSTEM_PROMPT;
 
-  it('is version 3 so results are distinguishable from earlier prompts', () => {
-    expect(AI_CLASSIFIER_PROMPT_VERSION).toBe(3);
+  it('is version 4 so results are distinguishable from earlier prompts', () => {
+    expect(AI_CLASSIFIER_PROMPT_VERSION).toBe(4);
   });
 
   it('keeps precision, uncertain as a valid output, and the ban on inventing facts', () => {
@@ -110,7 +110,10 @@ describe('AI classifier prompt v2', () => {
     expect(prompt).toMatch(/acompa[nñ]amiento, arreglo, ornamentaci[oó]n o formato instrumental/);
     expect(prompt).toMatch(/ABBA\/Queen\/Beatles con orquesta/);
     expect(prompt).toMatch(/Hans Zimmer\/Morricone/);
-    expect(prompt).toMatch(/coprincipales y los hechos no permiten decidir/);
+    expect(prompt).toMatch(/coprincipales/);
+    expect(prompt).toMatch(/NUNCA exclude autom[aá]tico por coprincipalidad/);
+    expect(prompt).toMatch(/Fito P[aá]ez con cuerdas/);
+    expect(prompt).toMatch(/musical de Broadway/);
   });
 
   it('does not force uncertain when a classical cycle lacks a work-by-work programme', () => {
@@ -119,6 +122,7 @@ describe('AI classifier prompt v2', () => {
     expect(prompt).toMatch(/source conocida → include/);
     expect(prompt).toMatch(/venue cl[aá]sico → include/);
     expect(prompt).toMatch(/se excluyen individualmente/);
+    expect(prompt).toMatch(/concierto de m[uú]sica cl[aá]sica/);
   });
 
   it('excludes participatory activities even inside a classical festival', () => {
@@ -155,6 +159,15 @@ describe('AI classifier prompt v2', () => {
     expect(prompt).toMatch(/No repitas evidence/);
     expect(prompt).not.toMatch(/confidence/i);
     expect(prompt).not.toMatch(/chain[- ]of[- ]thought/i);
+  });
+
+  it('asks the same call to fill eras from works, composers and programText', () => {
+    expect(prompt).toMatch(/si eligibility=include, intenta rellenarlas/);
+    expect(prompt).toMatch(/programText cuando nombra expl[ií]citamente/);
+    expect(prompt).toMatch(/Bach\/H[äa]ndel → baroque/);
+    expect(prompt).toMatch(/Mozart\/Haydn → classical/);
+    expect(prompt).toMatch(/Brahms\/Mahler → romantic/);
+    expect(prompt).toMatch(/eras=\[\] s[oó]lo si/);
   });
 });
 

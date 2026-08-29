@@ -36,7 +36,7 @@ function listingEvent(overrides: Partial<RawEvent> & Pick<RawEvent, 'sourceUrl'>
 }
 
 describe('orquestación de hydration', () => {
-  it('completa los hechos del listing con la ficha y no toca las ocurrencias', async () => {
+  it('completa los hechos del listing con la ficha y conserva las ocurrencias si la ficha no trae fecha', async () => {
     const listingBody = await readFile(path.join(fixtures, 'auditorio-events.json'), 'utf8');
     const detailBody = await readFile(path.join(detailDir, 'auditorio-ocne-sinfonico-01.excerpt.html'), 'utf8');
     const ctx = listingCtx('auditorio-nacional', async (url) => {

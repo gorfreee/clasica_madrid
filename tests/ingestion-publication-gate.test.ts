@@ -304,6 +304,70 @@ describe('publication gate — pipeline completo', () => {
     expect(run.candidates[0]!.event.eras).toEqual([]);
     expect(run.candidates[0]!.event.formats).toEqual([]);
     expect(run.candidates[0]!.event.kind).toBe('alternative');
+    expect(run.candidates[0]!.event.citations[0]?.url).toMatch(/^https:\/\//);
+  });
+
+  it('una ficha aplazada a una fecha futura fuera de la ventana de listing conserva esa fecha', async () => {
+    const detail = `
+      <article id="content">
+        <h1>CNDM. Barbara Hannigan</h1>
+        <div class="content">
+          <h4>CONCIERTO APLAZADO. AL 11 de ABRIL de 2027<br />BARBARA HANNIGAN soprano</h4>
+          <h4>Johann Sebastian Bach<br />Suite para violonchelo n.º 3</h4>
+        </div>
+        <div class="rightcolumn">
+          <p class="rightColumn__item">
+            <label class="rightColumn__item__label">Sala:</label>
+            <span class="location camara rightColumn__item__text">Sala de Cámara</span>
+          </p>
+        </div>
+      </article>
+    `;
+    const run = await runAuditorio({
+      items: [
+        {
+          title: 'CNDM. Barbara Hannigan',
+          slug: 'cndm-barbara-hannigan',
+          start: '2026-09-18T19:30:00+02:00',
+          className: 'camara',
+        },
+      ],
+      details: { 'cndm-barbara-hannigan': detail },
+    });
+
+    expect(run.rawEvents[0]?.dateFromDetail).toBe(true);
+    expect(run.rawEvents[0]?.observed.occurrences[0]?.date).toBe('2027-04-11');
+    expect(run.summary.eligibility.include).toBe(1);
+    expect(run.candidates).toHaveLength(1);
+    expect(run.candidates[0]!.event.occurrences[0]?.date).toBe('2027-04-11');
+    expect(run.candidates[0]!.event.status).toBe('scheduled');
+    expect(run.candidates[0]!.event.citations[0]?.url).toContain('cndm-barbara-hannigan');
+  });
+
+  it('un evento explícitamente cancelado no se publica como activo', async () => {
+    const detail = `
+      <article id="content">
+        <h1>CNDM. Cancelado</h1>
+        <div class="content">
+          <h4>CONCIERTO CANCELADO<br />Orquesta Nacional de España</h4>
+          <h4>Johann Sebastian Bach<br />Suite orquestal</h4>
+        </div>
+        <div class="rightcolumn">
+          <p class="rightColumn__item">
+            <label class="rightColumn__item__label">Sala:</label>
+            <span class="rightColumn__item__text">Sala Sinfónica</span>
+          </p>
+        </div>
+      </article>
+    `;
+    const run = await runAuditorio({
+      items: [{ title: 'CNDM. Cancelado', slug: 'cndm-cancelado' }],
+      details: { 'cndm-cancelado': detail },
+    });
+
+    expect(run.rawEvents[0]?.eventStatus).toBe('cancelled');
+    expect(run.candidates).toEqual([]);
+    expect(run.decisions[0]?.structuralSkip?.reason).toBe('cancelado');
   });
 
   it('J. roles inequívocos se copian y los ambiguos se omiten', async () => {

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_trilogia_andaluza",
+  "origin": "phase1-smoke",
+  "sourceId": "madrid-datos",
+  "sourceUrl": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=d2f4832f37fba910VgnVCM200000f921e388RCRD",
+  "listingTitle": "Trilogía andaluza",
+  "observed": {
+    "title": "Trilogía andaluza",
+    "description": "Concierto de música clásica española. Concierto ilustrado con fotografías, narrado y cantado. Compositor: Miguel Ángel Villalba García.",
+    "venueText": "Centro Cultural Casa de Vacas (Retiro)",
+    "accessText": "free",
+    "performers": [],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": [],
+    "eras": [],
+    "kind": "alternative",
+    "access": "free"
+  },
+  "reason": "La ficha declara explícitamente que es un concierto de música clásica española. No hay programa obra-por-obra, pero esa declaración sobre el propio evento basta para include. No es include por venue ni por source.",
+  "checkedAt": "2026-08-29"
+}

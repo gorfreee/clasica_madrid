@@ -135,6 +135,8 @@ Tras consultar las fuentes oficiales, si el repertorio queda claro, decidir `inc
 
 Un título que *parece* clásico puede ser un gala popular. Un título que *parece* genérico puede ser Mahler. La ficha manda.
 
+Una declaración explícita y fiable de que **ese evento** es un concierto de música clásica (p. ej. «Concierto de música clásica española») puede ser evidencia suficiente para `include`, aunque no haya programa obra-por-obra. Eso no es `venue clásico → include` ni `source clásica → include`, ni basta un título ambiguo.
+
 La ausencia de programa obra-por-obra **no** obliga siempre a `uncertain`. Un concierto puede tener evidencia suficiente para `include` cuando la fuente oficial demuestra de forma clara que:
 
 - se trata de un concierto real (no un taller, jam, open piano ni otra actividad no interpretativa);
@@ -153,9 +155,9 @@ La presencia de orquesta, de un piano o de un compositor clásico aislado **no**
 
 Ejemplos:
 
-- `include`: concierto sinfónico real con una primera parte de repertorio clásico autónomo (obras de concierto, solista y orquesta) y una segunda parte de repertorio popular o regional.
-- `exclude`: ABBA, Queen o Beatles con orquesta; tributo a Hans Zimmer o Morricone; pop anunciado como «de clásico a lo pop»; espectáculo de humor/crossover que parodia un recital.
-- `uncertain`: las dos identidades son coprincipales y no hay un bloque clásico autónomo ni una identidad no clásica que mande con claridad.
+- `include`: concierto sinfónico real con una primera parte de repertorio clásico autónomo (obras de concierto, solista y orquesta) y una segunda parte de repertorio popular o regional. También cuando lo clásico es claramente principal.
+- `exclude`: ABBA, Queen o Beatles con orquesta; Fito Páez con cuerdas; tributo a Hans Zimmer o Morricone; pop anunciado como «de clásico a lo pop»; musical de Broadway con orquesta; espectáculo de humor/crossover que parodia un recital; flamenco donde lo clásico es accesorio.
+- `include` o `uncertain`, nunca `exclude` automático: las dos identidades son genuinamente coprincipales (p. ej. barroco y flamenco en el mismo programa) y no hay una identidad no clásica que mande con claridad.
 
 ---
 
@@ -225,7 +227,8 @@ Orden de evidencia:
 
 1. obras identificadas;
 2. si no hay obras, compositores declarados por la fuente;
-3. si no hay ninguna de las dos, vacío. No deducir época por el nombre del ensemble, del ciclo o del venue.
+3. si no hay arrays estructurados, `programText` (o la descripción) cuando nombra explícitamente compositores u obras conocidos;
+4. si no hay ninguna de esas evidencias, vacío. No deducir época por el nombre del ensemble, del ciclo o del venue.
 
 Ejemplo: Bach + Mozart + Mahler → `baroque` + `classical` + `romantic`.
 

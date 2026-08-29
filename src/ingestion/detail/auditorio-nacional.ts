@@ -1,4 +1,6 @@
 import { allCaptures, firstMatch, splitBreaks, stripTags } from '../html.ts';
+import { inferScheduleFromText } from './schedule.ts';
+import { looksLikeComposerLine, looksLikeProgramHeader, looksLikeWorkLine } from '../observed-cleanup.ts';
 import {
   composersFromWorks,
   normalizePersonList,
@@ -41,9 +43,11 @@ function parseProduction(html: string): ObservedFactPatch {
 
   const performerLines = blocks[0] ?? [];
   const programLines = blocks.slice(1).flat();
+  const allLines = [...performerLines, ...programLines];
+  const schedule = inferScheduleFromText(allLines.join('. '));
   const performers = normalizePersonList(performerLines.map(parsePersonLine));
   const works = normalizeWorkList(pairComposerWorks(programLines));
-  const programText = collapseProgram([...performerLines, ...programLines]);
+  const programText = collapseProgram(allLines);
 
   const venueText = stripTags(
     firstMatch(
@@ -62,6 +66,8 @@ function parseProduction(html: string): ObservedFactPatch {
     ...(programText ? { programText } : {}),
     ...(venueText ? { venueText } : {}),
     ...(accessText ? { accessText } : {}),
+    ...(schedule.eventStatus ? { eventStatus: schedule.eventStatus } : {}),
+    ...(schedule.occurrences ? { occurrences: schedule.occurrences } : {}),
     performers,
     works,
     composers: composersFromWorks(works),
@@ -118,10 +124,15 @@ function parseExcerpt(html: string): ObservedFactPatch {
     ),
   ];
 
+  const programText = programParts.length > 0 ? programParts.join('. ') : undefined;
+  const schedule = inferScheduleFromText([programText, ...leftover].filter(Boolean).join('. '));
+
   return {
     ...(venueText ? { venueText } : {}),
     ...(accessText ? { accessText } : {}),
-    ...(programParts.length > 0 ? { programText: programParts.join('. ') } : {}),
+    ...(programText ? { programText } : {}),
+    ...(schedule.eventStatus ? { eventStatus: schedule.eventStatus } : {}),
+    ...(schedule.occurrences ? { occurrences: schedule.occurrences } : {}),
     performers: normalizePersonList(allPerformers),
     works,
     composers: composersFromWorks(works),
@@ -129,11 +140,21 @@ function parseExcerpt(html: string): ObservedFactPatch {
 }
 
 function parsePersonLine(text: string): ObservedPerson {
-  const director = /^(director|directora)\s*:\s*(.+)$/i.exec(text);
-  if (director?.[2]) return { name: director[2].trim(), roleText: 'director' };
-  const named = /^(.+?),\s+([^,]+)$/.exec(text);
-  if (named?.[1] && named[2]) return { name: named[1].trim(), roleText: named[2].trim() };
-  return { name: text.trim() };
+  const cleaned = text.replace(/\s+/g, ' ').trim();
+  const director = /^(?:dir(?:ector|ectora)?\.?|directora)\s*[:.]?\s+(.+)$/i.exec(cleaned);
+  if (director?.[1]) return { name: director[1].trim(), roleText: 'director' };
+  const named = /^(.+?),\s+([^,]+)$/.exec(cleaned);
+  if (named?.[1] && named[2] && named[2].length <= 40) {
+    return { name: named[1].trim(), roleText: named[2].trim() };
+  }
+  const roleSuffix =
+    /^(.+?)\s+(soprano|mezzosoprano|mezzo|tenor|bar[ií]tono|bajo|bajo-bar[ií]tono|contratenor|piano|viol[ií]n|viola|violonchelo|cello|contrabajo|flauta|oboe|clarinete|fagot|trompa|trompeta|tromb[oó]n|arpa|clave|la[uú]d|tiorba|guitarra|percusiones|bater[ií]a|mel[oó]dica|\u00f3rgano|organo|director|directora|direcci[oó]n|narradora)(?:\s+y\s+direcci[oó]n)?$/i.exec(
+      cleaned,
+    );
+  if (roleSuffix?.[1] && roleSuffix[2] && !looksLikeProgramHeader(roleSuffix[1])) {
+    return { name: roleSuffix[1].trim(), roleText: roleSuffix[2].trim() };
+  }
+  return { name: cleaned };
 }
 
 function parseComposerDashWork(text: string): ObservedWork {
@@ -145,13 +166,14 @@ function parseComposerDashWork(text: string): ObservedWork {
 function pairComposerWorks(lines: string[]): ObservedWork[] {
   const usable = lines
     .map((line) => line.replace(/\*+\s*$/, '').trim())
-    .filter((line) => line && !line.startsWith('*'));
+    .filter((line) => line && !line.startsWith('*') && !looksLikeProgramHeader(line));
   if (usable.length < 2 || usable.length % 2 !== 0) return [];
   const works: ObservedWork[] = [];
   for (let index = 0; index < usable.length; index += 2) {
     const composerName = usable[index];
     const title = usable[index + 1];
     if (!composerName || !title) return [];
+    if (!looksLikeComposerLine(composerName) || !looksLikeWorkLine(title)) return [];
     works.push({ title, composerName });
   }
   return works;

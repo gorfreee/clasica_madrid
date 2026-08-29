@@ -85,11 +85,16 @@ export const aiClassificationSchema = z.object({
 export const AI_CLASSIFICATION_JSON_SCHEMA = {
   type: 'object',
   additionalProperties: false,
-  required: ['eligibility'],
+  required: ['eligibility', 'eras'],
   properties: {
     eligibility: { type: 'string', enum: [...ELIGIBILITIES] },
     formats: { type: 'array', items: { type: 'string', enum: [...FORMATS] } },
-    eras: { type: 'array', items: { type: 'string', enum: [...ERAS] } },
+    eras: {
+      type: 'array',
+      items: { type: 'string', enum: [...ERAS] },
+      description:
+        'Musical eras from observed works, composers or programText. Empty only if the programme cannot support a reasonable estimate.',
+    },
     kind: { type: 'string', enum: [...EVENT_KINDS] },
     evidence: { type: 'array', maxItems: 12, items: { type: 'string' } },
     rationale: {

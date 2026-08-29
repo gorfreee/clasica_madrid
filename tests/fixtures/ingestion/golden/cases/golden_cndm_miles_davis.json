@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_cndm_miles_davis",
+  "origin": "phase1-smoke",
+  "sourceId": "auditorio-nacional",
+  "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-6",
+  "listingTitle": "CNDM. Julián Sánchez Quintet",
+  "observed": {
+    "title": "CNDM. Julián Sánchez Quintet",
+    "categoryText": "camara",
+    "venueText": "Sala de Cámara",
+    "accessText": "36, 27 y 18 €",
+    "programText": "JULIÁN SÁNCHEZ QUINTET. JULIÁN SÁNCHEZ trompeta y arreglos. TETE LEAL saxos tenor y soprano y flauta travesera. ALBERT SANZ piano y teclado eléctrico. HOSS BENÍTEZ batería. BORI ALBERO contrabajo acústico. \"Los sonidos de Miles Davis\"",
+    "performers": [
+      {
+        "name": "Julián Sánchez Quintet"
+      },
+      {
+        "name": "Julián Sánchez",
+        "roleText": "trompeta y arreglos"
+      }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "exclude",
+    "formats": ["other"],
+    "eras": [],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "Identidad principal jazz (Miles Davis, quinteto con batería y teclado eléctrico). CNDM no implica include.",
+  "checkedAt": "2026-08-29"
+}

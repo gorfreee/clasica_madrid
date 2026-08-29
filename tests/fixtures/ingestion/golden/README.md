@@ -22,12 +22,12 @@ Si `expected.eligibility === include`, `kind` debe estar resuelto (`established`
 
 ## Composición
 
-49 eventos reales, elegidos por diversidad (no al azar) a partir del workbook de smoke de Phase 1, del catálogo publicado y del acceptance de Phase 2. El rebaseline editorial de 2026-08-29 añadió casos de eventos mixtos, ciclo clásico sin programa, contemporánea concertística y actividades participativas. Esta estabilización añade `golden_chigi_codex` (franco-flamenco ≠ flamenco).
+52 eventos reales, elegidos por diversidad (no al azar) a partir del workbook de smoke de Phase 1, del catálogo publicado y del acceptance de Phase 2. El rebaseline editorial de 2026-08-29 añadió casos de eventos mixtos, ciclo clásico sin programa, contemporánea concertística y actividades participativas. La estabilización posterior al dry-run de Gemini añade `golden_chigi_codex` (franco-flamenco ≠ flamenco), `golden_trilogia_andaluza` (declaración explícita de concierto clásico), `golden_cndm_miles_davis` y `golden_musicales_broadway`.
 
 | Eligibility | Casos | Papel |
 |---|---|---|
-| `exclude` | 21 | Falsos positivos que Phase 1 publicaría hoy |
-| `include` | 23 | Repertorio clásico, también cuando el título no lo dice |
+| `exclude` | 23 | Falsos positivos que Phase 1 publicaría hoy |
+| `include` | 24 | Repertorio clásico, también cuando el título no lo dice |
 | `uncertain` | 5 | Ficha insuficiente; no auto-publicar |
 
 Fuentes representadas: Teatro Real, Auditorio Nacional / CNDM / Excelentia / OCNE, Fever, Teatros del Canal, Teatro de la Zarzuela, Basílica de Medinaceli, Museo Arqueológico Nacional, Madrid a Tempo, Ayuntamiento de Madrid, Real Hermandad del Refugio.
@@ -58,7 +58,8 @@ HTML completo no se guarda: el golden set es la capa de *observed facts*. Fixtur
 | `golden_ocne_sinfonico_01` | código interno, sin repertorio | Mahler 2 + Urquiza → `include` |
 | `golden_xabier_anduaga` / `golden_veronique_gens` | sólo el intérprete | arias de ópera / barroco francés → `include` |
 | `golden_dj_delica_vivaldi` | Vivaldi | producto DJ/crossover → `exclude` |
-| `golden_sarao_barroco` | música antigua | Barroco **y** flamenco coprincipales → `uncertain` |
+| `golden_sarao_barroco` | música antigua | Barroco **y** flamenco coprincipales → `uncertain` (no `exclude` automático) |
+| `golden_trilogia_andaluza` | título poético / municipal | «Concierto de música clásica española» → `include` sin programa obra-por-obra |
 | `golden_fito_paez` | «Clásico» en el Teatro Real | canción popular con cuerdas → `exclude` |
 | `golden_raices_sinfonicas` | fiesta canaria / folklore | bloque clásico autónomo (Saint-Saëns, Falla) en concierto sinfónico → `include` |
 | `golden_madrid_tempo_open_piano` | festival de piano | open piano participativo, sin concierto programado → `exclude` |

@@ -1,5 +1,5 @@
 import type { Era } from '../../lib/schemas/taxonomies.ts';
-import { matchComposer } from '../knowledge/composers.ts';
+import { findKnownComposersInText, matchComposer } from '../knowledge/composers.ts';
 import type { ObservedFacts } from '../observed.ts';
 import type { Resolution } from './types.ts';
 
@@ -14,8 +14,8 @@ const ERA_ORDER: Era[] = [
 ];
 
 /**
- * Evidence order: works[].composerName, then composers[].
- * No venue, ensemble name, source or vague title words.
+ * Evidence order: works[].composerName, then composers[], then names
+ * explicitly present in programText / description. No venue or ensemble.
  */
 export function resolveEras(facts: ObservedFacts): Resolution<Era[]> {
   const fromWorks = erasFromNames(
@@ -37,6 +37,23 @@ export function resolveEras(facts: ObservedFacts): Resolution<Era[]> {
       method: 'knowledge',
       ruleId: 'eras-from-composers',
       evidence: fromComposers.evidence,
+    };
+  }
+
+  const programme = [facts.programText, facts.description].filter(Boolean).join('\n');
+  const mentioned = findKnownComposersInText(programme);
+  if (mentioned.length > 0) {
+    const eras = new Set<Era>();
+    const evidence: string[] = [];
+    for (const item of mentioned) {
+      evidence.push(`${item.canonicalName} (${item.eras.join(', ')})`);
+      for (const era of item.eras) eras.add(era);
+    }
+    return {
+      value: ERA_ORDER.filter((era) => eras.has(era)),
+      method: 'knowledge',
+      ruleId: 'eras-from-program-text',
+      evidence,
     };
   }
 

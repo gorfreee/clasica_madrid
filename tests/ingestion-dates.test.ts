@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { parseObservedDateTime, parseObservedTime, isDateInWindow } from '../src/ingestion/dates.ts';
+import {
+  parseObservedDateTime,
+  parseObservedTime,
+  parsePostponementDate,
+  parseSpanishCalendarDate,
+  isDateInWindow,
+} from '../src/ingestion/dates.ts';
+import { inferScheduleFromText } from '../src/ingestion/detail/schedule.ts';
 import { normalizeRawEvent } from '../src/ingestion/normalize.ts';
 import { eventIdFor, occurrenceIdFor } from '../src/ingestion/ids.ts';
 import { TEST_NOW } from './helpers.ts';
@@ -27,6 +34,31 @@ describe('parseo de fechas y horas', () => {
   it('normaliza horas con un solo dígito de hora', () => {
     expect(parseObservedTime('9:05')).toBe('09:05');
     expect(parseObservedTime('25:00')).toBeNull();
+  });
+
+  it('entiende una fecha civil en español', () => {
+    expect(parseSpanishCalendarDate('AL 11 de ABRIL de 2027')).toBe('2027-04-11');
+    expect(parseSpanishCalendarDate('pospuesto al 13 de septiembre de 2026')).toBe('2026-09-13');
+    expect(parseSpanishCalendarDate('sin fecha clara')).toBeNull();
+  });
+
+  it('infiere aplazamiento y cancelación desde el texto de la ficha', () => {
+    const postponed = inferScheduleFromText('CONCIERTO APLAZADO. AL 11 de ABRIL de 2027');
+    expect(postponed.eventStatus).toBe('scheduled');
+    expect(postponed.occurrences?.[0]?.date).toBe('2027-04-11');
+
+    const cancelled = inferScheduleFromText('CONCIERTO CANCELADO. No se celebrará.');
+    expect(cancelled.eventStatus).toBe('cancelled');
+    expect(cancelled.occurrences).toBeUndefined();
+  });
+
+  it('en un aplazamiento con fecha original y fecha nueva, usa la nueva', () => {
+    const text =
+      'Concierto originalmente programado para el 5 de julio de 2026 y, posteriormente, pospuesto al 13 de septiembre de 2026.';
+    expect(parseSpanishCalendarDate(text)).toBe('2026-07-05');
+    expect(parsePostponementDate(text)).toBe('2026-09-13');
+    expect(inferScheduleFromText(text).occurrences?.[0]?.date).toBe('2026-09-13');
+    expect(parsePostponementDate('pospuesto, sin fecha clara, el 5 de julio de 2026 y el 13 de septiembre de 2026')).toBeNull();
   });
 
   it('acota la ventana móvil de 120 días, inclusiva en ambos extremos', () => {

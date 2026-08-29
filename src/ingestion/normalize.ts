@@ -30,6 +30,9 @@ export type NormalizedEvent = {
   title: string;
   description?: string;
   occurrences: NormalizedOccurrence[];
+  /** Detail page replaced the listing date with an explicit new date. */
+  dateFromDetail?: boolean;
+  eventStatus?: 'scheduled' | 'cancelled' | 'postponed';
   venueText?: string;
   /** Source facility id when the adapter observed one. Not a catalog venue id. */
   venueFacilityId?: string;
@@ -86,6 +89,8 @@ export function normalizeRawEvent(raw: RawEvent): NormalizedEvent | undefined {
     title,
     description: optionalText(raw.observed.description),
     occurrences,
+    ...(raw.dateFromDetail ? { dateFromDetail: true } : {}),
+    ...(raw.eventStatus ? { eventStatus: raw.eventStatus } : {}),
     venueText: optionalText(raw.observed.venueText),
     venueFacilityId: optionalText(raw.venueFacilityId),
     organizerText: optionalText(raw.observed.organizerText),

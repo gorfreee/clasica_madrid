@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { matchComposer } from '../src/ingestion/knowledge/composers.ts';
+import { findKnownComposersInText, matchComposer } from '../src/ingestion/knowledge/composers.ts';
 
 describe('composer knowledge base', () => {
   it('resuelve Bach, Mozart y Mahler a las épocas canónicas', () => {
@@ -20,6 +20,24 @@ describe('composer knowledge base', () => {
     expect(matchComposer('Camille Saint-Saëns')?.eras).toEqual(['romantic']);
     expect(matchComposer('Manuel de Falla')?.eras).toEqual(['twentieth']);
     expect(matchComposer('Ludovico Einaudi')?.eras).toEqual(['contemporary']);
+    expect(matchComposer('Bach')?.eras).toEqual(['baroque']);
+    expect(matchComposer('Johann Sebastian Bach (1685-1750)')?.eras).toEqual(['baroque']);
+    expect(matchComposer('Beethoven')?.eras).toEqual(['classical', 'romantic']);
+    expect(matchComposer('Brahms')?.eras).toEqual(['romantic']);
+  });
+
+  it('encuentra compositores conocidos en un programText', () => {
+    const found = findKnownComposersInText(
+      'Bach: Suite. Mozart: Concierto. Brahms: Sinfonía. Mahler: Adagio.',
+    );
+    expect(found.map((item) => item.canonicalName)).toEqual(
+      expect.arrayContaining([
+        'Johann Sebastian Bach',
+        'Wolfgang Amadeus Mozart',
+        'Johannes Brahms',
+        'Gustav Mahler',
+      ]),
+    );
   });
 
   it('no hace fuzzy matching agresivo', () => {

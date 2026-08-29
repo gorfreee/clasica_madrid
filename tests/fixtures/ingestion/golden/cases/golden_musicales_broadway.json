@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_musicales_broadway",
+  "origin": "phase1-smoke",
+  "sourceId": "auditorio-nacional",
+  "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/upm-1",
+  "listingTitle": "UPM. Musicales en Concierto",
+  "observed": {
+    "title": "UPM. Musicales en Concierto",
+    "categoryText": "sinfonica",
+    "venueText": "Sala Sinfónica",
+    "accessText": "35, 29, 21 y 9'50 €",
+    "programText": "ORQUESTA METROPOLITANA DE MADRID. Broadway Showstoppers. My Fair Lady. El hombre de la mancha. New York, New York. El mago de Oz. Los Miserables. Jesucristo Superstar. Chicago. El fantasma de la ópera.",
+    "performers": [
+      {
+        "name": "Orquesta Metropolitana de Madrid"
+      }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "exclude",
+    "formats": ["symphonic"],
+    "eras": [],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "Concierto de musicales de Broadway con orquesta. El formato sinfónico no convierte el repertorio de teatro musical en música clásica.",
+  "checkedAt": "2026-08-29"
+}

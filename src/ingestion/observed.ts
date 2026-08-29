@@ -1,5 +1,10 @@
 import { z } from 'zod';
 import { collapseWhitespace } from './html.ts';
+import {
+  isObviousNonPerformer,
+  isUnreliableComposerName,
+  looksLikeWorkLine,
+} from './observed-cleanup.ts';
 
 const nonEmpty = z.string().trim().min(1);
 
@@ -47,8 +52,22 @@ export type ObservedComposer = z.infer<typeof observedComposerSchema>;
 export type ObservedWork = z.infer<typeof observedWorkSchema>;
 export type ObservedFacts = z.infer<typeof observedFactsSchema>;
 
-/** Fields a detail parser may add on top of listing facts. Title stays with the listing. */
-export type ObservedFactPatch = Partial<Omit<ObservedFacts, 'title'>>;
+export type DetailOccurrence = {
+  raw: string;
+  date?: string;
+  time?: string;
+};
+
+export type ObservedEventStatus = 'scheduled' | 'cancelled' | 'postponed';
+
+/**
+ * Fields a detail parser may add on top of listing facts. Title stays with the listing.
+ * Occurrences and event status are optional: only set them when the ficha is explicit.
+ */
+export type ObservedFactPatch = Partial<Omit<ObservedFacts, 'title'>> & {
+  occurrences?: DetailOccurrence[];
+  eventStatus?: ObservedEventStatus;
+};
 
 export function emptyObservedLists(): Pick<ObservedFacts, 'performers' | 'composers' | 'works'> {
   return { performers: [], composers: [], works: [] };
@@ -76,6 +95,7 @@ export function normalizePersonList(items: ObservedPerson[] | undefined): Observ
       const name = collapseWhitespace(item.name);
       if (!name) return [];
       const roleText = item.roleText ? collapseWhitespace(item.roleText) || undefined : undefined;
+      if (isObviousNonPerformer(name, roleText)) return [];
       return [{ name, ...(roleText ? { roleText } : {}) }];
     }),
     (item) => `${item.name.toLowerCase()}|${item.roleText?.toLowerCase() ?? ''}`,
@@ -86,7 +106,8 @@ export function normalizeComposerList(items: ObservedComposer[] | undefined): Ob
   return uniqueByKey(
     (items ?? []).flatMap((item) => {
       const name = collapseWhitespace(item.name);
-      return name ? [{ name }] : [];
+      if (!name || isUnreliableComposerName(name)) return [];
+      return [{ name }];
     }),
     (item) => item.name.toLowerCase(),
   );
@@ -96,10 +117,13 @@ export function normalizeWorkList(items: ObservedWork[] | undefined): ObservedWo
   return uniqueByKey(
     (items ?? []).flatMap((item) => {
       const title = collapseWhitespace(item.title);
-      if (!title) return [];
+      if (!title || !looksLikeWorkLine(title)) return [];
       const composerName = item.composerName
         ? collapseWhitespace(item.composerName) || undefined
         : undefined;
+      if (composerName && isUnreliableComposerName(composerName)) {
+        return [{ title }];
+      }
       return [{ title, ...(composerName ? { composerName } : {}) }];
     }),
     (item) => `${item.title.toLowerCase()}|${item.composerName?.toLowerCase() ?? ''}`,
