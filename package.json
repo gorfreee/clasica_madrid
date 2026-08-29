@@ -12,6 +12,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "ingest:promote": "tsx src/cli/promote-candidate.ts",
+    "export:excel": "tsx src/cli/export-excel.ts",
     "build": "astro check && astro build",
     "preview": "astro preview"
   },
@@ -25,6 +26,7 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "@types/node": "^22.10.0",
+    "exceljs": "^4.4.0",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0",
     "vitest": "^4.1.11"

@@ -26,3 +26,7 @@ ingestion/rejected/**
 !ingestion/rejected/.gitkeep
 ingestion/work/**
 !ingestion/work/.gitkeep
+
+# generated catalog review spreadsheets
+exports/**
+!exports/.gitkeep
