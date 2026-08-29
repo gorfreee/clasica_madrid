@@ -72,7 +72,7 @@ El resumen humano de la CLI sigue siendo el agregado. `--report` añade un artif
 npm run ingest:source -- madrid-datos --dry-run --report ingestion/reports/madrid-datos.json
 ```
 
-El fichero contiene `summary` (el mismo agregado de la CLI) y `events[]`. Cada fila incluye, cuando aplica: `sourceId`, `sourceUrl`, `externalId`, `title`, hidratación, descarte estructural, eligibility (valor, método, `ruleId`, evidencia), si se intentó IA, `formats` / `eras` / `kind` / `access` con método y `ruleId`, si es publicable, si se generó Candidate, y `existing` / `new` cuando esa identidad se puede determinar con seguridad contra el catálogo (URL o `externalId`).
+El fichero contiene `summary` (el mismo agregado de la CLI) y `events[]`. Cada fila incluye, cuando aplica: `sourceId`, `sourceUrl`, `externalId`, `title`, hidratación, descarte estructural, eligibility (valor, método, `ruleId`, evidencia), si se intentó IA, diagnósticos de transporte `ai` (modelo final, si hubo fallback, intentos) cuando el provider los expone, `formats` / `eras` / `kind` / `access` con método y `ruleId`, si es publicable, si se generó Candidate, y `existing` / `new` cuando esa identidad se puede determinar con seguridad contra el catálogo (URL o `externalId`). El `summary.ai` desglosa include/exclude/uncertain de IA, `ai-invalid-output`, `ai-rate-limited`, otros errores, requests HTTP, retries, fallbacks de modelo y conteos por modelo.
 
 Es un diagnóstico. No cambia las decisiones de clasificación, no cambia qué se publica, no añade campos al `Event` canónico y no se escribe en `data/**`. En dry-run el catálogo no se modifica. `ingestion/reports/` está gitignorado: no hace falta versionar dumps de una ejecución.
 
@@ -85,11 +85,41 @@ Sin provider o credenciales utilizables el fallback de IA no se invoca; los `unc
 | Variable | Uso |
 |---|---|
 | `AI_PROVIDER` | `openai` o `gemini`. Si falta: OpenAI cuando hay `OPENAI_API_KEY`; si no, Gemini cuando hay `GEMINI_API_KEY`. |
-| `GEMINI_API_KEY` | Credencial de Gemini. No la commits ni la pongas en fixtures, logs o reports. |
-| `GEMINI_MODEL` | Override del modelo Gemini. Por defecto `gemini-3.1-flash-lite`. |
+| `GEMINI_API_KEY` | Credencial de Gemini. Una sola clave sirve para toda la cadena de modelos. No la commits ni la pongas en fixtures, logs o reports. Varias API keys del **mismo** proyecto de Google **no** multiplican la cuota. |
+| `GEMINI_MODELS` | Cadena **ordenada** de failover, separada por comas. Si está presente y no vacía, gana a `GEMINI_MODEL`. |
+| `GEMINI_MODEL` | Un solo modelo (compatibilidad). Se ignora si `GEMINI_MODELS` tiene valores. Por defecto, sin ninguna de las dos: `gemini-3.1-flash-lite`. |
+| `GEMINI_RPM` | RPM por defecto para cualquier modelo Gemini sin override. Por defecto `12`. |
+| `GEMINI_MODEL_RPM` | RPM por modelo: `nombre:rpm` separados por comas. Ejemplo: `gemini-3.1-flash-lite:12`. |
 | `OPENAI_API_KEY` | Credencial de OpenAI. Misma regla: no la commits. |
 | `OPENAI_MODEL` | Override del modelo OpenAI. Por defecto `gpt-4o-mini`. |
 | `OPENAI_BASE_URL` | Override del endpoint de OpenAI. Por defecto `https://api.openai.com/v1`. |
+
+`GEMINI_MODELS` no hace round-robin ni balanceo: es failover. Si el modelo primario responde una clasificación válida (incluido `eligibility: uncertain`), no se pregunta a otro modelo. Un 429 se reporta como `ai-rate-limited` (el evento sigue `uncertain`); el lote no aborta. Tras agotar 2 retries del modelo actual se prueba el siguiente de la cadena. Si el payload indica cuota diaria agotada, ese modelo se deshabilita el resto del run.
+
+#### Cuotas Gemini Free Tier
+
+Los límites RPM / TPM / RPD son **del proyecto y del modelo**, no de la API key. Consulta siempre [AI Studio → rate limits](https://aistudio.google.com/rate-limit): las cifras cambian.
+
+Valores **observados** para este proyecto en `Gemini 3.1 Flash Lite` (pueden cambiar):
+
+| Límite | Observado | Configuración operativa |
+|---|---|---|
+| RPM | 15 | `12` (margen para ventanas móviles y jitter) |
+| TPM | 250K | no es el cuello de botella actual |
+| RPD | 500 | no es el cuello de botella actual |
+
+No hardcodees fallbacks. Añade un modelo a `GEMINI_MODELS` sólo después de comprobar en AI Studio que ese proyecto tiene cuota gratuita positiva para él. El default sin configuración sigue siendo únicamente `gemini-3.1-flash-lite`.
+
+```bash
+# default: un modelo, 12 RPM
+AI_PROVIDER=gemini GEMINI_API_KEY="$GEMINI_API_KEY" npm run ingest:sync -- --dry-run --report ingestion/reports/gemini-acceptance.json
+
+# cadena opcional, tras verificar cuota en AI Studio
+GEMINI_MODELS=gemini-3.1-flash-lite,gemini-2.5-flash
+GEMINI_MODEL_RPM=gemini-3.1-flash-lite:12,gemini-2.5-flash:10
+```
+
+Migración desde `GEMINI_MODEL=gemini-3.5-flash`: o bien dejas esa variable (sigue funcionando como un solo modelo), o bien pasas a `GEMINI_MODELS=gemini-3.5-flash` / `GEMINI_MODELS=gemini-3.1-flash-lite,gemini-3.5-flash`. Si ambas están definidas, gana `GEMINI_MODELS`.
 
 Acceptance real del fallback con Gemini, en dry-run y sin escribir `data/**`:
 
@@ -106,7 +136,7 @@ npm run ingest:sync -- --dry-run --report ingestion/reports/gemini-acceptance.js
 
 (`GEMINI_API_KEY` debe estar ya en el entorno; no la imprimas.)
 
-**Follow-up (no implementado aquí):** el Free Tier de Gemini suele limitar RPM (orden de ~10–15 req/min, según cuenta; ver [AI Studio](https://aistudio.google.com/rate-limit)). Un lote de 100–150 `uncertain` en serie puede devolver 429 y degradar a `uncertain`. Esta PR no añade retries ni throttling.
+Con el default de 12 RPM, ~117 eventos que llegan a IA tardan del orden de **10–15 minutos** (116 × 5 s de separación más la latencia HTTP). El report JSON incluye `ai-include` / `ai-exclude` / `ai-uncertain` / `ai-invalid-output` / `ai-rate-limited` / `ai-error`, requests, retries, fallbacks de modelo, y, por evento, el modelo final, si hubo fallback y el número de intentos.
 
 ### Candidatos JSON (legacy)
 

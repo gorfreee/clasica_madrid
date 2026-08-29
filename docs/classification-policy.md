@@ -328,7 +328,7 @@ El prompt versionado del fallback está en `src/ingestion/classification/ai-prom
 
 Contrato de salida: objeto JSON validado con Zod (`eligibility` obligatorio; `formats` / `eras` / `kind` / `evidence` opcionales). Valores fuera de taxonomía → inválido → `uncertain`.
 
-Degradación: provider ausente, API key ausente, timeout, error HTTP, excepción, respuesta vacía, JSON inválido o schema inválido conservan `eligibility = uncertain` y no tumbaron el resto del lote. El `ruleId` interno (`ai-unavailable`, `ai-timeout`, `ai-error`, `ai-malformed-output`, `ai-invalid-output`) permite diagnosticar el fallo. OpenAI y Gemini comparten el mismo prompt y la misma puerta `parseAiClassification()`.
+Degradación: provider ausente, API key ausente, timeout, error HTTP, rate limit, excepción, respuesta vacía, JSON inválido o schema inválido conservan `eligibility = uncertain` y no tumbaron el resto del lote. El `ruleId` interno (`ai-unavailable`, `ai-timeout`, `ai-error`, `ai-rate-limited`, `ai-malformed-output`, `ai-invalid-output`) permite diagnosticar el fallo. `rationale` demasiado largo se trunca antes de Zod; no invalida una clasificación semánticamente válida. OpenAI y Gemini comparten el mismo prompt y la misma puerta `parseAiClassification()`.
 
 CI no llama a un LLM. Tests usan fakes. El resultado final gobierna la publicación de `runIngest`: sólo `include` puede convertirse en Candidate. `exclude` y `uncertain` no se publican. Ausencia o fallo de IA → `uncertain` → no publicar. `eras=[]` / `formats=[]` no bloquean un `include`. Los eventos ya publicados no se borran ni se re-clasifican en esta fase.
 

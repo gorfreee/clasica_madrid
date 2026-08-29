@@ -1,5 +1,5 @@
 import type { AiClassifier } from './ai.ts';
-import { GeminiClassifier } from './gemini.ts';
+import { GeminiClassifier, resolveGeminiConfig } from './gemini.ts';
 import { OpenAiClassifier } from './openai.ts';
 
 export const AI_PROVIDERS = ['openai', 'gemini'] as const;
@@ -11,7 +11,14 @@ export type AiEnv = {
   OPENAI_MODEL?: string;
   OPENAI_BASE_URL?: string;
   GEMINI_API_KEY?: string;
+  /** Single-model override. Ignored when `GEMINI_MODELS` is non-empty. */
   GEMINI_MODEL?: string;
+  /** Ordered failover chain, comma-separated. Wins over `GEMINI_MODEL`. */
+  GEMINI_MODELS?: string;
+  /** Default RPM for every Gemini model without a per-model override. */
+  GEMINI_RPM?: string;
+  /** Per-model RPM, `name:rpm` pairs comma-separated. */
+  GEMINI_MODEL_RPM?: string;
 };
 
 /**
@@ -45,8 +52,11 @@ function openaiFromEnv(env: AiEnv): AiClassifier | undefined {
 function geminiFromEnv(env: AiEnv): AiClassifier | undefined {
   const apiKey = env.GEMINI_API_KEY?.trim();
   if (!apiKey) return undefined;
+  const config = resolveGeminiConfig(env);
   return new GeminiClassifier({
     apiKey,
-    model: env.GEMINI_MODEL,
+    models: config.models,
+    defaultRpm: config.defaultRpm,
+    rpmByModel: config.rpmByModel,
   });
 }

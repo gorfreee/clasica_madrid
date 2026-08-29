@@ -39,6 +39,7 @@ const TECHNICAL_KEYS = [
   'occurrences',
   'publishable',
   'aiAttempted',
+  'ai',
   'structuralSkip',
   'hydration',
   'candidateGenerated',
@@ -187,6 +188,47 @@ describe('ingest event report', () => {
     expect(decision.candidateGenerated).toBe(false);
     expect(decision.formats).toBeUndefined();
     expect(run.candidates).toEqual([]);
+    expect(run.summary.written).toEqual([]);
+  });
+
+  it('recoge diagnósticos de transporte de IA en el summary y por evento', async () => {
+    const ai: AiClassifier = {
+      async classify() {
+        return { eligibility: 'include', kind: 'alternative', evidence: ['fake'] };
+      },
+      lastDiagnostics: () => ({
+        model: 'gemini-3.1-flash-lite',
+        fallbackUsed: true,
+        attempts: 3,
+      }),
+      snapshotStats: () => ({
+        httpRequests: 4,
+        retries: 2,
+        modelFallbacks: 1,
+        requestsByModel: { 'gemini-3.1-flash-lite': 3, 'gemini-2.5-flash': 1 },
+        classificationsByModel: { 'gemini-2.5-flash': 1 },
+      }),
+    };
+    const { run } = await runAuditorio({
+      items: [{ title: 'Concierto extraordinario', slug: 'gala-ai-diag' }],
+      ai,
+    });
+
+    expect(run.decisions[0]!.aiAttempted).toBe(true);
+    expect(run.decisions[0]!.ai).toEqual({
+      model: 'gemini-3.1-flash-lite',
+      fallbackUsed: true,
+      attempts: 3,
+    });
+    expect(run.summary.ai.include).toBe(1);
+    expect(run.summary.ai.httpRequests).toBe(4);
+    expect(run.summary.ai.retries).toBe(2);
+    expect(run.summary.ai.modelFallbacks).toBe(1);
+    expect(run.summary.ai.requestsByModel).toEqual({
+      'gemini-3.1-flash-lite': 3,
+      'gemini-2.5-flash': 1,
+    });
+    expect(run.summary.ai.classificationsByModel).toEqual({ 'gemini-2.5-flash': 1 });
     expect(run.summary.written).toEqual([]);
   });
 

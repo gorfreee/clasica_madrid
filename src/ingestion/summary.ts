@@ -20,6 +20,19 @@ export function formatRunSummary(summary: IngestRunSummary): string {
     `  intentadas: ${summary.ai.attempted}`,
     `  resueltas: ${summary.ai.resolved}`,
     `  sin resolver: ${summary.ai.unresolved}`,
+    `  ai-include: ${summary.ai.include}`,
+    `  ai-exclude: ${summary.ai.exclude}`,
+    `  ai-uncertain: ${summary.ai.uncertain}`,
+    `  ai-invalid-output: ${summary.ai.invalidOutput}`,
+    `  ai-malformed-output: ${summary.ai.malformedOutput}`,
+    `  ai-rate-limited: ${summary.ai.rateLimited}`,
+    `  ai-timeout: ${summary.ai.timeout}`,
+    `  ai-error: ${summary.ai.error}`,
+    `  http: ${summary.ai.httpRequests}`,
+    `  retries: ${summary.ai.retries}`,
+    `  fallbacks de modelo: ${summary.ai.modelFallbacks}`,
+    ...formatCountMap('requests por modelo', summary.ai.requestsByModel),
+    ...formatCountMap('clasificaciones por modelo', summary.ai.classificationsByModel),
     `Descartados estructuralmente: ${summary.skippedUnusable}`,
     `Candidatos generados: ${summary.candidates}`,
     `Eventos nuevos: ${summary.newEvents}`,
@@ -36,6 +49,12 @@ export function formatRunSummary(summary: IngestRunSummary): string {
     }
   }
   return lines.join('\n');
+}
+
+function formatCountMap(label: string, counts: Record<string, number>): string[] {
+  const entries = Object.entries(counts).filter(([, value]) => value > 0);
+  if (entries.length === 0) return [];
+  return [`  ${label}: ${entries.map(([name, value]) => `${name}=${value}`).join(', ')}`];
 }
 
 function suffixList(ids: string[]): string {

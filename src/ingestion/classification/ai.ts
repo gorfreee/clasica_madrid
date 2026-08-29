@@ -8,13 +8,58 @@ import { ELIGIBILITIES, type Eligibility } from './golden-case.ts';
  * Provider-agnostic AI classification. Implementations return a JSON-compatible
  * payload; `parseAiClassification` is the only validation gate the enrich
  * layer trusts. Tests inject fakes; CI never calls a live model.
+ *
+ * Optional hooks stay provider-agnostic: Gemini uses them for rate-limit
+ * diagnostics; OpenAI and test fakes omit them.
  */
-export type AiClassifier = {
-  classify(observed: ObservedFacts): Promise<unknown>;
+export type AiCallDiagnostics = {
+  model?: string;
+  fallbackUsed?: boolean;
+  attempts?: number;
 };
 
-/** Single-call timeout for any AI provider. No retries. */
+export type AiProviderStats = {
+  httpRequests: number;
+  retries: number;
+  modelFallbacks: number;
+  requestsByModel: Record<string, number>;
+  classificationsByModel: Record<string, number>;
+};
+
+export type AiClassifier = {
+  classify(observed: ObservedFacts): Promise<unknown>;
+  /** Overall budget for `classify()` including provider-internal waits. */
+  classifyBudgetMs?: number;
+  lastDiagnostics?(): AiCallDiagnostics | undefined;
+  snapshotStats?(): AiProviderStats | undefined;
+};
+
+/** Per-HTTP-request timeout for providers that manage their own transport. */
 export const AI_CLASSIFY_TIMEOUT_MS = 15_000;
+
+/** Zod max for `rationale`. Longer strings are truncated before validation. */
+export const AI_RATIONALE_MAX_CHARS = 800;
+
+/**
+ * Rate-limit / quota failure after the provider exhausted its own retries.
+ * Distinct from a generic `ai-error` so reports can show `ai-rate-limited`.
+ */
+export class AiRateLimitedError extends Error {
+  readonly retryAfterMs?: number;
+  readonly quotaExhausted: boolean;
+  readonly model?: string;
+
+  constructor(
+    message: string,
+    options: { retryAfterMs?: number; quotaExhausted?: boolean; model?: string } = {},
+  ) {
+    super(message);
+    this.name = 'AiRateLimitedError';
+    this.retryAfterMs = options.retryAfterMs;
+    this.quotaExhausted = options.quotaExhausted ?? false;
+    this.model = options.model;
+  }
+}
 
 export type AiClassificationResult = {
   eligibility: Eligibility;
@@ -47,7 +92,10 @@ export const AI_CLASSIFICATION_JSON_SCHEMA = {
     eras: { type: 'array', items: { type: 'string', enum: [...ERAS] } },
     kind: { type: 'string', enum: [...EVENT_KINDS] },
     evidence: { type: 'array', maxItems: 12, items: { type: 'string' } },
-    rationale: { type: 'string' },
+    rationale: {
+      type: 'string',
+      description: '1-2 short sentences. Do not repeat evidence. Keep well under 800 characters.',
+    },
   },
 } as const;
 
@@ -61,7 +109,7 @@ export function parseAiClassification(raw: unknown): ParseAiClassification {
     return { ok: false, ruleId: 'ai-malformed-output', reason: asObject.reason };
   }
 
-  const parsed = aiClassificationSchema.safeParse(asObject.value);
+  const parsed = aiClassificationSchema.safeParse(normalizeAiClassificationInput(asObject.value));
   if (!parsed.success) {
     return {
       ok: false,
@@ -85,6 +133,22 @@ export function parseAiClassification(raw: unknown): ParseAiClassification {
       evidence,
     },
   };
+}
+
+/**
+ * Non-semantic pre-validation fixups. Truncates an overlong `rationale`
+ * so explanatory metadata cannot void an otherwise valid classification.
+ * Does not invent enums, repair eligibility/formats/eras, or add evidence.
+ */
+export function normalizeAiClassificationInput(raw: unknown): unknown {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return raw;
+  const rationale = (raw as { rationale?: unknown }).rationale;
+  if (typeof rationale !== 'string') return raw;
+  const trimmed = rationale.trim();
+  if (trimmed.length <= AI_RATIONALE_MAX_CHARS) {
+    return trimmed === rationale ? raw : { ...(raw as object), rationale: trimmed };
+  }
+  return { ...(raw as object), rationale: trimmed.slice(0, AI_RATIONALE_MAX_CHARS) };
 }
 
 function coerceObject(raw: unknown): { ok: true; value: unknown } | { ok: false; reason: string } {

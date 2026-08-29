@@ -1,6 +1,12 @@
 import { classify, resolveAccess, resolveEras, resolveFormats, resolveKind } from './classify.ts';
 import type { ObservedFacts } from '../observed.ts';
-import { AI_CLASSIFY_TIMEOUT_MS, parseAiClassification, type AiClassifier, type AiClassificationResult } from './ai.ts';
+import {
+  AI_CLASSIFY_TIMEOUT_MS,
+  AiRateLimitedError,
+  parseAiClassification,
+  type AiClassifier,
+  type AiClassificationResult,
+} from './ai.ts';
 import type { ClassificationResult, Resolution, ResolutionMethod } from './types.ts';
 
 export { AI_CLASSIFY_TIMEOUT_MS };
@@ -41,13 +47,16 @@ export async function enrichWithAiIfNeeded(
     ]);
   }
 
-  const timeoutMs = options.timeoutMs ?? AI_CLASSIFY_TIMEOUT_MS;
+  const timeoutMs = options.timeoutMs ?? ai.classifyBudgetMs ?? AI_CLASSIFY_TIMEOUT_MS;
   let raw: unknown;
   try {
     raw = await withTimeout(ai.classify(facts), timeoutMs);
   } catch (error) {
     if (isTimeoutError(error)) {
       return degrade(deterministic, 'ai', 'ai-timeout', [errorMessage(error)]);
+    }
+    if (error instanceof AiRateLimitedError) {
+      return degrade(deterministic, 'ai', 'ai-rate-limited', [errorMessage(error)]);
     }
     return degrade(deterministic, 'ai', 'ai-error', [errorMessage(error)]);
   }

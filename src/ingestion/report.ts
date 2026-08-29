@@ -34,6 +34,15 @@ export type IngestEventDecision = {
     evidence: string[];
   };
   aiAttempted: boolean;
+  /**
+   * Transport diagnostics for the AI call, when the provider exposes them.
+   * Never written to `data/**`.
+   */
+  ai?: {
+    model?: string;
+    fallbackUsed?: boolean;
+    attempts?: number;
+  };
   formats?: FieldResolution<Format[]>;
   eras?: FieldResolution<Era[]>;
   kind?: FieldResolution<EventKind>;
@@ -57,6 +66,7 @@ export type DecisionInput = {
   structuralSkip?: string;
   classification?: ClassificationResult;
   aiAttempted: boolean;
+  ai?: IngestEventDecision['ai'];
   publishable: boolean;
   candidateGenerated: boolean;
   identity?: 'existing' | 'new';
@@ -79,6 +89,7 @@ export function buildEventDecision(input: DecisionInput): IngestEventDecision {
   if (input.raw.externalId) decision.externalId = input.raw.externalId;
   if (input.structuralSkip) decision.structuralSkip = { reason: input.structuralSkip };
   if (input.identity) decision.identity = input.identity;
+  if (input.ai) decision.ai = input.ai;
 
   const classification = input.classification;
   if (classification) {
