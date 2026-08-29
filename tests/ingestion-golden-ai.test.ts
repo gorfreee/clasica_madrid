@@ -82,7 +82,7 @@ describe('golden set → classify + AI fake', () => {
   it('los uncertain esperados pueden seguir uncertain con un fake que no fuerza decisión', async () => {
     const cases = await loadGoldenCases();
     const uncertain = cases.filter((item) => item.expected.eligibility === 'uncertain');
-    expect(uncertain.length).toBeGreaterThanOrEqual(5);
+    expect(uncertain.length).toBeGreaterThanOrEqual(4);
 
     for (const item of uncertain) {
       const result = await classifyObserved(item.observed, {

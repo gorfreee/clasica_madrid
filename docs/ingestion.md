@@ -10,7 +10,7 @@ No es la especificación de arquitectura objetivo.
 | Estado operativo actual (este documento) | `docs/ingestion.md` |
 | Classification Policy v1 y criterios de Phase 2 | [`docs/classification-policy.md`](classification-policy.md) |
 | Acceptance real de Phase 2 (dry-run 2026-08-29) | [`docs/ingestion-phase2-acceptance.md`](ingestion-phase2-acceptance.md) |
-| Auditoría del catálogo legacy contra la Classification Policy | [`docs/catalog-rebaseline-audit.md`](catalog-rebaseline-audit.md) |
+| Rebaseline editorial del catálogo legacy | [`docs/catalog-rebaseline-audit.md`](catalog-rebaseline-audit.md) |
 | Golden evaluation set | [`tests/fixtures/ingestion/golden/`](../tests/fixtures/ingestion/golden/) |
 | Modelo de datos canónico | [`docs/data-model.md`](data-model.md) |
 | Investigación y planes anteriores (histórico, no requisitos) | [`docs/archive/`](archive/) |

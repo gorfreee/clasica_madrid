@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_candlelight_einaudi",
+  "origin": "published-catalog",
+  "sourceId": "fever",
+  "sourceUrl": "https://feverup.com/m/135802",
+  "listingTitle": "Candlelight: Tributo a Ludovico Einaudi",
+  "observed": {
+    "title": "Candlelight: Tributo a Ludovico Einaudi",
+    "venueText": "Círculo de Bellas Artes, Madrid",
+    "accessText": "asientos según tipo de ticket",
+    "programText": "Programa Candlelight: Tributo a Ludovico Einaudi. I Giorni; Le Onde; Primavera; Elegy for the Arctic; In Un’Altra Vita; Nuvole Bianche; Una Mattina; Divenire; Fly.",
+    "performers": [
+      {
+        "name": "Esther Toledano",
+        "roleText": "piano"
+      }
+    ],
+    "composers": [
+      {
+        "name": "Ludovico Einaudi"
+      }
+    ],
+    "works": [
+      {
+        "title": "I Giorni",
+        "composerName": "Ludovico Einaudi"
+      },
+      {
+        "title": "Nuvole Bianche",
+        "composerName": "Ludovico Einaudi"
+      },
+      {
+        "title": "Divenire",
+        "composerName": "Ludovico Einaudi"
+      }
+    ]
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": ["recital"],
+    "eras": ["contemporary"],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "Recital de piano de repertorio instrumental contemporáneo/neoclásico. Fever y el formato Candlelight no deciden eligibility; el programa de Einaudi sí. Contrasta con Candlelight Zimmer (música de cine).",
+  "checkedAt": "2026-08-29"
+}

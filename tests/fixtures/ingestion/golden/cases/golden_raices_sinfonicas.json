@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_raices_sinfonicas",
+  "origin": "published-catalog",
+  "sourceId": "auditorio-nacional",
+  "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/uam-raices-sinfonicas-gran-fiesta-canaria",
+  "listingTitle": "UAM. Raíces Sinfónicas. Gran Fiesta Canaria",
+  "observed": {
+    "title": "UAM. Raíces Sinfónicas. Gran Fiesta Canaria",
+    "seriesText": "CSIPM. Universidad Autónoma de Madrid. Ciclo de Grandes Autores e Intérpretes de la Música",
+    "venueText": "Auditorio Nacional de Música — Sala Sinfónica",
+    "accessText": "De 7 a 40 €",
+    "programText": "Primera parte: C. Saint-Saëns, Campanas de Las Palmas. 6 Estudios, Op.111: No.4; C. Saint-Saëns, Vals canariote; Manuel de Falla, Noches en los Jardines de España. Segunda parte: La Cantata del Mencey Loco (selección); Llamarme Guanche; La Leyenda de San Borondón; Pescador de Morenas; Tenerife; Unicornio; Dos Cruces; Aquella Tarde; Voces del Meridiano.",
+    "performers": [
+      {
+        "name": "Los Sabandeños"
+      },
+      {
+        "name": "Joven Orquesta de Canarias"
+      },
+      {
+        "name": "Víctor Pablo Pérez",
+        "roleText": "director"
+      },
+      {
+        "name": "Juan Pérez Floristán",
+        "roleText": "piano"
+      }
+    ],
+    "composers": [
+      {
+        "name": "Camille Saint-Saëns"
+      },
+      {
+        "name": "Manuel de Falla"
+      },
+      {
+        "name": "R. Gil Roldán"
+      },
+      {
+        "name": "Elfidio Alonso"
+      },
+      {
+        "name": "Braulio"
+      },
+      {
+        "name": "Silvio Rodríguez"
+      },
+      {
+        "name": "Carmelo Larrea"
+      },
+      {
+        "name": "Ernesto Lecuona"
+      },
+      {
+        "name": "Benito Cabrera"
+      }
+    ],
+    "works": [
+      {
+        "title": "Campanas de Las Palmas. 6 Estudios, Op.111: No.4",
+        "composerName": "Camille Saint-Saëns"
+      },
+      {
+        "title": "Vals canariote",
+        "composerName": "Camille Saint-Saëns"
+      },
+      {
+        "title": "Noches en los Jardines de España",
+        "composerName": "Manuel de Falla"
+      },
+      {
+        "title": "La Cantata del Mencey Loco (selección)",
+        "composerName": "R. Gil Roldán"
+      },
+      {
+        "title": "Unicornio",
+        "composerName": "Silvio Rodríguez"
+      }
+    ]
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": ["symphonic"],
+    "eras": ["romantic", "twentieth"],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "Concierto sinfónico real con un bloque clásico autónomo (Saint-Saëns y Falla, JOCAN, Floristán) y una segunda parte popular/canaria. La identidad global es un concierto del ciclo UAM, no un homenaje pop ni un arreglo de canción.",
+  "checkedAt": "2026-08-29"
+}

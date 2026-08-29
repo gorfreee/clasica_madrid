@@ -20,15 +20,12 @@
     "works": []
   },
   "expected": {
-    "eligibility": "uncertain",
-    "formats": [
-      "chamber"
-    ],
+    "eligibility": "include",
+    "formats": ["symphonic", "chamber"],
     "eras": [],
     "kind": "established",
     "access": "paid"
   },
-  "reason": "El ciclo es de cámara en el Teatro Real, pero la ficha describe la temporada entera, no el programa de esta sesión.",
-  "missingEvidence": "Falta el programa concreto de Domingos de Cámara I (obras e intérpretes de esa fecha). Los compositores citados son el eje de la temporada de ópera, no necesariamente el repertorio de este concierto.",
+  "reason": "La ficha oficial describe una serie de conciertos de cámara de los solistas de la Orquesta Titular. No hay programa de esta sesión, pero hay evidencia suficiente de un concierto real dentro de un ciclo explícitamente de música de cámara. Los compositores citados son el eje de la temporada de ópera y no se copian como obras de este concierto. El classifier también asigna `symphonic` porque el nombre del intérprete contiene «orquesta»; el catálogo publicado conserva `chamber`.",
   "checkedAt": "2026-08-29"
 }

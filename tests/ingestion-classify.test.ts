@@ -184,6 +184,103 @@ describe('eligibility — conflictos y fallback', () => {
     expect(result.eligibility.value).toBe('uncertain');
     expect(result.eligibility.ruleId).toBe('insufficient-evidence');
   });
+
+  it('incluye un concierto mixto con bloque clásico autónomo en un concierto sinfónico real', () => {
+    const result = classify(
+      facts({
+        title: 'UAM. Raíces Sinfónicas. Gran Fiesta Canaria',
+        seriesText: 'Ciclo de Grandes Autores e Intérpretes de la Música',
+        programText:
+          'Primera parte: Saint-Saëns y Falla. Segunda parte: repertorio canario de Los Sabandeños.',
+        performers: [
+          { name: 'Joven Orquesta de Canarias' },
+          { name: 'Los Sabandeños' },
+          { name: 'Juan Pérez Floristán', roleText: 'piano' },
+        ],
+        composers: [{ name: 'Camille Saint-Saëns' }, { name: 'Manuel de Falla' }, { name: 'Silvio Rodríguez' }],
+        works: [
+          { title: 'Noches en los Jardines de España', composerName: 'Manuel de Falla' },
+          { title: 'Unicornio', composerName: 'Silvio Rodríguez' },
+        ],
+      }),
+    );
+    expect(result.eligibility.value).toBe('include');
+  });
+
+  it('no convierte ABBA con orquesta ni un tributo de cine en include', () => {
+    const abba = classify(
+      facts({
+        title: 'ABBA, Queen, Beatles y Otros Grandes del Pop',
+        performers: [{ name: 'Pop Orchestra', roleText: 'orquesta' }],
+      }),
+    );
+    expect(abba.eligibility.value).toBe('exclude');
+
+    const zimmer = classify(
+      facts({
+        title: 'Candlelight: Tributo a Hans Zimmer',
+        composers: [{ name: 'Hans Zimmer' }],
+        programText: 'Time; El rey león; Interstellar',
+      }),
+    );
+    expect(zimmer.eligibility.value).toBe('exclude');
+    expect(zimmer.eligibility.ruleId).toBe('film-music-identity');
+  });
+
+  it('incluye repertorio de piano contemporáneo/neoclásico de tradición concertística', () => {
+    const result = classify(
+      facts({
+        title: 'Candlelight: Tributo a Ludovico Einaudi',
+        composers: [{ name: 'Ludovico Einaudi' }],
+        works: [{ title: 'Nuvole Bianche', composerName: 'Ludovico Einaudi' }],
+        performers: [{ name: 'Esther Toledano', roleText: 'piano' }],
+      }),
+    );
+    expect(result.eligibility.value).toBe('include');
+  });
+
+  it('incluye un concierto de ciclo clásico sin programa obra-por-obra', () => {
+    const chamber = classify(
+      facts({
+        title: 'Domingos de Cámara I',
+        categoryText: 'Domingos de Cámara',
+        description:
+          'Los solistas de la Orquesta Titular del Teatro Real ofrecerán una serie de conciertos.',
+        performers: [{ name: 'solistas de la Orquesta Titular del Teatro Real' }],
+      }),
+    );
+    expect(chamber.eligibility.value).toBe('include');
+    expect(chamber.eligibility.ruleId).toBe('classical-concert-series');
+
+    const festival = classify(
+      facts({
+        title: 'Madrid a Tempo: Concierto de inauguración',
+        seriesText: 'Festival Internacional de Piano Madrid a Tempo',
+      }),
+    );
+    expect(festival.eligibility.value).toBe('include');
+    expect(festival.eligibility.ruleId).toBe('classical-concert-series');
+  });
+
+  it('excluye open piano y jam participativa aunque el festival sea de piano clásico', () => {
+    const openPiano = classify(
+      facts({
+        title: 'Madrid a Tempo: Open Piano',
+        description: 'Open Piano/Piano al aire libre',
+        seriesText: 'Festival Internacional de Piano Madrid a Tempo',
+      }),
+    );
+    expect(openPiano.eligibility.value).toBe('exclude');
+    expect(openPiano.eligibility.ruleId).toBe('participatory-activity');
+
+    const jam = classify(
+      facts({
+        title: 'Jam participativa de piano',
+        seriesText: 'Festival Internacional de Piano',
+      }),
+    );
+    expect(jam.eligibility.value).toBe('exclude');
+  });
 });
 
 describe('eligibility — source y venue no determinan', () => {
@@ -217,6 +314,18 @@ describe('eligibility — source y venue no determinan', () => {
     );
     expect(municipal.eligibility.value).not.toBe('exclude');
     expect(municipal.eligibility.value).toBe('uncertain');
+
+    const mixedFilm = classify(
+      facts({
+        title: 'Los sonidos del universo',
+        categoryText: 'Actuación música / Música clásica',
+        description:
+          'Un recorrido por grandes obras de la música clásica y las bandas sonoras más emblemáticas del cine.',
+      }),
+    );
+    expect(mixedFilm.eligibility.value).not.toBe('exclude');
+    expect(mixedFilm.eligibility.value).toBe('uncertain');
+    expect(mixedFilm.eligibility.ruleId).toBe('classical-and-nonclassical-coprincipal');
   });
 });
 
