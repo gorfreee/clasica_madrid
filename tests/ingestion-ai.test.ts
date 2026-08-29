@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import type { ObservedFacts } from '../src/ingestion/observed.ts';
 import type { AiClassifier } from '../src/ingestion/classification/ai.ts';
-import { AI_CLASSIFICATION_JSON_SCHEMA, parseAiClassification } from '../src/ingestion/classification/ai.ts';
+import {
+  AI_CLASSIFICATION_JSON_SCHEMA,
+  AiRateLimitedError,
+  parseAiClassification,
+} from '../src/ingestion/classification/ai.ts';
 import {
   AI_CLASSIFIER_PROMPT_VERSION,
   AI_CLASSIFIER_SYSTEM_PROMPT,
@@ -14,6 +18,7 @@ import {
   GEMINI_API_REVISION,
   GEMINI_DEFAULT_MODEL,
 } from '../src/ingestion/classification/gemini.ts';
+import type { SleepClock } from '../src/ingestion/classification/gemini.ts';
 import {
   OpenAiClassifier,
   OPENAI_DEFAULT_MODEL,
@@ -26,6 +31,19 @@ function facts(overrides: Partial<ObservedFacts> & Pick<ObservedFacts, 'title'>)
     composers: [],
     works: [],
     ...overrides,
+  };
+}
+
+function immediateClock(): SleepClock & { sleeps: number[] } {
+  let now = 0;
+  const sleeps: number[] = [];
+  return {
+    now: () => now,
+    async sleep(ms) {
+      sleeps.push(ms);
+      now += ms;
+    },
+    sleeps,
   };
 }
 
@@ -56,8 +74,8 @@ const uncertainFacts = facts({ title: 'Concierto extraordinario' });
 describe('AI classifier prompt v2', () => {
   const prompt = AI_CLASSIFIER_SYSTEM_PROMPT;
 
-  it('is version 2 so results are distinguishable from v1', () => {
-    expect(AI_CLASSIFIER_PROMPT_VERSION).toBe(2);
+  it('is version 3 so results are distinguishable from earlier prompts', () => {
+    expect(AI_CLASSIFIER_PROMPT_VERSION).toBe(3);
   });
 
   it('keeps precision, uncertain as a valid output, and the ban on inventing facts', () => {
@@ -131,6 +149,10 @@ describe('AI classifier prompt v2', () => {
     expect(prompt).toContain('"eras"');
     expect(prompt).toContain('"kind": "established" | "alternative"');
     expect(prompt).toContain('"evidence"');
+    expect(prompt).toContain('"rationale"');
+    expect(prompt).toMatch(/rationale es metadata auxiliar muy breve/);
+    expect(prompt).toMatch(/m[aá]ximo 1[–-]2 frases/);
+    expect(prompt).toMatch(/No repitas evidence/);
     expect(prompt).not.toMatch(/confidence/i);
     expect(prompt).not.toMatch(/chain[- ]of[- ]thought/i);
   });
@@ -183,6 +205,32 @@ describe('parseAiClassification', () => {
     expect(parseAiClassification('').ok).toBe(false);
     expect(parseAiClassification(null).ok).toBe(false);
     expect(parseAiClassification([]).ok).toBe(false);
+  });
+
+  it('trunca rationale > 800 y conserva una clasificación válida', () => {
+    const parsed = parseAiClassification({
+      eligibility: 'include',
+      kind: 'alternative',
+      evidence: ['ciclo de órgano'],
+      rationale: `x`.repeat(801),
+    });
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    expect(parsed.value.eligibility).toBe('include');
+    expect(parsed.value.kind).toBe('alternative');
+    const rationale = parsed.value.evidence.find((item) => item.length === 800);
+    expect(rationale).toBe('x'.repeat(800));
+  });
+
+  it('un output semánticamente inválido sigue siendo ai-invalid-output aunque rationale sea largo', () => {
+    const parsed = parseAiClassification({
+      eligibility: 'include',
+      formats: ['jazz'],
+      rationale: 'y'.repeat(900),
+    });
+    expect(parsed.ok).toBe(false);
+    if (parsed.ok) return;
+    expect(parsed.ruleId).toBe('ai-invalid-output');
   });
 });
 
@@ -250,6 +298,19 @@ describe('classifyObserved — fallback cuando el determinista es uncertain', ()
     expect(result.formats).toBeUndefined();
     expect(result.eras).toBeUndefined();
     expect(result.kind).toBeUndefined();
+  });
+
+  it('rationale > 800 no tira una clasificación AI válida', async () => {
+    const result = await classifyObserved(uncertainFacts, {
+      ai: {
+        async classify() {
+          return { eligibility: 'exclude', rationale: 'z'.repeat(900) };
+        },
+      },
+    });
+    expect(result.eligibility.value).toBe('exclude');
+    expect(result.eligibility.ruleId).toBe('ai-exclude');
+    expect(result.eligibility.evidence.some((item) => item.length === 800)).toBe(true);
   });
 
   it('AI uncertain → uncertain', async () => {
@@ -392,6 +453,15 @@ describe('OpenAI provider (fetch inyectado, sin red)', () => {
       apiKey: 'sk-test',
       fetch: async () => new Response('nope', { status: 500 }),
     });
+    const rateLimited = new OpenAiClassifier({
+      apiKey: 'sk-test',
+      fetch: async () => new Response('quota', { status: 429 }),
+    });
+    await expect(rateLimited.classify(observed)).rejects.toThrow(/OpenAI HTTP 429/);
+    const rateResult = await classifyObserved(observed, { ai: rateLimited });
+    expect(rateResult.eligibility.ruleId).toBe('ai-error');
+    expect(rateResult.eligibility.ruleId).not.toBe('ai-rate-limited');
+
     await expect(http.classify(observed)).rejects.toThrow(/OpenAI HTTP 500/);
 
     const empty = new OpenAiClassifier({
@@ -526,9 +596,12 @@ describe('Gemini provider (fetch inyectado, sin red)', () => {
 
     const tooMany = new GeminiClassifier({
       apiKey: 'gemini-test',
+      clock: immediateClock(),
+      random: () => 0,
+      defaultRpm: 60_000,
       fetch: async () => new Response('quota', { status: 429 }),
     });
-    await expect(tooMany.classify(observed)).rejects.toThrow(/Gemini HTTP 429/);
+    await expect(tooMany.classify(observed)).rejects.toBeInstanceOf(AiRateLimitedError);
 
     const empty = new GeminiClassifier({
       apiKey: 'gemini-test',
@@ -554,11 +627,14 @@ describe('Gemini provider (fetch inyectado, sin red)', () => {
 
     const rateLimited = new GeminiClassifier({
       apiKey: 'gemini-test',
+      clock: immediateClock(),
+      random: () => 0,
+      defaultRpm: 60_000,
       fetch: async () => new Response('quota', { status: 429 }),
     });
     const rateResult = await classifyObserved(observed, { ai: rateLimited });
     expect(rateResult.eligibility.value).toBe('uncertain');
-    expect(rateResult.eligibility.ruleId).toBe('ai-error');
+    expect(rateResult.eligibility.ruleId).toBe('ai-rate-limited');
     expect(rateResult.eligibility.evidence.join(' ')).toMatch(/429/);
 
     const hanging = new GeminiClassifier({
@@ -620,6 +696,20 @@ describe('createAiClassifierFromEnv — selección de provider', () => {
       GEMINI_MODEL: 'gemini-3.5-flash',
     });
     expect(built).toBeInstanceOf(GeminiClassifier);
+    expect((built as GeminiClassifier).models).toEqual(['gemini-3.5-flash']);
+  });
+
+  it('GEMINI_MODELS gana a GEMINI_MODEL y el default sigue siendo un solo modelo', () => {
+    const chained = createAiClassifierFromEnv({
+      GEMINI_API_KEY: 'gemini-test',
+      GEMINI_MODELS: 'gemini-3.1-flash-lite,gemini-2.5-flash',
+      GEMINI_MODEL: 'gemini-3.5-flash',
+    });
+    expect(chained).toBeInstanceOf(GeminiClassifier);
+    expect((chained as GeminiClassifier).models).toEqual(['gemini-3.1-flash-lite', 'gemini-2.5-flash']);
+
+    const defaults = createAiClassifierFromEnv({ GEMINI_API_KEY: 'gemini-test' }) as GeminiClassifier;
+    expect(defaults.models).toEqual([GEMINI_DEFAULT_MODEL]);
   });
 
   it('AI_PROVIDER=openai exige OPENAI_API_KEY y no cae a Gemini', () => {

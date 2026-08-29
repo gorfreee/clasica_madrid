@@ -95,6 +95,46 @@ export type ProposedChange = {
   action: 'create' | 'unchanged';
 };
 
+export type IngestAiSummary = {
+  attempted: number;
+  resolved: number;
+  unresolved: number;
+  include: number;
+  exclude: number;
+  uncertain: number;
+  invalidOutput: number;
+  malformedOutput: number;
+  rateLimited: number;
+  timeout: number;
+  error: number;
+  httpRequests: number;
+  retries: number;
+  modelFallbacks: number;
+  requestsByModel: Record<string, number>;
+  classificationsByModel: Record<string, number>;
+};
+
+export function emptyIngestAiSummary(): IngestAiSummary {
+  return {
+    attempted: 0,
+    resolved: 0,
+    unresolved: 0,
+    include: 0,
+    exclude: 0,
+    uncertain: 0,
+    invalidOutput: 0,
+    malformedOutput: 0,
+    rateLimited: 0,
+    timeout: 0,
+    error: 0,
+    httpRequests: 0,
+    retries: 0,
+    modelFallbacks: 0,
+    requestsByModel: {},
+    classificationsByModel: {},
+  };
+}
+
 export type IngestRunSummary = {
   sourcesAttempted: string[];
   sourcesSucceeded: string[];
@@ -106,11 +146,7 @@ export type IngestRunSummary = {
     exclude: number;
     uncertain: number;
   };
-  ai: {
-    attempted: number;
-    resolved: number;
-    unresolved: number;
-  };
+  ai: IngestAiSummary;
   candidates: number;
   newEvents: number;
   unchangedEvents: number;

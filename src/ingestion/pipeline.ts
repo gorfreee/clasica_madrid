@@ -2,7 +2,7 @@ import type { Catalog } from '../lib/domain/catalog.ts';
 import type { Candidate } from '../lib/schemas/candidate.ts';
 import type { AiClassifier } from './classification/ai.ts';
 import { classifyObserved } from './classification/enrich.ts';
-import { isPublishableInclude } from './classification/types.ts';
+import { isPublishableInclude, type ClassificationResult } from './classification/types.ts';
 import { collapseWhitespace } from './html.ts';
 import { getAdapter, getSourceDefinition, listSourceDefinitions } from './registry.ts';
 import { normalizeRawEvent, normalizeSkipReason, observedFactsFromNormalized } from './normalize.ts';
@@ -10,7 +10,8 @@ import { applyCandidateBatch, type BatchApplyResult } from './batch.ts';
 import { matchHarvestIdentity, structuralSkipReason, toCandidate } from './to-candidate.ts';
 import { countHydration, hydrateEvents, memoizeGet } from './hydrate.ts';
 import { buildEventDecision, type IngestEventDecision } from './report.ts';
-import type { AdapterContext, IngestRunSummary, RawEvent, SourceDefinition, SourceFailure } from './types.ts';
+import type { AdapterContext, IngestAiSummary, IngestRunSummary, RawEvent, SourceDefinition, SourceFailure } from './types.ts';
+import { emptyIngestAiSummary } from './types.ts';
 import { getText } from './http.ts';
 
 export type IngestOptions = {
@@ -64,7 +65,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
   const decisions: IngestEventDecision[] = [];
   let skippedUnusable = 0;
   const eligibility = { include: 0, exclude: 0, uncertain: 0 };
-  const aiUsage = { attempted: 0, resolved: 0, unresolved: 0 };
+  const aiUsage = emptyIngestAiSummary();
 
   const ai = wrapAi(options.ai, aiUsage);
 
@@ -121,6 +122,9 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
     let aiAttempted = false;
     const eventAi: AiClassifier | undefined = ai
       ? {
+          classifyBudgetMs: ai.classifyBudgetMs,
+          lastDiagnostics: ai.lastDiagnostics?.bind(ai),
+          snapshotStats: ai.snapshotStats?.bind(ai),
           async classify(observed) {
             aiAttempted = true;
             return ai.classify(observed);
@@ -129,10 +133,8 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
       : undefined;
     const classification = await classifyObserved(facts, { ai: eventAi });
     eligibility[classification.eligibility.value] += 1;
-    if (classification.eligibility.method === 'ai') {
-      if (classification.eligibility.value === 'uncertain') aiUsage.unresolved += 1;
-      else aiUsage.resolved += 1;
-    }
+    recordAiOutcome(aiUsage, classification);
+    const aiCall = aiAttempted ? eventAi?.lastDiagnostics?.() : undefined;
 
     const identity = matchHarvestIdentity(options.catalog, event, source.catalogSourceId);
 
@@ -143,6 +145,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
           title: event.title,
           classification,
           aiAttempted,
+          ai: aiCall,
           publishable: false,
           candidateGenerated: false,
           identity,
@@ -169,6 +172,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
           structuralSkip: built.skippedReason,
           classification,
           aiAttempted,
+          ai: aiCall,
           publishable: true,
           candidateGenerated: false,
           identity,
@@ -183,12 +187,15 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
         title: event.title,
         classification,
         aiAttempted,
+        ai: aiCall,
         publishable: true,
         candidateGenerated: true,
         identity: identity ?? 'new',
       }),
     );
   }
+
+  mergeProviderStats(aiUsage, options.ai);
 
   const apply = await applyCandidateBatch(options.catalog, candidates, options.dataDir, {
     dryRun: options.dryRun,
@@ -232,17 +239,59 @@ export async function extractSource(
   return events;
 }
 
-function wrapAi(
-  inner: AiClassifier | undefined,
-  usage: { attempted: number; resolved: number; unresolved: number },
-): AiClassifier | undefined {
+function wrapAi(inner: AiClassifier | undefined, usage: IngestAiSummary): AiClassifier | undefined {
   if (!inner) return undefined;
   return {
+    classifyBudgetMs: inner.classifyBudgetMs,
+    lastDiagnostics: inner.lastDiagnostics?.bind(inner),
+    snapshotStats: inner.snapshotStats?.bind(inner),
     async classify(observed) {
       usage.attempted += 1;
       return inner.classify(observed);
     },
   };
+}
+
+function recordAiOutcome(usage: IngestAiSummary, classification: ClassificationResult): void {
+  if (classification.eligibility.method !== 'ai') return;
+  if (classification.eligibility.value === 'uncertain') usage.unresolved += 1;
+  else usage.resolved += 1;
+
+  switch (classification.eligibility.ruleId) {
+    case 'ai-include':
+      usage.include += 1;
+      break;
+    case 'ai-exclude':
+      usage.exclude += 1;
+      break;
+    case 'ai-uncertain':
+      usage.uncertain += 1;
+      break;
+    case 'ai-invalid-output':
+      usage.invalidOutput += 1;
+      break;
+    case 'ai-malformed-output':
+      usage.malformedOutput += 1;
+      break;
+    case 'ai-rate-limited':
+      usage.rateLimited += 1;
+      break;
+    case 'ai-timeout':
+      usage.timeout += 1;
+      break;
+    default:
+      usage.error += 1;
+  }
+}
+
+function mergeProviderStats(usage: IngestAiSummary, ai: AiClassifier | undefined): void {
+  const stats = ai?.snapshotStats?.();
+  if (!stats) return;
+  usage.httpRequests = stats.httpRequests;
+  usage.retries = stats.retries;
+  usage.modelFallbacks = stats.modelFallbacks;
+  usage.requestsByModel = stats.requestsByModel;
+  usage.classificationsByModel = stats.classificationsByModel;
 }
 
 function selectSources(ids: string[] | undefined): SourceDefinition[] {

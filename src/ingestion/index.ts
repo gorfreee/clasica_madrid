@@ -3,10 +3,12 @@ export type {
   RawOccurrence,
   SourceAdapter,
   SourceDefinition,
+  IngestAiSummary,
   IngestRunSummary,
   HydrationMeta,
   HydrationStatus,
 } from './types.ts';
+export { emptyIngestAiSummary } from './types.ts';
 export type { ObservedFacts, ObservedPerson, ObservedWork } from './observed.ts';
 export {
   SOURCE_REGISTRY,
@@ -24,7 +26,8 @@ export { normalizeRawEvent, normalizeRawEvents, observedFactsFromNormalized } fr
 export { classify } from './classification/classify.ts';
 export { classifyObserved, enrichWithAiIfNeeded } from './classification/enrich.ts';
 export { createAiClassifierFromEnv } from './classification/provider.ts';
-export type { AiClassifier } from './classification/ai.ts';
+export type { AiCallDiagnostics, AiClassifier, AiProviderStats } from './classification/ai.ts';
+export { AiRateLimitedError } from './classification/ai.ts';
 export type { ClassificationResult, PublishableClassification, ResolutionMethod } from './classification/types.ts';
 export { isPublishableInclude } from './classification/types.ts';
 export { resolvePerformerRole } from './classification/performer-role.ts';

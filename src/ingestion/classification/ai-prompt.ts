@@ -1,6 +1,6 @@
 import type { ObservedFacts } from '../observed.ts';
 
-export const AI_CLASSIFIER_PROMPT_VERSION = 2 as const;
+export const AI_CLASSIFIER_PROMPT_VERSION = 3 as const;
 
 export function buildAiClassifierUserMessage(observed: ObservedFacts): string {
   return [
@@ -49,7 +49,8 @@ Reglas:
 - sí puedes usar conocimiento musical general para interpretar hechos observados (p. ej. que Bach o un Réquiem de Mozart son repertorio clásico, o que una agrupación/intérprete tiene identidad clásica cuando eso ayuda a leer los hechos presentes);
 - ese conocimiento NO puede inventar que un compositor, obra, performer, precio, fecha, venue o repertorio está en el programa si no aparece en los hechos;
 - no clasifiques solo por un título genérico o poético si el resto de hechos no basta;
-- eligibility ≠ format ≠ kind.
+- eligibility ≠ format ≠ kind;
+- rationale es metadata auxiliar muy breve (máximo 1–2 frases). No repitas evidence. No escribas un ensayo.
 
 Taxonomías cerradas:
 - formats: symphonic, chamber, recital, choral, organ, early-music, opera, zarzuela, lied, other
@@ -64,7 +65,8 @@ Devuelve ÚNICAMENTE un objeto JSON con esta forma:
   "formats": [...],          // opcional; solo si include y hay evidencia
   "eras": [...],             // opcional
   "kind": "established" | "alternative",  // opcional; solo si include
-  "evidence": ["..."]        // opcional; razones internas breves, basadas en hechos observados, sin inventar
+  "evidence": ["..."],       // opcional; razones internas breves, basadas en hechos observados, sin inventar
+  "rationale": "..."         // opcional; 1–2 frases; no repitas evidence
 }
 
 No añadas otros campos. No escribas prosa fuera del JSON.`;
