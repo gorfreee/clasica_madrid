@@ -249,6 +249,9 @@ function normalized(overrides: Partial<NormalizedEvent> = {}): NormalizedEvent {
     occurrences: [{ date: '2026-09-10', time: '19:30' }],
     venueText: 'Teatro Real',
     access: 'unknown',
+    performers: [],
+    composers: [],
+    works: [],
     ...overrides,
   };
 }
@@ -410,6 +413,30 @@ describe('toCandidate y deduplicación', () => {
     expect(built.candidate?.event.kind).toBe('established');
     expect(built.candidate?.event.primarySourceId).toBe('src_teatro_real');
     expect(built.candidate?.sources).toBeUndefined();
+  });
+
+  it('copia nombres observados al candidato y no asigna role canónico', () => {
+    const source = getSourceDefinition('teatro-real');
+    const catalog = teatroCatalog();
+    const built = toCandidate(
+      normalized({
+        performers: [{ name: 'Kynan Johns', roleText: 'director' }],
+        composers: [{ name: 'Gustav Mahler' }],
+        works: [{ title: 'Sinfonía núm. 2', composerName: 'Gustav Mahler' }],
+      }),
+      source,
+      catalog,
+      TEST_NOW,
+      new Set(),
+      new Set(),
+    );
+    expect(built.candidate?.event.performers).toEqual([{ name: 'Kynan Johns' }]);
+    expect(built.candidate?.event.composers).toEqual([{ name: 'Gustav Mahler' }]);
+    expect(built.candidate?.event.works).toEqual([
+      { title: 'Sinfonía núm. 2', composerName: 'Gustav Mahler' },
+    ]);
+    expect(built.candidate?.event.eras).toEqual([]);
+    expect(built.candidate?.event.formats).toEqual([]);
   });
 
   it('detecta un duplicado por externalId y por URL equivalente', () => {

@@ -1,6 +1,10 @@
 import { z } from 'zod';
 import { httpUrlSchema, isoDateSchema } from '../../lib/schemas/common.ts';
 import { ACCESS_MODES, ERAS, EVENT_KINDS, FORMATS } from '../../lib/schemas/taxonomies.ts';
+import { observedFactsSchema } from '../observed.ts';
+
+export { observedFactsSchema } from '../observed.ts';
+export type { ObservedFacts } from '../observed.ts';
 
 export const ELIGIBILITIES = ['include', 'exclude', 'uncertain'] as const;
 export type Eligibility = (typeof ELIGIBILITIES)[number];
@@ -11,38 +15,6 @@ export type GoldenOrigin = (typeof GOLDEN_ORIGINS)[number];
 export const GOLDEN_CASE_SCHEMA_VERSION = 1 as const;
 
 const nonEmpty = z.string().trim().min(1);
-
-const observedPersonSchema = z
-  .object({
-    name: nonEmpty,
-    roleText: nonEmpty.optional(),
-  })
-  .strict();
-
-const observedWorkSchema = z
-  .object({
-    title: nonEmpty,
-    composerName: nonEmpty.optional(),
-  })
-  .strict();
-
-/**
- * Facts copied from an official source page. Adapters must not invent these.
- * Empty arrays mean the source did not declare them.
- */
-export const observedFactsSchema = z
-  .object({
-    title: nonEmpty,
-    description: nonEmpty.optional(),
-    categoryText: nonEmpty.optional(),
-    venueText: nonEmpty.optional(),
-    accessText: nonEmpty.optional(),
-    programText: nonEmpty.optional(),
-    performers: z.array(observedPersonSchema).default([]),
-    composers: z.array(z.object({ name: nonEmpty }).strict()).default([]),
-    works: z.array(observedWorkSchema).default([]),
-  })
-  .strict();
 
 export const expectedEnrichmentSchema = z
   .object({
@@ -82,7 +54,6 @@ export const goldenCaseSchema = z
     }
   });
 
-export type ObservedFacts = z.infer<typeof observedFactsSchema>;
 export type ExpectedEnrichment = z.infer<typeof expectedEnrichmentSchema>;
 export type GoldenCase = z.infer<typeof goldenCaseSchema>;
 

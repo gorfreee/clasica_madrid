@@ -38,7 +38,7 @@ Consulta de las URLs oficiales enlazadas desde el smoke o el catálogo (2026-08-
 
 No se usó conocimiento general para rellenar obras ausentes. Si la ficha no lista el programa, `composers`/`works` quedan vacíos y, si hace falta, `uncertain`.
 
-HTML completo no se guarda: el golden set es la capa de *observed facts*. Fixtures HTML de parser, si se necesitan al implementar detail fetch, deben ser pocos y representativos por source.
+HTML completo no se guarda: el golden set es la capa de *observed facts*. Fixtures HTML de parser viven en `../detail/` (pocos excerpts representativos por source). El pipeline de Phase 2.1 hidrata fichas y extrae hechos; todavía no ejecuta `golden.observed → classifier → golden.expected`.
 
 ## Datos deliberadamente unknown / vacíos
 
@@ -62,6 +62,5 @@ HTML completo no se guarda: el golden set es la capa de *observed facts*. Fixtur
 ## Qué no hace este dataset
 
 - No implementa el classifier.
-- No hidrata páginas de detalle en el pipeline productivo.
 - No publica los ~134 eventos del sandbox.
 - No llama a un LLM.

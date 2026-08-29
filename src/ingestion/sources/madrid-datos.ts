@@ -1,5 +1,12 @@
 import { parseObservedDateTime, parseObservedTime } from '../dates.ts';
+import { emptyObservedLists } from '../observed.ts';
 import type { AdapterContext, RawEvent, SourceAdapter, SourceDefinition } from '../types.ts';
+
+/**
+ * Madrid Datos JSON-LD already carries title, description, date/time, venue
+ * and free/paid. The `link` field points at a municipal page that does not add
+ * a stable, parseable program. Phase 2.1 does not hydrate this source.
+ */
 
 const MUSICA_TYPE = /\/actividades\/Musica(\/|$)/i;
 
@@ -78,6 +85,7 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
       occurrences: [{ raw: dtstart, date: parsed.date, time }],
       venueText,
       accessText: item.free === 1 || item.free === '1' ? 'free' : item.free === 0 || item.free === '0' ? 'paid' : undefined,
+      ...emptyObservedLists(),
     },
   };
 }

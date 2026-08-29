@@ -11,6 +11,7 @@ export function formatRunSummary(summary: IngestRunSummary): string {
   }
   lines.push(
     `RawEvents encontrados: ${summary.rawEvents}`,
+    `Hidratación de fichas: intentadas ${summary.detailHydrationAttempted}, correctas ${summary.detailHydrationSucceeded}, fallidas ${summary.detailHydrationFailed}`,
     `Descartados (sin fecha/lugar reconocible o fuera de ventana): ${summary.skippedUnusable}`,
     `Candidatos generados: ${summary.candidates}`,
     `Eventos nuevos: ${summary.newEvents}`,

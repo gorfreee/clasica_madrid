@@ -2,7 +2,7 @@
 
 > Estado: **diseño objetivo vigente y fuente de verdad autoritativa** para la evolución de la ingestión. Este documento define la dirección recomendada para evolucionar la ingestión de Clásica Madrid a una v3 simple, mantenible, automatizada y preparada para usar IA de forma pragmática.
 >
-> La **fase 1** (contratos + vertical slice + hardening) está implementada en `src/ingestion/` y se opera con `npm run ingest:sync`. La **Classification Policy v1** y el golden set de evaluación están preparados; las fases 2–6 siguen siendo diseño objetivo, no código de pipeline.
+> La **fase 1** (contratos + vertical slice + hardening) y la **fase 2.1** (hechos observados + hidratación de fichas) están implementadas en `src/ingestion/` y se operan con `npm run ingest:sync`. La **Classification Policy v1** y el golden set de evaluación están preparados; el classifier de la fase 2.2 y las fases 3–6 siguen siendo diseño objetivo, no código de pipeline.
 >
 > [`docs/classification-policy.md`](classification-policy.md) es la política editorial de enrichment. [`docs/ingestion.md`](ingestion.md) es la puerta de entrada operativa (qué hay implementado hoy). Los documentos en [`docs/archive/`](archive/) son investigación y planes históricos: no son requisitos vigentes.
 >
@@ -291,7 +291,7 @@ Debe evitar:
 - realizar clasificación musical compleja si esa tarea pertenece al enriquecimiento común;
 - inferir `Event.kind` o elegibilidad editorial a partir de la source.
 
-`extract` puede ser síncrono o devolver `Promise<RawEvent[]>` para que un adapter pueda, en la fase 2, consultar páginas de detalle con `ctx.get` sin cambiar el contrato. La fase 1 no implementa ese crawling: los listados suelen traer título, fecha, hora, URL y lugar; performers, composers, works, categorías y descripciones suelen estar en la ficha.
+`extract` parsea el listing. La hidratación de fichas es una etapa posterior (`hydrate` en el adapter, orquestada por el pipeline). Un fallo de listing es un source failure; un fallo de ficha es local al evento.
 
 ### 8.1 Preferencia de extracción
 
@@ -413,7 +413,7 @@ confidence / evidence
 Candidate
 ```
 
-La fase 1 se queda en el listado. A partir de la fase 2, el enrichment no debe clasificar sólo con el título del calendario cuando exista una ficha.
+La fase 1 se queda en el listado. La fase 2.1 hidrata fichas y acumula hechos observados. A partir de la fase 2.2, el enrichment no debe clasificar sólo con el título del calendario cuando exista una ficha.
 
 Eligibility tiene prioridad: un `exclude` no debe consumir trabajo innecesario de clasificación posterior. Un `uncertain` degrada de forma segura y **no se publica automáticamente**.
 
@@ -1287,7 +1287,9 @@ Elegir fuentes diferentes entre sí ayuda a validar la abstracción, por ejemplo
 
 **Preparación (hecha, aún sin classifier productivo):** Classification Policy v1 y golden evaluation set. Phase 2 se mide contra esos casos, no contra una impresión subjetiva posterior.
 
-Flujo que debe implementar esta fase:
+**2.1 Observed facts + detail hydration (hecha):** `RawEvent.observed` alineado con el golden set; hidratación orquestada fuera de `extract()`; parsers de ficha para Auditorio Nacional y Teatro Real; un fallo de ficha es local al evento. Madrid Datos no hidrata (el JSON-LD ya trae los hechos). Todavía no hay eligibility ni clasificación musical.
+
+Flujo que debe implementar el resto de esta fase (2.2+):
 
 ```text
 listing harvest

@@ -1,5 +1,7 @@
 import { madridToday } from '../../lib/domain/dates.ts';
+import { parseAuditorioNacionalDetail } from '../detail/auditorio-nacional.ts';
 import { addIsoDays, DEFAULT_WINDOW_DAYS, parseObservedDateTime } from '../dates.ts';
+import { emptyObservedLists } from '../observed.ts';
 import { urlPathIdentity } from '../urls.ts';
 import type { AdapterContext, RawEvent, SourceAdapter, SourceDefinition } from '../types.ts';
 
@@ -56,6 +58,9 @@ export const auditorioNacionalAdapter: SourceAdapter = {
     }
     return events.sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
   },
+  hydrate(_event, body) {
+    return parseAuditorioNacionalDetail(body);
+  },
 };
 
 function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
@@ -80,6 +85,7 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
       occurrences: [{ raw: start, date: parsed.date, time: parsed.time ?? undefined }],
       venueText: className ? (VENUE_BY_CLASS[className] ?? className) : undefined,
       categoryText: className,
+      ...emptyObservedLists(),
     },
   };
 }

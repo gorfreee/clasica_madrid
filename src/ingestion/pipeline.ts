@@ -4,6 +4,7 @@ import { getAdapter, getSourceDefinition, listSourceDefinitions } from './regist
 import { normalizeRawEvents } from './normalize.ts';
 import { applyCandidateBatch, type BatchApplyResult } from './batch.ts';
 import { toCandidate } from './to-candidate.ts';
+import { countHydration, hydrateEvents, memoizeGet } from './hydrate.ts';
 import type { AdapterContext, IngestRunSummary, RawEvent, SourceDefinition, SourceFailure } from './types.ts';
 import { getText } from './http.ts';
 
@@ -25,7 +26,7 @@ export type IngestRun = {
 
 export async function runIngest(options: IngestOptions): Promise<IngestRun> {
   const sources = selectSources(options.sourceIds);
-  const get = options.get ?? getText;
+  const get = memoizeGet(options.get ?? getText);
   const failures: SourceFailure[] = [];
   const succeeded: string[] = [];
   const rawEvents: RawEvent[] = [];
@@ -33,7 +34,10 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
   for (const source of sources) {
     try {
       const extracted = await extractSource(source, options.now, get);
-      rawEvents.push(...extracted);
+      const adapter = getAdapter(source.adapterId);
+      const ctx: AdapterContext = { source, now: options.now, get };
+      const hydrated = await hydrateEvents(extracted, adapter, ctx);
+      rawEvents.push(...hydrated);
       succeeded.push(source.id);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -71,6 +75,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
     dryRun: options.dryRun,
   });
 
+  const hydration = countHydration(rawEvents);
   const summary: IngestRunSummary = {
     sourcesAttempted: sources.map((source) => source.id),
     sourcesSucceeded: succeeded,
@@ -82,6 +87,9 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
     unchangedEvents: apply.unchangedEvents,
     written: apply.written,
     dryRun: options.dryRun,
+    detailHydrationAttempted: hydration.attempted,
+    detailHydrationSucceeded: hydration.succeeded,
+    detailHydrationFailed: hydration.failed,
   };
 
   return { summary, apply, rawEvents, candidates };

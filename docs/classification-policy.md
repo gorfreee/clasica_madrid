@@ -33,7 +33,7 @@ Candidate
 
 Un `exclude` no debe consumir trabajo innecesario de clasificación posterior. Un `uncertain` degrada de forma segura: no se publica automáticamente.
 
-La fase 2 **no implementa** todavía este flujo. El harvesting de fase 1 extrae hechos de listado y no clasifica.
+La fase 2 **implementa** la hidratación de fichas y el contrato de hechos observados (PR 2.1). El harvesting extrae hechos; el classifier de eligibility/formats/eras/kind (PR 2.2) todavía no existe.
 
 ## Lo que no es esta política
 

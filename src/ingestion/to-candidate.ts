@@ -58,9 +58,13 @@ export function toCandidate(
     organizerIds: [],
     seriesId: null,
     occurrences,
-    performers: [],
-    composers: [],
-    works: [],
+    // Observed names only. Canonical performer.role is enrichment (Phase 2.2).
+    performers: event.performers.map((item) => ({ name: item.name })),
+    composers: event.composers.map((item) => ({ name: item.name })),
+    works: event.works.map((item) => ({
+      title: item.title,
+      ...(item.composerName ? { composerName: item.composerName } : {}),
+    })),
     eras: [],
     formats: [],
     // Phase 1 fallback only. Event.kind is an enrichment decision, not a source property.
