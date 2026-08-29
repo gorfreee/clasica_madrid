@@ -1,4 +1,4 @@
-import type { EventKind, Source } from '../lib/schemas/index.ts';
+import type { Source } from '../lib/schemas/index.ts';
 import type { ObservedFactPatch, ObservedFacts } from './observed.ts';
 
 /**
@@ -22,7 +22,6 @@ export type HydrationStatus = 'succeeded' | 'failed' | 'not-requested';
 
 /**
  * Internal pipeline metadata. Never written to `data/events/**`.
- * Phase 2.2 can use this to know which facts came from a ficha.
  */
 export type HydrationMeta = {
   status: HydrationStatus;
@@ -51,12 +50,6 @@ export type SourceDefinition = {
    * introduce its editorial provenance on the first successful run.
    */
   seedSource: Source;
-  /**
-   * Phase 1 stand-in for `Event.kind` until PR 2.4 connects the classifier.
-   * This is not a property of the source and must not be treated as one.
-   * The classifier in `classification/` does not read this field.
-   */
-  provisionalKind: EventKind;
 };
 
 export type AdapterContext = {
@@ -102,6 +95,16 @@ export type IngestRunSummary = {
   sourcesFailed: SourceFailure[];
   rawEvents: number;
   skippedUnusable: number;
+  eligibility: {
+    include: number;
+    exclude: number;
+    uncertain: number;
+  };
+  ai: {
+    attempted: number;
+    resolved: number;
+    unresolved: number;
+  };
   candidates: number;
   newEvents: number;
   unchangedEvents: number;

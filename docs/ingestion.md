@@ -17,9 +17,9 @@ La web no escribe datos. Todo lo publicado entra por Git, pasa validación deter
 
 ## Estado actualmente implementado
 
-Hay dos caminos. El harvesting determinista de la **v3 fase 1** es el que hay que usar para extraer fuentes conocidas. El flujo de candidatos JSON en disco sigue existiendo como herramienta manual durante la migración.
+Hay dos caminos. El harvesting determinista de la **v3 (fases 1 y 2)** es el que hay que usar para extraer fuentes conocidas. El flujo de candidatos JSON en disco sigue existiendo como herramienta manual durante la migración.
 
-### Harvesting v3 (fase 1)
+### Harvesting v3 (fases 1 y 2)
 
 Código en `src/ingestion/`. Ejecución local:
 
@@ -37,10 +37,11 @@ Flujo:
 3. Aísla fuentes fallidas; las sanas siguen.
 4. Hidrata fichas de detalle cuando el adapter implementa `hydrate` (Auditorio Nacional y Teatro Real). Un fallo de ficha (404, 403, HTML inesperado) es local al evento: se conservan los hechos del listing. Madrid Datos no hidrata: el JSON-LD ya trae los hechos disponibles.
 5. Normaliza hechos (textos, fechas, horas, URLs, performers/composers/works observados). Las URLs usadas en identidad, citas y matching ignoran trailing slash, fragment y casing del hostname; no se eliminan query params.
-6. Transforma a `Candidate` en memoria (mismo esquema que `ingest:promote`). Copia nombres observados; **no** aplica todavía el classifier de eligibility como puerta de publicación (fase 2.4). El fallback de IA de la fase 2.3 existe (`classifyObserved`) pero `runIngest` no lo llama. `kind` sigue el fallback `provisionalKind` de la fase 1. `access` se resuelve desde `accessText` con el resolver de classification (hechos, no venue/source).
-7. Construye y valida el lote completo.
-8. Escribe sólo archivos nuevos, primero a un temporal y después al destino. Un fallo no deja el lote a medias. No actualiza eventos ya publicados.
-9. Imprime un resumen (fuentes, RawEvents, hidratación de fichas, candidatos, escritos).
+6. Proyecta `NormalizedEvent → ObservedFacts` (sin `sourceId`, `sourceUrl`, `externalId` ni occurrences) y clasifica con `classifyObserved()`: reglas deterministas, knowledge, y fallback de IA **sólo** si el resultado es `uncertain`.
+7. Puerta de publicación: `include` puede continuar hacia Candidate; `exclude` y `uncertain` no se publican, no consumen IDs/slugs y no se mezclan con los descartes estructurales. El Candidate usa `formats`, `eras`, `kind` y `access` del `ClassificationResult`. `kind` no proviene de la source (`provisionalKind` ya no existe). Un `include` con `eras=[]` / `formats=[]` sigue siendo publicable. Roles de intérprete se asignan sólo cuando `roleText` es inequívoco.
+8. Construye y valida el lote completo.
+9. Escribe sólo archivos nuevos, primero a un temporal y después al destino. Un fallo no deja el lote a medias. No actualiza ni borra eventos ya publicados.
+10. Imprime un resumen (fuentes, RawEvents, hidratación, clasificación include/exclude/uncertain, uso de IA, descartes estructurales, candidatos, escritos).
 
 Una segunda ejecución inmediata contra los mismos inputs no debe escribir cambios canónicos.
 
@@ -56,7 +57,7 @@ Fuentes de la fase 1:
 
 Un adapter que reconoce la estructura general pero no consigue interpretar ningún evento (extracción vacía sospechosa) falla de forma visible; esa fuente se aísla y las demás continúan. Un calendario genuinamente vacío no es un error.
 
-No hay GitHub Actions de ingestión ni auto-merge. Un evento nuevo sale con `eras`/`formats` vacíos. Performers, composers y works se copian cuando la ficha los declara; no se infieren. `kind` es un fallback provisional de la fase 1 (`source.provisionalKind`). El classifier determinista (fase 2.2) y el fallback de IA (fase 2.3, `classifyObserved`) existen y se testean sobre el golden set, pero **no** alimentan todavía el Candidate publicado ni actúan como puerta de `runIngest`. La IA sólo se invocaría para `uncertain`; sin credenciales, timeout o respuesta inválida degrada a `uncertain`. CI no llama a un LLM. Sólo se publica si el lugar se reconoce de forma inequívoca (catálogo o alias conocidos). Los eventos ya citados por URL o `externalId` se dejan igual. El pipeline productivo de `runIngest` todavía no descarta `exclude`/`uncertain`.
+No hay GitHub Actions de ingestión ni auto-merge. Un evento nuevo se publica sólo si la clasificación final es `include` y los datos estructurales (fecha en ventana, lugar reconocible) son válidos. `exclude` no se publica. `uncertain` no se publica (tampoco como include de baja confianza). Sin `OPENAI_API_KEY`, con timeout o respuesta inválida, el fallback de IA degrada a `uncertain` y el resto del lote continúa. CI no llama a un LLM: `runIngest` recibe un `AiClassifier` inyectado por la CLI (`createAiClassifierFromEnv()`). `eras` y `formats` vacíos no bloquean un `include`. `kind` sale del classifier, no de la source. Performers, composers y works se copian cuando la ficha los declara; el rol canónico sólo se asigna si `roleText` es inequívoco. Sólo se publica si el lugar se reconoce de forma inequívoca (catálogo o alias conocidos). Los eventos ya citados por URL o `externalId` se dejan igual: Phase 2.4 no re-clasifica ni borra `data/**`.
 
 ### Candidatos JSON (legacy)
 
@@ -118,7 +119,7 @@ Principio rector de la v3: *el código obtiene y controla los hechos; la IA ayud
 
 El flujo normal previsto (harvesting con adapters, `RawEvent`, normalización, enrichment, reconciliación, PR y auto-merge, cadencia ~10 días, ventana de 120 días) está especificado allí. No se duplica en este documento.
 
-Hoy **sí** están implementados (fase 1 + fase 2.1 + fase 2.2 + fase 2.3): adapters con interpretación estricta, `RawEvent` de hechos observados, hidratación de fichas (Auditorio Nacional y Teatro Real; Madrid Datos no la necesita), registry mínimo (referencia a Source canónica + seed), normalización común (hechos, sin inferir access), lote validate-then-write atómico, contrato async-compatible de `extract`/`hydrate`, CLI local, Classification Policy v1, golden set, el **classifier determinista** (`src/ingestion/classification/`, knowledge base en `src/ingestion/knowledge/`) y el **fallback de IA** (`classifyObserved` + `AiClassifier`; provider OpenAI encapsulado, degradación a `uncertain` si falta o falla). El classifier **no** es todavía la puerta de publicación de `runIngest`. **No** están implementados la integración del classifier al Candidate (2.4), discovery automático, reconciliación fuzzy, política de desapariciones, GitHub Actions de ingestión ni auto-merge. No los añadas salvo que una tarea pida explícitamente la fase correspondiente.
+Hoy **sí** están implementados (fase 1 + **fase 2 completa**: 2.1 + 2.2 + 2.3 + 2.4): adapters con interpretación estricta, `RawEvent` de hechos observados, hidratación de fichas (Auditorio Nacional y Teatro Real; Madrid Datos no la necesita), registry mínimo (referencia a Source canónica + seed), normalización común, proyección explícita a `ObservedFacts`, classifier determinista, fallback de IA con degradación segura, **puerta de publicación** (`include` → Candidate; `exclude`/`uncertain` → no publicar), lote validate-then-write atómico, contrato async-compatible de `extract`/`hydrate`, y CLI local. **No** están implementados discovery automático, reconciliación fuzzy, política de desapariciones, GitHub Actions de ingestión ni auto-merge (fase 3+). No los añadas salvo que una tarea pida explícitamente la fase correspondiente.
 
 ## CI y auto-merge (hoy vs objetivo)
 

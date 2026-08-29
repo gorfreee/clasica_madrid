@@ -46,7 +46,6 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
     adapterId: auditorioNacionalAdapter.id,
     catalogSourceId: srcAuditorio.id,
     seedSource: srcAuditorio,
-    provisionalKind: 'established',
   },
   {
     id: 'teatro-real',
@@ -55,7 +54,6 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
     adapterId: teatroRealAdapter.id,
     catalogSourceId: srcTeatroReal.id,
     seedSource: srcTeatroReal,
-    provisionalKind: 'established',
   },
   {
     id: 'madrid-datos',
@@ -64,7 +62,6 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
     adapterId: madridDatosAdapter.id,
     catalogSourceId: srcAyuntamiento.id,
     seedSource: srcAyuntamiento,
-    provisionalKind: 'alternative',
   },
 ];
 

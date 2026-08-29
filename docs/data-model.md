@@ -90,7 +90,7 @@ Los valores canónicos están en `src/lib/schemas/taxonomies.ts`. Las etiquetas 
 1. Crea o reutiliza venue, organizer, series y source en sus carpetas.
 2. Añade `data/events/{id}.json` con al menos una representación y una citación.
 3. Ejecuta `npm run validate`.
-4. El harvesting determinista (v3 fase 1) es `npm run ingest:sync`. El camino manual de un candidato en disco sigue siendo `npm run ingest:promote` (ver [`docs/ingestion.md`](ingestion.md)). La arquitectura objetivo completa está en [`docs/ingestion-v3-plan.md`](ingestion-v3-plan.md). La Classification Policy v1 (elegibilidad y enrichment) está en [`docs/classification-policy.md`](classification-policy.md); no es un campo del schema `Event`.
+4. El harvesting determinista (v3, fases 1 y 2) es `npm run ingest:sync`. El camino manual de un candidato en disco sigue siendo `npm run ingest:promote` (ver [`docs/ingestion.md`](ingestion.md)). La arquitectura objetivo completa está en [`docs/ingestion-v3-plan.md`](ingestion-v3-plan.md). La Classification Policy v1 (elegibilidad y enrichment) está en [`docs/classification-policy.md`](classification-policy.md); no es un campo del schema `Event`.
 
 No inventes eventos de producción. Los ejemplos de tests están en `tests/`, no en `data/`.
 

@@ -2,7 +2,7 @@
 
 > Estado: **diseño objetivo vigente y fuente de verdad autoritativa** para la evolución de la ingestión. Este documento define la dirección recomendada para evolucionar la ingestión de Clásica Madrid a una v3 simple, mantenible, automatizada y preparada para usar IA de forma pragmática.
 >
-> La **fase 1** (contratos + vertical slice + hardening), la **fase 2.1** (hechos observados + hidratación de fichas), la **fase 2.2** (núcleo de clasificación determinista) y la **fase 2.3** (fallback de IA con degradación segura) están implementadas en `src/ingestion/`. Se operan con `npm run ingest:sync`. El classifier **no** es todavía la puerta de publicación del pipeline: eso es la fase 2.4. Las fases 3–6 siguen siendo diseño objetivo.
+> **Phase 1 ✅ · Phase 2.1 ✅ · Phase 2.2 ✅ · Phase 2.3 ✅ · Phase 2.4 ✅ — PHASE 2 COMPLETE.** El harvesting, la clasificación (determinista + fallback de IA) y la puerta de publicación viven en `src/ingestion/` y se operan con `npm run ingest:sync`. Las fases 3–6 siguen siendo diseño objetivo.
 >
 > [`docs/classification-policy.md`](classification-policy.md) es la política editorial de enrichment. [`docs/ingestion.md`](ingestion.md) es la puerta de entrada operativa (qué hay implementado hoy). Los documentos en [`docs/archive/`](archive/) son investigación y planes históricos: no son requisitos vigentes.
 >
@@ -248,7 +248,7 @@ El registro describe **cómo encontrar y extraer eventos**, no la procedencia ed
 
 En la implementación de la fase 1 el registry apunta a la Source canónica por `catalogSourceId` y sólo lleva un `seedSource` para el caso en que esa entidad todavía no exista en el catálogo. El pipeline reutiliza la entidad del catálogo cuando ya está publicada. Eso no es un sistema de gestión de sources: es el mínimo para poder incorporar una fuente nueva sin duplicar la verdad editorial.
 
-`Event.kind` no es un atributo de la source. El registry puede guardar un `provisionalKind` como fallback explícito de la fase 1; la clasificación real pertenece al enrichment.
+`Event.kind` no es un atributo de la source. El registry describe cómo encontrar y extraer eventos; la clasificación real (`kind`, `formats`, `eras`, `access`, eligibility) pertenece al enrichment. `provisionalKind` ya no existe.
 
 Ejemplo conceptual:
 
@@ -1140,6 +1140,8 @@ La fase 2.2 ejecuta `golden.observed → classify()` (`tests/ingestion-golden-cl
 
 La fase 2.3 evalúa `golden.observed → classify() → AI fake si uncertain` (`tests/ingestion-golden-ai.test.ts`). CI no llama a un LLM: los tests inyectan fakes. Un fallo o ausencia de IA deja `uncertain`.
 
+La fase 2.4 cubre el pipeline completo (`tests/ingestion-publication-gate.test.ts`): `listing → hydrate → normalize → classifyObserved → publication gate → Candidate`. Un `exclude` o `uncertain` nunca llega a Candidate. CI no llama a un LLM.
+
 La IA no debe ser la única definición ejecutable de la política. CI no llama a un LLM.
 
 ### 27.4 Tests de reconciliación
@@ -1285,26 +1287,37 @@ Elegir fuentes diferentes entre sí ayuda a validar la abstracción, por ejemplo
 
 **2.1 Observed facts + detail hydration (hecha):** `RawEvent.observed` alineado con el golden set; hidratación orquestada fuera de `extract()`; parsers de ficha para Auditorio Nacional y Teatro Real; un fallo de ficha es local al evento. Madrid Datos no hidrata (el JSON-LD ya trae los hechos).
 
-**2.2 Deterministic classification core (hecha):** `ObservedFacts → classify()` en `src/ingestion/classification/`. Eligibility conservadora (`include` / `exclude` / `uncertain`) con short-circuit; formats/eras/kind/access sólo si `include`; knowledge base mínima de compositores en `src/ingestion/knowledge/composers.ts`; `access` se resuelve sólo desde `accessText`. Evidence interna (`Resolution`), no confidence numérica. **No** está conectado como puerta de publicación de `runIngest`.
+**2.2 Deterministic classification core (hecha):** `ObservedFacts → classify()` en `src/ingestion/classification/`. Eligibility conservadora (`include` / `exclude` / `uncertain`) con short-circuit; formats/eras/kind/access sólo si `include`; knowledge base mínima de compositores en `src/ingestion/knowledge/composers.ts`; `access` se resuelve sólo desde `accessText`. Evidence interna (`Resolution`), no confidence numérica.
 
-**2.3 AI fallback (hecha):** `classifyObserved()` en `src/ingestion/classification/enrich.ts`. Sólo llama a `AiClassifier` cuando el determinista devuelve `uncertain` (máximo una llamada). Un `include`/`exclude` determinista no se reabre. La respuesta se valida con Zod contra las taxonomías canónicas. Ausencia de provider, timeout, error, JSON inválido o valores fuera de taxonomía → `eligibility = uncertain` con `ruleId` diagnóstico (`ai-unavailable`, `ai-timeout`, `ai-error`, `ai-malformed-output`, `ai-invalid-output`). Provider real: OpenAI Chat Completions vía `fetch` (`OPENAI_API_KEY`); CI y tests usan fakes, nunca un LLM. **Todavía no gobierna la publicación de `runIngest`.**
+**2.3 AI fallback (hecha):** `classifyObserved()` en `src/ingestion/classification/enrich.ts`. Sólo llama a `AiClassifier` cuando el determinista devuelve `uncertain` (máximo una llamada). Un `include`/`exclude` determinista no se reabre. La respuesta se valida con Zod contra las taxonomías canónicas. Ausencia de provider, timeout, error, JSON inválido o valores fuera de taxonomía → `eligibility = uncertain` con `ruleId` diagnóstico (`ai-unavailable`, `ai-timeout`, `ai-error`, `ai-malformed-output`, `ai-invalid-output`). Provider real: OpenAI Chat Completions vía `fetch` (`OPENAI_API_KEY`); CI y tests usan fakes, nunca un LLM.
 
-Flujo implementado (2.1–2.3) y pendiente (2.4):
+**2.4 Pipeline integration + publication gate (hecha):** `runIngest` proyecta `NormalizedEvent → ObservedFacts` (`observedFactsFromNormalized`), llama a `classifyObserved`, y sólo convierte en Candidate un `include` publicable. `exclude` y `uncertain` no se publican, no consumen IDs/slugs y no se mezclan con `skippedUnusable`. El Candidate usa `formats` / `eras` / `kind` / `access` del `ClassificationResult`. `kind` ya no viene de la source: `provisionalKind` se ha eliminado. La CLI (`src/cli/ingest.ts`) construye como máximo un `AiClassifier` por ejecución con `createAiClassifierFromEnv()` y lo inyecta; `runIngest` no lee env. Sin API key el pipeline determinista funciona y los `uncertain` no se publican. Los eventos ya publicados en `data/**` no se borran ni se re-clasifican: esta puerta aplica a nuevos resultados de harvesting.
+
+**PHASE 2 COMPLETE.**
+
+Flujo productivo:
 
 ```text
 listing harvest
       ↓
 detail-page hydration / observed facts
       ↓
+normalize
+      ↓
+ObservedFacts (proyección explícita, sin metadata técnica)
+      ↓
 deterministic classify()
       ↓
 include / exclude → resultado final
-uncertain → AI fallback (2.3) → include | exclude | uncertain
+uncertain → AI fallback (si hay provider) → include | exclude | uncertain
       ↓
-Candidate + publication gate (2.4, pendiente)
+publication gate
+      ├── include + kind → Candidate enriquecido
+      ├── exclude → no publicar
+      └── uncertain → no publicar
+      ↓
+batch validation → data/**
 ```
-
-**2.4 Pipeline integration (pendiente):** `classifyObserved` → Candidate → no publicar `exclude`/`uncertain`; sustituir `source.provisionalKind`.
 
 Acceptance criteria: [`docs/classification-policy.md`](classification-policy.md) §7.
 

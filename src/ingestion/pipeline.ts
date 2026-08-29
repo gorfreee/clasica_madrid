@@ -1,9 +1,12 @@
 import type { Catalog } from '../lib/domain/catalog.ts';
 import type { Candidate } from '../lib/schemas/candidate.ts';
+import type { AiClassifier } from './classification/ai.ts';
+import { classifyObserved } from './classification/enrich.ts';
+import { isPublishableInclude } from './classification/types.ts';
 import { getAdapter, getSourceDefinition, listSourceDefinitions } from './registry.ts';
-import { normalizeRawEvents } from './normalize.ts';
+import { normalizeRawEvents, observedFactsFromNormalized } from './normalize.ts';
 import { applyCandidateBatch, type BatchApplyResult } from './batch.ts';
-import { toCandidate } from './to-candidate.ts';
+import { structuralSkipReason, toCandidate } from './to-candidate.ts';
 import { countHydration, hydrateEvents, memoizeGet } from './hydrate.ts';
 import type { AdapterContext, IngestRunSummary, RawEvent, SourceDefinition, SourceFailure } from './types.ts';
 import { getText } from './http.ts';
@@ -15,6 +18,8 @@ export type IngestOptions = {
   dryRun: boolean;
   sourceIds?: string[];
   get?: (url: string) => Promise<string>;
+  /** Injected by the CLI. Absent → deterministic path only; uncertain stays unpublished. */
+  ai?: AiClassifier;
 };
 
 export type IngestRun = {
@@ -55,6 +60,10 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
   const usedSlugs = new Set(options.catalog.events.map((event) => event.slug));
   const candidates: Candidate[] = [];
   let skippedUnusable = normalized.skipped;
+  const eligibility = { include: 0, exclude: 0, uncertain: 0 };
+  const aiUsage = { attempted: 0, resolved: 0, unresolved: 0 };
+
+  const ai = wrapAi(options.ai, aiUsage);
 
   const bySource = new Map(sources.map((source) => [source.id, source]));
   for (const event of normalized.events) {
@@ -63,7 +72,32 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
       skippedUnusable += 1;
       continue;
     }
-    const built = toCandidate(event, source, options.catalog, options.now, usedIds, usedSlugs);
+    if (structuralSkipReason(event, options.catalog, options.now)) {
+      skippedUnusable += 1;
+      continue;
+    }
+
+    const facts = observedFactsFromNormalized(event);
+    const classification = await classifyObserved(facts, { ai });
+    eligibility[classification.eligibility.value] += 1;
+    if (classification.eligibility.method === 'ai') {
+      if (classification.eligibility.value === 'uncertain') aiUsage.unresolved += 1;
+      else aiUsage.resolved += 1;
+    }
+
+    if (!isPublishableInclude(classification)) {
+      continue;
+    }
+
+    const built = toCandidate(
+      event,
+      source,
+      options.catalog,
+      options.now,
+      usedIds,
+      usedSlugs,
+      classification,
+    );
     if (!built.candidate) {
       skippedUnusable += 1;
       continue;
@@ -82,6 +116,8 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
     sourcesFailed: failures,
     rawEvents: rawEvents.length,
     skippedUnusable,
+    eligibility,
+    ai: aiUsage,
     candidates: candidates.length,
     newEvents: apply.newEvents,
     unchangedEvents: apply.unchangedEvents,
@@ -109,6 +145,19 @@ export async function extractSource(
     events.push(...(await adapter.extract(body, url, ctx)));
   }
   return events;
+}
+
+function wrapAi(
+  inner: AiClassifier | undefined,
+  usage: { attempted: number; resolved: number; unresolved: number },
+): AiClassifier | undefined {
+  if (!inner) return undefined;
+  return {
+    async classify(observed) {
+      usage.attempted += 1;
+      return inner.classify(observed);
+    },
+  };
 }
 
 function selectSources(ids: string[] | undefined): SourceDefinition[] {

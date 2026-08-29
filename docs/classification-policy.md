@@ -4,7 +4,7 @@ Política editorial y operativa para el enrichment de ingestión v3 (fase 2).
 
 No es un campo del schema canónico `Event`. La elegibilidad es metadata interna del pipeline. `formats`, `eras`, `kind` y `access` sí son campos canónicos; esta política dice cómo derivarlos.
 
-La implementación de la fase 2.2 (classifier determinista) vive en `src/ingestion/classification/`. La fase 2.3 (fallback de IA, `classifyObserved`) existe y sólo se activa si el determinista deja `uncertain`. La fase 2.4 (puerta de publicación) aún no existe: `runIngest` no usa esta capa. Este documento y el golden set en `tests/fixtures/ingestion/golden/` son la especificación contra la que se mide.
+La implementación de la fase 2 vive en `src/ingestion/classification/` y se conecta al pipeline en `runIngest`. Flujo: hechos observados → classifier determinista → fallback de IA si `uncertain` → puerta de publicación (`include` → Candidate; `exclude`/`uncertain` → no publicar). Este documento y el golden set en `tests/fixtures/ingestion/golden/` son la especificación contra la que se mide.
 
 ## Principio
 
@@ -41,7 +41,7 @@ Candidate
 
 Un `exclude` no debe consumir trabajo innecesario de clasificación posterior. Un `uncertain` degrada de forma segura: no se publica automáticamente.
 
-La fase 2.1 implementa la hidratación de fichas y el contrato de hechos observados. La fase 2.2 implementa el classifier determinista (`classify(observed)`). La fase 2.3 implementa `classifyObserved` (IA sólo si `uncertain`). Ninguna de las dos está conectada a `runIngest` como puerta de publicación.
+La fase 2.1 implementa la hidratación de fichas y el contrato de hechos observados. La fase 2.2 implementa el classifier determinista (`classify(observed)`). La fase 2.3 implementa `classifyObserved` (IA sólo si `uncertain`). La fase 2.4 conecta ese resultado a `runIngest` como puerta de publicación.
 
 ## Lo que no es esta política
 
@@ -245,7 +245,7 @@ Auditorio Nacional → established
 Madrid Datos → alternative
 ```
 
-Eso era un fallback provisional de la fase 1. `kind` no es una propiedad de la source. El classifier no lee `source.provisionalKind`.
+Eso era un fallback provisional de la fase 1, ya retirado: `provisionalKind` ya no existe. `kind` no es una propiedad de la source.
 
 Un concierto de pop en el Teatro Real puede ser `established` + `exclude`. Un recital de órgano en una basílica, si forma parte de un ciclo concertístico estable, puede ser `established` + `include`. Un open-piano en un puente es `alternative`.
 
@@ -308,11 +308,11 @@ Contrato de salida: objeto JSON validado con Zod (`eligibility` obligatorio; `fo
 
 Degradación: provider ausente, API key ausente, timeout, error HTTP, excepción, respuesta vacía, JSON inválido o schema inválido conservan `eligibility = uncertain` y no tumbaron el resto del lote. El `ruleId` interno (`ai-unavailable`, `ai-timeout`, `ai-error`, `ai-malformed-output`, `ai-invalid-output`) permite diagnosticar el fallo.
 
-CI no llama a un LLM. Tests usan fakes. **Esta capa todavía no gobierna la publicación de `runIngest` (fase 2.4).**
+CI no llama a un LLM. Tests usan fakes. El resultado final gobierna la publicación de `runIngest`: sólo `include` puede convertirse en Candidate. `exclude` y `uncertain` no se publican. Ausencia o fallo de IA → `uncertain` → no publicar. `eras=[]` / `formats=[]` no bloquean un `include`. Los eventos ya publicados no se borran ni se re-clasifican en esta fase.
 
 ### Tests
 
-El golden set valida el contrato de los fixtures. La fase 2.2 ejecuta el classifier determinista sobre `golden.observed`. La fase 2.3 evalúa el mismo set con un fake de IA cuando el determinista es `uncertain`. CI no llama a un LLM. Sin IA, la cobertura de `include` no es un objetivo de recall.
+El golden set valida el contrato de los fixtures. La fase 2.2 ejecuta el classifier determinista sobre `golden.observed`. La fase 2.3 evalúa el mismo set con un fake de IA cuando el determinista es `uncertain`. La fase 2.4 demuestra la puerta de publicación en el pipeline completo (`tests/ingestion-publication-gate.test.ts`). CI no llama a un LLM. Sin IA, la cobertura de `include` no es un objetivo de recall.
 
 ---
 
