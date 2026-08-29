@@ -134,3 +134,27 @@ export function findExistingEvent(catalog: Catalog, event: Event, source: Source
   if (byUrl) return byUrl;
   return catalog.events.find((item) => item.id === event.id);
 }
+
+/**
+ * Catalog identity from harvest facts only. Returns `existing` when a citation
+ * matches; otherwise undefined — `new` is only safe once a Candidate exists.
+ */
+export function matchHarvestIdentity(
+  catalog: Catalog,
+  observed: { sourceUrl: string; externalId?: string },
+  catalogSourceId: string,
+): 'existing' | undefined {
+  const found = catalog.events.some((existing) =>
+    existing.citations.some((item) => {
+      if (
+        observed.externalId &&
+        item.sourceId === catalogSourceId &&
+        item.externalId === observed.externalId
+      ) {
+        return true;
+      }
+      return urlsEquivalent(item.url, observed.sourceUrl);
+    }),
+  );
+  return found ? 'existing' : undefined;
+}

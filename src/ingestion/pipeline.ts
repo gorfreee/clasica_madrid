@@ -3,11 +3,13 @@ import type { Candidate } from '../lib/schemas/candidate.ts';
 import type { AiClassifier } from './classification/ai.ts';
 import { classifyObserved } from './classification/enrich.ts';
 import { isPublishableInclude } from './classification/types.ts';
+import { collapseWhitespace } from './html.ts';
 import { getAdapter, getSourceDefinition, listSourceDefinitions } from './registry.ts';
-import { normalizeRawEvents, observedFactsFromNormalized } from './normalize.ts';
+import { normalizeRawEvent, normalizeSkipReason, observedFactsFromNormalized } from './normalize.ts';
 import { applyCandidateBatch, type BatchApplyResult } from './batch.ts';
-import { structuralSkipReason, toCandidate } from './to-candidate.ts';
+import { matchHarvestIdentity, structuralSkipReason, toCandidate } from './to-candidate.ts';
 import { countHydration, hydrateEvents, memoizeGet } from './hydrate.ts';
+import { buildEventDecision, type IngestEventDecision } from './report.ts';
 import type { AdapterContext, IngestRunSummary, RawEvent, SourceDefinition, SourceFailure } from './types.ts';
 import { getText } from './http.ts';
 
@@ -27,6 +29,7 @@ export type IngestRun = {
   apply: BatchApplyResult;
   rawEvents: RawEvent[];
   candidates: Candidate[];
+  decisions: IngestEventDecision[];
 };
 
 export async function runIngest(options: IngestOptions): Promise<IngestRun> {
@@ -55,37 +58,96 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
     return left.sourceUrl.localeCompare(right.sourceUrl);
   });
 
-  const normalized = normalizeRawEvents(rawEvents);
   const usedIds = new Set(options.catalog.events.map((event) => event.id));
   const usedSlugs = new Set(options.catalog.events.map((event) => event.slug));
   const candidates: Candidate[] = [];
-  let skippedUnusable = normalized.skipped;
+  const decisions: IngestEventDecision[] = [];
+  let skippedUnusable = 0;
   const eligibility = { include: 0, exclude: 0, uncertain: 0 };
   const aiUsage = { attempted: 0, resolved: 0, unresolved: 0 };
 
   const ai = wrapAi(options.ai, aiUsage);
 
   const bySource = new Map(sources.map((source) => [source.id, source]));
-  for (const event of normalized.events) {
+  for (const raw of rawEvents) {
+    const event = normalizeRawEvent(raw);
+    if (!event) {
+      skippedUnusable += 1;
+      decisions.push(
+        buildEventDecision({
+          raw,
+          title: collapseWhitespace(raw.observed.title) || raw.observed.title,
+          structuralSkip: normalizeSkipReason(raw) ?? 'no normalizable',
+          aiAttempted: false,
+          publishable: false,
+          candidateGenerated: false,
+        }),
+      );
+      continue;
+    }
     const source = bySource.get(event.sourceId);
     if (!source) {
       skippedUnusable += 1;
+      decisions.push(
+        buildEventDecision({
+          raw,
+          title: event.title,
+          structuralSkip: 'fuente desconocida',
+          aiAttempted: false,
+          publishable: false,
+          candidateGenerated: false,
+        }),
+      );
       continue;
     }
-    if (structuralSkipReason(event, options.catalog, options.now)) {
+    const skip = structuralSkipReason(event, options.catalog, options.now);
+    if (skip) {
       skippedUnusable += 1;
+      decisions.push(
+        buildEventDecision({
+          raw,
+          title: event.title,
+          structuralSkip: skip,
+          aiAttempted: false,
+          publishable: false,
+          candidateGenerated: false,
+          identity: matchHarvestIdentity(options.catalog, event, source.catalogSourceId),
+        }),
+      );
       continue;
     }
 
     const facts = observedFactsFromNormalized(event);
-    const classification = await classifyObserved(facts, { ai });
+    let aiAttempted = false;
+    const eventAi: AiClassifier | undefined = ai
+      ? {
+          async classify(observed) {
+            aiAttempted = true;
+            return ai.classify(observed);
+          },
+        }
+      : undefined;
+    const classification = await classifyObserved(facts, { ai: eventAi });
     eligibility[classification.eligibility.value] += 1;
     if (classification.eligibility.method === 'ai') {
       if (classification.eligibility.value === 'uncertain') aiUsage.unresolved += 1;
       else aiUsage.resolved += 1;
     }
 
+    const identity = matchHarvestIdentity(options.catalog, event, source.catalogSourceId);
+
     if (!isPublishableInclude(classification)) {
+      decisions.push(
+        buildEventDecision({
+          raw,
+          title: event.title,
+          classification,
+          aiAttempted,
+          publishable: false,
+          candidateGenerated: false,
+          identity,
+        }),
+      );
       continue;
     }
 
@@ -100,9 +162,32 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
     );
     if (!built.candidate) {
       skippedUnusable += 1;
+      decisions.push(
+        buildEventDecision({
+          raw,
+          title: event.title,
+          structuralSkip: built.skippedReason,
+          classification,
+          aiAttempted,
+          publishable: true,
+          candidateGenerated: false,
+          identity,
+        }),
+      );
       continue;
     }
     candidates.push(built.candidate);
+    decisions.push(
+      buildEventDecision({
+        raw,
+        title: event.title,
+        classification,
+        aiAttempted,
+        publishable: true,
+        candidateGenerated: true,
+        identity: identity ?? 'new',
+      }),
+    );
   }
 
   const apply = await applyCandidateBatch(options.catalog, candidates, options.dataDir, {
@@ -128,7 +213,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
     detailHydrationFailed: hydration.failed,
   };
 
-  return { summary, apply, rawEvents, candidates };
+  return { summary, apply, rawEvents, candidates, decisions };
 }
 
 export async function extractSource(

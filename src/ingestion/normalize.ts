@@ -58,6 +58,12 @@ export function normalizeRawEvents(rawEvents: RawEvent[]): {
   return { events, skipped };
 }
 
+export function normalizeSkipReason(raw: RawEvent): string | undefined {
+  if (normalizeRawEvent(raw)) return undefined;
+  const title = collapseWhitespace(raw.observed.title);
+  return title ? 'sin fecha' : 'sin título';
+}
+
 export function normalizeRawEvent(raw: RawEvent): NormalizedEvent | undefined {
   const title = collapseWhitespace(raw.observed.title);
   if (!title) return undefined;

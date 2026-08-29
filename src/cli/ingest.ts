@@ -3,6 +3,7 @@ import { systemClock } from '../lib/domain/dates.ts';
 import { defaultDataDir } from '../lib/repository/fs.ts';
 import { loadCatalogFromDir } from '../lib/repository/load.ts';
 import { formatRunSummary } from '../ingestion/summary.ts';
+import { buildIngestReport, writeIngestReport } from '../ingestion/report.ts';
 import { runIngest } from '../ingestion/pipeline.ts';
 import { createAiClassifierFromEnv } from '../ingestion/classification/openai.ts';
 import { listSourceDefinitions } from '../ingestion/registry.ts';
@@ -30,6 +31,10 @@ try {
   });
 
   console.log(formatRunSummary(run.summary));
+
+  if (parsed.reportPath) {
+    await writeIngestReport(parsed.reportPath, buildIngestReport(run, new Date()));
+  }
 
   if (!run.apply.report.ok) {
     for (const issue of run.apply.report.issues) {

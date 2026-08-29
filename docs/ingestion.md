@@ -9,6 +9,8 @@ No es la especificación de arquitectura objetivo.
 | Diseño objetivo vigente (fuente de verdad para evolucionar la ingestión) | [`docs/ingestion-v3-plan.md`](ingestion-v3-plan.md) |
 | Estado operativo actual (este documento) | `docs/ingestion.md` |
 | Classification Policy v1 y criterios de Phase 2 | [`docs/classification-policy.md`](classification-policy.md) |
+| Acceptance real de Phase 2 (dry-run 2026-08-29) | [`docs/ingestion-phase2-acceptance.md`](ingestion-phase2-acceptance.md) |
+| Auditoría del catálogo legacy contra la Classification Policy | [`docs/catalog-rebaseline-audit.md`](catalog-rebaseline-audit.md) |
 | Golden evaluation set | [`tests/fixtures/ingestion/golden/`](../tests/fixtures/ingestion/golden/) |
 | Modelo de datos canónico | [`docs/data-model.md`](data-model.md) |
 | Investigación y planes anteriores (histórico, no requisitos) | [`docs/archive/`](archive/) |
@@ -26,8 +28,9 @@ Código en `src/ingestion/`. Ejecución local:
 ```bash
 npm run ingest:sync
 npm run ingest:sync -- --dry-run
+npm run ingest:sync -- --dry-run --report ingestion/reports/sync.json
 npm run ingest:source -- auditorio-nacional
-npm run ingest:source -- teatro-real --dry-run
+npm run ingest:source -- teatro-real --dry-run --report ingestion/reports/teatro-real.json
 ```
 
 Flujo:
@@ -42,6 +45,7 @@ Flujo:
 8. Construye y valida el lote completo.
 9. Escribe sólo archivos nuevos, primero a un temporal y después al destino. Un fallo no deja el lote a medias. No actualiza ni borra eventos ya publicados.
 10. Imprime un resumen (fuentes, RawEvents, hidratación, clasificación include/exclude/uncertain, uso de IA, descartes estructurales, candidatos, escritos).
+11. Si se pasa `--report <ruta>`, escribe además un JSON diagnóstico por evento observado (ver [Report por evento](#report-por-evento)).
 
 Una segunda ejecución inmediata contra los mismos inputs no debe escribir cambios canónicos.
 
@@ -53,11 +57,25 @@ Fuentes de la fase 1:
 | `teatro-real` | HTML del calendario `/es/calendario` | HTML custom |
 | `madrid-datos` | JSON-LD abierto `206974-0-agenda-eventos-culturales-100` | JSON-LD (sólo `@type` Música, con fecha, hora y lugar) |
 
-`--dry-run` valida y resume sin escribir. `--data-dir` apunta a otro árbol (por defecto `data/` o `DATA_DIR`). La CLI rechaza flags desconocidas, `--data-dir` sin ruta, fuentes inexistentes y combinaciones incorrectas de argumentos.
+`--dry-run` valida y resume sin escribir. `--data-dir` apunta a otro árbol (por defecto `data/` o `DATA_DIR`). `--report <ruta>` escribe un JSON diagnóstico de la ejecución; no cambia la clasificación ni qué se publica. La CLI rechaza flags desconocidas, `--data-dir` o `--report` sin ruta, fuentes inexistentes y combinaciones incorrectas de argumentos.
 
 Un adapter que reconoce la estructura general pero no consigue interpretar ningún evento (extracción vacía sospechosa) falla de forma visible; esa fuente se aísla y las demás continúan. Un calendario genuinamente vacío no es un error.
 
 No hay GitHub Actions de ingestión ni auto-merge. Un evento nuevo se publica sólo si la clasificación final es `include` y los datos estructurales (fecha en ventana, lugar reconocible) son válidos. `exclude` no se publica. `uncertain` no se publica (tampoco como include de baja confianza). Sin `OPENAI_API_KEY`, con timeout o respuesta inválida, el fallback de IA degrada a `uncertain` y el resto del lote continúa. CI no llama a un LLM: `runIngest` recibe un `AiClassifier` inyectado por la CLI (`createAiClassifierFromEnv()`). `eras` y `formats` vacíos no bloquean un `include`. `kind` sale del classifier, no de la source. Performers, composers y works se copian cuando la ficha los declara; el rol canónico sólo se asigna si `roleText` es inequívoco. Sólo se publica si el lugar se reconoce de forma inequívoca (catálogo o alias conocidos). Los eventos ya citados por URL o `externalId` se dejan igual: Phase 2.4 no re-clasifica ni borra `data/**`.
+
+### Report por evento
+
+El resumen humano de la CLI sigue siendo el agregado. `--report` añade un artifact JSON para inspeccionar cada evento observado procesable:
+
+```bash
+npm run ingest:source -- madrid-datos --dry-run --report ingestion/reports/madrid-datos.json
+```
+
+El fichero contiene `summary` (el mismo agregado de la CLI) y `events[]`. Cada fila incluye, cuando aplica: `sourceId`, `sourceUrl`, `externalId`, `title`, hidratación, descarte estructural, eligibility (valor, método, `ruleId`, evidencia), si se intentó IA, `formats` / `eras` / `kind` / `access` con método y `ruleId`, si es publicable, si se generó Candidate, y `existing` / `new` cuando esa identidad se puede determinar con seguridad contra el catálogo (URL o `externalId`).
+
+Es un diagnóstico. No cambia las decisiones de clasificación, no cambia qué se publica, no añade campos al `Event` canónico y no se escribe en `data/**`. En dry-run el catálogo no se modifica. `ingestion/reports/` está gitignorado: no hace falta versionar dumps de una ejecución.
+
+Sin `OPENAI_API_KEY` el fallback de IA no se invoca; los `uncertain` quedan `uncertain` y `aiAttempted` es `false`.
 
 ### Candidatos JSON (legacy)
 
@@ -80,6 +98,7 @@ Directorios de trabajo (ignorados por Git):
 - `ingestion/inbox/` — candidatos pendientes
 - `ingestion/work/` — normalización en curso
 - `ingestion/rejected/` — descartados, para inspección
+- `ingestion/reports/` — dumps JSON de `--report` (diagnóstico; no son datos canónicos)
 
 Formato mínimo de un candidato:
 
@@ -119,7 +138,7 @@ Principio rector de la v3: *el código obtiene y controla los hechos; la IA ayud
 
 El flujo normal previsto (harvesting con adapters, `RawEvent`, normalización, enrichment, reconciliación, PR y auto-merge, cadencia ~10 días, ventana de 120 días) está especificado allí. No se duplica en este documento.
 
-Hoy **sí** están implementados (fase 1 + **fase 2 completa**: 2.1 + 2.2 + 2.3 + 2.4): adapters con interpretación estricta, `RawEvent` de hechos observados, hidratación de fichas (Auditorio Nacional y Teatro Real; Madrid Datos no la necesita), registry mínimo (referencia a Source canónica + seed), normalización común, proyección explícita a `ObservedFacts`, classifier determinista, fallback de IA con degradación segura, **puerta de publicación** (`include` → Candidate; `exclude`/`uncertain` → no publicar), lote validate-then-write atómico, contrato async-compatible de `extract`/`hydrate`, y CLI local. **No** están implementados discovery automático, reconciliación fuzzy, política de desapariciones, GitHub Actions de ingestión ni auto-merge (fase 3+). No los añadas salvo que una tarea pida explícitamente la fase correspondiente.
+Hoy **sí** están implementados (fase 1 + **fase 2 completa**: 2.1 + 2.2 + 2.3 + 2.4): adapters con interpretación estricta, `RawEvent` de hechos observados, hidratación de fichas (Auditorio Nacional y Teatro Real; Madrid Datos no la necesita), registry mínimo (referencia a Source canónica + seed), normalización común, proyección explícita a `ObservedFacts`, classifier determinista, fallback de IA con degradación segura, **puerta de publicación** (`include` → Candidate; `exclude`/`uncertain` → no publicar), report JSON opcional por evento (`--report`), lote validate-then-write atómico, contrato async-compatible de `extract`/`hydrate`, y CLI local. **No** están implementados discovery automático, reconciliación fuzzy, política de desapariciones, GitHub Actions de ingestión ni auto-merge (fase 3+). No los añadas salvo que una tarea pida explícitamente la fase correspondiente.
 
 ## CI y auto-merge (hoy vs objetivo)
 
