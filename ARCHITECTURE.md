@@ -98,7 +98,7 @@ Los datos fuente del repositorio no tienen por qué copiarse íntegramente al de
 
 La ingestión está separada de la web pública.
 
-La implementación **actual** (candidatos JSON y `ingest:promote`) está descrita en [`docs/ingestion.md`](docs/ingestion.md). La arquitectura **objetivo** vigente de la ingestión está en [`docs/ingestion-v3-plan.md`](docs/ingestion-v3-plan.md). El flujo legacy no debe interpretarse como el diseño futuro.
+Lo implementado hoy (harvesting v3 fase 1 y el camino legacy de candidatos) está en [`docs/ingestion.md`](docs/ingestion.md). La arquitectura **objetivo** vigente de la ingestión está en [`docs/ingestion-v3-plan.md`](docs/ingestion-v3-plan.md). El flujo legacy no debe interpretarse como el diseño futuro.
 
 ```text
 fuentes conocidas + búsqueda con agentes de IA

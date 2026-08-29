@@ -21,10 +21,13 @@ npm run build        # sitio estático en dist/
 npm run preview      # sirve dist/
 ```
 
-Ingestión **actual** de un candidato (implementación vigente, no el diseño v3; ver [`docs/ingestion.md`](docs/ingestion.md)):
+Ingestión. Harvesting v3 fase 1 (fuentes conocidas) y el camino legacy de un candidato JSON; detalle en [`docs/ingestion.md`](docs/ingestion.md):
 
 ```bash
-npm run ingest:promote -- ingestion/inbox/evento.json
+npm run ingest:sync              # extrae las fuentes del registry, valida el lote y escribe
+npm run ingest:sync -- --dry-run
+npm run ingest:source -- auditorio-nacional
+npm run ingest:promote -- ingestion/inbox/evento.json   # legacy: un candidato en disco
 ```
 
 ## Dónde están los datos
