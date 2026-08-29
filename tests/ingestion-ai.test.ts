@@ -2,6 +2,10 @@ import { describe, expect, it } from 'vitest';
 import type { ObservedFacts } from '../src/ingestion/observed.ts';
 import type { AiClassifier } from '../src/ingestion/classification/ai.ts';
 import { parseAiClassification } from '../src/ingestion/classification/ai.ts';
+import {
+  AI_CLASSIFIER_PROMPT_VERSION,
+  AI_CLASSIFIER_SYSTEM_PROMPT,
+} from '../src/ingestion/classification/ai-prompt.ts';
 import { classify } from '../src/ingestion/classification/classify.ts';
 import { classifyObserved, enrichWithAiIfNeeded } from '../src/ingestion/classification/enrich.ts';
 import {
@@ -42,6 +46,89 @@ const excludeFacts = facts({
 });
 
 const uncertainFacts = facts({ title: 'Concierto extraordinario' });
+
+describe('AI classifier prompt v2', () => {
+  const prompt = AI_CLASSIFIER_SYSTEM_PROMPT;
+
+  it('is version 2 so results are distinguishable from v1', () => {
+    expect(AI_CLASSIFIER_PROMPT_VERSION).toBe(2);
+  });
+
+  it('keeps precision, uncertain as a valid output, and the ban on inventing facts', () => {
+    expect(prompt).toMatch(/precisi[oó]n\s*>\s*cobertura/);
+    expect(prompt).toMatch(/uncertain es una salida v[aá]lida/);
+    expect(prompt).toMatch(/no inventes performers, composers, works/);
+    expect(prompt).toMatch(/no uses source ni venue/);
+    expect(prompt).toContain('eligibility ≠ format ≠ kind');
+  });
+
+  it('keeps decided exclusions for pop, DJ, film, jazz, flamenco, dance, cinema and workshops', () => {
+    expect(prompt).toMatch(/pop\s*\/\s*rock\s*\/\s*canci[oó]n popular/);
+    expect(prompt).toMatch(/DJ\s*\/\s*electr[oó]nica\s*\/\s*crossover/);
+    expect(prompt).toMatch(/m[uú]sica de cine como contenido principal/);
+    expect(prompt).toMatch(/jazz como identidad del evento/);
+    expect(prompt).toMatch(/flamenco musical espa[nñ]ol/);
+    expect(prompt).toMatch(/danza o ballet como espect[aá]culo/);
+    expect(prompt).toMatch(/cine\s*\/\s*proyecci[oó]n como actividad principal/);
+    expect(prompt).toMatch(/talleres, charlas, conferencias/);
+  });
+
+  it('allows contemporary/neoclassical concert music without treating popularity as exclusion', () => {
+    expect(prompt).toMatch(/instrumental contempor[aá]nea o neocl[aá]sica/);
+    expect(prompt).toMatch(/tradici[oó]n concert[ií]stica/);
+    expect(prompt).toMatch(/popularidad o el car[aá]cter comercial no son criterio de exclusi[oó]n/);
+    expect(prompt).toMatch(/m[uú]sica de cine, pop\/rock o crossover no cl[aá]sico/);
+  });
+
+  it('states mixed-event include vs exclude vs uncertain', () => {
+    expect(prompt).toMatch(/Eventos mixtos/);
+    expect(prompt).toMatch(/bloque cl[aá]sico sustancial, aut[oó]nomo e identificable/);
+    expect(prompt).toMatch(/acompa[nñ]amiento, arreglo, ornamentaci[oó]n o formato instrumental/);
+    expect(prompt).toMatch(/ABBA\/Queen\/Beatles con orquesta/);
+    expect(prompt).toMatch(/Hans Zimmer\/Morricone/);
+    expect(prompt).toMatch(/coprincipales y los hechos no permiten decidir/);
+  });
+
+  it('does not force uncertain when a classical cycle lacks a work-by-work programme', () => {
+    expect(prompt).toMatch(/obra-por-obra NO obliga a uncertain/);
+    expect(prompt).toMatch(/festival o ciclo expl[ií]citamente de m[uú]sica cl[aá]sica/);
+    expect(prompt).toMatch(/source conocida → include/);
+    expect(prompt).toMatch(/venue cl[aá]sico → include/);
+    expect(prompt).toMatch(/se excluyen individualmente/);
+  });
+
+  it('excludes participatory activities even inside a classical festival', () => {
+    expect(prompt).toMatch(/open piano/);
+    expect(prompt).toMatch(/piano abierto al p[uú]blico/);
+    expect(prompt).toMatch(/jam participativa/);
+    expect(prompt).toMatch(/instrumento a disposici[oó]n del p[uú]blico/);
+    expect(prompt).toMatch(/no convierte esa actividad en concierto/);
+  });
+
+  it('distinguishes Spanish flamenco from Franco-Flemish / Chigi contexts', () => {
+    expect(prompt).toMatch(/franco-flamenco/);
+    expect(prompt).toMatch(/C[oó]dice de Chigi/);
+    expect(prompt).toMatch(/coinciden(?:cia)? l[eé]xica/);
+    expect(prompt).toMatch(/Flemish/);
+    expect(prompt).toMatch(/Si el contexto no permite distinguir → uncertain/);
+  });
+
+  it('allows musical knowledge only to interpret observed facts', () => {
+    expect(prompt).toMatch(/conocimiento musical general para interpretar hechos observados/);
+    expect(prompt).toMatch(/Bach o un R[eé]quiem de Mozart/);
+    expect(prompt).toMatch(/NO puede inventar que un compositor, obra, performer/);
+  });
+
+  it('keeps the structured JSON contract without extra fields', () => {
+    expect(prompt).toContain('"eligibility": "include" | "exclude" | "uncertain"');
+    expect(prompt).toContain('"formats"');
+    expect(prompt).toContain('"eras"');
+    expect(prompt).toContain('"kind": "established" | "alternative"');
+    expect(prompt).toContain('"evidence"');
+    expect(prompt).not.toMatch(/confidence/i);
+    expect(prompt).not.toMatch(/chain[- ]of[- ]thought/i);
+  });
+});
 
 describe('parseAiClassification', () => {
   it('acepta un objeto válido y recorta duplicados', () => {
@@ -272,6 +359,8 @@ describe('OpenAI provider (fetch inyectado, sin red)', () => {
         const body = JSON.parse(String(init?.body));
         expect(body.model).toBe(OPENAI_DEFAULT_MODEL);
         expect(body.messages).toHaveLength(2);
+        expect(body.messages[0].content).toBe(AI_CLASSIFIER_SYSTEM_PROMPT);
+        expect(body.messages[1].content).toContain(`promptVersion: ${AI_CLASSIFIER_PROMPT_VERSION}`);
         expect(body.messages[1].content).toContain('Concierto extraordinario');
         return new Response(
           JSON.stringify({

@@ -9,6 +9,7 @@ No es la especificación de arquitectura objetivo.
 | Diseño objetivo vigente (fuente de verdad para evolucionar la ingestión) | [`docs/ingestion-v3-plan.md`](ingestion-v3-plan.md) |
 | Estado operativo actual (este documento) | `docs/ingestion.md` |
 | Classification Policy v1 y criterios de Phase 2 | [`docs/classification-policy.md`](classification-policy.md) |
+| Prompt versionado del fallback de IA | [`src/ingestion/classification/ai-prompt.ts`](../src/ingestion/classification/ai-prompt.ts) |
 | Acceptance real de Phase 2 (dry-run 2026-08-29) | [`docs/ingestion-phase2-acceptance.md`](ingestion-phase2-acceptance.md) |
 | Rebaseline editorial del catálogo legacy | [`docs/catalog-rebaseline-audit.md`](catalog-rebaseline-audit.md) |
 | Golden evaluation set | [`tests/fixtures/ingestion/golden/`](../tests/fixtures/ingestion/golden/) |
