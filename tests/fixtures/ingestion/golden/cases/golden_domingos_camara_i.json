@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_domingos_camara_i",
+  "origin": "phase1-smoke",
+  "sourceId": "teatro-real",
+  "sourceUrl": "https://www.teatroreal.es/es/espectaculo/domingos-camara-i",
+  "listingTitle": "Domingos de Cámara I",
+  "observed": {
+    "title": "Domingos de Cámara I",
+    "description": "A lo largo de la temporada, los solistas de la Orquesta Titular del Teatro Real ofrecerán una serie de conciertos —siempre en domingo a las 12:00h— en los que los compositores de las óperas Manon Lescaut, Las bodas de Figaro, Simon Boccanegra, Katia Kabanová, Norma y El barbero de Sevilla serán el eje central de la temporada.",
+    "categoryText": "Domingos de Cámara",
+    "venueText": "Teatro Real",
+    "accessText": "Compra tus entradas",
+    "performers": [
+      {
+        "name": "solistas de la Orquesta Titular del Teatro Real"
+      }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "uncertain",
+    "formats": [
+      "chamber"
+    ],
+    "eras": [],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "El ciclo es de cámara en el Teatro Real, pero la ficha describe la temporada entera, no el programa de esta sesión.",
+  "missingEvidence": "Falta el programa concreto de Domingos de Cámara I (obras e intérpretes de esa fecha). Los compositores citados son el eje de la temporada de ópera, no necesariamente el repertorio de este concierto.",
+  "checkedAt": "2026-08-29"
+}

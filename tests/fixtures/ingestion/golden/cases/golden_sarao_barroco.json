@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_sarao_barroco",
+  "origin": "phase1-smoke",
+  "sourceId": "teatro-real",
+  "sourceUrl": "https://www.teatroreal.es/es/espectaculo/sarao-barroco",
+  "listingTitle": "Sarao Barroco",
+  "observed": {
+    "title": "Sarao Barroco",
+    "description": "En Sarao barroco, Andreas Prittwitz y el ensamble Lookingback nos invitan a descubrir el pulso festivo del Barroco y el flamenco. Cante: Eva Durán. Guitarra flamenca: José Almarcha. Guitarra barroca y archilaúd: Ramiro Morales.",
+    "categoryText": "El Real Junior",
+    "venueText": "SALA PRINCIPAL Real Teatro de Retiro",
+    "accessText": "Bebés de 0 a 2 años: 3€. De 3 a 15 años: 15€. A partir de 16 años: 20€",
+    "performers": [
+      {
+        "name": "Andreas Prittwitz",
+        "roleText": "saxofón y clarinete"
+      },
+      {
+        "name": "Lookingback",
+        "roleText": "ensamble"
+      },
+      {
+        "name": "Eva Durán",
+        "roleText": "cante"
+      },
+      {
+        "name": "José Almarcha",
+        "roleText": "guitarra flamenca"
+      },
+      {
+        "name": "Ramiro Morales",
+        "roleText": "guitarra barroca y archilaúd"
+      },
+      {
+        "name": "Daniel Garay",
+        "roleText": "percusiones"
+      }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "uncertain",
+    "formats": [
+      "other"
+    ],
+    "eras": [],
+    "kind": "alternative",
+    "access": "paid"
+  },
+  "reason": "El título sugiere música antigua. La ficha presenta Barroco y flamenco como coprincipales en un espectáculo familiar. No hay programa de obras que permita decidir cuál es el contenido principal.",
+  "missingEvidence": "Falta un programa que muestre si el repertorio principal es música antigua o una fiesta de fusión con cante y guitarra flamenca.",
+  "notes": "Trampa de título: «Barroco» no basta. Flamenco como identidad coprincipal impide un include automático.",
+  "checkedAt": "2026-08-29"
+}

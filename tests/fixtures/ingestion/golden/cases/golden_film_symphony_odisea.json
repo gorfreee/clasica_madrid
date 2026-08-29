@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_film_symphony_odisea",
+  "origin": "phase1-smoke",
+  "sourceId": "auditorio-nacional",
+  "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/film-symphony-orchestra-odisea",
+  "listingTitle": "Film Symphony Orchestra. Odisea",
+  "observed": {
+    "title": "Film Symphony Orchestra. Odisea",
+    "venueText": "Sala Sinfónica",
+    "accessText": "68, 65, 58, 54, 44 y 38 €",
+    "programText": "FSO Film Symphony Orchestra. Constantino Martínez-Orts, director. «Odisea». Bandas sonoras: El Señor de los Anillos, Star Wars, Juego de Tronos, Gladiator, Interstellar, Avatar, Dragonheart, Stargate, Los Goonies, Memorias de África, entre otras.",
+    "performers": [
+      {
+        "name": "Film Symphony Orchestra",
+        "roleText": "orquesta"
+      },
+      {
+        "name": "Constantino Martínez-Orts",
+        "roleText": "director"
+      }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "exclude",
+    "formats": [
+      "symphonic"
+    ],
+    "eras": [],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "Concierto cuyo contenido principal es música cinematográfica. Format symphonic no implica include.",
+  "checkedAt": "2026-08-29"
+}

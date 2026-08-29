@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_fito_paez",
+  "origin": "phase1-smoke",
+  "sourceId": "teatro-real",
+  "sourceUrl": "https://www.teatroreal.es/es/espectaculo/fito-paez-clasico",
+  "listingTitle": "FITO PÁEZ CLÁSICO",
+  "observed": {
+    "title": "FITO PÁEZ CLÁSICO",
+    "description": "El miércoles 2 de septiembre, el imponente Teatro Real de Madrid será escenario de Clásico, un espectáculo especialmente concebido para disfrutar la obra de Fito desde una dimensión elegante y profundamente emocional. Acompañado por un octeto de cuerdas, el músico rosarino recorrerá parte fundamental de su repertorio.",
+    "categoryText": "También en el Real",
+    "venueText": "Sala Principal",
+    "accessText": "Compra tus entradas",
+    "performers": [
+      {
+        "name": "Fito Páez"
+      },
+      {
+        "name": "octeto de cuerdas",
+        "roleText": "cuerdas"
+      }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "exclude",
+    "formats": [
+      "chamber"
+    ],
+    "eras": [],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "El repertorio principal es la canción popular de Fito Páez. Un octeto de cuerdas no convierte el concierto en música clásica.",
+  "notes": "El título «Clásico» y el venue Teatro Real no bastan para include.",
+  "checkedAt": "2026-08-29"
+}

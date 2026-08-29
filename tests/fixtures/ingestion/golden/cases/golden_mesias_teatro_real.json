@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_mesias_teatro_real",
+  "origin": "phase1-smoke",
+  "sourceId": "teatro-real",
+  "sourceUrl": "https://www.teatroreal.es/es/espectaculo/mesias",
+  "listingTitle": "El Mesías",
+  "observed": {
+    "title": "El Mesías",
+    "description": "Oratorio en tres partes, HWV 56. Música de Georg Friedrich Händel (1685-1759). Coro de cámara de la RIAS y la Akademie für Alte Musik, ambas de Berlín, bajo la dirección de Justin Doyle.",
+    "venueText": "Sala Principal",
+    "accessText": "Compra tus entradas",
+    "performers": [
+      {
+        "name": "Coro de cámara de la RIAS",
+        "roleText": "coro"
+      },
+      {
+        "name": "Akademie für Alte Musik",
+        "roleText": "ensemble"
+      },
+      {
+        "name": "Justin Doyle",
+        "roleText": "dirección"
+      }
+    ],
+    "composers": [
+      {
+        "name": "Georg Friedrich Händel"
+      }
+    ],
+    "works": [
+      {
+        "title": "El Mesías",
+        "composerName": "Georg Friedrich Händel"
+      }
+    ]
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": [
+      "choral",
+      "early-music"
+    ],
+    "eras": [
+      "baroque"
+    ],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "Oratorio barroco de Handel con ensemble historicamente informado.",
+  "checkedAt": "2026-08-29"
+}

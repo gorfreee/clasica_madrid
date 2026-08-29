@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_real_junior_cine",
+  "origin": "phase1-smoke",
+  "sourceId": "teatro-real",
+  "sourceUrl": "https://www.teatroreal.es/es/espectaculo/real-junior-cine-pequena-cerillera",
+  "listingTitle": "El Real Junior de cine: La pequeña cerillera",
+  "observed": {
+    "title": "El Real Junior de cine: La pequeña cerillera",
+    "description": "Este ciclo en el Real Teatro de Retiro propone la proyección de títulos emblemáticos que han sido presentados en el Teatro Real. Música: César Frank (1822-1890).",
+    "categoryText": "Proyección de espectáculo musical",
+    "venueText": "SALA PACÍFICO Real Teatro de Retiro",
+    "accessText": "Precio único: 3€",
+    "performers": [],
+    "composers": [
+      {
+        "name": "César Frank"
+      }
+    ],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "exclude",
+    "formats": [
+      "other"
+    ],
+    "eras": [],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "La actividad principal es una proyección cinematográfica. La música de Franck en la ficha no convierte el evento en un concierto.",
+  "checkedAt": "2026-08-29"
+}

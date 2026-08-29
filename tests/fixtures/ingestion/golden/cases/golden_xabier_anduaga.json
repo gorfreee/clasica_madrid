@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_xabier_anduaga",
+  "origin": "phase1-smoke",
+  "sourceId": "teatro-real",
+  "sourceUrl": "https://www.teatroreal.es/es/espectaculo/xabier-anduaga",
+  "listingTitle": "Xabier Anduaga",
+  "observed": {
+    "title": "Xabier Anduaga",
+    "description": "Arias de óperas de Giuseppe Verdi, Gaetano Donizetti, Charles Gounod y Jules Massenet; y de zarzuelas.",
+    "categoryText": "Conciertos",
+    "venueText": "Sala Principal",
+    "accessText": "Desde 15 euros",
+    "performers": [
+      {
+        "name": "Xabier Anduaga",
+        "roleText": "tenor"
+      },
+      {
+        "name": "Julio García Vico",
+        "roleText": "dirección musical"
+      },
+      {
+        "name": "Orquesta Titular del Teatro Real",
+        "roleText": "orquesta"
+      }
+    ],
+    "composers": [
+      {
+        "name": "Giuseppe Verdi"
+      },
+      {
+        "name": "Gaetano Donizetti"
+      },
+      {
+        "name": "Charles Gounod"
+      },
+      {
+        "name": "Jules Massenet"
+      }
+    ],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": [
+      "opera",
+      "zarzuela",
+      "symphonic"
+    ],
+    "eras": [
+      "romantic"
+    ],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "El listado sólo tenía el nombre del tenor. La ficha declara arias de ópera y zarzuela con orquesta.",
+  "notes": "Trampa de título: nombre de intérprete sin programa en el listado; el detalle es include.",
+  "checkedAt": "2026-08-29"
+}

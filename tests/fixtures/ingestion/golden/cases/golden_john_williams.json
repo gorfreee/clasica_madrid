@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_john_williams",
+  "origin": "phase1-smoke",
+  "sourceId": "auditorio-nacional",
+  "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/film-symphony-orchestra-especial-john-williams",
+  "listingTitle": "Film Symphony Orchestra. Especial John Williams",
+  "observed": {
+    "title": "Film Symphony Orchestra. Especial John Williams",
+    "venueText": "Sala Sinfónica",
+    "accessText": "De 34 a 65 €",
+    "programText": "FSO Film Symphony Orchestra. Constantino Martínez-Orts, director. Bandas sonoras de STAR WARS, INDIANA JONES, E.T., TIBURÓN, HARRY POTTER, SUPERMAN, PARQUE JURÁSICO, LA LISTA DE SCHINDLER, LA TERMINAL, ENTRE OTRAS.",
+    "performers": [
+      {
+        "name": "Film Symphony Orchestra",
+        "roleText": "orquesta"
+      },
+      {
+        "name": "Constantino Martínez-Orts",
+        "roleText": "director"
+      }
+    ],
+    "composers": [
+      {
+        "name": "John Williams"
+      }
+    ],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "exclude",
+    "formats": [
+      "symphonic"
+    ],
+    "eras": [],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "Gala de bandas sonoras de John Williams. Música de cine, aunque sea orquestal.",
+  "checkedAt": "2026-08-29"
+}

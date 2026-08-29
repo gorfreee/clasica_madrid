@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_te_suena_manon",
+  "origin": "phase1-smoke",
+  "sourceId": "teatro-real",
+  "sourceUrl": "https://www.teatroreal.es/es/espectaculo/te-suena-manon-lescaut-g-puccini",
+  "listingTitle": "¿Te suena Manon Lescaut, de G. Puccini?",
+  "observed": {
+    "title": "¿Te suena Manon Lescaut, de G. Puccini?",
+    "description": "Aprender en familia es muy divertido con ¿Te suena?, un taller de introducción a la música para todos los públicos. Un encuentro lúdico y participativo en el que aprenderemos a escuchar ópera con cuentos, canciones, mini conciertos e instrumentos insólitos.",
+    "categoryText": "Taller musical en familia",
+    "venueText": "SALA PACÍFICO Real Teatro de Retiro",
+    "accessText": "De 0 a 2 años: 3€. De 3 a 15 años: 15€. A partir de 16 años: 20€",
+    "performers": [],
+    "composers": [
+      {
+        "name": "G. Puccini"
+      }
+    ],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "exclude",
+    "formats": [
+      "other"
+    ],
+    "eras": [],
+    "kind": "alternative",
+    "access": "paid"
+  },
+  "reason": "Taller pedagógico familiar, no una representación de la ópera. Puccini en el título no basta.",
+  "checkedAt": "2026-08-29"
+}

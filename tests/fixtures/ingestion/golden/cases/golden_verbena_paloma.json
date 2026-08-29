@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_verbena_paloma",
+  "origin": "published-catalog",
+  "sourceId": "teatro-zarzuela",
+  "sourceUrl": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/la-verbena-de-la-paloma",
+  "listingTitle": "La verbena de la Paloma — reparto Gerardo López, Borja Quiza y Carmen Romeu",
+  "observed": {
+    "title": "La verbena de la Paloma",
+    "venueText": "Teatro de la Zarzuela",
+    "performers": [
+      {
+        "name": "Orquesta de la Comunidad de Madrid",
+        "roleText": "orquesta"
+      },
+      {
+        "name": "Coro del Teatro de la Zarzuela",
+        "roleText": "coro"
+      },
+      {
+        "name": "Carlos Aragón",
+        "roleText": "director"
+      }
+    ],
+    "composers": [
+      {
+        "name": "Tomás Bretón"
+      }
+    ],
+    "works": [
+      {
+        "title": "La verbena de la Paloma",
+        "composerName": "Tomás Bretón"
+      }
+    ]
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": [
+      "zarzuela"
+    ],
+    "eras": [
+      "romantic"
+    ],
+    "kind": "established",
+    "access": "unknown"
+  },
+  "reason": "Zarzuela de repertorio. La página oficial de temporada identifica la obra; no se inventan precios que la ficha HTML no expuso de forma usable.",
+  "notes": "La petición HTTP a la ficha devolvió la home del teatro (página pesada/JS). Hechos tomados del título/URL oficiales y del catálogo publicado alineado con esa URL.",
+  "checkedAt": "2026-08-29"
+}

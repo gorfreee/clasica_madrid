@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_candlelight_vivaldi",
+  "origin": "published-catalog",
+  "sourceId": "fever",
+  "sourceUrl": "https://feverup.com/m/367608",
+  "listingTitle": "Candlelight: Las Cuatro Estaciones de Vivaldi",
+  "observed": {
+    "title": "Candlelight: Las Cuatro Estaciones de Vivaldi",
+    "venueText": "Basílica Pontificia de San Miguel, Madrid",
+    "programText": "Programa Candlelight: Las Cuatro Estaciones de Vivaldi. Las Cuatro Estaciones.",
+    "performers": [],
+    "composers": [
+      {
+        "name": "Antonio Vivaldi"
+      }
+    ],
+    "works": [
+      {
+        "title": "Las Cuatro Estaciones",
+        "composerName": "Antonio Vivaldi"
+      }
+    ]
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": [
+      "chamber"
+    ],
+    "eras": [
+      "baroque"
+    ],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "Repertorio barroco explícito. Fever como source y una iglesia como venue no deciden eligibility; el repertorio sí. Contrasta con el tributo Candlelight a Hans Zimmer.",
+  "checkedAt": "2026-08-29"
+}

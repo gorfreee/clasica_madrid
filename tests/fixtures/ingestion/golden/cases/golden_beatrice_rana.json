@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_beatrice_rana",
+  "origin": "phase1-smoke",
+  "sourceId": "auditorio-nacional",
+  "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/fundacion-scherzo-beatrice-rana-2",
+  "listingTitle": "Fundación Scherzo. Beatrice Rana",
+  "observed": {
+    "title": "Fundación Scherzo. Beatrice Rana",
+    "venueText": "Sala Sinfónica",
+    "programText": "Beatrice Rana, piano. Johann Sebastian Bach Concierto italiano en fa mayor, BWV 971. Muzio Clementi Sonata en sol menor, Op. 50 n.º 3 «Didone abbandonata». Robert Schumann Carnaval.",
+    "performers": [
+      {
+        "name": "Beatrice Rana",
+        "roleText": "piano"
+      }
+    ],
+    "composers": [
+      {
+        "name": "Johann Sebastian Bach"
+      },
+      {
+        "name": "Muzio Clementi"
+      },
+      {
+        "name": "Robert Schumann"
+      }
+    ],
+    "works": [
+      {
+        "title": "Concierto italiano en fa mayor, BWV 971",
+        "composerName": "Johann Sebastian Bach"
+      },
+      {
+        "title": "Sonata en sol menor, Op. 50 n.º 3 «Didone abbandonata»",
+        "composerName": "Muzio Clementi"
+      },
+      {
+        "title": "Carnaval",
+        "composerName": "Robert Schumann"
+      }
+    ]
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": [
+      "recital"
+    ],
+    "eras": [
+      "baroque",
+      "classical",
+      "romantic"
+    ],
+    "kind": "established",
+    "access": "unknown"
+  },
+  "reason": "Recital de piano de repertorio clásico. Programa multiera observado.",
+  "checkedAt": "2026-08-29"
+}

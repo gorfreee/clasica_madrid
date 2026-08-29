@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_vertixe_sonora",
+  "origin": "published-catalog",
+  "sourceId": "teatros-canal",
+  "sourceUrl": "https://www.teatroscanal.com/espectaculo/xvi-festival-de-ensembles-tc256/",
+  "listingTitle": "XVI Festival de Ensembles: Vertixe Sonora Ensemble de Galicia",
+  "observed": {
+    "title": "XVI Festival de Ensembles",
+    "description": "PluralEnsemble presenta la XVI edición del Festival de Ensembles en Madrid. El Festival contará con la participación de los conjuntos invitados Vertixe Sonora Ensemble, Taller Sonoro de Sevilla, Rioja Filarmonía y PluralEnsemble de Madrid. El ciclo tiene carácter artístico-divulgativo, cuyo objetivo es, además de estrenar nuevas obras, fomentar entre el público el repertorio musical contemporáneo.",
+    "categoryText": "Música contemporánea",
+    "venueText": "Sala Verde",
+    "accessText": "Entrada libre hasta completar aforo",
+    "performers": [
+      {
+        "name": "Vertixe Sonora Ensemble de Galicia",
+        "roleText": "ensemble"
+      }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": [
+      "chamber"
+    ],
+    "eras": [
+      "contemporary"
+    ],
+    "kind": "established",
+    "access": "free"
+  },
+  "reason": "Festival de ensembles de música contemporánea de tradición académica. Creación contemporánea clásica es include.",
+  "checkedAt": "2026-08-29"
+}

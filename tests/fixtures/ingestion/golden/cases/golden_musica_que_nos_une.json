@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_musica_que_nos_une",
+  "origin": "published-catalog",
+  "sourceId": "real-hermandad-refugio",
+  "sourceUrl": "https://realhermandaddelrefugio.org/calendario-de-eventos/musica-que-nos-une-concierto/",
+  "listingTitle": "Música que nos une",
+  "observed": {
+    "title": "Música que nos une",
+    "venueText": "Iglesia de San Antonio de los Alemanes",
+    "performers": [],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "uncertain",
+    "formats": [],
+    "eras": [],
+    "access": "unknown"
+  },
+  "reason": "Título genérico en una iglesia. La petición a la ficha oficial devolvió 403; no hay programa observable en esta consulta.",
+  "missingEvidence": "No hay descripción, performers, composers ni works extraídos de la fuente oficial (HTTP 403). Tampoco hay access declarado.",
+  "notes": "kind omitido: sin evidencia de si es ciclo estable o concierto parroquial puntual.",
+  "checkedAt": "2026-08-29"
+}

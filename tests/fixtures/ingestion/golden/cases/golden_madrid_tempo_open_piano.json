@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_madrid_tempo_open_piano",
+  "origin": "published-catalog",
+  "sourceId": "madrid-a-tempo",
+  "sourceUrl": "https://www.madridatempo.com/programacion-2023",
+  "listingTitle": "Madrid a Tempo: Open Piano",
+  "observed": {
+    "title": "Madrid a Tempo: Open Piano",
+    "venueText": "Puente de Toledo — Marqués de Vadillo",
+    "performers": [],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "uncertain",
+    "formats": [
+      "recital"
+    ],
+    "eras": [],
+    "kind": "alternative",
+    "access": "unknown"
+  },
+  "reason": "Open piano al aire libre en un festival de piano. Puede ser improvisación pública, repertorio clásico u otro. La URL de programación no aísla el repertorio de esta sesión.",
+  "missingEvidence": "Falta el programa o una descripción de qué se interpreta en el Open Piano.",
+  "checkedAt": "2026-08-29"
+}

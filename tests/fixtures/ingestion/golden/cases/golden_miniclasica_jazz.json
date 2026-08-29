@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_miniclasica_jazz",
+  "origin": "phase1-smoke",
+  "sourceId": "teatro-real",
+  "sourceUrl": "https://www.teatroreal.es/es/espectaculo/miniclasica-descubriendo-jazz",
+  "listingTitle": "Miniclásica: descubriendo el jazz",
+  "observed": {
+    "title": "Miniclásica: descubriendo el jazz",
+    "description": "En esta segunda cita de la temporada, Indigo Jazz nos invita a disfrutar de los ritmos del jazz clásico y del swing. Cuca Albert y su banda van a llenar el Hall del Real Teatro de Retiro de ritmos y melodías.",
+    "categoryText": "El Real Junior",
+    "venueText": "HALL Real Teatro de Retiro",
+    "accessText": "Bebés de 0 a 2 años: 1€. General: 8€",
+    "performers": [
+      {
+        "name": "Índigo Jazz"
+      },
+      {
+        "name": "Cuca Albert"
+      }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "exclude",
+    "formats": [
+      "other"
+    ],
+    "eras": [],
+    "kind": "alternative",
+    "access": "paid"
+  },
+  "reason": "La identidad principal es jazz. Un ciclo del Teatro Real no lo convierte en música clásica.",
+  "checkedAt": "2026-08-29"
+}

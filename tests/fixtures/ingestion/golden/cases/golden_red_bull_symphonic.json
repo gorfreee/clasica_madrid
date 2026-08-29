@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_red_bull_symphonic",
+  "origin": "phase1-smoke",
+  "sourceId": "auditorio-nacional",
+  "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/red-bull-symphonic-con-lia-kali",
+  "listingTitle": "Red Bull Symphonic con Lia Kali",
+  "observed": {
+    "title": "Red Bull Symphonic con Lia Kali",
+    "venueText": "Sala Sinfónica",
+    "accessText": "60 €",
+    "programText": "Red Bull Symphonic. Director musical: Pablo Donaire. Director orquesta: Lucas Vidal. Lia Kali, voz. «La música camina conmigo».",
+    "performers": [
+      {
+        "name": "Lia Kali",
+        "roleText": "voz"
+      },
+      {
+        "name": "Pablo Donaire",
+        "roleText": "director musical"
+      },
+      {
+        "name": "Lucas Vidal",
+        "roleText": "director orquesta"
+      }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "exclude",
+    "formats": [
+      "symphonic"
+    ],
+    "eras": [],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "Producto crossover Red Bull Symphonic con artista urbana. La orquesta no cambia que el repertorio principal no es música clásica.",
+  "checkedAt": "2026-08-29"
+}

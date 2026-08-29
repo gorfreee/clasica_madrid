@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_candlelight_zimmer",
+  "origin": "published-catalog",
+  "sourceId": "fever",
+  "sourceUrl": "https://feverup.com/m/112052",
+  "listingTitle": "Candlelight: Tributo a Hans Zimmer",
+  "observed": {
+    "title": "Candlelight: Tributo a Hans Zimmer",
+    "venueText": "Círculo de Bellas Artes, Madrid",
+    "accessText": "asientos según tipo de ticket",
+    "programText": "Programa Candlelight: Tributo a Hans Zimmer. Time de Origen; This Land de El rey león; Zooster’s Breakout de Madagascar.",
+    "performers": [],
+    "composers": [
+      {
+        "name": "Hans Zimmer"
+      }
+    ],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "exclude",
+    "formats": [
+      "chamber"
+    ],
+    "eras": [],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "Tributo a música de cine. Contrasta con Candlelight Vivaldi, que sí es repertorio clásico.",
+  "checkedAt": "2026-08-29"
+}

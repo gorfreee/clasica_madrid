@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_manon_lescaut",
+  "origin": "phase1-smoke",
+  "sourceId": "teatro-real",
+  "sourceUrl": "https://www.teatroreal.es/es/espectaculo/manon-lescaut",
+  "listingTitle": "Manon Lescaut — reparto Sondra Radvanovsky",
+  "observed": {
+    "title": "Manon Lescaut",
+    "description": "Dramma lirico en cuatro actos. Música de Giacomo Puccini (1858-1924). Dirigida musicalmente por Nicola Luisotti. Nueva producción del Teatro Real.",
+    "categoryText": "Ópera",
+    "venueText": "Sala Principal",
+    "accessText": "Compra tus entradas",
+    "performers": [],
+    "composers": [
+      {
+        "name": "Giacomo Puccini"
+      }
+    ],
+    "works": [
+      {
+        "title": "Manon Lescaut",
+        "composerName": "Giacomo Puccini"
+      }
+    ]
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": [
+      "opera"
+    ],
+    "eras": [
+      "romantic"
+    ],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "Ópera de Puccini en temporada. Contrasta con el taller «¿Te suena Manon Lescaut?».",
+  "checkedAt": "2026-08-29"
+}

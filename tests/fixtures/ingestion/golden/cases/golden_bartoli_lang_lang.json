@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_bartoli_lang_lang",
+  "origin": "phase1-smoke",
+  "sourceId": "auditorio-nacional",
+  "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/impacta-cecilia-bartoli-y-lang-lang",
+  "listingTitle": "Impacta. Cecilia Bartoli y Lang Lang",
+  "observed": {
+    "title": "Impacta. Cecilia Bartoli y Lang Lang",
+    "venueText": "Sala Sinfónica",
+    "accessText": "160, 135, 110, 85, 65 y 45 €",
+    "programText": "Cecilia Bartoli, mezzosoprano. Lang Lang, piano. Recital de voz y piano.",
+    "performers": [
+      {
+        "name": "Cecilia Bartoli",
+        "roleText": "mezzosoprano"
+      },
+      {
+        "name": "Lang Lang",
+        "roleText": "piano"
+      }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "uncertain",
+    "formats": [
+      "recital"
+    ],
+    "eras": [],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "Nombres de intérpretes clásicos y formato recital, pero la fuente no declara repertorio. No se infiere el programa por biografía.",
+  "missingEvidence": "Falta el programa (obras y compositores) del recital de voz y piano.",
+  "checkedAt": "2026-08-29"
+}

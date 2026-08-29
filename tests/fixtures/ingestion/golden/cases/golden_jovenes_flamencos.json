@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_jovenes_flamencos",
+  "origin": "phase1-smoke",
+  "sourceId": "auditorio-nacional",
+  "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-gala-de-ganadores-del-circuito-andaluz-de-jovenes-flamencos",
+  "listingTitle": "CNDM. Gala de Ganadores del Circuito Andaluz de Jóvenes Flamencos",
+  "observed": {
+    "title": "CNDM. Gala de Ganadores del Circuito Andaluz de Jóvenes Flamencos",
+    "categoryText": "Andalucía Flamenca",
+    "venueText": "Sala de Cámara",
+    "accessText": "36, 27 y 18 €",
+    "programText": "En coproducción con la Junta de Andalucía. Gala de Ganadores del Circuito Andaluz de Jóvenes Flamencos.",
+    "performers": [],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "exclude",
+    "formats": [
+      "other"
+    ],
+    "eras": [],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "Gala de flamenco. El CNDM como source no implica include.",
+  "notes": "Demuestra eligibility ≠ source: el ciclo institucional incluye programación no clásica.",
+  "checkedAt": "2026-08-29"
+}

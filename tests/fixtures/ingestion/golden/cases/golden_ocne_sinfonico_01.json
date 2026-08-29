@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_ocne_sinfonico_01",
+  "origin": "phase1-smoke",
+  "sourceId": "auditorio-nacional",
+  "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-01-1",
+  "listingTitle": "OCNE. Sinfónico 01",
+  "observed": {
+    "title": "OCNE. Sinfónico 01",
+    "venueText": "Sala Sinfónica",
+    "accessText": "Viernes y Sábado: 40, 36, 28, 20 y 13 €. Domingo: 28, 24, 20, 16 y 12 €",
+    "programText": "Orquesta y Coro Nacionales de España. Kent Nagano, director. Jane Archibal, soprano. Christina Bock, mezzosoprano. Mikel Urquiza: Deseo tomó delicia (estreno absoluto, encargo OCNE). Gustav Mahler: Sinfonía núm. 2 en Do menor, «Resurrección».",
+    "performers": [
+      {
+        "name": "Orquesta y Coro Nacionales de España"
+      },
+      {
+        "name": "Kent Nagano",
+        "roleText": "director"
+      },
+      {
+        "name": "Jane Archibal",
+        "roleText": "soprano"
+      },
+      {
+        "name": "Christina Bock",
+        "roleText": "mezzosoprano"
+      }
+    ],
+    "composers": [
+      {
+        "name": "Mikel Urquiza"
+      },
+      {
+        "name": "Gustav Mahler"
+      }
+    ],
+    "works": [
+      {
+        "title": "Deseo tomó delicia",
+        "composerName": "Mikel Urquiza"
+      },
+      {
+        "title": "Sinfonía núm. 2 en Do menor, «Resurrección»",
+        "composerName": "Gustav Mahler"
+      }
+    ]
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": [
+      "symphonic",
+      "choral"
+    ],
+    "eras": [
+      "romantic",
+      "contemporary"
+    ],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "Programa sinfónico-coral de repertorio clásico (Mahler) y un estreno de tradición académica. El título interno no bastaba; la ficha sí.",
+  "notes": "Trampa de título: «OCNE. Sinfónico 01» parecía uncertain; el detalle es include claro.",
+  "checkedAt": "2026-08-29"
+}
