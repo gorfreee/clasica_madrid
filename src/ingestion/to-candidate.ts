@@ -9,6 +9,7 @@ import type { SourceDefinition } from './types.ts';
 import { matchVenue } from './venues.ts';
 import { isDateInWindow } from './dates.ts';
 import { resolveCatalogSource } from './registry.ts';
+import { resolveAccess } from './classification/access.ts';
 
 export type CandidateBuild = {
   candidate?: Candidate;
@@ -58,7 +59,7 @@ export function toCandidate(
     organizerIds: [],
     seriesId: null,
     occurrences,
-    // Observed names only. Canonical performer.role is enrichment (Phase 2.2).
+    // Observed names only. Canonical performer.role remains enrichment (PR 2.4).
     performers: event.performers.map((item) => ({ name: item.name })),
     composers: event.composers.map((item) => ({ name: item.name })),
     works: event.works.map((item) => ({
@@ -67,9 +68,10 @@ export function toCandidate(
     })),
     eras: [],
     formats: [],
-    // Phase 1 fallback only. Event.kind is an enrichment decision, not a source property.
+    // Phase 1 fallback only. The classifier does not use provisionalKind.
+    // PR 2.4 will replace this with classify().kind when eligibility is include.
     kind: source.provisionalKind,
-    access: event.access === 'unknown' ? source.defaultAccess : event.access,
+    access: resolveAccess(event.accessText).value,
     citations: [
       {
         sourceId: catalogSource.id,

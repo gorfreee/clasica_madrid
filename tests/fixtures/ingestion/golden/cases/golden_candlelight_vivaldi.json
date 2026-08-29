@@ -31,8 +31,9 @@
       "baroque"
     ],
     "kind": "established",
-    "access": "paid"
+    "access": "unknown"
   },
   "reason": "Repertorio barroco explícito. Fever como source y una iglesia como venue no deciden eligibility; el repertorio sí. Contrasta con el tributo Candlelight a Hans Zimmer.",
+  "notes": "access=unknown: este caso no declara accessText. No se infiere paid por ser Fever ni por el venue.",
   "checkedAt": "2026-08-29"
 }

@@ -1,4 +1,4 @@
-import type { AccessMode, EventKind, Source } from '../lib/schemas/index.ts';
+import type { EventKind, Source } from '../lib/schemas/index.ts';
 import type { ObservedFactPatch, ObservedFacts } from './observed.ts';
 
 /**
@@ -52,11 +52,11 @@ export type SourceDefinition = {
    */
   seedSource: Source;
   /**
-   * Phase 1 stand-in for `Event.kind` until enrichment classifies the event.
+   * Phase 1 stand-in for `Event.kind` until PR 2.4 connects the classifier.
    * This is not a property of the source and must not be treated as one.
+   * The classifier in `classification/` does not read this field.
    */
   provisionalKind: EventKind;
-  defaultAccess: AccessMode;
 };
 
 export type AdapterContext = {

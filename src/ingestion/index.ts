@@ -19,6 +19,8 @@ export { runIngest, extractSource } from './pipeline.ts';
 export { hydrateEvents, memoizeGet } from './hydrate.ts';
 export { formatRunSummary } from './summary.ts';
 export { normalizeRawEvent, normalizeRawEvents } from './normalize.ts';
+export { classify } from './classification/classify.ts';
+export type { ClassificationResult } from './classification/types.ts';
 export { parseObservedDateTime, parseObservedTime } from './dates.ts';
 export { eventIdFor, occurrenceIdFor, toSlug, uniqueId, uniqueSlug } from './ids.ts';
 export { mergeCandidateBatch, applyCandidateBatch } from './batch.ts';

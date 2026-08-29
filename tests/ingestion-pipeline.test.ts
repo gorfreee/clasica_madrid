@@ -248,7 +248,6 @@ function normalized(overrides: Partial<NormalizedEvent> = {}): NormalizedEvent {
     title: 'Demo',
     occurrences: [{ date: '2026-09-10', time: '19:30' }],
     venueText: 'Teatro Real',
-    access: 'unknown',
     performers: [],
     composers: [],
     works: [],

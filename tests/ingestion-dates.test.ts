@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { parseObservedDateTime, parseObservedTime, isDateInWindow } from '../src/ingestion/dates.ts';
-import { inferAccess, normalizeRawEvent } from '../src/ingestion/normalize.ts';
+import { normalizeRawEvent } from '../src/ingestion/normalize.ts';
 import { eventIdFor, occurrenceIdFor } from '../src/ingestion/ids.ts';
 import { TEST_NOW } from './helpers.ts';
 import type { RawEvent } from '../src/ingestion/types.ts';
@@ -151,12 +151,6 @@ describe('normalización', () => {
     expect(normalizeRawEvent(raw)).toBeUndefined();
   });
 
-  it('infiere acceso solo con evidencia explícita', () => {
-    expect(inferAccess('gratuito')).toBe('free');
-    expect(inferAccess('1')).toBe('free');
-    expect(inferAccess(undefined)).toBe('unknown');
-    expect(inferAccess('consultar')).toBe('unknown');
-  });
 });
 
 describe('IDs deterministas', () => {

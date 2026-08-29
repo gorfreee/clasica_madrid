@@ -52,6 +52,13 @@ export const goldenCaseSchema = z
         message: 'un caso uncertain debe declarar qué evidencia falta',
       });
     }
+    if (value.expected.eligibility === 'include' && !value.expected.kind) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['expected', 'kind'],
+        message: 'un caso include debe resolver kind (established o alternative)',
+      });
+    }
   });
 
 export type ExpectedEnrichment = z.infer<typeof expectedEnrichmentSchema>;
