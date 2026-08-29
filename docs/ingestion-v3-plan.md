@@ -2,7 +2,7 @@
 
 > Estado: **diseño objetivo vigente y fuente de verdad autoritativa** para la evolución de la ingestión. Este documento define la dirección recomendada para evolucionar la ingestión de Clásica Madrid a una v3 simple, mantenible, automatizada y preparada para usar IA de forma pragmática.
 >
-> La **fase 1** (contratos + vertical slice) está implementada en `src/ingestion/` y se opera con `npm run ingest:sync`. Las fases 2–6 siguen siendo diseño objetivo, no código.
+> La **fase 1** (contratos + vertical slice + hardening) está implementada en `src/ingestion/` y se opera con `npm run ingest:sync`. Las fases 2–6 siguen siendo diseño objetivo, no código.
 >
 > [`docs/ingestion.md`](ingestion.md) es la puerta de entrada operativa (qué hay implementado hoy). Los documentos en [`docs/archive/`](archive/) son investigación y planes históricos: no son requisitos vigentes.
 >
@@ -246,6 +246,10 @@ La v3 mantiene la idea de un registro explícito de fuentes conocidas, pero debe
 
 El registro describe **cómo encontrar y extraer eventos**, no la procedencia editorial publicada en `data/sources/`.
 
+En la implementación de la fase 1 el registry apunta a la Source canónica por `catalogSourceId` y sólo lleva un `seedSource` para el caso en que esa entidad todavía no exista en el catálogo. El pipeline reutiliza la entidad del catálogo cuando ya está publicada. Eso no es un sistema de gestión de sources: es el mínimo para poder incorporar una fuente nueva sin duplicar la verdad editorial.
+
+`Event.kind` no es un atributo de la source. El registry puede guardar un `provisionalKind` como fallback explícito de la fase 1; la clasificación real pertenece al enrichment.
+
 Ejemplo conceptual:
 
 ```yaml
@@ -284,7 +288,10 @@ Debe evitar:
 - escribir directamente en `data/**`;
 - crear PRs;
 - resolver toda la deduplicación global;
-- realizar clasificación musical compleja si esa tarea pertenece al enriquecimiento común.
+- realizar clasificación musical compleja si esa tarea pertenece al enriquecimiento común;
+- inferir `Event.kind` o elegibilidad editorial a partir de la source.
+
+`extract` puede ser síncrono o devolver `Promise<RawEvent[]>` para que un adapter pueda, en la fase 2, consultar páginas de detalle con `ctx.get` sin cambiar el contrato. La fase 1 no implementa ese crawling: los listados suelen traer título, fecha, hora, URL y lugar; performers, composers, works, categorías y descripciones suelen estar en la ficha.
 
 ### 8.1 Preferencia de extracción
 
@@ -308,6 +315,8 @@ Si la fuente cambia y el parser ya no entiende con seguridad una sección, debe:
 - producir un fallo visible para esa fuente;
 - conservar el resto de fuentes sanas;
 - evitar publicar datos parcialmente interpretados como si fueran correctos.
+
+Una extracción vacía es sospechosa cuando el documento **parece** contener calendario o eventos pero el parser no reconoce ninguno. Eso debe fallar de forma visible. Un calendario genuinamente vacío (estructura reconocida, días sin eventos) no es un error.
 
 ---
 
@@ -407,10 +416,13 @@ Especialmente:
 
 - `eras[]`;
 - `formats[]`;
-- `kind`;
+- `kind` — contexto del evento (`established` / `alternative`), no naturaleza de la source;
 - `access`;
+- elegibilidad / relevancia respecto al alcance de Clásica Madrid;
 - roles de intérpretes cuando puedan inferirse con suficiente seguridad;
 - otros campos derivados que se incorporen en el futuro.
+
+`kind` no debe inferirse de forma permanente a partir de la source. Una sala o un calendario “clásicos” pueden publicar eventos que no son `established`, y una agenda municipal puede incluir tanto circuitos estables como propuestas alternativas.
 
 ### 11.2 Principio de preferencia
 
@@ -429,6 +441,31 @@ fallback seguro
 ```
 
 No debemos gastar razonamiento de modelo en una clasificación que puede deducirse inequívocamente mediante reglas simples.
+
+### 11.3 Elegibilidad y relevancia
+
+Estar publicado en un venue o source habitualmente clásicos **no implica** que el evento pertenezca al alcance de Clásica Madrid.
+
+Una source válida puede mezclar música clásica, danza, charlas, actividades educativas, pop, electrónica u otros eventos musicales. El criterio de producto es que el evento tenga un componente claro de interpretación o programación de repertorio del ámbito de la música clásica.
+
+Esta puerta de elegibilidad es responsabilidad de la **fase 2** (enrichment), no del harvesting. El harvesting debe extraer hechos; el enrichment decide si el evento es publicable.
+
+La política objetivo debe contemplar internamente algo equivalente a:
+
+```text
+include
+exclude
+uncertain
+```
+
+Principios:
+
+- reglas deterministas para los casos evidentes;
+- IA sólo cuando aporte valor;
+- no inventar;
+- un caso incierto debe degradar de forma segura (no publicar como si fuera un sí);
+- un evento claramente fuera de ámbito no debe publicarse;
+- una source no determina por sí sola la elegibilidad.
 
 ---
 
@@ -761,6 +798,8 @@ Responsabilidades:
 Siempre que sea razonable, la escritura debe ser atómica a nivel de lote publicado.
 
 Un fallo no debe dejar media ejecución aplicada.
+
+En la fase 1 esto se implementa de forma local y simple: el lote se construye y valida en memoria; los archivos se escriben primero a un directorio temporal (`.ingest-tmp-*` dentro del árbol de datos); si la preparación termina bien, se mueven al destino; un fallo durante la preparación o el movimiento revierte lo ya publicado y limpia el temporal. No es un sistema transaccional genérico. La fase 1 sólo crea archivos nuevos.
 
 ---
 
@@ -1210,7 +1249,8 @@ Objetivo: demostrar el pipeline completo con pocas fuentes.
 - normalización común;
 - transformación a Candidate;
 - batch validation/apply;
-- ejecución idempotente local.
+- ejecución idempotente local;
+- hardening de parsers estrictos, IDs/slugs, URLs, fechas Madrid/UTC, escritura atómica y CLI.
 
 Elegir fuentes diferentes entre sí ayuda a validar la abstracción, por ejemplo:
 
@@ -1223,6 +1263,9 @@ Elegir fuentes diferentes entre sí ayuda a validar la abstracción, por ejemplo
 - documentar Classification Policy inicial;
 - reglas deterministas básicas de `formats`;
 - knowledge base mínima para `eras`;
+- clasificar `kind` como propiedad del evento, no de la source;
+- puerta de elegibilidad / relevancia (`include` / `exclude` / `uncertain`);
+- consultar páginas de detalle cuando el listado no traiga performers, composers, works u otros hechos;
 - interfaz de enrichment con IA;
 - confidence/evidence internos;
 - métricas de campos no clasificados.

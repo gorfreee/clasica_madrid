@@ -3,11 +3,12 @@ import type { Catalog } from '../lib/domain/catalog.ts';
 import type { Candidate } from '../lib/schemas/candidate.ts';
 import type { Event, Occurrence, Source, Venue } from '../lib/schemas/index.ts';
 import { eventIdFor, occurrenceIdFor, uniqueId, uniqueSlug } from './ids.ts';
-import { urlPathIdentity } from './urls.ts';
+import { normalizeUrl, urlPathIdentity, urlsEquivalent } from './urls.ts';
 import type { NormalizedEvent } from './normalize.ts';
 import type { SourceDefinition } from './types.ts';
 import { matchVenue } from './venues.ts';
 import { isDateInWindow } from './dates.ts';
+import { resolveCatalogSource } from './registry.ts';
 
 export type CandidateBuild = {
   candidate?: Candidate;
@@ -33,6 +34,7 @@ export function toCandidate(
     return { skippedReason: 'lugar no reconocido' };
   }
 
+  const catalogSource = resolveCatalogSource(source, catalog);
   const identity = event.externalId ?? urlPathIdentity(event.sourceUrl);
   const eventId = uniqueId(eventIdFor(source.id, identity), usedIds);
   usedIds.add(eventId);
@@ -61,17 +63,18 @@ export function toCandidate(
     works: [],
     eras: [],
     formats: [],
-    kind: source.defaultKind,
+    // Phase 1 fallback only. Event.kind is an enrichment decision, not a source property.
+    kind: source.provisionalKind,
     access: event.access === 'unknown' ? source.defaultAccess : event.access,
     citations: [
       {
-        sourceId: source.catalogSource.id,
-        url: event.sourceUrl,
+        sourceId: catalogSource.id,
+        url: normalizeUrl(event.sourceUrl),
         checkedAt: verified,
         ...(event.externalId ? { externalId: event.externalId } : {}),
       },
     ],
-    primarySourceId: source.catalogSource.id,
+    primarySourceId: catalogSource.id,
     lastVerifiedAt: verified,
   };
 
@@ -82,8 +85,8 @@ export function toCandidate(
   if (venueMatch.kind === 'known' && !catalog.venues.some((venue) => venue.id === venueMatch.venue.id)) {
     candidate.venue = withVerified(venueMatch.venue, verified);
   }
-  if (!catalog.sources.some((item) => item.id === source.catalogSource.id)) {
-    candidate.sources = [source.catalogSource];
+  if (!catalog.sources.some((item) => item.id === catalogSource.id)) {
+    candidate.sources = [catalogSource];
   }
   return { candidate };
 }
@@ -104,7 +107,9 @@ export function findExistingEvent(catalog: Catalog, event: Event, source: Source
     : undefined;
   if (byExternal) return byExternal;
   const url = citation.url;
-  const byUrl = catalog.events.find((existing) => existing.citations.some((item) => item.url === url));
+  const byUrl = catalog.events.find((existing) =>
+    existing.citations.some((item) => urlsEquivalent(item.url, url)),
+  );
   if (byUrl) return byUrl;
   return catalog.events.find((item) => item.id === event.id);
 }

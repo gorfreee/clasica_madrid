@@ -3,6 +3,7 @@ import { ID_PREFIX } from '../lib/schemas/taxonomies.ts';
 
 const MAX_SLUG = 120;
 const MAX_ID = 120;
+const MAX_COLLISION_ATTEMPTS = 100_000;
 
 export function toSlug(value: string): string {
   const slug = normalizeText(value).replace(/ /g, '-');
@@ -41,16 +42,27 @@ export function venueIdFor(name: string): string {
 }
 
 export function uniqueSlug(base: string, used: Set<string>): string {
-  const root = toSlug(base);
-  if (!used.has(root)) return root;
-  let n = 2;
-  while (used.has(`${root}-${n}`)) n += 1;
-  return `${root}-${n}`.slice(0, MAX_SLUG);
+  return uniquify(toSlug(base), used, '-', MAX_SLUG);
 }
 
 export function uniqueId(base: string, used: Set<string>): string {
-  if (!used.has(base)) return base;
-  let n = 2;
-  while (used.has(`${base}_${n}`)) n += 1;
-  return `${base}_${n}`.slice(0, MAX_ID);
+  const root = base.length <= MAX_ID ? base : base.slice(0, MAX_ID).replace(/_+$/, '') || 'item';
+  return uniquify(root, used, '_', MAX_ID);
+}
+
+/**
+ * Resolve a collision without exceeding `max`. The numeric suffix is reserved
+ * first so truncation cannot recreate a value that is already taken.
+ */
+function uniquify(root: string, used: Set<string>, separator: string, max: number): string {
+  if (root.length <= max && !used.has(root)) return root;
+  for (let n = 2; n < MAX_COLLISION_ATTEMPTS; n += 1) {
+    const suffix = `${separator}${n}`;
+    if (suffix.length >= max) {
+      throw new Error(`no se pudo generar un identificador único dentro de ${max} caracteres`);
+    }
+    const candidate = `${root.slice(0, max - suffix.length)}${suffix}`;
+    if (!used.has(candidate)) return candidate;
+  }
+  throw new Error(`no se pudo generar un identificador único (más de ${MAX_COLLISION_ATTEMPTS} colisiones)`);
 }

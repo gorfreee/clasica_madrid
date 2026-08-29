@@ -27,6 +27,9 @@ ingestion/rejected/**
 ingestion/work/**
 !ingestion/work/.gitkeep
 
+# leftover ingest batch temp dirs (normally cleaned up after each write)
+.ingest-tmp-*
+
 # generated catalog review spreadsheets
 exports/**
 !exports/.gitkeep

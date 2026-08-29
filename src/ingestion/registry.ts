@@ -1,3 +1,4 @@
+import type { Catalog } from '../lib/domain/catalog.ts';
 import type { Source } from '../lib/schemas/index.ts';
 import { auditorioNacionalAdapter } from './sources/auditorio-nacional.ts';
 import { madridDatosAdapter } from './sources/madrid-datos.ts';
@@ -43,8 +44,9 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
     name: 'Auditorio Nacional de Música',
     urls: ['https://auditorionacional.inaem.gob.es/front-page-events.json'],
     adapterId: auditorioNacionalAdapter.id,
-    catalogSource: srcAuditorio,
-    defaultKind: 'established',
+    catalogSourceId: srcAuditorio.id,
+    seedSource: srcAuditorio,
+    provisionalKind: 'established',
     defaultAccess: 'unknown',
   },
   {
@@ -52,8 +54,9 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
     name: 'Teatro Real',
     urls: ['https://www.teatroreal.es/es/calendario'],
     adapterId: teatroRealAdapter.id,
-    catalogSource: srcTeatroReal,
-    defaultKind: 'established',
+    catalogSourceId: srcTeatroReal.id,
+    seedSource: srcTeatroReal,
+    provisionalKind: 'established',
     defaultAccess: 'unknown',
   },
   {
@@ -61,8 +64,9 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
     name: 'Datos abiertos del Ayuntamiento de Madrid',
     urls: ['https://datos.madrid.es/egob/catalogo/206974-0-agenda-eventos-culturales-100.json'],
     adapterId: madridDatosAdapter.id,
-    catalogSource: srcAyuntamiento,
-    defaultKind: 'alternative',
+    catalogSourceId: srcAyuntamiento.id,
+    seedSource: srcAyuntamiento,
+    provisionalKind: 'alternative',
     defaultAccess: 'unknown',
   },
 ];
@@ -86,4 +90,8 @@ export function getAdapter(id: string): SourceAdapter {
     throw new Error(`adapter desconocido: ${id}`);
   }
   return adapter;
+}
+
+export function resolveCatalogSource(source: SourceDefinition, catalog: Catalog): Source {
+  return catalog.sources.find((item) => item.id === source.catalogSourceId) ?? source.seedSource;
 }

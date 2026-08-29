@@ -37,11 +37,17 @@ export const teatroRealAdapter: SourceAdapter = {
         existing.observed.occurrences.push(...event.observed.occurrences);
       }
     }
-    return [...grouped.values()].sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
+    const events = [...grouped.values()].sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
+    if (events.length === 0 && boxes.some((box) => dayLooksPopulated(box))) {
+      throw new Error(
+        'teatro-real: el calendario parece tener eventos pero no se ha podido interpretar ninguno',
+      );
+    }
+    return events;
   },
 };
 
-type DayBox = { date: string; chunks: string[] };
+type DayBox = { date: string; chunks: string[]; slice: string };
 
 function splitBoxes(html: string): DayBox[] {
   const matches = [...html.matchAll(BOX_ID)];
@@ -58,9 +64,20 @@ function splitBoxes(html: string): DayBox[] {
     boxes.push({
       date: `${year}-${month}-${day}`,
       chunks: extractContentBoxes(slice),
+      slice,
     });
   }
   return boxes;
+}
+
+function dayLooksPopulated(box: DayBox): boolean {
+  if (box.chunks.length > 0) return true;
+  return (
+    /contentbox/i.test(box.slice) ||
+    /\/es\/espectaculo\//i.test(box.slice) ||
+    /item-box--premiere/i.test(box.slice) ||
+    /<h3[\s>]/i.test(box.slice)
+  );
 }
 
 function extractContentBoxes(slice: string): string[] {

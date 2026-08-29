@@ -14,15 +14,19 @@ export function normalizeUrl(value: string): string {
 }
 
 export function resolveUrl(href: string, base: string): string {
-  return new URL(href, base).href;
+  return normalizeUrl(new URL(href, base).href);
 }
 
 export function urlPathIdentity(url: string): string {
   try {
-    const parsed = new URL(url);
+    const parsed = new URL(normalizeUrl(url));
     const last = parsed.pathname.split('/').filter(Boolean).at(-1);
     return last ?? parsed.pathname;
   } catch {
     return url;
   }
+}
+
+export function urlsEquivalent(left: string, right: string): boolean {
+  return normalizeUrl(left) === normalizeUrl(right);
 }

@@ -1,4 +1,5 @@
-import { writeFile } from 'node:fs/promises';
+import { mkdir, rename, rm, writeFile } from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import type { Catalog } from '../lib/domain/catalog.ts';
 import type { Candidate } from '../lib/schemas/candidate.ts';
@@ -13,6 +14,7 @@ import {
 } from '../lib/validation/promote.ts';
 import { errorIssue, makeReport, type ValidationIssue, type ValidationReport } from '../lib/validation/report.ts';
 import { findExistingEvent } from './to-candidate.ts';
+import { normalizeUrl } from './urls.ts';
 
 export type BatchApplyResult = {
   report: ValidationReport;
@@ -63,7 +65,9 @@ export function mergeCandidateBatch(existing: Catalog, candidates: Candidate[]):
     }
     const candidate = parsed.data;
     const source = candidate.sources?.[0] ?? catalog.sources.find((item) => item.id === candidate.event.primarySourceId);
-    const citationUrl = candidate.event.citations[0]?.url;
+    const citationUrl = candidate.event.citations[0]?.url
+      ? normalizeUrl(candidate.event.citations[0].url)
+      : undefined;
     const existingEvent = source
       ? findExistingEvent(catalog, candidate.event, source)
       : catalog.events.find((item) => item.id === candidate.event.id);
@@ -132,11 +136,33 @@ function reconcile<T extends { id: string }>(
   return list;
 }
 
+export type BatchIo = {
+  writeFile: (filePath: string, contents: string) => Promise<void>;
+  rename: (from: string, to: string) => Promise<void>;
+  mkdir: (dir: string) => Promise<void>;
+  rm: (target: string) => Promise<void>;
+};
+
+export const defaultBatchIo: BatchIo = {
+  writeFile: async (filePath, contents) => {
+    await writeFile(filePath, contents, 'utf8');
+  },
+  rename: async (from, to) => {
+    await rename(from, to);
+  },
+  mkdir: async (dir) => {
+    await mkdir(dir, { recursive: true });
+  },
+  rm: async (target) => {
+    await rm(target, { recursive: true, force: true });
+  },
+};
+
 export async function applyCandidateBatch(
   existing: Catalog,
   candidates: Candidate[],
   dataDir: string,
-  options: { dryRun: boolean },
+  options: { dryRun: boolean; io?: BatchIo },
 ): Promise<BatchApplyResult> {
   const merged = mergeCandidateBatch(existing, candidates);
   const issues = [...merged.issues, ...findReferenceIssues(merged.catalog), ...findDuplicateEvents(merged.catalog)];
@@ -165,12 +191,7 @@ export async function applyCandidateBatch(
   }
 
   await ensureDataDirs(dataDir);
-  const written: string[] = [];
-  for (const file of filesToWrite) {
-    const absolute = path.join(dataDir, file.relativePath);
-    await writeFile(absolute, serializeCanonical(file.value), 'utf8');
-    written.push(file.relativePath);
-  }
+  const written = await writeBatchAtomically(dataDir, filesToWrite, options.io ?? defaultBatchIo);
   return {
     report,
     proposed: merged.catalog,
@@ -179,6 +200,50 @@ export async function applyCandidateBatch(
     unchangedEvents: merged.unchangedEvents,
     written,
   };
+}
+
+/**
+ * Write every file to a temp tree first, then move into place. A failure
+ * during prepare leaves the destination untouched. A failure during the
+ * final moves rolls back files already moved (Phase 1 only creates new files).
+ */
+export async function writeBatchAtomically(
+  dataDir: string,
+  files: FileToWrite[],
+  io: BatchIo = defaultBatchIo,
+): Promise<string[]> {
+  if (files.length === 0) return [];
+  const tmpDir = path.join(dataDir, `.ingest-tmp-${randomUUID()}`);
+  const prepared: Array<{ tmp: string; dest: string; relativePath: string }> = [];
+  try {
+    await io.mkdir(tmpDir);
+    for (const file of files) {
+      const tmp = path.join(tmpDir, file.relativePath);
+      await io.mkdir(path.dirname(tmp));
+      await io.writeFile(tmp, serializeCanonical(file.value));
+      prepared.push({
+        tmp,
+        dest: path.join(dataDir, file.relativePath),
+        relativePath: file.relativePath,
+      });
+    }
+    const moved: string[] = [];
+    try {
+      for (const file of prepared) {
+        await io.mkdir(path.dirname(file.dest));
+        await io.rename(file.tmp, file.dest);
+        moved.push(file.dest);
+      }
+    } catch (error) {
+      for (const dest of moved) {
+        await io.rm(dest);
+      }
+      throw error;
+    }
+    return prepared.map((file) => file.relativePath);
+  } finally {
+    await io.rm(tmpDir);
+  }
 }
 
 export function serializeCanonical(value: unknown): string {

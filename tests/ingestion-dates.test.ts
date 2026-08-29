@@ -29,11 +29,83 @@ describe('parseo de fechas y horas', () => {
     expect(parseObservedTime('25:00')).toBeNull();
   });
 
-  it('acota la ventana móvil de 120 días', () => {
+  it('acota la ventana móvil de 120 días, inclusiva en ambos extremos', () => {
     expect(isDateInWindow('2026-09-01', TEST_NOW)).toBe(true);
     expect(isDateInWindow('2026-12-30', TEST_NOW)).toBe(true);
     expect(isDateInWindow('2026-08-31', TEST_NOW)).toBe(false);
+    expect(isDateInWindow('2026-12-31', TEST_NOW)).toBe(false);
     expect(isDateInWindow('2027-01-01', TEST_NOW)).toBe(false);
+  });
+
+  it('convierte un instante UTC a hora civil de Madrid en verano (CEST)', () => {
+    expect(parseObservedDateTime('2026-07-15T17:30:00Z')).toEqual({
+      date: '2026-07-15',
+      time: '19:30',
+    });
+  });
+
+  it('convierte un instante UTC a hora civil de Madrid en invierno (CET)', () => {
+    expect(parseObservedDateTime('2026-01-15T18:30:00Z')).toEqual({
+      date: '2026-01-15',
+      time: '19:30',
+    });
+  });
+
+  it('un offset explícito que ya es Madrid no se desplaza', () => {
+    expect(parseObservedDateTime('2026-01-15T19:30:00+01:00')).toEqual({
+      date: '2026-01-15',
+      time: '19:30',
+    });
+    expect(parseObservedDateTime('2026-07-15T19:30:00+02:00')).toEqual({
+      date: '2026-07-15',
+      time: '19:30',
+    });
+  });
+
+  it('cruza el día cuando el instante UTC cae después de medianoche en Madrid', () => {
+    expect(parseObservedDateTime('2026-07-15T22:30:00Z')).toEqual({
+      date: '2026-07-16',
+      time: '00:30',
+    });
+    expect(parseObservedDateTime('2026-01-15T23:30:00Z')).toEqual({
+      date: '2026-01-16',
+      time: '00:30',
+    });
+  });
+
+  it('respeta el salto CET→CEST del 29 de marzo de 2026', () => {
+    expect(parseObservedDateTime('2026-03-29T00:30:00Z')).toEqual({
+      date: '2026-03-29',
+      time: '01:30',
+    });
+    expect(parseObservedDateTime('2026-03-29T01:30:00Z')).toEqual({
+      date: '2026-03-29',
+      time: '03:30',
+    });
+  });
+
+  it('respeta el retroceso CEST→CET del 25 de octubre de 2026', () => {
+    expect(parseObservedDateTime('2026-10-25T00:30:00Z')).toEqual({
+      date: '2026-10-25',
+      time: '02:30',
+    });
+    expect(parseObservedDateTime('2026-10-25T01:30:00Z')).toEqual({
+      date: '2026-10-25',
+      time: '02:30',
+    });
+  });
+
+  it('no convierte una hora civil local sin timezone', () => {
+    expect(parseObservedDateTime('2026-07-15T19:30')).toEqual({
+      date: '2026-07-15',
+      time: '19:30',
+    });
+  });
+
+  it('rechaza una hora imposible', () => {
+    expect(parseObservedDateTime('2026-09-18T25:00:00Z')).toBeNull();
+    expect(parseObservedDateTime('2026-09-18T19:61')).toBeNull();
+    expect(parseObservedTime('24:00')).toBeNull();
   });
 });
 

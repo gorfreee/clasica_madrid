@@ -34,8 +34,19 @@ export type SourceDefinition = {
   name: string;
   urls: string[];
   adapterId: string;
-  catalogSource: Source;
-  defaultKind: EventKind;
+  /** Canonical `Source.id` in `data/sources/`. The registry does not own that entity. */
+  catalogSourceId: string;
+  /**
+   * Bootstrap Source used only when the catalog does not yet contain
+   * `catalogSourceId`. Needed so a newly registered harvest source can
+   * introduce its editorial provenance on the first successful run.
+   */
+  seedSource: Source;
+  /**
+   * Phase 1 stand-in for `Event.kind` until enrichment classifies the event.
+   * This is not a property of the source and must not be treated as one.
+   */
+  provisionalKind: EventKind;
   defaultAccess: AccessMode;
 };
 
@@ -50,10 +61,12 @@ export type SourceAdapter = {
   /** URLs to fetch for this source given the current clock. */
   resolveFetchUrls(source: SourceDefinition, now: Date): string[];
   /**
-   * Parse one fetched body. Throw if the document is not the expected
-   * structure. Skip individual items that lack required facts.
+   * Parse one fetched body. May be sync or async so Phase 2 can `await ctx.get`
+   * for detail pages without changing the contract again. Throw if the
+   * document is not the expected structure. Skip individual items that lack
+   * required facts. Do not treat a suspiciously empty extraction as success.
    */
-  extract(body: string, url: string, ctx: AdapterContext): RawEvent[];
+  extract(body: string, url: string, ctx: AdapterContext): Promise<RawEvent[]> | RawEvent[];
 };
 
 export type SourceFailure = {
