@@ -2,7 +2,9 @@
   "@context": {
     "title": "vcard:fn",
     "dtstart": "c:dtstart",
-    "time": "c:time"
+    "time": "c:time",
+    "relation": "dcterms:relation",
+    "event-location": "c:location"
   },
   "@graph": [
     {
@@ -15,7 +17,88 @@
       "time": "19:30",
       "uid": "50390001",
       "link": "http://www.madrid.es/evento/concierto-camara-teatro-real",
-      "event-location": "Teatro Real"
+      "event-location": "Teatro Real",
+      "relation": {
+        "@id": "https://datos.madrid.es/egob/catalogo/tipo/entidadesyorganismos/9999-teatro-real.json"
+      }
+    },
+    {
+      "@type": "https://datos.madrid.es/egob/kos/actividades/Musica",
+      "id": "50322790",
+      "title": "Recital de piano",
+      "description": "Recital en Casa de Vacas.",
+      "free": 1,
+      "dtstart": "2026-09-20 19:00:00.0",
+      "time": "19:00",
+      "uid": "50322790",
+      "link": "http://www.madrid.es/evento/recital-piano-casa-vacas",
+      "event-location": "Centro Cultural Casa de Vacas (Retiro)",
+      "relation": {
+        "@id": "https://datos.madrid.es/egob/catalogo/tipo/entidadesyorganismos/1945-centro-cultural-casa-vacas-retiro-.json"
+      },
+      "address": {
+        "area": {
+          "locality": "MADRID",
+          "postal-code": "28009",
+          "street-address": "PASEO COLOMBIA 1"
+        }
+      }
+    },
+    {
+      "@type": "https://datos.madrid.es/egob/kos/actividades/Musica",
+      "id": "50322791",
+      "title": "Festival Alicia de Larrocha",
+      "free": 1,
+      "dtstart": "2026-09-21 19:00:00.0",
+      "time": "19:00",
+      "uid": "50322791",
+      "link": "http://www.madrid.es/evento/alicia-larrocha",
+      "event-location": "Centro Cultural Casa de Vacas",
+      "relation": {
+        "@id": "https://datos.madrid.es/egob/catalogo/tipo/entidadesyorganismos/1945-centro-cultural-casa-vacas-retiro-.json"
+      }
+    },
+    {
+      "@type": "https://datos.madrid.es/egob/kos/actividades/Musica",
+      "id": "50234843",
+      "title": "Encuentro en CondeDuque",
+      "free": 1,
+      "dtstart": "2026-09-18 20:00:00.0",
+      "time": "20:00",
+      "uid": "50234843",
+      "link": "http://www.madrid.es/evento/condeduque-encuentro",
+      "event-location": "Centro de Cultura Contemporánea CondeDuque",
+      "relation": {
+        "@id": "https://datos.madrid.es/egob/catalogo/tipo/entidadesyorganismos/1916-centro-cultura-contemporanea-condeduque.json"
+      }
+    },
+    {
+      "@type": "https://datos.madrid.es/egob/kos/actividades/Musica",
+      "id": "50235568",
+      "title": "Sala Principal municipal",
+      "free": 1,
+      "dtstart": "2026-09-16 18:00:00.0",
+      "time": "18:00",
+      "uid": "50235568",
+      "link": "http://www.madrid.es/evento/sala-principal-municipal",
+      "event-location": "Sala Principal",
+      "relation": {
+        "@id": "https://datos.madrid.es/egob/catalogo/tipo/entidadesyorganismos/8888-sala-principal.json"
+      }
+    },
+    {
+      "@type": "https://datos.madrid.es/egob/kos/actividades/Musica",
+      "id": "50341119",
+      "title": "Concierto en Buenavista",
+      "free": 1,
+      "dtstart": "2026-09-22 19:30:00.0",
+      "time": "19:30",
+      "uid": "50341119",
+      "link": "http://www.madrid.es/evento/buenavista",
+      "event-location": "Centro Cultural Buenavista (Salamanca)",
+      "relation": {
+        "@id": "https://datos.madrid.es/egob/catalogo/tipo/entidadesyorganismos/64851-centro-cultural-buenavista-salamanca-.json"
+      }
     },
     {
       "@type": "https://datos.madrid.es/egob/kos/actividades/Musica",

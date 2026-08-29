@@ -109,6 +109,8 @@ Excluir cuando la identidad principal del evento sea una de estas:
 
 **Flamenco**, incluidos homenajes a Paco de Lucía, jóvenes flamencos, zambombas, etc.
 
+No excluir por la palabra *flamenco* cuando el contexto es claramente musicológico / histórico (escuela **franco-flamenca**, polifonía flamenca, compositores flamencos renacentistas, Códice de Chigi). En ese uso «flamenco» significa Flemish, no el género musical español. Si hay duda entre las dos lecturas, `uncertain` es preferible a un `exclude` determinista: ese `exclude` no llega al fallback de IA.
+
 **Danza**: espectáculos de danza, incluso con repertorio clásico. Ballet, Alvin Ailey, *El Cascanueces* como representación de danza. La agenda es de eventos musicales, no de artes escénicas en general.
 
 **Cine / proyecciones**: películas, cine familiar, cine mudo con acompañamiento, ciclos cuya actividad principal sea ver una película. Si excepcionalmente la componente principal es una **interpretación musical clásica en directo**, no asumir exclusión automática: evaluar el detalle.

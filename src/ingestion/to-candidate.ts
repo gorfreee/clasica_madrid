@@ -26,7 +26,7 @@ export function structuralSkipReason(
     isDateInWindow(occurrence.date, now),
   );
   if (occurrencesInWindow.length === 0) return 'fuera de ventana';
-  if (!matchVenue(event.venueText, catalog)) return 'lugar no reconocido';
+  if (!matchVenue(venueHint(event), catalog)) return 'lugar no reconocido';
   return undefined;
 }
 
@@ -45,7 +45,7 @@ export function toCandidate(
   if (occurrencesInWindow.length === 0) {
     return { skippedReason: 'fuera de ventana' };
   }
-  const venueMatch = matchVenue(event.venueText, catalog);
+  const venueMatch = matchVenue(venueHint(event), catalog);
   if (!venueMatch) {
     return { skippedReason: 'lugar no reconocido' };
   }
@@ -114,6 +114,14 @@ export function toCandidate(
 
 function withVerified(venue: Venue, lastVerifiedAt: string): Venue {
   return { ...venue, lastVerifiedAt };
+}
+
+function venueHint(event: NormalizedEvent) {
+  return {
+    venueText: event.venueText,
+    sourceId: event.sourceId,
+    facilityId: event.venueFacilityId,
+  };
 }
 
 export function findExistingEvent(catalog: Catalog, event: Event, source: Source): Event | undefined {

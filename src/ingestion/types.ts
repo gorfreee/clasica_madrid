@@ -35,6 +35,12 @@ export type RawEvent = {
   externalId?: string;
   observed: RawObserved;
   hydration?: HydrationMeta;
+  /**
+   * Stable facility identifier exposed by the source (e.g. Madrid Datos
+   * `relation.@id` numeric id). Not a catalog `venue.id`. Used only for
+   * source-aware venue resolution; never copied onto ObservedFacts.
+   */
+  venueFacilityId?: string;
 };
 
 export type SourceDefinition = {

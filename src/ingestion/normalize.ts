@@ -31,6 +31,8 @@ export type NormalizedEvent = {
   description?: string;
   occurrences: NormalizedOccurrence[];
   venueText?: string;
+  /** Source facility id when the adapter observed one. Not a catalog venue id. */
+  venueFacilityId?: string;
   organizerText?: string;
   seriesText?: string;
   accessText?: string;
@@ -85,6 +87,7 @@ export function normalizeRawEvent(raw: RawEvent): NormalizedEvent | undefined {
     description: optionalText(raw.observed.description),
     occurrences,
     venueText: optionalText(raw.observed.venueText),
+    venueFacilityId: optionalText(raw.venueFacilityId),
     organizerText: optionalText(raw.observed.organizerText),
     seriesText: optionalText(raw.observed.seriesText),
     accessText,

@@ -22,13 +22,13 @@ Si `expected.eligibility === include`, `kind` debe estar resuelto (`established`
 
 ## Composición
 
-45 eventos reales, elegidos por diversidad (no al azar) a partir del workbook de smoke de Phase 1 y del catálogo publicado. El rebaseline editorial de 2026-08-29 añadió casos de eventos mixtos, ciclo clásico sin programa, contemporánea concertística y actividades participativas.
+49 eventos reales, elegidos por diversidad (no al azar) a partir del workbook de smoke de Phase 1, del catálogo publicado y del acceptance de Phase 2. El rebaseline editorial de 2026-08-29 añadió casos de eventos mixtos, ciclo clásico sin programa, contemporánea concertística y actividades participativas. Esta estabilización añade `golden_chigi_codex` (franco-flamenco ≠ flamenco).
 
 | Eligibility | Casos | Papel |
 |---|---|---|
 | `exclude` | 21 | Falsos positivos que Phase 1 publicaría hoy |
 | `include` | 23 | Repertorio clásico, también cuando el título no lo dice |
-| `uncertain` | 4 | Ficha insuficiente; no auto-publicar |
+| `uncertain` | 5 | Ficha insuficiente; no auto-publicar |
 
 Fuentes representadas: Teatro Real, Auditorio Nacional / CNDM / Excelentia / OCNE, Fever, Teatros del Canal, Teatro de la Zarzuela, Basílica de Medinaceli, Museo Arqueológico Nacional, Madrid a Tempo, Ayuntamiento de Madrid, Real Hermandad del Refugio.
 
@@ -63,6 +63,7 @@ HTML completo no se guarda: el golden set es la capa de *observed facts*. Fixtur
 | `golden_raices_sinfonicas` | fiesta canaria / folklore | bloque clásico autónomo (Saint-Saëns, Falla) en concierto sinfónico → `include` |
 | `golden_madrid_tempo_open_piano` | festival de piano | open piano participativo, sin concierto programado → `exclude` |
 | `golden_domingos_camara_i` | título de ciclo sin obras | serie de conciertos de cámara de solistas de orquesta → `include` |
+| `golden_chigi_codex` | «flamencos» en la ficha | escuela franco-flamenca / Códice de Chigi; no es flamenco musical → no `exclude` |
 
 ## Qué no hace este dataset
 

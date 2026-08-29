@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_chigi_codex",
+  "origin": "phase1-smoke",
+  "sourceId": "auditorio-nacional",
+  "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-08-chigi-codex",
+  "listingTitle": "OCNE. Satélite 08. Chigi Codex",
+  "observed": {
+    "title": "OCNE. Satélite 08. Chigi Codex",
+    "description": "Música de compositores flamencos del Códice de Chigi (ca. 1498).",
+    "categoryText": "OCNE Satélite",
+    "venueText": "Sala Sinfónica",
+    "accessText": "12 €",
+    "programText": "Coro Nacional de España. Miguel Ángel García Cañamero, Edward Houghton, directores. Música de compositores flamencos del Códice de Chigi (ca. 1498).",
+    "performers": [
+      {
+        "name": "Coro Nacional de España"
+      },
+      {
+        "name": "Miguel Ángel García Cañamero",
+        "roleText": "director"
+      },
+      {
+        "name": "Edward Houghton",
+        "roleText": "director"
+      }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "uncertain",
+    "formats": [
+      "choral"
+    ],
+    "eras": [],
+    "access": "paid"
+  },
+  "reason": "Concierto coral de repertorio franco-flamenco renacentista. «Flamencos» aquí es Flemish, no flamenco musical. Un deterministic exclude por esa colisión lingüística es un falso positivo grave.",
+  "missingEvidence": "La ficha no lista compositores u obras con nombre; sin knowledge de esos nombres el núcleo determinista no debe forzar include. Sí debe abstenerse de exclude por flamenco.",
+  "notes": "Regresión del acceptance de Phase 2: identityHaystack contiene «compositores flamencos del Códice de Chigi».",
+  "checkedAt": "2026-08-29"
+}
