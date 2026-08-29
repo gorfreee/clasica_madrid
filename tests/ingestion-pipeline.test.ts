@@ -396,6 +396,40 @@ describe('toCandidate y deduplicación', () => {
     expect(unknownVenue.skippedReason).toBe('lugar no reconocido');
   });
 
+  it('conserva una fecha de ficha futura aunque quede fuera de la ventana de listing', () => {
+    const source = getSourceDefinition('teatro-real');
+    const catalog = teatroCatalog();
+    const postponed = toCandidate(
+      normalized({
+        occurrences: [{ date: '2027-04-11', time: '19:30' }],
+        dateFromDetail: true,
+      }),
+      source,
+      catalog,
+      TEST_NOW,
+      new Set(),
+      new Set(),
+      includeClassification(),
+    );
+    expect(postponed.candidate).toBeDefined();
+    expect(postponed.candidate?.event.occurrences[0]?.date).toBe('2027-04-11');
+  });
+
+  it('no publica un evento cancelado por la ficha', () => {
+    const source = getSourceDefinition('teatro-real');
+    const canceled = toCandidate(
+      normalized({ eventStatus: 'cancelled' }),
+      source,
+      teatroCatalog(),
+      TEST_NOW,
+      new Set(),
+      new Set(),
+      includeClassification(),
+    );
+    expect(canceled.candidate).toBeUndefined();
+    expect(canceled.skippedReason).toBe('cancelado');
+  });
+
   it('incluye los extremos de la ventana hoy y hoy+120', () => {
     const source = getSourceDefinition('teatro-real');
     const catalog = teatroCatalog();

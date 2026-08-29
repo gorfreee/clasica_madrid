@@ -1,4 +1,5 @@
 import { allCaptures, firstMatch, splitBreaks, stripTags } from '../html.ts';
+import { inferScheduleFromText } from './schedule.ts';
 import {
   composersFromWorks,
   normalizePersonList,
@@ -65,6 +66,7 @@ function parseProduction(html: string): ObservedFactPatch {
     .map((part) => stripTags(part))
     .filter(Boolean);
   const works = normalizeWorkList(listItems.map(parseTitleComposerWork));
+  const schedule = inferScheduleFromText([programText, description].filter(Boolean).join(' '));
 
   return {
     ...(description ? { description } : {}),
@@ -72,6 +74,8 @@ function parseProduction(html: string): ObservedFactPatch {
     ...(organizerText ? { organizerText } : {}),
     ...(venueText ? { venueText } : {}),
     ...(programText ? { programText } : {}),
+    ...(schedule.eventStatus ? { eventStatus: schedule.eventStatus } : {}),
+    ...(schedule.occurrences ? { occurrences: schedule.occurrences } : {}),
     performers,
     works,
     composers: composersFromWorks(works),

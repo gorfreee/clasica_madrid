@@ -94,6 +94,71 @@ export function parseObservedDateTime(raw: string): ParsedDateTime | null {
   return null;
 }
 
+const SPANISH_MONTHS: Record<string, string> = {
+  enero: '01',
+  febrero: '02',
+  marzo: '03',
+  abril: '04',
+  mayo: '05',
+  junio: '06',
+  julio: '07',
+  agosto: '08',
+  septiembre: '09',
+  setiembre: '09',
+  octubre: '10',
+  noviembre: '11',
+  diciembre: '12',
+};
+
+const MONTH_NAMES =
+  'enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre';
+const SPANISH_CALENDAR_DATE = new RegExp(
+  `(\\d{1,2})\\s+de\\s+(${MONTH_NAMES})\\s+(?:de\\s+)?(\\d{4})`,
+  'i',
+);
+const POSTPONED_TO_DATE = new RegExp(
+  `(?:aplazad\\w*|pospuest\\w*)[\\s\\S]{0,80}?\\bal\\s+${SPANISH_CALENDAR_DATE.source}`,
+  'i',
+);
+
+/**
+ * Parse a Spanish calendar phrase such as `11 de ABRIL de 2027`.
+ * Returns YYYY-MM-DD or null. Does not guess from numeric-only fragments.
+ */
+export function parseSpanishCalendarDate(raw: string): string | null {
+  return calendarFromMatch(SPANISH_CALENDAR_DATE.exec(foldSpanishDateText(raw)));
+}
+
+/**
+ * New date of an explicit postponement (`pospuesto al …`, `APLAZADO. AL …`).
+ * If several calendar dates appear, the target after `al` wins. If that cue
+ * is missing and more than one date is present, return null (keep the listing).
+ */
+export function parsePostponementDate(raw: string): string | null {
+  const text = foldSpanishDateText(raw);
+  const targeted = POSTPONED_TO_DATE.exec(text);
+  if (targeted) return calendarFromMatch(targeted);
+  const dates = [...text.matchAll(new RegExp(SPANISH_CALENDAR_DATE.source, 'gi'))]
+    .map((match) => calendarFromMatch(match))
+    .filter((item): item is string => Boolean(item));
+  return dates.length === 1 ? dates[0]! : null;
+}
+
+function foldSpanishDateText(raw: string): string {
+  return raw.normalize('NFD').replace(/\p{M}/gu, '');
+}
+
+function calendarFromMatch(match: RegExpExecArray | string[] | null): string | null {
+  const day = match?.[1];
+  const monthName = match?.[2];
+  const year = match?.[3];
+  if (!day || !monthName || !year) return null;
+  const month = SPANISH_MONTHS[monthName.toLowerCase()];
+  if (!month) return null;
+  const date = `${year}-${month}-${day.padStart(2, '0')}`;
+  return isRealIsoDate(date) ? date : null;
+}
+
 export function parseObservedTime(raw: string): string | null {
   const match = TIME_HM.exec(raw.trim());
   if (!match) return null;

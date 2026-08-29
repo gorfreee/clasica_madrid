@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { classify, resolveAccess, resolveFormats, resolveKind } from '../src/ingestion/classification/classify.ts';
+import { classify, resolveAccess, resolveEras, resolveFormats, resolveKind } from '../src/ingestion/classification/classify.ts';
 import type { ObservedFacts } from '../src/ingestion/observed.ts';
 
 function facts(overrides: Partial<ObservedFacts> & Pick<ObservedFacts, 'title'>): ObservedFacts {
@@ -279,6 +279,61 @@ describe('eligibility — conflictos y fallback', () => {
     expect(result.eligibility.value).toBe('include');
   });
 
+  it('incluye un concierto declarado explícitamente como música clásica sin programa completo', () => {
+    const result = classify(
+      facts({
+        title: 'Trilogía andaluza',
+        description:
+          'Concierto de música clásica española. Concierto ilustrado con fotografías, narrado y cantado.',
+      }),
+    );
+    expect(result.eligibility.value).toBe('include');
+    expect(result.eligibility.ruleId).toBe('explicit-classical-concert');
+  });
+
+  it('no incluye solo por un título ambiguo que parezca clásico', () => {
+    expect(classify(facts({ title: 'Concierto de Navidad' })).eligibility.value).not.toBe('include');
+    expect(classify(facts({ title: 'Gala de música' })).eligibility.value).not.toBe('include');
+  });
+
+  it('excluye jazz CNDM / Miles Davis y un musical de Broadway con orquesta', () => {
+    expect(
+      classify(
+        facts({
+          title: 'CNDM. Julián Sánchez Quintet',
+          programText: 'Los sonidos de Miles Davis',
+        }),
+      ).eligibility.value,
+    ).toBe('exclude');
+
+    expect(
+      classify(
+        facts({
+          title: 'UPM. Musicales en Concierto',
+          programText: 'Broadway Showstoppers. My Fair Lady. Chicago.',
+          performers: [{ name: 'Orquesta Metropolitana de Madrid' }],
+        }),
+      ).eligibility.value,
+    ).toBe('exclude');
+  });
+
+  it('un mixto coprincipal barroco+flamenco no se excluye automáticamente', () => {
+    const sarao = classify(
+      facts({
+        title: 'Sarao Barroco',
+        description:
+          'En Sarao barroco, Andreas Prittwitz y el ensamble Lookingback nos invitan a descubrir el pulso festivo del Barroco y el flamenco.',
+        performers: [
+          { name: 'Eva Durán', roleText: 'cante' },
+          { name: 'José Almarcha', roleText: 'guitarra flamenca' },
+          { name: 'Ramiro Morales', roleText: 'guitarra barroca' },
+        ],
+      }),
+    );
+    expect(sarao.eligibility.value).not.toBe('exclude');
+    expect(sarao.eligibility.value).toBe('uncertain');
+  });
+
   it('incluye un concierto de ciclo clásico sin programa obra-por-obra', () => {
     const chamber = classify(
       facts({
@@ -399,6 +454,48 @@ describe('short-circuit del classifier', () => {
     expect(result.eligibility.value).toBe('include');
     expect(result.kind?.value).toBeDefined();
     expect(['established', 'alternative']).toContain(result.kind?.value);
+  });
+});
+
+describe('eras', () => {
+  it('deriva épocas de compositores y de programText cuando el programa los nombra', () => {
+    expect(
+      resolveEras(
+        facts({
+          title: 'Bach',
+          composers: [{ name: 'Johann Sebastian Bach' }],
+        }),
+      ).value,
+    ).toEqual(['baroque']);
+
+    expect(
+      resolveEras(
+        facts({
+          title: 'Clasicismo',
+          programText: 'Mozart: Divertimento. Haydn: Cuarteto op. 20.',
+        }),
+      ).value,
+    ).toEqual(['classical']);
+
+    expect(
+      resolveEras(
+        facts({
+          title: 'Romanticismo',
+          programText: 'Brahms, Sinfonía núm. 4. Mahler, Sinfonía núm. 3.',
+        }),
+      ).value,
+    ).toEqual(['romantic']);
+
+    expect(
+      resolveEras(
+        facts({
+          title: 'Mixto',
+          programText: 'Bach: Suite. Mozart: Concierto. Brahms: Sinfonía.',
+        }),
+      ).value,
+    ).toEqual(['baroque', 'classical', 'romantic']);
+
+    expect(resolveEras(facts({ title: 'Concierto extraordinario' })).value).toEqual([]);
   });
 });
 

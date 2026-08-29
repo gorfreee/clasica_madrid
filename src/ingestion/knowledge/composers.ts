@@ -12,12 +12,12 @@ export type ComposerKnowledge = {
   eras: Era[];
 };
 
-export const COMPOSER_KNOWLEDGE_VERSION = '2026-08-29';
+export const COMPOSER_KNOWLEDGE_VERSION = '2026-08-29b';
 
 export const COMPOSERS: ComposerKnowledge[] = [
   {
     canonicalName: 'Johann Sebastian Bach',
-    aliases: ['Johann Sebastian Bach', 'J. S. Bach', 'J.S. Bach', 'J.S.Bach'],
+    aliases: ['Johann Sebastian Bach', 'J. S. Bach', 'J.S. Bach', 'J.S.Bach', 'Bach'],
     eras: ['baroque'],
   },
   {
@@ -66,6 +66,16 @@ export const COMPOSERS: ComposerKnowledge[] = [
     canonicalName: 'Joseph-François Salomon',
     aliases: ['Joseph-François Salomon', 'Joseph-Francois Salomon', 'Salomon'],
     eras: ['baroque'],
+  },
+  {
+    canonicalName: 'Ludwig van Beethoven',
+    aliases: ['Ludwig van Beethoven', 'L. van Beethoven', 'L. v. Beethoven', 'Beethoven'],
+    eras: ['classical', 'romantic'],
+  },
+  {
+    canonicalName: 'Johannes Brahms',
+    aliases: ['Johannes Brahms', 'J. Brahms', 'Brahms'],
+    eras: ['romantic'],
   },
   {
     canonicalName: 'Wolfgang Amadeus Mozart',
@@ -206,11 +216,47 @@ type ComposerIndex = {
 };
 
 const INDEX: ComposerIndex = buildIndex(COMPOSERS);
+const ALIASES_BY_LENGTH = [...new Set(COMPOSERS.flatMap((entry) => entry.aliases))].sort(
+  (left, right) => right.length - left.length,
+);
 
 export function matchComposer(name: string): ComposerKnowledge | undefined {
   const folded = foldName(name);
   if (!folded) return undefined;
-  return INDEX.byFolded.get(folded) ?? INDEX.byCompact.get(compactName(name));
+  const direct = INDEX.byFolded.get(folded) ?? INDEX.byCompact.get(compactName(name));
+  if (direct) return direct;
+  const withoutYears = name.replace(/\s*\([^)]*\d{3,4}[^)]*\)\s*$/u, '').trim();
+  if (withoutYears && withoutYears !== name) return matchComposer(withoutYears);
+  return undefined;
+}
+
+/**
+ * Conservative scan of observed prose for known composer names.
+ * Longest alias first; word-boundary only. Does not invent names.
+ */
+export function findKnownComposersInText(text: string): ComposerKnowledge[] {
+  const folded = foldName(text);
+  if (!folded) return [];
+  const found: ComposerKnowledge[] = [];
+  const seen = new Set<string>();
+  for (const alias of ALIASES_BY_LENGTH) {
+    const needle = foldName(alias);
+    if (!needle || needle.length < 4) continue;
+    if (!hasFoldedPhrase(folded, needle)) continue;
+    const match = INDEX.byFolded.get(needle);
+    if (!match || seen.has(match.canonicalName)) continue;
+    seen.add(match.canonicalName);
+    found.push(match);
+  }
+  return found;
+}
+
+function hasFoldedPhrase(haystack: string, phrase: string): boolean {
+  return new RegExp(`(?:^| )${escapeRegExp(phrase)}(?: |$)`).test(haystack);
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function foldName(value: string): string {

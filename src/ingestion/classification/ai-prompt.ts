@@ -1,6 +1,6 @@
 import type { ObservedFacts } from '../observed.ts';
 
-export const AI_CLASSIFIER_PROMPT_VERSION = 3 as const;
+export const AI_CLASSIFIER_PROMPT_VERSION = 4 as const;
 
 export function buildAiClassifierUserMessage(observed: ObservedFacts): string {
   return [
@@ -35,11 +35,11 @@ Excluye cuando la identidad principal sea una de estas:
 Flamenco vs franco-flamenco: «franco-flamenco», «escuela flamenca», «polifonía flamenca», «compositores flamencos renacentistas», Códice de Chigi y usos musicológicos equivalentes NO significan el género flamenco español (significan Flemish / escuela franco-flamenca). No excluyas por coincidencia léxica cuando el contexto es claramente esa escuela. Si el contexto no permite distinguir → uncertain.
 
 Eventos mixtos (contenido clásico + no clásico):
-- include si hay un bloque clásico sustancial, autónomo e identificable y el evento global se presenta genuinamente como concierto clásico o sinfónico (p. ej. primera parte independiente de repertorio clásico y segunda parte popular/regional);
-- exclude cuando lo clásico es principalmente acompañamiento, arreglo, ornamentación o formato instrumental de una identidad predominantemente pop, rock, canción popular, jazz, flamenco, música de cine, DJ/electrónica o crossover (p. ej. ABBA/Queen/Beatles con orquesta; Hans Zimmer/Morricone; pop con cuerdas; espectáculo crossover);
-- si ambas identidades son coprincipales y los hechos no permiten decidir con seguridad → uncertain.
+- include si la música clásica es claramente principal, o si hay un bloque clásico sustancial, autónomo e identificable y el evento se presenta como concierto clásico o sinfónico (p. ej. primera parte independiente de repertorio clásico y segunda parte popular/regional);
+- si lo clásico y otra identidad (p. ej. flamenco) son genuinamente coprincipales → include o, como mínimo, uncertain. NUNCA exclude automático por coprincipalidad;
+- exclude SOLO cuando lo clásico es principalmente acompañamiento, arreglo, ornamentación o formato instrumental de una identidad predominantemente pop, rock, canción popular, jazz, flamenco, música de cine, DJ/electrónica o crossover (p. ej. Fito Páez con cuerdas; ABBA/Queen/Beatles con orquesta; Hans Zimmer/Morricone; Pastora Soler; musical de Broadway con orquesta; concierto cuya identidad principal sea jazz; flamenco donde lo clásico es accesorio).
 
-Ciclos y festivales: la ausencia de programa obra-por-obra NO obliga a uncertain. Puede haber evidencia suficiente para include si los hechos observados muestran que es un concierto real y (a) pertenece a un festival o ciclo explícitamente de música clásica, o (b) lo interpreta una formación clásica dentro de una serie cuya identidad clásica está suficientemente demostrada. Eso NO es «source conocida → include» ni «venue clásico → include»: la decisión es por evento. Un mismo ciclo clásico puede contener talleres, jazz, pop u otras actividades paralelas que se excluyen individualmente.
+Ciclos y festivales: la ausencia de programa obra-por-obra NO obliga a uncertain. Puede haber evidencia suficiente para include si los hechos observados muestran que es un concierto real y (a) pertenece a un festival o ciclo explícitamente de música clásica, o (b) lo interpreta una formación clásica dentro de una serie cuya identidad clásica está suficientemente demostrada, o (c) la propia ficha declara de forma explícita y fiable que el evento es un concierto de música clásica (p. ej. «Concierto de música clásica española»). Eso NO es «source conocida → include» ni «venue clásico → include» ni «título ambiguo → include»: la decisión es por evento. Un mismo ciclo clásico puede contener talleres, jazz, pop u otras actividades paralelas que se excluyen individualmente.
 
 Reglas:
 - precisión > cobertura;
@@ -57,7 +57,7 @@ Taxonomías cerradas:
 - eras: early, renaissance, baroque, classical, romantic, twentieth, contemporary
 - kind: established | alternative (solo si eligibility=include; established = circuito profesional/estable; si no hay evidencia, alternative)
 
-eras sólo a partir de obras o compositores observados, o de conocimiento ligado a esos nombres. No deduzcas época por ensemble, ciclo o venue. Vacío es mejor que adivinar.
+eras: si eligibility=include, intenta rellenarlas en la misma respuesta. Derívalas de (1) obras observadas, (2) compositores observados, (3) programText cuando nombra explícitamente compositores u obras. Puedes usar conocimiento musical general sobre esos nombres. Ejemplos: Bach/Händel → baroque; Mozart/Haydn → classical; Beethoven → classical y/o romantic según la obra; Brahms/Mahler → romantic; Falla → twentieth; compositor vivo o encargo contemporáneo → contemporary. Un programa mixto puede tener varias eras. eras=[] sólo si el contenido no permite una estimación razonable. No deduzcas época por ensemble, ciclo o venue. No conviertas eras vacías en exclude.
 
 Devuelve ÚNICAMENTE un objeto JSON con esta forma:
 {

@@ -1,6 +1,6 @@
-import { mergeObserved } from './observed.ts';
+import { mergeObserved, type ObservedFactPatch } from './observed.ts';
 import { normalizeUrl } from './urls.ts';
-import type { AdapterContext, HydrationMeta, RawEvent, SourceAdapter } from './types.ts';
+import type { AdapterContext, HydrationMeta, RawEvent, RawOccurrence, SourceAdapter } from './types.ts';
 
 export function memoizeGet(get: (url: string) => Promise<string>): (url: string) => Promise<string> {
   const cache = new Map<string, Promise<string>>();
@@ -35,10 +35,7 @@ export async function hydrateEvents(
       const body = await ctx.get(detailUrl);
       const patch = adapter.hydrate(event, body, ctx);
       hydrated.push(
-        withHydration(
-          { ...event, observed: { ...event.observed, ...mergeObserved(event.observed, patch) } },
-          { status: 'succeeded', detailUrl },
-        ),
+        withHydration(applyDetailPatch(event, patch), { status: 'succeeded', detailUrl }),
       );
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -60,6 +57,36 @@ export function countHydration(events: RawEvent[]): {
     else if (event.hydration?.status === 'failed') failed += 1;
   }
   return { attempted: succeeded + failed, succeeded, failed };
+}
+
+export function applyDetailPatch(event: RawEvent, patch: ObservedFactPatch): RawEvent {
+  const facts = mergeObserved(event.observed, patch);
+  const merged = preferOccurrences(event.observed.occurrences, patch.occurrences);
+  return {
+    ...event,
+    observed: { ...event.observed, ...facts, occurrences: merged.occurrences },
+    dateFromDetail: merged.replaced,
+    ...(patch.eventStatus ? { eventStatus: patch.eventStatus } : {}),
+  };
+}
+
+function preferOccurrences(
+  listing: RawOccurrence[],
+  detail: ObservedFactPatch['occurrences'],
+): { occurrences: RawOccurrence[]; replaced: boolean } {
+  const explicit = (detail ?? []).filter((item) => item.date);
+  if (explicit.length === 0) {
+    return { occurrences: listing, replaced: false };
+  }
+  const listingTime = listing[0]?.time;
+  return {
+    replaced: true,
+    occurrences: explicit.flatMap((item) =>
+      item.date
+        ? [{ raw: item.raw, date: item.date, time: item.time ?? listingTime }]
+        : [],
+    ),
+  };
 }
 
 function withHydration(event: RawEvent, hydration: HydrationMeta): RawEvent {

@@ -64,6 +64,86 @@ describe('parser de ficha Auditorio Nacional', () => {
     expect(facts.composers).toEqual([{ name: 'Mikel Urquiza' }, { name: 'Gustav Mahler' }]);
   });
 
+  it('un programa largo no convierte Bach, BWV, movimientos ni PAUSA en performers', () => {
+    const html = `
+      <article id="content">
+        <h1>Atlántida Chamber Orchestra. Las 4 Estaciones</h1>
+        <div class="content">
+          <h4>Atlántida Chamber Orchestra<br />Maria Solozobova, violín<br />Dir. Manuel Tévar<br />Programa:<br />Johann Sebastian Bach (1685–1750)<br />Concierto para teclado y cuerdas en Fa menor, BWV 1056<br />I. Allegro moderato<br />II. Largo<br />------PAUSA-----<br />Antonio Vivaldi (1678–1741)<br />Las Cuatro Estaciones, Op. 8</h4>
+        </div>
+        <div class="rightcolumn">
+          <p class="rightColumn__item">
+            <label class="rightColumn__item__label">Sala:</label>
+            <span class="location camara rightColumn__item__text">Sala de Cámara</span>
+          </p>
+        </div>
+      </article>
+    `;
+    const facts = parseAuditorioNacionalDetail(html);
+    const names = facts.performers?.map((item) => item.name) ?? [];
+    expect(names).toContain('Atlántida Chamber Orchestra');
+    expect(names).toContain('Maria Solozobova');
+    expect(names).toContain('Manuel Tévar');
+    expect(names.some((name) => /bach/i.test(name))).toBe(false);
+    expect(names.some((name) => /bwv/i.test(name))).toBe(false);
+    expect(names.some((name) => /pausa/i.test(name))).toBe(false);
+    expect(names.some((name) => /programa/i.test(name))).toBe(false);
+    expect(names.some((name) => /allegro/i.test(name))).toBe(false);
+    expect(facts.programText).toMatch(/Bach/);
+    expect(facts.programText).toMatch(/PAUSA/);
+  });
+
+  it('si el pairing composer/obra es ambiguo, conserva programText y no inventa la asociación', () => {
+    const html = `
+      <article id="content">
+        <h1>CNDM. Cantoría</h1>
+        <div class="content">
+          <h4>CANTORÍA<br />JORGE LOSANA tenor y dirección</h4>
+          <h4>¡A la fiesta!<br />José de San Juan (1687-1735)<br />¡A la fiesta, zagales! (1728)<br />Céfiros corra, pájaros vaya (1723)</h4>
+        </div>
+        <div class="rightcolumn">
+          <p class="rightColumn__item">
+            <label class="rightColumn__item__label">Sala:</label>
+            <span class="rightColumn__item__text">Sala de Cámara</span>
+          </p>
+        </div>
+      </article>
+    `;
+    const facts = parseAuditorioNacionalDetail(html);
+    expect(facts.programText).toMatch(/A la fiesta/);
+    expect(facts.composers).toEqual([]);
+    expect(facts.works).toEqual([]);
+    expect(facts.performers?.map((item) => item.name)).toEqual(
+      expect.arrayContaining(['CANTORÍA', 'JORGE LOSANA']),
+    );
+  });
+
+  it('la ficha de aplazamiento sustituye la fecha del listing', () => {
+    const html = `
+      <article id="content">
+        <h1>CNDM. Barbara Hannigan</h1>
+        <div class="content">
+          <h4>CONCIERTO APLAZADO. AL 11 de ABRIL de 2027<br />BARBARA HANNIGAN soprano<br />BERTRAND CHAMAYOU piano</h4>
+        </div>
+        <div class="rightcolumn">
+          <p class="rightColumn__item">
+            <label class="rightColumn__item__label">Sala:</label>
+            <span class="rightColumn__item__text">Sala de Cámara</span>
+          </p>
+        </div>
+      </article>
+    `;
+    const facts = parseAuditorioNacionalDetail(html);
+    expect(facts.eventStatus).toBe('scheduled');
+    expect(facts.occurrences).toEqual([
+      { raw: expect.stringMatching(/11 de ABRIL de 2027/i), date: '2027-04-11' },
+    ]);
+    expect(facts.performers?.map((item) => item.name)).toEqual(
+      expect.arrayContaining(['BARBARA HANNIGAN', 'BERTRAND CHAMAYOU']),
+    );
+    expect(facts.performers?.some((item) => /aplazado/i.test(item.name))).toBe(false);
+  });
+
   it('no inventa performers, composers ni works si la ficha no los declara', () => {
     const facts = parseAuditorioNacionalDetail(
       '<article><h1>OCNE. Sinfónico 01</h1><p>Concierto de temporada.</p></article>',
@@ -146,6 +226,28 @@ describe('parser de ficha Teatro Real', () => {
     ]);
     expect(facts.works).toEqual([]);
     expect(facts.composers).toEqual([]);
+  });
+
+  it('si la ficha pospone el concierto, usa la fecha nueva y no la original', () => {
+    const html = `
+      <div class="wrap-content-hero">
+        <h4>Domingos de Cámara</h4>
+        <h1>Domingos de Cámara V 25-26</h1>
+      </div>
+      <div class="back-image"></div>
+      <section class="text-intro-show">
+        <div class="wrap-text-free">
+          <p>Concierto originalmente programado para el 5 de julio de 2026 y, posteriormente, pospuesto al 13 de septiembre de 2026.</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+      <section class="functions-show">
+        <div class="functions-show__block--item-space"><p>Sala Principal</p></div>
+      </section>
+    `;
+    const facts = parseTeatroRealDetail(html);
+    expect(facts.eventStatus).toBe('scheduled');
+    expect(facts.occurrences?.[0]?.date).toBe('2026-09-13');
   });
 
   it('no inventa un programa a partir del título', () => {

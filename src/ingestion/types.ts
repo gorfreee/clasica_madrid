@@ -36,6 +36,14 @@ export type RawEvent = {
   observed: RawObserved;
   hydration?: HydrationMeta;
   /**
+   * True when the detail page supplied a parseable date that replaced
+   * the listing occurrences. Publication must not drop that date only
+   * because it falls outside the listing discovery window.
+   */
+  dateFromDetail?: boolean;
+  /** Explicit schedule status from the detail page, when the ficha states one. */
+  eventStatus?: 'scheduled' | 'cancelled' | 'postponed';
+  /**
    * Stable facility identifier exposed by the source (e.g. Madrid Datos
    * `relation.@id` numeric id). Not a catalog `venue.id`. Used only for
    * source-aware venue resolution; never copied onto ObservedFacts.

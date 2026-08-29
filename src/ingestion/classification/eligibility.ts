@@ -124,6 +124,8 @@ function collectInclusions(facts: ObservedFacts, haystack: string): Inclusion[] 
   ) {
     found.push({ ruleId: 'organ-concert', evidence: ['conciertos de órgano'] });
   }
+  const explicitClassical = explicitClassicalConcertDeclaration(facts);
+  if (explicitClassical) found.push(explicitClassical);
   if (describedClassicalPerformance(facts, haystack) && known.length === 0) {
     found.push({
       ruleId: 'described-classical-repertoire',
@@ -168,6 +170,9 @@ function jazzIdentity(
     if (hasWord(fieldFolded(performer.name), 'jazz')) {
       return exclusion('jazz-identity', [performer.name], true);
     }
+  }
+  if (hasPhrase(haystack, 'miles davis')) {
+    return exclusion('jazz-identity', ['Miles Davis'], true);
   }
   if (hasWord(haystack, 'jazz') && !knownClassicalNames(facts).length) {
     return exclusion('jazz-identity', ['jazz'], true);
@@ -380,6 +385,9 @@ function popularMusicIdentity(
   const evidence: string[] = [];
   if (hasWord(title, 'pop') || hasWord(haystack, 'pop')) evidence.push('pop');
   if (hasPhrase(title, 'grandes del pop')) evidence.push('grandes del pop');
+  if (hasPhrase(title, 'musicales en concierto') || hasPhrase(haystack, 'broadway')) {
+    evidence.push('Broadway / musical');
+  }
   if (hasWord(title, 'abba') || hasWord(haystack, 'abba')) evidence.push('ABBA');
   if (hasWord(title, 'beatles')) evidence.push('Beatles');
   if (hasWord(title, 'queen') && (hasWord(title, 'pop') || hasWord(title, 'abba') || hasWord(title, 'beatles'))) {
@@ -416,6 +424,24 @@ function popularProgramHit(program: string): boolean {
     hasWord(program, 'avicii') ||
     hasWord(program, 'coldplay')
   );
+}
+
+function explicitClassicalConcertDeclaration(facts: ObservedFacts): Inclusion | undefined {
+  const fields = [facts.description, facts.programText, facts.categoryText];
+  for (const field of fields) {
+    const folded = fieldFolded(field);
+    if (!folded) continue;
+    if (
+      hasPhrase(folded, 'concierto de musica clasica') ||
+      hasPhrase(folded, 'concierto de musica clasica espanola')
+    ) {
+      return {
+        ruleId: 'explicit-classical-concert',
+        evidence: [field ?? ''],
+      };
+    }
+  }
+  return undefined;
 }
 
 function describedClassicalPerformance(facts: ObservedFacts, _haystack: string): boolean {
