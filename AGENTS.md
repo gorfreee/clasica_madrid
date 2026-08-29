@@ -26,6 +26,7 @@ Standard commands live in `package.json` scripts:
 
 - Node 22 is required (Astro 5). The environment ships Node 22, which is fine; installing prints a harmless `EBADENGINE` warning for `undici` wanting Node `>=22.19.0`, which does not affect dev/build.
 - Use `npm` (not pnpm/yarn). Keep `package-lock.json` committed so CI can `npm ci`.
+- Windows `npm install` can drop optional WASM lockfile entries (`@emnapi/core`, `@emnapi/runtime`) that Linux `npm ci` (GitHub Actions and Cloudflare) requires. If install fails with those packages missing, restore the entries from git rather than re-running `npm install` on Windows.
 - Do not invent production events. Fixtures belong in `tests/`.
 - UI must consume `src/lib/presentation`, not raw JSON files.
 - Pagefind is intentionally not installed yet; search is a query-param filter over the built agenda.
