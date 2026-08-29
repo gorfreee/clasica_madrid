@@ -17,7 +17,7 @@ describe('golden classification dataset', () => {
     const cases = await loadGoldenCases(casesDir);
 
     expect(files.length).toBeGreaterThanOrEqual(35);
-    expect(files.length).toBeLessThanOrEqual(45);
+    expect(files.length).toBeLessThanOrEqual(55);
     expect(cases).toHaveLength(files.length);
 
     const ids = cases.map((item) => item.caseId);
@@ -45,7 +45,7 @@ describe('golden classification dataset', () => {
   it('los casos uncertain explican la evidencia que falta y no son publicables', async () => {
     const cases = await loadGoldenCases(casesDir);
     const uncertain = cases.filter((item) => item.expected.eligibility === 'uncertain');
-    expect(uncertain.length).toBeGreaterThanOrEqual(5);
+    expect(uncertain.length).toBeGreaterThanOrEqual(4);
 
     for (const item of uncertain) {
       expect(item.missingEvidence?.trim().length).toBeGreaterThan(0);

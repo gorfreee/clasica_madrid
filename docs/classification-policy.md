@@ -91,6 +91,8 @@ Clásica Madrid incluye eventos cuyo contenido musical principal sea **música c
 
 Formatos habituales de inclusión, si el repertorio encaja: concierto sinfónico, coral clásico, cámara, recital instrumental o vocal clásico, ópera, zarzuela, música antigua, órgano, ensemble especializado, conciertos contemporáneos del ámbito clásico, programas explícitos de compositores clásicos.
 
+La música **instrumental contemporánea o neoclásica** dentro de la tradición concertística —por ejemplo, repertorio de piano interpretado como recital— puede quedar dentro del ámbito. La popularidad o el carácter comercial del compositor o del producto **no** son criterio de exclusión. Siguen fuera cuando la identidad principal sea música de cine, pop/rock u otro crossover.
+
 No clasificar **solo** por palabras del título si existe ficha de detalle.
 
 ### 1.2 Exclusiones decididas
@@ -113,6 +115,8 @@ Excluir cuando la identidad principal del evento sea una de estas:
 
 **Talleres / actividades educativas no interpretativas**: talleres, encuentros, charlas, conferencias, actividades paralelas, actividades infantiles tipo taller. Ejemplo: `¿Te suena Manon Lescaut?`. Un concierto real con mediación (p. ej. OCNE «Descubre» con narradora y repertorio clásico) **sí** puede ser `include`: la actividad principal sigue siendo el concierto.
 
+**Actividades participativas sin concierto programado**: poner un instrumento a disposición del público, jam participativa, open piano u otras sesiones donde no hay una interpretación concertística anunciada. No se publican como eventos de la agenda. Un recital o concierto real del mismo festival o ciclo se evalúa aparte.
+
 **Otros no musicales / no interpretativos**: exposiciones, visitas, teatro de objetos, coloquios, actos culturales sin interpretación de repertorio clásico.
 
 ### 1.3 Títulos que exigen ficha
@@ -129,13 +133,27 @@ Tras consultar las fuentes oficiales, si el repertorio queda claro, decidir `inc
 
 Un título que *parece* clásico puede ser un gala popular. Un título que *parece* genérico puede ser Mahler. La ficha manda.
 
+La ausencia de programa obra-por-obra **no** obliga siempre a `uncertain`. Un concierto puede tener evidencia suficiente para `include` cuando la fuente oficial demuestra de forma clara que:
+
+- se trata de un concierto real (no un taller, jam, open piano ni otra actividad no interpretativa);
+- pertenece a un festival o ciclo explícitamente de música clásica; o
+- está interpretado por una formación clásica dentro de una serie cuya identidad clásica está suficientemente establecida.
+
+Eso es evidencia válida sobre **ese evento**. No es una regla automática por source ni por venue (`eligibility ≠ source`, `eligibility ≠ venue`). Un mismo ciclo puede contener actividades excluidas: cada evento se evalúa individualmente.
+
 ### 1.4 Eventos mixtos
 
-Si hay un bloque clásico y otro claramente fuera (folk popular, pop, flamenco) y la identidad anunciada es la del bloque no clásico, `exclude`.
+Un evento mixto puede ser `include` si contiene un **bloque clásico sustancial, autónomo e identificable** y el evento global se presenta genuinamente como concierto musical clásico o sinfónico.
 
-Si el repertorio principal es clásico y el elemento ajeno es claramente secundario, `include`.
+Debe seguir siendo `exclude` cuando lo clásico sea principalmente acompañamiento, arreglo, ornamentación o formato instrumental de una identidad predominantemente pop/rock, canción popular, jazz, flamenco, música de cine, crossover, DJ/electrónica u otra categoría expresamente excluida.
 
-Si ambas identidades son coprincipales y no se puede decidir con seguridad, `uncertain`.
+La presencia de orquesta, de un piano o de un compositor clásico aislado **no** convierte en `include` un homenaje pop, un tributo de cine o un espectáculo crossover.
+
+Ejemplos:
+
+- `include`: concierto sinfónico real con una primera parte de repertorio clásico autónomo (obras de concierto, solista y orquesta) y una segunda parte de repertorio popular o regional.
+- `exclude`: ABBA, Queen o Beatles con orquesta; tributo a Hans Zimmer o Morricone; pop anunciado como «de clásico a lo pop»; espectáculo de humor/crossover que parodia un recital.
+- `uncertain`: las dos identidades son coprincipales y no hay un bloque clásico autónomo ni una identidad no clásica que mande con claridad.
 
 ---
 
@@ -247,7 +265,7 @@ Madrid Datos → alternative
 
 Eso era un fallback provisional de la fase 1, ya retirado: `provisionalKind` ya no existe. `kind` no es una propiedad de la source.
 
-Un concierto de pop en el Teatro Real puede ser `established` + `exclude`. Un recital de órgano en una basílica, si forma parte de un ciclo concertístico estable, puede ser `established` + `include`. Un open-piano en un puente es `alternative`.
+Un concierto de pop en el Teatro Real puede ser `established` + `exclude`. Un recital de órgano en una basílica, si forma parte de un ciclo concertístico estable, puede ser `established` + `include`. Un open-piano en un puente, si llegara a clasificarse, sería `alternative`; como actividad participativa su elegibilidad es `exclude`.
 
 ---
 
@@ -320,7 +338,7 @@ El golden set valida el contrato de los fixtures. La fase 2.2 ejecuta el classif
 
 Dataset: `tests/fixtures/ingestion/golden/`.
 
-Aproximadamente 45 eventos reales, mayoritariamente del smoke de fase 1 (`clasica-madrid-phase1-smoke.xlsx`) y algunos del catálogo publicado cuando aportan diversidad (iglesia, museo, festival, Fever, municipal).
+Aproximadamente 48 eventos reales, mayoritariamente del smoke de fase 1 (`clasica-madrid-phase1-smoke.xlsx`) y algunos del catálogo publicado cuando aportan diversidad (iglesia, museo, festival, Fever, municipal).
 
 Cada caso separa hechos observados de expected. Los `uncertain` declaran qué evidencia falta.
 

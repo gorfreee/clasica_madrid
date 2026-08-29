@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_madrid_tempo_inauguracion",
+  "origin": "published-catalog",
+  "sourceId": "madrid-a-tempo",
+  "sourceUrl": "https://www.madridatempo.com/programacion-2023",
+  "listingTitle": "Madrid a Tempo: Concierto de inauguración",
+  "observed": {
+    "title": "Madrid a Tempo: Concierto de inauguración",
+    "seriesText": "Festival Internacional de Piano Madrid a Tempo",
+    "venueText": "Ateneo de Madrid",
+    "accessText": "Entrada gratuita por orden de llegada hasta completar aforo",
+    "performers": [],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": [],
+    "eras": [],
+    "kind": "alternative",
+    "access": "free"
+  },
+  "reason": "La fuente oficial lo anuncia como concierto del Festival Internacional de Piano. No hay programa obra-por-obra, pero hay evidencia suficiente de que es un concierto real de un festival explícitamente de piano clásico. Contrasta con el Open Piano del mismo festival.",
+  "checkedAt": "2026-08-29"
+}

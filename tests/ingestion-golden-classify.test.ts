@@ -27,7 +27,7 @@ describe('golden set → deterministic classifier', () => {
   it('no publica los uncertain esperados y no los convierte en include', async () => {
     const cases = await loadGoldenCases();
     const uncertain = cases.filter((item) => item.expected.eligibility === 'uncertain');
-    expect(uncertain.length).toBeGreaterThanOrEqual(5);
+    expect(uncertain.length).toBeGreaterThanOrEqual(4);
 
     for (const item of uncertain) {
       const actual = classify(item.observed).eligibility.value;

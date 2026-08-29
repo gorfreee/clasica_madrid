@@ -88,6 +88,9 @@ function collectExclusions(facts: ObservedFacts, haystack: string): Exclusion[] 
   const workshop = workshopIdentity(facts, category, title, description);
   if (workshop) found.push(workshop);
 
+  const participatory = participatoryActivity(facts, title, haystack);
+  if (participatory) found.push(participatory);
+
   const film = filmMusicIdentity(facts, haystack);
   if (film) found.push(film);
 
@@ -133,6 +136,8 @@ function collectInclusions(facts: ObservedFacts, haystack: string): Inclusion[] 
       evidence: [facts.categoryText ?? facts.description ?? facts.title],
     });
   }
+  const seriesConcert = classicalConcertSeries(facts, haystack);
+  if (seriesConcert) found.push(seriesConcert);
   return found;
 }
 
@@ -270,7 +275,26 @@ function workshopIdentity(
   return undefined;
 }
 
-function filmMusicIdentity(_facts: ObservedFacts, haystack: string): Exclusion | undefined {
+function participatoryActivity(
+  facts: ObservedFacts,
+  title: string,
+  haystack: string,
+): Exclusion | undefined {
+  if (
+    hasPhrase(title, 'open piano') ||
+    hasPhrase(haystack, 'open piano') ||
+    hasPhrase(title, 'piano abierto') ||
+    hasPhrase(haystack, 'piano abierto')
+  ) {
+    return exclusion('participatory-activity', [facts.title], true);
+  }
+  if (hasPhrase(haystack, 'jam participativa')) {
+    return exclusion('participatory-activity', [facts.title], true);
+  }
+  return undefined;
+}
+
+function filmMusicIdentity(facts: ObservedFacts, haystack: string): Exclusion | undefined {
   const evidence: string[] = [];
   if (hasPhrase(haystack, 'film symphony')) evidence.push('film symphony');
   if (hasPhrase(haystack, 'bandas sonoras') || hasPhrase(haystack, 'banda sonora')) {
@@ -284,6 +308,21 @@ function filmMusicIdentity(_facts: ObservedFacts, haystack: string): Exclusion |
   if (hasPhrase(haystack, 'ennio morricone')) evidence.push('Ennio Morricone');
   if (hasPhrase(haystack, 'royal film concert')) evidence.push('film concert orchestra');
   if (evidence.length === 0) return undefined;
+
+  const namedFilmIdentity =
+    hasPhrase(haystack, 'hans zimmer') ||
+    hasPhrase(haystack, 'john williams') ||
+    hasPhrase(haystack, 'ennio morricone') ||
+    hasPhrase(haystack, 'film symphony') ||
+    hasPhrase(haystack, 'royal film concert') ||
+    hasPhrase(haystack, 'musica de cine');
+  const classicalBlock =
+    knownClassicalNames(facts).length > 0 ||
+    hasPhrase(haystack, 'musica clasica') ||
+    hasPhrase(haystack, 'grandes obras de la musica clasica');
+  if (classicalBlock && !namedFilmIdentity) {
+    return exclusion('film-music-identity', evidence, false, true);
+  }
   return exclusion('film-music-identity', evidence, true);
 }
 
@@ -357,6 +396,32 @@ function academicContemporary(facts: ObservedFacts, haystack: string): boolean {
     hasWord(haystack, 'estreno') ||
     hasPhrase(haystack, 'nuevas obras')
   );
+}
+
+function classicalConcertSeries(facts: ObservedFacts, haystack: string): Inclusion | undefined {
+  const title = fieldFolded(facts.title);
+  const description = fieldFolded(facts.description);
+  const concertCue =
+    hasWord(title, 'concierto') ||
+    hasPhrase(haystack, 'serie de conciertos') ||
+    (description.length > 0 && hasWord(description, 'conciertos'));
+  if (!concertCue) return undefined;
+
+  const seriesCue =
+    hasPhrase(haystack, 'domingos de camara') ||
+    hasPhrase(haystack, 'liceo de camara') ||
+    hasPhrase(haystack, 'musica de camara') ||
+    hasPhrase(haystack, 'festival de piano') ||
+    hasPhrase(haystack, 'festival internacional de piano') ||
+    hasPhrase(haystack, 'ciclo de organo') ||
+    hasPhrase(haystack, 'conciertos de organo') ||
+    hasPhrase(haystack, 'ciclo de grandes autores');
+  if (!seriesCue) return undefined;
+
+  return {
+    ruleId: 'classical-concert-series',
+    evidence: [facts.seriesText ?? facts.categoryText ?? facts.title],
+  };
 }
 
 function isOperaCategory(category: string): boolean {

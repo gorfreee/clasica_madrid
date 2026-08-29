@@ -7,20 +7,22 @@
   "listingTitle": "Los sonidos del universo",
   "observed": {
     "title": "Los sonidos del universo",
+    "description": "Un exquisito recorrido por algunas de las grandes obras de la música clásica y las bandas sonoras más emblemáticas del cine. La delicadeza del violín, la elegancia del arpa y la calidez de la guitarra se unen para ofrecer un concierto lleno de belleza, sensibilidad y emoción, convirtiéndose en el broche de oro de una experiencia única bajo el cielo estrellado.",
     "categoryText": "Actuación música / Música clásica",
     "venueText": "Parque Lineal de Palomeras",
+    "accessText": "Gratuito",
     "performers": [],
     "composers": [],
     "works": []
   },
   "expected": {
-    "eligibility": "uncertain",
+    "eligibility": "include",
     "formats": [],
     "eras": [],
     "kind": "alternative",
-    "access": "unknown"
+    "access": "free"
   },
-  "reason": "Título poético. La categoría municipal dice «Música clásica», pero eso no es un programa. No se asume include por la etiqueta del Ayuntamiento ni free por ser municipal.",
-  "missingEvidence": "Faltan descripción, intérpretes, obras y condiciones de acceso en la ficha consultada.",
+  "reason": "La ficha municipal anuncia un concierto mixto: grandes obras de la música clásica y bandas sonoras, presentado como concierto. No hay obras ni compositores nombrados. La etiqueta municipal no decide por sí sola; el texto oficial sí describe un concierto con bloque clásico.",
+  "notes": "El núcleo determinista puede dejar uncertain (cine + clásica coprincipales, sin obras identificadas). No se inventan compositores. Un include esperado no debe convertirse en exclude.",
   "checkedAt": "2026-08-29"
 }

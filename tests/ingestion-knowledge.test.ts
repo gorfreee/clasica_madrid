@@ -17,6 +17,9 @@ describe('composer knowledge base', () => {
     expect(matchComposer('George Frideric Haendel')?.canonicalName).toBe('Georg Friedrich Händel');
     expect(matchComposer('G. Puccini')?.canonicalName).toBe('Giacomo Puccini');
     expect(matchComposer('Chaikovski')?.eras).toEqual(['romantic']);
+    expect(matchComposer('Camille Saint-Saëns')?.eras).toEqual(['romantic']);
+    expect(matchComposer('Manuel de Falla')?.eras).toEqual(['twentieth']);
+    expect(matchComposer('Ludovico Einaudi')?.eras).toEqual(['contemporary']);
   });
 
   it('no hace fuzzy matching agresivo', () => {

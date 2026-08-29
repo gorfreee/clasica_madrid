@@ -138,6 +138,11 @@ export const COMPOSERS: ComposerKnowledge[] = [
     eras: ['romantic'],
   },
   {
+    canonicalName: 'Camille Saint-Saëns',
+    aliases: ['Camille Saint-Saëns', 'C. Saint-Saëns', 'Saint-Saëns', 'Saint-Saens'],
+    eras: ['romantic'],
+  },
+  {
     canonicalName: 'Jacques Offenbach',
     aliases: ['Jacques Offenbach', 'Offenbach'],
     eras: ['romantic'],
@@ -169,6 +174,11 @@ export const COMPOSERS: ComposerKnowledge[] = [
     eras: ['twentieth'],
   },
   {
+    canonicalName: 'Manuel de Falla',
+    aliases: ['Manuel de Falla', 'Falla'],
+    eras: ['twentieth'],
+  },
+  {
     canonicalName: 'Mikel Urquiza',
     aliases: ['Mikel Urquiza', 'Urquiza'],
     eras: ['contemporary'],
@@ -181,6 +191,11 @@ export const COMPOSERS: ComposerKnowledge[] = [
   {
     canonicalName: 'Jean-Pierre Deleuze',
     aliases: ['Jean-Pierre Deleuze', 'Deleuze'],
+    eras: ['contemporary'],
+  },
+  {
+    canonicalName: 'Ludovico Einaudi',
+    aliases: ['Ludovico Einaudi', 'Einaudi'],
     eras: ['contemporary'],
   },
 ];
