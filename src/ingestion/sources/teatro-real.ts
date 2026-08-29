@@ -1,4 +1,6 @@
+import { parseTeatroRealDetail } from '../detail/teatro-real.ts';
 import { firstMatch, stripTags } from '../html.ts';
+import { emptyObservedLists } from '../observed.ts';
 import { parseObservedTime } from '../dates.ts';
 import { resolveUrl, urlPathIdentity } from '../urls.ts';
 import type { AdapterContext, RawEvent, RawOccurrence, SourceAdapter, SourceDefinition } from '../types.ts';
@@ -44,6 +46,9 @@ export const teatroRealAdapter: SourceAdapter = {
       );
     }
     return events;
+  },
+  hydrate(_event, body) {
+    return parseTeatroRealDetail(body);
   },
 };
 
@@ -116,6 +121,7 @@ function parseContentBox(
       occurrences,
       venueText: venueForCategory(category),
       categoryText: category,
+      ...emptyObservedLists(),
     },
   };
 }

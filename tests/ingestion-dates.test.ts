@@ -122,6 +122,9 @@ describe('normalización', () => {
           { raw: '2026-09-19T19:30:00+02:00' },
         ],
         venueText: '  Sala Sinfónica ',
+        performers: [],
+        composers: [],
+        works: [],
       },
     };
     const normalized = normalizeRawEvent(raw);
@@ -137,7 +140,13 @@ describe('normalización', () => {
     const raw: RawEvent = {
       sourceId: 'x',
       sourceUrl: 'https://example.org/evento',
-      observed: { title: 'Sin fecha', occurrences: [{ raw: 'próximamente' }] },
+      observed: {
+        title: 'Sin fecha',
+        occurrences: [{ raw: 'próximamente' }],
+        performers: [],
+        composers: [],
+        works: [],
+      },
     };
     expect(normalizeRawEvent(raw)).toBeUndefined();
   });

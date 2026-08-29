@@ -23,3 +23,16 @@ export function firstMatch(html: string, pattern: RegExp): string | undefined {
   const match = pattern.exec(html);
   return match?.[1];
 }
+
+export function allCaptures(html: string, pattern: RegExp): string[] {
+  const flags = pattern.global ? pattern.flags : `${pattern.flags}g`;
+  const re = new RegExp(pattern.source, flags);
+  return [...html.matchAll(re)].flatMap((match) => (match[1] ? [match[1]] : []));
+}
+
+export function splitBreaks(html: string): string[] {
+  return html
+    .split(/<br\s*\/?>/i)
+    .map((part) => stripTags(part))
+    .filter(Boolean);
+}

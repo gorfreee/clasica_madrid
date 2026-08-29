@@ -1,6 +1,14 @@
 import type { AccessMode } from '../lib/schemas/index.ts';
 import { collapseWhitespace } from './html.ts';
 import { collapseOccurrences, parseObservedDateTime, parseObservedTime } from './dates.ts';
+import {
+  normalizeComposerList,
+  normalizePersonList,
+  normalizeWorkList,
+  type ObservedComposer,
+  type ObservedPerson,
+  type ObservedWork,
+} from './observed.ts';
 import type { RawEvent, RawOccurrence } from './types.ts';
 import { normalizeUrl } from './urls.ts';
 
@@ -9,6 +17,10 @@ export type NormalizedOccurrence = {
   time: string | null;
 };
 
+/**
+ * Observed facts in a common representation. Still no editorial/musical
+ * interpretation: no eligibility, formats, eras, kind or confidence.
+ */
 export type NormalizedEvent = {
   sourceId: string;
   sourceUrl: string;
@@ -19,8 +31,13 @@ export type NormalizedEvent = {
   venueText?: string;
   organizerText?: string;
   seriesText?: string;
+  accessText?: string;
   access: AccessMode;
   categoryText?: string;
+  programText?: string;
+  performers: ObservedPerson[];
+  composers: ObservedComposer[];
+  works: ObservedWork[];
 };
 
 export function normalizeRawEvents(rawEvents: RawEvent[]): {
@@ -51,32 +68,30 @@ export function normalizeRawEvent(raw: RawEvent): NormalizedEvent | undefined {
   );
   if (occurrences.length === 0) return undefined;
 
-  const description = raw.observed.description
-    ? collapseWhitespace(raw.observed.description) || undefined
-    : undefined;
-  const venueText = raw.observed.venueText
-    ? collapseWhitespace(raw.observed.venueText) || undefined
-    : undefined;
+  const accessText = optionalText(raw.observed.accessText);
 
   return {
     sourceId: raw.sourceId,
     sourceUrl: normalizeUrl(raw.sourceUrl),
     externalId: raw.externalId?.trim() || undefined,
     title,
-    description,
+    description: optionalText(raw.observed.description),
     occurrences,
-    venueText,
-    organizerText: raw.observed.organizerText
-      ? collapseWhitespace(raw.observed.organizerText) || undefined
-      : undefined,
-    seriesText: raw.observed.seriesText
-      ? collapseWhitespace(raw.observed.seriesText) || undefined
-      : undefined,
-    access: inferAccess(raw.observed.accessText),
-    categoryText: raw.observed.categoryText
-      ? collapseWhitespace(raw.observed.categoryText) || undefined
-      : undefined,
+    venueText: optionalText(raw.observed.venueText),
+    organizerText: optionalText(raw.observed.organizerText),
+    seriesText: optionalText(raw.observed.seriesText),
+    accessText,
+    access: inferAccess(accessText),
+    categoryText: optionalText(raw.observed.categoryText),
+    programText: optionalText(raw.observed.programText),
+    performers: normalizePersonList(raw.observed.performers),
+    composers: normalizeComposerList(raw.observed.composers),
+    works: normalizeWorkList(raw.observed.works),
   };
+}
+
+function optionalText(value: string | undefined): string | undefined {
+  return value ? collapseWhitespace(value) || undefined : undefined;
 }
 
 function parseOccurrence(occurrence: RawOccurrence): { date: string; time: string | null } | undefined {

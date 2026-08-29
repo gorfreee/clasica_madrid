@@ -1,4 +1,5 @@
 import type { AccessMode, EventKind, Source } from '../lib/schemas/index.ts';
+import type { ObservedFactPatch, ObservedFacts } from './observed.ts';
 
 /**
  * Facts observed in a source, before editorial or musical interpretation.
@@ -13,20 +14,28 @@ export type RawOccurrence = {
   time?: string;
 };
 
+export type RawObserved = ObservedFacts & {
+  occurrences: RawOccurrence[];
+};
+
+export type HydrationStatus = 'succeeded' | 'failed' | 'not-requested';
+
+/**
+ * Internal pipeline metadata. Never written to `data/events/**`.
+ * Phase 2.2 can use this to know which facts came from a ficha.
+ */
+export type HydrationMeta = {
+  status: HydrationStatus;
+  detailUrl?: string;
+  message?: string;
+};
+
 export type RawEvent = {
   sourceId: string;
   sourceUrl: string;
   externalId?: string;
-  observed: {
-    title: string;
-    description?: string;
-    occurrences: RawOccurrence[];
-    venueText?: string;
-    organizerText?: string;
-    seriesText?: string;
-    accessText?: string;
-    categoryText?: string;
-  };
+  observed: RawObserved;
+  hydration?: HydrationMeta;
 };
 
 export type SourceDefinition = {
@@ -61,12 +70,20 @@ export type SourceAdapter = {
   /** URLs to fetch for this source given the current clock. */
   resolveFetchUrls(source: SourceDefinition, now: Date): string[];
   /**
-   * Parse one fetched body. May be sync or async so Phase 2 can `await ctx.get`
-   * for detail pages without changing the contract again. Throw if the
-   * document is not the expected structure. Skip individual items that lack
-   * required facts. Do not treat a suspiciously empty extraction as success.
+   * Parse one fetched listing/feed body. May be sync or async.
+   * Throw if the document is not the expected structure. Skip individual
+   * items that lack required facts. Do not treat a suspiciously empty
+   * extraction as success.
    */
   extract(body: string, url: string, ctx: AdapterContext): Promise<RawEvent[]> | RawEvent[];
+  /**
+   * Source-specific detail parser. The pipeline fetches `event.sourceUrl`
+   * and calls this; do not fetch inside `hydrate`.
+   *
+   * Throw if the document is not the expected structure. The pipeline treats
+   * that as an event-local hydration failure and keeps the listing facts.
+   */
+  hydrate?(event: RawEvent, body: string, ctx: AdapterContext): ObservedFactPatch;
 };
 
 export type SourceFailure = {
@@ -90,4 +107,7 @@ export type IngestRunSummary = {
   unchangedEvents: number;
   written: string[];
   dryRun: boolean;
+  detailHydrationAttempted: number;
+  detailHydrationSucceeded: number;
+  detailHydrationFailed: number;
 };

@@ -1,4 +1,13 @@
-export type { RawEvent, RawOccurrence, SourceAdapter, SourceDefinition, IngestRunSummary } from './types.ts';
+export type {
+  RawEvent,
+  RawOccurrence,
+  SourceAdapter,
+  SourceDefinition,
+  IngestRunSummary,
+  HydrationMeta,
+  HydrationStatus,
+} from './types.ts';
+export type { ObservedFacts, ObservedPerson, ObservedWork } from './observed.ts';
 export {
   SOURCE_REGISTRY,
   getAdapter,
@@ -7,6 +16,7 @@ export {
   resolveCatalogSource,
 } from './registry.ts';
 export { runIngest, extractSource } from './pipeline.ts';
+export { hydrateEvents, memoizeGet } from './hydrate.ts';
 export { formatRunSummary } from './summary.ts';
 export { normalizeRawEvent, normalizeRawEvents } from './normalize.ts';
 export { parseObservedDateTime, parseObservedTime } from './dates.ts';

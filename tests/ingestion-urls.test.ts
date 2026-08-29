@@ -33,6 +33,9 @@ describe('normalización de URLs en hechos', () => {
         title: 'Bayreuth',
         occurrences: [{ raw: '2026-09-03T19:30', date: '2026-09-03', time: '19:30' }],
         venueText: 'Teatro Real',
+        performers: [],
+        composers: [],
+        works: [],
       },
     };
     expect(normalizeRawEvent(raw)?.sourceUrl).toBe('https://www.teatroreal.es/es/espectaculo/bayreuth');
