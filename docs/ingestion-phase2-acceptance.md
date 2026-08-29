@@ -10,6 +10,7 @@ Esta prueba evalúa si Phase 2 es operable y observable. **No** implementa Phase
 |---|---|
 | Fecha | 2026-08-29 |
 | Base | `origin/main` `7213049` (Phase 2.4 mergeada) |
+| Commit probado | `0545f65` |
 | Rama | `feat/ingestion-phase2-observability` |
 | IA | no configurada (`ai.attempted = 0` en todas las ejecuciones) |
 | Reports | `ingestion/reports/*.json` (gitignorados; no van a Git) |
