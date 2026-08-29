@@ -2,6 +2,8 @@
 
 > Estado: **diseño objetivo vigente y fuente de verdad autoritativa** para la evolución de la ingestión. Este documento define la dirección recomendada para evolucionar la ingestión de Clásica Madrid a una v3 simple, mantenible, automatizada y preparada para usar IA de forma pragmática.
 >
+> La **fase 1** (contratos + vertical slice) está implementada en `src/ingestion/` y se opera con `npm run ingest:sync`. Las fases 2–6 siguen siendo diseño objetivo, no código.
+>
 > [`docs/ingestion.md`](ingestion.md) es la puerta de entrada operativa (qué hay implementado hoy). Los documentos en [`docs/archive/`](archive/) son investigación y planes históricos: no son requisitos vigentes.
 >
 > Toma como base la investigación histórica en [`docs/archive/ingestion-v2-plan.md`](archive/ingestion-v2-plan.md) y [`docs/archive/ingestion-inspiration.md`](archive/ingestion-inspiration.md), el modelo de datos actual y las lecciones de las primeras cargas reales.

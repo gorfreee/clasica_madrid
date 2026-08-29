@@ -1,0 +1,51 @@
+{
+  "@context": {
+    "title": "vcard:fn",
+    "dtstart": "c:dtstart",
+    "time": "c:time"
+  },
+  "@graph": [
+    {
+      "@type": "https://datos.madrid.es/egob/kos/actividades/Musica",
+      "id": "50390001",
+      "title": "Concierto de cámara en el Teatro Real",
+      "description": "Programa de cámara.",
+      "free": 0,
+      "dtstart": "2026-09-15 19:30:00.0",
+      "time": "19:30",
+      "uid": "50390001",
+      "link": "http://www.madrid.es/evento/concierto-camara-teatro-real",
+      "event-location": "Teatro Real"
+    },
+    {
+      "@type": "https://datos.madrid.es/egob/kos/actividades/Musica",
+      "id": "50341118",
+      "title": "Animación infantil participativa de calle",
+      "free": 1,
+      "dtstart": "2026-09-14 18:00:00.0",
+      "time": "18:00",
+      "uid": "50341118",
+      "link": "http://www.madrid.es/evento/animacion-calle",
+      "event-location": ""
+    },
+    {
+      "@type": "https://datos.madrid.es/egob/kos/actividades/Exposiciones",
+      "id": "50366129",
+      "title": "Exposición municipal",
+      "dtstart": "2026-09-01 00:00:00.0",
+      "time": "",
+      "link": "http://www.madrid.es/evento/expo",
+      "event-location": "Museo de San Isidro"
+    },
+    {
+      "@type": "https://datos.madrid.es/egob/kos/actividades/Musica",
+      "id": "50390002",
+      "title": "Ciclo semanal de música",
+      "dtstart": "2026-09-01 00:00:00.0",
+      "time": "",
+      "recurrence": { "days": "MO", "frequency": "WEEKLY", "interval": 1 },
+      "link": "http://www.madrid.es/evento/ciclo",
+      "event-location": "Centro cultural"
+    }
+  ]
+}

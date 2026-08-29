@@ -12,7 +12,7 @@ Canonical event data lives in `data/` and is validated at build/CI time. An empt
 |---|---|---|
 | Astro site | `npm run dev` | Serves on `http://localhost:4321`. This is the entire product. |
 
-Scripts live in `package.json`. Use those names rather than duplicating flags here. The usual loop is `dev`, `validate`, `test`, `check` (Astro/TS diagnostics; there is no ESLint/Prettier), `build` (static output to `dist/`), and `preview`. The currently implemented candidate path is `ingest:promote` (legacy during the v3 migration; not the target architecture).
+Scripts live in `package.json`. Use those names rather than duplicating flags here. The usual loop is `dev`, `validate`, `test`, `check` (Astro/TS diagnostics; there is no ESLint/Prettier), `build` (static output to `dist/`), and `preview`. Harvesting v3 phase 1 is `ingest:sync` / `ingest:source`. `ingest:promote` remains as the legacy candidate-file path during the migration.
 
 ### Non-obvious notes
 
@@ -23,7 +23,7 @@ Scripts live in `package.json`. Use those names rather than duplicating flags he
 - UI must consume `src/lib/presentation`, not raw JSON files.
 - Pagefind is intentionally not installed yet; search is a query-param filter over the built agenda.
 - For any ingestion-related work, `docs/ingestion-v3-plan.md` is the current target-architecture specification. `docs/ingestion.md` is the operational entry point (what is implemented today). Documents under `docs/archive/` are historical and must not be used as current requirements unless a task explicitly asks to research prior decisions.
-- The currently implemented ingestion path is candidate JSON + `ingest:promote`. Working directories under `ingestion/inbox`, `work` and `rejected` are gitignored. That infrastructure may remain during the v3 migration; do not treat it as the future design, and do not remove it unless a task says so.
+- Ingestion v3 phase 1 lives in `src/ingestion/` (`ingest:sync`, `ingest:source`). Candidate JSON + `ingest:promote` remains as a manual/legacy path. Working directories under `ingestion/inbox`, `work` and `rejected` are gitignored. Do not remove that infrastructure unless a task says so. Do not implement later v3 phases (enrichment, GitHub Actions, auto-merge, discovery agents) unless a task asks for that phase.
 - Once an event or venue is published, its `slug` is permanent. Do not rename published slugs. Aliases and historical redirects are not implemented.
 - Every published venue has a `/lugares/{slug}` page, including venues with no upcoming events. The venues index lists only venues with upcoming events.
 - `loadPublishedCatalog()` memoizes the parsed catalog for the process lifetime. Tests that need another tree must call `loadCatalogFromDir`. Restart `astro dev` after editing `data/` if pages look stale.

@@ -12,6 +12,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "ingest:promote": "tsx src/cli/promote-candidate.ts",
+    "ingest:sync": "tsx src/cli/ingest.ts sync",
+    "ingest:source": "tsx src/cli/ingest.ts source",
     "export:excel": "tsx src/cli/export-excel.ts",
     "build": "astro build",
     "preview": "astro preview"

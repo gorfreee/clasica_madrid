@@ -15,7 +15,45 @@ La web no escribe datos. Todo lo publicado entra por Git, pasa validación deter
 
 ## Estado actualmente implementado
 
-Hoy la ingestión es un flujo **manual de candidatos JSON**, anterior a la v3.
+Hay dos caminos. El harvesting determinista de la **v3 fase 1** es el que hay que usar para extraer fuentes conocidas. El flujo de candidatos JSON en disco sigue existiendo como herramienta manual durante la migración.
+
+### Harvesting v3 (fase 1)
+
+Código en `src/ingestion/`. Ejecución local:
+
+```bash
+npm run ingest:sync
+npm run ingest:sync -- --dry-run
+npm run ingest:source -- auditorio-nacional
+npm run ingest:source -- teatro-real --dry-run
+```
+
+Flujo:
+
+1. Carga el source registry (`src/ingestion/registry.ts`).
+2. Ejecuta cada adapter y obtiene `RawEvent[]`.
+3. Aísla fuentes fallidas; las sanas siguen.
+4. Normaliza hechos (textos, fechas, horas, URLs).
+5. Transforma a `Candidate` en memoria (mismo esquema que `ingest:promote`).
+6. Construye y valida el lote completo.
+7. Escribe sólo archivos nuevos. No actualiza eventos ya publicados.
+8. Imprime un resumen (fuentes, RawEvents, candidatos, escritos).
+
+Una segunda ejecución inmediata contra los mismos inputs no debe escribir cambios canónicos.
+
+Fuentes de la fase 1:
+
+| id | Input | Adapter |
+|---|---|---|
+| `auditorio-nacional` | JSON FullCalendar `front-page-events.json` | JSON |
+| `teatro-real` | HTML del calendario `/es/calendario` | HTML custom |
+| `madrid-datos` | JSON-LD abierto `206974-0-agenda-eventos-culturales-100` | JSON-LD (sólo `@type` Música, con fecha, hora y lugar) |
+
+`--dry-run` valida y resume sin escribir. `--data-dir` apunta a otro árbol (por defecto `data/` o `DATA_DIR`).
+
+No hay GitHub Actions de ingestión, enrichment con IA, ni auto-merge. Un evento nuevo sale con `eras`/`formats` vacíos, sin intérpretes ni obras salvo que la fuente los traiga (hoy no). Sólo se publica si el lugar se reconoce de forma inequívoca (catálogo o alias conocidos). Los eventos ya citados por URL o `externalId` se dejan igual.
+
+### Candidatos JSON (legacy)
 
 1. Un agente o una persona extrae un evento y lo escribe como candidato (`src/lib/schemas/candidate.ts`).
 2. El fichero se deja en `ingestion/inbox/` (gitignored).
@@ -63,7 +101,7 @@ Mientras se implementa la v3, puede seguir existiendo esta infraestructura:
 - `ingestion/rejected/`
 - el esquema `Candidate` como fichero JSON en disco
 
-Eso es el **estado actual**, no el diseño futuro. No lo interpretes automáticamente como arquitectura objetivo ni lo tomes como requisito para nuevas piezas de ingestión.
+Eso puede seguir existiendo durante la migración. No lo interpretes como arquitectura objetivo ni como requisito para nuevas piezas de ingestión.
 
 La v3 prevé que, en el flujo automático normal, los candidatos puedan existir sólo en memoria; `ingestion/inbox/` queda como herramienta de imports manuales, debugging y casos excepcionales. Ver [`docs/ingestion-v3-plan.md`](ingestion-v3-plan.md).
 
@@ -75,7 +113,7 @@ Principio rector de la v3: *el código obtiene y controla los hechos; la IA ayud
 
 El flujo normal previsto (harvesting con adapters, `RawEvent`, normalización, enrichment, reconciliación, PR y auto-merge, cadencia ~10 días, ventana de 120 días) está especificado allí. No se duplica en este documento.
 
-Hoy **no** están implementados adapters, `RawEvent`, discovery automático, enrichment, reconciliación ni el workflow programado en GitHub Actions. No los añadas salvo que una tarea pida explícitamente implementar una fase de la v3.
+Hoy **sí** están implementados (fase 1): adapters, `RawEvent`, registry mínimo, normalización común, lote validate-then-write y CLI local. **No** están implementados discovery automático, enrichment, reconciliación fuzzy, política de desapariciones, GitHub Actions de ingestión ni auto-merge. No los añadas salvo que una tarea pida explícitamente la fase correspondiente.
 
 ## CI y auto-merge (hoy vs objetivo)
 
