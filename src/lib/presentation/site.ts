@@ -35,8 +35,8 @@ export async function loadVenuePage(
   return buildVenuePageModel(await getPublishedCatalog(), slug, clock);
 }
 
-export async function loadVenueSlugs(clock: Clock = systemClock): Promise<string[]> {
-  return listVenuePageSlugs(await getPublishedCatalog(), clock);
+export async function loadVenueSlugs(): Promise<string[]> {
+  return listVenuePageSlugs(await getPublishedCatalog());
 }
 
 export type { AgendaPageModel, EventPageModel, VenuePageModel, VenuesIndexModel };

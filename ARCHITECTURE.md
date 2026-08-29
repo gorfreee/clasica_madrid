@@ -19,7 +19,7 @@ Este documento define la arquitectura técnica base del proyecto. Debe manteners
 - JavaScript de cliente mínimo; usar componentes interactivos sólo donde aporten valor real.
 - **JSON** versionado en GitHub para los datos canónicos.
 - **Zod** para validar esquemas y datos.
-- **Pagefind** para búsqueda estática, si resulta suficiente para las necesidades de búsqueda y filtrado.
+- **Pagefind** para búsqueda estática, si resulta suficiente; todavía no está instalado. La agenda filtra en cliente sobre el HTML generado en build.
 - **Cloudflare Pages** para hosting y despliegue estático.
 - **GitHub Actions** para validación, tests, builds y automatizaciones.
 - **Vitest** para lógica y validadores; **Playwright** sólo para recorridos críticos de la interfaz.
@@ -67,12 +67,14 @@ data/
 Los esquemas exactos podrán evolucionar, pero todo dato publicado debe:
 
 - cumplir un esquema explícito y versionado;
-- tener identificadores estables;
+- tener identificadores y slugs estables (un slug publicado no se renombra);
 - conservar la fuente original y la fecha de comprobación cuando sea posible;
 - poder validarse de forma determinista;
 - evitar duplicados y referencias rotas.
 
-Los eventos pasados se conservan en el repositorio para disponer de histórico y permitir futuras estadísticas. La agenda pública está orientada a presente y futuro; cada evento canónico conserva una página pública estable `/eventos/{slug}` aunque todas sus representaciones hayan pasado.
+Los eventos pasados se conservan en el repositorio para disponer de histórico y permitir futuras estadísticas. La agenda pública está orientada a presente y futuro; cada evento canónico conserva una página pública estable `/eventos/{slug}` aunque todas sus representaciones hayan pasado. Cada lugar publicado conserva una página `/lugares/{slug}` aunque ya no tenga conciertos próximos; el índice de lugares puede listar sólo espacios con agenda vigente.
+
+Una vez publicado un evento o un lugar, su `slug` es permanente. No hay aliases ni redirects históricos todavía: no se renombra un slug ya publicado. El identificador (`id`) tampoco cambia.
 
 ## Build y publicación
 
@@ -84,8 +86,6 @@ GitHub (código + datos)
 validación + tests
         ↓
 Astro build
-        ↓
-Pagefind / índices estáticos
         ↓
 Cloudflare Pages
 ```

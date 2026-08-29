@@ -6,17 +6,18 @@ El producto y su alcance están en [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md). L
 
 ## Requisitos
 
-- Node 22+
+- Node 22+ (véase `engines` en `package.json`)
 
 ## Comandos
 
+Los scripts están definidos en `package.json`. Tras `npm install`:
+
 ```bash
-npm install
 npm run dev          # http://localhost:4321
 npm run validate     # esquemas, referencias y duplicados de data/
-npm test             # Vitest (lógica de dominio y validación)
-npm run check        # Astro + TypeScript
-npm run build        # check + sitio estático en dist/
+npm test             # Vitest
+npm run check        # astro check (tipos y diagnósticos)
+npm run build        # sitio estático en dist/
 npm run preview      # sirve dist/
 ```
 
@@ -38,7 +39,7 @@ data/series/
 data/sources/
 ```
 
-Hoy el catálogo de producción está vacío a propósito: la web muestra un estado vacío válido. Cómo modelar y añadir eventos: [`docs/data-model.md`](docs/data-model.md).
+Un catálogo vacío es válido. Cómo modelar y añadir eventos: [`docs/data-model.md`](docs/data-model.md).
 
 Los ejemplos usados en tests viven en `tests/` (incluidas copias JSON en `tests/fixtures/`), no en `data/`.
 
@@ -70,4 +71,4 @@ Los filtros de la agenda viven en la URL (`/?access=free&area=madrid`) y se apli
 
 ## CI
 
-Cada push y pull request ejecuta instalación, validación de datos, tests, typecheck y build (`.github/workflows/ci.yml`).
+Cada push a `main` y cada pull request ejecuta validación de datos, tests, typecheck y build (`.github/workflows/ci.yml`). El push directo a `main` está permitido.

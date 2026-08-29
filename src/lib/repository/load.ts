@@ -15,8 +15,27 @@ export class CatalogValidationError extends Error {
   }
 }
 
+let publishedCatalog: { dir: string; catalog: Promise<Catalog> } | null = null;
+
+/**
+ * Carga el catálogo de DATA_DIR (o `data/`). Queda memoizado durante el proceso
+ * para que el build de Astro no relea y revalide en cada página.
+ *
+ * Los tests que necesiten otro árbol deben usar `loadCatalogFromDir`.
+ */
 export async function loadPublishedCatalog(): Promise<Catalog> {
-  return loadCatalogFromDir(defaultDataDir());
+  const dir = defaultDataDir();
+  if (publishedCatalog?.dir === dir) {
+    return publishedCatalog.catalog;
+  }
+  const catalog = loadCatalogFromDir(dir);
+  publishedCatalog = { dir, catalog };
+  return catalog;
+}
+
+/** Vacía la caché del catálogo publicado. Pensado para tests. */
+export function clearPublishedCatalogCache(): void {
+  publishedCatalog = null;
 }
 
 export async function loadCatalogFromDir(rootDir: string): Promise<Catalog> {

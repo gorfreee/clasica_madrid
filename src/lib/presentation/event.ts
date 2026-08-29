@@ -19,7 +19,7 @@ import {
   seriesKindLabels,
   sourceKindLabels,
 } from './labels.ts';
-import type { Occurrence } from '../schemas/event.ts';
+import type { Event, Occurrence } from '../schemas/event.ts';
 import { SITE_ORIGIN } from './constants.ts';
 
 export type EventOccurrenceModel = {
@@ -158,6 +158,26 @@ function buildEventDescription(resolved: ResolvedEvent, next?: Occurrence, isPas
   return `${parts.join('. ')}.`;
 }
 
+const SCHEMA_EVENT_STATUS = {
+  scheduled: 'https://schema.org/EventScheduled',
+  cancelled: 'https://schema.org/EventCancelled',
+  postponed: 'https://schema.org/EventPostponed',
+} as const;
+
+/** Schema.org / Google Events status for one MusicEvent occurrence. */
+export function musicEventSchemaStatus(
+  eventStatus: Event['status'],
+  occurrenceStatus: Occurrence['status'],
+): (typeof SCHEMA_EVENT_STATUS)[keyof typeof SCHEMA_EVENT_STATUS] {
+  if (eventStatus === 'cancelled' || occurrenceStatus === 'cancelled') {
+    return SCHEMA_EVENT_STATUS.cancelled;
+  }
+  if (eventStatus === 'postponed') {
+    return SCHEMA_EVENT_STATUS.postponed;
+  }
+  return SCHEMA_EVENT_STATUS.scheduled;
+}
+
 function buildMusicEventJsonLd(resolved: ResolvedEvent): Record<string, unknown>[] {
   const { event, venue, organizers, series } = resolved;
   const location: Record<string, unknown> = {
@@ -173,17 +193,15 @@ function buildMusicEventJsonLd(resolved: ResolvedEvent): Record<string, unknown>
   if (venue.url) location.url = venue.url;
 
   return event.occurrences
-    .filter((occurrence) => occurrence.status === 'scheduled')
+    .slice()
+    .sort((a, b) => a.date.localeCompare(b.date) || (a.time ?? '').localeCompare(b.time ?? ''))
     .map((occurrence) => {
       const data: Record<string, unknown> = {
         '@context': 'https://schema.org',
         '@type': 'MusicEvent',
         name: event.title,
         startDate: madridDateTimeIso(occurrence.date, occurrence.time),
-        eventStatus:
-          event.status === 'cancelled'
-            ? 'https://schema.org/EventCancelled'
-            : 'https://schema.org/EventScheduled',
+        eventStatus: musicEventSchemaStatus(event.status, occurrence.status),
         eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
         location,
         url: `${SITE_ORIGIN}/eventos/${event.slug}`,

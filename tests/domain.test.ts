@@ -17,8 +17,9 @@ import {
 import { findEventBySlug, listCanonicalEvents, listUpcomingOccurrences } from '../src/lib/domain/queries.ts';
 import { buildAgendaPageModel } from '../src/lib/presentation/agenda.ts';
 import { buildEventPageModel, listEventPageSlugs } from '../src/lib/presentation/event.ts';
+import { buildVenuePageModel, buildVenuesIndexModel, listVenuePageSlugs } from '../src/lib/presentation/venue.ts';
 import { emptyCatalog } from '../src/lib/domain/catalog.ts';
-import { makeCatalog, makeEvent, richCatalog, testClock } from './helpers.ts';
+import { makeCatalog, makeEvent, makeVenue, richCatalog, testClock } from './helpers.ts';
 
 describe('fechas y ocurrencias', () => {
   it('considera futura una fecha posterior', () => {
@@ -211,6 +212,62 @@ describe('modelos de presentación', () => {
     expect(page?.jsonLd[0]?.['@type']).toBe('MusicEvent');
   });
 
+  it('genera página de lugar aunque no tenga conciertos próximos', () => {
+    const catalog = makeCatalog({
+      events: [
+        makeEvent({
+          occurrences: [{ id: 'occ_pasada', date: '2026-07-01', time: '20:00', status: 'scheduled' }],
+        }),
+      ],
+    });
+    expect(listVenuePageSlugs(catalog)).toEqual(['auditorio-nacional']);
+    const page = buildVenuePageModel(catalog, 'auditorio-nacional', testClock);
+    expect(page).not.toBeNull();
+    expect(page?.upcoming).toEqual([]);
+    expect(page?.canonicalPath).toBe('/lugares/auditorio-nacional');
+  });
+
+  it('el índice de lugares solo lista espacios con próximos conciertos', () => {
+    const historicalVenue = makeVenue({
+      id: 'ven_teatro_historico',
+      slug: 'teatro-historico',
+      name: 'Teatro histórico',
+    });
+    const catalog = makeCatalog({
+      venues: [makeVenue(), historicalVenue],
+      events: [
+        makeEvent(),
+        makeEvent({
+          id: 'evt_verano',
+          slug: 'concierto-de-verano',
+          venueId: 'ven_teatro_historico',
+          occurrences: [{ id: 'occ_verano_1', date: '2026-07-01', time: '20:00', status: 'scheduled' }],
+        }),
+      ],
+    });
+    const index = buildVenuesIndexModel(catalog, testClock);
+    expect(index.venues.map((venue) => venue.slug)).toEqual(['auditorio-nacional']);
+    expect(listVenuePageSlugs(catalog)).toEqual(['auditorio-nacional', 'teatro-historico']);
+    expect(buildVenuePageModel(catalog, 'teatro-historico', testClock)).not.toBeNull();
+  });
+
+  it('los enlaces de eventos históricos apuntan a un lugar con página pública', () => {
+    const catalog = richCatalog();
+    const venuePages = new Set(listVenuePageSlugs(catalog));
+    const historical = buildEventPageModel(catalog, 'concierto-de-verano', testClock);
+    expect(historical?.venueHref).toBe('/lugares/auditorio-nacional');
+    expect(venuePages.has('auditorio-nacional')).toBe(true);
+    expect(buildVenuePageModel(catalog, 'auditorio-nacional', testClock)).not.toBeNull();
+
+    for (const resolved of listCanonicalEvents(catalog)) {
+      const page = buildEventPageModel(catalog, resolved.event.slug, testClock);
+      const slug = page?.venueHref.replace(/^\/lugares\//, '');
+      expect(slug, `${resolved.event.slug} debe enlazar a un lugar`).toBeTruthy();
+      expect(venuePages.has(slug ?? '')).toBe(true);
+      expect(buildVenuePageModel(catalog, slug ?? '', testClock)).not.toBeNull();
+    }
+  });
+
   it('usa la representación futura en la descripción cuando hay pasadas y futuras', () => {
     const catalog = makeCatalog({
       events: [
@@ -228,10 +285,10 @@ describe('modelos de presentación', () => {
     expect(page?.description).not.toContain('20 de agosto');
   });
 
-  it('construye JSON-LD MusicEvent por función activa', () => {
+  it('construye JSON-LD MusicEvent por cada representación', () => {
     const page = buildEventPageModel(richCatalog(), 'carmen', testClock);
     expect(page).not.toBeNull();
-    expect(page?.jsonLd).toHaveLength(2);
+    expect(page?.jsonLd).toHaveLength(3);
     expect(page?.jsonLd[0]?.['@type']).toBe('MusicEvent');
     expect(page?.sources[0]?.isPrimary).toBe(true);
   });

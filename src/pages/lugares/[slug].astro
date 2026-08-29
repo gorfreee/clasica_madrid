@@ -41,9 +41,15 @@ if (!model) {
 
     <section aria-labelledby="proximos-titulo">
       <h2 id="proximos-titulo">Próximos conciertos</h2>
-      <div class="agenda-day__list">
-        {model.upcoming.map((item) => <AgendaItem item={item} />)}
-      </div>
+      {
+        model.upcoming.length === 0 ? (
+          <p>No hay conciertos próximos publicados en este espacio.</p>
+        ) : (
+          <div class="agenda-day__list">
+            {model.upcoming.map((item) => <AgendaItem item={item} />)}
+          </div>
+        )
+      }
     </section>
   </article>
 </Layout>

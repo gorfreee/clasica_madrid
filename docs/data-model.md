@@ -18,7 +18,7 @@ Intérpretes, compositores y obras **no** son entidades propias en v1: van embeb
 
 - IDs estables, ASCII, con prefijo: `evt_carmen_2026`.
 - El nombre del fichero debe coincidir con el ID: `evt_carmen_2026.json`.
-- `slug` en kebab-case, único dentro de su colección. Puede cambiar; el ID no.
+- `slug` en kebab-case, único dentro de su colección. Una vez publicado un evento o un lugar, su slug es permanente. El ID tampoco cambia. No hay aliases ni redirects históricos: no se renombra un slug ya publicado.
 
 ## Evento
 
@@ -45,6 +45,8 @@ Campos principales:
 - `lastVerifiedAt`: `YYYY-MM-DD`, no anterior a ningún `checkedAt`
 
 Un evento no puede publicarse sin procedencia. Si está `cancelled`, todas las representaciones deben estarlo.
+
+En JSON-LD (`MusicEvent` por representación, alineado con Schema.org y Google Events): `scheduled` → `EventScheduled`, `cancelled` → `EventCancelled`, `postponed` → `EventPostponed`. Las representaciones canceladas se incluyen para expresar `EventCancelled`; no se omiten. Un evento aplazado conserva las fechas originales. No hay `EventRescheduled` todavía.
 
 Una misma entidad `Event` solo agrupa `occurrences` cuando comparten los atributos musicales y contextuales esenciales. Cuando lugar, programa, reparto relevante o condiciones cambian sustancialmente, se consideran eventos separados. `Occurrence` permanece simple (`id`, `date`, `time`, `status`): no hay overrides por función. Varias funciones de una ópera o un programa repetido en las mismas condiciones son **un** evento. La agenda aplana esas representaciones en filas cronológicas.
 
@@ -95,3 +97,5 @@ No inventes eventos de producción. Los ejemplos de tests están en `tests/`, no
 ## Histórico
 
 Los eventos pasados se conservan. La agenda lista presente y futuro (y el navegador oculta representaciones que ya hayan pasado desde el último build, en zona `Europe/Madrid`). Cada evento canónico tiene una página pública `/eventos/{slug}` que permanece tras haber pasado: `getStaticPaths()` no exige una representación futura.
+
+Cada lugar publicado tiene una página `/lugares/{slug}` aunque ya no tenga representaciones futuras. El índice `/lugares` lista sólo espacios con próximos conciertos.
