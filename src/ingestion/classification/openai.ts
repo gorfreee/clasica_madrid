@@ -1,9 +1,6 @@
 import type { ObservedFacts } from '../observed.ts';
 import { AI_CLASSIFY_TIMEOUT_MS, type AiClassifier } from './ai.ts';
-import {
-  AI_CLASSIFIER_PROMPT_VERSION,
-  AI_CLASSIFIER_SYSTEM_PROMPT,
-} from './ai-prompt.ts';
+import { AI_CLASSIFIER_SYSTEM_PROMPT, buildAiClassifierUserMessage } from './ai-prompt.ts';
 
 export const OPENAI_DEFAULT_MODEL = 'gpt-4o-mini';
 export const OPENAI_DEFAULT_BASE_URL = 'https://api.openai.com/v1';
@@ -57,7 +54,7 @@ export class OpenAiClassifier implements AiClassifier {
           response_format: { type: 'json_object' },
           messages: [
             { role: 'system', content: AI_CLASSIFIER_SYSTEM_PROMPT },
-            { role: 'user', content: userMessage(observed) },
+            { role: 'user', content: buildAiClassifierUserMessage(observed) },
           ],
         }),
       });
@@ -95,34 +92,6 @@ export class OpenAiClassifier implements AiClassifier {
       clearTimeout(timer);
     }
   }
-}
-
-export type AiEnv = {
-  OPENAI_API_KEY?: string;
-  OPENAI_MODEL?: string;
-  OPENAI_BASE_URL?: string;
-};
-
-/**
- * Build a real provider from env, or undefined when credentials are missing.
- * Callers must treat undefined as "no AI" and keep eligibility uncertain.
- */
-export function createAiClassifierFromEnv(env: AiEnv = process.env): AiClassifier | undefined {
-  const apiKey = env.OPENAI_API_KEY?.trim();
-  if (!apiKey) return undefined;
-  return new OpenAiClassifier({
-    apiKey,
-    model: env.OPENAI_MODEL,
-    baseUrl: env.OPENAI_BASE_URL,
-  });
-}
-
-function userMessage(observed: ObservedFacts): string {
-  return [
-    `promptVersion: ${AI_CLASSIFIER_PROMPT_VERSION}`,
-    'Hechos observados (JSON). No inventes campos ausentes.',
-    JSON.stringify(observed, null, 2),
-  ].join('\n');
 }
 
 function messageContent(payload: unknown): string | undefined {

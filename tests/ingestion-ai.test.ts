@@ -1,18 +1,24 @@
 import { describe, expect, it } from 'vitest';
 import type { ObservedFacts } from '../src/ingestion/observed.ts';
 import type { AiClassifier } from '../src/ingestion/classification/ai.ts';
-import { parseAiClassification } from '../src/ingestion/classification/ai.ts';
+import { AI_CLASSIFICATION_JSON_SCHEMA, parseAiClassification } from '../src/ingestion/classification/ai.ts';
 import {
   AI_CLASSIFIER_PROMPT_VERSION,
   AI_CLASSIFIER_SYSTEM_PROMPT,
+  buildAiClassifierUserMessage,
 } from '../src/ingestion/classification/ai-prompt.ts';
 import { classify } from '../src/ingestion/classification/classify.ts';
 import { classifyObserved, enrichWithAiIfNeeded } from '../src/ingestion/classification/enrich.ts';
 import {
-  createAiClassifierFromEnv,
+  GeminiClassifier,
+  GEMINI_API_REVISION,
+  GEMINI_DEFAULT_MODEL,
+} from '../src/ingestion/classification/gemini.ts';
+import {
   OpenAiClassifier,
   OPENAI_DEFAULT_MODEL,
 } from '../src/ingestion/classification/openai.ts';
+import { createAiClassifierFromEnv } from '../src/ingestion/classification/provider.ts';
 
 function facts(overrides: Partial<ObservedFacts> & Pick<ObservedFacts, 'title'>): ObservedFacts {
   return {
@@ -414,13 +420,6 @@ describe('OpenAI provider (fetch inyectado, sin red)', () => {
     expect(['ai-timeout', 'ai-error']).toContain(result.eligibility.ruleId);
   });
 
-  it('createAiClassifierFromEnv sin clave no construye provider', () => {
-    expect(createAiClassifierFromEnv({})).toBeUndefined();
-    expect(createAiClassifierFromEnv({ OPENAI_API_KEY: '   ' })).toBeUndefined();
-    const built = createAiClassifierFromEnv({ OPENAI_API_KEY: 'sk-test' });
-    expect(built).toBeInstanceOf(OpenAiClassifier);
-  });
-
   it('constructor sin clave lanza; classifyObserved sigue sin tumbar', async () => {
     expect(() => new OpenAiClassifier({ apiKey: '' })).toThrow(/OPENAI_API_KEY/);
     const result = await classifyObserved(uncertainFacts, {
@@ -428,5 +427,219 @@ describe('OpenAI provider (fetch inyectado, sin red)', () => {
     });
     expect(result.eligibility.value).toBe('uncertain');
     expect(result.eligibility.ruleId).toBe('ai-unavailable');
+  });
+});
+
+describe('Gemini provider (fetch inyectado, sin red)', () => {
+  const observed = uncertainFacts;
+
+  function jsonResponse(body: unknown, status = 200): Response {
+    return new Response(JSON.stringify(body), { status });
+  }
+
+  function geminiStepsResponse(text: string): Response {
+    return jsonResponse({
+      steps: [{ type: 'model_output', content: [{ type: 'text', text }] }],
+    });
+  }
+
+  it('construye Interactions request con modelo, auth, prompt, hechos y schema', async () => {
+    let requests = 0;
+    const provider = new GeminiClassifier({
+      apiKey: 'gemini-test',
+      fetch: async (input, init) => {
+        requests += 1;
+        expect(String(input)).toBe('https://generativelanguage.googleapis.com/v1beta/interactions');
+        const headers = new Headers(init?.headers);
+        expect(headers.get('x-goog-api-key')).toBe('gemini-test');
+        expect(headers.get('api-revision')).toBe(GEMINI_API_REVISION);
+        expect(headers.get('authorization')).toBeNull();
+        const body = JSON.parse(String(init?.body));
+        expect(body.model).toBe(GEMINI_DEFAULT_MODEL);
+        expect(body.store).toBe(false);
+        expect(body.system_instruction).toBe(AI_CLASSIFIER_SYSTEM_PROMPT);
+        expect(body.input).toBe(buildAiClassifierUserMessage(observed));
+        expect(body.input).toContain(`promptVersion: ${AI_CLASSIFIER_PROMPT_VERSION}`);
+        expect(body.input).toContain('Concierto extraordinario');
+        expect(body.tools).toBeUndefined();
+        expect(body.generation_config?.tool_choice).toBe('none');
+        expect(body.response_format).toEqual({
+          type: 'text',
+          mime_type: 'application/json',
+          schema: AI_CLASSIFICATION_JSON_SCHEMA,
+        });
+        expect(body.response_format.schema.properties).toHaveProperty('eligibility');
+        expect(body.response_format.schema.properties).toHaveProperty('formats');
+        expect(body.response_format.schema.properties).toHaveProperty('eras');
+        expect(body.response_format.schema.properties).toHaveProperty('kind');
+        expect(body.response_format.schema.properties).toHaveProperty('evidence');
+        expect(body.response_format.schema.properties).toHaveProperty('rationale');
+        return geminiStepsResponse(JSON.stringify({ eligibility: 'uncertain', evidence: ['ficha genérica'] }));
+      },
+    });
+    const raw = await provider.classify(observed);
+    expect(raw).toEqual({ eligibility: 'uncertain', evidence: ['ficha genérica'] });
+    expect(requests).toBe(1);
+  });
+
+  it('usa gemini-3.1-flash-lite por defecto y respeta GEMINI_MODEL', async () => {
+    const defaultProvider = new GeminiClassifier({
+      apiKey: 'gemini-test',
+      fetch: async (_input, init) => {
+        expect(JSON.parse(String(init?.body)).model).toBe('gemini-3.1-flash-lite');
+        return geminiStepsResponse('{"eligibility":"exclude"}');
+      },
+    });
+    await defaultProvider.classify(observed);
+
+    const override = new GeminiClassifier({
+      apiKey: 'gemini-test',
+      model: 'gemini-3.5-flash',
+      fetch: async (_input, init) => {
+        expect(JSON.parse(String(init?.body)).model).toBe('gemini-3.5-flash');
+        return geminiStepsResponse('{"eligibility":"exclude"}');
+      },
+    });
+    await override.classify(observed);
+  });
+
+  it('parsea output_text y steps de una respuesta válida', async () => {
+    const fromSteps = new GeminiClassifier({
+      apiKey: 'gemini-test',
+      fetch: async () => geminiStepsResponse(JSON.stringify({ eligibility: 'include', kind: 'alternative' })),
+    });
+    expect(await fromSteps.classify(observed)).toEqual({ eligibility: 'include', kind: 'alternative' });
+
+    const fromSugar = new GeminiClassifier({
+      apiKey: 'gemini-test',
+      fetch: async () => jsonResponse({ output_text: '{"eligibility":"uncertain"}' }),
+    });
+    expect(await fromSugar.classify(observed)).toEqual({ eligibility: 'uncertain' });
+  });
+
+  it('HTTP error, 429, cuerpo vacío y JSON inválido lanzan', async () => {
+    const http = new GeminiClassifier({
+      apiKey: 'gemini-test',
+      fetch: async () => new Response('nope', { status: 500 }),
+    });
+    await expect(http.classify(observed)).rejects.toThrow(/Gemini HTTP 500/);
+
+    const tooMany = new GeminiClassifier({
+      apiKey: 'gemini-test',
+      fetch: async () => new Response('quota', { status: 429 }),
+    });
+    await expect(tooMany.classify(observed)).rejects.toThrow(/Gemini HTTP 429/);
+
+    const empty = new GeminiClassifier({
+      apiKey: 'gemini-test',
+      fetch: async () => jsonResponse({ steps: [{ type: 'model_output', content: [{ type: 'text', text: '   ' }] }] }),
+    });
+    await expect(empty.classify(observed)).rejects.toThrow(/vacía/);
+
+    const badJson = new GeminiClassifier({
+      apiKey: 'gemini-test',
+      fetch: async () => geminiStepsResponse('no-json'),
+    });
+    await expect(badJson.classify(observed)).rejects.toThrow(/JSON inválido/);
+  });
+
+  it('HTTP, 429, timeout y JSON inválido degradan a uncertain vía classifyObserved', async () => {
+    const http = new GeminiClassifier({
+      apiKey: 'gemini-test',
+      fetch: async () => new Response('boom', { status: 500 }),
+    });
+    const httpResult = await classifyObserved(observed, { ai: http });
+    expect(httpResult.eligibility.value).toBe('uncertain');
+    expect(httpResult.eligibility.ruleId).toBe('ai-error');
+
+    const rateLimited = new GeminiClassifier({
+      apiKey: 'gemini-test',
+      fetch: async () => new Response('quota', { status: 429 }),
+    });
+    const rateResult = await classifyObserved(observed, { ai: rateLimited });
+    expect(rateResult.eligibility.value).toBe('uncertain');
+    expect(rateResult.eligibility.ruleId).toBe('ai-error');
+    expect(rateResult.eligibility.evidence.join(' ')).toMatch(/429/);
+
+    const hanging = new GeminiClassifier({
+      apiKey: 'gemini-test',
+      timeoutMs: 40,
+      fetch: () => new Promise(() => {}),
+    });
+    const timeoutResult = await classifyObserved(observed, { ai: hanging, timeoutMs: 80 });
+    expect(timeoutResult.eligibility.value).toBe('uncertain');
+    expect(['ai-timeout', 'ai-error']).toContain(timeoutResult.eligibility.ruleId);
+
+    const invalid = new GeminiClassifier({
+      apiKey: 'gemini-test',
+      fetch: async () => geminiStepsResponse('no-json'),
+    });
+    const invalidResult = await classifyObserved(observed, { ai: invalid });
+    expect(invalidResult.eligibility.value).toBe('uncertain');
+    expect(invalidResult.eligibility.ruleId).toBe('ai-error');
+  });
+
+  it('constructor sin clave lanza', () => {
+    expect(() => new GeminiClassifier({ apiKey: '' })).toThrow(/GEMINI_API_KEY/);
+  });
+});
+
+describe('createAiClassifierFromEnv — selección de provider', () => {
+  it('sin credenciales sigue siendo ai-unavailable', async () => {
+    expect(createAiClassifierFromEnv({})).toBeUndefined();
+    expect(createAiClassifierFromEnv({ OPENAI_API_KEY: '   ', GEMINI_API_KEY: '   ' })).toBeUndefined();
+    const result = await classifyObserved(uncertainFacts, {
+      ai: createAiClassifierFromEnv({}),
+    });
+    expect(result.eligibility.value).toBe('uncertain');
+    expect(result.eligibility.ruleId).toBe('ai-unavailable');
+  });
+
+  it('sin AI_PROVIDER conserva OpenAI si hay OPENAI_API_KEY', () => {
+    const built = createAiClassifierFromEnv({ OPENAI_API_KEY: 'sk-test' });
+    expect(built).toBeInstanceOf(OpenAiClassifier);
+    const both = createAiClassifierFromEnv({
+      OPENAI_API_KEY: 'sk-test',
+      GEMINI_API_KEY: 'gemini-test',
+    });
+    expect(both).toBeInstanceOf(OpenAiClassifier);
+  });
+
+  it('sin AI_PROVIDER usa Gemini si sólo hay GEMINI_API_KEY', () => {
+    const built = createAiClassifierFromEnv({ GEMINI_API_KEY: 'gemini-test' });
+    expect(built).toBeInstanceOf(GeminiClassifier);
+  });
+
+  it('AI_PROVIDER=gemini exige GEMINI_API_KEY y no cae a OpenAI', () => {
+    expect(
+      createAiClassifierFromEnv({ AI_PROVIDER: 'gemini', OPENAI_API_KEY: 'sk-test' }),
+    ).toBeUndefined();
+    const built = createAiClassifierFromEnv({
+      AI_PROVIDER: 'gemini',
+      GEMINI_API_KEY: 'gemini-test',
+      GEMINI_MODEL: 'gemini-3.5-flash',
+    });
+    expect(built).toBeInstanceOf(GeminiClassifier);
+  });
+
+  it('AI_PROVIDER=openai exige OPENAI_API_KEY y no cae a Gemini', () => {
+    expect(
+      createAiClassifierFromEnv({ AI_PROVIDER: 'openai', GEMINI_API_KEY: 'gemini-test' }),
+    ).toBeUndefined();
+    const built = createAiClassifierFromEnv({
+      AI_PROVIDER: 'openai',
+      OPENAI_API_KEY: 'sk-test',
+    });
+    expect(built).toBeInstanceOf(OpenAiClassifier);
+  });
+
+  it('AI_PROVIDER desconocido no construye provider', () => {
+    expect(
+      createAiClassifierFromEnv({
+        AI_PROVIDER: 'anthropic',
+        OPENAI_API_KEY: 'sk-test',
+        GEMINI_API_KEY: 'gemini-test',
+      }),
+    ).toBeUndefined();
   });
 });

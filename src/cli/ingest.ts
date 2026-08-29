@@ -5,7 +5,7 @@ import { loadCatalogFromDir } from '../lib/repository/load.ts';
 import { formatRunSummary } from '../ingestion/summary.ts';
 import { buildIngestReport, writeIngestReport } from '../ingestion/report.ts';
 import { runIngest } from '../ingestion/pipeline.ts';
-import { createAiClassifierFromEnv } from '../ingestion/classification/openai.ts';
+import { createAiClassifierFromEnv } from '../ingestion/classification/provider.ts';
 import { listSourceDefinitions } from '../ingestion/registry.ts';
 import { ingestExitCode, parseIngestArgs } from './ingest-args.ts';
 

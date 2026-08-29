@@ -23,7 +23,7 @@ export { formatRunSummary } from './summary.ts';
 export { normalizeRawEvent, normalizeRawEvents, observedFactsFromNormalized } from './normalize.ts';
 export { classify } from './classification/classify.ts';
 export { classifyObserved, enrichWithAiIfNeeded } from './classification/enrich.ts';
-export { createAiClassifierFromEnv } from './classification/openai.ts';
+export { createAiClassifierFromEnv } from './classification/provider.ts';
 export type { AiClassifier } from './classification/ai.ts';
 export type { ClassificationResult, PublishableClassification, ResolutionMethod } from './classification/types.ts';
 export { isPublishableInclude } from './classification/types.ts';

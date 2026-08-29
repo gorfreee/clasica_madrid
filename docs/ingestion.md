@@ -62,7 +62,7 @@ Fuentes de la fase 1:
 
 Un adapter que reconoce la estructura general pero no consigue interpretar ningún evento (extracción vacía sospechosa) falla de forma visible; esa fuente se aísla y las demás continúan. Un calendario genuinamente vacío no es un error.
 
-No hay GitHub Actions de ingestión ni auto-merge. Un evento nuevo se publica sólo si la clasificación final es `include` y los datos estructurales (fecha en ventana, lugar reconocible) son válidos. `exclude` no se publica. `uncertain` no se publica (tampoco como include de baja confianza). Sin `OPENAI_API_KEY`, con timeout o respuesta inválida, el fallback de IA degrada a `uncertain` y el resto del lote continúa. CI no llama a un LLM: `runIngest` recibe un `AiClassifier` inyectado por la CLI (`createAiClassifierFromEnv()`). `eras` y `formats` vacíos no bloquean un `include`. `kind` sale del classifier, no de la source. Performers, composers y works se copian cuando la ficha los declara; el rol canónico sólo se asigna si `roleText` es inequívoco. Sólo se publica si el lugar se reconoce de forma inequívoca (catálogo, alias globales, o alias **source-aware**). «Sala Principal» no es un alias global: sólo resuelve a Teatro Real cuando `sourceId=teatro-real`. Madrid Datos puede resolver un centro municipal ya publicado por nombre exacto, por sufijo de distrito `(Retiro)` u otro entre paréntesis al final, o por el id numérico de `relation.@id` cuando está mapeado a un venue canónico. Un facility municipal sin mapeo ni nombre inequívoco sigue siendo `lugar no reconocido`. No se crean venues nuevos por heurística ni se igualan nombres parecidos (p. ej. el centro CondeDuque no es el auditorio canónico). Los eventos ya citados por URL o `externalId` se dejan igual: Phase 2.4 no re-clasifica ni borra `data/**`.
+No hay GitHub Actions de ingestión ni auto-merge. Un evento nuevo se publica sólo si la clasificación final es `include` y los datos estructurales (fecha en ventana, lugar reconocible) son válidos. `exclude` no se publica. `uncertain` no se publica (tampoco como include de baja confianza). Sin provider/credenciales de IA, con timeout o respuesta inválida, el fallback degrada a `uncertain` y el resto del lote continúa. CI no llama a un LLM: `runIngest` recibe un `AiClassifier` inyectado por la CLI (`createAiClassifierFromEnv()`). `eras` y `formats` vacíos no bloquean un `include`. `kind` sale del classifier, no de la source. Performers, composers y works se copian cuando la ficha los declara; el rol canónico sólo se asigna si `roleText` es inequívoco. Sólo se publica si el lugar se reconoce de forma inequívoca (catálogo, alias globales, o alias **source-aware**). «Sala Principal» no es un alias global: sólo resuelve a Teatro Real cuando `sourceId=teatro-real`. Madrid Datos puede resolver un centro municipal ya publicado por nombre exacto, por sufijo de distrito `(Retiro)` u otro entre paréntesis al final, o por el id numérico de `relation.@id` cuando está mapeado a un venue canónico. Un facility municipal sin mapeo ni nombre inequívoco sigue siendo `lugar no reconocido`. No se crean venues nuevos por heurística ni se igualan nombres parecidos (p. ej. el centro CondeDuque no es el auditorio canónico). Los eventos ya citados por URL o `externalId` se dejan igual: Phase 2.4 no re-clasifica ni borra `data/**`.
 
 ### Report por evento
 
@@ -76,7 +76,37 @@ El fichero contiene `summary` (el mismo agregado de la CLI) y `events[]`. Cada f
 
 Es un diagnóstico. No cambia las decisiones de clasificación, no cambia qué se publica, no añade campos al `Event` canónico y no se escribe en `data/**`. En dry-run el catálogo no se modifica. `ingestion/reports/` está gitignorado: no hace falta versionar dumps de una ejecución.
 
-Sin `OPENAI_API_KEY` el fallback de IA no se invoca; los `uncertain` quedan `uncertain` y `aiAttempted` es `false`.
+Sin provider o credenciales utilizables el fallback de IA no se invoca; los `uncertain` quedan `uncertain` y `aiAttempted` es `false`.
+
+### Providers de IA
+
+`AiClassifier` es provider-agnóstico. La CLI construye como máximo un provider por ejecución. La IA **sólo** se llama cuando el classifier determinista queda `uncertain`; no reabre un `include` o `exclude`. `parseAiClassification()` es la única validación del JSON. OpenAI y Gemini usan el mismo `AI_CLASSIFIER_SYSTEM_PROMPT`.
+
+| Variable | Uso |
+|---|---|
+| `AI_PROVIDER` | `openai` o `gemini`. Si falta: OpenAI cuando hay `OPENAI_API_KEY`; si no, Gemini cuando hay `GEMINI_API_KEY`. |
+| `GEMINI_API_KEY` | Credencial de Gemini. No la commits ni la pongas en fixtures, logs o reports. |
+| `GEMINI_MODEL` | Override del modelo Gemini. Por defecto `gemini-3.1-flash-lite`. |
+| `OPENAI_API_KEY` | Credencial de OpenAI. Misma regla: no la commits. |
+| `OPENAI_MODEL` | Override del modelo OpenAI. Por defecto `gpt-4o-mini`. |
+| `OPENAI_BASE_URL` | Override del endpoint de OpenAI. Por defecto `https://api.openai.com/v1`. |
+
+Acceptance real del fallback con Gemini, en dry-run y sin escribir `data/**`:
+
+```bash
+AI_PROVIDER=gemini GEMINI_API_KEY="$GEMINI_API_KEY" npm run ingest:sync -- --dry-run --report ingestion/reports/gemini-acceptance.json
+```
+
+En PowerShell:
+
+```powershell
+$env:AI_PROVIDER = "gemini"
+npm run ingest:sync -- --dry-run --report ingestion/reports/gemini-acceptance.json
+```
+
+(`GEMINI_API_KEY` debe estar ya en el entorno; no la imprimas.)
+
+**Follow-up (no implementado aquí):** el Free Tier de Gemini suele limitar RPM (orden de ~10–15 req/min, según cuenta; ver [AI Studio](https://aistudio.google.com/rate-limit)). Un lote de 100–150 `uncertain` en serie puede devolver 429 y degradar a `uncertain`. Esta PR no añade retries ni throttling.
 
 ### Candidatos JSON (legacy)
 
