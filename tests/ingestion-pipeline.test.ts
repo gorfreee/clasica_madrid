@@ -9,6 +9,7 @@ import { applyCandidateBatch, defaultBatchIo, mergeCandidateBatch } from '../src
 import { runIngest } from '../src/ingestion/pipeline.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { toCandidate } from '../src/ingestion/to-candidate.ts';
+import type { PublishableClassification } from '../src/ingestion/classification/types.ts';
 import { ingestExitCode } from '../src/cli/ingest-args.ts';
 import type { NormalizedEvent } from '../src/ingestion/normalize.ts';
 import { TEST_NOW, makeCatalog, makeEvent, makeSource, makeVenue } from './helpers.ts';
@@ -50,6 +51,9 @@ async function fixtureGet(url: string): Promise<string> {
   if (url.includes('front-page-events.json')) {
     return readFile(path.join(fixtures, 'auditorio-events.json'), 'utf8');
   }
+  if (url.includes('ocne-sinfonico-01')) {
+    return readFile(path.join(fixtures, 'detail', 'auditorio-ocne-sinfonico-01.excerpt.html'), 'utf8');
+  }
   if (url.includes('/es/calendario')) {
     return readFile(path.join(fixtures, 'teatro-real-calendario.html'), 'utf8');
   }
@@ -57,6 +61,19 @@ async function fixtureGet(url: string): Promise<string> {
     return readFile(path.join(fixtures, 'madrid-agenda.json'), 'utf8');
   }
   throw new Error(`URL de test no mapeada: ${url}`);
+}
+
+function includeClassification(
+  overrides: Partial<PublishableClassification> = {},
+): PublishableClassification {
+  return {
+    eligibility: { value: 'include', method: 'rule', ruleId: 'test-include', evidence: [] },
+    formats: { value: [], method: 'fallback', ruleId: 'formats-insufficient', evidence: [] },
+    eras: { value: [], method: 'fallback', ruleId: 'eras-unknown', evidence: [] },
+    kind: { value: 'established', method: 'knowledge', ruleId: 'established-circuit', evidence: ['teatro real'] },
+    access: { value: 'unknown', method: 'fallback', ruleId: 'access-missing', evidence: [] },
+    ...overrides,
+  };
 }
 
 describe('validación de lote', () => {
@@ -361,6 +378,7 @@ describe('toCandidate y deduplicación', () => {
       TEST_NOW,
       usedIds,
       usedSlugs,
+      includeClassification(),
     );
     expect(outside.candidate).toBeUndefined();
     expect(outside.skippedReason).toBe('fuera de ventana');
@@ -372,6 +390,7 @@ describe('toCandidate y deduplicación', () => {
       TEST_NOW,
       usedIds,
       usedSlugs,
+      includeClassification(),
     );
     expect(unknownVenue.candidate).toBeUndefined();
     expect(unknownVenue.skippedReason).toBe('lugar no reconocido');
@@ -387,6 +406,7 @@ describe('toCandidate y deduplicación', () => {
       TEST_NOW,
       new Set(),
       new Set(),
+      includeClassification(),
     );
     const lastDay = toCandidate(
       normalized({
@@ -400,26 +420,45 @@ describe('toCandidate y deduplicación', () => {
       TEST_NOW,
       new Set(),
       new Set(),
+      includeClassification(),
     );
     expect(today.candidate).toBeDefined();
     expect(lastDay.candidate).toBeDefined();
   });
 
-  it('usa kind provisional y reutiliza la Source canónica del catálogo', () => {
+  it('usa classification.kind y no un fallback de la source', () => {
     const source = getSourceDefinition('teatro-real');
     const catalog = teatroCatalog();
-    const built = toCandidate(normalized(), source, catalog, TEST_NOW, new Set(), new Set());
-    expect(built.candidate?.event.kind).toBe('established');
+    const built = toCandidate(
+      normalized(),
+      source,
+      catalog,
+      TEST_NOW,
+      new Set(),
+      new Set(),
+      includeClassification({
+        kind: {
+          value: 'alternative',
+          method: 'fallback',
+          ruleId: 'kind-alternative-fallback',
+          evidence: ['test'],
+        },
+      }),
+    );
+    expect(built.candidate?.event.kind).toBe('alternative');
     expect(built.candidate?.event.primarySourceId).toBe('src_teatro_real');
     expect(built.candidate?.sources).toBeUndefined();
   });
 
-  it('copia nombres observados al candidato y no asigna role canónico', () => {
+  it('copia enrichment de la clasificación y roles inequívocos', () => {
     const source = getSourceDefinition('teatro-real');
     const catalog = teatroCatalog();
     const built = toCandidate(
       normalized({
-        performers: [{ name: 'Kynan Johns', roleText: 'director' }],
+        performers: [
+          { name: 'Kynan Johns', roleText: 'director' },
+          { name: 'Jane Archibal', roleText: 'soprano' },
+        ],
         composers: [{ name: 'Gustav Mahler' }],
         works: [{ title: 'Sinfonía núm. 2', composerName: 'Gustav Mahler' }],
       }),
@@ -428,14 +467,25 @@ describe('toCandidate y deduplicación', () => {
       TEST_NOW,
       new Set(),
       new Set(),
+      includeClassification({
+        eras: { value: ['romantic'], method: 'knowledge', ruleId: 'eras-from-works', evidence: [] },
+        formats: { value: ['symphonic'], method: 'rule', ruleId: 'symphonic-format', evidence: [] },
+        kind: { value: 'established', method: 'knowledge', ruleId: 'established-circuit', evidence: [] },
+        access: { value: 'paid', method: 'rule', ruleId: 'access-paid', evidence: [] },
+      }),
     );
-    expect(built.candidate?.event.performers).toEqual([{ name: 'Kynan Johns' }]);
+    expect(built.candidate?.event.performers).toEqual([
+      { name: 'Kynan Johns', role: 'conductor' },
+      { name: 'Jane Archibal' },
+    ]);
     expect(built.candidate?.event.composers).toEqual([{ name: 'Gustav Mahler' }]);
     expect(built.candidate?.event.works).toEqual([
       { title: 'Sinfonía núm. 2', composerName: 'Gustav Mahler' },
     ]);
-    expect(built.candidate?.event.eras).toEqual([]);
-    expect(built.candidate?.event.formats).toEqual([]);
+    expect(built.candidate?.event.eras).toEqual(['romantic']);
+    expect(built.candidate?.event.formats).toEqual(['symphonic']);
+    expect(built.candidate?.event.kind).toBe('established');
+    expect(built.candidate?.event.access).toBe('paid');
   });
 
   it('detecta un duplicado por externalId y por URL equivalente', () => {

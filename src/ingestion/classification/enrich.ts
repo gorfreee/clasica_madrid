@@ -15,7 +15,8 @@ export type ClassifyObservedOptions = {
  * Deterministic classify(), then at most one AI call if eligibility is uncertain.
  * Include/exclude from rules or knowledge are never reopened. Failures stay uncertain.
  *
- * Not a publication gate: runIngest still uses the Phase 1 Candidate path (PR 2.4).
+ * The publication gate lives in `runIngest`: only a final `include` may
+ * become a Candidate. This function does not publish.
  */
 export async function classifyObserved(
   facts: ObservedFacts,

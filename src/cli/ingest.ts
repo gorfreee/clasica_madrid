@@ -4,6 +4,7 @@ import { defaultDataDir } from '../lib/repository/fs.ts';
 import { loadCatalogFromDir } from '../lib/repository/load.ts';
 import { formatRunSummary } from '../ingestion/summary.ts';
 import { runIngest } from '../ingestion/pipeline.ts';
+import { createAiClassifierFromEnv } from '../ingestion/classification/openai.ts';
 import { listSourceDefinitions } from '../ingestion/registry.ts';
 import { ingestExitCode, parseIngestArgs } from './ingest-args.ts';
 
@@ -25,6 +26,7 @@ try {
     now: systemClock.now(),
     dryRun: parsed.dryRun,
     sourceIds: parsed.command === 'source' ? [parsed.sourceId] : undefined,
+    ai: createAiClassifierFromEnv(),
   });
 
   console.log(formatRunSummary(run.summary));

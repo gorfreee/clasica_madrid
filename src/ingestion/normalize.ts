@@ -4,7 +4,9 @@ import {
   normalizeComposerList,
   normalizePersonList,
   normalizeWorkList,
+  observedFactsSchema,
   type ObservedComposer,
+  type ObservedFacts,
   type ObservedPerson,
   type ObservedWork,
 } from './observed.ts';
@@ -86,6 +88,27 @@ export function normalizeRawEvent(raw: RawEvent): NormalizedEvent | undefined {
     composers: normalizeComposerList(raw.observed.composers),
     works: normalizeWorkList(raw.observed.works),
   };
+}
+
+/**
+ * Project pipeline metadata away before classification / AI.
+ * The result is exactly `ObservedFacts` — never sourceId, sourceUrl,
+ * externalId, occurrences or other technical fields.
+ */
+export function observedFactsFromNormalized(event: NormalizedEvent): ObservedFacts {
+  return observedFactsSchema.parse({
+    title: event.title,
+    ...(event.description ? { description: event.description } : {}),
+    ...(event.categoryText ? { categoryText: event.categoryText } : {}),
+    ...(event.venueText ? { venueText: event.venueText } : {}),
+    ...(event.organizerText ? { organizerText: event.organizerText } : {}),
+    ...(event.seriesText ? { seriesText: event.seriesText } : {}),
+    ...(event.accessText ? { accessText: event.accessText } : {}),
+    ...(event.programText ? { programText: event.programText } : {}),
+    performers: event.performers,
+    composers: event.composers,
+    works: event.works,
+  });
 }
 
 function optionalText(value: string | undefined): string | undefined {

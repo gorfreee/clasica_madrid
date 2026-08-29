@@ -21,3 +21,19 @@ export type ClassificationResult = {
   kind?: Resolution<EventKind>;
   access?: Resolution<AccessMode>;
 };
+
+/**
+ * Final include that may continue toward a Candidate.
+ * `kind` is required: an include without kind is an internal contract violation
+ * and must not be published. Empty `eras` / `formats` remain valid.
+ */
+export type PublishableClassification = ClassificationResult & {
+  eligibility: Resolution<'include'>;
+  kind: Resolution<EventKind>;
+};
+
+export function isPublishableInclude(
+  result: ClassificationResult,
+): result is PublishableClassification {
+  return result.eligibility.value === 'include' && result.kind !== undefined;
+}

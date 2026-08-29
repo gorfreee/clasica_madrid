@@ -40,7 +40,7 @@ Consulta de las URLs oficiales enlazadas desde el smoke o el catálogo (2026-08-
 
 No se usó conocimiento general para rellenar obras ausentes. Si la ficha no lista el programa, `composers`/`works` quedan vacíos y, si hace falta, `uncertain`.
 
-HTML completo no se guarda: el golden set es la capa de *observed facts*. Fixtures HTML de parser viven en `../detail/` (pocos excerpts representativos por source). Phase 2.1 hidrata fichas. Phase 2.2 clasifica esos hechos. Phase 2.3 añade fallback de IA (tests con fake; CI no llama a un LLM). Phase 2.4 conectará el classifier al pipeline.
+HTML completo no se guarda: el golden set es la capa de *observed facts*. Fixtures HTML de parser viven en `../detail/` (pocos excerpts representativos por source). Phase 2.1 hidrata fichas. Phase 2.2 clasifica esos hechos. Phase 2.3 añade fallback de IA (tests con fake; CI no llama a un LLM). Phase 2.4 conecta el classifier al pipeline como puerta de publicación: expected exclude/uncertain nunca llegan a Candidate.
 
 ## Datos deliberadamente unknown / vacíos
 

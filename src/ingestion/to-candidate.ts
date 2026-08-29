@@ -2,6 +2,8 @@ import { madridToday } from '../lib/domain/dates.ts';
 import type { Catalog } from '../lib/domain/catalog.ts';
 import type { Candidate } from '../lib/schemas/candidate.ts';
 import type { Event, Occurrence, Source, Venue } from '../lib/schemas/index.ts';
+import { resolvePerformerRole } from './classification/performer-role.ts';
+import type { PublishableClassification } from './classification/types.ts';
 import { eventIdFor, occurrenceIdFor, uniqueId, uniqueSlug } from './ids.ts';
 import { normalizeUrl, urlPathIdentity, urlsEquivalent } from './urls.ts';
 import type { NormalizedEvent } from './normalize.ts';
@@ -9,12 +11,24 @@ import type { SourceDefinition } from './types.ts';
 import { matchVenue } from './venues.ts';
 import { isDateInWindow } from './dates.ts';
 import { resolveCatalogSource } from './registry.ts';
-import { resolveAccess } from './classification/access.ts';
 
 export type CandidateBuild = {
   candidate?: Candidate;
   skippedReason?: string;
 };
+
+export function structuralSkipReason(
+  event: NormalizedEvent,
+  catalog: Catalog,
+  now: Date,
+): string | undefined {
+  const occurrencesInWindow = event.occurrences.filter((occurrence) =>
+    isDateInWindow(occurrence.date, now),
+  );
+  if (occurrencesInWindow.length === 0) return 'fuera de ventana';
+  if (!matchVenue(event.venueText, catalog)) return 'lugar no reconocido';
+  return undefined;
+}
 
 export function toCandidate(
   event: NormalizedEvent,
@@ -23,6 +37,7 @@ export function toCandidate(
   now: Date,
   usedIds: Set<string>,
   usedSlugs: Set<string>,
+  classification: PublishableClassification,
 ): CandidateBuild {
   const occurrencesInWindow = event.occurrences.filter((occurrence) =>
     isDateInWindow(occurrence.date, now),
@@ -59,19 +74,19 @@ export function toCandidate(
     organizerIds: [],
     seriesId: null,
     occurrences,
-    // Observed names only. Canonical performer.role remains enrichment (PR 2.4).
-    performers: event.performers.map((item) => ({ name: item.name })),
+    performers: event.performers.map((item) => {
+      const role = resolvePerformerRole(item.roleText);
+      return role ? { name: item.name, role } : { name: item.name };
+    }),
     composers: event.composers.map((item) => ({ name: item.name })),
     works: event.works.map((item) => ({
       title: item.title,
       ...(item.composerName ? { composerName: item.composerName } : {}),
     })),
-    eras: [],
-    formats: [],
-    // Phase 1 fallback only. The classifier does not use provisionalKind.
-    // PR 2.4 will replace this with classify().kind when eligibility is include.
-    kind: source.provisionalKind,
-    access: resolveAccess(event.accessText).value,
+    eras: classification.eras?.value ?? [],
+    formats: classification.formats?.value ?? [],
+    kind: classification.kind.value,
+    access: classification.access?.value ?? 'unknown',
     citations: [
       {
         sourceId: catalogSource.id,
