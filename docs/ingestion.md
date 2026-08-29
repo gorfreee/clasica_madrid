@@ -80,7 +80,7 @@ Sin provider o credenciales utilizables el fallback de IA no se invoca; los `unc
 
 ### Providers de IA
 
-`AiClassifier` es provider-agnóstico. La CLI construye como máximo un provider por ejecución. La IA **sólo** se llama cuando el classifier determinista queda `uncertain`; no reabre un `include` o `exclude`. `parseAiClassification()` es la única validación del JSON. OpenAI y Gemini usan el mismo `AI_CLASSIFIER_SYSTEM_PROMPT`.
+`AiClassifier` es provider-agnóstico. La CLI construye como máximo un provider por ejecución. `ingest:sync` / `ingest:source` cargan `.local/ai.env` (gitignorado) si existe; las variables ya definidas en el proceso **no** se pisan. Plantilla: `.env.example`. No commits la clave ni la imprimas. La IA **sólo** se llama cuando el classifier determinista queda `uncertain`; no reabre un `include` o `exclude`. `parseAiClassification()` es la única validación del JSON. OpenAI y Gemini usan el mismo `AI_CLASSIFIER_SYSTEM_PROMPT`.
 
 | Variable | Uso |
 |---|---|
@@ -121,20 +121,17 @@ GEMINI_MODEL_RPM=gemini-3.1-flash-lite:12,gemini-2.5-flash:10
 
 Migración desde `GEMINI_MODEL=gemini-3.5-flash`: o bien dejas esa variable (sigue funcionando como un solo modelo), o bien pasas a `GEMINI_MODELS=gemini-3.5-flash` / `GEMINI_MODELS=gemini-3.1-flash-lite,gemini-3.5-flash`. Si ambas están definidas, gana `GEMINI_MODELS`.
 
-Acceptance real del fallback con Gemini, en dry-run y sin escribir `data/**`:
+Acceptance real del fallback con Gemini, en dry-run y sin escribir `data/**`. Si `.local/ai.env` tiene `AI_PROVIDER=gemini` y `GEMINI_API_KEY`, basta:
+
+```bash
+npm run ingest:sync -- --dry-run --report ingestion/reports/gemini-acceptance.json
+```
+
+Si prefieres el entorno del proceso (gana sobre el fichero):
 
 ```bash
 AI_PROVIDER=gemini GEMINI_API_KEY="$GEMINI_API_KEY" npm run ingest:sync -- --dry-run --report ingestion/reports/gemini-acceptance.json
 ```
-
-En PowerShell:
-
-```powershell
-$env:AI_PROVIDER = "gemini"
-npm run ingest:sync -- --dry-run --report ingestion/reports/gemini-acceptance.json
-```
-
-(`GEMINI_API_KEY` debe estar ya en el entorno; no la imprimas.)
 
 Con el default de 12 RPM, ~117 eventos que llegan a IA tardan del orden de **10–15 minutos** (116 × 5 s de separación más la latencia HTTP). El report JSON incluye `ai-include` / `ai-exclude` / `ai-uncertain` / `ai-invalid-output` / `ai-rate-limited` / `ai-error`, requests, retries, fallbacks de modelo, y, por evento, el modelo final, si hubo fallback y el número de intentos.
 

@@ -8,6 +8,9 @@ import { runIngest } from '../ingestion/pipeline.ts';
 import { createAiClassifierFromEnv } from '../ingestion/classification/provider.ts';
 import { listSourceDefinitions } from '../ingestion/registry.ts';
 import { ingestExitCode, parseIngestArgs } from './ingest-args.ts';
+import { loadLocalAiEnv } from './load-local-env.ts';
+
+loadLocalAiEnv();
 
 const knownSources = listSourceDefinitions().map((source) => source.id);
 const parsed = parseIngestArgs(process.argv.slice(2), knownSources);
