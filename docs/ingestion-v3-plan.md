@@ -2,7 +2,7 @@
 
 > Estado: **diseño objetivo vigente y fuente de verdad autoritativa** para la evolución de la ingestión. Este documento define la dirección recomendada para evolucionar la ingestión de Clásica Madrid a una v3 simple, mantenible, automatizada y preparada para usar IA de forma pragmática.
 >
-> La **fase 1** (contratos + vertical slice + hardening), la **fase 2.1** (hechos observados + hidratación de fichas) y la **fase 2.2** (núcleo de clasificación determinista) están implementadas en `src/ingestion/`. Se operan con `npm run ingest:sync`. El classifier **no** es todavía la puerta de publicación del pipeline: eso es la fase 2.4, después del fallback de IA (fase 2.3). Las fases 3–6 siguen siendo diseño objetivo.
+> La **fase 1** (contratos + vertical slice + hardening), la **fase 2.1** (hechos observados + hidratación de fichas), la **fase 2.2** (núcleo de clasificación determinista) y la **fase 2.3** (fallback de IA con degradación segura) están implementadas en `src/ingestion/`. Se operan con `npm run ingest:sync`. El classifier **no** es todavía la puerta de publicación del pipeline: eso es la fase 2.4. Las fases 3–6 siguen siendo diseño objetivo.
 >
 > [`docs/classification-policy.md`](classification-policy.md) es la política editorial de enrichment. [`docs/ingestion.md`](ingestion.md) es la puerta de entrada operativa (qué hay implementado hoy). Los documentos en [`docs/archive/`](archive/) son investigación y planes históricos: no son requisitos vigentes.
 >
@@ -1138,6 +1138,8 @@ El contrato del golden set (`tests/ingestion-golden.test.ts`) valida el dataset:
 
 La fase 2.2 ejecuta `golden.observed → classify()` (`tests/ingestion-golden-classify.test.ts`) con invariantes duros: cero `include` sobre expected exclude/uncertain; ningún expected include puede ser `exclude`. Sin IA, un include verdadero puede quedar `uncertain`. Las métricas viven en `src/ingestion/classification/metrics.ts`.
 
+La fase 2.3 evalúa `golden.observed → classify() → AI fake si uncertain` (`tests/ingestion-golden-ai.test.ts`). CI no llama a un LLM: los tests inyectan fakes. Un fallo o ausencia de IA deja `uncertain`.
+
 La IA no debe ser la única definición ejecutable de la política. CI no llama a un LLM.
 
 ### 27.4 Tests de reconciliación
@@ -1285,25 +1287,24 @@ Elegir fuentes diferentes entre sí ayuda a validar la abstracción, por ejemplo
 
 **2.2 Deterministic classification core (hecha):** `ObservedFacts → classify()` en `src/ingestion/classification/`. Eligibility conservadora (`include` / `exclude` / `uncertain`) con short-circuit; formats/eras/kind/access sólo si `include`; knowledge base mínima de compositores en `src/ingestion/knowledge/composers.ts`; `access` se resuelve sólo desde `accessText`. Evidence interna (`Resolution`), no confidence numérica. **No** está conectado como puerta de publicación de `runIngest`.
 
-Flujo objetivo del resto de esta fase (2.3–2.4):
+**2.3 AI fallback (hecha):** `classifyObserved()` en `src/ingestion/classification/enrich.ts`. Sólo llama a `AiClassifier` cuando el determinista devuelve `uncertain` (máximo una llamada). Un `include`/`exclude` determinista no se reabre. La respuesta se valida con Zod contra las taxonomías canónicas. Ausencia de provider, timeout, error, JSON inválido o valores fuera de taxonomía → `eligibility = uncertain` con `ruleId` diagnóstico (`ai-unavailable`, `ai-timeout`, `ai-error`, `ai-malformed-output`, `ai-invalid-output`). Provider real: OpenAI Chat Completions vía `fetch` (`OPENAI_API_KEY`); CI y tests usan fakes, nunca un LLM. **Todavía no gobierna la publicación de `runIngest`.**
+
+Flujo implementado (2.1–2.3) y pendiente (2.4):
 
 ```text
 listing harvest
       ↓
 detail-page hydration / observed facts
       ↓
-eligibility
+deterministic classify()
       ↓
-formats / eras / kind / access
+include / exclude → resultado final
+uncertain → AI fallback (2.3) → include | exclude | uncertain
       ↓
-AI fallback (2.3)
-      ↓
-Candidate + publication gate (2.4)
+Candidate + publication gate (2.4, pendiente)
 ```
 
-**2.3 AI fallback (pendiente):** interfaz de enrichment con IA y degradación segura. Sin IA, `uncertain` es el comportamiento correcto.
-
-**2.4 Pipeline integration (pendiente):** `classify` → Candidate → no publicar `exclude`/`uncertain`; sustituir `source.provisionalKind`.
+**2.4 Pipeline integration (pendiente):** `classifyObserved` → Candidate → no publicar `exclude`/`uncertain`; sustituir `source.provisionalKind`.
 
 Acceptance criteria: [`docs/classification-policy.md`](classification-policy.md) §7.
 
