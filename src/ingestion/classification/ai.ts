@@ -33,6 +33,24 @@ export const aiClassificationSchema = z.object({
   rationale: z.string().trim().min(1).max(800).optional(),
 });
 
+/**
+ * JSON Schema for provider structured-output requests.
+ * Must stay aligned with `aiClassificationSchema` / `parseAiClassification`.
+ */
+export const AI_CLASSIFICATION_JSON_SCHEMA = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['eligibility'],
+  properties: {
+    eligibility: { type: 'string', enum: [...ELIGIBILITIES] },
+    formats: { type: 'array', items: { type: 'string', enum: [...FORMATS] } },
+    eras: { type: 'array', items: { type: 'string', enum: [...ERAS] } },
+    kind: { type: 'string', enum: [...EVENT_KINDS] },
+    evidence: { type: 'array', maxItems: 12, items: { type: 'string' } },
+    rationale: { type: 'string' },
+  },
+} as const;
+
 export type ParseAiClassification =
   | { ok: true; value: AiClassificationResult }
   | { ok: false; ruleId: 'ai-malformed-output' | 'ai-invalid-output'; reason: string };

@@ -1,4 +1,14 @@
+import type { ObservedFacts } from '../observed.ts';
+
 export const AI_CLASSIFIER_PROMPT_VERSION = 2 as const;
+
+export function buildAiClassifierUserMessage(observed: ObservedFacts): string {
+  return [
+    `promptVersion: ${AI_CLASSIFIER_PROMPT_VERSION}`,
+    'Hechos observados (JSON). No inventes campos ausentes.',
+    JSON.stringify(observed, null, 2),
+  ].join('\n');
+}
 
 /**
  * Versioned system prompt for the AI eligibility fallback.
