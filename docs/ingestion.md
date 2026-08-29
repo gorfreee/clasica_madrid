@@ -33,10 +33,10 @@ Flujo:
 1. Carga el source registry (`src/ingestion/registry.ts`).
 2. Ejecuta cada adapter y obtiene `RawEvent[]`.
 3. Aísla fuentes fallidas; las sanas siguen.
-4. Normaliza hechos (textos, fechas, horas, URLs).
+4. Normaliza hechos (textos, fechas, horas, URLs). Las URLs usadas en identidad, citas y matching ignoran trailing slash, fragment y casing del hostname; no se eliminan query params.
 5. Transforma a `Candidate` en memoria (mismo esquema que `ingest:promote`).
 6. Construye y valida el lote completo.
-7. Escribe sólo archivos nuevos. No actualiza eventos ya publicados.
+7. Escribe sólo archivos nuevos, primero a un temporal y después al destino. Un fallo no deja el lote a medias. No actualiza eventos ya publicados.
 8. Imprime un resumen (fuentes, RawEvents, candidatos, escritos).
 
 Una segunda ejecución inmediata contra los mismos inputs no debe escribir cambios canónicos.
@@ -49,9 +49,11 @@ Fuentes de la fase 1:
 | `teatro-real` | HTML del calendario `/es/calendario` | HTML custom |
 | `madrid-datos` | JSON-LD abierto `206974-0-agenda-eventos-culturales-100` | JSON-LD (sólo `@type` Música, con fecha, hora y lugar) |
 
-`--dry-run` valida y resume sin escribir. `--data-dir` apunta a otro árbol (por defecto `data/` o `DATA_DIR`).
+`--dry-run` valida y resume sin escribir. `--data-dir` apunta a otro árbol (por defecto `data/` o `DATA_DIR`). La CLI rechaza flags desconocidas, `--data-dir` sin ruta, fuentes inexistentes y combinaciones incorrectas de argumentos.
 
-No hay GitHub Actions de ingestión, enrichment con IA, ni auto-merge. Un evento nuevo sale con `eras`/`formats` vacíos, sin intérpretes ni obras salvo que la fuente los traiga (hoy no). Sólo se publica si el lugar se reconoce de forma inequívoca (catálogo o alias conocidos). Los eventos ya citados por URL o `externalId` se dejan igual.
+Un adapter que reconoce la estructura general pero no consigue interpretar ningún evento (extracción vacía sospechosa) falla de forma visible; esa fuente se aísla y las demás continúan. Un calendario genuinamente vacío no es un error.
+
+No hay GitHub Actions de ingestión, enrichment con IA, ni auto-merge. Un evento nuevo sale con `eras`/`formats` vacíos, sin intérpretes ni obras salvo que la fuente los traiga (hoy no). `kind` es un fallback provisional de la fase 1; la clasificación real pertenece al enrichment y no se deduce de forma permanente de la source. Sólo se publica si el lugar se reconoce de forma inequívoca (catálogo o alias conocidos). Los eventos ya citados por URL o `externalId` se dejan igual. La elegibilidad editorial (un evento de una source clásica no es automáticamente publicable) se documenta para la fase 2 y no se aplica todavía.
 
 ### Candidatos JSON (legacy)
 
@@ -113,7 +115,7 @@ Principio rector de la v3: *el código obtiene y controla los hechos; la IA ayud
 
 El flujo normal previsto (harvesting con adapters, `RawEvent`, normalización, enrichment, reconciliación, PR y auto-merge, cadencia ~10 días, ventana de 120 días) está especificado allí. No se duplica en este documento.
 
-Hoy **sí** están implementados (fase 1): adapters, `RawEvent`, registry mínimo, normalización común, lote validate-then-write y CLI local. **No** están implementados discovery automático, enrichment, reconciliación fuzzy, política de desapariciones, GitHub Actions de ingestión ni auto-merge. No los añadas salvo que una tarea pida explícitamente la fase correspondiente.
+Hoy **sí** están implementados (fase 1): adapters con interpretación estricta, `RawEvent`, registry mínimo (referencia a Source canónica + seed), normalización común, lote validate-then-write atómico, contrato async-compatible de `extract` y CLI local. **No** están implementados discovery automático, enrichment (incluidos `kind` definitivo, elegibilidad y fichas de detalle), reconciliación fuzzy, política de desapariciones, GitHub Actions de ingestión ni auto-merge. No los añadas salvo que una tarea pida explícitamente la fase correspondiente.
 
 ## CI y auto-merge (hoy vs objetivo)
 

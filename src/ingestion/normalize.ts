@@ -2,6 +2,7 @@ import type { AccessMode } from '../lib/schemas/index.ts';
 import { collapseWhitespace } from './html.ts';
 import { collapseOccurrences, parseObservedDateTime, parseObservedTime } from './dates.ts';
 import type { RawEvent, RawOccurrence } from './types.ts';
+import { normalizeUrl } from './urls.ts';
 
 export type NormalizedOccurrence = {
   date: string;
@@ -59,7 +60,7 @@ export function normalizeRawEvent(raw: RawEvent): NormalizedEvent | undefined {
 
   return {
     sourceId: raw.sourceId,
-    sourceUrl: raw.sourceUrl,
+    sourceUrl: normalizeUrl(raw.sourceUrl),
     externalId: raw.externalId?.trim() || undefined,
     title,
     description,

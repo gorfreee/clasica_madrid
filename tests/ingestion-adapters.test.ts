@@ -46,6 +46,12 @@ describe('adapter Auditorio Nacional (JSON)', () => {
       auditorioNacionalAdapter.extract('[{"foo":1}]', 'https://example.test/events.json', ctx('auditorio-nacional')),
     ).toThrow(/no contiene eventos/);
   });
+
+  it('un calendario JSON vacío es un resultado válido', () => {
+    expect(auditorioNacionalAdapter.extract('[]', 'https://example.test/events.json', ctx('auditorio-nacional'))).toEqual(
+      [],
+    );
+  });
 });
 
 describe('adapter Teatro Real (HTML)', () => {
@@ -69,6 +75,38 @@ describe('adapter Teatro Real (HTML)', () => {
       teatroRealAdapter.extract('<html><body>sin calendario</body></html>', 'https://www.teatroreal.es/es/calendario', ctx('teatro-real')),
     ).toThrow(/calendario esperado/);
   });
+
+  it('falla si hay días del calendario pero el markup interno ya no es interpretable', () => {
+    const body = `
+      <div id="accordion-calendar">
+        <div class="item-box" id="box09-2026-03">
+          <div class="contentbox">
+            <article class="show-card">
+              <p class="headline">Bayreuth</p>
+              <time>19:30</time>
+            </article>
+          </div>
+        </div>
+      </div>
+    `;
+    expect(() =>
+      teatroRealAdapter.extract(body, 'https://www.teatroreal.es/es/calendario', ctx('teatro-real')),
+    ).toThrow(/parece tener eventos/);
+  });
+
+  it('un calendario con días pero sin eventos no es un error', () => {
+    const body = `
+      <div id="accordion-calendar">
+        <div class="item-box" id="box09-2026-03">
+          <h2 class="dia-sidebar-calendario">Jueves 03</h2>
+        </div>
+        <div class="item-box" id="box09-2026-04">
+          <h2 class="dia-sidebar-calendario">Viernes 04</h2>
+        </div>
+      </div>
+    `;
+    expect(teatroRealAdapter.extract(body, 'https://www.teatroreal.es/es/calendario', ctx('teatro-real'))).toEqual([]);
+  });
 });
 
 describe('adapter Madrid datos (JSON-LD)', () => {
@@ -88,5 +126,23 @@ describe('adapter Madrid datos (JSON-LD)', () => {
     expect(() =>
       madridDatosAdapter.extract('{"items":[]}', 'https://datos.madrid.es/agenda.json', ctx('madrid-datos')),
     ).toThrow(/@graph/);
+  });
+
+  it('un @graph vacío es un resultado válido', () => {
+    expect(madridDatosAdapter.extract('{"@graph":[]}', 'https://datos.madrid.es/agenda.json', ctx('madrid-datos'))).toEqual(
+      [],
+    );
+  });
+
+  it('falla si hay ítems pero ninguno es música usable', () => {
+    expect(() =>
+      madridDatosAdapter.extract(
+        JSON.stringify({
+          '@graph': [{ '@type': 'https://datos.madrid.es/egob/kos/actividades/Exposiciones', title: 'Expo' }],
+        }),
+        'https://datos.madrid.es/agenda.json',
+        ctx('madrid-datos'),
+      ),
+    ).toThrow(/no hay eventos de música/);
   });
 });

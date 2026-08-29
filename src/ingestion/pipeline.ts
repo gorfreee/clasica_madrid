@@ -98,7 +98,7 @@ export async function extractSource(
   const events: RawEvent[] = [];
   for (const url of urls) {
     const body = await get(url);
-    events.push(...adapter.extract(body, url, ctx));
+    events.push(...(await adapter.extract(body, url, ctx)));
   }
   return events;
 }
