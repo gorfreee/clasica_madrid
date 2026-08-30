@@ -3,12 +3,14 @@ import type { Source } from '../lib/schemas/index.ts';
 import { auditorioNacionalAdapter } from './sources/auditorio-nacional.ts';
 import { madridDatosAdapter } from './sources/madrid-datos.ts';
 import { teatroRealAdapter } from './sources/teatro-real.ts';
+import { teatroZarzuelaAdapter } from './sources/teatro-zarzuela.ts';
 import type { SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
   [auditorioNacionalAdapter.id]: auditorioNacionalAdapter,
   [teatroRealAdapter.id]: teatroRealAdapter,
   [madridDatosAdapter.id]: madridDatosAdapter,
+  [teatroZarzuelaAdapter.id]: teatroZarzuelaAdapter,
 };
 
 const srcAuditorio: Source = {
@@ -62,6 +64,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
     adapterId: madridDatosAdapter.id,
     catalogSourceId: srcAyuntamiento.id,
     seedSource: srcAyuntamiento,
+  },
+  {
+    id: 'teatro-zarzuela',
+    name: 'Teatro de la Zarzuela',
+    urls: ['https://teatrodelazarzuela.inaem.gob.es/es/'],
+    adapterId: teatroZarzuelaAdapter.id,
+    catalogSourceId: 'src_teatro_zarzuela',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_teatro_zarzuela',
+      slug: 'teatro-de-la-zarzuela',
+      name: 'Teatro de la Zarzuela',
+      kind: 'official',
+      url: 'https://teatrodelazarzuela.inaem.gob.es/',
+    },
   },
 ];
 

@@ -450,7 +450,8 @@ function explicitClassicalConcertDeclaration(facts: ObservedFacts): Inclusion | 
 }
 
 function describedClassicalPerformance(facts: ObservedFacts, _haystack: string): boolean {
-  const description = fieldFolded(facts.description);
+  // Naming the theatre is not a declaration of the repertoire performed there.
+  const description = fieldFolded(facts.description).replace(/\bteatro (?:de la )?zarzuela\b/g, '');
   if (!description) return false;
   const performs = /interpreta/.test(description);
   const repertoire =

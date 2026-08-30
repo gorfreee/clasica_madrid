@@ -48,6 +48,10 @@ async function fileExists(filePath: string): Promise<boolean> {
 }
 
 async function fixtureGet(url: string): Promise<string> {
+  if (url === 'https://teatrodelazarzuela.inaem.gob.es/es/') {
+    return '<a href="/es/temporada/lirica-2026-2027">Lírica</a>';
+  }
+  if (url.includes('teatrodelazarzuela.inaem.gob.es')) return '<ul class="listadoObras"></ul>';
   if (url.includes('front-page-events.json')) {
     return readFile(path.join(fixtures, 'auditorio-events.json'), 'utf8');
   }
@@ -166,7 +170,7 @@ describe('aislamiento de fallos por fuente', () => {
       },
     });
     expect(run.summary.sourcesFailed.map((item) => item.sourceId)).toEqual(['teatro-real']);
-    expect(run.summary.sourcesSucceeded).toEqual(['auditorio-nacional', 'madrid-datos']);
+    expect(run.summary.sourcesSucceeded).toEqual(['auditorio-nacional', 'madrid-datos', 'teatro-zarzuela']);
     expect(run.rawEvents.length).toBeGreaterThan(0);
     expect(run.rawEvents.some((event) => event.sourceId === 'teatro-real')).toBe(false);
     expect(run.summary.written).toEqual([]);
@@ -185,7 +189,7 @@ describe('aislamiento de fallos por fuente', () => {
       },
     });
     expect(run.summary.sourcesSucceeded).toEqual([]);
-    expect(run.summary.sourcesFailed).toHaveLength(3);
+    expect(run.summary.sourcesFailed).toHaveLength(4);
     expect(run.summary.written).toEqual([]);
     expect(run.apply.report.ok).toBe(true);
     expect(run.summary.health).toBe('fatal');
