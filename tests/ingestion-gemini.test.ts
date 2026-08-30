@@ -106,10 +106,8 @@ describe('Gemini config', () => {
       'gemini-3.6-flash',
       'gemini-3.5-flash',
       'gemini-3-flash-preview',
-      'gemini-2.5-flash',
       'gemini-3.5-flash-lite',
       'gemini-3.1-flash-lite',
-      'gemini-2.5-flash-lite',
       'gemma-4-31b-it',
       'gemma-4-26b-a4b-it',
     ]);
@@ -157,6 +155,26 @@ describe('Gemini config', () => {
       }),
     ).toEqual(['gemini-3.1-flash-lite', 'gemini-2.5-flash']);
     expect(resolveGeminiModels({ model: 'gemini-3.5-flash' })).toEqual(['gemini-3.5-flash']);
+  });
+
+  it('permite configurar los modelos 2.5 retirados explícitamente por env', () => {
+    const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite'];
+    const config = resolveGeminiConfig({
+      GEMINI_MODELS: models.join(','),
+      GEMINI_MODEL: 'gemini-3.7-flash',
+      GEMINI_MODEL_RPM: 'gemini-2.5-flash:2',
+      GEMINI_MODEL_TPM: 'gemini-2.5-flash-lite:10000',
+      GEMINI_MODEL_RPD: 'gemini-2.5-flash-lite:5',
+    });
+    expect(config).toMatchObject({
+      models,
+      rpmByModel: { 'gemini-2.5-flash': 2 },
+      tpmByModel: { 'gemini-2.5-flash-lite': 10000 },
+      rpdByModel: { 'gemini-2.5-flash-lite': 5 },
+    });
+    for (const model of models) {
+      expect(resolveGeminiConfig({ GEMINI_MODEL: model }).models).toEqual([model]);
+    }
   });
 
   it('parsea RPM por modelo y GEMINI_RPM como default', () => {

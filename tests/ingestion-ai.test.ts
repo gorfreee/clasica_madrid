@@ -560,7 +560,7 @@ describe('Gemini provider (fetch inyectado, sin red)', () => {
         expect(body.input).toContain('Concierto extraordinario');
         expect(body.tools).toBeUndefined();
         expect(body.generation_config?.tool_choice).toBe('none');
-        expect(body.generation_config?.thinking_level).toBe('minimal');
+        expect(body.generation_config?.thinking_level).toBe('low');
         expect(body.response_format).toEqual({
           type: 'text',
           mime_type: 'application/json',

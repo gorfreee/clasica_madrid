@@ -281,16 +281,36 @@ describe('quota accounting and bounded scheduling', () => {
     expect(resolveRetryAfterMs('90', '', 0)).toBe(90_000);
   });
 
-  it('disables unavailable models and stops spending on shared auth failures', async () => {
+  it.each([
+    [400, "'minimal' is not a supported thinking level for this model. Allowed values are: high, low, medium."],
+    [404, 'This model models/unavailable is no longer available to new users.'],
+  ])('isolates HTTP %i for the rest of the run, across eligibility and taxonomy', async (status, message) => {
+    const time = clock();
     const sent: string[] = [];
-    const p = provider({ models: ['unavailable', 'working'], fetch: async (_url, init) => {
+    const p = provider({ clock: time, models: ['unavailable', 'working'], fetch: async (_url, init) => {
       const model = JSON.parse(String(init?.body)).model;
       sent.push(model);
-      return model === 'unavailable' ? new Response('missing', { status: 404 }) : response();
+      return model === 'unavailable' ? new Response(JSON.stringify({ error: { message } }), { status }) : response();
     } });
-    await p.classify(facts);
-    await p.classify({ ...facts, title: 'Otro concierto' });
-    expect(sent).toEqual(['unavailable', 'working', 'working']);
+    await expect(p.classify(facts)).resolves.toEqual({ eligibility: 'include' });
+    expect(p.lastDiagnostics()).toMatchObject({ attempts: 2, fallbackUsed: true, model: 'working' });
+    expect(p.lastDiagnostics()?.routing).toContainEqual({ model: 'unavailable', reason: 'unavailable-model-or-config' });
+    expect(p.lastDiagnostics()?.failures?.[0]?.excerpt).toContain(`Gemini HTTP ${status}`);
+    // Beyond RPM/cooldown windows: a permanent failure must still be disabled.
+    time.set(time.now() + 120_000);
+    for (const purpose of ['eligibility', 'taxonomy'] as const) {
+      await expect(p.classify({ ...facts, title: 'Otro concierto' }, { purpose })).resolves.toEqual({ eligibility: 'include' });
+      expect(p.lastDiagnostics()).toMatchObject({ attempts: 1, failures: [] });
+      expect(p.lastDiagnostics()?.routing).toContainEqual({ model: 'unavailable', reason: 'disabled' });
+    }
+    expect(sent).toEqual(['unavailable', 'working', 'working', 'working']);
+    expect(p.snapshotStats()).toMatchObject({
+      httpRequests: 4, retries: 1, deferred: 0,
+      requestsByModel: { unavailable: 1, working: 3 },
+    });
+  });
+
+  it('stops spending on shared auth failures', async () => {
     const fetch = vi.fn(async () => new Response('secret-test-key invalid', { status: 401 }));
     const bad = provider({ fetch });
     await expect(bad.classify(facts)).rejects.toThrow('[redacted] invalid');
@@ -479,30 +499,38 @@ describe('recoverable unusable output and thinking', () => {
     expect(result.eligibility.method).toBe('ai');
   });
 
-  it('envía thinking mínimo/low solo a modelos que lo soportan', async () => {
-    expect(thinkingConfigForModel('gemini-3.7-flash')).toEqual({ thinking_level: 'minimal' });
-    expect(thinkingConfigForModel('gemini-3-flash-preview')).toEqual({ thinking_level: 'minimal' });
-    expect(thinkingConfigForModel('gemini-2.5-flash')).toEqual({ thinking_level: 'low' });
-    expect(thinkingConfigForModel('gemini-2.5-flash-lite')).toBeUndefined();
-    expect(thinkingConfigForModel('gemma-4-31b-it')).toBeUndefined();
-    expect(thinkingConfigForModel('gemma-4-26b-a4b-it')).toBeUndefined();
-
-    const bodies: Array<{ model: string; thinking?: string }> = [];
-    const p = provider({
-      models: ['gemini-3.1-flash-lite', 'gemma-4-31b-it', 'gemini-2.5-flash'],
-      defaultRpm: undefined,
-      fetch: async (_url, init) => {
+  it.each(['eligibility', 'taxonomy'] as const)('envía thinking admitido por ID para %s', async (purpose) => {
+    const cases = [
+      ['gemini-3.7-flash', 'low'],
+      ['gemini-3.6-flash', 'minimal'],
+      ['gemini-3.5-flash', 'minimal'],
+      ['gemini-3-flash-preview', 'minimal'],
+      ['gemini-3.5-flash-lite', 'minimal'],
+      ['gemini-3.1-flash-lite', 'minimal'],
+      ['gemini-2.5-flash', 'low'],
+      ['gemini-2.5-flash-lite', undefined],
+      ['gemma-4-31b-it', undefined],
+      ['gemma-4-26b-a4b-it', undefined],
+      ['gemini-3.1-pro-preview', undefined],
+      ['gemini-3.8-flash', undefined], // Unknown future model: never infer support.
+      ['gemini-3.7-flash-preview', undefined],
+      ['gemini-3.1-flash-lite-image', undefined],
+    ] as const;
+    for (const [model, level] of cases) {
+      const thinking = level ? { thinking_level: level } : undefined;
+      expect(thinkingConfigForModel(model)).toEqual(thinking);
+      const fetch = vi.fn<typeof globalThis.fetch>(async (_url, init) => {
         const body = JSON.parse(String(init?.body));
-        bodies.push({ model: body.model, thinking: body.generation_config?.thinking_level });
+        expect(body.model).toBe(model);
+        expect(body.generation_config).toEqual({ max_output_tokens: 600, tool_choice: 'none', ...thinking });
         return response();
-      },
-    });
-    for (let i = 0; i < 3; i++) await p.classify({ ...facts, title: `Concierto ${i}` });
-    expect(bodies).toEqual([
-      { model: 'gemini-3.1-flash-lite', thinking: 'minimal' },
-      { model: 'gemma-4-31b-it', thinking: undefined },
-      { model: 'gemini-2.5-flash', thinking: 'low' },
-    ]);
+      });
+      const p = provider({ ...resolveGeminiConfig({ GEMINI_MODEL: model }), fetch });
+      await expect(p.classify(facts, { purpose })).resolves.toEqual({ eligibility: 'include' });
+      expect(fetch).toHaveBeenCalledTimes(1);
+    }
+    expect(thinkingConfigForModel(' GEMINI-3.7-FLASH ')).toEqual({ thinking_level: 'low' });
+    expect(thinkingConfigForModel('')).toBeUndefined();
   });
 });
 
