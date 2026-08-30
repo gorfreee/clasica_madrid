@@ -55,6 +55,22 @@ async function tempDir(prefix: string): Promise<string> {
 }
 
 describe('observabilidad de ingestión', () => {
+  it('el journal conserva motivos de circuito y transporte antes de clasificación', async () => {
+    const directory = await tempDir('clasica-obs-zarzuela-');
+    const obs = startObservability({ directory, mode: 'dry-run', sources: ['teatro-zarzuela'], window: { from: '2026-09-01', to: '2026-12-30' } })!;
+    const hydration = {
+      status: 'not-requested' as const, reason: 'circuit-open' as const,
+      message: 'circuito abierto tras 3 HTTP 403', requestAttempts: 0,
+      httpStatuses: [], retryDelaysMs: [],
+    };
+    obs.recordObservation({ raw: {
+      sourceId: 'teatro-zarzuela', sourceUrl: 'https://example.com/zarzuela', hydration,
+      observed: { title: 'Fixture', occurrences: [], performers: [], composers: [], works: [] },
+    } });
+    obs.close();
+    expect((await readJsonl(path.join(directory, EVENT_JOURNAL_FILE)))[0]?.hydration).toEqual(hydration);
+  });
+
   it('una run completada escribe report, journal y run.json completed sin cambiar el pipeline', async () => {
     const dataDir = await tempDir('clasica-obs-data-');
     const obsDir = await tempDir('clasica-obs-run-');

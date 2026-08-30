@@ -1,5 +1,12 @@
 const USER_AGENT = 'ClasicaMadrid-ingestion/1 (+https://github.com/gorfreee/clasica_madrid)';
 
+/** Preserve HTTP facts for source-local retry policies; no retries by default. */
+export class HttpError extends Error {
+  constructor(public readonly status: number, url: string, public readonly retryAfter: string | null = null) {
+    super(`HTTP ${status} al pedir ${url}`);
+  }
+}
+
 export async function getText(url: string, timeoutMs = 30_000): Promise<string> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -13,7 +20,8 @@ export async function getText(url: string, timeoutMs = 30_000): Promise<string> 
       },
     });
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status} al pedir ${url}`);
+      await response.body?.cancel();
+      throw new HttpError(response.status, url, response.headers.get('retry-after'));
     }
     return await response.text();
   } catch (error) {

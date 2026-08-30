@@ -5,7 +5,7 @@ export type IngestHealth = 'clean' | 'degraded' | 'review' | 'fatal';
 export type IngestHealthInput = {
   batchOk: boolean;
   sourcesSucceeded: readonly string[];
-  sourcesFailed: readonly { sourceId: string }[];
+  sourcesFailed: readonly { sourceId: string; stage?: 'hydration' }[];
   ambiguous: number;
   classificationDrift: number;
   batchDuplicates: number;
@@ -49,6 +49,7 @@ export function evaluateIngestHealth(input: IngestHealthInput): {
 
   for (const failed of input.sourcesFailed) {
     findings.push({ reason: `source-failed:${failed.sourceId}`, health: 'review' });
+    if (failed.stage === 'hydration') findings.push({ reason: `source-hydration-incomplete:${failed.sourceId}`, health: 'review' });
   }
   if (input.ambiguous > 0) findings.push({ reason: 'ambiguous', health: 'review' });
   if (input.classificationDrift > 0) {

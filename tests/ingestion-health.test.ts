@@ -27,6 +27,15 @@ const base = {
 };
 
 describe('evaluateIngestHealth', () => {
+  it('una source con hydration severamente incompleta bloquea auto-merge aunque otras estén sanas', () => {
+    expect(evaluateIngestHealth({
+      ...base,
+      sourcesFailed: [{ sourceId: 'teatro-zarzuela', stage: 'hydration' }],
+    })).toMatchObject({
+      health: 'review', autoMergeEligible: false,
+      healthReasons: ['source-failed:teatro-zarzuela', 'source-hydration-incomplete:teatro-zarzuela'],
+    });
+  });
   it('es clean cuando el lote es válido, las sources están sanas y no hay anomalías', () => {
     expect(evaluateIngestHealth(base)).toEqual({
       health: 'clean',

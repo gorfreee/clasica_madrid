@@ -1,5 +1,6 @@
 import { mergeObserved, type ObservedFactPatch } from './observed.ts';
 import { normalizeUrl } from './urls.ts';
+import { createZarzuelaDetailClient, zarzuelaOutsideWindow } from './detail/zarzuela-hydration.ts';
 import type { AdapterContext, HydrationMeta, RawEvent, RawOccurrence, SourceAdapter } from './types.ts';
 
 export function memoizeGet(get: (url: string) => Promise<string>): (url: string) => Promise<string> {
@@ -8,7 +9,11 @@ export function memoizeGet(get: (url: string) => Promise<string>): (url: string)
     const key = normalizeUrl(url);
     const existing = cache.get(key);
     if (existing) return existing;
-    const pending = get(url);
+    const pending = get(url).catch((error: unknown) => {
+      // Do not replay a rejected promise when a source deliberately retries.
+      cache.delete(key);
+      throw error;
+    });
     cache.set(key, pending);
     return pending;
   };
@@ -29,17 +34,29 @@ export async function hydrateEvents(
   }
 
   const hydrated: RawEvent[] = [];
+  const zarzuelaGet = adapter.id === 'teatro-zarzuela' ? createZarzuelaDetailClient(ctx.get) : undefined;
   for (const event of events) {
     const detailUrl = event.sourceUrl;
+    if (zarzuelaGet && zarzuelaOutsideWindow(event, ctx.window)) {
+      hydrated.push(withHydration(event, { status: 'not-requested', detailUrl, reason: 'outside-window', message: 'listing completamente fuera de ventana', requestAttempts: 0 }));
+      continue;
+    }
+    let meta: HydrationMeta = { status: 'succeeded', detailUrl };
     try {
-      const body = await ctx.get(detailUrl);
+      const response = zarzuelaGet ? await zarzuelaGet(detailUrl) : { body: await ctx.get(detailUrl), hydration: meta };
+      meta = response.hydration;
+      if (response.body === undefined) {
+        hydrated.push(withHydration(event, meta));
+        continue;
+      }
+      const body = response.body;
       const patch = adapter.hydrate(event, body, ctx);
       hydrated.push(
-        withHydration(applyDetailPatch(event, patch), { status: 'succeeded', detailUrl }),
+        withHydration(applyDetailPatch(event, patch), meta),
       );
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      hydrated.push(withHydration(event, { status: 'failed', detailUrl, message }));
+      hydrated.push(withHydration(event, { ...meta, status: 'failed', message, ...(zarzuelaGet ? { reason: 'parse-failed' as const } : {}) }));
     }
   }
   return hydrated;

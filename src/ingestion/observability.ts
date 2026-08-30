@@ -181,10 +181,7 @@ export class IngestObservability {
         sourceId: input.raw.sourceId,
         sourceUrl: input.raw.sourceUrl,
         title: input.normalized?.title || input.raw.observed.title,
-        hydration: {
-          status: hydration.status,
-          ...(hydration.message ? { message: hydration.message } : {}),
-        },
+        hydration: { ...hydration },
         observed: snapshotObservedFacts(input.raw),
       };
       if (input.raw.externalId) entry.externalId = input.raw.externalId;
