@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ocne_satelite_02_raices_y_modernidad",
+  "slug": "ocne-satelite-02-raices-y-modernidad",
+  "title": "OCNE. Satélite 02. Raíces y Modernidad",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ocne_satelite_02_raices_y_modernidad_01",
+      "date": "2026-10-13",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Poetica Ensamble"
+    },
+    {
+      "name": "Gloria Londoño"
+    },
+    {
+      "name": "Laura Godoy"
+    },
+    {
+      "name": "Daniel Rey Grimau"
+    },
+    {
+      "name": "Francisco Santiago"
+    },
+    {
+      "name": "Pablo Martín Acevedo"
+    },
+    {
+      "name": "Jone de la Fuente Gorostiza"
+    },
+    {
+      "name": "Martí Varela Navarro"
+    },
+    {
+      "name": "Gabriel Sevilla Martínez"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-02-raices-y-modernidad",
+      "checkedAt": "2026-08-30",
+      "externalId": "ocne-satelite-02-raices-y-modernidad"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

@@ -60,7 +60,9 @@
   "eras": [
     "romantic"
   ],
-  "formats": [],
+  "formats": [
+    "chamber"
+  ],
   "kind": "established",
   "access": "paid",
   "citations": [

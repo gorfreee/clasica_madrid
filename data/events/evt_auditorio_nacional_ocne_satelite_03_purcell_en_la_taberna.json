@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ocne_satelite_03_purcell_en_la_taberna",
+  "slug": "ocne-satelite-03-purcell-en-la-taberna",
+  "title": "OCNE. Satélite 03. Purcell en la Taberna",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ocne_satelite_03_purcell_en_la_taberna_01",
+      "date": "2026-10-20",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "La Fortuna"
+    },
+    {
+      "name": "Diego Blázquez"
+    },
+    {
+      "name": "Emiliano Cano"
+    },
+    {
+      "name": "Ariel Hernández"
+    },
+    {
+      "name": "Marija Pendeva"
+    },
+    {
+      "name": "César Hualde"
+    },
+    {
+      "name": "Josep Trescolí"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Henry Purcell"
+    }
+  ],
+  "works": [
+    {
+      "title": "Música vocal e instrumental",
+      "composerName": "Henry Purcell"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-03-purcell-en-la-taberna",
+      "checkedAt": "2026-08-30",
+      "externalId": "ocne-satelite-03-purcell-en-la-taberna"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

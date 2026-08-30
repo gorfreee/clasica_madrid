@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_03529816e6be4a8e9f0703818ce8a5f6",
+  "slug": "ocne-sinfonico-09",
+  "title": "OCNE. Sinfónico 09",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_03529816e6be4a8e9f0703818ce8a5f6_01",
+      "date": "2026-12-11",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_03529816e6be4a8e9f0703818ce8a5f6_02",
+      "date": "2026-12-12",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_03529816e6be4a8e9f0703818ce8a5f6_03",
+      "date": "2026-12-13",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Nacional de España"
+    },
+    {
+      "name": "Anna Rakitina",
+      "role": "conductor"
+    },
+    {
+      "name": "Josu de Solaun"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Caroline Shaw"
+    },
+    {
+      "name": "Benjamin Britten"
+    }
+  ],
+  "works": [
+    {
+      "title": "Entr’acte, para orquesta de cuerda",
+      "composerName": "Caroline Shaw"
+    },
+    {
+      "title": "Concierto para piano núm. 1, op. 13",
+      "composerName": "Benjamin Britten"
+    },
+    {
+      "title": "Enigma, op. 36"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-09-1",
+      "checkedAt": "2026-08-30",
+      "externalId": "03529816e6be4a8e9f0703818ce8a5f6"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

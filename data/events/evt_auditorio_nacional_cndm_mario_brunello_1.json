@@ -55,7 +55,9 @@
   "eras": [
     "baroque"
   ],
-  "formats": [],
+  "formats": [
+    "chamber"
+  ],
   "kind": "established",
   "access": "paid",
   "citations": [

@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "id": "evt_madrid_datos_50146209",
-  "slug": "trilogia-andaluza",
-  "title": "Trilogía andaluza",
+  "id": "evt_madrid_datos_50386269",
+  "slug": "bach-en-guitarra",
+  "title": "Bach en guitarra",
   "status": "scheduled",
-  "venueId": "ven_casa_vacas_retiro",
+  "venueId": "ven_md_fac_64851",
   "organizerIds": [],
   "seriesId": null,
   "occurrences": [
     {
-      "id": "occ_madrid_datos_50146209_01",
-      "date": "2026-09-17",
+      "id": "occ_madrid_datos_50386269_01",
+      "date": "2026-09-05",
       "time": "19:00",
       "status": "scheduled"
     }
@@ -19,19 +19,19 @@
   "composers": [],
   "works": [],
   "eras": [
-    "contemporary"
+    "baroque"
   ],
   "formats": [
-    "other"
+    "recital"
   ],
-  "kind": "alternative",
+  "kind": "established",
   "access": "free",
   "citations": [
     {
       "sourceId": "src_ayuntamiento_madrid",
-      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=d2f4832f37fba910VgnVCM200000f921e388RCRD",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=b276d41751330a10VgnVCM100000891ecb1aRCRD",
       "checkedAt": "2026-08-30",
-      "externalId": "50146209"
+      "externalId": "50386269"
     }
   ],
   "primarySourceId": "src_ayuntamiento_madrid",

@@ -18,7 +18,10 @@
   "performers": [],
   "composers": [],
   "works": [],
-  "eras": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
   "formats": [
     "opera"
   ],

@@ -78,9 +78,10 @@
     {
       "sourceId": "src_teatro_real",
       "url": "https://www.teatroreal.es/es/espectaculo/manon-lescaut",
-      "checkedAt": "2026-08-28"
+      "checkedAt": "2026-08-30",
+      "externalId": "manon-lescaut"
     }
   ],
   "primarySourceId": "src_teatro_real",
-  "lastVerifiedAt": "2026-08-28"
+  "lastVerifiedAt": "2026-08-30"
 }

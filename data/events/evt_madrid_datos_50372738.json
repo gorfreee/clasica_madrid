@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50372738",
+  "slug": "le-quan-ninh",
+  "title": "Lê Quan Ninh",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_6013703",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50372738_01",
+      "date": "2026-10-24",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=0d75c7b4fc1bf910VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-08-30",
+      "externalId": "50372738"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-08-30"
+}
