@@ -11,13 +11,13 @@ import { auditorioNacionalAdapter } from '../src/ingestion/sources/auditorio-nac
 import { madridDatosAdapter } from '../src/ingestion/sources/madrid-datos.ts';
 import { teatroRealAdapter } from '../src/ingestion/sources/teatro-real.ts';
 import type { AdapterContext, RawEvent, SourceAdapter } from '../src/ingestion/types.ts';
-import { TEST_NOW } from './helpers.ts';
+import { TEST_NOW, TEST_WINDOW } from './helpers.ts';
 
 const fixtures = path.join(import.meta.dirname, 'fixtures', 'ingestion');
 const detailDir = path.join(fixtures, 'detail');
 
 function listingCtx(sourceId: string, get: AdapterContext['get']): AdapterContext {
-  return { source: getSourceDefinition(sourceId), now: TEST_NOW, get };
+  return { source: getSourceDefinition(sourceId), now: TEST_NOW, window: TEST_WINDOW, get };
 }
 
 function listingEvent(overrides: Partial<RawEvent> & Pick<RawEvent, 'sourceUrl'>): RawEvent {

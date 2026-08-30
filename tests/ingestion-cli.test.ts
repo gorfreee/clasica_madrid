@@ -66,6 +66,67 @@ describe('parseIngestArgs', () => {
     expect(parsed.ok).toBe(false);
     if (!parsed.ok) expect(parsed.message).toMatch(/comando desconocido: enrich/);
   });
+
+  it('exige --from y --to juntos, con fechas reales y from <= to', () => {
+    const missingTo = parseIngestArgs(['sync', '--from', '2026-09-01'], sources);
+    expect(missingTo.ok).toBe(false);
+    if (!missingTo.ok) expect(missingTo.message).toMatch(/--from y --to deben indicarse juntos/);
+
+    const missingFrom = parseIngestArgs(['sync', '--to', '2026-12-30'], sources);
+    expect(missingFrom.ok).toBe(false);
+
+    const invalid = parseIngestArgs(['sync', '--from', '2026-02-31', '--to', '2026-03-01'], sources);
+    expect(invalid.ok).toBe(false);
+    if (!invalid.ok) expect(invalid.message).toMatch(/--from no es una fecha ISO válida/);
+
+    const inverted = parseIngestArgs(['sync', '--from', '2026-12-01', '--to', '2026-09-01'], sources);
+    expect(inverted.ok).toBe(false);
+    if (!inverted.ok) expect(inverted.message).toMatch(/no puede ser posterior/);
+
+    const ok = parseIngestArgs(
+      ['sync', '--from', '2026-01-01', '--to', '2027-06-01', '--dry-run'],
+      sources,
+    );
+    expect(ok).toEqual({
+      ok: true,
+      command: 'sync',
+      dryRun: true,
+      window: { from: '2026-01-01', to: '2027-06-01' },
+    });
+  });
+
+  it('acepta --from/--to en ingest:source y --sources en ingest:sync', () => {
+    expect(
+      parseIngestArgs(
+        ['source', 'auditorio-nacional', '--from', '2026-09-01', '--to', '2027-04-30'],
+        sources,
+      ),
+    ).toEqual({
+      ok: true,
+      command: 'source',
+      sourceId: 'auditorio-nacional',
+      dryRun: false,
+      window: { from: '2026-09-01', to: '2027-04-30' },
+    });
+
+    expect(parseIngestArgs(['sync', '--sources', 'teatro-real, auditorio-nacional'], sources)).toEqual({
+      ok: true,
+      command: 'sync',
+      dryRun: false,
+      sourceIds: ['teatro-real', 'auditorio-nacional'],
+    });
+
+    const unknown = parseIngestArgs(['sync', '--sources', 'cndm,teatro-real'], sources);
+    expect(unknown.ok).toBe(false);
+    if (!unknown.ok) expect(unknown.message).toMatch(/fuente desconocida: cndm/);
+
+    const empty = parseIngestArgs(['sync', '--sources', ' , '], sources);
+    expect(empty.ok).toBe(false);
+
+    const onSource = parseIngestArgs(['source', 'teatro-real', '--sources', 'madrid-datos'], sources);
+    expect(onSource.ok).toBe(false);
+    if (!onSource.ok) expect(onSource.message).toMatch(/no admite --sources/);
+  });
 });
 
 describe('ingestExitCode', () => {
@@ -86,6 +147,33 @@ describe('ingestExitCode', () => {
       ingestExitCode({
         apply: { report: { ok: true } },
         summary: { sourcesFailed: ['teatro-real'], sourcesSucceeded: ['auditorio-nacional'] },
+      }),
+    ).toBe(0);
+  });
+
+  it('sale 1 sólo en health fatal; review y degraded no fallan el proceso', () => {
+    expect(
+      ingestExitCode({
+        apply: { report: { ok: true } },
+        summary: { health: 'fatal', sourcesFailed: [], sourcesSucceeded: [] },
+      }),
+    ).toBe(1);
+    expect(
+      ingestExitCode({
+        apply: { report: { ok: true } },
+        summary: { health: 'review', sourcesFailed: ['teatro-real'], sourcesSucceeded: ['auditorio-nacional'] },
+      }),
+    ).toBe(0);
+    expect(
+      ingestExitCode({
+        apply: { report: { ok: true } },
+        summary: { health: 'degraded', sourcesFailed: [], sourcesSucceeded: ['teatro-real'] },
+      }),
+    ).toBe(0);
+    expect(
+      ingestExitCode({
+        apply: { report: { ok: true } },
+        summary: { health: 'clean', sourcesFailed: [], sourcesSucceeded: ['teatro-real'] },
       }),
     ).toBe(0);
   });

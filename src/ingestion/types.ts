@@ -1,5 +1,7 @@
 import type { Source } from '../lib/schemas/index.ts';
+import type { IngestHealth } from './health.ts';
 import type { ObservedFactPatch, ObservedFacts } from './observed.ts';
+import type { IngestWindow } from './dates.ts';
 
 /**
  * Facts observed in a source, before editorial or musical interpretation.
@@ -69,13 +71,14 @@ export type SourceDefinition = {
 export type AdapterContext = {
   source: SourceDefinition;
   now: Date;
+  window: IngestWindow;
   get: (url: string) => Promise<string>;
 };
 
 export type SourceAdapter = {
   id: string;
-  /** URLs to fetch for this source given the current clock. */
-  resolveFetchUrls(source: SourceDefinition, now: Date): string[];
+  /** URLs to fetch for this source given the current clock and ingest window. */
+  resolveFetchUrls(source: SourceDefinition, now: Date, window: IngestWindow): string[];
   /**
    * Parse one fetched listing/feed body. May be sync or async.
    * Throw if the document is not the expected structure. Skip individual
@@ -152,6 +155,10 @@ export function emptyIngestAiSummary(): IngestAiSummary {
 }
 
 export type IngestRunSummary = {
+  window: IngestWindow;
+  health: IngestHealth;
+  autoMergeEligible: boolean;
+  healthReasons: string[];
   sourcesAttempted: string[];
   sourcesSucceeded: string[];
   sourcesFailed: SourceFailure[];

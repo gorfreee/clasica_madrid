@@ -1,7 +1,9 @@
 import type { Catalog } from '../src/lib/domain/catalog.ts';
 import type { Event, Organizer, Series, Source, Venue } from '../src/lib/schemas/index.ts';
+import { defaultIngestWindow } from '../src/ingestion/dates.ts';
 
 export const TEST_NOW = new Date('2026-09-01T10:00:00+02:00');
+export const TEST_WINDOW = defaultIngestWindow(TEST_NOW);
 export const testClock = { now: () => TEST_NOW };
 
 export function makeVenue(overrides: Partial<Venue> = {}): Venue {

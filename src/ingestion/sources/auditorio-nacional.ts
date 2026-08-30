@@ -1,6 +1,5 @@
-import { madridToday } from '../../lib/domain/dates.ts';
 import { parseAuditorioNacionalDetail } from '../detail/auditorio-nacional.ts';
-import { addIsoDays, DEFAULT_WINDOW_DAYS, parseObservedDateTime } from '../dates.ts';
+import { parseObservedDateTime, type IngestWindow } from '../dates.ts';
 import { emptyObservedLists } from '../observed.ts';
 import { urlPathIdentity } from '../urls.ts';
 import type { AdapterContext, RawEvent, SourceAdapter, SourceDefinition } from '../types.ts';
@@ -21,13 +20,12 @@ const VENUE_BY_CLASS: Record<string, string> = {
 
 export const auditorioNacionalAdapter: SourceAdapter = {
   id: 'auditorio-nacional',
-  resolveFetchUrls(source: SourceDefinition, now: Date): string[] {
+  resolveFetchUrls(source: SourceDefinition, _now: Date, window: IngestWindow): string[] {
     const base = source.urls[0];
     if (!base) throw new Error('auditorio-nacional: falta la URL del calendario JSON');
-    const start = madridToday(now);
     const url = new URL(base);
-    url.searchParams.set('start', start);
-    url.searchParams.set('end', addIsoDays(start, DEFAULT_WINDOW_DAYS));
+    url.searchParams.set('start', window.from);
+    url.searchParams.set('end', window.to);
     return [url.href];
   },
   extract(body: string, _url: string, ctx: AdapterContext): RawEvent[] {

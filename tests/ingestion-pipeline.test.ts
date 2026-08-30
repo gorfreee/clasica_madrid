@@ -185,6 +185,9 @@ describe('aislamiento de fallos por fuente', () => {
     expect(run.summary.sourcesFailed).toHaveLength(3);
     expect(run.summary.written).toEqual([]);
     expect(run.apply.report.ok).toBe(true);
+    expect(run.summary.health).toBe('fatal');
+    expect(run.summary.autoMergeEligible).toBe(false);
+    expect(run.summary.healthReasons).toContain('no-sources-succeeded');
     expect(ingestExitCode(run)).toBe(1);
   });
 });

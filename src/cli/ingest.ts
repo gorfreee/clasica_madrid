@@ -3,8 +3,9 @@ import { systemClock } from '../lib/domain/dates.ts';
 import { defaultDataDir } from '../lib/repository/fs.ts';
 import { loadCatalogFromDir } from '../lib/repository/load.ts';
 import { formatRunSummary } from '../ingestion/summary.ts';
-import { buildIngestReport, writeIngestReport } from '../ingestion/report.ts';
+import { buildFatalIngestReport, buildIngestReport, writeIngestReport } from '../ingestion/report.ts';
 import { runIngest } from '../ingestion/pipeline.ts';
+import { defaultIngestWindow } from '../ingestion/dates.ts';
 import { createAiClassifierFromEnv } from '../ingestion/classification/provider.ts';
 import { listSourceDefinitions } from '../ingestion/registry.ts';
 import { ingestExitCode, parseIngestArgs } from './ingest-args.ts';
@@ -45,7 +46,8 @@ try {
     catalog,
     now: systemClock.now(),
     dryRun: parsed.dryRun,
-    sourceIds: parsed.command === 'source' ? [parsed.sourceId] : undefined,
+    sourceIds: parsed.command === 'source' ? [parsed.sourceId] : parsed.sourceIds,
+    window: parsed.window,
     ai,
   });
 
@@ -66,6 +68,20 @@ try {
 } catch (error) {
   const message = error instanceof Error ? error.message : String(error);
   console.error(message);
+  if (parsed.reportPath) {
+    const reason = /GEMINI_|requieren el provider Gemini/.test(message)
+      ? 'ai-config-fatal'
+      : 'unexpected-exception';
+    await writeIngestReport(
+      parsed.reportPath,
+      buildFatalIngestReport({
+        generatedAt: new Date(),
+        dryRun: parsed.dryRun,
+        window: parsed.window ?? defaultIngestWindow(systemClock.now()),
+        reasons: [reason],
+      }),
+    );
+  }
   process.exitCode = 1;
 } finally {
   ai?.close?.();

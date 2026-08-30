@@ -1,15 +1,19 @@
+import { parseIngestWindow, type IngestWindow } from '../ingestion/dates.ts';
+import type { IngestHealth } from '../ingestion/health.ts';
+
 export type IngestCliSuccess = {
   ok: true;
   dryRun: boolean;
   dataDir?: string;
   reportPath?: string;
+  window?: IngestWindow;
   aiModel?: string;
   aiNoCache?: boolean;
   aiMaxRequests?: number;
 };
 
 export type IngestCliCommand =
-  | (IngestCliSuccess & { command: 'sync' })
+  | (IngestCliSuccess & { command: 'sync'; sourceIds?: string[] })
   | (IngestCliSuccess & { command: 'source'; sourceId: string })
   | { ok: false; message: string };
 
@@ -29,6 +33,9 @@ export function parseIngestArgs(argv: string[], knownSources: string[]): IngestC
   let dryRun = false;
   let dataDir: string | undefined;
   let reportPath: string | undefined;
+  let from: string | undefined;
+  let to: string | undefined;
+  let sourceIds: string[] | undefined;
   const aiFlags: Pick<IngestCliSuccess, 'aiModel' | 'aiNoCache' | 'aiMaxRequests'> = {};
   const positionals: string[] = [];
   const rest = argv.slice(1);
@@ -74,11 +81,43 @@ export function parseIngestArgs(argv: string[], knownSources: string[]): IngestC
       index += 1;
       continue;
     }
+    if (arg === '--from' || arg === '--to') {
+      const value = rest[index + 1];
+      if (!value || value.startsWith('--')) {
+        return { ok: false, message: `${arg} requiere una fecha YYYY-MM-DD` };
+      }
+      if (arg === '--from') from = value;
+      else to = value;
+      index += 1;
+      continue;
+    }
+    if (arg === '--sources') {
+      if (command === 'source') {
+        return {
+          ok: false,
+          message: 'ingest:source no admite --sources; indica la fuente como argumento',
+        };
+      }
+      const value = rest[index + 1];
+      if (!value || value.startsWith('--')) {
+        return { ok: false, message: '--sources requiere una lista de fuentes separadas por coma' };
+      }
+      const parsed = parseSelectedSources(value, knownSources);
+      if (!parsed.ok) return parsed;
+      sourceIds = parsed.sourceIds;
+      index += 1;
+      continue;
+    }
     if (arg.startsWith('--')) {
       return { ok: false, message: `flag desconocida: ${arg}` };
     }
     positionals.push(arg);
   }
+
+  const windowResult = resolveCliWindow(from, to);
+  if (!windowResult.ok) return windowResult;
+  const window = windowResult.window;
+  const flags = { ...successFlags(dryRun, dataDir, reportPath, window), ...aiFlags };
 
   if (command === 'sync') {
     if (positionals.length > 0) {
@@ -87,13 +126,18 @@ export function parseIngestArgs(argv: string[], knownSources: string[]): IngestC
         message: `ingest:sync no admite argumentos posicionales: ${positionals.join(', ')}`,
       };
     }
-    return { ok: true, command: 'sync', ...successFlags(dryRun, dataDir, reportPath), ...aiFlags };
+    return {
+      ok: true,
+      command: 'sync',
+      ...flags,
+      ...(sourceIds ? { sourceIds } : {}),
+    };
   }
 
   if (positionals.length === 0) {
     return {
       ok: false,
-      message: `Uso: npm run ingest:source -- <fuente> [--dry-run] [--data-dir <ruta>] [--report <fichero.json>]\nFuentes: ${knownSources.join(', ')}`,
+      message: `Uso: npm run ingest:source -- <fuente> [--from YYYY-MM-DD --to YYYY-MM-DD] [--dry-run] [--data-dir <ruta>] [--report <fichero.json>]\nFuentes: ${knownSources.join(', ')}`,
     };
   }
   if (positionals.length > 1) {
@@ -110,25 +154,71 @@ export function parseIngestArgs(argv: string[], knownSources: string[]): IngestC
       message: `fuente desconocida: ${sourceId}. Disponibles: ${knownSources.join(', ')}`,
     };
   }
-  return { ok: true, command: 'source', sourceId, ...successFlags(dryRun, dataDir, reportPath), ...aiFlags };
+  return { ok: true, command: 'source', sourceId, ...flags };
+}
+
+export function parseSelectedSources(
+  raw: string,
+  knownSources: string[],
+): { ok: true; sourceIds: string[] } | { ok: false; message: string } {
+  const ids = raw
+    .split(',')
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0);
+  if (ids.length === 0) {
+    return { ok: false, message: '--sources requiere al menos una fuente' };
+  }
+  const unknown = ids.filter((id) => !knownSources.includes(id));
+  if (unknown.length > 0) {
+    return {
+      ok: false,
+      message: `fuente desconocida: ${unknown.join(', ')}. Disponibles: ${knownSources.join(', ')}`,
+    };
+  }
+  const sourceIds: string[] = [];
+  for (const id of ids) {
+    if (!sourceIds.includes(id)) sourceIds.push(id);
+  }
+  return { ok: true, sourceIds };
+}
+
+function resolveCliWindow(
+  from: string | undefined,
+  to: string | undefined,
+): { ok: true; window?: IngestWindow } | { ok: false; message: string } {
+  if (from === undefined && to === undefined) return { ok: true };
+  if (from === undefined || to === undefined) {
+    return { ok: false, message: '--from y --to deben indicarse juntos' };
+  }
+  const parsed = parseIngestWindow(from, to);
+  if (!parsed.ok) return parsed;
+  return { ok: true, window: parsed.window };
 }
 
 function successFlags(
   dryRun: boolean,
   dataDir: string | undefined,
   reportPath: string | undefined,
-): { dryRun: boolean; dataDir?: string; reportPath?: string } {
+  window: IngestWindow | undefined,
+): { dryRun: boolean; dataDir?: string; reportPath?: string; window?: IngestWindow } {
   return {
     dryRun,
     ...(dataDir ? { dataDir } : {}),
     ...(reportPath ? { reportPath } : {}),
+    ...(window ? { window } : {}),
   };
 }
 
 export function ingestExitCode(run: {
   apply: { report: { ok: boolean } };
-  summary: { sourcesFailed: readonly unknown[]; sourcesSucceeded: readonly unknown[] };
+  summary: {
+    health?: IngestHealth;
+    sourcesFailed: readonly unknown[];
+    sourcesSucceeded: readonly unknown[];
+  };
 }): number {
+  if (run.summary.health === 'fatal') return 1;
+  if (run.summary.health) return 0;
   if (!run.apply.report.ok) return 1;
   if (run.summary.sourcesFailed.length > 0 && run.summary.sourcesSucceeded.length === 0) return 1;
   return 0;
@@ -136,8 +226,8 @@ export function ingestExitCode(run: {
 
 export function ingestUsage(knownSources: string[]): string {
   return `Uso:
-  npm run ingest:sync [-- --dry-run] [-- --data-dir <ruta>] [-- --report <fichero.json>]
-  npm run ingest:source -- <fuente> [--dry-run] [--data-dir <ruta>] [--report <fichero.json>]
+  npm run ingest:sync [-- --dry-run] [-- --from YYYY-MM-DD --to YYYY-MM-DD] [-- --sources fuente-a,fuente-b] [-- --data-dir <ruta>] [-- --report <fichero.json>]
+  npm run ingest:source -- <fuente> [--from YYYY-MM-DD --to YYYY-MM-DD] [--dry-run] [--data-dir <ruta>] [--report <fichero.json>]
 
 Gemini: --ai-model <modelo> (fija modelo sin fallback), --ai-no-cache, --ai-max-requests <n>
 

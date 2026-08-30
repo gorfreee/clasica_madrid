@@ -10,6 +10,8 @@ import { applyCandidateBatch, type BatchApplyResult } from './batch.ts';
 import { findPossiblyMissing, type PossiblyMissingEvent } from './disappear.ts';
 import { matchEventIdentity, type EventIdentityAlias } from './identity.ts';
 import { countHydration, hydrateEvents, memoizeGet } from './hydrate.ts';
+import { evaluateIngestHealth } from './health.ts';
+import { defaultIngestWindow, type IngestWindow } from './dates.ts';
 import {
   reconcileHarvest,
   shouldClassifyObservation,
@@ -27,6 +29,7 @@ export type IngestOptions = {
   now: Date;
   dryRun: boolean;
   sourceIds?: string[];
+  window?: IngestWindow;
   get?: (url: string) => Promise<string>;
   /** Injected by the CLI. Absent → deterministic path only; uncertain stays unpublished. */
   ai?: AiClassifier;
@@ -43,6 +46,7 @@ export type IngestRun = {
 };
 
 export async function runIngest(options: IngestOptions): Promise<IngestRun> {
+  const window = options.window ?? defaultIngestWindow(options.now);
   const sources = selectSources(options.sourceIds);
   const get = memoizeGet(options.get ?? getText);
   const failures: SourceFailure[] = [];
@@ -51,9 +55,9 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
 
   for (const source of sources) {
     try {
-      const extracted = await extractSource(source, options.now, get);
+      const extracted = await extractSource(source, options.now, window, get);
       const adapter = getAdapter(source.adapterId);
-      const ctx: AdapterContext = { source, now: options.now, get };
+      const ctx: AdapterContext = { source, now: options.now, window, get };
       const hydrated = await hydrateEvents(extracted, adapter, ctx);
       rawEvents.push(...hydrated);
       succeeded.push(source.id);
@@ -92,7 +96,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
         : undefined;
     const classify =
       event && source && identity
-        ? shouldClassifyObservation(event, options.catalog, options.now, identity)
+        ? shouldClassifyObservation(event, options.catalog, options.now, identity, window)
         : false;
     return { raw, event, source, identity, classify };
   });
@@ -140,6 +144,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
   const reconciled = reconcileHarvest({
     catalog: options.catalog,
     now: options.now,
+    window,
     observations,
     aliases: options.identityAliases,
   });
@@ -214,6 +219,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
   const possiblyMissing = findPossiblyMissing({
     catalog: options.catalog,
     now: options.now,
+    window,
     sources,
     succeededSourceIds: succeeded,
     failedSourceIds: failures.map((item) => item.sourceId),
@@ -221,7 +227,33 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
   });
 
   const hydration = countHydration(rawEvents);
+  const classificationDrift = decisions.filter((item) => item.classificationDrift).length;
+  const unresolvedTaxonomy = decisions.filter((item) => {
+    const snapshot = item.candidate;
+    return Boolean(
+      item.publishable &&
+        item.candidateGenerated &&
+        snapshot &&
+        (snapshot.eras.length === 0 || snapshot.formats.length === 0),
+    );
+  }).length;
+  const health = evaluateIngestHealth({
+    batchOk: apply.report.ok,
+    sourcesSucceeded: succeeded,
+    sourcesFailed: failures,
+    ambiguous: reconciled.stats.ambiguous,
+    classificationDrift,
+    batchDuplicates: reconciled.stats.batchDuplicates,
+    possiblyMissing: possiblyMissing.length,
+    hydrationFailed: hydration.failed,
+    unresolvedTaxonomy,
+    ai: aiUsage,
+  });
   const summary: IngestRunSummary = {
+    window,
+    health: health.health,
+    autoMergeEligible: health.autoMergeEligible,
+    healthReasons: health.healthReasons,
     sourcesAttempted: sources.map((source) => source.id),
     sourcesSucceeded: succeeded,
     sourcesFailed: failures,
@@ -257,11 +289,12 @@ function venueHint(event: { venueText?: string; sourceId: string; venueFacilityI
 export async function extractSource(
   source: SourceDefinition,
   now: Date,
+  window: IngestWindow,
   get: (url: string) => Promise<string>,
 ): Promise<RawEvent[]> {
   const adapter = getAdapter(source.adapterId);
-  const urls = adapter.resolveFetchUrls(source, now);
-  const ctx: AdapterContext = { source, now, get };
+  const urls = adapter.resolveFetchUrls(source, now, window);
+  const ctx: AdapterContext = { source, now, window, get };
   const events: RawEvent[] = [];
   for (const url of urls) {
     const body = await get(url);
