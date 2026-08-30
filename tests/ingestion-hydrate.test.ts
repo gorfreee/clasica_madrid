@@ -153,7 +153,7 @@ describe('orquestación de hydration', () => {
         throw new Error('madrid-datos no debe pedir fichas');
       }),
     );
-    expect(hydrated).toHaveLength(6);
+    expect(hydrated).toHaveLength(8);
     expect(hydrated.every((event) => event.hydration?.status === 'not-requested')).toBe(true);
     const teatro = hydrated.find((event) => event.externalId === '50390001');
     expect(teatro?.observed.description).toBe('Programa de cámara.');

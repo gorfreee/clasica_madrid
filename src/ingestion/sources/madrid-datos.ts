@@ -8,8 +8,8 @@ import type { AdapterContext, RawEvent, SourceAdapter, SourceDefinition } from '
  * a stable, parseable program. Phase 2.1 does not hydrate this source.
  *
  * Venue identity (when present): `event-location` name, plus `relation.@id`
- * (municipal facility). Resolution is source-aware in `matchVenue`; this
- * adapter does not invent catalog venues.
+ * (municipal facility). Resolution is source-aware in `matchVenue`. An official
+ * facility that is not yet in the catalog may become a new Venue on the Candidate.
  */
 
 const MUSICA_TYPE = /\/actividades\/Musica(\/|$)/i;
@@ -68,6 +68,9 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
   const item = value as GraphEvent;
   const type = typeof item['@type'] === 'string' ? item['@type'] : '';
   if (!MUSICA_TYPE.test(type)) return undefined;
+  // Recurrence is a weekly/interval schedule (expos, talleres, ciclos), not a
+  // single concert date. Expanding it needs occurrence semantics this source
+  // does not have yet; a one-off music listing never carries this field today.
   if (item.recurrence && typeof item.recurrence === 'object') return undefined;
   const title = asNonEmptyString(item.title);
   const link = asNonEmptyString(item.link);

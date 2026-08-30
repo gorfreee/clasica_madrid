@@ -128,7 +128,7 @@ describe('adapter Madrid datos (JSON-LD)', () => {
   it('se queda solo con música puntual que tiene título, URL, fecha, hora y lugar', async () => {
     const body = await readFile(path.join(fixtures, 'madrid-agenda.json'), 'utf8');
     const events = madridDatosAdapter.extract(body, 'https://datos.madrid.es/agenda.json', ctx('madrid-datos'));
-    expect(events).toHaveLength(6);
+    expect(events).toHaveLength(8);
     const teatro = events.find((event) => event.externalId === '50390001');
     expect(teatro?.observed.title).toContain('Teatro Real');
     expect(teatro?.sourceUrl.startsWith('https://')).toBe(true);
@@ -148,6 +148,45 @@ describe('adapter Madrid datos (JSON-LD)', () => {
     const condeduque = events.find((event) => event.externalId === '50234843');
     expect(condeduque?.observed.venueText).toBe('Centro de Cultura Contemporánea CondeDuque');
     expect(condeduque?.venueFacilityId).toBe('1916');
+
+    const secondBuenavista = events.find((event) => event.externalId === '50341120');
+    expect(secondBuenavista?.venueFacilityId).toBe('64851');
+    expect(secondBuenavista?.observed.venueText).toBe('Centro Cultural Buenavista');
+
+    const unidentified = events.find((event) => event.externalId === '50341121');
+    expect(unidentified?.observed.venueText).toBe('Sala sin identificar');
+    expect(unidentified?.venueFacilityId).toBeUndefined();
+
+    expect(events.some((event) => event.externalId === '50390002')).toBe(false);
+  });
+
+  it('omite un listing de música con recurrence semanal en vez de inventar representaciones', () => {
+    const body = JSON.stringify({
+      '@graph': [
+        {
+          '@type': 'https://datos.madrid.es/egob/kos/actividades/Musica',
+          id: '1',
+          title: 'Ciclo semanal',
+          dtstart: '2026-09-01 19:00:00.0',
+          time: '19:00',
+          link: 'http://www.madrid.es/evento/ciclo',
+          'event-location': 'Centro cultural',
+          recurrence: { days: 'MO', frequency: 'WEEKLY', interval: 1 },
+        },
+        {
+          '@type': 'https://datos.madrid.es/egob/kos/actividades/Musica',
+          id: '2',
+          title: 'Concierto puntual',
+          dtstart: '2026-09-02 19:00:00.0',
+          time: '19:00',
+          link: 'http://www.madrid.es/evento/puntual',
+          'event-location': 'Teatro Real',
+        },
+      ],
+    });
+    const events = madridDatosAdapter.extract(body, 'https://datos.madrid.es/agenda.json', ctx('madrid-datos'));
+    expect(events).toHaveLength(1);
+    expect(events[0]?.observed.title).toBe('Concierto puntual');
   });
 
   it('falla si no hay @graph', () => {

@@ -8,7 +8,7 @@ import { eventIdFor, occurrenceIdFor, uniqueId, uniqueSlug } from './ids.ts';
 import { normalizeUrl, urlPathIdentity } from './urls.ts';
 import type { NormalizedEvent } from './normalize.ts';
 import type { SourceDefinition } from './types.ts';
-import { matchVenue } from './venues.ts';
+import { matchVenue, unpublishedMatchedVenue } from './venues.ts';
 import { defaultIngestWindow, isDateInHarvestScope, type IngestWindow } from './dates.ts';
 import { resolveCatalogSource } from './registry.ts';
 
@@ -115,8 +115,9 @@ export function toCandidate(
     schemaVersion: 1,
     event: built,
   };
-  if (venueMatch.kind === 'known' && !catalog.venues.some((venue) => venue.id === venueMatch.venue.id)) {
-    candidate.venue = withVerified(venueMatch.venue, verified);
+  const unpublished = unpublishedMatchedVenue(venueMatch, catalog);
+  if (unpublished) {
+    candidate.venue = withVerified(unpublished, verified);
   }
   if (!catalog.sources.some((item) => item.id === catalogSource.id)) {
     candidate.sources = [catalogSource];

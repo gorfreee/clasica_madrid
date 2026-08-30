@@ -23,7 +23,7 @@ import { resolveCatalogSource } from './registry.ts';
 import { collapseOccurrences, defaultIngestWindow, type IngestWindow } from './dates.ts';
 import { newEventPublicationSkip, toCandidate } from './to-candidate.ts';
 import type { RawEvent, SourceDefinition } from './types.ts';
-import { matchVenue } from './venues.ts';
+import { matchVenue, unpublishedMatchedVenue } from './venues.ts';
 
 export type ReconcileAction = 'new' | 'unchanged' | 'updated' | 'ambiguous';
 
@@ -203,10 +203,7 @@ function prepareItem(
     now,
     window,
     venueId: venueMatch?.venue.id,
-    venue:
-      venueMatch?.kind === 'known' && !catalog.venues.some((venue) => venue.id === venueMatch.venue.id)
-        ? venueMatch.venue
-        : undefined,
+    venue: unpublishedMatchedVenue(venueMatch, catalog),
     classification: observation.classification,
   });
   return { observation, identity, venueId: venueMatch?.venue.id, venue: proposal.venue, proposal, skip };

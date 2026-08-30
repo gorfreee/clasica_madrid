@@ -3,10 +3,12 @@ import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { emptyCatalog } from '../src/lib/domain/catalog.ts';
-import { matchVenue } from '../src/ingestion/venues.ts';
+import { matchVenue, madridDatosFacilityVenueId } from '../src/ingestion/venues.ts';
 import { runIngest } from '../src/ingestion/pipeline.ts';
+import { mergeCandidateBatch } from '../src/ingestion/batch.ts';
 import { toCandidate } from '../src/ingestion/to-candidate.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
+import { candidateSchema } from '../src/lib/schemas/candidate.ts';
 import type { NormalizedEvent } from '../src/ingestion/normalize.ts';
 import type { PublishableClassification } from '../src/ingestion/classification/types.ts';
 import { TEST_NOW, makeSource, makeVenue } from './helpers.ts';
@@ -194,29 +196,51 @@ describe('resolución de venue — Madrid Datos', () => {
         catalog,
       ),
     ).toBeUndefined();
-    expect(
-      matchVenue(
-        {
-          venueText: 'Centro de Cultura Contemporánea CondeDuque',
-          sourceId: 'madrid-datos',
-          facilityId: '1916',
-        },
-        catalog,
-      ),
-    ).toBeUndefined();
+    const proposed = matchVenue(
+      {
+        venueText: 'Centro de Cultura Contemporánea CondeDuque',
+        sourceId: 'madrid-datos',
+        facilityId: '1916',
+      },
+      catalog,
+    );
+    expect(proposed?.kind).toBe('new');
+    expect(proposed?.venue.id).toBe(madridDatosFacilityVenueId('1916'));
+    expect(proposed?.venue.id).not.toBe('ven_condeduque_auditorio');
+    expect(proposed?.venue.address).toBeUndefined();
+    expect(proposed?.venue.url).toBeUndefined();
   });
 
-  it('un centro municipal desconocido permanece sin resolver', () => {
+  it('un facility oficial nuevo propone un venue determinista sin inventar dirección', () => {
+    const catalog = catalogWith(casaVacas, teatroReal);
+    const match = matchVenue(
+      {
+        venueText: 'Centro Cultural Buenavista (Salamanca)',
+        sourceId: 'madrid-datos',
+        facilityId: '64851',
+      },
+      catalog,
+    );
+    expect(match?.kind).toBe('new');
+    expect(match?.venue.id).toBe('ven_md_fac_64851');
+    expect(match?.venue.slug).toBe('centro-cultural-buenavista-64851');
+    expect(match?.venue.name).toBe('Centro Cultural Buenavista');
+    expect(match?.venue.municipality).toBe('Madrid');
+    expect(match?.venue.area).toBe('madrid');
+    expect(match?.venue.address).toBeUndefined();
+    expect(match?.venue.url).toBeUndefined();
+  });
+
+  it('sin facility id oficial no inventa un venue aunque haya nombre', () => {
     const catalog = catalogWith(casaVacas, teatroReal);
     expect(
       matchVenue(
-        {
-          venueText: 'Centro Cultural Buenavista (Salamanca)',
-          sourceId: 'madrid-datos',
-          facilityId: '64851',
-        },
+        { venueText: 'Centro Cultural Buenavista (Salamanca)', sourceId: 'madrid-datos' },
         catalog,
       ),
+    ).toBeUndefined();
+    expect(
+      matchVenue({ venueText: 'Sala sin identificar', sourceId: 'madrid-datos' }, catalog),
     ).toBeUndefined();
   });
 });
@@ -238,7 +262,7 @@ describe('toCandidate usa el matching source-aware', () => {
     expect(built.candidate?.venue).toBeUndefined();
   });
 
-  it('Madrid Datos en Sala Principal no se cuela como Teatro Real', () => {
+  it('Madrid Datos en Sala Principal sin facility no se cuela como Teatro Real', () => {
     const catalog = catalogWith(teatroReal);
     const built = toCandidate(
       eventAt({
@@ -256,10 +280,198 @@ describe('toCandidate usa el matching source-aware', () => {
     expect(built.candidate).toBeUndefined();
     expect(built.skippedReason).toBe('lugar no reconocido');
   });
+
+  it('Madrid Datos + facility conocido reutiliza el venue publicado', () => {
+    const catalog = catalogWith(casaVacas);
+    const built = toCandidate(
+      eventAt({
+        sourceId: 'madrid-datos',
+        sourceUrl: 'https://www.madrid.es/evento/recital-piano-casa-vacas',
+        externalId: '50322790',
+        title: 'Recital de piano',
+        venueText: 'Centro Cultural Casa de Vacas (Retiro)',
+        venueFacilityId: '1945',
+      }),
+      getSourceDefinition('madrid-datos'),
+      catalog,
+      TEST_NOW,
+      new Set(),
+      new Set(),
+      includeClassification(),
+    );
+    expect(built.skippedReason).toBeUndefined();
+    expect(built.candidate?.event.venueId).toBe('ven_casa_vacas_retiro');
+    expect(built.candidate?.venue).toBeUndefined();
+    expect(candidateSchema.safeParse(built.candidate).success).toBe(true);
+  });
+
+  it('Madrid Datos + facility oficial nuevo incluye el venue en el Candidate', () => {
+    const catalog = catalogWith(teatroReal, casaVacas);
+    const built = toCandidate(
+      eventAt({
+        sourceId: 'madrid-datos',
+        sourceUrl: 'https://www.madrid.es/evento/buenavista',
+        externalId: '50341119',
+        title: 'Concierto de música renacentista',
+        venueText: 'Biblioteca Pública Municipal Miguel Delibes (Moratalaz)',
+        venueFacilityId: '1752',
+      }),
+      getSourceDefinition('madrid-datos'),
+      catalog,
+      TEST_NOW,
+      new Set(),
+      new Set(),
+      includeClassification(),
+    );
+    expect(built.skippedReason).toBeUndefined();
+    expect(built.candidate?.event.venueId).toBe('ven_md_fac_1752');
+    expect(built.candidate?.venue?.id).toBe('ven_md_fac_1752');
+    expect(built.candidate?.venue?.slug).toBe('biblioteca-publica-municipal-miguel-delibes-1752');
+    expect(built.candidate?.venue?.name).toBe('Biblioteca Pública Municipal Miguel Delibes');
+    expect(built.candidate?.venue?.address).toBeUndefined();
+    expect(built.candidate?.venue?.url).toBeUndefined();
+    expect(candidateSchema.safeParse(built.candidate).success).toBe(true);
+  });
+
+  it('el mismo facility en dos eventos reutiliza el mismo venue y el lote no lo duplica', () => {
+    const catalog = catalogWith(teatroReal);
+    const first = toCandidate(
+      eventAt({
+        sourceId: 'madrid-datos',
+        sourceUrl: 'https://www.madrid.es/evento/buenavista',
+        externalId: '50341119',
+        title: 'Concierto en Buenavista',
+        venueText: 'Centro Cultural Buenavista (Salamanca)',
+        venueFacilityId: '64851',
+      }),
+      getSourceDefinition('madrid-datos'),
+      catalog,
+      TEST_NOW,
+      new Set(),
+      new Set(),
+      includeClassification(),
+    );
+    const second = toCandidate(
+      eventAt({
+        sourceId: 'madrid-datos',
+        sourceUrl: 'https://www.madrid.es/evento/bach-guitarra-buenavista',
+        externalId: '50341120',
+        title: 'Bach en guitarra',
+        venueText: 'Centro Cultural Buenavista',
+        venueFacilityId: '64851',
+      }),
+      getSourceDefinition('madrid-datos'),
+      catalog,
+      TEST_NOW,
+      new Set([first.candidate!.event.id]),
+      new Set([first.candidate!.event.slug]),
+      includeClassification(),
+    );
+    expect(first.candidate?.venue?.id).toBe('ven_md_fac_64851');
+    expect(second.candidate?.venue?.id).toBe('ven_md_fac_64851');
+    expect(first.candidate?.venue?.name).toBe(second.candidate?.venue?.name);
+    expect(first.candidate?.event.id).not.toBe(second.candidate?.event.id);
+
+    const merged = mergeCandidateBatch(catalog, [first.candidate!, second.candidate!]);
+    expect(merged.issues).toEqual([]);
+    expect(merged.catalog.venues.filter((venue) => venue.id === 'ven_md_fac_64851')).toHaveLength(1);
+    expect(merged.filesToWrite.filter((file) => file.relativePath === 'venues/ven_md_fac_64851.json')).toHaveLength(1);
+    expect(merged.newEvents).toBe(2);
+  });
+
+  it('el mismo input contra el catálogo ya actualizado es idempotente', () => {
+    const catalog = catalogWith(teatroReal);
+    const first = toCandidate(
+      eventAt({
+        sourceId: 'madrid-datos',
+        sourceUrl: 'https://www.madrid.es/evento/buenavista',
+        externalId: '50341119',
+        title: 'Concierto en Buenavista',
+        venueText: 'Centro Cultural Buenavista (Salamanca)',
+        venueFacilityId: '64851',
+      }),
+      getSourceDefinition('madrid-datos'),
+      catalog,
+      TEST_NOW,
+      new Set(),
+      new Set(),
+      includeClassification(),
+    );
+    expect(first.candidate?.venue).toBeDefined();
+    catalog.venues.push(first.candidate!.venue!);
+
+    const second = toCandidate(
+      eventAt({
+        sourceId: 'madrid-datos',
+        sourceUrl: 'https://www.madrid.es/evento/buenavista',
+        externalId: '50341119',
+        title: 'Concierto en Buenavista',
+        venueText: 'Centro Cultural Buenavista (Salamanca)',
+        venueFacilityId: '64851',
+      }),
+      getSourceDefinition('madrid-datos'),
+      catalog,
+      TEST_NOW,
+      new Set([first.candidate!.event.id]),
+      new Set([first.candidate!.event.slug]),
+      includeClassification(),
+    );
+    expect(second.candidate?.event.venueId).toBe('ven_md_fac_64851');
+    expect(second.candidate?.venue).toBeUndefined();
+    const match = matchVenue(
+      {
+        venueText: 'Centro Cultural Buenavista (Salamanca)',
+        sourceId: 'madrid-datos',
+        facilityId: '64851',
+      },
+      catalog,
+    );
+    expect(match?.kind).toBe('catalog');
+    expect(match?.venue.id).toBe('ven_md_fac_64851');
+  });
+
+  it('otra source con venue desconocido sigue siendo lugar no reconocido', () => {
+    const catalog = catalogWith(teatroReal);
+    const built = toCandidate(
+      eventAt({
+        sourceId: 'teatro-real',
+        sourceUrl: 'https://www.teatroreal.es/es/espectaculo/polideportivo',
+        venueText: 'Centro Cultural Buenavista (Salamanca)',
+        venueFacilityId: '64851',
+      }),
+      getSourceDefinition('teatro-real'),
+      catalog,
+      TEST_NOW,
+      new Set(),
+      new Set(),
+      includeClassification(),
+    );
+    expect(built.candidate).toBeUndefined();
+    expect(built.skippedReason).toBe('lugar no reconocido');
+  });
+
+  it('sin información suficiente para identificar el venue no se publica', () => {
+    const catalog = catalogWith(teatroReal);
+    const built = toCandidate(
+      eventAt({
+        sourceId: 'madrid-datos',
+        sourceUrl: 'https://www.madrid.es/evento/sala-sin-identificar',
+        venueText: 'Sala sin identificar',
+      }),
+      getSourceDefinition('madrid-datos'),
+      catalog,
+      TEST_NOW,
+      new Set(),
+      new Set(),
+      includeClassification(),
+    );
+    expect(built.candidate).toBeUndefined();
+    expect(built.skippedReason).toBe('lugar no reconocido');
+  });
 });
 
 describe('pipeline Madrid Datos', () => {
-  it('clasifica venues reconocidos y deja skip estructural los ambiguos o desconocidos', async () => {
+  it('clasifica facilities oficiales y deja skip estructural sólo la identidad insuficiente', async () => {
     const catalog = catalogWith(teatroReal, casaVacas, condeduqueAuditorio);
     const dir = await mkdtemp(path.join(os.tmpdir(), 'clasica-venues-md-'));
     const agenda = await readFile(madridAgenda, 'utf8');
@@ -272,23 +484,22 @@ describe('pipeline Madrid Datos', () => {
       get: async () => agenda,
     });
 
-    expect(run.rawEvents).toHaveLength(6);
+    expect(run.rawEvents).toHaveLength(8);
 
     const classified = run.decisions.filter((item) => !item.structuralSkip);
     const skipped = run.decisions.filter((item) => item.structuralSkip?.reason === 'lugar no reconocido');
 
     const casaIds = new Set(['50322790', '50322791']);
-    const teatroId = '50390001';
-    const unresolvedIds = new Set(['50234843', '50235568', '50341119']);
+    const newFacilityIds = new Set(['50234843', '50235568', '50341119', '50341120']);
 
+    expect(classified.some((row) => row.externalId === '50390001')).toBe(true);
+    expect(classified.filter((row) => casaIds.has(row.externalId ?? ''))).toHaveLength(2);
+    expect(classified.filter((row) => newFacilityIds.has(row.externalId ?? '')).length).toBe(4);
     for (const row of classified) {
-      expect(['50390001', '50322790', '50322791']).toContain(row.externalId);
       expect(row.eligibility).toBeDefined();
     }
-    expect(classified.some((row) => row.externalId === teatroId)).toBe(true);
-    expect(classified.filter((row) => casaIds.has(row.externalId ?? ''))).toHaveLength(2);
 
-    expect(skipped.map((row) => row.externalId).sort()).toEqual([...unresolvedIds].sort());
-    expect(run.summary.skippedUnusable).toBe(3);
+    expect(skipped.map((row) => row.externalId)).toEqual(['50341121']);
+    expect(run.summary.skippedUnusable).toBe(1);
   });
 });
