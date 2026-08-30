@@ -1,6 +1,6 @@
 import type { ObservedFacts } from '../observed.ts';
 
-export const AI_CLASSIFIER_PROMPT_VERSION = 4 as const;
+export const AI_CLASSIFIER_PROMPT_VERSION = 5 as const;
 
 export function buildAiClassifierUserMessage(observed: ObservedFacts): string {
   return [
@@ -36,7 +36,7 @@ Flamenco vs franco-flamenco: «franco-flamenco», «escuela flamenca», «polifo
 
 Eventos mixtos (contenido clásico + no clásico):
 - include si la música clásica es claramente principal, o si hay un bloque clásico sustancial, autónomo e identificable y el evento se presenta como concierto clásico o sinfónico (p. ej. primera parte independiente de repertorio clásico y segunda parte popular/regional);
-- si lo clásico y otra identidad (p. ej. flamenco) son genuinamente coprincipales → include o, como mínimo, uncertain. NUNCA exclude automático por coprincipalidad;
+- si una identidad clásica y una identidad expresamente excluida (p. ej. flamenco) son genuinamente coprincipales: NUNCA exclude automático por coprincipalidad. include sólo si los hechos observados demuestran un bloque clásico sustancial, autónomo e identificable. Si no lo demuestran → uncertain, no include;
 - exclude SOLO cuando lo clásico es principalmente acompañamiento, arreglo, ornamentación o formato instrumental de una identidad predominantemente pop, rock, canción popular, jazz, flamenco, música de cine, DJ/electrónica o crossover (p. ej. Fito Páez con cuerdas; ABBA/Queen/Beatles con orquesta; Hans Zimmer/Morricone; Pastora Soler; musical de Broadway con orquesta; concierto cuya identidad principal sea jazz; flamenco donde lo clásico es accesorio).
 
 Ciclos y festivales: la ausencia de programa obra-por-obra NO obliga a uncertain. Puede haber evidencia suficiente para include si los hechos observados muestran que es un concierto real y (a) pertenece a un festival o ciclo explícitamente de música clásica, o (b) lo interpreta una formación clásica dentro de una serie cuya identidad clásica está suficientemente demostrada, o (c) la propia ficha declara de forma explícita y fiable que el evento es un concierto de música clásica (p. ej. «Concierto de música clásica española»). Eso NO es «source conocida → include» ni «venue clásico → include» ni «título ambiguo → include»: la decisión es por evento. Un mismo ciclo clásico puede contener talleres, jazz, pop u otras actividades paralelas que se excluyen individualmente.

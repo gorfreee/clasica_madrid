@@ -74,8 +74,8 @@ const uncertainFacts = facts({ title: 'Concierto extraordinario' });
 describe('AI classifier prompt v2', () => {
   const prompt = AI_CLASSIFIER_SYSTEM_PROMPT;
 
-  it('is version 4 so results are distinguishable from earlier prompts', () => {
-    expect(AI_CLASSIFIER_PROMPT_VERSION).toBe(4);
+  it('is version 5 so results are distinguishable from earlier prompts', () => {
+    expect(AI_CLASSIFIER_PROMPT_VERSION).toBe(5);
   });
 
   it('keeps precision, uncertain as a valid output, and the ban on inventing facts', () => {
@@ -114,6 +114,18 @@ describe('AI classifier prompt v2', () => {
     expect(prompt).toMatch(/NUNCA exclude autom[aá]tico por coprincipalidad/);
     expect(prompt).toMatch(/Fito P[aá]ez con cuerdas/);
     expect(prompt).toMatch(/musical de Broadway/);
+  });
+
+  it('hardens coprincipal classical + excluded identity to uncertain without a substantial classical block', () => {
+    expect(prompt).toMatch(/identidad expresamente excluida/);
+    expect(prompt).toMatch(
+      /include s[oó]lo si los hechos observados demuestran un bloque cl[aá]sico sustancial, aut[oó]nomo e identificable/,
+    );
+    expect(prompt).toMatch(/Si no lo demuestran → uncertain, no include/);
+    expect(prompt).toMatch(/primera parte independiente de repertorio cl[aá]sico y segunda parte popular\/regional/);
+    expect(prompt).not.toMatch(/include o, como m[ií]nimo, uncertain/);
+    expect(prompt).not.toMatch(/Sarao Barroco/);
+    expect(prompt).not.toMatch(/golden_sarao/);
   });
 
   it('does not force uncertain when a classical cycle lacks a work-by-work programme', () => {

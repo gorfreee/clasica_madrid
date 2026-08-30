@@ -157,7 +157,7 @@ Ejemplos:
 
 - `include`: concierto sinfónico real con una primera parte de repertorio clásico autónomo (obras de concierto, solista y orquesta) y una segunda parte de repertorio popular o regional. También cuando lo clásico es claramente principal.
 - `exclude`: ABBA, Queen o Beatles con orquesta; Fito Páez con cuerdas; tributo a Hans Zimmer o Morricone; pop anunciado como «de clásico a lo pop»; musical de Broadway con orquesta; espectáculo de humor/crossover que parodia un recital; flamenco donde lo clásico es accesorio.
-- `include` o `uncertain`, nunca `exclude` automático: las dos identidades son genuinamente coprincipales (p. ej. barroco y flamenco en el mismo programa) y no hay una identidad no clásica que mande con claridad.
+- coprincipales (p. ej. barroco y flamenco en el mismo programa): nunca `exclude` automático. `include` sólo si los hechos observados demuestran un bloque clásico sustancial, autónomo e identificable; si no, `uncertain`.
 
 ---
 
