@@ -17,6 +17,7 @@ import {
   GeminiClassifier,
   GEMINI_API_REVISION,
   GEMINI_DEFAULT_MODEL,
+  GEMINI_DEFAULT_MODELS,
 } from '../src/ingestion/classification/gemini.ts';
 import type { SleepClock } from '../src/ingestion/classification/gemini.ts';
 import {
@@ -724,7 +725,7 @@ describe('createAiClassifierFromEnv — selección de provider', () => {
     expect((built as GeminiClassifier).models).toEqual(['gemini-3.5-flash']);
   });
 
-  it('GEMINI_MODELS gana a GEMINI_MODEL y el default sigue siendo un solo modelo', () => {
+  it('GEMINI_MODELS gana a GEMINI_MODEL y el default usa el pool', () => {
     const chained = createAiClassifierFromEnv({
       GEMINI_API_KEY: 'gemini-test',
       GEMINI_MODELS: 'gemini-3.1-flash-lite,gemini-2.5-flash',
@@ -734,7 +735,7 @@ describe('createAiClassifierFromEnv — selección de provider', () => {
     expect((chained as GeminiClassifier).models).toEqual(['gemini-3.1-flash-lite', 'gemini-2.5-flash']);
 
     const defaults = createAiClassifierFromEnv({ GEMINI_API_KEY: 'gemini-test' }) as GeminiClassifier;
-    expect(defaults.models).toEqual([GEMINI_DEFAULT_MODEL]);
+    expect(defaults.models).toEqual(GEMINI_DEFAULT_MODELS);
   });
 
   it('AI_PROVIDER=openai exige OPENAI_API_KEY y no cae a Gemini', () => {

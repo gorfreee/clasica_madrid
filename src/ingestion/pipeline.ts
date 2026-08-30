@@ -1,6 +1,6 @@
 import type { Catalog } from '../lib/domain/catalog.ts';
 import type { Candidate } from '../lib/schemas/candidate.ts';
-import type { AiClassifier } from './classification/ai.ts';
+import type { AiClassifier, AiCallDiagnostics } from './classification/ai.ts';
 import { classifyObserved } from './classification/enrich.ts';
 import { isPublishableInclude, type ClassificationResult } from './classification/types.ts';
 import { collapseWhitespace } from './html.ts';
@@ -70,8 +70,36 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
   const ai = wrapAi(options.ai, aiUsage);
 
   const bySource = new Map(sources.map((source) => [source.id, source]));
-  for (const raw of rawEvents) {
+  // Only classification is concurrent. Candidate construction and allocation stay
+  // in original source order, independent of model/network completion order.
+  const prepared = rawEvents.map((raw) => {
     const event = normalizeRawEvent(raw);
+    const source = event ? bySource.get(event.sourceId) : undefined;
+    const skip = event ? structuralSkipReason(event, options.catalog, options.now) : undefined;
+    return { raw, event, source, skip };
+  });
+  const classified = await mapConcurrent(prepared, options.ai?.concurrency ?? 1, async ({ event, source, skip }) => {
+    if (!event || !source || skip) return undefined;
+    let aiAttempted = false;
+    let aiCall: AiCallDiagnostics | undefined;
+    const eventAi: AiClassifier | undefined = ai ? {
+      classifyBudgetMs: ai.classifyBudgetMs,
+      async classify(observed, context) {
+        aiAttempted = true;
+        try { return await ai.classify(observed, context); }
+        finally {
+          // Legacy/fake providers are sequential by default. Concurrent providers
+          // must emit diagnostics through the per-call context, never shared state.
+          if (!aiCall && (options.ai?.concurrency ?? 1) === 1) aiCall = ai.lastDiagnostics?.();
+        }
+      },
+    } : undefined;
+    const classification = await classifyObserved(observedFactsFromNormalized(event), {
+      ai: eventAi, onDiagnostics: (diagnostics) => { aiCall = diagnostics; },
+    });
+    return { classification, aiAttempted, aiCall };
+  });
+  for (const [index, { raw, event, source, skip }] of prepared.entries()) {
     if (!event) {
       skippedUnusable += 1;
       decisions.push(
@@ -86,7 +114,6 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
       );
       continue;
     }
-    const source = bySource.get(event.sourceId);
     if (!source) {
       skippedUnusable += 1;
       decisions.push(
@@ -101,7 +128,6 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
       );
       continue;
     }
-    const skip = structuralSkipReason(event, options.catalog, options.now);
     if (skip) {
       skippedUnusable += 1;
       decisions.push(
@@ -118,23 +144,9 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
       continue;
     }
 
-    const facts = observedFactsFromNormalized(event);
-    let aiAttempted = false;
-    const eventAi: AiClassifier | undefined = ai
-      ? {
-          classifyBudgetMs: ai.classifyBudgetMs,
-          lastDiagnostics: ai.lastDiagnostics?.bind(ai),
-          snapshotStats: ai.snapshotStats?.bind(ai),
-          async classify(observed) {
-            aiAttempted = true;
-            return ai.classify(observed);
-          },
-        }
-      : undefined;
-    const classification = await classifyObserved(facts, { ai: eventAi });
+    const { classification, aiAttempted, aiCall } = classified[index]!;
     eligibility[classification.eligibility.value] += 1;
     recordAiOutcome(aiUsage, classification);
-    const aiCall = aiAttempted ? eventAi?.lastDiagnostics?.() : undefined;
 
     const identity = matchHarvestIdentity(options.catalog, event, source.catalogSourceId);
 
@@ -246,9 +258,9 @@ function wrapAi(inner: AiClassifier | undefined, usage: IngestAiSummary): AiClas
     classifyBudgetMs: inner.classifyBudgetMs,
     lastDiagnostics: inner.lastDiagnostics?.bind(inner),
     snapshotStats: inner.snapshotStats?.bind(inner),
-    async classify(observed) {
+    async classify(observed, context) {
       usage.attempted += 1;
-      return inner.classify(observed);
+      return inner.classify(observed, context);
     },
   };
 }
@@ -293,9 +305,26 @@ function mergeProviderStats(usage: IngestAiSummary, ai: AiClassifier | undefined
   usage.modelFallbacks = stats.modelFallbacks;
   usage.requestsByModel = stats.requestsByModel;
   usage.classificationsByModel = stats.classificationsByModel;
+  usage.cacheHits = stats.cacheHits ?? 0;
+  usage.deferred = stats.deferred ?? 0;
+  usage.inputTokensByModel = stats.inputTokensByModel ?? {};
+  usage.dailyRequestsByModel = stats.dailyRequestsByModel ?? {};
 }
 
 function selectSources(ids: string[] | undefined): SourceDefinition[] {
   if (!ids || ids.length === 0) return listSourceDefinitions();
   return ids.map((id) => getSourceDefinition(id));
+}
+
+async function mapConcurrent<T, R>(items: T[], concurrency: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+  const results = new Array<R>(items.length);
+  let next = 0;
+  const workers = Math.max(1, Math.min(16, Math.floor(concurrency) || 1, items.length));
+  await Promise.all(Array.from({ length: workers }, async () => {
+    while (next < items.length) {
+      const index = next++;
+      results[index] = await fn(items[index]!);
+    }
+  }));
+  return results;
 }

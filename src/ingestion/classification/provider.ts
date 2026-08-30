@@ -1,24 +1,20 @@
+import { fileURLToPath } from 'node:url';
 import type { AiClassifier } from './ai.ts';
 import { GeminiClassifier, resolveGeminiConfig } from './gemini.ts';
 import { OpenAiClassifier } from './openai.ts';
+import type { GeminiConfigEnv } from './gemini-config.ts';
 
 export const AI_PROVIDERS = ['openai', 'gemini'] as const;
 export type AiProvider = (typeof AI_PROVIDERS)[number];
 
-export type AiEnv = {
+export type AiEnv = GeminiConfigEnv & {
   AI_PROVIDER?: string;
   OPENAI_API_KEY?: string;
   OPENAI_MODEL?: string;
   OPENAI_BASE_URL?: string;
   GEMINI_API_KEY?: string;
-  /** Single-model override. Ignored when `GEMINI_MODELS` is non-empty. */
-  GEMINI_MODEL?: string;
-  /** Ordered failover chain, comma-separated. Wins over `GEMINI_MODEL`. */
-  GEMINI_MODELS?: string;
-  /** Default RPM for every Gemini model without a per-model override. */
-  GEMINI_RPM?: string;
-  /** Per-model RPM, `name:rpm` pairs comma-separated. */
-  GEMINI_MODEL_RPM?: string;
+  GEMINI_STATE_DIR?: string;
+  GEMINI_CACHE?: string;
 };
 
 /**
@@ -53,10 +49,14 @@ function geminiFromEnv(env: AiEnv): AiClassifier | undefined {
   const apiKey = env.GEMINI_API_KEY?.trim();
   if (!apiKey) return undefined;
   const config = resolveGeminiConfig(env);
+  const cache = env.GEMINI_CACHE?.trim();
+  if (cache && !['on', 'off'].includes(cache)) {
+    throw new Error('GEMINI_CACHE debe ser on u off');
+  }
   return new GeminiClassifier({
     apiKey,
-    models: config.models,
-    defaultRpm: config.defaultRpm,
-    rpmByModel: config.rpmByModel,
+    ...config,
+    stateDir: env.GEMINI_STATE_DIR?.trim() || fileURLToPath(new URL('../../../.local/ai/', import.meta.url)),
+    cacheEnabled: cache !== 'off',
   });
 }

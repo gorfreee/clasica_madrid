@@ -1,368 +1,397 @@
+import { randomUUID } from 'node:crypto';
 import type { ObservedFacts } from '../observed.ts';
 import {
-  AI_CLASSIFICATION_JSON_SCHEMA,
-  AI_CLASSIFY_TIMEOUT_MS,
-  AiRateLimitedError,
-  type AiCallDiagnostics,
-  type AiClassifier,
-  type AiProviderStats,
+  AI_CLASSIFICATION_JSON_SCHEMA, AI_CLASSIFY_TIMEOUT_MS, AiRateLimitedError,
+  parseAiClassification, type AiCallContext, type AiCallDiagnostics,
+  type AiClassifier, type AiProviderStats,
 } from './ai.ts';
 import { AI_CLASSIFIER_SYSTEM_PROMPT, buildAiClassifierUserMessage } from './ai-prompt.ts';
+import { GEMINI_DEFAULT_LIMITS, intervalMsForRpm, resolveGeminiModels, type ModelLimits } from './gemini-config.ts';
+import { GeminiState, hashInput, nextQuotaReset } from './gemini-state.ts';
 
-export const GEMINI_DEFAULT_MODEL = 'gemini-3.1-flash-lite';
+export * from './gemini-config.ts';
 export const GEMINI_DEFAULT_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta';
-
-/** Interactions API revision that returns `steps` instead of the legacy `outputs`. */
 export const GEMINI_API_REVISION = '2026-05-20';
-
-/** Conservative default vs the observed Free Tier 15 RPM for Flash Lite. */
-export const GEMINI_DEFAULT_RPM = 12;
-
-/** Extra HTTP attempts after the first, per model. */
+/** Extra attempts across the entire pool, not per model. */
 export const GEMINI_MAX_RETRIES = 2;
-
 export const GEMINI_BACKOFF_BASE_MS = 2_000;
 export const GEMINI_MAX_RETRY_WAIT_MS = 60_000;
-
-/** Hang-safety for `classify()` including throttle and bounded retries. */
 export const GEMINI_CLASSIFY_BUDGET_MS = 180_000;
-
-export type SleepClock = {
-  now(): number;
-  sleep(ms: number): Promise<void>;
-};
-
+export type SleepClock = { now(): number; sleep(ms: number): Promise<void> };
 export type GeminiClassifierOptions = {
   apiKey: string;
-  /** Ordered failover chain. Wins over `model` when non-empty. */
   models?: string[];
-  /** Single-model override (compat with `GEMINI_MODEL`). */
   model?: string;
   rpmByModel?: Record<string, number>;
+  tpmByModel?: Record<string, number>;
+  rpdByModel?: Record<string, number>;
   defaultRpm?: number;
   maxRetries?: number;
   timeoutMs?: number;
   classifyBudgetMs?: number;
+  concurrency?: number;
+  maxRequests?: number;
+  /** Undefined gives an in-memory store for embedded callers/tests. CLI persists. */
+  stateDir?: string;
+  cacheEnabled?: boolean;
   baseUrl?: string;
   fetch?: typeof fetch;
   clock?: SleepClock;
   random?: () => number;
 };
-
-export type GeminiModelConfig = {
-  models: string[];
-  defaultRpm: number;
-  rpmByModel: Record<string, number>;
-};
-
 const systemClock: SleepClock = {
-  now: () => Date.now(),
-  sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+  now: () => Date.now(), sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
 };
+type RequestSpec = ReturnType<typeof requestSpec>;
+type RequestResult = { value: unknown; inputTokens?: number };
+type Reservation = { model: string; id: string; estimated: number };
+type CallResult = { value: unknown; diagnostics: AiCallDiagnostics };
 
-/**
- * Gemini Interactions caller with per-model throttling, bounded 429 retries,
- * and ordered model failover. One API key for the whole chain. No key rotation.
- */
+/** One project/key, preference-ordered scheduling over independent model quotas. */
 export class GeminiClassifier implements AiClassifier {
   readonly models: readonly string[];
   readonly classifyBudgetMs: number;
-  private readonly apiKey: string;
-  private readonly timeoutMs: number;
-  private readonly maxRetries: number;
-  private readonly defaultRpm: number;
-  private readonly rpmByModel: Record<string, number>;
-  private readonly baseUrl: string;
-  private readonly fetchImpl: typeof fetch;
+  readonly concurrency: number;
+  private readonly options: GeminiClassifierOptions;
   private readonly clock: SleepClock;
-  private readonly random: () => number;
-  private readonly gates = new Map<string, PerModelGate>();
+  private readonly state: GeminiState;
+  private readonly limits: Record<string, ModelLimits> = {};
   private readonly disabled = new Set<string>();
-  private readonly stats: AiProviderStats = {
-    httpRequests: 0,
-    retries: 0,
-    modelFallbacks: 0,
-    requestsByModel: {},
-    classificationsByModel: {},
+  private readonly inFlight = new Map<string, Promise<CallResult>>();
+  private active = 0;
+  private reservedRequests = 0;
+  private fatalError?: Error;
+  private lastCall?: AiCallDiagnostics;
+  private readonly stats = {
+    httpRequests: 0, retries: 0, modelFallbacks: 0, cacheHits: 0, deferred: 0,
+    requestsByModel: {} as Record<string, number>,
+    classificationsByModel: {} as Record<string, number>,
+    inputTokensByModel: {} as Record<string, number>,
   };
-  private lastCall: AiCallDiagnostics | undefined;
 
   constructor(options: GeminiClassifierOptions) {
-    const apiKey = options.apiKey.trim();
-    if (!apiKey) {
-      throw new Error('GEMINI_API_KEY ausente');
-    }
-    this.apiKey = apiKey;
-    this.models = resolveGeminiModels({ models: options.models, model: options.model });
-    this.timeoutMs = options.timeoutMs ?? AI_CLASSIFY_TIMEOUT_MS;
+    if (!options.apiKey.trim()) throw new Error('GEMINI_API_KEY ausente');
+    this.options = { ...options, apiKey: options.apiKey.trim() };
+    this.models = resolveGeminiModels(options);
     this.classifyBudgetMs = options.classifyBudgetMs ?? GEMINI_CLASSIFY_BUDGET_MS;
-    this.maxRetries = options.maxRetries ?? GEMINI_MAX_RETRIES;
-    this.defaultRpm = options.defaultRpm ?? GEMINI_DEFAULT_RPM;
-    this.rpmByModel = { ...(options.rpmByModel ?? {}) };
-    this.baseUrl = (options.baseUrl ?? GEMINI_DEFAULT_BASE_URL).replace(/\/$/, '');
-    this.fetchImpl = options.fetch ?? fetch;
+    this.concurrency = options.concurrency ?? 4;
+    if (!Number.isInteger(this.concurrency) || this.concurrency < 1 || this.concurrency > 16) {
+      throw new Error('Gemini concurrency debe estar entre 1 y 16');
+    }
+    for (const [name, value] of Object.entries({
+      maxRetries: options.maxRetries ?? GEMINI_MAX_RETRIES,
+      maxRequests: options.maxRequests ?? Number.MAX_SAFE_INTEGER,
+    })) {
+      if (!Number.isSafeInteger(value) || value < 0) throw new Error(`Gemini ${name} inválido`);
+    }
+    for (const value of [this.classifyBudgetMs, options.timeoutMs ?? AI_CLASSIFY_TIMEOUT_MS]) {
+      if (!Number.isFinite(value) || value <= 0) throw new Error('Gemini timeout inválido');
+    }
     this.clock = options.clock ?? systemClock;
-    this.random = options.random ?? Math.random;
-  }
-
-  lastDiagnostics(): AiCallDiagnostics | undefined {
-    return this.lastCall ? { ...this.lastCall } : undefined;
-  }
-
-  snapshotStats(): AiProviderStats {
-    return {
-      httpRequests: this.stats.httpRequests,
-      retries: this.stats.retries,
-      modelFallbacks: this.stats.modelFallbacks,
-      requestsByModel: { ...this.stats.requestsByModel },
-      classificationsByModel: { ...this.stats.classificationsByModel },
-    };
-  }
-
-  async classify(observed: ObservedFacts): Promise<unknown> {
-    this.lastCall = { model: this.models[0], fallbackUsed: false, attempts: 0 };
-    if (this.models.every((model) => this.disabled.has(model))) {
-      throw new AiRateLimitedError('Gemini: todos los modelos de la cadena están agotados para este run', {
-        quotaExhausted: true,
-        model: this.models[0],
-      });
-    }
-    let lastError: unknown;
-
+    this.state = new GeminiState(options.stateDir);
     for (const model of this.models) {
-      if (this.disabled.has(model)) continue;
-
-      if (model !== this.models[0]) {
-        this.stats.modelFallbacks += 1;
-        this.lastCall.fallbackUsed = true;
+      // Custom explicit models get conservative defaults; no automatic discovery.
+      const defaults = GEMINI_DEFAULT_LIMITS[model] ?? { rpm: 4, tpm: 12_800, rpd: 18 };
+      const limits = {
+        rpm: options.rpmByModel?.[model] ?? options.defaultRpm ?? defaults.rpm,
+        tpm: options.tpmByModel?.[model] ?? defaults.tpm,
+        rpd: options.rpdByModel?.[model] ?? defaults.rpd,
+      };
+      if (Object.values(limits).some((v) => !Number.isFinite(v) || v < 0)) {
+        throw new Error(`Gemini: límites inválidos para ${model}`);
       }
-
-      const outcome = await this.classifyWithModel(model, observed);
-      if (outcome.ok) {
-        this.lastCall.model = model;
-        bump(this.stats.classificationsByModel, model);
-        return outcome.value;
-      }
-
-      lastError = outcome.error;
-      if (outcome.exhausted) this.disabled.add(model);
-      if (!outcome.unavailable) throw outcome.error;
+      this.limits[model] = limits;
     }
-
-    if (lastError instanceof Error) throw lastError;
-    throw new Error('Gemini no produjo una clasificación');
   }
 
-  private async classifyWithModel(
-    model: string,
-    observed: ObservedFacts,
-  ): Promise<ModelAttempt> {
-    const gate = this.gateFor(model);
+  initialize(): void { this.state.initialize(); }
+  close(): void { this.state.close(); }
+  lastDiagnostics(): AiCallDiagnostics | undefined { return this.lastCall ? structuredClone(this.lastCall) : undefined; }
+  snapshotStats(): AiProviderStats {
+    return { ...structuredClone(this.stats), dailyRequestsByModel: this.state.dailyCounts(this.clock.now()) };
+  }
+
+  async classify(observed: ObservedFacts, context: AiCallContext = {}): Promise<unknown> {
+    this.initialize();
+    // The entire request (prompt text/version, schema, params, facts, endpoint and
+    // API revision) is the cache identity. No dates/URLs outside ObservedFacts.
+    const spec = requestSpec(observed);
+    const key = hashInput({ spec, baseUrl: this.baseUrl, revision: GEMINI_API_REVISION });
+    const flightKey = hashInput({ key, models: this.models });
+    const diagnostics: AiCallDiagnostics = { attempts: 0, fallbackUsed: false, cacheHit: false, routing: [] };
+    const publishDiagnostics = () => {
+      this.lastCall = structuredClone(diagnostics);
+      context.onDiagnostics?.(structuredClone(diagnostics));
+    };
+    const controller = new AbortController();
+    const abort = () => controller.abort();
+    context.signal?.addEventListener('abort', abort, { once: true });
+    if (context.signal?.aborted) controller.abort();
+    const timer = setTimeout(abort, this.classifyBudgetMs);
+    const signal = controller.signal;
+    let flight: Promise<CallResult> | undefined;
+    try {
+      signal.throwIfAborted();
+      const existing = this.options.cacheEnabled !== false ? this.inFlight.get(flightKey) : undefined;
+      if (existing) {
+        const result = await abortable(existing, signal);
+        Object.assign(diagnostics, result.diagnostics, {
+          attempts: 0, cacheHit: true, routing: [{ model: result.diagnostics.model!, reason: 'in-flight-cache' }],
+        });
+        this.stats.cacheHits++;
+        return structuredClone(result.value);
+      }
+      flight = this.classifyOnce(observed, spec, key, diagnostics, signal);
+      if (this.options.cacheEnabled !== false) this.inFlight.set(flightKey, flight);
+      return (await flight).value;
+    } catch (error) {
+      diagnostics.deferred = true;
+      this.stats.deferred++;
+      const reason = error instanceof Error ? error.message.replaceAll(this.options.apiKey, '[redacted]') : 'Gemini error';
+      this.state.defer(key, observed, spec, diagnostics, reason);
+      if (signal.aborted) throw new Error('tiempo agotado en la clasificación con IA');
+      if (error instanceof Error && error.message !== reason) error.message = reason;
+      throw error;
+    } finally {
+      if (flight && this.inFlight.get(flightKey) === flight) this.inFlight.delete(flightKey);
+      clearTimeout(timer);
+      context.signal?.removeEventListener('abort', abort);
+      publishDiagnostics();
+    }
+  }
+
+  private async classifyOnce(
+    observed: ObservedFacts, spec: RequestSpec, key: string,
+    diagnostics: AiCallDiagnostics, signal: AbortSignal,
+  ): Promise<CallResult> {
+    const deadline = this.clock.now() + this.classifyBudgetMs;
+    const maxAttempts = 1 + (this.options.maxRetries ?? GEMINI_MAX_RETRIES);
     let lastError: unknown;
-
-    for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
-      await gate.acquire();
-      this.stats.httpRequests += 1;
+    while (diagnostics.attempts! < maxAttempts) {
+      signal.throwIfAborted();
+      if (this.options.cacheEnabled !== false) {
+        for (const model of this.models) {
+          if (!this.enabled(model)) continue;
+          const value = this.state.cached(hashInput({ key, model }));
+          if (value !== undefined) {
+            Object.assign(diagnostics, { model, cacheHit: true, fallbackUsed: model !== this.models[0] });
+            route(diagnostics, model, 'cache');
+            this.stats.cacheHits++;
+            this.state.resolvePending(key);
+            return { value, diagnostics };
+          }
+        }
+      }
+      if (this.fatalError) throw this.fatalError;
+      const reservation = await this.acquire(spec, deadline, signal, diagnostics);
+      const { model, id, estimated } = reservation;
+      if (diagnostics.attempts! > 0) this.stats.retries++;
+      diagnostics.attempts!++;
+      diagnostics.model = model;
+      diagnostics.fallbackUsed = model !== this.models[0];
+      if (model !== this.models[0]) this.stats.modelFallbacks++;
+      this.stats.httpRequests++;
       bump(this.stats.requestsByModel, model);
-      this.lastCall = {
-        model,
-        fallbackUsed: this.lastCall?.fallbackUsed ?? model !== this.models[0],
-        attempts: (this.lastCall?.attempts ?? 0) + 1,
-      };
-
       try {
-        return { ok: true, value: await this.request(model, observed) };
+        const result = await this.request(model, spec, signal);
+        const state = this.state.model(model, this.clock.now());
+        if (result.inputTokens !== undefined) {
+          const recent = state.recent.find((r) => r.id === id);
+          if (recent) recent.tokens = result.inputTokens;
+          state.tokenScale = Math.max(state.tokenScale, result.inputTokens / estimated * state.tokenScale);
+          this.stats.inputTokensByModel[model] = (this.stats.inputTokensByModel[model] ?? 0) + result.inputTokens;
+          this.state.save();
+        }
+        if (parseAiClassification(result.value).ok) {
+          if (this.options.cacheEnabled !== false) this.state.cache(hashInput({ key, model }), result.value);
+          this.state.resolvePending(key);
+          bump(this.stats.classificationsByModel, model);
+        } else {
+          diagnostics.deferred = true;
+          this.stats.deferred++;
+          this.state.defer(key, observed, spec, diagnostics, 'ai-invalid-output');
+        }
+        // Valid uncertain and invalid semantic output both stop here; never shop
+        // for include or silently repair editorial values on another model.
+        return { value: result.value, diagnostics };
       } catch (error) {
         lastError = error;
+        signal.throwIfAborted();
         if (error instanceof AiRateLimitedError) {
-          if (error.quotaExhausted) {
-            return { ok: false, error, unavailable: true, exhausted: true };
-          }
-          if (attempt < this.maxRetries) {
-            this.stats.retries += 1;
-            gate.cooldownUntil(this.clock.now() + this.retryWaitMs(error, attempt));
-            continue;
-          }
-          return { ok: false, error, unavailable: true, exhausted: false };
+          const state = this.state.model(model, this.clock.now());
+          if (error.quotaExhausted) state.dailyUntil = nextQuotaReset(this.clock.now());
+          else state.cooldownUntil = Math.max(state.cooldownUntil, this.clock.now() + this.retryWait(error, diagnostics.attempts! - 1));
+          this.state.save();
+          diagnostics.routing!.push({ model, reason: error.quotaExhausted ? 'daily-quota' : 'rate-limit' });
+        } else if (error instanceof Error && /Gemini HTTP (400|404)/.test(error.message)) {
+          this.disabled.add(model);
+          diagnostics.routing!.push({ model, reason: 'unavailable-model-or-config' });
+        } else if (error instanceof Error && /Gemini HTTP (401|403)/.test(error.message)) {
+          this.fatalError = error;
+          throw error;
+        } else if (isUnavailableError(error)) {
+          const state = this.state.model(model, this.clock.now());
+          state.cooldownUntil = this.clock.now() + this.retryWait(undefined, diagnostics.attempts! - 1);
+          this.state.save();
+          diagnostics.routing!.push({ model, reason: 'transport-error' });
+        } else {
+          throw error;
         }
-        if (isUnavailableError(error)) {
-          return { ok: false, error, unavailable: true, exhausted: false };
-        }
-        return { ok: false, error, unavailable: false, exhausted: false };
+      } finally {
+        this.active--;
       }
     }
-
-    return { ok: false, error: lastError, unavailable: true, exhausted: false };
+    throw lastError ?? new Error('Gemini: máximo de intentos alcanzado');
   }
 
-  private retryWaitMs(error: AiRateLimitedError, attempt: number): number {
-    if (error.retryAfterMs !== undefined) {
-      return Math.min(Math.max(0, error.retryAfterMs), GEMINI_MAX_RETRY_WAIT_MS);
+  private enabled(model: string): boolean {
+    const limits = this.limits[model]!;
+    return limits.rpm > 0 && limits.tpm > 0 && limits.rpd > 0;
+  }
+
+  private async acquire(spec: RequestSpec, deadline: number, signal: AbortSignal, diagnostics: AiCallDiagnostics): Promise<Reservation> {
+    while (true) {
+      signal.throwIfAborted();
+      if (this.fatalError) throw this.fatalError;
+      if (this.reservedRequests >= (this.options.maxRequests ?? Number.MAX_SAFE_INTEGER)) {
+        throw new AiRateLimitedError('Gemini: presupuesto HTTP de esta ejecución agotado');
+      }
+      const now = this.clock.now();
+      if (now >= deadline) throw new Error('tiempo agotado esperando cuota de IA');
+      let earliest = Infinity;
+      for (const model of this.models) {
+        if (this.disabled.has(model) || !this.enabled(model)) {
+          route(diagnostics, model, 'disabled');
+          continue;
+        }
+        const limits = this.limits[model]!;
+        const state = this.state.model(model, now);
+        if (state.requests >= limits.rpd || state.dailyUntil > now) {
+          route(diagnostics, model, state.dailyUntil > now ? 'daily-quota' : 'daily-budget');
+          continue;
+        }
+        const estimated = Math.ceil(estimateInputTokens(spec) * state.tokenScale);
+        if (estimated > limits.tpm) {
+          route(diagnostics, model, 'input-over-tpm');
+          continue; // Do not truncate source evidence.
+        }
+        if (state.nextAt > now) route(diagnostics, model, 'rpm-wait');
+        if (state.cooldownUntil > now) route(diagnostics, model, 'cooldown');
+        let next = Math.max(now, state.nextAt, state.cooldownUntil);
+        let tokens = state.recent.reduce((sum, r) => sum + r.tokens, 0);
+        if (tokens + estimated > limits.tpm) route(diagnostics, model, 'tpm-wait');
+        for (const request of state.recent) {
+          if (tokens + estimated <= limits.tpm) break;
+          tokens -= request.tokens;
+          next = Math.max(next, request.at + 60_000);
+        }
+        if (next <= now && this.active < this.concurrency) {
+          const id = randomUUID();
+          state.requests++;
+          state.nextAt = now + intervalMsForRpm(limits.rpm);
+          state.recent.push({ id, at: now, tokens: estimated });
+          this.state.save(); // Synchronous reservation: no races between workers.
+          this.reservedRequests++;
+          this.active++;
+          diagnostics.routing!.push({ model, reason: model === this.models[0] ? 'preferred-ready' : 'next-available' });
+          return { model, id, estimated };
+        }
+        earliest = Math.min(earliest, next);
+      }
+      if (!Number.isFinite(earliest)) {
+        throw new AiRateLimitedError('Gemini: ningún modelo tiene cuota diaria, configuración o capacidad TPM suficiente');
+      }
+      if (earliest >= deadline) {
+        throw new AiRateLimitedError('Gemini: próxima disponibilidad fuera del presupuesto de espera');
+      }
+      // HTTP completions can correct TPM estimates. Recheck at most once/second.
+      const wait = Math.min(1_000, Math.max(25, earliest - now), deadline - now);
+      await sleep(this.clock, wait, signal);
     }
-    const exp = GEMINI_BACKOFF_BASE_MS * 2 ** attempt;
-    const jitter = this.random() * GEMINI_BACKOFF_BASE_MS;
-    return Math.min(exp + jitter, GEMINI_MAX_RETRY_WAIT_MS);
   }
 
-  private gateFor(model: string): PerModelGate {
-    const existing = this.gates.get(model);
-    if (existing) return existing;
-    const gate = new PerModelGate(intervalMsForRpm(this.rpmFor(model)), this.clock);
-    this.gates.set(model, gate);
-    return gate;
+  private retryWait(error: AiRateLimitedError | undefined, attempt: number): number {
+    if (error?.retryAfterMs !== undefined) return Math.max(0, error.retryAfterMs);
+    return Math.min(GEMINI_MAX_RETRY_WAIT_MS,
+      GEMINI_BACKOFF_BASE_MS * 2 ** attempt + (this.options.random ?? Math.random)() * GEMINI_BACKOFF_BASE_MS);
   }
 
-  private rpmFor(model: string): number {
-    return this.rpmByModel[model] ?? this.defaultRpm;
-  }
+  private get baseUrl(): string { return (this.options.baseUrl ?? GEMINI_DEFAULT_BASE_URL).replace(/\/$/, ''); }
 
-  private async request(model: string, observed: ObservedFacts): Promise<unknown> {
+  private async request(model: string, spec: RequestSpec, signal: AbortSignal): Promise<RequestResult> {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), this.timeoutMs);
+    const abort = () => controller.abort();
+    signal.addEventListener('abort', abort, { once: true });
+    if (signal.aborted) controller.abort();
+    const timeoutMs = this.options.timeoutMs ?? AI_CLASSIFY_TIMEOUT_MS;
+    const timer = setTimeout(abort, timeoutMs);
     try {
-      const response = await this.fetchImpl(`${this.baseUrl}/interactions`, {
-        method: 'POST',
-        signal: controller.signal,
-        headers: {
-          'x-goog-api-key': this.apiKey,
-          'content-type': 'application/json',
-          'api-revision': GEMINI_API_REVISION,
-        },
-        body: JSON.stringify({
-          model,
-          store: false,
-          system_instruction: AI_CLASSIFIER_SYSTEM_PROMPT,
-          input: buildAiClassifierUserMessage(observed),
-          response_format: {
-            type: 'text',
-            mime_type: 'application/json',
-            schema: AI_CLASSIFICATION_JSON_SCHEMA,
-          },
-          generation_config: {
-            max_output_tokens: 600,
-            tool_choice: 'none',
-          },
-        }),
-      });
-
+      controller.signal.throwIfAborted();
+      const fetchImpl = this.options.fetch ?? fetch;
+      const response = await abortable(fetchImpl(`${this.baseUrl}/interactions`, {
+        method: 'POST', signal: controller.signal,
+        headers: { 'x-goog-api-key': this.options.apiKey, 'content-type': 'application/json', 'api-revision': GEMINI_API_REVISION },
+        body: JSON.stringify({ model, ...spec }),
+      }), controller.signal);
       if (!response.ok) {
-        const body = await response.text().catch(() => '');
-        throw httpError(response.status, body, response.headers.get('retry-after'), model, this.clock.now());
+        const body = await abortable(response.text(), controller.signal);
+        throw httpError(response.status, body.replaceAll(this.options.apiKey, '[redacted]'), response.headers.get('retry-after'), model, this.clock.now());
       }
-
-      let payload: unknown;
-      try {
-        payload = await response.json();
-      } catch {
-        throw new Error('Gemini devolvió un cuerpo no JSON');
-      }
-
+      const payload = await abortable(response.json(), controller.signal);
       const content = interactionText(payload);
-      if (content === undefined) {
-        throw new Error('Gemini devolvió una respuesta vacía');
-      }
-      try {
-        return JSON.parse(content);
-      } catch {
-        throw new Error('Gemini devolvió JSON inválido');
-      }
+      if (content === undefined) throw new Error('Gemini devolvió una respuesta vacía');
+      let value: unknown;
+      try { value = JSON.parse(content); }
+      catch { throw new Error('Gemini devolvió JSON inválido'); }
+      const tokens = payload?.usage?.total_input_tokens;
+      return { value, inputTokens: typeof tokens === 'number' && Number.isFinite(tokens) && tokens >= 0 ? tokens : undefined };
     } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        throw new Error(`tiempo agotado en la clasificación con IA (${this.timeoutMs}ms)`);
-      }
+      if (controller.signal.aborted) throw new Error(`tiempo agotado en la clasificación con IA (${timeoutMs}ms)`);
       throw error;
     } finally {
       clearTimeout(timer);
+      signal.removeEventListener('abort', abort);
     }
   }
 }
 
-type ModelAttempt =
-  | { ok: true; value: unknown }
-  | { ok: false; error: unknown; unavailable: boolean; exhausted: boolean };
-
-class PerModelGate {
-  private nextAllowedAt = 0;
-  private tail: Promise<void> = Promise.resolve();
-
-  constructor(
-    private readonly minIntervalMs: number,
-    private readonly clock: SleepClock,
-  ) {}
-
-  cooldownUntil(at: number): void {
-    this.nextAllowedAt = Math.max(this.nextAllowedAt, at);
-  }
-
-  async acquire(): Promise<void> {
-    let release!: () => void;
-    const previous = this.tail;
-    this.tail = new Promise<void>((resolve) => {
-      release = resolve;
-    });
-    await previous;
-    try {
-      const wait = Math.max(0, this.nextAllowedAt - this.clock.now());
-      if (wait > 0) await this.clock.sleep(wait);
-      this.nextAllowedAt = this.clock.now() + this.minIntervalMs;
-    } finally {
-      release();
-    }
-  }
-}
-
-export function resolveGeminiModels(input: { models?: string[] | string; model?: string }): string[] {
-  if (Array.isArray(input.models)) {
-    const cleaned = uniqueNonEmpty(input.models);
-    if (cleaned.length > 0) return cleaned;
-  } else if (typeof input.models === 'string') {
-    const cleaned = uniqueNonEmpty(splitComma(input.models));
-    if (cleaned.length > 0) return cleaned;
-  }
-  const single = input.model?.trim();
-  if (single) return [single];
-  return [GEMINI_DEFAULT_MODEL];
-}
-
-export function parseGeminiModelRpm(value: string | undefined): Record<string, number> {
-  const out: Record<string, number> = {};
-  if (!value) return out;
-  for (const part of value.split(',')) {
-    const trimmed = part.trim();
-    if (!trimmed) continue;
-    const colon = trimmed.lastIndexOf(':');
-    if (colon <= 0) continue;
-    const name = trimmed.slice(0, colon).trim();
-    const rpm = parsePositiveNumber(trimmed.slice(colon + 1));
-    if (!name || rpm === undefined) continue;
-    out[name] = rpm;
-  }
-  return out;
-}
-
-export function parsePositiveNumber(raw: string | undefined): number | undefined {
-  if (!raw) return undefined;
-  const n = Number(raw.trim());
-  if (!Number.isFinite(n) || n <= 0) return undefined;
-  return n;
-}
-
-export function intervalMsForRpm(rpm: number): number {
-  const safe = Number.isFinite(rpm) && rpm > 0 ? rpm : GEMINI_DEFAULT_RPM;
-  return Math.ceil(60_000 / safe);
-}
-
-export function resolveGeminiConfig(env: {
-  GEMINI_MODELS?: string;
-  GEMINI_MODEL?: string;
-  GEMINI_RPM?: string;
-  GEMINI_MODEL_RPM?: string;
-}): GeminiModelConfig {
+function requestSpec(observed: ObservedFacts) {
   return {
-    models: resolveGeminiModels({ models: env.GEMINI_MODELS, model: env.GEMINI_MODEL }),
-    defaultRpm: parsePositiveNumber(env.GEMINI_RPM) ?? GEMINI_DEFAULT_RPM,
-    rpmByModel: parseGeminiModelRpm(env.GEMINI_MODEL_RPM),
+    store: false,
+    system_instruction: AI_CLASSIFIER_SYSTEM_PROMPT,
+    input: buildAiClassifierUserMessage(observed),
+    response_format: { type: 'text', mime_type: 'application/json', schema: AI_CLASSIFICATION_JSON_SCHEMA },
+    generation_config: { max_output_tokens: 600, tool_choice: 'none' },
   };
+}
+
+function route(diagnostics: AiCallDiagnostics, model: string, reason: string): void {
+  if (!diagnostics.routing!.some((r) => r.model === model && r.reason === reason)) {
+    diagnostics.routing!.push({ model, reason });
+  }
+}
+
+/** Conservative text estimate including system prompt + schema; no extra API call. */
+export function estimateInputTokens(spec: unknown): number {
+  return Math.ceil(Buffer.byteLength(JSON.stringify(spec), 'utf8') / 3) + 128;
+}
+
+async function abortable<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
+  signal.throwIfAborted();
+  let abort!: () => void;
+  try {
+    return await Promise.race([promise, new Promise<never>((_resolve, reject) => {
+      abort = () => reject(new DOMException('Aborted', 'AbortError'));
+      signal.addEventListener('abort', abort, { once: true });
+    })]);
+  } finally { signal.removeEventListener('abort', abort); }
+}
+
+async function sleep(clock: SleepClock, ms: number, signal: AbortSignal): Promise<void> {
+  if (clock !== systemClock) return abortable(clock.sleep(ms), signal);
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try { await abortable(new Promise<void>((resolve) => { timer = setTimeout(resolve, ms); }), signal); }
+  finally { clearTimeout(timer); }
 }
 
 export function detectDailyQuotaExhausted(body: string): boolean {
@@ -409,11 +438,11 @@ function parseRetryAfterHeader(header: string | null | undefined, now: number): 
   if (!trimmed) return undefined;
   const seconds = Number(trimmed);
   if (Number.isFinite(seconds) && seconds >= 0) {
-    return Math.min(seconds * 1000, GEMINI_MAX_RETRY_WAIT_MS);
+    return seconds * 1000;
   }
   const date = Date.parse(trimmed);
   if (Number.isNaN(date)) return undefined;
-  return Math.min(Math.max(0, date - now), GEMINI_MAX_RETRY_WAIT_MS);
+  return Math.max(0, date - now);
 }
 
 function parseRetryDelayFromBody(body: string): number | undefined {
@@ -456,7 +485,7 @@ function parseRetryDelayString(value: string): number | undefined {
 }
 
 function secondsToMs(raw: string): number {
-  return Math.min(Number(raw) * 1000, GEMINI_MAX_RETRY_WAIT_MS);
+  return Number(raw) * 1000;
 }
 
 function isUnavailableError(error: unknown): boolean {
@@ -497,22 +526,6 @@ function modelOutputText(step: unknown): string | undefined {
     if (typeof text === 'string' && text.trim()) parts.push(text.trim());
   }
   return parts.length > 0 ? parts.join('\n') : undefined;
-}
-
-function splitComma(value: string): string[] {
-  return value.split(',').map((part) => part.trim());
-}
-
-function uniqueNonEmpty(items: string[]): string[] {
-  const seen = new Set<string>();
-  const out: string[] = [];
-  for (const item of items) {
-    const trimmed = item.trim();
-    if (!trimmed || seen.has(trimmed)) continue;
-    seen.add(trimmed);
-    out.push(trimmed);
-  }
-  return out;
 }
 
 function bump(map: Record<string, number>, key: string): void {

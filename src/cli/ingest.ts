@@ -9,6 +9,8 @@ import { createAiClassifierFromEnv } from '../ingestion/classification/provider.
 import { listSourceDefinitions } from '../ingestion/registry.ts';
 import { ingestExitCode, parseIngestArgs } from './ingest-args.ts';
 import { loadLocalAiEnv } from './load-local-env.ts';
+import type { AiClassifier } from '../ingestion/classification/ai.ts';
+import { GeminiClassifier } from '../ingestion/classification/gemini.ts';
 
 loadLocalAiEnv();
 
@@ -21,8 +23,22 @@ if (!parsed.ok) {
 }
 
 const dataDir = parsed.dataDir ?? defaultDataDir();
+let ai: AiClassifier | undefined;
+// Graceful termination releases the local lock; SIGKILL requires manual recovery.
+process.once('SIGINT', () => process.exit(130));
+process.once('SIGTERM', () => process.exit(143));
 
 try {
+  ai = createAiClassifierFromEnv({
+    ...process.env,
+    ...(parsed.aiModel ? { GEMINI_MODELS: parsed.aiModel } : {}),
+    ...(parsed.aiNoCache ? { GEMINI_CACHE: 'off' } : {}),
+    ...(parsed.aiMaxRequests !== undefined ? { GEMINI_MAX_REQUESTS: String(parsed.aiMaxRequests) } : {}),
+  });
+  if ((parsed.aiModel || parsed.aiNoCache || parsed.aiMaxRequests !== undefined) && !(ai instanceof GeminiClassifier)) {
+    throw new Error('Las opciones --ai-* requieren el provider Gemini y GEMINI_API_KEY');
+  }
+  ai?.initialize?.();
   const catalog = await loadCatalogFromDir(dataDir);
   const run = await runIngest({
     dataDir,
@@ -30,7 +46,7 @@ try {
     now: systemClock.now(),
     dryRun: parsed.dryRun,
     sourceIds: parsed.command === 'source' ? [parsed.sourceId] : undefined,
-    ai: createAiClassifierFromEnv(),
+    ai,
   });
 
   console.log(formatRunSummary(run.summary));
@@ -46,9 +62,11 @@ try {
     }
   }
 
-  process.exit(ingestExitCode(run));
+  process.exitCode = ingestExitCode(run);
 } catch (error) {
   const message = error instanceof Error ? error.message : String(error);
   console.error(message);
-  process.exit(1);
+  process.exitCode = 1;
+} finally {
+  ai?.close?.();
 }

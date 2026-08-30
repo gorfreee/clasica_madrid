@@ -29,17 +29,21 @@ export function formatRunSummary(summary: IngestRunSummary): string {
     `  ai-timeout: ${summary.ai.timeout}`,
     `  ai-error: ${summary.ai.error}`,
     `  http: ${summary.ai.httpRequests}`,
+    `  caché: ${summary.ai.cacheHits}`,
+    `  pendientes recuperables: ${summary.ai.deferred}`,
     `  retries: ${summary.ai.retries}`,
     `  fallbacks de modelo: ${summary.ai.modelFallbacks}`,
     ...formatCountMap('requests por modelo', summary.ai.requestsByModel),
     ...formatCountMap('clasificaciones por modelo', summary.ai.classificationsByModel),
+    ...formatCountMap('tokens de entrada medidos', summary.ai.inputTokensByModel),
+    ...formatCountMap('requests del día (local)', summary.ai.dailyRequestsByModel),
     `Descartados estructuralmente: ${summary.skippedUnusable}`,
     `Candidatos generados: ${summary.candidates}`,
     `Eventos nuevos: ${summary.newEvents}`,
     `Eventos ya existentes (sin cambios): ${summary.unchangedEvents}`,
   );
   if (summary.dryRun) {
-    lines.push('Modo dry-run: no se ha escrito nada.');
+    lines.push('Modo dry-run: no se ha escrito nada en el catálogo. La IA puede guardar caché, cuotas y pendientes locales.');
   } else if (summary.written.length === 0) {
     lines.push('Cambios aplicados: 0');
   } else {
