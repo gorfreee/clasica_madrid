@@ -60,6 +60,9 @@ async function fixtureGet(url: string): Promise<string> {
   if (url.includes('agenda-eventos-culturales-100')) {
     return readFile(path.join(fixtures, 'madrid-agenda.json'), 'utf8');
   }
+  if (url.includes('madrid.es')) {
+    return '<article><h1>Ficha</h1></article>';
+  }
   throw new Error(`URL de test no mapeada: ${url}`);
 }
 

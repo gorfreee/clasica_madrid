@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parseAuditorioNacionalDetail } from '../src/ingestion/detail/auditorio-nacional.ts';
+import { parseMadridDatosDetail } from '../src/ingestion/detail/madrid-datos.ts';
 import { parseTeatroRealDetail } from '../src/ingestion/detail/teatro-real.ts';
 import { normalizeRawEvent } from '../src/ingestion/normalize.ts';
 import { emptyObservedLists } from '../src/ingestion/observed.ts';
@@ -462,6 +463,132 @@ describe('parser de ficha Teatro Real', () => {
 
   it('falla si el HTML no es una ficha reconocible', () => {
     expect(() => parseTeatroRealDetail('<div class="home">Teatro Real</div>')).toThrow(/estructura esperada/);
+  });
+});
+
+describe('parser de ficha Madrid Datos', () => {
+  it('extrae descripción ampliada, intérpretes y compositores del excerpt renacentista', async () => {
+    const html = await readFile(path.join(detailDir, 'madrid-datos-renacentista.excerpt.html'), 'utf8');
+    const facts = parseMadridDatosDetail(html);
+    expect(facts.description).toMatch(/cuerda pulsada/);
+    expect(facts.programText).toMatch(/Luis de Milán/);
+    expect(facts.performers).toEqual([
+      { name: 'Jesús Hernández' },
+      { name: 'Santiago Pindado' },
+    ]);
+    expect(facts.composers).toEqual([
+      { name: 'Luis de Milán' },
+      { name: 'Luys de Narváez' },
+      { name: 'Alonso Mudarra' },
+      { name: 'Enríquez de Valderrábano' },
+    ]);
+    expect(facts.works).toEqual([]);
+    expect(facts.occurrences).toBeUndefined();
+    expect(facts.venueText).toBeUndefined();
+    expect(facts.accessText).toBeUndefined();
+  });
+
+  it('extrae el dúo de RAGE y conserva el texto contemporáneo', async () => {
+    const html = await readFile(path.join(detailDir, 'madrid-datos-rage.excerpt.html'), 'utf8');
+    const facts = parseMadridDatosDetail(html);
+    expect(facts.description).toMatch(/técnicas extendidas/);
+    expect(facts.programText).toMatch(/estreno absoluto/);
+    expect(facts.performers).toEqual([{ name: 'Weston Olencki' }, { name: 'Mattie Barbier' }]);
+    expect(facts.composers).toEqual([]);
+  });
+
+  it('conserva la evidencia editorial de Lê Quan Ninh sin inventar el elenco', async () => {
+    const html = await readFile(path.join(detailDir, 'madrid-datos-ninh.excerpt.html'), 'utf8');
+    const facts = parseMadridDatosDetail(html);
+    expect(facts.description).toMatch(/formación clásica/);
+    expect(facts.programText).toMatch(/música contemporánea/);
+    expect(facts.performers).toEqual([]);
+    expect(facts.composers).toEqual([]);
+  });
+
+  it('extrae el dúo de Senyawa cuando el texto lo declara', async () => {
+    const html = await readFile(path.join(detailDir, 'madrid-datos-senyawa.excerpt.html'), 'utf8');
+    const facts = parseMadridDatosDetail(html);
+    expect(facts.description).toMatch(/improvisación/);
+    expect(facts.performers).toEqual([{ name: 'Rully Shabara' }, { name: 'Wukir Suryadi' }]);
+  });
+
+  it('una ficha sin información musical adicional deja el patch vacío', async () => {
+    const html = await readFile(path.join(detailDir, 'madrid-datos-piano.excerpt.html'), 'utf8');
+    const facts = parseMadridDatosDetail(html);
+    expect(facts.description).toBeUndefined();
+    expect(facts.programText).toBeUndefined();
+    expect(facts.performers).toEqual([]);
+    expect(facts.composers).toEqual([]);
+    expect(facts.works).toEqual([]);
+  });
+
+  it('lee .detalle / .tiny-text de producción y no copia fecha, lugar ni acceso', () => {
+    const html = `
+      <main class="mainContent" id="readspeaker">
+        <div class="detalle">
+          <div class="summary"><h3 class="summary-title">Concierto de m&uacute;sica renacentista</h3></div>
+          <div class="tramites-content">
+            <div class="image-content"></div>
+            <div class="tiny-text">
+              <p>A cargo de <strong>Jes&uacute;s Hern&aacute;ndez</strong> y <strong>Santiago Pindado</strong>, el concierto ser&aacute; interpretado con instrumentos de cuerda pulsada.</p>
+              <p>El repertorio propuesto incluye obras maestras de autores tan relevantes como Luis de Mil&aacute;n, Luys de Narv&aacute;ez, Alonso Mudarra y Enr&iacute;quez de Valderr&aacute;bano, cuyas composiciones representan un pilar cultural.</p>
+            </div>
+          </div>
+          <div class="info-actividad">
+            <h4 class="fecha title9">Fecha</h4>
+            <p class="text-date">Viernes 16 de octubre de 2026 a las 18:30 horas</p>
+            <h4 class="place title9">Lugar de celebraci&oacute;n</h4>
+            <dd><a class="url fn">Biblioteca P&uacute;blica Municipal Miguel Delibes (Moratalaz)</a></dd>
+            <p class="gratuita">Gratuito</p>
+            <h5>Organizaci&oacute;n</h5>
+            <p>Bibliotecas Madrid</p>
+          </div>
+        </div>
+      </main>
+    `;
+    const facts = parseMadridDatosDetail(html);
+    expect(facts.description).toMatch(/cuerda pulsada/);
+    expect(facts.performers?.map((item) => item.name)).toEqual(['Jesús Hernández', 'Santiago Pindado']);
+    expect(facts.composers?.map((item) => item.name)).toContain('Luis de Milán');
+    expect(facts.organizerText).toBe('Bibliotecas Madrid');
+    expect(facts.occurrences).toBeUndefined();
+    expect(facts.venueText).toBeUndefined();
+    expect(facts.accessText).toBeUndefined();
+    expect(facts.eventStatus).toBeUndefined();
+  });
+
+  it('un markup parcialmente distinto (sin .detalle, con tramites-content) no rompe', () => {
+    const html = `
+      <div class="tramites-content wrapping">
+        <div class="tiny-text">
+          <p class="jumbotron"><a>VANG VIII. M&uacute;sicas en vanguardia</a></p>
+          <p>El d&uacute;o formado por Weston Olencki y Mattie Barbier presenta un estreno.</p>
+        </div>
+      </div>
+    `;
+    const facts = parseMadridDatosDetail(html);
+    expect(facts.seriesText).toMatch(/VANG VIII/);
+    expect(facts.performers).toEqual([{ name: 'Weston Olencki' }, { name: 'Mattie Barbier' }]);
+    expect(facts.description).toMatch(/estreno/);
+  });
+
+  it('no mezcla el ciclo del jumbotron con los intérpretes de un dúo', () => {
+    const html = `
+      <article>
+        <h1>Senyawa</h1>
+        <p>Limo . Músicas corrientes</p>
+        <p>Rully Shabara y Wukir Suryadi son un dúo indonesio procedente de Java.</p>
+      </article>
+    `;
+    const facts = parseMadridDatosDetail(html);
+    expect(facts.performers).toEqual([{ name: 'Rully Shabara' }, { name: 'Wukir Suryadi' }]);
+  });
+
+  it('falla si el HTML no es una ficha reconocible', () => {
+    expect(() => parseMadridDatosDetail('<HTML><HEAD><TITLE>Access Denied</TITLE></HEAD></HTML>')).toThrow(
+      /estructura esperada/,
+    );
   });
 });
 

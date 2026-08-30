@@ -108,6 +108,7 @@ describe('orquestación de hydration', () => {
         if (url.includes('agenda-eventos-culturales-100')) {
           return readFile(path.join(fixtures, 'madrid-agenda.json'), 'utf8');
         }
+        if (url.includes('madrid.es')) return '<article><h1>Ficha</h1></article>';
         throw new Error(`URL no mapeada: ${url}`);
       },
     });
@@ -141,22 +142,99 @@ describe('orquestación de hydration', () => {
     expect(calls).toBe(1);
   });
 
-  it('Madrid Datos no pide ficha: hydration not-requested', async () => {
-    const body = await readFile(path.join(fixtures, 'madrid-agenda.json'), 'utf8');
-    const extracted = madridDatosAdapter.extract(body, 'https://datos.madrid.es/agenda.json', listingCtx('madrid-datos', async () => {
-      throw new Error('madrid-datos no debe pedir fichas');
-    }));
+  it('Madrid Datos hidrata la ficha y no sustituye fecha, lugar ni acceso del JSON-LD', async () => {
+    const listingBody = await readFile(path.join(fixtures, 'madrid-agenda.json'), 'utf8');
+    const detailBody = await readFile(path.join(detailDir, 'madrid-datos-renacentista.excerpt.html'), 'utf8');
+    const extracted = madridDatosAdapter.extract(
+      listingBody,
+      'https://datos.madrid.es/agenda.json',
+      listingCtx('madrid-datos', async () => detailBody),
+    );
+    const listing = extracted.find((event) => event.externalId === '50390001');
+    expect(listing).toBeDefined();
     const hydrated = await hydrateEvents(
-      extracted,
+      listing ? [listing] : [],
       madridDatosAdapter,
+      listingCtx('madrid-datos', async () => detailBody),
+    );
+    const event = hydrated[0];
+    expect(event?.hydration?.status).toBe('succeeded');
+    expect(event?.observed.title).toContain('Teatro Real');
+    expect(event?.observed.description).toMatch(/cuerda pulsada/);
+    expect(event?.observed.programText).toMatch(/Luis de Milán/);
+    expect(event?.observed.performers.map((item) => item.name)).toEqual([
+      'Jesús Hernández',
+      'Santiago Pindado',
+    ]);
+    expect(event?.observed.composers.map((item) => item.name)).toContain('Luis de Milán');
+    expect(event?.observed.occurrences).toEqual([
+      { raw: '2026-09-15 19:30:00.0', date: '2026-09-15', time: '19:30' },
+    ]);
+    expect(event?.observed.venueText).toBe('Teatro Real');
+    expect(event?.observed.accessText).toBe('paid');
+    expect(event?.dateFromDetail).toBeFalsy();
+  });
+
+  it('Madrid Datos: un fallo de ficha conserva el listing', async () => {
+    const listingBody = await readFile(path.join(fixtures, 'madrid-agenda.json'), 'utf8');
+    const extracted = madridDatosAdapter.extract(
+      listingBody,
+      'https://datos.madrid.es/agenda.json',
       listingCtx('madrid-datos', async () => {
-        throw new Error('madrid-datos no debe pedir fichas');
+        throw new Error('HTTP 404 al pedir ficha');
       }),
     );
-    expect(hydrated).toHaveLength(8);
-    expect(hydrated.every((event) => event.hydration?.status === 'not-requested')).toBe(true);
-    const teatro = hydrated.find((event) => event.externalId === '50390001');
-    expect(teatro?.observed.description).toBe('Programa de cámara.');
+    const listing = extracted.find((event) => event.externalId === '50390001');
+    const hydrated = await hydrateEvents(
+      listing ? [listing] : [],
+      madridDatosAdapter,
+      listingCtx('madrid-datos', async () => {
+        throw new Error('HTTP 404 al pedir ficha');
+      }),
+    );
+    expect(hydrated[0]?.hydration?.status).toBe('failed');
+    expect(hydrated[0]?.hydration?.message).toMatch(/404/);
+    expect(hydrated[0]?.observed.description).toBe('Programa de cámara.');
+    expect(hydrated[0]?.observed.venueText).toBe('Teatro Real');
+    expect(hydrated[0]?.observed.occurrences[0]?.date).toBe('2026-09-15');
+    expect(hydrated[0]?.observed.performers).toEqual([]);
+  });
+
+  it('Madrid Datos: el merge no duplica description, programText, performers ni composers', async () => {
+    const listingBody = await readFile(path.join(fixtures, 'madrid-agenda.json'), 'utf8');
+    const detailBody = await readFile(path.join(detailDir, 'madrid-datos-renacentista.excerpt.html'), 'utf8');
+    const extracted = madridDatosAdapter.extract(
+      listingBody,
+      'https://datos.madrid.es/agenda.json',
+      listingCtx('madrid-datos', async () => detailBody),
+    );
+    const listing = extracted.find((event) => event.externalId === '50390001');
+    expect(listing).toBeDefined();
+    listing!.observed.description =
+      'A cargo de Jesús Hernández y Santiago Pindado, el concierto será interpretado con instrumentos de cuerda pulsada originales de la época. El repertorio propuesto incluye obras maestras de autores tan relevantes como Luis de Milán, Luys de Narváez, Alonso Mudarra y Enríquez de Valderrábano, cuyas composiciones representan uno de los pilares culturales más brillantes de nuestra historia. Cada pieza viene acompañada de una breve explicación histórico musical.';
+    listing!.observed.programText = listing!.observed.description;
+    listing!.observed.performers = [{ name: 'Jesús Hernández' }, { name: 'Santiago Pindado' }];
+    listing!.observed.composers = [{ name: 'Luis de Milán' }];
+
+    const hydrated = await hydrateEvents(
+      [listing!],
+      madridDatosAdapter,
+      listingCtx('madrid-datos', async () => detailBody),
+    );
+    const observed = hydrated[0]?.observed;
+    expect(observed?.description).not.toMatch(/cuerda pulsada.*cuerda pulsada/s);
+    expect(observed?.programText).not.toMatch(/Luis de Milán.*Luis de Milán.*Luis de Milán/s);
+    expect(observed?.performers).toEqual([
+      { name: 'Jesús Hernández' },
+      { name: 'Santiago Pindado' },
+    ]);
+    expect(observed?.composers.filter((item) => item.name === 'Luis de Milán')).toHaveLength(1);
+    expect(observed?.composers.map((item) => item.name)).toEqual([
+      'Luis de Milán',
+      'Luys de Narváez',
+      'Alonso Mudarra',
+      'Enríquez de Valderrábano',
+    ]);
   });
 
   it('Teatro Real hidrata el excerpt de Navidad sin clasificar el programa', async () => {

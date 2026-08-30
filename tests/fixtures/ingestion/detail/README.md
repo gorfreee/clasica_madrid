@@ -6,4 +6,4 @@ El golden set vive en `../golden/` como hechos observados. No guardar dumps HTML
 
 Los parsers están en `src/ingestion/detail/`. Añadir como mucho unos pocos excerpts por source y asertar el parser contra ellos. Páginas de producción con variaciones menores se cubren con HTML inline en tests.
 
-Madrid Datos no tiene fixture de ficha: el JSON-LD abierto ya trae los hechos disponibles.
+Madrid Datos hidrata la ficha oficial de Madrid.es (`.detalle` / `.tiny-text`). Los excerpts cubren descripción ampliada, repertorio e intérpretes; el JSON-LD sigue siendo la fuente de fecha, lugar y acceso.

@@ -1,11 +1,20 @@
+import { parseMadridDatosDetail } from '../detail/madrid-datos.ts';
 import { parseObservedDateTime, parseObservedTime } from '../dates.ts';
-import { emptyObservedLists } from '../observed.ts';
+import { collapseWhitespace } from '../html.ts';
+import {
+  emptyObservedLists,
+  normalizeComposerList,
+  normalizePersonList,
+  normalizeWorkList,
+  type ObservedFactPatch,
+} from '../observed.ts';
 import type { AdapterContext, RawEvent, SourceAdapter, SourceDefinition } from '../types.ts';
 
 /**
- * Madrid Datos JSON-LD already carries title, description, date/time, venue
- * and free/paid. The `link` field points at a municipal page that does not add
- * a stable, parseable program. Phase 2.1 does not hydrate this source.
+ * Madrid Datos JSON-LD is the primary source for identity, date/time, venue,
+ * facilityId, access and URL. The official Madrid.es ficha often adds
+ * editorial/musical evidence (description, repertorio, intérpretes) that the
+ * listing JSON omits. Hydration enriches those fields only.
  *
  * Venue identity (when present): `event-location` name, plus `relation.@id`
  * (municipal facility). Resolution is source-aware in `matchVenue`. An official
@@ -61,6 +70,9 @@ export const madridDatosAdapter: SourceAdapter = {
     }
     return events.sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
   },
+  hydrate(event, body) {
+    return constrainMadridDatosPatch(event, parseMadridDatosDetail(body));
+  },
 };
 
 function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
@@ -113,4 +125,42 @@ function asNonEmptyString(value: unknown): string | undefined {
   if (typeof value !== 'string') return undefined;
   const trimmed = value.trim();
   return trimmed || undefined;
+}
+
+/**
+ * JSON-LD keeps identity, schedule, venue and access. The patch may only
+ * add editorial/musical evidence, and must not repeat listing text.
+ */
+function constrainMadridDatosPatch(event: RawEvent, parsed: ObservedFactPatch): ObservedFactPatch {
+  const listing = event.observed;
+  const patch: ObservedFactPatch = {};
+  const description = richerText(listing.description, parsed.description);
+  if (description) patch.description = description;
+  const programText = richerText(listing.programText, parsed.programText);
+  if (programText) patch.programText = programText;
+  const organizerText = richerText(listing.organizerText, parsed.organizerText);
+  if (organizerText) patch.organizerText = organizerText;
+  const seriesText = richerText(listing.seriesText, parsed.seriesText);
+  if (seriesText) patch.seriesText = seriesText;
+  const categoryText = richerText(listing.categoryText, parsed.categoryText);
+  if (categoryText) patch.categoryText = categoryText;
+
+  const performers = normalizePersonList([...(listing.performers ?? []), ...(parsed.performers ?? [])]);
+  if ((parsed.performers?.length ?? 0) > 0) patch.performers = performers;
+  const composers = normalizeComposerList([...(listing.composers ?? []), ...(parsed.composers ?? [])]);
+  if ((parsed.composers?.length ?? 0) > 0) patch.composers = composers;
+  const works = normalizeWorkList([...(listing.works ?? []), ...(parsed.works ?? [])]);
+  if ((parsed.works?.length ?? 0) > 0) patch.works = works;
+
+  return patch;
+}
+
+function richerText(current: string | undefined, incoming: string | undefined): string | undefined {
+  const next = incoming ? collapseWhitespace(incoming) : undefined;
+  if (!next) return undefined;
+  const prev = current ? collapseWhitespace(current) : undefined;
+  if (!prev) return next;
+  if (prev.toLowerCase() === next.toLowerCase()) return undefined;
+  if (next.length < prev.length && prev.toLowerCase().includes(next.toLowerCase())) return undefined;
+  return next;
 }
