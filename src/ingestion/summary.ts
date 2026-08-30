@@ -18,6 +18,8 @@ export function formatRunSummary(summary: IngestRunSummary): string {
   lines.push(
     `RawEvents encontrados: ${summary.rawEvents}`,
     `Hidratación de fichas: intentadas ${summary.detailHydrationAttempted}, correctas ${summary.detailHydrationSucceeded}, fallidas ${summary.detailHydrationFailed}`,
+    `Fichas no solicitadas: fuera de ventana ${summary.detailHydrationSkippedOutsideWindow ?? 0}, circuito abierto ${summary.detailHydrationSkippedCircuitOpen ?? 0}`,
+    `Desapariciones no evaluables (source incompleta): ${summary.disappearanceSuppressedSources?.join(', ') || 'ninguna'}`,
     'Clasificación:',
     `  include: ${summary.eligibility.include}`,
     `  exclude: ${summary.eligibility.exclude}`,

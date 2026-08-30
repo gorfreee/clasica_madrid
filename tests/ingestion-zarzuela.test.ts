@@ -1,7 +1,7 @@
 import { readFile, mkdtemp } from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { parseZarzuelaListing, teatroZarzuelaAdapter } from '../src/ingestion/sources/teatro-zarzuela.ts';
 import { parseZarzuelaDetail } from '../src/ingestion/detail/teatro-zarzuela.ts';
 import { parseZarzuelaSchedule } from '../src/ingestion/detail/zarzuela-schedule.ts';
@@ -143,9 +143,14 @@ describe('fichas y horarios de Zarzuela', () => {
 
   it('un fallo de ficha no convierte los rangos del listado en funciones publicables', async () => {
     const listing = parseZarzuelaListing(await fixture('listing-lirica-2026-2027'), base, context);
-    const events = await hydrateEvents(listing, teatroZarzuelaAdapter, context);
-    expect(events.every((e) => e.hydration?.status === 'failed')).toBe(true);
-    expect(events.every((e) => !e.observed.occurrences.length)).toBe(true);
+    vi.useFakeTimers();
+    try {
+      const pending = hydrateEvents(listing, teatroZarzuelaAdapter, context);
+      await vi.runAllTimersAsync();
+      const events = await pending;
+      expect(events.every((e) => e.hydration?.status === 'failed' || e.hydration?.reason === 'outside-window')).toBe(true);
+      expect(events.every((e) => !e.observed.occurrences.length)).toBe(true);
+    } finally { vi.useRealTimers(); }
   });
 });
 

@@ -87,10 +87,7 @@ export type IngestEventDecision = {
   sourceUrl: string;
   externalId?: string;
   title: string;
-  hydration: {
-    status: NonNullable<RawEvent['hydration']>['status'];
-    message?: string;
-  };
+  hydration: NonNullable<RawEvent['hydration']>;
   structuralSkip?: {
     reason: string;
   };
@@ -213,6 +210,7 @@ export function buildEventDecision(input: DecisionInput): IngestEventDecision {
     sourceUrl: input.raw.sourceUrl,
     title: input.title,
     hydration: {
+      ...input.raw.hydration,
       status: hydrationStatus,
       ...(input.raw.hydration?.message ? { message: input.raw.hydration.message } : {}),
     },

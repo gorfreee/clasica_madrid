@@ -18,15 +18,18 @@ export function findPossiblyMissing(options: {
   sources: SourceDefinition[];
   succeededSourceIds: readonly string[];
   failedSourceIds: readonly string[];
+  /** Listing succeeded, but missing details make negative evidence unreliable. */
+  incompleteSourceIds?: readonly string[];
   seenEventIds: ReadonlySet<string>;
 }): PossiblyMissingEvent[] {
   const succeeded = new Set(options.succeededSourceIds);
   const failed = new Set(options.failedSourceIds);
+  const incomplete = new Set(options.incompleteSourceIds);
   const window = options.window ?? defaultIngestWindow(options.now);
   const missing: PossiblyMissingEvent[] = [];
 
   for (const source of options.sources) {
-    if (!succeeded.has(source.id) || failed.has(source.id)) continue;
+    if (!succeeded.has(source.id) || failed.has(source.id) || incomplete.has(source.id)) continue;
     for (const event of options.catalog.events) {
       if (options.seenEventIds.has(event.id)) continue;
       if (!eventBelongsToSource(event, source.catalogSourceId)) continue;

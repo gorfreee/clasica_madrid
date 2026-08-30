@@ -65,6 +65,9 @@ export function normalizeRawEvents(rawEvents: RawEvent[]): {
 
 export function normalizeSkipReason(raw: RawEvent): string | undefined {
   if (normalizeRawEvent(raw)) return undefined;
+  if (raw.hydration?.reason === 'outside-window') return 'fuera de ventana (hint del listing; ficha no solicitada)';
+  if (raw.hydration?.reason === 'circuit-open') return 'ficha no solicitada: circuito abierto';
+  if (raw.sourceId === 'teatro-zarzuela' && raw.hydration?.status === 'failed') return `sin calendario fiable: ${raw.hydration.message ?? 'hydration fallida'}`;
   const title = collapseWhitespace(raw.observed.title);
   return title ? 'sin fecha' : 'sin título';
 }

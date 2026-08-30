@@ -23,6 +23,9 @@ export const teatroZarzuelaAdapter: SourceAdapter = {
     for (const categoryUrl of categories) {
       const listing = await ctx.get(categoryUrl);
       for (const event of parseZarzuelaListing(listing, categoryUrl, ctx)) {
+        const previous = events.get(event.sourceUrl);
+        // Conflicting listings cannot prove that the entire event is out of scope.
+        if (previous && previous.listingDateText !== event.listingDateText) event.listingDateText = undefined;
         events.set(event.sourceUrl, event);
       }
     }
@@ -62,6 +65,7 @@ export function parseZarzuelaListing(body: string, url: string, ctx: AdapterCont
       sourceUrl,
       // A recurrent title can reuse its slug in a later season.
       externalId: new URL(sourceUrl).pathname,
+      listingDateText: dateText || undefined,
       observed: {
         title,
         categoryText: categoryText || undefined,

@@ -23,6 +23,8 @@ import { matchVenue } from './venues.ts';
 import type { AdapterContext, IngestAiSummary, IngestRunSummary, RawEvent, SourceDefinition, SourceFailure } from './types.ts';
 import { emptyIngestAiSummary } from './types.ts';
 import { getText } from './http.ts';
+import { zarzuelaHydrationCoverage } from './detail/zarzuela-hydration.ts';
+import { normalizeUrl } from './urls.ts';
 
 export type IngestOptions = {
   dataDir: string;
@@ -54,6 +56,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
   const get = memoizeGet(options.get ?? getText);
   const failures: SourceFailure[] = [];
   const succeeded: string[] = [];
+  const disappearanceSuppressedSources: string[] = [];
   const rawEvents: RawEvent[] = [];
   const listingByRaw = new Map<RawEvent, RawEvent>();
   const obs = options.observability;
@@ -72,7 +75,15 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
         obs?.recordObservation({ raw, listing, normalized: normalizeRawEvent(raw) });
       }
       rawEvents.push(...hydrated);
-      succeeded.push(source.id);
+      const coverage = source.id === 'teatro-zarzuela' ? zarzuelaHydrationCoverage(hydrated) : undefined;
+      if (coverage?.incomplete) disappearanceSuppressedSources.push(source.id);
+      if (coverage?.severe) {
+        const message = `cobertura de hydration incompleta: ${coverage.succeeded}/${coverage.required} fichas necesarias; desapariciones no evaluables`;
+        failures.push({ sourceId: source.id, stage: 'hydration', message });
+        obs?.recordSourceFailure(source.id, message);
+      } else {
+        succeeded.push(source.id);
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       failures.push({ sourceId: source.id, message });
@@ -249,6 +260,15 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
     dryRun: options.dryRun,
   }).catch((error: unknown) => attachFailureContext(error, { stage: 'apply' }));
 
+  // Presence in a successfully read Zarzuela listing is positive evidence even
+  // if its detail was skipped by the window hint. Do not infer a disappearance
+  // (or apply a date change) from not requesting that ficha.
+  const seenEventIds = new Set(reconciled.seenEventIds);
+  const zarzuelaUrls = new Set(rawEvents.filter((raw) => raw.sourceId === 'teatro-zarzuela').map((raw) => normalizeUrl(raw.sourceUrl)));
+  const zarzuelaSourceId = bySource.get('teatro-zarzuela')?.catalogSourceId;
+  for (const event of options.catalog.events) {
+    if (event.citations.some((citation) => citation.sourceId === zarzuelaSourceId && zarzuelaUrls.has(normalizeUrl(citation.url)))) seenEventIds.add(event.id);
+  }
   const possiblyMissing = findPossiblyMissing({
     catalog: options.catalog,
     now: options.now,
@@ -256,7 +276,8 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
     sources,
     succeededSourceIds: succeeded,
     failedSourceIds: failures.map((item) => item.sourceId),
-    seenEventIds: reconciled.seenEventIds,
+    incompleteSourceIds: disappearanceSuppressedSources,
+    seenEventIds,
   });
 
   const hydration = countHydration(rawEvents);
@@ -306,6 +327,9 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
     detailHydrationAttempted: hydration.attempted,
     detailHydrationSucceeded: hydration.succeeded,
     detailHydrationFailed: hydration.failed,
+    detailHydrationSkippedOutsideWindow: rawEvents.filter((raw) => raw.hydration?.reason === 'outside-window').length,
+    detailHydrationSkippedCircuitOpen: rawEvents.filter((raw) => raw.hydration?.reason === 'circuit-open').length,
+    disappearanceSuppressedSources,
   };
 
   return { summary, apply, rawEvents, candidates: reconciled.candidates, decisions, possiblyMissing };

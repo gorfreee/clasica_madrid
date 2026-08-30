@@ -29,6 +29,10 @@ export type HydrationMeta = {
   status: HydrationStatus;
   detailUrl?: string;
   message?: string;
+  reason?: 'outside-window' | 'circuit-open' | 'request-failed' | 'parse-failed';
+  requestAttempts?: number;
+  httpStatuses?: number[];
+  retryDelaysMs?: number[];
 };
 
 export type RawEvent = {
@@ -36,6 +40,8 @@ export type RawEvent = {
   sourceUrl: string;
   externalId?: string;
   observed: RawObserved;
+  /** Exact listing text, used only as a conservative hydration/window hint. */
+  listingDateText?: string;
   hydration?: HydrationMeta;
   /**
    * True when the detail page supplied a parseable date that replaced
@@ -99,6 +105,7 @@ export type SourceAdapter = {
 export type SourceFailure = {
   sourceId: string;
   message: string;
+  stage?: 'hydration';
 };
 
 export type ProposedChange = {
@@ -188,4 +195,7 @@ export type IngestRunSummary = {
   detailHydrationAttempted: number;
   detailHydrationSucceeded: number;
   detailHydrationFailed: number;
+  detailHydrationSkippedOutsideWindow?: number;
+  detailHydrationSkippedCircuitOpen?: number;
+  disappearanceSuppressedSources?: string[];
 };

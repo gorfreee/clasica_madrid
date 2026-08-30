@@ -83,6 +83,9 @@ function formatAutomationMarkdown(
 | Motivos | ${cell(reasons)} |
 | Fuentes correctas | ${cell(sourcesSucceeded)} |
 | Fuentes fallidas | ${cell(sourcesFailed)} |
+| Fichas: intentadas / correctas / fallidas | ${summary.detailHydrationAttempted} / ${summary.detailHydrationSucceeded} / ${summary.detailHydrationFailed} |
+| Fichas no solicitadas: ventana / circuito | ${summary.detailHydrationSkippedOutsideWindow ?? 0} / ${summary.detailHydrationSkippedCircuitOpen ?? 0} |
+| Desapariciones no evaluables (source incompleta) | ${cell(summary.disappearanceSuppressedSources?.join(', ') || 'ninguna')} |
 | Nuevos | ${summary.newEvents} |
 | Actualizados | ${summary.updatedEvents} |
 | Sin cambios | ${summary.unchangedEvents} |
