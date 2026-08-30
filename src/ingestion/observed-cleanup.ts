@@ -38,6 +38,7 @@ export function isObviousNonPerformer(name: string, roleText?: string): boolean 
   if (LIFESPAN.test(text)) return true;
   if (CATALOG.test(text) && !/\bdir(?:ector|ectora|\.)\b/i.test(text)) return true;
   if (WORK_GENRE.test(text) && !looksLikeEnsembleName(text)) return true;
+  if (looksLikeWorkInstrumentation(text) && !looksLikeEnsembleName(text)) return true;
   if (roleText && (CATALOG.test(roleText) || WORK_GENRE.test(roleText) || LIFESPAN.test(roleText))) {
     return true;
   }
@@ -75,9 +76,18 @@ export function looksLikeScheduleNotice(text: string): boolean {
 
 export function looksLikeEnsembleName(text: string): boolean {
   if (!ENSEMBLE.test(text)) return false;
-  // "Concierto para piano y orquesta" names an instrumentation, not a group.
-  if (WORK_GENRE.test(text) && !ENSEMBLE_SUBJECT.test(text.trim())) return false;
+  if (ENSEMBLE_SUBJECT.test(text.trim())) return true;
+  // "Concierto para piano y orquesta" / "Entr’acte, para orquesta de cuerda"
+  // name instrumentation, not a group.
+  if (WORK_GENRE.test(text) || looksLikeWorkInstrumentation(text)) return false;
   return true;
+}
+
+/** "Work title, para arpa / orquesta" is instrumentation, not a person or group. */
+export function looksLikeWorkInstrumentation(text: string): boolean {
+  return /(?:,\s*|\b)(?:para|for)\s+(?:la\s+)?(?:orquesta|orchestra|arpa|viol[ií]n|violonchelo|cello|piano|coro|cuerda)/i.test(
+    text.trim(),
+  );
 }
 
 /** Names that must not appear as `composers[]` / `works[].composerName`. */

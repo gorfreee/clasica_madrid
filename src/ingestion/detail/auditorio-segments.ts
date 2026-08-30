@@ -3,6 +3,7 @@ import {
   looksLikeEnsembleName,
   looksLikeProgramHeader,
   looksLikeScheduleNotice,
+  looksLikeWorkInstrumentation,
 } from '../observed-cleanup.ts';
 
 export type AuditorioSegments = {
@@ -44,6 +45,7 @@ const NAME_PARTICLE = /^(?:de|del|van|von|di|da|el|la|los|las)$/i;
 
 /**
  * Split Auditorio Nacional h4 lines into notice / cast / program.
+ * Later h4 blocks never leak back into the cast once a program section has started.
  * When the frontier is unclear, omit unlabeled names — precision over a full cast.
  */
 export function segmentAuditorioBlocks(blocks: string[][]): AuditorioSegments {
@@ -59,29 +61,36 @@ export function segmentAuditorioBlocks(blocks: string[][]): AuditorioSegments {
     if (content.length > 0) contentBlocks.push(content);
   }
 
-  const remaining = contentBlocks.flat();
-  const start = findProgramStartIndex(remaining);
-  if (start >= 0) {
-    return {
-      noticeLines,
-      performerLines: remaining.slice(0, start),
-      programLines: remaining.slice(start),
-    };
+  const performerLines: string[] = [];
+  const programLines: string[] = [];
+  let inProgram = false;
+
+  for (let index = 0; index < contentBlocks.length; index++) {
+    const content = contentBlocks[index] ?? [];
+    if (inProgram) {
+      programLines.push(...content);
+      continue;
+    }
+
+    const start = findProgramStartIndex(content);
+    if (start >= 0) {
+      performerLines.push(...content.slice(0, start));
+      programLines.push(...content.slice(start));
+      inProgram = true;
+      continue;
+    }
+
+    const hasLaterBlock = contentBlocks.slice(index + 1).some((block) => block.length > 0);
+    if (hasLaterBlock) {
+      performerLines.push(...content);
+      inProgram = true;
+      continue;
+    }
+
+    performerLines.push(...content.filter((line) => hasExplicitPerformerSignal(line)));
   }
 
-  if (contentBlocks.length >= 2) {
-    return {
-      noticeLines,
-      performerLines: contentBlocks[0] ?? [],
-      programLines: contentBlocks.slice(1).flat(),
-    };
-  }
-
-  return {
-    noticeLines,
-    performerLines: remaining.filter((line) => hasExplicitPerformerSignal(line)),
-    programLines: [],
-  };
+  return { noticeLines, performerLines, programLines };
 }
 
 /** Index where repertoire begins, or -1 if no conservative frontier exists. */
@@ -94,13 +103,13 @@ export function findProgramStartIndex(lines: string[]): number {
     }
     if (parseComposerColonWork(line)) return index;
     if (isComposerHeading(line)) return index;
-    if (looksLikeStrongWorkLine(line)) return walkBackOneComposer(lines, index);
+    if (looksLikeStrongWorkLine(line)) return walkBackComposers(lines, index);
     if (
       looksLikeUnlabeledPerson(line) &&
       next !== undefined &&
       looksLikeWorkishLine(next)
     ) {
-      return index;
+      return walkBackComposers(lines, index);
     }
   }
   return -1;
@@ -113,11 +122,13 @@ export function looksLikeRoleOnlyLine(text: string): boolean {
 export function hasExplicitPerformerSignal(text: string): boolean {
   const cleaned = cleanLine(text);
   if (!cleaned) return false;
+  if (STRONG_CATALOG.test(cleaned) || looksLikeWorkInstrumentation(cleaned)) return false;
   if (looksLikeCastEnsemble(cleaned)) return true;
   if (DIRECTOR_PREFIX.test(cleaned)) return true;
   if (parseCommaRole(cleaned)) return true;
   if (ROLE_SUFFIX.test(cleaned) && !looksLikeProgramHeader(ROLE_SUFFIX.exec(cleaned)?.[1] ?? '')) {
     const name = ROLE_SUFFIX.exec(cleaned)?.[1]?.trim() ?? '';
+    if (STRONG_CATALOG.test(name) || looksLikeWorkInstrumentation(name)) return false;
     return looksLikePersonOrGroupName(name);
   }
   return false;
@@ -132,6 +143,7 @@ export function parseAuditorioPersonLine(
   if (looksLikeRoleOnlyLine(cleaned) || ANONYMOUS_COMPOSER.test(cleaned)) return undefined;
   if (parseComposerColonWork(cleaned)) return undefined;
   if (isComposerHeading(cleaned) || looksLikeStrongWorkLine(cleaned)) return undefined;
+  if (looksLikeWorkInstrumentation(cleaned)) return undefined;
 
   const director = DIRECTOR_PREFIX.exec(cleaned);
   if (director?.[1]) return { name: director[1].trim(), roleText: 'director' };
@@ -182,10 +194,13 @@ function looksLikeColonWorkTitle(title: string): boolean {
 function parseCommaRole(text: string): { name: string; roleText: string } | undefined {
   const named = /^(.+?),\s+([^,]+)$/.exec(text);
   if (!named?.[1] || !named[2] || named[2].length > 40) return undefined;
+  const name = named[1].trim();
   const role = named[2].trim();
-  if (STRONG_CATALOG.test(role) || WORK_GENRE.test(role)) return undefined;
+  if (STRONG_CATALOG.test(name) || STRONG_CATALOG.test(role)) return undefined;
+  if (WORK_GENRE.test(name) || WORK_GENRE.test(role)) return undefined;
+  if (looksLikeWorkInstrumentation(text) || looksLikeWorkInstrumentation(name)) return undefined;
   if (!ROLE_ONLY.test(role)) return undefined;
-  return { name: named[1].trim(), roleText: role };
+  return { name, roleText: role };
 }
 
 function looksLikeCastEnsemble(text: string): boolean {
@@ -211,6 +226,7 @@ function looksLikeStrongWorkLine(text: string): boolean {
   if (looksLikeRoleOnlyLine(trimmed) || looksLikeUnlabeledPerson(trimmed)) return false;
   if (STRONG_CATALOG.test(trimmed)) return true;
   if (looksLikeCastEnsemble(trimmed)) return false;
+  if (looksLikeWorkInstrumentation(trimmed)) return true;
   return WORK_GENRE.test(trimmed);
 }
 
@@ -219,7 +235,9 @@ function looksLikeWorkishLine(text: string): boolean {
   if (!trimmed) return false;
   if (hasExplicitPerformerSignal(trimmed)) return false;
   if (looksLikeRoleOnlyLine(trimmed) || looksLikeScheduleNotice(trimmed)) return false;
-  if (ROLE_SUFFIX.test(trimmed)) return false;
+  if (ROLE_SUFFIX.test(trimmed) && !looksLikeWorkInstrumentation(trimmed) && !STRONG_CATALOG.test(trimmed)) {
+    return false;
+  }
   if (isComposerHeading(trimmed) || looksLikeUnlabeledPerson(trimmed)) return false;
   if (looksLikeStrongWorkLine(trimmed) || MOVEMENT.test(trimmed)) return true;
   if (looksLikeEnsembleName(trimmed) && !STRONG_CATALOG.test(trimmed) && !WORK_GENRE.test(trimmed)) {
@@ -249,16 +267,36 @@ function looksLikeUnlabeledPerson(text: string): boolean {
   );
 }
 
-function walkBackOneComposer(lines: string[], index: number): number {
-  if (index <= 0) return index;
-  const prev = lines[index - 1] ?? '';
-  if (hasExplicitPerformerSignal(prev) || looksLikeCastEnsemble(prev) || looksLikeRoleOnlyLine(prev)) {
-    return index;
+function walkBackComposers(lines: string[], index: number): number {
+  let start = index;
+  while (start > 0) {
+    const prev = lines[start - 1] ?? '';
+    if (isCastBoundary(prev) || looksLikeProgramHeader(prev)) break;
+    if (
+      isComposerHeading(prev) ||
+      looksLikeUnlabeledPerson(prev) ||
+      ANONYMOUS_COMPOSER.test(prev) ||
+      INITIALS_COMPOSER.test(prev)
+    ) {
+      start -= 1;
+      continue;
+    }
+    break;
   }
-  if (isComposerHeading(prev) || looksLikeUnlabeledPerson(prev) || ANONYMOUS_COMPOSER.test(prev)) {
-    return index - 1;
-  }
-  return index;
+  return start;
+}
+
+function isCastBoundary(line: string): boolean {
+  return hasExplicitPerformerSignal(line) || looksLikeCastEnsemble(line) || looksLikeRoleOnlyLine(line);
+}
+
+/** Composer heading in a program block, including unlabeled names not in the knowledge base. */
+export function canPairAsAuditorioComposer(text: string): boolean {
+  const cleaned = cleanLine(text);
+  if (!cleaned || looksLikeProgramHeader(cleaned) || looksLikeRoleOnlyLine(cleaned)) return false;
+  if (isCastBoundary(cleaned) || STRONG_CATALOG.test(cleaned)) return false;
+  if (looksLikeWorkInstrumentation(cleaned)) return false;
+  return isComposerHeading(cleaned) || looksLikeUnlabeledPerson(cleaned) || ANONYMOUS_COMPOSER.test(cleaned);
 }
 
 function stripCharacterCue(role: string): string {

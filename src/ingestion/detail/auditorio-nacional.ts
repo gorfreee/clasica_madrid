@@ -1,7 +1,12 @@
 import { allCaptures, firstMatch, splitBreaks, stripTags } from '../html.ts';
 import { inferScheduleFromText } from './schedule.ts';
-import { parseAuditorioPersonLine, parseComposerColonWork, segmentAuditorioBlocks } from './auditorio-segments.ts';
-import { looksLikeComposerLine, looksLikeProgramHeader, looksLikeWorkLine } from '../observed-cleanup.ts';
+import {
+  canPairAsAuditorioComposer,
+  parseAuditorioPersonLine,
+  parseComposerColonWork,
+  segmentAuditorioBlocks,
+} from './auditorio-segments.ts';
+import { looksLikeProgramHeader, looksLikeWorkLine } from '../observed-cleanup.ts';
 import {
   composersFromWorks,
   normalizePersonList,
@@ -180,7 +185,7 @@ function pairComposerWorks(lines: string[]): ObservedWork[] {
     const composerName = usable[index];
     const title = usable[index + 1];
     if (!composerName || !title) return [];
-    if (!looksLikeComposerLine(composerName) || !looksLikeWorkLine(title)) return [];
+    if (!canPairAsAuditorioComposer(composerName) || !looksLikeWorkLine(title)) return [];
     works.push({ title, composerName });
   }
   return works;
