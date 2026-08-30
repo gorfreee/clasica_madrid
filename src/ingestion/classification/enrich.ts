@@ -6,6 +6,7 @@ import {
   parseAiClassification,
   type AiClassifier,
   type AiClassificationResult,
+  type AiCallDiagnostics,
 } from './ai.ts';
 import type { ClassificationResult, Resolution, ResolutionMethod } from './types.ts';
 
@@ -15,6 +16,7 @@ export type ClassifyObservedOptions = {
   /** Absent / undefined → keep deterministic uncertain. Never required. */
   ai?: AiClassifier;
   timeoutMs?: number;
+  onDiagnostics?: (diagnostics: AiCallDiagnostics) => void;
 };
 
 /**
@@ -49,8 +51,12 @@ export async function enrichWithAiIfNeeded(
 
   const timeoutMs = options.timeoutMs ?? ai.classifyBudgetMs ?? AI_CLASSIFY_TIMEOUT_MS;
   let raw: unknown;
+  const controller = new AbortController();
   try {
-    raw = await withTimeout(ai.classify(facts), timeoutMs);
+    raw = await withTimeout(ai.classify(facts, {
+      signal: controller.signal,
+      onDiagnostics: options.onDiagnostics,
+    }), timeoutMs, controller);
   } catch (error) {
     if (isTimeoutError(error)) {
       return degrade(deterministic, 'ai', 'ai-timeout', [errorMessage(error)]);
@@ -155,11 +161,14 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+async function withTimeout<T>(promise: Promise<T>, ms: number, controller: AbortController): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
     return await new Promise<T>((resolve, reject) => {
-      timer = setTimeout(() => reject(new AiTimeoutError(ms)), ms);
+      timer = setTimeout(() => {
+        controller.abort();
+        reject(new AiTimeoutError(ms));
+      }, ms);
       promise.then(resolve, reject);
     });
   } finally {

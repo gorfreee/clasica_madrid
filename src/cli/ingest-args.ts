@@ -3,6 +3,9 @@ export type IngestCliSuccess = {
   dryRun: boolean;
   dataDir?: string;
   reportPath?: string;
+  aiModel?: string;
+  aiNoCache?: boolean;
+  aiMaxRequests?: number;
 };
 
 export type IngestCliCommand =
@@ -26,11 +29,29 @@ export function parseIngestArgs(argv: string[], knownSources: string[]): IngestC
   let dryRun = false;
   let dataDir: string | undefined;
   let reportPath: string | undefined;
+  const aiFlags: Pick<IngestCliSuccess, 'aiModel' | 'aiNoCache' | 'aiMaxRequests'> = {};
   const positionals: string[] = [];
   const rest = argv.slice(1);
 
   for (let index = 0; index < rest.length; index += 1) {
     const arg = rest[index];
+    if (arg === '--ai-no-cache') {
+      aiFlags.aiNoCache = true;
+      continue;
+    }
+    if (arg === '--ai-model' || arg === '--ai-max-requests') {
+      const value = rest[++index]?.trim();
+      if (!value || value.startsWith('--')) return { ok: false, message: `${arg} requiere un valor` };
+      if (arg === '--ai-model') {
+        if (value.includes(',')) return { ok: false, message: '--ai-model requiere un único modelo' };
+        aiFlags.aiModel = value;
+      } else {
+        const n = Number(value);
+        if (!Number.isSafeInteger(n) || n < 0) return { ok: false, message: '--ai-max-requests requiere un entero >= 0' };
+        aiFlags.aiMaxRequests = n;
+      }
+      continue;
+    }
     if (arg === '--dry-run') {
       dryRun = true;
       continue;
@@ -66,7 +87,7 @@ export function parseIngestArgs(argv: string[], knownSources: string[]): IngestC
         message: `ingest:sync no admite argumentos posicionales: ${positionals.join(', ')}`,
       };
     }
-    return { ok: true, command: 'sync', ...successFlags(dryRun, dataDir, reportPath) };
+    return { ok: true, command: 'sync', ...successFlags(dryRun, dataDir, reportPath), ...aiFlags };
   }
 
   if (positionals.length === 0) {
@@ -89,7 +110,7 @@ export function parseIngestArgs(argv: string[], knownSources: string[]): IngestC
       message: `fuente desconocida: ${sourceId}. Disponibles: ${knownSources.join(', ')}`,
     };
   }
-  return { ok: true, command: 'source', sourceId, ...successFlags(dryRun, dataDir, reportPath) };
+  return { ok: true, command: 'source', sourceId, ...successFlags(dryRun, dataDir, reportPath), ...aiFlags };
 }
 
 function successFlags(
@@ -117,6 +138,8 @@ export function ingestUsage(knownSources: string[]): string {
   return `Uso:
   npm run ingest:sync [-- --dry-run] [-- --data-dir <ruta>] [-- --report <fichero.json>]
   npm run ingest:source -- <fuente> [--dry-run] [--data-dir <ruta>] [--report <fichero.json>]
+
+Gemini: --ai-model <modelo> (fija modelo sin fallback), --ai-no-cache, --ai-max-requests <n>
 
 Fuentes: ${knownSources.join(', ')}`;
 }

@@ -6,6 +6,7 @@ import type { AccessMode, Era, EventKind, Format } from '../lib/schemas/taxonomi
 import type { Eligibility } from './classification/golden-case.ts';
 import type { ClassificationResult, Resolution, ResolutionMethod } from './classification/types.ts';
 import type { IngestRunSummary, RawEvent } from './types.ts';
+import type { AiCallDiagnostics } from './classification/ai.ts';
 
 export type FieldResolution<T> = {
   value: T;
@@ -40,11 +41,7 @@ export type IngestEventDecision = {
    * Transport diagnostics for the AI call, when the provider exposes them.
    * Never written to `data/**`.
    */
-  ai?: {
-    model?: string;
-    fallbackUsed?: boolean;
-    attempts?: number;
-  };
+  ai?: AiCallDiagnostics;
   formats?: FieldResolution<Format[]>;
   eras?: FieldResolution<Era[]>;
   kind?: FieldResolution<EventKind>;

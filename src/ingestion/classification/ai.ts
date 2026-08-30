@@ -16,6 +16,14 @@ export type AiCallDiagnostics = {
   model?: string;
   fallbackUsed?: boolean;
   attempts?: number;
+  cacheHit?: boolean;
+  deferred?: boolean;
+  routing?: Array<{ model: string; reason: string }>;
+};
+
+export type AiCallContext = {
+  signal?: AbortSignal;
+  onDiagnostics?: (diagnostics: AiCallDiagnostics) => void;
 };
 
 export type AiProviderStats = {
@@ -24,10 +32,18 @@ export type AiProviderStats = {
   modelFallbacks: number;
   requestsByModel: Record<string, number>;
   classificationsByModel: Record<string, number>;
+  cacheHits?: number;
+  deferred?: number;
+  inputTokensByModel?: Record<string, number>;
+  dailyRequestsByModel?: Record<string, number>;
 };
 
 export type AiClassifier = {
-  classify(observed: ObservedFacts): Promise<unknown>;
+  classify(observed: ObservedFacts, context?: AiCallContext): Promise<unknown>;
+  /** Parallel event classifications supported by this provider. Default 1. */
+  concurrency?: number;
+  initialize?(): void;
+  close?(): void;
   /** Overall budget for `classify()` including provider-internal waits. */
   classifyBudgetMs?: number;
   lastDiagnostics?(): AiCallDiagnostics | undefined;

@@ -58,7 +58,7 @@ Fuentes de la fase 1:
 | `teatro-real` | HTML del calendario `/es/calendario` | HTML custom |
 | `madrid-datos` | JSON-LD abierto `206974-0-agenda-eventos-culturales-100` | JSON-LD (sólo `@type` Música, con fecha, hora y lugar) |
 
-`--dry-run` valida y resume sin escribir. `--data-dir` apunta a otro árbol (por defecto `data/` o `DATA_DIR`). `--report <ruta>` escribe un JSON diagnóstico de la ejecución; no cambia la clasificación ni qué se publica. La CLI rechaza flags desconocidas, `--data-dir` o `--report` sin ruta, fuentes inexistentes y combinaciones incorrectas de argumentos.
+`--dry-run` valida y resume sin escribir el catálogo (la IA sí puede guardar estado local). `--data-dir` apunta a otro árbol (por defecto `data/` o `DATA_DIR`). `--report <ruta>` escribe un JSON diagnóstico de la ejecución; no cambia la clasificación ni qué se publica. La CLI rechaza flags desconocidas, `--data-dir` o `--report` sin ruta, fuentes inexistentes y combinaciones incorrectas de argumentos.
 
 Un adapter que reconoce la estructura general pero no consigue interpretar ningún evento (extracción vacía sospechosa) falla de forma visible; esa fuente se aísla y las demás continúan. Un calendario genuinamente vacío no es un error.
 
@@ -80,60 +80,76 @@ Sin provider o credenciales utilizables el fallback de IA no se invoca; los `unc
 
 ### Providers de IA
 
-`AiClassifier` es provider-agnóstico. La CLI construye como máximo un provider por ejecución. `ingest:sync` / `ingest:source` cargan `.local/ai.env` (gitignorado) si existe; las variables ya definidas en el proceso **no** se pisan. Plantilla: `.env.example`. No commits la clave ni la imprimas. La IA **sólo** se llama cuando el classifier determinista queda `uncertain`; no reabre un `include` o `exclude`. `parseAiClassification()` es la única validación del JSON. OpenAI y Gemini usan el mismo `AI_CLASSIFIER_SYSTEM_PROMPT`.
+`AiClassifier` es provider-agnóstico. La CLI crea un provider por ejecución. `ingest:sync` / `ingest:source` cargan `.local/ai.env` (gitignorado); el entorno del proceso gana. Plantilla: `.env.example`. No commits ni imprimas la clave. La IA sólo interpreta casos deterministas `uncertain`: no reabre `include` / `exclude`. `parseAiClassification()` sigue siendo la validación del JSON. No cambia la política editorial ni la puerta de publicación.
+
+#### Pool Gemini / Gemma
+
+Una API key autentica todos los modelos. Para cada llamada se elige el **primer modelo disponible**, respetando RPM, TPM, presupuesto diario y cooldown. No espera a un 429 para utilizar el siguiente. Una respuesta válida, incluido `uncertain`, termina la clasificación: no hay votación ni búsqueda de un `include` entre modelos.
+
+Pool por defecto y presupuestos operativos (basados en las cuotas del proyecto a 2026-08-30, con margen):
+
+| Orden | Modelo | RPM | TPM de entrada | Requests/día |
+|---|---|---|---|---|
+| 1 | `gemini-3.1-flash-lite` | 12 | 200.000 | 450 |
+| 2 | `gemini-3.5-flash-lite` | 12 | 200.000 | 450 |
+| 3 | `gemma-4-26b-a4b-it` | 24 | 12.800 | 12.960 |
+| 4 | `gemma-4-31b-it` | 24 | 12.800 | 12.960 |
+
+Gemma queda habilitado sin un benchmark previo. El código y CI prueban el contrato con respuestas simuladas; eso no certifica disponibilidad ni calidad de cada modelo en vivo. Se conservan JSON Schema, límites de salida y validación local. Los modelos con sólo 20 RPD no se añaden al pool por defecto. Un modelo personalizado explícito sin overrides recibe límites conservadores de 4 RPM, 12.800 TPM y 18 RPD.
+
+Google limita por **proyecto y modelo**, no por clave. Las cifras pueden cambiar: consulta [AI Studio](https://aistudio.google.com/rate-limit) y la [documentación de cuotas](https://ai.google.dev/gemini-api/docs/rate-limits). Varias claves del mismo proyecto no añaden capacidad. Este código no crea proyectos, rota claves ni activa facturación.
+
+Hasta cuatro clasificaciones avanzan en paralelo. La construcción de candidatos/IDs/slugs y el lote validate-then-write conservan el orden original, aunque las respuestas terminen en otro orden. Los diagnósticos son por llamada, sin compartir un “último modelo” mutable entre eventos.
+
+#### Configuración
 
 | Variable | Uso |
 |---|---|
-| `AI_PROVIDER` | `openai` o `gemini`. Si falta: OpenAI cuando hay `OPENAI_API_KEY`; si no, Gemini cuando hay `GEMINI_API_KEY`. |
-| `GEMINI_API_KEY` | Credencial de Gemini. Una sola clave sirve para toda la cadena de modelos. No la commits ni la pongas en fixtures, logs o reports. Varias API keys del **mismo** proyecto de Google **no** multiplican la cuota. |
-| `GEMINI_MODELS` | Cadena **ordenada** de failover, separada por comas. Si está presente y no vacía, gana a `GEMINI_MODEL`. |
-| `GEMINI_MODEL` | Un solo modelo (compatibilidad). Se ignora si `GEMINI_MODELS` tiene valores. Por defecto, sin ninguna de las dos: `gemini-3.1-flash-lite`. |
-| `GEMINI_RPM` | RPM por defecto para cualquier modelo Gemini sin override. Por defecto `12`. |
-| `GEMINI_MODEL_RPM` | RPM por modelo: `nombre:rpm` separados por comas. Ejemplo: `gemini-3.1-flash-lite:12`. |
-| `OPENAI_API_KEY` | Credencial de OpenAI. Misma regla: no la commits. |
-| `OPENAI_MODEL` | Override del modelo OpenAI. Por defecto `gpt-4o-mini`. |
-| `OPENAI_BASE_URL` | Override del endpoint de OpenAI. Por defecto `https://api.openai.com/v1`. |
+| `AI_PROVIDER` | `gemini` u `openai`. Sin valor: OpenAI si hay `OPENAI_API_KEY`; si no, Gemini si hay `GEMINI_API_KEY`. |
+| `GEMINI_API_KEY` | Una credencial para todo el pool. Nunca se guarda en caché, cuota, pendientes ni reports. |
+| `GEMINI_MODELS` | Lista ordenada por preferencia, separada por comas. Gana a `GEMINI_MODEL`. |
+| `GEMINI_MODEL` | Compatibilidad: fija un solo modelo si no hay `GEMINI_MODELS`. Sin ambas variables se usa el pool de cuatro modelos. |
+| `GEMINI_RPM` | Override global de RPM; por defecto se aplica la tabla por modelo. |
+| `GEMINI_MODEL_RPM` / `GEMINI_MODEL_TPM` / `GEMINI_MODEL_RPD` | Overrides `modelo:entero`, separados por comas. Cero en cualquiera deshabilita el modelo. Los mapas mal formados producen error de configuración. |
+| `GEMINI_CONCURRENCY` | Clasificaciones concurrentes, por defecto 4; rango 1–16. |
+| `GEMINI_MAX_REQUESTS` | Presupuesto opcional HTTP por ejecución, incluidos retries. Sin valor no hay techo adicional al diario. Cero permite sólo caché. |
+| `GEMINI_CACHE` | `on` por defecto. `off` desactiva lectura/escritura de caché para pruebas reales. **No** desactiva cuotas. |
+| `GEMINI_STATE_DIR` | Por defecto `.local/ai/` relativo a la repo. Override relativo al directorio de trabajo, o absoluto. Usa la misma carpeta para ejecuciones del mismo proyecto en este equipo. |
+| `OPENAI_API_KEY` / `OPENAI_MODEL` / `OPENAI_BASE_URL` | Alternativa OpenAI existente (`gpt-4o-mini`, `https://api.openai.com/v1`). No participa en este pool ni recibe estos controles Gemini. |
 
-`GEMINI_MODELS` no hace round-robin ni balanceo: es failover. Si el modelo primario responde una clasificación válida (incluido `eligibility: uncertain`), no se pregunta a otro modelo. Un 429 se reporta como `ai-rate-limited` (el evento sigue `uncertain`); el lote no aborta. Tras agotar 2 retries del modelo actual se prueba el siguiente de la cadena. Si el payload indica cuota diaria agotada, ese modelo se deshabilita el resto del run.
+**Migración:** si tu `.local/ai.env` conserva `GEMINI_MODEL=gemini-3.1-flash-lite`, seguirá fijando un solo modelo. Para activar el pool añade la línea `GEMINI_MODELS` de `.env.example`, sin sustituir tu API key. No hace falta configurar todos los límites: tienen defaults.
 
-#### Cuotas Gemini Free Tier
+#### Caché, cuotas y pendientes
 
-Los límites RPM / TPM / RPD son **del proyecto y del modelo**, no de la API key. Consulta siempre [AI Studio → rate limits](https://aistudio.google.com/rate-limit): las cifras cambian.
+Todo queda bajo `GEMINI_STATE_DIR`, fuera de Git y de `data/**`:
 
-Valores **observados** para este proyecto en `Gemini 3.1 Flash Lite` (pueden cambiar):
+- `cache/`: sólo respuestas de clasificación válidas. La clave incluye modelo, hechos enviados, texto/versión del prompt, esquema, parámetros, endpoint y revisión API. Una nueva run reutiliza respuestas, incluso de modelos secundarios; cambiar cualquiera de esos inputs provoca un miss. Los duplicados simultáneos comparten una llamada. Una respuesta `uncertain` válida también se cachea.
+- `quota.json`: reservas antes de enviar HTTP, incluidos intentos fallidos; ventana de tokens/minuto, próximo envío, cooldown y consumo del día. Escrituras mediante fichero temporal + rename. Reiniciar no recupera cuota consumida. Un fichero corrupto produce error, nunca un reinicio silencioso a cero.
+- `pending/`: hechos y petición de clasificaciones aplazadas por cuota, errores o salida inválida. No son decisiones editoriales ni candidatos publicables. Una ejecución posterior sobre esos mismos inputs los reintenta y borra el pendiente al obtener una respuesta válida. Si el evento ya no aparece en las fuentes, su snapshot permanece para recuperación manual; no se publica automáticamente desde esta carpeta.
+- `run.lock`: impide dos ejecuciones simultáneas sobre ese estado. Se libera al terminar, fallar o recibir SIGINT/SIGTERM. Tras SIGKILL/cierre forzado puede quedar: comprueba el PID/host del fichero y retíralo sólo cuando la ejecución anterior ya no exista. No se roban locks automáticamente.
 
-| Límite | Observado | Configuración operativa |
-|---|---|---|
-| RPM | 15 | `12` (margen para ventanas móviles y jitter) |
-| TPM | 250K | no es el cuello de botella actual |
-| RPD | 500 | no es el cuello de botella actual |
+El día se calcula en `America/Los_Angeles`, incluido el cambio de horario. Un 429 **diario explícito** aparta el modelo hasta esa medianoche. Un 429 temporal respeta `Retry-After`/`retryDelay` completo; sin indicación usa backoff acotado con jitter. Mientras tanto puede usar otro modelo. Hay **tres intentos HTTP totales por evento**, no tres por modelo. Un 400/404 aparta ese modelo para el run; un 401/403 detiene nuevas llamadas con esa credencial. Timeouts/red/5xx tienen reintentos acotados. Los errores/salidas inválidas no se cachean como clasificación.
 
-No hardcodees fallbacks. Añade un modelo a `GEMINI_MODELS` sólo después de comprobar en AI Studio que ese proyecto tiene cuota gratuita positiva para él. El default sin configuración sigue siendo únicamente `gemini-3.1-flash-lite`.
+TPM usa una estimación conservadora del cuerpo enviado (incluye prompt y schema); la corrige con `usage.total_input_tokens` y ajusta futuras estimaciones por modelo. No se hacen llamadas extra para contar tokens. Es una aproximación, no una garantía de evitar cualquier 429. Una petición que exceda el TPM de un modelo se deriva a otro o queda pendiente; no se recorta evidencia para hacerla caber. Las esperas y peticiones se cancelan al vencer el presupuesto temporal, sin llamadas tardías en segundo plano.
 
-```bash
-# default: un modelo, 12 RPM
-AI_PROVIDER=gemini GEMINI_API_KEY="$GEMINI_API_KEY" npm run ingest:sync -- --dry-run --report ingestion/reports/gemini-acceptance.json
+El contador sólo conoce ejecuciones que comparten ese directorio. Otras herramientas, equipos o carpetas pueden consumir cuota del mismo proyecto; las respuestas de Google siguen siendo autoritativas. No hay coordinación distribuida ni consulta automática de cuota restante. Mantén el proyecto en Free Tier en AI Studio si necesitas coste cero: un presupuesto local de requests no convierte un proyecto de pago en gratuito.
 
-# cadena opcional, tras verificar cuota en AI Studio
-GEMINI_MODELS=gemini-3.1-flash-lite,gemini-2.5-flash
-GEMINI_MODEL_RPM=gemini-3.1-flash-lite:12,gemini-2.5-flash:10
-```
+`--dry-run` no escribe el catálogo, pero sí puede gastar cuota y guardar este estado local. `--report` incluye caché, pendientes, requests/retries, tokens de entrada medidos, consumo diario local y modelo/motivo de routing/intentos por evento. `aiAttempted` indica que se invocó el provider, incluso si resolvió desde caché; el número de HTTP reales aparece separado. `modelFallbacks` cuenta envíos a modelos distintos del primero, también por reparto normal.
 
-Migración desde `GEMINI_MODEL=gemini-3.5-flash`: o bien dejas esa variable (sigue funcionando como un solo modelo), o bien pasas a `GEMINI_MODELS=gemini-3.5-flash` / `GEMINI_MODELS=gemini-3.1-flash-lite,gemini-3.5-flash`. Si ambas están definidas, gana `GEMINI_MODELS`.
-
-Acceptance real del fallback con Gemini, en dry-run y sin escribir `data/**`. Si `.local/ai.env` tiene `AI_PROVIDER=gemini` y `GEMINI_API_KEY`, basta:
+#### Ejecuciones y benchmarks
 
 ```bash
-npm run ingest:sync -- --dry-run --report ingestion/reports/gemini-acceptance.json
+# Ejecución normal con caché y pool; el report no publica datos.
+npm run ingest:sync -- --dry-run --report ingestion/reports/pool.json
+
+# Presupuesto por run: máximo 40 llamadas HTTP; el resto queda pendiente.
+npm run ingest:sync -- --dry-run --ai-max-requests 40
+
+# Prueba real fijando un modelo, sin caché ni fallback a otros modelos.
+npm run ingest:sync -- --dry-run --ai-model gemma-4-31b-it --ai-no-cache --ai-max-requests 40 --report ingestion/reports/gemma.json
 ```
 
-Si prefieres el entorno del proceso (gana sobre el fichero):
-
-```bash
-AI_PROVIDER=gemini GEMINI_API_KEY="$GEMINI_API_KEY" npm run ingest:sync -- --dry-run --report ingestion/reports/gemini-acceptance.json
-```
-
-Con el default de 12 RPM, ~117 eventos que llegan a IA tardan del orden de **10–15 minutos** (116 × 5 s de separación más la latencia HTTP). El report JSON incluye `ai-include` / `ai-exclude` / `ai-uncertain` / `ai-invalid-output` / `ai-rate-limited` / `ai-error`, requests, retries, fallbacks de modelo, y, por evento, el modelo final, si hubo fallback y el número de intentos.
+Las opciones `--ai-*` requieren Gemini configurado; ganan al entorno. `--ai-model` fija un solo modelo incluso cuando `.local/ai.env` define el pool. El límite de requests **no** selecciona una muestra editorial: para comparaciones reproducibles usa los mismos hechos/fixtures, prompt y parámetros. Los tests ordinarios usan fakes y relojes inyectados y no llaman a una API real. `--ai-no-cache` no altera la caché reutilizable ni desactiva los contadores persistentes.
 
 ### Candidatos JSON (legacy)
 

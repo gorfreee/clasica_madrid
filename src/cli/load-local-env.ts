@@ -20,6 +20,12 @@ export const LOCAL_AI_ENV_KEYS = [
   'GEMINI_MODELS',
   'GEMINI_RPM',
   'GEMINI_MODEL_RPM',
+  'GEMINI_MODEL_TPM',
+  'GEMINI_MODEL_RPD',
+  'GEMINI_CONCURRENCY',
+  'GEMINI_MAX_REQUESTS',
+  'GEMINI_STATE_DIR',
+  'GEMINI_CACHE',
 ] as const satisfies ReadonlyArray<keyof AiEnv>;
 
 const ALLOWED = new Set<string>(LOCAL_AI_ENV_KEYS);

@@ -5,6 +5,7 @@ import {
   detectDailyQuotaExhausted,
   GeminiClassifier,
   GEMINI_DEFAULT_MODEL,
+  GEMINI_DEFAULT_MODELS,
   GEMINI_DEFAULT_RPM,
   GEMINI_MAX_RETRIES,
   intervalMsForRpm,
@@ -87,6 +88,7 @@ function classifier(
 ): GeminiClassifier {
   return new GeminiClassifier({
     apiKey: 'gemini-test',
+    model: GEMINI_DEFAULT_MODEL,
     clock: immediateClock(),
     random: () => 0,
     defaultRpm: 60_000,
@@ -96,10 +98,10 @@ function classifier(
 }
 
 describe('Gemini config', () => {
-  it('usa sólo gemini-3.1-flash-lite por defecto', () => {
-    expect(resolveGeminiModels({})).toEqual([GEMINI_DEFAULT_MODEL]);
-    expect(resolveGeminiConfig({}).models).toEqual([GEMINI_DEFAULT_MODEL]);
-    expect(resolveGeminiConfig({}).defaultRpm).toBe(GEMINI_DEFAULT_RPM);
+  it('usa Flash-Lite y Gemma en orden de preferencia por defecto', () => {
+    expect(resolveGeminiModels({})).toEqual(GEMINI_DEFAULT_MODELS);
+    expect(resolveGeminiConfig({}).models).toEqual(GEMINI_DEFAULT_MODELS);
+    expect(resolveGeminiConfig({}).defaultRpm).toBeUndefined();
     expect(intervalMsForRpm(12)).toBe(5_000);
   });
 
@@ -148,6 +150,7 @@ describe('Gemini throttling (reloj inyectado)', () => {
     const { fetch, requests } = recordingFetch(() => classification('uncertain'));
     const provider = new GeminiClassifier({
       apiKey: 'gemini-test',
+      model: GEMINI_DEFAULT_MODEL,
       clock,
       random: () => 0,
       fetch,
@@ -156,47 +159,25 @@ describe('Gemini throttling (reloj inyectado)', () => {
     await provider.classify(otherObserved);
     expect(requests).toHaveLength(2);
     expect(requests.every((item) => item.model === GEMINI_DEFAULT_MODEL)).toBe(true);
-    expect(clock.sleeps).toEqual([5_000]);
+    expect(clock.nowMs()).toBe(5_000);
   });
 
-  it('respeta RPM configurado por modelo y mantiene un limiter por modelo', async () => {
+  it('reparte trabajo al segundo modelo antes de esperar, respetando ambos RPM', async () => {
     const clock = immediateClock();
-    let primaryCalls = 0;
-    const { fetch, requests } = recordingFetch((request) => {
-      if (request.model === 'model-a') {
-        primaryCalls += 1;
-        if (primaryCalls === 3) {
-          return new Response(
-            JSON.stringify({
-              error: { details: [{ quotaId: 'GenerateRequestsPerDayPerProjectPerModel-FreeTier' }] },
-            }),
-            { status: 429 },
-          );
-        }
-        return classification('include');
-      }
-      return classification('exclude');
+    const sent: Array<{ model: string; at: number }> = [];
+    const { fetch } = recordingFetch((request) => {
+      sent.push({ model: request.model, at: clock.now() });
+      return classification('include');
     });
-    const provider = new GeminiClassifier({
-      apiKey: 'gemini-test',
-      models: ['model-a', 'model-b'],
-      rpmByModel: { 'model-a': 12, 'model-b': 6 },
-      clock,
-      random: () => 0,
-      fetch,
+    const provider = classifier(fetch, {
+      models: ['model-a', 'model-b'], rpmByModel: { 'model-a': 12, 'model-b': 6 }, clock,
     });
-
-    await provider.classify(observed);
-    await provider.classify(otherObserved);
-    expect(clock.sleeps).toEqual([5_000]);
-
-    await provider.classify({ title: 'Tercero', performers: [], composers: [], works: [] });
-    expect(requests.filter((item) => item.model === 'model-b')).toHaveLength(1);
-
-    await provider.classify({ title: 'Cuarto', performers: [], composers: [], works: [] });
-    const bWaits = clock.sleeps.filter((ms) => ms === 10_000);
-    expect(bWaits).toHaveLength(1);
-    expect(requests.at(-1)?.model).toBe('model-b');
+    for (let i = 0; i < 5; i++) await provider.classify({ ...observed, title: `Concierto ${i}` });
+    expect(sent).toEqual([
+      { model: 'model-a', at: 0 }, { model: 'model-b', at: 0 },
+      { model: 'model-a', at: 5_000 }, { model: 'model-a', at: 10_000 },
+      { model: 'model-b', at: 10_000 },
+    ]);
   });
 });
 
@@ -213,7 +194,7 @@ describe('Gemini 429 + retries', () => {
     await expect(provider.classify(observed)).resolves.toEqual({ eligibility: 'include' });
     expect(requests).toHaveLength(2);
     expect(provider.snapshotStats().retries).toBe(1);
-    expect(clock.sleeps).toContain(4_000);
+    expect(clock.nowMs()).toBe(4_000);
   });
 
   it('sin Retry-After usa backoff exponencial con jitter inyectado', async () => {
@@ -227,7 +208,7 @@ describe('Gemini 429 + retries', () => {
     const provider = classifier(fetch, { clock, random: () => 0 });
     await expect(provider.classify(observed)).resolves.toEqual({ eligibility: 'exclude' });
     expect(calls).toBe(3);
-    expect(clock.sleeps).toEqual([2_000, 4_000]);
+    expect(clock.nowMs()).toBe(6_000);
   });
 
   it('no reintenta más allá del máximo y no entra en un loop infinito', async () => {
@@ -269,18 +250,18 @@ describe('Gemini 429 + retries', () => {
 });
 
 describe('Gemini model failover', () => {
-  it('pasa al segundo modelo tras agotar retries del primero', async () => {
+  it('pasa al segundo modelo disponible sin gastar retries en el primero', async () => {
     const { fetch, requests } = recordingFetch((request) => {
       if (request.model === 'primary') return new Response('quota', { status: 429 });
       return classification('include');
     });
     const provider = classifier(fetch, { models: ['primary', 'secondary'], maxRetries: 1 });
     await expect(provider.classify(observed)).resolves.toEqual({ eligibility: 'include' });
-    expect(requests.map((item) => item.model)).toEqual(['primary', 'primary', 'secondary']);
-    expect(provider.lastDiagnostics()).toEqual({
+    expect(requests.map((item) => item.model)).toEqual(['primary', 'secondary']);
+    expect(provider.lastDiagnostics()).toMatchObject({
       model: 'secondary',
       fallbackUsed: true,
-      attempts: 3,
+      attempts: 2,
     });
     expect(provider.snapshotStats().modelFallbacks).toBe(1);
     expect(provider.snapshotStats().classificationsByModel).toEqual({ secondary: 1 });
@@ -330,7 +311,7 @@ describe('Gemini model failover', () => {
     const provider = new GeminiClassifier({
       apiKey: 'shared-key',
       models: ['primary', 'secondary'],
-      maxRetries: 0,
+      maxRetries: 1,
       clock: immediateClock(),
       random: () => 0,
       defaultRpm: 60_000,

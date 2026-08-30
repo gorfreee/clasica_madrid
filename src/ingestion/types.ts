@@ -120,6 +120,10 @@ export type IngestAiSummary = {
   modelFallbacks: number;
   requestsByModel: Record<string, number>;
   classificationsByModel: Record<string, number>;
+  cacheHits: number;
+  deferred: number;
+  inputTokensByModel: Record<string, number>;
+  dailyRequestsByModel: Record<string, number>;
 };
 
 export function emptyIngestAiSummary(): IngestAiSummary {
@@ -140,6 +144,10 @@ export function emptyIngestAiSummary(): IngestAiSummary {
     modelFallbacks: 0,
     requestsByModel: {},
     classificationsByModel: {},
+    cacheHits: 0,
+    deferred: 0,
+    inputTokensByModel: {},
+    dailyRequestsByModel: {},
   };
 }
 

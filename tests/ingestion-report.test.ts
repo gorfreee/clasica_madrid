@@ -239,6 +239,35 @@ describe('ingest event report', () => {
     expect(run.summary.written).toEqual([]);
   });
 
+  it('clasificación concurrente conserva orden, IDs y diagnósticos aunque termine al revés', async () => {
+    const items = [
+      { title: 'Concierto extraordinario A', slug: 'a' },
+      { title: 'Concierto extraordinario B', slug: 'b' },
+      { title: 'Concierto extraordinario C', slug: 'c' },
+    ];
+    const sequential = await runAuditorio({ items, ai: { async classify() { return { eligibility: 'include' }; } } });
+    let releaseA!: () => void;
+    const holdA = new Promise<void>((resolve) => { releaseA = resolve; });
+    const completion: string[] = [];
+    const concurrent = await runAuditorio({ items, ai: {
+      concurrency: 2,
+      lastDiagnostics: () => { throw new Error('No leer estado compartido en paralelo'); },
+      async classify(observed, context) {
+        if (observed.title.endsWith('A')) await holdA;
+        completion.push(observed.title);
+        context?.onDiagnostics?.({ model: observed.title, attempts: 1, cacheHit: false });
+        if (observed.title.endsWith('B')) releaseA();
+        return { eligibility: 'include' };
+      },
+    } });
+    expect(completion[0]).toBe('Concierto extraordinario B');
+    expect(concurrent.run.candidates).toEqual(sequential.run.candidates);
+    expect(concurrent.run.decisions.map((d) => d.title)).toEqual(items.map((i) => i.title));
+    expect(concurrent.run.decisions.every((d) => d.ai?.model === d.title)).toBe(true);
+    expect(concurrent.run.summary.ai.attempted).toBe(3);
+    expect(concurrent.run.summary.written).toEqual([]);
+  });
+
   it('uncertain sin AI: no Candidate, aiAttempted false', async () => {
     const { run } = await runAuditorio({
       items: [{ title: 'Concierto extraordinario', slug: 'concierto-extraordinario' }],
