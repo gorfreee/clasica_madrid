@@ -144,6 +144,100 @@ describe('parser de ficha Auditorio Nacional', () => {
     expect(facts.performers?.some((item) => /aplazado/i.test(item.name))).toBe(false);
   });
 
+  it('Hannigan: el aviso de aplazamiento no es performer y el repertorio tampoco', async () => {
+    const html = await readFile(path.join(detailDir, 'auditorio-hannigan.excerpt.html'), 'utf8');
+    const facts = parseAuditorioNacionalDetail(html);
+    const names = facts.performers?.map((item) => item.name) ?? [];
+
+    expect(facts.eventStatus).toBe('scheduled');
+    expect(facts.occurrences).toEqual([
+      { raw: expect.stringMatching(/11 de ABRIL de 2027/i), date: '2027-04-11' },
+    ]);
+    expect(facts.performers).toEqual([
+      { name: 'BARBARA HANNIGAN', roleText: 'soprano' },
+      { name: 'BERTRAND CHAMAYOU', roleText: 'piano' },
+    ]);
+    expect(names.some((name) => /abril|aplazado|2027/i.test(name))).toBe(false);
+    expect(names.some((name) => /messiaen|scriabin|zorn|chants|poème|jumalattaret/i.test(name))).toBe(
+      false,
+    );
+    expect(facts.programText).toMatch(/Messiaen/);
+    expect(facts.programText).toMatch(/AL 11 de ABRIL de 2027/i);
+    expect(facts.works).toEqual([]);
+    expect(facts.composers).toEqual([]);
+  });
+
+  it('Beatrice Rana: Programa corta el elenco; compositores, movimientos y Pause no son performers', async () => {
+    const html = await readFile(path.join(detailDir, 'auditorio-beatrice-rana.excerpt.html'), 'utf8');
+    const facts = parseAuditorioNacionalDetail(html);
+    const names = facts.performers?.map((item) => item.name) ?? [];
+
+    expect(facts.performers).toEqual([{ name: 'Beatrice Rana', roleText: 'piano' }]);
+    expect(names.some((name) => /bach|clementi|schumann|chopin|paganini/i.test(name))).toBe(false);
+    expect(names.some((name) => /pause|préambule|pierrot|allegro|programa/i.test(name))).toBe(false);
+    expect(facts.programText).toMatch(/^Beatrice Rana, piano\. Programa\./);
+    expect(facts.programText).toMatch(/Carnaval/);
+    expect(facts.programText).toMatch(/Pause/);
+    expect(facts.works).toEqual([]);
+    expect(facts.composers).toEqual([]);
+  });
+
+  it('Rafael Aguirre: Primera/Segunda Parte y títulos de obras no son performers', async () => {
+    const html = await readFile(path.join(detailDir, 'auditorio-rafael-aguirre.excerpt.html'), 'utf8');
+    const facts = parseAuditorioNacionalDetail(html);
+    const names = facts.performers?.map((item) => item.name) ?? [];
+
+    expect(facts.performers).toEqual([{ name: 'Rafael Aguirre', roleText: 'guitarra' }]);
+    expect(names.some((name) => /primera parte|segunda parte/i.test(name))).toBe(false);
+    expect(names.some((name) => /lascia|invocaci[oó]n|sueño|danza/i.test(name))).toBe(false);
+    expect(facts.programText).toMatch(/Primera Parte/);
+    expect(facts.programText).toMatch(/Segunda Parte/);
+    expect(facts.programText).toMatch(/Lascia ch'io pianga/);
+    expect(facts.works).toEqual([]);
+    expect(facts.composers).toEqual([]);
+  });
+
+  it('Lea Desandre: sin header Programa, el lifespan del compositor abre el repertorio', async () => {
+    const html = await readFile(path.join(detailDir, 'auditorio-lea-desandre.excerpt.html'), 'utf8');
+    const facts = parseAuditorioNacionalDetail(html);
+    const names = facts.performers?.map((item) => item.name) ?? [];
+
+    expect(facts.performers).toEqual([
+      { name: 'LEA DESANDRE', roleText: 'mezzosoprano' },
+      { name: 'THOMAS DUNFORD', roleText: 'laúd y tiorba' },
+    ]);
+    expect(names.some((name) => /idylle|charpentier|ambruys|H 450|tourment|laissez/i.test(name))).toBe(
+      false,
+    );
+    expect(facts.programText).toMatch(/Idylle/);
+    expect(facts.programText).toMatch(/H 450/);
+    expect(facts.works).toEqual([]);
+    expect(facts.composers).toEqual([]);
+  });
+
+  it('OCNE Satélite: elenco sin roles y programa sin frontera trivial no se mezclan', async () => {
+    const html = await readFile(path.join(detailDir, 'auditorio-ocne-satelite-01.excerpt.html'), 'utf8');
+    const facts = parseAuditorioNacionalDetail(html);
+    const names = facts.performers?.map((item) => item.name) ?? [];
+
+    expect(names).toEqual(
+      expect.arrayContaining([
+        'Áurea Corda',
+        'Pablo Martín',
+        'Laura Balboa',
+        'Martí Varela',
+        'Montserrat Egea',
+        'Jorge Martínez',
+      ]),
+    );
+    expect(names.some((name) => /boccherini|onslow|milhaud|quinteto/i.test(name))).toBe(false);
+    expect(names.some((name) => /violines|viola|violonchelo|contrabajo/i.test(name))).toBe(false);
+    expect(facts.programText).toMatch(/Boccherini/);
+    expect(facts.programText).toMatch(/G\. 339/);
+    expect(facts.works).toEqual([]);
+    expect(facts.composers).toEqual([]);
+  });
+
   it('no inventa performers, composers ni works si la ficha no los declara', () => {
     const facts = parseAuditorioNacionalDetail(
       '<article><h1>OCNE. Sinfónico 01</h1><p>Concierto de temporada.</p></article>',
