@@ -1,5 +1,11 @@
 # Rebaseline editorial del catálogo publicado
 
+> **Documentación histórica.** Registro de una pasada editorial única (2026-08-29). **No** es el inventario actual del catálogo ni un requisito de implementación.
+>
+> La política editorial vigente está en [`docs/classification-policy.md`](../classification-policy.md). El catálogo publicado es `data/`. No uses los recuentos de este fichero como estado actual.
+>
+> Consérvese como contexto de aquellas decisiones. Las reglas generales que salieron de esta pasada ya viven en la Classification Policy.
+
 Limpieza única del catálogo **legacy** después de la auditoría de Phase 2. La puerta de publicación no re-clasifica ni borra `data/**`; esta pasada sí aplicó las decisiones editoriales finales sobre los eventos ya publicados.
 
 No implementa Phase 3 (harvesting, reconciliation, desapariciones, GitHub Actions ni auto-merge).

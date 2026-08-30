@@ -21,7 +21,7 @@ npm run build        # sitio estático en dist/
 npm run preview      # sirve dist/
 ```
 
-Ingestión. Harvesting v3 fase 1 (fuentes conocidas) y el camino legacy de un candidato JSON; detalle en [`docs/ingestion.md`](docs/ingestion.md). Classification Policy v1 y golden set de Phase 2: [`docs/classification-policy.md`](docs/classification-policy.md).
+Ingestión: [`docs/ingestion.md`](docs/ingestion.md). Política editorial: [`docs/classification-policy.md`](docs/classification-policy.md). Arquitectura objetivo de la ingestión: [`docs/ingestion-v3-plan.md`](docs/ingestion-v3-plan.md).
 
 ```bash
 npm run ingest:sync              # extrae las fuentes del registry, valida el lote y escribe

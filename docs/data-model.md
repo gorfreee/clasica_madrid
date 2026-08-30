@@ -1,6 +1,6 @@
 # Modelo de datos v1
 
-Los datos canónicos viven en `data/` y se validan con Zod (`src/lib/schemas`). Un fichero JSON por entidad, llamado `{id}.json`. El catálogo vacío es válido.
+Los datos canónicos viven en `data/`. Un fichero JSON por entidad, llamado `{id}.json`. El catálogo vacío es válido. Los schemas Zod en `src/lib/schemas` son el contrato ejecutable; este documento resume el modelo, no duplica cada constraint.
 
 ## Entidades
 
@@ -70,9 +70,7 @@ La entidad `sources/` describe el origen (nombre, tipo, URL de la sede). Cada ev
 
 ## Taxonomías
 
-**Épocas (`eras`)**: `early`, `renaissance`, `baroque`, `classical`, `romantic`, `twentieth`, `contemporary`.
-
-**Formatos (`formats`)**: `symphonic`, `chamber`, `recital`, `choral`, `organ`, `early-music`, `opera`, `zarzuela`, `lied`, `other`.
+Valores canónicos: `src/lib/schemas/taxonomies.ts`. Etiquetas en español: capa de presentación.
 
 **Contexto (`kind`)** — no es calidad; dos valores excluyentes:
 
@@ -81,21 +79,18 @@ La entidad `sources/` describe el origen (nombre, tipo, URL de la sede). Cada ev
 
 Un coro parroquial, una audición de escuela de música o un concierto ocasional en una iglesia no especializada son `alternative`. La temporada de un auditorio o un ciclo institucional estable es `established`.
 
-**Series (`kind`)**: `festival`, `cycle`, `season`, `series`.
-
-Los valores canónicos están en `src/lib/schemas/taxonomies.ts`. Las etiquetas en español están en la capa de presentación.
-
 ## Cómo añadir un evento
 
 1. Crea o reutiliza venue, organizer, series y source en sus carpetas.
 2. Añade `data/events/{id}.json` con al menos una representación y una citación.
 3. Ejecuta `npm run validate`.
-4. El harvesting determinista (v3, fases 1 y 2) es `npm run ingest:sync`. El camino manual de un candidato en disco sigue siendo `npm run ingest:promote` (ver [`docs/ingestion.md`](ingestion.md)). La arquitectura objetivo completa está en [`docs/ingestion-v3-plan.md`](ingestion-v3-plan.md). La Classification Policy v1 (elegibilidad y enrichment) está en [`docs/classification-policy.md`](classification-policy.md); no es un campo del schema `Event`.
+
+Harvesting: [`docs/ingestion.md`](ingestion.md). Arquitectura objetivo: [`docs/ingestion-v3-plan.md`](ingestion-v3-plan.md). Elegibilidad y enrichment: [`docs/classification-policy.md`](classification-policy.md) (no es un campo del schema `Event`).
 
 No inventes eventos de producción. Los ejemplos de tests están en `tests/`, no en `data/`.
 
 ## Histórico
 
-Los eventos pasados se conservan. La agenda lista presente y futuro (y el navegador oculta representaciones que ya hayan pasado desde el último build, en zona `Europe/Madrid`). Cada evento canónico tiene una página pública `/eventos/{slug}` que permanece tras haber pasado: `getStaticPaths()` no exige una representación futura.
+Los eventos pasados se conservan. La agenda lista presente y futuro (y el navegador oculta representaciones que ya hayan pasado desde el último build, en zona `Europe/Madrid`). Cada evento canónico tiene una página pública `/eventos/{slug}` que permanece tras haber pasado.
 
 Cada lugar publicado tiene una página `/lugares/{slug}` aunque ya no tenga representaciones futuras. El índice `/lugares` lista sólo espacios con próximos conciertos.

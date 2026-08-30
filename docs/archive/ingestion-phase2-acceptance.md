@@ -1,5 +1,11 @@
 # Acceptance de Ingestion v3 Phase 2
 
+> **Documentación histórica.** Snapshot de un dry-run concreto (2026-08-29). **No** es el estado operativo actual ni un requisito de implementación.
+>
+> Lo implementado hoy está en [`docs/ingestion.md`](../ingestion.md). La arquitectura objetivo vigente está en [`docs/ingestion-v3-plan.md`](../ingestion-v3-plan.md). La política editorial está en [`docs/classification-policy.md`](../classification-policy.md).
+>
+> Consérvese como registro de aquella corrida. Las métricas, commits y listas de eventos de este fichero no deben copiarse a documentación vigente.
+
 Ejecución real en dry-run de las tres sources actuales, **sin** `OPENAI_API_KEY` y **sin** LLM live. No se escribió `data/**`.
 
 Esta prueba evalúa si Phase 2 es operable y observable. **No** implementa Phase 3 (reconciliation, updates, desapariciones, GitHub Actions ni auto-merge).

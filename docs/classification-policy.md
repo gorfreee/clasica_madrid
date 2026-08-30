@@ -1,10 +1,8 @@
 # Classification Policy v1
 
-Política editorial y operativa para el enrichment de ingestión v3 (fase 2).
+Política editorial para el enrichment de ingestión. No es un campo del schema canónico `Event`.
 
-No es un campo del schema canónico `Event`. La elegibilidad es metadata interna del pipeline. `formats`, `eras`, `kind` y `access` sí son campos canónicos; esta política dice cómo derivarlos.
-
-La implementación de la fase 2 vive en `src/ingestion/classification/` y se conecta al pipeline en `runIngest`. Flujo: hechos observados → classifier determinista → fallback de IA si `uncertain` → puerta de publicación (`include` → Candidate; `exclude`/`uncertain` → no publicar). Este documento y el golden set en `tests/fixtures/ingestion/golden/` son la especificación contra la que se mide.
+La elegibilidad es metadata interna del pipeline. `formats`, `eras`, `kind` y `access` sí son campos canónicos; esta política dice cómo derivarlos. La implementación vive en `src/ingestion/classification/`. El golden set en `tests/fixtures/ingestion/golden/` es la medida.
 
 ## Principio
 
@@ -13,15 +11,9 @@ precision > coverage
 observed facts → deterministic rules → musical knowledge → AI → safe uncertain
 ```
 
-En la fase 2.2 no hay IA. El comportamiento correcto del núcleo determinista es:
-
-```text
-observed facts → deterministic rules → musical knowledge → safe uncertain
-```
-
-La fase 2.3 añade el fallback de IA **sólo** sobre `uncertain`. Un `include` o `exclude` determinista no se reabre. Si la IA no está disponible o falla, el resultado sigue siendo `uncertain`.
-
 Preferimos perder temporalmente un evento antes que publicar un falso positivo.
+
+Un `include` o `exclude` determinista no se reabre con IA. El fallback de IA sólo actúa sobre `uncertain`. Si la IA no está disponible o falla, el resultado sigue siendo `uncertain`.
 
 ## Separación de responsabilidades
 
@@ -34,14 +26,10 @@ eligibility          ← puerta de publicación
       ↓
 formats / eras / kind / access
       ↓
-evidence (interna)
-      ↓
 Candidate
 ```
 
-Un `exclude` no debe consumir trabajo innecesario de clasificación posterior. Un `uncertain` degrada de forma segura: no se publica automáticamente.
-
-La fase 2.1 implementa la hidratación de fichas y el contrato de hechos observados. La fase 2.2 implementa el classifier determinista (`classify(observed)`). La fase 2.3 implementa `classifyObserved` (IA sólo si `uncertain`). La fase 2.4 conecta ese resultado a `runIngest` como puerta de publicación.
+Un `exclude` no debe consumir clasificación posterior. Un `uncertain` no se publica automáticamente.
 
 ## Lo que no es esta política
 
@@ -51,8 +39,6 @@ eligibility ≠ kind
 eligibility ≠ source
 eligibility ≠ venue
 ```
-
-Ejemplos:
 
 - `format=symphonic` no implica música clásica. ABBA con orquesta puede ser `symphonic` y `exclude`.
 - `kind=established` no implica música clásica. Un concierto de pop en el Teatro Real puede ser `established` y `exclude`.
@@ -67,8 +53,6 @@ La presencia de orquesta, instrumentos clásicos, sala clásica, músicos de for
 
 ## 1. Eligibility (tri-state interno)
 
-Valores:
-
 | Valor | Semántica | ¿Publicable automáticamente? |
 |---|---|---|
 | `include` | Hay evidencia suficiente de que el evento pertenece al ámbito de Clásica Madrid | sí, si el resto de datos esenciales es válido |
@@ -79,15 +63,7 @@ Valores:
 
 ### 1.1 Ámbito musical
 
-Clásica Madrid incluye eventos cuyo contenido musical principal sea **música clásica occidental**, en sentido amplio:
-
-- música antigua;
-- Renacimiento;
-- Barroco;
-- Clasicismo;
-- Romanticismo;
-- repertorio de los siglos XX y XXI del ámbito de la música clásica;
-- creación contemporánea de tradición clásica / académica.
+Clásica Madrid incluye eventos cuyo contenido musical principal sea **música clásica occidental**, en sentido amplio: música antigua, Renacimiento, Barroco, Clasicismo, Romanticismo, repertorio de los siglos XX y XXI del ámbito clásico, y creación contemporánea de tradición clásica / académica.
 
 Formatos habituales de inclusión, si el repertorio encaja: concierto sinfónico, coral clásico, cámara, recital instrumental o vocal clásico, ópera, zarzuela, música antigua, órgano, ensemble especializado, conciertos contemporáneos del ámbito clásico, programas explícitos de compositores clásicos.
 
@@ -123,13 +99,7 @@ No excluir por la palabra *flamenco* cuando el contexto es claramente musicológ
 
 ### 1.3 Títulos que exigen ficha
 
-No decidir por el título solo cuando sea genérico, poético, un código interno o un nombre de intérprete sin programa:
-
-- Concierto de Navidad / Gala de Navidad;
-- Concierto extraordinario / aniversario;
-- `OCNE Sinfónico 01`;
-- títulos puramente poéticos;
-- nombres de intérpretes sin programa.
+No decidir por el título solo cuando sea genérico, poético, un código interno o un nombre de intérprete sin programa: Concierto de Navidad / Gala de Navidad; Concierto extraordinario / aniversario; `OCNE Sinfónico 01`; títulos puramente poéticos; nombres de intérpretes sin programa.
 
 Tras consultar las fuentes oficiales, si el repertorio queda claro, decidir `include` o `exclude`. Si sigue sin haber evidencia suficiente → `uncertain`.
 
@@ -143,7 +113,7 @@ La ausencia de programa obra-por-obra **no** obliga siempre a `uncertain`. Un co
 - pertenece a un festival o ciclo explícitamente de música clásica; o
 - está interpretado por una formación clásica dentro de una serie cuya identidad clásica está suficientemente establecida.
 
-Eso es evidencia válida sobre **ese evento**. No es una regla automática por source ni por venue (`eligibility ≠ source`, `eligibility ≠ venue`). Un mismo ciclo puede contener actividades excluidas: cada evento se evalúa individualmente.
+Eso es evidencia válida sobre **ese evento**. No es una regla automática por source ni por venue. Un mismo ciclo puede contener actividades excluidas: cada evento se evalúa individualmente.
 
 ### 1.4 Eventos mixtos
 
@@ -163,39 +133,19 @@ Ejemplos:
 
 ## 2. Hechos observados vs inferencias
 
-```text
-source parsing
-      ↓
-observed facts
-      ↓
-enrichment / classification
-```
+**Hechos observados** (el adapter o la hidratación de detalle los extrae; no se inventan): título, descripción, categoría oficial, fechas, lugar, URL; performers, composers, works, programa, cuando la fuente los declara; texto de acceso, cuando existe.
 
-**Hechos observados** (el adapter o la hidratación de detalle los extrae; no se inventan):
-
-- título, descripción, categoría oficial de la fuente;
-- fechas, lugar, URL;
-- performers, composers, works, programa, cuando la fuente los declara;
-- texto de acceso, cuando existe.
-
-**Inferencias** (enrichment):
-
-- `eligibility`;
-- `formats`, `eras`, `kind`;
-- `access` sólo si el texto de la fuente lo soporta;
-- roles canónicos de intérprete, cuando el texto lo permite con seguridad.
+**Inferencias** (enrichment): `eligibility`; `formats`, `eras`, `kind`; `access` sólo si el texto de la fuente lo soporta; roles canónicos de intérprete, cuando el texto lo permite con seguridad.
 
 La knowledge base puede asociar `Bach → baroque`. No puede afirmar que Beethoven participa en un programa donde la fuente no lo menciona.
 
-CI y tests no deben depender de llamadas live a un LLM. Si la IA no está disponible, hace timeout, devuelve algo inválido o tiene baja confianza, el pipeline degrada: reglas y knowledge si bastan; si no, `uncertain` / campos vacíos.
+CI y tests no deben depender de llamadas live a un LLM. Si la IA no está disponible, hace timeout o devuelve algo inválido, el pipeline degrada: reglas y knowledge si bastan; si no, `uncertain` / campos vacíos.
 
 ---
 
 ## 3. `formats[]`
 
-Taxonomía vigente: `symphonic`, `chamber`, `recital`, `choral`, `organ`, `early-music`, `opera`, `zarzuela`, `lied`, `other`.
-
-Pueden ser múltiples. Vacío es mejor que incorrecto. Un `format` incorrecto no debe bloquear un `include` fiable, pero el golden set espera valores cuando la evidencia es clara.
+Taxonomía: `src/lib/schemas/taxonomies.ts`. Pueden ser múltiples. Vacío es mejor que incorrecto. Un `format` incorrecto no debe bloquear un `include` fiable.
 
 Derivación preferida a partir de hechos:
 
@@ -219,9 +169,7 @@ Derivación preferida a partir de hechos:
 
 ## 4. `eras[]`
 
-Taxonomía vigente: `early`, `renaissance`, `baroque`, `classical`, `romantic`, `twentieth`, `contemporary`.
-
-Pueden ser múltiples. Vacío es mejor que incorrecto. No bloquean publicación si `eligibility=include`.
+Taxonomía: `src/lib/schemas/taxonomies.ts`. Pueden ser múltiples. Vacío es mejor que incorrecto. No bloquean publicación si `eligibility=include`.
 
 Orden de evidencia:
 
@@ -247,7 +195,7 @@ El schema no define fechas. Criterio operativo v1 (conservador):
 
 ## 5. `kind`
 
-Contexto del evento, **no** ranking de calidad y **no** elegibilidad.
+Contexto del evento, **no** ranking de calidad y **no** elegibilidad. `kind` no es una propiedad de la source.
 
 Para un evento con `eligibility = include`, `kind` **siempre** tiene valor. No existe `unknown` / `undefined` / `uncertain` para un evento publicable.
 
@@ -261,14 +209,7 @@ include + clearly established → established
 include + otherwise → alternative
 ```
 
-No deducir de forma permanente:
-
-```text
-Auditorio Nacional → established
-Madrid Datos → alternative
-```
-
-Eso era un fallback provisional de la fase 1, ya retirado: `provisionalKind` ya no existe. `kind` no es una propiedad de la source.
+No deducir de forma permanente `Auditorio Nacional → established` ni `Madrid Datos → alternative`.
 
 Un concierto de pop en el Teatro Real puede ser `established` + `exclude`. Un recital de órgano en una basílica, si forma parte de un ciclo concertístico estable, puede ser `established` + `include`. Un open-piano en un puente, si llegara a clasificarse, sería `alternative`; como actividad participativa su elegibilidad es `exclude`.
 
@@ -282,71 +223,25 @@ Sólo `free` / `paid` / `unknown` cuando la fuente lo soporta.
 - «entrada libre», «gratuito», «libre hasta completar aforo» → `free`;
 - si no está claro → `unknown`.
 
-No asumir:
-
-```text
-Auditorio = paid
-iglesia = free
-evento municipal = free
-```
+No asumir Auditorio = paid, iglesia = free, evento municipal = free.
 
 ---
 
-## 7. Acceptance criteria de Phase 2
+## 7. Cómo se mide
 
-Estos criterios son objetivos. El golden set es la medida.
-
-### Eligibility
-
-Sobre el golden set:
+El golden set es la medida. Sobre ese dataset:
 
 - ningún caso `expected.eligibility=exclude` puede avanzar como publicable;
 - ningún caso `expected.eligibility=uncertain` puede publicarse automáticamente;
-- los casos `include` deben mantenerse como publicables (no descartarlos por source, venue o `kind`);
-- la clasificación no puede depender sólo de source o venue: CNDM y Teatro Real contienen tanto `include` como `exclude`.
+- los casos `include` no deben descartarse por source, venue o `kind`;
+- la clasificación no puede depender sólo de source o venue.
 
 Objetivo prioritario: **precision** frente a falsos positivos.
 
-### Hechos
+La implementación no debe inventar performers, composers, works, fechas, venues ni access. Deben proceder de observación determinista o de conocimiento autorizado explícito (alias de venue, knowledge de épocas por compositor **ya observado**).
 
-La implementación no debe inventar performers, composers, works, fechas, venues ni access. Deben proceder de observación determinista o de conocimiento autorizado explícito (p. ej. alias de venue, knowledge de épocas por compositor **ya observado**).
+`eras` / `formats`: preferimos vacío a incorrecto; pueden ser múltiples; no bloquean publicación si eligibility es `include` y los datos esenciales son válidos.
 
-### Eras / formats
+La IA interpreta `ObservedFacts`. No inventa hechos. El prompt versionado está en `src/ingestion/classification/ai-prompt.ts`; no es una copia literal de esta política. Valores fuera de taxonomía → inválido → `uncertain`. Ausencia o fallo de IA → `uncertain` → no publicar. CI no llama a un LLM. Tests usan fakes. Los eventos ya publicados no se borran ni se re-clasifican por esta puerta: aplica a nuevos resultados de harvesting.
 
-- preferimos vacío a incorrecto;
-- pueden ser múltiples;
-- no bloquean publicación si eligibility es `include` y los datos esenciales son válidos.
-
-### IA
-
-Arquitectura:
-
-```text
-deterministic facts/rules → knowledge → AI cuando eligibility=uncertain → safe fallback
-```
-
-La IA interpreta `ObservedFacts`. No inventa performers, composers, works, fechas, horas, venue, organizadores, precios, acceso ni URLs. Puede usar conocimiento musical general. `uncertain` es una salida válida.
-
-El prompt versionado del fallback está en `src/ingestion/classification/ai-prompt.ts` (`AI_CLASSIFIER_PROMPT_VERSION`). Resume esta política de forma compacta; no es una copia literal. Subir la versión permite distinguir resultados de prompts distintos.
-
-Contrato de salida: objeto JSON validado con Zod (`eligibility` obligatorio; `formats` / `eras` / `kind` / `evidence` opcionales). Valores fuera de taxonomía → inválido → `uncertain`.
-
-Degradación: provider ausente, API key ausente, timeout, error HTTP, rate limit, excepción, respuesta vacía, JSON inválido o schema inválido conservan `eligibility = uncertain` y no tumbaron el resto del lote. El `ruleId` interno (`ai-unavailable`, `ai-timeout`, `ai-error`, `ai-rate-limited`, `ai-malformed-output`, `ai-invalid-output`) permite diagnosticar el fallo. `rationale` demasiado largo se trunca antes de Zod; no invalida una clasificación semánticamente válida. OpenAI y Gemini comparten el mismo prompt y la misma puerta `parseAiClassification()`.
-
-CI no llama a un LLM. Tests usan fakes. El resultado final gobierna la publicación de `runIngest`: sólo `include` puede convertirse en Candidate. `exclude` y `uncertain` no se publican. Ausencia o fallo de IA → `uncertain` → no publicar. `eras=[]` / `formats=[]` no bloquean un `include`. Los eventos ya publicados no se borran ni se re-clasifican en esta fase.
-
-### Tests
-
-El golden set valida el contrato de los fixtures. La fase 2.2 ejecuta el classifier determinista sobre `golden.observed`. La fase 2.3 evalúa el mismo set con un fake de IA cuando el determinista es `uncertain`. La fase 2.4 demuestra la puerta de publicación en el pipeline completo (`tests/ingestion-publication-gate.test.ts`). CI no llama a un LLM. Sin IA, la cobertura de `include` no es un objetivo de recall.
-
----
-
-## 8. Golden evaluation set
-
-Dataset: `tests/fixtures/ingestion/golden/`.
-
-Aproximadamente 48 eventos reales, mayoritariamente del smoke de fase 1 (`clasica-madrid-phase1-smoke.xlsx`) y algunos del catálogo publicado cuando aportan diversidad (iglesia, museo, festival, Fever, municipal).
-
-Cada caso separa hechos observados de expected. Los `uncertain` declaran qué evidencia falta.
-
-Documentación de composición, conteos y trampas de título: `tests/fixtures/ingestion/golden/README.md`.
+Forma de cada caso y cómo añadir uno: `tests/fixtures/ingestion/golden/README.md`.

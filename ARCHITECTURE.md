@@ -21,8 +21,8 @@ Este documento define la arquitectura técnica base del proyecto. Debe manteners
 - **Zod** para validar esquemas y datos.
 - **Pagefind** para búsqueda estática, si resulta suficiente; todavía no está instalado. La agenda filtra en cliente sobre el HTML generado en build.
 - **Cloudflare Pages** para hosting y despliegue estático.
-- **GitHub Actions** para validación, tests, builds y automatizaciones.
-- **Vitest** para lógica y validadores; **Playwright** sólo para recorridos críticos de la interfaz.
+- **GitHub Actions** para validación, tests, builds y (como objetivo de ingestión) automatizaciones.
+- **Vitest** para lógica y validadores. Playwright no está instalado; sólo se consideraría para recorridos críticos de la interfaz si aparece esa necesidad.
 
 No usar inicialmente una base de datos, backend, SSR, API propia, CMS, sistema de autenticación ni servicios de búsqueda externos.
 
@@ -55,16 +55,9 @@ El objetivo es que una futura sustitución completa del diseño afecte principal
 
 ## Datos
 
-El repositorio contiene tanto código como datos canónicos. Una estructura inicial orientativa:
+El repositorio contiene tanto código como datos canónicos bajo `data/`. Las entidades y campos están en [`docs/data-model.md`](docs/data-model.md); el contrato ejecutable es `src/lib/schemas`.
 
-```text
-data/
-  events/
-  venues/
-  sources/
-```
-
-Los esquemas exactos podrán evolucionar, pero todo dato publicado debe:
+Todo dato publicado debe:
 
 - cumplir un esquema explícito y versionado;
 - tener identificadores y slugs estables (un slug publicado no se renombra);
@@ -98,7 +91,7 @@ Los datos fuente del repositorio no tienen por qué copiarse íntegramente al de
 
 La ingestión está separada de la web pública.
 
-Lo implementado hoy (harvesting v3 fase 1 y el camino legacy de candidatos) está en [`docs/ingestion.md`](docs/ingestion.md). La arquitectura **objetivo** vigente de la ingestión está en [`docs/ingestion-v3-plan.md`](docs/ingestion-v3-plan.md). El flujo legacy no debe interpretarse como el diseño futuro.
+Lo implementado hoy está en [`docs/ingestion.md`](docs/ingestion.md). La arquitectura **objetivo** de la ingestión está en [`docs/ingestion-v3-plan.md`](docs/ingestion-v3-plan.md). El camino legacy de candidatos JSON en disco no es el diseño futuro.
 
 ```text
 fuentes conocidas + búsqueda con agentes de IA
