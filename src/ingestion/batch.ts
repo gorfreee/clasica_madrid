@@ -1,4 +1,4 @@
-import { mkdir, rename, rm, writeFile } from 'node:fs/promises';
+import { access, mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import type { Catalog } from '../lib/domain/catalog.ts';
@@ -13,14 +13,14 @@ import {
   type FileToWrite,
 } from '../lib/validation/promote.ts';
 import { errorIssue, makeReport, type ValidationIssue, type ValidationReport } from '../lib/validation/report.ts';
-import { findExistingEvent } from './to-candidate.ts';
-import { normalizeUrl } from './urls.ts';
+import { matchEventIdentity } from './identity.ts';
 
 export type BatchApplyResult = {
   report: ValidationReport;
   proposed: Catalog;
   filesToWrite: FileToWrite[];
   newEvents: number;
+  updatedEvents: number;
   unchangedEvents: number;
   written: string[];
 };
@@ -37,6 +37,7 @@ export function mergeCandidateBatch(existing: Catalog, candidates: Candidate[]):
   filesToWrite: FileToWrite[];
   issues: ValidationIssue[];
   newEvents: number;
+  updatedEvents: number;
   unchangedEvents: number;
 } {
   const catalog: Catalog = {
@@ -49,9 +50,9 @@ export function mergeCandidateBatch(existing: Catalog, candidates: Candidate[]):
   const filesToWrite: FileToWrite[] = [];
   const issues: ValidationIssue[] = [];
   let newEvents = 0;
+  let updatedEvents = 0;
   let unchangedEvents = 0;
-
-  const seenUrls = new Set<string>();
+  const originalIds = new Set(existing.events.map((event) => event.id));
 
   for (const incoming of candidates) {
     const parsed = candidateSchema.safeParse(incoming);
@@ -64,19 +65,6 @@ export function mergeCandidateBatch(existing: Catalog, candidates: Candidate[]):
       continue;
     }
     const candidate = parsed.data;
-    const source = candidate.sources?.[0] ?? catalog.sources.find((item) => item.id === candidate.event.primarySourceId);
-    const citationUrl = candidate.event.citations[0]?.url
-      ? normalizeUrl(candidate.event.citations[0].url)
-      : undefined;
-    const existingEvent = source
-      ? findExistingEvent(catalog, candidate.event, source)
-      : catalog.events.find((item) => item.id === candidate.event.id);
-
-    if (existingEvent || (citationUrl && seenUrls.has(citationUrl))) {
-      unchangedEvents += 1;
-      continue;
-    }
-    if (citationUrl) seenUrls.add(citationUrl);
 
     catalog.venues = reconcile(catalog.venues, candidate.venue, 'venue', 'venues', filesToWrite, issues);
     for (const organizer of candidate.organizers ?? []) {
@@ -85,6 +73,37 @@ export function mergeCandidateBatch(existing: Catalog, candidates: Candidate[]):
     catalog.series = reconcile(catalog.series, candidate.series, 'series', 'series', filesToWrite, issues);
     for (const sourceEntity of candidate.sources ?? []) {
       catalog.sources = reconcile(catalog.sources, sourceEntity, 'source', 'sources', filesToWrite, issues);
+    }
+
+    const current = catalog.events.find((item) => item.id === candidate.event.id);
+    const citation = candidate.event.citations[0];
+    const identity = citation
+      ? matchEventIdentity(catalog, {
+          sourceUrl: citation.url,
+          externalId: citation.externalId,
+          title: candidate.event.title,
+          occurrences: candidate.event.occurrences,
+        }, {
+          catalogSourceId: candidate.event.primarySourceId,
+          venueId: candidate.event.venueId,
+        })
+      : { kind: 'unmatched' as const };
+    if (!originalIds.has(candidate.event.id) && identity.kind === 'matched') {
+      unchangedEvents += 1;
+      continue;
+    }
+    if (current && originalIds.has(candidate.event.id)) {
+      const diffs = canonicalFieldDiffs(current, candidate.event);
+      if (diffs.length === 0) {
+        unchangedEvents += 1;
+        continue;
+      }
+      catalog.events = catalog.events.map((item) =>
+        item.id === candidate.event.id ? candidate.event : item,
+      );
+      filesToWrite.push({ relativePath: `events/${candidate.event.id}.json`, value: candidate.event });
+      updatedEvents += 1;
+      continue;
     }
 
     if (catalog.events.some((item) => item.id === candidate.event.id)) {
@@ -104,7 +123,7 @@ export function mergeCandidateBatch(existing: Catalog, candidates: Candidate[]):
   }
 
   filesToWrite.sort((left, right) => left.relativePath.localeCompare(right.relativePath));
-  return { catalog, filesToWrite, issues, newEvents, unchangedEvents };
+  return { catalog, filesToWrite, issues, newEvents, updatedEvents, unchangedEvents };
 }
 
 function reconcile<T extends { id: string }>(
@@ -138,15 +157,18 @@ function reconcile<T extends { id: string }>(
 
 export type BatchIo = {
   writeFile: (filePath: string, contents: string) => Promise<void>;
+  readFile: (filePath: string) => Promise<string>;
   rename: (from: string, to: string) => Promise<void>;
   mkdir: (dir: string) => Promise<void>;
   rm: (target: string) => Promise<void>;
+  exists: (filePath: string) => Promise<boolean>;
 };
 
 export const defaultBatchIo: BatchIo = {
   writeFile: async (filePath, contents) => {
     await writeFile(filePath, contents, 'utf8');
   },
+  readFile: async (filePath) => readFile(filePath, 'utf8'),
   rename: async (from, to) => {
     await rename(from, to);
   },
@@ -155,6 +177,14 @@ export const defaultBatchIo: BatchIo = {
   },
   rm: async (target) => {
     await rm(target, { recursive: true, force: true });
+  },
+  exists: async (filePath) => {
+    try {
+      await access(filePath);
+      return true;
+    } catch {
+      return false;
+    }
   },
 };
 
@@ -173,6 +203,7 @@ export async function applyCandidateBatch(
       proposed: merged.catalog,
       filesToWrite: [],
       newEvents: merged.newEvents,
+      updatedEvents: merged.updatedEvents,
       unchangedEvents: merged.unchangedEvents,
       written: [],
     };
@@ -185,6 +216,7 @@ export async function applyCandidateBatch(
       proposed: merged.catalog,
       filesToWrite,
       newEvents: merged.newEvents,
+      updatedEvents: merged.updatedEvents,
       unchangedEvents: merged.unchangedEvents,
       written: [],
     };
@@ -197,15 +229,18 @@ export async function applyCandidateBatch(
     proposed: merged.catalog,
     filesToWrite,
     newEvents: merged.newEvents,
+    updatedEvents: merged.updatedEvents,
     unchangedEvents: merged.unchangedEvents,
     written,
   };
 }
 
 /**
- * Write every file to a temp tree first, then move into place. A failure
- * during prepare leaves the destination untouched. A failure during the
- * final moves rolls back files already moved (Phase 1 only creates new files).
+ * Write every file to a temp tree first, then move into place.
+ * Creates and updates share the same commit: existing files are moved aside
+ * before replace. A failure during prepare leaves the destination untouched.
+ * A failure during commit restores every replaced file byte-for-byte and
+ * removes files that this batch created.
  */
 export async function writeBatchAtomically(
   dataDir: string,
@@ -214,36 +249,62 @@ export async function writeBatchAtomically(
 ): Promise<string[]> {
   if (files.length === 0) return [];
   const tmpDir = path.join(dataDir, `.ingest-tmp-${randomUUID()}`);
-  const prepared: Array<{ tmp: string; dest: string; relativePath: string }> = [];
+  const backupDir = path.join(dataDir, `.ingest-bak-${randomUUID()}`);
+  type Prepared = { tmp: string; dest: string; relativePath: string; backup?: string };
+  const prepared: Prepared[] = [];
   try {
     await io.mkdir(tmpDir);
     for (const file of files) {
       const tmp = path.join(tmpDir, file.relativePath);
+      const dest = path.join(dataDir, file.relativePath);
       await io.mkdir(path.dirname(tmp));
       await io.writeFile(tmp, serializeCanonical(file.value));
+      const destExists = await io.exists(dest);
       prepared.push({
         tmp,
-        dest: path.join(dataDir, file.relativePath),
+        dest,
         relativePath: file.relativePath,
+        backup: destExists ? path.join(backupDir, file.relativePath) : undefined,
       });
     }
-    const moved: string[] = [];
+    const committed: Prepared[] = [];
     try {
       for (const file of prepared) {
         await io.mkdir(path.dirname(file.dest));
-        await io.rename(file.tmp, file.dest);
-        moved.push(file.dest);
+        if (file.backup) {
+          await io.mkdir(path.dirname(file.backup));
+          await io.writeFile(file.backup, await io.readFile(file.dest));
+          await io.rm(file.dest);
+        }
+        try {
+          await io.rename(file.tmp, file.dest);
+        } catch (error) {
+          if (file.backup && (await io.exists(file.backup)) && !(await io.exists(file.dest))) {
+            await restoreFromBackup(io, file.backup, file.dest);
+          }
+          throw error;
+        }
+        committed.push(file);
       }
     } catch (error) {
-      for (const dest of moved) {
-        await io.rm(dest);
+      for (const file of committed.reverse()) {
+        await io.rm(file.dest);
+        if (file.backup) {
+          await restoreFromBackup(io, file.backup, file.dest);
+        }
       }
       throw error;
     }
     return prepared.map((file) => file.relativePath);
   } finally {
     await io.rm(tmpDir);
+    await io.rm(backupDir);
   }
+}
+
+async function restoreFromBackup(io: BatchIo, backup: string, dest: string): Promise<void> {
+  await io.mkdir(path.dirname(dest));
+  await io.writeFile(dest, await io.readFile(backup));
 }
 
 export function serializeCanonical(value: unknown): string {

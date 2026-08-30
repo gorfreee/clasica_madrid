@@ -164,7 +164,7 @@ describe('ingest event report', () => {
     expect(decision.access?.value).toBe('paid');
     expect(decision.publishable).toBe(true);
     expect(decision.candidateGenerated).toBe(true);
-    expect(decision.identity).toBe('new');
+    expect(decision.identity?.action).toBe('new');
     expect(decision.candidate).toBeDefined();
     expect(decision.candidate?.id).toBe(run.candidates[0]!.event.id);
     expect(decision.candidate?.slug).toBe(run.candidates[0]!.event.slug);
@@ -498,11 +498,14 @@ describe('ingest event report', () => {
       catalog,
     });
 
-    expect(run.decisions[0]!.identity).toBe('existing');
+    expect(run.decisions[0]!.identity?.action).toBe('updated');
+    expect(run.decisions[0]!.identity?.method).toBe('externalId');
+    expect(run.decisions[0]!.identity?.eventId).toBe('evt_ocne_existente');
     expect(run.decisions[0]!.candidateGenerated).toBe(true);
-    expect(run.decisions[0]!.candidate?.id).toBe(run.candidates[0]!.event.id);
-    expect(run.decisions[0]!.candidate?.slug).toBe(run.candidates[0]!.event.slug);
+    expect(run.decisions[0]!.candidate?.id).toBe('evt_ocne_existente');
+    expect(run.decisions[0]!.candidate?.slug).toBe('ocne-existente');
+    expect(run.candidates[0]!.event.id).toBe('evt_ocne_existente');
     expect(run.summary.newEvents).toBe(0);
-    expect(run.summary.unchangedEvents).toBe(1);
+    expect(run.summary.updatedEvents).toBe(1);
   });
 });

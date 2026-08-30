@@ -36,7 +36,7 @@ Scripts live in `package.json`. Use those names rather than duplicating flags he
 - Do not invent production events. Fixtures belong in `tests/`.
 - UI must consume `src/lib/presentation`, not raw JSON files.
 - Pagefind is intentionally not installed yet; search is a query-param filter over the built agenda.
-- For ingestion work, follow `docs/ingestion.md` (today) and `docs/ingestion-v3-plan.md` (target). Do not implement later v3 phases (GitHub Actions for ingest, auto-merge, discovery agents, fuzzy reconciliation, disappearance policy) unless a task asks for that phase.
+- For ingestion work, follow `docs/ingestion.md` (today) and `docs/ingestion-v3-plan.md` (target). Do not implement later v3 phases (GitHub Actions for ingest, auto-merge, discovery agents, fuzzy reconciliation) unless a task asks for that phase. `possiblyMissing` is diagnostic-only; do not delete or auto-cancel from a disappearance.
 - Once an event or venue is published, its `slug` is permanent. Do not rename published slugs. Aliases and historical redirects are not implemented.
 - Every published venue has a `/lugares/{slug}` page, including venues with no upcoming events. The venues index lists only venues with upcoming events.
 - `loadPublishedCatalog()` memoizes the parsed catalog for the process lifetime. Tests that need another tree must call `loadCatalogFromDir`. Restart `astro dev` after editing `data/` if pages look stale.

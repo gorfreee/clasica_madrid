@@ -5,6 +5,9 @@ import type { Event, Occurrence } from '../lib/schemas/event.ts';
 import type { AccessMode, Era, EventKind, Format } from '../lib/schemas/taxonomies.ts';
 import type { Eligibility } from './classification/golden-case.ts';
 import type { ClassificationResult, Resolution, ResolutionMethod } from './classification/types.ts';
+import type { PossiblyMissingEvent } from './disappear.ts';
+import type { IdentityMethod } from './identity.ts';
+import type { ReconcileAction } from './reconcile.ts';
 import type { IngestRunSummary, RawEvent } from './types.ts';
 import type { AiCallDiagnostics } from './classification/ai.ts';
 
@@ -48,7 +51,19 @@ export type IngestEventDecision = {
   access?: FieldResolution<AccessMode>;
   publishable: boolean;
   candidateGenerated: boolean;
-  identity?: 'existing' | 'new';
+  identity?: {
+    action?: ReconcileAction;
+    method?: IdentityMethod;
+    eventId?: string;
+    reason?: string;
+  };
+  fieldDiffs?: string[];
+  classificationDrift?: {
+    eligibility: 'exclude' | 'uncertain';
+    ruleId: string;
+  };
+  scheduleChange?: 'cancelled' | 'postponed';
+  batchDuplicate?: boolean;
   /**
    * Diagnostic projection of the Candidate that would be written.
    * Present only when a Candidate exists. Not sent to the classifier.
@@ -83,6 +98,7 @@ export type IngestReport = {
   dryRun: boolean;
   summary: IngestRunSummary;
   events: IngestEventDecision[];
+  possiblyMissing: PossiblyMissingEvent[];
 };
 
 export type DecisionInput = {
@@ -94,7 +110,11 @@ export type DecisionInput = {
   ai?: IngestEventDecision['ai'];
   publishable: boolean;
   candidateGenerated: boolean;
-  identity?: 'existing' | 'new';
+  identity?: IngestEventDecision['identity'];
+  fieldDiffs?: string[];
+  classificationDrift?: IngestEventDecision['classificationDrift'];
+  scheduleChange?: IngestEventDecision['scheduleChange'];
+  batchDuplicate?: boolean;
   candidate?: Candidate;
 };
 
@@ -115,6 +135,10 @@ export function buildEventDecision(input: DecisionInput): IngestEventDecision {
   if (input.raw.externalId) decision.externalId = input.raw.externalId;
   if (input.structuralSkip) decision.structuralSkip = { reason: input.structuralSkip };
   if (input.identity) decision.identity = input.identity;
+  if (input.fieldDiffs && input.fieldDiffs.length > 0) decision.fieldDiffs = input.fieldDiffs;
+  if (input.classificationDrift) decision.classificationDrift = input.classificationDrift;
+  if (input.scheduleChange) decision.scheduleChange = input.scheduleChange;
+  if (input.batchDuplicate) decision.batchDuplicate = true;
   if (input.ai) decision.ai = input.ai;
   if (input.candidate) decision.candidate = snapshotCandidate(input.candidate);
 
@@ -140,7 +164,11 @@ export function buildEventDecision(input: DecisionInput): IngestEventDecision {
 }
 
 export function buildIngestReport(
-  run: { summary: IngestRunSummary; decisions: IngestEventDecision[] },
+  run: {
+    summary: IngestRunSummary;
+    decisions: IngestEventDecision[];
+    possiblyMissing?: PossiblyMissingEvent[];
+  },
   generatedAt: Date,
 ): IngestReport {
   return {
@@ -149,6 +177,7 @@ export function buildIngestReport(
     dryRun: run.summary.dryRun,
     summary: run.summary,
     events: run.decisions,
+    possiblyMissing: run.possiblyMissing ?? [],
   };
 }
 

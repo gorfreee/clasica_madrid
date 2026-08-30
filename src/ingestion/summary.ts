@@ -40,7 +40,11 @@ export function formatRunSummary(summary: IngestRunSummary): string {
     `Descartados estructuralmente: ${summary.skippedUnusable}`,
     `Candidatos generados: ${summary.candidates}`,
     `Eventos nuevos: ${summary.newEvents}`,
+    `Eventos actualizados: ${summary.updatedEvents}`,
     `Eventos ya existentes (sin cambios): ${summary.unchangedEvents}`,
+    `Ambiguos: ${summary.ambiguous}`,
+    `Posiblemente desaparecidos: ${summary.possiblyMissing}`,
+    `Duplicados del lote: ${summary.batchDuplicates}`,
   );
   if (summary.dryRun) {
     lines.push('Modo dry-run: no se ha escrito nada en el catálogo. La IA puede guardar caché, cuotas y pendientes locales.');

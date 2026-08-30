@@ -100,7 +100,7 @@ export type SourceFailure = {
 
 export type ProposedChange = {
   relativePath: string;
-  action: 'create' | 'unchanged';
+  action: 'create' | 'update' | 'unchanged';
 };
 
 export type IngestAiSummary = {
@@ -165,7 +165,11 @@ export type IngestRunSummary = {
   ai: IngestAiSummary;
   candidates: number;
   newEvents: number;
+  updatedEvents: number;
   unchangedEvents: number;
+  ambiguous: number;
+  possiblyMissing: number;
+  batchDuplicates: number;
   written: string[];
   dryRun: boolean;
   detailHydrationAttempted: number;

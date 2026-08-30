@@ -1,6 +1,6 @@
 # Ingestión v3 — arquitectura pragmática y automatizada
 
-> Estado: **diseño objetivo vigente** para evolucionar la ingestión. Las fases 1 y 2 (harvesting, clasificación y puerta de publicación) ya viven en `src/ingestion/` y se operan con `npm run ingest:sync`. Este documento define hacia dónde va el resto; no es un diario de lo ya implementado.
+> Estado: **diseño objetivo vigente** para evolucionar la ingestión. Las fases 1–3 (harvesting, clasificación, puerta de publicación y reconciliation) ya viven en `src/ingestion/` y se operan con `npm run ingest:sync`. Este documento define hacia dónde va el resto; no es un diario de lo ya implementado.
 >
 > Qué hay hoy: [`docs/ingestion.md`](ingestion.md). Política editorial: [`docs/classification-policy.md`](classification-policy.md). Histórico: [`docs/archive/`](archive/).
 >
@@ -266,7 +266,7 @@ Flujo completo previsto:
 12. emit run summary
 ```
 
-Hoy el pipeline llega hasta el paso 6 y escribe **sólo eventos nuevos**. Reconciliation, updates, PRs automáticas y auto-merge son trabajo pendiente.
+Hoy el pipeline llega hasta el paso 10 en local (reconcile, validate, write). Las PRs automáticas y el auto-merge son Phase 4.
 
 ---
 
@@ -278,9 +278,9 @@ Salvo necesidad demostrable: PostgreSQL/Supabase, Redis, Kafka, colas, Airbyte, 
 
 ## 17. Fases
 
-**Hechas (1 y 2):** contratos, adapters, hidratación, classifier determinista, fallback de IA, puerta de publicación, escritura atómica local. El detalle está en el código y en [`docs/ingestion.md`](ingestion.md).
+**Hechas (1, 2 y 3):** contratos, adapters, hidratación, classifier determinista, fallback de IA, puerta de publicación, matching determinista, merge conservador, updates, desapariciones sólo como diagnóstico, escritura atómica de creates y updates. El detalle está en el código y en [`docs/ingestion.md`](ingestion.md).
 
-**Fase 3 — reconciliation:** matching contra catálogo, aliases, deduplicación batch, detección de updates, política conservadora de desapariciones, tests de idempotencia.
+**Fase 3 — reconciliation (hecha):** matching contra catálogo (`externalId` → URL → alias → coincidencia fuerte única), aliases tipados, deduplicación batch, updates no destructivos, `possiblyMissing` diagnóstico, tests de idempotencia. Queda fuera de esta fase el fuzzy/IA matching y cualquier política que borre o cancele por ausencia.
 
 **Fase 4 — automatización GitHub:** workflow scheduled, ventana de 120 días, ~cada 10 días, PR automática, CI, auto-merge de cambios de datos válidos, resumen de ejecución.
 
