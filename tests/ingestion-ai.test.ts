@@ -578,11 +578,11 @@ describe('Gemini provider (fetch inyectado, sin red)', () => {
     expect(requests).toBe(1);
   });
 
-  it('usa gemini-3.1-flash-lite por defecto y respeta GEMINI_MODEL', async () => {
+  it('usa el modelo preferente del pool por defecto y respeta GEMINI_MODEL', async () => {
     const defaultProvider = new GeminiClassifier({
       apiKey: 'gemini-test',
       fetch: async (_input, init) => {
-        expect(JSON.parse(String(init?.body)).model).toBe('gemini-3.1-flash-lite');
+        expect(JSON.parse(String(init?.body)).model).toBe(GEMINI_DEFAULT_MODEL);
         return geminiStepsResponse('{"eligibility":"exclude"}');
       },
     });
