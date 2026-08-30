@@ -48,8 +48,8 @@ export function evaluateGoldenCases(cases: GoldenCase[]): {
 }
 
 /**
- * Same golden invariants after `classify() → AI fake when uncertain`.
- * `aiForCase` is only invoked when the deterministic classifier returned uncertain.
+ * Same golden invariants after `classify() → AI fake when eligibility is uncertain`.
+ * Taxonomy enrichment may add a second call for includes with unresolved eras/formats.
  */
 export async function evaluateGoldenCasesWithAi(
   cases: GoldenCase[],
@@ -58,11 +58,13 @@ export async function evaluateGoldenCasesWithAi(
   metrics: GoldenMetrics;
   rows: GoldenEvaluationRow[];
   aiCalls: number;
+  taxonomyCalls: number;
   deterministicUncertain: number;
 }> {
   const metrics = emptyMetrics();
   const rows: GoldenEvaluationRow[] = [];
   let aiCalls = 0;
+  let taxonomyCalls = 0;
   let deterministicUncertain = 0;
 
   for (const item of cases) {
@@ -71,12 +73,13 @@ export async function evaluateGoldenCasesWithAi(
 
     const spy = countingAi(aiForCase(item));
     const result = await classifyObserved(item.observed, { ai: spy });
-    aiCalls += spy.calls;
+    aiCalls += spy.eligibilityCalls;
+    taxonomyCalls += spy.taxonomyCalls;
     rows.push(recordRow(metrics, item, result));
   }
 
   finishCoverage(metrics);
-  return { metrics, rows, aiCalls, deterministicUncertain };
+  return { metrics, rows, aiCalls, taxonomyCalls, deterministicUncertain };
 }
 
 export function formatGoldenMetrics(metrics: GoldenMetrics): string {
@@ -100,12 +103,16 @@ export function formatGoldenMetrics(metrics: GoldenMetrics): string {
   ].join('\n');
 }
 
-function countingAi(inner: AiClassifier): AiClassifier & { calls: number } {
-  const spy: AiClassifier & { calls: number } = {
+function countingAi(inner: AiClassifier): AiClassifier & { calls: number; eligibilityCalls: number; taxonomyCalls: number } {
+  const spy: AiClassifier & { calls: number; eligibilityCalls: number; taxonomyCalls: number } = {
     calls: 0,
-    async classify(observed) {
+    eligibilityCalls: 0,
+    taxonomyCalls: 0,
+    async classify(observed, context) {
       spy.calls += 1;
-      return inner.classify(observed);
+      if (context?.purpose === 'taxonomy') spy.taxonomyCalls += 1;
+      else spy.eligibilityCalls += 1;
+      return inner.classify(observed, context);
     },
   };
   return spy;

@@ -13,7 +13,7 @@ observed facts → deterministic rules → musical knowledge → AI → safe unc
 
 Preferimos perder temporalmente un evento antes que publicar un falso positivo.
 
-Un `include` o `exclude` determinista no se reabre con IA. El fallback de IA sólo actúa sobre `uncertain`. Si la IA no está disponible o falla, el resultado sigue siendo `uncertain`.
+Un `include` o `exclude` determinista no se reabre con IA para eligibility. El fallback de IA sólo actúa sobre `uncertain` para decidir include/exclude. Si el resultado final es `include` y `eras`/`formats` siguen sin resolver, la IA puede completar esos campos; no puede cambiar eligibility ni `access`. Si esa llamada falla, el evento sigue `include`.
 
 ## Separación de responsabilidades
 

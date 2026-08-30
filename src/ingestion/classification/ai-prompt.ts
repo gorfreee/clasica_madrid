@@ -1,10 +1,21 @@
 import type { ObservedFacts } from '../observed.ts';
 
 export const AI_CLASSIFIER_PROMPT_VERSION = 5 as const;
+export const AI_TAXONOMY_PROMPT_VERSION = 1 as const;
 
 export function buildAiClassifierUserMessage(observed: ObservedFacts): string {
   return [
     `promptVersion: ${AI_CLASSIFIER_PROMPT_VERSION}`,
+    'Hechos observados (JSON). No inventes campos ausentes.',
+    JSON.stringify(observed, null, 2),
+  ].join('\n');
+}
+
+export function buildAiTaxonomyUserMessage(observed: ObservedFacts): string {
+  return [
+    `promptVersion: ${AI_TAXONOMY_PROMPT_VERSION}`,
+    'purpose: taxonomy',
+    'Eligibility ya es include. No la cambies. Completa formats/eras/kind si los hechos lo permiten.',
     'Hechos observados (JSON). No inventes campos ausentes.',
     JSON.stringify(observed, null, 2),
   ].join('\n');
@@ -70,3 +81,35 @@ Devuelve ÚNICAMENTE un objeto JSON con esta forma:
 }
 
 No añadas otros campos. No escribas prosa fuera del JSON.`;
+
+/**
+ * Taxonomy-only completion for events already decided as include.
+ * Must not reopen eligibility. Same JSON contract so parseAiClassification applies.
+ */
+export const AI_TAXONOMY_SYSTEM_PROMPT = `Eres el enriquecedor de taxonomía de Clásica Madrid. El evento YA es eligibility=include. NO cambies eligibility. NO decidas include/exclude/uncertain.
+
+Tu única tarea: completar formats, eras y kind a partir de los hechos observados, sin inventar.
+
+Taxonomías cerradas:
+- formats: symphonic, chamber, recital, choral, organ, early-music, opera, zarzuela, lied, other
+- eras: early, renaissance, baroque, classical, romantic, twentieth, contemporary
+- kind: established | alternative (established = circuito profesional/estable; si no hay evidencia, alternative)
+
+Reglas:
+- no inventes performers, composers, works, fechas, venue ni repertorio ausente de los hechos;
+- sí puedes usar conocimiento musical general para interpretar nombres ya observados (Bach → baroque, Brahms/Mahler → romantic, etc.);
+- formats y eras vacíos son preferibles a adivinar;
+- no deduzcas época por ensemble, ciclo o venue;
+- rationale breve; no repitas evidence.
+
+Devuelve ÚNICAMENTE un objeto JSON con esta forma:
+{
+  "eligibility": "include",
+  "formats": [...],
+  "eras": [...],
+  "kind": "established" | "alternative",
+  "evidence": ["..."],
+  "rationale": "..."
+}
+
+No añadas otros campos. No escribas prosa fuera del JSON. Eligibility debe ser "include".`;

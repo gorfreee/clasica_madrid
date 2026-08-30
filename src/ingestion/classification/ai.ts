@@ -12,18 +12,52 @@ import { ELIGIBILITIES, type Eligibility } from './golden-case.ts';
  * Optional hooks stay provider-agnostic: Gemini uses them for rate-limit
  * diagnostics; OpenAI and test fakes omit them.
  */
+export type AiCallPurpose = 'eligibility' | 'taxonomy';
+
+export type AiFailureKind =
+  | 'malformed-output'
+  | 'invalid-output'
+  | 'incomplete'
+  | 'empty-output'
+  | 'rate-limit'
+  | 'timeout'
+  | 'transport-error';
+
+export type AiTokenCounts = {
+  input?: number;
+  output?: number;
+  thought?: number;
+};
+
+/** One technically failed HTTP/model attempt. No secrets; excerpt is truncated. */
+export type AiAttemptFailure = {
+  model: string;
+  kind: AiFailureKind;
+  status?: string;
+  finishReason?: string;
+  tokens?: AiTokenCounts;
+  excerpt?: string;
+};
+
 export type AiCallDiagnostics = {
   model?: string;
+  purpose?: AiCallPurpose;
   fallbackUsed?: boolean;
   attempts?: number;
   cacheHit?: boolean;
   deferred?: boolean;
   routing?: Array<{ model: string; reason: string }>;
+  failures?: AiAttemptFailure[];
+  status?: string;
+  tokens?: AiTokenCounts;
+  extraCalls?: AiCallDiagnostics[];
 };
 
 export type AiCallContext = {
   signal?: AbortSignal;
   onDiagnostics?: (diagnostics: AiCallDiagnostics) => void;
+  /** Eligibility fallback vs taxonomy-only completion. Default eligibility. */
+  purpose?: AiCallPurpose;
 };
 
 export type AiProviderStats = {
@@ -75,6 +109,73 @@ export class AiRateLimitedError extends Error {
     this.quotaExhausted = options.quotaExhausted ?? false;
     this.model = options.model;
   }
+}
+
+export const AI_UNUSABLE_OUTPUT_KINDS = ['empty', 'malformed', 'invalid', 'incomplete'] as const;
+export type AiUnusableOutputKind = (typeof AI_UNUSABLE_OUTPUT_KINDS)[number];
+
+export const AI_OUTPUT_EXCERPT_MAX_CHARS = 240;
+
+/**
+ * Model returned something structurally unusable. Recoverable inside a pool:
+ * consume a retry and try another model. Never treat this as editorial uncertain
+ * until the pool is exhausted. Distinct from a valid `eligibility: uncertain`.
+ */
+export class AiUnusableOutputError extends Error {
+  readonly kind: AiUnusableOutputKind;
+  readonly ruleId: 'ai-malformed-output' | 'ai-invalid-output' | 'ai-incomplete';
+  readonly model?: string;
+  readonly status?: string;
+  readonly finishReason?: string;
+  readonly tokens?: AiTokenCounts;
+  readonly excerpt?: string;
+
+  constructor(
+    message: string,
+    options: {
+      kind: AiUnusableOutputKind;
+      model?: string;
+      status?: string;
+      finishReason?: string;
+      tokens?: AiTokenCounts;
+      excerpt?: string;
+    },
+  ) {
+    super(message);
+    this.name = 'AiUnusableOutputError';
+    this.kind = options.kind;
+    this.ruleId = ruleIdForUnusableKind(options.kind);
+    this.model = options.model;
+    this.status = options.status;
+    this.finishReason = options.finishReason;
+    this.tokens = options.tokens;
+    this.excerpt = options.excerpt;
+  }
+}
+
+export function ruleIdForUnusableKind(
+  kind: AiUnusableOutputKind,
+): 'ai-malformed-output' | 'ai-invalid-output' | 'ai-incomplete' {
+  if (kind === 'invalid') return 'ai-invalid-output';
+  if (kind === 'incomplete') return 'ai-incomplete';
+  return 'ai-malformed-output';
+}
+
+export function failureKindForUnusable(kind: AiUnusableOutputKind): AiFailureKind {
+  if (kind === 'invalid') return 'invalid-output';
+  if (kind === 'incomplete') return 'incomplete';
+  if (kind === 'empty') return 'empty-output';
+  return 'malformed-output';
+}
+
+/** Truncate and strip obvious secrets. Never store API keys or huge blobs. */
+export function sanitizeAiOutputExcerpt(raw: string, secret?: string): string {
+  let text = raw.replace(/\s+/g, ' ').trim();
+  if (secret) text = text.replaceAll(secret, '[redacted]');
+  text = text.replace(/AIza[\w-]{8,}/g, '[redacted]');
+  text = text.replace(/sk-[\w-]{8,}/g, '[redacted]');
+  if (text.length <= AI_OUTPUT_EXCERPT_MAX_CHARS) return text;
+  return text.slice(0, AI_OUTPUT_EXCERPT_MAX_CHARS);
 }
 
 export type AiClassificationResult = {

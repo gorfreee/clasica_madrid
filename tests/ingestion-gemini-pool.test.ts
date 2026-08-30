@@ -2,10 +2,11 @@ import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'n
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { AiRateLimitedError, type AiCallDiagnostics } from '../src/ingestion/classification/ai.ts';
+import { AiRateLimitedError, AiUnusableOutputError, type AiCallDiagnostics } from '../src/ingestion/classification/ai.ts';
 import { classifyObserved } from '../src/ingestion/classification/enrich.ts';
 import {
   GeminiClassifier, GEMINI_DEFAULT_MODELS, resolveGeminiConfig, resolveRetryAfterMs,
+  thinkingConfigForModel,
   type GeminiClassifierOptions,
 } from '../src/ingestion/classification/gemini.ts';
 import { nextQuotaReset, quotaDay } from '../src/ingestion/classification/gemini-state.ts';
@@ -80,7 +81,7 @@ describe('persistent cache and recovery', () => {
       .mockResolvedValueOnce(new Response('unavailable', { status: 503 }))
       .mockResolvedValueOnce(response({ eligibility: 'exclude' }));
     const p = provider({ stateDir, fetch, maxRetries: 0 });
-    await p.classify(facts);
+    await expect(p.classify(facts)).rejects.toBeInstanceOf(AiUnusableOutputError);
     expect(readdirSync(path.join(stateDir, 'pending'))).toHaveLength(1);
     await expect(p.classify(facts)).rejects.toThrow('503');
     await p.classify(facts);
@@ -200,7 +201,7 @@ describe('quota accounting and bounded scheduling', () => {
       sent.push(time.now());
       return new Response('no json', { status: 200 });
     };
-    const options = { stateDir, clock: time, fetch, defaultRpm: 12, rpdByModel: { 'gemini-3.1-flash-lite': 2 } };
+    const options = { stateDir, clock: time, fetch, defaultRpm: 12, rpdByModel: { 'gemini-3.1-flash-lite': 2 }, maxRetries: 0 };
     const first = provider(options);
     await expect(first.classify(facts)).rejects.toThrow();
     first.close();
@@ -380,3 +381,128 @@ describe('Pacific day and configuration', () => {
     }
   });
 });
+
+describe('recoverable unusable output and thinking', () => {
+  function steps(text: string, extra: Record<string, unknown> = {}) {
+    return new Response(JSON.stringify({
+      output_text: text,
+      ...extra,
+    }));
+  }
+
+  it('JSON inválido en A hace fallback a B y clasifica', async () => {
+    const sent: string[] = [];
+    const p = provider({
+      models: ['gemini-3.1-flash-lite', 'gemma-4-31b-it'],
+      fetch: async (_url, init) => {
+        const model = JSON.parse(String(init?.body)).model;
+        sent.push(model);
+        if (model === 'gemini-3.1-flash-lite') return steps('```json\n{"eligibility":');
+        return response({ eligibility: 'include', kind: 'alternative' });
+      },
+    });
+    await expect(p.classify(facts)).resolves.toEqual({ eligibility: 'include', kind: 'alternative' });
+    expect(sent).toEqual(['gemini-3.1-flash-lite', 'gemma-4-31b-it']);
+    expect(p.lastDiagnostics()).toMatchObject({ fallbackUsed: true, model: 'gemma-4-31b-it' });
+    expect(p.lastDiagnostics()?.failures?.[0]).toMatchObject({
+      model: 'gemini-3.1-flash-lite',
+      kind: 'malformed-output',
+    });
+    expect(p.lastDiagnostics()?.failures?.[0]?.excerpt).toMatch(/eligibility/);
+  });
+
+  it('schema inválido en A hace fallback a B', async () => {
+    const sent: string[] = [];
+    const p = provider({
+      models: ['gemini-3.1-flash-lite', 'gemma-4-31b-it'],
+      fetch: async (_url, init) => {
+        const model = JSON.parse(String(init?.body)).model;
+        sent.push(model);
+        if (model === 'gemini-3.1-flash-lite') return response({ eligibility: 'include', formats: ['jazz'] });
+        return response({ eligibility: 'exclude' });
+      },
+    });
+    await expect(p.classify(facts)).resolves.toEqual({ eligibility: 'exclude' });
+    expect(sent).toEqual(['gemini-3.1-flash-lite', 'gemma-4-31b-it']);
+    expect(p.lastDiagnostics()?.failures?.[0]?.kind).toBe('invalid-output');
+  });
+
+  it('interacción incomplete hace fallback', async () => {
+    const sent: string[] = [];
+    const p = provider({
+      models: ['gemini-3.1-flash-lite', 'gemma-4-31b-it'],
+      fetch: async (_url, init) => {
+        const model = JSON.parse(String(init?.body)).model;
+        sent.push(model);
+        if (model === 'gemini-3.1-flash-lite') {
+          return steps('{"eligibility":', {
+            status: 'incomplete',
+            incomplete_details: { reason: 'max_tokens' },
+            usage: { total_input_tokens: 80, total_output_tokens: 600, total_thought_tokens: 12 },
+          });
+        }
+        return response({ eligibility: 'uncertain', evidence: ['ficha breve'] });
+      },
+    });
+    await expect(p.classify(facts)).resolves.toEqual({ eligibility: 'uncertain', evidence: ['ficha breve'] });
+    expect(sent).toEqual(['gemini-3.1-flash-lite', 'gemma-4-31b-it']);
+    expect(p.lastDiagnostics()?.failures?.[0]).toMatchObject({
+      kind: 'incomplete',
+      status: 'incomplete',
+      finishReason: 'max_tokens',
+    });
+    expect(p.lastDiagnostics()?.failures?.[0]?.tokens).toEqual({ input: 80, output: 600, thought: 12 });
+  });
+
+  it('eligibility uncertain JSON válido no prueba otro modelo', async () => {
+    const sent: string[] = [];
+    const p = provider({
+      models: ['gemini-3.1-flash-lite', 'gemma-4-31b-it'],
+      fetch: async (_url, init) => {
+        sent.push(JSON.parse(String(init?.body)).model);
+        return response({ eligibility: 'uncertain', evidence: ['no basta'] });
+      },
+    });
+    await expect(p.classify(facts)).resolves.toEqual({ eligibility: 'uncertain', evidence: ['no basta'] });
+    expect(sent).toEqual(['gemini-3.1-flash-lite']);
+    expect(p.lastDiagnostics()?.failures).toEqual([]);
+  });
+
+  it('todos los modelos fallan técnicamente: uncertain degradado, sin publicación insegura', async () => {
+    const p = provider({
+      models: ['gemini-3.1-flash-lite', 'gemma-4-31b-it'],
+      fetch: async () => steps('esto no es json'),
+    });
+    const result = await classifyObserved(facts, { ai: p });
+    expect(result.eligibility.value).toBe('uncertain');
+    expect(result.eligibility.ruleId).toBe('ai-malformed-output');
+    expect(result.eligibility.method).toBe('ai');
+  });
+
+  it('envía thinking mínimo/low solo a modelos que lo soportan', async () => {
+    expect(thinkingConfigForModel('gemini-3.7-flash')).toEqual({ thinking_level: 'minimal' });
+    expect(thinkingConfigForModel('gemini-3-flash-preview')).toEqual({ thinking_level: 'minimal' });
+    expect(thinkingConfigForModel('gemini-2.5-flash')).toEqual({ thinking_level: 'low' });
+    expect(thinkingConfigForModel('gemini-2.5-flash-lite')).toBeUndefined();
+    expect(thinkingConfigForModel('gemma-4-31b-it')).toBeUndefined();
+    expect(thinkingConfigForModel('gemma-4-26b-a4b-it')).toBeUndefined();
+
+    const bodies: Array<{ model: string; thinking?: string }> = [];
+    const p = provider({
+      models: ['gemini-3.1-flash-lite', 'gemma-4-31b-it', 'gemini-2.5-flash'],
+      defaultRpm: undefined,
+      fetch: async (_url, init) => {
+        const body = JSON.parse(String(init?.body));
+        bodies.push({ model: body.model, thinking: body.generation_config?.thinking_level });
+        return response();
+      },
+    });
+    for (let i = 0; i < 3; i++) await p.classify({ ...facts, title: `Concierto ${i}` });
+    expect(bodies).toEqual([
+      { model: 'gemini-3.1-flash-lite', thinking: 'minimal' },
+      { model: 'gemma-4-31b-it', thinking: undefined },
+      { model: 'gemini-2.5-flash', thinking: 'low' },
+    ]);
+  });
+});
+

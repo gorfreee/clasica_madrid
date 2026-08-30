@@ -1,6 +1,9 @@
 import type { ObservedFacts } from '../observed.ts';
-import { AI_CLASSIFY_TIMEOUT_MS, type AiClassifier } from './ai.ts';
-import { AI_CLASSIFIER_SYSTEM_PROMPT, buildAiClassifierUserMessage } from './ai-prompt.ts';
+import { AI_CLASSIFY_TIMEOUT_MS, AiUnusableOutputError, type AiCallContext, type AiClassifier } from './ai.ts';
+import {
+  AI_CLASSIFIER_SYSTEM_PROMPT, AI_TAXONOMY_SYSTEM_PROMPT,
+  buildAiClassifierUserMessage, buildAiTaxonomyUserMessage,
+} from './ai-prompt.ts';
 
 export const OPENAI_DEFAULT_MODEL = 'gpt-4o-mini';
 export const OPENAI_DEFAULT_BASE_URL = 'https://api.openai.com/v1';
@@ -36,9 +39,10 @@ export class OpenAiClassifier implements AiClassifier {
     this.fetchImpl = options.fetch ?? fetch;
   }
 
-  async classify(observed: ObservedFacts): Promise<unknown> {
+  async classify(observed: ObservedFacts, context: AiCallContext = {}): Promise<unknown> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.timeoutMs);
+    const taxonomy = context.purpose === 'taxonomy';
     try {
       const response = await this.fetchImpl(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
@@ -53,8 +57,8 @@ export class OpenAiClassifier implements AiClassifier {
           max_tokens: 600,
           response_format: { type: 'json_object' },
           messages: [
-            { role: 'system', content: AI_CLASSIFIER_SYSTEM_PROMPT },
-            { role: 'user', content: buildAiClassifierUserMessage(observed) },
+            { role: 'system', content: taxonomy ? AI_TAXONOMY_SYSTEM_PROMPT : AI_CLASSIFIER_SYSTEM_PROMPT },
+            { role: 'user', content: taxonomy ? buildAiTaxonomyUserMessage(observed) : buildAiClassifierUserMessage(observed) },
           ],
         }),
       });
@@ -76,12 +80,16 @@ export class OpenAiClassifier implements AiClassifier {
 
       const content = messageContent(payload);
       if (content === undefined) {
-        throw new Error('OpenAI devolvió una respuesta vacía');
+        throw new AiUnusableOutputError('OpenAI devolvió una respuesta vacía', { kind: 'empty', model: this.model });
       }
       try {
         return JSON.parse(content);
       } catch {
-        throw new Error('OpenAI devolvió JSON inválido');
+        throw new AiUnusableOutputError('OpenAI devolvió JSON inválido', {
+          kind: 'malformed',
+          model: this.model,
+          excerpt: content.slice(0, 240),
+        });
       }
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {

@@ -51,9 +51,9 @@ function immediateClock(): SleepClock & { sleeps: number[] } {
 function countingAi(inner: AiClassifier): AiClassifier & { calls: number } {
   const spy: AiClassifier & { calls: number } = {
     calls: 0,
-    async classify(observed) {
+    async classify(observed, context) {
       spy.calls += 1;
-      return inner.classify(observed);
+      return inner.classify(observed, context);
     },
   };
   return spy;
@@ -296,6 +296,7 @@ describe('classifyObserved — fallback cuando el determinista es uncertain', ()
         return {
           eligibility: 'include',
           formats: ['early-music'],
+          eras: ['early'],
           kind: 'alternative',
           evidence: ['repertorio de música antigua'],
         };
@@ -559,6 +560,7 @@ describe('Gemini provider (fetch inyectado, sin red)', () => {
         expect(body.input).toContain('Concierto extraordinario');
         expect(body.tools).toBeUndefined();
         expect(body.generation_config?.tool_choice).toBe('none');
+        expect(body.generation_config?.thinking_level).toBe('minimal');
         expect(body.response_format).toEqual({
           type: 'text',
           mime_type: 'application/json',
@@ -678,7 +680,7 @@ describe('Gemini provider (fetch inyectado, sin red)', () => {
     });
     const invalidResult = await classifyObserved(observed, { ai: invalid });
     expect(invalidResult.eligibility.value).toBe('uncertain');
-    expect(invalidResult.eligibility.ruleId).toBe('ai-error');
+    expect(invalidResult.eligibility.ruleId).toBe('ai-malformed-output');
   });
 
   it('constructor sin clave lanza', () => {
@@ -759,3 +761,128 @@ describe('createAiClassifierFromEnv — selección de provider', () => {
     ).toBeUndefined();
   });
 });
+
+describe('taxonomy enrichment — separado de eligibility', () => {
+  const includeIncomplete = facts({
+    title: 'Programa clásico',
+    programText: 'Johannes Brahms: Sinfonía núm. 1',
+  });
+
+  it('include determinista con eras/formats/kind resueltos no llama a IA', async () => {
+    const ai = countingAi({
+      classify: async () => {
+        throw new Error('IA no debe llamarse');
+      },
+    });
+    const result = await classifyObserved(includeFacts, { ai });
+    expect(result.eligibility.value).toBe('include');
+    expect(result.formats?.value.length).toBeGreaterThan(0);
+    expect(result.eras?.value.length).toBeGreaterThan(0);
+    expect(ai.calls).toBe(0);
+  });
+
+  it('include determinista con taxonomía incompleta llama a IA solo para completar campos', async () => {
+    const purposes: Array<string | undefined> = [];
+    const ai = countingAi({
+      async classify(_observed, context) {
+        purposes.push(context?.purpose);
+        return {
+          eligibility: 'exclude',
+          formats: ['chamber'],
+          eras: ['romantic'],
+          kind: 'alternative',
+          evidence: ['Brahms en el programa'],
+        };
+      },
+    });
+    const deterministic = classify(includeIncomplete);
+    expect(deterministic.eligibility.value).toBe('include');
+    expect(deterministic.formats?.value).toEqual([]);
+    expect(deterministic.eras?.value).toEqual(['romantic']);
+
+    const result = await classifyObserved(includeIncomplete, { ai });
+    expect(result.eligibility.value).toBe('include');
+    expect(result.eligibility.method).not.toBe('ai');
+    expect(result.formats?.value).toEqual(['chamber']);
+    expect(result.formats?.method).toBe('ai');
+    expect(result.eras?.value).toEqual(['romantic']);
+    expect(result.eras?.method).toBe('knowledge');
+    expect(ai.calls).toBe(1);
+    expect(purposes).toEqual(['taxonomy']);
+  });
+
+  it('eligibility IA no sobrescribe formats deterministas ya resueltos', async () => {
+    const ai = countingAi({
+      async classify() {
+        return {
+          eligibility: 'include',
+          formats: ['recital'],
+          eras: ['contemporary'],
+          kind: 'established',
+          evidence: ['ciclo de cámara'],
+        };
+      },
+    });
+    const result = await classifyObserved(
+      facts({
+        title: 'Concierto extraordinario',
+        categoryText: 'camara',
+      }),
+      { ai },
+    );
+    expect(result.eligibility.value).toBe('include');
+    expect(result.eligibility.method).toBe('ai');
+    expect(result.formats?.value).toEqual(['chamber']);
+    expect(result.formats?.method).toBe('rule');
+    expect(result.eras?.value).toEqual(['contemporary']);
+    expect(result.eras?.method).toBe('ai');
+    expect(ai.calls).toBe(1);
+  });
+
+  it('eligibility resuelta por IA con taxonomy válida no hace segunda llamada', async () => {
+    const purposes: Array<string | undefined> = [];
+    const ai = countingAi({
+      async classify(_observed, context) {
+        purposes.push(context?.purpose);
+        return {
+          eligibility: 'include',
+          formats: ['early-music'],
+          eras: ['baroque'],
+          kind: 'alternative',
+          evidence: ['repertorio de música antigua'],
+        };
+      },
+    });
+    const result = await classifyObserved(uncertainFacts, { ai });
+    expect(result.eligibility.value).toBe('include');
+    expect(result.formats?.value).toEqual(['early-music']);
+    expect(ai.calls).toBe(1);
+    expect(purposes).toEqual(['eligibility']);
+  });
+
+  it('fallo de taxonomy enrichment conserva el include', async () => {
+    const ai = countingAi({
+      async classify() {
+        throw new Error('taxonomy caído');
+      },
+    });
+    const result = await classifyObserved(includeIncomplete, { ai });
+    expect(result.eligibility.value).toBe('include');
+    expect(result.eligibility.method).not.toBe('ai');
+    expect(result.formats?.value).toEqual([]);
+    expect(ai.calls).toBe(1);
+  });
+
+  it('eligibility: uncertain JSON válido no se reabre por taxonomía', async () => {
+    const ai = countingAi({
+      async classify() {
+        return { eligibility: 'uncertain', evidence: ['ficha insuficiente'] };
+      },
+    });
+    const result = await classifyObserved(uncertainFacts, { ai });
+    expect(result.eligibility.ruleId).toBe('ai-uncertain');
+    expect(result.formats).toBeUndefined();
+    expect(ai.calls).toBe(1);
+  });
+});
+

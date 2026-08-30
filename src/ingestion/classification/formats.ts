@@ -102,9 +102,13 @@ function isChoralFormat(facts: ObservedFacts, haystack: string): boolean {
 
 function isSymphonicFormat(facts: ObservedFacts, haystack: string): boolean {
   if (isNamedWorkEvent(facts)) return false;
+  const category = fieldFolded(facts.categoryText);
+  if (hasWord(category, 'sinfonica') || hasWord(category, 'sinfonico')) return true;
   if (hasPhrase(haystack, 'orquesta y coro')) return true;
-  if (hasPhrase(haystack, 'orquesta sinfonica') || hasWord(haystack, 'sinfonico')) {
-    if (isChamberOrchestraName(haystack) && !hasWord(haystack, 'sinfonico')) return false;
+  if (hasPhrase(haystack, 'orquesta sinfonica') || hasWord(haystack, 'sinfonico') || hasWord(haystack, 'sinfonica')) {
+    if (isChamberOrchestraName(haystack) && !hasWord(haystack, 'sinfonico') && !hasWord(haystack, 'sinfonica')) {
+      return false;
+    }
     return true;
   }
   const orchestra = facts.performers.some((item) => {
@@ -119,6 +123,8 @@ function isSymphonicFormat(facts: ObservedFacts, haystack: string): boolean {
 }
 
 function isChamberFormat(facts: ObservedFacts, haystack: string): boolean {
+  const category = fieldFolded(facts.categoryText);
+  if (isMusicalChamberCategory(category, haystack)) return true;
   if (
     hasWord(haystack, 'cuarteto') ||
     hasWord(haystack, 'octeto') ||
@@ -213,6 +219,20 @@ function isNamedWorkEvent(facts: ObservedFacts): boolean {
 
 function isChamberOrchestraName(haystack: string): boolean {
   return hasPhrase(haystack, 'chamber orchestra') || hasPhrase(haystack, 'orquesta de camara');
+}
+
+/** Municipal / source category `camara` when the event is already musical. */
+function isMusicalChamberCategory(category: string, haystack: string): boolean {
+  if (!hasWord(category, 'camara')) return false;
+  if (hasPhrase(category, 'camara de comercio') || hasPhrase(category, 'camara de fotos')) return false;
+  if (category === 'camara' || hasPhrase(category, 'musica de camara')) return true;
+  return (
+    hasWord(haystack, 'concierto') ||
+    hasWord(haystack, 'musica') ||
+    hasWord(haystack, 'recital') ||
+    hasWord(haystack, 'cuarteto') ||
+    hasWord(haystack, 'orquesta')
+  );
 }
 
 function uniqueFormats(formats: Format[]): Format[] {

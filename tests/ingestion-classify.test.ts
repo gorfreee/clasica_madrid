@@ -213,6 +213,63 @@ describe('eligibility — conflictos y fallback', () => {
     expect(result.eligibility.ruleId).toBe('known-classical-composer');
   });
 
+  it('incluye compositores conocidos presentes en programText aunque no vengan en composers[]', () => {
+    for (const name of ['Brahms', 'Mahler', 'Mendelssohn', 'Bach']) {
+      const result = classify(
+        facts({
+          title: 'Concierto de temporada',
+          programText: `${name}: obra del programa.`,
+        }),
+      );
+      expect(result.eligibility.value, name).toBe('include');
+      expect(result.eligibility.ruleId, name).toBe('known-classical-composer');
+    }
+  });
+
+  it('un compositor clásico en el programa no gana a jazz, pop, taller o danza', () => {
+    expect(
+      classify(
+        facts({
+          title: 'Jazz en el Auditorio',
+          categoryText: 'Jazz en el Auditorio',
+          programText: 'Brahms y estándares de jazz.',
+        }),
+      ).eligibility.ruleId,
+    ).toBe('jazz-identity');
+
+    expect(
+      classify(
+        facts({
+          title: 'ABBA, Queen, Beatles y Otros Grandes del Pop',
+          programText: 'También un arreglo de Bach.',
+          performers: [{ name: 'Pop Orchestra', roleText: 'orquesta' }],
+        }),
+      ).eligibility.ruleId,
+    ).toBe('popular-music-identity');
+
+    expect(
+      classify(
+        facts({
+          title: '¿Te suena Manon Lescaut, de G. Puccini?',
+          categoryText: 'Taller musical en familia',
+          programText: 'Puccini: Manon Lescaut.',
+        }),
+      ).eligibility.ruleId,
+    ).toBe('non-performance-activity');
+
+    expect(
+      classify(
+        facts({
+          title: '¿Te suena Manon Lescaut, de G. Puccini?',
+          categoryText: 'El Real Junior',
+          description: 'Taller musical en familia',
+          programText: 'Taller musical en familia. Puccini: Manon Lescaut.',
+        }),
+      ).eligibility,
+    ).toMatchObject({ value: 'exclude', ruleId: 'non-performance-activity' });
+  });
+
+
   it('deja uncertain un concierto genérico sin programa ni compositores', () => {
     const result = classify(
       facts({
@@ -555,6 +612,36 @@ describe('formats', () => {
   it('no fuerza un format ambiguo', () => {
     expect(resolveFormats(facts({ title: 'Concierto' })).value).toEqual([]);
   });
+
+  it('asigna chamber/symphonic a categorías municipales inequívocas', () => {
+    expect(
+      resolveFormats(
+        facts({
+          title: 'Ciclo de temporada',
+          categoryText: 'camara',
+        }),
+      ).value,
+    ).toEqual(['chamber']);
+
+    expect(
+      resolveFormats(
+        facts({
+          title: 'OCNE Satélite',
+          categoryText: 'sinfonica',
+        }),
+      ).value,
+    ).toEqual(['symphonic']);
+
+    expect(
+      resolveFormats(
+        facts({
+          title: 'Trilogía andaluza',
+          description: 'Concierto de música clásica española.',
+        }),
+      ).value,
+    ).toEqual([]);
+  });
+
 });
 
 describe('kind', () => {

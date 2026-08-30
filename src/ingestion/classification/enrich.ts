@@ -3,12 +3,16 @@ import type { ObservedFacts } from '../observed.ts';
 import {
   AI_CLASSIFY_TIMEOUT_MS,
   AiRateLimitedError,
+  AiUnusableOutputError,
   parseAiClassification,
-  type AiClassifier,
-  type AiClassificationResult,
+  type AiCallContext,
   type AiCallDiagnostics,
+  type AiCallPurpose,
+  type AiClassificationResult,
+  type AiClassifier,
 } from './ai.ts';
 import type { ClassificationResult, Resolution, ResolutionMethod } from './types.ts';
+import type { EventKind } from '../../lib/schemas/taxonomies.ts';
 
 export { AI_CLASSIFY_TIMEOUT_MS };
 
@@ -20,11 +24,10 @@ export type ClassifyObservedOptions = {
 };
 
 /**
- * Deterministic classify(), then at most one AI call if eligibility is uncertain.
- * Include/exclude from rules or knowledge are never reopened. Failures stay uncertain.
- *
- * The publication gate lives in `runIngest`: only a final `include` may
- * become a Candidate. This function does not publish.
+ * Deterministic classify(), then AI only where it is allowed:
+ * - eligibility: only if deterministic is uncertain. Include/exclude are never reopened.
+ * - taxonomy: only if the final eligibility is include and eras/formats remain unresolved.
+ * Failures of eligibility AI stay uncertain. Failures of taxonomy AI keep the include.
  */
 export async function classifyObserved(
   facts: ObservedFacts,
@@ -38,41 +41,26 @@ export async function enrichWithAiIfNeeded(
   facts: ObservedFacts,
   options: ClassifyObservedOptions = {},
 ): Promise<ClassificationResult> {
-  if (deterministic.eligibility.value !== 'uncertain') {
+  let result = deterministic;
+  let diagnostics: AiCallDiagnostics | undefined;
+  const emit = (next: AiCallDiagnostics) => {
+    diagnostics = diagnostics ? mergeDiagnostics(diagnostics, next) : next;
+    options.onDiagnostics?.(structuredClone(diagnostics));
+  };
+  const callOptions = { ...options, onDiagnostics: emit };
+
+  if (deterministic.eligibility.value === 'uncertain') {
+    result = await resolveEligibilityWithAi(deterministic, facts, callOptions);
+  } else if (deterministic.eligibility.value === 'exclude') {
     return deterministic;
   }
 
-  const ai = options.ai;
-  if (!ai) {
-    return degrade(deterministic, 'fallback', 'ai-unavailable', [
-      'provider de IA no configurado o no disponible',
-    ]);
-  }
+  if (result.eligibility.value !== 'include') return result;
 
-  const timeoutMs = options.timeoutMs ?? ai.classifyBudgetMs ?? AI_CLASSIFY_TIMEOUT_MS;
-  let raw: unknown;
-  const controller = new AbortController();
-  try {
-    raw = await withTimeout(ai.classify(facts, {
-      signal: controller.signal,
-      onDiagnostics: options.onDiagnostics,
-    }), timeoutMs, controller);
-  } catch (error) {
-    if (isTimeoutError(error)) {
-      return degrade(deterministic, 'ai', 'ai-timeout', [errorMessage(error)]);
-    }
-    if (error instanceof AiRateLimitedError) {
-      return degrade(deterministic, 'ai', 'ai-rate-limited', [errorMessage(error)]);
-    }
-    return degrade(deterministic, 'ai', 'ai-error', [errorMessage(error)]);
-  }
+  result = ensureTaxonomy(result, facts);
+  if (!taxonomyNeedsAi(result) || !options.ai) return result;
 
-  const parsed = parseAiClassification(raw);
-  if (!parsed.ok) {
-    return degrade(deterministic, 'ai', parsed.ruleId, [parsed.reason]);
-  }
-
-  return applyAiResult(deterministic, facts, parsed.value);
+  return enrichTaxonomyWithAi(result, facts, callOptions);
 }
 
 export class AiTimeoutError extends Error {
@@ -85,7 +73,58 @@ export class AiTimeoutError extends Error {
   }
 }
 
-function applyAiResult(
+async function resolveEligibilityWithAi(
+  deterministic: ClassificationResult,
+  facts: ObservedFacts,
+  options: ClassifyObservedOptions,
+): Promise<ClassificationResult> {
+  const called = await invokeAi(facts, options, 'eligibility');
+  if (!called.ok) return degradeFromError(deterministic, called.error);
+
+  const parsed = parseAiClassification(called.value);
+  if (!parsed.ok) {
+    return degrade(deterministic, 'ai', parsed.ruleId, [parsed.reason]);
+  }
+  return applyEligibilityAi(deterministic, facts, parsed.value);
+}
+
+async function enrichTaxonomyWithAi(
+  current: ClassificationResult,
+  facts: ObservedFacts,
+  options: ClassifyObservedOptions,
+): Promise<ClassificationResult> {
+  const called = await invokeAi(facts, options, 'taxonomy');
+  if (!called.ok) return current;
+
+  const parsed = parseAiClassification(called.value);
+  if (!parsed.ok) return current;
+  return applyTaxonomyAi(current, facts, parsed.value);
+}
+
+async function invokeAi(
+  facts: ObservedFacts,
+  options: ClassifyObservedOptions,
+  purpose: AiCallPurpose,
+): Promise<{ ok: true; value: unknown } | { ok: false; error: unknown }> {
+  const ai = options.ai;
+  if (!ai) return { ok: false, error: new Error('ai-unavailable') };
+
+  const timeoutMs = options.timeoutMs ?? ai.classifyBudgetMs ?? AI_CLASSIFY_TIMEOUT_MS;
+  const controller = new AbortController();
+  const context: AiCallContext = {
+    signal: controller.signal,
+    onDiagnostics: options.onDiagnostics,
+    purpose,
+  };
+  try {
+    const value = await withTimeout(ai.classify(facts, context), timeoutMs, controller);
+    return { ok: true, value };
+  } catch (error) {
+    return { ok: false, error };
+  }
+}
+
+function applyEligibilityAi(
   deterministic: ClassificationResult,
   facts: ObservedFacts,
   ai: AiClassificationResult,
@@ -96,30 +135,88 @@ function applyAiResult(
     `ai-${ai.eligibility}`,
     [...deterministic.eligibility.evidence, ...ai.evidence],
   );
+  if (ai.eligibility !== 'include') return { eligibility };
 
-  if (ai.eligibility !== 'include') {
-    return { eligibility };
-  }
-
-  const formats =
-    ai.formats && ai.formats.length > 0
-      ? resolution(ai.formats, 'ai', 'ai-formats', ai.evidence)
-      : resolveFormats(facts);
-  const eras =
-    ai.eras && ai.eras.length > 0
-      ? resolution(ai.eras, 'ai', 'ai-eras', ai.evidence)
-      : resolveEras(facts);
-  const kind = ai.kind
-    ? resolution(ai.kind, 'ai', 'ai-kind', ai.evidence)
-    : resolveKind(facts);
-
+  const base = ensureTaxonomy({ eligibility }, facts);
   return {
     eligibility,
-    formats,
-    eras,
-    kind,
+    formats: keepResolvedList(base.formats, ai.formats, ai.evidence, 'ai-formats', () => resolveFormats(facts)),
+    eras: keepResolvedList(base.eras, ai.eras, ai.evidence, 'ai-eras', () => resolveEras(facts)),
+    kind: keepResolvedKind(base.kind, ai.kind, ai.evidence, facts),
     access: resolveAccess(facts.accessText),
   };
+}
+
+function applyTaxonomyAi(
+  current: ClassificationResult,
+  facts: ObservedFacts,
+  ai: AiClassificationResult,
+): ClassificationResult {
+  // Eligibility is already include and must not change.
+  return {
+    eligibility: current.eligibility,
+    formats: keepResolvedList(current.formats, ai.formats, ai.evidence, 'ai-formats', () => resolveFormats(facts)),
+    eras: keepResolvedList(current.eras, ai.eras, ai.evidence, 'ai-eras', () => resolveEras(facts)),
+    kind: keepResolvedKind(current.kind, ai.kind, ai.evidence, facts),
+    access: current.access ?? resolveAccess(facts.accessText),
+  };
+}
+
+function ensureTaxonomy(result: ClassificationResult, facts: ObservedFacts): ClassificationResult {
+  return {
+    eligibility: result.eligibility,
+    formats: result.formats ?? resolveFormats(facts),
+    eras: result.eras ?? resolveEras(facts),
+    kind: result.kind ?? resolveKind(facts),
+    access: result.access ?? resolveAccess(facts.accessText),
+  };
+}
+
+function taxonomyNeedsAi(result: ClassificationResult): boolean {
+  const formatsMissing = !result.formats || result.formats.value.length === 0;
+  const erasMissing = !result.eras || result.eras.value.length === 0;
+  return formatsMissing || erasMissing;
+}
+
+function keepResolvedList<T>(
+  current: Resolution<T[]> | undefined,
+  aiValue: T[] | undefined,
+  evidence: string[],
+  ruleId: string,
+  fallback: () => Resolution<T[]>,
+): Resolution<T[]> {
+  if (current && current.value.length > 0) return current;
+  if (aiValue && aiValue.length > 0) return resolution(aiValue, 'ai', ruleId, evidence);
+  return current ?? fallback();
+}
+
+function keepResolvedKind(
+  current: Resolution<EventKind> | undefined,
+  aiValue: EventKind | undefined,
+  evidence: string[],
+  facts: ObservedFacts,
+): Resolution<EventKind> {
+  if (current && current.method !== 'fallback') return current;
+  if (aiValue) return resolution(aiValue, 'ai', 'ai-kind', evidence);
+  return current ?? resolveKind(facts);
+}
+
+function degradeFromError(deterministic: ClassificationResult, error: unknown): ClassificationResult {
+  if (error instanceof Error && error.message === 'ai-unavailable') {
+    return degrade(deterministic, 'fallback', 'ai-unavailable', [
+      'provider de IA no configurado o no disponible',
+    ]);
+  }
+  if (isTimeoutError(error)) {
+    return degrade(deterministic, 'ai', 'ai-timeout', [errorMessage(error)]);
+  }
+  if (error instanceof AiRateLimitedError) {
+    return degrade(deterministic, 'ai', 'ai-rate-limited', [errorMessage(error)]);
+  }
+  if (error instanceof AiUnusableOutputError) {
+    return degrade(deterministic, 'ai', error.ruleId, [errorMessage(error)]);
+  }
+  return degrade(deterministic, 'ai', 'ai-error', [errorMessage(error)]);
 }
 
 function degrade(
@@ -159,6 +256,17 @@ function isTimeoutError(error: unknown): boolean {
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
+}
+
+function mergeDiagnostics(first: AiCallDiagnostics, next: AiCallDiagnostics): AiCallDiagnostics {
+  return {
+    ...first,
+    extraCalls: [...(first.extraCalls ?? []), next],
+    fallbackUsed: Boolean(first.fallbackUsed || next.fallbackUsed),
+    attempts: (first.attempts ?? 0) + (next.attempts ?? 0),
+    failures: [...(first.failures ?? []), ...(next.failures ?? [])],
+    cacheHit: Boolean(first.cacheHit && next.cacheHit),
+  };
 }
 
 async function withTimeout<T>(promise: Promise<T>, ms: number, controller: AbortController): Promise<T> {
