@@ -4,6 +4,8 @@ import { classifyObserved } from '../src/ingestion/classification/enrich.ts';
 import {
   detectDailyQuotaExhausted,
   GeminiClassifier,
+  GEMINI_DEFAULT_CONCURRENCY,
+  GEMINI_DEFAULT_LIMITS,
   GEMINI_DEFAULT_MODEL,
   GEMINI_DEFAULT_MODELS,
   GEMINI_DEFAULT_RPM,
@@ -98,11 +100,53 @@ function classifier(
 }
 
 describe('Gemini config', () => {
-  it('usa Flash-Lite y Gemma en orden de preferencia por defecto', () => {
+  it('usa el pool gratuito de Flash y Gemma en orden de preferencia por defecto', () => {
+    expect(GEMINI_DEFAULT_MODELS).toEqual([
+      'gemini-3.7-flash',
+      'gemini-3.6-flash',
+      'gemini-3.5-flash',
+      'gemini-3-flash-preview',
+      'gemini-2.5-flash',
+      'gemini-3.5-flash-lite',
+      'gemini-3.1-flash-lite',
+      'gemini-2.5-flash-lite',
+      'gemma-4-31b-it',
+      'gemma-4-26b-a4b-it',
+    ]);
+    expect(GEMINI_DEFAULT_MODEL).toBe('gemini-3.7-flash');
     expect(resolveGeminiModels({})).toEqual(GEMINI_DEFAULT_MODELS);
     expect(resolveGeminiConfig({}).models).toEqual(GEMINI_DEFAULT_MODELS);
     expect(resolveGeminiConfig({}).defaultRpm).toBeUndefined();
+    expect(resolveGeminiConfig({}).concurrency).toBe(GEMINI_DEFAULT_CONCURRENCY);
+    expect(GEMINI_DEFAULT_CONCURRENCY).toBe(8);
     expect(intervalMsForRpm(12)).toBe(5_000);
+  });
+
+  it('aplica márgenes internos conservadores sobre las cuotas de AI Studio', () => {
+    const flash = { rpm: 4, tpm: 200_000, rpd: 18 };
+    const flashLite = { rpm: 12, tpm: 200_000, rpd: 450 };
+    const gemma = { rpm: 24, tpm: 12_800, rpd: 12_960 };
+    expect(GEMINI_DEFAULT_LIMITS['gemini-3.7-flash']).toEqual(flash);
+    expect(GEMINI_DEFAULT_LIMITS['gemini-3.6-flash']).toEqual(flash);
+    expect(GEMINI_DEFAULT_LIMITS['gemini-3.5-flash']).toEqual(flash);
+    expect(GEMINI_DEFAULT_LIMITS['gemini-3-flash-preview']).toEqual(flash);
+    expect(GEMINI_DEFAULT_LIMITS['gemini-2.5-flash']).toEqual(flash);
+    expect(GEMINI_DEFAULT_LIMITS['gemini-3.5-flash-lite']).toEqual(flashLite);
+    expect(GEMINI_DEFAULT_LIMITS['gemini-3.1-flash-lite']).toEqual(flashLite);
+    expect(GEMINI_DEFAULT_LIMITS['gemini-2.5-flash-lite']).toEqual({ rpm: 8, tpm: 200_000, rpd: 18 });
+    expect(GEMINI_DEFAULT_LIMITS['gemma-4-31b-it']).toEqual(gemma);
+    expect(GEMINI_DEFAULT_LIMITS['gemma-4-26b-a4b-it']).toEqual(gemma);
+    expect(intervalMsForRpm(flash.rpm)).toBe(15_000);
+  });
+
+  it('usa concurrencia 8 por defecto en config y classifier', () => {
+    expect(resolveGeminiConfig({}).concurrency).toBe(8);
+    expect(resolveGeminiConfig({ GEMINI_CONCURRENCY: '3' }).concurrency).toBe(3);
+    const provider = new GeminiClassifier({
+      apiKey: 'gemini-test',
+      fetch: async () => classification('include'),
+    });
+    expect(provider.concurrency).toBe(8);
   });
 
   it('GEMINI_MODELS gana a GEMINI_MODEL y deduplica en orden', () => {
@@ -145,12 +189,12 @@ describe('Gemini 429 inspection', () => {
 });
 
 describe('Gemini throttling (reloj inyectado)', () => {
-  it('separa requests al mismo modelo según el RPM por defecto (12 → 5s)', async () => {
+  it('separa requests al mismo modelo según el RPM de Flash-Lite (12 → 5s)', async () => {
     const clock = immediateClock();
     const { fetch, requests } = recordingFetch(() => classification('uncertain'));
     const provider = new GeminiClassifier({
       apiKey: 'gemini-test',
-      model: GEMINI_DEFAULT_MODEL,
+      model: 'gemini-3.1-flash-lite',
       clock,
       random: () => 0,
       fetch,
@@ -158,8 +202,25 @@ describe('Gemini throttling (reloj inyectado)', () => {
     await provider.classify(observed);
     await provider.classify(otherObserved);
     expect(requests).toHaveLength(2);
-    expect(requests.every((item) => item.model === GEMINI_DEFAULT_MODEL)).toBe(true);
+    expect(requests.every((item) => item.model === 'gemini-3.1-flash-lite')).toBe(true);
     expect(clock.nowMs()).toBe(5_000);
+  });
+
+  it('un modelo de 5 RPM usa el margen interno de 4 RPM (15s)', async () => {
+    const clock = immediateClock();
+    const { fetch, requests } = recordingFetch(() => classification('include'));
+    const provider = new GeminiClassifier({
+      apiKey: 'gemini-test',
+      model: 'gemini-3.7-flash',
+      clock,
+      random: () => 0,
+      fetch,
+    });
+    await provider.classify(observed);
+    await provider.classify(otherObserved);
+    expect(requests).toHaveLength(2);
+    expect(requests.every((item) => item.model === 'gemini-3.7-flash')).toBe(true);
+    expect(clock.nowMs()).toBe(15_000);
   });
 
   it('reparte trabajo al segundo modelo antes de esperar, respetando ambos RPM', async () => {

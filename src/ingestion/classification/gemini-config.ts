@@ -1,13 +1,20 @@
 /** Project quotas supplied in AI Studio, with RPM/TPM/RPD safety margins. */
 export const GEMINI_DEFAULT_LIMITS: Record<string, ModelLimits> = {
-  'gemini-3.1-flash-lite': { rpm: 12, tpm: 200_000, rpd: 450 },
+  'gemini-3.7-flash': { rpm: 4, tpm: 200_000, rpd: 18 },
+  'gemini-3.6-flash': { rpm: 4, tpm: 200_000, rpd: 18 },
+  'gemini-3.5-flash': { rpm: 4, tpm: 200_000, rpd: 18 },
+  'gemini-3-flash-preview': { rpm: 4, tpm: 200_000, rpd: 18 },
+  'gemini-2.5-flash': { rpm: 4, tpm: 200_000, rpd: 18 },
   'gemini-3.5-flash-lite': { rpm: 12, tpm: 200_000, rpd: 450 },
-  'gemma-4-26b-a4b-it': { rpm: 24, tpm: 12_800, rpd: 12_960 },
+  'gemini-3.1-flash-lite': { rpm: 12, tpm: 200_000, rpd: 450 },
+  'gemini-2.5-flash-lite': { rpm: 8, tpm: 200_000, rpd: 18 },
   'gemma-4-31b-it': { rpm: 24, tpm: 12_800, rpd: 12_960 },
+  'gemma-4-26b-a4b-it': { rpm: 24, tpm: 12_800, rpd: 12_960 },
 };
 export const GEMINI_DEFAULT_MODELS = Object.keys(GEMINI_DEFAULT_LIMITS);
 export const GEMINI_DEFAULT_MODEL = GEMINI_DEFAULT_MODELS[0]!;
 export const GEMINI_DEFAULT_RPM = 12;
+export const GEMINI_DEFAULT_CONCURRENCY = 8;
 export type ModelLimits = { rpm: number; tpm: number; rpd: number };
 
 export type GeminiConfigEnv = {
@@ -70,7 +77,7 @@ export function resolveGeminiConfig(env: GeminiConfigEnv) {
     rpmByModel: limitsMap(env.GEMINI_MODEL_RPM, 'GEMINI_MODEL_RPM'),
     tpmByModel: limitsMap(env.GEMINI_MODEL_TPM, 'GEMINI_MODEL_TPM'),
     rpdByModel: limitsMap(env.GEMINI_MODEL_RPD, 'GEMINI_MODEL_RPD'),
-    concurrency: integerOption(env.GEMINI_CONCURRENCY, 4, 'GEMINI_CONCURRENCY', 16),
+    concurrency: integerOption(env.GEMINI_CONCURRENCY, GEMINI_DEFAULT_CONCURRENCY, 'GEMINI_CONCURRENCY', 16),
     maxRequests: integerOption(env.GEMINI_MAX_REQUESTS, Number.MAX_SAFE_INTEGER, 'GEMINI_MAX_REQUESTS'),
   };
 }

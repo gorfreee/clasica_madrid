@@ -6,7 +6,9 @@ import {
   type AiClassifier, type AiProviderStats,
 } from './ai.ts';
 import { AI_CLASSIFIER_SYSTEM_PROMPT, buildAiClassifierUserMessage } from './ai-prompt.ts';
-import { GEMINI_DEFAULT_LIMITS, intervalMsForRpm, resolveGeminiModels, type ModelLimits } from './gemini-config.ts';
+import {
+  GEMINI_DEFAULT_CONCURRENCY, GEMINI_DEFAULT_LIMITS, intervalMsForRpm, resolveGeminiModels, type ModelLimits,
+} from './gemini-config.ts';
 import { GeminiState, hashInput, nextQuotaReset } from './gemini-state.ts';
 
 export * from './gemini-config.ts';
@@ -74,7 +76,7 @@ export class GeminiClassifier implements AiClassifier {
     this.options = { ...options, apiKey: options.apiKey.trim() };
     this.models = resolveGeminiModels(options);
     this.classifyBudgetMs = options.classifyBudgetMs ?? GEMINI_CLASSIFY_BUDGET_MS;
-    this.concurrency = options.concurrency ?? 4;
+    this.concurrency = options.concurrency ?? GEMINI_DEFAULT_CONCURRENCY;
     if (!Number.isInteger(this.concurrency) || this.concurrency < 1 || this.concurrency > 16) {
       throw new Error('Gemini concurrency debe estar entre 1 y 16');
     }

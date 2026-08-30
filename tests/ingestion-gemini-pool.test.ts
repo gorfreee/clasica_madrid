@@ -4,7 +4,10 @@ import path from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AiRateLimitedError, type AiCallDiagnostics } from '../src/ingestion/classification/ai.ts';
 import { classifyObserved } from '../src/ingestion/classification/enrich.ts';
-import { GeminiClassifier, resolveGeminiConfig, resolveRetryAfterMs, type GeminiClassifierOptions } from '../src/ingestion/classification/gemini.ts';
+import {
+  GeminiClassifier, GEMINI_DEFAULT_MODELS, resolveGeminiConfig, resolveRetryAfterMs,
+  type GeminiClassifierOptions,
+} from '../src/ingestion/classification/gemini.ts';
 import { nextQuotaReset, quotaDay } from '../src/ingestion/classification/gemini-state.ts';
 import { parseIngestArgs } from '../src/cli/ingest-args.ts';
 import { parseLocalAiEnv } from '../src/cli/load-local-env.ts';
@@ -137,14 +140,56 @@ describe('persistent cache and recovery', () => {
 });
 
 describe('quota accounting and bounded scheduling', () => {
-  it('uses all four configured models without waiting for a 429', async () => {
+  it('uses every default-pool model without waiting for a 429', async () => {
     const models: string[] = [];
     const p = provider({ model: undefined, defaultRpm: undefined, fetch: async (_url, init) => {
       models.push(JSON.parse(String(init?.body)).model);
       return response();
     } });
-    for (let i = 0; i < 4; i++) await p.classify({ ...facts, title: `Concierto ${i}` });
-    expect(models).toEqual(['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemma-4-26b-a4b-it', 'gemma-4-31b-it']);
+    for (let i = 0; i < GEMINI_DEFAULT_MODELS.length; i++) {
+      await p.classify({ ...facts, title: `Concierto ${i}` });
+    }
+    expect(models).toEqual([...GEMINI_DEFAULT_MODELS]);
+  });
+
+  it('moves to later models while preferred ones wait on RPM', async () => {
+    const time = clock();
+    const start = time.now();
+    const sent: Array<{ model: string; at: number }> = [];
+    const p = provider({
+      models: ['gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash-lite'],
+      defaultRpm: undefined,
+      clock: time,
+      fetch: async (_url, init) => {
+        sent.push({ model: JSON.parse(String(init?.body)).model, at: time.now() });
+        return response();
+      },
+    });
+    for (let i = 0; i < 3; i++) await p.classify({ ...facts, title: `Concierto ${i}` });
+    expect(sent).toEqual([
+      { model: 'gemini-3.7-flash', at: start },
+      { model: 'gemini-3.6-flash', at: start },
+      { model: 'gemini-3.5-flash-lite', at: start },
+    ]);
+  });
+
+  it('treats a 20 RPD model as 18 internal daily requests before moving on', async () => {
+    const time = clock();
+    const sent: string[] = [];
+    const p = provider({
+      models: ['gemini-3.7-flash', 'gemini-3.6-flash'],
+      clock: time,
+      fetch: async (_url, init) => {
+        sent.push(JSON.parse(String(init?.body)).model);
+        return response();
+      },
+    });
+    for (let i = 0; i < 19; i++) {
+      await p.classify({ ...facts, title: `Concierto ${i}` });
+      time.set(time.now() + 1);
+    }
+    expect(sent.slice(0, 18).every((model) => model === 'gemini-3.7-flash')).toBe(true);
+    expect(sent[18]).toBe('gemini-3.6-flash');
   });
 
   it('persists RPM and daily reservations across restarts, including failed requests', async () => {
@@ -278,7 +323,7 @@ describe('concurrency and cancellation', () => {
     const p = provider({ clock: undefined, concurrency: 2, model: undefined, fetch: async (_url, init) => {
       active++; peak = Math.max(peak, active);
       const model = JSON.parse(String(init?.body)).model;
-      await new Promise((resolve) => setTimeout(resolve, model === 'gemini-3.1-flash-lite' ? 50 : 10));
+      await new Promise((resolve) => setTimeout(resolve, model === 'gemini-3.7-flash' ? 50 : 10));
       active--;
       return response();
     } });
@@ -291,8 +336,8 @@ describe('concurrency and cancellation', () => {
     await finished;
     expect(peak).toBe(2);
     expect(events).toHaveLength(5);
-    expect(events.find((e) => e.title === 'Concierto 0')?.diagnostics.model).toBe('gemini-3.1-flash-lite');
-    expect(events.find((e) => e.title === 'Concierto 1')?.diagnostics.model).toBe('gemini-3.5-flash-lite');
+    expect(events.find((e) => e.title === 'Concierto 0')?.diagnostics.model).toBe('gemini-3.7-flash');
+    expect(events.find((e) => e.title === 'Concierto 1')?.diagnostics.model).toBe('gemini-3.6-flash');
     expect(events.every((e) => e.diagnostics.attempts === 1)).toBe(true);
   });
 
