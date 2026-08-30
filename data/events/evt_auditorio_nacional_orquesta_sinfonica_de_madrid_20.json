@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_orquesta_sinfonica_de_madrid_20",
+  "slug": "orquesta-sinfonica-de-madrid-alexander-prior",
+  "title": "Orquesta Sinfónica de Madrid. Alexander Prior",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_orquesta_sinfonica_de_madrid_20_01",
+      "date": "2026-10-23",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Sinfónica de Madrid"
+    },
+    {
+      "name": "Alexander Prior"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/orquesta-sinfonica-de-madrid-20",
+      "checkedAt": "2026-08-30",
+      "externalId": "orquesta-sinfonica-de-madrid-20"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

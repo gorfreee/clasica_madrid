@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ocne_satelite_01_evoluciones",
+  "slug": "ocne-satelite-01-evoluciones",
+  "title": "OCNE. Satélite 01. Evoluciones",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ocne_satelite_01_evoluciones_01",
+      "date": "2026-09-29",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Áurea Corda"
+    },
+    {
+      "name": "Pablo Martín"
+    },
+    {
+      "name": "Laura Balboa"
+    },
+    {
+      "name": "Martí Varela"
+    },
+    {
+      "name": "Montserrat Egea"
+    },
+    {
+      "name": "Jorge Martínez"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Luigi Boccherini"
+    },
+    {
+      "name": "George Onslow"
+    },
+    {
+      "name": "Darius Milhaud"
+    }
+  ],
+  "works": [
+    {
+      "title": "Quinteto de cuerdas en Re Mayor, G. 339",
+      "composerName": "Luigi Boccherini"
+    },
+    {
+      "title": "Quinteto de cuerdas en Mi menor núm. 30, op. 74",
+      "composerName": "George Onslow"
+    },
+    {
+      "title": "Quinteto de cuerdas núm. 2, op. 316",
+      "composerName": "Darius Milhaud"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-01-evoluciones",
+      "checkedAt": "2026-08-30",
+      "externalId": "ocne-satelite-01-evoluciones"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

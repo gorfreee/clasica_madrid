@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ibermusica_london_philharmonic_orchestra_12",
+  "slug": "ibermusica-london-philharmonic-orchestra-2",
+  "title": "Ibermúsica. London Philharmonic Orchestra",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ibermusica_london_philharmonic_orchestra_12_01",
+      "date": "2026-10-29",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "London Philharmonic Orchestra"
+    },
+    {
+      "name": "Edward Gardner"
+    },
+    {
+      "name": "Julia Fischer"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-london-philharmonic-orchestra-12",
+      "checkedAt": "2026-08-30",
+      "externalId": "ibermusica-london-philharmonic-orchestra-12"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

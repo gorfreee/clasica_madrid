@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_opera_il_trovatore_de_verdi",
+  "slug": "excelentia-opera-il-trovatore-de-verdi",
+  "title": "Excelentia. Ópera: IL Trovatore de Verdi",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_opera_il_trovatore_de_verdi_01",
+      "date": "2026-11-08",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "opera",
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-opera-il-trovatore-de-verdi",
+      "checkedAt": "2026-08-30",
+      "externalId": "excelentia-opera-il-trovatore-de-verdi"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

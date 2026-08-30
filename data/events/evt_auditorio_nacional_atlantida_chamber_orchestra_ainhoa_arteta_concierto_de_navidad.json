@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_atlantida_chamber_orchestra_ainhoa_arteta_concierto_de_navidad",
+  "slug": "atlantida-chamber-orchestra-ainhoa-arteta-concierto-de-navidad",
+  "title": "Atlántida Chamber Orchestra. Ainhoa Arteta: Concierto de Navidad",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_atlantida_chamber_orchestra_ainhoa_arteta_concierto_de_navidad_01",
+      "date": "2026-12-26",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Atlántida Chamber Orchestra"
+    },
+    {
+      "name": "Ainhoa Arteta"
+    },
+    {
+      "name": "Jasper Chang"
+    },
+    {
+      "name": "Manuel Tévar",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic",
+    "chamber",
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/atlantida-chamber-orchestra-ainhoa-arteta-concierto-de-navidad",
+      "checkedAt": "2026-08-30",
+      "externalId": "atlantida-chamber-orchestra-ainhoa-arteta-concierto-de-navidad"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

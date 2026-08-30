@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ocne_satelite_04_paisajes_sonoros",
+  "slug": "ocne-satelite-04-paisajes-sonoros",
+  "title": "OCNE. Satélite 04 Paisajes Sonoros",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ocne_satelite_04_paisajes_sonoros_01",
+      "date": "2026-11-03",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Galatea Ensemble"
+    },
+    {
+      "name": "Laura Salcedo Rubio"
+    },
+    {
+      "name": "Joaquín Fernández Díaz"
+    },
+    {
+      "name": "Coline-Marie Orliac"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Luigi Maurizio"
+    },
+    {
+      "name": "Mijaíl Glinka"
+    },
+    {
+      "name": "Jacques Ibert"
+    }
+  ],
+  "works": [
+    {
+      "title": "Tedeschi Suite op. 46, para arpa, violín y violonchelo",
+      "composerName": "Luigi Maurizio"
+    },
+    {
+      "title": "Tres canciones rusas, para arpa, violín y violonchelo",
+      "composerName": "Mijaíl Glinka"
+    },
+    {
+      "title": "Trío for violín, violonchelo y arpa",
+      "composerName": "Jacques Ibert"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-04-paisajes-sonoros",
+      "checkedAt": "2026-08-30",
+      "externalId": "ocne-satelite-04-paisajes-sonoros"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

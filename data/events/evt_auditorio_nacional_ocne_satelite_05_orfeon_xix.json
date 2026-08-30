@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ocne_satelite_05_orfeon_xix",
+  "slug": "ocne-satelite-05-orfeon-xix",
+  "title": "OCNE. Satélite 05. Orfeón XIX",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ocne_satelite_05_orfeon_xix_01",
+      "date": "2026-11-17",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "ARS ATLÁNTICA"
+    },
+    {
+      "name": "Manuel Vilas"
+    },
+    {
+      "name": "Ariel Hernández"
+    },
+    {
+      "name": "Emiliano Cano"
+    },
+    {
+      "name": "Diego Blázquez"
+    },
+    {
+      "name": "César Hualde"
+    },
+    {
+      "name": "Enrique Sánchez-Ramos"
+    },
+    {
+      "name": "José Bernardo"
+    },
+    {
+      "name": "Ales Pérez"
+    },
+    {
+      "name": "Pedro Llarena"
+    },
+    {
+      "name": "Marija Pendeva"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-05-orfeon-xix",
+      "checkedAt": "2026-08-30",
+      "externalId": "ocne-satelite-05-orfeon-xix"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

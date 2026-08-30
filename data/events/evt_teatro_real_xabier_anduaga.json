@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_real_xabier_anduaga",
+  "slug": "xabier-anduaga",
+  "title": "Xabier Anduaga",
+  "status": "scheduled",
+  "venueId": "ven_teatro_real",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_real_xabier_anduaga_01",
+      "date": "2026-10-04",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic",
+    "classical"
+  ],
+  "formats": [
+    "opera",
+    "recital"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_teatro_real",
+      "url": "https://www.teatroreal.es/es/espectaculo/xabier-anduaga",
+      "checkedAt": "2026-08-30",
+      "externalId": "xabier-anduaga"
+    }
+  ],
+  "primarySourceId": "src_teatro_real",
+  "lastVerifiedAt": "2026-08-30"
+}

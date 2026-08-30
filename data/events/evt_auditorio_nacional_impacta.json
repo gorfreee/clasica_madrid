@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_impacta",
+  "slug": "impacta-requiem-de-mozart",
+  "title": "Impacta. Réquiem de Mozart",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_impacta_01",
+      "date": "2026-11-01",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Camerata Salzburg"
+    },
+    {
+      "name": "Vox Luminis"
+    },
+    {
+      "name": "Lionel Meunier",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "classical"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/impacta",
+      "checkedAt": "2026-08-30",
+      "externalId": "impacta"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

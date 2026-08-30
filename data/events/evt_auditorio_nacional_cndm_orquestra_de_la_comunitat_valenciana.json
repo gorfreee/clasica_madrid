@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_cndm_orquestra_de_la_comunitat_valenciana",
+  "slug": "cndm-orquestra-de-la-comunitat-valenciana",
+  "title": "CNDM. Orquestra de la Comunitat Valenciana",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_cndm_orquestra_de_la_comunitat_valenciana_01",
+      "date": "2026-11-15",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic",
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-orquestra-de-la-comunitat-valenciana",
+      "checkedAt": "2026-08-30",
+      "externalId": "cndm-orquestra-de-la-comunitat-valenciana"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

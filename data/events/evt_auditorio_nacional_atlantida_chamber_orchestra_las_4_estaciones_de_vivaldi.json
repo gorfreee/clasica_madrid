@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_atlantida_chamber_orchestra_las_4_estaciones_de_vivaldi",
+  "slug": "atlantida-chamber-orchestra-las-4-estaciones-de-vivaldi",
+  "title": "Atlántida Chamber Orchestra. Las 4 Estaciones de Vivaldi",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_atlantida_chamber_orchestra_las_4_estaciones_de_vivaldi_01",
+      "date": "2026-11-08",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Atlántida Chamber Orchestra"
+    },
+    {
+      "name": "Maria Solozobova"
+    },
+    {
+      "name": "Alberto Urroz"
+    },
+    {
+      "name": "Manuel Tévar",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/atlantida-chamber-orchestra-las-4-estaciones-de-vivaldi",
+      "checkedAt": "2026-08-30",
+      "externalId": "atlantida-chamber-orchestra-las-4-estaciones-de-vivaldi"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

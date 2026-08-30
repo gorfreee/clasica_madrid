@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_la_filarmonica_oratorio_de_navidad_1",
+  "slug": "cndm-la-filarmonica-oratorio-de-navidad",
+  "title": "CNDM. La Filarmónica. Oratorio de Navidad",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_la_filarmonica_oratorio_de_navidad_1_01",
+      "date": "2026-12-17",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "COLLEGIUM VOCALE GENT"
+    },
+    {
+      "name": "PHILIPPE HERREWEGHE",
+      "role": "conductor"
+    },
+    {
+      "name": "MARIE-LUISE WERNEBURG"
+    },
+    {
+      "name": "ALEX POTTER"
+    },
+    {
+      "name": "GUY CUTTING"
+    },
+    {
+      "name": "FLORIAN STÖRTZ"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach (1685-1750)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Oratorio de Navidad, BWV 248 (1734)",
+      "composerName": "Johann Sebastian Bach (1685-1750)"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/la-filarmonica-oratorio-de-navidad-1",
+      "checkedAt": "2026-08-30",
+      "externalId": "la-filarmonica-oratorio-de-navidad-1"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

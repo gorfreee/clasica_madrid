@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_impacta_cecilia_bartoli_y_lang_lang",
+  "slug": "impacta-cecilia-bartoli-y-lang-lang",
+  "title": "Impacta. Cecilia Bartoli y Lang Lang",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_impacta_cecilia_bartoli_y_lang_lang_01",
+      "date": "2026-11-29",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Cecilia Bartoli"
+    },
+    {
+      "name": "Lang Lang"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/impacta-cecilia-bartoli-y-lang-lang",
+      "checkedAt": "2026-08-30",
+      "externalId": "impacta-cecilia-bartoli-y-lang-lang"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

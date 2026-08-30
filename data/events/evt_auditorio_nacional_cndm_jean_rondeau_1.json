@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_cndm_jean_rondeau_1",
+  "slug": "cndm-jean-rondeau-2",
+  "title": "CNDM. Jean Rondeau",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_cndm_jean_rondeau_1_01",
+      "date": "2026-12-18",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "JEAN RONDEAU"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-jean-rondeau-1",
+      "checkedAt": "2026-08-30",
+      "externalId": "cndm-jean-rondeau-1"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

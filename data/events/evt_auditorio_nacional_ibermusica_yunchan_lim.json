@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ibermusica_yunchan_lim",
+  "slug": "ibermusica-yunchan-lim",
+  "title": "Ibermúsica. Yunchan Lim",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ibermusica_yunchan_lim_01",
+      "date": "2026-12-03",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Yunchan Lim"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "classical"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-yunchan-lim",
+      "checkedAt": "2026-08-30",
+      "externalId": "ibermusica-yunchan-lim"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

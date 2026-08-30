@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_grupo_concertante_talia_ciclo_batuta_septima_sinfonia_de_beethoven",
+  "slug": "grupo-concertante-talia-ciclo-batuta-septima-sinfonia-de-beethoven",
+  "title": "Grupo Concertante Talía. Ciclo Batuta. Séptima Sinfonía de Beethoven",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_grupo_concertante_talia_ciclo_batuta_septima_sinfonia_de_beethoven_01",
+      "date": "2026-11-07",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Metropolitana de Madrid"
+    },
+    {
+      "name": "Silvia Sanz",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [
+    {
+      "title": "Sinfonía nº 7 (L. van Beethoven)"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/grupo-concertante-talia-ciclo-batuta-septima-sinfonia-de-beethoven",
+      "checkedAt": "2026-08-30",
+      "externalId": "grupo-concertante-talia-ciclo-batuta-septima-sinfonia-de-beethoven"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

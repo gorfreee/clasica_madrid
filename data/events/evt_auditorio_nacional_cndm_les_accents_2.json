@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_cndm_les_accents_2",
+  "slug": "cndm-les-accents",
+  "title": "CNDM. Les Accents",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_cndm_les_accents_2_01",
+      "date": "2026-11-22",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "LES ACCENTS"
+    },
+    {
+      "name": "THIBAULT NOALLY"
+    },
+    {
+      "name": "MAGDALENA KOŽENÁ"
+    },
+    {
+      "name": "JULIA LEZHNEVA"
+    },
+    {
+      "name": "CHRISTOPHE DUMAUX"
+    },
+    {
+      "name": "ADÈLE CHARVET"
+    },
+    {
+      "name": "NICOLAS BROOYMANS"
+    },
+    {
+      "name": "ADRIEN FOURNAISON"
+    },
+    {
+      "name": "PAUL FIGUIER"
+    }
+  ],
+  "composers": [
+    {
+      "name": "George Frideric Haendel (1685-1759)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Agrippina, HWV 6 (1709)",
+      "composerName": "George Frideric Haendel (1685-1759)"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-les-accents-2",
+      "checkedAt": "2026-08-30",
+      "externalId": "cndm-les-accents-2"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

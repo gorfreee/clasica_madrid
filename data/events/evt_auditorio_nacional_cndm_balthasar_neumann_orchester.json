@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_cndm_balthasar_neumann_orchester",
+  "slug": "cndm-balthasar-neumann-orchester",
+  "title": "CNDM. Balthasar-Neumann-Orchester",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_cndm_balthasar_neumann_orchester_01",
+      "date": "2026-11-05",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "BALTHASAR-NEUMANN-ORCHESTER"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-balthasar-neumann-orchester",
+      "checkedAt": "2026-08-30",
+      "externalId": "cndm-balthasar-neumann-orchester"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

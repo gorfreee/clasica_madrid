@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_concierto_piano_schumann_y_beethoven_num_7",
+  "slug": "excelentia-concierto-piano-schumann-y-beethoven-num-7",
+  "title": "Excelentia. Concierto Piano Schumann y Beethoven Núm. 7",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_concierto_piano_schumann_y_beethoven_num_7_01",
+      "date": "2026-10-08",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Clásica Santa Cecilia"
+    },
+    {
+      "name": "Sebastian Lang-Lessing ·",
+      "role": "conductor"
+    },
+    {
+      "name": "Zee Zee"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic",
+    "classical",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic",
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-concierto-piano-schumann-y-beethoven-num-7",
+      "checkedAt": "2026-08-30",
+      "externalId": "excelentia-concierto-piano-schumann-y-beethoven-num-7"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

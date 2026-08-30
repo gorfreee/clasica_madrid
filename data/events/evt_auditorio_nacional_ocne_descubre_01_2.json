@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ocne_descubre_01_2",
+  "slug": "ocne-descubre-01",
+  "title": "OCNE. Descubre 01",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ocne_descubre_01_2_01",
+      "date": "2026-10-11",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta y Coro Nacionalesde España"
+    },
+    {
+      "name": "Irene Delgado-Jiménez",
+      "role": "conductor"
+    },
+    {
+      "name": "Sofía Martínez Villar"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Lili Boulanger"
+    },
+    {
+      "name": "Ludwig van Beethoven"
+    }
+  ],
+  "works": [
+    {
+      "title": "Salmo 130, «Desde las profundidades»",
+      "composerName": "Lili Boulanger"
+    },
+    {
+      "title": "Sinfonía núm. 2 en Re mayor, op. 36",
+      "composerName": "Ludwig van Beethoven"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-descubre-01-2",
+      "checkedAt": "2026-08-30",
+      "externalId": "ocne-descubre-01-2"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

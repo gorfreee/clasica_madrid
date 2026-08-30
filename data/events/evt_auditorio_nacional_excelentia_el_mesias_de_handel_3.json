@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_el_mesias_de_handel_3",
+  "slug": "excelentia-el-mesias-de-handel",
+  "title": "Excelentia. El Mesías de Händel",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_el_mesias_de_handel_3_01",
+      "date": "2026-12-23",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Sociedad Coral Excelentia de Madrid"
+    },
+    {
+      "name": "Orquesta Clásica Santa Cecilia"
+    },
+    {
+      "name": "Kynan Johns",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "choral",
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-el-mesias-de-handel-3",
+      "checkedAt": "2026-08-30",
+      "externalId": "excelentia-el-mesias-de-handel-3"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

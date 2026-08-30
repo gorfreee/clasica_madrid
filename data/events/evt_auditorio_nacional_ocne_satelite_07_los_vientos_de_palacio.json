@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ocne_satelite_07_los_vientos_de_palacio",
+  "slug": "ocne-satelite-07-los-vientos-de-palacio",
+  "title": "OCNE. Satélite 07 Los Vientos de Palacio",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ocne_satelite_07_los_vientos_de_palacio_01",
+      "date": "2026-12-01",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Camerata Federici"
+    },
+    {
+      "name": "Mario Pérez"
+    },
+    {
+      "name": "Irene Val"
+    },
+    {
+      "name": "Gabriel Sevilla"
+    },
+    {
+      "name": "Jose María Ferrero"
+    },
+    {
+      "name": "Vicente Palomares"
+    },
+    {
+      "name": "Javier Bonet"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "classical"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-07-los-vientos-de-palacio",
+      "checkedAt": "2026-08-30",
+      "externalId": "ocne-satelite-07-los-vientos-de-palacio"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

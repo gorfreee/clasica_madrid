@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_fa90483449f2427f866ada260393ffdf",
+  "slug": "ocne-sinfonico-05",
+  "title": "OCNE. Sinfónico 05",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_fa90483449f2427f866ada260393ffdf_01",
+      "date": "2026-11-06",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_fa90483449f2427f866ada260393ffdf_02",
+      "date": "2026-11-07",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_fa90483449f2427f866ada260393ffdf_03",
+      "date": "2026-11-08",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ludovic Morlot",
+      "role": "conductor"
+    },
+    {
+      "name": "Anne Akiko Meyers"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Alberto Ginastera"
+    },
+    {
+      "name": "Arturo Márquez"
+    },
+    {
+      "name": "Antonín Dvořák"
+    }
+  ],
+  "works": [
+    {
+      "title": "Glosses sobre temes de Pau Casals",
+      "composerName": "Alberto Ginastera"
+    },
+    {
+      "title": "Fandango, para violín y orquesta",
+      "composerName": "Arturo Márquez"
+    },
+    {
+      "title": "Sinfonía núm. 9en Mi menor, op. 95, «Del Nuevo Mundo»",
+      "composerName": "Antonín Dvořák"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-05-1",
+      "checkedAt": "2026-08-30",
+      "externalId": "fa90483449f2427f866ada260393ffdf"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

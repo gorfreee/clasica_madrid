@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_orquesta_sinfonica_de_madrid_juanjo_mena_6",
+  "slug": "orquesta-sinfonica-de-madrid-juanjo-mena",
+  "title": "Orquesta Sinfónica de Madrid. Juanjo Mena",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_orquesta_sinfonica_de_madrid_juanjo_mena_6_01",
+      "date": "2026-12-22",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Sinfónica de Madrid"
+    },
+    {
+      "name": "CORO NACIONAL DE ESPAÑA"
+    },
+    {
+      "name": "Miguel Ángel García Cañamero, DIRECTOR de CORO"
+    },
+    {
+      "name": "Juanjo Mena"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    }
+  ],
+  "works": [
+    {
+      "title": "(Edición 37°)"
+    },
+    {
+      "title": "Sinfonía n.° 9 en re menor “Coral”, op. 125",
+      "composerName": "Ludwig van Beethoven"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic",
+    "choral",
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/orquesta-sinfonica-de-madrid-juanjo-mena-6",
+      "checkedAt": "2026-08-30",
+      "externalId": "orquesta-sinfonica-de-madrid-juanjo-mena-6"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

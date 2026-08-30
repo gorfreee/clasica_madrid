@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_upm_musica_francesa_debussy_y_ravel",
+  "slug": "upm-musica-francesa-debussy-y-ravel",
+  "title": "UPM. Música Francesa: Debussy y Ravel",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_upm_musica_francesa_debussy_y_ravel_01",
+      "date": "2026-11-21",
+      "time": "22:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "ORQUESTA FILARMONÍA DE MADRID"
+    },
+    {
+      "name": "Pascual Osa",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/upm-musica-francesa-debussy-y-ravel",
+      "checkedAt": "2026-08-30",
+      "externalId": "upm-musica-francesa-debussy-y-ravel"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

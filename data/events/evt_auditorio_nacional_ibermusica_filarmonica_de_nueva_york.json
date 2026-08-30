@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ibermusica_filarmonica_de_nueva_york",
+  "slug": "ibermusica-filarmonica-de-nueva-york",
+  "title": "Ibermúsica. Filarmónica de Nueva York",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ibermusica_filarmonica_de_nueva_york_01",
+      "date": "2026-10-13",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Filarmónica de Nueva York"
+    },
+    {
+      "name": "Orfeó Català"
+    },
+    {
+      "name": "Gustavo Dudamel"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-filarmonica-de-nueva-york",
+      "checkedAt": "2026-08-30",
+      "externalId": "ibermusica-filarmonica-de-nueva-york"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

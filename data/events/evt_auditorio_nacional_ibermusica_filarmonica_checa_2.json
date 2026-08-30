@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ibermusica_filarmonica_checa_2",
+  "slug": "ibermusica-filarmonica-checa",
+  "title": "Ibermúsica. Filarmónica Checa",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ibermusica_filarmonica_checa_2_01",
+      "date": "2026-11-11",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Filarmónica Checa"
+    },
+    {
+      "name": "Semyon Bychkov"
+    },
+    {
+      "name": "Behzod Abduraimov"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-filarmonica-checa-2",
+      "checkedAt": "2026-08-30",
+      "externalId": "ibermusica-filarmonica-checa-2"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

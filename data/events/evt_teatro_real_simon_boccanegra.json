@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_real_simon_boccanegra",
+  "slug": "simon-boccanegra",
+  "title": "Simon Boccanegra",
+  "status": "scheduled",
+  "venueId": "ven_teatro_real",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_real_simon_boccanegra_01",
+      "date": "2026-12-16",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_simon_boccanegra_02",
+      "date": "2026-12-19",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_simon_boccanegra_03",
+      "date": "2026-12-20",
+      "time": "18:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_simon_boccanegra_04",
+      "date": "2026-12-23",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_simon_boccanegra_05",
+      "date": "2026-12-26",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_simon_boccanegra_06",
+      "date": "2026-12-27",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "opera"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_teatro_real",
+      "url": "https://www.teatroreal.es/es/espectaculo/simon-boccanegra",
+      "checkedAt": "2026-08-30",
+      "externalId": "simon-boccanegra"
+    }
+  ],
+  "primarySourceId": "src_teatro_real",
+  "lastVerifiedAt": "2026-08-30"
+}

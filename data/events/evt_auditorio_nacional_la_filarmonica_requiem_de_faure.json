@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_la_filarmonica_requiem_de_faure",
+  "slug": "la-filarmonica-requiem-de-faure",
+  "title": "La Filarmónica. Réquiem de Fauré",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_la_filarmonica_requiem_de_faure_01",
+      "date": "2026-11-17",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Da Camera"
+    },
+    {
+      "name": "Coro Barcelona Ars Nova"
+    },
+    {
+      "name": "Núria Rial"
+    },
+    {
+      "name": "José Antonio López"
+    },
+    {
+      "name": "Mireia Barrera",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/la-filarmonica-requiem-de-faure",
+      "checkedAt": "2026-08-30",
+      "externalId": "la-filarmonica-requiem-de-faure"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

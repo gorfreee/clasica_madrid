@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_orcam_sinfonico_3_amanecer_en_el_recuerdo",
+  "slug": "orcam-sinfonico-3-amanecer-en-el-recuerdo",
+  "title": "ORCAM. Sinfónico 3. Amanecer en el Recuerdo",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_orcam_sinfonico_3_amanecer_en_el_recuerdo_01",
+      "date": "2026-11-24",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta y Coro de la Comunidad de Madrid"
+    },
+    {
+      "name": "Arantza Ezenarro"
+    },
+    {
+      "name": "Silvia Tro Santafé"
+    },
+    {
+      "name": "Filip Filipović"
+    },
+    {
+      "name": "Marko Mimica"
+    },
+    {
+      "name": "Miquel Ortega, DIRECTOR CORO"
+    },
+    {
+      "name": "Guy Braunstein",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-sinfonico-3-amanecer-en-el-recuerdo",
+      "checkedAt": "2026-08-30",
+      "externalId": "orcam-sinfonico-3-amanecer-en-el-recuerdo"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_cndm_cuarteto_casals_4",
+  "slug": "cndm-cuarteto-casals",
+  "title": "CNDM. Cuarteto Casals",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_cndm_cuarteto_casals_4_01",
+      "date": "2026-12-10",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "CUARTETO CASALS"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Franz Joseph Haydn (1732-1809)"
+    },
+    {
+      "name": "Raquel García-Tomás (1984)"
+    },
+    {
+      "name": "Felix Mendelssohn (1809-1847)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Cuarteto de cuerda en fa menor, op. 20, n.º 5 (1772)",
+      "composerName": "Franz Joseph Haydn (1732-1809)"
+    },
+    {
+      "title": "Estreno absoluto. Obra encargo del CNDM, la Kölner Philharmonie y la Musikverein Wien *+ (2026)",
+      "composerName": "Raquel García-Tomás (1984)"
+    },
+    {
+      "title": "Cuarteto de cuerda n.º 3 en re mayor, op. 44, n.º 1 (1838)",
+      "composerName": "Felix Mendelssohn (1809-1847)"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic",
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-cuarteto-casals-4",
+      "checkedAt": "2026-08-30",
+      "externalId": "cndm-cuarteto-casals-4"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

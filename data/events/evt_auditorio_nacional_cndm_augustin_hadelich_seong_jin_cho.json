@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_cndm_augustin_hadelich_seong_jin_cho",
+  "slug": "cndm-augustin-hadelich-seong-jin-cho",
+  "title": "CNDM. Augustin Hadelich & Seong-Jin Cho",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_cndm_augustin_hadelich_seong_jin_cho_01",
+      "date": "2026-11-13",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "AUGUSTIN HADELICH"
+    },
+    {
+      "name": "SEONG-JIN CHO"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johannes Brahms (1833-1897)"
+    },
+    {
+      "name": "Leoš Janáček (1854-1928)"
+    },
+    {
+      "name": "Amy Beach (1867-1944)"
+    },
+    {
+      "name": "Serguéi Prokófiev (1891-1953)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata para violín y piano n.º 1 en sol mayor, op. 78 (1878-1879)",
+      "composerName": "Johannes Brahms (1833-1897)"
+    },
+    {
+      "title": "Sonata para violín (1914-1915, rev. 1916-1922)",
+      "composerName": "Leoš Janáček (1854-1928)"
+    },
+    {
+      "title": "Romance para violín y piano, op. 23 (1893)",
+      "composerName": "Amy Beach (1867-1944)"
+    },
+    {
+      "title": "Sonata para violín y piano n.º 2 en re mayor, op. 94a (1943-1944)",
+      "composerName": "Serguéi Prokófiev (1891-1953)"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-augustin-hadelich-seong-jin-cho",
+      "checkedAt": "2026-08-30",
+      "externalId": "cndm-augustin-hadelich-seong-jin-cho"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_violin_mendelssohn_y_scheherazade",
+  "slug": "excelentia-violin-mendelssohn-y-scheherazade",
+  "title": "Excelentia. Violín Mendelssohn y Scheherazade",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_violin_mendelssohn_y_scheherazade_01",
+      "date": "2026-10-27",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Clásica Santa Cecilia"
+    },
+    {
+      "name": "Julian Kuerti",
+      "role": "conductor"
+    },
+    {
+      "name": "Veriko Tchumburidze"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-violin-mendelssohn-y-scheherazade",
+      "checkedAt": "2026-08-30",
+      "externalId": "excelentia-violin-mendelssohn-y-scheherazade"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

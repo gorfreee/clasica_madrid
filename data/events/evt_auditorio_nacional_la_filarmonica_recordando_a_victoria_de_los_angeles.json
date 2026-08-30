@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_la_filarmonica_recordando_a_victoria_de_los_angeles",
+  "slug": "la-filarmonica-recordando-a-victoria-de-los-angeles",
+  "title": "La Filarmónica. Recordando a Victoria de los Ángeles",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_la_filarmonica_recordando_a_victoria_de_los_angeles_01",
+      "date": "2026-12-15",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Elionor Martínez"
+    },
+    {
+      "name": "Olivia Zaugg"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/la-filarmonica-recordando-a-victoria-de-los-angeles",
+      "checkedAt": "2026-08-30",
+      "externalId": "la-filarmonica-recordando-a-victoria-de-los-angeles"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

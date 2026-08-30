@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ibermusica_filarmonica_de_nueva_york_1",
+  "slug": "ibermusica-filarmonica-de-nueva-york-2",
+  "title": "Ibermúsica. Filarmónica de Nueva York",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ibermusica_filarmonica_de_nueva_york_1_01",
+      "date": "2026-10-14",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Filarmónica de Nueva York"
+    },
+    {
+      "name": "Gustavo Dudamel"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic",
+    "contemporary"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-filarmonica-de-nueva-york-1",
+      "checkedAt": "2026-08-30",
+      "externalId": "ibermusica-filarmonica-de-nueva-york-1"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

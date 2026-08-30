@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_chopin_genio_del_piano",
+  "slug": "excelentia-chopin-genio-del-piano",
+  "title": "Excelentia. Chopin, Genio del Piano",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_chopin_genio_del_piano_01",
+      "date": "2026-10-10",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Clásica Santa Cecilia"
+    },
+    {
+      "name": "Andrei Yaroshinski"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Mozart"
+    },
+    {
+      "name": "Chopin"
+    }
+  ],
+  "works": [
+    {
+      "title": "Divertimento en Re mayor, K. 136 (Allegro)",
+      "composerName": "Mozart"
+    },
+    {
+      "title": "Concierto para piano y orquesta n.º 1",
+      "composerName": "Chopin"
+    },
+    {
+      "title": "Andante spianato y Gran Polonesa brillante, op. 22",
+      "composerName": "Chopin"
+    },
+    {
+      "title": "Concierto para piano y orquesta n.º 2",
+      "composerName": "Chopin"
+    }
+  ],
+  "eras": [
+    "classical"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-chopin-genio-del-piano",
+      "checkedAt": "2026-08-30",
+      "externalId": "excelentia-chopin-genio-del-piano"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

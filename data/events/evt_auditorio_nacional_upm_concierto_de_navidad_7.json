@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_upm_concierto_de_navidad_7",
+  "slug": "upm-concierto-de-navidad",
+  "title": "UPM. Concierto de Navidad",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_upm_concierto_de_navidad_7_01",
+      "date": "2026-12-12",
+      "time": "22:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "ORQUESTA FILARMÓNICA ESPAÑOLA"
+    },
+    {
+      "name": "CORO DE LA UNIVERSIDAD POLITÉCNICA DE MADRID"
+    },
+    {
+      "name": "Camila Oria"
+    },
+    {
+      "name": "Giselle Fundora"
+    },
+    {
+      "name": "Juan Antonio Sanabria"
+    },
+    {
+      "name": "Alejandro Von Büren"
+    },
+    {
+      "name": "Javier Corcuera Martínez",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/upm-concierto-de-navidad-7",
+      "checkedAt": "2026-08-30",
+      "externalId": "upm-concierto-de-navidad-7"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

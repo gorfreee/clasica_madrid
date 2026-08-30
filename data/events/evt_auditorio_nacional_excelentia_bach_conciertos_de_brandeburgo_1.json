@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_bach_conciertos_de_brandeburgo_1",
+  "slug": "excelentia-bach-conciertos-de-brandeburgo",
+  "title": "Excelentia. Bach: Conciertos de Brandeburgo",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_bach_conciertos_de_brandeburgo_1_01",
+      "date": "2026-10-17",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Clásica Santa Cecilia"
+    },
+    {
+      "name": "Luis Sánchez"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-bach-conciertos-de-brandeburgo-1",
+      "checkedAt": "2026-08-30",
+      "externalId": "excelentia-bach-conciertos-de-brandeburgo-1"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

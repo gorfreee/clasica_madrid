@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_uam",
+  "slug": "uam-spark-neue-kammermusik",
+  "title": "UAM. Spark. Neue Kammermusik",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_uam_01",
+      "date": "2026-10-24",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "SPARK"
+    },
+    {
+      "name": "Andre Ritter"
+    },
+    {
+      "name": "Christian Fritz"
+    },
+    {
+      "name": "Daniel Koschitzki"
+    },
+    {
+      "name": "Isabel García Castro"
+    },
+    {
+      "name": "Stefan Balazsovics"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "baroque",
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/uam",
+      "checkedAt": "2026-08-30",
+      "externalId": "uam"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}
