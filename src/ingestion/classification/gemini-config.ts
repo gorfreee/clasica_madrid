@@ -11,7 +11,18 @@ export const GEMINI_DEFAULT_LIMITS: Record<string, ModelLimits> = {
   'gemma-4-31b-it': { rpm: 24, tpm: 12_800, rpd: 12_960 },
   'gemma-4-26b-a4b-it': { rpm: 24, tpm: 12_800, rpd: 12_960 },
 };
-export const GEMINI_DEFAULT_MODELS = Object.keys(GEMINI_DEFAULT_LIMITS);
+// Keep legacy 2.5 quota defaults above for explicit overrides, but do not
+// schedule them by default: this project's API rejects them with permanent 404s.
+export const GEMINI_DEFAULT_MODELS = [
+  'gemini-3.7-flash',
+  'gemini-3.6-flash',
+  'gemini-3.5-flash',
+  'gemini-3-flash-preview',
+  'gemini-3.5-flash-lite',
+  'gemini-3.1-flash-lite',
+  'gemma-4-31b-it',
+  'gemma-4-26b-a4b-it',
+];
 export const GEMINI_DEFAULT_MODEL = GEMINI_DEFAULT_MODELS[0]!;
 export const GEMINI_DEFAULT_RPM = 12;
 export const GEMINI_DEFAULT_CONCURRENCY = 8;
@@ -24,19 +35,25 @@ export type GeminiThinkingConfig = { thinking_level: 'minimal' | 'low' };
  * Only send parameters the model family is known to accept; unsupported
  * fields would 400 and disable the model for the rest of the run.
  *
- * Gemma: no thinking params.
- * Gemini 3.x Flash (not Pro): `minimal`.
- * Gemini 2.5 Flash (not lite): `low` (no `minimal`; default thinking is on).
- * Gemini 2.5 Flash-Lite: omit (thinking is off by default).
+ * Explicit IDs only: future models must not inherit another model's levels.
+ * Interactions API levels: https://ai.google.dev/gemini-api/docs/thinking
+ * Gemma, 2.5 Flash-Lite and unknown IDs use the provider's default.
  */
 export function thinkingConfigForModel(model: string): GeminiThinkingConfig | undefined {
   const name = model.trim().toLowerCase();
-  if (!name || name.startsWith('gemma-')) return undefined;
-  if (/^gemini-3(\.|-|$)/.test(name) && !/\bpro\b/.test(name) && !name.includes('-pro-')) {
-    return { thinking_level: 'minimal' };
+  switch (name) {
+    case 'gemini-3.7-flash':
+    case 'gemini-2.5-flash':
+      return { thinking_level: 'low' };
+    case 'gemini-3.6-flash':
+    case 'gemini-3.5-flash':
+    case 'gemini-3-flash-preview':
+    case 'gemini-3.5-flash-lite':
+    case 'gemini-3.1-flash-lite':
+      return { thinking_level: 'minimal' };
+    default:
+      return undefined;
   }
-  if (name === 'gemini-2.5-flash') return { thinking_level: 'low' };
-  return undefined;
 }
 
 export type GeminiConfigEnv = {
