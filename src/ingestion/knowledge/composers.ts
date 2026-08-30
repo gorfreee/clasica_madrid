@@ -1,10 +1,12 @@
 import type { Era } from '../../lib/schemas/taxonomies.ts';
 
 /**
- * Musical knowledge base v1 (2026-08-29).
+ * Musical knowledge base v1.
  *
- * Deliberately small: composers observed in the golden set plus a few
- * canonical aliases needed for deterministic matching. Not an encyclopedia.
+ * Deliberately small: observed composers plus selected common repertoire.
+ * Aliases also scan editorial prose and can decide eligibility: prefer full
+ * names over ambiguous surnames. Not an encyclopedia or publication normalizer.
+ * Era assignments follow docs/classification-policy.md, not lifespan alone.
  */
 export type ComposerKnowledge = {
   canonicalName: string;
@@ -12,9 +14,39 @@ export type ComposerKnowledge = {
   eras: Era[];
 };
 
-export const COMPOSER_KNOWLEDGE_VERSION = '2026-08-29b';
+export const COMPOSER_KNOWLEDGE_VERSION = '2026-08-30';
 
 export const COMPOSERS: ComposerKnowledge[] = [
+  {
+    canonicalName: 'Guillaume de Machaut',
+    aliases: ['Guillaume de Machaut'],
+    eras: ['early'],
+  },
+  {
+    canonicalName: 'Josquin des Prez',
+    aliases: ['Josquin des Prez', 'Josquin Desprez'],
+    eras: ['renaissance'],
+  },
+  {
+    canonicalName: 'Tomás Luis de Victoria',
+    aliases: ['Tomás Luis de Victoria'],
+    eras: ['renaissance'],
+  },
+  {
+    canonicalName: 'Cristóbal de Morales',
+    aliases: ['Cristóbal de Morales'],
+    eras: ['renaissance'],
+  },
+  {
+    canonicalName: 'Luis de Milán',
+    aliases: ['Luis de Milán', 'Luys de Milán'],
+    eras: ['renaissance'],
+  },
+  {
+    canonicalName: 'Luys de Narváez',
+    aliases: ['Luys de Narváez', 'Luis de Narváez'],
+    eras: ['renaissance'],
+  },
   {
     canonicalName: 'Johann Sebastian Bach',
     aliases: ['Johann Sebastian Bach', 'J. S. Bach', 'J.S. Bach', 'J.S.Bach', 'Bach'],
@@ -31,6 +63,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
       'Georg Friedrich Händel',
       'George Frideric Handel',
       'George Frideric Haendel',
+      'G. F. Haendel',
       'Haendel',
       'Händel',
       'Handel',
@@ -65,6 +98,16 @@ export const COMPOSERS: ComposerKnowledge[] = [
   {
     canonicalName: 'Joseph-François Salomon',
     aliases: ['Joseph-François Salomon', 'Joseph-Francois Salomon', 'Salomon'],
+    eras: ['baroque'],
+  },
+  {
+    canonicalName: 'Henry Purcell',
+    aliases: ['Henry Purcell', 'Purcell'],
+    eras: ['baroque'],
+  },
+  {
+    canonicalName: 'Georg Philipp Telemann',
+    aliases: ['Georg Philipp Telemann', 'Telemann'],
     eras: ['baroque'],
   },
   {
@@ -174,6 +217,36 @@ export const COMPOSERS: ComposerKnowledge[] = [
     eras: ['romantic'],
   },
   {
+    canonicalName: 'Franz Schubert',
+    aliases: ['Franz Schubert', 'Schubert'],
+    eras: ['romantic'],
+  },
+  {
+    canonicalName: 'Frédéric Chopin',
+    aliases: ['Frédéric Chopin', 'Fryderyk Chopin', 'Chopin'],
+    eras: ['romantic'],
+  },
+  {
+    canonicalName: 'Franz Liszt',
+    aliases: ['Franz Liszt', 'Liszt'],
+    eras: ['romantic'],
+  },
+  {
+    canonicalName: 'Antonín Dvořák',
+    aliases: ['Antonín Dvořák', 'Dvořák'],
+    eras: ['romantic'],
+  },
+  {
+    canonicalName: 'Richard Wagner',
+    aliases: ['Richard Wagner'],
+    eras: ['romantic'],
+  },
+  {
+    canonicalName: 'Jean Sibelius',
+    aliases: ['Jean Sibelius', 'Sibelius'],
+    eras: ['romantic'],
+  },
+  {
     canonicalName: 'Samuel Barber',
     aliases: ['Samuel Barber', 'Barber'],
     eras: ['twentieth'],
@@ -187,6 +260,51 @@ export const COMPOSERS: ComposerKnowledge[] = [
     canonicalName: 'Manuel de Falla',
     aliases: ['Manuel de Falla', 'Falla'],
     eras: ['twentieth'],
+  },
+  {
+    canonicalName: 'Claude Debussy',
+    aliases: ['Claude Debussy', 'Debussy'],
+    eras: ['twentieth'],
+  },
+  {
+    canonicalName: 'Maurice Ravel',
+    aliases: ['Maurice Ravel', 'Ravel'],
+    eras: ['twentieth'],
+  },
+  {
+    canonicalName: 'Béla Bartók',
+    aliases: ['Béla Bartók', 'Bartók'],
+    eras: ['twentieth'],
+  },
+  {
+    canonicalName: 'Lili Boulanger',
+    aliases: ['Lili Boulanger'],
+    eras: ['twentieth'],
+  },
+  {
+    canonicalName: 'Pablo Sorozábal',
+    aliases: ['Pablo Sorozábal'],
+    eras: ['twentieth'],
+  },
+  {
+    canonicalName: 'Serguéi Prokófiev',
+    aliases: ['Serguéi Prokófiev', 'Sergei Prokofiev', 'Sergey Prokofiev', 'Prokófiev'],
+    eras: ['twentieth'],
+  },
+  {
+    canonicalName: 'Kaija Saariaho',
+    aliases: ['Kaija Saariaho', 'Saariaho'],
+    eras: ['contemporary'],
+  },
+  {
+    canonicalName: 'Tomás Marco',
+    aliases: ['Tomás Marco'],
+    eras: ['contemporary'],
+  },
+  {
+    canonicalName: 'Elena Mendoza',
+    aliases: ['Elena Mendoza'],
+    eras: ['contemporary'],
   },
   {
     canonicalName: 'Mikel Urquiza',
