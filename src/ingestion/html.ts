@@ -1,14 +1,53 @@
+const NAMED_ENTITIES: Record<string, string> = {
+  nbsp: ' ',
+  amp: '&',
+  quot: '"',
+  apos: "'",
+  lt: '<',
+  gt: '>',
+  mdash: '—',
+  ndash: '–',
+  hellip: '…',
+  laquo: '«',
+  raquo: '»',
+  middot: '·',
+  aacute: 'á',
+  Aacute: 'Á',
+  eacute: 'é',
+  Eacute: 'É',
+  iacute: 'í',
+  Iacute: 'Í',
+  oacute: 'ó',
+  Oacute: 'Ó',
+  uacute: 'ú',
+  Uacute: 'Ú',
+  ntilde: 'ñ',
+  Ntilde: 'Ñ',
+  uuml: 'ü',
+  Uuml: 'Ü',
+  auml: 'ä',
+  euml: 'ë',
+  iuml: 'ï',
+  ouml: 'ö',
+  acirc: 'â',
+  ecirc: 'ê',
+  icirc: 'î',
+  ocirc: 'ô',
+  ucirc: 'û',
+  agrave: 'à',
+  egrave: 'è',
+  igrave: 'ì',
+  ograve: 'ò',
+  ugrave: 'ù',
+};
+
 export function decodeHtmlEntities(value: string): string {
   return value
-    .replace(/&nbsp;/gi, ' ')
     .replace(/&#(\d+);/g, (_, code: string) => String.fromCharCode(Number(code)))
-    .replace(/&#x([0-9a-f]+);/gi, (_, code: string) => String.fromCharCode(Number.parseInt(code, 16)))
-    .replace(/&amp;/gi, '&')
-    .replace(/&quot;/gi, '"')
-    .replace(/&apos;/gi, "'")
-    .replace(/&#039;/g, "'")
-    .replace(/&lt;/gi, '<')
-    .replace(/&gt;/gi, '>');
+    .replace(/&#x([0-9a-f]+);/gi, (_, code: string) =>
+      String.fromCharCode(Number.parseInt(code, 16)),
+    )
+    .replace(/&([A-Za-z]+);/g, (match, name: string) => NAMED_ENTITIES[name] ?? match);
 }
 
 export function collapseWhitespace(value: string): string {

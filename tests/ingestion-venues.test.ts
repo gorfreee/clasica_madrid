@@ -481,7 +481,10 @@ describe('pipeline Madrid Datos', () => {
       now: TEST_NOW,
       dryRun: true,
       sourceIds: ['madrid-datos'],
-      get: async () => agenda,
+      get: async (url) => {
+        if (url.includes('agenda-eventos-culturales-100') || url.includes('agenda.json')) return agenda;
+        return '<article><h1>Ficha</h1></article>';
+      },
     });
 
     expect(run.rawEvents).toHaveLength(8);
