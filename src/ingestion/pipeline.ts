@@ -2,14 +2,21 @@ import type { Catalog } from '../lib/domain/catalog.ts';
 import type { Candidate } from '../lib/schemas/candidate.ts';
 import type { AiClassifier, AiCallDiagnostics } from './classification/ai.ts';
 import { classifyObserved } from './classification/enrich.ts';
-import { isPublishableInclude, type ClassificationResult } from './classification/types.ts';
+import type { ClassificationResult } from './classification/types.ts';
 import { collapseWhitespace } from './html.ts';
 import { getAdapter, getSourceDefinition, listSourceDefinitions } from './registry.ts';
 import { normalizeRawEvent, normalizeSkipReason, observedFactsFromNormalized } from './normalize.ts';
 import { applyCandidateBatch, type BatchApplyResult } from './batch.ts';
-import { matchHarvestIdentity, structuralSkipReason, toCandidate } from './to-candidate.ts';
+import { findPossiblyMissing, type PossiblyMissingEvent } from './disappear.ts';
+import { matchEventIdentity, type EventIdentityAlias } from './identity.ts';
 import { countHydration, hydrateEvents, memoizeGet } from './hydrate.ts';
+import {
+  reconcileHarvest,
+  shouldClassifyObservation,
+  type HarvestObservation,
+} from './reconcile.ts';
 import { buildEventDecision, type IngestEventDecision } from './report.ts';
+import { matchVenue } from './venues.ts';
 import type { AdapterContext, IngestAiSummary, IngestRunSummary, RawEvent, SourceDefinition, SourceFailure } from './types.ts';
 import { emptyIngestAiSummary } from './types.ts';
 import { getText } from './http.ts';
@@ -23,6 +30,7 @@ export type IngestOptions = {
   get?: (url: string) => Promise<string>;
   /** Injected by the CLI. Absent → deterministic path only; uncertain stays unpublished. */
   ai?: AiClassifier;
+  identityAliases?: readonly EventIdentityAlias[];
 };
 
 export type IngestRun = {
@@ -31,6 +39,7 @@ export type IngestRun = {
   rawEvents: RawEvent[];
   candidates: Candidate[];
   decisions: IngestEventDecision[];
+  possiblyMissing: PossiblyMissingEvent[];
 };
 
 export async function runIngest(options: IngestOptions): Promise<IngestRun> {
@@ -59,9 +68,6 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
     return left.sourceUrl.localeCompare(right.sourceUrl);
   });
 
-  const usedIds = new Set(options.catalog.events.map((event) => event.id));
-  const usedSlugs = new Set(options.catalog.events.map((event) => event.slug));
-  const candidates: Candidate[] = [];
   const decisions: IngestEventDecision[] = [];
   let skippedUnusable = 0;
   const eligibility = { include: 0, exclude: 0, uncertain: 0 };
@@ -70,16 +76,28 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
   const ai = wrapAi(options.ai, aiUsage);
 
   const bySource = new Map(sources.map((source) => [source.id, source]));
-  // Only classification is concurrent. Candidate construction and allocation stay
-  // in original source order, independent of model/network completion order.
+  // Identity is resolved before the publication gate. Classification stays
+  // concurrent; candidate construction and ID allocation stay in source order.
   const prepared = rawEvents.map((raw) => {
     const event = normalizeRawEvent(raw);
     const source = event ? bySource.get(event.sourceId) : undefined;
-    const skip = event ? structuralSkipReason(event, options.catalog, options.now) : undefined;
-    return { raw, event, source, skip };
+    const venueId = event ? matchVenue(venueHint(event), options.catalog)?.venue.id : undefined;
+    const identity =
+      event && source
+        ? matchEventIdentity(options.catalog, event, {
+            catalogSourceId: source.catalogSourceId,
+            venueId,
+            aliases: options.identityAliases,
+          })
+        : undefined;
+    const classify =
+      event && source && identity
+        ? shouldClassifyObservation(event, options.catalog, options.now, identity)
+        : false;
+    return { raw, event, source, identity, classify };
   });
-  const classified = await mapConcurrent(prepared, options.ai?.concurrency ?? 1, async ({ event, source, skip }) => {
-    if (!event || !source || skip) return undefined;
+  const classified = await mapConcurrent(prepared, options.ai?.concurrency ?? 1, async ({ event, classify }) => {
+    if (!event || !classify) return undefined;
     let aiAttempted = false;
     let aiCall: AiCallDiagnostics | undefined;
     const eventAi: AiClassifier | undefined = ai ? {
@@ -99,7 +117,34 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
     });
     return { classification, aiAttempted, aiCall };
   });
-  for (const [index, { raw, event, source, skip }] of prepared.entries()) {
+
+  const observations: HarvestObservation[] = [];
+  for (const [index, { raw, event, source }] of prepared.entries()) {
+    const classifiedAt = classified[index];
+    if (classifiedAt) {
+      eligibility[classifiedAt.classification.eligibility.value] += 1;
+      recordAiOutcome(aiUsage, classifiedAt.classification);
+    }
+    if (!event || !source) continue;
+    observations.push({
+      index,
+      raw,
+      event,
+      source,
+      classification: classifiedAt?.classification,
+      aiAttempted: classifiedAt?.aiAttempted ?? false,
+      aiCall: classifiedAt?.aiCall,
+    });
+  }
+
+  const reconciled = reconcileHarvest({
+    catalog: options.catalog,
+    now: options.now,
+    observations,
+    aliases: options.identityAliases,
+  });
+
+  for (const [index, { raw, event, source }] of prepared.entries()) {
     if (!event) {
       skippedUnusable += 1;
       decisions.push(
@@ -128,90 +173,50 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
       );
       continue;
     }
-    if (skip) {
-      skippedUnusable += 1;
-      decisions.push(
-        buildEventDecision({
-          raw,
-          title: event.title,
-          structuralSkip: skip,
-          aiAttempted: false,
-          publishable: false,
-          candidateGenerated: false,
-          identity: matchHarvestIdentity(options.catalog, event, source.catalogSourceId),
-        }),
-      );
-      continue;
-    }
 
-    const { classification, aiAttempted, aiCall } = classified[index]!;
-    eligibility[classification.eligibility.value] += 1;
-    recordAiOutcome(aiUsage, classification);
-
-    const identity = matchHarvestIdentity(options.catalog, event, source.catalogSourceId);
-
-    if (!isPublishableInclude(classification)) {
-      decisions.push(
-        buildEventDecision({
-          raw,
-          title: event.title,
-          classification,
-          aiAttempted,
-          ai: aiCall,
-          publishable: false,
-          candidateGenerated: false,
-          identity,
-        }),
-      );
-      continue;
-    }
-
-    const built = toCandidate(
-      event,
-      source,
-      options.catalog,
-      options.now,
-      usedIds,
-      usedSlugs,
-      classification,
-    );
-    if (!built.candidate) {
-      skippedUnusable += 1;
-      decisions.push(
-        buildEventDecision({
-          raw,
-          title: event.title,
-          structuralSkip: built.skippedReason,
-          classification,
-          aiAttempted,
-          ai: aiCall,
-          publishable: true,
-          candidateGenerated: false,
-          identity,
-        }),
-      );
-      continue;
-    }
-    candidates.push(built.candidate);
+    const result = reconciled.byIndex.get(index);
+    if (result?.skippedReason) skippedUnusable += 1;
+    const identity = result
+      ? {
+          ...(result.action ? { action: result.action } : {}),
+          ...(result.method ? { method: result.method } : {}),
+          ...(result.eventId ? { eventId: result.eventId } : {}),
+          ...(result.ambiguousReason ? { reason: result.ambiguousReason } : {}),
+        }
+      : undefined;
     decisions.push(
       buildEventDecision({
         raw,
         title: event.title,
-        classification,
-        aiAttempted,
-        ai: aiCall,
-        publishable: true,
-        candidateGenerated: true,
-        identity: identity ?? 'new',
-        candidate: built.candidate,
+        structuralSkip: result?.skippedReason,
+        classification: classified[index]?.classification,
+        aiAttempted: classified[index]?.aiAttempted ?? false,
+        ai: classified[index]?.aiCall,
+        publishable: result?.publishable ?? false,
+        candidateGenerated: result?.candidateGenerated ?? false,
+        identity: identity && Object.keys(identity).length > 0 ? identity : undefined,
+        fieldDiffs: result?.fieldDiffs,
+        classificationDrift: result?.classificationDrift,
+        scheduleChange: result?.scheduleChange,
+        batchDuplicate: result?.batchDuplicate,
+        candidate: result?.candidate,
       }),
     );
   }
 
   mergeProviderStats(aiUsage, options.ai);
 
-  const apply = await applyCandidateBatch(options.catalog, candidates, options.dataDir, {
+  const apply = await applyCandidateBatch(options.catalog, reconciled.candidates, options.dataDir, {
     dryRun: options.dryRun,
+  });
+
+  const possiblyMissing = findPossiblyMissing({
+    catalog: options.catalog,
+    now: options.now,
+    sources,
+    succeededSourceIds: succeeded,
+    failedSourceIds: failures.map((item) => item.sourceId),
+    seenEventIds: reconciled.seenEventIds,
   });
 
   const hydration = countHydration(rawEvents);
@@ -223,9 +228,13 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
     skippedUnusable,
     eligibility,
     ai: aiUsage,
-    candidates: candidates.length,
+    candidates: reconciled.candidates.length,
     newEvents: apply.newEvents,
-    unchangedEvents: apply.unchangedEvents,
+    updatedEvents: apply.updatedEvents,
+    unchangedEvents: reconciled.stats.unchangedEvents,
+    ambiguous: reconciled.stats.ambiguous,
+    possiblyMissing: possiblyMissing.length,
+    batchDuplicates: reconciled.stats.batchDuplicates,
     written: apply.written,
     dryRun: options.dryRun,
     detailHydrationAttempted: hydration.attempted,
@@ -233,7 +242,15 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
     detailHydrationFailed: hydration.failed,
   };
 
-  return { summary, apply, rawEvents, candidates, decisions };
+  return { summary, apply, rawEvents, candidates: reconciled.candidates, decisions, possiblyMissing };
+}
+
+function venueHint(event: { venueText?: string; sourceId: string; venueFacilityId?: string }) {
+  return {
+    venueText: event.venueText,
+    sourceId: event.sourceId,
+    facilityId: event.venueFacilityId,
+  };
 }
 
 export async function extractSource(

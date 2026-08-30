@@ -1,11 +1,11 @@
 import { madridToday } from '../lib/domain/dates.ts';
 import type { Catalog } from '../lib/domain/catalog.ts';
 import type { Candidate } from '../lib/schemas/candidate.ts';
-import type { Event, Occurrence, Source, Venue } from '../lib/schemas/index.ts';
+import type { Event, Occurrence, Venue } from '../lib/schemas/index.ts';
 import { resolvePerformerRole } from './classification/performer-role.ts';
 import type { PublishableClassification } from './classification/types.ts';
 import { eventIdFor, occurrenceIdFor, uniqueId, uniqueSlug } from './ids.ts';
-import { normalizeUrl, urlPathIdentity, urlsEquivalent } from './urls.ts';
+import { normalizeUrl, urlPathIdentity } from './urls.ts';
 import type { NormalizedEvent } from './normalize.ts';
 import type { SourceDefinition } from './types.ts';
 import { matchVenue } from './venues.ts';
@@ -17,17 +17,25 @@ export type CandidateBuild = {
   skippedReason?: string;
 };
 
+export function newEventPublicationSkip(
+  event: NormalizedEvent,
+  catalog: Catalog,
+  now: Date,
+): string | undefined {
+  if (publicationOccurrences(event, now).length === 0) {
+    return event.dateFromDetail ? 'fecha pasada' : 'fuera de ventana';
+  }
+  if (!matchVenue(venueHint(event), catalog)) return 'lugar no reconocido';
+  return undefined;
+}
+
 export function structuralSkipReason(
   event: NormalizedEvent,
   catalog: Catalog,
   now: Date,
 ): string | undefined {
   if (event.eventStatus === 'cancelled') return 'cancelado';
-  if (publicationOccurrences(event, now).length === 0) {
-    return event.dateFromDetail ? 'fecha pasada' : 'fuera de ventana';
-  }
-  if (!matchVenue(venueHint(event), catalog)) return 'lugar no reconocido';
-  return undefined;
+  return newEventPublicationSkip(event, catalog, now);
 }
 
 export function toCandidate(
@@ -142,45 +150,3 @@ function venueHint(event: NormalizedEvent) {
   };
 }
 
-export function findExistingEvent(catalog: Catalog, event: Event, source: Source): Event | undefined {
-  const citation = event.citations[0];
-  if (!citation) return undefined;
-  const byExternal = citation.externalId
-    ? catalog.events.find((existing) =>
-        existing.citations.some(
-          (item) => item.sourceId === source.id && item.externalId === citation.externalId,
-        ),
-      )
-    : undefined;
-  if (byExternal) return byExternal;
-  const url = citation.url;
-  const byUrl = catalog.events.find((existing) =>
-    existing.citations.some((item) => urlsEquivalent(item.url, url)),
-  );
-  if (byUrl) return byUrl;
-  return catalog.events.find((item) => item.id === event.id);
-}
-
-/**
- * Catalog identity from harvest facts only. Returns `existing` when a citation
- * matches; otherwise undefined — `new` is only safe once a Candidate exists.
- */
-export function matchHarvestIdentity(
-  catalog: Catalog,
-  observed: { sourceUrl: string; externalId?: string },
-  catalogSourceId: string,
-): 'existing' | undefined {
-  const found = catalog.events.some((existing) =>
-    existing.citations.some((item) => {
-      if (
-        observed.externalId &&
-        item.sourceId === catalogSourceId &&
-        item.externalId === observed.externalId
-      ) {
-        return true;
-      }
-      return urlsEquivalent(item.url, observed.sourceUrl);
-    }),
-  );
-  return found ? 'existing' : undefined;
-}

@@ -18,22 +18,26 @@ La web no escribe datos. Todo lo publicado entra por Git, pasa validación deter
 
 ## Qué hay implementado
 
-Harvesting de fuentes conocidas (fases 1 y 2 del plan v3): extraer, hidratar fichas cuando el adapter lo soporta, normalizar, clasificar y, si el resultado es `include`, escribir **sólo eventos nuevos**.
+Harvesting de fuentes conocidas (fases 1–3 del plan v3): extraer, hidratar fichas cuando el adapter lo soporta, normalizar, resolver identidad, clasificar y reconciliar contra el catálogo.
 
 ```text
-registry → extract → hydrate → normalize → classify → publication gate → validate → write
+registry → extract → hydrate → normalize → identity → classify → publication gate → reconcile → validate → write
 ```
 
 - Un fallo de listing aísla esa fuente; el resto continúa.
 - Un fallo de ficha de detalle es local al evento: se conservan los hechos del listing.
 - Clasificación: reglas deterministas y knowledge, con fallback de IA **sólo** si el determinista deja `uncertain`. Un `include` o `exclude` determinista no se reabre.
-- Publicación: sólo `include` se convierte en Candidate. `exclude` y `uncertain` no se publican, no consumen IDs/slugs y no se mezclan con los descartes estructurales.
-- `kind`, `formats`, `eras` y `access` salen del classifier, no de la source.
-- `eras` / `formats` vacíos no bloquean un `include`.
-- Escritura atómica de archivos **nuevos**. No actualiza ni borra eventos ya publicados.
-- Una segunda ejecución contra los mismos inputs no debe escribir cambios canónicos.
+- Identidad (sin fuzzy ni IA): `externalId` de la misma source → URL equivalente → alias explícito → coincidencia fuerte única (fecha, venue, título normalizado). Si hay más de un match plausible, el caso es `ambiguous`: no se crea ni se modifica.
+- Publicación de eventos **nuevos**: sólo `include` se convierte en Candidate. `exclude` y `uncertain` no se publican, no consumen IDs/slugs y no se mezclan con los descartes estructurales.
+- Eventos **ya publicados**: se conservan `id` y `slug`. Una reclasificación posterior `exclude`/`uncertain` no despublica; se registra como `classificationDrift`. Los hechos objetivos de la fuente (fecha, venue, status, programa, citas) sí pueden actualizarse.
+- Merge conservador: una observación puede corregir datos, pero un array vacío, `organizerIds: []`, `seriesId: null` o `access: unknown` no borran información canónica previa.
+- Cancelación/aplazamiento: un evento nuevo ya cancelado no se crea; uno existente se actualiza. Un aplazamiento de una única representación conserva el occurrence ID.
+- Desapariciones: `possiblyMissing` es sólo diagnóstico. Requiere source sana, evento futuro dentro de la ventana de esa ejecución y ningún match. Una source fallida no marca sus eventos. Los históricos no desaparecen.
+- Deduplicación del lote: varias observaciones de la misma identidad se combinan; un conflicto material irresoluble no se escribe.
+- Escritura atómica de creates y updates. Un fallo de prepare o commit restaura byte a byte cualquier archivo ya sustituido y no deja archivos nuevos a medias.
+- Una segunda ejecución contra los mismos inputs y el mismo clock no debe escribir cambios canónicos.
 
-No están implementados (no los añadas salvo que una tarea pida esa fase): discovery automático, reconciliación fuzzy, updates de eventos existentes, política de desapariciones, GitHub Actions de ingestión ni auto-merge.
+No están implementados (no los añadas salvo que una tarea pida esa fase): discovery automático, reconciliación fuzzy, GitHub Actions de ingestión ni auto-merge.
 
 Las fuentes concretas, adapters, flags de CLI y detalles de matching viven en el código. No los dupliques aquí.
 
