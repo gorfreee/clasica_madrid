@@ -1,0 +1,382 @@
+name: Production ingestion
+
+on:
+  schedule:
+    - cron: '17 9 1,11,21 * *'
+      timezone: Europe/Madrid
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Ejecutar sin escribir o preparar una PR de datos
+        type: choice
+        options:
+          - dry-run
+          - publish
+        default: dry-run
+        required: true
+      sources:
+        description: "all o IDs separados por coma"
+        type: string
+        default: all
+        required: true
+      from:
+        description: Fecha inicial YYYY-MM-DD (requiere to)
+        type: string
+        required: false
+      to:
+        description: Fecha final YYYY-MM-DD (requiere from)
+        type: string
+        required: false
+      auto_merge:
+        description: Solicitar auto-merge tras CI verde
+        type: boolean
+        default: false
+        required: true
+      ai_max_requests:
+        description: Tope opcional de requests HTTP de IA
+        type: string
+        required: false
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: ingestion-production
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    name: Ingest and publish data PR
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      AI_PROVIDER: gemini
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GEMINI_STATE_DIR: ${{ github.workspace }}/.local/ai
+      REPORT_PATH: ingestion/reports/ingestion-${{ github.run_id }}-${{ github.run_attempt }}.json
+      PR_BODY_PATH: ${{ runner.temp }}/ingestion-pr-body.md
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+
+      - name: Resolve and validate inputs
+        id: config
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_MODE: ${{ inputs.mode }}
+          DISPATCH_SOURCES: ${{ inputs.sources }}
+          DISPATCH_FROM: ${{ inputs.from }}
+          DISPATCH_TO: ${{ inputs.to }}
+          DISPATCH_AUTO_MERGE: ${{ inputs.auto_merge }}
+          DISPATCH_AI_MAX_REQUESTS: ${{ inputs.ai_max_requests }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == "schedule" ]]; then
+            mode="publish"
+            sources="all"
+            from=""
+            to=""
+            auto_merge_requested="true"
+            ai_max_requests=""
+          else
+            mode="$DISPATCH_MODE"
+            sources="$DISPATCH_SOURCES"
+            from="$DISPATCH_FROM"
+            to="$DISPATCH_TO"
+            auto_merge_requested="$DISPATCH_AUTO_MERGE"
+            ai_max_requests="$DISPATCH_AI_MAX_REQUESTS"
+          fi
+
+          if [[ "$mode" != "dry-run" && "$mode" != "publish" ]]; then
+            echo "mode debe ser dry-run o publish" >&2
+            exit 1
+          fi
+          if [[ -z "$sources" ]]; then
+            echo "sources no puede estar vacío" >&2
+            exit 1
+          fi
+          if [[ "$sources" == *$'\n'* || "$sources" == *$'\r'* ]]; then
+            echo "sources debe ser una lista de una sola línea" >&2
+            exit 1
+          fi
+          if [[ ( -n "$from" && -z "$to" ) || ( -z "$from" && -n "$to" ) ]]; then
+            echo "from y to deben indicarse juntos" >&2
+            exit 1
+          fi
+          if [[ -n "$from" && ( ! "$from" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ || ! "$to" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ) ]]; then
+            echo "from y to deben usar YYYY-MM-DD" >&2
+            exit 1
+          fi
+          if [[ -n "$ai_max_requests" && ! "$ai_max_requests" =~ ^[0-9]+$ ]]; then
+            echo "ai_max_requests debe ser un entero no negativo" >&2
+            exit 1
+          fi
+
+          {
+            echo "mode=$mode"
+            echo "sources=$sources"
+            echo "from=$from"
+            echo "to=$to"
+            echo "auto_merge_requested=$auto_merge_requested"
+            echo "ai_max_requests=$ai_max_requests"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Restore persistent Gemini state
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: |
+            .local/ai/quota.json
+            .local/ai/cache/**
+            .local/ai/pending/**
+          key: ingestion-gemini-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            ingestion-gemini-${{ runner.os }}-
+
+      - name: Install
+        run: npm ci
+
+      - name: Run ingestion
+        env:
+          MODE: ${{ steps.config.outputs.mode }}
+          SOURCES: ${{ steps.config.outputs.sources }}
+          FROM_DATE: ${{ steps.config.outputs.from }}
+          TO_DATE: ${{ steps.config.outputs.to }}
+          AI_MAX_REQUESTS: ${{ steps.config.outputs.ai_max_requests }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=(--report "$REPORT_PATH")
+          if [[ "$MODE" == "dry-run" ]]; then
+            args+=(--dry-run)
+          fi
+          if [[ "$SOURCES" != "all" ]]; then
+            args+=(--sources "$SOURCES")
+          fi
+          if [[ -n "$FROM_DATE" && -n "$TO_DATE" ]]; then
+            args+=(--from "$FROM_DATE" --to "$TO_DATE")
+          fi
+          if [[ -n "$AI_MAX_REQUESTS" ]]; then
+            args+=(--ai-max-requests "$AI_MAX_REQUESTS")
+          fi
+          npm run ingest:sync -- "${args[@]}"
+
+      - name: Render report and PR body
+        id: report
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! -f "$REPORT_PATH" ]]; then
+            echo "report_available=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "## Ingestión de producción"
+              echo
+              echo "> [!ERROR]"
+              echo "> La ejecución terminó antes de que el pipeline pudiera generar el report JSON."
+              echo
+              echo "[Ver ejecución de GitHub Actions]($RUN_URL)"
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          npx tsx src/cli/format-ingestion-automation.ts \
+            --report "$REPORT_PATH" \
+            --summary "$GITHUB_STEP_SUMMARY" \
+            --pr-body "$PR_BODY_PATH" \
+            --run-url "$RUN_URL" \
+            --output "$GITHUB_OUTPUT"
+
+      - name: Annotate non-clean health
+        if: always() && steps.report.outputs.report_available == 'true' && steps.report.outputs.health != 'clean'
+        env:
+          HEALTH: ${{ steps.report.outputs.health }}
+        shell: bash
+        run: |
+          if [[ "$HEALTH" == "fatal" ]]; then
+            echo "::error::La ingestión terminó con health fatal; no se publicará ninguna PR."
+          else
+            echo "::warning::La ingestión terminó con health $HEALTH; revisa los motivos en el summary y el report."
+          fi
+
+      - name: Upload ingestion report
+        if: always() && steps.report.outputs.report_available == 'true'
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: ingestion-report-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.REPORT_PATH }}
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Enforce publication diff boundary
+        id: changes
+        if: success() && steps.report.outputs.report_available == 'true'
+        env:
+          MODE: ${{ steps.config.outputs.mode }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -d '' changed_files < <(
+            {
+              git diff --name-only -z
+              git diff --cached --name-only -z
+              git ls-files --others --exclude-standard -z
+            } | sort -zu
+          )
+
+          unexpected=()
+          data_changes="false"
+          for file in "${changed_files[@]}"; do
+            if [[ "$file" == data/* ]]; then
+              data_changes="true"
+            else
+              unexpected+=("$file")
+            fi
+          done
+
+          if (( ${#unexpected[@]} > 0 )); then
+            echo "Cambios inesperados fuera de data/**:" >&2
+            printf '  %s\n' "${unexpected[@]}" >&2
+            exit 1
+          fi
+          if [[ "$MODE" == "dry-run" && "$data_changes" == "true" ]]; then
+            echo "El modo dry-run modificó data/**; se aborta." >&2
+            exit 1
+          fi
+          echo "data_changes=$data_changes" >> "$GITHUB_OUTPUT"
+
+      - name: Publish data pull request
+        id: publish
+        if: success() && steps.config.outputs.mode == 'publish'
+        env:
+          GH_TOKEN: ${{ secrets.INGESTION_BOT_TOKEN }}
+          DATA_CHANGES: ${{ steps.changes.outputs.data_changes }}
+          HEALTH: ${{ steps.report.outputs.health }}
+          AUTO_MERGE_ELIGIBLE: ${{ steps.report.outputs.auto_merge_eligible }}
+          AUTO_MERGE_REQUESTED: ${{ steps.config.outputs.auto_merge_requested }}
+          AUTO_MERGE_ENABLED: ${{ vars.INGESTION_AUTO_MERGE_ENABLED }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$DATA_CHANGES" != "true" ]]; then
+            if [[ "$HEALTH" == "review" ]]; then
+              echo "::warning::Health review sin cambios materiales; no se crea PR."
+            fi
+            {
+              echo
+              echo "### Publicación"
+              echo "No-op: no hay cambios materiales en \`data/**\`; no se creó branch, commit ni PR."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          existing_pr=$(gh pr list \
+            --repo "$GITHUB_REPOSITORY" \
+            --state open \
+            --limit 100 \
+            --json headRefName,url \
+            --jq '.[] | select(.headRefName | startswith("automation/ingestion-")) | .url' \
+            | head -n 1)
+          if [[ -n "$existing_pr" ]]; then
+            echo "::warning::Ya existe una PR de ingestión abierta: $existing_pr"
+            {
+              echo
+              echo "### Publicación"
+              echo "> [!WARNING]"
+              echo "> No se publicó esta ejecución porque ya existe una PR de ingestión abierta: $existing_pr"
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          branch="automation/ingestion-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git switch -c "$branch"
+          git config user.name "Clásica Madrid Ingestion Bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- data
+          if git diff --cached --quiet; then
+            echo "El diff material desapareció antes del commit" >&2
+            exit 1
+          fi
+          if git diff --cached --name-only | grep -Ev '^data/' >/dev/null; then
+            echo "El commit contendría cambios fuera de data/**" >&2
+            exit 1
+          fi
+          git commit -m "Update catalog from automated ingestion"
+          gh auth setup-git
+          git push --set-upstream origin "$branch"
+
+          draft_args=()
+          if [[ "$HEALTH" == "review" ]]; then
+            draft_args+=(--draft)
+          fi
+          pr_url=$(gh pr create \
+            --repo "$GITHUB_REPOSITORY" \
+            --base main \
+            --head "$branch" \
+            --title "Automated catalog ingestion" \
+            --body-file "$PR_BODY_PATH" \
+            "${draft_args[@]}")
+          if [[ "$pr_url" == *$'\n'* || "$pr_url" != https://github.com/*/pull/* ]]; then
+            echo "gh pr create no devolvió una URL de PR válida" >&2
+            exit 1
+          fi
+          echo "pr_url=$pr_url" >> "$GITHUB_OUTPUT"
+          {
+            echo
+            echo "### Publicación"
+            echo "PR creada: $pr_url"
+            if [[ "$HEALTH" == "review" ]]; then
+              echo "Se creó como draft por health review; auto-merge deshabilitado."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ "$HEALTH" == "review" || "$AUTO_MERGE_ELIGIBLE" != "true" ]]; then
+            exit 0
+          fi
+          if [[ "$AUTO_MERGE_REQUESTED" != "true" || "$AUTO_MERGE_ENABLED" != "true" ]]; then
+            echo "Auto-merge no solicitado o deshabilitado por el kill switch global." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          ci_run_id=""
+          for _ in {1..30}; do
+            ci_run_id=$(gh run list \
+              --repo "$GITHUB_REPOSITORY" \
+              --workflow ci.yml \
+              --branch "$branch" \
+              --event pull_request \
+              --limit 1 \
+              --json databaseId \
+              --jq '.[0].databaseId // empty')
+            [[ -n "$ci_run_id" ]] && break
+            sleep 10
+          done
+          if [[ -z "$ci_run_id" ]]; then
+            echo "No apareció una ejecución pull_request de ci.yml para $branch" >&2
+            exit 1
+          fi
+
+          gh run watch "$ci_run_id" --repo "$GITHUB_REPOSITORY" --exit-status
+          gh pr merge "$pr_url" --repo "$GITHUB_REPOSITORY" --auto --squash
+          echo "CI verde; squash auto-merge solicitado." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Record dry-run outcome
+        if: success() && steps.config.outputs.mode == 'dry-run'
+        shell: bash
+        run: |
+          {
+            echo
+            echo "### Publicación"
+            echo "Dry-run completado: \`data/**\` permanece intacto y no se creó ninguna PR."
+          } >> "$GITHUB_STEP_SUMMARY"
