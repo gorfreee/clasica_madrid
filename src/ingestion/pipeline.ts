@@ -186,6 +186,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
           ...(result.action ? { action: result.action } : {}),
           ...(result.method ? { method: result.method } : {}),
           ...(result.eventId ? { eventId: result.eventId } : {}),
+          ...(result.eventIds && result.eventIds.length > 0 ? { eventIds: result.eventIds } : {}),
           ...(result.ambiguousReason ? { reason: result.ambiguousReason } : {}),
         }
       : undefined;

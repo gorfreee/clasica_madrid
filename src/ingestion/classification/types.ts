@@ -37,3 +37,21 @@ export function isPublishableInclude(
 ): result is PublishableClassification {
   return result.eligibility.value === 'include' && result.kind !== undefined;
 }
+
+/**
+ * AI transport / non-response failures. These stay `uncertain` and `degraded`,
+ * but they are not an editorial contradiction of a published event.
+ */
+export const TECHNICAL_CLASSIFICATION_RULE_IDS = [
+  'ai-error',
+  'ai-timeout',
+  'ai-rate-limited',
+  'ai-malformed-output',
+  'ai-invalid-output',
+  'ai-unavailable',
+  'ai-deferred',
+] as const;
+
+export function isTechnicalClassificationFailure(ruleId: string): boolean {
+  return (TECHNICAL_CLASSIFICATION_RULE_IDS as readonly string[]).includes(ruleId);
+}

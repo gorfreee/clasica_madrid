@@ -29,7 +29,7 @@ export { createAiClassifierFromEnv } from './classification/provider.ts';
 export type { AiCallDiagnostics, AiClassifier, AiProviderStats } from './classification/ai.ts';
 export { AiRateLimitedError } from './classification/ai.ts';
 export type { ClassificationResult, PublishableClassification, ResolutionMethod } from './classification/types.ts';
-export { isPublishableInclude } from './classification/types.ts';
+export { isPublishableInclude, isTechnicalClassificationFailure } from './classification/types.ts';
 export { resolvePerformerRole } from './classification/performer-role.ts';
 export {
   parseObservedDateTime,

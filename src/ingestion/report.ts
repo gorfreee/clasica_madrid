@@ -58,6 +58,7 @@ export type IngestEventDecision = {
     action?: ReconcileAction;
     method?: IdentityMethod;
     eventId?: string;
+    eventIds?: string[];
     reason?: string;
   };
   fieldDiffs?: string[];
