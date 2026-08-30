@@ -1,3 +1,4 @@
+import type { IngestRunManifest } from './observability.ts';
 import type { IngestReport } from './report.ts';
 
 export type AutomationReportMetrics = {
@@ -14,14 +15,37 @@ export function automationReportMetrics(report: IngestReport): AutomationReportM
   };
 }
 
-export function formatAutomationSummary(report: IngestReport, runUrl: string): string {
-  return formatAutomationMarkdown(report, runUrl, 'Ingestión de producción');
+export type AutomationSummaryExtras = {
+  manifest?: IngestRunManifest;
+  artifactName?: string;
+};
+
+export function formatAutomationSummary(
+  report: IngestReport,
+  runUrl: string,
+  extras?: AutomationSummaryExtras,
+): string {
+  return formatAutomationMarkdown(report, runUrl, 'Ingestión de producción', extras);
 }
 
 export function formatAutomationPrBody(report: IngestReport, runUrl: string): string {
   return `${formatAutomationMarkdown(report, runUrl, 'Actualización automática de datos')}
 
 Esta PR sólo contiene cambios materiales bajo \`data/**\`. El report JSON completo está adjunto a la ejecución de Actions.`;
+}
+
+export function formatMissingReportSummary(runUrl: string, extras?: AutomationSummaryExtras): string {
+  const lines = [
+    '## Ingestión de producción',
+    '',
+    '> [!ERROR]',
+    '> La ejecución terminó antes de que el pipeline pudiera generar el report JSON.',
+    '',
+  ];
+  const observability = formatObservabilitySection(extras, extras?.manifest?.failure ?? undefined);
+  if (observability) lines.push(observability, '');
+  lines.push(`[Ver ejecución de GitHub Actions](${runUrl})`);
+  return lines.join('\n');
 }
 
 export function assertIngestReport(value: unknown): asserts value is IngestReport {
@@ -36,13 +60,19 @@ export function assertIngestReport(value: unknown): asserts value is IngestRepor
   }
 }
 
-function formatAutomationMarkdown(report: IngestReport, runUrl: string, title: string): string {
+function formatAutomationMarkdown(
+  report: IngestReport,
+  runUrl: string,
+  title: string,
+  extras?: AutomationSummaryExtras,
+): string {
   const summary = report.summary;
   const metrics = automationReportMetrics(report);
   const sourcesSucceeded = summary.sourcesSucceeded.join(', ') || 'ninguna';
   const sourcesFailed =
     summary.sourcesFailed.map((failure) => `${failure.sourceId}: ${failure.message}`).join('; ') || 'ninguna';
   const reasons = report.healthReasons.join(', ') || 'ninguno';
+  const observability = formatObservabilitySection(extras, report.failure);
 
   return `## ${title}
 
@@ -65,8 +95,31 @@ function formatAutomationMarkdown(report: IngestReport, runUrl: string, title: s
 | IA: cache hits | ${summary.ai.cacheHits} |
 | IA: fallbacks | ${summary.ai.modelFallbacks} |
 | IA: deferred | ${summary.ai.deferred} |
-
+${observability ? `\n${observability}\n` : ''}
 [Ver ejecución de GitHub Actions](${runUrl})`;
+}
+
+function formatObservabilitySection(
+  extras: AutomationSummaryExtras | undefined,
+  failure: IngestReport['failure'],
+): string {
+  const manifest = extras?.manifest;
+  const status = manifest?.status;
+  const lastStage = manifest?.lastStage;
+  const artifactName = extras?.artifactName;
+  const reason = failure ?? manifest?.failure;
+  if (!status && !lastStage && !artifactName && !reason) return '';
+
+  const rows: string[] = ['### Observabilidad', '', '| Campo | Valor |', '|---|---|'];
+  if (status) rows.push(`| Estado | ${cell(status)} |`);
+  if (lastStage) rows.push(`| Último stage | ${cell(lastStage)} |`);
+  if (artifactName) rows.push(`| Artifact | \`${cell(artifactName)}\` |`);
+  if (reason) {
+    const detail = reason.stage ? `${reason.code} (${reason.stage})` : reason.code;
+    rows.push(`| Fallo | ${cell(detail)}: ${cell(reason.message)} |`);
+  }
+  rows.push('', 'El detalle por evento está en el artifact (`report.json`, `events.jsonl`), no en este resumen.');
+  return rows.join('\n');
 }
 
 function cell(value: string): string {

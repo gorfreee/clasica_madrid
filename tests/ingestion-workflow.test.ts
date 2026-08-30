@@ -1,0 +1,52 @@
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+import { describe, expect, it } from 'vitest';
+
+const workflowPath = path.join(import.meta.dirname, '..', '.github', 'workflows', 'ingestion.yml');
+
+describe('workflow de ingestión: artifact de observabilidad', () => {
+  it('sube el bundle siempre, sin tapar el error original, y conserva dry-run/publish', async () => {
+    const yaml = await readFile(workflowPath, 'utf8');
+    const upload = section(yaml, 'Upload ingestion run artifact');
+    const ingest = section(yaml, 'Run ingestion');
+    const format = section(yaml, 'Render report and PR body');
+    const gemini = section(yaml, 'Restore persistent Gemini state');
+    const publish = section(yaml, 'Publish data pull request');
+    const dryRun = section(yaml, 'Record dry-run outcome');
+
+    expect(upload).toContain('if: always()');
+    expect(upload).toContain('continue-on-error: true');
+    expect(upload).toContain('if-no-files-found: ignore');
+    expect(upload).toContain('retention-days: 90');
+    expect(upload).toContain('name: ingestion-run-${{ github.run_id }}-${{ github.run_attempt }}');
+    expect(upload).toContain('path: ${{ env.OBS_DIR }}');
+    expect(upload).not.toContain('.local/ai');
+
+    expect(ingest).toContain('set -euo pipefail');
+    expect(ingest).toContain('--observability-dir "$OBS_DIR"');
+    expect(ingest).toContain('--dry-run');
+    expect(ingest).toContain('2>&1 | tee "$OBS_DIR/run.log"');
+
+    expect(format).toContain('if: always()');
+    expect(format).toContain('--run-manifest');
+    expect(format).toContain('--artifact-name');
+
+    expect(gemini).toContain('.local/ai/quota.json');
+    expect(gemini).toContain('.local/ai/cache/**');
+    expect(gemini).toContain('.local/ai/pending/**');
+    expect(gemini).not.toContain('run.lock');
+
+    expect(publish).toContain("steps.config.outputs.mode == 'publish'");
+    expect(dryRun).toContain("steps.config.outputs.mode == 'dry-run'");
+    expect(yaml).not.toContain('if-no-files-found: error');
+  });
+});
+
+function section(yaml: string, name: string): string {
+  const marker = `- name: ${name}`;
+  const start = yaml.indexOf(marker);
+  expect(start, name).toBeGreaterThan(-1);
+  const rest = yaml.slice(start + marker.length);
+  const next = rest.search(/\n      - name: /);
+  return next === -1 ? rest : rest.slice(0, next);
+}

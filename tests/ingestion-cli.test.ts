@@ -17,13 +17,23 @@ describe('parseIngestArgs', () => {
       dryRun: true,
       dataDir: 'tmp/data',
     });
-    expect(
-      parseIngestArgs(['sync', '--dry-run', '--report', 'ingestion/reports/sync.json'], sources),
-    ).toEqual({
+    expect(parseIngestArgs(['sync', '--dry-run', '--report', 'ingestion/reports/sync.json'], sources)).toEqual({
       ok: true,
       command: 'sync',
       dryRun: true,
       reportPath: 'ingestion/reports/sync.json',
+    });
+    expect(
+      parseIngestArgs(
+        ['sync', '--report', 'ingestion/reports/run/report.json', '--observability-dir', 'ingestion/reports/run'],
+        sources,
+      ),
+    ).toEqual({
+      ok: true,
+      command: 'sync',
+      dryRun: false,
+      reportPath: 'ingestion/reports/run/report.json',
+      observabilityDir: 'ingestion/reports/run',
     });
   });
 
@@ -37,6 +47,12 @@ describe('parseIngestArgs', () => {
     const parsed = parseIngestArgs(['sync', '--report'], sources);
     expect(parsed.ok).toBe(false);
     if (!parsed.ok) expect(parsed.message).toMatch(/--report requiere una ruta/);
+  });
+
+  it('rechaza --observability-dir sin valor', () => {
+    const parsed = parseIngestArgs(['sync', '--observability-dir'], sources);
+    expect(parsed.ok).toBe(false);
+    if (!parsed.ok) expect(parsed.message).toMatch(/--observability-dir requiere una ruta/);
   });
 
   it('rechaza flags desconocidas', () => {

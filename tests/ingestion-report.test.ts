@@ -45,6 +45,9 @@ const TECHNICAL_KEYS = [
   'candidateGenerated',
   'identity',
   'candidate',
+  'listing',
+  'observed',
+  'normalized',
 ];
 
 type ListingItem = {
@@ -151,6 +154,9 @@ describe('ingest event report', () => {
     expect(decision.sourceUrl).toContain('ocne-sinfonico-01');
     expect(decision.externalId).toBeTruthy();
     expect(decision.hydration.status).toBe('succeeded');
+    expect(decision.observed?.title).toBe('OCNE. Sinfónico 01');
+    expect(decision.normalized?.title).toBe('OCNE. Sinfónico 01');
+    expect(decision.listing).toBeDefined();
     expect(decision.structuralSkip).toBeUndefined();
     expect(decision.eligibility?.value).toBe('include');
     expect(['rule', 'knowledge']).toContain(decision.eligibility?.method);

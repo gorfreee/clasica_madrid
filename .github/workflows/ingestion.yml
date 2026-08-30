@@ -54,7 +54,9 @@ jobs:
       AI_PROVIDER: gemini
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       GEMINI_STATE_DIR: ${{ github.workspace }}/.local/ai
-      REPORT_PATH: ingestion/reports/ingestion-${{ github.run_id }}-${{ github.run_attempt }}.json
+      REPORT_PATH: ingestion/reports/ingestion-run-${{ github.run_id }}-${{ github.run_attempt }}/report.json
+      OBS_DIR: ingestion/reports/ingestion-run-${{ github.run_id }}-${{ github.run_attempt }}
+      ARTIFACT_NAME: ingestion-run-${{ github.run_id }}-${{ github.run_attempt }}
       RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
     steps:
@@ -157,7 +159,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          args=(--report "$REPORT_PATH")
+          mkdir -p "$OBS_DIR"
+          args=(--report "$REPORT_PATH" --observability-dir "$OBS_DIR")
           if [[ "$MODE" == "dry-run" ]]; then
             args+=(--dry-run)
           fi
@@ -170,7 +173,7 @@ jobs:
           if [[ -n "$AI_MAX_REQUESTS" ]]; then
             args+=(--ai-max-requests "$AI_MAX_REQUESTS")
           fi
-          npm run ingest:sync -- "${args[@]}"
+          npm run ingest:sync -- "${args[@]}" 2>&1 | tee "$OBS_DIR/run.log"
 
       - name: Render report and PR body
         id: report
@@ -180,24 +183,20 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if [[ ! -f "$REPORT_PATH" ]]; then
-            echo "report_available=false" >> "$GITHUB_OUTPUT"
-            {
-              echo "## Ingestión de producción"
-              echo
-              echo "> [!ERROR]"
-              echo "> La ejecución terminó antes de que el pipeline pudiera generar el report JSON."
-              echo
-              echo "[Ver ejecución de GitHub Actions]($RUN_URL)"
-            } >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-          npx tsx src/cli/format-ingestion-automation.ts \
-            --report "$REPORT_PATH" \
-            --summary "$GITHUB_STEP_SUMMARY" \
-            --pr-body "$PR_BODY_PATH" \
-            --run-url "$RUN_URL" \
+          args=(
+            --summary "$GITHUB_STEP_SUMMARY"
+            --pr-body "$PR_BODY_PATH"
+            --run-url "$RUN_URL"
             --output "$GITHUB_OUTPUT"
+            --artifact-name "$ARTIFACT_NAME"
+          )
+          if [[ -f "$REPORT_PATH" ]]; then
+            args+=(--report "$REPORT_PATH")
+          fi
+          if [[ -f "$OBS_DIR/run.json" ]]; then
+            args+=(--run-manifest "$OBS_DIR/run.json")
+          fi
+          npx tsx src/cli/format-ingestion-automation.ts "${args[@]}"
 
       - name: Annotate non-clean health
         if: always() && steps.report.outputs.report_available == 'true' && steps.report.outputs.health != 'clean'
@@ -211,13 +210,14 @@ jobs:
             echo "::warning::La ingestión terminó con health $HEALTH; revisa los motivos en el summary y el report."
           fi
 
-      - name: Upload ingestion report
-        if: always() && steps.report.outputs.report_available == 'true'
+      - name: Upload ingestion run artifact
+        if: always()
+        continue-on-error: true
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: ingestion-report-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ env.REPORT_PATH }}
-          if-no-files-found: error
+          name: ingestion-run-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.OBS_DIR }}
+          if-no-files-found: ignore
           retention-days: 90
 
       - name: Enforce publication diff boundary

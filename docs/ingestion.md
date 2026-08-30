@@ -53,7 +53,7 @@ npm run ingest:source -- auditorio-nacional
 npm run ingest:source -- auditorio-nacional --from 2026-09-01 --to 2027-06-01
 ```
 
-`--dry-run` valida y resume sin escribir el catálogo. `--data-dir` apunta a otro árbol (por defecto `data/` o `DATA_DIR`). `--report` escribe un JSON diagnóstico por evento (incluye `window`, `health`, `autoMergeEligible` y `healthReasons`); no cambia la clasificación ni qué se publica. `ingestion/reports/` está gitignorado.
+`--dry-run` valida y resume sin escribir el catálogo. `--data-dir` apunta a otro árbol (por defecto `data/` o `DATA_DIR`). `--report` escribe un JSON diagnóstico por evento (incluye `window`, `health`, `autoMergeEligible` y `healthReasons`); no cambia la clasificación ni qué se publica. `--observability-dir` escribe además `run.json` y el journal `events.jsonl`. Si hay `--report` y no se indica directorio, esos ficheros van junto al report. `ingestion/reports/` está gitignorado.
 
 Sin `--from`/`--to`, la ventana es hoy en Europe/Madrid → +120 días. Si se indica uno, hay que indicar ambos. Un rango manual no tiene tope de 120 días. Sin `--sources`, `ingest:sync` ejecuta todas las fuentes del registry. `ingest:source` es el atajo de una sola fuente y comparte el mismo `runIngest`.
 
@@ -95,7 +95,57 @@ El dry-run nunca puede modificar `data/**` ni crear una PR. En publish, un no-op
 - secret `INGESTION_BOT_TOKEN`: token fine-grained con acceso a esta repo para Contents read/write, Pull requests read/write y Actions read. Se usa para push, creación de PR y auto-merge, de modo que el evento `pull_request` dispare CI;
 - repository variable `INGESTION_AUTO_MERGE_ENABLED`: kill switch global; sólo el valor exacto `true` habilita auto-merge.
 
-El state persistente recupera `quota.json`, `cache/**` y `pending/**` mediante `actions/cache`. Cada run guarda una key inmutable y restaura la más reciente; `run.lock` nunca se persiste. Los reports se suben siempre que existan como artifacts con 90 días de retención y nunca se commitean.
+El state persistente recupera `quota.json`, `cache/**` y `pending/**` mediante `actions/cache`. Cada run guarda una key inmutable y restaura la más reciente; `run.lock` nunca se persiste. Cada ejecución sube un artifact de observabilidad (`ingestion-run-<run_id>-<attempt>`) con retención de 90 días, incluso si la ingestión falla. Ese bundle no se commitea. El estado persistente de Gemini (`.local/ai/`) no forma parte del artifact.
+
+### Dónde está una run
+
+1. Job Summary de la ejecución (métricas, health, estado final, nombre del artifact).
+2. Logs nativos de Actions (interfaz principal para ver el progreso en caliente).
+3. Artifact `ingestion-run-<run_id>-<attempt>`:
+
+| Fichero | Qué es |
+|---|---|
+| `run.json` | Manifest de la ejecución: modo, ventana, sources, status (`completed` / `failed` / `interrupted`), último stage, fallo sanitizado. |
+| `report.json` | Resultado canónico machine-readable cuando el pipeline termina (o un fatal/interrupted stub si no pudo). Decisiones finales por evento, con hechos de listing/observed/normalized. |
+| `events.jsonl` | Journal incremental. Una línea JSON por observación, decisión o fallo de fuente. Sobrevive a un corte a mitad de run. |
+| `run.log` | stdout/stderr de `npm run ingest:sync` (el exit code real se conserva con `pipefail`). |
+
+`report.json` es el resumen final. `events.jsonl` es la evidencia forense incremental: no es event sourcing ni trazas `STARTED`/`FINISHED`.
+
+El Job Summary no es un dashboard. El detalle por evento vive en el artifact.
+
+### Cómo investigar una run fallida
+
+Empieza por el Job Summary (estado, último stage, motivo conciso) y descarga el artifact. `run.json` dice si fue `failed` o `interrupted` y en qué stage. `events.jsonl` conserva lo ya procesado. `report.json` está cuando el proceso pudo escribirlo. Los logs de Actions siguen siendo la interfaz inmediata; `run.log` hace que el artifact sea autocontenido para un agente.
+
+`SIGINT`/`SIGTERM` (cancelación o timeout de Actions) se tratan como `interrupted`: se flushea el journal, se actualiza `run.json`, se libera el lock de Gemini y se sale 130/143. **`SIGKILL` no es interceptable**; si el runner mata el proceso, el journal puede perder las últimas líneas no flusheadas.
+
+Preguntas útiles para un agente con el bundle:
+
+```text
+Revisa todos los uncertain y dime cuáles parecen falsos negativos.
+
+Haz un muestreo estratificado de includes/excludes y busca errores editoriales.
+
+Busca anomalías en performers/composers/works agrupadas por source.
+
+Explícame la trazabilidad completa del evento X.
+
+Compara dos run artifacts e identifica regresiones.
+```
+
+La trazabilidad por evento en `report.json` sigue `listing → observed → normalized → classification → identity → candidate`. Sirve para distinguir si un performer salió del adapter, de la hidratación de ficha, de la normalización o del merge.
+
+### Observabilidad frente a estado persistente de Gemini
+
+| Qué | Dónde | Para qué |
+|---|---|---|
+| Artifact de la run | Actions artifact, 90 días | Entender esa ejecución |
+| `quota.json`, `cache/**`, `pending/**` | `.local/ai/` vía `actions/cache` | Operar Gemini en la siguiente run |
+
+No conviertas el state de Gemini en historial de runs ni lo metas en el artifact.
+
+`--observability-dir` (o, si sólo hay `--report`, el directorio del report) escribe `run.json` y `events.jsonl` en local. El flag no cambia clasificación ni publicación.
 
 ### Publicación y recovery
 
@@ -104,7 +154,7 @@ El state persistente recupera `quota.json`, `cache/**` y `pending/**` mediante `
 - `clean` / `degraded`: con cambios crea una PR normal. El scheduled solicita auto-merge si el kill switch está activo; el manual publish necesita además `auto_merge=true`;
 - antes de solicitar squash auto-merge, el workflow espera la ejecución `pull_request` real de `ci.yml` para el SHA publicado y exige que termine verde.
 
-Ante un fallo, empieza por el Job Summary y el artifact JSON. Si hay una PR de ingestión abierta, revísala y fusiónala o ciérrala antes de reintentar. Si el token expiró, rota `INGESTION_BOT_TOKEN`. Si el state restaurado está corrupto, no reinicies contadores a ciegas: conserva o recupera `quota.json`, o espera al siguiente reset diario antes de retirar el cache afectado. Un rerun es seguro porque no reutiliza `run.lock` y la reconciliación filtra reverificaciones sin cambios materiales.
+Ante un fallo, empieza por el Job Summary y el artifact de observabilidad. Si hay una PR de ingestión abierta, revísala y fusiónala o ciérrala antes de reintentar. Si el token expiró, rota `INGESTION_BOT_TOKEN`. Si el state restaurado está corrupto, no reinicies contadores a ciegas: conserva o recupera `quota.json`, o espera al siguiente reset diario antes de retirar el cache afectado. Un rerun es seguro porque no reutiliza `run.lock` y la reconciliación filtra reverificaciones sin cambios materiales.
 
 ## Candidatos JSON (legacy)
 

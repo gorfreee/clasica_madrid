@@ -18,8 +18,17 @@ export {
   resolveCatalogSource,
 } from './registry.ts';
 export { runIngest, extractSource } from './pipeline.ts';
-export type { IngestEventDecision, IngestReport, ReportCandidateSnapshot } from './report.ts';
-export { buildIngestReport, buildFatalIngestReport, serializeIngestReport, snapshotCandidate, writeIngestReport } from './report.ts';
+export type { IngestEventDecision, IngestReport, ReportCandidateSnapshot, IngestFailureInfo } from './report.ts';
+export {
+  buildIngestReport,
+  buildFatalIngestReport,
+  serializeIngestReport,
+  snapshotCandidate,
+  snapshotObservedFacts,
+  snapshotNormalizedFacts,
+  writeIngestReport,
+  writeIngestReportSync,
+} from './report.ts';
 export { hydrateEvents, memoizeGet } from './hydrate.ts';
 export { formatRunSummary } from './summary.ts';
 export { normalizeRawEvent, normalizeRawEvents, observedFactsFromNormalized } from './normalize.ts';
@@ -52,3 +61,15 @@ export type { ReconcileAction } from './reconcile.ts';
 export { findPossiblyMissing } from './disappear.ts';
 export type { PossiblyMissingEvent } from './disappear.ts';
 export { normalizeUrl } from './urls.ts';
+export {
+  IngestObservability,
+  startObservability,
+  sanitizeErrorMessage,
+  classifyFailureCode,
+} from './observability.ts';
+export type {
+  IngestRunManifest,
+  IngestRunStage,
+  IngestRunStatus,
+  IngestJournalEntry,
+} from './observability.ts';

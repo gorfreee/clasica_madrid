@@ -6,6 +6,7 @@ export type IngestCliSuccess = {
   dryRun: boolean;
   dataDir?: string;
   reportPath?: string;
+  observabilityDir?: string;
   window?: IngestWindow;
   aiModel?: string;
   aiNoCache?: boolean;
@@ -33,6 +34,7 @@ export function parseIngestArgs(argv: string[], knownSources: string[]): IngestC
   let dryRun = false;
   let dataDir: string | undefined;
   let reportPath: string | undefined;
+  let observabilityDir: string | undefined;
   let from: string | undefined;
   let to: string | undefined;
   let sourceIds: string[] | undefined;
@@ -81,6 +83,15 @@ export function parseIngestArgs(argv: string[], knownSources: string[]): IngestC
       index += 1;
       continue;
     }
+    if (arg === '--observability-dir') {
+      const value = rest[index + 1];
+      if (!value || value.startsWith('--')) {
+        return { ok: false, message: '--observability-dir requiere una ruta' };
+      }
+      observabilityDir = value;
+      index += 1;
+      continue;
+    }
     if (arg === '--from' || arg === '--to') {
       const value = rest[index + 1];
       if (!value || value.startsWith('--')) {
@@ -117,7 +128,7 @@ export function parseIngestArgs(argv: string[], knownSources: string[]): IngestC
   const windowResult = resolveCliWindow(from, to);
   if (!windowResult.ok) return windowResult;
   const window = windowResult.window;
-  const flags = { ...successFlags(dryRun, dataDir, reportPath, window), ...aiFlags };
+  const flags = { ...successFlags(dryRun, dataDir, reportPath, observabilityDir, window), ...aiFlags };
 
   if (command === 'sync') {
     if (positionals.length > 0) {
@@ -137,7 +148,7 @@ export function parseIngestArgs(argv: string[], knownSources: string[]): IngestC
   if (positionals.length === 0) {
     return {
       ok: false,
-      message: `Uso: npm run ingest:source -- <fuente> [--from YYYY-MM-DD --to YYYY-MM-DD] [--dry-run] [--data-dir <ruta>] [--report <fichero.json>]\nFuentes: ${knownSources.join(', ')}`,
+      message: `Uso: npm run ingest:source -- <fuente> [--from YYYY-MM-DD --to YYYY-MM-DD] [--dry-run] [--data-dir <ruta>] [--report <fichero.json>] [--observability-dir <ruta>]\nFuentes: ${knownSources.join(', ')}`,
     };
   }
   if (positionals.length > 1) {
@@ -199,12 +210,20 @@ function successFlags(
   dryRun: boolean,
   dataDir: string | undefined,
   reportPath: string | undefined,
+  observabilityDir: string | undefined,
   window: IngestWindow | undefined,
-): { dryRun: boolean; dataDir?: string; reportPath?: string; window?: IngestWindow } {
+): {
+  dryRun: boolean;
+  dataDir?: string;
+  reportPath?: string;
+  observabilityDir?: string;
+  window?: IngestWindow;
+} {
   return {
     dryRun,
     ...(dataDir ? { dataDir } : {}),
     ...(reportPath ? { reportPath } : {}),
+    ...(observabilityDir ? { observabilityDir } : {}),
     ...(window ? { window } : {}),
   };
 }
@@ -226,8 +245,8 @@ export function ingestExitCode(run: {
 
 export function ingestUsage(knownSources: string[]): string {
   return `Uso:
-  npm run ingest:sync [-- --dry-run] [-- --from YYYY-MM-DD --to YYYY-MM-DD] [-- --sources fuente-a,fuente-b] [-- --data-dir <ruta>] [-- --report <fichero.json>]
-  npm run ingest:source -- <fuente> [--from YYYY-MM-DD --to YYYY-MM-DD] [--dry-run] [--data-dir <ruta>] [--report <fichero.json>]
+  npm run ingest:sync [-- --dry-run] [-- --from YYYY-MM-DD --to YYYY-MM-DD] [-- --sources fuente-a,fuente-b] [-- --data-dir <ruta>] [-- --report <fichero.json>] [-- --observability-dir <ruta>]
+  npm run ingest:source -- <fuente> [--from YYYY-MM-DD --to YYYY-MM-DD] [--dry-run] [--data-dir <ruta>] [--report <fichero.json>] [--observability-dir <ruta>]
 
 Gemini: --ai-model <modelo> (fija modelo sin fallback), --ai-no-cache, --ai-max-requests <n>
 
