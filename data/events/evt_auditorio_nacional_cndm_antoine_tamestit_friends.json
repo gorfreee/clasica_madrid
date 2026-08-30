@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_cndm_antoine_tamestit_friends",
+  "slug": "cndm-antoine-tamestit-friends",
+  "title": "CNDM. Antoine Tamestit & Friends",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_cndm_antoine_tamestit_friends_01",
+      "date": "2026-12-02",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "ANTOINE TAMESTIT"
+    },
+    {
+      "name": "JAMES EHNES"
+    },
+    {
+      "name": "ALEXANDRA PREUCIL"
+    },
+    {
+      "name": "SÀO SOULEZ LARIVIÈRE"
+    },
+    {
+      "name": "CHRISTIAN POLTÉRA"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johannes Brahms (1833-1897)"
+    },
+    {
+      "name": "George Benjamin (1960)"
+    },
+    {
+      "name": "J. Brahms"
+    }
+  ],
+  "works": [
+    {
+      "title": "Quinteto de cuerda n.º 1 en fa mayor, op. 88 (1882)",
+      "composerName": "Johannes Brahms (1833-1897)"
+    },
+    {
+      "title": "Viola, viola (1997)",
+      "composerName": "George Benjamin (1960)"
+    },
+    {
+      "title": "Quinteto de cuerda n.º 2 en sol mayor, op. 111 (1890)",
+      "composerName": "J. Brahms"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-antoine-tamestit-friends",
+      "checkedAt": "2026-08-30",
+      "externalId": "cndm-antoine-tamestit-friends"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

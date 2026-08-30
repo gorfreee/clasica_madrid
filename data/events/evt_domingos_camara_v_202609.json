@@ -25,7 +25,10 @@
   ],
   "composers": [],
   "works": [],
-  "eras": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
   "formats": [
     "chamber"
   ],
@@ -35,9 +38,10 @@
     {
       "sourceId": "src_teatro_real",
       "url": "https://www.teatroreal.es/es/espectaculo/domingos-camara-v",
-      "checkedAt": "2026-08-28"
+      "checkedAt": "2026-08-30",
+      "externalId": "domingos-camara-v"
     }
   ],
   "primarySourceId": "src_teatro_real",
-  "lastVerifiedAt": "2026-08-28"
+  "lastVerifiedAt": "2026-08-30"
 }

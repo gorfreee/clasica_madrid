@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_orcam_tiempo_de_camara_1_volver_a_creer",
+  "slug": "orcam-tiempo-de-camara-1-volver-a-creer",
+  "title": "ORCAM. Tiempo de Cámara 1. Volver a Creer",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_orcam_tiempo_de_camara_1_volver_a_creer_01",
+      "date": "2026-10-25",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro de la Comunidad de Madrid"
+    },
+    {
+      "name": "Karina Azizova"
+    },
+    {
+      "name": "Javier Carmena",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "choral",
+    "chamber",
+    "recital"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-tiempo-de-camara-1-volver-a-creer",
+      "checkedAt": "2026-08-30",
+      "externalId": "orcam-tiempo-de-camara-1-volver-a-creer"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

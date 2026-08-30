@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_grupo_concertante_talia_ciclo_sinfonico_coral_ciclo_sinfonico_coral_sinfonia_no2_de_brahms",
+  "slug": "grupo-concertante-talia-ciclo-sinfonico-coral-sinfonia-n-2-de-brahms",
+  "title": "Grupo Concertante Talía. Ciclo Sinfónico-Coral. Sinfonía nº2 de Brahms",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_grupo_concertante_talia_ciclo_sinfonico_coral_ciclo_sinfonico_coral_sinfonia_no2_de_brahms_01",
+      "date": "2026-10-03",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Metropolitana de Madrid"
+    },
+    {
+      "name": "Coro Talía"
+    },
+    {
+      "name": "Silvia Sanz",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/grupo-concertante-talia-ciclo-sinfonico-coral-ciclo-sinfonico-coral-sinfonia-no2-de-brahms",
+      "checkedAt": "2026-08-30",
+      "externalId": "grupo-concertante-talia-ciclo-sinfonico-coral-ciclo-sinfonico-coral-sinfonia-no2-de-brahms"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_39687b578b2f4a998880961b4a18f9d1",
+  "slug": "ocne-sinfonico-08",
+  "title": "OCNE. Sinfónico 08",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_39687b578b2f4a998880961b4a18f9d1_01",
+      "date": "2026-11-27",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_39687b578b2f4a998880961b4a18f9d1_02",
+      "date": "2026-11-28",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_39687b578b2f4a998880961b4a18f9d1_03",
+      "date": "2026-11-29",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta y Coro Nacionales de España"
+    },
+    {
+      "name": "Pierre Bleuse",
+      "role": "conductor"
+    },
+    {
+      "name": "Jone Martínez"
+    },
+    {
+      "name": "Elsa Benoit"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-08-1",
+      "checkedAt": "2026-08-30",
+      "externalId": "39687b578b2f4a998880961b4a18f9d1"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

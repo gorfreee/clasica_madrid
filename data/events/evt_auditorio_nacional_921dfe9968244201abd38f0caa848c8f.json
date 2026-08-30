@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_921dfe9968244201abd38f0caa848c8f",
+  "slug": "ocne-sinfonico-04",
+  "title": "OCNE. Sinfónico 04",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_921dfe9968244201abd38f0caa848c8f_01",
+      "date": "2026-10-30",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_921dfe9968244201abd38f0caa848c8f_02",
+      "date": "2026-10-31",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_921dfe9968244201abd38f0caa848c8f_03",
+      "date": "2026-11-01",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta y Coro Nacionales de España"
+    },
+    {
+      "name": "Barcelona Ars Nova"
+    },
+    {
+      "name": "Kent Nagano",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-04-1",
+      "checkedAt": "2026-08-30",
+      "externalId": "921dfe9968244201abd38f0caa848c8f"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

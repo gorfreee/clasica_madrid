@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_el_mesias_de_handel_4",
+  "slug": "excelentia-el-mesias-de-handel-2",
+  "title": "Excelentia. El Mesías de Händel",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_el_mesias_de_handel_4_01",
+      "date": "2026-12-20",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Excelentia Vocal Ensemble"
+    },
+    {
+      "name": "Orquesta Clásica Santa Cecilia"
+    },
+    {
+      "name": "Kynan Johns",
+      "role": "conductor"
+    },
+    {
+      "name": "Rocío Martínez"
+    },
+    {
+      "name": "Beatriz Oleaga"
+    },
+    {
+      "name": "Víctor Sordo"
+    },
+    {
+      "name": "David Cervera"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "choral",
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-el-mesias-de-handel-4",
+      "checkedAt": "2026-08-30",
+      "externalId": "excelentia-el-mesias-de-handel-4"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

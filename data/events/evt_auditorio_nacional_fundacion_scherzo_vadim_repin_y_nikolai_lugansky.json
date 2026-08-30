@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_fundacion_scherzo_vadim_repin_y_nikolai_lugansky",
+  "slug": "fundacion-scherzo-vadim-repin-y-nikolai-lugansky",
+  "title": "Fundación Scherzo. Vadim Repin y Nikolai Lugansky",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_fundacion_scherzo_vadim_repin_y_nikolai_lugansky_01",
+      "date": "2026-10-20",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Vadim Repin"
+    },
+    {
+      "name": "Nikolai Lugansky"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "chamber",
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/fundacion-scherzo-vadim-repin-y-nikolai-lugansky",
+      "checkedAt": "2026-08-30",
+      "externalId": "fundacion-scherzo-vadim-repin-y-nikolai-lugansky"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

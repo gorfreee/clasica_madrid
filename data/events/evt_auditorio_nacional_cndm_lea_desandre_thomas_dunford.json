@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_cndm_lea_desandre_thomas_dunford",
+  "slug": "cndm-lea-desandre-thomas-dunford",
+  "title": "CNDM. Lea Desandre & Thomas Dunford",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_cndm_lea_desandre_thomas_dunford_01",
+      "date": "2026-10-22",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "LEA DESANDRE"
+    },
+    {
+      "name": "THOMAS DUNFORD"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "baroque",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber",
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-lea-desandre-thomas-dunford",
+      "checkedAt": "2026-08-30",
+      "externalId": "cndm-lea-desandre-thomas-dunford"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_uam_el_mesias_dublin_1742",
+  "slug": "uam-el-mesias-dublin-1742",
+  "title": "UAM. El Mesías. Dublín, 1742",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_uam_el_mesias_dublin_1742_01",
+      "date": "2026-12-19",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro de la Universidad Autónoma de Madrid"
+    },
+    {
+      "name": "Marcos Magalhães",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Georg Friedrich Händel (1685-1759)"
+    }
+  ],
+  "works": [
+    {
+      "title": "El Mesías (selección de coros y arias)",
+      "composerName": "Georg Friedrich Händel (1685-1759)"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/uam-el-mesias-dublin-1742",
+      "checkedAt": "2026-08-30",
+      "externalId": "uam-el-mesias-dublin-1742"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

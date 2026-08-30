@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_requiem_de_mozart_9",
+  "slug": "excelentia-requiem-de-mozart",
+  "title": "Excelentia. Réquiem de Mozart",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_requiem_de_mozart_9_01",
+      "date": "2026-11-02",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Sociedad Coral Excelentia de Madrid"
+    },
+    {
+      "name": "Orquesta Clásica Santa Cecilia"
+    },
+    {
+      "name": "Kynan Johns",
+      "role": "conductor"
+    },
+    {
+      "name": "Ruth Terán"
+    },
+    {
+      "name": "Victor Sordo"
+    },
+    {
+      "name": "Olga Syniakova"
+    },
+    {
+      "name": "David Cervera"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Schumann"
+    },
+    {
+      "name": "Mozart"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sinfonía nº 3 “Renana”",
+      "composerName": "Schumann"
+    },
+    {
+      "title": "Réquiem",
+      "composerName": "Mozart"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-requiem-de-mozart-9",
+      "checkedAt": "2026-08-30",
+      "externalId": "excelentia-requiem-de-mozart-9"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

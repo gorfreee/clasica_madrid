@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ibermusica_london_philharmonic_orchestra_11",
+  "slug": "ibermusica-london-philharmonic-orchestra",
+  "title": "Ibermúsica. London Philharmonic Orchestra",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ibermusica_london_philharmonic_orchestra_11_01",
+      "date": "2026-10-28",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "London Philharmonic Orchestra"
+    },
+    {
+      "name": "Edward Gardner"
+    },
+    {
+      "name": "Daniel Müller-Schott"
+    },
+    {
+      "name": "Julia Fischer"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-london-philharmonic-orchestra-11",
+      "checkedAt": "2026-08-30",
+      "externalId": "ibermusica-london-philharmonic-orchestra-11"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_la_filarmonica_tercera_de_mahler",
+  "slug": "la-filarmonica-tercera-de-mahler",
+  "title": "La Filarmónica. Tercera de Mahler",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_la_filarmonica_tercera_de_mahler_01",
+      "date": "2026-10-21",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Sinfónica de Düsseldorf"
+    },
+    {
+      "name": "Coro femenino e infantil de la ORCAM"
+    },
+    {
+      "name": "Catriona Morison"
+    },
+    {
+      "name": "Ádám Fischer",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/la-filarmonica-tercera-de-mahler",
+      "checkedAt": "2026-08-30",
+      "externalId": "la-filarmonica-tercera-de-mahler"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

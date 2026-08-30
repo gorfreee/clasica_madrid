@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_bach_conciertos_de_brandeburgo_2",
+  "slug": "excelentia-bach-conciertos-de-brandeburgo-2",
+  "title": "Excelentia. Bach: Conciertos de Brandeburgo",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_bach_conciertos_de_brandeburgo_2_01",
+      "date": "2026-11-21",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Clásica Santa Cecilia"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-bach-conciertos-de-brandeburgo-2",
+      "checkedAt": "2026-08-30",
+      "externalId": "excelentia-bach-conciertos-de-brandeburgo-2"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

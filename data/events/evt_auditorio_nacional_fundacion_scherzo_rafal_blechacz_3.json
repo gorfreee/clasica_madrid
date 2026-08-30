@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_fundacion_scherzo_rafal_blechacz_3",
+  "slug": "fundacion-scherzo-rafal-blechacz",
+  "title": "Fundación Scherzo. Rafal Blechacz",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_fundacion_scherzo_rafal_blechacz_3_01",
+      "date": "2026-11-10",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Rafal Blechacz"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "baroque",
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/fundacion-scherzo-rafal-blechacz-3",
+      "checkedAt": "2026-08-30",
+      "externalId": "fundacion-scherzo-rafal-blechacz-3"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

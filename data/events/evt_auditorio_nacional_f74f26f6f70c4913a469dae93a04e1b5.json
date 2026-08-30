@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_f74f26f6f70c4913a469dae93a04e1b5",
+  "slug": "ocne-sinfonico-06",
+  "title": "OCNE. Sinfónico 06",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_f74f26f6f70c4913a469dae93a04e1b5_01",
+      "date": "2026-11-13",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_f74f26f6f70c4913a469dae93a04e1b5_02",
+      "date": "2026-11-14",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_f74f26f6f70c4913a469dae93a04e1b5_03",
+      "date": "2026-11-15",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Nacional de España"
+    },
+    {
+      "name": "Josep Pons",
+      "role": "conductor"
+    },
+    {
+      "name": "Benjamin Bruns"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic",
+    "lied"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-06-1",
+      "checkedAt": "2026-08-30",
+      "externalId": "f74f26f6f70c4913a469dae93a04e1b5"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

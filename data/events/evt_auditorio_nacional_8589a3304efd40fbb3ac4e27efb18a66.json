@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_8589a3304efd40fbb3ac4e27efb18a66",
+  "slug": "ocne-sinfonico-03",
+  "title": "OCNE. Sinfónico 03",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_8589a3304efd40fbb3ac4e27efb18a66_01",
+      "date": "2026-10-16",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_8589a3304efd40fbb3ac4e27efb18a66_02",
+      "date": "2026-10-17",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_8589a3304efd40fbb3ac4e27efb18a66_03",
+      "date": "2026-10-18",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Nacional de España"
+    },
+    {
+      "name": "David Afkham",
+      "role": "conductor"
+    },
+    {
+      "name": "Frank Peter Zimmermann"
+    }
+  ],
+  "composers": [
+    {
+      "name": "William Walton"
+    },
+    {
+      "name": "Serguéi Rajmáninov"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para violín",
+      "composerName": "William Walton"
+    },
+    {
+      "title": "Sinfonía núm. 2 en Mi menor, op. 27",
+      "composerName": "Serguéi Rajmáninov"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-03-1",
+      "checkedAt": "2026-08-30",
+      "externalId": "8589a3304efd40fbb3ac4e27efb18a66"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

@@ -69,8 +69,14 @@
       "sourceId": "src_excelentia_musica",
       "url": "https://excelentiamusica.com/30092026-violin-chaikovsky-y-sinfonia-2-sibelius/",
       "checkedAt": "2026-08-28"
+    },
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-violin-chaikovsky-y-sinfonia-2-sibelius",
+      "checkedAt": "2026-08-30",
+      "externalId": "excelentia-violin-chaikovsky-y-sinfonia-2-sibelius"
     }
   ],
   "primarySourceId": "src_excelentia_musica",
-  "lastVerifiedAt": "2026-08-28"
+  "lastVerifiedAt": "2026-08-30"
 }

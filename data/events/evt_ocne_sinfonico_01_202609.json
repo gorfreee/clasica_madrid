@@ -79,9 +79,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-01-1",
-      "checkedAt": "2026-08-28"
+      "checkedAt": "2026-08-30",
+      "externalId": "094859ec8b69466481bb839d02a9af07"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-28"
+  "lastVerifiedAt": "2026-08-30"
 }

@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_uam_rafael_aguirre_la_voz_de_la_guitarra",
+  "slug": "uam-rafael-aguirre-la-voz-de-la-guitarra",
+  "title": "UAM. Rafael Aguirre. La Voz de la Guitarra",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_uam_rafael_aguirre_la_voz_de_la_guitarra_01",
+      "date": "2026-11-14",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Rafael Aguirre"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "baroque",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/uam-rafael-aguirre-la-voz-de-la-guitarra",
+      "checkedAt": "2026-08-30",
+      "externalId": "uam-rafael-aguirre-la-voz-de-la-guitarra"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

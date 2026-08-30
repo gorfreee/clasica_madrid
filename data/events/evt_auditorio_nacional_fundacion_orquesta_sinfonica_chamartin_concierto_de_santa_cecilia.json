@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_fundacion_orquesta_sinfonica_chamartin_concierto_de_santa_cecilia",
+  "slug": "fundacion-orquesta-sinfonica-chamartin-fosc-de-la-manana-a-la-noche-concierto-de-santa-cecilia",
+  "title": "Fundación Orquesta Sinfónica Chamartín. FOSC. De la Mañana a la Noche. Concierto de Santa Cecilia",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_fundacion_orquesta_sinfonica_chamartin_concierto_de_santa_cecilia_01",
+      "date": "2026-11-21",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Celeste Classic"
+    },
+    {
+      "name": "Coro y Escolanía Maravillas"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic",
+    "contemporary"
+  ],
+  "formats": [
+    "symphonic",
+    "choral",
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/fundacion-orquesta-sinfonica-chamartin-concierto-de-santa-cecilia",
+      "checkedAt": "2026-08-30",
+      "externalId": "fundacion-orquesta-sinfonica-chamartin-concierto-de-santa-cecilia"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ibermusica_el_mesias_de_haendel",
+  "slug": "ibermusica-el-mesias-de-haendel",
+  "title": "Ibermúsica. El Mesías de Haendel",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ibermusica_el_mesias_de_haendel_01",
+      "date": "2026-12-10",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Le Concert D’Astrée orquesta y coro"
+    },
+    {
+      "name": "Emmanuelle Haïm"
+    },
+    {
+      "name": "Lucy Crowe"
+    },
+    {
+      "name": "Carlo Vistoli"
+    },
+    {
+      "name": "Lunga Eric Hallam"
+    },
+    {
+      "name": "Ashley Riches"
+    }
+  ],
+  "composers": [
+    {
+      "name": "G. F. Haendel"
+    }
+  ],
+  "works": [
+    {
+      "title": "\"El Mesías\"",
+      "composerName": "G. F. Haendel"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "symphonic",
+    "choral",
+    "opera"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-el-mesias-de-haendel",
+      "checkedAt": "2026-08-30",
+      "externalId": "ibermusica-el-mesias-de-haendel"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_atlantida_chamber_orchestra_maxim_vengerov_concierto_de_sibelius",
+  "slug": "atlantida-chamber-orchestra-maxim-vengerov-concierto-de-sibelius",
+  "title": "Atlántida Chamber Orchestra. Maxim Vengerov: Concierto de Sibelius",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_atlantida_chamber_orchestra_maxim_vengerov_concierto_de_sibelius_01",
+      "date": "2026-10-07",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Atlántida Chamber Orchestra"
+    },
+    {
+      "name": "Maxim Vengerov"
+    },
+    {
+      "name": "Manuel Tévar",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/atlantida-chamber-orchestra-maxim-vengerov-concierto-de-sibelius",
+      "checkedAt": "2026-08-30",
+      "externalId": "atlantida-chamber-orchestra-maxim-vengerov-concierto-de-sibelius"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

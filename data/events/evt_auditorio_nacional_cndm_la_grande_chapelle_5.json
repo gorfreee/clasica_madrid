@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_cndm_la_grande_chapelle_5",
+  "slug": "cndm-la-grande-chapelle",
+  "title": "CNDM. La Grande Chapelle",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_cndm_la_grande_chapelle_5_01",
+      "date": "2026-11-26",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "LA GRANDE CHAPELLE"
+    },
+    {
+      "name": "ALBERT RECASENS",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "renaissance"
+  ],
+  "formats": [
+    "early-music",
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-la-grande-chapelle-5",
+      "checkedAt": "2026-08-30",
+      "externalId": "cndm-la-grande-chapelle-5"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

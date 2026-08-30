@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_hispania_concertalia_gustav_mahler_jugendorchester",
+  "slug": "hispania-concertalia-gustav-mahler-jugendorchester",
+  "title": "Hispania Concertalia. Gustav Mahler Jugendorchester",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_hispania_concertalia_gustav_mahler_jugendorchester_01",
+      "date": "2026-11-14",
+      "time": "22:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Gustav Mahler Jugendorchester"
+    },
+    {
+      "name": "Cristian Măcelaru"
+    },
+    {
+      "name": "Julia Hagen"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antonín Dvořák"
+    },
+    {
+      "name": "Piotr Ilich Chaikovski"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para violonchelo en si menor, op. 104",
+      "composerName": "Antonín Dvořák"
+    },
+    {
+      "title": "Sinfonía n.º 6 en si menor, op. 74 «Patética»",
+      "composerName": "Piotr Ilich Chaikovski"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/hispania-concertalia-gustav-mahler-jugendorchester",
+      "checkedAt": "2026-08-30",
+      "externalId": "hispania-concertalia-gustav-mahler-jugendorchester"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ocne_satelite_06_del_nacionalismo_checo_a_la_francia_de_ravel",
+  "slug": "ocne-satelite-06-del-nacionalismo-checo-a-la-francia-de-ravel",
+  "title": "OCNE. Satélite 06 Del Nacionalismo Checo a la Francia de Ravel",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ocne_satelite_06_del_nacionalismo_checo_a_la_francia_de_ravel_01",
+      "date": "2026-11-24",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Cuarteto Ignis"
+    },
+    {
+      "name": "Laura Balboa"
+    },
+    {
+      "name": "Victoria Kramer"
+    },
+    {
+      "name": "Lorena Otero"
+    },
+    {
+      "name": "Alberto Alonso"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Leos Janácek"
+    },
+    {
+      "name": "Germaine Tailleferre"
+    },
+    {
+      "name": "Maurice Ravel"
+    }
+  ],
+  "works": [
+    {
+      "title": "Cuarteto de cuerda núm. 1 «Sonata a Kreutzer»",
+      "composerName": "Leos Janácek"
+    },
+    {
+      "title": "Cuarteto de cuerda",
+      "composerName": "Germaine Tailleferre"
+    },
+    {
+      "title": "Cuarteto de cuerda en Fa mayor",
+      "composerName": "Maurice Ravel"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-06-del-nacionalismo-checo-a-la-francia-de-ravel",
+      "checkedAt": "2026-08-30",
+      "externalId": "ocne-satelite-06-del-nacionalismo-checo-a-la-francia-de-ravel"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

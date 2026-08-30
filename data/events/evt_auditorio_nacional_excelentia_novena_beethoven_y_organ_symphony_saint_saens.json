@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_novena_beethoven_y_organ_symphony_saint_saens",
+  "slug": "excelentia-novena-beethoven-y-organ-symphony-saint-saens",
+  "title": "Excelentia. Novena Beethoven y Organ Symphony Saint Saëns",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_novena_beethoven_y_organ_symphony_saint_saens_01",
+      "date": "2026-11-26",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Sociedad Coral Excelentia de Madrid"
+    },
+    {
+      "name": "Orquesta Clásica Santa Cecilia"
+    },
+    {
+      "name": "Kynan Johns",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic",
+    "choral",
+    "organ"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-novena-beethoven-y-organ-symphony-saint-saens",
+      "checkedAt": "2026-08-30",
+      "externalId": "excelentia-novena-beethoven-y-organ-symphony-saint-saens"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

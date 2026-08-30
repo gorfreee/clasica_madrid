@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_orcam_sinfonico_2_coreografias_sinfonicas",
+  "slug": "orcam-sinfonico-2-coreografias-sinfonicas",
+  "title": "ORCAM. Sinfónico 2. Coreografías Sinfónicas",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_orcam_sinfonico_2_coreografias_sinfonicas_01",
+      "date": "2026-11-03",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-sinfonico-2-coreografias-sinfonicas",
+      "checkedAt": "2026-08-30",
+      "externalId": "orcam-sinfonico-2-coreografias-sinfonicas"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

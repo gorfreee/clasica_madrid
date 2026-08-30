@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_mozart_270_aniversario",
+  "slug": "excelentia-mozart-270-aniversario",
+  "title": "Excelentia. Mozart: 270 Aniversario",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_mozart_270_aniversario_01",
+      "date": "2026-11-27",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Clásica Santa Cecilia"
+    },
+    {
+      "name": "Eduard Kollert"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Mozart"
+    }
+  ],
+  "works": [
+    {
+      "title": "Obertura de Las bodas de Fígaro",
+      "composerName": "Mozart"
+    },
+    {
+      "title": "Concierto para violín n.º 3",
+      "composerName": "Mozart"
+    },
+    {
+      "title": "Sinfonía n.º 41 “Júpiter”",
+      "composerName": "Mozart"
+    }
+  ],
+  "eras": [
+    "classical"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-mozart-270-aniversario",
+      "checkedAt": "2026-08-30",
+      "externalId": "excelentia-mozart-270-aniversario"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

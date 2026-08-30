@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_cndm_patricia_kopatchinskaja_fazil_say_1",
+  "slug": "cndm-patricia-kopatchinskaja-fazil-say",
+  "title": "CNDM. Patricia Kopatchinskaja & Fazil Say",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_cndm_patricia_kopatchinskaja_fazil_say_1_01",
+      "date": "2026-11-20",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "PATRICIA KOPATCHINSKAJA"
+    },
+    {
+      "name": "FAZIL SAY"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-patricia-kopatchinskaja-fazil-say-1",
+      "checkedAt": "2026-08-30",
+      "externalId": "cndm-patricia-kopatchinskaja-fazil-say-1"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

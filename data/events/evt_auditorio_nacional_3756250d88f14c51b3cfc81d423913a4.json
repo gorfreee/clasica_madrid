@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_3756250d88f14c51b3cfc81d423913a4",
+  "slug": "ocne-sinfonico-07",
+  "title": "OCNE. Sinfónico 07",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_3756250d88f14c51b3cfc81d423913a4_01",
+      "date": "2026-11-20",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_3756250d88f14c51b3cfc81d423913a4_02",
+      "date": "2026-11-21",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_3756250d88f14c51b3cfc81d423913a4_03",
+      "date": "2026-11-22",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Nacional de España"
+    },
+    {
+      "name": "Leonidas Kavakos",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Anton Bruckner"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para dos pianos y orquesta núm. 10 en Mi bemol Mayor, K. 365",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Sinfonía núm. 4 en Mi bemol mayor, «Romántica»",
+      "composerName": "Anton Bruckner"
+    }
+  ],
+  "eras": [
+    "classical"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-07-1",
+      "checkedAt": "2026-08-30",
+      "externalId": "3756250d88f14c51b3cfc81d423913a4"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

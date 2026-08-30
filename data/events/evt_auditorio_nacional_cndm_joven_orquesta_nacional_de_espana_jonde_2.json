@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_cndm_joven_orquesta_nacional_de_espana_jonde_2",
+  "slug": "cndm-joven-orquesta-nacional-de-espana-jonde-2",
+  "title": "CNDM. Joven Orquesta Nacional de España. JONDE",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_cndm_joven_orquesta_nacional_de_espana_jonde_2_01",
+      "date": "2026-10-28",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "JOVEN ORQUESTA NACIONAL DE ESPAÑA"
+    },
+    {
+      "name": "MIEMBROS DEL KLANGFORUM WIEN"
+    },
+    {
+      "name": "ISABEL RUBIO",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Helena Cánovas Parés (1994)"
+    },
+    {
+      "name": "Nuria Núñez Hierro (1890)"
+    },
+    {
+      "name": "Unsuk Chin (1961)"
+    }
+  ],
+  "works": [
+    {
+      "title": "The crossing place of road and river * (2025-2026)",
+      "composerName": "Helena Cánovas Parés (1994)"
+    },
+    {
+      "title": "Metazoa *1 (2026)",
+      "composerName": "Nuria Núñez Hierro (1890)"
+    },
+    {
+      "title": "Graffiti (2012-2013)",
+      "composerName": "Unsuk Chin (1961)"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-joven-orquesta-nacional-de-espana-jonde-2",
+      "checkedAt": "2026-08-30",
+      "externalId": "cndm-joven-orquesta-nacional-de-espana-jonde-2"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

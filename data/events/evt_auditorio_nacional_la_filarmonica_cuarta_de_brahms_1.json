@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_la_filarmonica_cuarta_de_brahms_1",
+  "slug": "la-filarmonica-cuarta-de-brahms",
+  "title": "La Filarmónica. Cuarta de Brahms",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_la_filarmonica_cuarta_de_brahms_1_01",
+      "date": "2026-12-02",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Academia Nacional Santa Cecília de Roma"
+    },
+    {
+      "name": "Kirill Gerstein"
+    },
+    {
+      "name": "Daniel Harding",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/la-filarmonica-cuarta-de-brahms-1",
+      "checkedAt": "2026-08-30",
+      "externalId": "la-filarmonica-cuarta-de-brahms-1"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

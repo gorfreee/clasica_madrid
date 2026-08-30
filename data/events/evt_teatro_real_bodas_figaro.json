@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_real_bodas_figaro",
+  "slug": "las-bodas-de-figaro",
+  "title": "Las bodas de Fígaro",
+  "status": "scheduled",
+  "venueId": "ven_teatro_real",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_real_bodas_figaro_01",
+      "date": "2026-11-10",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_bodas_figaro_02",
+      "date": "2026-11-11",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_bodas_figaro_03",
+      "date": "2026-11-12",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_bodas_figaro_04",
+      "date": "2026-11-15",
+      "time": "18:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_bodas_figaro_05",
+      "date": "2026-11-16",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_bodas_figaro_06",
+      "date": "2026-11-17",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_bodas_figaro_07",
+      "date": "2026-11-18",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_bodas_figaro_08",
+      "date": "2026-11-20",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_bodas_figaro_09",
+      "date": "2026-11-21",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_bodas_figaro_10",
+      "date": "2026-11-22",
+      "time": "18:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_bodas_figaro_11",
+      "date": "2026-11-24",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_bodas_figaro_12",
+      "date": "2026-11-26",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_bodas_figaro_13",
+      "date": "2026-11-27",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "classical"
+  ],
+  "formats": [
+    "opera"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_teatro_real",
+      "url": "https://www.teatroreal.es/es/espectaculo/bodas-figaro",
+      "checkedAt": "2026-08-30",
+      "externalId": "bodas-figaro"
+    }
+  ],
+  "primarySourceId": "src_teatro_real",
+  "lastVerifiedAt": "2026-08-30"
+}

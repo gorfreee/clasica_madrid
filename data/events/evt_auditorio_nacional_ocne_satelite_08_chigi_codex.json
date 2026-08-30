@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ocne_satelite_08_chigi_codex",
+  "slug": "ocne-satelite-08-chigi-codex",
+  "title": "OCNE. Satélite 08. Chigi Codex",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ocne_satelite_08_chigi_codex_01",
+      "date": "2026-12-05",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro Nacional de España"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "renaissance"
+  ],
+  "formats": [
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-08-chigi-codex",
+      "checkedAt": "2026-08-30",
+      "externalId": "ocne-satelite-08-chigi-codex"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

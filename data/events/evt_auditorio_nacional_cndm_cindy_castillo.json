@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_cndm_cindy_castillo",
+  "slug": "cndm-cindy-castillo",
+  "title": "CNDM. Cindy Castillo",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_cndm_cindy_castillo_01",
+      "date": "2026-10-17",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "CINDY CASTILLO"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "baroque",
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "organ"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-cindy-castillo",
+      "checkedAt": "2026-08-30",
+      "externalId": "cndm-cindy-castillo"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

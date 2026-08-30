@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_impacta_philippe_jaroussky_il_mio_vivaldi",
+  "slug": "impacta-philippe-jaroussky-il-mio-vivaldi",
+  "title": "Impacta. Philippe Jaroussky: IL Mio Vivaldi",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_impacta_philippe_jaroussky_il_mio_vivaldi_01",
+      "date": "2026-12-03",
+      "time": "22:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Philippe Jaroussky"
+    },
+    {
+      "name": "Ensemble Artaserse"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "early-music",
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/impacta-philippe-jaroussky-il-mio-vivaldi",
+      "checkedAt": "2026-08-30",
+      "externalId": "impacta-philippe-jaroussky-il-mio-vivaldi"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

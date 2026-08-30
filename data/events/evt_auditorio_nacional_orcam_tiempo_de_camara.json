@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_orcam_tiempo_de_camara",
+  "slug": "orcam-tiempo-de-camara-2-esencias-de-villancicos",
+  "title": "ORCAM. Tiempo de Cámara 2. Esencias de Villancicos",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_orcam_tiempo_de_camara_01",
+      "date": "2026-12-09",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro de la Comunidad de Madrid"
+    },
+    {
+      "name": "Laura Hernández"
+    },
+    {
+      "name": "Karina Azizova"
+    },
+    {
+      "name": "Javier Carmena",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "choral",
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-tiempo-de-camara",
+      "checkedAt": "2026-08-30",
+      "externalId": "orcam-tiempo-de-camara"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}

@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_atlantida_chamber_orchestra_el_mesias_grandes_coros_y_arias",
+  "slug": "atlantida-chamber-orchestra-el-mesias-grandes-coros-y-arias",
+  "title": "Atlántida Chamber Orchestra. El Mesías: Grandes Coros y Arias",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_atlantida_chamber_orchestra_el_mesias_grandes_coros_y_arias_01",
+      "date": "2026-12-23",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Atlántida Chamber Orchestra & Choir"
+    },
+    {
+      "name": "Congyu Wang"
+    },
+    {
+      "name": "Alexandra Zamfira"
+    },
+    {
+      "name": "Manuel Tévar",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "baroque",
+    "classical"
+  ],
+  "formats": [
+    "symphonic",
+    "chamber",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/atlantida-chamber-orchestra-el-mesias-grandes-coros-y-arias",
+      "checkedAt": "2026-08-30",
+      "externalId": "atlantida-chamber-orchestra-el-mesias-grandes-coros-y-arias"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-08-30"
+}
