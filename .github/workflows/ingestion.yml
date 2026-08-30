@@ -55,7 +55,6 @@ jobs:
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       GEMINI_STATE_DIR: ${{ github.workspace }}/.local/ai
       REPORT_PATH: ingestion/reports/ingestion-${{ github.run_id }}-${{ github.run_attempt }}.json
-      PR_BODY_PATH: ${{ runner.temp }}/ingestion-pr-body.md
       RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
     steps:
@@ -176,6 +175,8 @@ jobs:
       - name: Render report and PR body
         id: report
         if: always()
+        env:
+          PR_BODY_PATH: ${{ runner.temp }}/ingestion-pr-body.md
         shell: bash
         run: |
           set -euo pipefail
@@ -261,6 +262,7 @@ jobs:
         if: success() && steps.config.outputs.mode == 'publish'
         env:
           GH_TOKEN: ${{ secrets.INGESTION_BOT_TOKEN }}
+          PR_BODY_PATH: ${{ runner.temp }}/ingestion-pr-body.md
           DATA_CHANGES: ${{ steps.changes.outputs.data_changes }}
           HEALTH: ${{ steps.report.outputs.health }}
           AUTO_MERGE_ELIGIBLE: ${{ steps.report.outputs.auto_merge_eligible }}
