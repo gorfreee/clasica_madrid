@@ -3,11 +3,26 @@ import { systemClock } from '../lib/domain/dates.ts';
 import { defaultDataDir } from '../lib/repository/fs.ts';
 import { loadCatalogFromDir } from '../lib/repository/load.ts';
 import { formatRunSummary } from '../ingestion/summary.ts';
-import { buildFatalIngestReport, buildIngestReport, writeIngestReport } from '../ingestion/report.ts';
+import {
+  buildFatalIngestReport,
+  buildIngestReport,
+  writeIngestReport,
+  writeIngestReportSync,
+} from '../ingestion/report.ts';
 import { runIngest } from '../ingestion/pipeline.ts';
 import { defaultIngestWindow } from '../ingestion/dates.ts';
 import { createAiClassifierFromEnv } from '../ingestion/classification/provider.ts';
 import { listSourceDefinitions } from '../ingestion/registry.ts';
+import {
+  classifyFailureCode,
+  parseGithubAttempt,
+  readFailureContext,
+  resolveObservabilityDir,
+  sanitizeErrorMessage,
+  sanitizeFailure,
+  startObservability,
+  type IngestObservability,
+} from '../ingestion/observability.ts';
 import { ingestExitCode, parseIngestArgs } from './ingest-args.ts';
 import { loadLocalAiEnv } from './load-local-env.ts';
 import type { AiClassifier } from '../ingestion/classification/ai.ts';
@@ -24,10 +39,76 @@ if (!parsed.ok) {
 }
 
 const dataDir = parsed.dataDir ?? defaultDataDir();
+const window = parsed.window ?? defaultIngestWindow(systemClock.now());
+const requestedSources =
+  parsed.command === 'source'
+    ? [parsed.sourceId]
+    : parsed.sourceIds ?? ['all'];
+const reportPath = parsed.reportPath;
+const dryRun = parsed.dryRun;
+const observabilityDir = resolveObservabilityDir(reportPath, parsed.observabilityDir);
+
 let ai: AiClassifier | undefined;
-// Graceful termination releases the local lock; SIGKILL requires manual recovery.
-process.once('SIGINT', () => process.exit(130));
-process.once('SIGTERM', () => process.exit(143));
+let observability: IngestObservability | undefined;
+let shuttingDown = false;
+
+if (observabilityDir) {
+  observability = startObservability({
+    directory: observabilityDir,
+    mode: dryRun ? 'dry-run' : 'publish',
+    sources: requestedSources,
+    window,
+    runId: process.env.GITHUB_RUN_ID,
+    attempt: parseGithubAttempt(process.env.GITHUB_RUN_ATTEMPT),
+    gitSha: process.env.GITHUB_SHA,
+  });
+}
+
+function shutdown(signal: NodeJS.Signals): void {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  const code = signal === 'SIGINT' ? 130 : 143;
+  try {
+    observability?.interrupt(signal);
+  } catch {
+    // Best-effort; never block process exit.
+  }
+  try {
+    if (reportPath) {
+      const snapshot = observability?.snapshot();
+      writeIngestReportSync(
+        reportPath,
+        buildFatalIngestReport({
+          generatedAt: new Date(),
+          dryRun,
+          window,
+          reasons: ['interrupted'],
+          failure: sanitizeFailure({
+            code: 'interrupted',
+            message: snapshot?.failure?.message ?? `Recibida ${signal}`,
+            stage: snapshot?.lastStage,
+          }),
+        }),
+      );
+    }
+  } catch {
+    // Best-effort; the journal and run.json are the forensic record.
+  }
+  try {
+    observability?.close();
+  } catch {
+    // ignore
+  }
+  try {
+    ai?.close?.();
+  } catch {
+    // ignore
+  }
+  process.exit(code);
+}
+
+process.once('SIGINT', () => shutdown('SIGINT'));
+process.once('SIGTERM', () => shutdown('SIGTERM'));
 
 try {
   ai = createAiClassifierFromEnv({
@@ -45,16 +126,17 @@ try {
     dataDir,
     catalog,
     now: systemClock.now(),
-    dryRun: parsed.dryRun,
+    dryRun,
     sourceIds: parsed.command === 'source' ? [parsed.sourceId] : parsed.sourceIds,
     window: parsed.window,
     ai,
+    observability,
   });
 
   console.log(formatRunSummary(run.summary));
 
-  if (parsed.reportPath) {
-    await writeIngestReport(parsed.reportPath, buildIngestReport(run, new Date()));
+  if (reportPath) {
+    await writeIngestReport(reportPath, buildIngestReport(run, new Date()));
   }
 
   if (!run.apply.report.ok) {
@@ -64,25 +146,44 @@ try {
     }
   }
 
+  observability?.complete();
   process.exitCode = ingestExitCode(run);
 } catch (error) {
   const message = error instanceof Error ? error.message : String(error);
-  console.error(message);
-  if (parsed.reportPath) {
-    const reason = /GEMINI_|requieren el provider Gemini/.test(message)
-      ? 'ai-config-fatal'
-      : 'unexpected-exception';
+  const safeMessage = sanitizeErrorMessage(message);
+  console.error(safeMessage);
+  if (error instanceof Error && error.stack) {
+    console.error(sanitizeErrorMessage(error.stack));
+  }
+  const context = readFailureContext(error);
+  const failure = sanitizeFailure({
+    code: classifyFailureCode(message),
+    message: safeMessage,
+    stage: context?.stage ?? observability?.snapshot().lastStage,
+    ...(context?.sourceId ? { sourceId: context.sourceId } : {}),
+    ...(context?.sourceUrl ? { sourceUrl: context.sourceUrl } : {}),
+  });
+  observability?.fail(failure);
+  if (reportPath) {
     await writeIngestReport(
-      parsed.reportPath,
+      reportPath,
       buildFatalIngestReport({
         generatedAt: new Date(),
-        dryRun: parsed.dryRun,
-        window: parsed.window ?? defaultIngestWindow(systemClock.now()),
-        reasons: [reason],
+        dryRun,
+        window,
+        reasons: [failure.code],
+        failure,
       }),
     );
   }
   process.exitCode = 1;
 } finally {
-  ai?.close?.();
+  if (!shuttingDown) {
+    try {
+      observability?.close();
+    } catch {
+      // ignore
+    }
+    ai?.close?.();
+  }
 }

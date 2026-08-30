@@ -17,6 +17,7 @@ import {
   shouldClassifyObservation,
   type HarvestObservation,
 } from './reconcile.ts';
+import { attachFailureContext, type IngestObservability } from './observability.ts';
 import { buildEventDecision, type IngestEventDecision } from './report.ts';
 import { matchVenue } from './venues.ts';
 import type { AdapterContext, IngestAiSummary, IngestRunSummary, RawEvent, SourceDefinition, SourceFailure } from './types.ts';
@@ -34,6 +35,8 @@ export type IngestOptions = {
   /** Injected by the CLI. Absent → deterministic path only; uncertain stays unpublished. */
   ai?: AiClassifier;
   identityAliases?: readonly EventIdentityAlias[];
+  /** Optional run observability. Must not affect editorial or publication decisions. */
+  observability?: IngestObservability;
 };
 
 export type IngestRun = {
@@ -52,18 +55,28 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
   const failures: SourceFailure[] = [];
   const succeeded: string[] = [];
   const rawEvents: RawEvent[] = [];
+  const listingByRaw = new Map<RawEvent, RawEvent>();
+  const obs = options.observability;
 
+  obs?.setStage('extraction');
   for (const source of sources) {
     try {
       const extracted = await extractSource(source, options.now, window, get);
       const adapter = getAdapter(source.adapterId);
       const ctx: AdapterContext = { source, now: options.now, window, get };
       const hydrated = await hydrateEvents(extracted, adapter, ctx);
+      for (let index = 0; index < hydrated.length; index += 1) {
+        const raw = hydrated[index]!;
+        const listing = extracted[index];
+        if (listing) listingByRaw.set(raw, listing);
+        obs?.recordObservation({ raw, listing, normalized: normalizeRawEvent(raw) });
+      }
       rawEvents.push(...hydrated);
       succeeded.push(source.id);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       failures.push({ sourceId: source.id, message });
+      obs?.recordSourceFailure(source.id, message);
     }
   }
 
@@ -79,6 +92,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
 
   const ai = wrapAi(options.ai, aiUsage);
 
+  obs?.setStage('classification');
   const bySource = new Map(sources.map((source) => [source.id, source]));
   // Identity is resolved before the publication gate. Classification stays
   // concurrent; candidate construction and ID allocation stay in source order.
@@ -102,24 +116,32 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
   });
   const classified = await mapConcurrent(prepared, options.ai?.concurrency ?? 1, async ({ event, classify }) => {
     if (!event || !classify) return undefined;
-    let aiAttempted = false;
-    let aiCall: AiCallDiagnostics | undefined;
-    const eventAi: AiClassifier | undefined = ai ? {
-      classifyBudgetMs: ai.classifyBudgetMs,
-      async classify(observed, context) {
-        aiAttempted = true;
-        try { return await ai.classify(observed, context); }
-        finally {
-          // Legacy/fake providers are sequential by default. Concurrent providers
-          // must emit diagnostics through the per-call context, never shared state.
-          if (!aiCall && (options.ai?.concurrency ?? 1) === 1) aiCall = ai.lastDiagnostics?.();
-        }
-      },
-    } : undefined;
-    const classification = await classifyObserved(observedFactsFromNormalized(event), {
-      ai: eventAi, onDiagnostics: (diagnostics) => { aiCall = diagnostics; },
-    });
-    return { classification, aiAttempted, aiCall };
+    try {
+      let aiAttempted = false;
+      let aiCall: AiCallDiagnostics | undefined;
+      const eventAi: AiClassifier | undefined = ai ? {
+        classifyBudgetMs: ai.classifyBudgetMs,
+        async classify(observed, context) {
+          aiAttempted = true;
+          try { return await ai.classify(observed, context); }
+          finally {
+            // Legacy/fake providers are sequential by default. Concurrent providers
+            // must emit diagnostics through the per-call context, never shared state.
+            if (!aiCall && (options.ai?.concurrency ?? 1) === 1) aiCall = ai.lastDiagnostics?.();
+          }
+        },
+      } : undefined;
+      const classification = await classifyObserved(observedFactsFromNormalized(event), {
+        ai: eventAi, onDiagnostics: (diagnostics) => { aiCall = diagnostics; },
+      });
+      return { classification, aiAttempted, aiCall };
+    } catch (error) {
+      attachFailureContext(error, {
+        stage: 'classification',
+        sourceId: event.sourceId,
+        sourceUrl: event.sourceUrl,
+      });
+    }
   });
 
   const observations: HarvestObservation[] = [];
@@ -141,6 +163,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
     });
   }
 
+  obs?.setStage('reconciliation');
   const reconciled = reconcileHarvest({
     catalog: options.catalog,
     now: options.now,
@@ -160,6 +183,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
           aiAttempted: false,
           publishable: false,
           candidateGenerated: false,
+          listing: listingByRaw.get(raw),
         }),
       );
       continue;
@@ -174,6 +198,8 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
           aiAttempted: false,
           publishable: false,
           candidateGenerated: false,
+          listing: listingByRaw.get(raw),
+          normalizedEvent: event,
         }),
       );
       continue;
@@ -206,16 +232,21 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
         scheduleChange: result?.scheduleChange,
         batchDuplicate: result?.batchDuplicate,
         mergeDiagnostics: result?.mergeDiagnostics,
+        listing: listingByRaw.get(raw),
+        normalizedEvent: event,
         candidate: result?.candidate,
       }),
     );
   }
 
+  for (const decision of decisions) obs?.recordDecision(decision);
+
   mergeProviderStats(aiUsage, options.ai);
 
+  obs?.setStage('apply');
   const apply = await applyCandidateBatch(options.catalog, reconciled.candidates, options.dataDir, {
     dryRun: options.dryRun,
-  });
+  }).catch((error: unknown) => attachFailureContext(error, { stage: 'apply' }));
 
   const possiblyMissing = findPossiblyMissing({
     catalog: options.catalog,

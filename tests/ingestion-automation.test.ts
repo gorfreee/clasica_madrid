@@ -4,8 +4,10 @@ import {
   automationReportMetrics,
   formatAutomationPrBody,
   formatAutomationSummary,
+  formatMissingReportSummary,
 } from '../src/ingestion/automation.ts';
 import { buildFatalIngestReport, type IngestReport } from '../src/ingestion/report.ts';
+import type { IngestRunManifest } from '../src/ingestion/observability.ts';
 import { emptyIngestAiSummary } from '../src/ingestion/types.ts';
 
 function report(): IngestReport {
@@ -114,14 +116,63 @@ describe('reporting de la automatización', () => {
     expect(body).toContain('`data/**`');
   });
 
+  it('añade estado, artifact y fallo conciso al Job Summary', () => {
+    const manifest: IngestRunManifest = {
+      schemaVersion: 1,
+      startedAt: '2026-08-30T10:00:00.000Z',
+      finishedAt: '2026-08-30T10:05:00.000Z',
+      status: 'failed',
+      lastStage: 'classification',
+      mode: 'publish',
+      sources: ['all'],
+      window: { from: '2026-08-30', to: '2026-12-28' },
+      failure: {
+        code: 'unexpected-exception',
+        message: 'ficha rota',
+        stage: 'classification',
+      },
+    };
+    const summary = formatAutomationSummary(report(), 'https://example.com/run', {
+      manifest,
+      artifactName: 'ingestion-run-123-1',
+    });
+    expect(summary).toContain('### Observabilidad');
+    expect(summary).toContain('| Estado | failed |');
+    expect(summary).toContain('| Último stage | classification |');
+    expect(summary).toContain('ingestion-run-123-1');
+    expect(summary).toContain('unexpected-exception (classification)');
+    expect(formatAutomationPrBody(report(), 'https://example.com/run')).not.toContain('### Observabilidad');
+  });
+
+  it('resume una run sin report.json usando el manifest', () => {
+    const missing = formatMissingReportSummary('https://example.com/run', {
+      manifest: {
+        schemaVersion: 1,
+        startedAt: '2026-08-30T10:00:00.000Z',
+        status: 'interrupted',
+        lastStage: 'extraction',
+        mode: 'publish',
+        sources: ['all'],
+        window: { from: '2026-08-30', to: '2026-12-28' },
+        failure: { code: 'interrupted', message: 'Recibida SIGTERM', stage: 'extraction' },
+      },
+      artifactName: 'ingestion-run-9-1',
+    });
+    expect(missing).toContain('antes de que el pipeline pudiera generar el report JSON');
+    expect(missing).toContain('| Estado | interrupted |');
+    expect(missing).toContain('ingestion-run-9-1');
+  });
+
   it('acepta reports fatal generados por la CLI y rechaza JSON incompleto', () => {
     const fatal = buildFatalIngestReport({
       generatedAt: new Date('2026-08-30T10:00:00Z'),
       dryRun: false,
       window: { from: '2026-08-30', to: '2026-12-28' },
       reasons: ['unexpected-exception'],
+      failure: { code: 'unexpected-exception', message: 'boom', stage: 'classification' },
     });
     expect(() => assertIngestReport(fatal)).not.toThrow();
+    expect(fatal.failure?.message).toBe('boom');
     expect(() => assertIngestReport({ schemaVersion: 1, health: 'clean' })).toThrow(/incompleto/);
   });
 });
