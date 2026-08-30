@@ -1,17 +1,22 @@
 import { matchComposer } from './knowledge/composers.ts';
 
 const HEADER =
-  /^(programa|program|pausa|intervalo|intermedio|i+|ii+|iii+|iv+|v+|vi+|1[aª]? parte|2[aª]? parte|3[aª]? parte|\*+\s*estreno|\*+\s*encargo)[:.\s]*$/i;
+  /^(programa|program|pausa|pause|intervalo|intermedio|i+|ii+|iii+|iv+|v+|vi+|primera parte|segunda parte|tercera parte|1[aª]? parte|2[aª]? parte|3[aª]? parte|\*+\s*estreno|\*+\s*encargo)[:.\s]*$/i;
 const SEPARATOR = /^-{2,}.*-{2,}$|^\*{2,}$|^·+$/;
 const LIFESPAN = /\(\s*(?:ca\.?\s*)?\d{3,4}\s*[–—-]\s*(?:ca\.?\s*)?\d{3,4}\s*\)|\(\s*(?:ca\.?\s*)?\d{4}\s*\)/;
 const CATALOG =
-  /\b(?:bwv|hwv|hob\.?|buxwv|swwv|rct|k\.?\s*\d|kv\.?\s*\d|op\.?\s*\d|opus\s+\d)\b/i;
+  /\b(?:bwv|hwv|hob\.?|buxwv|swwv|rct|k\.?\s*\d|kv\.?\s*\d|op\.?\s*\d|opus\s+\d|g\.\s*\d|h\.?\s*\d{2,})\b/i;
 const MOVEMENT = /^(?:i{1,3}|iv|vi{0,3}|[1-9]\d*)\.\s+\S+/i;
 const WORK_GENRE =
   /\b(?:concierto|concerto|sinfon[ií]a|symphony|sonata|suite|quinteto|cuarteto|cuartet|tr[ií]o|obertura|ouverture|r[eé]quiem|misa|missa|toccata|fuga|fugue|preludio|pr[eé]lude|nocturne|mazurka|scherzo|impromptu|variaciones|variations|cantata|oratorio|fantas[ií]a|romance)\b/i;
-const POSTPONEMENT = /\b(?:aplazad|pospuest|cancelad)\b/i;
+const MONTH =
+  'enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre';
+const SCHEDULE_NOTICE = new RegExp(
+  `(?:aplazad|pospuest|cancelad)|^(?:al\\s+)?\\d{1,2}\\s+de\\s+(?:${MONTH})\\b`,
+  'i',
+);
 const INSTRUMENT_ONLY =
-  /^(?:violines|viol[ií]n|violas?|violonchelos?|cellos?|contrabajos?|tenores|bajos|sopranos?|mezzosopranos?|bar[ií]tonos?|pianos?|flautas?|oboes?|clarinetes?|fagotes?|trompas?|trompetas?|arpas?|claves?|percusi[oó]n|bater[ií]a|directores?)$/i;
+  /^(?:violines|viol[ií]n|violas?|violonchelos?|cellos?|contrabajos?|tenores|bajos|sopranos?|mezzosopranos?|bar[ií]tonos?|pianos?|flautas?|oboes?|clarinetes?|fagotes?|trompas?|trompetas?|arpas?|claves?|percusi[oó]n|bater[ií]a|directores?|directora|direcci[oó]n)$/i;
 
 /**
  * Drop fragments that are clearly not people or ensembles.
@@ -21,10 +26,11 @@ export function isObviousNonPerformer(name: string, roleText?: string): boolean 
   const text = name.trim();
   if (!text) return true;
   if (HEADER.test(text) || SEPARATOR.test(text)) return true;
-  if (POSTPONEMENT.test(text) && !/\bdir(?:ector|ectora|\.)\b/i.test(text)) return true;
+  if (looksLikeScheduleNotice(text) && !/\bdir(?:ector|ectora|\.)\b/i.test(text)) return true;
   if (MOVEMENT.test(text)) return true;
   if (INSTRUMENT_ONLY.test(text)) return true;
   if (/^obras de\b/i.test(text)) return true;
+  if (/\bpor determinar\b/i.test(text)) return true;
   if (LIFESPAN.test(text)) return true;
   if (CATALOG.test(text) && !/\bdir(?:ector|ectora|\.)\b/i.test(text)) return true;
   if (WORK_GENRE.test(text) && !looksLikeEnsembleName(text)) return true;
@@ -59,6 +65,16 @@ export function looksLikeProgramHeader(text: string): boolean {
   return HEADER.test(text.trim()) || SEPARATOR.test(text.trim());
 }
 
+export function looksLikeScheduleNotice(text: string): boolean {
+  return SCHEDULE_NOTICE.test(text.trim());
+}
+
+export function looksLikeEnsembleName(text: string): boolean {
+  return /\b(?:orquesta|orchestra|orchester|coro|choir|ensemble|ensamble|camerata|cuarteto|quinteto|agrupaci[oó]n|sociedad coral)\b/i.test(
+    text,
+  );
+}
+
 /** Names that must not appear as `composers[]` / `works[].composerName`. */
 export function isUnreliableComposerName(text: string): boolean {
   const trimmed = text.trim();
@@ -67,12 +83,6 @@ export function isUnreliableComposerName(text: string): boolean {
   if (WORK_GENRE.test(trimmed) || CATALOG.test(trimmed)) return true;
   if (/^[¡!]/.test(trimmed)) return true;
   return false;
-}
-
-function looksLikeEnsembleName(text: string): boolean {
-  return /\b(?:orquesta|orchestra|coro|choir|ensemble|cuarteto|quinteto|agrupaci[oó]n|sociedad coral)\b/i.test(
-    text,
-  );
 }
 
 function looksLikePersonName(text: string): boolean {

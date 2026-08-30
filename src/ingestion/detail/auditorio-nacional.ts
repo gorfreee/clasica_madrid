@@ -1,5 +1,6 @@
 import { allCaptures, firstMatch, splitBreaks, stripTags } from '../html.ts';
 import { inferScheduleFromText } from './schedule.ts';
+import { parseAuditorioPersonLine, segmentAuditorioBlocks } from './auditorio-segments.ts';
 import { looksLikeComposerLine, looksLikeProgramHeader, looksLikeWorkLine } from '../observed-cleanup.ts';
 import {
   composersFromWorks,
@@ -41,12 +42,16 @@ function parseProduction(html: string): ObservedFactPatch {
     .map((block) => splitBreaks(block))
     .filter((lines) => lines.length > 0);
 
-  const performerLines = blocks[0] ?? [];
-  const programLines = blocks.slice(1).flat();
-  const allLines = [...performerLines, ...programLines];
+  const segments = segmentAuditorioBlocks(blocks);
+  const allLines = [...segments.noticeLines, ...segments.performerLines, ...segments.programLines];
   const schedule = inferScheduleFromText(allLines.join('. '));
-  const performers = normalizePersonList(performerLines.map(parsePersonLine));
-  const works = normalizeWorkList(pairComposerWorks(programLines));
+  const performers = normalizePersonList(
+    segments.performerLines.flatMap((line) => {
+      const person = parseAuditorioPersonLine(line);
+      return person ? [person] : [];
+    }),
+  );
+  const works = normalizeWorkList(pairComposerWorks(segments.programLines));
   const programText = collapseProgram(allLines);
 
   const venueText = stripTags(
@@ -104,6 +109,10 @@ function parseExcerpt(html: string): ObservedFactPatch {
       continue;
     }
     const person = parsePersonLine(paragraph);
+    if (!person) {
+      leftover.push(paragraph);
+      continue;
+    }
     if (person.roleText) {
       performers.push(person);
       continue;
@@ -139,22 +148,8 @@ function parseExcerpt(html: string): ObservedFactPatch {
   };
 }
 
-function parsePersonLine(text: string): ObservedPerson {
-  const cleaned = text.replace(/\s+/g, ' ').trim();
-  const director = /^(?:dir(?:ector|ectora)?\.?|directora)\s*[:.]?\s+(.+)$/i.exec(cleaned);
-  if (director?.[1]) return { name: director[1].trim(), roleText: 'director' };
-  const named = /^(.+?),\s+([^,]+)$/.exec(cleaned);
-  if (named?.[1] && named[2] && named[2].length <= 40) {
-    return { name: named[1].trim(), roleText: named[2].trim() };
-  }
-  const roleSuffix =
-    /^(.+?)\s+(soprano|mezzosoprano|mezzo|tenor|bar[ií]tono|bajo|bajo-bar[ií]tono|contratenor|piano|viol[ií]n|viola|violonchelo|cello|contrabajo|flauta|oboe|clarinete|fagot|trompa|trompeta|tromb[oó]n|arpa|clave|la[uú]d|tiorba|guitarra|percusiones|bater[ií]a|mel[oó]dica|\u00f3rgano|organo|director|directora|direcci[oó]n|narradora)(?:\s+y\s+direcci[oó]n)?$/i.exec(
-      cleaned,
-    );
-  if (roleSuffix?.[1] && roleSuffix[2] && !looksLikeProgramHeader(roleSuffix[1])) {
-    return { name: roleSuffix[1].trim(), roleText: roleSuffix[2].trim() };
-  }
-  return { name: cleaned };
+function parsePersonLine(text: string): ObservedPerson | undefined {
+  return parseAuditorioPersonLine(text);
 }
 
 function parseComposerDashWork(text: string): ObservedWork {
