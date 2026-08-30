@@ -266,7 +266,7 @@ Flujo completo previsto:
 12. emit run summary
 ```
 
-Hoy el pipeline llega hasta el paso 10 en local (reconcile, validate, write). El dominio ya expone ventana explícita, selección de sources, diffs materiales, `health` y `autoMergeEligible`. Las PRs automáticas, el workflow scheduled y el auto-merge siguen pendientes de Phase 4.
+El flujo hasta el paso 12 está implementado. El dominio expone ventana explícita, selección de sources, diffs materiales, `health` y `autoMergeEligible`; `.github/workflows/ingestion.yml` añade ejecución scheduled/manual, state persistente, report/summary, PR única, CI y squash auto-merge conservador.
 
 ---
 
@@ -278,11 +278,11 @@ Salvo necesidad demostrable: PostgreSQL/Supabase, Redis, Kafka, colas, Airbyte, 
 
 ## 17. Fases
 
-**Hechas (1, 2 y 3):** contratos, adapters, hidratación, classifier determinista, fallback de IA, puerta de publicación, matching determinista, merge conservador, updates, desapariciones sólo como diagnóstico, escritura atómica de creates y updates. El detalle está en el código y en [`docs/ingestion.md`](ingestion.md).
+**Hechas (1, 2, 3 y 4):** contratos, adapters, hidratación, classifier determinista, fallback de IA, puerta de publicación, matching determinista, merge conservador, updates, desapariciones sólo como diagnóstico, escritura atómica, automatización scheduled/manual, PR de datos, observabilidad y auto-merge condicionado. El detalle está en el código y en [`docs/ingestion.md`](ingestion.md).
 
 **Fase 3 — reconciliation (hecha):** matching contra catálogo (`externalId` → URL → alias → coincidencia fuerte única), aliases tipados, deduplicación batch, updates no destructivos, `possiblyMissing` diagnóstico, tests de idempotencia. Queda fuera de esta fase el fuzzy/IA matching y cualquier política que borre o cancele por ausencia.
 
-**Fase 4 — automatización GitHub:** el dominio/CLI ya tiene ventana explícita, `--sources`, diffs materiales y `health`/`autoMergeEligible` (esta entrega). Quedan el workflow scheduled ~cada 10 días, PR automática, CI y auto-merge de cambios de datos válidos (`clean`/`degraded` con checks verdes). No añadir esos workflows salvo que una tarea lo pida.
+**Fase 4 — automatización GitHub (hecha):** workflow serializado los días 1/11/21 a las 09:17 de Europe/Madrid y dispatch manual seguro; cache persistente de Gemini sin `run.lock`; report y Job Summary siempre que el pipeline llega a generarlos; no-op sin PR; límite estricto `data/**`; una única PR de ingestión; draft para `review`; y squash auto-merge de `clean`/`degraded` sólo con kill switch, opt-in manual cuando aplica y CI normal verde.
 
 **Fase 5 — ampliar fuentes conocidas:** adapters progresivos; cada fuente recurrente descubierta se evalúa para el registry.
 

@@ -18,7 +18,7 @@ La web no escribe datos. Todo lo publicado entra por Git, pasa validación deter
 
 ## Qué hay implementado
 
-Harvesting de fuentes conocidas (fases 1–3 del plan v3): extraer, hidratar fichas cuando el adapter lo soporta, normalizar, resolver identidad, clasificar y reconciliar contra el catálogo.
+Harvesting de fuentes conocidas y automatización de producción (fases 1–4 del plan v3): extraer, hidratar fichas cuando el adapter lo soporta, normalizar, resolver identidad, clasificar y reconciliar contra el catálogo; después, publicar cambios materiales mediante PR y CI.
 
 ```text
 registry → extract → hydrate → normalize → identity → classify → publication gate → reconcile → validate → write
@@ -36,9 +36,9 @@ registry → extract → hydrate → normalize → identity → classify → pub
 - Deduplicación del lote: varias observaciones de la misma identidad se combinan; un conflicto material irresoluble no se escribe.
 - Escritura atómica de creates y updates. Un fallo de prepare o commit restaura byte a byte cualquier archivo ya sustituido y no deja archivos nuevos a medias.
 - Una reverificación que sólo cambia `event.lastVerifiedAt` y/o `citation.checkedAt` se trata como `unchanged` y **no** reescribe el JSON. La frescura queda en el report (`unchangedEvents`, `window`, `health`). Si hay algún cambio material, se escribe el evento completo con los timestamps de verificación actuales.
-- Cada ejecución evalúa `health`: `clean` | `degraded` | `review` | `fatal`. `autoMergeEligible` es true sólo en `clean` y `degraded`. Los workflows de GitHub y el auto-merge aún no existen.
+- Cada ejecución evalúa `health`: `clean` | `degraded` | `review` | `fatal`. `autoMergeEligible` es true sólo en `clean` y `degraded`. El workflow de producción consume exclusivamente estos campos machine-readable para decidir si falla, crea draft o permite auto-merge.
 
-No están implementados (no los añadas salvo que una tarea pida esa fase): discovery automático, reconciliación fuzzy, GitHub Actions de ingestión ni auto-merge.
+No están implementados (no los añadas salvo que una tarea pida esa fase): discovery automático ni reconciliación fuzzy.
 
 Las fuentes concretas, adapters, flags de CLI y detalles de matching viven en el código. No los dupliques aquí.
 
@@ -69,6 +69,43 @@ El estado local (caché, cuota, pendientes, lock) vive bajo `.local/ai/` por def
 
 Flags `--ai-*` (modelo, sin caché, tope de requests) existen para pruebas acotadas. Requieren Gemini. Los tests ordinarios no las necesitan.
 
+## Automatización en GitHub Actions
+
+`.github/workflows/ingestion.yml` serializa todas las ejecuciones en el concurrency group `ingestion-production`; una scheduled y una manual nunca comparten simultáneamente cuota ni state de Gemini.
+
+### Scheduled
+
+Se ejecuta los días 1, 11 y 21 de cada mes a las 09:17 de `Europe/Madrid`, siempre en modo publish, contra todas las sources y con la ventana por defecto de hoy a +120 días.
+
+### Manual
+
+En **Actions → Production ingestion → Run workflow**:
+
+- `mode`: `dry-run` (default) o `publish`;
+- `sources`: `all` o uno o varios IDs separados por coma;
+- `from` y `to`: rango opcional; deben informarse juntos;
+- `auto_merge`: opt-in adicional para un publish manual;
+- `ai_max_requests`: presupuesto HTTP opcional para Gemini.
+
+El dry-run nunca puede modificar `data/**` ni crear una PR. En publish, un no-op tampoco crea branch, commit ni PR. Si ya existe una PR abierta cuyo branch empieza por `automation/ingestion-`, la ejecución conserva su report pero no crea ni actualiza otra PR.
+
+### Secrets, variable y permisos
+
+- secret `GEMINI_API_KEY`: key del proyecto de Google AI Studio;
+- secret `INGESTION_BOT_TOKEN`: token fine-grained con acceso a esta repo para Contents read/write, Pull requests read/write y Actions read. Se usa para push, creación de PR y auto-merge, de modo que el evento `pull_request` dispare CI;
+- repository variable `INGESTION_AUTO_MERGE_ENABLED`: kill switch global; sólo el valor exacto `true` habilita auto-merge.
+
+El state persistente recupera `quota.json`, `cache/**` y `pending/**` mediante `actions/cache`. Cada run guarda una key inmutable y restaura la más reciente; `run.lock` nunca se persiste. Los reports se suben siempre que existan como artifacts con 90 días de retención y nunca se commitean.
+
+### Publicación y recovery
+
+- `fatal`: falla el workflow y no crea PR;
+- `review`: sin cambios sólo avisa; con cambios crea una draft PR y nunca activa auto-merge;
+- `clean` / `degraded`: con cambios crea una PR normal. El scheduled solicita auto-merge si el kill switch está activo; el manual publish necesita además `auto_merge=true`;
+- antes de solicitar squash auto-merge, el workflow espera la ejecución `pull_request` real de `ci.yml` para el SHA publicado y exige que termine verde.
+
+Ante un fallo, empieza por el Job Summary y el artifact JSON. Si hay una PR de ingestión abierta, revísala y fusiónala o ciérrala antes de reintentar. Si el token expiró, rota `INGESTION_BOT_TOKEN`. Si el state restaurado está corrupto, no reinicies contadores a ciegas: conserva o recupera `quota.json`, o espera al siguiente reset diario antes de retirar el cache afectado. Un rerun es seguro porque no reutiliza `run.lock` y la reconciliación filtra reverificaciones sin cambios materiales.
+
 ## Candidatos JSON (legacy)
 
 Camino manual durante la migración, no la arquitectura objetivo:
@@ -87,4 +124,4 @@ Un agente puede descubrir, extraer y clasificar. Nunca debe saltarse la validaci
 
 ## CI
 
-La CI actual (`.github/workflows/ci.yml`) valida, testea, typecheckea y construye. No aprueba PRs ni fusiona sola. Branch protection, required checks y workflows de ingestión forman parte del *objetivo* v3, no de la implementación actual.
+`ci.yml` valida, testea, typecheckea y construye todas las PRs sin llamar a Gemini. El workflow de ingestión no duplica esa CI: sólo ejecuta el pipeline, comprueba que el working tree no tenga cambios fuera de `data/**`, crea la PR y, cuando corresponde, espera el CI normal antes de solicitar squash auto-merge.
