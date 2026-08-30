@@ -101,4 +101,80 @@ describe('segmentación performer/programa del Auditorio', () => {
     ]);
     expect(parseAuditorioPersonLine('Chopin: Concierto para piano y orquesta n.º 1')).toBeUndefined();
   });
+
+  it('un segundo h4 de programa no devuelve compositores ni obras al elenco', () => {
+    const segments = segmentAuditorioBlocks([
+      ['Orquesta Nacional de España', 'Anna Rakitina, Directora', 'Josu de Solaun, Piano'],
+      [
+        'Caroline Shaw',
+        'Entr’acte, para orquesta de cuerda',
+        'Benjamin Britten',
+        'Concierto para piano núm. 1, op. 13',
+      ],
+    ]);
+    expect(segments.performerLines).toEqual([
+      'Orquesta Nacional de España',
+      'Anna Rakitina, Directora',
+      'Josu de Solaun, Piano',
+    ]);
+    expect(segments.programLines[0]).toBe('Caroline Shaw');
+    expect(segments.programLines).toContain('Entr’acte, para orquesta de cuerda');
+    expect(parseAuditorioPersonLine('Caroline Shaw')).toEqual({ name: 'Caroline Shaw' });
+    expect(parseAuditorioPersonLine('Entr’acte, para orquesta de cuerda')).toBeUndefined();
+  });
+
+  it('tras el último instrumento, compositor y obra con «para arpa» son programa', () => {
+    const segments = segmentAuditorioBlocks([
+      [
+        'Galatea Ensemble',
+        'Laura Salcedo Rubio',
+        'Violín',
+        'Coline-Marie Orliac',
+        'Arpa',
+        'Luigi Maurizio',
+        'Tedeschi Suite op. 46, para arpa, violín y violonchelo',
+        'Mijaíl Glinka',
+        'Tres canciones rusas, para arpa, violín y violonchelo',
+      ],
+    ]);
+    expect(segments.performerLines).toEqual([
+      'Galatea Ensemble',
+      'Laura Salcedo Rubio',
+      'Violín',
+      'Coline-Marie Orliac',
+      'Arpa',
+    ]);
+    expect(segments.programLines[0]).toBe('Luigi Maurizio');
+    expect(segments.programLines).toContain('Tres canciones rusas, para arpa, violín y violonchelo');
+    expect(parseAuditorioPersonLine('Tres canciones rusas, para arpa')).toBeUndefined();
+    expect(
+      parseAuditorioPersonLine('Tres canciones rusas, para arpa, violín y violonchelo'),
+    ).toBeUndefined();
+  });
+
+  it('un compositor sin lifespan no queda en el elenco si le sigue repertorio', () => {
+    const segments = segmentAuditorioBlocks([
+      [
+        'Poetica Ensamble',
+        'Gloria Londoño',
+        'Soprano',
+        'Gabriel Sevilla Martínez',
+        'Violonchelo',
+        'Carlos Guastavino',
+        'Jeromita Linares',
+        'Cuatro canciones opulares argentinas',
+        'Alicia Terzian',
+        'Canción del atardecer (del opus 5)',
+      ],
+    ]);
+    expect(segments.performerLines).toEqual([
+      'Poetica Ensamble',
+      'Gloria Londoño',
+      'Soprano',
+      'Gabriel Sevilla Martínez',
+      'Violonchelo',
+    ]);
+    expect(segments.programLines[0]).toBe('Carlos Guastavino');
+    expect(parseAuditorioPersonLine('Carlos Guastavino')).toEqual({ name: 'Carlos Guastavino' });
+  });
 });

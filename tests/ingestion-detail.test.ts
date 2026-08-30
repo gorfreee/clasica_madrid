@@ -255,8 +255,93 @@ describe('parser de ficha Auditorio Nacional', () => {
     expect(names.some((name) => /violines|viola|violonchelo|contrabajo/i.test(name))).toBe(false);
     expect(facts.programText).toMatch(/Boccherini/);
     expect(facts.programText).toMatch(/G\. 339/);
-    expect(facts.works).toEqual([]);
-    expect(facts.composers).toEqual([]);
+    expect(facts.works).toEqual([
+      { title: 'Quinteto de cuerdas en Re Mayor, G. 339', composerName: 'Luigi Boccherini' },
+      {
+        title: 'Quinteto de cuerdas en Mi menor núm. 30, op. 74',
+        composerName: 'George Onslow',
+      },
+      { title: 'Quinteto de cuerdas núm. 2, op. 316', composerName: 'Darius Milhaud' },
+    ]);
+    expect(facts.composers).toEqual([
+      { name: 'Luigi Boccherini' },
+      { name: 'George Onslow' },
+      { name: 'Darius Milhaud' },
+    ]);
+  });
+
+  it('OCNE Sinfónico 09: el h4 de programa no publica a Shaw ni Entr’acte como performers', async () => {
+    const html = await readFile(
+      path.join(detailDir, 'auditorio-ocne-sinfonico-09.excerpt.html'),
+      'utf8',
+    );
+    const facts = parseAuditorioNacionalDetail(html);
+    const names = facts.performers?.map((item) => item.name) ?? [];
+
+    expect(facts.performers).toEqual([
+      { name: 'Orquesta Nacional de España' },
+      { name: 'Anna Rakitina', roleText: 'Directora' },
+      { name: 'Josu de Solaun', roleText: 'Piano' },
+    ]);
+    expect(names.some((name) => /shaw|entr.?acte|britten|elgar/i.test(name))).toBe(false);
+    expect(facts.works).toEqual(
+      expect.arrayContaining([
+        { title: 'Entr’acte, para orquesta de cuerda', composerName: 'Caroline Shaw' },
+      ]),
+    );
+    expect(facts.composers).toEqual(expect.arrayContaining([{ name: 'Caroline Shaw' }]));
+  });
+
+  it('OCNE Satélite 04: Tres canciones rusas no es performer', async () => {
+    const html = await readFile(
+      path.join(detailDir, 'auditorio-ocne-satelite-04.excerpt.html'),
+      'utf8',
+    );
+    const facts = parseAuditorioNacionalDetail(html);
+    const names = facts.performers?.map((item) => item.name) ?? [];
+
+    expect(names).toEqual(
+      expect.arrayContaining([
+        'Galatea Ensemble',
+        'Laura Salcedo Rubio',
+        'Joaquín Fernández Díaz',
+        'Coline-Marie Orliac',
+      ]),
+    );
+    expect(names.some((name) => /canciones rusas|glinka|ibert|tedeschi|maurizio/i.test(name))).toBe(
+      false,
+    );
+    expect(facts.works).toEqual(
+      expect.arrayContaining([
+        {
+          title: 'Tres canciones rusas, para arpa, violín y violonchelo',
+          composerName: 'Mijaíl Glinka',
+        },
+      ]),
+    );
+  });
+
+  it('OCNE Satélite 02: Carlos Guastavino es programa, no performer', async () => {
+    const html = await readFile(
+      path.join(detailDir, 'auditorio-ocne-satelite-02.excerpt.html'),
+      'utf8',
+    );
+    const facts = parseAuditorioNacionalDetail(html);
+    const names = facts.performers?.map((item) => item.name) ?? [];
+
+    expect(names).toEqual(
+      expect.arrayContaining([
+        'Poetica Ensamble',
+        'Gloria Londoño',
+        'Laura Godoy',
+        'Gabriel Sevilla Martínez',
+      ]),
+    );
+    expect(names.some((name) => /guastavino|jeromita|terzian|gianneo|leguizam/i.test(name))).toBe(
+      false,
+    );
+    expect(facts.programText).toMatch(/Carlos Guastavino/);
+    expect(facts.programText).toMatch(/Jeromita Linares/);
   });
 
   it('no inventa performers, composers ni works si la ficha no los declara', () => {
