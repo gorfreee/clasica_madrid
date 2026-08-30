@@ -47,7 +47,9 @@
   "eras": [
     "romantic"
   ],
-  "formats": [],
+  "formats": [
+    "symphonic"
+  ],
   "kind": "alternative",
   "access": "paid",
   "citations": [

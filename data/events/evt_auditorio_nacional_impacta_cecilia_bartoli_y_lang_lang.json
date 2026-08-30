@@ -25,7 +25,12 @@
   ],
   "composers": [],
   "works": [],
-  "eras": [],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
   "formats": [
     "recital"
   ],

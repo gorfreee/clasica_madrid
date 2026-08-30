@@ -25,7 +25,11 @@
   ],
   "composers": [],
   "works": [],
-  "eras": [],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
   "formats": [
     "chamber"
   ],

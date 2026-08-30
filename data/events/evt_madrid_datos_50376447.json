@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50376447",
+  "slug": "concierto-de-musica-renacentista",
+  "title": "Concierto de música renacentista",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_1752",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50376447_01",
+      "date": "2026-10-16",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Jesús Hernández"
+    },
+    {
+      "name": "Santiago Pindado"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Luis de Milán"
+    },
+    {
+      "name": "Luys de Narváez"
+    },
+    {
+      "name": "Alonso Mudarra"
+    },
+    {
+      "name": "Enríquez de Valderrábano"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "renaissance"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=3da1e3ca4e0df910VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-08-30",
+      "externalId": "50376447"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-08-30"
+}
