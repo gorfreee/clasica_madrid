@@ -1,5 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import type { Candidate } from '../lib/schemas/candidate.ts';
+import type { Event, Occurrence } from '../lib/schemas/event.ts';
 import type { AccessMode, Era, EventKind, Format } from '../lib/schemas/taxonomies.ts';
 import type { Eligibility } from './classification/golden-case.ts';
 import type { ClassificationResult, Resolution, ResolutionMethod } from './classification/types.ts';
@@ -50,6 +52,32 @@ export type IngestEventDecision = {
   publishable: boolean;
   candidateGenerated: boolean;
   identity?: 'existing' | 'new';
+  /**
+   * Diagnostic projection of the Candidate that would be written.
+   * Present only when a Candidate exists. Not sent to the classifier.
+   */
+  candidate?: ReportCandidateSnapshot;
+};
+
+/**
+ * Inspectable facts from a generated Candidate. Reuses Event/Occurrence
+ * field types; omits citations and related entities.
+ */
+export type ReportCandidateSnapshot = Pick<
+  Event,
+  | 'id'
+  | 'slug'
+  | 'status'
+  | 'venueId'
+  | 'performers'
+  | 'composers'
+  | 'works'
+  | 'eras'
+  | 'formats'
+  | 'kind'
+  | 'access'
+> & {
+  occurrences: Array<Pick<Occurrence, 'date' | 'time' | 'status'>>;
 };
 
 export type IngestReport = {
@@ -70,6 +98,7 @@ export type DecisionInput = {
   publishable: boolean;
   candidateGenerated: boolean;
   identity?: 'existing' | 'new';
+  candidate?: Candidate;
 };
 
 export function buildEventDecision(input: DecisionInput): IngestEventDecision {
@@ -90,6 +119,7 @@ export function buildEventDecision(input: DecisionInput): IngestEventDecision {
   if (input.structuralSkip) decision.structuralSkip = { reason: input.structuralSkip };
   if (input.identity) decision.identity = input.identity;
   if (input.ai) decision.ai = input.ai;
+  if (input.candidate) decision.candidate = snapshotCandidate(input.candidate);
 
   const classification = input.classification;
   if (classification) {
@@ -132,6 +162,28 @@ export function serializeIngestReport(report: IngestReport): string {
 export async function writeIngestReport(filePath: string, report: IngestReport): Promise<void> {
   await mkdir(path.dirname(filePath), { recursive: true });
   await writeFile(filePath, serializeIngestReport(report), 'utf8');
+}
+
+export function snapshotCandidate(candidate: Candidate): ReportCandidateSnapshot {
+  const event = candidate.event;
+  return {
+    id: event.id,
+    slug: event.slug,
+    status: event.status,
+    venueId: event.venueId,
+    occurrences: event.occurrences.map((item) => ({
+      date: item.date,
+      time: item.time,
+      status: item.status,
+    })),
+    performers: event.performers,
+    composers: event.composers,
+    works: event.works,
+    eras: event.eras,
+    formats: event.formats,
+    kind: event.kind,
+    access: event.access,
+  };
 }
 
 function fieldOf<T>(resolution: Resolution<T> | undefined): FieldResolution<T> | undefined {

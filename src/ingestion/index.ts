@@ -18,8 +18,8 @@ export {
   resolveCatalogSource,
 } from './registry.ts';
 export { runIngest, extractSource } from './pipeline.ts';
-export type { IngestEventDecision, IngestReport } from './report.ts';
-export { buildIngestReport, serializeIngestReport, writeIngestReport } from './report.ts';
+export type { IngestEventDecision, IngestReport, ReportCandidateSnapshot } from './report.ts';
+export { buildIngestReport, serializeIngestReport, snapshotCandidate, writeIngestReport } from './report.ts';
 export { hydrateEvents, memoizeGet } from './hydrate.ts';
 export { formatRunSummary } from './summary.ts';
 export { normalizeRawEvent, normalizeRawEvents, observedFactsFromNormalized } from './normalize.ts';

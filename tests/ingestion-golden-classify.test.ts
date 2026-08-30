@@ -24,6 +24,16 @@ describe('golden set → deterministic classifier', () => {
     }
   });
 
+  it('mantiene Sarao Barroco como golden uncertain sin excepción por título', async () => {
+    const cases = await loadGoldenCases();
+    const sarao = cases.find((item) => item.caseId === 'golden_sarao_barroco');
+    expect(sarao).toBeDefined();
+    expect(sarao!.expected.eligibility).toBe('uncertain');
+    expect(sarao!.observed.title).toBe('Sarao Barroco');
+    expect(classify(sarao!.observed).eligibility.value).toBe('uncertain');
+    expect(classify(sarao!.observed).eligibility.ruleId).toBe('classical-and-nonclassical-coprincipal');
+  });
+
   it('no publica los uncertain esperados y no los convierte en include', async () => {
     const cases = await loadGoldenCases();
     const uncertain = cases.filter((item) => item.expected.eligibility === 'uncertain');

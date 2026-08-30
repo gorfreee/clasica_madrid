@@ -44,6 +44,7 @@ const TECHNICAL_KEYS = [
   'hydration',
   'candidateGenerated',
   'identity',
+  'candidate',
 ];
 
 type ListingItem = {
@@ -164,6 +165,11 @@ describe('ingest event report', () => {
     expect(decision.publishable).toBe(true);
     expect(decision.candidateGenerated).toBe(true);
     expect(decision.identity).toBe('new');
+    expect(decision.candidate).toBeDefined();
+    expect(decision.candidate?.id).toBe(run.candidates[0]!.event.id);
+    expect(decision.candidate?.slug).toBe(run.candidates[0]!.event.slug);
+    expect(decision.candidate?.status).toBe('scheduled');
+    expect(decision.candidate?.venueId).toBe(run.candidates[0]!.event.venueId);
     expect(ai.calls).toBe(0);
     expect(run.candidates).toHaveLength(1);
   });
@@ -186,6 +192,7 @@ describe('ingest event report', () => {
     expect(decision.aiAttempted).toBe(false);
     expect(decision.publishable).toBe(false);
     expect(decision.candidateGenerated).toBe(false);
+    expect(decision.candidate).toBeUndefined();
     expect(decision.formats).toBeUndefined();
     expect(run.candidates).toEqual([]);
     expect(run.summary.written).toEqual([]);
@@ -242,6 +249,7 @@ describe('ingest event report', () => {
     expect(decision.aiAttempted).toBe(false);
     expect(decision.publishable).toBe(false);
     expect(decision.candidateGenerated).toBe(false);
+    expect(decision.candidate).toBeUndefined();
     expect(run.summary.ai.attempted).toBe(0);
     expect(run.candidates).toEqual([]);
   });
@@ -263,6 +271,7 @@ describe('ingest event report', () => {
     expect(decision.aiAttempted).toBe(false);
     expect(decision.publishable).toBe(false);
     expect(decision.candidateGenerated).toBe(false);
+    expect(decision.candidate).toBeUndefined();
     expect(run.summary.skippedUnusable).toBe(1);
     expect(run.summary.eligibility).toEqual({ include: 0, exclude: 0, uncertain: 0 });
   });
@@ -279,6 +288,7 @@ describe('ingest event report', () => {
     expect(decision.eligibility?.value).toBe('exclude');
     expect(decision.publishable).toBe(false);
     expect(decision.candidateGenerated).toBe(false);
+    expect(decision.candidate).toBeUndefined();
     expect(run.summary.detailHydrationFailed).toBe(1);
   });
 
@@ -304,6 +314,67 @@ describe('ingest event report', () => {
     expect(parsed.schemaVersion).toBe(1);
     expect(parsed.dryRun).toBe(true);
     expect(parsed.events).toHaveLength(1);
+    expect(parsed.events[0]!.candidateGenerated).toBe(true);
+    expect(parsed.events[0]!.candidate).toEqual({
+      id: run.candidates[0]!.event.id,
+      slug: run.candidates[0]!.event.slug,
+      status: run.candidates[0]!.event.status,
+      venueId: run.candidates[0]!.event.venueId,
+      occurrences: run.candidates[0]!.event.occurrences.map((item) => ({
+        date: item.date,
+        time: item.time,
+        status: item.status,
+      })),
+      performers: run.candidates[0]!.event.performers,
+      composers: run.candidates[0]!.event.composers,
+      works: run.candidates[0]!.event.works,
+      eras: run.candidates[0]!.event.eras,
+      formats: run.candidates[0]!.event.formats,
+      kind: run.candidates[0]!.event.kind,
+      access: run.candidates[0]!.event.access,
+    });
+    expect(parsed.events[0]!.candidate).not.toHaveProperty('citations');
+    expect(await readdir(path.join(dir, 'events'))).toEqual([]);
+  });
+
+  it('el snapshot del Candidate es diagnóstico y no muta el Candidate generado', async () => {
+    const detail = await readFile(ocneDetailPath, 'utf8');
+    const { dir, run } = await runAuditorio({
+      items: [{ title: 'OCNE. Sinfónico 01', slug: 'ocne-sinfonico-01-1' }],
+      details: { 'ocne-sinfonico-01': detail },
+      dryRun: true,
+    });
+
+    const built = run.candidates[0]!;
+    const before = structuredClone(built);
+    const decision = run.decisions[0]!;
+    expect(decision.candidateGenerated).toBe(true);
+    expect(decision.candidate).toEqual({
+      id: built.event.id,
+      slug: built.event.slug,
+      status: built.event.status,
+      venueId: built.event.venueId,
+      occurrences: built.event.occurrences.map((item) => ({
+        date: item.date,
+        time: item.time,
+        status: item.status,
+      })),
+      performers: built.event.performers,
+      composers: built.event.composers,
+      works: built.event.works,
+      eras: built.event.eras,
+      formats: built.event.formats,
+      kind: built.event.kind,
+      access: built.event.access,
+    });
+    expect(decision.candidate?.occurrences.length).toBeGreaterThan(0);
+    expect(decision.candidate?.occurrences[0]).toEqual(
+      expect.objectContaining({
+        date: expect.any(String),
+        status: 'scheduled',
+      }),
+    );
+    expect(built).toEqual(before);
     expect(await readdir(path.join(dir, 'events'))).toEqual([]);
   });
 
@@ -358,6 +429,9 @@ describe('ingest event report', () => {
     expect(report.events.filter((item) => item.candidateGenerated).map((item) => item.title)).toEqual(
       first.run.candidates.map((item) => item.event.title),
     );
+    expect(report.events.filter((item) => item.candidate).map((item) => item.candidate?.id)).toEqual(
+      first.run.candidates.map((item) => item.event.id),
+    );
   });
 
   it('marca existing cuando la URL o externalId ya están en el catálogo', async () => {
@@ -397,6 +471,8 @@ describe('ingest event report', () => {
 
     expect(run.decisions[0]!.identity).toBe('existing');
     expect(run.decisions[0]!.candidateGenerated).toBe(true);
+    expect(run.decisions[0]!.candidate?.id).toBe(run.candidates[0]!.event.id);
+    expect(run.decisions[0]!.candidate?.slug).toBe(run.candidates[0]!.event.slug);
     expect(run.summary.newEvents).toBe(0);
     expect(run.summary.unchangedEvents).toBe(1);
   });

@@ -191,6 +191,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
         publishable: true,
         candidateGenerated: true,
         identity: identity ?? 'new',
+        candidate: built.candidate,
       }),
     );
   }
