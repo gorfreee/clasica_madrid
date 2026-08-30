@@ -12,6 +12,7 @@ import {
   canonicalFieldDiffs,
   type FileToWrite,
 } from '../lib/validation/promote.ts';
+import { materialEventDiffs } from './material-diff.ts';
 import { errorIssue, makeReport, type ValidationIssue, type ValidationReport } from '../lib/validation/report.ts';
 import { matchEventIdentity } from './identity.ts';
 
@@ -93,7 +94,7 @@ export function mergeCandidateBatch(existing: Catalog, candidates: Candidate[]):
       continue;
     }
     if (current && originalIds.has(candidate.event.id)) {
-      const diffs = canonicalFieldDiffs(current, candidate.event);
+      const diffs = materialEventDiffs(current, candidate.event);
       if (diffs.length === 0) {
         unchangedEvents += 1;
         continue;
@@ -317,6 +318,9 @@ function isSameAsCatalog(catalog: Catalog, file: FileToWrite): boolean {
   if (!folder || !id) return false;
   const current = collectionOf(catalog, folder)?.find((item) => item.id === id);
   if (!current) return false;
+  if (folder === 'events') {
+    return materialEventDiffs(current as Event, file.value as Event).length === 0;
+  }
   return canonicalFieldDiffs(current, file.value as object).length === 0;
 }
 

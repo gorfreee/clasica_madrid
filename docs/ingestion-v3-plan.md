@@ -185,7 +185,7 @@ Cuando un agente haga discovery abierto, no debería editar cientos de JSON can�
 
 Cada ejecución se procesa como conjunto: cargar catálogo, extraer fuentes sanas, normalizar, enriquecer, resolver entidades, detectar duplicados, comparar, validar en memoria, escribir de forma coherente. Un fallo no debe dejar media ejecución aplicada.
 
-La v3 evita inicialmente cursores o estado incremental. Cada ejecución ordinaria vuelve a revisar la ventana móvil de 120 días. La optimización incremental sólo cuando haya evidencia de que hace falta.
+La v3 evita inicialmente cursores o estado incremental. Cada ejecución ordinaria vuelve a revisar la ventana móvil de 120 días (hoy en Europe/Madrid → +120). El CLI admite un rango manual `--from`/`--to` sin tope de 120 días. La optimización incremental sólo cuando haya evidencia de que hace falta.
 
 ---
 
@@ -241,7 +241,7 @@ Cada ejecución debería producir un resumen legible y, cuando sea útil, un art
 
 Invertir más en tests que en infraestructura: fixtures por adapter (incluido fallo visible ante estructura inesperada), normalización (aliases, IDs, fechas), Classification Policy contra el golden set, reconciliación (nuevo, sin cambios, modificado, desaparecido, duplicado, fallo de una source). CI no llama a un LLM. La IA no es la única definición ejecutable de la política.
 
-Propiedad deseable de `ingest:sync`: ejecutar dos veces consecutivas contra las mismas fuentes debería producir cero cambios en la segunda. Eso simplifica retries, debugging y confianza en la automatización.
+Propiedad deseable de `ingest:sync`: ejecutar dos veces consecutivas contra las mismas fuentes debería producir cero cambios en la segunda. Una reverificación cuyo único delta son timestamps de verificación (`lastVerifiedAt` / `citation.checkedAt`) tampoco debe escribir `data/**`; esa frescura vive en el report. Eso simplifica retries, debugging y confianza en la automatización.
 
 ---
 
@@ -266,7 +266,7 @@ Flujo completo previsto:
 12. emit run summary
 ```
 
-Hoy el pipeline llega hasta el paso 10 en local (reconcile, validate, write). Las PRs automáticas y el auto-merge son Phase 4.
+Hoy el pipeline llega hasta el paso 10 en local (reconcile, validate, write). El dominio ya expone ventana explícita, selección de sources, diffs materiales, `health` y `autoMergeEligible`. Las PRs automáticas, el workflow scheduled y el auto-merge siguen pendientes de Phase 4.
 
 ---
 
@@ -282,7 +282,7 @@ Salvo necesidad demostrable: PostgreSQL/Supabase, Redis, Kafka, colas, Airbyte, 
 
 **Fase 3 — reconciliation (hecha):** matching contra catálogo (`externalId` → URL → alias → coincidencia fuerte única), aliases tipados, deduplicación batch, updates no destructivos, `possiblyMissing` diagnóstico, tests de idempotencia. Queda fuera de esta fase el fuzzy/IA matching y cualquier política que borre o cancele por ausencia.
 
-**Fase 4 — automatización GitHub:** workflow scheduled, ventana de 120 días, ~cada 10 días, PR automática, CI, auto-merge de cambios de datos válidos, resumen de ejecución.
+**Fase 4 — automatización GitHub:** el dominio/CLI ya tiene ventana explícita, `--sources`, diffs materiales y `health`/`autoMergeEligible` (esta entrega). Quedan el workflow scheduled ~cada 10 días, PR automática, CI y auto-merge de cambios de datos válidos (`clean`/`degraded` con checks verdes). No añadir esos workflows salvo que una tarea lo pida.
 
 **Fase 5 — ampliar fuentes conocidas:** adapters progresivos; cada fuente recurrente descubierta se evalúa para el registry.
 

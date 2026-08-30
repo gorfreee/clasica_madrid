@@ -1,14 +1,16 @@
 import { madridToday } from '../lib/domain/dates.ts';
 import { normalizeText } from '../lib/domain/normalize.ts';
-import { canonicalFieldDiffs, canonicalValuesEqual } from '../lib/validation/promote.ts';
+import { canonicalValuesEqual } from '../lib/validation/promote.ts';
 import type { Candidate } from '../lib/schemas/candidate.ts';
 import type { Citation, Composer, Event, Occurrence, Performer, Venue, Work } from '../lib/schemas/index.ts';
 import { resolvePerformerRole } from './classification/performer-role.ts';
 import { isPublishableInclude, type ClassificationResult } from './classification/types.ts';
 import { occurrenceIdFor, uniqueId } from './ids.ts';
+import { materialEventDiffs } from './material-diff.ts';
 import type { NormalizedEvent } from './normalize.ts';
 import { publicationOccurrences } from './to-candidate.ts';
 import { normalizeUrl } from './urls.ts';
+import type { IngestWindow } from './dates.ts';
 
 export type EventProposal = {
   title: string;
@@ -43,6 +45,7 @@ export function proposalFromObservation(
     venueId?: string;
     venue?: Venue;
     classification?: ClassificationResult;
+    window?: IngestWindow;
   },
 ): EventProposal {
   const verified = madridToday(options.now);
@@ -59,7 +62,7 @@ export function proposalFromObservation(
     title: event.title,
     status: observedStatus(event),
     venueId: options.venueId,
-    occurrences: observedSchedule(event, options.now),
+    occurrences: observedSchedule(event, options.now, options.window),
     performers: event.performers.map((item) => {
       const role = resolvePerformerRole(item.roleText);
       return role ? { name: item.name, role } : { name: item.name };
@@ -167,7 +170,7 @@ export function mergeExistingEvent(existing: Event, proposal: EventProposal, now
   };
   return {
     event: merged,
-    diffs: canonicalFieldDiffs(existing, merged),
+    diffs: materialEventDiffs(existing, merged),
     diagnostics: [
       title.diagnostic,
       kind.diagnostic,
@@ -223,9 +226,10 @@ function observedStatus(event: NormalizedEvent): Event['status'] | undefined {
 function observedSchedule(
   event: NormalizedEvent,
   now: Date,
+  window?: IngestWindow,
 ): Array<{ date: string; time: string | null }> {
   if (event.eventStatus === 'cancelled') return [];
-  return publicationOccurrences(event, now, { allowOutOfWindowDetail: true });
+  return publicationOccurrences(event, now, { allowOutOfWindowDetail: true, window });
 }
 
 function mergeStatus(existing: Event['status'], incoming: Event['status'] | undefined): Event['status'] {

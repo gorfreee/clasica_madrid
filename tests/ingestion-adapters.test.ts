@@ -5,7 +5,7 @@ import { auditorioNacionalAdapter } from '../src/ingestion/sources/auditorio-nac
 import { madridDatosAdapter } from '../src/ingestion/sources/madrid-datos.ts';
 import { teatroRealAdapter } from '../src/ingestion/sources/teatro-real.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
-import { TEST_NOW } from './helpers.ts';
+import { TEST_NOW, TEST_WINDOW } from './helpers.ts';
 import type { AdapterContext } from '../src/ingestion/types.ts';
 
 const fixtures = path.join(import.meta.dirname, 'fixtures', 'ingestion');
@@ -14,6 +14,7 @@ function ctx(sourceId: string): AdapterContext {
   return {
     source: getSourceDefinition(sourceId),
     now: TEST_NOW,
+    window: TEST_WINDOW,
     get: async () => {
       throw new Error('no debe pedirse red en tests de fixtures');
     },
@@ -51,6 +52,20 @@ describe('adapter Auditorio Nacional (JSON)', () => {
     expect(auditorioNacionalAdapter.extract('[]', 'https://example.test/events.json', ctx('auditorio-nacional'))).toEqual(
       [],
     );
+  });
+
+  it('usa exactamente start/end de la ventana solicitada', () => {
+    const source = getSourceDefinition('auditorio-nacional');
+    const defaultUrls = auditorioNacionalAdapter.resolveFetchUrls(source, TEST_NOW, TEST_WINDOW);
+    expect(defaultUrls).toHaveLength(1);
+    const defaultUrl = new URL(defaultUrls[0]!);
+    expect(defaultUrl.searchParams.get('start')).toBe('2026-09-01');
+    expect(defaultUrl.searchParams.get('end')).toBe('2026-12-30');
+
+    const custom = { from: '2026-01-15', to: '2027-06-01' };
+    const customUrl = new URL(auditorioNacionalAdapter.resolveFetchUrls(source, TEST_NOW, custom)[0]!);
+    expect(customUrl.searchParams.get('start')).toBe('2026-01-15');
+    expect(customUrl.searchParams.get('end')).toBe('2027-06-01');
   });
 });
 

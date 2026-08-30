@@ -15,6 +15,16 @@ const NAIVE_DATETIME =
 
 export const DEFAULT_WINDOW_DAYS = 120;
 
+/** Inclusive civil-date range in Europe/Madrid (`YYYY-MM-DD`). */
+export type IngestWindow = {
+  from: string;
+  to: string;
+};
+
+export type IngestWindowParse =
+  | { ok: true; window: IngestWindow }
+  | { ok: false; message: string };
+
 export function addIsoDays(date: string, days: number): string {
   const match = ISO_DATE.exec(date);
   if (!match) {
@@ -31,13 +41,39 @@ export function windowEnd(now: Date, days = DEFAULT_WINDOW_DAYS): string {
   return addIsoDays(madridToday(now), days);
 }
 
-export function isDateInWindow(
-  date: string,
-  now: Date,
-  days = DEFAULT_WINDOW_DAYS,
-): boolean {
-  const today = madridToday(now);
-  return date >= today && date <= windowEnd(now, days);
+export function defaultIngestWindow(now: Date): IngestWindow {
+  const from = madridToday(now);
+  return { from, to: addIsoDays(from, DEFAULT_WINDOW_DAYS) };
+}
+
+/**
+ * Parse a caller-supplied inclusive range. Manual runs may be longer or
+ * shorter than 120 days; `from` must not be after `to`.
+ */
+export function parseIngestWindow(from: string, to: string): IngestWindowParse {
+  if (!isRealIsoDate(from)) {
+    return { ok: false, message: `--from no es una fecha ISO válida (YYYY-MM-DD): ${from}` };
+  }
+  if (!isRealIsoDate(to)) {
+    return { ok: false, message: `--to no es una fecha ISO válida (YYYY-MM-DD): ${to}` };
+  }
+  if (from > to) {
+    return { ok: false, message: `--from (${from}) no puede ser posterior a --to (${to})` };
+  }
+  return { ok: true, window: { from, to } };
+}
+
+export function isDateInWindow(date: string, window: IngestWindow): boolean {
+  return date >= window.from && date <= window.to;
+}
+
+/**
+ * Dates that count for new-event publication and possiblyMissing: in the
+ * ingest window and not before today in Europe/Madrid. Historical creates
+ * stay blocked even when a manual window starts in the past.
+ */
+export function isDateInHarvestScope(date: string, now: Date, window: IngestWindow): boolean {
+  return date >= madridToday(now) && isDateInWindow(date, window);
 }
 
 export type ParsedDateTime = {

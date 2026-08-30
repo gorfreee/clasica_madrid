@@ -9,7 +9,7 @@ import { normalizeUrl, urlPathIdentity } from './urls.ts';
 import type { NormalizedEvent } from './normalize.ts';
 import type { SourceDefinition } from './types.ts';
 import { matchVenue } from './venues.ts';
-import { isDateInWindow } from './dates.ts';
+import { defaultIngestWindow, isDateInHarvestScope, type IngestWindow } from './dates.ts';
 import { resolveCatalogSource } from './registry.ts';
 
 export type CandidateBuild = {
@@ -21,8 +21,9 @@ export function newEventPublicationSkip(
   event: NormalizedEvent,
   catalog: Catalog,
   now: Date,
+  window: IngestWindow = defaultIngestWindow(now),
 ): string | undefined {
-  if (publicationOccurrences(event, now).length === 0) {
+  if (publicationOccurrences(event, now, { window }).length === 0) {
     return emptyScheduleSkipReason(event, now);
   }
   if (!matchVenue(venueHint(event), catalog)) return 'lugar no reconocido';
@@ -33,9 +34,10 @@ export function structuralSkipReason(
   event: NormalizedEvent,
   catalog: Catalog,
   now: Date,
+  window: IngestWindow = defaultIngestWindow(now),
 ): string | undefined {
   if (event.eventStatus === 'cancelled') return 'cancelado';
-  return newEventPublicationSkip(event, catalog, now);
+  return newEventPublicationSkip(event, catalog, now, window);
 }
 
 export function toCandidate(
@@ -46,11 +48,12 @@ export function toCandidate(
   usedIds: Set<string>,
   usedSlugs: Set<string>,
   classification: PublishableClassification,
+  window: IngestWindow = defaultIngestWindow(now),
 ): CandidateBuild {
   if (event.eventStatus === 'cancelled') {
     return { skippedReason: 'cancelado' };
   }
-  const publishableOccurrences = publicationOccurrences(event, now);
+  const publishableOccurrences = publicationOccurrences(event, now, { window });
   if (publishableOccurrences.length === 0) {
     return { skippedReason: emptyScheduleSkipReason(event, now) };
   }
@@ -127,8 +130,9 @@ function withVerified(venue: Venue, lastVerifiedAt: string): Venue {
 
 /**
  * Occurrences that may become a new published event. The hydrated date must
- * still fall inside the active 120-day window: a listing inside the window
- * whose detail page moves the concert beyond it is out of scope for create.
+ * still fall inside the active ingest window (default: today → +120 days):
+ * a listing inside the window whose detail page moves the concert beyond it
+ * is out of scope for create.
  *
  * Existing events may still accept an explicit out-of-window postponement;
  * that path passes `{ allowOutOfWindowDetail: true }`.
@@ -136,11 +140,12 @@ function withVerified(venue: Venue, lastVerifiedAt: string): Venue {
 export function publicationOccurrences(
   event: NormalizedEvent,
   now: Date,
-  options?: { allowOutOfWindowDetail?: boolean },
+  options?: { allowOutOfWindowDetail?: boolean; window?: IngestWindow },
 ): Array<{ date: string; time: string | null }> {
+  const window = options?.window ?? defaultIngestWindow(now);
   const today = madridToday(now);
   const future = event.occurrences.filter((occurrence) => occurrence.date >= today);
-  const inWindow = future.filter((occurrence) => isDateInWindow(occurrence.date, now));
+  const inWindow = future.filter((occurrence) => isDateInHarvestScope(occurrence.date, now, window));
   if (inWindow.length > 0) return inWindow;
   if (options?.allowOutOfWindowDetail && event.dateFromDetail && future.length > 0) {
     return future;

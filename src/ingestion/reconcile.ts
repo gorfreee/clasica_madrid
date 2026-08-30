@@ -16,7 +16,7 @@ import {
 } from './merge.ts';
 import type { NormalizedEvent } from './normalize.ts';
 import { resolveCatalogSource } from './registry.ts';
-import { collapseOccurrences } from './dates.ts';
+import { collapseOccurrences, defaultIngestWindow, type IngestWindow } from './dates.ts';
 import { newEventPublicationSkip, toCandidate } from './to-candidate.ts';
 import type { RawEvent, SourceDefinition } from './types.ts';
 import { matchVenue } from './venues.ts';
@@ -79,10 +79,12 @@ type PreparedItem = {
 export function reconcileHarvest(options: {
   catalog: Catalog;
   now: Date;
+  window?: IngestWindow;
   observations: HarvestObservation[];
   aliases?: readonly EventIdentityAlias[];
 }): ReconcileResult {
   const { catalog, now } = options;
+  const window = options.window ?? defaultIngestWindow(now);
   const usedIds = new Set(catalog.events.map((event) => event.id));
   const usedSlugs = new Set(catalog.events.map((event) => event.slug));
   const byIndex = new Map<number, ObservationReconcile>();
@@ -102,7 +104,7 @@ export function reconcileHarvest(options: {
   const fresh: PreparedItem[] = [];
 
   for (const observation of options.observations) {
-    const item = prepareItem(observation, catalog, now, options.aliases);
+    const item = prepareItem(observation, catalog, now, window, options.aliases);
     prepared.push(item);
     if (item.identity.kind === 'ambiguous') {
       ambiguous.push(item);
@@ -160,7 +162,7 @@ export function reconcileHarvest(options: {
 
   const freshGroups = groupNewObservations(fresh);
   for (const group of freshGroups) {
-    applyNewGroup(group, catalog, now, usedIds, usedSlugs, candidates, byIndex, stats);
+    applyNewGroup(group, catalog, now, window, usedIds, usedSlugs, candidates, byIndex, stats);
   }
 
   return { candidates, byIndex, stats, seenEventIds };
@@ -170,6 +172,7 @@ function prepareItem(
   observation: HarvestObservation,
   catalog: Catalog,
   now: Date,
+  window: IngestWindow,
   aliases?: readonly EventIdentityAlias[],
 ): PreparedItem {
   const event = observation.event;
@@ -180,10 +183,11 @@ function prepareItem(
     aliases,
   });
   const skip =
-    identity.kind === 'unmatched' ? newEventPublicationSkip(event, catalog, now) : undefined;
+    identity.kind === 'unmatched' ? newEventPublicationSkip(event, catalog, now, window) : undefined;
   const proposal = proposalFromObservation(event, {
     catalogSourceId: resolveCatalogSource(observation.source, catalog).id,
     now,
+    window,
     venueId: venueMatch?.venue.id,
     venue:
       venueMatch?.kind === 'known' && !catalog.venues.some((venue) => venue.id === venueMatch.venue.id)
@@ -260,6 +264,7 @@ function applyNewGroup(
   group: PreparedItem[],
   catalog: Catalog,
   now: Date,
+  window: IngestWindow,
   usedIds: Set<string>,
   usedSlugs: Set<string>,
   candidates: Candidate[],
@@ -305,6 +310,7 @@ function applyNewGroup(
     usedIds,
     usedSlugs,
     classification,
+    window,
   );
   if (!built.candidate) {
     for (const item of group) {
@@ -458,9 +464,10 @@ export function shouldClassifyObservation(
   catalog: Catalog,
   now: Date,
   identity: IdentityMatch,
+  window: IngestWindow = defaultIngestWindow(now),
 ): boolean {
   if (event.eventStatus === 'cancelled') return false;
   if (identity.kind === 'matched') return true;
   if (identity.kind === 'ambiguous') return false;
-  return !newEventPublicationSkip(event, catalog, now);
+  return !newEventPublicationSkip(event, catalog, now, window);
 }

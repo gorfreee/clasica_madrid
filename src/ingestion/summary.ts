@@ -2,6 +2,12 @@ import type { IngestRunSummary } from './types.ts';
 
 export function formatRunSummary(summary: IngestRunSummary): string {
   const lines = [
+    `Ventana: ${summary.window.from} → ${summary.window.to}`,
+    `Salud: ${summary.health}`,
+    `Auto-merge: ${summary.autoMergeEligible ? 'elegible' : 'no elegible'}`,
+    ...(summary.healthReasons.length > 0
+      ? [`Motivos: ${summary.healthReasons.join(', ')}`]
+      : []),
     `Fuentes ejecutadas: ${summary.sourcesAttempted.length} (${summary.sourcesAttempted.join(', ') || 'ninguna'})`,
     `Fuentes correctas: ${summary.sourcesSucceeded.length}${suffixList(summary.sourcesSucceeded)}`,
     `Fuentes fallidas: ${summary.sourcesFailed.length}`,

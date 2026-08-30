@@ -19,7 +19,7 @@ export {
 } from './registry.ts';
 export { runIngest, extractSource } from './pipeline.ts';
 export type { IngestEventDecision, IngestReport, ReportCandidateSnapshot } from './report.ts';
-export { buildIngestReport, serializeIngestReport, snapshotCandidate, writeIngestReport } from './report.ts';
+export { buildIngestReport, buildFatalIngestReport, serializeIngestReport, snapshotCandidate, writeIngestReport } from './report.ts';
 export { hydrateEvents, memoizeGet } from './hydrate.ts';
 export { formatRunSummary } from './summary.ts';
 export { normalizeRawEvent, normalizeRawEvents, observedFactsFromNormalized } from './normalize.ts';
@@ -31,7 +31,18 @@ export { AiRateLimitedError } from './classification/ai.ts';
 export type { ClassificationResult, PublishableClassification, ResolutionMethod } from './classification/types.ts';
 export { isPublishableInclude } from './classification/types.ts';
 export { resolvePerformerRole } from './classification/performer-role.ts';
-export { parseObservedDateTime, parseObservedTime } from './dates.ts';
+export {
+  parseObservedDateTime,
+  parseObservedTime,
+  defaultIngestWindow,
+  parseIngestWindow,
+  isDateInWindow,
+  isDateInHarvestScope,
+} from './dates.ts';
+export type { IngestWindow } from './dates.ts';
+export { evaluateIngestHealth } from './health.ts';
+export type { IngestHealth } from './health.ts';
+export { materialEventDiffs } from './material-diff.ts';
 export { eventIdFor, occurrenceIdFor, toSlug, uniqueId, uniqueSlug } from './ids.ts';
 export { mergeCandidateBatch, applyCandidateBatch, serializeCanonical } from './batch.ts';
 export { matchEventIdentity, EVENT_IDENTITY_ALIASES } from './identity.ts';

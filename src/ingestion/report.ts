@@ -5,10 +5,13 @@ import type { Event, Occurrence } from '../lib/schemas/event.ts';
 import type { AccessMode, Era, EventKind, Format } from '../lib/schemas/taxonomies.ts';
 import type { Eligibility } from './classification/golden-case.ts';
 import type { ClassificationResult, Resolution, ResolutionMethod } from './classification/types.ts';
+import type { IngestHealth } from './health.ts';
 import type { PossiblyMissingEvent } from './disappear.ts';
 import type { IdentityMethod } from './identity.ts';
 import type { ReconcileAction } from './reconcile.ts';
 import type { IngestRunSummary, RawEvent } from './types.ts';
+import { emptyIngestAiSummary } from './types.ts';
+import type { IngestWindow } from './dates.ts';
 import type { AiCallDiagnostics } from './classification/ai.ts';
 
 export type FieldResolution<T> = {
@@ -101,6 +104,10 @@ export type IngestReport = {
   schemaVersion: 1;
   generatedAt: string;
   dryRun: boolean;
+  window: IngestWindow;
+  health: IngestHealth;
+  autoMergeEligible: boolean;
+  healthReasons: string[];
   summary: IngestRunSummary;
   events: IngestEventDecision[];
   possiblyMissing: PossiblyMissingEvent[];
@@ -184,10 +191,48 @@ export function buildIngestReport(
     schemaVersion: 1,
     generatedAt: generatedAt.toISOString(),
     dryRun: run.summary.dryRun,
+    window: run.summary.window,
+    health: run.summary.health,
+    autoMergeEligible: run.summary.autoMergeEligible,
+    healthReasons: run.summary.healthReasons,
     summary: run.summary,
     events: run.decisions,
     possiblyMissing: run.possiblyMissing ?? [],
   };
+}
+
+export function buildFatalIngestReport(options: {
+  generatedAt: Date;
+  dryRun: boolean;
+  window: IngestWindow;
+  reasons: readonly string[];
+}): IngestReport {
+  const summary: IngestRunSummary = {
+    window: options.window,
+    health: 'fatal',
+    autoMergeEligible: false,
+    healthReasons: [...options.reasons],
+    sourcesAttempted: [],
+    sourcesSucceeded: [],
+    sourcesFailed: [],
+    rawEvents: 0,
+    skippedUnusable: 0,
+    eligibility: { include: 0, exclude: 0, uncertain: 0 },
+    ai: emptyIngestAiSummary(),
+    candidates: 0,
+    newEvents: 0,
+    updatedEvents: 0,
+    unchangedEvents: 0,
+    ambiguous: 0,
+    possiblyMissing: 0,
+    batchDuplicates: 0,
+    written: [],
+    dryRun: options.dryRun,
+    detailHydrationAttempted: 0,
+    detailHydrationSucceeded: 0,
+    detailHydrationFailed: 0,
+  };
+  return buildIngestReport({ summary, decisions: [], possiblyMissing: [] }, options.generatedAt);
 }
 
 export function serializeIngestReport(report: IngestReport): string {

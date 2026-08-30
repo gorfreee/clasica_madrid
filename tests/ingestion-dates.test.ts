@@ -5,6 +5,9 @@ import {
   parsePostponementDate,
   parseSpanishCalendarDate,
   isDateInWindow,
+  defaultIngestWindow,
+  parseIngestWindow,
+  isDateInHarvestScope,
 } from '../src/ingestion/dates.ts';
 import { inferScheduleFromText } from '../src/ingestion/detail/schedule.ts';
 import { normalizeRawEvent } from '../src/ingestion/normalize.ts';
@@ -62,11 +65,26 @@ describe('parseo de fechas y horas', () => {
   });
 
   it('acota la ventana móvil de 120 días, inclusiva en ambos extremos', () => {
-    expect(isDateInWindow('2026-09-01', TEST_NOW)).toBe(true);
-    expect(isDateInWindow('2026-12-30', TEST_NOW)).toBe(true);
-    expect(isDateInWindow('2026-08-31', TEST_NOW)).toBe(false);
-    expect(isDateInWindow('2026-12-31', TEST_NOW)).toBe(false);
-    expect(isDateInWindow('2027-01-01', TEST_NOW)).toBe(false);
+    const window = defaultIngestWindow(TEST_NOW);
+    expect(window).toEqual({ from: '2026-09-01', to: '2026-12-30' });
+    expect(isDateInWindow('2026-09-01', window)).toBe(true);
+    expect(isDateInWindow('2026-12-30', window)).toBe(true);
+    expect(isDateInWindow('2026-08-31', window)).toBe(false);
+    expect(isDateInWindow('2026-12-31', window)).toBe(false);
+    expect(isDateInWindow('2027-01-01', window)).toBe(false);
+  });
+
+  it('acepta un rango manual más largo de 120 días y rechaza fechas inválidas', () => {
+    expect(parseIngestWindow('2026-09-01', '2027-06-01')).toEqual({
+      ok: true,
+      window: { from: '2026-09-01', to: '2027-06-01' },
+    });
+    expect(parseIngestWindow('2026-02-31', '2026-03-01').ok).toBe(false);
+    expect(parseIngestWindow('2026-09-10', '2026-09-01').ok).toBe(false);
+    const long = { from: '2026-01-01', to: '2027-12-31' };
+    expect(isDateInWindow('2027-04-11', long)).toBe(true);
+    expect(isDateInHarvestScope('2026-06-01', TEST_NOW, long)).toBe(false);
+    expect(isDateInHarvestScope('2026-09-01', TEST_NOW, long)).toBe(true);
   });
 
   it('convierte un instante UTC a hora civil de Madrid en verano (CEST)', () => {
