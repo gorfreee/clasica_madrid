@@ -1,6 +1,6 @@
 import { allCaptures, firstMatch, splitBreaks, stripTags } from '../html.ts';
 import { inferScheduleFromText } from './schedule.ts';
-import { parseAuditorioPersonLine, segmentAuditorioBlocks } from './auditorio-segments.ts';
+import { parseAuditorioPersonLine, parseComposerColonWork, segmentAuditorioBlocks } from './auditorio-segments.ts';
 import { looksLikeComposerLine, looksLikeProgramHeader, looksLikeWorkLine } from '../observed-cleanup.ts';
 import {
   composersFromWorks,
@@ -51,7 +51,7 @@ function parseProduction(html: string): ObservedFactPatch {
       return person ? [person] : [];
     }),
   );
-  const works = normalizeWorkList(pairComposerWorks(segments.programLines));
+  const works = normalizeWorkList(worksFromProgramLines(segments.programLines));
   const programText = collapseProgram(allLines);
 
   const venueText = stripTags(
@@ -156,6 +156,18 @@ function parseComposerDashWork(text: string): ObservedWork {
   const dash = /^(.+?)\s+[—–]\s+(.+)$/.exec(text);
   if (dash?.[1] && dash[2]) return { title: dash[2].trim(), composerName: dash[1].trim() };
   return { title: text.trim() };
+}
+
+function worksFromProgramLines(lines: string[]): ObservedWork[] {
+  const usable = lines
+    .map((line) => line.replace(/\*+\s*$/, '').trim())
+    .filter((line) => line && !line.startsWith('*') && !looksLikeProgramHeader(line));
+  if (usable.length === 0) return [];
+  const colonWorks = usable.map((line) => parseComposerColonWork(line));
+  if (colonWorks.every((item) => item) && colonWorks.length > 0) {
+    return colonWorks as ObservedWork[];
+  }
+  return pairComposerWorks(lines);
 }
 
 function pairComposerWorks(lines: string[]): ObservedWork[] {

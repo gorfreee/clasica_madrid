@@ -1,7 +1,8 @@
 import { madridToday } from '../lib/domain/dates.ts';
-import { canonicalFieldDiffs } from '../lib/validation/promote.ts';
+import { normalizeText } from '../lib/domain/normalize.ts';
+import { canonicalFieldDiffs, canonicalValuesEqual } from '../lib/validation/promote.ts';
 import type { Candidate } from '../lib/schemas/candidate.ts';
-import type { Citation, Event, Occurrence, Venue } from '../lib/schemas/index.ts';
+import type { Citation, Composer, Event, Occurrence, Performer, Venue, Work } from '../lib/schemas/index.ts';
 import { resolvePerformerRole } from './classification/performer-role.ts';
 import { isPublishableInclude, type ClassificationResult } from './classification/types.ts';
 import { occurrenceIdFor, uniqueId } from './ids.ts';
@@ -30,6 +31,8 @@ export type EventProposal = {
 export type MergedEvent = {
   event: Event;
   diffs: string[];
+  /** Incoming values that were not applied to published canonical/enrichment fields. */
+  diagnostics: string[];
 };
 
 export function proposalFromObservation(
@@ -100,32 +103,81 @@ export function mergeProposals(base: EventProposal, incoming: EventProposal): Ev
   };
 }
 
+/**
+ * Merge an observation into a published event.
+ *
+ * Source-owned fields may update: status, occurrences, venueId (when matched),
+ * citations, lastVerifiedAt.
+ *
+ * Canonical/enrichment fields stay conservative: prefer the published value
+ * over a later classifier or a thinner scrape. Empty incoming lists never
+ * wipe published data. When both sides have values, keep the published ones
+ * entirely (union/replace would drop `choral`, roles, or `composerName`).
+ * Typographic title equivalents are not a disagreement.
+ */
 export function mergeExistingEvent(existing: Event, proposal: EventProposal, now: Date): MergedEvent {
   const verified = madridToday(now);
   const status = mergeStatus(existing.status, proposal.status);
   const occurrences = mergeOccurrences(existing, proposal, status);
+  const title = mergePublishedTitle(existing.title, proposal.title);
+  const kind = mergePublishedKind(existing.kind, proposal.kind);
+  const eras = mergePublishedTaxonomy('eras', existing.eras, proposal.eras);
+  const formats = mergePublishedTaxonomy('formats', existing.formats, proposal.formats);
+  const performers = mergePublishedList(
+    'performers',
+    existing.performers,
+    proposal.performers,
+    (item) => normalizeText(item.name),
+    enrichPerformer,
+  );
+  const composers = mergePublishedList(
+    'composers',
+    existing.composers,
+    proposal.composers,
+    (item) => normalizeText(item.name),
+    (canonical: Composer) => canonical,
+  );
+  const works = mergePublishedList(
+    'works',
+    existing.works,
+    proposal.works,
+    (item) => normalizeText(item.title),
+    enrichWork,
+  );
   const merged: Event = {
     schemaVersion: existing.schemaVersion,
     id: existing.id,
     slug: existing.slug,
-    title: proposal.title || existing.title,
+    title: title.value,
     status,
     venueId: proposal.venueId ?? existing.venueId,
     organizerIds: existing.organizerIds,
     seriesId: existing.seriesId,
     occurrences,
-    performers: preferNonEmpty(existing.performers, proposal.performers),
-    composers: preferNonEmpty(existing.composers, proposal.composers),
-    works: preferNonEmpty(existing.works, proposal.works),
-    eras: preferNonEmpty(existing.eras, proposal.eras ?? []),
-    formats: preferNonEmpty(existing.formats, proposal.formats ?? []),
-    kind: proposal.kind ?? existing.kind,
+    performers: performers.value,
+    composers: composers.value,
+    works: works.value,
+    eras: eras.value,
+    formats: formats.value,
+    kind: kind.value,
     access: mergeAccess(existing.access, proposal.access) ?? existing.access,
     citations: mergeCitationLists(existing.citations, proposal.citations),
     primarySourceId: existing.primarySourceId,
     lastVerifiedAt: verified,
   };
-  return { event: merged, diffs: canonicalFieldDiffs(existing, merged) };
+  return {
+    event: merged,
+    diffs: canonicalFieldDiffs(existing, merged),
+    diagnostics: [
+      title.diagnostic,
+      kind.diagnostic,
+      eras.diagnostic,
+      formats.diagnostic,
+      performers.diagnostic,
+      composers.diagnostic,
+      works.diagnostic,
+    ].filter((item): item is string => Boolean(item)),
+  };
 }
 
 export function materialProposalConflict(left: EventProposal, right: EventProposal): string | undefined {
@@ -173,7 +225,7 @@ function observedSchedule(
   now: Date,
 ): Array<{ date: string; time: string | null }> {
   if (event.eventStatus === 'cancelled') return [];
-  return publicationOccurrences(event, now);
+  return publicationOccurrences(event, now, { allowOutOfWindowDetail: true });
 }
 
 function mergeStatus(existing: Event['status'], incoming: Event['status'] | undefined): Event['status'] {
@@ -187,6 +239,80 @@ function mergeAccess(
   if (incoming === undefined) return existing;
   if (incoming === 'unknown' && (existing === 'free' || existing === 'paid')) return existing;
   return incoming;
+}
+
+function mergePublishedTitle(
+  existing: string,
+  incoming: string,
+): { value: string; diagnostic?: string } {
+  if (!incoming || incoming === existing) return { value: existing };
+  if (normalizeText(incoming) === normalizeText(existing)) return { value: existing };
+  return {
+    value: existing,
+    diagnostic: `title: se conserva el canónico «${existing}»; la observación proponía «${incoming}»`,
+  };
+}
+
+function mergePublishedKind(
+  existing: Event['kind'],
+  incoming: Event['kind'] | undefined,
+): { value: Event['kind']; diagnostic?: string } {
+  if (incoming === undefined || incoming === existing) return { value: existing };
+  return {
+    value: existing,
+    diagnostic: `kind: se conserva «${existing}»; la observación proponía «${incoming}»`,
+  };
+}
+
+function mergePublishedTaxonomy<T>(
+  field: string,
+  existing: T[],
+  incoming: T[] | undefined,
+): { value: T[]; diagnostic?: string } {
+  if (!incoming || incoming.length === 0) return { value: existing };
+  if (existing.length === 0) return { value: incoming };
+  if (canonicalValuesEqual(existing, incoming)) return { value: existing };
+  return {
+    value: existing,
+    diagnostic: `${field}: se conservan los valores publicados; la observación proponía ${JSON.stringify(incoming)}`,
+  };
+}
+
+function mergePublishedList<T>(
+  field: string,
+  existing: T[],
+  incoming: T[],
+  identityOf: (item: T) => string,
+  enrich: (canonical: T, observed: T) => T,
+): { value: T[]; diagnostic?: string } {
+  if (incoming.length === 0) return { value: existing };
+  if (existing.length === 0) return { value: incoming };
+
+  const used = new Set<number>();
+  const value = existing.map((item) => {
+    const key = identityOf(item);
+    if (!key) return item;
+    const index = incoming.findIndex((observed, offset) => !used.has(offset) && identityOf(observed) === key);
+    if (index < 0) return item;
+    used.add(index);
+    return enrich(item, incoming[index]!);
+  });
+
+  if (canonicalValuesEqual(value, incoming)) return { value };
+  return {
+    value,
+    diagnostic: `${field}: se conserva la información canónica; la observación difería`,
+  };
+}
+
+function enrichPerformer(canonical: Performer, observed: Performer): Performer {
+  if (canonical.role || !observed.role) return canonical;
+  return { name: canonical.name, role: observed.role };
+}
+
+function enrichWork(canonical: Work, observed: Work): Work {
+  if (canonical.composerName || !observed.composerName) return canonical;
+  return { title: canonical.title, composerName: observed.composerName };
 }
 
 function preferNonEmpty<T>(existing: T[], incoming: T[]): T[] {

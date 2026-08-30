@@ -199,6 +199,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
         classificationDrift: result?.classificationDrift,
         scheduleChange: result?.scheduleChange,
         batchDuplicate: result?.batchDuplicate,
+        mergeDiagnostics: result?.mergeDiagnostics,
         candidate: result?.candidate,
       }),
     );

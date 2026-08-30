@@ -8,7 +8,7 @@ const CATALOG =
   /\b(?:bwv|hwv|hob\.?|buxwv|swwv|rct|k\.?\s*\d|kv\.?\s*\d|op\.?\s*\d|opus\s+\d|g\.\s*\d|h\.?\s*\d{2,})\b/i;
 const MOVEMENT = /^(?:i{1,3}|iv|vi{0,3}|[1-9]\d*)\.\s+\S+/i;
 const WORK_GENRE =
-  /\b(?:concierto|concerto|sinfon[ií]a|symphony|sonata|suite|quinteto|cuarteto|cuartet|tr[ií]o|obertura|ouverture|r[eé]quiem|misa|missa|toccata|fuga|fugue|preludio|pr[eé]lude|nocturne|mazurka|scherzo|impromptu|variaciones|variations|cantata|oratorio|fantas[ií]a|romance)\b/i;
+  /\b(?:concierto|concerto|sinfon[ií]a|symphony|sonata|suite|quinteto|cuarteto|cuartet|tr[ií]o|obertura|ouverture|r[eé]quiem|misa|missa|toccata|fuga|fugue|preludio|pr[eé]lude|nocturne|mazurka|scherzo|impromptu|variaciones|variations|cantata|oratorio|fantas[ií]a|romance|divertimento|polonesa|polonaise)\b/i;
 const MONTH =
   'enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre';
 const SCHEDULE_NOTICE = new RegExp(
@@ -17,6 +17,10 @@ const SCHEDULE_NOTICE = new RegExp(
 );
 const INSTRUMENT_ONLY =
   /^(?:violines|viol[ií]n|violas?|violonchelos?|cellos?|contrabajos?|tenores|bajos|sopranos?|mezzosopranos?|bar[ií]tonos?|pianos?|flautas?|oboes?|clarinetes?|fagotes?|trompas?|trompetas?|arpas?|claves?|percusi[oó]n|bater[ií]a|directores?|directora|direcci[oó]n)$/i;
+const ENSEMBLE =
+  /\b(?:orquesta|orchestra|orchester|coro|choir|ensemble|ensamble|camerata|cuarteto|quinteto|agrupaci[oó]n|sociedad coral)\b/i;
+const ENSEMBLE_SUBJECT =
+  /^(?:orquesta|orchestra|orchester|coro|choir|ensemble|ensamble|camerata|cuarteto|quinteto|agrupaci[oó]n|sociedad coral)\b/i;
 
 /**
  * Drop fragments that are clearly not people or ensembles.
@@ -70,9 +74,10 @@ export function looksLikeScheduleNotice(text: string): boolean {
 }
 
 export function looksLikeEnsembleName(text: string): boolean {
-  return /\b(?:orquesta|orchestra|orchester|coro|choir|ensemble|ensamble|camerata|cuarteto|quinteto|agrupaci[oó]n|sociedad coral)\b/i.test(
-    text,
-  );
+  if (!ENSEMBLE.test(text)) return false;
+  // "Concierto para piano y orquesta" names an instrumentation, not a group.
+  if (WORK_GENRE.test(text) && !ENSEMBLE_SUBJECT.test(text.trim())) return false;
+  return true;
 }
 
 /** Names that must not appear as `composers[]` / `works[].composerName`. */

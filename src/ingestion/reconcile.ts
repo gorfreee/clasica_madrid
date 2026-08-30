@@ -49,6 +49,7 @@ export type ObservationReconcile = {
   candidateGenerated: boolean;
   ambiguousReason?: string;
   batchDuplicate?: boolean;
+  mergeDiagnostics?: string[];
 };
 
 export type ReconcileStats = {
@@ -250,6 +251,7 @@ function applyExistingGroup(
       publishable: true,
       candidateGenerated: true,
       batchDuplicate: offset > 0,
+      ...(merged.diagnostics.length > 0 ? { mergeDiagnostics: merged.diagnostics } : {}),
     });
   }
 }

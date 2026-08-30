@@ -65,6 +65,11 @@ export type IngestEventDecision = {
   scheduleChange?: 'cancelled' | 'postponed';
   batchDuplicate?: boolean;
   /**
+   * Incoming canonical/enrichment values that were not applied to a
+   * published event. Diagnostic only; never written to `data/**`.
+   */
+  mergeDiagnostics?: string[];
+  /**
    * Diagnostic projection of the Candidate that would be written.
    * Present only when a Candidate exists. Not sent to the classifier.
    */
@@ -115,6 +120,7 @@ export type DecisionInput = {
   classificationDrift?: IngestEventDecision['classificationDrift'];
   scheduleChange?: IngestEventDecision['scheduleChange'];
   batchDuplicate?: boolean;
+  mergeDiagnostics?: string[];
   candidate?: Candidate;
 };
 
@@ -136,6 +142,9 @@ export function buildEventDecision(input: DecisionInput): IngestEventDecision {
   if (input.structuralSkip) decision.structuralSkip = { reason: input.structuralSkip };
   if (input.identity) decision.identity = input.identity;
   if (input.fieldDiffs && input.fieldDiffs.length > 0) decision.fieldDiffs = input.fieldDiffs;
+  if (input.mergeDiagnostics && input.mergeDiagnostics.length > 0) {
+    decision.mergeDiagnostics = input.mergeDiagnostics;
+  }
   if (input.classificationDrift) decision.classificationDrift = input.classificationDrift;
   if (input.scheduleChange) decision.scheduleChange = input.scheduleChange;
   if (input.batchDuplicate) decision.batchDuplicate = true;

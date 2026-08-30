@@ -77,4 +77,28 @@ describe('segmentación performer/programa del Auditorio', () => {
       ]),
     ).toBe(5);
   });
+
+  it('Composer: Work con «y orquesta» abre el programa y no entra en el elenco', () => {
+    const segments = segmentAuditorioBlocks([
+      [
+        'Orquesta Clásica Santa Cecilia',
+        'Andrei Yaroshinski, piano',
+        'Mozart: Divertimento en Re mayor, K. 136 (Allegro)',
+        'Chopin: Concierto para piano y orquesta n.º 1',
+        'Chopin: Andante spianato y Gran Polonesa brillante, op. 22',
+        'Chopin: Concierto para piano y orquesta n.º 2',
+      ],
+    ]);
+    expect(segments.performerLines).toEqual([
+      'Orquesta Clásica Santa Cecilia',
+      'Andrei Yaroshinski, piano',
+    ]);
+    expect(segments.programLines).toEqual([
+      'Mozart: Divertimento en Re mayor, K. 136 (Allegro)',
+      'Chopin: Concierto para piano y orquesta n.º 1',
+      'Chopin: Andante spianato y Gran Polonesa brillante, op. 22',
+      'Chopin: Concierto para piano y orquesta n.º 2',
+    ]);
+    expect(parseAuditorioPersonLine('Chopin: Concierto para piano y orquesta n.º 1')).toBeUndefined();
+  });
 });

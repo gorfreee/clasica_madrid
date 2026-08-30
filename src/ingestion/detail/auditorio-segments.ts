@@ -36,7 +36,7 @@ const STRONG_CATALOG =
   /\b(?:bwv|hwv|hob\.?|buxwv|swwv|rct|k\.?\s*\d|kv\.?\s*\d|op\.?\s*\d|opus\s+\d|g\.\s*\d|h\.?\s*\d{2,}|n[úu]m\.?\s*\d)\b/i;
 
 const WORK_GENRE =
-  /\b(?:concierto|concerto|sinfon[ií]a|symphony|sonata|suite|quinteto|cuarteto|cuartet|tr[ií]o|obertura|ouverture|r[eé]quiem|misa|missa|toccata|fuga|fugue|preludio|pr[eé]lude|nocturne|mazurka|scherzo|impromptu|variaciones|variations|cantata|oratorio|fantas[ií]a|romance|rhapsod|rapsodia)\b/i;
+  /\b(?:concierto|concerto|sinfon[ií]a|symphony|sonata|suite|quinteto|cuarteto|cuartet|tr[ií]o|obertura|ouverture|r[eé]quiem|misa|missa|toccata|fuga|fugue|preludio|pr[eé]lude|nocturne|mazurka|scherzo|impromptu|variaciones|variations|cantata|oratorio|fantas[ií]a|romance|rhapsod|rapsodia|divertimento|polonesa|polonaise)\b/i;
 
 const MOVEMENT = /^(?:i{1,3}|iv|vi{0,3}|[1-9]\d*)\.\s+\S+/i;
 
@@ -92,6 +92,7 @@ export function findProgramStartIndex(lines: string[]): number {
     if (looksLikeProgramHeader(line) || ANONYMOUS_COMPOSER.test(line) || /^obras de\b/i.test(line)) {
       return index;
     }
+    if (parseComposerColonWork(line)) return index;
     if (isComposerHeading(line)) return index;
     if (looksLikeStrongWorkLine(line)) return walkBackOneComposer(lines, index);
     if (
@@ -129,6 +130,7 @@ export function parseAuditorioPersonLine(
   if (!cleaned) return undefined;
   if (looksLikeScheduleNotice(cleaned) || looksLikeProgramHeader(cleaned)) return undefined;
   if (looksLikeRoleOnlyLine(cleaned) || ANONYMOUS_COMPOSER.test(cleaned)) return undefined;
+  if (parseComposerColonWork(cleaned)) return undefined;
   if (isComposerHeading(cleaned) || looksLikeStrongWorkLine(cleaned)) return undefined;
 
   const director = DIRECTOR_PREFIX.exec(cleaned);
@@ -148,6 +150,33 @@ export function parseAuditorioPersonLine(
   if (looksLikeCastEnsemble(cleaned)) return { name: cleaned };
   if (looksLikePersonOrGroupName(cleaned)) return { name: cleaned };
   return undefined;
+}
+
+/**
+ * `Composer: Work title` on one line. Used as a program frontier, never as a person.
+ * Requires a work-genre or catalogue signal on the title side so `Nombre: rol` stays a person.
+ */
+export function parseComposerColonWork(
+  text: string,
+): { title: string; composerName: string } | undefined {
+  const cleaned = cleanLine(text);
+  const named = /^(.+?):\s+(.+)$/.exec(cleaned);
+  if (!named?.[1] || !named[2]) return undefined;
+  const composerName = named[1].trim();
+  const title = named[2].trim();
+  if (!composerName || !title) return undefined;
+  if (hasExplicitPerformerSignal(composerName) || looksLikeRoleOnlyLine(composerName)) return undefined;
+  if (WORK_GENRE.test(composerName) || STRONG_CATALOG.test(composerName)) return undefined;
+  if (composerName.length > 80 || /\d/.test(composerName)) return undefined;
+  const words = composerName.split(/\s+/).filter(Boolean);
+  if (words.length < 1 || words.length > 6) return undefined;
+  if (!looksLikeColonWorkTitle(title)) return undefined;
+  return { title, composerName };
+}
+
+function looksLikeColonWorkTitle(title: string): boolean {
+  if (WORK_GENRE.test(title) || STRONG_CATALOG.test(title)) return true;
+  return /\b(?:bwv|hwv|hob|buxwv|swwv|rct|k\.?v?|op\.?|opus|g\.|h\.?)\s*\d+/i.test(title);
 }
 
 function parseCommaRole(text: string): { name: string; roleText: string } | undefined {
