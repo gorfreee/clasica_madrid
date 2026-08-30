@@ -251,7 +251,7 @@ describe('ingest event report', () => {
       { title: 'Concierto extraordinario B', slug: 'b' },
       { title: 'Concierto extraordinario C', slug: 'c' },
     ];
-    const sequential = await runAuditorio({ items, ai: { async classify() { return { eligibility: 'include' }; } } });
+    const sequential = await runAuditorio({ items, ai: { async classify() { return { eligibility: 'include', formats: ['other'], eras: ['contemporary'], kind: 'alternative' }; } } });
     let releaseA!: () => void;
     const holdA = new Promise<void>((resolve) => { releaseA = resolve; });
     const completion: string[] = [];
@@ -263,7 +263,7 @@ describe('ingest event report', () => {
         completion.push(observed.title);
         context?.onDiagnostics?.({ model: observed.title, attempts: 1, cacheHit: false });
         if (observed.title.endsWith('B')) releaseA();
-        return { eligibility: 'include' };
+        return { eligibility: 'include', formats: ['other'], eras: ['contemporary'], kind: 'alternative' };
       },
     } });
     expect(completion[0]).toBe('Concierto extraordinario B');

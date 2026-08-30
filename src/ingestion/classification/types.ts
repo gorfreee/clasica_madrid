@@ -48,6 +48,7 @@ export const TECHNICAL_CLASSIFICATION_RULE_IDS = [
   'ai-rate-limited',
   'ai-malformed-output',
   'ai-invalid-output',
+  'ai-incomplete',
   'ai-unavailable',
   'ai-deferred',
 ] as const;

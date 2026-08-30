@@ -10,6 +10,7 @@ const healthyAi = {
   error: 0,
   invalidOutput: 0,
   malformedOutput: 0,
+  incomplete: 0,
 };
 
 const base = {
@@ -47,6 +48,12 @@ describe('evaluateIngestHealth', () => {
     expect(evaluateIngestHealth({ ...base, ai: { ...healthyAi, rateLimited: 1 } }).health).toBe('degraded');
     expect(evaluateIngestHealth({ ...base, ai: { ...healthyAi, timeout: 1 } }).health).toBe('degraded');
     expect(evaluateIngestHealth({ ...base, ai: { ...healthyAi, deferred: 3 } }).health).toBe('degraded');
+    expect(evaluateIngestHealth({ ...base, ai: { ...healthyAi, malformedOutput: 1 } }).healthReasons).toEqual([
+      'ai-malformed-output',
+    ]);
+    expect(evaluateIngestHealth({ ...base, ai: { ...healthyAi, incomplete: 1 } }).healthReasons).toEqual([
+      'ai-incomplete',
+    ]);
     expect(evaluateIngestHealth({ ...base, unresolvedTaxonomy: 4 })).toMatchObject({
       health: 'degraded',
       autoMergeEligible: true,

@@ -115,9 +115,12 @@ export type IngestAiSummary = {
   uncertain: number;
   invalidOutput: number;
   malformedOutput: number;
+  incomplete: number;
   rateLimited: number;
   timeout: number;
   error: number;
+  taxonomyAttempted: number;
+  taxonomyFilled: number;
   httpRequests: number;
   retries: number;
   modelFallbacks: number;
@@ -139,9 +142,12 @@ export function emptyIngestAiSummary(): IngestAiSummary {
     uncertain: 0,
     invalidOutput: 0,
     malformedOutput: 0,
+    incomplete: 0,
     rateLimited: 0,
     timeout: 0,
     error: 0,
+    taxonomyAttempted: 0,
+    taxonomyFilled: 0,
     httpRequests: 0,
     retries: 0,
     modelFallbacks: 0,

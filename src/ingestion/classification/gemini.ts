@@ -2,12 +2,17 @@ import { randomUUID } from 'node:crypto';
 import type { ObservedFacts } from '../observed.ts';
 import {
   AI_CLASSIFICATION_JSON_SCHEMA, AI_CLASSIFY_TIMEOUT_MS, AiRateLimitedError,
-  parseAiClassification, type AiCallContext, type AiCallDiagnostics,
-  type AiClassifier, type AiProviderStats,
+  AiUnusableOutputError, failureKindForUnusable, parseAiClassification,
+  sanitizeAiOutputExcerpt, type AiAttemptFailure, type AiCallContext, type AiCallDiagnostics,
+  type AiCallPurpose, type AiClassifier, type AiProviderStats, type AiTokenCounts,
 } from './ai.ts';
-import { AI_CLASSIFIER_SYSTEM_PROMPT, buildAiClassifierUserMessage } from './ai-prompt.ts';
 import {
-  GEMINI_DEFAULT_CONCURRENCY, GEMINI_DEFAULT_LIMITS, intervalMsForRpm, resolveGeminiModels, type ModelLimits,
+  AI_CLASSIFIER_SYSTEM_PROMPT, AI_TAXONOMY_SYSTEM_PROMPT,
+  buildAiClassifierUserMessage, buildAiTaxonomyUserMessage,
+} from './ai-prompt.ts';
+import {
+  GEMINI_DEFAULT_CONCURRENCY, GEMINI_DEFAULT_LIMITS, intervalMsForRpm, resolveGeminiModels,
+  thinkingConfigForModel, type ModelLimits,
 } from './gemini-config.ts';
 import { GeminiState, hashInput, nextQuotaReset } from './gemini-state.ts';
 
@@ -45,7 +50,12 @@ const systemClock: SleepClock = {
   now: () => Date.now(), sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
 };
 type RequestSpec = ReturnType<typeof requestSpec>;
-type RequestResult = { value: unknown; inputTokens?: number };
+type RequestResult = {
+  value: unknown;
+  tokens?: AiTokenCounts;
+  status?: string;
+  finishReason?: string;
+};
 type Reservation = { model: string; id: string; estimated: number };
 type CallResult = { value: unknown; diagnostics: AiCallDiagnostics };
 
@@ -117,10 +127,13 @@ export class GeminiClassifier implements AiClassifier {
     this.initialize();
     // The entire request (prompt text/version, schema, params, facts, endpoint and
     // API revision) is the cache identity. No dates/URLs outside ObservedFacts.
-    const spec = requestSpec(observed);
+    const purpose: AiCallPurpose = context.purpose ?? 'eligibility';
+    const spec = requestSpec(observed, purpose);
     const key = hashInput({ spec, baseUrl: this.baseUrl, revision: GEMINI_API_REVISION });
     const flightKey = hashInput({ key, models: this.models });
-    const diagnostics: AiCallDiagnostics = { attempts: 0, fallbackUsed: false, cacheHit: false, routing: [] };
+    const diagnostics: AiCallDiagnostics = {
+      attempts: 0, fallbackUsed: false, cacheHit: false, routing: [], failures: [], purpose,
+    };
     const publishDiagnostics = () => {
       this.lastCall = structuredClone(diagnostics);
       context.onDiagnostics?.(structuredClone(diagnostics));
@@ -143,7 +156,7 @@ export class GeminiClassifier implements AiClassifier {
         this.stats.cacheHits++;
         return structuredClone(result.value);
       }
-      flight = this.classifyOnce(observed, spec, key, diagnostics, signal);
+      flight = this.classifyOnce(spec, key, diagnostics, signal);
       if (this.options.cacheEnabled !== false) this.inFlight.set(flightKey, flight);
       return (await flight).value;
     } catch (error) {
@@ -163,17 +176,18 @@ export class GeminiClassifier implements AiClassifier {
   }
 
   private async classifyOnce(
-    observed: ObservedFacts, spec: RequestSpec, key: string,
+    spec: RequestSpec, key: string,
     diagnostics: AiCallDiagnostics, signal: AbortSignal,
   ): Promise<CallResult> {
     const deadline = this.clock.now() + this.classifyBudgetMs;
     const maxAttempts = 1 + (this.options.maxRetries ?? GEMINI_MAX_RETRIES);
+    const skippedThisCall = new Set<string>();
     let lastError: unknown;
     while (diagnostics.attempts! < maxAttempts) {
       signal.throwIfAborted();
       if (this.options.cacheEnabled !== false) {
         for (const model of this.models) {
-          if (!this.enabled(model)) continue;
+          if (!this.enabled(model) || skippedThisCall.has(model)) continue;
           const value = this.state.cached(hashInput({ key, model }));
           if (value !== undefined) {
             Object.assign(diagnostics, { model, cacheHit: true, fallbackUsed: model !== this.models[0] });
@@ -185,7 +199,7 @@ export class GeminiClassifier implements AiClassifier {
         }
       }
       if (this.fatalError) throw this.fatalError;
-      const reservation = await this.acquire(spec, deadline, signal, diagnostics);
+      const reservation = await this.acquire(spec, deadline, signal, diagnostics, skippedThisCall);
       const { model, id, estimated } = reservation;
       if (diagnostics.attempts! > 0) this.stats.retries++;
       diagnostics.attempts!++;
@@ -197,37 +211,59 @@ export class GeminiClassifier implements AiClassifier {
       try {
         const result = await this.request(model, spec, signal);
         const state = this.state.model(model, this.clock.now());
-        if (result.inputTokens !== undefined) {
+        if (result.tokens?.input !== undefined) {
           const recent = state.recent.find((r) => r.id === id);
-          if (recent) recent.tokens = result.inputTokens;
-          state.tokenScale = Math.max(state.tokenScale, result.inputTokens / estimated * state.tokenScale);
-          this.stats.inputTokensByModel[model] = (this.stats.inputTokensByModel[model] ?? 0) + result.inputTokens;
+          if (recent) recent.tokens = result.tokens.input;
+          state.tokenScale = Math.max(state.tokenScale, result.tokens.input / estimated * state.tokenScale);
+          this.stats.inputTokensByModel[model] = (this.stats.inputTokensByModel[model] ?? 0) + result.tokens.input;
           this.state.save();
         }
-        if (parseAiClassification(result.value).ok) {
+        diagnostics.status = result.status;
+        diagnostics.tokens = result.tokens;
+        const parsed = parseAiClassification(result.value);
+        if (parsed.ok) {
+          // Valid JSON, including legitimate eligibility: uncertain, stops here.
+          // Never shop another model to turn uncertain into include.
           if (this.options.cacheEnabled !== false) this.state.cache(hashInput({ key, model }), result.value);
           this.state.resolvePending(key);
           bump(this.stats.classificationsByModel, model);
-        } else {
-          diagnostics.deferred = true;
-          this.stats.deferred++;
-          this.state.defer(key, observed, spec, diagnostics, 'ai-invalid-output');
+          return { value: result.value, diagnostics };
         }
-        // Valid uncertain and invalid semantic output both stop here; never shop
-        // for include or silently repair editorial values on another model.
-        return { value: result.value, diagnostics };
+        throw new AiUnusableOutputError(`Gemini: output no cumple el schema (${parsed.reason})`, {
+          kind: parsed.ruleId === 'ai-invalid-output' ? 'invalid' : 'malformed',
+          model,
+          status: result.status,
+          finishReason: result.finishReason,
+          tokens: result.tokens,
+          excerpt: sanitizeAiOutputExcerpt(
+            typeof result.value === 'string' ? result.value : JSON.stringify(result.value),
+            this.options.apiKey,
+          ),
+        });
       } catch (error) {
         lastError = error;
         signal.throwIfAborted();
-        if (error instanceof AiRateLimitedError) {
+        if (error instanceof AiUnusableOutputError) {
+          recordFailure(diagnostics, error, model);
+          skipUnusableModel(skippedThisCall, model, this.models, (name) => (
+            !this.disabled.has(name) && this.enabled(name) && !skippedThisCall.has(name)
+          ));
+          route(diagnostics, model, failureKindForUnusable(error.kind));
+        } else if (error instanceof AiRateLimitedError) {
           const state = this.state.model(model, this.clock.now());
           if (error.quotaExhausted) state.dailyUntil = nextQuotaReset(this.clock.now());
           else state.cooldownUntil = Math.max(state.cooldownUntil, this.clock.now() + this.retryWait(error, diagnostics.attempts! - 1));
           this.state.save();
           diagnostics.routing!.push({ model, reason: error.quotaExhausted ? 'daily-quota' : 'rate-limit' });
+          pushFailure(diagnostics, {
+            model, kind: 'rate-limit', excerpt: sanitizeAiOutputExcerpt(error.message, this.options.apiKey),
+          });
         } else if (error instanceof Error && /Gemini HTTP (400|404)/.test(error.message)) {
           this.disabled.add(model);
           diagnostics.routing!.push({ model, reason: 'unavailable-model-or-config' });
+          pushFailure(diagnostics, {
+            model, kind: 'transport-error', excerpt: sanitizeAiOutputExcerpt(error.message, this.options.apiKey),
+          });
         } else if (error instanceof Error && /Gemini HTTP (401|403)/.test(error.message)) {
           this.fatalError = error;
           throw error;
@@ -235,7 +271,13 @@ export class GeminiClassifier implements AiClassifier {
           const state = this.state.model(model, this.clock.now());
           state.cooldownUntil = this.clock.now() + this.retryWait(undefined, diagnostics.attempts! - 1);
           this.state.save();
-          diagnostics.routing!.push({ model, reason: 'transport-error' });
+          const timeout = error instanceof Error && /tiempo agotado/i.test(error.message);
+          diagnostics.routing!.push({ model, reason: timeout ? 'timeout' : 'transport-error' });
+          pushFailure(diagnostics, {
+            model,
+            kind: timeout ? 'timeout' : 'transport-error',
+            excerpt: sanitizeAiOutputExcerpt(error instanceof Error ? error.message : 'transport-error', this.options.apiKey),
+          });
         } else {
           throw error;
         }
@@ -251,7 +293,13 @@ export class GeminiClassifier implements AiClassifier {
     return limits.rpm > 0 && limits.tpm > 0 && limits.rpd > 0;
   }
 
-  private async acquire(spec: RequestSpec, deadline: number, signal: AbortSignal, diagnostics: AiCallDiagnostics): Promise<Reservation> {
+  private async acquire(
+    spec: RequestSpec,
+    deadline: number,
+    signal: AbortSignal,
+    diagnostics: AiCallDiagnostics,
+    skippedThisCall: ReadonlySet<string> = new Set(),
+  ): Promise<Reservation> {
     while (true) {
       signal.throwIfAborted();
       if (this.fatalError) throw this.fatalError;
@@ -262,8 +310,8 @@ export class GeminiClassifier implements AiClassifier {
       if (now >= deadline) throw new Error('tiempo agotado esperando cuota de IA');
       let earliest = Infinity;
       for (const model of this.models) {
-        if (this.disabled.has(model) || !this.enabled(model)) {
-          route(diagnostics, model, 'disabled');
+        if (this.disabled.has(model) || !this.enabled(model) || skippedThisCall.has(model)) {
+          route(diagnostics, model, skippedThisCall.has(model) ? 'unusable-output' : 'disabled');
           continue;
         }
         const limits = this.limits[model]!;
@@ -333,35 +381,78 @@ export class GeminiClassifier implements AiClassifier {
       const response = await abortable(fetchImpl(`${this.baseUrl}/interactions`, {
         method: 'POST', signal: controller.signal,
         headers: { 'x-goog-api-key': this.options.apiKey, 'content-type': 'application/json', 'api-revision': GEMINI_API_REVISION },
-        body: JSON.stringify({ model, ...spec }),
+        body: JSON.stringify({
+          model,
+          ...spec,
+          generation_config: { ...spec.generation_config, ...thinkingConfigForModel(model) },
+        }),
       }), controller.signal);
       if (!response.ok) {
         const body = await abortable(response.text(), controller.signal);
         throw httpError(response.status, body.replaceAll(this.options.apiKey, '[redacted]'), response.headers.get('retry-after'), model, this.clock.now());
       }
       const payload = await abortable(response.json(), controller.signal);
-      const content = interactionText(payload);
-      if (content === undefined) throw new Error('Gemini devolvió una respuesta vacía');
-      let value: unknown;
-      try { value = JSON.parse(content); }
-      catch { throw new Error('Gemini devolvió JSON inválido'); }
-      const tokens = payload?.usage?.total_input_tokens;
-      return { value, inputTokens: typeof tokens === 'number' && Number.isFinite(tokens) && tokens >= 0 ? tokens : undefined };
+      return this.parseInteraction(model, payload);
     } catch (error) {
       if (controller.signal.aborted) throw new Error(`tiempo agotado en la clasificación con IA (${timeoutMs}ms)`);
+      if (error instanceof SyntaxError) {
+        throw new AiUnusableOutputError('Gemini devolvió un cuerpo HTTP no JSON', {
+          kind: 'malformed',
+          model,
+          excerpt: sanitizeAiOutputExcerpt(error.message, this.options.apiKey),
+        });
+      }
       throw error;
     } finally {
       clearTimeout(timer);
       signal.removeEventListener('abort', abort);
     }
   }
+
+  private parseInteraction(model: string, payload: unknown): RequestResult {
+    const inspected = inspectInteraction(payload, this.options.apiKey);
+    let value: unknown | undefined;
+    if (inspected.content) {
+      try { value = JSON.parse(inspected.content); }
+      catch {
+        throw new AiUnusableOutputError(
+          isIncompleteStatus(inspected.status) ? 'Gemini devolvió una interacción incompleta' : 'Gemini devolvió JSON inválido',
+          {
+            kind: isIncompleteStatus(inspected.status) ? 'incomplete' : 'malformed',
+            model,
+            status: inspected.status,
+            finishReason: inspected.finishReason,
+            tokens: inspected.tokens,
+            excerpt: inspected.excerpt,
+          },
+        );
+      }
+    }
+    if (value !== undefined && parseAiClassification(value).ok) {
+      return { value, tokens: inspected.tokens, status: inspected.status, finishReason: inspected.finishReason };
+    }
+    if (isIncompleteStatus(inspected.status)) {
+      throw new AiUnusableOutputError('Gemini devolvió una interacción incompleta', {
+        kind: 'incomplete', model, status: inspected.status, finishReason: inspected.finishReason,
+        tokens: inspected.tokens, excerpt: inspected.excerpt,
+      });
+    }
+    if (!inspected.content) {
+      throw new AiUnusableOutputError('Gemini devolvió una respuesta vacía', {
+        kind: 'empty', model, status: inspected.status, finishReason: inspected.finishReason,
+        tokens: inspected.tokens, excerpt: inspected.excerpt,
+      });
+    }
+    return { value, tokens: inspected.tokens, status: inspected.status, finishReason: inspected.finishReason };
+  }
 }
 
-function requestSpec(observed: ObservedFacts) {
+function requestSpec(observed: ObservedFacts, purpose: AiCallPurpose = 'eligibility') {
+  const taxonomy = purpose === 'taxonomy';
   return {
     store: false,
-    system_instruction: AI_CLASSIFIER_SYSTEM_PROMPT,
-    input: buildAiClassifierUserMessage(observed),
+    system_instruction: taxonomy ? AI_TAXONOMY_SYSTEM_PROMPT : AI_CLASSIFIER_SYSTEM_PROMPT,
+    input: taxonomy ? buildAiTaxonomyUserMessage(observed) : buildAiClassifierUserMessage(observed),
     response_format: { type: 'text', mime_type: 'application/json', schema: AI_CLASSIFICATION_JSON_SCHEMA },
     generation_config: { max_output_tokens: 600, tool_choice: 'none' },
   };
@@ -371,6 +462,90 @@ function route(diagnostics: AiCallDiagnostics, model: string, reason: string): v
   if (!diagnostics.routing!.some((r) => r.model === model && r.reason === reason)) {
     diagnostics.routing!.push({ model, reason });
   }
+}
+
+function recordFailure(diagnostics: AiCallDiagnostics, error: AiUnusableOutputError, model: string): void {
+  pushFailure(diagnostics, {
+    model,
+    kind: failureKindForUnusable(error.kind),
+    status: error.status,
+    finishReason: error.finishReason,
+    tokens: error.tokens,
+    excerpt: error.excerpt,
+  });
+}
+
+function pushFailure(diagnostics: AiCallDiagnostics, failure: AiAttemptFailure): void {
+  diagnostics.failures = [...(diagnostics.failures ?? []), failure];
+}
+
+function skipUnusableModel(
+  skipped: Set<string>,
+  model: string,
+  pool: readonly string[],
+  available: (name: string) => boolean,
+): void {
+  const others = pool.filter((name) => name !== model && available(name));
+  if (others.length > 0) skipped.add(model);
+}
+
+function isIncompleteStatus(status: string | undefined): boolean {
+  return status === 'incomplete' || status === 'failed' || status === 'cancelled' || status === 'budget_exceeded';
+}
+
+function inspectInteraction(payload: unknown, secret?: string): {
+  content?: string;
+  status?: string;
+  finishReason?: string;
+  tokens?: AiTokenCounts;
+  excerpt?: string;
+} {
+  if (!payload || typeof payload !== 'object') {
+    return { excerpt: sanitizeAiOutputExcerpt(String(payload), secret) };
+  }
+  const obj = payload as {
+    status?: unknown;
+    output_text?: unknown;
+    incomplete_details?: { reason?: unknown };
+    error?: { message?: unknown };
+    usage?: {
+      total_input_tokens?: unknown;
+      total_output_tokens?: unknown;
+      total_thought_tokens?: unknown;
+    };
+  };
+  const status = typeof obj.status === 'string' ? obj.status : undefined;
+  const finishReason =
+    (obj.incomplete_details && typeof obj.incomplete_details.reason === 'string'
+      ? obj.incomplete_details.reason
+      : undefined)
+    ?? (obj.error && typeof obj.error.message === 'string' ? obj.error.message : undefined);
+  const content = interactionText(payload);
+  const tokens = readTokenCounts(obj.usage);
+  const excerpt = sanitizeAiOutputExcerpt(
+    content ?? (typeof obj.output_text === 'string' ? obj.output_text : JSON.stringify(payload).slice(0, 400)),
+    secret,
+  );
+  return { content, status, finishReason, tokens, excerpt };
+}
+
+function readTokenCounts(usage: {
+  total_input_tokens?: unknown;
+  total_output_tokens?: unknown;
+  total_thought_tokens?: unknown;
+} | undefined): AiTokenCounts | undefined {
+  if (!usage) return undefined;
+  const tokens: AiTokenCounts = {};
+  if (typeof usage.total_input_tokens === 'number' && Number.isFinite(usage.total_input_tokens) && usage.total_input_tokens >= 0) {
+    tokens.input = usage.total_input_tokens;
+  }
+  if (typeof usage.total_output_tokens === 'number' && Number.isFinite(usage.total_output_tokens) && usage.total_output_tokens >= 0) {
+    tokens.output = usage.total_output_tokens;
+  }
+  if (typeof usage.total_thought_tokens === 'number' && Number.isFinite(usage.total_thought_tokens) && usage.total_thought_tokens >= 0) {
+    tokens.thought = usage.total_thought_tokens;
+  }
+  return Object.keys(tokens).length > 0 ? tokens : undefined;
 }
 
 /** Conservative text estimate including system prompt + schema; no extra API call. */

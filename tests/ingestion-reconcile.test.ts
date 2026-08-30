@@ -908,6 +908,7 @@ describe('pipeline — new, unchanged, updates', () => {
       'ai-rate-limited',
       'ai-malformed-output',
       'ai-invalid-output',
+      'ai-incomplete',
       'ai-unavailable',
       'ai-deferred',
     ]) {

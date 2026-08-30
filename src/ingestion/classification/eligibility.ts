@@ -1,4 +1,4 @@
-import { matchComposer } from '../knowledge/composers.ts';
+import { findKnownComposersInText, matchComposer } from '../knowledge/composers.ts';
 import type { ObservedFacts } from '../observed.ts';
 import type { Eligibility } from './golden-case.ts';
 import { fieldFolded, hasPhrase, hasWord, identityHaystack } from './text.ts';
@@ -85,7 +85,7 @@ function collectExclusions(facts: ObservedFacts, haystack: string): Exclusion[] 
   const cinema = cinemaIdentity(facts, category, title, description);
   if (cinema) found.push(cinema);
 
-  const workshop = workshopIdentity(facts, category, title, description);
+  const workshop = workshopIdentity(facts, category, title, description, program);
   if (workshop) found.push(workshop);
 
   const participatory = participatoryActivity(facts, title, haystack);
@@ -309,6 +309,7 @@ function workshopIdentity(
   category: string,
   title: string,
   description: string,
+  program: string,
 ): Exclusion | undefined {
   if (
     hasWord(category, 'taller') ||
@@ -317,7 +318,11 @@ function workshopIdentity(
     hasWord(title, 'taller') ||
     hasWord(title, 'conferencia') ||
     hasPhrase(description, 'un taller') ||
-    hasPhrase(description, 'taller de')
+    hasPhrase(description, 'taller de') ||
+    hasPhrase(description, 'taller musical') ||
+    hasPhrase(program, 'un taller') ||
+    hasPhrase(program, 'taller de') ||
+    hasPhrase(program, 'taller musical')
   ) {
     return exclusion('non-performance-activity', [facts.categoryText ?? facts.title], true);
   }
@@ -507,6 +512,12 @@ function knownClassicalNames(facts: ObservedFacts): string[] {
   for (const name of names) {
     const hit = matchComposer(name);
     if (hit) matched.push(hit.canonicalName);
+  }
+  const editorial = [facts.programText, facts.description, facts.title, facts.seriesText]
+    .filter(Boolean)
+    .join('\n');
+  for (const item of findKnownComposersInText(editorial)) {
+    matched.push(item.canonicalName);
   }
   return [...new Set(matched)];
 }

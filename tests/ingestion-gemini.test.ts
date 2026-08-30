@@ -281,7 +281,7 @@ describe('Gemini 429 + retries', () => {
     expect(provider.snapshotStats().httpRequests).toBe(GEMINI_MAX_RETRIES + 1);
   });
 
-  it('no reintenta errores no recuperables (401, JSON inválido)', async () => {
+  it('no reintenta errores de auth; JSON inválido sí consume retries del pool', async () => {
     const auth = recordingFetch(() => new Response('no', { status: 401 }));
     const unauthorized = classifier(auth.fetch);
     await expect(unauthorized.classify(observed)).rejects.toThrow(/Gemini HTTP 401/);
@@ -290,7 +290,7 @@ describe('Gemini 429 + retries', () => {
     const bad = recordingFetch(() => geminiStepsResponse('no-json'));
     const invalid = classifier(bad.fetch);
     await expect(invalid.classify(observed)).rejects.toThrow(/JSON inválido/);
-    expect(bad.requests).toHaveLength(1);
+    expect(bad.requests).toHaveLength(GEMINI_MAX_RETRIES + 1);
   });
 
   it('el lote continúa después de un 429', async () => {

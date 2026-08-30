@@ -17,6 +17,28 @@ export const GEMINI_DEFAULT_RPM = 12;
 export const GEMINI_DEFAULT_CONCURRENCY = 8;
 export type ModelLimits = { rpm: number; tpm: number; rpd: number };
 
+export type GeminiThinkingConfig = { thinking_level: 'minimal' | 'low' };
+
+/**
+ * Structured JSON classification does not need deep reasoning.
+ * Only send parameters the model family is known to accept; unsupported
+ * fields would 400 and disable the model for the rest of the run.
+ *
+ * Gemma: no thinking params.
+ * Gemini 3.x Flash (not Pro): `minimal`.
+ * Gemini 2.5 Flash (not lite): `low` (no `minimal`; default thinking is on).
+ * Gemini 2.5 Flash-Lite: omit (thinking is off by default).
+ */
+export function thinkingConfigForModel(model: string): GeminiThinkingConfig | undefined {
+  const name = model.trim().toLowerCase();
+  if (!name || name.startsWith('gemma-')) return undefined;
+  if (/^gemini-3(\.|-|$)/.test(name) && !/\bpro\b/.test(name) && !name.includes('-pro-')) {
+    return { thinking_level: 'minimal' };
+  }
+  if (name === 'gemini-2.5-flash') return { thinking_level: 'low' };
+  return undefined;
+}
+
 export type GeminiConfigEnv = {
   GEMINI_MODELS?: string;
   GEMINI_MODEL?: string;

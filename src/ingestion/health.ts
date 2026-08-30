@@ -14,7 +14,7 @@ export type IngestHealthInput = {
   unresolvedTaxonomy: number;
   ai: Pick<
     IngestAiSummary,
-    'uncertain' | 'rateLimited' | 'timeout' | 'deferred' | 'error' | 'invalidOutput' | 'malformedOutput'
+    'uncertain' | 'rateLimited' | 'timeout' | 'deferred' | 'error' | 'invalidOutput' | 'malformedOutput' | 'incomplete'
   >;
   /** Extra fatal causes (unexpected exception, AI auth/config). */
   fatalReasons?: readonly string[];
@@ -65,6 +65,7 @@ export function evaluateIngestHealth(input: IngestHealthInput): {
   if (input.ai.error > 0) findings.push({ reason: 'ai-error', health: 'degraded' });
   if (input.ai.invalidOutput > 0) findings.push({ reason: 'ai-invalid-output', health: 'degraded' });
   if (input.ai.malformedOutput > 0) findings.push({ reason: 'ai-malformed-output', health: 'degraded' });
+  if (input.ai.incomplete > 0) findings.push({ reason: 'ai-incomplete', health: 'degraded' });
   if (input.unresolvedTaxonomy > 0) {
     findings.push({ reason: 'unresolved-taxonomy', health: 'degraded' });
   }

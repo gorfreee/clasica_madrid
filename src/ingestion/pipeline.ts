@@ -150,6 +150,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
     if (classifiedAt) {
       eligibility[classifiedAt.classification.eligibility.value] += 1;
       recordAiOutcome(aiUsage, classifiedAt.classification);
+      recordTaxonomyOutcome(aiUsage, classifiedAt.classification, classifiedAt.aiCall);
     }
     if (!event || !source) continue;
     observations.push({
@@ -343,6 +344,7 @@ function wrapAi(inner: AiClassifier | undefined, usage: IngestAiSummary): AiClas
     snapshotStats: inner.snapshotStats?.bind(inner),
     async classify(observed, context) {
       usage.attempted += 1;
+      if (context?.purpose === 'taxonomy') usage.taxonomyAttempted += 1;
       return inner.classify(observed, context);
     },
   };
@@ -369,6 +371,9 @@ function recordAiOutcome(usage: IngestAiSummary, classification: ClassificationR
     case 'ai-malformed-output':
       usage.malformedOutput += 1;
       break;
+    case 'ai-incomplete':
+      usage.incomplete += 1;
+      break;
     case 'ai-rate-limited':
       usage.rateLimited += 1;
       break;
@@ -378,6 +383,23 @@ function recordAiOutcome(usage: IngestAiSummary, classification: ClassificationR
     default:
       usage.error += 1;
   }
+}
+
+function recordTaxonomyOutcome(
+  usage: IngestAiSummary,
+  classification: ClassificationResult,
+  aiCall: AiCallDiagnostics | undefined,
+): void {
+  const calls = [aiCall, ...(aiCall?.extraCalls ?? [])].filter(
+    (item): item is AiCallDiagnostics => Boolean(item),
+  );
+  if (!calls.some((item) => item.purpose === 'taxonomy')) return;
+  if (classification.eligibility.value !== 'include') return;
+  const filled =
+    (classification.formats?.method === 'ai' && (classification.formats.value.length ?? 0) > 0) ||
+    (classification.eras?.method === 'ai' && (classification.eras.value.length ?? 0) > 0) ||
+    (classification.kind?.method === 'ai' && classification.eligibility.method !== 'ai');
+  if (filled) usage.taxonomyFilled += 1;
 }
 
 function mergeProviderStats(usage: IngestAiSummary, ai: AiClassifier | undefined): void {
