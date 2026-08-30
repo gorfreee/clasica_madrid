@@ -2,7 +2,11 @@ import type { Catalog } from '../lib/domain/catalog.ts';
 import type { Candidate } from '../lib/schemas/candidate.ts';
 import type { Event } from '../lib/schemas/index.ts';
 import type { AiCallDiagnostics } from './classification/ai.ts';
-import { isPublishableInclude, type ClassificationResult } from './classification/types.ts';
+import {
+  isPublishableInclude,
+  isTechnicalClassificationFailure,
+  type ClassificationResult,
+} from './classification/types.ts';
 import type { EventIdentityAlias, IdentityMatch, IdentityMethod } from './identity.ts';
 import { matchEventIdentity, newObservationKeys } from './identity.ts';
 import {
@@ -37,6 +41,7 @@ export type ObservationReconcile = {
   action?: ReconcileAction;
   method?: IdentityMethod;
   eventId?: string;
+  eventIds?: string[];
   fieldDiffs?: string[];
   classificationDrift?: {
     eligibility: 'exclude' | 'uncertain';
@@ -101,6 +106,7 @@ export function reconcileHarvest(options: {
   const skipped: PreparedItem[] = [];
   const ambiguous: PreparedItem[] = [];
   const existing: PreparedItem[] = [];
+  const shared: PreparedItem[] = [];
   const fresh: PreparedItem[] = [];
 
   for (const observation of options.observations) {
@@ -112,6 +118,10 @@ export function reconcileHarvest(options: {
     }
     if (item.identity.kind === 'matched') {
       existing.push(item);
+      continue;
+    }
+    if (item.identity.kind === 'matched-many') {
+      shared.push(item);
       continue;
     }
     if (item.skip) {
@@ -158,6 +168,10 @@ export function reconcileHarvest(options: {
 
   for (const group of existingGroups.values()) {
     applyExistingGroup(group, now, candidates, byIndex, stats, seenEventIds);
+  }
+
+  for (const item of shared) {
+    applySharedSourceObservation(item, now, candidates, byIndex, stats, seenEventIds);
   }
 
   const freshGroups = groupNewObservations(fresh);
@@ -258,6 +272,63 @@ function applyExistingGroup(
       ...(merged.diagnostics.length > 0 ? { mergeDiagnostics: merged.diagnostics } : {}),
     });
   }
+}
+
+function applySharedSourceObservation(
+  item: PreparedItem,
+  now: Date,
+  candidates: Candidate[],
+  byIndex: Map<number, ObservationReconcile>,
+  stats: ReconcileStats,
+  seenEventIds: Set<string>,
+): void {
+  const match = item.identity;
+  if (match.kind !== 'matched-many') return;
+
+  const cancelled = item.proposal.status === 'cancelled';
+  const eventIds: string[] = [];
+  const diffs: string[] = [];
+  const diagnostics: string[] = [];
+  let anyUpdated = false;
+  let firstCandidate: Candidate | undefined;
+
+  for (const assignment of match.assigned) {
+    const existing = assignment.event;
+    seenEventIds.add(existing.id);
+    eventIds.push(existing.id);
+    const proposal: EventProposal = {
+      ...item.proposal,
+      occurrences: cancelled ? item.proposal.occurrences : assignment.occurrences,
+    };
+    const merged = mergeExistingEvent(existing, proposal, now);
+    const action: ReconcileAction = merged.diffs.length === 0 ? 'unchanged' : 'updated';
+    if (action === 'unchanged') stats.unchangedEvents += 1;
+    else {
+      stats.updatedEvents += 1;
+      anyUpdated = true;
+    }
+    const candidate = withCandidateEvent(merged.event, proposal.venue);
+    firstCandidate ??= candidate;
+    if (action !== 'unchanged') candidates.push(candidate);
+    diffs.push(...merged.diffs);
+    diagnostics.push(...merged.diagnostics);
+  }
+
+  const uniqueDiffs = [...new Set(diffs)];
+  const uniqueDiagnostics = [...new Set(diagnostics)];
+  byIndex.set(item.observation.index, {
+    action: anyUpdated ? 'updated' : 'unchanged',
+    method: match.method,
+    eventId: eventIds[0],
+    eventIds,
+    fieldDiffs: anyUpdated && uniqueDiffs.length > 0 ? uniqueDiffs : undefined,
+    classificationDrift: driftOf(item, match.events[0]!),
+    scheduleChange: scheduleChangeOf(item.observation.event, match.events[0]),
+    candidate: firstCandidate,
+    publishable: true,
+    candidateGenerated: Boolean(firstCandidate),
+    ...(uniqueDiagnostics.length > 0 ? { mergeDiagnostics: uniqueDiagnostics } : {}),
+  });
 }
 
 function applyNewGroup(
@@ -429,6 +500,7 @@ function driftOf(
 ): ObservationReconcile['classificationDrift'] {
   const eligibility = item.observation.classification?.eligibility;
   if (!eligibility || eligibility.value === 'include') return undefined;
+  if (isTechnicalClassificationFailure(eligibility.ruleId)) return undefined;
   return { eligibility: eligibility.value, ruleId: eligibility.ruleId };
 }
 
@@ -467,7 +539,7 @@ export function shouldClassifyObservation(
   window: IngestWindow = defaultIngestWindow(now),
 ): boolean {
   if (event.eventStatus === 'cancelled') return false;
-  if (identity.kind === 'matched') return true;
+  if (identity.kind === 'matched' || identity.kind === 'matched-many') return true;
   if (identity.kind === 'ambiguous') return false;
   return !newEventPublicationSkip(event, catalog, now, window);
 }

@@ -9,6 +9,8 @@ import { findPossiblyMissing } from '../src/ingestion/disappear.ts';
 import { matchEventIdentity, type EventIdentityAlias } from '../src/ingestion/identity.ts';
 import { mergeExistingEvent, proposalFromObservation } from '../src/ingestion/merge.ts';
 import { runIngest } from '../src/ingestion/pipeline.ts';
+import { AiRateLimitedError, type AiClassifier } from '../src/ingestion/classification/ai.ts';
+import { isTechnicalClassificationFailure } from '../src/ingestion/classification/types.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { serializeCanonical } from '../src/ingestion/batch.ts';
 import { makeEvent, makeSource, makeVenue, TEST_NOW } from './helpers.ts';
@@ -147,6 +149,7 @@ async function runAuditorio(options: {
   identityAliases?: EventIdentityAlias[];
   failListing?: boolean;
   now?: Date;
+  ai?: AiClassifier;
 }) {
   const catalog = options.catalog ?? emptyCatalog();
   const dir = await mkdtemp(path.join(os.tmpdir(), 'clasica-recon-'));
@@ -159,6 +162,7 @@ async function runAuditorio(options: {
     dryRun: !options.write,
     sourceIds: ['auditorio-nacional'],
     identityAliases: options.identityAliases,
+    ai: options.ai,
     get: async (url) => {
       if (url.includes('front-page-events.json')) {
         if (options.failListing) throw new Error('listing caído');
@@ -286,6 +290,103 @@ describe('identity matching', () => {
     expect(match.kind).toBe('ambiguous');
     if (match.kind === 'ambiguous') {
       expect(match.events.map((event) => event.id).sort()).toEqual(['evt_demo_a', 'evt_demo_b']);
+    }
+  });
+
+  it('reparte una observación 1→N con la misma URL y fechas disjuntas', () => {
+    const catalog = emptyCatalog();
+    catalog.venues.push(makeVenue({ id: 'ven_teatro_real', slug: 'teatro-real', name: 'Teatro Real' }));
+    const sharedUrl = 'https://www.teatroreal.es/es/espectaculo/manon-lescaut';
+    catalog.events.push(
+      makeEvent({
+        id: 'evt_manon_a',
+        slug: 'manon-reparto-a',
+        title: 'Manon Lescaut — reparto A',
+        venueId: 'ven_teatro_real',
+        organizerIds: [],
+        seriesId: null,
+        occurrences: [
+          { id: 'occ_manon_a_01', date: '2026-09-23', time: '19:30', status: 'scheduled' },
+          { id: 'occ_manon_a_02', date: '2026-09-26', time: '19:30', status: 'scheduled' },
+        ],
+        citations: [{ sourceId: 'src_teatro_real', url: sharedUrl, checkedAt: '2026-08-01' }],
+        primarySourceId: 'src_teatro_real',
+      }),
+      makeEvent({
+        id: 'evt_manon_b',
+        slug: 'manon-reparto-b',
+        title: 'Manon Lescaut — reparto B',
+        venueId: 'ven_teatro_real',
+        organizerIds: [],
+        seriesId: null,
+        occurrences: [
+          { id: 'occ_manon_b_01', date: '2026-09-24', time: '19:30', status: 'scheduled' },
+          { id: 'occ_manon_b_02', date: '2026-09-27', time: '19:30', status: 'scheduled' },
+        ],
+        citations: [{ sourceId: 'src_teatro_real', url: sharedUrl, checkedAt: '2026-08-01' }],
+        primarySourceId: 'src_teatro_real',
+      }),
+    );
+
+    const match = matchEventIdentity(
+      catalog,
+      {
+        sourceUrl: sharedUrl,
+        externalId: 'manon-lescaut',
+        title: 'Manon Lescaut',
+        occurrences: [
+          { date: '2026-09-23', time: '19:30' },
+          { date: '2026-09-24', time: '19:30' },
+          { date: '2026-09-26', time: '19:30' },
+          { date: '2026-09-27', time: '19:30' },
+          { date: '2026-10-03', time: '19:30' },
+        ],
+      },
+      { catalogSourceId: 'src_teatro_real', venueId: 'ven_teatro_real' },
+    );
+    expect(match.kind).toBe('matched-many');
+    if (match.kind !== 'matched-many') return;
+    expect(match.events.map((event) => event.id).sort()).toEqual(['evt_manon_a', 'evt_manon_b']);
+    expect(match.method).toBe('url');
+    const byId = Object.fromEntries(
+      match.assigned.map((item) => [item.event.id, item.occurrences.map((occ) => occ.date)]),
+    );
+    expect(byId.evt_manon_a).toEqual(['2026-09-23', '2026-09-26']);
+    expect(byId.evt_manon_b).toEqual(['2026-09-24', '2026-09-27']);
+  });
+
+  it('sigue siendo ambiguous si la misma URL tiene fechas solapadas entre eventos', () => {
+    const catalog = emptyCatalog();
+    catalog.venues.push(makeVenue({ id: 'ven_teatro_real', slug: 'teatro-real', name: 'Teatro Real' }));
+    const sharedUrl = 'https://www.teatroreal.es/es/espectaculo/manon-lescaut';
+    for (const suffix of ['a', 'b']) {
+      catalog.events.push(
+        makeEvent({
+          id: `evt_manon_${suffix}`,
+          slug: `manon-${suffix}`,
+          title: `Manon Lescaut — ${suffix}`,
+          venueId: 'ven_teatro_real',
+          organizerIds: [],
+          seriesId: null,
+          occurrences: [{ id: `occ_manon_${suffix}_01`, date: '2026-09-23', time: '19:30', status: 'scheduled' }],
+          citations: [{ sourceId: 'src_teatro_real', url: sharedUrl, checkedAt: '2026-08-01' }],
+          primarySourceId: 'src_teatro_real',
+        }),
+      );
+    }
+
+    const match = matchEventIdentity(
+      catalog,
+      {
+        sourceUrl: sharedUrl,
+        title: 'Manon Lescaut',
+        occurrences: [{ date: '2026-09-23', time: '19:30' }],
+      },
+      { catalogSourceId: 'src_teatro_real', venueId: 'ven_teatro_real' },
+    );
+    expect(match.kind).toBe('ambiguous');
+    if (match.kind === 'ambiguous') {
+      expect(match.reason).toMatch(/fechas solapadas/);
     }
   });
 
@@ -646,6 +747,175 @@ describe('pipeline — new, unchanged, updates', () => {
     expect(run.decisions[0]!.classificationDrift?.eligibility).toBe('exclude');
     expect(run.decisions[0]!.identity?.eventId).toBe('evt_ocne_existente');
     expect(run.candidates[0]?.event.id ?? run.decisions[0]!.identity?.eventId).toBe('evt_ocne_existente');
+    expect(run.summary.health).toBe('review');
+    expect(run.summary.healthReasons).toContain('classification-drift');
+  });
+
+  it('reparte occurrences de una ficha 1→N y no genera ambiguous', async () => {
+    const sharedSlug = 'manon-lescaut';
+    const sharedUrl = `https://auditorionacional.inaem.gob.es/es/programacion/${sharedSlug}`;
+    const catalog = baseCatalog([
+      publishedEvent({
+        id: 'evt_manon_a',
+        slug: 'manon-reparto-a',
+        title: 'Manon Lescaut — reparto A',
+        occurrences: [
+          { id: 'occ_manon_a_01', date: '2026-09-23', time: '19:30', status: 'scheduled' },
+          { id: 'occ_manon_a_02', date: '2026-09-26', time: '19:30', status: 'scheduled' },
+        ],
+        citations: [
+          { sourceId: 'src_auditorio_nacional', url: sharedUrl, checkedAt: '2026-08-01', externalId: sharedSlug },
+        ],
+      }),
+      publishedEvent({
+        id: 'evt_manon_b',
+        slug: 'manon-reparto-b',
+        title: 'Manon Lescaut — reparto B',
+        occurrences: [
+          { id: 'occ_manon_b_01', date: '2026-09-24', time: '19:30', status: 'scheduled' },
+          { id: 'occ_manon_b_02', date: '2026-09-27', time: '19:30', status: 'scheduled' },
+        ],
+        citations: [
+          { sourceId: 'src_auditorio_nacional', url: sharedUrl, checkedAt: '2026-08-01', externalId: sharedSlug },
+        ],
+      }),
+    ]);
+    const { run } = await runAuditorio({
+      items: [
+        { title: 'Manon Lescaut', slug: sharedSlug, start: '2026-09-23T19:30:00+02:00' },
+        { title: 'Manon Lescaut', slug: sharedSlug, start: '2026-09-24T19:30:00+02:00' },
+        { title: 'Manon Lescaut', slug: sharedSlug, start: '2026-09-26T19:30:00+02:00' },
+        { title: 'Manon Lescaut', slug: sharedSlug, start: '2026-09-27T19:30:00+02:00' },
+        { title: 'Manon Lescaut', slug: sharedSlug, start: '2026-10-03T19:30:00+02:00' },
+      ],
+      catalog,
+    });
+    expect(run.summary.ambiguous).toBe(0);
+    expect(run.summary.newEvents).toBe(0);
+    expect(run.decisions[0]!.identity?.action).not.toBe('ambiguous');
+    expect(run.decisions[0]!.identity?.eventIds?.sort()).toEqual(['evt_manon_a', 'evt_manon_b']);
+    expect(run.possiblyMissing.some((item) => item.eventId === 'evt_manon_a' || item.eventId === 'evt_manon_b')).toBe(
+      false,
+    );
+    expect(run.candidates.every((candidate) => !candidate.event.occurrences.some((item) => item.date === '2026-10-03'))).toBe(
+      true,
+    );
+    for (const candidate of run.candidates) {
+      const dates = candidate.event.occurrences.map((item) => item.date);
+      if (candidate.event.id === 'evt_manon_a') {
+        expect(dates).toEqual(expect.arrayContaining(['2026-09-23', '2026-09-26']));
+        expect(dates.some((date) => date === '2026-09-24' || date === '2026-09-27')).toBe(false);
+      }
+      if (candidate.event.id === 'evt_manon_b') {
+        expect(dates).toEqual(expect.arrayContaining(['2026-09-24', '2026-09-27']));
+        expect(dates.some((date) => date === '2026-09-23' || date === '2026-09-26')).toBe(false);
+      }
+    }
+  });
+
+  it('no trata un error técnico de IA como classificationDrift', async () => {
+    const catalog = baseCatalog([
+      publishedEvent({
+        title: 'Encuentro con el público',
+        citations: [
+          {
+            sourceId: 'src_auditorio_nacional',
+            url: 'https://auditorionacional.inaem.gob.es/es/programacion/encuentro-publico',
+            checkedAt: '2026-09-01',
+            externalId: 'encuentro-publico',
+          },
+        ],
+      }),
+    ]);
+    const cases: Array<{ name: string; ai: AiClassifier; ruleId: string }> = [
+      { name: 'ai-error', ai: { async classify() { throw new Error('red caída'); } }, ruleId: 'ai-error' },
+      {
+        name: 'ai-timeout',
+        ai: { classifyBudgetMs: 30, classify: () => new Promise(() => {}) },
+        ruleId: 'ai-timeout',
+      },
+      {
+        name: 'ai-rate-limited',
+        ai: { async classify() { throw new AiRateLimitedError('cuota agotada'); } },
+        ruleId: 'ai-rate-limited',
+      },
+      {
+        name: 'ai-malformed-output',
+        ai: { async classify() { return 'esto no es JSON de clasificación'; } },
+        ruleId: 'ai-malformed-output',
+      },
+      {
+        name: 'ai-invalid-output',
+        ai: { async classify() { return { eligibility: 'include', formats: ['jazz'] }; } },
+        ruleId: 'ai-invalid-output',
+      },
+    ];
+
+    for (const item of cases) {
+      const { run } = await runAuditorio({
+        items: [{ title: 'Encuentro con el público', slug: 'encuentro-publico' }],
+        catalog,
+        ai: item.ai,
+      });
+      expect(run.decisions[0]!.eligibility?.ruleId, item.name).toBe(item.ruleId);
+      expect(run.decisions[0]!.classificationDrift, item.name).toBeUndefined();
+      expect(run.summary.healthReasons, item.name).not.toContain('classification-drift');
+      expect(run.summary.health, item.name).toBe('degraded');
+      expect(run.summary.autoMergeEligible, item.name).toBe(true);
+    }
+  });
+
+  it('no trata ai-unavailable como classificationDrift y conserva drift editorial', async () => {
+    const uncertainCatalog = baseCatalog([
+      publishedEvent({
+        title: 'Encuentro con el público',
+        citations: [
+          {
+            sourceId: 'src_auditorio_nacional',
+            url: 'https://auditorionacional.inaem.gob.es/es/programacion/encuentro-publico',
+            checkedAt: '2026-09-01',
+            externalId: 'encuentro-publico',
+          },
+        ],
+      }),
+    ]);
+    const unavailable = await runAuditorio({
+      items: [{ title: 'Encuentro con el público', slug: 'encuentro-publico' }],
+      catalog: uncertainCatalog,
+    });
+    expect(unavailable.run.decisions[0]!.eligibility?.ruleId).toBe('ai-unavailable');
+    expect(unavailable.run.decisions[0]!.classificationDrift).toBeUndefined();
+    expect(unavailable.run.summary.healthReasons).not.toContain('classification-drift');
+
+    const editorial = await runAuditorio({
+      items: [{ title: 'Encuentro con el público', slug: 'encuentro-publico' }],
+      catalog: uncertainCatalog,
+      ai: { async classify() { return { eligibility: 'uncertain', eras: [] }; } },
+    });
+    expect(editorial.run.decisions[0]!.classificationDrift).toEqual({
+      eligibility: 'uncertain',
+      ruleId: 'ai-uncertain',
+    });
+    expect(editorial.run.summary.health).toBe('review');
+    expect(editorial.run.summary.healthReasons).toContain('classification-drift');
+    expect(editorial.run.summary.autoMergeEligible).toBe(false);
+  });
+
+  it('distingue ruleIds técnicos de una clasificación editorial', () => {
+    for (const ruleId of [
+      'ai-error',
+      'ai-timeout',
+      'ai-rate-limited',
+      'ai-malformed-output',
+      'ai-invalid-output',
+      'ai-unavailable',
+      'ai-deferred',
+    ]) {
+      expect(isTechnicalClassificationFailure(ruleId)).toBe(true);
+    }
+    expect(isTechnicalClassificationFailure('ai-uncertain')).toBe(false);
+    expect(isTechnicalClassificationFailure('ai-exclude')).toBe(false);
+    expect(isTechnicalClassificationFailure('jazz-event')).toBe(false);
   });
 
   it('deduplica observaciones del lote y no escribe un conflicto de venue', async () => {

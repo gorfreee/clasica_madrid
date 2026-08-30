@@ -36,9 +36,20 @@ export type IdentityFacts = {
   occurrences: Array<{ date: string; time: string | null }>;
 };
 
+export type SharedSourceAssignment = {
+  event: Event;
+  occurrences: Array<{ date: string; time: string | null }>;
+};
+
 export type IdentityMatch =
   | { kind: 'unmatched' }
   | { kind: 'matched'; event: Event; method: IdentityMethod }
+  | {
+      kind: 'matched-many';
+      events: Event[];
+      method: IdentityMethod;
+      assigned: SharedSourceAssignment[];
+    }
   | { kind: 'ambiguous'; events: Event[]; methods: IdentityMethod[]; reason: string };
 
 const METHOD_RANK: Record<IdentityMethod, number> = {
@@ -47,6 +58,8 @@ const METHOD_RANK: Record<IdentityMethod, number> = {
   alias: 2,
   strong: 3,
 };
+
+const SOURCE_IDENTITY_METHODS = new Set<IdentityMethod>(['externalId', 'url', 'alias']);
 
 export function matchEventIdentity(
   catalog: Catalog,
@@ -88,7 +101,7 @@ export function matchEventIdentity(
     }
   }
 
-  return collapseHits(hits);
+  return collapseHits(hits, observed);
 }
 
 export function eventMatchesExternalId(event: Event, catalogSourceId: string, externalId: string): boolean {
@@ -152,7 +165,10 @@ function timesCompatible(left: string | null, right: string | null): boolean {
   return left === right;
 }
 
-function collapseHits(hits: Array<{ event: Event; method: IdentityMethod }>): IdentityMatch {
+function collapseHits(
+  hits: Array<{ event: Event; method: IdentityMethod }>,
+  observed: IdentityFacts,
+): IdentityMatch {
   if (hits.length === 0) return { kind: 'unmatched' };
 
   const byId = new Map<string, { event: Event; method: IdentityMethod }>();
@@ -169,10 +185,66 @@ function collapseHits(hits: Array<{ event: Event; method: IdentityMethod }>): Id
     return { kind: 'matched', event: only.event, method: only.method };
   }
 
+  const ids = unique.map((item) => item.event.id).join(', ');
+  if (!unique.every((item) => SOURCE_IDENTITY_METHODS.has(item.method))) {
+    return {
+      kind: 'ambiguous',
+      events: unique.map((item) => item.event),
+      methods: unique.map((item) => item.method),
+      reason: `varios eventos plausibles: ${ids}`,
+    };
+  }
+
+  const events = unique.map((item) => item.event);
+  const split = assignOccurrences(observed, events);
+  if (split.overlap) {
+    return {
+      kind: 'ambiguous',
+      events,
+      methods: unique.map((item) => item.method),
+      reason: `varios eventos plausibles con fechas solapadas: ${ids}`,
+    };
+  }
+
+  const method = unique.reduce(
+    (best, item) => (METHOD_RANK[item.method] < METHOD_RANK[best] ? item.method : best),
+    unique[0]!.method,
+  );
   return {
-    kind: 'ambiguous',
-    events: unique.map((item) => item.event),
-    methods: unique.map((item) => item.method),
-    reason: `varios eventos plausibles: ${unique.map((item) => item.event.id).join(', ')}`,
+    kind: 'matched-many',
+    events,
+    method,
+    assigned: unique.map((item) => ({
+      event: item.event,
+      occurrences: split.byEventId.get(item.event.id) ?? [],
+    })),
   };
+}
+
+function assignOccurrences(
+  observed: IdentityFacts,
+  events: Event[],
+): {
+  overlap: boolean;
+  byEventId: Map<string, Array<{ date: string; time: string | null }>>;
+} {
+  const byEventId = new Map<string, Array<{ date: string; time: string | null }>>();
+  for (const event of events) byEventId.set(event.id, []);
+  let overlap = false;
+  for (const incoming of observed.occurrences) {
+    const owners = events.filter((event) =>
+      event.occurrences.some(
+        (existing) =>
+          existing.date === incoming.date && timesCompatible(existing.time, incoming.time),
+      ),
+    );
+    if (owners.length > 1) {
+      overlap = true;
+      continue;
+    }
+    if (owners.length === 1) {
+      byEventId.get(owners[0]!.id)!.push({ date: incoming.date, time: incoming.time });
+    }
+  }
+  return { overlap, byEventId };
 }
