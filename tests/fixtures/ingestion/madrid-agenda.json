@@ -102,6 +102,31 @@
     },
     {
       "@type": "https://datos.madrid.es/egob/kos/actividades/Musica",
+      "id": "50341120",
+      "title": "Bach en guitarra",
+      "free": 1,
+      "dtstart": "2026-09-23 19:00:00.0",
+      "time": "19:00",
+      "uid": "50341120",
+      "link": "http://www.madrid.es/evento/bach-guitarra-buenavista",
+      "event-location": "Centro Cultural Buenavista",
+      "relation": {
+        "@id": "https://datos.madrid.es/egob/catalogo/tipo/entidadesyorganismos/64851-centro-cultural-buenavista-salamanca-.json"
+      }
+    },
+    {
+      "@type": "https://datos.madrid.es/egob/kos/actividades/Musica",
+      "id": "50341121",
+      "title": "Concierto en sala sin identificar",
+      "free": 1,
+      "dtstart": "2026-09-24 19:00:00.0",
+      "time": "19:00",
+      "uid": "50341121",
+      "link": "http://www.madrid.es/evento/sala-sin-identificar",
+      "event-location": "Sala sin identificar"
+    },
+    {
+      "@type": "https://datos.madrid.es/egob/kos/actividades/Musica",
       "id": "50341118",
       "title": "Animación infantil participativa de calle",
       "free": 1,

@@ -1,6 +1,8 @@
 import type { Area, Venue } from '../lib/schemas/index.ts';
+import { ID_PREFIX } from '../lib/schemas/taxonomies.ts';
 import { normalizeText } from '../lib/domain/normalize.ts';
 import type { Catalog } from '../lib/domain/catalog.ts';
+import { makePrefixedId, toSlug } from './ids.ts';
 
 export type KnownVenue = {
   keys: string[];
@@ -103,8 +105,9 @@ const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
 
 /**
  * Madrid Datos `relation.@id` numeric facility ids that are the same physical
- * place as an already published (or seed) venue. Unmapped facilities stay unresolved.
+ * place as an already published (or seed) venue.
  * CondeDuque's cultural-centre id is intentionally absent: it is not the auditorium.
+ * An unmapped official facility may still become a new venue (`kind: 'new'`).
  */
 const SOURCE_FACILITY_VENUES: Record<string, Record<string, string>> = {
   'madrid-datos': {
@@ -124,7 +127,8 @@ for (const known of KNOWN_VENUES) {
 
 export type VenueMatch =
   | { kind: 'catalog'; venue: Venue }
-  | { kind: 'known'; venue: Venue };
+  | { kind: 'known'; venue: Venue }
+  | { kind: 'new'; venue: Venue };
 
 export type VenueMatchInput = {
   venueText?: string;
@@ -142,6 +146,11 @@ export function matchVenue(
     const mapped = SOURCE_FACILITY_VENUES[input.sourceId]?.[input.facilityId];
     const fromFacility = mapped ? venueById(mapped, catalog) : undefined;
     if (fromFacility) return fromFacility;
+
+    if (input.sourceId === 'madrid-datos') {
+      const published = venueById(madridDatosFacilityVenueId(input.facilityId), catalog);
+      if (published) return published;
+    }
   }
 
   for (const needle of venueNeedles(input)) {
@@ -162,6 +171,73 @@ export function matchVenue(
     }
   }
 
+  if (input.sourceId === 'madrid-datos' && input.facilityId && input.venueText) {
+    const proposed = proposeMadridDatosVenue(input.facilityId, input.venueText, catalog);
+    if (proposed) return { kind: 'new', venue: proposed };
+  }
+
+  return undefined;
+}
+
+/** Stable catalog id for a Madrid Datos municipal facility. */
+export function madridDatosFacilityVenueId(facilityId: string): string {
+  return makePrefixedId(ID_PREFIX.venue, 'md', 'fac', facilityId);
+}
+
+/**
+ * Venue attached to a Candidate when the match is not already in the catalog.
+ * Shared by `toCandidate` and harvest reconcile so creates stay identical.
+ */
+export function unpublishedMatchedVenue(
+  match: VenueMatch | undefined,
+  catalog: Catalog,
+): Venue | undefined {
+  if (!match) return undefined;
+  if (catalog.venues.some((venue) => venue.id === match.venue.id)) return undefined;
+  return match.venue;
+}
+
+/**
+ * Official municipal installation that is not yet in the catalog.
+ * Identity is the facility id. Name comes from `event-location` (district
+ * suffix stripped). municipality/area are inherent to this City of Madrid
+ * source; address and URL are omitted because the listing does not publish
+ * them reliably.
+ */
+export function proposeMadridDatosVenue(
+  facilityId: string,
+  venueText: string,
+  catalog: Catalog,
+): Venue | undefined {
+  if (!/^\d+$/.test(facilityId)) return undefined;
+  const name = stripTrailingParenthetical(venueText);
+  if (!name) return undefined;
+  const id = madridDatosFacilityVenueId(facilityId);
+  const slug = madridDatosFacilitySlug(name, facilityId, id, catalog);
+  if (!slug) return undefined;
+  return {
+    schemaVersion: 1,
+    id,
+    slug,
+    name,
+    municipality: 'Madrid',
+    area: 'madrid',
+  };
+}
+
+function madridDatosFacilitySlug(
+  name: string,
+  facilityId: string,
+  venueId: string,
+  catalog: Catalog,
+): string | undefined {
+  const preferred = toSlug(`${name} ${facilityId}`);
+  const fallback = toSlug(`md fac ${facilityId}`);
+  for (const slug of [preferred, fallback]) {
+    if (!slug || slug === 'evento') continue;
+    const taken = catalog.venues.some((venue) => venue.slug === slug && venue.id !== venueId);
+    if (!taken) return slug;
+  }
   return undefined;
 }
 
