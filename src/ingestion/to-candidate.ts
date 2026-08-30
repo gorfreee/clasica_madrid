@@ -23,7 +23,7 @@ export function newEventPublicationSkip(
   now: Date,
 ): string | undefined {
   if (publicationOccurrences(event, now).length === 0) {
-    return event.dateFromDetail ? 'fecha pasada' : 'fuera de ventana';
+    return emptyScheduleSkipReason(event, now);
   }
   if (!matchVenue(venueHint(event), catalog)) return 'lugar no reconocido';
   return undefined;
@@ -52,7 +52,7 @@ export function toCandidate(
   }
   const publishableOccurrences = publicationOccurrences(event, now);
   if (publishableOccurrences.length === 0) {
-    return { skippedReason: event.dateFromDetail ? 'fecha pasada' : 'fuera de ventana' };
+    return { skippedReason: emptyScheduleSkipReason(event, now) };
   }
   const venueMatch = matchVenue(venueHint(event), catalog);
   if (!venueMatch) {
@@ -126,20 +126,33 @@ function withVerified(venue: Venue, lastVerifiedAt: string): Venue {
 }
 
 /**
- * Listing dates stay inside the discovery window. A date the detail page
- * explicitly replaced may be any future civil date — do not drop it only
- * because it is beyond the window used to discover the event.
+ * Occurrences that may become a new published event. The hydrated date must
+ * still fall inside the active 120-day window: a listing inside the window
+ * whose detail page moves the concert beyond it is out of scope for create.
+ *
+ * Existing events may still accept an explicit out-of-window postponement;
+ * that path passes `{ allowOutOfWindowDetail: true }`.
  */
 export function publicationOccurrences(
   event: NormalizedEvent,
   now: Date,
+  options?: { allowOutOfWindowDetail?: boolean },
 ): Array<{ date: string; time: string | null }> {
   const today = madridToday(now);
   const future = event.occurrences.filter((occurrence) => occurrence.date >= today);
   const inWindow = future.filter((occurrence) => isDateInWindow(occurrence.date, now));
   if (inWindow.length > 0) return inWindow;
-  if (event.dateFromDetail && future.length > 0) return future;
+  if (options?.allowOutOfWindowDetail && event.dateFromDetail && future.length > 0) {
+    return future;
+  }
   return [];
+}
+
+function emptyScheduleSkipReason(event: NormalizedEvent, now: Date): string {
+  const today = madridToday(now);
+  const hasFuture = event.occurrences.some((occurrence) => occurrence.date >= today);
+  if (!hasFuture && event.dateFromDetail) return 'fecha pasada';
+  return 'fuera de ventana';
 }
 
 function venueHint(event: NormalizedEvent) {

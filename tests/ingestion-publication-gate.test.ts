@@ -307,7 +307,7 @@ describe('publication gate — pipeline completo', () => {
     expect(run.candidates[0]!.event.citations[0]?.url).toMatch(/^https:\/\//);
   });
 
-  it('una ficha aplazada a una fecha futura fuera de la ventana de listing conserva esa fecha', async () => {
+  it('una ficha aplazada fuera de 120 días no publica un evento nuevo', async () => {
     const detail = `
       <article id="content">
         <h1>CNDM. Barbara Hannigan</h1>
@@ -337,11 +337,10 @@ describe('publication gate — pipeline completo', () => {
 
     expect(run.rawEvents[0]?.dateFromDetail).toBe(true);
     expect(run.rawEvents[0]?.observed.occurrences[0]?.date).toBe('2027-04-11');
-    expect(run.summary.eligibility.include).toBe(1);
-    expect(run.candidates).toHaveLength(1);
-    expect(run.candidates[0]!.event.occurrences[0]?.date).toBe('2027-04-11');
-    expect(run.candidates[0]!.event.status).toBe('scheduled');
-    expect(run.candidates[0]!.event.citations[0]?.url).toContain('cndm-barbara-hannigan');
+    expect(run.candidates).toEqual([]);
+    expect(run.summary.newEvents).toBe(0);
+    expect(run.decisions[0]?.structuralSkip?.reason).toBe('fuera de ventana');
+    expect(run.decisions[0]?.eligibility).toBeUndefined();
   });
 
   it('un evento explícitamente cancelado no se publica como activo', async () => {

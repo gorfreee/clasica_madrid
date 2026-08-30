@@ -396,7 +396,7 @@ describe('toCandidate y deduplicación', () => {
     expect(unknownVenue.skippedReason).toBe('lugar no reconocido');
   });
 
-  it('conserva una fecha de ficha futura aunque quede fuera de la ventana de listing', () => {
+  it('un evento nuevo con fecha de ficha fuera de la ventana de 120 días no se publica', () => {
     const source = getSourceDefinition('teatro-real');
     const catalog = teatroCatalog();
     const postponed = toCandidate(
@@ -411,8 +411,8 @@ describe('toCandidate y deduplicación', () => {
       new Set(),
       includeClassification(),
     );
-    expect(postponed.candidate).toBeDefined();
-    expect(postponed.candidate?.event.occurrences[0]?.date).toBe('2027-04-11');
+    expect(postponed.candidate).toBeUndefined();
+    expect(postponed.skippedReason).toBe('fuera de ventana');
   });
 
   it('no publica un evento cancelado por la ficha', () => {

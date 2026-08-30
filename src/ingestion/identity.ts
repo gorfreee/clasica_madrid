@@ -16,8 +16,18 @@ export type EventIdentityAlias = {
   url?: string;
 };
 
-/** Production aliases. Empty until a repeated identity needs a stable mapping. */
-export const EVENT_IDENTITY_ALIASES: readonly EventIdentityAlias[] = [];
+/**
+ * Production aliases. Only explicit, reviewed cross-source identities —
+ * not a general mapping store and not a substitute for matching.
+ */
+export const EVENT_IDENTITY_ALIASES: readonly EventIdentityAlias[] = [
+  {
+    eventId: 'evt_excelentia_chaikovsky_sibelius_20260930',
+    catalogSourceId: 'src_auditorio_nacional',
+    externalId: 'excelentia-violin-chaikovsky-y-sinfonia-2-sibelius',
+    url: 'https://auditorionacional.inaem.gob.es/es/programacion/excelentia-violin-chaikovsky-y-sinfonia-2-sibelius',
+  },
+];
 
 export type IdentityFacts = {
   sourceUrl: string;

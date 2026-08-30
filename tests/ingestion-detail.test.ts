@@ -182,6 +182,27 @@ describe('parser de ficha Auditorio Nacional', () => {
     expect(facts.composers).toEqual([]);
   });
 
+  it('títulos Composer: Work no se publican como performers', async () => {
+    const html = await readFile(
+      path.join(detailDir, 'auditorio-composer-colon-works.excerpt.html'),
+      'utf8',
+    );
+    const facts = parseAuditorioNacionalDetail(html);
+    const names = facts.performers?.map((item) => item.name) ?? [];
+
+    expect(names).toEqual(['Orquesta Clásica Santa Cecilia', 'Andrei Yaroshinski']);
+    expect(names.some((name) => /chopin|mozart|concierto|divertimento|polonesa/i.test(name))).toBe(
+      false,
+    );
+    expect(facts.works).toEqual([
+      { title: 'Divertimento en Re mayor, K. 136 (Allegro)', composerName: 'Mozart' },
+      { title: 'Concierto para piano y orquesta n.º 1', composerName: 'Chopin' },
+      { title: 'Andante spianato y Gran Polonesa brillante, op. 22', composerName: 'Chopin' },
+      { title: 'Concierto para piano y orquesta n.º 2', composerName: 'Chopin' },
+    ]);
+    expect(facts.composers).toEqual([{ name: 'Mozart' }, { name: 'Chopin' }]);
+  });
+
   it('Rafael Aguirre: Primera/Segunda Parte y títulos de obras no son performers', async () => {
     const html = await readFile(path.join(detailDir, 'auditorio-rafael-aguirre.excerpt.html'), 'utf8');
     const facts = parseAuditorioNacionalDetail(html);

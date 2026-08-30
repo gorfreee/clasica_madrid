@@ -288,6 +288,56 @@ describe('identity matching', () => {
       expect(match.events.map((event) => event.id).sort()).toEqual(['evt_demo_a', 'evt_demo_b']);
     }
   });
+
+  it('el alias de producción Excelentia resuelve el listing del Auditorio al ID canónico', () => {
+    const catalog = emptyCatalog();
+    catalog.venues.push(salaSinfonica());
+    catalog.events.push(
+      makeEvent({
+        id: 'evt_excelentia_chaikovsky_sibelius_20260930',
+        slug: 'violin-chaikovsky-sinfonia-dos-sibelius',
+        title: 'Violín de Chaikovsky y Sinfonía núm. 2 de Sibelius',
+        venueId: 'ven_auditorio_nacional_sala_sinfonica',
+        organizerIds: ['org_fundacion_excelentia'],
+        seriesId: null,
+        occurrences: [
+          {
+            id: 'occ_excelentia_chaikovsky_sibelius_20260930_01',
+            date: '2026-09-30',
+            time: '19:30',
+            status: 'scheduled',
+          },
+        ],
+        citations: [
+          {
+            sourceId: 'src_excelentia_musica',
+            url: 'https://excelentiamusica.com/30092026-violin-chaikovsky-y-sinfonia-2-sibelius/',
+            checkedAt: '2026-08-28',
+          },
+        ],
+        primarySourceId: 'src_excelentia_musica',
+      }),
+    );
+
+    const observed = {
+      sourceUrl:
+        'https://auditorionacional.inaem.gob.es/es/programacion/excelentia-violin-chaikovsky-y-sinfonia-2-sibelius',
+      externalId: 'excelentia-violin-chaikovsky-y-sinfonia-2-sibelius',
+      title: 'Excelentia. Violín Chaikovsky y Sinfonía 2 Sibelius',
+      occurrences: [{ date: '2026-09-30', time: '19:30' as string | null }],
+    };
+    const options = {
+      catalogSourceId: 'src_auditorio_nacional',
+      venueId: 'ven_auditorio_nacional_sala_sinfonica',
+    };
+
+    expect(matchEventIdentity(catalog, observed, { ...options, aliases: [] }).kind).toBe('unmatched');
+    expect(matchEventIdentity(catalog, observed, options)).toMatchObject({
+      kind: 'matched',
+      method: 'alias',
+      event: { id: 'evt_excelentia_chaikovsky_sibelius_20260930' },
+    });
+  });
 });
 
 describe('merge conservador', () => {
@@ -328,7 +378,7 @@ describe('merge conservador', () => {
     const merged = mergeExistingEvent(existing, proposal, TEST_NOW);
     expect(merged.event.id).toBe(existing.id);
     expect(merged.event.slug).toBe(existing.slug);
-    expect(merged.event.title).toBe('Matinées de otoño (oficial)');
+    expect(merged.event.title).toBe(existing.title);
     expect(merged.event.venueId).toBe('ven_teatro_real');
     expect(merged.event.occurrences[0]?.id).toBe(existing.occurrences[0]?.id);
     expect(merged.event.occurrences[0]?.date).toBe('2026-09-16');
@@ -338,10 +388,12 @@ describe('merge conservador', () => {
     expect(merged.event.works).toEqual(existing.works);
     expect(merged.event.eras).toEqual(['romantic']);
     expect(merged.event.formats).toEqual(['symphonic']);
+    expect(merged.event.kind).toBe(existing.kind);
     expect(merged.event.organizerIds).toEqual(['org_ocne']);
     expect(merged.event.seriesId).toBe('ser_ciclo_camara');
     expect(merged.event.access).toBe('paid');
-    expect(merged.diffs.some((diff) => diff.startsWith('title:'))).toBe(true);
+    expect(merged.diagnostics.some((diff) => diff.startsWith('title:'))).toBe(true);
+    expect(merged.diffs.some((diff) => diff.startsWith('title:'))).toBe(false);
   });
 });
 
@@ -383,6 +435,55 @@ describe('pipeline — new, unchanged, updates', () => {
     expect(second.summary.written).toEqual([]);
     expect(second.summary.unchangedEvents).toBeGreaterThan(0);
     expect(second.decisions[0]!.identity?.eventId).toBe(afterFirst.events[0]?.id);
+  });
+
+  it('el alias Excelentia reconcilia el listing del Auditorio y no lo publica como new', async () => {
+    const catalog = baseCatalog([
+      makeEvent({
+        id: 'evt_excelentia_chaikovsky_sibelius_20260930',
+        slug: 'violin-chaikovsky-sinfonia-dos-sibelius',
+        title: 'Violín de Chaikovsky y Sinfonía núm. 2 de Sibelius',
+        venueId: 'ven_auditorio_nacional_sala_sinfonica',
+        organizerIds: ['org_fundacion_excelentia'],
+        seriesId: null,
+        occurrences: [
+          {
+            id: 'occ_excelentia_chaikovsky_sibelius_20260930_01',
+            date: '2026-09-30',
+            time: '19:30',
+            status: 'scheduled',
+          },
+        ],
+        citations: [
+          {
+            sourceId: 'src_excelentia_musica',
+            url: 'https://excelentiamusica.com/30092026-violin-chaikovsky-y-sinfonia-2-sibelius/',
+            checkedAt: '2026-08-28',
+          },
+        ],
+        primarySourceId: 'src_excelentia_musica',
+        lastVerifiedAt: '2026-08-28',
+      }),
+    ]);
+    const { run } = await runAuditorio({
+      items: [
+        {
+          title: 'Excelentia. Violín Chaikovsky y Sinfonía 2 Sibelius',
+          slug: 'excelentia-violin-chaikovsky-y-sinfonia-2-sibelius',
+          start: '2026-09-30T19:30:00+02:00',
+        },
+      ],
+      details: {
+        'excelentia-violin-chaikovsky-y-sinfonia-2-sibelius': salaDetail('Sala Sinfónica', 'sinfonica'),
+      },
+      catalog,
+    });
+    expect(run.summary.newEvents).toBe(0);
+    expect(run.decisions[0]!.identity).toMatchObject({
+      method: 'alias',
+      eventId: 'evt_excelentia_chaikovsky_sibelius_20260930',
+    });
+    expect(run.decisions[0]!.identity?.action).not.toBe('new');
   });
 
   it('actualiza fecha/hora y venue sin crear otro evento', async () => {
@@ -458,6 +559,34 @@ describe('pipeline — new, unchanged, updates', () => {
     expect(run.candidates[0]!.event.id).toBe('evt_ocne_existente');
     expect(run.candidates[0]!.event.occurrences[0]?.id).toBe('occ_ocne_existente_01');
     expect(run.candidates[0]!.event.occurrences[0]?.date).toBe('2027-04-11');
+  });
+
+  it('un evento nuevo hidratado fuera de 120 días no genera Candidate', async () => {
+    const detail = `
+      <article id="content">
+        <h1>CNDM. Barbara Hannigan</h1>
+        <div class="content">
+          <h4>CONCIERTO APLAZADO. AL 11 de ABRIL de 2027<br />BARBARA HANNIGAN soprano</h4>
+          <h4>Olivier Messiaen<br />Chants de terre et de ciel</h4>
+        </div>
+        <div class="rightcolumn">
+          <p class="rightColumn__item">
+            <label class="rightColumn__item__label">Sala:</label>
+            <span class="location camara rightColumn__item__text">Sala de Cámara</span>
+          </p>
+        </div>
+      </article>
+    `;
+    const { run } = await runAuditorio({
+      items: [{ title: 'CNDM. Barbara Hannigan', slug: 'cndm-barbara-hannigan', className: 'camara' }],
+      details: { 'cndm-barbara-hannigan': detail },
+    });
+    expect(run.rawEvents[0]?.dateFromDetail).toBe(true);
+    expect(run.rawEvents[0]?.observed.occurrences[0]?.date).toBe('2027-04-11');
+    expect(run.candidates).toEqual([]);
+    expect(run.summary.newEvents).toBe(0);
+    expect(run.decisions[0]?.structuralSkip?.reason).toBe('fuera de ventana');
+    expect(run.decisions[0]?.identity?.action).not.toBe('new');
   });
 
   it('cancela un evento existente y no crea uno nuevo ya cancelado', async () => {
