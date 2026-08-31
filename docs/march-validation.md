@@ -22,6 +22,28 @@ Worker: [`infra/fetch-relay`](../infra/fetch-relay/README.md). Allowlist estrict
 
 Permanece hasta que un dry-run real de `fundacion-juan-march` desde GitHub Actions **con el relay** resulte sano (listing 200, hydration de las fichas actuales, sin problemas nuevos de adquisición). `--sources fundacion-juan-march` sigue ejecutándola; un relay ausente, incompleto o un 403/500 sigue siendo fallo visible, no un éxito vacío.
 
+## Dry-run desde GitHub Actions (esta PR)
+
+[Run `33389595159`](https://github.com/gorfreee/clasica_madrid/actions/runs/33389595159) — `mode=dry-run`, `sources=fundacion-juan-march`, rama `feat/ingest-fetch-relay` (`6a1ce14`).
+
+Los secrets `INGEST_FETCH_RELAY_URL` y `INGEST_FETCH_RELAY_TOKEN` estaban vacíos, así que `getText` usó el transporte directo (comportamiento correcto cuando el relay no está configurado). Resultado:
+
+| Campo | Valor |
+|---|---|
+| Listing | HTTP 403 al pedir `https://www.march.es/es/madrid/conciertos` |
+| RawEvents | 0 |
+| Hydration attempted/succeeded/failed | 0 / 0 / 0 |
+| Structural skips | 0 |
+| include / exclude / uncertain | 0 / 0 / 0 |
+| IA | 0 llamadas |
+| Candidates | 0 |
+| new / updated / unchanged | 0 / 0 / 0 |
+| duplicates / ambiguous / possiblyMissing | 0 / 0 / 0 |
+| Health | `fatal` (`no-sources-succeeded`, `source-failed:fundacion-juan-march`) |
+| `data/**` | intacto (dry-run; el job falló antes del boundary check) |
+
+El fallo es visible y conservador: no se convirtió en un éxito vacío. Falta desplegar el Worker (`infra/fetch-relay`) y configurar los dos secrets para repetir este dry-run con el relay.
+
 ## Evidencia previa (egress directo de Actions)
 
 | Run | Código | Listing | RawEvents | Hydration | Health | `data/**` |
