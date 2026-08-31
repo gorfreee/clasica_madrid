@@ -4,6 +4,7 @@ import type { AiClassifier, AiCallDiagnostics } from './classification/ai.ts';
 import { classifyObserved } from './classification/enrich.ts';
 import type { ClassificationResult } from './classification/types.ts';
 import { collapseWhitespace } from './html.ts';
+import { discoveryToRawEvents, type DiscoveryBatch } from './discovery.ts';
 import { getAdapter, getSourceDefinition, listSourceDefinitions } from './registry.ts';
 import { normalizeRawEvent, normalizeSkipReason, observedFactsFromNormalized } from './normalize.ts';
 import { applyCandidateBatch, type BatchApplyResult } from './batch.ts';
@@ -20,7 +21,16 @@ import {
 import { attachFailureContext, type IngestObservability } from './observability.ts';
 import { buildEventDecision, type IngestEventDecision } from './report.ts';
 import { matchVenue } from './venues.ts';
-import type { AdapterContext, IngestAiSummary, IngestRunSummary, RawEvent, SourceDefinition, SourceFailure } from './types.ts';
+import type {
+  AdapterContext,
+  IngestAiSummary,
+  IngestRunSummary,
+  PipelineSource,
+  ProposedVenueFacts,
+  RawEvent,
+  SourceDefinition,
+  SourceFailure,
+} from './types.ts';
 import { emptyIngestAiSummary } from './types.ts';
 import { getText } from './http.ts';
 import { normalizeUrl } from './urls.ts';
@@ -47,6 +57,10 @@ export type IngestRun = {
   candidates: Candidate[];
   decisions: IngestEventDecision[];
   possiblyMissing: PossiblyMissingEvent[];
+};
+
+export type DiscoveryIngestOptions = Omit<IngestOptions, 'sourceIds' | 'get'> & {
+  batch: DiscoveryBatch;
 };
 
 export async function runIngest(options: IngestOptions): Promise<IngestRun> {
@@ -89,6 +103,67 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
       obs?.recordSourceFailure(source.id, message);
     }
   }
+
+  return ingestPreparedEvents({
+    ...options,
+    window,
+    rawEvents,
+    listingByRaw,
+    sources,
+    harvest: {
+      attempted: sources,
+      succeeded,
+      failed: failures,
+      disappearanceSuppressedSources,
+    },
+  });
+}
+
+/**
+ * Import observed facts from a DiscoveryBatch into the shared ingest pipeline.
+ * Skips harvest extraction, hydration and possiblyMissing: a point observation
+ * is not complete coverage of a source.
+ */
+export async function runDiscoveryIngest(options: DiscoveryIngestOptions): Promise<IngestRun> {
+  const window = options.window ?? defaultIngestWindow(options.now);
+  const { rawEvents, sources } = discoveryToRawEvents(options.batch, options.catalog);
+  const listingByRaw = new Map<RawEvent, RawEvent>();
+  const obs = options.observability;
+  for (const raw of rawEvents) {
+    obs?.recordObservation({ raw, listing: raw, normalized: normalizeRawEvent(raw) });
+  }
+  return ingestPreparedEvents({
+    ...options,
+    window,
+    rawEvents,
+    listingByRaw,
+    sources,
+  });
+}
+
+async function ingestPreparedEvents(
+  options: IngestOptions & {
+    window: IngestWindow;
+    rawEvents: RawEvent[];
+    listingByRaw: Map<RawEvent, RawEvent>;
+    sources: readonly PipelineSource[];
+    harvest?: {
+      attempted: SourceDefinition[];
+      succeeded: string[];
+      failed: SourceFailure[];
+      disappearanceSuppressedSources: string[];
+    };
+  },
+): Promise<IngestRun> {
+  const window = options.window;
+  const rawEvents = options.rawEvents;
+  const listingByRaw = options.listingByRaw;
+  const sources = options.sources;
+  const harvest = options.harvest;
+  const obs = options.observability;
+  const succeeded = harvest?.succeeded ?? sources.map((source) => source.id);
+  const failures = harvest?.failed ?? [];
+  const disappearanceSuppressedSources = harvest?.disappearanceSuppressedSources ?? [];
 
   rawEvents.sort((left, right) => {
     if (left.sourceId !== right.sourceId) return left.sourceId.localeCompare(right.sourceId);
@@ -262,22 +337,25 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
   // Listings with detail-only schedules still prove presence when a ficha fails
   // or is not requested. This must not apply a partial calendar to the event.
   const seenEventIds = new Set(reconciled.seenEventIds);
-  for (const source of sources.filter((source) => getAdapter(source.adapterId).requiresDetailSchedule)) {
+  const harvestSources = harvest?.attempted ?? [];
+  for (const source of harvestSources.filter((source) => getAdapter(source.adapterId).requiresDetailSchedule)) {
     const urls = new Set(rawEvents.filter((raw) => raw.sourceId === source.id).map((raw) => normalizeUrl(raw.sourceUrl)));
     for (const event of options.catalog.events) {
       if (event.citations.some((citation) => citation.sourceId === source.catalogSourceId && urls.has(normalizeUrl(citation.url)))) seenEventIds.add(event.id);
     }
   }
-  const possiblyMissing = findPossiblyMissing({
-    catalog: options.catalog,
-    now: options.now,
-    window,
-    sources,
-    succeededSourceIds: succeeded,
-    failedSourceIds: failures.map((item) => item.sourceId),
-    incompleteSourceIds: disappearanceSuppressedSources,
-    seenEventIds,
-  });
+  const possiblyMissing = harvest
+    ? findPossiblyMissing({
+        catalog: options.catalog,
+        now: options.now,
+        window,
+        sources: harvestSources,
+        succeededSourceIds: succeeded,
+        failedSourceIds: failures.map((item) => item.sourceId),
+        incompleteSourceIds: disappearanceSuppressedSources,
+        seenEventIds,
+      })
+    : [];
 
   const hydration = countHydration(rawEvents);
   const classificationDrift = decisions.filter((item) => item.classificationDrift).length;
@@ -290,6 +368,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
         (snapshot.eras.length === 0 || snapshot.formats.length === 0),
     );
   }).length;
+  const sourcesAttempted = harvest ? harvest.attempted.map((source) => source.id) : sources.map((source) => source.id);
   const health = evaluateIngestHealth({
     batchOk: apply.report.ok,
     sourcesSucceeded: succeeded,
@@ -301,13 +380,14 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
     hydrationFailed: hydration.failed,
     unresolvedTaxonomy,
     ai: aiUsage,
+    requireSourcesSucceeded: harvest ? true : sources.length > 0,
   });
   const summary: IngestRunSummary = {
     window,
     health: health.health,
     autoMergeEligible: health.autoMergeEligible,
     healthReasons: health.healthReasons,
-    sourcesAttempted: sources.map((source) => source.id),
+    sourcesAttempted,
     sourcesSucceeded: succeeded,
     sourcesFailed: failures,
     rawEvents: rawEvents.length,
@@ -334,11 +414,17 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
   return { summary, apply, rawEvents, candidates: reconciled.candidates, decisions, possiblyMissing };
 }
 
-function venueHint(event: { venueText?: string; sourceId: string; venueFacilityId?: string }) {
+function venueHint(event: {
+  venueText?: string;
+  sourceId: string;
+  venueFacilityId?: string;
+  proposedVenue?: ProposedVenueFacts;
+}) {
   return {
     venueText: event.venueText,
     sourceId: event.sourceId,
     facilityId: event.venueFacilityId,
+    proposed: event.proposedVenue,
   };
 }
 

@@ -10,7 +10,7 @@ import {
   type ObservedPerson,
   type ObservedWork,
 } from './observed.ts';
-import type { RawEvent, RawOccurrence } from './types.ts';
+import type { RawEvent, RawOccurrence, ProposedVenueFacts } from './types.ts';
 import { normalizeUrl } from './urls.ts';
 
 export type NormalizedOccurrence = {
@@ -44,6 +44,10 @@ export type NormalizedEvent = {
   performers: ObservedPerson[];
   composers: ObservedComposer[];
   works: ObservedWork[];
+  /** Discovery-only; never sent to classification. */
+  proposedVenue?: ProposedVenueFacts;
+  /** Discovery-only trail. Never a canonical source. */
+  foundVia?: string;
 };
 
 export function normalizeRawEvents(rawEvents: RawEvent[]): {
@@ -104,6 +108,8 @@ export function normalizeRawEvent(raw: RawEvent): NormalizedEvent | undefined {
     performers: normalizePersonList(raw.observed.performers),
     composers: normalizeComposerList(raw.observed.composers),
     works: normalizeWorkList(raw.observed.works),
+    ...(raw.proposedVenue ? { proposedVenue: raw.proposedVenue } : {}),
+    ...(raw.foundVia ? { foundVia: raw.foundVia } : {}),
   };
 }
 

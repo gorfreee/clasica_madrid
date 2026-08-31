@@ -86,6 +86,7 @@ export type IngestEventDecision = {
   sourceId: string;
   sourceUrl: string;
   externalId?: string;
+  foundVia?: string;
   title: string;
   hydration: NonNullable<RawEvent['hydration']>;
   structuralSkip?: {
@@ -219,6 +220,7 @@ export function buildEventDecision(input: DecisionInput): IngestEventDecision {
     candidateGenerated: input.candidateGenerated,
   };
   if (input.raw.externalId) decision.externalId = input.raw.externalId;
+  if (input.raw.foundVia) decision.foundVia = input.raw.foundVia;
   if (input.structuralSkip) decision.structuralSkip = { reason: input.structuralSkip };
   if (input.identity) decision.identity = input.identity;
   if (input.fieldDiffs && input.fieldDiffs.length > 0) decision.fieldDiffs = input.fieldDiffs;

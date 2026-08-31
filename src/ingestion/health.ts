@@ -18,6 +18,11 @@ export type IngestHealthInput = {
   >;
   /** Extra fatal causes (unexpected exception, AI auth/config). */
   fatalReasons?: readonly string[];
+  /**
+   * Harvest treats zero succeeded sources as fatal. Discovery imports may
+   * have an empty observation list; that is a no-op, not a harvest failure.
+   */
+  requireSourcesSucceeded?: boolean;
 };
 
 type HealthFinding = {
@@ -40,7 +45,7 @@ export function evaluateIngestHealth(input: IngestHealthInput): {
   const findings: HealthFinding[] = [];
 
   if (!input.batchOk) findings.push({ reason: 'invalid-batch', health: 'fatal' });
-  if (input.sourcesSucceeded.length === 0) {
+  if (input.requireSourcesSucceeded !== false && input.sourcesSucceeded.length === 0) {
     findings.push({ reason: 'no-sources-succeeded', health: 'fatal' });
   }
   for (const reason of input.fatalReasons ?? []) {

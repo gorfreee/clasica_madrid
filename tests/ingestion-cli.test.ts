@@ -4,6 +4,42 @@ import { ingestExitCode, parseIngestArgs } from '../src/cli/ingest-args.ts';
 const sources = ['auditorio-nacional', 'teatro-real', 'madrid-datos'];
 
 describe('parseIngestArgs', () => {
+  it('entiende discovery con el fichero y flags opcionales', () => {
+    expect(parseIngestArgs(['discovery', 'ingestion/work/lote.json', '--dry-run', '--data-dir', 'tmp/data'], sources)).toEqual({
+      ok: true,
+      command: 'discovery',
+      batchPath: 'ingestion/work/lote.json',
+      dryRun: true,
+      dataDir: 'tmp/data',
+    });
+    expect(
+      parseIngestArgs(
+        ['discovery', 'lote.json', '--from', '2026-09-01', '--to', '2027-01-01', '--report', 'ingestion/reports/d.json'],
+        sources,
+      ),
+    ).toEqual({
+      ok: true,
+      command: 'discovery',
+      batchPath: 'lote.json',
+      dryRun: false,
+      window: { from: '2026-09-01', to: '2027-01-01' },
+      reportPath: 'ingestion/reports/d.json',
+    });
+  });
+
+  it('rechaza discovery sin fichero, con --sources o con posicionales de más', () => {
+    const missing = parseIngestArgs(['discovery', '--dry-run'], sources);
+    expect(missing.ok).toBe(false);
+    if (!missing.ok) expect(missing.message).toMatch(/ingest:discovery/);
+
+    const extra = parseIngestArgs(['discovery', 'a.json', 'b.json'], sources);
+    expect(extra.ok).toBe(false);
+
+    const sourcesFlag = parseIngestArgs(['discovery', 'a.json', '--sources', 'teatro-real'], sources);
+    expect(sourcesFlag.ok).toBe(false);
+    if (!sourcesFlag.ok) expect(sourcesFlag.message).toMatch(/no admite --sources/);
+  });
+
   it('entiende sync y source con flags opcionales', () => {
     expect(parseIngestArgs(['sync'], sources)).toEqual({
       ok: true,

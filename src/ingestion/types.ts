@@ -1,4 +1,4 @@
-import type { Source } from '../lib/schemas/index.ts';
+import type { Area, Source } from '../lib/schemas/index.ts';
 import type { IngestHealth } from './health.ts';
 import type { ObservedFactPatch, ObservedFacts } from './observed.ts';
 import type { IngestWindow } from './dates.ts';
@@ -35,6 +35,19 @@ export type HydrationMeta = {
   retryDelaysMs?: number[];
 };
 
+/**
+ * Venue facts supplied by discovery when the place may not be in the catalog.
+ * Not ObservedFacts: never sent to classification. Exact name match reuses
+ * an existing venue; insufficient facts stay unpublished.
+ */
+export type ProposedVenueFacts = {
+  name: string;
+  municipality?: string;
+  area?: Area;
+  address?: string;
+  url?: string;
+};
+
 export type RawEvent = {
   sourceId: string;
   sourceUrl: string;
@@ -57,21 +70,39 @@ export type RawEvent = {
    * source-aware venue resolution; never copied onto ObservedFacts.
    */
   venueFacilityId?: string;
+  /**
+   * Discovery-only proposed venue. Harvest adapters leave this unset.
+   * Matching prefers an existing catalog/known venue over creating one.
+   */
+  proposedVenue?: ProposedVenueFacts;
+  /**
+   * How the observation was found (search URL, etc.). Internal only:
+   * never a canonical Source, never Event.primarySourceId.
+   */
+  foundVia?: string;
 };
 
-export type SourceDefinition = {
+/**
+ * Provenance the shared pipeline needs to reconcile and cite.
+ * Harvest registry entries extend this with adapter/fetch fields.
+ * Discovery builds an in-memory instance; it is not a registry row.
+ */
+export type PipelineSource = {
   id: string;
   name: string;
-  urls: string[];
-  adapterId: string;
-  /** Canonical `Source.id` in `data/sources/`. The registry does not own that entity. */
+  /** Canonical `Source.id` in `data/sources/`. */
   catalogSourceId: string;
   /**
    * Bootstrap Source used only when the catalog does not yet contain
-   * `catalogSourceId`. Needed so a newly registered harvest source can
-   * introduce its editorial provenance on the first successful run.
+   * `catalogSourceId`. Harvest seeds a newly registered source; discovery
+   * seeds a source that is not in the registry and has no adapter.
    */
   seedSource: Source;
+};
+
+export type SourceDefinition = PipelineSource & {
+  urls: string[];
+  adapterId: string;
   /**
    * Omit from ingest:sync when no --sources list is given (scheduled
    * production). Explicit --sources / ingest:source still run it, and a

@@ -123,6 +123,20 @@ describe('evaluateIngestHealth', () => {
     });
   });
 
+  it('un lote de discovery vacío no es fatal por ausencia de harvest sources', () => {
+    expect(
+      evaluateIngestHealth({
+        ...base,
+        sourcesSucceeded: [],
+        requireSourcesSucceeded: false,
+      }),
+    ).toEqual({
+      health: 'clean',
+      autoMergeEligible: true,
+      healthReasons: [],
+    });
+  });
+
   it('no trata un fallo de IA ya aislado como error global', () => {
     const isolated = evaluateIngestHealth({
       ...base,

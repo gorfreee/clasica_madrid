@@ -20,6 +20,8 @@ La web no escribe datos. Todo lo publicado entra por Git, pasa validación deter
 
 Harvesting de fuentes conocidas y automatización de producción (fases 1–4 del plan v3): extraer, hidratar fichas cuando el adapter lo soporta, normalizar, resolver identidad, clasificar y reconciliar contra el catálogo; después, publicar cambios materiales mediante PR y CI.
 
+Discovery v1 (fase 6, primera pieza): un agente externo puede entregar un `DiscoveryBatch` de hechos observados; el mismo pipeline lo normaliza, clasifica y reconcilia. No hay búsqueda web, scheduling ni promoción a adapters.
+
 ```text
 registry → extract → hydrate → normalize → identity → classify → publication gate → reconcile → validate → write
 ```
@@ -40,7 +42,7 @@ registry → extract → hydrate → normalize → identity → classify → pub
 - Una reverificación que sólo cambia `event.lastVerifiedAt` y/o `citation.checkedAt` se trata como `unchanged` y **no** reescribe el JSON. La frescura queda en el report (`unchangedEvents`, `window`, `health`). Si hay algún cambio material, se escribe el evento completo con los timestamps de verificación actuales.
 - Cada ejecución evalúa `health`: `clean` | `degraded` | `review` | `fatal`. `autoMergeEligible` es true sólo en `clean` y `degraded`. El workflow de producción consume exclusivamente estos campos machine-readable para decidir si falla, crea draft o permite auto-merge.
 
-No están implementados (no los añadas salvo que una tarea pida esa fase): discovery automático ni reconciliación fuzzy.
+No están implementados (no los añadas salvo que una tarea pida esa fase): búsqueda web de discovery, scheduling de discovery, aprendizaje de sources ni reconciliación fuzzy.
 
 Las fuentes concretas, adapters, flags de CLI y detalles de matching viven en el código. No los dupliques aquí.
 
@@ -53,11 +55,33 @@ npm run ingest:sync -- --dry-run --report ingestion/reports/sync.json
 npm run ingest:sync -- --from 2026-09-01 --to 2027-06-01 --sources auditorio-nacional,teatro-real
 npm run ingest:source -- auditorio-nacional
 npm run ingest:source -- auditorio-nacional --from 2026-09-01 --to 2027-06-01
+npm run ingest:discovery -- ingestion/work/discovery-batch.json --dry-run
+npm run ingest:discovery -- ingestion/work/discovery-batch.json --dry-run --from 2026-09-01 --to 2027-01-01
 ```
 
 `--dry-run` valida y resume sin escribir el catálogo. `--data-dir` apunta a otro árbol (por defecto `data/` o `DATA_DIR`). `--report` escribe un JSON diagnóstico por evento (incluye `window`, `health`, `autoMergeEligible` y `healthReasons`); no cambia la clasificación ni qué se publica. `--observability-dir` escribe además `run.json` y el journal `events.jsonl`. Si hay `--report` y no se indica directorio, esos ficheros van junto al report. `ingestion/reports/` está gitignorado.
 
 Sin `--from`/`--to`, la ventana es hoy en Europe/Madrid → +120 días. Si se indica uno, hay que indicar ambos. Un rango manual no tiene tope de 120 días. Sin `--sources`, `ingest:sync` ejecuta las fuentes del registry que no marcan `skipDefaultSync`. `ingest:source` y `--sources` explícitos siguen ejecutando cualquier fuente del registry, incluida una marcada así, y un fallo sigue siendo un fallo.
+
+## Discovery v1
+
+El harvesting cubre fuentes del registry. Discovery cubre lo que todavía no tiene adapter: una parroquia, un conservatorio, un concierto puntual. Un agente (Cursor u otro) busca fuera; el código de ingestión no navega la web.
+
+El agente entrega **hechos observados** (título, fechas, URL que respalda el evento, venue, intérpretes/obras si la fuente los declara). No entrega `eligibility`, `kind`, `formats`, `eras`, slugs ni Candidates canónicos. El pipeline común clasifica y publica exactamente como en harvesting.
+
+El fichero es output del agente, no una cola de producción. Forma conceptual:
+
+```text
+agente → DiscoveryBatch JSON → npm run ingest:discovery → normalize → classify → reconcile → Candidate → data/**
+```
+
+- cada observación necesita una URL http(s) que respalde los hechos; sin URL no se publica;
+- `foundVia` (p. ej. una URL de búsqueda) es trazabilidad interna: no es source canónica ni `primarySource`;
+- una source descubierta no entra en el registry ni recibe adapter; si el Candidate se publica y esa source no está en `data/sources`, el batch existente la incorpora;
+- un venue nuevo sólo se crea con name + municipality + area coherentes; si el nombre coincide exactamente con un lugar del catálogo, se reutiliza; no hay fuzzy matching;
+- discovery no evalúa `possiblyMissing`: una observación puntual no demuestra la cobertura de una source.
+
+`ingest:promote` sigue siendo el import manual de Candidates ya interpretados. Discovery no lo usa: el agente no debe saltarse classification.
 
 CI no llama a un LLM. Tests inyectan fakes.
 
@@ -65,7 +89,7 @@ CI no llama a un LLM. Tests inyectan fakes.
 
 El fallback es opcional y provider-agnóstico. La CLI crea como máximo un classifier por ejecución (`createAiClassifierFromEnv()`). Sin credenciales, timeout o respuesta inválida, el caso permanece `uncertain` y el lote continúa.
 
-`ingest:sync` / `ingest:source` cargan `.local/ai.env` (gitignorado) si existe; el entorno del proceso gana. Plantilla y variables: `.env.example`. No commits ni imprimas la clave.
+`ingest:sync` / `ingest:source` / `ingest:discovery` cargan `.local/ai.env` (gitignorado) si existe; el entorno del proceso gana. Plantilla y variables: `.env.example`. No commits ni imprimas la clave.
 
 El estado local (caché, cuota, pendientes, lock) vive bajo `.local/ai/` por defecto, fuera de Git y de `data/`. `--dry-run` no escribe el catálogo, pero sí puede gastar cuota y guardar ese estado. No hay rotación de claves ni coordinación entre máquinas: Google limita por proyecto y modelo.
 
