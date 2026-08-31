@@ -1,6 +1,6 @@
 # Rediseño de interfaz — documento de trabajo
 
-> Estado: **v0.2 / exploración**  
+> Estado: **v0.3 / exploración**  
 > Este documento es deliberadamente vivo. Recoge objetivos, principios, hipótesis y preguntas abiertas para guiar el rediseño de la interfaz de Clásica Madrid. No debe interpretarse como una especificación cerrada ni como un mandato de implementar ahora todas las ideas aquí mencionadas.
 
 ## Propósito
@@ -116,7 +116,13 @@ Esto no implica mostrar simultáneamente todos los campos disponibles. La compos
 
 No se considera deseable convertir cada evento en una card grande y decorativa si eso reduce demasiado la densidad de información. Tampoco se parte de la idea de conservar una tabla ancha mediante scroll horizontal como experiencia móvil principal.
 
-En música clásica, el `title` no debe asumirse como único protagonista universal. Según el evento, compositor, repertorio, intérpretes o contexto pueden explicar mejor qué va a escuchar el usuario. Los experimentos deberán comprobar cómo construir esa jerarquía sin depender de un único campo perfecto.
+El `title` canónico será la referencia principal y estable del evento en el listado. Clásica Madrid no debería intentar fabricar de forma general un nuevo título editorial a partir de compositores, obras o programa: esos datos pueden faltar, ser incompletos o producir resultados excesivamente largos. La calidad del título debe resolverse prioritariamente en los datos y en el pipeline, procurando que identifique correctamente el evento sin inventar información.
+
+Esto no convierte la agenda en `title-only`. Cuando existan, intérpretes, compositores, repertorio, lugar u otros datos pueden aportar contexto secundario y mejorar la comprensión del evento. La jerarquía visual exacta entre esos elementos debe probarse con datos reales, sin exigir una plantilla rígida que dependa de que todos los eventos tengan la misma riqueza.
+
+La densidad es un principio explícito: programas extensos, muchos compositores, muchos intérpretes u otros metadatos ricos **no deben hacer que una entrada crezca hasta ocupar una parte desproporcionada de la pantalla**, especialmente en móvil. El listado debe resumir o limitar esa información de forma elegante y reservar el detalle completo para la ficha.
+
+La interfaz móvil debe mantenerse especialmente limpia. Los controles persistentes deben limitarse a los que aporten valor frecuente; la riqueza adicional de filtros puede aparecer mediante progressive disclosure.
 
 ### Hipótesis inicial para escritorio
 
@@ -125,6 +131,8 @@ En pantallas grandes debe aprovecharse el espacio para ofrecer mayor densidad y 
 La hipótesis principal pasa a ser una **agenda editorial de filas densas**: más flexible que una tabla rígida, pero con suficiente estructura para comparar rápidamente hora, contenido musical, intérpretes, lugar y señales relevantes.
 
 Esta dirección debe probarse frente a alternativas más utilitarias o tabulares. No se fija todavía una representación final ni se exige ofrecer varias vistas al usuario.
+
+Desktop puede mostrar más controles o información secundaria directamente que móvil cuando el espacio disponible lo justifique, siempre que eso no transforme la agenda en un dashboard de controles ni rompa la jerarquía principal.
 
 ### Principio de progressive disclosure
 
@@ -149,7 +157,9 @@ Este comportamiento se complementará con accesos ligeros a momentos frecuentes,
 
 No se parte de una gran vista mensual ni de una navegación obligatoriamente organizada por semanas. El calendario puede existir como mecanismo de salto, no necesariamente como representación principal del catálogo.
 
-Los agrupadores de fecha, los saltos de mes y cualquier navegación temporal persistente deberán resolverse durante los experimentos con datos reales.
+Los días deben actuar como **agrupadores visuales claros** dentro de la cronología, de manera que el usuario pueda reconocer rápidamente dónde empieza y termina la programación de cada fecha. Los cambios de mes también deberían ser reconocibles. La intensidad visual exacta de esos encabezados y la posibilidad de hacerlos persistentes o `sticky` quedan abiertas a experimentación.
+
+No se introducirá inicialmente una capa adicional de agrupación visual para funciones de una misma producción, programas repetidos u otros eventos relacionados. La agenda seguirá presentando cada occurrence en su posición cronológica correspondiente. Si los datos reales demuestran más adelante que determinadas repeticiones generan ruido suficiente para justificar agrupación, podrá reconsiderarse.
 
 ## Búsqueda y filtros
 
@@ -167,6 +177,8 @@ Idealmente podrá encontrar coincidencias relevantes en elementos como:
 - lugares;
 - ciclos u otros textos útiles disponibles.
 
+Compositores e intérpretes deben tratarse principalmente como **dimensiones buscables**, no como listas explícitas de filtros con cientos de opciones. Esto evita convertir el panel de filtros en un catálogo inmanejable y aprovecha mejor la búsqueda para entidades de cardinalidad alta.
+
 No se exige en esta fase una búsqueda semántica o técnicamente sofisticada. El diseño, sin embargo, no debería bloquear una evolución posterior hacia consultas más expresivas.
 
 ### Filtros
@@ -181,7 +193,13 @@ Una dirección a explorar es combinar:
 - eliminación individual y `Limpiar todo`;
 - URLs compartibles cuando tenga sentido.
 
-La selección exacta de shortcuts y filtros queda abierta a validación. No deben añadirse controles porque el dato exista, sino porque ayuden a descubrir conciertos.
+Los filtros explícitos deberían concentrarse principalmente en dimensiones con un conjunto limitado o manejable de opciones y una utilidad clara para decidir qué concierto ver. Fecha, acceso, formato y época son candidatos naturales; lugar puede justificar un selector propio buscable por su importancia en el producto. La selección definitiva debe validarse durante los experimentos y no derivarse mecánicamente de todos los campos disponibles en el modelo.
+
+`Gratis` se considera un **shortcut privilegiado** por su utilidad frecuente y puede permanecer visible fuera del filtrado avanzado. No es necesario dar el mismo peso permanente a `De pago`: la selección completa por acceso puede seguir existiendo dentro de filtros.
+
+Los eventos gratuitos pueden recibir una **señal visible y compacta en el propio listado**, pero no se fija todavía que esa señal deba ser literalmente una etiqueta `Gratis`. El lenguaje visual exacto debe explorarse para que resulte útil sin llenar cada fila de badges.
+
+En móvil debe priorizarse una superficie limpia con pocos accesos persistentes y un mecanismo claro para abrir filtros adicionales. En desktop puede aprovecharse el espacio para mantener más controles frecuentes a la vista. La forma exacta —drawer, panel, popover, controles inline u otras soluciones— queda abierta a los prototipos.
 
 ## Programación institucional y alternativa
 
@@ -222,6 +240,14 @@ Debe poder presentar de forma clara, cuando estén disponibles:
 - otros datos relevantes.
 
 Su diseño debe facilitar tanto una lectura rápida como una exploración más profunda, pero no necesita sustituir a la página original del organizador.
+
+### Relación agenda → ficha
+
+La interacción principal de una entrada de agenda debe llevar a la **ficha interna del evento en Clásica Madrid**. En móvil, ésta será la ruta natural antes de acceder a la fuente oficial.
+
+No es necesario repetir botones de `Más información` en cada fila si la affordance de navegación puede resolverse de forma clara sobre la propia entrada.
+
+En desktop, donde existe más espacio, puede explorarse además un acceso secundario directo a la fuente oficial desde la fila. Ese acceso no debería sustituir ni competir con la navegación principal hacia la ficha interna.
 
 ### Fuente oficial como acción principal
 
@@ -395,7 +421,7 @@ Estos contratos pueden evolucionar si el nuevo diseño necesita otra arquitectur
 
 ## Decisiones actuales
 
-A fecha de esta v0.2 se consideran acordados los siguientes puntos:
+A fecha de esta v0.3 se consideran acordados los siguientes puntos:
 
 1. Se hará un replanteamiento amplio de la interfaz antes de encargar una implementación final.
 2. Este documento será la memoria viva de esa fase y puede cambiar sustancialmente.
@@ -417,18 +443,29 @@ A fecha de esta v0.2 se consideran acordados los siguientes puntos:
 18. Performance, SEO y accesibilidad son restricciones de producto, no tareas posteriores.
 19. El logo y la identidad final pueden esperar hasta que exista una dirección visual clara.
 20. Las ideas futuras —incluido mapa u otras vistas del catálogo— deben permanecer abiertas sin convertirse prematuramente en alcance de implementación.
+21. El `title` canónico será la referencia principal y estable de cada entrada; la UI no intentará generar de forma general títulos editoriales sintéticos a partir de programas, compositores u otros campos irregulares.
+22. El título no estará solo: la agenda podrá complementarlo con los mejores datos secundarios disponibles, dejando la jerarquía visual exacta para los experimentos con datos reales.
+23. Programas largos y listas extensas de intérpretes, compositores u otros metadatos no deberán expandir excesivamente una entrada de agenda, especialmente en móvil.
+24. Los días tendrán agrupación visual clara dentro de la cronología; el tratamiento exacto de cambios de mes y encabezados persistentes queda abierto a experimentación.
+25. No se añadirá inicialmente agrupación visual adicional de funciones o eventos relacionados: cada occurrence aparecerá en su posición cronológica.
+26. La interacción principal desde una entrada de agenda abrirá la ficha interna del evento. En desktop podrá explorarse además un acceso secundario directo a la fuente oficial.
+27. Compositores e intérpretes se resolverán principalmente mediante búsqueda y no mediante listas explícitas de filtros de alta cardinalidad.
+28. La interfaz móvil mantendrá pocos controles persistentes; desktop podrá mostrar más controles o información cuando el espacio aporte una ventaja real.
+29. `Gratis` tendrá tratamiento privilegiado como shortcut de acceso frecuente. Los eventos gratuitos podrán recibir una señal compacta en el listado, sin cerrar todavía su forma visual ni exigir que sea una etiqueta literal `Gratis`.
 
 ## Preguntas abiertas
 
 Entre las preguntas que deberán resolverse en futuras iteraciones están:
 
 - ¿Cuál debe ser la composición exacta de la zona inicial de la home y cuánto espacio debe ocupar antes de la agenda?
-- ¿Qué jerarquía concreta funciona mejor para título, repertorio, compositor e intérpretes cuando los datos son irregulares?
-- ¿Qué densidad exacta funciona mejor en móvil y desktop?
-- ¿Cómo debe agruparse visualmente la agenda por días y meses?
-- ¿Qué shortcuts temporales y de acceso aportan suficiente valor para permanecer visibles?
+- Dentro de un enfoque `title-first` pero no `title-only`, ¿qué jerarquía concreta funciona mejor para intérpretes, compositores, repertorio, lugar y otros datos secundarios cuando la información es irregular?
+- ¿Qué densidad exacta funciona mejor en móvil y desktop y cómo se resumen visualmente listas o programas largos?
+- ¿Qué peso deben tener los encabezados de día y cambios de mes? ¿Aporta valor que alguno sea `sticky`?
+- Además de `Gratis`, ¿qué shortcuts temporales o de acceso aportan suficiente valor para permanecer visibles en móvil y desktop?
+- ¿Qué conjunto de filtros explícitos aporta utilidad real en la primera implementación y cuáles deben permanecer en búsqueda u otras superficies?
 - ¿Cómo debe abrirse y comportarse el filtrado avanzado en móvil y desktop?
 - ¿Qué capacidades debe tener la búsqueda en la primera implementación frente a evoluciones posteriores?
+- ¿Qué señal visual compacta comunica mejor que un evento es gratuito sin llenar la agenda de etiquetas repetitivas?
 - ¿Qué señales visuales sutiles ayudan a diferenciar tipos de evento sin crear una jerarquía artificial?
 - ¿Qué información mínima y qué acciones deben aparecer en una ficha de lugar?
 - ¿Cómo se presenta el índice de lugares cuando haya muchos espacios con muy distinta frecuencia de programación?
