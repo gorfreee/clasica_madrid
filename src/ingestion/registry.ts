@@ -6,9 +6,11 @@ import { teatroRealAdapter } from './sources/teatro-real.ts';
 import { teatroZarzuelaAdapter } from './sources/teatro-zarzuela.ts';
 import { fundacionJuanMarchAdapter } from './sources/fundacion-juan-march.ts';
 import { fundacionOrcamAdapter } from './sources/fundacion-orcam.ts';
+import { orquestaCoroRtveAdapter } from './sources/orquesta-coro-rtve.ts';
 import type { SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
+  [orquestaCoroRtveAdapter.id]: orquestaCoroRtveAdapter,
   [fundacionOrcamAdapter.id]: fundacionOrcamAdapter,
   [fundacionJuanMarchAdapter.id]: fundacionJuanMarchAdapter,
   [auditorioNacionalAdapter.id]: auditorioNacionalAdapter,
@@ -114,6 +116,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Fundación ORCAM',
       kind: 'official',
       url: 'https://fundacionorcam.org/',
+    },
+  },
+  {
+    id: 'orquesta-coro-rtve',
+    name: 'Orquesta y Coro RTVE / Teatro Monumental',
+    urls: ['https://www.teatromonumental.es/'],
+    adapterId: orquestaCoroRtveAdapter.id,
+    catalogSourceId: 'src_orquesta_coro_rtve',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_orquesta_coro_rtve',
+      slug: 'orquesta-y-coro-rtve',
+      name: 'Orquesta y Coro RTVE / Teatro Monumental',
+      kind: 'official',
+      url: 'https://www.teatromonumental.es/',
     },
   },
 ];

@@ -16,6 +16,18 @@ const MADRID: { municipality: string; area: Area } = {
 
 export const KNOWN_VENUES: KnownVenue[] = [
   {
+    keys: ['teatro monumental', 'teatro monumental de madrid'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_teatro_monumental',
+      slug: 'teatro-monumental',
+      name: 'Teatro Monumental',
+      ...MADRID,
+      address: 'Calle de Atocha, 66, Madrid',
+      url: 'https://www.teatromonumental.es/',
+    },
+  },
+  {
     keys: ['fundacion juan march auditorio'],
     venue: {
       schemaVersion: 1,
