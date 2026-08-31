@@ -1,7 +1,7 @@
 # Fetch relay (Cloudflare Worker)
 
-GitHub-hosted runners cannot reach some official sources (today:
-`www.march.es` returns HTTP 403 on the first hop). This Worker is a GET-only,
+GitHub-hosted runners cannot reach some official sources reliably (today:
+`www.march.es` and `teatrodelazarzuela.inaem.gob.es` may return HTTP 403). This Worker is a GET-only,
 authenticated fetch relay so ingestion can keep running in GitHub Actions
 while adapters still see official URLs.
 

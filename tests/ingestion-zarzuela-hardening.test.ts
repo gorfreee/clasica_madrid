@@ -186,7 +186,7 @@ describe('transporte de fichas respetuoso y acotado', () => {
   it('getText conserva status y Retry-After sin cambiar el User-Agent ni reintentar', async () => {
     const fetch = vi.fn(async () => new Response('blocked', { status: 429, headers: { 'Retry-After': '15' } }));
     vi.stubGlobal('fetch', fetch);
-    await expect(getText(category)).rejects.toMatchObject({ status: 429, retryAfter: '15' });
+    await expect(getText(category, 30_000, {})).rejects.toMatchObject({ status: 429, retryAfter: '15' });
     expect(fetch).toHaveBeenCalledTimes(1);
     expect(fetch).toHaveBeenCalledWith(category, expect.objectContaining({ headers: expect.objectContaining({ 'user-agent': 'ClasicaMadrid-ingestion/1 (+https://github.com/gorfreee/clasica_madrid)' }) }));
   });
