@@ -144,3 +144,26 @@ desde una IP bloqueada. El parser temporal deliberadamente no reconoce todos
 los textos: algunas fichas futuras ambiguas todavía se solicitan. La supresión
 de desapariciones de toda la source prioriza precisión a costa de ocultar una
 desaparición real hasta una ejecución completamente evaluable.
+
+## Listados de temporada e Imperva
+
+El dry-run de referencia
+[`33421201876`](https://github.com/gorfreee/clasica_madrid/actions/runs/33421201876)
+(`main` `239d6df`, relay ya activo) falló en extracción, no en hydration:
+home correcta, luego `HTTP 403` en
+`/es/temporada/conciertos-2026-2027`. Runs previos del relay vieron `503` en
+home o en el primer listado. La URL sigue existiendo.
+
+El origen publica `x-cdn: Imperva` y `Set-Cookie` `visid_incap_*` /
+`incap_ses_*`. Un 403 de este host incluye el cuerpo
+`Forbidden access (Flooding)`. Cada `getText` (y cada invocación del Worker)
+partía de un jar vacío, así que home + 7 listados eran visitantes nuevos.
+Eso no es un cambio de User-Agent ni una URL obsoleta.
+
+El relay ahora reutiliza esas cookies de sesión (isolate +
+`x-relay-origin-cookie` autenticado) y reintenta una vez un 403/503 que traiga
+cookie nueva. Los listados de Zarzuela reutilizan la pausa de 1,5 s y un retry
+acotado de las fichas; un listado que sigue fallando marca la source como
+fallida y no publica un snapshot parcial. Un publish de GitHub Actions con
+este comportamiento sólo puede comprobarse después de mergear: `publish`
+hace checkout de `main`.

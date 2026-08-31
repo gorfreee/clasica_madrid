@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { getText, HttpError, resolveFetchRelay } from '../src/ingestion/http.ts';
+import { getText, HttpError, RELAY_ORIGIN_COOKIE_HEADER, resetOriginCookieJar, resolveFetchRelay } from '../src/ingestion/http.ts';
 import { fundacionJuanMarchAdapter as adapter } from '../src/ingestion/sources/fundacion-juan-march.ts';
 import { parseMarchDetail } from '../src/ingestion/detail/fundacion-juan-march.ts';
 import { parseZarzuelaDetail } from '../src/ingestion/detail/teatro-zarzuela.ts';
@@ -36,6 +36,7 @@ const fixture = (name: string) =>
   readFile(path.join(import.meta.dirname, 'fixtures/ingestion/march', `${name}.html`), 'utf8');
 
 afterEach(() => {
+  resetOriginCookieJar();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
@@ -317,6 +318,67 @@ describe('getText fetch relay', () => {
     });
     expect(blocked).toHaveBeenCalledTimes(1);
     expect(String(blocked.mock.calls[0]?.[0])).toBe(ordinary);
+  });
+
+  it('reuses same-origin cookies across getText calls on the direct transport', async () => {
+    const fetch = vi.fn(async (url: string, init?: RequestInit) => {
+      if (url === zarzuelaHome) {
+        expect(header(init, 'cookie')).toBeUndefined();
+        return new Response('<html>home</html>', {
+          status: 200,
+          headers: { 'set-cookie': 'visid_incap_1=abc; path=/; Domain=.inaem.gob.es' },
+        });
+      }
+      expect(url).toBe(zarzuelaListing);
+      expect(header(init, 'cookie')).toBe('visid_incap_1=abc');
+      return new Response('<ul class="listadoObras"></ul>', { status: 200 });
+    });
+    vi.stubGlobal('fetch', fetch);
+    await expect(getText(zarzuelaHome, 30_000, {})).resolves.toContain('home');
+    await expect(getText(zarzuelaListing, 30_000, {})).resolves.toContain('listadoObras');
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('sends and stores relay origin cookies without exposing them as Set-Cookie', async () => {
+    const fetch = vi.fn(async (url: string, init?: RequestInit) => {
+      const official = new URL(url).searchParams.get('url');
+      if (official === zarzuelaHome) {
+        expect(header(init, RELAY_ORIGIN_COOKIE_HEADER)).toBeUndefined();
+        expect(header(init, 'cookie')).toBeUndefined();
+        return new Response('<html>home</html>', {
+          status: 200,
+          headers: { [RELAY_ORIGIN_COOKIE_HEADER]: 'visid_incap_1=abc' },
+        });
+      }
+      expect(official).toBe(zarzuelaListing);
+      expect(header(init, RELAY_ORIGIN_COOKIE_HEADER)).toBe('visid_incap_1=abc');
+      expect(header(init, 'cookie')).toBeUndefined();
+      return new Response('<ul class="listadoObras"></ul>', {
+        status: 200,
+        headers: { [RELAY_ORIGIN_COOKIE_HEADER]: 'visid_incap_1=abc; incap_ses_1=xyz' },
+      });
+    });
+    vi.stubGlobal('fetch', fetch);
+    await expect(getText(zarzuelaHome, 30_000, relayEnv)).resolves.toContain('home');
+    await expect(getText(zarzuelaListing, 30_000, relayEnv)).resolves.toContain('listadoObras');
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps relay cookies after an origin 403 so a later retry can send them', async () => {
+    const fetch = vi.fn(async (url: string, init?: RequestInit) => {
+      const official = new URL(url).searchParams.get('url');
+      if (official === zarzuelaHome) {
+        return new Response('no', {
+          status: 403,
+          headers: { [RELAY_ORIGIN_COOKIE_HEADER]: 'visid_incap_1=abc' },
+        });
+      }
+      expect(header(init, RELAY_ORIGIN_COOKIE_HEADER)).toBe('visid_incap_1=abc');
+      return new Response('<ul class="listadoObras"></ul>', { status: 200 });
+    });
+    vi.stubGlobal('fetch', fetch);
+    await expect(getText(zarzuelaHome, 30_000, relayEnv)).rejects.toMatchObject({ status: 403 });
+    await expect(getText(zarzuelaListing, 30_000, relayEnv)).resolves.toContain('listadoObras');
   });
 
   it('fails visibly when the required relay is only half-configured', async () => {

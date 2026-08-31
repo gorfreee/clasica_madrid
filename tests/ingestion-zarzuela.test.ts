@@ -1,7 +1,7 @@
 import { readFile, mkdtemp } from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi, afterEach } from 'vitest';
 import { parseZarzuelaListing, teatroZarzuelaAdapter } from '../src/ingestion/sources/teatro-zarzuela.ts';
 import { parseZarzuelaDetail } from '../src/ingestion/detail/teatro-zarzuela.ts';
 import { parseZarzuelaSchedule } from '../src/ingestion/detail/zarzuela-schedule.ts';
@@ -26,6 +26,11 @@ const raw = (slug = 'la-verbena-de-la-paloma'): RawEvent => ({
   sourceUrl: `${base}/es/temporada/lirica-2026-2027/${slug}`,
   observed: { title: 'La verbena de la Paloma', occurrences: [], performers: [], composers: [], works: [] },
 });
+async function advance<T>(pending: Promise<T>): Promise<T> {
+  await vi.runAllTimersAsync();
+  return pending;
+}
+afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); });
 
 describe('descubrimiento K2 de Zarzuela', () => {
   it('usa el fetch relay genérico por hostname, sin proxy propio', () => {
@@ -33,14 +38,25 @@ describe('descubrimiento K2 de Zarzuela', () => {
   });
 
   it('descubre las siete secciones y todas las filas de tres obras, sin duplicar navegación', async () => {
+    vi.useFakeTimers();
+    const home = await fixture('home');
+    const bodies = new Map<string, string>();
+    for (const match of home.matchAll(/href="([^"]+)"/g)) {
+      const slug = match[1]!.split('/').at(-1);
+      if (slug && /-\d{4}-\d{4}$/.test(slug) && !bodies.has(slug)) {
+        bodies.set(slug, await fixture(`listing-${slug}`));
+      }
+    }
     const requests: string[] = [];
-    const events = await teatroZarzuelaAdapter.extract(await fixture('home'), `${base}/es/`, {
+    const events = await advance(teatroZarzuelaAdapter.extract(home, `${base}/es/`, {
       ...context,
       get: async (url) => {
         requests.push(url);
-        return fixture(`listing-${url.split('/').at(-1)}`);
+        const body = bodies.get(url.split('/').at(-1)!);
+        if (!body) throw new Error(`sin fixture para ${url}`);
+        return body;
       },
-    });
+    }));
     expect(requests).toHaveLength(7);
     expect(events).toHaveLength(40);
     expect(new Set(events.map((e) => e.sourceUrl)).size).toBe(40);

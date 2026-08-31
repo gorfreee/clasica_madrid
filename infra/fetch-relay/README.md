@@ -17,9 +17,19 @@ GitHub Settings.
 - accepts only public `https:` targets (no credentials, no non-default ports,
   no IP literals, no localhost / reserved names)
 - follows a conservative number of **same-origin** redirects
-- replays `Set-Cookie` only back to the origin that set them
+- replays `Set-Cookie` only back to the origin that set them, including
+  across later requests in the same Worker isolate
+- if the origin answers 403/503 (or similar) **and** sets a new cookie,
+  retries that same URL once with the cookie (the March 307 challenge
+  generalized to Imperva-style session cookies)
 - returns the final HTML
-- never forwards cookies, `Set-Cookie`, or the Bearer token to the caller
+- returns origin cookies to the **authenticated** caller only, via
+  `x-relay-origin-cookie` (never as `Set-Cookie`, never in error bodies,
+  never without a valid Bearer token)
+- accepts the same header on the next request so GitHub Actions can keep
+  the session even if the Worker isolate changes
+- never forwards the caller's `Cookie` header, the Bearer token, or
+  cookies to a different origin
 - never puts the token in error bodies
 
 The Node client (`getText` in `src/ingestion/http.ts`) sends the official

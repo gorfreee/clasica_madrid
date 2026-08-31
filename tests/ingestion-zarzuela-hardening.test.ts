@@ -4,7 +4,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createZarzuelaDetailClient, zarzuelaListingBounds } from '../src/ingestion/detail/zarzuela-hydration.ts';
-import { getText, HttpError } from '../src/ingestion/http.ts';
+import { createZarzuelaListingGet } from '../src/ingestion/detail/zarzuela-transport.ts';
+import { getText, HttpError, resetOriginCookieJar } from '../src/ingestion/http.ts';
 import { hydrateEvents, memoizeGet } from '../src/ingestion/hydrate.ts';
 import { parseZarzuelaListing, teatroZarzuelaAdapter } from '../src/ingestion/sources/teatro-zarzuela.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
@@ -30,7 +31,7 @@ async function advance<T>(pending: Promise<T>): Promise<T> {
   await vi.runAllTimersAsync();
   return pending;
 }
-afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
+afterEach(() => { resetOriginCookieJar(); vi.useRealTimers(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 describe('prefiltro conservador del listing', () => {
   it.each([
@@ -80,8 +81,9 @@ describe('prefiltro conservador del listing', () => {
   });
 
   it('no prefiltra URLs duplicadas con fechas contradictorias en distintos listados', async () => {
+    vi.useFakeTimers();
     const home = '<a href="/es/temporada/a-2026-2027">A</a><a href="/es/temporada/b-2026-2027">B</a>';
-    const events = await teatroZarzuelaAdapter.extract(home, base, { ...ctx, get: async (url) => `<ul class="listadoObras"><li><h3><a href="${category}/same">Obra</a></h3><p class="entradilla">${url.includes('/a-') ? '8 de octubre de 2026' : '8 de julio de 2027'}</p></li></ul>` });
+    const events = await advance(teatroZarzuelaAdapter.extract(home, base, { ...ctx, get: async (url) => `<ul class="listadoObras"><li><h3><a href="${category}/same">Obra</a></h3><p class="entradilla">${url.includes('/a-') ? '8 de octubre de 2026' : '8 de julio de 2027'}</p></li></ul>` }));
     expect(events).toHaveLength(1);
     expect(events[0]?.listingDateText).toBeUndefined();
   });
@@ -189,6 +191,57 @@ describe('transporte de fichas respetuoso y acotado', () => {
     await expect(getText(category, 30_000, {})).rejects.toMatchObject({ status: 429, retryAfter: '15' });
     expect(fetch).toHaveBeenCalledTimes(1);
     expect(fetch).toHaveBeenCalledWith(category, expect.objectContaining({ headers: expect.objectContaining({ 'user-agent': 'ClasicaMadrid-ingestion/1 (+https://github.com/gorfreee/clasica_madrid)' }) }));
+  });
+});
+
+describe('listados de temporada respetuosos y fail-closed', () => {
+  it('separa los listados 1,5 s y reintenta un HTTP 403; un segundo 403 sigue fallando la fuente', async () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    const times: number[] = [];
+    let concertAttempts = 0;
+    const get = vi.fn(async (url: string) => {
+      times.push(Date.now());
+      if (url.endsWith('/a-2026-2027')) return `<ul class="listadoObras"><li><h3><a href="${category}/one">Uno</a></h3><p class="entradilla">8 de octubre de 2026</p></li></ul>`;
+      concertAttempts += 1;
+      if (concertAttempts === 1) throw new HttpError(403, url);
+      return `<ul class="listadoObras"><li><h3><a href="${category}/two">Dos</a></h3><p class="entradilla">8 de octubre de 2026</p></li></ul>`;
+    });
+    const home = '<a href="/es/temporada/a-2026-2027">A</a><a href="/es/temporada/b-2026-2027">B</a>';
+    const events = await advance(teatroZarzuelaAdapter.extract(home, base, { ...ctx, get }));
+    expect(get).toHaveBeenCalledTimes(3);
+    expect(times[1]! - times[0]!).toBe(1500);
+    expect(times[2]! - times[1]!).toBe(2250);
+    expect(events).toHaveLength(2);
+  });
+
+  it('un listado con 403 persistente no devuelve un snapshot parcial', async () => {
+    vi.useFakeTimers();
+    const get = vi.fn(async (url: string) => {
+      if (url.endsWith('/a-2026-2027')) return `<ul class="listadoObras"><li><h3><a href="${category}/one">Uno</a></h3><p class="entradilla">8 de octubre de 2026</p></li></ul>`;
+      throw new HttpError(403, url);
+    });
+    const home = '<a href="/es/temporada/a-2026-2027">A</a><a href="/es/temporada/b-2026-2027">B</a>';
+    const pending = teatroZarzuelaAdapter.extract(home, base, { ...ctx, get });
+    const assertion = expect(pending).rejects.toMatchObject({ status: 403 });
+    await vi.runAllTimersAsync();
+    await assertion;
+    expect(get).toHaveBeenCalledTimes(3);
+  });
+
+  it('createZarzuelaListingGet no abre circuito: el segundo listado sigue intentándose', async () => {
+    vi.useFakeTimers();
+    const get = vi.fn(async () => { throw new HttpError(503, category); });
+    const listingGet = createZarzuelaListingGet(get);
+    const first = listingGet(`${category}/a`);
+    const firstAssert = expect(first).rejects.toMatchObject({ status: 503 });
+    await vi.runAllTimersAsync();
+    await firstAssert;
+    const second = listingGet(`${category}/b`);
+    const secondAssert = expect(second).rejects.toMatchObject({ status: 503 });
+    await vi.runAllTimersAsync();
+    await secondAssert;
+    expect(get).toHaveBeenCalledTimes(4);
   });
 });
 

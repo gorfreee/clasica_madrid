@@ -1,4 +1,5 @@
 import { parseZarzuelaDetail } from '../detail/teatro-zarzuela.ts';
+import { createZarzuelaListingGet } from '../detail/zarzuela-transport.ts';
 import { decodeHtmlEntities, stripTags } from '../html.ts';
 import { emptyObservedLists } from '../observed.ts';
 import type { AdapterContext, RawEvent, SourceAdapter } from '../types.ts';
@@ -21,8 +22,9 @@ export const teatroZarzuelaAdapter: SourceAdapter = {
     }
     if (!categories.size) throw new Error('teatro-zarzuela: no aparecen los listados de temporada');
     const events = new Map<string, RawEvent>();
+    const getListing = createZarzuelaListingGet(ctx.get);
     for (const categoryUrl of categories) {
-      const listing = await ctx.get(categoryUrl);
+      const listing = await getListing(categoryUrl);
       for (const event of parseZarzuelaListing(listing, categoryUrl, ctx)) {
         const previous = events.get(event.sourceUrl);
         // Conflicting listings cannot prove that the entire event is out of scope.
