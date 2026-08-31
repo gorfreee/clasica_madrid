@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_memoriam_iv_elegias_espejo",
+  "slug": "in-memoriam-iv-elegias-en-espejo",
+  "title": "In Memoriam (IV): Elegías en espejo",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_memoriam_iv_elegias_espejo_01",
+      "date": "2026-11-07",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Lawrence Power"
+    },
+    {
+      "name": "Simon Crawford-Phillips"
+    }
+  ],
+  "composers": [
+    {
+      "name": "François Couperin"
+    },
+    {
+      "name": "Maurice Ravel"
+    },
+    {
+      "name": "Arthur Benjamin"
+    },
+    {
+      "name": "Pyotr Ilyich Tchaikovsky"
+    },
+    {
+      "name": "Igor Stravinsky"
+    },
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "York Bowen"
+    },
+    {
+      "name": "Dmitriĭ Shostakovich"
+    }
+  ],
+  "works": [
+    {
+      "title": "Prélude , de Suite nº 1 en Mi menor, de Pièces de viole",
+      "composerName": "François Couperin"
+    },
+    {
+      "title": "Menuet , de Le tombeau de Couperin, M 68",
+      "composerName": "Maurice Ravel"
+    },
+    {
+      "title": "Le Tombeau de Ravel. Valses-caprices para viola y piano",
+      "composerName": "Arthur Benjamin"
+    },
+    {
+      "title": "Nur wer die Sehnsucht kennt [Nadie sino el corazón solitario] , de Seis romanzas, op. 6",
+      "composerName": "Pyotr Ilyich Tchaikovsky"
+    },
+    {
+      "title": "Divertimento, para violín solo , de Le baiser de la fée, ballet en homenaje a Pyotr Ilyich Tchaikovsky",
+      "composerName": "Igor Stravinsky"
+    },
+    {
+      "title": "In Moonlight, arreglo para viola y piano del Adagio sostenuto de la Sonata para piano op. 27 nº 2, “Claro de luna”"
+    },
+    {
+      "title": "Adagio “En memoria del gran Beethoven” , de Sonata para viola y piano, op. 147",
+      "composerName": "Dmitriĭ Shostakovich"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber",
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/memoriam-iv-elegias-espejo",
+      "checkedAt": "2026-08-31",
+      "externalId": "/es/madrid/concierto/memoriam-iv-elegias-espejo"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-08-31"
+}

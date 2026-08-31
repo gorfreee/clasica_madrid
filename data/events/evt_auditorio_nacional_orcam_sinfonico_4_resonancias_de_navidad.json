@@ -71,10 +71,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-sinfonico-4-resonancias-de-navidad",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-08-31",
       "externalId": "orcam-sinfonico-4-resonancias-de-navidad"
+    },
+    {
+      "sourceId": "src_fundacion_orcam",
+      "url": "https://fundacionorcam.org/conciertos/2026-27/resonancias-de-navidad",
+      "checkedAt": "2026-08-31",
+      "externalId": "4846"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-08-31"
 }

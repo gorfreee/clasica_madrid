@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_beethoven_schubert_sombras_cruzadas_i_anhelos_amada",
+  "slug": "beethoven-y-schubert-sombras-cruzadas-i-anhelos-de-la-amada",
+  "title": "Beethoven y Schubert: sombras cruzadas (I): Anhelos de la amada",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_beethoven_schubert_sombras_cruzadas_i_anhelos_amada_01",
+      "date": "2026-10-14",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Rafael Fingerlos"
+    },
+    {
+      "name": "Rubén Fernández Aguirre"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Franz Schubert"
+    }
+  ],
+  "works": [
+    {
+      "title": "Zärtliche Liebe [Tierno amor], WoO 123",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "An die Geliebte [A la amada], WoO 140",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "In questa tomba oscura [En esta tumba oscura], WoO 133",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Abendempfindung [Sentimiento de atardecer], KV 523",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Io ti lascio, o cara, addio [Te dejo, querida, adiós], KV 621a",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "An die ferne Geliebte [A la amada lejana], op. 98",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "An mein Herz [A mi corazón], D 860",
+      "composerName": "Franz Schubert"
+    },
+    {
+      "title": "An den Mond [A la luna], op. 57 nº 3, D 193",
+      "composerName": "Franz Schubert"
+    },
+    {
+      "title": "An den Mond, D 259",
+      "composerName": "Franz Schubert"
+    },
+    {
+      "title": "Wanderers Nachtlied [Canción nocturna del caminante], op. 96 nº 3, D 768",
+      "composerName": "Franz Schubert"
+    },
+    {
+      "title": "Du bist die Ruh [Tú eres el reposo], op. 59 nº 3, D 776",
+      "composerName": "Franz Schubert"
+    },
+    {
+      "title": "Am Bach im Frühling [Junto al arroyo en primavera], D 361",
+      "composerName": "Franz Schubert"
+    },
+    {
+      "title": "Frühlingsglaube [Fe primaveral], D 686",
+      "composerName": "Franz Schubert"
+    },
+    {
+      "title": "Seligkeit [Dicha], D 433",
+      "composerName": "Franz Schubert"
+    },
+    {
+      "title": "Lied eines Schiffers an die Dioskuren [Canción de un barquero a los Dioscuros], op. 65 nº 1, D 360",
+      "composerName": "Franz Schubert"
+    },
+    {
+      "title": "Litanei auf das Fest Allerseelen [Letanía en la fiesta de los Difuntos], D 343",
+      "composerName": "Franz Schubert"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "lied"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/beethoven-schubert-sombras-cruzadas-i-anhelos-amada",
+      "checkedAt": "2026-08-31",
+      "externalId": "/es/madrid/concierto/beethoven-schubert-sombras-cruzadas-i-anhelos-amada"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-08-31"
+}

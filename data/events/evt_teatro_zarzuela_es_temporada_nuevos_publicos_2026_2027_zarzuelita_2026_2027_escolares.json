@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_zarzuela_es_temporada_nuevos_publicos_2026_2027_zarzuelita_2026_2027_escolares",
+  "slug": "zarzuelita-2",
+  "title": "Zarzuelita",
+  "status": "scheduled",
+  "venueId": "ven_teatro_zarzuela",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_nuevos_publicos_2026_2027_zarzuelita_2026_2027_escolares_01",
+      "date": "2026-10-16",
+      "time": "10:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "LUCÍA BELTRÁN"
+    },
+    {
+      "name": "ADRIÁN QUIÑONES"
+    },
+    {
+      "name": "ANGELO CHIU LEE"
+    },
+    {
+      "name": "RAMÓN GRAU"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "zarzuela",
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_teatro_zarzuela",
+      "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/nuevos-publicos-2026-2027/zarzuelita-2026-2027-escolares",
+      "checkedAt": "2026-08-31",
+      "externalId": "/es/temporada/nuevos-publicos-2026-2027/zarzuelita-2026-2027-escolares"
+    }
+  ],
+  "primarySourceId": "src_teatro_zarzuela",
+  "lastVerifiedAt": "2026-08-31"
+}

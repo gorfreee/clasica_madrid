@@ -56,10 +56,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-sinfonico-1-la-creacion-de-un-todo",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-08-31",
       "externalId": "orcam-sinfonico-1-la-creacion-de-un-todo"
+    },
+    {
+      "sourceId": "src_fundacion_orcam",
+      "url": "https://fundacionorcam.org/conciertos/2026-27/la-creacion-de-un-todo",
+      "checkedAt": "2026-08-31",
+      "externalId": "4840"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-08-31"
 }

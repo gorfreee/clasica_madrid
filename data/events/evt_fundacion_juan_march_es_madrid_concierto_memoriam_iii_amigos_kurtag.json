@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_memoriam_iii_amigos_kurtag",
+  "slug": "in-memoriam-iii-los-amigos-de-kurtag",
+  "title": "In Memoriam (III): Los amigos de Kurtág",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_memoriam_iii_amigos_kurtag_01",
+      "date": "2026-10-31",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Cuarteto Quiroga"
+    },
+    {
+      "name": "Aitor Hevia"
+    },
+    {
+      "name": "Cibrán Sierra"
+    },
+    {
+      "name": "Josep Puchades"
+    },
+    {
+      "name": "Helena Poggio"
+    }
+  ],
+  "composers": [
+    {
+      "name": "György Kurtág"
+    },
+    {
+      "name": "Endre Szervánszky"
+    },
+    {
+      "name": "Jacob Obrecht"
+    },
+    {
+      "name": "Alban Berg"
+    }
+  ],
+  "works": [
+    {
+      "title": "Officium breve in memoriam Andreae Szervánszky, op. 28",
+      "composerName": "György Kurtág"
+    },
+    {
+      "title": "Arioso de la Serenata para orquesta de cuerda",
+      "composerName": "Endre Szervánszky"
+    },
+    {
+      "title": "Hommage à Jacob Obrecht",
+      "composerName": "György Kurtág"
+    },
+    {
+      "title": "In drage de mutze cluse",
+      "composerName": "Jacob Obrecht"
+    },
+    {
+      "title": "Arioso à la manière d'Alban Berg",
+      "composerName": "György Kurtág"
+    },
+    {
+      "title": "Cuarteto, Op. 3",
+      "composerName": "Alban Berg"
+    }
+  ],
+  "eras": [
+    "renaissance",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/memoriam-iii-amigos-kurtag",
+      "checkedAt": "2026-08-31",
+      "externalId": "/es/madrid/concierto/memoriam-iii-amigos-kurtag"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-08-31"
+}

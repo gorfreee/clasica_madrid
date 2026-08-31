@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_zarzuela_es_temporada_ciclo_de_lied_2026_2027_andreas_schager",
+  "slug": "andreas-schager",
+  "title": "Andreas Schager",
+  "status": "scheduled",
+  "venueId": "ven_teatro_zarzuela",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_ciclo_de_lied_2026_2027_andreas_schager_01",
+      "date": "2026-10-26",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "ANDREAS SCHAGER *"
+    },
+    {
+      "name": "GUILLERMO GARCÍA CALVO *"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital",
+    "lied"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_teatro_zarzuela",
+      "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/ciclo-de-lied-2026-2027/andreas-schager",
+      "checkedAt": "2026-08-31",
+      "externalId": "/es/temporada/ciclo-de-lied-2026-2027/andreas-schager"
+    }
+  ],
+  "primarySourceId": "src_teatro_zarzuela",
+  "lastVerifiedAt": "2026-08-31"
+}

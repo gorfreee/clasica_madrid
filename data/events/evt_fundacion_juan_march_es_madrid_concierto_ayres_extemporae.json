@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_ayres_extemporae",
+  "slug": "ayres-extemporae",
+  "title": "Ayres Extemporae",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_ayres_extemporae_01",
+      "date": "2026-10-18",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_ayres_extemporae_02",
+      "date": "2026-10-19",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ayres Extemporae"
+    },
+    {
+      "name": "Xenia Gogu"
+    },
+    {
+      "name": "Víctor García García"
+    },
+    {
+      "name": "Teresa Madeira"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Matthew Locke"
+    },
+    {
+      "name": "Heinrich Ignaz Franz Biber"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    }
+  ],
+  "works": [
+    {
+      "title": "Suite nº 5 en Mi menor (The Little Consort)",
+      "composerName": "Matthew Locke"
+    },
+    {
+      "title": "Sonata para violin y continuo nº 5 en Mi menor, C 142 (selección)",
+      "composerName": "Heinrich Ignaz Franz Biber"
+    },
+    {
+      "title": "Andante , de Sonata para viola da gamba y clave nº 2 en Re mayor, BWV 1028",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Aria \"Erbarme dich!\" , de Cantata \"Ich armer Mensch, ich Sündernknecht\", BWV 55",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Sonata para violín y bajo continuo nº 6 en Do menor, C 143",
+      "composerName": "Heinrich Ignaz Franz Biber"
+    },
+    {
+      "title": "Adagio , de Sonata para viola da gamba y clave nº 3 en Sol menor, BWV 1029",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Aria \"Ich traue seiner Gnaden\" , de Cantata \"In allen meinen Taten\", BWV 97",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Sonata para viola da gamba y clave nº 1 en Sol mayor, BWV 1027",
+      "composerName": "Johann Sebastian Bach"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "early-music",
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/ayres-extemporae",
+      "checkedAt": "2026-08-31",
+      "externalId": "/es/madrid/concierto/ayres-extemporae"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-08-31"
+}

@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_teatro_monumental",
+  "slug": "teatro-monumental",
+  "name": "Teatro Monumental",
+  "municipality": "Madrid",
+  "area": "madrid",
+  "address": "Calle de Atocha, 66, Madrid",
+  "url": "https://www.teatromonumental.es/",
+  "lastVerifiedAt": "2026-08-31"
+}

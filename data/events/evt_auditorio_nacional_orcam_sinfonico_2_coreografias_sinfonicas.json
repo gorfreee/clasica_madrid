@@ -15,9 +15,50 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
-  "works": [],
+  "performers": [
+    {
+      "name": "Orquesta de la Comunidad de Madrid"
+    },
+    {
+      "name": "Caleb Teicher"
+    },
+    {
+      "name": "Alondra de la Parra",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Alberto Ginastera"
+    },
+    {
+      "name": "Thomas Enhco"
+    },
+    {
+      "name": "Carlos Simon"
+    },
+    {
+      "name": "Leonard Bernstein"
+    }
+  ],
+  "works": [
+    {
+      "title": "Suite Estancia",
+      "composerName": "Alberto Ginastera"
+    },
+    {
+      "title": "Concierto Tap ++",
+      "composerName": "Thomas Enhco"
+    },
+    {
+      "title": "Cuatro danzas negras americanas +",
+      "composerName": "Carlos Simon"
+    },
+    {
+      "title": "Danzas sinfónicas de West Side Story",
+      "composerName": "Leonard Bernstein"
+    }
+  ],
   "eras": [
     "twentieth",
     "contemporary"
@@ -31,10 +72,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-sinfonico-2-coreografias-sinfonicas",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-08-31",
       "externalId": "orcam-sinfonico-2-coreografias-sinfonicas"
+    },
+    {
+      "sourceId": "src_fundacion_orcam",
+      "url": "https://fundacionorcam.org/conciertos/2026-27/coreografias-sinfonicas",
+      "checkedAt": "2026-08-31",
+      "externalId": "4842"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-08-31"
 }
