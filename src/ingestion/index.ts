@@ -69,6 +69,14 @@ export {
   DiscoveryBatchError,
 } from './discovery.ts';
 export type { DiscoveryBatch, DiscoveryObservation } from './discovery.ts';
+export {
+  buildDiscoveryContext,
+  parseDiscoveryContext,
+  serializeDiscoveryContext,
+  DiscoveryContextError,
+  discoveryContextSchema,
+} from './discovery-context.ts';
+export type { DiscoveryContext } from './discovery-context.ts';
 export { isSufficientProposedVenue, proposeDiscoveryVenue } from './venues.ts';
 export {
   IngestObservability,

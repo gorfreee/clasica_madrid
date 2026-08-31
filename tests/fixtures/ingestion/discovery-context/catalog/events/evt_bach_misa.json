@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_bach_misa",
+  "slug": "misa-en-si-menor",
+  "title": "Misa en Si menor",
+  "status": "scheduled",
+  "venueId": "ven_iglesia_san_jose",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_bach_misa_1",
+      "date": "2026-10-12",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    { "name": "Capilla de San José", "role": "choir" },
+    { "name": "Ana Ruiz", "role": "soloist" }
+  ],
+  "composers": [{ "name": "Johann Sebastian Bach" }],
+  "works": [
+    {
+      "title": "Misa en Si menor, BWV 232",
+      "composerName": "Johann Sebastian Bach"
+    }
+  ],
+  "eras": ["baroque"],
+  "formats": ["choral"],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_parroquia_san_jose",
+      "url": "https://www.parroquia-san-jose.example/conciertos/bach",
+      "checkedAt": "2026-08-20"
+    }
+  ],
+  "primarySourceId": "src_parroquia_san_jose",
+  "lastVerifiedAt": "2026-08-20"
+}
