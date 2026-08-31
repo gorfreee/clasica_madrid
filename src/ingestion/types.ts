@@ -37,8 +37,9 @@ export type HydrationMeta = {
 
 /**
  * Venue facts supplied by discovery when the place may not be in the catalog.
- * Not ObservedFacts: never sent to classification. Exact name match reuses
- * an existing venue; insufficient facts stay unpublished.
+ * Not ObservedFacts: never sent to classification. Matching uses exact name
+ * plus compatible municipality, and an explicit address only to disambiguate
+ * homonyms. Ambiguous matches stay unpublished; there is no fuzzy matching.
  */
 export type ProposedVenueFacts = {
   name: string;

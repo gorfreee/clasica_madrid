@@ -470,6 +470,120 @@ describe('toCandidate usa el matching source-aware', () => {
   });
 });
 
+describe('resolución de venue — ProposedVenueFacts', () => {
+  const sanJoseMadrid = makeVenue({
+    id: 'ven_iglesia_san_jose',
+    slug: 'iglesia-de-san-jose',
+    name: 'Iglesia de San José',
+    municipality: 'Madrid',
+    area: 'madrid',
+    address: 'Calle de Alcalá, 43, Madrid',
+  });
+  const sanJoseGetafe = makeVenue({
+    id: 'ven_iglesia_san_jose_getafe',
+    slug: 'iglesia-de-san-jose-getafe',
+    name: 'Iglesia de San José',
+    municipality: 'Getafe',
+    area: 'nearby',
+    address: 'Plaza de la Constitución, 1, Getafe',
+  });
+  const sanJoseMalasana = makeVenue({
+    id: 'ven_iglesia_san_jose_malasana',
+    slug: 'iglesia-de-san-jose-malasana',
+    name: 'Iglesia de San José',
+    municipality: 'Madrid',
+    area: 'madrid',
+    address: 'Calle de San Vicente Ferrer, 10, Madrid',
+  });
+
+  function proposedSanJose(
+    overrides: Partial<{
+      municipality: string;
+      area: 'madrid' | 'nearby';
+      address: string;
+    }> = {},
+  ) {
+    return {
+      venueText: 'Iglesia de San José',
+      proposed: {
+        name: 'Iglesia de San José',
+        municipality: 'Madrid',
+        area: 'madrid' as const,
+        address: 'Calle de Alcalá, 43, Madrid',
+        ...overrides,
+      },
+    };
+  }
+
+  it('nombre exacto + municipio compatible reutiliza el venue del catálogo', () => {
+    const catalog = catalogWith(sanJoseMadrid, teatroReal);
+    const match = matchVenue(proposedSanJose({ address: undefined }), catalog);
+    expect(match?.kind).toBe('catalog');
+    expect(match?.venue.id).toBe('ven_iglesia_san_jose');
+  });
+
+  it('el mismo nombre en otro municipio no reutiliza el venue y propone uno nuevo', () => {
+    const catalog = catalogWith(sanJoseMadrid);
+    const match = matchVenue(
+      proposedSanJose({ municipality: 'Getafe', area: 'nearby', address: 'Plaza de la Constitución, 1, Getafe' }),
+      catalog,
+    );
+    expect(match?.kind).toBe('new');
+    expect(match?.venue.id).not.toBe('ven_iglesia_san_jose');
+    expect(match?.venue.municipality).toBe('Getafe');
+    expect(match?.venue.area).toBe('nearby');
+  });
+
+  it('dos homónimos en municipios distintos se distinguen por municipio, sin dirección', () => {
+    const catalog = catalogWith(sanJoseMadrid, sanJoseGetafe);
+    const madrid = matchVenue(proposedSanJose({ address: undefined }), catalog);
+    const getafe = matchVenue(
+      proposedSanJose({ municipality: 'Getafe', area: 'nearby', address: undefined }),
+      catalog,
+    );
+    expect(madrid?.venue.id).toBe('ven_iglesia_san_jose');
+    expect(getafe?.venue.id).toBe('ven_iglesia_san_jose_getafe');
+  });
+
+  it('dos homónimos en el mismo municipio sin dirección no se resuelven', () => {
+    const catalog = catalogWith(sanJoseMadrid, sanJoseMalasana);
+    expect(matchVenue(proposedSanJose({ address: undefined }), catalog)).toBeUndefined();
+  });
+
+  it('dos homónimos en el mismo municipio se distinguen por dirección exacta', () => {
+    const catalog = catalogWith(sanJoseMadrid, sanJoseMalasana);
+    const alcalá = matchVenue(proposedSanJose(), catalog);
+    const malasaña = matchVenue(
+      proposedSanJose({ address: 'Calle de San Vicente Ferrer, 10, Madrid' }),
+      catalog,
+    );
+    expect(alcalá?.venue.id).toBe('ven_iglesia_san_jose');
+    expect(malasaña?.venue.id).toBe('ven_iglesia_san_jose_malasana');
+    expect(alcalá?.venue.id).not.toBe(malasaña?.venue.id);
+  });
+
+  it('un alias explícito de KNOWN_VENUES sigue resolviendo con municipio compatible', () => {
+    const catalog = catalogWith(teatroReal);
+    const match = matchVenue(
+      {
+        venueText: 'teatro real de madrid',
+        proposed: { name: 'teatro real de madrid', municipality: 'Madrid', area: 'madrid' },
+      },
+      catalog,
+    );
+    expect(match?.kind).toBe('catalog');
+    expect(match?.venue.id).toBe('ven_teatro_real');
+  });
+
+  it('un venue ya publicado en una ejecución anterior se reutiliza (idempotencia)', () => {
+    const catalog = catalogWith(sanJoseMadrid, sanJoseGetafe);
+    const first = matchVenue(proposedSanJose(), catalog);
+    const second = matchVenue(proposedSanJose(), catalog);
+    expect(first?.venue.id).toBe('ven_iglesia_san_jose');
+    expect(second?.venue.id).toBe(first?.venue.id);
+  });
+});
+
 describe('pipeline Madrid Datos', () => {
   it('clasifica facilities oficiales y deja skip estructural sólo la identidad insuficiente', async () => {
     const catalog = catalogWith(teatroReal, casaVacas, condeduqueAuditorio);

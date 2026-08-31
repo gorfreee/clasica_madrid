@@ -18,6 +18,10 @@ import {
 } from '../lib/schemas/index.ts';
 import { isDateInWindow, type IngestWindow } from './dates.ts';
 import { SOURCE_REGISTRY, resolveCatalogSource } from './registry.ts';
+import {
+  SHARED_SOURCE_HOSTS,
+  discoveryBatchJsonSchema,
+} from './discovery.ts';
 import { urlsEquivalent } from './urls.ts';
 import { KNOWN_VENUES } from './venues.ts';
 
@@ -117,6 +121,18 @@ const editorialScopeSchema = z
   })
   .strict();
 
+const discoveryOutputContractSchema = z
+  .object({
+    produces: z.literal('DiscoveryBatch'),
+    schemaVersion: z.literal(1),
+    jsonSchema: z.record(z.string(), z.unknown()),
+    sharedSourceHosts: z.array(z.string().trim().min(1)).min(1),
+    requiredObservedArrays: z.tuple([z.literal('performers'), z.literal('composers'), z.literal('works')]),
+    forbiddenFields: z.array(z.string().trim().min(1)).min(1),
+    notes: z.array(z.string().trim().min(1)).min(1),
+  })
+  .strict();
+
 export const discoveryContextSchema = z
   .object({
     schemaVersion: z.literal(1),
@@ -133,17 +149,19 @@ export const discoveryContextSchema = z
     coveredEvents: z.array(coveredEventSchema),
     editorialScope: editorialScopeSchema,
     evidenceInstructions: z.array(z.string().trim().min(1)).min(1),
+    output: discoveryOutputContractSchema,
   })
   .strict();
 
 export type DiscoveryContext = z.infer<typeof discoveryContextSchema>;
 
 export const DISCOVERY_CONTEXT_TASK =
-  'Identificar conciertos relevantes de la ventana que probablemente no estén ya cubiertos, y sources nuevas que merezca la pena investigar. Devolver un DiscoveryBatch (schemaVersion 1) de hechos observados; el pipeline común decide elegibilidad y lo canónico.';
+  'Identificar conciertos relevantes de la ventana que probablemente no estén ya cubiertos, y sources nuevas que merezca la pena investigar. Devolver un DiscoveryBatch (schemaVersion 1) según output; el pipeline común decide elegibilidad y lo canónico.';
 
 export const DISCOVERY_EDITORIAL_SCOPE: DiscoveryContext['editorialScope'] = {
   geography: {
-    focus: 'Comunidad de Madrid: municipio de Madrid (area madrid) y municipios nearby del modelo.',
+    focus:
+      'Municipio de Madrid (area madrid). Pueden incluirse municipios muy próximos y bien conectados cuando encajen en nearby. No es una agenda de toda la Comunidad de Madrid.',
     areas: [...AREAS],
   },
   music: {
@@ -178,7 +196,36 @@ export const DISCOVERY_EVIDENCE_INSTRUCTIONS: readonly string[] = [
   'No inventar hechos que la fuente no declare.',
   'No devolver eligibility, kind, eras o formats como hechos observados.',
   'Si hay rastro de búsqueda (URL de resultados, etc.), indicarlo en foundVia aparte de la URL de evidencia.',
+  'En hosts compartidos (output.sharedSourceHosts), source.homepage debe ser el perfil de esa organización, no el origin de la plataforma.',
 ];
+
+export const DISCOVERY_FORBIDDEN_OUTPUT_FIELDS = [
+  'eligibility',
+  'kind',
+  'eras',
+  'formats',
+  'access',
+  'slug',
+  'id',
+  'confidence',
+  'candidate',
+] as const;
+
+export const DISCOVERY_OUTPUT_CONTRACT: DiscoveryContext['output'] = {
+  produces: 'DiscoveryBatch',
+  schemaVersion: 1,
+  jsonSchema: discoveryBatchJsonSchema(),
+  sharedSourceHosts: [...SHARED_SOURCE_HOSTS],
+  requiredObservedArrays: ['performers', 'composers', 'works'],
+  forbiddenFields: [...DISCOVERY_FORBIDDEN_OUTPUT_FIELDS],
+  notes: [
+    'Sólo hechos observados. El pipeline decide eligibility, kind, eras, formats, slugs e ids.',
+    'Incluir siempre performers, composers y works; [] si la fuente no los declara.',
+    'venue es opcional; para publicar un lugar nuevo hacen falta name, municipality y area coherentes.',
+    'foundVia es rastro de búsqueda, no source canónica ni primarySource.',
+    'En un host compartido, no usar el origin de la plataforma como identidad de source.',
+  ],
+};
 
 export class DiscoveryContextError extends Error {
   constructor(message: string) {
@@ -242,6 +289,7 @@ export function buildDiscoveryContext(options: BuildDiscoveryContextOptions): Di
     coveredEvents: buildCoveredEvents(catalog, options.window),
     editorialScope: DISCOVERY_EDITORIAL_SCOPE,
     evidenceInstructions: [...DISCOVERY_EVIDENCE_INSTRUCTIONS],
+    output: DISCOVERY_OUTPUT_CONTRACT,
   });
 }
 

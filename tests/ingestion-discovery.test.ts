@@ -51,19 +51,23 @@ async function loadFixture(name: string): Promise<DiscoveryBatch> {
 }
 
 function observation(overrides: {
-  source?: Partial<DiscoveryObservation['source']>;
+  source?: Partial<DiscoveryObservation['source']> & { homepage?: string | null };
   event?: Partial<DiscoveryObservation['event']>;
   venue?: DiscoveryObservation['venue'];
   foundVia?: string;
 }): DiscoveryObservation {
+  const homepage =
+    overrides.source && 'homepage' in overrides.source
+      ? overrides.source.homepage
+      : 'https://www.parroquia.example/';
+  const source: DiscoveryObservation['source'] = {
+    url: overrides.source?.url ?? 'https://www.parroquia.example/conciertos/bach',
+    name: overrides.source?.name ?? 'Parroquia de San José',
+    kind: overrides.source?.kind ?? 'official',
+  };
+  if (homepage) source.homepage = homepage;
   return {
-    source: {
-      url: 'https://www.parroquia.example/conciertos/bach',
-      name: 'Parroquia de San José',
-      homepage: 'https://www.parroquia.example/',
-      kind: 'official',
-      ...overrides.source,
-    },
+    source,
     event: {
       title: 'Misa en Si menor',
       occurrences: [{ raw: '2026-10-12 19:30', date: '2026-10-12', time: '19:30' }],
@@ -155,6 +159,16 @@ describe('DiscoveryBatch schema', () => {
         observations: [{ ...observation({}), eligibility: 'include', kind: 'alternative' }],
       }),
     ).toThrow(/DiscoveryBatch inválido/);
+  });
+
+  it('exige los arrays observados performers, composers y works', () => {
+    const { performers: _performers, ...event } = observation({}).event;
+    expect(() =>
+      parseDiscoveryBatch({
+        schemaVersion: 1,
+        observations: [{ ...observation({}), event }],
+      }),
+    ).toThrow(/performers/);
   });
 });
 
@@ -337,6 +351,235 @@ describe('discovery: venue insuficiente', () => {
     expect(run.candidates).toEqual([]);
     expect(run.decisions[0]?.structuralSkip?.reason).toBe('lugar nuevo con datos insuficientes');
     expect(run.summary.skippedUnusable).toBe(1);
+  });
+});
+
+describe('discovery: venues homónimos', () => {
+  const sanJoseMadrid = makeVenue({
+    id: 'ven_iglesia_san_jose',
+    slug: 'iglesia-de-san-jose',
+    name: 'Iglesia de San José',
+    municipality: 'Madrid',
+    area: 'madrid',
+    address: 'Calle de Alcalá, 43, Madrid',
+  });
+  const sanJoseMalasana = makeVenue({
+    id: 'ven_iglesia_san_jose_malasana',
+    slug: 'iglesia-de-san-jose-malasana',
+    name: 'Iglesia de San José',
+    municipality: 'Madrid',
+    area: 'madrid',
+    address: 'Calle de San Vicente Ferrer, 10, Madrid',
+  });
+  const sanJoseGetafe = makeVenue({
+    id: 'ven_iglesia_san_jose_getafe',
+    slug: 'iglesia-de-san-jose-getafe',
+    name: 'Iglesia de San José',
+    municipality: 'Getafe',
+    area: 'nearby',
+    address: 'Plaza de la Constitución, 1, Getafe',
+  });
+
+  function catalogWithHomonyms(...venues: ReturnType<typeof makeVenue>[]): Catalog {
+    const catalog = emptyCatalog();
+    catalog.venues.push(...venues);
+    return catalog;
+  }
+
+  it('no asocia un homónimo de otro municipio', async () => {
+    const { run } = await runDiscovery(
+      batchOf(
+        observation({
+          venue: {
+            name: 'Iglesia de San José',
+            municipality: 'Getafe',
+            area: 'nearby',
+            address: 'Plaza de la Constitución, 1, Getafe',
+          },
+        }),
+      ),
+      catalogWithHomonyms(sanJoseMadrid),
+    );
+    expect(run.candidates).toHaveLength(1);
+    expect(run.candidates[0]?.event.venueId).not.toBe('ven_iglesia_san_jose');
+    expect(run.candidates[0]?.venue?.municipality).toBe('Getafe');
+    expect(run.candidates[0]?.venue?.area).toBe('nearby');
+  });
+
+  it('dos iglesias homónimas en Madrid sin dirección no se publican', async () => {
+    const { run } = await runDiscovery(
+      batchOf(
+        observation({
+          venue: { name: 'Iglesia de San José', municipality: 'Madrid', area: 'madrid' },
+        }),
+      ),
+      catalogWithHomonyms(sanJoseMadrid, sanJoseMalasana),
+    );
+    expect(run.candidates).toEqual([]);
+    expect(run.decisions[0]?.structuralSkip?.reason).toBe('lugar ambiguo');
+  });
+
+  it('la dirección exacta distingue dos iglesias homónimas en Madrid', async () => {
+    const { run } = await runDiscovery(
+      batchOf(
+        observation({
+          venue: {
+            name: 'Iglesia de San José',
+            municipality: 'Madrid',
+            area: 'madrid',
+            address: 'Calle de San Vicente Ferrer, 10, Madrid',
+          },
+        }),
+      ),
+      catalogWithHomonyms(sanJoseMadrid, sanJoseMalasana),
+    );
+    expect(run.candidates).toHaveLength(1);
+    expect(run.candidates[0]?.event.venueId).toBe('ven_iglesia_san_jose_malasana');
+    expect(run.candidates[0]?.event.venueId).not.toBe('ven_iglesia_san_jose');
+    expect(run.candidates[0]?.venue).toBeUndefined();
+  });
+
+  it('municipio compatible distingue homónimos de distinta localización', async () => {
+    const { run } = await runDiscovery(
+      batchOf(observation({ venue: churchVenue() })),
+      catalogWithHomonyms(sanJoseMadrid, sanJoseGetafe),
+    );
+    expect(run.candidates).toHaveLength(1);
+    expect(run.candidates[0]?.event.venueId).toBe('ven_iglesia_san_jose');
+    expect(run.candidates[0]?.venue).toBeUndefined();
+  });
+});
+
+describe('discovery: sources en hosts compartidos', () => {
+  it('rechaza un host compartido sin homepage/perfil identificable', () => {
+    expect(() =>
+      parseDiscoveryBatch(
+        batchOf(
+          observation({
+            source: {
+              url: 'https://www.facebook.com/events/123456',
+              name: 'Parroquia de San José',
+              homepage: null,
+            },
+            venue: churchVenue(),
+          }),
+        ),
+      ),
+    ).toThrow(/host compartido/);
+    expect(() =>
+      parseDiscoveryBatch(
+        batchOf(
+          observation({
+            source: {
+              url: 'https://www.facebook.com/events/123456',
+              name: 'Parroquia de San José',
+              homepage: 'https://www.facebook.com/',
+            },
+            venue: churchVenue(),
+          }),
+        ),
+      ),
+    ).toThrow(/host compartido/);
+  });
+
+  it('dos perfiles del mismo host no colapsan en la misma source', async () => {
+    const { run } = await runDiscovery(
+      batchOf(
+        observation({
+          source: {
+            url: 'https://www.facebook.com/parroquia.sanjose/posts/111',
+            name: 'Parroquia de San José',
+            homepage: 'https://www.facebook.com/parroquia.sanjose',
+            kind: 'official',
+          },
+          venue: churchVenue(),
+        }),
+        observation({
+          source: {
+            url: 'https://www.facebook.com/conservatorio.alcala/posts/222',
+            name: 'Conservatorio de Alcalá',
+            homepage: 'https://www.facebook.com/conservatorio.alcala',
+            kind: 'official',
+          },
+          event: {
+            title: 'Misa en Si menor',
+            venueText: 'Iglesia de San José',
+            occurrences: [{ raw: '2026-10-20 19:30', date: '2026-10-20', time: '19:30' }],
+            composers: [{ name: 'Johann Sebastian Bach' }],
+            works: [{ title: 'Misa en Si menor', composerName: 'Johann Sebastian Bach' }],
+            performers: [],
+          },
+          venue: churchVenue(),
+        }),
+      ),
+      emptyCatalog(),
+    );
+    expect(run.candidates).toHaveLength(2);
+    const sourceIds = run.candidates.map((candidate) => candidate.event.primarySourceId);
+    expect(new Set(sourceIds).size).toBe(2);
+    const homepages = run.candidates.flatMap((candidate) => candidate.sources ?? []).map((source) => source.url);
+    expect(homepages).toEqual(
+      expect.arrayContaining([
+        'https://www.facebook.com/parroquia.sanjose',
+        'https://www.facebook.com/conservatorio.alcala',
+      ]),
+    );
+    expect(homepages.some((url) => /^https:\/\/www\.facebook\.com\/?$/.test(url))).toBe(false);
+  });
+
+  it('el mismo perfil en dos observaciones reutiliza la source', async () => {
+    const { run } = await runDiscovery(
+      batchOf(
+        observation({
+          source: {
+            url: 'https://www.facebook.com/parroquia.sanjose/posts/111',
+            name: 'Parroquia de San José',
+            homepage: 'https://www.facebook.com/parroquia.sanjose',
+            kind: 'official',
+          },
+          venue: churchVenue(),
+        }),
+        observation({
+          source: {
+            url: 'https://www.facebook.com/parroquia.sanjose/posts/222',
+            name: 'Parroquia de San José',
+            homepage: 'https://www.facebook.com/parroquia.sanjose',
+            kind: 'official',
+          },
+          event: {
+            title: 'Misa en Si menor',
+            venueText: 'Iglesia de San José',
+            occurrences: [{ raw: '2026-10-20 19:30', date: '2026-10-20', time: '19:30' }],
+            composers: [{ name: 'Johann Sebastian Bach' }],
+            works: [{ title: 'Misa en Si menor', composerName: 'Johann Sebastian Bach' }],
+            performers: [],
+          },
+          venue: churchVenue(),
+        }),
+      ),
+      emptyCatalog(),
+    );
+    expect(run.candidates).toHaveLength(2);
+    expect(run.candidates[0]?.event.primarySourceId).toBe(run.candidates[1]?.event.primarySourceId);
+    expect(run.candidates.some((candidate) => candidate.sources?.some((source) => source.url.includes('facebook.com/parroquia.sanjose')))).toBe(true);
+  });
+
+  it('un dominio propio sigue pudiendo omitir homepage y usar el origin', async () => {
+    const { run } = await runDiscovery(
+      batchOf(
+        observation({
+          source: {
+            url: 'https://www.parroquia.example/conciertos/bach',
+            name: 'Parroquia de San José',
+            homepage: null,
+          },
+          venue: churchVenue(),
+        }),
+      ),
+      emptyCatalog(),
+    );
+    expect(run.candidates).toHaveLength(1);
+    expect(run.candidates[0]?.sources?.[0]?.url).toBe('https://www.parroquia.example/');
   });
 });
 

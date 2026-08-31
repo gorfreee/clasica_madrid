@@ -182,6 +182,10 @@ export function matchVenue(
     }
   }
 
+  if (input.proposed && isSufficientProposedVenue(input.proposed)) {
+    return matchProposedVenue(input.proposed, catalog);
+  }
+
   for (const needle of venueNeedles(input)) {
     const exactCatalog = uniqueCatalogByName(needle, catalog);
     if (exactCatalog) return { kind: 'catalog', venue: exactCatalog };
@@ -203,11 +207,6 @@ export function matchVenue(
   if (input.sourceId === 'madrid-datos' && input.facilityId && input.venueText) {
     const proposed = proposeMadridDatosVenue(input.facilityId, input.venueText, catalog);
     if (proposed) return { kind: 'new', venue: proposed };
-  }
-
-  if (input.proposed && isSufficientProposedVenue(input.proposed)) {
-    const fromProposed = matchProposedVenue(input.proposed, catalog);
-    if (fromProposed) return fromProposed;
   }
 
   return undefined;
@@ -289,11 +288,17 @@ function madridDatosFacilitySlug(
 
 function matchProposedVenue(proposed: ProposedVenueFacts, catalog: Catalog): VenueMatch | undefined {
   const needle = normalizeText(proposed.name);
-  const exactCatalog = uniqueCatalogByName(needle, catalog);
-  if (exactCatalog) return { kind: 'catalog', venue: exactCatalog };
+  const named = catalog.venues.filter((venue) => normalizeText(venue.name) === needle);
+  const located = proposed.municipality
+    ? named.filter((venue) => normalizeText(venue.municipality) === normalizeText(proposed.municipality!))
+    : named;
+
+  const resolved = uniqueProposedCatalogMatch(located, proposed);
+  if (resolved === 'ambiguous') return undefined;
+  if (resolved) return { kind: 'catalog', venue: resolved };
 
   const known = aliasIndex.get(needle);
-  if (known) {
+  if (known && knownVenueCompatible(known, proposed)) {
     const existing = catalog.venues.find((venue) => venue.id === known.venue.id);
     if (existing) return { kind: 'catalog', venue: existing };
     return { kind: 'known', venue: known.venue };
@@ -301,6 +306,33 @@ function matchProposedVenue(proposed: ProposedVenueFacts, catalog: Catalog): Ven
 
   const created = proposeDiscoveryVenue(proposed, catalog);
   return created ? { kind: 'new', venue: created } : undefined;
+}
+
+/**
+ * One catalog venue for these facts, or `ambiguous` when several remain
+ * indistinguishable. `undefined` means none of these candidates fit, so a
+ * new venue may be created.
+ */
+function uniqueProposedCatalogMatch(
+  candidates: readonly Venue[],
+  proposed: ProposedVenueFacts,
+): Venue | 'ambiguous' | undefined {
+  if (candidates.length === 0) return undefined;
+  if (candidates.length === 1) return candidates[0];
+  if (!proposed.address) return 'ambiguous';
+
+  const byAddress = candidates.filter(
+    (venue) => venue.address && normalizeText(venue.address) === normalizeText(proposed.address!),
+  );
+  if (byAddress.length === 1) return byAddress[0];
+  if (byAddress.length > 1) return 'ambiguous';
+  if (candidates.some((venue) => !venue.address)) return 'ambiguous';
+  return undefined;
+}
+
+function knownVenueCompatible(known: KnownVenue, proposed: ProposedVenueFacts): boolean {
+  if (!proposed.municipality) return true;
+  return normalizeText(known.venue.municipality) === normalizeText(proposed.municipality);
 }
 
 /**

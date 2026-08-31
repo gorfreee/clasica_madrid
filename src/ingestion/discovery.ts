@@ -14,12 +14,28 @@ import {
   nonEmptyStringSchema,
 } from '../lib/schemas/common.ts';
 import { makePrefixedId, toSlug, uniqueId, uniqueSlug } from './ids.ts';
-import { observedFactsSchema } from './observed.ts';
+import { observedComposerSchema, observedFactsSchema, observedPersonSchema, observedWorkSchema } from './observed.ts';
 import { SOURCE_REGISTRY, resolveCatalogSource } from './registry.ts';
 import type { PipelineSource, ProposedVenueFacts, RawEvent, RawOccurrence } from './types.ts';
 import { normalizeUrl, urlsEquivalent } from './urls.ts';
 
 const foundViaSchema = z.string().trim().min(1).max(2000);
+
+/**
+ * Hosts where many independent organisations share one origin.
+ * Homepage/profile is required; the platform origin is not a source identity.
+ * Subdomains of these hosts are treated the same. Not an internet registry.
+ */
+export const SHARED_SOURCE_HOSTS = [
+  'facebook.com',
+  'fb.com',
+  'instagram.com',
+  'twitter.com',
+  'x.com',
+  'eventbrite.com',
+  'eventbrite.es',
+  'meetup.com',
+] as const;
 
 const discoveryOccurrenceSchema = z
   .object({
@@ -47,7 +63,16 @@ const discoverySourceSchema = z
     homepage: httpUrlSchema.optional(),
     kind: z.enum(SOURCE_KINDS).optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((source, ctx) => {
+    if (discoverySourceHomepageIsIdentifiable(source)) return;
+    ctx.addIssue({
+      code: 'custom',
+      message:
+        'host compartido: source.homepage debe ser el perfil identificable de esa organización, no el origin de la plataforma',
+      path: ['homepage'],
+    });
+  });
 
 const discoveryEventSchema = observedFactsSchema
   .omit({ venueText: true })
@@ -55,6 +80,9 @@ const discoveryEventSchema = observedFactsSchema
     venueText: nonEmptyStringSchema.optional(),
     occurrences: z.array(discoveryOccurrenceSchema).min(1),
     externalId: z.string().trim().min(1).max(300).optional(),
+    performers: z.array(observedPersonSchema),
+    composers: z.array(observedComposerSchema),
+    works: z.array(observedWorkSchema),
   })
   .strict();
 
@@ -187,8 +215,7 @@ function resolveDiscoverySource(
   usedSourceSlugs: Set<string>,
   usedPipelineIds: Set<string>,
 ): PipelineSource {
-  const eventUrl = normalizeUrl(input.url);
-  const homepage = normalizeUrl(input.homepage ?? originOf(eventUrl) ?? eventUrl);
+  const homepage = discoverySourceHomepage(input);
   const cacheKey = homepage;
   const cached = cache.get(cacheKey);
   if (cached) return cached;
@@ -271,5 +298,58 @@ function originOf(url: string): string | undefined {
     return `${parsed.protocol}//${parsed.host}/`;
   } catch {
     return undefined;
+  }
+}
+
+export function discoveryBatchJsonSchema(): Record<string, unknown> {
+  const schema = z.toJSONSchema(discoveryBatchSchema, {
+    io: 'input',
+    reused: 'inline',
+    unrepresentable: 'any',
+  });
+  const { $schema: _schema, ...rest } = schema as Record<string, unknown> & { $schema?: unknown };
+  return rest;
+}
+
+export function isSharedSourceHost(hostname: string): boolean {
+  const host = hostname.toLowerCase().replace(/\.$/, '').replace(/^www\./, '');
+  return SHARED_SOURCE_HOSTS.some((listed) => host === listed || host.endsWith(`.${listed}`));
+}
+
+function discoverySourceHomepage(input: DiscoveryObservation['source']): string {
+  if (!discoverySourceHomepageIsIdentifiable(input)) {
+    throw new DiscoveryBatchError(
+      'DiscoveryBatch inválido: source.homepage: host compartido: source.homepage debe ser el perfil identificable de esa organización, no el origin de la plataforma',
+    );
+  }
+  const eventUrl = normalizeUrl(input.url);
+  if (input.homepage) return normalizeUrl(input.homepage);
+  return normalizeUrl(originOf(eventUrl) ?? eventUrl);
+}
+
+function discoverySourceHomepageIsIdentifiable(source: {
+  url: string;
+  homepage?: string;
+}): boolean {
+  if (source.homepage) {
+    return !isSharedSourceHostUrl(source.homepage) || urlHasIdentityPath(source.homepage);
+  }
+  return !isSharedSourceHostUrl(source.url);
+}
+
+function isSharedSourceHostUrl(url: string): boolean {
+  try {
+    return isSharedSourceHost(new URL(normalizeUrl(url)).hostname);
+  } catch {
+    return false;
+  }
+}
+
+function urlHasIdentityPath(url: string): boolean {
+  try {
+    const parsed = new URL(normalizeUrl(url));
+    return parsed.pathname.split('/').filter(Boolean).length > 0;
+  } catch {
+    return false;
   }
 }
