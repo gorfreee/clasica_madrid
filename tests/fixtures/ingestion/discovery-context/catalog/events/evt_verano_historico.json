@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_verano_historico",
+  "slug": "concierto-de-verano",
+  "title": "Concierto de verano",
+  "status": "scheduled",
+  "venueId": "ven_teatro_real",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_verano_historico_1",
+      "date": "2026-07-01",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [{ "name": "Orquesta titular", "role": "orchestra" }],
+  "composers": [{ "name": "Wolfgang Amadeus Mozart" }],
+  "works": [{ "title": "Sinfonía n.º 40", "composerName": "Wolfgang Amadeus Mozart" }],
+  "eras": ["classical"],
+  "formats": ["symphonic"],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_teatro_real",
+      "url": "https://www.teatroreal.es/es/evento/verano",
+      "checkedAt": "2026-06-01"
+    }
+  ],
+  "primarySourceId": "src_teatro_real",
+  "lastVerifiedAt": "2026-06-01"
+}

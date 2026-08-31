@@ -15,6 +15,7 @@
     "ingest:sync": "tsx src/cli/ingest.ts sync",
     "ingest:source": "tsx src/cli/ingest.ts source",
     "ingest:discovery": "tsx src/cli/ingest.ts discovery",
+    "ingest:discovery-context": "tsx src/cli/discovery-context.ts",
     "export:excel": "tsx src/cli/export-excel.ts",
     "build": "astro build",
     "preview": "astro preview"

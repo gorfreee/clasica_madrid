@@ -93,7 +93,7 @@ Cada descubrimiento debe intentar reducir trabajo futuro: si proviene de una fue
                     RawEvent[]  →  mismo pipeline
 ```
 
-Harvesting y discovery convergen en `RawEvent` / `PipelineSource` antes de normalize. Discovery v1 importa un batch de hechos observados; no extrae la web ni evalúa desapariciones.
+Harvesting y discovery convergen en `RawEvent` / `PipelineSource` antes de normalize. Discovery v1 exporta un contexto compacto para un agente externo e importa un batch de hechos observados; no extrae la web ni evalúa desapariciones.
 
 Mientras el volumen lo permita, la implementación es TypeScript en esta repo. Copiar patrones (adapter por fuente, modelo intermedio, strict interpretation, aislamiento de fallos, IA después de reglas baratas), no plataformas completas. La estructura de carpetas es la del código, no una especulación de este documento.
 
@@ -286,7 +286,7 @@ Salvo necesidad demostrable: PostgreSQL/Supabase, Redis, Kafka, colas, Airbyte, 
 
 **Fase 5 — ampliar fuentes conocidas:** adapters progresivos; cada fuente recurrente descubierta se evalúa para el registry.
 
-**Fase 6 — discovery con agentes:** la entrada estructurada (`DiscoveryBatch` → pipeline común, `npm run ingest:discovery`) está implementada. Siguen fuera: búsqueda web automática, scheduling, source-learning/ledger, promoción a adapters y fuzzy reconciliation.
+**Fase 6 — discovery con agentes:** están implementados el export compacto de contexto (`DiscoveryContext`, `npm run ingest:discovery-context`) y la entrada estructurada (`DiscoveryBatch` → pipeline común, `npm run ingest:discovery`). Un agente externo consume el JSON de contexto y produce el batch; el pipeline común sigue tomando las decisiones editoriales y canónicas. Siguen fuera: búsqueda web automática, scheduling, Actions de Discovery, source-learning/ledger, promoción a adapters y fuzzy reconciliation.
 
 No implementar una fase posterior salvo que una tarea lo pida.
 
