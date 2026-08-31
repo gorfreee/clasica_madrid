@@ -28,15 +28,27 @@ export const LOCAL_AI_ENV_KEYS = [
   'GEMINI_CACHE',
 ] as const satisfies ReadonlyArray<keyof AiEnv>;
 
-const ALLOWED = new Set<string>(LOCAL_AI_ENV_KEYS);
+/** Optional fetch relay; unused unless both URL and token are present. */
+export const LOCAL_FETCH_RELAY_ENV_KEYS = [
+  'INGEST_FETCH_RELAY_URL',
+  'INGEST_FETCH_RELAY_TOKEN',
+] as const;
+
+export type LocalIngestEnv = AiEnv & {
+  INGEST_FETCH_RELAY_URL?: string;
+  INGEST_FETCH_RELAY_TOKEN?: string;
+};
+
+const ALLOWED = new Set<string>([...LOCAL_AI_ENV_KEYS, ...LOCAL_FETCH_RELAY_ENV_KEYS]);
+const LOCAL_INGEST_ENV_KEYS = [...LOCAL_AI_ENV_KEYS, ...LOCAL_FETCH_RELAY_ENV_KEYS] as const;
 const ASSIGNMENT = /^(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/;
 
 export function repoRootFromCliModule(moduleUrl = import.meta.url): string {
   return path.resolve(fileURLToPath(new URL('../..', moduleUrl)));
 }
 
-export function parseLocalAiEnv(contents: string): AiEnv {
-  const parsed: AiEnv = {};
+export function parseLocalAiEnv(contents: string): LocalIngestEnv {
+  const parsed: LocalIngestEnv = {};
   for (const rawLine of contents.split(/\r?\n/)) {
     const line = rawLine.trim();
     if (!line || line.startsWith('#')) continue;
@@ -44,13 +56,13 @@ export function parseLocalAiEnv(contents: string): AiEnv {
     if (!match) continue;
     const key = match[1];
     if (!ALLOWED.has(key)) continue;
-    parsed[key as keyof AiEnv] = unquote(match[2].trim());
+    parsed[key as keyof LocalIngestEnv] = unquote(match[2].trim());
   }
   return parsed;
 }
 
-export function applyLocalAiEnv(values: AiEnv, env: NodeJS.ProcessEnv = process.env): void {
-  for (const key of LOCAL_AI_ENV_KEYS) {
+export function applyLocalAiEnv(values: LocalIngestEnv, env: NodeJS.ProcessEnv = process.env): void {
+  for (const key of LOCAL_INGEST_ENV_KEYS) {
     const value = values[key];
     if (value === undefined) continue;
     if (env[key] !== undefined) continue;

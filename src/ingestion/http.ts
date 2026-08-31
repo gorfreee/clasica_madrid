@@ -1,3 +1,5 @@
+import { fetchRelayHosts } from './registry.ts';
+
 const USER_AGENT = 'ClasicaMadrid-ingestion/1 (+https://github.com/gorfreee/clasica_madrid)';
 const MAX_REDIRECTS = 10;
 
@@ -8,17 +10,32 @@ export class HttpError extends Error {
   }
 }
 
+export type FetchRelayTarget = {
+  requestUrl: string;
+  token: string;
+};
+
 /**
+ * Direct cookie-aware fetch, or a configured fetch relay for hosts that a
+ * source marked with `useFetchRelay`.
+ *
+ * Ordinary URLs always use the current direct transport. Relay hosts use the
+ * Worker only when URL and token are both set. Callers keep passing the
+ * official source URL; this function never rewrites it into a workers.dev
+ * address. Error statuses are never retried, and a 403 on a direct host is
+ * never sent to the relay.
+ *
  * Native fetch does not persist Set-Cookie across redirects. www.march.es
- * answers a same-URL 307 with a session cookie; following without it yields
- * 403 (GitHub Actions) or a closed connection (some networks). This client
- * follows redirects itself and sends cookies only back to the origin that
- * set them. Error statuses are never retried.
+ * answers a same-URL 307 with a session cookie; the direct client follows
+ * redirects itself and sends cookies only back to the origin that set them.
+ * The relay Worker does the same cookie replay for any public HTTPS target.
  */
-export async function getText(url: string, timeoutMs = 30_000): Promise<string> {
+export async function getText(url: string, timeoutMs = 30_000, env: NodeJS.ProcessEnv = process.env): Promise<string> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
+    const relay = resolveFetchRelay(url, env);
+    if (relay) return await readViaRelay(url, relay, controller.signal);
     return await readFollowingRedirects(url, controller.signal);
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
@@ -28,6 +45,52 @@ export async function getText(url: string, timeoutMs = 30_000): Promise<string> 
   } finally {
     clearTimeout(timer);
   }
+}
+
+/**
+ * `undefined` → direct transport. Throws if this host uses the relay but the
+ * relay is only half-configured or not https.
+ */
+export function resolveFetchRelay(url: string, env: NodeJS.ProcessEnv = process.env): FetchRelayTarget | undefined {
+  const parsed = parseHttpUrl(url);
+  if (!parsed || !isFetchRelayHost(parsed.hostname)) return undefined;
+  const relayUrl = env.INGEST_FETCH_RELAY_URL?.trim() ?? '';
+  const token = env.INGEST_FETCH_RELAY_TOKEN?.trim() ?? '';
+  if (!relayUrl && !token) return undefined;
+  if (!relayUrl || !token) {
+    throw new Error(`relay de fetch incompleto al pedir ${url}`);
+  }
+  const relay = parseHttpUrl(relayUrl);
+  if (!relay || relay.protocol !== 'https:') {
+    throw new Error(`relay de fetch inválido al pedir ${url}`);
+  }
+  relay.searchParams.set('url', url);
+  return { requestUrl: relay.href, token };
+}
+
+export function isFetchRelayHost(hostname: string): boolean {
+  const host = hostname.toLowerCase().replace(/\.$/, '');
+  return fetchRelayHosts().includes(host);
+}
+
+async function readViaRelay(url: string, relay: FetchRelayTarget, signal: AbortSignal): Promise<string> {
+  const response = await fetch(relay.requestUrl, {
+    signal,
+    redirect: 'manual',
+    headers: {
+      accept: 'text/html,application/json;q=0.9,*/*;q=0.8',
+      authorization: `Bearer ${relay.token}`,
+    },
+  });
+  if (response.status >= 300 && response.status < 400) {
+    await response.body?.cancel();
+    throw new HttpError(response.status, url, response.headers.get('retry-after'));
+  }
+  if (!response.ok) {
+    await response.body?.cancel();
+    throw new HttpError(response.status, url, response.headers.get('retry-after'));
+  }
+  return await response.text();
 }
 
 async function readFollowingRedirects(url: string, signal: AbortSignal): Promise<string> {
@@ -62,13 +125,17 @@ async function readFollowingRedirects(url: string, signal: AbortSignal): Promise
   throw new Error(`demasiadas redirecciones al pedir ${url}`);
 }
 
-function requestOrigin(url: string): string | undefined {
+function parseHttpUrl(url: string): URL | undefined {
   try {
     const parsed = new URL(url);
-    return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? parsed.origin : undefined;
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? parsed : undefined;
   } catch {
     return undefined;
   }
+}
+
+function requestOrigin(url: string): string | undefined {
+  return parseHttpUrl(url)?.origin;
 }
 
 function resolveRedirect(current: string, location: string): string | undefined {

@@ -88,7 +88,7 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
     urls: ['https://www.march.es/es/madrid/conciertos'],
     adapterId: fundacionJuanMarchAdapter.id,
     catalogSourceId: 'src_fundacion_juan_march',
-    skipDefaultSync: true,
+    useFetchRelay: true,
     seedSource: {
       schemaVersion: 1,
       id: 'src_fundacion_juan_march',
@@ -102,6 +102,23 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
 
 export function listSourceDefinitions(): SourceDefinition[] {
   return SOURCE_REGISTRY;
+}
+
+/** Listing hostnames of sources with `useFetchRelay`. The Worker has no copy of this list. */
+export function fetchRelayHosts(sources: readonly SourceDefinition[] = SOURCE_REGISTRY): string[] {
+  const hosts = new Set<string>();
+  for (const source of sources) {
+    if (!source.useFetchRelay) continue;
+    for (const url of source.urls) {
+      try {
+        const host = new URL(url).hostname.toLowerCase().replace(/\.$/, '');
+        if (host) hosts.add(host);
+      } catch {
+        // ignore unparseable listing URLs; extraction will fail that source
+      }
+    }
+  }
+  return [...hosts].sort();
 }
 
 export function getSourceDefinition(id: string): SourceDefinition {

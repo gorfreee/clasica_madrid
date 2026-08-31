@@ -50,6 +50,11 @@ describe('workflow de ingestión: artifact de observabilidad', () => {
     expect(config).toContain('Publish ejecuta siempre el código de main');
     expect(config).toContain('code_sha=$(git rev-parse HEAD)');
     expect(ingest).toContain('GITHUB_SHA: ${{ steps.config.outputs.code_sha }}');
+    expect(ingest).toContain('INGEST_FETCH_RELAY_URL: ${{ vars.INGEST_FETCH_RELAY_URL }}');
+    expect(ingest).toContain('INGEST_FETCH_RELAY_TOKEN: ${{ secrets.INGEST_FETCH_RELAY_TOKEN }}');
+    expect(ingest).not.toContain('secrets.INGEST_FETCH_RELAY_URL');
+    expect(ingest).not.toContain('workers.dev');
+    expect(yaml).not.toMatch(/INGEST_FETCH_RELAY_TOKEN:\s*['\"]?[A-Za-z0-9_-]{8,}/);
   });
 });
 

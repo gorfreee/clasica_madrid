@@ -1,0 +1,148 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+import { handleRelayRequest } from '../infra/fetch-relay/worker.js';
+
+const listing = 'https://www.march.es/es/madrid/conciertos';
+const detail = 'https://www.march.es/es/madrid/concierto/andromeda-perseo';
+const ordinary = 'https://example.org/calendar';
+const token = 'relay-secret-token-xyz';
+const env = { INGEST_FETCH_RELAY_TOKEN: token };
+const workerSource = () =>
+  readFile(path.join(import.meta.dirname, '..', 'infra', 'fetch-relay', 'worker.js'), 'utf8');
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
+
+describe('Cloudflare fetch-relay worker', () => {
+  it('has no source or host allowlist of its own', async () => {
+    const source = await workerSource();
+    expect(source).not.toContain('www.march.es');
+    expect(source).not.toContain('ALLOWED_HOST');
+    expect(source).not.toContain('FETCH_RELAY_HOSTS');
+    expect(source).not.toContain('fundacion-juan-march');
+    expect(source).not.toMatch(/\/es\/madrid\/concierto/);
+  });
+
+  it('rejects non-GET and missing/wrong tokens without fetching', async () => {
+    const fetch = vi.fn();
+    vi.stubGlobal('fetch', fetch);
+    expect((await handleRelayRequest(request(listing, { method: 'POST' }), env)).status).toBe(405);
+    expect((await handleRelayRequest(request(listing, { auth: false }), env)).status).toBe(401);
+    expect((await handleRelayRequest(request(listing), { INGEST_FETCH_RELAY_TOKEN: '' })).status).toBe(401);
+    expect((await handleRelayRequest(request(listing, { token: 'nope-nope' }), env)).status).toBe(401);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('rejects HTTP, IP literals, localhost, credentials and non-default ports without fetching', async () => {
+    const fetch = vi.fn();
+    vi.stubGlobal('fetch', fetch);
+    const denied = [
+      'http://www.march.es/es/madrid/conciertos',
+      'https://1.2.3.4/path',
+      'https://127.0.0.1/',
+      'https://[::1]/',
+      'https://localhost/',
+      'https://foo.localhost/bar',
+      'https://intranet.local/',
+      'https://user:pass@example.org/secret',
+      'https://example.org:8443/calendar',
+    ];
+    for (const target of denied) {
+      const response = await handleRelayRequest(request(target), env);
+      const body = await response.text();
+      expect(response.status, target).toBe(403);
+      expect(body).toBe('forbidden target');
+      expect(body).not.toContain(token);
+    }
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('fetches any public https target when authenticated, without changing the Worker', async () => {
+    const fetch = vi.fn(async (url: string) => {
+      expect(url).toBe(ordinary);
+      return new Response('<html>ok</html>', { status: 200 });
+    });
+    vi.stubGlobal('fetch', fetch);
+    const response = await handleRelayRequest(request(ordinary), env);
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe('<html>ok</html>');
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('replays a same-origin Set-Cookie 307 and returns HTML without cookies or secrets', async () => {
+    const fetch = vi.fn(async (url: string, init?: RequestInit) => {
+      expect(url).toBe(listing);
+      const cookie = header(init, 'cookie');
+      if (!cookie) {
+        return new Response('challenge', {
+          status: 307,
+          headers: {
+            location: listing,
+            'set-cookie': 'nWOwNHMosvrVGWEEUloHNVicyOulM7EB=abc123; path=/; Secure; SameSite=None',
+          },
+        });
+      }
+      expect(cookie).toBe('nWOwNHMosvrVGWEEUloHNVicyOulM7EB=abc123');
+      return new Response('<h1>Conciertos en Madrid</h1><a href="/es/madrid/concierto/andromeda-perseo">', {
+        status: 200,
+        headers: { 'set-cookie': 'nWOwNHMosvrVGWEEUloHNVicyOulM7EB=abc123; path=/; Secure' },
+      });
+    });
+    vi.stubGlobal('fetch', fetch);
+    const response = await handleRelayRequest(request(listing), env);
+    expect(response.status).toBe(200);
+    expect(await response.text()).toContain('Conciertos en Madrid');
+    expect(response.headers.get('set-cookie')).toBeNull();
+    expect(response.headers.get('authorization')).toBeNull();
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('allows a concert ficha and rejects a cross-origin redirect', async () => {
+    const ok = vi.fn(async (url: string) => {
+      expect(url).toBe(detail);
+      return new Response('<link rel="canonical" href="https://www.march.es/es/madrid/concierto/andromeda-perseo">', {
+        status: 200,
+      });
+    });
+    vi.stubGlobal('fetch', ok);
+    const ficha = await handleRelayRequest(request(detail), env);
+    expect(ficha.status).toBe(200);
+    expect(await ficha.text()).toContain('canonical');
+
+    const bounced = vi.fn(async () =>
+      new Response('', { status: 302, headers: { location: 'https://evil.example/steal' } }),
+    );
+    vi.stubGlobal('fetch', bounced);
+    const denied = await handleRelayRequest(request(listing), env);
+    expect(denied.status).toBe(502);
+    expect(await denied.text()).toBe('redirect not allowed');
+    expect(denied.headers.get('set-cookie')).toBeNull();
+  });
+
+  it('surfaces origin 403/500 and never puts the token in the body', async () => {
+    for (const status of [403, 500]) {
+      vi.stubGlobal('fetch', vi.fn(async () => new Response(`token=${token}`, { status })));
+      const response = await handleRelayRequest(request(listing), env);
+      expect(response.status).toBe(status);
+      const body = await response.text();
+      expect(body).toBe(`origin HTTP ${status}`);
+      expect(body).not.toContain(token);
+    }
+  });
+});
+
+function request(target: string, options: { method?: string; token?: string; auth?: boolean } = {}): Request {
+  const url = `https://clasica-madrid-fetch-relay.example.workers.dev/?url=${encodeURIComponent(target)}`;
+  const headers: Record<string, string> = {};
+  if (options.auth !== false) headers.authorization = `Bearer ${options.token ?? token}`;
+  return new Request(url, { method: options.method ?? 'GET', headers });
+}
+
+function header(init: RequestInit | undefined, name: string): string | undefined {
+  const value = init?.headers;
+  if (!value || value instanceof Headers || Array.isArray(value)) return undefined;
+  return (value as Record<string, string>)[name];
+}

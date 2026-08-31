@@ -3,7 +3,7 @@ import { decodeHtmlEntities, stripTags } from '../html.ts';
 import { emptyObservedLists } from '../observed.ts';
 import type { RawEvent, SourceAdapter } from '../types.ts';
 
-/** Discovery only: the listing's calendar links expose just the FIRST performance. HTTP access to www.march.es depends on getText honoring the nginx Set-Cookie redirect. */
+/** Discovery only: the listing's calendar links expose just the FIRST performance. Acquisition of www.march.es is getText's job, not this adapter's. */
 export const fundacionJuanMarchAdapter: SourceAdapter = {
   id: 'fundacion-juan-march',
   requiresDetailSchedule: true,

@@ -12,7 +12,7 @@ import {
 } from '../src/cli/load-local-env.ts';
 
 describe('parseLocalAiEnv', () => {
-  it('lee sólo las claves de IA y ignora el resto', () => {
+  it('lee las claves de IA y del fetch relay, e ignora el resto', () => {
     const parsed = parseLocalAiEnv(`
 # comment
 AI_PROVIDER=gemini
@@ -21,6 +21,8 @@ GEMINI_MODEL=gemini-3.1-flash-lite
 GEMINI_MODELS=gemini-3.1-flash-lite,gemini-2.5-flash
 GEMINI_RPM=12
 GEMINI_MODEL_RPM=gemini-3.1-flash-lite:12
+INGEST_FETCH_RELAY_URL=https://relay.example.test/
+INGEST_FETCH_RELAY_TOKEN="relay-secret-token-xyz"
 PATH=/should/not/be/read
 export OPENAI_MODEL=gpt-4o-mini
 `);
@@ -31,6 +33,8 @@ export OPENAI_MODEL=gpt-4o-mini
       GEMINI_MODELS: 'gemini-3.1-flash-lite,gemini-2.5-flash',
       GEMINI_RPM: '12',
       GEMINI_MODEL_RPM: 'gemini-3.1-flash-lite:12',
+      INGEST_FETCH_RELAY_URL: 'https://relay.example.test/',
+      INGEST_FETCH_RELAY_TOKEN: 'relay-secret-token-xyz',
       OPENAI_MODEL: 'gpt-4o-mini',
     });
     expect(parsed).not.toHaveProperty('PATH');
