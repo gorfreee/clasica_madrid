@@ -66,7 +66,9 @@ export { normalizeUrl } from './urls.ts';
 export {
   parseDiscoveryBatch,
   discoveryToRawEvents,
+  discoveryBatchJsonSchema,
   DiscoveryBatchError,
+  SHARED_SOURCE_HOSTS,
 } from './discovery.ts';
 export type { DiscoveryBatch, DiscoveryObservation } from './discovery.ts';
 export {

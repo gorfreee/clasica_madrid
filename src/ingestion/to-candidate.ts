@@ -164,10 +164,11 @@ function emptyScheduleSkipReason(event: NormalizedEvent, now: Date): string {
 }
 
 function unrecognizedVenueReason(event: NormalizedEvent): string {
-  if (event.proposedVenue && !isSufficientProposedVenue(event.proposedVenue)) {
+  if (!event.proposedVenue) return 'lugar no reconocido';
+  if (!isSufficientProposedVenue(event.proposedVenue)) {
     return 'lugar nuevo con datos insuficientes';
   }
-  return 'lugar no reconocido';
+  return 'lugar ambiguo';
 }
 
 function venueHint(event: NormalizedEvent) {

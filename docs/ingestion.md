@@ -71,7 +71,7 @@ El harvesting cubre fuentes del registry. Discovery cubre lo que todavía no tie
 
 Hay dos piezas, y sólo esas:
 
-1. **Contexto.** `npm run ingest:discovery-context` vuelca un `DiscoveryContext` JSON compacto: ventana (por defecto la misma de Ingestion v3: hoy en Europe/Madrid → +120 días), sources harvesteadas y canónicas ya conocidas, venues, fingerprints de eventos cuya representación intersecta la ventana, un resumen editorial estable y reglas breves de evidencia. Sirve para que el agente evite rebuscar Teatro Real / Auditorio / March y reconozca un redescubrimiento. No es la Classification Policy ejecutable ni un volcado del catálogo.
+1. **Contexto.** `npm run ingest:discovery-context` vuelca un `DiscoveryContext` JSON compacto: ventana (por defecto la misma de Ingestion v3: hoy en Europe/Madrid → +120 días), sources harvesteadas y canónicas ya conocidas, venues, fingerprints de eventos cuya representación intersecta la ventana, un resumen editorial estable, reglas breves de evidencia y el contrato de output (`DiscoveryBatch` schemaVersion 1, derivado del schema ejecutable). El alcance geográfico del resumen es el municipio de Madrid, con `nearby` sólo para municipios muy próximos; no cubre toda la Comunidad de Madrid. Sirve para que el agente evite rebuscar Teatro Real / Auditorio / March y reconozca un redescubrimiento. No es la Classification Policy ejecutable ni un volcado del catálogo.
 2. **Import.** El agente escribe un `DiscoveryBatch` de **hechos observados** (título, fechas, URL que respalda el evento, venue, intérpretes/obras si la fuente los declara). No entrega `eligibility`, `kind`, `formats`, `eras`, slugs ni Candidates canónicos. `npm run ingest:discovery` lo pasa al pipeline común, que clasifica y publica exactamente como en harvesting.
 
 El `DiscoveryContext` es input del agente. El `DiscoveryBatch` es output del agente, no una cola de producción. Forma conceptual:
@@ -88,7 +88,8 @@ npm run ingest:discovery-context → DiscoveryContext JSON
 - cada observación necesita una URL http(s) que respalde los hechos; sin URL no se publica;
 - `foundVia` (p. ej. una URL de búsqueda) es trazabilidad interna: no es source canónica ni `primarySource`;
 - una source descubierta no entra en el registry ni recibe adapter; si el Candidate se publica y esa source no está en `data/sources`, el batch existente la incorpora;
-- un venue nuevo sólo se crea con name + municipality + area coherentes; si el nombre coincide exactamente con un lugar del catálogo, se reutiliza; no hay fuzzy matching;
+- en un host compartido (red social, plataforma de eventos) la identidad de la source es el perfil/`homepage`, no el origin de la plataforma; sin perfil identificable no se importa;
+- un venue nuevo sólo se crea con name + municipality + area coherentes; se reutiliza un lugar del catálogo con el mismo nombre exacto y municipio compatible, y una dirección explícita sólo para desambiguar homónimos; si varios encajan, no se publica; no hay fuzzy matching;
 - discovery no evalúa `possiblyMissing`: una observación puntual no demuestra la cobertura de una source.
 
 `ingest:promote` sigue siendo el import manual de Candidates ya interpretados. Discovery no lo usa: el agente no debe saltarse classification.

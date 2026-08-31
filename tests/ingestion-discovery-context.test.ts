@@ -10,6 +10,7 @@ import {
   serializeDiscoveryContext,
   type DiscoveryContext,
 } from '../src/ingestion/discovery-context.ts';
+import { discoveryBatchJsonSchema, parseDiscoveryBatch, SHARED_SOURCE_HOSTS } from '../src/ingestion/discovery.ts';
 import { SOURCE_REGISTRY } from '../src/ingestion/registry.ts';
 import { loadCatalogFromDir } from '../src/lib/repository/load.ts';
 import { makeCatalog, makeEvent, makeSource, makeVenue, TEST_NOW, TEST_WINDOW } from './helpers.ts';
@@ -265,6 +266,59 @@ describe('DiscoveryContext', () => {
     expect(scope).not.toMatch(/Exclusiones decididas/);
     expect(scope).not.toMatch(/DJ \/ electrónica/);
     expect(scope.length).toBeLessThan(policy.length);
+  });
+
+  it('no presenta Clásica Madrid como agenda de toda la Comunidad', () => {
+    const context = contextFrom(emptyCatalog());
+    expect(context.editorialScope.geography.areas).toEqual(['madrid', 'nearby']);
+    expect(context.editorialScope.geography.focus).toMatch(/Municipio de Madrid/);
+    expect(context.editorialScope.geography.focus).toMatch(/nearby/);
+    expect(context.editorialScope.geography.focus).toMatch(/No es una agenda de toda la Comunidad de Madrid/);
+    expect(context.editorialScope.geography.focus.startsWith('Comunidad de Madrid')).toBe(false);
+  });
+
+  it('incluye un contrato de output derivado del schema de DiscoveryBatch', () => {
+    const context = contextFrom(emptyCatalog());
+    const eventSchema = (
+      context.output.jsonSchema as {
+        properties: {
+          observations: { items: { properties: { event: { required?: string[] }; source: unknown } } };
+        };
+      }
+    ).properties.observations.items.properties.event;
+
+    expect(context.output.produces).toBe('DiscoveryBatch');
+    expect(context.output.schemaVersion).toBe(1);
+    expect(context.output.jsonSchema).toEqual(discoveryBatchJsonSchema());
+    expect(context.output.sharedSourceHosts).toEqual([...SHARED_SOURCE_HOSTS]);
+    expect(context.output.requiredObservedArrays).toEqual(['performers', 'composers', 'works']);
+    expect(eventSchema.required).toEqual(expect.arrayContaining(['performers', 'composers', 'works', 'occurrences']));
+    expect(context.output.forbiddenFields).toEqual(
+      expect.arrayContaining(['eligibility', 'kind', 'eras', 'formats', 'slug', 'id']),
+    );
+    expect(JSON.stringify(context.output.jsonSchema)).not.toContain('eligibility');
+    expect(JSON.stringify(context.output).length).toBeLessThan(12_000);
+
+    const sample = parseDiscoveryBatch({
+      schemaVersion: 1,
+      observations: [
+        {
+          source: {
+            url: 'https://www.parroquia.example/conciertos/bach',
+            name: 'Parroquia de San José',
+            homepage: 'https://www.parroquia.example/',
+          },
+          event: {
+            title: 'Misa en Si menor',
+            occurrences: [{ raw: '2026-10-12 19:30', date: '2026-10-12', time: '19:30' }],
+            performers: [],
+            composers: [{ name: 'Johann Sebastian Bach' }],
+            works: [{ title: 'Misa en Si menor', composerName: 'Johann Sebastian Bach' }],
+          },
+        },
+      ],
+    });
+    expect(sample.schemaVersion).toBe(context.output.schemaVersion);
   });
 });
 
