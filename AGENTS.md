@@ -12,7 +12,7 @@ Canonical event data lives in `data/` and is validated at build/CI time. An empt
 |---|---|---|
 | Astro site | `npm run dev` | Serves on `http://localhost:4321`. This is the entire product. |
 
-Scripts live in `package.json`. Use those names rather than duplicating flags here. The usual loop is `dev`, `validate`, `test`, `check` (Astro/TS diagnostics; there is no ESLint/Prettier), `build` (static output to `dist/`), and `preview`. Harvesting is `ingest:sync` / `ingest:source`. `ingest:promote` is the legacy candidate-file path.
+Scripts live in `package.json`. Use those names rather than duplicating flags here. The usual loop is `dev`, `validate`, `test`, `test:e2e` (Playwright smokes against `dist/`; needs a prior `build`), `check` (Astro/TS diagnostics; there is no ESLint/Prettier), `build` (static output to `dist/`), and `preview`. Harvesting is `ingest:sync` / `ingest:source`. `ingest:promote` is the legacy candidate-file path.
 
 ### Documentation
 
@@ -40,4 +40,5 @@ Scripts live in `package.json`. Use those names rather than duplicating flags he
 - Once an event or venue is published, its `slug` is permanent. Do not rename published slugs. Aliases and historical redirects are not implemented.
 - Every published venue has a `/lugares/{slug}` page, including venues with no upcoming events. The venues index lists only venues with upcoming events.
 - `loadPublishedCatalog()` memoizes the parsed catalog for the process lifetime. Tests that need another tree must call `loadCatalogFromDir`. Restart `astro dev` after editing `data/` if pages look stale.
-- Direct pushes to `main` are allowed. Site CI must stay a single simple workflow: validate, test, typecheck, build. Do not add required pull requests or required status checks. A scheduled ingestion workflow and auto-merge of data PRs are part of the v3 *target*, not of the current implementation.
+- Direct pushes to `main` are allowed. Site CI must stay a single simple workflow: validate, test, typecheck, build, e2e smoke. Do not add required pull requests or required status checks. A scheduled ingestion workflow and auto-merge of data PRs are part of the v3 *target*, not of the current implementation.
+- Agenda client filters depend on the `data-*` / `#agenda-filter-data` contract documented in `src/lib/presentation/agenda-client.ts`. Do not remove those attributes while that script exists; `e2e/` smokes guard the behaviour.

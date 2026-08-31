@@ -8,6 +8,7 @@ type Props = {
 const { item } = Astro.props;
 const timeLabel = item.time ?? 'Hora no indicada';
 ---
+{/* Contrato UI interno: [data-occurrence-id] lo usa agenda-client.ts. */}
 
 <article class="agenda-item" data-occurrence-id={item.occurrenceId}>
   <p class="agenda-item__when">
