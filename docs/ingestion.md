@@ -26,7 +26,7 @@ registry → extract → hydrate → normalize → identity → classify → pub
 
 - Un fallo de listing aísla esa fuente; el resto continúa.
 - Un fallo de ficha de detalle es local al evento: se conservan los hechos del listing.
-- La incorporación de March y sus límites de validación están en [validación de March](march-validation.md). Reutiliza la protección de cobertura para adapters cuyo calendario depende de las fichas.
+- La incorporación de March, el acceso HTTP y `skipDefaultSync` están en [validación de March](march-validation.md). Reutiliza la protección de cobertura para adapters cuyo calendario depende de las fichas.
 - En Zarzuela, las fichas son necesarias para el calendario y la sede: una cobertura severamente incompleta también marca fallo de source (etapa `hydration`), bloqueando auto-merge. Cualquier ficha necesaria fallida/no solicitada por circuito suprime las desapariciones de esa source; el report y el summary explicitan que no son evaluables. Las fechas del listing sólo sirven como hint para evitar hidratar obras enteramente fuera de ventana, nunca para generar funciones. Véase [validación del hardening de Zarzuela](zarzuela-hardening-validation.md).
 - Clasificación: reglas deterministas y knowledge. El fallback de IA **sólo** decide eligibility si el determinista deja `uncertain`; un `include` o `exclude` determinista no se reabre. Si el resultado final es `include` y `eras`/`formats` siguen sin resolver, una segunda llamada puede completar esa taxonomía sin cambiar eligibility. Un fallo de taxonomía conserva el include.
 - Identidad (sin fuzzy ni IA): `externalId` de la misma source → URL equivalente → alias explícito → coincidencia fuerte única (fecha, venue, título normalizado). Varios eventos publicados que comparten esa URL o `externalId` se tratan como una observación 1→N: se reparte el calendario si las fechas no solapan; si no hay asignación inequívoca se marcan todos como vistos sin escribir occurrences no asignables. `ambiguous` queda para colisiones reales (p. ej. coincidencia fuerte hacia eventos distintos, o fechas solapadas): no se crea ni se modifica.
@@ -57,7 +57,7 @@ npm run ingest:source -- auditorio-nacional --from 2026-09-01 --to 2027-06-01
 
 `--dry-run` valida y resume sin escribir el catálogo. `--data-dir` apunta a otro árbol (por defecto `data/` o `DATA_DIR`). `--report` escribe un JSON diagnóstico por evento (incluye `window`, `health`, `autoMergeEligible` y `healthReasons`); no cambia la clasificación ni qué se publica. `--observability-dir` escribe además `run.json` y el journal `events.jsonl`. Si hay `--report` y no se indica directorio, esos ficheros van junto al report. `ingestion/reports/` está gitignorado.
 
-Sin `--from`/`--to`, la ventana es hoy en Europe/Madrid → +120 días. Si se indica uno, hay que indicar ambos. Un rango manual no tiene tope de 120 días. Sin `--sources`, `ingest:sync` ejecuta todas las fuentes del registry. `ingest:source` es el atajo de una sola fuente y comparte el mismo `runIngest`.
+Sin `--from`/`--to`, la ventana es hoy en Europe/Madrid → +120 días. Si se indica uno, hay que indicar ambos. Un rango manual no tiene tope de 120 días. Sin `--sources`, `ingest:sync` ejecuta las fuentes del registry que no marcan `skipDefaultSync`. `ingest:source` y `--sources` explícitos siguen ejecutando cualquier fuente del registry, incluida una marcada así, y un fallo sigue siendo un fallo.
 
 CI no llama a un LLM. Tests inyectan fakes.
 
@@ -89,7 +89,7 @@ En **Actions → Production ingestion → Run workflow**:
 - `auto_merge`: opt-in adicional para un publish manual;
 - `ai_max_requests`: presupuesto HTTP opcional para Gemini.
 
-El dry-run nunca puede modificar `data/**` ni crear una PR. En publish, un no-op tampoco crea branch, commit ni PR. Si ya existe una PR abierta cuyo branch empieza por `automation/ingestion-`, la ejecución conserva su report pero no crea ni actualiza otra PR.
+El dry-run usa el ref seleccionado en «Run workflow» y nunca puede modificar `data/**` ni crear una PR. `schedule` y `publish` ejecutan siempre el código de `main`, de modo que una rama no fusionada no puede escribir el catálogo. En publish, un no-op tampoco crea branch, commit ni PR. Si ya existe una PR abierta cuyo branch empieza por `automation/ingestion-`, la ejecución conserva su report pero no crea ni actualiza otra PR.
 
 ### Secrets, variable y permisos
 

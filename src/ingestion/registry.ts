@@ -88,6 +88,7 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
     urls: ['https://www.march.es/es/madrid/conciertos'],
     adapterId: fundacionJuanMarchAdapter.id,
     catalogSourceId: 'src_fundacion_juan_march',
+    skipDefaultSync: true,
     seedSource: {
       schemaVersion: 1,
       id: 'src_fundacion_juan_march',
