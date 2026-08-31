@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "evt_discovery_basilicadejesusdemedinaceli_org_conciertos",
+  "id": "evt_basilicadejesusdemedinaceli_org_conciertos",
   "slug": "christian-bischof",
   "title": "Christian Bischof",
   "status": "scheduled",
@@ -9,7 +9,7 @@
   "seriesId": null,
   "occurrences": [
     {
-      "id": "occ_discovery_basilicadejesusdemedinaceli_org_conciertos_01",
+      "id": "occ_basilicadejesusdemedinaceli_org_conciertos_01",
       "date": "2026-10-03",
       "time": "12:30",
       "status": "scheduled"

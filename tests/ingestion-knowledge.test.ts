@@ -27,6 +27,8 @@ describe('composer knowledge base', () => {
     expect(matchComposer('Chaikovski')?.eras).toEqual(['romantic']);
     expect(matchComposer('Camille Saint-Saëns')?.eras).toEqual(['romantic']);
     expect(matchComposer('Manuel de Falla')?.eras).toEqual(['twentieth']);
+    expect(matchComposer('Frederic Mompou')?.eras).toEqual(['twentieth']);
+    expect(matchComposer('Mompou')?.eras).toEqual(['twentieth']);
     expect(matchComposer('Ludovico Einaudi')?.eras).toEqual(['contemporary']);
     expect(matchComposer('Bach')?.eras).toEqual(['baroque']);
     expect(matchComposer('Johann Sebastian Bach (1685-1750)')?.eras).toEqual(['baroque']);
@@ -89,6 +91,14 @@ describe('composer knowledge base', () => {
     ['Bartok', 'Béla Bartók', 'twentieth'],
     ['Lili Boulanger', 'Lili Boulanger', 'twentieth'],
     ['Pablo Sorozabal', 'Pablo Sorozábal', 'twentieth'],
+    ['Frederic Mompou', 'Frederic Mompou', 'twentieth'],
+    ['Federico Mompou', 'Frederic Mompou', 'twentieth'],
+    ['Mompou', 'Frederic Mompou', 'twentieth'],
+    ['Claudio Monteverdi', 'Claudio Monteverdi', 'baroque'],
+    ['Monteverdi', 'Claudio Monteverdi', 'baroque'],
+    ['Edvard Grieg', 'Edvard Grieg', 'romantic'],
+    ['Grieg', 'Edvard Grieg', 'romantic'],
+    ['Thomas Morley', 'Thomas Morley', 'renaissance'],
     ['Serguéi Prokófiev (1891-1953)', 'Serguéi Prokófiev', 'twentieth'],
     ['Sergei Prokofiev', 'Serguéi Prokófiev', 'twentieth'],
     ['Sergey Prokofiev', 'Serguéi Prokófiev', 'twentieth'],

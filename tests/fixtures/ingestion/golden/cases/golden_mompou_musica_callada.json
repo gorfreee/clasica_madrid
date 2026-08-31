@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_mompou_musica_callada",
+  "origin": "published-catalog",
+  "sourceId": "fundacion-piu-mosso",
+  "sourceUrl": "https://www.fundacionpiumosso.com/evento/mario-prisuelos-musica-callada-de-frederic-mompou",
+  "listingTitle": "Mario Prisuelos. Música callada de Frederic Mompou",
+  "observed": {
+    "title": "Mario Prisuelos. Música callada de Frederic Mompou",
+    "venueText": "Ateneo de Madrid",
+    "seriesText": "Ciclo Grandes Intérpretes",
+    "description": "Música callada de Frederic Mompou es una obra cumbre para piano dividida en 28 piezas agrupadas en cuatro cuadernos compuestos entre 1959 y 1967. Esta colección representa la esencia del silencio, la intimidad y la contención sonora del autor catalán.",
+    "programText": "Música callada de Frederic Mompou. El programa exacto lo desarrollaremos en breve.",
+    "performers": [
+      {
+        "name": "Mario Prisuelos",
+        "roleText": "piano"
+      }
+    ],
+    "composers": [
+      { "name": "Frederic Mompou" }
+    ],
+    "works": [
+      { "title": "Música callada", "composerName": "Frederic Mompou" }
+    ]
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": ["recital"],
+    "eras": ["twentieth"],
+    "kind": "alternative",
+    "access": "unknown"
+  },
+  "reason": "Recital de piano de repertorio académico de 1959–1967. Mompou es twentieth; contemporary no está justificado.",
+  "checkedAt": "2026-08-31"
+}

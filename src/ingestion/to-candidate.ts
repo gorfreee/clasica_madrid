@@ -10,7 +10,8 @@ import type { NormalizedEvent } from './normalize.ts';
 import type { PipelineSource } from './types.ts';
 import { isSufficientProposedVenue, matchVenue, unpublishedMatchedVenue } from './venues.ts';
 import { defaultIngestWindow, isDateInHarvestScope, type IngestWindow } from './dates.ts';
-import { resolveCatalogSource } from './registry.ts';
+import { ID_PREFIX } from '../lib/schemas/taxonomies.ts';
+import { SOURCE_REGISTRY, resolveCatalogSource } from './registry.ts';
 
 export type CandidateBuild = {
   candidate?: Candidate;
@@ -66,7 +67,7 @@ export function toCandidate(
 
   const catalogSource = resolveCatalogSource(source, catalog);
   const identity = event.externalId ?? urlPathIdentity(event.sourceUrl);
-  const eventId = uniqueId(eventIdFor(source.id, identity), usedIds);
+  const eventId = uniqueId(eventIdFor(eventIdSourceKey(source), identity), usedIds);
   usedIds.add(eventId);
   const slug = uniqueSlug(event.title, usedSlugs);
   usedSlugs.add(slug);
@@ -169,6 +170,19 @@ function unrecognizedVenueReason(event: NormalizedEvent): string {
     return 'lugar nuevo con datos insuficientes';
   }
   return 'lugar ambiguo';
+}
+
+/**
+ * Harvest IDs stay keyed by the registry id (`teatro-real` → `evt_teatro_real_…`).
+ * Discovery must not bake an operational `discovery` namespace into Event.id:
+ * use the canonical Source tail so a later adapter keeps the same identity.
+ */
+export function eventIdSourceKey(source: PipelineSource): string {
+  if (SOURCE_REGISTRY.some((item) => item.id === source.id)) return source.id;
+  if (source.catalogSourceId.startsWith(ID_PREFIX.source)) {
+    return source.catalogSourceId.slice(ID_PREFIX.source.length);
+  }
+  return source.id;
 }
 
 function venueHint(event: NormalizedEvent) {

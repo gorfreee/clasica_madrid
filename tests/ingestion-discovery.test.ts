@@ -13,7 +13,9 @@ import {
   type DiscoveryObservation,
 } from '../src/ingestion/discovery.ts';
 import { runDiscoveryIngest, runIngest } from '../src/ingestion/pipeline.ts';
-import { SOURCE_REGISTRY } from '../src/ingestion/registry.ts';
+import { SOURCE_REGISTRY, getSourceDefinition } from '../src/ingestion/registry.ts';
+import { eventIdFor } from '../src/ingestion/ids.ts';
+import { eventIdSourceKey } from '../src/ingestion/to-candidate.ts';
 import { makeEvent, makeSource, makeVenue, TEST_NOW } from './helpers.ts';
 
 const fixtures = path.join(import.meta.dirname, 'fixtures', 'ingestion', 'discovery');
@@ -191,6 +193,8 @@ describe('discovery: evento nuevo + source oficial + venue iglesia', () => {
       'https://www.parroquia-san-manuel.example/conciertos/misa-en-si-menor',
     );
     expect(candidate.event.primarySourceId).toBe(candidate.sources?.[0]?.id);
+    expect(candidate.event.id).not.toMatch(/discovery/i);
+    expect(candidate.event.id).toBe('evt_parroquia_san_manuel_example_misa_en_si_menor');
     expect(candidate.event).not.toHaveProperty('foundVia');
     expect(run.decisions[0]?.foundVia).toBe('https://www.google.com/search?q=misa+si+menor+madrid');
     expect(SOURCE_REGISTRY.some((source) => source.id === run.summary.sourcesAttempted[0])).toBe(false);
@@ -633,6 +637,69 @@ describe('discovery: possiblyMissing e idempotencia', () => {
     expect(second.summary.newEvents).toBe(0);
     expect(second.summary.updatedEvents).toBe(0);
     expect(second.summary.unchangedEvents).toBe(1);
+    expect(first.candidates[0]?.event.id).toBe('evt_parroquia_san_manuel_example_misa_en_si_menor');
+    expect(first.candidates[0]?.event.id).not.toMatch(/discovery/i);
+    const afterSecond = await loadCatalogFromDir(dir);
+    expect(afterSecond.events[0]?.id).toBe(first.candidates[0]?.event.id);
+  });
+});
+
+describe('discovery: identidad canónica sin namespace operacional', () => {
+  it('el ID es determinista entre dos ejecuciones y no contiene discovery', async () => {
+    const batch = await loadFixture('church-new.json');
+    const { run: first } = await runDiscovery(batch, emptyCatalog());
+    const { run: second } = await runDiscovery(batch, emptyCatalog());
+    const id = first.candidates[0]!.event.id;
+    expect(id).toBe('evt_parroquia_san_manuel_example_misa_en_si_menor');
+    expect(id).not.toMatch(/discovery/i);
+    expect(second.candidates[0]!.event.id).toBe(id);
+    expect(first.summary.sourcesAttempted[0]).not.toMatch(/discovery/i);
+  });
+
+  it('una source Discovery ya en catálogo conserva la identidad', async () => {
+    const catalog = emptyCatalog();
+    catalog.venues.push(
+      makeVenue({
+        id: 'ven_iglesia_de_san_jose',
+        slug: 'iglesia-de-san-jose',
+        name: 'Iglesia de San José',
+        municipality: 'Madrid',
+        area: 'madrid',
+        address: 'Calle de Alcalá, 1, Madrid',
+      }),
+    );
+    catalog.sources.push(
+      makeSource({
+        id: 'src_parroquia_example',
+        slug: 'parroquia-de-san-jose',
+        name: 'Parroquia de San José',
+        url: 'https://www.parroquia.example/',
+      }),
+    );
+    const { dir, run: first } = await runDiscovery(
+      batchOf(observation({ venue: churchVenue() })),
+      catalog,
+      { dryRun: false },
+    );
+    expect(first.summary.newEvents).toBe(1);
+    expect(first.candidates[0]?.event.primarySourceId).toBe('src_parroquia_example');
+    expect(first.candidates[0]?.sources).toBeUndefined();
+    expect(first.candidates[0]?.event.id).toBe('evt_parroquia_example_bach');
+    expect(first.candidates[0]?.event.id).not.toMatch(/discovery/i);
+
+    const after = await loadCatalogFromDir(dir);
+    const second = await runDiscoveryIngest({
+      dataDir: dir,
+      catalog: after,
+      now: TEST_NOW,
+      dryRun: false,
+      batch: batchOf(observation({ venue: churchVenue() })),
+    });
+    expect(second.summary.unchangedEvents).toBe(1);
+    expect(second.summary.newEvents).toBe(0);
+    const afterSecond = await loadCatalogFromDir(dir);
+    expect(afterSecond.events.map((event) => event.id)).toEqual(['evt_parroquia_example_bach']);
+    expect(afterSecond.events[0]?.primarySourceId).toBe('src_parroquia_example');
   });
 });
 
@@ -685,5 +752,15 @@ describe('harvesting no cambia de comportamiento', () => {
     expect(discovery.possiblyMissing).toEqual([]);
     expect(discovery.summary.sourcesAttempted.every((id) => id !== 'auditorio-nacional')).toBe(true);
     expect(await fileExists(path.join(repoDataDir, 'venues', 'ven_iglesia_de_san_jose.json'))).toBe(false);
+  });
+
+  it('harvesting sigue generando exactamente los mismos IDs que antes', () => {
+    expect(eventIdSourceKey(getSourceDefinition('teatro-real'))).toBe('teatro-real');
+    expect(eventIdSourceKey(getSourceDefinition('auditorio-nacional'))).toBe('auditorio-nacional');
+    expect(eventIdSourceKey(getSourceDefinition('madrid-datos'))).toBe('madrid-datos');
+    expect(eventIdFor('teatro-real', 'xabier-anduaga')).toBe('evt_teatro_real_xabier_anduaga');
+    expect(eventIdFor('auditorio-nacional', 'ocne-sinfonico-01-1')).toBe(
+      'evt_auditorio_nacional_ocne_sinfonico_01_1',
+    );
   });
 });

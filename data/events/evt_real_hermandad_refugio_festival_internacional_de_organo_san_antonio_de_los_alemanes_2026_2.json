@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "evt_discovery_realhermandaddelrefugio_org_festival_internacional_de_organo_san_antonio_de_los_alemanes_2026_2",
+  "id": "evt_real_hermandad_refugio_festival_internacional_de_organo_san_antonio_de_los_alemanes_2026_2",
   "slug": "festival-internacional-de-organo-san-antonio-de-los-alemanes-2026-margreeth-de-jong",
   "title": "Festival Internacional de Órgano San Antonio de los Alemanes 2026 — Margreeth de Jong",
   "status": "scheduled",
@@ -9,7 +9,7 @@
   "seriesId": null,
   "occurrences": [
     {
-      "id": "occ_discovery_realhermandaddelrefugio_org_festival_internacional_de_organo_san_antonio_de_los_alemanes_2026_2_01",
+      "id": "occ_real_hermandad_refugio_festival_internacional_de_organo_san_antonio_de_los_alemanes_2026_2_01",
       "date": "2026-10-02",
       "time": "20:00",
       "status": "scheduled"

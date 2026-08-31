@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "evt_discovery_casamerica_es_xxviii_festival_internacional_coma26_de_musica_contemporanea",
+  "id": "evt_casamerica_es_xxviii_festival_internacional_coma26_de_musica_contemporanea",
   "slug": "duo-arcadia-xxviii-festival-internacional-coma-26",
   "title": "Dúo Arcadia — XXVIII Festival Internacional COMA'26",
   "status": "scheduled",
@@ -9,7 +9,7 @@
   "seriesId": null,
   "occurrences": [
     {
-      "id": "occ_discovery_casamerica_es_xxviii_festival_internacional_coma26_de_musica_contemporanea_01",
+      "id": "occ_casamerica_es_xxviii_festival_internacional_coma26_de_musica_contemporanea_01",
       "date": "2026-10-09",
       "time": "19:00",
       "status": "scheduled"

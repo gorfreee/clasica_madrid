@@ -244,6 +244,9 @@ describe('DiscoveryContext', () => {
     expect(context.venues.length).toBeGreaterThan(0);
     expect(context.editorialScope.longTail).toContain('iglesias/parroquias');
     expect(context.evidenceInstructions.some((line) => line.includes('foundVia'))).toBe(true);
+    expect(
+      context.evidenceInstructions.some((line) => /programa, compositores u obras/i.test(line)),
+    ).toBe(true);
     expect(parseDiscoveryContext(context).coveredEvents).toEqual([]);
   });
 

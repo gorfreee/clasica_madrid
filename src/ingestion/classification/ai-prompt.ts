@@ -1,7 +1,7 @@
 import type { ObservedFacts } from '../observed.ts';
 
-export const AI_CLASSIFIER_PROMPT_VERSION = 5 as const;
-export const AI_TAXONOMY_PROMPT_VERSION = 1 as const;
+export const AI_CLASSIFIER_PROMPT_VERSION = 6 as const;
+export const AI_TAXONOMY_PROMPT_VERSION = 2 as const;
 
 export function buildAiClassifierUserMessage(observed: ObservedFacts): string {
   return [
@@ -49,6 +49,7 @@ Eventos mixtos (contenido clásico + no clásico):
 - include si la música clásica es claramente principal, o si hay un bloque clásico sustancial, autónomo e identificable y el evento se presenta como concierto clásico o sinfónico (p. ej. primera parte independiente de repertorio clásico y segunda parte popular/regional);
 - si una identidad clásica y una identidad expresamente excluida (p. ej. flamenco) son genuinamente coprincipales: NUNCA exclude automático por coprincipalidad. include sólo si los hechos observados demuestran un bloque clásico sustancial, autónomo e identificable. Si no lo demuestran → uncertain, no include;
 - exclude SOLO cuando lo clásico es principalmente acompañamiento, arreglo, ornamentación o formato instrumental de una identidad predominantemente pop, rock, canción popular, jazz, flamenco, música de cine, DJ/electrónica o crossover (p. ej. Fito Páez con cuerdas; ABBA/Queen/Beatles con orquesta; Hans Zimmer/Morricone; Pastora Soler; musical de Broadway con orquesta; concierto cuya identidad principal sea jazz; flamenco donde lo clásico es accesorio).
+- un compositor clásico aislado (p. ej. un arreglo de Saint-Saëns) NO convierte en include un programa predominantemente popular; uncertain u exclude según la identidad principal. Un programa mixto con varios autores clásicos listados como bloque autónomo sí puede ser include.
 
 Ciclos y festivales: la ausencia de programa obra-por-obra NO obliga a uncertain. Puede haber evidencia suficiente para include si los hechos observados muestran que es un concierto real y (a) pertenece a un festival o ciclo explícitamente de música clásica, o (b) lo interpreta una formación clásica dentro de una serie cuya identidad clásica está suficientemente demostrada, o (c) la propia ficha declara de forma explícita y fiable que el evento es un concierto de música clásica (p. ej. «Concierto de música clásica española»). Eso NO es «source conocida → include» ni «venue clásico → include» ni «título ambiguo → include»: la decisión es por evento. Un mismo ciclo clásico puede contener talleres, jazz, pop u otras actividades paralelas que se excluyen individualmente.
 
@@ -68,7 +69,7 @@ Taxonomías cerradas:
 - eras: early, renaissance, baroque, classical, romantic, twentieth, contemporary
 - kind: established | alternative (solo si eligibility=include; established = circuito profesional/estable; si no hay evidencia, alternative)
 
-eras: si eligibility=include, intenta rellenarlas en la misma respuesta. Derívalas de (1) obras observadas, (2) compositores observados, (3) programText cuando nombra explícitamente compositores u obras. Puedes usar conocimiento musical general sobre esos nombres. Ejemplos: Bach/Händel → baroque; Mozart/Haydn → classical; Beethoven → classical y/o romantic según la obra; Brahms/Mahler → romantic; Falla → twentieth; compositor vivo o encargo contemporáneo → contemporary. Un programa mixto puede tener varias eras. eras=[] sólo si el contenido no permite una estimación razonable. No deduzcas época por ensemble, ciclo o venue. No conviertas eras vacías en exclude.
+eras: si eligibility=include, intenta rellenarlas en la misma respuesta. Derívalas de (1) obras observadas, (2) compositores observados, (3) programText cuando nombra explícitamente compositores u obras. Puedes usar conocimiento musical general sobre esos nombres. Ejemplos: Bach/Händel → baroque; Mozart/Haydn → classical; Beethoven → classical y/o romantic según la obra; Brahms/Mahler → romantic; Falla/Mompou/Satie → twentieth; compositor vivo o encargo contemporáneo (~después de 1970) → contemporary. Una obra académica de ~1900–1970 (p. ej. Música callada, 1959–1967) es twentieth, no contemporary: no añadas contemporary porque el lenguaje sea «moderno», «intimista» o «del siglo XX». Un programa mixto puede tener varias eras. eras=[] sólo si el contenido no permite una estimación razonable. No deduzcas época por ensemble, ciclo o venue. No conviertas eras vacías en exclude.
 
 Devuelve ÚNICAMENTE un objeto JSON con esta forma:
 {
@@ -97,7 +98,8 @@ Taxonomías cerradas:
 
 Reglas:
 - no inventes performers, composers, works, fechas, venue ni repertorio ausente de los hechos;
-- sí puedes usar conocimiento musical general para interpretar nombres ya observados (Bach → baroque, Brahms/Mahler → romantic, etc.);
+- sí puedes usar conocimiento musical general para interpretar nombres ya observados (Bach → baroque, Brahms/Mahler → romantic, Falla/Mompou → twentieth, compositor vivo o post-~1970 → contemporary);
+- una obra académica ~1900–1970 es twentieth, no contemporary;
 - formats y eras vacíos son preferibles a adivinar;
 - no deduzcas época por ensemble, ciclo o venue;
 - rationale breve; no repitas evidence.

@@ -220,7 +220,11 @@ function resolveDiscoverySource(
   const cached = cache.get(cacheKey);
   if (cached) return cached;
 
-  const existing = matchExistingSource(homepage, catalog);
+  /**
+   * Pipeline ids are host-derived, not `discovery-*`. Event.id uses the
+   * canonical Source tail; a later adapter must not inherit an operational namespace.
+   */
+  const existing = matchExistingSource(homepage, catalog, usedPipelineIds);
   if (existing) {
     cache.set(cacheKey, existing);
     usedPipelineIds.add(existing.id);
@@ -234,7 +238,7 @@ function resolveDiscoverySource(
   usedSourceIds.add(catalogSourceId);
   const slug = uniqueSlug(input.name, usedSourceSlugs);
   usedSourceSlugs.add(slug);
-  const pipelineId = uniqueSlug(`discovery-${toSlug(hostTail(homepage))}`, usedPipelineIds);
+  const pipelineId = uniqueSlug(toSlug(hostTail(homepage)), usedPipelineIds);
   usedPipelineIds.add(pipelineId);
 
   const seedSource: Source = {
@@ -255,7 +259,11 @@ function resolveDiscoverySource(
   return created;
 }
 
-function matchExistingSource(homepage: string, catalog: Catalog): PipelineSource | undefined {
+function matchExistingSource(
+  homepage: string,
+  catalog: Catalog,
+  usedPipelineIds: Set<string>,
+): PipelineSource | undefined {
   const catalogHit = uniqueMatch(
     catalog.sources.filter((source) => urlsEquivalent(source.url, homepage)),
   );
@@ -263,7 +271,7 @@ function matchExistingSource(homepage: string, catalog: Catalog): PipelineSource
     const registry = SOURCE_REGISTRY.find((item) => item.catalogSourceId === catalogHit.id);
     if (registry) return registry;
     return {
-      id: discoveryPipelineId(homepage),
+      id: uniqueSlug(toSlug(hostTail(homepage)), usedPipelineIds),
       name: catalogHit.name,
       catalogSourceId: catalogHit.id,
       seedSource: catalogHit,
@@ -278,10 +286,6 @@ function matchExistingSource(homepage: string, catalog: Catalog): PipelineSource
 
 function uniqueMatch<T>(items: T[]): T | undefined {
   return items.length === 1 ? items[0] : undefined;
-}
-
-function discoveryPipelineId(homepage: string): string {
-  return uniqueSlug(`discovery-${toSlug(hostTail(homepage))}`, new Set());
 }
 
 function hostTail(url: string): string {

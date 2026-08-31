@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "evt_discovery_fundacionpiumosso_com_mario_prisuelos_musica_callada_de_frederic_mompou",
+  "id": "evt_fundacionpiumosso_com_mario_prisuelos_musica_callada_de_frederic_mompou",
   "slug": "mario-prisuelos-musica-callada-de-frederic-mompou",
   "title": "Mario Prisuelos. Música callada de Frederic Mompou",
   "status": "scheduled",
@@ -9,7 +9,7 @@
   "seriesId": null,
   "occurrences": [
     {
-      "id": "occ_discovery_fundacionpiumosso_com_mario_prisuelos_musica_callada_de_frederic_mompou_01",
+      "id": "occ_fundacionpiumosso_com_mario_prisuelos_musica_callada_de_frederic_mompou_01",
       "date": "2026-09-20",
       "time": "19:30",
       "status": "scheduled"
@@ -32,13 +32,12 @@
     }
   ],
   "eras": [
-    "twentieth",
-    "contemporary"
+    "twentieth"
   ],
   "formats": [
     "recital"
   ],
-  "kind": "established",
+  "kind": "alternative",
   "access": "unknown",
   "citations": [
     {

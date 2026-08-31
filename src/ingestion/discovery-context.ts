@@ -196,6 +196,7 @@ export const DISCOVERY_EVIDENCE_INSTRUCTIONS: readonly string[] = [
   'No inventar hechos que la fuente no declare.',
   'No devolver eligibility, kind, eras o formats como hechos observados.',
   'Si hay rastro de búsqueda (URL de resultados, etc.), indicarlo en foundVia aparte de la URL de evidencia.',
+  'Cuando la ficha oficial publique programa, compositores u obras, capturarlos con exhaustividad razonable; no detenerse tras una sola señal suficiente para eligibility.',
   'En hosts compartidos (output.sharedSourceHosts), source.homepage debe ser el perfil de esa organización, no el origin de la plataforma.',
 ];
 
