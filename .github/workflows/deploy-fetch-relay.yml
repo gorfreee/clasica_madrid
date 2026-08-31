@@ -1,0 +1,52 @@
+name: Deploy fetch relay
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'infra/fetch-relay/**'
+      - '.github/workflows/deploy-fetch-relay.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-fetch-relay
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy Cloudflare Worker
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Deploy
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: infra/fetch-relay
+          secrets: |
+            INGEST_FETCH_RELAY_TOKEN
+        env:
+          INGEST_FETCH_RELAY_TOKEN: ${{ secrets.INGEST_FETCH_RELAY_TOKEN }}
+
+      - name: Record deployment URL
+        if: success()
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        shell: bash
+        run: |
+          {
+            echo "### Fetch relay"
+            if [[ -n "$DEPLOYMENT_URL" ]]; then
+              echo "Deployment URL: \`$DEPLOYMENT_URL\`"
+            else
+              echo "Wrangler no devolvió una deployment URL."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

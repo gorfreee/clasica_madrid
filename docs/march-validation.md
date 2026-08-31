@@ -14,9 +14,9 @@ El transporte de producción para este host es por tanto:
 GitHub Actions → Cloudflare Worker (fetch relay) → www.march.es
 ```
 
-`getText` sigue siendo la abstracción común. Sólo `www.march.es` usa el relay, y sólo cuando `INGEST_FETCH_RELAY_URL` y `INGEST_FETCH_RELAY_TOKEN` están los dos. El adapter de March no conoce Cloudflare. Las URLs lógicas, citations, `externalId` y reports siguen siendo `https://www.march.es/...`.
+`getText` sigue siendo la abstracción común. March usa el relay porque el registry marca `useFetchRelay: true`, y sólo cuando `INGEST_FETCH_RELAY_URL` y `INGEST_FETCH_RELAY_TOKEN` están los dos. El adapter de March no conoce Cloudflare. Las URLs lógicas, citations, `externalId` y reports siguen siendo `https://www.march.es/...`.
 
-Worker: [`infra/fetch-relay`](../infra/fetch-relay/README.md). Allowlist estricta (GET, Bearer, listing + `/es/madrid/concierto/*`, sin redirects cross-origin, cookie jar same-origin, HTML final sin `Set-Cookie`).
+Worker: [`infra/fetch-relay`](../infra/fetch-relay/README.md). Genérico y autenticado (GET, Bearer, sólo HTTPS público, sin redirects cross-origin, cookie jar same-origin, HTML final sin `Set-Cookie`). No tiene allowlist de March; el único interruptor es `useFetchRelay` en el registry.
 
 ## `skipDefaultSync`
 
@@ -26,7 +26,7 @@ Permanece hasta que un dry-run real de `fundacion-juan-march` desde GitHub Actio
 
 [Run `33389595159`](https://github.com/gorfreee/clasica_madrid/actions/runs/33389595159) — `mode=dry-run`, `sources=fundacion-juan-march`, rama `feat/ingest-fetch-relay` (`6a1ce14`).
 
-Los secrets `INGEST_FETCH_RELAY_URL` y `INGEST_FETCH_RELAY_TOKEN` estaban vacíos, así que `getText` usó el transporte directo (comportamiento correcto cuando el relay no está configurado). Resultado:
+`INGEST_FETCH_RELAY_URL` y `INGEST_FETCH_RELAY_TOKEN` estaban vacíos, así que `getText` usó el transporte directo (comportamiento correcto cuando el relay no está configurado). Resultado:
 
 | Campo | Valor |
 |---|---|
@@ -42,7 +42,7 @@ Los secrets `INGEST_FETCH_RELAY_URL` y `INGEST_FETCH_RELAY_TOKEN` estaban vacío
 | Health | `fatal` (`no-sources-succeeded`, `source-failed:fundacion-juan-march`) |
 | `data/**` | intacto (dry-run; el job falló antes del boundary check) |
 
-El fallo es visible y conservador: no se convirtió en un éxito vacío. Falta desplegar el Worker (`infra/fetch-relay`) y configurar los dos secrets para repetir este dry-run con el relay.
+El fallo es visible y conservador: no se convirtió en un éxito vacío. Falta desplegar el Worker (`infra/fetch-relay`) y configurar la variable `INGEST_FETCH_RELAY_URL` y el secret `INGEST_FETCH_RELAY_TOKEN` para repetir este dry-run con el relay. La primera prueba puede hacerse desde el Dashboard; el workflow `deploy-fetch-relay.yml` queda para después del merge.
 
 ## Evidencia previa (egress directo de Actions)
 

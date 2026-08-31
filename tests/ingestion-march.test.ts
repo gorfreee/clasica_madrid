@@ -154,6 +154,7 @@ describe('March pipeline safety and reconciliation', () => {
 
   it('is omitted from the default sync but still fails visibly when named', async () => {
     expect(source.skipDefaultSync).toBe(true);
+    expect(source.useFetchRelay).toBe(true);
     const dataDir = await mkdtemp(path.join(os.tmpdir(), 'march-optin-'));
     const defaultRun = await runIngest({
       catalog: emptyCatalog(), now: TEST_NOW, dryRun: true, dataDir,

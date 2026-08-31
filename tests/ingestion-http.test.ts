@@ -4,9 +4,9 @@ import path from 'node:path';
 import { getText, HttpError, resolveFetchRelay } from '../src/ingestion/http.ts';
 import { fundacionJuanMarchAdapter as adapter } from '../src/ingestion/sources/fundacion-juan-march.ts';
 import { parseMarchDetail } from '../src/ingestion/detail/fundacion-juan-march.ts';
-import { getSourceDefinition } from '../src/ingestion/registry.ts';
+import { fetchRelayHosts, getSourceDefinition, listSourceDefinitions } from '../src/ingestion/registry.ts';
 import { TEST_NOW, TEST_WINDOW } from './helpers.ts';
-import type { AdapterContext } from '../src/ingestion/types.ts';
+import type { AdapterContext, SourceDefinition } from '../src/ingestion/types.ts';
 
 const listing = 'https://www.march.es/es/madrid/conciertos';
 const detail = 'https://www.march.es/es/madrid/concierto/andromeda-perseo';
@@ -122,6 +122,25 @@ describe('getText cookie-capable redirects', () => {
 });
 
 describe('getText fetch relay', () => {
+  it('decides relay hosts only from useFetchRelay on the source registry', async () => {
+    const worker = await readFile(path.join(import.meta.dirname, '..', 'infra', 'fetch-relay', 'worker.js'), 'utf8');
+    const http = await readFile(path.join(import.meta.dirname, '..', 'src', 'ingestion', 'http.ts'), 'utf8');
+    expect(worker).not.toContain('www.march.es');
+    expect(http).not.toContain('FETCH_RELAY_HOSTS');
+    expect(listSourceDefinitions().filter((item) => item.useFetchRelay).map((item) => item.id)).toEqual([
+      'fundacion-juan-march',
+    ]);
+    expect(fetchRelayHosts()).toEqual(['www.march.es']);
+    expect(getSourceDefinition('auditorio-nacional').useFetchRelay).toBeFalsy();
+
+    const extra: SourceDefinition = {
+      ...getSourceDefinition('auditorio-nacional'),
+      useFetchRelay: true,
+    };
+    expect(fetchRelayHosts([extra])).toEqual(['auditorionacional.inaem.gob.es']);
+    expect(worker).not.toContain('auditorionacional.inaem.gob.es');
+  });
+
   it('keeps ordinary URLs on the direct transport even when the relay is configured', async () => {
     const fetch = vi.fn(async (url: string) => {
       expect(url).toBe(ordinary);
@@ -135,7 +154,7 @@ describe('getText fetch relay', () => {
     expect(resolveFetchRelay(ordinary, relayEnv)).toBeUndefined();
   });
 
-  it('sends allowlisted March URLs to the relay and keeps the official logical URL', async () => {
+  it('sends registry relay hosts to the Worker and keeps the official logical URL', async () => {
     const html = '<h1>Conciertos en Madrid</h1>';
     const fetch = vi.fn(async (url: string, init?: RequestInit) => {
       const parsed = new URL(url);
@@ -202,7 +221,7 @@ describe('getText fetch relay', () => {
     }
   });
 
-  it('never sends a non-allowlisted host to the relay', async () => {
+  it('never sends a host without useFetchRelay to the relay, including a 403', async () => {
     expect(resolveFetchRelay('https://canal.march.es/es', relayEnv)).toBeUndefined();
     expect(resolveFetchRelay('https://www.march.es.evil.test/', relayEnv)).toBeUndefined();
     const fetch = vi.fn(async (url: string) => {
@@ -212,6 +231,19 @@ describe('getText fetch relay', () => {
     vi.stubGlobal('fetch', fetch);
     await expect(getText('https://canal.march.es/es', 30_000, relayEnv)).resolves.toBe('canal');
     expect(String(fetch.mock.calls[0]?.[0])).toBe('https://canal.march.es/es');
+
+    const blocked = vi.fn(async (url: string, init?: RequestInit) => {
+      expect(url).toBe(ordinary);
+      expect(header(init, 'authorization')).toBeUndefined();
+      return new Response('no', { status: 403 });
+    });
+    vi.stubGlobal('fetch', blocked);
+    await expect(getText(ordinary, 30_000, relayEnv)).rejects.toMatchObject({
+      status: 403,
+      message: `HTTP 403 al pedir ${ordinary}`,
+    });
+    expect(blocked).toHaveBeenCalledTimes(1);
+    expect(String(blocked.mock.calls[0]?.[0])).toBe(ordinary);
   });
 
   it('fails visibly when the required relay is only half-configured', async () => {

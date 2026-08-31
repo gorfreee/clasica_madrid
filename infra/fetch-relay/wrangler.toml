@@ -2,5 +2,5 @@ name = "clasica-madrid-fetch-relay"
 main = "worker.js"
 compatibility_date = "2026-08-31"
 
-# Token: `npx wrangler secret put INGEST_FETCH_RELAY_TOKEN`
-# Never put the Bearer token in [vars].
+# Token: Dashboard secret, `npx wrangler secret put INGEST_FETCH_RELAY_TOKEN`,
+# or the deploy-fetch-relay GitHub workflow. Never put the Bearer token in [vars].

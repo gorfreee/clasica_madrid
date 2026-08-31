@@ -1,18 +1,16 @@
 /**
- * Minimal GET-only fetch relay for GitHub-hosted ingestion.
- * Not an open proxy: Bearer token + host/path allowlist + same-origin redirects.
+ * Authenticated GET-only fetch relay for GitHub-hosted ingestion.
+ * Not an open proxy: Bearer token + public HTTPS targets only.
  *
- * Allowed targets (keep in sync with src/ingestion/http.ts FETCH_RELAY_HOSTS
- * and the March adapter URLs):
- *   https://www.march.es/es/madrid/conciertos
- *   https://www.march.es/es/madrid/concierto/*
+ * Which hosts the pipeline sends here is decided in the source registry
+ * (`useFetchRelay`). This Worker has no source/host allowlist.
  *
  * Deploy: see README.md. Secret: INGEST_FETCH_RELAY_TOKEN.
  */
 
 const USER_AGENT = 'ClasicaMadrid-ingestion/1 (+https://github.com/gorfreee/clasica_madrid)';
 const MAX_REDIRECTS = 5;
-const ALLOWED_HOST = 'www.march.es';
+const BLOCKED_HOST_SUFFIXES = ['.localhost', '.local', '.internal', '.invalid', '.arpa'];
 
 export default {
   async fetch(request, env) {
@@ -28,7 +26,7 @@ export async function handleRelayRequest(request, env) {
     return errorResponse(401, 'unauthorized');
   }
   const targetParam = new URL(request.url).searchParams.get('url');
-  const target = allowedTarget(targetParam);
+  const target = publicHttpsTarget(targetParam);
   if (!target) {
     return errorResponse(403, 'forbidden target');
   }
@@ -79,7 +77,7 @@ function timingSafeEqual(left, right) {
   return diff === 0;
 }
 
-function allowedTarget(value) {
+function publicHttpsTarget(value) {
   if (!value) return undefined;
   let url;
   try {
@@ -88,11 +86,17 @@ function allowedTarget(value) {
     return undefined;
   }
   if (url.protocol !== 'https:' || url.username || url.password || url.port) return undefined;
-  if (url.hostname !== ALLOWED_HOST || url.search || url.hash) return undefined;
-  const path = url.pathname.replace(/\/$/, '') || '/';
-  if (path === '/es/madrid/conciertos') return url;
-  if (/^\/es\/madrid\/concierto\/[^/]+$/.test(path)) return url;
-  return undefined;
+  const host = url.hostname.toLowerCase().replace(/\.$/, '');
+  if (!host || host === 'localhost') return undefined;
+  if (BLOCKED_HOST_SUFFIXES.some((suffix) => host.endsWith(suffix))) return undefined;
+  if (isIpLiteral(host)) return undefined;
+  return url;
+}
+
+function isIpLiteral(host) {
+  if (host.includes(':')) return true;
+  if (/^[\d.]+$/.test(host)) return true;
+  return false;
 }
 
 async function fetchOrigin(initial) {
@@ -133,7 +137,7 @@ function resolveSameOriginRedirect(current, location) {
     return undefined;
   }
   if (next.origin !== new URL(current).origin) return undefined;
-  return allowedTarget(next.href)?.href;
+  return publicHttpsTarget(next.href)?.href;
 }
 
 function rememberCookies(origin, response, jar) {

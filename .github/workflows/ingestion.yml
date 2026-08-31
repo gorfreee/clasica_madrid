@@ -165,7 +165,7 @@ jobs:
           TO_DATE: ${{ steps.config.outputs.to }}
           AI_MAX_REQUESTS: ${{ steps.config.outputs.ai_max_requests }}
           GITHUB_SHA: ${{ steps.config.outputs.code_sha }}
-          INGEST_FETCH_RELAY_URL: ${{ secrets.INGEST_FETCH_RELAY_URL }}
+          INGEST_FETCH_RELAY_URL: ${{ vars.INGEST_FETCH_RELAY_URL }}
           INGEST_FETCH_RELAY_TOKEN: ${{ secrets.INGEST_FETCH_RELAY_TOKEN }}
         shell: bash
         run: |

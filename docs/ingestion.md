@@ -26,7 +26,7 @@ registry → extract → hydrate → normalize → identity → classify → pub
 
 - Un fallo de listing aísla esa fuente; el resto continúa.
 - Un fallo de ficha de detalle es local al evento: se conservan los hechos del listing.
-- La incorporación de March, el acceso HTTP y `skipDefaultSync` están en [validación de March](march-validation.md). GitHub-hosted Actions no alcanza `www.march.es` en directo; `getText` puede salir por un fetch relay de Cloudflare (`INGEST_FETCH_RELAY_URL` / `INGEST_FETCH_RELAY_TOKEN`) sólo para hosts allowlisteados. Las URLs lógicas siguen siendo las oficiales. Reutiliza la protección de cobertura para adapters cuyo calendario depende de las fichas.
+- La incorporación de March, el acceso HTTP y `skipDefaultSync` están en [validación de March](march-validation.md). GitHub-hosted Actions no alcanza `www.march.es` en directo; `getText` puede salir por un fetch relay de Cloudflare (`vars.INGEST_FETCH_RELAY_URL` / `INGEST_FETCH_RELAY_TOKEN`) sólo para fuentes con `useFetchRelay` en el registry. Las URLs lógicas siguen siendo las oficiales. Reutiliza la protección de cobertura para adapters cuyo calendario depende de las fichas.
 - En Zarzuela, las fichas son necesarias para el calendario y la sede: una cobertura severamente incompleta también marca fallo de source (etapa `hydration`), bloqueando auto-merge. Cualquier ficha necesaria fallida/no solicitada por circuito suprime las desapariciones de esa source; el report y el summary explicitan que no son evaluables. Las fechas del listing sólo sirven como hint para evitar hidratar obras enteramente fuera de ventana, nunca para generar funciones. Véase [validación del hardening de Zarzuela](zarzuela-hardening-validation.md).
 - Clasificación: reglas deterministas y knowledge. El fallback de IA **sólo** decide eligibility si el determinista deja `uncertain`; un `include` o `exclude` determinista no se reabre. Si el resultado final es `include` y `eras`/`formats` siguen sin resolver, una segunda llamada puede completar esa taxonomía sin cambiar eligibility. Un fallo de taxonomía conserva el include.
 - Identidad (sin fuzzy ni IA): `externalId` de la misma source → URL equivalente → alias explícito → coincidencia fuerte única (fecha, venue, título normalizado). Varios eventos publicados que comparten esa URL o `externalId` se tratan como una observación 1→N: se reparte el calendario si las fechas no solapan; si no hay asignación inequívoca se marcan todos como vistos sin escribir occurrences no asignables. `ambiguous` queda para colisiones reales (p. ej. coincidencia fuerte hacia eventos distintos, o fechas solapadas): no se crea ni se modifica.
@@ -75,7 +75,7 @@ Flags `--ai-*` (modelo, sin caché, tope de requests) existen para pruebas acota
 
 `.github/workflows/ingestion.yml` serializa todas las ejecuciones en el concurrency group `ingestion-production`; una scheduled y una manual nunca comparten simultáneamente cuota ni state de Gemini.
 
-`fundacion-juan-march` no forma parte del `all` programado (`skipDefaultSync`) hasta que un dry-run real desde Actions vía el fetch relay resulte sano. Un `March HTTP diagnostic` (dispatch, ubuntu + macOS, group propio) comprueba el listing **en directo**, sin relay; no escribe `data/**`. Ver [validación de March](march-validation.md) e [infra/fetch-relay](../infra/fetch-relay/README.md).
+`fundacion-juan-march` no forma parte del `all` programado (`skipDefaultSync`) hasta que un dry-run real desde Actions vía el fetch relay resulte sano. Un `March HTTP diagnostic` (dispatch, ubuntu + macOS, group propio) comprueba el listing **en directo**, sin relay; no escribe `data/**`. Ver [validación de March](march-validation.md) e [infra/fetch-relay](../infra/fetch-relay/README.md). El Worker se despliega con [deploy-fetch-relay.yml](../.github/workflows/deploy-fetch-relay.yml) o desde el Dashboard; añadir otra fuente al relay es `useFetchRelay: true` en el registry.
 
 ### Scheduled
 
@@ -93,11 +93,12 @@ En **Actions → Production ingestion → Run workflow**:
 
 El dry-run usa el ref seleccionado en «Run workflow» y nunca puede modificar `data/**` ni crear una PR. `schedule` y `publish` ejecutan siempre el código de `main`, de modo que una rama no fusionada no puede escribir el catálogo. En publish, un no-op tampoco crea branch, commit ni PR. Si ya existe una PR abierta cuyo branch empieza por `automation/ingestion-`, la ejecución conserva su report pero no crea ni actualiza otra PR.
 
-### Secrets, variable y permisos
+### Secrets, variables y permisos
 
 - secret `GEMINI_API_KEY`: key del proyecto de Google AI Studio;
 - secret `INGESTION_BOT_TOKEN`: token fine-grained con acceso a esta repo para Contents read/write, Pull requests read/write y Actions read. Se usa para push, creación de PR y auto-merge, de modo que el evento `pull_request` dispare CI;
-- secrets `INGEST_FETCH_RELAY_URL` y `INGEST_FETCH_RELAY_TOKEN`: Worker de Cloudflare usado como egress para hosts allowlisteados (`www.march.es`). Ausentes, el resto de fuentes no cambia; March falla de forma visible si se pide explícitamente;
+- secret `INGEST_FETCH_RELAY_TOKEN`: Bearer del Worker de Cloudflare usado como egress;
+- repository variable `INGEST_FETCH_RELAY_URL`: URL del Worker (no es sensible). El pipeline sólo la usa para fuentes con `useFetchRelay` en el registry. Ausentes, el resto de fuentes no cambia; esas fuentes fallan de forma visible si se piden explícitamente;
 - repository variable `INGESTION_AUTO_MERGE_ENABLED`: kill switch global; sólo el valor exacto `true` habilita auto-merge.
 
 El state persistente recupera `quota.json`, `cache/**` y `pending/**` mediante `actions/cache`. Cada run guarda una key inmutable y restaura la más reciente; `run.lock` nunca se persiste. Cada ejecución sube un artifact de observabilidad (`ingestion-run-<run_id>-<attempt>`) con retención de 90 días, incluso si la ingestión falla. Ese bundle no se commitea. El estado persistente de Gemini (`.local/ai/`) no forma parte del artifact.

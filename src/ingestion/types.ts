@@ -78,6 +78,12 @@ export type SourceDefinition = {
    * failure there remains a failure.
    */
   skipDefaultSync?: boolean;
+  /**
+   * Send this source's listing hosts through the authenticated fetch relay
+   * when both INGEST_FETCH_RELAY_URL and INGEST_FETCH_RELAY_TOKEN are set.
+   * The Worker is source-agnostic; this flag is the only switch.
+   */
+  useFetchRelay?: boolean;
 };
 
 export type AdapterContext = {

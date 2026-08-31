@@ -1,8 +1,7 @@
+import { fetchRelayHosts } from './registry.ts';
+
 const USER_AGENT = 'ClasicaMadrid-ingestion/1 (+https://github.com/gorfreee/clasica_madrid)';
 const MAX_REDIRECTS = 10;
-
-/** Hosts that may use INGEST_FETCH_RELAY_URL. Ordinary hosts never do. */
-export const FETCH_RELAY_HOSTS = ['www.march.es'] as const;
 
 /** Preserve HTTP facts for source-local retry policies; no retries by default. */
 export class HttpError extends Error {
@@ -17,17 +16,19 @@ export type FetchRelayTarget = {
 };
 
 /**
- * Direct cookie-aware fetch, or a configured fetch relay for allowlisted hosts.
+ * Direct cookie-aware fetch, or a configured fetch relay for hosts that a
+ * source marked with `useFetchRelay`.
  *
- * Ordinary URLs always use the current direct transport. `www.march.es` uses
- * the relay only when URL and token are both set. Callers keep passing the
+ * Ordinary URLs always use the current direct transport. Relay hosts use the
+ * Worker only when URL and token are both set. Callers keep passing the
  * official source URL; this function never rewrites it into a workers.dev
- * address. Error statuses are never retried.
+ * address. Error statuses are never retried, and a 403 on a direct host is
+ * never sent to the relay.
  *
  * Native fetch does not persist Set-Cookie across redirects. www.march.es
  * answers a same-URL 307 with a session cookie; the direct client follows
  * redirects itself and sends cookies only back to the origin that set them.
- * The relay Worker does the same cookie replay behind the allowlist.
+ * The relay Worker does the same cookie replay for any public HTTPS target.
  */
 export async function getText(url: string, timeoutMs = 30_000, env: NodeJS.ProcessEnv = process.env): Promise<string> {
   const controller = new AbortController();
@@ -47,7 +48,7 @@ export async function getText(url: string, timeoutMs = 30_000, env: NodeJS.Proce
 }
 
 /**
- * `undefined` → direct transport. Throws if this host is allowlisted but the
+ * `undefined` → direct transport. Throws if this host uses the relay but the
  * relay is only half-configured or not https.
  */
 export function resolveFetchRelay(url: string, env: NodeJS.ProcessEnv = process.env): FetchRelayTarget | undefined {
@@ -68,7 +69,8 @@ export function resolveFetchRelay(url: string, env: NodeJS.ProcessEnv = process.
 }
 
 export function isFetchRelayHost(hostname: string): boolean {
-  return (FETCH_RELAY_HOSTS as readonly string[]).includes(hostname);
+  const host = hostname.toLowerCase().replace(/\.$/, '');
+  return fetchRelayHosts().includes(host);
 }
 
 async function readViaRelay(url: string, relay: FetchRelayTarget, signal: AbortSignal): Promise<string> {

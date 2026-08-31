@@ -1,10 +1,15 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 import { handleRelayRequest } from '../infra/fetch-relay/worker.js';
 
 const listing = 'https://www.march.es/es/madrid/conciertos';
 const detail = 'https://www.march.es/es/madrid/concierto/andromeda-perseo';
+const ordinary = 'https://example.org/calendar';
 const token = 'relay-secret-token-xyz';
 const env = { INGEST_FETCH_RELAY_TOKEN: token };
+const workerSource = () =>
+  readFile(path.join(import.meta.dirname, '..', 'infra', 'fetch-relay', 'worker.js'), 'utf8');
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -12,18 +17,59 @@ afterEach(() => {
 });
 
 describe('Cloudflare fetch-relay worker', () => {
-  it('rejects non-GET, missing/wrong tokens and non-allowlisted targets without fetching', async () => {
+  it('has no source or host allowlist of its own', async () => {
+    const source = await workerSource();
+    expect(source).not.toContain('www.march.es');
+    expect(source).not.toContain('ALLOWED_HOST');
+    expect(source).not.toContain('FETCH_RELAY_HOSTS');
+    expect(source).not.toContain('fundacion-juan-march');
+    expect(source).not.toMatch(/\/es\/madrid\/concierto/);
+  });
+
+  it('rejects non-GET and missing/wrong tokens without fetching', async () => {
     const fetch = vi.fn();
     vi.stubGlobal('fetch', fetch);
     expect((await handleRelayRequest(request(listing, { method: 'POST' }), env)).status).toBe(405);
     expect((await handleRelayRequest(request(listing, { auth: false }), env)).status).toBe(401);
     expect((await handleRelayRequest(request(listing), { INGEST_FETCH_RELAY_TOKEN: '' })).status).toBe(401);
     expect((await handleRelayRequest(request(listing, { token: 'nope-nope' }), env)).status).toBe(401);
-    expect((await handleRelayRequest(request('https://example.org/'), env)).status).toBe(403);
-    expect((await handleRelayRequest(request('https://canal.march.es/es'), env)).status).toBe(403);
-    expect((await handleRelayRequest(request('https://www.march.es/es/madrid'), env)).status).toBe(403);
-    expect((await handleRelayRequest(request(`${listing}?utm=1`), env)).status).toBe(403);
     expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('rejects HTTP, IP literals, localhost, credentials and non-default ports without fetching', async () => {
+    const fetch = vi.fn();
+    vi.stubGlobal('fetch', fetch);
+    const denied = [
+      'http://www.march.es/es/madrid/conciertos',
+      'https://1.2.3.4/path',
+      'https://127.0.0.1/',
+      'https://[::1]/',
+      'https://localhost/',
+      'https://foo.localhost/bar',
+      'https://intranet.local/',
+      'https://user:pass@example.org/secret',
+      'https://example.org:8443/calendar',
+    ];
+    for (const target of denied) {
+      const response = await handleRelayRequest(request(target), env);
+      const body = await response.text();
+      expect(response.status, target).toBe(403);
+      expect(body).toBe('forbidden target');
+      expect(body).not.toContain(token);
+    }
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('fetches any public https target when authenticated, without changing the Worker', async () => {
+    const fetch = vi.fn(async (url: string) => {
+      expect(url).toBe(ordinary);
+      return new Response('<html>ok</html>', { status: 200 });
+    });
+    vi.stubGlobal('fetch', fetch);
+    const response = await handleRelayRequest(request(ordinary), env);
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe('<html>ok</html>');
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 
   it('replays a same-origin Set-Cookie 307 and returns HTML without cookies or secrets', async () => {
