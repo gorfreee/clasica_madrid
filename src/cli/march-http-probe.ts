@@ -203,7 +203,7 @@ async function httpsFollow(url: string, headers: Record<string, string>): Promis
   return hops.map(publicHop);
 }
 
-function parseCurlStdout(raw: string): InternalHop & { writeOut?: string } {
+function parseCurlStdout(raw: string): Omit<InternalHop, 'url'> {
   const normalized = raw.replace(/\r\n/g, '\n');
   const writeOut = /http_version=([\d.]+)\s*$/.exec(normalized)?.[1];
   const headerText = writeOut ? normalized.slice(0, normalized.lastIndexOf('http_version=')) : normalized;
@@ -221,7 +221,6 @@ function parseCurlStdout(raw: string): InternalHop & { writeOut?: string } {
   }
   const pairs = cookiePairs(headerMap['set-cookie']);
   return {
-    url: '',
     status: Number.isFinite(status) ? status : undefined,
     location: headerMap.location?.[0] ?? null,
     setCookieNames: cookieNamesFromPairs(pairs),
@@ -246,8 +245,8 @@ async function curlInternal(url: string, extraArgs: string[], headers: Record<st
     const err = error as { stdout?: string; stderr?: string; message?: string };
     const parsed = err.stdout ? parseCurlStdout(err.stdout) : undefined;
     return {
-      url,
       ...(parsed ?? { setCookieNames: [], diagnosticHeaders: {} }),
+      url,
       error: (err.stderr || err.message || String(error)).trim().slice(0, 240),
     };
   }
