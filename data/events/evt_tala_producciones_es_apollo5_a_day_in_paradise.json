@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_tala_producciones_es_apollo5_a_day_in_paradise",
+  "slug": "apollo5-a-day-in-paradise",
+  "title": "APOLLO5 – ‘A Day in Paradise’",
+  "status": "scheduled",
+  "venueId": "ven_ateneo_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_tala_producciones_es_apollo5_a_day_in_paradise_01",
+      "date": "2026-09-27",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "APOLLO5"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Thomas Morley"
+    },
+    {
+      "name": "Claudio Monteverdi"
+    },
+    {
+      "name": "Francis Pott"
+    },
+    {
+      "name": "Edvard Grieg"
+    },
+    {
+      "name": "George Gershwin"
+    },
+    {
+      "name": "Eric Whitacre"
+    },
+    {
+      "name": "Michael McGlynn"
+    },
+    {
+      "name": "Camille Saint-Saëns"
+    },
+    {
+      "name": "Piers Connor Kennedy"
+    },
+    {
+      "name": "Bart Howard"
+    },
+    {
+      "name": "Manning Sherwin"
+    },
+    {
+      "name": "Charles Villiers Stanford"
+    },
+    {
+      "name": "Karine Ann Polwart"
+    },
+    {
+      "name": "Tom Petty"
+    },
+    {
+      "name": "Bill Withers"
+    }
+  ],
+  "works": [
+    {
+      "title": "Arise, Awake",
+      "composerName": "Thomas Morley"
+    },
+    {
+      "title": "Sfogava con le stelle",
+      "composerName": "Claudio Monteverdi"
+    },
+    {
+      "title": "Méditation",
+      "composerName": "Francis Pott"
+    },
+    {
+      "title": "Våren",
+      "composerName": "Edvard Grieg"
+    },
+    {
+      "title": "Summertime",
+      "composerName": "George Gershwin"
+    },
+    {
+      "title": "This Marriage",
+      "composerName": "Eric Whitacre"
+    },
+    {
+      "title": "Where All Roses Go",
+      "composerName": "Michael McGlynn"
+    },
+    {
+      "title": "Les fleurs et les arbres",
+      "composerName": "Camille Saint-Saëns"
+    },
+    {
+      "title": "Strike it up, Tabor",
+      "composerName": "Piers Connor Kennedy"
+    },
+    {
+      "title": "Fly Me To The Moon",
+      "composerName": "Bart Howard"
+    },
+    {
+      "title": "A Nightingale Sang In Berkley Square",
+      "composerName": "Manning Sherwin"
+    },
+    {
+      "title": "The Blue Bird",
+      "composerName": "Charles Villiers Stanford"
+    },
+    {
+      "title": "The Heron",
+      "composerName": "Karine Ann Polwart"
+    },
+    {
+      "title": "Wildflowers",
+      "composerName": "Tom Petty"
+    },
+    {
+      "title": "Sh-Boom (Life Could Be A Dream)",
+      "composerName": "James Keyes"
+    },
+    {
+      "title": "Lovely Day",
+      "composerName": "Bill Withers"
+    }
+  ],
+  "eras": [
+    "renaissance",
+    "baroque",
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_tala_producciones_es",
+      "url": "https://www.tala-producciones.es/salon-del-ateneo/apollo5-a-day-in-paradise",
+      "checkedAt": "2026-08-31"
+    }
+  ],
+  "primarySourceId": "src_tala_producciones_es",
+  "lastVerifiedAt": "2026-08-31"
+}

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_real_hermandad_refugio_festival_internacional_de_organo_san_antonio_de_los_alemanes_2026_2",
+  "slug": "festival-internacional-de-organo-san-antonio-de-los-alemanes-2026-margreeth-de-jong",
+  "title": "Festival Internacional de Órgano San Antonio de los Alemanes 2026 — Margreeth de Jong",
+  "status": "scheduled",
+  "venueId": "ven_iglesia_san_antonio_alemanes",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_real_hermandad_refugio_festival_internacional_de_organo_san_antonio_de_los_alemanes_2026_2_01",
+      "date": "2026-10-02",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Margreeth de Jong"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital",
+    "organ"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_real_hermandad_refugio",
+      "url": "https://realhermandaddelrefugio.org/calendario-de-eventos/festival-internacional-de-organo-san-antonio-de-los-alemanes-2026-2",
+      "checkedAt": "2026-08-31"
+    }
+  ],
+  "primarySourceId": "src_real_hermandad_refugio",
+  "lastVerifiedAt": "2026-08-31"
+}

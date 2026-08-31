@@ -75,8 +75,8 @@ const uncertainFacts = facts({ title: 'Concierto extraordinario' });
 describe('AI classifier prompt v2', () => {
   const prompt = AI_CLASSIFIER_SYSTEM_PROMPT;
 
-  it('is version 5 so results are distinguishable from earlier prompts', () => {
-    expect(AI_CLASSIFIER_PROMPT_VERSION).toBe(5);
+  it('is version 6 so results are distinguishable from earlier prompts', () => {
+    expect(AI_CLASSIFIER_PROMPT_VERSION).toBe(6);
   });
 
   it('keeps precision, uncertain as a valid output, and the ban on inventing facts', () => {
@@ -115,6 +115,8 @@ describe('AI classifier prompt v2', () => {
     expect(prompt).toMatch(/NUNCA exclude autom[aá]tico por coprincipalidad/);
     expect(prompt).toMatch(/Fito P[aá]ez con cuerdas/);
     expect(prompt).toMatch(/musical de Broadway/);
+    expect(prompt).toMatch(/compositor cl[aá]sico aislado/);
+    expect(prompt).toMatch(/Saint-Sa[eë]ns/);
   });
 
   it('hardens coprincipal classical + excluded identity to uncertain without a substantial classical block', () => {
@@ -152,6 +154,12 @@ describe('AI classifier prompt v2', () => {
     expect(prompt).toMatch(/coinciden(?:cia)? l[eé]xica/);
     expect(prompt).toMatch(/Flemish/);
     expect(prompt).toMatch(/Si el contexto no permite distinguir → uncertain/);
+  });
+
+  it('keeps twentieth vs contemporary as a conservative academic boundary', () => {
+    expect(prompt).toMatch(/Falla\/Mompou\/Satie → twentieth/);
+    expect(prompt).toMatch(/Música callada, 1959–1967/);
+    expect(prompt).toMatch(/es twentieth, no contemporary/);
   });
 
   it('allows musical knowledge only to interpret observed facts', () => {

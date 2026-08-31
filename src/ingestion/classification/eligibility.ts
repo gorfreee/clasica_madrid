@@ -29,6 +29,14 @@ export function resolveEligibility(facts: ObservedFacts): Resolution<Eligibility
 
   const coprincipal = exclusions.filter((item) => item.coprincipal);
   if (coprincipal.length > 0) {
+    if (inclusions.length > 0 && hasSubstantialClassicalBlock(facts)) {
+      return resolution(
+        'include',
+        inclusions[0]!.ruleId.startsWith('known-') ? 'knowledge' : 'rule',
+        'mixed-program-classical-block',
+        [...flattenEvidence(inclusions), ...flattenEvidence(coprincipal)],
+      );
+    }
     return resolution(
       'uncertain',
       'rule',
@@ -39,6 +47,14 @@ export function resolveEligibility(facts: ObservedFacts): Resolution<Eligibility
 
   const hardExclude = exclusions.filter((item) => !item.overridesClassical && !item.coprincipal);
   if (hardExclude.length > 0 && inclusions.length > 0) {
+    if (hasSubstantialClassicalBlock(facts)) {
+      return resolution(
+        'include',
+        inclusions[0]!.ruleId.startsWith('known-') ? 'knowledge' : 'rule',
+        'mixed-program-classical-block',
+        [...flattenEvidence(inclusions), ...flattenEvidence(hardExclude)],
+      );
+    }
     return resolution(
       'uncertain',
       'rule',
@@ -387,48 +403,78 @@ function popularMusicIdentity(
   program: string,
   haystack: string,
 ): Exclusion | undefined {
-  const evidence: string[] = [];
-  if (hasWord(title, 'pop') || hasWord(haystack, 'pop')) evidence.push('pop');
-  if (hasPhrase(title, 'grandes del pop')) evidence.push('grandes del pop');
+  const strong: string[] = [];
+  if (hasWord(title, 'pop')) strong.push('pop');
+  if (hasPhrase(title, 'grandes del pop')) strong.push('grandes del pop');
   if (hasPhrase(title, 'musicales en concierto') || hasPhrase(haystack, 'broadway')) {
-    evidence.push('Broadway / musical');
+    strong.push('Broadway / musical');
   }
-  if (hasWord(title, 'abba') || hasWord(haystack, 'abba')) evidence.push('ABBA');
-  if (hasWord(title, 'beatles')) evidence.push('Beatles');
+  if (hasWord(title, 'abba') || hasWord(haystack, 'abba')) strong.push('ABBA');
+  if (hasWord(title, 'beatles')) strong.push('Beatles');
   if (hasWord(title, 'queen') && (hasWord(title, 'pop') || hasWord(title, 'abba') || hasWord(title, 'beatles'))) {
-    evidence.push('Queen');
+    strong.push('Queen');
   }
   if (hasPhrase(description, 'melodias populares') || hasPhrase(description, 'villancicos mas famosos')) {
-    evidence.push('gala popular');
+    strong.push('gala popular');
   }
   if (
     knownClassicalNames(facts).length === 0 &&
     (hasPhrase(description, 'su repertorio') || hasPhrase(description, 'la obra de')) &&
     (hasPhrase(haystack, 'octeto') || hasWord(haystack, 'cuerdas') || hasWord(haystack, 'orquesta'))
   ) {
-    evidence.push('repertorio popular con ensemble clásico');
+    strong.push('repertorio popular con ensemble clásico');
   }
-  if (
-    knownClassicalNames(facts).length === 0 &&
-    popularProgramHit(program)
-  ) {
-    evidence.push('programa popular');
+
+  const adjacent: string[] = [];
+  if (hasWord(haystack, 'pop') && !hasWord(title, 'pop')) adjacent.push('pop');
+  if (popularProgramHit(program) || popularProgramHit(haystack)) {
+    adjacent.push('programa popular');
   }
-  if (evidence.length === 0) return undefined;
-  return exclusion('popular-music-identity', evidence, true);
+
+  if (strong.length > 0) {
+    return exclusion('popular-music-identity', [...new Set(strong)], true);
+  }
+  if (adjacent.length === 0) return undefined;
+  const classical = knownClassicalNames(facts).length > 0;
+  return exclusion('popular-music-identity', [...new Set(adjacent)], !classical, classical);
 }
 
-function popularProgramHit(program: string): boolean {
+function popularProgramHit(text: string): boolean {
   return (
-    hasWord(program, 'lennon') ||
-    hasWord(program, 'sinatra') ||
-    hasWord(program, 'feliciano') ||
-    hasPhrase(program, 'white christmas') ||
-    hasPhrase(program, 'david guetta') ||
-    hasPhrase(program, 'daft punk') ||
-    hasWord(program, 'avicii') ||
-    hasWord(program, 'coldplay')
+    hasWord(text, 'lennon') ||
+    hasWord(text, 'sinatra') ||
+    hasWord(text, 'feliciano') ||
+    hasPhrase(text, 'white christmas') ||
+    hasPhrase(text, 'david guetta') ||
+    hasPhrase(text, 'daft punk') ||
+    hasWord(text, 'avicii') ||
+    hasWord(text, 'coldplay') ||
+    hasPhrase(text, 'tom petty') ||
+    hasPhrase(text, 'bill withers')
   );
+}
+
+/**
+ * Mixed programmes are include only when classical is a listed block, not one
+ * named composer inside an otherwise popular bill.
+ */
+function hasSubstantialClassicalBlock(facts: ObservedFacts): boolean {
+  const known = knownClassicalNames(facts);
+  if (known.length >= 2) return true;
+  if (known.length === 0) return false;
+  return classicalFirstHalf(facts, known);
+}
+
+function classicalFirstHalf(facts: ObservedFacts, known: string[]): boolean {
+  const program = fieldFolded(facts.programText) || fieldFolded(facts.description);
+  if (!program) return false;
+  const start = program.search(/primera parte|1\.?\s*a\.?\s*parte|first half/);
+  if (start < 0) return false;
+  const rest = program.slice(start + 1);
+  const end = rest.search(/segunda parte|2\.?\s*a\.?\s*parte|second half/);
+  const block = end >= 0 ? program.slice(start, start + 1 + end) : program.slice(start);
+  if (findKnownComposersInText(block).length > 0) return true;
+  return known.some((name) => hasPhrase(block, name));
 }
 
 function explicitClassicalConcertDeclaration(facts: ObservedFacts): Inclusion | undefined {

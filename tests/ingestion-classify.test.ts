@@ -304,6 +304,71 @@ describe('eligibility — conflictos y fallback', () => {
     expect(result.eligibility.value).toBe('include');
   });
 
+  it('Mompou — Música callada (1959–1967) es twentieth, no contemporary', () => {
+    const result = classify(
+      facts({
+        title: 'Mario Prisuelos. Música callada de Frederic Mompou',
+        description:
+          'Música callada de Frederic Mompou es una obra cumbre para piano dividida en 28 piezas agrupadas en cuatro cuadernos compuestos entre 1959 y 1967.',
+        programText: 'Música callada de Frederic Mompou.',
+        performers: [{ name: 'Mario Prisuelos', roleText: 'piano' }],
+        composers: [{ name: 'Frederic Mompou' }],
+        works: [{ title: 'Música callada', composerName: 'Frederic Mompou' }],
+      }),
+    );
+    expect(result.eligibility.value).toBe('include');
+    expect(result.eras?.value).toEqual(['twentieth']);
+    expect(result.eras?.value).not.toContain('contemporary');
+  });
+
+  it('un programa mixto con bloque clásico sustancial sigue siendo include', () => {
+    const result = classify(
+      facts({
+        title: "APOLLO5 – 'A Day in Paradise'",
+        seriesText: 'Ciclo de música de cámara Salón del Ateneo',
+        description:
+          'El quinteto vocal británico APOLLO5 presenta un programa de Renacimiento a pop. Obras de Morley, Monteverdi, Grieg, Gershwin, Whitacre, Saint-Saëns, Tom Petty y otros.',
+        programText:
+          'Thomas Morley: Arise, Awake. Claudio Monteverdi: Sfogava con le stelle. Edvard Grieg: Våren. Camille Saint-Saëns: Les fleurs et les arbres. George Gershwin: Summertime. Tom Petty: Wildflowers. Bill Withers: Lovely Day.',
+        performers: [{ name: 'APOLLO5' }],
+        composers: [
+          { name: 'Thomas Morley' },
+          { name: 'Claudio Monteverdi' },
+          { name: 'Edvard Grieg' },
+          { name: 'Camille Saint-Saëns' },
+          { name: 'George Gershwin' },
+          { name: 'Tom Petty' },
+          { name: 'Bill Withers' },
+        ],
+        works: [
+          { title: 'Arise, Awake', composerName: 'Thomas Morley' },
+          { title: 'Sfogava con le stelle', composerName: 'Claudio Monteverdi' },
+          { title: 'Les fleurs et les arbres', composerName: 'Camille Saint-Saëns' },
+          { title: 'Wildflowers', composerName: 'Tom Petty' },
+        ],
+      }),
+    );
+    expect(result.eligibility.value).toBe('include');
+    expect(result.eligibility.ruleId).toBe('mixed-program-classical-block');
+  });
+
+  it('un programa pop-dominante con una sola referencia clásica no es include automático', () => {
+    const result = classify(
+      facts({
+        title: 'Tribute to Tom Petty',
+        programText: 'Free Fallin’; Refugee; El cisne de Saint-Saëns.',
+        composers: [{ name: 'Tom Petty' }, { name: 'Camille Saint-Saëns' }],
+        works: [
+          { title: 'Free Fallin’', composerName: 'Tom Petty' },
+          { title: 'Le cygne', composerName: 'Camille Saint-Saëns' },
+        ],
+        performers: [{ name: 'Pop Chamber Ensemble' }],
+      }),
+    );
+    expect(result.eligibility.value).not.toBe('include');
+    expect(result.eligibility.ruleId).not.toBe('known-classical-composer');
+  });
+
   it('no convierte ABBA con orquesta ni un tributo de cine en include', () => {
     const abba = classify(
       facts({

@@ -474,6 +474,8 @@ describe('toCandidate y deduplicación', () => {
     );
     expect(today.candidate).toBeDefined();
     expect(lastDay.candidate).toBeDefined();
+    expect(today.candidate?.event.id).toBe('evt_teatro_real_demo');
+    expect(today.candidate?.event.id).not.toMatch(/discovery/);
   });
 
   it('usa classification.kind y no un fallback de la source', () => {

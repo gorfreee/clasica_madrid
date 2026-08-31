@@ -14,7 +14,7 @@ export type ComposerKnowledge = {
   eras: Era[];
 };
 
-export const COMPOSER_KNOWLEDGE_VERSION = '2026-08-30';
+export const COMPOSER_KNOWLEDGE_VERSION = '2026-08-31';
 
 export const COMPOSERS: ComposerKnowledge[] = [
   {
@@ -99,6 +99,16 @@ export const COMPOSERS: ComposerKnowledge[] = [
     canonicalName: 'Joseph-François Salomon',
     aliases: ['Joseph-François Salomon', 'Joseph-Francois Salomon', 'Salomon'],
     eras: ['baroque'],
+  },
+  {
+    canonicalName: 'Claudio Monteverdi',
+    aliases: ['Claudio Monteverdi', 'Monteverdi'],
+    eras: ['baroque'],
+  },
+  {
+    canonicalName: 'Thomas Morley',
+    aliases: ['Thomas Morley'],
+    eras: ['renaissance'],
   },
   {
     canonicalName: 'Henry Purcell',
@@ -196,6 +206,11 @@ export const COMPOSERS: ComposerKnowledge[] = [
     eras: ['romantic'],
   },
   {
+    canonicalName: 'Edvard Grieg',
+    aliases: ['Edvard Grieg', 'Grieg'],
+    eras: ['romantic'],
+  },
+  {
     canonicalName: 'Jacques Offenbach',
     aliases: ['Jacques Offenbach', 'Offenbach'],
     eras: ['romantic'],
@@ -259,6 +274,11 @@ export const COMPOSERS: ComposerKnowledge[] = [
   {
     canonicalName: 'Manuel de Falla',
     aliases: ['Manuel de Falla', 'Falla'],
+    eras: ['twentieth'],
+  },
+  {
+    canonicalName: 'Frederic Mompou',
+    aliases: ['Frederic Mompou', 'Federico Mompou', 'Mompou'],
     eras: ['twentieth'],
   },
   {

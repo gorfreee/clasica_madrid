@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_pop_isolated_saint_saens",
+  "origin": "phase1-smoke",
+  "sourceId": "example-pop-tribute",
+  "sourceUrl": "https://www.example.org/conciertos/tribute-tom-petty-saint-saens",
+  "listingTitle": "Tribute to Tom Petty",
+  "observed": {
+    "title": "Tribute to Tom Petty",
+    "venueText": "Sala de Cámara",
+    "programText": "Free Fallin’; Refugee; El cisne de Saint-Saëns.",
+    "performers": [
+      {
+        "name": "Pop Chamber Ensemble"
+      }
+    ],
+    "composers": [
+      { "name": "Tom Petty" },
+      { "name": "Camille Saint-Saëns" }
+    ],
+    "works": [
+      { "title": "Free Fallin’", "composerName": "Tom Petty" },
+      { "title": "Le cygne", "composerName": "Camille Saint-Saëns" }
+    ]
+  },
+  "expected": {
+    "eligibility": "uncertain",
+    "formats": [],
+    "eras": [],
+    "access": "unknown"
+  },
+  "reason": "Programa predominantemente popular con una única referencia clásica aislada. Un compositor conocido no basta para include automático.",
+  "missingEvidence": "No hay un bloque clásico sustancial, autónomo e identificable; Saint-Saëns aparece como cita aislada junto al repertorio de Tom Petty.",
+  "checkedAt": "2026-08-31"
+}

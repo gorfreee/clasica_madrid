@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacionpiumosso_com_mario_prisuelos_musica_callada_de_frederic_mompou",
+  "slug": "mario-prisuelos-musica-callada-de-frederic-mompou",
+  "title": "Mario Prisuelos. Música callada de Frederic Mompou",
+  "status": "scheduled",
+  "venueId": "ven_ateneo_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacionpiumosso_com_mario_prisuelos_musica_callada_de_frederic_mompou_01",
+      "date": "2026-09-20",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Mario Prisuelos"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Frederic Mompou"
+    }
+  ],
+  "works": [
+    {
+      "title": "Música callada",
+      "composerName": "Frederic Mompou"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_fundacionpiumosso_com",
+      "url": "https://www.fundacionpiumosso.com/evento/mario-prisuelos-musica-callada-de-frederic-mompou",
+      "checkedAt": "2026-08-31"
+    }
+  ],
+  "primarySourceId": "src_fundacionpiumosso_com",
+  "lastVerifiedAt": "2026-08-31"
+}

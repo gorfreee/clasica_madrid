@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_apollo5_day_in_paradise",
+  "origin": "published-catalog",
+  "sourceId": "tala-producciones",
+  "sourceUrl": "https://www.tala-producciones.es/salon-del-ateneo/apollo5-a-day-in-paradise",
+  "listingTitle": "APOLLO5 – ‘A Day in Paradise’",
+  "observed": {
+    "title": "APOLLO5 – ‘A Day in Paradise’",
+    "seriesText": "Ciclo de música de cámara Salón del Ateneo",
+    "venueText": "Ateneo de Madrid",
+    "description": "El quinteto vocal británico APOLLO5 presenta 'A Day in Paradise'. Repertorio que recorre desde el Renacimiento hasta obras corales clásicas y contemporáneas, conjuntamente con el jazz, folk y el pop.",
+    "programText": "Thomas Morley (1557-1602) Arise, Awake. Claudio Monteverdi (1567-1643) Sfogava con le stelle. Francis Pott Méditation. Edvard Grieg Våren. George Gershwin Summertime. Eric Whitacre This Marriage. Camille Saint-Saëns Les fleurs et les arbres. Charles Villiers Stanford The Blue Bird. Tom Petty Wildflowers. Bill Withers Lovely Day.",
+    "accessText": "20,48 €",
+    "performers": [
+      {
+        "name": "APOLLO5"
+      }
+    ],
+    "composers": [
+      { "name": "Thomas Morley" },
+      { "name": "Claudio Monteverdi" },
+      { "name": "Francis Pott" },
+      { "name": "Edvard Grieg" },
+      { "name": "George Gershwin" },
+      { "name": "Eric Whitacre" },
+      { "name": "Camille Saint-Saëns" },
+      { "name": "Charles Villiers Stanford" },
+      { "name": "Tom Petty" },
+      { "name": "Bill Withers" }
+    ],
+    "works": [
+      { "title": "Arise, Awake", "composerName": "Thomas Morley" },
+      { "title": "Sfogava con le stelle", "composerName": "Claudio Monteverdi" },
+      { "title": "Méditation", "composerName": "Francis Pott" },
+      { "title": "Våren", "composerName": "Edvard Grieg" },
+      { "title": "Summertime", "composerName": "George Gershwin" },
+      { "title": "This Marriage", "composerName": "Eric Whitacre" },
+      { "title": "Les fleurs et les arbres", "composerName": "Camille Saint-Saëns" },
+      { "title": "The Blue Bird", "composerName": "Charles Villiers Stanford" },
+      { "title": "Wildflowers", "composerName": "Tom Petty" },
+      { "title": "Lovely Day", "composerName": "Bill Withers" }
+    ]
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": ["chamber", "choral"],
+    "eras": ["renaissance", "baroque", "romantic"],
+    "kind": "alternative",
+    "access": "paid"
+  },
+  "reason": "Programa mixto con un bloque clásico sustancial y autónomo (Morley, Monteverdi, Grieg, Saint-Saëns y otros) junto a arreglos de jazz/pop. No es un homenaje pop con una cita clásica aislada.",
+  "checkedAt": "2026-08-31"
+}
