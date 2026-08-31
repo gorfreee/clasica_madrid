@@ -249,6 +249,9 @@ describe('observabilidad de ingestión', () => {
     expect(sanitizeErrorMessage('token=super-secret-key-value', { GEMINI_API_KEY: 'super-secret-key-value' })).toBe(
       'token=[GEMINI_API_KEY]',
     );
+    expect(sanitizeErrorMessage('relay=relay-secret-token-xyz', { INGEST_FETCH_RELAY_TOKEN: 'relay-secret-token-xyz' })).toBe(
+      'relay=[INGEST_FETCH_RELAY_TOKEN]',
+    );
     expect(sanitizeErrorMessage('Authorization: Bearer abc.def')).toBe('Authorization: Bearer [redacted]');
     expect(classifyFailureCode('Las opciones --ai-* requieren el provider Gemini y GEMINI_API_KEY')).toBe(
       'ai-config-fatal',

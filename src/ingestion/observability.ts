@@ -93,6 +93,7 @@ export type FailureContext = {
 const SECRET_ENV_KEYS = [
   'GEMINI_API_KEY',
   'INGESTION_BOT_TOKEN',
+  'INGEST_FETCH_RELAY_TOKEN',
   'GH_TOKEN',
   'GITHUB_TOKEN',
   'OPENAI_API_KEY',

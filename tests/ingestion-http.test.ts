@@ -1,9 +1,34 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { getText } from '../src/ingestion/http.ts';
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+import { getText, HttpError, resolveFetchRelay } from '../src/ingestion/http.ts';
+import { fundacionJuanMarchAdapter as adapter } from '../src/ingestion/sources/fundacion-juan-march.ts';
+import { parseMarchDetail } from '../src/ingestion/detail/fundacion-juan-march.ts';
+import { getSourceDefinition } from '../src/ingestion/registry.ts';
+import { TEST_NOW, TEST_WINDOW } from './helpers.ts';
+import type { AdapterContext } from '../src/ingestion/types.ts';
 
 const listing = 'https://www.march.es/es/madrid/conciertos';
 const detail = 'https://www.march.es/es/madrid/concierto/andromeda-perseo';
+const ordinary = 'https://auditorionacional.inaem.gob.es/front-page-events.json';
 const ua = 'ClasicaMadrid-ingestion/1 (+https://github.com/gorfreee/clasica_madrid)';
+const relayOrigin = 'https://relay.example.test';
+const token = 'relay-secret-token-xyz';
+const relayEnv = {
+  INGEST_FETCH_RELAY_URL: `${relayOrigin}/`,
+  INGEST_FETCH_RELAY_TOKEN: token,
+};
+const source = getSourceDefinition(adapter.id);
+const context: AdapterContext = {
+  source,
+  now: TEST_NOW,
+  window: TEST_WINDOW,
+  get: async () => {
+    throw new Error('sin red');
+  },
+};
+const fixture = (name: string) =>
+  readFile(path.join(import.meta.dirname, 'fixtures/ingestion/march', `${name}.html`), 'utf8');
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -28,7 +53,7 @@ describe('getText cookie-capable redirects', () => {
       return new Response('<h1>Conciertos en Madrid</h1>', { status: 200 });
     });
     vi.stubGlobal('fetch', fetch);
-    await expect(getText(listing)).resolves.toBe('<h1>Conciertos en Madrid</h1>');
+    await expect(getText(listing, 30_000, {})).resolves.toBe('<h1>Conciertos en Madrid</h1>');
     expect(fetch).toHaveBeenCalledTimes(2);
     expect(fetch.mock.calls[0]?.[1]).toEqual(expect.objectContaining({
       redirect: 'manual',
@@ -46,7 +71,7 @@ describe('getText cookie-capable redirects', () => {
       return new Response('ok', { status: 200 });
     });
     vi.stubGlobal('fetch', fetch);
-    await expect(getText('https://example.org/a')).resolves.toBe('ok');
+    await expect(getText('https://example.org/a', 30_000, {})).resolves.toBe('ok');
     expect(fetch).toHaveBeenCalledTimes(2);
     expect(header(fetch.mock.calls[1]?.[1], 'cookie')).toBeUndefined();
     expect(header(fetch.mock.calls[0]?.[1], 'user-agent')).toBe(ua);
@@ -68,7 +93,7 @@ describe('getText cookie-capable redirects', () => {
       return new Response('canal', { status: 200 });
     });
     vi.stubGlobal('fetch', fetch);
-    await expect(getText(listing)).resolves.toBe('canal');
+    await expect(getText(listing, 30_000, {})).resolves.toBe('canal');
   });
 
   it('does not retry a 403 after the cookie hop, nor a 429 without a challenge', async () => {
@@ -79,20 +104,134 @@ describe('getText cookie-capable redirects', () => {
       return new Response('no', { status: 403, headers: { 'Retry-After': '9' } });
     });
     vi.stubGlobal('fetch', blocked);
-    await expect(getText(listing)).rejects.toMatchObject({ status: 403, retryAfter: '9' });
+    await expect(getText(listing, 30_000, {})).rejects.toMatchObject({ status: 403, retryAfter: '9' });
     expect(blocked).toHaveBeenCalledTimes(2);
 
     const limited = vi.fn(async () => new Response('blocked', { status: 429, headers: { 'Retry-After': '15' } }));
     vi.stubGlobal('fetch', limited);
-    await expect(getText(detail)).rejects.toMatchObject({ status: 429, retryAfter: '15' });
+    await expect(getText(detail, 30_000, {})).rejects.toMatchObject({ status: 429, retryAfter: '15' });
     expect(limited).toHaveBeenCalledTimes(1);
   });
 
   it('fails visibly on a redirect loop instead of hanging', async () => {
     const fetch = vi.fn(async () => new Response('', { status: 307, headers: { location: listing } }));
     vi.stubGlobal('fetch', fetch);
-    await expect(getText(listing)).rejects.toThrow(/demasiadas redirecciones/);
+    await expect(getText(listing, 30_000, {})).rejects.toThrow(/demasiadas redirecciones/);
     expect(fetch).toHaveBeenCalledTimes(10);
+  });
+});
+
+describe('getText fetch relay', () => {
+  it('keeps ordinary URLs on the direct transport even when the relay is configured', async () => {
+    const fetch = vi.fn(async (url: string) => {
+      expect(url).toBe(ordinary);
+      return new Response('[]', { status: 200 });
+    });
+    vi.stubGlobal('fetch', fetch);
+    await expect(getText(ordinary, 30_000, relayEnv)).resolves.toBe('[]');
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(String(fetch.mock.calls[0]?.[0])).toBe(ordinary);
+    expect(header(fetch.mock.calls[0]?.[1], 'authorization')).toBeUndefined();
+    expect(resolveFetchRelay(ordinary, relayEnv)).toBeUndefined();
+  });
+
+  it('sends allowlisted March URLs to the relay and keeps the official logical URL', async () => {
+    const html = '<h1>Conciertos en Madrid</h1>';
+    const fetch = vi.fn(async (url: string, init?: RequestInit) => {
+      const parsed = new URL(url);
+      expect(parsed.origin).toBe(relayOrigin);
+      expect(parsed.searchParams.get('url')).toBe(listing);
+      expect(header(init, 'authorization')).toBe(`Bearer ${token}`);
+      expect(init?.redirect).toBe('manual');
+      return new Response(html, { status: 200 });
+    });
+    vi.stubGlobal('fetch', fetch);
+    await expect(getText(listing, 30_000, relayEnv)).resolves.toBe(html);
+    expect(fetch).toHaveBeenCalledTimes(1);
+    const target = resolveFetchRelay(listing, relayEnv);
+    expect(target?.requestUrl).toContain(encodeURIComponent(listing));
+    expect(JSON.stringify(target)).not.toContain('workers.dev');
+  });
+
+  it('feeds relay HTML to the March parser without rewriting official URLs', async () => {
+    const listingHtml = await fixture('listing');
+    const detailHtml = await fixture('detail-andromeda');
+    const fetch = vi.fn(async (url: string) => {
+      const requested = new URL(url).searchParams.get('url');
+      expect(url.startsWith(`${relayOrigin}/`)).toBe(true);
+      expect(requested?.startsWith('https://www.march.es/')).toBe(true);
+      if (requested === listing) return new Response(listingHtml, { status: 200 });
+      if (requested === detail) return new Response(detailHtml, { status: 200 });
+      throw new Error(`relay no debía pedir ${requested}`);
+    });
+    vi.stubGlobal('fetch', fetch);
+    const body = await getText(listing, 30_000, relayEnv);
+    const events = await adapter.extract(body, listing, context);
+    expect(events.length).toBeGreaterThan(0);
+    expect(events.every((event) => event.sourceUrl.startsWith('https://www.march.es/es/madrid/concierto/'))).toBe(true);
+    expect(events.some((event) => event.sourceUrl === detail)).toBe(true);
+    expect(events.every((event) => event.externalId === new URL(event.sourceUrl).pathname)).toBe(true);
+    expect(JSON.stringify(events)).not.toContain('relay.example');
+    expect(JSON.stringify(events)).not.toContain(token);
+
+    const andromeda = events.find((event) => event.sourceUrl === detail)!;
+    const hydrated = parseMarchDetail(andromeda, await getText(detail, 30_000, relayEnv));
+    expect(hydrated.occurrences.length).toBeGreaterThan(0);
+    expect(JSON.stringify(hydrated)).not.toContain('relay.example');
+    expect(await adapter.extract(listingHtml, listing, context)).toEqual(events);
+  });
+
+  it('surfaces relay 403 and 500 against the official URL without leaking the token', async () => {
+    for (const status of [403, 500]) {
+      const fetch = vi.fn(async () => new Response('nope', { status }));
+      vi.stubGlobal('fetch', fetch);
+      await expect(getText(listing, 30_000, relayEnv)).rejects.toMatchObject({
+        status,
+        message: `HTTP ${status} al pedir ${listing}`,
+      });
+      try {
+        await getText(listing, 30_000, relayEnv);
+        throw new Error('expected failure');
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        expect(message).not.toContain(token);
+        expect(message).not.toContain('Bearer');
+        expect(message).not.toContain(relayOrigin);
+        expect(error).toBeInstanceOf(HttpError);
+      }
+    }
+  });
+
+  it('never sends a non-allowlisted host to the relay', async () => {
+    expect(resolveFetchRelay('https://canal.march.es/es', relayEnv)).toBeUndefined();
+    expect(resolveFetchRelay('https://www.march.es.evil.test/', relayEnv)).toBeUndefined();
+    const fetch = vi.fn(async (url: string) => {
+      expect(url).toBe('https://canal.march.es/es');
+      return new Response('canal', { status: 200 });
+    });
+    vi.stubGlobal('fetch', fetch);
+    await expect(getText('https://canal.march.es/es', 30_000, relayEnv)).resolves.toBe('canal');
+    expect(String(fetch.mock.calls[0]?.[0])).toBe('https://canal.march.es/es');
+  });
+
+  it('fails visibly when the required relay is only half-configured', async () => {
+    const fetch = vi.fn(async (url: string) => {
+      expect(url).toBe(ordinary);
+      return new Response('[]', { status: 200 });
+    });
+    vi.stubGlobal('fetch', fetch);
+    await expect(getText(listing, 30_000, { INGEST_FETCH_RELAY_URL: `${relayOrigin}/` })).rejects.toThrow(
+      `relay de fetch incompleto al pedir ${listing}`,
+    );
+    await expect(getText(listing, 30_000, { INGEST_FETCH_RELAY_TOKEN: token })).rejects.toThrow(
+      `relay de fetch incompleto al pedir ${listing}`,
+    );
+    await expect(getText(listing, 30_000, {
+      INGEST_FETCH_RELAY_URL: 'http://relay.example.test/',
+      INGEST_FETCH_RELAY_TOKEN: token,
+    })).rejects.toThrow(`relay de fetch inválido al pedir ${listing}`);
+    await expect(getText(ordinary, 30_000, { INGEST_FETCH_RELAY_TOKEN: token })).resolves.toBe('[]');
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 });
 

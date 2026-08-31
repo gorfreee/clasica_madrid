@@ -1,78 +1,38 @@
-# Validación de Fundación Juan March — 2026-08-31
+# Validación de Fundación Juan March — fetch relay
 
-Base: `main` en `cdb5f53` (PR #41). No se modifica `data/**`. Adapter, hydration, clasificación y reconciliation de #40 permanecen intactos. `skipDefaultSync` sigue activo.
+Base: `main` en `c8547d1` (PR #42). No se modifica `data/**`. Adapter, hydration, clasificación y reconciliation de #40/#41 permanecen intactos.
 
-## Conclusión
+## Conclusión operativa
 
-**`fundacion-juan-march` requiere un entorno de ejecución con acceso directo a `www.march.es`.** GitHub-hosted Actions no es ese entorno. No hay un cambio de cliente HTTP, headers o runner hosted que abra el listado, y no hay un endpoint first-party alternativo que cubra el calendario presencial completo.
+GitHub-hosted Actions recibe HTTP 403 en el primer request a `https://www.march.es/es/madrid/conciertos`. Eso no depende de Node fetch, curl, HTTP/1.1 vs HTTP/2, headers ni ubuntu vs macOS (PR #42).
 
-El siguiente paso operativo es decidir otro entorno (por ejemplo un runner self-hosted), no seguir eludiendo el bloqueo desde código.
+Cloudflare Workers sí alcanzan March: listing 307 + `Set-Cookie` → replay same-origin → 200; las fichas responden 200 con canonical, JSON-LD y `p-acto__fechas`.
 
-## Evidencia de ingestión real
+El transporte de producción para este host es por tanto:
 
-| Run | Código | Listing | RawEvents | Hydration | Clasificación / IA | Health | `data/**` |
-|---|---|---|---|---|---|---|---|
-| [`33378603348`](https://github.com/gorfreee/clasica_madrid/actions/runs/33378603348) | `main` #40 `9936aa1` | HTTP 403 | 0 | 0 | 0 | `fatal` | intacto |
-| [`33380991290`](https://github.com/gorfreee/clasica_madrid/actions/runs/33380991290) | rama #41, cookie jar | HTTP 403 | 0 | 0 | 0 | `fatal` | intacto |
-| [`33381711259`](https://github.com/gorfreee/clasica_madrid/actions/runs/33381711259) | `main` #41 `cdb5f53` | HTTP 403 | 0 | 0 | 0 | `fatal` | intacto |
+```text
+GitHub Actions → Cloudflare Worker (fetch relay) → www.march.es
+```
 
-Las tres fallan **en el primer request** a `https://www.march.es/es/madrid/conciertos`, antes de `extract()`. El parser no intervino.
+`getText` sigue siendo la abstracción común. Sólo `www.march.es` usa el relay, y sólo cuando `INGEST_FETCH_RELAY_URL` y `INGEST_FETCH_RELAY_TOKEN` están los dos. El adapter de March no conoce Cloudflare. Las URLs lógicas, citations, `externalId` y reports siguen siendo `https://www.march.es/...`.
 
-En redes que reciben el 307 de nginx, `getText` reenvía el `Set-Cookie` a la misma origin y obtiene 200 (11 conciertos / 17 funciones; Andrómeda conserva seis funciones a las 18:30). Actions no llega a ese desafío: responde 403 sin `Location` ni `Set-Cookie`.
+Worker: [`infra/fetch-relay`](../infra/fetch-relay/README.md). Allowlist estricta (GET, Bearer, listing + `/es/madrid/concierto/*`, sin redirects cross-origin, cookie jar same-origin, HTML final sin `Set-Cookie`).
 
-## Matriz HTTP desde GitHub-hosted runners
+## `skipDefaultSync`
 
-Workflow `March HTTP diagnostic`, [run `33383332172`](https://github.com/gorfreee/clasica_madrid/actions/runs/33383332172), rama `diagnose/march-actions-http`. Pocas peticiones por variante, sin reintentos de 403, cuerpos descartados.
+Permanece hasta que un dry-run real de `fundacion-juan-march` desde GitHub Actions **con el relay** resulte sano (listing 200, hydration de las fichas actuales, sin problemas nuevos de adquisición). `--sources fundacion-juan-march` sigue ejecutándola; un relay ausente, incompleto o un 403/500 sigue siendo fallo visible, no un éxito vacío.
 
-Listing `https://www.march.es/es/madrid/conciertos`:
+## Evidencia previa (egress directo de Actions)
 
-| Cliente | ubuntu-latest | macos-latest |
-|---|---|---|
-| Node `fetch` (headers de `getText`) | 403, sin redirect ni cookie | 403, sin redirect ni cookie |
-| Node `https` (TLS distinto de undici) | 403, HTTP/1.1, TLS 1.3 | 403, HTTP/1.1, TLS 1.3 |
-| Node `https` + Accept / Accept-Language / UA de navegación (sólo diagnóstico) | 403 | 403 |
-| `curl` por defecto (HTTP/2) | 403 | 403 |
-| `curl --http1.1` | 403 | 403 |
-| `curl` + headers de navegación (sólo diagnóstico) | 403 | 403 |
-| `getText` de producción | no invocado: el primer hop ya era 403 | no invocado |
+| Run | Código | Listing | RawEvents | Hydration | Health | `data/**` |
+|---|---|---|---|---|---|---|
+| [`33378603348`](https://github.com/gorfreee/clasica_madrid/actions/runs/33378603348) | `main` #40 | HTTP 403 | 0 | 0 | `fatal` | intacto |
+| [`33380991290`](https://github.com/gorfreee/clasica_madrid/actions/runs/33380991290) | rama #41, cookie jar | HTTP 403 | 0 | 0 | `fatal` | intacto |
+| [`33381711259`](https://github.com/gorfreee/clasica_madrid/actions/runs/33381711259) | `main` #41 | HTTP 403 | 0 | 0 | `fatal` | intacto |
+| [`33383332172`](https://github.com/gorfreee/clasica_madrid/actions/runs/33383332172) | matriz HTTP #42 | 403 en todos los clientes | — | — | — | intacto |
 
-Mismo host, otras rutas y hosts March:
+En redes que reciben el 307 de nginx, el cliente directo de `getText` reenvía el `Set-Cookie` y obtiene 200. Actions no llega a ese desafío.
 
-| URL | ubuntu-latest | macos-latest | ¿Calendario completo? |
-|---|---|---|---|
-| `www.march.es/robots.txt` | 200 | 200 | no |
-| `canal.march.es/es` | 200 | 200 | no (control de egress) |
-| `www2.march.es/invitaciones/` | 200 | 200 | no: formulario de invitaciones; una ficha, una fecha |
-| `recursos.march.es/` | 400 | 400 | no (almacén de media) |
+No se reabre la vía de User-Agent, retries, Playwright ni endpoints alternativos de March.
 
-El 403 no es un fallo de TLS, HTTP/2, User-Agent ni del runner Linux/Azure en concreto: macOS hosted se comporta igual. `robots.txt` en el mismo host responde 200, así que no es un corte total del hostname; el listado HTML y, por tanto, el pipeline, siguen inaccesibles.
-
-No se implementan proxies, navegador, spoofing de UA como «solución», ni retries de un 403 determinista.
-
-Para repetir la matriz: **Actions → March HTTP diagnostic → Run workflow** sobre la rama que contenga el workflow. No comparte el group `ingestion-production`.
-
-## Superficies first-party (rechequeo breve)
-
-Nada nuevo cubre descubrimiento completo + varias funciones + horas reales + URL canónica:
-
-| Superficie | Resultado | Calendario completo |
-|---|---|---|
-| `www.march.es` con replay del 307 (redes que lo reciben) | 200 | sí |
-| `www.march.es` desde GitHub-hosted Actions | 403 en el listing | no |
-| JSON:API `/jsonapi` | 401 | no |
-| `?_format=json` | 406 | no |
-| `canal.march.es` | 200 | no: streaming / una función / hora de entrevista |
-| ICS/Outlook del listado | — | sólo la primera función |
-| `www2.march.es/musica/` | 301 al listing de `www.march.es` | no |
-| `www2.march.es/calendario/` | 301 a `www.march.es/es/madrid` | no |
-| `www2.march.es/invitaciones/` | 200 desde local y desde Actions | no: 1 concierto observado, 1 fecha; las fichas siguen en `www.march.es` |
-| `recursos.march.es` | 400 en la raíz | no |
-| PDF de temporada en `cdnrepositorios.march.es` | 200 | temporada 2025–26, no un feed |
-
-Canal March y el formulario de invitaciones de `www2` son alcanzables desde Actions. Ninguno sustituye al listado canónico.
-
-## Estado operativo
-
-`skipDefaultSync` permanece. El sync programado no incluye March. `--sources fundacion-juan-march` sigue ejecutándola y un 403 sigue siendo fallo visible, no un éxito silencioso.
-
-No reactivar el set por defecto hasta que un dry-run real desde **el entorno que vaya a operar March** descubra conciertos actuales sin HTTP 403 en el listing.
+Para repetir la matriz **sin relay**: **Actions → March HTTP diagnostic**. No comparte el group `ingestion-production`.

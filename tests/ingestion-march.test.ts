@@ -1,7 +1,7 @@
 import { readFile, mkdtemp } from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fundacionJuanMarchAdapter as adapter, marchConcertUrl } from '../src/ingestion/sources/fundacion-juan-march.ts';
 import { parseMarchDetail } from '../src/ingestion/detail/fundacion-juan-march.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
@@ -11,7 +11,7 @@ import { matchVenue } from '../src/ingestion/venues.ts';
 import { mergeCandidateBatch } from '../src/ingestion/batch.ts';
 import { emptyCatalog, type Catalog } from '../src/lib/domain/catalog.ts';
 import type { AdapterContext, RawEvent } from '../src/ingestion/types.ts';
-import { HttpError } from '../src/ingestion/http.ts';
+import { getText, HttpError } from '../src/ingestion/http.ts';
 import { TEST_NOW, TEST_WINDOW } from './helpers.ts';
 
 const base = 'https://www.march.es/es/madrid';
@@ -134,6 +134,11 @@ describe('March JSON-LD hydration', () => {
 
 describe('March pipeline safety and reconciliation', () => {
   const slugs = ['ayres-extemporae', 'beethoven-schubert-sombras-cruzadas-iii-formas-libertad'];
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
   async function run(catalog: Catalog = emptyCatalog(), failAyres = false, failAll = false) {
     const listing = await listingFor(slugs);
     return runIngest({
@@ -170,6 +175,47 @@ describe('March pipeline safety and reconciliation', () => {
     expect(explicit.summary.health).toBe('fatal');
     expect(explicit.summary.autoMergeEligible).toBe(false);
     expect(explicit.summary.rawEvents).toBe(0);
+  });
+
+  it('does not change classification or reconciliation when HTML arrives through the fetch relay', async () => {
+    const baseline = await run();
+    const listingHtml = await listingFor(slugs);
+    const ayres = await fixture('detail-ayres');
+    const formas = await fixture('detail-formas');
+    const fetch = vi.fn(async (url: string) => {
+      const requested = new URL(url).searchParams.get('url');
+      expect(url).toContain('relay.example.test');
+      expect(requested?.startsWith('https://www.march.es/')).toBe(true);
+      if (requested === `${base}/conciertos`) return new Response(listingHtml, { status: 200 });
+      if (requested?.endsWith('/ayres-extemporae')) return new Response(ayres, { status: 200 });
+      if (requested?.endsWith('/beethoven-schubert-sombras-cruzadas-iii-formas-libertad')) {
+        return new Response(formas, { status: 200 });
+      }
+      throw new Error(`relay no debía pedir ${requested}`);
+    });
+    vi.stubGlobal('fetch', fetch);
+    const relayed = await runIngest({
+      now: TEST_NOW,
+      dryRun: true,
+      catalog: emptyCatalog(),
+      sourceIds: [source.id],
+      dataDir: await mkdtemp(path.join(os.tmpdir(), 'march-relay-')),
+      get: (url) => getText(url, 30_000, {
+        INGEST_FETCH_RELAY_URL: 'https://relay.example.test/',
+        INGEST_FETCH_RELAY_TOKEN: 'relay-secret-token-xyz',
+      }),
+    });
+    expect(relayed.summary.eligibility).toEqual(baseline.summary.eligibility);
+    expect(relayed.summary.newEvents).toBe(baseline.summary.newEvents);
+    expect(relayed.summary.unchangedEvents).toBe(baseline.summary.unchangedEvents);
+    expect(relayed.summary.ambiguous).toBe(baseline.summary.ambiguous);
+    expect(relayed.summary.possiblyMissing).toBe(baseline.summary.possiblyMissing);
+    expect(relayed.summary.detailHydrationSucceeded).toBe(baseline.summary.detailHydrationSucceeded);
+    expect(relayed.candidates.map((item) => item.event.citations.map((citation) => citation.url))).toEqual(
+      baseline.candidates.map((item) => item.event.citations.map((citation) => citation.url)),
+    );
+    expect(JSON.stringify(relayed.rawEvents)).not.toContain('relay.example');
+    expect(JSON.stringify(relayed.candidates)).not.toContain('workers.dev');
   });
 
   it('bootstraps source/venue through Candidates, validates and is idempotent', async () => {
