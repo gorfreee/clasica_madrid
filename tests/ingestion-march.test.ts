@@ -152,18 +152,19 @@ describe('March pipeline safety and reconciliation', () => {
     });
   }
 
-  it('is omitted from the default sync but still fails visibly when named', async () => {
-    expect(source.skipDefaultSync).toBe(true);
+  it('joins the default sync via the fetch relay and still fails visibly when blocked', async () => {
+    expect(source.skipDefaultSync).toBeFalsy();
     expect(source.useFetchRelay).toBe(true);
     const dataDir = await mkdtemp(path.join(os.tmpdir(), 'march-optin-'));
     const defaultRun = await runIngest({
       catalog: emptyCatalog(), now: TEST_NOW, dryRun: true, dataDir,
       get: async (url) => {
-        if (url.includes('march.es')) throw new Error('March no debe pedirse en el sync por defecto');
+        if (url === `${base}/conciertos`) return emptyListing;
         throw new Error(`URL no mapeada: ${url}`);
       },
     });
-    expect(defaultRun.summary.sourcesAttempted).not.toContain(source.id);
+    expect(defaultRun.summary.sourcesAttempted).toContain(source.id);
+    expect(defaultRun.summary.sourcesSucceeded).toContain(source.id);
     expect(defaultRun.summary.sourcesFailed.map((item) => item.sourceId)).not.toContain(source.id);
     const explicit = await runIngest({
       catalog: emptyCatalog(), now: TEST_NOW, dryRun: true, dataDir, sourceIds: [source.id],
