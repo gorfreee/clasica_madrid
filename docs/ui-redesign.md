@@ -1,6 +1,6 @@
 # Rediseño de interfaz — documento de trabajo
 
-> Estado: **v0.1 / exploración**  
+> Estado: **v0.2 / exploración**  
 > Este documento es deliberadamente vivo. Recoge objetivos, principios, hipótesis y preguntas abiertas para guiar el rediseño de la interfaz de Clásica Madrid. No debe interpretarse como una especificación cerrada ni como un mandato de implementar ahora todas las ideas aquí mencionadas.
 
 ## Propósito
@@ -81,6 +81,22 @@ A futuro podrán evaluarse páginas semánticas útiles para determinadas formas
 
 La accesibilidad debe formar parte de los componentes y patrones desde el principio: HTML semántico, navegación por teclado, foco visible, contraste, targets táctiles adecuados, formularios comprensibles y respeto a preferencias como `prefers-reduced-motion`.
 
+## Experiencia de entrada y home
+
+La hipótesis acordada es que **la home sea esencialmente la agenda**, con una capa inicial muy ligera de identidad y orientación.
+
+No se busca una portada separada de la utilidad principal ni una hero extensa. El usuario debería llegar casi inmediatamente a conciertos próximos, manteniendo suficiente identidad para que la página se sienta como un producto cultural propio y no como una tabla desnuda.
+
+Una estructura de partida podría combinar:
+
+- wordmark `Clásica Madrid`;
+- una descripción breve, si aporta contexto;
+- accesos temporales frecuentes;
+- búsqueda y filtros;
+- comienzo inmediato de la agenda.
+
+La composición exacta, la altura de esta zona inicial y el peso relativo de cada control quedan abiertos a exploración visual.
+
 ## Responsive: una interfaz adaptada a cada contexto
 
 El objetivo no es reducir una interfaz de escritorio hasta que quepa en móvil. Las distintas anchuras pueden justificar representaciones diferentes de los mismos datos.
@@ -89,24 +105,26 @@ El objetivo no es reducir una interfaz de escritorio hasta que quepa en móvil. 
 
 La hipótesis de partida es una **agenda cronológica vertical, compacta y muy escaneable**.
 
-Cada evento debería mostrar sólo la información necesaria para decidir rápidamente si merece atención. El resto puede vivir en la ficha del evento o aparecer mediante progressive disclosure.
+Cada evento debe permitir entender aproximadamente, sin abrir la ficha:
+
+- **qué** se toca o qué ocurre;
+- **quién** lo interpreta;
+- **dónde**;
+- **cuándo**.
+
+Esto no implica mostrar simultáneamente todos los campos disponibles. La composición debe adaptarse a la irregularidad de los datos y mantener una jerarquía clara.
 
 No se considera deseable convertir cada evento en una card grande y decorativa si eso reduce demasiado la densidad de información. Tampoco se parte de la idea de conservar una tabla ancha mediante scroll horizontal como experiencia móvil principal.
 
-La composición exacta del elemento de agenda —qué peso tienen fecha, hora, título, lugar, compositores, intérpretes, formato, acceso, precio, etc.— queda abierta y debe probarse con datos reales.
+En música clásica, el `title` no debe asumirse como único protagonista universal. Según el evento, compositor, repertorio, intérpretes o contexto pueden explicar mejor qué va a escuchar el usuario. Los experimentos deberán comprobar cómo construir esa jerarquía sin depender de un único campo perfecto.
 
 ### Hipótesis inicial para escritorio
 
-En pantallas grandes sí debe aprovecharse el espacio para ofrecer mayor densidad y capacidad de comparación.
+En pantallas grandes debe aprovecharse el espacio para ofrecer mayor densidad y capacidad de comparación.
 
-Entre las alternativas que deben explorarse están:
+La hipótesis principal pasa a ser una **agenda editorial de filas densas**: más flexible que una tabla rígida, pero con suficiente estructura para comparar rápidamente hora, contenido musical, intérpretes, lugar y señales relevantes.
 
-- una tabla de alta densidad;
-- una agenda editorial estructurada en filas;
-- un híbrido entre tabla y lista;
-- vistas alternables, por ejemplo `Agenda` / `Tabla`, si aportan valor suficiente.
-
-No se fija todavía que escritorio deba equivaler necesariamente a tabla.
+Esta dirección debe probarse frente a alternativas más utilitarias o tabulares. No se fija todavía una representación final ni se exige ofrecer varias vistas al usuario.
 
 ### Principio de progressive disclosure
 
@@ -118,16 +136,46 @@ Una posible jerarquía general es:
 2. ficha de evento para comprenderlo en profundidad;
 3. filtros y otras vistas para navegar el catálogo desde perspectivas distintas.
 
+## Navegación temporal
+
+La agenda debe poder recorrerse de forma natural mediante **scroll cronológico continuo**.
+
+Este comportamiento se complementará con accesos ligeros a momentos frecuentes, por ejemplo:
+
+- `Hoy`;
+- `Mañana`;
+- `Este fin de semana`;
+- selector de fecha o calendario.
+
+No se parte de una gran vista mensual ni de una navegación obligatoriamente organizada por semanas. El calendario puede existir como mecanismo de salto, no necesariamente como representación principal del catálogo.
+
+Los agrupadores de fecha, los saltos de mes y cualquier navegación temporal persistente deberán resolverse durante los experimentos con datos reales.
+
 ## Búsqueda y filtros
 
-Los filtros son una parte central del producto y merecen diseño específico.
+Búsqueda y filtros son capacidades relacionadas pero conceptualmente distintas.
+
+### Búsqueda
+
+La búsqueda debe tener presencia visible sin dominar la home. Debe concebirse desde el principio como una búsqueda sobre el catálogo, no únicamente sobre el título de los eventos.
+
+Idealmente podrá encontrar coincidencias relevantes en elementos como:
+
+- títulos;
+- compositores;
+- intérpretes;
+- lugares;
+- ciclos u otros textos útiles disponibles.
+
+No se exige en esta fase una búsqueda semántica o técnicamente sofisticada. El diseño, sin embargo, no debería bloquear una evolución posterior hacia consultas más expresivas.
+
+### Filtros
 
 Debe evitarse tanto un formulario enorme e intimidante como una simplificación que prive al usuario avanzado de capacidad real.
 
 Una dirección a explorar es combinar:
 
-- accesos o shortcuts útiles para consultas frecuentes (`Hoy`, `Mañana`, `Este fin de semana`, `Gratis`, etc.);
-- búsqueda textual;
+- accesos o shortcuts útiles para consultas frecuentes (`Hoy`, `Este fin de semana`, `Gratis`, etc.);
 - un sistema de filtros avanzados accesible cuando el usuario lo necesite;
 - visualización clara de filtros activos;
 - eliminación individual y `Limpiar todo`;
@@ -135,9 +183,29 @@ Una dirección a explorar es combinar:
 
 La selección exacta de shortcuts y filtros queda abierta a validación. No deben añadirse controles porque el dato exista, sino porque ayuden a descubrir conciertos.
 
+## Programación institucional y alternativa
+
+Los eventos de grandes instituciones, espacios consolidados, ciclos pequeños, iglesias, universidades, agrupaciones amateurs y otras fuentes deben **convivir en la misma agenda general**.
+
+No se quiere una jerarquía editorial explícita que convierta unos eventos en principales y otros en secundarios. Tampoco se consideran deseables etiquetas grandes o repetitivas como `alternativo` que condicionen innecesariamente la lectura.
+
+La naturaleza del evento puede comunicarse de forma sutil cuando resulte útil mediante el propio lugar, contexto, intérpretes, estilo visual u otros metadatos apropiados.
+
+La segmentación más fuerte debe poder realizarse mediante filtros y futuras superficies de exploración por tipo o nivel de evento.
+
+## Datos incompletos y composición adaptable
+
+Los eventos reales tendrán grados de detalle muy diferentes. La interfaz debe asumirlo como una característica normal del catálogo.
+
+Por defecto, un dato ausente debe **desaparecer limpiamente de la composición** en lugar de producir filas llenas de guiones, `Desconocido` o `No disponible`.
+
+Los componentes deben poder sentirse completos con distintos niveles de riqueza de información. La ausencia sólo debería comunicarse explícitamente cuando sea relevante para poder asistir o comprender el estado del evento, por ejemplo una hora todavía por confirmar.
+
+La UI nunca debe inferir información no respaldada para rellenar huecos visuales.
+
 ## Ficha de evento
 
-La ficha es el lugar natural para mostrar la riqueza completa del catálogo sin sobrecargar la agenda.
+La ficha es el lugar natural para mostrar la riqueza disponible del catálogo sin sobrecargar la agenda.
 
 Debe poder presentar de forma clara, cuando estén disponibles:
 
@@ -153,21 +221,45 @@ Debe poder presentar de forma clara, cuando estén disponibles:
 - fuente y trazabilidad;
 - otros datos relevantes.
 
-Su diseño debe facilitar tanto una lectura rápida como una exploración más profunda.
+Su diseño debe facilitar tanto una lectura rápida como una exploración más profunda, pero no necesita sustituir a la página original del organizador.
+
+### Fuente oficial como acción principal
+
+Clásica Madrid funciona como capa de descubrimiento, normalización y comparación. La **fuente oficial sigue siendo la referencia final** para detalles como entradas, condiciones de acceso, cambios de última hora, programa completo o información que el catálogo no conserve.
+
+Por ello, la acción de ir a la fuente —por ejemplo `Ver información oficial` o equivalente— debe tener presencia clara y relativamente protagonista en la ficha del evento. No debe quedar relegada a una nota técnica de trazabilidad al final de la página.
+
+La interfaz debe ser útil por sí misma, pero no intentar retener al usuario dentro de Clásica Madrid a costa de ocultar la fuente original.
 
 ## Lugares y otras superficies de exploración
 
-Las páginas y el índice de lugares no deben considerarse secciones secundarias puramente técnicas. Pueden convertirse en una vía importante para descubrir el catálogo.
+`Agenda` y `Lugares` se consideran las **dos superficies principales iniciales** del producto.
 
-Debe explorarse cómo podría funcionar una experiencia de lugares que permita, por ejemplo:
+Esto no impide que la navegación evolucione más adelante hacia compositores, intérpretes, formatos, mapa u otras entidades, pero evita introducir desde el principio demasiadas secciones de primer nivel.
 
-- recorrer espacios con programación próxima;
-- entrar en un lugar y consultar su agenda;
-- distinguir grandes instituciones y espacios alternativos sin crear una jerarquía editorial artificial;
-- relacionar lugar, municipio y programación;
-- incorporar más adelante una vista de mapa si demuestra utilidad.
+### Índice de lugares
 
-La posible vista de mapa es una idea futura, no un requisito de la primera implementación. La arquitectura y el diseño no deberían bloquearla innecesariamente.
+Las páginas y el índice de lugares no deben considerarse secciones secundarias puramente técnicas. Deben funcionar como una vía real para descubrir programación.
+
+En lugar de limitarse a un directorio alfabético, conviene explorar una presentación orientada a actividad próxima, por ejemplo mostrando cuando exista:
+
+- nombre del lugar;
+- número de conciertos próximos;
+- siguiente fecha con programación;
+- municipio o zona cuando aporte contexto.
+
+Debe poder distinguirse qué lugares tienen programación próxima sin crear una jerarquía editorial artificial entre instituciones grandes y espacios pequeños.
+
+### Página de lugar
+
+La ficha de un lugar debería poder combinar:
+
+- nombre y localización básica;
+- próximos conciertos;
+- información o enlace oficial disponible;
+- otros datos útiles del lugar cuando existan.
+
+Una vista de mapa sigue siendo una posibilidad futura, no un requisito de esta primera implementación. La arquitectura y el diseño no deberían bloquearla innecesariamente.
 
 El mismo principio puede extenderse en el futuro a compositores, intérpretes u otras entidades si el catálogo y el comportamiento de los usuarios justifican esas superficies.
 
@@ -240,6 +332,8 @@ Definir con más precisión:
 
 Crear varias propuestas realmente distintas utilizando el mismo conjunto de eventos reales y probándolas al menos en móvil y desktop.
 
+La exploración debería incluir al menos una interpretación fuerte de la agenda editorial densa en desktop y una alternativa más utilitaria/tabular, sin asumir que ninguna de ellas será la solución final.
+
 ### Fase 3 — Convergencia
 
 Elegir una dirección o combinar las mejores ideas de varias propuestas. Resolver contradicciones y dejar claras las decisiones de producto.
@@ -301,41 +395,46 @@ Estos contratos pueden evolucionar si el nuevo diseño necesita otra arquitectur
 
 ## Decisiones actuales
 
-A fecha de esta v0.1 se consideran acordados los siguientes puntos:
+A fecha de esta v0.2 se consideran acordados los siguientes puntos:
 
 1. Se hará un replanteamiento amplio de la interfaz antes de encargar una implementación final.
 2. Este documento será la memoria viva de esa fase y puede cambiar sustancialmente.
-3. Móvil y escritorio no tienen por qué utilizar la misma representación visual.
-4. No debe intentarse mostrar todos los atributos de un evento simultáneamente.
-5. La agenda cronológica es central, pero no es la única forma futura de explorar el catálogo.
-6. La experiencia debe equilibrar facilidad de uso y profundidad para usuarios avanzados, sin diseño condescendiente.
-7. Performance, SEO y accesibilidad son restricciones de producto, no tareas posteriores.
-8. El logo y la identidad final pueden esperar hasta que exista una dirección visual clara.
-9. Las ideas futuras —incluido mapa u otras vistas del catálogo— deben permanecer abiertas sin convertirse prematuramente en alcance de implementación.
+3. La home será esencialmente la agenda, con una capa inicial ligera de identidad y orientación.
+4. Móvil y escritorio no tienen por qué utilizar la misma representación visual.
+5. El listado debe permitir entender aproximadamente qué se toca, quién lo toca, dónde y cuándo sin obligar a abrir la ficha.
+6. No debe intentarse mostrar todos los atributos de un evento simultáneamente.
+7. La composición debe adaptarse con elegancia a eventos con datos incompletos; la ausencia visual silenciosa será la opción por defecto.
+8. La agenda se recorrerá principalmente mediante scroll cronológico continuo, complementado con shortcuts temporales y selector de fecha.
+9. La búsqueda tendrá presencia visible y se concibe sobre el catálogo completo, no sólo sobre títulos.
+10. Los filtros avanzados deben estar disponibles sin ocupar permanentemente la interfaz principal.
+11. La hipótesis principal para desktop será una agenda editorial de filas densas, que deberá compararse con alternativas más tabulares durante la exploración.
+12. Programación institucional y alternativa convivirán en la misma agenda sin jerarquía editorial explícita; podrán existir señales sutiles y filtros para distinguir tipos de evento.
+13. La fuente oficial será una acción clara y relativamente protagonista en la ficha del evento.
+14. `Agenda` y `Lugares` serán las dos superficies principales iniciales de exploración.
+15. El índice de lugares debe ayudar a descubrir programación próxima, no limitarse a un directorio administrativo.
+16. La agenda cronológica es central, pero no es la única forma futura de explorar el catálogo.
+17. La experiencia debe equilibrar facilidad de uso y profundidad para usuarios avanzados, sin diseño condescendiente.
+18. Performance, SEO y accesibilidad son restricciones de producto, no tareas posteriores.
+19. El logo y la identidad final pueden esperar hasta que exista una dirección visual clara.
+20. Las ideas futuras —incluido mapa u otras vistas del catálogo— deben permanecer abiertas sin convertirse prematuramente en alcance de implementación.
 
 ## Preguntas abiertas
 
 Entre las preguntas que deberán resolverse en futuras iteraciones están:
 
-- ¿Qué debe ver exactamente el usuario al entrar en la home?
-- ¿Qué información mínima debe contener un evento en móvil?
-- ¿Qué densidad funciona mejor en desktop?
-- ¿Tabla, agenda editorial, híbrido o varias vistas?
-- ¿Qué shortcuts de fecha o acceso son realmente útiles?
+- ¿Cuál debe ser la composición exacta de la zona inicial de la home y cuánto espacio debe ocupar antes de la agenda?
+- ¿Qué jerarquía concreta funciona mejor para título, repertorio, compositor e intérpretes cuando los datos son irregulares?
+- ¿Qué densidad exacta funciona mejor en móvil y desktop?
+- ¿Cómo debe agruparse visualmente la agenda por días y meses?
+- ¿Qué shortcuts temporales y de acceso aportan suficiente valor para permanecer visibles?
 - ¿Cómo debe abrirse y comportarse el filtrado avanzado en móvil y desktop?
-- ¿Qué atributos merecen filtros visibles y cuáles deben vivir únicamente en búsqueda o detalle?
-- ¿Cómo debe integrarse la exploración por lugares en la navegación principal?
-- ¿Cuándo tendría sentido una vista de mapa y qué problema resolvería?
-- ¿Qué dirección visual transmite mejor el carácter de Clásica Madrid?
-- ¿Qué presupuestos de performance y objetivos de Core Web Vitals se adoptarán?
-- ¿Qué páginas semánticas adicionales aportan valor real a usuario y SEO?
-- ¿Qué nivel de interacción requiere JavaScript y qué puede mantenerse completamente estático?
-- ¿Qué skill de diseño y qué metodología de auditoría se utilizarán durante implementación?
+- ¿Qué capacidades debe tener la búsqueda en la primera implementación frente a evoluciones posteriores?
+- ¿Qué señales visuales sutiles ayudan a diferenciar tipos de evento sin crear una jerarquía artificial?
+- ¿Qué información mínima y qué acciones deben aparecer en una ficha de lugar?
+- ¿Cómo se presenta el índice de lugares cuando haya muchos espacios con muy distinta frecuencia de programación?
+- ¿Qué territorios visuales merece la pena convertir en prototipos reales?
+- ¿Cuánto puede diferir la composición móvil de la de escritorio sin perder coherencia?
+- ¿Qué presupuestos medibles de rendimiento se fijarán para la implementación final?
+- ¿Qué experimentos deben realizarse antes de convertir estas decisiones en una especificación normativa?
 
-## Criterio general de decisión
-
-Cuando haya tensión entre mostrar más información y mantener claridad, debe priorizarse que el usuario pueda **descubrir y decidir con rapidez**, dejando disponible la profundidad mediante filtros, navegación y detalle.
-
-Cuando haya tensión entre una solución visualmente llamativa y otra más rápida, accesible y útil, la estética sólo debe ganar si aporta valor real sin deteriorar de forma significativa la experiencia.
-
-Cuando una idea futura sea prometedora pero no necesaria para validar el rediseño, debe documentarse y mantenerse abierta en lugar de introducirla prematuramente en el alcance.
+No todas estas preguntas tienen que resolverse antes de empezar a diseñar. Parte del objetivo de los experimentos es producir evidencia para responderlas.
