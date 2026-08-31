@@ -48,6 +48,7 @@ async function fileExists(filePath: string): Promise<boolean> {
 }
 
 async function fixtureGet(url: string): Promise<string> {
+  if (url === 'https://fundacionorcam.org/programacion/') return '<main><h1>Próximos conciertos</h1><div data-search-filter-settings="{&quot;urlName&quot;:&quot;fecha&quot;,&quot;values&quot;:[],&quot;options&quot;:[]}"></div><div data-widget_type="loop-grid.post"></div></main>';
   if (url === 'https://www.march.es/es/madrid/conciertos') return '<h1>Conciertos en Madrid</h1><div class="snippet-container snippet-container--0"></div><h2>La música</h2>';
   if (url === 'https://teatrodelazarzuela.inaem.gob.es/es/') {
     return '<a href="/es/temporada/lirica-2026-2027">Lírica</a>';
@@ -171,7 +172,7 @@ describe('aislamiento de fallos por fuente', () => {
       },
     });
     expect(run.summary.sourcesFailed.map((item) => item.sourceId)).toEqual(['teatro-real']);
-    expect(run.summary.sourcesSucceeded).toEqual(['auditorio-nacional', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march']);
+    expect(run.summary.sourcesSucceeded).toEqual(['auditorio-nacional', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam']);
     expect(run.rawEvents.length).toBeGreaterThan(0);
     expect(run.rawEvents.some((event) => event.sourceId === 'teatro-real')).toBe(false);
     expect(run.summary.written).toEqual([]);
@@ -191,7 +192,7 @@ describe('aislamiento de fallos por fuente', () => {
     });
     expect(run.summary.sourcesSucceeded).toEqual([]);
     expect(run.summary.sourcesFailed.map((item) => item.sourceId)).toEqual([
-      'auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march',
+      'auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam',
     ]);
     expect(run.summary.written).toEqual([]);
     expect(run.apply.report.ok).toBe(true);
@@ -596,4 +597,3 @@ describe('toCandidate y deduplicación', () => {
     expect(byUrl.filesToWrite).toEqual([]);
   });
 });
-

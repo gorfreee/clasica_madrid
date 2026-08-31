@@ -5,9 +5,11 @@ import { madridDatosAdapter } from './sources/madrid-datos.ts';
 import { teatroRealAdapter } from './sources/teatro-real.ts';
 import { teatroZarzuelaAdapter } from './sources/teatro-zarzuela.ts';
 import { fundacionJuanMarchAdapter } from './sources/fundacion-juan-march.ts';
+import { fundacionOrcamAdapter } from './sources/fundacion-orcam.ts';
 import type { SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
+  [fundacionOrcamAdapter.id]: fundacionOrcamAdapter,
   [fundacionJuanMarchAdapter.id]: fundacionJuanMarchAdapter,
   [auditorioNacionalAdapter.id]: auditorioNacionalAdapter,
   [teatroRealAdapter.id]: teatroRealAdapter,
@@ -97,6 +99,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Fundación Juan March',
       kind: 'official',
       url: 'https://www.march.es/',
+    },
+  },
+  {
+    id: 'fundacion-orcam',
+    name: 'Fundación ORCAM',
+    urls: ['https://fundacionorcam.org/programacion/'],
+    adapterId: fundacionOrcamAdapter.id,
+    catalogSourceId: 'src_fundacion_orcam',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_fundacion_orcam',
+      slug: 'fundacion-orcam',
+      name: 'Fundación ORCAM',
+      kind: 'official',
+      url: 'https://fundacionorcam.org/',
     },
   },
 ];
