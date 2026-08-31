@@ -11,6 +11,7 @@ import { matchVenue } from '../src/ingestion/venues.ts';
 import { mergeCandidateBatch } from '../src/ingestion/batch.ts';
 import { emptyCatalog, type Catalog } from '../src/lib/domain/catalog.ts';
 import type { AdapterContext, RawEvent } from '../src/ingestion/types.ts';
+import { HttpError } from '../src/ingestion/http.ts';
 import { TEST_NOW, TEST_WINDOW } from './helpers.ts';
 
 const base = 'https://www.march.es/es/madrid';
@@ -145,6 +146,31 @@ describe('March pipeline safety and reconciliation', () => {
       },
     });
   }
+
+  it('is omitted from the default sync but still fails visibly when named', async () => {
+    expect(source.skipDefaultSync).toBe(true);
+    const dataDir = await mkdtemp(path.join(os.tmpdir(), 'march-optin-'));
+    const defaultRun = await runIngest({
+      catalog: emptyCatalog(), now: TEST_NOW, dryRun: true, dataDir,
+      get: async (url) => {
+        if (url.includes('march.es')) throw new Error('March no debe pedirse en el sync por defecto');
+        throw new Error(`URL no mapeada: ${url}`);
+      },
+    });
+    expect(defaultRun.summary.sourcesAttempted).not.toContain(source.id);
+    expect(defaultRun.summary.sourcesFailed.map((item) => item.sourceId)).not.toContain(source.id);
+    const explicit = await runIngest({
+      catalog: emptyCatalog(), now: TEST_NOW, dryRun: true, dataDir, sourceIds: [source.id],
+      get: async (url) => { throw new HttpError(403, url); },
+    });
+    expect(explicit.summary.sourcesFailed).toEqual([expect.objectContaining({
+      sourceId: source.id,
+      message: `HTTP 403 al pedir ${base}/conciertos`,
+    })]);
+    expect(explicit.summary.health).toBe('fatal');
+    expect(explicit.summary.autoMergeEligible).toBe(false);
+    expect(explicit.summary.rawEvents).toBe(0);
+  });
 
   it('bootstraps source/venue through Candidates, validates and is idempotent', async () => {
     const first = await run();

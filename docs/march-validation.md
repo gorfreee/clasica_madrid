@@ -49,6 +49,19 @@ La URL de la ficha y su pathname son la identidad; no se usan las URLs de stream
 
 `schedule` y `publish` siguen ejecutando código de `main`. Un `dry-run` manual usa el ref seleccionado en Actions, para poder humear una rama antes del merge. Publish desde una feature branch no puede escribir `data/**` con código no fusionado.
 
+## Acceso HTTP desde GitHub Actions
+
+Honrar el `Set-Cookie` del 307 hace que el listado y las fichas respondan 200 desde un cliente Node en redes que reciben el desafío de cookie (comprobado en local: 11 conciertos, 17 funciones; Andrómeda conserva las seis a las 18:30).
+
+Desde GitHub Actions el primer hop es HTTP 403 incluso con ese cliente:
+
+- run [`33378603348`](https://github.com/gorfreee/clasica_madrid/actions/runs/33378603348) sobre `main` (#40), sin cookie jar;
+- run [`33380991290`](https://github.com/gorfreee/clasica_madrid/actions/runs/33380991290) sobre esta rama, con cookie jar y checkout de la feature branch.
+
+No hay API JSON first-party usable. Canal March es alcanzable sin cookie pero no es un calendario presencial completo. Hasta que Actions reciba 200 en `www.march.es/es/madrid/conciertos`, la fuente marca `skipDefaultSync`: el sync programado no la incluye. `ingest:source` / `--sources fundacion-juan-march` siguen ejecutándola; un 403 sigue siendo fallo de source, no un éxito silencioso.
+
+Evidencia para reactivarla en el set por defecto: un dry-run explícito desde Actions que descubra conciertos actuales sin HTTP 403 en el listado.
+
 ## Validación
 
-Ventana por defecto. Sin modificar `data/**`. Los resultados de tests/check/validate/build y del dry-run HTTP real de GitHub Actions de esta rama se recogen en la PR.
+633 tests, `check`, validación del catálogo y build correctos. No se modifica `data/**`.

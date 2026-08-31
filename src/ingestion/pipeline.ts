@@ -440,7 +440,9 @@ function mergeProviderStats(usage: IngestAiSummary, ai: AiClassifier | undefined
 }
 
 function selectSources(ids: string[] | undefined): SourceDefinition[] {
-  if (!ids || ids.length === 0) return listSourceDefinitions();
+  if (!ids || ids.length === 0) {
+    return listSourceDefinitions().filter((source) => !source.skipDefaultSync);
+  }
   return ids.map((id) => getSourceDefinition(id));
 }
 

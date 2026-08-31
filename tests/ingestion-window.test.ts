@@ -184,7 +184,7 @@ describe('ventana de ingestión', () => {
 });
 
 describe('selección de sources', () => {
-  it('sin sourceIds ejecuta todas; con sourceIds sólo las pedidas y en ese orden', async () => {
+  it('sin sourceIds ejecuta el set por defecto; con sourceIds sólo las pedidas y en ese orden', async () => {
     const dir = await emptyDataDir();
     const all = await runIngest({
       dataDir: dir,
@@ -203,7 +203,7 @@ describe('selección de sources', () => {
         throw new Error(`URL no mapeada: ${url}`);
       },
     });
-    expect(all.summary.sourcesAttempted).toEqual(['auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march']);
+    expect(all.summary.sourcesAttempted).toEqual(['auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela']);
 
     const subset = await runIngest({
       dataDir: dir,

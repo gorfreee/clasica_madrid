@@ -72,6 +72,12 @@ export type SourceDefinition = {
    * introduce its editorial provenance on the first successful run.
    */
   seedSource: Source;
+  /**
+   * Omit from ingest:sync when no --sources list is given (scheduled
+   * production). Explicit --sources / ingest:source still run it, and a
+   * failure there remains a failure.
+   */
+  skipDefaultSync?: boolean;
 };
 
 export type AdapterContext = {
