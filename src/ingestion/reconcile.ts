@@ -179,6 +179,22 @@ export function reconcileHarvest(options: {
     applyNewGroup(group, catalog, now, window, usedIds, usedSlugs, candidates, byIndex, stats);
   }
 
+  // A new source can contribute only citations to existing events (ORCAM
+  // overlaps Auditorio). Bootstrap every referenced registry source, not
+  // just the primary source of newly created events in toCandidate.
+  const sourceEntities = new Map(options.observations.map(({ source }) =>
+    [source.catalogSourceId, resolveCatalogSource(source, catalog)],
+  ));
+  for (const candidate of candidates) {
+    const present = new Set([...catalog.sources, ...(candidate.sources ?? [])].map((source) => source.id));
+    for (const citation of candidate.event.citations) {
+      const source = sourceEntities.get(citation.sourceId);
+      if (!source || present.has(source.id)) continue;
+      (candidate.sources ??= []).push(source);
+      present.add(source.id);
+    }
+  }
+
   return { candidates, byIndex, stats, seenEventIds };
 }
 

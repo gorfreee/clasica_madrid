@@ -95,7 +95,7 @@ export function matchEventIdentity(
 
   if (options.venueId) {
     for (const event of catalog.events) {
-      if (eventMatchesStrong(event, observed, options.venueId)) {
+      if (eventMatchesStrong(event, observed, options.venueId, options.catalogSourceId)) {
         hits.push({ event, method: 'strong' });
       }
     }
@@ -127,6 +127,8 @@ export function newObservationKeys(
     const title = normalizeText(observed.title);
     for (const occurrence of observed.occurrences) {
       keys.push(`strong:${venueId}:${occurrence.date}:${occurrence.time ?? ''}:${title}`);
+      const orcamTitle = orcamIdentityTitle(observed.title, catalogSourceId);
+      if (orcamTitle && occurrence.time) keys.push(`orcam:${venueId}:${occurrence.date}:${occurrence.time}:${orcamTitle}`);
     }
   }
   return keys;
@@ -149,15 +151,35 @@ function aliasMatches(
   return false;
 }
 
-function eventMatchesStrong(event: Event, observed: IdentityFacts, venueId: string): boolean {
+function eventMatchesStrong(event: Event, observed: IdentityFacts, venueId: string, catalogSourceId: string): boolean {
   if (event.venueId !== venueId) return false;
-  if (normalizeText(event.title) !== normalizeText(observed.title)) return false;
+  if (normalizeText(event.title) !== normalizeText(observed.title)) {
+    const incoming = orcamIdentityTitle(observed.title, catalogSourceId);
+    const existing = orcamIdentityTitle(event.title, event.primarySourceId);
+    if (!incoming || incoming !== existing) return false;
+    // This source-specific title equivalence requires two explicit equal
+    // times; unlike the general exact-title match, unknown time is not enough.
+    return event.occurrences.some((a) => observed.occurrences.some((b) =>
+      a.date === b.date && Boolean(a.time) && a.time === b.time,
+    ));
+  }
   return event.occurrences.some((existing) =>
     observed.occurrences.some(
       (incoming) =>
         incoming.date === existing.date && timesCompatible(incoming.time, existing.time),
     ),
   );
+}
+
+/** Auditorio prefixes ORCAM's official title with the cycle and concert
+ * number. Keep published titles/slugs and observed facts unchanged; only
+ * identity compares the exact remaining title, venue, date and time.
+ * Separate keys ensure this does not relax matching for other sources. */
+function orcamIdentityTitle(title: string, catalogSourceId: string): string | undefined {
+  if (catalogSourceId === 'src_fundacion_orcam') return normalizeText(title) || undefined;
+  if (catalogSourceId !== 'src_auditorio_nacional') return undefined;
+  const match = /^ORCAM\.\s+(?:Sinfónico|Tiempo de Cámara)\s+\d+\.\s+(.+)$/iu.exec(title);
+  return match ? normalizeText(match[1]!) || undefined : undefined;
 }
 
 function timesCompatible(left: string | null, right: string | null): boolean {
