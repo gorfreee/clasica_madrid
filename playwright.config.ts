@@ -4,8 +4,8 @@ const baseURL = 'http://localhost:4321';
 
 /**
  * Smoke tests against the production preview (`dist/`).
- * Run `npm run build` first (CI already does). Locally, a running
- * `npm run preview` / `npm run dev` on port 4321 is reused when CI is unset.
+ * Run `npm run build` first (CI already does). CI uses the Google Chrome
+ * bundled with GitHub's Ubuntu runner; local runs keep Playwright Chromium.
  */
 export default defineConfig({
   testDir: './e2e',
@@ -20,7 +20,10 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        channel: process.env.CI ? 'chrome' : undefined,
+      },
     },
   ],
   webServer: {
