@@ -92,15 +92,3 @@ function retryAfterMs(value: string | null): number {
   const date = Date.parse(value);
   return Number.isFinite(date) ? Math.max(0, date - Date.now()) : 0;
 }
-
-/** No successes, or at least three unavailable fichas covering half the scope. */
-export function zarzuelaHydrationCoverage(events: RawEvent[]) {
-  const required = events.filter((event) => event.hydration?.reason !== 'outside-window');
-  const succeeded = required.filter((event) => event.hydration?.status === 'succeeded').length;
-  const unavailable = required.length - succeeded;
-  return {
-    required: required.length, succeeded, unavailable,
-    incomplete: unavailable > 0,
-    severe: unavailable > 0 && (succeeded === 0 || (unavailable >= 3 && unavailable * 2 >= required.length)),
-  };
-}

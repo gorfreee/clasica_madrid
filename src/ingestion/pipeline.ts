@@ -9,7 +9,7 @@ import { normalizeRawEvent, normalizeSkipReason, observedFactsFromNormalized } f
 import { applyCandidateBatch, type BatchApplyResult } from './batch.ts';
 import { findPossiblyMissing, type PossiblyMissingEvent } from './disappear.ts';
 import { matchEventIdentity, type EventIdentityAlias } from './identity.ts';
-import { countHydration, hydrateEvents, memoizeGet } from './hydrate.ts';
+import { countHydration, hydrateEvents, memoizeGet, requiredHydrationCoverage } from './hydrate.ts';
 import { evaluateIngestHealth } from './health.ts';
 import { defaultIngestWindow, type IngestWindow } from './dates.ts';
 import {
@@ -23,7 +23,6 @@ import { matchVenue } from './venues.ts';
 import type { AdapterContext, IngestAiSummary, IngestRunSummary, RawEvent, SourceDefinition, SourceFailure } from './types.ts';
 import { emptyIngestAiSummary } from './types.ts';
 import { getText } from './http.ts';
-import { zarzuelaHydrationCoverage } from './detail/zarzuela-hydration.ts';
 import { normalizeUrl } from './urls.ts';
 
 export type IngestOptions = {
@@ -75,7 +74,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
         obs?.recordObservation({ raw, listing, normalized: normalizeRawEvent(raw) });
       }
       rawEvents.push(...hydrated);
-      const coverage = source.id === 'teatro-zarzuela' ? zarzuelaHydrationCoverage(hydrated) : undefined;
+      const coverage = adapter.requiresDetailSchedule ? requiredHydrationCoverage(hydrated) : undefined;
       if (coverage?.incomplete) disappearanceSuppressedSources.push(source.id);
       if (coverage?.severe) {
         const message = `cobertura de hydration incompleta: ${coverage.succeeded}/${coverage.required} fichas necesarias; desapariciones no evaluables`;
@@ -260,14 +259,14 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
     dryRun: options.dryRun,
   }).catch((error: unknown) => attachFailureContext(error, { stage: 'apply' }));
 
-  // Presence in a successfully read Zarzuela listing is positive evidence even
-  // if its detail was skipped by the window hint. Do not infer a disappearance
-  // (or apply a date change) from not requesting that ficha.
+  // Listings with detail-only schedules still prove presence when a ficha fails
+  // or is not requested. This must not apply a partial calendar to the event.
   const seenEventIds = new Set(reconciled.seenEventIds);
-  const zarzuelaUrls = new Set(rawEvents.filter((raw) => raw.sourceId === 'teatro-zarzuela').map((raw) => normalizeUrl(raw.sourceUrl)));
-  const zarzuelaSourceId = bySource.get('teatro-zarzuela')?.catalogSourceId;
-  for (const event of options.catalog.events) {
-    if (event.citations.some((citation) => citation.sourceId === zarzuelaSourceId && zarzuelaUrls.has(normalizeUrl(citation.url)))) seenEventIds.add(event.id);
+  for (const source of sources.filter((source) => getAdapter(source.adapterId).requiresDetailSchedule)) {
+    const urls = new Set(rawEvents.filter((raw) => raw.sourceId === source.id).map((raw) => normalizeUrl(raw.sourceUrl)));
+    for (const event of options.catalog.events) {
+      if (event.citations.some((citation) => citation.sourceId === source.catalogSourceId && urls.has(normalizeUrl(citation.url)))) seenEventIds.add(event.id);
+    }
   }
   const possiblyMissing = findPossiblyMissing({
     catalog: options.catalog,

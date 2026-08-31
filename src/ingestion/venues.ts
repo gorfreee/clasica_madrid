@@ -16,6 +16,18 @@ const MADRID: { municipality: string; area: Area } = {
 
 export const KNOWN_VENUES: KnownVenue[] = [
   {
+    keys: ['fundacion juan march auditorio'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_fundacion_juan_march_auditorio',
+      slug: 'fundacion-juan-march-auditorio',
+      name: 'Fundación Juan March — Auditorio',
+      ...MADRID,
+      address: 'Calle de Castelló, 77, 28006 Madrid',
+      url: 'https://www.march.es/es/madrid',
+    },
+  },
+  {
     keys: [
       'sala sinfonica',
       'auditorio nacional sala sinfonica',
@@ -92,6 +104,9 @@ export const KNOWN_VENUES: KnownVenue[] = [
  * Generic hall names such as "Sala Principal" must never be global aliases.
  */
 const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
+  'fundacion-juan-march': {
+    'fundacion juan march madrid': 'ven_fundacion_juan_march_auditorio',
+  },
   'teatro-real': {
     'sala principal': 'ven_teatro_real',
     'sala principal real teatro de retiro': 'ven_real_teatro_retiro',
