@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_discovery_casamerica_es_xxviii_festival_internacional_coma26_de_musica_contemporanea",
+  "slug": "duo-arcadia-xxviii-festival-internacional-coma-26",
+  "title": "Dúo Arcadia — XXVIII Festival Internacional COMA'26",
+  "status": "scheduled",
+  "venueId": "ven_casa_de_america_auditorio_gabriela_mistral",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_discovery_casamerica_es_xxviii_festival_internacional_coma26_de_musica_contemporanea_01",
+      "date": "2026-10-09",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Dúo Arcadia"
+    },
+    {
+      "name": "Pilar Rius"
+    },
+    {
+      "name": "Avelina Vidal"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_casamerica_es",
+      "url": "https://www.casamerica.es/musica/xxviii-festival-internacional-coma26-de-musica-contemporanea",
+      "checkedAt": "2026-08-31"
+    }
+  ],
+  "primarySourceId": "src_casamerica_es",
+  "lastVerifiedAt": "2026-08-31"
+}

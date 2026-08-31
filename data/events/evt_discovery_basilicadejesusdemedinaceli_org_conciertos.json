@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_discovery_basilicadejesusdemedinaceli_org_conciertos",
+  "slug": "christian-bischof",
+  "title": "Christian Bischof",
+  "status": "scheduled",
+  "venueId": "ven_basilica_jesus_medinaceli",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_discovery_basilicadejesusdemedinaceli_org_conciertos_01",
+      "date": "2026-10-03",
+      "time": "12:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Christian Bischof"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital",
+    "organ"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_basilicadejesusdemedinaceli_org",
+      "url": "https://www.basilicadejesusdemedinaceli.org/Organo/6/conciertos",
+      "checkedAt": "2026-08-31"
+    }
+  ],
+  "primarySourceId": "src_basilicadejesusdemedinaceli_org",
+  "lastVerifiedAt": "2026-08-31"
+}
