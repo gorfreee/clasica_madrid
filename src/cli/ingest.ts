@@ -1,4 +1,5 @@
 #!/usr/bin/env npx tsx
+import { readFile } from 'node:fs/promises';
 import { systemClock } from '../lib/domain/dates.ts';
 import { defaultDataDir } from '../lib/repository/fs.ts';
 import { loadCatalogFromDir } from '../lib/repository/load.ts';
@@ -9,9 +10,10 @@ import {
   writeIngestReport,
   writeIngestReportSync,
 } from '../ingestion/report.ts';
-import { runIngest } from '../ingestion/pipeline.ts';
+import { runDiscoveryIngest, runIngest } from '../ingestion/pipeline.ts';
 import { defaultIngestWindow } from '../ingestion/dates.ts';
 import { createAiClassifierFromEnv } from '../ingestion/classification/provider.ts';
+import { DiscoveryBatchError, parseDiscoveryBatch } from '../ingestion/discovery.ts';
 import { listSourceDefinitions } from '../ingestion/registry.ts';
 import {
   classifyFailureCode,
@@ -43,7 +45,9 @@ const window = parsed.window ?? defaultIngestWindow(systemClock.now());
 const requestedSources =
   parsed.command === 'source'
     ? [parsed.sourceId]
-    : parsed.sourceIds ?? ['all'];
+    : parsed.command === 'discovery'
+      ? ['discovery']
+      : parsed.sourceIds ?? ['all'];
 const reportPath = parsed.reportPath;
 const dryRun = parsed.dryRun;
 const observabilityDir = resolveObservabilityDir(reportPath, parsed.observabilityDir);
@@ -122,16 +126,28 @@ try {
   }
   ai?.initialize?.();
   const catalog = await loadCatalogFromDir(dataDir);
-  const run = await runIngest({
-    dataDir,
-    catalog,
-    now: systemClock.now(),
-    dryRun,
-    sourceIds: parsed.command === 'source' ? [parsed.sourceId] : parsed.sourceIds,
-    window: parsed.window,
-    ai,
-    observability,
-  });
+  const run =
+    parsed.command === 'discovery'
+      ? await runDiscoveryIngest({
+          dataDir,
+          catalog,
+          now: systemClock.now(),
+          dryRun,
+          window: parsed.window,
+          ai,
+          observability,
+          batch: await loadDiscoveryBatch(parsed.batchPath),
+        })
+      : await runIngest({
+          dataDir,
+          catalog,
+          now: systemClock.now(),
+          dryRun,
+          sourceIds: parsed.command === 'source' ? [parsed.sourceId] : parsed.sourceIds,
+          window: parsed.window,
+          ai,
+          observability,
+        });
 
   console.log(formatRunSummary(run.summary));
 
@@ -186,4 +202,15 @@ try {
     }
     ai?.close?.();
   }
+}
+
+async function loadDiscoveryBatch(batchPath: string) {
+  let json: unknown;
+  try {
+    json = JSON.parse(await readFile(batchPath, 'utf8'));
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new DiscoveryBatchError(`no se pudo leer el lote de discovery (${batchPath}): ${detail}`);
+  }
+  return parseDiscoveryBatch(json);
 }

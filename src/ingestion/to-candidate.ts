@@ -7,8 +7,8 @@ import type { PublishableClassification } from './classification/types.ts';
 import { eventIdFor, occurrenceIdFor, uniqueId, uniqueSlug } from './ids.ts';
 import { normalizeUrl, urlPathIdentity } from './urls.ts';
 import type { NormalizedEvent } from './normalize.ts';
-import type { SourceDefinition } from './types.ts';
-import { matchVenue, unpublishedMatchedVenue } from './venues.ts';
+import type { PipelineSource } from './types.ts';
+import { isSufficientProposedVenue, matchVenue, unpublishedMatchedVenue } from './venues.ts';
 import { defaultIngestWindow, isDateInHarvestScope, type IngestWindow } from './dates.ts';
 import { resolveCatalogSource } from './registry.ts';
 
@@ -26,7 +26,9 @@ export function newEventPublicationSkip(
   if (publicationOccurrences(event, now, { window }).length === 0) {
     return emptyScheduleSkipReason(event, now);
   }
-  if (!matchVenue(venueHint(event), catalog)) return 'lugar no reconocido';
+  if (!matchVenue(venueHint(event), catalog)) {
+    return unrecognizedVenueReason(event);
+  }
   return undefined;
 }
 
@@ -42,7 +44,7 @@ export function structuralSkipReason(
 
 export function toCandidate(
   event: NormalizedEvent,
-  source: SourceDefinition,
+  source: PipelineSource,
   catalog: Catalog,
   now: Date,
   usedIds: Set<string>,
@@ -59,7 +61,7 @@ export function toCandidate(
   }
   const venueMatch = matchVenue(venueHint(event), catalog);
   if (!venueMatch) {
-    return { skippedReason: 'lugar no reconocido' };
+    return { skippedReason: unrecognizedVenueReason(event) };
   }
 
   const catalogSource = resolveCatalogSource(source, catalog);
@@ -161,11 +163,19 @@ function emptyScheduleSkipReason(event: NormalizedEvent, now: Date): string {
   return 'fuera de ventana';
 }
 
+function unrecognizedVenueReason(event: NormalizedEvent): string {
+  if (event.proposedVenue && !isSufficientProposedVenue(event.proposedVenue)) {
+    return 'lugar nuevo con datos insuficientes';
+  }
+  return 'lugar no reconocido';
+}
+
 function venueHint(event: NormalizedEvent) {
   return {
     venueText: event.venueText,
     sourceId: event.sourceId,
     facilityId: event.venueFacilityId,
+    proposed: event.proposedVenue,
   };
 }
 

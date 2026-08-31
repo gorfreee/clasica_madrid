@@ -3,6 +3,8 @@ export type {
   RawOccurrence,
   SourceAdapter,
   SourceDefinition,
+  PipelineSource,
+  ProposedVenueFacts,
   IngestAiSummary,
   IngestRunSummary,
   HydrationMeta,
@@ -17,7 +19,7 @@ export {
   listSourceDefinitions,
   resolveCatalogSource,
 } from './registry.ts';
-export { runIngest, extractSource } from './pipeline.ts';
+export { runIngest, runDiscoveryIngest, extractSource } from './pipeline.ts';
 export type { IngestEventDecision, IngestReport, ReportCandidateSnapshot, IngestFailureInfo } from './report.ts';
 export {
   buildIngestReport,
@@ -61,6 +63,13 @@ export type { ReconcileAction } from './reconcile.ts';
 export { findPossiblyMissing } from './disappear.ts';
 export type { PossiblyMissingEvent } from './disappear.ts';
 export { normalizeUrl } from './urls.ts';
+export {
+  parseDiscoveryBatch,
+  discoveryToRawEvents,
+  DiscoveryBatchError,
+} from './discovery.ts';
+export type { DiscoveryBatch, DiscoveryObservation } from './discovery.ts';
+export { isSufficientProposedVenue, proposeDiscoveryVenue } from './venues.ts';
 export {
   IngestObservability,
   startObservability,

@@ -1,8 +1,9 @@
 import type { Area, Venue } from '../lib/schemas/index.ts';
 import { ID_PREFIX } from '../lib/schemas/taxonomies.ts';
-import { normalizeText } from '../lib/domain/normalize.ts';
+import { isMadridMunicipality, normalizeText } from '../lib/domain/normalize.ts';
 import type { Catalog } from '../lib/domain/catalog.ts';
-import { makePrefixedId, toSlug } from './ids.ts';
+import { makePrefixedId, toSlug, uniqueId, uniqueSlug, venueIdFor } from './ids.ts';
+import type { ProposedVenueFacts } from './types.ts';
 
 export type KnownVenue = {
   keys: string[];
@@ -161,6 +162,7 @@ export type VenueMatchInput = {
   venueText?: string;
   sourceId?: string;
   facilityId?: string;
+  proposed?: ProposedVenueFacts;
 };
 
 export function matchVenue(
@@ -203,6 +205,11 @@ export function matchVenue(
     if (proposed) return { kind: 'new', venue: proposed };
   }
 
+  if (input.proposed && isSufficientProposedVenue(input.proposed)) {
+    const fromProposed = matchProposedVenue(input.proposed, catalog);
+    if (fromProposed) return fromProposed;
+  }
+
   return undefined;
 }
 
@@ -222,6 +229,18 @@ export function unpublishedMatchedVenue(
   if (!match) return undefined;
   if (catalog.venues.some((venue) => venue.id === match.venue.id)) return undefined;
   return match.venue;
+}
+
+export function isSufficientProposedVenue(
+  proposed: ProposedVenueFacts | undefined,
+): proposed is ProposedVenueFacts & { municipality: string; area: NonNullable<ProposedVenueFacts['area']> } {
+  if (!proposed) return false;
+  if (!proposed.name.trim()) return false;
+  if (!proposed.municipality?.trim() || !proposed.area) return false;
+  const madrid = isMadridMunicipality(proposed.municipality);
+  if (madrid && proposed.area !== 'madrid') return false;
+  if (!madrid && proposed.area === 'madrid') return false;
+  return true;
 }
 
 /**
@@ -268,6 +287,46 @@ function madridDatosFacilitySlug(
   return undefined;
 }
 
+function matchProposedVenue(proposed: ProposedVenueFacts, catalog: Catalog): VenueMatch | undefined {
+  const needle = normalizeText(proposed.name);
+  const exactCatalog = uniqueCatalogByName(needle, catalog);
+  if (exactCatalog) return { kind: 'catalog', venue: exactCatalog };
+
+  const known = aliasIndex.get(needle);
+  if (known) {
+    const existing = catalog.venues.find((venue) => venue.id === known.venue.id);
+    if (existing) return { kind: 'catalog', venue: existing };
+    return { kind: 'known', venue: known.venue };
+  }
+
+  const created = proposeDiscoveryVenue(proposed, catalog);
+  return created ? { kind: 'new', venue: created } : undefined;
+}
+
+/**
+ * Discovery venue not yet in the catalog. Identity is the observed name;
+ * there is no fuzzy match. municipality/area must already be sufficient.
+ */
+export function proposeDiscoveryVenue(proposed: ProposedVenueFacts, catalog: Catalog): Venue | undefined {
+  if (!isSufficientProposedVenue(proposed) || !proposed.municipality || !proposed.area) return undefined;
+  const usedIds = new Set(catalog.venues.map((venue) => venue.id));
+  const usedSlugs = new Set(catalog.venues.map((venue) => venue.slug));
+  const id = uniqueId(venueIdFor(proposed.name), usedIds);
+  const slug = uniqueSlug(proposed.name, usedSlugs);
+  if (!slug || slug === 'evento') return undefined;
+  const venue: Venue = {
+    schemaVersion: 1,
+    id,
+    slug,
+    name: proposed.name.trim(),
+    municipality: proposed.municipality.trim(),
+    area: proposed.area,
+  };
+  if (proposed.address) venue.address = proposed.address;
+  if (proposed.url) venue.url = proposed.url;
+  return venue;
+}
+
 function toInput(venueTextOrInput: string | VenueMatchInput | undefined, sourceId?: string): VenueMatchInput {
   if (typeof venueTextOrInput === 'string' || venueTextOrInput === undefined) {
     return { venueText: venueTextOrInput, sourceId };
@@ -276,6 +335,7 @@ function toInput(venueTextOrInput: string | VenueMatchInput | undefined, sourceI
     venueText: venueTextOrInput.venueText,
     sourceId: venueTextOrInput.sourceId ?? sourceId,
     facilityId: venueTextOrInput.facilityId,
+    proposed: venueTextOrInput.proposed,
   };
 }
 

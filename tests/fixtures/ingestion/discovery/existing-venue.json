@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "observations": [
+    {
+      "source": {
+        "url": "https://conservatorio.example/recital-octubre",
+        "name": "Conservatorio Teresa Berganza"
+      },
+      "event": {
+        "title": "Recital de piano",
+        "venueText": "Auditorio Nacional de Música",
+        "occurrences": [
+          {
+            "raw": "2026-10-05 18:00",
+            "date": "2026-10-05",
+            "time": "18:00"
+          }
+        ],
+        "composers": [{ "name": "Frédéric Chopin" }],
+        "works": [{ "title": "Balada n.º 1", "composerName": "Frédéric Chopin" }],
+        "performers": [{ "name": "Ana Ruiz", "roleText": "piano" }]
+      }
+    }
+  ]
+}

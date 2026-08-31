@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "observations": [
+    {
+      "source": {
+        "url": "https://www.parroquia-san-manuel.example/conciertos/misa-en-si-menor",
+        "name": "Parroquia de San Manuel y San Benito",
+        "homepage": "https://www.parroquia-san-manuel.example/",
+        "kind": "official"
+      },
+      "foundVia": "https://www.google.com/search?q=misa+si+menor+madrid",
+      "venue": {
+        "name": "Iglesia de San Manuel y San Benito",
+        "municipality": "Madrid",
+        "area": "madrid",
+        "address": "Calle de Alcalá, 83, Madrid",
+        "url": "https://www.parroquia-san-manuel.example/"
+      },
+      "event": {
+        "title": "Misa en Si menor",
+        "venueText": "Iglesia de San Manuel y San Benito",
+        "occurrences": [
+          {
+            "raw": "2026-10-12 19:30",
+            "date": "2026-10-12",
+            "time": "19:30"
+          }
+        ],
+        "description": "Concierto coral de música clásica con la Misa en Si menor de Bach.",
+        "accessText": "entrada libre",
+        "performers": [{ "name": "Coro parroquial", "roleText": "coro" }],
+        "composers": [{ "name": "Johann Sebastian Bach" }],
+        "works": [{ "title": "Misa en Si menor", "composerName": "Johann Sebastian Bach" }]
+      }
+    }
+  ]
+}

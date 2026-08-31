@@ -7,7 +7,7 @@ import { teatroZarzuelaAdapter } from './sources/teatro-zarzuela.ts';
 import { fundacionJuanMarchAdapter } from './sources/fundacion-juan-march.ts';
 import { fundacionOrcamAdapter } from './sources/fundacion-orcam.ts';
 import { orquestaCoroRtveAdapter } from './sources/orquesta-coro-rtve.ts';
-import type { SourceAdapter, SourceDefinition } from './types.ts';
+import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
   [orquestaCoroRtveAdapter.id]: orquestaCoroRtveAdapter,
@@ -173,6 +173,6 @@ export function getAdapter(id: string): SourceAdapter {
   return adapter;
 }
 
-export function resolveCatalogSource(source: SourceDefinition, catalog: Catalog): Source {
+export function resolveCatalogSource(source: PipelineSource, catalog: Catalog): Source {
   return catalog.sources.find((item) => item.id === source.catalogSourceId) ?? source.seedSource;
 }

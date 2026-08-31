@@ -22,7 +22,7 @@ import type { NormalizedEvent } from './normalize.ts';
 import { resolveCatalogSource } from './registry.ts';
 import { collapseOccurrences, defaultIngestWindow, type IngestWindow } from './dates.ts';
 import { newEventPublicationSkip, toCandidate } from './to-candidate.ts';
-import type { RawEvent, SourceDefinition } from './types.ts';
+import type { RawEvent, PipelineSource } from './types.ts';
 import { matchVenue, unpublishedMatchedVenue } from './venues.ts';
 
 export type ReconcileAction = 'new' | 'unchanged' | 'updated' | 'ambiguous';
@@ -31,7 +31,7 @@ export type HarvestObservation = {
   index: number;
   raw: RawEvent;
   event: NormalizedEvent;
-  source: SourceDefinition;
+  source: PipelineSource;
   classification?: ClassificationResult;
   aiAttempted: boolean;
   aiCall?: AiCallDiagnostics;
@@ -541,6 +541,7 @@ function venueHint(event: NormalizedEvent) {
     venueText: event.venueText,
     sourceId: event.sourceId,
     facilityId: event.venueFacilityId,
+    proposed: event.proposedVenue,
   };
 }
 

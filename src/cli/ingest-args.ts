@@ -16,6 +16,7 @@ export type IngestCliSuccess = {
 export type IngestCliCommand =
   | (IngestCliSuccess & { command: 'sync'; sourceIds?: string[] })
   | (IngestCliSuccess & { command: 'source'; sourceId: string })
+  | (IngestCliSuccess & { command: 'discovery'; batchPath: string })
   | { ok: false; message: string };
 
 export function parseIngestArgs(argv: string[], knownSources: string[]): IngestCliCommand {
@@ -24,7 +25,7 @@ export function parseIngestArgs(argv: string[], knownSources: string[]): IngestC
   }
 
   const command = argv[0];
-  if (command !== 'sync' && command !== 'source') {
+  if (command !== 'sync' && command !== 'source' && command !== 'discovery') {
     return {
       ok: false,
       message: `comando desconocido: ${command}\n${ingestUsage(knownSources)}`,
@@ -109,6 +110,12 @@ export function parseIngestArgs(argv: string[], knownSources: string[]): IngestC
           message: 'ingest:source no admite --sources; indica la fuente como argumento',
         };
       }
+      if (command === 'discovery') {
+        return {
+          ok: false,
+          message: 'ingest:discovery no admite --sources; las fuentes van en el lote observado',
+        };
+      }
       const value = rest[index + 1];
       if (!value || value.startsWith('--')) {
         return { ok: false, message: '--sources requiere una lista de fuentes separadas por coma' };
@@ -143,6 +150,24 @@ export function parseIngestArgs(argv: string[], knownSources: string[]): IngestC
       ...flags,
       ...(sourceIds ? { sourceIds } : {}),
     };
+  }
+
+  if (command === 'discovery') {
+    if (positionals.length === 0) {
+      return {
+        ok: false,
+        message:
+          'Uso: npm run ingest:discovery -- <lote.json> [--from YYYY-MM-DD --to YYYY-MM-DD] [--dry-run] [--data-dir <ruta>] [--report <fichero.json>] [--observability-dir <ruta>]',
+      };
+    }
+    if (positionals.length > 1) {
+      return { ok: false, message: `demasiados argumentos: ${positionals.join(', ')}` };
+    }
+    const batchPath = positionals[0];
+    if (!batchPath) {
+      return { ok: false, message: 'indica el fichero JSON del lote de discovery' };
+    }
+    return { ok: true, command: 'discovery', batchPath, ...flags };
   }
 
   if (positionals.length === 0) {
@@ -247,8 +272,9 @@ export function ingestUsage(knownSources: string[]): string {
   return `Uso:
   npm run ingest:sync [-- --dry-run] [-- --from YYYY-MM-DD --to YYYY-MM-DD] [-- --sources fuente-a,fuente-b] [-- --data-dir <ruta>] [-- --report <fichero.json>] [-- --observability-dir <ruta>]
   npm run ingest:source -- <fuente> [--from YYYY-MM-DD --to YYYY-MM-DD] [--dry-run] [--data-dir <ruta>] [--report <fichero.json>] [--observability-dir <ruta>]
+  npm run ingest:discovery -- <lote.json> [--from YYYY-MM-DD --to YYYY-MM-DD] [--dry-run] [--data-dir <ruta>] [--report <fichero.json>] [--observability-dir <ruta>]
 
 Gemini: --ai-model <modelo> (fija modelo sin fallback), --ai-no-cache, --ai-max-requests <n>
 
-Fuentes: ${knownSources.join(', ')}`;
+Fuentes de harvesting: ${knownSources.join(', ')}`;
 }
