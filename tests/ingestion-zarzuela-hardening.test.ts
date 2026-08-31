@@ -1,8 +1,9 @@
+import { requiredHydrationCoverage } from '../src/ingestion/hydrate.ts';
 import { readFileSync, mkdtempSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createZarzuelaDetailClient, zarzuelaHydrationCoverage, zarzuelaListingBounds } from '../src/ingestion/detail/zarzuela-hydration.ts';
+import { createZarzuelaDetailClient, zarzuelaListingBounds } from '../src/ingestion/detail/zarzuela-hydration.ts';
 import { getText, HttpError } from '../src/ingestion/http.ts';
 import { hydrateEvents, memoizeGet } from '../src/ingestion/hydrate.ts';
 import { parseZarzuelaListing, teatroZarzuelaAdapter } from '../src/ingestion/sources/teatro-zarzuela.ts';
@@ -225,7 +226,7 @@ describe('cobertura, health y desapariciones', () => {
   it.each([[0, 40, false], [1, 40, false], [2, 40, false], [7, 40, false], [39, 40, true], [1, 1, true], [3, 6, true]])(
     '%s fallos de %s fichas: severo=%s', (failures, count, severe) => {
       const events = Array.from({ length: count }, (_, i) => ({ ...event(), hydration: { status: i < failures ? 'failed' : 'succeeded' } as HydrationMeta }));
-      expect(zarzuelaHydrationCoverage(events).severe).toBe(severe);
+      expect(requiredHydrationCoverage(events).severe).toBe(severe);
     },
   );
 

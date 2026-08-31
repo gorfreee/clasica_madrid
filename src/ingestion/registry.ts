@@ -4,9 +4,11 @@ import { auditorioNacionalAdapter } from './sources/auditorio-nacional.ts';
 import { madridDatosAdapter } from './sources/madrid-datos.ts';
 import { teatroRealAdapter } from './sources/teatro-real.ts';
 import { teatroZarzuelaAdapter } from './sources/teatro-zarzuela.ts';
+import { fundacionJuanMarchAdapter } from './sources/fundacion-juan-march.ts';
 import type { SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
+  [fundacionJuanMarchAdapter.id]: fundacionJuanMarchAdapter,
   [auditorioNacionalAdapter.id]: auditorioNacionalAdapter,
   [teatroRealAdapter.id]: teatroRealAdapter,
   [madridDatosAdapter.id]: madridDatosAdapter,
@@ -78,6 +80,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Teatro de la Zarzuela',
       kind: 'official',
       url: 'https://teatrodelazarzuela.inaem.gob.es/',
+    },
+  },
+  {
+    id: 'fundacion-juan-march',
+    name: 'Fundación Juan March',
+    urls: ['https://www.march.es/es/madrid/conciertos'],
+    adapterId: fundacionJuanMarchAdapter.id,
+    catalogSourceId: 'src_fundacion_juan_march',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_fundacion_juan_march',
+      slug: 'fundacion-juan-march',
+      name: 'Fundación Juan March',
+      kind: 'official',
+      url: 'https://www.march.es/',
     },
   },
 ];

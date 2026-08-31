@@ -83,6 +83,8 @@ export type AdapterContext = {
 
 export type SourceAdapter = {
   id: string;
+  /** Listing cannot supply a complete schedule; incomplete hydration suppresses disappearances. */
+  requiresDetailSchedule?: boolean;
   /** URLs to fetch for this source given the current clock and ingest window. */
   resolveFetchUrls(source: SourceDefinition, now: Date, window: IngestWindow): string[];
   /**

@@ -6,6 +6,7 @@ import type { AdapterContext, RawEvent, SourceAdapter } from '../types.ts';
 /** K2 season listings are more complete than the site's outdated JEvents calendar. */
 export const teatroZarzuelaAdapter: SourceAdapter = {
   id: 'teatro-zarzuela',
+  requiresDetailSchedule: true,
   resolveFetchUrls(source) {
     if (!source.urls[0]) throw new Error('teatro-zarzuela: falta la URL de inicio');
     return [source.urls[0]];

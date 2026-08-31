@@ -109,3 +109,15 @@ function preferOccurrences(
 function withHydration(event: RawEvent, hydration: HydrationMeta): RawEvent {
   return { ...event, hydration };
 }
+
+/** No successes, or at least three unavailable fichas covering half the scope. */
+export function requiredHydrationCoverage(events: RawEvent[]) {
+  const required = events.filter((event) => event.hydration?.reason !== 'outside-window');
+  const succeeded = required.filter((event) => event.hydration?.status === 'succeeded').length;
+  const unavailable = required.length - succeeded;
+  return {
+    required: required.length, succeeded, unavailable,
+    incomplete: unavailable > 0,
+    severe: unavailable > 0 && (succeeded === 0 || (unavailable >= 3 && unavailable * 2 >= required.length)),
+  };
+}
