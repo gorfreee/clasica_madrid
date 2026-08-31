@@ -1,66 +1,61 @@
 ---
 import type { AgendaPageModel } from '../lib/presentation/agenda.ts';
 
-type Props = {
-  model: AgendaPageModel;
-};
-
+type Props = { model: AgendaPageModel };
 const { model } = Astro.props;
 ---
-{/* Contrato UI interno: [data-agenda-filters] y [data-clear-filters] los usa agenda-client.ts. */}
 
+{/* Contrato UI interno: [data-agenda-filters] y [data-clear-filters] los usa agenda-client.ts. */}
 <section class="filters" aria-labelledby="filtros-titulo">
-  <h2 id="filtros-titulo" class="filters__title">Filtrar</h2>
+  <h2 id="filtros-titulo" class="sr-only">Buscar y filtrar conciertos</h2>
   <form class="filters__form" method="get" action="/" data-agenda-filters>
-    <div class="filters__grid">
-      <label class="field">
-        <span>Buscar</span>
-        <input type="search" name="q" value={model.query} placeholder="Título, compositor, lugar…" />
+    <div class="search-row">
+      <label class="search-field">
+        <span class="sr-only">Buscar en el catálogo</span>
+        <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4 4"></path></svg>
+        <input type="search" name="q" value={model.query} placeholder="Concierto, intérprete, compositor o lugar" />
       </label>
-      <label class="field">
-        <span>Desde</span>
-        <input type="date" name="from" value={model.from} />
-      </label>
-      <label class="field">
-        <span>Hasta</span>
-        <input type="date" name="to" value={model.to} />
-      </label>
-      {
-        model.selectFilters.map((field) => (
-          <label class="field">
-            <span>{field.label}</span>
-            <select name={field.name}>
-              {field.options.map((option) => (
-                <option value={option.value} selected={option.value === field.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        ))
-      }
-      <label class="field">
-        <span>Compositor</span>
-        <input
-          type="text"
-          name="composer"
-          value={model.composer}
-          list="composer-suggestions"
-          autocomplete="off"
-        />
-        <datalist id="composer-suggestions">
-          {model.composerSuggestions.map((name) => <option value={name} />)}
-        </datalist>
-      </label>
+      <button class="search-submit" type="submit">Buscar</button>
     </div>
-    <div class="filters__actions">
-      <button type="submit">Aplicar filtros</button>
-      <a class="filters__clear" href="/" data-clear-filters hidden>
-        Quitar filtros
-      </a>
+
+    <div class="shortcut-row" aria-label="Accesos rápidos">
+      {model.shortcuts.map((shortcut) => <a href={shortcut.href} data-filter-shortcut>{shortcut.label}</a>)}
+      <details class="filter-panel">
+        <summary>
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h16M7 12h10M10 17h4"></path></svg>
+          Más filtros
+        </summary>
+        <div class="filter-panel__body">
+          <div class="filter-panel__heading">
+            <div><p class="eyebrow">Explorar</p><h3>Afina la agenda</h3></div>
+            <span>Los filtros se pueden combinar</span>
+          </div>
+          <div class="filters__grid">
+            <label class="field"><span>Desde</span><input type="date" name="from" value={model.from} /></label>
+            <label class="field"><span>Hasta</span><input type="date" name="to" value={model.to} /></label>
+            {model.selectFilters.map((field) => (
+              <label class="field">
+                <span>{field.label}</span>
+                <select name={field.name}>
+                  {field.options.map((option) => <option value={option.value} selected={option.value === field.value}>{option.label}</option>)}
+                </select>
+              </label>
+            ))}
+            <label class="field">
+              <span>Compositor</span>
+              <input type="text" name="composer" value={model.composer} list="composer-suggestions" autocomplete="off" placeholder="Ej. Clara Schumann" />
+              <datalist id="composer-suggestions">{model.composerSuggestions.map((name) => <option value={name} />)}</datalist>
+            </label>
+          </div>
+          <div class="filters__actions">
+            <button type="submit">Ver conciertos</button>
+            <a class="filters__clear" href="/">Limpiar todo</a>
+          </div>
+        </div>
+      </details>
     </div>
+    <div class="active-filters" data-active-filters aria-live="polite"></div>
+    <a class="filters__clear filters__clear--outside" href="/" data-clear-filters hidden>Limpiar filtros</a>
   </form>
-  <noscript>
-    <p class="filters__noscript">Los filtros de la URL se aplican con JavaScript.</p>
-  </noscript>
+  <noscript><p class="filters__noscript">Activa JavaScript para aplicar filtros sin recargar la página.</p></noscript>
 </section>

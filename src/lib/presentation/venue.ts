@@ -7,6 +7,7 @@ import {
   systemClock,
 } from '../domain/index.ts';
 import { isMadridMunicipality } from '../domain/normalize.ts';
+import { formatMadridDate } from '../domain/dates.ts';
 import { areaLabels } from './labels.ts';
 import { toAgendaItem, type AgendaItemModel } from './agenda.ts';
 
@@ -18,6 +19,8 @@ export type VenueListItemModel = {
   showMunicipality: boolean;
   areaLabel: string;
   upcomingCount: number;
+  nextDate: string | null;
+  nextDateLabel: string | null;
 };
 
 export type VenuePageModel = {
@@ -40,24 +43,41 @@ export type VenuesIndexModel = {
   canonicalPath: string;
   isEmpty: boolean;
   venues: VenueListItemModel[];
+  allVenues: VenueListItemModel[];
 };
 
 export function buildVenuesIndexModel(catalog: Catalog, clock: Clock = systemClock): VenuesIndexModel {
-  const venues = listVenuesWithUpcoming(catalog, clock).map(({ venue, occurrences }) => ({
-    name: venue.name,
-    slug: venue.slug,
-    href: `/lugares/${venue.slug}`,
-    municipality: venue.municipality,
-    showMunicipality: !isMadridMunicipality(venue.municipality),
-    areaLabel: areaLabels[venue.area],
-    upcomingCount: occurrences.length,
-  }));
+  const upcomingByVenue = new Map(
+    listVenuesWithUpcoming(catalog, clock).map(({ venue, occurrences }) => [venue.id, occurrences]),
+  );
+  const allVenues = catalog.venues.map((venue) => {
+    const occurrences = upcomingByVenue.get(venue.id) ?? [];
+    const nextDate = occurrences[0]?.occurrence.date ?? null;
+    return {
+      name: venue.name,
+      slug: venue.slug,
+      href: `/lugares/${venue.slug}`,
+      municipality: venue.municipality,
+      showMunicipality: !isMadridMunicipality(venue.municipality),
+      areaLabel: areaLabels[venue.area],
+      upcomingCount: occurrences.length,
+      nextDate,
+      nextDateLabel: nextDate ? formatMadridDate(nextDate) : null,
+    };
+  });
+  const venues = allVenues
+    .filter((venue) => venue.nextDate)
+    .sort((left, right) => (left.nextDate ?? '').localeCompare(right.nextDate ?? '') || left.name.localeCompare(right.name, 'es'));
+  const inactiveVenues = allVenues
+    .filter((venue) => !venue.nextDate)
+    .sort((left, right) => left.name.localeCompare(right.name, 'es'));
   return {
     title: 'Lugares',
     description: 'Espacios con conciertos de música clásica próximos en Madrid y su entorno.',
     canonicalPath: '/lugares',
     isEmpty: venues.length === 0,
     venues,
+    allVenues: [...venues, ...inactiveVenues],
   };
 }
 

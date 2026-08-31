@@ -29,6 +29,9 @@ export function initAgendaFilters(): void {
   const count = document.querySelector<HTMLElement>('[data-result-count]');
   const noResults = document.querySelector<HTMLElement>('[data-no-results]');
   const clear = document.querySelector<HTMLAnchorElement>('[data-clear-filters]');
+  const activeFilters = document.querySelector<HTMLElement>('[data-active-filters]');
+  const todayEmpty = document.querySelector<HTMLElement>('[data-today-empty]');
+  const filterPanel = document.querySelector<HTMLDetailsElement>('.filter-panel');
   if (!dataNode?.textContent || !list) return;
 
   const items = JSON.parse(dataNode.textContent) as FilterableOccurrence[];
@@ -56,7 +59,14 @@ export function initAgendaFilters(): void {
     }
     if (noResults) noResults.hidden = visible.size > 0;
     if (clear) clear.hidden = !active;
+    if (todayEmpty) todayEmpty.hidden = active;
     syncForm(form, filters);
+    renderActiveFilters(activeFilters, form, filters, () => {
+      const params = form ? formDataToParams(new FormData(form)) : new URLSearchParams();
+      history.pushState({}, '', params.toString() ? `/?${params.toString()}` : '/');
+      apply();
+    });
+    if (filterPanel && hasAdvancedFilters(filters)) filterPanel.open = true;
   };
 
   form?.addEventListener('submit', (event) => {
@@ -72,8 +82,53 @@ export function initAgendaFilters(): void {
     form?.reset();
     apply();
   });
+  for (const shortcut of document.querySelectorAll<HTMLAnchorElement>('[data-filter-shortcut]')) {
+    shortcut.addEventListener('click', (event) => {
+      event.preventDefault();
+      const url = new URL(shortcut.href);
+      history.pushState({}, '', `${url.pathname}${url.search}`);
+      apply();
+    });
+  }
   window.addEventListener('popstate', apply);
   apply();
+}
+
+function hasAdvancedFilters(filters: AgendaFilters): boolean {
+  return Boolean(
+    filters.from || filters.to || filters.area || filters.access || filters.format ||
+      filters.era || filters.kind || filters.venue || filters.composer,
+  );
+}
+
+function renderActiveFilters(
+  container: HTMLElement | null,
+  form: HTMLFormElement | null,
+  filters: AgendaFilters,
+  onRemove: () => void,
+): void {
+  if (!container || !form) return;
+  container.replaceChildren();
+  const entries = Object.entries(filters).filter(([, value]) => Boolean(value));
+  container.hidden = entries.length === 0;
+  for (const [name, value] of entries) {
+    const field = form.elements.namedItem(name);
+    if (!(field instanceof HTMLInputElement || field instanceof HTMLSelectElement)) continue;
+    const fieldLabel = field.closest('label')?.querySelector('span')?.textContent?.trim();
+    const selectedLabel = field instanceof HTMLSelectElement
+      ? field.selectedOptions[0]?.textContent?.trim()
+      : String(value);
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'active-filter';
+    button.textContent = `${fieldLabel && fieldLabel !== 'Buscar en el catálogo' ? `${fieldLabel}: ` : ''}${selectedLabel} ×`;
+    button.setAttribute('aria-label', `Quitar filtro ${fieldLabel ?? name}`);
+    button.addEventListener('click', () => {
+      field.value = '';
+      onRemove();
+    });
+    container.append(button);
+  }
 }
 
 function formDataToParams(data: FormData): URLSearchParams {

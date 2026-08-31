@@ -8,156 +8,108 @@ export async function getStaticPaths() {
 }
 
 const { slug } = Astro.params;
-if (!slug) {
-  throw new Error('Falta el slug del evento');
-}
+if (!slug) throw new Error('Falta el slug del evento');
 const model = await loadEventPage(slug);
-if (!model) {
-  throw new Error(`Evento no encontrado: ${slug}`);
-}
+if (!model) throw new Error(`Evento no encontrado: ${slug}`);
+const primarySource = model.sources.find((source) => source.isPrimary) ?? model.sources[0];
 ---
 
 <Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath} jsonLd={model.jsonLd}>
-  <article class="detail">
-    <header class="page-header">
-      <p class="eyebrow">{model.isPast ? 'Evento pasado' : 'Evento'}</p>
-      <h1>{model.title}</h1>
-      <p class="lede">
-        <a href={model.venueHref}>{model.venueName}</a>
-        {model.showMunicipality && <span> · {model.municipality}</span>}
-        {model.seriesName && (
-          <span>
-            {' '}
-            · {model.seriesKind}: {model.seriesName}
-          </span>
-        )}
-      </p>
-      {model.isPast && <p class="lede">Este evento ya ha tenido lugar.</p>}
+  <article class="detail event-detail">
+    <nav class="breadcrumb" aria-label="Migas de pan"><a href="/">Agenda</a><span aria-hidden="true">/</span><span>Evento</span></nav>
+
+    <header class="event-header">
+      <div class="event-header__title">
+        <p class="eyebrow">{model.isPast ? 'Archivo · evento pasado' : model.statusLabel}</p>
+        <h1>{model.title}</h1>
+        <p class="event-header__place">
+          <a href={model.venueHref}>{model.venueName}</a>
+          {model.showMunicipality && <span> · {model.municipality}</span>}
+        </p>
+        {model.seriesName && <p class="event-header__series">{model.seriesKind}: {model.seriesName}</p>}
+      </div>
+      <div class="event-header__date" aria-label="Fechas del evento">
+        <span>{model.occurrences.length === 1 ? 'Fecha' : `${model.occurrences.length} fechas`}</span>
+        <strong>{model.featuredOccurrence.dateLabel}</strong>
+        <em>{model.featuredOccurrence.time ?? 'Hora por confirmar'}</em>
+      </div>
     </header>
 
-    <dl class="fact-list">
-      <div>
-        <dt>Acceso</dt>
-        <dd>{model.access.label}</dd>
-      </div>
-      <div>
-        <dt>Contexto</dt>
-        <dd>{model.kind.label}</dd>
-      </div>
-      {
-        model.formats.length > 0 && (
-          <div>
-            <dt>Formato</dt>
-            <dd>{model.formats.map((item) => item.label).join(', ')}</dd>
-          </div>
-        )
-      }
-      {
-        model.eras.length > 0 && (
-          <div>
-            <dt>Época</dt>
-            <dd>{model.eras.map((item) => item.label).join(', ')}</dd>
-          </div>
-        )
-      }
-      {
-        model.organizers.length > 0 && (
-          <div>
-            <dt>Organiza</dt>
-            <dd>{model.organizers.join(', ')}</dd>
-          </div>
-        )
-      }
+    {model.isPast && <p class="status-note">Este evento ya ha tenido lugar. Conservamos la ficha como parte del archivo de la agenda.</p>}
+
+    <div class="event-actions">
+      {primarySource && <a class="primary-action" href={primarySource.url} rel="noopener noreferrer">Ver información oficial <span aria-hidden="true">↗</span></a>}
+      <a class="secondary-action" href={model.venueHref}>Explorar el lugar <span aria-hidden="true">→</span></a>
+    </div>
+
+    <dl class="fact-list fact-list--event">
+      <div><dt>Acceso</dt><dd class:list={[{ 'free-value': model.access.id === 'free' }]}>{model.access.label}</dd></div>
+      <div><dt>Contexto</dt><dd>{model.kind.label}</dd></div>
+      {model.formats.length > 0 && <div><dt>Formato</dt><dd>{model.formats.map((item) => item.label).join(', ')}</dd></div>}
+      {model.eras.length > 0 && <div><dt>Época</dt><dd>{model.eras.map((item) => item.label).join(', ')}</dd></div>}
     </dl>
 
-    {
-      model.venueAddress && (
-        <p class="detail__address">
-          {model.venueAddress}
-          {model.showMunicipality ? `, ${model.municipality}` : ''}
-        </p>
-      )
-    }
-
-    <section aria-labelledby="fechas-titulo">
-      <h2 id="fechas-titulo">Fechas</h2>
-      <ol class="occurrence-list">
-        {
-          model.occurrences.map((occurrence) => (
-            <li class:list={[{ 'is-cancelled': occurrence.isCancelled }]}>
-              <time datetime={occurrence.startIso}>{occurrence.dateLabel}</time>
-              <span>{occurrence.time ?? 'Hora no indicada'}</span>
-              {occurrence.isCancelled && <span> · {occurrence.status}</span>}
-            </li>
-          ))
-        }
-      </ol>
-    </section>
-
-    {
-      model.performers.length > 0 && (
-        <section aria-labelledby="interpretes-titulo">
-          <h2 id="interpretes-titulo">Intérpretes</h2>
-          <ul>
-            {model.performers.map((performer) => (
-              <li>
-                {performer.name}
-                {performer.role ? ` (${performer.role})` : ''}
+    <div class="detail-grid">
+      <div class="detail-grid__main">
+        <section aria-labelledby="fechas-titulo" class="editorial-section">
+          <h2 id="fechas-titulo">Fechas</h2>
+          <ol class="occurrence-list">
+            {model.occurrences.map((occurrence) => (
+              <li class:list={[{ 'is-cancelled': occurrence.isCancelled }]}>
+                <time datetime={occurrence.startIso}>{occurrence.dateLabel}</time>
+                <span>{occurrence.time ?? 'Hora por confirmar'}</span>
+                {occurrence.isCancelled && <strong>{occurrence.status}</strong>}
               </li>
             ))}
-          </ul>
+          </ol>
         </section>
-      )
-    }
 
-    {
-      model.composers.length > 0 && (
-        <section aria-labelledby="compositores-titulo">
-          <h2 id="compositores-titulo">Compositores</h2>
-          <ul>
-            {model.composers.map((composer) => (
-              <li>{composer}</li>
-            ))}
-          </ul>
-        </section>
-      )
-    }
+        {model.performers.length > 0 && (
+          <section aria-labelledby="interpretes-titulo" class="editorial-section">
+            <h2 id="interpretes-titulo">Intérpretes</h2>
+            <ul class="people-list">
+              {model.performers.map((performer) => <li><span>{performer.name}</span>{performer.role && <small>{performer.role}</small>}</li>)}
+            </ul>
+          </section>
+        )}
 
-    {
-      model.works.length > 0 && (
-        <section aria-labelledby="obras-titulo">
-          <h2 id="obras-titulo">Programa</h2>
-          <ul>
-            {model.works.map((work) => (
-              <li>
-                {work.title}
-                {work.composerName ? ` — ${work.composerName}` : ''}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )
-    }
+        {model.works.length > 0 && (
+          <section aria-labelledby="obras-titulo" class="editorial-section program-section">
+            <h2 id="obras-titulo">Programa</h2>
+            <ol class="program-list">
+              {model.works.map((work) => <li><span>{work.title}</span>{work.composerName && <small>{work.composerName}</small>}</li>)}
+            </ol>
+          </section>
+        )}
 
-    <section aria-labelledby="fuentes-titulo">
-      <h2 id="fuentes-titulo">Fuentes</h2>
+        {model.composers.length > 0 && model.works.length === 0 && (
+          <section aria-labelledby="compositores-titulo" class="editorial-section">
+            <h2 id="compositores-titulo">Compositores</h2>
+            <p class="names-line">{model.composers.join(' · ')}</p>
+          </section>
+        )}
+      </div>
+
+      <aside class="practical" aria-labelledby="practica-titulo">
+        <p class="eyebrow" id="practica-titulo">Información práctica</p>
+        <h2><a href={model.venueHref}>{model.venueName}</a></h2>
+        {model.venueAddress && <p>{model.venueAddress}{model.showMunicipality ? `, ${model.municipality}` : ''}</p>}
+        {model.organizers.length > 0 && <p><span>Organiza</span>{model.organizers.join(', ')}</p>}
+        <p class="practical__warning">Comprueba horarios, disponibilidad y condiciones en la fuente oficial antes de desplazarte.</p>
+      </aside>
+    </div>
+
+    <section aria-labelledby="fuentes-titulo" class="sources-section">
+      <div><p class="eyebrow">Trazabilidad</p><h2 id="fuentes-titulo">Fuentes</h2></div>
       <ul class="source-list">
-        {
-          model.sources.map((source) => (
-            <li>
-              <a href={source.url} rel="noopener noreferrer">
-                {source.name}
-              </a>
-              <span>
-                {' '}
-                · {source.kind}
-                {source.isPrimary ? ' · principal' : ''} · comprobada {source.checkedAt}
-              </span>
-            </li>
-          ))
-        }
+        {model.sources.map((source) => (
+          <li>
+            <a href={source.url} rel="noopener noreferrer">{source.name} <span aria-hidden="true">↗</span></a>
+            <span>{source.kind}{source.isPrimary ? ' · fuente principal' : ''} · comprobada {source.checkedAt}</span>
+          </li>
+        ))}
       </ul>
-      <p class="verified">Última verificación: {model.lastVerifiedAt}</p>
+      <p class="verified">Última verificación del evento: {model.lastVerifiedAt}</p>
     </section>
   </article>
 </Layout>

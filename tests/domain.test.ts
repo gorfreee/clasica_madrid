@@ -172,6 +172,13 @@ describe('modelos de presentación', () => {
     expect(organ?.showMunicipality).toBe(true);
     expect(organ?.municipality).toBe('Alcobendas');
     expect(organ?.time).toBeNull();
+    expect(model.today).toBe('2026-09-01');
+    expect(model.shortcuts.map((shortcut) => shortcut.label)).toEqual([
+      'Hoy',
+      'Mañana',
+      'Fin de semana',
+      'Gratis',
+    ]);
   });
 
   it('distingue catálogo vacío de filtros sin resultados', () => {
@@ -247,6 +254,11 @@ describe('modelos de presentación', () => {
     });
     const index = buildVenuesIndexModel(catalog, testClock);
     expect(index.venues.map((venue) => venue.slug)).toEqual(['auditorio-nacional']);
+    expect(index.venues[0]?.nextDate).toBe('2026-09-15');
+    expect(index.allVenues.map((venue) => venue.slug)).toEqual([
+      'auditorio-nacional',
+      'teatro-historico',
+    ]);
     expect(listVenuePageSlugs(catalog)).toEqual(['auditorio-nacional', 'teatro-historico']);
     expect(buildVenuePageModel(catalog, 'teatro-historico', testClock)).not.toBeNull();
   });
@@ -283,6 +295,7 @@ describe('modelos de presentación', () => {
     expect(page?.isPast).toBe(false);
     expect(page?.description).toContain('20 de septiembre');
     expect(page?.description).not.toContain('20 de agosto');
+    expect(page?.featuredOccurrence.id).toBe('occ_futura');
   });
 
   it('construye JSON-LD MusicEvent por cada representación', () => {

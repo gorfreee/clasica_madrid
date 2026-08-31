@@ -1,7 +1,7 @@
 import type { Catalog } from '../domain/catalog.ts';
 import type { FilterableOccurrence } from '../domain/filters.ts';
 import { toFilterable } from '../domain/filters.ts';
-import { formatMadridDate } from '../domain/dates.ts';
+import { formatMadridDate, fromMadridLocal, madridToday } from '../domain/dates.ts';
 import { listUpcomingOccurrences, type Clock, systemClock } from '../domain/index.ts';
 import type { ResolvedOccurrence } from '../domain/resolve.ts';
 import { accessLabels, areaLabels, eraLabels, formatLabels, kindLabels, occurrenceCountLabel } from './labels.ts';
@@ -41,7 +41,18 @@ export type AgendaItemModel = {
 export type AgendaDayModel = {
   date: string;
   dateLabel: string;
+  dayNumber: string;
+  weekdayLabel: string;
+  monthLabel: string;
+  isToday: boolean;
+  isTomorrow: boolean;
+  startsMonth: boolean;
   items: AgendaItemModel[];
+};
+
+export type AgendaShortcutModel = {
+  label: string;
+  href: string;
 };
 
 export type FilterFieldModel = {
@@ -68,6 +79,10 @@ export type AgendaPageModel = {
   composer: string;
   composerSuggestions: string[];
   filterIndex: FilterableOccurrence[];
+  today: string;
+  todayLabel: string;
+  hasEventsToday: boolean;
+  shortcuts: AgendaShortcutModel[];
 };
 
 export { occurrenceCountLabel } from './labels.ts';
@@ -78,7 +93,9 @@ export function buildAgendaPageModel(
   clock: Clock = systemClock,
 ): AgendaPageModel {
   const upcoming = listUpcomingOccurrences(catalog, clock);
-  const days = groupByDate(upcoming.map(toAgendaItem));
+  const today = madridToday(clock.now());
+  const tomorrow = addCivilDays(today, 1);
+  const days = groupByDate(upcoming.map(toAgendaItem), today, tomorrow);
   return {
     title: 'Agenda de música clásica en Madrid',
     description:
@@ -97,6 +114,10 @@ export function buildAgendaPageModel(
     composer: '',
     composerSuggestions: unique(upcoming.flatMap((item) => item.resolved.event.composers.map((c) => c.name))),
     filterIndex: upcoming.map(toFilterable),
+    today,
+    todayLabel: formatMadridDate(today),
+    hasEventsToday: days[0]?.date === today,
+    shortcuts: buildShortcuts(today),
   };
 }
 
@@ -128,17 +149,58 @@ export function toAgendaItem(item: ResolvedOccurrence): AgendaItemModel {
   };
 }
 
-function groupByDate(items: AgendaItemModel[]): AgendaDayModel[] {
+function groupByDate(items: AgendaItemModel[], today: string, tomorrow: string): AgendaDayModel[] {
   const days: AgendaDayModel[] = [];
   for (const item of items) {
     const last = days.at(-1);
     if (last && last.date === item.date) {
       last.items.push(item);
     } else {
-      days.push({ date: item.date, dateLabel: item.dateLabel, items: [item] });
+      const instant = fromMadridLocal(item.date, '12:00');
+      const monthLabel = new Intl.DateTimeFormat('es-ES', {
+        timeZone: 'Europe/Madrid',
+        month: 'long',
+      }).format(instant);
+      days.push({
+        date: item.date,
+        dateLabel: item.dateLabel,
+        dayNumber: new Intl.DateTimeFormat('es-ES', {
+          timeZone: 'Europe/Madrid',
+          day: '2-digit',
+        }).format(instant),
+        weekdayLabel: new Intl.DateTimeFormat('es-ES', {
+          timeZone: 'Europe/Madrid',
+          weekday: 'long',
+        }).format(instant),
+        monthLabel,
+        isToday: item.date === today,
+        isTomorrow: item.date === tomorrow,
+        startsMonth: days.length === 0 || days.at(-1)?.monthLabel !== monthLabel,
+        items: [item],
+      });
     }
   }
   return days;
+}
+
+function addCivilDays(date: string, days: number): string {
+  const instant = new Date(`${date}T12:00:00Z`);
+  instant.setUTCDate(instant.getUTCDate() + days);
+  return instant.toISOString().slice(0, 10);
+}
+
+function buildShortcuts(today: string): AgendaShortcutModel[] {
+  const tomorrow = addCivilDays(today, 1);
+  const weekday = new Date(`${today}T12:00:00Z`).getUTCDay();
+  const saturdayOffset = weekday === 0 ? 0 : weekday === 6 ? 0 : 6 - weekday;
+  const weekendFrom = weekday === 0 ? today : addCivilDays(today, saturdayOffset);
+  const weekendTo = weekday === 0 ? today : addCivilDays(weekendFrom, 1);
+  return [
+    { label: 'Hoy', href: `/?from=${today}&to=${today}` },
+    { label: 'Mañana', href: `/?from=${tomorrow}&to=${tomorrow}` },
+    { label: 'Fin de semana', href: `/?from=${weekendFrom}&to=${weekendTo}` },
+    { label: 'Gratis', href: '/?access=free' },
+  ];
 }
 
 function buildSelectFilters(upcoming: ResolvedOccurrence[]): FilterFieldModel[] {

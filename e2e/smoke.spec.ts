@@ -37,7 +37,7 @@ test.describe('agenda', () => {
 
     const form = page.locator('[data-agenda-filters]');
     await form.getByRole('searchbox').fill(NO_MATCH_QUERY);
-    await form.getByRole('button', { name: 'Aplicar filtros' }).click();
+    await form.getByRole('button', { name: 'Buscar' }).click();
 
     await expect(page).toHaveURL(new RegExp(`[?&]q=${NO_MATCH_QUERY}`));
     await expect(page.locator('[data-no-results]')).toBeVisible();
@@ -55,7 +55,7 @@ test.describe('agenda', () => {
 
     const form = page.locator('[data-agenda-filters]');
     await form.getByRole('searchbox').fill(NO_MATCH_QUERY);
-    await form.getByRole('button', { name: 'Aplicar filtros' }).click();
+    await form.getByRole('button', { name: 'Buscar' }).click();
     await expect(page.locator('[data-no-results]')).toBeVisible();
 
     await page.locator('[data-clear-filters]').click();
@@ -75,7 +75,7 @@ test.describe('agenda', () => {
 
     const form = page.locator('[data-agenda-filters]');
     await form.getByRole('searchbox').fill(NO_MATCH_QUERY);
-    await form.getByRole('button', { name: 'Aplicar filtros' }).click();
+    await form.getByRole('button', { name: 'Buscar' }).click();
     await expect(page).toHaveURL(new RegExp(`[?&]q=${NO_MATCH_QUERY}`));
     await expect(visibleOccurrences(page)).toHaveCount(0);
 
