@@ -1,47 +1,54 @@
 # Validación de Fundación Juan March — 2026-08-31
 
-Base inspeccionada: `main` en `f9ac819` (incluye hardening de Zarzuela y del pool Gemini). No se modifica `data/**`.
+Base inspeccionada: `main` en `9936aa1` (PR #40 mergeada). No se modifica `data/**`.
 
-## Mecanismo y cobertura
+## Root cause del dry-run 33378603348
 
-El listado oficial [Conciertos en Madrid](https://www.march.es/es/madrid/conciertos) descubre las fichas. Sus 11 tarjetas ya están en el HTML: «Mostrar más» revela las tres inicialmente ocultas, sin añadir otra página. Se limita la lectura al bloque de próximos conciertos, antes del siguiente `h2`, para no ingerir el carrusel del archivo. Se comprueba el número de tarjetas declarado por el CMS; una estructura desconocida o una futura paginación falla de forma visible.
+Tras el merge de #40, [la ejecución `33378603348`](https://github.com/gorfreee/clasica_madrid/actions/runs/33378603348) corrió `fundacion-juan-march` sobre ese `main`:
 
-No se ha podido verificar una API pública mejor. El listado contiene JSON-LD de WebSite/Organization, pero no los conciertos. Las fichas sí contienen un `@graph` de Event por función. Los enlaces ICS/Google/Outlook del listado sólo incluyen la **primera** función, por lo que no sirven como calendario completo. No se extraen horarios del PDF de temporada, que aún enlaza 2025–26.
+- listado `https://www.march.es/es/madrid/conciertos` → HTTP 403;
+- 0 RawEvents, 0 hydrations, 0 llamadas de IA;
+- health `fatal` por `no-sources-succeeded` y `source-failed:fundacion-juan-march`;
+- `data/**` intacto.
+
+El parser de #40 no intervino: el fallo está antes de `extract()`. Node `fetch` sigue redirecciones **sin** reenviar `Set-Cookie`. `www.march.es` responde un 307 al mismo URL con una cookie de sesión nginx; sin reenviarla, Actions recibe 403 y algunos clientes locales cierran la conexión.
+
+## Superficies oficiales reinvestigadas
+
+Cliente HTTP comparable a Node/GitHub Actions, sin navegador:
+
+| Superficie | Resultado | Calendario completo |
+|---|---|---|
+| `www.march.es/es/madrid/conciertos` sin cookie | 307 al mismo URL | no |
+| `www.march.es` reenviando el `Set-Cookie` del 307 | 200, 11 fichas, detalle Andrómeda 200 | sí |
+| JSON:API `/jsonapi` | 401 Unauthorized | no |
+| `?_format=json` | 406 HTML only | no |
+| `canal.march.es` (Next.js, `__NEXT_DATA__`) | 200 sin cookie | no: mezcla conferencias y un streaming por acto |
+| `canal.march.es/es/streaming/49477` (Andrómeda) | 200 | una función (07 oct 18:00), no las seis presenciales ni la hora visible 18:30 |
+| `www2.march.es/musica/` | 301 al listado de `www.march.es` | no |
+| ICS/Google/Outlook del listado | — | sólo la primera función |
+| PDF de temporada en `cdnrepositorios.march.es` | 200 | 2025–26, no un feed estructurado |
+
+No se usan mirrors ni terceros. Canal March no sustituye al listado: perdería funciones, mezclaría streaming con calendario presencial y no conserva la URL canónica `www.march.es/es/madrid/concierto/...`.
+
+## Mecanismo
+
+Se conserva el adapter de #40. El listado oficial [Conciertos en Madrid](https://www.march.es/es/madrid/conciertos) descubre las fichas. Sus tarjetas ya están en el HTML: «Mostrar más» revela las inicialmente ocultas, sin añadir otra página. Se limita la lectura al bloque de próximos conciertos y se comprueba el número de tarjetas declarado por el CMS.
+
+`getText` sigue redirecciones de forma explícita y reenvía a **la misma origin** las cookies que acaba de recibir. No se cambia el User-Agent, no hay reintentos de 403/429, no hay navegador, proxies ni cookies copiadas a mano.
 
 Cada ficha se hidrata una vez para obtener:
 
 - Fechas, sede, modalidad presencial/mixta, estado, descripción e intérpretes del JSON-LD.
-- **Hora del concierto del calendario visible**, cotejando fechas y número de funciones con el JSON-LD. En los miércoles el JSON-LD/ICS puede indicar las 18:00 de la entrevista previa, mientras la ficha anuncia el concierto a las 18:30. No se aplica un desplazamiento fijo ni se inventa una hora. Se comprueban también fecha válida y día de la semana.
-- Programa de la sección identificada por el CMS; compositores/obras sólo cuando están etiquetados explícitamente. Las negritas de un programa en prosa no convierten a su dramaturgo en compositor. No se interpretan repertorios, elegibilidad, épocas ni formatos en el adapter.
+- **Hora del concierto del calendario visible**, cotejando fechas y número de funciones con el JSON-LD. En los miércoles el JSON-LD/ICS puede indicar las 18:00 de la entrevista previa, mientras la ficha anuncia el concierto a las 18:30. No se aplica un desplazamiento fijo ni se inventa una hora.
+- Programa de la sección identificada por el CMS; compositores/obras sólo cuando están etiquetados explícitamente.
 
-La URL de la ficha y su pathname son la identidad; no se usan las URLs de streaming ni los identificadores de cada función. Se reutilizan los IDs/slugs publicados de la fuente y del auditorio. La gratuidad procede de la declaración expresa del listado, no de una regla editorial por fuente.
+La URL de la ficha y su pathname son la identidad; no se usan las URLs de streaming ni los identificadores de cada función. El listado no aporta un calendario completo: un fallo de ficha no publica la primera fecha ni recorta un calendario existente. Cualquier ficha necesaria fallida suprime desapariciones de March.
 
-## Fallos conservadores
+## Workflow
 
-El listado no aporta un calendario completo: sus RawEvents no contienen funciones publicables hasta hidratarse. Un fallo de ficha no publica la primera fecha ni recorta un calendario existente. Un flag opt-in del contrato reutiliza, sin cambiar umbrales, la cobertura de hydration y la evidencia de presencia que ya tenía Zarzuela. La lógica HTTP, reintentos y windowing de Zarzuela permanecen intactos; las demás fuentes no activan este flag.
-
-Cualquier ficha necesaria fallida suprime desapariciones de March. Un fallo severo también marca la fuente como fallida en hydration. Se rechazan calendarios incoherentes, funciones no presenciales en Madrid y combinaciones de sedes/estados que el contrato común no puede representar sin pérdida.
+`schedule` y `publish` siguen ejecutando código de `main`. Un `dry-run` manual usa el ref seleccionado en Actions, para poder humear una rama antes del merge. Publish desde una feature branch no puede escribir `data/**` con código no fusionado.
 
 ## Validación
 
-Ventana: 2026-08-31 → 2026-12-29. Sin IA: no hay credenciales locales, no se consumió cuota.
-
-- 627 tests, `check`, validación del catálogo y build correctos. Incluye tests de fechas/horas, cambio CET/CEST, fallo parcial/total, URL oficial, identidades cross-source, bootstrap, idempotencia y ausencia de publicación fuera de ventana/cancelada.
-- Dry-run HTTP de March: timeout del listado, 0 RawEvents, health `fatal`, sin escrituras. El navegador sí pudo leer el listado y las 11 fichas. Las pruebas HTTP adicionales devolvieron redirección 307 al mismo URL y respuesta vacía 444; no se añaden cookies, spoofing, navegador ni workarounds al adapter.
-- Dry-run HTTP de todas las fuentes: 234 RawEvents; Auditorio, Real y Madrid Datos correctos; fallo 403 de un listado de Zarzuela y timeout de March. Health `review`; 0 nuevos, 1 actualizado, 113 unchanged, 0 ambiguos, 0 duplicados, 1 possiblyMissing de las fuentes anteriores. No demuestra disponibilidad HTTP de March.
-- Replay de las capturas oficiales completas de March por el pipeline real: **11 RawEvents, 17 funciones, 11/11 fichas hidratadas, 0 descartes estructurales; 9 include, 0 exclude, 2 uncertain; 9 altas y 1 actualización; 0 ambiguos/duplicados/possiblyMissing**. Health `degraded` por taxonomía incompleta. Esta prueba inyecta capturas mediante el `get` existente; no es una ejecución HTTP exitosa.
-
-La ejecución adicional con las cuatro fuentes por HTTP y March desde sus capturas produjo **285 RawEvents; 103 include / 45 exclude / 57 uncertain; 9 altas, 4 actualizaciones y 113 unchanged; 0 ambiguos y 0 duplicados**. De 263 hydrations intentadas, 258 funcionaron y 5 fallaron en las fuentes anteriores; 22 fichas de Zarzuela quedaron fuera de ventana. Se reprodujeron las mismas respuestas HTTP en un checkout separado de `main` (`f9ac819`): **las 274 decisiones de las otras fuentes, sus tres candidatos y el único possiblyMissing son idénticos**. El incremento es exclusivamente March (11 observaciones, 9 altas y la actualización de Andrómeda). Las capturas no ocultan el fallo de transporte: son una comprobación separada de extracción, clasificación y reconciliación.
-
-Andrómeda se reconcilia con el evento público ya publicado (se conservan ID, slug y las seis funciones; no se mezcla con escolares). Los dos uncertain sin IA son Andrómeda y Los amigos de Kurtág; el primero conserva su clasificación canónica al ser un evento existente. No se amplía el knowledge base para forzar su inclusión.
-
-## Pendiente antes de fusionar
-
-Verificar un dry-run HTTP exitoso desde un entorno que llegue a March, con la rama de esta PR. El workflow actual de producción hace checkout explícito de `main`: seleccionar esta rama en «Run workflow» no basta para probarla antes del merge. El timeout local impide dar por validado el transporte. Por ello la PR se abre como draft; no se cambia el workflow de producción para esta prueba.
-
-```bash
-npm run ingest:source -- fundacion-juan-march --dry-run --report ingestion/reports/march/report.json
-npm run ingest:sync -- --dry-run --report ingestion/reports/all/report.json
-```
-
-La cobertura se limita a las fichas publicadas en próximos conciertos (en esta captura, hasta 11 de noviembre). Archivo histórico, programaciones no enlazadas y enriquecimiento fino quedan para iteraciones posteriores. Las funciones con varios estados/sedes se rechazan en lugar de convertirlas en un calendario engañoso.
+Ventana por defecto. Sin modificar `data/**`. Los resultados de tests/check/validate/build y del dry-run HTTP real de GitHub Actions de esta rama se recogen en la PR.

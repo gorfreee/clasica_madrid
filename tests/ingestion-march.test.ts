@@ -2,7 +2,7 @@ import { readFile, mkdtemp } from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import { describe, expect, it } from 'vitest';
-import { fundacionJuanMarchAdapter as adapter } from '../src/ingestion/sources/fundacion-juan-march.ts';
+import { fundacionJuanMarchAdapter as adapter, marchConcertUrl } from '../src/ingestion/sources/fundacion-juan-march.ts';
 import { parseMarchDetail } from '../src/ingestion/detail/fundacion-juan-march.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { hydrateEvents } from '../src/ingestion/hydrate.ts';
@@ -31,6 +31,13 @@ async function listingFor(slugs: string[]) {
 }
 
 describe('March discovery', () => {
+  it('keeps the official www.march.es listing as acquisition and concert URLs as identity', () => {
+    expect(source.urls).toEqual(['https://www.march.es/es/madrid/conciertos']);
+    expect(marchConcertUrl('/es/madrid/concierto/andromeda-perseo', `${base}/conciertos`))
+      .toBe('https://www.march.es/es/madrid/concierto/andromeda-perseo');
+    expect(marchConcertUrl('https://canal.march.es/es/streaming/49477', `${base}/conciertos`)).toBeUndefined();
+  });
+
   it('reads all 11 cards, including hidden ones, and excludes archive/navigation', async () => {
     const events = await adapter.extract(await fixture('listing'), `${base}/conciertos`, context);
     expect(events).toHaveLength(11);

@@ -60,10 +60,12 @@ jobs:
       RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
     steps:
-      - name: Checkout main
+      - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: main
+          # schedule and manual publish always run merged main so feature
+          # code cannot write data/**. Manual dry-run uses the selected ref.
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'dry-run' && github.ref || 'main' }}
           persist-credentials: false
 
       - name: Resolve and validate inputs
@@ -120,6 +122,11 @@ jobs:
             exit 1
           fi
 
+          if [[ "$EVENT_NAME" == "workflow_dispatch" && "$mode" == "publish" && "${GITHUB_REF}" != "refs/heads/main" ]]; then
+            echo "::warning::Publish ejecuta siempre el código de main; se ignora ${GITHUB_REF}."
+          fi
+
+          code_sha=$(git rev-parse HEAD)
           {
             echo "mode=$mode"
             echo "sources=$sources"
@@ -127,6 +134,7 @@ jobs:
             echo "to=$to"
             echo "auto_merge_requested=$auto_merge_requested"
             echo "ai_max_requests=$ai_max_requests"
+            echo "code_sha=$code_sha"
           } >> "$GITHUB_OUTPUT"
 
       - name: Setup Node
@@ -156,6 +164,7 @@ jobs:
           FROM_DATE: ${{ steps.config.outputs.from }}
           TO_DATE: ${{ steps.config.outputs.to }}
           AI_MAX_REQUESTS: ${{ steps.config.outputs.ai_max_requests }}
+          GITHUB_SHA: ${{ steps.config.outputs.code_sha }}
         shell: bash
         run: |
           set -euo pipefail

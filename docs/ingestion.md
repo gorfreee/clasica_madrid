@@ -89,7 +89,7 @@ En **Actions → Production ingestion → Run workflow**:
 - `auto_merge`: opt-in adicional para un publish manual;
 - `ai_max_requests`: presupuesto HTTP opcional para Gemini.
 
-El dry-run nunca puede modificar `data/**` ni crear una PR. En publish, un no-op tampoco crea branch, commit ni PR. Si ya existe una PR abierta cuyo branch empieza por `automation/ingestion-`, la ejecución conserva su report pero no crea ni actualiza otra PR.
+El dry-run usa el ref seleccionado en «Run workflow» y nunca puede modificar `data/**` ni crear una PR. `schedule` y `publish` ejecutan siempre el código de `main`, de modo que una rama no fusionada no puede escribir el catálogo. En publish, un no-op tampoco crea branch, commit ni PR. Si ya existe una PR abierta cuyo branch empieza por `automation/ingestion-`, la ejecución conserva su report pero no crea ni actualiza otra PR.
 
 ### Secrets, variable y permisos
 

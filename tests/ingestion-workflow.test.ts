@@ -13,6 +13,8 @@ describe('workflow de ingestión: artifact de observabilidad', () => {
     const gemini = section(yaml, 'Restore persistent Gemini state');
     const publish = section(yaml, 'Publish data pull request');
     const dryRun = section(yaml, 'Record dry-run outcome');
+    const checkout = section(yaml, 'Checkout');
+    const config = section(yaml, 'Resolve and validate inputs');
 
     expect(upload).toContain('if: always()');
     expect(upload).toContain('continue-on-error: true');
@@ -39,6 +41,15 @@ describe('workflow de ingestión: artifact de observabilidad', () => {
     expect(publish).toContain("steps.config.outputs.mode == 'publish'");
     expect(dryRun).toContain("steps.config.outputs.mode == 'dry-run'");
     expect(yaml).not.toContain('if-no-files-found: error');
+
+    expect(checkout).toContain("github.event_name == 'workflow_dispatch'");
+    expect(checkout).toContain("inputs.mode == 'dry-run'");
+    expect(checkout).toContain('github.ref');
+    expect(checkout).toContain("|| 'main'");
+    expect(checkout).not.toMatch(/ref:\s*main\s*$/m);
+    expect(config).toContain('Publish ejecuta siempre el código de main');
+    expect(config).toContain('code_sha=$(git rev-parse HEAD)');
+    expect(ingest).toContain('GITHUB_SHA: ${{ steps.config.outputs.code_sha }}');
   });
 });
 
