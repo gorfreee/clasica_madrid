@@ -22,7 +22,8 @@ Este documento define la arquitectura técnica base del proyecto. Debe manteners
 - **Pagefind** para búsqueda estática, si resulta suficiente; todavía no está instalado. La agenda filtra en cliente sobre el HTML generado en build.
 - **Cloudflare Pages** para hosting y despliegue estático.
 - **GitHub Actions** para validación, tests, builds y (como objetivo de ingestión) automatizaciones.
-- **Vitest** para lógica y validadores. Playwright no está instalado; sólo se consideraría para recorridos críticos de la interfaz si aparece esa necesidad.
+- **Vitest** para lógica y validadores.
+- **Playwright** (Chromium) para unos pocos smoke tests de la agenda y la ficha de evento. No es una suite de regresión visual ni un framework de testing de UI.
 
 No usar inicialmente una base de datos, backend, SSR, API propia, CMS, sistema de autenticación ni servicios de búsqueda externos.
 
@@ -52,6 +53,8 @@ Reglas:
 - evitar acoplar el dominio a Tailwind, Astro o a una librería concreta de componentes.
 
 El objetivo es que una futura sustitución completa del diseño afecte principalmente a la capa de presentación y no obligue a reconstruir el resto del sistema.
+
+Los filtros de la agenda se aplican en el navegador. `src/lib/presentation/agenda-client.ts` localiza el formulario, la lista y el índice serializado con un conjunto pequeño de atributos `data-*` e `#agenda-filter-data`. Eso es un contrato interno de la UI, no un design system: un rediseño puede cambiar markup, clases y estilos, pero no debe eliminar esos selectores mientras el filtrado en cliente siga existiendo. Los smoke tests de `e2e/` cubren ese recorrido.
 
 ## Datos
 

@@ -11,6 +11,7 @@
     "validate": "tsx src/cli/validate-data.ts",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
     "ingest:promote": "tsx src/cli/promote-candidate.ts",
     "ingest:sync": "tsx src/cli/ingest.ts sync",
     "ingest:source": "tsx src/cli/ingest.ts source",
@@ -29,6 +30,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@playwright/test": "^1.62.1",
     "@types/node": "^22.10.0",
     "exceljs": "^4.4.0",
     "tsx": "^4.19.0",

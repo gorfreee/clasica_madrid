@@ -37,6 +37,7 @@ const model = await loadAgendaPage(Astro.url);
           {model.resultCountLabel}
         </p>
         <AgendaList days={model.days} />
+        {/* data-result-count / data-no-results: contrato de agenda-client.ts */}
         <div data-no-results hidden>
           <EmptyState
             title="Ningún concierto coincide con esos filtros"
@@ -49,6 +50,7 @@ const model = await loadAgendaPage(Astro.url);
           is:inline
           set:html={serializeJsonForScript(model.filterIndex)}
         />
+        {/* #agenda-filter-data: contrato de agenda-client.ts; no eliminar en un rediseño */}
         <script>
           import { initAgendaFilters } from '../lib/presentation/agenda-client.ts';
           initAgendaFilters();

@@ -1,3 +1,18 @@
+/**
+ * Client-side agenda filters. The markup in `src/pages/index.astro` and
+ * `src/components/{FilterForm,AgendaList,AgendaItem}.astro` must keep this
+ * internal DOM contract while this script exists — it is not discovered by
+ * TypeScript. Playwright smokes in `e2e/` guard the behaviour.
+ *
+ * - `#agenda-filter-data` — JSON index of FilterableOccurrence
+ * - `[data-agenda-filters]` — filter form (names match URL params)
+ * - `[data-agenda-list]` — occurrence list
+ * - `[data-agenda-day]` — day group (hidden when every child is hidden)
+ * - `[data-occurrence-id]` — occurrence article; value is occurrenceId
+ * - `[data-result-count]` — live result count
+ * - `[data-no-results]` — empty-filter state
+ * - `[data-clear-filters]` — reset to `/`
+ */
 import {
   hasActiveFilters,
   parseAgendaFilters,
