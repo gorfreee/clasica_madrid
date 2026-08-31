@@ -20,9 +20,11 @@ describe('Cloudflare fetch-relay worker', () => {
   it('has no source or host allowlist of its own', async () => {
     const source = await workerSource();
     expect(source).not.toContain('www.march.es');
+    expect(source).not.toContain('teatrodelazarzuela.inaem.gob.es');
     expect(source).not.toContain('ALLOWED_HOST');
     expect(source).not.toContain('FETCH_RELAY_HOSTS');
     expect(source).not.toContain('fundacion-juan-march');
+    expect(source).not.toContain('teatro-zarzuela');
     expect(source).not.toMatch(/\/es\/madrid\/concierto/);
   });
 

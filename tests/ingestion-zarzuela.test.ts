@@ -28,6 +28,10 @@ const raw = (slug = 'la-verbena-de-la-paloma'): RawEvent => ({
 });
 
 describe('descubrimiento K2 de Zarzuela', () => {
+  it('usa el fetch relay genérico por hostname, sin proxy propio', () => {
+    expect(source.useFetchRelay).toBe(true);
+  });
+
   it('descubre las siete secciones y todas las filas de tres obras, sin duplicar navegación', async () => {
     const requests: string[] = [];
     const events = await teatroZarzuelaAdapter.extract(await fixture('home'), `${base}/es/`, {

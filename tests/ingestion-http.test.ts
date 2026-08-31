@@ -4,6 +4,8 @@ import path from 'node:path';
 import { getText, HttpError, resolveFetchRelay } from '../src/ingestion/http.ts';
 import { fundacionJuanMarchAdapter as adapter } from '../src/ingestion/sources/fundacion-juan-march.ts';
 import { parseMarchDetail } from '../src/ingestion/detail/fundacion-juan-march.ts';
+import { parseZarzuelaDetail } from '../src/ingestion/detail/teatro-zarzuela.ts';
+import { teatroZarzuelaAdapter } from '../src/ingestion/sources/teatro-zarzuela.ts';
 import { fetchRelayHosts, getSourceDefinition, listSourceDefinitions } from '../src/ingestion/registry.ts';
 import { TEST_NOW, TEST_WINDOW } from './helpers.ts';
 import type { AdapterContext, SourceDefinition } from '../src/ingestion/types.ts';
@@ -11,6 +13,9 @@ import type { AdapterContext, SourceDefinition } from '../src/ingestion/types.ts
 const listing = 'https://www.march.es/es/madrid/conciertos';
 const detail = 'https://www.march.es/es/madrid/concierto/andromeda-perseo';
 const ordinary = 'https://auditorionacional.inaem.gob.es/front-page-events.json';
+const zarzuelaHome = 'https://teatrodelazarzuela.inaem.gob.es/es/';
+const zarzuelaListing = 'https://teatrodelazarzuela.inaem.gob.es/es/temporada/teatro-musical-de-camara-2026-2027';
+const zarzuelaDetail = 'https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/la-verbena-de-la-paloma';
 const ua = 'ClasicaMadrid-ingestion/1 (+https://github.com/gorfreee/clasica_madrid)';
 const relayOrigin = 'https://relay.example.test';
 const token = 'relay-secret-token-xyz';
@@ -126,11 +131,13 @@ describe('getText fetch relay', () => {
     const worker = await readFile(path.join(import.meta.dirname, '..', 'infra', 'fetch-relay', 'worker.js'), 'utf8');
     const http = await readFile(path.join(import.meta.dirname, '..', 'src', 'ingestion', 'http.ts'), 'utf8');
     expect(worker).not.toContain('www.march.es');
+    expect(worker).not.toContain('teatrodelazarzuela.inaem.gob.es');
     expect(http).not.toContain('FETCH_RELAY_HOSTS');
     expect(listSourceDefinitions().filter((item) => item.useFetchRelay).map((item) => item.id)).toEqual([
+      'teatro-zarzuela',
       'fundacion-juan-march',
     ]);
-    expect(fetchRelayHosts()).toEqual(['www.march.es']);
+    expect(fetchRelayHosts()).toEqual(['teatrodelazarzuela.inaem.gob.es', 'www.march.es']);
     expect(getSourceDefinition('auditorio-nacional').useFetchRelay).toBeFalsy();
 
     const extra: SourceDefinition = {
@@ -200,23 +207,89 @@ describe('getText fetch relay', () => {
     expect(await adapter.extract(listingHtml, listing, context)).toEqual(events);
   });
 
+  it('sends Zarzuela home, listing and detail through the relay and keeps official URLs', async () => {
+    const homeHtml = '<nav><a href="/es/temporada/lirica-2026-2027">Temporada</a></nav>';
+    const listingHtml = await readFile(
+      path.join(import.meta.dirname, 'fixtures/ingestion/zarzuela', 'listing-lirica-2026-2027.html'),
+      'utf8',
+    );
+    const detailHtml = await readFile(
+      path.join(import.meta.dirname, 'fixtures/ingestion/zarzuela', 'detail-verbena.html'),
+      'utf8',
+    );
+    const requested: string[] = [];
+    const fetch = vi.fn(async (url: string, init?: RequestInit) => {
+      const parsed = new URL(url);
+      expect(parsed.origin).toBe(relayOrigin);
+      expect(header(init, 'authorization')).toBe(`Bearer ${token}`);
+      const official = parsed.searchParams.get('url');
+      expect(official?.startsWith('https://teatrodelazarzuela.inaem.gob.es/')).toBe(true);
+      requested.push(official!);
+      if (official === zarzuelaHome) return new Response(homeHtml, { status: 200 });
+      if (official === 'https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027') {
+        return new Response(listingHtml, { status: 200 });
+      }
+      if (official === zarzuelaDetail) return new Response(detailHtml, { status: 200 });
+      throw new Error(`relay no debía pedir ${official}`);
+    });
+    vi.stubGlobal('fetch', fetch);
+
+    expect(resolveFetchRelay(zarzuelaHome, relayEnv)?.requestUrl).toContain(encodeURIComponent(zarzuelaHome));
+    expect(resolveFetchRelay(zarzuelaListing, relayEnv)?.requestUrl).toContain(encodeURIComponent(zarzuelaListing));
+    expect(resolveFetchRelay(zarzuelaDetail, relayEnv)?.requestUrl).toContain(encodeURIComponent(zarzuelaDetail));
+    expect(resolveFetchRelay(ordinary, relayEnv)).toBeUndefined();
+
+    const zarzuela = getSourceDefinition('teatro-zarzuela');
+    const zarzuelaContext: AdapterContext = {
+      source: zarzuela,
+      now: TEST_NOW,
+      window: TEST_WINDOW,
+      get: (url) => getText(url, 30_000, relayEnv),
+    };
+    const events = await teatroZarzuelaAdapter.extract(
+      await getText(zarzuelaHome, 30_000, relayEnv),
+      zarzuelaHome,
+      zarzuelaContext,
+    );
+    expect(events.length).toBeGreaterThan(0);
+    expect(events.every((event) => event.sourceUrl.startsWith('https://teatrodelazarzuela.inaem.gob.es/es/temporada/'))).toBe(true);
+    expect(events.every((event) => event.externalId === new URL(event.sourceUrl).pathname)).toBe(true);
+    expect(events.some((event) => event.sourceUrl === zarzuelaDetail)).toBe(true);
+    expect(JSON.stringify(events)).not.toContain('relay.example');
+    expect(JSON.stringify(events)).not.toContain(token);
+    expect(JSON.stringify(events)).not.toContain('workers.dev');
+
+    const verbena = events.find((event) => event.sourceUrl === zarzuelaDetail)!;
+    const hydrated = parseZarzuelaDetail(verbena, await getText(zarzuelaDetail, 30_000, relayEnv));
+    expect(hydrated.occurrences?.length).toBeGreaterThan(0);
+    expect(JSON.stringify(hydrated)).not.toContain('relay.example');
+    expect(JSON.stringify(hydrated)).not.toContain(token);
+    expect(requested).toEqual([
+      zarzuelaHome,
+      'https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027',
+      zarzuelaDetail,
+    ]);
+  });
+
   it('surfaces relay 403 and 500 against the official URL without leaking the token', async () => {
-    for (const status of [403, 500]) {
-      const fetch = vi.fn(async () => new Response('nope', { status }));
-      vi.stubGlobal('fetch', fetch);
-      await expect(getText(listing, 30_000, relayEnv)).rejects.toMatchObject({
-        status,
-        message: `HTTP ${status} al pedir ${listing}`,
-      });
-      try {
-        await getText(listing, 30_000, relayEnv);
-        throw new Error('expected failure');
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        expect(message).not.toContain(token);
-        expect(message).not.toContain('Bearer');
-        expect(message).not.toContain(relayOrigin);
-        expect(error).toBeInstanceOf(HttpError);
+    for (const target of [listing, zarzuelaListing]) {
+      for (const status of [403, 500]) {
+        const fetch = vi.fn(async () => new Response('nope', { status }));
+        vi.stubGlobal('fetch', fetch);
+        await expect(getText(target, 30_000, relayEnv)).rejects.toMatchObject({
+          status,
+          message: `HTTP ${status} al pedir ${target}`,
+        });
+        try {
+          await getText(target, 30_000, relayEnv);
+          throw new Error('expected failure');
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          expect(message).not.toContain(token);
+          expect(message).not.toContain('Bearer');
+          expect(message).not.toContain(relayOrigin);
+          expect(error).toBeInstanceOf(HttpError);
+        }
       }
     }
   });

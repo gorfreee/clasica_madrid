@@ -73,6 +73,7 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
     urls: ['https://teatrodelazarzuela.inaem.gob.es/es/'],
     adapterId: teatroZarzuelaAdapter.id,
     catalogSourceId: 'src_teatro_zarzuela',
+    useFetchRelay: true,
     seedSource: {
       schemaVersion: 1,
       id: 'src_teatro_zarzuela',
