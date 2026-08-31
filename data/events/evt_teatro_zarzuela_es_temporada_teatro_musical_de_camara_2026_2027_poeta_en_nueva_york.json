@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_zarzuela_es_temporada_teatro_musical_de_camara_2026_2027_poeta_en_nueva_york",
+  "slug": "poeta-en-nueva-york",
+  "title": "Poeta en Nueva York",
+  "status": "scheduled",
+  "venueId": "ven_teatro_zarzuela",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_teatro_musical_de_camara_2026_2027_poeta_en_nueva_york_01",
+      "date": "2026-10-08",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "ALBERTO CARRETERO"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_teatro_zarzuela",
+      "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/teatro-musical-de-camara-2026-2027/poeta-en-nueva-york",
+      "checkedAt": "2026-08-31",
+      "externalId": "/es/temporada/teatro-musical-de-camara-2026-2027/poeta-en-nueva-york"
+    }
+  ],
+  "primarySourceId": "src_teatro_zarzuela",
+  "lastVerifiedAt": "2026-08-31"
+}

@@ -39,8 +39,17 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Johannes Brahms / Guy Braunstein"
+    }
+  ],
+  "works": [
+    {
+      "title": "Johannes Brahms – Der Sonnen Aufgang (La salida del sol) *",
+      "composerName": "Johannes Brahms / Guy Braunstein"
+    }
+  ],
   "eras": [
     "romantic"
   ],
@@ -53,10 +62,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-sinfonico-3-amanecer-en-el-recuerdo",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-08-31",
       "externalId": "orcam-sinfonico-3-amanecer-en-el-recuerdo"
+    },
+    {
+      "sourceId": "src_fundacion_orcam",
+      "url": "https://fundacionorcam.org/conciertos/2026-27/amanecer-en-el-recuerdo",
+      "checkedAt": "2026-08-31",
+      "externalId": "4844"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-08-31"
 }

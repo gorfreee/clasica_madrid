@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_memoriam_i_tombeaux_musicas_duelo",
+  "slug": "in-memoriam-i-tombeaux-musicas-de-duelo",
+  "title": "In Memoriam (I): Tombeaux , músicas de duelo",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_memoriam_i_tombeaux_musicas_duelo_01",
+      "date": "2026-10-17",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Béatrice Martin"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Louis Couperin"
+    },
+    {
+      "name": "Johann Jacob Froberger"
+    },
+    {
+      "name": "François Couperin"
+    },
+    {
+      "name": "Johann Pachelbel"
+    },
+    {
+      "name": "Jean-Henri d'Anglebert"
+    }
+  ],
+  "works": [
+    {
+      "title": "Prélude non mesuré en Re menor, BG 1",
+      "composerName": "Louis Couperin"
+    },
+    {
+      "title": "Tombeau de Mr. de Blancrocher par Mr. Couperin",
+      "composerName": "Louis Couperin"
+    },
+    {
+      "title": "Suite en Re menor nº 7, G 57",
+      "composerName": "Louis Couperin"
+    },
+    {
+      "title": "Toccata nº 3 en Sol mayor, FbWV 103 (Libro Secondo di Toccate, Viena, 1649)",
+      "composerName": "Johann Jacob Froberger"
+    },
+    {
+      "title": "Tombeau en Do menor, FbWV 632, \"Tombeau fait à Paris sur la mort de Monsieur Blancheroche\"",
+      "composerName": "Johann Jacob Froberger"
+    },
+    {
+      "title": "La ténébreuse. Allemande , de Tercer orden de piezas para clave en Do menor",
+      "composerName": "François Couperin"
+    },
+    {
+      "title": "Les Ombres-errantes , de Vigésimo quinto orden de piezas de clave en Mi mayor",
+      "composerName": "François Couperin"
+    },
+    {
+      "title": "Suite en Mi menor, P 436",
+      "composerName": "Johann Pachelbel"
+    },
+    {
+      "title": "L'âme-en peine , de Décimo tercer orden de piezas para clave en Si menor",
+      "composerName": "François Couperin"
+    },
+    {
+      "title": "Méditation, faite sur ma Mort future laquelle se joue lentement avec discrétion , de Suite nº 20 en Re mayor, FbWV 620",
+      "composerName": "Johann Jacob Froberger"
+    },
+    {
+      "title": "Rittournelle des Fées de Roland de Mr de Lully , de Suite en Sol mayor, op. 1 nº 19 (Pièces de clavecin)",
+      "composerName": "Jean-Henri d'Anglebert"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "recital",
+    "early-music"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/memoriam-i-tombeaux-musicas-duelo",
+      "checkedAt": "2026-08-31",
+      "externalId": "/es/madrid/concierto/memoriam-i-tombeaux-musicas-duelo"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-08-31"
+}

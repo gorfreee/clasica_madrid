@@ -30,8 +30,31 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Benjamin Britten"
+    },
+    {
+      "name": "Albert Heinrich Zabel"
+    },
+    {
+      "name": "Albert Guinovart"
+    }
+  ],
+  "works": [
+    {
+      "title": "Ceremonia de villancicos, op. 28",
+      "composerName": "Benjamin Britten"
+    },
+    {
+      "title": "La fuente, op. 23 +",
+      "composerName": "Albert Heinrich Zabel"
+    },
+    {
+      "title": "Siete villancicos tradicionales españoles",
+      "composerName": "Albert Guinovart"
+    }
+  ],
   "eras": [
     "twentieth",
     "contemporary"
@@ -46,10 +69,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-tiempo-de-camara",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-08-31",
       "externalId": "orcam-tiempo-de-camara"
+    },
+    {
+      "sourceId": "src_fundacion_orcam",
+      "url": "https://fundacionorcam.org/conciertos/2026-27/esencias-de-villancicos",
+      "checkedAt": "2026-08-31",
+      "externalId": "4868"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-08-31"
 }

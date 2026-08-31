@@ -124,7 +124,8 @@
     {
       "sourceId": "src_fundacion_juan_march",
       "url": "https://www.march.es/es/madrid/concierto/andromeda-perseo",
-      "checkedAt": "2026-08-28"
+      "checkedAt": "2026-08-31",
+      "externalId": "/es/madrid/concierto/andromeda-perseo"
     },
     {
       "sourceId": "src_cntc",
@@ -133,5 +134,5 @@
     }
   ],
   "primarySourceId": "src_fundacion_juan_march",
-  "lastVerifiedAt": "2026-08-28"
+  "lastVerifiedAt": "2026-08-31"
 }

@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_beethoven_schubert_sombras_cruzadas_iii_formas_libertad",
+  "slug": "beethoven-y-schubert-sombras-cruzadas-iii-formas-en-libertad",
+  "title": "Beethoven y Schubert: sombras cruzadas (III): Formas en libertad",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_beethoven_schubert_sombras_cruzadas_iii_formas_libertad_01",
+      "date": "2026-10-28",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Cédric Tiberghien"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Franz Schubert"
+    },
+    {
+      "name": "Ludwig van Beethoven"
+    }
+  ],
+  "works": [
+    {
+      "title": "Variación sobre un vals de Diabelli, D 718",
+      "composerName": "Franz Schubert"
+    },
+    {
+      "title": "Tres piezas para piano, D 946",
+      "composerName": "Franz Schubert"
+    },
+    {
+      "title": "Variaciones sobre un vals de Diabelli Op. 120",
+      "composerName": "Ludwig van Beethoven"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/beethoven-schubert-sombras-cruzadas-iii-formas-libertad",
+      "checkedAt": "2026-08-31",
+      "externalId": "/es/madrid/concierto/beethoven-schubert-sombras-cruzadas-iii-formas-libertad"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-08-31"
+}

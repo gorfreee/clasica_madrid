@@ -27,8 +27,17 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Antonín Dvořák"
+    }
+  ],
+  "works": [
+    {
+      "title": "Stabat Mater (versión 1876) +",
+      "composerName": "Antonín Dvořák"
+    }
+  ],
   "eras": [
     "romantic"
   ],
@@ -43,10 +52,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-tiempo-de-camara-1-volver-a-creer",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-08-31",
       "externalId": "orcam-tiempo-de-camara-1-volver-a-creer"
+    },
+    {
+      "sourceId": "src_fundacion_orcam",
+      "url": "https://fundacionorcam.org/conciertos/2026-27/volver-a-creer",
+      "checkedAt": "2026-08-31",
+      "externalId": "4866"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-08-31"
 }

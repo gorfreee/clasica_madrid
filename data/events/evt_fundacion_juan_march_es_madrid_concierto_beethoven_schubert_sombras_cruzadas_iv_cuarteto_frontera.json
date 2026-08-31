@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_beethoven_schubert_sombras_cruzadas_iv_cuarteto_frontera",
+  "slug": "beethoven-y-schubert-sombras-cruzadas-iv-el-cuarteto-en-la-frontera",
+  "title": "Beethoven y Schubert: sombras cruzadas (IV): El cuarteto en la frontera",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_beethoven_schubert_sombras_cruzadas_iv_cuarteto_frontera_01",
+      "date": "2026-11-04",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Cuarteto Pavel Haas"
+    },
+    {
+      "name": "Veronika Jarůšková"
+    },
+    {
+      "name": "Marek Zwiebel"
+    },
+    {
+      "name": "Šimon Truszka"
+    },
+    {
+      "name": "Peter Jarůšek"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Franz Schubert"
+    },
+    {
+      "name": "Ludwig van Beethoven"
+    }
+  ],
+  "works": [
+    {
+      "title": "Cuarteto nº 12 en Do menor, D 703, “Quartettsatz”",
+      "composerName": "Franz Schubert"
+    },
+    {
+      "title": "Cuarteto nº 16, en Fa mayor, op. 135",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Cuarteto nº 14 en Re menor, D 810, \"La muerte y la doncella\"",
+      "composerName": "Franz Schubert"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/beethoven-schubert-sombras-cruzadas-iv-cuarteto-frontera",
+      "checkedAt": "2026-08-31",
+      "externalId": "/es/madrid/concierto/beethoven-schubert-sombras-cruzadas-iv-cuarteto-frontera"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-08-31"
+}

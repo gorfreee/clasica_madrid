@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_orquesta_coro_rtve_eventos_concierto_sinfonico_b_6",
+  "slug": "concierto-sinfonico-b-6",
+  "title": "CONCIERTO SINFÓNICO B/6",
+  "status": "scheduled",
+  "venueId": "ven_teatro_monumental",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_orquesta_coro_rtve_eventos_concierto_sinfonico_b_6_01",
+      "date": "2026-11-26",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_orquesta_coro_rtve_eventos_concierto_sinfonico_b_6_02",
+      "date": "2026-11-27",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_orquesta_coro_rtve",
+      "url": "https://www.teatromonumental.es/eventos/concierto-sinfonico-b-6",
+      "checkedAt": "2026-08-31",
+      "externalId": "/eventos/concierto-sinfonico-b-6/"
+    }
+  ],
+  "primarySourceId": "src_orquesta_coro_rtve",
+  "lastVerifiedAt": "2026-08-31"
+}

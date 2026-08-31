@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_memoriam_ii_adieu_memoire",
+  "slug": "in-memoriam-ii-adieu-a-la-memoire-de",
+  "title": "In Memoriam (II): Adieu (à la mémoire de)",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_memoriam_ii_adieu_memoire_01",
+      "date": "2026-10-24",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Marino Formenti"
+    }
+  ],
+  "composers": [
+    {
+      "name": "William Byrd"
+    },
+    {
+      "name": "Maurice Ravel"
+    },
+    {
+      "name": "François Couperin"
+    },
+    {
+      "name": "Paul Dukas"
+    },
+    {
+      "name": "Johann Jacob Froberger"
+    },
+    {
+      "name": "Manuel de Falla"
+    },
+    {
+      "name": "Claude Debussy"
+    },
+    {
+      "name": "Béla Bartók"
+    },
+    {
+      "name": "György Ligeti"
+    },
+    {
+      "name": "Tristan Murail"
+    },
+    {
+      "name": "Olivier Messiaen"
+    }
+  ],
+  "works": [
+    {
+      "title": "Pavana Lachrymae, BK 54 (homenaje a John Dowland)",
+      "composerName": "William Byrd"
+    },
+    {
+      "title": "Oiseaux tristes [Pájaros tristes] , de Miroirs",
+      "composerName": "Maurice Ravel"
+    },
+    {
+      "title": "Les fauvétes plaintives , de Décimo cuarto orden de piezas para clave en Re mayor",
+      "composerName": "François Couperin"
+    },
+    {
+      "title": "Plainte (faîte à Londres pour passer la melancholi: la quelle se joüe lentemente avec discretion) , de Partita FbWV 630 (del Manuscrito VMin 743, 1650-53)",
+      "composerName": "Johann Jacob Froberger"
+    },
+    {
+      "title": "3. La puerta del vino , de 24 preludios. Libro II",
+      "composerName": "Claude Debussy"
+    },
+    {
+      "title": "Improvisaciones sobre canciones campesinas húngaras, op. 20 (selección)",
+      "composerName": "Béla Bartók"
+    },
+    {
+      "title": "Musica ricercata (selección)",
+      "composerName": "György Ligeti"
+    },
+    {
+      "title": "Cloches a travers les feuilles , de Images. Libro 2",
+      "composerName": "Claude Debussy"
+    },
+    {
+      "title": "Cloches d'Adieu, et un Sourire (a la memoria de Oliver Messiaen)",
+      "composerName": "Tristan Murail"
+    },
+    {
+      "title": "6. Cloches d'angoisse et larmes d'adieu , de Ocho preludios para piano",
+      "composerName": "Olivier Messiaen"
+    },
+    {
+      "title": "Pavane pour une infante défunte, M 19",
+      "composerName": "Maurice Ravel"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/memoriam-ii-adieu-memoire",
+      "checkedAt": "2026-08-31",
+      "externalId": "/es/madrid/concierto/memoriam-ii-adieu-memoire"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-08-31"
+}

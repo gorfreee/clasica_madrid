@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_orquesta_coro_rtve_eventos_concierto_sinfonico_b_4",
+  "slug": "concierto-sinfonico-b-4",
+  "title": "CONCIERTO SINFÓNICO B/4",
+  "status": "scheduled",
+  "venueId": "ven_teatro_monumental",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_orquesta_coro_rtve_eventos_concierto_sinfonico_b_4_01",
+      "date": "2026-10-29",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_orquesta_coro_rtve_eventos_concierto_sinfonico_b_4_02",
+      "date": "2026-10-30",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_orquesta_coro_rtve",
+      "url": "https://www.teatromonumental.es/eventos/concierto-sinfonico-b-4",
+      "checkedAt": "2026-08-31",
+      "externalId": "/eventos/concierto-sinfonico-b-4/"
+    }
+  ],
+  "primarySourceId": "src_orquesta_coro_rtve",
+  "lastVerifiedAt": "2026-08-31"
+}
