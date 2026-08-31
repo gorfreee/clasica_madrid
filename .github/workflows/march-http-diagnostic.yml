@@ -1,0 +1,59 @@
+name: March HTTP diagnostic
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: march-http-diagnostic-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    name: Probe March listing (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    env:
+      MARCH_PROBE_OUT: ${{ runner.temp }}/march-http-probe.json
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Probe March HTTP
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx tsx src/cli/march-http-probe.ts | tee "${{ runner.temp }}/march-http-probe.md"
+          {
+            echo
+            cat "${{ runner.temp }}/march-http-probe.md"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload probe artifact
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: march-http-probe-${{ matrix.os }}-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/march-http-probe.json
+            ${{ runner.temp }}/march-http-probe.md
+          if-no-files-found: ignore
+          retention-days: 30
