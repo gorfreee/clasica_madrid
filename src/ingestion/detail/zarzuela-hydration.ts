@@ -1,6 +1,7 @@
 import { parseSpanishCalendarDate, type IngestWindow } from '../dates.ts';
 import { HttpError } from '../http.ts';
 import type { HydrationMeta, RawEvent } from '../types.ts';
+import { ZARZUELA_GAP_MS, ZARZUELA_MAX_RETRY_WAIT_MS, ZARZUELA_RETRYABLE, zarzuelaRetryAfterMs } from './zarzuela-transport.ts';
 
 const MONTH = '(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre)';
 const SINGLE = new RegExp(`^(?:(domingo|lunes|martes|miercoles|jueves|viernes|sabado),?\\s+)?(\\d{1,2}) de ${MONTH} (?:de )?(\\d{4})\\.?$`);
@@ -32,9 +33,6 @@ export function zarzuelaOutsideWindow(event: RawEvent, window: IngestWindow): bo
 }
 
 type DetailResponse = { body?: string; hydration: HydrationMeta };
-const GAP_MS = 1_500;
-const MAX_RETRY_WAIT_MS = 60_000;
-const RETRYABLE = new Set([403, 408, 429, 500, 502, 503, 504]);
 
 /** One instance per source/run; sequential requests, no effect on other hosts. */
 export function createZarzuelaDetailClient(get: (url: string) => Promise<string>) {
@@ -59,10 +57,10 @@ export function createZarzuelaDetailClient(get: (url: string) => Promise<string>
         const body = await get(url);
         consecutiveBlocks = 0;
         lastBlock = undefined;
-        nextRequestAt = Date.now() + GAP_MS;
+        nextRequestAt = Date.now() + ZARZUELA_GAP_MS;
         return { body, hydration: { ...meta, status: 'succeeded', reason: undefined, message: undefined } };
       } catch (error) {
-        nextRequestAt = Date.now() + GAP_MS;
+        nextRequestAt = Date.now() + ZARZUELA_GAP_MS;
         meta.reason = 'request-failed';
         meta.message = error instanceof Error ? error.message : String(error);
         const status = error instanceof HttpError ? error.status : undefined;
@@ -71,24 +69,17 @@ export function createZarzuelaDetailClient(get: (url: string) => Promise<string>
         consecutiveBlocks = blocked ? (lastBlock === status ? consecutiveBlocks + 1 : 1) : 0;
         lastBlock = blocked ? status : undefined;
         if (consecutiveBlocks >= 3) circuitReason = `teatro-zarzuela: circuito abierto tras 3 HTTP ${status} consecutivos`;
-        const retryAfter = error instanceof HttpError ? retryAfterMs(error.retryAfter) : 0;
+        const retryAfter = error instanceof HttpError ? zarzuelaRetryAfterMs(error.retryAfter) : 0;
         // A long host cooldown is respected by stopping, never by truncating it.
-        if (retryAfter > MAX_RETRY_WAIT_MS) circuitReason = 'teatro-zarzuela: circuito abierto; Retry-After supera 60 segundos';
+        if (retryAfter > ZARZUELA_MAX_RETRY_WAIT_MS) circuitReason = 'teatro-zarzuela: circuito abierto; Retry-After supera 60 segundos';
         nextRequestAt = Math.max(nextRequestAt, Date.now() + retryAfter);
-        if (circuitReason || status === undefined || !RETRYABLE.has(status) || attempt === 1) break;
+        if (circuitReason || status === undefined || !ZARZUELA_RETRYABLE.has(status) || attempt === 1) break;
         const backoff = 2_000 + Math.floor(Math.random() * 500);
-        const delay = Math.max(backoff, retryAfter, GAP_MS);
+        const delay = Math.max(backoff, retryAfter, ZARZUELA_GAP_MS);
         meta.retryDelaysMs!.push(delay);
         nextRequestAt = Date.now() + delay;
       }
     }
     return { hydration: meta };
   };
-}
-
-function retryAfterMs(value: string | null): number {
-  if (!value) return 0;
-  if (/^\d+$/.test(value.trim())) return Number(value) * 1_000;
-  const date = Date.parse(value);
-  return Number.isFinite(date) ? Math.max(0, date - Date.now()) : 0;
 }

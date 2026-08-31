@@ -110,7 +110,7 @@ Flags `--ai-*` (modelo, sin caché, tope de requests) existen para pruebas acota
 
 `.github/workflows/ingestion.yml` serializa todas las ejecuciones en el concurrency group `ingestion-production`; una scheduled y una manual nunca comparten simultáneamente cuota ni state de Gemini.
 
-`fundacion-juan-march` y `teatro-zarzuela` forman parte del `all` programado y salen por el fetch relay (`useFetchRelay`). Un `March HTTP diagnostic` (dispatch, ubuntu + macOS, group propio) comprueba el listing de March **en directo**, sin relay; no escribe `data/**`. Ver [validación de March](march-validation.md) e [infra/fetch-relay](../infra/fetch-relay/README.md). El Worker se despliega con [deploy-fetch-relay.yml](../.github/workflows/deploy-fetch-relay.yml) o desde el Dashboard; añadir otra fuente al relay es `useFetchRelay: true` en el registry. El hardening de Zarzuela (pacing, retry, circuito, cobertura) permanece; el relay sólo cambia el egress.
+`fundacion-juan-march` y `teatro-zarzuela` forman parte del `all` programado y salen por el fetch relay (`useFetchRelay`). Un `March HTTP diagnostic` (dispatch, ubuntu + macOS, group propio) comprueba el listing de March **en directo**, sin relay; no escribe `data/**`. Ver [validación de March](march-validation.md) e [infra/fetch-relay](../infra/fetch-relay/README.md). El Worker se despliega con [deploy-fetch-relay.yml](../.github/workflows/deploy-fetch-relay.yml) o desde el Dashboard; añadir otra fuente al relay es `useFetchRelay: true` en el registry. El hardening de Zarzuela (pacing, retry, circuito, cobertura) permanece; el relay reutiliza cookies de sesión del origen (p. ej. Imperva) entre páginas y no cambia el User-Agent.
 
 ### Scheduled
 

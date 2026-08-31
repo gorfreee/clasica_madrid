@@ -2,6 +2,14 @@ import { fetchRelayHosts } from './registry.ts';
 
 const USER_AGENT = 'ClasicaMadrid-ingestion/1 (+https://github.com/gorfreee/clasica_madrid)';
 const MAX_REDIRECTS = 10;
+export const RELAY_ORIGIN_COOKIE_HEADER = 'x-relay-origin-cookie';
+
+/** Same-origin cookies kept for the process, including across relay hops. */
+const originCookieJar = new Map<string, string>();
+
+export function resetOriginCookieJar(): void {
+  originCookieJar.clear();
+}
 
 /** Preserve HTTP facts for source-local retry policies; no retries by default. */
 export class HttpError extends Error {
@@ -29,6 +37,13 @@ export type FetchRelayTarget = {
  * answers a same-URL 307 with a session cookie; the direct client follows
  * redirects itself and sends cookies only back to the origin that set them.
  * The relay Worker does the same cookie replay for any public HTTPS target.
+ *
+ * Imperva-protected hosts also set visitor/session cookies on 200 and 403.
+ * Those must be reused on later pages of the same origin; otherwise each
+ * getText looks like a new visitor and the CDN answers 403 (Flooding).
+ * Direct fetches keep a process jar. Relay fetches send/receive
+ * `x-relay-origin-cookie` only to the authenticated Worker, never as
+ * browser `Cookie`/`Set-Cookie`.
  */
 export async function getText(url: string, timeoutMs = 30_000, env: NodeJS.ProcessEnv = process.env): Promise<string> {
   const controller = new AbortController();
@@ -74,14 +89,19 @@ export function isFetchRelayHost(hostname: string): boolean {
 }
 
 async function readViaRelay(url: string, relay: FetchRelayTarget, signal: AbortSignal): Promise<string> {
+  const origin = requestOrigin(url);
+  const headers: Record<string, string> = {
+    accept: 'text/html,application/json;q=0.9,*/*;q=0.8',
+    authorization: `Bearer ${relay.token}`,
+  };
+  const cookie = origin ? originCookieJar.get(origin) : undefined;
+  if (cookie) headers[RELAY_ORIGIN_COOKIE_HEADER] = cookie;
   const response = await fetch(relay.requestUrl, {
     signal,
     redirect: 'manual',
-    headers: {
-      accept: 'text/html,application/json;q=0.9,*/*;q=0.8',
-      authorization: `Bearer ${relay.token}`,
-    },
+    headers,
   });
+  rememberRelayCookies(origin, response);
   if (response.status >= 300 && response.status < 400) {
     await response.body?.cancel();
     throw new HttpError(response.status, url, response.headers.get('retry-after'));
@@ -94,35 +114,45 @@ async function readViaRelay(url: string, relay: FetchRelayTarget, signal: AbortS
 }
 
 async function readFollowingRedirects(url: string, signal: AbortSignal): Promise<string> {
-  const cookiesByOrigin = new Map<string, string>();
+  const cookiesByOrigin = new Map(originCookieJar);
   let current = url;
-  for (let hop = 0; hop < MAX_REDIRECTS; hop += 1) {
-    const origin = requestOrigin(current);
-    if (!origin) throw new Error(`URL no soportada: ${current}`);
-    const headers: Record<string, string> = {
-      accept: 'text/html,application/json;q=0.9,*/*;q=0.8',
-      'user-agent': USER_AGENT,
-    };
-    const cookie = cookiesByOrigin.get(origin);
-    if (cookie) headers.cookie = cookie;
-    const response = await fetch(current, { signal, redirect: 'manual', headers });
-    rememberCookies(origin, response, cookiesByOrigin);
-    if (response.status >= 300 && response.status < 400) {
-      const retryAfter = response.headers.get('retry-after');
-      const location = response.headers.get('location');
-      await response.body?.cancel();
-      const next = location ? resolveRedirect(current, location) : undefined;
-      if (!next) throw new HttpError(response.status, url, retryAfter);
-      current = next;
-      continue;
+  try {
+    for (let hop = 0; hop < MAX_REDIRECTS; hop += 1) {
+      const origin = requestOrigin(current);
+      if (!origin) throw new Error(`URL no soportada: ${current}`);
+      const headers: Record<string, string> = {
+        accept: 'text/html,application/json;q=0.9,*/*;q=0.8',
+        'user-agent': USER_AGENT,
+      };
+      const cookie = cookiesByOrigin.get(origin);
+      if (cookie) headers.cookie = cookie;
+      const response = await fetch(current, { signal, redirect: 'manual', headers });
+      rememberCookies(origin, response, cookiesByOrigin);
+      if (response.status >= 300 && response.status < 400) {
+        const retryAfter = response.headers.get('retry-after');
+        const location = response.headers.get('location');
+        await response.body?.cancel();
+        const next = location ? resolveRedirect(current, location) : undefined;
+        if (!next) throw new HttpError(response.status, url, retryAfter);
+        current = next;
+        continue;
+      }
+      if (!response.ok) {
+        await response.body?.cancel();
+        throw new HttpError(response.status, url, response.headers.get('retry-after'));
+      }
+      return await response.text();
     }
-    if (!response.ok) {
-      await response.body?.cancel();
-      throw new HttpError(response.status, url, response.headers.get('retry-after'));
-    }
-    return await response.text();
+    throw new Error(`demasiadas redirecciones al pedir ${url}`);
+  } finally {
+    for (const [origin, cookie] of cookiesByOrigin) originCookieJar.set(origin, cookie);
   }
-  throw new Error(`demasiadas redirecciones al pedir ${url}`);
+}
+
+function rememberRelayCookies(origin: string | undefined, response: Response): void {
+  if (!origin) return;
+  const returned = response.headers.get(RELAY_ORIGIN_COOKIE_HEADER);
+  if (returned) originCookieJar.set(origin, returned);
 }
 
 function parseHttpUrl(url: string): URL | undefined {

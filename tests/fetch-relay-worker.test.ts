@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { handleRelayRequest } from '../infra/fetch-relay/worker.js';
+import { handleRelayRequest, resetRelayCookieJar } from '../infra/fetch-relay/worker.js';
 
 const listing = 'https://www.march.es/es/madrid/conciertos';
 const detail = 'https://www.march.es/es/madrid/concierto/andromeda-perseo';
@@ -12,6 +12,7 @@ const workerSource = () =>
   readFile(path.join(import.meta.dirname, '..', 'infra', 'fetch-relay', 'worker.js'), 'utf8');
 
 afterEach(() => {
+  resetRelayCookieJar();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
@@ -126,6 +127,7 @@ describe('Cloudflare fetch-relay worker', () => {
 
   it('surfaces origin 403/500 and never puts the token in the body', async () => {
     for (const status of [403, 500]) {
+      resetRelayCookieJar();
       vi.stubGlobal('fetch', vi.fn(async () => new Response(`token=${token}`, { status })));
       const response = await handleRelayRequest(request(listing), env);
       expect(response.status).toBe(status);
@@ -134,12 +136,123 @@ describe('Cloudflare fetch-relay worker', () => {
       expect(body).not.toContain(token);
     }
   });
+
+  it('replays origin cookies across pages and returns them only to the authenticated caller', async () => {
+    const home = 'https://teatrodelazarzuela.inaem.gob.es/es/';
+    const category = 'https://teatrodelazarzuela.inaem.gob.es/es/temporada/conciertos-2026-2027';
+    const fetch = vi.fn(async (url: string, init?: RequestInit) => {
+      const cookie = header(init, 'cookie');
+      if (url === home) {
+        expect(cookie).toBeUndefined();
+        return new Response('<html>home</html>', {
+          status: 200,
+          headers: { 'set-cookie': 'visid_incap_1=abc; path=/; Domain=.inaem.gob.es' },
+        });
+      }
+      expect(url).toBe(category);
+      expect(cookie).toBe('visid_incap_1=abc');
+      return new Response('<ul class="listadoObras"></ul>', {
+        status: 200,
+        headers: { 'set-cookie': 'incap_ses_1=xyz; path=/; Domain=.inaem.gob.es' },
+      });
+    });
+    vi.stubGlobal('fetch', fetch);
+
+    const first = await handleRelayRequest(request(home), env);
+    expect(first.status).toBe(200);
+    expect(first.headers.get('set-cookie')).toBeNull();
+    expect(first.headers.get('x-relay-origin-cookie')).toBe('visid_incap_1=abc');
+    expect(await first.text()).toContain('home');
+
+    const second = await handleRelayRequest(request(category), env);
+    expect(second.status).toBe(200);
+    expect(second.headers.get('set-cookie')).toBeNull();
+    expect(second.headers.get('x-relay-origin-cookie')).toBe('visid_incap_1=abc; incap_ses_1=xyz');
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries a 403 once when the origin sets a session cookie', async () => {
+    const target = 'https://teatrodelazarzuela.inaem.gob.es/es/temporada/conciertos-2026-2027';
+    const fetch = vi.fn(async (_url: string, init?: RequestInit) => {
+      const cookie = header(init, 'cookie');
+      if (!cookie) {
+        return new Response('<h1>Forbidden access</h1><p>(Flooding)</p>', {
+          status: 403,
+          headers: { 'set-cookie': 'visid_incap_1=abc; path=/; Domain=.inaem.gob.es' },
+        });
+      }
+      expect(cookie).toBe('visid_incap_1=abc');
+      return new Response('<ul class="listadoObras"></ul>', { status: 200 });
+    });
+    vi.stubGlobal('fetch', fetch);
+    const response = await handleRelayRequest(request(target), env);
+    expect(response.status).toBe(200);
+    expect(await response.text()).toContain('listadoObras');
+    expect(response.headers.get('x-relay-origin-cookie')).toBe('visid_incap_1=abc');
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not retry a 403 without new cookies; returns origin cookies to the caller', async () => {
+    const target = 'https://teatrodelazarzuela.inaem.gob.es/es/';
+    const fetch = vi.fn(async () => new Response('no', { status: 403 }));
+    vi.stubGlobal('fetch', fetch);
+    const denied = await handleRelayRequest(request(target), env);
+    expect(denied.status).toBe(403);
+    expect(await denied.text()).toBe('origin HTTP 403');
+    expect(denied.headers.get('x-relay-origin-cookie')).toBeNull();
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not retry a 403 when inbound cookies already match the origin Set-Cookie', async () => {
+    const target = 'https://teatrodelazarzuela.inaem.gob.es/es/';
+    const fetch = vi.fn(async () =>
+      new Response('no', { status: 403, headers: { 'set-cookie': 'visid_incap_1=abc; path=/' } }),
+    );
+    vi.stubGlobal('fetch', fetch);
+    const denied = await handleRelayRequest(request(target, { originCookie: 'visid_incap_1=abc' }), env);
+    expect(denied.status).toBe(403);
+    expect(await denied.text()).toBe('origin HTTP 403');
+    expect(denied.headers.get('x-relay-origin-cookie')).toBe('visid_incap_1=abc');
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores a malformed inbound cookie header and never forwards caller Cookie', async () => {
+    const target = 'https://example.org/calendar';
+    const fetch = vi.fn(async (_url: string, init?: RequestInit) => {
+      expect(header(init, 'cookie')).toBeUndefined();
+      return new Response('ok', { status: 200 });
+    });
+    vi.stubGlobal('fetch', fetch);
+    const response = await handleRelayRequest(
+      request(target, { originCookie: '@@@=not-a-cookie', extraCookie: 'steal=1' }),
+      env,
+    );
+    expect(response.status).toBe(200);
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses inbound authenticated cookies only for the requested origin', async () => {
+    const target = 'https://teatrodelazarzuela.inaem.gob.es/es/';
+    const fetch = vi.fn(async (_url: string, init?: RequestInit) => {
+      expect(header(init, 'cookie')).toBe('visid_incap_1=from-client');
+      return new Response('ok', { status: 200 });
+    });
+    vi.stubGlobal('fetch', fetch);
+    const response = await handleRelayRequest(request(target, { originCookie: 'visid_incap_1=from-client' }), env);
+    expect(response.status).toBe(200);
+    expect(response.headers.get('x-relay-origin-cookie')).toBe('visid_incap_1=from-client');
+  });
 });
 
-function request(target: string, options: { method?: string; token?: string; auth?: boolean } = {}): Request {
+function request(
+  target: string,
+  options: { method?: string; token?: string; auth?: boolean; originCookie?: string; extraCookie?: string } = {},
+): Request {
   const url = `https://clasica-madrid-fetch-relay.example.workers.dev/?url=${encodeURIComponent(target)}`;
   const headers: Record<string, string> = {};
   if (options.auth !== false) headers.authorization = `Bearer ${options.token ?? token}`;
+  if (options.originCookie) headers['x-relay-origin-cookie'] = options.originCookie;
+  if (options.extraCookie) headers.cookie = options.extraCookie;
   return new Request(url, { method: options.method ?? 'GET', headers });
 }
 

@@ -11,12 +11,22 @@
 const USER_AGENT = 'ClasicaMadrid-ingestion/1 (+https://github.com/gorfreee/clasica_madrid)';
 const MAX_REDIRECTS = 5;
 const BLOCKED_HOST_SUFFIXES = ['.localhost', '.local', '.internal', '.invalid', '.arpa'];
+const RELAY_COOKIE_HEADER = 'x-relay-origin-cookie';
+const MAX_RELAY_COOKIE_CHARS = 4096;
+const COOKIE_CHALLENGE_STATUSES = new Set([403, 408, 429, 500, 502, 503, 504]);
+
+/** Isolate-scoped same-origin cookies. Sequential ingest hops often reuse it. */
+const isolateCookies = new Map();
 
 export default {
   async fetch(request, env) {
     return handleRelayRequest(request, env);
   },
 };
+
+export function resetRelayCookieJar() {
+  isolateCookies.clear();
+}
 
 export async function handleRelayRequest(request, env) {
   if (request.method !== 'GET') {
@@ -30,18 +40,16 @@ export async function handleRelayRequest(request, env) {
   if (!target) {
     return errorResponse(403, 'forbidden target');
   }
+  const inbound = parseRelayCookies(request.headers.get(RELAY_COOKIE_HEADER));
   try {
-    const html = await fetchOrigin(target);
+    const html = await fetchOrigin(target, inbound);
     return new Response(html, {
       status: 200,
-      headers: {
-        'content-type': 'text/html; charset=utf-8',
-        'cache-control': 'no-store',
-      },
+      headers: relayResponseHeaders(isolateCookies.get(target.origin)),
     });
   } catch (error) {
     if (error instanceof OriginHttpError) {
-      return errorResponse(error.status, `origin HTTP ${error.status}`);
+      return errorResponse(error.status, `origin HTTP ${error.status}`, error.cookies);
     }
     const message = error instanceof Error ? error.message : 'origin fetch failed';
     if (message === 'redirect not allowed' || message === 'too many redirects') {
@@ -52,9 +60,10 @@ export async function handleRelayRequest(request, env) {
 }
 
 class OriginHttpError extends Error {
-  constructor(status) {
+  constructor(status, cookies) {
     super(`origin HTTP ${status}`);
     this.status = status;
+    this.cookies = cookies;
   }
 }
 
@@ -99,9 +108,13 @@ function isIpLiteral(host) {
   return false;
 }
 
-async function fetchOrigin(initial) {
+async function fetchOrigin(initial, inboundCookies) {
   const cookiesByOrigin = new Map();
+  const startOrigin = initial.origin;
+  const seeded = mergeCookieString(isolateCookies.get(startOrigin), inboundCookies);
+  if (seeded) cookiesByOrigin.set(startOrigin, seeded);
   let current = initial.href;
+  let cookieChallengeUsed = false;
   for (let hop = 0; hop < MAX_REDIRECTS; hop += 1) {
     const origin = new URL(current).origin;
     const headers = {
@@ -111,7 +124,9 @@ async function fetchOrigin(initial) {
     const cookie = cookiesByOrigin.get(origin);
     if (cookie) headers.cookie = cookie;
     const response = await fetch(current, { redirect: 'manual', headers });
+    const before = cookiesByOrigin.get(origin);
     rememberCookies(origin, response, cookiesByOrigin);
+    persistIsolateCookies(origin, cookiesByOrigin);
     if (response.status >= 300 && response.status < 400) {
       const location = response.headers.get('location');
       await response.body?.cancel();
@@ -121,12 +136,28 @@ async function fetchOrigin(initial) {
       continue;
     }
     if (!response.ok) {
+      const after = cookiesByOrigin.get(origin);
+      const canChallenge =
+        !cookieChallengeUsed &&
+        COOKIE_CHALLENGE_STATUSES.has(response.status) &&
+        Boolean(after) &&
+        after !== before;
       await response.body?.cancel();
-      throw new OriginHttpError(response.status);
+      if (canChallenge) {
+        cookieChallengeUsed = true;
+        continue;
+      }
+      throw new OriginHttpError(response.status, after);
     }
+    persistIsolateCookies(origin, cookiesByOrigin);
     return await response.text();
   }
   throw new Error('too many redirects');
+}
+
+function persistIsolateCookies(origin, jar) {
+  const cookie = jar.get(origin);
+  if (cookie) isolateCookies.set(origin, cookie);
 }
 
 function resolveSameOriginRedirect(current, location) {
@@ -141,20 +172,49 @@ function resolveSameOriginRedirect(current, location) {
 }
 
 function rememberCookies(origin, response, jar) {
-  const parsed = new Map();
-  const existing = jar.get(origin);
-  if (existing) {
-    for (const part of existing.split('; ')) {
-      const index = part.indexOf('=');
-      if (index > 0) parsed.set(part.slice(0, index), part.slice(index + 1));
-    }
-  }
+  const parsed = cookieMap(jar.get(origin));
   for (const raw of setCookieValues(response)) {
     const pair = raw.split(';', 1)[0]?.trim() ?? '';
     const index = pair.indexOf('=');
     if (index > 0) parsed.set(pair.slice(0, index), pair.slice(index + 1));
   }
-  if (parsed.size) jar.set(origin, [...parsed].map(([name, value]) => `${name}=${value}`).join('; '));
+  if (parsed.size) jar.set(origin, serializeCookieMap(parsed));
+}
+
+function cookieMap(value) {
+  const parsed = new Map();
+  if (!value) return parsed;
+  for (const part of value.split('; ')) {
+    const index = part.indexOf('=');
+    if (index > 0) parsed.set(part.slice(0, index), part.slice(index + 1));
+  }
+  return parsed;
+}
+
+function serializeCookieMap(parsed) {
+  return [...parsed].map(([name, value]) => `${name}=${value}`).join('; ');
+}
+
+function mergeCookieString(existing, inbound) {
+  const parsed = cookieMap(existing);
+  for (const [name, value] of cookieMap(inbound)) parsed.set(name, value);
+  return parsed.size ? serializeCookieMap(parsed) : undefined;
+}
+
+function parseRelayCookies(value) {
+  if (!value || value.length > MAX_RELAY_COOKIE_CHARS || /[\r\n]/.test(value)) return undefined;
+  const parsed = new Map();
+  for (const part of value.split('; ')) {
+    const index = part.indexOf('=');
+    if (index <= 0) continue;
+    const name = part.slice(0, index);
+    const cookieValue = part.slice(index + 1);
+    if (!/^[A-Za-z0-9_!#$%&'*+\-.^`|~]+$/.test(name)) continue;
+    if (!cookieValue || cookieValue.length > 1024 || /[;\r\n]/.test(cookieValue)) continue;
+    parsed.set(name, cookieValue);
+  }
+  if (!parsed.size || parsed.size > 30) return undefined;
+  return serializeCookieMap(parsed);
 }
 
 function setCookieValues(response) {
@@ -166,9 +226,17 @@ function setCookieValues(response) {
   return single ? [single] : [];
 }
 
-function errorResponse(status, message) {
-  return new Response(message, {
-    status,
-    headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' },
-  });
+function relayResponseHeaders(cookies) {
+  const headers = {
+    'content-type': 'text/html; charset=utf-8',
+    'cache-control': 'no-store',
+  };
+  if (cookies) headers[RELAY_COOKIE_HEADER] = cookies;
+  return headers;
+}
+
+function errorResponse(status, message, cookies) {
+  const headers = { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' };
+  if (cookies) headers[RELAY_COOKIE_HEADER] = cookies;
+  return new Response(message, { status, headers });
 }
