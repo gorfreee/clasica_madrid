@@ -203,7 +203,7 @@ describe('selección de sources', () => {
         throw new Error(`URL no mapeada: ${url}`);
       },
     });
-    expect(all.summary.sourcesAttempted).toEqual(['auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam']);
+    expect(all.summary.sourcesAttempted).toEqual(['auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve']);
 
     const subset = await runIngest({
       dataDir: dir,
