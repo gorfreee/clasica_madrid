@@ -19,8 +19,6 @@ jobs:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
-    env:
-      MARCH_PROBE_OUT: ${{ runner.temp }}/march-http-probe.json
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -37,6 +35,8 @@ jobs:
         run: npm ci
 
       - name: Probe March HTTP
+        env:
+          MARCH_PROBE_OUT: ${{ runner.temp }}/march-http-probe.json
         shell: bash
         run: |
           set -euo pipefail
