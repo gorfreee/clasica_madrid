@@ -36,7 +36,7 @@ const ctx: AdapterContext = {
 };
 
 function card(id: string, title: string, time: string, venue?: string): string {
-  return `<div class="item"><div class="big-calendar__event"><a href="/node/${id}">${title}</a><br>${time}${venue ? ` - ${venue}` : ''}</div></div>`;
+  return `<div class="item"><div class="view-item"><div class="big-calendar__event"><a href="/node/${id}">${title}</a><br>${time}${venue ? ` - ${venue}` : ''}</div></div></div>`;
 }
 
 function monthListing(month: string, cardsByDay: Record<number, string[]> = {}): string {

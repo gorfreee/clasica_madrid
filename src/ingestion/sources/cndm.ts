@@ -99,7 +99,7 @@ export function parseCndmMonthListing(body: string, url: string, sourceId: strin
   const events: RawEvent[] = [];
   for (const [date, cell] of cells) {
     const cards = cndmDivs(cell, 'big-calendar__event');
-    const itemCount = [...cell.matchAll(/<div\b[^>]*class=["'][^"']*\bitem\b[^"']*["'][^>]*>/gi)].length;
+    const itemCount = countDivClass(cell, 'item');
     if (cards.length !== itemCount) {
       throw new Error('cndm: cobertura distinta de los elementos del calendario');
     }
@@ -195,4 +195,10 @@ function nextMonth(firstOfMonth: string): string {
 
 function isMadridVenue(venueText: string): boolean {
   return /\|\s*Madrid\s*$/iu.test(venueText) || /^Ateneo de Madrid\s*\|/iu.test(venueText);
+}
+
+function countDivClass(html: string, className: string): number {
+  return [...html.matchAll(/<div\b[^>]*class=["']([^"']*)["'][^>]*>/gi)]
+    .filter((match) => match[1]!.split(/\s+/).includes(className))
+    .length;
 }
