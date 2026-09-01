@@ -1,5 +1,5 @@
 import { parseObservedTime, parseSpanishCalendarDate } from '../dates.ts';
-import { decodeHtmlEntities, stripTags } from '../html.ts';
+import { collapseWhitespace, decodeHtmlEntities, stripTags } from '../html.ts';
 import { emptyObservedLists, type ObservedFactPatch } from '../observed.ts';
 import { normalizeUrl } from '../urls.ts';
 import type { RawEvent, RawOccurrence } from '../types.ts';
@@ -53,7 +53,7 @@ export function parseRefugioDetail(event: RawEvent, body: string): ObservedFactP
     throw new Error('real-hermandad-refugio: ficha sin identidad de evento coincidente');
   }
   const title = stripTags(field(main, FIELDS.title) ?? '');
-  if (!title || title !== event.observed.title) {
+  if (!title || !titlesEquivalent(title, event.observed.title)) {
     throw new Error('real-hermandad-refugio: título de ficha distinto del listado');
   }
   const startText = stripTags(field(main, FIELDS.start) ?? '');
@@ -117,6 +117,12 @@ export function refugioDiv(html: string, marker: RegExp): string | undefined {
     if (depth === 0) return html.slice(start.index, offset + tag.index! + tag[0].length);
   }
   throw new Error('real-hermandad-refugio: sección HTML incompleta');
+}
+
+/** REST `title.rendered` keeps `&#8211;`; the ficha often prints ASCII `-`. */
+function titlesEquivalent(left: string, right: string): boolean {
+  const fold = (value: string) => collapseWhitespace(value).replace(/[\u2010-\u2015\u2212]/g, '-');
+  return fold(left) === fold(right);
 }
 
 function field(html: string, dataId: string): string | undefined {

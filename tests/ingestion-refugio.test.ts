@@ -168,6 +168,16 @@ describe('Real Hermandad del Refugio ficha hydration', () => {
     expect(withoutVenue.occurrences).toEqual([{ raw: 'Empieza octubre 2, 2026 Hora 20:00', date: '2026-10-02', time: '20:00' }]);
   });
 
+  it('treats REST en-dash titles as the same concert as an ASCII hyphen on the ficha', async () => {
+    const listed = (await adapter.extract(await listingItem('10538'), listingUrl, ctx))[0]!;
+    listed.observed.title = listed.observed.title.replace('Concierto Benéfico.', 'Concierto Benéfico – extra');
+    const html = (await fixture('detail-recorrido.html')).replace('Concierto Benéfico.', 'Concierto Benéfico - extra');
+    const patch = parseRefugioDetail(listed, html);
+    expect(patch.occurrences?.[0]?.date).toBe('2026-09-24');
+    listed.observed.title = 'Otro concierto';
+    expect(() => parseRefugioDetail(listed, html)).toThrow(/título de ficha distinto/);
+  });
+
   it('skips season landings instead of inventing a calendar from a date range', async () => {
     const listed = (await adapter.extract(await listingItem('7163'), listingUrl, ctx))[0]!;
     const patch = parseRefugioDetail(listed, await fixture('detail-festival-landing.html'));
