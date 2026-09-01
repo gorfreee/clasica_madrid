@@ -9,7 +9,7 @@
       "url": "https://github.com/gorfreee/clasica_madrid",
       "revision": "eb1b2dcb40b1f6a1ffb01fd112ececa424fca472"
     },
-    "viewBox": [1230, 650],
+    "viewBox": [1230, 600],
     "views": [
       {
         "id": "publicacion",
@@ -56,7 +56,7 @@
       "label": "Discovery externo",
       "sublabel": "Agente con web search",
       "tag": "hechos observados",
-      "pos": [455, 500],
+      "pos": [455, 470],
       "size": [200, 74],
       "sources": [
         { "path": "src/ingestion/discovery-context.ts", "label": "contexto" },
@@ -70,7 +70,7 @@
       "sublabel": "Cloudflare Worker · GET only",
       "tag": "Bearer + HTTPS público",
       "brand": "cloudflare",
-      "pos": [220, 500],
+      "pos": [220, 470],
       "size": [170, 74],
       "sources": [
         { "path": "infra/fetch-relay/worker.js", "label": "worker seguro" },
@@ -168,7 +168,7 @@
       "label": "Astro 7 · sitio estático",
       "sublabel": "repository → domain → presentation → UI",
       "tag": "Tailwind v4 · JS mínimo",
-      "pos": [970, 500],
+      "pos": [970, 470],
       "size": [220, 82],
       "sources": [
         { "path": "src/lib/repository/load.ts", "label": "repository" },
@@ -183,7 +183,7 @@
       "sublabel": "HTML · CSS · JS · sitemap",
       "tag": "público · móvil + escritorio",
       "brand": "cloudflare",
-      "pos": [700, 500],
+      "pos": [700, 470],
       "size": [200, 78],
       "sources": [
         { "path": "astro.config.mjs", "label": "build estático" },
@@ -280,45 +280,27 @@
       "from": "astro_site",
       "to": "cloudflare_pages",
       "label": "dist/ estático",
-      "labelAt": [935, 610],
+      "labelAt": [935, 450],
       "variant": "emphasis"
     }
   ],
   "cards": [
     {
       "dot": "cyan",
-      "title": "Simplicidad radical",
+      "title": "Arquitectura deliberada",
       "items": [
-        "Git es la base de datos: sin backend, SSR, CMS ni API propia",
-        "Astro publica artefactos estáticos cacheables con JavaScript mínimo",
-        "Infraestructura recurrente dentro de planes gratuitos"
-      ]
-    },
-    {
-      "dot": "emerald",
-      "title": "Datos que se pueden defender",
-      "items": [
-        "Cada evento conserva fuente, citas, fecha de comprobación e identidad estable",
-        "Zod, referencias y duplicados bloquean datos estructuralmente inválidos",
-        "Los cambios materiales se escriben de forma atómica y auditable"
+        "Git como base de datos: sin backend, SSR, CMS ni API propia; coste recurrente 0 €",
+        "Astro publica HTML cacheable con filtros por URL y JavaScript mínimo",
+        "repository → domain → presentation mantiene la interfaz reemplazable"
       ]
     },
     {
       "dot": "violet",
-      "title": "Automatización con criterio",
+      "title": "Calidad automatizada",
       "items": [
-        "10 adapters deterministas; Gemini sólo resuelve casos inciertos",
-        "Fallos aislados, health gate y posiblementeMissing nunca borra datos",
-        "PR de datos, CI única y artefactos forenses antes del auto-merge"
-      ]
-    },
-    {
-      "dot": "amber",
-      "title": "Producto desacoplado",
-      "items": [
-        "repository → domain → presentation mantiene la UI reemplazable",
-        "Filtros compartibles por URL sobre HTML preconstruido",
-        "50 módulos Vitest + smoke E2E protegen datos, pipeline y experiencia"
+        "10 adapters deterministas; Gemini sólo interviene en casos inciertos",
+        "Zod, referencias, duplicados, escritura atómica y health gate protegen data/**",
+        "PR + CI + 50 módulos Vitest + artefactos forenses antes del auto-merge"
       ]
     }
   ]
