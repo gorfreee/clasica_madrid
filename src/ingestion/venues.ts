@@ -206,6 +206,21 @@ export const KNOWN_VENUES: KnownVenue[] = [
       url: 'https://www.circulobellasartes.com/',
     },
   },
+  {
+    keys: [
+      'real academia de bellas artes de san fernando salon de actos',
+      'real academia bellas artes san fernando salon de actos',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_real_academia_bellas_artes_salon_actos',
+      slug: 'real-academia-bellas-artes-san-fernando-salon-actos',
+      name: 'Real Academia de Bellas Artes de San Fernando — Salón de actos',
+      ...MADRID,
+      address: 'Calle de Alcalá, 13, 28014 Madrid',
+      url: 'https://www.realacademiabellasartessanfernando.com/',
+    },
+  },
 ];
 
 /**
@@ -239,6 +254,9 @@ const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
   'circulo-bellas-artes': {
     'teatro fernando de rojas': 'ven_circulo_bellas_artes_teatro_fernando_de_rojas',
     'sala de columnas': 'ven_circulo_bellas_artes_sala_columnas',
+  },
+  'real-academia-bellas-artes': {
+    'salon de actos': 'ven_real_academia_bellas_artes_salon_actos',
   },
 };
 

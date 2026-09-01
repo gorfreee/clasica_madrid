@@ -10,6 +10,7 @@ import { fundacionOrcamAdapter } from './sources/fundacion-orcam.ts';
 import { orquestaCoroRtveAdapter } from './sources/orquesta-coro-rtve.ts';
 import { teatrosCanalAdapter } from './sources/teatros-canal.ts';
 import { circuloBellasArtesAdapter } from './sources/circulo-bellas-artes.ts';
+import { realAcademiaBellasArtesAdapter } from './sources/real-academia-bellas-artes.ts';
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
@@ -23,6 +24,7 @@ const ADAPTERS: Record<string, SourceAdapter> = {
   [madridDatosAdapter.id]: madridDatosAdapter,
   [teatroZarzuelaAdapter.id]: teatroZarzuelaAdapter,
   [teatrosCanalAdapter.id]: teatrosCanalAdapter,
+  [realAcademiaBellasArtesAdapter.id]: realAcademiaBellasArtesAdapter,
 };
 
 const srcAuditorio: Source = {
@@ -189,6 +191,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Círculo de Bellas Artes',
       kind: 'official',
       url: 'https://www.circulobellasartes.com/',
+    },
+  },
+  {
+    id: 'real-academia-bellas-artes',
+    name: 'Real Academia de Bellas Artes de San Fernando',
+    urls: ['https://www.realacademiabellasartessanfernando.com/actividades/conciertos/'],
+    adapterId: realAcademiaBellasArtesAdapter.id,
+    catalogSourceId: 'src_real_academia_bellas_artes_san_fernando',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_real_academia_bellas_artes_san_fernando',
+      slug: 'real-academia-bellas-artes-san-fernando',
+      name: 'Real Academia de Bellas Artes de San Fernando',
+      kind: 'official',
+      url: 'https://www.realacademiabellasartessanfernando.com/',
     },
   },
 ];
