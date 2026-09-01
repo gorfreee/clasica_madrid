@@ -89,7 +89,13 @@ function isZarzuelaFormat(facts: ObservedFacts, haystack: string): boolean {
 }
 
 function isOrganFormat(facts: ObservedFacts, haystack: string): boolean {
-  if (hasPhrase(haystack, 'conciertos de organo') || hasPhrase(haystack, 'recital de organo')) return true;
+  if (
+    hasPhrase(haystack, 'conciertos de organo') ||
+    hasPhrase(haystack, 'recital de organo') ||
+    hasPhrase(haystack, 'ciclo internacional de organo')
+  ) {
+    return true;
+  }
   return facts.performers.some((item) => hasWord(fieldFolded(item.roleText), 'organo'));
 }
 

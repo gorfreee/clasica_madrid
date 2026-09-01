@@ -11,6 +11,7 @@ import { orquestaCoroRtveAdapter } from './sources/orquesta-coro-rtve.ts';
 import { teatrosCanalAdapter } from './sources/teatros-canal.ts';
 import { circuloBellasArtesAdapter } from './sources/circulo-bellas-artes.ts';
 import { cndmAdapter } from './sources/cndm.ts';
+import { basilicaSanMiguelAdapter } from './sources/basilica-san-miguel.ts';
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
@@ -25,6 +26,7 @@ const ADAPTERS: Record<string, SourceAdapter> = {
   [teatroZarzuelaAdapter.id]: teatroZarzuelaAdapter,
   [teatrosCanalAdapter.id]: teatrosCanalAdapter,
   [cndmAdapter.id]: cndmAdapter,
+  [basilicaSanMiguelAdapter.id]: basilicaSanMiguelAdapter,
 };
 
 const srcAuditorio: Source = {
@@ -206,6 +208,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Centro Nacional de Difusión Musical',
       kind: 'official',
       url: 'https://cndm.inaem.gob.es/',
+    },
+  },
+  {
+    id: 'basilica-san-miguel',
+    name: 'Basílica Pontificia de San Miguel',
+    urls: ['https://basilicadesanmiguel.org/wp-json/tribe/events/v1/events'],
+    adapterId: basilicaSanMiguelAdapter.id,
+    catalogSourceId: 'src_basilica_san_miguel',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_basilica_san_miguel',
+      slug: 'basilica-pontificia-de-san-miguel',
+      name: 'Basílica Pontificia de San Miguel',
+      kind: 'official',
+      url: 'https://basilicadesanmiguel.org/',
     },
   },
 ];
