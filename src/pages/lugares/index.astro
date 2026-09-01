@@ -8,32 +8,94 @@ const model = await loadVenuesIndex();
 ---
 
 <Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath}>
-  <header class="page-header">
-    <p class="eyebrow">Lugares</p>
-    <h1>Dónde suena</h1>
-    <p class="lede">Espacios con conciertos próximos. El listado crece con el catálogo.</p>
+  <header class="page-header page-header--places">
+    <p class="folio">Lugares</p>
+    <h1>La música, por espacios</h1>
+    <p class="lede">Explora la programación próxima de auditorios, teatros, iglesias y salas de Madrid.</p>
   </header>
 
-  {
-    model.isEmpty ? (
-      <EmptyState
-        title="Todavía no hay lugares con conciertos publicados"
-        body="Cuando el catálogo tenga eventos verificados, sus espacios aparecerán aquí."
-      />
-    ) : (
-      <ul class="venue-list">
-        {model.venues.map((venue) => (
-          <li>
-            <a href={venue.href}>
-              <span class="venue-list__name">{venue.name}</span>
-              <span class="venue-list__meta">
-                {venue.showMunicipality ? `${venue.municipality} · ` : ''}
-                {venueUpcomingSummary(venue.upcomingCount)}
-              </span>
-            </a>
-          </li>
-        ))}
-      </ul>
-    )
-  }
+  {model.isEmpty ? (
+    <EmptyState title="Todavía no hay lugares publicados" body="Los espacios aparecerán aquí cuando se incorporen al catálogo." />
+  ) : (
+    <div class="places" data-places>
+      <label class="place-search">
+        <span>Buscar un lugar</span>
+        <input type="search" placeholder="Nombre o municipio" autocomplete="off" data-place-search />
+      </label>
+
+      <section aria-labelledby="programacion-proxima" data-active-places>
+        <div class="section-heading">
+          <h2 id="programacion-proxima">Con programación próxima</h2>
+          <p>Ordenados por la siguiente fecha en agenda</p>
+        </div>
+        {model.venues.length === 0 ? (
+          <p class="quiet-empty">No hay espacios con conciertos próximos en este momento.</p>
+        ) : (
+          <ol class="venue-list venue-list--active">
+            {model.venues.map((venue) => (
+              <li data-place={`${venue.name} ${venue.municipality}`}>
+                <a href={venue.href}>
+                  <span class="venue-list__date">{venue.nextDateLabel}</span>
+                  <span class="venue-list__name">{venue.name}</span>
+                  <span class="venue-list__meta">
+                    {venue.showMunicipality && <span>{venue.municipality} · </span>}
+                    {venueUpcomingSummary(venue.upcomingCount)}
+                  </span>
+                  <span class="venue-list__arrow" aria-hidden="true">→</span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        )}
+      </section>
+
+      {model.inactiveVenues.length > 0 && (
+        <details class="all-places" data-inactive-places>
+          <summary>Ver también los lugares sin programación próxima <span>{model.inactiveVenues.length}</span></summary>
+          <ul class="venue-list venue-list--inactive">
+            {model.inactiveVenues.map((venue) => (
+              <li data-place={`${venue.name} ${venue.municipality}`}>
+                <a href={venue.href}>
+                  <span class="venue-list__name">{venue.name}</span>
+                  <span class="venue-list__meta">{venue.showMunicipality ? venue.municipality : venue.areaLabel}</span>
+                  <span class="venue-list__arrow" aria-hidden="true">→</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+      <p class="quiet-empty" data-place-empty hidden>No hay lugares que coincidan con esa búsqueda.</p>
+    </div>
+  )}
+
+  <script>
+    const search = document.querySelector<HTMLInputElement>('[data-place-search]');
+    const rows = [...document.querySelectorAll<HTMLElement>('[data-place]')];
+    const empty = document.querySelector<HTMLElement>('[data-place-empty]');
+    const activeSection = document.querySelector<HTMLElement>('[data-active-places]');
+    const inactiveDetails = document.querySelector<HTMLDetailsElement>('[data-inactive-places]');
+    const normalize = (value: string) => value.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLocaleLowerCase('es');
+    search?.addEventListener('input', () => {
+      const query = normalize(search.value.trim());
+      let visible = 0;
+      let activeVisible = 0;
+      let inactiveVisible = 0;
+      for (const row of rows) {
+        const matches = !query || normalize(row.dataset.place ?? '').includes(query);
+        row.hidden = !matches;
+        if (matches) {
+          visible += 1;
+          if (row.closest('[data-inactive-places]')) inactiveVisible += 1;
+          else activeVisible += 1;
+        }
+      }
+      if (activeSection) activeSection.hidden = Boolean(query) && activeVisible === 0;
+      if (inactiveDetails) {
+        inactiveDetails.hidden = Boolean(query) && inactiveVisible === 0;
+        if (query && inactiveVisible > 0) inactiveDetails.open = true;
+      }
+      if (empty) empty.hidden = visible > 0;
+    });
+  </script>
 </Layout>

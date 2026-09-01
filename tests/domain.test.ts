@@ -174,6 +174,16 @@ describe('modelos de presentación', () => {
     expect(organ?.time).toBeNull();
   });
 
+  it('construye atajos temporales civiles desde hoy', () => {
+    const model = buildAgendaPageModel(richCatalog(), new URL('https://clasicamadrid.com/'), testClock);
+    expect(model.shortcuts).toEqual([
+      { id: 'today', label: 'Hoy', href: '/?from=2026-09-01&to=2026-09-01' },
+      { id: 'tomorrow', label: 'Mañana', href: '/?from=2026-09-02&to=2026-09-02' },
+      { id: 'weekend', label: 'Fin de semana', href: '/?from=2026-09-05&to=2026-09-06' },
+      { id: 'free', label: 'Gratis', href: '/?access=free' },
+    ]);
+  });
+
   it('distingue catálogo vacío de filtros sin resultados', () => {
     const empty = buildAgendaPageModel(emptyCatalog(), new URL('https://clasicamadrid.com/'), testClock);
     expect(empty.isEmptyCatalog).toBe(true);
@@ -249,6 +259,37 @@ describe('modelos de presentación', () => {
     expect(index.venues.map((venue) => venue.slug)).toEqual(['auditorio-nacional']);
     expect(listVenuePageSlugs(catalog)).toEqual(['auditorio-nacional', 'teatro-historico']);
     expect(buildVenuePageModel(catalog, 'teatro-historico', testClock)).not.toBeNull();
+  });
+
+  it('ordena los lugares por su próxima actividad y conserva aparte los inactivos', () => {
+    const secondVenue = makeVenue({
+      id: 'ven_sala_segunda',
+      slug: 'sala-segunda',
+      name: 'Sala segunda',
+    });
+    const inactiveVenue = makeVenue({
+      id: 'ven_sala_sin_agenda',
+      slug: 'sala-sin-agenda',
+      name: 'Sala sin agenda',
+    });
+    const catalog = makeCatalog({
+      venues: [makeVenue(), secondVenue, inactiveVenue],
+      events: [
+        makeEvent({
+          occurrences: [{ id: 'occ_tarde', date: '2026-09-20', time: '20:00', status: 'scheduled' }],
+        }),
+        makeEvent({
+          id: 'evt_segundo',
+          slug: 'segundo-concierto',
+          venueId: secondVenue.id,
+          occurrences: [{ id: 'occ_antes', date: '2026-09-10', time: '19:00', status: 'scheduled' }],
+        }),
+      ],
+    });
+    const index = buildVenuesIndexModel(catalog, testClock);
+    expect(index.venues.map((venue) => venue.slug)).toEqual(['sala-segunda', 'auditorio-nacional']);
+    expect(index.venues[0]?.nextDate).toBe('2026-09-10');
+    expect(index.inactiveVenues.map((venue) => venue.slug)).toEqual(['sala-sin-agenda']);
   });
 
   it('los enlaces de eventos históricos apuntan a un lugar con página pública', () => {

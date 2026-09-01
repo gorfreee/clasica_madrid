@@ -86,6 +86,31 @@ test.describe('agenda', () => {
     await expect(page.locator('[data-no-results]')).toBeHidden();
     await expect(form.getByRole('searchbox')).toHaveValue('');
   });
+
+  test('los filtros avanzados se aplican y quedan reflejados en la URL', async ({ page }) => {
+    await page.goto('/');
+    const initialCount = await visibleOccurrences(page).count();
+
+    await page.getByText('Más filtros', { exact: false }).click();
+    await page.getByLabel('Acceso').selectOption('free');
+    await page.getByRole('button', { name: 'Ver conciertos' }).click();
+
+    await expect(page).toHaveURL(/\?access=free/);
+    const filteredCount = await visibleOccurrences(page).count();
+    expect(filteredCount).toBeGreaterThan(0);
+    expect(filteredCount).toBeLessThan(initialCount);
+    await expect(page.getByRole('button', { name: /Quitar filtro Acceso/ })).toBeVisible();
+  });
+});
+
+test.describe('lugares', () => {
+  test('la búsqueda local de lugares ofrece un estado vacío claro', async ({ page }) => {
+    await page.goto('/lugares/');
+    await page.getByRole('searchbox', { name: 'Buscar un lugar' }).fill(NO_MATCH_QUERY);
+
+    await expect(page.locator('[data-place]:visible')).toHaveCount(0);
+    await expect(page.locator('[data-place-empty]')).toBeVisible();
+  });
 });
 
 test.describe('ficha de evento', () => {
@@ -104,7 +129,7 @@ test.describe('ficha de evento', () => {
 
     await expect(page).toHaveURL(href!);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(title);
-    await expect(page.getByRole('link', { name: venueName })).toBeVisible();
+    await expect(page.getByRole('link', { name: venueName, exact: true })).toBeVisible();
     await expect(page.locator('dt', { hasText: 'Acceso' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Fechas', level: 2 })).toBeVisible();
     await expect(

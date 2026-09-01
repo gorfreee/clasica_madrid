@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import AgendaItem from '../../components/AgendaItem.astro';
+import AgendaList from '../../components/AgendaList.astro';
+import EmptyState from '../../components/EmptyState.astro';
 import { loadVenuePage, loadVenueSlugs } from '../../lib/presentation/site.ts';
 
 export async function getStaticPaths() {
@@ -9,47 +10,49 @@ export async function getStaticPaths() {
 }
 
 const { slug } = Astro.params;
-if (!slug) {
-  throw new Error('Falta el slug del lugar');
-}
+if (!slug) throw new Error('Falta el slug del lugar');
 const model = await loadVenuePage(slug);
-if (!model) {
-  throw new Error(`Lugar público no encontrado: ${slug}`);
-}
+if (!model) throw new Error(`Lugar público no encontrado: ${slug}`);
+
+const directionsQuery = [model.name, model.address, model.municipality].filter(Boolean).join(', ');
+const directionsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(directionsQuery)}`;
 ---
 
 <Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath}>
-  <article class="detail">
-    <header class="page-header">
-      <p class="eyebrow">Lugar</p>
+  <article class="venue-detail">
+    <p class="breadcrumb"><a href="/lugares">Lugares</a><span aria-hidden="true">/</span> {model.name}</p>
+
+    <header class="venue-header">
+      <p class="folio">Lugar</p>
       <h1>{model.name}</h1>
-      <p class="lede">
-        {model.showMunicipality ? `${model.municipality} · ` : ''}
-        {model.areaLabel}
+      <p class="venue-header__location">
+        {model.showMunicipality ? `${model.municipality} · ${model.areaLabel}` : model.areaLabel}
       </p>
-      {model.address && <p class="detail__address">{model.address}</p>}
-      {
-        model.url && (
-          <p>
-            <a href={model.url} rel="noopener noreferrer">
-              Sitio del espacio
-            </a>
-          </p>
-        )
-      }
     </header>
 
-    <section aria-labelledby="proximos-titulo">
-      <h2 id="proximos-titulo">Próximos conciertos</h2>
-      {
-        model.upcoming.length === 0 ? (
-          <p>No hay conciertos próximos publicados en este espacio.</p>
-        ) : (
-          <div class="agenda-day__list">
-            {model.upcoming.map((item) => <AgendaItem item={item} />)}
-          </div>
-        )
-      }
+    <div class="venue-practical">
+      <div>
+        <p>{model.address ?? 'Dirección no indicada'}</p>
+      </div>
+      <div class="venue-practical__actions">
+        {model.address && <a class="text-action" href={directionsUrl} rel="noopener noreferrer">Cómo llegar <span aria-hidden="true">↗</span></a>}
+        {model.url && <a class="text-action" href={model.url} rel="noopener noreferrer">Sitio del espacio <span aria-hidden="true">↗</span></a>}
+      </div>
+    </div>
+
+    <section class="venue-program" aria-labelledby="proximos-titulo">
+      <div class="section-heading">
+        <h2 id="proximos-titulo">Próximos conciertos</h2>
+        {model.upcoming.length > 0 && <p>{model.upcoming.length} en agenda</p>}
+      </div>
+      {model.upcoming.length === 0 ? (
+        <EmptyState
+          title="Sin conciertos próximos publicados"
+          body="El lugar permanece en el catálogo y volverá a mostrar programación cuando haya nuevas fechas verificadas."
+        />
+      ) : (
+        <AgendaList days={model.upcomingDays} />
+      )}
     </section>
   </article>
 </Layout>

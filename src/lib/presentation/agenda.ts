@@ -1,7 +1,7 @@
 import type { Catalog } from '../domain/catalog.ts';
 import type { FilterableOccurrence } from '../domain/filters.ts';
 import { toFilterable } from '../domain/filters.ts';
-import { formatMadridDate } from '../domain/dates.ts';
+import { formatMadridDate, fromMadridLocal, madridToday } from '../domain/dates.ts';
 import { listUpcomingOccurrences, type Clock, systemClock } from '../domain/index.ts';
 import type { ResolvedOccurrence } from '../domain/resolve.ts';
 import { accessLabels, areaLabels, eraLabels, formatLabels, kindLabels, occurrenceCountLabel } from './labels.ts';
@@ -30,6 +30,8 @@ export type AgendaItemModel = {
   seriesName: string | null;
   performers: string[];
   composers: string[];
+  contextLine: string | null;
+  descriptorLine: string | null;
   formats: TaxonomyOption[];
   eras: TaxonomyOption[];
   kind: TaxonomyOption;
@@ -41,7 +43,18 @@ export type AgendaItemModel = {
 export type AgendaDayModel = {
   date: string;
   dateLabel: string;
+  compactDateLabel: string;
+  monthLabel: string;
+  isToday: boolean;
+  isTomorrow: boolean;
+  startsMonth: boolean;
   items: AgendaItemModel[];
+};
+
+export type TemporalShortcutModel = {
+  id: 'today' | 'tomorrow' | 'weekend' | 'free';
+  label: string;
+  href: string;
 };
 
 export type FilterFieldModel = {
@@ -64,6 +77,10 @@ export type AgendaPageModel = {
   resultCount: number;
   upcomingCount: number;
   resultCountLabel: string;
+  todayDate: string;
+  todayDateLabel: string;
+  hasToday: boolean;
+  shortcuts: TemporalShortcutModel[];
   selectFilters: FilterFieldModel[];
   composer: string;
   composerSuggestions: string[];
@@ -78,7 +95,9 @@ export function buildAgendaPageModel(
   clock: Clock = systemClock,
 ): AgendaPageModel {
   const upcoming = listUpcomingOccurrences(catalog, clock);
-  const days = groupByDate(upcoming.map(toAgendaItem));
+  const today = madridToday(clock.now());
+  const tomorrow = addCivilDays(today, 1);
+  const days = groupAgendaItemsByDate(upcoming.map(toAgendaItem), clock);
   return {
     title: 'Agenda de música clásica en Madrid',
     description:
@@ -93,6 +112,10 @@ export function buildAgendaPageModel(
     resultCount: upcoming.length,
     upcomingCount: upcoming.length,
     resultCountLabel: occurrenceCountLabel(upcoming.length),
+    todayDate: today,
+    todayDateLabel: formatMadridDate(today),
+    hasToday: upcoming.some((item) => item.occurrence.date === today),
+    shortcuts: buildTemporalShortcuts(today, tomorrow),
     selectFilters: buildSelectFilters(upcoming),
     composer: '',
     composerSuggestions: unique(upcoming.flatMap((item) => item.resolved.event.composers.map((c) => c.name))),
@@ -119,6 +142,16 @@ export function toAgendaItem(item: ResolvedOccurrence): AgendaItemModel {
     seriesName: series?.name ?? null,
     performers: event.performers.map((performer) => performer.name),
     composers: event.composers.map((composer) => composer.name),
+    contextLine: summarizeList(
+      event.performers.length > 0
+        ? event.performers.map((performer) => performer.name)
+        : event.composers.map((composer) => composer.name),
+      3,
+    ),
+    descriptorLine:
+      event.performers.length > 0
+        ? summarizeList(event.composers.map((composer) => composer.name), 2) ?? series?.name ?? null
+        : series?.name ?? null,
     formats: event.formats.map((id) => ({ id, label: formatLabels[id] })),
     eras: event.eras.map((id) => ({ id, label: eraLabels[id] })),
     kind: { id: event.kind, label: kindLabels[event.kind] },
@@ -128,17 +161,76 @@ export function toAgendaItem(item: ResolvedOccurrence): AgendaItemModel {
   };
 }
 
-function groupByDate(items: AgendaItemModel[]): AgendaDayModel[] {
+export function groupAgendaItemsByDate(
+  items: AgendaItemModel[],
+  clock: Clock = systemClock,
+): AgendaDayModel[] {
   const days: AgendaDayModel[] = [];
+  const today = madridToday(clock.now());
+  const tomorrow = addCivilDays(today, 1);
   for (const item of items) {
     const last = days.at(-1);
     if (last && last.date === item.date) {
       last.items.push(item);
     } else {
-      days.push({ date: item.date, dateLabel: item.dateLabel, items: [item] });
+      days.push({
+        date: item.date,
+        dateLabel: item.dateLabel,
+        compactDateLabel: formatCompactMadridDate(item.date),
+        monthLabel: formatMadridMonth(item.date),
+        isToday: item.date === today,
+        isTomorrow: item.date === tomorrow,
+        startsMonth: !last || last.date.slice(0, 7) !== item.date.slice(0, 7),
+        items: [item],
+      });
     }
   }
   return days;
+}
+
+function summarizeList(items: string[], limit: number): string | null {
+  if (items.length === 0) return null;
+  const visible = items.slice(0, limit).join(', ');
+  const remaining = items.length - limit;
+  return remaining > 0 ? `${visible} +${remaining}` : visible;
+}
+
+function addCivilDays(date: string, amount: number): string {
+  const instant = new Date(`${date}T12:00:00Z`);
+  instant.setUTCDate(instant.getUTCDate() + amount);
+  return instant.toISOString().slice(0, 10);
+}
+
+function formatCompactMadridDate(date: string): string {
+  const label = new Intl.DateTimeFormat('es-ES', {
+    timeZone: 'Europe/Madrid',
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  }).format(fromMadridLocal(date, '12:00'));
+  return label.charAt(0).toLocaleUpperCase('es-ES') + label.slice(1);
+}
+
+function formatMadridMonth(date: string): string {
+  const label = new Intl.DateTimeFormat('es-ES', {
+    timeZone: 'Europe/Madrid',
+    month: 'long',
+    year: 'numeric',
+  }).format(fromMadridLocal(date, '12:00'));
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+function buildTemporalShortcuts(today: string, tomorrow: string): TemporalShortcutModel[] {
+  const day = new Date(`${today}T12:00:00Z`).getUTCDay();
+  const daysUntilSaturday = day === 0 ? -1 : day === 6 ? 0 : 6 - day;
+  const weekendFrom = addCivilDays(today, daysUntilSaturday);
+  const weekendTo = addCivilDays(weekendFrom, 1);
+  return [
+    { id: 'today', label: 'Hoy', href: `/?from=${today}&to=${today}` },
+    { id: 'tomorrow', label: 'Mañana', href: `/?from=${tomorrow}&to=${tomorrow}` },
+    { id: 'weekend', label: 'Fin de semana', href: `/?from=${weekendFrom}&to=${weekendTo}` },
+    { id: 'free', label: 'Gratis', href: '/?access=free' },
+  ];
 }
 
 function buildSelectFilters(upcoming: ResolvedOccurrence[]): FilterFieldModel[] {
