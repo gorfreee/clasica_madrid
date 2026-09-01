@@ -66,7 +66,7 @@ export function cndmMonthUrls(homepage: string | undefined, window: IngestWindow
   const last = `${window.to.slice(0, 7)}-01`;
   const urls: string[] = [];
   for (let month = first; month <= last; month = nextMonth(month)) {
-    urls.push(`${origin}/eventos/${month.replace('-', '')}`);
+    urls.push(`${origin}/eventos/${month.slice(0, 4)}${month.slice(5, 7)}`);
   }
   return urls;
 }

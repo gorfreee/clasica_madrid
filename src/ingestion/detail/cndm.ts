@@ -166,7 +166,12 @@ function parseCndmProgram(html: string | undefined): {
     if (!text) continue;
     const strong = [...raw.matchAll(/<strong\b[^>]*>([\s\S]*?)<\/strong>/gi)].map((item) => stripTags(item[1]!));
     const strongText = strong.join(' ');
-    if (strong.length > 0 && strongText === text && canPairAsAuditorioComposer(text)) {
+    if (
+      strong.length > 0 &&
+      strongText === text &&
+      !/\b(?:premio|concierto|festival|ciclo)\b/iu.test(text) &&
+      canPairAsAuditorioComposer(text)
+    ) {
       composerName = text;
       composers.push({ name: text });
       continue;
