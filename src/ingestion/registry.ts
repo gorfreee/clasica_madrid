@@ -10,6 +10,7 @@ import { fundacionOrcamAdapter } from './sources/fundacion-orcam.ts';
 import { orquestaCoroRtveAdapter } from './sources/orquesta-coro-rtve.ts';
 import { teatrosCanalAdapter } from './sources/teatros-canal.ts';
 import { circuloBellasArtesAdapter } from './sources/circulo-bellas-artes.ts';
+import { realHermandadRefugioAdapter } from './sources/real-hermandad-refugio.ts';
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
@@ -23,6 +24,7 @@ const ADAPTERS: Record<string, SourceAdapter> = {
   [madridDatosAdapter.id]: madridDatosAdapter,
   [teatroZarzuelaAdapter.id]: teatroZarzuelaAdapter,
   [teatrosCanalAdapter.id]: teatrosCanalAdapter,
+  [realHermandadRefugioAdapter.id]: realHermandadRefugioAdapter,
 };
 
 const srcAuditorio: Source = {
@@ -189,6 +191,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Círculo de Bellas Artes',
       kind: 'official',
       url: 'https://www.circulobellasartes.com/',
+    },
+  },
+  {
+    id: 'real-hermandad-refugio',
+    name: 'Real Hermandad del Refugio',
+    urls: ['https://realhermandaddelrefugio.org/wp-json/wp/v2/calendario-eventos'],
+    adapterId: realHermandadRefugioAdapter.id,
+    catalogSourceId: 'src_real_hermandad_refugio',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_real_hermandad_refugio',
+      slug: 'real-hermandad-del-refugio',
+      name: 'Real Hermandad del Refugio',
+      kind: 'official',
+      url: 'https://realhermandaddelrefugio.org/',
     },
   },
 ];

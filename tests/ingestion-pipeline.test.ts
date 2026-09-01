@@ -89,6 +89,9 @@ async function fixtureGet(url: string): Promise<string> {
   if (url.includes('wp-json/tribe/events/v1/events')) {
     return '{"events":[],"total":0,"total_pages":0}';
   }
+  if (url.includes('wp-json/wp/v2/calendario-eventos')) {
+    return '[]';
+  }
   throw new Error(`URL de test no mapeada: ${url}`);
 }
 
@@ -192,7 +195,7 @@ describe('aislamiento de fallos por fuente', () => {
       },
     });
     expect(run.summary.sourcesFailed.map((item) => item.sourceId)).toEqual(['teatro-real']);
-    expect(run.summary.sourcesSucceeded).toEqual(['auditorio-nacional', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes']);
+    expect(run.summary.sourcesSucceeded).toEqual(['auditorio-nacional', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'real-hermandad-refugio']);
     expect(run.rawEvents.length).toBeGreaterThan(0);
     expect(run.rawEvents.some((event) => event.sourceId === 'teatro-real')).toBe(false);
     expect(run.summary.written).toEqual([]);
@@ -212,7 +215,7 @@ describe('aislamiento de fallos por fuente', () => {
     });
     expect(run.summary.sourcesSucceeded).toEqual([]);
     expect(run.summary.sourcesFailed.map((item) => item.sourceId)).toEqual([
-      'auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes',
+      'auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'real-hermandad-refugio',
     ]);
     expect(run.summary.written).toEqual([]);
     expect(run.apply.report.ok).toBe(true);
