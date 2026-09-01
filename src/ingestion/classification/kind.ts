@@ -15,6 +15,7 @@ const ESTABLISHED_PHRASES = [
   'museo arqueologico nacional',
   'circulo de bellas artes',
   'fundacion juan march',
+  'fundacion canal',
   'cndm',
   'centro nacional de difusion musical',
   'ocne',
