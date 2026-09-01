@@ -13,10 +13,18 @@ const { days } = Astro.props;
 <div class="agenda" data-agenda-list>
   {
     days.map((day) => (
-      <section class="agenda-day" data-agenda-day={day.date} aria-labelledby={`dia-${day.date}`}>
-        <h2 id={`dia-${day.date}`} class="agenda-day__title">
-          <time datetime={day.date}>{day.dateLabel}</time>
-        </h2>
+      <section class:list={['agenda-day', { 'agenda-day--today': day.isToday }]} data-agenda-day={day.date} aria-labelledby={`dia-${day.date}`}>
+        {day.startsMonth && <p class="agenda-month">{day.monthLabel}</p>}
+        <header class="agenda-day__header">
+          <p class="agenda-day__number" aria-hidden="true">{day.dayNumber}</p>
+          <h2 id={`dia-${day.date}`} class="agenda-day__title">
+            <time datetime={day.date}>
+              {(day.isToday || day.isTomorrow) && <strong>{day.isToday ? 'Hoy' : 'Mañana'}</strong>}
+              <span>{day.weekdayLabel}</span>
+            </time>
+          </h2>
+          <p class="agenda-day__count">{day.items.length} {day.items.length === 1 ? 'concierto' : 'conciertos'}</p>
+        </header>
         <div class="agenda-day__list">
           {day.items.map((item) => (
             <AgendaItem item={item} />

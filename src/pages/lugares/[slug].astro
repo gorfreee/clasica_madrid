@@ -9,47 +9,41 @@ export async function getStaticPaths() {
 }
 
 const { slug } = Astro.params;
-if (!slug) {
-  throw new Error('Falta el slug del lugar');
-}
+if (!slug) throw new Error('Falta el slug del lugar');
 const model = await loadVenuePage(slug);
-if (!model) {
-  throw new Error(`Lugar público no encontrado: ${slug}`);
-}
+if (!model) throw new Error(`Lugar público no encontrado: ${slug}`);
+const directionsQuery = [model.name, model.address, model.municipality].filter(Boolean).join(', ');
+const directionsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(directionsQuery)}`;
 ---
 
 <Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath}>
-  <article class="detail">
-    <header class="page-header">
-      <p class="eyebrow">Lugar</p>
-      <h1>{model.name}</h1>
-      <p class="lede">
-        {model.showMunicipality ? `${model.municipality} · ` : ''}
-        {model.areaLabel}
-      </p>
-      {model.address && <p class="detail__address">{model.address}</p>}
-      {
-        model.url && (
-          <p>
-            <a href={model.url} rel="noopener noreferrer">
-              Sitio del espacio
-            </a>
-          </p>
-        )
-      }
+  <article class="detail venue-detail">
+    <nav class="breadcrumb" aria-label="Migas de pan"><a href="/lugares">Lugares</a><span aria-hidden="true">/</span><span>Ficha</span></nav>
+    <header class="venue-header">
+      <div>
+        <p class="eyebrow">Lugar · {model.areaLabel}</p>
+        <h1>{model.name}</h1>
+      </div>
+      <div class="venue-header__facts">
+        <p>{model.showMunicipality ? model.municipality : 'Madrid'}</p>
+        {model.address && <address>{model.address}</address>}
+        <div class="venue-header__actions">
+          <a class="primary-action" href={directionsUrl} rel="noopener noreferrer">Cómo llegar <span aria-hidden="true">↗</span></a>
+          {model.url && <a class="secondary-action" href={model.url} rel="noopener noreferrer">Web del espacio <span aria-hidden="true">↗</span></a>}
+        </div>
+      </div>
     </header>
 
-    <section aria-labelledby="proximos-titulo">
-      <h2 id="proximos-titulo">Próximos conciertos</h2>
-      {
-        model.upcoming.length === 0 ? (
-          <p>No hay conciertos próximos publicados en este espacio.</p>
-        ) : (
-          <div class="agenda-day__list">
-            {model.upcoming.map((item) => <AgendaItem item={item} />)}
-          </div>
-        )
-      }
+    <section aria-labelledby="proximos-titulo" class="venue-programme">
+      <div class="section-heading">
+        <div><p class="eyebrow">Programación</p><h2 id="proximos-titulo">Próximos conciertos</h2></div>
+        <p>{model.upcoming.length === 1 ? '1 cita próxima' : `${model.upcoming.length} citas próximas`}</p>
+      </div>
+      {model.upcoming.length === 0 ? (
+        <div class="venue-empty"><p>No hay conciertos próximos publicados en este espacio.</p><a href="/">Volver a la agenda</a></div>
+      ) : (
+        <div class="venue-agenda">{model.upcoming.map((item) => <AgendaItem item={item} />)}</div>
+      )}
     </section>
   </article>
 </Layout>

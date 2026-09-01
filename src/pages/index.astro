@@ -11,12 +11,9 @@ const model = await loadAgendaPage(Astro.url);
 
 <Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath}>
   <header class="page-header">
-    <p class="eyebrow">Agenda</p>
-    <h1>Música clásica en Madrid</h1>
-    <p class="lede">
-      Conciertos y eventos con fuente original. El catálogo cubre el municipio de Madrid y, cuando
-      tiene sentido, municipios próximos.
-    </p>
+    <p class="eyebrow">Agenda independiente</p>
+    <h1>Madrid<br /><em>suena.</em></h1>
+    <p class="lede">Conciertos de música clásica, grandes y pequeños, reunidos en una agenda clara y verificable.</p>
   </header>
 
   {
@@ -33,9 +30,21 @@ const model = await loadAgendaPage(Astro.url);
     ) : (
       <>
         <FilterForm model={model} />
-        <p class="result-count" data-result-count aria-live="polite">
-          {model.resultCountLabel}
-        </p>
+        <div class="agenda-intro">
+          <p class="eyebrow">Próximos conciertos</p>
+          <p class="result-count" data-result-count aria-live="polite">{model.resultCountLabel}</p>
+        </div>
+        {!model.hasEventsToday && (
+          <section class="agenda-day agenda-day--today agenda-today-empty" data-today-empty aria-labelledby="hoy-sin-conciertos">
+            <header class="agenda-day__header">
+              <p class="agenda-day__number" aria-hidden="true">{model.today.slice(-2)}</p>
+              <h2 id="hoy-sin-conciertos" class="agenda-day__title">
+                <time datetime={model.today}><strong>Hoy</strong><span>{model.todayLabel}</span></time>
+              </h2>
+            </header>
+            <p class="agenda-today-empty__message">No hay conciertos publicados para hoy. La agenda continúa en la próxima fecha con música.</p>
+          </section>
+        )}
         <AgendaList days={model.days} />
         {/* data-result-count / data-no-results: contrato de agenda-client.ts */}
         <div data-no-results hidden>
