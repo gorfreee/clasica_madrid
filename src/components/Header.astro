@@ -8,7 +8,10 @@ const links = [
 
 <header class="site-header">
   <div class="site-header__inner">
-    <a class="site-mark" href="/">Clásica Madrid</a>
+    <a class="site-mark" href="/" aria-label="Clásica Madrid, ir a la agenda">
+      <span class="site-mark__siglum" aria-hidden="true">CM</span>
+      <span class="site-mark__name">Clásica<br />Madrid</span>
+    </a>
     <nav aria-label="Principal">
       <ul class="nav-list">
         {
@@ -22,5 +25,6 @@ const links = [
         }
       </ul>
     </nav>
+    <p class="site-header__edition" aria-hidden="true">Agenda · Madrid</p>
   </div>
 </header>

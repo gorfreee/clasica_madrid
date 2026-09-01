@@ -9,9 +9,9 @@ const model = await loadVenuesIndex();
 
 <Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath}>
   <header class="page-header">
-    <p class="eyebrow">Lugares</p>
-    <h1>Dónde suena</h1>
-    <p class="lede">Espacios con conciertos próximos. El listado crece con el catálogo.</p>
+    <p class="eyebrow"><span>Lugares</span><span>Por próxima actividad</span></p>
+    <h1>Escenarios de Madrid</h1>
+    <p class="lede">Salas, teatros, iglesias y espacios con música clásica próxima.</p>
   </header>
 
   {
@@ -21,11 +21,13 @@ const model = await loadVenuesIndex();
         body="Cuando el catálogo tenga eventos verificados, sus espacios aparecerán aquí."
       />
     ) : (
-      <ul class="venue-list">
-        {model.venues.map((venue) => (
+      <ol class="venue-list">
+        {model.venues.map((venue, index) => (
           <li>
             <a href={venue.href}>
+              <span class="venue-list__number">{String(index + 1).padStart(2, '0')}</span>
               <span class="venue-list__name">{venue.name}</span>
+              <time class="venue-list__next" datetime={venue.nextDate}>{venue.nextDateLabel}</time>
               <span class="venue-list__meta">
                 {venue.showMunicipality ? `${venue.municipality} · ` : ''}
                 {venueUpcomingSummary(venue.upcomingCount)}
@@ -33,7 +35,7 @@ const model = await loadVenuesIndex();
             </a>
           </li>
         ))}
-      </ul>
+      </ol>
     )
   }
 </Layout>

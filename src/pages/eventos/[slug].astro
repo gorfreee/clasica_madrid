@@ -15,71 +15,32 @@ const model = await loadEventPage(slug);
 if (!model) {
   throw new Error(`Evento no encontrado: ${slug}`);
 }
+const primarySource = model.sources.find((source) => source.isPrimary) ?? model.sources[0];
 ---
 
 <Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath} jsonLd={model.jsonLd}>
-  <article class="detail">
-    <header class="page-header">
-      <p class="eyebrow">{model.isPast ? 'Evento pasado' : 'Evento'}</p>
+  <article class="detail detail--event">
+    <header class="page-header event-header">
+      <p class="eyebrow">
+        <span>{model.isPast ? 'Evento pasado' : model.statusLabel}</span>
+        {model.seriesName ? <span>{model.seriesName}</span> : <span>Programa de concierto</span>}
+      </p>
       <h1>{model.title}</h1>
-      <p class="lede">
+      <p class="lede event-header__venue">
         <a href={model.venueHref}>{model.venueName}</a>
         {model.showMunicipality && <span> · {model.municipality}</span>}
-        {model.seriesName && (
-          <span>
-            {' '}
-            · {model.seriesKind}: {model.seriesName}
-          </span>
-        )}
       </p>
       {model.isPast && <p class="lede">Este evento ya ha tenido lugar.</p>}
+      {primarySource && (
+        <p class="official-action">
+          <a href={primarySource.url} rel="noopener noreferrer">
+            Ver información oficial <span aria-hidden="true">↗</span>
+          </a>
+        </p>
+      )}
     </header>
 
-    <dl class="fact-list">
-      <div>
-        <dt>Acceso</dt>
-        <dd>{model.access.label}</dd>
-      </div>
-      <div>
-        <dt>Contexto</dt>
-        <dd>{model.kind.label}</dd>
-      </div>
-      {
-        model.formats.length > 0 && (
-          <div>
-            <dt>Formato</dt>
-            <dd>{model.formats.map((item) => item.label).join(', ')}</dd>
-          </div>
-        )
-      }
-      {
-        model.eras.length > 0 && (
-          <div>
-            <dt>Época</dt>
-            <dd>{model.eras.map((item) => item.label).join(', ')}</dd>
-          </div>
-        )
-      }
-      {
-        model.organizers.length > 0 && (
-          <div>
-            <dt>Organiza</dt>
-            <dd>{model.organizers.join(', ')}</dd>
-          </div>
-        )
-      }
-    </dl>
-
-    {
-      model.venueAddress && (
-        <p class="detail__address">
-          {model.venueAddress}
-          {model.showMunicipality ? `, ${model.municipality}` : ''}
-        </p>
-      )
-    }
-
-    <section aria-labelledby="fechas-titulo">
+    <section class="score-section score-section--dates" aria-labelledby="fechas-titulo">
       <h2 id="fechas-titulo">Fechas</h2>
       <ol class="occurrence-list">
         {
@@ -94,52 +55,59 @@ if (!model) {
       </ol>
     </section>
 
-    {
-      model.performers.length > 0 && (
-        <section aria-labelledby="interpretes-titulo">
-          <h2 id="interpretes-titulo">Intérpretes</h2>
-          <ul>
-            {model.performers.map((performer) => (
-              <li>
-                {performer.name}
-                {performer.role ? ` (${performer.role})` : ''}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )
-    }
+    <div class="event-score">
+      <div class="event-score__music">
+        {model.performers.length > 0 && (
+          <section class="score-section" aria-labelledby="interpretes-titulo">
+            <h2 id="interpretes-titulo">Intérpretes</h2>
+            <ul class="performer-list">
+              {model.performers.map((performer) => (
+                <li>
+                  <span>{performer.name}</span>
+                  {performer.role && <small>{performer.role}</small>}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
-    {
-      model.composers.length > 0 && (
-        <section aria-labelledby="compositores-titulo">
-          <h2 id="compositores-titulo">Compositores</h2>
-          <ul>
-            {model.composers.map((composer) => (
-              <li>{composer}</li>
-            ))}
-          </ul>
-        </section>
-      )
-    }
+        {model.works.length > 0 && (
+          <section class="score-section" aria-labelledby="obras-titulo">
+            <h2 id="obras-titulo">Programa</h2>
+            <ol class="programme-list">
+              {model.works.map((work, index) => (
+                <li>
+                  <span class="programme-list__number">{String(index + 1).padStart(2, '0')}</span>
+                  <span class="programme-list__work">{work.title}</span>
+                  {work.composerName && <span class="programme-list__composer">{work.composerName}</span>}
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
 
-    {
-      model.works.length > 0 && (
-        <section aria-labelledby="obras-titulo">
-          <h2 id="obras-titulo">Programa</h2>
-          <ul>
-            {model.works.map((work) => (
-              <li>
-                {work.title}
-                {work.composerName ? ` — ${work.composerName}` : ''}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )
-    }
+        {model.composers.length > 0 && model.works.length === 0 && (
+          <section class="score-section" aria-labelledby="compositores-titulo">
+            <h2 id="compositores-titulo">Compositores</h2>
+            <ul class="plain-list">{model.composers.map((composer) => <li>{composer}</li>)}</ul>
+          </section>
+        )}
+      </div>
 
-    <section aria-labelledby="fuentes-titulo">
+      <aside class="event-score__practical" aria-label="Información práctica">
+        <h2>Información práctica</h2>
+        <dl class="fact-list">
+          <div><dt>Acceso</dt><dd>{model.access.label}</dd></div>
+          {model.formats.length > 0 && <div><dt>Formato</dt><dd>{model.formats.map((item) => item.label).join(', ')}</dd></div>}
+          {model.eras.length > 0 && <div><dt>Época</dt><dd>{model.eras.map((item) => item.label).join(', ')}</dd></div>}
+          {model.seriesName && <div><dt>{model.seriesKind ?? 'Serie'}</dt><dd>{model.seriesName}</dd></div>}
+          {model.organizers.length > 0 && <div><dt>Organiza</dt><dd>{model.organizers.join(', ')}</dd></div>}
+          {model.venueAddress && <div><dt>Dirección</dt><dd>{model.venueAddress}{model.showMunicipality ? `, ${model.municipality}` : ''}</dd></div>}
+        </dl>
+      </aside>
+    </div>
+
+    <section class="score-section sources" aria-labelledby="fuentes-titulo">
       <h2 id="fuentes-titulo">Fuentes</h2>
       <ul class="source-list">
         {

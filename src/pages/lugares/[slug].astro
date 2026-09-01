@@ -16,37 +16,37 @@ const model = await loadVenuePage(slug);
 if (!model) {
   throw new Error(`Lugar público no encontrado: ${slug}`);
 }
+const mapQuery = [model.address, model.municipality].filter(Boolean).join(', ');
+const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`;
 ---
 
 <Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath}>
   <article class="detail">
     <header class="page-header">
-      <p class="eyebrow">Lugar</p>
+      <p class="eyebrow"><span>Lugar</span><span>{model.areaLabel}</span></p>
       <h1>{model.name}</h1>
       <p class="lede">
         {model.showMunicipality ? `${model.municipality} · ` : ''}
         {model.areaLabel}
       </p>
       {model.address && <p class="detail__address">{model.address}</p>}
-      {
-        model.url && (
-          <p>
-            <a href={model.url} rel="noopener noreferrer">
-              Sitio del espacio
-            </a>
-          </p>
-        )
-      }
+      <div class="venue-actions">
+        {model.url && <a href={model.url} rel="noopener noreferrer">Sitio del espacio <span aria-hidden="true">↗</span></a>}
+        {mapQuery && <a href={mapsUrl} rel="noopener noreferrer">Cómo llegar <span aria-hidden="true">↗</span></a>}
+      </div>
     </header>
 
-    <section aria-labelledby="proximos-titulo">
-      <h2 id="proximos-titulo">Próximos conciertos</h2>
+    <section class="venue-programme" aria-labelledby="proximos-titulo">
+      <div class="venue-programme__heading">
+        <p>Programa</p>
+        <h2 id="proximos-titulo">Próximos conciertos</h2>
+      </div>
       {
         model.upcoming.length === 0 ? (
           <p>No hay conciertos próximos publicados en este espacio.</p>
         ) : (
           <div class="agenda-day__list">
-            {model.upcoming.map((item) => <AgendaItem item={item} />)}
+            {model.upcoming.map((item) => <AgendaItem item={item} showDate />)}
           </div>
         )
       }
