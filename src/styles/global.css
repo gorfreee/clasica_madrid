@@ -453,8 +453,7 @@ a:hover {
 .verified {
   font-family: var(--font-sans);
   font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.04em;
   color: var(--muted);
   margin: 0 0 0.9rem;
 }
