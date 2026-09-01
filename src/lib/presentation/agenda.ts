@@ -1,7 +1,7 @@
 import type { Catalog } from '../domain/catalog.ts';
-import type { FilterableOccurrence } from '../domain/filters.ts';
-import { toFilterable } from '../domain/filters.ts';
-import { formatMadridDate } from '../domain/dates.ts';
+import type { AgendaFilters, FilterableOccurrence } from '../domain/filters.ts';
+import { parseAgendaFilters, toFilterable } from '../domain/filters.ts';
+import { formatMadridDate, fromMadridLocal, madridToday } from '../domain/dates.ts';
 import { listUpcomingOccurrences, type Clock, systemClock } from '../domain/index.ts';
 import type { ResolvedOccurrence } from '../domain/resolve.ts';
 import { accessLabels, areaLabels, eraLabels, formatLabels, kindLabels, occurrenceCountLabel } from './labels.ts';
@@ -41,7 +41,20 @@ export type AgendaItemModel = {
 export type AgendaDayModel = {
   date: string;
   dateLabel: string;
+  dayNumber: string;
+  weekdayLabel: string;
+  monthLabel: string;
+  monthKey: string;
+  isToday: boolean;
+  isTomorrow: boolean;
+  isEmptyToday: boolean;
   items: AgendaItemModel[];
+};
+
+export type AgendaShortcutModel = {
+  label: string;
+  href: string;
+  emphasis?: boolean;
 };
 
 export type FilterFieldModel = {
@@ -68,6 +81,7 @@ export type AgendaPageModel = {
   composer: string;
   composerSuggestions: string[];
   filterIndex: FilterableOccurrence[];
+  shortcuts: AgendaShortcutModel[];
 };
 
 export { occurrenceCountLabel } from './labels.ts';
@@ -78,7 +92,9 @@ export function buildAgendaPageModel(
   clock: Clock = systemClock,
 ): AgendaPageModel {
   const upcoming = listUpcomingOccurrences(catalog, clock);
-  const days = groupByDate(upcoming.map(toAgendaItem));
+  const now = clock.now();
+  const days = groupByDate(upcoming.map(toAgendaItem), now);
+  const filters = parseAgendaFilters(_url?.searchParams ?? new URLSearchParams());
   return {
     title: 'Agenda de música clásica en Madrid',
     description:
@@ -86,17 +102,18 @@ export function buildAgendaPageModel(
     canonicalPath: '/',
     isEmptyCatalog: catalog.events.length === 0,
     hasUpcoming: upcoming.length > 0,
-    query: '',
-    from: '',
-    to: '',
+    query: filters.q ?? '',
+    from: filters.from ?? '',
+    to: filters.to ?? '',
     days,
     resultCount: upcoming.length,
     upcomingCount: upcoming.length,
     resultCountLabel: occurrenceCountLabel(upcoming.length),
-    selectFilters: buildSelectFilters(upcoming),
-    composer: '',
+    selectFilters: buildSelectFilters(upcoming, filters),
+    composer: filters.composer ?? '',
     composerSuggestions: unique(upcoming.flatMap((item) => item.resolved.event.composers.map((c) => c.name))),
     filterIndex: upcoming.map(toFilterable),
+    shortcuts: buildShortcuts(now),
   };
 }
 
@@ -128,20 +145,55 @@ export function toAgendaItem(item: ResolvedOccurrence): AgendaItemModel {
   };
 }
 
-function groupByDate(items: AgendaItemModel[]): AgendaDayModel[] {
+function groupByDate(items: AgendaItemModel[], now: Date): AgendaDayModel[] {
   const days: AgendaDayModel[] = [];
+  const today = madridToday(now);
+  const tomorrow = shiftIsoDate(today, 1);
   for (const item of items) {
     const last = days.at(-1);
     if (last && last.date === item.date) {
       last.items.push(item);
     } else {
-      days.push({ date: item.date, dateLabel: item.dateLabel, items: [item] });
+      days.push(buildDay(item.date, [item], today, tomorrow));
     }
+  }
+  if (days.length > 0 && days[0]?.date !== today) {
+    days.unshift(buildDay(today, [], today, tomorrow));
   }
   return days;
 }
 
-function buildSelectFilters(upcoming: ResolvedOccurrence[]): FilterFieldModel[] {
+function buildDay(
+  date: string,
+  items: AgendaItemModel[],
+  today: string,
+  tomorrow: string,
+): AgendaDayModel {
+  const instant = fromMadridLocal(date, '12:00');
+  const weekdayLabel = new Intl.DateTimeFormat('es-ES', {
+    timeZone: 'Europe/Madrid',
+    weekday: 'long',
+  }).format(instant);
+  const monthLabel = new Intl.DateTimeFormat('es-ES', {
+    timeZone: 'Europe/Madrid',
+    month: 'long',
+    year: 'numeric',
+  }).format(instant);
+  return {
+    date,
+    dateLabel: formatMadridDate(date),
+    dayNumber: date.slice(8, 10).replace(/^0/, ''),
+    weekdayLabel,
+    monthLabel,
+    monthKey: date.slice(0, 7),
+    isToday: date === today,
+    isTomorrow: date === tomorrow,
+    isEmptyToday: date === today && items.length === 0,
+    items,
+  };
+}
+
+function buildSelectFilters(upcoming: ResolvedOccurrence[], filters: AgendaFilters): FilterFieldModel[] {
   const venues = uniqueMap(
     upcoming.map((item) => item.resolved.venue),
     (venue) => venue.slug,
@@ -151,7 +203,7 @@ function buildSelectFilters(upcoming: ResolvedOccurrence[]): FilterFieldModel[] 
     {
       name: 'area',
       label: 'Ámbito',
-      value: '',
+      value: filters.area ?? '',
       options: [
         { value: '', label: 'Madrid y alrededores' },
         ...AREAS.map((id) => ({ value: id, label: areaLabels[id] })),
@@ -160,7 +212,7 @@ function buildSelectFilters(upcoming: ResolvedOccurrence[]): FilterFieldModel[] 
     {
       name: 'access',
       label: 'Acceso',
-      value: '',
+      value: filters.access ?? '',
       options: [
         { value: '', label: 'Cualquier acceso' },
         ...ACCESS_MODES.map((id) => ({ value: id, label: accessLabels[id] })),
@@ -169,7 +221,7 @@ function buildSelectFilters(upcoming: ResolvedOccurrence[]): FilterFieldModel[] 
     {
       name: 'format',
       label: 'Formato',
-      value: '',
+      value: filters.format ?? '',
       options: [
         { value: '', label: 'Cualquier formato' },
         ...FORMATS.map((id) => ({ value: id, label: formatLabels[id] })),
@@ -178,7 +230,7 @@ function buildSelectFilters(upcoming: ResolvedOccurrence[]): FilterFieldModel[] 
     {
       name: 'era',
       label: 'Época',
-      value: '',
+      value: filters.era ?? '',
       options: [
         { value: '', label: 'Cualquier época' },
         ...ERAS.map((id) => ({ value: id, label: eraLabels[id] })),
@@ -187,7 +239,7 @@ function buildSelectFilters(upcoming: ResolvedOccurrence[]): FilterFieldModel[] 
     {
       name: 'kind',
       label: 'Contexto',
-      value: '',
+      value: filters.kind ?? '',
       options: [
         { value: '', label: 'Cualquier contexto' },
         ...EVENT_KINDS.map((id) => ({ value: id, label: kindLabels[id] })),
@@ -196,10 +248,30 @@ function buildSelectFilters(upcoming: ResolvedOccurrence[]): FilterFieldModel[] 
     {
       name: 'venue',
       label: 'Lugar',
-      value: '',
+      value: filters.venue ?? '',
       options: [{ value: '', label: 'Cualquier lugar' }, ...venues],
     },
   ];
+}
+
+function buildShortcuts(now: Date): AgendaShortcutModel[] {
+  const today = madridToday(now);
+  const tomorrow = shiftIsoDate(today, 1);
+  const weekday = fromMadridLocal(today, '12:00').getUTCDay();
+  const weekendStart = weekday === 0 ? today : shiftIsoDate(today, (6 - weekday + 7) % 7);
+  const weekendEnd = weekday === 0 ? today : shiftIsoDate(weekendStart, 1);
+  return [
+    { label: 'Hoy', href: `/?from=${today}&to=${today}` },
+    { label: 'Mañana', href: `/?from=${tomorrow}&to=${tomorrow}` },
+    { label: 'Fin de semana', href: `/?from=${weekendStart}&to=${weekendEnd}` },
+    { label: 'Gratis', href: '/?access=free', emphasis: true },
+  ];
+}
+
+function shiftIsoDate(date: string, days: number): string {
+  const instant = new Date(`${date}T12:00:00Z`);
+  instant.setUTCDate(instant.getUTCDate() + days);
+  return instant.toISOString().slice(0, 10);
 }
 
 function unique(values: string[]): string[] {

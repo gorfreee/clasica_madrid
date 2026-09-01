@@ -16,34 +16,33 @@ const model = await loadVenuePage(slug);
 if (!model) {
   throw new Error(`Lugar público no encontrado: ${slug}`);
 }
+const mapQuery = encodeURIComponent([model.address, model.municipality].filter(Boolean).join(', '));
 ---
 
 <Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath}>
-  <article class="detail">
-    <header class="page-header">
-      <p class="eyebrow">Lugar</p>
+  <article class="detail venue-detail">
+    <header class="detail-hero detail-hero--venue">
+      <p class="eyebrow">Lugar / {model.areaLabel}</p>
       <h1>{model.name}</h1>
-      <p class="lede">
-        {model.showMunicipality ? `${model.municipality} · ` : ''}
-        {model.areaLabel}
-      </p>
-      {model.address && <p class="detail__address">{model.address}</p>}
-      {
-        model.url && (
-          <p>
-            <a href={model.url} rel="noopener noreferrer">
-              Sitio del espacio
-            </a>
-          </p>
-        )
-      }
+      <div class="venue-detail__practical">
+        <p>{model.address ?? model.municipality}{model.showMunicipality && model.address ? `, ${model.municipality}` : ''}</p>
+        <div class="button-row">
+          {model.address && <a class="button-link" href={`https://www.google.com/maps/search/?api=1&query=${mapQuery}`} rel="noopener noreferrer">Cómo llegar ↗</a>}
+          {model.url && <a class="text-link" href={model.url} rel="noopener noreferrer">Web del espacio ↗</a>}
+        </div>
+      </div>
+      <span class="detail-hero__shape" aria-hidden="true"></span>
     </header>
 
-    <section aria-labelledby="proximos-titulo">
-      <h2 id="proximos-titulo">Próximos conciertos</h2>
+    <section class="detail-section venue-programme" aria-labelledby="proximos-titulo">
+      <div class="section-heading">
+        <p>Programación</p>
+        <h2 id="proximos-titulo">Próximos conciertos</h2>
+        <span>{model.upcoming.length}</span>
+      </div>
       {
         model.upcoming.length === 0 ? (
-          <p>No hay conciertos próximos publicados en este espacio.</p>
+          <p class="quiet-state">No hay conciertos próximos publicados en este espacio.</p>
         ) : (
           <div class="agenda-day__list">
             {model.upcoming.map((item) => <AgendaItem item={item} />)}

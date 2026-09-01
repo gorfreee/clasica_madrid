@@ -8,14 +8,17 @@ const links = [
 
 <header class="site-header">
   <div class="site-header__inner">
-    <a class="site-mark" href="/">Clásica Madrid</a>
+    <a class="site-mark" href="/" aria-label="Clásica Madrid, ir a la agenda">
+      <span class="site-mark__shape" aria-hidden="true"></span>
+      <span class="site-mark__text">Clásica<br />Madrid</span>
+    </a>
     <nav aria-label="Principal">
       <ul class="nav-list">
         {
           links.map((link) => (
             <li>
               <a href={link.href} aria-current={link.current ? 'page' : undefined}>
-                {link.label}
+                <span>{link.label}</span>
               </a>
             </li>
           ))

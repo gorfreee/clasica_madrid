@@ -174,6 +174,22 @@ describe('modelos de presentación', () => {
     expect(organ?.time).toBeNull();
   });
 
+  it('abre la cronología en hoy aunque la primera representación sea posterior', () => {
+    const model = buildAgendaPageModel(richCatalog(), new URL('https://clasicamadrid.com/'), testClock);
+    expect(model.days[0]).toMatchObject({
+      date: '2026-09-01',
+      isToday: true,
+      isEmptyToday: true,
+      items: [],
+    });
+    expect(model.shortcuts.map((shortcut) => shortcut.label)).toEqual([
+      'Hoy',
+      'Mañana',
+      'Fin de semana',
+      'Gratis',
+    ]);
+  });
+
   it('distingue catálogo vacío de filtros sin resultados', () => {
     const empty = buildAgendaPageModel(emptyCatalog(), new URL('https://clasicamadrid.com/'), testClock);
     expect(empty.isEmptyCatalog).toBe(true);
@@ -247,6 +263,7 @@ describe('modelos de presentación', () => {
     });
     const index = buildVenuesIndexModel(catalog, testClock);
     expect(index.venues.map((venue) => venue.slug)).toEqual(['auditorio-nacional']);
+    expect(index.inactiveVenues.map((venue) => venue.slug)).toEqual(['teatro-historico']);
     expect(listVenuePageSlugs(catalog)).toEqual(['auditorio-nacional', 'teatro-historico']);
     expect(buildVenuePageModel(catalog, 'teatro-historico', testClock)).not.toBeNull();
   });
