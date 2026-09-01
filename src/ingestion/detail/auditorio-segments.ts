@@ -26,7 +26,9 @@ const ROLE_SUFFIX = new RegExp(
 );
 
 const DIRECTOR_PREFIX =
-  /^(?:dir(?:ector|ectora)?\.?|directora|direcci[oó]n(?:\s+musical)?)\s*[:.]?\s+(.+)$/i;
+  /^(?:dir(?:ector|ectora)?\.?|directora|direcci[oó]n(?:\s+musical)?)\s*[:.,]?\s+(.+)$/i;
+
+const PARENTHETICAL_ROLE = new RegExp(`^(.+?)\\s*\\((${ROLE_TOKEN})\\)$`, 'i');
 
 const ANONYMOUS_COMPOSER = /^(?:an[oó]nimo|varios autores)\b/i;
 
@@ -98,6 +100,7 @@ export function findProgramStartIndex(lines: string[]): number {
   for (let index = 0; index < lines.length; index++) {
     const line = lines[index] ?? '';
     const next = lines[index + 1];
+    if (hasExplicitPerformerSignal(line) || looksLikeRoleOnlyLine(line)) continue;
     if (looksLikeProgramHeader(line) || ANONYMOUS_COMPOSER.test(line) || /^obras de\b/i.test(line)) {
       return index;
     }
@@ -126,6 +129,7 @@ export function hasExplicitPerformerSignal(text: string): boolean {
   if (looksLikeCastEnsemble(cleaned)) return true;
   if (DIRECTOR_PREFIX.test(cleaned)) return true;
   if (parseCommaRole(cleaned)) return true;
+  if (parseParentheticalRole(cleaned)) return true;
   if (ROLE_SUFFIX.test(cleaned) && !looksLikeProgramHeader(ROLE_SUFFIX.exec(cleaned)?.[1] ?? '')) {
     const name = ROLE_SUFFIX.exec(cleaned)?.[1]?.trim() ?? '';
     if (STRONG_CATALOG.test(name) || looksLikeWorkInstrumentation(name)) return false;
@@ -150,6 +154,9 @@ export function parseAuditorioPersonLine(
 
   const comma = parseCommaRole(cleaned);
   if (comma) return comma;
+
+  const parenthetical = parseParentheticalRole(cleaned);
+  if (parenthetical) return parenthetical;
 
   const suffix = ROLE_SUFFIX.exec(cleaned);
   if (suffix?.[1] && suffix[2] && !looksLikeProgramHeader(suffix[1])) {
@@ -189,6 +196,17 @@ export function parseComposerColonWork(
 function looksLikeColonWorkTitle(title: string): boolean {
   if (WORK_GENRE.test(title) || STRONG_CATALOG.test(title)) return true;
   return /\b(?:bwv|hwv|hob|buxwv|swwv|rct|k\.?v?|op\.?|opus|g\.|h\.?)\s*\d+/i.test(title);
+}
+
+function parseParentheticalRole(text: string): { name: string; roleText: string } | undefined {
+  const named = PARENTHETICAL_ROLE.exec(text);
+  if (!named?.[1] || !named[2]) return undefined;
+  const name = named[1].replace(/[.,;:]+$/u, '').trim();
+  const role = named[2].trim();
+  if (!name || STRONG_CATALOG.test(name) || looksLikeWorkInstrumentation(name)) return undefined;
+  if (WORK_GENRE.test(name) || looksLikeProgramHeader(name)) return undefined;
+  if (!looksLikePersonOrGroupName(name)) return undefined;
+  return { name, roleText: role };
 }
 
 function parseCommaRole(text: string): { name: string; roleText: string } | undefined {

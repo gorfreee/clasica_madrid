@@ -214,7 +214,7 @@ describe('publication gate — pipeline completo', () => {
     expect(ai.calls).toBe(1);
     expect(run.summary.ai).toEqual(expect.objectContaining({ attempted: 1, resolved: 1, unresolved: 0, include: 1 }));
     expect(run.candidates).toHaveLength(1);
-    expect(run.candidates[0]!.event.formats).toEqual(['symphonic']);
+    expect(run.candidates[0]!.event.formats).toEqual(['chamber']);
     expect(run.candidates[0]!.event.eras).toEqual(['baroque']);
     expect(run.candidates[0]!.event.kind).toBe('alternative');
   });
@@ -302,7 +302,7 @@ describe('publication gate — pipeline completo', () => {
 
     expect(run.candidates).toHaveLength(1);
     expect(run.candidates[0]!.event.eras).toEqual([]);
-    expect(run.candidates[0]!.event.formats).toEqual(['symphonic']);
+    expect(run.candidates[0]!.event.formats).toEqual([]);
     expect(run.candidates[0]!.event.kind).toBe('alternative');
     expect(run.candidates[0]!.event.citations[0]?.url).toMatch(/^https:\/\//);
   });

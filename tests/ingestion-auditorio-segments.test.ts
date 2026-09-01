@@ -177,4 +177,46 @@ describe('segmentación performer/programa del Auditorio', () => {
     expect(segments.programLines[0]).toBe('Carlos Guastavino');
     expect(parseAuditorioPersonLine('Carlos Guastavino')).toEqual({ name: 'Carlos Guastavino' });
   });
+
+  it('roles entre paréntesis y Director, Nombre no desplazan el elenco al programa', () => {
+    const tenores = segmentAuditorioBlocks([
+      [
+        'Miguel Borrallo (Tenor)',
+        'Eduardo Sandoval (Tenor)',
+        'Sergio Escobar (Tenor)',
+        'Francisco Pérez Sánchez. (Piano)',
+        'Programa:',
+        '«E lucevan le stelle» de «Tosca» de G. Puccini (Eduardo Sandoval)',
+      ],
+    ]);
+    expect(tenores.performerLines).toEqual([
+      'Miguel Borrallo (Tenor)',
+      'Eduardo Sandoval (Tenor)',
+      'Sergio Escobar (Tenor)',
+      'Francisco Pérez Sánchez. (Piano)',
+    ]);
+    expect(tenores.programLines[0]).toBe('Programa:');
+    expect(parseAuditorioPersonLine('Miguel Borrallo (Tenor)')).toEqual({
+      name: 'Miguel Borrallo',
+      roleText: 'Tenor',
+    });
+    expect(parseAuditorioPersonLine('Francisco Pérez Sánchez. (Piano)')).toEqual({
+      name: 'Francisco Pérez Sánchez',
+      roleText: 'Piano',
+    });
+    expect(parseAuditorioPersonLine('«E lucevan le stelle» de «Tosca» de G. Puccini (Eduardo Sandoval)')).toBeUndefined();
+
+    const anoNuevo = segmentAuditorioBlocks([
+      ['Orquesta Clásica Santa Cecilia', 'Director, Kynan Johns', 'Programa:', 'J. Strauss: El Danubio azul'],
+    ]);
+    expect(anoNuevo.performerLines).toEqual([
+      'Orquesta Clásica Santa Cecilia',
+      'Director, Kynan Johns',
+    ]);
+    expect(anoNuevo.programLines[0]).toBe('Programa:');
+    expect(parseAuditorioPersonLine('Director, Kynan Johns')).toEqual({
+      name: 'Kynan Johns',
+      roleText: 'director',
+    });
+  });
 });
