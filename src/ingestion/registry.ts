@@ -5,12 +5,14 @@ import { madridDatosAdapter } from './sources/madrid-datos.ts';
 import { teatroRealAdapter } from './sources/teatro-real.ts';
 import { teatroZarzuelaAdapter } from './sources/teatro-zarzuela.ts';
 import { fundacionJuanMarchAdapter } from './sources/fundacion-juan-march.ts';
+import { fundacionCanalAdapter } from './sources/fundacion-canal.ts';
 import { fundacionOrcamAdapter } from './sources/fundacion-orcam.ts';
 import { orquestaCoroRtveAdapter } from './sources/orquesta-coro-rtve.ts';
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
   [orquestaCoroRtveAdapter.id]: orquestaCoroRtveAdapter,
+  [fundacionCanalAdapter.id]: fundacionCanalAdapter,
   [fundacionOrcamAdapter.id]: fundacionOrcamAdapter,
   [fundacionJuanMarchAdapter.id]: fundacionJuanMarchAdapter,
   [auditorioNacionalAdapter.id]: auditorioNacionalAdapter,
@@ -131,6 +133,25 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Orquesta y Coro RTVE / Teatro Monumental',
       kind: 'official',
       url: 'https://www.teatromonumental.es/',
+    },
+  },
+  {
+    id: 'fundacion-canal',
+    name: 'Fundación Canal',
+    urls: [
+      'https://www.fundacioncanal.com/ciclo-musica-camara/',
+      'https://www.fundacioncanal.com/ciclo-musica-en-familia/proximas/',
+      'https://www.fundacioncanal.com/otros-conciertos/proximas/',
+    ],
+    adapterId: fundacionCanalAdapter.id,
+    catalogSourceId: 'src_fundacion_canal',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_fundacion_canal',
+      slug: 'fundacion-canal',
+      name: 'Fundación Canal',
+      kind: 'official',
+      url: 'https://www.fundacioncanal.com/',
     },
   },
 ];

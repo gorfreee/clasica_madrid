@@ -42,6 +42,24 @@ export const KNOWN_VENUES: KnownVenue[] = [
   },
   {
     keys: [
+      'auditorio fundacion canal',
+      'auditorio de la fundacion canal',
+      'fundacion canal auditorio',
+      'auditorio mateo inurria 2',
+      'auditorio de la fundacion canal mateo inurria 2',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_auditorio_fundacion_canal',
+      slug: 'auditorio-fundacion-canal',
+      name: 'Fundación Canal — Auditorio',
+      ...MADRID,
+      address: 'Calle de Mateo Inurria, 2, 28036 Madrid',
+      url: 'https://www.fundacioncanal.com/',
+    },
+  },
+  {
+    keys: [
       'sala sinfonica',
       'auditorio nacional sala sinfonica',
       'auditorio nacional de musica sala sinfonica',
@@ -119,6 +137,10 @@ export const KNOWN_VENUES: KnownVenue[] = [
 const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
   'fundacion-juan-march': {
     'fundacion juan march madrid': 'ven_fundacion_juan_march_auditorio',
+  },
+  'fundacion-canal': {
+    'auditorio mateo inurria 2': 'ven_auditorio_fundacion_canal',
+    'fundacion canal': 'ven_auditorio_fundacion_canal',
   },
   'teatro-real': {
     'sala principal': 'ven_teatro_real',

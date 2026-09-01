@@ -50,6 +50,15 @@ async function fileExists(filePath: string): Promise<boolean> {
 async function fixtureGet(url: string): Promise<string> {
   if (url === 'https://www.teatromonumental.es/') return readFile(path.join(fixtures, 'rtve/listing-single.html'), 'utf8');
   if (url === 'https://www.teatromonumental.es/eventos/concierto-sinfonico-a-1/') return readFile(path.join(fixtures, 'rtve/detail-symphonic.html'), 'utf8');
+  if (url === 'https://www.fundacioncanal.com/ciclo-musica-camara/') {
+    return readFile(path.join(fixtures, 'canal/camara-empty.html'), 'utf8');
+  }
+  if (url === 'https://www.fundacioncanal.com/ciclo-musica-en-familia/proximas/') {
+    return readFile(path.join(fixtures, 'canal/familia-proximas-empty.html'), 'utf8');
+  }
+  if (url === 'https://www.fundacioncanal.com/otros-conciertos/proximas/') {
+    return readFile(path.join(fixtures, 'canal/otros-proximas-empty.html'), 'utf8');
+  }
   if (url === 'https://fundacionorcam.org/programacion/') return '<main><h1>Próximos conciertos</h1><div data-search-filter-settings="{&quot;urlName&quot;:&quot;fecha&quot;,&quot;values&quot;:[],&quot;options&quot;:[]}"></div><div data-widget_type="loop-grid.post"></div></main>';
   if (url === 'https://www.march.es/es/madrid/conciertos') return '<h1>Conciertos en Madrid</h1><div class="snippet-container snippet-container--0"></div><h2>La música</h2>';
   if (url === 'https://teatrodelazarzuela.inaem.gob.es/es/') {
@@ -174,7 +183,7 @@ describe('aislamiento de fallos por fuente', () => {
       },
     });
     expect(run.summary.sourcesFailed.map((item) => item.sourceId)).toEqual(['teatro-real']);
-    expect(run.summary.sourcesSucceeded).toEqual(['auditorio-nacional', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve']);
+    expect(run.summary.sourcesSucceeded).toEqual(['auditorio-nacional', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'fundacion-canal']);
     expect(run.rawEvents.length).toBeGreaterThan(0);
     expect(run.rawEvents.some((event) => event.sourceId === 'teatro-real')).toBe(false);
     expect(run.summary.written).toEqual([]);
@@ -194,7 +203,7 @@ describe('aislamiento de fallos por fuente', () => {
     });
     expect(run.summary.sourcesSucceeded).toEqual([]);
     expect(run.summary.sourcesFailed.map((item) => item.sourceId)).toEqual([
-      'auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve',
+      'auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'fundacion-canal',
     ]);
     expect(run.summary.written).toEqual([]);
     expect(run.apply.report.ok).toBe(true);
