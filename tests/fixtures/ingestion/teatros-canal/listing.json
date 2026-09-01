@@ -1,0 +1,1333 @@
+{
+  "events": [
+    {
+      "id": 71611,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/festival-coma-2026/",
+      "title": "COMA’26",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2026-09-22 00:00:00",
+      "end_date": "2026-10-27 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Conciertos",
+          "slug": "conciertos",
+          "id": 7
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "festival-coma-2026"
+    },
+    {
+      "id": 99384,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/suma-flamenca-joven-2026/",
+      "title": "SUMA FLAMENCA JOVEN 2026",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2026-09-24 00:00:00",
+      "end_date": "2026-09-27 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Abono",
+          "slug": "abono",
+          "id": 180
+        },
+        {
+          "name": "Carné Joven",
+          "slug": "carne-joven",
+          "id": 122
+        },
+        {
+          "name": "Danza",
+          "slug": "danza",
+          "id": 6
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Festivales",
+          "slug": "festivales",
+          "id": 68
+        },
+        {
+          "name": "Flamenco",
+          "slug": "flamenco",
+          "id": 69
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "suma-flamenca-joven-2026"
+    },
+    {
+      "id": 100116,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/xvii-festival-de-ensembles-2026/",
+      "title": "XVII Festival de Ensembles",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2026-10-07 00:00:00",
+      "end_date": "2026-12-05 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Conciertos",
+          "slug": "conciertos",
+          "id": 7
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "xvii-festival-de-ensembles-2026"
+    },
+    {
+      "id": 100095,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/ferial-calaveras/",
+      "title": "Ferial de Calaveras",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2026-10-09 00:00:00",
+      "end_date": "2026-10-11 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Abono",
+          "slug": "abono",
+          "id": 180
+        },
+        {
+          "name": "Carné Joven",
+          "slug": "carne-joven",
+          "id": 122
+        },
+        {
+          "name": "Danza",
+          "slug": "danza",
+          "id": 6
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "ferial-calaveras"
+    },
+    {
+      "id": 100137,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/festival-xxi-suma-flamenca-2026/",
+      "title": "XXI Suma Flamenca 2026",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2026-10-13 00:00:00",
+      "end_date": "2026-11-01 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Abono",
+          "slug": "abono",
+          "id": 180
+        },
+        {
+          "name": "Carné Joven",
+          "slug": "carne-joven",
+          "id": 122
+        },
+        {
+          "name": "Danza",
+          "slug": "danza",
+          "id": 6
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Festivales",
+          "slug": "festivales",
+          "id": 68
+        },
+        {
+          "name": "Flamenco",
+          "slug": "flamenco",
+          "id": 69
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        },
+        {
+          "name": "Proximamente",
+          "slug": "proximamente",
+          "id": 13
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "festival-xxi-suma-flamenca-2026"
+    },
+    {
+      "id": 105366,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/entra-con-cuidado-y-quedate-a-bailar-ede/",
+      "title": "Ede",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2026-11-13 00:00:00",
+      "end_date": "2026-11-13 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Carné Joven",
+          "slug": "carne-joven",
+          "id": 122
+        },
+        {
+          "name": "Conciertos",
+          "slug": "conciertos",
+          "id": 7
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Festivales",
+          "slug": "festivales",
+          "id": 68
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        },
+        {
+          "name": "Teatro",
+          "slug": "teatro",
+          "id": 5
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "entra-con-cuidado-y-quedate-a-bailar-ede"
+    },
+    {
+      "id": 105552,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/sorvina/",
+      "title": "Sorvina",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2026-11-20 00:00:00",
+      "end_date": "2026-11-20 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Carné Joven",
+          "slug": "carne-joven",
+          "id": 122
+        },
+        {
+          "name": "Conciertos",
+          "slug": "conciertos",
+          "id": 7
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Festivales",
+          "slug": "festivales",
+          "id": 68
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "sorvina"
+    },
+    {
+      "id": 105558,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/a-good-woman-izo-fitzroy/",
+      "title": "Izo Fitzroy",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2026-11-21 00:00:00",
+      "end_date": "2026-11-21 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Conciertos",
+          "slug": "conciertos",
+          "id": 7
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Festivales",
+          "slug": "festivales",
+          "id": 68
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "a-good-woman-izo-fitzroy"
+    },
+    {
+      "id": 105426,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/pachuquismo-la-mezcla/",
+      "title": "La Mezcla",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2026-11-21 00:00:00",
+      "end_date": "2026-11-22 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Carné Joven",
+          "slug": "carne-joven",
+          "id": 122
+        },
+        {
+          "name": "Danza",
+          "slug": "danza",
+          "id": 6
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Festivales",
+          "slug": "festivales",
+          "id": 68
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        },
+        {
+          "name": "Teatro",
+          "slug": "teatro",
+          "id": 5
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "pachuquismo-la-mezcla"
+    },
+    {
+      "id": 99843,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/el-otro-del-27-rafael-de-leon-juan-valderrama-santiago-sanchez-victor-lucas/",
+      "title": "Juan Valderrama | Santiago Sánchez y Víctor Lucas",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2027-01-12 00:00:00",
+      "end_date": "2027-01-24 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Abono",
+          "slug": "abono",
+          "id": 180
+        },
+        {
+          "name": "Carné Joven",
+          "slug": "carne-joven",
+          "id": 122
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        },
+        {
+          "name": "Teatro",
+          "slug": "teatro",
+          "id": 5
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "el-otro-del-27-rafael-de-leon-juan-valderrama-santiago-sanchez-victor-lucas"
+    },
+    {
+      "id": 101322,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/pepin-bello-del-amor-la-juan-gallery/",
+      "title": "LA JUAN GALLERY",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2027-01-16 00:00:00",
+      "end_date": "2027-01-16 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        },
+        {
+          "name": "Performance",
+          "slug": "performance",
+          "id": 152
+        },
+        {
+          "name": "Proximamente",
+          "slug": "proximamente",
+          "id": 13
+        },
+        {
+          "name": "Teatro",
+          "slug": "teatro",
+          "id": 5
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "pepin-bello-del-amor-la-juan-gallery"
+    },
+    {
+      "id": 102183,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/canal-plaza/",
+      "title": "CANAL PLAZA",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2027-01-21 00:00:00",
+      "end_date": "2027-06-20 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Conciertos",
+          "slug": "conciertos",
+          "id": 7
+        },
+        {
+          "name": "Danza",
+          "slug": "danza",
+          "id": 6
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Familiar",
+          "slug": "familiar",
+          "id": 136
+        },
+        {
+          "name": "Infantil",
+          "slug": "infantil",
+          "id": 71
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        },
+        {
+          "name": "Otros",
+          "slug": "otros",
+          "id": 11
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "canal-plaza"
+    },
+    {
+      "id": 99327,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/self-help-lekuona/",
+      "title": "Lekuona ",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2027-01-28 00:00:00",
+      "end_date": "2027-01-29 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Abono",
+          "slug": "abono",
+          "id": 180
+        },
+        {
+          "name": "Carné Joven",
+          "slug": "carne-joven",
+          "id": 122
+        },
+        {
+          "name": "Conciertos",
+          "slug": "conciertos",
+          "id": 7
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        },
+        {
+          "name": "Performance",
+          "slug": "performance",
+          "id": 152
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "self-help-lekuona"
+    },
+    {
+      "id": 99702,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/fashion-boiler-room-oteyza/",
+      "title": "Oteyza",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2027-02-26 00:00:00",
+      "end_date": "2027-02-27 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Abono",
+          "slug": "abono",
+          "id": 180
+        },
+        {
+          "name": "Carné Joven",
+          "slug": "carne-joven",
+          "id": 122
+        },
+        {
+          "name": "Danza",
+          "slug": "danza",
+          "id": 6
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        },
+        {
+          "name": "Proximamente",
+          "slug": "proximamente",
+          "id": 13
+        },
+        {
+          "name": "Video",
+          "slug": "video",
+          "id": 153
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "fashion-boiler-room-oteyza"
+    },
+    {
+      "id": 99315,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/una-bestia-romain-dubois/",
+      "title": "Romain Dubois",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2027-02-28 00:00:00",
+      "end_date": "2027-02-28 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Abono",
+          "slug": "abono",
+          "id": 180
+        },
+        {
+          "name": "Carné Joven",
+          "slug": "carne-joven",
+          "id": 122
+        },
+        {
+          "name": "Conciertos",
+          "slug": "conciertos",
+          "id": 7
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        },
+        {
+          "name": "Performance",
+          "slug": "performance",
+          "id": 152
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "una-bestia-romain-dubois"
+    },
+    {
+      "id": 99696,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/teatralia-2027/",
+      "title": "Teatralia",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2027-03-02 00:00:00",
+      "end_date": "2027-03-21 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Familiar",
+          "slug": "familiar",
+          "id": 136
+        },
+        {
+          "name": "Festivales",
+          "slug": "festivales",
+          "id": 68
+        },
+        {
+          "name": "Magia",
+          "slug": "magia",
+          "id": 177
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        },
+        {
+          "name": "Proximamente",
+          "slug": "proximamente",
+          "id": 13
+        },
+        {
+          "name": "Teatro",
+          "slug": "teatro",
+          "id": 5
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "teatralia-2027"
+    },
+    {
+      "id": 100695,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/trozos-de-instante-suso-saiz-mfo/",
+      "title": "Suso Saiz &#038; MFO",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2027-03-23 00:00:00",
+      "end_date": "2027-03-23 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Abono",
+          "slug": "abono",
+          "id": 180
+        },
+        {
+          "name": "Carné Joven",
+          "slug": "carne-joven",
+          "id": 122
+        },
+        {
+          "name": "Conciertos",
+          "slug": "conciertos",
+          "id": 7
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        },
+        {
+          "name": "Video",
+          "slug": "video",
+          "id": 153
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "trozos-de-instante-suso-saiz-mfo"
+    },
+    {
+      "id": 98865,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/versos-en-libertad-maria-galiana/",
+      "title": "María Galiana | Dir.: Enrico Amerio",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2027-03-23 00:00:00",
+      "end_date": "2027-03-24 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Abono",
+          "slug": "abono",
+          "id": 180
+        },
+        {
+          "name": "Carné Joven",
+          "slug": "carne-joven",
+          "id": 122
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        },
+        {
+          "name": "Teatro",
+          "slug": "teatro",
+          "id": 5
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "versos-en-libertad-maria-galiana"
+    },
+    {
+      "id": 99069,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/estibaliz-martyn-sergio-kuhlmann-donde-nace-la-voz/",
+      "title": "Estíbaliz Martyn | Sergio Kuhlmann",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2027-03-24 00:00:00",
+      "end_date": "2027-03-24 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Abono",
+          "slug": "abono",
+          "id": 180
+        },
+        {
+          "name": "Carné Joven",
+          "slug": "carne-joven",
+          "id": 122
+        },
+        {
+          "name": "Conciertos",
+          "slug": "conciertos",
+          "id": 7
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "estibaliz-martyn-sergio-kuhlmann-donde-nace-la-voz"
+    },
+    {
+      "id": 98895,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/mujeres-y-hombres-del-27-juan-echanove/",
+      "title": "Juan Echanove | Dir.: Enrico Amerio",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2027-03-25 00:00:00",
+      "end_date": "2027-03-26 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Abono",
+          "slug": "abono",
+          "id": 180
+        },
+        {
+          "name": "Carné Joven",
+          "slug": "carne-joven",
+          "id": 122
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        },
+        {
+          "name": "Teatro",
+          "slug": "teatro",
+          "id": 5
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "mujeres-y-hombres-del-27-juan-echanove"
+    },
+    {
+      "id": 99117,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/sinfonia-n9-en-re-menor-joven-orquesta-comunidad-de-madrid-coro-comunidad-madrid/",
+      "title": "Joven Orquesta de la Comunidad de Madrid | Coro de la Comunidad de Madrid",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2027-03-28 00:00:00",
+      "end_date": "2027-03-28 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        },
+        {
+          "name": "Proximamente",
+          "slug": "proximamente",
+          "id": 13
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "sinfonia-n9-en-re-menor-joven-orquesta-comunidad-de-madrid-coro-comunidad-madrid"
+    },
+    {
+      "id": 98913,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/las-chicas-del-27-silvia-marso/",
+      "title": "Silvia Marsó | Dir.: Xavier Albertí",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2027-03-30 00:00:00",
+      "end_date": "2027-04-11 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Abono",
+          "slug": "abono",
+          "id": 180
+        },
+        {
+          "name": "Carné Joven",
+          "slug": "carne-joven",
+          "id": 122
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        },
+        {
+          "name": "Teatro",
+          "slug": "teatro",
+          "id": 5
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "las-chicas-del-27-silvia-marso"
+    },
+    {
+      "id": 99084,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/thibaut-garcia-antoine-moriniere-variaciones-goldberg/",
+      "title": "Dúo Thibaut Garcia &#038; Antoine Morinière",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2027-03-31 00:00:00",
+      "end_date": "2027-03-31 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Abono",
+          "slug": "abono",
+          "id": 180
+        },
+        {
+          "name": "Carné Joven",
+          "slug": "carne-joven",
+          "id": 122
+        },
+        {
+          "name": "Conciertos",
+          "slug": "conciertos",
+          "id": 7
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "thibaut-garcia-antoine-moriniere-variaciones-goldberg"
+    },
+    {
+      "id": 99636,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/trino-la-senorita-blanco/",
+      "title": "La Señorita Blanco",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2027-04-06 00:00:00",
+      "end_date": "2027-04-18 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        },
+        {
+          "name": "Otros",
+          "slug": "otros",
+          "id": 11
+        },
+        {
+          "name": "Performance",
+          "slug": "performance",
+          "id": 152
+        },
+        {
+          "name": "Proximamente",
+          "slug": "proximamente",
+          "id": 13
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "trino-la-senorita-blanco"
+    },
+    {
+      "id": 99609,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/apoyatura-oscar-bueno/",
+      "title": "Óscar Bueno",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2027-04-24 00:00:00",
+      "end_date": "2027-04-25 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Abono",
+          "slug": "abono",
+          "id": 180
+        },
+        {
+          "name": "Carné Joven",
+          "slug": "carne-joven",
+          "id": 122
+        },
+        {
+          "name": "Conciertos",
+          "slug": "conciertos",
+          "id": 7
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        },
+        {
+          "name": "Performance",
+          "slug": "performance",
+          "id": 152
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "apoyatura-oscar-bueno"
+    },
+    {
+      "id": 99603,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/the-eternal-circle-cora-novoa/",
+      "title": "Cora Novoa",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2027-05-01 00:00:00",
+      "end_date": "2027-05-01 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Abono",
+          "slug": "abono",
+          "id": 180
+        },
+        {
+          "name": "Carné Joven",
+          "slug": "carne-joven",
+          "id": 122
+        },
+        {
+          "name": "Conciertos",
+          "slug": "conciertos",
+          "id": 7
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        },
+        {
+          "name": "Video",
+          "slug": "video",
+          "id": 153
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "the-eternal-circle-cora-novoa"
+    },
+    {
+      "id": 99597,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/la-nota-silenciosa-laura-sierra-piano/",
+      "title": "Laura Sierra, piano",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2027-05-02 00:00:00",
+      "end_date": "2027-05-02 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Abono",
+          "slug": "abono",
+          "id": 180
+        },
+        {
+          "name": "Carné Joven",
+          "slug": "carne-joven",
+          "id": 122
+        },
+        {
+          "name": "Conciertos",
+          "slug": "conciertos",
+          "id": 7
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "la-nota-silenciosa-laura-sierra-piano"
+    },
+    {
+      "id": 99354,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/lobo-aurora-bauza-pere-jou/",
+      "title": "Aurora Bauzà &#038; Pere Jou",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2027-06-18 00:00:00",
+      "end_date": "2027-06-19 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Abono",
+          "slug": "abono",
+          "id": 180
+        },
+        {
+          "name": "Carné Joven",
+          "slug": "carne-joven",
+          "id": 122
+        },
+        {
+          "name": "Danza",
+          "slug": "danza",
+          "id": 6
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "lobo-aurora-bauza-pere-jou"
+    },
+    {
+      "id": 99906,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/joven-camerata-de-la-orcam-concierto-fin-de-curso/",
+      "title": "Joven Camerata de la ORCAM",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2027-06-22 00:00:00",
+      "end_date": "2027-06-22 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Conciertos",
+          "slug": "conciertos",
+          "id": 7
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        },
+        {
+          "name": "Proximamente",
+          "slug": "proximamente",
+          "id": 13
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "joven-camerata-de-la-orcam-concierto-fin-de-curso"
+    }
+  ],
+  "rest_url": "https://www.teatroscanal.com/wp-json/tribe/events/v1/events/?page=1&per_page=50&start_date=2026-09-01 00:00:00&end_date=2026-12-30 23:59:59&status=publish&categories=musica",
+  "total": 29,
+  "total_pages": 1
+}

@@ -1,0 +1,197 @@
+{
+  "events": [
+    {
+      "id": 71611,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/festival-coma-2026/",
+      "title": "COMA’26",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2026-09-22 00:00:00",
+      "end_date": "2026-10-27 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Conciertos",
+          "slug": "conciertos",
+          "id": 7
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "festival-coma-2026"
+    },
+    {
+      "id": 100116,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/xvii-festival-de-ensembles-2026/",
+      "title": "XVII Festival de Ensembles",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2026-10-07 00:00:00",
+      "end_date": "2026-12-05 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Conciertos",
+          "slug": "conciertos",
+          "id": 7
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "xvii-festival-de-ensembles-2026"
+    },
+    {
+      "id": 99117,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/sinfonia-n9-en-re-menor-joven-orquesta-comunidad-de-madrid-coro-comunidad-madrid/",
+      "title": "Joven Orquesta de la Comunidad de Madrid | Coro de la Comunidad de Madrid",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2027-03-28 00:00:00",
+      "end_date": "2027-03-28 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        },
+        {
+          "name": "Proximamente",
+          "slug": "proximamente",
+          "id": 13
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "sinfonia-n9-en-re-menor-joven-orquesta-comunidad-de-madrid-coro-comunidad-madrid"
+    },
+    {
+      "id": 99084,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/thibaut-garcia-antoine-moriniere-variaciones-goldberg/",
+      "title": "Dúo Thibaut Garcia &#038; Antoine Morinière",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2027-03-31 00:00:00",
+      "end_date": "2027-03-31 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Abono",
+          "slug": "abono",
+          "id": 180
+        },
+        {
+          "name": "Carné Joven",
+          "slug": "carne-joven",
+          "id": 122
+        },
+        {
+          "name": "Conciertos",
+          "slug": "conciertos",
+          "id": 7
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "thibaut-garcia-antoine-moriniere-variaciones-goldberg"
+    },
+    {
+      "id": 99597,
+      "status": "publish",
+      "url": "https://www.teatroscanal.com/espectaculo/la-nota-silenciosa-laura-sierra-piano/",
+      "title": "Laura Sierra, piano",
+      "description": "",
+      "excerpt": "",
+      "start_date": "2027-05-02 00:00:00",
+      "end_date": "2027-05-02 23:59:59",
+      "all_day": true,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "name": "Abono",
+          "slug": "abono",
+          "id": 180
+        },
+        {
+          "name": "Carné Joven",
+          "slug": "carne-joven",
+          "id": 122
+        },
+        {
+          "name": "Conciertos",
+          "slug": "conciertos",
+          "id": 7
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "id": 80
+        },
+        {
+          "name": "Música",
+          "slug": "musica",
+          "id": 151
+        }
+      ],
+      "venue": [],
+      "organizer": [],
+      "slug": "la-nota-silenciosa-laura-sierra-piano"
+    }
+  ],
+  "rest_url": "https://www.teatroscanal.com/wp-json/tribe/events/v1/events/?page=1&per_page=50&start_date=2026-09-01 00:00:00&end_date=2026-12-30 23:59:59&status=publish&categories=musica",
+  "total": 5,
+  "total_pages": 1
+}
