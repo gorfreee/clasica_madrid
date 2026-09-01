@@ -98,9 +98,9 @@ describe('parseIngestArgs', () => {
   });
 
   it('rechaza una fuente inexistente', () => {
-    const parsed = parseIngestArgs(['source', 'cndm'], sources);
+    const parsed = parseIngestArgs(['source', 'fuente-inexistente'], sources);
     expect(parsed.ok).toBe(false);
-    if (!parsed.ok) expect(parsed.message).toMatch(/fuente desconocida: cndm/);
+    if (!parsed.ok) expect(parsed.message).toMatch(/fuente desconocida: fuente-inexistente/);
   });
 
   it('rechaza source sin id y sync con posicionales', () => {
@@ -168,9 +168,9 @@ describe('parseIngestArgs', () => {
       sourceIds: ['teatro-real', 'auditorio-nacional'],
     });
 
-    const unknown = parseIngestArgs(['sync', '--sources', 'cndm,teatro-real'], sources);
+    const unknown = parseIngestArgs(['sync', '--sources', 'fuente-inexistente,teatro-real'], sources);
     expect(unknown.ok).toBe(false);
-    if (!unknown.ok) expect(unknown.message).toMatch(/fuente desconocida: cndm/);
+    if (!unknown.ok) expect(unknown.message).toMatch(/fuente desconocida: fuente-inexistente/);
 
     const empty = parseIngestArgs(['sync', '--sources', ' , '], sources);
     expect(empty.ok).toBe(false);

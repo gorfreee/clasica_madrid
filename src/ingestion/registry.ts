@@ -10,6 +10,7 @@ import { fundacionOrcamAdapter } from './sources/fundacion-orcam.ts';
 import { orquestaCoroRtveAdapter } from './sources/orquesta-coro-rtve.ts';
 import { teatrosCanalAdapter } from './sources/teatros-canal.ts';
 import { circuloBellasArtesAdapter } from './sources/circulo-bellas-artes.ts';
+import { cndmAdapter } from './sources/cndm.ts';
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
@@ -23,6 +24,7 @@ const ADAPTERS: Record<string, SourceAdapter> = {
   [madridDatosAdapter.id]: madridDatosAdapter,
   [teatroZarzuelaAdapter.id]: teatroZarzuelaAdapter,
   [teatrosCanalAdapter.id]: teatrosCanalAdapter,
+  [cndmAdapter.id]: cndmAdapter,
 };
 
 const srcAuditorio: Source = {
@@ -189,6 +191,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Círculo de Bellas Artes',
       kind: 'official',
       url: 'https://www.circulobellasartes.com/',
+    },
+  },
+  {
+    id: 'cndm',
+    name: 'Centro Nacional de Difusión Musical',
+    urls: ['https://cndm.inaem.gob.es/'],
+    adapterId: cndmAdapter.id,
+    catalogSourceId: 'src_cndm',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_cndm',
+      slug: 'centro-nacional-de-difusion-musical',
+      name: 'Centro Nacional de Difusión Musical',
+      kind: 'official',
+      url: 'https://cndm.inaem.gob.es/',
     },
   },
 ];

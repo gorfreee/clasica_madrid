@@ -129,6 +129,33 @@ export const KNOWN_VENUES: KnownVenue[] = [
     },
   },
   {
+    keys: ['ateneo de madrid', 'ateneo de madrid catedra mayor'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_ateneo_madrid',
+      slug: 'ateneo-de-madrid',
+      name: 'Ateneo de Madrid',
+      ...MADRID,
+      address: 'Calle del Prado, 21, 28014 Madrid',
+      url: 'https://www.ateneodemadrid.com/',
+    },
+  },
+  {
+    keys: [
+      'museo reina sofia a400',
+      'museo reina sofia a400 madrid',
+      'auditorio 400 museo nacional de arte reina sofia',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_museo_reina_sofia_auditorio_400',
+      slug: 'museo-reina-sofia-auditorio-400',
+      name: 'Museo Reina Sofía — Auditorio 400',
+      ...MADRID,
+      address: 'Ronda de Atocha, 2, 28012 Madrid',
+    },
+  },
+  {
     keys: [
       'teatros del canal sala roja concha velasco',
       'teatros del canal sala roja',
@@ -239,6 +266,13 @@ const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
   'circulo-bellas-artes': {
     'teatro fernando de rojas': 'ven_circulo_bellas_artes_teatro_fernando_de_rojas',
     'sala de columnas': 'ven_circulo_bellas_artes_sala_columnas',
+  },
+  cndm: {
+    'auditorio nacional sinfonica madrid': 'ven_auditorio_nacional_sala_sinfonica',
+    'auditorio nacional camara madrid': 'ven_auditorio_nacional_sala_camara',
+    'teatro de la zarzuela madrid': 'ven_teatro_zarzuela',
+    'ateneo de madrid catedra mayor': 'ven_ateneo_madrid',
+    'museo reina sofia a400 madrid': 'ven_museo_reina_sofia_auditorio_400',
   },
 };
 
