@@ -176,7 +176,10 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
   {
     id: 'circulo-bellas-artes',
     name: 'Círculo de Bellas Artes',
-    urls: ['https://www.circulobellasartes.com/eventos/'],
+    urls: [
+      'https://www.circulobellasartes.com/eventos/',
+      'https://www.circulobellasartes.com/espectaculos/',
+    ],
     adapterId: circuloBellasArtesAdapter.id,
     catalogSourceId: 'src_circulo_bellas_artes',
     seedSource: {
