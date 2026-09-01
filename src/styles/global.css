@@ -292,9 +292,9 @@ button, input, select { font: inherit; }
   font-size: .72rem;
   font-weight: 800;
   letter-spacing: .1em;
-  text-transform: uppercase;
 }
 .agenda-status p { margin: 0; }
+.agenda-status > span { text-transform: uppercase; }
 
 .month-marker {
   margin: 4.5rem 0 0;
