@@ -1,5 +1,5 @@
 import { parseObservedDateTime, parseObservedTime, parseSpanishCalendarDate } from '../dates.ts';
-import { decodeHtmlEntities, firstMatch, stripTags } from '../html.ts';
+import { decodeHtmlEntities, firstMatch, splitBreaks, stripTags } from '../html.ts';
 import type { ObservedFactPatch } from '../observed.ts';
 import { normalizeUrl } from '../urls.ts';
 import type { RawEvent, RawOccurrence } from '../types.ts';
@@ -78,6 +78,93 @@ export function parseTeatrosCanalDetail(event: RawEvent, body: string): Observed
   if (eventStatus) patch.eventStatus = eventStatus;
   return patch;
 }
+
+export type CanalProgrammeConcert = {
+  name: string;
+  venueText: string;
+  date: string;
+  raw: string;
+};
+
+/**
+ * Distinct dated concerts named in the info tab (festival programmes).
+ * A combined "Sala Verde y Negra" headline is not a venue.
+ */
+export function parseCanalProgrammeConcerts(
+  body: string,
+  range?: { from: string; to: string },
+): CanalProgrammeConcert[] {
+  const info = firstMatch(body, /<div class="tab-content" id="tabs1-info">([\s\S]*?)<\/div>/i);
+  if (!info) return [];
+  const found: CanalProgrammeConcert[] = [];
+  const seen = new Set<string>();
+  for (const block of info.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)) {
+    const concert = concertFromParagraph(block[1]!, range);
+    if (!concert || seen.has(concert.date)) continue;
+    seen.add(concert.date);
+    found.push(concert);
+  }
+  return found;
+}
+
+export function expandTeatrosCanalEvent(event: RawEvent, body: string): RawEvent[] | undefined {
+  const concerts = parseCanalProgrammeConcerts(body, listingDateRange(event));
+  if (concerts.length < 2) return undefined;
+  const dates = new Set(concerts.map((item) => item.date));
+  if (dates.size !== concerts.length) return undefined;
+  return concerts.map((concert) => ({
+    ...event,
+    externalId: event.externalId ? `${event.externalId}:${concert.date}` : undefined,
+    observed: {
+      ...event.observed,
+      title: `${event.observed.title}: ${concert.name}`,
+      venueText: concert.venueText,
+      occurrences: [{ raw: concert.raw, date: concert.date }],
+      performers: [{ name: concert.name }],
+    },
+  }));
+}
+
+function concertFromParagraph(
+  html: string,
+  range?: { from: string; to: string },
+): CanalProgrammeConcert | undefined {
+  const lines = splitBreaks(html);
+  const roomIndex = lines.findIndex((line) => ROOM_DATE.exec(line));
+  if (roomIndex < 0) return undefined;
+  const roomLine = lines[roomIndex]!;
+  const match = ROOM_DATE.exec(roomLine);
+  if (!match) return undefined;
+  const venueText = canalRoomName(match[1]!);
+  const date = resolveDate(match[2]!, match[3]!, undefined, range);
+  const name = concertHeading(lines.slice(0, roomIndex));
+  if (!venueText || !date || !name) return undefined;
+  return { name, venueText, date, raw: roomLine };
+}
+
+function concertHeading(lines: string[]): string | undefined {
+  for (const line of lines) {
+    const name = line.replace(/\s+/g, ' ').trim();
+    if (!name || /^(programa|duraci[oó]n|entrada|sala)\b/i.test(name)) continue;
+    if (name.length > 80) continue;
+    return name.replace(/,+\s*$/, '');
+  }
+  return undefined;
+}
+
+function canalRoomName(raw: string): string | undefined {
+  const text = raw.replace(/\s+/g, ' ').trim();
+  if (/roja/i.test(text)) return 'Sala Roja Concha Velasco';
+  if (/cristal/i.test(text)) return 'Sala de Cristal';
+  if (/verde/i.test(text)) return 'Sala Verde';
+  if (/negra/i.test(text)) return 'Sala Negra';
+  return undefined;
+}
+
+const ROOM_DATE = new RegExp(
+  `\\b(Sala Roja(?: Concha Velasco)?|Sala Verde|Sala Negra|Sala de Cristal)\\s*[–—-]\\s*(\\d{1,2})\\s+de\\s+(${MONTH_NAMES})\\b`,
+  'i',
+);
 
 function innerText(html: string, pattern: RegExp): string | undefined {
   return stripTags(firstMatch(html, pattern) ?? '') || undefined;

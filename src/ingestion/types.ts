@@ -146,7 +146,24 @@ export type SourceAdapter = {
    * that as an event-local hydration failure and keeps the listing facts.
    */
   hydrate?(event: RawEvent, body: string, ctx: AdapterContext): ObservedFactPatch;
+  /**
+   * After a successful hydrate, optionally replace the listing item with
+   * several observations (a festival ficha that names distinct concerts).
+   * Return at least two events to take effect.
+   */
+  expand?(event: RawEvent, body: string): RawEvent[] | undefined;
 };
+
+/** Listing produced usable events, but coverage of that source is incomplete. */
+export class IncompleteListingError extends Error {
+  constructor(
+    message: string,
+    public readonly events: RawEvent[],
+  ) {
+    super(message);
+    this.name = 'IncompleteListingError';
+  }
+}
 
 export type SourceFailure = {
   sourceId: string;

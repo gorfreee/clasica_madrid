@@ -51,9 +51,13 @@ export async function hydrateEvents(
       }
       const body = response.body;
       const patch = adapter.hydrate(event, body, ctx);
-      hydrated.push(
-        withHydration(applyDetailPatch(event, patch), meta),
-      );
+      const hydratedEvent = withHydration(applyDetailPatch(event, patch), meta);
+      const expanded = adapter.expand?.(hydratedEvent, body);
+      if (expanded && expanded.length > 1) {
+        hydrated.push(...expanded.map((item) => withHydration(item, meta)));
+        continue;
+      }
+      hydrated.push(hydratedEvent);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       hydrated.push(withHydration(event, { ...meta, status: 'failed', message, ...(zarzuelaGet ? { reason: 'parse-failed' as const } : {}) }));

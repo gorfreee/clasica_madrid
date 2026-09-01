@@ -26,7 +26,7 @@ Discovery v1 (fase 6, dos piezas): un comando determinista exporta un `Discovery
 registry → extract → hydrate → normalize → identity → classify → publication gate → reconcile → validate → write
 ```
 
-- Un fallo de listing aísla esa fuente; el resto continúa.
+- Un fallo de listing aísla esa fuente; el resto continúa. En Zarzuela, un fallo HTTP persistente de una sección de temporada no descarta las demás: se hidratan las secciones disponibles y no se evalúan desapariciones.
 - Un fallo de ficha de detalle es local al evento: se conservan los hechos del listing.
 - La incorporación de March y el acceso HTTP vía fetch relay están en [validación de March](march-validation.md). GitHub-hosted Actions no alcanza de forma fiable `www.march.es` ni `teatrodelazarzuela.inaem.gob.es` en directo; `getText` sale por un fetch relay de Cloudflare (`vars.INGEST_FETCH_RELAY_URL` / `INGEST_FETCH_RELAY_TOKEN`) sólo para fuentes con `useFetchRelay` en el registry. Las URLs lógicas siguen siendo las oficiales. Reutiliza la protección de cobertura para adapters cuyo calendario depende de las fichas.
 - En Zarzuela, las fichas son necesarias para el calendario y la sede: una cobertura severamente incompleta también marca fallo de source (etapa `hydration`), bloqueando auto-merge. Cualquier ficha necesaria fallida/no solicitada por circuito suprime las desapariciones de esa source; el report y el summary explicitan que no son evaluables. Las fechas del listing sólo sirven como hint para evitar hidratar obras enteramente fuera de ventana, nunca para generar funciones. Véase [validación del hardening de Zarzuela](zarzuela-hardening-validation.md).

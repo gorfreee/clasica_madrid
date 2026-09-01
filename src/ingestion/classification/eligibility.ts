@@ -331,7 +331,8 @@ function workshopIdentity(
     hasWord(category, 'taller') ||
     hasWord(category, 'conferencia') ||
     hasWord(category, 'coloquio') ||
-    hasWord(title, 'taller') ||
+    hasPhrase(title, 'taller de') ||
+    hasPhrase(title, 'un taller') ||
     hasWord(title, 'conferencia') ||
     hasPhrase(description, 'un taller') ||
     hasPhrase(description, 'taller de') ||

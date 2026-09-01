@@ -1,8 +1,8 @@
 import { parseZarzuelaDetail } from '../detail/teatro-zarzuela.ts';
-import { createZarzuelaListingGet } from '../detail/zarzuela-transport.ts';
+import { createZarzuelaListingGet, ZARZUELA_RETRYABLE } from '../detail/zarzuela-transport.ts';
 import { decodeHtmlEntities, stripTags } from '../html.ts';
 import { emptyObservedLists } from '../observed.ts';
-import type { AdapterContext, RawEvent, SourceAdapter } from '../types.ts';
+import { IncompleteListingError, type AdapterContext, type RawEvent, type SourceAdapter } from '../types.ts';
 
 /** K2 season listings are more complete than the site's outdated JEvents calendar. */
 export const teatroZarzuelaAdapter: SourceAdapter = {
@@ -23,16 +23,34 @@ export const teatroZarzuelaAdapter: SourceAdapter = {
     if (!categories.size) throw new Error('teatro-zarzuela: no aparecen los listados de temporada');
     const events = new Map<string, RawEvent>();
     const getListing = createZarzuelaListingGet(ctx.get);
+    const failedCategories: string[] = [];
+    let lastHttpError: unknown;
     for (const categoryUrl of categories) {
-      const listing = await getListing(categoryUrl);
-      for (const event of parseZarzuelaListing(listing, categoryUrl, ctx)) {
-        const previous = events.get(event.sourceUrl);
-        // Conflicting listings cannot prove that the entire event is out of scope.
-        if (previous && previous.listingDateText !== event.listingDateText) event.listingDateText = undefined;
-        events.set(event.sourceUrl, event);
+      try {
+        const listing = await getListing(categoryUrl);
+        for (const event of parseZarzuelaListing(listing, categoryUrl, ctx)) {
+          const previous = events.get(event.sourceUrl);
+          // Conflicting listings cannot prove that the entire event is out of scope.
+          if (previous && previous.listingDateText !== event.listingDateText) event.listingDateText = undefined;
+          events.set(event.sourceUrl, event);
+        }
+      } catch (error) {
+        if (!isIsolatedListingFailure(error)) throw error;
+        failedCategories.push(categoryUrl);
+        lastHttpError = error;
       }
     }
-    return [...events.values()].sort((a, b) => a.sourceUrl.localeCompare(b.sourceUrl));
+    const collected = [...events.values()].sort((a, b) => a.sourceUrl.localeCompare(b.sourceUrl));
+    if (failedCategories.length && collected.length) {
+      throw new IncompleteListingError(
+        `teatro-zarzuela: secciones de temporada no disponibles (${failedCategories.join(', ')})`,
+        collected,
+      );
+    }
+    if (failedCategories.length && lastHttpError) {
+      throw lastHttpError instanceof Error ? lastHttpError : new Error(String(lastHttpError));
+    }
+    return collected;
   },
   hydrate: parseZarzuelaDetail,
 };
@@ -82,6 +100,13 @@ export function parseZarzuelaListing(body: string, url: string, ctx: AdapterCont
   }
   if (list.trim() && !items.length) throw new Error('teatro-zarzuela: listado no vacío sin obras reconocibles');
   return events;
+}
+
+function isIsolatedListingFailure(error: unknown): boolean {
+  if (!error || typeof error !== 'object' || !('status' in error)) return false;
+  const status = error.status;
+  if (typeof status !== 'number') return false;
+  return status === 404 || status === 410 || ZARZUELA_RETRYABLE.has(status);
 }
 
 function officialUrl(href: string, base: string): string | undefined {

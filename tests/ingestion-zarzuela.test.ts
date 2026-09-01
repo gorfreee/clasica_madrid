@@ -10,7 +10,8 @@ import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { runIngest } from '../src/ingestion/pipeline.ts';
 import { emptyCatalog } from '../src/lib/domain/catalog.ts';
 import { resolveEligibility } from '../src/ingestion/classification/eligibility.ts';
-import type { AdapterContext, RawEvent } from '../src/ingestion/types.ts';
+import { IncompleteListingError, type AdapterContext, type RawEvent } from '../src/ingestion/types.ts';
+import { HttpError } from '../src/ingestion/http.ts';
 import { TEST_NOW, TEST_WINDOW, makeEvent, makeVenue } from './helpers.ts';
 
 const base = 'https://teatrodelazarzuela.inaem.gob.es';
@@ -80,6 +81,50 @@ describe('descubrimiento K2 de Zarzuela', () => {
     const home = '<a href="https://example.org/es/temporada/lirica-2026-2027">Ajeno</a>';
     await expect(teatroZarzuelaAdapter.extract(home, `${base}/es/`, context)).rejects.toThrow(/temporada/);
     await expect(teatroZarzuelaAdapter.extract(await fixture('home'), `${base}/es/`, context)).rejects.toThrow(/red no permitida/);
+  });
+
+  it('un 403 persistente en una sección conserva las demás y marca cobertura incompleta', async () => {
+    vi.useFakeTimers();
+    const home = [
+      '<a href="/es/temporada/lirica-2026-2027">Lírica</a>',
+      '<a href="/es/temporada/danza-2026-2027">Danza</a>',
+    ].join('');
+    const lirica = `<h2 class="first">Lírica</h2><ul class="listadoObras"><li><h3><a href="${raw().sourceUrl}">La verbena de la Paloma</a></h3><p class="entradilla">Martes, 29 de septiembre de 2026</p></li></ul>`;
+    const get: AdapterContext['get'] = async (url) => {
+      if (url.includes('/danza-2026-2027')) throw new HttpError(403, url);
+      if (url.includes('/lirica-2026-2027') && !url.includes('verbena') && !raw().sourceUrl.endsWith(url.split('/').at(-1)!)) {
+        return lirica;
+      }
+      if (url === raw().sourceUrl || url.includes('verbena')) return fixture('detail-verbena');
+      return lirica;
+    };
+    const pending = teatroZarzuelaAdapter.extract(home, `${base}/es/`, { ...context, get });
+    const assertion = expect(pending).rejects.toBeInstanceOf(IncompleteListingError);
+    await vi.runAllTimersAsync();
+    await assertion;
+    const error = await pending.catch((item: unknown) => item);
+    expect(error).toBeInstanceOf(IncompleteListingError);
+    if (!(error instanceof IncompleteListingError)) throw error;
+    expect(error.events).toHaveLength(1);
+    expect(error.events[0]?.observed.title).toBe('La verbena de la Paloma');
+
+    const ingestPending = runIngest({
+      now: TEST_NOW,
+      dryRun: true,
+      catalog: emptyCatalog(),
+      sourceIds: [source.id],
+      dataDir: await mkdtemp(path.join(os.tmpdir(), 'zarzuela-listing-')),
+      get: async (url) => {
+        if (url === `${base}/es/` || url === `${base}/es`) return home;
+        if (/\/temporada\/danza-2026-2027\/?$/.test(new URL(url).pathname)) throw new HttpError(403, url);
+        if (/\/temporada\/lirica-2026-2027\/?$/.test(new URL(url).pathname)) return lirica;
+        return fixture('detail-verbena');
+      },
+    });
+    const run = await advance(ingestPending);
+    expect(run.summary.sourcesFailed).toEqual([]);
+    expect(run.summary.disappearanceSuppressedSources).toEqual([source.id]);
+    expect(run.rawEvents.map((event) => event.observed.title)).toEqual(['La verbena de la Paloma']);
   });
 });
 

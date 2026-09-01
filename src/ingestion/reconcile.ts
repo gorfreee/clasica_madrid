@@ -306,6 +306,7 @@ function applySharedSourceObservation(
   let firstCandidate: Candidate | undefined;
 
   for (const assignment of match.assigned) {
+    if (!cancelled && assignment.occurrences.length === 0) continue;
     const existing = assignment.event;
     seenEventIds.add(existing.id);
     eventIds.push(existing.id);
@@ -325,6 +326,21 @@ function applySharedSourceObservation(
     if (action !== 'unchanged') candidates.push(candidate);
     diffs.push(...merged.diffs);
     diagnostics.push(...merged.diagnostics);
+  }
+
+  if (eventIds.length === 0) {
+    for (const event of match.events) seenEventIds.add(event.id);
+    byIndex.set(item.observation.index, {
+      action: 'unchanged',
+      method: match.method,
+      eventId: match.events[0]?.id,
+      eventIds: match.events.map((event) => event.id),
+      publishable: true,
+      candidateGenerated: false,
+      classificationDrift: driftOf(item, match.events[0]!),
+      scheduleChange: scheduleChangeOf(item.observation.event, match.events[0]),
+    });
+    return;
   }
 
   const uniqueDiffs = [...new Set(diffs)];
