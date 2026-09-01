@@ -13,15 +13,40 @@ const { days } = Astro.props;
 <div class="agenda" data-agenda-list>
   {
     days.map((day) => (
-      <section class="agenda-day" data-agenda-day={day.date} aria-labelledby={`dia-${day.date}`}>
+      <section
+        class="agenda-day"
+        data-agenda-day={day.date}
+        data-empty-today={day.isEmpty && day.isToday ? '' : undefined}
+        aria-labelledby={`dia-${day.date}`}
+      >
+        {
+          day.monthBreak && (
+            <p class="month-break">
+              <span class="visually-hidden">Cambio de mes. </span>
+              {day.monthLabel}
+            </p>
+          )
+        }
         <h2 id={`dia-${day.date}`} class="agenda-day__title">
-          <time datetime={day.date}>{day.dateLabel}</time>
+          <span class:list={['rehearsal', { 'rehearsal--word': day.isToday || day.isTomorrow }]}>
+            {day.isToday ? 'Hoy' : day.isTomorrow ? 'Mañana' : day.dayNumber}
+          </span>
+          <time class="agenda-day__weekday" datetime={day.date}>
+            {day.weekdayLabel}
+            {!day.isToday && !day.isTomorrow && <span> {day.dayNumber}</span>}
+          </time>
         </h2>
-        <div class="agenda-day__list">
-          {day.items.map((item) => (
-            <AgendaItem item={item} />
-          ))}
-        </div>
+        {
+          day.isEmpty ? (
+            <p class="agenda-day__empty">Hoy no hay conciertos publicados.</p>
+          ) : (
+            <div class="agenda-day__list">
+              {day.items.map((item) => (
+                <AgendaItem item={item} />
+              ))}
+            </div>
+          )
+        }
       </section>
     ))
   }

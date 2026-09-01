@@ -28,15 +28,18 @@ if (!model) {
         {model.areaLabel}
       </p>
       {model.address && <p class="detail__address">{model.address}</p>}
-      {
-        model.url && (
-          <p>
-            <a href={model.url} rel="noopener noreferrer">
+      <div class="detail__actions">
+        {
+          model.url && (
+            <a class="action" href={model.url} rel="noopener noreferrer">
               Sitio del espacio
             </a>
-          </p>
-        )
-      }
+          )
+        }
+        <a class="action--ghost" href={model.mapsHref} rel="noopener noreferrer">
+          Cómo llegar
+        </a>
+      </div>
     </header>
 
     <section aria-labelledby="proximos-titulo">

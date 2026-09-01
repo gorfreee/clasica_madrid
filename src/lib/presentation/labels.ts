@@ -88,5 +88,5 @@ export function eventStatusLabel(status: 'scheduled' | 'cancelled' | 'postponed'
 }
 
 export function occurrenceCountLabel(count: number): string {
-  return count === 1 ? '1 representación próxima' : `${count} representaciones próximas`;
+  return count === 1 ? '1 concierto' : `${count} conciertos`;
 }

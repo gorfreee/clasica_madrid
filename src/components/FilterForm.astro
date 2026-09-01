@@ -10,56 +10,85 @@ const { model } = Astro.props;
 {/* Contrato UI interno: [data-agenda-filters] y [data-clear-filters] los usa agenda-client.ts. */}
 
 <section class="filters" aria-labelledby="filtros-titulo">
-  <h2 id="filtros-titulo" class="filters__title">Filtrar</h2>
+  <h2 id="filtros-titulo" class="visually-hidden">Buscar y filtrar</h2>
   <form class="filters__form" method="get" action="/" data-agenda-filters>
-    <div class="filters__grid">
+    <div class="toolbar">
       <label class="field">
         <span>Buscar</span>
-        <input type="search" name="q" value={model.query} placeholder="Título, compositor, lugar…" />
+        <input
+          type="search"
+          name="q"
+          value={model.query}
+          placeholder="Título, intérprete, compositor, lugar…"
+        />
       </label>
-      <label class="field">
-        <span>Desde</span>
-        <input type="date" name="from" value={model.from} />
-      </label>
-      <label class="field">
-        <span>Hasta</span>
-        <input type="date" name="to" value={model.to} />
-      </label>
+      <div class="filters__actions">
+        <button type="submit">Aplicar filtros</button>
+      </div>
+    </div>
+
+    <div class="shortcuts" role="navigation" aria-label="Accesos frecuentes">
       {
-        model.selectFilters.map((field) => (
-          <label class="field">
-            <span>{field.label}</span>
-            <select name={field.name}>
-              {field.options.map((option) => (
-                <option value={option.value} selected={option.value === field.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
+        model.shortcuts.map((shortcut) => (
+          <a class="shortcut" href={shortcut.href} data-shortcut={shortcut.id}>
+            {shortcut.label}
+          </a>
         ))
       }
-      <label class="field">
-        <span>Compositor</span>
-        <input
-          type="text"
-          name="composer"
-          value={model.composer}
-          list="composer-suggestions"
-          autocomplete="off"
-        />
-        <datalist id="composer-suggestions">
-          {model.composerSuggestions.map((name) => <option value={name} />)}
-        </datalist>
+      <label class="shortcut--jump">
+        <span>Fecha</span>
+        <input type="date" data-jump-date value="" />
       </label>
     </div>
+
+    <details class="filters__advanced">
+      <summary>Más filtros</summary>
+      <div class="filters__grid">
+        <label class="field">
+          <span>Desde</span>
+          <input type="date" name="from" value={model.from} />
+        </label>
+        <label class="field">
+          <span>Hasta</span>
+          <input type="date" name="to" value={model.to} />
+        </label>
+        {
+          model.selectFilters.map((field) => (
+            <label class="field">
+              <span>{field.label}</span>
+              <select name={field.name}>
+                {field.options.map((option) => (
+                  <option value={option.value} selected={option.value === field.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ))
+        }
+        <label class="field">
+          <span>Compositor</span>
+          <input
+            type="text"
+            name="composer"
+            value={model.composer}
+            list="composer-suggestions"
+            autocomplete="off"
+          />
+          <datalist id="composer-suggestions">
+            {model.composerSuggestions.map((name) => <option value={name} />)}
+          </datalist>
+        </label>
+      </div>
+    </details>
+
     <div class="filters__actions">
-      <button type="submit">Aplicar filtros</button>
       <a class="filters__clear" href="/" data-clear-filters hidden>
         Quitar filtros
       </a>
     </div>
   </form>
+  <div class="filter-chips" data-active-filters hidden></div>
   <noscript>
     <p class="filters__noscript">Los filtros de la URL se aplican con JavaScript.</p>
   </noscript>
