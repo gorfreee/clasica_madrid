@@ -707,6 +707,78 @@ describe('formats', () => {
     ).toEqual([]);
   });
 
+  it('no infiere symphonic ni chamber de la sala del Auditorio Nacional', () => {
+    expect(
+      resolveFormats(
+        facts({
+          title: 'Excelentia. Concierto de Año Nuevo',
+          venueText: 'Sala Sinfónica',
+        }),
+      ).value,
+    ).toEqual([]);
+
+    expect(
+      resolveFormats(
+        facts({
+          title: 'Excelentia. Lo Mejor de los Tres Tenores',
+          venueText: 'Sala de Cámara',
+        }),
+      ).value,
+    ).toEqual([]);
+  });
+
+  it('sigue infiriendo format cuando hay evidencia musical real, no por la sala', () => {
+    expect(
+      resolveFormats(
+        facts({
+          title: 'Excelentia. Concierto de Año Nuevo',
+          venueText: 'Sala Sinfónica',
+          performers: [{ name: 'Orquesta Clásica Santa Cecilia' }],
+        }),
+      ).value,
+    ).toEqual(['symphonic']);
+
+    expect(
+      resolveFormats(
+        facts({
+          title: 'CNDM. Cuarteto Casals',
+          venueText: 'Sala de Cámara',
+          performers: [{ name: 'Cuarteto Casals', roleText: 'cuarteto' }],
+        }),
+      ).value,
+    ).toEqual(['chamber']);
+
+    expect(
+      resolveFormats(
+        facts({
+          title: 'Canto y piano',
+          venueText: 'Sala de Cámara',
+          performers: [
+            { name: 'Ana Pérez', roleText: 'soprano' },
+            { name: 'Luis Gómez', roleText: 'piano' },
+          ],
+        }),
+      ).value,
+    ).toEqual(['recital']);
+  });
+
+  it('varios cantantes con piano no se fuerzan a recital ni a chamber por la sala', () => {
+    expect(
+      resolveFormats(
+        facts({
+          title: 'Excelentia. Lo Mejor de los Tres Tenores',
+          venueText: 'Sala de Cámara',
+          performers: [
+            { name: 'Miguel Borrallo', roleText: 'tenor' },
+            { name: 'Eduardo Sandoval', roleText: 'tenor' },
+            { name: 'Sergio Escobar', roleText: 'tenor' },
+            { name: 'Francisco Pérez Sánchez', roleText: 'piano' },
+          ],
+        }),
+      ).value,
+    ).toEqual([]);
+  });
+
 });
 
 describe('kind', () => {

@@ -50,7 +50,12 @@ describe('orquestación de hydration', () => {
       ctx,
     );
     const ocne = extracted.find((event) => event.sourceUrl.includes('ocne-sinfonico-01'));
+    const satelite = extracted.find((event) => event.sourceUrl.includes('ocne-satelite'));
     expect(ocne).toBeDefined();
+    expect(ocne?.observed.venueText).toBe('Sala Sinfónica');
+    expect(ocne?.observed.categoryText).toBeUndefined();
+    expect(satelite?.observed.venueText).toBe('Sala de Cámara');
+    expect(satelite?.observed.categoryText).toBeUndefined();
     const hydrated = await hydrateEvents(ocne ? [ocne] : [], auditorioNacionalAdapter, ctx);
     expect(hydrated[0]?.hydration?.status).toBe('succeeded');
     expect(hydrated[0]?.observed.title).toBe('OCNE. Sinfónico 01');

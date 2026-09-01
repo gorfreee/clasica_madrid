@@ -81,8 +81,10 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
       title,
       description: description && description !== title ? description : undefined,
       occurrences: [{ raw: start, date: parsed.date, time: parsed.time ?? undefined }],
+      // FullCalendar `className` is the physical room (sinfonica / camara), not a
+      // musical category. Copying it into categoryText made the classifier treat
+      // the room as format evidence (Sala de Cámara → chamber).
       venueText: className ? (VENUE_BY_CLASS[className] ?? className) : undefined,
-      categoryText: className,
       ...emptyObservedLists(),
     },
   };

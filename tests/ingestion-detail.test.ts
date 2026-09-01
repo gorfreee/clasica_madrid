@@ -183,6 +183,44 @@ describe('parser de ficha Auditorio Nacional', () => {
     expect(facts.composers).toEqual([]);
   });
 
+  it('Excelentia Tres Tenores: roles entre paréntesis son elenco; las arias no se inventan como obras', async () => {
+    const html = await readFile(
+      path.join(detailDir, 'auditorio-excelentia-tres-tenores.excerpt.html'),
+      'utf8',
+    );
+    const facts = parseAuditorioNacionalDetail(html);
+
+    expect(facts.venueText).toBe('Sala de Cámara');
+    expect(facts.accessText).toMatch(/65 y 58/);
+    expect(facts.performers).toEqual([
+      { name: 'Miguel Borrallo', roleText: 'Tenor' },
+      { name: 'Eduardo Sandoval', roleText: 'Tenor' },
+      { name: 'Sergio Escobar', roleText: 'Tenor' },
+      { name: 'Francisco Pérez Sánchez', roleText: 'Piano' },
+    ]);
+    expect(facts.programText).toMatch(/Miguel Borrallo/);
+    expect(facts.programText).toMatch(/Tosca/);
+    expect(facts.works).toEqual([]);
+    expect(facts.composers).toEqual([]);
+  });
+
+  it('Excelentia Año Nuevo: Director, Nombre no se come a la orquesta ni abre el programa', async () => {
+    const html = await readFile(
+      path.join(detailDir, 'auditorio-excelentia-ano-nuevo.excerpt.html'),
+      'utf8',
+    );
+    const facts = parseAuditorioNacionalDetail(html);
+
+    expect(facts.venueText).toBe('Sala Sinfónica');
+    expect(facts.performers).toEqual([
+      { name: 'Orquesta Clásica Santa Cecilia' },
+      { name: 'Kynan Johns', roleText: 'director' },
+    ]);
+    expect(facts.programText).toMatch(/Danubio azul/);
+    expect(facts.works).toEqual([]);
+    expect(facts.composers).toEqual([]);
+  });
+
   it('títulos Composer: Work no se publican como performers', async () => {
     const html = await readFile(
       path.join(detailDir, 'auditorio-composer-colon-works.excerpt.html'),
