@@ -5,7 +5,7 @@ import { normalizeUrl } from '../urls.ts';
 import type { RawEvent, RawOccurrence } from '../types.ts';
 
 const HOSTS = new Set(['www.fundacionpiumosso.com', 'fundacionpiumosso.com']);
-const EVENT_PATH = /^\/evento\/[a-z0-9-]+$/i;
+const EVENT_PATH = /^\/evento\/[a-z0-9_-]+$/i;
 
 /**
  * Official `/evento/{slug}` URL. Apex host is rewritten to www, which is
@@ -30,14 +30,16 @@ export function piumossoEventUrl(href: string, base?: string): string | undefine
 
 export function extractPiumossoListing(body: string, url: string, sourceId: string): RawEvent[] {
   assertListingSurface(body, url);
-  const grid = piumossoDiv(body, /<div\b[^>]*id=["']ect-grid-wrapper["'][^>]*>/i);
-  if (grid === undefined) throw new Error('fundacion-piu-mosso: falta la cuadrícula de programación');
-  if (/\bect-load-more-btn\b|rel=["']next["']|\bpage-numbers\b/i.test(grid)) {
-    throw new Error('fundacion-piu-mosso: paginación no soportada');
+  const grids = piumossoDivs(body, /<div\b[^>]*id=["']ect-grid-wrapper["'][^>]*>/i);
+  if (grids.length === 0) throw new Error('fundacion-piu-mosso: falta la cuadrícula de programación');
+  const cards: ListingCard[] = [];
+  for (const grid of grids) {
+    if (/\bect-load-more-btn\b|rel=["']next["']|\bpage-numbers\b/i.test(grid)) {
+      throw new Error('fundacion-piu-mosso: paginación no soportada');
+    }
+    cards.push(...listingCards(grid));
   }
-
   const ldEvents = collectLdEvents(body);
-  const cards = listingCards(grid);
   if (cards.length === 0 && ldEvents.length === 0) return [];
   if (ldEvents.length === 0) throw new Error('fundacion-piu-mosso: falta el JSON-LD de eventos');
   if (cards.length === 0) throw new Error('fundacion-piu-mosso: faltan las tarjetas de la programación');
@@ -58,12 +60,16 @@ export function extractPiumossoListing(body: string, url: string, sourceId: stri
   }
 
   if (events.size !== cards.length || events.size !== ldEvents.length) {
-    throw new Error('fundacion-piu-mosso: cobertura distinta entre JSON-LD y tarjetas');
+    throw new Error(
+      `fundacion-piu-mosso: cobertura distinta entre JSON-LD y tarjetas (${ldEvents.length} json-ld, ${cards.length} tarjetas, ${events.size} extraídos)`,
+    );
   }
-  for (const card of cards) {
-    if (!events.has(card.sourceUrl)) {
-      throw new Error('fundacion-piu-mosso: cobertura distinta entre JSON-LD y tarjetas');
-    }
+  const extractedUrls = new Set(events.keys());
+  const missingFromLd = cards.filter((card) => !extractedUrls.has(card.sourceUrl)).map((card) => card.sourceUrl);
+  if (missingFromLd.length) {
+    throw new Error(
+      `fundacion-piu-mosso: cobertura distinta entre JSON-LD y tarjetas (${missingFromLd[0]})`,
+    );
   }
   return [...events.values()].sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
 }
@@ -243,7 +249,9 @@ function listingCards(grid: string): ListingCard[] {
 }
 
 function toRawEvent(item: LdEvent, card: ListingCard | undefined, sourceId: string): RawEvent {
-  if (!card) throw new Error('fundacion-piu-mosso: cobertura distinta entre JSON-LD y tarjetas');
+  if (!card) {
+    throw new Error(`fundacion-piu-mosso: cobertura distinta entre JSON-LD y tarjetas (${item.sourceUrl})`);
+  }
   const occurrence = occurrenceFromLd(item.startDate, item.endDate);
   if (!occurrence.date) throw new Error('fundacion-piu-mosso: fecha de listado no reconocible');
   return {
@@ -353,4 +361,17 @@ export function piumossoDiv(html: string, marker: RegExp): string | undefined {
     if (depth === 0) return html.slice(start.index, offset + tag.index! + tag[0].length);
   }
   throw new Error('fundacion-piu-mosso: sección HTML incompleta');
+}
+
+function piumossoDivs(html: string, marker: RegExp): string[] {
+  const flags = marker.global ? marker.flags : `${marker.flags}g`;
+  const global = new RegExp(marker.source, flags);
+  const blocks: string[] = [];
+  for (const start of html.matchAll(global)) {
+    if (start.index === undefined) continue;
+    const block = piumossoDiv(html.slice(start.index), marker);
+    if (!block) throw new Error('fundacion-piu-mosso: sección HTML incompleta');
+    blocks.push(block);
+  }
+  return blocks;
 }

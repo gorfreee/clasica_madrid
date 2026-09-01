@@ -12,8 +12,10 @@ the same 72 cards (`id="event-{postId}"`) without load-more. The ICS at
 coverage cross-check.
 
 - `listing.html`: https://www.fundacionpiumosso.com/programacion/ — two
-  JSON-LD Event arrays plus four `ect-grid-event` cards (Tretyakov, Prisuelos,
-  a date-only festival slot, Getafe).
+  JSON-LD Event arrays, two `id="ect-grid-wrapper"` grids (próximos +
+  celebrados) and four `ect-grid-event` cards (Tretyakov, Prisuelos,
+  a date-only festival slot, Getafe). The live page also publishes the
+  archive in the second grid; this excerpt keeps that second wrapper empty.
 - `detail-tretyakov.html`: https://www.fundacionpiumosso.com/evento/victor-tretyakov-piano/
 - `detail-prisuelos.html`: https://www.fundacionpiumosso.com/evento/mario-prisuelos-musica-callada-de-frederic-mompou/
 - `detail-festival.html`: https://www.fundacionpiumosso.com/evento/festival-alicia-de-larrocha-casa-de-vacas-del-retiro/

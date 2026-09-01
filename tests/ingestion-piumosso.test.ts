@@ -100,6 +100,24 @@ describe('Fundación Più Mosso listing', () => {
     expect(source.urls).toEqual(['https://www.fundacionpiumosso.com/programacion/']);
   });
 
+  it('merges upcoming and past grids on the same programming page', async () => {
+    const upcoming = oneCardListing(
+      '2187',
+      'https://www.fundacionpiumosso.com/evento/aaa/',
+      'Uno',
+      '2026-09-12T19:30:00+02:00',
+    );
+    const past = oneCardListing(
+      '1001',
+      'https://www.fundacionpiumosso.com/evento/bbb/',
+      'Dos',
+      '2026-04-08T20:30:00+02:00',
+    );
+    const html = `<body class="page"><h1>Programación</h1>${upcoming}${past}</body>`;
+    const events = await adapter.extract(html, listingUrl, ctx);
+    expect(events.map((event) => event.externalId).sort()).toEqual(['1001', '2187']);
+  });
+
   it('omits clock time only for an explicit all-day 00:00–23:59 span', async () => {
     const html = allDayListing();
     const events = await adapter.extract(html, listingUrl, ctx);
@@ -137,6 +155,9 @@ describe('Fundación Più Mosso listing', () => {
       'https://www.fundacionpiumosso.com/evento/mario-prisuelos-musica-callada-de-frederic-mompou',
     );
     expect(piumossoEventUrl('https://www.fundacionpiumosso.com@evil.example/evento/test/', listingUrl)).toBeUndefined();
+    expect(piumossoEventUrl('https://www.fundacionpiumosso.com/evento/un_extraordinario_concierto/', listingUrl)).toBe(
+      'https://www.fundacionpiumosso.com/evento/un_extraordinario_concierto',
+    );
     expect(piumossoEventUrl('https://www.fundacionpiumosso.com/ciclo/grandes-interpretes/', listingUrl)).toBeUndefined();
   });
 });
@@ -277,6 +298,20 @@ function catalogWithMompou(): Catalog {
       }),
     ],
   };
+}
+
+function oneCardListing(id: string, url: string, title: string, startDate: string): string {
+  const ld = JSON.stringify([
+    {
+      '@context': 'http://schema.org',
+      '@type': 'Event',
+      name: title,
+      url,
+      startDate,
+      location: { '@type': 'Place', name: 'Ateneo de Madrid' },
+    },
+  ]);
+  return `<script type="application/ld+json">${ld}</script><div id="ect-grid-wrapper"><div id="event-${id}" class="ect-grid-event"><div class="ect-grid-title"><h4><a class="ect-event-url" href="${url}">${title}</a></h4></div></div></div>`;
 }
 
 function allDayListing(): string {
