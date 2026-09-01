@@ -55,6 +55,7 @@ export type EventPageModel = {
   kind: { id: string; label: string };
   access: { id: string; label: string };
   occurrences: EventOccurrenceModel[];
+  featuredOccurrence: EventOccurrenceModel | null;
   sources: {
     name: string;
     url: string;
@@ -86,6 +87,11 @@ export function toEventPageModel(resolved: ResolvedEvent, clock: Clock = systemC
   const next = nextUpcomingOccurrence(event.occurrences, now);
   const isPast = event.status === 'scheduled' && !hasUpcomingOccurrence(event.occurrences, now);
   const description = buildEventDescription(resolved, next, isPast);
+  const occurrences = event.occurrences
+    .slice()
+    .sort((a, b) => a.date.localeCompare(b.date) || (a.time ?? '').localeCompare(b.time ?? ''))
+    .map(toOccurrenceModel);
+  const featuredCanonical = next ?? (isPast ? lastScheduledOccurrence(event.occurrences) : undefined);
   return {
     title: event.title,
     description,
@@ -114,18 +120,10 @@ export function toEventPageModel(resolved: ResolvedEvent, clock: Clock = systemC
     eras: event.eras.map((id) => ({ id, label: eraLabels[id] })),
     kind: { id: event.kind, label: kindLabels[event.kind] },
     access: { id: event.access, label: accessLabels[event.access] },
-    occurrences: event.occurrences
-      .slice()
-      .sort((a, b) => a.date.localeCompare(b.date) || (a.time ?? '').localeCompare(b.time ?? ''))
-      .map((occurrence) => ({
-        id: occurrence.id,
-        date: occurrence.date,
-        dateLabel: formatMadridDate(occurrence.date),
-        time: occurrence.time,
-        status: occurrenceStatusLabels[occurrence.status],
-        isCancelled: occurrence.status === 'cancelled',
-        startIso: madridDateTimeIso(occurrence.date, occurrence.time),
-      })),
+    occurrences,
+    featuredOccurrence: featuredCanonical
+      ? occurrences.find((occurrence) => occurrence.id === featuredCanonical.id) ?? null
+      : null,
     sources: citations.map((citation) => ({
       name: citation.source.name,
       url: citation.url,
@@ -135,6 +133,18 @@ export function toEventPageModel(resolved: ResolvedEvent, clock: Clock = systemC
     })),
     lastVerifiedAt: event.lastVerifiedAt,
     jsonLd: buildMusicEventJsonLd(resolved),
+  };
+}
+
+function toOccurrenceModel(occurrence: Occurrence): EventOccurrenceModel {
+  return {
+    id: occurrence.id,
+    date: occurrence.date,
+    dateLabel: formatMadridDate(occurrence.date),
+    time: occurrence.time,
+    status: occurrenceStatusLabels[occurrence.status],
+    isCancelled: occurrence.status === 'cancelled',
+    startIso: madridDateTimeIso(occurrence.date, occurrence.time),
   };
 }
 

@@ -15,79 +15,48 @@ const model = await loadEventPage(slug);
 if (!model) {
   throw new Error(`Evento no encontrado: ${slug}`);
 }
+const primarySource = model.sources.find((source) => source.isPrimary) ?? model.sources[0];
+const featured = model.featuredOccurrence;
 ---
 
 <Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath} jsonLd={model.jsonLd}>
-  <article class="detail">
-    <header class="page-header">
-      <p class="eyebrow">{model.isPast ? 'Evento pasado' : 'Evento'}</p>
+  <article class="detail event-detail">
+    <header class="detail-hero detail-hero--event">
+      <p class="eyebrow">{model.isPast ? 'Archivo / Evento pasado' : 'Agenda / Evento'}</p>
+      {model.statusLabel !== 'Programado' && <p class="status-alert">{model.statusLabel}</p>}
       <h1>{model.title}</h1>
-      <p class="lede">
-        <a href={model.venueHref}>{model.venueName}</a>
-        {model.showMunicipality && <span> · {model.municipality}</span>}
-        {model.seriesName && (
-          <span>
-            {' '}
-            · {model.seriesKind}: {model.seriesName}
-          </span>
-        )}
-      </p>
-      {model.isPast && <p class="lede">Este evento ya ha tenido lugar.</p>}
+      {model.seriesName && <p class="detail-hero__series">{model.seriesKind} / {model.seriesName}</p>}
+      <span class="detail-hero__shape" aria-hidden="true"></span>
     </header>
 
-    <dl class="fact-list">
-      <div>
+    <dl class="event-facts fact-list">
+      <div class="event-facts__when">
+        <dt>{model.isPast ? 'Tuvo lugar' : 'Próxima función'}</dt>
+        <dd>{featured ? <><time datetime={featured.startIso}>{featured.dateLabel}</time><strong>{featured.time ?? 'Hora por confirmar'}</strong></> : 'Fecha por confirmar'}</dd>
+      </div>
+      <div class="event-facts__venue">
+        <dt>Lugar</dt>
+        <dd><a href={model.venueHref}>{model.venueName}</a>{model.showMunicipality && <span> / {model.municipality}</span>}</dd>
+        {model.venueAddress && <dd class="event-facts__address">{model.venueAddress}</dd>}
+      </div>
+      <div class="event-facts__access">
         <dt>Acceso</dt>
         <dd>{model.access.label}</dd>
       </div>
-      <div>
-        <dt>Contexto</dt>
-        <dd>{model.kind.label}</dd>
-      </div>
-      {
-        model.formats.length > 0 && (
-          <div>
-            <dt>Formato</dt>
-            <dd>{model.formats.map((item) => item.label).join(', ')}</dd>
-          </div>
-        )
-      }
-      {
-        model.eras.length > 0 && (
-          <div>
-            <dt>Época</dt>
-            <dd>{model.eras.map((item) => item.label).join(', ')}</dd>
-          </div>
-        )
-      }
-      {
-        model.organizers.length > 0 && (
-          <div>
-            <dt>Organiza</dt>
-            <dd>{model.organizers.join(', ')}</dd>
-          </div>
-        )
-      }
     </dl>
 
-    {
-      model.venueAddress && (
-        <p class="detail__address">
-          {model.venueAddress}
-          {model.showMunicipality ? `, ${model.municipality}` : ''}
-        </p>
-      )
-    }
+    {model.isPast && <p class="past-notice">Este evento ya ha tenido lugar. Conservamos la ficha como parte del archivo.</p>}
+    {primarySource && <a class="official-link" href={primarySource.url} rel="noopener noreferrer"><span>Consulta entradas, condiciones y posibles cambios</span><strong>Ver información oficial ↗</strong></a>}
 
-    <section aria-labelledby="fechas-titulo">
-      <h2 id="fechas-titulo">Fechas</h2>
+    <section class="detail-section" aria-labelledby="fechas-titulo">
+      <div class="section-heading"><p>Cuándo</p><h2 id="fechas-titulo">Fechas</h2><span>{model.occurrences.length}</span></div>
       <ol class="occurrence-list">
         {
           model.occurrences.map((occurrence) => (
             <li class:list={[{ 'is-cancelled': occurrence.isCancelled }]}>
               <time datetime={occurrence.startIso}>{occurrence.dateLabel}</time>
-              <span>{occurrence.time ?? 'Hora no indicada'}</span>
-              {occurrence.isCancelled && <span> · {occurrence.status}</span>}
+              <strong>{occurrence.time ?? 'Hora por confirmar'}</strong>
+              {occurrence.isCancelled && <span>{occurrence.status}</span>}
             </li>
           ))
         }
@@ -96,13 +65,13 @@ if (!model) {
 
     {
       model.performers.length > 0 && (
-        <section aria-labelledby="interpretes-titulo">
-          <h2 id="interpretes-titulo">Intérpretes</h2>
-          <ul>
+        <section class="detail-section" aria-labelledby="interpretes-titulo">
+          <div class="section-heading"><p>Quién</p><h2 id="interpretes-titulo">Intérpretes</h2></div>
+          <ul class="editorial-list performer-list">
             {model.performers.map((performer) => (
               <li>
-                {performer.name}
-                {performer.role ? ` (${performer.role})` : ''}
+                <span>{performer.name}</span>
+                {performer.role && <small>{performer.role}</small>}
               </li>
             ))}
           </ul>
@@ -112,9 +81,9 @@ if (!model) {
 
     {
       model.composers.length > 0 && (
-        <section aria-labelledby="compositores-titulo">
-          <h2 id="compositores-titulo">Compositores</h2>
-          <ul>
+        <section class="detail-section" aria-labelledby="compositores-titulo">
+          <div class="section-heading"><p>Autores</p><h2 id="compositores-titulo">Compositores</h2></div>
+          <ul class="editorial-list">
             {model.composers.map((composer) => (
               <li>{composer}</li>
             ))}
@@ -125,22 +94,32 @@ if (!model) {
 
     {
       model.works.length > 0 && (
-        <section aria-labelledby="obras-titulo">
-          <h2 id="obras-titulo">Programa</h2>
-          <ul>
+        <section class="detail-section programme" aria-labelledby="obras-titulo">
+          <div class="section-heading"><p>Obras</p><h2 id="obras-titulo">Programa</h2></div>
+          <ol class="programme-list">
             {model.works.map((work) => (
               <li>
-                {work.title}
-                {work.composerName ? ` — ${work.composerName}` : ''}
+                <span>{work.title}</span>
+                {work.composerName && <small>{work.composerName}</small>}
               </li>
             ))}
-          </ul>
+          </ol>
         </section>
       )
     }
 
-    <section aria-labelledby="fuentes-titulo">
-      <h2 id="fuentes-titulo">Fuentes</h2>
+    <section class="detail-section detail-meta" aria-labelledby="datos-titulo">
+      <div class="section-heading"><p>Contexto</p><h2 id="datos-titulo">Sobre el concierto</h2></div>
+      <dl class="fact-list fact-list--compact">
+        <div><dt>Contexto</dt><dd>{model.kind.label}</dd></div>
+        {model.formats.length > 0 && <div><dt>Formato</dt><dd>{model.formats.map((item) => item.label).join(', ')}</dd></div>}
+        {model.eras.length > 0 && <div><dt>Época</dt><dd>{model.eras.map((item) => item.label).join(', ')}</dd></div>}
+        {model.organizers.length > 0 && <div><dt>Organiza</dt><dd>{model.organizers.join(', ')}</dd></div>}
+      </dl>
+    </section>
+
+    <section class="detail-section sources" aria-labelledby="fuentes-titulo">
+      <div class="section-heading"><p>Trazabilidad</p><h2 id="fuentes-titulo">Fuentes</h2></div>
       <ul class="source-list">
         {
           model.sources.map((source) => (
@@ -148,11 +127,7 @@ if (!model) {
               <a href={source.url} rel="noopener noreferrer">
                 {source.name}
               </a>
-              <span>
-                {' '}
-                · {source.kind}
-                {source.isPrimary ? ' · principal' : ''} · comprobada {source.checkedAt}
-              </span>
+              <span>{source.kind}{source.isPrimary ? ' / principal' : ''} / comprobada {source.checkedAt}</span>
             </li>
           ))
         }

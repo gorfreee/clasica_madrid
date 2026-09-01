@@ -8,11 +8,16 @@ const model = await loadVenuesIndex();
 ---
 
 <Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath}>
-  <header class="page-header">
-    <p class="eyebrow">Lugares</p>
-    <h1>Dónde suena</h1>
-    <p class="lede">Espacios con conciertos próximos. El listado crece con el catálogo.</p>
+  <header class="section-intro section-intro--venues">
+    <p class="eyebrow">Lugares / próxima actividad</p>
+    <h1>La ciudad<br />como escenario.</h1>
+    <p class="lede">Teatros, auditorios, iglesias y espacios inesperados, ordenados por su próximo concierto.</p>
   </header>
+
+  <label class="venue-search">
+    <span>Buscar un lugar</span>
+    <input type="search" placeholder="Nombre o municipio" data-venue-search />
+  </label>
 
   {
     model.isEmpty ? (
@@ -22,18 +27,43 @@ const model = await loadVenuesIndex();
       />
     ) : (
       <ul class="venue-list">
-        {model.venues.map((venue) => (
-          <li>
+        {model.venues.map((venue, index) => (
+          <li data-venue-entry data-search={`${venue.name} ${venue.municipality}`.toLowerCase()}>
             <a href={venue.href}>
+              <span class="venue-list__index">{String(index + 1).padStart(2, '0')}</span>
               <span class="venue-list__name">{venue.name}</span>
-              <span class="venue-list__meta">
-                {venue.showMunicipality ? `${venue.municipality} · ` : ''}
-                {venueUpcomingSummary(venue.upcomingCount)}
-              </span>
+              <span class="venue-list__next">Próximo / {venue.nextDateLabel}</span>
+              <span class="venue-list__meta">{venue.showMunicipality ? `${venue.municipality} / ` : ''}{venueUpcomingSummary(venue.upcomingCount)}</span>
             </a>
           </li>
         ))}
       </ul>
     )
   }
+
+  {model.inactiveVenues.length > 0 && (
+    <details class="inactive-venues">
+      <summary>Ver todos los lugares <span>{model.inactiveVenues.length} sin programación próxima</span></summary>
+      <ul class="venue-list venue-list--inactive">
+        {model.inactiveVenues.map((venue) => (
+          <li data-venue-entry data-search={`${venue.name} ${venue.municipality}`.toLowerCase()}>
+            <a href={venue.href}>
+              <span class="venue-list__name">{venue.name}</span>
+              <span class="venue-list__meta">{venue.showMunicipality ? venue.municipality : venue.areaLabel}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </details>
+  )}
+
+  <script>
+    const input = document.querySelector<HTMLInputElement>('[data-venue-search]');
+    input?.addEventListener('input', () => {
+      const query = input.value.trim().toLocaleLowerCase('es');
+      for (const entry of document.querySelectorAll<HTMLElement>('[data-venue-entry]')) {
+        entry.hidden = Boolean(query && !entry.dataset.search?.includes(query));
+      }
+    });
+  </script>
 </Layout>

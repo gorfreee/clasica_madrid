@@ -29,6 +29,7 @@ export function initAgendaFilters(): void {
   const count = document.querySelector<HTMLElement>('[data-result-count]');
   const noResults = document.querySelector<HTMLElement>('[data-no-results]');
   const clear = document.querySelector<HTMLAnchorElement>('[data-clear-filters]');
+  const activeFilters = document.querySelector<HTMLElement>('[data-active-filters]');
   if (!dataNode?.textContent || !list) return;
 
   const items = JSON.parse(dataNode.textContent) as FilterableOccurrence[];
@@ -47,7 +48,20 @@ export function initAgendaFilters(): void {
       const anyVisible = [...day.querySelectorAll<HTMLElement>('[data-occurrence-id]')].some(
         (article) => !article.hidden,
       );
-      day.hidden = !anyVisible;
+      const isEmptyToday = day.dataset.todayEmpty === 'true';
+      day.hidden = isEmptyToday ? active : !anyVisible;
+    }
+    for (const marker of list.querySelectorAll<HTMLElement>('[data-month-marker]')) {
+      let sibling = marker.nextElementSibling;
+      let hasVisibleDay = false;
+      while (sibling && !(sibling instanceof HTMLElement && sibling.dataset.monthMarker)) {
+        if (sibling instanceof HTMLElement && sibling.dataset.agendaDay && !sibling.hidden) {
+          hasVisibleDay = true;
+          break;
+        }
+        sibling = sibling.nextElementSibling;
+      }
+      marker.hidden = !hasVisibleDay;
     }
 
     if (count) {
@@ -57,6 +71,7 @@ export function initAgendaFilters(): void {
     if (noResults) noResults.hidden = visible.size > 0;
     if (clear) clear.hidden = !active;
     syncForm(form, filters);
+    renderActiveFilters(activeFilters, form, filters);
   };
 
   form?.addEventListener('submit', (event) => {
@@ -72,8 +87,42 @@ export function initAgendaFilters(): void {
     form?.reset();
     apply();
   });
+  activeFilters?.addEventListener('click', (event) => {
+    const button = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-remove-filter]');
+    if (!button || !form) return;
+    const field = form.elements.namedItem(button.dataset.removeFilter ?? '');
+    if (field instanceof HTMLInputElement || field instanceof HTMLSelectElement) field.value = '';
+    const params = formDataToParams(new FormData(form));
+    history.pushState({}, '', params.toString() ? `/?${params.toString()}` : '/');
+    apply();
+  });
   window.addEventListener('popstate', apply);
   apply();
+}
+
+function renderActiveFilters(
+  container: HTMLElement | null,
+  form: HTMLFormElement | null,
+  filters: AgendaFilters,
+): void {
+  if (!container || !form) return;
+  container.replaceChildren();
+  for (const [name, value] of Object.entries(filters)) {
+    if (!value) continue;
+    const field = form.elements.namedItem(name);
+    if (!(field instanceof HTMLInputElement || field instanceof HTMLSelectElement)) continue;
+    const label = field.closest('label')?.querySelector('span')?.textContent?.trim() || 'Filtro';
+    const shownValue = field instanceof HTMLSelectElement
+      ? field.selectedOptions[0]?.textContent?.trim() || value
+      : value;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.dataset.removeFilter = name;
+    button.className = 'active-filter';
+    button.setAttribute('aria-label', `Quitar filtro ${label}: ${shownValue}`);
+    button.textContent = `${label}: ${shownValue} ×`;
+    container.append(button);
+  }
 }
 
 function formDataToParams(data: FormData): URLSearchParams {

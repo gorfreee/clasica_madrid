@@ -3,42 +3,32 @@ import type { AgendaItemModel } from '../lib/presentation/agenda.ts';
 
 type Props = {
   item: AgendaItemModel;
+  showDate?: boolean;
 };
 
-const { item } = Astro.props;
-const timeLabel = item.time ?? 'Hora no indicada';
+const { item, showDate = true } = Astro.props;
+const timeLabel = item.time ?? 'Hora por confirmar';
+const context = item.performers.length > 0 ? item.performers : item.composers;
+const signal = item.formats[0] ?? item.kind;
 ---
 {/* Contrato UI interno: [data-occurrence-id] lo usa agenda-client.ts. */}
 
 <article class="agenda-item" data-occurrence-id={item.occurrenceId}>
   <p class="agenda-item__when">
-    <time datetime={`${item.date}${item.time ? `T${item.time}` : ''}`}>{item.date}</time>
-    <span aria-label={item.time ? `A las ${item.time}` : 'Hora no indicada'}>{timeLabel}</span>
+    {showDate && <time datetime={item.date}>{item.dateLabel}</time>}
+    <span aria-label={item.time ? `A las ${item.time}` : 'Hora por confirmar'}>{timeLabel}</span>
   </p>
-  <h3 class="agenda-item__title">
-    <a href={item.href}>{item.title}</a>
-  </h3>
-  <p class="agenda-item__meta">
+  <div class="agenda-item__main">
+    <h3 class="agenda-item__title"><a href={item.href}>{item.title}</a></h3>
+    {context.length > 0 && <p class="agenda-item__people">{context.join(', ')}</p>}
+    {item.seriesName && <p class="agenda-item__series">{item.seriesName}</p>}
+  </div>
+  <p class="agenda-item__venue">
     <a href={item.venueHref}>{item.venueName}</a>
-    {item.showMunicipality && <span> · {item.municipality}</span>}
-    {item.seriesName && <span> · {item.seriesName}</span>}
+    {item.showMunicipality && <span> / {item.municipality}</span>}
   </p>
-  {
-    (item.performers.length > 0 || item.composers.length > 0) && (
-      <p class="agenda-item__people">
-        {item.performers.length > 0 && <span>{item.performers.join(', ')}</span>}
-        {item.performers.length > 0 && item.composers.length > 0 && <span> · </span>}
-        {item.composers.length > 0 && <span>{item.composers.join(', ')}</span>}
-      </p>
-    )
-  }
-  <ul class="chip-list">
-    {item.formats.map((format) => <li>{format.label}</li>)}
-    {item.eras.map((era) => <li>{era.label}</li>)}
-    <li>{item.kind.label}</li>
-    <li>{item.access.label}</li>
-  </ul>
-  <p class="agenda-item__source">
-    <a href={item.sourceUrl} rel="noopener noreferrer">Fuente: {item.sourceLabel}</a>
+  <p class="agenda-item__signal">
+    {item.access.id === 'free' && <span class="signal-free">Entrada libre</span>}
+    {item.access.id !== 'free' && <span>{signal.label}</span>}
   </p>
 </article>
