@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_concierto_de_ano_nuevo_8",
+  "slug": "excelentia-concierto-de-ano-nuevo",
+  "title": "Excelentia. Concierto de Año Nuevo",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_concierto_de_ano_nuevo_8_01",
+      "date": "2026-12-30",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-concierto-de-ano-nuevo-8",
+      "checkedAt": "2026-09-01",
+      "externalId": "excelentia-concierto-de-ano-nuevo-8"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-01"
+}

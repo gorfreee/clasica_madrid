@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_lo_mejor_de_los_tres_tenores_6",
+  "slug": "excelentia-lo-mejor-de-los-tres-tenores",
+  "title": "Excelentia. Lo Mejor de los Tres Tenores",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_lo_mejor_de_los_tres_tenores_6_01",
+      "date": "2026-12-30",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-lo-mejor-de-los-tres-tenores-6",
+      "checkedAt": "2026-09-01",
+      "externalId": "excelentia-lo-mejor-de-los-tres-tenores-6"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-01"
+}

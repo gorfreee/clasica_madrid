@@ -49,6 +49,12 @@
       "date": "2026-12-29",
       "time": "19:30",
       "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_simon_boccanegra_08",
+      "date": "2026-12-30",
+      "time": "19:30",
+      "status": "scheduled"
     }
   ],
   "performers": [],
@@ -66,10 +72,10 @@
     {
       "sourceId": "src_teatro_real",
       "url": "https://www.teatroreal.es/es/espectaculo/simon-boccanegra",
-      "checkedAt": "2026-08-31",
+      "checkedAt": "2026-09-01",
       "externalId": "simon-boccanegra"
     }
   ],
   "primarySourceId": "src_teatro_real",
-  "lastVerifiedAt": "2026-08-31"
+  "lastVerifiedAt": "2026-09-01"
 }
