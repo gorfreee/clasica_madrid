@@ -13,6 +13,7 @@ import { circuloBellasArtesAdapter } from './sources/circulo-bellas-artes.ts';
 import { cndmAdapter } from './sources/cndm.ts';
 import { basilicaSanMiguelAdapter } from './sources/basilica-san-miguel.ts';
 import { fundacionPiuMossoAdapter } from './sources/fundacion-piu-mosso.ts';
+import { realHermandadRefugioAdapter } from './sources/real-hermandad-refugio.ts';
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
@@ -29,6 +30,7 @@ const ADAPTERS: Record<string, SourceAdapter> = {
   [cndmAdapter.id]: cndmAdapter,
   [basilicaSanMiguelAdapter.id]: basilicaSanMiguelAdapter,
   [fundacionPiuMossoAdapter.id]: fundacionPiuMossoAdapter,
+  [realHermandadRefugioAdapter.id]: realHermandadRefugioAdapter,
 };
 
 const srcAuditorio: Source = {
@@ -240,6 +242,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Fundación Più Mosso',
       kind: 'official',
       url: 'https://www.fundacionpiumosso.com/',
+    },
+  },
+  {
+    id: 'real-hermandad-refugio',
+    name: 'Real Hermandad del Refugio',
+    urls: ['https://realhermandaddelrefugio.org/wp-json/wp/v2/calendario-eventos'],
+    adapterId: realHermandadRefugioAdapter.id,
+    catalogSourceId: 'src_real_hermandad_refugio',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_real_hermandad_refugio',
+      slug: 'real-hermandad-del-refugio',
+      name: 'Real Hermandad del Refugio',
+      kind: 'official',
+      url: 'https://realhermandaddelrefugio.org/',
     },
   },
 ];

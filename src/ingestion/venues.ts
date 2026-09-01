@@ -257,6 +257,24 @@ export const KNOWN_VENUES: KnownVenue[] = [
       url: 'https://www.madrid.es/',
     },
   },
+  {
+    keys: [
+      'iglesia de san antonio de los alemanes',
+      'iglesia san antonio de los alemanes',
+      'iglesia de san antonio de los alemanes c de la puebla 22 madrid',
+      'iglesia de san antonio de los alemanes calle de la puebla 22 madrid',
+      'iglesia de san antonio de los alemanes c de la puebla 22',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_iglesia_san_antonio_alemanes',
+      slug: 'iglesia-san-antonio-de-los-alemanes',
+      name: 'Iglesia de San Antonio de los Alemanes',
+      ...MADRID,
+      address: 'Calle de la Puebla, 22, 28004 Madrid',
+      url: 'https://realhermandaddelrefugio.org/',
+    },
+  },
 ];
 
 /**
