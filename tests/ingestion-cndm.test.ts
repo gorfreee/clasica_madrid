@@ -199,6 +199,17 @@ describe('CNDM detail hydration', () => {
     expect(hydrated?.dateFromDetail).toBe(true);
   });
 
+  it('accepts an explicitly unlocated activity without inventing a venue', async () => {
+    const event = rawEvent('23799', 'LES MUSICIENS DU LOUVRE', '2026-10-04', '19:00', 'Auditorio Nacional (Sinfónica) | Madrid');
+    delete event.observed.venueText;
+    const html = (await fixture('detail-musiciens'))
+      .replace('<p class="pt-3">Auditorio Nacional (Sinfónica) | Madrid</p>', '')
+      .replace(/<div class="event-place">[\s\S]*?<\/div>/, '');
+    const patch = parseCndmDetail(event, html);
+    expect(patch.venueText).toBeUndefined();
+    expect(patch.occurrences).toEqual([expect.objectContaining({ date: '2026-10-04', time: '19:00' })]);
+  });
+
   it('fails locally for wrong identity, title, venue, date or truncated structure', async () => {
     const event = rawEvent('23799', 'LES MUSICIENS DU LOUVRE', '2026-10-04', '19:00', 'Auditorio Nacional (Sinfónica) | Madrid');
     const html = await fixture('detail-musiciens');

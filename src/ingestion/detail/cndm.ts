@@ -55,8 +55,8 @@ export function parseCndmDetail(event: RawEvent, body: string): ObservedFactPatc
 
   const place = cndmDiv(body, /<div\b[^>]*class=["'][^"']*\bevent-place\b[^"']*["'][^>]*>/i);
   const venueText = stripTags(/<h3\b[^>]*>([\s\S]*?)<\/h3>/i.exec(place ?? '')?.[1] ?? '');
-  if (!venueText) throw new Error('cndm: ficha sin sede explícita');
-  if (event.observed.venueText && event.observed.venueText !== venueText) {
+  if (event.observed.venueText && !venueText) throw new Error('cndm: ficha sin sede explícita');
+  if (event.observed.venueText && venueText && event.observed.venueText !== venueText) {
     throw new Error('cndm: sede de ficha distinta del listado');
   }
 
@@ -78,7 +78,7 @@ export function parseCndmDetail(event: RawEvent, body: string): ObservedFactPatc
   return {
     occurrences: schedule.occurrences ?? [occurrence],
     ...(schedule.eventStatus ? { eventStatus: schedule.eventStatus } : {}),
-    venueText,
+    ...(venueText ? { venueText } : {}),
     ...(cycle ? { seriesText: decodeHtmlEntities(cycle) } : {}),
     ...(description ? { description } : {}),
     ...(accessText ? { accessText } : {}),
@@ -176,7 +176,7 @@ function parseCndmProgram(html: string | undefined): {
       composers.push({ name: text });
       continue;
     }
-    if (composerName && looksLikeWorkLine(text)) {
+    if (composerName && !text.startsWith('*') && looksLikeWorkLine(text)) {
       works.push({ title: text, composerName });
     }
   }
