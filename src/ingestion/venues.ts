@@ -129,6 +129,33 @@ export const KNOWN_VENUES: KnownVenue[] = [
     },
   },
   {
+    keys: ['ateneo de madrid', 'ateneo de madrid catedra mayor'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_ateneo_madrid',
+      slug: 'ateneo-de-madrid',
+      name: 'Ateneo de Madrid',
+      ...MADRID,
+      address: 'Calle del Prado, 21, 28014 Madrid',
+      url: 'https://www.ateneodemadrid.com/',
+    },
+  },
+  {
+    keys: [
+      'museo reina sofia a400',
+      'museo reina sofia a400 madrid',
+      'auditorio 400 museo nacional de arte reina sofia',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_museo_reina_sofia_auditorio_400',
+      slug: 'museo-reina-sofia-auditorio-400',
+      name: 'Museo Reina Sofía — Auditorio 400',
+      ...MADRID,
+      address: 'Ronda de Atocha, 2, 28012 Madrid',
+    },
+  },
+  {
     keys: [
       'teatros del canal sala roja concha velasco',
       'teatros del canal sala roja',
@@ -206,6 +233,63 @@ export const KNOWN_VENUES: KnownVenue[] = [
       url: 'https://www.circulobellasartes.com/',
     },
   },
+  {
+    keys: ['basilica pontificia de san miguel', 'basilica de san miguel'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_basilica_pontificia_san_miguel',
+      slug: 'basilica-pontificia-de-san-miguel',
+      name: 'Basílica Pontificia de San Miguel',
+      ...MADRID,
+      address: 'Calle de San Justo, 4, 28005 Madrid',
+      url: 'https://basilicadesanmiguel.org/',
+    },
+  },
+  {
+    keys: ['centro cultural casa de vacas', 'casa de vacas del retiro'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_casa_vacas_retiro',
+      slug: 'casa-de-vacas-retiro',
+      name: 'Centro Cultural Casa de Vacas',
+      ...MADRID,
+      address: 'Paseo de Colombia, s/n, Parque de El Retiro, 28009 Madrid',
+      url: 'https://www.madrid.es/',
+    },
+  },
+  {
+    keys: [
+      'iglesia de san antonio de los alemanes',
+      'iglesia san antonio de los alemanes',
+      'iglesia de san antonio de los alemanes c de la puebla 22 madrid',
+      'iglesia de san antonio de los alemanes calle de la puebla 22 madrid',
+      'iglesia de san antonio de los alemanes c de la puebla 22',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_iglesia_san_antonio_alemanes',
+      slug: 'iglesia-san-antonio-de-los-alemanes',
+      name: 'Iglesia de San Antonio de los Alemanes',
+      ...MADRID,
+      address: 'Calle de la Puebla, 22, 28004 Madrid',
+      url: 'https://realhermandaddelrefugio.org/',
+    },
+  },
+  {
+    keys: [
+      'real academia de bellas artes de san fernando salon de actos',
+      'real academia bellas artes san fernando salon de actos',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_real_academia_bellas_artes_salon_actos',
+      slug: 'real-academia-bellas-artes-san-fernando-salon-actos',
+      name: 'Real Academia de Bellas Artes de San Fernando — Salón de actos',
+      ...MADRID,
+      address: 'Calle de Alcalá, 13, 28014 Madrid',
+      url: 'https://www.realacademiabellasartessanfernando.com/',
+    },
+  },
 ];
 
 /**
@@ -239,6 +323,20 @@ const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
   'circulo-bellas-artes': {
     'teatro fernando de rojas': 'ven_circulo_bellas_artes_teatro_fernando_de_rojas',
     'sala de columnas': 'ven_circulo_bellas_artes_sala_columnas',
+  },
+  cndm: {
+    'auditorio nacional sinfonica madrid': 'ven_auditorio_nacional_sala_sinfonica',
+    'auditorio nacional camara madrid': 'ven_auditorio_nacional_sala_camara',
+    'teatro de la zarzuela madrid': 'ven_teatro_zarzuela',
+    'ateneo de madrid catedra mayor': 'ven_ateneo_madrid',
+    'museo reina sofia a400 madrid': 'ven_museo_reina_sofia_auditorio_400',
+  },
+  'fundacion-piu-mosso': {
+    'centro cultural casa de vacas': 'ven_casa_vacas_retiro',
+    'ateneo de madrid': 'ven_ateneo_madrid',
+  },
+  'real-academia-bellas-artes': {
+    'salon de actos': 'ven_real_academia_bellas_artes_salon_actos',
   },
 };
 

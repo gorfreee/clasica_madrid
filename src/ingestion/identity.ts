@@ -129,6 +129,10 @@ export function newObservationKeys(
       keys.push(`strong:${venueId}:${occurrence.date}:${occurrence.time ?? ''}:${title}`);
       const orcamTitle = orcamIdentityTitle(observed.title, catalogSourceId);
       if (orcamTitle && occurrence.time) keys.push(`orcam:${venueId}:${occurrence.date}:${occurrence.time}:${orcamTitle}`);
+      const cndmTitle = cndmAuditorioIdentityTitle(observed.title, catalogSourceId);
+      if (cndmTitle && occurrence.time) keys.push(`cndm:${venueId}:${occurrence.date}:${occurrence.time}:${cndmTitle}`);
+      const cndmLiedTitle = cndmZarzuelaIdentityTitle(observed.title, catalogSourceId);
+      if (cndmLiedTitle && occurrence.time) keys.push(`cndm-lied:${venueId}:${occurrence.date}:${occurrence.time}:${cndmLiedTitle}`);
     }
   }
   return keys;
@@ -154,9 +158,12 @@ function aliasMatches(
 function eventMatchesStrong(event: Event, observed: IdentityFacts, venueId: string, catalogSourceId: string): boolean {
   if (event.venueId !== venueId) return false;
   if (normalizeText(event.title) !== normalizeText(observed.title)) {
-    const incoming = orcamIdentityTitle(observed.title, catalogSourceId);
-    const existing = orcamIdentityTitle(event.title, event.primarySourceId);
-    if (!incoming || incoming !== existing) return false;
+    const equivalent = [
+      [orcamIdentityTitle(observed.title, catalogSourceId), orcamIdentityTitle(event.title, event.primarySourceId)],
+      [cndmAuditorioIdentityTitle(observed.title, catalogSourceId), cndmAuditorioIdentityTitle(event.title, event.primarySourceId)],
+      [cndmZarzuelaIdentityTitle(observed.title, catalogSourceId), cndmZarzuelaIdentityTitle(event.title, event.primarySourceId)],
+    ].some(([incoming, existing]) => Boolean(incoming) && incoming === existing);
+    if (!equivalent) return false;
     // This source-specific title equivalence requires two explicit equal
     // times; unlike the general exact-title match, unknown time is not enough.
     return event.occurrences.some((a) => observed.occurrences.some((b) =>
@@ -180,6 +187,26 @@ function orcamIdentityTitle(title: string, catalogSourceId: string): string | un
   if (catalogSourceId !== 'src_auditorio_nacional') return undefined;
   const match = /^ORCAM\.\s+(?:Sinfónico|Tiempo de Cámara)\s+\d+\.\s+(.+)$/iu.exec(title);
   return match ? normalizeText(match[1]!) || undefined : undefined;
+}
+
+/** CNDM fichas omit the "CNDM." prefix used by the Auditorio calendar. */
+function cndmAuditorioIdentityTitle(title: string, catalogSourceId: string): string | undefined {
+  if (catalogSourceId === 'src_cndm') {
+    return normalizeText(title.replace(/^\[(?:aplazado|cancelado)\]\s*/iu, '')) || undefined;
+  }
+  if (catalogSourceId !== 'src_auditorio_nacional') return undefined;
+  const match = /^CNDM\.\s+(.+)$/iu.exec(title);
+  return match ? normalizeText(match[1]!) || undefined : undefined;
+}
+
+/** CNDM names both Lied performers while Zarzuela publishes the principal
+ * artist as title. Venue, date and explicit time remain mandatory. */
+function cndmZarzuelaIdentityTitle(title: string, catalogSourceId: string): string | undefined {
+  if (catalogSourceId === 'src_cndm') {
+    const principal = title.replace(/^\[(?:aplazado|cancelado)\]\s*/iu, '').split(/\s+&\s+/u)[0];
+    return principal ? normalizeText(principal) || undefined : undefined;
+  }
+  return catalogSourceId === 'src_teatro_zarzuela' ? normalizeText(title) || undefined : undefined;
 }
 
 function timesCompatible(left: string | null, right: string | null): boolean {

@@ -16,6 +16,19 @@ import { TEST_NOW, makeCatalog, makeEvent, makeSource, makeVenue } from './helpe
 
 const fixtures = path.join(import.meta.dirname, 'fixtures', 'ingestion');
 
+function emptyCndmMonth(url: string): string {
+  const match = /\/eventos\/(\d{4})(\d{2})$/.exec(url)!;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const names = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  const days = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  const cells = Array.from({ length: days }, (_, index) => {
+    const date = `${year}-${String(month).padStart(2, '0')}-${String(index + 1).padStart(2, '0')}`;
+    return `<td id="events_calendar-${date}-0" date-date="${date}"><div class="inner"></div></td>`;
+  });
+  return `<div class="big-calendar"><header><h3>${names[month - 1]} ${year}</h3></header><table><tr>${cells.join('')}</tr></table></div>`;
+}
+
 async function writeCatalog(dir: string, catalog: Catalog): Promise<void> {
   for (const collection of ENTITY_COLLECTIONS) {
     await mkdir(path.join(dir, collection), { recursive: true });
@@ -88,6 +101,16 @@ async function fixtureGet(url: string): Promise<string> {
   }
   if (url.includes('wp-json/tribe/events/v1/events')) {
     return '{"events":[],"total":0,"total_pages":0}';
+  }
+  if (url.includes('cndm.inaem.gob.es/eventos/')) return emptyCndmMonth(url);
+  if (url === 'https://www.fundacionpiumosso.com/programacion/') {
+    return '<body class="page page-id-50"><h1>Programación</h1><div id="ect-grid-wrapper" class="ect-grid-view-style-2 all"></div></body>';
+  }
+  if (url.includes('wp-json/wp/v2/calendario-eventos')) {
+    return '[]';
+  }
+  if (url === 'https://www.realacademiabellasartessanfernando.com/actividades/conciertos/') {
+    return '<body class="archive tax-actividad_type term-conciertos term-33"><main><h1>Conciertos</h1><div class="rc-actividades-block__container"><ul class="rc-actividades-block__list"></ul></div></main></body>';
   }
   throw new Error(`URL de test no mapeada: ${url}`);
 }
@@ -192,7 +215,7 @@ describe('aislamiento de fallos por fuente', () => {
       },
     });
     expect(run.summary.sourcesFailed.map((item) => item.sourceId)).toEqual(['teatro-real']);
-    expect(run.summary.sourcesSucceeded).toEqual(['auditorio-nacional', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes']);
+    expect(run.summary.sourcesSucceeded).toEqual(['auditorio-nacional', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes']);
     expect(run.rawEvents.length).toBeGreaterThan(0);
     expect(run.rawEvents.some((event) => event.sourceId === 'teatro-real')).toBe(false);
     expect(run.summary.written).toEqual([]);
@@ -212,7 +235,7 @@ describe('aislamiento de fallos por fuente', () => {
     });
     expect(run.summary.sourcesSucceeded).toEqual([]);
     expect(run.summary.sourcesFailed.map((item) => item.sourceId)).toEqual([
-      'auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes',
+      'auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes',
     ]);
     expect(run.summary.written).toEqual([]);
     expect(run.apply.report.ok).toBe(true);
