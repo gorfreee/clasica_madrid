@@ -240,7 +240,7 @@ describe('modelos de presentación', () => {
     const page = buildVenuePageModel(catalog, 'auditorio-nacional', testClock);
     expect(page).not.toBeNull();
     expect(page?.upcoming).toEqual([]);
-    expect(page?.canonicalPath).toBe('/lugares/auditorio-nacional');
+    expect(page?.canonicalPath).toBe('/lugares/auditorio-nacional/');
   });
 
   it('el índice de lugares solo lista espacios con próximos conciertos', () => {
@@ -272,13 +272,13 @@ describe('modelos de presentación', () => {
     const catalog = richCatalog();
     const venuePages = new Set(listVenuePageSlugs(catalog));
     const historical = buildEventPageModel(catalog, 'concierto-de-verano', testClock);
-    expect(historical?.venueHref).toBe('/lugares/auditorio-nacional');
+    expect(historical?.venueHref).toBe('/lugares/auditorio-nacional/');
     expect(venuePages.has('auditorio-nacional')).toBe(true);
     expect(buildVenuePageModel(catalog, 'auditorio-nacional', testClock)).not.toBeNull();
 
     for (const resolved of listCanonicalEvents(catalog)) {
       const page = buildEventPageModel(catalog, resolved.event.slug, testClock);
-      const slug = page?.venueHref.replace(/^\/lugares\//, '');
+      const slug = page?.venueHref.replace(/^\/lugares\//, '').replace(/\/$/, '');
       expect(slug, `${resolved.event.slug} debe enlazar a un lugar`).toBeTruthy();
       expect(venuePages.has(slug ?? '')).toBe(true);
       expect(buildVenuePageModel(catalog, slug ?? '', testClock)).not.toBeNull();
@@ -305,7 +305,7 @@ describe('modelos de presentación', () => {
   it('construye JSON-LD MusicEvent por cada representación', () => {
     const page = buildEventPageModel(richCatalog(), 'carmen', testClock);
     expect(page).not.toBeNull();
-    expect(page?.jsonLd).toHaveLength(3);
+    expect(page?.jsonLd.filter((item) => item['@type'] === 'MusicEvent')).toHaveLength(3);
     expect(page?.jsonLd[0]?.['@type']).toBe('MusicEvent');
     expect(page?.sources[0]?.isPrimary).toBe(true);
   });

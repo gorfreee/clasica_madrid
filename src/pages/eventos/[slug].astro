@@ -19,7 +19,7 @@ const primarySource = model.sources.find((source) => source.isPrimary) ?? model.
 const featured = model.featuredOccurrence;
 ---
 
-<Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath} jsonLd={model.jsonLd}>
+<Layout title={model.documentTitle} description={model.description} canonicalPath={model.canonicalPath} jsonLd={model.jsonLd}>
   <article class="detail event-detail">
     <header class="detail-hero detail-hero--event">
       <p class="eyebrow">{model.isPast ? 'Archivo / Evento pasado' : 'Agenda / Evento'}</p>

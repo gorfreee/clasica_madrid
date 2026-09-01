@@ -4,7 +4,7 @@ import { listCanonicalEvents } from '../domain/queries.ts';
 import type { Catalog } from '../domain/catalog.ts';
 import type { ResolvedEvent } from '../domain/resolve.ts';
 import type { Occurrence } from '../schemas/event.ts';
-import { SITE_ORIGIN } from '../presentation/constants.ts';
+import { eventUrl } from '../presentation/urls.ts';
 import {
   accessLabels,
   areaLabels,
@@ -159,7 +159,7 @@ export function toEventExportRow(resolved: ResolvedEvent): EventExportRow {
       }),
     ),
     lastVerifiedAt: event.lastVerifiedAt,
-    publicUrl: `${SITE_ORIGIN}/eventos/${event.slug}`,
+    publicUrl: eventUrl(event.slug),
   };
 }
 

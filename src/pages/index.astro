@@ -9,7 +9,7 @@ import { serializeJsonForScript } from '../lib/util/json-script.ts';
 const model = await loadAgendaPage(Astro.url);
 ---
 
-<Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath}>
+<Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath} jsonLd={model.jsonLd}>
   <header class="agenda-intro">
     <div class="agenda-intro__copy">
       <p class="eyebrow">Agenda abierta / Madrid</p>

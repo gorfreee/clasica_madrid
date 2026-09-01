@@ -2,7 +2,7 @@
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 const links = [
   { href: '/', label: 'Agenda', current: path === '/' },
-  { href: '/lugares', label: 'Lugares', current: path === '/lugares' || path.startsWith('/lugares/') },
+  { href: '/lugares/', label: 'Lugares', current: path === '/lugares' || path.startsWith('/lugares/') },
 ];
 ---
 
