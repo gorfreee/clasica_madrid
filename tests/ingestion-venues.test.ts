@@ -99,6 +99,8 @@ describe('resolución de venue — aliases existentes', () => {
     expect(matchVenue('Sala Sinfónica', catalog)?.venue.id).toBe('ven_auditorio_nacional_sala_sinfonica');
     expect(matchVenue('Sala de Cámara', catalog)?.venue.id).toBe('ven_auditorio_nacional_sala_camara');
     expect(matchVenue('Real Teatro de Retiro', catalog)?.venue.id).toBe('ven_real_teatro_retiro');
+    expect(matchVenue('Teatro Fernando de Rojas', catalog)?.venue.id).toBe('ven_circulo_bellas_artes_teatro_fernando_de_rojas');
+    expect(matchVenue('Sala de Columnas', catalog)?.venue.id).toBe('ven_circulo_bellas_artes_sala_columnas');
   });
 });
 

@@ -9,11 +9,13 @@ import { fundacionCanalAdapter } from './sources/fundacion-canal.ts';
 import { fundacionOrcamAdapter } from './sources/fundacion-orcam.ts';
 import { orquestaCoroRtveAdapter } from './sources/orquesta-coro-rtve.ts';
 import { teatrosCanalAdapter } from './sources/teatros-canal.ts';
+import { circuloBellasArtesAdapter } from './sources/circulo-bellas-artes.ts';
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
   [orquestaCoroRtveAdapter.id]: orquestaCoroRtveAdapter,
   [fundacionCanalAdapter.id]: fundacionCanalAdapter,
+  [circuloBellasArtesAdapter.id]: circuloBellasArtesAdapter,
   [fundacionOrcamAdapter.id]: fundacionOrcamAdapter,
   [fundacionJuanMarchAdapter.id]: fundacionJuanMarchAdapter,
   [auditorioNacionalAdapter.id]: auditorioNacionalAdapter,
@@ -169,6 +171,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Fundación Canal',
       kind: 'official',
       url: 'https://www.fundacioncanal.com/',
+    },
+  },
+  {
+    id: 'circulo-bellas-artes',
+    name: 'Círculo de Bellas Artes',
+    urls: ['https://www.circulobellasartes.com/eventos/'],
+    adapterId: circuloBellasArtesAdapter.id,
+    catalogSourceId: 'src_circulo_bellas_artes',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_circulo_bellas_artes',
+      slug: 'circulo-de-bellas-artes',
+      name: 'Círculo de Bellas Artes',
+      kind: 'official',
+      url: 'https://www.circulobellasartes.com/',
     },
   },
 ];
