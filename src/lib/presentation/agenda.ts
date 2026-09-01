@@ -7,6 +7,8 @@ import type { ResolvedOccurrence } from '../domain/resolve.ts';
 import { accessLabels, areaLabels, eraLabels, formatLabels, kindLabels, occurrenceCountLabel } from './labels.ts';
 import { ACCESS_MODES, AREAS, ERAS, EVENT_KINDS, FORMATS } from '../schemas/taxonomies.ts';
 import { isMadridMunicipality } from '../domain/normalize.ts';
+import { buildWebsiteJsonLd } from './json-ld.ts';
+import { AGENDA_PATH, eventPath, venuePath } from './urls.ts';
 
 export type TaxonomyOption = {
   id: string;
@@ -68,6 +70,7 @@ export type AgendaPageModel = {
   title: string;
   description: string;
   canonicalPath: string;
+  jsonLd: Record<string, unknown>[];
   isEmptyCatalog: boolean;
   hasUpcoming: boolean;
   query: string;
@@ -99,7 +102,8 @@ export function buildAgendaPageModel(
     title: 'Agenda de música clásica en Madrid',
     description:
       'Conciertos y eventos de música clásica en Madrid y su entorno inmediato, con fuente original.',
-    canonicalPath: '/',
+    canonicalPath: AGENDA_PATH,
+    jsonLd: [buildWebsiteJsonLd()],
     isEmptyCatalog: catalog.events.length === 0,
     hasUpcoming: upcoming.length > 0,
     query: filters.q ?? '',
@@ -123,13 +127,13 @@ export function toAgendaItem(item: ResolvedOccurrence): AgendaItemModel {
     eventId: event.id,
     eventSlug: event.slug,
     occurrenceId: item.occurrence.id,
-    href: `/eventos/${event.slug}`,
+    href: eventPath(event.slug),
     date: item.occurrence.date,
     dateLabel: formatMadridDate(item.occurrence.date),
     time: item.occurrence.time,
     title: event.title,
     venueName: venue.name,
-    venueHref: `/lugares/${venue.slug}`,
+    venueHref: venuePath(venue.slug),
     municipality: venue.municipality,
     showMunicipality: !isMadridMunicipality(venue.municipality),
     areaLabel: areaLabels[venue.area],

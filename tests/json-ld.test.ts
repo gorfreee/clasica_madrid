@@ -6,6 +6,10 @@ const SCHEDULED = 'https://schema.org/EventScheduled';
 const CANCELLED = 'https://schema.org/EventCancelled';
 const POSTPONED = 'https://schema.org/EventPostponed';
 
+function musicEvents(jsonLd: Record<string, unknown>[] | undefined) {
+  return (jsonLd ?? []).filter((item) => item['@type'] === 'MusicEvent');
+}
+
 describe('estados Schema.org de MusicEvent', () => {
   it('mapea scheduled, cancelled y postponed según Google Events', () => {
     expect(musicEventSchemaStatus('scheduled', 'scheduled')).toBe(SCHEDULED);
@@ -17,10 +21,9 @@ describe('estados Schema.org de MusicEvent', () => {
 
   it('incluye la representación cancelada de un evento vigente como EventCancelled', () => {
     const page = buildEventPageModel(richCatalog(), 'carmen', testClock);
-    expect(page?.jsonLd).toHaveLength(3);
-    const byStart = Object.fromEntries(
-      (page?.jsonLd ?? []).map((item) => [item.startDate, item.eventStatus]),
-    );
+    const events = musicEvents(page?.jsonLd);
+    expect(events).toHaveLength(3);
+    const byStart = Object.fromEntries(events.map((item) => [item.startDate, item.eventStatus]));
     expect(byStart['2026-09-10T19:00:00+02:00']).toBe(SCHEDULED);
     expect(byStart['2026-09-12T19:00:00+02:00']).toBe(CANCELLED);
     expect(byStart['2026-09-14T18:00:00+02:00']).toBe(SCHEDULED);
@@ -36,10 +39,11 @@ describe('estados Schema.org de MusicEvent', () => {
       ],
     });
     const page = buildEventPageModel(catalog, 'matinees-de-otono', testClock);
-    expect(page?.jsonLd).toHaveLength(1);
-    expect(page?.jsonLd[0]?.['@type']).toBe('MusicEvent');
-    expect(page?.jsonLd[0]?.eventStatus).toBe(CANCELLED);
-    expect(page?.jsonLd[0]?.startDate).toBe('2026-09-15T19:30:00+02:00');
+    const events = musicEvents(page?.jsonLd);
+    expect(events).toHaveLength(1);
+    expect(events[0]?.['@type']).toBe('MusicEvent');
+    expect(events[0]?.eventStatus).toBe(CANCELLED);
+    expect(events[0]?.startDate).toBe('2026-09-15T19:30:00+02:00');
   });
 
   it('marca EventPostponed y conserva la fecha original', () => {
@@ -52,8 +56,9 @@ describe('estados Schema.org de MusicEvent', () => {
       ],
     });
     const page = buildEventPageModel(catalog, 'matinees-de-otono', testClock);
-    expect(page?.jsonLd).toHaveLength(1);
-    expect(page?.jsonLd[0]?.eventStatus).toBe(POSTPONED);
-    expect(page?.jsonLd[0]?.startDate).toBe('2026-09-15T19:30:00+02:00');
+    const events = musicEvents(page?.jsonLd);
+    expect(events).toHaveLength(1);
+    expect(events[0]?.eventStatus).toBe(POSTPONED);
+    expect(events[0]?.startDate).toBe('2026-09-15T19:30:00+02:00');
   });
 });

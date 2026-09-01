@@ -19,7 +19,7 @@ if (!model) {
 const mapQuery = encodeURIComponent([model.address, model.municipality].filter(Boolean).join(', '));
 ---
 
-<Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath}>
+<Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath} jsonLd={model.jsonLd}>
   <article class="detail venue-detail">
     <header class="detail-hero detail-hero--venue">
       <p class="eyebrow">Lugar / {model.areaLabel}</p>

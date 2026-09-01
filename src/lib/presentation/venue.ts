@@ -8,7 +8,9 @@ import {
 } from '../domain/index.ts';
 import { isMadridMunicipality } from '../domain/normalize.ts';
 import { areaLabels } from './labels.ts';
+import { buildVenueJsonLd } from './json-ld.ts';
 import { toAgendaItem, type AgendaItemModel } from './agenda.ts';
+import { venuePath, VENUES_INDEX_PATH } from './urls.ts';
 
 export type VenueListItemModel = {
   name: string;
@@ -34,6 +36,7 @@ export type VenuePageModel = {
   address: string | null;
   url: string | null;
   upcoming: AgendaItemModel[];
+  jsonLd: Record<string, unknown>[];
 };
 
 export type VenuesIndexModel = {
@@ -53,7 +56,7 @@ export function buildVenuesIndexModel(catalog: Catalog, clock: Clock = systemClo
     return {
       name: venue.name,
       slug: venue.slug,
-      href: `/lugares/${venue.slug}`,
+      href: venuePath(venue.slug),
       municipality: venue.municipality,
       showMunicipality: !isMadridMunicipality(venue.municipality),
       areaLabel: areaLabels[venue.area],
@@ -70,7 +73,7 @@ export function buildVenuesIndexModel(catalog: Catalog, clock: Clock = systemClo
     .map((venue) => ({
       name: venue.name,
       slug: venue.slug,
-      href: `/lugares/${venue.slug}`,
+      href: venuePath(venue.slug),
       municipality: venue.municipality,
       showMunicipality: !isMadridMunicipality(venue.municipality),
       areaLabel: areaLabels[venue.area],
@@ -80,9 +83,9 @@ export function buildVenuesIndexModel(catalog: Catalog, clock: Clock = systemClo
     }))
     .sort((left, right) => left.name.localeCompare(right.name, 'es'));
   return {
-    title: 'Lugares',
+    title: 'Lugares de conciertos en Madrid',
     description: 'Espacios con conciertos de música clásica próximos en Madrid y su entorno.',
-    canonicalPath: '/lugares',
+    canonicalPath: VENUES_INDEX_PATH,
     isEmpty: venues.length === 0,
     venues,
     inactiveVenues,
@@ -110,9 +113,9 @@ export function buildVenuePageModel(
     title: venue.name,
     description:
       upcoming.length > 0
-        ? `Próximos conciertos en ${place}.`
+        ? `Próximos conciertos de música clásica en ${place}.`
         : `Conciertos de música clásica en ${place}.`,
-    canonicalPath: `/lugares/${venue.slug}`,
+    canonicalPath: venuePath(venue.slug),
     name: venue.name,
     slug: venue.slug,
     municipality: venue.municipality,
@@ -121,6 +124,7 @@ export function buildVenuePageModel(
     address: venue.address ?? null,
     url: venue.url ?? null,
     upcoming,
+    jsonLd: buildVenueJsonLd(venue),
   };
 }
 

@@ -19,8 +19,11 @@ import {
   seriesKindLabels,
   sourceKindLabels,
 } from './labels.ts';
-import type { Event, Occurrence } from '../schemas/event.ts';
-import { SITE_ORIGIN } from './constants.ts';
+import type { Occurrence } from '../schemas/event.ts';
+import { buildMusicEventJsonLd } from './json-ld.ts';
+import { eventPath, venuePath } from './urls.ts';
+
+export { musicEventSchemaStatus } from './event-status.ts';
 
 export type EventOccurrenceModel = {
   id: string;
@@ -34,6 +37,7 @@ export type EventOccurrenceModel = {
 
 export type EventPageModel = {
   title: string;
+  documentTitle: string;
   description: string;
   canonicalPath: string;
   slug: string;
@@ -94,13 +98,14 @@ export function toEventPageModel(resolved: ResolvedEvent, clock: Clock = systemC
   const featuredCanonical = next ?? (isPast ? lastScheduledOccurrence(event.occurrences) : undefined);
   return {
     title: event.title,
+    documentTitle: eventDocumentTitle(event.title, venue.name),
     description,
-    canonicalPath: `/eventos/${event.slug}`,
+    canonicalPath: eventPath(event.slug),
     slug: event.slug,
     statusLabel: eventStatusLabel(event.status),
     isPast,
     venueName: venue.name,
-    venueHref: `/lugares/${venue.slug}`,
+    venueHref: venuePath(venue.slug),
     venueAddress: venue.address ?? null,
     municipality: venue.municipality,
     showMunicipality: !isMadridMunicipality(venue.municipality),
@@ -155,6 +160,10 @@ function lastScheduledOccurrence(occurrences: Occurrence[]): Occurrence | undefi
     .at(-1);
 }
 
+export function eventDocumentTitle(title: string, venueName: string): string {
+  return title.includes(venueName) ? title : `${title} · ${venueName}`;
+}
+
 function buildEventDescription(resolved: ResolvedEvent, next?: Occurrence, isPast = false): string {
   const whenOccurrence = next ?? (isPast ? lastScheduledOccurrence(resolved.event.occurrences) : undefined);
   const when = whenOccurrence
@@ -165,79 +174,8 @@ function buildEventDescription(resolved: ResolvedEvent, next?: Occurrence, isPas
     parts.push(resolved.venue.municipality);
   }
   if (when) parts.push(when);
+  const format = resolved.event.formats.map((id) => formatLabels[id]).join(', ');
+  if (format) parts.push(format);
+  if (resolved.event.access === 'free') parts.push('Entrada gratuita');
   return `${parts.join('. ')}.`;
-}
-
-const SCHEMA_EVENT_STATUS = {
-  scheduled: 'https://schema.org/EventScheduled',
-  cancelled: 'https://schema.org/EventCancelled',
-  postponed: 'https://schema.org/EventPostponed',
-} as const;
-
-/** Schema.org / Google Events status for one MusicEvent occurrence. */
-export function musicEventSchemaStatus(
-  eventStatus: Event['status'],
-  occurrenceStatus: Occurrence['status'],
-): (typeof SCHEMA_EVENT_STATUS)[keyof typeof SCHEMA_EVENT_STATUS] {
-  if (eventStatus === 'cancelled' || occurrenceStatus === 'cancelled') {
-    return SCHEMA_EVENT_STATUS.cancelled;
-  }
-  if (eventStatus === 'postponed') {
-    return SCHEMA_EVENT_STATUS.postponed;
-  }
-  return SCHEMA_EVENT_STATUS.scheduled;
-}
-
-function buildMusicEventJsonLd(resolved: ResolvedEvent): Record<string, unknown>[] {
-  const { event, venue, organizers, series } = resolved;
-  const location: Record<string, unknown> = {
-    '@type': venue.url ? 'MusicVenue' : 'Place',
-    name: venue.name,
-    address: {
-      '@type': 'PostalAddress',
-      addressLocality: venue.municipality,
-      addressCountry: 'ES',
-      ...(venue.address ? { streetAddress: venue.address } : {}),
-    },
-  };
-  if (venue.url) location.url = venue.url;
-
-  return event.occurrences
-    .slice()
-    .sort((a, b) => a.date.localeCompare(b.date) || (a.time ?? '').localeCompare(b.time ?? ''))
-    .map((occurrence) => {
-      const data: Record<string, unknown> = {
-        '@context': 'https://schema.org',
-        '@type': 'MusicEvent',
-        name: event.title,
-        startDate: madridDateTimeIso(occurrence.date, occurrence.time),
-        eventStatus: musicEventSchemaStatus(event.status, occurrence.status),
-        eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-        location,
-        url: `${SITE_ORIGIN}/eventos/${event.slug}`,
-      };
-      if (event.access === 'free') data.isAccessibleForFree = true;
-      if (event.access === 'paid') data.isAccessibleForFree = false;
-      if (organizers.length > 0) {
-        data.organizer = organizers.map((organizer) => ({
-          '@type': 'Organization',
-          name: organizer.name,
-          ...(organizer.url ? { url: organizer.url } : {}),
-        }));
-      }
-      if (event.performers.length > 0) {
-        data.performer = event.performers.map((performer) => ({
-          '@type': 'PerformingGroup',
-          name: performer.name,
-        }));
-      }
-      if (series) {
-        data.superEvent = {
-          '@type': 'EventSeries',
-          name: series.name,
-          ...(series.url ? { url: series.url } : {}),
-        };
-      }
-      return data;
-    });
 }

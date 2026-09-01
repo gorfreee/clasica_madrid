@@ -26,7 +26,7 @@ describe('exportación Excel del catálogo', () => {
     expect(row?.organizers).toBe('Orquesta y Coro Nacionales de España');
     expect(row?.series).toBe('Ciclo de Cámara');
     expect(row?.primarySource).toBe('Auditorio Nacional');
-    expect(row?.publicUrl).toBe('https://clasicamadrid.com/eventos/matinees-de-otono');
+    expect(row?.publicUrl).toBe('https://clasicamadrid.com/eventos/matinees-de-otono/');
   });
 
   it('ordena eventos por primera fecha y luego por título', () => {

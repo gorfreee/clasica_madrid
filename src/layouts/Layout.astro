@@ -2,13 +2,15 @@
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { DEFAULT_DESCRIPTION, DEFAULT_TITLE, SITE_NAME, SITE_ORIGIN } from '../lib/presentation/constants.ts';
+import { DEFAULT_DESCRIPTION, DEFAULT_TITLE, SITE_NAME } from '../lib/presentation/constants.ts';
+import { publicUrl } from '../lib/presentation/urls.ts';
 import { serializeJsonForScript } from '../lib/util/json-script.ts';
 
 type Props = {
   title?: string;
   description?: string;
   canonicalPath?: string;
+  indexable?: boolean;
   jsonLd?: Record<string, unknown>[] | Record<string, unknown>;
 };
 
@@ -16,11 +18,12 @@ const {
   title = DEFAULT_TITLE,
   description = DEFAULT_DESCRIPTION,
   canonicalPath = '/',
+  indexable = true,
   jsonLd,
 } = Astro.props;
 
 const pageTitle = title === DEFAULT_TITLE || title.includes(SITE_NAME) ? title : `${title} — ${SITE_NAME}`;
-const canonical = new URL(canonicalPath, SITE_ORIGIN).toString();
+const canonical = indexable ? publicUrl(canonicalPath) : null;
 const jsonLdScript = jsonLd ? serializeJsonForScript(jsonLd) : null;
 ---
 
@@ -31,14 +34,14 @@ const jsonLdScript = jsonLd ? serializeJsonForScript(jsonLd) : null;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <meta name="color-scheme" content="light" />
-    <link rel="canonical" href={canonical} />
+    {indexable ? <link rel="canonical" href={canonical} /> : <meta name="robots" content="noindex" />}
     <title>{pageTitle}</title>
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="es_ES" />
     <meta property="og:site_name" content={SITE_NAME} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonical} />
+    {canonical && <meta property="og:url" content={canonical} />}
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={description} />
