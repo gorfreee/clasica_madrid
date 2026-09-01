@@ -7,6 +7,7 @@ import { teatroZarzuelaAdapter } from './sources/teatro-zarzuela.ts';
 import { fundacionJuanMarchAdapter } from './sources/fundacion-juan-march.ts';
 import { fundacionOrcamAdapter } from './sources/fundacion-orcam.ts';
 import { orquestaCoroRtveAdapter } from './sources/orquesta-coro-rtve.ts';
+import { teatrosCanalAdapter } from './sources/teatros-canal.ts';
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
@@ -17,6 +18,7 @@ const ADAPTERS: Record<string, SourceAdapter> = {
   [teatroRealAdapter.id]: teatroRealAdapter,
   [madridDatosAdapter.id]: madridDatosAdapter,
   [teatroZarzuelaAdapter.id]: teatroZarzuelaAdapter,
+  [teatrosCanalAdapter.id]: teatrosCanalAdapter,
 };
 
 const srcAuditorio: Source = {
@@ -131,6 +133,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Orquesta y Coro RTVE / Teatro Monumental',
       kind: 'official',
       url: 'https://www.teatromonumental.es/',
+    },
+  },
+  {
+    id: 'teatros-canal',
+    name: 'Teatros del Canal',
+    urls: ['https://www.teatroscanal.com/wp-json/tribe/events/v1/events'],
+    adapterId: teatrosCanalAdapter.id,
+    catalogSourceId: 'src_teatros_canal',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_teatros_canal',
+      slug: 'teatros-del-canal',
+      name: 'Teatros del Canal',
+      kind: 'official',
+      url: 'https://www.teatroscanal.com/',
     },
   },
 ];

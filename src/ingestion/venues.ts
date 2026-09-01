@@ -110,6 +110,60 @@ export const KNOWN_VENUES: KnownVenue[] = [
       url: 'https://teatrodelazarzuela.inaem.gob.es/',
     },
   },
+  {
+    keys: [
+      'teatros del canal sala roja concha velasco',
+      'teatros del canal sala roja',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_teatros_canal_sala_roja',
+      slug: 'teatros-del-canal-sala-roja',
+      name: 'Teatros del Canal — Sala Roja Concha Velasco',
+      ...MADRID,
+      address: 'Calle de Cea Bermúdez, 1, 28003 Madrid',
+      url: 'https://www.teatroscanal.com/',
+    },
+  },
+  {
+    keys: ['teatros del canal sala verde'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_teatros_canal_sala_verde',
+      slug: 'teatros-del-canal-sala-verde',
+      name: 'Teatros del Canal — Sala Verde',
+      ...MADRID,
+      address: 'Calle de Cea Bermúdez, 1, 28003 Madrid',
+      url: 'https://www.teatroscanal.com/',
+    },
+  },
+  {
+    keys: ['teatros del canal sala negra'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_teatros_canal_sala_negra',
+      slug: 'teatros-del-canal-sala-negra',
+      name: 'Teatros del Canal — Sala Negra',
+      ...MADRID,
+      address: 'Calle de Cea Bermúdez, 1, 28003 Madrid',
+      url: 'https://www.teatroscanal.com/',
+    },
+  },
+  {
+    keys: [
+      'teatros del canal sala de cristal',
+      'teatros del canal la cuarta sala',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_teatros_canal_sala_cristal',
+      slug: 'teatros-del-canal-sala-de-cristal',
+      name: 'Teatros del Canal — Sala de Cristal',
+      ...MADRID,
+      address: 'Calle de Cea Bermúdez, 1, 28003 Madrid',
+      url: 'https://www.teatroscanal.com/',
+    },
+  },
 ];
 
 /**
@@ -128,6 +182,13 @@ const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
   },
   'madrid-datos': {
     'jardin del bulevar de pena gorbea': 'ven_jardin_bulevar_pena_gorbea',
+  },
+  'teatros-canal': {
+    'sala roja concha velasco': 'ven_teatros_canal_sala_roja',
+    'sala roja': 'ven_teatros_canal_sala_roja',
+    'sala verde': 'ven_teatros_canal_sala_verde',
+    'sala negra': 'ven_teatros_canal_sala_negra',
+    'sala de cristal': 'ven_teatros_canal_sala_cristal',
   },
 };
 

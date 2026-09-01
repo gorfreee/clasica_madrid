@@ -130,6 +130,40 @@ describe('resolución de venue — Teatro Real / Sala Principal', () => {
   });
 });
 
+describe('resolución de venue — Teatros del Canal', () => {
+  const salaRoja = makeVenue({
+    id: 'ven_teatros_canal_sala_roja',
+    slug: 'teatros-del-canal-sala-roja',
+    name: 'Teatros del Canal — Sala Roja Concha Velasco',
+    address: 'Calle de Cea Bermúdez, 1, 28003 Madrid',
+    url: 'https://www.teatroscanal.com/',
+  });
+
+  it('con source teatros-canal, Sala Roja resuelve a la sala canónica', () => {
+    const catalog = catalogWith(salaRoja);
+    expect(matchVenue({ venueText: 'Sala Roja Concha Velasco', sourceId: 'teatros-canal' }, catalog)?.venue.id).toBe(
+      'ven_teatros_canal_sala_roja',
+    );
+    expect(matchVenue({ venueText: 'Sala Roja', sourceId: 'teatros-canal' }, catalog)?.venue.id).toBe(
+      'ven_teatros_canal_sala_roja',
+    );
+  });
+
+  it('otra source + Sala Roja no resuelve a Teatros del Canal', () => {
+    const catalog = catalogWith(salaRoja);
+    expect(matchVenue({ venueText: 'Sala Roja', sourceId: 'teatro-real' }, catalog)).toBeUndefined();
+    expect(matchVenue('Sala Roja', catalog)).toBeUndefined();
+  });
+
+  it('con source teatros-canal, Sala de Cristal resuelve a la cuarta sala', () => {
+    const catalog = catalogWith(salaRoja);
+    expect(matchVenue({ venueText: 'Sala de Cristal', sourceId: 'teatros-canal' }, catalog)?.venue.id).toBe(
+      'ven_teatros_canal_sala_cristal',
+    );
+    expect(matchVenue({ venueText: 'Sala de Cristal', sourceId: 'teatro-real' }, catalog)).toBeUndefined();
+  });
+});
+
 describe('resolución de venue — Madrid Datos', () => {
   it('un venue ya conocido por nombre exacto sigue resolviendo', () => {
     const catalog = catalogWith(teatroReal, casaVacas);
