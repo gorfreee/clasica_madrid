@@ -109,6 +109,9 @@ async function fixtureGet(url: string): Promise<string> {
   if (url.includes('wp-json/wp/v2/calendario-eventos')) {
     return '[]';
   }
+  if (url === 'https://www.realacademiabellasartessanfernando.com/actividades/conciertos/') {
+    return '<body class="archive tax-actividad_type term-conciertos term-33"><main><h1>Conciertos</h1><div class="rc-actividades-block__container"><ul class="rc-actividades-block__list"></ul></div></main></body>';
+  }
   throw new Error(`URL de test no mapeada: ${url}`);
 }
 
@@ -212,7 +215,7 @@ describe('aislamiento de fallos por fuente', () => {
       },
     });
     expect(run.summary.sourcesFailed.map((item) => item.sourceId)).toEqual(['teatro-real']);
-    expect(run.summary.sourcesSucceeded).toEqual(['auditorio-nacional', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio']);
+    expect(run.summary.sourcesSucceeded).toEqual(['auditorio-nacional', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes']);
     expect(run.rawEvents.length).toBeGreaterThan(0);
     expect(run.rawEvents.some((event) => event.sourceId === 'teatro-real')).toBe(false);
     expect(run.summary.written).toEqual([]);
@@ -232,7 +235,7 @@ describe('aislamiento de fallos por fuente', () => {
     });
     expect(run.summary.sourcesSucceeded).toEqual([]);
     expect(run.summary.sourcesFailed.map((item) => item.sourceId)).toEqual([
-      'auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio',
+      'auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes',
     ]);
     expect(run.summary.written).toEqual([]);
     expect(run.apply.report.ok).toBe(true);

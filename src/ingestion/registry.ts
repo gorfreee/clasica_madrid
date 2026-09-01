@@ -14,6 +14,7 @@ import { cndmAdapter } from './sources/cndm.ts';
 import { basilicaSanMiguelAdapter } from './sources/basilica-san-miguel.ts';
 import { fundacionPiuMossoAdapter } from './sources/fundacion-piu-mosso.ts';
 import { realHermandadRefugioAdapter } from './sources/real-hermandad-refugio.ts';
+import { realAcademiaBellasArtesAdapter } from './sources/real-academia-bellas-artes.ts';
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
@@ -31,6 +32,7 @@ const ADAPTERS: Record<string, SourceAdapter> = {
   [basilicaSanMiguelAdapter.id]: basilicaSanMiguelAdapter,
   [fundacionPiuMossoAdapter.id]: fundacionPiuMossoAdapter,
   [realHermandadRefugioAdapter.id]: realHermandadRefugioAdapter,
+  [realAcademiaBellasArtesAdapter.id]: realAcademiaBellasArtesAdapter,
 };
 
 const srcAuditorio: Source = {
@@ -257,6 +259,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Real Hermandad del Refugio',
       kind: 'official',
       url: 'https://realhermandaddelrefugio.org/',
+    },
+  },
+  {
+    id: 'real-academia-bellas-artes',
+    name: 'Real Academia de Bellas Artes de San Fernando',
+    urls: ['https://www.realacademiabellasartessanfernando.com/actividades/conciertos/'],
+    adapterId: realAcademiaBellasArtesAdapter.id,
+    catalogSourceId: 'src_real_academia_bellas_artes_san_fernando',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_real_academia_bellas_artes_san_fernando',
+      slug: 'real-academia-bellas-artes-san-fernando',
+      name: 'Real Academia de Bellas Artes de San Fernando',
+      kind: 'official',
+      url: 'https://www.realacademiabellasartessanfernando.com/',
     },
   },
 ];

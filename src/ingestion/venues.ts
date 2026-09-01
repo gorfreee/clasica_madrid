@@ -275,6 +275,21 @@ export const KNOWN_VENUES: KnownVenue[] = [
       url: 'https://realhermandaddelrefugio.org/',
     },
   },
+  {
+    keys: [
+      'real academia de bellas artes de san fernando salon de actos',
+      'real academia bellas artes san fernando salon de actos',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_real_academia_bellas_artes_salon_actos',
+      slug: 'real-academia-bellas-artes-san-fernando-salon-actos',
+      name: 'Real Academia de Bellas Artes de San Fernando — Salón de actos',
+      ...MADRID,
+      address: 'Calle de Alcalá, 13, 28014 Madrid',
+      url: 'https://www.realacademiabellasartessanfernando.com/',
+    },
+  },
 ];
 
 /**
@@ -319,6 +334,9 @@ const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
   'fundacion-piu-mosso': {
     'centro cultural casa de vacas': 'ven_casa_vacas_retiro',
     'ateneo de madrid': 'ven_ateneo_madrid',
+  },
+  'real-academia-bellas-artes': {
+    'salon de actos': 'ven_real_academia_bellas_artes_salon_actos',
   },
 };
 
