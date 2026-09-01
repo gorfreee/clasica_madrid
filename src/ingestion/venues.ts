@@ -206,6 +206,30 @@ export const KNOWN_VENUES: KnownVenue[] = [
       url: 'https://www.circulobellasartes.com/',
     },
   },
+  {
+    keys: ['ateneo de madrid'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_ateneo_madrid',
+      slug: 'ateneo-de-madrid',
+      name: 'Ateneo de Madrid',
+      ...MADRID,
+      address: 'Calle del Prado, 21, 28014 Madrid',
+      url: 'https://www.ateneodemadrid.com/',
+    },
+  },
+  {
+    keys: ['centro cultural casa de vacas', 'casa de vacas del retiro'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_casa_vacas_retiro',
+      slug: 'casa-de-vacas-retiro',
+      name: 'Centro Cultural Casa de Vacas',
+      ...MADRID,
+      address: 'Paseo de Colombia, s/n, Parque de El Retiro, 28009 Madrid',
+      url: 'https://www.madrid.es/',
+    },
+  },
 ];
 
 /**
@@ -239,6 +263,10 @@ const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
   'circulo-bellas-artes': {
     'teatro fernando de rojas': 'ven_circulo_bellas_artes_teatro_fernando_de_rojas',
     'sala de columnas': 'ven_circulo_bellas_artes_sala_columnas',
+  },
+  'fundacion-piu-mosso': {
+    'centro cultural casa de vacas': 'ven_casa_vacas_retiro',
+    'ateneo de madrid': 'ven_ateneo_madrid',
   },
 };
 
