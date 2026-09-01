@@ -12,6 +12,7 @@ import { teatrosCanalAdapter } from './sources/teatros-canal.ts';
 import { circuloBellasArtesAdapter } from './sources/circulo-bellas-artes.ts';
 import { cndmAdapter } from './sources/cndm.ts';
 import { basilicaSanMiguelAdapter } from './sources/basilica-san-miguel.ts';
+import { fundacionPiuMossoAdapter } from './sources/fundacion-piu-mosso.ts';
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
@@ -27,6 +28,7 @@ const ADAPTERS: Record<string, SourceAdapter> = {
   [teatrosCanalAdapter.id]: teatrosCanalAdapter,
   [cndmAdapter.id]: cndmAdapter,
   [basilicaSanMiguelAdapter.id]: basilicaSanMiguelAdapter,
+  [fundacionPiuMossoAdapter.id]: fundacionPiuMossoAdapter,
 };
 
 const srcAuditorio: Source = {
@@ -223,6 +225,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Basílica Pontificia de San Miguel',
       kind: 'official',
       url: 'https://basilicadesanmiguel.org/',
+    },
+  },
+  {
+    id: 'fundacion-piu-mosso',
+    name: 'Fundación Più Mosso',
+    urls: ['https://www.fundacionpiumosso.com/programacion/'],
+    adapterId: fundacionPiuMossoAdapter.id,
+    catalogSourceId: 'src_fundacionpiumosso_com',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_fundacionpiumosso_com',
+      slug: 'fundacion-piu-mosso',
+      name: 'Fundación Più Mosso',
+      kind: 'official',
+      url: 'https://www.fundacionpiumosso.com/',
     },
   },
 ];

@@ -245,6 +245,18 @@ export const KNOWN_VENUES: KnownVenue[] = [
       url: 'https://basilicadesanmiguel.org/',
     },
   },
+  {
+    keys: ['centro cultural casa de vacas', 'casa de vacas del retiro'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_casa_vacas_retiro',
+      slug: 'casa-de-vacas-retiro',
+      name: 'Centro Cultural Casa de Vacas',
+      ...MADRID,
+      address: 'Paseo de Colombia, s/n, Parque de El Retiro, 28009 Madrid',
+      url: 'https://www.madrid.es/',
+    },
+  },
 ];
 
 /**
@@ -285,6 +297,10 @@ const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
     'teatro de la zarzuela madrid': 'ven_teatro_zarzuela',
     'ateneo de madrid catedra mayor': 'ven_ateneo_madrid',
     'museo reina sofia a400 madrid': 'ven_museo_reina_sofia_auditorio_400',
+  },
+  'fundacion-piu-mosso': {
+    'centro cultural casa de vacas': 'ven_casa_vacas_retiro',
+    'ateneo de madrid': 'ven_ateneo_madrid',
   },
 };
 
