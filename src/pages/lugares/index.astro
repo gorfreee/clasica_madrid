@@ -11,7 +11,7 @@ const model = await loadVenuesIndex();
   <header class="page-header">
     <p class="eyebrow">Lugares</p>
     <h1>Dónde suena</h1>
-    <p class="lede">Espacios con conciertos próximos. El listado crece con el catálogo.</p>
+    <p class="lede">Espacios con programación próxima, ordenados por la fecha más cercana.</p>
   </header>
 
   {
@@ -21,19 +21,59 @@ const model = await loadVenuesIndex();
         body="Cuando el catálogo tenga eventos verificados, sus espacios aparecerán aquí."
       />
     ) : (
-      <ul class="venue-list">
-        {model.venues.map((venue) => (
-          <li>
-            <a href={venue.href}>
-              <span class="venue-list__name">{venue.name}</span>
-              <span class="venue-list__meta">
-                {venue.showMunicipality ? `${venue.municipality} · ` : ''}
-                {venueUpcomingSummary(venue.upcomingCount)}
-              </span>
-            </a>
-          </li>
-        ))}
-      </ul>
+      <>
+        <div class="venue-toolbar">
+          <label class="field">
+            <span>Buscar un lugar</span>
+            <input type="search" data-venue-filter placeholder="Nombre o municipio" />
+          </label>
+        </div>
+        <p class="empty-state" data-venue-filter-empty hidden>Ningún lugar coincide con esa búsqueda.</p>
+        <ul class="venue-list">
+          {model.venues.map((venue) => (
+            <li
+              class="venue-list__item"
+              data-venue-row={`${venue.name} ${venue.municipality}`}
+            >
+              <a href={venue.href}>
+                <span class="venue-list__name">{venue.name}</span>
+                <span class="venue-list__count">{venueUpcomingSummary(venue.upcomingCount)}</span>
+                <span class="venue-list__meta">
+                  {venue.showMunicipality ? `${venue.municipality} · ` : ''}
+                  {venue.nextDateLabel ? `próximo ${venue.nextDateLabel}` : ''}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+        {
+          model.inactiveVenues.length > 0 && (
+            <details class="catalog-rest" id="todos-los-lugares">
+              <summary>Ver todos los lugares</summary>
+              <ul class="venue-list">
+                {model.inactiveVenues.map((venue) => (
+                  <li
+                    class="venue-list__item"
+                    data-venue-row={`${venue.name} ${venue.municipality}`}
+                  >
+                    <a href={venue.href}>
+                      <span class="venue-list__name">{venue.name}</span>
+                      <span class="venue-list__count">Sin próximos</span>
+                      <span class="venue-list__meta">
+                        {venue.showMunicipality ? venue.municipality : venue.areaLabel}
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )
+        }
+        <script>
+          import { initVenueIndex } from '../../lib/presentation/agenda-client.ts';
+          initVenueIndex();
+        </script>
+      </>
     )
   }
 </Layout>

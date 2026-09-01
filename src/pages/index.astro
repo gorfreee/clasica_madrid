@@ -11,12 +11,8 @@ const model = await loadAgendaPage(Astro.url);
 
 <Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath}>
   <header class="page-header">
-    <p class="eyebrow">Agenda</p>
-    <h1>Música clásica en Madrid</h1>
-    <p class="lede">
-      Conciertos y eventos con fuente original. El catálogo cubre el municipio de Madrid y, cuando
-      tiene sentido, municipios próximos.
-    </p>
+    <h1 class="page-title page-title--quiet">Agenda</h1>
+    <p class="lede lede--compact">Qué música clásica se puede escuchar en Madrid.</p>
   </header>
 
   {

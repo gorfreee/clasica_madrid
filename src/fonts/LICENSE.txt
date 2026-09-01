@@ -1,0 +1,9 @@
+IBM Plex Sans
+Copyright © 2017 IBM Corp. with Reserved Font Name "Plex"
+Licensed under the SIL Open Font License, Version 1.1.
+https://github.com/IBM/plex
+
+Newsreader
+Copyright 2020 The Newsreader Project Authors
+Licensed under the SIL Open Font License, Version 1.1.
+https://github.com/productiontype/Newsreader

@@ -1,12 +1,21 @@
 import type { Catalog } from '../domain/catalog.ts';
 import type { FilterableOccurrence } from '../domain/filters.ts';
 import { toFilterable } from '../domain/filters.ts';
-import { formatMadridDate } from '../domain/dates.ts';
+import { formatMadridDate, madridToday } from '../domain/dates.ts';
 import { listUpcomingOccurrences, type Clock, systemClock } from '../domain/index.ts';
 import type { ResolvedOccurrence } from '../domain/resolve.ts';
 import { accessLabels, areaLabels, eraLabels, formatLabels, kindLabels, occurrenceCountLabel } from './labels.ts';
 import { ACCESS_MODES, AREAS, ERAS, EVENT_KINDS, FORMATS } from '../schemas/taxonomies.ts';
 import { isMadridMunicipality } from '../domain/normalize.ts';
+import {
+  addIsoDays,
+  buildAgendaShortcuts,
+  formatDayNumber,
+  formatMonthYear,
+  formatWeekdayLabel,
+  type AgendaShortcut,
+} from './calendar.ts';
+import { agendaContextLine } from './context.ts';
 
 export type TaxonomyOption = {
   id: string;
@@ -28,12 +37,14 @@ export type AgendaItemModel = {
   showMunicipality: boolean;
   areaLabel: string;
   seriesName: string | null;
+  contextLine: string | null;
   performers: string[];
   composers: string[];
   formats: TaxonomyOption[];
   eras: TaxonomyOption[];
   kind: TaxonomyOption;
   access: TaxonomyOption;
+  isFree: boolean;
   sourceUrl: string;
   sourceLabel: string;
 };
@@ -41,6 +52,13 @@ export type AgendaItemModel = {
 export type AgendaDayModel = {
   date: string;
   dateLabel: string;
+  weekdayLabel: string;
+  dayNumber: string;
+  monthLabel: string;
+  isToday: boolean;
+  isTomorrow: boolean;
+  isEmpty: boolean;
+  monthBreak: boolean;
   items: AgendaItemModel[];
 };
 
@@ -57,6 +75,7 @@ export type AgendaPageModel = {
   canonicalPath: string;
   isEmptyCatalog: boolean;
   hasUpcoming: boolean;
+  today: string;
   query: string;
   from: string;
   to: string;
@@ -67,6 +86,7 @@ export type AgendaPageModel = {
   selectFilters: FilterFieldModel[];
   composer: string;
   composerSuggestions: string[];
+  shortcuts: AgendaShortcut[];
   filterIndex: FilterableOccurrence[];
 };
 
@@ -77,15 +97,18 @@ export function buildAgendaPageModel(
   _url?: URL,
   clock: Clock = systemClock,
 ): AgendaPageModel {
+  const today = madridToday(clock.now());
   const upcoming = listUpcomingOccurrences(catalog, clock);
-  const days = groupByDate(upcoming.map(toAgendaItem));
+  const isEmptyCatalog = catalog.events.length === 0;
+  const days = isEmptyCatalog ? [] : groupByDate(upcoming.map(toAgendaItem), today);
   return {
     title: 'Agenda de música clásica en Madrid',
     description:
       'Conciertos y eventos de música clásica en Madrid y su entorno inmediato, con fuente original.',
     canonicalPath: '/',
-    isEmptyCatalog: catalog.events.length === 0,
+    isEmptyCatalog,
     hasUpcoming: upcoming.length > 0,
+    today,
     query: '',
     from: '',
     to: '',
@@ -96,6 +119,7 @@ export function buildAgendaPageModel(
     selectFilters: buildSelectFilters(upcoming),
     composer: '',
     composerSuggestions: unique(upcoming.flatMap((item) => item.resolved.event.composers.map((c) => c.name))),
+    shortcuts: buildAgendaShortcuts(today),
     filterIndex: upcoming.map(toFilterable),
   };
 }
@@ -117,28 +141,57 @@ export function toAgendaItem(item: ResolvedOccurrence): AgendaItemModel {
     showMunicipality: !isMadridMunicipality(venue.municipality),
     areaLabel: areaLabels[venue.area],
     seriesName: series?.name ?? null,
+    contextLine: agendaContextLine(event.performers, event.composers.map((composer) => composer.name)),
     performers: event.performers.map((performer) => performer.name),
     composers: event.composers.map((composer) => composer.name),
     formats: event.formats.map((id) => ({ id, label: formatLabels[id] })),
     eras: event.eras.map((id) => ({ id, label: eraLabels[id] })),
     kind: { id: event.kind, label: kindLabels[event.kind] },
     access: { id: event.access, label: accessLabels[event.access] },
+    isFree: event.access === 'free',
     sourceUrl: primaryCitation.url,
     sourceLabel: primaryCitation.source.name,
   };
 }
 
-function groupByDate(items: AgendaItemModel[]): AgendaDayModel[] {
+function groupByDate(items: AgendaItemModel[], today: string): AgendaDayModel[] {
+  const tomorrow = addIsoDays(today, 1);
   const days: AgendaDayModel[] = [];
   for (const item of items) {
     const last = days.at(-1);
     if (last && last.date === item.date) {
       last.items.push(item);
     } else {
-      days.push({ date: item.date, dateLabel: item.dateLabel, items: [item] });
+      days.push(toDayModel(item.date, [item], today, tomorrow, last?.date ?? null));
     }
   }
+  if (items.length > 0 && !days.some((day) => day.date === today)) {
+    days.unshift(toDayModel(today, [], today, tomorrow, null));
+    const next = days[1];
+    if (next) next.monthBreak = next.date.slice(0, 7) !== today.slice(0, 7);
+  }
   return days;
+}
+
+function toDayModel(
+  date: string,
+  items: AgendaItemModel[],
+  today: string,
+  tomorrow: string,
+  previousDate: string | null,
+): AgendaDayModel {
+  return {
+    date,
+    dateLabel: formatMadridDate(date),
+    weekdayLabel: formatWeekdayLabel(date),
+    dayNumber: formatDayNumber(date),
+    monthLabel: formatMonthYear(date),
+    isToday: date === today,
+    isTomorrow: date === tomorrow,
+    isEmpty: items.length === 0,
+    monthBreak: Boolean(previousDate && previousDate.slice(0, 7) !== date.slice(0, 7)),
+    items,
+  };
 }
 
 function buildSelectFilters(upcoming: ResolvedOccurrence[]): FilterFieldModel[] {
@@ -186,10 +239,10 @@ function buildSelectFilters(upcoming: ResolvedOccurrence[]): FilterFieldModel[] 
     },
     {
       name: 'kind',
-      label: 'Contexto',
+      label: 'Programación',
       value: '',
       options: [
-        { value: '', label: 'Cualquier contexto' },
+        { value: '', label: 'Cualquier programación' },
         ...EVENT_KINDS.map((id) => ({ value: id, label: kindLabels[id] })),
       ],
     },

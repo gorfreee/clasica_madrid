@@ -5,7 +5,13 @@ import {
   madridDateTimeIso,
   nextUpcomingOccurrence,
 } from '../domain/dates.ts';
-import { findEventBySlug, listCanonicalEvents, type Clock, systemClock } from '../domain/index.ts';
+import {
+  findEventBySlug,
+  listCanonicalEvents,
+  listUpcomingOccurrences,
+  type Clock,
+  systemClock,
+} from '../domain/index.ts';
 import type { ResolvedEvent } from '../domain/resolve.ts';
 import { isMadridMunicipality } from '../domain/normalize.ts';
 import {
@@ -21,6 +27,8 @@ import {
 } from './labels.ts';
 import type { Event, Occurrence } from '../schemas/event.ts';
 import { SITE_ORIGIN } from './constants.ts';
+import { toAgendaItem, type AgendaItemModel } from './agenda.ts';
+import { groupWorksByComposer, mapsSearchHref, type ProgramGroup } from './context.ts';
 
 export type EventOccurrenceModel = {
   id: string;
@@ -39,22 +47,30 @@ export type EventPageModel = {
   slug: string;
   statusLabel: string;
   isPast: boolean;
+  isCancelled: boolean;
+  isPostponed: boolean;
   venueName: string;
   venueHref: string;
   venueAddress: string | null;
   municipality: string;
   showMunicipality: boolean;
+  mapsHref: string;
   seriesName: string | null;
   seriesKind: string | null;
   organizers: string[];
   performers: { name: string; role?: string }[];
   composers: string[];
   works: { title: string; composerName?: string }[];
+  program: ProgramGroup[];
   formats: { id: string; label: string }[];
   eras: { id: string; label: string }[];
   kind: { id: string; label: string };
   access: { id: string; label: string };
+  isFree: boolean;
   occurrences: EventOccurrenceModel[];
+  headlineDateLabel: string | null;
+  headlineTime: string | null;
+  timeUnknown: boolean;
   sources: {
     name: string;
     url: string;
@@ -62,6 +78,10 @@ export type EventPageModel = {
     checkedAt: string;
     isPrimary: boolean;
   }[];
+  primarySourceUrl: string;
+  primarySourceName: string;
+  relatedVenue: AgendaItemModel[];
+  relatedSeries: AgendaItemModel[];
   lastVerifiedAt: string;
   jsonLd: Record<string, unknown>[];
 };
@@ -77,15 +97,37 @@ export function buildEventPageModel(
 ): EventPageModel | null {
   const resolved = findEventBySlug(catalog, slug);
   if (!resolved) return null;
-  return toEventPageModel(resolved, clock);
+  return toEventPageModel(resolved, clock, catalog);
 }
 
-export function toEventPageModel(resolved: ResolvedEvent, clock: Clock = systemClock): EventPageModel {
-  const { event, venue, series, organizers, citations } = resolved;
+export function toEventPageModel(
+  resolved: ResolvedEvent,
+  clock: Clock = systemClock,
+  catalog?: Catalog,
+): EventPageModel {
+  const { event, venue, series, organizers, citations, primaryCitation } = resolved;
   const now = clock.now();
   const next = nextUpcomingOccurrence(event.occurrences, now);
   const isPast = event.status === 'scheduled' && !hasUpcomingOccurrence(event.occurrences, now);
   const description = buildEventDescription(resolved, next, isPast);
+  const works = event.works.map((work) => ({
+    title: work.title,
+    composerName: work.composerName,
+  }));
+  const occurrences = event.occurrences
+    .slice()
+    .sort((a, b) => a.date.localeCompare(b.date) || (a.time ?? '').localeCompare(b.time ?? ''))
+    .map((occurrence) => ({
+      id: occurrence.id,
+      date: occurrence.date,
+      dateLabel: formatMadridDate(occurrence.date),
+      time: occurrence.time,
+      status: occurrenceStatusLabels[occurrence.status],
+      isCancelled: occurrence.status === 'cancelled',
+      startIso: madridDateTimeIso(occurrence.date, occurrence.time),
+    }));
+  const headline = next ?? (isPast ? lastScheduledOccurrence(event.occurrences) : event.occurrences[0]);
+  const related = catalog ? relatedAgendaItems(catalog, event.id, venue.id, series?.id ?? null, clock) : { venue: [], series: [] };
   return {
     title: event.title,
     description,
@@ -93,11 +135,14 @@ export function toEventPageModel(resolved: ResolvedEvent, clock: Clock = systemC
     slug: event.slug,
     statusLabel: eventStatusLabel(event.status),
     isPast,
+    isCancelled: event.status === 'cancelled',
+    isPostponed: event.status === 'postponed',
     venueName: venue.name,
     venueHref: `/lugares/${venue.slug}`,
     venueAddress: venue.address ?? null,
     municipality: venue.municipality,
     showMunicipality: !isMadridMunicipality(venue.municipality),
+    mapsHref: mapsSearchHref([venue.address, venue.name, venue.municipality]),
     seriesName: series?.name ?? null,
     seriesKind: series ? seriesKindLabels[series.kind] : null,
     organizers: organizers.map((organizer) => organizer.name),
@@ -106,26 +151,17 @@ export function toEventPageModel(resolved: ResolvedEvent, clock: Clock = systemC
       role: performer.role ? performerRoleLabels[performer.role] : undefined,
     })),
     composers: event.composers.map((composer) => composer.name),
-    works: event.works.map((work) => ({
-      title: work.title,
-      composerName: work.composerName,
-    })),
+    works,
+    program: groupWorksByComposer(works),
     formats: event.formats.map((id) => ({ id, label: formatLabels[id] })),
     eras: event.eras.map((id) => ({ id, label: eraLabels[id] })),
     kind: { id: event.kind, label: kindLabels[event.kind] },
     access: { id: event.access, label: accessLabels[event.access] },
-    occurrences: event.occurrences
-      .slice()
-      .sort((a, b) => a.date.localeCompare(b.date) || (a.time ?? '').localeCompare(b.time ?? ''))
-      .map((occurrence) => ({
-        id: occurrence.id,
-        date: occurrence.date,
-        dateLabel: formatMadridDate(occurrence.date),
-        time: occurrence.time,
-        status: occurrenceStatusLabels[occurrence.status],
-        isCancelled: occurrence.status === 'cancelled',
-        startIso: madridDateTimeIso(occurrence.date, occurrence.time),
-      })),
+    isFree: event.access === 'free',
+    occurrences,
+    headlineDateLabel: headline ? formatMadridDate(headline.date) : null,
+    headlineTime: headline?.time ?? null,
+    timeUnknown: Boolean(headline && headline.time === null),
     sources: citations.map((citation) => ({
       name: citation.source.name,
       url: citation.url,
@@ -133,8 +169,30 @@ export function toEventPageModel(resolved: ResolvedEvent, clock: Clock = systemC
       checkedAt: citation.checkedAt,
       isPrimary: citation.isPrimary,
     })),
+    primarySourceUrl: primaryCitation.url,
+    primarySourceName: primaryCitation.source.name,
+    relatedVenue: related.venue,
+    relatedSeries: related.series,
     lastVerifiedAt: event.lastVerifiedAt,
     jsonLd: buildMusicEventJsonLd(resolved),
+  };
+}
+
+function relatedAgendaItems(
+  catalog: Catalog,
+  eventId: string,
+  venueId: string,
+  seriesId: string | null,
+  clock: Clock,
+): { venue: AgendaItemModel[]; series: AgendaItemModel[] } {
+  const upcoming = listUpcomingOccurrences(catalog, clock).filter(
+    (item) => item.resolved.event.id !== eventId,
+  );
+  return {
+    venue: upcoming.filter((item) => item.resolved.venue.id === venueId).slice(0, 5).map(toAgendaItem),
+    series: seriesId
+      ? upcoming.filter((item) => item.resolved.series?.id === seriesId).slice(0, 5).map(toAgendaItem)
+      : [],
   };
 }
 
