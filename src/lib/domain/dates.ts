@@ -120,13 +120,14 @@ function formatOffset(instant: Date): string {
 
 export function formatMadridDate(date: string, locale = 'es-ES'): string {
   const instant = fromMadridLocal(date, '12:00');
-  return new Intl.DateTimeFormat(locale, {
+  const label = new Intl.DateTimeFormat(locale, {
     timeZone: MADRID_TIME_ZONE,
     weekday: 'long',
     day: 'numeric',
     month: 'long',
     year: 'numeric',
   }).format(instant);
+  return label.charAt(0).toLocaleUpperCase(locale) + label.slice(1);
 }
 
 export function formatMadridTime(time: string | null): string | null {

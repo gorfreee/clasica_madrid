@@ -6,39 +6,30 @@ type Props = {
 };
 
 const { item } = Astro.props;
-const timeLabel = item.time ?? 'Hora no indicada';
+const timeLabel = item.time ?? 'Sin hora';
 ---
 {/* Contrato UI interno: [data-occurrence-id] lo usa agenda-client.ts. */}
 
 <article class="agenda-item" data-occurrence-id={item.occurrenceId}>
-  <p class="agenda-item__when">
-    <time datetime={`${item.date}${item.time ? `T${item.time}` : ''}`}>{item.date}</time>
-    <span aria-label={item.time ? `A las ${item.time}` : 'Hora no indicada'}>{timeLabel}</span>
+  <p class:list={['agenda-item__time', { 'agenda-item__time--unknown': !item.time }]}>
+    <time
+      datetime={`${item.date}${item.time ? `T${item.time}` : ''}`}
+      aria-label={item.time ? `${item.dateLabel}, a las ${item.time}` : `${item.dateLabel}, hora no indicada`}
+    >{timeLabel}</time>
   </p>
-  <h3 class="agenda-item__title">
-    <a href={item.href}>{item.title}</a>
-  </h3>
-  <p class="agenda-item__meta">
-    <a href={item.venueHref}>{item.venueName}</a>
-    {item.showMunicipality && <span> · {item.municipality}</span>}
-    {item.seriesName && <span> · {item.seriesName}</span>}
+  <div class="agenda-item__main">
+    <h3 class="agenda-item__title">
+      <a href={item.href}>{item.title}</a>
+    </h3>
+    {item.contextLine && <p class="agenda-item__context">{item.contextLine}</p>}
+    {item.descriptorLine && <p class="agenda-item__descriptor">{item.descriptorLine}</p>}
+  </div>
+  <p class="agenda-item__place">
+    <a href={item.venueHref} aria-label={`Ver lugar: ${item.venueName}`}>{item.venueName}</a>
+    {item.showMunicipality && <span class="agenda-item__municipality">{item.municipality}</span>}
   </p>
-  {
-    (item.performers.length > 0 || item.composers.length > 0) && (
-      <p class="agenda-item__people">
-        {item.performers.length > 0 && <span>{item.performers.join(', ')}</span>}
-        {item.performers.length > 0 && item.composers.length > 0 && <span> · </span>}
-        {item.composers.length > 0 && <span>{item.composers.join(', ')}</span>}
-      </p>
-    )
-  }
-  <ul class="chip-list">
-    {item.formats.map((format) => <li>{format.label}</li>)}
-    {item.eras.map((era) => <li>{era.label}</li>)}
-    <li>{item.kind.label}</li>
-    <li>{item.access.label}</li>
-  </ul>
-  <p class="agenda-item__source">
-    <a href={item.sourceUrl} rel="noopener noreferrer">Fuente: {item.sourceLabel}</a>
+  <p class="agenda-item__signals">
+    {item.access.id === 'free' && <span class="agenda-item__free">Entrada libre</span>}
+    {item.formats[0] && <span>{item.formats[0].label}</span>}
   </p>
 </article>

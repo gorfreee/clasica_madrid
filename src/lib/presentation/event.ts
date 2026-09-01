@@ -7,7 +7,14 @@ import {
 } from '../domain/dates.ts';
 import { findEventBySlug, listCanonicalEvents, type Clock, systemClock } from '../domain/index.ts';
 import type { ResolvedEvent } from '../domain/resolve.ts';
+import { listUpcomingOccurrences } from '../domain/queries.ts';
 import { isMadridMunicipality } from '../domain/normalize.ts';
+import {
+  groupAgendaItemsByDate,
+  toAgendaItem,
+  type AgendaDayModel,
+  type AgendaItemModel,
+} from './agenda.ts';
 import {
   accessLabels,
   eraLabels,
@@ -63,6 +70,8 @@ export type EventPageModel = {
     isPrimary: boolean;
   }[];
   lastVerifiedAt: string;
+  relatedAtVenue: AgendaItemModel[];
+  relatedAtVenueDays: AgendaDayModel[];
   jsonLd: Record<string, unknown>[];
 };
 
@@ -77,15 +86,27 @@ export function buildEventPageModel(
 ): EventPageModel | null {
   const resolved = findEventBySlug(catalog, slug);
   if (!resolved) return null;
-  return toEventPageModel(resolved, clock);
+  return toEventPageModel(resolved, clock, catalog);
 }
 
-export function toEventPageModel(resolved: ResolvedEvent, clock: Clock = systemClock): EventPageModel {
+export function toEventPageModel(
+  resolved: ResolvedEvent,
+  clock: Clock = systemClock,
+  catalog?: Catalog,
+): EventPageModel {
   const { event, venue, series, organizers, citations } = resolved;
   const now = clock.now();
   const next = nextUpcomingOccurrence(event.occurrences, now);
   const isPast = event.status === 'scheduled' && !hasUpcomingOccurrence(event.occurrences, now);
   const description = buildEventDescription(resolved, next, isPast);
+  const relatedAtVenue = catalog
+    ? listUpcomingOccurrences(catalog, clock)
+        .filter(
+          (item) => item.resolved.venue.id === venue.id && item.resolved.event.id !== event.id,
+        )
+        .slice(0, 4)
+        .map(toAgendaItem)
+    : [];
   return {
     title: event.title,
     description,
@@ -134,6 +155,8 @@ export function toEventPageModel(resolved: ResolvedEvent, clock: Clock = systemC
       isPrimary: citation.isPrimary,
     })),
     lastVerifiedAt: event.lastVerifiedAt,
+    relatedAtVenue,
+    relatedAtVenueDays: groupAgendaItemsByDate(relatedAtVenue, clock),
     jsonLd: buildMusicEventJsonLd(resolved),
   };
 }
