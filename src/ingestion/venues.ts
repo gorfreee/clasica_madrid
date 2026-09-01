@@ -206,6 +206,18 @@ export const KNOWN_VENUES: KnownVenue[] = [
       url: 'https://www.circulobellasartes.com/',
     },
   },
+  {
+    keys: ['basilica pontificia de san miguel', 'basilica de san miguel'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_basilica_pontificia_san_miguel',
+      slug: 'basilica-pontificia-de-san-miguel',
+      name: 'Basílica Pontificia de San Miguel',
+      ...MADRID,
+      address: 'Calle de San Justo, 4, 28005 Madrid',
+      url: 'https://basilicadesanmiguel.org/',
+    },
+  },
 ];
 
 /**

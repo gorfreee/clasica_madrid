@@ -537,6 +537,7 @@ function classicalConcertSeries(facts: ObservedFacts, haystack: string): Inclusi
     hasPhrase(haystack, 'festival internacional de piano') ||
     hasPhrase(haystack, 'ciclo de organo') ||
     hasPhrase(haystack, 'conciertos de organo') ||
+    hasPhrase(haystack, 'ciclo internacional de organo') ||
     hasPhrase(haystack, 'ciclo de grandes autores');
   if (!seriesCue) return undefined;
 

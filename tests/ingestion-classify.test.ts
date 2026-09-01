@@ -477,6 +477,19 @@ describe('eligibility — conflictos y fallback', () => {
     );
     expect(festival.eligibility.value).toBe('include');
     expect(festival.eligibility.ruleId).toBe('classical-concert-series');
+
+    const organ = classify(
+      facts({
+        title: 'Concierto de Mineko Kojima',
+        categoryText: 'Ciclo Internacional de Órgano; Conciertos',
+        seriesText: 'Ciclo Internacional de Órgano',
+        venueText: 'Basílica Pontificia de San Miguel',
+      }),
+    );
+    expect(organ.eligibility.value).toBe('include');
+    expect(organ.eligibility.ruleId).toBe('classical-concert-series');
+    expect(organ.kind.value).toBe('established');
+    expect(organ.formats.value).toContain('organ');
   });
 
   it('excluye open piano y jam participativa aunque el festival sea de piano clásico', () => {

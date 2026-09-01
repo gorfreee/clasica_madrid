@@ -1,0 +1,124 @@
+{
+  "events": [
+    {
+      "id": 4613,
+      "status": "publish",
+      "url": "https://basilicadesanmiguel.org/actividad/concierto-de-mineko-kojima/",
+      "title": "Concierto de Mineko Kojima",
+      "description": "",
+      "excerpt": "",
+      "slug": "concierto-de-mineko-kojima",
+      "all_day": false,
+      "start_date": "2026-09-15 20:00:00",
+      "end_date": "2026-09-15 21:00:00",
+      "timezone": "UTC+0",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "id": 23,
+          "name": "Ciclo Internacional de Órgano",
+          "slug": "ciclo-internacional-de-organo"
+        },
+        {
+          "id": 24,
+          "name": "Conciertos",
+          "slug": "conciertos"
+        }
+      ],
+      "venue": {
+        "id": 3192,
+        "url": "https://basilicadesanmiguel.org/recinto/basilica-pontificia-de-san-miguel/",
+        "venue": "Basílica Pontificia de San Miguel",
+        "slug": "basilica-pontificia-de-san-miguel",
+        "address": "C. de San Justo, 4, Centro, 28005 Madrid"
+      },
+      "organizer": []
+    },
+    {
+      "id": 4627,
+      "status": "publish",
+      "url": "https://basilicadesanmiguel.org/actividad/concierto-de-juan-de-la-rubia/",
+      "title": "Concierto de Juan de la Rubia",
+      "description": "",
+      "excerpt": "",
+      "slug": "concierto-de-juan-de-la-rubia",
+      "all_day": false,
+      "start_date": "2026-11-04 20:00:00",
+      "end_date": "2026-11-04 21:00:00",
+      "timezone": "UTC+0",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "id": 23,
+          "name": "Ciclo Internacional de Órgano",
+          "slug": "ciclo-internacional-de-organo"
+        },
+        {
+          "id": 24,
+          "name": "Conciertos",
+          "slug": "conciertos"
+        }
+      ],
+      "venue": {
+        "id": 3192,
+        "url": "https://basilicadesanmiguel.org/recinto/basilica-pontificia-de-san-miguel/",
+        "venue": "Basílica Pontificia de San Miguel",
+        "slug": "basilica-pontificia-de-san-miguel",
+        "address": "C. de San Justo, 4, Centro, 28005 Madrid"
+      },
+      "organizer": []
+    },
+    {
+      "id": 3190,
+      "status": "publish",
+      "url": "https://basilicadesanmiguel.org/actividad/adoracion-eucaristica/",
+      "title": "Adoración Eucarística",
+      "description": "",
+      "excerpt": "",
+      "slug": "adoracion-eucaristica",
+      "all_day": false,
+      "start_date": "2026-04-30 19:15:00",
+      "end_date": "2026-04-30 20:15:00",
+      "timezone": "UTC+0",
+      "cost": "",
+      "website": "",
+      "categories": [],
+      "venue": [],
+      "organizer": []
+    },
+    {
+      "id": 3264,
+      "status": "publish",
+      "url": "https://basilicadesanmiguel.org/actividad/syrinx-flauta-y-organo-en-dialogo-en-la-basilica-de-san-miguel/",
+      "title": "SYRINX «Flauta y órgano en diálogo en la Basílica de San Miguel»",
+      "description": "<h4><span style=\"color: #0000ff;\"><em><a style=\"color: #0000ff;\" href=\"https://basilicadesanmiguel.org/programa-synrix/\">PROGRAMA: SYNRIX</a></em></span></h4>\n<h4><em>Una experiencia sonora que une aliento, espacio y emoción.</em></h4>\n<h4><em>Con Tomás Alcocer y Héctor Guerrero</em></h4>\n<h4><em><strong>Reserva de Localidades:</strong> <span style=\"color: #0000ff;\"><a style=\"color: #0000ff;\" href=\"https://vc.vivaticket.es/espectaculo/syrinx/SYRINX26\">https://vc.vivaticket.es/espectaculo/syrinx/SYRINX26</a></span></em></h4>",
+      "excerpt": "",
+      "slug": "syrinx-flauta-y-organo-en-dialogo-en-la-basilica-de-san-miguel",
+      "all_day": false,
+      "start_date": "2026-05-10 19:30:00",
+      "end_date": "2026-05-10 20:30:00",
+      "timezone": "UTC+0",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "id": 23,
+          "name": "Ciclo Internacional de Órgano",
+          "slug": "ciclo-internacional-de-organo"
+        }
+      ],
+      "venue": {
+        "id": 3192,
+        "url": "https://basilicadesanmiguel.org/recinto/basilica-pontificia-de-san-miguel/",
+        "venue": "Basílica Pontificia de San Miguel",
+        "slug": "basilica-pontificia-de-san-miguel",
+        "address": "C. de San Justo, 4, Centro, 28005 Madrid"
+      },
+      "organizer": []
+    }
+  ],
+  "total": 4,
+  "total_pages": 1
+}

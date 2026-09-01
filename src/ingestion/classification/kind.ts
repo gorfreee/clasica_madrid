@@ -29,6 +29,7 @@ const ESTABLISHED_PHRASES = [
   'bach vermut',
   'festival de ensembles',
   'ciclo internacional de conciertos de organo',
+  'ciclo internacional de organo',
   'ciclo sinfonico',
   'orquesta filarmonica espanola',
   'orquesta de la comunidad de madrid',

@@ -1,0 +1,181 @@
+{
+  "events": [
+    {
+      "id": 4613,
+      "status": "publish",
+      "url": "https://basilicadesanmiguel.org/actividad/concierto-de-mineko-kojima/",
+      "title": "Concierto de Mineko Kojima",
+      "description": "",
+      "excerpt": "",
+      "slug": "concierto-de-mineko-kojima",
+      "all_day": false,
+      "start_date": "2026-09-15 20:00:00",
+      "end_date": "2026-09-15 21:00:00",
+      "timezone": "UTC+0",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "id": 23,
+          "name": "Ciclo Internacional de Órgano",
+          "slug": "ciclo-internacional-de-organo"
+        },
+        {
+          "id": 24,
+          "name": "Conciertos",
+          "slug": "conciertos"
+        }
+      ],
+      "venue": {
+        "id": 3192,
+        "url": "https://basilicadesanmiguel.org/recinto/basilica-pontificia-de-san-miguel/",
+        "venue": "Basílica Pontificia de San Miguel",
+        "slug": "basilica-pontificia-de-san-miguel",
+        "address": "C. de San Justo, 4, Centro, 28005 Madrid"
+      },
+      "organizer": []
+    },
+    {
+      "id": 4621,
+      "status": "publish",
+      "url": "https://basilicadesanmiguel.org/actividad/concierto-de-lucie-zakova/",
+      "title": "Concierto de Lucie Žáková",
+      "description": "",
+      "excerpt": "",
+      "slug": "concierto-de-lucie-zakova",
+      "all_day": false,
+      "start_date": "2026-10-04 20:00:00",
+      "end_date": "2026-10-04 21:00:00",
+      "timezone": "UTC+0",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "id": 23,
+          "name": "Ciclo Internacional de Órgano",
+          "slug": "ciclo-internacional-de-organo"
+        },
+        {
+          "id": 24,
+          "name": "Conciertos",
+          "slug": "conciertos"
+        }
+      ],
+      "venue": {
+        "id": 3192,
+        "url": "https://basilicadesanmiguel.org/recinto/basilica-pontificia-de-san-miguel/",
+        "venue": "Basílica Pontificia de San Miguel",
+        "slug": "basilica-pontificia-de-san-miguel",
+        "address": "C. de San Justo, 4, Centro, 28005 Madrid"
+      },
+      "organizer": []
+    },
+    {
+      "id": 4623,
+      "status": "publish",
+      "url": "https://basilicadesanmiguel.org/actividad/concierto-de-irina-kryukova/",
+      "title": "Concierto de Irina Kryukova",
+      "description": "",
+      "excerpt": "",
+      "slug": "concierto-de-irina-kryukova",
+      "all_day": false,
+      "start_date": "2026-10-16 20:00:00",
+      "end_date": "2026-10-16 21:00:00",
+      "timezone": "UTC+0",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "id": 23,
+          "name": "Ciclo Internacional de Órgano",
+          "slug": "ciclo-internacional-de-organo"
+        },
+        {
+          "id": 24,
+          "name": "Conciertos",
+          "slug": "conciertos"
+        }
+      ],
+      "venue": {
+        "id": 3192,
+        "url": "https://basilicadesanmiguel.org/recinto/basilica-pontificia-de-san-miguel/",
+        "venue": "Basílica Pontificia de San Miguel",
+        "slug": "basilica-pontificia-de-san-miguel",
+        "address": "C. de San Justo, 4, Centro, 28005 Madrid"
+      },
+      "organizer": []
+    },
+    {
+      "id": 4625,
+      "status": "publish",
+      "url": "https://basilicadesanmiguel.org/actividad/concierto-de-david-titterington/",
+      "title": "Concierto de David Titterington",
+      "description": "",
+      "excerpt": "",
+      "slug": "concierto-de-david-titterington",
+      "all_day": false,
+      "start_date": "2026-10-23 20:00:00",
+      "end_date": "2026-10-23 21:00:00",
+      "timezone": "UTC+0",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "id": 23,
+          "name": "Ciclo Internacional de Órgano",
+          "slug": "ciclo-internacional-de-organo"
+        },
+        {
+          "id": 24,
+          "name": "Conciertos",
+          "slug": "conciertos"
+        }
+      ],
+      "venue": {
+        "id": 3192,
+        "url": "https://basilicadesanmiguel.org/recinto/basilica-pontificia-de-san-miguel/",
+        "venue": "Basílica Pontificia de San Miguel",
+        "slug": "basilica-pontificia-de-san-miguel",
+        "address": "C. de San Justo, 4, Centro, 28005 Madrid"
+      },
+      "organizer": []
+    },
+    {
+      "id": 4627,
+      "status": "publish",
+      "url": "https://basilicadesanmiguel.org/actividad/concierto-de-juan-de-la-rubia/",
+      "title": "Concierto de Juan de la Rubia",
+      "description": "",
+      "excerpt": "",
+      "slug": "concierto-de-juan-de-la-rubia",
+      "all_day": false,
+      "start_date": "2026-11-04 20:00:00",
+      "end_date": "2026-11-04 21:00:00",
+      "timezone": "UTC+0",
+      "cost": "",
+      "website": "",
+      "categories": [
+        {
+          "id": 23,
+          "name": "Ciclo Internacional de Órgano",
+          "slug": "ciclo-internacional-de-organo"
+        },
+        {
+          "id": 24,
+          "name": "Conciertos",
+          "slug": "conciertos"
+        }
+      ],
+      "venue": {
+        "id": 3192,
+        "url": "https://basilicadesanmiguel.org/recinto/basilica-pontificia-de-san-miguel/",
+        "venue": "Basílica Pontificia de San Miguel",
+        "slug": "basilica-pontificia-de-san-miguel",
+        "address": "C. de San Justo, 4, Centro, 28005 Madrid"
+      },
+      "organizer": []
+    }
+  ],
+  "total": 5,
+  "total_pages": 1
+}
