@@ -7,6 +7,7 @@ import {
   systemClock,
 } from '../domain/index.ts';
 import { isMadridMunicipality } from '../domain/normalize.ts';
+import { formatMadridDate } from '../domain/dates.ts';
 import { areaLabels } from './labels.ts';
 import { toAgendaItem, type AgendaItemModel } from './agenda.ts';
 
@@ -18,6 +19,8 @@ export type VenueListItemModel = {
   showMunicipality: boolean;
   areaLabel: string;
   upcomingCount: number;
+  nextDate: string;
+  nextDateLabel: string;
 };
 
 export type VenuePageModel = {
@@ -51,6 +54,8 @@ export function buildVenuesIndexModel(catalog: Catalog, clock: Clock = systemClo
     showMunicipality: !isMadridMunicipality(venue.municipality),
     areaLabel: areaLabels[venue.area],
     upcomingCount: occurrences.length,
+    nextDate: occurrences[0]!.occurrence.date,
+    nextDateLabel: formatMadridDate(occurrences[0]!.occurrence.date),
   }));
   return {
     title: 'Lugares',

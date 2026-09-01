@@ -13,15 +13,34 @@ const { days } = Astro.props;
 <div class="agenda" data-agenda-list>
   {
     days.map((day) => (
-      <section class="agenda-day" data-agenda-day={day.date} aria-labelledby={`dia-${day.date}`}>
-        <h2 id={`dia-${day.date}`} class="agenda-day__title">
-          <time datetime={day.date}>{day.dateLabel}</time>
-        </h2>
-        <div class="agenda-day__list">
-          {day.items.map((item) => (
-            <AgendaItem item={item} />
-          ))}
-        </div>
+      <section
+        class:list={['agenda-day', { 'agenda-day--today': day.isToday }]}
+        data-agenda-day={day.date}
+        data-agenda-today-empty={day.isToday && day.items.length === 0 ? 'true' : undefined}
+        aria-labelledby={`dia-${day.date}`}
+      >
+        {day.startsMonth && (
+          <div class="month-marker" aria-hidden="true">
+            <span>{day.monthLabel}</span>
+            <span>{day.yearLabel}</span>
+          </div>
+        )}
+          <h2 id={`dia-${day.date}`} class="agenda-day__title">
+            <time datetime={day.date} aria-label={day.dateLabel}>
+              <span class="agenda-day__number">{day.dayNumber}</span>
+              <span class="agenda-day__words">
+                <span>{day.isToday ? 'Hoy' : day.isTomorrow ? 'Mañana' : day.weekdayLabel}</span>
+                <span>{day.monthLabel}</span>
+              </span>
+            </time>
+          </h2>
+          <div class="agenda-day__list">
+            {day.items.length > 0 ? (
+              day.items.map((item) => <AgendaItem item={item} />)
+            ) : (
+              <p class="agenda-day__empty">Sin conciertos publicados hoy. La agenda continúa en la próxima fecha.</p>
+            )}
+          </div>
       </section>
     ))
   }
