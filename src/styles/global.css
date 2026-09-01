@@ -795,8 +795,9 @@ a:hover {
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 0.35rem 1rem;
   align-items: baseline;
-  padding: 0.8rem 0;
+  padding: 0.8rem 0 0.8rem 0.85rem;
   text-decoration: none;
+  border-left: 2px solid var(--ink);
 }
 
 .venue-list__name {
@@ -857,14 +858,6 @@ a:hover {
 
   .filters__grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .filters__advanced > summary {
-    display: none;
-  }
-
-  .filters__advanced .filters__grid {
-    display: grid !important;
   }
 
   .agenda-item__body {

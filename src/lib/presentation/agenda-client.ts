@@ -52,10 +52,6 @@ export function initAgendaFilters(): void {
   if (!dataNode?.textContent || !list) return;
 
   const items = JSON.parse(dataNode.textContent) as FilterableOccurrence[];
-  const advanced = form?.querySelector('details.filters__advanced');
-  if (advanced instanceof HTMLDetailsElement && window.matchMedia('(min-width: 720px)').matches) {
-    advanced.open = true;
-  }
 
   const submitForm = () => {
     if (!form) return;

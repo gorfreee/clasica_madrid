@@ -33,7 +33,6 @@ const { days } = Astro.props;
           </span>
           <time class="agenda-day__weekday" datetime={day.date}>
             {day.weekdayLabel}
-            {!day.isToday && !day.isTomorrow && <span> {day.dayNumber}</span>}
           </time>
         </h2>
         {
