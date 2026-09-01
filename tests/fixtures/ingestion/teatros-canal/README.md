@@ -15,4 +15,5 @@ uses The Events Calendar REST API that backs that page:
 - `listing-sample.json`: five representative events (festival range, same-day
   paid, same-day without time).
 - `detail-*.html`: canonical URL + `.single-event` ficha from
-  `https://www.teatroscanal.com/espectaculo/<slug>/`.
+  `https://www.teatroscanal.com/espectaculo/<slug>/`. `detail-cristal.html`
+  covers the fourth room (Sala de Cristal).

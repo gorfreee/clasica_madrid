@@ -183,6 +183,28 @@ describe('Teatros del Canal ficha', () => {
     expect(n9.programText).toMatch(/Beethoven/);
   });
 
+  it('maps the fourth Canal room when the ficha names Sala de Cristal', async () => {
+    const event: RawEvent = {
+      sourceId: source.id,
+      sourceUrl: 'https://www.teatroscanal.com/espectaculo/a-good-woman-izo-fitzroy',
+      externalId: '105558',
+      listingDateText: '2026-11-21',
+      observed: {
+        title: 'Izo Fitzroy',
+        occurrences: [{ raw: '2026-11-21 00:00:00', date: '2026-11-21' }],
+        performers: [],
+        composers: [],
+        works: [],
+      },
+    };
+    const patch = parseTeatrosCanalDetail(event, await fixture('detail-cristal.html'));
+    expect(patch.venueText).toBe('Sala de Cristal');
+    expect(patch.occurrences).toEqual([
+      { raw: '21 de noviembre, a las 21:00', date: '2026-11-21', time: '21:00' },
+    ]);
+    expect(patch.accessText).toMatch(/20\s*€/);
+  });
+
   it('does not expand del/al ranges into daily occurrences', () => {
     expect(
       parseScheduleDates('Del 13 de octubre al 1 de noviembre de 2026', {

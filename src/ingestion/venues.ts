@@ -149,6 +149,21 @@ export const KNOWN_VENUES: KnownVenue[] = [
       url: 'https://www.teatroscanal.com/',
     },
   },
+  {
+    keys: [
+      'teatros del canal sala de cristal',
+      'teatros del canal la cuarta sala',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_teatros_canal_sala_cristal',
+      slug: 'teatros-del-canal-sala-de-cristal',
+      name: 'Teatros del Canal — Sala de Cristal',
+      ...MADRID,
+      address: 'Calle de Cea Bermúdez, 1, 28003 Madrid',
+      url: 'https://www.teatroscanal.com/',
+    },
+  },
 ];
 
 /**
@@ -173,6 +188,7 @@ const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
     'sala roja': 'ven_teatros_canal_sala_roja',
     'sala verde': 'ven_teatros_canal_sala_verde',
     'sala negra': 'ven_teatros_canal_sala_negra',
+    'sala de cristal': 'ven_teatros_canal_sala_cristal',
   },
 };
 

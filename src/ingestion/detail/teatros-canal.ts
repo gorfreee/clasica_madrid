@@ -163,6 +163,7 @@ function venueFromSala(text: string | undefined): string | undefined {
     { pattern: /\broja\b/i, name: 'Sala Roja Concha Velasco' },
     { pattern: /\bverde\b/i, name: 'Sala Verde' },
     { pattern: /\bnegra\b/i, name: 'Sala Negra' },
+    { pattern: /\bcristal\b/i, name: 'Sala de Cristal' },
   ].filter((item) => item.pattern.test(headline)).map((item) => item.name);
   if (rooms.length === 1) return rooms[0];
   if (rooms.length > 1) return headline;

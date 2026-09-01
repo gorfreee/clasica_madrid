@@ -154,6 +154,14 @@ describe('resolución de venue — Teatros del Canal', () => {
     expect(matchVenue({ venueText: 'Sala Roja', sourceId: 'teatro-real' }, catalog)).toBeUndefined();
     expect(matchVenue('Sala Roja', catalog)).toBeUndefined();
   });
+
+  it('con source teatros-canal, Sala de Cristal resuelve a la cuarta sala', () => {
+    const catalog = catalogWith(salaRoja);
+    expect(matchVenue({ venueText: 'Sala de Cristal', sourceId: 'teatros-canal' }, catalog)?.venue.id).toBe(
+      'ven_teatros_canal_sala_cristal',
+    );
+    expect(matchVenue({ venueText: 'Sala de Cristal', sourceId: 'teatro-real' }, catalog)).toBeUndefined();
+  });
 });
 
 describe('resolución de venue — Madrid Datos', () => {
