@@ -1,5 +1,5 @@
 import { parseObservedDateTime, parseObservedTime } from '../dates.ts';
-import { decodeHtmlEntities, stripTags } from '../html.ts';
+import { collapseWhitespace, decodeHtmlEntities, stripTags } from '../html.ts';
 import { emptyObservedLists, type ObservedFactPatch } from '../observed.ts';
 import { normalizeUrl } from '../urls.ts';
 import type { RawEvent, RawOccurrence } from '../types.ts';
@@ -87,9 +87,10 @@ export function parsePiumossoDetail(event: RawEvent, body: string): ObservedFact
   if (!postId || postId !== event.externalId) {
     throw new Error('fundacion-piu-mosso: ficha sin identidad de evento coincidente');
   }
+  const listingTitle = collapseWhitespace(event.observed.title);
   const heading = [...body.matchAll(/<h2\b[^>]*>([\s\S]*?)<\/h2>/gi)]
     .map((item) => stripTags(item[1]!))
-    .find((text) => text === event.observed.title);
+    .find((text) => text === listingTitle);
   if (!heading) throw new Error('fundacion-piu-mosso: título de ficha distinto del listado');
 
   const details = piumossoDiv(body, /<div\b[^>]*class=["'][^"']*\btribe-events-meta-group-details\b[^"']*["'][^>]*>/i);
@@ -335,7 +336,7 @@ function statusFromSchema(value: string | undefined): 'scheduled' | 'cancelled' 
 
 function asText(value: unknown): string | undefined {
   if (typeof value !== 'string' && typeof value !== 'number') return undefined;
-  return decodeHtmlEntities(String(value)).trim() || undefined;
+  return collapseWhitespace(decodeHtmlEntities(String(value))) || undefined;
 }
 
 function asHtmlText(value: unknown): string | undefined {

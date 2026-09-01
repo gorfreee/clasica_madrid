@@ -192,12 +192,20 @@ describe('Fundación Più Mosso ficha', () => {
     expect(patch.description).toBeUndefined();
   });
 
+  it('matches a ficha heading when the listing title only differs by extra spaces', async () => {
+    const event = await sample();
+    event.observed.title = 'VICTOR  TRETYAKOV, Piano';
+    const patch = parsePiumossoDetail(event, await fixture('detail-tretyakov'));
+    expect(patch.venueText).toBe('Centro Cultural "Casa de Vacas"');
+  });
+
   it('fails locally for wrong identity or a mismatched room, and keeps listing facts after a failed fetch', async () => {
     const event = await sample();
     const html = await fixture('detail-tretyakov');
     for (const broken of [
       html.replace('rel="canonical"', 'rel="alternate"'),
       html.replace('postid-2187', 'postid-9999'),
+      html.replace('<h2>VICTOR TRETYAKOV, Piano</h2>', '<h2>Otro concierto</h2>'),
       html.replace('19:30', 'al mediodía'),
       html.replace('Centro Cultural &quot;Casa de Vacas&quot;', 'Otra sala'),
     ]) {
