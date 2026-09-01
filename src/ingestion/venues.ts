@@ -182,6 +182,30 @@ export const KNOWN_VENUES: KnownVenue[] = [
       url: 'https://www.teatroscanal.com/',
     },
   },
+  {
+    keys: ['teatro fernando de rojas', 'circulo de bellas artes teatro fernando de rojas'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_circulo_bellas_artes_teatro_fernando_de_rojas',
+      slug: 'circulo-de-bellas-artes-teatro-fernando-de-rojas',
+      name: 'Círculo de Bellas Artes — Teatro Fernando de Rojas',
+      ...MADRID,
+      address: 'Calle de Alcalá, 42, 28014 Madrid',
+      url: 'https://www.circulobellasartes.com/',
+    },
+  },
+  {
+    keys: ['sala de columnas', 'circulo de bellas artes sala de columnas'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_circulo_bellas_artes_sala_columnas',
+      slug: 'circulo-de-bellas-artes-sala-columnas',
+      name: 'Círculo de Bellas Artes — Sala de Columnas',
+      ...MADRID,
+      address: 'Calle de Alcalá, 42, 28014 Madrid',
+      url: 'https://www.circulobellasartes.com/',
+    },
+  },
 ];
 
 /**
@@ -211,6 +235,10 @@ const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
     'sala verde': 'ven_teatros_canal_sala_verde',
     'sala negra': 'ven_teatros_canal_sala_negra',
     'sala de cristal': 'ven_teatros_canal_sala_cristal',
+  },
+  'circulo-bellas-artes': {
+    'teatro fernando de rojas': 'ven_circulo_bellas_artes_teatro_fernando_de_rojas',
+    'sala de columnas': 'ven_circulo_bellas_artes_sala_columnas',
   },
 };
 
