@@ -203,7 +203,6 @@ function groupWorksByComposer(lines: string[]): ObservedWork[] {
       continue;
     }
     if (!composerName || MOVEMENT_LINE.test(line)) continue;
-    if (!looksLikeWorkLine(line) || canPairAsAuditorioComposer(line)) continue;
     // One-word tokens are movements or surnames (Chopin, Paganini, Préambule), not works.
     if (!/\s/.test(line)) continue;
     works.push({ title: line, composerName });
@@ -235,9 +234,15 @@ function looksLikeColonPair(line: string): boolean {
 
 function isStickyComposerHeading(text: string): boolean {
   if (!canPairAsAuditorioComposer(text)) return false;
-  if (/\(\s*(?:ca\.?\s*)?\d{3,4}/u.test(text)) return true;
+  if (hasLifespanYears(text)) return true;
+  // "(Homenaje a Falla)" is a work subtitle, not a lifespan we can strip to a name.
+  if (/\([^)]+\)\s*$/u.test(text)) return false;
   const words = text.replace(/\s*\([^)]*\)\s*$/u, '').trim().split(/\s+/).filter(Boolean);
   return words.length >= 2;
+}
+
+function hasLifespanYears(text: string): boolean {
+  return /\(\s*(?:ca\.?\s*)?\d{3,4}/u.test(text);
 }
 
 function pairComposerWorks(lines: string[]): ObservedWork[] {
