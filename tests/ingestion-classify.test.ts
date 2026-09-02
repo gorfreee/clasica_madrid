@@ -226,6 +226,37 @@ describe('eligibility — conflictos y fallback', () => {
     }
   });
 
+  it.each([
+    ['Giovanni Battista Mele', 'baroque'],
+    ['Luis Misón', 'baroque'],
+    ['Francesco Federici', 'classical'],
+    ['Felipe Libón', 'classical'],
+    ['Gioachino Rossini', 'romantic'],
+    ['Johann Strauss II', 'romantic'],
+    ['Ralph Vaughan Williams', 'twentieth'],
+    ['Carl Orff', 'twentieth'],
+    ['Kurt Weill', 'twentieth'],
+    ['A. Ginastera', 'twentieth'],
+    ['Luis Gianneo', 'twentieth'],
+    ['Steve Reich', 'contemporary'],
+    ['Alicia Terzian', 'contemporary'],
+    ['Irma Urteaga', 'contemporary'],
+    ['Francesc Vila', 'contemporary'],
+    ['M. Sotelo', 'contemporary'],
+    ['Unsuk Chin', 'contemporary'],
+    ['Carlos Simon', 'contemporary'],
+  ])('reconoce el compositor observado en la temporada oficial: %s', (name, era) => {
+    const result = classify(facts({
+      title: 'Concierto de temporada',
+      programText: `${name}: obra del programa.`,
+    }));
+    expect(result.eligibility).toMatchObject({
+      value: 'include',
+      ruleId: 'known-classical-composer',
+    });
+    expect(result.eras?.value).toContain(era);
+  });
+
   it('un compositor clásico en el programa no gana a jazz, pop, taller o danza', () => {
     expect(
       classify(
@@ -646,6 +677,18 @@ describe('eligibility — conflictos y fallback', () => {
     );
     expect(talk.eligibility.value).toBe('exclude');
     expect(talk.eligibility.ruleId).toBe('non-performance-activity');
+  });
+
+  it('incluye títulos oficiales que declaran ópera y dos entregas inequívocas de Miniclásica', () => {
+    for (const observed of [
+      facts({ title: 'Excelentia. Arias de Ópera Italianas' }),
+      facts({ title: 'Filarmonía de Madrid. Gala de Ópera' }),
+      facts({ title: 'Micróperas', description: 'Óperas de nueva creación para niños y niñas.' }),
+      facts({ title: 'Miniclásica: Descubriendo el Clasicismo' }),
+      facts({ title: 'Miniclásica: Descubriendo la música antigua' }),
+    ]) {
+      expect(classify(observed).eligibility.value, observed.title).toBe('include');
+    }
   });
 
   it('incluye COMA y una categoría explícita de música clásica, y sigue excluyendo jazz en un ciclo mixto', () => {
