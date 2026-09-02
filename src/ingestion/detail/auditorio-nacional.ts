@@ -203,6 +203,7 @@ function groupWorksByComposer(lines: string[]): ObservedWork[] {
       continue;
     }
     if (!composerName || MOVEMENT_LINE.test(line)) continue;
+    if (parseAuditorioPersonLine(line)) continue;
     // One-word tokens are movements or surnames (Chopin, Paganini, Préambule), not works.
     if (!/\s/.test(line)) continue;
     works.push({ title: line, composerName });

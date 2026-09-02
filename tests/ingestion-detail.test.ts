@@ -94,6 +94,72 @@ describe('parser de ficha Auditorio Nacional', () => {
     expect(facts.programText).toMatch(/PAUSA/);
   });
 
+  it('no convierte solistas repetidos dentro del programa oficial de Ainhoa Arteta en obras', async () => {
+    const html = await readFile(
+      path.join(detailDir, 'auditorio-ainhoa-arteta-cast-in-program.excerpt.html'),
+      'utf8',
+    );
+    const facts = parseAuditorioNacionalDetail(html);
+
+    expect(facts.performers).toEqual([
+      { name: 'Atlántida Chamber Orchestra' },
+      { name: 'Ainhoa Arteta', roleText: 'soprano' },
+      { name: 'Jasper Chang', roleText: 'violín' },
+      { name: 'Manuel Tévar', roleText: 'director' },
+    ]);
+    expect(facts.works).toEqual([
+      {
+        title: 'Introducción y Rondó Caprichoso, Op. 28es',
+        composerName: 'Camille Saint-Saëns (1835–1921)',
+      },
+      {
+        title: 'Cuatro últimas canciones (Vier letzte Lieder)',
+        composerName: 'Richard Strauss (1864–1949)',
+      },
+      {
+        title: 'Suite de El lago de los cisnes, Op. 20a',
+        composerName: 'Piotr Ilich Tchaikovsky (1840–1893)',
+      },
+    ]);
+  });
+
+  it('omite elenco incrustado en el programa FOSC en vez de atribuirlo como obras o compositor', async () => {
+    const html = await readFile(
+      path.join(detailDir, 'auditorio-fosc-cast-in-program.excerpt.html'),
+      'utf8',
+    );
+    const facts = parseAuditorioNacionalDetail(html);
+
+    expect(facts.performers).toEqual([
+      { name: 'Orquesta Celeste Classic' },
+      { name: 'Coro y Escolanía Maravillas' },
+    ]);
+    expect(facts.composers).toEqual([]);
+    expect(facts.works).toEqual([]);
+    expect(facts.programText).toMatch(/Times and seasons/);
+  });
+
+  it('conserva una obra cuya instrumentación menciona soprano y orquesta', () => {
+    const facts = parseAuditorioNacionalDetail(`
+      <article id="content">
+        <h1>Concierto vocal</h1>
+        <div class="content">
+          <h4>Óscar Esplá<br />Canciones playeras, para soprano y orquesta</h4>
+        </div>
+        <div class="rightcolumn">
+          <p class="rightColumn__item">
+            <label class="rightColumn__item__label">Sala:</label>
+            <span class="rightColumn__item__text">Sala Sinfónica</span>
+          </p>
+        </div>
+      </article>
+    `);
+
+    expect(facts.works).toEqual([
+      { title: 'Canciones playeras, para soprano y orquesta', composerName: 'Óscar Esplá' },
+    ]);
+  });
+
   it('un compositor con lifespan agrupa las villancicos siguientes y omite el título del bloque', () => {
     const html = `
       <article id="content">
