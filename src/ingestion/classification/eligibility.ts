@@ -612,7 +612,7 @@ function classicalSeriesIdentity(facts: ObservedFacts): string | undefined {
     }
   }
   if (facts.title) {
-    const title = fieldFolded(facts.title);
+    const title = foldName(facts.title);
     if (
       matchesTitleClassicalCycle(facts.title) ||
       hasPhrase(title, 'miniclasica descubriendo el clasicismo') ||
