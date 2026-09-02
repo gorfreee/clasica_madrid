@@ -1,5 +1,6 @@
 /** Project quotas supplied in AI Studio, with RPM/TPM/RPD safety margins. */
 export const GEMINI_DEFAULT_LIMITS: Record<string, ModelLimits> = {
+  'gemini-3.8-flash': { rpm: 4, tpm: 200_000, rpd: 18 },
   'gemini-3.7-flash': { rpm: 4, tpm: 200_000, rpd: 18 },
   'gemini-3.6-flash': { rpm: 4, tpm: 200_000, rpd: 18 },
   'gemini-3.5-flash': { rpm: 4, tpm: 200_000, rpd: 18 },
@@ -14,6 +15,7 @@ export const GEMINI_DEFAULT_LIMITS: Record<string, ModelLimits> = {
 // Keep legacy 2.5 quota defaults above for explicit overrides, but do not
 // schedule them by default: this project's API rejects them with permanent 404s.
 export const GEMINI_DEFAULT_MODELS = [
+  'gemini-3.8-flash',
   'gemini-3.7-flash',
   'gemini-3.6-flash',
   'gemini-3.5-flash',
@@ -42,6 +44,7 @@ export type GeminiThinkingConfig = { thinking_level: 'minimal' | 'low' };
 export function thinkingConfigForModel(model: string): GeminiThinkingConfig | undefined {
   const name = model.trim().toLowerCase();
   switch (name) {
+    case 'gemini-3.8-flash':
     case 'gemini-3.7-flash':
     case 'gemini-2.5-flash':
       return { thinking_level: 'low' };
