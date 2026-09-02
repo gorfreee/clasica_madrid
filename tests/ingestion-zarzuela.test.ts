@@ -63,6 +63,12 @@ describe('descubrimiento K2 de Zarzuela', () => {
     expect(new Set(events.map((e) => e.sourceUrl)).size).toBe(40);
     expect(events.some((e) => e.observed.title === 'El barberillo de Lavapiés')).toBe(true);
     expect(events.some((e) => e.observed.categoryText?.includes('Lied'))).toBe(true);
+    const firstLirica = events.findIndex((event) => event.sourceUrl.includes('/lirica-'));
+    const firstConcerts = events.findIndex((event) => event.sourceUrl.includes('/conciertos-'));
+    expect(firstLirica).toBeGreaterThanOrEqual(0);
+    expect(firstConcerts).toBeGreaterThan(firstLirica);
+    expect(requests[0]).toContain('/lirica-');
+    expect(requests.at(-1)).toContain('/conciertos-');
     expect(events.every((e) => e.observed.occurrences.length === 0)).toBe(true);
     expect(events.every((e) => e.externalId?.includes('2026-2027'))).toBe(true);
     expect(events.find((e) => e.observed.title.includes('cumpleaños'))?.sourceUrl).toContain('%C3%B1');
