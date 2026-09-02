@@ -2,6 +2,8 @@ import { allCaptures, firstMatch, splitBreaks, stripTags } from '../html.ts';
 import { inferScheduleFromText } from './schedule.ts';
 import {
   canPairAsAuditorioComposer,
+  hasExplicitPerformerSignal,
+  looksLikeRoleOnlyLine,
   parseAuditorioPersonLine,
   parseComposerColonWork,
   segmentAuditorioBlocks,
@@ -163,6 +165,8 @@ function parseComposerDashWork(text: string): ObservedWork {
   return { title: text.trim() };
 }
 
+const MOVEMENT_LINE = /^(?:i{1,3}|iv|vi{0,3}|[1-9]\d*)\.\s+\S+/i;
+
 function worksFromProgramLines(lines: string[]): ObservedWork[] {
   const usable = lines
     .map((line) => line.replace(/\*+\s*$/, '').trim())
@@ -172,18 +176,81 @@ function worksFromProgramLines(lines: string[]): ObservedWork[] {
   if (colonWorks.every((item) => item) && colonWorks.length > 0) {
     return colonWorks as ObservedWork[];
   }
-  return pairComposerWorks(lines);
+  const grouped = groupWorksByComposer(usable);
+  if (grouped.length > 0) return grouped;
+  return pairComposerWorks(usable);
+}
+
+/**
+ * CNDM/OCNE fichas list a composer heading (often with lifespan) then one or
+ * more works. Bare surnames like Chopin/Paganini in a Schumann suite are not
+ * headings — those collided with 1:1 pairing, so we require a full name or years.
+ */
+function groupWorksByComposer(lines: string[]): ObservedWork[] {
+  const works: ObservedWork[] = [];
+  let composerName: string | undefined;
+  for (const line of lines) {
+    const colon = parseComposerColonWork(line) ?? parseGroupedColonWork(line);
+    if (colon) {
+      works.push(colon);
+      composerName = colon.composerName;
+      continue;
+    }
+    // `Name: Title` that we could not parse is not a work of the previous composer.
+    if (looksLikeColonPair(line)) continue;
+    if (isStickyComposerHeading(line)) {
+      composerName = line;
+      continue;
+    }
+    if (!composerName || MOVEMENT_LINE.test(line)) continue;
+    // One-word tokens are movements or surnames (Chopin, Paganini, Préambule), not works.
+    if (!/\s/.test(line)) continue;
+    works.push({ title: line, composerName });
+  }
+  return works;
+}
+
+/**
+ * Program-block `Composer: Title` without a genre/catalogue signal on the title.
+ * The strict parser keeps `Nombre: rol` out of the cast frontier; here we already
+ * know we are in repertoire (Excelentia `F.v. Suppe: Caballería ligera`).
+ */
+function parseGroupedColonWork(line: string): ObservedWork | undefined {
+  const named = /^(.+?):\s+(.+)$/.exec(line);
+  if (!named?.[1] || !named[2]) return undefined;
+  const composerName = named[1].trim();
+  const title = named[2].trim();
+  if (!composerName || !title) return undefined;
+  if (hasExplicitPerformerSignal(composerName) || looksLikeRoleOnlyLine(composerName)) return undefined;
+  if (hasExplicitPerformerSignal(title) || looksLikeRoleOnlyLine(title)) return undefined;
+  if (!canPairAsAuditorioComposer(composerName)) return undefined;
+  if (!looksLikeWorkLine(title)) return undefined;
+  return { title, composerName };
+}
+
+function looksLikeColonPair(line: string): boolean {
+  return /^.+?:\s+\S/.test(line);
+}
+
+function isStickyComposerHeading(text: string): boolean {
+  if (!canPairAsAuditorioComposer(text)) return false;
+  if (hasLifespanYears(text)) return true;
+  // "(Homenaje a Falla)" is a work subtitle, not a lifespan we can strip to a name.
+  if (/\([^)]+\)\s*$/u.test(text)) return false;
+  const words = text.replace(/\s*\([^)]*\)\s*$/u, '').trim().split(/\s+/).filter(Boolean);
+  return words.length >= 2;
+}
+
+function hasLifespanYears(text: string): boolean {
+  return /\(\s*(?:ca\.?\s*)?\d{3,4}/u.test(text);
 }
 
 function pairComposerWorks(lines: string[]): ObservedWork[] {
-  const usable = lines
-    .map((line) => line.replace(/\*+\s*$/, '').trim())
-    .filter((line) => line && !line.startsWith('*') && !looksLikeProgramHeader(line));
-  if (usable.length < 2 || usable.length % 2 !== 0) return [];
+  if (lines.length < 2 || lines.length % 2 !== 0) return [];
   const works: ObservedWork[] = [];
-  for (let index = 0; index < usable.length; index += 2) {
-    const composerName = usable[index];
-    const title = usable[index + 1];
+  for (let index = 0; index < lines.length; index += 2) {
+    const composerName = lines[index];
+    const title = lines[index + 1];
     if (!composerName || !title) return [];
     if (!canPairAsAuditorioComposer(composerName) || !looksLikeWorkLine(title)) return [];
     works.push({ title, composerName });

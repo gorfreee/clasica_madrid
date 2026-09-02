@@ -94,7 +94,7 @@ describe('parser de ficha Auditorio Nacional', () => {
     expect(facts.programText).toMatch(/PAUSA/);
   });
 
-  it('si el pairing composer/obra es ambiguo, conserva programText y no inventa la asociación', () => {
+  it('un compositor con lifespan agrupa las villancicos siguientes y omite el título del bloque', () => {
     const html = `
       <article id="content">
         <h1>CNDM. Cantoría</h1>
@@ -112,8 +112,11 @@ describe('parser de ficha Auditorio Nacional', () => {
     `;
     const facts = parseAuditorioNacionalDetail(html);
     expect(facts.programText).toMatch(/A la fiesta/);
-    expect(facts.composers).toEqual([]);
-    expect(facts.works).toEqual([]);
+    expect(facts.composers).toEqual([{ name: 'José de San Juan (1687-1735)' }]);
+    expect(facts.works).toEqual([
+      { title: '¡A la fiesta, zagales! (1728)', composerName: 'José de San Juan (1687-1735)' },
+      { title: 'Céfiros corra, pájaros vaya (1723)', composerName: 'José de San Juan (1687-1735)' },
+    ]);
     expect(facts.performers?.map((item) => item.name)).toEqual(
       expect.arrayContaining(['CANTORÍA', 'JORGE LOSANA']),
     );
@@ -164,8 +167,17 @@ describe('parser de ficha Auditorio Nacional', () => {
     );
     expect(facts.programText).toMatch(/Messiaen/);
     expect(facts.programText).toMatch(/AL 11 de ABRIL de 2027/i);
-    expect(facts.works).toEqual([]);
-    expect(facts.composers).toEqual([]);
+    expect(facts.composers).toEqual([
+      { name: 'Olivier Messiaen (1908-1992)' },
+      { name: 'Alexander Scriabin (1872-1915)' },
+      { name: 'John Zorn (1953)' },
+    ]);
+    expect(facts.works).toEqual([
+      { title: 'Chants de terre et de ciel (1938)', composerName: 'Olivier Messiaen (1908-1992)' },
+      { title: 'Poème-nocturne, op. 61 (1911)', composerName: 'Alexander Scriabin (1872-1915)' },
+      { title: 'Vers la flamme, op. 72 (1914)', composerName: 'Alexander Scriabin (1872-1915)' },
+      { title: 'Jumalattaret ** (2012)', composerName: 'John Zorn (1953)' },
+    ]);
   });
 
   it('Beatrice Rana: Programa corta el elenco; compositores, movimientos y Pause no son performers', async () => {
@@ -179,8 +191,26 @@ describe('parser de ficha Auditorio Nacional', () => {
     expect(facts.programText).toMatch(/^Beatrice Rana, piano\. Programa\./);
     expect(facts.programText).toMatch(/Carnaval/);
     expect(facts.programText).toMatch(/Pause/);
-    expect(facts.works).toEqual([]);
-    expect(facts.composers).toEqual([]);
+    expect(facts.composers).toEqual([
+      { name: 'Johann Sebastian Bach' },
+      { name: 'Muzio Clementi' },
+      { name: 'Robert Schumann' },
+    ]);
+    expect(facts.works).toEqual([
+      { title: 'Concierto italiano en fa mayor, BWV 971', composerName: 'Johann Sebastian Bach' },
+      {
+        title: 'Sonata en sol menor, Op. 50 n.º 3 «Didone abbandonata»',
+        composerName: 'Muzio Clementi',
+      },
+      {
+        title: 'Carnaval, escenas mignonnes sobre cuatro notas, Op. 9',
+        composerName: 'Robert Schumann',
+      },
+      {
+        title: 'Marche des «Davidsbündler» contre les Philistins',
+        composerName: 'Robert Schumann',
+      },
+    ]);
   });
 
   it('Excelentia Tres Tenores: roles entre paréntesis son elenco; las arias no se inventan como obras', async () => {
@@ -217,8 +247,18 @@ describe('parser de ficha Auditorio Nacional', () => {
       { name: 'Kynan Johns', roleText: 'director' },
     ]);
     expect(facts.programText).toMatch(/Danubio azul/);
-    expect(facts.works).toEqual([]);
-    expect(facts.composers).toEqual([]);
+    expect(facts.works).toEqual([
+      { title: 'Caballería ligera', composerName: 'F.v. Suppe' },
+      { title: 'La caza, Polka, op.373', composerName: 'J. Strauss II' },
+      { title: 'Las alegres comadres de Windsor, obertura', composerName: 'Otto Nicolai' },
+      { title: 'El Danubio azul', composerName: 'J. Strauss' },
+    ]);
+    expect(facts.composers).toEqual([
+      { name: 'F.v. Suppe' },
+      { name: 'J. Strauss II' },
+      { name: 'Otto Nicolai' },
+      { name: 'J. Strauss' },
+    ]);
   });
 
   it('títulos Composer: Work no se publican como performers', async () => {
@@ -253,8 +293,28 @@ describe('parser de ficha Auditorio Nacional', () => {
     expect(facts.programText).toMatch(/Primera Parte/);
     expect(facts.programText).toMatch(/Segunda Parte/);
     expect(facts.programText).toMatch(/Lascia ch'io pianga/);
-    expect(facts.works).toEqual([]);
-    expect(facts.composers).toEqual([]);
+    expect(facts.works).toEqual([
+      { title: 'Preludio, Fuga y Allegro, BWV998', composerName: 'J.S. Bach (1685 - 1750)' },
+      { title: 'Theme and variations, op.77', composerName: 'Lennox Berkeley (1903 - 1989)' },
+      {
+        title: '"Lascia ch\'io pianga", de la opera Rinaldo',
+        composerName: 'G.F. Händel (1685 - 1759)',
+      },
+      {
+        title: 'Invocación y danza (Homenaje a Manuel de Falla)',
+        composerName: 'Joaquín Rodrigo (1901 - 1999)',
+      },
+      { title: 'Un sueño en la floresta', composerName: 'Agustín Pío Barrios "Mangoré" (1885 - 1944)' },
+      { title: 'La danza (tarantella napolitana)', composerName: 'Gioachino Rossini (1792 - 1866)' },
+    ]);
+    expect(facts.composers).toEqual([
+      { name: 'J.S. Bach (1685 - 1750)' },
+      { name: 'Lennox Berkeley (1903 - 1989)' },
+      { name: 'G.F. Händel (1685 - 1759)' },
+      { name: 'Joaquín Rodrigo (1901 - 1999)' },
+      { name: 'Agustín Pío Barrios "Mangoré" (1885 - 1944)' },
+      { name: 'Gioachino Rossini (1792 - 1866)' },
+    ]);
   });
 
   it('Lea Desandre: sin header Programa, el lifespan del compositor abre el repertorio', async () => {
@@ -271,8 +331,22 @@ describe('parser de ficha Auditorio Nacional', () => {
     );
     expect(facts.programText).toMatch(/Idylle/);
     expect(facts.programText).toMatch(/H 450/);
-    expect(facts.works).toEqual([]);
-    expect(facts.composers).toEqual([]);
+    expect(facts.composers).toEqual([
+      { name: 'Honoré d’Ambruys (ca. 1660-ca. 1702)' },
+      { name: 'Marc-Antoine Charpentier (1643-1704)' },
+    ]);
+    expect(facts.works).toEqual([
+      {
+        title: 'Le doux silence de nos bois, de Livre d’airs (1685)',
+        composerName: 'Honoré d’Ambruys (ca. 1660-ca. 1702)',
+      },
+      {
+        title: 'Celle qui fait tout mon tourment, H 450 (Recueil d’airs sérieux et à boire, 1695)',
+        composerName: 'Marc-Antoine Charpentier (1643-1704)',
+      },
+      { title: 'Auprès du feu l’on fait l’amour, H 446', composerName: 'Marc-Antoine Charpentier (1643-1704)' },
+      { title: 'Laissez durer la nuit', composerName: 'Marc-Antoine Charpentier (1643-1704)' },
+    ]);
   });
 
   it('OCNE Satélite: elenco sin roles y programa sin frontera trivial no se mezclan', async () => {

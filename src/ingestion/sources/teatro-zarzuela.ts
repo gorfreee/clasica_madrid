@@ -25,7 +25,9 @@ export const teatroZarzuelaAdapter: SourceAdapter = {
     const getListing = createZarzuelaListingGet(ctx.get);
     const failedCategories: string[] = [];
     let lastHttpError: unknown;
-    for (const categoryUrl of categories) {
+    // Lírica before recitals: hydration is sequential and a 403 circuit
+    // drops remaining fichas. Alphabetical URLs put /conciertos- ahead of /lirica-.
+    for (const categoryUrl of [...categories].sort(compareZarzuelaSeasonUrl)) {
       try {
         const listing = await getListing(categoryUrl);
         for (const event of parseZarzuelaListing(listing, categoryUrl, ctx)) {
@@ -40,7 +42,9 @@ export const teatroZarzuelaAdapter: SourceAdapter = {
         lastHttpError = error;
       }
     }
-    const collected = [...events.values()].sort((a, b) => a.sourceUrl.localeCompare(b.sourceUrl));
+    const collected = [...events.values()].sort((left, right) =>
+      compareZarzuelaSeasonUrl(left.sourceUrl, right.sourceUrl),
+    );
     if (failedCategories.length && collected.length) {
       throw new IncompleteListingError(
         `teatro-zarzuela: secciones de temporada no disponibles (${failedCategories.join(', ')})`,
@@ -100,6 +104,32 @@ export function parseZarzuelaListing(body: string, url: string, ctx: AdapterCont
   }
   if (list.trim() && !items.length) throw new Error('teatro-zarzuela: listado no vacío sin obras reconocibles');
   return events;
+}
+
+/** Lower hydrates first. Unknown sections stay last, then URL order. */
+const ZARZUELA_SECTION_PRIORITY: Record<string, number> = {
+  lirica: 0,
+  'teatro-musical-de-camara': 1,
+  danza: 2,
+  'nuevos-publicos': 3,
+  ambigu: 4,
+  'ciclo-de-lied': 5,
+  conciertos: 6,
+};
+
+export function compareZarzuelaSeasonUrl(left: string, right: string): number {
+  const bySection = zarzuelaSectionPriority(left) - zarzuelaSectionPriority(right);
+  return bySection !== 0 ? bySection : left.localeCompare(right);
+}
+
+function zarzuelaSectionPriority(url: string): number {
+  try {
+    const section = /\/temporada\/([a-z0-9-]+)-\d{4}-\d{4}(?:\/|$)/i.exec(new URL(url).pathname)?.[1];
+    if (section && section in ZARZUELA_SECTION_PRIORITY) return ZARZUELA_SECTION_PRIORITY[section]!;
+  } catch {
+    // unparseable URLs sort last among themselves
+  }
+  return 7;
 }
 
 function isIsolatedListingFailure(error: unknown): boolean {

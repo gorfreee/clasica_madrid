@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { Era } from '../src/lib/schemas/taxonomies.ts';
 import { classify, resolveEras } from '../src/ingestion/classification/classify.ts';
 import { findKnownComposersInText, matchComposer } from '../src/ingestion/knowledge/composers.ts';
-import { looksLikeComposerLine } from '../src/ingestion/observed-cleanup.ts';
+import { looksLikeComposerLine, looksLikeWorkLine } from '../src/ingestion/observed-cleanup.ts';
 import { normalizeComposerList, normalizeWorkList, type ObservedFacts } from '../src/ingestion/observed.ts';
 
 function facts(overrides: Partial<ObservedFacts>): ObservedFacts {
@@ -185,6 +185,8 @@ describe('composer knowledge base', () => {
     expect(looksLikeComposerLine('Ana Morales')).toBe(false);
     expect(looksLikeComposerLine('Rubén Mendoza')).toBe(false);
     expect(looksLikeComposerLine('Marco')).toBe(false);
+    expect(looksLikeComposerLine('Invocación y danza (Homenaje a Manuel de Falla)')).toBe(false);
+    expect(looksLikeWorkLine('Invocación y danza (Homenaje a Manuel de Falla)')).toBe(true);
     const composers = [{ name: 'Luis de Narvaez' }, { name: 'Sergei Prokofiev' }];
     const works = [{ title: 'Mille regretz', composerName: 'Josquin Desprez' }];
     expect(normalizeComposerList(composers)).toEqual(composers);

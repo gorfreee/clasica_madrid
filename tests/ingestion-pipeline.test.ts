@@ -102,6 +102,9 @@ async function fixtureGet(url: string): Promise<string> {
   if (url.includes('wp-json/tribe/events/v1/events')) {
     return '{"events":[],"total":0,"total_pages":0}';
   }
+  if (url === 'https://cndm.inaem.gob.es/' || url === 'https://cndm.inaem.gob.es') {
+    return '<title>Centro Nacional de Difusión Musical</title>';
+  }
   if (url.includes('cndm.inaem.gob.es/eventos/')) return emptyCndmMonth(url);
   if (url === 'https://www.fundacionpiumosso.com/programacion/') {
     return '<body class="page page-id-50"><h1>Programación</h1><div id="ect-grid-wrapper" class="ect-grid-view-style-2 all"></div></body>';

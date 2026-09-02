@@ -53,7 +53,11 @@ export function looksLikeComposerLine(text: string): boolean {
   if (CATALOG.test(trimmed)) return false;
   if (WORK_GENRE.test(trimmed)) return false;
   const stripped = stripTrailingYears(trimmed);
-  if (matchComposer(stripped) || matchComposer(lastNameToken(stripped))) return true;
+  if (matchComposer(stripped)) return true;
+  // "Invocación y danza (Homenaje a Manuel de Falla)" ends with a known surname;
+  // that is a work subtitle, not a composer heading.
+  const trailingParen = /\([^)]+\)\s*$/u.test(stripped);
+  if (!trailingParen && matchComposer(lastNameToken(stripped))) return true;
   return LIFESPAN.test(trimmed) && looksLikePersonName(stripped);
 }
 

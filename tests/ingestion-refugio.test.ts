@@ -55,7 +55,7 @@ describe('Real Hermandad del Refugio listing', () => {
     expect(musica.observed.description).toMatch(/Capilla Musical/);
 
     expect(source.skipDefaultSync).toBeFalsy();
-    expect(source.useFetchRelay).toBeFalsy();
+    expect(source.useFetchRelay).toBe(true);
     expect(source.catalogSourceId).toBe('src_real_hermandad_refugio');
     expect(source.urls).toEqual(['https://realhermandaddelrefugio.org/wp-json/wp/v2/calendario-eventos']);
   });
