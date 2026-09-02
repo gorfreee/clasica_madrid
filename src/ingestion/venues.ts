@@ -110,6 +110,23 @@ export const KNOWN_VENUES: KnownVenue[] = [
     },
   },
   {
+    keys: [
+      'teatro de la abadia',
+      'teatro de la abadía',
+      'teatro abadia',
+      'teatro abadía',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_teatro_abadia',
+      slug: 'teatro-de-la-abadia',
+      name: 'Teatro de la Abadía',
+      ...MADRID,
+      address: 'Calle de Fernández de los Ríos, 42, 28015 Madrid',
+      url: 'https://www.teatroabadia.com/',
+    },
+  },
+  {
     keys: ['real teatro de retiro', 'teatro real de retiro'],
     venue: {
       schemaVersion: 1,
@@ -314,6 +331,7 @@ const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
     'sala principal real teatro de retiro': 'ven_real_teatro_retiro',
     'hall real teatro de retiro': 'ven_real_teatro_retiro',
     'sala pacifico real teatro de retiro': 'ven_real_teatro_retiro',
+    'teatro de la abadia': 'ven_teatro_abadia',
   },
   'madrid-datos': {
     'jardin del bulevar de pena gorbea': 'ven_jardin_bulevar_pena_gorbea',

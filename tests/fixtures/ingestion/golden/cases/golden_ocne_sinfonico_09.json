@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_ocne_sinfonico_09",
+  "origin": "phase1-smoke",
+  "sourceId": "auditorio-nacional",
+  "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-09-1",
+  "listingTitle": "OCNE. Sinfónico 09",
+  "observed": {
+    "title": "OCNE. Sinfónico 09",
+    "venueText": "Sala Sinfónica",
+    "accessText": "Viernes y Sábado: 40 €",
+    "programText": "Orquesta Nacional de España. Anna Rakitina, Directora. Josu de Solaun, Piano. Caroline Shaw. Entr’acte, para orquesta de cuerda. Benjamin Britten. Concierto para piano núm. 1, op. 13. Edward Elgar Variaciones. Enigma, op. 36",
+    "performers": [
+      { "name": "Orquesta Nacional de España" },
+      { "name": "Anna Rakitina", "roleText": "Directora" },
+      { "name": "Josu de Solaun", "roleText": "Piano" }
+    ],
+    "composers": [
+      { "name": "Caroline Shaw" },
+      { "name": "Benjamin Britten" }
+    ],
+    "works": [
+      { "title": "Entr’acte, para orquesta de cuerda", "composerName": "Caroline Shaw" },
+      { "title": "Concierto para piano núm. 1, op. 13", "composerName": "Benjamin Britten" },
+      { "title": "Enigma, op. 36" }
+    ]
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": ["symphonic"],
+    "eras": ["romantic", "twentieth", "contemporary"],
+    "kind": "established",
+    "access": "paid"
+  },
+  "reason": "Programa de la OCNE con Britten, Elgar y Shaw. El título interno no basta; los compositores observados sí. El dry-run caía a IA rate-limited porque no estaban en la knowledge base.",
+  "checkedAt": "2026-09-02"
+}

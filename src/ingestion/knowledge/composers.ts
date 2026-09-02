@@ -14,7 +14,7 @@ export type ComposerKnowledge = {
   eras: Era[];
 };
 
-export const COMPOSER_KNOWLEDGE_VERSION = '2026-08-31';
+export const COMPOSER_KNOWLEDGE_VERSION = '2026-09-02';
 
 export const COMPOSERS: ComposerKnowledge[] = [
   {
@@ -111,6 +111,21 @@ export const COMPOSERS: ComposerKnowledge[] = [
     eras: ['renaissance'],
   },
   {
+    canonicalName: 'Giovanni Pierluigi da Palestrina',
+    aliases: ['Giovanni Pierluigi da Palestrina', 'Palestrina'],
+    eras: ['renaissance'],
+  },
+  {
+    canonicalName: 'Antonio de Cabezón',
+    aliases: ['Antonio de Cabezón', 'A. de Cabezón', 'Cabezón'],
+    eras: ['renaissance'],
+  },
+  {
+    canonicalName: 'William Byrd',
+    aliases: ['William Byrd'],
+    eras: ['renaissance'],
+  },
+  {
     canonicalName: 'Henry Purcell',
     aliases: ['Henry Purcell', 'Purcell'],
     eras: ['baroque'],
@@ -118,6 +133,21 @@ export const COMPOSERS: ComposerKnowledge[] = [
   {
     canonicalName: 'Georg Philipp Telemann',
     aliases: ['Georg Philipp Telemann', 'Telemann'],
+    eras: ['baroque'],
+  },
+  {
+    canonicalName: 'Marc-Antoine Charpentier',
+    aliases: ['Marc-Antoine Charpentier', 'Charpentier'],
+    eras: ['baroque'],
+  },
+  {
+    canonicalName: 'Dietrich Buxtehude',
+    aliases: ['Dietrich Buxtehude', 'Buxtehude'],
+    eras: ['baroque'],
+  },
+  {
+    canonicalName: 'José de Nebra',
+    aliases: ['José de Nebra', 'J. de Nebra', 'Nebra'],
     eras: ['baroque'],
   },
   {
@@ -143,6 +173,16 @@ export const COMPOSERS: ComposerKnowledge[] = [
   {
     canonicalName: 'Muzio Clementi',
     aliases: ['Muzio Clementi', 'Clementi'],
+    eras: ['classical'],
+  },
+  {
+    canonicalName: 'Luigi Boccherini',
+    aliases: ['Luigi Boccherini', 'Boccherini'],
+    eras: ['classical'],
+  },
+  {
+    canonicalName: 'George Onslow',
+    aliases: ['George Onslow', 'Onslow'],
     eras: ['classical'],
   },
   {
@@ -262,6 +302,54 @@ export const COMPOSERS: ComposerKnowledge[] = [
     eras: ['romantic'],
   },
   {
+    canonicalName: 'Modest Mussorgski',
+    aliases: ['Modest Mussorgski', 'Modest Mussorgsky', 'Mussorgski', 'Mussorgsky'],
+    eras: ['romantic'],
+  },
+  {
+    canonicalName: 'Anton Bruckner',
+    aliases: ['Anton Bruckner', 'A. Bruckner', 'Bruckner'],
+    eras: ['romantic'],
+  },
+  {
+    canonicalName: 'Serguéi Rajmáninov',
+    aliases: [
+      'Serguéi Rajmáninov',
+      'Sergei Rachmaninoff',
+      'Sergei Rachmaninov',
+      'Rachmaninoff',
+      'Rachmaninov',
+      'Rachmáninov',
+      'Rajmáninov',
+    ],
+    eras: ['romantic'],
+  },
+  {
+    canonicalName: 'Edward Elgar',
+    aliases: ['Edward Elgar', 'Elgar'],
+    eras: ['romantic'],
+  },
+  {
+    canonicalName: 'Hector Berlioz',
+    aliases: ['Hector Berlioz', 'Berlioz'],
+    eras: ['romantic'],
+  },
+  {
+    canonicalName: 'Gabriel Fauré',
+    aliases: ['Gabriel Fauré', 'Fauré'],
+    eras: ['romantic'],
+  },
+  {
+    canonicalName: 'Bedřich Smetana',
+    aliases: ['Bedřich Smetana', 'Smetana'],
+    eras: ['romantic'],
+  },
+  {
+    canonicalName: 'Mijaíl Glinka',
+    aliases: ['Mijaíl Glinka', 'Mikhail Glinka', 'Glinka'],
+    eras: ['romantic'],
+  },
+  {
     canonicalName: 'Samuel Barber',
     aliases: ['Samuel Barber', 'Barber'],
     eras: ['twentieth'],
@@ -312,6 +400,56 @@ export const COMPOSERS: ComposerKnowledge[] = [
     eras: ['twentieth'],
   },
   {
+    canonicalName: 'Ígor Stravinski',
+    aliases: ['Ígor Stravinski', 'Igor Stravinsky', 'Igor Stravinski', 'Stravinski', 'Stravinsky'],
+    eras: ['twentieth'],
+  },
+  {
+    canonicalName: 'Dmitri Shostakóvich',
+    aliases: ['Dmitri Shostakóvich', 'Dmitri Shostakovich', 'Shostakóvich', 'Shostakovich'],
+    eras: ['twentieth'],
+  },
+  {
+    canonicalName: 'Francis Poulenc',
+    aliases: ['Francis Poulenc', 'Poulenc'],
+    eras: ['twentieth'],
+  },
+  {
+    canonicalName: 'Benjamin Britten',
+    aliases: ['Benjamin Britten', 'Britten'],
+    eras: ['twentieth'],
+  },
+  {
+    canonicalName: 'William Walton',
+    aliases: ['William Walton'],
+    eras: ['twentieth'],
+  },
+  {
+    canonicalName: 'Darius Milhaud',
+    aliases: ['Darius Milhaud', 'Milhaud'],
+    eras: ['twentieth'],
+  },
+  {
+    canonicalName: 'Maurice Ohana',
+    aliases: ['Maurice Ohana', 'Ohana'],
+    eras: ['twentieth'],
+  },
+  {
+    canonicalName: 'Jacques Ibert',
+    aliases: ['Jacques Ibert', 'Ibert'],
+    eras: ['twentieth'],
+  },
+  {
+    canonicalName: 'Silvestre Revueltas',
+    aliases: ['Silvestre Revueltas', 'Revueltas'],
+    eras: ['twentieth'],
+  },
+  {
+    canonicalName: 'Arturo Márquez',
+    aliases: ['Arturo Márquez', 'Arturo Marquez'],
+    eras: ['twentieth'],
+  },
+  {
     canonicalName: 'Kaija Saariaho',
     aliases: ['Kaija Saariaho', 'Saariaho'],
     eras: ['contemporary'],
@@ -334,6 +472,11 @@ export const COMPOSERS: ComposerKnowledge[] = [
   {
     canonicalName: 'Raquel García-Tomás',
     aliases: ['Raquel García-Tomás', 'Raquel Garcia-Tomas', 'García-Tomás', 'Garcia-Tomas'],
+    eras: ['contemporary'],
+  },
+  {
+    canonicalName: 'Caroline Shaw',
+    aliases: ['Caroline Shaw'],
     eras: ['contemporary'],
   },
   {

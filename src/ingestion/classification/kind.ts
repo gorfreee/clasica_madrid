@@ -22,6 +22,7 @@ const ESTABLISHED_PHRASES = [
   'orquesta y coro nacionales',
   'orquesta titular del teatro real',
   'fundacion scherzo',
+  'ibermusica',
   'excelentia',
   'candlelight',
   'universo barroco',

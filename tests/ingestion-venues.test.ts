@@ -111,6 +111,7 @@ describe('resolución de venue — aliases existentes', () => {
       )?.venue.id,
     ).toBe('ven_auditorio_nacional_sala_camara');
     expect(matchVenue('Real Teatro de Retiro', catalog)?.venue.id).toBe('ven_real_teatro_retiro');
+    expect(matchVenue('Teatro de la Abadía', catalog)?.venue.id).toBe('ven_teatro_abadia');
     expect(matchVenue('Teatro Fernando de Rojas', catalog)?.venue.id).toBe('ven_circulo_bellas_artes_teatro_fernando_de_rojas');
     expect(matchVenue('Sala de Columnas', catalog)?.venue.id).toBe('ven_circulo_bellas_artes_sala_columnas');
   });
@@ -141,6 +142,35 @@ describe('resolución de venue — Teatro Real / Sala Principal', () => {
     );
     expect(match?.venue.id).toBe('ven_real_teatro_retiro');
     expect(match?.venue.id).not.toBe('ven_teatro_real');
+  });
+
+  it('una coproducción en el Teatro de la Abadía no se descarta por lugar', () => {
+    const catalog = catalogWith(teatroReal);
+    const match = matchVenue(
+      { venueText: 'Teatro de la Abadía', sourceId: 'teatro-real' },
+      catalog,
+    );
+    expect(match?.venue.id).toBe('ven_teatro_abadia');
+    expect(match?.kind).toBe('known');
+
+    const built = toCandidate(
+      eventAt({
+        title: 'He who loves beauty',
+        venueText: 'Teatro de la Abadía',
+        sourceId: 'teatro-real',
+        sourceUrl: 'https://www.teatroreal.es/es/espectaculo/he-who-loves-beauty',
+      }),
+      getSourceDefinition('teatro-real'),
+      catalog,
+      TEST_NOW,
+      new Set(),
+      new Set(),
+      includeClassification(),
+    );
+    expect(built.skippedReason).toBeUndefined();
+    expect(built.candidate?.event.venueId).toBe('ven_teatro_abadia');
+    expect(built.candidate?.venue?.id).toBe('ven_teatro_abadia');
+    expect(built.candidate?.venue?.name).toBe('Teatro de la Abadía');
   });
 });
 

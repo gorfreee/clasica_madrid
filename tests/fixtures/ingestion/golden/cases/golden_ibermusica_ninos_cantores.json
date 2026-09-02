@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_ibermusica_ninos_cantores",
+  "origin": "phase1-smoke",
+  "sourceId": "auditorio-nacional",
+  "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-ninos-cantores-de-viena",
+  "listingTitle": "Ibermúsica. Niños Cantores de Viena",
+  "observed": {
+    "title": "Ibermúsica. Niños Cantores de Viena",
+    "venueText": "Sala Sinfónica",
+    "programText": "Manolo Cagnin, dirección",
+    "performers": [
+      { "name": "Manolo Cagnin", "roleText": "dirección" }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": [],
+    "eras": [],
+    "kind": "established",
+    "access": "unknown"
+  },
+  "reason": "Ibermúsica es un ciclo de conciertos clásicos establecido. El título declara la serie aunque la ficha no liste obras. Contrasta con Impacta. Bartoli/Lang Lang, que no es un ciclo con identidad musical suficiente sin repertorio.",
+  "checkedAt": "2026-09-02"
+}
