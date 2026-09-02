@@ -132,6 +132,11 @@ export type SourceAdapter = {
   /** URLs to fetch for this source given the current clock and ingest window. */
   resolveFetchUrls(source: SourceDefinition, now: Date, window: IngestWindow): string[];
   /**
+   * Optional source-specific listing transport. Adapters use this only when
+   * the listing itself needs the same retry/pacing policy as its child pages.
+   */
+  fetchListing?(url: string, ctx: AdapterContext): Promise<string>;
+  /**
    * Parse one fetched listing/feed body. May be sync or async.
    * Throw if the document is not the expected structure. Skip individual
    * items that lack required facts. Do not treat a suspiciously empty
