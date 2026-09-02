@@ -576,12 +576,21 @@ function classicalConcertSeries(facts: ObservedFacts, haystack: string): Inclusi
 }
 
 /**
- * Established classical cycles whose titles are often only the performer.
- * Match series/category, not description: a talk may mention Universo Barroco.
+ * Auditorio listings put the cycle in the event title and leave seriesText empty.
+ * Only named classical cycles, never season codes (OCNE. Sinfónico 01) or
+ * mixed series (Impacta, CNDM, La Filarmónica). Not description: a talk may
+ * mention Universo Barroco.
  */
+const TITLE_CLASSICAL_CYCLES = [
+  'ibermusica',
+  'fundacion scherzo',
+  'festival alicia de larrocha',
+  'festival internacional de piano',
+];
+
 function classicalSeriesIdentity(facts: ObservedFacts): string | undefined {
-  const fields = [facts.seriesText, facts.categoryText].filter(Boolean) as string[];
-  for (const field of fields) {
+  const seriesFields = [facts.seriesText, facts.categoryText].filter(Boolean) as string[];
+  for (const field of seriesFields) {
     const folded = fieldFolded(field);
     if (
       hasPhrase(folded, 'universo barroco') ||
@@ -595,12 +604,19 @@ function classicalSeriesIdentity(facts: ObservedFacts): string | undefined {
       hasPhrase(folded, 'bach vermut') ||
       hasPhrase(folded, 'les arts en madrid') ||
       hasPhrase(folded, 'fronteras') ||
-      folded === 'lied'
+      folded === 'lied' ||
+      matchesTitleClassicalCycle(field)
     ) {
       return field;
     }
   }
+  if (facts.title && matchesTitleClassicalCycle(facts.title)) return facts.title;
   return undefined;
+}
+
+function matchesTitleClassicalCycle(text: string): boolean {
+  const named = foldName(text);
+  return TITLE_CLASSICAL_CYCLES.some((cycle) => named.includes(foldName(cycle)));
 }
 
 function isOperaCategory(category: string): boolean {

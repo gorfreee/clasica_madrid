@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_scherzo_sokolov",
+  "origin": "phase1-smoke",
+  "sourceId": "auditorio-nacional",
+  "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/fundacion-scherzo-grigory-sokolov",
+  "listingTitle": "Fundación Scherzo. Grigory Sokolov",
+  "observed": {
+    "title": "Fundación Scherzo. Grigory Sokolov",
+    "venueText": "Sala Sinfónica",
+    "programText": "Grigory Sokolov, piano. Programa pendiente de confirmación",
+    "performers": [
+      { "name": "Grigory Sokolov", "roleText": "piano" }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": ["recital"],
+    "eras": [],
+    "kind": "established",
+    "access": "unknown"
+  },
+  "reason": "Fundación Scherzo es un ciclo de recitales de piano. Como Liceo de Cámara, el título de la serie basta aunque el programa esté pendiente. No se inventan obras.",
+  "checkedAt": "2026-09-02"
+}

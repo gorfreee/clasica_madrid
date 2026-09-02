@@ -524,6 +524,105 @@ describe('eligibility — conflictos y fallback', () => {
     expect(liceo.eligibility.ruleId).toBe('classical-concert-series');
   });
 
+  it('incluye ciclos del Auditorio cuyo título lleva el nombre de la serie', () => {
+    const ibermusica = classify(
+      facts({
+        title: 'Ibermúsica. Niños Cantores de Viena',
+        venueText: 'Sala Sinfónica',
+        programText: 'Manolo Cagnin, dirección',
+        performers: [{ name: 'Manolo Cagnin', roleText: 'dirección' }],
+      }),
+    );
+    expect(ibermusica.eligibility.value).toBe('include');
+    expect(ibermusica.eligibility.ruleId).toBe('classical-concert-series');
+    expect(ibermusica.kind.value).toBe('established');
+
+    const visitingOrchestra = classify(
+      facts({
+        title: 'Ibermúsica. Deutsche Radio Philharmonie',
+        venueText: 'Sala Sinfónica',
+        programText:
+          'Josep Pons, dirección. WAGNER Preludio y muerte Tristán e Isolda. STRAUSS Cuatro últimas canciones.',
+      }),
+    );
+    expect(visitingOrchestra.eligibility.value).toBe('include');
+    expect(visitingOrchestra.eligibility.ruleId).toBe('classical-concert-series');
+
+    const scherzo = classify(
+      facts({
+        title: 'Fundación Scherzo. Grigory Sokolov',
+        venueText: 'Sala Sinfónica',
+        programText: 'Grigory Sokolov, piano. Programa pendiente de confirmación',
+        performers: [{ name: 'Grigory Sokolov', roleText: 'piano' }],
+      }),
+    );
+    expect(scherzo.eligibility.value).toBe('include');
+    expect(scherzo.eligibility.ruleId).toBe('classical-concert-series');
+
+    const ocne = classify(
+      facts({
+        title: 'OCNE. Sinfónico 09',
+        venueText: 'Sala Sinfónica',
+        composers: [{ name: 'Benjamin Britten' }, { name: 'Edward Elgar' }],
+        programText:
+          'Caroline Shaw. Entr’acte, para orquesta de cuerda. Benjamin Britten. Concierto para piano núm. 1, op. 13.',
+      }),
+    );
+    expect(ocne.eligibility.value).toBe('include');
+    expect(ocne.eligibility.ruleId).toBe('known-classical-composer');
+    expect(ocne.eras.value).toEqual(expect.arrayContaining(['twentieth', 'romantic']));
+
+    const larrocha = classify(
+      facts({
+        title: 'IV FESTIVAL ALICIA DE LARROCHA - ALUMNOS DEL PROFESOR FRANCISCO FIERRO',
+        venueText: 'Centro Cultural Casa de Vacas',
+      }),
+    );
+    expect(larrocha.eligibility.value).toBe('include');
+    expect(larrocha.eligibility.ruleId).toBe('classical-concert-series');
+  });
+
+  it('no trata un código de temporada OCNE o un Satélite gospel como ciclo clásico', () => {
+    const coded = classify(
+      facts({
+        title: 'OCNE. Sinfónico 03',
+        venueText: 'Sala Sinfónica',
+      }),
+    );
+    expect(coded.eligibility.value).toBe('uncertain');
+
+    const gospel = classify(
+      facts({
+        title: 'OCNE. Satélite 16 Gospel, Taking Its Place',
+        venueText: 'Sala Sinfónica',
+      }),
+    );
+    expect(gospel.eligibility.value).not.toBe('include');
+  });
+
+  it('no infiere include por un recital Impacta sin repertorio ni por un gala Bernstein-Gershwin', () => {
+    const bartoli = classify(
+      facts({
+        title: 'Impacta. Cecilia Bartoli y Lang Lang',
+        programText: 'Cecilia Bartoli, mezzosoprano. Lang Lang, piano. Recital de voz y piano.',
+        performers: [
+          { name: 'Cecilia Bartoli', roleText: 'mezzosoprano' },
+          { name: 'Lang Lang', roleText: 'piano' },
+        ],
+      }),
+    );
+    expect(bartoli.eligibility.value).toBe('uncertain');
+
+    const rhapsody = classify(
+      facts({
+        title: 'La Filarmónica. Rhapsody In Blue',
+        programText:
+          'Bernstein, Wonderful town. Gershwin, Rhapsody in blue. Bernstein, Candide. Bernstein-Gershwin, Summertime.',
+      }),
+    );
+    expect(rhapsody.eligibility.value).not.toBe('include');
+  });
+
   it('incluye la temporada de lírica y no una charla que menciona el ciclo', () => {
     const lirica = classify(
       facts({
