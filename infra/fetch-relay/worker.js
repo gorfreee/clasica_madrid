@@ -135,7 +135,7 @@ async function fetchOrigin(initial, inboundCookies) {
       current = next;
       continue;
     }
-    if (!response.ok) {
+    if (response.status === 202 || !response.ok) {
       const after = cookiesByOrigin.get(origin);
       const canChallenge =
         !cookieChallengeUsed &&

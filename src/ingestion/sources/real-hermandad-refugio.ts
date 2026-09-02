@@ -1,5 +1,6 @@
 import { parseRefugioDetail, refugioEventUrl } from '../detail/real-hermandad-refugio.ts';
 import { decodeHtmlEntities, stripTags } from '../html.ts';
+import { createListingGet, unexpectedHtmlInsteadOfJson } from '../listing-retry.ts';
 import { emptyObservedLists } from '../observed.ts';
 import type { AdapterContext, RawEvent, SourceAdapter, SourceDefinition } from '../types.ts';
 
@@ -20,8 +21,11 @@ type WpListItem = {
 
 /**
  * Official concert CPT via WordPress REST. `/conciertos/` is an Elementor
- * listing of the same posts with infinite scroll (`posts_per_page: 4`); the
- * REST collection is the complete, paginated surface.
+ * listing of the same posts with infinite scroll (`posts_per_page: 4`) and is
+ * not a complete harvest surface. The REST collection remains the structured
+ * source; a SiteGround captcha HTML interstitial is retried once and, if it
+ * persists, a simpler official REST URL (without `_fields`) is tried. HTML is
+ * never parsed as JSON.
  */
 export const realHermandadRefugioAdapter: SourceAdapter = {
   id: 'real-hermandad-refugio',
@@ -37,12 +41,16 @@ export const realHermandadRefugioAdapter: SourceAdapter = {
     url.searchParams.set('_fields', 'id,slug,link,title,status,categoria-eventos,class_list,content');
     return [url.href];
   },
+  fetchListing(url, ctx) {
+    return fetchRefugioListing(url, ctx.get);
+  },
   async extract(body, url, ctx) {
     const first = parseWpList(body);
     const pages = [first];
     if (first.length === REFUGIO_PER_PAGE) {
+      const getPage = createListingGet(ctx.get);
       for (let page = 2; page <= MAX_PAGES; page += 1) {
-        const next = parseWpList(await ctx.get(withPage(url, page)));
+        const next = parseWpList(await getPage(withPage(url, page)));
         pages.push(next);
         if (next.length < REFUGIO_PER_PAGE) break;
       }
@@ -72,6 +80,8 @@ export const realHermandadRefugioAdapter: SourceAdapter = {
 };
 
 function parseWpList(body: string): unknown[] {
+  const html = unexpectedHtmlInsteadOfJson('real-hermandad-refugio', body);
+  if (html) throw new Error(html);
   let parsed: unknown;
   try {
     parsed = JSON.parse(body);
@@ -83,6 +93,53 @@ function parseWpList(body: string): unknown[] {
     throw new Error('real-hermandad-refugio: se esperaba un array de calendario-eventos');
   }
   return parsed;
+}
+
+/**
+ * Official WP REST remains the structured source. SiteGround may answer a
+ * captcha HTML interstitial; retry that same REST URL once, then fall back to
+ * the same CPT without `_fields` (still official JSON). HTML is never parsed
+ * as JSON.
+ */
+async function fetchRefugioListing(url: string, get: (url: string) => Promise<string>): Promise<string> {
+  const readJson = async (target: string) => readRefugioJson(await get(target));
+  try {
+    return await createListingGet(readJson)(url);
+  } catch (error) {
+    const fallbackUrl = refugioRestFallbackUrl(url);
+    if (!fallbackUrl || !isTransientListingOrHtml(error)) throw error;
+    try {
+      return await readJson(fallbackUrl);
+    } catch {
+      throw error;
+    }
+  }
+}
+
+function readRefugioJson(body: string): string {
+  parseWpList(body);
+  return body;
+}
+
+function isTransientListingOrHtml(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return /HTML inesperado|HTML de desafío|JSON inválido/i.test(message)
+    || /tiempo agotado|fetch failed|HTTP 202|HTTP 408|HTTP 429|HTTP 5\d\d/i.test(message);
+}
+
+function refugioRestFallbackUrl(url: string): string | undefined {
+  try {
+    const parsed = new URL(url);
+    if (parsed.pathname !== '/wp-json/wp/v2/calendario-eventos') return undefined;
+    if (!parsed.searchParams.has('_fields') && !parsed.searchParams.has('per_page')) return undefined;
+    parsed.searchParams.delete('_fields');
+    parsed.searchParams.delete('per_page');
+    parsed.searchParams.set('status', 'publish');
+    parsed.searchParams.set('page', parsed.searchParams.get('page') || '1');
+    return parsed.href === url ? undefined : parsed.href;
+  } catch {
+    return undefined;
+  }
 }
 
 function withPage(url: string, page: number): string {

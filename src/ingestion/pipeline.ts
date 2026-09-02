@@ -32,7 +32,7 @@ import type {
   SourceFailure,
 } from './types.ts';
 import { emptyIngestAiSummary, IncompleteListingError } from './types.ts';
-import { getText } from './http.ts';
+import { getText, HttpError, resolveFetchRelay } from './http.ts';
 import { normalizeUrl } from './urls.ts';
 
 export type IngestOptions = {
@@ -93,19 +93,20 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
     Math.max(1, Math.floor(options.sourceConcurrency ?? SOURCE_INGEST_CONCURRENCY) || 1),
   );
   const harvestedSources = await mapConcurrent(sources, sourceConcurrency, async (source): Promise<HarvestSourceResult> => {
+    const sourceGet = instrumentSourceGet(get, source.id, obs);
     try {
       let extracted: RawEvent[];
       let listingIncomplete = false;
       try {
         extracted = await measureSourcePhase(obs, source.id, 'extraction', () =>
-          extractSource(source, options.now, window, get));
+          extractSource(source, options.now, window, sourceGet));
       } catch (error) {
         if (!(error instanceof IncompleteListingError) || error.events.length === 0) throw error;
         extracted = error.events;
         listingIncomplete = true;
       }
       const adapter = getAdapter(source.adapterId);
-      const ctx: AdapterContext = { source, now: options.now, window, get };
+      const ctx: AdapterContext = { source, now: options.now, window, get: sourceGet };
       const hydrated = await measureSourcePhase(obs, source.id, 'hydration', () =>
         hydrateEvents(extracted, adapter, ctx));
       const coverage = adapter.requiresDetailSchedule ? requiredHydrationCoverage(hydrated) : undefined;
@@ -128,19 +129,23 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
   // independent of source completion order.
   for (const result of harvestedSources) {
     const { source, extracted, hydrated, listingIncomplete, coverage, failure } = result;
+    const adapter = getAdapter(source.adapterId);
     const sourceHydration = countHydration(hydrated);
-    if (extracted.length > 0 || hydrated.length > 0) {
-      obs?.recordSourceStats({
-        sourceId: source.id,
-        extractedEvents: extracted.length,
-        hydratedEvents: hydrated.length,
-        hydrationAttempted: sourceHydration.attempted,
-        hydrationSucceeded: sourceHydration.succeeded,
-        hydrationFailed: sourceHydration.failed,
-        hydrationSkippedOutsideWindow: hydrated.filter((raw) => raw.hydration?.reason === 'outside-window').length,
-        hydrationSkippedCircuitOpen: hydrated.filter((raw) => raw.hydration?.reason === 'circuit-open').length,
-      });
-    }
+    const listingError = failure && failure.stage !== 'hydration' ? failure.message : undefined;
+    obs?.recordSourceStats({
+      sourceId: source.id,
+      extractedEvents: extracted.length,
+      hydratedEvents: hydrated.length,
+      hydrationAttempted: sourceHydration.attempted,
+      hydrationSucceeded: sourceHydration.succeeded,
+      hydrationFailed: sourceHydration.failed,
+      hydrationSkippedOutsideWindow: hydrated.filter((raw) => raw.hydration?.reason === 'outside-window').length,
+      hydrationSkippedCircuitOpen: hydrated.filter((raw) => raw.hydration?.reason === 'circuit-open').length,
+      status: failure ? 'failed' : 'ok',
+      usesHydration: Boolean(adapter.hydrate),
+      hydrationReached: !listingError,
+      listingError,
+    });
     const listingByUrl = new Map<string, RawEvent>();
     for (const listing of extracted) {
       listingByUrl.set(normalizeUrl(listing.sourceUrl), listing);
@@ -597,6 +602,65 @@ function measureSourcePhase<T>(
   task: () => Promise<T>,
 ): Promise<T> {
   return observability ? observability.measureSourcePhase(sourceId, phase, task) : task();
+}
+
+function instrumentSourceGet(
+  get: (url: string) => Promise<string>,
+  sourceId: string,
+  observability: IngestObservability | undefined,
+): (url: string) => Promise<string> {
+  if (!observability) return get;
+  const failedUrls = new Set<string>();
+  return async (url: string) => {
+    const startedAtMs = performance.now();
+    const retry = failedUrls.has(normalizeUrl(url));
+    let transport: 'direct' | 'relay' = 'direct';
+    try {
+      if (resolveFetchRelay(url)) transport = 'relay';
+    } catch {
+      transport = 'relay';
+    }
+    try {
+      const body = await get(url);
+      observability.recordHttp({
+        sourceId,
+        transport,
+        durationMs: performance.now() - startedAtMs,
+        retry,
+        status: 200,
+      });
+      return body;
+    } catch (error) {
+      failedUrls.add(normalizeUrl(url));
+      observability.recordHttp({
+        sourceId,
+        transport,
+        durationMs: performance.now() - startedAtMs,
+        retry,
+        ...classifyHttpFailure(error),
+      });
+      throw error;
+    }
+  };
+}
+
+function classifyHttpFailure(error: unknown): {
+  status?: number;
+  timeout?: boolean;
+  fetchFailed?: boolean;
+  challenge?: boolean;
+} {
+  const message = error instanceof Error ? error.message : String(error);
+  const status = error instanceof HttpError ? error.status : undefined;
+  const timeout = (error instanceof Error && error.name === 'AbortError') || /tiempo agotado/i.test(message);
+  const fetchFailed = /fetch failed/i.test(message);
+  const challenge = status === 202 || /sgcaptcha|SiteGround \(captcha\)|HTML de desafío/i.test(message);
+  return {
+    ...(status !== undefined ? { status } : {}),
+    ...(timeout ? { timeout: true } : {}),
+    ...(fetchFailed ? { fetchFailed: true } : {}),
+    ...(challenge ? { challenge: true } : {}),
+  };
 }
 
 async function mapConcurrent<T, R>(items: T[], concurrency: number, fn: (item: T) => Promise<R>): Promise<R[]> {

@@ -1,3 +1,4 @@
+import { isSiteGroundChallenge } from './listing-retry.ts';
 import { fetchRelayHosts } from './registry.ts';
 
 const USER_AGENT = 'ClasicaMadrid-ingestion/1 (+https://github.com/gorfreee/clasica_madrid)';
@@ -106,11 +107,7 @@ async function readViaRelay(url: string, relay: FetchRelayTarget, signal: AbortS
     await response.body?.cancel();
     throw new HttpError(response.status, url, response.headers.get('retry-after'));
   }
-  if (!response.ok) {
-    await response.body?.cancel();
-    throw new HttpError(response.status, url, response.headers.get('retry-after'));
-  }
-  return await response.text();
+  return await readDocumentBody(url, response);
 }
 
 async function readFollowingRedirects(url: string, signal: AbortSignal): Promise<string> {
@@ -137,16 +134,32 @@ async function readFollowingRedirects(url: string, signal: AbortSignal): Promise
         current = next;
         continue;
       }
-      if (!response.ok) {
+      if (response.status >= 300) {
         await response.body?.cancel();
         throw new HttpError(response.status, url, response.headers.get('retry-after'));
       }
-      return await response.text();
+      return await readDocumentBody(url, response);
     }
     throw new Error(`demasiadas redirecciones al pedir ${url}`);
   } finally {
     for (const [origin, cookie] of cookiesByOrigin) originCookieJar.set(origin, cookie);
   }
+}
+
+/**
+ * 202 is not a document (SiteGround captcha interstitial). 200 + sgcaptcha HTML
+ * is the same challenge when a relay has already remapped the origin status.
+ */
+async function readDocumentBody(url: string, response: Response): Promise<string> {
+  if (response.status === 202 || !response.ok) {
+    await response.body?.cancel();
+    throw new HttpError(response.status, url, response.headers.get('retry-after'));
+  }
+  const body = await response.text();
+  if (isSiteGroundChallenge(body)) {
+    throw new HttpError(202, url, response.headers.get('retry-after'));
+  }
+  return body;
 }
 
 function rememberRelayCookies(origin: string | undefined, response: Response): void {
