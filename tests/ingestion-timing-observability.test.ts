@@ -49,6 +49,9 @@ describe('timings de observabilidad de ingestión', () => {
       hydrationAttempted: 129,
       hydrationSucceeded: 124,
       hydrationFailed: 5,
+      status: 'ok',
+      usesHydration: true,
+      hydrationReached: true,
     });
 
     tick = 250;
@@ -83,6 +86,20 @@ describe('timings de observabilidad de ingestión', () => {
       hydrationFailed: 5,
       hydrationSkippedOutsideWindow: 0,
       hydrationSkippedCircuitOpen: 0,
+      status: 'ok',
+      hydrationMode: 'ran',
+      http: {
+        requests: 0,
+        retries: 0,
+        timeoutCount: 0,
+        fetchFailedCount: 0,
+        challengeCount: 0,
+        statusCounts: {},
+        latencyMsTotal: 0,
+        latencyMsMax: 0,
+        directRequests: 0,
+        relayRequests: 0,
+      },
     });
   });
 
@@ -117,6 +134,20 @@ describe('timings de observabilidad de ingestión', () => {
             hydrationFailed: 5,
             hydrationSkippedOutsideWindow: 0,
             hydrationSkippedCircuitOpen: 0,
+            status: 'ok',
+            hydrationMode: 'ran',
+            http: {
+              requests: 129,
+              retries: 3,
+              timeoutCount: 1,
+              fetchFailedCount: 0,
+              challengeCount: 0,
+              statusCounts: { '200': 125, timeout: 1, '503': 3 },
+              latencyMsTotal: 480_000,
+              latencyMsMax: 12_000,
+              directRequests: 0,
+              relayRequests: 129,
+            },
           },
           'teatro-real': {
             extractionMs: 5_000,
@@ -129,6 +160,20 @@ describe('timings de observabilidad de ingestión', () => {
             hydrationFailed: 0,
             hydrationSkippedOutsideWindow: 0,
             hydrationSkippedCircuitOpen: 0,
+            status: 'ok',
+            hydrationMode: 'ran',
+            http: {
+              requests: 85,
+              retries: 0,
+              timeoutCount: 0,
+              fetchFailedCount: 0,
+              challengeCount: 0,
+              statusCounts: { '200': 85 },
+              latencyMsTotal: 55_000,
+              latencyMsMax: 900,
+              directRequests: 85,
+              relayRequests: 0,
+            },
           },
         },
       },
@@ -139,7 +184,14 @@ describe('timings de observabilidad de ingestión', () => {
     expect(summary).toContain('#### Tiempos por fase');
     expect(summary).toContain('| extraction | 15m 00s |');
     expect(summary).toContain('#### Tiempos por fuente');
-    expect(summary).toContain('| cndm | 20s | 8m 00s | 8m 20s | 124/5 |');
+    expect(summary).toContain('| Fuente | Estado | Eventos | Hydration | Fichas int/ok/fallo |');
+    expect(summary).toContain('| cndm | ok | 129 | sí | 129/124/5 | 20s | 8m 00s | 8m 20s |');
+    expect(summary).toContain('relay');
+    expect(summary).toContain('retry 3');
+    expect(summary).toContain('timeout 1');
+    expect(summary).toContain('| teatro-real | ok | 85 | sí | 85/85/0 |');
+    expect(summary).toContain('directo');
+    expect(summary).not.toMatch(/\| cndm \|[^|]*\| 124\/5 \|/);
     expect(summary.indexOf('| cndm |')).toBeLessThan(summary.indexOf('| teatro-real |'));
   });
 });

@@ -125,8 +125,8 @@ describe('Cloudflare fetch-relay worker', () => {
     expect(denied.headers.get('set-cookie')).toBeNull();
   });
 
-  it('surfaces origin 403/500 and never puts the token in the body', async () => {
-    for (const status of [403, 500]) {
+  it('surfaces origin 403/500/202 and never puts the token in the body', async () => {
+    for (const status of [403, 500, 202]) {
       resetRelayCookieJar();
       vi.stubGlobal('fetch', vi.fn(async () => new Response(`token=${token}`, { status })));
       const response = await handleRelayRequest(request(listing), env);

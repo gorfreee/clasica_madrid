@@ -5,6 +5,7 @@ import {
   parseTeatrosCanalDetail,
 } from '../detail/teatros-canal.ts';
 import { decodeHtmlEntities } from '../html.ts';
+import { createListingGet } from '../listing-retry.ts';
 import { emptyObservedLists } from '../observed.ts';
 import type { AdapterContext, RawEvent, SourceAdapter, SourceDefinition } from '../types.ts';
 import type { IngestWindow } from '../dates.ts';
@@ -44,6 +45,9 @@ export const teatrosCanalAdapter: SourceAdapter = {
     url.searchParams.set('status', 'publish');
     return [url.href];
   },
+  fetchListing(url, ctx) {
+    return createListingGet(ctx.get)(url);
+  },
   async extract(body, url, ctx) {
     const first = parseTecList(body);
     const pages = [first];
@@ -51,9 +55,10 @@ export const teatrosCanalAdapter: SourceAdapter = {
     if (totalPages > MAX_PAGES) {
       throw new Error(`teatros-canal: demasiadas páginas (${totalPages})`);
     }
+    const getPage = createListingGet(ctx.get);
     for (let page = 2; page <= totalPages; page += 1) {
       const next = withPage(url, page);
-      pages.push(parseTecList(await ctx.get(next)));
+      pages.push(parseTecList(await getPage(next)));
     }
     const items = pages.flatMap((page) => page.events);
     if (first.total > 0 && items.length !== first.total) {

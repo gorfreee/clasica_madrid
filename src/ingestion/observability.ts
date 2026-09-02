@@ -37,6 +37,22 @@ export type IngestRunStatus = 'running' | 'completed' | 'failed' | 'interrupted'
 export type IngestTimedStage = Exclude<IngestRunStage, 'completed'>;
 export type IngestSourcePhase = 'extraction' | 'hydration';
 
+export type IngestSourceStatus = 'ok' | 'failed';
+export type IngestHydrationMode = 'unused' | 'not-reached' | 'empty' | 'ran';
+
+export type IngestSourceHttpStats = {
+  requests: number;
+  retries: number;
+  timeoutCount: number;
+  fetchFailedCount: number;
+  challengeCount: number;
+  statusCounts: Record<string, number>;
+  latencyMsTotal: number;
+  latencyMsMax: number;
+  directRequests: number;
+  relayRequests: number;
+};
+
 export type IngestSourceTiming = {
   extractionMs: number;
   hydrationMs: number;
@@ -48,6 +64,10 @@ export type IngestSourceTiming = {
   hydrationFailed: number;
   hydrationSkippedOutsideWindow: number;
   hydrationSkippedCircuitOpen: number;
+  status: IngestSourceStatus;
+  hydrationMode: IngestHydrationMode;
+  listingError?: string;
+  http: IngestSourceHttpStats;
 };
 
 export type IngestTimingSummary = {
@@ -224,6 +244,10 @@ export class IngestObservability {
     hydrationFailed: number;
     hydrationSkippedOutsideWindow?: number;
     hydrationSkippedCircuitOpen?: number;
+    status?: IngestSourceStatus;
+    usesHydration?: boolean;
+    hydrationReached?: boolean;
+    listingError?: string;
   }): void {
     this.guard(() => {
       const timing = this.sourceTiming(input.sourceId);
@@ -234,6 +258,43 @@ export class IngestObservability {
       timing.hydrationFailed = input.hydrationFailed;
       timing.hydrationSkippedOutsideWindow = input.hydrationSkippedOutsideWindow ?? 0;
       timing.hydrationSkippedCircuitOpen = input.hydrationSkippedCircuitOpen ?? 0;
+      if (input.status) timing.status = input.status;
+      timing.hydrationMode = hydrationMode(input);
+      if (input.listingError) timing.listingError = sanitizeErrorMessage(input.listingError);
+      else delete timing.listingError;
+      this.persistManifest();
+    });
+  }
+
+  recordHttp(input: {
+    sourceId: string;
+    transport: 'direct' | 'relay';
+    durationMs: number;
+    retry: boolean;
+    status?: number;
+    timeout?: boolean;
+    fetchFailed?: boolean;
+    challenge?: boolean;
+  }): void {
+    this.guard(() => {
+      const http = this.sourceTiming(input.sourceId).http;
+      http.requests += 1;
+      if (input.retry) http.retries += 1;
+      http.latencyMsTotal += Math.max(0, Math.round(input.durationMs));
+      http.latencyMsMax = Math.max(http.latencyMsMax, Math.max(0, Math.round(input.durationMs)));
+      if (input.transport === 'relay') http.relayRequests += 1;
+      else http.directRequests += 1;
+      if (input.timeout) http.timeoutCount += 1;
+      if (input.fetchFailed) http.fetchFailedCount += 1;
+      if (input.challenge) http.challengeCount += 1;
+      const statusKey = input.timeout
+        ? 'timeout'
+        : input.fetchFailed
+          ? 'fetch-failed'
+          : input.challenge && input.status === undefined
+            ? 'challenge'
+            : String(input.status ?? 'error');
+      http.statusCounts[statusKey] = (http.statusCounts[statusKey] ?? 0) + 1;
       this.persistManifest();
     });
   }
@@ -367,6 +428,9 @@ export class IngestObservability {
       hydrationFailed: 0,
       hydrationSkippedOutsideWindow: 0,
       hydrationSkippedCircuitOpen: 0,
+      status: 'ok',
+      hydrationMode: 'unused',
+      http: emptyHttpStats(),
     };
   }
 
@@ -411,6 +475,32 @@ export class IngestObservability {
 
 function elapsedMs(startedAtMs: number, finishedAtMs: number): number {
   return Math.max(0, Math.round(finishedAtMs - startedAtMs));
+}
+
+function emptyHttpStats(): IngestSourceHttpStats {
+  return {
+    requests: 0,
+    retries: 0,
+    timeoutCount: 0,
+    fetchFailedCount: 0,
+    challengeCount: 0,
+    statusCounts: {},
+    latencyMsTotal: 0,
+    latencyMsMax: 0,
+    directRequests: 0,
+    relayRequests: 0,
+  };
+}
+
+function hydrationMode(input: {
+  usesHydration?: boolean;
+  hydrationReached?: boolean;
+  hydrationAttempted: number;
+}): IngestHydrationMode {
+  if (!input.usesHydration) return 'unused';
+  if (input.hydrationReached === false) return 'not-reached';
+  if (input.hydrationAttempted === 0) return 'empty';
+  return 'ran';
 }
 
 export function startObservability(options: ObservabilityOptions): IngestObservability | undefined {

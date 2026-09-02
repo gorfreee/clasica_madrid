@@ -126,6 +126,25 @@ describe('getText cookie-capable redirects', () => {
     await expect(getText(listing, 30_000, {})).rejects.toThrow(/demasiadas redirecciones/);
     expect(fetch).toHaveBeenCalledTimes(10);
   });
+
+  it('does not treat HTTP 202 or a SiteGround captcha page as a document', async () => {
+    const interstitial = vi.fn(async () => new Response(
+      '<html><head><meta http-equiv="refresh" content="0;/.well-known/sgcaptcha/?r=%2F"></head></html>',
+      { status: 202, headers: { 'content-type': 'text/html' } },
+    ));
+    vi.stubGlobal('fetch', interstitial);
+    await expect(getText(ordinary, 30_000, {})).rejects.toMatchObject({
+      status: 202,
+      message: `HTTP 202 al pedir ${ordinary}`,
+    });
+
+    const remapped = vi.fn(async () => new Response(
+      '<html><head><meta http-equiv="refresh" content="0;/.well-known/sgcaptcha/?r=%2Fwp-json"></head></html>',
+      { status: 200, headers: { 'content-type': 'text/html' } },
+    ));
+    vi.stubGlobal('fetch', remapped);
+    await expect(getText(ordinary, 30_000, {})).rejects.toMatchObject({ status: 202 });
+  });
 });
 
 describe('getText fetch relay', () => {

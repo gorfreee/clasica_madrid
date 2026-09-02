@@ -1,4 +1,4 @@
-import type { IngestRunManifest } from './observability.ts';
+import type { IngestRunManifest, IngestSourceHttpStats, IngestSourceTiming } from './observability.ts';
 import type { IngestReport } from './report.ts';
 
 export type AutomationReportMetrics = {
@@ -143,12 +143,12 @@ function formatObservabilitySection(
       '',
       '#### Tiempos por fuente',
       '',
-      '| Fuente | Extracción | Hydration | Total | Fichas ok/fallo |',
-      '|---|---:|---:|---:|---:|',
+      '| Fuente | Estado | Eventos | Hydration | Fichas int/ok/fallo | Extracción | Hydration | Total | HTTP | Fallo listing |',
+      '|---|---|---:|---|---|---:|---:|---:|---|---|',
     );
     for (const [sourceId, timing] of sourceEntries) {
       rows.push(
-        `| ${cell(sourceId)} | ${formatDuration(timing.extractionMs)} | ${formatDuration(timing.hydrationMs)} | ${formatDuration(timing.totalMs)} | ${timing.hydrationSucceeded}/${timing.hydrationFailed} |`,
+        `| ${cell(sourceId)} | ${cell(formatSourceStatus(timing))} | ${timing.extractedEvents} | ${cell(formatHydrationMode(timing))} | ${cell(formatFichas(timing))} | ${formatDuration(timing.extractionMs)} | ${formatDuration(timing.hydrationMs)} | ${formatDuration(timing.totalMs)} | ${cell(formatHttp(timing.http))} | ${cell(timing.listingError ?? '')} |`,
       );
     }
   }
@@ -164,6 +164,50 @@ function formatDuration(ms: number): string {
   if (seconds < 60) return `${seconds}s`;
   const minutes = Math.floor(seconds / 60);
   return `${minutes}m ${String(seconds % 60).padStart(2, '0')}s`;
+}
+
+function formatSourceStatus(timing: IngestSourceTiming): string {
+  return timing.status === 'failed' || timing.listingError ? 'fallo' : 'ok';
+}
+
+function formatHydrationMode(timing: IngestSourceTiming): string {
+  switch (timing.hydrationMode) {
+    case 'unused':
+      return 'no usa';
+    case 'not-reached':
+      return 'no alcanzada';
+    case 'empty':
+      return 'sin fichas';
+    case 'ran':
+      return 'sí';
+  }
+}
+
+function formatFichas(timing: IngestSourceTiming): string {
+  if (timing.hydrationMode !== 'ran') return '—';
+  return `${timing.hydrationAttempted}/${timing.hydrationSucceeded}/${timing.hydrationFailed}`;
+}
+
+function formatHttp(http: IngestSourceHttpStats | undefined): string {
+  if (!http || http.requests === 0) return '—';
+  const parts = [`${http.requests} req`];
+  parts.push(`${formatDuration(http.latencyMsTotal / http.requests)} avg`);
+  if (http.latencyMsMax > 0) parts.push(`max ${formatDuration(http.latencyMsMax)}`);
+  if (http.relayRequests && !http.directRequests) parts.push('relay');
+  else if (http.directRequests && !http.relayRequests) parts.push('directo');
+  else if (http.relayRequests || http.directRequests) {
+    parts.push(`relay ${http.relayRequests}/directo ${http.directRequests}`);
+  }
+  if (http.retries) parts.push(`retry ${http.retries}`);
+  if (http.timeoutCount) parts.push(`timeout ${http.timeoutCount}`);
+  if (http.fetchFailedCount) parts.push(`fetch-failed ${http.fetchFailedCount}`);
+  if (http.challengeCount) parts.push(`captcha ${http.challengeCount}`);
+  const notable = Object.entries(http.statusCounts)
+    .filter(([key]) => key !== '200')
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([key, count]) => `${key}×${count}`);
+  if (notable.length) parts.push(notable.join(' '));
+  return parts.join(', ');
 }
 
 function cell(value: string): string {
