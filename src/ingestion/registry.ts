@@ -207,6 +207,7 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
     urls: ['https://cndm.inaem.gob.es/'],
     adapterId: cndmAdapter.id,
     catalogSourceId: 'src_cndm',
+    useFetchRelay: true,
     seedSource: {
       schemaVersion: 1,
       id: 'src_cndm',
@@ -252,6 +253,7 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
     urls: ['https://realhermandaddelrefugio.org/wp-json/wp/v2/calendario-eventos'],
     adapterId: realHermandadRefugioAdapter.id,
     catalogSourceId: 'src_real_hermandad_refugio',
+    useFetchRelay: true,
     seedSource: {
       schemaVersion: 1,
       id: 'src_real_hermandad_refugio',

@@ -2,7 +2,7 @@ import { addIsoDays, parseObservedTime, type IngestWindow } from '../dates.ts';
 import { cndmDiv, cndmDivs, cndmEventUrl, parseCndmDetail } from '../detail/cndm.ts';
 import { stripTags } from '../html.ts';
 import { emptyObservedLists } from '../observed.ts';
-import type { RawEvent, RawOccurrence, SourceAdapter } from '../types.ts';
+import { IncompleteListingError, type RawEvent, type RawOccurrence, type SourceAdapter } from '../types.ts';
 
 const MONTH_NAMES = [
   'Enero',
@@ -19,34 +19,72 @@ const MONTH_NAMES = [
   'Diciembre',
 ] as const;
 
+const CNDM_RETRYABLE = new Set([403, 408, 429, 500, 502, 503, 504]);
+
 export const cndmAdapter: SourceAdapter = {
   id: 'cndm',
   resolveFetchUrls(source, _now, window) {
-    const urls = cndmMonthUrls(source.urls[0], window);
-    if (!urls[0]) throw new Error('cndm: la ventana no contiene meses');
-    // Extraction fetches and deduplicates every month in one pass. This keeps
-    // a multi-day node as one observation even when it crosses a month boundary.
-    return [urls[0]];
+    if (!cndmMonthUrls(source.urls[0], window)[0]) throw new Error('cndm: la ventana no contiene meses');
+    // Seed with the homepage so a 503 on the first month does not skip extract.
+    // Months are fetched inside extract and isolated like Zarzuela sections.
+    return [cndmHomepageUrl(source.urls[0])];
   },
   async extract(body, url, ctx) {
     const urls = cndmMonthUrls(ctx.source.urls[0], ctx.window);
-    if (url !== urls[0]) throw new Error('cndm: URL inicial de calendario inesperada');
+    if (!urls[0]) throw new Error('cndm: la ventana no contiene meses');
+    const seededMonth = isCndmMonthUrl(url);
+    const seededHome = isCndmHomepage(url);
+    if (!seededMonth && !seededHome) throw new Error('cndm: URL inicial de calendario inesperada');
+
     const events = new Map<string, RawEvent>();
-    for (const monthUrl of urls) {
-      const html = monthUrl === url ? body : await ctx.get(monthUrl);
+    const failedMonths: string[] = [];
+    let lastIsolated: unknown;
+    const absorb = (html: string, monthUrl: string) => {
       for (const event of parseCndmMonthListing(html, monthUrl, ctx.source.id)) {
         absorbCndmEvent(events, event);
       }
+    };
+
+    for (const monthUrl of urls) {
+      try {
+        const html = monthUrl === url ? body : await ctx.get(monthUrl);
+        absorb(html, monthUrl);
+      } catch (error) {
+        if (!isIsolatedCndmMonthFailure(error)) throw error;
+        failedMonths.push(monthUrl);
+        lastIsolated = error;
+      }
     }
-    return [...events.values()]
+
+    const collected = [...events.values()]
       .filter((event) => !event.observed.venueText || isMadridVenue(event.observed.venueText))
       .sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
+    if (failedMonths.length && collected.length) {
+      throw new IncompleteListingError(
+        `cndm: meses no disponibles (${failedMonths.join(', ')})`,
+        collected,
+      );
+    }
+    if (failedMonths.length && lastIsolated) {
+      throw lastIsolated instanceof Error ? lastIsolated : new Error(String(lastIsolated));
+    }
+    return collected;
   },
   hydrate: parseCndmDetail,
 };
 
 export function cndmMonthUrls(homepage: string | undefined, window: IngestWindow): string[] {
-  let origin: string;
+  const origin = cndmOfficialOrigin(homepage);
+  const first = `${window.from.slice(0, 7)}-01`;
+  const last = `${window.to.slice(0, 7)}-01`;
+  const urls: string[] = [];
+  for (let month = first; month <= last; month = nextMonth(month)) {
+    urls.push(`${origin}/eventos/${month.slice(0, 4)}${month.slice(5, 7)}`);
+  }
+  return urls;
+}
+
+function cndmOfficialOrigin(homepage: string | undefined): string {
   try {
     const parsed = new URL(homepage ?? '');
     if (
@@ -58,17 +96,10 @@ export function cndmMonthUrls(homepage: string | undefined, window: IngestWindow
     ) {
       throw new Error();
     }
-    origin = parsed.origin;
+    return parsed.origin;
   } catch {
     throw new Error('cndm: URL oficial no reconocible');
   }
-  const first = `${window.from.slice(0, 7)}-01`;
-  const last = `${window.to.slice(0, 7)}-01`;
-  const urls: string[] = [];
-  for (let month = first; month <= last; month = nextMonth(month)) {
-    urls.push(`${origin}/eventos/${month.slice(0, 4)}${month.slice(5, 7)}`);
-  }
-  return urls;
 }
 
 export function parseCndmMonthListing(body: string, url: string, sourceId: string): RawEvent[] {
@@ -161,6 +192,45 @@ function absorbCndmEvent(events: Map<string, RawEvent>, incoming: RawEvent): voi
       occurrences.findIndex((item) => item.date === occurrence.date && item.time === occurrence.time) === index,
   );
   existing.listingDateText = existing.observed.occurrences.map((item) => item.raw).join('; ');
+}
+
+function cndmHomepageUrl(homepage: string | undefined): string {
+  return `${cndmOfficialOrigin(homepage)}/`;
+}
+
+function isCndmHomepage(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return (
+      parsed.protocol === 'https:' &&
+      parsed.hostname === 'cndm.inaem.gob.es' &&
+      (parsed.pathname === '/' || parsed.pathname === '') &&
+      !parsed.port &&
+      !parsed.username &&
+      !parsed.password
+    );
+  } catch {
+    return false;
+  }
+}
+
+function isCndmMonthUrl(url: string): boolean {
+  try {
+    requestedMonthFromUrl(url);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function isIsolatedCndmMonthFailure(error: unknown): boolean {
+  // Duck-type status so this module does not import http.ts (http → registry → cndm).
+  if (error && typeof error === 'object' && 'status' in error) {
+    const status = error.status;
+    if (typeof status === 'number' && CNDM_RETRYABLE.has(status)) return true;
+  }
+  const message = error instanceof Error ? error.message : String(error);
+  return /tiempo agotado|fetch failed/i.test(message);
 }
 
 function requestedMonthFromUrl(url: string): string {

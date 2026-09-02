@@ -137,8 +137,15 @@ describe('getText fetch relay', () => {
     expect(listSourceDefinitions().filter((item) => item.useFetchRelay).map((item) => item.id)).toEqual([
       'teatro-zarzuela',
       'fundacion-juan-march',
+      'cndm',
+      'real-hermandad-refugio',
     ]);
-    expect(fetchRelayHosts()).toEqual(['teatrodelazarzuela.inaem.gob.es', 'www.march.es']);
+    expect(fetchRelayHosts()).toEqual([
+      'cndm.inaem.gob.es',
+      'realhermandaddelrefugio.org',
+      'teatrodelazarzuela.inaem.gob.es',
+      'www.march.es',
+    ]);
     expect(getSourceDefinition('auditorio-nacional').useFetchRelay).toBeFalsy();
 
     const extra: SourceDefinition = {
