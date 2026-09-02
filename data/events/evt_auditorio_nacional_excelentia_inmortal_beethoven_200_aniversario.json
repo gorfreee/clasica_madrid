@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_inmortal_beethoven_200_aniversario",
+  "slug": "excelentia-inmortal-beethoven-200-aniversario",
+  "title": "Excelentia. Inmortal Beethoven. 200 Aniversario",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_inmortal_beethoven_200_aniversario_01",
+      "date": "2027-03-12",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Clásica Santa Cecilia"
+    },
+    {
+      "name": "Vlad Khandani"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Beethoven"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para piano n.º 3",
+      "composerName": "Beethoven"
+    },
+    {
+      "title": "Sinfonía n.º 5",
+      "composerName": "Beethoven"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-inmortal-beethoven-200-aniversario",
+      "checkedAt": "2026-09-03",
+      "externalId": "excelentia-inmortal-beethoven-200-aniversario"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

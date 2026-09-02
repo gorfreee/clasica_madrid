@@ -23,8 +23,39 @@
       "name": "FAZIL SAY"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Karol Szymanowski (1882-1937)"
+    },
+    {
+      "name": "Fazıl Say (1970)"
+    },
+    {
+      "name": "Serguéi Prokófiev (1891-1953)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Mythes, op. 30 (1921)",
+      "composerName": "Karol Szymanowski (1882-1937)"
+    },
+    {
+      "title": "Sonata para violín y piano n.º 3 ‘Lost screams’, op. 119 (1997)",
+      "composerName": "Fazıl Say (1970)"
+    },
+    {
+      "title": "PatKop (1977)",
+      "composerName": "Fazıl Say (1970)"
+    },
+    {
+      "title": "UniSolo, para violín y piano ** (2024)",
+      "composerName": "Fazıl Say (1970)"
+    },
+    {
+      "title": "Sonata para piano n.º 1 en fa menor, op. 1 (1907, rev. 1909)",
+      "composerName": "Serguéi Prokófiev (1891-1953)"
+    }
+  ],
   "eras": [
     "twentieth",
     "contemporary"
@@ -38,10 +69,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-patricia-kopatchinskaja-fazil-say-1",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "cndm-patricia-kopatchinskaja-fazil-say-1"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23864",
+      "checkedAt": "2026-09-03",
+      "externalId": "23864"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

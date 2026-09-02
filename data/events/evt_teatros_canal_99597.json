@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatros_canal_99597",
+  "slug": "laura-sierra-piano",
+  "title": "Laura Sierra, piano",
+  "status": "scheduled",
+  "venueId": "ven_teatros_canal_sala_negra",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatros_canal_99597_01",
+      "date": "2027-05-02",
+      "time": "17:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "baroque",
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_teatros_canal",
+      "url": "https://www.teatroscanal.com/espectaculo/la-nota-silenciosa-laura-sierra-piano",
+      "checkedAt": "2026-09-03",
+      "externalId": "99597"
+    }
+  ],
+  "primarySourceId": "src_teatros_canal",
+  "lastVerifiedAt": "2026-09-03"
+}

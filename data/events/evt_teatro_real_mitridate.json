@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_real_mitridate",
+  "slug": "mitridate",
+  "title": "Mitridate",
+  "status": "scheduled",
+  "venueId": "ven_teatro_real",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_real_mitridate_01",
+      "date": "2027-04-18",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Andrea Buccarella",
+      "role": "conductor"
+    },
+    {
+      "name": "Il Pomo d'Oro",
+      "role": "orchestra"
+    },
+    {
+      "name": "Michael Spyres"
+    },
+    {
+      "name": "Madison Nonoa"
+    },
+    {
+      "name": "Margherita Sala"
+    },
+    {
+      "name": "Arianna Vendittelli"
+    },
+    {
+      "name": "Chelsea Zurflüh"
+    },
+    {
+      "name": "Alex Rosen"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Nicola Antonio Porpora"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "opera",
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_teatro_real",
+      "url": "https://www.teatroreal.es/es/espectaculo/mitridate",
+      "checkedAt": "2026-09-03",
+      "externalId": "mitridate"
+    }
+  ],
+  "primarySourceId": "src_teatro_real",
+  "lastVerifiedAt": "2026-09-03"
+}

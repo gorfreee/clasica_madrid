@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_concierto_de_ano_nuevo_8",
+  "slug": "excelentia-concierto-de-ano-nuevo",
+  "title": "Excelentia. Concierto de Año Nuevo",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_concierto_de_ano_nuevo_8_01",
+      "date": "2026-12-30",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Clásica Santa Cecilia"
+    },
+    {
+      "name": "Kynan Johns",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "F.v. Suppe"
+    },
+    {
+      "name": "E. Waldteufel"
+    },
+    {
+      "name": "J. Strauss II"
+    },
+    {
+      "name": "J. Strauss"
+    },
+    {
+      "name": "Otto Nicolai"
+    },
+    {
+      "name": "Hans Christian Lumbye"
+    },
+    {
+      "name": "J. StraussII"
+    },
+    {
+      "name": "E. Strauss"
+    },
+    {
+      "name": "J. Offenbach"
+    }
+  ],
+  "works": [
+    {
+      "title": "Caballería ligera",
+      "composerName": "F.v. Suppe"
+    },
+    {
+      "title": "Estudiantina",
+      "composerName": "E. Waldteufel"
+    },
+    {
+      "title": "La caza, Polka, op.373",
+      "composerName": "J. Strauss II"
+    },
+    {
+      "title": "“Banditen Galopp”, op.378",
+      "composerName": "J. Strauss"
+    },
+    {
+      "title": "Las alegres comadres de Windsor, obertura",
+      "composerName": "Otto Nicolai"
+    },
+    {
+      "title": "Copenhagen Steamrailway Galopp",
+      "composerName": "Hans Christian Lumbye"
+    },
+    {
+      "title": "El bosque de Krapfen, Polka, op.336",
+      "composerName": "J. StraussII"
+    },
+    {
+      "title": "Obertura «Die Fledermaus»",
+      "composerName": "J. Strauss II"
+    },
+    {
+      "title": "La Polka del herrero",
+      "composerName": "J. StraussII"
+    },
+    {
+      "title": "Carmen Quadrille",
+      "composerName": "E. Strauss"
+    },
+    {
+      "title": "Barba azul, obertura",
+      "composerName": "J. Offenbach"
+    },
+    {
+      "title": "Champagne Galopp",
+      "composerName": "Hans Christian Lumbye"
+    },
+    {
+      "title": "Los patinadores,vals",
+      "composerName": "E. Waldteufel"
+    },
+    {
+      "title": "Bajo truenos y relámpagos, Polka",
+      "composerName": "J. Strauss II"
+    },
+    {
+      "title": "Tik -Tak, Polka",
+      "composerName": "J. Strauss"
+    },
+    {
+      "title": "El Danubio azul",
+      "composerName": "J. Strauss"
+    },
+    {
+      "title": "Marcha Radetzky",
+      "composerName": "J. Strauss"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-concierto-de-ano-nuevo-8",
+      "checkedAt": "2026-09-03",
+      "externalId": "excelentia-concierto-de-ano-nuevo-8"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

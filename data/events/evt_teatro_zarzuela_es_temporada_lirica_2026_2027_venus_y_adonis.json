@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_zarzuela_es_temporada_lirica_2026_2027_venus_y_adonis",
+  "slug": "venus-y-adonis",
+  "title": "Venus y Adonis",
+  "status": "scheduled",
+  "venueId": "ven_teatro_zarzuela",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_venus_y_adonis_01",
+      "date": "2027-05-05",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_venus_y_adonis_02",
+      "date": "2027-05-07",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_venus_y_adonis_03",
+      "date": "2027-05-08",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_venus_y_adonis_04",
+      "date": "2027-05-09",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "ALBERTO MIGUÉLEZ ROUCO",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "JOSÉ DE NEBRA"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "opera",
+    "early-music"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_teatro_zarzuela",
+      "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/venus-y-adonis",
+      "checkedAt": "2026-09-03",
+      "externalId": "/es/temporada/lirica-2026-2027/venus-y-adonis"
+    }
+  ],
+  "primarySourceId": "src_teatro_zarzuela",
+  "lastVerifiedAt": "2026-09-03"
+}

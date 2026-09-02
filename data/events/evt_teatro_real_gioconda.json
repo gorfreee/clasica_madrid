@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_real_gioconda",
+  "slug": "la-gioconda",
+  "title": "La Gioconda",
+  "status": "scheduled",
+  "venueId": "ven_teatro_real",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_real_gioconda_01",
+      "date": "2027-03-31",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_gioconda_02",
+      "date": "2027-04-03",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Marco Armiliato",
+      "role": "conductor"
+    },
+    {
+      "name": "José Luis Basso",
+      "role": "conductor"
+    },
+    {
+      "name": "Coro y Orquesta Titulares del Teatro Real",
+      "role": "orchestra"
+    },
+    {
+      "name": "Pequeños Cantores de la ORCAM",
+      "role": "choir"
+    },
+    {
+      "name": "Anna Netrebko"
+    },
+    {
+      "name": "Eve-Maude Hubeaux"
+    },
+    {
+      "name": "Simon Lim"
+    },
+    {
+      "name": "Lucile Richardot"
+    },
+    {
+      "name": "Yusif Eyvazov"
+    },
+    {
+      "name": "Luca Salsi"
+    },
+    {
+      "name": "Fernando Radó"
+    },
+    {
+      "name": "Jan Antem"
+    },
+    {
+      "name": "Josep Fadó"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Amilcare Ponchielli"
+    }
+  ],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "opera",
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_teatro_real",
+      "url": "https://www.teatroreal.es/es/espectaculo/gioconda",
+      "checkedAt": "2026-09-03",
+      "externalId": "gioconda"
+    }
+  ],
+  "primarySourceId": "src_teatro_real",
+  "lastVerifiedAt": "2026-09-03"
+}

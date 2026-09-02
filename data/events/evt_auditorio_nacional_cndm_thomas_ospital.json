@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_cndm_thomas_ospital",
+  "slug": "cndm-thomas-ospital",
+  "title": "CNDM. Thomas Ospital",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_cndm_thomas_ospital_01",
+      "date": "2027-03-20",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "THOMAS OSPITAL"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital",
+    "organ"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-thomas-ospital",
+      "checkedAt": "2026-09-03",
+      "externalId": "cndm-thomas-ospital"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

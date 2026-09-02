@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_b9547b211b764d0f81df773d97d9bdfd",
+  "slug": "ocne-sinfonico-17",
+  "title": "OCNE. Sinfónico 17",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_b9547b211b764d0f81df773d97d9bdfd_01",
+      "date": "2027-04-16",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_b9547b211b764d0f81df773d97d9bdfd_02",
+      "date": "2027-04-17",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_b9547b211b764d0f81df773d97d9bdfd_03",
+      "date": "2027-04-18",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta y Coro Nacionales de España"
+    },
+    {
+      "name": "Lucas Macías Navarro",
+      "role": "conductor"
+    },
+    {
+      "name": "Pablo Sáinz Villegas"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Mario Castelnuovo-Tedesco"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para guitarra y orquesta núm. 1 en Re mayor",
+      "composerName": "Mario Castelnuovo-Tedesco"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-17-4",
+      "checkedAt": "2026-09-03",
+      "externalId": "b9547b211b764d0f81df773d97d9bdfd"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

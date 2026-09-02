@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_23870",
+  "slug": "cuarteto-gringolts-clemens-hagen",
+  "title": "CUARTETO GRINGOLTS & CLEMENS HAGEN",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_23870_01",
+      "date": "2027-04-13",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Cuarteto Gringolts"
+    },
+    {
+      "name": "Clemens Hagen"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Nepomuk Hummel (1778-1837)"
+    },
+    {
+      "name": "Franz Schubert (1797-1828)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Cuarteto de cuerda en do mayor, op. 30, n.º 1 (1804-1808)",
+      "composerName": "Johann Nepomuk Hummel (1778-1837)"
+    },
+    {
+      "title": "Quinteto de cuerda en do mayor, op. 163 (1828)",
+      "composerName": "Franz Schubert (1797-1828)"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-cuarteto-gringolts-clemens-hagen",
+      "checkedAt": "2026-09-03",
+      "externalId": "23870"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23870",
+      "checkedAt": "2026-09-03",
+      "externalId": "23870"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

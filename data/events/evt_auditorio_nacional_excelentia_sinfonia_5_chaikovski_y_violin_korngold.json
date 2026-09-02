@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_sinfonia_5_chaikovski_y_violin_korngold",
+  "slug": "excelentia-sinfonia-5-chaikovski-y-violin-korngold",
+  "title": "Excelentia. Sinfonía 5 Chaikovski y Violín Korngold",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_sinfonia_5_chaikovski_y_violin_korngold_01",
+      "date": "2027-04-15",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Clásica Santa Cecilia"
+    },
+    {
+      "name": "Fuad Ibrahimov",
+      "role": "conductor"
+    },
+    {
+      "name": "Alexandra Tirsu"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Chaikovski"
+    },
+    {
+      "name": "Korngold"
+    }
+  ],
+  "works": [
+    {
+      "title": "Romeo y Julieta, obertura-fantasía",
+      "composerName": "Chaikovski"
+    },
+    {
+      "title": "Concierto para violín y orquesta",
+      "composerName": "Korngold"
+    },
+    {
+      "title": "Sinfonía n.º 5",
+      "composerName": "Chaikovski"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-sinfonia-5-chaikovski-y-violin-korngold",
+      "checkedAt": "2026-09-03",
+      "externalId": "excelentia-sinfonia-5-chaikovski-y-violin-korngold"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

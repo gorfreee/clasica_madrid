@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_uam_missa_papae_marcelli_la_gloria_de_palestrina",
+  "slug": "uam-missa-papae-marcelli-la-gloria-de-palestrina",
+  "title": "UAM. Missa Papae Marcelli. La Gloria de Palestrina",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_uam_missa_papae_marcelli_la_gloria_de_palestrina_01",
+      "date": "2027-03-13",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "La Academia de los Nocturnos"
+    },
+    {
+      "name": "Schola Cantorum UAM"
+    },
+    {
+      "name": "Isaac Alonso",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Giovanni Pierluigi da Palestrina (1525-1594)"
+    }
+  ],
+  "works": [
+    {
+      "title": "\"Misa del papa Marcelo\"",
+      "composerName": "Giovanni Pierluigi da Palestrina (1525-1594)"
+    }
+  ],
+  "eras": [
+    "renaissance"
+  ],
+  "formats": [],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/uam-missa-papae-marcelli-la-gloria-de-palestrina",
+      "checkedAt": "2026-09-03",
+      "externalId": "uam-missa-papae-marcelli-la-gloria-de-palestrina"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_23826",
+  "slug": "obni",
+  "title": "OBNI",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_23826_01",
+      "date": "2027-02-25",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Miriam Hontana"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antonio Vivaldi (1678-1741)"
+    },
+    {
+      "name": "Johann Georg Pisendel (1687-1755)"
+    },
+    {
+      "name": "A. Vivaldi"
+    },
+    {
+      "name": "J. G. Pisendel"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para violín en fa mayor , RV 292 (ca. 1716-1717)",
+      "composerName": "Antonio Vivaldi (1678-1741)"
+    },
+    {
+      "title": "Concierto para violín en sol menor, JunP I.1",
+      "composerName": "Johann Georg Pisendel (1687-1755)"
+    },
+    {
+      "title": "Concierto para violín en si menor, RV 389 (1720-1724)",
+      "composerName": "A. Vivaldi"
+    },
+    {
+      "title": "[Largo] y Allegro de la Sonata para violín solo sin bajo en la menor, JunP IV.2",
+      "composerName": "J. G. Pisendel"
+    },
+    {
+      "title": "Sinfonía de L’olimpiade, RV 725 (1733)",
+      "composerName": "A. Vivaldi"
+    },
+    {
+      "title": "Concierto para violín en re menor ‘Per monsieur Pisendel’ , op. 8, n.º 7",
+      "composerName": "A. Vivaldi"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-obni",
+      "checkedAt": "2026-09-03",
+      "externalId": "23826"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23826",
+      "checkedAt": "2026-09-03",
+      "externalId": "23826"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

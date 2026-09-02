@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_23816",
+  "slug": "leticia-moreno-edicson-ruiz-gonzalo-grau",
+  "title": "LETICIA MORENO, EDICSON RUIZ & GONZALO GRAU",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_23816_01",
+      "date": "2027-01-15",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "LETICIA MORENO"
+    },
+    {
+      "name": "EDICSON RUIZ"
+    },
+    {
+      "name": "GONZALO GRAU"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Efraín Oscher (1974)"
+    },
+    {
+      "name": "Gonzalo Grau (1972)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Passacaglia , para violín y contrabajo, sobre la Passacaglia para órgano en do menor, BWV 582, de J. S. Bach ** (2018)",
+      "composerName": "Efraín Oscher (1974)"
+    },
+    {
+      "title": "RumBach for J. S ., para violín, contrabajo y percusión ** (2017)",
+      "composerName": "Gonzalo Grau (1972)"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-leticia-moreno-edicson-ruiz-gonzalo-grau",
+      "checkedAt": "2026-09-03",
+      "externalId": "23816"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23816",
+      "checkedAt": "2026-09-03",
+      "externalId": "23816"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

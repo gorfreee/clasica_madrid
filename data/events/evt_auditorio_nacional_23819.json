@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_23819",
+  "slug": "fazil-say",
+  "title": "FAZIL SAY",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_23819_01",
+      "date": "2027-01-25",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "FAZIL SAY"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Modest Mussorgski (1839-1881)"
+    },
+    {
+      "name": "Fazıl Say (1970)"
+    }
+  ],
+  "works": [
+    {
+      "title": "À la carte, obras sin anuncio previo que elegirá el pianista",
+      "composerName": "Fazıl Say (1970)"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-fazil-say-1",
+      "checkedAt": "2026-09-03",
+      "externalId": "23819"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23819",
+      "checkedAt": "2026-09-03",
+      "externalId": "23819"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

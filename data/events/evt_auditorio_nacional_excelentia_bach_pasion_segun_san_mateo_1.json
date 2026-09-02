@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_bach_pasion_segun_san_mateo_1",
+  "slug": "excelentia-bach-pasion-segun-san-mateo",
+  "title": "Excelentia. Bach: Pasión según San Mateo",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_bach_pasion_segun_san_mateo_1_01",
+      "date": "2027-03-19",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Sociedad Coral Excelentia de Madrid"
+    },
+    {
+      "name": "Orquesta Clásica Santa Cecilia"
+    },
+    {
+      "name": "Alexander Znamenskiy",
+      "role": "conductor"
+    },
+    {
+      "name": "Tereza Zimková"
+    },
+    {
+      "name": "Lena Belkina"
+    }
+  ],
+  "composers": [
+    {
+      "name": "J.S. Bach"
+    }
+  ],
+  "works": [
+    {
+      "title": "Pasión según San Mateo, BWV 244",
+      "composerName": "J.S. Bach"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-bach-pasion-segun-san-mateo-1",
+      "checkedAt": "2026-09-03",
+      "externalId": "excelentia-bach-pasion-segun-san-mateo-1"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

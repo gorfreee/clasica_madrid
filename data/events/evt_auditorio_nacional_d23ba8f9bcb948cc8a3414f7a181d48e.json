@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_d23ba8f9bcb948cc8a3414f7a181d48e",
+  "slug": "ocne-sinfonico-12",
+  "title": "OCNE. Sinfónico 12",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_d23ba8f9bcb948cc8a3414f7a181d48e_01",
+      "date": "2027-02-19",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_d23ba8f9bcb948cc8a3414f7a181d48e_02",
+      "date": "2027-02-20",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_d23ba8f9bcb948cc8a3414f7a181d48e_03",
+      "date": "2027-02-21",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Nacional de España"
+    },
+    {
+      "name": "Eun Sun Kim",
+      "role": "conductor"
+    },
+    {
+      "name": "Truls Mørk"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antonín Dvořák"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para violonchelo en Si menor, op. 104",
+      "composerName": "Antonín Dvořák"
+    },
+    {
+      "title": "Johannes Brahms / Arnold Schönberg",
+      "composerName": "Antonín Dvořák"
+    },
+    {
+      "title": "Cuarteto con piano núm. 1 en Sol menor, op. 25 [43’]",
+      "composerName": "Antonín Dvořák"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic",
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-12-4",
+      "checkedAt": "2026-09-03",
+      "externalId": "d23ba8f9bcb948cc8a3414f7a181d48e"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

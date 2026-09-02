@@ -58,10 +58,11 @@
   "citations": [
     {
       "sourceId": "src_circulo_bellas_artes",
-      "url": "https://www.circulobellasartes.com/espectaculos/in-honour-of-the-moon/",
-      "checkedAt": "2026-08-28"
+      "url": "https://www.circulobellasartes.com/espectaculos/in-honour-of-the-moon",
+      "checkedAt": "2026-09-03",
+      "externalId": "134930"
     }
   ],
   "primarySourceId": "src_circulo_bellas_artes",
-  "lastVerifiedAt": "2026-08-28"
+  "lastVerifiedAt": "2026-09-03"
 }

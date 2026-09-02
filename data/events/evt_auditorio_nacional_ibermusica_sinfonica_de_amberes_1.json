@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ibermusica_sinfonica_de_amberes_1",
+  "slug": "ibermusica-sinfonica-de-amberes",
+  "title": "Ibermúsica. Sinfónica de Amberes",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ibermusica_sinfonica_de_amberes_1_01",
+      "date": "2027-03-04",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Sinfónica de Amberes"
+    },
+    {
+      "name": "Marc Albrecht"
+    },
+    {
+      "name": "Augustin Hadelich"
+    }
+  ],
+  "composers": [
+    {
+      "name": "STRAUSS Till Eulenspiegel"
+    }
+  ],
+  "works": [
+    {
+      "title": "STRAUSS Danza de los siete velos op.54 (de Salomé)",
+      "composerName": "STRAUSS Till Eulenspiegel"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-sinfonica-de-amberes-1",
+      "checkedAt": "2026-09-03",
+      "externalId": "ibermusica-sinfonica-de-amberes-1"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cndm_es_temporada_ciclo_de_lied_2026_2027_anja_mittermuller",
+  "slug": "anja-mittermuller",
+  "title": "Anja Mittermüller",
+  "status": "scheduled",
+  "venueId": "ven_teatro_zarzuela",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cndm_es_temporada_ciclo_de_lied_2026_2027_anja_mittermuller_01",
+      "date": "2027-02-02",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "ANJA MITTERMÜLLER *"
+    },
+    {
+      "name": "RICHARD FU *"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Franz Schubert (1797-1828)"
+    },
+    {
+      "name": "Manuel de Falla (1876-1946)"
+    },
+    {
+      "name": "Gabriel Fauré (1845-1924)"
+    },
+    {
+      "name": "Henri Duparc (1848-1933)"
+    },
+    {
+      "name": "Richard Strauss (1864-1949)"
+    }
+  ],
+  "works": [
+    {
+      "title": "An den Mond , D 193 (1815)",
+      "composerName": "Franz Schubert (1797-1828)"
+    },
+    {
+      "title": "Suleika II , D 717 (1824)",
+      "composerName": "Franz Schubert (1797-1828)"
+    },
+    {
+      "title": "An die untergehende Sonne , D 457 (1816-1817)",
+      "composerName": "Franz Schubert (1797-1828)"
+    },
+    {
+      "title": "Auf dem See, op. 92, n.º 2 (1828)",
+      "composerName": "Franz Schubert (1797-1828)"
+    },
+    {
+      "title": "Auf dem Wasser zu singen , D 774 (1823)",
+      "composerName": "Franz Schubert (1797-1828)"
+    },
+    {
+      "title": "Suleika I , D 720 (1821)",
+      "composerName": "Franz Schubert (1797-1828)"
+    },
+    {
+      "title": "Notre amour , op. 23, n.º 2 (1879)",
+      "composerName": "Gabriel Fauré (1845-1924)"
+    },
+    {
+      "title": "Le papillon et la fleur , op. 1, n.º 1 (1861)",
+      "composerName": "Gabriel Fauré (1845-1924)"
+    },
+    {
+      "title": "Les roses d’Ispahan, op. 39, n.º 4 (1884)",
+      "composerName": "Gabriel Fauré (1845-1924)"
+    },
+    {
+      "title": "Chanson triste , IHD 4 (1868)",
+      "composerName": "Henri Duparc (1848-1933)"
+    },
+    {
+      "title": "Phidylé , IHD 14 (1882)",
+      "composerName": "Henri Duparc (1848-1933)"
+    },
+    {
+      "title": "L’invitation au voyage , IHD 10 (ca. 1870)",
+      "composerName": "Henri Duparc (1848-1933)"
+    },
+    {
+      "title": "Vier Lieder , op. 27 (1894)",
+      "composerName": "Richard Strauss (1864-1949)"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "recital",
+    "lied"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23795",
+      "checkedAt": "2026-09-03",
+      "externalId": "/es/temporada/ciclo-de-lied-2026-2027/anja-mittermuller"
+    },
+    {
+      "sourceId": "src_teatro_zarzuela",
+      "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/ciclo-de-lied-2026-2027/anja-mittermuller",
+      "checkedAt": "2026-09-03",
+      "externalId": "/es/temporada/ciclo-de-lied-2026-2027/anja-mittermuller"
+    }
+  ],
+  "primarySourceId": "src_cndm",
+  "lastVerifiedAt": "2026-09-03"
+}

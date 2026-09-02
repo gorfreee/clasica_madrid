@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_cndm_il_fervore",
+  "slug": "cndm-il-fervore",
+  "title": "CNDM. IL Fervore",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_cndm_il_fervore_01",
+      "date": "2027-01-17",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "IL FERVORE"
+    },
+    {
+      "name": "JESÚS MERINO"
+    },
+    {
+      "name": "FRANCESCA LOMBARDI MAZZULLI"
+    },
+    {
+      "name": "SOPHIE JUNKER"
+    },
+    {
+      "name": "LUCÍA MARTÍN-CARTÓN"
+    },
+    {
+      "name": "AURORA PEÑA"
+    },
+    {
+      "name": "LUCÍA CAIHUELA"
+    },
+    {
+      "name": "PILAR ALVA"
+    },
+    {
+      "name": "ALAIN DAMAS"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Giovanni Battista Mele (ca. 1701-1752)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Júpiter y Calisto, zarzuela barroca en dos jornadas ø+ (ca. 1736)",
+      "composerName": "Giovanni Battista Mele (ca. 1701-1752)"
+    },
+    {
+      "title": "ø+ Recuperación histórica, estreno en tiempos modernos",
+      "composerName": "Giovanni Battista Mele (ca. 1701-1752)"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "early-music",
+    "zarzuela"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-il-fervore",
+      "checkedAt": "2026-09-03",
+      "externalId": "cndm-il-fervore"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

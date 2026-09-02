@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ccd4883ea266436c85cb891eadc70494",
+  "slug": "ocne-sinfonico-15",
+  "title": "OCNE. Sinfónico 15",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ccd4883ea266436c85cb891eadc70494_01",
+      "date": "2027-03-12",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_ccd4883ea266436c85cb891eadc70494_02",
+      "date": "2027-03-13",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_ccd4883ea266436c85cb891eadc70494_03",
+      "date": "2027-03-14",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta y Coro Nacionales de España"
+    },
+    {
+      "name": "Giovanni Antonini",
+      "role": "conductor"
+    },
+    {
+      "name": "Julia Lezhneva"
+    },
+    {
+      "name": "Svetlina Stoyanova"
+    },
+    {
+      "name": "Krystian Adam"
+    },
+    {
+      "name": "Theodore Platt"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Franz Joseph Haydn"
+    }
+  ],
+  "works": [
+    {
+      "title": "Obertura de Idomeneo, rey de Creta, K. 366",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Misa de la Coronación en Domayor, K.317",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Aria «Parto, ma tu ben mio», de La clemencia de Tito, K. 621",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Sinfonía nº 104 en Re mayor,«Londres»",
+      "composerName": "Franz Joseph Haydn"
+    }
+  ],
+  "eras": [
+    "classical"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-15-4",
+      "checkedAt": "2026-09-03",
+      "externalId": "ccd4883ea266436c85cb891eadc70494"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

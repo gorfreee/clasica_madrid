@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ibermusica_musikkollegium_winterthur",
+  "slug": "ibermusica-musikkollegium-winterthur",
+  "title": "Ibermúsica. Musikkollegium Winterthur",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ibermusica_musikkollegium_winterthur_01",
+      "date": "2027-01-12",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Musikkollegium Winterthur"
+    },
+    {
+      "name": "Roberto González-Monjas"
+    },
+    {
+      "name": "Pablo Ferrández"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-musikkollegium-winterthur",
+      "checkedAt": "2026-09-03",
+      "externalId": "ibermusica-musikkollegium-winterthur"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

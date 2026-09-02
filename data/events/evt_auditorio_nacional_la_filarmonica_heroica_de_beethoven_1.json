@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_la_filarmonica_heroica_de_beethoven_1",
+  "slug": "la-filarmonica-heroica-de-beethoven",
+  "title": "La Filarmónica. Heroica de Beethoven",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_la_filarmonica_heroica_de_beethoven_1_01",
+      "date": "2027-01-26",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Sinfónica de Viena"
+    },
+    {
+      "name": "Rudolf Buchbinder"
+    },
+    {
+      "name": "Petr Popelka",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/la-filarmonica-heroica-de-beethoven-1",
+      "checkedAt": "2026-09-03",
+      "externalId": "la-filarmonica-heroica-de-beethoven-1"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

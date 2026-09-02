@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ocne_satelite_17_la_forma_del_aire",
+  "slug": "ocne-satelite-17-la-forma-del-aire",
+  "title": "OCNE. Satélite 17. La Forma del Aire",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ocne_satelite_17_la_forma_del_aire_01",
+      "date": "2027-04-27",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Marshland Consort"
+    },
+    {
+      "name": "Víctor Anchel"
+    },
+    {
+      "name": "Pablo Martín Acevedo"
+    },
+    {
+      "name": "Joaquín Arias"
+    },
+    {
+      "name": "Alberto Alonso"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Benjamin Britten"
+    },
+    {
+      "name": "Oliver Knussen"
+    }
+  ],
+  "works": [
+    {
+      "title": "Cuarteto para oboe y cuerdas en Fa mayor, K. 370",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Phantasy Quartet, op. 2",
+      "composerName": "Benjamin Britten"
+    },
+    {
+      "title": "Cantata op. 15 para oboe y trío de cuerdas",
+      "composerName": "Oliver Knussen"
+    }
+  ],
+  "eras": [
+    "classical",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-17-la-forma-del-aire",
+      "checkedAt": "2026-09-03",
+      "externalId": "ocne-satelite-17-la-forma-del-aire"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

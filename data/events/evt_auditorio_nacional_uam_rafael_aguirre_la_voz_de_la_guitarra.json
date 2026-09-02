@@ -20,8 +20,73 @@
       "name": "Rafael Aguirre"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "J.S. Bach (1685 - 1750)"
+    },
+    {
+      "name": "Lennox Berkeley (1903 - 1989)"
+    },
+    {
+      "name": "G.F. Händel (1685 - 1759)"
+    },
+    {
+      "name": "Joaquín Rodrigo (1901 - 1999)"
+    },
+    {
+      "name": "Manuel de Falla (1876 - 1946)"
+    },
+    {
+      "name": "Agustín Pío Barrios \"Mangoré\" (1885 - 1944)"
+    },
+    {
+      "name": "Abel Fleury (1903 - 1958)"
+    },
+    {
+      "name": "Gioachino Rossini (1792 - 1868)"
+    },
+    {
+      "name": "Julián Arcas (1832 - 1882)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Preludio, Fuga y Allegro, BWV998",
+      "composerName": "J.S. Bach (1685 - 1750)"
+    },
+    {
+      "title": "Theme and variations, op.77",
+      "composerName": "Lennox Berkeley (1903 - 1989)"
+    },
+    {
+      "title": "\"Lascia ch'io pianga\", de la opera Rinaldo",
+      "composerName": "G.F. Händel (1685 - 1759)"
+    },
+    {
+      "title": "Invocación y danza (Homenaje a Manuel de Falla)",
+      "composerName": "Joaquín Rodrigo (1901 - 1999)"
+    },
+    {
+      "title": "\"Danza española nº1\" de La Vida Breve",
+      "composerName": "Manuel de Falla (1876 - 1946)"
+    },
+    {
+      "title": "Un sueño en la floresta",
+      "composerName": "Agustín Pío Barrios \"Mangoré\" (1885 - 1944)"
+    },
+    {
+      "title": "Milongueo del ayer",
+      "composerName": "Abel Fleury (1903 - 1958)"
+    },
+    {
+      "title": "La danza (tarantella napolitana)",
+      "composerName": "Gioachino Rossini (1792 - 1868)"
+    },
+    {
+      "title": "Fantasía sobre motivos de La Traviata",
+      "composerName": "Julián Arcas (1832 - 1882)"
+    }
+  ],
   "eras": [
     "baroque",
     "romantic",
@@ -36,10 +101,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/uam-rafael-aguirre-la-voz-de-la-guitarra",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "uam-rafael-aguirre-la-voz-de-la-guitarra"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

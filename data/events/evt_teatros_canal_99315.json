@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatros_canal_99315",
+  "slug": "romain-dubois",
+  "title": "Romain Dubois",
+  "status": "scheduled",
+  "venueId": "ven_teatros_canal_sala_roja",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatros_canal_99315_01",
+      "date": "2027-02-28",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_teatros_canal",
+      "url": "https://www.teatroscanal.com/espectaculo/una-bestia-romain-dubois",
+      "checkedAt": "2026-09-03",
+      "externalId": "99315"
+    }
+  ],
+  "primarySourceId": "src_teatros_canal",
+  "lastVerifiedAt": "2026-09-03"
+}

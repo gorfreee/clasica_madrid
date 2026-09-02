@@ -23,23 +23,40 @@
       "name": "GUILLERMO GARCÍA CALVO *"
     }
   ],
-  "composers": [],
-  "works": [],
-  "eras": [],
+  "composers": [
+    {
+      "name": "Franz Schubert (1797-1828)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Die schöne Müllerin , D 795 (1823)",
+      "composerName": "Franz Schubert (1797-1828)"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
   "formats": [
     "recital",
     "lied"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_teatro_zarzuela",
       "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/ciclo-de-lied-2026-2027/andreas-schager",
-      "checkedAt": "2026-08-31",
+      "checkedAt": "2026-09-03",
       "externalId": "/es/temporada/ciclo-de-lied-2026-2027/andreas-schager"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23792",
+      "checkedAt": "2026-09-03",
+      "externalId": "23792"
     }
   ],
   "primarySourceId": "src_teatro_zarzuela",
-  "lastVerifiedAt": "2026-08-31"
+  "lastVerifiedAt": "2026-09-03"
 }

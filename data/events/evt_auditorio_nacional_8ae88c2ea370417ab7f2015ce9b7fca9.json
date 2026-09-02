@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_8ae88c2ea370417ab7f2015ce9b7fca9",
+  "slug": "ocne-sinfonico-19",
+  "title": "OCNE. Sinfónico 19",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_8ae88c2ea370417ab7f2015ce9b7fca9_01",
+      "date": "2027-05-14",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_8ae88c2ea370417ab7f2015ce9b7fca9_02",
+      "date": "2027-05-15",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_8ae88c2ea370417ab7f2015ce9b7fca9_03",
+      "date": "2027-05-16",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta y Coro Nacionales de España"
+    },
+    {
+      "name": "David Afkham",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Robert Schumann"
+    }
+  ],
+  "works": [
+    {
+      "title": "El paraíso y la peri, op. 50",
+      "composerName": "Robert Schumann"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-19-5",
+      "checkedAt": "2026-09-03",
+      "externalId": "8ae88c2ea370417ab7f2015ce9b7fca9"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

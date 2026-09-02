@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_cndm_fazil_say_aslihan_and_say_aykut_koselerli",
+  "slug": "cndm-fazil-say-aslihan-and-say-aykut-koselerli",
+  "title": "CNDM. Fazil Say, Aslihan And Say & Aykut Köselerli",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_cndm_fazil_say_aslihan_and_say_aykut_koselerli_01",
+      "date": "2027-03-17",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "FAZIL SAY"
+    },
+    {
+      "name": "ASLIHAN AND SAY"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-fazil-say-aslihan-and-say-aykut-koselerli",
+      "checkedAt": "2026-09-03",
+      "externalId": "cndm-fazil-say-aslihan-and-say-aykut-koselerli"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

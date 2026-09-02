@@ -24,8 +24,28 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "C. Debussy"
+    },
+    {
+      "name": "M. Ravel"
+    }
+  ],
+  "works": [
+    {
+      "title": "Preludio a la siesta de un fauno",
+      "composerName": "C. Debussy"
+    },
+    {
+      "title": "Concierto para piano y orquesta en sol mayor",
+      "composerName": "M. Ravel"
+    },
+    {
+      "title": "Daphnis y Cloé",
+      "composerName": "M. Ravel"
+    }
+  ],
   "eras": [
     "twentieth"
   ],
@@ -38,10 +58,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/upm-musica-francesa-debussy-y-ravel",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "upm-musica-francesa-debussy-y-ravel"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

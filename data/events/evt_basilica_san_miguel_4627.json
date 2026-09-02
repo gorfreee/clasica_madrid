@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_basilica_san_miguel_4627",
+  "slug": "concierto-de-juan-de-la-rubia",
+  "title": "Concierto de Juan de la Rubia",
+  "status": "scheduled",
+  "venueId": "ven_basilica_pontificia_san_miguel",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_basilica_san_miguel_4627_01",
+      "date": "2026-11-04",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital",
+    "organ"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_basilica_san_miguel",
+      "url": "https://basilicadesanmiguel.org/actividad/concierto-de-juan-de-la-rubia",
+      "checkedAt": "2026-09-03",
+      "externalId": "4627"
+    }
+  ],
+  "primarySourceId": "src_basilica_san_miguel",
+  "lastVerifiedAt": "2026-09-03"
+}

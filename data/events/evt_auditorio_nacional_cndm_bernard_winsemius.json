@@ -20,8 +20,93 @@
       "name": "BERNARD WINSEMIUS"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach (1685-1750)"
+    },
+    {
+      "name": "Louis Couperin (1626-1661)"
+    },
+    {
+      "name": "Jan Pieterszoon Sweelinck (1562-1621)"
+    },
+    {
+      "name": "Dietrich Buxtehude (1637-1707)"
+    },
+    {
+      "name": "J. S. Bach"
+    }
+  ],
+  "works": [
+    {
+      "title": "Allegro ma non tanto del Concierto para clave, cuerda y bajo continuo n.º 4 en la mayor, BWV 1055 (1738, arr. B. Winsemius)",
+      "composerName": "Johann Sebastian Bach (1685-1750)"
+    },
+    {
+      "title": "De Pièces de clavecin (ms. Bauyn, F-Pn Rés. Vm7 674-675)",
+      "composerName": "Louis Couperin (1626-1661)"
+    },
+    {
+      "title": "Prélude en re menor, OL 46 (1654)",
+      "composerName": "Louis Couperin (1626-1661)"
+    },
+    {
+      "title": "Fantaisie (basse) en re menor, OL 13 (1656)",
+      "composerName": "Louis Couperin (1626-1661)"
+    },
+    {
+      "title": "Duo en sol menor, OL 16 (ca. 1656)",
+      "composerName": "Louis Couperin (1626-1661)"
+    },
+    {
+      "title": "Fantaisie (fugue) en re menor, OL 49 (1654)",
+      "composerName": "Louis Couperin (1626-1661)"
+    },
+    {
+      "title": "Variaciones sobre ‘Ick voer al over Rhijn’, SwWV 322",
+      "composerName": "Jan Pieterszoon Sweelinck (1562-1621)"
+    },
+    {
+      "title": "Joseph Butler (?-a. 1674)",
+      "composerName": "Jan Pieterszoon Sweelinck (1562-1621)"
+    },
+    {
+      "title": "Dos melodías con una variación sobre Stichtelijcke rijmen (Dirck Camphuysen, s. XVII, arr. B. Winsemius)",
+      "composerName": "Jan Pieterszoon Sweelinck (1562-1621)"
+    },
+    {
+      "title": "Nu treurt, myn siel",
+      "composerName": "Jan Pieterszoon Sweelinck (1562-1621)"
+    },
+    {
+      "title": "Onbestendigh droef gemoed",
+      "composerName": "Jan Pieterszoon Sweelinck (1562-1621)"
+    },
+    {
+      "title": "Preludio en re menor, BuxWV 140",
+      "composerName": "Dietrich Buxtehude (1637-1707)"
+    },
+    {
+      "title": "Siciliano del Concierto para clave y cuerda n.º 2 en mi mayor, BWV 1053 (1738, arr. B. Winsemius)",
+      "composerName": "J. S. Bach"
+    },
+    {
+      "title": "De la Sonata para dos flautas y bajo continuo en sol mayor , BWV 1039 (ca. 1736-1741, arr. B. Winsemius)",
+      "composerName": "J. S. Bach"
+    },
+    {
+      "title": "I. Adagio",
+      "composerName": "J. S. Bach"
+    },
+    {
+      "title": "II. Allegro ma non presto",
+      "composerName": "J. S. Bach"
+    },
+    {
+      "title": "Toccata en do mayor , BWV 566a (ca. 1707)",
+      "composerName": "J. S. Bach"
+    }
+  ],
   "eras": [
     "baroque"
   ],
@@ -34,10 +119,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-bernard-winsemius",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "cndm-bernard-winsemius"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23844",
+      "checkedAt": "2026-09-03",
+      "externalId": "23844"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

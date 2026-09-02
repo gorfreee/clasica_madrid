@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_uam_tonadillas_300_de_luis_mison",
+  "slug": "uam-tonadillas-300-de-luis-mison",
+  "title": "UAM. Tonadillas. 300 de Luis Misón",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_uam_tonadillas_300_de_luis_mison_01",
+      "date": "2027-05-29",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Camerata Antonio Soler"
+    },
+    {
+      "name": "Gustavo Sánchez",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Luis Misón (1727 - 1766)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Tonadilla de El Abandono (a solo)",
+      "composerName": "Luis Misón (1727 - 1766)"
+    },
+    {
+      "title": "Tonadilla de El compositor (a dúo)",
+      "composerName": "Luis Misón (1727 - 1766)"
+    },
+    {
+      "title": "Tonadilla de Los ciegos (a tres)",
+      "composerName": "Luis Misón (1727 - 1766)"
+    },
+    {
+      "title": "Tonadilla de El sacristán, el payo y su mujer (a tres)",
+      "composerName": "Luis Misón (1727 - 1766)"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "classical"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/uam-tonadillas-300-de-luis-mison",
+      "checkedAt": "2026-09-03",
+      "externalId": "uam-tonadillas-300-de-luis-mison"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

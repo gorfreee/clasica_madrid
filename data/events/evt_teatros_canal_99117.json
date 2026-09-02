@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatros_canal_99117",
+  "slug": "joven-orquesta-de-la-comunidad-de-madrid-coro-de-la-comunidad-de-madrid",
+  "title": "Joven Orquesta de la Comunidad de Madrid | Coro de la Comunidad de Madrid",
+  "status": "scheduled",
+  "venueId": "ven_teatros_canal_sala_roja",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatros_canal_99117_01",
+      "date": "2027-03-28",
+      "time": null,
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_teatros_canal",
+      "url": "https://www.teatroscanal.com/espectaculo/sinfonia-n9-en-re-menor-joven-orquesta-comunidad-de-madrid-coro-comunidad-madrid",
+      "checkedAt": "2026-09-03",
+      "externalId": "99117"
+    }
+  ],
+  "primarySourceId": "src_teatros_canal",
+  "lastVerifiedAt": "2026-09-03"
+}

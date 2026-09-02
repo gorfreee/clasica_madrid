@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_real_academia_bellas_artes_after_the_dance",
+  "slug": "after-the-dance",
+  "title": "After the Dance",
+  "status": "scheduled",
+  "venueId": "ven_real_academia_bellas_artes_salon_actos",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_real_academia_bellas_artes_after_the_dance_01",
+      "date": "2026-09-25",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Intervienen"
+    },
+    {
+      "name": "Josu De Solaun"
+    },
+    {
+      "name": "Paco Moya",
+      "role": "conductor"
+    },
+    {
+      "name": "María Valverde"
+    },
+    {
+      "name": "José Luis García del Busto"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Frédéric Chopin"
+    }
+  ],
+  "works": [
+    {
+      "title": "Selección de 19 Mazurcas",
+      "composerName": "Frédéric Chopin"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_real_academia_bellas_artes_san_fernando",
+      "url": "https://www.realacademiabellasartessanfernando.com/actividades/conciertos/after-the-dance",
+      "checkedAt": "2026-09-03",
+      "externalId": "after-the-dance"
+    }
+  ],
+  "primarySourceId": "src_real_academia_bellas_artes_san_fernando",
+  "lastVerifiedAt": "2026-09-03"
+}

@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_4853",
+  "slug": "pasion-y-extasis",
+  "title": "Pasión y éxtasis",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_4853_01",
+      "date": "2027-02-23",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta de la Comunidad de Madrid"
+    },
+    {
+      "name": "Coro de la Comunidad de Madrid"
+    },
+    {
+      "name": "Lydia Hoen Tjore"
+    },
+    {
+      "name": "Lora Grigorieva"
+    },
+    {
+      "name": "Bastien Rimondi"
+    },
+    {
+      "name": "Edward Jowle"
+    },
+    {
+      "name": "Javier Carmena",
+      "role": "choir"
+    },
+    {
+      "name": "Marc Minkowski",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Franz Joseph Haydn"
+    },
+    {
+      "name": "Anton Bruckner"
+    }
+  ],
+  "works": [
+    {
+      "title": "Misa, en re menor, Hob. XXII:11 “Misa Nelson” (Missa in angustiis)",
+      "composerName": "Franz Joseph Haydn"
+    },
+    {
+      "title": "Sinfonía n.º 4, en mi bemol mayor, “Romántica”",
+      "composerName": "Anton Bruckner"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-sinfonico-7-pasion-y-extasis",
+      "checkedAt": "2026-09-03",
+      "externalId": "4853"
+    },
+    {
+      "sourceId": "src_fundacion_orcam",
+      "url": "https://fundacionorcam.org/conciertos/2026-27/pasion-y-extasis",
+      "checkedAt": "2026-09-03",
+      "externalId": "4853"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

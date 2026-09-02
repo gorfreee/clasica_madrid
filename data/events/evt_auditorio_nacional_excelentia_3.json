@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_3",
+  "slug": "excelentia-vivaldi-handel",
+  "title": "Excelentia. Vivaldi & Händel",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_3_01",
+      "date": "2027-04-10",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Clásica Santa Cecilia"
+    },
+    {
+      "name": "Excelentia Vocal Ensemble"
+    },
+    {
+      "name": "José Luis López Antón",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Händel"
+    },
+    {
+      "name": "Vivaldi"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concerto grosso, op. 6 n.º 11",
+      "composerName": "Händel"
+    },
+    {
+      "title": "Música acuática, Suite n.º 1",
+      "composerName": "Händel"
+    },
+    {
+      "title": "Gloria",
+      "composerName": "Vivaldi"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-3",
+      "checkedAt": "2026-09-03",
+      "externalId": "excelentia-3"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

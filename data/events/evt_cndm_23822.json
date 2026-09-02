@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cndm_23822",
+  "slug": "christian-tetzlaff-orquestra-de-la-comunitat-valenciana",
+  "title": "CHRISTIAN TETZLAFF & ORQUESTRA DE LA COMUNITAT VALENCIANA",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cndm_23822_01",
+      "date": "2026-11-15",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Thomas Hengelbrock",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johannes Brahms (1833-1897)"
+    },
+    {
+      "name": "Robert Schumann (1810-1856)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para violín en re mayor , op. 77 (1878)",
+      "composerName": "Johannes Brahms (1833-1897)"
+    },
+    {
+      "title": "Sinfonía n.º 2 en do mayor , op. 61 (1845-1846)",
+      "composerName": "Robert Schumann (1810-1856)"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23822",
+      "checkedAt": "2026-09-03",
+      "externalId": "23822"
+    }
+  ],
+  "primarySourceId": "src_cndm",
+  "lastVerifiedAt": "2026-09-03"
+}

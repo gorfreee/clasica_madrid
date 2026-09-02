@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ibermusica_berner_symphonieorchester",
+  "slug": "ibermusica-berner-symphonieorchester",
+  "title": "Ibermúsica. Berner Symphonieorchester",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ibermusica_berner_symphonieorchester_01",
+      "date": "2027-04-20",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Berner Symphonieorchester"
+    },
+    {
+      "name": "Krzysztof Urbański"
+    },
+    {
+      "name": "Sol Gabetta"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-berner-symphonieorchester",
+      "checkedAt": "2026-09-03",
+      "externalId": "ibermusica-berner-symphonieorchester"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

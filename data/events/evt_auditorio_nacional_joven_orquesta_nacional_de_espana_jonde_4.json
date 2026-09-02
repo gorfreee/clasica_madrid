@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_joven_orquesta_nacional_de_espana_jonde_4",
+  "slug": "joven-orquesta-nacional-de-espana-jonde",
+  "title": "Joven Orquesta Nacional de España (JONDE)",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_joven_orquesta_nacional_de_espana_jonde_4_01",
+      "date": "2027-01-18",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Joven Orquesta Nacional de España (JONDE)"
+    },
+    {
+      "name": "Jaime Martín",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Luis Tabuenca (1979)"
+    },
+    {
+      "name": "Wolfgang Amadeus Mozart (1756-1791)"
+    },
+    {
+      "name": "Gustav Mahler (1860 - 1911)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Rémanence (2025)",
+      "composerName": "Luis Tabuenca (1979)"
+    },
+    {
+      "title": "XLIII Premio Reina Sofía de Composición Musical",
+      "composerName": "Luis Tabuenca (1979)"
+    },
+    {
+      "title": "Sinfonía concertante para oboe, clarinete, fagot, trompa y orquesta en mi bemol mayor, K.297b (1778)",
+      "composerName": "Wolfgang Amadeus Mozart (1756-1791)"
+    },
+    {
+      "title": "Sinfonía nº 1 en re mayor, “Titán” (1884–1889)",
+      "composerName": "Gustav Mahler (1860 - 1911)"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/joven-orquesta-nacional-de-espana-jonde-4",
+      "checkedAt": "2026-09-03",
+      "externalId": "joven-orquesta-nacional-de-espana-jonde-4"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

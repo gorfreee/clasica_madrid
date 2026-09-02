@@ -49,10 +49,103 @@
       "date": "2026-12-29",
       "time": "19:30",
       "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_simon_boccanegra_08",
+      "date": "2026-12-30",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_simon_boccanegra_09",
+      "date": "2027-01-02",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_simon_boccanegra_10",
+      "date": "2027-01-03",
+      "time": "18:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_simon_boccanegra_11",
+      "date": "2027-01-08",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_simon_boccanegra_12",
+      "date": "2027-01-09",
+      "time": "19:30",
+      "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
+  "performers": [
+    {
+      "name": "Nicola Luisotti",
+      "role": "conductor"
+    },
+    {
+      "name": "Daniel Montané",
+      "role": "conductor"
+    },
+    {
+      "name": "José Luis Basso",
+      "role": "conductor"
+    },
+    {
+      "name": "Coro y Orquesta Titulares del Teatro Real",
+      "role": "orchestra"
+    },
+    {
+      "name": "Ludovic Tézier"
+    },
+    {
+      "name": "Daniel Luis de Vicente"
+    },
+    {
+      "name": "Hrachuhí Bassénz"
+    },
+    {
+      "name": "Mané Galoyan"
+    },
+    {
+      "name": "John Relyea"
+    },
+    {
+      "name": "Alexander Vinogradov"
+    },
+    {
+      "name": "Gianluca Buratto"
+    },
+    {
+      "name": "Francesco Meli"
+    },
+    {
+      "name": "Piero Pretti"
+    },
+    {
+      "name": "Germán Enrique Alcántara"
+    },
+    {
+      "name": "Simón Orfila"
+    },
+    {
+      "name": "David Lagares"
+    },
+    {
+      "name": "Fabián Lara"
+    },
+    {
+      "name": "Cassandre Berthon"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Giuseppe Verdi"
+    }
+  ],
   "works": [],
   "eras": [
     "romantic"
@@ -66,10 +159,10 @@
     {
       "sourceId": "src_teatro_real",
       "url": "https://www.teatroreal.es/es/espectaculo/simon-boccanegra",
-      "checkedAt": "2026-08-31",
+      "checkedAt": "2026-09-03",
       "externalId": "simon-boccanegra"
     }
   ],
   "primarySourceId": "src_teatro_real",
-  "lastVerifiedAt": "2026-08-31"
+  "lastVerifiedAt": "2026-09-03"
 }

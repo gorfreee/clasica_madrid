@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_orquesta_sinfonica_de_madrid_marzena_diakun",
+  "slug": "orquesta-sinfonica-de-madrid-marzena-diakun",
+  "title": "Orquesta Sinfónica de Madrid. Marzena Diakun",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_orquesta_sinfonica_de_madrid_marzena_diakun_01",
+      "date": "2027-06-24",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Sinfónica de Madrid"
+    },
+    {
+      "name": "Marzena Diakun"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Rosa García Ascot"
+    },
+    {
+      "name": "Tríptico del Tamarit"
+    },
+    {
+      "name": "Hector Berlioz"
+    }
+  ],
+  "works": [
+    {
+      "title": "Suite para orquesta",
+      "composerName": "Rosa García Ascot"
+    },
+    {
+      "title": "Gacela y dos casidas",
+      "composerName": "Tríptico del Tamarit"
+    },
+    {
+      "title": "(Estreno absoluto)",
+      "composerName": "Tríptico del Tamarit"
+    },
+    {
+      "title": "Sinfonía Fantástica, op. 14",
+      "composerName": "Hector Berlioz"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/orquesta-sinfonica-de-madrid-marzena-diakun",
+      "checkedAt": "2026-09-03",
+      "externalId": "orquesta-sinfonica-de-madrid-marzena-diakun"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

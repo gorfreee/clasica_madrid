@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cndm_23876",
+  "slug": "trio-arbos-martina-alonso-rocio-gomez",
+  "title": "TRÍO ARBÓS, MARTINA ALONSO &ROCÍO GÓMEZ",
+  "status": "scheduled",
+  "venueId": "ven_ateneo_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cndm_23876_01",
+      "date": "2027-05-26",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Martina Alonso"
+    },
+    {
+      "name": "Rocío Gómez"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "chamber",
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23876",
+      "checkedAt": "2026-09-03",
+      "externalId": "23876"
+    }
+  ],
+  "primarySourceId": "src_cndm",
+  "lastVerifiedAt": "2026-09-03"
+}

@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_impacta_pasion_segun_san_mateo_j_s_bach",
+  "slug": "impacta-pasion-segun-san-mateo-j-s-bach",
+  "title": "Impacta. Pasión según San Mateo, J.S. Bach",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_impacta_pasion_segun_san_mateo_j_s_bach_01",
+      "date": "2027-03-17",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Freiburg Baroque Orchestra"
+    },
+    {
+      "name": "Zürcher Sing-Akademie"
+    },
+    {
+      "name": "Pequeños Cantores de la ORCAM"
+    },
+    {
+      "name": "Sir Simon Rattle",
+      "role": "conductor"
+    },
+    {
+      "name": "Florian Helgath, director del coro"
+    },
+    {
+      "name": "Miriam Feuersinger"
+    },
+    {
+      "name": "Magdalena Kožená"
+    },
+    {
+      "name": "Roderick Williams"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/impacta-pasion-segun-san-mateo-j-s-bach",
+      "checkedAt": "2026-09-03",
+      "externalId": "impacta-pasion-segun-san-mateo-j-s-bach"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

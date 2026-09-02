@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_noches_en_los_jardines_de_espana_y_concierto_de_aranjuez",
+  "slug": "excelentia-noches-en-los-jardines-de-espana-y-concierto-de-aranjuez",
+  "title": "Excelentia. Noches en los Jardines de España y Concierto de Aranjuez",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_noches_en_los_jardines_de_espana_y_concierto_de_aranjuez_01",
+      "date": "2027-05-28",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Clásica Santa Cecilia"
+    },
+    {
+      "name": "José Luis López Antón",
+      "role": "conductor"
+    },
+    {
+      "name": "Alejandro Hurtado"
+    },
+    {
+      "name": "Andrés Barrios"
+    }
+  ],
+  "composers": [
+    {
+      "name": "J.Turina.- La Procesión del Rocío"
+    },
+    {
+      "name": "Rodrigo"
+    }
+  ],
+  "works": [
+    {
+      "title": "Granados · Goyescas, Intermezzo",
+      "composerName": "J.Turina.- La Procesión del Rocío"
+    },
+    {
+      "title": "Concierto de Aranjuez",
+      "composerName": "Rodrigo"
+    },
+    {
+      "title": "Falla · El sombrero de tres picos, danza final",
+      "composerName": "Rodrigo"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-noches-en-los-jardines-de-espana-y-concierto-de-aranjuez",
+      "checkedAt": "2026-09-03",
+      "externalId": "excelentia-noches-en-los-jardines-de-espana-y-concierto-de-aranjuez"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

@@ -87,8 +87,76 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
+  "performers": [
+    {
+      "name": "Stefano Montanari",
+      "role": "conductor"
+    },
+    {
+      "name": "José Luis Basso",
+      "role": "conductor"
+    },
+    {
+      "name": "Coro y Orquesta Titulares del Teatro Real",
+      "role": "orchestra"
+    },
+    {
+      "name": "Mattia Olivieri"
+    },
+    {
+      "name": "Carles Pachon"
+    },
+    {
+      "name": "Olga Kulchynska"
+    },
+    {
+      "name": "Elsa Dreisig"
+    },
+    {
+      "name": "Sara Blanch"
+    },
+    {
+      "name": "Giulia Semenzato"
+    },
+    {
+      "name": "Luca Micheletti"
+    },
+    {
+      "name": "Germán Olvera"
+    },
+    {
+      "name": "Cecilia Molinari"
+    },
+    {
+      "name": "Lucía Caihuela"
+    },
+    {
+      "name": "Raquel Lojendio"
+    },
+    {
+      "name": "Gianluca Buratto"
+    },
+    {
+      "name": "Juan Sancho"
+    },
+    {
+      "name": "Pablo García-López"
+    },
+    {
+      "name": "Lucía Martín Cartón"
+    },
+    {
+      "name": "Lucía Iglesias"
+    },
+    {
+      "name": "Ihor Voievodin"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    }
+  ],
   "works": [],
   "eras": [
     "classical"
@@ -102,10 +170,10 @@
     {
       "sourceId": "src_teatro_real",
       "url": "https://www.teatroreal.es/es/espectaculo/bodas-figaro",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "bodas-figaro"
     }
   ],
   "primarySourceId": "src_teatro_real",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

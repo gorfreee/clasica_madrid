@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_basilica_san_miguel_4623",
+  "slug": "concierto-de-irina-kryukova",
+  "title": "Concierto de Irina Kryukova",
+  "status": "scheduled",
+  "venueId": "ven_basilica_pontificia_san_miguel",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_basilica_san_miguel_4623_01",
+      "date": "2026-10-16",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital",
+    "organ"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_basilica_san_miguel",
+      "url": "https://basilicadesanmiguel.org/actividad/concierto-de-irina-kryukova",
+      "checkedAt": "2026-09-03",
+      "externalId": "4623"
+    }
+  ],
+  "primarySourceId": "src_basilica_san_miguel",
+  "lastVerifiedAt": "2026-09-03"
+}

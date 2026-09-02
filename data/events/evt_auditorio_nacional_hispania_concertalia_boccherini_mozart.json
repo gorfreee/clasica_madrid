@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_hispania_concertalia_boccherini_mozart",
+  "slug": "hispania-concertalia-boccherini-mozart",
+  "title": "Hispania Concertalia. Boccherini & Mozart",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_hispania_concertalia_boccherini_mozart_01",
+      "date": "2027-02-25",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "I Solisti Veneti"
+    },
+    {
+      "name": "Giuliano Carella",
+      "role": "conductor"
+    },
+    {
+      "name": "Annemarie Federle"
+    },
+    {
+      "name": "Giuseppe Barutti"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Luigi Boccherini"
+    },
+    {
+      "name": "Wolfgang A. Mozart"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para violonchelo y cuerdas n.º 6 en Re mayor, G 479",
+      "composerName": "Luigi Boccherini"
+    },
+    {
+      "title": "Concierto para trompa n.º 4 en Mi bemol mayor, KV 495",
+      "composerName": "Wolfgang A. Mozart"
+    },
+    {
+      "title": "Sinfonía en Re menor, op. 12 n.º 4, G 506 «La Casa del Diavolo»",
+      "composerName": "Luigi Boccherini"
+    }
+  ],
+  "eras": [
+    "classical"
+  ],
+  "formats": [
+    "chamber",
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/hispania-concertalia-boccherini-mozart",
+      "checkedAt": "2026-09-03",
+      "externalId": "hispania-concertalia-boccherini-mozart"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

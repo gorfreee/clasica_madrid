@@ -30,8 +30,42 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach (1685–1750)"
+    },
+    {
+      "name": "III. Presto"
+    },
+    {
+      "name": "Tomaso Albinoni (1671–1751)"
+    },
+    {
+      "name": "Antonio Vivaldi (1678–1741)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para teclado y cuerdas en Fa menor, BWV 1056",
+      "composerName": "Johann Sebastian Bach (1685–1750)"
+    },
+    {
+      "title": "Concierto para teclado y cuerdas en Sol menor, BWV 1058",
+      "composerName": "III. Presto"
+    },
+    {
+      "title": "Sinfonía en Sol menor, T.Si 7",
+      "composerName": "Tomaso Albinoni (1671–1751)"
+    },
+    {
+      "title": "Concierto a cinque en La menor, Op. 5 nº 5",
+      "composerName": "Tomaso Albinoni (1671–1751)"
+    },
+    {
+      "title": "Las Cuatro Estaciones, Op. 8, nº 1–4",
+      "composerName": "Antonio Vivaldi (1678–1741)"
+    }
+  ],
   "eras": [
     "baroque"
   ],
@@ -44,10 +78,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/atlantida-chamber-orchestra-las-4-estaciones-de-vivaldi",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "atlantida-chamber-orchestra-las-4-estaciones-de-vivaldi"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

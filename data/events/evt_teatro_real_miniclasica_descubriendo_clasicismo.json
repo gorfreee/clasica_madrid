@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_real_miniclasica_descubriendo_clasicismo",
+  "slug": "miniclasica-descubriendo-el-clasicismo",
+  "title": "Miniclásica: Descubriendo el Clasicismo",
+  "status": "scheduled",
+  "venueId": "ven_real_teatro_retiro",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_real_miniclasica_descubriendo_clasicismo_01",
+      "date": "2027-03-06",
+      "time": "11:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_miniclasica_descubriendo_clasicismo_02",
+      "date": "2027-03-06",
+      "time": "13:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_miniclasica_descubriendo_clasicismo_03",
+      "date": "2027-03-07",
+      "time": "11:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_teatro_real",
+      "url": "https://www.teatroreal.es/es/espectaculo/miniclasica-descubriendo-clasicismo",
+      "checkedAt": "2026-09-03",
+      "externalId": "miniclasica-descubriendo-clasicismo"
+    }
+  ],
+  "primarySourceId": "src_teatro_real",
+  "lastVerifiedAt": "2026-09-03"
+}

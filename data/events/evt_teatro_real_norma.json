@@ -1,0 +1,203 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_real_norma",
+  "slug": "norma",
+  "title": "Norma",
+  "status": "scheduled",
+  "venueId": "ven_teatro_real",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_real_norma_01",
+      "date": "2027-04-09",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_norma_02",
+      "date": "2027-04-10",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_norma_03",
+      "date": "2027-04-12",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_norma_04",
+      "date": "2027-04-13",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_norma_05",
+      "date": "2027-04-14",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_norma_06",
+      "date": "2027-04-16",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_norma_07",
+      "date": "2027-04-19",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_norma_08",
+      "date": "2027-04-20",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_norma_09",
+      "date": "2027-04-22",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_norma_10",
+      "date": "2027-04-23",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_norma_11",
+      "date": "2027-04-24",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_norma_12",
+      "date": "2027-04-25",
+      "time": "18:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_norma_13",
+      "date": "2027-04-26",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_norma_14",
+      "date": "2027-04-27",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_norma_15",
+      "date": "2027-04-29",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_norma_16",
+      "date": "2027-04-30",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Francesco Lanzillotta",
+      "role": "conductor"
+    },
+    {
+      "name": "John Fiore",
+      "role": "conductor"
+    },
+    {
+      "name": "José Luis Basso",
+      "role": "conductor"
+    },
+    {
+      "name": "Coro y Orquesta Titulares del Teatro Real",
+      "role": "orchestra"
+    },
+    {
+      "name": "Javier Camarena"
+    },
+    {
+      "name": "Dmitry Korchak"
+    },
+    {
+      "name": "Francesco Demuro"
+    },
+    {
+      "name": "Riccardo Fassi"
+    },
+    {
+      "name": "Krzysztof Bączyk"
+    },
+    {
+      "name": "Maharram Huseynov"
+    },
+    {
+      "name": "Lisette Oropesa"
+    },
+    {
+      "name": "Jessica Pratt"
+    },
+    {
+      "name": "Lidia Fridman"
+    },
+    {
+      "name": "Marina Rebeka"
+    },
+    {
+      "name": "Aigul Akhmetshina"
+    },
+    {
+      "name": "Rihab Chaieb"
+    },
+    {
+      "name": "Raffaella Lupinacci"
+    },
+    {
+      "name": "Gemma Coma-Alabert"
+    },
+    {
+      "name": "Yasmin Forastiero"
+    },
+    {
+      "name": "Moisés Marín"
+    },
+    {
+      "name": "Jorge Rodríguez Norton"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Vincenzo Bellini"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "opera",
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_teatro_real",
+      "url": "https://www.teatroreal.es/es/espectaculo/norma",
+      "checkedAt": "2026-09-03",
+      "externalId": "norma"
+    }
+  ],
+  "primarySourceId": "src_teatro_real",
+  "lastVerifiedAt": "2026-09-03"
+}

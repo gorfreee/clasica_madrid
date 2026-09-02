@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_emperador_beethoven_y_201cpastoral201d",
+  "slug": "excelentia-emperador-beethoven-y-pastoral",
+  "title": "Excelentia. Emperador Beethoven y “Pastoral”",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_emperador_beethoven_y_201cpastoral201d_01",
+      "date": "2027-01-20",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Clásica Santa Cecilia"
+    },
+    {
+      "name": "Federico Colli"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Cherubini"
+    },
+    {
+      "name": "Beethoven"
+    }
+  ],
+  "works": [
+    {
+      "title": "Médée, obertura",
+      "composerName": "Cherubini"
+    },
+    {
+      "title": "Concierto para piano n.º 5 “Emperador”",
+      "composerName": "Beethoven"
+    },
+    {
+      "title": "Sinfonía n.º 6 “Pastoral”",
+      "composerName": "Beethoven"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-emperador-beethoven-y-201cpastoral201d",
+      "checkedAt": "2026-09-03",
+      "externalId": "excelentia-emperador-beethoven-y-201cpastoral201d"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

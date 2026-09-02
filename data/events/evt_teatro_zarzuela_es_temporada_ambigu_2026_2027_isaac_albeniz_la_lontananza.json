@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_zarzuela_es_temporada_ambigu_2026_2027_isaac_albeniz_la_lontananza",
+  "slug": "isaac-albeniz-la-lontananza",
+  "title": "Isaac Albéniz: la lontananza",
+  "status": "scheduled",
+  "venueId": "ven_teatro_zarzuela",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_ambigu_2026_2027_isaac_albeniz_la_lontananza_01",
+      "date": "2027-03-30",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "recital",
+    "lied"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_teatro_zarzuela",
+      "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/ambigu-2026-2027/isaac-albeniz-la-lontananza",
+      "checkedAt": "2026-09-03",
+      "externalId": "/es/temporada/ambigu-2026-2027/isaac-albeniz-la-lontananza"
+    }
+  ],
+  "primarySourceId": "src_teatro_zarzuela",
+  "lastVerifiedAt": "2026-09-03"
+}

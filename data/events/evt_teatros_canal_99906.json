@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatros_canal_99906",
+  "slug": "joven-camerata-de-la-orcam",
+  "title": "Joven Camerata de la ORCAM",
+  "status": "scheduled",
+  "venueId": "ven_teatros_canal_sala_verde",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatros_canal_99906_01",
+      "date": "2027-06-22",
+      "time": null,
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_teatros_canal",
+      "url": "https://www.teatroscanal.com/espectaculo/joven-camerata-de-la-orcam-concierto-fin-de-curso",
+      "checkedAt": "2026-09-03",
+      "externalId": "99906"
+    }
+  ],
+  "primarySourceId": "src_teatros_canal",
+  "lastVerifiedAt": "2026-09-03"
+}

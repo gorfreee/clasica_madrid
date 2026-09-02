@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ocne_satelite_22_suenos_de_luz",
+  "slug": "ocne-satelite-22-suenos-de-luz",
+  "title": "OCNE. Satélite 22. Sueños de Luz",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ocne_satelite_22_suenos_de_luz_01",
+      "date": "2027-06-08",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Cuarteto Lumière"
+    },
+    {
+      "name": "Joan Espina"
+    },
+    {
+      "name": "Sei MorIshima"
+    },
+    {
+      "name": "Joaquín Arias"
+    },
+    {
+      "name": "Carlos Sánchez"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Gabriel Fauré"
+    },
+    {
+      "name": "Claude Debussy"
+    }
+  ],
+  "works": [
+    {
+      "title": "Cuarteto de cuerda en Mi menor, Op. 121",
+      "composerName": "Gabriel Fauré"
+    },
+    {
+      "title": "Cuarteto de cuerda en Sol menor, op. 10",
+      "composerName": "Claude Debussy"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-22-suenos-de-luz",
+      "checkedAt": "2026-09-03",
+      "externalId": "ocne-satelite-22-suenos-de-luz"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

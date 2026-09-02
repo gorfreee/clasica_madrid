@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_real_ermonela_jaho",
+  "slug": "ermonela-jaho",
+  "title": "Ermonela Jaho",
+  "status": "scheduled",
+  "venueId": "ven_teatro_real",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_real_ermonela_jaho_01",
+      "date": "2027-01-23",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_teatro_real",
+      "url": "https://www.teatroreal.es/es/espectaculo/ermonela-jaho",
+      "checkedAt": "2026-09-03",
+      "externalId": "ermonela-jaho"
+    }
+  ],
+  "primarySourceId": "src_teatro_real",
+  "lastVerifiedAt": "2026-09-03"
+}

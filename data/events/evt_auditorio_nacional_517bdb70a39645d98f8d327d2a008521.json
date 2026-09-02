@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_517bdb70a39645d98f8d327d2a008521",
+  "slug": "ocne-sinfonico-20",
+  "title": "OCNE. Sinfónico 20",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_517bdb70a39645d98f8d327d2a008521_01",
+      "date": "2027-05-21",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_517bdb70a39645d98f8d327d2a008521_02",
+      "date": "2027-05-22",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_517bdb70a39645d98f8d327d2a008521_03",
+      "date": "2027-05-23",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Nacional de España"
+    },
+    {
+      "name": "Anja Bihlmaier",
+      "role": "conductor"
+    },
+    {
+      "name": "Sergej Krylov"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Sofiya Gubaidúlina"
+    },
+    {
+      "name": "Jean Sibelius"
+    }
+  ],
+  "works": [
+    {
+      "title": "Offertorium, concierto para violín y orquesta",
+      "composerName": "Sofiya Gubaidúlina"
+    },
+    {
+      "title": "Sinfonía núm. 5 en Mi bemol mayor, op. 82",
+      "composerName": "Jean Sibelius"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-20-5",
+      "checkedAt": "2026-09-03",
+      "externalId": "517bdb70a39645d98f8d327d2a008521"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

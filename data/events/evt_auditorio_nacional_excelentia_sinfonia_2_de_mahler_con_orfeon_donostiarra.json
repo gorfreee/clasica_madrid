@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_sinfonia_2_de_mahler_con_orfeon_donostiarra",
+  "slug": "excelentia-sinfonia-2-de-mahler-con-orfeon-donostiarra",
+  "title": "Excelentia. Sinfonía 2 de Mahler con Orfeón Donostiarra",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_sinfonia_2_de_mahler_con_orfeon_donostiarra_01",
+      "date": "2027-03-02",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Clásica Santa Cecilia"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Director.- Sebastian Lang-Lessing"
+    }
+  ],
+  "works": [
+    {
+      "title": "Mahler.- Sinfonía núm 2 “Resurrección”",
+      "composerName": "Director.- Sebastian Lang-Lessing"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-sinfonia-2-de-mahler-con-orfeon-donostiarra",
+      "checkedAt": "2026-09-03",
+      "externalId": "excelentia-sinfonia-2-de-mahler-con-orfeon-donostiarra"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_77bcb12819d847279ebd40397e9aab3b",
+  "slug": "ocne-sinfonico-13",
+  "title": "OCNE. Sinfónico 13",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_77bcb12819d847279ebd40397e9aab3b_01",
+      "date": "2027-02-26",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_77bcb12819d847279ebd40397e9aab3b_02",
+      "date": "2027-02-27",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_77bcb12819d847279ebd40397e9aab3b_03",
+      "date": "2027-02-28",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta y Coro Nacionales de España"
+    },
+    {
+      "name": "Coro de la Comunidad de Madrid"
+    },
+    {
+      "name": "Vasily Petrenko",
+      "role": "conductor"
+    },
+    {
+      "name": "Pedro Jorge"
+    },
+    {
+      "name": "Mira Alkhovik"
+    },
+    {
+      "name": "Filip Filipović"
+    },
+    {
+      "name": "James Newby"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Richard Strauss"
+    },
+    {
+      "name": "Gustav Mahler"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para trompa y orquesta núm. 2 en Mi bemol mayor, TrV 283 [18’]",
+      "composerName": "Richard Strauss"
+    },
+    {
+      "title": "La canción del lamento [65’]",
+      "composerName": "Gustav Mahler"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-13-4",
+      "checkedAt": "2026-09-03",
+      "externalId": "77bcb12819d847279ebd40397e9aab3b"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

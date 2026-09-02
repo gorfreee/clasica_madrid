@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_grupo_concertante_talia_ciclo_batuta_cuentos_en_concierto",
+  "slug": "grupo-concertante-talia-ciclo-batuta-cuentos-en-concierto",
+  "title": "Grupo Concertante Talía. Ciclo Batuta. Cuentos en Concierto",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_grupo_concertante_talia_ciclo_batuta_cuentos_en_concierto_01",
+      "date": "2027-02-13",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Metropolitana de Madrid"
+    },
+    {
+      "name": "Silvia Sanz",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [
+    {
+      "title": "La Dama de plica (A. Vivas)"
+    },
+    {
+      "title": "Pedro y el lobo (S. Prokofiev)"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/grupo-concertante-talia-ciclo-batuta-cuentos-en-concierto",
+      "checkedAt": "2026-09-03",
+      "externalId": "grupo-concertante-talia-ciclo-batuta-cuentos-en-concierto"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cndm_23856",
+  "slug": "ensemble-sonido-extremo-vertixe-sonora-ensemble",
+  "title": "ENSEMBLE SONIDO EXTREMO & VERTIXE SONORA ENSEMBLE",
+  "status": "scheduled",
+  "venueId": "ven_museo_reina_sofia_auditorio_400",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cndm_23856_01",
+      "date": "2027-04-05",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Jordi Francés",
+      "role": "conductor"
+    },
+    {
+      "name": "Sarah Defrise"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Mikel Urquiza (1988)"
+    },
+    {
+      "name": "Gérard Grisey (1946-1998)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Estreno absoluto. Obra encargo del CNDM *+ (2027)",
+      "composerName": "Mikel Urquiza (1988)"
+    },
+    {
+      "title": "Quatre chants pour franchir le seuil (1996-1998)",
+      "composerName": "Gérard Grisey (1946-1998)"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23856",
+      "checkedAt": "2026-09-03",
+      "externalId": "23856"
+    }
+  ],
+  "primarySourceId": "src_cndm",
+  "lastVerifiedAt": "2026-09-03"
+}

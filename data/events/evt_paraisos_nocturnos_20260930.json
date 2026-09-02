@@ -89,10 +89,11 @@
   "citations": [
     {
       "sourceId": "src_real_academia_bellas_artes_san_fernando",
-      "url": "https://www.realacademiabellasartessanfernando.com/actividades/conciertos/paraisos-nocturnos/",
-      "checkedAt": "2026-08-28"
+      "url": "https://www.realacademiabellasartessanfernando.com/actividades/conciertos/paraisos-nocturnos",
+      "checkedAt": "2026-09-03",
+      "externalId": "paraisos-nocturnos"
     }
   ],
   "primarySourceId": "src_real_academia_bellas_artes_san_fernando",
-  "lastVerifiedAt": "2026-08-28"
+  "lastVerifiedAt": "2026-09-03"
 }

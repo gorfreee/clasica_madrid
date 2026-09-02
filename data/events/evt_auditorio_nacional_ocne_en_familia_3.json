@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ocne_en_familia_3",
+  "slug": "ocne-en-familia",
+  "title": "OCNE. En Familia",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ocne_en_familia_3_01",
+      "date": "2027-04-04",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Nacional de España"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ballet Nacional de España"
+    }
+  ],
+  "works": [
+    {
+      "title": "Rubén Olmo, director artístico BNE",
+      "composerName": "Ballet Nacional de España"
+    },
+    {
+      "title": "Domenico Scarlatti / Miguel Ángel Coria",
+      "composerName": "Ballet Nacional de España"
+    },
+    {
+      "title": "Seis sonatas para la reina de España",
+      "composerName": "Ballet Nacional de España"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-en-familia-3",
+      "checkedAt": "2026-09-03",
+      "externalId": "ocne-en-familia-3"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_23842",
+  "slug": "orquestra-de-la-comunitat-valenciana",
+  "title": "ORQUESTRA DE LA COMUNITAT VALENCIANA",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_23842_01",
+      "date": "2027-05-13",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Mark Elder",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Dmitri Shostakóvich (1906-1975)"
+    },
+    {
+      "name": "Piotr Ilich Chaikovski (1840-1893)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sinfonía n.º 9 en mi bemol mayor , op. 70 (1945)",
+      "composerName": "Dmitri Shostakóvich (1906-1975)"
+    },
+    {
+      "title": "La bella durmiente , op. 66, selección (1888-1889)",
+      "composerName": "Piotr Ilich Chaikovski (1840-1893)"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-orquestra-de-la-comunitat-valenciana-2",
+      "checkedAt": "2026-09-03",
+      "externalId": "23842"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23842",
+      "checkedAt": "2026-09-03",
+      "externalId": "23842"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

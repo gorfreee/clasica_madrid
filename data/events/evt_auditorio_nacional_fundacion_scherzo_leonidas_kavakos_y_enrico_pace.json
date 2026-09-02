@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_fundacion_scherzo_leonidas_kavakos_y_enrico_pace",
+  "slug": "fundacion-scherzo-leonidas-kavakos-y-enrico-pace",
+  "title": "Fundación Scherzo. Leonidas Kavakos y Enrico Pace",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_fundacion_scherzo_leonidas_kavakos_y_enrico_pace_01",
+      "date": "2027-05-11",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Leonidas Kavakos"
+    },
+    {
+      "name": "Enrico Pace"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata para violín y piano n.º 1 en re mayor, Op. 12 n.º 1",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Sonata para violín y piano n.º 5 en fa mayor «Spring», Op. 24",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Sonata para violín y piano n.º 9 «Kreutzer», Op. 47",
+      "composerName": "Ludwig van Beethoven"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/fundacion-scherzo-leonidas-kavakos-y-enrico-pace",
+      "checkedAt": "2026-09-03",
+      "externalId": "fundacion-scherzo-leonidas-kavakos-y-enrico-pace"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

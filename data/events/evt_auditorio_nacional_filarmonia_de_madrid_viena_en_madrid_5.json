@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_filarmonia_de_madrid_viena_en_madrid_5",
+  "slug": "filarmonia-de-madrid-viena-en-madrid",
+  "title": "Filarmonía de Madrid. Viena en Madrid",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_filarmonia_de_madrid_viena_en_madrid_5_01",
+      "date": "2026-12-26",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Filarmonía"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/filarmonia-de-madrid-viena-en-madrid-5",
+      "checkedAt": "2026-09-03",
+      "externalId": "filarmonia-de-madrid-viena-en-madrid-5"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

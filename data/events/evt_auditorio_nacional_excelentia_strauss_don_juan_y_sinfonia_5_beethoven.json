@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_strauss_don_juan_y_sinfonia_5_beethoven",
+  "slug": "excelentia-strauss-don-juan-y-sinfonia-5-beethoven",
+  "title": "Excelentia. Strauss Don Juan y Sinfonía 5 Beethoven",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_strauss_don_juan_y_sinfonia_5_beethoven_01",
+      "date": "2027-06-01",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Clásica Santa Cecilia"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Respighi.- Pinos de Roma"
+    }
+  ],
+  "works": [
+    {
+      "title": "Beethoven.- Sinfonía núm 5",
+      "composerName": "Respighi.- Pinos de Roma"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-strauss-don-juan-y-sinfonia-5-beethoven",
+      "checkedAt": "2026-09-03",
+      "externalId": "excelentia-strauss-don-juan-y-sinfonia-5-beethoven"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

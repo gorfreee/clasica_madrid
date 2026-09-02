@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_real_concierto_concurso_tenor_vinas",
+  "slug": "concierto-concurso-tenor-vinas",
+  "title": "Concierto Concurso Tenor Viñas",
+  "status": "scheduled",
+  "venueId": "ven_teatro_real",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_real_concierto_concurso_tenor_vinas_01",
+      "date": "2027-04-18",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "opera",
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_teatro_real",
+      "url": "https://www.teatroreal.es/es/espectaculo/concierto-concurso-tenor-vinas",
+      "checkedAt": "2026-09-03",
+      "externalId": "concierto-concurso-tenor-vinas"
+    }
+  ],
+  "primarySourceId": "src_teatro_real",
+  "lastVerifiedAt": "2026-09-03"
+}

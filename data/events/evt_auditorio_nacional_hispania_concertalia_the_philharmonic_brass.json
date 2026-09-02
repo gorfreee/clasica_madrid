@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_hispania_concertalia_the_philharmonic_brass",
+  "slug": "hispania-concertalia-the-philharmonic-brass",
+  "title": "Hispania Concertalia. The Philharmonic Brass",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_hispania_concertalia_the_philharmonic_brass_01",
+      "date": "2027-05-19",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "The Philharmonic Brass"
+    },
+    {
+      "name": "Tugan Sokhiev",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Modest Músorgski"
+    }
+  ],
+  "works": [
+    {
+      "title": "Cuadros de una exposición",
+      "composerName": "Modest Músorgski"
+    },
+    {
+      "title": "(Bilder einer Ausstellung)",
+      "composerName": "Modest Músorgski"
+    },
+    {
+      "title": "— Intermedio —",
+      "composerName": "Modest Músorgski"
+    },
+    {
+      "title": "Obras de Shostakóvich, Borodín, Prokófiev",
+      "composerName": "Modest Músorgski"
+    },
+    {
+      "title": "y otros compositores",
+      "composerName": "Modest Músorgski"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/hispania-concertalia-the-philharmonic-brass",
+      "checkedAt": "2026-09-03",
+      "externalId": "hispania-concertalia-the-philharmonic-brass"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_23869",
+  "slug": "trio-arbos",
+  "title": "TRÍO ARBÓS",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_23869_01",
+      "date": "2027-03-10",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Franz Schubert (1797-1828)"
+    },
+    {
+      "name": "Johannes Brahms (1833-1897)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Trío con piano n.º 1 en si bemol mayor , op. 99 (1827)",
+      "composerName": "Franz Schubert (1797-1828)"
+    },
+    {
+      "title": "Trío con piano n.º 1 en si mayor, op. 8 (versión de 1889)",
+      "composerName": "Johannes Brahms (1833-1897)"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-trio-arbos",
+      "checkedAt": "2026-09-03",
+      "externalId": "23869"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23869",
+      "checkedAt": "2026-09-03",
+      "externalId": "23869"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

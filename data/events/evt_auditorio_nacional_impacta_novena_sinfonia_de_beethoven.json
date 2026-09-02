@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_impacta_novena_sinfonia_de_beethoven",
+  "slug": "impacta-novena-sinfonia-de-beethoven",
+  "title": "Impacta. Novena Sinfonía de Beethoven",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_impacta_novena_sinfonia_de_beethoven_01",
+      "date": "2027-03-31",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Pygmalion, Coro y Orquesta"
+    }
+  ],
+  "composers": [
+    {
+      "name": "L. V. Beethoven"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sinfonía nº9 en re menor, opus 125 «Coral»",
+      "composerName": "L. V. Beethoven"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/impacta-novena-sinfonia-de-beethoven",
+      "checkedAt": "2026-09-03",
+      "externalId": "impacta-novena-sinfonia-de-beethoven"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

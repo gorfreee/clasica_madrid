@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_impacta_orfeo_de_monteverdi",
+  "slug": "impacta-orfeo-de-monteverdi",
+  "title": "Impacta. Orfeo de Monteverdi",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_impacta_orfeo_de_monteverdi_01",
+      "date": "2027-02-02",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro de Cámara de Namur"
+    },
+    {
+      "name": "Leonardo García-Alarcón",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "early",
+    "baroque"
+  ],
+  "formats": [
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/impacta-orfeo-de-monteverdi",
+      "checkedAt": "2026-09-03",
+      "externalId": "impacta-orfeo-de-monteverdi"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

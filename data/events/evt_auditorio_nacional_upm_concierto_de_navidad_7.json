@@ -39,8 +39,21 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "J.S. Bach"
+    }
+  ],
+  "works": [
+    {
+      "title": "Oratorio de Navidad BWV 248",
+      "composerName": "J.S. Bach"
+    },
+    {
+      "title": "Cantatas IV, V y VI",
+      "composerName": "J.S. Bach"
+    }
+  ],
   "eras": [
     "baroque"
   ],
@@ -54,10 +67,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/upm-concierto-de-navidad-7",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "upm-concierto-de-navidad-7"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

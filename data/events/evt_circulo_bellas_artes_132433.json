@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_circulo_bellas_artes_132433",
+  "slug": "piotr-anderszewski-piano",
+  "title": "Piotr Anderszewski, piano",
+  "status": "scheduled",
+  "venueId": "ven_circulo_bellas_artes_teatro_fernando_de_rojas",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_circulo_bellas_artes_132433_01",
+      "date": "2026-10-25",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Johannes Brahms"
+    },
+    {
+      "name": "Ludwig van Beethoven"
+    }
+  ],
+  "works": [
+    {
+      "title": "Intermezzo en si menor, op. 119: n.º 1",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Intermezzo en do mayor, op. 119 n.º 3",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Intermezzo en la menor, op. 118 n.º 1",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Intermezzo en la mayor, op. 118 n.º 2",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Intermezzo en la menor, op. 116 n.º 2",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Capriccio en sol menor, op. 116 n.º 3",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Intermezzo en mi mayor, op. 116 n.º 4",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Intermezzo en mi menor, op. 116 n.º 5",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Intermezzo en do sostenido meno, op.117 n.º 3",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Rapsodia en mi bemol mayor, op.119 n.º 4",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Intermezzo en si bemol mayor, op.117 n.º 2",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Intermezzo en si bemol menor, op.118 n.º 6",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Sonata para piano no. 32 en do menor, op. 111",
+      "composerName": "Ludwig van Beethoven"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_circulo_bellas_artes",
+      "url": "https://www.circulobellasartes.com/eventos/piotr-anderszewski-piano",
+      "checkedAt": "2026-09-03",
+      "externalId": "132433"
+    }
+  ],
+  "primarySourceId": "src_circulo_bellas_artes",
+  "lastVerifiedAt": "2026-09-03"
+}

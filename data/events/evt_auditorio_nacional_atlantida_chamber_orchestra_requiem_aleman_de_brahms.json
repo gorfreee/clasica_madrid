@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_atlantida_chamber_orchestra_requiem_aleman_de_brahms",
+  "slug": "atlantida-chamber-orchestra-requiem-aleman-de-brahms",
+  "title": "Atlántida Chamber Orchestra. Réquiem Alemán de Brahms",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_atlantida_chamber_orchestra_requiem_aleman_de_brahms_01",
+      "date": "2027-06-27",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Atlántida Chamber Orchestra & Choir"
+    },
+    {
+      "name": "Sherry Tse"
+    },
+    {
+      "name": "Sonia Suárez"
+    },
+    {
+      "name": "Alejandro Escuer"
+    },
+    {
+      "name": "Manuel Tévar",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "A. Petrovic"
+    },
+    {
+      "name": "Johannes Brahms (1833–1897)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Obra a determinar (estreno absoluto)",
+      "composerName": "A. Petrovic"
+    },
+    {
+      "title": "He Zhanhao / Chen Gang",
+      "composerName": "A. Petrovic"
+    },
+    {
+      "title": "Ein deutsches Requiem, Op. 45",
+      "composerName": "Johannes Brahms (1833–1897)"
+    },
+    {
+      "title": "(Un Réquiem Alemán)",
+      "composerName": "Johannes Brahms (1833–1897)"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/atlantida-chamber-orchestra-requiem-aleman-de-brahms",
+      "checkedAt": "2026-09-03",
+      "externalId": "atlantida-chamber-orchestra-requiem-aleman-de-brahms"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

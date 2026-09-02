@@ -27,8 +27,31 @@
       "name": "Veriko Tchumburidze"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Borodin"
+    },
+    {
+      "name": "Mendelssohn"
+    },
+    {
+      "name": "Rimsky-Korsakov"
+    }
+  ],
+  "works": [
+    {
+      "title": "Príncipe Ígor, obertura",
+      "composerName": "Borodin"
+    },
+    {
+      "title": "Concierto para violín y orquesta en mi menor, op. 64",
+      "composerName": "Mendelssohn"
+    },
+    {
+      "title": "Scheherazade, op. 35",
+      "composerName": "Rimsky-Korsakov"
+    }
+  ],
   "eras": [
     "romantic"
   ],
@@ -41,10 +64,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-violin-mendelssohn-y-scheherazade",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "excelentia-violin-mendelssohn-y-scheherazade"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

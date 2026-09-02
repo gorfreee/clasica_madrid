@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_upm_conmemoracion_centenario_ciudad_universitaria",
+  "slug": "upm-conmemoracion-centenario-ciudad-universitaria",
+  "title": "UPM. Conmemoración Centenario Ciudad Universitaria",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_upm_conmemoracion_centenario_ciudad_universitaria_01",
+      "date": "2027-04-24",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "ORQUESTA SINFÓNICA UPM"
+    },
+    {
+      "name": "CORO DE LA UNIVERSIDAD POLITÉCNICA DE MADRID"
+    },
+    {
+      "name": "CORO DE LA UNIVERSIDAD COMPLUTENSE DE MADRID"
+    },
+    {
+      "name": "Alejandro Cantalapiedra",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "J. Brahms"
+    },
+    {
+      "name": "L. Beethoven"
+    }
+  ],
+  "works": [
+    {
+      "title": "Obertura del festival académico, Op.80",
+      "composerName": "J. Brahms"
+    },
+    {
+      "title": "Sinfonía nº 9, Op. 125 “Coral”",
+      "composerName": "L. Beethoven"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/upm-conmemoracion-centenario-ciudad-universitaria",
+      "checkedAt": "2026-09-03",
+      "externalId": "upm-conmemoracion-centenario-ciudad-universitaria"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

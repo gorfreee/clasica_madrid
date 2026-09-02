@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_real_lotte_lulu_lenya",
+  "slug": "lotte-lulu-lenya",
+  "title": "Lotte, Lulu, Lenya",
+  "status": "scheduled",
+  "venueId": "ven_teatro_real",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_real_lotte_lulu_lenya_01",
+      "date": "2027-06-04",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_teatro_real",
+      "url": "https://www.teatroreal.es/es/espectaculo/lotte-lulu-lenya",
+      "checkedAt": "2026-09-03",
+      "externalId": "lotte-lulu-lenya"
+    }
+  ],
+  "primarySourceId": "src_teatro_real",
+  "lastVerifiedAt": "2026-09-03"
+}

@@ -20,8 +20,21 @@
       "name": "Orquesta Clásica Santa Cecilia"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Bach"
+    }
+  ],
+  "works": [
+    {
+      "title": "Suite orquestal núm 2 BWV. 1067",
+      "composerName": "Bach"
+    },
+    {
+      "title": "Conciertos de Brandeburgo núm 1, 3, 6",
+      "composerName": "Bach"
+    }
+  ],
   "eras": [
     "baroque"
   ],
@@ -34,10 +47,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-bach-conciertos-de-brandeburgo-2",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "excelentia-bach-conciertos-de-brandeburgo-2"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cndm_23803",
+  "slug": "il-fervore-jupiter-y-calisto-g-b-mele",
+  "title": "IL FERVORE: \"JÚPITER Y CALISTO\" (G. B. MELE)",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cndm_23803_01",
+      "date": "2027-01-17",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Jesús Merino"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Giovanni Battista Mele (ca. 1701-1752)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Júpiter y Calisto , zarzuela barroca en dos jornadas ø+ (ca. 1736)",
+      "composerName": "Giovanni Battista Mele (ca. 1701-1752)"
+    },
+    {
+      "title": "ø+ Recuperación histórica, estreno en tiempos modernos",
+      "composerName": "Giovanni Battista Mele (ca. 1701-1752)"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "symphonic",
+    "early-music"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23803",
+      "checkedAt": "2026-09-03",
+      "externalId": "23803"
+    }
+  ],
+  "primarySourceId": "src_cndm",
+  "lastVerifiedAt": "2026-09-03"
+}

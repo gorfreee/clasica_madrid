@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ibermusica_ninos_cantores_de_viena_1",
+  "slug": "ibermusica-ninos-cantores-de-viena",
+  "title": "Ibermúsica. Niños Cantores de Viena",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ibermusica_ninos_cantores_de_viena_1_01",
+      "date": "2027-03-06",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Manolo Cagnin"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "choral"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-ninos-cantores-de-viena-1",
+      "checkedAt": "2026-09-03",
+      "externalId": "ibermusica-ninos-cantores-de-viena-1"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

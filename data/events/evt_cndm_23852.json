@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cndm_23852",
+  "slug": "ricardo-descalzo",
+  "title": "RICARDO DESCALZO",
+  "status": "scheduled",
+  "venueId": "ven_museo_reina_sofia_auditorio_400",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cndm_23852_01",
+      "date": "2027-01-18",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "John Adams (1947)"
+    },
+    {
+      "name": "Nik Bärtsch (1971)"
+    },
+    {
+      "name": "John Cage (1912-1992)"
+    },
+    {
+      "name": "Philip Glass (1937)"
+    },
+    {
+      "name": "Karen Tanaka (1961)"
+    },
+    {
+      "name": "Ricardo Descalzo (1970)"
+    },
+    {
+      "name": "P. Glass"
+    },
+    {
+      "name": "Nahre Sol (1991)"
+    },
+    {
+      "name": "Alfonso Peduto (1978)"
+    },
+    {
+      "name": "Hania Rani (1990)"
+    },
+    {
+      "name": "Nils Frahm (1982)"
+    },
+    {
+      "name": "Christopher Cerrone (1984)"
+    },
+    {
+      "name": "Mario Carro (1979)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Modul 5 (2001)",
+      "composerName": "Nik Bärtsch (1971)"
+    },
+    {
+      "title": "Mysterious adventure , para piano preparado (1945)",
+      "composerName": "John Cage (1912-1992)"
+    },
+    {
+      "title": "Étude n.º 3, de Études para pian o, vol. 1 (1994)",
+      "composerName": "Philip Glass (1937)"
+    },
+    {
+      "title": "Techno etudes, II y III (1999)",
+      "composerName": "Karen Tanaka (1961)"
+    },
+    {
+      "title": "Living automata *+ (2026)",
+      "composerName": "Ricardo Descalzo (1970)"
+    },
+    {
+      "title": "Étude n.º 9, de Études para piano, vol. 1 (1994)",
+      "composerName": "P. Glass"
+    },
+    {
+      "title": "De Pocket pieces, para teclado electrónico (2018)",
+      "composerName": "Nahre Sol (1991)"
+    },
+    {
+      "title": "Ostinato , n.º 6",
+      "composerName": "Nahre Sol (1991)"
+    },
+    {
+      "title": "Funk excursion , n.º 7",
+      "composerName": "Nahre Sol (1991)"
+    },
+    {
+      "title": "Glass (2019)",
+      "composerName": "Hania Rani (1990)"
+    },
+    {
+      "title": "Hammers (2013)",
+      "composerName": "Nils Frahm (1982)"
+    },
+    {
+      "title": "Hoyt-Schermerhorn , para piano amplificado y electrónica (2010)",
+      "composerName": "Christopher Cerrone (1984)"
+    },
+    {
+      "title": "Impromptu (2010)",
+      "composerName": "Mario Carro (1979)"
+    },
+    {
+      "title": "Concierto amplificado",
+      "composerName": "Mario Carro (1979)"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23852",
+      "checkedAt": "2026-09-03",
+      "externalId": "23852"
+    }
+  ],
+  "primarySourceId": "src_cndm",
+  "lastVerifiedAt": "2026-09-03"
+}

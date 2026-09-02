@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_cndm_10",
+  "slug": "cndm",
+  "title": "CNDM.",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_cndm_10_01",
+      "date": "2027-05-09",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "CANTORÍA"
+    },
+    {
+      "name": "JORGE LOSANA",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "De Selva morale e spirituale (1641)"
+    },
+    {
+      "name": "Heinrich Schütz (1585-1672)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Dixit Dominus, SV 264",
+      "composerName": "De Selva morale e spirituale (1641)"
+    },
+    {
+      "title": "Salve Regina, SV 284",
+      "composerName": "De Selva morale e spirituale (1641)"
+    },
+    {
+      "title": "Beatus vir, SV 268",
+      "composerName": "De Selva morale e spirituale (1641)"
+    },
+    {
+      "title": "Gloria a 7, SV 258",
+      "composerName": "De Selva morale e spirituale (1641)"
+    },
+    {
+      "title": "Magnificat, SV 281",
+      "composerName": "De Selva morale e spirituale (1641)"
+    },
+    {
+      "title": "Adoramus te, SV 289 (Libro primo de motetti in lode d’iddio nostro Signore, de G. C. Bianchi, 1620)",
+      "composerName": "De Selva morale e spirituale (1641)"
+    },
+    {
+      "title": "De Psalmen Davids sampt etlichen Moteten und Concerten, op. 2 (1619)",
+      "composerName": "Heinrich Schütz (1585-1672)"
+    },
+    {
+      "title": "An den Wassern zu Babel saßen wir, SWV 37",
+      "composerName": "Heinrich Schütz (1585-1672)"
+    },
+    {
+      "title": "Warum toben die Heiden, SWV 23",
+      "composerName": "Heinrich Schütz (1585-1672)"
+    },
+    {
+      "title": "Alleluja! Lobet den Herren in seinem Heiligtum, SWV 38",
+      "composerName": "Heinrich Schütz (1585-1672)"
+    },
+    {
+      "title": "Singet dem Herrn ein neues Lied, SWV 35",
+      "composerName": "Heinrich Schütz (1585-1672)"
+    },
+    {
+      "title": "Jauchzet dem Herren, alle Welt, SWV 36",
+      "composerName": "Heinrich Schütz (1585-1672)"
+    },
+    {
+      "title": "Danket dem Herren, denn er ist freundlich, SWV 45",
+      "composerName": "Heinrich Schütz (1585-1672)"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "lied"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-10",
+      "checkedAt": "2026-09-03",
+      "externalId": "cndm-10"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

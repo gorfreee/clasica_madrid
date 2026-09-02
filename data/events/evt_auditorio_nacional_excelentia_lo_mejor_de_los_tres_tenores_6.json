@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_lo_mejor_de_los_tres_tenores_6",
+  "slug": "excelentia-lo-mejor-de-los-tres-tenores",
+  "title": "Excelentia. Lo Mejor de los Tres Tenores",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_lo_mejor_de_los_tres_tenores_6_01",
+      "date": "2026-12-30",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Miguel Borrallo"
+    },
+    {
+      "name": "Eduardo Sandoval"
+    },
+    {
+      "name": "Sergio Escobar"
+    },
+    {
+      "name": "Francisco Pérez Sánchez"
+    }
+  ],
+  "composers": [
+    {
+      "name": "O Sole Mio"
+    }
+  ],
+  "works": [
+    {
+      "title": "Obertura de «El barbero de Sevilla» de G. Rossini (Piano)",
+      "composerName": "O Sole Mio"
+    },
+    {
+      "title": "Popurrí Popular – Los Tres Tenores",
+      "composerName": "O Sole Mio"
+    },
+    {
+      "title": "My Way (Sinatra)",
+      "composerName": "O Sole Mio"
+    },
+    {
+      "title": "Con te partiró (Bocelli)",
+      "composerName": "O Sole Mio"
+    },
+    {
+      "title": "La Vie en Rose (E. Piaf)",
+      "composerName": "O Sole Mio"
+    },
+    {
+      "title": "New York, New York (Sinatra)",
+      "composerName": "O Sole Mio"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-lo-mejor-de-los-tres-tenores-6",
+      "checkedAt": "2026-09-03",
+      "externalId": "excelentia-lo-mejor-de-los-tres-tenores-6"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

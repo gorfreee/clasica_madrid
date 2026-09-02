@@ -15,8 +15,37 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
+  "performers": [
+    {
+      "name": "Justin Doyle",
+      "role": "conductor"
+    },
+    {
+      "name": "Akademie für Alte Musik",
+      "role": "orchestra"
+    },
+    {
+      "name": "RIAS Kammerchor",
+      "role": "choir"
+    },
+    {
+      "name": "Julia Doyle"
+    },
+    {
+      "name": "Tim Mead"
+    },
+    {
+      "name": "Thomas Hobbs"
+    },
+    {
+      "name": "Roderick Williams"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Georg Friedrich Händel"
+    }
+  ],
   "works": [],
   "eras": [
     "baroque"
@@ -33,10 +62,10 @@
     {
       "sourceId": "src_teatro_real",
       "url": "https://www.teatroreal.es/es/espectaculo/mesias",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "mesias"
     }
   ],
   "primarySourceId": "src_teatro_real",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

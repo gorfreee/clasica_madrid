@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_cndm_le_concert_de_la_loge",
+  "slug": "cndm-le-concert-de-la-loge",
+  "title": "CNDM. Le Concert de La Loge",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_cndm_le_concert_de_la_loge_01",
+      "date": "2027-05-23",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "LE CONCERT DE LA LOGE"
+    },
+    {
+      "name": "JULIEN CHAUVIN"
+    },
+    {
+      "name": "LUCILE RICHARDOT"
+    },
+    {
+      "name": "LAURENCE KILSBY"
+    },
+    {
+      "name": "MÉLISSA PETIT"
+    },
+    {
+      "name": "PAUL-ANTOINE BÉNOS-DJIAN"
+    },
+    {
+      "name": "JULIETTE MEY"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antonio Vivaldi (1678-1741)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Griselda, RV 718 (1735)",
+      "composerName": "Antonio Vivaldi (1678-1741)"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "opera",
+    "early-music"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-le-concert-de-la-loge",
+      "checkedAt": "2026-09-03",
+      "externalId": "cndm-le-concert-de-la-loge"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

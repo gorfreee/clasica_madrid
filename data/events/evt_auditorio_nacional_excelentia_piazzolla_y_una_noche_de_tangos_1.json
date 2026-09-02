@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_piazzolla_y_una_noche_de_tangos_1",
+  "slug": "excelentia-piazzolla-y-una-noche-de-tangos",
+  "title": "Excelentia. Piazzolla y una Noche de Tangos",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_piazzolla_y_una_noche_de_tangos_1_01",
+      "date": "2027-01-16",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Délica Chamber Orchestra"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Piazzolla"
+    },
+    {
+      "name": "Matos Rodríguez"
+    }
+  ],
+  "works": [
+    {
+      "title": "Chant et fugue",
+      "composerName": "Piazzolla"
+    },
+    {
+      "title": "La cumparsita",
+      "composerName": "Matos Rodríguez"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-piazzolla-y-una-noche-de-tangos-1",
+      "checkedAt": "2026-09-03",
+      "externalId": "excelentia-piazzolla-y-una-noche-de-tangos-1"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

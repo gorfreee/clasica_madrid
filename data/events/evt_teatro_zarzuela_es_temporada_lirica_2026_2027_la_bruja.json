@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_zarzuela_es_temporada_lirica_2026_2027_la_bruja",
+  "slug": "la-bruja",
+  "title": "La bruja",
+  "status": "scheduled",
+  "venueId": "ven_teatro_zarzuela",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_la_bruja_01",
+      "date": "2027-03-11",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_la_bruja_02",
+      "date": "2027-03-12",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_la_bruja_03",
+      "date": "2027-03-13",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_la_bruja_04",
+      "date": "2027-03-14",
+      "time": "18:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_la_bruja_05",
+      "date": "2027-03-17",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_la_bruja_06",
+      "date": "2027-03-18",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_la_bruja_07",
+      "date": "2027-03-19",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_la_bruja_08",
+      "date": "2027-03-20",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_la_bruja_09",
+      "date": "2027-03-21",
+      "time": "18:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_la_bruja_10",
+      "date": "2027-03-23",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_la_bruja_11",
+      "date": "2027-03-24",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_la_bruja_12",
+      "date": "2027-03-27",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_la_bruja_13",
+      "date": "2027-03-28",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "JOSÉ MIGUEL PÉREZ-SIERRA",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "RUPERTO CHAPÍ"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "zarzuela"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_teatro_zarzuela",
+      "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/la-bruja",
+      "checkedAt": "2026-09-03",
+      "externalId": "/es/temporada/lirica-2026-2027/la-bruja"
+    }
+  ],
+  "primarySourceId": "src_teatro_zarzuela",
+  "lastVerifiedAt": "2026-09-03"
+}

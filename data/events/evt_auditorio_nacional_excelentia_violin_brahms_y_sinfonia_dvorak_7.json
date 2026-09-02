@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_violin_brahms_y_sinfonia_dvorak_7",
+  "slug": "excelentia-violin-brahms-y-sinfonia-dvorak-7",
+  "title": "Excelentia. Violín Brahms y Sinfonía Dvorák 7",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_violin_brahms_y_sinfonia_dvorak_7_01",
+      "date": "2027-02-17",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Clásica Santa Cecilia"
+    },
+    {
+      "name": "Daniel Raiskin",
+      "role": "conductor"
+    },
+    {
+      "name": "Julian Rhee"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Brahms"
+    },
+    {
+      "name": "Dvořák"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para violín y orquesta",
+      "composerName": "Brahms"
+    },
+    {
+      "title": "Sinfonía n.º 7",
+      "composerName": "Dvořák"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-violin-brahms-y-sinfonia-dvorak-7",
+      "checkedAt": "2026-09-03",
+      "externalId": "excelentia-violin-brahms-y-sinfonia-dvorak-7"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

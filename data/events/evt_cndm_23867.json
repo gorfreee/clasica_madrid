@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cndm_23867",
+  "slug": "cuarteto-julia-fischer-amihai-grosz",
+  "title": "CUARTETO JULIA FISCHER & AMIHAI GROSZ",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cndm_23867_01",
+      "date": "2027-01-09",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Cuarteto Julia Fischer"
+    },
+    {
+      "name": "Amihai Grosz"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Felix Mendelssohn (1809-1847)"
+    },
+    {
+      "name": "Bernard Herrmann (1911-1975)"
+    },
+    {
+      "name": "Antonín Dvořák (1841-1904)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Quinteto de cuerda n.º 1 en la mayor , op. 18 (1826-1832)",
+      "composerName": "Felix Mendelssohn (1809-1847)"
+    },
+    {
+      "title": "Echoes , para cuarteto de cuerda (1965)",
+      "composerName": "Bernard Herrmann (1911-1975)"
+    },
+    {
+      "title": "Quinteto de cuerda n.º 3 en mi bemol mayor ‘Americano’, op. 97 (1893)",
+      "composerName": "Antonín Dvořák (1841-1904)"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23867",
+      "checkedAt": "2026-09-03",
+      "externalId": "23867"
+    }
+  ],
+  "primarySourceId": "src_cndm",
+  "lastVerifiedAt": "2026-09-03"
+}

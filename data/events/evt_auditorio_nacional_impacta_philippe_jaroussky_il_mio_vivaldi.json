@@ -23,8 +23,17 @@
       "name": "Ensemble Artaserse"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Nisi Dominus, A. Vivaldi"
+    }
+  ],
+  "works": [
+    {
+      "title": "Selección de arias de ópera",
+      "composerName": "Nisi Dominus, A. Vivaldi"
+    }
+  ],
   "eras": [
     "baroque"
   ],
@@ -38,10 +47,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/impacta-philippe-jaroussky-il-mio-vivaldi",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "impacta-philippe-jaroussky-il-mio-vivaldi"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

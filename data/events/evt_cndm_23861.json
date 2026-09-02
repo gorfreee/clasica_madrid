@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cndm_23861",
+  "slug": "ensemble-l-itineraire",
+  "title": "ENSEMBLE L’ITINÉRAIRE",
+  "status": "scheduled",
+  "venueId": "ven_museo_reina_sofia_auditorio_400",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cndm_23861_01",
+      "date": "2027-05-31",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Asier Puga",
+      "role": "conductor"
+    },
+    {
+      "name": "Ensemble L'Itinéraire"
+    },
+    {
+      "name": "Nathalie Forget ondas"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Tobias Feierabend (1993)"
+    },
+    {
+      "name": "Matías Rosales (1988)"
+    },
+    {
+      "name": "Núria Giménez-Comas (1980)"
+    },
+    {
+      "name": "Unsuk Chin (1961)"
+    },
+    {
+      "name": "Tristan Murail (1947)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Felûres , para ensemble * (2027)",
+      "composerName": "Tobias Feierabend (1993)"
+    },
+    {
+      "title": "Obra a determinar, para flauta, viola y violonchelo * (2027)",
+      "composerName": "Tobias Feierabend (1993)"
+    },
+    {
+      "title": "Obra a determinar, para ensemble *1 (2027)",
+      "composerName": "Matías Rosales (1988)"
+    },
+    {
+      "title": "Obra a determinar, para ondas Martenot y tres instrumentos * (2027)",
+      "composerName": "Matías Rosales (1988)"
+    },
+    {
+      "title": "Obra a determinar, para ondas Martenot y ensemble * (2027)",
+      "composerName": "Tristan Murail (1947)"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "chamber",
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23861",
+      "checkedAt": "2026-09-03",
+      "externalId": "23861"
+    }
+  ],
+  "primarySourceId": "src_cndm",
+  "lastVerifiedAt": "2026-09-03"
+}

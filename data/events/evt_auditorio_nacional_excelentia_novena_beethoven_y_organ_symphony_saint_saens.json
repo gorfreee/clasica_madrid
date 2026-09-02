@@ -27,8 +27,24 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Saint-Saëns"
+    },
+    {
+      "name": "Beethoven"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sinfonía n.º 3 “con órgano”",
+      "composerName": "Saint-Saëns"
+    },
+    {
+      "title": "Sinfonía n.º 9 “Coral”",
+      "composerName": "Beethoven"
+    }
+  ],
   "eras": [
     "classical",
     "romantic"
@@ -44,10 +60,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-novena-beethoven-y-organ-symphony-saint-saens",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "excelentia-novena-beethoven-y-organ-symphony-saint-saens"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

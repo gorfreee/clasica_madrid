@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_piu_mosso_2187",
+  "slug": "victor-tretyakov-piano",
+  "title": "VICTOR TRETYAKOV, Piano",
+  "status": "scheduled",
+  "venueId": "ven_casa_vacas_retiro",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_piu_mosso_2187_01",
+      "date": "2026-09-12",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacionpiumosso_com",
+      "url": "https://www.fundacionpiumosso.com/evento/victor-tretyakov-piano",
+      "checkedAt": "2026-09-03",
+      "externalId": "2187"
+    }
+  ],
+  "primarySourceId": "src_fundacionpiumosso_com",
+  "lastVerifiedAt": "2026-09-03"
+}

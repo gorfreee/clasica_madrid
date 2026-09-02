@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_23848",
+  "slug": "daniel-oyarzabal-suhar-korua",
+  "title": "DANIEL OYARZABAL & SUHAR KORUA",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_23848_01",
+      "date": "2027-04-17",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Esteban Urzelai",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach (1685-1750)"
+    },
+    {
+      "name": "Maurice Duruflé (1902-1986)"
+    },
+    {
+      "name": "Francisco Madina (1907-1972)"
+    },
+    {
+      "name": "Gabriel Fauré (1845-1924)"
+    },
+    {
+      "name": "Vicente Goicoechea (1854-1916)"
+    },
+    {
+      "name": "René Eespere (1953)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto en re menor, sobre el Concierto para dos violines y violonchelo en re menor de A. Vivaldi, BWV 596 (1713-1714)",
+      "composerName": "Johann Sebastian Bach (1685-1750)"
+    },
+    {
+      "title": "Toccata de la Suite para órgano , op. 5 (1933)",
+      "composerName": "Maurice Duruflé (1902-1986)"
+    },
+    {
+      "title": "Messe ‘Cum jubilo’ , op. 11 (1967)",
+      "composerName": "Maurice Duruflé (1902-1986)"
+    },
+    {
+      "title": "Euge serve bone",
+      "composerName": "Francisco Madina (1907-1972)"
+    },
+    {
+      "title": "Ave Maria , op. posth. (1871)",
+      "composerName": "Gabriel Fauré (1845-1924)"
+    },
+    {
+      "title": "Ave, verum corpus",
+      "composerName": "Vicente Goicoechea (1854-1916)"
+    },
+    {
+      "title": "Glorificatio (1990)",
+      "composerName": "René Eespere (1953)"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "romantic"
+  ],
+  "formats": [
+    "recital",
+    "organ"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-daniel-oyarzabal-suhar-korua",
+      "checkedAt": "2026-09-03",
+      "externalId": "23848"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23848",
+      "checkedAt": "2026-09-03",
+      "externalId": "23848"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

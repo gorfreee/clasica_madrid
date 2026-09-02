@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ocne_satelite_15_a_granada",
+  "slug": "ocne-satelite-15-a-granada",
+  "title": "OCNE. Satélite 15. A Granada",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ocne_satelite_15_a_granada_01",
+      "date": "2027-03-30",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Virtue Echo"
+    },
+    {
+      "name": "Héctor Eliel Márquez"
+    },
+    {
+      "name": "Paloma Friedhoff"
+    },
+    {
+      "name": "Margarita Rodríguez"
+    },
+    {
+      "name": "Maria Morellà"
+    },
+    {
+      "name": "Beatriz Oleaga"
+    },
+    {
+      "name": "Diego Blázquez"
+    },
+    {
+      "name": "Ariel Hernández"
+    },
+    {
+      "name": "Víctor Cruz"
+    },
+    {
+      "name": "Alesander Pérez"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Francesc Vila"
+    }
+  ],
+  "works": [
+    {
+      "title": "Nocturnos de la ventana",
+      "composerName": "Francesc Vila"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "choral",
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-15-a-granada",
+      "checkedAt": "2026-09-03",
+      "externalId": "ocne-satelite-15-a-granada"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

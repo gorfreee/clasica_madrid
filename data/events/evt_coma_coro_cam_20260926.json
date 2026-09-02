@@ -44,10 +44,11 @@
   "citations": [
     {
       "sourceId": "src_teatros_canal",
-      "url": "https://www.teatroscanal.com/espectaculo/festival-coma-2026/",
-      "checkedAt": "2026-08-28"
+      "url": "https://www.teatroscanal.com/espectaculo/festival-coma-2026",
+      "checkedAt": "2026-09-03",
+      "externalId": "71611:2026-09-26"
     }
   ],
   "primarySourceId": "src_teatros_canal",
-  "lastVerifiedAt": "2026-08-28"
+  "lastVerifiedAt": "2026-09-03"
 }

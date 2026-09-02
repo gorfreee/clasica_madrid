@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_hispania_concertalia_concierto_de_ano_nuevo_de_viena_en_madrid_1",
+  "slug": "hispania-concertalia-concierto-de-ano-nuevo-de-viena-en-madrid-2",
+  "title": "Hispania Concertalia. Concierto de Año Nuevo de Viena en Madrid",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_hispania_concertalia_concierto_de_ano_nuevo_de_viena_en_madrid_1_01",
+      "date": "2027-01-03",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "PHILHARMONIC ENSEMBLE"
+    },
+    {
+      "name": "Miembros de la Orquesta Filarmónica de Viena"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Strauss I"
+    },
+    {
+      "name": "Johann Strauss II"
+    },
+    {
+      "name": "Josef Strauss"
+    }
+  ],
+  "works": [
+    {
+      "title": "El carnaval en París, galop, op. 100",
+      "composerName": "Johann Strauss I"
+    },
+    {
+      "title": "Johann Strauss II –Hojas matutinas, vals, op. 279",
+      "composerName": "Johann Strauss I"
+    },
+    {
+      "title": "En el bosque de Krapfen, polca francesa, op. 336",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Música de las esferas, vals, op. 235",
+      "composerName": "Josef Strauss"
+    },
+    {
+      "title": "Johann Strauss II –Bandidos-Galopp, op. 378",
+      "composerName": "Josef Strauss"
+    },
+    {
+      "title": "Marcha egipcia, op. 335",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "¡Sin preocupaciones!, polca rápida, op. 271",
+      "composerName": "Josef Strauss"
+    },
+    {
+      "title": "Carl Michael Ziehrer –Leyendas del Danubio, vals, op. 446",
+      "composerName": "Josef Strauss"
+    },
+    {
+      "title": "Final tradicional",
+      "composerName": "Johann Strauss I"
+    },
+    {
+      "title": "Johann Strauss II – El Danubio azul",
+      "composerName": "Johann Strauss I"
+    },
+    {
+      "title": "Johann Strauss I – Marcha Radetzky",
+      "composerName": "Johann Strauss I"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/hispania-concertalia-concierto-de-ano-nuevo-de-viena-en-madrid-1",
+      "checkedAt": "2026-09-03",
+      "externalId": "hispania-concertalia-concierto-de-ano-nuevo-de-viena-en-madrid-1"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

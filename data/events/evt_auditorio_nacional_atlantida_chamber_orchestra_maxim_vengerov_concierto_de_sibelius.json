@@ -27,8 +27,31 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Ruslán y Ludmila"
+    },
+    {
+      "name": "Jean Sibelius (1865–1957)"
+    },
+    {
+      "name": "Antonín Dvořák (1841–1904)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Obertura",
+      "composerName": "Ruslán y Ludmila"
+    },
+    {
+      "title": "Concierto para violín en Re menor, Op. 47",
+      "composerName": "Jean Sibelius (1865–1957)"
+    },
+    {
+      "title": "Sinfonía nº 8 en Sol mayor, Op. 88",
+      "composerName": "Antonín Dvořák (1841–1904)"
+    }
+  ],
   "eras": [
     "romantic",
     "twentieth"
@@ -42,10 +65,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/atlantida-chamber-orchestra-maxim-vengerov-concierto-de-sibelius",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "atlantida-chamber-orchestra-maxim-vengerov-concierto-de-sibelius"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

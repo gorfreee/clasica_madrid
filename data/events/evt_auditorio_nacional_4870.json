@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_4870",
+  "slug": "musica-para-la-eternidad",
+  "title": "Música para la eternidad",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_4870_01",
+      "date": "2027-02-05",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro de la Comunidad de Madrid"
+    },
+    {
+      "name": "Heide Müller",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Heinrich Schütz"
+    },
+    {
+      "name": "Gottfried August Homilius"
+    },
+    {
+      "name": "Dietrich Buxtehude"
+    },
+    {
+      "name": "Johann Pachelbel"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Frank Martin"
+    }
+  ],
+  "works": [
+    {
+      "title": "Los cielos cuentan la gloria de Dios +",
+      "composerName": "Heinrich Schütz"
+    },
+    {
+      "title": "Mirad qué amor +",
+      "composerName": "Gottfried August Homilius"
+    },
+    {
+      "title": "Cantate Domino +",
+      "composerName": "Dietrich Buxtehude"
+    },
+    {
+      "title": "Chacona, en fa menor +",
+      "composerName": "Johann Pachelbel"
+    },
+    {
+      "title": "No te dejaré, BWV 467 +",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Misa para doble coro a capella",
+      "composerName": "Frank Martin"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-tiempo-de-camara-1",
+      "checkedAt": "2026-09-03",
+      "externalId": "4870"
+    },
+    {
+      "sourceId": "src_fundacion_orcam",
+      "url": "https://fundacionorcam.org/conciertos/2026-27/musica-para-la-eternidad",
+      "checkedAt": "2026-09-03",
+      "externalId": "4870"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatros_canal_99084",
+  "slug": "duo-thibaut-garcia-antoine-moriniere",
+  "title": "Dúo Thibaut Garcia & Antoine Morinière",
+  "status": "scheduled",
+  "venueId": "ven_teatros_canal_sala_roja",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatros_canal_99084_01",
+      "date": "2027-03-31",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_teatros_canal",
+      "url": "https://www.teatroscanal.com/espectaculo/thibaut-garcia-antoine-moriniere-variaciones-goldberg",
+      "checkedAt": "2026-09-03",
+      "externalId": "99084"
+    }
+  ],
+  "primarySourceId": "src_teatros_canal",
+  "lastVerifiedAt": "2026-09-03"
+}

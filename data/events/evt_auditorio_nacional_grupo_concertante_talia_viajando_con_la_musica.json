@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_grupo_concertante_talia_viajando_con_la_musica",
+  "slug": "grupo-concertante-talia-viajando-con-la-musica",
+  "title": "Grupo Concertante Talía. Viajando con la Música",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_grupo_concertante_talia_viajando_con_la_musica_01",
+      "date": "2027-04-10",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Infantil y Juvenil EOS"
+    },
+    {
+      "name": "Silvia Sanz",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "VIAJANDO CON LA MÚSICA"
+    }
+  ],
+  "works": [
+    {
+      "title": "Un americano en París, Pinos de Roma, España, Lawrence de Arabia, Indiana Jones. La Conga del fuego nuevo, Baba Yetu, En las estepas del Asia central.",
+      "composerName": "VIAJANDO CON LA MÚSICA"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/grupo-concertante-talia-viajando-con-la-musica",
+      "checkedAt": "2026-09-03",
+      "externalId": "grupo-concertante-talia-viajando-con-la-musica"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

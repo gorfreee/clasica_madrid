@@ -13,6 +13,30 @@
       "date": "2026-10-16",
       "time": "10:00",
       "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_nuevos_publicos_2026_2027_zarzuelita_2026_2027_escolares_02",
+      "date": "2027-02-19",
+      "time": "10:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_nuevos_publicos_2026_2027_zarzuelita_2026_2027_escolares_03",
+      "date": "2027-02-19",
+      "time": "11:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_nuevos_publicos_2026_2027_zarzuelita_2026_2027_escolares_04",
+      "date": "2027-04-23",
+      "time": "10:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_nuevos_publicos_2026_2027_zarzuelita_2026_2027_escolares_05",
+      "date": "2027-04-23",
+      "time": "11:30",
+      "status": "scheduled"
     }
   ],
   "performers": [
@@ -42,10 +66,10 @@
     {
       "sourceId": "src_teatro_zarzuela",
       "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/nuevos-publicos-2026-2027/zarzuelita-2026-2027-escolares",
-      "checkedAt": "2026-08-31",
+      "checkedAt": "2026-09-03",
       "externalId": "/es/temporada/nuevos-publicos-2026-2027/zarzuelita-2026-2027-escolares"
     }
   ],
   "primarySourceId": "src_teatro_zarzuela",
-  "lastVerifiedAt": "2026-08-31"
+  "lastVerifiedAt": "2026-09-03"
 }

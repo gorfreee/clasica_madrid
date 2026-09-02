@@ -31,6 +31,54 @@
       "date": "2026-10-18",
       "time": "12:15",
       "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_ambigu_2026_2027_zarzuelita_2026_2027_05",
+      "date": "2027-02-20",
+      "time": "10:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_ambigu_2026_2027_zarzuelita_2026_2027_06",
+      "date": "2027-02-20",
+      "time": "12:15",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_ambigu_2026_2027_zarzuelita_2026_2027_07",
+      "date": "2027-02-21",
+      "time": "10:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_ambigu_2026_2027_zarzuelita_2026_2027_08",
+      "date": "2027-02-21",
+      "time": "12:15",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_ambigu_2026_2027_zarzuelita_2026_2027_09",
+      "date": "2027-04-24",
+      "time": "10:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_ambigu_2026_2027_zarzuelita_2026_2027_10",
+      "date": "2027-04-24",
+      "time": "12:15",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_ambigu_2026_2027_zarzuelita_2026_2027_11",
+      "date": "2027-04-25",
+      "time": "10:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_ambigu_2026_2027_zarzuelita_2026_2027_12",
+      "date": "2027-04-25",
+      "time": "12:15",
+      "status": "scheduled"
     }
   ],
   "performers": [
@@ -62,10 +110,10 @@
     {
       "sourceId": "src_teatro_zarzuela",
       "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/ambigu-2026-2027/zarzuelita-2026-2027",
-      "checkedAt": "2026-08-31",
+      "checkedAt": "2026-09-03",
       "externalId": "/es/temporada/ambigu-2026-2027/zarzuelita-2026-2027"
     }
   ],
   "primarySourceId": "src_teatro_zarzuela",
-  "lastVerifiedAt": "2026-08-31"
+  "lastVerifiedAt": "2026-09-03"
 }

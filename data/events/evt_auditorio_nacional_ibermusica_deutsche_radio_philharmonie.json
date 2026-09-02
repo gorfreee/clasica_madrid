@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ibermusica_deutsche_radio_philharmonie",
+  "slug": "ibermusica-deutsche-radio-philharmonie",
+  "title": "Ibermúsica. Deutsche Radio Philharmonie",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ibermusica_deutsche_radio_philharmonie_01",
+      "date": "2027-01-27",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Deutsche Radio Philharmonie"
+    },
+    {
+      "name": "Josep Pons"
+    },
+    {
+      "name": "Elisabeth Teige"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-deutsche-radio-philharmonie",
+      "checkedAt": "2026-09-03",
+      "externalId": "ibermusica-deutsche-radio-philharmonie"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

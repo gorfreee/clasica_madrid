@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_piu_mosso_2215",
+  "slug": "festival-alicia-de-larrocha-iv-edicion-schubertiada",
+  "title": "FESTIVAL ALICIA DE LARROCHA IV. EDICIÓN. SCHUBERTIADA.",
+  "status": "scheduled",
+  "venueId": "ven_ateneo_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_piu_mosso_2215_01",
+      "date": "2026-12-26",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_fundacionpiumosso_com",
+      "url": "https://www.fundacionpiumosso.com/evento/festival-alicia-de-larrocha-iv-edicion-schubertiada",
+      "checkedAt": "2026-09-03",
+      "externalId": "2215"
+    }
+  ],
+  "primarySourceId": "src_fundacionpiumosso_com",
+  "lastVerifiedAt": "2026-09-03"
+}

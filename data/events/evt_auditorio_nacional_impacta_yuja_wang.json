@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_impacta_yuja_wang",
+  "slug": "impacta-yuja-wang",
+  "title": "Impacta. Yuja Wang",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_impacta_yuja_wang_01",
+      "date": "2027-02-03",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Yuja Wang"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/impacta-yuja-wang",
+      "checkedAt": "2026-09-03",
+      "externalId": "impacta-yuja-wang"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

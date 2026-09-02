@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_upm_america_tradicion_identidad_y_nuevo_mundo",
+  "slug": "upm-america-tradicion-identidad-y-nuevo-mundo",
+  "title": "UPM. América: Tradición, Identidad y Nuevo Mundo",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_upm_america_tradicion_identidad_y_nuevo_mundo_01",
+      "date": "2027-02-14",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "ORQUESTA SINFÓNICA UPM"
+    },
+    {
+      "name": "Marcos Enrique Romero Gil",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/upm-america-tradicion-identidad-y-nuevo-mundo",
+      "checkedAt": "2026-09-03",
+      "externalId": "upm-america-tradicion-identidad-y-nuevo-mundo"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ibermusica_staatskapelle_dresden_y_orfeo_catala_1",
+  "slug": "ibermusica-staatskapelle-dresden-y-orfeo-catala",
+  "title": "Ibermúsica. Staatskapelle Dresden y Orfeó Català",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ibermusica_staatskapelle_dresden_y_orfeo_catala_1_01",
+      "date": "2027-05-18",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Staatskapelle Dresden"
+    },
+    {
+      "name": "Daniele Gatti"
+    },
+    {
+      "name": "Orfeó Català, coro"
+    },
+    {
+      "name": "Sara Blanch"
+    },
+    {
+      "name": "Silvia Tro Santafé"
+    },
+    {
+      "name": "Bernard Richter"
+    },
+    {
+      "name": "Christian Gerhaher"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-staatskapelle-dresden-y-orfeo-catala-1",
+      "checkedAt": "2026-09-03",
+      "externalId": "ibermusica-staatskapelle-dresden-y-orfeo-catala-1"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

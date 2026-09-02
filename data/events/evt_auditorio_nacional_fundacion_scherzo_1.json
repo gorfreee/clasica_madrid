@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_fundacion_scherzo_1",
+  "slug": "fundacion-scherzo",
+  "title": "Fundación Scherzo.",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_fundacion_scherzo_1_01",
+      "date": "2027-06-02",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Arcadi Volodos"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/fundacion-scherzo-1",
+      "checkedAt": "2026-09-03",
+      "externalId": "fundacion-scherzo-1"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

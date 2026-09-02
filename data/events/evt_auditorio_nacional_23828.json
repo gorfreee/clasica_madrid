@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_23828",
+  "slug": "hippocampus",
+  "title": "HIPPOCAMPUS",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_23828_01",
+      "date": "2027-03-11",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Richard Egarr"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach (1685-1750)"
+    },
+    {
+      "name": "Asís Márquez (1987)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Suite orquestal n.º 3 en re mayor, BWV 1068 (ca. 1730)",
+      "composerName": "Johann Sebastian Bach (1685-1750)"
+    },
+    {
+      "title": "Suite orquestal n.º 4 en re mayor , BWV 1069 (1725)",
+      "composerName": "Johann Sebastian Bach (1685-1750)"
+    },
+    {
+      "title": "Danzas de suites y partitas para tecla, selección (arr. R. Egarr y A. Martínez) *",
+      "composerName": "Johann Sebastian Bach (1685-1750)"
+    },
+    {
+      "title": "Suite orquestal *+ (2027)",
+      "composerName": "Asís Márquez (1987)"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "chamber",
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-hippocampus-1",
+      "checkedAt": "2026-09-03",
+      "externalId": "23828"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23828",
+      "checkedAt": "2026-09-03",
+      "externalId": "23828"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

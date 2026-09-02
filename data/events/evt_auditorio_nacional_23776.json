@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_23776",
+  "slug": "cuarteto-cosmos",
+  "title": "CUARTETO COSMOS",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_23776_01",
+      "date": "2027-01-08",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "CUARTETO COSMOS"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven (1770-1827)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Cuarteto de cuerda n.º 1 en fa mayor , op. 18, n.º 1 (1799)",
+      "composerName": "Ludwig van Beethoven (1770-1827)"
+    },
+    {
+      "title": "Cuarteto de cuerda n.º 8 en mi menor ‘Razumovski ’, op. 59, n.º 2 (1806)",
+      "composerName": "Ludwig van Beethoven (1770-1827)"
+    },
+    {
+      "title": "Cuarteto de cuerda n.º 15 en la menor, op. 132 (1823-1825)",
+      "composerName": "Ludwig van Beethoven (1770-1827)"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-cuarteto-cosmos-2",
+      "checkedAt": "2026-09-03",
+      "externalId": "23776"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23776",
+      "checkedAt": "2026-09-03",
+      "externalId": "23776"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

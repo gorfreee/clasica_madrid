@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_real_bodas_sangre",
+  "slug": "bodas-de-sangre",
+  "title": "Bodas de sangre",
+  "status": "scheduled",
+  "venueId": "ven_teatro_real",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_real_bodas_sangre_01",
+      "date": "2027-03-09",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_bodas_sangre_02",
+      "date": "2027-03-10",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_bodas_sangre_03",
+      "date": "2027-03-11",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_bodas_sangre_04",
+      "date": "2027-03-13",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_bodas_sangre_05",
+      "date": "2027-03-14",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Manuel Busto",
+      "role": "conductor"
+    },
+    {
+      "name": "José Luis Basso",
+      "role": "conductor"
+    },
+    {
+      "name": "Coro y Orquesta Titulares del Teatro Real",
+      "role": "orchestra"
+    },
+    {
+      "name": "Marina Monzó"
+    },
+    {
+      "name": "Ana Ibarra"
+    },
+    {
+      "name": "Marina Pardo"
+    },
+    {
+      "name": "Vicky Peña"
+    },
+    {
+      "name": "Ana Morales"
+    },
+    {
+      "name": "Santiago Sánchez"
+    },
+    {
+      "name": "José Antonio López"
+    },
+    {
+      "name": "Luis Cansino"
+    },
+    {
+      "name": "Urs Schönebaum"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Manuel Busto"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "opera",
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_teatro_real",
+      "url": "https://www.teatroreal.es/es/espectaculo/bodas-sangre",
+      "checkedAt": "2026-09-03",
+      "externalId": "bodas-sangre"
+    }
+  ],
+  "primarySourceId": "src_teatro_real",
+  "lastVerifiedAt": "2026-09-03"
+}

@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_fundacion_scherzo_yulianna_avdeeva_1",
+  "slug": "fundacion-scherzo-yulianna-avdeeva",
+  "title": "Fundación Scherzo. Yulianna Avdeeva",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_fundacion_scherzo_yulianna_avdeeva_1_01",
+      "date": "2027-02-16",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Yulianna Avdeeva"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Ludwig van Beethoven"
+    }
+  ],
+  "works": [
+    {
+      "title": "Fantasía cromática y fuga, BWV 903",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Fantasía, Op. 77",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Sonata para piano n.º 23 «Appassionata», Op. 57",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Maurice Ravel — Pavane pour une infante défunte",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Maurice Ravel — Valses nobles et sentimentales",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Maurice Ravel — La Valse",
+      "composerName": "Ludwig van Beethoven"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/fundacion-scherzo-yulianna-avdeeva-1",
+      "checkedAt": "2026-09-03",
+      "externalId": "fundacion-scherzo-yulianna-avdeeva-1"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

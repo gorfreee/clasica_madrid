@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_requiem_de_mozart_8",
+  "slug": "excelentia-requiem-de-mozart-2",
+  "title": "Excelentia. Réquiem de Mozart",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_requiem_de_mozart_8_01",
+      "date": "2027-03-18",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Clásica Santa Cecilia"
+    },
+    {
+      "name": "Excelentia Vocal Ensemble"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Mozart"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sinfonía n.º 40",
+      "composerName": "Mozart"
+    },
+    {
+      "title": "Réquiem",
+      "composerName": "Mozart"
+    }
+  ],
+  "eras": [
+    "classical"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-requiem-de-mozart-8",
+      "checkedAt": "2026-09-03",
+      "externalId": "excelentia-requiem-de-mozart-8"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

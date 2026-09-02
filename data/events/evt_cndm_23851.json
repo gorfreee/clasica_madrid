@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cndm_23851",
+  "slug": "trio-arbos-2",
+  "title": "TRÍO ARBÓS",
+  "status": "scheduled",
+  "venueId": "ven_museo_reina_sofia_auditorio_400",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cndm_23851_01",
+      "date": "2026-11-23",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Álvaro Octavio"
+    },
+    {
+      "name": "Ángel Luis Sánchez"
+    },
+    {
+      "name": "Joan Enric Lluna"
+    },
+    {
+      "name": "Rocío Gómez"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Manuel de Falla (1876-1946)"
+    },
+    {
+      "name": "Joaquín Nin-Culmell (1908-2004)"
+    },
+    {
+      "name": "Fernando Remacha (1898-1984)"
+    },
+    {
+      "name": "Jesús Torres (1965)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para clave, flauta, oboe, clarinete, violín y violonchelo (1923-1926)",
+      "composerName": "Manuel de Falla (1876-1946)"
+    },
+    {
+      "title": "Quinteto para piano y cuarteto de cuerda (1934-1936)",
+      "composerName": "Joaquín Nin-Culmell (1908-2004)"
+    },
+    {
+      "title": "Cuarteto con piano (1932)",
+      "composerName": "Fernando Remacha (1898-1984)"
+    },
+    {
+      "title": "Concertante. Cuatro miradas de Luis Cernuda, para flauta, oboe, clarinete, violín, violonchelo y clave *+ (2026)",
+      "composerName": "Jesús Torres (1965)"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23851",
+      "checkedAt": "2026-09-03",
+      "externalId": "23851"
+    }
+  ],
+  "primarySourceId": "src_cndm",
+  "lastVerifiedAt": "2026-09-03"
+}

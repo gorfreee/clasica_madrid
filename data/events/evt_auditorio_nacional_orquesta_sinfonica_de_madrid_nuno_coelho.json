@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_orquesta_sinfonica_de_madrid_nuno_coelho",
+  "slug": "orquesta-sinfonica-de-madrid-nuno-coelho",
+  "title": "Orquesta Sinfónica de Madrid. Nuno Coelho",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_orquesta_sinfonica_de_madrid_nuno_coelho_01",
+      "date": "2027-03-18",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Sinfónica de Madrid"
+    },
+    {
+      "name": "Nuno Coelho"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Dmitri Shostakóvich"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sinfonía n.° 10 en mi menor, op. 93",
+      "composerName": "Dmitri Shostakóvich"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/orquesta-sinfonica-de-madrid-nuno-coelho",
+      "checkedAt": "2026-09-03",
+      "externalId": "orquesta-sinfonica-de-madrid-nuno-coelho"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

@@ -30,8 +30,31 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Joseph Haydn (1732–1809)"
+    },
+    {
+      "name": "III. Presto"
+    },
+    {
+      "name": "Georg Friedrich Haendel (1685–1759)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sinfonía nº 1 en Re mayor, Hob. I:1",
+      "composerName": "Joseph Haydn (1732–1809)"
+    },
+    {
+      "title": "Concierto para piano nº 11 en Re mayor, Hob. XVIII:11",
+      "composerName": "III. Presto"
+    },
+    {
+      "title": "El Mesías (selección)",
+      "composerName": "Georg Friedrich Haendel (1685–1759)"
+    }
+  ],
   "eras": [
     "baroque",
     "classical"
@@ -47,10 +70,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/atlantida-chamber-orchestra-el-mesias-grandes-coros-y-arias",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "atlantida-chamber-orchestra-el-mesias-grandes-coros-y-arias"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

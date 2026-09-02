@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_24018",
+  "slug": "barbara-hannigan-bertrand-chamayou",
+  "title": "BARBARA HANNIGAN & BERTRAND CHAMAYOU",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_24018_01",
+      "date": "2027-04-11",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "BARBARA HANNIGAN"
+    },
+    {
+      "name": "BERTRAND CHAMAYOU"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Olivier Messiaen (1908-1992)"
+    },
+    {
+      "name": "Alexander Scriabin (1872-1915)"
+    },
+    {
+      "name": "John Zorn (1953)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Chants de terre et de ciel (1938)",
+      "composerName": "Olivier Messiaen (1908-1992)"
+    },
+    {
+      "title": "Poème-nocturne , op. 61 (1911)",
+      "composerName": "Alexander Scriabin (1872-1915)"
+    },
+    {
+      "title": "Vers la flamme , op. 72 (1914)",
+      "composerName": "Alexander Scriabin (1872-1915)"
+    },
+    {
+      "title": "Jumalattaret ** (2012)",
+      "composerName": "John Zorn (1953)"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-barbara-hannigan-bertrand-chamayou",
+      "checkedAt": "2026-09-03",
+      "externalId": "24018"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23814",
+      "checkedAt": "2026-09-03",
+      "externalId": "23814"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/24018",
+      "checkedAt": "2026-09-03",
+      "externalId": "24018"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}
