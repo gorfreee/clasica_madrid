@@ -93,7 +93,7 @@ export function looksLikeEnsembleName(text: string): boolean {
 
 /** "Work title, para arpa / orquesta" is instrumentation, not a person or group. */
 export function looksLikeWorkInstrumentation(text: string): boolean {
-  return /(?:,\s*|\b)(?:para|for)\s+(?:la\s+)?(?:orquesta|orchestra|arpa|viol[ií]n|violonchelo|cello|piano|coro|cuerda)/i.test(
+  return /(?:,\s*|\b)(?:para|for)\s+(?:la\s+)?(?:orquesta|orchestra|arpa|viol[ií]n|violonchelo|cello|piano|coro|cuerda|soprano|mezzosoprano|contratenor|tenor|bar[ií]tono|bajo)/i.test(
     text.trim(),
   );
 }
