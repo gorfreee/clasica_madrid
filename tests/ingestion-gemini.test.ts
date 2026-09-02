@@ -102,6 +102,7 @@ function classifier(
 describe('Gemini config', () => {
   it('usa el pool gratuito de Flash y Gemma en orden de preferencia por defecto', () => {
     expect(GEMINI_DEFAULT_MODELS).toEqual([
+      'gemini-3.8-flash',
       'gemini-3.7-flash',
       'gemini-3.6-flash',
       'gemini-3.5-flash',
@@ -111,7 +112,7 @@ describe('Gemini config', () => {
       'gemma-4-31b-it',
       'gemma-4-26b-a4b-it',
     ]);
-    expect(GEMINI_DEFAULT_MODEL).toBe('gemini-3.7-flash');
+    expect(GEMINI_DEFAULT_MODEL).toBe('gemini-3.8-flash');
     expect(resolveGeminiModels({})).toEqual(GEMINI_DEFAULT_MODELS);
     expect(resolveGeminiConfig({}).models).toEqual(GEMINI_DEFAULT_MODELS);
     expect(resolveGeminiConfig({}).defaultRpm).toBeUndefined();
@@ -124,6 +125,7 @@ describe('Gemini config', () => {
     const flash = { rpm: 4, tpm: 200_000, rpd: 18 };
     const flashLite = { rpm: 12, tpm: 200_000, rpd: 450 };
     const gemma = { rpm: 24, tpm: 12_800, rpd: 12_960 };
+    expect(GEMINI_DEFAULT_LIMITS['gemini-3.8-flash']).toEqual(flash);
     expect(GEMINI_DEFAULT_LIMITS['gemini-3.7-flash']).toEqual(flash);
     expect(GEMINI_DEFAULT_LIMITS['gemini-3.6-flash']).toEqual(flash);
     expect(GEMINI_DEFAULT_LIMITS['gemini-3.5-flash']).toEqual(flash);

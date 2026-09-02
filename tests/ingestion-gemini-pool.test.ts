@@ -344,7 +344,7 @@ describe('concurrency and cancellation', () => {
     const p = provider({ clock: undefined, concurrency: 2, model: undefined, fetch: async (_url, init) => {
       active++; peak = Math.max(peak, active);
       const model = JSON.parse(String(init?.body)).model;
-      await new Promise((resolve) => setTimeout(resolve, model === 'gemini-3.7-flash' ? 50 : 10));
+      await new Promise((resolve) => setTimeout(resolve, model === 'gemini-3.8-flash' ? 50 : 10));
       active--;
       return response();
     } });
@@ -357,8 +357,8 @@ describe('concurrency and cancellation', () => {
     await finished;
     expect(peak).toBe(2);
     expect(events).toHaveLength(5);
-    expect(events.find((e) => e.title === 'Concierto 0')?.diagnostics.model).toBe('gemini-3.7-flash');
-    expect(events.find((e) => e.title === 'Concierto 1')?.diagnostics.model).toBe('gemini-3.6-flash');
+    expect(events.find((e) => e.title === 'Concierto 0')?.diagnostics.model).toBe('gemini-3.8-flash');
+    expect(events.find((e) => e.title === 'Concierto 1')?.diagnostics.model).toBe('gemini-3.7-flash');
     expect(events.every((e) => e.diagnostics.attempts === 1)).toBe(true);
   });
 
@@ -501,6 +501,7 @@ describe('recoverable unusable output and thinking', () => {
 
   it.each(['eligibility', 'taxonomy'] as const)('envía thinking admitido por ID para %s', async (purpose) => {
     const cases = [
+      ['gemini-3.8-flash', 'low'],
       ['gemini-3.7-flash', 'low'],
       ['gemini-3.6-flash', 'minimal'],
       ['gemini-3.5-flash', 'minimal'],
@@ -512,7 +513,7 @@ describe('recoverable unusable output and thinking', () => {
       ['gemma-4-31b-it', undefined],
       ['gemma-4-26b-a4b-it', undefined],
       ['gemini-3.1-pro-preview', undefined],
-      ['gemini-3.8-flash', undefined], // Unknown future model: never infer support.
+      ['gemini-3.9-flash', undefined], // Unknown future model: never infer support.
       ['gemini-3.7-flash-preview', undefined],
       ['gemini-3.1-flash-lite-image', undefined],
     ] as const;
@@ -533,4 +534,3 @@ describe('recoverable unusable output and thinking', () => {
     expect(thinkingConfigForModel('')).toBeUndefined();
   });
 });
-
