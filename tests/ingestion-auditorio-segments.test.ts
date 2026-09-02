@@ -119,7 +119,8 @@ describe('segmentación performer/programa del Auditorio', () => {
     ]);
     expect(segments.programLines[0]).toBe('Caroline Shaw');
     expect(segments.programLines).toContain('Entr’acte, para orquesta de cuerda');
-    expect(parseAuditorioPersonLine('Caroline Shaw')).toEqual({ name: 'Caroline Shaw' });
+    expect(parseAuditorioPersonLine('Caroline Shaw')).toBeUndefined();
+    expect(parseAuditorioPersonLine('Benjamin Britten')).toBeUndefined();
     expect(parseAuditorioPersonLine('Entr’acte, para orquesta de cuerda')).toBeUndefined();
   });
 

@@ -239,11 +239,12 @@ describe('Fundación Più Mosso pipeline safety', () => {
     expect(first.summary.sourcesFailed).toEqual([]);
     expect(first.rawEvents).toHaveLength(4);
     expect(first.summary.possiblyMissing).toBe(0);
-    expect(first.summary.newEvents).toBe(1);
+    expect(first.summary.newEvents).toBe(2);
     expect(first.summary.updatedEvents + first.summary.unchangedEvents).toBe(1);
     const merged = mergeCandidateBatch(catalog, first.candidates).catalog;
     expect(merged.events.some((event) => event.id === 'evt_fundacionpiumosso_com_mario_prisuelos_musica_callada_de_frederic_mompou')).toBe(true);
     expect(merged.events.some((event) => event.venueId === 'ven_casa_vacas_retiro' && event.citations[0]?.url.includes('victor-tretyakov'))).toBe(true);
+    expect(merged.events.some((event) => event.citations[0]?.url.includes('festival-alicia-de-larrocha'))).toBe(true);
     expect(merged.events.some((event) => event.citations[0]?.url.includes('getafe'))).toBe(false);
 
     const second = await runIngest({
