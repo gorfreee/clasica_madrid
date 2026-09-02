@@ -69,6 +69,7 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
     urls: ['https://auditorionacional.inaem.gob.es/front-page-events.json'],
     adapterId: auditorioNacionalAdapter.id,
     catalogSourceId: srcAuditorio.id,
+    useFetchRelay: true,
     seedSource: srcAuditorio,
   },
   {

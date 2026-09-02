@@ -169,6 +169,27 @@ describe('fichas y horarios de Zarzuela', () => {
     expect(patch.accessText).toBeUndefined();
   });
 
+  it('completa días enumerados sin mes con el mes y año explícitos de la función accesible', async () => {
+    const patch = parseZarzuelaDetail(raw('el-barbarillo-de-lavapies'), await fixture('detail-barberillo'));
+    expect(patch.categoryText).toBe('Lírica');
+    expect(patch.occurrences?.map((o) => `${o.date} ${o.time}`)).toEqual([
+      '2027-06-09 19:30',
+      '2027-06-10 19:30',
+      '2027-06-11 19:30',
+      '2027-06-12 19:30',
+      '2027-06-13 18:00',
+      '2027-06-16 19:30',
+      '2027-06-17 19:30',
+      '2027-06-18 19:30',
+      '2027-06-19 19:30',
+      '2027-06-20 18:00',
+      '2027-06-23 19:30',
+      '2027-06-24 19:30',
+      '2027-06-25 19:30',
+    ]);
+    expect(patch.occurrences?.some((o) => o.raw.includes('FUNCIÓN'))).toBe(false);
+  });
+
   it('mantiene sesiones dobles y horarios particulares por fecha, sin mezclar escolares y familias', async () => {
     const family = parseZarzuelaDetail(raw(), await fixture('detail-family'));
     const school = parseZarzuelaDetail(raw(), await fixture('detail-school'));
@@ -210,6 +231,27 @@ describe('fichas y horarios de Zarzuela', () => {
   it('deduce el año omitido sólo desde un año expreso posterior y permite cambio de año', () => {
     expect(parseZarzuelaSchedule('<p>31 de diciembre y 1 de enero de 2027 19:30 horas</p>').map((o) => o.date))
       .toEqual(['2026-12-31', '2027-01-01']);
+  });
+
+  it('completa una lista de días sin mes con un único mes y año publicados en el mismo bloque', () => {
+    expect(
+      parseZarzuelaSchedule(
+        '<p>9, 10, 11, 12 y 13. 19:30 horas (domingos, a las 18:00 horas)</p><dl><dt>FUNCIÓN DE TEATRO ACCESIBLE:</dt><dd>Sábado, 12 de junio de 2027</dd></dl>',
+      ).map((o) => `${o.date} ${o.time}`),
+    ).toEqual([
+      '2027-06-09 19:30',
+      '2027-06-10 19:30',
+      '2027-06-11 19:30',
+      '2027-06-12 19:30',
+      '2027-06-13 18:00',
+    ]);
+  });
+
+  it('no toma un rango ni una lista de días sin mes y año explícitos', () => {
+    expect(() => parseZarzuelaSchedule('<p>Del 12 al 15 de abril de 2027 (10:00 y 12:30 horas)</p>')).toThrow(
+      /teatro-zarzuela/,
+    );
+    expect(() => parseZarzuelaSchedule('<p>9, 10, 11, 12 y 13. 19:30 horas</p>')).toThrow(/teatro-zarzuela/);
   });
 
   it('un fallo de ficha no convierte los rangos del listado en funciones publicables', async () => {

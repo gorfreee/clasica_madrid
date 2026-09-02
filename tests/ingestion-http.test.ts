@@ -12,7 +12,8 @@ import type { AdapterContext, SourceDefinition } from '../src/ingestion/types.ts
 
 const listing = 'https://www.march.es/es/madrid/conciertos';
 const detail = 'https://www.march.es/es/madrid/concierto/andromeda-perseo';
-const ordinary = 'https://auditorionacional.inaem.gob.es/front-page-events.json';
+const ordinary = 'https://www.teatroreal.es/es/calendario';
+const auditorioListing = 'https://auditorionacional.inaem.gob.es/front-page-events.json';
 const zarzuelaHome = 'https://teatrodelazarzuela.inaem.gob.es/es/';
 const zarzuelaListing = 'https://teatrodelazarzuela.inaem.gob.es/es/temporada/teatro-musical-de-camara-2026-2027';
 const zarzuelaDetail = 'https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/la-verbena-de-la-paloma';
@@ -135,24 +136,29 @@ describe('getText fetch relay', () => {
     expect(worker).not.toContain('teatrodelazarzuela.inaem.gob.es');
     expect(http).not.toContain('FETCH_RELAY_HOSTS');
     expect(listSourceDefinitions().filter((item) => item.useFetchRelay).map((item) => item.id)).toEqual([
+      'auditorio-nacional',
       'teatro-zarzuela',
       'fundacion-juan-march',
       'cndm',
       'real-hermandad-refugio',
     ]);
     expect(fetchRelayHosts()).toEqual([
+      'auditorionacional.inaem.gob.es',
       'cndm.inaem.gob.es',
       'realhermandaddelrefugio.org',
       'teatrodelazarzuela.inaem.gob.es',
       'www.march.es',
     ]);
-    expect(getSourceDefinition('auditorio-nacional').useFetchRelay).toBeFalsy();
+    expect(getSourceDefinition('auditorio-nacional').useFetchRelay).toBe(true);
+    expect(resolveFetchRelay(auditorioListing, relayEnv)?.requestUrl).toContain(
+      encodeURIComponent(auditorioListing),
+    );
 
     const extra: SourceDefinition = {
-      ...getSourceDefinition('auditorio-nacional'),
+      ...getSourceDefinition('teatro-real'),
       useFetchRelay: true,
     };
-    expect(fetchRelayHosts([extra])).toEqual(['auditorionacional.inaem.gob.es']);
+    expect(fetchRelayHosts([extra])).toEqual(['www.teatroreal.es']);
     expect(worker).not.toContain('auditorionacional.inaem.gob.es');
   });
 

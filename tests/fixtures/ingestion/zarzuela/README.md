@@ -10,7 +10,9 @@ No son eventos de producción.
   Cada listado tiene varias filas `ul.listadoObras`, de hasta tres obras cada una.
 - Fichas: los enlaces oficiales están en los listados. `verbena`, `rosas` y `double`
   son las fichas de La verbena de la Paloma, Las trece rosas rojas y El dúo de la
-  africana; `lied` es Christiane Karg; `family`/`school` son ambas Zarzuelitas;
+  africana; `barberillo` es El barberillo de Lavapiés (días enumerados sin mes en
+  la línea de funciones; el mes y año salen de la función accesible del mismo
+  bloque); `lied` es Christiane Karg; `family`/`school` son ambas Zarzuelitas;
   `dance` es Aión; `external` es Andrómeda y Perseo (teatro musical de cámara);
   `missing-schedule` es Me gustan todas (Galdós y las suripantas), y `rosa`
   es Rosa León: como la cigarra.
