@@ -111,18 +111,59 @@ function formatObservabilitySection(
   const lastStage = manifest?.lastStage;
   const artifactName = extras?.artifactName;
   const reason = failure ?? manifest?.failure;
-  if (!status && !lastStage && !artifactName && !reason) return '';
+  const timings = manifest?.timings;
+  if (!status && !lastStage && !artifactName && !reason && !timings) return '';
 
   const rows: string[] = ['### Observabilidad', '', '| Campo | Valor |', '|---|---|'];
   if (status) rows.push(`| Estado | ${cell(status)} |`);
   if (lastStage) rows.push(`| Último stage | ${cell(lastStage)} |`);
+  if (manifest?.startedAt && manifest.finishedAt) {
+    const totalMs = Math.max(0, Date.parse(manifest.finishedAt) - Date.parse(manifest.startedAt));
+    if (Number.isFinite(totalMs)) rows.push(`| Duración total | ${formatDuration(totalMs)} |`);
+  }
   if (artifactName) rows.push(`| Artifact | \`${cell(artifactName)}\` |`);
   if (reason) {
     const detail = reason.stage ? `${reason.code} (${reason.stage})` : reason.code;
     rows.push(`| Fallo | ${cell(detail)}: ${cell(reason.message)} |`);
   }
-  rows.push('', 'El detalle por evento está en el artifact (`report.json`, `events.jsonl`), no en este resumen.');
+
+  const stageEntries = Object.entries(timings?.stagesMs ?? {})
+    .filter((entry): entry is [string, number] => typeof entry[1] === 'number');
+  if (stageEntries.length > 0) {
+    rows.push('', '#### Tiempos por fase', '', '| Fase | Duración |', '|---|---:|');
+    for (const [stage, durationMs] of stageEntries) {
+      rows.push(`| ${cell(stage)} | ${formatDuration(durationMs)} |`);
+    }
+  }
+
+  const sourceEntries = Object.entries(timings?.sources ?? {})
+    .sort((left, right) => right[1].totalMs - left[1].totalMs);
+  if (sourceEntries.length > 0) {
+    rows.push(
+      '',
+      '#### Tiempos por fuente',
+      '',
+      '| Fuente | Extracción | Hydration | Total | Fichas ok/fallo |',
+      '|---|---:|---:|---:|---:|',
+    );
+    for (const [sourceId, timing] of sourceEntries) {
+      rows.push(
+        `| ${cell(sourceId)} | ${formatDuration(timing.extractionMs)} | ${formatDuration(timing.hydrationMs)} | ${formatDuration(timing.totalMs)} | ${timing.hydrationSucceeded}/${timing.hydrationFailed} |`,
+      );
+    }
+  }
+
+  rows.push('', 'El detalle por evento y los timings estructurados están en el artifact (`report.json`, `events.jsonl`, `run.json`).');
   return rows.join('\n');
+}
+
+function formatDuration(ms: number): string {
+  const roundedMs = Math.max(0, Math.round(ms));
+  if (roundedMs < 1_000) return `${roundedMs} ms`;
+  const seconds = Math.round(roundedMs / 1_000);
+  if (seconds < 60) return `${seconds}s`;
+  const minutes = Math.floor(seconds / 60);
+  return `${minutes}m ${String(seconds % 60).padStart(2, '0')}s`;
 }
 
 function cell(value: string): string {

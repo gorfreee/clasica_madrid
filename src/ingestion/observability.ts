@@ -7,6 +7,7 @@ import {
   writeSync,
 } from 'node:fs';
 import path from 'node:path';
+import { performance } from 'node:perf_hooks';
 import type { IngestWindow } from './dates.ts';
 import type { NormalizedEvent } from './normalize.ts';
 import {
@@ -33,6 +34,26 @@ export type IngestRunStage =
   | 'completed';
 
 export type IngestRunStatus = 'running' | 'completed' | 'failed' | 'interrupted';
+export type IngestTimedStage = Exclude<IngestRunStage, 'completed'>;
+export type IngestSourcePhase = 'extraction' | 'hydration';
+
+export type IngestSourceTiming = {
+  extractionMs: number;
+  hydrationMs: number;
+  totalMs: number;
+  extractedEvents: number;
+  hydratedEvents: number;
+  hydrationAttempted: number;
+  hydrationSucceeded: number;
+  hydrationFailed: number;
+  hydrationSkippedOutsideWindow: number;
+  hydrationSkippedCircuitOpen: number;
+};
+
+export type IngestTimingSummary = {
+  stagesMs: Partial<Record<IngestTimedStage, number>>;
+  sources: Record<string, IngestSourceTiming>;
+};
 
 export type IngestRunManifest = {
   schemaVersion: 1;
@@ -46,6 +67,7 @@ export type IngestRunManifest = {
   mode: 'dry-run' | 'publish';
   sources: string[];
   window: IngestWindow;
+  timings?: IngestTimingSummary;
   failure?: IngestFailureInfo;
 };
 
@@ -123,6 +145,7 @@ export type ObservabilityOptions = {
   attempt?: number;
   gitSha?: string;
   now?: () => Date;
+  monotonicNow?: () => number;
 };
 
 /**
@@ -133,13 +156,17 @@ export type ObservabilityOptions = {
 export class IngestObservability {
   readonly directory: string;
   private readonly now: () => Date;
+  private readonly monotonicNow: () => number;
   private manifest: IngestRunManifest;
+  private stageStartedAtMs: number;
   private journalFd?: number;
   private closed = false;
 
   constructor(options: ObservabilityOptions) {
     this.directory = options.directory;
     this.now = options.now ?? (() => new Date());
+    this.monotonicNow = options.monotonicNow ?? (() => performance.now());
+    this.stageStartedAtMs = this.monotonicNow();
     this.manifest = {
       schemaVersion: INGEST_RUN_MANIFEST_SCHEMA_VERSION,
       startedAt: this.now().toISOString(),
@@ -148,6 +175,7 @@ export class IngestObservability {
       mode: options.mode,
       sources: options.sources,
       window: options.window,
+      timings: { stagesMs: {}, sources: {} },
     };
     if (options.runId) this.manifest.runId = options.runId;
     if (options.attempt !== undefined) this.manifest.attempt = options.attempt;
@@ -163,8 +191,49 @@ export class IngestObservability {
 
   setStage(stage: IngestRunStage): void {
     this.guard(() => {
-      if (this.manifest.status !== 'running') return;
+      if (this.manifest.status !== 'running' || this.manifest.lastStage === stage) return;
+      this.finishCurrentStageTiming();
       this.manifest.lastStage = stage;
+      this.persistManifest();
+    });
+  }
+
+  async measureSourcePhase<T>(sourceId: string, phase: IngestSourcePhase, task: () => Promise<T>): Promise<T> {
+    if (this.closed) return task();
+    const startedAtMs = this.monotonicNow();
+    try {
+      return await task();
+    } finally {
+      const durationMs = elapsedMs(startedAtMs, this.monotonicNow());
+      this.guard(() => {
+        const timing = this.sourceTiming(sourceId);
+        if (phase === 'extraction') timing.extractionMs += durationMs;
+        else timing.hydrationMs += durationMs;
+        timing.totalMs = timing.extractionMs + timing.hydrationMs;
+        this.persistManifest();
+      });
+    }
+  }
+
+  recordSourceStats(input: {
+    sourceId: string;
+    extractedEvents: number;
+    hydratedEvents: number;
+    hydrationAttempted: number;
+    hydrationSucceeded: number;
+    hydrationFailed: number;
+    hydrationSkippedOutsideWindow?: number;
+    hydrationSkippedCircuitOpen?: number;
+  }): void {
+    this.guard(() => {
+      const timing = this.sourceTiming(input.sourceId);
+      timing.extractedEvents = input.extractedEvents;
+      timing.hydratedEvents = input.hydratedEvents;
+      timing.hydrationAttempted = input.hydrationAttempted;
+      timing.hydrationSucceeded = input.hydrationSucceeded;
+      timing.hydrationFailed = input.hydrationFailed;
+      timing.hydrationSkippedOutsideWindow = input.hydrationSkippedOutsideWindow ?? 0;
+      timing.hydrationSkippedCircuitOpen = input.hydrationSkippedCircuitOpen ?? 0;
       this.persistManifest();
     });
   }
@@ -236,6 +305,7 @@ export class IngestObservability {
   complete(): void {
     this.guard(() => {
       if (this.manifest.status !== 'running') return;
+      this.finishCurrentStageTiming();
       this.manifest.status = 'completed';
       this.manifest.lastStage = 'completed';
       this.manifest.finishedAt = this.now().toISOString();
@@ -247,6 +317,7 @@ export class IngestObservability {
   fail(failure: IngestFailureInfo): void {
     this.guard(() => {
       if (this.manifest.status !== 'running') return;
+      this.finishCurrentStageTiming();
       this.manifest.status = 'failed';
       this.manifest.finishedAt = this.now().toISOString();
       if (failure.stage) this.manifest.lastStage = failure.stage as IngestRunStage;
@@ -259,6 +330,7 @@ export class IngestObservability {
   interrupt(signal: NodeJS.Signals): void {
     this.guard(() => {
       if (this.manifest.status !== 'running') return;
+      this.finishCurrentStageTiming();
       this.manifest.status = 'interrupted';
       this.manifest.finishedAt = this.now().toISOString();
       this.manifest.failure = sanitizeFailure({
@@ -280,6 +352,32 @@ export class IngestObservability {
       }
       this.closed = true;
     });
+  }
+
+  private sourceTiming(sourceId: string): IngestSourceTiming {
+    const timings = this.manifest.timings ??= { stagesMs: {}, sources: {} };
+    return timings.sources[sourceId] ??= {
+      extractionMs: 0,
+      hydrationMs: 0,
+      totalMs: 0,
+      extractedEvents: 0,
+      hydratedEvents: 0,
+      hydrationAttempted: 0,
+      hydrationSucceeded: 0,
+      hydrationFailed: 0,
+      hydrationSkippedOutsideWindow: 0,
+      hydrationSkippedCircuitOpen: 0,
+    };
+  }
+
+  private finishCurrentStageTiming(): void {
+    const stage = this.manifest.lastStage;
+    const finishedAtMs = this.monotonicNow();
+    if (stage !== 'completed') {
+      const timings = this.manifest.timings ??= { stagesMs: {}, sources: {} };
+      timings.stagesMs[stage] = (timings.stagesMs[stage] ?? 0) + elapsedMs(this.stageStartedAtMs, finishedAtMs);
+    }
+    this.stageStartedAtMs = finishedAtMs;
   }
 
   private append(entry: IngestJournalEntry): void {
@@ -309,6 +407,10 @@ export class IngestObservability {
       console.error(`Observabilidad de ingestión: ${sanitizeErrorMessage(message)}`);
     }
   }
+}
+
+function elapsedMs(startedAtMs: number, finishedAtMs: number): number {
+  return Math.max(0, Math.round(finishedAtMs - startedAtMs));
 }
 
 export function startObservability(options: ObservabilityOptions): IngestObservability | undefined {

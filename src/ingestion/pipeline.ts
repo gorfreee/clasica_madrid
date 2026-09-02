@@ -80,7 +80,8 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
       let extracted: RawEvent[];
       let listingIncomplete = false;
       try {
-        extracted = await extractSource(source, options.now, window, get);
+        extracted = await measureSourcePhase(obs, source.id, 'extraction', () =>
+          extractSource(source, options.now, window, get));
       } catch (error) {
         if (!(error instanceof IncompleteListingError) || error.events.length === 0) throw error;
         extracted = error.events;
@@ -88,7 +89,19 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
       }
       const adapter = getAdapter(source.adapterId);
       const ctx: AdapterContext = { source, now: options.now, window, get };
-      const hydrated = await hydrateEvents(extracted, adapter, ctx);
+      const hydrated = await measureSourcePhase(obs, source.id, 'hydration', () =>
+        hydrateEvents(extracted, adapter, ctx));
+      const sourceHydration = countHydration(hydrated);
+      obs?.recordSourceStats({
+        sourceId: source.id,
+        extractedEvents: extracted.length,
+        hydratedEvents: hydrated.length,
+        hydrationAttempted: sourceHydration.attempted,
+        hydrationSucceeded: sourceHydration.succeeded,
+        hydrationFailed: sourceHydration.failed,
+        hydrationSkippedOutsideWindow: hydrated.filter((raw) => raw.hydration?.reason === 'outside-window').length,
+        hydrationSkippedCircuitOpen: hydrated.filter((raw) => raw.hydration?.reason === 'circuit-open').length,
+      });
       const listingByUrl = new Map<string, RawEvent>();
       for (const listing of extracted) {
         listingByUrl.set(normalizeUrl(listing.sourceUrl), listing);
@@ -541,6 +554,15 @@ function selectSources(ids: string[] | undefined): SourceDefinition[] {
     return listSourceDefinitions().filter((source) => !source.skipDefaultSync);
   }
   return ids.map((id) => getSourceDefinition(id));
+}
+
+function measureSourcePhase<T>(
+  observability: IngestObservability | undefined,
+  sourceId: string,
+  phase: 'extraction' | 'hydration',
+  task: () => Promise<T>,
+): Promise<T> {
+  return observability ? observability.measureSourcePhase(sourceId, phase, task) : task();
 }
 
 async function mapConcurrent<T, R>(items: T[], concurrency: number, fn: (item: T) => Promise<R>): Promise<R[]> {
