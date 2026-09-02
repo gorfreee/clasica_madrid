@@ -29,6 +29,10 @@ const ENSEMBLE_SUBJECT =
 export function isObviousNonPerformer(name: string, roleText?: string): boolean {
   const text = name.trim();
   if (!text) return true;
+  // Event.performers[].name is max 300. A longer blob is never a person or ensemble.
+  if (text.length > 300) return true;
+  if (text.length > 120 && !looksLikeEnsembleName(text)) return true;
+  if (/^charlas?\b/i.test(text)) return true;
   if (HEADER.test(text) || SEPARATOR.test(text)) return true;
   if (looksLikeScheduleNotice(text) && !/\bdir(?:ector|ectora|\.)\b/i.test(text)) return true;
   if (MOVEMENT.test(text)) return true;

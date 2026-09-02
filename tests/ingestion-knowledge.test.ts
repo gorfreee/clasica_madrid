@@ -2,8 +2,17 @@ import { describe, expect, it } from 'vitest';
 import type { Era } from '../src/lib/schemas/taxonomies.ts';
 import { classify, resolveEras } from '../src/ingestion/classification/classify.ts';
 import { findKnownComposersInText, matchComposer } from '../src/ingestion/knowledge/composers.ts';
-import { looksLikeComposerLine, looksLikeWorkLine } from '../src/ingestion/observed-cleanup.ts';
-import { normalizeComposerList, normalizeWorkList, type ObservedFacts } from '../src/ingestion/observed.ts';
+import {
+  isObviousNonPerformer,
+  looksLikeComposerLine,
+  looksLikeWorkLine,
+} from '../src/ingestion/observed-cleanup.ts';
+import {
+  normalizeComposerList,
+  normalizePersonList,
+  normalizeWorkList,
+  type ObservedFacts,
+} from '../src/ingestion/observed.ts';
 
 function facts(overrides: Partial<ObservedFacts>): ObservedFacts {
   return { title: 'Concierto de temporada', performers: [], composers: [], works: [], ...overrides };
@@ -191,5 +200,15 @@ describe('composer knowledge base', () => {
     const works = [{ title: 'Mille regretz', composerName: 'Josquin Desprez' }];
     expect(normalizeComposerList(composers)).toEqual(composers);
     expect(normalizeWorkList(works)).toEqual(works);
+  });
+
+  it('no trata una charla o un párrafo largo como intérprete', () => {
+    const charlas =
+      'Charlas previas al ciclo de conciertos de Universo Barroco en la Sala Sinfónica del Auditorio Nacional de Música. Sesiones de cuarenta y cinco minutos en las que, de una forma desenfadada pero muy informada, nos rodearemos de invitados y desgranaremos las obras a interpretar, su historia, los personajes';
+    expect(isObviousNonPerformer(charlas)).toBe(true);
+    expect(normalizePersonList([{ name: charlas }, { name: 'Václav Luks', roleText: 'director' }])).toEqual([
+      { name: 'Václav Luks', roleText: 'director' },
+    ]);
+    expect(isObviousNonPerformer('Collegium Vocale 1704')).toBe(false);
   });
 });

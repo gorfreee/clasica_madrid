@@ -237,6 +237,25 @@ describe('CNDM detail hydration', () => {
     expect(contemporary.works).toEqual([]);
   });
 
+  it('keeps billed performers and drops Universo Barroco pre-concert talks', async () => {
+    const event = rawEvent(
+      '23804',
+      'COLLEGIUM 1704: "LA PASIÓN SEGÚN SAN MATEO" (J. S. BACH)',
+      '2027-03-21',
+      '18:00',
+      'Auditorio Nacional (Sinfónica) | Madrid',
+    );
+    const patch = parseCndmDetail(event, await fixture('detail-universo-charlas'));
+    expect(patch.performers).toEqual([
+      { name: 'Václav Luks', roleText: 'director' },
+      { name: 'Collegium Vocale 1704' },
+      { name: 'Collegium 1704' },
+      { name: 'Eric Stoklossa', roleText: 'tenor (Evangelista)' },
+    ]);
+    expect(patch.performers.some((item) => /charlas previas/i.test(item.name))).toBe(false);
+    expect(patch.performers.every((item) => item.name.length <= 300)).toBe(true);
+  });
+
   it('uses an explicit postponement date and keeps the listed clock time during hydration', async () => {
     const event = rawEvent('23814', '[APLAZADO] BARBARA HANNIGAN & BERTRAND CHAMAYOU', '2026-10-23', '19:30', 'Auditorio Nacional (Cámara) | Madrid');
     const patch = parseCndmDetail(event, await fixture('detail-postponed'));
@@ -347,6 +366,62 @@ describe('CNDM pipeline and cross-source identity', () => {
       auditorio.catalogSourceId,
       source.catalogSourceId,
     ]);
+  });
+
+  it('publishes a new CNDM/Auditorio pair instead of skipping the merged hall label', async () => {
+    const auditorio = getSourceDefinition('auditorio-nacional');
+    const cndmListing = monthListing('202610', {
+      16: [card('23837', 'BENJAMIN ALARD', '19:30', 'Auditorio Nacional (Cámara) | Madrid')],
+    });
+    const cndmDetail = `<head><link rel="canonical" href="https://cndm.inaem.gob.es/node/23837"></head>
+<div class="event-banner"><div class="event-banner__title"><a href="/node/23837">BENJAMIN ALARD</a></div>
+<div class="event-banner__dates">19:30<br>Octubre/26<br><strong>Vie16</strong></div>
+<div class="event-banner__detail"><p>Benjamin Alard, clave</p><p class="pt-3">Auditorio Nacional (Cámara) | Madrid</p></div></div>
+<div class="event-place"><h3>Auditorio Nacional (Cámara) | Madrid</h3></div>
+<div class="event-program"><h3>Programa</h3><p><strong>Johann Sebastian Bach (1685-1750)</strong><br>El clave bien temperado, libro I (1722)</p></div>
+<div class="content"><p>Benjamin Alard interpreta el Libro I.</p></div>
+<div class="tickets"><a>Entradas</a></div>`;
+    const auditorioDetail = `<article>
+  <h1>CNDM. Benjamin Alard</h1>
+  <p>BENJAMIN ALARD, clave</p>
+  <ul><li>Johann Sebastian Bach (1685-1750) — El clave bien temperado, libro I (1722)</li></ul>
+  <p>Sala: Sala de Cámara</p>
+  <p>Entradas 12 €</p>
+</article>`;
+    const result = await runIngest({
+      now: TEST_NOW,
+      dryRun: true,
+      catalog: emptyCatalog(),
+      window: octoberWindow,
+      sourceIds: [auditorio.id, source.id],
+      dataDir: await mkdtemp(path.join(os.tmpdir(), 'cndm-auditorio-')),
+      get: async (url) => {
+        if (url.includes('front-page-events.json')) {
+          return JSON.stringify([{
+            title: 'CNDM. Benjamin Alard',
+            url: 'https://auditorionacional.inaem.gob.es/es/programacion/cndm-benjamin-alard',
+            start: '2026-10-16T19:30:00+02:00',
+            className: 'camara',
+            id: 'cndm-benjamin-alard-1',
+          }]);
+        }
+        if (url.includes('/cndm-benjamin-alard')) return auditorioDetail;
+        if (url === source.urls[0] || url === 'https://cndm.inaem.gob.es') return '<title>CNDM</title>';
+        if (url === octoberUrl) return cndmListing;
+        if (url === 'https://cndm.inaem.gob.es/node/23837') return cndmDetail;
+        throw new Error(`URL no mapeada: ${url}`);
+      },
+    });
+    expect(result.summary.sourcesFailed).toEqual([]);
+    expect(result.summary.newEvents).toBe(1);
+    expect(result.summary.candidates).toBe(1);
+    expect(result.decisions.filter((item) => item.structuralSkip?.reason === 'lugar no reconocido')).toEqual([]);
+    expect(result.candidates[0]?.event.venueId).toBe('ven_auditorio_nacional_sala_camara');
+    expect(result.candidates[0]?.event.citations.map((citation) => citation.sourceId)).toEqual([
+      auditorio.catalogSourceId,
+      source.catalogSourceId,
+    ]);
+    expect(result.apply.report.ok).toBe(true);
   });
 
   it('bridges exact CNDM identities for Auditorio and Zarzuela only with venue, date and time', () => {
