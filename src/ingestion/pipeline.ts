@@ -48,6 +48,8 @@ export type IngestOptions = {
   identityAliases?: readonly EventIdentityAlias[];
   /** Optional run observability. Must not affect editorial or publication decisions. */
   observability?: IngestObservability;
+  /** Optional lower limit for deterministic comparisons/tests; never raises the global cap. */
+  sourceConcurrency?: number;
 };
 
 export type IngestRun = {
@@ -63,6 +65,17 @@ export type DiscoveryIngestOptions = Omit<IngestOptions, 'sourceIds' | 'get'> & 
   batch: DiscoveryBatch;
 };
 
+export const SOURCE_INGEST_CONCURRENCY = 4;
+
+type HarvestSourceResult = {
+  source: SourceDefinition;
+  extracted: RawEvent[];
+  hydrated: RawEvent[];
+  listingIncomplete: boolean;
+  coverage?: ReturnType<typeof requiredHydrationCoverage>;
+  failure?: SourceFailure;
+};
+
 export async function runIngest(options: IngestOptions): Promise<IngestRun> {
   const window = options.window ?? defaultIngestWindow(options.now);
   const sources = selectSources(options.sourceIds);
@@ -75,7 +88,11 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
   const obs = options.observability;
 
   obs?.setStage('extraction');
-  for (const source of sources) {
+  const sourceConcurrency = Math.min(
+    SOURCE_INGEST_CONCURRENCY,
+    Math.max(1, Math.floor(options.sourceConcurrency ?? SOURCE_INGEST_CONCURRENCY) || 1),
+  );
+  const harvestedSources = await mapConcurrent(sources, sourceConcurrency, async (source): Promise<HarvestSourceResult> => {
     try {
       let extracted: RawEvent[];
       let listingIncomplete = false;
@@ -91,7 +108,28 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
       const ctx: AdapterContext = { source, now: options.now, window, get };
       const hydrated = await measureSourcePhase(obs, source.id, 'hydration', () =>
         hydrateEvents(extracted, adapter, ctx));
-      const sourceHydration = countHydration(hydrated);
+      const coverage = adapter.requiresDetailSchedule ? requiredHydrationCoverage(hydrated) : undefined;
+      const failure = coverage?.severe
+        ? {
+            sourceId: source.id,
+            stage: 'hydration' as const,
+            message: `cobertura de hydration incompleta: ${coverage.succeeded}/${coverage.required} fichas necesarias; desapariciones no evaluables`,
+          }
+        : undefined;
+      return { source, extracted, hydrated, listingIncomplete, coverage, failure };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      return { source, extracted: [], hydrated: [], listingIncomplete: false, failure: { sourceId: source.id, message } };
+    }
+  });
+
+  // mapConcurrent preserves input positions. Consolidating only after every
+  // source finishes keeps summaries, observations and downstream ID allocation
+  // independent of source completion order.
+  for (const result of harvestedSources) {
+    const { source, extracted, hydrated, listingIncomplete, coverage, failure } = result;
+    const sourceHydration = countHydration(hydrated);
+    if (extracted.length > 0 || hydrated.length > 0) {
       obs?.recordSourceStats({
         sourceId: source.id,
         extractedEvents: extracted.length,
@@ -102,29 +140,23 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
         hydrationSkippedOutsideWindow: hydrated.filter((raw) => raw.hydration?.reason === 'outside-window').length,
         hydrationSkippedCircuitOpen: hydrated.filter((raw) => raw.hydration?.reason === 'circuit-open').length,
       });
-      const listingByUrl = new Map<string, RawEvent>();
-      for (const listing of extracted) {
-        listingByUrl.set(normalizeUrl(listing.sourceUrl), listing);
-      }
-      for (const raw of hydrated) {
-        const listing = listingByUrl.get(normalizeUrl(raw.sourceUrl));
-        if (listing) listingByRaw.set(raw, listing);
-        obs?.recordObservation({ raw, listing: listing ?? raw, normalized: normalizeRawEvent(raw) });
-      }
-      rawEvents.push(...hydrated);
-      const coverage = adapter.requiresDetailSchedule ? requiredHydrationCoverage(hydrated) : undefined;
-      if (listingIncomplete || coverage?.incomplete) disappearanceSuppressedSources.push(source.id);
-      if (coverage?.severe) {
-        const message = `cobertura de hydration incompleta: ${coverage.succeeded}/${coverage.required} fichas necesarias; desapariciones no evaluables`;
-        failures.push({ sourceId: source.id, stage: 'hydration', message });
-        obs?.recordSourceFailure(source.id, message);
-      } else {
-        succeeded.push(source.id);
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      failures.push({ sourceId: source.id, message });
-      obs?.recordSourceFailure(source.id, message);
+    }
+    const listingByUrl = new Map<string, RawEvent>();
+    for (const listing of extracted) {
+      listingByUrl.set(normalizeUrl(listing.sourceUrl), listing);
+    }
+    for (const raw of hydrated) {
+      const listing = listingByUrl.get(normalizeUrl(raw.sourceUrl));
+      if (listing) listingByRaw.set(raw, listing);
+      obs?.recordObservation({ raw, listing: listing ?? raw, normalized: normalizeRawEvent(raw) });
+    }
+    rawEvents.push(...hydrated);
+    if (listingIncomplete || coverage?.incomplete) disappearanceSuppressedSources.push(source.id);
+    if (failure) {
+      failures.push(failure);
+      obs?.recordSourceFailure(source.id, failure.message);
+    } else {
+      succeeded.push(source.id);
     }
   }
 
