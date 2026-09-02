@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { getText, HttpError, RELAY_ORIGIN_COOKIE_HEADER, resetOriginCookieJar, resolveFetchRelay } from '../src/ingestion/http.ts';
+import { getText, HttpError, HTML_ACCEPT, JSON_DOCUMENT_ACCEPT, RELAY_ORIGIN_COOKIE_HEADER, acceptHeaderForUrl, resetOriginCookieJar, resolveFetchRelay } from '../src/ingestion/http.ts';
 import { fundacionJuanMarchAdapter as adapter } from '../src/ingestion/sources/fundacion-juan-march.ts';
 import { parseMarchDetail } from '../src/ingestion/detail/fundacion-juan-march.ts';
 import { parseZarzuelaDetail } from '../src/ingestion/detail/teatro-zarzuela.ts';
@@ -144,6 +144,21 @@ describe('getText cookie-capable redirects', () => {
     ));
     vi.stubGlobal('fetch', remapped);
     await expect(getText(ordinary, 30_000, {})).rejects.toMatchObject({ status: 202 });
+  });
+
+  it('prefers JSON Accept on WordPress REST and keeps HTML Accept on fichas', async () => {
+    const wpJson = 'https://realhermandaddelrefugio.org/wp-json/wp/v2/calendario-eventos?status=publish';
+    expect(acceptHeaderForUrl(wpJson)).toBe(JSON_DOCUMENT_ACCEPT);
+    expect(acceptHeaderForUrl(ordinary)).toBe(HTML_ACCEPT);
+
+    const fetch = vi.fn(async (url: string, init?: RequestInit) => {
+      expect(url).toBe(wpJson);
+      expect(header(init, 'accept')).toBe(JSON_DOCUMENT_ACCEPT);
+      return new Response('[]', { status: 200, headers: { 'content-type': 'application/json' } });
+    });
+    vi.stubGlobal('fetch', fetch);
+    await expect(getText(wpJson, 30_000, {})).resolves.toBe('[]');
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 });
 

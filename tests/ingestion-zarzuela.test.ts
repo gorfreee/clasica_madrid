@@ -216,6 +216,23 @@ describe('fichas y horarios de Zarzuela', () => {
     expect(() => parseZarzuelaDetail(raw(), missing)).toThrow(/secciones/);
   });
 
+  it('hidrata funciones escolares en la sala principal, sin tratarla como sede externa', async () => {
+    const patch = parseZarzuelaDetail(raw(), await fixture('detail-escolares-sala'));
+    expect(patch.venueText).toBe('Teatro de la Zarzuela');
+    expect(patch.occurrences?.map((o) => `${o.date} ${o.time}`)).toEqual([
+      '2027-03-15 10:00',
+      '2027-03-15 12:00',
+      '2027-03-16 10:00',
+      '2027-03-16 12:00',
+    ]);
+    expect(patch.performers).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'MAIA PLANAS', roleText: 'Soprano' }),
+        expect.objectContaining({ name: 'PABLO LÓPEZ', roleText: 'Barítono' }),
+      ]),
+    );
+  });
+
   it.each([
     'Del 1 al 4 de octubre de 2026 19:30 horas',
     '1 de octubre 19:30 horas',
@@ -226,6 +243,14 @@ describe('fichas y horarios de Zarzuela', () => {
     '1 de octubre de 2026',
   ])('rechaza un calendario incompleto o contradictorio: %s', (text) => {
     expect(() => parseZarzuelaSchedule(`<p>${text}</p>`)).toThrow(/teatro-zarzuela/);
+  });
+
+  it('ignora la nota FUNCIONES ESCOLARES y no exige horario en el resto de la línea', () => {
+    expect(
+      parseZarzuelaSchedule(
+        '<p>15 y 16 de marzo de 2027 10:00 horas FUNCIONES ESCOLARES</p>',
+      ).map((o) => `${o.date} ${o.time}`),
+    ).toEqual(['2027-03-15 10:00', '2027-03-16 10:00']);
   });
 
   it('deduce el año omitido sólo desde un año expreso posterior y permite cambio de año', () => {

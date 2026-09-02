@@ -14,7 +14,8 @@ No son eventos de producción.
   la línea de funciones; el mes y año salen de la función accesible del mismo
   bloque); `lied` es Christiane Karg; `family`/`school` son ambas Zarzuelitas;
   `dance` es Aión; `external` es Andrómeda y Perseo (teatro musical de cámara);
-  `missing-schedule` es Me gustan todas (Galdós y las suripantas), y `rosa`
+  `missing-schedule` es Me gustan todas (Galdós y las suripantas); `escolares-sala`
+  es De la Z a la A (funciones escolares en la sala principal), y `rosa`
   es Rosa León: como la cigarra.
 
 La investigación encontró Joomla/K2 y JEvents. No se encontró un JSON/ICS

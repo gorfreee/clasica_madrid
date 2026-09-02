@@ -75,6 +75,23 @@ describe('Cloudflare fetch-relay worker', () => {
     expect(fetch).toHaveBeenCalledTimes(1);
   });
 
+  it('sends JSON Accept to WordPress REST and HTML Accept to ordinary pages', async () => {
+    const wpJson = 'https://realhermandaddelrefugio.org/wp-json/wp/v2/calendario-eventos?status=publish';
+    const fetch = vi.fn(async (url: string, init?: RequestInit) => {
+      if (url === wpJson) {
+        expect(header(init, 'accept')).toBe('application/json, text/html;q=0.9, */*;q=0.8');
+        return new Response('[]', { status: 200, headers: { 'content-type': 'application/json' } });
+      }
+      expect(url).toBe(ordinary);
+      expect(header(init, 'accept')).toBe('text/html,application/json;q=0.9,*/*;q=0.8');
+      return new Response('<html>ok</html>', { status: 200 });
+    });
+    vi.stubGlobal('fetch', fetch);
+    expect((await handleRelayRequest(request(wpJson), env)).status).toBe(200);
+    expect((await handleRelayRequest(request(ordinary), env)).status).toBe(200);
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
   it('replays a same-origin Set-Cookie 307 and returns HTML without cookies or secrets', async () => {
     const fetch = vi.fn(async (url: string, init?: RequestInit) => {
       expect(url).toBe(listing);

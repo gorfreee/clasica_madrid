@@ -23,9 +23,10 @@ type WpListItem = {
  * Official concert CPT via WordPress REST. `/conciertos/` is an Elementor
  * listing of the same posts with infinite scroll (`posts_per_page: 4`) and is
  * not a complete harvest surface. The REST collection remains the structured
- * source; a SiteGround captcha HTML interstitial is retried once and, if it
- * persists, a simpler official REST URL (without `_fields`) is tried. HTML is
- * never parsed as JSON.
+ * source. SiteGround answers HTTP 202 HTML when the client prefers `text/html`;
+ * `getText` / the fetch relay send `Accept: application/json` for `/wp-json/`.
+ * A captcha HTML interstitial is retried once and, if it persists, a simpler
+ * official REST URL (without `_fields`) is tried. HTML is never parsed as JSON.
  */
 export const realHermandadRefugioAdapter: SourceAdapter = {
   id: 'real-hermandad-refugio',

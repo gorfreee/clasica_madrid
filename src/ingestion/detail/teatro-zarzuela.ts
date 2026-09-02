@@ -31,7 +31,7 @@ export function parseZarzuelaDetail(_event: RawEvent, body: string): ObservedFac
   const scheduleText = stripTags(scheduleHtml);
   // A single RawEvent cannot assign different venues to its performances.
   // Never assign an external co-production to this theatre by default.
-  if (/\bEN (?:LA|EL) (?:FUNDACI[ÓO]N|TEATRO (?!DE LA ZARZUELA)|AUDITORIO|ESPACIO|SALA\b)/i.test(scheduleText)) {
+  if (hasExternalZarzuelaVenue(scheduleText)) {
     throw new Error('teatro-zarzuela: sede externa o múltiple; requiere calendario por sede');
   }
   const occurrences = parseZarzuelaSchedule(scheduleHtml);
@@ -60,4 +60,18 @@ export function parseZarzuelaDetail(_event: RawEvent, body: string): ObservedFac
     ...(status ? { eventStatus: status } : {}),
     ...(/>\s*Comprar entradas\s*</i.test(content) ? { accessText: 'Comprar entradas' } : {}),
   };
+}
+
+/**
+ * "En la sala principal del Teatro de la Zarzuela" is this theatre's hall, not
+ * an external SALA. Fundación / other theatres / auditorios stay external.
+ */
+function hasExternalZarzuelaVenue(scheduleText: string): boolean {
+  const pattern = /\bEN (?:LA|EL) (?:FUNDACI[ÓO]N|TEATRO (?!DE LA ZARZUELA)|AUDITORIO|ESPACIO|SALA)\b/gi;
+  for (const match of scheduleText.matchAll(pattern)) {
+    const around = scheduleText.slice(match.index, match.index + 80);
+    if (/sala principal(?: del teatro de la zarzuela)?/i.test(around)) continue;
+    return true;
+  }
+  return false;
 }
