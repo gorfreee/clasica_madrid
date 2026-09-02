@@ -25,6 +25,8 @@ type WpListItem = {
  * not a complete harvest surface. The REST collection remains the structured
  * source. SiteGround answers HTTP 202 HTML when Accept includes text/html or a
  * wildcard type; `getText` / the fetch relay send `Accept: application/json` only for `/wp-json/`.
+ * Node `fetch` uses HTTP/1.1 and can still receive 202 from this host; HTTP/2
+ * (curl, Cloudflare Worker) with the same JSON Accept returns the CPT JSON.
  * A captcha HTML interstitial is retried once and, if it persists, a simpler
  * official REST URL (without `_fields`) is tried. HTML is never parsed as JSON.
  */
