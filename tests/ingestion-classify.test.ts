@@ -239,6 +239,12 @@ describe('eligibility — conflictos y fallback', () => {
     ['A. Ginastera', 'twentieth'],
     ['Luis Gianneo', 'twentieth'],
     ['Steve Reich', 'contemporary'],
+    ['Philip Glass', 'contemporary'],
+    ['Olivier Messiaen', 'twentieth'],
+    ['Alexander Scriabin', 'twentieth'],
+    ['Richard Strauss', 'romantic'],
+    ['Vincenzo Bellini', 'romantic'],
+    ['Domenico Scarlatti', 'baroque'],
     ['Alicia Terzian', 'contemporary'],
     ['Irma Urteaga', 'contemporary'],
     ['Francesc Vila', 'contemporary'],
@@ -652,6 +658,32 @@ describe('eligibility — conflictos y fallback', () => {
       }),
     );
     expect(rhapsody.eligibility.value).not.toBe('include');
+  });
+
+  it('incluye un recital CNDM cuando la ficha declara Messiaen y Scriabin', () => {
+    const result = classify(
+      facts({
+        title: 'BARBARA HANNIGAN & BERTRAND CHAMAYOU',
+        composers: [
+          { name: 'Olivier Messiaen (1908-1992)' },
+          { name: 'Alexander Scriabin (1872-1915)' },
+          { name: 'John Zorn (1953)' },
+        ],
+        works: [
+          { title: 'Chants de terre et de ciel (1938)', composerName: 'Olivier Messiaen (1908-1992)' },
+          { title: 'Poème-nocturne, op. 61 (1911)', composerName: 'Alexander Scriabin (1872-1915)' },
+        ],
+        performers: [
+          { name: 'Barbara Hannigan', roleText: 'soprano' },
+          { name: 'Bertrand Chamayou', roleText: 'piano' },
+        ],
+      }),
+    );
+    expect(result.eligibility.value).toBe('include');
+    expect(result.eligibility.ruleId).toBe('known-classical-composer');
+    expect(result.eligibility.evidence).toEqual(
+      expect.arrayContaining(['Olivier Messiaen', 'Alexander Scriabin']),
+    );
   });
 
   it('incluye la temporada de lírica y no una charla que menciona el ciclo', () => {

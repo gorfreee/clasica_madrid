@@ -179,7 +179,10 @@ export function parseComposerColonWork(
   text: string,
 ): { title: string; composerName: string } | undefined {
   const cleaned = cleanLine(text);
-  const named = /^(.+?):\s+(.+)$/.exec(cleaned);
+  const named =
+    /^(.+?):\s+(.+)$/.exec(cleaned) ??
+    /^(.+?)\s+[·•]\s+(.+)$/.exec(cleaned) ??
+    /^(.+?)\s+[—–]\s+(.+)$/.exec(cleaned);
   if (!named?.[1] || !named[2]) return undefined;
   const composerName = named[1].trim();
   const title = named[2].trim();
@@ -322,5 +325,5 @@ function stripCharacterCue(role: string): string {
 }
 
 function cleanLine(text: string): string {
-  return text.replace(/\s+/g, ' ').trim();
+  return text.replace(/\s+/g, ' ').trim().replace(/[·•]+\s*$/u, '').trim();
 }
