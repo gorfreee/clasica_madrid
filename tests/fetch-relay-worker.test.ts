@@ -79,7 +79,7 @@ describe('Cloudflare fetch-relay worker', () => {
     const wpJson = 'https://realhermandaddelrefugio.org/wp-json/wp/v2/calendario-eventos?status=publish';
     const fetch = vi.fn(async (url: string, init?: RequestInit) => {
       if (url === wpJson) {
-        expect(header(init, 'accept')).toBe('application/json, text/html;q=0.9, */*;q=0.8');
+        expect(header(init, 'accept')).toBe('application/json');
         return new Response('[]', { status: 200, headers: { 'content-type': 'application/json' } });
       }
       expect(url).toBe(ordinary);

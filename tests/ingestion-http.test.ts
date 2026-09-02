@@ -148,6 +148,8 @@ describe('getText cookie-capable redirects', () => {
 
   it('prefers JSON Accept on WordPress REST and keeps HTML Accept on fichas', async () => {
     const wpJson = 'https://realhermandaddelrefugio.org/wp-json/wp/v2/calendario-eventos?status=publish';
+    expect(JSON_DOCUMENT_ACCEPT).toBe('application/json');
+    expect(JSON_DOCUMENT_ACCEPT).not.toMatch(/text\/html|\*\//);
     expect(acceptHeaderForUrl(wpJson)).toBe(JSON_DOCUMENT_ACCEPT);
     expect(acceptHeaderForUrl(ordinary)).toBe(HTML_ACCEPT);
 

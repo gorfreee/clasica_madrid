@@ -6,8 +6,11 @@ const MAX_REDIRECTS = 10;
 export const RELAY_ORIGIN_COOKIE_HEADER = 'x-relay-origin-cookie';
 /** HTML listings and fichas. SiteGround treats this as a browser and may 202 a `/wp-json/` URL. */
 export const HTML_ACCEPT = 'text/html,application/json;q=0.9,*/*;q=0.8';
-/** WordPress REST. SiteGround then returns JSON 200 instead of an sgcaptcha 202. */
-export const JSON_DOCUMENT_ACCEPT = 'application/json, text/html;q=0.9, */*;q=0.8';
+/**
+ * WordPress REST. SiteGround 202s HTML captcha when Accept includes text/html
+ * or a wildcard type; JSON-only plus the ingestion User-Agent returns the CPT JSON.
+ */
+export const JSON_DOCUMENT_ACCEPT = 'application/json';
 
 /** Same-origin cookies kept for the process, including across relay hops. */
 const originCookieJar = new Map<string, string>();
@@ -93,7 +96,7 @@ export function isFetchRelayHost(hostname: string): boolean {
   return fetchRelayHosts().includes(host);
 }
 
-/** Origin `Accept` for this URL. `/wp-json/` prefers JSON so SiteGround does not serve HTML 202. */
+/** Origin `Accept` for this URL. `/wp-json/` is JSON-only so SiteGround does not serve HTML 202. */
 export function acceptHeaderForUrl(url: string): string {
   try {
     if (new URL(url).pathname.toLowerCase().includes('/wp-json/')) return JSON_DOCUMENT_ACCEPT;
