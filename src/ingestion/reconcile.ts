@@ -541,7 +541,10 @@ function overlayNormalized(base: NormalizedEvent, incoming: NormalizedEvent): No
     occurrences: collapseOccurrences([...base.occurrences, ...incoming.occurrences]),
     dateFromDetail: base.dateFromDetail || incoming.dateFromDetail,
     eventStatus: incoming.eventStatus ?? base.eventStatus,
-    venueText: incoming.venueText ?? base.venueText,
+    // Keep the primary observation's hall label. CNDM's "Auditorio Nacional
+    // (Cámara) | Madrid" used to replace Auditorio's "Sala de Cámara" and then
+    // fail matchVenue because the surviving sourceId is auditorio-nacional.
+    venueText: base.venueText ?? incoming.venueText,
     venueFacilityId: incoming.venueFacilityId ?? base.venueFacilityId,
     performers: incoming.performers.length > 0 ? incoming.performers : base.performers,
     composers: incoming.composers.length > 0 ? incoming.composers : base.composers,

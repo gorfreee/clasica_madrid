@@ -64,6 +64,10 @@ export const KNOWN_VENUES: KnownVenue[] = [
       'auditorio nacional sala sinfonica',
       'auditorio nacional de musica sala sinfonica',
       'auditorio nacional de musica - sala sinfonica',
+      // CNDM listing/ficha label. Must be global: overlay of a CNDM+Auditorio
+      // pair keeps sourceId auditorio-nacional, so a cndm-only SOURCE_VENUE_KEY
+      // does not resolve the merged venueText.
+      'Auditorio Nacional (Sinfónica) | Madrid',
     ],
     venue: {
       schemaVersion: 1,
@@ -81,6 +85,7 @@ export const KNOWN_VENUES: KnownVenue[] = [
       'sala camara',
       'auditorio nacional sala de camara',
       'auditorio nacional de musica sala de camara',
+      'Auditorio Nacional (Cámara) | Madrid',
     ],
     venue: {
       schemaVersion: 1,
