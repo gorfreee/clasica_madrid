@@ -9,6 +9,8 @@
  */
 
 const USER_AGENT = 'ClasicaMadrid-ingestion/1 (+https://github.com/gorfreee/clasica_madrid)';
+const HTML_ACCEPT = 'text/html,application/json;q=0.9,*/*;q=0.8';
+const JSON_DOCUMENT_ACCEPT = 'application/json';
 const MAX_REDIRECTS = 5;
 const BLOCKED_HOST_SUFFIXES = ['.localhost', '.local', '.internal', '.invalid', '.arpa'];
 const RELAY_COOKIE_HEADER = 'x-relay-origin-cookie';
@@ -86,6 +88,16 @@ function timingSafeEqual(left, right) {
   return diff === 0;
 }
 
+/** `/wp-json/` is JSON-only: SiteGround 202s if Accept includes HTML or a wildcard type. */
+function originAccept(url) {
+  try {
+    if (new URL(url).pathname.toLowerCase().includes('/wp-json/')) return JSON_DOCUMENT_ACCEPT;
+  } catch {
+    // keep the HTML default
+  }
+  return HTML_ACCEPT;
+}
+
 function publicHttpsTarget(value) {
   if (!value) return undefined;
   let url;
@@ -118,7 +130,7 @@ async function fetchOrigin(initial, inboundCookies) {
   for (let hop = 0; hop < MAX_REDIRECTS; hop += 1) {
     const origin = new URL(current).origin;
     const headers = {
-      accept: 'text/html,application/json;q=0.9,*/*;q=0.8',
+      accept: originAccept(current),
       'user-agent': USER_AGENT,
     };
     const cookie = cookiesByOrigin.get(origin);

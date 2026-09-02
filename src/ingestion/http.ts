@@ -4,6 +4,13 @@ import { fetchRelayHosts } from './registry.ts';
 const USER_AGENT = 'ClasicaMadrid-ingestion/1 (+https://github.com/gorfreee/clasica_madrid)';
 const MAX_REDIRECTS = 10;
 export const RELAY_ORIGIN_COOKIE_HEADER = 'x-relay-origin-cookie';
+/** HTML listings and fichas. SiteGround treats this as a browser and may 202 a `/wp-json/` URL. */
+export const HTML_ACCEPT = 'text/html,application/json;q=0.9,*/*;q=0.8';
+/**
+ * WordPress REST. SiteGround 202s HTML captcha when Accept includes text/html
+ * or a wildcard type; JSON-only plus the ingestion User-Agent returns the CPT JSON.
+ */
+export const JSON_DOCUMENT_ACCEPT = 'application/json';
 
 /** Same-origin cookies kept for the process, including across relay hops. */
 const originCookieJar = new Map<string, string>();
@@ -89,6 +96,16 @@ export function isFetchRelayHost(hostname: string): boolean {
   return fetchRelayHosts().includes(host);
 }
 
+/** Origin `Accept` for this URL. `/wp-json/` is JSON-only so SiteGround does not serve HTML 202. */
+export function acceptHeaderForUrl(url: string): string {
+  try {
+    if (new URL(url).pathname.toLowerCase().includes('/wp-json/')) return JSON_DOCUMENT_ACCEPT;
+  } catch {
+    // invalid URL: keep the HTML default used for listings and fichas
+  }
+  return HTML_ACCEPT;
+}
+
 async function readViaRelay(url: string, relay: FetchRelayTarget, signal: AbortSignal): Promise<string> {
   const origin = requestOrigin(url);
   const headers: Record<string, string> = {
@@ -118,7 +135,7 @@ async function readFollowingRedirects(url: string, signal: AbortSignal): Promise
       const origin = requestOrigin(current);
       if (!origin) throw new Error(`URL no soportada: ${current}`);
       const headers: Record<string, string> = {
-        accept: 'text/html,application/json;q=0.9,*/*;q=0.8',
+        accept: acceptHeaderForUrl(current),
         'user-agent': USER_AGENT,
       };
       const cookie = cookiesByOrigin.get(origin);

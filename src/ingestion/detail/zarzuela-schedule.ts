@@ -28,7 +28,10 @@ export function parseZarzuelaSchedule(html: string): RawOccurrence[] {
     const sunday = /\(domingos?\s*,?\s*(?:a las\s+)?(\d{1,2}:\d{2})\s*(?:horas|h\.?)(?:\s*)\)/i.exec(timeText);
     const general = sunday ? timeText.replace(sunday[0], '') : timeText;
     const times = [...general.matchAll(CLOCK)].map((m) => parseObservedTime(m[0]));
-    const rest = general.replace(CLOCK, '').replace(/horas|h\b/gi, '').replace(/[\s.,;:·()y-]/gi, '');
+    const rest = general.replace(CLOCK, '')
+      .replace(/horas|h\b/gi, '')
+      .replace(/funciones?\s+escolares/gi, '')
+      .replace(/[\s.,;:·()y-]/gi, '');
     const sundayTime = sunday ? parseObservedTime(sunday[1]!) : undefined;
     if (rest || !times.length || times.some((t) => !t) || (sunday && !sundayTime)) {
       throw new Error('teatro-zarzuela: horario no interpretable sin inferencias');
@@ -39,7 +42,10 @@ export function parseZarzuelaSchedule(html: string): RawOccurrence[] {
     }
     pending.length = 0;
   }
-  if (pending.length || !result.length) throw new Error('teatro-zarzuela: fechas u horas ausentes o ambiguas');
+  if (!result.length) throw new Error('teatro-zarzuela: fechas u horas ausentes o ambiguas');
+  if (pending.length && leftoverLooksLikeSchedule(pending.join(' '))) {
+    throw new Error('teatro-zarzuela: fechas u horas ausentes o ambiguas');
+  }
   const unique = new Map(result.map((o) => [`${o.date}T${o.time}`, o]));
   return [...unique.values()].sort((a, b) => `${a.date}T${a.time}`.localeCompare(`${b.date}T${b.time}`));
 }
@@ -54,6 +60,7 @@ function parseDates(text: string, fallback?: { monthName: string; year: number }
   }
   const rest = text.replace(DATE_GROUP, '')
     .replace(/lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bados?|domingos?|sesi[oó]n doble cada ma[nñ]ana/gi, '')
+    .replace(/funciones?\s+escolares/gi, '')
     .replace(/[\s,;.·()y:-]/gi, '');
   if (rest || !groups.length) throw new Error('teatro-zarzuela: fechas no enumeradas o estructura inesperada');
   let year: number | undefined;
@@ -86,6 +93,13 @@ function datedDays(dayList: string, monthName: string, year: number, weekdaySour
     }
   }
   return dates;
+}
+
+/** Venue notes or "5º y 6º de Primaria" after a parsed clock line are not a schedule. */
+function leftoverLooksLikeSchedule(text: string): boolean {
+  if (/\b\d{1,2}:\d{2}(?!\d)/.test(text)) return true;
+  if (new RegExp(DATE_GROUP.source, 'i').test(text)) return true;
+  return Boolean(DAYS_ONLY.exec(text.trim()));
 }
 
 /**

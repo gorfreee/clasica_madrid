@@ -18,6 +18,7 @@ GitHub Settings.
 - accepts only public `https:` targets (no credentials, no non-default ports,
   no IP literals, no localhost / reserved names)
 - follows a conservative number of **same-origin** redirects
+- sends `Accept: application/json` only (no `text/html` / wildcard type) when the target path contains `/wp-json/` (SiteGround otherwise answers HTTP 202 HTML). The Worker origin fetch is HTTP/2; Node `fetch` on HTTP/1.1 can still receive 202 from the same URL.
 - replays `Set-Cookie` only back to the origin that set them, including
   across later requests in the same Worker isolate
 - if the origin answers 403/503 (or similar) **and** sets a new cookie,

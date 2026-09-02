@@ -953,6 +953,42 @@ describe('formats', () => {
     expect(resolveFormats(facts({ title: 'Concierto' })).value).toEqual([]);
   });
 
+  it('alinea opera/recital/choral/symphonic con hechos ya extraídos, sin inventar era', () => {
+    expect(
+      resolveFormats(facts({ title: 'Filarmonía de Madrid. Gala de Ópera' })).value,
+    ).toEqual(['opera']);
+    expect(
+      resolveFormats(facts({ title: 'Micróperas', categoryText: 'El Real Junior' })).value,
+    ).toEqual(['opera']);
+    expect(
+      resolveFormats(
+        facts({
+          title: 'CNDM. Diego Ares',
+          performers: [{ name: 'DIEGO ARES', roleText: 'clave' }],
+        }),
+      ).value,
+    ).toEqual(['recital']);
+    expect(
+      resolveFormats(
+        facts({
+          title: 'Impacta. Pasión según San Mateo, J.S. Bach',
+          performers: [
+            { name: 'Freiburg Baroque Orchestra' },
+            { name: 'Pequeños Cantores de la ORCAM' },
+          ],
+        }),
+      ).value.sort(),
+    ).toEqual(['choral', 'symphonic']);
+    expect(
+      resolveFormats(
+        facts({
+          title: 'UAM. Missa Papae Marcelli',
+          performers: [{ name: 'Schola Cantorum UAM' }],
+        }),
+      ).value,
+    ).toEqual(['choral']);
+  });
+
   it('asigna chamber/symphonic a categorías municipales inequívocas', () => {
     expect(
       resolveFormats(

@@ -67,9 +67,13 @@ export function resolveFormats(facts: ObservedFacts): Resolution<Format[]> {
 
 function isOperaFormat(facts: ObservedFacts, haystack: string): boolean {
   const category = fieldFolded(facts.categoryText);
+  const title = fieldFolded(facts.title);
   if (hasWord(category, 'taller')) return false;
+  // Same title/category signals as eligibility `opera-event` / `isOperaTitle`.
+  if (hasWord(category, 'opera') || hasWord(title, 'opera') || /\bmicroperas?\b/u.test(title)) {
+    return true;
+  }
   return (
-    hasWord(category, 'opera') ||
     hasPhrase(haystack, 'arias de opera') ||
     hasPhrase(haystack, 'dramma lirico') ||
     hasPhrase(haystack, 'opera en') ||
@@ -103,7 +107,15 @@ function isChoralFormat(facts: ObservedFacts, haystack: string): boolean {
   if (hasWord(haystack, 'oratorio')) return true;
   if (isNamedWorkEvent(facts)) return false;
   if (facts.performers.some((item) => hasWord(fieldFolded(item.roleText), 'coro'))) return true;
-  return facts.performers.some((item) => /^coro\b/.test(fieldFolded(item.name)));
+  return facts.performers.some((item) => {
+    const name = fieldFolded(item.name);
+    return (
+      hasWord(name, 'coro') ||
+      hasWord(name, 'choir') ||
+      hasWord(name, 'cantores') ||
+      hasPhrase(name, 'schola cantorum')
+    );
+  });
 }
 
 function isSymphonicFormat(facts: ObservedFacts, haystack: string): boolean {
@@ -120,7 +132,12 @@ function isSymphonicFormat(facts: ObservedFacts, haystack: string): boolean {
   const orchestra = facts.performers.some((item) => {
     const role = fieldFolded(item.roleText);
     const name = fieldFolded(item.name);
-    if (hasWord(role, 'orquesta') || hasWord(name, 'orquesta')) {
+    if (
+      hasWord(role, 'orquesta') ||
+      hasWord(name, 'orquesta') ||
+      hasWord(role, 'orchestra') ||
+      hasWord(name, 'orchestra')
+    ) {
       return !hasWord(name, 'chamber') && !hasPhrase(name, 'camara');
     }
     return false;
@@ -153,6 +170,8 @@ function isRecitalFormat(facts: ObservedFacts, haystack: string, already: Format
     return (
       hasWord(role, 'piano') ||
       hasWord(role, 'violin') ||
+      hasWord(role, 'clave') ||
+      hasWord(role, 'clavecin') ||
       hasWord(role, 'soprano') ||
       hasWord(role, 'tenor') ||
       hasWord(role, 'mezzosoprano') ||
