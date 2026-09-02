@@ -484,6 +484,113 @@ export const COMPOSERS: ComposerKnowledge[] = [
     aliases: ['Jean-Pierre Deleuze', 'Deleuze'],
     eras: ['contemporary'],
   },
+  // Names observed verbatim in the 2026–2027 official season programmes.
+  // Keep aliases specific: short surnames such as Strauss are ambiguous.
+  {
+    canonicalName: 'Giovanni Battista Mele',
+    aliases: ['Giovanni Battista Mele'],
+    eras: ['baroque'],
+  },
+  {
+    canonicalName: 'Luis Misón',
+    aliases: ['Luis Misón', 'Luis Mison'],
+    eras: ['baroque', 'classical'],
+  },
+  {
+    canonicalName: 'Francesco Federici',
+    aliases: ['Francesco Federici'],
+    eras: ['classical'],
+  },
+  {
+    canonicalName: 'Felipe Libón',
+    aliases: ['Felipe Libón', 'Felipe Libon'],
+    eras: ['classical', 'romantic'],
+  },
+  {
+    canonicalName: 'Gioachino Rossini',
+    aliases: ['Gioachino Rossini'],
+    eras: ['romantic'],
+  },
+  {
+    canonicalName: 'Johann Strauss I',
+    aliases: ['Johann Strauss I'],
+    eras: ['romantic'],
+  },
+  {
+    canonicalName: 'Johann Strauss II',
+    aliases: ['Johann Strauss II'],
+    eras: ['romantic'],
+  },
+  {
+    canonicalName: 'Josef Strauss',
+    aliases: ['Josef Strauss'],
+    eras: ['romantic'],
+  },
+  {
+    canonicalName: 'Carl Michael Ziehrer',
+    aliases: ['Carl Michael Ziehrer'],
+    eras: ['romantic'],
+  },
+  {
+    canonicalName: 'Ralph Vaughan Williams',
+    aliases: ['Ralph Vaughan Williams'],
+    eras: ['twentieth'],
+  },
+  {
+    canonicalName: 'Carl Orff',
+    aliases: ['Carl Orff'],
+    eras: ['twentieth'],
+  },
+  {
+    canonicalName: 'Kurt Weill',
+    aliases: ['Kurt Weill'],
+    eras: ['twentieth'],
+  },
+  {
+    canonicalName: 'Alberto Ginastera',
+    aliases: ['Alberto Ginastera', 'A. Ginastera', 'Ginastera'],
+    eras: ['twentieth'],
+  },
+  {
+    canonicalName: 'Luis Gianneo',
+    aliases: ['Luis Gianneo'],
+    eras: ['twentieth'],
+  },
+  {
+    canonicalName: 'Steve Reich',
+    aliases: ['Steve Reich'],
+    eras: ['contemporary'],
+  },
+  {
+    canonicalName: 'Alicia Terzian',
+    aliases: ['Alicia Terzian'],
+    eras: ['contemporary'],
+  },
+  {
+    canonicalName: 'Irma Urteaga',
+    aliases: ['Irma Urteaga'],
+    eras: ['contemporary'],
+  },
+  {
+    canonicalName: 'Francesc Vila',
+    aliases: ['Francesc Vila'],
+    eras: ['contemporary'],
+  },
+  {
+    canonicalName: 'Mauricio Sotelo',
+    aliases: ['Mauricio Sotelo', 'M. Sotelo'],
+    eras: ['contemporary'],
+  },
+  {
+    canonicalName: 'Unsuk Chin',
+    aliases: ['Unsuk Chin'],
+    eras: ['contemporary'],
+  },
+  {
+    canonicalName: 'Carlos Simon',
+    aliases: ['Carlos Simon'],
+    eras: ['contemporary'],
+  },
   {
     canonicalName: 'Ludovico Einaudi',
     aliases: ['Ludovico Einaudi', 'Einaudi'],

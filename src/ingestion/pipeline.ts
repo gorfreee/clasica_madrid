@@ -495,7 +495,9 @@ export async function extractSource(
   const ctx: AdapterContext = { source, now, window, get };
   const events: RawEvent[] = [];
   for (const url of urls) {
-    const body = await get(url);
+    const body = adapter.fetchListing
+      ? await adapter.fetchListing(url, ctx)
+      : await get(url);
     events.push(...(await adapter.extract(body, url, ctx)));
   }
   return events;

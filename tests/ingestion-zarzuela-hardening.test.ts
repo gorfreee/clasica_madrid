@@ -9,7 +9,7 @@ import { getText, HttpError, resetOriginCookieJar } from '../src/ingestion/http.
 import { hydrateEvents, memoizeGet } from '../src/ingestion/hydrate.ts';
 import { parseZarzuelaListing, teatroZarzuelaAdapter } from '../src/ingestion/sources/teatro-zarzuela.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
-import { runIngest } from '../src/ingestion/pipeline.ts';
+import { extractSource, runIngest } from '../src/ingestion/pipeline.ts';
 import { buildEventDecision } from '../src/ingestion/report.ts';
 import { emptyCatalog } from '../src/lib/domain/catalog.ts';
 import { normalizeRawEvent } from '../src/ingestion/normalize.ts';
@@ -196,6 +196,29 @@ describe('transporte de fichas respetuoso y acotado', () => {
 });
 
 describe('listados de temporada respetuosos y fail-closed', () => {
+  it('aplica el retry de Zarzuela también al inicio que descubre las secciones', async () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    let homeAttempts = 0;
+    const get = vi.fn(async (url: string) => {
+      if (url === `${base}/es/`) {
+        homeAttempts += 1;
+        if (homeAttempts === 1) throw new HttpError(403, url);
+        return `<a href="${category}">Conciertos</a>`;
+      }
+      if (url === category) {
+        return `<ul class="listadoObras"><li><h3><a href="${category}/one">Uno</a></h3><p class="entradilla">8 de octubre de 2026</p></li></ul>`;
+      }
+      throw new Error(`URL no mapeada: ${url}`);
+    });
+
+    const events = await advance(extractSource(source, TEST_NOW, TEST_WINDOW, get));
+
+    expect(homeAttempts).toBe(2);
+    expect(get).toHaveBeenCalledTimes(3);
+    expect(events.map((item) => item.observed.title)).toEqual(['Uno']);
+  });
+
   it('separa los listados 1,5 s y reintenta un HTTP 403; un segundo 403 sigue fallando la fuente', async () => {
     vi.useFakeTimers();
     vi.spyOn(Math, 'random').mockReturnValue(0.5);

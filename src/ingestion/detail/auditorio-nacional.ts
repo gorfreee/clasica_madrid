@@ -203,11 +203,19 @@ function groupWorksByComposer(lines: string[]): ObservedWork[] {
       continue;
     }
     if (!composerName || MOVEMENT_LINE.test(line)) continue;
+    if (isCastLineInsideProgram(line)) continue;
     // One-word tokens are movements or surnames (Chopin, Paganini, Préambule), not works.
     if (!/\s/.test(line)) continue;
     works.push({ title: line, composerName });
   }
   return works;
+}
+
+function isCastLineInsideProgram(line: string): boolean {
+  const person = parseAuditorioPersonLine(line);
+  if (person?.roleText) return true;
+  if (/^.+,\s*director(?:a)?\s+del\s+coro\b/iu.test(line)) return true;
+  return /^(?:orquesta|orchestra|orchester|coro|choir|escolan[ií]a)\b/iu.test(line);
 }
 
 /**

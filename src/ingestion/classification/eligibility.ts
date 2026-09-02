@@ -127,13 +127,14 @@ function collectInclusions(facts: ObservedFacts, haystack: string): Inclusion[] 
   }
 
   const category = fieldFolded(facts.categoryText);
-  if (isOperaCategory(category)) {
-    found.push({ ruleId: 'opera-event', evidence: [facts.categoryText ?? ''] });
+  const title = fieldFolded(facts.title);
+  if (isOperaCategory(category) || isOperaTitle(title)) {
+    found.push({ ruleId: 'opera-event', evidence: [facts.categoryText ?? facts.title] });
   }
   if (hasWord(category, 'lirica') && !hasWord(category, 'taller')) {
     found.push({ ruleId: 'lyric-theatre-event', evidence: [facts.categoryText ?? ''] });
   }
-  if (hasWord(category, 'zarzuela') || hasWord(fieldFolded(facts.title), 'zarzuela')) {
+  if (hasWord(category, 'zarzuela') || hasWord(title, 'zarzuela')) {
     found.push({ ruleId: 'zarzuela-event', evidence: [facts.categoryText ?? facts.title] });
   }
   if (
@@ -610,7 +611,16 @@ function classicalSeriesIdentity(facts: ObservedFacts): string | undefined {
       return field;
     }
   }
-  if (facts.title && matchesTitleClassicalCycle(facts.title)) return facts.title;
+  if (facts.title) {
+    const title = foldName(facts.title);
+    if (
+      matchesTitleClassicalCycle(facts.title) ||
+      hasPhrase(title, 'miniclasica descubriendo el clasicismo') ||
+      hasPhrase(title, 'miniclasica descubriendo la musica antigua')
+    ) {
+      return facts.title;
+    }
+  }
   return undefined;
 }
 
@@ -621,6 +631,10 @@ function matchesTitleClassicalCycle(text: string): boolean {
 
 function isOperaCategory(category: string): boolean {
   return hasWord(category, 'opera') && !hasWord(category, 'taller');
+}
+
+function isOperaTitle(title: string): boolean {
+  return hasWord(title, 'opera') || /\bmicroperas?\b/u.test(title);
 }
 
 function knownClassicalNames(facts: ObservedFacts): string[] {

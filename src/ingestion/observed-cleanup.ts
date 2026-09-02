@@ -18,9 +18,9 @@ const SCHEDULE_NOTICE = new RegExp(
 const INSTRUMENT_ONLY =
   /^(?:violines|viol[ií]n|violas?|violonchelos?|cellos?|contrabajos?|tenores|bajos|sopranos?|mezzosopranos?|bar[ií]tonos?|pianos?|flautas?|oboes?|clarinetes?|fagotes?|trompas?|trompetas?|arpas?|claves?|percusi[oó]n|bater[ií]a|directores?|directora|direcci[oó]n)$/i;
 const ENSEMBLE =
-  /\b(?:orquesta|orchestra|orchester|coro|choir|ensemble|ensamble|camerata|cuarteto|quinteto|agrupaci[oó]n|sociedad coral)\b/i;
+  /\b(?:orquesta|orchestra|orchester|coro|choir|escolan[ií]a|ensemble|ensamble|camerata|cuarteto|quinteto|agrupaci[oó]n|sociedad coral)\b/i;
 const ENSEMBLE_SUBJECT =
-  /^(?:orquesta|orchestra|orchester|coro|choir|ensemble|ensamble|camerata|cuarteto|quinteto|agrupaci[oó]n|sociedad coral)\b/i;
+  /^(?:orquesta|orchestra|orchester|coro|choir|escolan[ií]a|ensemble|ensamble|camerata|cuarteto|quinteto|agrupaci[oó]n|sociedad coral)\b/i;
 
 /**
  * Drop fragments that are clearly not people or ensembles.
@@ -93,7 +93,7 @@ export function looksLikeEnsembleName(text: string): boolean {
 
 /** "Work title, para arpa / orquesta" is instrumentation, not a person or group. */
 export function looksLikeWorkInstrumentation(text: string): boolean {
-  return /(?:,\s*|\b)(?:para|for)\s+(?:la\s+)?(?:orquesta|orchestra|arpa|viol[ií]n|violonchelo|cello|piano|coro|cuerda)/i.test(
+  return /(?:,\s*|\b)(?:para|for)\s+(?:la\s+)?(?:orquesta|orchestra|arpa|viol[ií]n|violonchelo|cello|piano|coro|cuerda|soprano|mezzosoprano|contratenor|tenor|bar[ií]tono|bajo)/i.test(
     text.trim(),
   );
 }

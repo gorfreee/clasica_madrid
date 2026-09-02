@@ -12,6 +12,9 @@ export const teatroZarzuelaAdapter: SourceAdapter = {
     if (!source.urls[0]) throw new Error('teatro-zarzuela: falta la URL de inicio');
     return [source.urls[0]];
   },
+  fetchListing(url, ctx) {
+    return createZarzuelaListingGet(ctx.get)(url);
+  },
   async extract(body, url, ctx) {
     const categories = new Set<string>();
     for (const match of body.matchAll(/href=["']([^"']+)["']/gi)) {
