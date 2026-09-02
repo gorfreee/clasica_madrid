@@ -119,7 +119,20 @@ export function newObservationKeys(
   catalogSourceId: string,
   venueId?: string,
 ): string[] {
-  const keys: string[] = [`url:${normalizeUrl(observed.sourceUrl)}`];
+  const keys: string[] = [];
+  const url = normalizeUrl(observed.sourceUrl);
+  const dated = observed.occurrences.filter((item) => item.date);
+  if (dated.length === 0) {
+    keys.push(`url:${url}`);
+  } else {
+    for (const occurrence of dated) {
+      keys.push(
+        venueId
+          ? `url:${url}:${occurrence.date}:${venueId}`
+          : `url:${url}:${occurrence.date}`,
+      );
+    }
+  }
   if (observed.externalId) {
     keys.push(`ext:${catalogSourceId}:${observed.externalId}`);
   }

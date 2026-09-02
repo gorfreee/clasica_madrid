@@ -3,7 +3,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { describe, expect, it } from 'vitest';
 import { teatrosCanalAdapter as adapter } from '../src/ingestion/sources/teatros-canal.ts';
-import { canalEventUrl, parseScheduleDates, parseTeatrosCanalDetail } from '../src/ingestion/detail/teatros-canal.ts';
+import { canalEventUrl, expandTeatrosCanalEvent, parseCanalProgrammeConcerts, parseScheduleDates, parseTeatrosCanalDetail } from '../src/ingestion/detail/teatros-canal.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { hydrateEvents } from '../src/ingestion/hydrate.ts';
 import { runIngest } from '../src/ingestion/pipeline.ts';
@@ -170,6 +170,28 @@ describe('Teatros del Canal ficha', () => {
     ]);
     expect(ensembles.venueText).toBe('Sala Verde y Negra');
     expect(ensembles.accessText).toMatch(/entrada libre/i);
+
+    const concerts = parseCanalProgrammeConcerts(
+      await fixture('detail-ensembles.html'),
+      { from: '2026-10-07', to: '2026-12-05' },
+    );
+    expect(concerts.map((item) => `${item.date} ${item.venueText} ${item.name}`)).toEqual([
+      '2026-10-07 Sala Negra PLURALENSEMBLE',
+      '2026-10-25 Sala Verde TALLER SONORO',
+      '2026-12-02 Sala Verde GRUPO ENIGMA',
+      '2026-12-05 Sala Negra ENSEMBLE TEATRO DEL ARTE SONORO',
+    ]);
+    const expanded = expandTeatrosCanalEvent(
+      await sample('xvii-festival-de-ensembles-2026'),
+      await fixture('detail-ensembles.html'),
+    );
+    expect(expanded?.map((item) => item.observed.venueText)).toEqual([
+      'Sala Negra',
+      'Sala Verde',
+      'Sala Verde',
+      'Sala Negra',
+    ]);
+    expect(expanded?.every((item) => item.observed.occurrences.length === 1)).toBe(true);
   });
 
   it('keeps a dated concert without inventing a time the ficha has not published', async () => {
@@ -412,8 +434,37 @@ describe('Teatros del Canal pipeline safety', () => {
         .filter((item) => item.event.citations.some((citation) => citation.url === comaUrl))
         .every((item) => publishedIds.has(item.event.id)),
     ).toBe(true);
-    const coma = result.rawEvents.find((event) => event.externalId === '71611');
-    expect(coma?.sourceUrl).toContain('festival-coma-2026');
-    expect(coma?.observed.occurrences).toHaveLength(6);
+    const coma = result.rawEvents.filter((event) => event.sourceUrl.includes('festival-coma-2026'));
+    expect(coma).toHaveLength(6);
+    expect(coma.every((event) => event.observed.occurrences.length === 1)).toBe(true);
+  });
+
+  it('publishes each Festival de Ensembles concert into its named room', async () => {
+    const result = await run(emptyCatalog(), false, { from: '2026-10-01', to: '2026-12-31' });
+    expect(result.summary.sourcesFailed).toEqual([]);
+    const concerts = result.rawEvents.filter((event) =>
+      event.sourceUrl.includes('xvii-festival-de-ensembles-2026'),
+    );
+    expect(concerts.map((event) => `${event.observed.occurrences[0]?.date}:${event.observed.venueText}`).sort()).toEqual([
+      '2026-10-07:Sala Negra',
+      '2026-10-25:Sala Verde',
+      '2026-12-02:Sala Verde',
+      '2026-12-05:Sala Negra',
+    ]);
+    expect(concerts.every((event) => event.observed.venueText !== 'Sala Verde y Negra')).toBe(true);
+    const published = result.candidates.filter((item) =>
+      item.event.citations.some((citation) => citation.url.includes('xvii-festival-de-ensembles-2026')),
+    );
+    expect(published).toHaveLength(4);
+    expect(new Set(published.map((item) => item.event.venueId))).toEqual(
+      new Set(['ven_teatros_canal_sala_negra', 'ven_teatros_canal_sala_verde']),
+    );
+    expect(
+      result.decisions.filter(
+        (item) =>
+          item.sourceUrl.includes('xvii-festival-de-ensembles-2026') &&
+          item.structuralSkip?.reason === 'lugar no reconocido',
+      ),
+    ).toEqual([]);
   });
 });

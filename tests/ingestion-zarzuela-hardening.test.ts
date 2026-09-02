@@ -14,6 +14,7 @@ import { buildEventDecision } from '../src/ingestion/report.ts';
 import { emptyCatalog } from '../src/lib/domain/catalog.ts';
 import { normalizeRawEvent } from '../src/ingestion/normalize.ts';
 import type { AdapterContext, HydrationMeta, RawEvent } from '../src/ingestion/types.ts';
+import { IncompleteListingError } from '../src/ingestion/types.ts';
 import { TEST_NOW, TEST_WINDOW, makeEvent, makeVenue } from './helpers.ts';
 
 const source = getSourceDefinition('teatro-zarzuela');
@@ -215,7 +216,7 @@ describe('listados de temporada respetuosos y fail-closed', () => {
     expect(events).toHaveLength(2);
   });
 
-  it('un listado con 403 persistente no devuelve un snapshot parcial', async () => {
+  it('un 403 persistente en una sección no descarta las demás y no finge cobertura completa', async () => {
     vi.useFakeTimers();
     const get = vi.fn(async (url: string) => {
       if (url.endsWith('/a-2026-2027')) return `<ul class="listadoObras"><li><h3><a href="${category}/one">Uno</a></h3><p class="entradilla">8 de octubre de 2026</p></li></ul>`;
@@ -223,9 +224,14 @@ describe('listados de temporada respetuosos y fail-closed', () => {
     });
     const home = '<a href="/es/temporada/a-2026-2027">A</a><a href="/es/temporada/b-2026-2027">B</a>';
     const pending = teatroZarzuelaAdapter.extract(home, base, { ...ctx, get });
-    const assertion = expect(pending).rejects.toMatchObject({ status: 403 });
+    const assertion = expect(pending).rejects.toBeInstanceOf(IncompleteListingError);
     await vi.runAllTimersAsync();
     await assertion;
+    const error = await pending.catch((item: unknown) => item);
+    expect(error).toBeInstanceOf(IncompleteListingError);
+    if (!(error instanceof IncompleteListingError)) throw error;
+    expect(error.events).toHaveLength(1);
+    expect(error.events[0]?.observed.title).toBe('Uno');
     expect(get).toHaveBeenCalledTimes(3);
   });
 

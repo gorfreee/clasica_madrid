@@ -25,7 +25,8 @@ function httpRetryAfter(error: unknown): string | null {
 /**
  * Listing pages share the same origin as fichas. Pace them and allow one
  * retry so a transient Imperva 403/503 does not fail the whole source.
- * Persistent failure still throws: a missing category is incomplete coverage.
+ * Persistent failure still throws; the adapter isolates that category when
+ * other season listings succeeded.
  */
 export function createZarzuelaListingGet(get: (url: string) => Promise<string>) {
   let nextRequestAt = 0;

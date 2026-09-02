@@ -1,5 +1,6 @@
 import {
   canalEventUrl,
+  expandTeatrosCanalEvent,
   parseListingDateTime,
   parseTeatrosCanalDetail,
 } from '../detail/teatros-canal.ts';
@@ -78,6 +79,7 @@ export const teatrosCanalAdapter: SourceAdapter = {
     return events.sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
   },
   hydrate: parseTeatrosCanalDetail,
+  expand: expandTeatrosCanalEvent,
 };
 
 function parseTecList(body: string): { events: unknown[]; total: number; totalPages: number } {

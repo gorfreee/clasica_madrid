@@ -31,7 +31,7 @@ import type {
   SourceDefinition,
   SourceFailure,
 } from './types.ts';
-import { emptyIngestAiSummary } from './types.ts';
+import { emptyIngestAiSummary, IncompleteListingError } from './types.ts';
 import { getText } from './http.ts';
 import { normalizeUrl } from './urls.ts';
 
@@ -77,19 +77,30 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
   obs?.setStage('extraction');
   for (const source of sources) {
     try {
-      const extracted = await extractSource(source, options.now, window, get);
+      let extracted: RawEvent[];
+      let listingIncomplete = false;
+      try {
+        extracted = await extractSource(source, options.now, window, get);
+      } catch (error) {
+        if (!(error instanceof IncompleteListingError) || error.events.length === 0) throw error;
+        extracted = error.events;
+        listingIncomplete = true;
+      }
       const adapter = getAdapter(source.adapterId);
       const ctx: AdapterContext = { source, now: options.now, window, get };
       const hydrated = await hydrateEvents(extracted, adapter, ctx);
-      for (let index = 0; index < hydrated.length; index += 1) {
-        const raw = hydrated[index]!;
-        const listing = extracted[index];
+      const listingByUrl = new Map<string, RawEvent>();
+      for (const listing of extracted) {
+        listingByUrl.set(normalizeUrl(listing.sourceUrl), listing);
+      }
+      for (const raw of hydrated) {
+        const listing = listingByUrl.get(normalizeUrl(raw.sourceUrl));
         if (listing) listingByRaw.set(raw, listing);
-        obs?.recordObservation({ raw, listing, normalized: normalizeRawEvent(raw) });
+        obs?.recordObservation({ raw, listing: listing ?? raw, normalized: normalizeRawEvent(raw) });
       }
       rawEvents.push(...hydrated);
       const coverage = adapter.requiresDetailSchedule ? requiredHydrationCoverage(hydrated) : undefined;
-      if (coverage?.incomplete) disappearanceSuppressedSources.push(source.id);
+      if (listingIncomplete || coverage?.incomplete) disappearanceSuppressedSources.push(source.id);
       if (coverage?.severe) {
         const message = `cobertura de hydration incompleta: ${coverage.succeeded}/${coverage.required} fichas necesarias; desapariciones no evaluables`;
         failures.push({ sourceId: source.id, stage: 'hydration', message });
