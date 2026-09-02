@@ -102,6 +102,34 @@ describe('segmentación performer/programa del Auditorio', () => {
     expect(parseAuditorioPersonLine('Chopin: Concierto para piano y orquesta n.º 1')).toBeUndefined();
   });
 
+  it('Composer · Work de Excelentia abre el programa y el middot suelto del director no es obra', () => {
+    const segments = segmentAuditorioBlocks([
+      [
+        'Orquesta Clásica Santa Cecilia',
+        'Director: Sebastian Lang-Lessing ·',
+        'Zee Zee, piano',
+        'Elgar · In the South “Alassio”, op.50',
+        'Schumann · Concierto para piano y orquesta en la menor, op. 54',
+        'Beethoven · Sinfonía n.º 7',
+      ],
+    ]);
+    expect(segments.performerLines).toEqual([
+      'Orquesta Clásica Santa Cecilia',
+      'Director: Sebastian Lang-Lessing',
+      'Zee Zee, piano',
+    ]);
+    expect(segments.programLines).toEqual([
+      'Elgar · In the South “Alassio”, op.50',
+      'Schumann · Concierto para piano y orquesta en la menor, op. 54',
+      'Beethoven · Sinfonía n.º 7',
+    ]);
+    expect(parseAuditorioPersonLine('Director: Sebastian Lang-Lessing ·')).toEqual({
+      name: 'Sebastian Lang-Lessing',
+      roleText: 'director',
+    });
+    expect(parseAuditorioPersonLine('Elgar · In the South “Alassio”, op.50')).toBeUndefined();
+  });
+
   it('un segundo h4 de programa no devuelve compositores ni obras al elenco', () => {
     const segments = segmentAuditorioBlocks([
       ['Orquesta Nacional de España', 'Anna Rakitina, Directora', 'Josu de Solaun, Piano'],

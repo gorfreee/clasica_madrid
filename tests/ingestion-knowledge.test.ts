@@ -161,6 +161,18 @@ describe('composer knowledge base', () => {
     ['Saariaho', 'Kaija Saariaho', 'contemporary'],
     ['Tomás Marco', 'Tomás Marco', 'contemporary'],
     ['Elena Mendoza (1973)', 'Elena Mendoza', 'contemporary'],
+    ['Olivier Messiaen', 'Olivier Messiaen', 'twentieth'],
+    ['Messiaen', 'Olivier Messiaen', 'twentieth'],
+    ['Alexander Scriabin (1872-1915)', 'Alexander Scriabin', 'twentieth'],
+    ['Scriabin', 'Alexander Scriabin', 'twentieth'],
+    ['Richard Strauss', 'Richard Strauss', 'romantic'],
+    ['R. Strauss', 'Richard Strauss', 'romantic'],
+    ['Vincenzo Bellini', 'Vincenzo Bellini', 'romantic'],
+    ['Bellini', 'Vincenzo Bellini', 'romantic'],
+    ['Domenico Scarlatti', 'Domenico Scarlatti', 'baroque'],
+    ['D. Scarlatti', 'Domenico Scarlatti', 'baroque'],
+    ['Philip Glass', 'Philip Glass', 'contemporary'],
+    ['P. Glass', 'Philip Glass', 'contemporary'],
   ])('reconoce %s sin ampliar la época ni atribuir otro compositor', (name, canonicalName, era) => {
     expect(matchComposer(name)).toMatchObject({ canonicalName, eras: [era] });
     expect(findKnownComposersInText(`Programa: ${name}; obra anunciada.`).map((item) => item.canonicalName))
@@ -172,7 +184,7 @@ describe('composer knowledge base', () => {
     'Boulanger', 'Nadia Boulanger', 'Wagner', 'Robert Wagner',
     'Francisco Guerrero', 'Francisco Guerrero Marín',
     'Dvor', 'Schuberrt', 'Chopines', 'Debussyana',
-    'Byrd', 'Shaw', 'Walton', 'Bernstein', 'Strauss', 'Marquez',
+    'Byrd', 'Shaw', 'Walton', 'Bernstein', 'Strauss', 'Scarlatti', 'Marquez',
   ])('no reconoce el nombre ambiguo o aproximado %s', (name) => {
     expect(matchComposer(name)).toBeUndefined();
     expect(findKnownComposersInText(name)).toEqual([]);

@@ -121,6 +121,11 @@ export const COMPOSERS: ComposerKnowledge[] = [
     eras: ['renaissance'],
   },
   {
+    canonicalName: 'Domenico Scarlatti',
+    aliases: ['Domenico Scarlatti', 'D. Scarlatti'],
+    eras: ['baroque'],
+  },
+  {
     canonicalName: 'William Byrd',
     aliases: ['William Byrd'],
     eras: ['renaissance'],
@@ -297,6 +302,16 @@ export const COMPOSERS: ComposerKnowledge[] = [
     eras: ['romantic'],
   },
   {
+    canonicalName: 'Vincenzo Bellini',
+    aliases: ['Vincenzo Bellini', 'Bellini'],
+    eras: ['romantic'],
+  },
+  {
+    canonicalName: 'Richard Strauss',
+    aliases: ['Richard Strauss', 'R. Strauss'],
+    eras: ['romantic'],
+  },
+  {
     canonicalName: 'Jean Sibelius',
     aliases: ['Jean Sibelius', 'Sibelius'],
     eras: ['romantic'],
@@ -367,6 +382,16 @@ export const COMPOSERS: ComposerKnowledge[] = [
   {
     canonicalName: 'Frederic Mompou',
     aliases: ['Frederic Mompou', 'Federico Mompou', 'Mompou'],
+    eras: ['twentieth'],
+  },
+  {
+    canonicalName: 'Olivier Messiaen',
+    aliases: ['Olivier Messiaen', 'Messiaen'],
+    eras: ['twentieth'],
+  },
+  {
+    canonicalName: 'Alexander Scriabin',
+    aliases: ['Alexander Scriabin', 'Aleksandr Scriabin', 'Scriabin', 'Skriabin'],
     eras: ['twentieth'],
   },
   {
@@ -559,6 +584,11 @@ export const COMPOSERS: ComposerKnowledge[] = [
   {
     canonicalName: 'Steve Reich',
     aliases: ['Steve Reich'],
+    eras: ['contemporary'],
+  },
+  {
+    canonicalName: 'Philip Glass',
+    aliases: ['Philip Glass', 'P. Glass'],
     eras: ['contemporary'],
   },
   {

@@ -2,6 +2,7 @@ import { allCaptures, firstMatch, splitBreaks, stripTags } from '../html.ts';
 import { inferScheduleFromText } from './schedule.ts';
 import {
   composersFromWorks,
+  normalizeComposerList,
   normalizePersonList,
   normalizeWorkList,
   type ObservedFactPatch,
@@ -53,9 +54,14 @@ function parseProduction(html: string): ObservedFactPatch {
   const paragraphs = splitIntroParagraphs(introHtml);
   const description = paragraphs[0]?.text;
   const peopleParagraph = paragraphs.find(looksLikeCastParagraph);
-  const performers = peopleParagraph
-    ? normalizePersonList(splitBreaks(peopleParagraph.html).map(parsePersonLine))
+  const introPerformers = peopleParagraph
+    ? splitBreaks(peopleParagraph.html).map(parsePersonLine)
     : [];
+  const performers = normalizePersonList([
+    ...parseMusicalTeam(html),
+    ...introPerformers,
+    ...parseCast(html),
+  ]);
 
   const programText = collapseIntro(paragraphs.map((item) => item.text));
   const venueText = stripTags(
@@ -66,6 +72,7 @@ function parseProduction(html: string): ObservedFactPatch {
     .map((part) => stripTags(part))
     .filter(Boolean);
   const works = normalizeWorkList(listItems.map(parseTitleComposerWork));
+  const declaredComposers = parseDeclaredComposers(introHtml);
   const schedule = inferScheduleFromText([programText, description].filter(Boolean).join(' '));
 
   return {
@@ -78,7 +85,10 @@ function parseProduction(html: string): ObservedFactPatch {
     ...(schedule.occurrences ? { occurrences: schedule.occurrences } : {}),
     performers,
     works,
-    composers: composersFromWorks(works),
+    composers: normalizeComposerList([
+      ...composersFromWorks(works),
+      ...declaredComposers.map((name) => ({ name })),
+    ]),
   };
 }
 
@@ -138,6 +148,110 @@ function parseExcerpt(html: string): ObservedFactPatch {
     works,
     composers: composersFromWorks(works),
   };
+}
+
+const MUSICAL_TEAM_DIRECTOR = new Set([
+  'direccion musical',
+  'director musical',
+  'directora musical',
+  'direccion del coro',
+  'director del coro',
+  'directora del coro',
+]);
+
+const MUSICAL_TEAM_ENSEMBLE = new Set(['coro y orquesta', 'orquesta', 'coro']);
+
+/**
+ * Equipo Artístico on Drupal production pages (`ul.lista-artistas`).
+ * Only musical roles: staging, costume and lighting stay out.
+ */
+function parseMusicalTeam(html: string): ObservedPerson[] {
+  const items = [
+    ...html.matchAll(
+      /<li\b[^>]*class="[^"]*\blista-artistas\b[^"]*"[^>]*>[\s\S]*?<span\b[^>]*class="[^"]*\blista-artistas-text\b[^"]*"[^>]*>([\s\S]*?)<\/span>[\s\S]*?<span\b[^>]*class="[^"]*\blista-artistas-title\b[^"]*"[^>]*>([\s\S]*?)<\/span>/gi,
+    ),
+  ];
+  const people: ObservedPerson[] = [];
+  for (const item of items) {
+    const label = stripTags(item[1] ?? '');
+    const name = stripTags(item[2] ?? '');
+    if (!label || !name) continue;
+    const folded = foldTeamLabel(label);
+    if (MUSICAL_TEAM_DIRECTOR.has(folded)) {
+      people.push({ name, roleText: 'director' });
+      continue;
+    }
+    if (MUSICAL_TEAM_ENSEMBLE.has(folded)) {
+      people.push({ name, roleText: label });
+    }
+  }
+  return people;
+}
+
+const PRODUCTION_TEAM_LABELS = new Set([
+  ...MUSICAL_TEAM_DIRECTOR,
+  ...MUSICAL_TEAM_ENSEMBLE,
+  'direccion de escena',
+  'director de escena',
+  'directora de escena',
+  'escenografo',
+  'escenografia',
+  'vestuario',
+  'iluminador',
+  'iluminadora',
+  'iluminacion',
+  'coreografia',
+  'coreografo',
+  'dramaturgia',
+  'video',
+  'ayudante de direccion',
+]);
+
+/**
+ * Reparto tiles (`page-thumb-artist__block` with `.position` + `.title`).
+ * Character names stay as roleText. The same tile grid also repeats Equipo
+ * Artístico: keep musical roles, drop staging/costume/lighting.
+ */
+function parseCast(html: string): ObservedPerson[] {
+  const items = [
+    ...html.matchAll(
+      /<span\b[^>]*class="[^"]*\bposition\b[^"]*"[^>]*>([\s\S]*?)<\/span>[\s\S]*?<span\b[^>]*class="title"[^>]*>([\s\S]*?)<\/span>/gi,
+    ),
+  ];
+  return items.flatMap((item) => {
+    const label = stripTags(item[1] ?? '');
+    const name = stripTags(item[2] ?? '');
+    if (!name || !label) return [];
+    const folded = foldTeamLabel(label);
+    if (MUSICAL_TEAM_DIRECTOR.has(folded)) return [{ name, roleText: 'director' }];
+    if (MUSICAL_TEAM_ENSEMBLE.has(folded)) return [{ name, roleText: label }];
+    if (PRODUCTION_TEAM_LABELS.has(folded) || folded.startsWith('direccion de')) return [];
+    return [{ name, roleText: label }];
+  });
+}
+
+function parseDeclaredComposers(html: string): string[] {
+  const names: string[] = [];
+  for (const paragraph of allCaptures(html, /<p\b[^>]*>([\s\S]*?)<\/p>/gi).map((part) => stripTags(part))) {
+    const declared = /^Música\s+de\s+(.+)$/i.exec(paragraph);
+    if (!declared?.[1]) continue;
+    const name = declared[1]
+      .replace(/\s*\(\s*(?:ca\.?\s*)?\d{3,4}[^)]*\)\s*/gu, ' ')
+      .replace(/[.,;]+$/u, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (name) names.push(name);
+  }
+  return names;
+}
+
+function foldTeamLabel(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z]+/g, ' ')
+    .trim();
 }
 
 function parsePersonLine(text: string): ObservedPerson {

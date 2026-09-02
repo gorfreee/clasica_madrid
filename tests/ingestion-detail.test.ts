@@ -523,6 +523,43 @@ describe('parser de ficha Auditorio Nacional', () => {
     expect(facts.programText).toMatch(/Jeromita Linares/);
   });
 
+  it('entiende el programa Excelentia Composer · Work en un h4 de producción', () => {
+    const html = `
+      <article id="content">
+        <h1>Excelentia. Concierto Piano Schumann y Beethoven Núm. 7</h1>
+        <div class="content">
+          <h4>Orquesta Clásica Santa Cecilia<br />Director: Sebastian Lang-Lessing ·<br />Zee Zee, piano<br />Elgar · In the South “Alassio”, op.50<br />Schumann · Concierto para piano y orquesta en la menor, op. 54<br />Beethoven · Sinfonía n.º 7</h4>
+        </div>
+        <div class="rightcolumn">
+          <p class="rightColumn__item">
+            <label class="rightColumn__item__label">Sala:</label>
+            <span class="location sinfonica rightColumn__item__text">Sala Sinfónica</span>
+          </p>
+        </div>
+      </article>
+    `;
+    const facts = parseAuditorioNacionalDetail(html);
+    expect(facts.venueText).toBe('Sala Sinfónica');
+    expect(facts.performers).toEqual([
+      { name: 'Orquesta Clásica Santa Cecilia' },
+      { name: 'Sebastian Lang-Lessing', roleText: 'director' },
+      { name: 'Zee Zee', roleText: 'piano' },
+    ]);
+    expect(facts.works).toEqual([
+      { title: 'In the South “Alassio”, op.50', composerName: 'Elgar' },
+      {
+        title: 'Concierto para piano y orquesta en la menor, op. 54',
+        composerName: 'Schumann',
+      },
+      { title: 'Sinfonía n.º 7', composerName: 'Beethoven' },
+    ]);
+    expect(facts.composers).toEqual([
+      { name: 'Elgar' },
+      { name: 'Schumann' },
+      { name: 'Beethoven' },
+    ]);
+  });
+
   it('no inventa performers, composers ni works si la ficha no los declara', () => {
     const facts = parseAuditorioNacionalDetail(
       '<article><h1>OCNE. Sinfónico 01</h1><p>Concierto de temporada.</p></article>',
@@ -627,6 +664,98 @@ describe('parser de ficha Teatro Real', () => {
     const facts = parseTeatroRealDetail(html);
     expect(facts.eventStatus).toBe('scheduled');
     expect(facts.occurrences?.[0]?.date).toBe('2026-09-13');
+  });
+
+  it('extrae Equipo Artístico musical, reparto y el compositor declarado como Música de', () => {
+    const html = `
+      <div class="wrap-content-hero">
+        <h4>Ópera</h4>
+        <h1>Manon Lescaut</h1>
+      </div>
+      <div class="back-image"></div>
+      <section class="text-intro-show">
+        <div class="wrap-text-free collapsible-mobile">
+          <p>Manon Lescaut, la tercera ópera de Giacomo Puccini, llega al Real.</p>
+          <hr />
+          <p><em>Dramma lirico</em> en cuatro actos.</p>
+          <p><strong>Música</strong> de Giacomo Puccini (1858-1924).</p>
+          <p><strong>Libreto</strong> de Domenico Oliva y Luigi Illica.</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+      <h3 class="titulo-artistas">Equipo Artístico</h3>
+      <ul class="lista-artistas">
+        <li class="lista-artistas">
+          <span class="lista-artistas-text">Dirección musical</span>
+          <span class="lista-artistas-title">Nicola Luisotti</span>
+        </li>
+        <li class="lista-artistas">
+          <span class="lista-artistas-text">Dirección de escena</span>
+          <span class="lista-artistas-title">Carlos Wagner</span>
+        </li>
+        <li class="lista-artistas">
+          <span class="lista-artistas-text">Vestuario</span>
+          <span class="lista-artistas-title">Jon Morrell</span>
+        </li>
+        <li class="lista-artistas">
+          <span class="lista-artistas-text">Dirección del coro</span>
+          <span class="lista-artistas-title">José Luis Basso</span>
+        </li>
+        <li class="lista-artistas">
+          <span class="lista-artistas-text">Coro y Orquesta</span>
+          <span class="lista-artistas-title">Coro y Orquesta Titulares del Teatro Real</span>
+        </li>
+      </ul>
+      <section class="page-thumb-artist page-thumb-artist-img">
+        <h3>Reparto</h3>
+        <div class="page-thumb-artist__block">
+          <p><span class="position">Manon Lescaut</span> <span class="title">Sondra Radvanovsky</span></p>
+        </div>
+        <div class="page-thumb-artist__block">
+          <p><span class="position">El caballero Renato des Grieux</span> <span class="title">Michael Fabiano</span></p>
+        </div>
+        <div class="page-thumb-artist__block">
+          <p><span class="position">Dirección de escena</span> <span class="title">Carlos Wagner</span></p>
+        </div>
+        <div class="page-thumb-artist__block">
+          <p><span class="position">Dirección musical</span> <span class="title">Nicola Luisotti</span></p>
+        </div>
+      </section>
+      <section class="functions-show">
+        <div class="functions-show__block--item-space"><p>Sala Principal</p></div>
+      </section>
+    `;
+    const facts = parseTeatroRealDetail(html);
+    expect(facts.categoryText).toBe('Ópera');
+    expect(facts.venueText).toBe('Sala Principal');
+    expect(facts.composers).toEqual([{ name: 'Giacomo Puccini' }]);
+    expect(facts.performers).toEqual([
+      { name: 'Nicola Luisotti', roleText: 'director' },
+      { name: 'José Luis Basso', roleText: 'director' },
+      { name: 'Coro y Orquesta Titulares del Teatro Real', roleText: 'Coro y Orquesta' },
+      { name: 'Sondra Radvanovsky', roleText: 'Manon Lescaut' },
+      { name: 'Michael Fabiano', roleText: 'El caballero Renato des Grieux' },
+    ]);
+    expect(facts.performers?.map((item) => item.name)).not.toContain('Carlos Wagner');
+    expect(facts.performers?.map((item) => item.name)).not.toContain('Jon Morrell');
+    expect(facts.works).toEqual([]);
+  });
+
+  it('limpia años y el punto final de Música de Vincenzo Bellini (1801-1835).', () => {
+    const facts = parseTeatroRealDetail(`
+      <div class="wrap-content-hero"><h4>Ópera</h4><h1>Norma</h1></div>
+      <div class="back-image"></div>
+      <section class="text-intro-show">
+        <div class="wrap-text-free">
+          <p><strong>Música</strong> de Vincenzo Bellini (1801-1835).</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+      <section class="functions-show">
+        <div class="functions-show__block--item-space"><p>Sala Principal</p></div>
+      </section>
+    `);
+    expect(facts.composers).toEqual([{ name: 'Vincenzo Bellini' }]);
   });
 
   it('no inventa un programa a partir del título', () => {
