@@ -56,6 +56,7 @@ describe('adapter Auditorio Nacional (JSON)', () => {
 
   it('usa exactamente start/end de la ventana solicitada', () => {
     const source = getSourceDefinition('auditorio-nacional');
+    expect(source.useFetchRelay).toBe(true);
     const defaultUrls = auditorioNacionalAdapter.resolveFetchUrls(source, TEST_NOW, TEST_WINDOW);
     expect(defaultUrls).toHaveLength(1);
     const defaultUrl = new URL(defaultUrls[0]!);

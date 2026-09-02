@@ -1,7 +1,7 @@
 import { findKnownComposersInText, matchComposer } from '../knowledge/composers.ts';
 import type { ObservedFacts } from '../observed.ts';
 import type { Eligibility } from './golden-case.ts';
-import { fieldFolded, hasPhrase, hasWord, identityHaystack } from './text.ts';
+import { fieldFolded, foldName, hasPhrase, hasWord, identityHaystack } from './text.ts';
 import type { Resolution } from './types.ts';
 
 type Exclusion = {
@@ -129,6 +129,9 @@ function collectInclusions(facts: ObservedFacts, haystack: string): Inclusion[] 
   const category = fieldFolded(facts.categoryText);
   if (isOperaCategory(category)) {
     found.push({ ruleId: 'opera-event', evidence: [facts.categoryText ?? ''] });
+  }
+  if (hasWord(category, 'lirica') && !hasWord(category, 'taller')) {
+    found.push({ ruleId: 'lyric-theatre-event', evidence: [facts.categoryText ?? ''] });
   }
   if (hasWord(category, 'zarzuela') || hasWord(fieldFolded(facts.title), 'zarzuela')) {
     found.push({ ruleId: 'zarzuela-event', evidence: [facts.categoryText ?? facts.title] });
@@ -334,6 +337,9 @@ function workshopIdentity(
     hasPhrase(title, 'taller de') ||
     hasPhrase(title, 'un taller') ||
     hasWord(title, 'conferencia') ||
+    hasWord(title, 'charla') ||
+    hasPhrase(title, 'charla sobre') ||
+    hasWord(category, 'charla') ||
     hasPhrase(description, 'un taller') ||
     hasPhrase(description, 'taller de') ||
     hasPhrase(description, 'taller musical') ||
@@ -479,6 +485,17 @@ function classicalFirstHalf(facts: ObservedFacts, known: string[]): boolean {
 }
 
 function explicitClassicalConcertDeclaration(facts: ObservedFacts): Inclusion | undefined {
+  const category = fieldFolded(facts.categoryText);
+  const categoryName = foldName(facts.categoryText ?? '');
+  if (
+    categoryName === 'musica clasica' ||
+    (hasWord(category, 'concierto') && hasPhrase(category, 'musica clasica'))
+  ) {
+    return {
+      ruleId: 'explicit-classical-concert',
+      evidence: [facts.categoryText ?? ''],
+    };
+  }
   const fields = [facts.description, facts.programText, facts.categoryText];
   for (const field of fields) {
     const folded = fieldFolded(field);
@@ -509,6 +526,13 @@ function describedClassicalPerformance(facts: ObservedFacts, _haystack: string):
 }
 
 function academicContemporary(facts: ObservedFacts, haystack: string): boolean {
+  const title = foldName(facts.title);
+  if (
+    hasPhrase(haystack, 'festival coma') ||
+    hasPhrase(title, 'coma 26')
+  ) {
+    return true;
+  }
   const category = fieldFolded(facts.categoryText);
   const contemporary =
     hasPhrase(category, 'musica contemporanea') || hasPhrase(haystack, 'repertorio musical contemporaneo');
@@ -524,13 +548,16 @@ function academicContemporary(facts: ObservedFacts, haystack: string): boolean {
 function classicalConcertSeries(facts: ObservedFacts, haystack: string): Inclusion | undefined {
   const title = fieldFolded(facts.title);
   const description = fieldFolded(facts.description);
+  const namedCycle = classicalSeriesIdentity(facts);
   const concertCue =
     hasWord(title, 'concierto') ||
     hasPhrase(haystack, 'serie de conciertos') ||
-    (description.length > 0 && hasWord(description, 'conciertos'));
+    (description.length > 0 && hasWord(description, 'conciertos')) ||
+    Boolean(namedCycle);
   if (!concertCue) return undefined;
 
   const seriesCue =
+    Boolean(namedCycle) ||
     hasPhrase(haystack, 'domingos de camara') ||
     hasPhrase(haystack, 'liceo de camara') ||
     hasPhrase(haystack, 'musica de camara') ||
@@ -544,8 +571,36 @@ function classicalConcertSeries(facts: ObservedFacts, haystack: string): Inclusi
 
   return {
     ruleId: 'classical-concert-series',
-    evidence: [facts.seriesText ?? facts.categoryText ?? facts.title],
+    evidence: [namedCycle ?? facts.seriesText ?? facts.categoryText ?? facts.title],
   };
+}
+
+/**
+ * Established classical cycles whose titles are often only the performer.
+ * Match series/category, not description: a talk may mention Universo Barroco.
+ */
+function classicalSeriesIdentity(facts: ObservedFacts): string | undefined {
+  const fields = [facts.seriesText, facts.categoryText].filter(Boolean) as string[];
+  for (const field of fields) {
+    const folded = fieldFolded(field);
+    if (
+      hasPhrase(folded, 'universo barroco') ||
+      hasPhrase(folded, 'universo beethoven') ||
+      hasPhrase(folded, 'series 20/21') ||
+      hasPhrase(folded, 'series 20 21') ||
+      hasPhrase(folded, 'liceo de camara') ||
+      hasPhrase(folded, 'en clave de concierto') ||
+      hasPhrase(folded, 'ciclo de lied') ||
+      hasPhrase(folded, 'generacion musical del 27') ||
+      hasPhrase(folded, 'bach vermut') ||
+      hasPhrase(folded, 'les arts en madrid') ||
+      hasPhrase(folded, 'fronteras') ||
+      folded === 'lied'
+    ) {
+      return field;
+    }
+  }
+  return undefined;
 }
 
 function isOperaCategory(category: string): boolean {

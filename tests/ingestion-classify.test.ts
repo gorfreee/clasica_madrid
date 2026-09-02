@@ -492,6 +492,94 @@ describe('eligibility — conflictos y fallback', () => {
     expect(organ.formats.value).toContain('organ');
   });
 
+  it('incluye ciclos clásicos cuyo título es sólo el intérprete', () => {
+    const universo = classify(
+      facts({
+        title: 'COLLEGIUM VOCALE GENT',
+        seriesText: 'Universo Barroco',
+        composers: [{ name: 'Carlo Gesualdo (1566-1613)' }],
+      }),
+    );
+    expect(universo.eligibility.value).toBe('include');
+    expect(universo.eligibility.ruleId).toBe('classical-concert-series');
+
+    const lied = classify(
+      facts({
+        title: 'Adriana González y Marina Viotti',
+        categoryText: 'XXXIII Ciclo de Lied',
+        venueText: 'Teatro de la Zarzuela',
+      }),
+    );
+    expect(lied.eligibility.value).toBe('include');
+    expect(lied.eligibility.ruleId).toBe('classical-concert-series');
+    expect(lied.formats.value).toContain('lied');
+
+    const liceo = classify(
+      facts({
+        title: 'ANA MARÍA VALDERRAMA & JUDITH JÁUREGUI',
+        seriesText: 'Liceo de Cámara XXI',
+      }),
+    );
+    expect(liceo.eligibility.value).toBe('include');
+    expect(liceo.eligibility.ruleId).toBe('classical-concert-series');
+  });
+
+  it('incluye la temporada de lírica y no una charla que menciona el ciclo', () => {
+    const lirica = classify(
+      facts({
+        title: 'Los gavilanes',
+        categoryText: 'Lírica',
+        composers: [{ name: 'JACINTO GUERRERO' }],
+        venueText: 'Teatro de la Zarzuela',
+      }),
+    );
+    expect(lirica.eligibility.value).toBe('include');
+    expect(lirica.eligibility.ruleId).toBe('lyric-theatre-event');
+    expect(lirica.kind.value).toBe('established');
+
+    const talk = classify(
+      facts({
+        title: 'Contextos Barrocos: Charla sobre el concierto de Collegium Vocale 1704',
+        seriesText: 'Educación',
+        description:
+          'Charlas previas al ciclo de conciertos de Universo Barroco en la Sala Sinfónica del Auditorio Nacional de Música.',
+      }),
+    );
+    expect(talk.eligibility.value).toBe('exclude');
+    expect(talk.eligibility.ruleId).toBe('non-performance-activity');
+  });
+
+  it('incluye COMA y una categoría explícita de música clásica, y sigue excluyendo jazz en un ciclo mixto', () => {
+    const coma = classify(
+      facts({
+        title: "COMA'26: ATLÁNTIDA CHAMBER ORCHESTRA",
+        categoryText: 'Música – Entrada libre hasta completar aforo',
+        description: 'El Festival COMA sigue creciendo en prestigio año tras año, con la panorámica de música actual.',
+      }),
+    );
+    expect(coma.eligibility.value).toBe('include');
+    expect(coma.eligibility.ruleId).toBe('academic-contemporary');
+
+    const camerata = classify(
+      facts({
+        title: 'Joven Camerata de la ORCAM',
+        categoryText: 'Música clásica',
+      }),
+    );
+    expect(camerata.eligibility.value).toBe('include');
+    expect(camerata.eligibility.ruleId).toBe('explicit-classical-concert');
+
+    const jazz = classify(
+      facts({
+        title: 'FAZIL SAY, ASLIHAN AND SAY',
+        seriesText: 'Fronteras',
+        description: 'Un concierto de jazz contemporáneo en el Auditorio Nacional.',
+      }),
+    );
+    expect(jazz.eligibility.value).toBe('exclude');
+    expect(jazz.eligibility.ruleId).toBe('jazz-identity');
+  });
+
   it('excluye open piano y jam participativa aunque el festival sea de piano clásico', () => {
     const openPiano = classify(
       facts({

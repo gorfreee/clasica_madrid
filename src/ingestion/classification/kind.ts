@@ -51,7 +51,10 @@ export function resolveKind(facts: ObservedFacts): Resolution<EventKind> {
   }
 
   const category = fieldFolded(facts.categoryText);
-  if ((hasWord(category, 'opera') || hasWord(category, 'zarzuela')) && !hasWord(category, 'taller')) {
+  if (
+    (hasWord(category, 'opera') || hasWord(category, 'zarzuela') || hasWord(category, 'lirica')) &&
+    !hasWord(category, 'taller')
+  ) {
     return {
       value: 'established',
       method: 'rule',
