@@ -198,7 +198,8 @@ function parseLabelledPerformers(blocks: string[]): ObservedPerson[] {
   const block = blocks.find((item) => /<strong\b[^>]*>\s*Intérpretes:\s*<\/strong>/i.test(item));
   if (!block) return [];
   const after = block.split(/<strong\b[^>]*>\s*Intérpretes:\s*<\/strong>/i)[1] ?? '';
-  const beforeNextLabel = after.split(/<strong\b[^>]*>\s*(?:Educación|Programa|Entradas?):/i)[0] ?? '';
+  const beforeNextLabel =
+    after.split(/<strong\b[^>]*>\s*(?:Educación|Programa|Entradas?|CONTEXTOS\b|Charlas?\b)/i)[0] ?? '';
   return beforeNextLabel
     .split(/<br\s*\/?>|<\/p>\s*<p\b[^>]*>/i)
     .flatMap((line) => parseCredit(stripTags(line)));
@@ -206,7 +207,7 @@ function parseLabelledPerformers(blocks: string[]): ObservedPerson[] {
 
 function parseCredit(text: string): ObservedPerson[] {
   const clean = stripTags(text);
-  if (!clean) return [];
+  if (!clean || clean.length > 120) return [];
   const match = /^(.+?),\s*([^,]+)$/.exec(clean);
   return [{ name: match?.[1] ?? clean, ...(match ? { roleText: match[2] } : {}) }];
 }
