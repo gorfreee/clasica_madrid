@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_4863",
+  "slug": "reina-roja",
+  "title": "Reina roja",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_4863_01",
+      "date": "2027-05-31",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta de la Comunidad de Madrid"
+    },
+    {
+      "name": "Pacho Flores"
+    },
+    {
+      "name": "Alondra de la Parra",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Gabriela Ortiz"
+    },
+    {
+      "name": "Arturo Márquez"
+    },
+    {
+      "name": "Silvestre Revueltas"
+    }
+  ],
+  "works": [
+    {
+      "title": "La Reina Roja ++",
+      "composerName": "Gabriela Ortiz"
+    },
+    {
+      "title": "Concierto de otoño para trompeta +",
+      "composerName": "Arturo Márquez"
+    },
+    {
+      "title": "La noche de los mayas",
+      "composerName": "Silvestre Revueltas"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-sinfonico-12-reina-roja",
+      "checkedAt": "2026-09-03",
+      "externalId": "4863"
+    },
+    {
+      "sourceId": "src_fundacion_orcam",
+      "url": "https://fundacionorcam.org/conciertos/2026-27/reina-roja",
+      "checkedAt": "2026-09-03",
+      "externalId": "4863"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

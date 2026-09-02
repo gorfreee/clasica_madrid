@@ -15,8 +15,26 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
+  "performers": [
+    {
+      "name": "Henrik Nánási",
+      "role": "conductor"
+    },
+    {
+      "name": "Alexander Köpeczi"
+    },
+    {
+      "name": "Anna Netrebko"
+    },
+    {
+      "name": "Misi Boros"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Béla Bartók"
+    }
+  ],
   "works": [],
   "eras": [
     "romantic",
@@ -31,10 +49,10 @@
     {
       "sourceId": "src_teatro_real",
       "url": "https://www.teatroreal.es/es/espectaculo/castillo-barbazul",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "castillo-barbazul"
     }
   ],
   "primarySourceId": "src_teatro_real",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

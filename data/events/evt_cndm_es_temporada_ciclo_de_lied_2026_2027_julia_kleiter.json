@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cndm_es_temporada_ciclo_de_lied_2026_2027_julia_kleiter",
+  "slug": "julia-kleiter",
+  "title": "Julia Kleiter",
+  "status": "scheduled",
+  "venueId": "ven_teatro_zarzuela",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cndm_es_temporada_ciclo_de_lied_2026_2027_julia_kleiter_01",
+      "date": "2027-05-06",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "JULIA KLEITER"
+    },
+    {
+      "name": "GEROLD HUBER"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Richard Strauss (1864-1949)"
+    },
+    {
+      "name": "Carl Loewe (1796-1869)"
+    },
+    {
+      "name": "Robert Schumann (1810-1856)"
+    },
+    {
+      "name": "R. Strauss"
+    }
+  ],
+  "works": [
+    {
+      "title": "Das Rosenband , op. 36, n.º 1 (1897-1898)",
+      "composerName": "Richard Strauss (1864-1949)"
+    },
+    {
+      "title": "Rote Rosen , AV 76 (1883)",
+      "composerName": "Richard Strauss (1864-1949)"
+    },
+    {
+      "title": "Traum durch die Dämmerung , op. 29, n.º 1 (1895)",
+      "composerName": "Richard Strauss (1864-1949)"
+    },
+    {
+      "title": "Traum der eignen Tage , op. 60, n.º 9 (1836)",
+      "composerName": "Carl Loewe (1796-1869)"
+    },
+    {
+      "title": "Frauenliebe und -Leben , op. 42 (1840)",
+      "composerName": "Robert Schumann (1810-1856)"
+    },
+    {
+      "title": "Lieder und Gesänge , vol. II, op. 51 (1842)",
+      "composerName": "Robert Schumann (1810-1856)"
+    },
+    {
+      "title": "De Sechs Lieder , op. 17, n.º 3 (1885-1887)",
+      "composerName": "R. Strauss"
+    },
+    {
+      "title": "Das Geheimnis , n.º 3 (1886)",
+      "composerName": "R. Strauss"
+    },
+    {
+      "title": "Ständchen , n.º 2 (1886)",
+      "composerName": "R. Strauss"
+    },
+    {
+      "title": "Geduld , op. 10, n.º 5 (1885)",
+      "composerName": "R. Strauss"
+    },
+    {
+      "title": "Begegnung , AV 72 (1880)",
+      "composerName": "R. Strauss"
+    },
+    {
+      "title": "Freundliche Vision , op. 48, n.º 1 (1900)",
+      "composerName": "R. Strauss"
+    },
+    {
+      "title": "Wiegenlied , op. 41, n.º 1 (1899)",
+      "composerName": "R. Strauss"
+    },
+    {
+      "title": "Ach Lieb, ich muss nun scheiden , op. 21, n.º 3 (1889-1890)",
+      "composerName": "R. Strauss"
+    },
+    {
+      "title": "Befreit , op. 39, n.º 4 (1897-1898)",
+      "composerName": "R. Strauss"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "recital",
+    "lied"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23797",
+      "checkedAt": "2026-09-03",
+      "externalId": "/es/temporada/ciclo-de-lied-2026-2027/julia-kleiter"
+    },
+    {
+      "sourceId": "src_teatro_zarzuela",
+      "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/ciclo-de-lied-2026-2027/julia-kleiter",
+      "checkedAt": "2026-09-03",
+      "externalId": "/es/temporada/ciclo-de-lied-2026-2027/julia-kleiter"
+    }
+  ],
+  "primarySourceId": "src_cndm",
+  "lastVerifiedAt": "2026-09-03"
+}

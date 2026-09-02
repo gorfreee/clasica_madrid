@@ -64,10 +64,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-mario-brunello-1",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "cndm-mario-brunello-1"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23862",
+      "checkedAt": "2026-09-03",
+      "externalId": "23862"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

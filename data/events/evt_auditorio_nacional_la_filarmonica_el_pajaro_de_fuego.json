@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_la_filarmonica_el_pajaro_de_fuego",
+  "slug": "la-filarmonica-segundo-de-rachmaninov",
+  "title": "La Filarmónica. Segundo de Rachmáninov",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_la_filarmonica_el_pajaro_de_fuego_01",
+      "date": "2027-03-03",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Joven de Colombia"
+    },
+    {
+      "name": "Nelson Goerner"
+    },
+    {
+      "name": "Andrés Orozco-Estrada",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/la-filarmonica-el-pajaro-de-fuego",
+      "checkedAt": "2026-09-03",
+      "externalId": "la-filarmonica-el-pajaro-de-fuego"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

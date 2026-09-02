@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_orquesta_sinfonica_de_madrid_elim_chan",
+  "slug": "orquesta-sinfonica-de-madrid-elim-chan",
+  "title": "Orquesta Sinfónica de Madrid. Elim Chan",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_orquesta_sinfonica_de_madrid_elim_chan_01",
+      "date": "2027-02-18",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Sinfónica de Madrid"
+    },
+    {
+      "name": "Elim Chan"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antonín Dvořák"
+    },
+    {
+      "name": "Piotr I. Tchaikovsky"
+    },
+    {
+      "name": "Maurice Ravel"
+    }
+  ],
+  "works": [
+    {
+      "title": "La bruja del mediodía, op. 108, B. 196",
+      "composerName": "Antonín Dvořák"
+    },
+    {
+      "title": "Romeo y Julieta:",
+      "composerName": "Piotr I. Tchaikovsky"
+    },
+    {
+      "title": "Daphnis y Chloe, Suite n.° 2",
+      "composerName": "Maurice Ravel"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/orquesta-sinfonica-de-madrid-elim-chan",
+      "checkedAt": "2026-09-03",
+      "externalId": "orquesta-sinfonica-de-madrid-elim-chan"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

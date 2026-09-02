@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ibermusica_the_constellation_choir_orchestra",
+  "slug": "ibermusica-the-constellation-choir-orchestra",
+  "title": "Ibermúsica. The Constellation Choir & Orchestra",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ibermusica_the_constellation_choir_orchestra_01",
+      "date": "2027-05-26",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "The Constellation Choir & Orchestra"
+    },
+    {
+      "name": "Sir John Eliot Gardiner"
+    },
+    {
+      "name": "Sir András Schiff"
+    },
+    {
+      "name": "Jean Guihen Queyras"
+    },
+    {
+      "name": "Isabelle Faust"
+    }
+  ],
+  "composers": [],
+  "works": [
+    {
+      "title": "BEETHOVEN Misa en Do Mayor"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic",
+    "choral",
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-the-constellation-choir-orchestra",
+      "checkedAt": "2026-09-03",
+      "externalId": "ibermusica-the-constellation-choir-orchestra"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

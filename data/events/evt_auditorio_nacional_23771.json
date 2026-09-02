@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_23771",
+  "slug": "vikingur-olafsson",
+  "title": "VÍKINGUR ÓLAFSSON",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_23771_01",
+      "date": "2027-05-27",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "VÍKINGUR ÓLAFSSON"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Philip Glass (1937)"
+    },
+    {
+      "name": "Claude Debussy (1862-1918)"
+    },
+    {
+      "name": "P. Glass"
+    },
+    {
+      "name": "Jean-Philippe Rameau (1683-1764)"
+    },
+    {
+      "name": "C. Debussy"
+    },
+    {
+      "name": "J.-P. Rameau"
+    }
+  ],
+  "works": [
+    {
+      "title": "Opening , de Glassworks (1981)",
+      "composerName": "Philip Glass (1937)"
+    },
+    {
+      "title": "Ondine , de Préludes , livre 2, n.º 8, CD 131 (1912-1913)",
+      "composerName": "Claude Debussy (1862-1918)"
+    },
+    {
+      "title": "Étude n.º 15, de Études para piano , vol. 2 (2012)",
+      "composerName": "P. Glass"
+    },
+    {
+      "title": "Suite en re mayor, RCT 3, selección[MBF11.1] (1724)",
+      "composerName": "Jean-Philippe Rameau (1683-1764)"
+    },
+    {
+      "title": "Serenade for the doll, de Children’s corner , CD 119, n.º 3 (1906-1908)",
+      "composerName": "C. Debussy"
+    },
+    {
+      "title": "Suite en mi menor, RCT 2, selección (1724)",
+      "composerName": "J.-P. Rameau"
+    },
+    {
+      "title": "Jardins sous la pluie , de Estampes , CD 108 (1903)",
+      "composerName": "C. Debussy"
+    },
+    {
+      "title": "Étude n.º 3, de Études para piano , vol. 1 (1994)",
+      "composerName": "P. Glass"
+    },
+    {
+      "title": "The snow is dancing , de Children’s corner, CD 119, n.º 4 (1906-1908)",
+      "composerName": "C. Debussy"
+    },
+    {
+      "title": "Suite en la menor , RCT 5 (1727)",
+      "composerName": "J.-P. Rameau"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-vikingur-olafsson-4",
+      "checkedAt": "2026-09-03",
+      "externalId": "23771"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23771",
+      "checkedAt": "2026-09-03",
+      "externalId": "23771"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

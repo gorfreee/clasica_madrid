@@ -73,8 +73,9 @@
   "citations": [
     {
       "sourceId": "src_fundacion_canal",
-      "url": "https://www.fundacioncanal.com/ciclo-musica-camara/schubert-desde-otra-mirada/",
-      "checkedAt": "2026-08-28"
+      "url": "https://www.fundacioncanal.com/ciclo-musica-camara/schubert-desde-otra-mirada",
+      "checkedAt": "2026-09-03",
+      "externalId": "/ciclo-musica-camara/schubert-desde-otra-mirada"
     },
     {
       "sourceId": "src_fundacion_canal",
@@ -83,5 +84,5 @@
     }
   ],
   "primarySourceId": "src_fundacion_canal",
-  "lastVerifiedAt": "2026-08-28"
+  "lastVerifiedAt": "2026-09-03"
 }

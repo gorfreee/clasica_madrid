@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ocne_satelite_18_maderas_de_color",
+  "slug": "ocne-satelite-18-maderas-de-color",
+  "title": "OCNE. Satélite 18. Maderas de Color",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ocne_satelite_18_maderas_de_color_01",
+      "date": "2027-05-04",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Quima Ensemble"
+    },
+    {
+      "name": "Elsa Sánchez"
+    },
+    {
+      "name": "Irene Val"
+    },
+    {
+      "name": "Mireya Peñarroja"
+    },
+    {
+      "name": "Marta Santamaría"
+    }
+  ],
+  "composers": [
+    {
+      "name": "José María Ferrero"
+    },
+    {
+      "name": "Eduardo Raimundo"
+    },
+    {
+      "name": "Franz Schubert"
+    },
+    {
+      "name": "Federigo Fiorillo"
+    },
+    {
+      "name": "Jean Françaix"
+    },
+    {
+      "name": "Eddie Mora"
+    }
+  ],
+  "works": [
+    {
+      "title": "Corno inglés",
+      "composerName": "José María Ferrero"
+    },
+    {
+      "title": "Clarinete bajo",
+      "composerName": "Eduardo Raimundo"
+    },
+    {
+      "title": "Trío de cuerda en Si bemol mayor, D.471",
+      "composerName": "Franz Schubert"
+    },
+    {
+      "title": "Cuarteto con flauta núm.6 en Mi menor",
+      "composerName": "Federigo Fiorillo"
+    },
+    {
+      "title": "(versión para piccolo)",
+      "composerName": "Federigo Fiorillo"
+    },
+    {
+      "title": "Cuarteto para corno inglés,",
+      "composerName": "Jean Françaix"
+    },
+    {
+      "title": "Silencio III, para clarinete bajo,",
+      "composerName": "Eddie Mora"
+    },
+    {
+      "title": "violín, viola y violoncello",
+      "composerName": "Eddie Mora"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-18-maderas-de-color",
+      "checkedAt": "2026-09-03",
+      "externalId": "ocne-satelite-18-maderas-de-color"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

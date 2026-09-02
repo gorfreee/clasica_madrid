@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_la_filarmonica_septima_de_bruckner",
+  "slug": "la-filarmonica-concierto-de-sibelius",
+  "title": "La Filarmónica. Concierto de Sibelius",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_la_filarmonica_septima_de_bruckner_01",
+      "date": "2027-02-10",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Filarmónica de Helsinki"
+    },
+    {
+      "name": "Minami Yoshida"
+    },
+    {
+      "name": "Jukka-Pekka Saraste",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/la-filarmonica-septima-de-bruckner",
+      "checkedAt": "2026-09-03",
+      "externalId": "la-filarmonica-septima-de-bruckner"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

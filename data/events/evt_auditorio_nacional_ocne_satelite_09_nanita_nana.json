@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ocne_satelite_09_nanita_nana",
+  "slug": "ocne-satelite-09-nanita-nana",
+  "title": "OCNE. Satélite 09. Nanita, Nana",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ocne_satelite_09_nanita_nana_01",
+      "date": "2027-01-12",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Carmen Gurriarán"
+    },
+    {
+      "name": "Marta Caamaño"
+    },
+    {
+      "name": "Pablo Alonso"
+    },
+    {
+      "name": "Ales Pérez"
+    },
+    {
+      "name": "Coline-Marie Orliac"
+    },
+    {
+      "name": "Pedro Llarena"
+    },
+    {
+      "name": "Benjamín Zafra"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "chamber",
+    "choral",
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-09-nanita-nana",
+      "checkedAt": "2026-09-03",
+      "externalId": "ocne-satelite-09-nanita-nana"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

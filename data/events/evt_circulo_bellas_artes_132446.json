@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_circulo_bellas_artes_132446",
+  "slug": "cuarteto-cosmos-y-vicent-alberola-clarinete",
+  "title": "Cuarteto Cosmos y Vicent Alberola, clarinete",
+  "status": "scheduled",
+  "venueId": "ven_circulo_bellas_artes_teatro_fernando_de_rojas",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_circulo_bellas_artes_132446_01",
+      "date": "2027-02-28",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_circulo_bellas_artes",
+      "url": "https://www.circulobellasartes.com/eventos/cuarteto-cosmos-y-vicent-alberola-clarinete",
+      "checkedAt": "2026-09-03",
+      "externalId": "132446"
+    }
+  ],
+  "primarySourceId": "src_circulo_bellas_artes",
+  "lastVerifiedAt": "2026-09-03"
+}

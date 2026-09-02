@@ -42,8 +42,24 @@
       "name": "Elsa Benoit"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Charles Ives"
+    },
+    {
+      "name": "Claude Debussy"
+    }
+  ],
+  "works": [
+    {
+      "title": "Central Park en la oscuridad",
+      "composerName": "Charles Ives"
+    },
+    {
+      "title": "El martirio de san Sebastián",
+      "composerName": "Claude Debussy"
+    }
+  ],
   "eras": [
     "twentieth",
     "contemporary"
@@ -57,10 +73,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-08-1",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "39687b578b2f4a998880961b4a18f9d1"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_orcam_sinfonico_13_geometrias_sonoras",
+  "slug": "orcam-sinfonico-13-geometrias-sonoras",
+  "title": "ORCAM. Sinfónico 13. Geometrías Sonoras",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_orcam_sinfonico_13_geometrias_sonoras_01",
+      "date": "2027-06-29",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta de la Comunidad de Madrid"
+    },
+    {
+      "name": "Coro de la Comunidad de Madrid"
+    },
+    {
+      "name": "Narek Hakhnazaryan"
+    },
+    {
+      "name": "Óscar Rodríguez DIRECTOR CORO"
+    },
+    {
+      "name": "Eduardo Strausser",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ígor Stravinski"
+    },
+    {
+      "name": "Edward Elgar"
+    },
+    {
+      "name": "Dmitri Shostakóvich"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sinfonía de los salmos",
+      "composerName": "Ígor Stravinski"
+    },
+    {
+      "title": "Concierto para violonchelo y orquesta, en mi menor, op. 85",
+      "composerName": "Edward Elgar"
+    },
+    {
+      "title": "Sinfonía n.º 1, en fa menor, op. 10",
+      "composerName": "Dmitri Shostakóvich"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-sinfonico-13-geometrias-sonoras",
+      "checkedAt": "2026-09-03",
+      "externalId": "orcam-sinfonico-13-geometrias-sonoras"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

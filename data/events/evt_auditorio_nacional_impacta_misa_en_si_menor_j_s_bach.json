@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_impacta_misa_en_si_menor_j_s_bach",
+  "slug": "impacta-misa-en-si-menor-j-s-bach",
+  "title": "Impacta. Misa en si menor, J.S. Bach",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_impacta_misa_en_si_menor_j_s_bach_01",
+      "date": "2027-05-04",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Freiburg Baroque Orchestra"
+    },
+    {
+      "name": "Vox Luminis"
+    },
+    {
+      "name": "Lionel Meunier",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "J. S. Bach"
+    }
+  ],
+  "works": [
+    {
+      "title": "Misa en Si menor, BWV 232",
+      "composerName": "J. S. Bach"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "choral",
+    "early-music"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/impacta-misa-en-si-menor-j-s-bach",
+      "checkedAt": "2026-09-03",
+      "externalId": "impacta-misa-en-si-menor-j-s-bach"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

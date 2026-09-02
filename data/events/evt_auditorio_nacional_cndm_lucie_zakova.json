@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_cndm_lucie_zakova",
+  "slug": "cndm-lucie-zakova",
+  "title": "CNDM. Lucie Žáková",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_cndm_lucie_zakova_01",
+      "date": "2027-02-20",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "LUCIE ŽÁKOVÁ"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach (1685-1750)"
+    },
+    {
+      "name": "Philip Glass (1937)"
+    },
+    {
+      "name": "J. S. Bach"
+    },
+    {
+      "name": "Bedřich Antonín Wiedermann (1883-1951)"
+    },
+    {
+      "name": "Bedřich Smetana (1824-1884)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Preludio y fuga en la menor, BWV 543 (d. 1715)",
+      "composerName": "Johann Sebastian Bach (1685-1750)"
+    },
+    {
+      "title": "Dance n.º 4 (1979)",
+      "composerName": "Philip Glass (1937)"
+    },
+    {
+      "title": "Ich ruf zu dir, Herr Jesu Christ (Orgelbüchlein), BWV 639 (1713-1715)",
+      "composerName": "J. S. Bach"
+    },
+    {
+      "title": "Toccata y fuga en fa menor (1912)",
+      "composerName": "Bedřich Antonín Wiedermann (1883-1951)"
+    },
+    {
+      "title": "Vltava (El Moldava), de Má vlast, op. 111, n.º 2 (1874, arr. J. Scott)",
+      "composerName": "Bedřich Smetana (1824-1884)"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "romantic",
+    "contemporary"
+  ],
+  "formats": [
+    "recital",
+    "organ"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-lucie-zakova",
+      "checkedAt": "2026-09-03",
+      "externalId": "cndm-lucie-zakova"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

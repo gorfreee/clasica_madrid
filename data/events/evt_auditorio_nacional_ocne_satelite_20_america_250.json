@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ocne_satelite_20_america_250",
+  "slug": "ocne-satelite-20-america-250",
+  "title": "OCNE. Satélite 20. América 250",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ocne_satelite_20_america_250_01",
+      "date": "2027-05-18",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Aulos Madrid"
+    },
+    {
+      "name": "Álvaro Octavio Díaz"
+    },
+    {
+      "name": "José María Ferrero"
+    },
+    {
+      "name": "Enrique Pérez"
+    },
+    {
+      "name": "Javier Bonet"
+    },
+    {
+      "name": "Vicente Palomares"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antonín Dvořák"
+    },
+    {
+      "name": "Elliott Carter"
+    },
+    {
+      "name": "Amy Beach"
+    }
+  ],
+  "works": [
+    {
+      "title": "Cuarteto «Americano», op. 96 (arr. David Walter)",
+      "composerName": "Antonín Dvořák"
+    },
+    {
+      "title": "Quinteto de viento",
+      "composerName": "Elliott Carter"
+    },
+    {
+      "title": "Pastorale para quinteto de viento, op. 151",
+      "composerName": "Amy Beach"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-20-america-250",
+      "checkedAt": "2026-09-03",
+      "externalId": "ocne-satelite-20-america-250"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

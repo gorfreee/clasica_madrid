@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_zarzuela_es_temporada_lirica_2026_2027_los_gavilanes",
+  "slug": "los-gavilanes",
+  "title": "Los gavilanes",
+  "status": "scheduled",
+  "venueId": "ven_teatro_zarzuela",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_los_gavilanes_01",
+      "date": "2027-01-28",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_los_gavilanes_02",
+      "date": "2027-01-29",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_los_gavilanes_03",
+      "date": "2027-01-30",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_los_gavilanes_04",
+      "date": "2027-01-31",
+      "time": "18:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_los_gavilanes_05",
+      "date": "2027-02-04",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_los_gavilanes_06",
+      "date": "2027-02-05",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_los_gavilanes_07",
+      "date": "2027-02-06",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_los_gavilanes_08",
+      "date": "2027-02-07",
+      "time": "18:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_los_gavilanes_09",
+      "date": "2027-02-10",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_los_gavilanes_10",
+      "date": "2027-02-11",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_los_gavilanes_11",
+      "date": "2027-02-12",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_los_gavilanes_12",
+      "date": "2027-02-13",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "JORDI BERNÀCER",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "JACINTO GUERRERO"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "zarzuela"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_teatro_zarzuela",
+      "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/los-gavilanes",
+      "checkedAt": "2026-09-03",
+      "externalId": "/es/temporada/lirica-2026-2027/los-gavilanes"
+    }
+  ],
+  "primarySourceId": "src_teatro_zarzuela",
+  "lastVerifiedAt": "2026-09-03"
+}

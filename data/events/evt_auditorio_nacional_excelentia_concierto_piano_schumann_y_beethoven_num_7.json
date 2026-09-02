@@ -27,8 +27,31 @@
       "name": "Zee Zee"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Elgar"
+    },
+    {
+      "name": "Schumann"
+    },
+    {
+      "name": "Beethoven"
+    }
+  ],
+  "works": [
+    {
+      "title": "In the South “Alassio”, op.50",
+      "composerName": "Elgar"
+    },
+    {
+      "title": "Concierto para piano y orquesta en la menor, op. 54",
+      "composerName": "Schumann"
+    },
+    {
+      "title": "Sinfonía n.º 7",
+      "composerName": "Beethoven"
+    }
+  ],
   "eras": [
     "romantic",
     "classical",
@@ -44,10 +67,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-concierto-piano-schumann-y-beethoven-num-7",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "excelentia-concierto-piano-schumann-y-beethoven-num-7"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

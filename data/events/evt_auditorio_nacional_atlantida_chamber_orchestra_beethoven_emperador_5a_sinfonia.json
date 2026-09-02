@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_atlantida_chamber_orchestra_beethoven_emperador_5a_sinfonia",
+  "slug": "atlantida-chamber-orchestra-beethoven-emperador-5-sinfonia",
+  "title": "Atlántida Chamber Orchestra. Beethoven: Emperador & 5ª Sinfonía",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_atlantida_chamber_orchestra_beethoven_emperador_5a_sinfonia_01",
+      "date": "2027-03-14",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Atlántida Chamber Orchestra"
+    },
+    {
+      "name": "Shiran Wang"
+    },
+    {
+      "name": "Manuel Tévar",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven (1770–1827)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para piano nº 5 en Mi bemol mayor, Op. 73 “Emperador”",
+      "composerName": "Ludwig van Beethoven (1770–1827)"
+    },
+    {
+      "title": "Sinfonía nº 5 en Do menor, Op. 67",
+      "composerName": "Ludwig van Beethoven (1770–1827)"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "chamber",
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/atlantida-chamber-orchestra-beethoven-emperador-5a-sinfonia",
+      "checkedAt": "2026-09-03",
+      "externalId": "atlantida-chamber-orchestra-beethoven-emperador-5a-sinfonia"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

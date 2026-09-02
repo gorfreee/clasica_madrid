@@ -1,0 +1,190 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_real_barbero_sevilla",
+  "slug": "el-barbero-de-sevilla",
+  "title": "El barbero de Sevilla",
+  "status": "scheduled",
+  "venueId": "ven_teatro_real",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_real_barbero_sevilla_01",
+      "date": "2027-07-03",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_barbero_sevilla_02",
+      "date": "2027-07-04",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_barbero_sevilla_03",
+      "date": "2027-07-06",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_barbero_sevilla_04",
+      "date": "2027-07-07",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_barbero_sevilla_05",
+      "date": "2027-07-11",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_barbero_sevilla_06",
+      "date": "2027-07-12",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_barbero_sevilla_07",
+      "date": "2027-07-13",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_barbero_sevilla_08",
+      "date": "2027-07-14",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_barbero_sevilla_09",
+      "date": "2027-07-15",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_barbero_sevilla_10",
+      "date": "2027-07-16",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_barbero_sevilla_11",
+      "date": "2027-07-18",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_barbero_sevilla_12",
+      "date": "2027-07-19",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_barbero_sevilla_13",
+      "date": "2027-07-20",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_barbero_sevilla_14",
+      "date": "2027-07-21",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Giacomo Sagripanti",
+      "role": "conductor"
+    },
+    {
+      "name": "José Luis Basso",
+      "role": "conductor"
+    },
+    {
+      "name": "Coro y Orquesta Titulares del Teatro Real",
+      "role": "orchestra"
+    },
+    {
+      "name": "René Barbera"
+    },
+    {
+      "name": "Pietro Adaini"
+    },
+    {
+      "name": "Dave Monaco"
+    },
+    {
+      "name": "Misha Kiria"
+    },
+    {
+      "name": "Nicola Alaimo"
+    },
+    {
+      "name": "Pablo Ruiz"
+    },
+    {
+      "name": "Marina Viotti"
+    },
+    {
+      "name": "Isabel Leonard"
+    },
+    {
+      "name": "Olga Syniakova"
+    },
+    {
+      "name": "Andrzej Filończyk"
+    },
+    {
+      "name": "Florian Sempey"
+    },
+    {
+      "name": "Germán Olvera"
+    },
+    {
+      "name": "Roberto Tagliavini"
+    },
+    {
+      "name": "Maharram Huseynov"
+    },
+    {
+      "name": "Alejandro López"
+    },
+    {
+      "name": "Josep-Ramón Olivé"
+    },
+    {
+      "name": "María José Moreno"
+    },
+    {
+      "name": "Lauren Randolph"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Music Gioachino Rossini"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "opera",
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_teatro_real",
+      "url": "https://www.teatroreal.es/es/espectaculo/barbero-sevilla",
+      "checkedAt": "2026-09-03",
+      "externalId": "barbero-sevilla"
+    }
+  ],
+  "primarySourceId": "src_teatro_real",
+  "lastVerifiedAt": "2026-09-03"
+}

@@ -20,8 +20,33 @@
       "name": "BALTHASAR-NEUMANN-ORCHESTER"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach (1685-1750)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto de Brandeburgo n.º 2 en fa mayor, BWV 1047 (1721)",
+      "composerName": "Johann Sebastian Bach (1685-1750)"
+    },
+    {
+      "title": "Concierto de Brandeburgo n.º 3 en sol mayor, BWV 1048 (1718)",
+      "composerName": "Johann Sebastian Bach (1685-1750)"
+    },
+    {
+      "title": "Concierto de Brandeburgo n.º 4 en sol mayor, BWV 1049 (1719-1720)",
+      "composerName": "Johann Sebastian Bach (1685-1750)"
+    },
+    {
+      "title": "Concierto de Brandeburgo n.º 5 en re mayor, BWV 1050 (1720-1721)",
+      "composerName": "Johann Sebastian Bach (1685-1750)"
+    },
+    {
+      "title": "Concierto de Brandeburgo n.º 6 en si bemol mayor, BWV 1051 (1718)",
+      "composerName": "Johann Sebastian Bach (1685-1750)"
+    }
+  ],
   "eras": [
     "baroque"
   ],
@@ -34,10 +59,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-balthasar-neumann-orchester",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "cndm-balthasar-neumann-orchester"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23823",
+      "checkedAt": "2026-09-03",
+      "externalId": "23823"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

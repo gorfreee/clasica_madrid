@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ocne_satelite_11_lumina_natalis_maestros_de_capilla",
+  "slug": "ocne-satelite-11-lumina-natalis-maestros-de-capilla",
+  "title": "OCNE. Satélite 11 Lumina Natalis. Maestros de Capilla",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ocne_satelite_11_lumina_natalis_maestros_de_capilla_01",
+      "date": "2027-01-26",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ad Infinitum"
+    },
+    {
+      "name": "Joan Espina"
+    },
+    {
+      "name": "Alejandra Navarro"
+    },
+    {
+      "name": "Mireya Peñarroja"
+    },
+    {
+      "name": "Toni García Araque"
+    },
+    {
+      "name": "Ramón Puchades"
+    },
+    {
+      "name": "Brais García Maceiras"
+    },
+    {
+      "name": "Francesca Calero"
+    },
+    {
+      "name": "Agnieszka Grzywacz"
+    },
+    {
+      "name": "Rebeca Cardiel"
+    },
+    {
+      "name": "Beatriz Oleaga"
+    },
+    {
+      "name": "Ariel Hernández"
+    },
+    {
+      "name": "Manuel Torrado"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "chamber",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-11-lumina-natalis-maestros-de-capilla",
+      "checkedAt": "2026-09-03",
+      "externalId": "ocne-satelite-11-lumina-natalis-maestros-de-capilla"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_4855",
+  "slug": "duelo-de-sombras",
+  "title": "Duelo de sombras",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_4855_01",
+      "date": "2027-03-15",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta de la Comunidad de Madrid"
+    },
+    {
+      "name": "Coro de la Comunidad de Madrid"
+    },
+    {
+      "name": "Jorge Puerta"
+    },
+    {
+      "name": "Gustavo Castillo"
+    },
+    {
+      "name": "Javier Carmena",
+      "role": "choir"
+    },
+    {
+      "name": "Diego Matheuz",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antonio Estévez"
+    },
+    {
+      "name": "Béla Bartók"
+    }
+  ],
+  "works": [
+    {
+      "title": "Cantata criolla +",
+      "composerName": "Antonio Estévez"
+    },
+    {
+      "title": "Concierto para orquesta, Sz. 116",
+      "composerName": "Béla Bartók"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-sinfonico-8-duelo-de-sombras",
+      "checkedAt": "2026-09-03",
+      "externalId": "4855"
+    },
+    {
+      "sourceId": "src_fundacion_orcam",
+      "url": "https://fundacionorcam.org/conciertos/2026-27/duelo-de-sombras",
+      "checkedAt": "2026-09-03",
+      "externalId": "4855"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

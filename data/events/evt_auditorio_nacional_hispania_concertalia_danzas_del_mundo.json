@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_hispania_concertalia_danzas_del_mundo",
+  "slug": "hispania-concertalia-danzas-del-mundo",
+  "title": "Hispania Concertalia. Danzas del Mundo",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_hispania_concertalia_danzas_del_mundo_01",
+      "date": "2027-04-29",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "PHILHARMONIC ENSEMBLE"
+    },
+    {
+      "name": "Miembros de la Orquesta Filarmónica de Viena"
+    },
+    {
+      "name": "Serena Sáenz"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Danzas del Mundo"
+    },
+    {
+      "name": "Antonín Dvořák"
+    },
+    {
+      "name": "Johann Strauss II"
+    }
+  ],
+  "works": [
+    {
+      "title": "Programa (selección)",
+      "composerName": "Danzas del Mundo"
+    },
+    {
+      "title": "Johann Strauss II –Rosas del Sur, op. 388",
+      "composerName": "Danzas del Mundo"
+    },
+    {
+      "title": "Danza eslava, op. 46 n.º 8",
+      "composerName": "Antonín Dvořák"
+    },
+    {
+      "title": "Edvard Grieg – Danza de Anitra (de Peer Gynt)",
+      "composerName": "Antonín Dvořák"
+    },
+    {
+      "title": "Astor Piazzolla – Oblivion",
+      "composerName": "Antonín Dvořák"
+    },
+    {
+      "title": "Johannes Brahms – Danza húngara n.º 5",
+      "composerName": "Antonín Dvořák"
+    },
+    {
+      "title": "Camille Saint-Saëns –Danza macabra, op. 40",
+      "composerName": "Antonín Dvořák"
+    },
+    {
+      "title": "Wolfgang A. Mozart –Rondo alla turca, KV 331 (versión orquestal)",
+      "composerName": "Antonín Dvořák"
+    },
+    {
+      "title": "Johann Strauss II –Voces de primavera, op. 410 (soprano y orquesta)",
+      "composerName": "Antonín Dvořák"
+    },
+    {
+      "title": "Léo Delibes – Las hijas de Cádiz (aria para soprano y orquesta)",
+      "composerName": "Antonín Dvořák"
+    },
+    {
+      "title": "Béla Bartók – Danzas populares rumanas, Sz. 56",
+      "composerName": "Antonín Dvořák"
+    },
+    {
+      "title": "Manuel de Falla – Danza española n.º 1 (de La vida breve)",
+      "composerName": "Antonín Dvořák"
+    },
+    {
+      "title": "Csárdás de la ópera Ritter Pásmán, op. 441",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Astor Piazzolla –Libertango",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Dmitri Shostakóvich – Vals n.º 2",
+      "composerName": "Johann Strauss II"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/hispania-concertalia-danzas-del-mundo",
+      "checkedAt": "2026-09-03",
+      "externalId": "hispania-concertalia-danzas-del-mundo"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

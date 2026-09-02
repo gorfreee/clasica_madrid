@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_fundacion_scherzo_stephen_hough_1",
+  "slug": "fundacion-scherzo-stephen-hough",
+  "title": "Fundación Scherzo. Stephen Hough",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_fundacion_scherzo_stephen_hough_1_01",
+      "date": "2027-04-06",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Stephen Hough"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Arnold Schoenberg"
+    },
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Robert Schumann"
+    },
+    {
+      "name": "Richard M. Sherman / Stephen Hough"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sechs kleine Klavierstücke, Op. 19",
+      "composerName": "Arnold Schoenberg"
+    },
+    {
+      "title": "Karlheinz Stockhausen — Klavierstück III",
+      "composerName": "Arnold Schoenberg"
+    },
+    {
+      "title": "Bagatela en re mayor, Op. 119 n.º 10",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Sonata para piano n.º 21 «Waldstein», Op. 53",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Carnaval, escenas mignonnes sobre cuatro notas, Op. 9",
+      "composerName": "Robert Schumann"
+    },
+    {
+      "title": "Mary Poppins Suite",
+      "composerName": "Richard M. Sherman / Stephen Hough"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/fundacion-scherzo-stephen-hough-1",
+      "checkedAt": "2026-09-03",
+      "externalId": "fundacion-scherzo-stephen-hough-1"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

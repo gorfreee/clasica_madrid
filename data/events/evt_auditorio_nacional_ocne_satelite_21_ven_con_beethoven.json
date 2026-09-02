@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ocne_satelite_21_ven_con_beethoven",
+  "slug": "ocne-satelite-21-ven-con-beethoven",
+  "title": "OCNE. Satélite 21. Ven con Beethoven",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ocne_satelite_21_ven_con_beethoven_01",
+      "date": "2027-05-25",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Delia Agúndez"
+    },
+    {
+      "name": "Ariadna Martínez"
+    },
+    {
+      "name": "Rosa Miranda"
+    },
+    {
+      "name": "Patricia Glez. Arroyo"
+    },
+    {
+      "name": "Maria Morellà"
+    },
+    {
+      "name": "Marta Caamaño"
+    },
+    {
+      "name": "Daniel Oyarzabal"
+    },
+    {
+      "name": "Jone de la Fuente"
+    },
+    {
+      "name": "Mariana Cores"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    }
+  ],
+  "works": [
+    {
+      "title": "Inno al creatore",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Un astro nuevo, Jesu dulcis memoria,",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Dona nobis pacem, Tres cánones a capella,",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Volkslieder (selección) y Ode an die Freude",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "(de la Sinfonía núm. 9)",
+      "composerName": "Ludwig van Beethoven"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "chamber",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-21-ven-con-beethoven",
+      "checkedAt": "2026-09-03",
+      "externalId": "ocne-satelite-21-ven-con-beethoven"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

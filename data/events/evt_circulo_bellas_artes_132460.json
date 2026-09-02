@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_circulo_bellas_artes_132460",
+  "slug": "frank-peter-zimmermann-violin-y-dmytro-choni-piano",
+  "title": "Frank Peter Zimmermann, violín, y Dmytro Choni, piano",
+  "status": "scheduled",
+  "venueId": "ven_circulo_bellas_artes_teatro_fernando_de_rojas",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_circulo_bellas_artes_132460_01",
+      "date": "2027-05-30",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_circulo_bellas_artes",
+      "url": "https://www.circulobellasartes.com/eventos/frank-peter-zimmermann-violin-y-dmytro-choni-piano",
+      "checkedAt": "2026-09-03",
+      "externalId": "132460"
+    }
+  ],
+  "primarySourceId": "src_circulo_bellas_artes",
+  "lastVerifiedAt": "2026-09-03"
+}

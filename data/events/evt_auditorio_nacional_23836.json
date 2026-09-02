@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_23836",
+  "slug": "irene-roldan",
+  "title": "IRENE ROLDÁN",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_23836_01",
+      "date": "2027-01-27",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "IRENE ROLDÁN"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antonio de Cabezón (1510-1566)"
+    },
+    {
+      "name": "William Byrd (1543-1623)"
+    },
+    {
+      "name": "A. de Cabezón"
+    },
+    {
+      "name": "W. Byrd"
+    }
+  ],
+  "works": [
+    {
+      "title": "De Obras de música para tecla, arpa y vihuela (1578)",
+      "composerName": "Antonio de Cabezón (1510-1566)"
+    },
+    {
+      "title": "Tiento de primer tono , LX",
+      "composerName": "Antonio de Cabezón (1510-1566)"
+    },
+    {
+      "title": "Diferencias sobre el villancico ‘Quién te me enojó, Ysabel?’ (arr. A. Cea)",
+      "composerName": "Antonio de Cabezón (1510-1566)"
+    },
+    {
+      "title": "John, come kiss me now , MB 81",
+      "composerName": "William Byrd (1543-1623)"
+    },
+    {
+      "title": "De Obras de música para tecla, arpa y vihuela (1578)",
+      "composerName": "A. de Cabezón"
+    },
+    {
+      "title": "Discante sobre la pavana italiana",
+      "composerName": "A. de Cabezón"
+    },
+    {
+      "title": "Diferencias sobre la gallarda milanesa",
+      "composerName": "A. de Cabezón"
+    },
+    {
+      "title": "Pavan en re menor, MB 52a",
+      "composerName": "W. Byrd"
+    },
+    {
+      "title": "Galliard en re menor, MB 52b",
+      "composerName": "W. Byrd"
+    },
+    {
+      "title": "Duuiensela (D’où vient cela), de Obras de música para tecla, arpa y vihuela (1578)",
+      "composerName": "A. de Cabezón"
+    },
+    {
+      "title": "Fantasia en sol mayor, MB 62",
+      "composerName": "W. Byrd"
+    },
+    {
+      "title": "Tiento de quinto tono, LXVI",
+      "composerName": "A. de Cabezón"
+    },
+    {
+      "title": "Diferencias sobre ‘El canto llano del caballero’",
+      "composerName": "A. de Cabezón"
+    },
+    {
+      "title": "Prelude en la menor, MB 12",
+      "composerName": "W. Byrd"
+    },
+    {
+      "title": "Fantasia en la menor, MB 13",
+      "composerName": "W. Byrd"
+    }
+  ],
+  "eras": [
+    "renaissance"
+  ],
+  "formats": [
+    "recital",
+    "early-music"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-irene-roldan",
+      "checkedAt": "2026-09-03",
+      "externalId": "23836"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23836",
+      "checkedAt": "2026-09-03",
+      "externalId": "23836"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

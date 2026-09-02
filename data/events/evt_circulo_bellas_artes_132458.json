@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_circulo_bellas_artes_132458",
+  "slug": "florian-boesch-baritono-y-malcolm-martineau-piano",
+  "title": "Florian Boesch, barítono, y Malcolm Martineau, piano",
+  "status": "scheduled",
+  "venueId": "ven_circulo_bellas_artes_teatro_fernando_de_rojas",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_circulo_bellas_artes_132458_01",
+      "date": "2027-05-16",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "lied"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_circulo_bellas_artes",
+      "url": "https://www.circulobellasartes.com/eventos/florian-boesch-baritono-y-malcolm-martineau-piano",
+      "checkedAt": "2026-09-03",
+      "externalId": "132458"
+    }
+  ],
+  "primarySourceId": "src_circulo_bellas_artes",
+  "lastVerifiedAt": "2026-09-03"
+}

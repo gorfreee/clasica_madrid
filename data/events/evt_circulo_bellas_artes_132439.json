@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_circulo_bellas_artes_132439",
+  "slug": "benjamin-alard-clavecin-y-direccion-friends-falla150",
+  "title": "Benjamin Alard, clavecín y dirección & Friends #Falla150",
+  "status": "scheduled",
+  "venueId": "ven_circulo_bellas_artes_teatro_fernando_de_rojas",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_circulo_bellas_artes_132439_01",
+      "date": "2026-11-02",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "renaissance",
+    "baroque",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_circulo_bellas_artes",
+      "url": "https://www.circulobellasartes.com/eventos/benjamin-alard-clavicembalo-y-direccion-y-friends-falla15",
+      "checkedAt": "2026-09-03",
+      "externalId": "132439"
+    }
+  ],
+  "primarySourceId": "src_circulo_bellas_artes",
+  "lastVerifiedAt": "2026-09-03"
+}

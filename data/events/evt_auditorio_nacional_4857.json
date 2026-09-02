@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_4857",
+  "slug": "arquitecturas-del-espiritu",
+  "title": "Arquitecturas del espíritu",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_4857_01",
+      "date": "2027-04-12",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta de la Comunidad de Madrid"
+    },
+    {
+      "name": "Coro de la Comunidad de Madrid"
+    },
+    {
+      "name": "Emőke Baráth"
+    },
+    {
+      "name": "Jan Antem"
+    },
+    {
+      "name": "Marc Korovitch",
+      "role": "choir"
+    },
+    {
+      "name": "Jean-Claude Casadesus",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Francis Poulenc/strong>"
+    },
+    {
+      "name": "Gabriel Fauré"
+    }
+  ],
+  "works": [
+    {
+      "title": "Gloria, en sol mayor, FP 177",
+      "composerName": "Francis Poulenc/strong>"
+    },
+    {
+      "title": "Réquiem, en re menor, op. 48",
+      "composerName": "Gabriel Fauré"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-sinfonico-9-arquitecturas-del-espiritu",
+      "checkedAt": "2026-09-03",
+      "externalId": "4857"
+    },
+    {
+      "sourceId": "src_fundacion_orcam",
+      "url": "https://fundacionorcam.org/conciertos/2026-27/arquitecturas-del-espiritu",
+      "checkedAt": "2026-09-03",
+      "externalId": "4857"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

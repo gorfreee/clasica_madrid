@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_23778",
+  "slug": "cuarteto-de-jerusalen",
+  "title": "CUARTETO DE JERUSALÉN",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_23778_01",
+      "date": "2027-02-21",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "CUARTETO DE JERUSALÉN"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven (1770-1827)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Cuarteto de cuerda n.º 2 en sol mayor , op. 18, n.º 2 (1799)",
+      "composerName": "Ludwig van Beethoven (1770-1827)"
+    },
+    {
+      "title": "Cuarteto de cuerda n.º 9 en do mayor ‘Razumovski’ , op. 59, n.º 3 (1806)",
+      "composerName": "Ludwig van Beethoven (1770-1827)"
+    },
+    {
+      "title": "Cuarteto de cuerda n.º 16 en fa mayor , op. 135 (1826)",
+      "composerName": "Ludwig van Beethoven (1770-1827)"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-cuarteto-de-jerusalen-3",
+      "checkedAt": "2026-09-03",
+      "externalId": "23778"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23778",
+      "checkedAt": "2026-09-03",
+      "externalId": "23778"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

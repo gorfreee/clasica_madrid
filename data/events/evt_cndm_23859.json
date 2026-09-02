@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cndm_23859",
+  "slug": "cuarteto-attacca",
+  "title": "CUARTETO ATTACCA",
+  "status": "scheduled",
+  "venueId": "ven_museo_reina_sofia_auditorio_400",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cndm_23859_01",
+      "date": "2027-05-17",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Josep Planells Schiaffino",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Louis Couperin (1626-1661)"
+    },
+    {
+      "name": "Michael Ippolito (1985)"
+    },
+    {
+      "name": "Caroline Shaw (1982)"
+    },
+    {
+      "name": "John Adams (1947)"
+    },
+    {
+      "name": "Ludwig van Beethoven (1770-1827)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Prélude non mesuré n.º 1 en re menor (ca. 1650, arr. G. Kahane)",
+      "composerName": "Louis Couperin (1626-1661)"
+    },
+    {
+      "title": "Radiohead",
+      "composerName": "Michael Ippolito (1985)"
+    },
+    {
+      "title": "Pyramid song (2001, arr. A. Schroeder)",
+      "composerName": "Michael Ippolito (1985)"
+    },
+    {
+      "title": "Sarabande de la Partita para ocho voces (2012, arr. A. Yee)",
+      "composerName": "Caroline Shaw (1982)"
+    },
+    {
+      "title": "Shye Ben-Tzur (1975)/ Jonny Greenwood (1971)/ The Rajasthan Express",
+      "composerName": "Caroline Shaw (1982)"
+    },
+    {
+      "title": "Junun (2015, arr. N. Schram)",
+      "composerName": "Caroline Shaw (1982)"
+    },
+    {
+      "title": "Iron jig ** (2026)",
+      "composerName": "John Adams (1947)"
+    },
+    {
+      "title": "Gran fuga , op. 133 (1825-1826)",
+      "composerName": "Ludwig van Beethoven (1770-1827)"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic",
+    "contemporary"
+  ],
+  "formats": [
+    "chamber",
+    "early-music"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23859",
+      "checkedAt": "2026-09-03",
+      "externalId": "23859"
+    }
+  ],
+  "primarySourceId": "src_cndm",
+  "lastVerifiedAt": "2026-09-03"
+}

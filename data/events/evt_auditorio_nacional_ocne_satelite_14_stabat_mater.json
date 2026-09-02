@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ocne_satelite_14_stabat_mater",
+  "slug": "ocne-satelite-14-stabat-mater",
+  "title": "OCNE. Satélite 14. Stabat Mater",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ocne_satelite_14_stabat_mater_01",
+      "date": "2027-03-16",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Septimæ Ensemble"
+    },
+    {
+      "name": "Paloma Friedhoff"
+    },
+    {
+      "name": "Diego Blázquez"
+    },
+    {
+      "name": "Víctor Cruz"
+    },
+    {
+      "name": "Miguel Colom"
+    },
+    {
+      "name": "Ane Matxain"
+    },
+    {
+      "name": "Olga González Cárdaba"
+    },
+    {
+      "name": "Josep Trescolí"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Joseph Haydn"
+    },
+    {
+      "name": "Nicolás Ledesma"
+    }
+  ],
+  "works": [
+    {
+      "title": "Las siete últimas palabras de Cristo en la cruz, op. 51, Hob. III:50-56",
+      "composerName": "Joseph Haydn"
+    },
+    {
+      "title": "Stabat Mater, para tres voces y cuarteto de cuerda",
+      "composerName": "Nicolás Ledesma"
+    }
+  ],
+  "eras": [
+    "classical"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-14-stabat-mater",
+      "checkedAt": "2026-09-03",
+      "externalId": "ocne-satelite-14-stabat-mater"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

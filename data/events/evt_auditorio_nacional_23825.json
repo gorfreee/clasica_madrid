@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_23825",
+  "slug": "delirivm-musica",
+  "title": "DELIRIVM MUSICA",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_23825_01",
+      "date": "2027-01-28",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Juan Portilla"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Marc-Antoine Charpentier (1643-1704)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Pour un reposoir, H 508 (1683)",
+      "composerName": "Marc-Antoine Charpentier (1643-1704)"
+    },
+    {
+      "title": "Motet pour les tréspassés ( Plaintes des âmes du purgatoire ), H 311 (1671-1672)",
+      "composerName": "Marc-Antoine Charpentier (1643-1704)"
+    },
+    {
+      "title": "Annunciate superi. Pour toutes les fêtes de la bienheureuse Vierge Marie , H 333 (ca. 1683-1684)",
+      "composerName": "Marc-Antoine Charpentier (1643-1704)"
+    },
+    {
+      "title": "Magnificat à 3 dessus sur une basse obligée, H 75 (1684)",
+      "composerName": "Marc-Antoine Charpentier (1643-1704)"
+    },
+    {
+      "title": "De profundis , H 189 (1683)",
+      "composerName": "Marc-Antoine Charpentier (1643-1704)"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "chamber",
+    "choral",
+    "early-music"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-delirivm-musica",
+      "checkedAt": "2026-09-03",
+      "externalId": "23825"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23825",
+      "checkedAt": "2026-09-03",
+      "externalId": "23825"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

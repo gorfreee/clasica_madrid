@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_las_cuatro_estaciones_de_vivaldi_4",
+  "slug": "excelentia-las-cuatro-estaciones-de-vivaldi",
+  "title": "Excelentia. Las Cuatro Estaciones de Vivaldi",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_las_cuatro_estaciones_de_vivaldi_4_01",
+      "date": "2027-01-30",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Délica Chamber Orchestra"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antonio Vivaldi"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para cuerdas en sol menor RV 157",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "La Folia RV 63 Op. 1 n.º 12. Tema con variaciones",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "Concierto en la menor RV 522 (L’estro armonico, Op. 3 n.º 8)",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "Concierto en re menor RV 565 (L’estro armonico, Op. 3 n.º 11)",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "Las cuatro estaciones Op. 8",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "La primavera, RV 269",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "El verano, RV 315",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "El otoño, RV 293",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "El invierno, RV 297",
+      "composerName": "Antonio Vivaldi"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-las-cuatro-estaciones-de-vivaldi-4",
+      "checkedAt": "2026-09-03",
+      "externalId": "excelentia-las-cuatro-estaciones-de-vivaldi-4"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

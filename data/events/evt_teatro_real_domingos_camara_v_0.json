@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_real_domingos_camara_v_0",
+  "slug": "domingos-de-camara-v-2",
+  "title": "Domingos de Cámara V",
+  "status": "scheduled",
+  "venueId": "ven_teatro_real",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_real_domingos_camara_v_0_01",
+      "date": "2027-04-25",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_teatro_real",
+      "url": "https://www.teatroreal.es/es/espectaculo/domingos-camara-v-0",
+      "checkedAt": "2026-09-03",
+      "externalId": "domingos-camara-v-0"
+    }
+  ],
+  "primarySourceId": "src_teatro_real",
+  "lastVerifiedAt": "2026-09-03"
+}

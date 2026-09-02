@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_cndm_vespres_d2019arnadi_6",
+  "slug": "cndm-vespres-d-arnadi",
+  "title": "CNDM. Vespres D’Arnadí",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_cndm_vespres_d2019arnadi_6_01",
+      "date": "2027-04-25",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "VESPRES D’ARNADÍ"
+    },
+    {
+      "name": "DANI ESPASA"
+    },
+    {
+      "name": "XAVIER SABATA"
+    },
+    {
+      "name": "EMŐKE BARÁTH"
+    },
+    {
+      "name": "ANNA DEVIN"
+    },
+    {
+      "name": "GABRIEL DÍAZ"
+    },
+    {
+      "name": "JOSEP-RAMON OLIVÉ"
+    },
+    {
+      "name": "FERRAN MITJANS"
+    },
+    {
+      "name": "ALBERT GUIÑÓN"
+    }
+  ],
+  "composers": [
+    {
+      "name": "George Frideric Haendel (1685-1759)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Alessandro, HWV 21 (1726)",
+      "composerName": "George Frideric Haendel (1685-1759)"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-vespres-d2019arnadi-6",
+      "checkedAt": "2026-09-03",
+      "externalId": "cndm-vespres-d2019arnadi-6"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

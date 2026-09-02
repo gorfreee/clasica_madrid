@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_la_flauta_magica_de_mozart",
+  "slug": "excelentia-la-flauta-magica-de-mozart",
+  "title": "Excelentia. La Flauta Mágica de Mozart",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_la_flauta_magica_de_mozart_01",
+      "date": "2027-04-01",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Clásica Santa Cecilia"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "classical"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-la-flauta-magica-de-mozart",
+      "checkedAt": "2026-09-03",
+      "externalId": "excelentia-la-flauta-magica-de-mozart"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

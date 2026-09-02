@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cndm_23853",
+  "slug": "brooklyn-rider",
+  "title": "BROOKLYN RIDER",
+  "status": "scheduled",
+  "venueId": "ven_museo_reina_sofia_auditorio_400",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cndm_23853_01",
+      "date": "2027-02-01",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Philip Glass (1937)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Cuarteto de cuerda n.º 7 (2014)",
+      "composerName": "Philip Glass (1937)"
+    },
+    {
+      "title": "Cuarteto de cuerda n.º 2 ‘Company’ (1984)",
+      "composerName": "Philip Glass (1937)"
+    },
+    {
+      "title": "Cuarteto de cuerda n.º 5 (1991)",
+      "composerName": "Philip Glass (1937)"
+    },
+    {
+      "title": "Cuarteto de cuerda n.º 4 ‘Buczak’ (1989)",
+      "composerName": "Philip Glass (1937)"
+    },
+    {
+      "title": "Cuarteto de cuerda n.º 3 ‘Mishima’ (1985)",
+      "composerName": "Philip Glass (1937)"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23853",
+      "checkedAt": "2026-09-03",
+      "externalId": "23853"
+    }
+  ],
+  "primarySourceId": "src_cndm",
+  "lastVerifiedAt": "2026-09-03"
+}

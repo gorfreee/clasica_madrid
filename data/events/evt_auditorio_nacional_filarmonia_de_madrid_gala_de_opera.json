@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_filarmonia_de_madrid_gala_de_opera",
+  "slug": "filarmonia-de-madrid-gala-de-opera",
+  "title": "Filarmonía de Madrid. Gala de Ópera",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_filarmonia_de_madrid_gala_de_opera_01",
+      "date": "2026-10-22",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta y Coro Filarmonía"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Participativos Filarmonía"
+    }
+  ],
+  "works": [
+    {
+      "title": "Pascual Osa, Director Musical",
+      "composerName": "Participativos Filarmonía"
+    }
+  ],
+  "eras": [],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/filarmonia-de-madrid-gala-de-opera",
+      "checkedAt": "2026-09-03",
+      "externalId": "filarmonia-de-madrid-gala-de-opera"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

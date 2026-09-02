@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_cndm_klangforum_wien_1",
+  "slug": "cndm-klangforum-wien",
+  "title": "CNDM. Klangforum Wien",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_cndm_klangforum_wien_1_01",
+      "date": "2027-01-14",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "KLANGFORUM WIEN"
+    },
+    {
+      "name": "INGO METZMACHER",
+      "role": "conductor"
+    },
+    {
+      "name": "JULIA BULLOCK"
+    },
+    {
+      "name": "PETER TANTSITS"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "chamber",
+    "lied"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-klangforum-wien-1",
+      "checkedAt": "2026-09-03",
+      "externalId": "cndm-klangforum-wien-1"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

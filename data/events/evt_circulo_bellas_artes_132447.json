@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_circulo_bellas_artes_132447",
+  "slug": "cuarteto-danel",
+  "title": "Cuarteto Danel",
+  "status": "scheduled",
+  "venueId": "ven_circulo_bellas_artes_teatro_fernando_de_rojas",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_circulo_bellas_artes_132447_01",
+      "date": "2027-03-07",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "chamber",
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_circulo_bellas_artes",
+      "url": "https://www.circulobellasartes.com/eventos/cuarteto-danel-2026-27",
+      "checkedAt": "2026-09-03",
+      "externalId": "132447"
+    }
+  ],
+  "primarySourceId": "src_circulo_bellas_artes",
+  "lastVerifiedAt": "2026-09-03"
+}

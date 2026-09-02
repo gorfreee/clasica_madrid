@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cndm_23858",
+  "slug": "ensemble-modern",
+  "title": "ENSEMBLE MODERN",
+  "status": "scheduled",
+  "venueId": "ven_museo_reina_sofia_auditorio_400",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cndm_23858_01",
+      "date": "2027-04-26",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Josep Planells Schiaffino",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Alberto Posadas (1967)"
+    },
+    {
+      "name": "Arnulf Herrmann (1968)"
+    },
+    {
+      "name": "José María Sánchez-Verdú (1968)"
+    },
+    {
+      "name": "Unsuk Chin (1961)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Estreno absoluto. Obra encargo del CNDM *+ (2027)",
+      "composerName": "José María Sánchez-Verdú (1968)"
+    },
+    {
+      "title": "Gougalōn (2009)",
+      "composerName": "Unsuk Chin (1961)"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23858",
+      "checkedAt": "2026-09-03",
+      "externalId": "23858"
+    }
+  ],
+  "primarySourceId": "src_cndm",
+  "lastVerifiedAt": "2026-09-03"
+}

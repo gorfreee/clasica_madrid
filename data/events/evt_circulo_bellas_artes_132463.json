@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_circulo_bellas_artes_132463",
+  "slug": "matthias-goerne-baritono",
+  "title": "Matthias Goerne, barítono",
+  "status": "scheduled",
+  "venueId": "ven_circulo_bellas_artes_teatro_fernando_de_rojas",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_circulo_bellas_artes_132463_01",
+      "date": "2027-06-06",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber",
+    "recital",
+    "lied"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_circulo_bellas_artes",
+      "url": "https://www.circulobellasartes.com/eventos/matthias-goerne-baritono",
+      "checkedAt": "2026-09-03",
+      "externalId": "132463"
+    }
+  ],
+  "primarySourceId": "src_circulo_bellas_artes",
+  "lastVerifiedAt": "2026-09-03"
+}

@@ -44,8 +44,38 @@
       "name": "Gabriel Sevilla Martínez"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Jeromita Linares"
+    },
+    {
+      "name": "Alicia Terzian"
+    },
+    {
+      "name": "Irma Urteaga"
+    },
+    {
+      "name": "Luis Gianneo"
+    }
+  ],
+  "works": [
+    {
+      "title": "Cuatro canciones opulares argentinas",
+      "composerName": "Jeromita Linares"
+    },
+    {
+      "title": "Canción del atardecer (del opus 5)",
+      "composerName": "Alicia Terzian"
+    },
+    {
+      "title": "Luz de mundos",
+      "composerName": "Irma Urteaga"
+    },
+    {
+      "title": "Marcha del Inca (De cantos populares incaicos)",
+      "composerName": "Luis Gianneo"
+    }
+  ],
   "eras": [
     "twentieth",
     "contemporary"
@@ -59,10 +89,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-02-raices-y-modernidad",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "ocne-satelite-02-raices-y-modernidad"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_carmina_burana_7",
+  "slug": "excelentia-carmina-burana",
+  "title": "Excelentia. Carmina Burana",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_carmina_burana_7_01",
+      "date": "2027-02-09",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Sociedad Coral Excelentia de Madrid"
+    },
+    {
+      "name": "Orquesta Clásica Santa Cecilia"
+    },
+    {
+      "name": "Kynan Johns",
+      "role": "conductor"
+    },
+    {
+      "name": "Rocío Martínez"
+    },
+    {
+      "name": "Manuel Mas"
+    },
+    {
+      "name": "Adrián Espada"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Franz Liszt"
+    },
+    {
+      "name": "Alexander Borodin"
+    }
+  ],
+  "works": [
+    {
+      "title": "Los preludios, S. 97 — poema sinfónico n.º 3",
+      "composerName": "Franz Liszt"
+    },
+    {
+      "title": "Danzas polovtsianas, de El príncipe Ígor",
+      "composerName": "Alexander Borodin"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-carmina-burana-7",
+      "checkedAt": "2026-09-03",
+      "externalId": "excelentia-carmina-burana-7"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

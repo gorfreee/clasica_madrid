@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cndm_23804",
+  "slug": "collegium-1704-la-pasion-segun-san-mateo-j-s-bach",
+  "title": "COLLEGIUM 1704: \"LA PASIÓN SEGÚN SAN MATEO\" (J. S. BACH)",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cndm_23804_01",
+      "date": "2027-03-21",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Václav Luks",
+      "role": "conductor"
+    },
+    {
+      "name": "Collegium Vocale 1704"
+    },
+    {
+      "name": "Collegium 1704"
+    },
+    {
+      "name": "Eric Stoklossa"
+    },
+    {
+      "name": "Matthias Winckhler"
+    },
+    {
+      "name": "Céline Scheen"
+    },
+    {
+      "name": "Tereza Zimková"
+    },
+    {
+      "name": "Pavla Radostová"
+    },
+    {
+      "name": "Luciana Mancini"
+    },
+    {
+      "name": "Aneta Petrasová"
+    },
+    {
+      "name": "Ondřej Holub"
+    },
+    {
+      "name": "Jan Petryka"
+    },
+    {
+      "name": "Lukáš Zeman"
+    },
+    {
+      "name": "Jiří Miroslav Procházka"
+    },
+    {
+      "name": "Krešimir Stražanac"
+    },
+    {
+      "name": "Tomáš Šelc"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach (1685-1750)"
+    }
+  ],
+  "works": [
+    {
+      "title": "La pasión según san Mateo , BWV 244 (1727)",
+      "composerName": "Johann Sebastian Bach (1685-1750)"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "symphonic",
+    "early-music"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23804",
+      "checkedAt": "2026-09-03",
+      "externalId": "23804"
+    }
+  ],
+  "primarySourceId": "src_cndm",
+  "lastVerifiedAt": "2026-09-03"
+}

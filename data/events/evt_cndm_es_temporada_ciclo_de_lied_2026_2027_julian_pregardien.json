@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cndm_es_temporada_ciclo_de_lied_2026_2027_julian_pregardien",
+  "slug": "julian-pregardien",
+  "title": "Julian Prégardien",
+  "status": "scheduled",
+  "venueId": "ven_teatro_zarzuela",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cndm_es_temporada_ciclo_de_lied_2026_2027_julian_pregardien_01",
+      "date": "2027-02-15",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "MARIANNE CREBASSA"
+    },
+    {
+      "name": "ALPHONSE CEMIN *"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Franz Schubert (1797-1828)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Winterreise , D 911 (1827)",
+      "composerName": "Franz Schubert (1797-1828)"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "recital",
+    "lied"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23796",
+      "checkedAt": "2026-09-03",
+      "externalId": "/es/temporada/ciclo-de-lied-2026-2027/julian-pregardien"
+    },
+    {
+      "sourceId": "src_teatro_zarzuela",
+      "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/ciclo-de-lied-2026-2027/julian-pregardien",
+      "checkedAt": "2026-09-03",
+      "externalId": "/es/temporada/ciclo-de-lied-2026-2027/julian-pregardien"
+    }
+  ],
+  "primarySourceId": "src_cndm",
+  "lastVerifiedAt": "2026-09-03"
+}

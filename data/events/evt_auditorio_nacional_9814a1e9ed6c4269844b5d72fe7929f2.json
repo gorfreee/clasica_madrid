@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_9814a1e9ed6c4269844b5d72fe7929f2",
+  "slug": "ocne-sinfonico-16",
+  "title": "OCNE. Sinfónico 16",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_9814a1e9ed6c4269844b5d72fe7929f2_01",
+      "date": "2027-04-09",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_9814a1e9ed6c4269844b5d72fe7929f2_02",
+      "date": "2027-04-10",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_9814a1e9ed6c4269844b5d72fe7929f2_03",
+      "date": "2027-04-11",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Nacional de España"
+    },
+    {
+      "name": "Kent Nagano",
+      "role": "conductor"
+    },
+    {
+      "name": "Enrique Pérez Piquer"
+    },
+    {
+      "name": "Álvaro Octavio"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Olivier Messiaen"
+    },
+    {
+      "name": "Franz Joseph Haydn"
+    },
+    {
+      "name": "Camille Saint-Saëns"
+    },
+    {
+      "name": "Claude Debussy"
+    },
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    }
+  ],
+  "works": [
+    {
+      "title": "«Abismo de los pájaros», del Cuarteto para el fin",
+      "composerName": "Olivier Messiaen"
+    },
+    {
+      "title": "de los tiempos (III)",
+      "composerName": "Olivier Messiaen"
+    },
+    {
+      "title": "Sinfoníanúm. 83 en Sol menor, «La gallina»",
+      "composerName": "Franz Joseph Haydn"
+    },
+    {
+      "title": "El carnaval de los animales",
+      "composerName": "Camille Saint-Saëns"
+    },
+    {
+      "title": "Syrinx, para flauta solista",
+      "composerName": "Claude Debussy"
+    },
+    {
+      "title": "Sinfonía núm. 41, en Do mayor, K. 551 «Júpiter»",
+      "composerName": "Wolfgang Amadeus Mozart"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic",
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-16-4",
+      "checkedAt": "2026-09-03",
+      "externalId": "9814a1e9ed6c4269844b5d72fe7929f2"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

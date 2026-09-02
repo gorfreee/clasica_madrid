@@ -38,8 +38,44 @@
       "name": "Javier Bonet"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Francesco Federici"
+    },
+    {
+      "name": "Felipe Libón"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sexteto núm. 1",
+      "composerName": "Francesco Federici"
+    },
+    {
+      "title": "Anónimo (Palacio Real de Madrid)",
+      "composerName": "Francesco Federici"
+    },
+    {
+      "title": "Trío para viola, trompa y fagot nº 3",
+      "composerName": "Francesco Federici"
+    },
+    {
+      "title": "Vicente Martín y Soler",
+      "composerName": "Francesco Federici"
+    },
+    {
+      "title": "Cuarteto para oboe y cuerdas sobre Una cosa rara",
+      "composerName": "Francesco Federici"
+    },
+    {
+      "title": "Trío núm. 1, op. 6",
+      "composerName": "Felipe Libón"
+    },
+    {
+      "title": "Sexteto núm. 3",
+      "composerName": "Francesco Federici"
+    }
+  ],
   "eras": [
     "classical"
   ],
@@ -52,10 +88,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-07-los-vientos-de-palacio",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "ocne-satelite-07-los-vientos-de-palacio"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_23817",
+  "slug": "fazil-say-signum-saxophone-quartet",
+  "title": "FAZIL SAY & SIGNUM SAXOPHONE QUARTET",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_23817_01",
+      "date": "2027-01-21",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "FAZIL SAY"
+    },
+    {
+      "name": "SIGNUM SAXOPHONE QUARTET"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Robert Schumann (1810-1856)"
+    },
+    {
+      "name": "Fazıl Say (1970)"
+    },
+    {
+      "name": "G.Gershwin"
+    }
+  ],
+  "works": [
+    {
+      "title": "Quinteto con piano en mi bemol mayor, op. 44 (1842, arr. Signum)",
+      "composerName": "Robert Schumann (1810-1856)"
+    },
+    {
+      "title": "Claros. Temple of prophecies, para piano, op. 112 (2024)",
+      "composerName": "Fazıl Say (1970)"
+    },
+    {
+      "title": "Rhapsody in blue (1924, arr. Signum)",
+      "composerName": "G.Gershwin"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "chamber",
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-fazil-say",
+      "checkedAt": "2026-09-03",
+      "externalId": "23817"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23817",
+      "checkedAt": "2026-09-03",
+      "externalId": "23817"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

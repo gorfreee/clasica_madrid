@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cndm_23812",
+  "slug": "cantoria",
+  "title": "CANTORÍA",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cndm_23812_01",
+      "date": "2027-05-09",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Jorge Losana",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Claudio Monteverdi (1567-1643)"
+    },
+    {
+      "name": "Heinrich Schütz (1585-1672)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Dixit Dominus , SV 264",
+      "composerName": "Claudio Monteverdi (1567-1643)"
+    },
+    {
+      "title": "Salve Regina , SV 284",
+      "composerName": "Claudio Monteverdi (1567-1643)"
+    },
+    {
+      "title": "Beatus vir, SV 268",
+      "composerName": "Claudio Monteverdi (1567-1643)"
+    },
+    {
+      "title": "Gloria a 7 , SV 258",
+      "composerName": "Claudio Monteverdi (1567-1643)"
+    },
+    {
+      "title": "Magnificat , SV 281",
+      "composerName": "Claudio Monteverdi (1567-1643)"
+    },
+    {
+      "title": "Adoramus te , SV 289 ( Libro primo de motetti in lode d’iddio nostro Signore , de G. C. Bianchi, 1620)",
+      "composerName": "Claudio Monteverdi (1567-1643)"
+    },
+    {
+      "title": "De Psalmen Davids sampt etlichen Moteten und Concerten , op. 2 (1619)",
+      "composerName": "Heinrich Schütz (1585-1672)"
+    },
+    {
+      "title": "An den Wassern zu Babel saßen wir , SWV 37",
+      "composerName": "Heinrich Schütz (1585-1672)"
+    },
+    {
+      "title": "Warum toben die Heiden , SWV 23",
+      "composerName": "Heinrich Schütz (1585-1672)"
+    },
+    {
+      "title": "Alleluja! Lobet den Herren in seinem Heiligtum , SWV 38",
+      "composerName": "Heinrich Schütz (1585-1672)"
+    },
+    {
+      "title": "Singet dem Herrn ein neues Lied , SWV 35",
+      "composerName": "Heinrich Schütz (1585-1672)"
+    },
+    {
+      "title": "Jauchzet dem Herren, alle Welt, SWV 36",
+      "composerName": "Heinrich Schütz (1585-1672)"
+    },
+    {
+      "title": "Danket dem Herren, denn er ist freundlich, SWV 45",
+      "composerName": "Heinrich Schütz (1585-1672)"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "symphonic",
+    "early-music",
+    "lied"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23812",
+      "checkedAt": "2026-09-03",
+      "externalId": "23812"
+    }
+  ],
+  "primarySourceId": "src_cndm",
+  "lastVerifiedAt": "2026-09-03"
+}

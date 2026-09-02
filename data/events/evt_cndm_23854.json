@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cndm_23854",
+  "slug": "cuarteto-diotima-arcangel",
+  "title": "CUARTETO DIOTIMA & ARCÁNGEL",
+  "status": "scheduled",
+  "venueId": "ven_museo_reina_sofia_auditorio_400",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cndm_23854_01",
+      "date": "2027-02-22",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "M. Sotelo"
+    }
+  ],
+  "works": [
+    {
+      "title": "Virgen de las nubes, para voz (cantaor) y cuarteto de cuerda ** (2026)",
+      "composerName": "M. Sotelo"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23854",
+      "checkedAt": "2026-09-03",
+      "externalId": "23854"
+    }
+  ],
+  "primarySourceId": "src_cndm",
+  "lastVerifiedAt": "2026-09-03"
+}

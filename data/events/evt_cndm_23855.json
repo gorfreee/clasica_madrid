@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cndm_23855",
+  "slug": "trio-penderecki",
+  "title": "TRÍO PENDERECKI",
+  "status": "scheduled",
+  "venueId": "ven_museo_reina_sofia_auditorio_400",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cndm_23855_01",
+      "date": "2027-03-15",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Krzysztof Penderecki (1933-2020)"
+    },
+    {
+      "name": "Arvo Pärt (1935)"
+    },
+    {
+      "name": "Fazıl Say (1970)"
+    },
+    {
+      "name": "Rodión Shchedrín (1932-2025)"
+    },
+    {
+      "name": "Òscar Colomina i Bosch (1977)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Ciaconna (2005, arr. L. Krupiński)",
+      "composerName": "Krzysztof Penderecki (1933-2020)"
+    },
+    {
+      "title": "Lacrimosa , del Réquiem polaco (1980, arr. L. Krupiński)",
+      "composerName": "Krzysztof Penderecki (1933-2020)"
+    },
+    {
+      "title": "Serenade (1996-1997, arr. L. Krupiński)",
+      "composerName": "Krzysztof Penderecki (1933-2020)"
+    },
+    {
+      "title": "Mozart-Adagio , para trío con piano (1992)",
+      "composerName": "Arvo Pärt (1935)"
+    },
+    {
+      "title": "Trío para clarinete, violonchelo y piano (1973)",
+      "composerName": "Arvo Pärt (1935)"
+    },
+    {
+      "title": "Estreno absoluto. Obra encargo del CNDM *+ (2027)",
+      "composerName": "Òscar Colomina i Bosch (1977)"
+    }
+  ],
+  "eras": [
+    "classical"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23855",
+      "checkedAt": "2026-09-03",
+      "externalId": "23855"
+    }
+  ],
+  "primarySourceId": "src_cndm",
+  "lastVerifiedAt": "2026-09-03"
+}

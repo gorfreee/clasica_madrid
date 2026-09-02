@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_4851",
+  "slug": "memoria-de-un-mundo",
+  "title": "Memoria de un mundo",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_4851_01",
+      "date": "2027-02-15",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta de la Comunidad de Madrid"
+    },
+    {
+      "name": "Albrecht Mayer"
+    },
+    {
+      "name": "Alondra de la Parra",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Richard Strauss"
+    },
+    {
+      "name": "Ludwig van Beethoven"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para oboe, en re mayor, op. 144",
+      "composerName": "Richard Strauss"
+    },
+    {
+      "title": "Sinfonía n.º 3, en mi bemol mayor op. 55 “Heroica”",
+      "composerName": "Ludwig van Beethoven"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-sinfonico-6-memoria-de-un-mundo",
+      "checkedAt": "2026-09-03",
+      "externalId": "4851"
+    },
+    {
+      "sourceId": "src_fundacion_orcam",
+      "url": "https://fundacionorcam.org/conciertos/2026-27/memoria-de-un-mundo",
+      "checkedAt": "2026-09-03",
+      "externalId": "4851"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

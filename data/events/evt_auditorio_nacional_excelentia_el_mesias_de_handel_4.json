@@ -39,8 +39,17 @@
       "name": "David Cervera"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "F. Händel"
+    }
+  ],
+  "works": [
+    {
+      "title": "El Mesías, HWV 56",
+      "composerName": "F. Händel"
+    }
+  ],
   "eras": [
     "baroque"
   ],
@@ -54,10 +63,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-el-mesias-de-handel-4",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "excelentia-el-mesias-de-handel-4"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

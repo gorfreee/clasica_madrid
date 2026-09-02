@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_real_pasion_segun_san_mateo",
+  "slug": "la-pasion-segun-san-mateo",
+  "title": "La Pasión según San Mateo",
+  "status": "scheduled",
+  "venueId": "ven_teatro_real",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_real_pasion_segun_san_mateo_01",
+      "date": "2027-04-04",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Teodor Currentzis",
+      "role": "conductor"
+    },
+    {
+      "name": "Utopia Orchestra & Choir",
+      "role": "orchestra"
+    },
+    {
+      "name": "Patrick Grahl"
+    },
+    {
+      "name": "Johannes Kammler"
+    },
+    {
+      "name": "David Fischer"
+    },
+    {
+      "name": "Iveta Simonyan"
+    },
+    {
+      "name": "Yulia Vakula"
+    },
+    {
+      "name": "Ludwig Mittelhammer"
+    },
+    {
+      "name": "Christophe Dumaux"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "opera",
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_teatro_real",
+      "url": "https://www.teatroreal.es/es/espectaculo/pasion-segun-san-mateo",
+      "checkedAt": "2026-09-03",
+      "externalId": "pasion-segun-san-mateo"
+    }
+  ],
+  "primarySourceId": "src_teatro_real",
+  "lastVerifiedAt": "2026-09-03"
+}

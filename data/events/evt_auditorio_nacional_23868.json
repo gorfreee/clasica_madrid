@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_23868",
+  "slug": "tabea-zimmermann-jean-guihen-queyras-javier-perianes",
+  "title": "TABEA ZIMMERMANN, JEAN-GUIHEN QUEYRAS & JAVIER PERIANES",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_23868_01",
+      "date": "2027-02-17",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Tabea Zimmermann"
+    },
+    {
+      "name": "Jean-Guihen Queyras"
+    },
+    {
+      "name": "Javier Perianes"
+    }
+  ],
+  "composers": [
+    {
+      "name": "J. Brahms"
+    }
+  ],
+  "works": [
+    {
+      "title": "Trío en la menor, op. 114 (1891-1892)",
+      "composerName": "J. Brahms"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-tabea-zimmermann-jean-guihen-queyras-javier-perianes",
+      "checkedAt": "2026-09-03",
+      "externalId": "23868"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23868",
+      "checkedAt": "2026-09-03",
+      "externalId": "23868"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_uam_musica_por_la_paz_barroco_iberico_italiano",
+  "slug": "uam-musica-por-la-paz-barroco-iberico-italiano",
+  "title": "UAM. Música por la Paz. Barroco Ibérico Italiano",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_uam_musica_por_la_paz_barroco_iberico_italiano_01",
+      "date": "2027-02-27",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Jacobo Díaz Giráldez"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Benedetto Marcello (1686 - 1739)"
+    },
+    {
+      "name": "Antonio Vivaldi (1678-1741)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para oboe en re menor, S.Z799",
+      "composerName": "Benedetto Marcello (1686 - 1739)"
+    },
+    {
+      "title": "Concierto para flautino en Do mayor RV 443",
+      "composerName": "Antonio Vivaldi (1678-1741)"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "early-music",
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/uam-musica-por-la-paz-barroco-iberico-italiano",
+      "checkedAt": "2026-09-03",
+      "externalId": "uam-musica-por-la-paz-barroco-iberico-italiano"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

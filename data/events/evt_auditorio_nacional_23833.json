@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_23833",
+  "slug": "capella-de-ministrers",
+  "title": "CAPELLA DE MINISTRERS",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_23833_01",
+      "date": "2027-05-21",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Carles Magraner"
+    }
+  ],
+  "composers": [
+    {
+      "name": "I. PRÍNCIPE HEREDERO (1527-1547)"
+    },
+    {
+      "name": "II. EL FELICÍSIMO VIAJE (1548-1555)"
+    },
+    {
+      "name": "IV. OCASO DEL REY PRUDENTE (1580-1598)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Obras de T. Susato (ca. 1515-d. 1570), J. Desprez (ca. 1440-1521), N. Gombert (ca. 1495-ca. 1560), J. del Encina (1468-1529), P. de Pastrana (ca. 1495-1563), A. Mudarra (ca. 1510-1580) y L. de Milán (ca. 1500-ca. 1561)",
+      "composerName": "I. PRÍNCIPE HEREDERO (1527-1547)"
+    },
+    {
+      "title": "Obras de A. Le Roy (ca. 1520-1589), A. de Cabezón (1510-1566) y D. Pisador (ca. 1509-d. 1557)",
+      "composerName": "II. EL FELICÍSIMO VIAJE (1548-1555)"
+    },
+    {
+      "title": "Obras de M. Flecha el Viejo (1481-1553), C. de Morales (1500-1553), T. Arbeau (1519-1595), C. Negri (ca. 1536-ca. 1604) y J. Brudieu (ca. 1520-1591)",
+      "composerName": "II. EL FELICÍSIMO VIAJE (1548-1555)"
+    },
+    {
+      "title": "Obras de D. Ortiz (ca. 1510-ca. 1570), A. Cotes (ca. 1550-1603) y anónimos",
+      "composerName": "IV. OCASO DEL REY PRUDENTE (1580-1598)"
+    }
+  ],
+  "eras": [
+    "renaissance"
+  ],
+  "formats": [
+    "early-music",
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-capella-de-ministrers-2",
+      "checkedAt": "2026-09-03",
+      "externalId": "23833"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23833",
+      "checkedAt": "2026-09-03",
+      "externalId": "23833"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

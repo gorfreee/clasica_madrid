@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ocne_satelite_10_contrastes_polifonia_espanola_para_voces_blancas",
+  "slug": "ocne-satelite-10-contrastes-polifonia-espanola-para-voces-blancas",
+  "title": "OCNE. Satélite 10 Contrastes. Polifonía Española para Voces Blancas",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ocne_satelite_10_contrastes_polifonia_espanola_para_voces_blancas_01",
+      "date": "2027-01-19",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Voces Huelgas"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Rosa de Segovia"
+    },
+    {
+      "name": "Pilar Pujol"
+    },
+    {
+      "name": "Marta Bornaechea"
+    },
+    {
+      "name": "Nuria Llopis"
+    }
+  ],
+  "works": [
+    {
+      "title": "Voces agudas",
+      "composerName": "Rosa de Segovia"
+    },
+    {
+      "title": "Voces medias",
+      "composerName": "Pilar Pujol"
+    },
+    {
+      "title": "Voces graves",
+      "composerName": "Marta Bornaechea"
+    },
+    {
+      "title": "El Siglo de Oro (s. XVI)",
+      "composerName": "Nuria Llopis"
+    },
+    {
+      "title": "Obras del Cancionero de Medinaceli y Francisco Guerrero",
+      "composerName": "Nuria Llopis"
+    },
+    {
+      "title": "El Siglo de Plata (s. XX) Obras de Pablo Sorozábal, Valentín Ruiz",
+      "composerName": "Nuria Llopis"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "choral",
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-10-contrastes-polifonia-espanola-para-voces-blancas",
+      "checkedAt": "2026-09-03",
+      "externalId": "ocne-satelite-10-contrastes-polifonia-espanola-para-voces-blancas"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

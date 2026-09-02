@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_cndm_5",
+  "slug": "cndm-2",
+  "title": "CNDM.",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_cndm_5_01",
+      "date": "2027-04-07",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "PIERRE-LAURENT AIMARD"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven (1770-1827)"
+    },
+    {
+      "name": "L. van Beethoven"
+    }
+  ],
+  "works": [
+    {
+      "title": "Bagatelas, op. 119, selección (1822)",
+      "composerName": "Ludwig van Beethoven (1770-1827)"
+    },
+    {
+      "title": "Bagatelas, op. 33, selección (1782, rev. 1802)",
+      "composerName": "Ludwig van Beethoven (1770-1827)"
+    },
+    {
+      "title": "Sonata n.º 23 en fa menor ‘Appassionata’, op. 57 (1804-1805)",
+      "composerName": "L. van Beethoven"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-5",
+      "checkedAt": "2026-09-03",
+      "externalId": "cndm-5"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

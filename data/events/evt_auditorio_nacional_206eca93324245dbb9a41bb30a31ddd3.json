@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_206eca93324245dbb9a41bb30a31ddd3",
+  "slug": "ocne-sinfonico-21",
+  "title": "OCNE. Sinfónico 21",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_206eca93324245dbb9a41bb30a31ddd3_01",
+      "date": "2027-06-04",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_206eca93324245dbb9a41bb30a31ddd3_02",
+      "date": "2027-06-05",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_206eca93324245dbb9a41bb30a31ddd3_03",
+      "date": "2027-06-06",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Nacional de España"
+    },
+    {
+      "name": "Kent Nagano",
+      "role": "conductor"
+    },
+    {
+      "name": "Emanuel Ax"
+    }
+  ],
+  "composers": [
+    {
+      "name": "György Ligeti"
+    },
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Johannes Brahms"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto rumano",
+      "composerName": "György Ligeti"
+    },
+    {
+      "title": "(IV. Molto vivace - Presto)",
+      "composerName": "György Ligeti"
+    },
+    {
+      "title": "Concierto para piano y orquesta núm. 20 en Re menor, K.466",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Sinfonía núm. 4 en Mi menor, op. 98",
+      "composerName": "Johannes Brahms"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-21-5",
+      "checkedAt": "2026-09-03",
+      "externalId": "206eca93324245dbb9a41bb30a31ddd3"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

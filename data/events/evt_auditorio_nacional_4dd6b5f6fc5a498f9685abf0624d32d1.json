@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_4dd6b5f6fc5a498f9685abf0624d32d1",
+  "slug": "ocne-sinfonico-10",
+  "title": "OCNE. Sinfónico 10",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_4dd6b5f6fc5a498f9685abf0624d32d1_01",
+      "date": "2027-01-15",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_4dd6b5f6fc5a498f9685abf0624d32d1_02",
+      "date": "2027-01-16",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_4dd6b5f6fc5a498f9685abf0624d32d1_03",
+      "date": "2027-01-17",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Nacional de España"
+    },
+    {
+      "name": "Kent Nagano",
+      "role": "conductor"
+    },
+    {
+      "name": "Ute Lemper"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Rodolphe Bruneau-Boulmier"
+    },
+    {
+      "name": "Kurt Weill"
+    }
+  ],
+  "works": [
+    {
+      "title": "Obertura de Fidelio, op. 72",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Las VII tentaciones actuales",
+      "composerName": "Rodolphe Bruneau-Boulmier"
+    },
+    {
+      "title": "Obertura Egmont, op. 84 [9’]",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Los siete pecados capitales [39’]",
+      "composerName": "Kurt Weill"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-10-4",
+      "checkedAt": "2026-09-03",
+      "externalId": "4dd6b5f6fc5a498f9685abf0624d32d1"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

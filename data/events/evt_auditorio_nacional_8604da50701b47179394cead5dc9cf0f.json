@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_8604da50701b47179394cead5dc9cf0f",
+  "slug": "ocne-sinfonico-22",
+  "title": "OCNE. Sinfónico 22",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_8604da50701b47179394cead5dc9cf0f_01",
+      "date": "2027-06-11",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_8604da50701b47179394cead5dc9cf0f_02",
+      "date": "2027-06-12",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_8604da50701b47179394cead5dc9cf0f_03",
+      "date": "2027-06-13",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta y Coro Nacionales de España"
+    },
+    {
+      "name": "Kent Nagano",
+      "role": "conductor"
+    },
+    {
+      "name": "Olivia Boen"
+    },
+    {
+      "name": "Ema Nikolovska"
+    },
+    {
+      "name": "Maximilian Schmidt"
+    },
+    {
+      "name": "Derek Welton"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    }
+  ],
+  "works": [
+    {
+      "title": "Missa solemnis en Re mayor, op. 123",
+      "composerName": "Ludwig van Beethoven"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-22-5",
+      "checkedAt": "2026-09-03",
+      "externalId": "8604da50701b47179394cead5dc9cf0f"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

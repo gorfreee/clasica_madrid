@@ -20,8 +20,43 @@
       "name": "Rafal Blechacz"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Fryderyk Chopin"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata para piano n.º 14 en do sostenido menor, Op. 27, n.º 2",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Suite francesa n.º 6 en mi mayor, BWV 817",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Fantasía y fuga en la menor, BWV 904",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Cuatro mazurcas, Op. 33",
+      "composerName": "Fryderyk Chopin"
+    },
+    {
+      "title": "Scherzo n.º 1 en si menor, Op. 20",
+      "composerName": "Fryderyk Chopin"
+    },
+    {
+      "title": "Sonata para piano n.º 2 en si bemol menor, Op. 35",
+      "composerName": "Fryderyk Chopin"
+    }
+  ],
   "eras": [
     "baroque",
     "classical",
@@ -36,10 +71,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/fundacion-scherzo-rafal-blechacz-3",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "fundacion-scherzo-rafal-blechacz-3"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

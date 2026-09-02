@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cndm_23857",
+  "slug": "sinfonietta-de-la-escuela-superior-de-musica-reina-sofia",
+  "title": "SINFONIETTA DE LA ESCUELA SUPERIOR DE MÚSICA REINA SOFÍA",
+  "status": "scheduled",
+  "venueId": "ven_museo_reina_sofia_auditorio_400",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cndm_23857_01",
+      "date": "2027-04-12",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Konstantia Gourzi",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23857",
+      "checkedAt": "2026-09-03",
+      "externalId": "23857"
+    }
+  ],
+  "primarySourceId": "src_cndm",
+  "lastVerifiedAt": "2026-09-03"
+}

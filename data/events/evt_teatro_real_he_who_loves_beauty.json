@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_real_he_who_loves_beauty",
+  "slug": "he-who-loves-beauty",
+  "title": "He who loves beauty",
+  "status": "scheduled",
+  "venueId": "ven_teatro_abadia",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_real_he_who_loves_beauty_01",
+      "date": "2027-04-29",
+      "time": "19:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_he_who_loves_beauty_02",
+      "date": "2027-05-01",
+      "time": "19:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_he_who_loves_beauty_03",
+      "date": "2027-05-02",
+      "time": "18:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_he_who_loves_beauty_04",
+      "date": "2027-05-04",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Mark Milhofer"
+    },
+    {
+      "name": "Manuel Navarro"
+    },
+    {
+      "name": "Gonzalo Villarruel"
+    },
+    {
+      "name": "Luis Alberto Domínguez"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Benjamin Britten , Henry Purcell , John Dowland"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "baroque",
+    "twentieth"
+  ],
+  "formats": [
+    "opera"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_teatro_real",
+      "url": "https://www.teatroreal.es/es/espectaculo/he-who-loves-beauty",
+      "checkedAt": "2026-09-03",
+      "externalId": "he-who-loves-beauty"
+    }
+  ],
+  "primarySourceId": "src_teatro_real",
+  "lastVerifiedAt": "2026-09-03"
+}

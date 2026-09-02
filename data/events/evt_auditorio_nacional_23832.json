@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_23832",
+  "slug": "vox-luminis",
+  "title": "VOX LUMINIS",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_23832_01",
+      "date": "2027-05-14",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Lionel Meunier",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Cristóbal de Morales (1500-1553)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Officium defunctorum",
+      "composerName": "Cristóbal de Morales (1500-1553)"
+    },
+    {
+      "title": "Missa pro defunctis , a cinco (1544)",
+      "composerName": "Cristóbal de Morales (1500-1553)"
+    }
+  ],
+  "eras": [
+    "renaissance"
+  ],
+  "formats": [
+    "choral",
+    "early-music"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-vox-luminis-4",
+      "checkedAt": "2026-09-03",
+      "externalId": "23832"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23832",
+      "checkedAt": "2026-09-03",
+      "externalId": "23832"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

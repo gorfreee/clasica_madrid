@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_4859",
+  "slug": "amores-imposibles",
+  "title": "Amores imposibles",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_4859_01",
+      "date": "2027-04-27",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta de la Comunidad de Madrid"
+    },
+    {
+      "name": "Daniel Lozakovich"
+    },
+    {
+      "name": "Alondra de la Parra",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johannes Brahms"
+    },
+    {
+      "name": "Serguéi Prokófiev"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para violín en re mayor, op. 77",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Romeo y Julieta (selecciones de las suites, n.º 1 y n.º 2)",
+      "composerName": "Serguéi Prokófiev"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-sinfonico-10-amores-imposibles",
+      "checkedAt": "2026-09-03",
+      "externalId": "4859"
+    },
+    {
+      "sourceId": "src_fundacion_orcam",
+      "url": "https://fundacionorcam.org/conciertos/2026-27/amores-imposibles",
+      "checkedAt": "2026-09-03",
+      "externalId": "4859"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

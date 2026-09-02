@@ -23,8 +23,28 @@
       "name": "Nikolai Lugansky"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Sergei Prokofiev"
+    },
+    {
+      "name": "Ludwig van Beethoven"
+    }
+  ],
+  "works": [
+    {
+      "title": "Five Melodies for Violin and Piano, Op. 35",
+      "composerName": "Sergei Prokofiev"
+    },
+    {
+      "title": "Sonata para violín y piano n.º 1, Op. 80",
+      "composerName": "Sergei Prokofiev"
+    },
+    {
+      "title": "Sonata para violín y piano n.º 9 «Kreutzer», Op. 47",
+      "composerName": "Ludwig van Beethoven"
+    }
+  ],
   "eras": [
     "romantic",
     "twentieth",
@@ -40,10 +60,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/fundacion-scherzo-vadim-repin-y-nikolai-lugansky",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "fundacion-scherzo-vadim-repin-y-nikolai-lugansky"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

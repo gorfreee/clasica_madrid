@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_zarzuela_es_temporada_lirica_2026_2027_el_duo_de_la_africana",
+  "slug": "el-duo-de-la-africana",
+  "title": "El dúo de «La africana»",
+  "status": "scheduled",
+  "venueId": "ven_teatro_zarzuela",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_el_duo_de_la_africana_01",
+      "date": "2027-04-10",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_el_duo_de_la_africana_02",
+      "date": "2027-04-10",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_el_duo_de_la_africana_03",
+      "date": "2027-04-16",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_el_duo_de_la_africana_04",
+      "date": "2027-04-17",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_el_duo_de_la_africana_05",
+      "date": "2027-04-17",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "JULIA CRUZ",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "MANUEL FERNÁNDEZ CABALLERO"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "opera"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_teatro_zarzuela",
+      "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/el-duo-de-la-africana",
+      "checkedAt": "2026-09-03",
+      "externalId": "/es/temporada/lirica-2026-2027/el-duo-de-la-africana"
+    }
+  ],
+  "primarySourceId": "src_teatro_zarzuela",
+  "lastVerifiedAt": "2026-09-03"
+}

@@ -23,8 +23,47 @@
       "name": "JULIUS DRAKE"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Gustav Mahler (1860-1911)"
+    },
+    {
+      "name": "Benjamin Britten (1913-1976)"
+    },
+    {
+      "name": "G. Mahler"
+    }
+  ],
+  "works": [
+    {
+      "title": "Des Knaben Wunderhorn , selección (1892-1896, rev. 1899-1901)",
+      "composerName": "Gustav Mahler (1860-1911)"
+    },
+    {
+      "title": "De Who are these children? , op. 84 (1969)",
+      "composerName": "Benjamin Britten (1913-1976)"
+    },
+    {
+      "title": "A laddie’s sang, n.º 2",
+      "composerName": "Benjamin Britten (1913-1976)"
+    },
+    {
+      "title": "The children , n.º 11",
+      "composerName": "Benjamin Britten (1913-1976)"
+    },
+    {
+      "title": "Slaughter , n.º 6",
+      "composerName": "Benjamin Britten (1913-1976)"
+    },
+    {
+      "title": "Who are these children? , n.º 9",
+      "composerName": "Benjamin Britten (1913-1976)"
+    },
+    {
+      "title": "Winter words , op. 52 (1953)",
+      "composerName": "Benjamin Britten (1913-1976)"
+    }
+  ],
   "eras": [
     "romantic",
     "twentieth"
@@ -34,15 +73,21 @@
     "lied"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_teatro_zarzuela",
       "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/ciclo-de-lied-2026-2027/ian-bostridge",
-      "checkedAt": "2026-08-31",
+      "checkedAt": "2026-09-03",
       "externalId": "/es/temporada/ciclo-de-lied-2026-2027/ian-bostridge"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23793",
+      "checkedAt": "2026-09-03",
+      "externalId": "23793"
     }
   ],
   "primarySourceId": "src_teatro_zarzuela",
-  "lastVerifiedAt": "2026-08-31"
+  "lastVerifiedAt": "2026-09-03"
 }

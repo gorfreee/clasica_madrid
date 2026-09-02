@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_23841",
+  "slug": "diego-ares",
+  "title": "DIEGO ARES",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_23841_01",
+      "date": "2027-05-20",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "DIEGO ARES"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Domenico Scarlatti (1685-1757)"
+    },
+    {
+      "name": "Alessandro Scarlatti (1660-1725)"
+    },
+    {
+      "name": "D. Scarlatti"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata en la bemol mayor, K 127",
+      "composerName": "Domenico Scarlatti (1685-1757)"
+    },
+    {
+      "title": "Sonata en re menor, K 213",
+      "composerName": "Domenico Scarlatti (1685-1757)"
+    },
+    {
+      "title": "Sonata en re mayor, K 214",
+      "composerName": "Domenico Scarlatti (1685-1757)"
+    },
+    {
+      "title": "Sonata en fa sostenido mayor, K 318",
+      "composerName": "Domenico Scarlatti (1685-1757)"
+    },
+    {
+      "title": "Sonata en fa sostenido mayor, K 319",
+      "composerName": "Domenico Scarlatti (1685-1757)"
+    },
+    {
+      "title": "Preludio",
+      "composerName": "Alessandro Scarlatti (1660-1725)"
+    },
+    {
+      "title": "Sonata en si menor , K 87",
+      "composerName": "D. Scarlatti"
+    },
+    {
+      "title": "Sonata en mi mayor, K 206",
+      "composerName": "D. Scarlatti"
+    },
+    {
+      "title": "Sonata en la menor, K 175",
+      "composerName": "D. Scarlatti"
+    },
+    {
+      "title": "Sonata en fa mayor, K 274",
+      "composerName": "D. Scarlatti"
+    },
+    {
+      "title": "Sonata en re menor, K 141",
+      "composerName": "D. Scarlatti"
+    },
+    {
+      "title": "Sonata en la mayor, K 429",
+      "composerName": "D. Scarlatti"
+    },
+    {
+      "title": "Sonata en sol mayor, K 454",
+      "composerName": "D. Scarlatti"
+    },
+    {
+      "title": "Sonata en sol mayor , K 455",
+      "composerName": "D. Scarlatti"
+    },
+    {
+      "title": "Sonata en do meno r, K 11",
+      "composerName": "D. Scarlatti"
+    },
+    {
+      "title": "Sonata en sol menor , K 450",
+      "composerName": "D. Scarlatti"
+    },
+    {
+      "title": "Sonata en do mayor , K 422",
+      "composerName": "D. Scarlatti"
+    },
+    {
+      "title": "Sonata en do mayor, K 423",
+      "composerName": "D. Scarlatti"
+    },
+    {
+      "title": "Sonata en sol mayor , K 235",
+      "composerName": "D. Scarlatti"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-diego-ares",
+      "checkedAt": "2026-09-03",
+      "externalId": "23841"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23841",
+      "checkedAt": "2026-09-03",
+      "externalId": "23841"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

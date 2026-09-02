@@ -16,8 +16,31 @@
     }
   ],
   "performers": [],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "ORQUESTRA DE LA COMUNITAT VALENCIANA"
+    },
+    {
+      "name": "Johannes Brahms (1833-1897)"
+    },
+    {
+      "name": "Robert Schumann (1810-1856)"
+    }
+  ],
+  "works": [
+    {
+      "title": "(Titular del Palau de les Arts)",
+      "composerName": "ORQUESTRA DE LA COMUNITAT VALENCIANA"
+    },
+    {
+      "title": "Concierto para violín en re mayor, op. 77 (1878)",
+      "composerName": "Johannes Brahms (1833-1897)"
+    },
+    {
+      "title": "Sinfonía n.º 2 en do mayor, op. 61 (1845-1846)",
+      "composerName": "Robert Schumann (1810-1856)"
+    }
+  ],
   "eras": [
     "romantic"
   ],
@@ -31,10 +54,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-orquestra-de-la-comunitat-valenciana",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "cndm-orquestra-de-la-comunitat-valenciana"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

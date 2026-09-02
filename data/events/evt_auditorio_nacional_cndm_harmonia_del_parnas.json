@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_cndm_harmonia_del_parnas",
+  "slug": "cndm-harmonia-del-parnas",
+  "title": "CNDM. Harmonia Del Parnàs",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_cndm_harmonia_del_parnas_01",
+      "date": "2027-04-21",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "HARMONIA DEL PARNÀS"
+    },
+    {
+      "name": "MARIAN ROSA MONTAGUT"
+    }
+  ],
+  "composers": [
+    {
+      "name": "José de Nebra (1702-1768)"
+    },
+    {
+      "name": "Minué de Iphigenia en Tracia (1747)"
+    },
+    {
+      "name": "José Castel (1737-1807)"
+    },
+    {
+      "name": "J. de Nebra"
+    },
+    {
+      "name": "Francesco Corradini (ca. 1700-1769)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Obertura de Iphigenia en Tracia (1747)",
+      "composerName": "José de Nebra (1702-1768)"
+    },
+    {
+      "title": "‘Al tierno esposo amante’, de Entre cándidos, bellos accidentes, cantada al Santísimo",
+      "composerName": "José de Nebra (1702-1768)"
+    },
+    {
+      "title": "‘Seré precipitada’, de Viento es la dicha de Amor (1743)",
+      "composerName": "José de Nebra (1702-1768)"
+    },
+    {
+      "title": "‘Bárbaro fementido’, de La colonia de Diana ø+ (1745, arr. M. R. Montagut)",
+      "composerName": "Minué de Iphigenia en Tracia (1747)"
+    },
+    {
+      "title": "Suavidad el aire inspire, cantada a la asunción de Nuestra Señora",
+      "composerName": "Minué de Iphigenia en Tracia (1747)"
+    },
+    {
+      "title": "Obertura de La fontana del placer (1776)",
+      "composerName": "José Castel (1737-1807)"
+    },
+    {
+      "title": "‘Ven del Líbano, esposa’, de Alienta fervorosa, cantada al Santísimo (1725)",
+      "composerName": "J. de Nebra"
+    },
+    {
+      "title": "‘Adiós, prenda de mi amor’, de Amor aumenta el valor (1728)",
+      "composerName": "J. de Nebra"
+    },
+    {
+      "title": "Baile de las máscaras, selección (arr. M. R. Montagut) ø+",
+      "composerName": "Francesco Corradini (ca. 1700-1769)"
+    },
+    {
+      "title": "‘Teme, aleve, fementido’, de Viento es la dicha de Amor (1743)",
+      "composerName": "J. de Nebra"
+    },
+    {
+      "title": "ø+ Recuperación histórica, estreno en tiempos modernos",
+      "composerName": "J. de Nebra"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "early-music",
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-harmonia-del-parnas",
+      "checkedAt": "2026-09-03",
+      "externalId": "cndm-harmonia-del-parnas"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

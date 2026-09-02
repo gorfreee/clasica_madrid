@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_orquesta_sinfonica_de_madrid_gustavo_gimeno_3",
+  "slug": "orquesta-sinfonica-de-madrid-gustavo-gimeno",
+  "title": "Orquesta Sinfónica de Madrid. Gustavo Gimeno",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_orquesta_sinfonica_de_madrid_gustavo_gimeno_3_01",
+      "date": "2027-01-28",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Sinfónica de Madrid"
+    },
+    {
+      "name": "Gustavo Gimeno"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Bedřich Smetana"
+    },
+    {
+      "name": "Antonín Dvořák"
+    }
+  ],
+  "works": [
+    {
+      "title": "3 danzas de “La novia vendida”",
+      "composerName": "Bedřich Smetana"
+    },
+    {
+      "title": "Sinfonía n.° 9 en mi menor “Del Nuevo Mundo”, op. 95, B. 178",
+      "composerName": "Antonín Dvořák"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/orquesta-sinfonica-de-madrid-gustavo-gimeno-3",
+      "checkedAt": "2026-09-03",
+      "externalId": "orquesta-sinfonica-de-madrid-gustavo-gimeno-3"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

@@ -20,8 +20,46 @@
       "name": "CINDY CASTILLO"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach (1685-1750)"
+    },
+    {
+      "name": "César Franck (1822-1890)"
+    },
+    {
+      "name": "Jean-Pierre Deleuze (1954)"
+    },
+    {
+      "name": "J. S. Bach"
+    }
+  ],
+  "works": [
+    {
+      "title": "Toccata y fuga en re menor , BWV 565 (ca. 1708)",
+      "composerName": "Johann Sebastian Bach (1685-1750)"
+    },
+    {
+      "title": "Concierto en re menor, sobre el Concierto para dos violines y violonchelo en re menor de A. Vivaldi, BWV 596 (1713-1714)",
+      "composerName": "Johann Sebastian Bach (1685-1750)"
+    },
+    {
+      "title": "Prière , op. 20 (1860-1862)",
+      "composerName": "César Franck (1822-1890)"
+    },
+    {
+      "title": "Toccata en re bemol mayor, op. 104 (1937)",
+      "composerName": "César Franck (1822-1890)"
+    },
+    {
+      "title": "La neige tombe, de Quatre haïku , para órgano, n.º 3 (2004)",
+      "composerName": "Jean-Pierre Deleuze (1954)"
+    },
+    {
+      "title": "Ricercar a 6 de La ofrenda musical , BWV 1079 (1747)",
+      "composerName": "J. S. Bach"
+    }
+  ],
   "eras": [
     "baroque",
     "romantic",
@@ -37,10 +75,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-cindy-castillo",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "cndm-cindy-castillo"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23843",
+      "checkedAt": "2026-09-03",
+      "externalId": "23843"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

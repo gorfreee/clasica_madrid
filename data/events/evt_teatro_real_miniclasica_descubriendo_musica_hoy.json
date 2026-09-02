@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_real_miniclasica_descubriendo_musica_hoy",
+  "slug": "miniclasica-descubriendo-la-musica-de-hoy",
+  "title": "Miniclásica: Descubriendo la música de hoy",
+  "status": "scheduled",
+  "venueId": "ven_real_teatro_retiro",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_real_miniclasica_descubriendo_musica_hoy_01",
+      "date": "2027-05-22",
+      "time": "11:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_miniclasica_descubriendo_musica_hoy_02",
+      "date": "2027-05-22",
+      "time": "13:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_miniclasica_descubriendo_musica_hoy_03",
+      "date": "2027-05-23",
+      "time": "11:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_miniclasica_descubriendo_musica_hoy_04",
+      "date": "2027-05-23",
+      "time": "13:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_teatro_real",
+      "url": "https://www.teatroreal.es/es/espectaculo/miniclasica-descubriendo-musica-hoy",
+      "checkedAt": "2026-09-03",
+      "externalId": "miniclasica-descubriendo-musica-hoy"
+    }
+  ],
+  "primarySourceId": "src_teatro_real",
+  "lastVerifiedAt": "2026-09-03"
+}

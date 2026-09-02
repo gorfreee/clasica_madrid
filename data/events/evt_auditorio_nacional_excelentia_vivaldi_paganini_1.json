@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_vivaldi_paganini_1",
+  "slug": "excelentia-vivaldi-paganini",
+  "title": "Excelentia. Vivaldi & Paganini",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_vivaldi_paganini_1_01",
+      "date": "2027-03-06",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Délica Chamber Orchestra"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Vivaldi"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto L’estro Armonico Op.3 N8",
+      "composerName": "Vivaldi"
+    },
+    {
+      "title": "Concerto grosso Op.3 N11",
+      "composerName": "Vivaldi"
+    },
+    {
+      "title": "“Invierno” de las cuatro estaciones. Allegro",
+      "composerName": "Vivaldi"
+    },
+    {
+      "title": "“Invierno” de las cuatro estaciones. Largo",
+      "composerName": "Vivaldi"
+    },
+    {
+      "title": "Concierto “Alla Rústica” RV151",
+      "composerName": "Vivaldi"
+    },
+    {
+      "title": "“Verano” de las cuatro estaciones. Presto",
+      "composerName": "Vivaldi"
+    },
+    {
+      "title": "según San Mateo, BWV 244",
+      "composerName": "Vivaldi"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-vivaldi-paganini-1",
+      "checkedAt": "2026-09-03",
+      "externalId": "excelentia-vivaldi-paganini-1"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

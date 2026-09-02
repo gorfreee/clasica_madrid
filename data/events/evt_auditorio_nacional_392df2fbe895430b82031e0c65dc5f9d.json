@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_392df2fbe895430b82031e0c65dc5f9d",
+  "slug": "ocne-sinfonico-11",
+  "title": "OCNE. Sinfónico 11",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_392df2fbe895430b82031e0c65dc5f9d_01",
+      "date": "2027-01-22",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_392df2fbe895430b82031e0c65dc5f9d_02",
+      "date": "2027-01-23",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_392df2fbe895430b82031e0c65dc5f9d_03",
+      "date": "2027-01-24",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Nacional de España"
+    },
+    {
+      "name": "Kristiina Poska",
+      "role": "conductor"
+    },
+    {
+      "name": "Tabea Zimmermann"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Paul Hindemith"
+    },
+    {
+      "name": "Felix Mendelssohn"
+    }
+  ],
+  "works": [
+    {
+      "title": "Der Schwanendreher, para viola y pequeña orquesta",
+      "composerName": "Paul Hindemith"
+    },
+    {
+      "title": "Sinfonía núm. 3 en La menor, op. 56, «Escocesa» [40’]",
+      "composerName": "Felix Mendelssohn"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-11-4",
+      "checkedAt": "2026-09-03",
+      "externalId": "392df2fbe895430b82031e0c65dc5f9d"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

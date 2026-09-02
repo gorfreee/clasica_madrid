@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_cndm_il_giardino_armonico_5",
+  "slug": "cndm-il-giardino-armonico",
+  "title": "CNDM. IL Giardino Armonico",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_cndm_il_giardino_armonico_5_01",
+      "date": "2027-04-18",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "IL GIARDINO ARMONICO"
+    },
+    {
+      "name": "GIOVANNI ANTONINI",
+      "role": "conductor"
+    },
+    {
+      "name": "ANETT FRITSCH"
+    },
+    {
+      "name": "JULIA LEZHNEVA"
+    },
+    {
+      "name": "LUCILE RICHARDOT"
+    },
+    {
+      "name": "KRYSTIAN ADAM"
+    }
+  ],
+  "composers": [
+    {
+      "name": "George Frideric Haendel (1685-1759)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Il trionfo del Tempo e del Disinganno, HWV 46a (1707)",
+      "composerName": "George Frideric Haendel (1685-1759)"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "choral",
+    "early-music"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-il-giardino-armonico-5",
+      "checkedAt": "2026-09-03",
+      "externalId": "cndm-il-giardino-armonico-5"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

@@ -20,8 +20,54 @@
       "name": "JEAN RONDEAU"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Louis Couperin (1626-1661)"
+    },
+    {
+      "name": "Jean-Philippe Rameau (1683-1764)"
+    },
+    {
+      "name": "François Couperin (1668-1733)"
+    },
+    {
+      "name": "Joseph-Nicolas-Pancrace Royer (1703-1755)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Suite en la menor, de Pièces de clavecin",
+      "composerName": "Louis Couperin (1626-1661)"
+    },
+    {
+      "title": "Prélude de la Suite en la menor, RCT 1, de Premier livre de pièces de clavecin (1706)",
+      "composerName": "Jean-Philippe Rameau (1683-1764)"
+    },
+    {
+      "title": "Suite en la menor, RCT 5, de Troisième livre de pièces de clavecin (1727)",
+      "composerName": "Jean-Philippe Rameau (1683-1764)"
+    },
+    {
+      "title": "Premier prélude en do mayor , de L’Art de toucher le clavecin (1716)",
+      "composerName": "François Couperin (1668-1733)"
+    },
+    {
+      "title": "De Pièces de clavecin, livre I (1713)",
+      "composerName": "François Couperin (1668-1733)"
+    },
+    {
+      "title": "La Ténébreuse. Allemande (troisième ordre, n.º 1)",
+      "composerName": "François Couperin (1668-1733)"
+    },
+    {
+      "title": "La Favorite. Chaconne à deux tems (troisième ordre, n.º 12)",
+      "composerName": "François Couperin (1668-1733)"
+    },
+    {
+      "title": "La marche des scythes, de Pièces de clavecin (1746)",
+      "composerName": "Joseph-Nicolas-Pancrace Royer (1703-1755)"
+    }
+  ],
   "eras": [
     "baroque"
   ],
@@ -34,10 +80,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-jean-rondeau-1",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "cndm-jean-rondeau-1"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23835",
+      "checkedAt": "2026-09-03",
+      "externalId": "23835"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

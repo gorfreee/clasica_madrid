@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_impacta_pretty_yende_y_javier_camarena",
+  "slug": "impacta-pretty-yende-y-javier-camarena",
+  "title": "Impacta. Pretty Yende y Javier Camarena",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_impacta_pretty_yende_y_javier_camarena_01",
+      "date": "2027-06-10",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Pretty Yende"
+    },
+    {
+      "name": "Javier Camarena"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/impacta-pretty-yende-y-javier-camarena",
+      "checkedAt": "2026-09-03",
+      "externalId": "impacta-pretty-yende-y-javier-camarena"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

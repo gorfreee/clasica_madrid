@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cndm_23768",
+  "slug": "l-arpeggiata-christina-pluhar",
+  "title": "L’ARPEGGIATA & CHRISTINA PLUHAR",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cndm_23768_01",
+      "date": "2027-03-08",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Christina Pluhar"
+    },
+    {
+      "name": "Céline Scheen"
+    },
+    {
+      "name": "Vincenzo Capezzuto"
+    },
+    {
+      "name": "Luciana Mancini"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Tradicional de Venezuela"
+    },
+    {
+      "name": "Hilda Herrera (1932)"
+    },
+    {
+      "name": "Agustín Rivas Chupacaña"
+    },
+    {
+      "name": "Tradicional de México"
+    },
+    {
+      "name": "Violeta Parra (1917-1967)"
+    },
+    {
+      "name": "Santiago de Murcia (1673-1739)"
+    },
+    {
+      "name": "A. Mudarra"
+    },
+    {
+      "name": "Simón Díaz (1928-2014)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Guayabo zarandeao (joropo central)",
+      "composerName": "Tradicional de Venezuela"
+    },
+    {
+      "title": "Tradicional de Venezuela/Alonso Mudarra (ca. 1510-1580)",
+      "composerName": "Tradicional de Venezuela"
+    },
+    {
+      "title": "Cumaná 500 años (polo margariteño y romanesca) (arr. M. A. Sánchez y C. Pluhar)",
+      "composerName": "Tradicional de Venezuela"
+    },
+    {
+      "title": "La diablera (zamba) (arr. L’Arpeggiata)",
+      "composerName": "Hilda Herrera (1932)"
+    },
+    {
+      "title": "Coplas-Yo vengo regando flores (merengue venezolano) (arr. M. A. Sánchez y C. Pluhar)",
+      "composerName": "Agustín Rivas Chupacaña"
+    },
+    {
+      "title": "Que me entierren en un arpa (joropo llanero)",
+      "composerName": "Tradicional de Venezuela"
+    },
+    {
+      "title": "La sirena (arr. C. Pluhar)",
+      "composerName": "Tradicional de México"
+    },
+    {
+      "title": "La Martiniana (arr. L’Arpeggiata)",
+      "composerName": "Tradicional de México"
+    },
+    {
+      "title": "El coco (arr. C. Pluhar)",
+      "composerName": "Tradicional de México"
+    },
+    {
+      "title": "La lavandera (arr. L’Arpeggiata)",
+      "composerName": "Violeta Parra (1917-1967)"
+    },
+    {
+      "title": "Ignacio ‘Indio’ Figueredo (1899-1995)",
+      "composerName": "Violeta Parra (1917-1967)"
+    },
+    {
+      "title": "El gavilán (joropo llanero)",
+      "composerName": "Violeta Parra (1917-1967)"
+    },
+    {
+      "title": "Fandango (arr. J. M. Martí Duran)",
+      "composerName": "Santiago de Murcia (1673-1739)"
+    },
+    {
+      "title": "Claros y frescos ríos (Tres libros de música en cifras para vihuela , 1546)",
+      "composerName": "A. Mudarra"
+    },
+    {
+      "title": "La petenera (arr. C. Pluhar)",
+      "composerName": "Tradicional de México"
+    },
+    {
+      "title": "La mañana de sant Juan (arr. C. Pluhar)",
+      "composerName": "A. Mudarra"
+    },
+    {
+      "title": "El indio (pasaje llanero) (1981)",
+      "composerName": "A. Mudarra"
+    },
+    {
+      "title": "Si me llaman (Tres libros de música en cifras para vihuela , 1546)",
+      "composerName": "A. Mudarra"
+    },
+    {
+      "title": "Pajarito (joropo llanero) (arr. L’Arpeggiata)",
+      "composerName": "Tradicional de Venezuela"
+    },
+    {
+      "title": "Tonada de luna llena",
+      "composerName": "Simón Díaz (1928-2014)"
+    }
+  ],
+  "eras": [
+    "renaissance",
+    "baroque",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "early-music"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23768",
+      "checkedAt": "2026-09-03",
+      "externalId": "23768"
+    }
+  ],
+  "primarySourceId": "src_cndm",
+  "lastVerifiedAt": "2026-09-03"
+}

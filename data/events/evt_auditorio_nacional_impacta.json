@@ -27,8 +27,24 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "J. Haydn"
+    },
+    {
+      "name": "W. A. Mozart"
+    }
+  ],
+  "works": [
+    {
+      "title": "Missa in Angustiis en Re menor, Hob.XXII:11 – Misa Nelson",
+      "composerName": "J. Haydn"
+    },
+    {
+      "title": "Misa de Réquiem en re menor, K. 626",
+      "composerName": "W. A. Mozart"
+    }
+  ],
   "eras": [
     "classical"
   ],
@@ -42,10 +58,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/impacta",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "impacta"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_4848",
+  "slug": "evocacion",
+  "title": "Evocación",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_4848_01",
+      "date": "2027-01-25",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta de la Comunidad de Madrid"
+    },
+    {
+      "name": "Jorge Luis Prats"
+    },
+    {
+      "name": "Lina González Granados",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Manuel de Falla"
+    },
+    {
+      "name": "AManuel de Falla"
+    },
+    {
+      "name": "Claude Debussy"
+    }
+  ],
+  "works": [
+    {
+      "title": "Interludio y Danza de La vida breve",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Noches en los jardines de España",
+      "composerName": "AManuel de Falla"
+    },
+    {
+      "title": "Imágenes",
+      "composerName": "Claude Debussy"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-sinfonico-5-evocacion",
+      "checkedAt": "2026-09-03",
+      "externalId": "4848"
+    },
+    {
+      "sourceId": "src_fundacion_orcam",
+      "url": "https://fundacionorcam.org/conciertos/2026-27/evocacion",
+      "checkedAt": "2026-09-03",
+      "externalId": "4848"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

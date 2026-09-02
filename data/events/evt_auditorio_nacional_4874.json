@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_4874",
+  "slug": "las-tres-b",
+  "title": "Las tres B",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_4874_01",
+      "date": "2027-06-10",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro de la Comunidad de Madrid"
+    },
+    {
+      "name": "Karina Azizova"
+    },
+    {
+      "name": "Florian Helgath",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Benjamin Britten"
+    },
+    {
+      "name": "Johannes Brahms"
+    }
+  ],
+  "works": [
+    {
+      "title": "Canto elegíaco, op. 118",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Cinco canciones florales, op. 47",
+      "composerName": "Benjamin Britten"
+    },
+    {
+      "title": "Cuatro canciones para voces femeninas, op. 17",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Fidelio, op. 72, acto I: “Oh qué alegría respirar en libertad”",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Que el hombre sea noble, WoO 185 +",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Adelante Democracia +",
+      "composerName": "Benjamin Britten"
+    },
+    {
+      "title": "Siete canciones, op. 62 +",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Cantata “Lobkowitz”, WoO 106 +",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "A Mälzel, WoO 162 +",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Canto espiritual, op. 30",
+      "composerName": "Johannes Brahms"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-tiempo-de-camara-5-las-tres-b",
+      "checkedAt": "2026-09-03",
+      "externalId": "4874"
+    },
+    {
+      "sourceId": "src_fundacion_orcam",
+      "url": "https://fundacionorcam.org/conciertos/2026-27/las-tres-b",
+      "checkedAt": "2026-09-03",
+      "externalId": "4874"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_la_filarmonica_rhapsody_in_blue",
+  "slug": "la-filarmonica-rhapsody-in-blue",
+  "title": "La Filarmónica. Rhapsody In Blue",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_la_filarmonica_rhapsody_in_blue_01",
+      "date": "2027-02-24",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Wdr Funkhausorchester"
+    },
+    {
+      "name": "Elionor Martínez"
+    },
+    {
+      "name": "Wayne Marshall",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/la-filarmonica-rhapsody-in-blue",
+      "checkedAt": "2026-09-03",
+      "externalId": "la-filarmonica-rhapsody-in-blue"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

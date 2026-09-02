@@ -30,8 +30,31 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Camille Saint-Saëns (1835–1921)"
+    },
+    {
+      "name": "Richard Strauss (1864–1949)"
+    },
+    {
+      "name": "Piotr Ilich Tchaikovsky (1840–1893)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Introducción y Rondó Caprichoso, Op. 28es",
+      "composerName": "Camille Saint-Saëns (1835–1921)"
+    },
+    {
+      "title": "Cuatro últimas canciones (Vier letzte Lieder)",
+      "composerName": "Richard Strauss (1864–1949)"
+    },
+    {
+      "title": "Suite de El lago de los cisnes, Op. 20a",
+      "composerName": "Piotr Ilich Tchaikovsky (1840–1893)"
+    }
+  ],
   "eras": [
     "romantic",
     "twentieth"
@@ -47,10 +70,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/atlantida-chamber-orchestra-ainhoa-arteta-concierto-de-navidad",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "atlantida-chamber-orchestra-ainhoa-arteta-concierto-de-navidad"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

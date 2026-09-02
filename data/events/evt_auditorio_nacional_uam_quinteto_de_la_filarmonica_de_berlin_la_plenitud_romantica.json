@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_uam_quinteto_de_la_filarmonica_de_berlin_la_plenitud_romantica",
+  "slug": "uam-quinteto-de-la-filarmonica-de-berlin-la-plenitud-romantica",
+  "title": "UAM. Quinteto de la Filarmónica de Berlín. La Plenitud Romántica",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_uam_quinteto_de_la_filarmonica_de_berlin_la_plenitud_romantica_01",
+      "date": "2027-04-17",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "QUINTETO DE LA FILARMÓNICA DE BERLÍN"
+    },
+    {
+      "name": "Wolfgang Talirz"
+    },
+    {
+      "name": "Gunars Upatnieks"
+    },
+    {
+      "name": "Miguel Ángel Tamarit"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Carl Maria von Weber (1782-1826)"
+    },
+    {
+      "name": "Piotr Ilich Tchaikovsky (1840-1893)"
+    },
+    {
+      "name": "Giovanni Bottesini (1821-1889)"
+    },
+    {
+      "name": "Giuseppe Verdi (1813-1901)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Quinteto para clarinete, op. 34",
+      "composerName": "Carl Maria von Weber (1782-1826)"
+    },
+    {
+      "title": "Aria de Lenski \"Kuda, Kuda\" de Eugen Onegin para violonchelo y cuerdas",
+      "composerName": "Piotr Ilich Tchaikovsky (1840-1893)"
+    },
+    {
+      "title": "Fantasía sobre La Sonámbula, de V. Bellini, para contrabajo y cuerdas",
+      "composerName": "Giovanni Bottesini (1821-1889)"
+    },
+    {
+      "title": "Romanza y Aria para Soprano y viola de El Cazador furtivo",
+      "composerName": "Carl Maria von Weber (1782-1826)"
+    },
+    {
+      "title": "Rigoletto-Fantasía para 2 violines y cuerda",
+      "composerName": "Giuseppe Verdi (1813-1901)"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/uam-quinteto-de-la-filarmonica-de-berlin-la-plenitud-romantica",
+      "checkedAt": "2026-09-03",
+      "externalId": "uam-quinteto-de-la-filarmonica-de-berlin-la-plenitud-romantica"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cndm_23794",
+  "slug": "adriana-gonzalez-marina-viotti-inaki-encina-oyon",
+  "title": "ADRIANA GONZÁLEZ & MARINA VIOTTI | IÑAKI ENCINA OYÓN",
+  "status": "scheduled",
+  "venueId": "ven_teatro_zarzuela",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cndm_23794_01",
+      "date": "2027-01-24",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Adriana González"
+    },
+    {
+      "name": "Marina Viotti"
+    },
+    {
+      "name": "Iñaqui Encina Oyón"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Charles-Marie Widor (1844-1937)"
+    },
+    {
+      "name": "Robert Dussaut (1896-1969)"
+    },
+    {
+      "name": "Ernest Chausson (1855-1899)"
+    },
+    {
+      "name": "Gabriel Fauré (1845-1924)"
+    },
+    {
+      "name": "Pauline García Viardot (1821-1910)"
+    },
+    {
+      "name": "Cécile Chaminade (1857-1944)"
+    },
+    {
+      "name": "Reynaldo Hahn (1874-1947)"
+    },
+    {
+      "name": "Alfred Bachelet (1864-1944)"
+    },
+    {
+      "name": "César Franck (1822-1890)"
+    },
+    {
+      "name": "Camille Saint-Saëns (1835-1921)"
+    },
+    {
+      "name": "Charles Gounod (1818-1893)"
+    }
+  ],
+  "works": [
+    {
+      "title": "L’hiver , op. 52, n.º 1 (1881)",
+      "composerName": "Charles-Marie Widor (1844-1937)"
+    },
+    {
+      "title": "Nocturne , op. 40, n.º 1 (1876)",
+      "composerName": "Charles-Marie Widor (1844-1937)"
+    },
+    {
+      "title": "Chance , op. 10, n.º 1 (1926)",
+      "composerName": "Robert Dussaut (1896-1969)"
+    },
+    {
+      "title": "Je dédie à tes pleurs , op. 5, n.º 1 (1921)",
+      "composerName": "Robert Dussaut (1896-1969)"
+    },
+    {
+      "title": "Deux duos , op. 11 (1883)",
+      "composerName": "Ernest Chausson (1855-1899)"
+    },
+    {
+      "title": "Après un rêve , op. 7, n.º 1 (1877)",
+      "composerName": "Gabriel Fauré (1845-1924)"
+    },
+    {
+      "title": "Chanson d’amour , op. 27, n.º 1 (1882)",
+      "composerName": "Gabriel Fauré (1845-1924)"
+    },
+    {
+      "title": "Deux duos , op. 10 (1873)",
+      "composerName": "Gabriel Fauré (1845-1924)"
+    },
+    {
+      "title": "Rêverie , VWV 1024 (1884)",
+      "composerName": "Pauline García Viardot (1821-1910)"
+    },
+    {
+      "title": "Duo d’étoiles , op. 68 (1892)",
+      "composerName": "Cécile Chaminade (1857-1944)"
+    },
+    {
+      "title": "Infidélité (1891)",
+      "composerName": "Reynaldo Hahn (1874-1947)"
+    },
+    {
+      "title": "Au bord de la mer",
+      "composerName": "César Franck (1822-1890)"
+    },
+    {
+      "title": "Chanson andalouse",
+      "composerName": "César Franck (1822-1890)"
+    },
+    {
+      "title": "La siesta, CG 399 (1871)",
+      "composerName": "Charles Gounod (1818-1893)"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "recital",
+    "lied"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23794",
+      "checkedAt": "2026-09-03",
+      "externalId": "23794"
+    }
+  ],
+  "primarySourceId": "src_cndm",
+  "lastVerifiedAt": "2026-09-03"
+}

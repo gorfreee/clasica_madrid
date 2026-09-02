@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_23829",
+  "slug": "collegium-vocale-gent",
+  "title": "COLLEGIUM VOCALE GENT",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_23829_01",
+      "date": "2027-04-15",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Philippe Herreweghe",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Carlo Gesualdo (1566-1613)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Madrigali a cinque voci, libro V (1611)",
+      "composerName": "Carlo Gesualdo (1566-1613)"
+    }
+  ],
+  "eras": [
+    "renaissance"
+  ],
+  "formats": [
+    "choral",
+    "early-music"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-collegium-vocale-gent-1",
+      "checkedAt": "2026-09-03",
+      "externalId": "23829"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23829",
+      "checkedAt": "2026-09-03",
+      "externalId": "23829"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

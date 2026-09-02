@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_real_fedora",
+  "slug": "fedora",
+  "title": "Fedora",
+  "status": "scheduled",
+  "venueId": "ven_teatro_real",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_real_fedora_01",
+      "date": "2027-01-07",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_fedora_02",
+      "date": "2027-01-10",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Daniel Oren",
+      "role": "conductor"
+    },
+    {
+      "name": "José Luis Basso",
+      "role": "conductor"
+    },
+    {
+      "name": "Coro y Orquesta Titulares del Teatro Real",
+      "role": "orchestra"
+    },
+    {
+      "name": "Sonya Yoncheva"
+    },
+    {
+      "name": "Sabina Puértolas"
+    },
+    {
+      "name": "Luciano Ganci"
+    },
+    {
+      "name": "George Petean"
+    },
+    {
+      "name": "Valentina Pernozzoli"
+    },
+    {
+      "name": "Mikeldi Atxalandabaso"
+    },
+    {
+      "name": "Alejandro López"
+    },
+    {
+      "name": "Tomeu Bibiloni"
+    },
+    {
+      "name": "Gabriele Sagona"
+    },
+    {
+      "name": "Edoardo Barsotti"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Umberto Giordano"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "opera",
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_teatro_real",
+      "url": "https://www.teatroreal.es/es/espectaculo/fedora",
+      "checkedAt": "2026-09-03",
+      "externalId": "fedora"
+    }
+  ],
+  "primarySourceId": "src_teatro_real",
+  "lastVerifiedAt": "2026-09-03"
+}

@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_zarzuela_es_temporada_lirica_2026_2027_el_barbarillo_de_lavapies",
+  "slug": "el-barberillo-de-lavapies",
+  "title": "El barberillo de Lavapiés",
+  "status": "scheduled",
+  "venueId": "ven_teatro_zarzuela",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_el_barbarillo_de_lavapies_01",
+      "date": "2027-06-09",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_el_barbarillo_de_lavapies_02",
+      "date": "2027-06-10",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_el_barbarillo_de_lavapies_03",
+      "date": "2027-06-11",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_el_barbarillo_de_lavapies_04",
+      "date": "2027-06-12",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_el_barbarillo_de_lavapies_05",
+      "date": "2027-06-13",
+      "time": "18:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_el_barbarillo_de_lavapies_06",
+      "date": "2027-06-16",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_el_barbarillo_de_lavapies_07",
+      "date": "2027-06-17",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_el_barbarillo_de_lavapies_08",
+      "date": "2027-06-18",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_el_barbarillo_de_lavapies_09",
+      "date": "2027-06-19",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_el_barbarillo_de_lavapies_10",
+      "date": "2027-06-20",
+      "time": "18:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_el_barbarillo_de_lavapies_11",
+      "date": "2027-06-23",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_el_barbarillo_de_lavapies_12",
+      "date": "2027-06-24",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_lirica_2026_2027_el_barbarillo_de_lavapies_13",
+      "date": "2027-06-25",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "JOSÉ MIGUEL PÉREZ-SIERRA/ JULIO CÉSAR PICOS",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "zarzuela"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_teatro_zarzuela",
+      "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/el-barbarillo-de-lavapies",
+      "checkedAt": "2026-09-03",
+      "externalId": "/es/temporada/lirica-2026-2027/el-barbarillo-de-lavapies"
+    }
+  ],
+  "primarySourceId": "src_teatro_zarzuela",
+  "lastVerifiedAt": "2026-09-03"
+}

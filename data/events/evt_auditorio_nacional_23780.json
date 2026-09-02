@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_23780",
+  "slug": "cuarteto-ebene",
+  "title": "CUARTETO ÉBÈNE",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_23780_01",
+      "date": "2027-04-29",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "CUARTETO ÉBÈNE"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven (1770-1827)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Cuarteto de cuerda n.º 7 en fa mayor ‘Razumovski’ , op. 59, n.º 1 (1806)",
+      "composerName": "Ludwig van Beethoven (1770-1827)"
+    },
+    {
+      "title": "Cuarteto de cuerda n.º 13 en si bemol mayor , op. 130 (1825)",
+      "composerName": "Ludwig van Beethoven (1770-1827)"
+    },
+    {
+      "title": "Gran fuga en si bemol mayor , op. 133 (1825-1826)",
+      "composerName": "Ludwig van Beethoven (1770-1827)"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-cuarteto-ebene",
+      "checkedAt": "2026-09-03",
+      "externalId": "23780"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23780",
+      "checkedAt": "2026-09-03",
+      "externalId": "23780"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

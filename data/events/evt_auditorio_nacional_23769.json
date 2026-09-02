@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_23769",
+  "slug": "leticia-moreno-orquesta-de-camara-simon-bolivar",
+  "title": "LETICIA MORENO & ORQUESTA DE CÁMARA SIMÓN BOLÍVAR",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_23769_01",
+      "date": "2027-04-28",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "LETICIA MORENO"
+    },
+    {
+      "name": "ORQUESTA DE CÁMARA SIMÓN BOLÍVAR"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antonio Vivaldi (1678-1741)"
+    },
+    {
+      "name": "Philip Glass (1937)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Las cuatro estaciones (Il cimento dell’armonia e dell’inventione , op. 8, 1725)",
+      "composerName": "Antonio Vivaldi (1678-1741)"
+    },
+    {
+      "title": "Concierto para violín n.º 2 ‘Las cuatro estaciones americanas’ (2009)",
+      "composerName": "Philip Glass (1937)"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-leticia-moreno-orquesta-de-camara-simon-bolivar",
+      "checkedAt": "2026-09-03",
+      "externalId": "23769"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23769",
+      "checkedAt": "2026-09-03",
+      "externalId": "23769"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

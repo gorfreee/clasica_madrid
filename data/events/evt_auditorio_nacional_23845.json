@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_23845",
+  "slug": "juan-de-la-rubia",
+  "title": "JUAN DE LA RUBIA",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_23845_01",
+      "date": "2027-01-16",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "JUAN DE LA RUBIA"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach (1685-1750)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Preludio y fuga en fa menor, BWV 534 (ca. 1710)",
+      "composerName": "Johann Sebastian Bach (1685-1750)"
+    },
+    {
+      "title": "Erhalt uns, Herr, bei deinem Wort, BWV 1103 (ca. 1703-1707)",
+      "composerName": "Johann Sebastian Bach (1685-1750)"
+    },
+    {
+      "title": "Preludio en sol mayor , BWV 568 (ca. 1705)",
+      "composerName": "Johann Sebastian Bach (1685-1750)"
+    },
+    {
+      "title": "Durch Adams Fall ist ganz verderbt , BWV 705 (1708)",
+      "composerName": "Johann Sebastian Bach (1685-1750)"
+    },
+    {
+      "title": "Der Tag, der ist so freudenreich, BWV 719 (ca. 1710)",
+      "composerName": "Johann Sebastian Bach (1685-1750)"
+    },
+    {
+      "title": "Ach Gott vom Himmel sieh darein , BWV 741",
+      "composerName": "Johann Sebastian Bach (1685-1750)"
+    },
+    {
+      "title": "Fuga super ‘Allein Gott in der Höh sei Her’ , BWV 716",
+      "composerName": "Johann Sebastian Bach (1685-1750)"
+    },
+    {
+      "title": "Toccata [y fuga] en re menor, BWV 565 (ca. 1708)",
+      "composerName": "Johann Sebastian Bach (1685-1750)"
+    },
+    {
+      "title": "Fragmento de Wie schön leuchtet der Morgenstern, BWV 764 (ca. 1705)",
+      "composerName": "Johann Sebastian Bach (1685-1750)"
+    },
+    {
+      "title": "Fuga en sol menor , BWV 578 (ca. 1707)",
+      "composerName": "Johann Sebastian Bach (1685-1750)"
+    },
+    {
+      "title": "Befiehl du deine Wege, Emans 36",
+      "composerName": "Johann Sebastian Bach (1685-1750)"
+    },
+    {
+      "title": "Fantasía y fuga en la menor, BWV 561 (1725)",
+      "composerName": "Johann Sebastian Bach (1685-1750)"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "recital",
+    "organ"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-juan-de-la-rubia-1",
+      "checkedAt": "2026-09-03",
+      "externalId": "23845"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23845",
+      "checkedAt": "2026-09-03",
+      "externalId": "23845"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

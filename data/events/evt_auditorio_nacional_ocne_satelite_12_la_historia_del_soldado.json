@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ocne_satelite_12_la_historia_del_soldado",
+  "slug": "ocne-satelite-12-la-historia-del-soldado",
+  "title": "OCNE. Satélite 12 La Historia del Soldado",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ocne_satelite_12_la_historia_del_soldado_01",
+      "date": "2027-02-23",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ensemble Aurea"
+    },
+    {
+      "name": "Pablo Martín Acebedo"
+    },
+    {
+      "name": "Guillermo Sánchez Lluc"
+    },
+    {
+      "name": "Eduardo Raimundo Beltrán"
+    },
+    {
+      "name": "Vicente Palomares"
+    },
+    {
+      "name": "Juan Antonio Martínez Escribano"
+    },
+    {
+      "name": "Daniel Quiles Cascant"
+    },
+    {
+      "name": "Antonio Martín Aranda"
+    },
+    {
+      "name": "Emilio Gavira"
+    },
+    {
+      "name": "Daniel Huertas"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ígor Stravinski"
+    }
+  ],
+  "works": [
+    {
+      "title": "La historia del soldado",
+      "composerName": "Ígor Stravinski"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-12-la-historia-del-soldado",
+      "checkedAt": "2026-09-03",
+      "externalId": "ocne-satelite-12-la-historia-del-soldado"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

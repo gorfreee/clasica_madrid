@@ -23,23 +23,100 @@
       "name": "MALCOLM MARTINEAU"
     }
   ],
-  "composers": [],
-  "works": [],
-  "eras": [],
+  "composers": [
+    {
+      "name": "Amy Beach (1867-1944)"
+    },
+    {
+      "name": "Claude Debussy (1862-1918)"
+    },
+    {
+      "name": "Alban Berg (1885-1935)"
+    },
+    {
+      "name": "Alma Mahler (1879-1964)"
+    },
+    {
+      "name": "Gustav Mahler (1860-1911)"
+    },
+    {
+      "name": "Richard Strauss (1864-1949)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Four songs, op. 51 (1903)",
+      "composerName": "Amy Beach (1867-1944)"
+    },
+    {
+      "title": "Fêtes galantes , deuxième recueil, CD 114 (1904)",
+      "composerName": "Claude Debussy (1862-1918)"
+    },
+    {
+      "title": "Laue Sommernacht, n.º 3",
+      "composerName": "Alma Mahler (1879-1964)"
+    },
+    {
+      "title": "Bei dir ist es traut, n.º 4",
+      "composerName": "Alma Mahler (1879-1964)"
+    },
+    {
+      "title": "Ich wandle unter Blumen , n.º 5",
+      "composerName": "Alma Mahler (1879-1964)"
+    },
+    {
+      "title": "Blicke mir nicht in die Lieder, n.º 1",
+      "composerName": "Gustav Mahler (1860-1911)"
+    },
+    {
+      "title": "Ich atmet’ einen linden Duft, n.º 2",
+      "composerName": "Gustav Mahler (1860-1911)"
+    },
+    {
+      "title": "Liebst du um Schönheit, n.º 5",
+      "composerName": "Gustav Mahler (1860-1911)"
+    },
+    {
+      "title": "Freundliche Vision, op. 48, n.º 1 (1900)",
+      "composerName": "Richard Strauss (1864-1949)"
+    },
+    {
+      "title": "De Acht Lieder, op. 49 (1900-1901)",
+      "composerName": "Richard Strauss (1864-1949)"
+    },
+    {
+      "title": "Waldseligkeit , n.º 1",
+      "composerName": "Richard Strauss (1864-1949)"
+    },
+    {
+      "title": "Wir schreiten in goldener Fülle , n.º 2",
+      "composerName": "Richard Strauss (1864-1949)"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
   "formats": [
     "recital",
     "lied"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_teatro_zarzuela",
       "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/ciclo-de-lied-2026-2027/christiane-karg",
-      "checkedAt": "2026-08-31",
+      "checkedAt": "2026-09-03",
       "externalId": "/es/temporada/ciclo-de-lied-2026-2027/christiane-karg"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23777",
+      "checkedAt": "2026-09-03",
+      "externalId": "23777"
     }
   ],
   "primarySourceId": "src_teatro_zarzuela",
-  "lastVerifiedAt": "2026-08-31"
+  "lastVerifiedAt": "2026-09-03"
 }

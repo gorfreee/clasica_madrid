@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_filarmonia_de_madrid_sinfonia_no9_coral_l_v_beethoven_1",
+  "slug": "filarmonia-de-madrid-sinfonia-n-9-coral-l-v-beethoven",
+  "title": "Filarmonía de Madrid. Sinfonía nº9 'Coral', L.V. Beethoven",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_filarmonia_de_madrid_sinfonia_no9_coral_l_v_beethoven_1_01",
+      "date": "2027-05-22",
+      "time": "22:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta y Coro Filarmonía"
+    },
+    {
+      "name": "Participativos Filarmonía"
+    },
+    {
+      "name": "Rafael Albiñana, Director del Coro"
+    }
+  ],
+  "composers": [
+    {
+      "name": "PARTE I"
+    },
+    {
+      "name": "PARTE II"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para piano y orquesta nº 1 en si bemol menor, Op. 23, P.I.Tchaikovsky",
+      "composerName": "PARTE I"
+    },
+    {
+      "title": "Sinfonía Nº 9 'Coral' L.V.Beethoven",
+      "composerName": "PARTE II"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/filarmonia-de-madrid-sinfonia-no9-coral-l-v-beethoven-1",
+      "checkedAt": "2026-09-03",
+      "externalId": "filarmonia-de-madrid-sinfonia-no9-coral-l-v-beethoven-1"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

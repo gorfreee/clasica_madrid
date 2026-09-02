@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_inmortal_bach_3",
+  "slug": "excelentia-inmortal-bach",
+  "title": "Excelentia. Inmortal Bach",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_inmortal_bach_3_01",
+      "date": "2027-02-20",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Délica Chamber Orchestra"
+    },
+    {
+      "name": "Olga Yakushina"
+    }
+  ],
+  "composers": [
+    {
+      "name": "J. S. Bach"
+    },
+    {
+      "name": "C. P. E. Bach"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para violín en Mi mayor, BWV 1042",
+      "composerName": "J. S. Bach"
+    },
+    {
+      "title": "Suite n.º 3 en Re mayor, BWV 1068",
+      "composerName": "J. S. Bach"
+    },
+    {
+      "title": "Concierto en sol menor, BWV 1056R",
+      "composerName": "J. S. Bach"
+    },
+    {
+      "title": "Sinfonía en sol mayor, Wq 182/1",
+      "composerName": "C. P. E. Bach"
+    },
+    {
+      "title": "Concierto para violín y oboe en Do menor, BWV 1060",
+      "composerName": "J. S. Bach"
+    },
+    {
+      "title": "Concierto para violín en La menor, BWV 1041",
+      "composerName": "J. S. Bach"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "chamber",
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-inmortal-bach-3",
+      "checkedAt": "2026-09-03",
+      "externalId": "excelentia-inmortal-bach-3"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

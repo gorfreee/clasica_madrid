@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_hispania_concertalia_ludwig_van_beethoven_manuel_de_falla",
+  "slug": "hispania-concertalia-ludwig-van-beethoven-manuel-de-falla",
+  "title": "Hispania Concertalia. Ludwig van Beethoven & Manuel de Falla",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_hispania_concertalia_ludwig_van_beethoven_manuel_de_falla_01",
+      "date": "2027-02-06",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Cuarteto de cuerda de Viena"
+    },
+    {
+      "name": "Luis González Lladó"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Joaquín Turina"
+    }
+  ],
+  "works": [
+    {
+      "title": "Cuarteto con piano en la menor, op. 67",
+      "composerName": "Joaquín Turina"
+    },
+    {
+      "title": "Manuel de Falla – El amor brujo (versión de cámara)",
+      "composerName": "Joaquín Turina"
+    },
+    {
+      "title": "Ludwig van Beethoven – [Obra por confirmar]",
+      "composerName": "Joaquín Turina"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber",
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/hispania-concertalia-ludwig-van-beethoven-manuel-de-falla",
+      "checkedAt": "2026-09-03",
+      "externalId": "hispania-concertalia-ludwig-van-beethoven-manuel-de-falla"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

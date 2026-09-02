@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_basilica_san_miguel_4621",
+  "slug": "concierto-de-lucie-zakova",
+  "title": "Concierto de Lucie Žáková",
+  "status": "scheduled",
+  "venueId": "ven_basilica_pontificia_san_miguel",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_basilica_san_miguel_4621_01",
+      "date": "2026-10-04",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital",
+    "organ"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_basilica_san_miguel",
+      "url": "https://basilicadesanmiguel.org/actividad/concierto-de-lucie-zakova",
+      "checkedAt": "2026-09-03",
+      "externalId": "4621"
+    }
+  ],
+  "primarySourceId": "src_basilica_san_miguel",
+  "lastVerifiedAt": "2026-09-03"
+}

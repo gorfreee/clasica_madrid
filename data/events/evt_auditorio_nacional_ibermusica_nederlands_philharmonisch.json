@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ibermusica_nederlands_philharmonisch",
+  "slug": "ibermusica-nederlands-philharmonisch",
+  "title": "Ibermúsica. Nederlands Philharmonisch",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ibermusica_nederlands_philharmonisch_01",
+      "date": "2027-04-05",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Nederlands Philharmonisch"
+    },
+    {
+      "name": "Lorenzo Viotti"
+    },
+    {
+      "name": "Gautier Capuçon"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-nederlands-philharmonisch",
+      "checkedAt": "2026-09-03",
+      "externalId": "ibermusica-nederlands-philharmonisch"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

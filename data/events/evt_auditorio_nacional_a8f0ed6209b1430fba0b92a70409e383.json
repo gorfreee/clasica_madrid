@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_a8f0ed6209b1430fba0b92a70409e383",
+  "slug": "ocne-sinfonico-18",
+  "title": "OCNE. Sinfónico 18",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_a8f0ed6209b1430fba0b92a70409e383_01",
+      "date": "2027-05-07",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_a8f0ed6209b1430fba0b92a70409e383_02",
+      "date": "2027-05-08",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_a8f0ed6209b1430fba0b92a70409e383_03",
+      "date": "2027-05-09",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Nacional de España"
+    },
+    {
+      "name": "Antonio Méndez",
+      "role": "conductor"
+    },
+    {
+      "name": "Javier Perianes"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Richard Strauss"
+    },
+    {
+      "name": "Francisco Coll"
+    },
+    {
+      "name": "Maurice Ravel"
+    },
+    {
+      "name": "Béla Bartók"
+    }
+  ],
+  "works": [
+    {
+      "title": "Las alegres travesuras de Till Eulenspiegel,op. 28",
+      "composerName": "Richard Strauss"
+    },
+    {
+      "title": "Ciudad sinsueño, fantasía para piano y orquesta",
+      "composerName": "Francisco Coll"
+    },
+    {
+      "title": "Concierto para piano y orquesta en Sol mayor",
+      "composerName": "Maurice Ravel"
+    },
+    {
+      "title": "Suite de El mandarín maravilloso, op. 19",
+      "composerName": "Béla Bartók"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-18-5",
+      "checkedAt": "2026-09-03",
+      "externalId": "a8f0ed6209b1430fba0b92a70409e383"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

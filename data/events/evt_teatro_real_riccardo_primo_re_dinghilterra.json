@@ -15,8 +15,39 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
+  "performers": [
+    {
+      "name": "Paul Agnew",
+      "role": "conductor"
+    },
+    {
+      "name": "Coro y Orquesta de Les Arts Florissants",
+      "role": "orchestra"
+    },
+    {
+      "name": "Hugh Cutting"
+    },
+    {
+      "name": "Mélissa Petit"
+    },
+    {
+      "name": "Alex Rosen"
+    },
+    {
+      "name": "Andreas Wolf"
+    },
+    {
+      "name": "Juliette Mey"
+    },
+    {
+      "name": "Paul Figuier"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Georg Friedrich Händel"
+    }
+  ],
   "works": [],
   "eras": [
     "baroque"
@@ -31,10 +62,10 @@
     {
       "sourceId": "src_teatro_real",
       "url": "https://www.teatroreal.es/es/espectaculo/riccardo-primo-re-dinghilterra",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-03",
       "externalId": "riccardo-primo-re-dinghilterra"
     }
   ],
   "primarySourceId": "src_teatro_real",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-03"
 }

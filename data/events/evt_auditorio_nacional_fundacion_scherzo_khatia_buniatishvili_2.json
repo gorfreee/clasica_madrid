@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_fundacion_scherzo_khatia_buniatishvili_2",
+  "slug": "fundacion-scherzo-khatia-buniatishvili",
+  "title": "Fundación Scherzo. Khatia Buniatishvili",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_fundacion_scherzo_khatia_buniatishvili_2_01",
+      "date": "2027-01-24",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Khatia Buniatishvili"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Robert Schumann"
+    },
+    {
+      "name": "Johannes Brahms"
+    },
+    {
+      "name": "Frédéric Chopin"
+    },
+    {
+      "name": "Sofia Gubaidulina"
+    },
+    {
+      "name": "Sergueï Prokofiev"
+    }
+  ],
+  "works": [
+    {
+      "title": "Fantasía op.17",
+      "composerName": "Robert Schumann"
+    },
+    {
+      "title": "Rapsodia n°2, op.79",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Intermezzo op. 117 n°1",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Intermezzo op. 117 n°2",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Intermezzo op. 118 n°2",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Scherzo n°2 op.31",
+      "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "Canción del pescador",
+      "composerName": "Sofia Gubaidulina"
+    },
+    {
+      "title": "Sonata para piano n° 7, op.83",
+      "composerName": "Sergueï Prokofiev"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/fundacion-scherzo-khatia-buniatishvili-2",
+      "checkedAt": "2026-09-03",
+      "externalId": "fundacion-scherzo-khatia-buniatishvili-2"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_orcam_4865",
+  "slug": "geometrias-sonoras",
+  "title": "Geometrías sonoras",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_orcam_4865_01",
+      "date": "2027-06-01",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta de la Comunidad de Madrid"
+    },
+    {
+      "name": "Coro de la Comunidad de Madrid"
+    },
+    {
+      "name": "Narek Haknazaryan"
+    },
+    {
+      "name": "Óscar Rodríguez",
+      "role": "choir"
+    },
+    {
+      "name": "Eduardo Strausser",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ígor Stravinski"
+    },
+    {
+      "name": "Edward Elga"
+    },
+    {
+      "name": "Dmitri Shostakovich"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sinfonía de los salmos",
+      "composerName": "Ígor Stravinski"
+    },
+    {
+      "title": "Concierto para violonchelo y orquesta, en mi menor, op. 85",
+      "composerName": "Edward Elga"
+    },
+    {
+      "title": "Sinfonía n.º 1, en fa menor, op. 10",
+      "composerName": "Dmitri Shostakovich"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_orcam",
+      "url": "https://fundacionorcam.org/conciertos/2026-27/geometrias-sonoras",
+      "checkedAt": "2026-09-03",
+      "externalId": "4865"
+    }
+  ],
+  "primarySourceId": "src_fundacion_orcam",
+  "lastVerifiedAt": "2026-09-03"
+}

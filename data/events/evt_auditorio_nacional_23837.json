@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_23837",
+  "slug": "benjamin-alard-2",
+  "title": "BENJAMIN ALARD",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_23837_01",
+      "date": "2027-02-16",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "BENJAMIN ALARD"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach (1685-1750)"
+    }
+  ],
+  "works": [
+    {
+      "title": "El clave bien temperado, libro I (1722)",
+      "composerName": "Johann Sebastian Bach (1685-1750)"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-benjamin-alard-8",
+      "checkedAt": "2026-09-03",
+      "externalId": "23837"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23837",
+      "checkedAt": "2026-09-03",
+      "externalId": "23837"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

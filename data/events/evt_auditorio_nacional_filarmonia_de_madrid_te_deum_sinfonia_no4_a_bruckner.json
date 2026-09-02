@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_filarmonia_de_madrid_te_deum_sinfonia_no4_a_bruckner",
+  "slug": "filarmonia-de-madrid-te-deum-sinfonia-n-4-a-bruckner",
+  "title": "Filarmonía de Madrid. Te Deum & Sinfonía nº4, A.Bruckner",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_filarmonia_de_madrid_te_deum_sinfonia_no4_a_bruckner_01",
+      "date": "2027-03-16",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta y Coro Filarmonía"
+    },
+    {
+      "name": "Participativos Filarmonía"
+    },
+    {
+      "name": "Rafael Albiñana, Director del Coro"
+    },
+    {
+      "name": "PARTE I"
+    }
+  ],
+  "composers": [
+    {
+      "name": "PARTE II"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sinfonía n.º 4 en mi bemol mayor, WAB 104, A.Bruckner",
+      "composerName": "PARTE II"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/filarmonia-de-madrid-te-deum-sinfonia-no4-a-bruckner",
+      "checkedAt": "2026-09-03",
+      "externalId": "filarmonia-de-madrid-te-deum-sinfonia-no4-a-bruckner"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}

@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ocne_satelite_19_dialogos_clasicos_luz_y_sombra",
+  "slug": "ocne-satelite-19-dialogos-clasicos-luz-y-sombra",
+  "title": "OCNE. Satélite 19 Diálogos Clásicos - Luz y Sombra",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ocne_satelite_19_dialogos_clasicos_luz_y_sombra_01",
+      "date": "2027-05-11",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Cuarteto Éclat"
+    },
+    {
+      "name": "Luis Arias Fernández"
+    },
+    {
+      "name": "Sei Morishima"
+    },
+    {
+      "name": "Joaquín Arias Fernández"
+    },
+    {
+      "name": "Carlos Sánchez Muñoz"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-19-dialogos-clasicos-luz-y-sombra",
+      "checkedAt": "2026-09-03",
+      "externalId": "ocne-satelite-19-dialogos-clasicos-luz-y-sombra"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-03"
+}
