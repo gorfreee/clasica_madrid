@@ -3,8 +3,9 @@ import type { ObservedFacts } from '../observed.ts';
 import {
   AI_CLASSIFICATION_JSON_SCHEMA, AI_CLASSIFY_TIMEOUT_MS, AiRateLimitedError,
   AiUnusableOutputError, failureKindForUnusable, parseAiClassification,
-  sanitizeAiOutputExcerpt, type AiAttemptFailure, type AiCallContext, type AiCallDiagnostics,
-  type AiCallPurpose, type AiClassifier, type AiProviderStats, type AiTokenCounts,
+  sanitizeAiOutputExcerpt, taxonomyFormatsStillUnresolved, type AiAttemptFailure,
+  type AiCallContext, type AiCallDiagnostics, type AiCallPurpose, type AiClassifier,
+  type AiProviderStats, type AiTokenCounts,
 } from './ai.ts';
 import {
   AI_CLASSIFIER_SYSTEM_PROMPT, AI_TAXONOMY_SYSTEM_PROMPT,
@@ -128,9 +129,10 @@ export class GeminiClassifier implements AiClassifier {
     // The entire request (prompt text/version, schema, params, facts, endpoint and
     // API revision) is the cache identity. No dates/URLs outside ObservedFacts.
     const purpose: AiCallPurpose = context.purpose ?? 'eligibility';
+    const requireFormats = Boolean(context.requireFormats);
     const spec = requestSpec(observed, purpose);
-    const key = hashInput({ spec, baseUrl: this.baseUrl, revision: GEMINI_API_REVISION });
-    const flightKey = hashInput({ key, models: this.models });
+    const key = hashInput({ spec, baseUrl: this.baseUrl, revision: GEMINI_API_REVISION, requireFormats });
+    const flightKey = hashInput({ key, models: this.models, requireFormats });
     const diagnostics: AiCallDiagnostics = {
       attempts: 0, fallbackUsed: false, cacheHit: false, routing: [], failures: [], purpose,
     };
@@ -156,7 +158,7 @@ export class GeminiClassifier implements AiClassifier {
         this.stats.cacheHits++;
         return structuredClone(result.value);
       }
-      flight = this.classifyOnce(spec, key, diagnostics, signal);
+      flight = this.classifyOnce(spec, key, diagnostics, signal, requireFormats);
       if (this.options.cacheEnabled !== false) this.inFlight.set(flightKey, flight);
       return (await flight).value;
     } catch (error) {
@@ -178,6 +180,7 @@ export class GeminiClassifier implements AiClassifier {
   private async classifyOnce(
     spec: RequestSpec, key: string,
     diagnostics: AiCallDiagnostics, signal: AbortSignal,
+    requireFormats: boolean,
   ): Promise<CallResult> {
     const deadline = this.clock.now() + this.classifyBudgetMs;
     const maxAttempts = 1 + (this.options.maxRetries ?? GEMINI_MAX_RETRIES);
@@ -190,6 +193,7 @@ export class GeminiClassifier implements AiClassifier {
           if (!this.enabled(model) || skippedThisCall.has(model)) continue;
           const value = this.state.cached(hashInput({ key, model }));
           if (value !== undefined) {
+            if (isUnsatisfactoryTaxonomyFormats(diagnostics.purpose, requireFormats, value)) continue;
             Object.assign(diagnostics, { model, cacheHit: true, fallbackUsed: model !== this.models[0] });
             route(diagnostics, model, 'cache');
             this.stats.cacheHits++;
@@ -224,7 +228,29 @@ export class GeminiClassifier implements AiClassifier {
         if (parsed.ok) {
           // Valid JSON, including legitimate eligibility: uncertain, stops here.
           // Never shop another model to turn uncertain into include.
-          if (this.options.cacheEnabled !== false) this.state.cache(hashInput({ key, model }), result.value);
+          // Taxonomy asked to fill formats: empty formats is retryable while attempts remain.
+          if (
+            isUnsatisfactoryTaxonomyFormats(diagnostics.purpose, requireFormats, result.value) &&
+            diagnostics.attempts! < maxAttempts
+          ) {
+            throw new AiUnusableOutputError('Gemini: formats vacío no resuelve la taxonomía', {
+              kind: 'incomplete',
+              model,
+              status: result.status,
+              finishReason: result.finishReason,
+              tokens: result.tokens,
+              excerpt: sanitizeAiOutputExcerpt(
+                typeof result.value === 'string' ? result.value : JSON.stringify(result.value),
+                this.options.apiKey,
+              ),
+            });
+          }
+          const skipCache = isUnsatisfactoryTaxonomyFormats(
+            diagnostics.purpose, requireFormats, result.value,
+          );
+          if (!skipCache && this.options.cacheEnabled !== false) {
+            this.state.cache(hashInput({ key, model }), result.value);
+          }
           this.state.resolvePending(key);
           bump(this.stats.classificationsByModel, model);
           return { value: result.value, diagnostics };
@@ -445,6 +471,16 @@ export class GeminiClassifier implements AiClassifier {
     }
     return { value, tokens: inspected.tokens, status: inspected.status, finishReason: inspected.finishReason };
   }
+}
+
+function isUnsatisfactoryTaxonomyFormats(
+  purpose: AiCallPurpose | undefined,
+  requireFormats: boolean,
+  value: unknown,
+): boolean {
+  if (purpose !== 'taxonomy' || !requireFormats) return false;
+  const parsed = parseAiClassification(value);
+  return parsed.ok && taxonomyFormatsStillUnresolved(parsed.value);
 }
 
 function requestSpec(observed: ObservedFacts, purpose: AiCallPurpose = 'eligibility') {

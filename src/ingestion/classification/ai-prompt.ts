@@ -1,7 +1,7 @@
 import type { ObservedFacts } from '../observed.ts';
 
 export const AI_CLASSIFIER_PROMPT_VERSION = 6 as const;
-export const AI_TAXONOMY_PROMPT_VERSION = 2 as const;
+export const AI_TAXONOMY_PROMPT_VERSION = 3 as const;
 
 export function buildAiClassifierUserMessage(observed: ObservedFacts): string {
   return [
@@ -97,12 +97,15 @@ Taxonomías cerradas:
 - kind: established | alternative (established = circuito profesional/estable; si no hay evidencia, alternative)
 
 Reglas:
-- no inventes performers, composers, works, fechas, venue ni repertorio ausente de los hechos;
-- sí puedes usar conocimiento musical general para interpretar nombres ya observados (Bach → baroque, Brahms/Mahler → romantic, Falla/Mompou → twentieth, compositor vivo o post-~1970 → contemporary);
+- no inventes performers, instrumentos, composers, works, fechas, venue, repertorio ni hechos ausentes;
+- sí puedes usar conocimiento musical general para interpretar hechos ya observados (Bach → baroque; una sinfonía u orquesta → symphonic; un cuarteto → chamber; un recital de piano o un rol de soprano/violín → recital; un coro → choral; órgano → organ; ópera/zarzuela/lied cuando esos géneros están en los hechos o se infieren con seguridad de ellos);
 - una obra académica ~1900–1970 es twentieth, no contemporary;
-- formats y eras vacíos son preferibles a adivinar;
 - no deduzcas época por ensemble, ciclo o venue;
 - rationale breve; no repitas evidence.
+
+formats: asigna al menos un formato cuando los hechos observados permitan una inferencia musical razonable. formats=[] sólo si realmente no hay evidencia suficiente para ninguna etiqueta. No uses other simplemente para evitar un array vacío: other queda para identidades híbridas o no clasificables de verdad, no como comodín. Vacío es preferible a adivinar; no es la salida normal cuando hay una lectura musical razonable.
+
+eras: derívalas de (1) obras observadas, (2) compositores observados, (3) programText cuando nombra explícitamente compositores u obras. Puedes usar conocimiento musical general sobre esos nombres. eras=[] sólo si el contenido no permite una estimación razonable.
 
 Devuelve ÚNICAMENTE un objeto JSON con esta forma:
 {
