@@ -8,6 +8,7 @@ import { isPublishableInclude, type ClassificationResult } from './classificatio
 import { occurrenceIdFor, uniqueId } from './ids.ts';
 import { materialEventDiffs } from './material-diff.ts';
 import type { NormalizedEvent } from './normalize.ts';
+import { canonicalizeEventTitle } from './event-title.ts';
 import { publicationOccurrences } from './to-candidate.ts';
 import { normalizeUrl } from './urls.ts';
 import type { IngestWindow } from './dates.ts';
@@ -59,7 +60,7 @@ export function proposalFromObservation(
   };
 
   const proposal: EventProposal = {
-    title: event.title,
+    title: canonicalizeEventTitle(event.title),
     status: observedStatus(event),
     venueId: options.venueId,
     occurrences: observedSchedule(event, options.now, options.window),
