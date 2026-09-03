@@ -62,6 +62,12 @@
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-il-giardino-armonico-5",
       "checkedAt": "2026-09-03",
       "externalId": "cndm-il-giardino-armonico-5"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23806",
+      "checkedAt": "2026-09-03",
+      "externalId": "23806"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",

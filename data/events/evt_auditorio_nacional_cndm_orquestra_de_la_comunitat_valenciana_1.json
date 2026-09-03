@@ -15,7 +15,12 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Mikko Franck",
+      "role": "conductor"
+    }
+  ],
   "composers": [
     {
       "name": "ORQUESTRA DE LA COMUNITAT VALENCIANA"
@@ -59,6 +64,12 @@
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-orquestra-de-la-comunitat-valenciana-1",
       "checkedAt": "2026-09-03",
       "externalId": "cndm-orquestra-de-la-comunitat-valenciana-1"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23838",
+      "checkedAt": "2026-09-03",
+      "externalId": "23838"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",

@@ -15,7 +15,12 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Thomas Hengelbrock",
+      "role": "conductor"
+    }
+  ],
   "composers": [
     {
       "name": "ORQUESTRA DE LA COMUNITAT VALENCIANA"
@@ -56,6 +61,12 @@
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-orquestra-de-la-comunitat-valenciana",
       "checkedAt": "2026-09-03",
       "externalId": "cndm-orquestra-de-la-comunitat-valenciana"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23822",
+      "checkedAt": "2026-09-03",
+      "externalId": "23822"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",

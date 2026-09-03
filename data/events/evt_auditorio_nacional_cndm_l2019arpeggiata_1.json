@@ -24,6 +24,9 @@
     },
     {
       "name": "LUCIANA MANCINI"
+    },
+    {
+      "name": "Vincenzo Capezzuto"
     }
   ],
   "composers": [
@@ -144,7 +147,8 @@
     "contemporary"
   ],
   "formats": [
-    "recital"
+    "recital",
+    "early-music"
   ],
   "kind": "established",
   "access": "paid",
@@ -154,6 +158,12 @@
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-l2019arpeggiata-1",
       "checkedAt": "2026-09-03",
       "externalId": "cndm-l2019arpeggiata-1"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23768",
+      "checkedAt": "2026-09-03",
+      "externalId": "23768"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
