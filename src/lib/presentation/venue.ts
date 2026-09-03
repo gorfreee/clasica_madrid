@@ -3,6 +3,9 @@ import {
   findVenueBySlug,
   listUpcomingOccurrences,
   listVenuesWithUpcoming,
+  familyVenueIds,
+  isChildVenue,
+  rootVenue,
   type Clock,
   systemClock,
 } from '../domain/index.ts';
@@ -69,7 +72,7 @@ export function buildVenuesIndexModel(catalog: Catalog, clock: Clock = systemClo
       (left.nextDate ?? '').localeCompare(right.nextDate ?? '') || left.name.localeCompare(right.name, 'es'),
   );
   const inactiveVenues = catalog.venues
-    .filter((venue) => !activeVenueIds.has(venue.id))
+    .filter((venue) => !isChildVenue(venue) && !activeVenueIds.has(venue.id))
     .map((venue) => ({
       name: venue.name,
       slug: venue.slug,
@@ -103,28 +106,31 @@ export function buildVenuePageModel(
 ): VenuePageModel | null {
   const venue = findVenueBySlug(catalog, slug);
   if (!venue) return null;
+  const scopeIds = isChildVenue(venue) ? new Set([venue.id]) : familyVenueIds(venue, catalog);
   const upcoming = listUpcomingOccurrences(catalog, clock)
-    .filter((item) => item.resolved.venue.id === venue.id)
+    .filter((item) => scopeIds.has(item.resolved.venue.id))
     .map(toAgendaItem);
-  const place = isMadridMunicipality(venue.municipality)
-    ? venue.name
-    : `${venue.name}, ${venue.municipality}`;
+  const principal = rootVenue(venue, catalog);
+  const place = isMadridMunicipality(principal.municipality)
+    ? principal.name
+    : `${principal.name}, ${principal.municipality}`;
+  const pageName = isChildVenue(venue) ? venue.name : principal.name;
   return {
-    title: venue.name,
+    title: pageName,
     description:
       upcoming.length > 0
         ? `Próximos conciertos de música clásica en ${place}.`
         : `Conciertos de música clásica en ${place}.`,
     canonicalPath: venuePath(venue.slug),
-    name: venue.name,
+    name: pageName,
     slug: venue.slug,
-    municipality: venue.municipality,
-    showMunicipality: !isMadridMunicipality(venue.municipality),
-    areaLabel: areaLabels[venue.area],
-    address: venue.address ?? null,
-    url: venue.url ?? null,
+    municipality: principal.municipality,
+    showMunicipality: !isMadridMunicipality(principal.municipality),
+    areaLabel: areaLabels[principal.area],
+    address: principal.address ?? venue.address ?? null,
+    url: principal.url ?? venue.url ?? null,
     upcoming,
-    jsonLd: buildVenueJsonLd(venue),
+    jsonLd: buildVenueJsonLd(venue, principal),
   };
 }
 

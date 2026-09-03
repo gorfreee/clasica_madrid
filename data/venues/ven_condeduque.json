@@ -1,13 +1,11 @@
 {
   "schemaVersion": 1,
-  "id": "ven_condeduque_auditorio",
-  "slug": "condeduque-auditorio",
-  "name": "Contemporánea Condeduque — Auditorio",
+  "id": "ven_condeduque",
+  "slug": "conde-duque",
+  "name": "Conde Duque",
   "municipality": "Madrid",
   "area": "madrid",
   "address": "Calle del Conde Duque, 9-11, 28015 Madrid",
   "url": "https://www.condeduquemadrid.es/",
-  "parentVenueId": "ven_condeduque",
-  "spaceName": "Auditorio",
   "lastVerifiedAt": "2026-08-28"
 }

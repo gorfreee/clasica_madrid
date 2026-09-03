@@ -1,13 +1,11 @@
 {
   "schemaVersion": 1,
-  "id": "ven_auditorio_fundacion_canal",
-  "slug": "auditorio-fundacion-canal",
-  "name": "Fundación Canal — Auditorio",
+  "id": "ven_fundacion_canal",
+  "slug": "fundacion-canal",
+  "name": "Fundación Canal",
   "municipality": "Madrid",
   "area": "madrid",
   "address": "Calle de Mateo Inurria, 2, 28036 Madrid",
   "url": "https://www.fundacioncanal.com/",
-  "parentVenueId": "ven_fundacion_canal",
-  "spaceName": "Auditorio",
   "lastVerifiedAt": "2026-08-28"
 }

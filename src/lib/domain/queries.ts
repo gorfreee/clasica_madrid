@@ -48,13 +48,13 @@ export function listVenuesWithUpcoming(
   const upcoming = listUpcomingOccurrences(catalog, clock);
   const byVenue = new Map<string, ResolvedOccurrence[]>();
   for (const item of upcoming) {
-    const venueId = item.resolved.venue.id;
+    const venueId = item.resolved.rootVenue.id;
     const list = byVenue.get(venueId) ?? [];
     list.push(item);
     byVenue.set(venueId, list);
   }
   return catalog.venues
-    .filter((venue) => byVenue.has(venue.id))
+    .filter((venue) => !venue.parentVenueId && byVenue.has(venue.id))
     .map((venue) => ({
       venue,
       occurrences: sortOccurrences(byVenue.get(venue.id) ?? []),

@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_auditorio_nacional",
+  "slug": "auditorio-nacional-de-musica",
+  "name": "Auditorio Nacional de Música",
+  "municipality": "Madrid",
+  "area": "madrid",
+  "address": "Calle del Príncipe de Vergara, 146, 28002 Madrid",
+  "url": "https://auditorionacional.inaem.gob.es/es",
+  "lastVerifiedAt": "2026-08-30"
+}

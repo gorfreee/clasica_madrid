@@ -45,6 +45,7 @@ export type EventPageModel = {
   isPast: boolean;
   venueName: string;
   venueHref: string;
+  spaceName: string | null;
   venueAddress: string | null;
   municipality: string;
   showMunicipality: boolean;
@@ -86,7 +87,7 @@ export function buildEventPageModel(
 }
 
 export function toEventPageModel(resolved: ResolvedEvent, clock: Clock = systemClock): EventPageModel {
-  const { event, venue, series, organizers, citations } = resolved;
+  const { event, venue, rootVenue, spaceName, series, organizers, citations } = resolved;
   const now = clock.now();
   const next = nextUpcomingOccurrence(event.occurrences, now);
   const isPast = event.status === 'scheduled' && !hasUpcomingOccurrence(event.occurrences, now);
@@ -98,17 +99,18 @@ export function toEventPageModel(resolved: ResolvedEvent, clock: Clock = systemC
   const featuredCanonical = next ?? (isPast ? lastScheduledOccurrence(event.occurrences) : undefined);
   return {
     title: event.title,
-    documentTitle: eventDocumentTitle(event.title, venue.name),
+    documentTitle: eventDocumentTitle(event.title, rootVenue.name),
     description,
     canonicalPath: eventPath(event.slug),
     slug: event.slug,
     statusLabel: eventStatusLabel(event.status),
     isPast,
-    venueName: venue.name,
-    venueHref: venuePath(venue.slug),
-    venueAddress: venue.address ?? null,
-    municipality: venue.municipality,
-    showMunicipality: !isMadridMunicipality(venue.municipality),
+    venueName: rootVenue.name,
+    venueHref: venuePath(rootVenue.slug),
+    spaceName,
+    venueAddress: rootVenue.address ?? venue.address ?? null,
+    municipality: rootVenue.municipality,
+    showMunicipality: !isMadridMunicipality(rootVenue.municipality),
     seriesName: series?.name ?? null,
     seriesKind: series ? seriesKindLabels[series.kind] : null,
     organizers: organizers.map((organizer) => organizer.name),
@@ -169,9 +171,9 @@ function buildEventDescription(resolved: ResolvedEvent, next?: Occurrence, isPas
   const when = whenOccurrence
     ? `${formatMadridDate(whenOccurrence.date)}${whenOccurrence.time ? ` a las ${whenOccurrence.time}` : ''}`
     : null;
-  const parts = [resolved.event.title, resolved.venue.name];
-  if (!isMadridMunicipality(resolved.venue.municipality)) {
-    parts.push(resolved.venue.municipality);
+  const parts = [resolved.event.title, resolved.rootVenue.name];
+  if (!isMadridMunicipality(resolved.rootVenue.municipality)) {
+    parts.push(resolved.rootVenue.municipality);
   }
   if (when) parts.push(when);
   const format = resolved.event.formats.map((id) => formatLabels[id]).join(', ');

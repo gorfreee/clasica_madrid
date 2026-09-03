@@ -24,13 +24,14 @@ export function findReferenceIssues(catalog: Catalog): ValidationIssue[] {
   issues.push(...findDuplicateSlugs('events', catalog.events.map((item) => ({ id: item.id, slug: item.slug }))));
 
   for (const venue of catalog.venues) {
+    const path = `venues/${venue.id}.json`;
     const madrid = isMadridMunicipality(venue.municipality);
     if (madrid && venue.area !== 'madrid') {
       issues.push(
         errorIssue(
           'area-mismatch',
           `el municipio Madrid debe usar area "madrid"`,
-          `venues/${venue.id}.json`,
+          path,
         ),
       );
     }
@@ -39,10 +40,11 @@ export function findReferenceIssues(catalog: Catalog): ValidationIssue[] {
         errorIssue(
           'area-mismatch',
           `area "madrid" solo aplica al municipio de Madrid (recibido: ${venue.municipality})`,
-          `venues/${venue.id}.json`,
+          path,
         ),
       );
     }
+    issues.push(...venueHierarchyIssues(venue, venues));
   }
 
   for (const event of catalog.events) {
@@ -129,6 +131,62 @@ export function findReferenceIssues(catalog: Catalog): ValidationIssue[] {
       );
     }
 
+  }
+
+  return issues;
+}
+
+function venueHierarchyIssues(
+  venue: { id: string; parentVenueId?: string; spaceName?: string },
+  venues: Map<string, { id: string; parentVenueId?: string }>,
+): ValidationIssue[] {
+  const path = `venues/${venue.id}.json`;
+  const issues: ValidationIssue[] = [];
+  const hasParent = Boolean(venue.parentVenueId);
+  const hasSpace = Boolean(venue.spaceName);
+  if (hasParent !== hasSpace) {
+    issues.push(
+      errorIssue(
+        'venue-space-mismatch',
+        'parentVenueId y spaceName deben ir juntos',
+        path,
+      ),
+    );
+  }
+  if (!venue.parentVenueId) return issues;
+
+  if (venue.parentVenueId === venue.id) {
+    issues.push(errorIssue('self-parent-venue', 'un lugar no puede ser padre de sí mismo', path));
+    return issues;
+  }
+
+  const parent = venues.get(venue.parentVenueId);
+  if (!parent) {
+    issues.push(
+      errorIssue('missing-parent-venue', `parentVenueId inexistente: ${venue.parentVenueId}`, path),
+    );
+    return issues;
+  }
+
+  if (parent.parentVenueId) {
+    issues.push(
+      errorIssue(
+        'nested-venue-parent',
+        `la jerarquía de lugares es de un solo nivel; ${parent.id} ya tiene padre`,
+        path,
+      ),
+    );
+  }
+
+  const seen = new Set<string>();
+  let current: { id: string; parentVenueId?: string } | undefined = venue;
+  while (current?.parentVenueId) {
+    if (seen.has(current.id)) {
+      issues.push(errorIssue('venue-parent-cycle', 'la jerarquía de lugares contiene un ciclo', path));
+      break;
+    }
+    seen.add(current.id);
+    current = venues.get(current.parentVenueId);
   }
 
   return issues;

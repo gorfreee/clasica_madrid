@@ -7,5 +7,7 @@
   "area": "madrid",
   "address": "Calle de Alcalá, 13, 28014 Madrid",
   "url": "https://www.realacademiabellasartessanfernando.com/",
+  "parentVenueId": "ven_real_academia_bellas_artes",
+  "spaceName": "Salón de actos",
   "lastVerifiedAt": "2026-08-28"
 }

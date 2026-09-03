@@ -7,5 +7,7 @@
   "area": "madrid",
   "address": "Calle de Miguel Ángel, 8, 28010 Madrid",
   "url": "https://www.iie.es/",
+  "parentVenueId": "ven_instituto_internacional",
+  "spaceName": "Auditorio",
   "lastVerifiedAt": "2026-08-28"
 }

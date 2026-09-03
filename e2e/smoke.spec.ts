@@ -86,6 +86,26 @@ test.describe('agenda', () => {
     await expect(page.locator('[data-no-results]')).toBeHidden();
     await expect(form.getByRole('searchbox')).toHaveValue('');
   });
+
+  test('un slug histórico de sala filtra el lugar principal y marca esa opción', async ({ page }) => {
+    await page.goto('/?venue=auditorio-nacional-sala-sinfonica');
+    await expect(visibleOccurrences(page).first()).toBeVisible();
+
+    const venueSelect = page.locator('[data-agenda-filters] select[name="venue"]');
+    await expect(venueSelect).toHaveValue('auditorio-nacional-de-musica');
+    await expect(page.locator('[data-active-filters] [data-remove-filter="venue"]')).toContainText(
+      'Auditorio Nacional de Música',
+    );
+
+    const items = visibleOccurrences(page);
+    await expect(items.first().getByRole('link').nth(1)).toHaveText('Auditorio Nacional de Música');
+    const sample = Math.min(await items.count(), 12);
+    for (let index = 0; index < sample; index += 1) {
+      await expect(items.nth(index).getByRole('link').nth(1)).toHaveText('Auditorio Nacional de Música');
+      await expect(items.nth(index).getByRole('link').nth(1)).not.toHaveText(/Sala Sinfónica/);
+    }
+    await expect(page.locator('[data-result-count]')).toBeVisible();
+  });
 });
 
 test.describe('ficha de evento', () => {

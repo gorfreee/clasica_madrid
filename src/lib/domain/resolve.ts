@@ -1,6 +1,7 @@
 import type { Catalog } from './catalog.ts';
 import type { Event, Organizer, Series, Source, Venue } from '../schemas/index.ts';
 import type { Citation, Occurrence } from '../schemas/event.ts';
+import { familyVenueKeys, rootVenue as resolveRootVenue, spaceNameOf } from './venues.ts';
 
 export type ResolvedCitation = Citation & {
   source: Source;
@@ -9,7 +10,14 @@ export type ResolvedCitation = Citation & {
 
 export type ResolvedEvent = {
   event: Event;
+  /** Exact catalog venue (`Event.venueId`), which may be an internal room. */
   venue: Venue;
+  /** Principal building / institution for public grouping. */
+  rootVenue: Venue;
+  /** Internal room label when `venue` is a child space; otherwise null. */
+  spaceName: string | null;
+  /** IDs and slugs of the principal venue and its rooms. */
+  familyKeys: string[];
   organizers: Organizer[];
   series: Series | null;
   citations: ResolvedCitation[];
@@ -60,7 +68,17 @@ export function resolveEvent(event: Event, catalog: Catalog): ResolvedEvent {
   if (!primaryCitation) {
     throw new Error(`Evento ${event.id} no tiene fuente principal`);
   }
-  return { event, venue, organizers, series, citations, primaryCitation };
+  return {
+    event,
+    venue,
+    rootVenue: resolveRootVenue(venue, catalog),
+    spaceName: spaceNameOf(venue),
+    familyKeys: familyVenueKeys(venue, catalog),
+    organizers,
+    series,
+    citations,
+    primaryCitation,
+  };
 }
 
 export function resolveCatalog(catalog: Catalog): ResolvedEvent[] {

@@ -541,6 +541,8 @@ button, input, select { font: inherit; }
 .event-facts__when dd { display: flex; flex-direction: column; gap: .35rem; }
 .event-facts__when strong { color: var(--blue); font-size: 2rem; font-variant-numeric: tabular-nums; }
 .event-facts__venue a { text-decoration-thickness: 1px; text-underline-offset: .16em; }
+.event-facts__venue dt:not(:first-of-type) { margin-top: .85rem; }
+.event-facts__space { color: var(--ink); font-size: clamp(.95rem, 1.6vw, 1.15rem) !important; font-weight: 600 !important; letter-spacing: -.02em !important; }
 .event-facts__address { margin-top: .75rem !important; color: var(--muted); font-size: .76rem !important; font-weight: 500 !important; letter-spacing: 0 !important; }
 .past-notice, .quiet-state { margin: 1.5rem 0 0; padding: 1rem; border-left: .75rem solid var(--coral); color: var(--muted); }
 .official-link {

@@ -7,5 +7,7 @@
   "area": "madrid",
   "address": "Calle del Príncipe de Vergara, 146, 28002 Madrid",
   "url": "https://auditorionacional.inaem.gob.es/es",
+  "parentVenueId": "ven_auditorio_nacional",
+  "spaceName": "Sala de Cámara",
   "lastVerifiedAt": "2026-08-30"
 }

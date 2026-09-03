@@ -67,7 +67,10 @@ export function mergeCandidateBatch(existing: Catalog, candidates: Candidate[]):
     }
     const candidate = parsed.data;
 
-    catalog.venues = reconcile(catalog.venues, candidate.venue, 'venue', 'venues', filesToWrite, issues);
+    const extraVenues = [...(candidate.venues ?? []), candidate.venue];
+    for (const venue of extraVenues) {
+      catalog.venues = reconcile(catalog.venues, venue, 'venue', 'venues', filesToWrite, issues);
+    }
     for (const organizer of candidate.organizers ?? []) {
       catalog.organizers = reconcile(catalog.organizers, organizer, 'organizer', 'organizers', filesToWrite, issues);
     }

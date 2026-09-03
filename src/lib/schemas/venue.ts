@@ -20,6 +20,8 @@ export const venueSchema = z
     address: z.string().trim().min(1).max(400).optional(),
     url: httpUrlSchema.optional(),
     lastVerifiedAt: isoDateSchema.optional(),
+    parentVenueId: venueIdSchema.optional(),
+    spaceName: nonEmptyStringSchema.optional(),
   })
   .strict();
 

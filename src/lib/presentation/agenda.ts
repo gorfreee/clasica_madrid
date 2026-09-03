@@ -1,6 +1,6 @@
 import type { Catalog } from '../domain/catalog.ts';
 import type { AgendaFilters, FilterableOccurrence } from '../domain/filters.ts';
-import { parseAgendaFilters, toFilterable } from '../domain/filters.ts';
+import { canonicalVenueFilter, parseAgendaFilters, toFilterable } from '../domain/filters.ts';
 import { formatMadridDate, fromMadridLocal, madridToday } from '../domain/dates.ts';
 import { listUpcomingOccurrences, type Clock, systemClock } from '../domain/index.ts';
 import type { ResolvedOccurrence } from '../domain/resolve.ts';
@@ -122,7 +122,7 @@ export function buildAgendaPageModel(
 }
 
 export function toAgendaItem(item: ResolvedOccurrence): AgendaItemModel {
-  const { event, venue, series, primaryCitation } = item.resolved;
+  const { event, rootVenue, series, primaryCitation } = item.resolved;
   return {
     eventId: event.id,
     eventSlug: event.slug,
@@ -132,11 +132,11 @@ export function toAgendaItem(item: ResolvedOccurrence): AgendaItemModel {
     dateLabel: formatMadridDate(item.occurrence.date),
     time: item.occurrence.time,
     title: event.title,
-    venueName: venue.name,
-    venueHref: venuePath(venue.slug),
-    municipality: venue.municipality,
-    showMunicipality: !isMadridMunicipality(venue.municipality),
-    areaLabel: areaLabels[venue.area],
+    venueName: rootVenue.name,
+    venueHref: venuePath(rootVenue.slug),
+    municipality: rootVenue.municipality,
+    showMunicipality: !isMadridMunicipality(rootVenue.municipality),
+    areaLabel: areaLabels[rootVenue.area],
     seriesName: series?.name ?? null,
     performers: event.performers.map((performer) => performer.name),
     composers: event.composers.map((composer) => composer.name),
@@ -199,7 +199,7 @@ function buildDay(
 
 function buildSelectFilters(upcoming: ResolvedOccurrence[], filters: AgendaFilters): FilterFieldModel[] {
   const venues = uniqueMap(
-    upcoming.map((item) => item.resolved.venue),
+    upcoming.map((item) => item.resolved.rootVenue),
     (venue) => venue.slug,
     (venue) => venue.name,
   );
@@ -252,7 +252,7 @@ function buildSelectFilters(upcoming: ResolvedOccurrence[], filters: AgendaFilte
     {
       name: 'venue',
       label: 'Lugar',
-      value: filters.venue ?? '',
+      value: selectedVenueFilter(upcoming, filters.venue),
       options: [{ value: '', label: 'Cualquier lugar' }, ...venues],
     },
   ];
@@ -270,6 +270,10 @@ function buildShortcuts(now: Date): AgendaShortcutModel[] {
     { label: 'Fin de semana', href: `/?from=${weekendStart}&to=${weekendEnd}` },
     { label: 'Gratis', href: '/?access=free', emphasis: true },
   ];
+}
+
+function selectedVenueFilter(upcoming: ResolvedOccurrence[], value: string | undefined): string {
+  return canonicalVenueFilter(upcoming.map(toFilterable), value);
 }
 
 function shiftIsoDate(date: string, days: number): string {

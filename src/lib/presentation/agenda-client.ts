@@ -5,6 +5,8 @@
  * TypeScript. Playwright smokes in `e2e/` guard the behaviour.
  *
  * - `#agenda-filter-data` — JSON index of FilterableOccurrence
+ *   (`venueSlug` / `venueId` are the principal place; `venueKeys` also
+ *   includes child room ids/slugs so old URLs still match)
  * - `[data-agenda-filters]` — filter form (names match URL params)
  * - `[data-agenda-list]` — occurrence list
  * - `[data-agenda-day]` — day group (hidden when every child is hidden)
@@ -14,6 +16,7 @@
  * - `[data-clear-filters]` — reset to `/`
  */
 import {
+  canonicalVenueFilter,
   hasActiveFilters,
   parseAgendaFilters,
   selectVisibleOccurrences,
@@ -35,7 +38,9 @@ export function initAgendaFilters(): void {
   const items = JSON.parse(dataNode.textContent) as FilterableOccurrence[];
 
   const apply = () => {
-    const filters = parseAgendaFilters(new URLSearchParams(window.location.search));
+    const parsed = parseAgendaFilters(new URLSearchParams(window.location.search));
+    const venue = canonicalVenueFilter(items, parsed.venue);
+    const filters: AgendaFilters = venue ? { ...parsed, venue } : { ...parsed, venue: undefined };
     const visibleItems = selectVisibleOccurrences(items, filters, new Date());
     const visible = new Set(visibleItems.map((item) => item.occurrenceId));
     const active = hasActiveFilters(filters);
