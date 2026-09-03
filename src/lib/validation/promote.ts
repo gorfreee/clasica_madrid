@@ -6,6 +6,7 @@ import { defaultDataDir, ensureDataDirs } from '../repository/fs.ts';
 import { loadCatalogFromDir } from '../repository/load.ts';
 import type { Catalog } from '../domain/catalog.ts';
 import { findDuplicateEvents } from './duplicates.ts';
+import { findScheduleCollisionIssues } from './schedule-collisions.ts';
 import { findReferenceIssues } from './references.ts';
 import { errorIssue, makeReport, type ValidationIssue, type ValidationReport } from './report.ts';
 
@@ -73,7 +74,7 @@ export async function promoteCandidate(
     };
   }
   const merged = mergeCandidate(existing, candidate);
-  const issues = [...merged.issues, ...findReferenceIssues(merged.catalog), ...findDuplicateEvents(merged.catalog)];
+  const issues = [...merged.issues, ...findReferenceIssues(merged.catalog), ...findDuplicateEvents(merged.catalog), ...findScheduleCollisionIssues(merged.catalog)];
   const report = makeReport(issues);
   if (!report.ok) {
     return { report, written: [] };

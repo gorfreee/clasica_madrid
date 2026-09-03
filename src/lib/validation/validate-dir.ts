@@ -7,6 +7,7 @@ import { venueSchema } from '../schemas/venue.ts';
 import { emptyCatalog, type Catalog } from '../domain/catalog.ts';
 import type { RawEntityFile } from '../repository/fs.ts';
 import { findDuplicateEvents } from './duplicates.ts';
+import { findScheduleCollisionIssues } from './schedule-collisions.ts';
 import { findReferenceIssues } from './references.ts';
 import { errorIssue, makeReport, type ValidationIssue, type ValidationReport } from './report.ts';
 import { readRawCatalogFiles } from '../repository/fs.ts';
@@ -68,6 +69,7 @@ export function validateRawFiles(files: RawEntityFile[]): ValidationReport {
   const catalog = catalogFromParsed(parsed);
   issues.push(...findReferenceIssues(catalog));
   issues.push(...findDuplicateEvents(catalog));
+  issues.push(...findScheduleCollisionIssues(catalog));
 
   return makeReport(issues);
 }

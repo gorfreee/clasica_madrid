@@ -298,7 +298,11 @@ function pipelineRun(failures: number, count = 10, failHttp = false, dateText = 
       if (url === category) return listing;
       detailCalls += 1;
       if (failHttp) throw new HttpError(403, url);
-      return Number(url.split('-').at(-1)) < failures ? 'HTML inesperado' : detail;
+      const index = Number(url.split('-').at(-1));
+      if (failHttp) throw new HttpError(403, url);
+      if (index < failures) return 'HTML inesperado';
+      // Unique times so this coverage fixture is not one exclusive slot.
+      return detail.replace('19:30 horas', `19:${String(30 + index).padStart(2, '0')} horas`);
     },
   });
   return { pending, catalog, before, detailCalls: () => detailCalls };

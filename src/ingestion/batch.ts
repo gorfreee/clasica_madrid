@@ -7,6 +7,7 @@ import type { Event, Organizer, Series, Source, Venue } from '../lib/schemas/ind
 import { candidateSchema } from '../lib/schemas/candidate.ts';
 import { ensureDataDirs } from '../lib/repository/fs.ts';
 import { findDuplicateEvents } from '../lib/validation/duplicates.ts';
+import { findScheduleCollisionIssues } from '../lib/validation/schedule-collisions.ts';
 import { findReferenceIssues } from '../lib/validation/references.ts';
 import {
   canonicalFieldDiffs,
@@ -87,9 +88,13 @@ export function mergeCandidateBatch(existing: Catalog, candidates: Candidate[]):
           externalId: citation.externalId,
           title: candidate.event.title,
           occurrences: candidate.event.occurrences,
+          performers: candidate.event.performers,
+          composers: candidate.event.composers,
+          works: candidate.event.works,
         }, {
           catalogSourceId: candidate.event.primarySourceId,
           venueId: candidate.event.venueId,
+          allowSlot: false,
         })
       : { kind: 'unmatched' as const };
     if (!originalIds.has(candidate.event.id) && identity.kind === 'matched') {
@@ -199,7 +204,7 @@ export async function applyCandidateBatch(
   options: { dryRun: boolean; io?: BatchIo },
 ): Promise<BatchApplyResult> {
   const merged = mergeCandidateBatch(existing, candidates);
-  const issues = [...merged.issues, ...findReferenceIssues(merged.catalog), ...findDuplicateEvents(merged.catalog)];
+  const issues = [...merged.issues, ...findReferenceIssues(merged.catalog), ...findDuplicateEvents(merged.catalog), ...findScheduleCollisionIssues(merged.catalog)];
   const report = makeReport(issues);
   if (!report.ok) {
     return {

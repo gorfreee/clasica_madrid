@@ -1,9 +1,11 @@
 import type { Catalog } from '../lib/domain/catalog.ts';
+import { isExclusiveScheduleVenueId } from '../lib/domain/venues.ts';
 import { normalizeText } from '../lib/domain/normalize.ts';
 import type { Event } from '../lib/schemas/index.ts';
+import { compareMusicalFacts, musicalFactsFrom } from './musical-identity.ts';
 import { normalizeUrl, urlsEquivalent } from './urls.ts';
 
-export type IdentityMethod = 'externalId' | 'url' | 'alias' | 'strong';
+export type IdentityMethod = 'externalId' | 'url' | 'alias' | 'strong' | 'slot';
 
 /**
  * Small typed alias from a harvest identifier to a published event.
@@ -33,7 +35,10 @@ export type IdentityFacts = {
   sourceUrl: string;
   externalId?: string;
   title: string;
-  occurrences: Array<{ date: string; time: string | null }>;
+  occurrences: Array<{ date: string; time: string | null; status?: string }>;
+  performers?: Array<{ name: string; role?: string }>;
+  composers?: Array<{ name: string }>;
+  works?: Array<{ title: string; composerName?: string }>;
 };
 
 export type SharedSourceAssignment = {
@@ -57,6 +62,7 @@ const METHOD_RANK: Record<IdentityMethod, number> = {
   url: 1,
   alias: 2,
   strong: 3,
+  slot: 4,
 };
 
 const SOURCE_IDENTITY_METHODS = new Set<IdentityMethod>(['externalId', 'url', 'alias']);
@@ -68,6 +74,8 @@ export function matchEventIdentity(
     catalogSourceId: string;
     venueId?: string;
     aliases?: readonly EventIdentityAlias[];
+    /** Slot matching is the ingest reconciler's second line. Batch apply keeps high-precision methods only. */
+    allowSlot?: boolean;
   },
 ): IdentityMatch {
   const hits: Array<{ event: Event; method: IdentityMethod }> = [];
@@ -101,7 +109,10 @@ export function matchEventIdentity(
     }
   }
 
-  return collapseHits(hits, observed);
+  const precise = collapseHits(hits, observed);
+  if (precise.kind !== 'unmatched') return precise;
+  if (options.allowSlot === false) return { kind: 'unmatched' };
+  return matchExclusiveSlot(catalog, observed, options.venueId);
 }
 
 export function eventMatchesExternalId(event: Event, catalogSourceId: string, externalId: string): boolean {
@@ -151,6 +162,30 @@ export function newObservationKeys(
   return keys;
 }
 
+export function sharesExclusiveSlot(
+  left: { venueId?: string; occurrences: Array<{ date: string; time: string | null; status?: string }> },
+  right: { venueId?: string; occurrences: Array<{ date: string; time: string | null; status?: string }> },
+): boolean {
+  if (!left.venueId || left.venueId !== right.venueId) return false;
+  return exclusiveSlotKeys(left.venueId, left.occurrences).some((key) =>
+    exclusiveSlotKeys(right.venueId, right.occurrences).includes(key),
+  );
+}
+
+export function exclusiveSlotKeys(
+  venueId: string | undefined,
+  occurrences: Array<{ date: string; time: string | null; status?: string }>,
+): string[] {
+  if (!venueId) return [];
+  return occurrences
+    .filter((item) => item.date && item.time && item.status !== 'cancelled')
+    .map((item) => `slot:${venueId}:${item.date}:${item.time}`);
+}
+
+export function slotIdentityVerdict(left: IdentityFacts, right: IdentityFacts) {
+  return compareMusicalFacts(musicalFactsFrom(left), musicalFactsFrom(right));
+}
+
 function aliasMatches(
   alias: EventIdentityAlias,
   observed: IdentityFacts,
@@ -166,6 +201,56 @@ function aliasMatches(
     return true;
   }
   return false;
+}
+
+function matchExclusiveSlot(
+  catalog: Catalog,
+  observed: IdentityFacts,
+  venueId: string | undefined,
+): IdentityMatch {
+  if (!isExclusiveScheduleVenueId(venueId, catalog)) return { kind: 'unmatched' };
+  const observedKeys = exclusiveSlotKeys(venueId, observed.occurrences);
+  if (observedKeys.length === 0) return { kind: 'unmatched' };
+
+  const matches: Event[] = [];
+  const conflicts: Array<{ event: Event; reasons: string[] }> = [];
+  for (const event of catalog.events) {
+    if (event.venueId !== venueId) continue;
+    if (event.status === 'cancelled') continue;
+    const eventKeys = exclusiveSlotKeys(event.venueId, event.occurrences);
+    if (!eventKeys.some((key) => observedKeys.includes(key))) continue;
+    const verdict = compareMusicalFacts(musicalFactsFrom(observed), musicalFactsFrom(event));
+    if (verdict.kind === 'match') matches.push(event);
+    if (verdict.kind === 'conflict') conflicts.push({ event, reasons: verdict.reasons });
+  }
+
+  const ids = [...new Set([...matches, ...conflicts.map((item) => item.event)].map((event) => event.id))];
+  if (conflicts.length > 0 && matches.length === 0) {
+    const first = conflicts[0]!;
+    return {
+      kind: 'ambiguous',
+      events: conflicts.map((item) => item.event),
+      methods: ['slot'],
+      reason: `schedule-conflict: ${slotConflictLabel(venueId!, observed)} (${first.reasons.join('; ')})`,
+    };
+  }
+  if (matches.length === 1 && conflicts.length === 0) {
+    return { kind: 'matched', event: matches[0]!, method: 'slot' };
+  }
+  if (matches.length > 1 || (matches.length > 0 && conflicts.length > 0)) {
+    return {
+      kind: 'ambiguous',
+      events: [...matches, ...conflicts.map((item) => item.event)],
+      methods: ['slot'],
+      reason: `schedule-conflict: ${slotConflictLabel(venueId!, observed)}: varios eventos en el mismo hueco (${ids.join(', ')})`,
+    };
+  }
+  return { kind: 'unmatched' };
+}
+
+function slotConflictLabel(venueId: string, observed: IdentityFacts): string {
+  const slot = observed.occurrences.find((item) => item.date && item.time);
+  return `${venueId} ${slot?.date ?? ''} ${slot?.time ?? ''}`.trim();
 }
 
 function eventMatchesStrong(event: Event, observed: IdentityFacts, venueId: string, catalogSourceId: string): boolean {

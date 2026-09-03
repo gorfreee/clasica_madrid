@@ -42,8 +42,10 @@ export {
   familyVenueIds,
   familyVenueKeys,
   isChildVenue,
+  isExclusiveScheduleVenueId,
   isPrincipalVenue,
   rootVenue,
   spaceNameOf,
   venueAddress,
+  venueHasExclusiveSchedule,
 } from './venues.ts';
