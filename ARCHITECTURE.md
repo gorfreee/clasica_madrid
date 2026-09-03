@@ -88,6 +88,8 @@ Cloudflare Pages
 
 El navegador no debe consultar una base de datos para mostrar la agenda. Los filtros, búsquedas e índices necesarios deben generarse durante el build o resolverse en cliente sobre artefactos estáticos pequeños.
 
+La UI calcula en build etiquetas y estados que dependen del reloj (`Hoy`, `Mañana`, `Fin de semana`, placeholder de hoy, `isPast`, próximos conciertos de lugares). El cliente sólo oculta representaciones ya pasadas; no reconstruye esa semántica. Cloudflare Pages reconstruye el sitio en cada push a `main` y, además, un Deploy Hook diario (`.github/workflows/daily-site-rebuild.yml`) dispara un rebuild poco después de medianoche en Europe/Madrid. El detalle operativo (secret, creación del hook, prueba manual) está en el README.
+
 Los datos fuente del repositorio no tienen por qué copiarse íntegramente al despliegue. El build publicará únicamente los artefactos necesarios para servir la web.
 
 ## Descubrimiento e ingestión de eventos
