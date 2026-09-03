@@ -55,6 +55,30 @@ Una misma entidad `Event` solo agrupa `occurrences` cuando comparten los atribut
 - `municipality`: texto libre (p. ej. `Madrid`, `Alcobendas`)
 - `area`: `madrid` (municipio de Madrid) o `nearby` (municipio próximo integrado en la experiencia)
 - `address` y `url` opcionales
+- `parentVenueId` y `spaceName` opcionales: relacionan una **sala o espacio interno** con su **lugar principal** (edificio o institución física)
+
+### Lugar principal y sala
+
+Un `Venue` puede ser:
+
+- **lugar principal**: el edificio o institución que el público identifica como lugar (`Auditorio Nacional de Música`, `Círculo de Bellas Artes`). No tiene `parentVenueId`.
+- **sala / espacio interno**: un recinto dentro de ese lugar (`Sala Sinfónica`). Conserva su propio `id` y `slug` publicados, y declara de forma explícita:
+  - `parentVenueId`: el ID del lugar principal, que debe existir en el catálogo
+  - `spaceName`: el nombre útil de la sala (`Sala Sinfónica`)
+
+Los dos campos van juntos. La jerarquía es de un solo nivel: una sala no tiene a su vez salas hijas. No se infiere el parentesco partiendo el `name` por `—` en runtime.
+
+`Event.venueId` apunta al venue más específico conocido. Un concierto en la Sala Sinfónica sigue teniendo `venueId: ven_auditorio_nacional_sala_sinfonica`. No se colapsa al padre.
+
+La presentación pública agrupa por el lugar principal:
+
+- la **agenda** muestra sólo el nombre del padre y enlaza a su página
+- el filtro **Lugar** ofrece una opción por padre; filtrar incluye eventos del padre y de todas sus salas
+- `/lugares` lista una entrada por padre, con `upcomingCount` y `nextDate` agregados
+- la página del padre reúne los conciertos propios y de sus salas
+- la **ficha del evento** muestra el lugar principal y, aparte, la sala cuando existe; si el evento apunta a un venue sin sala, no hay campo «Sala»
+
+Los IDs y slugs publicados, incluidos los de las salas hijas, siguen siendo permanentes. Las páginas `/lugares/{slug}` de las salas históricas permanecen; no se promocionan en el índice.
 
 No hay lista cerrada de municipios del área metropolitana. Si `municipality` es Madrid, `area` debe ser `madrid`, y al revés.
 
