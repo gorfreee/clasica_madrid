@@ -7,5 +7,7 @@
   "area": "madrid",
   "address": "Calle de Castelló, 77, 28006 Madrid",
   "url": "https://www.march.es/es/madrid",
+  "parentVenueId": "ven_fundacion_juan_march",
+  "spaceName": "Auditorio",
   "lastVerifiedAt": "2026-08-28"
 }

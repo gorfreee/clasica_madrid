@@ -1,13 +1,11 @@
 {
   "schemaVersion": 1,
-  "id": "ven_teatros_canal_sala_verde",
-  "slug": "teatros-del-canal-sala-verde",
-  "name": "Teatros del Canal — Sala Verde",
+  "id": "ven_teatros_canal",
+  "slug": "teatros-del-canal",
+  "name": "Teatros del Canal",
   "municipality": "Madrid",
   "area": "madrid",
   "address": "Calle de Cea Bermúdez, 1, 28003 Madrid",
   "url": "https://www.teatroscanal.com/",
-  "parentVenueId": "ven_teatros_canal",
-  "spaceName": "Sala Verde",
   "lastVerifiedAt": "2026-08-28"
 }

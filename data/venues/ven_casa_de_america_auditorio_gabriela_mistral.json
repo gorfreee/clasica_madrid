@@ -7,5 +7,7 @@
   "area": "madrid",
   "address": "acceso por C/ Marqués del Duero, 2",
   "url": "https://www.casamerica.es/",
+  "parentVenueId": "ven_casa_de_america",
+  "spaceName": "Auditorio Gabriela Mistral",
   "lastVerifiedAt": "2026-08-31"
 }

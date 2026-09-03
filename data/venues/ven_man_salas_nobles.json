@@ -7,5 +7,7 @@
   "area": "madrid",
   "address": "Calle de Serrano, 13, 28001 Madrid",
   "url": "https://www.man.es/",
+  "parentVenueId": "ven_museo_arqueologico_nacional",
+  "spaceName": "Salas Nobles",
   "lastVerifiedAt": "2026-08-28"
 }

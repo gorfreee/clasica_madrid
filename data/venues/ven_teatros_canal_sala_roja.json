@@ -7,5 +7,7 @@
   "area": "madrid",
   "address": "Calle de Cea Bermúdez, 1, 28003 Madrid",
   "url": "https://www.teatroscanal.com/",
+  "parentVenueId": "ven_teatros_canal",
+  "spaceName": "Sala Roja Concha Velasco",
   "lastVerifiedAt": "2026-08-28"
 }

@@ -6,5 +6,7 @@
   "municipality": "Madrid",
   "area": "madrid",
   "address": "Ronda de Atocha, 2, 28012 Madrid",
+  "parentVenueId": "ven_museo_reina_sofia",
+  "spaceName": "Auditorio 400",
   "lastVerifiedAt": "2026-09-03"
 }
