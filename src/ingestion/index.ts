@@ -64,6 +64,7 @@ export { eventIdFor, occurrenceIdFor, toSlug, uniqueId, uniqueSlug } from './ids
 export { mergeCandidateBatch, applyCandidateBatch, serializeCanonical } from './batch.ts';
 export { matchEventIdentity, EVENT_IDENTITY_ALIASES } from './identity.ts';
 export type { EventIdentityAlias, IdentityMatch, IdentityMethod } from './identity.ts';
+export { compareMusicalFacts } from './musical-identity.ts';
 export { reconcileHarvest } from './reconcile.ts';
 export type { ReconcileAction } from './reconcile.ts';
 export { findPossiblyMissing } from './disappear.ts';

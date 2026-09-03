@@ -12,6 +12,7 @@ import {
   rootVenue,
   spaceNameOf,
   toFilterable,
+  venueHasExclusiveSchedule,
 } from '../src/lib/domain/index.ts';
 import { toEventExportRow } from '../src/lib/export/catalog-workbook.ts';
 import { buildAgendaPageModel } from '../src/lib/presentation/agenda.ts';
@@ -148,6 +149,8 @@ describe('jerarquía de lugares — dominio', () => {
         'ven_auditorio_nacional_sala_camara',
       ]),
     );
+    expect(venueHasExclusiveSchedule(child, catalog)).toBe(true);
+    expect(venueHasExclusiveSchedule(rootVenue(child, catalog), catalog)).toBe(false);
   });
 
   it('acepta parentVenueId y spaceName en el schema', () => {

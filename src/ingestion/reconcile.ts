@@ -1,3 +1,4 @@
+import { isExclusiveScheduleVenueId } from '../lib/domain/venues.ts';
 import type { Catalog } from '../lib/domain/catalog.ts';
 import type { Candidate } from '../lib/schemas/candidate.ts';
 import type { Event } from '../lib/schemas/index.ts';
@@ -8,7 +9,12 @@ import {
   type ClassificationResult,
 } from './classification/types.ts';
 import type { EventIdentityAlias, IdentityMatch, IdentityMethod } from './identity.ts';
-import { matchEventIdentity, newObservationKeys } from './identity.ts';
+import {
+  exclusiveSlotKeys,
+  matchEventIdentity,
+  newObservationKeys,
+  slotIdentityVerdict,
+} from './identity.ts';
 import {
   materialProposalConflict,
   mergeExistingEvent,
@@ -174,8 +180,25 @@ export function reconcileHarvest(options: {
     applySharedSourceObservation(item, now, candidates, byIndex, stats, seenEventIds);
   }
 
-  const freshGroups = groupNewObservations(fresh);
-  for (const group of freshGroups) {
+  const freshGroups = groupNewObservations(fresh, catalog);
+  const { publishable, conflicting } = partitionFreshSlotConflicts(freshGroups, catalog);
+  for (const group of conflicting) {
+    const reason = group[0] ? slotConflictReason(group[0], catalog) : 'schedule-conflict';
+    stats.ambiguous += group.length;
+    if (group.length > 1) stats.batchDuplicates += group.length - 1;
+    for (const item of group) {
+      byIndex.set(item.observation.index, {
+        action: 'ambiguous',
+        method: 'slot',
+        ambiguousReason: reason,
+        publishable: true,
+        candidateGenerated: false,
+        scheduleChange: scheduleChangeOf(item.observation.event),
+        batchDuplicate: group.length > 1,
+      });
+    }
+  }
+  for (const group of publishable) {
     applyNewGroup(group, catalog, now, window, usedIds, usedSlugs, candidates, byIndex, stats);
   }
 
@@ -446,7 +469,7 @@ function applyNewGroup(
   }
 }
 
-function groupNewObservations(items: PreparedItem[]): PreparedItem[][] {
+function groupNewObservations(items: PreparedItem[], catalog: Catalog): PreparedItem[][] {
   const parent = new Map<number, number>();
   const find = (index: number): number => {
     const current = parent.get(index) ?? index;
@@ -476,6 +499,17 @@ function groupNewObservations(items: PreparedItem[]): PreparedItem[][] {
     }
   }
 
+  for (const [left, item] of items.entries()) {
+    if (!item.venueId || !isExclusiveSlotItem(item, catalog)) continue;
+    for (const [right, other] of items.entries()) {
+      if (right <= left) continue;
+      if (other.venueId !== item.venueId) continue;
+      if (!sharesPreparedSlot(item, other)) continue;
+      if (slotIdentityVerdict(item.observation.event, other.observation.event).kind !== 'match') continue;
+      union(left, right);
+    }
+  }
+
   const groups = new Map<number, PreparedItem[]>();
   for (const [index, item] of items.entries()) {
     const root = find(index);
@@ -486,6 +520,64 @@ function groupNewObservations(items: PreparedItem[]): PreparedItem[][] {
   return [...groups.values()].map((group) =>
     group.sort((left, right) => left.observation.index - right.observation.index),
   );
+}
+
+function partitionFreshSlotConflicts(
+  groups: PreparedItem[][],
+  catalog: Catalog,
+): { publishable: PreparedItem[][]; conflicting: PreparedItem[][] } {
+  const conflictRoots = new Set<number>();
+  const indexed = groups.map((group, index) => ({ group, index }));
+  for (const left of indexed) {
+    const leftItem = left.group[0];
+    if (!leftItem || !isExclusiveSlotItem(leftItem, catalog)) continue;
+    for (const right of indexed) {
+      if (right.index <= left.index) continue;
+      const rightItem = right.group[0];
+      if (!rightItem || rightItem.venueId !== leftItem.venueId) continue;
+      if (!groupsShareSlot(left.group, right.group)) continue;
+      const conflict = groupsHaveSlotConflict(left.group, right.group);
+      if (!conflict) continue;
+      conflictRoots.add(left.index);
+      conflictRoots.add(right.index);
+    }
+  }
+  const publishable: PreparedItem[][] = [];
+  const conflicting: PreparedItem[][] = [];
+  for (const [index, group] of groups.entries()) {
+    if (conflictRoots.has(index)) conflicting.push(group);
+    else publishable.push(group);
+  }
+  return { publishable, conflicting };
+}
+
+function isExclusiveSlotItem(item: PreparedItem, catalog: Catalog): boolean {
+  return Boolean(item.venueId) && isExclusiveScheduleVenueId(item.venueId, catalog);
+}
+
+function sharesPreparedSlot(left: PreparedItem, right: PreparedItem): boolean {
+  return exclusiveSlotKeys(left.venueId, left.observation.event.occurrences).some((key) =>
+    exclusiveSlotKeys(right.venueId, right.observation.event.occurrences).includes(key),
+  );
+}
+
+function groupsShareSlot(left: PreparedItem[], right: PreparedItem[]): boolean {
+  return left.some((item) => right.some((other) => sharesPreparedSlot(item, other)));
+}
+
+function groupsHaveSlotConflict(left: PreparedItem[], right: PreparedItem[]): boolean {
+  return left.some((item) =>
+    right.some((other) =>
+      sharesPreparedSlot(item, other) &&
+      slotIdentityVerdict(item.observation.event, other.observation.event).kind === 'conflict',
+    ),
+  );
+}
+
+function slotConflictReason(item: PreparedItem, _catalog: Catalog): string {
+  const keys = exclusiveSlotKeys(item.venueId, item.observation.event.occurrences);
+  const sample = keys[0]?.replace(/^slot:/, '') ?? item.venueId ?? '';
+  return `schedule-conflict: ${sample}`;
 }
 
 function groupBy<T>(items: T[], keyOf: (item: T) => string): Map<string, T[]> {

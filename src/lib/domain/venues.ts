@@ -50,3 +50,26 @@ export function venueAddress(venue: Venue, catalog: Catalog): string | undefined
   const principal = rootVenue(venue, catalog);
   return principal.address ?? venue.address;
 }
+
+/**
+ * A venue where two scheduled occurrences at the same date and time
+ * cannot normally coexist: an internal room, or a principal place that
+ * has no rooms yet. A parent that already has rooms is not exclusive —
+ * events may still point at the building while others point at a hall.
+ */
+export function venueHasExclusiveSchedule(venue: Venue, catalog: Catalog): boolean {
+  if (venue.parentVenueId) return true;
+  return childVenues(venue, catalog).length === 0;
+}
+
+/**
+ * True when this catalog venue id is a precise exclusive room.
+ * An unresolved id is treated as exclusive: adapters already matched a
+ * specific place. A principal venue with child rooms is not exclusive.
+ */
+export function isExclusiveScheduleVenueId(venueId: string | undefined, catalog: Catalog): boolean {
+  if (!venueId) return false;
+  const venue = indexVenues(catalog).get(venueId);
+  if (!venue) return true;
+  return venueHasExclusiveSchedule(venue, catalog);
+}

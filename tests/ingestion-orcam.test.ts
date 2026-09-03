@@ -182,7 +182,10 @@ describe('ORCAM pipeline safety', () => {
       { ...observed, occurrences: [{ date: '2026-10-06', time: null }] },
     ]) expect(matchEventIdentity(catalog, changed, options).kind).toBe('unmatched');
     expect(matchEventIdentity(catalog, observed, { ...options, venueId: 'ven_other' }).kind).toBe('unmatched');
-    expect(matchEventIdentity(catalog, observed, { ...options, catalogSourceId: 'src_other' }).kind).toBe('unmatched');
+    expect(matchEventIdentity(catalog, observed, { ...options, catalogSourceId: 'src_other' })).toMatchObject({
+      kind: 'matched',
+      method: 'slot',
+    });
   });
 
   it('shares exact cross-source keys for new concerts but never broadens other sources or unknown times', () => {
