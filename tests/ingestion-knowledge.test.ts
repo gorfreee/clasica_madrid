@@ -180,7 +180,7 @@ describe('composer knowledge base', () => {
     ['Joaquin Rodrigo (1901 - 1999)', 'Joaquín Rodrigo', 'twentieth'],
     ['J. Rodrigo', 'Joaquín Rodrigo', 'twentieth'],
     ['Enrique Granados', 'Enrique Granados', 'romantic'],
-    ['Granados', 'Enrique Granados', 'romantic'],
+    ['E. Granados', 'Enrique Granados', 'romantic'],
     ['Ruperto Chapí', 'Ruperto Chapí', 'romantic'],
     ['Ruperto Chapi', 'Ruperto Chapí', 'romantic'],
     ['R. Chapí', 'Ruperto Chapí', 'romantic'],
@@ -286,7 +286,7 @@ describe('composer knowledge base', () => {
     'Dvor', 'Schuberrt', 'Chopines', 'Debussyana',
     'Byrd', 'Shaw', 'Walton', 'Bernstein', 'Strauss', 'Scarlatti', 'Marquez',
     'Chueca', 'Rodrigo', 'Guerrero', 'Chapí', 'Chapi', 'Barbieri', 'Turina',
-    'Soler', 'Couperin', 'Weber', 'Halffter', 'Adams', 'Martin', 'Field',
+    'Granados', 'Soler', 'Couperin', 'Weber', 'Halffter', 'Adams', 'Martin', 'Field',
     'Gershwin', 'Pärt', 'Part', 'Lalo', 'José Serrano', 'Francisco Alonso',
   ])('no reconoce el nombre ambiguo o aproximado %s', (name) => {
     expect(matchComposer(name)).toBeUndefined();
@@ -305,6 +305,7 @@ describe('composer knowledge base', () => {
     'Un paseo por Chueca y Malasaña',
     'Entrevista a Ana Rodrigo en el Conservatorio',
     'Héctor Guerrero al saxofón',
+    'Lina González Granados dirige a la orquesta',
     'La familia Halffter y el Grupo de Madrid',
     'Fazil Say y un concierto de jazz contemporáneo',
   ])('no convierte una coincidencia accidental en eligibility: %s', (text) => {
@@ -318,7 +319,7 @@ describe('composer knowledge base', () => {
 
   it('reconoce el repertorio español añadido desde programa y composers[]', () => {
     const program = findKnownComposersInText(
-      'Granados: Goyescas. Joaquín Turina: Danzas fantásticas. Joaquín Rodrigo: Concierto de Aranjuez. Ruperto Chapí: La bruja. Federico Chueca: La Gran Vía. Asenjo Barbieri: El barberillo de Lavapiés.',
+      'Enrique Granados: Goyescas. Joaquín Turina: Danzas fantásticas. Joaquín Rodrigo: Concierto de Aranjuez. Ruperto Chapí: La bruja. Federico Chueca: La Gran Vía. Asenjo Barbieri: El barberillo de Lavapiés.',
     );
     expect(program.map((item) => item.canonicalName)).toEqual(
       expect.arrayContaining([

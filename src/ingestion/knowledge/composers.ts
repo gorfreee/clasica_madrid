@@ -1448,7 +1448,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Enrique Granados',
-    aliases: ['Enrique Granados', 'E. Granados', 'Granados'],
+    aliases: ['Enrique Granados', 'E. Granados'],
     eras: ['romantic'],
   },
   {
