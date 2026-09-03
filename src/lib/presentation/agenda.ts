@@ -1,6 +1,6 @@
 import type { Catalog } from '../domain/catalog.ts';
 import type { AgendaFilters, FilterableOccurrence } from '../domain/filters.ts';
-import { parseAgendaFilters, toFilterable } from '../domain/filters.ts';
+import { canonicalVenueFilter, parseAgendaFilters, toFilterable } from '../domain/filters.ts';
 import { formatMadridDate, fromMadridLocal, madridToday } from '../domain/dates.ts';
 import { listUpcomingOccurrences, type Clock, systemClock } from '../domain/index.ts';
 import type { ResolvedOccurrence } from '../domain/resolve.ts';
@@ -273,11 +273,7 @@ function buildShortcuts(now: Date): AgendaShortcutModel[] {
 }
 
 function selectedVenueFilter(upcoming: ResolvedOccurrence[], value: string | undefined): string {
-  if (!value) return '';
-  for (const item of upcoming) {
-    if (item.resolved.familyKeys.includes(value)) return item.resolved.rootVenue.slug;
-  }
-  return value;
+  return canonicalVenueFilter(upcoming.map(toFilterable), value);
 }
 
 function shiftIsoDate(date: string, days: number): string {

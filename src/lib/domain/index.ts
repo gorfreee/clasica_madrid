@@ -16,6 +16,7 @@ export {
 } from './dates.ts';
 export { emptyCatalog, type Catalog } from './catalog.ts';
 export {
+  canonicalVenueFilter,
   filterFilterable,
   filterOccurrences,
   filtersToSearchParams,

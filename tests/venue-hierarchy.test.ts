@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { findReferenceIssues } from '../src/lib/validation/references.ts';
 import { venueSchema } from '../src/lib/schemas/venue.ts';
 import {
+  canonicalVenueFilter,
   childVenues,
   familyVenueIds,
   filterOccurrences,
@@ -10,6 +11,7 @@ import {
   resolveEvent,
   rootVenue,
   spaceNameOf,
+  toFilterable,
 } from '../src/lib/domain/index.ts';
 import { toEventExportRow } from '../src/lib/export/catalog-workbook.ts';
 import { buildAgendaPageModel } from '../src/lib/presentation/agenda.ts';
@@ -238,6 +240,15 @@ describe('jerarquía de lugares — agenda y filtro', () => {
       'conferencia-auditorio',
       'ocne-sinfonico',
     ]);
+  });
+
+  it('un slug o ID de sala se canónica al lugar principal del filtro Lugar', () => {
+    const items = listUpcomingOccurrences(hierarchyCatalog(), testClock).map(toFilterable);
+    expect(canonicalVenueFilter(items, 'auditorio-nacional-sala-sinfonica')).toBe('auditorio-nacional');
+    expect(canonicalVenueFilter(items, 'ven_auditorio_nacional_sala_camara')).toBe('auditorio-nacional');
+    expect(canonicalVenueFilter(items, 'ven_auditorio_nacional')).toBe('auditorio-nacional');
+    expect(canonicalVenueFilter(items, 'auditorio-nacional')).toBe('auditorio-nacional');
+    expect(canonicalVenueFilter(items, undefined)).toBe('');
   });
 });
 

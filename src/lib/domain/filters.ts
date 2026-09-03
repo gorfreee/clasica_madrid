@@ -38,6 +38,23 @@ export type FilterableOccurrence = {
   searchHaystack: string;
 };
 
+/**
+ * Map a venue query (parent slug/id or a historical child slug/id) to the
+ * principal `venueSlug` used by the Lugar <select>. Unknown values pass through.
+ */
+export function canonicalVenueFilter(
+  items: ReadonlyArray<Pick<FilterableOccurrence, 'venueSlug' | 'venueId' | 'venueKeys'>>,
+  value: string | undefined,
+): string {
+  if (!value) return '';
+  for (const item of items) {
+    if (item.venueSlug === value || item.venueId === value || item.venueKeys.includes(value)) {
+      return item.venueSlug;
+    }
+  }
+  return value;
+}
+
 export function parseAgendaFilters(params: URLSearchParams): AgendaFilters {
   const filters: AgendaFilters = {};
   const from = params.get('from');
