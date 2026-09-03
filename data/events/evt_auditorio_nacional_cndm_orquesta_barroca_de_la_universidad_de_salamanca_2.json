@@ -68,7 +68,8 @@
   ],
   "formats": [
     "symphonic",
-    "chamber"
+    "chamber",
+    "early-music"
   ],
   "kind": "established",
   "access": "paid",
@@ -78,6 +79,12 @@
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-orquesta-barroca-de-la-universidad-de-salamanca-2",
       "checkedAt": "2026-09-03",
       "externalId": "cndm-orquesta-barroca-de-la-universidad-de-salamanca-2"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23834",
+      "checkedAt": "2026-09-03",
+      "externalId": "23834"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",

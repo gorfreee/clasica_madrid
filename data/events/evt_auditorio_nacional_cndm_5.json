@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "evt_auditorio_nacional_cndm_5",
   "slug": "cndm-2",
-  "title": "CNDM.",
+  "title": "CNDM. Pierre-Laurent Aimard",
   "status": "scheduled",
   "venueId": "ven_auditorio_nacional_sala_camara",
   "organizerIds": [],
@@ -26,6 +26,12 @@
     },
     {
       "name": "L. van Beethoven"
+    },
+    {
+      "name": "György Ligeti (1923-2006)"
+    },
+    {
+      "name": "Karlheinz Stockhausen (1928-2007)"
     }
   ],
   "works": [
@@ -57,6 +63,12 @@
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-5",
       "checkedAt": "2026-09-03",
       "externalId": "cndm-5"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23821",
+      "checkedAt": "2026-09-03",
+      "externalId": "23821"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",

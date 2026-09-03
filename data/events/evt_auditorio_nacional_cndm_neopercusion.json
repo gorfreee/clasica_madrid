@@ -22,9 +22,16 @@
     {
       "name": "JUANJO GUILLEM",
       "role": "conductor"
+    },
+    {
+      "name": "Iván Puñal"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Steve Reich (1936)"
+    }
+  ],
   "works": [],
   "eras": [
     "contemporary"
@@ -33,13 +40,19 @@
     "chamber"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-neopercusion",
       "checkedAt": "2026-09-03",
       "externalId": "cndm-neopercusion"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23770",
+      "checkedAt": "2026-09-03",
+      "externalId": "23770"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",

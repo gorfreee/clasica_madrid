@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "evt_auditorio_nacional_cndm_10",
   "slug": "cndm",
-  "title": "CNDM.",
+  "title": "CNDM. Cantoría",
   "status": "scheduled",
   "venueId": "ven_auditorio_nacional_sala_sinfonica",
   "organizerIds": [],
@@ -30,6 +30,9 @@
     },
     {
       "name": "Heinrich Schütz (1585-1672)"
+    },
+    {
+      "name": "Claudio Monteverdi (1567-1643)"
     }
   ],
   "works": [
@@ -90,7 +93,8 @@
     "baroque"
   ],
   "formats": [
-    "lied"
+    "lied",
+    "early-music"
   ],
   "kind": "established",
   "access": "paid",
@@ -100,6 +104,12 @@
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-10",
       "checkedAt": "2026-09-03",
       "externalId": "cndm-10"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23812",
+      "checkedAt": "2026-09-03",
+      "externalId": "23812"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",

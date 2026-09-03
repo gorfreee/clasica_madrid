@@ -101,6 +101,12 @@
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-harmonia-del-parnas",
       "checkedAt": "2026-09-03",
       "externalId": "cndm-harmonia-del-parnas"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23830",
+      "checkedAt": "2026-09-03",
+      "externalId": "23830"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
