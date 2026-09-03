@@ -951,6 +951,7 @@ describe('formats', () => {
 
   it('no fuerza un format ambiguo', () => {
     expect(resolveFormats(facts({ title: 'Concierto' })).value).toEqual([]);
+    expect(resolveFormats(facts({ title: 'Concierto' })).value).not.toContain('other');
   });
 
   it('alinea opera/recital/choral/symphonic con hechos ya extraídos, sin inventar era', () => {
@@ -987,6 +988,42 @@ describe('formats', () => {
         }),
       ).value,
     ).toEqual(['choral']);
+  });
+
+  it('usa señales inequívocas de sinfonía, orquesta, órgano, coro, trío y rol solista', () => {
+    expect(
+      resolveFormats(
+        facts({
+          title: 'Programa clásico',
+          programText: 'Johannes Brahms: Sinfonía núm. 1',
+        }),
+      ).value,
+    ).toEqual(['symphonic']);
+
+    expect(
+      resolveFormats(facts({ title: 'Orquesta Nacional de España. Temporada' })).value,
+    ).toEqual(['symphonic']);
+
+    expect(
+      resolveFormats(facts({ title: 'Concierto de órgano en San Miguel' })).value,
+    ).toEqual(['recital', 'organ']);
+
+    expect(
+      resolveFormats(facts({ title: 'Concierto del Coro de RTVE' })).value,
+    ).toEqual(['choral']);
+
+    expect(
+      resolveFormats(facts({ title: 'Trío Arbós' })).value,
+    ).toEqual(['chamber']);
+
+    expect(
+      resolveFormats(
+        facts({
+          title: 'CNDM. Recital',
+          performers: [{ name: 'Solista', roleText: 'violonchelo' }],
+        }),
+      ).value,
+    ).toEqual(['recital']);
   });
 
   it('asigna chamber/symphonic a categorías municipales inequívocas', () => {

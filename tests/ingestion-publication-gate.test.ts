@@ -305,6 +305,8 @@ describe('publication gate — pipeline completo', () => {
     expect(run.candidates[0]!.event.formats).toEqual([]);
     expect(run.candidates[0]!.event.kind).toBe('established');
     expect(run.candidates[0]!.event.citations[0]?.url).toMatch(/^https:\/\//);
+    expect(run.summary.healthReasons).toContain('unresolved-taxonomy');
+    expect(run.summary.autoMergeEligible).toBe(true);
   });
 
   it('una ficha aplazada fuera de 120 días no publica un evento nuevo', async () => {

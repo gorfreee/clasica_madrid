@@ -147,6 +147,8 @@ CI y tests no deben depender de llamadas live a un LLM. Si la IA no está dispon
 
 Taxonomía: `src/lib/schemas/taxonomies.ts`. Pueden ser múltiples. Vacío es mejor que incorrecto. Un `format` incorrecto no debe bloquear un `include` fiable.
 
+El fallback de IA debe intentar asignar al menos un formato cuando los hechos observados permitan una inferencia musical razonable. `formats: []` queda para casos sin evidencia suficiente, no como respuesta por defecto. No rellenar con `other` sólo para evitar el vacío.
+
 Derivación preferida a partir de hechos:
 
 | Hecho | Format típico |

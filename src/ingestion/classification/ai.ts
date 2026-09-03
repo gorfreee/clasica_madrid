@@ -58,6 +58,12 @@ export type AiCallContext = {
   onDiagnostics?: (diagnostics: AiCallDiagnostics) => void;
   /** Eligibility fallback vs taxonomy-only completion. Default eligibility. */
   purpose?: AiCallPurpose;
+  /**
+   * Taxonomy completion: formats were empty before this call, so an empty or
+   * omitted `formats` array is not a satisfactory resolution. Providers reuse
+   * their existing retry / model-fallback loop. Eligibility calls ignore this.
+   */
+  requireFormats?: boolean;
 };
 
 export type AiProviderStats = {
@@ -205,7 +211,12 @@ export const AI_CLASSIFICATION_JSON_SCHEMA = {
   required: ['eligibility', 'eras'],
   properties: {
     eligibility: { type: 'string', enum: [...ELIGIBILITIES] },
-    formats: { type: 'array', items: { type: 'string', enum: [...FORMATS] } },
+    formats: {
+      type: 'array',
+      items: { type: 'string', enum: [...FORMATS] },
+      description:
+        'Concert formats from observed facts. Assign at least one when a reasonable musical inference is possible. Empty only if evidence is genuinely insufficient. Do not use other merely to avoid an empty array.',
+    },
     eras: {
       type: 'array',
       items: { type: 'string', enum: [...ERAS] },
@@ -255,6 +266,13 @@ export function parseAiClassification(raw: unknown): ParseAiClassification {
       evidence,
     },
   };
+}
+
+/** Empty or omitted formats: valid JSON, but not a completed format assignment. */
+export function taxonomyFormatsStillUnresolved(
+  result: Pick<AiClassificationResult, 'formats'>,
+): boolean {
+  return !result.formats || result.formats.length === 0;
 }
 
 /**

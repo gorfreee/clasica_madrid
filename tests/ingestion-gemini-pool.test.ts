@@ -488,6 +488,78 @@ describe('recoverable unusable output and thinking', () => {
     expect(p.lastDiagnostics()?.failures).toEqual([]);
   });
 
+  it('taxonomy con formats vacío en A hace fallback a B y rellena el format', async () => {
+    const sent: string[] = [];
+    const includeFacts: ObservedFacts = {
+      title: 'Programa clásico',
+      programText: 'Johannes Brahms',
+      performers: [],
+      composers: [],
+      works: [],
+    };
+    const p = provider({
+      models: ['gemini-3.1-flash-lite', 'gemma-4-31b-it'],
+      fetch: async (_url, init) => {
+        const model = JSON.parse(String(init?.body)).model;
+        sent.push(model);
+        if (model === 'gemini-3.1-flash-lite') {
+          return response({ eligibility: 'include', formats: [], eras: ['romantic'] });
+        }
+        return response({ eligibility: 'include', formats: ['symphonic'], eras: ['romantic'] });
+      },
+    });
+    const result = await classifyObserved(includeFacts, { ai: p });
+    expect(result.eligibility.value).toBe('include');
+    expect(result.formats?.value).toEqual(['symphonic']);
+    expect(result.formats?.method).toBe('ai');
+    expect(sent).toEqual(['gemini-3.1-flash-lite', 'gemma-4-31b-it']);
+    expect(p.lastDiagnostics()).toMatchObject({ fallbackUsed: true, model: 'gemma-4-31b-it', purpose: 'taxonomy' });
+    expect(p.lastDiagnostics()?.failures?.[0]).toMatchObject({
+      model: 'gemini-3.1-flash-lite',
+      kind: 'incomplete',
+    });
+  });
+
+  it('taxonomy con formats vacío en todos los modelos sigue include y no cachea el vacío', async () => {
+    const includeFacts: ObservedFacts = {
+      title: 'Programa clásico',
+      programText: 'Johannes Brahms',
+      performers: [],
+      composers: [],
+      works: [],
+    };
+    const fetch = vi.fn(async () => response({ eligibility: 'include', formats: [], eras: [] }));
+    const p = provider({
+      models: ['gemini-3.1-flash-lite', 'gemma-4-31b-it'],
+      fetch,
+    });
+    const result = await classifyObserved(includeFacts, { ai: p });
+    expect(result.eligibility.value).toBe('include');
+    expect(result.formats?.value).toEqual([]);
+    expect(result.formats?.ruleId).toBe('ai-formats-unresolved');
+    expect(result.formats?.value).not.toContain('other');
+    expect(fetch.mock.calls.length).toBeGreaterThan(1);
+    expect(p.lastDiagnostics()?.failures?.some((item) => item.kind === 'incomplete')).toBe(true);
+
+    const again = await classifyObserved(includeFacts, { ai: p });
+    expect(again.formats?.value).toEqual([]);
+    expect(fetch.mock.calls.length).toBeGreaterThan(2);
+  });
+
+  it('eligibility uncertain JSON válido no prueba otro modelo aunque formats esté vacío', async () => {
+    const sent: string[] = [];
+    const p = provider({
+      models: ['gemini-3.1-flash-lite', 'gemma-4-31b-it'],
+      fetch: async (_url, init) => {
+        sent.push(JSON.parse(String(init?.body)).model);
+        return response({ eligibility: 'uncertain', formats: [] });
+      },
+    });
+    await expect(p.classify(facts)).resolves.toEqual({ eligibility: 'uncertain', formats: [] });
+    expect(sent).toEqual(['gemini-3.1-flash-lite']);
+    expect(p.lastDiagnostics()?.failures).toEqual([]);
+  });
+
   it('todos los modelos fallan técnicamente: uncertain degradado, sin publicación insegura', async () => {
     const p = provider({
       models: ['gemini-3.1-flash-lite', 'gemma-4-31b-it'],

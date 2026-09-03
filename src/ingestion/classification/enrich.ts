@@ -12,7 +12,7 @@ import {
   type AiClassifier,
 } from './ai.ts';
 import type { ClassificationResult, Resolution, ResolutionMethod } from './types.ts';
-import type { EventKind } from '../../lib/schemas/taxonomies.ts';
+import type { EventKind, Format } from '../../lib/schemas/taxonomies.ts';
 
 export { AI_CLASSIFY_TIMEOUT_MS };
 
@@ -95,7 +95,8 @@ async function enrichTaxonomyWithAi(
   facts: ObservedFacts,
   options: ClassifyObservedOptions,
 ): Promise<ClassificationResult> {
-  const called = await invokeAi(facts, options, 'taxonomy');
+  const formatsMissing = !current.formats || current.formats.value.length === 0;
+  const called = await invokeAi(facts, options, 'taxonomy', { requireFormats: formatsMissing });
   if (!called.ok) return current;
 
   const parsed = parseAiClassification(called.value);
@@ -107,6 +108,7 @@ async function invokeAi(
   facts: ObservedFacts,
   options: ClassifyObservedOptions,
   purpose: AiCallPurpose,
+  extras: Pick<AiCallContext, 'requireFormats'> = {},
 ): Promise<{ ok: true; value: unknown } | { ok: false; error: unknown }> {
   const ai = options.ai;
   if (!ai) return { ok: false, error: new Error('ai-unavailable') };
@@ -117,6 +119,7 @@ async function invokeAi(
     signal: controller.signal,
     onDiagnostics: options.onDiagnostics,
     purpose,
+    ...extras,
   };
   try {
     const value = await withTimeout(ai.classify(facts, context), timeoutMs, controller);
@@ -159,7 +162,7 @@ function applyTaxonomyAi(
   // Eligibility is already include and must not change. Kind stays deterministic.
   return {
     eligibility: current.eligibility,
-    formats: keepResolvedList(current.formats, ai.formats, ai.evidence, 'ai-formats', () => resolveFormats(facts)),
+    formats: keepResolvedFormats(current.formats, ai.formats, ai.evidence, facts),
     eras: keepResolvedList(current.eras, ai.eras, ai.evidence, 'ai-eras', () => resolveEras(facts)),
     kind: keepResolvedKind(current.kind, facts, venue),
     access: current.access ?? resolveAccess(facts.accessText),
@@ -196,6 +199,29 @@ function keepResolvedList<T>(
   if (current && current.value.length > 0) return current;
   if (aiValue && aiValue.length > 0) return resolution(aiValue, 'ai', ruleId, evidence);
   return current ?? fallback();
+}
+
+/**
+ * Formats already filled stay. AI formats apply only when non-empty.
+ * An empty AI formats array does not wipe eras/kind and does not invent `other`.
+ * After a taxonomy call, leftover empty formats are marked unresolved for health.
+ */
+function keepResolvedFormats(
+  current: Resolution<Format[]> | undefined,
+  aiValue: Format[] | undefined,
+  evidence: string[],
+  facts: ObservedFacts,
+): Resolution<Format[]> {
+  if (current && current.value.length > 0) return current;
+  if (aiValue && aiValue.length > 0) return resolution(aiValue, 'ai', 'ai-formats', evidence);
+  const fallback = current ?? resolveFormats(facts);
+  if (fallback.value.length > 0) return fallback;
+  return {
+    value: [],
+    method: 'ai',
+    ruleId: 'ai-formats-unresolved',
+    evidence: uniqueStrings([...fallback.evidence, ...evidence]),
+  };
 }
 
 function keepResolvedKind(

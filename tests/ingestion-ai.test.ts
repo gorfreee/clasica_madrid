@@ -5,10 +5,13 @@ import {
   AI_CLASSIFICATION_JSON_SCHEMA,
   AiRateLimitedError,
   parseAiClassification,
+  taxonomyFormatsStillUnresolved,
 } from '../src/ingestion/classification/ai.ts';
 import {
   AI_CLASSIFIER_PROMPT_VERSION,
   AI_CLASSIFIER_SYSTEM_PROMPT,
+  AI_TAXONOMY_PROMPT_VERSION,
+  AI_TAXONOMY_SYSTEM_PROMPT,
   buildAiClassifierUserMessage,
 } from '../src/ingestion/classification/ai-prompt.ts';
 import { classify } from '../src/ingestion/classification/classify.ts';
@@ -48,11 +51,13 @@ function immediateClock(): SleepClock & { sleeps: number[] } {
   };
 }
 
-function countingAi(inner: AiClassifier): AiClassifier & { calls: number } {
-  const spy: AiClassifier & { calls: number } = {
+function countingAi(inner: AiClassifier): AiClassifier & { calls: number; contexts: Array<Parameters<AiClassifier['classify']>[1]> } {
+  const spy: AiClassifier & { calls: number; contexts: Array<Parameters<AiClassifier['classify']>[1]> } = {
     calls: 0,
+    contexts: [],
     async classify(observed, context) {
       spy.calls += 1;
+      spy.contexts.push(context);
       return inner.classify(observed, context);
     },
   };
@@ -239,6 +244,19 @@ describe('parseAiClassification', () => {
     expect(parseAiClassification('').ok).toBe(false);
     expect(parseAiClassification(null).ok).toBe(false);
     expect(parseAiClassification([]).ok).toBe(false);
+  });
+
+  it('acepta formats vacío u omitido como JSON válido; no es una resolución de formato', () => {
+    const empty = parseAiClassification({ eligibility: 'include', formats: [], eras: [] });
+    expect(empty.ok).toBe(true);
+    if (!empty.ok) return;
+    expect(taxonomyFormatsStillUnresolved(empty.value)).toBe(true);
+
+    const omitted = parseAiClassification({ eligibility: 'include', eras: ['romantic'] });
+    expect(omitted.ok).toBe(true);
+    if (!omitted.ok) return;
+    expect(taxonomyFormatsStillUnresolved(omitted.value)).toBe(true);
+    expect(omitted.value.eras).toEqual(['romantic']);
   });
 
   it('trunca rationale > 800 y conserva una clasificación válida', () => {
@@ -773,7 +791,7 @@ describe('createAiClassifierFromEnv — selección de provider', () => {
 describe('taxonomy enrichment — separado de eligibility', () => {
   const includeIncomplete = facts({
     title: 'Programa clásico',
-    programText: 'Johannes Brahms: Sinfonía núm. 1',
+    programText: 'Johannes Brahms',
   });
 
   it('include determinista con eras/formats/kind resueltos no llama a IA', async () => {
@@ -817,6 +835,7 @@ describe('taxonomy enrichment — separado de eligibility', () => {
     expect(result.eras?.method).toBe('knowledge');
     expect(ai.calls).toBe(1);
     expect(purposes).toEqual(['taxonomy']);
+    expect(ai.contexts[0]?.requireFormats).toBe(true);
   });
 
   it('eligibility IA no sobrescribe formats deterministas ya resueltos', async () => {
@@ -891,6 +910,100 @@ describe('taxonomy enrichment — separado de eligibility', () => {
     expect(result.eligibility.ruleId).toBe('ai-uncertain');
     expect(result.formats).toBeUndefined();
     expect(ai.calls).toBe(1);
+  });
+
+  it('include con format determinista no pide formats a taxonomy AI', async () => {
+    const ai = countingAi({
+      async classify() {
+        return { eligibility: 'include', eras: ['contemporary'], evidence: ['creación actual'] };
+      },
+    });
+    const result = await classifyObserved(facts({ title: 'Micróperas' }), { ai });
+    expect(result.eligibility.value).toBe('include');
+    expect(result.formats?.value).toEqual(['opera']);
+    expect(result.formats?.method).toBe('rule');
+    expect(result.eras?.value).toEqual(['contemporary']);
+    expect(ai.calls).toBe(1);
+    expect(ai.contexts[0]?.purpose).toBe('taxonomy');
+    expect(ai.contexts[0]?.requireFormats).toBe(false);
+  });
+
+  it('include sin format aplica el format que devuelve taxonomy AI', async () => {
+    const ai = countingAi({
+      async classify() {
+        return {
+          eligibility: 'include',
+          formats: ['recital'],
+          eras: ['romantic'],
+          evidence: ['solista de piano en el programa'],
+        };
+      },
+    });
+    const result = await classifyObserved(includeIncomplete, { ai });
+    expect(result.formats?.value).toEqual(['recital']);
+    expect(result.formats?.method).toBe('ai');
+    expect(result.eras?.value).toEqual(['romantic']);
+    expect(ai.contexts[0]?.requireFormats).toBe(true);
+  });
+
+  it('formats vacío de IA no inventa other ni borra eras ya resueltas', async () => {
+    const ai = countingAi({
+      async classify() {
+        return {
+          eligibility: 'include',
+          formats: [],
+          eras: ['contemporary'],
+          kind: 'alternative',
+          evidence: ['sin evidencia de formato'],
+        };
+      },
+    });
+    const result = await classifyObserved(includeIncomplete, { ai });
+    expect(result.eligibility.value).toBe('include');
+    expect(result.formats?.value).toEqual([]);
+    expect(result.formats?.value).not.toContain('other');
+    expect(result.formats?.ruleId).toBe('ai-formats-unresolved');
+    expect(result.eras?.value).toEqual(['romantic']);
+    expect(result.eras?.method).toBe('knowledge');
+  });
+
+  it('formats omitido rellena eras vacías y deja formats sin resolver', async () => {
+    const ai = countingAi({
+      async classify() {
+        return { eligibility: 'include', eras: ['romantic'], evidence: ['repertorio español romántico'] };
+      },
+    });
+    const result = await classifyObserved(
+      facts({
+        title: 'Trilogía andaluza',
+        description: 'Concierto de música clásica española.',
+      }),
+      { ai },
+    );
+    expect(result.eligibility.value).toBe('include');
+    expect(result.eras?.value).toEqual(['romantic']);
+    expect(result.eras?.method).toBe('ai');
+    expect(result.formats?.value).toEqual([]);
+    expect(result.formats?.ruleId).toBe('ai-formats-unresolved');
+    expect(result.formats?.value).not.toContain('other');
+  });
+});
+
+describe('taxonomy AI prompt', () => {
+  const prompt = AI_TAXONOMY_SYSTEM_PROMPT;
+
+  it('is version 3 so results are distinguishable from earlier taxonomy prompts', () => {
+    expect(AI_TAXONOMY_PROMPT_VERSION).toBe(3);
+  });
+
+  it('asks for a format when observed facts support a musical inference', () => {
+    expect(prompt).toMatch(/asigna al menos un formato/);
+    expect(prompt).toMatch(/inferencia musical razonable/);
+    expect(prompt).toMatch(/conocimiento musical general/);
+    expect(prompt).toMatch(/formats=\[\] s[oó]lo si realmente no hay evidencia suficiente/);
+    expect(prompt).toMatch(/No uses other simplemente para evitar un array vac[ií]o/);
+    expect(prompt).toMatch(/no inventes performers, instrumentos/);
+    expect(prompt).not.toMatch(/formats y eras vac[ií]os son preferibles a adivinar/);
   });
 });
 

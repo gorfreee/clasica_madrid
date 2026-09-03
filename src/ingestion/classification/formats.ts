@@ -95,17 +95,38 @@ function isZarzuelaFormat(facts: ObservedFacts, haystack: string): boolean {
 function isOrganFormat(facts: ObservedFacts, haystack: string): boolean {
   if (
     hasPhrase(haystack, 'conciertos de organo') ||
+    hasPhrase(haystack, 'concierto de organo') ||
     hasPhrase(haystack, 'recital de organo') ||
     hasPhrase(haystack, 'ciclo internacional de organo')
   ) {
     return true;
   }
-  return facts.performers.some((item) => hasWord(fieldFolded(item.roleText), 'organo'));
+  if (
+    hasWord(haystack, 'organo') &&
+    (hasWord(haystack, 'concierto') || hasWord(haystack, 'recital') || hasWord(haystack, 'ciclo'))
+  ) {
+    return true;
+  }
+  return facts.performers.some((item) => {
+    const role = fieldFolded(item.roleText);
+    return hasWord(role, 'organo') || hasWord(role, 'organista');
+  });
 }
 
 function isChoralFormat(facts: ObservedFacts, haystack: string): boolean {
   if (hasWord(haystack, 'oratorio')) return true;
   if (isNamedWorkEvent(facts)) return false;
+  const title = fieldFolded(facts.title);
+  const category = fieldFolded(facts.categoryText);
+  if (
+    hasWord(title, 'coro') ||
+    hasWord(title, 'choir') ||
+    hasWord(category, 'coro') ||
+    hasWord(category, 'coral') ||
+    hasWord(category, 'choir')
+  ) {
+    return true;
+  }
   if (facts.performers.some((item) => hasWord(fieldFolded(item.roleText), 'coro'))) return true;
   return facts.performers.some((item) => {
     const name = fieldFolded(item.name);
@@ -123,10 +144,13 @@ function isSymphonicFormat(facts: ObservedFacts, haystack: string): boolean {
   const category = fieldFolded(facts.categoryText);
   if (hasWord(category, 'sinfonica') || hasWord(category, 'sinfonico')) return true;
   if (hasPhrase(haystack, 'orquesta y coro')) return true;
-  if (hasPhrase(haystack, 'orquesta sinfonica') || hasWord(haystack, 'sinfonico') || hasWord(haystack, 'sinfonica')) {
-    if (isChamberOrchestraName(haystack) && !hasWord(haystack, 'sinfonico') && !hasWord(haystack, 'sinfonica')) {
+  if (hasSymphonySignal(haystack)) {
+    if (isChamberOrchestraName(haystack) && !hasSymphonyWord(haystack)) {
       return false;
     }
+    return true;
+  }
+  if ((hasWord(haystack, 'orquesta') || hasWord(haystack, 'orchestra')) && !isChamberOrchestraName(haystack)) {
     return true;
   }
   const orchestra = facts.performers.some((item) => {
@@ -150,7 +174,10 @@ function isChamberFormat(facts: ObservedFacts, haystack: string): boolean {
   if (isMusicalChamberCategory(category, haystack)) return true;
   if (
     hasWord(haystack, 'cuarteto') ||
+    hasWord(haystack, 'quinteto') ||
+    hasWord(haystack, 'sexteto') ||
     hasWord(haystack, 'octeto') ||
+    hasWord(haystack, 'trio') ||
     hasPhrase(haystack, 'liceo de camara') ||
     hasPhrase(haystack, 'domingos de camara') ||
     hasPhrase(haystack, 'musica de camara') ||
@@ -169,11 +196,29 @@ function isRecitalFormat(facts: ObservedFacts, haystack: string, already: Format
     const role = fieldFolded(item.roleText);
     return (
       hasWord(role, 'piano') ||
+      hasWord(role, 'pianista') ||
       hasWord(role, 'violin') ||
+      hasWord(role, 'violinista') ||
+      hasWord(role, 'viola') ||
+      hasWord(role, 'violonchelo') ||
+      hasWord(role, 'violoncello') ||
+      hasWord(role, 'cello') ||
       hasWord(role, 'clave') ||
       hasWord(role, 'clavecin') ||
+      hasWord(role, 'clavecinista') ||
+      hasWord(role, 'harpsichord') ||
+      hasWord(role, 'flauta') ||
+      hasWord(role, 'flute') ||
+      hasWord(role, 'oboe') ||
+      hasWord(role, 'clarinet') ||
+      hasWord(role, 'clarinete') ||
+      hasWord(role, 'arpa') ||
+      hasWord(role, 'harp') ||
+      hasWord(role, 'organista') ||
       hasWord(role, 'soprano') ||
       hasWord(role, 'tenor') ||
+      hasWord(role, 'contralto') ||
+      hasWord(role, 'contratenor') ||
       hasWord(role, 'mezzosoprano') ||
       hasWord(role, 'mezzo') ||
       hasWord(role, 'baritono') ||
@@ -244,6 +289,19 @@ function isNamedWorkEvent(facts: ObservedFacts): boolean {
 
 function isChamberOrchestraName(haystack: string): boolean {
   return hasPhrase(haystack, 'chamber orchestra') || hasPhrase(haystack, 'orquesta de camara');
+}
+
+function hasSymphonyWord(haystack: string): boolean {
+  return (
+    hasWord(haystack, 'sinfonico') ||
+    hasWord(haystack, 'sinfonica') ||
+    hasWord(haystack, 'sinfonia') ||
+    hasWord(haystack, 'symphony')
+  );
+}
+
+function hasSymphonySignal(haystack: string): boolean {
+  return hasPhrase(haystack, 'orquesta sinfonica') || hasSymphonyWord(haystack);
 }
 
 /** Municipal / source category `camara` when the event is already musical. */
