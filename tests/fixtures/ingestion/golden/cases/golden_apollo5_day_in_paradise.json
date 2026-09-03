@@ -45,7 +45,7 @@
   "expected": {
     "eligibility": "include",
     "formats": ["chamber", "choral"],
-    "eras": ["renaissance", "baroque", "romantic"],
+    "eras": ["renaissance", "baroque", "romantic", "twentieth", "contemporary"],
     "kind": "alternative",
     "access": "paid"
   },

@@ -538,7 +538,7 @@ describe('eligibility — conflictos y fallback', () => {
       }),
     );
     expect(universo.eligibility.value).toBe('include');
-    expect(universo.eligibility.ruleId).toBe('classical-concert-series');
+    expect(universo.eligibility.ruleId).toBe('known-classical-composer');
 
     const lied = classify(
       facts({
@@ -696,7 +696,7 @@ describe('eligibility — conflictos y fallback', () => {
       }),
     );
     expect(lirica.eligibility.value).toBe('include');
-    expect(lirica.eligibility.ruleId).toBe('lyric-theatre-event');
+    expect(lirica.eligibility.ruleId).toBe('known-classical-composer');
     expect(lirica.kind.value).toBe('established');
 
     const talk = classify(

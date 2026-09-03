@@ -204,7 +204,7 @@ describe('segmentación performer/programa del Auditorio', () => {
       'Violonchelo',
     ]);
     expect(segments.programLines[0]).toBe('Carlos Guastavino');
-    expect(parseAuditorioPersonLine('Carlos Guastavino')).toEqual({ name: 'Carlos Guastavino' });
+    expect(parseAuditorioPersonLine('Carlos Guastavino')).toBeUndefined();
   });
 
   it('roles entre paréntesis y Director, Nombre no desplazan el elenco al programa', () => {
