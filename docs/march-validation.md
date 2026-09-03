@@ -51,6 +51,4 @@ Antes del relay, GitHub-hosted Actions recibía HTTP 403 en el primer request a 
 
 Cloudflare Workers sí alcanzaban March (listing 307 + `Set-Cookie` → replay same-origin → 200; fichas 200). El 403 de Actions era un bloqueo de egress, no un bug del parser.
 
-No se reabre la vía de User-Agent, retries, Playwright ni endpoints alternativos de March.
-
-Para repetir la matriz **sin relay**: **Actions → March HTTP diagnostic**. No comparte el group `ingestion-production`.
+No se reabre la vía de User-Agent, retries, Playwright ni endpoints alternativos de March. El probe HTTP directo (`March HTTP diagnostic`) se retiró: el transporte de producción es el fetch relay.
