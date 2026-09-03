@@ -32,11 +32,17 @@ export function sitemapLastmodMap(catalog: Catalog): Map<string, string> {
   if (lugaresLastmod) map.set(VENUES_INDEX_PATH, lugaresLastmod);
 
   const latestByVenue = new Map<string, string>();
+  const venuesById = new Map(catalog.venues.map((venue) => [venue.id, venue]));
   for (const event of catalog.events) {
-    const current = latestByVenue.get(event.venueId);
-    if (!current || event.lastVerifiedAt > current) {
-      latestByVenue.set(event.venueId, event.lastVerifiedAt);
-    }
+    const bump = (venueId: string) => {
+      const current = latestByVenue.get(venueId);
+      if (!current || event.lastVerifiedAt > current) {
+        latestByVenue.set(venueId, event.lastVerifiedAt);
+      }
+    };
+    bump(event.venueId);
+    const parentId = venuesById.get(event.venueId)?.parentVenueId;
+    if (parentId) bump(parentId);
     map.set(eventPath(event.slug), event.lastVerifiedAt);
   }
   for (const venue of catalog.venues) {

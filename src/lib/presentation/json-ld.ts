@@ -24,31 +24,35 @@ export function buildWebsiteJsonLd(): Record<string, unknown> {
   };
 }
 
-export function buildVenueJsonLd(venue: Venue): Record<string, unknown>[] {
+export function buildVenueJsonLd(venue: Venue, principal: Venue = venue): Record<string, unknown>[] {
   const url = venueUrl(venue.slug);
+  const isRoom = principal.id !== venue.id;
   const place: Record<string, unknown> = {
     '@context': 'https://schema.org',
-    '@type': venue.url ? 'MusicVenue' : 'Place',
+    '@type': (isRoom ? principal.url : venue.url) ? 'MusicVenue' : 'Place',
     '@id': url,
-    name: venue.name,
+    name: isRoom ? (venue.spaceName ?? venue.name) : venue.name,
     url,
-    address: postalAddress(venue),
+    address: postalAddress(principal.address ? principal : venue),
   };
-  if (venue.url) place.sameAs = venue.url;
-  return [
-    place,
-    breadcrumbList([
-      { name: 'Agenda', url: publicUrl(AGENDA_PATH) },
-      { name: 'Lugares', url: publicUrl(VENUES_INDEX_PATH) },
-      { name: venue.name, url },
-    ]),
+  if (!isRoom && venue.url) place.sameAs = venue.url;
+  if (isRoom) {
+    place.containedInPlace = jsonLdPrincipalPlace(principal);
+  }
+  const crumbName = isRoom ? (venue.spaceName ?? venue.name) : venue.name;
+  const crumbs = [
+    { name: 'Agenda', url: publicUrl(AGENDA_PATH) },
+    { name: 'Lugares', url: publicUrl(VENUES_INDEX_PATH) },
+    ...(isRoom ? [{ name: principal.name, url: venueUrl(principal.slug) }] : []),
+    { name: crumbName, url },
   ];
+  return [place, breadcrumbList(crumbs)];
 }
 
 export function buildMusicEventJsonLd(resolved: ResolvedEvent): Record<string, unknown>[] {
-  const { event, venue, organizers, series, primaryCitation } = resolved;
+  const { event, organizers, series, primaryCitation } = resolved;
   const pageUrl = eventUrl(event.slug);
-  const location = jsonLdLocation(venue);
+  const location = jsonLdLocation(resolved);
   const description = buildMusicEventDescription(event);
   const events = event.occurrences
     .slice()
@@ -97,13 +101,35 @@ export function buildMusicEventJsonLd(resolved: ResolvedEvent): Record<string, u
   ];
 }
 
-function jsonLdLocation(venue: Venue): Record<string, unknown> {
+function jsonLdLocation(resolved: ResolvedEvent): Record<string, unknown> {
+  const { venue, rootVenue, spaceName } = resolved;
+  if (!spaceName) {
+    const location: Record<string, unknown> = {
+      '@type': rootVenue.url ? 'MusicVenue' : 'Place',
+      name: rootVenue.name,
+      address: postalAddress(rootVenue),
+    };
+    if (rootVenue.url) location.url = rootVenue.url;
+    return location;
+  }
+  return {
+    '@type': 'Place',
+    name: spaceName,
+    address: postalAddress(rootVenue.address ? rootVenue : venue),
+    containedInPlace: jsonLdPrincipalPlace(rootVenue),
+  };
+}
+
+function jsonLdPrincipalPlace(venue: Venue): Record<string, unknown> {
+  const url = venueUrl(venue.slug);
   const location: Record<string, unknown> = {
     '@type': venue.url ? 'MusicVenue' : 'Place',
+    '@id': url,
     name: venue.name,
+    url,
     address: postalAddress(venue),
   };
-  if (venue.url) location.url = venue.url;
+  if (venue.url) location.sameAs = venue.url;
   return location;
 }
 

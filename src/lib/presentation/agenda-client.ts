@@ -5,6 +5,8 @@
  * TypeScript. Playwright smokes in `e2e/` guard the behaviour.
  *
  * - `#agenda-filter-data` — JSON index of FilterableOccurrence
+ *   (`venueSlug` / `venueId` are the principal place; `venueKeys` also
+ *   includes child room ids/slugs so old URLs still match)
  * - `[data-agenda-filters]` — filter form (names match URL params)
  * - `[data-agenda-list]` — occurrence list
  * - `[data-agenda-day]` — day group (hidden when every child is hidden)

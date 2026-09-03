@@ -8,7 +8,7 @@ import { eventIdFor, occurrenceIdFor, uniqueId, uniqueSlug } from './ids.ts';
 import { normalizeUrl, urlPathIdentity } from './urls.ts';
 import type { NormalizedEvent } from './normalize.ts';
 import type { PipelineSource } from './types.ts';
-import { isSufficientProposedVenue, matchVenue, unpublishedMatchedVenue } from './venues.ts';
+import { isSufficientProposedVenue, matchVenue, unpublishedMatchedVenue, unpublishedParentVenue } from './venues.ts';
 import { defaultIngestWindow, isDateInHarvestScope, type IngestWindow } from './dates.ts';
 import { ID_PREFIX } from '../lib/schemas/taxonomies.ts';
 import { SOURCE_REGISTRY, resolveCatalogSource } from './registry.ts';
@@ -123,6 +123,8 @@ export function toCandidate(
   const unpublished = unpublishedMatchedVenue(venueMatch, catalog);
   if (unpublished) {
     candidate.venue = withVerified(unpublished, verified);
+    const parent = unpublishedParentVenue(unpublished, catalog);
+    if (parent) candidate.venues = [withVerified(parent, verified)];
   }
   if (!catalog.sources.some((item) => item.id === catalogSource.id)) {
     candidate.sources = [catalogSource];

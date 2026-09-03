@@ -36,3 +36,13 @@ export {
   sortOccurrences,
 } from './queries.ts';
 export { resolveCatalog, resolveEvent, type ResolvedCitation, type ResolvedEvent, type ResolvedOccurrence } from './resolve.ts';
+export {
+  childVenues,
+  familyVenueIds,
+  familyVenueKeys,
+  isChildVenue,
+  isPrincipalVenue,
+  rootVenue,
+  spaceNameOf,
+  venueAddress,
+} from './venues.ts';

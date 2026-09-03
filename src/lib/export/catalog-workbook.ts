@@ -40,6 +40,9 @@ export type EventExportRow = {
   area: string;
   address: string;
   venueId: string;
+  parentVenue: string;
+  parentVenueId: string;
+  spaceName: string;
   organizers: string;
   organizerIds: string;
   series: string;
@@ -79,6 +82,9 @@ const EVENT_COLUMNS: ColumnSpec<EventExportRow>[] = [
   { header: 'Área', key: 'area', width: 14 },
   { header: 'Dirección', key: 'address', width: 36 },
   { header: 'Lugar ID', key: 'venueId', width: 36 },
+  { header: 'Lugar principal', key: 'parentVenue', width: 36 },
+  { header: 'Lugar principal ID', key: 'parentVenueId', width: 36 },
+  { header: 'Sala', key: 'spaceName', width: 28 },
   { header: 'Organizadores', key: 'organizers', width: 36 },
   { header: 'Organizadores ID', key: 'organizerIds', width: 28 },
   { header: 'Serie', key: 'series', width: 32 },
@@ -108,7 +114,7 @@ function sortedOccurrences(occurrences: readonly Occurrence[]): Occurrence[] {
 }
 
 export function toEventExportRow(resolved: ResolvedEvent): EventExportRow {
-  const { event, venue, organizers, series, citations, primaryCitation } = resolved;
+  const { event, venue, rootVenue, spaceName, organizers, series, citations, primaryCitation } = resolved;
   const occurrences = sortedOccurrences(event.occurrences);
   const first = occurrences[0];
   const last = occurrences[occurrences.length - 1];
@@ -141,10 +147,13 @@ export function toEventExportRow(resolved: ResolvedEvent): EventExportRow {
       ),
     ),
     venue: venue.name,
-    municipality: venue.municipality,
-    area: areaLabels[venue.area],
-    address: venue.address ?? '',
+    municipality: rootVenue.municipality,
+    area: areaLabels[rootVenue.area],
+    address: rootVenue.address ?? venue.address ?? '',
     venueId: venue.id,
+    parentVenue: rootVenue.id === venue.id ? '' : rootVenue.name,
+    parentVenueId: venue.parentVenueId ?? '',
+    spaceName: spaceName ?? '',
     organizers: join(organizers.map((organizer) => organizer.name)),
     organizerIds: join(organizers.map((organizer) => organizer.id)),
     series: series?.name ?? '',
@@ -225,6 +234,8 @@ export function buildCatalogWorkbook(catalog: Catalog): ExcelJS.Workbook {
       { header: 'Área', key: 'area', width: 14 },
       { header: 'Dirección', key: 'address', width: 36 },
       { header: 'URL', key: 'url', width: 48 },
+      { header: 'Lugar principal ID', key: 'parentVenueId', width: 36 },
+      { header: 'Sala', key: 'spaceName', width: 28 },
       { header: 'Verificado', key: 'lastVerifiedAt', width: 14 },
     ],
     byName(catalog.venues).map((venue) => ({
@@ -235,6 +246,8 @@ export function buildCatalogWorkbook(catalog: Catalog): ExcelJS.Workbook {
       area: areaLabels[venue.area],
       address: venue.address ?? '',
       url: venue.url ?? '',
+      parentVenueId: venue.parentVenueId ?? '',
+      spaceName: venue.spaceName ?? '',
       lastVerifiedAt: venue.lastVerifiedAt ?? '',
     })),
   );

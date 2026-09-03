@@ -29,6 +29,18 @@ export const KNOWN_VENUES: KnownVenue[] = [
     },
   },
   {
+    keys: ['fundacion juan march'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_fundacion_juan_march',
+      slug: 'fundacion-juan-march',
+      name: 'Fundación Juan March',
+      ...MADRID,
+      address: 'Calle de Castelló, 77, 28006 Madrid',
+      url: 'https://www.march.es/es/madrid',
+    },
+  },
+  {
     keys: ['fundacion juan march auditorio'],
     venue: {
       schemaVersion: 1,
@@ -38,6 +50,20 @@ export const KNOWN_VENUES: KnownVenue[] = [
       ...MADRID,
       address: 'Calle de Castelló, 77, 28006 Madrid',
       url: 'https://www.march.es/es/madrid',
+      parentVenueId: 'ven_fundacion_juan_march',
+      spaceName: 'Auditorio',
+    },
+  },
+  {
+    keys: ['fundacion canal'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_fundacion_canal',
+      slug: 'fundacion-canal',
+      name: 'Fundación Canal',
+      ...MADRID,
+      address: 'Calle de Mateo Inurria, 2, 28036 Madrid',
+      url: 'https://www.fundacioncanal.com/',
     },
   },
   {
@@ -56,6 +82,20 @@ export const KNOWN_VENUES: KnownVenue[] = [
       ...MADRID,
       address: 'Calle de Mateo Inurria, 2, 28036 Madrid',
       url: 'https://www.fundacioncanal.com/',
+      parentVenueId: 'ven_fundacion_canal',
+      spaceName: 'Auditorio',
+    },
+  },
+  {
+    keys: ['auditorio nacional', 'auditorio nacional de musica'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_auditorio_nacional',
+      slug: 'auditorio-nacional-de-musica',
+      name: 'Auditorio Nacional de Música',
+      ...MADRID,
+      address: 'Calle del Príncipe de Vergara, 146, 28002 Madrid',
+      url: 'https://auditorionacional.inaem.gob.es/es',
     },
   },
   {
@@ -77,6 +117,8 @@ export const KNOWN_VENUES: KnownVenue[] = [
       ...MADRID,
       address: 'Calle del Príncipe de Vergara, 146, 28002 Madrid',
       url: 'https://auditorionacional.inaem.gob.es/es',
+      parentVenueId: 'ven_auditorio_nacional',
+      spaceName: 'Sala Sinfónica',
     },
   },
   {
@@ -95,6 +137,8 @@ export const KNOWN_VENUES: KnownVenue[] = [
       ...MADRID,
       address: 'Calle del Príncipe de Vergara, 146, 28002 Madrid',
       url: 'https://auditorionacional.inaem.gob.es/es',
+      parentVenueId: 'ven_auditorio_nacional',
+      spaceName: 'Sala de Cámara',
     },
   },
   {
@@ -163,6 +207,18 @@ export const KNOWN_VENUES: KnownVenue[] = [
     },
   },
   {
+    keys: ['museo reina sofia', 'museo nacional centro de arte reina sofia'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_museo_reina_sofia',
+      slug: 'museo-reina-sofia',
+      name: 'Museo Reina Sofía',
+      ...MADRID,
+      address: 'Ronda de Atocha, 2, 28012 Madrid',
+      url: 'https://www.museoreinasofia.es/',
+    },
+  },
+  {
     keys: [
       'museo reina sofia a400',
       'museo reina sofia a400 madrid',
@@ -175,6 +231,21 @@ export const KNOWN_VENUES: KnownVenue[] = [
       name: 'Museo Reina Sofía — Auditorio 400',
       ...MADRID,
       address: 'Ronda de Atocha, 2, 28012 Madrid',
+      url: 'https://www.museoreinasofia.es/',
+      parentVenueId: 'ven_museo_reina_sofia',
+      spaceName: 'Auditorio 400',
+    },
+  },
+  {
+    keys: ['teatros del canal'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_teatros_canal',
+      slug: 'teatros-del-canal',
+      name: 'Teatros del Canal',
+      ...MADRID,
+      address: 'Calle de Cea Bermúdez, 1, 28003 Madrid',
+      url: 'https://www.teatroscanal.com/',
     },
   },
   {
@@ -190,6 +261,8 @@ export const KNOWN_VENUES: KnownVenue[] = [
       ...MADRID,
       address: 'Calle de Cea Bermúdez, 1, 28003 Madrid',
       url: 'https://www.teatroscanal.com/',
+      parentVenueId: 'ven_teatros_canal',
+      spaceName: 'Sala Roja Concha Velasco',
     },
   },
   {
@@ -202,6 +275,8 @@ export const KNOWN_VENUES: KnownVenue[] = [
       ...MADRID,
       address: 'Calle de Cea Bermúdez, 1, 28003 Madrid',
       url: 'https://www.teatroscanal.com/',
+      parentVenueId: 'ven_teatros_canal',
+      spaceName: 'Sala Verde',
     },
   },
   {
@@ -214,6 +289,8 @@ export const KNOWN_VENUES: KnownVenue[] = [
       ...MADRID,
       address: 'Calle de Cea Bermúdez, 1, 28003 Madrid',
       url: 'https://www.teatroscanal.com/',
+      parentVenueId: 'ven_teatros_canal',
+      spaceName: 'Sala Negra',
     },
   },
   {
@@ -229,6 +306,20 @@ export const KNOWN_VENUES: KnownVenue[] = [
       ...MADRID,
       address: 'Calle de Cea Bermúdez, 1, 28003 Madrid',
       url: 'https://www.teatroscanal.com/',
+      parentVenueId: 'ven_teatros_canal',
+      spaceName: 'Sala de Cristal',
+    },
+  },
+  {
+    keys: ['circulo de bellas artes', 'circulo bellas artes'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_circulo_bellas_artes',
+      slug: 'circulo-de-bellas-artes',
+      name: 'Círculo de Bellas Artes',
+      ...MADRID,
+      address: 'Calle de Alcalá, 42, 28014 Madrid',
+      url: 'https://www.circulobellasartes.com/',
     },
   },
   {
@@ -241,6 +332,8 @@ export const KNOWN_VENUES: KnownVenue[] = [
       ...MADRID,
       address: 'Calle de Alcalá, 42, 28014 Madrid',
       url: 'https://www.circulobellasartes.com/',
+      parentVenueId: 'ven_circulo_bellas_artes',
+      spaceName: 'Teatro Fernando de Rojas',
     },
   },
   {
@@ -253,6 +346,8 @@ export const KNOWN_VENUES: KnownVenue[] = [
       ...MADRID,
       address: 'Calle de Alcalá, 42, 28014 Madrid',
       url: 'https://www.circulobellasartes.com/',
+      parentVenueId: 'ven_circulo_bellas_artes',
+      spaceName: 'Sala de Columnas',
     },
   },
   {
@@ -299,6 +394,21 @@ export const KNOWN_VENUES: KnownVenue[] = [
   },
   {
     keys: [
+      'real academia de bellas artes de san fernando',
+      'real academia bellas artes san fernando',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_real_academia_bellas_artes',
+      slug: 'real-academia-bellas-artes-san-fernando',
+      name: 'Real Academia de Bellas Artes de San Fernando',
+      ...MADRID,
+      address: 'Calle de Alcalá, 13, 28014 Madrid',
+      url: 'https://www.realacademiabellasartessanfernando.com/',
+    },
+  },
+  {
+    keys: [
       'real academia de bellas artes de san fernando salon de actos',
       'real academia bellas artes san fernando salon de actos',
     ],
@@ -310,6 +420,68 @@ export const KNOWN_VENUES: KnownVenue[] = [
       ...MADRID,
       address: 'Calle de Alcalá, 13, 28014 Madrid',
       url: 'https://www.realacademiabellasartessanfernando.com/',
+      parentVenueId: 'ven_real_academia_bellas_artes',
+      spaceName: 'Salón de actos',
+    },
+  },
+  {
+    keys: ['museo arqueologico nacional'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_museo_arqueologico_nacional',
+      slug: 'museo-arqueologico-nacional',
+      name: 'Museo Arqueológico Nacional',
+      ...MADRID,
+      address: 'Calle de Serrano, 13, 28001 Madrid',
+      url: 'https://www.man.es/',
+    },
+  },
+  {
+    keys: ['instituto internacional'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_instituto_internacional',
+      slug: 'instituto-internacional',
+      name: 'Instituto Internacional',
+      ...MADRID,
+      address: 'Calle de Miguel Ángel, 8, 28010 Madrid',
+      url: 'https://www.iie.es/',
+    },
+  },
+  {
+    keys: ['casa de america'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_casa_de_america',
+      slug: 'casa-de-america',
+      name: 'Casa de América',
+      ...MADRID,
+      address: 'acceso por C/ Marqués del Duero, 2',
+      url: 'https://www.casamerica.es/',
+    },
+  },
+  {
+    keys: ['conde duque', 'condeduque'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_condeduque',
+      slug: 'conde-duque',
+      name: 'Conde Duque',
+      ...MADRID,
+      address: 'Calle del Conde Duque, 9-11, 28015 Madrid',
+      url: 'https://www.condeduquemadrid.es/',
+    },
+  },
+  {
+    keys: ['museo nacional del prado', 'museo del prado'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_museo_prado',
+      slug: 'museo-nacional-del-prado',
+      name: 'Museo Nacional del Prado',
+      ...MADRID,
+      address: 'Paseo del Prado, s/n, 28014 Madrid',
+      url: 'https://www.museodelprado.es/',
     },
   },
 ];
@@ -419,6 +591,12 @@ export function matchVenue(
   }
 
   for (const needle of venueNeedles(input)) {
+    if (input.sourceId) {
+      const mapped = SOURCE_VENUE_KEYS[input.sourceId]?.[needle];
+      const fromSource = mapped ? venueById(mapped, catalog) : undefined;
+      if (fromSource) return fromSource;
+    }
+
     const exactCatalog = uniqueCatalogByName(needle, catalog);
     if (exactCatalog) return { kind: 'catalog', venue: exactCatalog };
 
@@ -427,12 +605,6 @@ export function matchVenue(
       const existing = catalog.venues.find((venue) => venue.id === known.venue.id);
       if (existing) return { kind: 'catalog', venue: existing };
       return { kind: 'known', venue: known.venue };
-    }
-
-    if (input.sourceId) {
-      const mapped = SOURCE_VENUE_KEYS[input.sourceId]?.[needle];
-      const fromSource = mapped ? venueById(mapped, catalog) : undefined;
-      if (fromSource) return fromSource;
     }
   }
 
@@ -460,6 +632,14 @@ export function unpublishedMatchedVenue(
   if (!match) return undefined;
   if (catalog.venues.some((venue) => venue.id === match.venue.id)) return undefined;
   return match.venue;
+}
+
+/** Parent building that must exist before a child room can be published. */
+export function unpublishedParentVenue(venue: Venue | undefined, catalog: Catalog): Venue | undefined {
+  if (!venue?.parentVenueId) return undefined;
+  if (catalog.venues.some((item) => item.id === venue.parentVenueId)) return undefined;
+  const known = KNOWN_VENUES.find((item) => item.venue.id === venue.parentVenueId);
+  return known?.venue;
 }
 
 export function isSufficientProposedVenue(

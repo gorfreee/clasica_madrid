@@ -37,6 +37,12 @@ const featured = model.featuredOccurrence;
       <div class="event-facts__venue">
         <dt>Lugar</dt>
         <dd><a href={model.venueHref}>{model.venueName}</a>{model.showMunicipality && <span> / {model.municipality}</span>}</dd>
+        {model.spaceName && (
+          <>
+            <dt>Sala</dt>
+            <dd class="event-facts__space">{model.spaceName}</dd>
+          </>
+        )}
         {model.venueAddress && <dd class="event-facts__address">{model.venueAddress}</dd>}
       </div>
       <div class="event-facts__access">

@@ -125,7 +125,9 @@ export function mergeCandidate(existing: Catalog, candidate: Candidate): Candida
     return list;
   };
 
-  catalog.venues = reconcile(catalog.venues, candidate.venue, 'venue', 'venues');
+  for (const venue of [...(candidate.venues ?? []), candidate.venue]) {
+    catalog.venues = reconcile(catalog.venues, venue, 'venue', 'venues');
+  }
   for (const organizer of candidate.organizers ?? []) {
     catalog.organizers = reconcile(catalog.organizers, organizer, 'organizer', 'organizers');
   }

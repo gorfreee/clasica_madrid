@@ -32,6 +32,8 @@ export type FilterableOccurrence = {
   municipality: string;
   venueSlug: string;
   venueId: string;
+  /** Principal + child ids/slugs so old child URLs still match the place. */
+  venueKeys: string[];
   composerNames: string[];
   searchHaystack: string;
 };
@@ -70,13 +72,15 @@ export function hasActiveFilters(filters: AgendaFilters): boolean {
 }
 
 export function toFilterable(item: ResolvedOccurrence): FilterableOccurrence {
-  const { event, venue, series, organizers } = item.resolved;
+  const { event, venue, rootVenue, spaceName, familyKeys, series, organizers } = item.resolved;
   const composerNames = [
     ...event.composers.map((composer) => composer.name),
     ...event.works.map((work) => work.composerName).filter((name): name is string => Boolean(name)),
   ];
   const searchHaystack = [
     event.title,
+    rootVenue.name,
+    spaceName ?? '',
     venue.name,
     venue.municipality,
     series?.name ?? '',
@@ -93,10 +97,11 @@ export function toFilterable(item: ResolvedOccurrence): FilterableOccurrence {
     formats: event.formats,
     eras: event.eras,
     kind: event.kind,
-    area: venue.area,
-    municipality: venue.municipality,
-    venueSlug: venue.slug,
-    venueId: venue.id,
+    area: rootVenue.area,
+    municipality: rootVenue.municipality,
+    venueSlug: rootVenue.slug,
+    venueId: rootVenue.id,
+    venueKeys: familyKeys,
     composerNames,
     searchHaystack,
   };
@@ -140,7 +145,12 @@ export function matchesFilters(item: FilterableOccurrence, filters: AgendaFilter
   if (filters.format && !item.formats.includes(filters.format)) return false;
   if (filters.era && !item.eras.includes(filters.era)) return false;
   if (filters.kind && item.kind !== filters.kind) return false;
-  if (filters.venue && item.venueSlug !== filters.venue && item.venueId !== filters.venue) {
+  if (
+    filters.venue &&
+    !item.venueKeys.includes(filters.venue) &&
+    item.venueSlug !== filters.venue &&
+    item.venueId !== filters.venue
+  ) {
     return false;
   }
   if (filters.composer) {
