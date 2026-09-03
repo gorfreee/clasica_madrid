@@ -216,7 +216,7 @@ describe('publication gate — pipeline completo', () => {
     expect(run.candidates).toHaveLength(1);
     expect(run.candidates[0]!.event.formats).toEqual(['chamber']);
     expect(run.candidates[0]!.event.eras).toEqual(['baroque']);
-    expect(run.candidates[0]!.event.kind).toBe('alternative');
+    expect(run.candidates[0]!.event.kind).toBe('established');
   });
 
   it('E. uncertain + fake AI exclude: no Candidate', async () => {
@@ -303,7 +303,7 @@ describe('publication gate — pipeline completo', () => {
     expect(run.candidates).toHaveLength(1);
     expect(run.candidates[0]!.event.eras).toEqual([]);
     expect(run.candidates[0]!.event.formats).toEqual([]);
-    expect(run.candidates[0]!.event.kind).toBe('alternative');
+    expect(run.candidates[0]!.event.kind).toBe('established');
     expect(run.candidates[0]!.event.citations[0]?.url).toMatch(/^https:\/\//);
   });
 

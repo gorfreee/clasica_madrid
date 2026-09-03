@@ -45,7 +45,7 @@ export const formatLabels: Record<Format, string> = {
 };
 
 export const kindLabels: Record<EventKind, string> = {
-  established: 'Establecido',
+  established: 'Circuito habitual',
   alternative: 'Alternativo',
 };
 

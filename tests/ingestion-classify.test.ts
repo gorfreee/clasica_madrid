@@ -525,7 +525,7 @@ describe('eligibility — conflictos y fallback', () => {
     );
     expect(organ.eligibility.value).toBe('include');
     expect(organ.eligibility.ruleId).toBe('classical-concert-series');
-    expect(organ.kind.value).toBe('established');
+    expect(organ.kind.value).toBe('alternative');
     expect(organ.formats.value).toContain('organ');
   });
 
@@ -1093,7 +1093,7 @@ describe('formats', () => {
 });
 
 describe('kind', () => {
-  it('usa entidades del evento, no el sourceId', () => {
+  it('usa el venue canónico, no el sourceId ni el texto del programa', () => {
     const established = resolveKind(
       facts({
         title: 'CNDM. Cuarteto Casals',
@@ -1110,17 +1110,18 @@ describe('kind', () => {
       }),
     );
     expect(fallback.value).toBe('alternative');
-    expect(fallback.ruleId).toBe('kind-alternative-fallback');
   });
 
-  it('no trata Real Teatro de Retiro como Teatro Real', () => {
+  it('clasifica Real Teatro de Retiro como circuito habitual, no como Teatro Real', () => {
     const result = resolveKind(
       facts({
         title: 'Miniclásica',
         venueText: 'HALL Real Teatro de Retiro',
       }),
     );
-    expect(result.value).toBe('alternative');
+    expect(result.value).toBe('established');
+    expect(result.evidence.join(' ')).toMatch(/retiro/i);
+    expect(result.evidence).not.toContain('ven_teatro_real');
   });
 });
 

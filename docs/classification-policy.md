@@ -195,23 +195,27 @@ El schema no define fechas. Criterio operativo v1 (conservador):
 
 ## 5. `kind`
 
-Contexto del evento, **no** ranking de calidad y **no** elegibilidad. `kind` no es una propiedad de la source.
+Contexto **del espacio en el que se celebra el evento**, no ranking de calidad, no profesionalidad, no fama de los intérpretes y no elegibilidad. `kind` no es una propiedad de la source. Un venue del circuito habitual **nunca** convierte por sí solo un evento en música clásica.
 
-Para un evento con `eligibility = include`, `kind` **siempre** tiene valor. No existe `unknown` / `undefined` / `uncertain` para un evento publicable.
+Para un evento con `eligibility = include`, `kind` **siempre** tiene exactamente uno de estos dos valores. No existe `unknown` / `undefined` / `uncertain` / `other` para un evento publicable.
 
-| Valor | Criterio |
-|---|---|
-| `established` | Evidencia clara de circuito profesional/estable: venue reconocido, organizer institucional, serie/ciclo estable, programación profesional estable, festival estable de ese circuito |
-| `alternative` | Cualquier otro caso. No significa que sepamos que el evento es amateur: significa que no hay evidencia suficiente para etiquetarlo como circuito established |
+| Valor | Label visible | Criterio |
+|---|---|---|
+| `established` | Circuito habitual | El evento se celebra en un espacio del circuito habitual de programación musical, concertística, escénica o cultural profesional |
+| `alternative` | Alternativo | El evento se celebra fuera de ese circuito, en un espacio donde el concierto clásico es un uso menos convencional del lugar |
 
 ```text
-include + clearly established → established
-include + otherwise → alternative
+include + espacio del circuito habitual → established
+include + cualquier otro espacio → alternative
 ```
 
-No deducir de forma permanente `Auditorio Nacional → established` ni `Madrid Datos → alternative`.
+La señal principal es el **venue canónico** ya resuelto por el pipeline (`venueId` / sede identificada). El organizer, la serie o el texto del programa no cambian la clasificación cuando el lugar está identificado. La calidad o la fama de los intérpretes tampoco: una gran orquesta internacional en una iglesia sigue siendo `alternative`.
 
-Un concierto de pop en el Teatro Real puede ser `established` + `exclude`. Un recital de órgano en una basílica, si forma parte de un ciclo concertístico estable, puede ser `established` + `include`. Un open-piano en un puente, si llegara a clasificarse, sería `alternative`; como actividad participativa su elegibilidad es `exclude`.
+`established` cubre, de forma inequívoca, teatros y auditorios de ese circuito (Teatro Real, Teatro de la Zarzuela, Auditorio Nacional — Sala Sinfónica y Sala de Cámara, Teatro Monumental, Teatros del Canal y sus salas, Fundación Juan March) y salas equivalentes con programación cultural/concertística estable.
+
+`alternative` cubre iglesias, parroquias y basílicas; colegios; universidades y aulas; conservatorios y escuelas; centros cívicos o culturales de barrio; bibliotecas; salas multiusos; parques y espacios públicos; y otros lugares no concebidos principalmente como parte de ese circuito.
+
+Un concierto de pop en el Teatro Real puede ser `established` + `exclude`. Un recital de órgano en una basílica, si es música clásica, puede ser `alternative` + `include`. Un open-piano en un puente, si llegara a clasificarse, sería `alternative`; como actividad participativa su elegibilidad es `exclude`.
 
 ---
 
