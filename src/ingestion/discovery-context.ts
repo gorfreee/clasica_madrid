@@ -169,8 +169,8 @@ export const DISCOVERY_EDITORIAL_SCOPE: DiscoveryContext['editorialScope'] = {
       'Música clásica occidental en sentido amplio (antigua, barroco, clasicismo, romanticismo, siglos XX/XXI de tradición académica). No basta venue, source ni orquesta: el repertorio y la naturaleza musical del evento mandan.',
     precisionOverCoverage: true,
     kinds: {
-      established: 'Válido. Circuito profesional o programación estable; no es ranking de calidad ni elegibilidad.',
-      alternative: 'También válido. Fuera de ese circuito (comunitario, educativo, puntual); no significa amateur.',
+      established: 'Válido. Circuito habitual de programación (auditorios, teatros, salas concertísticas); no es ranking de calidad, profesionalidad ni elegibilidad.',
+      alternative: 'También válido. Fuera de ese circuito (iglesias, colegios, centros cívicos, parques); no significa amateur ni menor calidad.',
     },
   },
   longTail: [

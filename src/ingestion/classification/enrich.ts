@@ -1,4 +1,4 @@
-import { classify, resolveAccess, resolveEras, resolveFormats, resolveKind } from './classify.ts';
+import { classify, resolveAccess, resolveEras, resolveFormats, resolveKind, type KindVenue } from './classify.ts';
 import type { ObservedFacts } from '../observed.ts';
 import {
   AI_CLASSIFY_TIMEOUT_MS,
@@ -21,6 +21,8 @@ export type ClassifyObservedOptions = {
   ai?: AiClassifier;
   timeoutMs?: number;
   onDiagnostics?: (diagnostics: AiCallDiagnostics) => void;
+  /** Canonical venue already resolved by ingest. Kind ignores AI. */
+  venue?: KindVenue;
 };
 
 /**
@@ -33,7 +35,7 @@ export async function classifyObserved(
   facts: ObservedFacts,
   options: ClassifyObservedOptions = {},
 ): Promise<ClassificationResult> {
-  return enrichWithAiIfNeeded(classify(facts), facts, options);
+  return enrichWithAiIfNeeded(classify(facts, options.venue), facts, options);
 }
 
 export async function enrichWithAiIfNeeded(
@@ -57,7 +59,7 @@ export async function enrichWithAiIfNeeded(
 
   if (result.eligibility.value !== 'include') return result;
 
-  result = ensureTaxonomy(result, facts);
+  result = ensureTaxonomy(result, facts, options.venue);
   if (!taxonomyNeedsAi(result) || !options.ai) return result;
 
   return enrichTaxonomyWithAi(result, facts, callOptions);
@@ -85,7 +87,7 @@ async function resolveEligibilityWithAi(
   if (!parsed.ok) {
     return degrade(deterministic, 'ai', parsed.ruleId, [parsed.reason]);
   }
-  return applyEligibilityAi(deterministic, facts, parsed.value);
+  return applyEligibilityAi(deterministic, facts, parsed.value, options.venue);
 }
 
 async function enrichTaxonomyWithAi(
@@ -98,7 +100,7 @@ async function enrichTaxonomyWithAi(
 
   const parsed = parseAiClassification(called.value);
   if (!parsed.ok) return current;
-  return applyTaxonomyAi(current, facts, parsed.value);
+  return applyTaxonomyAi(current, facts, parsed.value, options.venue);
 }
 
 async function invokeAi(
@@ -128,6 +130,7 @@ function applyEligibilityAi(
   deterministic: ClassificationResult,
   facts: ObservedFacts,
   ai: AiClassificationResult,
+  venue?: KindVenue,
 ): ClassificationResult {
   const eligibility = resolution(
     ai.eligibility,
@@ -137,12 +140,12 @@ function applyEligibilityAi(
   );
   if (ai.eligibility !== 'include') return { eligibility };
 
-  const base = ensureTaxonomy({ eligibility }, facts);
+  const base = ensureTaxonomy({ eligibility }, facts, venue);
   return {
     eligibility,
     formats: keepResolvedList(base.formats, ai.formats, ai.evidence, 'ai-formats', () => resolveFormats(facts)),
     eras: keepResolvedList(base.eras, ai.eras, ai.evidence, 'ai-eras', () => resolveEras(facts)),
-    kind: keepResolvedKind(base.kind, ai.kind, ai.evidence, facts),
+    kind: keepResolvedKind(base.kind, facts, venue),
     access: resolveAccess(facts.accessText),
   };
 }
@@ -151,23 +154,28 @@ function applyTaxonomyAi(
   current: ClassificationResult,
   facts: ObservedFacts,
   ai: AiClassificationResult,
+  venue?: KindVenue,
 ): ClassificationResult {
-  // Eligibility is already include and must not change.
+  // Eligibility is already include and must not change. Kind stays deterministic.
   return {
     eligibility: current.eligibility,
     formats: keepResolvedList(current.formats, ai.formats, ai.evidence, 'ai-formats', () => resolveFormats(facts)),
     eras: keepResolvedList(current.eras, ai.eras, ai.evidence, 'ai-eras', () => resolveEras(facts)),
-    kind: keepResolvedKind(current.kind, ai.kind, ai.evidence, facts),
+    kind: keepResolvedKind(current.kind, facts, venue),
     access: current.access ?? resolveAccess(facts.accessText),
   };
 }
 
-function ensureTaxonomy(result: ClassificationResult, facts: ObservedFacts): ClassificationResult {
+function ensureTaxonomy(
+  result: ClassificationResult,
+  facts: ObservedFacts,
+  venue?: KindVenue,
+): ClassificationResult {
   return {
     eligibility: result.eligibility,
     formats: result.formats ?? resolveFormats(facts),
     eras: result.eras ?? resolveEras(facts),
-    kind: result.kind ?? resolveKind(facts),
+    kind: result.kind ?? resolveKind(facts, venue),
     access: result.access ?? resolveAccess(facts.accessText),
   };
 }
@@ -192,13 +200,10 @@ function keepResolvedList<T>(
 
 function keepResolvedKind(
   current: Resolution<EventKind> | undefined,
-  aiValue: EventKind | undefined,
-  evidence: string[],
   facts: ObservedFacts,
+  venue?: KindVenue,
 ): Resolution<EventKind> {
-  if (current && current.method !== 'fallback') return current;
-  if (aiValue) return resolution(aiValue, 'ai', 'ai-kind', evidence);
-  return current ?? resolveKind(facts);
+  return current ?? resolveKind(facts, venue);
 }
 
 function degradeFromError(deterministic: ClassificationResult, error: unknown): ClassificationResult {

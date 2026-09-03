@@ -48,18 +48,6 @@ export function identityHaystack(facts: ObservedFacts): string {
   ]);
 }
 
-export function kindHaystack(facts: ObservedFacts): string {
-  return joinFolded([
-    facts.title,
-    facts.categoryText,
-    facts.venueText,
-    facts.organizerText,
-    facts.seriesText,
-    facts.description,
-    ...facts.performers.map((item) => item.name),
-  ]);
-}
-
 export function formatHaystack(facts: ObservedFacts): string {
   return joinFolded([
     facts.title,

@@ -3,12 +3,13 @@ import { resolveAccess } from './access.ts';
 import { resolveEligibility } from './eligibility.ts';
 import { resolveEras } from './eras.ts';
 import { resolveFormats } from './formats.ts';
-import { resolveKind } from './kind.ts';
+import { resolveKind, type KindVenue } from './kind.ts';
 import type { ClassificationResult } from './types.ts';
 
 /**
- * Deterministic classifier. Input is ObservedFacts only.
- * Does not fetch, does not read the published catalog, does not call AI.
+ * Deterministic classifier. Does not fetch, does not call AI.
+ * Kind may use a venue already resolved by the ingest pipeline; otherwise it
+ * reuses the same venue aliases as `matchVenue` (empty catalog).
  *
  * Short-circuit: exclude and uncertain skip formats / eras / kind / access.
  * Field resolvers remain independently testable.
@@ -17,7 +18,7 @@ import type { ClassificationResult } from './types.ts';
  * in `runIngest` consumes that final result; this function stays the
  * publication-agnostic rule layer.
  */
-export function classify(facts: ObservedFacts): ClassificationResult {
+export function classify(facts: ObservedFacts, venue?: KindVenue): ClassificationResult {
   const eligibility = resolveEligibility(facts);
   if (eligibility.value !== 'include') {
     return { eligibility };
@@ -27,7 +28,7 @@ export function classify(facts: ObservedFacts): ClassificationResult {
     eligibility,
     formats: resolveFormats(facts),
     eras: resolveEras(facts),
-    kind: resolveKind(facts),
+    kind: resolveKind(facts, venue),
     access: resolveAccess(facts.accessText),
   };
 }
@@ -37,3 +38,4 @@ export { resolveEligibility } from './eligibility.ts';
 export { resolveEras } from './eras.ts';
 export { resolveFormats } from './formats.ts';
 export { resolveKind } from './kind.ts';
+export type { KindVenue } from './kind.ts';

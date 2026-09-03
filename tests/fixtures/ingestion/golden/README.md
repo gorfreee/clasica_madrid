@@ -29,7 +29,7 @@ Consulta de las URLs oficiales. Se copió lo que la ficha declara. No se usó co
 - `access=unknown` cuando no hay precio ni «gratuito»/«entrada libre» en `accessText`.
 - `eras=[]` cuando no hay obras ni compositores observables.
 - `kind` omitido si eligibility no es `include`.
-- Para `include` sin evidencia established, `kind=alternative`.
+- Para `include` en un espacio fuera del circuito habitual, `kind=alternative`. El venue canónico es la señal principal; no es «falta de evidencia de established».
 
 Un título de listado puede sugerir lo contrario de la ficha (gala de Navidad popular, código interno que es Mahler, «flamencos» que son franco-flamencos). La ficha manda; cada caso documenta el `reason`.
 

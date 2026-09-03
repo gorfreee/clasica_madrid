@@ -88,6 +88,6 @@ Checks: la suite completa pasó con `npm test -- --maxWorkers=2` (45 suites, 681
 - Depende de las clases semánticas del tema WordPress. Los fallos de estructura se hacen visibles, pero no existe contador upstream que permita demostrar que el propio sitio no ha omitido una tarjeta completa.
 - Se hidratan todas las fichas descubiertas, incluso fuera de ventana, para verificar el calendario sin introducir cambios en el mecanismo compartido de windowing. Son 44 peticiones por ejecución con el catálogo observado.
 - Hay fichas sin repertorio y erratas musicales upstream (por ejemplo `Edward Grieg`); no se corrigen ni se adivinan contenidos.
-- Los arrays musicales permanecen vacíos y el `kind` común cae a `alternative` al no reconocer todavía Monumental como circuito establecido. Son limitaciones de enrichment que no bloquean fechas, sede, procedencia ni publicación fiable.
+- Los arrays musicales pueden quedar vacíos cuando la ficha no declara repertorio; el `kind` de un concierto en el Teatro Monumental es `established` porque el espacio pertenece al circuito habitual. Son limitaciones de enrichment de programa que no bloquean fechas, sede, procedencia ni publicación fiable.
 - No hay un campo estructurado de cancelación en las fichas observadas. Una futura variante de plantilla de cancelación/reprogramación requerirá una fixture específica; las desapariciones nunca cancelan automáticamente.
 - El comportamiento desde GitHub-hosted Actions con sus credenciales de IA/relay no se ha demostrado mediante estas ejecuciones locales.

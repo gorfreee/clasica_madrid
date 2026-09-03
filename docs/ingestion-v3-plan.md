@@ -151,7 +151,7 @@ uncertain → no se publica automáticamente
 
 La política editorial vigente es [`docs/classification-policy.md`](classification-policy.md). El golden set está en `tests/fixtures/ingestion/golden/`. No se duplican aquí taxonomías ni reglas.
 
-`kind` es contexto del evento (`established` / `alternative`), no ranking de calidad ni propiedad de la source. Una sala «clásica» puede publicar eventos que no son `established`.
+`kind` es el contexto del evento (`established` / «Circuito habitual» o `alternative` / «Alternativo»): el circuito en el que se celebra, no un ranking de calidad ni una propiedad de la source. Un teatro del circuito habitual puede acoger un evento `established` que no es música clásica (`exclude`). Una iglesia es `alternative` aunque toque una orquesta internacional.
 
 ---
 

@@ -174,6 +174,16 @@ describe('modelos de presentación', () => {
     expect(organ?.time).toBeNull();
   });
 
+  it('etiqueta established como Circuito habitual en los filtros', () => {
+    const model = buildAgendaPageModel(richCatalog(), new URL('https://clasicamadrid.com/'), testClock);
+    const kindField = model.selectFilters.find((field) => field.name === 'kind');
+    expect(kindField?.options.map((option) => option.label)).toEqual([
+      'Cualquier contexto',
+      'Circuito habitual',
+      'Alternativo',
+    ]);
+  });
+
   it('abre la cronología en hoy aunque la primera representación sea posterior', () => {
     const model = buildAgendaPageModel(richCatalog(), new URL('https://clasicamadrid.com/'), testClock);
     expect(model.days[0]).toMatchObject({

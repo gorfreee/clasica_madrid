@@ -245,7 +245,8 @@ async function ingestPreparedEvents(
   const prepared = rawEvents.map((raw) => {
     const event = normalizeRawEvent(raw);
     const source = event ? bySource.get(event.sourceId) : undefined;
-    const venueId = event ? matchVenue(venueHint(event), options.catalog)?.venue.id : undefined;
+    const venueMatch = event ? matchVenue(venueHint(event), options.catalog) : undefined;
+    const venueId = venueMatch?.venue.id;
     const identity =
       event && source
         ? matchEventIdentity(options.catalog, event, {
@@ -258,9 +259,9 @@ async function ingestPreparedEvents(
       event && source && identity
         ? shouldClassifyObservation(event, options.catalog, options.now, identity, window)
         : false;
-    return { raw, event, source, identity, classify };
+    return { raw, event, source, identity, classify, venueMatch };
   });
-  const classified = await mapConcurrent(prepared, options.ai?.concurrency ?? 1, async ({ event, classify }) => {
+  const classified = await mapConcurrent(prepared, options.ai?.concurrency ?? 1, async ({ event, classify, venueMatch }) => {
     if (!event || !classify) return undefined;
     try {
       let aiAttempted = false;
@@ -278,7 +279,11 @@ async function ingestPreparedEvents(
         },
       } : undefined;
       const classification = await classifyObserved(observedFactsFromNormalized(event), {
-        ai: eventAi, onDiagnostics: (diagnostics) => { aiCall = diagnostics; },
+        ai: eventAi,
+        onDiagnostics: (diagnostics) => { aiCall = diagnostics; },
+        venue: venueMatch
+          ? { id: venueMatch.venue.id, name: venueMatch.venue.name }
+          : undefined,
       });
       return { classification, aiAttempted, aiCall };
     } catch (error) {

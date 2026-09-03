@@ -38,7 +38,7 @@ Campos principales:
 - `composers[]`: `{ name }`
 - `works[]`: `{ title, composerName? }` (opcional, puede ir vacío)
 - `eras[]`, `formats[]` (taxonomías; pueden ir vacíos si aún no hay clasificación)
-- `kind`: contexto, no ranking de calidad. `established` | `alternative`
+- `kind`: contexto del espacio, no ranking de calidad. `established` | `alternative`. Todo evento publicable tiene exactamente uno.
 - `access`: `free` | `paid` | `unknown` (sin precios)
 - `citations[]`: al menos una. `{ sourceId, url, checkedAt, externalId? }`
 - `primarySourceId`: debe estar en `citations`
@@ -72,12 +72,12 @@ La entidad `sources/` describe el origen (nombre, tipo, URL de la sede). Cada ev
 
 Valores canónicos: `src/lib/schemas/taxonomies.ts`. Etiquetas en español: capa de presentación.
 
-**Contexto (`kind`)** — no es calidad; dos valores excluyentes:
+**Contexto (`kind`)** — describe el circuito en el que se celebra el evento, no la calidad, la profesionalidad ni la source. Dos valores excluyentes; todo evento publicable tiene exactamente uno:
 
-- `established`: programación profesional o estable dentro del circuito habitual de música clásica/cultural
-- `alternative`: fuera de ese circuito estable, incluidas propuestas amateur, comunitarias, educativas o conciertos puntuales en espacios no dedicados habitualmente a programación musical
+- `established` («Circuito habitual»): espacio del circuito habitual de programación musical, concertística, escénica o cultural profesional (auditorios, teatros, salas equivalentes)
+- `alternative` («Alternativo»): fuera de ese circuito (iglesias, colegios, universidades, centros cívicos, parques, salas multiusos y similares)
 
-Un coro parroquial, una audición de escuela de música o un concierto ocasional en una iglesia no especializada son `alternative`. La temporada de un auditorio o un ciclo institucional estable es `established`.
+Un coro parroquial o un concierto ocasional en una iglesia es `alternative` aunque los intérpretes sean profesionales. La temporada de un auditorio o un teatro de ese circuito es `established` aunque el programa no sea clásico (`kind` no decide eligibility).
 
 ## Cómo añadir un evento
 

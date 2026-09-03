@@ -45,10 +45,10 @@ export const FORMATS = [
 export type Format = (typeof FORMATS)[number];
 
 /**
- * Context of the event, not a quality ranking.
- * established: professional/stable programming in the usual classical/cultural circuit.
- * alternative: outside that circuit (amateur, community, educational, or one-off concerts
- * in spaces not usually dedicated to music programming).
+ * Context of the event — the circuit in which it takes place — not a quality ranking,
+ * not professionalism, and not eligibility.
+ * established: habitual concert / theatre / cultural circuit (auditoriums, theatres, equivalent halls).
+ * alternative: outside that circuit (churches, schools, civic centres, parks, and similar spaces).
  */
 export const EVENT_KINDS = ['established', 'alternative'] as const;
 export type EventKind = (typeof EVENT_KINDS)[number];
