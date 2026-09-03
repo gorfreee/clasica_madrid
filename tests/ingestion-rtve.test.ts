@@ -147,7 +147,11 @@ describe('RTVE pipeline safety', () => {
     expect(first.summary.eligibility.include).toBe(1);
     expect(first.apply.report.ok).toBe(true);
     const catalog = mergeCandidateBatch(emptyCatalog(), first.candidates).catalog;
-    expect(catalog.events[0]).toMatchObject({ venueId: 'ven_teatro_monumental', access: 'paid' });
+    expect(catalog.events[0]).toMatchObject({
+      venueId: 'ven_teatro_monumental',
+      access: 'paid',
+      title: 'Concierto Sinfónico A/1',
+    });
     expect(catalog.events[0]?.occurrences).toHaveLength(2);
     expect(catalog.events[0]?.citations[0]?.sourceId).toBe(source.catalogSourceId);
     const second = await run(catalog);

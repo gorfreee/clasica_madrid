@@ -216,6 +216,20 @@ function assertNeverLosesPublishedIdentity(event: Event): void {
 }
 
 describe('invariantes de identidad canónica', () => {
+  it('un título solo tipográficamente equivalente no es desacuerdo ni reescribe el canónico', () => {
+    const existing = makeEvent({ title: 'Concierto Sinfónico A/5' });
+    const merged = mergeExistingEvent(
+      existing,
+      proposal({ title: 'CONCIERTO SINFÓNICO A/5' }),
+      TEST_NOW,
+    );
+    expect(merged.event.title).toBe('Concierto Sinfónico A/5');
+    expect(merged.event.id).toBe(existing.id);
+    expect(merged.event.slug).toBe(existing.slug);
+    expect(merged.diagnostics.some((item) => item.startsWith('title:'))).toBe(false);
+    expect(merged.diffs.some((item) => item.startsWith('title:'))).toBe(false);
+  });
+
   it('nunca cambia id ni slug', () => {
     const existing = makeEvent();
     const merged = mergeExistingEvent(existing, proposal({ title: 'Otro' }), TEST_NOW);

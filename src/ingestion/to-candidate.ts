@@ -12,6 +12,7 @@ import { isSufficientProposedVenue, matchVenue, unpublishedMatchedVenue } from '
 import { defaultIngestWindow, isDateInHarvestScope, type IngestWindow } from './dates.ts';
 import { ID_PREFIX } from '../lib/schemas/taxonomies.ts';
 import { SOURCE_REGISTRY, resolveCatalogSource } from './registry.ts';
+import { canonicalizeEventTitle } from './event-title.ts';
 
 export type CandidateBuild = {
   candidate?: Candidate;
@@ -69,7 +70,8 @@ export function toCandidate(
   const identity = event.externalId ?? urlPathIdentity(event.sourceUrl);
   const eventId = uniqueId(eventIdFor(eventIdSourceKey(source), identity), usedIds);
   usedIds.add(eventId);
-  const slug = uniqueSlug(event.title, usedSlugs);
+  const title = canonicalizeEventTitle(event.title);
+  const slug = uniqueSlug(title, usedSlugs);
   usedSlugs.add(slug);
   const verified = madridToday(now);
   const occurrences: Occurrence[] = publishableOccurrences.map((occurrence, index) => ({
@@ -83,7 +85,7 @@ export function toCandidate(
     schemaVersion: 1,
     id: eventId,
     slug,
-    title: event.title,
+    title,
     status: 'scheduled',
     venueId: venueMatch.venue.id,
     organizerIds: [],

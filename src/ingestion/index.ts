@@ -54,6 +54,12 @@ export type { IngestWindow } from './dates.ts';
 export { evaluateIngestHealth } from './health.ts';
 export type { IngestHealth } from './health.ts';
 export { materialEventDiffs } from './material-diff.ts';
+export {
+  canonicalizeEventTitle,
+  planPublishedTitleCanonicalization,
+  replacePublishedTitle,
+} from './event-title.ts';
+export type { PublishedTitleChange } from './event-title.ts';
 export { eventIdFor, occurrenceIdFor, toSlug, uniqueId, uniqueSlug } from './ids.ts';
 export { mergeCandidateBatch, applyCandidateBatch, serializeCanonical } from './batch.ts';
 export { matchEventIdentity, EVENT_IDENTITY_ALIASES } from './identity.ts';
