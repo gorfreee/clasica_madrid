@@ -41,7 +41,9 @@
   "eras": [
     "renaissance"
   ],
-  "formats": [],
+  "formats": [
+    "choral"
+  ],
   "kind": "established",
   "access": "unknown",
   "citations": [

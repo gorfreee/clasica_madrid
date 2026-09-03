@@ -58,7 +58,10 @@
   "eras": [
     "baroque"
   ],
-  "formats": [],
+  "formats": [
+    "opera",
+    "early-music"
+  ],
   "kind": "established",
   "access": "paid",
   "citations": [

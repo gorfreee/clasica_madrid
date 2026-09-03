@@ -23,7 +23,9 @@
     "romantic",
     "twentieth"
   ],
-  "formats": [],
+  "formats": [
+    "recital"
+  ],
   "kind": "alternative",
   "access": "free",
   "citations": [
