@@ -72,6 +72,16 @@ Se puede sustituir la UI sin cambiar esquemas, validación ni consultas.
 
 Los filtros de la agenda viven en la URL (`/?access=free&area=madrid`) y se aplican en el cliente sobre el listado estático generado en build, para no introducir SSR. El mismo script oculta las representaciones que ya han pasado respecto al reloj del navegador (`Europe/Madrid`), de modo que la agenda no depende de un deploy para dejar de mostrar un concierto terminado.
 
-## CI
+El resto de la semántica temporal sí se fija en el build: atajos `Hoy` / `Mañana` / `Fin de semana`, el placeholder cuando hoy no hay conciertos, `isPast` en las fichas de evento y los próximos conciertos de lugares. Cloudflare Pages reconstruye el sitio en cada push a `main`; además, un rebuild diario (`.github/workflows/daily-site-rebuild.yml`) dispara un Deploy Hook poco después de las 00:00 en Europe/Madrid para que esa presentación no se desfase un día sin cambios en Git.
 
-Cada push a `main` y cada pull request ejecuta validación de datos, tests, typecheck y build (`.github/workflows/ci.yml`). El push directo a `main` está permitido.
+## CI y publicación
+
+Cada push a `main` y cada pull request ejecuta validación de datos, tests, typecheck y build (`.github/workflows/ci.yml`). El push directo a `main` está permitido. Cloudflare Pages despliega el sitio estático desde `main`.
+
+El workflow diario no hace checkout ni build en GitHub: sólo hace `POST` al secret `CLOUDFLARE_PAGES_DEPLOY_HOOK_URL`. Configuración (una vez):
+
+1. En Cloudflare Pages, abre el proyecto del sitio → Settings → Builds & deployments → Deploy hooks.
+2. Crea un hook que apunte a la rama `main`.
+3. Guarda la URL como secret de GitHub Actions `CLOUDFLARE_PAGES_DEPLOY_HOOK_URL`. No la subas al repositorio.
+
+Para probarlo: Actions → Daily site rebuild → Run workflow (`workflow_dispatch`). El cron programado cubre CET y CEST (22:15 y 23:15 UTC) y un guard `TZ=Europe/Madrid` evita el disparo duplicado.
