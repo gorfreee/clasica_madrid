@@ -223,8 +223,8 @@ function looksLikeArtistTitle(value: string): boolean {
   if (isOrganizerName(value) || looksLikeWorkPhrase(value)) return false;
   const tokens = normalizeText(value)
     .split(' ')
-    .filter((token) => token && !STOPWORDS.has(token) && !ORGANIZER_TOKENS.has(token));
-  if (tokens.length < 1 || tokens.length > 6) return false;
+    .filter((token) => token && !STOPWORDS.has(token) && !ORGANIZER_TOKENS.has(token) && !/^\d+$/.test(token));
+  if (tokens.length < 2 || tokens.length > 6) return false;
   if (tokens.some((token) => PROGRAM_TITLE_WORDS.has(token))) return false;
   return tokens.some((token) => token.length >= 3);
 }
