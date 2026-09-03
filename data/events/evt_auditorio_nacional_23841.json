@@ -112,7 +112,9 @@
   "eras": [
     "baroque"
   ],
-  "formats": [],
+  "formats": [
+    "recital"
+  ],
   "kind": "established",
   "access": "paid",
   "citations": [

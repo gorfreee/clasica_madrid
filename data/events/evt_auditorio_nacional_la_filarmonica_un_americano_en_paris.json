@@ -22,7 +22,9 @@
     "classical",
     "romantic"
   ],
-  "formats": [],
+  "formats": [
+    "symphonic"
+  ],
   "kind": "established",
   "access": "paid",
   "citations": [

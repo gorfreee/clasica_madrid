@@ -47,7 +47,10 @@
   "eras": [
     "baroque"
   ],
-  "formats": [],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
   "kind": "established",
   "access": "paid",
   "citations": [

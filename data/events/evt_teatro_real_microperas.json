@@ -25,7 +25,9 @@
   "composers": [],
   "works": [],
   "eras": [],
-  "formats": [],
+  "formats": [
+    "opera"
+  ],
   "kind": "established",
   "access": "unknown",
   "citations": [

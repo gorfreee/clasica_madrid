@@ -31,7 +31,9 @@
   "composers": [],
   "works": [],
   "eras": [],
-  "formats": [],
+  "formats": [
+    "chamber"
+  ],
   "kind": "established",
   "access": "unknown",
   "citations": [

@@ -21,7 +21,11 @@
   "eras": [
     "romantic"
   ],
-  "formats": [],
+  "formats": [
+    "opera",
+    "symphonic",
+    "choral"
+  ],
   "kind": "established",
   "access": "unknown",
   "citations": [
