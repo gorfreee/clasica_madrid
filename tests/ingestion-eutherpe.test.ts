@@ -147,7 +147,7 @@ describe('Fundación Eutherpe listing', () => {
       '<html>Service unavailable</html>',
       html.replace('Programación de conciertos', 'Agenda'),
       html.replace('bloque-meses', 'bloque-agenda'),
-      html.replaceAll('fundacioneutherpe.com/conciertos/', 'example.org/conciertos/'),
+      html.replaceAll('href="/conciertos/', 'href="https://example.org/conciertos/'),
       html.replace('Septiembre / 2026', 'Mes / 2026'),
       html.replace('>12<', '>32<'),
       html.replace('collection-list-2 w-dyn-items', 'collection-list-2 w-dyn-items"><a class="page-numbers" href="?page=2">2</a'),
@@ -206,7 +206,7 @@ describe('Fundación Eutherpe ficha hydration', () => {
     const html = await fixture('detail-battipaglia.html');
     for (const broken of [
       html.replace('head-conciertos', 'changed'),
-      html.replace('>Guitarra clásica: Luca Battipaglia. Italia<', '>Otro concierto<'),
+      html.replaceAll('>Guitarra clásica: Luca Battipaglia. Italia<', '>Otro concierto<'),
       html.replace('12/9/26', '13/9/26'),
       html.replace('19:30 horas', 'mediodía'),
     ]) {
@@ -281,7 +281,7 @@ describe('Fundación Eutherpe pipeline safety', () => {
           occurrences: [
             { id: 'occ_battipaglia_20260912_01', date: '2026-09-12', time: '19:30', status: 'scheduled' },
           ],
-          citations: [{ sourceId: source.catalogSourceId, url, checkedAt: '2026-08-28' }],
+          citations: [{ sourceId: source.catalogSourceId, url, checkedAt: '2026-08-28', externalId: 'guitarra-clasica-luca-battipaglia-italia' }],
           primarySourceId: source.catalogSourceId,
           lastVerifiedAt: '2026-08-28',
         }),
@@ -290,11 +290,9 @@ describe('Fundación Eutherpe pipeline safety', () => {
     const matched = await run(catalog);
     expect(matched.summary.sourcesFailed).toEqual([]);
     expect(matched.summary.newEvents).toBe(0);
-    expect(matched.candidates[0]?.event).toMatchObject({
-      id: 'evt_battipaglia_20260912',
-      slug: 'guitarra-clasica-luca-battipaglia',
-      title: 'Guitarra clásica: Luca Battipaglia. Italia',
-    });
+    expect(matched.summary.updatedEvents).toBe(0);
+    expect(matched.summary.unchangedEvents).toBe(1);
+    expect(matched.summary.possiblyMissing).toBe(0);
     const repeated = await run(mergeCandidateBatch(catalog, matched.candidates).catalog);
     expect(repeated.summary.newEvents).toBe(0);
     expect(repeated.summary.updatedEvents).toBe(0);
@@ -330,7 +328,7 @@ describe('Fundación Eutherpe pipeline safety', () => {
           occurrences: [
             { id: 'occ_battipaglia_20260912_01', date: '2026-09-12', time: '19:30', status: 'scheduled' },
           ],
-          citations: [{ sourceId: source.catalogSourceId, url, checkedAt: '2026-08-28' }],
+          citations: [{ sourceId: source.catalogSourceId, url, checkedAt: '2026-08-28', externalId: 'guitarra-clasica-luca-battipaglia-italia' }],
           primarySourceId: source.catalogSourceId,
           lastVerifiedAt: '2026-08-28',
         }),

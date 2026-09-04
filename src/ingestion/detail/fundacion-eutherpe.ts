@@ -92,7 +92,7 @@ export function extractEutherpeListing(body: string, url: string, sourceId: stri
 }
 
 export function parseEutherpeDetail(event: RawEvent, body: string): ObservedFactPatch {
-  if (!/\b(?:head-conciertos|titular-conciertos)\b/i.test(body) || !/\bheading-43\b/i.test(body)) {
+  if (!/\bhead-conciertos\b/i.test(body) || !/\btitular-conciertos\b/i.test(body) || !/\bheading-43\b/i.test(body)) {
     throw new Error('fundacion-eutherpe: falta la ficha del concierto');
   }
   const titles = uniqueTexts(body, /<h1\b[^>]*class=["'][^"']*\bheading-43\b[^"']*["'][^>]*>([\s\S]*?)<\/h1>/gi);
@@ -371,8 +371,12 @@ function collectDetailClock(body: string): {
     body,
     /<div\b[^>]*class=["'][^"']*\btext-block-35 nohover\b[^"']*["'][^>]*>([\s\S]*?)<\/div>/gi,
   );
-  const dates = texts.filter((item) => NUMERIC_DATE.test(item));
-  const times = texts.filter((item) => /\d{1,2}:\d{2}/.test(item));
+  const dates: string[] = [];
+  const times: string[] = [];
+  for (const item of texts) {
+    if (NUMERIC_DATE.test(item)) dates.push(item);
+    else times.push(item);
+  }
   const uniqueDates = [...new Set(dates)];
   const uniqueTimes = [...new Set(times)];
   if (uniqueDates.length > 1) throw new Error('fundacion-eutherpe: ficha con fechas contradictorias');
