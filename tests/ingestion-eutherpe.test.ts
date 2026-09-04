@@ -125,6 +125,8 @@ describe('Fundación Eutherpe listing', () => {
     ]);
     expect(eutherpeNumericDate('12/9/26')).toBe('2026-09-12');
     expect(eutherpeTime('19:00h')).toBe('19:00');
+    expect(eutherpeTime('19:0 horas')).toBe('19:00');
+    expect(eutherpeTime('19: 30 horas')).toBe('19:30');
   });
 
   it('deduplicates the Madrid programming page against the same CMS calendar', async () => {

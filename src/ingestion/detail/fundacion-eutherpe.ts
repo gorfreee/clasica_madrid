@@ -409,9 +409,12 @@ export function eutherpeNumericDate(text: string): string | undefined {
 }
 
 export function eutherpeTime(text: string): string | undefined {
-  const match = /(\d{1,2})[:.](\d{2})/.exec(stripTags(text));
+  const match = /(\d{1,2})\s*[:.]\s*(\d{1,2})/.exec(stripTags(text));
   if (!match) return undefined;
-  return parseObservedTime(`${match[1]!.padStart(2, '0')}:${match[2]}`) ?? undefined;
+  const hour = Number(match[1]);
+  const minute = Number(match[2]);
+  if (hour > 23 || minute > 59) return undefined;
+  return parseObservedTime(`${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`) ?? undefined;
 }
 
 export function eutherpeDirectoryDayMonth(text: string): { day: number; month: number } | undefined {
