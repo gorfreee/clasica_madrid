@@ -212,6 +212,10 @@ function parseMonth(block: string): CalendarHit[] {
       ...(categoryText ? { categoryText, venueText: categoryText } : {}),
     });
   }
+  numbered.sort((left, right) => left - right);
+  if (new Set(numbered).size !== numbered.length) {
+    throw new Error('fundacion-eutherpe: día del calendario duplicado');
+  }
   if (numbered.join(',') !== Array.from({ length: lastDay }, (_, index) => index + 1).join(',')) {
     throw new Error('fundacion-eutherpe: cobertura distinta de los días del mes');
   }

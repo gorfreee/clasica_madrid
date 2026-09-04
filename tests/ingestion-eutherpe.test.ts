@@ -191,6 +191,14 @@ describe('Fundación Eutherpe listing', () => {
       ...ctx,
       get: async () => emptyDivHeading,
     })).toEqual([]);
+    const shuffled = eutherpeEmptyListing()
+      .replace('>5</a>', '>__six__</a>')
+      .replace('>6</a>', '>5</a>')
+      .replace('>__six__</a>', '>6</a>');
+    expect(await adapter.extract(shuffled, listingUrl, {
+      ...ctx,
+      get: async () => shuffled,
+    })).toEqual([]);
   });
 });
 
