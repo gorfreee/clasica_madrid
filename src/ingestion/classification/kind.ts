@@ -76,6 +76,7 @@ const ALTERNATIVE_VENUE_IDS = new Set([
   'ven_four_seasons_madrid',
   'ven_goethe_institut_madrid',
   'ven_hinves_pianos',
+  'ven_shigeru_kawai_center',
 ]);
 
 /**
