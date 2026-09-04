@@ -1,5 +1,11 @@
 # Fundación ORCAM: incorporación y validación
 
+> **Documentación histórica.** Registro de la incorporación y dry-run de Fundación ORCAM (2026-08-31). **No** es el estado operativo actual ni un requisito de implementación.
+>
+> Lo implementado hoy está en [`docs/ingestion.md`](../ingestion.md). El adapter y sus tests viven en el código.
+>
+> Consérvese como evidencia de aquella corrida. Las métricas, commits y listas de eventos de este fichero no deben copiarse a documentación vigente.
+
 Investigación y ejecuciones locales del 2026-08-31 iniciadas sobre `main`
 `4ccafc7`; rama actualizada después sobre `891cb62` (PR #44, relay de Zarzuela).
 Se repitieron tests/check y el dry-run de ORCAM tras el rebase. El dry-run
