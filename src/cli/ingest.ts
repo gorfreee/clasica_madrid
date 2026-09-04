@@ -11,7 +11,7 @@ import {
   writeIngestReportSync,
 } from '../ingestion/report.ts';
 import { runDiscoveryIngest, runIngest } from '../ingestion/pipeline.ts';
-import { defaultIngestWindow } from '../ingestion/dates.ts';
+import { defaultIngestWindow, seasonIngestWindow } from '../ingestion/dates.ts';
 import { createAiClassifierFromEnv } from '../ingestion/classification/provider.ts';
 import { DiscoveryBatchError, parseDiscoveryBatch } from '../ingestion/discovery.ts';
 import { listSourceDefinitions } from '../ingestion/registry.ts';
@@ -41,7 +41,9 @@ if (!parsed.ok) {
 }
 
 const dataDir = parsed.dataDir ?? defaultDataDir();
-const window = parsed.window ?? defaultIngestWindow(systemClock.now());
+const now = systemClock.now();
+const window = parsed.window
+  ?? (parsed.seasonWindow ? seasonIngestWindow(now) : defaultIngestWindow(now));
 const requestedSources =
   parsed.command === 'source'
     ? [parsed.sourceId]
@@ -131,9 +133,9 @@ try {
       ? await runDiscoveryIngest({
           dataDir,
           catalog,
-          now: systemClock.now(),
+          now,
           dryRun,
-          window: parsed.window,
+          window,
           ai,
           observability,
           batch: await loadDiscoveryBatch(parsed.batchPath),
@@ -141,10 +143,10 @@ try {
       : await runIngest({
           dataDir,
           catalog,
-          now: systemClock.now(),
+          now,
           dryRun,
           sourceIds: parsed.command === 'source' ? [parsed.sourceId] : parsed.sourceIds,
-          window: parsed.window,
+          window,
           ai,
           observability,
         });

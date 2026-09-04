@@ -11,7 +11,7 @@
 ## 1. Decisiones de producto y operación
 
 - la ingestión automática ordinaria se ejecutará aproximadamente **cada 10 días**;
-- en cada ejecución se trabajará sobre una ventana móvil de los **próximos 120 días**;
+- la ejecución programada cubre desde el día de la run hasta el **31 de julio más cercano**; el CLI y el dispatch manual sin fechas siguen usando hoy → +120 días;
 - el objetivo operativo es **0 % de intervención humana** en el flujo normal;
 - `eras` y `formats` deben intentarse siempre, pero una clasificación ausente o incierta **no debe bloquear por sí sola** la publicación de un evento fiable;
 - el pipeline fundamental debe poder funcionar aunque temporalmente no haya ningún agente de IA disponible;
@@ -185,7 +185,7 @@ Cuando un agente haga discovery abierto, no debería editar cientos de JSON can�
 
 Cada ejecución se procesa como conjunto: cargar catálogo, extraer fuentes sanas, normalizar, enriquecer, resolver entidades, detectar duplicados, comparar, validar en memoria, escribir de forma coherente. Un fallo no debe dejar media ejecución aplicada.
 
-La v3 evita inicialmente cursores o estado incremental. Cada ejecución ordinaria vuelve a revisar la ventana móvil de 120 días (hoy en Europe/Madrid → +120). El CLI admite un rango manual `--from`/`--to` sin tope de 120 días. La optimización incremental sólo cuando haya evidencia de que hace falta.
+La v3 evita inicialmente cursores o estado incremental. Cada ejecución programada vuelve a revisar desde el día de la run hasta el 31 de julio más cercano. El CLI por defecto usa hoy en Europe/Madrid → +120, y admite un rango manual `--from`/`--to` sin tope de 120 días. La optimización incremental sólo cuando haya evidencia de que hace falta.
 
 ---
 
@@ -259,7 +259,7 @@ Flujo completo previsto:
 5. normalize
 6. eligibility + enrich (reglas, knowledge, IA con fallback)
 7. reconcile + deduplicate
-8. compare with current 120-day catalog
+8. compare with current catalog window
 9. validate in memory
 10. write coherent changes
 11. PR → CI → auto-merge if green
@@ -282,7 +282,7 @@ Salvo necesidad demostrable: PostgreSQL/Supabase, Redis, Kafka, colas, Airbyte, 
 
 **Fase 3 — reconciliation (hecha):** matching contra catálogo (`externalId` → URL → alias → coincidencia fuerte única), aliases tipados, deduplicación batch, updates no destructivos, `possiblyMissing` diagnóstico, tests de idempotencia. Queda fuera de esta fase el fuzzy/IA matching y cualquier política que borre o cancele por ausencia.
 
-**Fase 4 — automatización GitHub (hecha):** workflow serializado los días 1/11/21 a las 09:17 de Europe/Madrid y dispatch manual seguro; cache persistente de Gemini sin `run.lock`; report y Job Summary siempre que el pipeline llega a generarlos; no-op sin PR; límite estricto `data/**`; una única PR de ingestión; draft para `review`; y squash auto-merge de `clean`/`degraded` sólo con kill switch, opt-in manual cuando aplica y CI normal verde.
+**Fase 4 — automatización GitHub (hecha):** workflow serializado los días 1/11/21 a las 09:17 de Europe/Madrid (ventana: día de la run → 31 de julio más cercano) y dispatch manual seguro; cache persistente de Gemini sin `run.lock`; report y Job Summary siempre que el pipeline llega a generarlos; no-op sin PR; límite estricto `data/**`; una única PR de ingestión; draft para `review`; y squash auto-merge de `clean`/`degraded` sólo con kill switch, opt-in manual cuando aplica y CI normal verde.
 
 **Fase 5 — ampliar fuentes conocidas:** adapters progresivos; cada fuente recurrente descubierta se evalúa para el registry.
 
@@ -296,7 +296,7 @@ No implementar una fase posterior salvo que una tarea lo pida.
 
 1. una ejecución se lanza con un único comando;
 2. GitHub Actions la ejecuta ~cada diez días;
-3. mantiene automáticamente los próximos 120 días;
+3. mantiene automáticamente la temporada hasta el próximo 31 de julio;
 4. una fuente rota no bloquea las sanas;
 5. una segunda ejecución sin cambios no modifica la repo;
 6. eventos nuevos y actualizados se detectan automáticamente;

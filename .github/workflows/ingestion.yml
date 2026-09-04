@@ -86,6 +86,7 @@ jobs:
             sources="all"
             from=""
             to=""
+            season_window="true"
             auto_merge_requested="true"
             ai_max_requests=""
           else
@@ -93,6 +94,7 @@ jobs:
             sources="$DISPATCH_SOURCES"
             from="$DISPATCH_FROM"
             to="$DISPATCH_TO"
+            season_window="false"
             auto_merge_requested="$DISPATCH_AUTO_MERGE"
             ai_max_requests="$DISPATCH_AI_MAX_REQUESTS"
           fi
@@ -107,6 +109,10 @@ jobs:
           fi
           if [[ "$sources" == *$'\n'* || "$sources" == *$'\r'* ]]; then
             echo "sources debe ser una lista de una sola línea" >&2
+            exit 1
+          fi
+          if [[ "$season_window" == "true" && ( -n "$from" || -n "$to" ) ]]; then
+            echo "el job programado no admite from/to; usa --season-window" >&2
             exit 1
           fi
           if [[ ( -n "$from" && -z "$to" ) || ( -z "$from" && -n "$to" ) ]]; then
@@ -132,6 +138,7 @@ jobs:
             echo "sources=$sources"
             echo "from=$from"
             echo "to=$to"
+            echo "season_window=$season_window"
             echo "auto_merge_requested=$auto_merge_requested"
             echo "ai_max_requests=$ai_max_requests"
             echo "code_sha=$code_sha"
@@ -163,6 +170,7 @@ jobs:
           SOURCES: ${{ steps.config.outputs.sources }}
           FROM_DATE: ${{ steps.config.outputs.from }}
           TO_DATE: ${{ steps.config.outputs.to }}
+          SEASON_WINDOW: ${{ steps.config.outputs.season_window }}
           AI_MAX_REQUESTS: ${{ steps.config.outputs.ai_max_requests }}
           GITHUB_SHA: ${{ steps.config.outputs.code_sha }}
           INGEST_FETCH_RELAY_URL: ${{ vars.INGEST_FETCH_RELAY_URL }}
@@ -177,6 +185,9 @@ jobs:
           fi
           if [[ "$SOURCES" != "all" ]]; then
             args+=(--sources "$SOURCES")
+          fi
+          if [[ "$SEASON_WINDOW" == "true" ]]; then
+            args+=(--season-window)
           fi
           if [[ -n "$FROM_DATE" && -n "$TO_DATE" ]]; then
             args+=(--from "$FROM_DATE" --to "$TO_DATE")

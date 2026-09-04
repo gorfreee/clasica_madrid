@@ -54,6 +54,7 @@ npm run ingest:sync
 npm run ingest:sync -- --dry-run
 npm run ingest:sync -- --dry-run --report ingestion/reports/sync.json
 npm run ingest:sync -- --from 2026-09-01 --to 2027-06-01 --sources auditorio-nacional,teatro-real
+npm run ingest:sync -- --season-window --dry-run
 npm run ingest:source -- auditorio-nacional
 npm run ingest:source -- auditorio-nacional --from 2026-09-01 --to 2027-06-01
 npm run ingest:discovery -- ingestion/work/discovery-batch.json --dry-run
@@ -64,7 +65,7 @@ npm run ingest:discovery-context -- --from 2026-09-01 --to 2027-01-01 --output i
 
 `--dry-run` valida y resume sin escribir el catálogo. `--data-dir` apunta a otro árbol (por defecto `data/` o `DATA_DIR`). `--report` escribe un JSON diagnóstico por evento (incluye `window`, `health`, `autoMergeEligible` y `healthReasons`); no cambia la clasificación ni qué se publica. `--observability-dir` escribe además `run.json` y el journal `events.jsonl`. Si hay `--report` y no se indica directorio, esos ficheros van junto al report. `ingestion/reports/` está gitignorado.
 
-Sin `--from`/`--to`, la ventana es hoy en Europe/Madrid → +120 días. Si se indica uno, hay que indicar ambos. Un rango manual no tiene tope de 120 días. Sin `--sources`, `ingest:sync` ejecuta las fuentes del registry que no marcan `skipDefaultSync`. `ingest:source` y `--sources` explícitos siguen ejecutando cualquier fuente del registry, incluida una marcada así, y un fallo sigue siendo un fallo.
+Sin `--from`/`--to`, la ventana es hoy en Europe/Madrid → +120 días. `--season-window` (el job programado) usa hoy → el 31 de julio más cercano y no se combina con `--from`/`--to`. Si se indica uno de `--from`/`--to`, hay que indicar ambos. Un rango manual no tiene tope de 120 días. Sin `--sources`, `ingest:sync` ejecuta las fuentes del registry que no marcan `skipDefaultSync`. `ingest:source` y `--sources` explícitos siguen ejecutando cualquier fuente del registry, incluida una marcada así, y un fallo sigue siendo un fallo.
 
 ## Discovery v1
 
@@ -115,7 +116,7 @@ Flags `--ai-*` (modelo, sin caché, tope de requests) existen para pruebas acota
 
 ### Scheduled
 
-Se ejecuta los días 1, 11 y 21 de cada mes a las 09:17 de `Europe/Madrid`, siempre en modo publish, contra todas las sources y con la ventana por defecto de hoy a +120 días.
+Se ejecuta los días 1, 11 y 21 de cada mes a las 09:17 de `Europe/Madrid`, siempre en modo publish, contra todas las sources. La ventana es el día de la ejecución (civil en `Europe/Madrid`) hasta el 31 de julio más cercano: el de este año si aún no ha pasado; si la run cae en agosto o después, el 31 de julio siguiente. El CLI local y el dispatch manual sin `from`/`to` siguen usando hoy → +120 días.
 
 ### Manual
 

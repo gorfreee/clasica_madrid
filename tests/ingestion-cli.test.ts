@@ -179,6 +179,28 @@ describe('parseIngestArgs', () => {
     expect(onSource.ok).toBe(false);
     if (!onSource.ok) expect(onSource.message).toMatch(/no admite --sources/);
   });
+
+  it('acepta --season-window y lo rechaza junto a --from/--to', () => {
+    expect(parseIngestArgs(['sync', '--season-window'], sources)).toEqual({
+      ok: true,
+      command: 'sync',
+      dryRun: false,
+      seasonWindow: true,
+    });
+    expect(parseIngestArgs(['source', 'teatro-real', '--season-window', '--dry-run'], sources)).toEqual({
+      ok: true,
+      command: 'source',
+      sourceId: 'teatro-real',
+      dryRun: true,
+      seasonWindow: true,
+    });
+    const mixed = parseIngestArgs(
+      ['sync', '--season-window', '--from', '2026-09-01', '--to', '2027-07-31'],
+      sources,
+    );
+    expect(mixed.ok).toBe(false);
+    if (!mixed.ok) expect(mixed.message).toMatch(/no se combina con --from\/--to/);
+  });
 });
 
 describe('ingestExitCode', () => {

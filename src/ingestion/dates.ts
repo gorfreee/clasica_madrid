@@ -43,6 +43,26 @@ export function defaultIngestWindow(now: Date): IngestWindow {
 }
 
 /**
+ * Production scheduled harvest: from the run date in Europe/Madrid through
+ * the nearest 31 July (this year if it has not passed yet; otherwise next).
+ * Inclusive on both ends. 31 July itself is a one-day window.
+ */
+export function seasonIngestWindow(now: Date): IngestWindow {
+  const from = madridToday(now);
+  return { from, to: nextSeasonEnd(from) };
+}
+
+export function nextSeasonEnd(from: string): string {
+  const year = Number(from.slice(0, 4));
+  const month = Number(from.slice(5, 7));
+  if (!ISO_DATE.test(from) || !Number.isInteger(year) || !Number.isInteger(month)) {
+    throw new Error(`fecha inválida: ${from}`);
+  }
+  if (month >= 8) return `${year + 1}-07-31`;
+  return `${year}-07-31`;
+}
+
+/**
  * Parse a caller-supplied inclusive range. Manual runs may be longer or
  * shorter than 120 days; `from` must not be after `to`.
  */

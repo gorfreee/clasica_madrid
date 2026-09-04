@@ -8,6 +8,7 @@ export type IngestCliSuccess = {
   reportPath?: string;
   observabilityDir?: string;
   window?: IngestWindow;
+  seasonWindow?: boolean;
   aiModel?: string;
   aiNoCache?: boolean;
   aiMaxRequests?: number;
@@ -38,6 +39,7 @@ export function parseIngestArgs(argv: string[], knownSources: string[]): IngestC
   let observabilityDir: string | undefined;
   let from: string | undefined;
   let to: string | undefined;
+  let seasonWindow = false;
   let sourceIds: string[] | undefined;
   const aiFlags: Pick<IngestCliSuccess, 'aiModel' | 'aiNoCache' | 'aiMaxRequests'> = {};
   const positionals: string[] = [];
@@ -93,6 +95,10 @@ export function parseIngestArgs(argv: string[], knownSources: string[]): IngestC
       index += 1;
       continue;
     }
+    if (arg === '--season-window') {
+      seasonWindow = true;
+      continue;
+    }
     if (arg === '--from' || arg === '--to') {
       const value = rest[index + 1];
       if (!value || value.startsWith('--')) {
@@ -132,10 +138,13 @@ export function parseIngestArgs(argv: string[], knownSources: string[]): IngestC
     positionals.push(arg);
   }
 
-  const windowResult = resolveCliWindow(from, to);
+  const windowResult = resolveCliWindow(from, to, seasonWindow);
   if (!windowResult.ok) return windowResult;
   const window = windowResult.window;
-  const flags = { ...successFlags(dryRun, dataDir, reportPath, observabilityDir, window), ...aiFlags };
+  const flags = {
+    ...successFlags(dryRun, dataDir, reportPath, observabilityDir, window, windowResult.seasonWindow),
+    ...aiFlags,
+  };
 
   if (command === 'sync') {
     if (positionals.length > 0) {
@@ -221,7 +230,12 @@ export function parseSelectedSources(
 function resolveCliWindow(
   from: string | undefined,
   to: string | undefined,
-): { ok: true; window?: IngestWindow } | { ok: false; message: string } {
+  seasonWindow: boolean,
+): { ok: true; window?: IngestWindow; seasonWindow?: boolean } | { ok: false; message: string } {
+  if (seasonWindow && (from !== undefined || to !== undefined)) {
+    return { ok: false, message: '--season-window no se combina con --from/--to' };
+  }
+  if (seasonWindow) return { ok: true, seasonWindow: true };
   if (from === undefined && to === undefined) return { ok: true };
   if (from === undefined || to === undefined) {
     return { ok: false, message: '--from y --to deben indicarse juntos' };
@@ -237,12 +251,14 @@ function successFlags(
   reportPath: string | undefined,
   observabilityDir: string | undefined,
   window: IngestWindow | undefined,
+  seasonWindow?: boolean,
 ): {
   dryRun: boolean;
   dataDir?: string;
   reportPath?: string;
   observabilityDir?: string;
   window?: IngestWindow;
+  seasonWindow?: boolean;
 } {
   return {
     dryRun,
@@ -250,6 +266,7 @@ function successFlags(
     ...(reportPath ? { reportPath } : {}),
     ...(observabilityDir ? { observabilityDir } : {}),
     ...(window ? { window } : {}),
+    ...(seasonWindow ? { seasonWindow: true } : {}),
   };
 }
 
@@ -270,7 +287,7 @@ export function ingestExitCode(run: {
 
 export function ingestUsage(knownSources: string[]): string {
   return `Uso:
-  npm run ingest:sync [-- --dry-run] [-- --from YYYY-MM-DD --to YYYY-MM-DD] [-- --sources fuente-a,fuente-b] [-- --data-dir <ruta>] [-- --report <fichero.json>] [-- --observability-dir <ruta>]
+  npm run ingest:sync [-- --dry-run] [-- --from YYYY-MM-DD --to YYYY-MM-DD] [-- --season-window] [-- --sources fuente-a,fuente-b] [-- --data-dir <ruta>] [-- --report <fichero.json>] [-- --observability-dir <ruta>]
   npm run ingest:source -- <fuente> [--from YYYY-MM-DD --to YYYY-MM-DD] [--dry-run] [--data-dir <ruta>] [--report <fichero.json>] [--observability-dir <ruta>]
   npm run ingest:discovery -- <lote.json> [--from YYYY-MM-DD --to YYYY-MM-DD] [--dry-run] [--data-dir <ruta>] [--report <fichero.json>] [--observability-dir <ruta>]
   npm run ingest:discovery-context [-- --from YYYY-MM-DD --to YYYY-MM-DD] [-- --output <fichero.json>] [-- --data-dir <ruta>]
