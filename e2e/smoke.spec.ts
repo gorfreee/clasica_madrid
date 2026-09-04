@@ -124,7 +124,11 @@ test.describe('ficha de evento', () => {
 
     await expect(page).toHaveURL(href!);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(title);
-    await expect(page.getByRole('link', { name: venueName })).toBeVisible();
+    // Venue and source can share a name (e.g. Teatro La Latina). The place
+    // link is the internal /lugares/ one, not the citation in Fuentes.
+    await expect(
+      page.getByRole('link', { name: venueName, exact: true }).and(page.locator('[href^="/lugares/"]')),
+    ).toBeVisible();
     await expect(page.locator('dt', { hasText: 'Acceso' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Fechas', level: 2 })).toBeVisible();
     await expect(

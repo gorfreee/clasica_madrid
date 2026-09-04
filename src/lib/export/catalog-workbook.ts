@@ -1,4 +1,6 @@
 import ExcelJS from 'exceljs';
+import { listSourceDefinitions } from '../../ingestion/registry.ts';
+import type { SourceDefinition } from '../../ingestion/types.ts';
 import { compareDateTime } from '../domain/dates.ts';
 import { listCanonicalEvents } from '../domain/queries.ts';
 import type { Catalog } from '../domain/catalog.ts';
@@ -182,6 +184,81 @@ export function buildEventExportRows(catalog: Catalog): EventExportRow[] {
     });
 }
 
+export type AdapterExportRow = {
+  id: string;
+  name: string;
+  catalogSourceId: string;
+  url: string;
+  eventCount: number;
+  primaryEventCount: number;
+};
+
+const ADAPTER_COLUMNS: ColumnSpec<AdapterExportRow>[] = [
+  { header: 'ID', key: 'id', width: 28 },
+  { header: 'Nombre', key: 'name', width: 40 },
+  { header: 'Fuente ID', key: 'catalogSourceId', width: 40 },
+  { header: 'URL', key: 'url', width: 48 },
+  { header: 'Eventos (cita)', key: 'eventCount', width: 16 },
+  { header: 'Eventos (principal)', key: 'primaryEventCount', width: 20 },
+];
+
+function bumpCount(map: Map<string, number>, key: string): void {
+  map.set(key, (map.get(key) ?? 0) + 1);
+}
+
+function catalogSourceEventCounts(catalog: Catalog): {
+  cited: Map<string, number>;
+  primary: Map<string, number>;
+} {
+  const cited = new Map<string, number>();
+  const primary = new Map<string, number>();
+  for (const event of catalog.events) {
+    bumpCount(primary, event.primarySourceId);
+    const seen = new Set<string>();
+    for (const citation of event.citations) {
+      if (seen.has(citation.sourceId)) continue;
+      seen.add(citation.sourceId);
+      bumpCount(cited, citation.sourceId);
+    }
+  }
+  return { cited, primary };
+}
+
+function adapterIdsByCatalogSourceId(
+  definitions: readonly SourceDefinition[],
+): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const source of definitions) {
+    const existing = map.get(source.catalogSourceId);
+    map.set(
+      source.catalogSourceId,
+      existing ? `${existing}${LIST_SEP}${source.id}` : source.id,
+    );
+  }
+  return map;
+}
+
+export function buildAdapterExportRows(
+  catalog: Catalog,
+  definitions: readonly SourceDefinition[] = listSourceDefinitions(),
+): AdapterExportRow[] {
+  const counts = catalogSourceEventCounts(catalog);
+  const sourceById = new Map(catalog.sources.map((source) => [source.id, source]));
+  return [...definitions]
+    .sort((left, right) => left.name.localeCompare(right.name, 'es'))
+    .map((source) => {
+      const canonical = sourceById.get(source.catalogSourceId) ?? source.seedSource;
+      return {
+        id: source.id,
+        name: source.name,
+        catalogSourceId: source.catalogSourceId,
+        url: canonical.url,
+        eventCount: counts.cited.get(source.catalogSourceId) ?? 0,
+        primaryEventCount: counts.primary.get(source.catalogSourceId) ?? 0,
+      };
+    });
+}
+
 function applySheetStyle(sheet: ExcelJS.Worksheet, columnCount: number, rowCount: number): void {
   sheet.views = [{ state: 'frozen', ySplit: 1 }];
   sheet.autoFilter = {
@@ -220,6 +297,8 @@ export function buildCatalogWorkbook(catalog: Catalog): ExcelJS.Workbook {
   const workbook = new ExcelJS.Workbook();
   workbook.creator = 'Clásica Madrid';
   workbook.created = new Date();
+  const registry = listSourceDefinitions();
+  const adapterByCatalogSource = adapterIdsByCatalogSourceId(registry);
 
   addSheet(workbook, 'Eventos', EVENT_COLUMNS, buildEventExportRows(catalog));
 
@@ -296,6 +375,7 @@ export function buildCatalogWorkbook(catalog: Catalog): ExcelJS.Workbook {
       { header: 'Slug', key: 'slug', width: 32 },
       { header: 'Nombre', key: 'name', width: 36 },
       { header: 'Tipo', key: 'kind', width: 14 },
+      { header: 'Adapter', key: 'adapter', width: 28 },
       { header: 'URL', key: 'url', width: 48 },
     ],
     byName(catalog.sources).map((source) => ({
@@ -303,9 +383,12 @@ export function buildCatalogWorkbook(catalog: Catalog): ExcelJS.Workbook {
       slug: source.slug,
       name: source.name,
       kind: sourceKindLabels[source.kind],
+      adapter: adapterByCatalogSource.get(source.id) ?? '',
       url: source.url,
     })),
   );
+
+  addSheet(workbook, 'Adaptadores', ADAPTER_COLUMNS, buildAdapterExportRows(catalog, registry));
 
   return workbook;
 }

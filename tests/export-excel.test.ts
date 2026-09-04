@@ -1,11 +1,14 @@
 import ExcelJS from 'exceljs';
 import { describe, expect, it } from 'vitest';
+import { listSourceDefinitions } from '../src/ingestion/registry.ts';
+import type { SourceDefinition } from '../src/ingestion/types.ts';
+import { emptyCatalog } from '../src/lib/domain/catalog.ts';
 import {
+  buildAdapterExportRows,
   buildCatalogWorkbook,
   buildEventExportRows,
 } from '../src/lib/export/catalog-workbook.ts';
-import { emptyCatalog } from '../src/lib/domain/catalog.ts';
-import { makeCatalog, makeEvent, richCatalog } from './helpers.ts';
+import { makeCatalog, makeEvent, makeSource, richCatalog } from './helpers.ts';
 
 describe('exportación Excel del catálogo', () => {
   it('emite una fila por evento, no por representación', () => {
@@ -63,6 +66,7 @@ describe('exportación Excel del catálogo', () => {
       'Organizadores',
       'Series',
       'Fuentes',
+      'Adaptadores',
     ]);
 
     const buffer = await workbook.xlsx.writeBuffer();
@@ -76,5 +80,162 @@ describe('exportación Excel del catálogo', () => {
 
     const venues = loaded.getWorksheet('Lugares');
     expect(venues?.rowCount).toBe(3);
+
+    const adapters = loaded.getWorksheet('Adaptadores');
+    const registry = listSourceDefinitions();
+    expect(adapters?.rowCount).toBe(registry.length + 1);
+    expect(headerValues(adapters)).toEqual([
+      'ID',
+      'Nombre',
+      'Fuente ID',
+      'URL',
+      'Eventos (cita)',
+      'Eventos (principal)',
+    ]);
+    const adapterIds = sheetColumn(adapters, 1).slice(1);
+    expect(adapterIds).toEqual(
+      [...registry].sort((left, right) => left.name.localeCompare(right.name, 'es')).map((source) => source.id),
+    );
+    expect(adapterIds).toContain('auditorio-nacional');
+  });
+
+  it('marca en Fuentes si la fuente canónica tiene adapter', async () => {
+    const workbook = buildCatalogWorkbook(
+      makeCatalog({
+        sources: [
+          makeSource({ id: 'src_auditorio_nacional', name: 'Auditorio Nacional de Música' }),
+          makeSource({
+            id: 'src_parroquia',
+            slug: 'parroquia',
+            name: 'Parroquia de San Manuel',
+            url: 'https://example.org/san-manuel',
+          }),
+        ],
+        events: [
+          makeEvent({
+            citations: [
+              {
+                sourceId: 'src_auditorio_nacional',
+                url: 'https://auditorionacional.inaem.gob.es/evento',
+                checkedAt: '2026-08-20',
+              },
+            ],
+            primarySourceId: 'src_auditorio_nacional',
+          }),
+        ],
+      }),
+    );
+
+    const sources = workbook.getWorksheet('Fuentes');
+    expect(headerValues(sources)).toEqual(['ID', 'Slug', 'Nombre', 'Tipo', 'Adapter', 'URL']);
+    expect(columnByHeader(sources, 'ID')).toEqual(['src_auditorio_nacional', 'src_parroquia']);
+    expect(columnByHeader(sources, 'Adapter')).toEqual(['auditorio-nacional', '']);
+  });
+
+  it('cuenta eventos citados y principales por adapter', () => {
+    const harvested = makeSource({
+      id: 'src_harvest',
+      slug: 'harvest',
+      name: 'Fuente harvesteada',
+      url: 'https://example.org/harvest',
+    });
+    const other = makeSource({
+      id: 'src_other',
+      slug: 'other',
+      name: 'Otra fuente',
+      url: 'https://example.org/other',
+    });
+    const catalog = makeCatalog({
+      sources: [harvested, other],
+      events: [
+        makeEvent({
+          id: 'evt_primary',
+          slug: 'primary',
+          title: 'Principal',
+          citations: [
+            { sourceId: harvested.id, url: 'https://example.org/a', checkedAt: '2026-08-20' },
+          ],
+          primarySourceId: harvested.id,
+        }),
+        makeEvent({
+          id: 'evt_cited',
+          slug: 'cited',
+          title: 'Solo citado',
+          citations: [
+            { sourceId: other.id, url: 'https://example.org/b', checkedAt: '2026-08-20' },
+            { sourceId: harvested.id, url: 'https://example.org/c', checkedAt: '2026-08-20' },
+            { sourceId: harvested.id, url: 'https://example.org/c-dup', checkedAt: '2026-08-21' },
+          ],
+          primarySourceId: other.id,
+        }),
+      ],
+    });
+
+    const rows = buildAdapterExportRows(catalog, [
+      fakeRegistrySource({
+        id: 'harvest-adapter',
+        name: 'Adapter Harvest',
+        catalogSourceId: harvested.id,
+        seedSource: harvested,
+      }),
+      fakeRegistrySource({
+        id: 'empty-adapter',
+        name: 'Adapter Vacío',
+        catalogSourceId: 'src_empty',
+        seedSource: makeSource({
+          id: 'src_empty',
+          slug: 'empty',
+          name: 'Sin catálogo',
+          url: 'https://example.org/empty',
+        }),
+      }),
+    ]);
+
+    expect(rows).toEqual([
+      {
+        id: 'harvest-adapter',
+        name: 'Adapter Harvest',
+        catalogSourceId: harvested.id,
+        url: harvested.url,
+        eventCount: 2,
+        primaryEventCount: 1,
+      },
+      {
+        id: 'empty-adapter',
+        name: 'Adapter Vacío',
+        catalogSourceId: 'src_empty',
+        url: 'https://example.org/empty',
+        eventCount: 0,
+        primaryEventCount: 0,
+      },
+    ]);
   });
 });
+
+function fakeRegistrySource(overrides: Partial<SourceDefinition> & Pick<SourceDefinition, 'id' | 'name' | 'catalogSourceId' | 'seedSource'>): SourceDefinition {
+  return {
+    urls: ['https://example.org/listing'],
+    adapterId: overrides.id,
+    ...overrides,
+  };
+}
+
+function headerValues(sheet: ExcelJS.Worksheet | undefined): unknown[] {
+  const values = sheet?.getRow(1).values;
+  return Array.isArray(values) ? values.slice(1) : [];
+}
+
+function sheetColumn(sheet: ExcelJS.Worksheet | undefined, column: number): unknown[] {
+  if (!sheet) return [];
+  const values: unknown[] = [];
+  sheet.eachRow((row) => {
+    values.push(row.getCell(column).value);
+  });
+  return values;
+}
+
+function columnByHeader(sheet: ExcelJS.Worksheet | undefined, header: string): unknown[] {
+  const index = headerValues(sheet).indexOf(header);
+  if (index < 0) return [];
+  return sheetColumn(sheet, index + 1).slice(1);
+}
