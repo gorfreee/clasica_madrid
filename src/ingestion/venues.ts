@@ -484,6 +484,28 @@ export const KNOWN_VENUES: KnownVenue[] = [
       url: 'https://www.museodelprado.es/',
     },
   },
+  {
+    keys: ['real monasterio de santa isabel', 'monasterio de santa isabel'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_real_monasterio_santa_isabel',
+      slug: 'real-monasterio-de-santa-isabel',
+      name: 'Real Monasterio de Santa Isabel',
+      ...MADRID,
+      address: 'Calle de Santa Isabel, 46, 28012 Madrid',
+    },
+  },
+  {
+    keys: ['palacio real de el pardo', 'palacio de el pardo'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_palacio_real_el_pardo',
+      slug: 'palacio-real-de-el-pardo',
+      name: 'Palacio Real de El Pardo',
+      ...MADRID,
+      address: 'Calle de Manuel Alonso, s/n, 28048 Madrid',
+    },
+  },
 ];
 
 /**

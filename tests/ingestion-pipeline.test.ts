@@ -115,6 +115,9 @@ async function fixtureGet(url: string): Promise<string> {
   if (url === 'https://www.realacademiabellasartessanfernando.com/actividades/conciertos/') {
     return '<body class="archive tax-actividad_type term-conciertos term-33"><main><h1>Conciertos</h1><div class="rc-actividades-block__container"><ul class="rc-actividades-block__list"></ul></div></main></body>';
   }
+  if (url === 'https://www.fundaciongoethe.org/es/eventos/') {
+    return '<html lang="es"><head><title>Eventos | Fundación Goethe España</title></head><body><h1 class="standardtitel">Nuestros próximos eventos</h1><ul class="divide-y divide-gray-300"></ul><h2 class="standardtitel">Eventos pasados</h2></body></html>';
+  }
   if (url === 'https://www.madridatempo.com/proximos-conciertos') {
     return readFile(path.join(fixtures, 'madrid-a-tempo/listing-empty.html'), 'utf8');
   }
@@ -221,7 +224,7 @@ describe('aislamiento de fallos por fuente', () => {
       },
     });
     expect(run.summary.sourcesFailed.map((item) => item.sourceId)).toEqual(['teatro-real']);
-    expect(run.summary.sourcesSucceeded).toEqual(['auditorio-nacional', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes', 'madrid-a-tempo']);
+    expect(run.summary.sourcesSucceeded).toEqual(['auditorio-nacional', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes', 'fundacion-goethe', 'madrid-a-tempo']);
     expect(run.rawEvents.length).toBeGreaterThan(0);
     expect(run.rawEvents.some((event) => event.sourceId === 'teatro-real')).toBe(false);
     expect(run.summary.written).toEqual([]);
@@ -241,7 +244,7 @@ describe('aislamiento de fallos por fuente', () => {
     });
     expect(run.summary.sourcesSucceeded).toEqual([]);
     expect(run.summary.sourcesFailed.map((item) => item.sourceId)).toEqual([
-      'auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes', 'madrid-a-tempo',
+      'auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes', 'fundacion-goethe', 'madrid-a-tempo',
     ]);
     expect(run.summary.written).toEqual([]);
     expect(run.apply.report.ok).toBe(true);
