@@ -1,7 +1,16 @@
 import { parseObservedDateTime, parseObservedTime } from '../dates.ts';
 import { decodeHtmlEntities, splitBreaks, stripTags } from '../html.ts';
 import { canPairAsAuditorioComposer } from './auditorio-segments.ts';
-import { looksLikeWorkLine } from '../observed-cleanup.ts';
+import { matchComposer } from '../knowledge/composers.ts';
+import {
+  hasComposerYears,
+  isUnreliableComposerName,
+  looksLikeComposerLine,
+  looksLikeEnsembleName,
+  looksLikeProgramHeader,
+  looksLikeUnequivocalWorkLine,
+  looksLikeWorkLine,
+} from '../observed-cleanup.ts';
 import {
   normalizeComposerList,
   normalizePersonList,
@@ -161,23 +170,28 @@ function parseCndmProgram(html: string | undefined): {
   const works: ObservedWork[] = [];
   let composerName: string | undefined;
   const body = html.replace(/^[\s\S]*?<\/h3>/i, '');
-  for (const raw of body.split(/<br\s*\/?>|<\/p>\s*<p\b[^>]*>/i)) {
-    const text = stripTags(raw);
-    if (!text) continue;
-    const strong = [...raw.matchAll(/<strong\b[^>]*>([\s\S]*?)<\/strong>/gi)].map((item) => stripTags(item[1]!));
-    const strongText = strong.join(' ');
-    if (
-      strong.length > 0 &&
-      strongText === text &&
-      !/\b(?:premio|concierto|festival|ciclo)\b/iu.test(text) &&
-      canPairAsAuditorioComposer(text)
-    ) {
-      composerName = text;
-      composers.push({ name: text });
+  const lines = body
+    .split(/<br\s*\/?>|<\/p>\s*<p\b[^>]*>/i)
+    .map((raw) => ({
+      raw,
+      text: stripTags(raw),
+      strong: [...raw.matchAll(/<strong\b[^>]*>([\s\S]*?)<\/strong>/gi)].map((item) =>
+        stripTags(item[1]!),
+      ),
+    }))
+    .filter((line) => line.text);
+  for (const [index, line] of lines.entries()) {
+    const following = lines[index + 1]?.text;
+    const strongText = line.strong.join(' ');
+    if (line.strong.length > 0 && strongText === line.text) {
+      if (isCndmComposerHeading(line.text, following)) {
+        composerName = line.text;
+        composers.push({ name: line.text });
+      }
       continue;
     }
-    if (composerName && !text.startsWith('*') && looksLikeWorkLine(text)) {
-      works.push({ title: text, composerName });
+    if (composerName && !line.text.startsWith('*') && looksLikeWorkLine(line.text)) {
+      works.push({ title: line.text, composerName });
     }
   }
   return {
@@ -185,6 +199,30 @@ function parseCndmProgram(html: string | undefined): {
     composers: normalizeComposerList(composers),
     works: normalizeWorkList(works),
   };
+}
+
+/**
+ * A Programa `<strong>` is a composer only with structural evidence:
+ * knowledge-base match, birth/death years, or an unequivocal following work.
+ * A title-like heading without that evidence stays in programText.
+ */
+function isCndmComposerHeading(text: string, following: string | undefined): boolean {
+  if (!text || looksLikeProgramHeader(text) || isUnreliableComposerName(text)) return false;
+  if (looksLikeEnsembleName(text) || looksLikeEventTitleHeading(text)) return false;
+  const stripped = text.replace(/\s*\([^)]*\d{3,4}[^)]*\)\s*$/u, '').trim();
+  if (matchComposer(stripped) || matchComposer(text)) return true;
+  if (hasComposerYears(text) && (looksLikeComposerLine(text) || canPairAsAuditorioComposer(text))) {
+    return true;
+  }
+  if (!following || looksLikeProgramHeader(following)) return false;
+  if (!looksLikeUnequivocalWorkLine(following)) return false;
+  return looksLikeComposerLine(text) || canPairAsAuditorioComposer(text);
+}
+
+/** Prize, festival or numbered programme titles are not composer names. */
+function looksLikeEventTitleHeading(text: string): boolean {
+  if (/\b(?:premio|festival|ciclo|concierto|certamen|concurso)\b/iu.test(text)) return true;
+  return /^(?:[ivxlcdm]{2,}|\d+)(?:\s|[.ºª])/iu.test(text.trim());
 }
 
 function parseBannerPerformers(html: string | undefined): ObservedPerson[] {
