@@ -43,7 +43,6 @@ export {
   familyVenueKeys,
   isChildVenue,
   isExclusiveScheduleVenueId,
-  isPrincipalVenue,
   rootVenue,
   spaceNameOf,
   venueAddress,

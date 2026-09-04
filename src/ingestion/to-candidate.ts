@@ -34,16 +34,6 @@ export function newEventPublicationSkip(
   return undefined;
 }
 
-export function structuralSkipReason(
-  event: NormalizedEvent,
-  catalog: Catalog,
-  now: Date,
-  window: IngestWindow = defaultIngestWindow(now),
-): string | undefined {
-  if (event.eventStatus === 'cancelled') return 'cancelado';
-  return newEventPublicationSkip(event, catalog, now, window);
-}
-
 export function toCandidate(
   event: NormalizedEvent,
   source: PipelineSource,

@@ -5,7 +5,6 @@ import { OpenAiClassifier } from './openai.ts';
 import type { GeminiConfigEnv } from './gemini-config.ts';
 
 export const AI_PROVIDERS = ['openai', 'gemini'] as const;
-export type AiProvider = (typeof AI_PROVIDERS)[number];
 
 export type AiEnv = GeminiConfigEnv & {
   AI_PROVIDER?: string;

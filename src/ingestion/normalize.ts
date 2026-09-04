@@ -50,23 +50,6 @@ export type NormalizedEvent = {
   foundVia?: string;
 };
 
-export function normalizeRawEvents(rawEvents: RawEvent[]): {
-  events: NormalizedEvent[];
-  skipped: number;
-} {
-  const events: NormalizedEvent[] = [];
-  let skipped = 0;
-  for (const raw of rawEvents) {
-    const normalized = normalizeRawEvent(raw);
-    if (!normalized) {
-      skipped += 1;
-      continue;
-    }
-    events.push(normalized);
-  }
-  return { events, skipped };
-}
-
 export function normalizeSkipReason(raw: RawEvent): string | undefined {
   if (normalizeRawEvent(raw)) return undefined;
   if (raw.hydration?.reason === 'outside-window') return 'fuera de ventana (hint del listing; ficha no solicitada)';

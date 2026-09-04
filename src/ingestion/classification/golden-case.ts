@@ -10,7 +10,6 @@ export const ELIGIBILITIES = ['include', 'exclude', 'uncertain'] as const;
 export type Eligibility = (typeof ELIGIBILITIES)[number];
 
 export const GOLDEN_ORIGINS = ['phase1-smoke', 'published-catalog'] as const;
-export type GoldenOrigin = (typeof GOLDEN_ORIGINS)[number];
 
 export const GOLDEN_CASE_SCHEMA_VERSION = 1 as const;
 
@@ -61,7 +60,6 @@ export const goldenCaseSchema = z
     }
   });
 
-export type ExpectedEnrichment = z.infer<typeof expectedEnrichmentSchema>;
 export type GoldenCase = z.infer<typeof goldenCaseSchema>;
 
 export function isAutomaticallyPublishable(eligibility: Eligibility): boolean {

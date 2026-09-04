@@ -176,11 +176,6 @@ export type SourceFailure = {
   stage?: 'hydration';
 };
 
-export type ProposedChange = {
-  relativePath: string;
-  action: 'create' | 'update' | 'unchanged';
-};
-
 export type IngestAiSummary = {
   attempted: number;
   resolved: number;

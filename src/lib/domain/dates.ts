@@ -128,7 +128,3 @@ export function formatMadridDate(date: string, locale = 'es-ES'): string {
     year: 'numeric',
   }).format(instant);
 }
-
-export function formatMadridTime(time: string | null): string | null {
-  return time;
-}
