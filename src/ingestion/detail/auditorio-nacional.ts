@@ -4,11 +4,12 @@ import {
   canPairAsAuditorioComposer,
   hasExplicitPerformerSignal,
   looksLikeRoleOnlyLine,
-  parseAuditorioPersonLine,
+  parseAuditorioPersonCredits,
   parseComposerColonWork,
+  parseComposerYearWork,
   segmentAuditorioBlocks,
 } from './auditorio-segments.ts';
-import { looksLikeProgramHeader, looksLikeWorkLine } from '../observed-cleanup.ts';
+import { looksLikeEnsembleName, looksLikeProgramHeader, looksLikeWorkLine } from '../observed-cleanup.ts';
 import {
   composersFromWorks,
   normalizePersonList,
@@ -53,10 +54,7 @@ function parseProduction(html: string): ObservedFactPatch {
   const allLines = [...segments.noticeLines, ...segments.performerLines, ...segments.programLines];
   const schedule = inferScheduleFromText(allLines.join('. '));
   const performers = normalizePersonList(
-    segments.performerLines.flatMap((line) => {
-      const person = parseAuditorioPersonLine(line);
-      return person ? [person] : [];
-    }),
+    segments.performerLines.flatMap((line) => parseAuditorioPersonCredits(line)),
   );
   const works = normalizeWorkList(worksFromProgramLines(segments.programLines));
   const programText = collapseProgram(allLines);
@@ -115,13 +113,13 @@ function parseExcerpt(html: string): ObservedFactPatch {
       accessText = entradas[1].trim();
       continue;
     }
-    const person = parsePersonLine(paragraph);
-    if (!person) {
+    const people = parseAuditorioPersonCredits(paragraph);
+    if (people.length === 0) {
       leftover.push(paragraph);
       continue;
     }
-    if (person.roleText) {
-      performers.push(person);
+    if (people.some((person) => person.roleText) || people.some((person) => looksLikeEnsembleName(person.name))) {
+      performers.push(...people);
       continue;
     }
     leftover.push(paragraph);
@@ -155,10 +153,6 @@ function parseExcerpt(html: string): ObservedFactPatch {
   };
 }
 
-function parsePersonLine(text: string): ObservedPerson | undefined {
-  return parseAuditorioPersonLine(text);
-}
-
 function parseComposerDashWork(text: string): ObservedWork {
   const dash = /^(.+?)\s+[—–]\s+(.+)$/.exec(text);
   if (dash?.[1] && dash[2]) return { title: dash[2].trim(), composerName: dash[1].trim() };
@@ -172,7 +166,7 @@ function worksFromProgramLines(lines: string[]): ObservedWork[] {
     .map((line) => line.replace(/\*+\s*$/, '').trim())
     .filter((line) => line && !line.startsWith('*') && !looksLikeProgramHeader(line));
   if (usable.length === 0) return [];
-  const colonWorks = usable.map((line) => parseComposerColonWork(line));
+  const colonWorks = usable.map((line) => parseComposerYearWork(line) ?? parseComposerColonWork(line));
   if (colonWorks.every((item) => item) && colonWorks.length > 0) {
     return colonWorks as ObservedWork[];
   }
@@ -190,7 +184,7 @@ function groupWorksByComposer(lines: string[]): ObservedWork[] {
   const works: ObservedWork[] = [];
   let composerName: string | undefined;
   for (const line of lines) {
-    const colon = parseComposerColonWork(line) ?? parseGroupedColonWork(line);
+    const colon = parseComposerYearWork(line) ?? parseComposerColonWork(line) ?? parseGroupedColonWork(line);
     if (colon) {
       works.push(colon);
       composerName = colon.composerName;
@@ -212,10 +206,11 @@ function groupWorksByComposer(lines: string[]): ObservedWork[] {
 }
 
 function isCastLineInsideProgram(line: string): boolean {
-  const person = parseAuditorioPersonLine(line);
-  if (person?.roleText) return true;
+  const people = parseAuditorioPersonCredits(line);
+  if (people.some((person) => person.roleText)) return true;
+  if (people.some((person) => looksLikeEnsembleName(person.name))) return true;
   if (/^.+,\s*director(?:a)?\s+del\s+coro\b/iu.test(line)) return true;
-  return /^(?:orquesta|orchestra|orchester|coro|choir|escolan[ií]a)\b/iu.test(line);
+  return looksLikeEnsembleName(line);
 }
 
 /**

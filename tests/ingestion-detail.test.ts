@@ -575,6 +575,83 @@ describe('parser de ficha Auditorio Nacional', () => {
       /estructura esperada/,
     );
   });
+
+  function auditorioPage(title: string, blocks: string[]): string {
+    const h4 = blocks.map((block) => `<h4>${block}</h4>`).join('\n');
+    return `
+      <article id="content">
+        <h1>${title}</h1>
+        <div class="content">${h4}</div>
+        <div class="rightcolumn">
+          <p class="rightColumn__item">
+            <label class="rightColumn__item__label">Sala:</label>
+            <span class="rightColumn__item__text">Sala de Cámara</span>
+          </p>
+        </div>
+      </article>
+    `;
+  }
+
+  it('Orquestra de Cambra Catalana es intérprete y nunca compositor', () => {
+    const facts = parseAuditorioNacionalDetail(
+      auditorioPage('COMA’26. Orquestra de Cambra Catalana', [
+        'Orquestra de Cambra Catalana<br />Stanislav Stepanek, concertino; Natàlia Borysiuk, concertino',
+        'JAVIER MARTÍNEZ CAMPOS (1989) Kaerlud<br />ENRIQUE IGOA (1958) El sueño de Amadís Op. 45',
+      ]),
+    );
+    expect(facts.performers?.map((item) => item.name)).toEqual(
+      expect.arrayContaining(['Orquestra de Cambra Catalana', 'Stanislav Stepanek', 'Natàlia Borysiuk']),
+    );
+    expect(facts.composers?.map((item) => item.name).join(' ')).not.toMatch(/orquestra/i);
+    expect(facts.works?.some((work) => /orquestra/i.test(work.composerName ?? ''))).toBe(false);
+    expect(facts.works).toEqual(
+      expect.arrayContaining([
+        { title: 'Kaerlud', composerName: 'JAVIER MARTÍNEZ CAMPOS (1989)' },
+        { title: 'El sueño de Amadís Op. 45', composerName: 'ENRIQUE IGOA (1958)' },
+      ]),
+    );
+  });
+
+  it('no convierte el elenco en obras y sí separa NOMBRE (AÑO) obra', () => {
+    const facts = parseAuditorioNacionalDetail(
+      auditorioPage('COMA’26. OSUCM', [
+        'Orquesta Sinfónica de la Universidad Complutense de Madrid (OSUCM)<br />Katrina Penman, flauta; Gerardo López Laguna, piano<br />José Sanchís, director artístico y musical',
+        'KATRINA PENMAN (1982) To Andalusia and beyond<br />JAVIER MARTÍNEZ CAMPOS (1989) Kaerlud<br />ALEJANDRO ROMÁN (1971) Tambourine op. 13<br />Variaciones para orquesta sobre un tema de Rameau (2001)',
+      ]),
+    );
+    expect(facts.performers).toEqual(
+      expect.arrayContaining([
+        { name: 'Katrina Penman', roleText: 'flauta' },
+        { name: 'Gerardo López Laguna', roleText: 'piano' },
+        { name: 'José Sanchís', roleText: 'director artístico y musical' },
+      ]),
+    );
+    expect(facts.works?.map((item) => item.title).join(' ')).not.toMatch(/Penman, flauta|López Laguna/i);
+    expect(facts.works).toEqual(
+      expect.arrayContaining([
+        { title: 'To Andalusia and beyond', composerName: 'KATRINA PENMAN (1982)' },
+        { title: 'Kaerlud', composerName: 'JAVIER MARTÍNEZ CAMPOS (1989)' },
+      ]),
+    );
+    expect(facts.works?.some((work) => /rameau/i.test(work.composerName ?? ''))).toBe(false);
+  });
+
+  it('parte dos directores que comparten función', () => {
+    const facts = parseAuditorioNacionalDetail(
+      auditorioPage('COMA’26. Nuevo Ensemble de Segovia', [
+        'Nuevo Ensemble de Segovia<br />David Mata, violín y percusión; Elena de Santos Cámara, piano<br />Chema García Portela y Flores Chaviano, dirección',
+      ]),
+    );
+    expect(facts.performers).toEqual(
+      expect.arrayContaining([
+        { name: 'David Mata', roleText: 'violín y percusión' },
+        { name: 'Elena de Santos Cámara', roleText: 'piano' },
+        { name: 'Chema García Portela', roleText: 'dirección' },
+        { name: 'Flores Chaviano', roleText: 'dirección' },
+      ]),
+    );
+    expect(facts.works).toEqual([]);
+  });
 });
 
 describe('parser de ficha Teatro Real', () => {

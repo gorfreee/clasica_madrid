@@ -18,9 +18,9 @@ const SCHEDULE_NOTICE = new RegExp(
 const INSTRUMENT_ONLY =
   /^(?:violines|viol[ií]n|violas?|violonchelos?|cellos?|contrabajos?|tenores|bajos|sopranos?|mezzosopranos?|bar[ií]tonos?|pianos?|flautas?|oboes?|clarinetes?|fagotes?|trompas?|trompetas?|arpas?|claves?|percusi[oó]n|bater[ií]a|directores?|directora|direcci[oó]n)$/i;
 const ENSEMBLE =
-  /\b(?:orquesta|orchestra|orchester|coro|choir|escolan[ií]a|ensemble|ensamble|camerata|cuarteto|quinteto|agrupaci[oó]n|sociedad coral)\b/i;
+  /\b(?:orquesta|orquestra|orchestra|orchester|coro|choir|escolan[ií]a|ensemble|ensamble|camerata|cuarteto|quinteto|agrupaci[oó]n|sociedad coral)\b/i;
 const ENSEMBLE_SUBJECT =
-  /^(?:orquesta|orchestra|orchester|coro|choir|escolan[ií]a|ensemble|ensamble|camerata|cuarteto|quinteto|agrupaci[oó]n|sociedad coral)\b/i;
+  /^(?:orquesta|orquestra|orchestra|orchester|coro|choir|escolan[ií]a|ensemble|ensamble|camerata|cuarteto|quinteto|agrupaci[oó]n|sociedad coral)\b/i;
 
 /**
  * Drop fragments that are clearly not people or ensembles.
@@ -54,6 +54,7 @@ export function looksLikeComposerLine(text: string): boolean {
   if (!trimmed || HEADER.test(trimmed) || SEPARATOR.test(trimmed)) return false;
   if (/^obras de\b/i.test(trimmed)) return false;
   if (/^(varios autores|an[oó]nimo)\b/i.test(trimmed)) return false;
+  if (looksLikeEnsembleName(trimmed)) return false;
   if (CATALOG.test(trimmed)) return false;
   if (WORK_GENRE.test(trimmed)) return false;
   const stripped = stripTrailingYears(trimmed);
@@ -93,9 +94,22 @@ export function looksLikeEnsembleName(text: string): boolean {
 
 /** "Work title, para arpa / orquesta" is instrumentation, not a person or group. */
 export function looksLikeWorkInstrumentation(text: string): boolean {
-  return /(?:,\s*|\b)(?:para|for)\s+(?:la\s+)?(?:orquesta|orchestra|arpa|viol[ií]n|violonchelo|cello|piano|coro|cuerda|soprano|mezzosoprano|contratenor|tenor|bar[ií]tono|bajo)/i.test(
+  return /(?:,\s*|\b)(?:para|for)\s+(?:la\s+)?(?:orquesta|orquestra|orchestra|arpa|viol[ií]n|violonchelo|cello|piano|coro|cuerda|soprano|mezzosoprano|contratenor|tenor|bar[ií]tono|bajo)/i.test(
     text.trim(),
   );
+}
+
+/** Genre, catalogue or instrumentation — enough to attach a following work to a heading. */
+export function looksLikeUnequivocalWorkLine(text: string): boolean {
+  const trimmed = text.trim();
+  if (!trimmed || HEADER.test(trimmed) || SEPARATOR.test(trimmed) || trimmed.startsWith('*')) {
+    return false;
+  }
+  return WORK_GENRE.test(trimmed) || CATALOG.test(trimmed) || looksLikeWorkInstrumentation(trimmed);
+}
+
+export function hasComposerYears(text: string): boolean {
+  return LIFESPAN.test(text.trim());
 }
 
 /** Names that must not appear as `composers[]` / `works[].composerName`. */
@@ -103,6 +117,7 @@ export function isUnreliableComposerName(text: string): boolean {
   const trimmed = text.trim();
   if (!trimmed || looksLikeProgramHeader(trimmed)) return true;
   if (/^obras de\b/i.test(trimmed)) return true;
+  if (looksLikeEnsembleName(trimmed)) return true;
   if (WORK_GENRE.test(trimmed) || CATALOG.test(trimmed)) return true;
   if (/^[¡!]/.test(trimmed)) return true;
   return false;
