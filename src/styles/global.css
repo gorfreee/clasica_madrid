@@ -308,27 +308,45 @@ button, input, select { font: inherit; }
   text-align: center;
   text-transform: uppercase;
 }
-.agenda-day { display: grid; grid-template-columns: 10.5rem minmax(0, 1fr); border-bottom: 2px solid var(--ink); }
+.agenda-day { display: grid; grid-template-columns: 12.75rem minmax(0, 1fr); border-bottom: 2px solid var(--ink); }
 .agenda-day__title { margin: 0; padding: 1.2rem 1rem 1.2rem 0; border-right: 1px solid var(--ink); }
-.agenda-day__title time { display: flex; align-items: flex-start; gap: .45rem; text-decoration: none; }
+.agenda-day__title time { display: flex; align-items: flex-start; gap: .5rem; text-decoration: none; }
 .agenda-day__number {
+  flex: 0 0 auto;
   color: var(--blue);
-  font-size: clamp(4.2rem, 7vw, 6.6rem);
+  font-size: clamp(3.5rem, 4.2vw, 4.8rem);
   font-weight: 800;
   letter-spacing: -.09em;
   line-height: .78;
 }
 .agenda-day__words {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
-  gap: .15rem;
-  padding-top: .1rem;
-  font-size: .65rem;
+  gap: .12rem;
+  min-width: 0;
+  padding-top: .15rem;
+  font-size: .68rem;
   font-weight: 800;
-  letter-spacing: .05em;
+  letter-spacing: .04em;
+  line-height: 1.15;
   text-transform: uppercase;
 }
-.agenda-day__words span:last-child { color: var(--muted); font-size: .6rem; font-weight: 600; }
+.agenda-day__weekday,
+.agenda-day__month,
+.agenda-day__year {
+  overflow-wrap: normal;
+  word-break: keep-all;
+  hyphens: none;
+}
+.agenda-day__period {
+  display: flex;
+  flex-direction: column;
+  gap: .08rem;
+  color: var(--muted);
+  font-size: .6rem;
+  font-weight: 600;
+}
 .agenda-day--today .agenda-day__number { color: var(--coral); }
 .agenda-day__empty { margin: 0; padding: 2rem; color: var(--muted); font-size: .9rem; }
 .agenda-item {
@@ -652,7 +670,10 @@ button, input, select { font: inherit; }
   .agenda-intro { min-height: 22rem; grid-template-columns: minmax(0, 1fr) 9rem; gap: 1.5rem; }
   .agenda-intro__graphic { height: 15rem; }
   .filters__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .agenda-day { grid-template-columns: 8rem minmax(0, 1fr); }
+  .agenda-day { grid-template-columns: 8.75rem minmax(0, 1fr); }
+  .agenda-day__title time { flex-direction: column; gap: .25rem; }
+  .agenda-day__number { font-size: 3.4rem; }
+  .agenda-day__words { padding-top: 0; }
   .agenda-item, .venue-programme .agenda-item {
     grid-template-columns: 4.6rem minmax(0, 1fr);
     grid-template-areas: "when main" ". venue" ". signal";
@@ -691,9 +712,10 @@ button, input, select { font: inherit; }
   .month-marker { margin-top: 3rem; }
   .agenda-day { display: block; }
   .agenda-day__title { padding: .9rem 0; border-right: 0; border-bottom: 1px solid var(--ink); }
-  .agenda-day__title time { align-items: center; }
+  .agenda-day__title time { flex-direction: row; align-items: center; }
   .agenda-day__number { font-size: 4rem; }
   .agenda-day__words { flex: 1; flex-direction: row; justify-content: space-between; align-items: baseline; }
+  .agenda-day__period { flex-direction: row; gap: .35em; }
   .agenda-day__empty { padding: 1rem 0; font-size: .78rem; }
   .agenda-item { grid-template-columns: 4.3rem minmax(0, 1fr); }
   .agenda-item > * { padding: .9rem .8rem; }

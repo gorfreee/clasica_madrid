@@ -27,8 +27,11 @@ const { days } = Astro.props;
               <time datetime={day.date} aria-label={day.dateLabel}>
                 <span class="agenda-day__number">{day.dayNumber}</span>
                 <span class="agenda-day__words">
-                  <span>{day.isToday ? 'Hoy' : day.isTomorrow ? 'Mañana' : day.weekdayLabel}</span>
-                  <span>{day.monthLabel}</span>
+                  <span class="agenda-day__weekday">{day.isToday ? 'Hoy' : day.isTomorrow ? 'Mañana' : day.weekdayLabel}</span>
+                  <span class="agenda-day__period">
+                    <span class="agenda-day__month">{day.monthName}</span>
+                    <span class="agenda-day__year">{day.year}</span>
+                  </span>
                 </span>
               </time>
             </h2>
