@@ -15,6 +15,7 @@ import { basilicaSanMiguelAdapter } from './sources/basilica-san-miguel.ts';
 import { fundacionPiuMossoAdapter } from './sources/fundacion-piu-mosso.ts';
 import { realHermandadRefugioAdapter } from './sources/real-hermandad-refugio.ts';
 import { realAcademiaBellasArtesAdapter } from './sources/real-academia-bellas-artes.ts';
+import { fundacionGoetheAdapter } from './sources/fundacion-goethe.ts';
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
@@ -33,6 +34,7 @@ const ADAPTERS: Record<string, SourceAdapter> = {
   [fundacionPiuMossoAdapter.id]: fundacionPiuMossoAdapter,
   [realHermandadRefugioAdapter.id]: realHermandadRefugioAdapter,
   [realAcademiaBellasArtesAdapter.id]: realAcademiaBellasArtesAdapter,
+  [fundacionGoetheAdapter.id]: fundacionGoetheAdapter,
 };
 
 const srcAuditorio: Source = {
@@ -277,6 +279,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Real Academia de Bellas Artes de San Fernando',
       kind: 'official',
       url: 'https://www.realacademiabellasartessanfernando.com/',
+    },
+  },
+  {
+    id: 'fundacion-goethe',
+    name: 'Fundación Goethe',
+    urls: ['https://www.fundaciongoethe.org/es/eventos/'],
+    adapterId: fundacionGoetheAdapter.id,
+    catalogSourceId: 'src_fundacion_goethe',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_fundacion_goethe',
+      slug: 'fundacion-goethe',
+      name: 'Fundación Goethe',
+      kind: 'official',
+      url: 'https://www.fundaciongoethe.org/',
     },
   },
 ];

@@ -75,6 +75,8 @@ const ALTERNATIVE_VENUE_IDS = new Set([
   'ven_hotel_wellington',
   'ven_four_seasons_madrid',
   'ven_goethe_institut_madrid',
+  'ven_real_monasterio_santa_isabel',
+  'ven_palacio_real_el_pardo',
   'ven_hinves_pianos',
 ]);
 
