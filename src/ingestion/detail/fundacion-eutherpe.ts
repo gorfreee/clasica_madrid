@@ -5,8 +5,9 @@ import { isRealIsoDate } from '../../lib/util/iso-date.ts';
 import type { RawEvent, RawOccurrence } from '../types.ts';
 
 const HOSTS = new Set(['www.fundacioneutherpe.com', 'fundacioneutherpe.com']);
-const CONCERT_PATH = /^\/conciertos\/[a-z0-9]+(?:-[a-z0-9]+)*$/i;
+const CONCERT_PATH = /^\/conciertos\/[a-z0-9]+(?:-+[a-z0-9]+)*$/i;
 const LISTING_PATHS = new Set(['/programacion', '/programacion-shigeru-kawai-madrid']);
+const CLASS_CALENDARIO = /class=["'](?:[^"']*\s)?calendario(?:\s[^"']*)?["']/i;
 const MONTHS: Record<string, number> = {
   enero: 1,
   febrero: 2,
@@ -71,7 +72,7 @@ export function extractEutherpeListing(body: string, url: string, sourceId: stri
     throw new Error('fundacion-eutherpe: paginación no soportada');
   }
   const months = eutherpeBlocks(body, 'div', 'w-slide').filter((block) =>
-    /\bcalendario\b/.test(block),
+    CLASS_CALENDARIO.test(block),
   );
   if (months.length === 0) throw new Error('fundacion-eutherpe: falta el calendario de programación');
   if (months.length > MAX_MONTHS) {
@@ -145,7 +146,7 @@ function assertListingSurface(body: string, url: string): void {
   if (!/\bdata-wf-domain=["']www\.fundacioneutherpe\.com["']/i.test(body) && !/\bfundacioneutherpe\.com\b/i.test(body)) {
     throw new Error('fundacion-eutherpe: falta el calendario de programación');
   }
-  if (!/\bbloque-meses\b/.test(body) || !/\bcalendario\b/.test(body)) {
+  if (!/\bbloque-meses\b/.test(body) || !CLASS_CALENDARIO.test(body)) {
     throw new Error('fundacion-eutherpe: falta el calendario de programación');
   }
   const heading = stripTags(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i.exec(body)?.[1] ?? '');
@@ -156,14 +157,16 @@ function assertListingSurface(body: string, url: string): void {
 
 function parseMonth(block: string): CalendarHit[] {
   const heading = stripTags(
-    /<a\b[^>]*class=["'][^"']*\blink-calendario-b\b[^"']*["'][^>]*>([\s\S]*?)<\/a>/i.exec(block)?.[1] ?? '',
+    /<(?:a|div)\b[^>]*class=["'][^"']*\blink-calendario-b\b[^"']*["'][^>]*>([\s\S]*?)<\/(?:a|div)>/i.exec(
+      block,
+    )?.[1] ?? '',
   );
   const parsed = MONTH_HEADING.exec(fold(heading));
   if (!parsed) throw new Error('fundacion-eutherpe: mes del calendario no reconocible');
   const month = MONTHS[parsed[1]!.toLowerCase()]!;
   const year = Number(parsed[2]);
   const lastDay = daysInMonth(year, month);
-  const calendar = eutherpeDiv(block, /<div\b[^>]*class=["'][^"']*\bcalendario\b[^"']*["'][^>]*>/i);
+  const calendar = eutherpeDiv(block, new RegExp(`<div\\b[^>]*${CLASS_CALENDARIO.source}[^>]*>`, 'i'));
   if (!calendar) throw new Error('fundacion-eutherpe: falta el calendario de programación');
   const cells = eutherpeBlocks(calendar, 'div', 'collection-item-5');
   if (cells.length === 0) throw new Error('fundacion-eutherpe: mes del calendario incompleto');

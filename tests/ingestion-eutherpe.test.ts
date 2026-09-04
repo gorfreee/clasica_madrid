@@ -165,9 +165,31 @@ describe('Fundación Eutherpe listing', () => {
       eutherpeConcertUrl('https://www.fundacioneutherpe.com@evil.example/conciertos/x'),
     ).toBeUndefined();
     expect(eutherpeConcertUrl('/programacion', listingUrl)).toBeUndefined();
+    expect(
+      eutherpeConcertUrl(
+        '/conciertos/voz-y-piano-olga-agafonova-soprano--francesco-leone-piano',
+        listingUrl,
+      ),
+    ).toBe('https://www.fundacioneutherpe.com/conciertos/voz-y-piano-olga-agafonova-soprano--francesco-leone-piano');
+    expect(
+      eutherpeConcertUrl(
+        '/conciertos/trio-reinecke-clarinete-bernardo-bertamini---viola-elena-lorenzoni-y-piano-samuele-masera',
+        listingUrl,
+      ),
+    ).toBe(
+      'https://www.fundacioneutherpe.com/conciertos/trio-reinecke-clarinete-bernardo-bertamini---viola-elena-lorenzoni-y-piano-samuele-masera',
+    );
     expect(await adapter.extract(eutherpeEmptyListing(), listingUrl, {
       ...ctx,
       get: async () => eutherpeEmptyListing('Programación de conciertos del Shigeru Kawai Center de Madrid 2026'),
+    })).toEqual([]);
+    const emptyDivHeading = eutherpeEmptyListing().replace(
+      '<a href="#" class="link-calendario-b">Septiembre / 2026</a>',
+      '<div class="link-calendario-b">Septiembre / 2026</div>',
+    );
+    expect(await adapter.extract(emptyDivHeading, listingUrl, {
+      ...ctx,
+      get: async () => emptyDivHeading,
     })).toEqual([]);
   });
 });
