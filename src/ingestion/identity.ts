@@ -29,6 +29,12 @@ export const EVENT_IDENTITY_ALIASES: readonly EventIdentityAlias[] = [
     externalId: 'excelentia-violin-chaikovsky-y-sinfonia-2-sibelius',
     url: 'https://auditorionacional.inaem.gob.es/es/programacion/excelentia-violin-chaikovsky-y-sinfonia-2-sibelius',
   },
+  {
+    eventId: 'evt_madrid_tempo_inauguracion_20260901',
+    catalogSourceId: 'src_madrid_a_tempo',
+    externalId: 'cc99d72e-7aa5-4eea-b32c-8eb17a8dce00',
+    url: 'https://www.madridatempo.com/post/ii-festival-internacional-de-piano-madrid-a-tempo-concierto-de-inauguración',
+  },
 ];
 
 export type IdentityFacts = {
