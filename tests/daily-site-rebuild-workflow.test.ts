@@ -9,9 +9,9 @@ describe('workflow de rebuild diario del sitio', () => {
     const yaml = await readFile(workflowPath, 'utf8');
 
     expect(yaml).toContain('workflow_dispatch:');
-    expect(yaml).toContain("cron: '15 22 * * *'");
-    expect(yaml).toContain("cron: '15 23 * * *'");
-    expect(yaml).toContain('TZ=Europe/Madrid');
+    expect(yaml).toContain("cron: '15 0 * * *'");
+    expect(yaml).toContain('timezone: Europe/Madrid');
+    expect(yaml.match(/^\s*- cron:/gm)).toHaveLength(1);
     expect(yaml).toContain('permissions: {}');
     expect(yaml).toContain('group: daily-site-rebuild');
     expect(yaml).toContain('cancel-in-progress: false');
@@ -27,7 +27,10 @@ describe('workflow de rebuild diario del sitio', () => {
     expect(yaml).not.toContain('npm run');
     expect(yaml).not.toContain('git commit');
     expect(yaml).not.toContain('git push');
-    expect(yaml).toContain("if: github.event_name == 'schedule'");
+    expect(yaml).not.toContain('Guard Europe/Madrid midnight');
+    expect(yaml).not.toContain('steps.guard.outputs');
+    expect(yaml).not.toContain('TZ=Europe/Madrid');
+    expect(yaml).not.toMatch(/^\s+if:/m);
     expect(yaml).not.toMatch(/CLOUDFLARE_PAGES_DEPLOY_HOOK_URL:\s*['\"]?https?:\/\//);
     expect(yaml).not.toContain('echo "$DEPLOY_HOOK_URL"');
     expect(yaml).not.toContain('cat "$body"');
