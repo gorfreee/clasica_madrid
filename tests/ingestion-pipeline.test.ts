@@ -60,6 +60,14 @@ async function fileExists(filePath: string): Promise<boolean> {
   }
 }
 
+function emptyEutherpeListing(): string {
+  const cells = ['-']
+    .concat(Array.from({ length: 30 }, (_, index) => String(index + 1)))
+    .map((label) => `<div role="listitem" class="collection-item-5 w-dyn-item"><div class="dia"><a href="#" class="link-10">${label}</a></div><div class="bloque-info-concierto w-condition-invisible"></div></div>`)
+    .join('');
+  return `<html data-wf-domain="www.fundacioneutherpe.com"><body><h1>Programación de conciertos de la Sala Eutherpe</h1><div class="bloque-meses"><div class="septiembre-2026 w-slide"><a href="#" class="link-calendario-b">Septiembre / 2026</a><div class="calendario"><div class="collection-list-2 w-dyn-items">${cells}</div></div></div></div></body></html>`;
+}
+
 async function fixtureGet(url: string): Promise<string> {
   if (url === 'https://www.circulobellasartes.com/eventos/') {
     return '<body class="archive category category-eventos category-63 fl-theme-builder-archive-categoria-evento-es"><h1>Eventos</h1><div class="fl-post-grid" itemscope="itemscope" itemtype="https://schema.org/Collection"></div><a class="fl-button" href="pasado/"><span class="fl-button-text">Ver el histórico de Eventos</span></a></body>';
@@ -114,6 +122,12 @@ async function fixtureGet(url: string): Promise<string> {
   }
   if (url === 'https://www.realacademiabellasartessanfernando.com/actividades/conciertos/') {
     return '<body class="archive tax-actividad_type term-conciertos term-33"><main><h1>Conciertos</h1><div class="rc-actividades-block__container"><ul class="rc-actividades-block__list"></ul></div></main></body>';
+  }
+  if (
+    url === 'https://www.fundacioneutherpe.com/programacion' ||
+    url === 'https://www.fundacioneutherpe.com/programacion-shigeru-kawai-madrid'
+  ) {
+    return emptyEutherpeListing();
   }
   throw new Error(`URL de test no mapeada: ${url}`);
 }
@@ -218,7 +232,7 @@ describe('aislamiento de fallos por fuente', () => {
       },
     });
     expect(run.summary.sourcesFailed.map((item) => item.sourceId)).toEqual(['teatro-real']);
-    expect(run.summary.sourcesSucceeded).toEqual(['auditorio-nacional', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes']);
+    expect(run.summary.sourcesSucceeded).toEqual(['auditorio-nacional', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes', 'fundacion-eutherpe']);
     expect(run.rawEvents.length).toBeGreaterThan(0);
     expect(run.rawEvents.some((event) => event.sourceId === 'teatro-real')).toBe(false);
     expect(run.summary.written).toEqual([]);
@@ -238,7 +252,7 @@ describe('aislamiento de fallos por fuente', () => {
     });
     expect(run.summary.sourcesSucceeded).toEqual([]);
     expect(run.summary.sourcesFailed.map((item) => item.sourceId)).toEqual([
-      'auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes',
+      'auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes', 'fundacion-eutherpe',
     ]);
     expect(run.summary.written).toEqual([]);
     expect(run.apply.report.ok).toBe(true);

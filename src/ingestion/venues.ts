@@ -484,6 +484,25 @@ export const KNOWN_VENUES: KnownVenue[] = [
       url: 'https://www.museodelprado.es/',
     },
   },
+  {
+    keys: [
+      'shigeru kawai center',
+      'shigeru kawai center madrid',
+      'shigeru kawai center de madrid',
+      'eutherpe madrid',
+      'eutherpemadrid',
+      'eutherpe en shigeru kawai center madrid',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_shigeru_kawai_center',
+      slug: 'shigeru-kawai-center',
+      name: 'Shigeru Kawai Center',
+      ...MADRID,
+      address: 'Plaza Francisco Morano, 3, 28003 Madrid',
+      url: 'https://www.fundacioneutherpe.com/programacion-shigeru-kawai-madrid',
+    },
+  },
 ];
 
 /**
@@ -532,6 +551,11 @@ const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
   },
   'real-academia-bellas-artes': {
     'salon de actos': 'ven_real_academia_bellas_artes_salon_actos',
+  },
+  'fundacion-eutherpe': {
+    'eutherpe madrid': 'ven_shigeru_kawai_center',
+    eutherpemadrid: 'ven_shigeru_kawai_center',
+    'sala eutherpe madrid': 'ven_shigeru_kawai_center',
   },
 };
 
