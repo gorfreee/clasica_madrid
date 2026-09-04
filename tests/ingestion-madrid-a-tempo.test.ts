@@ -15,8 +15,9 @@ import { HttpError } from '../src/ingestion/http.ts';
 import { runIngest } from '../src/ingestion/pipeline.ts';
 import { mergeCandidateBatch } from '../src/ingestion/batch.ts';
 import { matchVenue } from '../src/ingestion/venues.ts';
+import { emptyObservedLists } from '../src/ingestion/observed.ts';
 import { emptyCatalog, type Catalog } from '../src/lib/domain/catalog.ts';
-import type { AdapterContext } from '../src/ingestion/types.ts';
+import type { AdapterContext, RawEvent } from '../src/ingestion/types.ts';
 import { normalizeUrl } from '../src/ingestion/urls.ts';
 import { TEST_NOW, TEST_WINDOW, makeEvent } from './helpers.ts';
 
@@ -57,6 +58,20 @@ async function sample(externalId = 'cc99d72e-7aa5-4eea-b32c-8eb17a8dce00') {
   return (await adapter.extract(await fixture('listing-sample'), listingUrl, ctx)).find(
     (event) => event.externalId === externalId,
   )!;
+}
+
+function listedPost(input: { sourceUrl: string; externalId: string; title: string }): RawEvent {
+  return {
+    sourceId: source.id,
+    sourceUrl: input.sourceUrl,
+    externalId: input.externalId,
+    listingDateText: input.title,
+    observed: {
+      title: input.title,
+      occurrences: [],
+      ...emptyObservedLists(),
+    },
+  };
 }
 
 describe('Madrid a Tempo listing', () => {
@@ -209,6 +224,87 @@ describe('Madrid a Tempo ficha hydration', () => {
     ]) {
       expect(() => parseMadridDetail(event, broken)).toThrow(/madrid-a-tempo/);
     }
+  });
+
+  it('accepts a truncated Wix JSON-LD headline when URL and UUID identify the post', async () => {
+    const event = listedPost({
+      sourceUrl: 'https://www.madridatempo.com/post/concierto-de-navidad-2024-piano-danza-nicola-s-flores-b',
+      externalId: '148491ba-eda2-442b-b3ac-b9dd02575a49',
+      title:
+        'CONCIERTO DE NAVIDAD 2024 - PIANO & DANZA - NICOLÁS FLORES BERMEJO, LAURA LA CALETA, JULIO ALBERTO FLORES BERMEJO.',
+    });
+    const patch = parseMadridDetail(event, await fixture('detail-navidad-2024'));
+    expect(patch.accessText).toMatch(/gratuit/i);
+  });
+
+  it('accepts whitespace, entities and a truncated last word when URL and UUID match', async () => {
+    const event = listedPost({
+      sourceUrl:
+        'https://www.madridatempo.com/post/jóvenes-clásicos-en-carabanchel-silvia-escamilla-guitarra-solo',
+      externalId: '4444a7a2-a6de-4985-bc5c-64fc7ff7bee6',
+      title:
+        'JÓVENES + CLÁSICOS EN CARABANCHEL                                   Silvia Escamilla Jiménez                 Guitarra - Solo',
+    });
+    expect(parseMadridDetail(event, await fixture('detail-silvia-escamilla')).accessText).toMatch(/gratuit/i);
+  });
+
+  it('accepts punctuation-only drift without a Wix UUID', async () => {
+    const event = listedPost({
+      sourceUrl: 'https://www.madridatempo.com/post/recital-de-piano-solo-maurizio-arroyo-reyes',
+      externalId: '1f75b64b-f81d-44cb-bda5-0af16d0951eb',
+      title: 'Recital Solidario de Piano - Solo Maurizio Arroyo Reyes',
+    });
+    const html = (await fixture('detail-maurizio'))
+      .replace('wix-warmup-data', 'changed')
+      .replace(
+        '"headline":"Recital Solidario de Piano - Solo Maurizio Arroyo  Reyes"',
+        '"headline":"Recital Solidario de Piano — Solo Maurizio Arroyo Reyes."',
+      );
+    expect(parseMadridDetail(event, html).accessText).toMatch(/15€/);
+  });
+
+  it('accepts a compatible editorial wording when URL and UUID lock the post', async () => {
+    const event = listedPost({
+      sourceUrl: 'https://www.madridatempo.com/post/concierto-de-piano-sofia-sacco-7-de-enero-12-00h',
+      externalId: 'b8448a47-d7d8-4d21-9314-ab609926d4da',
+      title: 'RECITAL DE PIANO SOLO - Sofia Sacco. 7 de enero, 12:00h Casa de Vacas - Parque del Retiro',
+    });
+    const patch = parseMadridDetail(event, await fixture('detail-sofia-sacco'));
+    expect(patch.description).toMatch(/Sofia Sacco/);
+  });
+
+  it('rejects a truncated headline when the Wix UUID is missing', async () => {
+    const event = listedPost({
+      sourceUrl: 'https://www.madridatempo.com/post/concierto-de-navidad-2024-piano-danza-nicola-s-flores-b',
+      externalId: '148491ba-eda2-442b-b3ac-b9dd02575a49',
+      title:
+        'CONCIERTO DE NAVIDAD 2024 - PIANO & DANZA - NICOLÁS FLORES BERMEJO, LAURA LA CALETA, JULIO ALBERTO FLORES BERMEJO.',
+    });
+    const html = (await fixture('detail-navidad-2024')).replace('wix-warmup-data', 'changed');
+    expect(() => parseMadridDetail(event, html)).toThrow(/título de ficha distinto/);
+  });
+
+  it('rejects a matching truncated title when the Wix UUID is not this post', async () => {
+    const event = listedPost({
+      sourceUrl: 'https://www.madridatempo.com/post/concierto-de-navidad-2024-piano-danza-nicola-s-flores-b',
+      externalId: '148491ba-eda2-442b-b3ac-b9dd02575a49',
+      title:
+        'CONCIERTO DE NAVIDAD 2024 - PIANO & DANZA - NICOLÁS FLORES BERMEJO, LAURA LA CALETA, JULIO ALBERTO FLORES BERMEJO.',
+    });
+    const html = (await fixture('detail-navidad-2024')).replace(
+      '148491ba-eda2-442b-b3ac-b9dd02575a49',
+      '00000000-0000-0000-0000-000000000000',
+    );
+    expect(() => parseMadridDetail(event, html)).toThrow(/identidad de concierto coincidente/);
+  });
+
+  it('rejects a clearly different concert title even when URL and UUID match', async () => {
+    const event = await sample();
+    const html = (await fixture('detail-inauguracion')).replace(
+      '"headline":"II Festival Internacional de Piano &quot;Madrid a Tempo&quot; Concierto de inauguración.  "',
+      '"headline":"Concierto de Guitarra Española - Ivo Lago"',
+    );
+    expect(() => parseMadridDetail(event, html)).toThrow(/título de ficha distinto/);
   });
 });
 

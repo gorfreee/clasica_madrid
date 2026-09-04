@@ -96,13 +96,12 @@ export function parseMadridDetail(event: RawEvent, body: string): ObservedFactPa
   if (!sourceUrl || normalizeUrl(sourceUrl) !== normalizeUrl(event.sourceUrl)) {
     throw new Error('madrid-a-tempo: ficha sin URL canónica coincidente');
   }
-  const heading = foldTitle(jsonLd.headline);
-  if (!heading || heading !== foldTitle(event.observed.title)) {
-    throw new Error('madrid-a-tempo: título de ficha distinto del listado');
-  }
   const warmupId = detailWarmupId(body, event);
   if (warmupId && warmupId !== event.externalId) {
     throw new Error('madrid-a-tempo: ficha sin identidad de concierto coincidente');
+  }
+  if (!madridTitlesCompatible(event.observed.title, jsonLd.headline, Boolean(warmupId))) {
+    throw new Error('madrid-a-tempo: título de ficha distinto del listado');
   }
   const schedule = parseMadridSchedule(jsonLd.description);
   const accessText = accessPhrase(jsonLd.description);
@@ -271,6 +270,52 @@ function hasNextCursor(postsWrap: Record<string, unknown>): boolean {
 
 function foldTitle(value: string): string {
   return collapseWhitespace(decodeHtmlEntities(value)).normalize('NFC');
+}
+
+/**
+ * Wix JSON-LD `headline` is often truncated around 110 characters and may
+ * keep entities, extra spaces or a slightly different editorial wording than
+ * the blog feed title. Canonical URL + Wix UUID already identify the post;
+ * this only rejects a clearly different concert title.
+ */
+const TITLE_CORE_MIN_CHARS = 20;
+const TITLE_CORE_MIN_WORDS = 3;
+
+function madridTitlesCompatible(listing: string, headline: string, identityLocked: boolean): boolean {
+  const foldedListing = foldTitle(listing);
+  const foldedHeadline = foldTitle(headline);
+  if (!foldedListing || !foldedHeadline) return false;
+  if (foldedListing === foldedHeadline) return true;
+
+  const listingCore = compactTitle(foldedListing);
+  const headlineCore = compactTitle(foldedHeadline);
+  if (!listingCore || !headlineCore) return false;
+  if (listingCore === headlineCore) return true;
+  if (!identityLocked) return false;
+
+  const [shorter, longer] =
+    listingCore.length <= headlineCore.length ? [listingCore, headlineCore] : [headlineCore, listingCore];
+  if (shorter.length >= TITLE_CORE_MIN_CHARS && longer.startsWith(shorter)) return true;
+
+  const overlap = sharedLeadingWords(listingCore, headlineCore);
+  return overlap.words >= TITLE_CORE_MIN_WORDS && overlap.chars >= TITLE_CORE_MIN_CHARS;
+}
+
+function compactTitle(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function sharedLeadingWords(left: string, right: string): { words: number; chars: number } {
+  const first = left.split(' ').filter(Boolean);
+  const second = right.split(' ').filter(Boolean);
+  let words = 0;
+  while (words < first.length && words < second.length && first[words] === second[words]) words += 1;
+  return { words, chars: first.slice(0, words).join(' ').length };
 }
 
 function venueName(text: string): string | undefined {

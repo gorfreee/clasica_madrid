@@ -26,3 +26,6 @@ explicit year, so it is not harvested.
 - `detail-maurizio.html`
 - `detail-ciclo.html`
 - `detail-daniel.html`
+- `detail-navidad-2024.html` — Wix JSON-LD `headline` truncated (~110 chars) with a literal `&amp;`
+- `detail-sofia-sacco.html` — `&#010;` / wording drift (`7 de enero` vs `7 enero`) plus a truncated suffix
+- `detail-silvia-escamilla.html` — extra inner whitespace and a truncated last word
