@@ -1,4 +1,3 @@
-#!/usr/bin/env npx tsx
 import { appendFile, readFile, writeFile } from 'node:fs/promises';
 import {
   assertIngestReport,

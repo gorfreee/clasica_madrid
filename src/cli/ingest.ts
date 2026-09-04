@@ -1,4 +1,3 @@
-#!/usr/bin/env npx tsx
 import { readFile } from 'node:fs/promises';
 import { systemClock } from '../lib/domain/dates.ts';
 import { defaultDataDir } from '../lib/repository/fs.ts';

@@ -1,4 +1,3 @@
-#!/usr/bin/env npx tsx
 import { promoteCandidateFile } from '../lib/validation/promote.ts';
 
 const candidatePath = process.argv[2];
