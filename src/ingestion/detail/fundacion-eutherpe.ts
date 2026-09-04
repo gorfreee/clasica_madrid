@@ -336,7 +336,8 @@ function absorbDirectory(event: RawEvent, card: DirectoryHit): void {
   const matching = event.observed.occurrences.filter((item) => {
     if (!item.date) return false;
     const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(item.date);
-    return Boolean(match) && Number(match[3]) === card.day && Number(match[2]) === card.month;
+    if (!match) return false;
+    return Number(match[3]) === card.day && Number(match[2]) === card.month;
   });
   if (event.observed.occurrences.length > 0 && matching.length === 0) {
     throw new Error('fundacion-eutherpe: fecha del directorio distinta del calendario');
