@@ -10,7 +10,7 @@ export function resolvePerformerRole(roleText: string | undefined): PerformerRol
   const text = fieldFolded(roleText);
   if (!text) return undefined;
 
-  if (hasWord(text, 'orquesta') || hasWord(text, 'orchestra')) return 'orchestra';
+  if (hasWord(text, 'orquesta') || hasWord(text, 'orquestra') || hasWord(text, 'orchestra')) return 'orchestra';
   if (hasWord(text, 'coro') || hasWord(text, 'choir') || hasWord(text, 'chorus')) return 'choir';
   if (
     hasWord(text, 'conductor') ||

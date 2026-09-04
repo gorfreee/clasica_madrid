@@ -89,7 +89,12 @@ export function matchEventIdentity(
   }
 
   for (const event of catalog.events) {
-    if (eventMatchesUrl(event, observed.sourceUrl)) {
+    if (
+      eventMatchesUrl(event, observed.sourceUrl, {
+        catalogSourceId: options.catalogSourceId,
+        observedExternalId: observed.externalId,
+      })
+    ) {
       hits.push({ event, method: 'url' });
     }
   }
@@ -121,8 +126,24 @@ export function eventMatchesExternalId(event: Event, catalogSourceId: string, ex
   );
 }
 
-export function eventMatchesUrl(event: Event, sourceUrl: string): boolean {
-  return event.citations.some((citation) => urlsEquivalent(citation.url, sourceUrl));
+export function eventMatchesUrl(
+  event: Event,
+  sourceUrl: string,
+  options?: { catalogSourceId?: string; observedExternalId?: string },
+): boolean {
+  return event.citations.some((citation) => {
+    if (!urlsEquivalent(citation.url, sourceUrl)) return false;
+    if (
+      options?.observedExternalId &&
+      options.catalogSourceId &&
+      citation.sourceId === options.catalogSourceId &&
+      citation.externalId &&
+      citation.externalId !== options.observedExternalId
+    ) {
+      return false;
+    }
+    return true;
+  });
 }
 
 export function newObservationKeys(
@@ -133,14 +154,18 @@ export function newObservationKeys(
   const keys: string[] = [];
   const url = normalizeUrl(observed.sourceUrl);
   const dated = observed.occurrences.filter((item) => item.date);
+  const urlKey = (suffix: string) =>
+    observed.externalId ? `${suffix}:ext:${observed.externalId}` : suffix;
   if (dated.length === 0) {
-    keys.push(`url:${url}`);
+    keys.push(urlKey(`url:${url}`));
   } else {
     for (const occurrence of dated) {
       keys.push(
-        venueId
-          ? `url:${url}:${occurrence.date}:${venueId}`
-          : `url:${url}:${occurrence.date}`,
+        urlKey(
+          venueId
+            ? `url:${url}:${occurrence.date}:${venueId}`
+            : `url:${url}:${occurrence.date}`,
+        ),
       );
     }
   }

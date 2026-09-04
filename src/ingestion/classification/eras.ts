@@ -1,6 +1,7 @@
 import type { Era } from '../../lib/schemas/taxonomies.ts';
 import { findKnownComposersInText, matchComposer } from '../knowledge/composers.ts';
 import type { ObservedFacts } from '../observed.ts';
+import { foldName, hasPhrase } from './text.ts';
 import type { Resolution } from './types.ts';
 
 const ERA_ORDER: Era[] = [
@@ -40,6 +41,15 @@ export function resolveEras(facts: ObservedFacts): Resolution<Era[]> {
     };
   }
 
+  if (declaresContemporaryEra(facts)) {
+    return {
+      value: ['contemporary'],
+      method: 'rule',
+      ruleId: 'eras-declared-contemporary',
+      evidence: [facts.categoryText ?? facts.title],
+    };
+  }
+
   const programme = [facts.programText, facts.description].filter(Boolean).join('\n');
   const mentioned = findKnownComposersInText(programme);
   if (mentioned.length > 0) {
@@ -75,4 +85,16 @@ function erasFromNames(names: string[]): { eras: Era[]; evidence: string[] } {
     for (const era of match.eras) eras.add(era);
   }
   return { eras: ERA_ORDER.filter((era) => eras.has(era)), evidence };
+}
+
+function declaresContemporaryEra(facts: ObservedFacts): boolean {
+  const title = foldName(facts.title);
+  const category = foldName(facts.categoryText ?? '');
+  const series = foldName(facts.seriesText ?? '');
+  return [title, category, series].some(
+    (text) =>
+      hasPhrase(text, 'musica contemporanea') ||
+      hasPhrase(text, 'festival coma') ||
+      hasPhrase(text, 'coma 26'),
+  );
 }

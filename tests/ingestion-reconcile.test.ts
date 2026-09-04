@@ -7,6 +7,10 @@ import { ENTITY_COLLECTIONS } from '../src/lib/repository/types.ts';
 import { applyCandidateBatch, defaultBatchIo, mergeCandidateBatch } from '../src/ingestion/batch.ts';
 import { findPossiblyMissing } from '../src/ingestion/disappear.ts';
 import { matchEventIdentity, type EventIdentityAlias } from '../src/ingestion/identity.ts';
+import { reconcileHarvest, type HarvestObservation } from '../src/ingestion/reconcile.ts';
+import type { ClassificationResult } from '../src/ingestion/classification/types.ts';
+import type { NormalizedEvent } from '../src/ingestion/normalize.ts';
+import type { RawEvent } from '../src/ingestion/types.ts';
 import { mergeExistingEvent, proposalFromObservation } from '../src/ingestion/merge.ts';
 import { runIngest } from '../src/ingestion/pipeline.ts';
 import { AiRateLimitedError, type AiClassifier } from '../src/ingestion/classification/ai.ts';
@@ -251,6 +255,194 @@ describe('identity matching', () => {
       { catalogSourceId: 'src_teatro_real', venueId: 'ven_teatro_real' },
     );
     expect(byStrong).toMatchObject({ kind: 'matched', method: 'strong', event: { id: 'evt_demo' } });
+  });
+
+  it('no usa la URL como identidad si la misma source ya cita otro externalId', () => {
+    const catalog = emptyCatalog();
+    catalog.venues.push(
+      makeVenue({ id: 'ven_teatros_canal_sala_negra', slug: 'sala-negra', name: 'Sala Negra' }),
+    );
+    catalog.events.push(
+      makeEvent({
+        id: 'evt_teatros_canal_100116_2026_10_07',
+        slug: 'xvii-festival-de-ensembles-pluralensemble',
+        title: 'XVII Festival de Ensembles: PLURALENSEMBLE',
+        venueId: 'ven_teatros_canal_sala_negra',
+        organizerIds: [],
+        seriesId: null,
+        occurrences: [{ id: 'occ_1', date: '2026-10-07', time: null, status: 'scheduled' }],
+        citations: [
+          {
+            sourceId: 'src_teatros_canal',
+            url: 'https://www.teatroscanal.com/espectaculo/xvii-festival-de-ensembles-2026',
+            checkedAt: '2026-09-03',
+            externalId: '100116:2026-10-07',
+          },
+        ],
+        primarySourceId: 'src_teatros_canal',
+      }),
+    );
+    const page = 'https://www.teatroscanal.com/espectaculo/xvii-festival-de-ensembles-2026';
+    const options = { catalogSourceId: 'src_teatros_canal', venueId: 'ven_teatros_canal_sala_negra' };
+
+    expect(
+      matchEventIdentity(
+        catalog,
+        {
+          sourceUrl: page,
+          externalId: '100116:2026-10-07',
+          title: 'XVII Festival de Ensembles: PLURALENSEMBLE',
+          occurrences: [{ date: '2026-10-07', time: null }],
+        },
+        options,
+      ),
+    ).toMatchObject({
+      kind: 'matched',
+      method: 'externalId',
+      event: { id: 'evt_teatros_canal_100116_2026_10_07' },
+    });
+
+    expect(
+      matchEventIdentity(
+        catalog,
+        {
+          sourceUrl: page,
+          externalId: '100116:2026-10-25',
+          title: 'XVII Festival de Ensembles: TALLER SONORO',
+          occurrences: [{ date: '2026-10-25', time: null }],
+        },
+        { catalogSourceId: 'src_teatros_canal', venueId: 'ven_teatros_canal_sala_verde' },
+      ).kind,
+    ).toBe('unmatched');
+  });
+
+  it('reconcilia por separado los cuatro conciertos de Teatros del Canal en la misma página', () => {
+    const source = getSourceDefinition('teatros-canal');
+    const include: ClassificationResult = {
+      eligibility: { value: 'include', method: 'rule', ruleId: 'academic-contemporary', evidence: [] },
+      kind: { value: 'established', method: 'rule', ruleId: 'test-kind', evidence: [] },
+      access: { value: 'free', method: 'rule', ruleId: 'test-access', evidence: [] },
+      formats: { value: ['chamber'], method: 'rule', ruleId: 'test-format', evidence: [] },
+      eras: { value: ['contemporary'], method: 'rule', ruleId: 'test-era', evidence: [] },
+    };
+    const negra = makeVenue({
+      id: 'ven_teatros_canal_sala_negra',
+      slug: 'teatros-canal-sala-negra',
+      name: 'Teatros del Canal — Sala Negra',
+    });
+    const verde = makeVenue({
+      id: 'ven_teatros_canal_sala_verde',
+      slug: 'teatros-canal-sala-verde',
+      name: 'Teatros del Canal — Sala Verde',
+    });
+    const page = 'https://www.teatroscanal.com/espectaculo/xvii-festival-de-ensembles-2026';
+    const concerts = [
+      {
+        externalId: '100116:2026-10-07',
+        title: 'XVII Festival de Ensembles: PLURALENSEMBLE',
+        date: '2026-10-07',
+        venueId: negra.id,
+        venueText: 'Sala Negra',
+      },
+      {
+        externalId: '100116:2026-10-25',
+        title: 'XVII Festival de Ensembles: TALLER SONORO',
+        date: '2026-10-25',
+        venueId: verde.id,
+        venueText: 'Sala Verde',
+      },
+      {
+        externalId: '100116:2026-12-02',
+        title: 'XVII Festival de Ensembles: GRUPO ENIGMA',
+        date: '2026-12-02',
+        venueId: verde.id,
+        venueText: 'Sala Verde',
+      },
+      {
+        externalId: '100116:2026-12-05',
+        title: 'XVII Festival de Ensembles: ENSEMBLE TEATRO DEL ARTE SONORO',
+        date: '2026-12-05',
+        venueId: negra.id,
+        venueText: 'Sala Negra',
+      },
+    ];
+    const published = makeEvent({
+      id: 'evt_teatros_canal_100116_2026_10_07',
+      slug: 'xvii-festival-de-ensembles-pluralensemble',
+      title: concerts[0]!.title,
+      venueId: negra.id,
+      organizerIds: [],
+      seriesId: null,
+      occurrences: [{ id: 'occ_1', date: concerts[0]!.date, time: null, status: 'scheduled' }],
+      performers: [{ name: 'PLURALENSEMBLE' }],
+      composers: [],
+      works: [],
+      eras: ['contemporary'],
+      formats: ['chamber'],
+      kind: 'established',
+      access: 'free',
+      citations: [
+        {
+          sourceId: source.catalogSourceId,
+          url: page,
+          checkedAt: '2026-09-03',
+          externalId: concerts[0]!.externalId,
+        },
+      ],
+      primarySourceId: source.catalogSourceId,
+    });
+    const catalog = emptyCatalog();
+    catalog.venues.push(negra, verde);
+    catalog.sources.push(source.seedSource);
+    catalog.events.push(published);
+
+    const observations: HarvestObservation[] = concerts.map((concert, index) => {
+      const event: NormalizedEvent = {
+        sourceId: source.id,
+        sourceUrl: page,
+        externalId: concert.externalId,
+        title: concert.title,
+        occurrences: [{ date: concert.date, time: null }],
+        venueText: concert.venueText,
+        performers: [{ name: concert.title.split(': ')[1]! }],
+        composers: [],
+        works: [],
+      };
+      const raw: RawEvent = {
+        sourceId: source.id,
+        sourceUrl: page,
+        externalId: concert.externalId,
+        observed: {
+          title: concert.title,
+          venueText: concert.venueText,
+          performers: event.performers,
+          composers: [],
+          works: [],
+          occurrences: [{ raw: concert.date, date: concert.date }],
+        },
+      };
+      return { index, raw, event, source, classification: include, aiAttempted: false };
+    });
+
+    const result = reconcileHarvest({
+      catalog,
+      now: TEST_NOW,
+      window: { from: '2026-09-01', to: '2027-07-31' },
+      observations,
+    });
+    const decisions = concerts.map((_, index) => result.byIndex.get(index));
+    expect(decisions[0]?.action).toMatch(/^(unchanged|updated)$/);
+    expect(decisions.slice(1).map((item) => item?.action)).toEqual(['new', 'new', 'new']);
+    expect(decisions.every((item) => item?.action !== 'ambiguous')).toBe(true);
+    expect(result.stats.ambiguous).toBe(0);
+    expect(result.stats.newEvents).toBe(3);
+    expect(new Set(result.candidates.map((item) => item.event.id)).size).toBe(3);
+    expect(result.candidates.every((item) => item.event.id !== published.id)).toBe(true);
+    expect(result.candidates.map((item) => item.event.citations[0]?.externalId).sort()).toEqual([
+      '100116:2026-10-25',
+      '100116:2026-12-02',
+      '100116:2026-12-05',
+    ]);
   });
 
   it('marca ambiguous cuando hay más de un match plausible', () => {

@@ -2406,6 +2406,8 @@ export function matchComposer(name: string): ComposerKnowledge | undefined {
 /**
  * Conservative scan of observed prose for known composer names.
  * Longest alias first; word-boundary only. Does not invent names.
+ * Skips names inside institutions/centres and contextual mentions
+ * (tema de, basado en, inspirado en, homenaje a).
  */
 export function findKnownComposersInText(text: string): ComposerKnowledge[] {
   const folded = foldName(text);
@@ -2415,7 +2417,7 @@ export function findKnownComposersInText(text: string): ComposerKnowledge[] {
   for (const alias of ALIASES_BY_LENGTH) {
     const needle = foldName(alias);
     if (!needle || needle.length < 4) continue;
-    if (!hasFoldedPhrase(folded, needle)) continue;
+    if (!hasAttributedComposerPhrase(folded, needle)) continue;
     const match = INDEX.byFolded.get(needle);
     if (!match || seen.has(match.canonicalName)) continue;
     seen.add(match.canonicalName);
@@ -2424,8 +2426,48 @@ export function findKnownComposersInText(text: string): ComposerKnowledge[] {
   return found;
 }
 
-function hasFoldedPhrase(haystack: string, phrase: string): boolean {
-  return new RegExp(`(?:^| )${escapeRegExp(phrase)}(?: |$)`).test(haystack);
+const CONTEXTUAL_COMPOSER_PREFIXES = [
+  'tema de',
+  'un tema de',
+  'sobre un tema de',
+  'basado en',
+  'basada en',
+  'inspirado en',
+  'inspirada en',
+  'homenaje a',
+  'en homenaje a',
+];
+
+const INSTITUTION_COMPOSER_PREFIXES = [
+  'cim',
+  'ceip',
+  'ies',
+  'csm',
+  'conservatorio',
+  'colegio',
+  'centro',
+  'escuela',
+  'instituto',
+  'fundacion',
+  'fundacio',
+];
+
+function hasAttributedComposerPhrase(haystack: string, phrase: string): boolean {
+  const pattern = new RegExp(`(?:^| )${escapeRegExp(phrase)}(?: |$)`, 'g');
+  for (const match of haystack.matchAll(pattern)) {
+    const start = match[0].startsWith(' ') ? match.index! + 1 : match.index!;
+    if (!isGuardedComposerContext(haystack.slice(0, start))) return true;
+  }
+  return false;
+}
+
+function isGuardedComposerContext(prefix: string): boolean {
+  const before = prefix.trimEnd();
+  if (!before) return false;
+  for (const guard of [...CONTEXTUAL_COMPOSER_PREFIXES, ...INSTITUTION_COMPOSER_PREFIXES]) {
+    if (new RegExp(`(?:^| )${escapeRegExp(guard)}$`).test(before)) return true;
+  }
+  return false;
 }
 
 function escapeRegExp(value: string): string {

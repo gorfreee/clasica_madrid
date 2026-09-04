@@ -297,6 +297,45 @@ describe('CNDM detail hydration', () => {
     expect(failed?.hydration?.status).toBe('failed');
     expect(failed?.observed).toEqual(event.observed);
   });
+
+  it('conserva un título de programa en strong sin convertirlo en compositor', () => {
+    const event = rawEvent(
+      '23820',
+      'FAZIL SAY, ASLIHAN AND SAY & AYKUT KÖSELERLI',
+      '2026-11-08',
+      '12:00',
+      'Auditorio Nacional (Cámara) | Madrid',
+    );
+    const html = `<head><link rel="canonical" href="https://cndm.inaem.gob.es/node/23820"></head>
+<div class="event-banner"><div class="event-banner__title"><a href="/node/23820">FAZIL SAY, ASLIHAN AND SAY & AYKUT KÖSELERLI</a></div>
+<div class="event-banner__dates">12:00<br>Noviembre/26<br><strong>Dom8</strong></div>
+<div class="event-banner__detail"><p>Fazil Say, piano</p><p class="pt-3">Auditorio Nacional (Cámara) | Madrid</p></div></div>
+<div class="event-place"><h3>Auditorio Nacional (Cámara) | Madrid</h3></div>
+<div class="event-program"><h3>Programa</h3><p>FAZIL SAY piano<br>ASLIHAN AND SAY flauta<br><strong>Ecos del Bósforo</strong></p></div>
+<div class="content"><p>Programa de piano, flauta y percusión turca.</p></div>
+<div class="tickets"><a>Entradas</a></div>`;
+    const patch = parseCndmDetail(event, html);
+    expect(patch.programText).toMatch(/Ecos del Bósforo/);
+    expect(patch.composers).toEqual([]);
+    expect(patch.works).toEqual([]);
+  });
+
+  it('sigue reconociendo un compositor en strong con años y obra posterior', () => {
+    const event = rawEvent('23837', 'BENJAMIN ALARD', '2026-10-16', '19:30', 'Auditorio Nacional (Cámara) | Madrid');
+    const html = `<head><link rel="canonical" href="https://cndm.inaem.gob.es/node/23837"></head>
+<div class="event-banner"><div class="event-banner__title"><a href="/node/23837">BENJAMIN ALARD</a></div>
+<div class="event-banner__dates">19:30<br>Octubre/26<br><strong>Vie16</strong></div>
+<div class="event-banner__detail"><p>Benjamin Alard, clave</p><p class="pt-3">Auditorio Nacional (Cámara) | Madrid</p></div></div>
+<div class="event-place"><h3>Auditorio Nacional (Cámara) | Madrid</h3></div>
+<div class="event-program"><h3>Programa</h3><p><strong>Johann Sebastian Bach (1685-1750)</strong><br>El clave bien temperado, libro I (1722)</p></div>
+<div class="content"><p>Benjamin Alard interpreta el Libro I.</p></div>
+<div class="tickets"><a>Entradas</a></div>`;
+    const patch = parseCndmDetail(event, html);
+    expect(patch.composers).toEqual([{ name: 'Johann Sebastian Bach (1685-1750)' }]);
+    expect(patch.works).toEqual([
+      { title: 'El clave bien temperado, libro I (1722)', composerName: 'Johann Sebastian Bach (1685-1750)' },
+    ]);
+  });
 });
 
 describe('CNDM pipeline and cross-source identity', () => {

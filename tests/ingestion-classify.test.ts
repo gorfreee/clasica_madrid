@@ -894,6 +894,38 @@ describe('eras', () => {
 
     expect(resolveEras(facts({ title: 'Concierto extraordinario' })).value).toEqual([]);
   });
+
+  it('no toma CIM ANTONIO SOLER ni un tema de Rameau como época barroca', () => {
+    expect(
+      resolveEras(
+        facts({
+          title: 'XXII Certamen de Coros Escolares',
+          programText:
+            'Modalidad Educación Infantil y Primaria. Coros:. CIM ANTONIO SOLER. COLEGIO JESÚS MAESTRO.',
+        }),
+      ).value,
+    ).toEqual([]);
+
+    expect(
+      resolveEras(
+        facts({
+          title:
+            'XXVIII Festival Internacional de Música Contemporánea de Madrid COMA’26. Orquesta Sinfónica de la Universidad Complutense de Madrid',
+          programText:
+            'ALEJANDRO ROMÁN (1971) Tambourine op. 13. Variaciones para orquesta sobre un tema de Rameau (2001)',
+        }),
+      ).value,
+    ).toEqual(['contemporary']);
+    expect(
+      resolveEras(
+        facts({
+          title: 'Concierto COMA’26',
+          categoryText: 'Música contemporánea',
+          programText: 'Variaciones para orquesta sobre un tema de Rameau (2001)',
+        }),
+      ).value,
+    ).toEqual(['contemporary']);
+  });
 });
 
 describe('formats', () => {

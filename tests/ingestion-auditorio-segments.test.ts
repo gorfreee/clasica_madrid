@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
   findProgramStartIndex,
+  parseAuditorioPersonCredits,
   parseAuditorioPersonLine,
+  parseComposerYearWork,
   segmentAuditorioBlocks,
 } from '../src/ingestion/detail/auditorio-segments.ts';
 
@@ -247,5 +249,58 @@ describe('segmentación performer/programa del Auditorio', () => {
       name: 'Kynan Johns',
       roleText: 'director',
     });
+  });
+
+  it('reconoce orquestra como ensemble y no como frontera de programa', () => {
+    const segments = segmentAuditorioBlocks([
+      [
+        'Orquestra de Cambra Catalana',
+        'Stanislav Stepanek, concertino',
+        'JAVIER MARTÍNEZ CAMPOS (1989) Kaerlud',
+      ],
+    ]);
+    expect(segments.performerLines[0]).toBe('Orquestra de Cambra Catalana');
+    expect(segments.programLines[0]).toBe('JAVIER MARTÍNEZ CAMPOS (1989) Kaerlud');
+    expect(parseAuditorioPersonLine('Orquestra de Cambra Catalana')).toEqual({
+      name: 'Orquestra de Cambra Catalana',
+    });
+  });
+
+  it('parte créditos con punto y coma y dos personas que comparten función', () => {
+    expect(
+      parseAuditorioPersonCredits('Katrina Penman, flauta; Gerardo López Laguna, piano'),
+    ).toEqual([
+      { name: 'Katrina Penman', roleText: 'flauta' },
+      { name: 'Gerardo López Laguna', roleText: 'piano' },
+    ]);
+    expect(
+      parseAuditorioPersonCredits('David Mata, violín y percusión; Elena de Santos Cámara, piano'),
+    ).toEqual([
+      { name: 'David Mata', roleText: 'violín y percusión' },
+      { name: 'Elena de Santos Cámara', roleText: 'piano' },
+    ]);
+    expect(parseAuditorioPersonCredits('Chema García Portela y Flores Chaviano, dirección')).toEqual([
+      { name: 'Chema García Portela', roleText: 'dirección' },
+      { name: 'Flores Chaviano', roleText: 'dirección' },
+    ]);
+  });
+
+  it('COMPOSER (AÑO) obra abre el programa y no se confunde con un crédito', () => {
+    expect(parseComposerYearWork('KATRINA PENMAN (1982) To Andalusia and beyond')).toEqual({
+      composerName: 'KATRINA PENMAN (1982)',
+      title: 'To Andalusia and beyond',
+    });
+    expect(parseComposerYearWork('JAVIER MARTÍNEZ CAMPOS (1989) Kaerlud')).toEqual({
+      composerName: 'JAVIER MARTÍNEZ CAMPOS (1989)',
+      title: 'Kaerlud',
+    });
+    expect(parseComposerYearWork('Katrina Penman, flauta')).toBeUndefined();
+    expect(parseComposerYearWork('Olivier Messiaen (1908-1992)')).toBeUndefined();
+    expect(
+      findProgramStartIndex([
+        'Orquestra de Cambra Catalana',
+        'KATRINA PENMAN (1982) To Andalusia and beyond',
+      ]),
+    ).toBe(1);
   });
 });
