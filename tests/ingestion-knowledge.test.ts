@@ -317,6 +317,21 @@ describe('composer knowledge base', () => {
     }
   });
 
+  it('no atribuye compositores citados en instituciones o menciones contextuales', () => {
+    expect(findKnownComposersInText('CIM ANTONIO SOLER. COLEGIO JESÚS MAESTRO.')).toEqual([]);
+    expect(
+      findKnownComposersInText('Variaciones para orquesta sobre un tema de Rameau (2001)'),
+    ).toEqual([]);
+    expect(findKnownComposersInText('Pieza basada en Mozart e inspirada en Bach')).toEqual([]);
+    expect(findKnownComposersInText('Un homenaje a Rameau en clave contemporánea')).toEqual([]);
+    expect(findKnownComposersInText('Bach: Suite. Mozart: Concierto.')).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ canonicalName: 'Johann Sebastian Bach' }),
+        expect.objectContaining({ canonicalName: 'Wolfgang Amadeus Mozart' }),
+      ]),
+    );
+  });
+
   it('reconoce el repertorio español añadido desde programa y composers[]', () => {
     const program = findKnownComposersInText(
       'Enrique Granados: Goyescas. Joaquín Turina: Danzas fantásticas. Joaquín Rodrigo: Concierto de Aranjuez. Ruperto Chapí: La bruja. Federico Chueca: La Gran Vía. Asenjo Barbieri: El barberillo de Lavapiés.',
