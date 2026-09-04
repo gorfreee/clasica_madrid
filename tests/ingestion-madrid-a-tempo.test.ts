@@ -94,6 +94,11 @@ describe('Madrid a Tempo listing', () => {
     expect(parseMadridSchedule('5 de julio de 2026 a las 12:00h Centro Cultural Casa de Vacas del Parque del Retiro - Madrid').occurrences)
       .toEqual([{ raw: '5 de julio de 2026 a las 12:00h', date: '2026-07-05', time: '12:00' }]);
     expect(parseMadridSchedule('20 febrero 19:00 h ATENEO DE MADRID').occurrences).toEqual([]);
+    expect(
+      parseMadridSchedule(
+        'Entrega de entradas gratuitas una hora antes del concierto. Julio Alberto Flores Bermejo nace en Madrid el 02 de Agosto de 2006.',
+      ).occurrences,
+    ).toEqual([]);
     expect(source.skipDefaultSync).toBeFalsy();
     expect(source.useFetchRelay).toBeFalsy();
     expect(source.catalogSourceId).toBe('src_madrid_a_tempo');

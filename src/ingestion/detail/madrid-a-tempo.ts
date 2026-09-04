@@ -18,6 +18,7 @@ const CALENDAR_DATE = new RegExp(
 const TIME = /(?:a las\s+)?(\d{1,2}):(\d{2})\s*h/i;
 const ACCESS_CUE = /entrada[s]?\s+gratuit|entrada\s+\d+\s*€|hasta completar aforo/i;
 const VENUE_STOP = /\b(?:organiza|programa|entrega|entrada|colaboraci[oó]n|link de reserva)\b/i;
+const BIO_STOP = /\b(?:nace|naci[oó]|nacida|nacido)\b/i;
 
 export function madridListingUrl(href: string, base?: string): string | undefined {
   return madridPathUrl(href, base, (path) => LISTING_PATH.test(path));
@@ -95,8 +96,8 @@ export function parseMadridDetail(event: RawEvent, body: string): ObservedFactPa
   if (!sourceUrl || normalizeUrl(sourceUrl) !== normalizeUrl(event.sourceUrl)) {
     throw new Error('madrid-a-tempo: ficha sin URL canónica coincidente');
   }
-  const heading = collapseWhitespace(decodeHtmlEntities(jsonLd.headline));
-  if (!heading || heading !== collapseWhitespace(event.observed.title)) {
+  const heading = foldTitle(jsonLd.headline);
+  if (!heading || heading !== foldTitle(event.observed.title)) {
     throw new Error('madrid-a-tempo: título de ficha distinto del listado');
   }
   const warmupId = detailWarmupId(body, event);
@@ -122,7 +123,8 @@ export function parseMadridSchedule(text: string): {
 } {
   const compact = collapseWhitespace(decodeHtmlEntities(stripTags(text)));
   if (!compact) return { occurrences: [] };
-  const dates = [...compact.matchAll(new RegExp(CALENDAR_DATE.source, 'gi'))];
+  const schedule = compact.split(BIO_STOP)[0] ?? compact;
+  const dates = [...schedule.matchAll(new RegExp(CALENDAR_DATE.source, 'gi'))];
   const occurrences: RawOccurrence[] = [];
   let firstSpan: { start: number; end: number } | undefined;
   for (const match of dates) {
@@ -145,7 +147,7 @@ export function parseMadridSchedule(text: string): {
   }
   const unique = uniqueOccurrences(occurrences);
   if (!firstSpan || unique.length === 0) return { occurrences: [] };
-  const rest = compact.slice(firstSpan.end);
+  const rest = schedule.slice(firstSpan.end);
   const stopped = rest.split(VENUE_STOP)[0] ?? rest;
   const venueText = venueName(stopped);
   return { occurrences: unique, ...(venueText ? { venueText } : {}) };
@@ -153,11 +155,13 @@ export function parseMadridSchedule(text: string): {
 
 function toRawEvent(post: MadridPost, sourceId: string): RawEvent | undefined {
   if (isCycleIndex(post.title, post.excerpt)) return undefined;
-  const title = collapseWhitespace(decodeHtmlEntities(post.title));
+  const title = foldTitle(post.title);
   const excerpt = collapseWhitespace(decodeHtmlEntities(post.excerpt));
   const sourceUrl = post.link
     ? madridPostUrl(post.link)
-    : madridPostUrl(post.path, `https://${HOST}/`);
+    : post.path
+      ? madridPostUrl(post.path, `https://${HOST}/`)
+      : undefined;
   if (!title || !sourceUrl || !post.id) {
     throw new Error('madrid-a-tempo: tarjeta incompleta');
   }
@@ -263,6 +267,10 @@ function hasNextCursor(postsWrap: Record<string, unknown>): boolean {
   const cursors = paging && isRecord(paging.cursors) ? paging.cursors : undefined;
   const next = asString(cursors?.next);
   return Boolean(next);
+}
+
+function foldTitle(value: string): string {
+  return collapseWhitespace(decodeHtmlEntities(value)).normalize('NFC');
 }
 
 function venueName(text: string): string | undefined {
