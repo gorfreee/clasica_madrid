@@ -7,6 +7,8 @@ import {
   isDateInWindow,
   defaultIngestWindow,
   parseIngestWindow,
+  seasonIngestWindow,
+  nextSeasonEnd,
   isDateInHarvestScope,
 } from '../src/ingestion/dates.ts';
 import { inferScheduleFromText } from '../src/ingestion/detail/schedule.ts';
@@ -72,6 +74,36 @@ describe('parseo de fechas y horas', () => {
     expect(isDateInWindow('2026-08-31', window)).toBe(false);
     expect(isDateInWindow('2026-12-31', window)).toBe(false);
     expect(isDateInWindow('2027-01-01', window)).toBe(false);
+  });
+
+  it('la ventana de temporada va del día de ejecución al 31 de julio más cercano', () => {
+    expect(seasonIngestWindow(TEST_NOW)).toEqual({ from: '2026-09-01', to: '2027-07-31' });
+    expect(seasonIngestWindow(new Date('2026-07-31T10:00:00+02:00'))).toEqual({
+      from: '2026-07-31',
+      to: '2026-07-31',
+    });
+    expect(seasonIngestWindow(new Date('2026-08-01T10:00:00+02:00'))).toEqual({
+      from: '2026-08-01',
+      to: '2027-07-31',
+    });
+    expect(seasonIngestWindow(new Date('2027-01-11T10:00:00+01:00'))).toEqual({
+      from: '2027-01-11',
+      to: '2027-07-31',
+    });
+    expect(seasonIngestWindow(new Date('2027-07-21T10:00:00+02:00'))).toEqual({
+      from: '2027-07-21',
+      to: '2027-07-31',
+    });
+    expect(nextSeasonEnd('2026-12-21')).toBe('2027-07-31');
+    expect(nextSeasonEnd('2027-07-01')).toBe('2027-07-31');
+    expect(seasonIngestWindow(new Date('2026-07-31T21:30:00Z'))).toEqual({
+      from: '2026-07-31',
+      to: '2026-07-31',
+    });
+    expect(seasonIngestWindow(new Date('2026-07-31T22:30:00Z'))).toEqual({
+      from: '2026-08-01',
+      to: '2027-07-31',
+    });
   });
 
   it('acepta un rango manual más largo de 120 días y rechaza fechas inválidas', () => {
