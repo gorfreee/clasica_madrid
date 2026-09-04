@@ -84,4 +84,4 @@ El workflow diario no hace checkout ni build en GitHub: sólo hace `POST` al sec
 2. Crea un hook que apunte a la rama `main`.
 3. Guarda la URL como secret de GitHub Actions `CLOUDFLARE_PAGES_DEPLOY_HOOK_URL`. No la subas al repositorio.
 
-Para probarlo: Actions → Daily site rebuild → Run workflow (`workflow_dispatch`). El cron programado cubre CET y CEST (22:15 y 23:15 UTC) y un guard `TZ=Europe/Madrid` evita el disparo duplicado.
+Para probarlo: Actions → Daily site rebuild → Run workflow (`workflow_dispatch`). El schedule se ejecuta una vez al día a las 00:15 con `timezone: Europe/Madrid`, ajustándose automáticamente entre CET y CEST.
