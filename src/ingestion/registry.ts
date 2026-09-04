@@ -16,6 +16,7 @@ import { fundacionPiuMossoAdapter } from './sources/fundacion-piu-mosso.ts';
 import { realHermandadRefugioAdapter } from './sources/real-hermandad-refugio.ts';
 import { realAcademiaBellasArtesAdapter } from './sources/real-academia-bellas-artes.ts';
 import { fundacionGoetheAdapter } from './sources/fundacion-goethe.ts';
+import { madridATempoAdapter } from './sources/madrid-a-tempo.ts';
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
@@ -35,6 +36,7 @@ const ADAPTERS: Record<string, SourceAdapter> = {
   [realHermandadRefugioAdapter.id]: realHermandadRefugioAdapter,
   [realAcademiaBellasArtesAdapter.id]: realAcademiaBellasArtesAdapter,
   [fundacionGoetheAdapter.id]: fundacionGoetheAdapter,
+  [madridATempoAdapter.id]: madridATempoAdapter,
 };
 
 const srcAuditorio: Source = {
@@ -294,6 +296,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Fundación Goethe',
       kind: 'official',
       url: 'https://www.fundaciongoethe.org/',
+    },
+  },
+  {
+    id: 'madrid-a-tempo',
+    name: 'Madrid a Tempo',
+    urls: ['https://www.madridatempo.com/proximos-conciertos'],
+    adapterId: madridATempoAdapter.id,
+    catalogSourceId: 'src_madrid_a_tempo',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_madrid_a_tempo',
+      slug: 'madrid-a-tempo',
+      name: 'Madrid a Tempo',
+      kind: 'official',
+      url: 'https://www.madridatempo.com/',
     },
   },
 ];

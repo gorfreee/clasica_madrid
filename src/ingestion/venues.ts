@@ -555,6 +555,14 @@ const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
   'real-academia-bellas-artes': {
     'salon de actos': 'ven_real_academia_bellas_artes_salon_actos',
   },
+  'madrid-a-tempo': {
+    'ateneo de madrid': 'ven_ateneo_madrid',
+    'centro cultural casa de vacas del parque del retiro madrid': 'ven_casa_vacas_retiro',
+    'centro cultural casa de vacas del parque del retiro': 'ven_casa_vacas_retiro',
+    'centro cultural casa de vacas parque del retiro madrid': 'ven_casa_vacas_retiro',
+    'centro cultural casa de vacas parque del retiro': 'ven_casa_vacas_retiro',
+    'casa de vacas del parque del retiro': 'ven_casa_vacas_retiro',
+  },
 };
 
 /**
