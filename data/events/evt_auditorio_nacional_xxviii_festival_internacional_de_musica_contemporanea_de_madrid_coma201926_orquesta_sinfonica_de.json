@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_xxviii_festival_internacional_de_musica_contemporanea_de_madrid_coma201926_orquesta_sinfonica_de",
+  "slug": "xxviii-festival-internacional-de-musica-contemporanea-de-madrid-coma-26-orquesta-sinfonica-de-la-universidad-complutense",
+  "title": "XXVIII Festival Internacional de Música Contemporánea de Madrid COMA’26. Orquesta Sinfónica de la Universidad Complutense de Madrid",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_xxviii_festival_internacional_de_musica_contemporanea_de_madrid_coma201926_orquesta_sinfonica_de",
+      "date": "2026-11-11",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Sinfónica de la Universidad Complutense de Madrid (OSUCM)"
+    },
+    {
+      "name": "Katrina Penman, flauta; Gerardo López Laguna"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/xxviii-festival-internacional-de-musica-contemporanea-de-madrid-coma201926-orquesta-sinfonica-de-la-universidad-complutense-de-madrid",
+      "checkedAt": "2026-09-04",
+      "externalId": "xxviii-festival-internacional-de-musica-contemporanea-de-madrid-coma201926-orquesta-sinfonica-de-la-universidad-complutense-de-madrid"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-04"
+}

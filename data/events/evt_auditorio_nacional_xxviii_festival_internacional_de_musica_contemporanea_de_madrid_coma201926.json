@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_xxviii_festival_internacional_de_musica_contemporanea_de_madrid_coma201926",
+  "slug": "xxviii-festival-internacional-de-musica-contemporanea-de-madrid-coma-26-orquestra-de-cambra-catalana",
+  "title": "XXVIII Festival Internacional de Música Contemporánea de Madrid COMA’26. Orquestra de Cambra Catalana",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_xxviii_festival_internacional_de_musica_contemporanea_de_madrid_coma201926_01",
+      "date": "2026-10-25",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Orquestra de Cambra Catalana"
+    }
+  ],
+  "works": [
+    {
+      "title": "Stanislav Stepanek, concertino; Natàlia Borysiuk, concertino; Mireia Puigmal, violín primero;",
+      "composerName": "Orquestra de Cambra Catalana"
+    },
+    {
+      "title": "Oriol Algueró, violín primero; Alexandru Bublitchi, violín segundo principal; Roger Gich, violín segundo;",
+      "composerName": "Orquestra de Cambra Catalana"
+    },
+    {
+      "title": "Cèlia Molina, violín segundo; Joaquim García, violín segundo; Marta Sedó, viola; Joaquim Badia, viola;",
+      "composerName": "Orquestra de Cambra Catalana"
+    },
+    {
+      "title": "Núria Piñol, viola; Zsolt Tottzer, violoncelo; Elisabetta Renzi, violoncelo; Rafael Esteve, contrabajo;",
+      "composerName": "Orquestra de Cambra Catalana"
+    },
+    {
+      "title": "JAVIER MARTÍNEZ CAMPOS (1989) Kaerlud",
+      "composerName": "Orquestra de Cambra Catalana"
+    },
+    {
+      "title": "ENRIQUE IGOA (1958) El sueño de Amadís Op. 45 (2004/revisión 2026)",
+      "composerName": "Orquestra de Cambra Catalana"
+    },
+    {
+      "title": "MANUEL RUIZ DEL CORRAL (1978) Ancorae mei temporis (2026)",
+      "composerName": "Orquestra de Cambra Catalana"
+    },
+    {
+      "title": "ENRIQUE MUÑOZ (1957) Paraísos para Joan(es)",
+      "composerName": "Orquestra de Cambra Catalana"
+    },
+    {
+      "title": "JUAN JOSÉ TALAVERA (1966) Requiem por Palestina",
+      "composerName": "Orquestra de Cambra Catalana"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/xxviii-festival-internacional-de-musica-contemporanea-de-madrid-coma201926",
+      "checkedAt": "2026-09-04",
+      "externalId": "xxviii-festival-internacional-de-musica-contemporanea-de-madrid-coma201926"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-04"
+}

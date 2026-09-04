@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_grupo_concertante_talia_ciclo_sinfonico_coral_te_deum_los_planetas",
+  "slug": "grupo-concertante-talia-ciclo-sinfonico-coral-te-deum-los-planetas",
+  "title": "Grupo Concertante Talía. Ciclo Sinfónico-Coral. Te Deum & Los Planetas",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_grupo_concertante_talia_ciclo_sinfonico_coral_te_deum_los_planetas_01",
+      "date": "2027-03-13",
+      "time": "22:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Metropolitana de Madrid"
+    },
+    {
+      "name": "Coro Talía"
+    },
+    {
+      "name": "Silvia Sanz",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/grupo-concertante-talia-ciclo-sinfonico-coral-te-deum-los-planetas",
+      "checkedAt": "2026-09-04",
+      "externalId": "grupo-concertante-talia-ciclo-sinfonico-coral-te-deum-los-planetas"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-04"
+}

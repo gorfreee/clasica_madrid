@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_xxviii_festival_internacional_de_musica_contemporanea_de_madrid_coma201926_nuevo_ensemble_de_sego",
+  "slug": "xxviii-festival-internacional-de-musica-contemporanea-de-madrid-coma-26-nuevo-ensemble-de-segovia",
+  "title": "XXVIII Festival Internacional de Música Contemporánea de Madrid COMA’26. Nuevo Ensemble de Segovia",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_xxviii_festival_internacional_de_musica_contemporanea_de_madrid_coma201926_nuevo_ensemble_de_sego",
+      "date": "2026-10-11",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Nuevo Ensemble de Segovia"
+    },
+    {
+      "name": "percusión; Elena de Santos Cámara"
+    },
+    {
+      "name": "Chema García Portela y Flores Chaviano"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/xxviii-festival-internacional-de-musica-contemporanea-de-madrid-coma201926-nuevo-ensemble-de-segovia",
+      "checkedAt": "2026-09-04",
+      "externalId": "xxviii-festival-internacional-de-musica-contemporanea-de-madrid-coma201926-nuevo-ensemble-de-segovia"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-04"
+}

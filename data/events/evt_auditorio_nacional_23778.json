@@ -52,16 +52,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-cuarteto-de-jerusalen-3",
-      "checkedAt": "2026-09-03",
-      "externalId": "23778"
+      "checkedAt": "2026-09-04",
+      "externalId": "cndm-cuarteto-de-jerusalen-3"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23778",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-04",
       "externalId": "23778"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-04"
 }

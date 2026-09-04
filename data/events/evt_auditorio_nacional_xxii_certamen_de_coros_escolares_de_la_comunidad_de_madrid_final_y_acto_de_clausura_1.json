@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_xxii_certamen_de_coros_escolares_de_la_comunidad_de_madrid_final_y_acto_de_clausura_1",
+  "slug": "xxii-certamen-de-coros-escolares-de-la-comunidad-de-madrid-final-y-acto-de-clausura",
+  "title": "XXII Certamen de Coros Escolares de la Comunidad de Madrid. Final y Acto de Clausura",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_xxii_certamen_de_coros_escolares_de_la_comunidad_de_madrid_final_y_acto_de_clausura_1_01",
+      "date": "2026-09-23",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "choral"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/xxii-certamen-de-coros-escolares-de-la-comunidad-de-madrid-final-y-acto-de-clausura-1",
+      "checkedAt": "2026-09-04",
+      "externalId": "xxii-certamen-de-coros-escolares-de-la-comunidad-de-madrid-final-y-acto-de-clausura-1"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-04"
+}

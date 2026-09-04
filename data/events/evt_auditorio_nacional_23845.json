@@ -88,16 +88,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-juan-de-la-rubia-1",
-      "checkedAt": "2026-09-03",
-      "externalId": "23845"
+      "checkedAt": "2026-09-04",
+      "externalId": "cndm-juan-de-la-rubia-1"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23845",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-04",
       "externalId": "23845"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-04"
 }

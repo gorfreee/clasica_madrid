@@ -36,7 +36,11 @@
   "performers": [],
   "composers": [],
   "works": [],
-  "eras": [],
+  "eras": [
+    "early",
+    "renaissance",
+    "baroque"
+  ],
   "formats": [
     "early-music"
   ],
@@ -46,10 +50,10 @@
     {
       "sourceId": "src_teatro_real",
       "url": "https://www.teatroreal.es/es/espectaculo/miniclasica-descubriendo-musica-antigua",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-04",
       "externalId": "miniclasica-descubriendo-musica-antigua"
     }
   ],
   "primarySourceId": "src_teatro_real",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-04"
 }

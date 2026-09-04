@@ -33,10 +33,11 @@
   "citations": [
     {
       "sourceId": "src_real_hermandad_refugio",
-      "url": "https://realhermandaddelrefugio.org/calendario-de-eventos/musica-que-nos-une-concierto/",
-      "checkedAt": "2026-08-28"
+      "url": "https://realhermandaddelrefugio.org/calendario-de-eventos/musica-que-nos-une-concierto",
+      "checkedAt": "2026-09-04",
+      "externalId": "10557"
     }
   ],
   "primarySourceId": "src_real_hermandad_refugio",
-  "lastVerifiedAt": "2026-08-28"
+  "lastVerifiedAt": "2026-09-04"
 }
