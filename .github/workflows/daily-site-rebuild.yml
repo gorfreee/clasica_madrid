@@ -7,9 +7,8 @@ name: Daily site rebuild
 
 on:
   schedule:
-    # GitHub cron is UTC. 00:15 Europe/Madrid is 22:15 UTC (CEST) or 23:15 UTC (CET).
-    - cron: '15 22 * * *'
-    - cron: '15 23 * * *'
+    - cron: '15 0 * * *'
+      timezone: Europe/Madrid
   workflow_dispatch:
 
 permissions: {}
@@ -24,24 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Guard Europe/Madrid midnight
-        id: guard
-        if: github.event_name == 'schedule'
-        shell: bash
-        run: |
-          set -euo pipefail
-          madrid_now=$(TZ=Europe/Madrid date --iso-8601=seconds)
-          madrid_hour=$(TZ=Europe/Madrid date +%H)
-          if [[ "$madrid_hour" != "00" ]]; then
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-            echo "Fuera de la ventana de medianoche en Europe/Madrid ($madrid_now). No se dispara el deploy."
-          else
-            echo "skip=false" >> "$GITHUB_OUTPUT"
-            echo "Dentro de la ventana de medianoche en Europe/Madrid ($madrid_now)."
-          fi
-
       - name: Trigger Cloudflare Pages deploy hook
-        if: steps.guard.outputs.skip != 'true'
         env:
           DEPLOY_HOOK_URL: ${{ secrets.CLOUDFLARE_PAGES_DEPLOY_HOOK_URL }}
         shell: bash
