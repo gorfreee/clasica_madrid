@@ -37,10 +37,6 @@ export function addIsoDays(date: string, days: number): string {
   return utc.toISOString().slice(0, 10);
 }
 
-export function windowEnd(now: Date, days = DEFAULT_WINDOW_DAYS): string {
-  return addIsoDays(madridToday(now), days);
-}
-
 export function defaultIngestWindow(now: Date): IngestWindow {
   const from = madridToday(now);
   return { from, to: addIsoDays(from, DEFAULT_WINDOW_DAYS) };

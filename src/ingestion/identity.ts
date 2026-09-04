@@ -193,16 +193,6 @@ export function newObservationKeys(
   return keys;
 }
 
-export function sharesExclusiveSlot(
-  left: { venueId?: string; occurrences: Array<{ date: string; time: string | null; status?: string }> },
-  right: { venueId?: string; occurrences: Array<{ date: string; time: string | null; status?: string }> },
-): boolean {
-  if (!left.venueId || left.venueId !== right.venueId) return false;
-  return exclusiveSlotKeys(left.venueId, left.occurrences).some((key) =>
-    exclusiveSlotKeys(right.venueId, right.occurrences).includes(key),
-  );
-}
-
 export function exclusiveSlotKeys(
   venueId: string | undefined,
   occurrences: Array<{ date: string; time: string | null; status?: string }>,

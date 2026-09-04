@@ -15,10 +15,6 @@ export function foldName(value: string): string {
     .trim();
 }
 
-export function compactName(value: string): string {
-  return foldName(value).replace(/\s+/g, '');
-}
-
 export function hasWord(haystack: string, word: string): boolean {
   const foldedWord = foldText(word);
   if (!foldedWord) return false;
