@@ -1,5 +1,11 @@
 # RTVE / Teatro Monumental: selección de fuente y validación
 
+> **Documentación histórica.** Registro de la selección de fuente y dry-run de RTVE / Teatro Monumental (2026-08-31). **No** es el estado operativo actual ni un requisito de implementación.
+>
+> Lo implementado hoy está en [`docs/ingestion.md`](../ingestion.md). El adapter y sus tests viven en el código.
+>
+> Consérvese como evidencia de aquella corrida. Las métricas, commits y listas de eventos de este fichero no deben copiarse a documentación vigente.
+
 Investigación y ejecución del 31-08-2026, sobre `main` `3b1cbc3` (con ORCAM, March y el fetch relay ya incorporados).
 
 ## Mecanismo elegido

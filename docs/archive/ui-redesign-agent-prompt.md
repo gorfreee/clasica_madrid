@@ -1,5 +1,11 @@
 # Prompt — implementar el rediseño de interfaz
 
+> **Documentación histórica.** Prompt de una sola ejecución para implementar el rediseño de interfaz. **No** es un requisito vigente ni un procedimiento a reutilizar.
+>
+> La dirección de producto y UX de aquel rediseño está en [`docs/ui-redesign.md`](../ui-redesign.md). El contexto del proyecto está en [`PROJECT_CONTEXT.md`](../../PROJECT_CONTEXT.md).
+>
+> Consérvese como registro de aquella tarea.
+
 Implementa el rediseño visual completo de la interfaz pública de Clásica Madrid y abre una PR.
 
 Antes de modificar nada:

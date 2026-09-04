@@ -1,5 +1,11 @@
 # Hardening de Zarzuela — validación
 
+> **Documentación histórica.** Registro de un incidente de hydration 403 y de la validación del hardening de Zarzuela. **No** es el estado operativo actual ni un requisito de implementación.
+>
+> El comportamiento vigente está resumido en [`docs/ingestion.md`](../ingestion.md).
+>
+> Consérvese como evidencia de aquella corrida. Las métricas, commits y runs de este fichero no deben copiarse a documentación vigente.
+
 ## Evidencia y causa
 
 Base inspeccionada: `main` en `ad629c644ce8bd60a28792c85a5d7e3cd9baa1df`,

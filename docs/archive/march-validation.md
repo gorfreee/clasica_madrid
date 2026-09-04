@@ -1,5 +1,11 @@
 # Validación de Fundación Juan March — fetch relay
 
+> **Documentación histórica.** Snapshot de la validación del fetch relay contra Fundación Juan March (2026-08-31). **No** es el estado operativo actual ni un requisito de implementación.
+>
+> Lo implementado hoy está en [`docs/ingestion.md`](../ingestion.md). El Worker está en [`infra/fetch-relay`](../../infra/fetch-relay/README.md).
+>
+> Consérvese como evidencia de aquella corrida. Las métricas y runs de este fichero no deben copiarse a documentación vigente.
+
 Base: `main` en `c8547d1` (PR #42). No se modifica `data/**`. Adapter, hydration, clasificación y reconciliation de #40/#41 permanecen intactos.
 
 ## Conclusión operativa
@@ -35,7 +41,7 @@ El `degraded` no es un problema del relay ni de adquisición. Listing, hydration
 
 `getText` sigue siendo la abstracción común. March usa el relay porque el registry marca `useFetchRelay: true`, y sólo cuando `INGEST_FETCH_RELAY_URL` y `INGEST_FETCH_RELAY_TOKEN` están los dos. El adapter de March no conoce Cloudflare. Las URLs lógicas, citations, `externalId` y reports siguen siendo `https://www.march.es/...`.
 
-Worker: [`infra/fetch-relay`](../infra/fetch-relay/README.md). Genérico y autenticado (GET, Bearer, sólo HTTPS público, sin redirects cross-origin, cookie jar same-origin, HTML final sin `Set-Cookie`). No tiene allowlist de March; el único interruptor es `useFetchRelay` en el registry.
+Worker: [`infra/fetch-relay`](../../infra/fetch-relay/README.md). Genérico y autenticado (GET, Bearer, sólo HTTPS público, sin redirects cross-origin, cookie jar same-origin, HTML final sin `Set-Cookie`). No tiene allowlist de March; el único interruptor es `useFetchRelay` en el registry.
 
 ## Evidencia histórica (egress directo de Actions)
 
