@@ -115,8 +115,12 @@ export function mergeProposals(base: EventProposal, incoming: EventProposal): Ev
  *
  * Canonical/enrichment fields stay conservative: prefer the published value
  * over a later classifier or a thinner scrape. Empty incoming lists never
- * wipe published data. When both sides have values, keep the published ones
- * entirely (union/replace would drop `choral`, roles, or `composerName`).
+ * wipe published data. `title`, `kind` and `eras`/`formats` keep the published
+ * value when both sides have one (union/replace would drop `choral`).
+ * `performers`, `composers` and `works` grow monotonically: a later observation
+ * may append identities only when it is a compatible superset of everything
+ * already published. Matching items may still gain `role` / `composerName`.
+ * A poorer or conflicting observation never deletes published identities.
  * Typographic title equivalents are not a disagreement.
  */
 export function mergeExistingEvent(existing: Event, proposal: EventProposal, now: Date): MergedEvent {
@@ -303,11 +307,45 @@ function mergePublishedList<T>(
     return enrich(item, incoming[index]!);
   });
 
+  const compatibleSuperset = incomingCoversPublished(existing, incoming, identityOf);
+  if (compatibleSuperset) {
+    appendUnmatchedIncoming(value, incoming, used, identityOf);
+  }
+
   if (canonicalValuesEqual(value, incoming)) return { value };
+  if (compatibleSuperset && value.length > existing.length) return { value };
   return {
     value,
     diagnostic: `${field}: se conserva la información canónica; la observación difería`,
   };
+}
+
+function incomingCoversPublished<T>(
+  existing: T[],
+  incoming: T[],
+  identityOf: (item: T) => string,
+): boolean {
+  return existing.every((item) => {
+    const key = identityOf(item);
+    if (!key) return true;
+    return incoming.some((observed) => identityOf(observed) === key);
+  });
+}
+
+function appendUnmatchedIncoming<T>(
+  value: T[],
+  incoming: T[],
+  used: Set<number>,
+  identityOf: (item: T) => string,
+): void {
+  const seen = new Set(value.map(identityOf).filter(Boolean));
+  for (const [index, observed] of incoming.entries()) {
+    if (used.has(index)) continue;
+    const key = identityOf(observed);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    value.push(observed);
+  }
 }
 
 function enrichPerformer(canonical: Performer, observed: Performer): Performer {
