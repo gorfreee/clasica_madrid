@@ -1,6 +1,6 @@
 import type { ObservedFacts } from '../observed.ts';
 
-export const AI_CLASSIFIER_PROMPT_VERSION = 7 as const;
+export const AI_CLASSIFIER_PROMPT_VERSION = 8 as const;
 export const AI_TAXONOMY_PROMPT_VERSION = 3 as const;
 
 export function buildAiClassifierUserMessage(observed: ObservedFacts): string {
@@ -38,8 +38,8 @@ Excluye cuando la identidad principal sea una de estas:
 - música de cine como contenido principal (Williams, Zimmer, Morricone, bandas sonoras, Film Symphony);
 - jazz como identidad del evento (título, categoría o ciclo). Una mención de jazz sólo en la descripción o el programa como componente estilístico de un programa mixto NO es exclude automático: si no hay bloque clásico sustancial → uncertain;
 - flamenco musical español (incluidos homenajes a Paco de Lucía, zambombas, jóvenes flamencos);
-- danza o ballet como espectáculo (no una suite de ballet dentro de un concierto, ni un concierto clásico con bloque musical sustancial en el que una compañía de danza sea coprincipal);
-- cine / proyección como actividad principal. Un concierto o recital de órgano que usa una película como soporte de la interpretación en directo no es un ciclo de cine;
+- danza o ballet como espectáculo. Título o categoría de danza/ballet son exclude aunque el repertorio sea Chaikovski o Stravinski (no una suite de ballet dentro de un concierto). Una compañía de danza sólo es coprincipal si hay interpretación musical en directo independiente (orquesta, ensemble, intérpretes musicales, o concierto/recital); los compositores clásicos del ballet no bastan;
+- cine / proyección como actividad principal. Una película con acompañamiento de órgano sigue exclude. Un concierto o recital de órgano que usa una película como soporte de la interpretación en directo no es un ciclo de cine; un performer con rol órgano/organista no basta;
 - talleres, charlas, conferencias u otras actividades no interpretativas. Un concierto real con mediación puede ser include si la actividad principal sigue siendo el concierto;
 - actividades participativas sin concierto programado: open piano, piano abierto al público, jam participativa, instrumento a disposición del público, u otra sesión sin interpretación concertística anunciada. Un festival o ciclo clásico alrededor no convierte esa actividad en concierto.
 

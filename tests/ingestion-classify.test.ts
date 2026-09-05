@@ -97,10 +97,10 @@ describe('eligibility — exclusiones de identidad', () => {
     expect(suite.eligibility.value).toBe('include');
   });
 
-  it('incluye un concierto clásico con compañía de danza coprincipal si hay bloque musical sustancial', () => {
+  it('incluye un concierto clásico con compañía de danza coprincipal si hay interpretación musical independiente', () => {
     const viennese = classify(
       facts({
-        title: 'Concierto de temporada. Valses vieneses',
+        title: 'Filarmonía de Madrid. Viena en Madrid',
         performers: [
           { name: 'Orquesta Filarmonía' },
           { name: 'Compañía JAC Ballet' },
@@ -121,7 +121,7 @@ describe('eligibility — exclusiones de identidad', () => {
 
     const family = classify(
       facts({
-        title: 'Concierto en familia',
+        title: 'OCNE. En Familia',
         performers: [
           { name: 'Orquesta Nacional de España' },
           { name: 'Ballet Nacional de España' },
@@ -133,7 +133,7 @@ describe('eligibility — exclusiones de identidad', () => {
     expect(family.eligibility.ruleId).not.toBe('dance-spectacle');
   });
 
-  it('sigue excluyendo un espectáculo de danza sin bloque musical clásico sustancial', () => {
+  it('sigue excluyendo un espectáculo de danza aunque el repertorio sea clásico', () => {
     const spectacle = classify(
       facts({
         title: 'Gala de danza contemporánea',
@@ -144,7 +144,29 @@ describe('eligibility — exclusiones de identidad', () => {
     expect(spectacle.eligibility.value).toBe('exclude');
     expect(spectacle.eligibility.ruleId).toBe('dance-spectacle');
 
-    const balletWithOneNamedScore = classify(
+    const balletGala = classify(
+      facts({
+        title: 'Gala de ballet',
+        performers: [{ name: 'Compañía Nacional de Ballet' }],
+        composers: [{ name: 'Chaikovski' }, { name: 'Stravinski' }],
+      }),
+    );
+    expect(balletGala.eligibility.value).toBe('exclude');
+    expect(balletGala.eligibility.ruleId).toBe('dance-spectacle');
+
+    const swanLake = classify(
+      facts({
+        title: 'El lago de los cisnes',
+        performers: [{ name: 'Compañía de Ballet' }],
+        composers: [{ name: 'Chaikovski' }, { name: 'Stravinski' }],
+        programText:
+          'Chaikovski: El lago de los cisnes. Stravinski: El pájaro de fuego. Ballet completo.',
+      }),
+    );
+    expect(swanLake.eligibility.value).toBe('exclude');
+    expect(swanLake.eligibility.ruleId).toBe('dance-spectacle');
+
+    const balletWithCategory = classify(
       facts({
         title: 'El lago de los cisnes',
         categoryText: 'Danza',
@@ -152,8 +174,8 @@ describe('eligibility — exclusiones de identidad', () => {
         performers: [{ name: 'Compañía de Ballet' }],
       }),
     );
-    expect(balletWithOneNamedScore.eligibility.value).toBe('exclude');
-    expect(balletWithOneNamedScore.eligibility.ruleId).toBe('dance-spectacle');
+    expect(balletWithCategory.eligibility.value).toBe('exclude');
+    expect(balletWithCategory.eligibility.ruleId).toBe('dance-spectacle');
   });
 
   it('excluye cine cuando ver la película es la actividad principal', () => {
@@ -204,6 +226,18 @@ describe('eligibility — exclusiones de identidad', () => {
     );
     expect(screening.eligibility.value).toBe('exclude');
     expect(screening.eligibility.ruleId).toBe('cinema-projection');
+  });
+
+  it('excluye una proyección con acompañamiento de órgano sin identidad concertística', () => {
+    const nosferatu = classify(
+      facts({
+        title: 'Proyección de Nosferatu',
+        description: 'película muda con acompañamiento en directo',
+        performers: [{ name: 'Juan Pérez', roleText: 'órgano' }],
+      }),
+    );
+    expect(nosferatu.eligibility.value).toBe('exclude');
+    expect(nosferatu.eligibility.ruleId).toBe('cinema-projection');
   });
 
   it('excluye un taller aunque cite a Puccini', () => {

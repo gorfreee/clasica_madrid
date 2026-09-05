@@ -81,7 +81,7 @@ describe('AI classifier prompt v2', () => {
   const prompt = AI_CLASSIFIER_SYSTEM_PROMPT;
 
   it('is version 6 so results are distinguishable from earlier prompts', () => {
-    expect(AI_CLASSIFIER_PROMPT_VERSION).toBe(7);
+    expect(AI_CLASSIFIER_PROMPT_VERSION).toBe(8);
   });
 
   it('keeps precision, uncertain as a valid output, and the ban on inventing facts', () => {
@@ -102,6 +102,8 @@ describe('AI classifier prompt v2', () => {
     expect(prompt).toMatch(/danza o ballet como espect[aá]culo/);
     expect(prompt).toMatch(/cine\s*\/\s*proyecci[oó]n como actividad principal/);
     expect(prompt).toMatch(/recital de [oó]rgano que usa una pel[ií]cula como soporte/);
+    expect(prompt).toMatch(/performer con rol [oó]rgano/);
+    expect(prompt).toMatch(/compositores cl[aá]sicos del ballet no bastan/);
     expect(prompt).toMatch(/talleres, charlas, conferencias/);
   });
 
