@@ -1,0 +1,27 @@
+---
+import AgendaList from '../components/AgendaList.astro';
+import { loadFullAgendaFragment } from '../lib/presentation/site.ts';
+import { serializeJsonForScript } from '../lib/util/json-script.ts';
+
+export const prerender = true;
+
+const model = await loadFullAgendaFragment();
+---
+
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="robots" content="noindex" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Agenda completa</title>
+  </head>
+  <body>
+    <AgendaList days={model.days} />
+    <script
+      id="agenda-filter-data"
+      type="application/json"
+      is:inline
+      set:html={serializeJsonForScript(model.filterIndex)}
+    />
+  </body>
+</html>

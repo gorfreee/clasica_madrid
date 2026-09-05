@@ -7,7 +7,7 @@ type Props = {
 
 const { model } = Astro.props;
 ---
-{/* Contrato UI interno: [data-agenda-filters] y [data-clear-filters] los usa agenda-client.ts. */}
+{/* Contrato UI interno: [data-agenda-filters], [data-agenda-shortcuts] y [data-clear-filters] los usa agenda-client.ts. */}
 
 <section class="filters" aria-labelledby="buscar-titulo">
   <form class="filters__form" method="get" action="/" data-agenda-filters>
@@ -20,7 +20,7 @@ const { model } = Astro.props;
       <button class="search-submit" type="submit" aria-label="Aplicar filtros">Buscar</button>
     </div>
 
-    <nav class="shortcuts" aria-label="Accesos rápidos de agenda">
+    <nav class="shortcuts" aria-label="Accesos rápidos de agenda" data-agenda-shortcuts>
       {model.shortcuts.map((shortcut) => (
         <a class:list={["shortcut", { "shortcut--emphasis": shortcut.emphasis }]} href={shortcut.href}>
           {shortcut.label}

@@ -90,3 +90,11 @@ export function eventStatusLabel(status: 'scheduled' | 'cancelled' | 'postponed'
 export function occurrenceCountLabel(count: number): string {
   return count === 1 ? '1 representación próxima' : `${count} representaciones próximas`;
 }
+
+export function showingOccurrenceCountLabel(shown: number, total: number): string {
+  return `Mostrando ${shown} de ${total} representaciones próximas`;
+}
+
+export const showAllAgendaLabel = 'Mostrar todos';
+
+export const fullAgendaLoadErrorMessage = 'No se ha podido cargar la agenda completa.';

@@ -61,7 +61,8 @@ test.describe('agenda', () => {
     await page.locator('[data-clear-filters]').click();
 
     await expect(page).toHaveURL('/');
-    await expect(visibleOccurrences(page)).toHaveCount(initialCount);
+    const restoredCount = await visibleOccurrences(page).count();
+    expect(restoredCount).toBeGreaterThanOrEqual(initialCount);
     await expect(page.locator('[data-result-count]')).toHaveText(initialLabel);
     await expect(page.locator('[data-no-results]')).toBeHidden();
     await expect(page.locator('[data-clear-filters]')).toBeHidden();
@@ -82,9 +83,15 @@ test.describe('agenda', () => {
     await page.goBack();
 
     await expect(page).toHaveURL('/');
-    await expect(visibleOccurrences(page)).toHaveCount(initialCount);
+    const restoredCount = await visibleOccurrences(page).count();
+    expect(restoredCount).toBeGreaterThanOrEqual(initialCount);
     await expect(page.locator('[data-no-results]')).toBeHidden();
     await expect(form.getByRole('searchbox')).toHaveValue('');
+
+    await page.goForward();
+    await expect(page).toHaveURL(new RegExp(`[?&]q=${NO_MATCH_QUERY}`));
+    await expect(visibleOccurrences(page)).toHaveCount(0);
+    await expect(page.locator('[data-no-results]')).toBeVisible();
   });
 
   test('un slug histórico de sala filtra el lugar principal y marca esa opción', async ({ page }) => {
