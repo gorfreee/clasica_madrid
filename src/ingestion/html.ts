@@ -75,3 +75,24 @@ export function splitBreaks(html: string): string[] {
     .map((part) => stripTags(part))
     .filter(Boolean);
 }
+
+const BLOCK_BOUNDARY =
+  /<\/?(?:p|div|h[1-6]|li|ul|ol|blockquote|section|article|tr|table|hr|dt|dd)\b[^>]*>/gi;
+
+/**
+ * Preserve paragraph, list, heading and break boundaries as newlines, then
+ * strip remaining inline tags. Does not collapse those boundaries into a
+ * single prose blob.
+ */
+export function flattenHtmlBlocks(html: string): string {
+  const withBreaks = html
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(BLOCK_BOUNDARY, '\n');
+  return decodeHtmlEntities(withBreaks.replace(/<[^>]+>/g, ' '))
+    .split('\n')
+    .map((line) => line.replace(/\s+/g, ' ').trim())
+    .filter(Boolean)
+    .join('\n');
+}

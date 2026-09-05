@@ -13,6 +13,11 @@ import { runIngest } from '../src/ingestion/pipeline.ts';
 import { mergeCandidateBatch } from '../src/ingestion/batch.ts';
 import { matchVenue } from '../src/ingestion/venues.ts';
 import { emptyCatalog, type Catalog } from '../src/lib/domain/catalog.ts';
+import { classify } from '../src/ingestion/classification/classify.ts';
+import { isPublishableInclude } from '../src/ingestion/classification/types.ts';
+import { enrichNormalizedEvent } from '../src/ingestion/enrich-normalized.ts';
+import { normalizeRawEvent, observedFactsFromNormalized } from '../src/ingestion/normalize.ts';
+import { toCandidate } from '../src/ingestion/to-candidate.ts';
 import type { AdapterContext, RawEvent } from '../src/ingestion/types.ts';
 import { TEST_NOW, TEST_WINDOW, makeEvent } from './helpers.ts';
 
@@ -73,6 +78,7 @@ describe('Fundación Più Mosso listing', () => {
       { raw: '2026-09-12T19:30:00+02:00', date: '2026-09-12', time: '19:30' },
     ]);
     expect(piano.observed.description).toContain('Schumann');
+    expect(piano.observed.programText).toBeUndefined();
     expect(piano).not.toHaveProperty('eligibility');
 
     const prisuelos = events.find((event) => event.externalId === '2192')!;
@@ -83,6 +89,7 @@ describe('Fundación Più Mosso listing', () => {
     expect(prisuelos.observed.categoryText).toBe('CICLO GRANDES INTÉRPRETES');
     expect(prisuelos.observed.accessText).toBeUndefined();
     expect(prisuelos.observed.occurrences[0]).toMatchObject({ date: '2026-09-20', time: '19:30' });
+    expect(prisuelos.observed.programText).toBeUndefined();
 
     const festival = events.find((event) => event.externalId === '2195')!;
     expect(festival.observed.occurrences).toEqual([
@@ -170,6 +177,8 @@ describe('Fundación Più Mosso ficha', () => {
     expect(patch.occurrences).toEqual([{ raw: '2026-09-12 19:30', date: '2026-09-12', time: '19:30' }]);
     expect(patch.accessText).toBe('Gratuito');
     expect(patch.description).toContain('Schumann');
+    expect(patch.programText).toBe('Schumann - Moszkowski - Chopin - Brahms - Beethoven - Ravel - Liszt');
+    expect(patch.programText).not.toMatch(/Dirección artística/i);
     expect(patch.composers).toEqual([]);
     expect(patch.works).toEqual([]);
     expect(patch).not.toHaveProperty('eligibility');
@@ -183,6 +192,8 @@ describe('Fundación Più Mosso ficha', () => {
     expect(patch.accessText).toBeUndefined();
     expect(patch.categoryText).toBe('CICLO GRANDES INTÉRPRETES');
     expect(patch.description).toMatch(/Música callada/i);
+    expect(patch.description).toContain('Tomás Marco');
+    expect(patch.programText).toBeUndefined();
   });
 
   it('keeps the published 08:00–17:00 slot and does not invent a concert hour', async () => {
@@ -214,6 +225,126 @@ describe('Fundación Più Mosso ficha', () => {
     const [failed] = await hydrateEvents([event], adapter, { ...ctx, get: async () => '<html>Unavailable</html>' });
     expect(failed?.hydration?.status).toBe('failed');
     expect(failed?.observed).toEqual(event.observed);
+  });
+});
+
+const BIOGRAPHY_COMPOSERS = [
+  'Tomás Marco',
+  'David del Puerto',
+  'Marisa Manchado',
+  'Alberto Carretero',
+  'Mario Carro',
+  'Mauricio Sotelo',
+];
+
+function withPiumossoDescription(html: string, inner: string): string {
+  return html.replace(
+    /<div class="tribe-events-single-event-description tribe-events-content">[\s\S]*?<\/div>/,
+    `<div class="tribe-events-single-event-description tribe-events-content">${inner}</div>`,
+  );
+}
+
+function publishableFrom(raw: RawEvent) {
+  const normalized = normalizeRawEvent(raw);
+  expect(normalized).toBeDefined();
+  const enriched = enrichNormalizedEvent(normalized!);
+  const classification = classify(observedFactsFromNormalized(enriched));
+  expect(isPublishableInclude(classification), classification.eligibility.ruleId).toBe(true);
+  const catalog = catalogWithMompou();
+  const built = toCandidate(
+    enriched,
+    source,
+    catalog,
+    TEST_NOW,
+    new Set(catalog.events.map((event) => event.id)),
+    new Set(catalog.events.map((event) => event.slug)),
+    classification,
+  );
+  return { enriched, classification, candidate: built.candidate?.event };
+}
+
+describe('Fundación Più Mosso programText', () => {
+  it('Música callada: title fallback recovers Mompou and ignores biography composers', async () => {
+    const event = await sample('2192');
+    const [hydrated] = await hydrateEvents([event], adapter, { ...ctx, get: pages });
+    expect(hydrated?.observed.programText).toBeUndefined();
+    expect(hydrated?.observed.description).toContain('Tomás Marco');
+    const { enriched, candidate } = publishableFrom(hydrated!);
+    expect(enriched.composers).toEqual([{ name: 'Frederic Mompou' }]);
+    expect(enriched.occurrences[0]).toMatchObject({ date: '2026-09-20', time: '19:30' });
+    expect(candidate?.composers).toEqual([{ name: 'Frederic Mompou' }]);
+    for (const name of BIOGRAPHY_COMPOSERS) {
+      expect(enriched.composers.map((item) => item.name)).not.toContain(name);
+      expect(candidate?.composers.map((item) => item.name)).not.toContain(name);
+    }
+  });
+
+  it('listado → hydration does not recover a contaminated listing programText', async () => {
+    const url = 'https://www.fundacionpiumosso.com/evento/mario-prisuelos-musica-callada-de-frederic-mompou';
+    const bio = `El intérprete estrena obras de ${BIOGRAPHY_COMPOSERS.join(', ')}.`;
+    const html = `<body class="page"><h1>Programación</h1>${oneCardListing(
+      '2192',
+      url,
+      'MARIO PRISUELOS. MÚSICA CALLADA DE FREDERIC MOMPOU.',
+      '2026-09-20T19:30:00+02:00',
+      bio,
+    )}</body>`;
+    const [listed] = await adapter.extract(html, listingUrl, ctx);
+    expect(listed?.observed.description).toContain('Tomás Marco');
+    expect(listed?.observed.programText).toBeUndefined();
+    const [hydrated] = await hydrateEvents([listed!], adapter, { ...ctx, get: pages });
+    expect(hydrated?.observed.programText).toBeUndefined();
+    expect(hydrated?.observed.description).toContain('Tomás Marco');
+    expect(enrichNormalizedEvent(normalizeRawEvent(hydrated!)!).composers).toEqual([
+      { name: 'Frederic Mompou' },
+    ]);
+  });
+
+  it('a legitimate repertoire list still enriches known composers, including names absent from the knowledge base', async () => {
+    const event = await sample();
+    const [hydrated] = await hydrateEvents([event], adapter, { ...ctx, get: pages });
+    expect(hydrated?.observed.programText).toBe(
+      'Schumann - Moszkowski - Chopin - Brahms - Beethoven - Ravel - Liszt',
+    );
+    expect(hydrated?.observed.programText).toContain('Moszkowski');
+    const { enriched } = publishableFrom(hydrated!);
+    expect(enriched.composers.map((item) => item.name)).toEqual([
+      'Robert Schumann',
+      'Frédéric Chopin',
+      'Johannes Brahms',
+      'Ludwig van Beethoven',
+      'Maurice Ravel',
+      'Franz Liszt',
+    ]);
+    expect(enriched.occurrences[0]).toMatchObject({ date: '2026-09-12', time: '19:30' });
+  });
+
+  it('extracts a Programa heading that appears after a biography', async () => {
+    const event = await sample('2192');
+    const html = withPiumossoDescription(
+      await fixture('detail-prisuelos'),
+      `<p>Nacido en Madrid. Ha estrenado obras de Tomás Marco y Mauricio Sotelo.</p><p><strong>EL INTÉRPRETE: MARIO PRISUELOS</strong></p><p>Biografía con Chopin y Brahms en frases corridas.</p><p><strong>Programa</strong></p><p>Obras de J. S. Bach y Johannes Brahms</p>`,
+    );
+    const patch = parsePiumossoDetail(event, html);
+    expect(patch.programText).toBe('Obras de J. S. Bach y Johannes Brahms');
+    expect(patch.description).toContain('Tomás Marco');
+    const raw = { ...event, observed: { ...event.observed, ...patch } };
+    expect(enrichNormalizedEvent(normalizeRawEvent(raw)!).composers.map((item) => item.name)).toEqual([
+      'Johann Sebastian Bach',
+      'Johannes Brahms',
+    ]);
+  });
+
+  it('keeps an independent composer list without requiring every name in the knowledge base', async () => {
+    const event = await sample();
+    const html = withPiumossoDescription(
+      await fixture('detail-tretyakov'),
+      `<p>Recital de piano.</p><ul><li>Schumann</li><li>Moszkowski</li><li>Chopin</li></ul><p><strong>Dirección artística</strong></p><p>Francisco Fierro</p>`,
+    );
+    const patch = parsePiumossoDetail(event, html);
+    expect(patch.programText).toBe('Schumann Moszkowski Chopin');
+    expect(patch.programText).toContain('Moszkowski');
+    expect(patch.description).toContain('Francisco Fierro');
   });
 });
 
@@ -309,7 +440,7 @@ function catalogWithMompou(): Catalog {
   };
 }
 
-function oneCardListing(id: string, url: string, title: string, startDate: string): string {
+function oneCardListing(id: string, url: string, title: string, startDate: string, description?: string): string {
   const ld = JSON.stringify([
     {
       '@context': 'http://schema.org',
@@ -318,6 +449,7 @@ function oneCardListing(id: string, url: string, title: string, startDate: strin
       url,
       startDate,
       location: { '@type': 'Place', name: 'Ateneo de Madrid' },
+      ...(description ? { description } : {}),
     },
   ]);
   return `<script type="application/ld+json">${ld}</script><div id="ect-grid-wrapper"><div id="event-${id}" class="ect-grid-event"><div class="ect-grid-title"><h4><a class="ect-event-url" href="${url}">${title}</a></h4></div></div></div>`;

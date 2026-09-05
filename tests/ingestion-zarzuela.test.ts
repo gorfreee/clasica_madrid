@@ -10,6 +10,11 @@ import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { runIngest } from '../src/ingestion/pipeline.ts';
 import { emptyCatalog } from '../src/lib/domain/catalog.ts';
 import { resolveEligibility } from '../src/ingestion/classification/eligibility.ts';
+import { classify } from '../src/ingestion/classification/classify.ts';
+import { isPublishableInclude } from '../src/ingestion/classification/types.ts';
+import { enrichNormalizedEvent } from '../src/ingestion/enrich-normalized.ts';
+import { normalizeRawEvent, observedFactsFromNormalized } from '../src/ingestion/normalize.ts';
+import { toCandidate } from '../src/ingestion/to-candidate.ts';
 import { IncompleteListingError, type AdapterContext, type RawEvent } from '../src/ingestion/types.ts';
 import { HttpError } from '../src/ingestion/http.ts';
 import { TEST_NOW, TEST_WINDOW, makeEvent, makeVenue } from './helpers.ts';
@@ -143,7 +148,10 @@ describe('fichas y horarios de Zarzuela', () => {
     expect(patch.occurrences?.some((o) => o.date === '2026-09-26')).toBe(false);
     expect(patch.composers).toEqual([{ name: 'TOMÁS BRETÓN' }]);
     expect(patch.performers).toEqual([{ name: 'CARLOS ARAGÓN', roleText: 'Dirección musical' }]);
-    expect(patch.programText).toContain('GERARDO LÓPEZ');
+    expect(patch.programText).toBeUndefined();
+    expect(patch.description).toContain('GERARDO LÓPEZ');
+    expect(patch.description).toContain('TOMÁS BRETÓN');
+    expect(patch.performers?.some((item) => item.name.includes('GERARDO'))).toBe(false);
     expect(patch.description).not.toContain('Newsletter');
     expect(patch.accessText).toBe('Comprar entradas');
     expect(patch).not.toHaveProperty('formats');
@@ -188,6 +196,14 @@ describe('fichas y horarios de Zarzuela', () => {
       '2027-06-25 19:30',
     ]);
     expect(patch.occurrences?.some((o) => o.raw.includes('FUNCIÓN'))).toBe(false);
+    expect(patch.composers).toEqual([{ name: 'FRANCISCO ASENJO BARBIERI' }]);
+    expect(patch.programText).toBeUndefined();
+    expect(patch.description).toContain('FRANCISCO ASENJO BARBIERI');
+    expect(patch.description).toContain('CÉSAR ARRIETA');
+    expect(patch.performers).toEqual([
+      { name: 'JOSÉ MIGUEL PÉREZ-SIERRA/ JULIO CÉSAR PICOS', roleText: 'Dirección musical' },
+    ]);
+    expect(patch.performers?.some((item) => /arrieta/i.test(item.name))).toBe(false);
   });
 
   it('mantiene sesiones dobles y horarios particulares por fecha, sin mezclar escolares y familias', async () => {
@@ -289,6 +305,134 @@ describe('fichas y horarios de Zarzuela', () => {
       expect(events.every((e) => e.hydration?.status === 'failed' || e.hydration?.reason === 'outside-window')).toBe(true);
       expect(events.every((e) => !e.observed.occurrences.length)).toBe(true);
     } finally { vi.useRealTimers(); }
+  });
+});
+
+const SEASON_WINDOW = { from: '2026-09-01', to: '2027-07-31' } as const;
+
+function zarzuelaFicha(options: {
+  title?: string;
+  intro: string;
+  artistic?: string;
+  program?: string;
+  schedule?: string;
+}): string {
+  const title = options.title ?? 'El barberillo de Lavapiés';
+  const artistic = options.artistic ?? '<dl><dt>Dirección musical</dt><dd>JOSÉ MIGUEL PÉREZ-SIERRA</dd></dl>';
+  const schedule = options.schedule ?? '<p>Martes, 6 de octubre de 2026<br />19:30 horas</p>';
+  const program = options.program
+    ? `<div class="encabezado-bloque"><h3>Programa</h3></div>${options.program}`
+    : '';
+  return `<span id="startOfPageId854"></span>
+<h2 class="antetitulo first">Lírica</h2>
+<div class="descripcionWrapper fichaMod1">
+<div class="encabezado-titulo"><h3 class="titulo">${title}</h3></div>
+${options.intro}
+</div>
+<div class="encabezado-bloque"><h3>Fechas y Horarios</h3></div>
+${schedule}
+<div class="encabezado-bloque"><h3>Ficha Artística</h3></div>
+${artistic}
+${program}
+<!-- Plugins: AfterDisplayContent -->
+</div>
+<!--END CONTENT-->`;
+}
+
+function zarzuelaPublishable(patch: ReturnType<typeof parseZarzuelaDetail>, title = 'El barberillo de Lavapiés') {
+  const event = raw('el-barbarillo-de-lavapies');
+  event.observed.title = title;
+  const hydrated: RawEvent = {
+    ...event,
+    observed: { ...event.observed, ...patch, occurrences: patch.occurrences ?? [] },
+  };
+  const normalized = normalizeRawEvent(hydrated);
+  expect(normalized).toBeDefined();
+  const enriched = enrichNormalizedEvent(normalized!);
+  const classification = classify(observedFactsFromNormalized(enriched));
+  expect(isPublishableInclude(classification), classification.eligibility.ruleId).toBe(true);
+  const catalog = emptyCatalog();
+  catalog.venues = [makeVenue({ id: 'ven_teatro_zarzuela', slug: 'teatro-de-la-zarzuela', name: 'Teatro de la Zarzuela', url: base })];
+  const built = toCandidate(
+    enriched,
+    source,
+    catalog,
+    TEST_NOW,
+    new Set(),
+    new Set(),
+    classification,
+    SEASON_WINDOW,
+  );
+  return { enriched, candidate: built.candidate?.event };
+}
+
+describe('Zarzuela programText y crédito de autor', () => {
+  it('El barberillo: Francisco Asenjo Barbieri from the music credit, never Emilio Arrieta from César Arrieta', async () => {
+    const patch = parseZarzuelaDetail(raw('el-barbarillo-de-lavapies'), await fixture('detail-barberillo'));
+    const { enriched, candidate } = zarzuelaPublishable(patch);
+    expect(enriched.composers).toEqual([{ name: 'FRANCISCO ASENJO BARBIERI' }]);
+    expect(candidate?.composers).toEqual([{ name: 'FRANCISCO ASENJO BARBIERI' }]);
+    expect(enriched.programText).toBeUndefined();
+    expect(enriched.description).toContain('CÉSAR ARRIETA');
+    expect(enriched.composers.map((item) => item.name).join(' ')).not.toMatch(/Emilio Arrieta/i);
+    expect(candidate?.occurrences).toHaveLength(13);
+    expect(candidate?.occurrences[0]).toMatchObject({ date: '2027-06-09', time: '19:30' });
+    expect(candidate?.occurrences[4]).toMatchObject({ date: '2027-06-13', time: '18:00' });
+  });
+
+  it.each([
+    ['strong', '<p>Música de <strong>FRANCISCO ASENJO BARBIERI</strong></p>'],
+    ['b', '<p>Música de <b>FRANCISCO ASENJO BARBIERI</b></p>'],
+    ['span', '<p><span>Música de </span><strong>FRANCISCO ASENJO BARBIERI</strong></p>'],
+    ['texto plano', '<p>Música de FRANCISCO ASENJO BARBIERI</p>'],
+    ['Música:', '<p>Música: FRANCISCO ASENJO BARBIERI</p>'],
+    ['continuación tras br', '<p>Música de<br /><strong>FRANCISCO ASENJO BARBIERI</strong></p>'],
+    ['continuación en el siguiente bloque', '<p>Música de</p><p>FRANCISCO ASENJO BARBIERI</p>'],
+    ['hasta Libreto de', '<p>Música de FRANCISCO ASENJO BARBIERI Libreto de LUIS MARIANO DE LARRA</p>'],
+  ])('lee el crédito musical con marcado %s', (_label, intro) => {
+    const patch = parseZarzuelaDetail(raw(), zarzuelaFicha({ intro }));
+    expect(patch.composers).toEqual([{ name: 'FRANCISCO ASENJO BARBIERI' }]);
+    expect(patch.programText).toBeUndefined();
+    expect(enrichNormalizedEvent(normalizeRawEvent({
+      ...raw(),
+      observed: { ...raw().observed, ...patch, occurrences: patch.occurrences ?? [] },
+    })!).composers).toEqual([{ name: 'FRANCISCO ASENJO BARBIERI' }]);
+  });
+
+  it('un reparto con apellido de compositor, sin crédito ni repertorio, no inventa el compositor', () => {
+    const patch = parseZarzuelaDetail(
+      raw(),
+      zarzuelaFicha({
+        intro: '<p>Zarzuela en tres actos. Una de las zarzuelas más representadas del repertorio.</p>',
+        artistic:
+          '<dl><dt>Dirección musical</dt><dd>JOSÉ MIGUEL PÉREZ-SIERRA</dd></dl><dl><dt class="spacing2">Reparto</dt><dd>Don Luis de Haro <strong>CÉSAR ARRIETA</strong></dd></dl>',
+      }),
+    );
+    expect(patch.composers).toEqual([]);
+    expect(patch.programText).toBeUndefined();
+    expect(patch.description).toContain('CÉSAR ARRIETA');
+    expect(patch.performers?.some((item) => /arrieta/i.test(item.name))).toBe(false);
+    expect(enrichNormalizedEvent(normalizeRawEvent({
+      ...raw(),
+      observed: { ...raw().observed, title: 'Función de zarzuela', ...patch, occurrences: patch.occurrences ?? [] },
+    })!).composers).toEqual([]);
+  });
+
+  it('construye programText sólo con la sección Programa, no con la ficha artística', () => {
+    const patch = parseZarzuelaDetail(
+      raw(),
+      zarzuelaFicha({
+        intro: '<p>Música de <strong>FRANCISCO ASENJO BARBIERI</strong></p><p>Libreto de LUIS MARIANO DE LARRA</p>',
+        artistic:
+          '<dl><dt>Dirección musical</dt><dd>JOSÉ MIGUEL PÉREZ-SIERRA</dd></dl><dl><dt class="spacing2">Reparto</dt><dd>Don Luis de Haro <strong>CÉSAR ARRIETA</strong></dd></dl>',
+        program: '<p>Obras de Francisco Asenjo Barbieri. El barberillo de Lavapiés.</p>',
+      }),
+    );
+    expect(patch.programText).toBe('Obras de Francisco Asenjo Barbieri. El barberillo de Lavapiés.');
+    expect(patch.programText).not.toMatch(/CÉSAR ARRIETA/);
+    expect(patch.description).toContain('CÉSAR ARRIETA');
+    expect(patch.description).toContain('FRANCISCO ASENJO BARBIERI');
+    expect(patch.composers).toEqual([{ name: 'FRANCISCO ASENJO BARBIERI' }]);
   });
 });
 
