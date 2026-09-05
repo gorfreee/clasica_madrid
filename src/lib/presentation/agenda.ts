@@ -45,7 +45,9 @@ export type AgendaDayModel = {
   dateLabel: string;
   dayNumber: string;
   weekdayLabel: string;
+  monthName: string;
   monthLabel: string;
+  year: string;
   monthKey: string;
   isToday: boolean;
   isTomorrow: boolean;
@@ -178,17 +180,20 @@ function buildDay(
     timeZone: 'Europe/Madrid',
     weekday: 'long',
   }).format(instant);
-  const monthLabel = new Intl.DateTimeFormat('es-ES', {
+  const monthName = new Intl.DateTimeFormat('es-ES', {
     timeZone: 'Europe/Madrid',
     month: 'long',
-    year: 'numeric',
   }).format(instant);
+  const year = date.slice(0, 4);
+  const monthLabel = `${monthName} de ${year}`;
   return {
     date,
     dateLabel: formatMadridDate(date),
     dayNumber: date.slice(8, 10).replace(/^0/, ''),
     weekdayLabel,
+    monthName,
     monthLabel,
+    year,
     monthKey: date.slice(0, 7),
     isToday: date === today,
     isTomorrow: date === tomorrow,
