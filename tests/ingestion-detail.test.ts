@@ -906,7 +906,7 @@ describe('parser de ficha Auditorio Nacional', () => {
     const facts = parseAuditorioNacionalDetail(html);
     const names = facts.performers?.map((item) => item.name) ?? [];
 
-    expect(names).toEqual(expect.arrayContaining(['Quima Ensemble', 'Elsa Sánchez', 'Marta Santamaría']));
+    expect(names).toEqual(expect.arrayContaining(['Quima Ensemble', 'Elsa Sánchez', 'Marta Santamaría', 'José María Ferrero']));
     expect(names.some((name) => /corno ingl[eé]s|françaix|schubert/i.test(name))).toBe(false);
     expect(facts.programText).toMatch(/Cuarteto para corno inglés/);
   });
@@ -932,7 +932,12 @@ describe('parser de ficha Auditorio Nacional', () => {
     const names = facts.performers?.map((item) => item.name) ?? [];
 
     expect(names).toEqual(
-      expect.arrayContaining(['QUINTETO DE LA FILARMÓNICA DE BERLÍN', 'Wolfgang Talirz', 'Miguel Ángel Tamarit']),
+      expect.arrayContaining([
+        'QUINTETO DE LA FILARMÓNICA DE BERLÍN',
+        'Luiz Felipe Coelho',
+        'Wolfgang Talirz',
+        'Miguel Ángel Tamarit',
+      ]),
     );
     expect(names.some((name) => /quinteto para clarinete|op\. 34/i.test(name))).toBe(false);
     expect(facts.works).toEqual(

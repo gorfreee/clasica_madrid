@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   findProgramStartIndex,
+  looksLikeRoleOnlyLine,
   parseAuditorioPersonCredits,
   parseAuditorioPersonLine,
   parseComposerColonWork,
@@ -441,6 +442,13 @@ describe('segmentación performer/programa del Auditorio', () => {
       name: 'Manuel Tévar',
       roleText: 'director',
     });
+    expect(parseAuditorioPersonLine('Luiz Felipe Coelho, violín I')).toEqual({
+      name: 'Luiz Felipe Coelho',
+      roleText: 'violín I',
+    });
+    expect(looksLikeRoleOnlyLine('Corno inglés')).toBe(true);
+    expect(looksLikeRoleOnlyLine('Clarinete bajo')).toBe(true);
+    expect(looksLikeRoleOnlyLine('Flautín')).toBe(true);
   });
 
   it('obra (compositor) persona, rol extrae el intérprete y deja la obra', () => {

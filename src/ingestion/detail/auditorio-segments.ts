@@ -20,11 +20,12 @@ export type AuditorioSegments = {
 };
 
 const ROLE_TOKEN =
-  'mezzosoprano|mezzo|soprano|contratenor|bajo-bar[ií]tono|bar[ií]tono|tenor|bajo|piano|viol[ií]n|viola|violonchelo|violoncelo|cello|contrabajo|flauta|oboe|clarinete|fagot|trompa|trompeta|tromb[oó]n|arpa|clave|la[uú]d|tiorba|guitarra|percusiones|percusi[oó]n|bater[ií]a|mel[oó]dica|\\u00f3rgano|organo|concertino|directora|director|direcci[oó]n|narradora|solista|core[oó]graf[oa]';
+  'mezzosoprano|mezzo|soprano|contratenor|bajo-bar[ií]tono|bar[ií]tono|tenor|bajo|alto|piano|viol[ií]n|viola|violonchelo|violoncelo|cello|contrabajo|flauta|flaut[ií]n|oboe|clarinete|fagot|trompa|trompeta|tromb[oó]n|corno|arpa|clave|la[uú]d|tiorba|guitarra|percusiones|percusi[oó]n|bater[ií]a|mel[oó]dica|\\u00f3rgano|organo|concertino|directora|director|direcci[oó]n|narradora|solista|core[oó]graf[oa]|cantaora';
 
 const CREDIT_PHRASE = 'preparaci[oó]n del conjunto vocal|asistente de direcci[oó]n';
 
-const ROLE_QUALIFIER = '(?:\\s+(?:primer[oa]|segund[oa]|principal|art[ií]stic[oa]))?';
+const ROLE_QUALIFIER =
+  '(?:\\s+(?:primer[oa]|segund[oa]|principal|art[ií]stic[oa]|ingl[eé]s|bajo|i{1,3}|[1-3]))?';
 
 const ROLE_ONLY = new RegExp(
   `^(?:(?:violines|tenores|bajos|sopranos?|mezzosopranos?|bar[ií]tonos?|pianos?|${ROLE_TOKEN})${ROLE_QUALIFIER}(?:\\s+y\\s+(?:musical|${ROLE_TOKEN})${ROLE_QUALIFIER})?|${CREDIT_PHRASE})$`,
@@ -287,9 +288,8 @@ export function parseComposerColonWork(
     return { title, composerName };
   }
   if (!colon && comma) {
-    // `Work, para viola` is instrumentation, not Composer, Title.
     if (/^(?:para|for)\b/i.test(title)) return undefined;
-    if (!canPairAsAuditorioComposer(composerName) && !looksLikeComposerLine(composerName)) {
+    if (!looksLikeComposerLine(composerName) && !INITIALS_COMPOSER.test(composerName)) {
       return undefined;
     }
     if (!looksLikeCommaOrDotDashTitle(title)) return undefined;
@@ -516,6 +516,12 @@ function parseCommaRole(text: string): { name: string; roleText: string } | unde
   if (WORK_GENRE.test(name) || WORK_GENRE.test(role)) return undefined;
   if (looksLikeWorkInstrumentation(text) || looksLikeWorkInstrumentation(name)) return undefined;
   if (!ROLE_ONLY.test(role)) return undefined;
+  if (looksLikeRoleOnlyLine(name)) return undefined;
+  const shared = name.split(/\s+y\s+/i).map((part) => part.trim()).filter(Boolean);
+  const nameOk =
+    looksLikePersonOrGroupName(name) ||
+    (shared.length === 2 && shared.every((part) => looksLikeUnlabeledPerson(part)));
+  if (!nameOk) return undefined;
   return { name, roleText: role };
 }
 
