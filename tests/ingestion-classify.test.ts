@@ -97,6 +97,87 @@ describe('eligibility — exclusiones de identidad', () => {
     expect(suite.eligibility.value).toBe('include');
   });
 
+  it('incluye un concierto clásico con compañía de danza coprincipal si hay interpretación musical independiente', () => {
+    const viennese = classify(
+      facts({
+        title: 'Filarmonía de Madrid. Viena en Madrid',
+        performers: [
+          { name: 'Orquesta Filarmonía' },
+          { name: 'Compañía JAC Ballet' },
+          { name: 'Coreógrafo invitado', roleText: 'Coreógrafo' },
+        ],
+        composers: [{ name: 'F. V. Suppé' }, { name: 'J. Offenbach' }, { name: 'F. Lehár' }],
+        works: [
+          { title: 'Pique Dame', composerName: 'F. V. Suppé' },
+          { title: 'La Belle Hélène', composerName: 'J. Offenbach' },
+          { title: 'Nechledil March', composerName: 'F. Lehár' },
+        ],
+        programText:
+          'Pique Dame, F. V. Suppé. La Belle Hélène, J. Offenbach. Nechledil March, F. Lehár.',
+      }),
+    );
+    expect(viennese.eligibility.value).toBe('include');
+    expect(viennese.eligibility.ruleId).not.toBe('dance-spectacle');
+
+    const family = classify(
+      facts({
+        title: 'OCNE. En Familia',
+        performers: [
+          { name: 'Orquesta Nacional de España' },
+          { name: 'Ballet Nacional de España' },
+        ],
+        programText: 'Domenico Scarlatti / Miguel Ángel Coria. Seis sonatas para la reina de España',
+      }),
+    );
+    expect(family.eligibility.value).toBe('include');
+    expect(family.eligibility.ruleId).not.toBe('dance-spectacle');
+  });
+
+  it('sigue excluyendo un espectáculo de danza aunque el repertorio sea clásico', () => {
+    const spectacle = classify(
+      facts({
+        title: 'Gala de danza contemporánea',
+        performers: [{ name: 'Compañía Nacional de Ballet' }],
+        description: 'Espectáculo de danza con coreografía original.',
+      }),
+    );
+    expect(spectacle.eligibility.value).toBe('exclude');
+    expect(spectacle.eligibility.ruleId).toBe('dance-spectacle');
+
+    const balletGala = classify(
+      facts({
+        title: 'Gala de ballet',
+        performers: [{ name: 'Compañía Nacional de Ballet' }],
+        composers: [{ name: 'Chaikovski' }, { name: 'Stravinski' }],
+      }),
+    );
+    expect(balletGala.eligibility.value).toBe('exclude');
+    expect(balletGala.eligibility.ruleId).toBe('dance-spectacle');
+
+    const swanLake = classify(
+      facts({
+        title: 'El lago de los cisnes',
+        performers: [{ name: 'Compañía de Ballet' }],
+        composers: [{ name: 'Chaikovski' }, { name: 'Stravinski' }],
+        programText:
+          'Chaikovski: El lago de los cisnes. Stravinski: El pájaro de fuego. Ballet completo.',
+      }),
+    );
+    expect(swanLake.eligibility.value).toBe('exclude');
+    expect(swanLake.eligibility.ruleId).toBe('dance-spectacle');
+
+    const balletWithCategory = classify(
+      facts({
+        title: 'El lago de los cisnes',
+        categoryText: 'Danza',
+        composers: [{ name: 'Chaikovski' }, { name: 'Minkus' }],
+        performers: [{ name: 'Compañía de Ballet' }],
+      }),
+    );
+    expect(balletWithCategory.eligibility.value).toBe('exclude');
+    expect(balletWithCategory.eligibility.ruleId).toBe('dance-spectacle');
+  });
+
   it('excluye cine cuando ver la película es la actividad principal', () => {
     const result = classify(
       facts({
@@ -107,6 +188,56 @@ describe('eligibility — exclusiones de identidad', () => {
     );
     expect(result.eligibility.value).toBe('exclude');
     expect(result.eligibility.ruleId).toBe('cinema-projection');
+  });
+
+  it('incluye un concierto de órgano en directo aunque la ficha mencione la proyección de una película muda', () => {
+    const fromListing = classify(
+      facts({
+        title: 'Ciclo de órgano. Organista invitado',
+        performers: [{ name: 'Organista invitado', roleText: 'órgano' }],
+        programText: 'Improvisaciones sobre la película muda Amanecer (1927), de Friedrich Wilhelm Murnau',
+      }),
+    );
+    expect(fromListing.eligibility.value).toBe('include');
+    expect(fromListing.eligibility.ruleId).toBe('organ-concert');
+    expect(fromListing.formats?.value).toContain('organ');
+
+    const fromDetail = classify(
+      facts({
+        title: 'Organista invitado',
+        seriesText: 'Bach Vermut',
+        description:
+          'Concierto en el órgano de la Sala Sinfónica. Pondrá música en directo a la proyección de Amanecer (1927), obra maestra del cine mudo. Improvisación concebida en tiempo real.',
+        programText: 'Improvisaciones sobre la película Amanecer (1927), de Friedrich Wilhelm Murnau (1888-1931)',
+      }),
+    );
+    expect(fromDetail.eligibility.value).toBe('include');
+    expect(fromDetail.eligibility.ruleId).not.toBe('cinema-projection');
+  });
+
+  it('no trata como concierto clásico una proyección cinematográfica con banda sonora o música en vivo genérica', () => {
+    const screening = classify(
+      facts({
+        title: 'El Real Junior de cine: La pequeña cerillera',
+        categoryText: 'Proyección de espectáculo musical',
+        description: 'Este ciclo propone la proyección de títulos emblemáticos. Música: César Frank.',
+        composers: [{ name: 'César Frank' }],
+      }),
+    );
+    expect(screening.eligibility.value).toBe('exclude');
+    expect(screening.eligibility.ruleId).toBe('cinema-projection');
+  });
+
+  it('excluye una proyección con acompañamiento de órgano sin identidad concertística', () => {
+    const nosferatu = classify(
+      facts({
+        title: 'Proyección de Nosferatu',
+        description: 'película muda con acompañamiento en directo',
+        performers: [{ name: 'Juan Pérez', roleText: 'órgano' }],
+      }),
+    );
+    expect(nosferatu.eligibility.value).toBe('exclude');
+    expect(nosferatu.eligibility.ruleId).toBe('cinema-projection');
   });
 
   it('excluye un taller aunque cite a Puccini', () => {
@@ -752,6 +883,31 @@ describe('eligibility — conflictos y fallback', () => {
     );
     expect(jazz.eligibility.value).toBe('exclude');
     expect(jazz.eligibility.ruleId).toBe('jazz-identity');
+  });
+
+  it('no excluye por una mención estilística de jazz en descripción o programa', () => {
+    const stylistic = classify(
+      facts({
+        title: 'Trío de piano, flauta y percusión',
+        seriesText: 'Fronteras',
+        description:
+          'Proyecto en el que la tradición musical convive con la escritura contemporánea, la improvisación y elementos procedentes del jazz y la música clásica.',
+        programText: 'Ecos del estrecho',
+      }),
+    );
+    expect(stylistic.eligibility.value).not.toBe('exclude');
+    expect(stylistic.eligibility.ruleId).not.toBe('jazz-identity');
+    expect(stylistic.eligibility.value).toBe('uncertain');
+
+    const titledJazz = classify(
+      facts({
+        title: 'Miniclásica: descubriendo el jazz',
+        performers: [{ name: 'Índigo Jazz' }],
+        description: 'Ritmos del jazz clásico y del swing.',
+      }),
+    );
+    expect(titledJazz.eligibility.value).toBe('exclude');
+    expect(titledJazz.eligibility.ruleId).toBe('jazz-identity');
   });
 
   it('excluye open piano y jam participativa aunque el festival sea de piano clásico', () => {

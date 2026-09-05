@@ -95,10 +95,10 @@ function collectExclusions(facts: ObservedFacts, haystack: string): Exclusion[] 
   const flamenco = flamencoIdentity(facts, category, title, haystack);
   if (flamenco) found.push(flamenco);
 
-  const dance = danceIdentity(facts, category, haystack);
+  const dance = danceIdentity(facts, category, title);
   if (dance) found.push(dance);
 
-  const cinema = cinemaIdentity(facts, category, title, description);
+  const cinema = cinemaIdentity(facts, category, title, description, haystack);
   if (cinema) found.push(cinema);
 
   const workshop = workshopIdentity(facts, category, title, description, program);
@@ -137,12 +137,8 @@ function collectInclusions(facts: ObservedFacts, haystack: string): Inclusion[] 
   if (hasWord(category, 'zarzuela') || hasWord(title, 'zarzuela')) {
     found.push({ ruleId: 'zarzuela-event', evidence: [facts.categoryText ?? facts.title] });
   }
-  if (
-    hasPhrase(haystack, 'conciertos de organo') ||
-    hasPhrase(haystack, 'concierto de organo') ||
-    hasPhrase(haystack, 'recital de organo')
-  ) {
-    found.push({ ruleId: 'organ-concert', evidence: ['conciertos de órgano'] });
+  if (organConcertInclusion(facts, haystack)) {
+    found.push({ ruleId: 'organ-concert', evidence: ['concierto o recital de órgano'] });
   }
   const explicitClassical = explicitClassicalConcertDeclaration(facts);
   if (explicitClassical) found.push(explicitClassical);
@@ -180,8 +176,14 @@ function jazzIdentity(
   title: string,
   haystack: string,
 ): Exclusion | undefined {
-  if (hasWord(category, 'jazz') || hasPhrase(category, 'jazz en el auditorio')) {
-    return exclusion('jazz-identity', [facts.categoryText ?? ''], true);
+  const series = fieldFolded(facts.seriesText);
+  if (
+    hasWord(category, 'jazz') ||
+    hasPhrase(category, 'jazz en el auditorio') ||
+    hasWord(series, 'jazz') ||
+    hasPhrase(series, 'jazz en el auditorio')
+  ) {
+    return exclusion('jazz-identity', [facts.categoryText ?? facts.seriesText ?? ''], true);
   }
   if (hasWord(title, 'jazz')) {
     return exclusion('jazz-identity', [facts.title], true);
@@ -194,10 +196,24 @@ function jazzIdentity(
   if (hasPhrase(haystack, 'miles davis')) {
     return exclusion('jazz-identity', ['Miles Davis'], true);
   }
-  if (hasWord(haystack, 'jazz') && !knownClassicalNames(facts).length) {
+
+  const body = `${fieldFolded(facts.description)} ${fieldFolded(facts.programText)}`.trim();
+  if (explicitJazzConcertIdentity(body)) {
     return exclusion('jazz-identity', ['jazz'], true);
   }
+  if (hasWord(body, 'jazz')) {
+    return exclusion('jazz-identity', ['jazz'], false, true);
+  }
   return undefined;
+}
+
+function explicitJazzConcertIdentity(body: string): boolean {
+  return (
+    hasPhrase(body, 'concierto de jazz') ||
+    hasPhrase(body, 'ciclo de jazz') ||
+    hasPhrase(body, 'recital de jazz') ||
+    hasPhrase(body, 'jazz en el auditorio')
+  );
 }
 
 function flamencoIdentity(
@@ -278,29 +294,129 @@ function flamencoTokenRemainsAfterFlemishGuards(haystack: string): boolean {
   return /flamenc/.test(stripped);
 }
 
-function danceIdentity(facts: ObservedFacts, category: string, haystack: string): Exclusion | undefined {
+function danceIdentity(facts: ObservedFacts, category: string, title: string): Exclusion | undefined {
+  const principalEvidence: string[] = [];
   if (
     hasWord(category, 'danza') ||
     hasWord(category, 'ballet') ||
     hasPhrase(category, 'danza contemporanea')
   ) {
-    return exclusion('dance-spectacle', [facts.categoryText ?? ''], true);
+    principalEvidence.push(facts.categoryText ?? '');
   }
-  const company = facts.performers.find((item) => {
-    const name = fieldFolded(item.name);
-    return (
-      hasPhrase(name, 'dance theater') ||
-      hasPhrase(name, 'dance project') ||
-      hasPhrase(name, 'ballet')
-    );
-  });
-  if (company) {
-    return exclusion('dance-spectacle', [company.name], true);
+  if (titleIdentifiesDanceOrBallet(title)) {
+    principalEvidence.push(facts.title);
   }
-  if (hasPhrase(haystack, 'espectaculo de danza') || hasPhrase(haystack, 'escuela de ballet')) {
-    return exclusion('dance-spectacle', ['danza'], true);
+  const spectacleFields = `${title} ${category} ${fieldFolded(facts.description)}`;
+  if (hasPhrase(spectacleFields, 'espectaculo de danza')) {
+    principalEvidence.push('espectáculo de danza');
   }
-  return undefined;
+  if (hasPhrase(spectacleFields, 'escuela de ballet')) {
+    principalEvidence.push('escuela de ballet');
+  }
+
+  const company = facts.performers.find(
+    (item) => isDanceCompanyName(item.name) || isDanceRole(item.roleText),
+  );
+  const secondaryEvidence = company ? [company.name || company.roleText || 'danza'] : [];
+
+  if (principalEvidence.length === 0 && secondaryEvidence.length === 0) return undefined;
+  if (principalEvidence.length > 0) {
+    return exclusion('dance-spectacle', principalEvidence, true);
+  }
+  if (hasIndependentLiveMusicalPerformance(facts)) {
+    return exclusion('dance-spectacle', secondaryEvidence, false, true);
+  }
+  return exclusion('dance-spectacle', secondaryEvidence, true);
+}
+
+function titleIdentifiesDanceOrBallet(title: string): boolean {
+  if (hasWord(title, 'ballet')) return true;
+  if (hasPhrase(title, 'gala de danza') || hasPhrase(title, 'espectaculo de danza')) return true;
+  if (hasPhrase(title, 'compania de danza') || hasPhrase(title, 'danza contemporanea')) return true;
+  return hasWord(title, 'danza') && (hasWord(title, 'gala') || hasWord(title, 'espectaculo'));
+}
+
+/**
+ * A dance company is coprincipal only when the bill also has a live musical
+ * performance of its own: orchestra/ensemble/musicians, or an unequivocal
+ * concert/recital declaration. Named classical composers are not enough — a
+ * ballet routinely plays Tchaikovsky and remains a dance spectacle.
+ */
+function hasIndependentLiveMusicalPerformance(facts: ObservedFacts): boolean {
+  const title = fieldFolded(facts.title);
+  const category = fieldFolded(facts.categoryText);
+  const series = fieldFolded(facts.seriesText);
+  if (
+    hasWord(title, 'concierto') ||
+    hasWord(title, 'recital') ||
+    hasWord(category, 'concierto') ||
+    hasWord(category, 'recital') ||
+    hasWord(series, 'concierto') ||
+    hasWord(series, 'recital')
+  ) {
+    return true;
+  }
+  if (classicalSeriesIdentity(facts)) return true;
+  return facts.performers.some((item) => isLiveMusicalPerformer(item));
+}
+
+function isLiveMusicalPerformer(item: { name: string; roleText?: string }): boolean {
+  if (isDanceCompanyName(item.name) || isDanceRole(item.roleText)) return false;
+  const name = fieldFolded(item.name);
+  const role = fieldFolded(item.roleText);
+  return (
+    hasWord(name, 'orquesta') ||
+    hasWord(name, 'orchestra') ||
+    hasWord(name, 'orquestra') ||
+    hasWord(name, 'ensemble') ||
+    hasWord(name, 'filarmonia') ||
+    hasWord(name, 'filarmonica') ||
+    hasWord(name, 'philharmonic') ||
+    hasWord(name, 'coro') ||
+    hasWord(role, 'orquesta') ||
+    hasWord(role, 'orchestra') ||
+    hasWord(role, 'orquestra') ||
+    hasWord(role, 'ensemble') ||
+    hasWord(role, 'coro') ||
+    hasWord(role, 'choir') ||
+    hasWord(role, 'piano') ||
+    hasWord(role, 'violin') ||
+    hasWord(role, 'viola') ||
+    hasWord(role, 'cello') ||
+    hasWord(role, 'chelo') ||
+    hasWord(role, 'organo') ||
+    hasWord(role, 'organista') ||
+    hasWord(role, 'soprano') ||
+    hasWord(role, 'tenor') ||
+    hasWord(role, 'baritono') ||
+    hasWord(role, 'mezzosoprano') ||
+    hasWord(role, 'contralto') ||
+    hasWord(role, 'flauta')
+  );
+}
+
+function isDanceCompanyName(name: string): boolean {
+  const folded = fieldFolded(name);
+  return (
+    hasPhrase(folded, 'dance theater') ||
+    hasPhrase(folded, 'dance project') ||
+    hasWord(folded, 'ballet') ||
+    hasPhrase(folded, 'compania de danza') ||
+    hasWord(folded, 'danza') ||
+    hasPhrase(folded, 'coreografia')
+  );
+}
+
+function isDanceRole(roleText: string | undefined): boolean {
+  const role = fieldFolded(roleText);
+  return (
+    hasWord(role, 'coreografo') ||
+    hasWord(role, 'coreografia') ||
+    hasWord(role, 'bailarin') ||
+    hasWord(role, 'bailarina') ||
+    hasWord(role, 'danza') ||
+    hasWord(role, 'ballet')
+  );
 }
 
 function cinemaIdentity(
@@ -308,20 +424,75 @@ function cinemaIdentity(
   category: string,
   title: string,
   description: string,
+  haystack: string,
 ): Exclusion | undefined {
   if (
-    hasWord(category, 'proyeccion') ||
-    hasPhrase(category, 'cine mudo') ||
-    hasWord(category, 'cine') ||
-    hasPhrase(title, 'cineclasica') ||
-    hasPhrase(title, 'de cine') ||
-    hasWord(title, 'cine') ||
-    hasPhrase(description, 'proyeccion de') ||
-    hasPhrase(description, 'ciclo de cine')
+    !(
+      hasWord(category, 'proyeccion') ||
+      hasPhrase(category, 'cine mudo') ||
+      hasWord(category, 'cine') ||
+      hasPhrase(title, 'cineclasica') ||
+      hasPhrase(title, 'de cine') ||
+      hasWord(title, 'cine') ||
+      hasWord(title, 'proyeccion') ||
+      hasPhrase(title, 'pelicula muda') ||
+      hasPhrase(description, 'proyeccion de') ||
+      hasPhrase(description, 'ciclo de cine') ||
+      hasPhrase(description, 'pelicula muda') ||
+      hasPhrase(description, 'cine mudo')
+    )
   ) {
-    return exclusion('cinema-projection', [facts.categoryText ?? facts.title], true);
+    return undefined;
   }
-  return undefined;
+  const evidence = [facts.categoryText ?? facts.title];
+  if (hasConcertIdentityBesidesOrganRole(facts, haystack)) {
+    return exclusion('cinema-projection', evidence, false, true);
+  }
+  return exclusion('cinema-projection', evidence, true);
+}
+
+/**
+ * Cinema becomes coprincipal only with positive concert identity besides an
+ * organist in the cast: concert/recital/musical cycle, a named classical
+ * series, or improvisation presented as the performance. Organ accompaniment
+ * of a film screening stays a projection.
+ */
+function hasConcertIdentityBesidesOrganRole(facts: ObservedFacts, haystack: string): boolean {
+  if (
+    hasPhrase(haystack, 'concierto de organo') ||
+    hasPhrase(haystack, 'conciertos de organo') ||
+    hasPhrase(haystack, 'recital de organo') ||
+    hasPhrase(haystack, 'concierto en el organo') ||
+    hasPhrase(haystack, 'ciclo de organo') ||
+    hasPhrase(haystack, 'ciclo internacional de organo')
+  ) {
+    return true;
+  }
+
+  const title = fieldFolded(facts.title);
+  const category = fieldFolded(facts.categoryText);
+  const series = fieldFolded(facts.seriesText);
+  if (
+    hasWord(title, 'concierto') ||
+    hasWord(title, 'recital') ||
+    hasWord(category, 'concierto') ||
+    hasWord(category, 'recital') ||
+    hasWord(series, 'concierto') ||
+    hasWord(series, 'recital')
+  ) {
+    return true;
+  }
+  if (hasWord(title, 'ciclo') && hasWord(title, 'organo')) return true;
+  if (classicalSeriesIdentity(facts)) return true;
+
+  return (
+    hasPhrase(haystack, 'improvisacion') &&
+    (hasPhrase(haystack, 'improvisaciones sobre') ||
+      hasPhrase(haystack, 'improvisacion concebida') ||
+      hasWord(title, 'improvisacion') ||
+      hasPhrase(haystack, 'concierto') ||
+      hasPhrase(haystack, 'recital'))
+  );
 }
 
 function workshopIdentity(
@@ -469,8 +640,70 @@ function popularProgramHit(text: string): boolean {
 function hasSubstantialClassicalBlock(facts: ObservedFacts): boolean {
   const known = knownClassicalNames(facts);
   if (known.length >= 2) return true;
+  if (liveOrganPerformance(facts, identityHaystack(facts))) return true;
   if (known.length === 0) return false;
-  return classicalFirstHalf(facts, known);
+  if (classicalFirstHalf(facts, known)) return true;
+  return explicitListedClassicalWork(facts, known);
+}
+
+const CLASSICAL_WORK_NOUNS = [
+  'sonata',
+  'sonatas',
+  'sinfonia',
+  'sinfonias',
+  'concierto',
+  'conciertos',
+  'suite',
+  'suites',
+  'misa',
+  'requiem',
+  'toccata',
+  'fuga',
+  'cuarteto',
+  'quinteto',
+  'oratorio',
+  'cantata',
+  'obertura',
+  'preludio',
+  'nocturno',
+  'partita',
+];
+
+function explicitListedClassicalWork(facts: ObservedFacts, known: string[]): boolean {
+  const program = fieldFolded(facts.programText);
+  if (!program) return false;
+  if (!known.some((name) => hasPhrase(program, name))) return false;
+  return CLASSICAL_WORK_NOUNS.some((noun) => hasWord(program, noun));
+}
+
+function organConcertInclusion(facts: ObservedFacts, haystack: string): boolean {
+  if (
+    hasPhrase(haystack, 'conciertos de organo') ||
+    hasPhrase(haystack, 'concierto de organo') ||
+    hasPhrase(haystack, 'recital de organo') ||
+    hasPhrase(haystack, 'concierto en el organo')
+  ) {
+    return true;
+  }
+  return facts.performers.some((item) => {
+    const role = fieldFolded(item.roleText);
+    const name = fieldFolded(item.name);
+    return hasWord(role, 'organo') || hasWord(role, 'organista') || hasWord(name, 'organista');
+  });
+}
+
+function liveOrganPerformance(facts: ObservedFacts, haystack: string): boolean {
+  if (organConcertInclusion(facts, haystack)) return true;
+  if (
+    hasPhrase(haystack, 'ciclo de organo') ||
+    hasPhrase(haystack, 'ciclo internacional de organo')
+  ) {
+    return true;
+  }
+  return (
+    hasWord(haystack, 'organo') &&
+    (hasPhrase(haystack, 'improvisacion') || hasPhrase(haystack, 'musica en directo'))
+  );
 }
 
 function classicalFirstHalf(facts: ObservedFacts, known: string[]): boolean {
