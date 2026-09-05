@@ -94,16 +94,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-tiempo-de-camara-5-las-tres-b",
-      "checkedAt": "2026-09-03",
-      "externalId": "4874"
+      "checkedAt": "2026-09-05",
+      "externalId": "orcam-tiempo-de-camara-5-las-tres-b"
     },
     {
       "sourceId": "src_fundacion_orcam",
       "url": "https://fundacionorcam.org/conciertos/2026-27/las-tres-b",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "4874"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

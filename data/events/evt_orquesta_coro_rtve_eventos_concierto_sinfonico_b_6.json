@@ -22,7 +22,11 @@
     }
   ],
   "performers": [],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Antonín Dvořák"
+    }
+  ],
   "works": [],
   "eras": [
     "romantic"
@@ -36,10 +40,10 @@
     {
       "sourceId": "src_orquesta_coro_rtve",
       "url": "https://www.teatromonumental.es/eventos/concierto-sinfonico-b-6",
-      "checkedAt": "2026-08-31",
+      "checkedAt": "2026-09-05",
       "externalId": "/eventos/concierto-sinfonico-b-6/"
     }
   ],
   "primarySourceId": "src_orquesta_coro_rtve",
-  "lastVerifiedAt": "2026-08-31"
+  "lastVerifiedAt": "2026-09-05"
 }

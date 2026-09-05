@@ -24,7 +24,20 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Alberto Ginastera"
+    },
+    {
+      "name": "George Gershwin"
+    },
+    {
+      "name": "Heitor Villa-Lobos"
+    },
+    {
+      "name": "Leonard Bernstein"
+    }
+  ],
   "works": [],
   "eras": [
     "twentieth"
@@ -38,10 +51,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/upm-america-tradicion-identidad-y-nuevo-mundo",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "upm-america-tradicion-identidad-y-nuevo-mundo"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

@@ -20,8 +20,68 @@
       "name": "Orquesta Filarmonía"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Compañía JAC Ballet"
+    },
+    {
+      "name": "Pique Dame, F. V. Suppé"
+    }
+  ],
+  "works": [
+    {
+      "title": "Jose Antonio Checa, Coreógrafo",
+      "composerName": "Compañía JAC Ballet"
+    },
+    {
+      "title": "PARTE ÚNICA:",
+      "composerName": "Compañía JAC Ballet"
+    },
+    {
+      "title": "Freikugeln Op. 362, Balas mágicas, Polca (J. Strauss)",
+      "composerName": "Pique Dame, F. V. Suppé"
+    },
+    {
+      "title": "Aus den Bergen op.292 , De las montañas, Vals (J. Strauss)",
+      "composerName": "Pique Dame, F. V. Suppé"
+    },
+    {
+      "title": "Episode-Polka, Op. 296 (J. Strauss)",
+      "composerName": "Pique Dame, F. V. Suppé"
+    },
+    {
+      "title": "Spanischer Marsch, Op. 433, Marcha Española (J. Strauss)",
+      "composerName": "Pique Dame, F. V. Suppé"
+    },
+    {
+      "title": "Pizzicato-Polka, Op. 449 (J. Strauss)",
+      "composerName": "Pique Dame, F. V. Suppé"
+    },
+    {
+      "title": "La Belle Hélène (J. Offenbach)",
+      "composerName": "Pique Dame, F. V. Suppé"
+    },
+    {
+      "title": "Kaiser-Walzer, Op. 437 (J. Strauss)",
+      "composerName": "Pique Dame, F. V. Suppé"
+    },
+    {
+      "title": "Accelerationen Waltz, Op. 234 (J. Strauss)",
+      "composerName": "Pique Dame, F. V. Suppé"
+    },
+    {
+      "title": "Louischen, Polka francaise, Op. 339 (J. Strauss)",
+      "composerName": "Pique Dame, F. V. Suppé"
+    },
+    {
+      "title": "Nechledil March (F. Lehár)",
+      "composerName": "Pique Dame, F. V. Suppé"
+    },
+    {
+      "title": "An der schönen blauen Donau (Op. 314), El Bello Danubio Azul (J. Strauss)",
+      "composerName": "Pique Dame, F. V. Suppé"
+    }
+  ],
   "eras": [
     "classical",
     "romantic"
@@ -35,10 +95,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/filarmonia-de-madrid-viena-en-madrid-5",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "filarmonia-de-madrid-viena-en-madrid-5"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

@@ -27,7 +27,14 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Piotr Ilich Chaikovski"
+    },
+    {
+      "name": "Johannes Brahms"
+    }
+  ],
   "works": [],
   "eras": [
     "romantic"
@@ -41,10 +48,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/la-filarmonica-cuarta-de-brahms-1",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-05",
       "externalId": "la-filarmonica-cuarta-de-brahms-1"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-05"
 }

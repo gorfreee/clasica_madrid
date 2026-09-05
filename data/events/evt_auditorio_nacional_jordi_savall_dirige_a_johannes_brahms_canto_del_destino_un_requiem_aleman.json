@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_jordi_savall_dirige_a_johannes_brahms_canto_del_destino_un_requiem_aleman",
+  "slug": "jordi-savall-dirige-a-johannes-brahms-canto-del-destino-un-requiem-aleman",
+  "title": "Jordi Savall Dirige a Johannes Brahms. Canto del Destino & Un Réquiem Alemán",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_jordi_savall_dirige_a_johannes_brahms_canto_del_destino_un_requiem_aleman_01",
+      "date": "2026-10-19",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Le Concert des Nations"
+    },
+    {
+      "name": "Lina Tur Bonet"
+    }
+  ],
+  "composers": [
+    {
+      "name": "LA CAPELLA NACIONAL DE CATALUNYA"
+    },
+    {
+      "name": "Johannes Brahms (1833-1897)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Lluís Vilamajó, preparación del conjunto vocal",
+      "composerName": "LA CAPELLA NACIONAL DE CATALUNYA"
+    },
+    {
+      "title": "Schicksalslied (Canto del destino)",
+      "composerName": "Johannes Brahms (1833-1897)"
+    },
+    {
+      "title": "Op. 54 (1868-71)",
+      "composerName": "Johannes Brahms (1833-1897)"
+    },
+    {
+      "title": "Ein deutsches Requiem,",
+      "composerName": "Johannes Brahms (1833-1897)"
+    },
+    {
+      "title": "nach Worten der heiligen Schrift",
+      "composerName": "Johannes Brahms (1833-1897)"
+    },
+    {
+      "title": "(Un réquiem alemán, basado en textos de las Sagradas Escrituras)",
+      "composerName": "Johannes Brahms (1833-1897)"
+    },
+    {
+      "title": "Op. 45 (1865-68)",
+      "composerName": "Johannes Brahms (1833-1897)"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/jordi-savall-dirige-a-johannes-brahms-canto-del-destino-un-requiem-aleman",
+      "checkedAt": "2026-09-05",
+      "externalId": "jordi-savall-dirige-a-johannes-brahms-canto-del-destino-un-requiem-aleman"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-05"
+}

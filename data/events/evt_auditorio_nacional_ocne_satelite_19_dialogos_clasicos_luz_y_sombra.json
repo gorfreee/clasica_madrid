@@ -32,7 +32,14 @@
       "name": "Carlos Sánchez Muñoz"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Johannes Brahms"
+    }
+  ],
   "works": [],
   "eras": [
     "classical",
@@ -47,10 +54,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-19-dialogos-clasicos-luz-y-sombra",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "ocne-satelite-19-dialogos-clasicos-luz-y-sombra"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

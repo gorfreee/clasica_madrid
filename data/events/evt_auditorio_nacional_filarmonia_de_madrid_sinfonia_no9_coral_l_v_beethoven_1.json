@@ -24,6 +24,18 @@
     },
     {
       "name": "Rafael Albiñana, Director del Coro"
+    },
+    {
+      "name": "Guiomar Cantó"
+    },
+    {
+      "name": "Paola Leguizamón"
+    },
+    {
+      "name": "José Darío Cano"
+    },
+    {
+      "name": "Ricardo Llamas"
     }
   ],
   "composers": [
@@ -57,10 +69,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/filarmonia-de-madrid-sinfonia-no9-coral-l-v-beethoven-1",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "filarmonia-de-madrid-sinfonia-no9-coral-l-v-beethoven-1"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

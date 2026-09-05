@@ -99,6 +99,10 @@
     {
       "title": "Pavane pour une infante défunte, M 19",
       "composerName": "Maurice Ravel"
+    },
+    {
+      "title": "La plainte, au loin, du faune (a la memoria de Claude Debussy)",
+      "composerName": "Paul Dukas"
     }
   ],
   "eras": [
@@ -113,10 +117,10 @@
     {
       "sourceId": "src_fundacion_juan_march",
       "url": "https://www.march.es/es/madrid/concierto/memoriam-ii-adieu-memoire",
-      "checkedAt": "2026-08-31",
+      "checkedAt": "2026-09-05",
       "externalId": "/es/madrid/concierto/memoriam-ii-adieu-memoire"
     }
   ],
   "primarySourceId": "src_fundacion_juan_march",
-  "lastVerifiedAt": "2026-08-31"
+  "lastVerifiedAt": "2026-09-05"
 }

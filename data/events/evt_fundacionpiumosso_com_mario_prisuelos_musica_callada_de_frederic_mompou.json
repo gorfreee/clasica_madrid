@@ -23,6 +23,24 @@
   "composers": [
     {
       "name": "Frederic Mompou"
+    },
+    {
+      "name": "Tomás Marco"
+    },
+    {
+      "name": "David del Puerto"
+    },
+    {
+      "name": "Marisa Manchado"
+    },
+    {
+      "name": "Alberto Carretero"
+    },
+    {
+      "name": "Mario Carro"
+    },
+    {
+      "name": "Mauricio Sotelo"
     }
   ],
   "works": [
@@ -43,10 +61,10 @@
     {
       "sourceId": "src_fundacionpiumosso_com",
       "url": "https://www.fundacionpiumosso.com/evento/mario-prisuelos-musica-callada-de-frederic-mompou",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "2192"
     }
   ],
   "primarySourceId": "src_fundacionpiumosso_com",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

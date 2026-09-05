@@ -25,7 +25,10 @@
   ],
   "composers": [],
   "works": [],
-  "eras": [],
+  "eras": [
+    "romantic",
+    "classical"
+  ],
   "formats": [
     "symphonic"
   ],
@@ -35,10 +38,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/impacta-pretty-yende-y-javier-camarena",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "impacta-pretty-yende-y-javier-camarena"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

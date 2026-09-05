@@ -26,7 +26,14 @@
       "name": "Julia Fischer"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Johannes Brahms"
+    },
+    {
+      "name": "Piotr Ilich Chaikovski"
+    }
+  ],
   "works": [],
   "eras": [
     "romantic"
@@ -40,10 +47,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-london-philharmonic-orchestra-12",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-05",
       "externalId": "ibermusica-london-philharmonic-orchestra-12"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-05"
 }

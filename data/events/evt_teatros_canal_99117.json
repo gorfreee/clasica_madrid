@@ -16,7 +16,11 @@
     }
   ],
   "performers": [],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    }
+  ],
   "works": [],
   "eras": [
     "classical",
@@ -32,10 +36,10 @@
     {
       "sourceId": "src_teatros_canal",
       "url": "https://www.teatroscanal.com/espectaculo/sinfonia-n9-en-re-menor-joven-orquesta-comunidad-de-madrid-coro-comunidad-madrid",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "99117"
     }
   ],
   "primarySourceId": "src_teatros_canal",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

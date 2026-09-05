@@ -23,6 +23,12 @@
   "composers": [
     {
       "name": "Vivaldi"
+    },
+    {
+      "name": "Tartini"
+    },
+    {
+      "name": "Paganini"
     }
   ],
   "works": [
@@ -53,6 +59,26 @@
     {
       "title": "según San Mateo, BWV 244",
       "composerName": "Vivaldi"
+    },
+    {
+      "title": "El trino del diablo",
+      "composerName": "Tartini"
+    },
+    {
+      "title": "Cantabile y Vals",
+      "composerName": "Paganini"
+    },
+    {
+      "title": "Caprice N24",
+      "composerName": "Paganini"
+    },
+    {
+      "title": "Campanella",
+      "composerName": "Paganini"
+    },
+    {
+      "title": "Carnival de Venice",
+      "composerName": "Paganini"
     }
   ],
   "eras": [
@@ -67,10 +93,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-vivaldi-paganini-1",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "excelentia-vivaldi-paganini-1"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

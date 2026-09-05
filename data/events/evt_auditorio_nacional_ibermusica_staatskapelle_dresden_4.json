@@ -23,7 +23,11 @@
       "name": "Daniele Gatti"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    }
+  ],
   "works": [],
   "eras": [
     "classical",
@@ -38,10 +42,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-staatskapelle-dresden-4",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "ibermusica-staatskapelle-dresden-4"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

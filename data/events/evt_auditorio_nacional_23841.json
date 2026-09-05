@@ -121,8 +121,8 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-diego-ares",
-      "checkedAt": "2026-09-03",
-      "externalId": "23841"
+      "checkedAt": "2026-09-05",
+      "externalId": "cndm-diego-ares"
     },
     {
       "sourceId": "src_cndm",
@@ -132,5 +132,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

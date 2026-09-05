@@ -26,7 +26,17 @@
       "name": "Sol Gabetta"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Modest Mussorgski"
+    },
+    {
+      "name": "Dmitri Shostakóvich"
+    },
+    {
+      "name": "Ígor Stravinski"
+    }
+  ],
   "works": [],
   "eras": [
     "romantic",
@@ -41,10 +51,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-berner-symphonieorchester",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "ibermusica-berner-symphonieorchester"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

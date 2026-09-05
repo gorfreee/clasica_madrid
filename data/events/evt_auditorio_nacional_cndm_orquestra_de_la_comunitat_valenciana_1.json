@@ -19,6 +19,12 @@
     {
       "name": "Mikko Franck",
       "role": "conductor"
+    },
+    {
+      "name": "Orquestra de la Comunitat Valenciana"
+    },
+    {
+      "name": "Michael Spyres"
     }
   ],
   "composers": [
@@ -62,7 +68,7 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-orquestra-de-la-comunitat-valenciana-1",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "cndm-orquestra-de-la-comunitat-valenciana-1"
     },
     {
@@ -73,5 +79,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

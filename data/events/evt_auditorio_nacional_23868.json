@@ -35,6 +35,30 @@
     {
       "title": "Trío en la menor, op. 114 (1891-1892)",
       "composerName": "J. Brahms"
+    },
+    {
+      "title": "Fantasiestücke (Piezas de fantasía), op. 73 (1849)",
+      "composerName": "Robert Schumann (1810-1856)"
+    },
+    {
+      "title": "Tres romanzas, op. 22 (1853)",
+      "composerName": "Clara Schumann (1819-1896)"
+    },
+    {
+      "title": "Melodías hebreas, op. 9 (1855)",
+      "composerName": "Joseph Joachim (1831-1907)"
+    },
+    {
+      "title": "Vier Balladen und Romanzen, op. 75 (1877-1878, arr. para viola, violonchelo y piano)",
+      "composerName": "Johannes Brahms (1833-1897)"
+    },
+    {
+      "title": "Drei intermezzi, op. 117 (1892)",
+      "composerName": "Johannes Brahms (1833-1897)"
+    },
+    {
+      "title": "Signs, games and messages, selección (1961-)",
+      "composerName": "György Kurtág (1926)"
     }
   ],
   "eras": [
@@ -49,8 +73,8 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-tabea-zimmermann-jean-guihen-queyras-javier-perianes",
-      "checkedAt": "2026-09-03",
-      "externalId": "23868"
+      "checkedAt": "2026-09-05",
+      "externalId": "cndm-tabea-zimmermann-jean-guihen-queyras-javier-perianes"
     },
     {
       "sourceId": "src_cndm",
@@ -60,5 +84,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

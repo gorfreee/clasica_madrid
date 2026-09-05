@@ -19,6 +19,9 @@
     {
       "name": "Mark Elder",
       "role": "conductor"
+    },
+    {
+      "name": "Orquestra de la Comunitat Valenciana"
     }
   ],
   "composers": [
@@ -27,6 +30,9 @@
     },
     {
       "name": "Piotr Ilich Chaikovski (1840-1893)"
+    },
+    {
+      "name": "Ígor Stravinski (1882-1971)"
     }
   ],
   "works": [
@@ -37,6 +43,10 @@
     {
       "title": "La bella durmiente , op. 66, selección (1888-1889)",
       "composerName": "Piotr Ilich Chaikovski (1840-1893)"
+    },
+    {
+      "title": "Scherzo à la russe, K 070 (1943-1944)",
+      "composerName": "Ígor Stravinski (1882-1971)"
     }
   ],
   "eras": [
@@ -52,8 +62,8 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-orquestra-de-la-comunitat-valenciana-2",
-      "checkedAt": "2026-09-03",
-      "externalId": "23842"
+      "checkedAt": "2026-09-05",
+      "externalId": "cndm-orquestra-de-la-comunitat-valenciana-2"
     },
     {
       "sourceId": "src_cndm",
@@ -63,5 +73,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

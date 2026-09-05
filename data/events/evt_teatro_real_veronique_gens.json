@@ -16,7 +16,23 @@
     }
   ],
   "performers": [],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Jean-Philippe Rameau"
+    },
+    {
+      "name": "Antoine Dauvergne"
+    },
+    {
+      "name": "François Francœur"
+    },
+    {
+      "name": "Henry Desmarets"
+    },
+    {
+      "name": "Joseph-François Salomon"
+    }
+  ],
   "works": [],
   "eras": [
     "baroque"
@@ -31,10 +47,10 @@
     {
       "sourceId": "src_teatro_real",
       "url": "https://www.teatroreal.es/es/espectaculo/veronique-gens",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-05",
       "externalId": "veronique-gens"
     }
   ],
   "primarySourceId": "src_teatro_real",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-05"
 }

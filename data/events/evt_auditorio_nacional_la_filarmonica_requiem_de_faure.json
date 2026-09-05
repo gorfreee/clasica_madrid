@@ -33,7 +33,17 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Franz Schubert"
+    },
+    {
+      "name": "Samuel Barber"
+    },
+    {
+      "name": "Gabriel Fauré"
+    }
+  ],
   "works": [],
   "eras": [
     "romantic",
@@ -49,10 +59,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/la-filarmonica-requiem-de-faure",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-05",
       "externalId": "la-filarmonica-requiem-de-faure"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-05"
 }

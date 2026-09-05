@@ -27,7 +27,14 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Johannes Brahms"
+    },
+    {
+      "name": "Felix Mendelssohn"
+    }
+  ],
   "works": [],
   "eras": [
     "romantic"
@@ -42,10 +49,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/grupo-concertante-talia-ciclo-sinfonico-coral-ciclo-sinfonico-coral-sinfonia-no2-de-brahms",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-05",
       "externalId": "grupo-concertante-talia-ciclo-sinfonico-coral-ciclo-sinfonico-coral-sinfonia-no2-de-brahms"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-05"
 }

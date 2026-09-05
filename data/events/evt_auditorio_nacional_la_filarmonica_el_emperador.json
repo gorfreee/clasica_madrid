@@ -27,7 +27,14 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Béla Bartók"
+    }
+  ],
   "works": [],
   "eras": [
     "classical",
@@ -43,10 +50,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/la-filarmonica-el-emperador",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "la-filarmonica-el-emperador"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

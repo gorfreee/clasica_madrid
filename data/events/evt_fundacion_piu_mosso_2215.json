@@ -16,7 +16,11 @@
     }
   ],
   "performers": [],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Franz Schubert"
+    }
+  ],
   "works": [],
   "eras": [
     "romantic"
@@ -30,10 +34,10 @@
     {
       "sourceId": "src_fundacionpiumosso_com",
       "url": "https://www.fundacionpiumosso.com/evento/festival-alicia-de-larrocha-iv-edicion-schubertiada",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "2215"
     }
   ],
   "primarySourceId": "src_fundacionpiumosso_com",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

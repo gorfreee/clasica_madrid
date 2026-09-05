@@ -20,7 +20,14 @@
       "name": "Hélène Grimaud"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Franz Schubert"
+    }
+  ],
   "works": [],
   "eras": [
     "classical",
@@ -35,10 +42,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-helene-grimaud-1",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "ibermusica-helene-grimaud-1"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

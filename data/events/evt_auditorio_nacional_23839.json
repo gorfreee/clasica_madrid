@@ -43,8 +43,8 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-benjamin-alard-9",
-      "checkedAt": "2026-09-03",
-      "externalId": "23839"
+      "checkedAt": "2026-09-05",
+      "externalId": "cndm-benjamin-alard-9"
     },
     {
       "sourceId": "src_cndm",
@@ -54,5 +54,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

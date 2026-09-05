@@ -23,7 +23,14 @@
       "name": "Coro y Escolanía Maravillas"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Edvard Grieg"
+    },
+    {
+      "name": "Charles Gounod"
+    }
+  ],
   "works": [],
   "eras": [
     "romantic",
@@ -40,10 +47,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/fundacion-orquesta-sinfonica-chamartin-concierto-de-santa-cecilia",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-05",
       "externalId": "fundacion-orquesta-sinfonica-chamartin-concierto-de-santa-cecilia"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-05"
 }

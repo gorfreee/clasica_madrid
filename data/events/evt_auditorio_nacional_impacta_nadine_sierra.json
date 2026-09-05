@@ -24,7 +24,14 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Gaetano Donizetti"
+    },
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    }
+  ],
   "works": [],
   "eras": [
     "classical",
@@ -39,10 +46,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/impacta-nadine-sierra",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "impacta-nadine-sierra"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatros_canal_71611_2026_10_13",
+  "slug": "coma-26-sonor-ensemble-y-anna-cabrera",
+  "title": "Coma’26: Sonor Ensemble y Anna Cabrera",
+  "status": "scheduled",
+  "venueId": "ven_teatros_canal_sala_roja",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatros_canal_71611_2026_10_13_01",
+      "date": "2026-10-13",
+      "time": null,
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Sonor Ensemble y Anna Cabrera"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_teatros_canal",
+      "url": "https://www.teatroscanal.com/espectaculo/festival-coma-2026",
+      "checkedAt": "2026-09-05",
+      "externalId": "71611:2026-10-13"
+    }
+  ],
+  "primarySourceId": "src_teatros_canal",
+  "lastVerifiedAt": "2026-09-05"
+}

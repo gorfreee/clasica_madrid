@@ -24,7 +24,11 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    }
+  ],
   "works": [
     {
       "title": "Sinfonía nº 7 (L. van Beethoven)"
@@ -43,10 +47,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/grupo-concertante-talia-ciclo-batuta-septima-sinfonia-de-beethoven",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-05",
       "externalId": "grupo-concertante-talia-ciclo-batuta-septima-sinfonia-de-beethoven"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-05"
 }
