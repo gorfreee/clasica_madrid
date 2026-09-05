@@ -4,11 +4,23 @@ import { canonicalVenueFilter, parseAgendaFilters, toFilterable } from '../domai
 import { formatMadridDate, fromMadridLocal, madridToday } from '../domain/dates.ts';
 import { listUpcomingOccurrences, type Clock, systemClock } from '../domain/index.ts';
 import type { ResolvedOccurrence } from '../domain/resolve.ts';
-import { accessLabels, areaLabels, eraLabels, formatLabels, kindLabels, occurrenceCountLabel } from './labels.ts';
+import {
+  accessLabels,
+  areaLabels,
+  eraLabels,
+  formatLabels,
+  fullAgendaLoadErrorMessage,
+  kindLabels,
+  occurrenceCountLabel,
+  showAllAgendaLabel,
+  showingOccurrenceCountLabel,
+} from './labels.ts';
 import { ACCESS_MODES, AREAS, ERAS, EVENT_KINDS, FORMATS } from '../schemas/taxonomies.ts';
 import { isMadridMunicipality } from '../domain/normalize.ts';
 import { buildWebsiteJsonLd } from './json-ld.ts';
 import { AGENDA_PATH, eventPath, venuePath } from './urls.ts';
+
+export const INITIAL_AGENDA_OCCURRENCE_LIMIT = 150;
 
 export type TaxonomyOption = {
   id: string;
@@ -81,7 +93,12 @@ export type AgendaPageModel = {
   days: AgendaDayModel[];
   resultCount: number;
   upcomingCount: number;
+  initialOccurrenceCount: number;
+  hasMoreOccurrences: boolean;
   resultCountLabel: string;
+  showingCountLabel: string;
+  showAllLabel: string;
+  fullAgendaLoadErrorMessage: string;
   selectFilters: FilterFieldModel[];
   composer: string;
   composerSuggestions: string[];
@@ -89,7 +106,31 @@ export type AgendaPageModel = {
   shortcuts: AgendaShortcutModel[];
 };
 
+export type FullAgendaFragmentModel = {
+  days: AgendaDayModel[];
+  filterIndex: FilterableOccurrence[];
+};
+
 export { occurrenceCountLabel } from './labels.ts';
+
+/**
+ * Take the first `limit` chronological occurrences and complete the cutoff date
+ * so a day is never split across the initial page and the full fragment.
+ */
+export function selectInitialAgendaOccurrences<T>(
+  upcoming: readonly T[],
+  dateOf: (item: T) => string,
+  limit: number = INITIAL_AGENDA_OCCURRENCE_LIMIT,
+): T[] {
+  if (upcoming.length <= limit) return [...upcoming];
+  const cutoffDate = dateOf(upcoming[limit - 1] as T);
+  if (!cutoffDate) return [...upcoming];
+  let end = limit;
+  while (end < upcoming.length && dateOf(upcoming[end] as T) === cutoffDate) {
+    end += 1;
+  }
+  return upcoming.slice(0, end);
+}
 
 export function buildAgendaPageModel(
   catalog: Catalog,
@@ -97,8 +138,9 @@ export function buildAgendaPageModel(
   clock: Clock = systemClock,
 ): AgendaPageModel {
   const upcoming = listUpcomingOccurrences(catalog, clock);
+  const initial = selectInitialAgendaOccurrences(upcoming, (item) => item.occurrence.date);
   const now = clock.now();
-  const days = groupByDate(upcoming.map(toAgendaItem), now);
+  const days = groupByDate(initial.map(toAgendaItem), now);
   const filters = parseAgendaFilters(_url?.searchParams ?? new URLSearchParams());
   return {
     title: 'Agenda de música clásica en Madrid',
@@ -114,12 +156,28 @@ export function buildAgendaPageModel(
     days,
     resultCount: upcoming.length,
     upcomingCount: upcoming.length,
+    initialOccurrenceCount: initial.length,
+    hasMoreOccurrences: initial.length < upcoming.length,
     resultCountLabel: occurrenceCountLabel(upcoming.length),
+    showingCountLabel: showingOccurrenceCountLabel(initial.length, upcoming.length),
+    showAllLabel: showAllAgendaLabel,
+    fullAgendaLoadErrorMessage,
     selectFilters: buildSelectFilters(upcoming, filters),
     composer: filters.composer ?? '',
     composerSuggestions: unique(upcoming.flatMap((item) => item.resolved.event.composers.map((c) => c.name))),
-    filterIndex: upcoming.map(toFilterable),
+    filterIndex: initial.map(toFilterable),
     shortcuts: buildShortcuts(now),
+  };
+}
+
+export function buildFullAgendaFragmentModel(
+  catalog: Catalog,
+  clock: Clock = systemClock,
+): FullAgendaFragmentModel {
+  const upcoming = listUpcomingOccurrences(catalog, clock);
+  return {
+    days: groupByDate(upcoming.map(toAgendaItem), clock.now()),
+    filterIndex: upcoming.map(toFilterable),
   };
 }
 

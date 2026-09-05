@@ -10,7 +10,8 @@ export async function serializeSitemapItem(item: SitemapItem): Promise<SitemapIt
 }
 
 export function sitemapPageFilter(page: string): boolean {
-  return !pathnameOf(page).startsWith('/404');
+  const path = pathnameOf(page);
+  return !path.startsWith('/404') && !path.startsWith('/_agenda');
 }
 
 async function lastmodByPath(): Promise<Map<string, string>> {

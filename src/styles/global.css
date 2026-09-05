@@ -295,6 +295,29 @@ button, input, select { font: inherit; }
 }
 .agenda-status p { margin: 0; }
 .agenda-status > span { text-transform: uppercase; }
+.agenda-more {
+  display: grid;
+  justify-items: center;
+  gap: .85rem;
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--ink);
+  text-align: center;
+}
+.agenda-more p { margin: 0; color: var(--muted); font-size: .82rem; font-weight: 700; }
+.agenda-more [data-agenda-load-error] { color: var(--ink); }
+.agenda-more button {
+  min-width: 12rem;
+  min-height: 3rem;
+  padding: .7rem 1.1rem;
+  border: 0;
+  background: var(--ink);
+  color: var(--paper-light);
+  cursor: pointer;
+  font-weight: 800;
+}
+.agenda-more button:hover:not(:disabled) { background: var(--blue); }
+.agenda-more button:disabled { opacity: .55; cursor: not-allowed; }
 
 .month-marker {
   margin: 4.5rem 0 0;
@@ -708,6 +731,7 @@ button, input, select { font: inherit; }
   .shortcut:nth-child(even) { margin-left: -2px; }
   .filters__grid { grid-template-columns: 1fr; }
   .filters__actions button { width: 100%; }
+  .agenda-more button { width: 100%; }
   .agenda-status { margin-top: 2rem; }
   .month-marker { margin-top: 3rem; }
   .agenda-day { display: block; }

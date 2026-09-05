@@ -98,8 +98,9 @@ describe('JSON-LD de presentación', () => {
 });
 
 describe('sitemap', () => {
-  it('excluye la URL de 404', () => {
+  it('excluye la URL de 404 y la agenda completa interna', () => {
     expect(sitemapPageFilter('https://clasicamadrid.com/404')).toBe(false);
+    expect(sitemapPageFilter('https://clasicamadrid.com/_agenda/completa/')).toBe(false);
     expect(sitemapPageFilter('https://clasicamadrid.com/eventos/carmen/')).toBe(true);
   });
 

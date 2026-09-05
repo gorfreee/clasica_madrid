@@ -33,24 +33,40 @@ const model = await loadAgendaPage(Astro.url);
     ) : (
       <>
         <FilterForm model={model} />
-        <div class="agenda-status">
-          <p class="result-count" data-result-count aria-live="polite">{model.resultCountLabel}</p>
-          <span aria-hidden="true">CM / 01</span>
-        </div>
-        <AgendaList days={model.days} />
-        {/* data-result-count / data-no-results: contrato de agenda-client.ts */}
-        <div data-no-results hidden>
-          <EmptyState
-            title="Ningún concierto coincide con esos filtros"
-            body="Prueba a quitar algún filtro o ampliar las fechas."
+        <div
+          class="agenda-root"
+          data-agenda-root
+          data-upcoming-count={model.upcomingCount}
+          data-agenda-complete={model.hasMoreOccurrences ? undefined : ''}
+        >
+          <div class="agenda-status">
+            <p class="result-count" data-result-count aria-live="polite">{model.resultCountLabel}</p>
+            <span aria-hidden="true">CM / 01</span>
+          </div>
+          <AgendaList days={model.days} />
+          {
+            model.hasMoreOccurrences && (
+              <div class="agenda-more" data-agenda-more>
+                <p data-agenda-showing>{model.showingCountLabel}</p>
+                <p data-agenda-load-error hidden role="alert">{model.fullAgendaLoadErrorMessage}</p>
+                <button type="button" data-load-full-agenda>{model.showAllLabel}</button>
+              </div>
+            )
+          }
+          {/* data-result-count / data-no-results: contrato de agenda-client.ts */}
+          <div data-no-results hidden>
+            <EmptyState
+              title="Ningún concierto coincide con esos filtros"
+              body="Prueba a quitar algún filtro o ampliar las fechas."
+            />
+          </div>
+          <script
+            id="agenda-filter-data"
+            type="application/json"
+            is:inline
+            set:html={serializeJsonForScript(model.filterIndex)}
           />
         </div>
-        <script
-          id="agenda-filter-data"
-          type="application/json"
-          is:inline
-          set:html={serializeJsonForScript(model.filterIndex)}
-        />
         {/* #agenda-filter-data: contrato de agenda-client.ts; no eliminar en un rediseño */}
         <script>
           import { initAgendaFilters } from '../lib/presentation/agenda-client.ts';
