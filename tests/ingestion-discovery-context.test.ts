@@ -205,7 +205,11 @@ describe('DiscoveryContext', () => {
     });
     expect(teatro?.aliases).toContain('teatro real de madrid');
     expect(teatro?.aliases).not.toContain('teatro real');
-    expect(JSON.stringify(context.venues)).not.toContain('sala principal');
+    expect(teatro?.aliases).not.toContain('sala principal');
+    expect(context.venues.some((venue) => venue.aliases.includes('sala principal'))).toBe(false);
+    expect(
+      context.venues.find((venue) => venue.id === 'ven_real_teatro_retiro_sala_principal')?.aliases,
+    ).toContain('sala principal real teatro de retiro');
 
     const parish = context.venues.find((venue) => venue.id === 'ven_iglesia_san_jose');
     expect(parish?.aliases).toEqual([]);

@@ -91,6 +91,8 @@ function formatAutomationMarkdown(
 | Sin cambios | ${summary.unchangedEvents} |
 | Ambiguos | ${summary.ambiguous} |
 | Posiblemente desaparecidos | ${summary.possiblyMissing} |
+| Duplicados del lote | ${summary.batchDuplicates} |
+| Corroboraciones entre fuentes | ${summary.crossSourceCorroborations} |
 | Classification drift | ${metrics.classificationDrift} |
 | Cancelaciones | ${metrics.cancellations} |
 | Aplazamientos | ${metrics.postponements} |

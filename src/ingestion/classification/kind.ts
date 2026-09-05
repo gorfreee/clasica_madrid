@@ -26,6 +26,8 @@ const ESTABLISHED_VENUE_IDS = new Set([
   'ven_teatro_la_latina',
   'ven_gran_teatro_principe_pio',
   'ven_real_teatro_retiro',
+  'ven_real_teatro_retiro_sala_principal',
+  'ven_real_teatro_retiro_sala_pacifico',
   'ven_auditorio_nacional',
   'ven_auditorio_nacional_sala_sinfonica',
   'ven_auditorio_nacional_sala_camara',

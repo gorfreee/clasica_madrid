@@ -1016,6 +1016,57 @@ describe('parser de ficha Teatro Real', () => {
     expect(facts.categoryText).toBe('También en el Real');
   });
 
+  it('conserva Sala Pacífico y Sala Principal del Retiro cuando la ficha las nombra', () => {
+    const pacifico = parseTeatroRealDetail(`
+      <div class="wrap-content-hero"><h4>El Real Junior</h4><h1>¿Te suena Tannhäuser, de R. Wagner?</h1></div>
+      <div class="back-image"></div>
+      <section class="text-intro-show">
+        <div class="wrap-text-free">
+          <p>Taller musical en familia.</p>
+          <p><strong>SALA PACÍFICO</strong> Real Teatro de Retiro, Plaza Daoíz y Velarde, 4. Metro Pacífico</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+      <section class="functions-show">
+        <div class="functions-show__block--item-space"><p>Real Teatro de Retiro</p></div>
+      </section>
+    `);
+    expect(pacifico.venueText).toBe('Sala Pacífico Real Teatro de Retiro');
+
+    const principal = parseTeatroRealDetail(`
+      <div class="wrap-content-hero"><h4>El Real Junior</h4><h1>Las bodas de Fígaro, de W.A Mozart</h1></div>
+      <div class="back-image"></div>
+      <section class="text-intro-show">
+        <div class="wrap-text-free">
+          <p>Ópera para niños y jóvenes.</p>
+          <p>SALA PRINCIPAL Real Teatro de Retiro, Plaza Daoíz y Velarde, 4. Metro Pacífico</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+      <section class="functions-show">
+        <div class="functions-show__block--item-space"><p>Real Teatro de Retiro</p></div>
+      </section>
+    `);
+    expect(principal.venueText).toBe('Sala Principal Real Teatro de Retiro');
+  });
+
+  it('sigue leyendo Sala Principal del coliseo cuando no hay frase de Retiro', () => {
+    const facts = parseTeatroRealDetail(`
+      <div class="wrap-content-hero"><h4>Ópera</h4><h1>Tannhäuser</h1></div>
+      <div class="back-image"></div>
+      <section class="text-intro-show">
+        <div class="wrap-text-free">
+          <p>Ópera de Richard Wagner.</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+      <section class="functions-show">
+        <div class="functions-show__block--item-space"><p>Sala Principal</p></div>
+      </section>
+    `);
+    expect(facts.venueText).toBe('Sala Principal');
+  });
+
   it('falla si el HTML no es una ficha reconocible', () => {
     expect(() => parseTeatroRealDetail('<div class="home">Teatro Real</div>')).toThrow(/estructura esperada/);
   });

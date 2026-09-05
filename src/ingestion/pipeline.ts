@@ -473,6 +473,7 @@ async function ingestPreparedEvents(
     ambiguous: reconciled.stats.ambiguous,
     possiblyMissing: possiblyMissing.length,
     batchDuplicates: reconciled.stats.batchDuplicates,
+    crossSourceCorroborations: reconciled.stats.crossSourceCorroborations,
     written: apply.written,
     dryRun: options.dryRun,
     detailHydrationAttempted: hydration.attempted,

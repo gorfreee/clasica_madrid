@@ -9,6 +9,7 @@ import {
   type ObservedPerson,
   type ObservedWork,
 } from '../observed.ts';
+import { normalizeText } from '../../lib/domain/normalize.ts';
 
 /**
  * Parse a Teatro Real `/es/espectaculo/…` page or the structural excerpt fixture.
@@ -64,9 +65,10 @@ function parseProduction(html: string): ObservedFactPatch {
   ]);
 
   const programText = collapseIntro(paragraphs.map((item) => item.text));
-  const venueText = stripTags(
-    firstMatch(html, /functions-show__block--item-space[\s\S]*?<p>([\s\S]*?)<\/p>/i) ?? '',
-  );
+  const functionsHtml = firstMatch(html, /class="functions-show"[\s\S]{0,20000}/i) ?? '';
+  const venueText =
+    extractRetiroRoomVenueText(`${introHtml}\n${functionsHtml}`) ??
+    stripTags(firstMatch(html, /functions-show__block--item-space[\s\S]*?<p>([\s\S]*?)<\/p>/i) ?? '');
 
   const listItems = allCaptures(introHtml, /<li\b[^>]*>([\s\S]*?)<\/li>/gi)
     .map((part) => stripTags(part))
@@ -301,5 +303,54 @@ function sliceBetween(html: string, start: string, end: string): string | undefi
   const endAt = html.indexOf(end, from + start.length);
   if (endAt === -1) return html.slice(from);
   return html.slice(from, endAt);
+}
+
+const RETIRO_BUILDING = new Set(['real teatro de retiro', 'teatro real de retiro']);
+const RETIRO_ROOMS: Record<string, string> = {
+  'sala principal': 'Sala Principal',
+  'sala pacifico': 'Sala Pacífico',
+  hall: 'HALL',
+};
+const RETIRO_ROOM_PHRASE = /\b(SALA PRINCIPAL|SALA PAC[IÍ]FICO|HALL)\s+Real Teatro de Retiro\b/giu;
+
+/**
+ * Keep the concrete Retiro hall when the ficha names it. "Sala Principal"
+ * alone remains the coliseo; only the explicit Retiro phrase is composed.
+ */
+export function composeTeatroRealVenueText(
+  listing?: string,
+  detail?: string,
+): string | undefined {
+  const named = canonicalRetiroRoomVenueText(detail);
+  if (named) return named;
+  const listingFolded = listing ? normalizeText(listing) : '';
+  const detailFolded = detail ? normalizeText(detail) : '';
+  const room = RETIRO_ROOMS[detailFolded];
+  if (RETIRO_BUILDING.has(listingFolded) && room) {
+    return `${room} Real Teatro de Retiro`;
+  }
+  return detail || listing;
+}
+
+function extractRetiroRoomVenueText(html: string): string | undefined {
+  const phrases = [...stripTags(html).matchAll(new RegExp(RETIRO_ROOM_PHRASE.source, 'giu'))]
+    .map((match) => canonicalRetiroRoomVenueText(match[0]))
+    .filter((item): item is string => Boolean(item));
+  const unique = [...new Set(phrases)];
+  return unique.length === 1 ? unique[0] : undefined;
+}
+
+function canonicalRetiroRoomVenueText(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  const folded = normalizeText(value);
+  for (const [roomKey, roomLabel] of Object.entries(RETIRO_ROOMS)) {
+    if (
+      folded === `${roomKey} real teatro de retiro` ||
+      folded === `real teatro de retiro ${roomKey}`
+    ) {
+      return `${roomLabel} Real Teatro de Retiro`;
+    }
+  }
+  return undefined;
 }
 

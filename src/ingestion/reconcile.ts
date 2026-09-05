@@ -70,6 +70,7 @@ export type ReconcileStats = {
   unchangedEvents: number;
   ambiguous: number;
   batchDuplicates: number;
+  crossSourceCorroborations: number;
 };
 
 export type ReconcileResult = {
@@ -107,6 +108,7 @@ export function reconcileHarvest(options: {
     unchangedEvents: 0,
     ambiguous: 0,
     batchDuplicates: 0,
+    crossSourceCorroborations: 0,
   };
 
   const prepared: PreparedItem[] = [];
@@ -186,7 +188,7 @@ export function reconcileHarvest(options: {
   for (const group of conflicting) {
     const reason = group[0] ? slotConflictReason(group[0], catalog) : 'schedule-conflict';
     stats.ambiguous += group.length;
-    if (group.length > 1) stats.batchDuplicates += group.length - 1;
+    recordGroupedObservations(group, stats, { conflicting: true });
     for (const item of group) {
       byIndex.set(item.observation.index, {
         action: 'ambiguous',
@@ -268,7 +270,7 @@ function applyExistingGroup(
   const conflict = groupConflict(group);
   if (conflict) {
     stats.ambiguous += group.length;
-    if (group.length > 1) stats.batchDuplicates += group.length - 1;
+    recordGroupedObservations(group, stats, { conflicting: true });
     for (const item of group) {
       byIndex.set(item.observation.index, {
         action: 'ambiguous',
@@ -293,12 +295,12 @@ function applyExistingGroup(
   const action = persistAction(existing, merged.event);
   if (action === 'unchanged') stats.unchangedEvents += 1;
   else stats.updatedEvents += 1;
-  if (group.length > 1) stats.batchDuplicates += group.length - 1;
+  const grouped = recordGroupedObservations(group, stats);
 
   const candidate = withCandidateEvent(merged.event, proposal.venue);
   if (action !== 'unchanged') candidates.push(candidate);
 
-  for (const [offset, item] of group.entries()) {
+  for (const item of group) {
     byIndex.set(item.observation.index, {
       action,
       method: item.identity.kind === 'matched' ? item.identity.method : undefined,
@@ -309,7 +311,7 @@ function applyExistingGroup(
       candidate,
       publishable: true,
       candidateGenerated: true,
-      batchDuplicate: offset > 0,
+      batchDuplicate: grouped.batchDuplicateIndexes.has(item.observation.index),
       ...(merged.diagnostics.length > 0 ? { mergeDiagnostics: merged.diagnostics } : {}),
     });
   }
@@ -402,7 +404,7 @@ function applyNewGroup(
   const conflict = groupConflict(group);
   if (conflict) {
     stats.ambiguous += group.length;
-    if (group.length > 1) stats.batchDuplicates += group.length - 1;
+    recordGroupedObservations(group, stats, { conflicting: true });
     for (const item of group) {
       byIndex.set(item.observation.index, {
         action: 'ambiguous',
@@ -459,9 +461,9 @@ function applyNewGroup(
   }
   candidates.push(candidate);
   stats.newEvents += 1;
-  if (group.length > 1) stats.batchDuplicates += group.length - 1;
+  const grouped = recordGroupedObservations(group, stats);
 
-  for (const [offset, item] of group.entries()) {
+  for (const item of group) {
     byIndex.set(item.observation.index, {
       action: 'new',
       candidate,
@@ -469,7 +471,7 @@ function applyNewGroup(
       publishable: true,
       candidateGenerated: true,
       scheduleChange: scheduleChangeOf(item.observation.event),
-      batchDuplicate: offset > 0,
+      batchDuplicate: grouped.batchDuplicateIndexes.has(item.observation.index),
     });
   }
 }
@@ -605,6 +607,60 @@ function groupConflict(group: PreparedItem[]): string | undefined {
     proposal = mergeProposals(proposal, item.proposal);
   }
   return undefined;
+}
+
+/**
+ * Same-source extras remain suspicious `batchDuplicates`. Compatible extras
+ * from a different `catalogSourceId` are resolved corroboration: they still
+ * merge and keep both citations, but they do not trip health review.
+ * Material conflicts stay `batchDuplicates` and never count as corroboration.
+ */
+function recordGroupedObservations(
+  group: PreparedItem[],
+  stats: ReconcileStats,
+  options?: { conflicting?: boolean },
+): { batchDuplicateIndexes: Set<number> } {
+  const classified = classifyGroupedObservations(group, options?.conflicting === true);
+  stats.batchDuplicates += classified.batchDuplicates;
+  stats.crossSourceCorroborations += classified.crossSourceCorroborations;
+  return { batchDuplicateIndexes: classified.batchDuplicateIndexes };
+}
+
+function classifyGroupedObservations(
+  group: PreparedItem[],
+  conflicting: boolean,
+): {
+  batchDuplicates: number;
+  crossSourceCorroborations: number;
+  batchDuplicateIndexes: Set<number>;
+} {
+  const batchDuplicateIndexes = new Set<number>();
+  if (group.length <= 1) {
+    return { batchDuplicates: 0, crossSourceCorroborations: 0, batchDuplicateIndexes };
+  }
+  if (conflicting) {
+    for (const item of group) batchDuplicateIndexes.add(item.observation.index);
+    return {
+      batchDuplicates: group.length - 1,
+      crossSourceCorroborations: 0,
+      batchDuplicateIndexes,
+    };
+  }
+
+  const seenSources = new Set<string>();
+  let batchDuplicates = 0;
+  let crossSourceCorroborations = 0;
+  for (const item of group) {
+    const sourceId = item.observation.source.catalogSourceId;
+    if (!seenSources.has(sourceId)) {
+      seenSources.add(sourceId);
+      if (seenSources.size > 1) crossSourceCorroborations += 1;
+      continue;
+    }
+    batchDuplicates += 1;
+    batchDuplicateIndexes.add(item.observation.index);
+  }
+  return { batchDuplicates, crossSourceCorroborations, batchDuplicateIndexes };
 }
 
 function skippedDecision(item: PreparedItem): ObservationReconcile {

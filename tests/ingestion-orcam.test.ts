@@ -217,7 +217,8 @@ describe('ORCAM pipeline safety', () => {
     });
     expect(result.apply.report.ok).toBe(true);
     expect(result.summary.newEvents).toBe(1);
-    expect(result.summary.batchDuplicates).toBe(1);
+    expect(result.summary.batchDuplicates).toBe(0);
+    expect(result.summary.crossSourceCorroborations).toBe(1);
     expect(result.candidates).toHaveLength(1);
     expect(result.candidates[0]?.event.citations).toHaveLength(2);
     expect(result.apply.proposed.sources.map((s) => s.id).sort()).toEqual(['src_auditorio_nacional', source.catalogSourceId].sort());

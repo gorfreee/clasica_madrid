@@ -70,7 +70,7 @@ function rawEvent(id: string, title: string, date: string, time: string, venueTe
 }
 
 describe('CNDM official monthly calendar', () => {
-  it('covers every month in the ingest window from the canonical calendar surface', () => {
+  it('covers every month in the ingest window from the canonical calendar surface', async () => {
     expect(cndmMonthUrls(source.urls[0], { from: '2026-09-30', to: '2027-01-02' })).toEqual([
       'https://cndm.inaem.gob.es/eventos/202609',
       'https://cndm.inaem.gob.es/eventos/202610',
@@ -82,6 +82,20 @@ describe('CNDM official monthly calendar', () => {
     expect(source.catalogSourceId).toBe('src_cndm');
     expect(source.skipDefaultSync).toBeFalsy();
     expect(source.useFetchRelay).toBe(true);
+    await expect(
+      adapter.fetchListing!('https://cndm.inaem.gob.es/', {
+        ...ctx,
+        get: async () => {
+          throw new Error('la homepage de CNDM no debe pedirse');
+        },
+      }),
+    ).resolves.toBe('');
+    await expect(
+      adapter.fetchListing!('https://cndm.inaem.gob.es/eventos/202610', {
+        ...ctx,
+        get: async (url) => `mes:${url}`,
+      }),
+    ).resolves.toBe('mes:https://cndm.inaem.gob.es/eventos/202610');
   });
 
   it('extracts all Madrid events, stable Drupal ids and observed schedule facts without cycle filtering', async () => {
@@ -184,7 +198,9 @@ describe('CNDM official monthly calendar', () => {
       sourceIds: [source.id],
       dataDir: await mkdtemp(path.join(os.tmpdir(), 'cndm-month-')),
       get: async (url) => {
-        if (url === source.urls[0] || url === 'https://cndm.inaem.gob.es') return '<title>CNDM</title>';
+        if (url === source.urls[0] || url === 'https://cndm.inaem.gob.es' || url === 'https://cndm.inaem.gob.es/') {
+          throw new Error(`homepage CNDM no debe pedirse: ${url}`);
+        }
         if (url === octoberUrl) throw new HttpError(503, url);
         if (url === 'https://cndm.inaem.gob.es/eventos/202611') return november;
         if (url === 'https://cndm.inaem.gob.es/node/25000') {
@@ -198,6 +214,47 @@ describe('CNDM official monthly calendar', () => {
         throw new Error(`URL no mapeada: ${url}`);
       },
     });
+    expect(ingest.summary.sourcesFailed).toEqual([]);
+    expect(ingest.summary.disappearanceSuppressedSources).toEqual([source.id]);
+    expect(ingest.rawEvents.map((event) => event.observed.title)).toEqual(['CUARTETO VIAJERO']);
+  });
+
+  it('una ingestión CNDM no solicita la homepage y continúa si un mes falla', async () => {
+    const october = monthListing('202610', {
+      4: [card('23799', 'LES MUSICIENS DU LOUVRE', '19:00', 'Auditorio Nacional (Sinfónica) | Madrid')],
+    });
+    const november = monthListing('202611', {
+      1: [card('25000', 'CUARTETO VIAJERO', '19:30', 'Auditorio Nacional (Cámara) | Madrid')],
+    });
+    const requested: string[] = [];
+    const ingest = await runIngest({
+      now: TEST_NOW,
+      dryRun: true,
+      catalog: emptyCatalog(),
+      window: { from: '2026-10-01', to: '2026-11-01' },
+      sourceIds: [source.id],
+      dataDir: await mkdtemp(path.join(os.tmpdir(), 'cndm-no-home-')),
+      get: async (url) => {
+        requested.push(url);
+        if (url === source.urls[0] || url === 'https://cndm.inaem.gob.es' || url === 'https://cndm.inaem.gob.es/') {
+          throw new Error(`homepage CNDM no debe pedirse: ${url}`);
+        }
+        if (url === octoberUrl) throw new HttpError(408, url);
+        if (url === 'https://cndm.inaem.gob.es/eventos/202611') return november;
+        if (url === 'https://cndm.inaem.gob.es/node/25000') {
+          return `<head><link rel="canonical" href="https://cndm.inaem.gob.es/node/25000"></head>
+<div class="event-banner"><div class="event-banner__title"><a href="/node/25000">CUARTETO VIAJERO</a></div>
+<div class="event-banner__dates">19:30<br>Noviembre/26<br><strong>Dom1</strong></div></div>
+<div class="event-place"><h3>Auditorio Nacional (Cámara) | Madrid</h3></div>
+<div class="event-program"><h3>Programa</h3></div>
+<div class="content"></div>`;
+        }
+        throw new Error(`URL no mapeada: ${url}`);
+      },
+    });
+    expect(requested.some((url) => /^https:\/\/cndm\.inaem\.gob\.es\/?$/.test(url))).toBe(false);
+    expect(requested).toContain(octoberUrl);
+    expect(requested).toContain('https://cndm.inaem.gob.es/eventos/202611');
     expect(ingest.summary.sourcesFailed).toEqual([]);
     expect(ingest.summary.disappearanceSuppressedSources).toEqual([source.id]);
     expect(ingest.rawEvents.map((event) => event.observed.title)).toEqual(['CUARTETO VIAJERO']);
@@ -352,7 +409,9 @@ describe('CNDM pipeline and cross-source identity', () => {
       sourceIds: [source.id],
       dataDir: await mkdtemp(path.join(os.tmpdir(), 'cndm-test-')),
       get: async (url) => {
-        if (url === source.urls[0] || url === 'https://cndm.inaem.gob.es') return '<title>CNDM</title>';
+        if (url === source.urls[0] || url === 'https://cndm.inaem.gob.es' || url === 'https://cndm.inaem.gob.es/') {
+          throw new Error(`homepage CNDM no debe pedirse: ${url}`);
+        }
         if (url === octoberUrl) return listingBody;
         if (url === 'https://cndm.inaem.gob.es/node/23799') {
           if (failDetail) throw new Error('HTTP 503');
@@ -445,7 +504,9 @@ describe('CNDM pipeline and cross-source identity', () => {
           }]);
         }
         if (url.includes('/cndm-benjamin-alard')) return auditorioDetail;
-        if (url === source.urls[0] || url === 'https://cndm.inaem.gob.es') return '<title>CNDM</title>';
+        if (url === source.urls[0] || url === 'https://cndm.inaem.gob.es' || url === 'https://cndm.inaem.gob.es/') {
+          throw new Error(`homepage CNDM no debe pedirse: ${url}`);
+        }
         if (url === octoberUrl) return cndmListing;
         if (url === 'https://cndm.inaem.gob.es/node/23837') return cndmDetail;
         throw new Error(`URL no mapeada: ${url}`);
