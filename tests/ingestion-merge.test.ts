@@ -210,6 +210,174 @@ describe('merge conservador de eventos publicados', () => {
   });
 });
 
+describe('enriquecimiento monotónico de performers, composers y works', () => {
+  it('composers: un superconjunto compatible añade el compositor nuevo', () => {
+    const existing = makeEvent({
+      composers: [{ name: 'Ludwig van Beethoven' }],
+    });
+    const merged = mergeExistingEvent(
+      existing,
+      proposal({
+        title: existing.title,
+        composers: [{ name: 'Johannes Brahms' }, { name: 'Ludwig van Beethoven' }],
+      }),
+      TEST_NOW,
+    );
+
+    expect(merged.event.composers).toEqual([
+      { name: 'Ludwig van Beethoven' },
+      { name: 'Johannes Brahms' },
+    ]);
+    expect(merged.diagnostics.filter((item) => item.startsWith('composers:'))).toEqual([]);
+    expect(merged.diffs.some((item) => item.startsWith('composers:'))).toBe(true);
+  });
+
+  it('composers: un subconjunto no elimina un compositor publicado', () => {
+    const existing = makeEvent({
+      composers: [{ name: 'Ludwig van Beethoven' }, { name: 'Johannes Brahms' }],
+    });
+    const merged = mergeExistingEvent(
+      existing,
+      proposal({
+        title: existing.title,
+        composers: [{ name: 'Ludwig van Beethoven' }],
+      }),
+      TEST_NOW,
+    );
+
+    expect(merged.event.composers).toEqual(existing.composers);
+    expect(merged.diagnostics.some((item) => item.startsWith('composers:'))).toBe(true);
+    expect(merged.diffs.some((item) => item.startsWith('composers:'))).toBe(false);
+  });
+
+  it('performers: una observación posterior incorpora un intérprete nuevo', () => {
+    const existing = makeEvent({
+      performers: [{ name: 'Orquesta X' }],
+    });
+    const merged = mergeExistingEvent(
+      existing,
+      proposal({
+        title: existing.title,
+        performers: [{ name: 'Orquesta X' }, { name: 'María Pérez', role: 'conductor' }],
+      }),
+      TEST_NOW,
+    );
+
+    expect(merged.event.performers).toEqual([
+      { name: 'Orquesta X' },
+      { name: 'María Pérez', role: 'conductor' },
+    ]);
+    expect(merged.diagnostics.filter((item) => item.startsWith('performers:'))).toEqual([]);
+  });
+
+  it('performers: un intérprete existente sigue pudiendo ganar role', () => {
+    const existing = makeEvent({
+      performers: [{ name: 'Kent Nagano' }],
+    });
+    const merged = mergeExistingEvent(
+      existing,
+      proposal({
+        title: existing.title,
+        performers: [{ name: 'Kent Nagano', role: 'conductor' }],
+      }),
+      TEST_NOW,
+    );
+
+    expect(merged.event.performers).toEqual([{ name: 'Kent Nagano', role: 'conductor' }]);
+    expect(merged.diagnostics.filter((item) => item.startsWith('performers:'))).toEqual([]);
+  });
+
+  it('works: un superconjunto compatible añade la obra nueva', () => {
+    const existing = makeEvent({
+      works: [{ title: 'Sinfonía nº 5' }],
+    });
+    const merged = mergeExistingEvent(
+      existing,
+      proposal({
+        title: existing.title,
+        works: [{ title: 'Sinfonía nº 5' }, { title: 'Obertura Coriolano' }],
+      }),
+      TEST_NOW,
+    );
+
+    expect(merged.event.works).toEqual([
+      { title: 'Sinfonía nº 5' },
+      { title: 'Obertura Coriolano' },
+    ]);
+    expect(merged.diagnostics.filter((item) => item.startsWith('works:'))).toEqual([]);
+  });
+
+  it('works: una obra existente sigue pudiendo ganar composerName', () => {
+    const existing = makeEvent({
+      works: [{ title: 'Sinfonía nº 5' }],
+    });
+    const merged = mergeExistingEvent(
+      existing,
+      proposal({
+        title: existing.title,
+        works: [{ title: 'Sinfonía nº 5', composerName: 'Ludwig van Beethoven' }],
+      }),
+      TEST_NOW,
+    );
+
+    expect(merged.event.works).toEqual([
+      { title: 'Sinfonía nº 5', composerName: 'Ludwig van Beethoven' },
+    ]);
+    expect(merged.diagnostics.filter((item) => item.startsWith('works:'))).toEqual([]);
+  });
+
+  it('una observación incompatible no añade elementos sueltos ni borra lo canónico', () => {
+    const existing = makeEvent({
+      composers: [{ name: 'Ludwig van Beethoven' }, { name: 'Johannes Brahms' }],
+      performers: [{ name: 'Orquesta X' }, { name: 'Coro Y' }],
+      works: [{ title: 'Sinfonía nº 5' }, { title: 'Sinfonía nº 7' }],
+    });
+    const merged = mergeExistingEvent(
+      existing,
+      proposal({
+        title: existing.title,
+        composers: [{ name: 'Ludwig van Beethoven' }, { name: 'Franz Schubert' }],
+        performers: [{ name: 'Orquesta X' }, { name: 'María Pérez', role: 'conductor' }],
+        works: [{ title: 'Sinfonía nº 5' }, { title: 'Obertura Coriolano' }],
+      }),
+      TEST_NOW,
+    );
+
+    expect(merged.event.composers).toEqual(existing.composers);
+    expect(merged.event.performers).toEqual(existing.performers);
+    expect(merged.event.works).toEqual(existing.works);
+    expect(merged.diagnostics.some((item) => item.startsWith('composers:'))).toBe(true);
+    expect(merged.diagnostics.some((item) => item.startsWith('performers:'))).toBe(true);
+    expect(merged.diagnostics.some((item) => item.startsWith('works:'))).toBe(true);
+    expect(merged.diffs).toEqual([]);
+  });
+
+  it('repetir la misma observación enriquecida es idempotente y no duplica', () => {
+    const existing = makeEvent({
+      composers: [{ name: 'Ludwig van Beethoven' }],
+      performers: [{ name: 'Orquesta X' }],
+      works: [{ title: 'Sinfonía nº 5' }],
+    });
+    const incoming = proposal({
+      title: existing.title,
+      composers: [{ name: 'Ludwig van Beethoven' }, { name: 'Johannes Brahms' }],
+      performers: [{ name: 'Orquesta X' }, { name: 'María Pérez', role: 'conductor' }],
+      works: [{ title: 'Sinfonía nº 5' }, { title: 'Obertura Coriolano' }],
+    });
+    const first = mergeExistingEvent(existing, incoming, TEST_NOW);
+    expect(first.event.composers).toHaveLength(2);
+    expect(first.event.performers).toHaveLength(2);
+    expect(first.event.works).toHaveLength(2);
+
+    const second = mergeExistingEvent(first.event, incoming, TEST_NOW);
+    expect(second.event.composers).toEqual(first.event.composers);
+    expect(second.event.performers).toEqual(first.event.performers);
+    expect(second.event.works).toEqual(first.event.works);
+    expect(second.diffs).toEqual([]);
+    expect(second.diagnostics).toEqual([]);
+  });
+});
+
 function assertNeverLosesPublishedIdentity(event: Event): void {
   expect(event.id).toMatch(/^evt_/);
   expect(event.slug).toBeTruthy();
