@@ -4,6 +4,7 @@ import {
   canPairAsAuditorioComposer,
   composersAreDistinct,
   extractObrasDeComposers,
+  extractStandaloneKnownComposers,
   hasExplicitPerformerSignal,
   looksLikeComposerNameList,
   looksLikeNameListContinuation,
@@ -25,6 +26,7 @@ import {
   looksLikePartHeader,
   looksLikeProductionNote,
   looksLikeProgramHeader,
+  looksLikeProgramLabel,
   looksLikeScheduleNotice,
   looksLikeTextCredit,
   looksLikeUnequivocalWorkLine,
@@ -216,7 +218,7 @@ function groupWorksByComposer(lines: string[]): { works: ObservedWork[]; extraCo
   let composerName: string | undefined;
   for (let index = 0; index < lines.length; index++) {
     const line = lines[index] ?? '';
-    if (looksLikePartHeader(line)) {
+    if (looksLikePartHeader(line) || looksLikeProgramLabel(line)) {
       composerName = undefined;
       continue;
     }
@@ -232,7 +234,7 @@ function groupWorksByComposer(lines: string[]): { works: ObservedWork[]; extraCo
       continue;
     }
     if (looksLikeComposerNameList(line)) {
-      extraComposers.push(...extractObrasDeComposers(line).map((name) => ({ name })));
+      extraComposers.push(...extractStandaloneKnownComposers(line).map((name) => ({ name })));
       composerName = undefined;
       continue;
     }

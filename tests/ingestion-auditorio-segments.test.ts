@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  extractStandaloneKnownComposers,
   findProgramStartIndex,
   looksLikeComposerNameList,
   looksLikeRoleOnlyLine,
@@ -498,9 +499,18 @@ describe('segmentación performer/programa del Auditorio', () => {
     expect(looksLikeComposerNameList('José de Nebra, Vicente Rodríguez, Francisco Corselli y Antolí Sala')).toBe(
       true,
     );
+    expect(looksLikeComposerNameList('Ana Morales, Rubén Mendoza y Marta Soler')).toBe(true);
     expect(looksLikeComposerNameList('Stravinsky, El pájaro de fuego (música del ballet completo)')).toBe(
       false,
     );
+    expect(extractStandaloneKnownComposers('Schubert, Debussy y Ravel')).toEqual([
+      'Schubert',
+      'Debussy',
+      'Ravel',
+    ]);
+    expect(extractStandaloneKnownComposers('Mompou, Toldrà y Granados')).toEqual([]);
+    expect(extractStandaloneKnownComposers('Ana Morales, Rubén Mendoza y Marta Soler')).toEqual([]);
+    expect(extractStandaloneKnownComposers('Obras de Schubert, Debussy y Ravel')).toEqual([]);
     expect(parseKnownComposerPrefixWork('Edward Elgar Variaciones', 'Enigma, op. 36')).toEqual({
       composerName: 'Edward Elgar',
       title: 'Variaciones Enigma, op. 36',

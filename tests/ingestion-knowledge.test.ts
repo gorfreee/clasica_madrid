@@ -498,6 +498,18 @@ describe('composer knowledge base', () => {
     expect(looksLikeProgramHeader('II PARTE')).toBe(true);
     expect(looksLikeProgramHeader('PARTE I')).toBe(true);
     expect(looksLikeProgramHeader('PARTE ÚNICA:')).toBe(true);
+    expect(looksLikeProgramHeader('Programa')).toBe(true);
+    expect(looksLikeProgramHeader('Programa:')).toBe(true);
+    expect(looksLikeProgramHeader('Programa (selección)')).toBe(true);
+    expect(looksLikeProgramHeader('Programa (selección de obras)')).toBe(true);
+    expect(looksLikeProgramHeader('Program (selection)')).toBe(true);
+    expect(looksLikeWorkLine('Programa (selección)')).toBe(false);
+    expect(looksLikeProgramHeader('El programa incluye obras de Bach')).toBe(false);
+    expect(looksLikeProgramHeader('un programa de cámara')).toBe(false);
+    expect(looksLikeProgramHeader('Programa de la OCNE')).toBe(false);
+    expect(looksLikeProgramHeader('Programa (selección de obras clásicas)')).toBe(false);
+    expect(looksLikeProgramHeader('Pause')).toBe(true);
+    expect(looksLikeProgramHeader('INTERVALO')).toBe(true);
     expect(looksLikeEnsembleName('LA CAPELLA NACIONAL DE CATALUNYA')).toBe(true);
     expect(looksLikeEnsembleName('Compañía JAC Ballet')).toBe(true);
     expect(looksLikeEnsembleName('Quinteto de la Filarmónica de Berlín')).toBe(true);

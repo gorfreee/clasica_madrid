@@ -478,6 +478,18 @@ export function looksLikeObrasDeLine(text: string): boolean {
   return /^obras de\b/i.test(cleanLine(text));
 }
 
+/**
+ * A standalone comma/`y` name list (no `Obras de`) only becomes composers when
+ * every token is a known composer. Personal-name syntax alone is not enough.
+ */
+export function extractStandaloneKnownComposers(text: string): string[] {
+  if (looksLikeObrasDeLine(text) || !looksLikeComposerNameList(text)) return [];
+  const names = extractObrasDeComposers(text);
+  if (names.length < 2) return [];
+  if (!names.every((name) => looksLikeComposerLine(name))) return [];
+  return names;
+}
+
 export function looksLikeComposerNameList(text: string): boolean {
   const cleaned = cleanLine(text).replace(/^obras de\s+/i, '').replace(/[.,;]+$/u, '').trim();
   if (!cleaned) return false;

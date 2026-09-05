@@ -539,44 +539,77 @@ describe('parser de ficha Auditorio Nacional', () => {
     );
   });
 
-  it('Danzas del Mundo: el compositor explícito de la línea gana al sticky anterior', async () => {
+  it('Danzas del Mundo: 14 obras reales y ningún heading como composer/work', async () => {
     const html = await readFile(path.join(detailDir, 'auditorio-danzas-del-mundo.excerpt.html'), 'utf8');
     const facts = parseAuditorioNacionalDetail(html);
     const works = facts.works ?? [];
+    const composers = facts.composers ?? [];
 
     expect(facts.performers?.map((item) => item.name)).toEqual(
       expect.arrayContaining(['PHILHARMONIC ENSEMBLE', 'Serena Sáenz']),
     );
-    expect(works).toEqual(
-      expect.arrayContaining([
-        { title: 'Rosas del Sur, op. 388', composerName: 'Johann Strauss II' },
-        { title: 'Danza eslava, op. 46 n.º 8', composerName: 'Antonín Dvořák' },
-        { title: 'Danza de Anitra (de Peer Gynt)', composerName: 'Edvard Grieg' },
-        { title: 'Oblivion', composerName: 'Astor Piazzolla' },
-        { title: 'Danza húngara n.º 5', composerName: 'Johannes Brahms' },
-        { title: 'Danza macabra, op. 40', composerName: 'Camille Saint-Saëns' },
-        { title: 'Rondo alla turca, KV 331 (versión orquestal)', composerName: 'Wolfgang A. Mozart' },
-        { title: 'Libertango', composerName: 'Astor Piazzolla' },
-        { title: 'Vals n.º 2', composerName: 'Dmitri Shostakóvich' },
-      ]),
-    );
-    const inherited = works.filter((work) => /dvo[rř]ák/i.test(work.composerName ?? ''));
-    expect(inherited).toEqual([{ title: 'Danza eslava, op. 46 n.º 8', composerName: 'Antonín Dvořák' }]);
+    expect(works).toEqual([
+      { title: 'Rosas del Sur, op. 388', composerName: 'Johann Strauss II' },
+      { title: 'Danza eslava, op. 46 n.º 8', composerName: 'Antonín Dvořák' },
+      { title: 'Danza de Anitra (de Peer Gynt)', composerName: 'Edvard Grieg' },
+      { title: 'Oblivion', composerName: 'Astor Piazzolla' },
+      { title: 'Danza húngara n.º 5', composerName: 'Johannes Brahms' },
+      { title: 'Danza macabra, op. 40', composerName: 'Camille Saint-Saëns' },
+      { title: 'Rondo alla turca, KV 331 (versión orquestal)', composerName: 'Wolfgang A. Mozart' },
+      { title: 'Voces de primavera, op. 410 (soprano y orquesta)', composerName: 'Johann Strauss II' },
+      { title: 'Las hijas de Cádiz (aria para soprano y orquesta)', composerName: 'Léo Delibes' },
+      { title: 'Danzas populares rumanas, Sz. 56', composerName: 'Béla Bartók' },
+      { title: 'Danza española n.º 1 (de La vida breve)', composerName: 'Manuel de Falla' },
+      { title: 'Csárdás de la ópera Ritter Pásmán, op. 441', composerName: 'Johann Strauss II' },
+      { title: 'Libertango', composerName: 'Astor Piazzolla' },
+      { title: 'Vals n.º 2', composerName: 'Dmitri Shostakóvich' },
+    ]);
+    expect(composers).toEqual([
+      { name: 'Johann Strauss II' },
+      { name: 'Antonín Dvořák' },
+      { name: 'Edvard Grieg' },
+      { name: 'Astor Piazzolla' },
+      { name: 'Johannes Brahms' },
+      { name: 'Camille Saint-Saëns' },
+      { name: 'Wolfgang A. Mozart' },
+      { name: 'Léo Delibes' },
+      { name: 'Béla Bartók' },
+      { name: 'Manuel de Falla' },
+      { name: 'Dmitri Shostakóvich' },
+    ]);
+    expect(works).toHaveLength(14);
+    expect(composers).toHaveLength(11);
+    expect(composers.some((item) => /danzas del mundo/i.test(item.name))).toBe(false);
+    expect(works.some((work) => /programa\s*\(\s*selecci/i.test(work.title))).toBe(false);
     expect(
       works.some(
         (work) =>
-          /dvo[rř]ák/i.test(work.composerName ?? '') &&
-          /grieg|piazzolla|brahms|saint-sa[eë]ns|mozart|delibes|bart[oó]k|falla|shostak/i.test(work.title),
+          Boolean(work.composerName) &&
+          work.title.toLocaleLowerCase('es').startsWith(work.composerName!.toLocaleLowerCase('es')),
       ),
     ).toBe(false);
-    expect(
-      works.some(
-        (work) =>
-          /^(?:edvard grieg|astor piazzolla|johannes brahms|camille saint-sa[eë]ns|wolfgang a\. mozart|l[eé]o delibes|b[eé]la bart[oó]k|manuel de falla|dmitri shostak)/i.test(
-            work.title,
-          ),
-      ),
-    ).toBe(false);
+  });
+
+  it('una lista suelta de personas en el programa no se publica como composers', () => {
+    const html = `
+      <article id="content">
+        <h1>Concierto de cámara</h1>
+        <div class="content">
+          <h4>Cuarteto Ejemplo<br />Ana Morales, violín<br />Programa<br />Ana Morales, Rubén Mendoza y Marta Soler<br />Johann Sebastian Bach<br />Concierto italiano</h4>
+        </div>
+        <div class="rightcolumn">
+          <p class="rightColumn__item">
+            <label class="rightColumn__item__label">Sala:</label>
+            <span class="rightColumn__item__text">Sala de Cámara</span>
+          </p>
+        </div>
+      </article>
+    `;
+    const facts = parseAuditorioNacionalDetail(html);
+    expect(facts.works).toEqual([{ title: 'Concierto italiano', composerName: 'Johann Sebastian Bach' }]);
+    expect(facts.composers).toEqual([{ name: 'Johann Sebastian Bach' }]);
+    expect(facts.composers?.some((item) => /morales|mendoza|soler/i.test(item.name))).toBe(false);
+    expect(facts.programText).toMatch(/Ana Morales, Rubén Mendoza y Marta Soler/);
   });
 
   it('OCNE Satélite 04: Tres canciones rusas no es performer', async () => {
