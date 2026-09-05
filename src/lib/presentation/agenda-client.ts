@@ -268,8 +268,9 @@ async function loadFullAgenda(state: AgendaRuntime): Promise<boolean> {
     state.root.setAttribute('data-agenda-complete', '');
     if (more) more.hidden = true;
     apply();
-    state.count?.setAttribute('tabindex', '-1');
-    state.count?.focus();
+    const list = state.root.querySelector<HTMLElement>('[data-agenda-list]');
+    list?.setAttribute('tabindex', '-1');
+    list?.focus({ preventScroll: true });
     return true;
   } catch {
     if (errorEl) errorEl.hidden = false;
