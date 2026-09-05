@@ -58,6 +58,7 @@ const SECRET_OR_OPS_PATTERNS = [
   /INGEST_FETCH_RELAY/i,
   /INGESTION_BOT/i,
   /useFetchRelay/,
+  /fetchTransport/,
   /skipDefaultSync/,
   /adapterId/,
   /Bearer /i,

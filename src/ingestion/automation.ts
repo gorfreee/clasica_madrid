@@ -196,7 +196,7 @@ function formatHttp(
   listingFallback?: IngestSourceTiming['listingFallback'],
 ): string {
   if (!http || http.requests === 0) {
-    return listingFallback === 'html-archive' ? 'fallback HTML' : '—';
+    return listingFallback === 'wp-rest' ? 'fallback REST' : '—';
   }
   const parts = [`${http.requests} req`];
   parts.push(`${formatDuration(http.latencyMsTotal / http.requests)} avg`);
@@ -211,7 +211,7 @@ function formatHttp(
   if (http.fetchFailedCount) parts.push(`fetch-failed ${http.fetchFailedCount}`);
   if (http.challengeCount) parts.push(`captcha ${http.challengeCount}`);
   if (http.recoveries) parts.push(`recuperadas ${http.recoveries}`);
-  if (listingFallback === 'html-archive') parts.push('fallback HTML');
+  if (listingFallback === 'wp-rest') parts.push('fallback REST');
   const notable = Object.entries(http.statusCounts)
     .filter(([key]) => key !== '200')
     .sort(([left], [right]) => left.localeCompare(right))

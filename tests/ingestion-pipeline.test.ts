@@ -112,6 +112,9 @@ async function fixtureGet(url: string): Promise<string> {
   if (url.includes('wp-json/wp/v2/calendario-eventos')) {
     return '[]';
   }
+  if (url.includes('/categoria-eventos/conciertos/')) {
+    return '<div class="jet-listing-grid__items" data-pages="1"></div>';
+  }
   if (url === 'https://www.realacademiabellasartessanfernando.com/actividades/conciertos/') {
     return '<body class="archive tax-actividad_type term-conciertos term-33"><main><h1>Conciertos</h1><div class="rc-actividades-block__container"><ul class="rc-actividades-block__list"></ul></div></main></body>';
   }

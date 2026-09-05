@@ -33,7 +33,7 @@ import type {
   SourceFailure,
 } from './types.ts';
 import { emptyIngestAiSummary, IncompleteListingError } from './types.ts';
-import { getText, HttpError, resolveFetchRelay, takeRelayRecoveries } from './http.ts';
+import { getText, HttpError, resolveFetchRelay, takeRecordedHttpAttempts, takeRelayRecoveries } from './http.ts';
 import { normalizeUrl } from './urls.ts';
 
 export type IngestOptions = {
@@ -138,8 +138,8 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
     const adapter = getAdapter(source.adapterId);
     const sourceHydration = countHydration(hydrated);
     const listingError = failure && failure.stage !== 'hydration' ? failure.message : undefined;
-    const listingFallback = extracted.some((raw) => raw.listingSurface === 'html-archive')
-      ? 'html-archive' as const
+    const listingFallback = extracted.some((raw) => raw.listingSurface === 'wp-rest')
+      ? 'wp-rest' as const
       : undefined;
     const hydrationRecoveries = hydrated.filter((raw) =>
       raw.hydration?.status === 'succeeded' && (raw.hydration.httpStatuses?.length ?? 0) > 0
@@ -642,28 +642,38 @@ function instrumentSourceGet(
     }
     try {
       const body = await get(url);
-      observability.recordHttp({
-        sourceId,
-        transport,
-        durationMs: performance.now() - startedAtMs,
-        retry,
-        status: 200,
-        recoveries: takeRelayRecoveries(url),
-      });
+      recordInstrumentedHttp(observability, sourceId, url, transport, startedAtMs, retry);
       return body;
     } catch (error) {
       failedUrls.add(normalizeUrl(url));
-      takeRelayRecoveries(url);
-      observability.recordHttp({
-        sourceId,
-        transport,
-        durationMs: performance.now() - startedAtMs,
-        retry,
-        ...classifyHttpFailure(error),
-      });
+      recordInstrumentedHttp(observability, sourceId, url, transport, startedAtMs, retry, error);
       throw error;
     }
   };
+}
+
+function recordInstrumentedHttp(
+  observability: IngestObservability,
+  sourceId: string,
+  url: string,
+  transport: 'direct' | 'relay',
+  startedAtMs: number,
+  retry: boolean,
+  error?: unknown,
+): void {
+  const recorded = takeRecordedHttpAttempts(url);
+  if (recorded.length > 0) {
+    for (const attempt of recorded) observability.recordHttp({ sourceId, ...attempt });
+    return;
+  }
+  if (error) takeRelayRecoveries(url);
+  observability.recordHttp({
+    sourceId,
+    transport,
+    durationMs: performance.now() - startedAtMs,
+    retry,
+    ...(error ? classifyHttpFailure(error) : { status: 200, recoveries: takeRelayRecoveries(url) }),
+  });
 }
 
 function classifyHttpFailure(error: unknown): {
@@ -673,7 +683,11 @@ function classifyHttpFailure(error: unknown): {
   challenge?: boolean;
 } {
   const message = error instanceof Error ? error.message : String(error);
-  const status = error instanceof HttpError ? error.status : undefined;
+  const status = error instanceof HttpError
+    ? error.status
+    : (error && typeof error === 'object' && 'status' in error && typeof error.status === 'number'
+      ? error.status
+      : undefined);
   const timeout = (error instanceof Error && error.name === 'AbortError') || /tiempo agotado/i.test(message);
   const fetchFailed = /fetch failed/i.test(message);
   const challenge = status === 202 || /sgcaptcha|SiteGround \(captcha\)|HTML de desafío/i.test(message);

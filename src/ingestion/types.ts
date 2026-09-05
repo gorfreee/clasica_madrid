@@ -58,8 +58,7 @@ export type RawEvent = {
   listingDateText?: string;
   /**
    * Diagnostic only: which official listing surface produced this observation.
-   * `html-archive` means REST was unreachable and the concert taxonomy archive
-   * was used. Never written to `data/**`.
+   * Never written to `data/**`.
    */
   listingSurface?: 'wp-rest' | 'html-archive';
   hydration?: HydrationMeta;
@@ -122,6 +121,13 @@ export type SourceDefinition = PipelineSource & {
    * The Worker is source-agnostic; this flag is the only switch.
    */
   useFetchRelay?: boolean;
+  /**
+   * How `getText` reaches this source's hosts. Unset means `relay` when
+   * `useFetchRelay` is set, otherwise `direct`. `direct-then-relay` tries
+   * the origin first and uses the Worker only after a recoverable block.
+   * March, Zarzuela, Auditorio and CNDM stay on `relay`.
+   */
+  fetchTransport?: 'direct' | 'relay' | 'direct-then-relay';
 };
 
 export type AdapterContext = {

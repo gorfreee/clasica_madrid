@@ -1,5 +1,6 @@
-import { isSiteGroundChallenge } from './listing-retry.ts';
-import { fetchRelayHosts } from './registry.ts';
+import { performance } from 'node:perf_hooks';
+import { isRecoverableTransportError, isSiteGroundChallenge } from './listing-retry.ts';
+import { fetchRelayHosts, fetchTransportForHost } from './registry.ts';
 
 const USER_AGENT = 'ClasicaMadrid-ingestion/1 (+https://github.com/gorfreee/clasica_madrid)';
 const MAX_REDIRECTS = 10;
@@ -17,10 +18,60 @@ export const JSON_DOCUMENT_ACCEPT = 'application/json';
 const originCookieJar = new Map<string, string>();
 /** Last Worker challenge recoveries, keyed by the official URL just fetched. */
 const relayRecoveriesByUrl = new Map<string, number>();
+/** Actual HTTP hops performed by the last `getText` call, drained by observability. */
+const recordedHttpAttempts: RecordedHttpAttempt[] = [];
+
+export type RecordedHttpAttempt = {
+  url: string;
+  transport: 'direct' | 'relay';
+  durationMs: number;
+  retry: boolean;
+  status?: number;
+  timeout?: boolean;
+  fetchFailed?: boolean;
+  challenge?: boolean;
+  recoveries?: number;
+};
+
+export type TransportAttempt = {
+  transport: 'direct' | 'relay';
+  status?: number;
+  message: string;
+};
+
+/** Both transports of `direct-then-relay` failed. Never includes cookies or tokens. */
+export class TransportAttemptsError extends Error {
+  readonly status?: number;
+  constructor(
+    url: string,
+    public readonly attempts: readonly TransportAttempt[],
+  ) {
+    const detail = attempts.map((item) => (
+      item.status !== undefined ? `${item.transport} → HTTP ${item.status}` : `${item.transport} → ${item.message}`
+    )).join('; ');
+    super(`${attempts.at(-1)?.message ?? `error al pedir ${url}`} [${detail}]`);
+    this.name = 'TransportAttemptsError';
+    this.status = [...attempts].reverse().find((item) => item.status !== undefined)?.status;
+  }
+}
 
 export function resetOriginCookieJar(): void {
   originCookieJar.clear();
   relayRecoveriesByUrl.clear();
+  recordedHttpAttempts.length = 0;
+}
+
+export function takeRecordedHttpAttempts(url?: string): RecordedHttpAttempt[] {
+  if (!url) return recordedHttpAttempts.splice(0, recordedHttpAttempts.length);
+  const taken: RecordedHttpAttempt[] = [];
+  for (let i = 0; i < recordedHttpAttempts.length; ) {
+    if (recordedHttpAttempts[i]!.url === url) {
+      taken.push(recordedHttpAttempts.splice(i, 1)[0]!);
+    } else {
+      i += 1;
+    }
+  }
+  return taken;
 }
 
 /** Consume recoveries recorded for this official URL; never logs cookie values. */
@@ -47,10 +98,12 @@ export type FetchRelayTarget = {
  * source marked with `useFetchRelay`.
  *
  * Ordinary URLs always use the current direct transport. Relay hosts use the
- * Worker only when URL and token are both set. Callers keep passing the
- * official source URL; this function never rewrites it into a workers.dev
- * address. Error statuses are never retried, and a 403 on a direct host is
- * never sent to the relay.
+ * Worker only when URL and token are both set. Hosts marked
+ * `direct-then-relay` try the origin first and use the Worker only after a
+ * recoverable block (202/403/408/429/5xx/timeout/fetch-failed). Callers keep
+ * passing the official source URL; this function never rewrites it into a
+ * workers.dev address. Error statuses are never retried on relay-only hosts,
+ * and a 403 on a direct-only host is never sent to the relay.
  *
  * Native fetch does not persist Set-Cookie across redirects. www.march.es
  * answers a same-URL 307 with a session cookie; the direct client follows
@@ -65,20 +118,148 @@ export type FetchRelayTarget = {
  * browser `Cookie`/`Set-Cookie`.
  */
 export async function getText(url: string, timeoutMs = 30_000, env: NodeJS.ProcessEnv = process.env): Promise<string> {
+  if (transportStrategy(url) === 'direct-then-relay') {
+    return await readDirectThenRelay(url, timeoutMs, env);
+  }
+  return await readOnce(url, timeoutMs, env);
+}
+
+function transportStrategy(url: string): 'direct' | 'relay' | 'direct-then-relay' {
+  const parsed = parseHttpUrl(url);
+  return parsed ? fetchTransportForHost(parsed.hostname) : 'direct';
+}
+
+async function readOnce(url: string, timeoutMs: number, env: NodeJS.ProcessEnv): Promise<string> {
+  const startedAtMs = performance.now();
+  let transport: 'direct' | 'relay' = 'direct';
+  try {
+    if (resolveFetchRelay(url, env)) transport = 'relay';
+  } catch {
+    transport = 'relay';
+  }
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const relay = resolveFetchRelay(url, env);
-    if (relay) return await readViaRelay(url, relay, controller.signal);
-    return await readFollowingRedirects(url, controller.signal);
+    const body = relay
+      ? await readViaRelay(url, relay, controller.signal)
+      : await readFollowingRedirects(url, controller.signal);
+    recordAttempt({ url, transport, startedAtMs, retry: false });
+    return body;
   } catch (error) {
-    if (error instanceof Error && error.name === 'AbortError') {
-      throw new Error(`tiempo agotado al pedir ${url}`);
-    }
-    throw error;
+    const wrapped = wrapAbort(url, error);
+    recordAttempt({ url, transport, startedAtMs, retry: false, error: wrapped });
+    throw wrapped;
   } finally {
     clearTimeout(timer);
   }
+}
+
+async function readDirectThenRelay(url: string, timeoutMs: number, env: NodeJS.ProcessEnv): Promise<string> {
+  const directStartedAtMs = performance.now();
+  try {
+    const body = await withTimeout(timeoutMs, (signal) => readFollowingRedirects(url, signal));
+    recordAttempt({ url, transport: 'direct', startedAtMs: directStartedAtMs, retry: false });
+    return body;
+  } catch (error) {
+    const directError = wrapAbort(url, error);
+    recordAttempt({ url, transport: 'direct', startedAtMs: directStartedAtMs, retry: false, error: directError });
+    if (!isRecoverableTransportError(directError)) throw directError;
+
+    let relay: FetchRelayTarget | undefined;
+    try {
+      relay = resolveFetchRelay(url, env);
+    } catch (configError) {
+      throw new TransportAttemptsError(url, [
+        toTransportAttempt('direct', directError),
+        toTransportAttempt('relay', configError),
+      ]);
+    }
+    if (!relay) throw directError;
+
+    const target = relay;
+    const relayStartedAtMs = performance.now();
+    try {
+      const body = await withTimeout(timeoutMs, (signal) => readViaRelay(url, target, signal));
+      recordAttempt({ url, transport: 'relay', startedAtMs: relayStartedAtMs, retry: true });
+      return body;
+    } catch (relayError) {
+      const wrapped = wrapAbort(url, relayError);
+      recordAttempt({ url, transport: 'relay', startedAtMs: relayStartedAtMs, retry: true, error: wrapped });
+      throw new TransportAttemptsError(url, [
+        toTransportAttempt('direct', directError),
+        toTransportAttempt('relay', wrapped),
+      ]);
+    }
+  }
+}
+
+async function withTimeout<T>(timeoutMs: number, task: (signal: AbortSignal) => Promise<T>): Promise<T> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await task(controller.signal);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function wrapAbort(url: string, error: unknown): unknown {
+  if (error instanceof Error && error.name === 'AbortError') {
+    return new Error(`tiempo agotado al pedir ${url}`);
+  }
+  return error;
+}
+
+function recordAttempt(input: {
+  url: string;
+  transport: 'direct' | 'relay';
+  startedAtMs: number;
+  retry: boolean;
+  error?: unknown;
+}): void {
+  const failure = input.error ? classifyTransportFailure(input.error) : undefined;
+  recordedHttpAttempts.push({
+    url: input.url,
+    transport: input.transport,
+    durationMs: Math.max(0, performance.now() - input.startedAtMs),
+    retry: input.retry,
+    recoveries: takeRelayRecoveries(input.url),
+    ...(input.error ? failure : { status: 200 }),
+  });
+}
+
+function classifyTransportFailure(error: unknown): {
+  status?: number;
+  timeout?: boolean;
+  fetchFailed?: boolean;
+  challenge?: boolean;
+} {
+  const message = error instanceof Error ? error.message : String(error);
+  const status = errorStatus(error);
+  const timeout = /tiempo agotado/i.test(message);
+  const fetchFailed = /fetch failed/i.test(message);
+  const challenge = status === 202 || /sgcaptcha|SiteGround \(captcha\)|HTML de desafío/i.test(message);
+  return {
+    ...(status !== undefined ? { status } : {}),
+    ...(timeout ? { timeout: true } : {}),
+    ...(fetchFailed ? { fetchFailed: true } : {}),
+    ...(challenge ? { challenge: true } : {}),
+  };
+}
+
+function errorStatus(error: unknown): number | undefined {
+  if (!error || typeof error !== 'object' || !('status' in error)) return undefined;
+  return typeof error.status === 'number' ? error.status : undefined;
+}
+
+function toTransportAttempt(transport: 'direct' | 'relay', error: unknown): TransportAttempt {
+  const status = errorStatus(error);
+  return {
+    transport,
+    ...(status !== undefined ? { status } : {}),
+    message: error instanceof Error ? error.message : String(error),
+  };
 }
 
 /**

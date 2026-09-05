@@ -6,12 +6,19 @@ import {
   refugioEventUrl,
 } from '../detail/real-hermandad-refugio.ts';
 import { decodeHtmlEntities, stripTags } from '../html.ts';
-import { createListingGet, isSiteGroundChallenge, unexpectedHtmlInsteadOfJson } from '../listing-retry.ts';
+import {
+  isRecoverableTransportError,
+  isSiteGroundChallenge,
+  ListingAttemptsError,
+  listingAttemptsFromError,
+  unexpectedHtmlInsteadOfJson,
+} from '../listing-retry.ts';
 import { emptyObservedLists } from '../observed.ts';
 import type { AdapterContext, RawEvent, SourceAdapter, SourceDefinition } from '../types.ts';
 
 export const REFUGIO_PER_PAGE = 50;
 export { REFUGIO_CONCERT_ARCHIVE_URL };
+export const REFUGIO_REST_COLLECTION_URL = 'https://realhermandaddelrefugio.org/wp-json/wp/v2/calendario-eventos';
 const MAX_PAGES = 20;
 const CONCERT_CATEGORY_ID = 47;
 
@@ -27,48 +34,39 @@ type WpListItem = {
 };
 
 /**
- * Official concert CPT via WordPress REST. `/conciertos/` is an Elementor
- * listing of the same posts with infinite scroll (`posts_per_page: 4`) and is
- * not a complete harvest surface. The REST collection remains the structured
- * source. SiteGround may answer HTTP 202 even with JSON Accept; the fetch
- * relay retries a 202 challenge when cookies or sgcaptcha evidence exist.
- * If REST stays unreachable, the official taxonomy archive
- * `/categoria-eventos/conciertos/` is the second surface: JetEngine prints
- * future concerts with canonical ficha URLs, `data-post-id`, and `data-pages`.
- * That archive is complete for upcoming concerts when `data-pages` is
- * followed. HTML is never parsed as JSON, and a captcha page is never a listing.
+ * Official concert taxonomy archive `/categoria-eventos/conciertos/` is the
+ * harvest surface. `/conciertos/` is an Elementor listing with infinite scroll
+ * (`posts_per_page: 4`) and is not complete. JetEngine prints future concerts
+ * with canonical ficha URLs, `data-post-id`, `data-pages`, and card fields
+ * (fecha, hora, lugar, precio). Follow `data-pages` up to MAX_PAGES.
+ *
+ * WordPress REST remains an optional secondary fallback. SiteGround may
+ * answer HTTP 202; HTML pages use `direct-then-relay` so the archive is not
+ * tied to the same relay hop that 202'd REST. HTML is never parsed as JSON,
+ * and a captcha page is never a listing.
  */
 export const realHermandadRefugioAdapter: SourceAdapter = {
   id: 'real-hermandad-refugio',
-  requiresDetailSchedule: true,
   resolveFetchUrls(source: SourceDefinition): string[] {
     const base = source.urls[0];
-    if (!base) throw new Error('real-hermandad-refugio: falta la URL del calendario JSON');
-    const url = new URL(base);
-    url.searchParams.set('categoria-eventos', String(CONCERT_CATEGORY_ID));
-    url.searchParams.set('per_page', String(REFUGIO_PER_PAGE));
-    url.searchParams.set('page', '1');
-    url.searchParams.set('status', 'publish');
-    url.searchParams.set('_fields', 'id,slug,link,title,status,categoria-eventos,class_list,content');
-    return [url.href];
+    if (!base) throw new Error('real-hermandad-refugio: falta la URL del archivo de conciertos');
+    return [base];
   },
   fetchListing(url, ctx) {
     return fetchRefugioListing(url, ctx.get);
   },
-  async extract(body, url, ctx) {
+  async extract(body, _url, ctx) {
     if (body.trimStart().startsWith('<')) {
-      const unexpected = unexpectedHtmlInsteadOfJson('real-hermandad-refugio', body);
-      if (unexpected && (isSiteGroundChallenge(body) || !/<div\b[^>]*\bjet-listing-grid__items\b/i.test(body))) {
-        throw new Error(unexpected);
+      if (isSiteGroundChallenge(body)) {
+        throw new Error('real-hermandad-refugio: se recibió HTML de desafío SiteGround (captcha) en lugar del archivo de conciertos');
       }
       return eventsFromHtmlArchive(body, ctx);
     }
     const first = parseWpList(body);
     const pages = [first];
     if (first.length === REFUGIO_PER_PAGE) {
-      const getPage = createListingGet(ctx.get);
       for (let page = 2; page <= MAX_PAGES; page += 1) {
-        const next = parseWpList(await getPage(withPage(url, page)));
+        const next = parseWpList(await ctx.get(refugioRestListingUrl(page)));
         pages.push(next);
         if (next.length < REFUGIO_PER_PAGE) break;
       }
@@ -114,36 +112,30 @@ function parseWpList(body: string): unknown[] {
 }
 
 /**
- * Official WP REST remains the structured source. SiteGround may answer a
- * captcha HTML interstitial or HTTP 202; retry that same REST URL once, then
- * fall back to the same CPT without `_fields`. If REST stays unreachable, use
- * the official concert taxonomy archive (not `/conciertos/`). HTML is never
- * parsed as JSON.
+ * Official HTML archive first. REST is an optional secondary surface, not a
+ * retry of the same blocked hop. Transport fallback (direct → relay) lives in
+ * `getText`; this function only switches listing surfaces.
  */
 async function fetchRefugioListing(url: string, get: (url: string) => Promise<string>): Promise<string> {
-  const readJson = async (target: string) => readRefugioJson(await get(target));
+  const attempts: ReturnType<typeof listingAttemptsFromError> = [];
   try {
-    return await createListingGet(readJson)(url);
+    return await fetchRefugioHtmlArchive(url, get);
   } catch (error) {
-    if (!isTransientListingOrHtml(error)) throw error;
-    const fallbackUrl = refugioRestFallbackUrl(url);
-    if (fallbackUrl) {
-      try {
-        return await readJson(fallbackUrl);
-      } catch (fallbackError) {
-        if (!isTransientListingOrHtml(fallbackError)) throw error;
-      }
-    }
-    try {
-      return await fetchRefugioHtmlArchive(get);
-    } catch {
-      throw error;
-    }
+    if (!isRefugioSurfaceFallback(error)) throw error;
+    attempts.push(...listingAttemptsFromError('html-archive', error));
+  }
+  try {
+    return readRefugioJson(await get(refugioRestListingUrl()));
+  } catch (error) {
+    if (!isRefugioSurfaceFallback(error)) throw error;
+    attempts.push(...listingAttemptsFromError('wp-rest', error));
+    throw new ListingAttemptsError('real-hermandad-refugio', attempts);
   }
 }
 
-async function fetchRefugioHtmlArchive(get: (url: string) => Promise<string>): Promise<string> {
-  const first = await get(REFUGIO_CONCERT_ARCHIVE_URL);
+async function fetchRefugioHtmlArchive(url: string, get: (url: string) => Promise<string>): Promise<string> {
+  const firstUrl = isRefugioArchiveUrl(url) ? url : REFUGIO_CONCERT_ARCHIVE_URL;
+  const first = await get(firstUrl);
   if (isSiteGroundChallenge(first)) {
     throw new Error('real-hermandad-refugio: se recibió HTML de desafío SiteGround (captcha) en lugar del archivo de conciertos');
   }
@@ -184,8 +176,10 @@ function eventsFromHtmlArchive(body: string, ctx: AdapterContext): RawEvent[] {
       observed: {
         title: item.title,
         ...(item.description ? { description: item.description } : {}),
+        ...(item.venueText ? { venueText: item.venueText } : {}),
+        ...(item.accessText ? { accessText: item.accessText } : {}),
         categoryText: 'Conciertos',
-        occurrences: [],
+        occurrences: item.occurrence ? [item.occurrence] : [],
         ...emptyObservedLists(),
       },
     });
@@ -198,31 +192,30 @@ function readRefugioJson(body: string): string {
   return body;
 }
 
-function isTransientListingOrHtml(error: unknown): boolean {
+function isRefugioSurfaceFallback(error: unknown): boolean {
+  if (isRecoverableTransportError(error)) return true;
   const message = error instanceof Error ? error.message : String(error);
-  return /HTML inesperado|HTML de desafío|JSON inválido/i.test(message)
-    || /tiempo agotado|fetch failed|HTTP 202|HTTP 408|HTTP 429|HTTP 5\d\d/i.test(message);
+  return /HTML de desafío|HTML inesperado|JSON inválido|paginación reconocible|en lugar del archivo/i.test(message);
 }
 
-function refugioRestFallbackUrl(url: string): string | undefined {
+export function refugioRestListingUrl(page = 1): string {
+  const url = new URL(REFUGIO_REST_COLLECTION_URL);
+  url.searchParams.set('categoria-eventos', String(CONCERT_CATEGORY_ID));
+  url.searchParams.set('per_page', String(REFUGIO_PER_PAGE));
+  url.searchParams.set('page', String(page));
+  url.searchParams.set('status', 'publish');
+  url.searchParams.set('_fields', 'id,slug,link,title,status,categoria-eventos,class_list,content');
+  return url.href;
+}
+
+function isRefugioArchiveUrl(url: string): boolean {
   try {
     const parsed = new URL(url);
-    if (parsed.pathname !== '/wp-json/wp/v2/calendario-eventos') return undefined;
-    if (!parsed.searchParams.has('_fields') && !parsed.searchParams.has('per_page')) return undefined;
-    parsed.searchParams.delete('_fields');
-    parsed.searchParams.delete('per_page');
-    parsed.searchParams.set('status', 'publish');
-    parsed.searchParams.set('page', parsed.searchParams.get('page') || '1');
-    return parsed.href === url ? undefined : parsed.href;
+    return parsed.hostname.toLowerCase() === 'realhermandaddelrefugio.org'
+      && /\/categoria-eventos\/conciertos\/?$/i.test(parsed.pathname);
   } catch {
-    return undefined;
+    return false;
   }
-}
-
-function withPage(url: string, page: number): string {
-  const next = new URL(url);
-  next.searchParams.set('page', String(page));
-  return next.href;
 }
 
 function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
@@ -241,6 +234,7 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
     sourceId: ctx.source.id,
     sourceUrl,
     externalId: id,
+    listingSurface: 'wp-rest',
     observed: {
       title,
       ...(description ? { description } : {}),
