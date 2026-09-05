@@ -140,8 +140,26 @@ describe('resolución de venue — Teatro Real / Sala Principal', () => {
       { venueText: 'SALA PRINCIPAL Real Teatro de Retiro', sourceId: 'teatro-real' },
       catalog,
     );
-    expect(match?.venue.id).toBe('ven_real_teatro_retiro');
+    expect(match?.venue.id).toBe('ven_real_teatro_retiro_sala_principal');
+    expect(match?.venue.parentVenueId).toBe('ven_real_teatro_retiro');
     expect(match?.venue.id).not.toBe('ven_teatro_real');
+  });
+
+  it('resuelve Sala Pacífico del Retiro al child venue y conserva HALL en el padre', () => {
+    const catalog = catalogWith(teatroReal);
+    expect(
+      matchVenue(
+        { venueText: 'SALA PACÍFICO Real Teatro de Retiro', sourceId: 'teatro-real' },
+        catalog,
+      )?.venue.id,
+    ).toBe('ven_real_teatro_retiro_sala_pacifico');
+    expect(
+      matchVenue({ venueText: 'Sala Pacífico Real Teatro de Retiro' }, catalog)?.venue.id,
+    ).toBe('ven_real_teatro_retiro_sala_pacifico');
+    expect(
+      matchVenue({ venueText: 'HALL Real Teatro de Retiro', sourceId: 'teatro-real' }, catalog)?.venue.id,
+    ).toBe('ven_real_teatro_retiro');
+    expect(matchVenue({ venueText: 'Sala Pacífico', sourceId: 'teatro-real' }, catalog)).toBeUndefined();
   });
 
   it('una coproducción en el Teatro de la Abadía no se descarta por lugar', () => {

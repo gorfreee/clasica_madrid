@@ -183,6 +183,40 @@ export const KNOWN_VENUES: KnownVenue[] = [
     },
   },
   {
+    keys: [
+      'sala principal real teatro de retiro',
+      'real teatro de retiro sala principal',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_real_teatro_retiro_sala_principal',
+      slug: 'real-teatro-de-retiro-sala-principal',
+      name: 'Real Teatro de Retiro — Sala Principal',
+      ...MADRID,
+      address: 'Plaza Daoíz y Velarde, 4, 28007 Madrid',
+      url: 'https://www.realteatroderetiro.es/',
+      parentVenueId: 'ven_real_teatro_retiro',
+      spaceName: 'Sala Principal',
+    },
+  },
+  {
+    keys: [
+      'sala pacifico real teatro de retiro',
+      'real teatro de retiro sala pacifico',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_real_teatro_retiro_sala_pacifico',
+      slug: 'real-teatro-de-retiro-sala-pacifico',
+      name: 'Real Teatro de Retiro — Sala Pacífico',
+      ...MADRID,
+      address: 'Plaza Daoíz y Velarde, 4, 28007 Madrid',
+      url: 'https://www.realteatroderetiro.es/',
+      parentVenueId: 'ven_real_teatro_retiro',
+      spaceName: 'Sala Pacífico',
+    },
+  },
+  {
     keys: ['teatro de la zarzuela', 'teatro zarzuela'],
     venue: {
       schemaVersion: 1,
@@ -522,9 +556,11 @@ const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
   },
   'teatro-real': {
     'sala principal': 'ven_teatro_real',
-    'sala principal real teatro de retiro': 'ven_real_teatro_retiro',
+    'sala principal real teatro de retiro': 'ven_real_teatro_retiro_sala_principal',
+    'real teatro de retiro sala principal': 'ven_real_teatro_retiro_sala_principal',
     'hall real teatro de retiro': 'ven_real_teatro_retiro',
-    'sala pacifico real teatro de retiro': 'ven_real_teatro_retiro',
+    'sala pacifico real teatro de retiro': 'ven_real_teatro_retiro_sala_pacifico',
+    'real teatro de retiro sala pacifico': 'ven_real_teatro_retiro_sala_pacifico',
     'teatro de la abadia': 'ven_teatro_abadia',
   },
   'madrid-datos': {

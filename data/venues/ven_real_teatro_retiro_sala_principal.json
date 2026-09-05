@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_real_teatro_retiro_sala_principal",
+  "slug": "real-teatro-de-retiro-sala-principal",
+  "name": "Real Teatro de Retiro — Sala Principal",
+  "municipality": "Madrid",
+  "area": "madrid",
+  "address": "Plaza Daoíz y Velarde, 4, 28007 Madrid",
+  "url": "https://www.realteatroderetiro.es/",
+  "parentVenueId": "ven_real_teatro_retiro",
+  "spaceName": "Sala Principal",
+  "lastVerifiedAt": "2026-09-05"
+}

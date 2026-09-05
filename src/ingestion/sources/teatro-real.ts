@@ -1,4 +1,4 @@
-import { parseTeatroRealDetail } from '../detail/teatro-real.ts';
+import { composeTeatroRealVenueText, parseTeatroRealDetail } from '../detail/teatro-real.ts';
 import { firstMatch, stripTags } from '../html.ts';
 import { emptyObservedLists } from '../observed.ts';
 import { parseObservedTime } from '../dates.ts';
@@ -47,8 +47,10 @@ export const teatroRealAdapter: SourceAdapter = {
     }
     return events;
   },
-  hydrate(_event, body) {
-    return parseTeatroRealDetail(body);
+  hydrate(event, body) {
+    const patch = parseTeatroRealDetail(body);
+    const venueText = composeTeatroRealVenueText(event.observed.venueText, patch.venueText);
+    return venueText ? { ...patch, venueText } : patch;
   },
 };
 
