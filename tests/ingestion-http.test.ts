@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { getText, HttpError, HTML_ACCEPT, JSON_DOCUMENT_ACCEPT, RELAY_ORIGIN_COOKIE_HEADER, acceptHeaderForUrl, resetOriginCookieJar, resolveFetchRelay, TransportAttemptsError } from '../src/ingestion/http.ts';
+import { getText, HttpError, HTML_ACCEPT, JSON_DOCUMENT_ACCEPT, RELAY_ORIGIN_COOKIE_HEADER, acceptHeaderForUrl, resetOriginCookieJar, resolveFetchRelay } from '../src/ingestion/http.ts';
 import { fundacionJuanMarchAdapter as adapter } from '../src/ingestion/sources/fundacion-juan-march.ts';
 import { parseMarchDetail } from '../src/ingestion/detail/fundacion-juan-march.ts';
 import { parseZarzuelaDetail } from '../src/ingestion/detail/teatro-zarzuela.ts';
@@ -176,16 +176,14 @@ describe('getText fetch relay', () => {
       'teatro-zarzuela',
       'fundacion-juan-march',
       'cndm',
-      'real-hermandad-refugio',
     ]);
     expect(fetchRelayHosts()).toEqual([
       'auditorionacional.inaem.gob.es',
       'cndm.inaem.gob.es',
-      'realhermandaddelrefugio.org',
       'teatrodelazarzuela.inaem.gob.es',
       'www.march.es',
     ]);
-    expect(fetchTransportForHost('realhermandaddelrefugio.org')).toBe('direct-then-relay');
+    expect(fetchTransportForHost('realhermandaddelrefugio.org')).toBe('direct');
     expect(fetchTransportForHost('www.march.es')).toBe('relay');
     expect(fetchTransportForHost('teatrodelazarzuela.inaem.gob.es')).toBe('relay');
     expect(fetchTransportForHost('auditorionacional.inaem.gob.es')).toBe('relay');
@@ -456,41 +454,17 @@ describe('getText fetch relay', () => {
     expect(fetch).toHaveBeenCalledTimes(1);
   });
 
-  it('tries Refugio HTML direct first and falls back to the relay on HTTP 202', async () => {
+  it('Refugio uses a single direct HTTP hop and does not fall back to the relay', async () => {
     const archive = 'https://realhermandaddelrefugio.org/categoria-eventos/conciertos/';
-    const html = '<div class="jet-listing-grid__items" data-pages="1"></div>';
     const fetch = vi.fn(async (url: string, init?: RequestInit) => {
-      if (url === archive) {
-        expect(header(init, 'authorization')).toBeUndefined();
-        return new Response('challenge', { status: 202 });
-      }
-      const parsed = new URL(url);
-      expect(parsed.origin).toBe(relayOrigin);
-      expect(parsed.searchParams.get('url')).toBe(archive);
-      expect(header(init, 'authorization')).toBe(`Bearer ${token}`);
-      return new Response(html, { status: 200 });
+      expect(url).toBe(archive);
+      expect(header(init, 'authorization')).toBeUndefined();
+      return new Response('challenge', { status: 202 });
     });
     vi.stubGlobal('fetch', fetch);
-    await expect(getText(archive, 30_000, relayEnv)).resolves.toBe(html);
-    expect(fetch).toHaveBeenCalledTimes(2);
+    await expect(getText(archive, 30_000, relayEnv)).rejects.toMatchObject({ status: 202 });
+    expect(fetch).toHaveBeenCalledTimes(1);
     expect(String(fetch.mock.calls[0]?.[0])).toBe(archive);
-  });
-
-  it('aggregates Refugio direct and relay 202 without leaking the token', async () => {
-    const archive = 'https://realhermandaddelrefugio.org/categoria-eventos/conciertos/';
-    const fetch = vi.fn(async () => new Response('no', { status: 202 }));
-    vi.stubGlobal('fetch', fetch);
-    await expect(getText(archive, 30_000, relayEnv)).rejects.toSatisfy((error: unknown) => {
-      expect(error).toBeInstanceOf(TransportAttemptsError);
-      const message = error instanceof Error ? error.message : String(error);
-      expect(message).toMatch(/direct → HTTP 202/);
-      expect(message).toMatch(/relay → HTTP 202/);
-      expect(message).not.toContain(token);
-      expect(message).not.toContain('Bearer');
-      expect(message).not.toContain(relayOrigin);
-      return true;
-    });
-    expect(fetch).toHaveBeenCalledTimes(2);
   });
 
   it('does not try a direct hop for March, Zarzuela, Auditorio or CNDM when the relay is configured', async () => {

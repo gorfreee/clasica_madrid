@@ -100,6 +100,8 @@ describe('timings de observabilidad de ingestión', () => {
         latencyMsMax: 0,
         directRequests: 0,
         relayRequests: 0,
+        browserRequests: 0,
+        browserFallbacks: 0,
       },
     });
   });
@@ -149,6 +151,8 @@ describe('timings de observabilidad de ingestión', () => {
               latencyMsMax: 12_000,
               directRequests: 0,
               relayRequests: 129,
+              browserRequests: 0,
+              browserFallbacks: 0,
             },
           },
           'teatro-real': {
@@ -176,6 +180,8 @@ describe('timings de observabilidad de ingestión', () => {
               latencyMsMax: 900,
               directRequests: 85,
               relayRequests: 0,
+              browserRequests: 0,
+              browserFallbacks: 0,
             },
           },
         },

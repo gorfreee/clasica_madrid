@@ -201,16 +201,23 @@ function formatHttp(
   const parts = [`${http.requests} req`];
   parts.push(`${formatDuration(http.latencyMsTotal / http.requests)} avg`);
   if (http.latencyMsMax > 0) parts.push(`max ${formatDuration(http.latencyMsMax)}`);
-  if (http.relayRequests && !http.directRequests) parts.push('relay');
-  else if (http.directRequests && !http.relayRequests) parts.push('directo');
-  else if (http.relayRequests || http.directRequests) {
-    parts.push(`relay ${http.relayRequests}/directo ${http.directRequests}`);
+  if (http.relayRequests && !http.directRequests && !http.browserRequests) parts.push('relay');
+  else if (http.directRequests && !http.relayRequests && !http.browserRequests) parts.push('directo');
+  else if (http.browserRequests && !http.directRequests && !http.relayRequests) parts.push('navegador');
+  else if (http.relayRequests || http.directRequests || http.browserRequests) {
+    const hops = [
+      http.directRequests ? `directo ${http.directRequests}` : undefined,
+      http.relayRequests ? `relay ${http.relayRequests}` : undefined,
+      http.browserRequests ? `navegador ${http.browserRequests}` : undefined,
+    ].filter(Boolean);
+    parts.push(hops.join('/'));
   }
   if (http.retries) parts.push(`retry ${http.retries}`);
   if (http.timeoutCount) parts.push(`timeout ${http.timeoutCount}`);
   if (http.fetchFailedCount) parts.push(`fetch-failed ${http.fetchFailedCount}`);
   if (http.challengeCount) parts.push(`captcha ${http.challengeCount}`);
   if (http.recoveries) parts.push(`recuperadas ${http.recoveries}`);
+  if (http.browserFallbacks) parts.push('fallback navegador');
   if (listingFallback === 'wp-rest') parts.push('fallback REST');
   const notable = Object.entries(http.statusCounts)
     .filter(([key]) => key !== '200')

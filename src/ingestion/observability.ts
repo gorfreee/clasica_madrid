@@ -52,6 +52,8 @@ export type IngestSourceHttpStats = {
   latencyMsMax: number;
   directRequests: number;
   relayRequests: number;
+  browserRequests: number;
+  browserFallbacks: number;
 };
 
 export type IngestSourceTiming = {
@@ -70,6 +72,7 @@ export type IngestSourceTiming = {
   hydrationMode: IngestHydrationMode;
   listingError?: string;
   listingFallback?: 'wp-rest';
+  listingTransport?: 'http' | 'browser';
   http: IngestSourceHttpStats;
 };
 
@@ -271,13 +274,15 @@ export class IngestObservability {
       else delete timing.listingError;
       if (input.listingFallback) timing.listingFallback = input.listingFallback;
       else delete timing.listingFallback;
+      if (timing.http.browserFallbacks > 0) timing.listingTransport = 'browser';
+      else delete timing.listingTransport;
       this.persistManifest();
     });
   }
 
   recordHttp(input: {
     sourceId: string;
-    transport: 'direct' | 'relay';
+    transport: 'direct' | 'relay' | 'browser';
     durationMs: number;
     retry: boolean;
     status?: number;
@@ -285,6 +290,7 @@ export class IngestObservability {
     fetchFailed?: boolean;
     challenge?: boolean;
     recoveries?: number;
+    browserFallback?: boolean;
   }): void {
     this.guard(() => {
       const http = this.sourceTiming(input.sourceId).http;
@@ -293,7 +299,9 @@ export class IngestObservability {
       http.latencyMsTotal += Math.max(0, Math.round(input.durationMs));
       http.latencyMsMax = Math.max(http.latencyMsMax, Math.max(0, Math.round(input.durationMs)));
       if (input.transport === 'relay') http.relayRequests += 1;
+      else if (input.transport === 'browser') http.browserRequests += 1;
       else http.directRequests += 1;
+      if (input.browserFallback) http.browserFallbacks += 1;
       if (input.timeout) http.timeoutCount += 1;
       if (input.fetchFailed) http.fetchFailedCount += 1;
       if (input.challenge) http.challengeCount += 1;
@@ -502,6 +510,8 @@ function emptyHttpStats(): IngestSourceHttpStats {
     latencyMsMax: 0,
     directRequests: 0,
     relayRequests: 0,
+    browserRequests: 0,
+    browserFallbacks: 0,
   };
 }
 

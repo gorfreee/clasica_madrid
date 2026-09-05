@@ -15,6 +15,7 @@
     "ingest:promote": "tsx src/cli/promote-candidate.ts",
     "ingest:sync": "tsx src/cli/ingest.ts sync",
     "ingest:source": "tsx src/cli/ingest.ts source",
+    "ingest:refugio-live-smoke": "tsx src/cli/refugio-live-smoke.ts",
     "ingest:discovery": "tsx src/cli/ingest.ts discovery",
     "ingest:discovery-context": "tsx src/cli/discovery-context.ts",
     "export:excel": "tsx src/cli/export-excel.ts",
@@ -33,6 +34,7 @@
     "@playwright/test": "^1.62.1",
     "@types/node": "^22.10.0",
     "exceljs": "^4.4.0",
+    "playwright-core": "^1.62.1",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0",
     "vitest": "^4.1.11"
