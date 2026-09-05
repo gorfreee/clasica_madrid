@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
   findProgramStartIndex,
+  looksLikeComposerNameList,
   looksLikeRoleOnlyLine,
   parseAuditorioPersonCredits,
   parseAuditorioPersonLine,
   parseComposerColonWork,
   parseComposerYearWork,
   parseDashRoleCredit,
+  parseKnownComposerPrefixWork,
   parseWorkThenPersonCredit,
   segmentAuditorioBlocks,
 } from '../src/ingestion/detail/auditorio-segments.ts';
@@ -411,6 +413,26 @@ describe('segmentación performer/programa del Auditorio', () => {
       title: 'Concierto para piano núm. 2',
     });
     expect(parseComposerColonWork('Beatrice Rana, piano')).toBeUndefined();
+    expect(parseComposerColonWork('Mompou, Toldrà y Granados')).toBeUndefined();
+    expect(
+      parseComposerColonWork('José de Nebra, Vicente Rodríguez, Francisco Corselli y Antolí Sala'),
+    ).toBeUndefined();
+    expect(parseComposerColonWork('Astor Piazzolla – Oblivion')).toEqual({
+      composerName: 'Astor Piazzolla',
+      title: 'Oblivion',
+    });
+    expect(parseComposerColonWork('Johann Strauss II –Rosas del Sur, op. 388')).toEqual({
+      composerName: 'Johann Strauss II',
+      title: 'Rosas del Sur, op. 388',
+    });
+    expect(parseComposerColonWork('Camille Saint-Saëns –Danza macabra, op. 40')).toEqual({
+      composerName: 'Camille Saint-Saëns',
+      title: 'Danza macabra, op. 40',
+    });
+    expect(parseComposerColonWork('Johannes Brahms  – Danza húngara n.º 5')).toEqual({
+      composerName: 'Johannes Brahms',
+      title: 'Danza húngara n.º 5',
+    });
     const excelentia = segmentAuditorioBlocks([
       ['Orquesta Clásica Santa Cecilia'],
       ['Christian Vasquez, director'],
@@ -469,5 +491,24 @@ describe('segmentación performer/programa del Auditorio', () => {
       roleText: 'piano',
     });
     expect(parseAuditorioPersonLine('Rhapsody in Blue (G. Gershwin)')).toBeUndefined();
+  });
+
+  it('Composer, Work exige evidencia musical y no interpreta una lista de nombres', () => {
+    expect(looksLikeComposerNameList('Mompou, Toldrà y Granados')).toBe(true);
+    expect(looksLikeComposerNameList('José de Nebra, Vicente Rodríguez, Francisco Corselli y Antolí Sala')).toBe(
+      true,
+    );
+    expect(looksLikeComposerNameList('Stravinsky, El pájaro de fuego (música del ballet completo)')).toBe(
+      false,
+    );
+    expect(parseKnownComposerPrefixWork('Edward Elgar Variaciones', 'Enigma, op. 36')).toEqual({
+      composerName: 'Edward Elgar',
+      title: 'Variaciones Enigma, op. 36',
+      consumedNext: true,
+    });
+    expect(parseKnownComposerPrefixWork('Edvard Grieg – Danza de Anitra (de Peer Gynt)')).toEqual({
+      composerName: 'Edvard Grieg',
+      title: 'Danza de Anitra (de Peer Gynt)',
+    });
   });
 });
