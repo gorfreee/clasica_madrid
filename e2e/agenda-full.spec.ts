@@ -108,10 +108,10 @@ test.describe('carga diferida de la agenda', () => {
     await page.goto('/');
     const form = page.locator('[data-agenda-filters]');
     await form.getByRole('searchbox').fill('Bach');
-    await Promise.all([
-      page.getByRole('button', { name: 'Mostrar todos' }).click(),
-      form.getByRole('button', { name: 'Aplicar filtros' }).click(),
-    ]);
+    await page.evaluate(() => {
+      document.querySelector<HTMLButtonElement>('[data-load-full-agenda]')?.click();
+      document.querySelector<HTMLFormElement>('[data-agenda-filters]')?.requestSubmit();
+    });
     await expect(page.getByRole('button', { name: 'Mostrar todos' })).toBeHidden();
     expect(fragmentRequests).toBe(1);
   });
