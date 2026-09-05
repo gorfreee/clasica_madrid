@@ -27,6 +27,7 @@ import {
 import type { NormalizedEvent } from './normalize.ts';
 import { resolveCatalogSource } from './registry.ts';
 import { collapseOccurrences, defaultIngestWindow, type IngestWindow } from './dates.ts';
+import { shouldPersistEventUpdate } from './material-diff.ts';
 import { newEventPublicationSkip, toCandidate } from './to-candidate.ts';
 import type { RawEvent, PipelineSource } from './types.ts';
 import { matchVenue, unpublishedMatchedVenue } from './venues.ts';
@@ -248,6 +249,10 @@ function prepareItem(
   return { observation, identity, venueId: venueMatch?.venue.id, venue: proposal.venue, proposal, skip };
 }
 
+function persistAction(existing: Event, incoming: Event): ReconcileAction {
+  return shouldPersistEventUpdate(existing, incoming) ? 'updated' : 'unchanged';
+}
+
 function applyExistingGroup(
   group: PreparedItem[],
   now: Date,
@@ -285,7 +290,7 @@ function applyExistingGroup(
     proposal = mergeProposals(proposal, item.proposal);
   }
   const merged = mergeExistingEvent(existing, proposal, now);
-  const action: ReconcileAction = merged.diffs.length === 0 ? 'unchanged' : 'updated';
+  const action = persistAction(existing, merged.event);
   if (action === 'unchanged') stats.unchangedEvents += 1;
   else stats.updatedEvents += 1;
   if (group.length > 1) stats.batchDuplicates += group.length - 1;
@@ -338,7 +343,7 @@ function applySharedSourceObservation(
       occurrences: cancelled ? item.proposal.occurrences : assignment.occurrences,
     };
     const merged = mergeExistingEvent(existing, proposal, now);
-    const action: ReconcileAction = merged.diffs.length === 0 ? 'unchanged' : 'updated';
+    const action = persistAction(existing, merged.event);
     if (action === 'unchanged') stats.unchangedEvents += 1;
     else {
       stats.updatedEvents += 1;
