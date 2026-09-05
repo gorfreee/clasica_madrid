@@ -590,7 +590,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Carl Orff',
-    aliases: ['Carl Orff', 'Orff'],
+    aliases: ['Carl Orff', 'C. Orff', 'Orff'],
     eras: ['twentieth'],
   },
   {
@@ -1215,7 +1215,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Franz von Suppé',
-    aliases: ['Franz von Suppé', 'Franz von Suppe', 'F. von Suppé', 'F.v. Suppe', 'Suppé', 'Suppe'],
+    aliases: ['Franz von Suppé', 'Franz von Suppe', 'F. von Suppé', 'F. V. Suppé', 'F. V. Suppe', 'F.v. Suppe', 'Suppé', 'Suppe'],
     eras: ['romantic'],
   },
   {
@@ -1235,7 +1235,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Franz Lehár',
-    aliases: ['Franz Lehár', 'Franz Lehar', 'Lehár', 'Lehar'],
+    aliases: ['Franz Lehár', 'Franz Lehar', 'F. Lehár', 'F. Lehar', 'Lehár', 'Lehar'],
     eras: ['romantic'],
   },
   {
