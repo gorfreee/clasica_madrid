@@ -85,6 +85,7 @@ describe('evaluateIngestHealth', () => {
     expect(evaluateIngestHealth({ ...base, ambiguous: 1 }).health).toBe('review');
     expect(evaluateIngestHealth({ ...base, classificationDrift: 2 }).health).toBe('review');
     expect(evaluateIngestHealth({ ...base, batchDuplicates: 1 }).health).toBe('review');
+    expect(evaluateIngestHealth(base).health).toBe('clean');
   });
 
   it('es fatal si el lote es inválido, no hay sources sanas o hay una causa global', () => {

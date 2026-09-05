@@ -56,6 +56,7 @@ export function formatRunSummary(summary: IngestRunSummary): string {
     `Ambiguos: ${summary.ambiguous}`,
     `Posiblemente desaparecidos: ${summary.possiblyMissing}`,
     `Duplicados del lote: ${summary.batchDuplicates}`,
+    `Corroboraciones entre fuentes: ${summary.crossSourceCorroborations}`,
   );
   if (summary.dryRun) {
     lines.push('Modo dry-run: no se ha escrito nada en el catálogo. La IA puede guardar caché, cuotas y pendientes locales.');

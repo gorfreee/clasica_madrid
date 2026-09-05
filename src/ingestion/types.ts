@@ -254,6 +254,7 @@ export type IngestRunSummary = {
   ambiguous: number;
   possiblyMissing: number;
   batchDuplicates: number;
+  crossSourceCorroborations: number;
   written: string[];
   dryRun: boolean;
   detailHydrationAttempted: number;

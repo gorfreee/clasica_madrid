@@ -307,6 +307,7 @@ export function buildFatalIngestReport(options: {
     ambiguous: 0,
     possiblyMissing: 0,
     batchDuplicates: 0,
+    crossSourceCorroborations: 0,
     written: [],
     dryRun: options.dryRun,
     detailHydrationAttempted: 0,
