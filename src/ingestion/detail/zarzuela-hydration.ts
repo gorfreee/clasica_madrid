@@ -1,7 +1,13 @@
 import { parseSpanishCalendarDate, type IngestWindow } from '../dates.ts';
-import { HttpError } from '../http.ts';
-import type { HydrationMeta, RawEvent } from '../types.ts';
-import { ZARZUELA_GAP_MS, ZARZUELA_MAX_RETRY_WAIT_MS, ZARZUELA_RETRYABLE, zarzuelaRetryAfterMs } from './zarzuela-transport.ts';
+import type { RawEvent } from '../types.ts';
+
+export {
+  createZarzuelaDetailClient,
+  ZARZUELA_GAP_MS,
+  ZARZUELA_MAX_RETRY_WAIT_MS,
+  ZARZUELA_RETRYABLE,
+  zarzuelaRetryAfterMs,
+} from './zarzuela-transport.ts';
 
 const MONTH = '(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre)';
 const SINGLE = new RegExp(`^(?:(domingo|lunes|martes|miercoles|jueves|viernes|sabado),?\\s+)?(\\d{1,2}) de ${MONTH} (?:de )?(\\d{4})\\.?$`);
@@ -30,56 +36,4 @@ export function zarzuelaListingBounds(raw: string | undefined): IngestWindow | u
 export function zarzuelaOutsideWindow(event: RawEvent, window: IngestWindow): boolean {
   const bounds = zarzuelaListingBounds(event.listingDateText);
   return Boolean(bounds && (bounds.to < window.from || bounds.from > window.to));
-}
-
-type DetailResponse = { body?: string; hydration: HydrationMeta };
-
-/** One instance per source/run; sequential requests, no effect on other hosts. */
-export function createZarzuelaDetailClient(get: (url: string) => Promise<string>) {
-  let nextRequestAt = 0;
-  let lastBlock: number | undefined;
-  let consecutiveBlocks = 0;
-  let circuitReason: string | undefined;
-  const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
-
-  return async (url: string): Promise<DetailResponse> => {
-    const meta: HydrationMeta = { status: 'failed', detailUrl: url, requestAttempts: 0, httpStatuses: [], retryDelaysMs: [] };
-    if (circuitReason) {
-      return { hydration: { ...meta, status: 'not-requested', reason: 'circuit-open', message: circuitReason } };
-    }
-    // At most one retry per ficha. Three consecutive equal 403/429 responses
-    // (including retries) stop the run's remaining detail requests altogether.
-    for (let attempt = 0; attempt < 2; attempt += 1) {
-      const wait = nextRequestAt - Date.now();
-      if (wait > 0) await sleep(wait);
-      meta.requestAttempts! += 1;
-      try {
-        const body = await get(url);
-        consecutiveBlocks = 0;
-        lastBlock = undefined;
-        nextRequestAt = Date.now() + ZARZUELA_GAP_MS;
-        return { body, hydration: { ...meta, status: 'succeeded', reason: undefined, message: undefined } };
-      } catch (error) {
-        nextRequestAt = Date.now() + ZARZUELA_GAP_MS;
-        meta.reason = 'request-failed';
-        meta.message = error instanceof Error ? error.message : String(error);
-        const status = error instanceof HttpError ? error.status : undefined;
-        if (status !== undefined) meta.httpStatuses!.push(status);
-        const blocked = status === 403 || status === 429;
-        consecutiveBlocks = blocked ? (lastBlock === status ? consecutiveBlocks + 1 : 1) : 0;
-        lastBlock = blocked ? status : undefined;
-        if (consecutiveBlocks >= 3) circuitReason = `teatro-zarzuela: circuito abierto tras 3 HTTP ${status} consecutivos`;
-        const retryAfter = error instanceof HttpError ? zarzuelaRetryAfterMs(error.retryAfter) : 0;
-        // A long host cooldown is respected by stopping, never by truncating it.
-        if (retryAfter > ZARZUELA_MAX_RETRY_WAIT_MS) circuitReason = 'teatro-zarzuela: circuito abierto; Retry-After supera 60 segundos';
-        nextRequestAt = Math.max(nextRequestAt, Date.now() + retryAfter);
-        if (circuitReason || status === undefined || !ZARZUELA_RETRYABLE.has(status) || attempt === 1) break;
-        const backoff = 2_000 + Math.floor(Math.random() * 500);
-        const delay = Math.max(backoff, retryAfter, ZARZUELA_GAP_MS);
-        meta.retryDelaysMs!.push(delay);
-        nextRequestAt = Date.now() + delay;
-      }
-    }
-    return { hydration: meta };
-  };
 }

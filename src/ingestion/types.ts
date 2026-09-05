@@ -56,6 +56,12 @@ export type RawEvent = {
   observed: RawObserved;
   /** Exact listing text, used only as a conservative hydration/window hint. */
   listingDateText?: string;
+  /**
+   * Diagnostic only: which official listing surface produced this observation.
+   * `html-archive` means REST was unreachable and the concert taxonomy archive
+   * was used. Never written to `data/**`.
+   */
+  listingSurface?: 'wp-rest' | 'html-archive';
   hydration?: HydrationMeta;
   /**
    * True when the detail page supplied a parseable date that replaced

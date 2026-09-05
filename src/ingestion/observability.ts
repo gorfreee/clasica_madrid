@@ -46,6 +46,7 @@ export type IngestSourceHttpStats = {
   timeoutCount: number;
   fetchFailedCount: number;
   challengeCount: number;
+  recoveries: number;
   statusCounts: Record<string, number>;
   latencyMsTotal: number;
   latencyMsMax: number;
@@ -64,9 +65,11 @@ export type IngestSourceTiming = {
   hydrationFailed: number;
   hydrationSkippedOutsideWindow: number;
   hydrationSkippedCircuitOpen: number;
+  hydrationRecoveries?: number;
   status: IngestSourceStatus;
   hydrationMode: IngestHydrationMode;
   listingError?: string;
+  listingFallback?: 'html-archive';
   http: IngestSourceHttpStats;
 };
 
@@ -244,10 +247,12 @@ export class IngestObservability {
     hydrationFailed: number;
     hydrationSkippedOutsideWindow?: number;
     hydrationSkippedCircuitOpen?: number;
+    hydrationRecoveries?: number;
     status?: IngestSourceStatus;
     usesHydration?: boolean;
     hydrationReached?: boolean;
     listingError?: string;
+    listingFallback?: 'html-archive';
   }): void {
     this.guard(() => {
       const timing = this.sourceTiming(input.sourceId);
@@ -258,10 +263,14 @@ export class IngestObservability {
       timing.hydrationFailed = input.hydrationFailed;
       timing.hydrationSkippedOutsideWindow = input.hydrationSkippedOutsideWindow ?? 0;
       timing.hydrationSkippedCircuitOpen = input.hydrationSkippedCircuitOpen ?? 0;
+      if (input.hydrationRecoveries) timing.hydrationRecoveries = input.hydrationRecoveries;
+      else delete timing.hydrationRecoveries;
       if (input.status) timing.status = input.status;
       timing.hydrationMode = hydrationMode(input);
       if (input.listingError) timing.listingError = sanitizeErrorMessage(input.listingError);
       else delete timing.listingError;
+      if (input.listingFallback) timing.listingFallback = input.listingFallback;
+      else delete timing.listingFallback;
       this.persistManifest();
     });
   }
@@ -275,6 +284,7 @@ export class IngestObservability {
     timeout?: boolean;
     fetchFailed?: boolean;
     challenge?: boolean;
+    recoveries?: number;
   }): void {
     this.guard(() => {
       const http = this.sourceTiming(input.sourceId).http;
@@ -287,6 +297,8 @@ export class IngestObservability {
       if (input.timeout) http.timeoutCount += 1;
       if (input.fetchFailed) http.fetchFailedCount += 1;
       if (input.challenge) http.challengeCount += 1;
+      if (input.retry && input.status === 200) http.recoveries += 1;
+      if (input.recoveries) http.recoveries += input.recoveries;
       const statusKey = input.timeout
         ? 'timeout'
         : input.fetchFailed
@@ -484,6 +496,7 @@ function emptyHttpStats(): IngestSourceHttpStats {
     timeoutCount: 0,
     fetchFailedCount: 0,
     challengeCount: 0,
+    recoveries: 0,
     statusCounts: {},
     latencyMsTotal: 0,
     latencyMsMax: 0,

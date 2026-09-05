@@ -17,6 +17,7 @@ import { normalizeRawEvent, observedFactsFromNormalized } from '../src/ingestion
 import { toCandidate } from '../src/ingestion/to-candidate.ts';
 import { IncompleteListingError, type AdapterContext, type RawEvent } from '../src/ingestion/types.ts';
 import { HttpError } from '../src/ingestion/http.ts';
+import { resetZarzuelaOriginSessions, setZarzuelaClock } from '../src/ingestion/detail/zarzuela-transport.ts';
 import { TEST_NOW, TEST_WINDOW, makeEvent, makeVenue } from './helpers.ts';
 
 const base = 'https://teatrodelazarzuela.inaem.gob.es';
@@ -36,7 +37,12 @@ async function advance<T>(pending: Promise<T>): Promise<T> {
   await vi.runAllTimersAsync();
   return pending;
 }
-afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); });
+afterEach(() => {
+  resetZarzuelaOriginSessions();
+  setZarzuelaClock(undefined);
+  vi.useRealTimers();
+  vi.restoreAllMocks();
+});
 
 describe('descubrimiento K2 de Zarzuela', () => {
   it('usa el fetch relay genérico por hostname, sin proxy propio', () => {
@@ -449,6 +455,7 @@ describe('Zarzuela en el pipeline común', () => {
   });
 
   it('reconcilia el URL compartido por repartos existentes sin duplicar ni borrar la función omitida en la ficha', async () => {
+    vi.useFakeTimers();
     const catalog = emptyCatalog();
     catalog.sources = [source.seedSource];
     catalog.venues = [makeVenue({ id: 'ven_teatro_zarzuela', slug: 'teatro-de-la-zarzuela', name: 'Teatro de la Zarzuela', url: base })];
@@ -470,11 +477,11 @@ describe('Zarzuela en el pipeline común', () => {
     const before = JSON.stringify(catalog);
     const home = '<a href="/es/temporada/lirica-2026-2027">Lírica</a>';
     const listing = `<h2 class="first">Lírica</h2><ul class="listadoObras"><li><h3><a href="${raw().sourceUrl}">La verbena de la Paloma</a></h3></li></ul>`;
-    const run = await runIngest({
+    const run = await advance(runIngest({
       catalog, dataDir: await mkdtemp(path.join(os.tmpdir(), 'zarzuela-test-')),
       now: TEST_NOW, dryRun: true, sourceIds: [source.id],
       get: async (url) => url === `${base}/es/` ? home : url === raw().sourceUrl ? fixture('detail-verbena') : listing,
-    });
+    }));
     expect(run.summary.sourcesFailed).toEqual([]);
     expect(run.summary.ambiguous).toBe(0);
     expect(run.summary.newEvents).toBe(0);
@@ -486,10 +493,11 @@ describe('Zarzuela en el pipeline común', () => {
   });
 
   it('una ventana ajena no publica fechas y un timeout de detalle tampoco', async () => {
+    vi.useFakeTimers();
     const home = '<a href="/es/temporada/lirica-2026-2027">Lírica</a>';
     const listing = `<ul class="listadoObras"><li><h3><a href="${raw().sourceUrl}">La verbena de la Paloma</a></h3></li></ul>`;
     for (const failDetail of [false, true]) {
-      const run = await runIngest({
+      const run = await advance(runIngest({
         catalog: emptyCatalog(), dataDir: await mkdtemp(path.join(os.tmpdir(), 'zarzuela-window-')),
         now: TEST_NOW, dryRun: true, sourceIds: [source.id], window: { from: '2026-12-01', to: '2026-12-31' },
         get: async (url) => {
@@ -498,7 +506,7 @@ describe('Zarzuela en el pipeline común', () => {
           if (failDetail) throw new Error('timeout');
           return fixture('detail-verbena');
         },
-      });
+      }));
       expect(run.summary.candidates).toBe(0);
       expect(run.summary.written).toEqual([]);
       expect(run.summary.detailHydrationFailed).toBe(failDetail ? 1 : 0);

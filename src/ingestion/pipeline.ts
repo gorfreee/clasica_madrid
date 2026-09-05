@@ -33,7 +33,7 @@ import type {
   SourceFailure,
 } from './types.ts';
 import { emptyIngestAiSummary, IncompleteListingError } from './types.ts';
-import { getText, HttpError, resolveFetchRelay } from './http.ts';
+import { getText, HttpError, resolveFetchRelay, takeRelayRecoveries } from './http.ts';
 import { normalizeUrl } from './urls.ts';
 
 export type IngestOptions = {
@@ -138,6 +138,12 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
     const adapter = getAdapter(source.adapterId);
     const sourceHydration = countHydration(hydrated);
     const listingError = failure && failure.stage !== 'hydration' ? failure.message : undefined;
+    const listingFallback = extracted.some((raw) => raw.listingSurface === 'html-archive')
+      ? 'html-archive' as const
+      : undefined;
+    const hydrationRecoveries = hydrated.filter((raw) =>
+      raw.hydration?.status === 'succeeded' && (raw.hydration.httpStatuses?.length ?? 0) > 0
+    ).length;
     obs?.recordSourceStats({
       sourceId: source.id,
       extractedEvents: extracted.length,
@@ -147,10 +153,12 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
       hydrationFailed: sourceHydration.failed,
       hydrationSkippedOutsideWindow: hydrated.filter((raw) => raw.hydration?.reason === 'outside-window').length,
       hydrationSkippedCircuitOpen: hydrated.filter((raw) => raw.hydration?.reason === 'circuit-open').length,
+      hydrationRecoveries,
       status: failure ? 'failed' : 'ok',
       usesHydration: Boolean(adapter.hydrate),
       hydrationReached: !listingError,
       listingError,
+      listingFallback,
     });
     const listingByUrl = new Map<string, RawEvent>();
     for (const listing of extracted) {
@@ -640,10 +648,12 @@ function instrumentSourceGet(
         durationMs: performance.now() - startedAtMs,
         retry,
         status: 200,
+        recoveries: takeRelayRecoveries(url),
       });
       return body;
     } catch (error) {
       failedUrls.add(normalizeUrl(url));
+      takeRelayRecoveries(url);
       observability.recordHttp({
         sourceId,
         transport,
