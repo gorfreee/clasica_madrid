@@ -8,7 +8,7 @@ const SEPARATOR = /^-{2,}.*-{2,}$|^\*{2,}$|^·+$/;
 const LIFESPAN = /\(\s*(?:ca\.?\s*)?\d{3,4}\s*[–—-]\s*(?:ca\.?\s*)?\d{3,4}\s*\)|\(\s*(?:ca\.?\s*)?\d{4}\s*\)/;
 const CATALOG =
   /\b(?:bwv|hwv|hob\.?|buxwv|swwv|rct|k\.?\s*\d|kv\.?\s*\d|op\.?\s*\d|opus\s+\d|g\.\s*\d|h\.?\s*\d{2,})\b/i;
-const MOVEMENT = /^(?:x{0,3}(?:ix|iv|v?i{0,3})|[1-9]\d*)\.\s+\S+/i;
+const MOVEMENT = /^(?:x{0,3}(?:ix|iv|v?i{0,3})|[1-9]\d*)\.\s*\S+/i;
 const CATALOG_ONLY =
   /^(?:(?:op(?:us)?|bwv|hwv|hob\.?|k(?:v)?\.?|woo)\s*\.?\s*\d+[a-z]?)(?:\s*\([^)]*\d{3,4}[^)]*\))?\s*$/i;
 const WORK_GENRE =
@@ -96,17 +96,23 @@ export function looksLikeScheduleNotice(text: string): boolean {
 }
 
 export function looksLikeEnsembleName(text: string): boolean {
-  if (!ENSEMBLE.test(text)) return false;
-  if (ENSEMBLE_SUBJECT.test(text.trim())) return true;
+  const trimmed = text.trim();
+  if (!ENSEMBLE.test(trimmed)) return false;
+  // Catalogue or "para + instrument" always names a work, even if the title
+  // starts with Cuarteto / Quinteto / Orquesta.
+  if (CATALOG.test(trimmed) || looksLikeWorkInstrumentation(trimmed)) return false;
+  // "a capella" is a singing indication, not Capella as a choir name.
+  if (/\ba\s+capp?ella\b/i.test(trimmed) && !ENSEMBLE_SUBJECT.test(trimmed)) return false;
+  if (ENSEMBLE_SUBJECT.test(trimmed)) return true;
   // "Concierto para piano y orquesta" / "Entr’acte, para orquesta de cuerda"
   // name instrumentation, not a group.
-  if (WORK_GENRE.test(text) || looksLikeWorkInstrumentation(text)) return false;
+  if (WORK_GENRE.test(trimmed)) return false;
   return true;
 }
 
 /** "Work title, para arpa / orquesta" is instrumentation, not a person or group. */
 export function looksLikeWorkInstrumentation(text: string): boolean {
-  return /(?:,\s*|\b)(?:para|for)\s+(?:la\s+)?(?:orquesta|orquestra|orchestra|arpa|viol[ií]n|violonchelo|cello|piano|coro|cuerda|soprano|mezzosoprano|contratenor|tenor|bar[ií]tono|bajo)/i.test(
+  return /(?:,\s*|\b)(?:para|for)\s+(?:(?:la|el|un[oa]?|pequeña|pequena)\s+)*(?:orquesta|orquestra|orchestra|arpa|viol[ií]n|viola|violonchelo|violoncelo|cello|piano|coro|cuerda|soprano|mezzosoprano|contratenor|tenor|bar[ií]tono|bajo|oboe|clarinete|fagot|flauta|piccolo|flaut[ií]n|trompa|trompeta|tromb[oó]n|corno|guitarra|clave|la[uú]d|tiorba|percusi[oó]n|quinteto|cuarteto|tr[ií]o)/i.test(
     text.trim(),
   );
 }

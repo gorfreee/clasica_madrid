@@ -3,7 +3,10 @@ import {
   findProgramStartIndex,
   parseAuditorioPersonCredits,
   parseAuditorioPersonLine,
+  parseComposerColonWork,
   parseComposerYearWork,
+  parseDashRoleCredit,
+  parseWorkThenPersonCredit,
   segmentAuditorioBlocks,
 } from '../src/ingestion/detail/auditorio-segments.ts';
 
@@ -353,5 +356,110 @@ describe('segmentación performer/programa del Auditorio', () => {
       'Lluís Vilamajó, preparación del conjunto vocal',
     ]);
     expect(savall.programLines[0]).toBe('Johannes Brahms (1833-1897)');
+  });
+
+  it('un h4 posterior no convierte el repertorio del bloque anterior en elenco', () => {
+    const segments = segmentAuditorioBlocks([
+      [
+        'Aulos Madrid',
+        'Álvaro Octavio Díaz',
+        'Flauta',
+        'Antonín Dvořák',
+        'Cuarteto «Americano», op. 96 (arr. David Walter)',
+      ],
+      ['Elliott Carter', 'Quinteto de viento'],
+    ]);
+    expect(segments.performerLines).toEqual(['Aulos Madrid', 'Álvaro Octavio Díaz', 'Flauta']);
+    expect(segments.programLines).toContain('Cuarteto «Americano», op. 96 (arr. David Walter)');
+    expect(segments.programLines).toContain('Quinteto de viento');
+    expect(parseAuditorioPersonLine('Cuarteto «Americano», op. 96 (arr. David Walter)')).toBeUndefined();
+    expect(parseAuditorioPersonLine('Quinteto de viento')).toBeUndefined();
+  });
+
+  it('líneas con señales claras de obra no se publican como intérpretes', () => {
+    const titles = [
+      'Der Schwanendreher, para viola y pequeña orquesta',
+      'Stravinsky, El pájaro de fuego (música del ballet completo)',
+      'Cuarteto para oboe y cuerdas sobre Una cosa rara',
+      'Cuarteto para corno inglés,',
+      'Cuarteto «Americano», op. 96 (arr. David Walter)',
+      'Dona nobis pacem, Tres cánones a capella,',
+      'Quinteto para clarinete, op. 34',
+      'Respighi.- Pinos de Roma',
+    ];
+    for (const title of titles) {
+      expect(parseAuditorioPersonCredits(title), title).toEqual([]);
+    }
+  });
+
+  it('Composer.- Work y Composer, Work abren el programa', () => {
+    expect(parseComposerColonWork('Respighi.- Pinos de Roma')).toEqual({
+      composerName: 'Respighi',
+      title: 'Pinos de Roma',
+    });
+    expect(parseComposerColonWork('R.Strauss.- Don Juan, poema sinfónico')).toEqual({
+      composerName: 'R.Strauss',
+      title: 'Don Juan, poema sinfónico',
+    });
+    expect(parseComposerColonWork('Stravinsky, El pájaro de fuego (música del ballet completo)')).toEqual({
+      composerName: 'Stravinsky',
+      title: 'El pájaro de fuego (música del ballet completo)',
+    });
+    expect(parseComposerColonWork('Rachmáninov, Concierto para piano núm. 2')).toEqual({
+      composerName: 'Rachmáninov',
+      title: 'Concierto para piano núm. 2',
+    });
+    expect(parseComposerColonWork('Beatrice Rana, piano')).toBeUndefined();
+    const excelentia = segmentAuditorioBlocks([
+      ['Orquesta Clásica Santa Cecilia'],
+      ['Christian Vasquez, director'],
+      ['R.Strauss.- Don Juan, poema sinfónico'],
+      ['Respighi.- Pinos de Roma'],
+      ['Beethoven.- Sinfonía núm 5'],
+    ]);
+    expect(excelentia.performerLines).toEqual([
+      'Orquesta Clásica Santa Cecilia',
+      'Christian Vasquez, director',
+    ]);
+    expect(excelentia.programLines).toEqual([
+      'R.Strauss.- Don Juan, poema sinfónico',
+      'Respighi.- Pinos de Roma',
+      'Beethoven.- Sinfonía núm 5',
+    ]);
+  });
+
+  it('Director Musical y Piano – Nombre no se traga el crédito como si fuera el apellido', () => {
+    expect(parseDashRoleCredit('Director Musical y Piano – Sergio Kuhlmann')).toEqual({
+      name: 'Sergio Kuhlmann',
+      roleText: 'Director Musical y Piano',
+    });
+    expect(parseAuditorioPersonLine('Director Musical y Piano – Sergio Kuhlmann')).toEqual({
+      name: 'Sergio Kuhlmann',
+      roleText: 'Director Musical y Piano',
+    });
+    expect(parseAuditorioPersonLine('Dir. Manuel Tévar')).toEqual({
+      name: 'Manuel Tévar',
+      roleText: 'director',
+    });
+  });
+
+  it('obra (compositor) persona, rol extrae el intérprete y deja la obra', () => {
+    expect(
+      parseWorkThenPersonCredit('Rhapsody in Blue (G. Gershwin) Susana Gómez Vázquez, piano'),
+    ).toEqual({
+      work: { title: 'Rhapsody in Blue', composerName: 'G. Gershwin' },
+      person: { name: 'Susana Gómez Vázquez', roleText: 'piano' },
+    });
+    expect(
+      parseWorkThenPersonCredit('Ciranda das Sete Notas (H. Villa-Lobos) Javier Sanz Pascual, fagot'),
+    ).toEqual({
+      work: { title: 'Ciranda das Sete Notas', composerName: 'H. Villa-Lobos' },
+      person: { name: 'Javier Sanz Pascual', roleText: 'fagot' },
+    });
+    expect(parseAuditorioPersonLine('Rhapsody in Blue (G. Gershwin) Susana Gómez Vázquez, piano')).toEqual({
+      name: 'Susana Gómez Vázquez',
+      roleText: 'piano',
+    });
+    expect(parseAuditorioPersonLine('Rhapsody in Blue (G. Gershwin)')).toBeUndefined();
   });
 });
