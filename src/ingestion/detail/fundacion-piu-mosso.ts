@@ -1,5 +1,5 @@
 import { parseObservedDateTime, parseObservedTime } from '../dates.ts';
-import { collapseWhitespace, decodeHtmlEntities, stripTags } from '../html.ts';
+import { collapseWhitespace, decodeHtmlEntities, flattenHtmlBlocks, stripTags } from '../html.ts';
 import { emptyObservedLists, type ObservedFactPatch } from '../observed.ts';
 import { normalizeUrl } from '../urls.ts';
 import type { RawEvent, RawOccurrence } from '../types.ts';
@@ -119,7 +119,9 @@ export function parsePiumossoDetail(event: RawEvent, body: string): ObservedFact
   const categoryText = categoryNames(
     /<span\b[^>]*class=["'][^"']*\btribe-events-event-categories\b(?!-)[^"']*["'][^>]*>([\s\S]*?)<\/span>/i.exec(details)?.[1] ?? '',
   );
-  const description = fichaDescription(body);
+  const descriptionHtml = fichaDescriptionHtml(body);
+  const description = descriptionHtml ? fichaDescriptionText(descriptionHtml) : undefined;
+  const programText = descriptionHtml ? extractPiumossoProgramText(descriptionHtml) : undefined;
   const eventStatus = statusFromBody(body);
 
   if (venueText && event.observed.venueText && normalizeLoose(venueText) !== normalizeLoose(event.observed.venueText)) {
@@ -131,7 +133,8 @@ export function parsePiumossoDetail(event: RawEvent, body: string): ObservedFact
     ...(venueText ? { venueText } : {}),
     ...(accessText ? { accessText } : {}),
     ...(categoryText ? { categoryText } : {}),
-    ...(description ? { description, programText: description } : {}),
+    ...(description ? { description } : {}),
+    ...(programText ? { programText } : {}),
     ...(eventStatus ? { eventStatus } : {}),
     ...emptyObservedLists(),
   };
@@ -267,7 +270,7 @@ function toRawEvent(item: LdEvent, card: ListingCard | undefined, sourceId: stri
       ...(item.venueText ? { venueText: item.venueText } : {}),
       ...(card.categoryText ? { categoryText: card.categoryText } : {}),
       ...(card.accessText ? { accessText: card.accessText } : {}),
-      ...(item.description ? { description: item.description, programText: item.description } : {}),
+      ...(item.description ? { description: item.description } : {}),
       ...emptyObservedLists(),
     },
   };
@@ -305,15 +308,102 @@ function categoryNames(html: string): string | undefined {
   return names.length ? names.join('; ') : undefined;
 }
 
-function fichaDescription(html: string): string | undefined {
+function fichaDescriptionHtml(html: string): string | undefined {
   const block = piumossoDiv(
     html,
     /<div\b[^>]*class=["'][^"']*\btribe-events-single-event-description\b[^"']*["'][^>]*>/i,
   );
   if (!block) return undefined;
-  const text = stripTags(block.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' '));
+  return block.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' ');
+}
+
+function fichaDescriptionText(html: string): string | undefined {
+  const text = stripTags(html);
   if (!text || /^estamos esperando informaci[oó]n$/i.test(text)) return undefined;
   return text;
+}
+
+const PROGRAM_HEADING =
+  /^(?:el\s+)?(?:programa|repertorio)(?:\s+musical|\s+del\s+concierto)?\s*[:.]?\s*(.*)$/i;
+const PROGRAM_HEDGE =
+  /programa exacto|desarrollaremos en breve|pendiente de confirmaci[oó]n|lo desarrollaremos/i;
+const BIO_OR_CREDIT_HEADING =
+  /^(?:el\s+)?(?:int[ée]rprete|biograf[íi]a|direcci[oó]n\s+art[íi]stica)\b/i;
+const OBRAS_DE = /^obras?\s+de\b/i;
+const NAME_LIST_SPLIT = /\s*[-–—·•|/]\s*/;
+
+/**
+ * Repertoire only: an explicit Programa/Repertorio section, "Obras de…" lines,
+ * dashed composer/work lists, or a short independent list. Biography and
+ * generic intro prose stay in description.
+ */
+function extractPiumossoProgramText(html: string): string | undefined {
+  const blocks = flattenHtmlBlocks(html).split('\n');
+  const parts: string[] = [];
+  const pendingList: string[] = [];
+  let inProgramSection = false;
+  let seenBioOrCredit = false;
+
+  const flushPendingList = (): void => {
+    if (pendingList.length >= 2) parts.push(...pendingList);
+    pendingList.length = 0;
+  };
+
+  for (const block of blocks) {
+    if (BIO_OR_CREDIT_HEADING.test(block)) {
+      flushPendingList();
+      if (inProgramSection) break;
+      seenBioOrCredit = true;
+      continue;
+    }
+
+    const programHeading = PROGRAM_HEADING.exec(block);
+    if (programHeading && !PROGRAM_HEDGE.test(block)) {
+      flushPendingList();
+      inProgramSection = true;
+      seenBioOrCredit = false;
+      const trailing = programHeading[1]?.trim();
+      if (trailing) parts.push(trailing);
+      continue;
+    }
+
+    if (inProgramSection) {
+      parts.push(block);
+      continue;
+    }
+    if (seenBioOrCredit) continue;
+
+    if (OBRAS_DE.test(block) || isDashedMusicalList(block)) {
+      flushPendingList();
+      parts.push(block);
+      continue;
+    }
+    if (looksLikeIndependentListItem(block)) {
+      pendingList.push(block);
+      continue;
+    }
+    flushPendingList();
+  }
+  flushPendingList();
+  const programText = collapseWhitespace(parts.join(' '));
+  return programText || undefined;
+}
+
+function isDashedMusicalList(text: string): boolean {
+  if (!/[-–—·•|]/.test(text)) return false;
+  const parts = text.split(NAME_LIST_SPLIT).map((item) => item.trim()).filter(Boolean);
+  return parts.length >= 2 && parts.every((item) => looksLikeIndependentListItem(item) && item.split(/\s+/).length <= 4);
+}
+
+function looksLikeIndependentListItem(text: string): boolean {
+  if (text.length > 80 || /[.!?¡¿]/.test(text)) return false;
+  if (BIO_OR_CREDIT_HEADING.test(text) || PROGRAM_HEDGE.test(text)) return false;
+  const words = text.split(/\s+/).filter(Boolean);
+  if (words.length === 0 || words.length > 6) return false;
+  if (/^(nacido|realiza|ha|es|entre|adem[aá]s|el t[ií]tulo|caracter[ií]sticas)\b/i.test(text)) {
+    return false;
+  }
+  return /^[\p{L}\d][\p{L}\d .,'’\-–—()/]*$/u.test(text);
 }
 
 function statusFromBody(html: string): 'scheduled' | 'cancelled' | 'postponed' | undefined {
