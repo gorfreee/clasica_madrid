@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { getText, HttpError, HTML_ACCEPT, JSON_DOCUMENT_ACCEPT, RELAY_ORIGIN_COOKIE_HEADER, acceptHeaderForUrl, resetOriginCookieJar, resolveFetchRelay } from '../src/ingestion/http.ts';
+import { getText, HttpError, HTML_ACCEPT, JSON_DOCUMENT_ACCEPT, RELAY_ORIGIN_COOKIE_HEADER, acceptHeaderForUrl, resetOriginCookieJar, resolveFetchRelay, TransportAttemptsError } from '../src/ingestion/http.ts';
 import { fundacionJuanMarchAdapter as adapter } from '../src/ingestion/sources/fundacion-juan-march.ts';
 import { parseMarchDetail } from '../src/ingestion/detail/fundacion-juan-march.ts';
 import { parseZarzuelaDetail } from '../src/ingestion/detail/teatro-zarzuela.ts';
 import { teatroZarzuelaAdapter } from '../src/ingestion/sources/teatro-zarzuela.ts';
-import { fetchRelayHosts, getSourceDefinition, listSourceDefinitions } from '../src/ingestion/registry.ts';
+import { fetchRelayHosts, fetchTransportForHost, getSourceDefinition, listSourceDefinitions } from '../src/ingestion/registry.ts';
 import { TEST_NOW, TEST_WINDOW } from './helpers.ts';
 import type { AdapterContext, SourceDefinition } from '../src/ingestion/types.ts';
 
@@ -185,6 +185,12 @@ describe('getText fetch relay', () => {
       'teatrodelazarzuela.inaem.gob.es',
       'www.march.es',
     ]);
+    expect(fetchTransportForHost('realhermandaddelrefugio.org')).toBe('direct-then-relay');
+    expect(fetchTransportForHost('www.march.es')).toBe('relay');
+    expect(fetchTransportForHost('teatrodelazarzuela.inaem.gob.es')).toBe('relay');
+    expect(fetchTransportForHost('auditorionacional.inaem.gob.es')).toBe('relay');
+    expect(fetchTransportForHost('cndm.inaem.gob.es')).toBe('relay');
+    expect(fetchTransportForHost('www.teatroreal.es')).toBe('direct');
     expect(getSourceDefinition('auditorio-nacional').useFetchRelay).toBe(true);
     expect(resolveFetchRelay(auditorioListing, relayEnv)?.requestUrl).toContain(
       encodeURIComponent(auditorioListing),
@@ -448,6 +454,56 @@ describe('getText fetch relay', () => {
     })).rejects.toThrow(`relay de fetch inválido al pedir ${listing}`);
     await expect(getText(ordinary, 30_000, { INGEST_FETCH_RELAY_TOKEN: token })).resolves.toBe('[]');
     expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('tries Refugio HTML direct first and falls back to the relay on HTTP 202', async () => {
+    const archive = 'https://realhermandaddelrefugio.org/categoria-eventos/conciertos/';
+    const html = '<div class="jet-listing-grid__items" data-pages="1"></div>';
+    const fetch = vi.fn(async (url: string, init?: RequestInit) => {
+      if (url === archive) {
+        expect(header(init, 'authorization')).toBeUndefined();
+        return new Response('challenge', { status: 202 });
+      }
+      const parsed = new URL(url);
+      expect(parsed.origin).toBe(relayOrigin);
+      expect(parsed.searchParams.get('url')).toBe(archive);
+      expect(header(init, 'authorization')).toBe(`Bearer ${token}`);
+      return new Response(html, { status: 200 });
+    });
+    vi.stubGlobal('fetch', fetch);
+    await expect(getText(archive, 30_000, relayEnv)).resolves.toBe(html);
+    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(String(fetch.mock.calls[0]?.[0])).toBe(archive);
+  });
+
+  it('aggregates Refugio direct and relay 202 without leaking the token', async () => {
+    const archive = 'https://realhermandaddelrefugio.org/categoria-eventos/conciertos/';
+    const fetch = vi.fn(async () => new Response('no', { status: 202 }));
+    vi.stubGlobal('fetch', fetch);
+    await expect(getText(archive, 30_000, relayEnv)).rejects.toSatisfy((error: unknown) => {
+      expect(error).toBeInstanceOf(TransportAttemptsError);
+      const message = error instanceof Error ? error.message : String(error);
+      expect(message).toMatch(/direct → HTTP 202/);
+      expect(message).toMatch(/relay → HTTP 202/);
+      expect(message).not.toContain(token);
+      expect(message).not.toContain('Bearer');
+      expect(message).not.toContain(relayOrigin);
+      return true;
+    });
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not try a direct hop for March, Zarzuela, Auditorio or CNDM when the relay is configured', async () => {
+    for (const target of [listing, zarzuelaHome, auditorioListing, 'https://cndm.inaem.gob.es/']) {
+      const fetch = vi.fn(async (url: string) => {
+        expect(String(url)).not.toBe(target);
+        expect(new URL(String(url)).origin).toBe(relayOrigin);
+        return new Response('ok', { status: 200 });
+      });
+      vi.stubGlobal('fetch', fetch);
+      await expect(getText(target, 30_000, relayEnv)).resolves.toBe('ok');
+      expect(fetch).toHaveBeenCalledTimes(1);
+    }
   });
 });
 

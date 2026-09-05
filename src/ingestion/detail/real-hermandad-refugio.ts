@@ -144,7 +144,7 @@ function labelledDate(text: string, label: 'Empieza' | 'Termina'): { date: strin
 }
 
 function labelledTime(text: string): string | undefined {
-  const match = /^Hora\s+(\d{1,2}:\d{2})$/i.exec(text);
+  const match = /^Hora:?\s+(\d{1,2}:\d{2})$/i.exec(text);
   if (!match) return undefined;
   return parseObservedTime(match[1]!) ?? undefined;
 }
@@ -173,6 +173,9 @@ export type RefugioArchiveEvent = {
   title: string;
   externalId?: string;
   description?: string;
+  venueText?: string;
+  accessText?: string;
+  occurrence?: RawOccurrence;
 };
 
 export function refugioArchivePageUrl(page: number): string {
@@ -233,12 +236,74 @@ function archiveCard(html: string): RefugioArchiveEvent | undefined {
   const postId = /\bdata-post-id=["'](\d+)["']/i.exec(html)?.[1]
     ?? /\bjet-listing-dynamic-post-(\d+)\b/i.exec(html)?.[1];
   const description = archiveCardDescription(html);
+  const fields = archiveCardFields(html);
+  const start = fields.start ? parseRefugioDate(fields.start) : undefined;
+  const end = fields.end ? parseRefugioDate(fields.end) : undefined;
+  const time = fields.time ? parseObservedTime(fields.time) ?? undefined : undefined;
+  const occurrence = archiveOccurrence(fields, start, end, time);
   return {
     sourceUrl,
     title,
     ...(postId ? { externalId: postId } : {}),
     ...(description ? { description } : {}),
+    ...(fields.venue ? { venueText: fields.venue } : {}),
+    ...(fields.price ? { accessText: fields.price } : {}),
+    ...(occurrence ? { occurrence } : {}),
   };
+}
+
+function archiveOccurrence(
+  fields: ArchiveCardFields,
+  start: string | undefined,
+  end: string | undefined,
+  time: string | undefined,
+): RawOccurrence | undefined {
+  if (!start) return undefined;
+  if (end && end !== start) return undefined;
+  const raw = [
+    fields.start ? `Fecha inicio: ${fields.start}` : undefined,
+    fields.time ? `Hora: ${fields.time}` : undefined,
+  ].filter(Boolean).join(' ');
+  return { raw, date: start, ...(time ? { time } : {}) };
+}
+
+type ArchiveCardFields = {
+  start?: string;
+  end?: string;
+  time?: string;
+  venue?: string;
+  price?: string;
+};
+
+function archiveCardFields(html: string): ArchiveCardFields {
+  const fields: ArchiveCardFields = {};
+  for (const match of html.matchAll(/jet-listing-dynamic-field__content"\s*>([\s\S]*?)<\/div>/gi)) {
+    const text = collapseWhitespace(stripTags(match[1] ?? ''));
+    const labelled = /^(Fecha inicio|Fecha fin|Hora|Lugar|Precio)\s*:\s*(.+)$/i.exec(text);
+    if (!labelled) continue;
+    const value = labelled[2]?.trim();
+    if (!value || value === '-' || value === '—') continue;
+    switch (labelled[1]!.toLowerCase()) {
+      case 'fecha inicio':
+        fields.start = value;
+        break;
+      case 'fecha fin':
+        fields.end = value;
+        break;
+      case 'hora':
+        fields.time = value;
+        break;
+      case 'lugar':
+        fields.venue = value;
+        break;
+      case 'precio':
+        fields.price = value;
+        break;
+      default:
+        break;
+    }
+  }
+  return fields;
 }
 
 function archiveCardTitle(html: string): string | undefined {

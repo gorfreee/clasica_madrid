@@ -198,37 +198,33 @@ describe('Real Hermandad del Refugio HTML inesperado y fallback REST', () => {
     },
   };
 
-  it('diagnostica HTML de captcha en lugar de parsearlo como JSON', async () => {
+  it('diagnostica HTML de captcha en lugar de parsearlo como archivo', async () => {
     await expect(realHermandadRefugioAdapter.extract(CAPTCHA_HTML, listingUrl, ctx)).rejects.toThrow(
-      /HTML de desafío SiteGround \(captcha\) en lugar de JSON/,
+      /HTML de desafío SiteGround \(captcha\) en lugar del archivo de conciertos/,
     );
     await expect(realHermandadRefugioAdapter.extract('<html><head></head><body>blocked</body></html>', listingUrl, ctx))
-      .rejects.toThrow(/HTML inesperado en lugar de JSON/);
+      .rejects.toThrow(/paginación reconocible/);
     await expect(realHermandadRefugioAdapter.extract('not json', listingUrl, ctx)).rejects.toThrow(/JSON inválido/);
   });
 
-  it('reintenta el REST oficial y cae a la URL simplificada si el HTML persiste', async () => {
+  it('cae a REST si el archivo oficial sigue devolviendo captcha', async () => {
     const json = await readFile(path.join(import.meta.dirname, 'fixtures/ingestion/refugio/listing-sample.json'), 'utf8');
     const requested: string[] = [];
-    let primaryAttempts = 0;
     const body = await realHermandadRefugioAdapter.fetchListing!(listingUrl, {
       ...ctx,
       get: async (url) => {
         requested.push(url);
-        if (url.includes('_fields')) {
-          primaryAttempts += 1;
-          return CAPTCHA_HTML;
-        }
-        return json;
+        if (url.includes('categoria-eventos/conciertos')) return CAPTCHA_HTML;
+        if (url.includes('/wp-json/')) return json;
+        throw new Error(`URL de test no mapeada: ${url}`);
       },
     });
-    expect(primaryAttempts).toBe(2);
-    expect(requested.some((url) => url.includes('_fields'))).toBe(true);
-    expect(requested.some((url) => !url.includes('_fields') && url.includes('status=publish'))).toBe(true);
+    expect(requested.some((url) => url.includes('categoria-eventos/conciertos'))).toBe(true);
+    expect(requested.some((url) => url.includes('/wp-json/'))).toBe(true);
     expect(JSON.parse(body)).toHaveLength(2);
   });
 
-  it('un HTML persistente en REST y fallback sigue aislando la fuente', async () => {
+  it('un HTML persistente en archivo y REST sigue aislando la fuente', async () => {
     const dataDir = await emptyDataDir('clasica-refugio-html-');
     const run = await runIngest({
       dataDir,
@@ -240,7 +236,8 @@ describe('Real Hermandad del Refugio HTML inesperado y fallback REST', () => {
       get: async () => CAPTCHA_HTML,
     });
     expect(run.summary.sourcesFailed[0]?.sourceId).toBe('real-hermandad-refugio');
-    expect(run.summary.sourcesFailed[0]?.message).toMatch(/HTML de desafío SiteGround/);
+    expect(run.summary.sourcesFailed[0]?.message).toMatch(/html-archive/);
+    expect(run.summary.sourcesFailed[0]?.message).toMatch(/wp-rest|HTML de desafío SiteGround/);
     expect(run.rawEvents).toEqual([]);
   });
 });

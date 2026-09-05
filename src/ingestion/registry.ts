@@ -255,10 +255,11 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
   {
     id: 'real-hermandad-refugio',
     name: 'Real Hermandad del Refugio',
-    urls: ['https://realhermandaddelrefugio.org/wp-json/wp/v2/calendario-eventos'],
+    urls: ['https://realhermandaddelrefugio.org/categoria-eventos/conciertos/'],
     adapterId: realHermandadRefugioAdapter.id,
     catalogSourceId: 'src_real_hermandad_refugio',
     useFetchRelay: true,
+    fetchTransport: 'direct-then-relay',
     seedSource: {
       schemaVersion: 1,
       id: 'src_real_hermandad_refugio',
@@ -319,11 +320,11 @@ export function listSourceDefinitions(): SourceDefinition[] {
   return SOURCE_REGISTRY;
 }
 
-/** Listing hostnames of sources with `useFetchRelay`. The Worker has no copy of this list. */
+/** Listing hostnames that may use the fetch relay. The Worker has no copy of this list. */
 export function fetchRelayHosts(sources: readonly SourceDefinition[] = SOURCE_REGISTRY): string[] {
   const hosts = new Set<string>();
   for (const source of sources) {
-    if (!source.useFetchRelay) continue;
+    if (!usesFetchRelay(source)) continue;
     for (const url of source.urls) {
       try {
         const host = new URL(url).hostname.toLowerCase().replace(/\.$/, '');
@@ -334,6 +335,31 @@ export function fetchRelayHosts(sources: readonly SourceDefinition[] = SOURCE_RE
     }
   }
   return [...hosts].sort();
+}
+
+export function fetchTransportForHost(
+  hostname: string,
+  sources: readonly SourceDefinition[] = SOURCE_REGISTRY,
+): 'direct' | 'relay' | 'direct-then-relay' {
+  const host = hostname.toLowerCase().replace(/\.$/, '');
+  for (const source of sources) {
+    const strategy = source.fetchTransport ?? (source.useFetchRelay ? 'relay' : 'direct');
+    if (strategy === 'direct') continue;
+    for (const url of source.urls) {
+      try {
+        if (new URL(url).hostname.toLowerCase().replace(/\.$/, '') === host) return strategy;
+      } catch {
+        // ignore unparseable listing URLs
+      }
+    }
+  }
+  return 'direct';
+}
+
+function usesFetchRelay(source: SourceDefinition): boolean {
+  return Boolean(source.useFetchRelay)
+    || source.fetchTransport === 'relay'
+    || source.fetchTransport === 'direct-then-relay';
 }
 
 export function getSourceDefinition(id: string): SourceDefinition {

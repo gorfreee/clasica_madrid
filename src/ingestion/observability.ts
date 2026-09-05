@@ -69,7 +69,7 @@ export type IngestSourceTiming = {
   status: IngestSourceStatus;
   hydrationMode: IngestHydrationMode;
   listingError?: string;
-  listingFallback?: 'html-archive';
+  listingFallback?: 'wp-rest';
   http: IngestSourceHttpStats;
 };
 
@@ -252,7 +252,7 @@ export class IngestObservability {
     usesHydration?: boolean;
     hydrationReached?: boolean;
     listingError?: string;
-    listingFallback?: 'html-archive';
+    listingFallback?: 'wp-rest';
   }): void {
     this.guard(() => {
       const timing = this.sourceTiming(input.sourceId);
