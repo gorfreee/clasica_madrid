@@ -27,8 +27,28 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Sibelius"
+    },
+    {
+      "name": "Bruckner"
+    }
+  ],
+  "works": [
+    {
+      "title": "La tempestad. Obertura",
+      "composerName": "Sibelius"
+    },
+    {
+      "title": "Concierto per a violín",
+      "composerName": "Sibelius"
+    },
+    {
+      "title": "Sinfonía núm. 7",
+      "composerName": "Bruckner"
+    }
+  ],
   "eras": [
     "romantic"
   ],
@@ -41,10 +61,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/la-filarmonica-septima-de-bruckner",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "la-filarmonica-septima-de-bruckner"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

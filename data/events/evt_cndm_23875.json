@@ -16,7 +16,26 @@
     }
   ],
   "performers": [],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Frederic Mompou"
+    },
+    {
+      "name": "Joaquín Rodrigo"
+    },
+    {
+      "name": "Rosa García Ascot"
+    },
+    {
+      "name": "Manuel de Falla"
+    },
+    {
+      "name": "Claude Debussy"
+    },
+    {
+      "name": "Ernesto Halffter"
+    }
+  ],
   "works": [],
   "eras": [
     "twentieth"
@@ -30,10 +49,10 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23875",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "23875"
     }
   ],
   "primarySourceId": "src_cndm",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

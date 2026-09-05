@@ -37,6 +37,9 @@
     },
     {
       "name": "Benjamin Bruns"
+    },
+    {
+      "name": "Fleur Barron"
     }
   ],
   "composers": [
@@ -78,10 +81,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-06-1",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "f74f26f6f70c4913a469dae93a04e1b5"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

@@ -27,8 +27,24 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Beethoven"
+    },
+    {
+      "name": "Bartók"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para piano y orquesta núm. 5, “Emperador”",
+      "composerName": "Beethoven"
+    },
+    {
+      "title": "Concierto para orquesta",
+      "composerName": "Bartók"
+    }
+  ],
   "eras": [
     "classical",
     "romantic",
@@ -43,10 +59,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/la-filarmonica-el-emperador",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "la-filarmonica-el-emperador"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

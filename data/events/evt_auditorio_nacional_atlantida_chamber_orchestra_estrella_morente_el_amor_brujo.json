@@ -22,6 +22,9 @@
     {
       "name": "Manuel Tévar",
       "role": "conductor"
+    },
+    {
+      "name": "Estrella Morente"
     }
   ],
   "composers": [
@@ -64,10 +67,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/atlantida-chamber-orchestra-estrella-morente-el-amor-brujo",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "atlantida-chamber-orchestra-estrella-morente-el-amor-brujo"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

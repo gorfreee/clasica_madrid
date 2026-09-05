@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_filarmonia_de_madrid_antologia_de_la_zarzuela_6",
+  "slug": "filarmonia-de-madrid-antologia-de-la-zarzuela",
+  "title": "Filarmonía de Madrid. Antología de la Zarzuela",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_filarmonia_de_madrid_antologia_de_la_zarzuela_6_01",
+      "date": "2027-02-04",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Participativos Filarmonía"
+    },
+    {
+      "name": "Quintín Bueno"
+    },
+    {
+      "name": "Bianca Tognocch"
+    },
+    {
+      "name": "Rafael Albiñana, Director del Coro"
+    },
+    {
+      "name": "Pascual Osa",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "M. de Falla"
+    },
+    {
+      "name": "E. Granados"
+    },
+    {
+      "name": "R. Chapí"
+    }
+  ],
+  "works": [
+    {
+      "title": "El Sombrero de Tres Picos",
+      "composerName": "M. de Falla"
+    },
+    {
+      "title": "Goyescas",
+      "composerName": "E. Granados"
+    },
+    {
+      "title": "El Barbero de Sevilla",
+      "composerName": "R. Chapí"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "zarzuela",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/filarmonia-de-madrid-antologia-de-la-zarzuela-6",
+      "checkedAt": "2026-09-05",
+      "externalId": "filarmonia-de-madrid-antologia-de-la-zarzuela-6"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-05"
+}

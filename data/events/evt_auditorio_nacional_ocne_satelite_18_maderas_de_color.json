@@ -30,6 +30,12 @@
     },
     {
       "name": "Marta Santamaría"
+    },
+    {
+      "name": "José María Ferrero"
+    },
+    {
+      "name": "Eduardo Raimundo"
     }
   ],
   "composers": [
@@ -98,10 +104,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-18-maderas-de-color",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "ocne-satelite-18-maderas-de-color"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

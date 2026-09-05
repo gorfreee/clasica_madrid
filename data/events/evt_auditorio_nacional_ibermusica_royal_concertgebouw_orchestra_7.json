@@ -26,7 +26,17 @@
       "name": "Lisa Batiashvili"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Robert Schumann"
+    },
+    {
+      "name": "Jean Sibelius"
+    },
+    {
+      "name": "Antonín Dvořák"
+    }
+  ],
   "works": [],
   "eras": [
     "romantic"
@@ -40,10 +50,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-royal-concertgebouw-orchestra-7",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "ibermusica-royal-concertgebouw-orchestra-7"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

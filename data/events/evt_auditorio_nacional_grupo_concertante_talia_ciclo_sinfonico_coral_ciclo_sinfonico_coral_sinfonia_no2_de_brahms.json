@@ -27,8 +27,21 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "J. Brahms"
+    }
+  ],
+  "works": [
+    {
+      "title": "Schicksalslied op. 54",
+      "composerName": "J. Brahms"
+    },
+    {
+      "title": "Sinfonía nº 2 op. 73 en Re M",
+      "composerName": "J. Brahms"
+    }
+  ],
   "eras": [
     "romantic"
   ],
@@ -42,10 +55,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/grupo-concertante-talia-ciclo-sinfonico-coral-ciclo-sinfonico-coral-sinfonia-no2-de-brahms",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-05",
       "externalId": "grupo-concertante-talia-ciclo-sinfonico-coral-ciclo-sinfonico-coral-sinfonia-no2-de-brahms"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-05"
 }

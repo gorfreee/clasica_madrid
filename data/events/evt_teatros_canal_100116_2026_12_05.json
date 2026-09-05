@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatros_canal_100116_2026_12_05",
+  "slug": "xvii-festival-de-ensembles-ensemble-teatro-del-arte-sonoro",
+  "title": "XVII Festival de Ensembles: ENSEMBLE TEATRO DEL ARTE SONORO",
+  "status": "scheduled",
+  "venueId": "ven_teatros_canal_sala_negra",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatros_canal_100116_2026_12_05_01",
+      "date": "2026-12-05",
+      "time": null,
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ensemble Teatro del Arte Sonoro"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_teatros_canal",
+      "url": "https://www.teatroscanal.com/espectaculo/xvii-festival-de-ensembles-2026",
+      "checkedAt": "2026-09-05",
+      "externalId": "100116:2026-12-05"
+    }
+  ],
+  "primarySourceId": "src_teatros_canal",
+  "lastVerifiedAt": "2026-09-05"
+}

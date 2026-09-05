@@ -27,8 +27,24 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Chaikovski"
+    },
+    {
+      "name": "Brahms"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para piano núm. 1",
+      "composerName": "Chaikovski"
+    },
+    {
+      "title": "Sinfonía núm. 4",
+      "composerName": "Brahms"
+    }
+  ],
   "eras": [
     "romantic"
   ],
@@ -41,10 +57,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/la-filarmonica-cuarta-de-brahms-1",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-05",
       "externalId": "la-filarmonica-cuarta-de-brahms-1"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-05"
 }

@@ -27,8 +27,21 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Beethoven"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para piano y orquesta núm. 4",
+      "composerName": "Beethoven"
+    },
+    {
+      "title": "Sinfonía núm. 3, “Heroica”",
+      "composerName": "Beethoven"
+    }
+  ],
   "eras": [
     "classical",
     "romantic"
@@ -42,10 +55,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/la-filarmonica-heroica-de-beethoven-1",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "la-filarmonica-heroica-de-beethoven-1"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

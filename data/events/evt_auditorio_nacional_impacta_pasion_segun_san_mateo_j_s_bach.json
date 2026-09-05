@@ -42,8 +42,16 @@
       "name": "Roderick Williams"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    }
+  ],
+  "works": [
+    {
+      "title": "J.S. Bach - Pasión según San Mateo, BWV 244"
+    }
+  ],
   "eras": [
     "baroque"
   ],
@@ -57,10 +65,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/impacta-pasion-segun-san-mateo-j-s-bach",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "impacta-pasion-segun-san-mateo-j-s-bach"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

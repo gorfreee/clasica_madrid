@@ -33,8 +33,35 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Schubert"
+    },
+    {
+      "name": "Barber"
+    },
+    {
+      "name": "Fauré"
+    }
+  ],
+  "works": [
+    {
+      "title": "Gesang der geister über den wassern",
+      "composerName": "Schubert"
+    },
+    {
+      "title": "Agnus dei",
+      "composerName": "Barber"
+    },
+    {
+      "title": "Cantique de jean racine",
+      "composerName": "Fauré"
+    },
+    {
+      "title": "Réquiem",
+      "composerName": "Fauré"
+    }
+  ],
   "eras": [
     "romantic",
     "twentieth"
@@ -49,10 +76,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/la-filarmonica-requiem-de-faure",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-05",
       "externalId": "la-filarmonica-requiem-de-faure"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-05"
 }

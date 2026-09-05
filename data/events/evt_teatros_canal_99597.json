@@ -16,7 +16,20 @@
     }
   ],
   "performers": [],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Robert Schumann"
+    },
+    {
+      "name": "Isaac Albéniz"
+    }
+  ],
   "works": [],
   "eras": [
     "baroque",
@@ -32,10 +45,10 @@
     {
       "sourceId": "src_teatros_canal",
       "url": "https://www.teatroscanal.com/espectaculo/la-nota-silenciosa-laura-sierra-piano",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "99597"
     }
   ],
   "primarySourceId": "src_teatros_canal",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

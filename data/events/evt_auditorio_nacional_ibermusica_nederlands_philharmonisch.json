@@ -26,7 +26,14 @@
       "name": "Gautier Capuçon"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Edward Elgar"
+    },
+    {
+      "name": "Piotr Ilich Chaikovski"
+    }
+  ],
   "works": [],
   "eras": [
     "romantic"
@@ -40,10 +47,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-nederlands-philharmonisch",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "ibermusica-nederlands-philharmonisch"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

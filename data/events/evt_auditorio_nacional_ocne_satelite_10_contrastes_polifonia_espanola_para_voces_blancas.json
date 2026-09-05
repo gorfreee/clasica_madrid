@@ -18,6 +18,9 @@
   "performers": [
     {
       "name": "Voces Huelgas"
+    },
+    {
+      "name": "Sofía Alegre"
     }
   ],
   "composers": [
@@ -73,10 +76,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-10-contrastes-polifonia-espanola-para-voces-blancas",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "ocne-satelite-10-contrastes-polifonia-espanola-para-voces-blancas"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

@@ -57,7 +57,12 @@
       "composerName": "Benjamin Britten"
     },
     {
-      "title": "Enigma, op. 36"
+      "title": "Enigma, op. 36",
+      "composerName": "Benjamin Britten"
+    },
+    {
+      "title": "Edward Elgar Variaciones",
+      "composerName": "Benjamin Britten"
     }
   ],
   "eras": [
@@ -74,10 +79,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-09-1",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-05",
       "externalId": "03529816e6be4a8e9f0703818ce8a5f6"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-05"
 }

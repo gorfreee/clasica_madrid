@@ -16,7 +16,26 @@
     }
   ],
   "performers": [],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Tomás Bretón"
+    },
+    {
+      "name": "Antón García Abril"
+    },
+    {
+      "name": "Ruperto Chapí"
+    },
+    {
+      "name": "Manuel de Falla"
+    },
+    {
+      "name": "Joaquín Turina"
+    },
+    {
+      "name": "Pablo Sorozábal"
+    }
+  ],
   "works": [],
   "eras": [
     "romantic",
@@ -33,10 +52,10 @@
     {
       "sourceId": "src_orquesta_coro_rtve",
       "url": "https://www.teatromonumental.es/eventos/jovenes-musicos-iii",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "/eventos/jovenes-musicos-iii/"
     }
   ],
   "primarySourceId": "src_orquesta_coro_rtve",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

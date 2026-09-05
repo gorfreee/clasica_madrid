@@ -38,7 +38,14 @@
       "name": "Benjamín Zafra"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Johannes Brahms"
+    },
+    {
+      "name": "Cristóbal Halffter"
+    }
+  ],
   "works": [],
   "eras": [
     "romantic"
@@ -54,10 +61,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-09-nanita-nana",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "ocne-satelite-09-nanita-nana"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

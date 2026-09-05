@@ -16,7 +16,14 @@
     }
   ],
   "performers": [],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Dmitri Shostakóvich"
+    },
+    {
+      "name": "Ottorino Respighi"
+    }
+  ],
   "works": [],
   "eras": [
     "twentieth"
@@ -30,10 +37,10 @@
     {
       "sourceId": "src_orquesta_coro_rtve",
       "url": "https://www.teatromonumental.es/eventos/jovenes-musicos-iv",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "/eventos/jovenes-musicos-iv/"
     }
   ],
   "primarySourceId": "src_orquesta_coro_rtve",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }
