@@ -132,8 +132,9 @@ export type SourceAdapter = {
   /** URLs to fetch for this source given the current clock and ingest window. */
   resolveFetchUrls(source: SourceDefinition, now: Date, window: IngestWindow): string[];
   /**
-   * Optional source-specific listing transport. Adapters use this only when
-   * the listing itself needs the same retry/pacing policy as its child pages.
+   * Optional source-specific listing transport. Adapters use this when the
+   * listing itself needs a retry/pacing policy, or when a syntactic seed URL
+   * must not hit the network (CNDM homepage).
    */
   fetchListing?(url: string, ctx: AdapterContext): Promise<string>;
   /**

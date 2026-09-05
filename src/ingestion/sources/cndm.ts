@@ -29,6 +29,20 @@ export const cndmAdapter: SourceAdapter = {
     // Months are fetched inside extract and isolated like Zarzuela sections.
     return [cndmHomepageUrl(source.urls[0])];
   },
+  /**
+   * The homepage URL from `resolveFetchUrls` is a syntactic seed, not a
+   * listing document. `extract()` builds `/eventos/YYYYMM` itself and fetches
+   * each month with isolated failures. Fetching `/` here would make a timeout
+   * on the homepage abort the source before that monthly logic runs.
+   *
+   * Only the expected CNDM homepage seed is skipped. Any other URL — including
+   * a monthly calendar if `resolveFetchUrls` ever returned one — still uses
+   * `ctx.get`.
+   */
+  fetchListing(url, ctx) {
+    if (isCndmHomepage(url)) return Promise.resolve('');
+    return ctx.get(url);
+  },
   async extract(body, url, ctx) {
     const urls = cndmMonthUrls(ctx.source.urls[0], ctx.window);
     if (!urls[0]) throw new Error('cndm: la ventana no contiene meses');
