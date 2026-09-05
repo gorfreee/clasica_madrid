@@ -17,10 +17,23 @@
   ],
   "performers": [
     {
-      "name": "JEAN RONDEAU"
+      "name": "Jean Rondeau"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "François Couperin"
+    },
+    {
+      "name": "Heinrich Ignaz Franz Biber"
+    },
+    {
+      "name": "György Ligeti"
+    }
+  ],
   "works": [],
   "eras": [
     "baroque",
