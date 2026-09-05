@@ -20,7 +20,9 @@
   "performers": [],
   "composers": [],
   "works": [],
-  "eras": [],
+  "eras": [
+    "twentieth"
+  ],
   "formats": [
     "recital"
   ],
@@ -29,10 +31,11 @@
   "citations": [
     {
       "sourceId": "src_madrid_a_tempo",
-      "url": "https://www.madridatempo.com/programacion-2023",
-      "checkedAt": "2026-08-28"
+      "url": "https://www.madridatempo.com/post/ii-festival-internacional-de-piano-madrid-a-tempo-concierto-de-inauguraci%C3%B3n",
+      "checkedAt": "2026-09-05",
+      "externalId": "cc99d72e-7aa5-4eea-b32c-8eb17a8dce00"
     }
   ],
   "primarySourceId": "src_madrid_a_tempo",
-  "lastVerifiedAt": "2026-08-28"
+  "lastVerifiedAt": "2026-09-05"
 }

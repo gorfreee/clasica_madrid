@@ -30,6 +30,9 @@
     },
     {
       "name": "Alberto Alonso"
+    },
+    {
+      "name": "Cuarteto de cuerda"
     }
   ],
   "composers": [
@@ -69,10 +72,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-06-del-nacionalismo-checo-a-la-francia-de-ravel",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-05",
       "externalId": "ocne-satelite-06-del-nacionalismo-checo-a-la-francia-de-ravel"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-05"
 }

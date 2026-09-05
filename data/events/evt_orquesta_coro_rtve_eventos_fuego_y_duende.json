@@ -16,7 +16,29 @@
     }
   ],
   "performers": [],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Nikolai Rimsky-Korsakov"
+    },
+    {
+      "name": "Giuseppe Verdi"
+    },
+    {
+      "name": "Isaac Albéniz"
+    },
+    {
+      "name": "Manuel de Falla"
+    },
+    {
+      "name": "Reveriano Soutullo"
+    },
+    {
+      "name": "Amadeo Vives"
+    },
+    {
+      "name": "Georges Bizet"
+    }
+  ],
   "works": [],
   "eras": [
     "romantic",
@@ -31,10 +53,10 @@
     {
       "sourceId": "src_orquesta_coro_rtve",
       "url": "https://www.teatromonumental.es/eventos/fuego-y-duende",
-      "checkedAt": "2026-08-31",
+      "checkedAt": "2026-09-05",
       "externalId": "/eventos/fuego-y-duende/"
     }
   ],
   "primarySourceId": "src_orquesta_coro_rtve",
-  "lastVerifiedAt": "2026-08-31"
+  "lastVerifiedAt": "2026-09-05"
 }

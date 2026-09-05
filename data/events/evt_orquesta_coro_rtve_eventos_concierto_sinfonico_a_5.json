@@ -22,7 +22,14 @@
     }
   ],
   "performers": [],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Johannes Brahms"
+    }
+  ],
   "works": [],
   "eras": [
     "classical",
@@ -37,10 +44,10 @@
     {
       "sourceId": "src_orquesta_coro_rtve",
       "url": "https://www.teatromonumental.es/eventos/concierto-sinfonico-a-5",
-      "checkedAt": "2026-08-31",
+      "checkedAt": "2026-09-05",
       "externalId": "/eventos/concierto-sinfonico-a-5/"
     }
   ],
   "primarySourceId": "src_orquesta_coro_rtve",
-  "lastVerifiedAt": "2026-08-31"
+  "lastVerifiedAt": "2026-09-05"
 }

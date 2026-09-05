@@ -45,7 +45,8 @@
       "composerName": "VIII.Nana de Sevilla"
     },
     {
-      "title": "XII.Los reyes de la baraja"
+      "title": "XII.Los reyes de la baraja",
+      "composerName": "VIII.Nana de Sevilla"
     },
     {
       "title": "El amor brujo (versión 1914)",
@@ -64,10 +65,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/atlantida-chamber-orchestra-estrella-morente-el-amor-brujo",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "atlantida-chamber-orchestra-estrella-morente-el-amor-brujo"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

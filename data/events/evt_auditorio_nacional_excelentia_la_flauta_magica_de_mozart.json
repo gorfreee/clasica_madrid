@@ -20,8 +20,17 @@
       "name": "Orquesta Clásica Santa Cecilia"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "W. A. Mozart"
+    }
+  ],
+  "works": [
+    {
+      "title": "La Flauta Mágica",
+      "composerName": "W. A. Mozart"
+    }
+  ],
   "eras": [
     "classical"
   ],
@@ -34,10 +43,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-la-flauta-magica-de-mozart",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "excelentia-la-flauta-magica-de-mozart"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

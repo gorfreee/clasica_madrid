@@ -56,7 +56,11 @@
       "name": "Manuel Torrado"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "José de Nebra"
+    }
+  ],
   "works": [],
   "eras": [
     "baroque"
@@ -71,10 +75,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-11-lumina-natalis-maestros-de-capilla",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "ocne-satelite-11-lumina-natalis-maestros-de-capilla"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

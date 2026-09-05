@@ -22,7 +22,12 @@
   ],
   "composers": [],
   "works": [],
-  "eras": [],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
   "formats": [
     "recital"
   ],
@@ -32,10 +37,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/impacta-yuja-wang",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "impacta-yuja-wang"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

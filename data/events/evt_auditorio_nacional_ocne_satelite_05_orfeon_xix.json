@@ -50,7 +50,17 @@
       "name": "Marija Pendeva"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Léo Delibes"
+    },
+    {
+      "name": "Giacomo Meyerbeer"
+    },
+    {
+      "name": "Johann Strauss II"
+    }
+  ],
   "works": [],
   "eras": [
     "romantic",
@@ -66,10 +76,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-05-orfeon-xix",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-05",
       "externalId": "ocne-satelite-05-orfeon-xix"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-05"
 }

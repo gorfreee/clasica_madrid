@@ -22,7 +22,17 @@
     }
   ],
   "performers": [],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Maurice Ravel"
+    },
+    {
+      "name": "Arturo Márquez"
+    },
+    {
+      "name": "Béla Bartók"
+    }
+  ],
   "works": [],
   "eras": [
     "twentieth"
@@ -36,10 +46,10 @@
     {
       "sourceId": "src_orquesta_coro_rtve",
       "url": "https://www.teatromonumental.es/eventos/concierto-sinfonico-a-13",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "/eventos/concierto-sinfonico-a-13/"
     }
   ],
   "primarySourceId": "src_orquesta_coro_rtve",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

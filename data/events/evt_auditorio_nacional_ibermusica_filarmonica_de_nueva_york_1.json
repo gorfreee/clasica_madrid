@@ -23,7 +23,11 @@
       "name": "Gustavo Dudamel"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Gustav Mahler"
+    }
+  ],
   "works": [],
   "eras": [
     "romantic",
@@ -38,10 +42,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-filarmonica-de-nueva-york-1",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-05",
       "externalId": "ibermusica-filarmonica-de-nueva-york-1"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-05"
 }

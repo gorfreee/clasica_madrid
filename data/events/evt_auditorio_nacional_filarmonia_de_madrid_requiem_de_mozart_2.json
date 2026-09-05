@@ -18,6 +18,32 @@
   "performers": [
     {
       "name": "Orquesta y Coro Filarmonía"
+    },
+    {
+      "name": "Participativos Filarmonía"
+    },
+    {
+      "name": "Javiera Saavedra"
+    },
+    {
+      "name": "Anna Moroz"
+    },
+    {
+      "name": "José Dario Cano"
+    },
+    {
+      "name": "Luis Santana"
+    },
+    {
+      "name": "Rafael Albiñana, director del Coro"
+    },
+    {
+      "name": "Pascual Osa",
+      "role": "conductor"
+    },
+    {
+      "name": "Manuel Blanco",
+      "role": "soloist"
     }
   ],
   "composers": [
@@ -47,10 +73,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/filarmonia-de-madrid-requiem-de-mozart-2",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "filarmonia-de-madrid-requiem-de-mozart-2"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

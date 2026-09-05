@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_goethe_concierto_cantus_juvenum_madrid_2026",
+  "slug": "concierto-con-cantus-juvenum-karlsruhe",
+  "title": "Concierto con Cantus Juvenum Karlsruhe",
+  "status": "scheduled",
+  "venueId": "ven_real_monasterio_santa_isabel",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_goethe_concierto_cantus_juvenum_madrid_2026_01",
+      "date": "2026-09-11",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Cantus Juvenum Karlsruhe"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_goethe",
+      "url": "https://www.fundaciongoethe.org/es/eventos/concierto-cantus-juvenum-madrid-2026",
+      "checkedAt": "2026-09-05",
+      "externalId": "concierto-cantus-juvenum-madrid-2026"
+    }
+  ],
+  "primarySourceId": "src_fundacion_goethe",
+  "lastVerifiedAt": "2026-09-05"
+}

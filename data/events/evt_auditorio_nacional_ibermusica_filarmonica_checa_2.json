@@ -26,7 +26,14 @@
       "name": "Behzod Abduraimov"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Serguéi Rajmáninov"
+    },
+    {
+      "name": "Bedřich Smetana"
+    }
+  ],
   "works": [],
   "eras": [
     "romantic",
@@ -41,10 +48,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-filarmonica-checa-2",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-05",
       "externalId": "ibermusica-filarmonica-checa-2"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-05"
 }

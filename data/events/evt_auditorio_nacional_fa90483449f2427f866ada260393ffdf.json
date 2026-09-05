@@ -34,6 +34,9 @@
     },
     {
       "name": "Anne Akiko Meyers"
+    },
+    {
+      "name": "Orquestra Simfònica de Barcelona i Nacional de Catalunya (OBC)"
     }
   ],
   "composers": [
@@ -75,10 +78,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-05-1",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-05",
       "externalId": "fa90483449f2427f866ada260393ffdf"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-05"
 }

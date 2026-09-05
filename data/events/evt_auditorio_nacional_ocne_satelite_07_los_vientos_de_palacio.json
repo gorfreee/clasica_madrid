@@ -36,6 +36,9 @@
     },
     {
       "name": "Javier Bonet"
+    },
+    {
+      "name": "Cuarteto para oboe y cuerdas sobre Una cosa rara"
     }
   ],
   "composers": [
@@ -44,6 +47,9 @@
     },
     {
       "name": "Felipe Libón"
+    },
+    {
+      "name": "Vicente Martín y Soler"
     }
   ],
   "works": [
@@ -88,10 +94,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-07-los-vientos-de-palacio",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "ocne-satelite-07-los-vientos-de-palacio"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

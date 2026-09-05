@@ -61,6 +61,9 @@
     },
     {
       "name": "Collegium Vocale 1704"
+    },
+    {
+      "name": "Collegium 1704"
     }
   ],
   "composers": [
@@ -87,16 +90,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-collegium-vocale-1704-collegium-1704",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "cndm-collegium-vocale-1704-collegium-1704"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23804",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "23804"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

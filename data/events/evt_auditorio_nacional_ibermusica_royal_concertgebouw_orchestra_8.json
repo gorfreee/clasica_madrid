@@ -23,8 +23,19 @@
       "name": "Klaus Mäkelä"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Robert Schumann"
+    },
+    {
+      "name": "Hector Berlioz"
+    }
+  ],
+  "works": [
+    {
+      "title": "SCHUMANN Sinfonía núm. 1 en Si bemol Mayor, Op. 38 “Primavera”"
+    }
+  ],
   "eras": [
     "romantic"
   ],
@@ -37,10 +48,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-royal-concertgebouw-orchestra-8",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "ibermusica-royal-concertgebouw-orchestra-8"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

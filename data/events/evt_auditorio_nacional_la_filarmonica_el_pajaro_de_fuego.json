@@ -25,9 +25,16 @@
     {
       "name": "Andrés Orozco-Estrada",
       "role": "conductor"
+    },
+    {
+      "name": "Stravinsky, El pájaro de fuego (música del ballet completo)"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Serguéi Rajmáninov"
+    }
+  ],
   "works": [],
   "eras": [
     "romantic",
@@ -42,10 +49,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/la-filarmonica-el-pajaro-de-fuego",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "la-filarmonica-el-pajaro-de-fuego"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

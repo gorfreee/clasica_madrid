@@ -18,6 +18,12 @@
   "performers": [
     {
       "name": "Orquesta Nacional de España"
+    },
+    {
+      "name": "Ballet Nacional de España"
+    },
+    {
+      "name": "Ana Hernández Sanchiz"
     }
   ],
   "composers": [
@@ -51,10 +57,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-en-familia-3",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "ocne-en-familia-3"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

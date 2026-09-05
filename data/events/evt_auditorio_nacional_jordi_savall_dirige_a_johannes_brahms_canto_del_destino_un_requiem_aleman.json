@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_jordi_savall_dirige_a_johannes_brahms_canto_del_destino_un_requiem_aleman",
+  "slug": "jordi-savall-dirige-a-johannes-brahms-canto-del-destino-un-requiem-aleman",
+  "title": "Jordi Savall Dirige a Johannes Brahms. Canto del Destino & Un Réquiem Alemán",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_jordi_savall_dirige_a_johannes_brahms_canto_del_destino_un_requiem_aleman_01",
+      "date": "2026-10-19",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Le Concert des Nations"
+    },
+    {
+      "name": "Lina Tur Bonet"
+    },
+    {
+      "name": "Luca Guglielmi"
+    },
+    {
+      "name": "La Capella Nacional de Catalunya"
+    },
+    {
+      "name": "Lluís Vilamajó"
+    },
+    {
+      "name": "Lina Johnson"
+    },
+    {
+      "name": "Matthias Winckhler"
+    },
+    {
+      "name": "Jordi Savall"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johannes Brahms (1833-1897)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Schicksalslied (Canto del destino), Op. 54 (1868-71)",
+      "composerName": "Johannes Brahms (1833-1897)"
+    },
+    {
+      "title": "Ein deutsches Requiem, nach Worten der heiligen Schrift (Un réquiem alemán, basado en textos de las Sagradas Escrituras), Op. 45 (1865-68)",
+      "composerName": "Johannes Brahms (1833-1897)"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/jordi-savall-dirige-a-johannes-brahms-canto-del-destino-un-requiem-aleman",
+      "checkedAt": "2026-09-05",
+      "externalId": "jordi-savall-dirige-a-johannes-brahms-canto-del-destino-un-requiem-aleman"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-05"
+}

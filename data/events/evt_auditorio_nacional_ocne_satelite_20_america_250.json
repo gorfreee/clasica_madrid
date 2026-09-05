@@ -33,6 +33,12 @@
     },
     {
       "name": "Vicente Palomares"
+    },
+    {
+      "name": "Cuarteto «Americano», op. 96 (arr. David Walter)"
+    },
+    {
+      "name": "Quinteto de viento"
     }
   ],
   "composers": [
@@ -72,10 +78,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-20-america-250",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "ocne-satelite-20-america-250"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

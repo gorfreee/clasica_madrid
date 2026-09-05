@@ -16,7 +16,14 @@
     }
   ],
   "performers": [],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Ígor Stravinski"
+    }
+  ],
   "works": [],
   "eras": [
     "classical",
@@ -31,10 +38,10 @@
     {
       "sourceId": "src_orquesta_coro_rtve",
       "url": "https://www.teatromonumental.es/eventos/jovenes-musicos-i",
-      "checkedAt": "2026-08-31",
+      "checkedAt": "2026-09-05",
       "externalId": "/eventos/jovenes-musicos-i/"
     }
   ],
   "primarySourceId": "src_orquesta_coro_rtve",
-  "lastVerifiedAt": "2026-08-31"
+  "lastVerifiedAt": "2026-09-05"
 }

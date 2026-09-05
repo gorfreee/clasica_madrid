@@ -18,10 +18,73 @@
   "performers": [
     {
       "name": "Orquesta Filarmonía"
+    },
+    {
+      "name": "Compañía JAC Ballet"
+    },
+    {
+      "name": "Jose Antonio Checa"
+    },
+    {
+      "name": "Pascual Osa",
+      "role": "conductor"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "F. V. Suppé"
+    },
+    {
+      "name": "J. Offenbach"
+    },
+    {
+      "name": "F. Lehár"
+    }
+  ],
+  "works": [
+    {
+      "title": "Pique Dame",
+      "composerName": "F. V. Suppé"
+    },
+    {
+      "title": "Freikugeln Op. 362, Balas mágicas, Polca (J. Strauss)"
+    },
+    {
+      "title": "Aus den Bergen op.292 , De las montañas, Vals (J. Strauss)"
+    },
+    {
+      "title": "Episode-Polka, Op. 296 (J. Strauss)"
+    },
+    {
+      "title": "Spanischer Marsch, Op. 433, Marcha Española (J. Strauss)"
+    },
+    {
+      "title": "Pizzicato-Polka, Op. 449 (J. Strauss)"
+    },
+    {
+      "title": "La Belle Hélène",
+      "composerName": "J. Offenbach"
+    },
+    {
+      "title": "Kaiser-Walzer, Op. 437 (J. Strauss)"
+    },
+    {
+      "title": "Ein herz-ein sinn, Op. 323: Polka Mazurka, Un corazón, un mismo sentir (J. Strauss)"
+    },
+    {
+      "title": "Accelerationen Waltz, Op. 234 (J. Strauss)"
+    },
+    {
+      "title": "Louischen, Polka francaise, Op. 339 (J. Strauss)"
+    },
+    {
+      "title": "Nechledil March",
+      "composerName": "F. Lehár"
+    },
+    {
+      "title": "An der schönen blauen Donau (Op. 314), El Bello Danubio Azul (J. Strauss)"
+    }
+  ],
   "eras": [
     "classical",
     "romantic"
@@ -35,10 +98,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/filarmonia-de-madrid-viena-en-madrid-5",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "filarmonia-de-madrid-viena-en-madrid-5"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_real_viaje_bastian",
+  "slug": "el-viaje-de-bastian",
+  "title": "El viaje de Bastián",
+  "status": "scheduled",
+  "venueId": "ven_real_teatro_retiro_sala_principal",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_real_viaje_bastian_01",
+      "date": "2027-02-13",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_viaje_bastian_02",
+      "date": "2027-02-13",
+      "time": "17:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "early-music",
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_teatro_real",
+      "url": "https://www.teatroreal.es/es/espectaculo/viaje-bastian",
+      "checkedAt": "2026-09-05",
+      "externalId": "viaje-bastian"
+    }
+  ],
+  "primarySourceId": "src_teatro_real",
+  "lastVerifiedAt": "2026-09-05"
+}

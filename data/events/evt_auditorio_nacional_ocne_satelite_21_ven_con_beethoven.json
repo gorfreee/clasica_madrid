@@ -42,11 +42,17 @@
     },
     {
       "name": "Mariana Cores"
+    },
+    {
+      "name": "Dona nobis pacem, Tres cánones a capella,"
     }
   ],
   "composers": [
     {
       "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Iluminada Pérez Frutos"
     }
   ],
   "works": [
@@ -85,10 +91,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-21-ven-con-beethoven",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "ocne-satelite-21-ven-con-beethoven"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }
