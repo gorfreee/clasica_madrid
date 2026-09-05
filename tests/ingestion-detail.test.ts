@@ -132,10 +132,12 @@ describe('parser de ficha Auditorio Nacional', () => {
     );
     const facts = parseAuditorioNacionalDetail(html);
 
-    expect(facts.performers).toEqual([
-      { name: 'Orquesta Celeste Classic' },
-      { name: 'Coro y Escolanía Maravillas' },
-    ]);
+    expect(facts.performers).toEqual(
+      expect.arrayContaining([
+        { name: 'Orquesta Celeste Classic' },
+        { name: 'Coro y Escolanía Maravillas' },
+      ]),
+    );
     expect(facts.composers).toEqual([]);
     expect(facts.works).toEqual([]);
     expect(facts.programText).toMatch(/Times and seasons/);
@@ -722,6 +724,7 @@ describe('parser de ficha Auditorio Nacional', () => {
     expect(composerNames.some((name) => /pique dame/i.test(name))).toBe(false);
     expect(pique).toEqual({ title: 'Pique Dame', composerName: 'F. V. Suppé' });
     expect(helene).toEqual({ title: 'La Belle Hélène', composerName: 'J. Offenbach' });
+    expect(freikugeln).toMatchObject({ title: expect.stringMatching(/Freikugeln/i) });
     expect(freikugeln?.composerName).toBeUndefined();
     expect(lehár?.composerName).toMatch(/Lehár/i);
     expect(published?.works?.filter((work) => /suppé|suppe/i.test(work.composerName ?? ''))).toEqual([

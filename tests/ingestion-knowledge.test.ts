@@ -509,6 +509,10 @@ describe('composer knowledge base', () => {
       composerName: 'G. PUCCINI',
     });
     expect(parseExplicitTitleAuthorWork('Freikugeln Op. 362, Balas mágicas, Polca (J. Strauss)')).toBeUndefined();
+    expect(parseExplicitTitleAuthorWork('Invocación y danza (Homenaje a Manuel de Falla)')).toBeUndefined();
+    expect(
+      parseExplicitTitleAuthorWork('Variaciones para orquesta sobre un tema de Rameau (2001)'),
+    ).toBeUndefined();
     expect(matchComposer('C. Orff')?.canonicalName).toBe('Carl Orff');
     expect(matchComposer('F. V. Suppé')?.canonicalName).toBe('Franz von Suppé');
     expect(matchComposer('F. Lehár')?.canonicalName).toBe('Franz Lehár');

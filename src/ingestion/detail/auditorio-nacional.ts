@@ -11,6 +11,7 @@ import {
 } from './auditorio-segments.ts';
 import {
   looksLikeCatalogOnlyLine,
+  looksLikeCatalogWorkLine,
   looksLikeEnsembleName,
   looksLikeMovementLine,
   looksLikePartHeader,
@@ -218,6 +219,10 @@ function groupWorksByComposer(lines: string[]): ObservedWork[] {
       works.push(attributed);
       continue;
     }
+    if (!composerName && looksLikeCatalogWorkLine(line) && looksLikeWorkLine(line)) {
+      works.push({ title: line });
+      continue;
+    }
     // `Name: Title` that we could not parse is not a work of the previous composer.
     if (looksLikeColonPair(line)) continue;
     if (isStickyComposerHeading(line)) {
@@ -229,10 +234,6 @@ function groupWorksByComposer(lines: string[]): ObservedWork[] {
       if (!looksLikeWorkLine(line)) continue;
       if (!/\s/.test(line) && !looksLikeUnequivocalWorkLine(line)) continue;
       works.push({ title: line, composerName });
-      continue;
-    }
-    if (looksLikeUnequivocalWorkLine(line)) {
-      works.push({ title: line });
     }
   }
   return works;
@@ -241,7 +242,7 @@ function groupWorksByComposer(lines: string[]): ObservedWork[] {
 function appendToLastWork(works: ObservedWork[], fragment: string): boolean {
   const last = works[works.length - 1];
   if (!last) return false;
-  const addition = fragment.replace(/^[(),\s]+|[(),\s]+$/g, '').trim();
+  const addition = fragment.replace(/^[,.\s]+|[,.\s]+$/g, '').trim();
   if (!addition) return false;
   const base = last.title.replace(/[,\s]+$/u, '').trim();
   last.title = `${base}, ${addition}`;
@@ -264,14 +265,16 @@ function appendContinuationIfLinked(works: ObservedWork[], line: string): boolea
 
 function repertoireProgramLines(lines: string[]): string[] {
   return lines.filter((line) => {
-    if (looksLikeScheduleNotice(line) || looksLikeEnsembleName(line)) return false;
+    if (looksLikeScheduleNotice(line)) return false;
     if (looksLikeProductionNote(line) || looksLikeTextCredit(line)) return false;
-    if (isCastLineInsideProgram(line)) return false;
+    if (looksLikeUnequivocalWorkLine(line) || parseExplicitTitleAuthorWork(line)) return true;
+    if (looksLikeEnsembleName(line) || isCastLineInsideProgram(line)) return false;
     return true;
   });
 }
 
 function isCastLineInsideProgram(line: string): boolean {
+  if (looksLikeUnequivocalWorkLine(line) || parseExplicitTitleAuthorWork(line)) return false;
   const people = parseAuditorioPersonCredits(line);
   if (people.some((person) => person.roleText)) return true;
   if (people.some((person) => looksLikeEnsembleName(person.name))) return true;

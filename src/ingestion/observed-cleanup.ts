@@ -27,6 +27,8 @@ const ENSEMBLE_SUBJECT =
   /^(?:orquesta|orquestra|orchestra|orchester|coro|choir|escolan[ií]a|ensemble|ensamble|camerata|cuarteto|quinteto|agrupaci[oó]n|sociedad coral|capella|cappella|chapelle|compa[ñn][ií]a\b.*\bballet|ballet)\b/i;
 const PRODUCTION_NOTE = /\(?\s*adaptaci[oó]n\s+escenificada\s*\)?/i;
 const TEXT_CREDIT = /^(?:texto|libreto|letra)\s*:/i;
+const INITIALS_AUTHOR = /^(?:[\p{Lu}\p{Lt}]\.\s*){1,3}[\p{L}’'-]+$/u;
+const CONTEXTUAL_DE_PREFIX = /(?:tema|un tema|sobre un tema|basad[oa]|inspirad[oa]|homenaje)\s+$/iu;
 
 export type TitleAuthorWork = {
   title: string;
@@ -127,6 +129,12 @@ export function looksLikeCatalogOnlyLine(text: string): boolean {
   return CATALOG_ONLY.test(text.trim());
 }
 
+export function looksLikeCatalogWorkLine(text: string): boolean {
+  const trimmed = text.trim();
+  if (!trimmed || looksLikeCatalogOnlyLine(trimmed) || looksLikeProductionNote(trimmed)) return false;
+  return /\b(?:op(?:us)?|bwv|hwv|hob\.?|k(?:v)?\.?|woo|g\.)\s*\.?\s*\d{1,4}\b/i.test(trimmed);
+}
+
 export function looksLikeProductionNote(text: string): boolean {
   const trimmed = text.trim().replace(/^[()]+|[()]+$/g, '').trim();
   if (!trimmed) return false;
@@ -153,7 +161,9 @@ export function parseExplicitTitleAuthorWork(text: string): TitleAuthorWork | un
   for (let index = deMatches.length - 1; index >= 0; index--) {
     const match = deMatches[index];
     if (match.index === undefined) continue;
-    const parsed = titleAuthorIfKnown(cleaned.slice(0, match.index), cleaned.slice(match.index + match[0].length));
+    const title = cleaned.slice(0, match.index);
+    if (CONTEXTUAL_DE_PREFIX.test(title)) continue;
+    const parsed = titleAuthorIfKnown(title, cleaned.slice(match.index + match[0].length));
     if (parsed) return parsed;
   }
   const commaAt = cleaned.lastIndexOf(', ');
@@ -174,10 +184,7 @@ export function isUnreliableComposerName(text: string): boolean {
   if (!trimmed || looksLikeProgramHeader(trimmed)) return true;
   if (/^obras de\b/i.test(trimmed)) return true;
   if (looksLikeEnsembleName(trimmed)) return true;
-  if (looksLikeMovementLine(trimmed) || looksLikeProductionNote(trimmed) || looksLikeTextCredit(trimmed)) {
-    return true;
-  }
-  if (parseExplicitTitleAuthorWork(trimmed)) return true;
+  if (looksLikeProductionNote(trimmed) || looksLikeTextCredit(trimmed)) return true;
   if (WORK_GENRE.test(trimmed) || CATALOG.test(trimmed)) return true;
   if (/^[¡!]/.test(trimmed)) return true;
   return false;
@@ -201,8 +208,18 @@ function titleAuthorIfKnown(title: string, author: string): TitleAuthorWork | un
   const workTitle = title.trim();
   const composerName = author.trim();
   if (!workTitle || !composerName) return undefined;
-  if (matchComposer(composerName)) return { title: workTitle, composerName };
-  return undefined;
+  if (/[()]/.test(composerName)) return undefined;
+  const open = (workTitle.match(/\(/g) ?? []).length;
+  const close = (workTitle.match(/\)/g) ?? []).length;
+  if (open !== close) return undefined;
+  if (!isAttributedAuthorFragment(composerName)) return undefined;
+  return { title: workTitle, composerName };
+}
+
+function isAttributedAuthorFragment(fragment: string): boolean {
+  if (!matchComposer(fragment)) return false;
+  if (INITIALS_AUTHOR.test(fragment)) return true;
+  return looksLikePersonName(fragment);
 }
 
 function looksLikePersonName(text: string): boolean {

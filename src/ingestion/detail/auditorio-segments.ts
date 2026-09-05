@@ -84,7 +84,10 @@ export function segmentAuditorioBlocks(blocks: string[][]): AuditorioSegments {
 
     const start = findProgramStartIndex(content);
     if (start >= 0) {
-      performerLines.push(...content.slice(0, start));
+      for (const line of content.slice(0, start)) {
+        if (belongsToCastBeforeProgram(line)) performerLines.push(line);
+        else programLines.push(line);
+      }
       programLines.push(...content.slice(start));
       inProgram = true;
       continue;
@@ -370,7 +373,8 @@ function walkBackComposers(lines: string[], index: number): number {
       isComposerHeading(prev) ||
       looksLikeUnlabeledPerson(prev) ||
       ANONYMOUS_COMPOSER.test(prev) ||
-      INITIALS_COMPOSER.test(prev)
+      INITIALS_COMPOSER.test(prev) ||
+      looksLikeWorkishLine(prev)
     ) {
       start -= 1;
       continue;
@@ -378,6 +382,13 @@ function walkBackComposers(lines: string[], index: number): number {
     break;
   }
   return start;
+}
+
+function belongsToCastBeforeProgram(line: string): boolean {
+  if (hasExplicitPerformerSignal(line) || looksLikeRoleOnlyLine(line) || looksLikeCastEnsemble(line)) {
+    return true;
+  }
+  return parseAuditorioPersonCredits(line).length > 0;
 }
 
 function isCastBoundary(line: string): boolean {
