@@ -258,8 +258,6 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
     urls: ['https://realhermandaddelrefugio.org/categoria-eventos/conciertos/'],
     adapterId: realHermandadRefugioAdapter.id,
     catalogSourceId: 'src_real_hermandad_refugio',
-    useFetchRelay: true,
-    fetchTransport: 'direct-then-relay',
     seedSource: {
       schemaVersion: 1,
       id: 'src_real_hermandad_refugio',

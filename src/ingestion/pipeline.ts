@@ -33,6 +33,7 @@ import type {
   SourceFailure,
 } from './types.ts';
 import { emptyIngestAiSummary, IncompleteListingError } from './types.ts';
+import { takeBrowserFetchAttempts } from './browser-fetch.ts';
 import { getText, HttpError, resolveFetchRelay, takeRecordedHttpAttempts, takeRelayRecoveries } from './http.ts';
 import { normalizeUrl } from './urls.ts';
 
@@ -110,6 +111,8 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
         if (!(error instanceof IncompleteListingError) || error.events.length === 0) throw error;
         extracted = error.events;
         listingIncomplete = true;
+      } finally {
+        flushBrowserFetchAttempts(source.id, obs);
       }
       const adapter = getAdapter(source.adapterId);
       const ctx: AdapterContext = { source, now: options.now, window, get: sourceGet };
@@ -126,6 +129,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
       return { source, extracted, hydrated, listingIncomplete, coverage, failure };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
+      flushBrowserFetchAttempts(source.id, obs);
       return { source, extracted: [], hydrated: [], listingIncomplete: false, failure: { sourceId: source.id, message } };
     }
   });
@@ -622,6 +626,26 @@ function measureSourcePhase<T>(
   task: () => Promise<T>,
 ): Promise<T> {
   return observability ? observability.measureSourcePhase(sourceId, phase, task) : task();
+}
+
+function flushBrowserFetchAttempts(
+  sourceId: string,
+  observability: IngestObservability | undefined,
+): void {
+  const attempts = takeBrowserFetchAttempts(sourceId);
+  if (!observability) return;
+  for (const attempt of attempts) {
+    observability.recordHttp({
+      sourceId,
+      transport: 'browser',
+      durationMs: attempt.durationMs,
+      retry: attempt.retry,
+      ...(attempt.browserFallback ? { browserFallback: true } : {}),
+      ...(attempt.status !== undefined ? { status: attempt.status } : {}),
+      ...(attempt.timeout ? { timeout: true } : {}),
+      ...(attempt.challenge ? { challenge: true } : {}),
+    });
+  }
 }
 
 function instrumentSourceGet(

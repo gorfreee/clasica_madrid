@@ -1,6 +1,10 @@
 import {
+  openBrowserSession,
+  recordedBrowserSession,
+  type BrowserDocumentSession,
+} from '../browser-fetch.ts';
+import {
   parseRefugioConcertArchive,
-  parseRefugioDetail,
   REFUGIO_CONCERT_ARCHIVE_URL,
   refugioArchivePageUrl,
   refugioEventUrl,
@@ -17,10 +21,25 @@ import { emptyObservedLists } from '../observed.ts';
 import type { AdapterContext, RawEvent, SourceAdapter, SourceDefinition } from '../types.ts';
 
 export const REFUGIO_PER_PAGE = 50;
+export const REFUGIO_MAX_PAGES = 20;
+export const REFUGIO_ARCHIVE_READY_SELECTOR = '.jet-listing-grid__items[data-pages]';
 export { REFUGIO_CONCERT_ARCHIVE_URL };
 export const REFUGIO_REST_COLLECTION_URL = 'https://realhermandaddelrefugio.org/wp-json/wp/v2/calendario-eventos';
-const MAX_PAGES = 20;
-const CONCERT_CATEGORY_ID = 47;
+
+type OpenBrowserSession = () => Promise<BrowserDocumentSession>;
+let openSession: OpenBrowserSession = openProductionBrowserSession;
+
+function openProductionBrowserSession(): Promise<BrowserDocumentSession> {
+  if (process.env.VITEST === 'true') {
+    throw new Error('real-hermandad-refugio: el fallback de navegador no está inyectado en test');
+  }
+  return openBrowserSession();
+}
+
+/** Test-only injection. Production always uses a real Chrome session. */
+export function setRefugioBrowserSessionForTests(factory?: OpenBrowserSession): void {
+  openSession = factory ?? openProductionBrowserSession;
+}
 
 type WpListItem = {
   id?: unknown;
@@ -33,17 +52,19 @@ type WpListItem = {
   class_list?: unknown;
 };
 
+const CONCERT_CATEGORY_ID = 47;
+
 /**
  * Official concert taxonomy archive `/categoria-eventos/conciertos/` is the
- * harvest surface. `/conciertos/` is an Elementor listing with infinite scroll
- * (`posts_per_page: 4`) and is not complete. JetEngine prints future concerts
- * with canonical ficha URLs, `data-post-id`, `data-pages`, and card fields
- * (fecha, hora, lugar, precio). Follow `data-pages` up to MAX_PAGES.
+ * only harvest surface. `/conciertos/` is an Elementor listing with infinite
+ * scroll (`posts_per_page: 4`) and is not complete. JetEngine prints future
+ * concerts with canonical ficha URLs, `data-post-id`, `data-pages`, and card
+ * fields (fecha, hora, lugar, precio). Follow `data-pages` up to MAX_PAGES.
  *
- * WordPress REST remains an optional secondary fallback. SiteGround may
- * answer HTTP 202; HTML pages use `direct-then-relay` so the archive is not
- * tied to the same relay hop that 202'd REST. HTML is never parsed as JSON,
- * and a captcha page is never a listing.
+ * Transport is one conventional HTTP GET, then a real Chrome session if that
+ * hop is an undelivered page (HTTP 202 / SG-Captcha). REST is not part of
+ * the production path. The archive cards are complete enough to publish
+ * without hydrating each ficha.
  */
 export const realHermandadRefugioAdapter: SourceAdapter = {
   id: 'real-hermandad-refugio',
@@ -65,14 +86,14 @@ export const realHermandadRefugioAdapter: SourceAdapter = {
     const first = parseWpList(body);
     const pages = [first];
     if (first.length === REFUGIO_PER_PAGE) {
-      for (let page = 2; page <= MAX_PAGES; page += 1) {
+      for (let page = 2; page <= REFUGIO_MAX_PAGES; page += 1) {
         const next = parseWpList(await ctx.get(refugioRestListingUrl(page)));
         pages.push(next);
         if (next.length < REFUGIO_PER_PAGE) break;
       }
     }
-    if (pages.length === MAX_PAGES && pages.at(-1)?.length === REFUGIO_PER_PAGE) {
-      throw new Error(`real-hermandad-refugio: demasiadas páginas (${MAX_PAGES})`);
+    if (pages.length === REFUGIO_MAX_PAGES && pages.at(-1)?.length === REFUGIO_PER_PAGE) {
+      throw new Error(`real-hermandad-refugio: demasiadas páginas (${REFUGIO_MAX_PAGES})`);
     }
     const items = pages.flat();
     const events: RawEvent[] = [];
@@ -92,73 +113,78 @@ export const realHermandadRefugioAdapter: SourceAdapter = {
     }
     return events.sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
   },
-  hydrate: parseRefugioDetail,
 };
 
-function parseWpList(body: string): unknown[] {
-  const html = unexpectedHtmlInsteadOfJson('real-hermandad-refugio', body);
-  if (html) throw new Error(html);
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(body);
-  } catch (error) {
-    const detail = error instanceof Error ? error.message : 'JSON inválido';
-    throw new Error(`real-hermandad-refugio: JSON inválido (${detail})`);
-  }
-  if (!Array.isArray(parsed)) {
-    throw new Error('real-hermandad-refugio: se esperaba un array de calendario-eventos');
-  }
-  return parsed;
-}
-
 /**
- * Official HTML archive first. REST is an optional secondary surface, not a
- * retry of the same blocked hop. Transport fallback (direct → relay) lives in
- * `getText`; this function only switches listing surfaces.
+ * One cheap HTTP attempt of the official archive. If SiteGround withholds
+ * the document (202 / captcha), the same archive is loaded in Chrome and
+ * later pages reuse that BrowserContext.
  */
-async function fetchRefugioListing(url: string, get: (url: string) => Promise<string>): Promise<string> {
-  const attempts: ReturnType<typeof listingAttemptsFromError> = [];
+export async function fetchRefugioListing(
+  url: string,
+  get: (url: string) => Promise<string>,
+): Promise<string> {
+  const archiveUrl = isRefugioArchiveUrl(url) ? url : REFUGIO_CONCERT_ARCHIVE_URL;
   try {
-    return await fetchRefugioHtmlArchive(url, get);
+    return await readArchivePages(archiveUrl, get);
   } catch (error) {
-    if (!isRefugioSurfaceFallback(error)) throw error;
-    attempts.push(...listingAttemptsFromError('html-archive', error));
-  }
-  try {
-    return readRefugioJson(await get(refugioRestListingUrl()));
-  } catch (error) {
-    if (!isRefugioSurfaceFallback(error)) throw error;
-    attempts.push(...listingAttemptsFromError('wp-rest', error));
-    throw new ListingAttemptsError('real-hermandad-refugio', attempts);
+    if (!isUndeliveredListing(error)) throw error;
+    try {
+      return await readArchivePagesWithBrowser(archiveUrl);
+    } catch (browserError) {
+      throw new ListingAttemptsError('real-hermandad-refugio', [
+        ...listingAttemptsFromError('html-archive', error).map((attempt) => ({
+          ...attempt,
+          transport: attempt.transport ?? 'direct',
+        })),
+        ...listingAttemptsFromError('html-archive', browserError).map((attempt) => ({
+          ...attempt,
+          transport: 'browser' as const,
+        })),
+      ]);
+    }
   }
 }
 
-async function fetchRefugioHtmlArchive(url: string, get: (url: string) => Promise<string>): Promise<string> {
-  const firstUrl = isRefugioArchiveUrl(url) ? url : REFUGIO_CONCERT_ARCHIVE_URL;
-  const first = await get(firstUrl);
-  if (isSiteGroundChallenge(first)) {
-    throw new Error('real-hermandad-refugio: se recibió HTML de desafío SiteGround (captcha) en lugar del archivo de conciertos');
+async function readArchivePagesWithBrowser(firstUrl: string): Promise<string> {
+  const session = recordedBrowserSession(await openSession(), realHermandadRefugioAdapter.id);
+  try {
+    return await readArchivePages(firstUrl, (pageUrl) => session.get(pageUrl, {
+      waitForSelector: REFUGIO_ARCHIVE_READY_SELECTOR,
+    }));
+  } finally {
+    await session.close();
   }
+}
+
+async function readArchivePages(
+  firstUrl: string,
+  getPage: (url: string) => Promise<string>,
+): Promise<string> {
+  const first = await getPage(firstUrl);
+  assertArchiveDocument(first);
   const parsed = parseRefugioConcertArchive(first);
-  if (parsed.pages > MAX_PAGES) {
+  if (parsed.pages > REFUGIO_MAX_PAGES) {
     throw new Error(`real-hermandad-refugio: demasiadas páginas del archivo (${parsed.pages})`);
   }
   const pages = [first];
   for (let page = 2; page <= parsed.pages; page += 1) {
-    const body = await get(refugioArchivePageUrl(page));
-    if (isSiteGroundChallenge(body)) {
-      throw new Error('real-hermandad-refugio: se recibió HTML de desafío SiteGround (captcha) en lugar del archivo de conciertos');
-    }
+    const body = await getPage(refugioArchivePageUrl(page));
+    assertArchiveDocument(body);
     parseRefugioConcertArchive(body);
     pages.push(body);
   }
   return pages.join('\n');
 }
 
-function eventsFromHtmlArchive(body: string, ctx: AdapterContext): RawEvent[] {
+function assertArchiveDocument(body: string): void {
   if (isSiteGroundChallenge(body)) {
     throw new Error('real-hermandad-refugio: se recibió HTML de desafío SiteGround (captcha) en lugar del archivo de conciertos');
   }
+}
+
+function eventsFromHtmlArchive(body: string, ctx: AdapterContext): RawEvent[] {
+  assertArchiveDocument(body);
   const parsed = parseRefugioConcertArchive(body);
   const events: RawEvent[] = [];
   const seen = new Set<string>();
@@ -187,15 +213,26 @@ function eventsFromHtmlArchive(body: string, ctx: AdapterContext): RawEvent[] {
   return events.sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
 }
 
-function readRefugioJson(body: string): string {
-  parseWpList(body);
-  return body;
+function parseWpList(body: string): unknown[] {
+  const html = unexpectedHtmlInsteadOfJson('real-hermandad-refugio', body);
+  if (html) throw new Error(html);
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(body);
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : 'JSON inválido';
+    throw new Error(`real-hermandad-refugio: JSON inválido (${detail})`);
+  }
+  if (!Array.isArray(parsed)) {
+    throw new Error('real-hermandad-refugio: se esperaba un array de calendario-eventos');
+  }
+  return parsed;
 }
 
-function isRefugioSurfaceFallback(error: unknown): boolean {
+function isUndeliveredListing(error: unknown): boolean {
   if (isRecoverableTransportError(error)) return true;
   const message = error instanceof Error ? error.message : String(error);
-  return /HTML de desafío|HTML inesperado|JSON inválido|paginación reconocible|en lugar del archivo/i.test(message);
+  return /HTML de desafío|sgcaptcha|en lugar del archivo de conciertos|Chrome del sistema no disponible/i.test(message);
 }
 
 export function refugioRestListingUrl(page = 1): string {

@@ -7,7 +7,7 @@ export const RECOVERABLE_TRANSPORT_STATUSES = new Set([202, 403, 408, 429, 500, 
 
 export type ListingAttempt = {
   surface: string;
-  transport?: 'direct' | 'relay';
+  transport?: 'direct' | 'relay' | 'browser';
   status?: number;
   message: string;
 };
@@ -77,15 +77,17 @@ function formatListingAttempt(attempt: ListingAttempt): string {
   return `${attempt.surface}${via} → ${attempt.message}`;
 }
 
-function nestedTransportAttempts(error: unknown): Array<{ transport?: 'direct' | 'relay'; status?: number; message: string }> | undefined {
+function nestedTransportAttempts(error: unknown): Array<{ transport?: 'direct' | 'relay' | 'browser'; status?: number; message: string }> | undefined {
   if (!error || typeof error !== 'object' || !('attempts' in error) || !Array.isArray(error.attempts)) return undefined;
   const items = error.attempts as unknown[];
   if (items.length === 0) return undefined;
-  const parsed: Array<{ transport?: 'direct' | 'relay'; status?: number; message: string }> = [];
+  const parsed: Array<{ transport?: 'direct' | 'relay' | 'browser'; status?: number; message: string }> = [];
   for (const item of items) {
     if (!item || typeof item !== 'object') return undefined;
     const record = item as { transport?: unknown; status?: unknown; message?: unknown };
-    const transport = record.transport === 'direct' || record.transport === 'relay' ? record.transport : undefined;
+    const transport = record.transport === 'direct' || record.transport === 'relay' || record.transport === 'browser'
+      ? record.transport
+      : undefined;
     const status = typeof record.status === 'number' ? record.status : undefined;
     const message = typeof record.message === 'string' ? record.message : undefined;
     if (!transport && status === undefined && !message) return undefined;

@@ -1,8 +1,8 @@
 import { readFile, mkdtemp } from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { realHermandadRefugioAdapter as adapter, REFUGIO_PER_PAGE, REFUGIO_CONCERT_ARCHIVE_URL, refugioRestListingUrl } from '../src/ingestion/sources/real-hermandad-refugio.ts';
+import { afterEach, describe, expect, it } from 'vitest';
+import { realHermandadRefugioAdapter as adapter, REFUGIO_PER_PAGE, REFUGIO_MAX_PAGES, REFUGIO_CONCERT_ARCHIVE_URL, refugioRestListingUrl, setRefugioBrowserSessionForTests } from '../src/ingestion/sources/real-hermandad-refugio.ts';
 import { parseRefugioConcertArchive, parseRefugioDate, parseRefugioDetail, refugioEventUrl } from '../src/ingestion/detail/real-hermandad-refugio.ts';
 import { fetchRelayHosts, getSourceDefinition } from '../src/ingestion/registry.ts';
 import { hydrateEvents } from '../src/ingestion/hydrate.ts';
@@ -12,9 +12,10 @@ import { matchEventIdentity } from '../src/ingestion/identity.ts';
 import { matchVenue } from '../src/ingestion/venues.ts';
 import { emptyCatalog, type Catalog } from '../src/lib/domain/catalog.ts';
 import type { AdapterContext } from '../src/ingestion/types.ts';
-import { HttpError, getText, resetOriginCookieJar, TransportAttemptsError } from '../src/ingestion/http.ts';
+import { HttpError } from '../src/ingestion/http.ts';
 import { ListingAttemptsError } from '../src/ingestion/listing-retry.ts';
 import { RUN_MANIFEST_FILE, startObservability, type IngestRunManifest } from '../src/ingestion/observability.ts';
+import { takeBrowserFetchAttempts } from '../src/ingestion/browser-fetch.ts';
 import { TEST_NOW, TEST_WINDOW, makeEvent, makeSource, makeVenue } from './helpers.ts';
 
 const source = getSourceDefinition(adapter.id);
@@ -39,8 +40,9 @@ describe('Real Hermandad del Refugio listing', () => {
   it('usa el archivo oficial de conciertos como superficie primaria', async () => {
     expect(listingUrl).toBe(REFUGIO_CONCERT_ARCHIVE_URL);
     expect(adapter.requiresDetailSchedule).toBeFalsy();
-    expect(source.useFetchRelay).toBe(true);
-    expect(source.fetchTransport).toBe('direct-then-relay');
+    expect(adapter.hydrate).toBeUndefined();
+    expect(source.useFetchRelay).toBeFalsy();
+    expect(source.fetchTransport).toBeUndefined();
     expect(source.catalogSourceId).toBe('src_real_hermandad_refugio');
     expect(source.urls).toEqual([REFUGIO_CONCERT_ARCHIVE_URL]);
     expect(source.skipDefaultSync).toBeFalsy();
@@ -88,7 +90,7 @@ describe('Real Hermandad del Refugio listing', () => {
     expect(recorrido.sourceUrl).toContain('un-recorrido-por-la-historia');
   });
 
-  it('el parser REST sigue disponible como superficie secundaria', async () => {
+  it('el parser REST sigue disponible para fixtures y no forma parte de la ingestión', async () => {
     const events = await adapter.extract(await fixture('listing.json'), listingUrl, ctx);
     expect(events).toHaveLength(5);
     expect(events.every((event) => event.listingSurface === 'wp-rest')).toBe(true);
@@ -242,14 +244,14 @@ describe('Real Hermandad del Refugio ficha hydration', () => {
     ]) {
       expect(() => parseRefugioDetail(event, broken)).toThrow(/real-hermandad-refugio/);
     }
-    const [failed] = await hydrateEvents([event], adapter, { ...ctx, get: async () => '<html>Unavailable</html>' });
+    const [failed] = await hydrateEvents([event], { ...adapter, hydrate: parseRefugioDetail }, { ...ctx, get: async () => '<html>Unavailable</html>' });
     expect(failed?.hydration?.status).toBe('failed');
     expect(failed?.observed).toEqual(event.observed);
   });
 });
 
 describe('Real Hermandad del Refugio pipeline safety', () => {
-  async function run(catalog: Catalog = emptyCatalog(), fail = false, window = TEST_WINDOW) {
+  async function run(catalog: Catalog = emptyCatalog(), window = TEST_WINDOW) {
     return runIngest({
       now: TEST_NOW,
       dryRun: true,
@@ -259,17 +261,7 @@ describe('Real Hermandad del Refugio pipeline safety', () => {
       dataDir: await mkdtemp(path.join(os.tmpdir(), 'refugio-test-')),
       get: async (url) => {
         if (url === listingUrl || url.startsWith(`${listingUrl}page/`)) return fixture('listing-archive.html');
-        if (fail) throw new HttpError(202, url);
-        if (url.includes('/calendario-de-eventos/un-recorrido-por-la-historia-de-la-musica-espanola-concierto-benefico/')) {
-          return fixture('detail-recorrido.html');
-        }
-        if (url.includes('/calendario-de-eventos/festival-internacional-de-organo-san-antonio-de-los-alemanes-2026-2/')) {
-          return fixture('detail-organo-2026.html');
-        }
-        if (url.includes('/calendario-de-eventos/musica-que-nos-une-concierto/')) {
-          return fixture('detail-musica.html');
-        }
-        throw new Error(`URL de test no mapeada: ${url}`);
+        throw new Error(`no debía hidratar ${url}`);
       },
     });
   }
@@ -320,12 +312,13 @@ describe('Real Hermandad del Refugio pipeline safety', () => {
     return catalog;
   }
 
-  it('hydrates the official ficha, resolves the church, and does not invent a calendar', async () => {
+  it('el archivo aporta fecha, sede y precio sin hidratar fichas', async () => {
     const first = await run();
     expect(first.summary.sourcesFailed).toEqual([]);
     const recorrido = first.rawEvents.find((event) => event.externalId === '10538');
+    expect(recorrido?.hydration?.status).toBe('not-requested');
     expect(recorrido?.observed.occurrences).toEqual([
-      { raw: 'Empieza septiembre 24, 2026 Hora 19:30', date: '2026-09-24', time: '19:30' },
+      { raw: 'Fecha inicio: septiembre 24, 2026 Hora: 19:30', date: '2026-09-24', time: '19:30' },
     ]);
     expect(recorrido?.observed.venueText).toBe('Iglesia de San Antonio de los Alemanes');
     expect(matchVenue({ venueText: recorrido?.observed.venueText, sourceId: source.id }, emptyCatalog())?.venue.id)
@@ -333,18 +326,18 @@ describe('Real Hermandad del Refugio pipeline safety', () => {
     expect(first.summary.possiblyMissing).toBe(0);
   });
 
-  it('una ficha bloqueada con 202 no elimina ni convierte en fallo de fuente un concierto con schedule en el listing', async () => {
-    expect((await run(emptyCatalog(), false, { from: '2026-11-01', to: '2026-11-30' })).summary.candidates).toBe(0);
+  it('no pide fichas y conserva el schedule del listing', async () => {
+    expect((await run(emptyCatalog(), { from: '2026-11-01', to: '2026-11-30' })).summary.candidates).toBe(0);
     const catalog = publishedCatalog();
-    const blocked = await run(catalog, true);
-    expect(blocked.summary.sourcesFailed).toEqual([]);
-    expect(blocked.summary.disappearanceSuppressedSources ?? []).not.toContain(source.id);
-    expect(blocked.summary.possiblyMissing).toBe(0);
-    const recorrido = blocked.rawEvents.find((event) => event.externalId === '10538');
-    expect(recorrido?.hydration?.status).toBe('failed');
+    const result = await run(catalog);
+    expect(result.summary.sourcesFailed).toEqual([]);
+    expect(result.summary.disappearanceSuppressedSources ?? []).not.toContain(source.id);
+    expect(result.summary.possiblyMissing).toBe(0);
+    const recorrido = result.rawEvents.find((event) => event.externalId === '10538');
+    expect(recorrido?.hydration?.status).toBe('not-requested');
     expect(recorrido?.observed.occurrences[0]).toMatchObject({ date: '2026-09-24', time: '19:30' });
     expect(recorrido?.observed.venueText).toBe('Iglesia de San Antonio de los Alemanes');
-    expect(blocked.summary.updatedEvents + blocked.summary.unchangedEvents).toBeGreaterThan(0);
+    expect(result.summary.updatedEvents + result.summary.unchangedEvents).toBeGreaterThan(0);
   });
 
   it('matches the already published concert by URL without duplicating or renaming it', async () => {
@@ -400,8 +393,18 @@ describe('Real Hermandad del Refugio pipeline safety', () => {
 describe('Real Hermandad del Refugio HTML archive', () => {
   const archiveUrl = REFUGIO_CONCERT_ARCHIVE_URL;
 
-  it('pide el archivo oficial primero y no usa /conciertos/', async () => {
+  afterEach(() => {
+    setRefugioBrowserSessionForTests();
+    takeBrowserFetchAttempts(adapter.id);
+  });
+
+  it('pide el archivo oficial primero y no usa /conciertos ni REST ni navegador', async () => {
     const requested: string[] = [];
+    let browserOpened = 0;
+    setRefugioBrowserSessionForTests(async () => {
+      browserOpened += 1;
+      throw new Error('no debía abrir el navegador');
+    });
     const body = await adapter.fetchListing!(listingUrl, {
       ...ctx,
       get: async (url) => {
@@ -416,29 +419,113 @@ describe('Real Hermandad del Refugio HTML archive', () => {
     expect(requested.every((url) => !url.includes('/wp-json/'))).toBe(true);
     expect(requested.every((url) => !url.includes('/conciertos/') || url.includes('categoria-eventos'))).toBe(true);
     expect(requested.some((url) => /^https:\/\/realhermandaddelrefugio.org\/conciertos\/?$/.test(url))).toBe(false);
+    expect(browserOpened).toBe(0);
     const events = await adapter.extract(body, listingUrl, ctx);
     expect(events).toHaveLength(3);
     expect(events.every((event) => event.listingSurface === 'html-archive')).toBe(true);
     expect(new Set(events.map((event) => event.externalId))).toEqual(new Set(['10538', '10559', '10557']));
   });
 
-  it('cae a REST si el archivo oficial sigue bloqueado', async () => {
+  it('HTTP 202 activa el fallback de navegador y no pide REST', async () => {
     const requested: string[] = [];
-    const json = await fixture('listing-archive-rest.json');
+    const browserUrls: string[] = [];
+    const html = await fixture('listing-archive.html');
+    setRefugioBrowserSessionForTests(async () => ({
+      async get(url) {
+        browserUrls.push(url);
+        return html;
+      },
+      async close() {},
+    }));
     const body = await adapter.fetchListing!(listingUrl, {
       ...ctx,
       get: async (url) => {
         requested.push(url);
         if (url === archiveUrl || url.startsWith(`${archiveUrl}page/`)) throw new HttpError(202, url);
-        if (url.includes('/wp-json/')) return json;
-        throw new Error(`URL de test no mapeada: ${url}`);
+        throw new Error(`no debía pedir ${url}`);
       },
     });
-    expect(requested).toContain(archiveUrl);
-    expect(requested.some((url) => url.includes('/wp-json/'))).toBe(true);
+    expect(requested).toEqual([archiveUrl]);
+    expect(requested.every((url) => !url.includes('/wp-json/'))).toBe(true);
+    expect(browserUrls).toEqual([archiveUrl]);
     const events = await adapter.extract(body, listingUrl, ctx);
-    expect(events.every((event) => event.listingSurface === 'wp-rest')).toBe(true);
+    expect(events.every((event) => event.listingSurface === 'html-archive')).toBe(true);
     expect(events).toHaveLength(3);
+    expect(new Set(events.map((event) => event.externalId))).toEqual(new Set(['10538', '10559', '10557']));
+  });
+
+  it('el navegador que devuelve challenge falla de forma visible', async () => {
+    setRefugioBrowserSessionForTests(async () => ({
+      async get() {
+        throw Object.assign(new Error('se recibió HTML de desafío SiteGround (captcha) en el navegador'), { status: 202 });
+      },
+      async close() {},
+    }));
+    await expect(adapter.fetchListing!(listingUrl, {
+      ...ctx,
+      get: async (url) => {
+        throw new HttpError(202, url);
+      },
+    })).rejects.toSatisfy((error: unknown) => {
+      expect(error).toBeInstanceOf(ListingAttemptsError);
+      const message = error instanceof Error ? error.message : String(error);
+      expect(message).toMatch(/html-archive direct → HTTP 202/);
+      expect(message).toMatch(/html-archive browser/);
+      expect(message).not.toMatch(/wp-rest/);
+      expect(message).not.toMatch(/Bearer|cookie|token|INGEST_FETCH_RELAY/i);
+      return true;
+    });
+  });
+
+  it('un timeout del navegador falla de forma clara y cierra la sesión', async () => {
+    let closed = 0;
+    setRefugioBrowserSessionForTests(async () => ({
+      async get() {
+        throw new Error('tiempo agotado esperando .jet-listing-grid__items[data-pages] en https://realhermandaddelrefugio.org/categoria-eventos/conciertos/');
+      },
+      async close() {
+        closed += 1;
+      },
+    }));
+    await expect(adapter.fetchListing!(listingUrl, {
+      ...ctx,
+      get: async (url) => {
+        throw new HttpError(202, url);
+      },
+    })).rejects.toThrow(/tiempo agotado/);
+    expect(closed).toBe(1);
+  });
+
+  it('varias páginas reutilizan la misma BrowserContext', async () => {
+    const html = await fixture('listing-archive.html');
+    const page1 = await fixture('listing-archive-page1.html');
+    const page2 = await fixture('listing-archive-page2.html');
+    const browserUrls: string[] = [];
+    let sessions = 0;
+    const session = {
+      async get(url: string) {
+        browserUrls.push(url);
+        if (url === archiveUrl) return page1;
+        if (url === `${archiveUrl}page/2/`) return page2;
+        throw new Error(`URL de navegador no mapeada: ${url}`);
+      },
+      async close() {},
+    };
+    setRefugioBrowserSessionForTests(async () => {
+      sessions += 1;
+      return session;
+    });
+    const body = await adapter.fetchListing!(listingUrl, {
+      ...ctx,
+      get: async (url) => {
+        throw new HttpError(202, url);
+      },
+    });
+    expect(sessions).toBe(1);
+    expect(browserUrls).toEqual([archiveUrl, `${archiveUrl}page/2/`]);
+    const events = await adapter.extract(body, listingUrl, ctx);
+    expect(events.map((event) => event.externalId).sort()).toEqual(['10538', '10557']);
+    expect(html.length).toBeGreaterThan(0);
   });
 
   it('produce las mismas identidades que REST y no duplica contra un catálogo REST', async () => {
@@ -448,6 +535,7 @@ describe('Real Hermandad del Refugio HTML archive', () => {
     const htmlEvents = await adapter.extract(html, archiveUrl, ctx);
     expect(htmlEvents.map((event) => event.sourceUrl).sort()).toEqual(restEvents.map((event) => event.sourceUrl).sort());
     expect(htmlEvents.map((event) => event.externalId).sort()).toEqual(restEvents.map((event) => event.externalId).sort());
+    expect(new Set(htmlEvents.map((event) => event.sourceUrl)).size).toBe(htmlEvents.length);
 
     const catalog = emptyCatalog();
     catalog.sources.push(makeSource({
@@ -540,6 +628,14 @@ describe('Real Hermandad del Refugio HTML archive', () => {
     expect(events.map((event) => event.externalId).sort()).toEqual(['10538', '10557']);
   });
 
+  it('respeta el tope MAX_PAGES del archivo', async () => {
+    const tooMany = `<div class="jet-listing-grid__items" data-pages="${REFUGIO_MAX_PAGES + 1}"></div>`;
+    await expect(adapter.fetchListing!(listingUrl, {
+      ...ctx,
+      get: async () => tooMany,
+    })).rejects.toThrow(/demasiadas páginas del archivo/);
+  });
+
   it('parsea el grid JetEngine y exige data-pages', () => {
     const parsed = parseRefugioConcertArchive(
       '<div class="jet-listing-grid__items" data-pages="1"></div>',
@@ -548,7 +644,7 @@ describe('Real Hermandad del Refugio HTML archive', () => {
     expect(() => parseRefugioConcertArchive('<html><body>Conciertos</body></html>')).toThrow(/paginación/);
   });
 
-  it('registra el archivo HTML primario sin marcarlo como fallback', async () => {
+  it('registra HTTP 200 del archivo sin fallback de navegador', async () => {
     const obsDir = await mkdtemp(path.join(os.tmpdir(), 'refugio-archive-obs-'));
     const observability = startObservability({
       directory: obsDir,
@@ -566,138 +662,73 @@ describe('Real Hermandad del Refugio HTML archive', () => {
       observability,
       get: async (url) => {
         if (url === archiveUrl || url.startsWith(`${archiveUrl}page/`)) return fixture('listing-archive.html');
-        if (url.includes('/calendario-de-eventos/')) return fixture('detail-recorrido.html');
-        throw new Error(`URL de test no mapeada: ${url}`);
+        throw new Error(`no debía hidratar ${url}`);
       },
     });
     observability.complete();
     observability.close();
     const manifest = JSON.parse(await readFile(path.join(obsDir, RUN_MANIFEST_FILE), 'utf8')) as IngestRunManifest;
     expect(manifest.timings?.sources[source.id]?.listingFallback).toBeUndefined();
+    expect(manifest.timings?.sources[source.id]?.listingTransport).toBeUndefined();
+    expect(manifest.timings?.sources[source.id]?.http.browserFallbacks).toBe(0);
+    expect(manifest.timings?.sources[source.id]?.http.browserRequests).toBe(0);
     expect(manifest.timings?.sources[source.id]?.extractedEvents).toBe(3);
   });
 
-  it('si archivo y REST fallan, el error conserva ambos intentos', async () => {
-    await expect(adapter.fetchListing!(listingUrl, {
-      ...ctx,
-      get: async (url) => {
-        throw new HttpError(202, url);
-      },
-    })).rejects.toSatisfy((error: unknown) => {
-      expect(error).toBeInstanceOf(ListingAttemptsError);
-      const message = error instanceof Error ? error.message : String(error);
-      expect(message).toMatch(/html-archive/);
-      expect(message).toMatch(/wp-rest/);
-      expect(message).toMatch(/HTTP 202/);
-      expect(message).not.toMatch(/Bearer|cookie|token|INGEST_FETCH_RELAY/i);
-      return true;
-    });
-  });
-});
-
-describe('Real Hermandad del Refugio transporte directo luego relay', () => {
-  const archiveUrl = REFUGIO_CONCERT_ARCHIVE_URL;
-  const relayOrigin = 'https://relay.example.test';
-  const token = 'relay-secret-token-xyz';
-  const relayEnv = {
-    INGEST_FETCH_RELAY_URL: `${relayOrigin}/`,
-    INGEST_FETCH_RELAY_TOKEN: token,
-  };
-
-  afterEach(() => {
-    resetOriginCookieJar();
-    vi.unstubAllGlobals();
-    vi.restoreAllMocks();
-  });
-
-  function header(init: RequestInit | undefined, name: string): string | undefined {
-    const value = init?.headers;
-    if (!value || value instanceof Headers || Array.isArray(value)) return undefined;
-    return value[name];
-  }
-
-  it('si un transporte recibe 202 y el alternativo devuelve el archivo, la fuente termina', async () => {
+  it('registra HTTP 202 y el fallback de navegador en run.json', async () => {
     const html = await fixture('listing-archive.html');
-    const fetch = vi.fn(async (url: string, init?: RequestInit) => {
-      if (String(url) === archiveUrl) {
-        expect(header(init, 'authorization')).toBeUndefined();
-        return new Response('<html>challenge</html>', { status: 202 });
-      }
-      const parsed = new URL(String(url));
-      expect(parsed.origin).toBe(relayOrigin);
-      expect(parsed.searchParams.get('url')).toBe(archiveUrl);
-      expect(header(init, 'authorization')).toBe(`Bearer ${token}`);
-      return new Response(html, { status: 200 });
-    });
-    vi.stubGlobal('fetch', fetch);
-
-    const body = await getText(archiveUrl, 30_000, relayEnv);
-    expect(body).toBe(html);
-    expect(fetch).toHaveBeenCalledTimes(2);
-
-    const events = await adapter.extract(body, archiveUrl, ctx);
-    expect(events).toHaveLength(3);
-    expect(events.every((event) => event.listingSurface === 'html-archive')).toBe(true);
-
-    const run = await runIngest({
+    setRefugioBrowserSessionForTests(async () => ({
+      async get() {
+        return html;
+      },
+      async close() {},
+    }));
+    const obsDir = await mkdtemp(path.join(os.tmpdir(), 'refugio-browser-obs-'));
+    const observability = startObservability({
+      directory: obsDir,
+      mode: 'dry-run',
+      sources: [source.id],
+      window: TEST_WINDOW,
+    })!;
+    await runIngest({
       now: TEST_NOW,
       dryRun: true,
       catalog: emptyCatalog(),
       window: TEST_WINDOW,
       sourceIds: [source.id],
-      dataDir: await mkdtemp(path.join(os.tmpdir(), 'refugio-direct-relay-')),
+      dataDir: await mkdtemp(path.join(os.tmpdir(), 'refugio-browser-data-')),
+      observability,
       get: async (url) => {
-        if (url === archiveUrl || url.startsWith(`${archiveUrl}page/`)) return getText(url, 30_000, relayEnv);
         throw new HttpError(202, url);
       },
     });
-    expect(run.summary.sourcesFailed).toEqual([]);
-    expect(run.summary.sourcesSucceeded).toContain(source.id);
-    expect(run.rawEvents).toHaveLength(3);
-    expect(run.rawEvents.find((event) => event.externalId === '10538')?.observed.occurrences[0]?.date).toBe('2026-09-24');
+    observability.complete();
+    observability.close();
+    const manifest = JSON.parse(await readFile(path.join(obsDir, RUN_MANIFEST_FILE), 'utf8')) as IngestRunManifest;
+    const timing = manifest.timings?.sources[source.id];
+    expect(timing?.listingFallback).toBeUndefined();
+    expect(timing?.listingTransport).toBe('browser');
+    expect(timing?.http.statusCounts['202']).toBeGreaterThan(0);
+    expect(timing?.http.challengeCount).toBeGreaterThan(0);
+    expect(timing?.http.browserFallbacks).toBe(1);
+    expect(timing?.http.browserRequests).toBeGreaterThan(0);
+    expect(timing?.extractedEvents).toBe(3);
+    expect(timing?.listingError).toBeUndefined();
   });
+});
 
-  it('si directo y relay fallan, el error agrega ambos intentos', async () => {
-    const fetch = vi.fn(async () => new Response('no', { status: 202 }));
-    vi.stubGlobal('fetch', fetch);
-    await expect(getText(archiveUrl, 30_000, relayEnv)).rejects.toSatisfy((error: unknown) => {
-      expect(error).toBeInstanceOf(TransportAttemptsError);
-      const message = error instanceof Error ? error.message : String(error);
-      expect(message).toMatch(/direct → HTTP 202/i);
-      expect(message).toMatch(/relay → HTTP 202/i);
-      expect(message).not.toContain(token);
-      expect(message).not.toContain('Bearer');
-      expect(message).not.toContain(relayOrigin);
-      return true;
-    });
-    expect(fetch).toHaveBeenCalledTimes(2);
-  });
-
-  it('March, Zarzuela, Auditorio y CNDM siguen yendo sólo por relay', async () => {
+describe('Real Hermandad del Refugio no cambia el transporte de otras fuentes', () => {
+  it('March, Zarzuela, Auditorio y CNDM siguen en el relay y Refugio no', () => {
     expect(fetchRelayHosts()).toEqual([
       'auditorionacional.inaem.gob.es',
       'cndm.inaem.gob.es',
-      'realhermandaddelrefugio.org',
       'teatrodelazarzuela.inaem.gob.es',
       'www.march.es',
     ]);
-    const official = [
-      'https://www.march.es/es/madrid/conciertos',
-      'https://teatrodelazarzuela.inaem.gob.es/es/',
-      'https://auditorionacional.inaem.gob.es/front-page-events.json',
-      'https://cndm.inaem.gob.es/',
-    ];
-    for (const target of official) {
-      const fetch = vi.fn(async (url: string) => {
-        const parsed = new URL(String(url));
-        expect(parsed.origin).toBe(relayOrigin);
-        expect(parsed.searchParams.get('url')).toBe(target);
-        return new Response('ok', { status: 200 });
-      });
-      vi.stubGlobal('fetch', fetch);
-      await expect(getText(target, 30_000, relayEnv)).resolves.toBe('ok');
-      expect(fetch).toHaveBeenCalledTimes(1);
-      expect(String(fetch.mock.calls[0]?.[0])).not.toBe(target);
-    }
+    expect(getSourceDefinition('fundacion-juan-march').useFetchRelay).toBe(true);
+    expect(getSourceDefinition('teatro-zarzuela').useFetchRelay).toBe(true);
+    expect(getSourceDefinition('auditorio-nacional').useFetchRelay).toBe(true);
+    expect(getSourceDefinition('cndm').useFetchRelay).toBe(true);
+    expect(getSourceDefinition('real-hermandad-refugio').useFetchRelay).toBeFalsy();
   });
 });
