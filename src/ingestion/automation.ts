@@ -150,7 +150,7 @@ function formatObservabilitySection(
     );
     for (const [sourceId, timing] of sourceEntries) {
       rows.push(
-        `| ${cell(sourceId)} | ${cell(formatSourceStatus(timing))} | ${timing.extractedEvents} | ${cell(formatHydrationMode(timing))} | ${cell(formatFichas(timing))} | ${formatDuration(timing.extractionMs)} | ${formatDuration(timing.hydrationMs)} | ${formatDuration(timing.totalMs)} | ${cell(formatHttp(timing.http))} | ${cell(timing.listingError ?? '')} |`,
+        `| ${cell(sourceId)} | ${cell(formatSourceStatus(timing))} | ${timing.extractedEvents} | ${cell(formatHydrationMode(timing))} | ${cell(formatFichas(timing))} | ${formatDuration(timing.extractionMs)} | ${formatDuration(timing.hydrationMs)} | ${formatDuration(timing.totalMs)} | ${cell(formatHttp(timing.http, timing.listingFallback))} | ${cell(timing.listingError ?? '')} |`,
       );
     }
   }
@@ -187,11 +187,17 @@ function formatHydrationMode(timing: IngestSourceTiming): string {
 
 function formatFichas(timing: IngestSourceTiming): string {
   if (timing.hydrationMode !== 'ran') return '—';
-  return `${timing.hydrationAttempted}/${timing.hydrationSucceeded}/${timing.hydrationFailed}`;
+  const base = `${timing.hydrationAttempted}/${timing.hydrationSucceeded}/${timing.hydrationFailed}`;
+  return timing.hydrationRecoveries ? `${base} rec${timing.hydrationRecoveries}` : base;
 }
 
-function formatHttp(http: IngestSourceHttpStats | undefined): string {
-  if (!http || http.requests === 0) return '—';
+function formatHttp(
+  http: IngestSourceHttpStats | undefined,
+  listingFallback?: IngestSourceTiming['listingFallback'],
+): string {
+  if (!http || http.requests === 0) {
+    return listingFallback === 'html-archive' ? 'fallback HTML' : '—';
+  }
   const parts = [`${http.requests} req`];
   parts.push(`${formatDuration(http.latencyMsTotal / http.requests)} avg`);
   if (http.latencyMsMax > 0) parts.push(`max ${formatDuration(http.latencyMsMax)}`);
@@ -204,6 +210,8 @@ function formatHttp(http: IngestSourceHttpStats | undefined): string {
   if (http.timeoutCount) parts.push(`timeout ${http.timeoutCount}`);
   if (http.fetchFailedCount) parts.push(`fetch-failed ${http.fetchFailedCount}`);
   if (http.challengeCount) parts.push(`captcha ${http.challengeCount}`);
+  if (http.recoveries) parts.push(`recuperadas ${http.recoveries}`);
+  if (listingFallback === 'html-archive') parts.push('fallback HTML');
   const notable = Object.entries(http.statusCounts)
     .filter(([key]) => key !== '200')
     .sort(([left], [right]) => left.localeCompare(right))

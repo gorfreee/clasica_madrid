@@ -2,8 +2,8 @@ import { readFile, mkdtemp } from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import { describe, expect, it } from 'vitest';
-import { realHermandadRefugioAdapter as adapter, REFUGIO_PER_PAGE } from '../src/ingestion/sources/real-hermandad-refugio.ts';
-import { parseRefugioDate, parseRefugioDetail, refugioEventUrl } from '../src/ingestion/detail/real-hermandad-refugio.ts';
+import { realHermandadRefugioAdapter as adapter, REFUGIO_PER_PAGE, REFUGIO_CONCERT_ARCHIVE_URL } from '../src/ingestion/sources/real-hermandad-refugio.ts';
+import { parseRefugioConcertArchive, parseRefugioDate, parseRefugioDetail, refugioEventUrl } from '../src/ingestion/detail/real-hermandad-refugio.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { hydrateEvents } from '../src/ingestion/hydrate.ts';
 import { runIngest } from '../src/ingestion/pipeline.ts';
@@ -12,6 +12,8 @@ import { matchEventIdentity } from '../src/ingestion/identity.ts';
 import { matchVenue } from '../src/ingestion/venues.ts';
 import { emptyCatalog, type Catalog } from '../src/lib/domain/catalog.ts';
 import type { AdapterContext } from '../src/ingestion/types.ts';
+import { HttpError } from '../src/ingestion/http.ts';
+import { RUN_MANIFEST_FILE, startObservability, type IngestRunManifest } from '../src/ingestion/observability.ts';
 import { TEST_NOW, TEST_WINDOW, makeEvent, makeSource, makeVenue } from './helpers.ts';
 
 const source = getSourceDefinition(adapter.id);
@@ -345,5 +347,194 @@ describe('Real Hermandad del Refugio pipeline safety', () => {
     expect(second.summary.updatedEvents).toBe(0);
     expect(second.summary.unchangedEvents).toBe(1);
     expect(second.summary.possiblyMissing).toBe(0);
+  });
+});
+
+describe('Real Hermandad del Refugio HTML archive fallback', () => {
+  const archiveUrl = REFUGIO_CONCERT_ARCHIVE_URL;
+  const rest202 = async (url: string) => {
+    if (url.includes('/wp-json/')) throw new HttpError(202, url);
+    throw new Error(`URL de test no mapeada: ${url}`);
+  };
+
+  it('activa el archivo oficial cuando REST sigue devolviendo 202', async () => {
+    const requested: string[] = [];
+    const body = await adapter.fetchListing!(listingUrl, {
+      ...ctx,
+      get: async (url) => {
+        requested.push(url);
+        if (url.includes('/wp-json/')) throw new HttpError(202, url);
+        if (url === archiveUrl || url.startsWith(`${archiveUrl}page/`)) {
+          return fixture('listing-archive.html');
+        }
+        throw new Error(`URL de test no mapeada: ${url}`);
+      },
+    });
+    expect(requested.some((url) => url.includes('/wp-json/'))).toBe(true);
+    expect(requested).toContain(archiveUrl);
+    expect(requested.every((url) => !url.includes('/conciertos/') || url.includes('categoria-eventos'))).toBe(true);
+    expect(requested.some((url) => /^https:\/\/realhermandaddelrefugio.org\/conciertos\/?$/.test(url))).toBe(false);
+    const events = await adapter.extract(body, listingUrl, ctx);
+    expect(events).toHaveLength(3);
+    expect(events.every((event) => event.listingSurface === 'html-archive')).toBe(true);
+    expect(new Set(events.map((event) => event.externalId))).toEqual(new Set(['10538', '10559', '10557']));
+  });
+
+  it('el JSON REST válido sigue el camino normal sin fallback', async () => {
+    const requested: string[] = [];
+    const json = await fixture('listing-archive-rest.json');
+    const body = await adapter.fetchListing!(listingUrl, {
+      ...ctx,
+      get: async (url) => {
+        requested.push(url);
+        if (url.includes('/wp-json/')) return json;
+        throw new Error(`no debía pedir ${url}`);
+      },
+    });
+    const events = await adapter.extract(body, listingUrl, ctx);
+    expect(requested.every((url) => url.includes('/wp-json/'))).toBe(true);
+    expect(requested).not.toContain(archiveUrl);
+    expect(events.every((event) => event.listingSurface !== 'html-archive')).toBe(true);
+    expect(events).toHaveLength(3);
+  });
+
+  it('produce las mismas identidades que REST y no duplica contra un catálogo REST', async () => {
+    const json = await fixture('listing-archive-rest.json');
+    const html = await fixture('listing-archive.html');
+    const restEvents = await adapter.extract(json, listingUrl, ctx);
+    const htmlEvents = await adapter.extract(html, archiveUrl, ctx);
+    expect(htmlEvents.map((event) => event.sourceUrl).sort()).toEqual(restEvents.map((event) => event.sourceUrl).sort());
+    expect(htmlEvents.map((event) => event.externalId).sort()).toEqual(restEvents.map((event) => event.externalId).sort());
+
+    const catalog = emptyCatalog();
+    catalog.sources.push(makeSource({
+      id: source.catalogSourceId,
+      slug: 'real-hermandad-del-refugio',
+      name: 'Real Hermandad del Refugio',
+      url: 'https://realhermandaddelrefugio.org/',
+    }));
+    catalog.venues.push(makeVenue({
+      id: 'ven_iglesia_san_antonio_alemanes',
+      slug: 'iglesia-san-antonio-de-los-alemanes',
+      name: 'Iglesia de San Antonio de los Alemanes',
+    }));
+    for (const event of restEvents) {
+      catalog.events.push(makeEvent({
+        id: `evt_rest_${event.externalId}`,
+        slug: `rest-${event.externalId}`,
+        title: event.observed.title,
+        venueId: 'ven_iglesia_san_antonio_alemanes',
+        organizerIds: [],
+        seriesId: null,
+        citations: [{
+          sourceId: source.catalogSourceId,
+          url: event.sourceUrl,
+          checkedAt: '2026-08-28',
+          externalId: event.externalId,
+        }],
+        primarySourceId: source.catalogSourceId,
+      }));
+    }
+    for (const observed of htmlEvents) {
+      const match = matchEventIdentity(catalog, {
+        sourceUrl: observed.sourceUrl,
+        externalId: observed.externalId,
+        title: observed.observed.title,
+        occurrences: [{ date: '2026-09-24', time: '19:30' }],
+      }, { catalogSourceId: source.catalogSourceId, venueId: 'ven_iglesia_san_antonio_alemanes' });
+      expect(match.kind).toBe('matched');
+    }
+  });
+
+  it('sin id numérico usa la URL canónica y no duplica eventos REST', async () => {
+    const json = await fixture('listing-archive-rest.json');
+    const restEvents = await adapter.extract(json, listingUrl, ctx);
+    const htmlEvents = await adapter.extract(await fixture('listing-archive-noid.html'), archiveUrl, ctx);
+    expect(htmlEvents.every((event) => event.externalId === undefined)).toBe(true);
+    expect(htmlEvents.map((event) => event.sourceUrl).sort()).toEqual(restEvents.map((event) => event.sourceUrl).sort());
+
+    const catalog = emptyCatalog();
+    catalog.sources.push(makeSource({
+      id: source.catalogSourceId,
+      slug: 'real-hermandad-del-refugio',
+      name: 'Real Hermandad del Refugio',
+      url: 'https://realhermandaddelrefugio.org/',
+    }));
+    const rest = restEvents[0]!;
+    catalog.events.push(makeEvent({
+      id: 'evt_rest_url_only',
+      slug: 'rest-url-only',
+      title: rest.observed.title,
+      venueId: 'ven_iglesia_san_antonio_alemanes',
+      organizerIds: [],
+      seriesId: null,
+      citations: [{ sourceId: source.catalogSourceId, url: rest.sourceUrl, checkedAt: '2026-08-28', externalId: rest.externalId }],
+      primarySourceId: source.catalogSourceId,
+    }));
+    const html = htmlEvents.find((event) => event.sourceUrl === rest.sourceUrl)!;
+    expect(matchEventIdentity(catalog, {
+      sourceUrl: html.sourceUrl,
+      title: html.observed.title,
+      occurrences: [{ date: '2026-09-24', time: '19:30' }],
+    }, { catalogSourceId: source.catalogSourceId }).kind).toBe('matched');
+  });
+
+  it('sigue data-pages del archivo oficial', async () => {
+    const requested: string[] = [];
+    const body = await adapter.fetchListing!(listingUrl, {
+      ...ctx,
+      get: async (url) => {
+        requested.push(url);
+        if (url.includes('/wp-json/')) throw new HttpError(202, url);
+        if (url === archiveUrl) return fixture('listing-archive-page1.html');
+        if (url === `${archiveUrl}page/2/`) return fixture('listing-archive-page2.html');
+        throw new Error(`URL de test no mapeada: ${url}`);
+      },
+    });
+    const events = await adapter.extract(body, listingUrl, ctx);
+    expect(requested).toContain(`${archiveUrl}page/2/`);
+    expect(events.map((event) => event.externalId).sort()).toEqual(['10538', '10557']);
+  });
+
+  it('parsea el grid JetEngine y exige data-pages', () => {
+    const parsed = parseRefugioConcertArchive(
+      '<div class="jet-listing-grid__items" data-pages="1"></div>',
+    );
+    expect(parsed).toEqual({ events: [], pages: 1 });
+    expect(() => parseRefugioConcertArchive('<html><body>Conciertos</body></html>')).toThrow(/paginación/);
+  });
+
+  it('registra el fallback HTML en run.json', async () => {
+    const obsDir = await mkdtemp(path.join(os.tmpdir(), 'refugio-fallback-obs-'));
+    const observability = startObservability({
+      directory: obsDir,
+      mode: 'dry-run',
+      sources: [source.id],
+      window: TEST_WINDOW,
+    })!;
+    await runIngest({
+      now: TEST_NOW,
+      dryRun: true,
+      catalog: emptyCatalog(),
+      window: TEST_WINDOW,
+      sourceIds: [source.id],
+      dataDir: await mkdtemp(path.join(os.tmpdir(), 'refugio-fallback-data-')),
+      observability,
+      get: async (url) => {
+        if (url.includes('/wp-json/')) throw new HttpError(202, url);
+        if (url === archiveUrl || url.startsWith(`${archiveUrl}page/`)) return fixture('listing-archive.html');
+        if (url.includes('/calendario-de-eventos/')) return fixture('detail-recorrido.html');
+        throw new Error(`URL de test no mapeada: ${url}`);
+      },
+    });
+    observability.complete();
+    observability.close();
+    const manifest = JSON.parse(await readFile(path.join(obsDir, RUN_MANIFEST_FILE), 'utf8')) as IngestRunManifest;
+    expect(manifest.timings?.sources[source.id]?.listingFallback).toBe('html-archive');
+    expect(manifest.timings?.sources[source.id]?.http.statusCounts['202']).toBeGreaterThan(0);
+  });
+
+  it('un 202 persistente en REST y archivo sigue aislando la fuente', async () => {
+    await expect(adapter.fetchListing!(listingUrl, { ...ctx, get: rest202 })).rejects.toMatchObject({ status: 202 });
   });
 });

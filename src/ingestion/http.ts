@@ -4,6 +4,7 @@ import { fetchRelayHosts } from './registry.ts';
 const USER_AGENT = 'ClasicaMadrid-ingestion/1 (+https://github.com/gorfreee/clasica_madrid)';
 const MAX_REDIRECTS = 10;
 export const RELAY_ORIGIN_COOKIE_HEADER = 'x-relay-origin-cookie';
+export const RELAY_RECOVERIES_HEADER = 'x-relay-recoveries';
 /** HTML listings and fichas. SiteGround treats this as a browser and may 202 a `/wp-json/` URL. */
 export const HTML_ACCEPT = 'text/html,application/json;q=0.9,*/*;q=0.8';
 /**
@@ -14,9 +15,19 @@ export const JSON_DOCUMENT_ACCEPT = 'application/json';
 
 /** Same-origin cookies kept for the process, including across relay hops. */
 const originCookieJar = new Map<string, string>();
+/** Last Worker challenge recoveries, keyed by the official URL just fetched. */
+const relayRecoveriesByUrl = new Map<string, number>();
 
 export function resetOriginCookieJar(): void {
   originCookieJar.clear();
+  relayRecoveriesByUrl.clear();
+}
+
+/** Consume recoveries recorded for this official URL; never logs cookie values. */
+export function takeRelayRecoveries(url: string): number {
+  const count = relayRecoveriesByUrl.get(url) ?? 0;
+  relayRecoveriesByUrl.delete(url);
+  return count;
 }
 
 /** Preserve HTTP facts for source-local retry policies; no retries by default. */
@@ -120,6 +131,7 @@ async function readViaRelay(url: string, relay: FetchRelayTarget, signal: AbortS
     headers,
   });
   rememberRelayCookies(origin, response);
+  rememberRelayRecoveries(url, response);
   if (response.status >= 300 && response.status < 400) {
     await response.body?.cancel();
     throw new HttpError(response.status, url, response.headers.get('retry-after'));
@@ -183,6 +195,13 @@ function rememberRelayCookies(origin: string | undefined, response: Response): v
   if (!origin) return;
   const returned = response.headers.get(RELAY_ORIGIN_COOKIE_HEADER);
   if (returned) originCookieJar.set(origin, returned);
+}
+
+function rememberRelayRecoveries(url: string, response: Response): void {
+  const raw = response.headers.get(RELAY_RECOVERIES_HEADER);
+  if (!raw) return;
+  const count = Number(raw);
+  if (Number.isSafeInteger(count) && count > 0) relayRecoveriesByUrl.set(url, count);
 }
 
 function parseHttpUrl(url: string): URL | undefined {

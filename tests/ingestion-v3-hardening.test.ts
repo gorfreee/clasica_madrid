@@ -30,6 +30,7 @@ const emptyHttp = {
   timeoutCount: 0,
   fetchFailedCount: 0,
   challengeCount: 0,
+  recoveries: 0,
   statusCounts: {},
   latencyMsTotal: 0,
   latencyMsMax: 0,
