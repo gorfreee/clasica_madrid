@@ -2,6 +2,9 @@ import { matchComposer } from './knowledge/composers.ts';
 
 const HEADER =
   /^(programa|program|pausa|pause|intervalo|intermedio|i+|ii+|iii+|iv+|v+|vi+|primera parte|segunda parte|tercera parte|1[aª]? parte|2[aª]? parte|3[aª]? parte|(?:i{1,3}|iv|[1-4])\s*parte|parte\s*(?:i{1,3}|iv|[1-4]|[úu]nica)|\*+\s*estreno|\*+\s*encargo)[:.\s]*$/i;
+/** Bare `Programa` / `Program` plus heading parentheticals. Not prose that contains the word. */
+const PROGRAM_HEADING =
+  /^(?:programa|program)(?:\s*\(\s*(?:selecci[oó]n(?:\s+de\s+obras)?|selection(?:\s+of\s+works)?)\s*\))?[:.\s]*$/i;
 const PART_HEADER =
   /^(?:(?:i{1,3}|iv|[1-4])\s*parte|parte\s*(?:i{1,3}|iv|[1-4]|[úu]nica))[:.\s]*$/i;
 const SEPARATOR = /^-{2,}.*-{2,}$|^\*{2,}$|^·+$/;
@@ -46,7 +49,7 @@ export function isObviousNonPerformer(name: string, roleText?: string): boolean 
   if (text.length > 300) return true;
   if (text.length > 120 && !looksLikeEnsembleName(text)) return true;
   if (/^charlas?\b/i.test(text)) return true;
-  if (HEADER.test(text) || SEPARATOR.test(text)) return true;
+  if (looksLikeProgramHeader(text)) return true;
   if (looksLikeScheduleNotice(text) && !/\bdir(?:ector|ectora|\.)\b/i.test(text)) return true;
   if (looksLikeMovementLine(text)) return true;
   if (INSTRUMENT_ONLY.test(text)) return true;
@@ -74,7 +77,7 @@ export function looksLikeComposerLine(text: string): boolean {
 
 export function looksLikeWorkLine(text: string): boolean {
   const trimmed = text.trim();
-  if (!trimmed || HEADER.test(trimmed) || SEPARATOR.test(trimmed)) return false;
+  if (!trimmed || looksLikeProgramHeader(trimmed)) return false;
   if (looksLikeProductionNote(trimmed) || looksLikeTextCredit(trimmed)) return false;
   if (looksLikeCatalogOnlyLine(trimmed)) return false;
   if (looksLikeComposerLine(trimmed) && !CATALOG.test(trimmed) && !WORK_GENRE.test(trimmed)) {
@@ -84,7 +87,13 @@ export function looksLikeWorkLine(text: string): boolean {
 }
 
 export function looksLikeProgramHeader(text: string): boolean {
-  return HEADER.test(text.trim()) || SEPARATOR.test(text.trim());
+  const trimmed = text.trim();
+  return HEADER.test(trimmed) || PROGRAM_HEADING.test(trimmed) || SEPARATOR.test(trimmed);
+}
+
+/** `Programa` / `Programa (selección)` — a programme label, not pause/part separators. */
+export function looksLikeProgramLabel(text: string): boolean {
+  return PROGRAM_HEADING.test(text.trim());
 }
 
 export function looksLikePartHeader(text: string): boolean {
@@ -120,7 +129,7 @@ export function looksLikeWorkInstrumentation(text: string): boolean {
 /** Genre, catalogue or instrumentation — enough to attach a following work to a heading. */
 export function looksLikeUnequivocalWorkLine(text: string): boolean {
   const trimmed = text.trim();
-  if (!trimmed || HEADER.test(trimmed) || SEPARATOR.test(trimmed) || trimmed.startsWith('*')) {
+  if (!trimmed || looksLikeProgramHeader(trimmed) || trimmed.startsWith('*')) {
     return false;
   }
   if (looksLikeProductionNote(trimmed) || looksLikeTextCredit(trimmed)) return false;
@@ -197,7 +206,7 @@ export function isUnreliableComposerName(text: string): boolean {
 }
 
 function rejectedComposerHeading(trimmed: string): boolean {
-  if (!trimmed || HEADER.test(trimmed) || SEPARATOR.test(trimmed)) return true;
+  if (!trimmed || looksLikeProgramHeader(trimmed)) return true;
   if (/^obras de\b/i.test(trimmed)) return true;
   if (/^(varios autores|an[oó]nimo)\b/i.test(trimmed)) return true;
   if (looksLikeEnsembleName(trimmed)) return true;

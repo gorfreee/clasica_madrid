@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Era } from '../src/lib/schemas/taxonomies.ts';
 import { classify, resolveEras } from '../src/ingestion/classification/classify.ts';
-import { findKnownComposersInText, matchComposer, buildIndex } from '../src/ingestion/knowledge/composers.ts';
+import { findKnownComposersInText, matchComposer, matchComposerPrefix, buildIndex } from '../src/ingestion/knowledge/composers.ts';
 import {
   isObviousNonPerformer,
   looksLikeComposerLine,
@@ -29,6 +29,17 @@ describe('composer knowledge base', () => {
     expect(matchComposer('Wolfgang Amadeus Mozart')?.eras).toEqual(['classical']);
     expect(matchComposer('Mozart')?.eras).toEqual(['classical']);
     expect(matchComposer('Gustav Mahler')?.eras).toEqual(['romantic']);
+    expect(matchComposerPrefix('Edward Elgar Variaciones')).toEqual({
+      knowledge: expect.objectContaining({ canonicalName: 'Edward Elgar' }),
+      matchedText: 'Edward Elgar',
+      rest: 'Variaciones',
+    });
+    expect(matchComposerPrefix('Bachianas Brasileiras')).toBeUndefined();
+    expect(matchComposerPrefix('Caroline Shaw')).toEqual({
+      knowledge: expect.objectContaining({ canonicalName: 'Caroline Shaw' }),
+      matchedText: 'Caroline Shaw',
+      rest: '',
+    });
     expect(matchComposer('Mahler')?.eras).toEqual(['romantic']);
   });
 
@@ -487,6 +498,18 @@ describe('composer knowledge base', () => {
     expect(looksLikeProgramHeader('II PARTE')).toBe(true);
     expect(looksLikeProgramHeader('PARTE I')).toBe(true);
     expect(looksLikeProgramHeader('PARTE ÚNICA:')).toBe(true);
+    expect(looksLikeProgramHeader('Programa')).toBe(true);
+    expect(looksLikeProgramHeader('Programa:')).toBe(true);
+    expect(looksLikeProgramHeader('Programa (selección)')).toBe(true);
+    expect(looksLikeProgramHeader('Programa (selección de obras)')).toBe(true);
+    expect(looksLikeProgramHeader('Program (selection)')).toBe(true);
+    expect(looksLikeWorkLine('Programa (selección)')).toBe(false);
+    expect(looksLikeProgramHeader('El programa incluye obras de Bach')).toBe(false);
+    expect(looksLikeProgramHeader('un programa de cámara')).toBe(false);
+    expect(looksLikeProgramHeader('Programa de la OCNE')).toBe(false);
+    expect(looksLikeProgramHeader('Programa (selección de obras clásicas)')).toBe(false);
+    expect(looksLikeProgramHeader('Pause')).toBe(true);
+    expect(looksLikeProgramHeader('INTERVALO')).toBe(true);
     expect(looksLikeEnsembleName('LA CAPELLA NACIONAL DE CATALUNYA')).toBe(true);
     expect(looksLikeEnsembleName('Compañía JAC Ballet')).toBe(true);
     expect(looksLikeEnsembleName('Quinteto de la Filarmónica de Berlín')).toBe(true);

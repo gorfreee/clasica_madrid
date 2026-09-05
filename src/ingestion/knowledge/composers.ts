@@ -2407,6 +2407,45 @@ export function matchComposer(name: string): ComposerKnowledge | undefined {
   return undefined;
 }
 
+export type ComposerPrefixMatch = {
+  knowledge: ComposerKnowledge;
+  matchedText: string;
+  rest: string;
+};
+
+/**
+ * Longest known-composer prefix of a line, word-boundary only.
+ * Returns the source spelling of the matched words and the unmatched remainder.
+ * Does not invent names or match inside a longer token (`Bachianas`).
+ */
+export function matchComposerPrefix(text: string): ComposerPrefixMatch | undefined {
+  const cleaned = text.replace(/\s+/g, ' ').trim();
+  if (!cleaned) return undefined;
+  const words = cleaned.split(' ').filter(Boolean);
+  if (words.length === 0) return undefined;
+  const max = Math.min(words.length, 8);
+  for (let count = max; count >= 1; count--) {
+    let candidateWords = words.slice(0, count);
+    while (candidateWords.length > 0 && isDelimiterToken(candidateWords[candidateWords.length - 1] ?? '')) {
+      candidateWords = candidateWords.slice(0, -1);
+    }
+    if (candidateWords.length === 0) continue;
+    const matchedText = candidateWords.join(' ');
+    const knowledge = matchComposer(matchedText);
+    if (!knowledge) continue;
+    return {
+      knowledge,
+      matchedText,
+      rest: words.slice(candidateWords.length).join(' ').trim(),
+    };
+  }
+  return undefined;
+}
+
+function isDelimiterToken(token: string): boolean {
+  return /^(?:[:·•]|[—–-])$/.test(token);
+}
+
 /**
  * Conservative scan of observed prose for known composer names.
  * Longest alias first; word-boundary only. Does not invent names.

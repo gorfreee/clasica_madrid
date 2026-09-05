@@ -454,7 +454,7 @@ describe('parser de ficha Auditorio Nacional', () => {
     ]);
   });
 
-  it('OCNE Sinfónico 09: el h4 de programa no publica a Shaw ni Entr’acte como performers', async () => {
+  it('OCNE Sinfónico 09: reconstruye Elgar y nunca atribuye Enigma a Britten', async () => {
     const html = await readFile(
       path.join(detailDir, 'auditorio-ocne-sinfonico-09.excerpt.html'),
       'utf8',
@@ -468,12 +468,148 @@ describe('parser de ficha Auditorio Nacional', () => {
       { name: 'Josu de Solaun', roleText: 'Piano' },
     ]);
     expect(names.some((name) => /shaw|entr.?acte|britten|elgar/i.test(name))).toBe(false);
-    expect(facts.works).toEqual(
+    expect(facts.works).toEqual([
+      { title: 'Entr’acte, para orquesta de cuerda', composerName: 'Caroline Shaw' },
+      { title: 'Concierto para piano núm. 1, op. 13', composerName: 'Benjamin Britten' },
+      { title: 'Variaciones Enigma, op. 36', composerName: 'Edward Elgar' },
+    ]);
+    expect(facts.works?.filter((work) => /enigma/i.test(work.title))).toEqual([
+      { title: 'Variaciones Enigma, op. 36', composerName: 'Edward Elgar' },
+    ]);
+    expect(facts.works?.some((work) => /enigma|elgar|variaciones/i.test(work.title) && /britten/i.test(work.composerName ?? ''))).toBe(
+      false,
+    );
+    expect(facts.composers).toEqual([
+      { name: 'Caroline Shaw' },
+      { name: 'Benjamin Britten' },
+      { name: 'Edward Elgar' },
+    ]);
+  });
+
+  it('Recordando a Victoria de los Ángeles: la lista de compositores no fabrica obras', async () => {
+    const html = await readFile(
+      path.join(detailDir, 'auditorio-victoria-de-los-angeles.excerpt.html'),
+      'utf8',
+    );
+    const facts = parseAuditorioNacionalDetail(html);
+    const composerNames = facts.composers?.map((item) => item.name) ?? [];
+
+    expect(facts.performers).toEqual([
+      { name: 'Elionor Martínez', roleText: 'soprano' },
+      { name: 'Olivia Zaugg', roleText: 'piano' },
+    ]);
+    expect(facts.works).toEqual([]);
+    expect(facts.works?.some((work) => /toldr|granados/i.test(work.title))).toBe(false);
+    expect(facts.works?.some((work) => /mompou/i.test(work.composerName ?? ''))).toBe(false);
+    expect(facts.programText).toMatch(/Obras de Schubert/);
+    expect(facts.programText).toMatch(/Mompou, Toldrà y Granados/);
+    expect(composerNames).toEqual(
+      expect.arrayContaining(['Schubert', 'Boulanger', 'Debussy', 'Ravel', 'Rodrigo', 'Guastavino', 'Mompou', 'Toldrà', 'Granados']),
+    );
+    expect(composerNames.some((name) => /toldr[aàá].*granados|granados.*toldr/i.test(name))).toBe(false);
+  });
+
+  it('Lumina Natalis: Obras de partidos en varias líneas no crean una obra ficticia', async () => {
+    const html = await readFile(
+      path.join(detailDir, 'auditorio-ocne-satelite-lumina-natalis.excerpt.html'),
+      'utf8',
+    );
+    const facts = parseAuditorioNacionalDetail(html);
+    const composerNames = facts.composers?.map((item) => item.name) ?? [];
+    const performerNames = facts.performers?.map((item) => item.name) ?? [];
+
+    expect(performerNames).toEqual(
+      expect.arrayContaining(['Ad Infinitum', 'Joan Espina', 'Alejandra Navarro', 'Manuel Torrado']),
+    );
+    expect(facts.works).toEqual([]);
+    expect(
+      facts.works?.some((work) => /vicente rodr[ií]guez|corselli|antol[ií] sala/i.test(work.title)),
+    ).toBe(false);
+    expect(facts.works?.some((work) => /nebra/i.test(work.composerName ?? ''))).toBe(false);
+    expect(facts.programText).toMatch(/Obras de Josep Antoni Martí/);
+    expect(facts.programText).toMatch(/Francisco Corselli y Antolí Sala/);
+    expect(composerNames).toEqual(
       expect.arrayContaining([
-        { title: 'Entr’acte, para orquesta de cuerda', composerName: 'Caroline Shaw' },
+        'Josep Antoni Martí',
+        'José de Nebra',
+        'Vicente Rodríguez',
+        'Francisco Corselli',
+        'Antolí Sala',
       ]),
     );
-    expect(facts.composers).toEqual(expect.arrayContaining([{ name: 'Caroline Shaw' }]));
+  });
+
+  it('Danzas del Mundo: 14 obras reales y ningún heading como composer/work', async () => {
+    const html = await readFile(path.join(detailDir, 'auditorio-danzas-del-mundo.excerpt.html'), 'utf8');
+    const facts = parseAuditorioNacionalDetail(html);
+    const works = facts.works ?? [];
+    const composers = facts.composers ?? [];
+
+    expect(facts.performers?.map((item) => item.name)).toEqual(
+      expect.arrayContaining(['PHILHARMONIC ENSEMBLE', 'Serena Sáenz']),
+    );
+    expect(works).toEqual([
+      { title: 'Rosas del Sur, op. 388', composerName: 'Johann Strauss II' },
+      { title: 'Danza eslava, op. 46 n.º 8', composerName: 'Antonín Dvořák' },
+      { title: 'Danza de Anitra (de Peer Gynt)', composerName: 'Edvard Grieg' },
+      { title: 'Oblivion', composerName: 'Astor Piazzolla' },
+      { title: 'Danza húngara n.º 5', composerName: 'Johannes Brahms' },
+      { title: 'Danza macabra, op. 40', composerName: 'Camille Saint-Saëns' },
+      { title: 'Rondo alla turca, KV 331 (versión orquestal)', composerName: 'Wolfgang A. Mozart' },
+      { title: 'Voces de primavera, op. 410 (soprano y orquesta)', composerName: 'Johann Strauss II' },
+      { title: 'Las hijas de Cádiz (aria para soprano y orquesta)', composerName: 'Léo Delibes' },
+      { title: 'Danzas populares rumanas, Sz. 56', composerName: 'Béla Bartók' },
+      { title: 'Danza española n.º 1 (de La vida breve)', composerName: 'Manuel de Falla' },
+      { title: 'Csárdás de la ópera Ritter Pásmán, op. 441', composerName: 'Johann Strauss II' },
+      { title: 'Libertango', composerName: 'Astor Piazzolla' },
+      { title: 'Vals n.º 2', composerName: 'Dmitri Shostakóvich' },
+    ]);
+    expect(composers).toEqual([
+      { name: 'Johann Strauss II' },
+      { name: 'Antonín Dvořák' },
+      { name: 'Edvard Grieg' },
+      { name: 'Astor Piazzolla' },
+      { name: 'Johannes Brahms' },
+      { name: 'Camille Saint-Saëns' },
+      { name: 'Wolfgang A. Mozart' },
+      { name: 'Léo Delibes' },
+      { name: 'Béla Bartók' },
+      { name: 'Manuel de Falla' },
+      { name: 'Dmitri Shostakóvich' },
+    ]);
+    expect(works).toHaveLength(14);
+    expect(composers).toHaveLength(11);
+    expect(composers.some((item) => /danzas del mundo/i.test(item.name))).toBe(false);
+    expect(works.some((work) => /programa\s*\(\s*selecci/i.test(work.title))).toBe(false);
+    expect(
+      works.some(
+        (work) =>
+          Boolean(work.composerName) &&
+          work.title.toLocaleLowerCase('es').startsWith(work.composerName!.toLocaleLowerCase('es')),
+      ),
+    ).toBe(false);
+  });
+
+  it('una lista suelta de personas en el programa no se publica como composers', () => {
+    const html = `
+      <article id="content">
+        <h1>Concierto de cámara</h1>
+        <div class="content">
+          <h4>Cuarteto Ejemplo<br />Ana Morales, violín<br />Programa<br />Ana Morales, Rubén Mendoza y Marta Soler<br />Johann Sebastian Bach<br />Concierto italiano</h4>
+        </div>
+        <div class="rightcolumn">
+          <p class="rightColumn__item">
+            <label class="rightColumn__item__label">Sala:</label>
+            <span class="rightColumn__item__text">Sala de Cámara</span>
+          </p>
+        </div>
+      </article>
+    `;
+    const facts = parseAuditorioNacionalDetail(html);
+    expect(facts.works).toEqual([{ title: 'Concierto italiano', composerName: 'Johann Sebastian Bach' }]);
+    expect(facts.composers).toEqual([{ name: 'Johann Sebastian Bach' }]);
+    expect(facts.composers?.some((item) => /morales|mendoza|soler/i.test(item.name))).toBe(false);
+    expect(facts.programText).toMatch(/Ana Morales, Rubén Mendoza y Marta Soler/);
   });
 
   it('OCNE Satélite 04: Tres canciones rusas no es performer', async () => {

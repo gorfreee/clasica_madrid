@@ -2,13 +2,21 @@ import { allCaptures, firstMatch, splitBreaks, stripTags } from '../html.ts';
 import { inferScheduleFromText } from './schedule.ts';
 import {
   canPairAsAuditorioComposer,
+  composersAreDistinct,
+  extractObrasDeComposers,
+  extractStandaloneKnownComposers,
   hasExplicitPerformerSignal,
+  looksLikeComposerNameList,
+  looksLikeNameListContinuation,
+  looksLikeObrasDeLine,
   looksLikeRoleOnlyLine,
   parseAuditorioPersonCredits,
   parseComposerColonWork,
   parseComposerYearWork,
+  parseKnownComposerPrefixWork,
   parseWorkThenPersonCredit,
   segmentAuditorioBlocks,
+  titleBeginsWithExplicitComposer,
 } from './auditorio-segments.ts';
 import {
   looksLikeCatalogOnlyLine,
@@ -18,16 +26,20 @@ import {
   looksLikePartHeader,
   looksLikeProductionNote,
   looksLikeProgramHeader,
+  looksLikeProgramLabel,
   looksLikeScheduleNotice,
   looksLikeTextCredit,
   looksLikeUnequivocalWorkLine,
   looksLikeWorkLine,
   parseExplicitTitleAuthorWork,
 } from '../observed-cleanup.ts';
+import { matchComposer } from '../knowledge/composers.ts';
 import {
   composersFromWorks,
+  normalizeComposerList,
   normalizePersonList,
   normalizeWorkList,
+  type ObservedComposer,
   type ObservedFactPatch,
   type ObservedPerson,
   type ObservedWork,
@@ -73,7 +85,7 @@ function parseProduction(html: string): ObservedFactPatch {
       parseAuditorioPersonCredits(line).filter((person) => Boolean(person.roleText)),
     ),
   ]);
-  const works = normalizeWorkList(worksFromProgramLines(segments.programLines));
+  const { works, extraComposers } = worksFromProgramLines(segments.programLines);
   const programText = collapseProgram(repertoireProgramLines(segments.programLines));
 
   const venueText = stripTags(
@@ -97,7 +109,7 @@ function parseProduction(html: string): ObservedFactPatch {
     ...(schedule.occurrences ? { occurrences: schedule.occurrences } : {}),
     performers,
     works,
-    composers: composersFromWorks(works),
+    composers: composersForProgram(works, extraComposers),
   };
 }
 
@@ -176,14 +188,22 @@ function parseComposerDashWork(text: string): ObservedWork {
   return { title: text.trim() };
 }
 
-function worksFromProgramLines(lines: string[]): ObservedWork[] {
+function worksFromProgramLines(lines: string[]): { works: ObservedWork[]; extraComposers: ObservedComposer[] } {
   const usable = lines
     .map((line) => line.replace(/\*+\s*$/, '').trim())
     .filter((line) => line && !line.startsWith('*'));
-  if (usable.length === 0) return [];
+  if (usable.length === 0) return { works: [], extraComposers: [] };
   const grouped = groupWorksByComposer(usable);
-  if (grouped.length > 0) return grouped;
-  return pairComposerWorks(usable.filter((line) => !looksLikeProgramHeader(line)));
+  if (grouped.works.length > 0 || grouped.extraComposers.length > 0) {
+    return {
+      works: normalizeWorkList(grouped.works),
+      extraComposers: grouped.extraComposers,
+    };
+  }
+  return {
+    works: normalizeWorkList(pairComposerWorks(usable.filter((line) => !looksLikeProgramHeader(line)))),
+    extraComposers: [],
+  };
 }
 
 /**
@@ -192,17 +212,33 @@ function worksFromProgramLines(lines: string[]): ObservedWork[] {
  * headings — those collided with 1:1 pairing, so we require a full name or years.
  * A line-level attribution never becomes the default composer of later lines.
  */
-function groupWorksByComposer(lines: string[]): ObservedWork[] {
+function groupWorksByComposer(lines: string[]): { works: ObservedWork[]; extraComposers: ObservedComposer[] } {
   const works: ObservedWork[] = [];
+  const extraComposers: ObservedComposer[] = [];
   let composerName: string | undefined;
-  for (const line of lines) {
-    if (looksLikePartHeader(line)) {
+  for (let index = 0; index < lines.length; index++) {
+    const line = lines[index] ?? '';
+    if (looksLikePartHeader(line) || looksLikeProgramLabel(line)) {
       composerName = undefined;
       continue;
     }
     if (looksLikeProgramHeader(line)) continue;
     if (looksLikeProductionNote(line) || looksLikeTextCredit(line)) continue;
     if (isCastLineInsideProgram(line)) continue;
+
+    const obras = consumeObrasDeList(lines, index);
+    if (obras) {
+      extraComposers.push(...obras.composers.map((name) => ({ name })));
+      composerName = undefined;
+      index = obras.endIndex;
+      continue;
+    }
+    if (looksLikeComposerNameList(line)) {
+      extraComposers.push(...extractStandaloneKnownComposers(line).map((name) => ({ name })));
+      composerName = undefined;
+      continue;
+    }
+
     if (looksLikeCatalogOnlyLine(line)) {
       appendToLastWork(works, line);
       continue;
@@ -216,9 +252,24 @@ function groupWorksByComposer(lines: string[]): ObservedWork[] {
       parseGroupedColonWork(line) ??
       parseExplicitTitleAuthorWork(line);
     if (attributed) {
+      if (titleStartsWithForeignComposer(attributed.title, attributed.composerName)) {
+        continue;
+      }
       works.push(attributed);
+      composerName = undefined;
       continue;
     }
+
+    const prefixWork = parseKnownComposerPrefixWork(line, lines[index + 1]);
+    if (prefixWork) {
+      if (!titleStartsWithForeignComposer(prefixWork.title, prefixWork.composerName)) {
+        works.push({ title: prefixWork.title, composerName: prefixWork.composerName });
+      }
+      composerName = undefined;
+      if (prefixWork.consumedNext) index += 1;
+      continue;
+    }
+
     if (!composerName && looksLikeCatalogWorkLine(line) && looksLikeWorkLine(line)) {
       works.push({ title: line });
       continue;
@@ -231,12 +282,54 @@ function groupWorksByComposer(lines: string[]): ObservedWork[] {
     }
     if (looksLikeMovementLine(line)) continue;
     if (composerName) {
+      if (titleBeginsWithExplicitComposer(line, composerName)) {
+        composerName = undefined;
+        index -= 1;
+        continue;
+      }
       if (!looksLikeWorkLine(line)) continue;
       if (!/\s/.test(line) && !looksLikeUnequivocalWorkLine(line)) continue;
+      if (titleStartsWithForeignComposer(line, composerName)) continue;
       works.push({ title: line, composerName });
     }
   }
-  return works;
+  return { works, extraComposers };
+}
+
+function consumeObrasDeList(
+  lines: string[],
+  start: number,
+): { composers: string[]; endIndex: number } | undefined {
+  const first = lines[start];
+  if (!first || !looksLikeObrasDeLine(first)) return undefined;
+  const collected = [first];
+  let index = start;
+  while (index + 1 < lines.length) {
+    const current = collected[collected.length - 1] ?? '';
+    const next = lines[index + 1];
+    if (!next || !/,\s*$/u.test(current)) break;
+    if (looksLikeNameListContinuation(next) || looksLikeComposerNameList(next)) {
+      collected.push(next);
+      index += 1;
+      continue;
+    }
+    break;
+  }
+  return { composers: extractObrasDeComposers(collected.join(' ')), endIndex: index };
+}
+
+function titleStartsWithForeignComposer(title: string, composerName: string | undefined): boolean {
+  if (!composerName) return false;
+  const prefix = titleBeginsWithExplicitComposer(title, composerName);
+  if (!prefix) return false;
+  return composersAreDistinct(composerName, leadingComposerName(title) ?? title);
+}
+
+function leadingComposerName(text: string): string | undefined {
+  return (
+    parseComposerColonWork(text)?.composerName ??
+    parseKnownComposerPrefixWork(text)?.composerName
+  );
 }
 
 function appendToLastWork(works: ObservedWork[], fragment: string): boolean {
@@ -315,10 +408,12 @@ function isStickyComposerHeading(text: string): boolean {
   if (looksLikeMovementLine(text) || looksLikeProductionNote(text) || looksLikeTextCredit(text)) {
     return false;
   }
+  if (looksLikeObrasDeLine(text) || looksLikeComposerNameList(text)) return false;
   if (looksLikeUnequivocalWorkLine(text) || looksLikeCatalogWorkLine(text)) return false;
   if (parseWorkThenPersonCredit(text) || parseComposerColonWork(text) || parseComposerYearWork(text)) {
     return false;
   }
+  if (parseKnownComposerPrefixWork(text)) return false;
   if (!canPairAsAuditorioComposer(text)) return false;
   if (hasLifespanYears(text)) return true;
   // "(Homenaje a Falla)" is a work subtitle, not a lifespan we can strip to a name.
@@ -346,6 +441,25 @@ function pairComposerWorks(lines: string[]): ObservedWork[] {
 
 function looksLikeProse(text: string): boolean {
   return /[.!?]/.test(text) || text.length > 80;
+}
+
+function composersForProgram(
+  works: ObservedWork[],
+  extraComposers: ObservedComposer[],
+): ObservedComposer[] {
+  return uniqueComposersByIdentity([...extraComposers, ...composersFromWorks(works)]);
+}
+
+function uniqueComposersByIdentity(items: ObservedComposer[]): ObservedComposer[] {
+  const seen = new Set<string>();
+  const result: ObservedComposer[] = [];
+  for (const item of normalizeComposerList(items)) {
+    const key = matchComposer(item.name)?.canonicalName ?? item.name.toLocaleLowerCase('es');
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    result.push(item);
+  }
+  return result;
 }
 
 function collapseProgram(lines: string[]): string | undefined {
