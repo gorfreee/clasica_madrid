@@ -481,6 +481,7 @@ describe('composer knowledge base', () => {
     expect(looksLikeComposerLine('LA CAPELLA NACIONAL DE CATALUNYA')).toBe(false);
     expect(looksLikeComposerLine('Compañía JAC Ballet')).toBe(false);
     expect(looksLikeComposerLine('IX. Adagio')).toBe(false);
+    expect(looksLikeComposerLine('VIII.Nana de Sevilla')).toBe(false);
     expect(looksLikeComposerLine('Johannes Brahms (1833-1897)')).toBe(true);
     expect(looksLikeProgramHeader('I PARTE')).toBe(true);
     expect(looksLikeProgramHeader('II PARTE')).toBe(true);
@@ -488,6 +489,13 @@ describe('composer knowledge base', () => {
     expect(looksLikeProgramHeader('PARTE ÚNICA:')).toBe(true);
     expect(looksLikeEnsembleName('LA CAPELLA NACIONAL DE CATALUNYA')).toBe(true);
     expect(looksLikeEnsembleName('Compañía JAC Ballet')).toBe(true);
+    expect(looksLikeEnsembleName('Quinteto de la Filarmónica de Berlín')).toBe(true);
+    expect(looksLikeEnsembleName('Cuarteto para oboe y cuerdas sobre Una cosa rara')).toBe(false);
+    expect(looksLikeEnsembleName('Quinteto para clarinete, op. 34')).toBe(false);
+    expect(looksLikeEnsembleName('Der Schwanendreher, para viola y pequeña orquesta')).toBe(false);
+    expect(looksLikeEnsembleName('Dona nobis pacem, Tres cánones a capella,')).toBe(false);
+    expect(looksLikeWorkLine('Der Schwanendreher, para viola y pequeña orquesta')).toBe(true);
+    expect(looksLikeWorkLine('Cuarteto «Americano», op. 96 (arr. David Walter)')).toBe(true);
     expect(parseExplicitTitleAuthorWork('Concierto para Trompa y Orquesta N.1 de R. Strauss')).toEqual({
       title: 'Concierto para Trompa y Orquesta N.1',
       composerName: 'R. Strauss',

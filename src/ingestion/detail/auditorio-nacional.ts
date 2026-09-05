@@ -7,6 +7,7 @@ import {
   parseAuditorioPersonCredits,
   parseComposerColonWork,
   parseComposerYearWork,
+  parseWorkThenPersonCredit,
   segmentAuditorioBlocks,
 } from './auditorio-segments.ts';
 import {
@@ -69,9 +70,7 @@ function parseProduction(html: string): ObservedFactPatch {
   const performers = normalizePersonList([
     ...segments.performerLines.flatMap((line) => parseAuditorioPersonCredits(line)),
     ...segments.programLines.flatMap((line) =>
-      parseAuditorioPersonCredits(line).filter(
-        (person) => person.roleText || looksLikeEnsembleName(person.name),
-      ),
+      parseAuditorioPersonCredits(line).filter((person) => Boolean(person.roleText)),
     ),
   ]);
   const works = normalizeWorkList(worksFromProgramLines(segments.programLines));
@@ -211,6 +210,7 @@ function groupWorksByComposer(lines: string[]): ObservedWork[] {
     if (appendContinuationIfLinked(works, line)) continue;
 
     const attributed =
+      parseWorkThenPersonCredit(line)?.work ??
       parseComposerYearWork(line) ??
       parseComposerColonWork(line) ??
       parseGroupedColonWork(line) ??
@@ -268,6 +268,9 @@ function repertoireProgramLines(lines: string[]): string[] {
     if (looksLikeScheduleNotice(line)) return false;
     if (looksLikeProductionNote(line) || looksLikeTextCredit(line)) return false;
     if (looksLikeUnequivocalWorkLine(line) || parseExplicitTitleAuthorWork(line)) return true;
+    if (parseWorkThenPersonCredit(line) || parseComposerColonWork(line) || parseComposerYearWork(line)) {
+      return true;
+    }
     if (looksLikeEnsembleName(line) || isCastLineInsideProgram(line)) return false;
     return true;
   });
@@ -275,6 +278,9 @@ function repertoireProgramLines(lines: string[]): string[] {
 
 function isCastLineInsideProgram(line: string): boolean {
   if (looksLikeUnequivocalWorkLine(line) || parseExplicitTitleAuthorWork(line)) return false;
+  if (parseWorkThenPersonCredit(line) || parseComposerColonWork(line) || parseComposerYearWork(line)) {
+    return false;
+  }
   const people = parseAuditorioPersonCredits(line);
   if (people.some((person) => person.roleText)) return true;
   if (people.some((person) => looksLikeEnsembleName(person.name))) return true;
@@ -307,6 +313,10 @@ function looksLikeColonPair(line: string): boolean {
 function isStickyComposerHeading(text: string): boolean {
   if (looksLikePartHeader(text) || parseExplicitTitleAuthorWork(text)) return false;
   if (looksLikeMovementLine(text) || looksLikeProductionNote(text) || looksLikeTextCredit(text)) {
+    return false;
+  }
+  if (looksLikeUnequivocalWorkLine(text) || looksLikeCatalogWorkLine(text)) return false;
+  if (parseWorkThenPersonCredit(text) || parseComposerColonWork(text) || parseComposerYearWork(text)) {
     return false;
   }
   if (!canPairAsAuditorioComposer(text)) return false;
