@@ -1,7 +1,12 @@
 import { loadPublishedCatalog } from '../repository/load.ts';
 import type { Catalog } from '../domain/catalog.ts';
 import { systemClock, type Clock } from '../domain/dates.ts';
-import { buildAgendaPageModel, type AgendaPageModel } from './agenda.ts';
+import {
+  buildAgendaPageModel,
+  buildFullAgendaFragmentModel,
+  type AgendaPageModel,
+  type FullAgendaFragmentModel,
+} from './agenda.ts';
 import { buildEventPageModel, listEventPageSlugs, type EventPageModel } from './event.ts';
 import { buildVenuePageModel, buildVenuesIndexModel, listVenuePageSlugs, type VenuePageModel, type VenuesIndexModel } from './venue.ts';
 
@@ -11,6 +16,12 @@ export async function getPublishedCatalog(): Promise<Catalog> {
 
 export async function loadAgendaPage(url: URL, clock: Clock = systemClock): Promise<AgendaPageModel> {
   return buildAgendaPageModel(await getPublishedCatalog(), url, clock);
+}
+
+export async function loadFullAgendaFragment(
+  clock: Clock = systemClock,
+): Promise<FullAgendaFragmentModel> {
+  return buildFullAgendaFragmentModel(await getPublishedCatalog(), clock);
 }
 
 export async function loadEventPage(
@@ -39,4 +50,4 @@ export async function loadVenueSlugs(): Promise<string[]> {
   return listVenuePageSlugs(await getPublishedCatalog());
 }
 
-export type { AgendaPageModel, EventPageModel, VenuePageModel, VenuesIndexModel };
+export type { AgendaPageModel, EventPageModel, FullAgendaFragmentModel, VenuePageModel, VenuesIndexModel };
