@@ -1,0 +1,307 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Clásica Madrid · del dato disperso a una agenda pública fiable",
+    "output": "architecture-showcase.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/gorfreee/clasica_madrid",
+      "revision": "eb1b2dcb40b1f6a1ffb01fd112ececa424fca472"
+    },
+    "viewBox": [1230, 600],
+    "views": [
+      {
+        "id": "publicacion",
+        "label": "Publicación de extremo a extremo",
+        "focus": ["known_sources", "source_adapters", "ingestion_core", "quality_gate", "canonical_catalog", "astro_site", "cloudflare_pages"],
+        "note": "De las fuentes oficiales a una web estática rápida, trazable y sin backend."
+      },
+      {
+        "id": "ingestion",
+        "label": "Ingestión resiliente",
+        "focus": ["known_sources", "fetch_relay", "source_adapters", "discovery_agent", "gemini", "ingestion_core", "quality_gate"],
+        "note": "Adapters deterministas, IA acotada y fallos aislados por fuente o evento."
+      },
+      {
+        "id": "automation",
+        "label": "Automatización auditable",
+        "focus": ["github_actions", "ingestion_core", "quality_gate", "canonical_catalog", "astro_site"],
+        "note": "Health gates, observabilidad, PR de datos y una única CI antes de publicar."
+      },
+      {
+        "id": "experience",
+        "label": "Experiencia pública",
+        "focus": ["canonical_catalog", "astro_site", "cloudflare_pages"],
+        "note": "HTML estático, filtros por URL y JavaScript mínimo para descubrir conciertos."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "known_sources",
+      "type": "external",
+      "label": "Fuentes culturales",
+      "sublabel": "APIs · feeds · HTML oficial",
+      "tag": "10 adapters",
+      "pos": [20, 200],
+      "size": [155, 74],
+      "sources": [
+        { "path": "src/ingestion/registry.ts", "label": "registry" }
+      ]
+    },
+    {
+      "id": "discovery_agent",
+      "type": "external",
+      "label": "Discovery externo",
+      "sublabel": "Agente con web search",
+      "tag": "hechos observados",
+      "pos": [455, 470],
+      "size": [200, 74],
+      "sources": [
+        { "path": "src/ingestion/discovery-context.ts", "label": "contexto" },
+        { "path": "src/ingestion/discovery.ts", "label": "import" }
+      ]
+    },
+    {
+      "id": "fetch_relay",
+      "type": "security",
+      "label": "Fetch Relay",
+      "sublabel": "Cloudflare Worker · GET only",
+      "tag": "Bearer + HTTPS público",
+      "brand": "cloudflare",
+      "pos": [220, 470],
+      "size": [170, 74],
+      "sources": [
+        { "path": "infra/fetch-relay/worker.js", "label": "worker seguro" },
+        { "path": ".github/workflows/deploy-fetch-relay.yml", "label": "deploy" }
+      ]
+    },
+    {
+      "id": "source_adapters",
+      "type": "backend",
+      "label": "Registry + adapters",
+      "sublabel": "extraen e hidratan fichas",
+      "tag": "aislamiento por fuente",
+      "pos": [220, 200],
+      "size": [170, 74],
+      "sources": [
+        { "path": "src/ingestion/registry.ts", "label": "10 fuentes" },
+        { "path": "src/ingestion/hydrate.ts", "label": "hydration" },
+        { "path": "src/ingestion/http.ts", "label": "HTTP" }
+      ]
+    },
+    {
+      "id": "ingestion_core",
+      "type": "backend",
+      "label": "Pipeline de ingestión",
+      "sublabel": "identidad · clasificación · reconcile",
+      "tag": "ventana Madrid +120 días",
+      "pos": [455, 200],
+      "size": [200, 82],
+      "sources": [
+        { "path": "src/ingestion/pipeline.ts", "label": "orquestación" },
+        { "path": "src/ingestion/reconcile.ts", "label": "reconcile" },
+        { "path": "src/ingestion/identity.ts", "label": "identidad" }
+      ]
+    },
+    {
+      "id": "gemini",
+      "type": "external",
+      "label": "Gemini opcional",
+      "sublabel": "fallback editorial acotado",
+      "tag": "solo uncertain",
+      "brand": "google-gemini",
+      "pos": [460, 40],
+      "size": [190, 74],
+      "sources": [
+        { "path": "src/ingestion/classification/ai.ts", "label": "contrato IA" },
+        { "path": "src/ingestion/classification/enrich.ts", "label": "fallback" }
+      ]
+    },
+    {
+      "id": "quality_gate",
+      "type": "security",
+      "label": "Quality gate",
+      "sublabel": "Zod · referencias · duplicados · health",
+      "tag": "clean · degraded · review · fatal",
+      "pos": [700, 200],
+      "size": [210, 82],
+      "sources": [
+        { "path": "src/lib/validation/index.ts", "label": "validación" },
+        { "path": "src/ingestion/health.ts", "label": "health" },
+        { "path": "src/ingestion/batch.ts", "label": "escritura atómica" }
+      ]
+    },
+    {
+      "id": "github_actions",
+      "type": "cloud",
+      "label": "GitHub Actions",
+      "sublabel": "schedule · PR · CI · auto-merge",
+      "tag": "artefactos 90 días",
+      "brand": "github-actions",
+      "pos": [700, 40],
+      "size": [210, 76],
+      "sources": [
+        { "path": ".github/workflows/ingestion.yml", "label": "producción" },
+        { "path": ".github/workflows/ci.yml", "label": "CI única" }
+      ]
+    },
+    {
+      "id": "canonical_catalog",
+      "type": "database",
+      "label": "GitHub · fuente de verdad",
+      "sublabel": "JSON versionado en data/**",
+      "tag": "176 eventos · 38 lugares · 27 fuentes",
+      "brand": "github",
+      "pos": [970, 200],
+      "size": [220, 82],
+      "sources": [
+        { "path": "src/lib/schemas/event.ts", "label": "eventos" },
+        { "path": "src/lib/schemas/venue.ts", "label": "lugares" },
+        { "path": "src/lib/schemas/source.ts", "label": "procedencia" }
+      ]
+    },
+    {
+      "id": "astro_site",
+      "type": "frontend",
+      "label": "Astro 7 · sitio estático",
+      "sublabel": "repository → domain → presentation → UI",
+      "tag": "Tailwind v4 · JS mínimo",
+      "pos": [970, 470],
+      "size": [220, 82],
+      "sources": [
+        { "path": "src/lib/repository/load.ts", "label": "repository" },
+        { "path": "src/lib/presentation/site.ts", "label": "presentación" },
+        { "path": "src/pages/index.astro", "label": "agenda" }
+      ]
+    },
+    {
+      "id": "cloudflare_pages",
+      "type": "cloud",
+      "label": "Cloudflare Pages",
+      "sublabel": "HTML · CSS · JS · sitemap",
+      "tag": "público · móvil + escritorio",
+      "brand": "cloudflare",
+      "pos": [700, 470],
+      "size": [200, 78],
+      "sources": [
+        { "path": "astro.config.mjs", "label": "build estático" },
+        { "path": "ARCHITECTURE.md", "label": "hosting" }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Repositorio Clásica Madrid · código + datos auditables",
+      "wraps": ["source_adapters", "ingestion_core", "quality_gate", "canonical_catalog", "astro_site"],
+      "pad": 28
+    },
+    {
+      "kind": "security-group",
+      "label": "Automatización gobernada",
+      "wraps": ["github_actions", "quality_gate", "canonical_catalog"],
+      "pad": 18
+    }
+  ],
+  "connections": [
+    {
+      "id": "sources_to_adapters",
+      "from": "known_sources",
+      "to": "source_adapters",
+      "label": "HTTPS · listings y fichas",
+      "labelAt": [197, 320],
+      "variant": "emphasis"
+    },
+    {
+      "id": "relay_to_adapters",
+      "from": "fetch_relay",
+      "to": "source_adapters",
+      "label": "GET autenticado",
+      "variant": "security"
+    },
+    {
+      "id": "adapters_to_pipeline",
+      "from": "source_adapters",
+      "to": "ingestion_core",
+      "label": "extract + hydrate",
+      "labelAt": [415, 340],
+      "variant": "emphasis"
+    },
+    {
+      "id": "discovery_to_pipeline",
+      "from": "discovery_agent",
+      "to": "ingestion_core",
+      "label": "DiscoveryBatch con evidencia",
+      "variant": "dashed"
+    },
+    {
+      "id": "gemini_to_pipeline",
+      "from": "gemini",
+      "to": "ingestion_core",
+      "label": "eligibility / taxonomía",
+      "labelAt": [555, 150],
+      "variant": "dashed"
+    },
+    {
+      "id": "pipeline_to_gate",
+      "from": "ingestion_core",
+      "to": "quality_gate",
+      "label": "Candidate + diagnóstico",
+      "labelAt": [670, 320],
+      "variant": "emphasis"
+    },
+    {
+      "id": "actions_to_pipeline",
+      "from": "github_actions",
+      "to": "ingestion_core",
+      "label": "schedule / dispatch",
+      "variant": "dashed"
+    },
+    {
+      "id": "gate_to_catalog",
+      "from": "quality_gate",
+      "to": "canonical_catalog",
+      "label": "escritura atómica · data/**",
+      "labelAt": [940, 320],
+      "variant": "emphasis"
+    },
+    {
+      "id": "catalog_to_site",
+      "from": "canonical_catalog",
+      "to": "astro_site",
+      "label": "carga y valida en build",
+      "labelAt": [1080, 405],
+      "variant": "emphasis"
+    },
+    {
+      "id": "site_to_pages",
+      "from": "astro_site",
+      "to": "cloudflare_pages",
+      "label": "dist/ estático",
+      "labelAt": [935, 450],
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Arquitectura deliberada",
+      "items": [
+        "Git como base de datos: sin backend, SSR, CMS ni API propia; coste recurrente 0 €",
+        "Astro publica HTML cacheable con filtros por URL y JavaScript mínimo",
+        "repository → domain → presentation mantiene la interfaz reemplazable"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Calidad automatizada",
+      "items": [
+        "10 adapters deterministas; Gemini sólo interviene en casos inciertos",
+        "Zod, referencias, duplicados, escritura atómica y health gate protegen data/**",
+        "PR + CI + 50 módulos Vitest + artefactos forenses antes del auto-merge"
+      ]
+    }
+  ]
+}
