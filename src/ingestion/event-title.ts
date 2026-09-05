@@ -1,11 +1,12 @@
 import type { Catalog } from '../lib/domain/catalog.ts';
 
 /**
- * Canonical event titles. Applied only when turning an observed title into a
- * published `Event.title` — adapters keep the source spelling as seen.
+ * Conservative ALL CAPS canonicalization for published event titles and
+ * performer names. Adapters keep the source spelling as seen; this rewrite
+ * applies when turning observations into a published `Event`.
  *
- * Conservative: rewrite only titles with uppercase letters and no lowercase
- * (clear ALL CAPS). Mixed or already reasonable casing is left unchanged.
+ * Rewrite only strings with uppercase letters and no lowercase (clear ALL
+ * CAPS). Mixed or already reasonable casing is left unchanged.
  */
 
 const LOCALE = 'es';
@@ -99,22 +100,35 @@ export type PublishedTitleChange = {
   to: string;
 };
 
-export function canonicalizeEventTitle(title: string): string {
-  if (!isArtificiallyUppercase(title)) return title;
+/**
+ * Conservative rewrite of strings that are clearly artificial ALL CAPS.
+ * Mixed or already reasonable casing is left byte-for-byte unchanged.
+ * Shared by event titles and performer names so both keep one algorithm.
+ */
+export function canonicalizeArtificiallyUppercase(value: string): string {
+  if (!isArtificiallyUppercase(value)) return value;
 
   let startOfSegment = true;
   let result = '';
   let lastIndex = 0;
-  for (const match of title.matchAll(TOKEN_RE)) {
+  for (const match of value.matchAll(TOKEN_RE)) {
     const token = match[0];
     const index = match.index ?? 0;
-    const between = title.slice(lastIndex, index);
+    const between = value.slice(lastIndex, index);
     if (SEGMENT_DELIM_RE.test(between)) startOfSegment = true;
     result += between + canonicalizeToken(token, startOfSegment);
     startOfSegment = false;
     lastIndex = index + token.length;
   }
-  return result + title.slice(lastIndex);
+  return result + value.slice(lastIndex);
+}
+
+export function canonicalizeEventTitle(title: string): string {
+  return canonicalizeArtificiallyUppercase(title);
+}
+
+export function canonicalizePerformerName(name: string): string {
+  return canonicalizeArtificiallyUppercase(name);
 }
 
 export function planPublishedTitleCanonicalization(catalog: Catalog): PublishedTitleChange[] {
@@ -123,6 +137,25 @@ export function planPublishedTitleCanonicalization(catalog: Catalog): PublishedT
     const to = canonicalizeEventTitle(event.title);
     if (to === event.title) continue;
     changes.push({ eventId: event.id, slug: event.slug, from: event.title, to });
+  }
+  return changes;
+}
+
+export type PublishedPerformerChange = {
+  eventId: string;
+  slug: string;
+  from: string;
+  to: string;
+};
+
+export function planPublishedPerformerCanonicalization(catalog: Catalog): PublishedPerformerChange[] {
+  const changes: PublishedPerformerChange[] = [];
+  for (const event of catalog.events) {
+    for (const performer of event.performers) {
+      const to = canonicalizePerformerName(performer.name);
+      if (to === performer.name) continue;
+      changes.push({ eventId: event.id, slug: event.slug, from: performer.name, to });
+    }
   }
   return changes;
 }

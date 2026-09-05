@@ -6,6 +6,7 @@ import type { ClassificationResult } from './classification/types.ts';
 import { collapseWhitespace } from './html.ts';
 import { discoveryToRawEvents, type DiscoveryBatch } from './discovery.ts';
 import { getAdapter, getSourceDefinition, listSourceDefinitions } from './registry.ts';
+import { enrichNormalizedEvent } from './enrich-normalized.ts';
 import { normalizeRawEvent, normalizeSkipReason, observedFactsFromNormalized } from './normalize.ts';
 import { applyCandidateBatch, type BatchApplyResult } from './batch.ts';
 import { findPossiblyMissing, type PossiblyMissingEvent } from './disappear.ts';
@@ -66,6 +67,11 @@ export type DiscoveryIngestOptions = Omit<IngestOptions, 'sourceIds' | 'get'> & 
 };
 
 export const SOURCE_INGEST_CONCURRENCY = 4;
+
+function prepareNormalizedEvent(raw: RawEvent) {
+  const event = normalizeRawEvent(raw);
+  return event ? enrichNormalizedEvent(event) : undefined;
+}
 
 type HarvestSourceResult = {
   source: SourceDefinition;
@@ -153,7 +159,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
     for (const raw of hydrated) {
       const listing = listingByUrl.get(normalizeUrl(raw.sourceUrl));
       if (listing) listingByRaw.set(raw, listing);
-      obs?.recordObservation({ raw, listing: listing ?? raw, normalized: normalizeRawEvent(raw) });
+      obs?.recordObservation({ raw, listing: listing ?? raw, normalized: prepareNormalizedEvent(raw) });
     }
     rawEvents.push(...hydrated);
     if (listingIncomplete || coverage?.incomplete) disappearanceSuppressedSources.push(source.id);
@@ -191,7 +197,7 @@ export async function runDiscoveryIngest(options: DiscoveryIngestOptions): Promi
   const listingByRaw = new Map<RawEvent, RawEvent>();
   const obs = options.observability;
   for (const raw of rawEvents) {
-    obs?.recordObservation({ raw, listing: raw, normalized: normalizeRawEvent(raw) });
+    obs?.recordObservation({ raw, listing: raw, normalized: prepareNormalizedEvent(raw) });
   }
   return ingestPreparedEvents({
     ...options,
@@ -243,7 +249,7 @@ async function ingestPreparedEvents(
   // Identity is resolved before the publication gate. Classification stays
   // concurrent; candidate construction and ID allocation stay in source order.
   const prepared = rawEvents.map((raw) => {
-    const event = normalizeRawEvent(raw);
+    const event = prepareNormalizedEvent(raw);
     const source = event ? bySource.get(event.sourceId) : undefined;
     const venueMatch = event ? matchVenue(venueHint(event), options.catalog) : undefined;
     const venueId = venueMatch?.venue.id;

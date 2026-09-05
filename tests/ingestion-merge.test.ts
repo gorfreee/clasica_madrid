@@ -376,6 +376,54 @@ describe('enriquecimiento monotónico de performers, composers y works', () => {
     expect(second.diffs).toEqual([]);
     expect(second.diagnostics).toEqual([]);
   });
+
+  it('corrige un performer publicado en ALL CAPS sin duplicarlo', () => {
+    const existing = makeEvent({
+      performers: [{ name: 'JEAN RONDEAU' }],
+    });
+    const merged = mergeExistingEvent(
+      existing,
+      proposal({
+        title: existing.title,
+        performers: [{ name: 'JEAN RONDEAU' }],
+      }),
+      TEST_NOW,
+    );
+
+    expect(merged.event.performers).toEqual([{ name: 'Jean Rondeau' }]);
+    expect(merged.event.performers).toHaveLength(1);
+    expect(merged.diffs.some((item) => item.startsWith('performers:'))).toBe(true);
+  });
+
+  it('un Event con composers vacíos admite el backfill de una observación posterior', () => {
+    const existing = makeEvent({
+      composers: [],
+      works: [],
+    });
+    const merged = mergeExistingEvent(
+      existing,
+      proposal({
+        title: existing.title,
+        composers: [
+          { name: 'Johann Sebastian Bach' },
+          { name: 'François Couperin' },
+          { name: 'Heinrich Ignaz Franz Biber' },
+          { name: 'György Ligeti' },
+        ],
+        works: [],
+      }),
+      TEST_NOW,
+    );
+
+    expect(merged.event.composers).toEqual([
+      { name: 'Johann Sebastian Bach' },
+      { name: 'François Couperin' },
+      { name: 'Heinrich Ignaz Franz Biber' },
+      { name: 'György Ligeti' },
+    ]);
+    expect(merged.event.works).toEqual([]);
+    expect(merged.diagnostics.filter((item) => item.startsWith('composers:'))).toEqual([]);
+  });
 });
 
 function assertNeverLosesPublishedIdentity(event: Event): void {

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   canonicalizeEventTitle,
+  canonicalizePerformerName,
+  planPublishedPerformerCanonicalization,
   planPublishedTitleCanonicalization,
   replacePublishedTitle,
 } from '../src/ingestion/event-title.ts';
@@ -130,6 +132,42 @@ describe('canonicalizeEventTitle', () => {
   });
 });
 
+describe('canonicalizePerformerName', () => {
+  it('normaliza JEAN RONDEAU', () => {
+    expect(canonicalizePerformerName('JEAN RONDEAU')).toBe('Jean Rondeau');
+  });
+
+  it('deja byte-for-byte un nombre que ya tiene casing razonable', () => {
+    const already = 'Jean Rondeau';
+    expect(canonicalizePerformerName(already)).toBe(already);
+    expect(canonicalizePerformerName('María de la O')).toBe('María de la O');
+  });
+
+  it('respeta partículas en un nombre ALL CAPS', () => {
+    expect(canonicalizePerformerName('JUAN DE LA RUBIA')).toBe('Juan de la Rubia');
+  });
+
+  it('respeta nombres compuestos, con guion o apóstrofo', () => {
+    expect(canonicalizePerformerName('PIERRE-LAURENT AIMARD')).toBe('Pierre-Laurent Aimard');
+    expect(canonicalizePerformerName('L’ARPEGGIATA')).toBe('L’Arpeggiata');
+  });
+
+  it('preserva acrónimos y ensembles estilizados', () => {
+    expect(canonicalizePerformerName('ORCAM')).toBe('ORCAM');
+    expect(canonicalizePerformerName('OCNE')).toBe('OCNE');
+    expect(canonicalizePerformerName('RTVE')).toBe('RTVE');
+    expect(canonicalizePerformerName('CNDM')).toBe('CNDM');
+    expect(canonicalizePerformerName('APOLLO5')).toBe('APOLLO5');
+    expect(canonicalizePerformerName('PLURALENSEMBLE')).toBe('PLURALENSEMBLE');
+  });
+
+  it('comparte el núcleo con títulos ALL CAPS', () => {
+    expect(canonicalizePerformerName('ORQUESTA NACIONAL DE ESPAÑA')).toBe(
+      canonicalizeEventTitle('ORQUESTA NACIONAL DE ESPAÑA'),
+    );
+  });
+});
+
 describe('publicación canónica', () => {
   it('toCandidate publica el título canónico sin cambiar id ni slug respecto al observado en ALL CAPS', () => {
     const source = getSourceDefinition('teatro-real');
@@ -156,6 +194,21 @@ describe('publicación canónica', () => {
     expect(mixed.candidate?.event.title).toBe('Concierto Sinfónico A/5');
     expect(caps.candidate?.event.id).toBe(mixed.candidate?.event.id);
     expect(caps.candidate?.event.slug).toBe(mixed.candidate?.event.slug);
+  });
+
+  it('toCandidate publica el performer canónico a partir de ALL CAPS', () => {
+    const source = getSourceDefinition('teatro-real');
+    const catalog = teatroCatalog();
+    const built = toCandidate(
+      observed({ performers: [{ name: 'JEAN RONDEAU' }] }),
+      source,
+      catalog,
+      TEST_NOW,
+      new Set(),
+      new Set(),
+      includeClassification(),
+    );
+    expect(built.candidate?.event.performers).toEqual([{ name: 'Jean Rondeau' }]);
   });
 
   it('proposalFromObservation canónico no pisa un título publicado bien formateado', () => {
@@ -203,6 +256,18 @@ describe('migración de títulos publicados', () => {
     expect(planPublishedTitleCanonicalization(catalog)).toEqual([]);
     for (const event of catalog.events) {
       expect(canonicalizeEventTitle(event.title), event.id).toBe(event.title);
+    }
+  });
+
+  it('todo performer publicado ya es el resultado del helper de casing', async () => {
+    const catalog = await loadCatalogFromDir(defaultDataDir());
+    expect(planPublishedPerformerCanonicalization(catalog)).toEqual([]);
+    for (const event of catalog.events) {
+      for (const performer of event.performers) {
+        expect(canonicalizePerformerName(performer.name), `${event.id}:${performer.name}`).toBe(
+          performer.name,
+        );
+      }
     }
   });
 });
