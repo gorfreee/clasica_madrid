@@ -18,6 +18,12 @@
   "performers": [
     {
       "name": "Coro Nacional de España"
+    },
+    {
+      "name": "Miguel Ángel García Cañamero"
+    },
+    {
+      "name": "Edward Houghton"
     }
   ],
   "composers": [],
@@ -34,10 +40,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-08-chigi-codex",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-05",
       "externalId": "ocne-satelite-08-chigi-codex"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-05"
 }

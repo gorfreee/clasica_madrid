@@ -18,7 +18,12 @@
   "performers": [],
   "composers": [],
   "works": [],
-  "eras": [],
+  "eras": [
+    "baroque",
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
   "formats": [
     "opera",
     "symphonic"
@@ -29,10 +34,10 @@
     {
       "sourceId": "src_teatro_real",
       "url": "https://www.teatroreal.es/es/espectaculo/concierto-concurso-tenor-vinas",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "concierto-concurso-tenor-vinas"
     }
   ],
   "primarySourceId": "src_teatro_real",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

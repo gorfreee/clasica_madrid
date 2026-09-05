@@ -26,8 +26,19 @@
       "name": "Anne-Sophie Mutter"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Johannes Brahms"
+    },
+    {
+      "name": "Franz Schubert"
+    }
+  ],
+  "works": [
+    {
+      "title": "BRAHMS Concierto para violín en Re Mayor Op.77"
+    }
+  ],
   "eras": [
     "romantic"
   ],
@@ -40,10 +51,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-anne-sophie-mutter-y-munchner-philharmoniker",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "ibermusica-anne-sophie-mutter-y-munchner-philharmoniker"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

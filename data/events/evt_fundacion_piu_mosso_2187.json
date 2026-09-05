@@ -16,7 +16,26 @@
     }
   ],
   "performers": [],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Robert Schumann"
+    },
+    {
+      "name": "Frédéric Chopin"
+    },
+    {
+      "name": "Johannes Brahms"
+    },
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Maurice Ravel"
+    },
+    {
+      "name": "Franz Liszt"
+    }
+  ],
   "works": [],
   "eras": [
     "classical",
@@ -32,10 +51,10 @@
     {
       "sourceId": "src_fundacionpiumosso_com",
       "url": "https://www.fundacionpiumosso.com/evento/victor-tretyakov-piano",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "2187"
     }
   ],
   "primarySourceId": "src_fundacionpiumosso_com",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

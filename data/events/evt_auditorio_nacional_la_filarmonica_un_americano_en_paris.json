@@ -16,8 +16,17 @@
     }
   ],
   "performers": [],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Beethoven"
+    }
+  ],
+  "works": [
+    {
+      "title": "Claro de luna",
+      "composerName": "Beethoven"
+    }
+  ],
   "eras": [
     "classical",
     "romantic"
@@ -31,10 +40,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/la-filarmonica-un-americano-en-paris",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "la-filarmonica-un-americano-en-paris"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

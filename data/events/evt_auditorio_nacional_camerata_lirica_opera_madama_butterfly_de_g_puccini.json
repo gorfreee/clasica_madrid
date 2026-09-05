@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_camerata_lirica_opera_madama_butterfly_de_g_puccini",
+  "slug": "camerata-lirica-opera-madama-butterfly-de-g-puccini",
+  "title": "Camerata Lírica. Ópera Madama Butterfly de G. Puccini",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_camerata_lirica_opera_madama_butterfly_de_g_puccini_01",
+      "date": "2026-10-31",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Camerata Lírica"
+    },
+    {
+      "name": "Sergio Kuhlmann",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "G. PUCCINI"
+    }
+  ],
+  "works": [
+    {
+      "title": "ÓPERA MADAMA BUTTERFLY",
+      "composerName": "G. PUCCINI"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "opera"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/camerata-lirica-opera-madama-butterfly-de-g-puccini",
+      "checkedAt": "2026-09-05",
+      "externalId": "camerata-lirica-opera-madama-butterfly-de-g-puccini"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-05"
+}

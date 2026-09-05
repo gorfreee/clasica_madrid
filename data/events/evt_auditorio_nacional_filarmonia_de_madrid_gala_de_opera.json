@@ -18,6 +18,22 @@
   "performers": [
     {
       "name": "Orquesta y Coro Filarmonía"
+    },
+    {
+      "name": "Participativos Filarmonía"
+    },
+    {
+      "name": "Anna Koźlakiewicz"
+    },
+    {
+      "name": "Andrés Sánchez-Joglar"
+    },
+    {
+      "name": "Rafael Albiñana, director del Coro"
+    },
+    {
+      "name": "Pascual Osa",
+      "role": "conductor"
     }
   ],
   "composers": [
@@ -31,7 +47,9 @@
       "composerName": "Participativos Filarmonía"
     }
   ],
-  "eras": [],
+  "eras": [
+    "romantic"
+  ],
   "formats": [
     "symphonic"
   ],
@@ -41,10 +59,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/filarmonia-de-madrid-gala-de-opera",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "filarmonia-de-madrid-gala-de-opera"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

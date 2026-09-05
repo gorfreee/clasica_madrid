@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_filarmonia_de_madrid_danza_espanola",
+  "slug": "filarmonia-de-madrid-danza-espanola",
+  "title": "Filarmonía de Madrid. Danza Española",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_filarmonia_de_madrid_danza_espanola_01",
+      "date": "2027-02-21",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "M. Ravel"
+    }
+  ],
+  "works": [
+    {
+      "title": "Bolero",
+      "composerName": "M. Ravel"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/filarmonia-de-madrid-danza-espanola",
+      "checkedAt": "2026-09-05",
+      "externalId": "filarmonia-de-madrid-danza-espanola"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-05"
+}

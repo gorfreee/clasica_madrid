@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatros_canal_100116_2026_10_25",
+  "slug": "xvii-festival-de-ensembles-taller-sonoro",
+  "title": "XVII Festival de Ensembles: TALLER SONORO",
+  "status": "scheduled",
+  "venueId": "ven_teatros_canal_sala_verde",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatros_canal_100116_2026_10_25_01",
+      "date": "2026-10-25",
+      "time": null,
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Taller Sonoro"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_teatros_canal",
+      "url": "https://www.teatroscanal.com/espectaculo/xvii-festival-de-ensembles-2026",
+      "checkedAt": "2026-09-05",
+      "externalId": "100116:2026-10-25"
+    }
+  ],
+  "primarySourceId": "src_teatros_canal",
+  "lastVerifiedAt": "2026-09-05"
+}

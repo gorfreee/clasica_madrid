@@ -16,7 +16,29 @@
     }
   ],
   "performers": [],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Georges Bizet"
+    },
+    {
+      "name": "Giacomo Puccini"
+    },
+    {
+      "name": "Giuseppe Verdi"
+    },
+    {
+      "name": "Gaetano Donizetti"
+    },
+    {
+      "name": "Francesco Cilea"
+    },
+    {
+      "name": "Jacques Offenbach"
+    },
+    {
+      "name": "Federico Moreno Torroba"
+    }
+  ],
   "works": [],
   "eras": [
     "romantic"
@@ -31,10 +53,10 @@
     {
       "sourceId": "src_orquesta_coro_rtve",
       "url": "https://www.teatromonumental.es/eventos/gala-de-opera-zarzuela",
-      "checkedAt": "2026-08-31",
+      "checkedAt": "2026-09-05",
       "externalId": "/eventos/gala-de-opera-zarzuela/"
     }
   ],
   "primarySourceId": "src_orquesta_coro_rtve",
-  "lastVerifiedAt": "2026-08-31"
+  "lastVerifiedAt": "2026-09-05"
 }

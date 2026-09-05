@@ -18,7 +18,10 @@
   "performers": [],
   "composers": [],
   "works": [],
-  "eras": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
   "formats": [
     "zarzuela"
   ],
@@ -28,10 +31,10 @@
     {
       "sourceId": "src_teatro_zarzuela",
       "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/conciertos-2026-2027/con-alma-de-zarzuela-2026",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "/es/temporada/conciertos-2026-2027/con-alma-de-zarzuela-2026"
     }
   ],
   "primarySourceId": "src_teatro_zarzuela",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

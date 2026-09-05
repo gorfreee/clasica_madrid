@@ -21,8 +21,17 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Chaikovski"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sinfonía núm. 5",
+      "composerName": "Chaikovski"
+    }
+  ],
   "eras": [
     "romantic"
   ],
@@ -35,10 +44,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/la-filarmonica-5",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "la-filarmonica-5"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

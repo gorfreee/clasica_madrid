@@ -46,6 +46,10 @@
     {
       "title": "Daphnis y Chloe, Suite n.° 2",
       "composerName": "Maurice Ravel"
+    },
+    {
+      "title": "Obertura-Fantasía",
+      "composerName": "Piotr I. Tchaikovsky"
     }
   ],
   "eras": [
@@ -61,10 +65,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/orquesta-sinfonica-de-madrid-elim-chan",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "orquesta-sinfonica-de-madrid-elim-chan"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

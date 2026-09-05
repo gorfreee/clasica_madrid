@@ -24,7 +24,14 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Antonio de Cabezón"
+    },
+    {
+      "name": "Miguel de Fuenllana"
+    }
+  ],
   "works": [],
   "eras": [
     "renaissance"
@@ -39,7 +46,7 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-la-grande-chapelle-5",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-05",
       "externalId": "cndm-la-grande-chapelle-5"
     },
     {
@@ -50,5 +57,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

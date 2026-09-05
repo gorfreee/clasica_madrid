@@ -16,7 +16,26 @@
     }
   ],
   "performers": [],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Robert Schumann"
+    },
+    {
+      "name": "Frédéric Chopin"
+    },
+    {
+      "name": "Johannes Brahms"
+    },
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Maurice Ravel"
+    },
+    {
+      "name": "Franz Liszt"
+    }
+  ],
   "works": [],
   "eras": [
     "classical",
@@ -32,10 +51,10 @@
     {
       "sourceId": "src_ayuntamiento_madrid",
       "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=a8d5e042bd42d910VgnVCM200000f921e388RCRD",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-05",
       "externalId": "50265531"
     }
   ],
   "primarySourceId": "src_ayuntamiento_madrid",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-05"
 }

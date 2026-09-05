@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_xxviii_festival_internacional_de_musica_contemporanea_de_madrid_coma201926",
+  "slug": "xxviii-festival-internacional-de-musica-contemporanea-de-madrid-coma-26-orquestra-de-cambra-catalana",
+  "title": "XXVIII Festival Internacional de Música Contemporánea de Madrid COMA’26. Orquestra de Cambra Catalana",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_xxviii_festival_internacional_de_musica_contemporanea_de_madrid_coma201926_01",
+      "date": "2026-10-25",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquestra de Cambra Catalana"
+    },
+    {
+      "name": "Stanislav Stepanek"
+    },
+    {
+      "name": "Natàlia Borysiuk"
+    },
+    {
+      "name": "Mireia Puigmal"
+    },
+    {
+      "name": "Oriol Algueró"
+    },
+    {
+      "name": "Roger Gich"
+    },
+    {
+      "name": "Cèlia Molina"
+    },
+    {
+      "name": "Joaquim García"
+    },
+    {
+      "name": "Marta Sedó"
+    },
+    {
+      "name": "Joaquim Badia"
+    },
+    {
+      "name": "Núria Piñol"
+    },
+    {
+      "name": "Zsolt Tottzer"
+    },
+    {
+      "name": "Elisabetta Renzi"
+    },
+    {
+      "name": "Rafael Esteve"
+    },
+    {
+      "name": "Alicia Moreno"
+    },
+    {
+      "name": "Joan Pàmies"
+    }
+  ],
+  "composers": [
+    {
+      "name": "JAVIER MARTÍNEZ CAMPOS (1989)"
+    },
+    {
+      "name": "ENRIQUE IGOA (1958)"
+    },
+    {
+      "name": "ENRIQUE MUÑOZ (1957)"
+    },
+    {
+      "name": "ALEJANDRO MORENO (1965)"
+    },
+    {
+      "name": "JUAN JOSÉ TALAVERA (1966)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Kaerlud",
+      "composerName": "JAVIER MARTÍNEZ CAMPOS (1989)"
+    },
+    {
+      "title": "El sueño de Amadís Op. 45 (2004/revisión 2026)",
+      "composerName": "ENRIQUE IGOA (1958)"
+    },
+    {
+      "title": "Paraísos para Joan(es)",
+      "composerName": "ENRIQUE MUÑOZ (1957)"
+    },
+    {
+      "title": "Desglaç: nº 3, 4, 6 y 7",
+      "composerName": "ALEJANDRO MORENO (1965)"
+    },
+    {
+      "title": "Requiem por Palestina",
+      "composerName": "JUAN JOSÉ TALAVERA (1966)"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/xxviii-festival-internacional-de-musica-contemporanea-de-madrid-coma201926",
+      "checkedAt": "2026-09-05",
+      "externalId": "xxviii-festival-internacional-de-musica-contemporanea-de-madrid-coma201926"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-05"
+}

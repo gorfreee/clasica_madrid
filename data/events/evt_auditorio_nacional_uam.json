@@ -153,6 +153,10 @@
     {
       "title": "Elena Kats-Chernin (1957-)",
       "composerName": "La Bohème (1965)"
+    },
+    {
+      "title": "RAPSODIA ROMANÍ",
+      "composerName": "LIKE A BOHO"
     }
   ],
   "eras": [
@@ -170,10 +174,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/uam",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "uam"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

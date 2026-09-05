@@ -45,17 +45,27 @@
     },
     {
       "name": "Alesander Pérez"
+    },
+    {
+      "name": "Juan-Alfonso García"
     }
   ],
   "composers": [
     {
       "name": "Francesc Vila"
+    },
+    {
+      "name": "Einojuhani Rautavaara"
     }
   ],
   "works": [
     {
       "title": "Nocturnos de la ventana",
       "composerName": "Francesc Vila"
+    },
+    {
+      "title": "Suite Lorca",
+      "composerName": "Einojuhani Rautavaara"
     }
   ],
   "eras": [
@@ -71,10 +81,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-15-a-granada",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "ocne-satelite-15-a-granada"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

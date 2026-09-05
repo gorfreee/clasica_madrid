@@ -50,6 +50,12 @@
     {
       "title": "Sinfonía en Re menor, op. 12 n.º 4, G 506 «La Casa del Diavolo»",
       "composerName": "Luigi Boccherini"
+    },
+    {
+      "title": "Luigi Boccherini (1743–1805) – Sinfonía en La mayor, op. 35 n.º 3, G 511"
+    },
+    {
+      "title": "Wolfgang A. Mozart (1756–1791) – Concierto para trompa n.º 1 en Re mayor, KV 412"
     }
   ],
   "eras": [
@@ -65,10 +71,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/hispania-concertalia-boccherini-mozart",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "hispania-concertalia-boccherini-mozart"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

@@ -22,7 +22,20 @@
     }
   ],
   "performers": [],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Giuseppe Verdi"
+    },
+    {
+      "name": "Gioachino Rossini"
+    },
+    {
+      "name": "Giacomo Puccini"
+    },
+    {
+      "name": "Ruggero Leoncavallo"
+    }
+  ],
   "works": [],
   "eras": [
     "romantic"
@@ -36,10 +49,10 @@
     {
       "sourceId": "src_orquesta_coro_rtve",
       "url": "https://www.teatromonumental.es/eventos/concierto-sinfonico-b-16",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "/eventos/concierto-sinfonico-b-16/"
     }
   ],
   "primarySourceId": "src_orquesta_coro_rtve",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

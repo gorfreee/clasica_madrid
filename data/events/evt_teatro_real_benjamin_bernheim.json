@@ -16,7 +16,23 @@
     }
   ],
   "performers": [],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Charles Gounod"
+    },
+    {
+      "name": "Georges Bizet"
+    },
+    {
+      "name": "Hector Berlioz"
+    },
+    {
+      "name": "Giuseppe Verdi"
+    },
+    {
+      "name": "Giacomo Puccini"
+    }
+  ],
   "works": [],
   "eras": [
     "romantic"
@@ -30,10 +46,10 @@
     {
       "sourceId": "src_teatro_real",
       "url": "https://www.teatroreal.es/es/espectaculo/benjamin-bernheim",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "benjamin-bernheim"
     }
   ],
   "primarySourceId": "src_teatro_real",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }

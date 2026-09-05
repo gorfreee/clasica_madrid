@@ -30,8 +30,17 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Mahler"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sinfonía núm. 3",
+      "composerName": "Mahler"
+    }
+  ],
   "eras": [
     "romantic"
   ],
@@ -45,10 +54,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/la-filarmonica-tercera-de-mahler",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-05",
       "externalId": "la-filarmonica-tercera-de-mahler"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-05"
 }

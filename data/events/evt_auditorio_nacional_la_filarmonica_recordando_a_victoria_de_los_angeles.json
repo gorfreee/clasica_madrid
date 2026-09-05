@@ -23,8 +23,17 @@
       "name": "Olivia Zaugg"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Mompou"
+    }
+  ],
+  "works": [
+    {
+      "title": "Toldrà y Granados",
+      "composerName": "Mompou"
+    }
+  ],
   "eras": [
     "classical",
     "romantic",
@@ -39,10 +48,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/la-filarmonica-recordando-a-victoria-de-los-angeles",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-05",
       "externalId": "la-filarmonica-recordando-a-victoria-de-los-angeles"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-05"
 }

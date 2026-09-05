@@ -29,6 +29,9 @@
     },
     {
       "name": "Antonín Dvořák"
+    },
+    {
+      "name": "Leoš Janáček"
     }
   ],
   "works": [
@@ -39,6 +42,10 @@
     {
       "title": "Sinfonía n.° 9 en mi menor “Del Nuevo Mundo”, op. 95, B. 178",
       "composerName": "Antonín Dvořák"
+    },
+    {
+      "title": "Suite de “Katia Kabanova”",
+      "composerName": "Leoš Janáček"
     }
   ],
   "eras": [
@@ -53,10 +60,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/orquesta-sinfonica-de-madrid-gustavo-gimeno-3",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-05",
       "externalId": "orquesta-sinfonica-de-madrid-gustavo-gimeno-3"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-05"
 }
