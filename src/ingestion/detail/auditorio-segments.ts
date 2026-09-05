@@ -1,9 +1,14 @@
 import {
+  looksLikeCatalogOnlyLine,
   looksLikeComposerLine,
   looksLikeEnsembleName,
+  looksLikeMovementLine,
+  looksLikeProductionNote,
   looksLikeProgramHeader,
   looksLikeScheduleNotice,
+  looksLikeTextCredit,
   looksLikeWorkInstrumentation,
+  parseExplicitTitleAuthorWork,
 } from '../observed-cleanup.ts';
 
 export type AuditorioSegments = {
@@ -13,12 +18,14 @@ export type AuditorioSegments = {
 };
 
 const ROLE_TOKEN =
-  'mezzosoprano|mezzo|soprano|contratenor|bajo-bar[ií]tono|bar[ií]tono|tenor|bajo|piano|viol[ií]n|viola|violonchelo|violoncelo|cello|contrabajo|flauta|oboe|clarinete|fagot|trompa|trompeta|tromb[oó]n|arpa|clave|la[uú]d|tiorba|guitarra|percusiones|percusi[oó]n|bater[ií]a|mel[oó]dica|\\u00f3rgano|organo|concertino|directora|director|direcci[oó]n|narradora';
+  'mezzosoprano|mezzo|soprano|contratenor|bajo-bar[ií]tono|bar[ií]tono|tenor|bajo|piano|viol[ií]n|viola|violonchelo|violoncelo|cello|contrabajo|flauta|oboe|clarinete|fagot|trompa|trompeta|tromb[oó]n|arpa|clave|la[uú]d|tiorba|guitarra|percusiones|percusi[oó]n|bater[ií]a|mel[oó]dica|\\u00f3rgano|organo|concertino|directora|director|direcci[oó]n|narradora|solista|core[oó]graf[oa]';
+
+const CREDIT_PHRASE = 'preparaci[oó]n del conjunto vocal|asistente de direcci[oó]n';
 
 const ROLE_QUALIFIER = '(?:\\s+(?:primer[oa]|segund[oa]|principal|art[ií]stic[oa]))?';
 
 const ROLE_ONLY = new RegExp(
-  `^(?:violines|tenores|bajos|sopranos?|mezzosopranos?|bar[ií]tonos?|pianos?|${ROLE_TOKEN})${ROLE_QUALIFIER}(?:\\s+y\\s+(?:musical|${ROLE_TOKEN})${ROLE_QUALIFIER})?$`,
+  `^(?:(?:violines|tenores|bajos|sopranos?|mezzosopranos?|bar[ií]tonos?|pianos?|${ROLE_TOKEN})${ROLE_QUALIFIER}(?:\\s+y\\s+(?:musical|${ROLE_TOKEN})${ROLE_QUALIFIER})?|${CREDIT_PHRASE})$`,
   'i',
 );
 
@@ -43,13 +50,12 @@ const STRONG_CATALOG =
 const WORK_GENRE =
   /\b(?:concierto|concerto|sinfon[ií]a|symphony|sonata|suite|quinteto|cuarteto|cuartet|tr[ií]o|obertura|ouverture|r[eé]quiem|misa|missa|toccata|fuga|fugue|preludio|pr[eé]lude|nocturne|mazurka|scherzo|impromptu|variaciones|variations|cantata|oratorio|fantas[ií]a|romance|rhapsod|rapsodia|divertimento|polonesa|polonaise)\b/i;
 
-const MOVEMENT = /^(?:i{1,3}|iv|vi{0,3}|[1-9]\d*)\.\s+\S+/i;
-
 const NAME_PARTICLE = /^(?:de|del|van|von|di|da|el|la|los|las)$/i;
 
 /**
  * Split Auditorio Nacional h4 lines into notice / cast / program.
- * Later h4 blocks never leak back into the cast once a program section has started.
+ * Consecutive blocks may all be cast; only a program header or musical evidence
+ * opens the repertoire. Later blocks never leak back into the cast after that.
  * When the frontier is unclear, omit unlabeled names — precision over a full cast.
  */
 export function segmentAuditorioBlocks(blocks: string[][]): AuditorioSegments {
@@ -87,7 +93,6 @@ export function segmentAuditorioBlocks(blocks: string[][]): AuditorioSegments {
     const hasLaterBlock = contentBlocks.slice(index + 1).some((block) => block.length > 0);
     if (hasLaterBlock) {
       performerLines.push(...content);
-      inProgram = true;
       continue;
     }
 
@@ -103,11 +108,15 @@ export function findProgramStartIndex(lines: string[]): number {
     const line = lines[index] ?? '';
     const next = lines[index + 1];
     if (hasExplicitPerformerSignal(line) || looksLikeRoleOnlyLine(line)) continue;
+    if (looksLikeMovementLine(line) || looksLikeProductionNote(line) || looksLikeTextCredit(line)) {
+      continue;
+    }
     if (looksLikeProgramHeader(line) || ANONYMOUS_COMPOSER.test(line) || /^obras de\b/i.test(line)) {
       return index;
     }
     if (parseComposerYearWork(line)) return index;
     if (parseComposerColonWork(line)) return index;
+    if (parseExplicitTitleAuthorWork(line)) return index;
     if (isComposerHeading(line)) return index;
     if (looksLikeStrongWorkLine(line)) return walkBackComposers(lines, index);
     if (
@@ -170,6 +179,7 @@ function parseSingleAuditorioPerson(
   if (looksLikeScheduleNotice(cleaned) || looksLikeProgramHeader(cleaned)) return undefined;
   if (looksLikeRoleOnlyLine(cleaned) || ANONYMOUS_COMPOSER.test(cleaned)) return undefined;
   if (parseComposerYearWork(cleaned) || parseComposerColonWork(cleaned)) return undefined;
+  if (parseExplicitTitleAuthorWork(cleaned)) return undefined;
   if (isComposerHeading(cleaned) || looksLikeStrongWorkLine(cleaned)) return undefined;
   if (looksLikeWorkInstrumentation(cleaned)) return undefined;
 
@@ -292,6 +302,11 @@ function looksLikeCastEnsemble(text: string): boolean {
 
 function isComposerHeading(line: string): boolean {
   if (looksLikeProgramHeader(line) || looksLikeRoleOnlyLine(line)) return false;
+  if (looksLikeMovementLine(line) || looksLikeProductionNote(line) || looksLikeTextCredit(line)) {
+    return false;
+  }
+  if (looksLikeCatalogOnlyLine(line) || parseExplicitTitleAuthorWork(line)) return false;
+  if (hasExplicitPerformerSignal(line) || looksLikeCastEnsemble(line)) return false;
   if (looksLikeComposerLine(line)) return true;
   if (INITIALS_COMPOSER.test(line)) return true;
   return false;
@@ -318,7 +333,7 @@ function looksLikeWorkishLine(text: string): boolean {
     return false;
   }
   if (isComposerHeading(trimmed) || looksLikeUnlabeledPerson(trimmed)) return false;
-  if (looksLikeStrongWorkLine(trimmed) || MOVEMENT.test(trimmed)) return true;
+  if (looksLikeStrongWorkLine(trimmed) || looksLikeMovementLine(trimmed)) return true;
   if (looksLikeEnsembleName(trimmed) && !STRONG_CATALOG.test(trimmed) && !WORK_GENRE.test(trimmed)) {
     return false;
   }
@@ -373,6 +388,10 @@ function isCastBoundary(line: string): boolean {
 export function canPairAsAuditorioComposer(text: string): boolean {
   const cleaned = cleanLine(text);
   if (!cleaned || looksLikeProgramHeader(cleaned) || looksLikeRoleOnlyLine(cleaned)) return false;
+  if (looksLikeMovementLine(cleaned) || looksLikeProductionNote(cleaned) || looksLikeTextCredit(cleaned)) {
+    return false;
+  }
+  if (parseExplicitTitleAuthorWork(cleaned) || looksLikeCatalogOnlyLine(cleaned)) return false;
   if (isCastBoundary(cleaned) || STRONG_CATALOG.test(cleaned)) return false;
   if (looksLikeWorkInstrumentation(cleaned)) return false;
   return isComposerHeading(cleaned) || looksLikeUnlabeledPerson(cleaned) || ANONYMOUS_COMPOSER.test(cleaned);

@@ -65,6 +65,24 @@ describe('segmentación performer/programa del Auditorio', () => {
     expect(parseAuditorioPersonLine('Pause')).toBeUndefined();
     expect(parseAuditorioPersonLine('Proyecto artístico y dirección')).toBeUndefined();
     expect(parseAuditorioPersonLine('Jesús De Monasterio, Léo Delibes')).toBeUndefined();
+    expect(parseAuditorioPersonLine('I PARTE')).toBeUndefined();
+    expect(parseAuditorioPersonLine('PARTE ÚNICA:')).toBeUndefined();
+    expect(parseAuditorioPersonLine('Matías Piñeira, Solista')).toEqual({
+      name: 'Matías Piñeira',
+      roleText: 'Solista',
+    });
+    expect(parseAuditorioPersonLine('Luca Guglielmi, asistente de dirección')).toEqual({
+      name: 'Luca Guglielmi',
+      roleText: 'asistente de dirección',
+    });
+    expect(parseAuditorioPersonLine('Lluís Vilamajó, preparación del conjunto vocal')).toEqual({
+      name: 'Lluís Vilamajó',
+      roleText: 'preparación del conjunto vocal',
+    });
+    expect(parseAuditorioPersonLine('Jose Antonio Checa, Coreógrafo')).toEqual({
+      name: 'Jose Antonio Checa',
+      roleText: 'Coreógrafo',
+    });
   });
 
   it('Obras de marca el inicio del programa', () => {
@@ -302,5 +320,38 @@ describe('segmentación performer/programa del Auditorio', () => {
         'KATRINA PENMAN (1982) To Andalusia and beyond',
       ]),
     ).toBe(1);
+  });
+
+  it('varios h4 consecutivos de intérpretes no abren el programa hasta el repertorio', () => {
+    const segments = segmentAuditorioBlocks([
+      ['CAMERATA LÍRICA', 'Guiomar Cantó, soprano'],
+      ['Programa', 'ÓPERA MADAMA BUTTERFLY de G. PUCCINI', '(Adaptación Escenificada)'],
+    ]);
+    expect(segments.performerLines).toEqual(['CAMERATA LÍRICA', 'Guiomar Cantó, soprano']);
+    expect(segments.programLines[0]).toBe('Programa');
+    expect(segments.programLines).toContain('ÓPERA MADAMA BUTTERFLY de G. PUCCINI');
+  });
+
+  it('I PARTE y Capella no son frontera de compositor; el repertorio empieza en el encabezado musical', () => {
+    expect(findProgramStartIndex(['Pascual Osa, Director', 'I PARTE', 'Carmina Burana (C. Orff)'])).toBe(1);
+    const savall = segmentAuditorioBlocks([
+      [
+        'LE CONCERT DES NATIONS',
+        'Lina Tur Bonet, concertino',
+        'Luca Guglielmi, asistente de dirección',
+        'LA CAPELLA NACIONAL DE CATALUNYA',
+        'Lluís Vilamajó, preparación del conjunto vocal',
+        'Johannes Brahms (1833-1897)',
+        'Schicksalslied (Canto del destino)',
+      ],
+    ]);
+    expect(savall.performerLines).toEqual([
+      'LE CONCERT DES NATIONS',
+      'Lina Tur Bonet, concertino',
+      'Luca Guglielmi, asistente de dirección',
+      'LA CAPELLA NACIONAL DE CATALUNYA',
+      'Lluís Vilamajó, preparación del conjunto vocal',
+    ]);
+    expect(savall.programLines[0]).toBe('Johannes Brahms (1833-1897)');
   });
 });

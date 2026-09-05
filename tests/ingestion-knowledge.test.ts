@@ -5,7 +5,10 @@ import { findKnownComposersInText, matchComposer, buildIndex } from '../src/inge
 import {
   isObviousNonPerformer,
   looksLikeComposerLine,
+  looksLikeEnsembleName,
+  looksLikeProgramHeader,
   looksLikeWorkLine,
+  parseExplicitTitleAuthorWork,
 } from '../src/ingestion/observed-cleanup.ts';
 import {
   normalizeComposerList,
@@ -472,6 +475,44 @@ describe('composer knowledge base', () => {
     expect(looksLikeComposerLine('Rubén Mendoza')).toBe(false);
     expect(looksLikeComposerLine('Marco')).toBe(false);
     expect(looksLikeComposerLine('Invocación y danza (Homenaje a Manuel de Falla)')).toBe(false);
+    expect(looksLikeComposerLine('Pique Dame, F. V. Suppé')).toBe(false);
+    expect(looksLikeComposerLine('I PARTE')).toBe(false);
+    expect(looksLikeComposerLine('PARTE ÚNICA:')).toBe(false);
+    expect(looksLikeComposerLine('LA CAPELLA NACIONAL DE CATALUNYA')).toBe(false);
+    expect(looksLikeComposerLine('Compañía JAC Ballet')).toBe(false);
+    expect(looksLikeComposerLine('IX. Adagio')).toBe(false);
+    expect(looksLikeComposerLine('Johannes Brahms (1833-1897)')).toBe(true);
+    expect(looksLikeProgramHeader('I PARTE')).toBe(true);
+    expect(looksLikeProgramHeader('II PARTE')).toBe(true);
+    expect(looksLikeProgramHeader('PARTE I')).toBe(true);
+    expect(looksLikeProgramHeader('PARTE ÚNICA:')).toBe(true);
+    expect(looksLikeEnsembleName('LA CAPELLA NACIONAL DE CATALUNYA')).toBe(true);
+    expect(looksLikeEnsembleName('Compañía JAC Ballet')).toBe(true);
+    expect(parseExplicitTitleAuthorWork('Concierto para Trompa y Orquesta N.1 de R. Strauss')).toEqual({
+      title: 'Concierto para Trompa y Orquesta N.1',
+      composerName: 'R. Strauss',
+    });
+    expect(parseExplicitTitleAuthorWork('Carmina Burana (C. Orff)')).toEqual({
+      title: 'Carmina Burana',
+      composerName: 'C. Orff',
+    });
+    expect(parseExplicitTitleAuthorWork('Pique Dame, F. V. Suppé')).toEqual({
+      title: 'Pique Dame',
+      composerName: 'F. V. Suppé',
+    });
+    expect(parseExplicitTitleAuthorWork('La Belle Hélène (J. Offenbach)')).toEqual({
+      title: 'La Belle Hélène',
+      composerName: 'J. Offenbach',
+    });
+    expect(parseExplicitTitleAuthorWork('ÓPERA MADAMA BUTTERFLY de G. PUCCINI')).toEqual({
+      title: 'ÓPERA MADAMA BUTTERFLY',
+      composerName: 'G. PUCCINI',
+    });
+    expect(parseExplicitTitleAuthorWork('Freikugeln Op. 362, Balas mágicas, Polca (J. Strauss)')).toBeUndefined();
+    expect(matchComposer('C. Orff')?.canonicalName).toBe('Carl Orff');
+    expect(matchComposer('F. V. Suppé')?.canonicalName).toBe('Franz von Suppé');
+    expect(matchComposer('F. Lehár')?.canonicalName).toBe('Franz Lehár');
+    expect(matchComposer('J. Strauss')).toBeUndefined();
     expect(looksLikeWorkLine('Invocación y danza (Homenaje a Manuel de Falla)')).toBe(true);
     const composers = [{ name: 'Luis de Narvaez' }, { name: 'Sergei Prokofiev' }];
     const works = [{ title: 'Mille regretz', composerName: 'Josquin Desprez' }];
