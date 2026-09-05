@@ -821,7 +821,13 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Heinrich Ignaz Franz Biber',
-    aliases: ['Heinrich Ignaz Franz Biber', 'Heinrich Biber', 'H. I. F. Biber', 'Biber'],
+    aliases: [
+      'Heinrich Ignaz Franz Biber',
+      'Heinrich Biber',
+      'H. I. F. von Biber',
+      'H. I. F. Biber',
+      'Biber',
+    ],
     eras: ['baroque'],
   },
   {
@@ -1911,7 +1917,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'György Ligeti',
-    aliases: ['György Ligeti', 'Gyorgy Ligeti', 'Ligeti'],
+    aliases: ['György Ligeti', 'Gyorgy Ligeti', 'G. Ligeti', 'Ligeti'],
     eras: ['twentieth'],
   },
   {

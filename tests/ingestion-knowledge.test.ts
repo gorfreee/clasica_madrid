@@ -59,6 +59,26 @@ describe('composer knowledge base', () => {
     );
   });
 
+  it('reconoce la grafía CNDM de un programa sin obras enumeradas', () => {
+    expect(matchComposer('H. I. F. von Biber')?.canonicalName).toBe('Heinrich Ignaz Franz Biber');
+    expect(matchComposer('G. Ligeti')?.canonicalName).toBe('György Ligeti');
+    expect(matchComposer('F. Couperin')?.canonicalName).toBe('François Couperin');
+    expect(matchComposer('J. S. Bach')?.canonicalName).toBe('Johann Sebastian Bach');
+
+    const found = findKnownComposersInText(
+      'Obras de J. S. Bach, F. Couperin, H. I. F. von Biber y G. Ligeti',
+    );
+    expect(found.map((item) => item.canonicalName).sort()).toEqual(
+      [
+        'François Couperin',
+        'György Ligeti',
+        'Heinrich Ignaz Franz Biber',
+        'Johann Sebastian Bach',
+      ].sort(),
+    );
+    expect(found).toHaveLength(4);
+  });
+
   it('no hace fuzzy matching agresivo', () => {
     expect(matchComposer('Bax')).toBeUndefined();
     expect(matchComposer('Mahlerian Ensemble')).toBeUndefined();

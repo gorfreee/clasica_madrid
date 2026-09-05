@@ -8,7 +8,7 @@ import { isPublishableInclude, type ClassificationResult } from './classificatio
 import { occurrenceIdFor, uniqueId } from './ids.ts';
 import { materialEventDiffs } from './material-diff.ts';
 import type { NormalizedEvent } from './normalize.ts';
-import { canonicalizeEventTitle } from './event-title.ts';
+import { canonicalizeEventTitle, canonicalizePerformerName } from './event-title.ts';
 import { publicationOccurrences } from './to-candidate.ts';
 import { normalizeUrl } from './urls.ts';
 import type { IngestWindow } from './dates.ts';
@@ -65,8 +65,9 @@ export function proposalFromObservation(
     venueId: options.venueId,
     occurrences: observedSchedule(event, options.now, options.window),
     performers: event.performers.map((item) => {
+      const name = canonicalizePerformerName(item.name);
       const role = resolvePerformerRole(item.roleText);
-      return role ? { name: item.name, role } : { name: item.name };
+      return role ? { name, role } : { name };
     }),
     composers: event.composers.map((item) => ({ name: item.name })),
     works: event.works.map((item) => ({
@@ -133,8 +134,8 @@ export function mergeExistingEvent(existing: Event, proposal: EventProposal, now
   const formats = mergePublishedTaxonomy('formats', existing.formats, proposal.formats);
   const performers = mergePublishedList(
     'performers',
-    existing.performers,
-    proposal.performers,
+    existing.performers.map(withCanonicalPerformerName),
+    proposal.performers.map(withCanonicalPerformerName),
     (item) => normalizeText(item.name),
     enrichPerformer,
   );
@@ -346,6 +347,12 @@ function appendUnmatchedIncoming<T>(
     seen.add(key);
     value.push(observed);
   }
+}
+
+function withCanonicalPerformerName(performer: Performer): Performer {
+  const name = canonicalizePerformerName(performer.name);
+  if (name === performer.name) return performer;
+  return performer.role ? { name, role: performer.role } : { name };
 }
 
 function enrichPerformer(canonical: Performer, observed: Performer): Performer {

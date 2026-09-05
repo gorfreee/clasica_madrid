@@ -12,7 +12,7 @@ import { isSufficientProposedVenue, matchVenue, unpublishedMatchedVenue, unpubli
 import { defaultIngestWindow, isDateInHarvestScope, type IngestWindow } from './dates.ts';
 import { ID_PREFIX } from '../lib/schemas/taxonomies.ts';
 import { SOURCE_REGISTRY, resolveCatalogSource } from './registry.ts';
-import { canonicalizeEventTitle } from './event-title.ts';
+import { canonicalizeEventTitle, canonicalizePerformerName } from './event-title.ts';
 
 export type CandidateBuild = {
   candidate?: Candidate;
@@ -82,8 +82,9 @@ export function toCandidate(
     seriesId: null,
     occurrences,
     performers: event.performers.map((item) => {
+      const name = canonicalizePerformerName(item.name);
       const role = resolvePerformerRole(item.roleText);
-      return role ? { name: item.name, role } : { name: item.name };
+      return role ? { name, role } : { name };
     }),
     composers: event.composers.map((item) => ({ name: item.name })),
     works: event.works.map((item) => ({
