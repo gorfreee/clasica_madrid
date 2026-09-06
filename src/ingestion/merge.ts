@@ -8,6 +8,14 @@ import { isPublishableInclude, type ClassificationResult } from './classificatio
 import { occurrenceIdFor, uniqueId } from './ids.ts';
 import { materialEventDiffs } from './material-diff.ts';
 import type { NormalizedEvent } from './normalize.ts';
+import {
+  canonicalizeComposerList,
+  canonicalizeComposerName,
+  canonicalizeWorkList,
+  publishedComposerIdentity,
+  rewritePublishedComposerName,
+  rewritePublishedWorkComposer,
+} from './composer-name.ts';
 import { canonicalizeEventTitle, canonicalizePerformerName } from './event-title.ts';
 import { publicationOccurrences } from './to-candidate.ts';
 import { normalizeUrl } from './urls.ts';
@@ -69,11 +77,8 @@ export function proposalFromObservation(
       const role = resolvePerformerRole(item.roleText);
       return role ? { name, role } : { name };
     }),
-    composers: event.composers.map((item) => ({ name: item.name })),
-    works: event.works.map((item) => ({
-      title: item.title,
-      ...(item.composerName ? { composerName: item.composerName } : {}),
-    })),
+    composers: canonicalizeComposerList(event.composers),
+    works: canonicalizeWorkList(event.works),
     citations: [citation],
     ...(event.dateFromDetail ? { dateFromDetail: true } : {}),
     ...(event.eventStatus ? { eventStatus: event.eventStatus } : {}),
@@ -141,15 +146,15 @@ export function mergeExistingEvent(existing: Event, proposal: EventProposal, now
   );
   const composers = mergePublishedList(
     'composers',
-    existing.composers,
-    proposal.composers,
-    (item) => normalizeText(item.name),
+    existing.composers.map(rewritePublishedComposerName),
+    canonicalizeComposerList(proposal.composers),
+    (item) => publishedComposerIdentity(item.name),
     (canonical: Composer) => canonical,
   );
   const works = mergePublishedList(
     'works',
-    existing.works,
-    proposal.works,
+    existing.works.map(rewritePublishedWorkComposer),
+    canonicalizeWorkList(proposal.works),
     (item) => normalizeText(item.title),
     enrichWork,
   );
@@ -363,7 +368,9 @@ function enrichPerformer(canonical: Performer, observed: Performer): Performer {
 
 function enrichWork(canonical: Work, observed: Work): Work {
   if (canonical.composerName || !observed.composerName) return canonical;
-  return { title: canonical.title, composerName: observed.composerName };
+  const composerName = canonicalizeComposerName(observed.composerName);
+  if (!composerName) return canonical;
+  return { title: canonical.title, composerName };
 }
 
 function preferNonEmpty<T>(existing: T[], incoming: T[]): T[] {

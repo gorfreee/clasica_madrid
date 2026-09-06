@@ -1,4 +1,8 @@
-import { matchComposer } from './knowledge/composers.ts';
+import {
+  hasComposerLifespanAnnotation,
+  matchComposer,
+  stripTrailingBiographicalYears,
+} from './knowledge/composers.ts';
 
 const HEADER =
   /^(programa|program|pausa|pause|intervalo|intermedio|i+|ii+|iii+|iv+|v+|vi+|primera parte|segunda parte|tercera parte|1[aª]? parte|2[aª]? parte|3[aª]? parte|(?:i{1,3}|iv|[1-4])\s*parte|parte\s*(?:i{1,3}|iv|[1-4]|[úu]nica)|\*+\s*estreno|\*+\s*encargo)[:.\s]*$/i;
@@ -8,8 +12,6 @@ const PROGRAM_HEADING =
 const PART_HEADER =
   /^(?:(?:i{1,3}|iv|[1-4])\s*parte|parte\s*(?:i{1,3}|iv|[1-4]|[úu]nica))[:.\s]*$/i;
 const SEPARATOR = /^-{2,}.*-{2,}$|^\*{2,}$|^·+$/;
-const LIFESPAN =
-  /\(\s*(?:ca\.?\s*)?\*?\d{3,4}\s*[–—-]\s*(?:(?:ca\.?\s*)?\*?\d{3,4})?\s*\)|\(\s*(?:ca\.?\s*)?\*?\d{4}\s*\)/;
 const CATALOG =
   /\b(?:bwv|hwv|hob\.?|buxwv|swwv|rct|k\.?\s*\d|kv\.?\s*\d|op\.?\s*\d|opus\s+\d|g\.\s*\d|h\.?\s*\d{2,})\b/i;
 const MOVEMENT = /^(?:x{0,3}(?:ix|iv|v?i{0,3})|[1-9]\d*)\.\s*\S+/i;
@@ -61,11 +63,11 @@ export function isObviousNonPerformer(name: string, roleText?: string): boolean 
   if (INSTRUMENT_ONLY.test(text)) return true;
   if (/^obras de\b/i.test(text)) return true;
   if (/\bpor determinar\b/i.test(text)) return true;
-  if (LIFESPAN.test(text)) return true;
+  if (hasComposerLifespanAnnotation(text)) return true;
   if (CATALOG.test(text) && !/\bdir(?:ector|ectora|\.)\b/i.test(text)) return true;
   if (WORK_GENRE.test(text) && !looksLikeEnsembleName(text)) return true;
   if (looksLikeWorkInstrumentation(text) && !looksLikeEnsembleName(text)) return true;
-  if (roleText && (CATALOG.test(roleText) || WORK_GENRE.test(roleText) || LIFESPAN.test(roleText))) {
+  if (roleText && (CATALOG.test(roleText) || WORK_GENRE.test(roleText) || hasComposerLifespanAnnotation(roleText))) {
     return true;
   }
   return false;
@@ -74,11 +76,11 @@ export function isObviousNonPerformer(name: string, roleText?: string): boolean 
 export function looksLikeComposerLine(text: string): boolean {
   const trimmed = text.trim();
   if (rejectedComposerHeading(trimmed)) return false;
-  const stripped = stripTrailingYears(trimmed);
+  const stripped = stripTrailingBiographicalYears(trimmed);
   if (matchComposer(stripped)) return true;
   // Unknown authors: clear personal-name syntax plus biographical years.
   // Negative checks already ran — this fallback cannot bypass them.
-  return LIFESPAN.test(trimmed) && looksLikeBiographicalComposerName(stripped, trimmed);
+  return hasComposerLifespanAnnotation(trimmed) && looksLikeBiographicalComposerName(stripped, trimmed);
 }
 
 export function looksLikeWorkLine(text: string): boolean {
@@ -219,13 +221,29 @@ export function parseExplicitTitleAuthorWork(text: string): TitleAuthorWork | un
 }
 
 export function hasComposerYears(text: string): boolean {
-  return LIFESPAN.test(text.trim());
+  return hasComposerLifespanAnnotation(text.trim());
+}
+
+/**
+ * Unequivocal non-person attributions. Small explicit rules, not a broad
+ * heuristic: a real person named similarly must not be dropped by accident.
+ */
+export function isNonPersonComposerAttribution(name: string): boolean {
+  const trimmed = name.trim();
+  if (!trimmed) return true;
+  if (/^(?:varios\s+autores|varios\s+compositores|various\s+authors|various\s+composers)\b/i.test(trimmed)) {
+    return true;
+  }
+  if (/^(?:an[oó]nimo|anonymous)\b/i.test(trimmed)) return true;
+  if (/^(?:tradicional|traditional)\b/i.test(trimmed)) return true;
+  return false;
 }
 
 /** Names that must not appear as `composers[]` / `works[].composerName`. */
 export function isUnreliableComposerName(text: string): boolean {
   const trimmed = text.trim();
   if (!trimmed || looksLikeProgramHeader(trimmed)) return true;
+  if (isNonPersonComposerAttribution(trimmed)) return true;
   if (/^obras de\b/i.test(trimmed)) return true;
   if (looksLikeEnsembleName(trimmed)) return true;
   if (
@@ -244,7 +262,7 @@ function rejectedComposerHeading(trimmed: string): boolean {
   if (!trimmed || looksLikeProgramHeader(trimmed)) return true;
   if (/^obras de\b/i.test(trimmed)) return true;
   if (/^de\s+/i.test(trimmed)) return true;
-  if (/^(varios autores|an[oó]nimo)\b/i.test(trimmed)) return true;
+  if (isNonPersonComposerAttribution(trimmed)) return true;
   if (looksLikeEnsembleName(trimmed)) return true;
   if (looksLikeMovementLine(trimmed)) return true;
   if (
@@ -311,6 +329,3 @@ function isPersonNameWord(word: string): boolean {
   return /^[\p{Lu}\p{Lt}][\p{L}.’-]*$/u.test(word);
 }
 
-function stripTrailingYears(text: string): string {
-  return text.replace(/\s*\([^)]*\d{3,4}[^)]*\)\s*$/u, '').trim();
-}
