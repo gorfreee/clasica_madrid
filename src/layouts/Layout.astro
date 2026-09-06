@@ -34,6 +34,8 @@ const jsonLdScript = jsonLd ? serializeJsonForScript(jsonLd) : null;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <meta name="color-scheme" content="light" />
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" type="image/x-icon" />
+    <link rel="icon" href="/favicon.svg" sizes="any" type="image/svg+xml" />
     {indexable ? <link rel="canonical" href={canonical} /> : <meta name="robots" content="noindex" />}
     <title>{pageTitle}</title>
     <meta property="og:type" content="website" />

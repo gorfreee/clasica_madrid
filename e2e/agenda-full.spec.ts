@@ -143,6 +143,7 @@ test.describe('carga diferida de la agenda', () => {
 test.describe('navegación del encabezado', () => {
   test('en la portada el logo y Agenda no recargan el documento', async ({ page }) => {
     await page.goto('/');
+    await expect(page.locator('.site-mark [data-brand-symbol]')).toBeVisible();
     await page.evaluate(() => {
       (window as Window & { __agendaStay?: boolean }).__agendaStay = true;
     });
@@ -151,6 +152,14 @@ test.describe('navegación del encabezado', () => {
     await page.getByRole('navigation', { name: 'Principal' }).getByRole('link', { name: 'Agenda' }).click();
     await expect(page).toHaveURL(/#contenido$/);
     expect(await page.evaluate(() => (window as Window & { __agendaStay?: boolean }).__agendaStay)).toBe(true);
+  });
+
+  test('publica el favicon vectorial y su fallback', async ({ page, request }) => {
+    await page.goto('/');
+    await expect(page.locator('link[rel="icon"][href="/favicon.svg"]')).toHaveCount(1);
+    await expect(page.locator('link[rel="icon"][href="/favicon.ico"]')).toHaveCount(1);
+    expect((await request.get('/favicon.svg')).ok()).toBe(true);
+    expect((await request.get('/favicon.ico')).ok()).toBe(true);
   });
 
   test('desde otras rutas el logo y Agenda llevan a la portada', async ({ page }) => {

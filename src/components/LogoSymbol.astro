@@ -1,0 +1,20 @@
+---
+type Props = {
+  class?: string;
+};
+
+const { class: className } = Astro.props;
+---
+
+<svg
+  class={className}
+  viewBox="0 0 100 80"
+  aria-hidden="true"
+  focusable="false"
+  data-brand-symbol
+>
+  <path d="M1 30A49 49 0 0 0 99 30H90A40 40 0 0 1 10 30Z"></path>
+  <path d="M16 30A34 34 0 0 0 84 30H75A25 25 0 0 1 25 30Z"></path>
+  <path d="M31 30A19 19 0 0 0 69 30H60A10 10 0 0 1 40 30Z"></path>
+  <path d="M44 22a6 6 0 1 0 12 0 6 6 0 1 0-12 0Z"></path>
+</svg>
