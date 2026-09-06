@@ -105,6 +105,14 @@
     {
       "title": "ø+1 Recuperación histórica, estreno en tiempos modernos en España",
       "composerName": "J. de San Juan"
+    },
+    {
+      "title": "Jilguerillo canoro (1694)",
+      "composerName": "José Martínez de Arce (ca. 1662-1721)"
+    },
+    {
+      "title": "De repiques de campanas (1734)",
+      "composerName": "J. de San Juan"
     }
   ],
   "eras": [
@@ -120,16 +128,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-cantoria",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "cndm-cantoria"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23824",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "23824"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

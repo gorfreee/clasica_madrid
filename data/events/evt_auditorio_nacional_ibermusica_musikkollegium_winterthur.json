@@ -26,8 +26,24 @@
       "name": "Pablo Ferrández"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "ELGAR"
+    },
+    {
+      "name": "MENDELSSOHN"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para violonchelo",
+      "composerName": "ELGAR"
+    },
+    {
+      "title": "Sinfonía núm. 5 “De la Reforma”",
+      "composerName": "MENDELSSOHN"
+    }
+  ],
   "eras": [
     "romantic"
   ],
@@ -40,10 +56,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-musikkollegium-winterthur",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "ibermusica-musikkollegium-winterthur"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

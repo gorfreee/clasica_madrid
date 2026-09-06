@@ -26,6 +26,9 @@
     },
     {
       "name": "Antonio Vivaldi (1678-1741)"
+    },
+    {
+      "name": "Francesco Corselli (1705-1778)"
     }
   ],
   "works": [
@@ -36,6 +39,10 @@
     {
       "title": "Concierto para flautino en Do mayor RV 443",
       "composerName": "Antonio Vivaldi (1678-1741)"
+    },
+    {
+      "title": "Invitatorio de Difuntos",
+      "composerName": "Francesco Corselli (1705-1778)"
     }
   ],
   "eras": [
@@ -51,10 +58,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/uam-musica-por-la-paz-barroco-iberico-italiano",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "uam-musica-por-la-paz-barroco-iberico-italiano"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

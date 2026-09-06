@@ -23,7 +23,35 @@
       "name": "Olivia Zaugg"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Schubert"
+    },
+    {
+      "name": "Boulanger"
+    },
+    {
+      "name": "Debussy"
+    },
+    {
+      "name": "Ravel"
+    },
+    {
+      "name": "Rodrigo"
+    },
+    {
+      "name": "Guastavino"
+    },
+    {
+      "name": "Mompou"
+    },
+    {
+      "name": "Toldrà"
+    },
+    {
+      "name": "Granados"
+    }
+  ],
   "works": [],
   "eras": [
     "classical",
@@ -39,10 +67,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/la-filarmonica-recordando-a-victoria-de-los-angeles",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-06",
       "externalId": "la-filarmonica-recordando-a-victoria-de-los-angeles"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-06"
 }

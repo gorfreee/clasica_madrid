@@ -57,6 +57,14 @@
     {
       "title": "Estreno absoluto. Obra encargo del CNDM *+ (2027)",
       "composerName": "Òscar Colomina i Bosch (1977)"
+    },
+    {
+      "title": "Space jump (2013)",
+      "composerName": "Fazıl Say (1970)"
+    },
+    {
+      "title": "Three funny pieces (1997)",
+      "composerName": "Rodión Shchedrín (1932-2025)"
     }
   ],
   "eras": [
@@ -71,10 +79,10 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23855",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "23855"
     }
   ],
   "primarySourceId": "src_cndm",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

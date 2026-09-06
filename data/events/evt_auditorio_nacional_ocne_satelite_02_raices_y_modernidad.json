@@ -74,6 +74,22 @@
     {
       "title": "Marcha del Inca (De cantos populares incaicos)",
       "composerName": "Luis Gianneo"
+    },
+    {
+      "title": "Jeromita Linares",
+      "composerName": "Carlos Guastavino"
+    },
+    {
+      "title": "Marlos Nobre",
+      "composerName": "Irma Urteaga"
+    },
+    {
+      "title": "Cancionero de Lampião",
+      "composerName": "Irma Urteaga"
+    },
+    {
+      "title": "Zamba de Juan Panadero",
+      "composerName": "C. Leguizamón"
     }
   ],
   "eras": [
@@ -89,10 +105,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-02-raices-y-modernidad",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "ocne-satelite-02-raices-y-modernidad"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

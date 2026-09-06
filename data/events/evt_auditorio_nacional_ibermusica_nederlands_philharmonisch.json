@@ -26,8 +26,24 @@
       "name": "Gautier Capuçon"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "ELGAR"
+    },
+    {
+      "name": "CHAIKOVSKI"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para violonchelo",
+      "composerName": "ELGAR"
+    },
+    {
+      "title": "Sinfonía núm. 6",
+      "composerName": "CHAIKOVSKI"
+    }
+  ],
   "eras": [
     "romantic"
   ],
@@ -40,10 +56,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-nederlands-philharmonisch",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "ibermusica-nederlands-philharmonisch"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

@@ -23,8 +23,24 @@
       "name": "Gautier Capuçon"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "SHOSTAKÓVICH"
+    },
+    {
+      "name": "DVOŘÁK"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para violonchelo núm. 2",
+      "composerName": "SHOSTAKÓVICH"
+    },
+    {
+      "title": "Sinfonía núm. 9 “Del Nuevo Mundo”",
+      "composerName": "DVOŘÁK"
+    }
+  ],
   "eras": [
     "romantic",
     "twentieth"
@@ -38,10 +54,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-filarmonica-della-scala-2",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "ibermusica-filarmonica-della-scala-2"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

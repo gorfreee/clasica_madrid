@@ -58,6 +58,14 @@
     {
       "title": "Pastorale para quinteto de viento, op. 151",
       "composerName": "Amy Beach"
+    },
+    {
+      "title": "Paquito D’Rivera",
+      "composerName": "Amy Beach"
+    },
+    {
+      "title": "Aires Tropicales",
+      "composerName": "Amy Beach"
     }
   ],
   "eras": [
@@ -72,10 +80,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-20-america-250",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "ocne-satelite-20-america-250"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

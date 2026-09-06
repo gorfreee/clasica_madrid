@@ -92,6 +92,10 @@
     {
       "title": "Vier Lieder , op. 27 (1894)",
       "composerName": "Richard Strauss (1864-1949)"
+    },
+    {
+      "title": "Siete canciones populares españolas (1914)",
+      "composerName": "Manuel de Falla (1876-1946)"
     }
   ],
   "eras": [
@@ -107,16 +111,16 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23795",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "23795"
     },
     {
       "sourceId": "src_teatro_zarzuela",
       "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/ciclo-de-lied-2026-2027/anja-mittermuller",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "/es/temporada/ciclo-de-lied-2026-2027/anja-mittermuller"
     }
   ],
   "primarySourceId": "src_cndm",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

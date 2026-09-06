@@ -113,6 +113,14 @@
     {
       "title": "Concierto amplificado",
       "composerName": "Mario Carro (1979)"
+    },
+    {
+      "title": "China gates (1977)",
+      "composerName": "John Adams (1947)"
+    },
+    {
+      "title": "Étude noire V (2021)",
+      "composerName": "Alfonso Peduto (1978)"
     }
   ],
   "eras": [
@@ -127,10 +135,10 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23852",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "23852"
     }
   ],
   "primarySourceId": "src_cndm",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

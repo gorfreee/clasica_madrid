@@ -80,6 +80,14 @@
     {
       "title": "Danket dem Herren, denn er ist freundlich, SWV 45",
       "composerName": "Heinrich Schütz (1585-1672)"
+    },
+    {
+      "title": "De Selva morale e spirituale (1641)",
+      "composerName": "Claudio Monteverdi (1567-1643)"
+    },
+    {
+      "title": "De Psalmen Davids sampt etlichen Moteten und Concerten , op. 2 (1619)",
+      "composerName": "Heinrich Schütz (1585-1672)"
     }
   ],
   "eras": [
@@ -95,16 +103,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-10",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "cndm-10"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23812",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "23812"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

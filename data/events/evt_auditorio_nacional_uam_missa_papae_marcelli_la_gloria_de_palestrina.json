@@ -36,6 +36,14 @@
     {
       "title": "\"Misa del papa Marcelo\"",
       "composerName": "Giovanni Pierluigi da Palestrina (1525-1594)"
+    },
+    {
+      "title": "Agnus Dei I",
+      "composerName": "Giovanni Pierluigi da Palestrina (1525-1594)"
+    },
+    {
+      "title": "Agnus Dei II",
+      "composerName": "Giovanni Pierluigi da Palestrina (1525-1594)"
     }
   ],
   "eras": [
@@ -50,10 +58,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/uam-missa-papae-marcelli-la-gloria-de-palestrina",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "uam-missa-papae-marcelli-la-gloria-de-palestrina"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }
