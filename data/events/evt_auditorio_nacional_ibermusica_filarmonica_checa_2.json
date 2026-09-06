@@ -26,8 +26,24 @@
       "name": "Behzod Abduraimov"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "RACHMANINOFF"
+    },
+    {
+      "name": "SMETANA"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para piano núm. 3",
+      "composerName": "RACHMANINOFF"
+    },
+    {
+      "title": "Mi patria (selección) (El alto castillo/Moldava/Sarka)",
+      "composerName": "SMETANA"
+    }
+  ],
   "eras": [
     "romantic",
     "twentieth"
@@ -41,10 +57,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-filarmonica-checa-2",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-06",
       "externalId": "ibermusica-filarmonica-checa-2"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-06"
 }

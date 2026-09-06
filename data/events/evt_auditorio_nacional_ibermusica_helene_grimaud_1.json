@@ -20,8 +20,24 @@
       "name": "Hélène Grimaud"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "BEETHOVEN"
+    },
+    {
+      "name": "SCHUBERT"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata para piano núm. 32 en Do menor op. 111",
+      "composerName": "BEETHOVEN"
+    },
+    {
+      "title": "Sonata para piano núm. 21 en Si bemol Mayor D.960",
+      "composerName": "SCHUBERT"
+    }
+  ],
   "eras": [
     "classical",
     "romantic"
@@ -35,10 +51,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-helene-grimaud-1",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "ibermusica-helene-grimaud-1"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

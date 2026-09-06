@@ -33,6 +33,12 @@
     },
     {
       "name": "A. DVORÁK"
+    },
+    {
+      "name": "G. PUCCINI"
+    },
+    {
+      "name": "I. Adagio"
     }
   ],
   "works": [
@@ -43,6 +49,14 @@
     {
       "title": "Sinfonía nº9 “Del Nuevo Mundo”",
       "composerName": "A. DVORÁK"
+    },
+    {
+      "title": "Preludio Sinfónico",
+      "composerName": "G. PUCCINI"
+    },
+    {
+      "title": "Allegro molto",
+      "composerName": "I. Adagio"
     }
   ],
   "eras": [
@@ -58,10 +72,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/atlantida-chamber-orchestra-mischa-maisky-el-nuevo-mundo",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "atlantida-chamber-orchestra-mischa-maisky-el-nuevo-mundo"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }
