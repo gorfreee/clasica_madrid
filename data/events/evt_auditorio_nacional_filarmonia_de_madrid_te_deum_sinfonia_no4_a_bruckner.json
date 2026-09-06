@@ -31,13 +31,17 @@
   ],
   "composers": [
     {
-      "name": "PARTE II"
+      "name": "A.Bruckner"
     }
   ],
   "works": [
     {
+      "title": "Te Deum",
+      "composerName": "A.Bruckner"
+    },
+    {
       "title": "Sinfonía n.º 4 en mi bemol mayor, WAB 104, A.Bruckner",
-      "composerName": "PARTE II"
+      "composerName": "A.Bruckner"
     }
   ],
   "eras": [

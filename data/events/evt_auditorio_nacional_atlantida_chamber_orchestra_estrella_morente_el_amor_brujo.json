@@ -26,10 +26,10 @@
   ],
   "composers": [
     {
-      "name": "FEDERICO GARCÍA LORCA (1898–1936)"
+      "name": "CONSTANCIO HERNÁEZ (1957-)"
     },
     {
-      "name": "VIII.Nana de Sevilla"
+      "name": "FEDERICO GARCÍA LORCA (1898–1936)"
     },
     {
       "name": "MANUEL DE FALLA (1876–1946)"
@@ -37,15 +37,12 @@
   ],
   "works": [
     {
+      "title": "Reflejos de Córdoba",
+      "composerName": "CONSTANCIO HERNÁEZ (1957-)"
+    },
+    {
       "title": "Canciones españolas antiguas",
       "composerName": "FEDERICO GARCÍA LORCA (1898–1936)"
-    },
-    {
-      "title": "IX. Los pelegrinitos",
-      "composerName": "VIII.Nana de Sevilla"
-    },
-    {
-      "title": "XII.Los reyes de la baraja"
     },
     {
       "title": "El amor brujo (versión 1914)",

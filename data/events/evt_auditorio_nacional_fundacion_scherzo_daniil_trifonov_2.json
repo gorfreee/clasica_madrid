@@ -22,40 +22,77 @@
   ],
   "composers": [
     {
-      "name": "Fantasie in C Major, D.760, «Wanderer-Fantasie». Franz Schubert (1797–1828)"
+      "name": "George Frideric Händel (1685-1759)"
     },
     {
-      "name": "Dança Negra. Mozart Camargo Guarnieri (1907 – 1993)"
+      "name": "Igor Stravinsky (1882–1971)"
+    },
+    {
+      "name": "Franz Schubert (1797–1828)"
+    },
+    {
+      "name": "Juan Francisco García (1892 -1974)"
+    },
+    {
+      "name": "Heitor Villa-Lobos (1887 -1959)"
+    },
+    {
+      "name": "Rafael Bullumba Landestoy (1924–2018)"
+    },
+    {
+      "name": "Alberto Ginastera (1916–1983)"
+    },
+    {
+      "name": "Daniil Trifonov (b. 1991)"
+    },
+    {
+      "name": "Mozart Camargo Guarnieri (1907 – 1993)"
     }
   ],
   "works": [
     {
-      "title": "Sambumbia (Rapsodia Dominicana). Juan Francisco García (1892 -1974)",
-      "composerName": "Fantasie in C Major, D.760, «Wanderer-Fantasie». Franz Schubert (1797–1828)"
+      "title": "Suite in E Major",
+      "composerName": "George Frideric Händel (1685-1759)"
     },
     {
-      "title": "Valsa da Dor, W. 316. Heitor Villa-Lobos (1887 -1959)",
-      "composerName": "Fantasie in C Major, D.760, «Wanderer-Fantasie». Franz Schubert (1797–1828)"
+      "title": "Piano Sonata",
+      "composerName": "Igor Stravinsky (1882–1971)"
     },
     {
-      "title": "El Vals de Santo Domingo. Rafael Bullumba Landestoy (1924–2018)",
-      "composerName": "Fantasie in C Major, D.760, «Wanderer-Fantasie». Franz Schubert (1797–1828)"
+      "title": "Fantasie in C Major, D.760, «Wanderer-Fantasie»",
+      "composerName": "Franz Schubert (1797–1828)"
     },
     {
-      "title": "Milonga, Op. 2, No. 1. Alberto Ginastera (1916–1983)",
-      "composerName": "Fantasie in C Major, D.760, «Wanderer-Fantasie». Franz Schubert (1797–1828)"
+      "title": "Sambumbia (Rapsodia Dominicana)",
+      "composerName": "Juan Francisco García (1892 -1974)"
     },
     {
-      "title": "Tango. Daniil Trifonov (b. 1991)",
-      "composerName": "Fantasie in C Major, D.760, «Wanderer-Fantasie». Franz Schubert (1797–1828)"
+      "title": "Valsa da Dor, W. 316",
+      "composerName": "Heitor Villa-Lobos (1887 -1959)"
     },
     {
-      "title": "Estudio en Zamba. Rafael Bullumba Landestoy (1924–2018)",
-      "composerName": "Fantasie in C Major, D.760, «Wanderer-Fantasie». Franz Schubert (1797–1828)"
+      "title": "El Vals de Santo Domingo",
+      "composerName": "Rafael Bullumba Landestoy (1924–2018)"
     },
     {
-      "title": "Bachianas Brasileiras No. 4. Heitor Villa-Lobos (1887 -1959)",
-      "composerName": "Dança Negra. Mozart Camargo Guarnieri (1907 – 1993)"
+      "title": "Milonga, Op. 2, No. 1",
+      "composerName": "Alberto Ginastera (1916–1983)"
+    },
+    {
+      "title": "Tango",
+      "composerName": "Daniil Trifonov (b. 1991)"
+    },
+    {
+      "title": "Estudio en Zamba",
+      "composerName": "Rafael Bullumba Landestoy (1924–2018)"
+    },
+    {
+      "title": "Dança Negra",
+      "composerName": "Mozart Camargo Guarnieri (1907 – 1993)"
+    },
+    {
+      "title": "Bachianas Brasileiras No. 4",
+      "composerName": "Heitor Villa-Lobos (1887 -1959)"
     }
   ],
   "eras": [

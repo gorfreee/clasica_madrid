@@ -29,35 +29,25 @@
       "name": "Francisco Pérez Sánchez"
     }
   ],
-  "composers": [
-    {
-      "name": "O Sole Mio"
-    }
-  ],
+  "composers": [],
   "works": [
     {
-      "title": "Obertura de «El barbero de Sevilla» de G. Rossini (Piano)",
-      "composerName": "O Sole Mio"
+      "title": "Obertura de «El barbero de Sevilla» de G. Rossini (Piano)"
     },
     {
-      "title": "Popurrí Popular – Los Tres Tenores",
-      "composerName": "O Sole Mio"
+      "title": "Popurrí Popular – Los Tres Tenores"
     },
     {
-      "title": "My Way (Sinatra)",
-      "composerName": "O Sole Mio"
+      "title": "My Way (Sinatra)"
     },
     {
-      "title": "Con te partiró (Bocelli)",
-      "composerName": "O Sole Mio"
+      "title": "Con te partiró (Bocelli)"
     },
     {
-      "title": "La Vie en Rose (E. Piaf)",
-      "composerName": "O Sole Mio"
+      "title": "La Vie en Rose (E. Piaf)"
     },
     {
-      "title": "New York, New York (Sinatra)",
-      "composerName": "O Sole Mio"
+      "title": "New York, New York (Sinatra)"
     }
   ],
   "eras": [

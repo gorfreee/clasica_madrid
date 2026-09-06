@@ -28,20 +28,20 @@
   ],
   "composers": [
     {
-      "name": "PARTE I"
+      "name": "P.I.Tchaikovsky"
     },
     {
-      "name": "PARTE II"
+      "name": "L.V.Beethoven"
     }
   ],
   "works": [
     {
       "title": "Concierto para piano y orquesta nº 1 en si bemol menor, Op. 23, P.I.Tchaikovsky",
-      "composerName": "PARTE I"
+      "composerName": "P.I.Tchaikovsky"
     },
     {
       "title": "Sinfonía Nº 9 'Coral' L.V.Beethoven",
-      "composerName": "PARTE II"
+      "composerName": "L.V.Beethoven"
     }
   ],
   "eras": [
