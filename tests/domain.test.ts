@@ -290,7 +290,7 @@ describe('modelos de presentación', () => {
     expect(page?.canonicalPath).toBe('/lugares/auditorio-nacional/');
   });
 
-  it('el índice de lugares solo lista espacios con próximos conciertos', () => {
+  it('el índice reúne en una sola lista los lugares con y sin conciertos próximos', () => {
     const historicalVenue = makeVenue({
       id: 'ven_teatro_historico',
       slug: 'teatro-historico',
@@ -309,8 +309,9 @@ describe('modelos de presentación', () => {
       ],
     });
     const index = buildVenuesIndexModel(catalog, testClock);
-    expect(index.venues.map((venue) => venue.slug)).toEqual(['auditorio-nacional']);
-    expect(index.inactiveVenues.map((venue) => venue.slug)).toEqual(['teatro-historico']);
+    expect(index.venues.map((venue) => venue.slug)).toEqual(['auditorio-nacional', 'teatro-historico']);
+    expect(index.venues.map((venue) => venue.upcomingCount)).toEqual([1, 0]);
+    expect(index.isEmpty).toBe(false);
     expect(listVenuePageSlugs(catalog)).toEqual(['auditorio-nacional', 'teatro-historico']);
     expect(buildVenuePageModel(catalog, 'teatro-historico', testClock)).not.toBeNull();
   });

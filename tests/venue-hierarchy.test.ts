@@ -264,7 +264,6 @@ describe('jerarquía de lugares — /lugares y ficha', () => {
     expect(auditorio[0]?.upcomingCount).toBe(3);
     expect(auditorio[0]?.nextDate).toBe('2026-09-10');
     expect(index.venues.some((venue) => venue.slug.includes('sala'))).toBe(false);
-    expect(index.inactiveVenues.some((venue) => venue.slug.includes('sala'))).toBe(false);
   });
 
   it('la página del Auditorio reúne eventos del padre y de ambas salas', () => {
