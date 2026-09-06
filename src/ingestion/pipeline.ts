@@ -24,6 +24,8 @@ import { buildEventDecision, type IngestEventDecision } from './report.ts';
 import { matchVenue } from './venues.ts';
 import type {
   AdapterContext,
+  AdapterDiscard,
+  AdapterDiscardReport,
   IngestAiSummary,
   IngestRunSummary,
   PipelineSource,
@@ -32,7 +34,7 @@ import type {
   SourceDefinition,
   SourceFailure,
 } from './types.ts';
-import { emptyIngestAiSummary, IncompleteListingError } from './types.ts';
+import { emptyAdapterDiscardCounts, emptyIngestAiSummary, IncompleteListingError, tallyAdapterDiscards } from './types.ts';
 import { takeBrowserFetchAttempts } from './browser-fetch.ts';
 import { getText, HttpError, resolveFetchRelay, takeRecordedHttpAttempts, takeRelayRecoveries } from './http.ts';
 import { normalizeUrl } from './urls.ts';
@@ -81,6 +83,7 @@ type HarvestSourceResult = {
   listingIncomplete: boolean;
   coverage?: ReturnType<typeof requiredHydrationCoverage>;
   failure?: SourceFailure;
+  adapterDiscards: AdapterDiscard[];
 };
 
 export async function runIngest(options: IngestOptions): Promise<IngestRun> {
@@ -101,12 +104,16 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
   );
   const harvestedSources = await mapConcurrent(sources, sourceConcurrency, async (source): Promise<HarvestSourceResult> => {
     const sourceGet = instrumentSourceGet(get, source.id, obs);
+    const adapterDiscards: AdapterDiscard[] = [];
+    const reportDiscard = (discard: AdapterDiscardReport) => {
+      adapterDiscards.push({ sourceId: source.id, ...discard });
+    };
     try {
       let extracted: RawEvent[];
       let listingIncomplete = false;
       try {
         extracted = await measureSourcePhase(obs, source.id, 'extraction', () =>
-          extractSource(source, options.now, window, sourceGet));
+          extractSource(source, options.now, window, sourceGet, reportDiscard));
       } catch (error) {
         if (!(error instanceof IncompleteListingError) || error.events.length === 0) throw error;
         extracted = error.events;
@@ -126,19 +133,22 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
             message: `cobertura de hydration incompleta: ${coverage.succeeded}/${coverage.required} fichas necesarias; desapariciones no evaluables`,
           }
         : undefined;
-      return { source, extracted, hydrated, listingIncomplete, coverage, failure };
+      return { source, extracted, hydrated, listingIncomplete, coverage, failure, adapterDiscards };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       flushBrowserFetchAttempts(source.id, obs);
-      return { source, extracted: [], hydrated: [], listingIncomplete: false, failure: { sourceId: source.id, message } };
+      return { source, extracted: [], hydrated: [], listingIncomplete: false, failure: { sourceId: source.id, message }, adapterDiscards };
     }
   });
 
   // mapConcurrent preserves input positions. Consolidating only after every
   // source finishes keeps summaries, observations and downstream ID allocation
   // independent of source completion order.
+  const adapterDiscards: AdapterDiscard[] = [];
   for (const result of harvestedSources) {
     const { source, extracted, hydrated, listingIncomplete, coverage, failure } = result;
+    adapterDiscards.push(...result.adapterDiscards);
+    for (const discard of result.adapterDiscards) obs?.recordAdapterDiscard(discard);
     const adapter = getAdapter(source.adapterId);
     const sourceHydration = countHydration(hydrated);
     const listingError = failure && failure.stage !== 'hydration' ? failure.message : undefined;
@@ -163,6 +173,8 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
       hydrationReached: !listingError,
       listingError,
       listingFallback,
+      adapterDiscards: result.adapterDiscards.length,
+      adapterDiscardsByReason: tallyAdapterDiscards(result.adapterDiscards).byReason,
     });
     const listingByUrl = new Map<string, RawEvent>();
     for (const listing of extracted) {
@@ -194,6 +206,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
       succeeded,
       failed: failures,
       disappearanceSuppressedSources,
+      adapterDiscards,
     },
   });
 }
@@ -231,6 +244,7 @@ async function ingestPreparedEvents(
       succeeded: string[];
       failed: SourceFailure[];
       disappearanceSuppressedSources: string[];
+      adapterDiscards: AdapterDiscard[];
     };
   },
 ): Promise<IngestRun> {
@@ -243,6 +257,7 @@ async function ingestPreparedEvents(
   const succeeded = harvest?.succeeded ?? sources.map((source) => source.id);
   const failures = harvest?.failed ?? [];
   const disappearanceSuppressedSources = harvest?.disappearanceSuppressedSources ?? [];
+  const adapterDiscards = harvest?.adapterDiscards ?? [];
 
   rawEvents.sort((left, right) => {
     if (left.sourceId !== right.sourceId) return left.sourceId.localeCompare(right.sourceId);
@@ -494,6 +509,7 @@ async function ingestPreparedEvents(
     detailHydrationSkippedOutsideWindow: rawEvents.filter((raw) => raw.hydration?.reason === 'outside-window').length,
     detailHydrationSkippedCircuitOpen: rawEvents.filter((raw) => raw.hydration?.reason === 'circuit-open').length,
     disappearanceSuppressedSources,
+    adapterDiscards: adapterDiscards.length > 0 ? tallyAdapterDiscards(adapterDiscards) : emptyAdapterDiscardCounts(),
   };
 
   return { summary, apply, rawEvents, candidates: reconciled.candidates, decisions, possiblyMissing };
@@ -518,10 +534,12 @@ export async function extractSource(
   now: Date,
   window: IngestWindow,
   get: (url: string) => Promise<string>,
+  reportDiscard?: (discard: AdapterDiscardReport) => void,
 ): Promise<RawEvent[]> {
   const adapter = getAdapter(source.adapterId);
   const urls = adapter.resolveFetchUrls(source, now, window);
   const ctx: AdapterContext = { source, now, window, get };
+  if (reportDiscard) ctx.reportDiscard = reportDiscard;
   const events: RawEvent[] = [];
   for (const url of urls) {
     const body = adapter.fetchListing

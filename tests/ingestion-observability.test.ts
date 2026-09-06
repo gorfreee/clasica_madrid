@@ -140,7 +140,7 @@ describe('observabilidad de ingestión', () => {
     expect(journal.some((entry) => entry.kind === 'decision' && entry.classification?.eligibility?.value === 'include')).toBe(true);
     for (const entry of journal) {
       expect(entry.schemaVersion).toBe(1);
-      expect(['observation', 'decision', 'source-failure']).toContain(entry.kind);
+      expect(['observation', 'decision', 'source-failure', 'adapter-discard']).toContain(entry.kind);
     }
   });
 

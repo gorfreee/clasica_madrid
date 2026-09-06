@@ -130,12 +130,58 @@ export type SourceDefinition = PipelineSource & {
   fetchTransport?: 'direct' | 'relay' | 'direct-then-relay';
 };
 
+/**
+ * Diagnostic report that an adapter recognized a candidate event and then
+ * discarded it. Not an editorial decision. Avoid HTML bodies or large payloads.
+ */
+export type AdapterDiscardReport = {
+  /** Stable machine-readable code, e.g. `missing-date`, `recurrence-unsupported`. */
+  reason: string;
+  title?: string;
+  sourceUrl?: string;
+  externalId?: string;
+};
+
+export type AdapterDiscard = AdapterDiscardReport & {
+  sourceId: string;
+};
+
+export type AdapterDiscardCounts = {
+  total: number;
+  bySource: Record<string, number>;
+  byReason: Record<string, number>;
+};
+
+export function emptyAdapterDiscardCounts(): AdapterDiscardCounts {
+  return { total: 0, bySource: {}, byReason: {} };
+}
+
+export function tallyAdapterDiscards(discards: readonly AdapterDiscard[]): AdapterDiscardCounts {
+  const bySource: Record<string, number> = {};
+  const byReason: Record<string, number> = {};
+  for (const item of discards) {
+    bySource[item.sourceId] = (bySource[item.sourceId] ?? 0) + 1;
+    byReason[item.reason] = (byReason[item.reason] ?? 0) + 1;
+  }
+  return { total: discards.length, bySource, byReason };
+}
+
 export type AdapterContext = {
   source: SourceDefinition;
   now: Date;
   window: IngestWindow;
   get: (url: string) => Promise<string>;
+  /**
+   * Optional diagnostic callback. The pipeline supplies it; adapters must not
+   * import observability. Only call it for a candidate already identified as
+   * in-scope that is then dropped.
+   */
+  reportDiscard?: (discard: AdapterDiscardReport) => void;
 };
+
+export function reportAdapterDiscard(ctx: AdapterContext, discard: AdapterDiscardReport): void {
+  ctx.reportDiscard?.(discard);
+}
 
 export type SourceAdapter = {
   id: string;
@@ -275,4 +321,9 @@ export type IngestRunSummary = {
   detailHydrationSkippedOutsideWindow?: number;
   detailHydrationSkippedCircuitOpen?: number;
   disappearanceSuppressedSources?: string[];
+  /**
+   * Diagnostic: in-scope candidates an adapter recognized and then dropped.
+   * Does not affect health, eligibility or publication.
+   */
+  adapterDiscards?: AdapterDiscardCounts;
 };

@@ -253,6 +253,55 @@ describe('eligibility — exclusiones de identidad', () => {
     expect(result.eligibility.ruleId).toBe('non-performance-activity');
   });
 
+  it('incluye un recital clásico con charla introductoria secundaria', () => {
+    const result = classify(
+      facts({
+        title: 'Recital de Bach con charla introductoria',
+        description: 'Recital de Johann Sebastian Bach. Tras una breve charla introductoria se interpretan las Partitas.',
+        composers: [{ name: 'Johann Sebastian Bach' }],
+      }),
+    );
+    expect(result.eligibility.value).toBe('include');
+    expect(result.eligibility.ruleId).not.toBe('non-performance-activity');
+  });
+
+  it('excluye una charla cuya actividad principal es la charla, aunque cite a Bach', () => {
+    const result = classify(
+      facts({
+        title: 'Charla introductoria sobre Bach',
+        description: 'Charla introductoria sobre la vida y la obra de Johann Sebastian Bach.',
+        composers: [{ name: 'Johann Sebastian Bach' }],
+      }),
+    );
+    expect(result.eligibility.value).toBe('exclude');
+    expect(result.eligibility.ruleId).toBe('non-performance-activity');
+  });
+
+  it('deja uncertain un encuentro ambiguo con Bach y charla sin identidad concertística', () => {
+    const result = classify(
+      facts({
+        title: 'Encuentro Bach',
+        description: 'Una charla y posiblemente música.',
+      }),
+    );
+    expect(result.eligibility.value).toBe('uncertain');
+    expect(result.eligibility.value).not.toBe('include');
+  });
+
+  it('no trata Taller Sonoro como actividad educativa', () => {
+    const result = classify(
+      facts({
+        title: 'XVII Festival de Ensembles: TALLER SONORO',
+        categoryText: 'Música contemporánea',
+        description:
+          'PluralEnsemble presenta el festival. Participa Taller Sonoro. El objetivo es estrenar nuevas obras y fomentar el repertorio musical contemporáneo.',
+        performers: [{ name: 'Taller Sonoro' }],
+      }),
+    );
+    expect(result.eligibility.ruleId).not.toBe('non-performance-activity');
+    expect(result.eligibility.value).toBe('include');
+  });
+
   it('excluye pop anunciado como identidad, aunque haya orquesta', () => {
     const result = classify(
       facts({
@@ -262,6 +311,31 @@ describe('eligibility — exclusiones de identidad', () => {
     );
     expect(result.eligibility.value).toBe('exclude');
     expect(result.eligibility.ruleId).toBe('popular-music-identity');
+  });
+
+  it('no infiere popular-music-identity por su repertorio + cuerdas sin evidencia popular', () => {
+    const contemporary = classify(
+      facts({
+        title: 'Concierto de música contemporánea',
+        categoryText: 'Música contemporánea',
+        description:
+          'El compositor presenta su repertorio para cuerdas. Estreno de nuevas obras de tradición académica.',
+      }),
+    );
+    expect(contemporary.eligibility.ruleId).not.toBe('popular-music-identity');
+    expect(contemporary.eligibility.value).not.toBe('exclude');
+    expect(contemporary.eligibility.value).toBe('include');
+
+    const fito = classify(
+      facts({
+        title: 'FITO PÁEZ CLÁSICO',
+        description:
+          'Espectáculo especialmente concebido para disfrutar la obra de Fito. Acompañado por un octeto de cuerdas, recorrerá parte fundamental de su repertorio.',
+        performers: [{ name: 'Fito Páez' }, { name: 'octeto de cuerdas', roleText: 'cuerdas' }],
+      }),
+    );
+    expect(fito.eligibility.ruleId).not.toBe('popular-music-identity');
+    expect(fito.eligibility.value).not.toBe('include');
   });
 
   it('excluye DJ / crossover aunque cite a Vivaldi', () => {

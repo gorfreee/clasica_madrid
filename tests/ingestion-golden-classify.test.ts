@@ -80,4 +80,30 @@ describe('golden set → deterministic classifier', () => {
       expect(actual, item.caseId).toBe(item.expected.access);
     }
   });
+
+  it('protege las regresiones de charla secundaria, repertorio+cuerdas y pop inequívoco', async () => {
+    const cases = await loadGoldenCases();
+    const byId = Object.fromEntries(cases.map((item) => [item.caseId, item]));
+
+    const fito = classify(byId.golden_fito_paez!.observed);
+    expect(fito.eligibility.value).not.toBe('include');
+    expect(fito.eligibility.ruleId).not.toBe('popular-music-identity');
+
+    const abba = classify(byId.golden_abba_queen_beatles!.observed);
+    expect(abba.eligibility.value).toBe('exclude');
+    expect(abba.eligibility.ruleId).toBe('popular-music-identity');
+
+    const manon = classify(byId.golden_te_suena_manon!.observed);
+    expect(manon.eligibility.value).toBe('exclude');
+    expect(manon.eligibility.ruleId).toBe('non-performance-activity');
+
+    const williams = classify(byId.golden_john_williams!.observed);
+    expect(williams.eligibility.value).toBe('exclude');
+
+    const ailey = classify(byId.golden_alvin_ailey!.observed);
+    expect(ailey.eligibility.value).toBe('exclude');
+
+    const myra = classify(byId.golden_myra_melford!.observed);
+    expect(myra.eligibility.value).toBe('exclude');
+  });
 });

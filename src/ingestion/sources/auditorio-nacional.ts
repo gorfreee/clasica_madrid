@@ -2,7 +2,7 @@ import { parseAuditorioNacionalDetail } from '../detail/auditorio-nacional.ts';
 import { parseObservedDateTime, type IngestWindow } from '../dates.ts';
 import { emptyObservedLists } from '../observed.ts';
 import { urlPathIdentity } from '../urls.ts';
-import type { AdapterContext, RawEvent, SourceAdapter, SourceDefinition } from '../types.ts';
+import { reportAdapterDiscard, type AdapterContext, type RawEvent, type SourceAdapter, type SourceDefinition } from '../types.ts';
 
 type CalendarItem = {
   id?: unknown;
@@ -67,9 +67,16 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
   const title = asNonEmptyString(item.title);
   const sourceUrl = asNonEmptyString(item.url);
   const start = asNonEmptyString(item.start);
-  if (!title || !sourceUrl || !start) return undefined;
+  if (!title || !sourceUrl) return undefined;
+  if (!start) {
+    reportAdapterDiscard(ctx, { reason: 'missing-date', title, sourceUrl });
+    return undefined;
+  }
   const parsed = parseObservedDateTime(start);
-  if (!parsed) return undefined;
+  if (!parsed) {
+    reportAdapterDiscard(ctx, { reason: 'invalid-date', title, sourceUrl });
+    return undefined;
+  }
   const className = asNonEmptyString(item.className);
   const id = asNonEmptyString(item.id);
   const description = asNonEmptyString(item.description);

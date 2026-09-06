@@ -18,7 +18,7 @@ import {
   type IngestEventDecision,
   type IngestFailureInfo,
 } from './report.ts';
-import type { RawEvent } from './types.ts';
+import type { AdapterDiscard, RawEvent } from './types.ts';
 
 export const INGEST_RUN_MANIFEST_SCHEMA_VERSION = 1;
 export const INGEST_JOURNAL_SCHEMA_VERSION = 1;
@@ -73,6 +73,8 @@ export type IngestSourceTiming = {
   listingError?: string;
   listingFallback?: 'wp-rest';
   listingTransport?: 'http' | 'browser';
+  adapterDiscards?: number;
+  adapterDiscardsByReason?: Record<string, number>;
   http: IngestSourceHttpStats;
 };
 
@@ -97,7 +99,7 @@ export type IngestRunManifest = {
   failure?: IngestFailureInfo;
 };
 
-export type IngestJournalKind = 'observation' | 'decision' | 'source-failure';
+export type IngestJournalKind = 'observation' | 'decision' | 'source-failure' | 'adapter-discard';
 
 export type IngestJournalClassification = {
   eligibility?: IngestEventDecision['eligibility'];
@@ -115,6 +117,7 @@ export type IngestJournalEntry = {
   externalId?: string;
   title?: string;
   message?: string;
+  reason?: string;
   hydration?: IngestEventDecision['hydration'];
   listing?: DiagnosticObservedFacts;
   observed?: DiagnosticObservedFacts;
@@ -256,6 +259,8 @@ export class IngestObservability {
     hydrationReached?: boolean;
     listingError?: string;
     listingFallback?: 'wp-rest';
+    adapterDiscards?: number;
+    adapterDiscardsByReason?: Record<string, number>;
   }): void {
     this.guard(() => {
       const timing = this.sourceTiming(input.sourceId);
@@ -276,6 +281,15 @@ export class IngestObservability {
       else delete timing.listingFallback;
       if (timing.http.browserFallbacks > 0) timing.listingTransport = 'browser';
       else delete timing.listingTransport;
+      if (input.adapterDiscards) {
+        timing.adapterDiscards = input.adapterDiscards;
+        if (input.adapterDiscardsByReason && Object.keys(input.adapterDiscardsByReason).length > 0) {
+          timing.adapterDiscardsByReason = input.adapterDiscardsByReason;
+        }
+      } else {
+        delete timing.adapterDiscards;
+        delete timing.adapterDiscardsByReason;
+      }
       this.persistManifest();
     });
   }
@@ -380,6 +394,21 @@ export class IngestObservability {
         sourceId,
         message: sanitizeErrorMessage(message),
       });
+    });
+  }
+
+  recordAdapterDiscard(discard: AdapterDiscard): void {
+    this.guard(() => {
+      const entry: IngestJournalEntry = {
+        schemaVersion: INGEST_JOURNAL_SCHEMA_VERSION,
+        kind: 'adapter-discard',
+        sourceId: discard.sourceId,
+        reason: discard.reason,
+      };
+      if (discard.sourceUrl) entry.sourceUrl = discard.sourceUrl;
+      if (discard.externalId) entry.externalId = discard.externalId;
+      if (discard.title) entry.title = discard.title;
+      this.append(entry);
     });
   }
 

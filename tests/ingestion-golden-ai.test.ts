@@ -110,8 +110,10 @@ describe('golden set → classify + AI fake', () => {
 
     const ecos = rows.find((row) => row.caseId === 'golden_ecos_tres_culturas');
     const pastora = rows.find((row) => row.caseId === 'golden_pastora_soler');
+    const fito = rows.find((row) => row.caseId === 'golden_fito_paez');
     expect(ecos?.actualEligibility).toBe('include');
     expect(pastora?.actualEligibility).toBe('exclude');
+    expect(fito?.actualEligibility).toBe('exclude');
 
     expect(metrics.includeLeftForAi).toBe(0);
     expect(metrics.excludeLeftForAi).toBe(0);
