@@ -5,7 +5,13 @@ import {
   madridDateTimeIso,
   nextUpcomingOccurrence,
 } from '../domain/dates.ts';
-import { findEventBySlug, listCanonicalEvents, type Clock, systemClock } from '../domain/index.ts';
+import {
+  eventPublicSlugs,
+  findEventBySlug,
+  listCanonicalEvents,
+  type Clock,
+  systemClock,
+} from '../domain/index.ts';
 import type { ResolvedEvent } from '../domain/resolve.ts';
 import { isMadridMunicipality } from '../domain/normalize.ts';
 import {
@@ -73,7 +79,24 @@ export type EventPageModel = {
 };
 
 export function listEventPageSlugs(catalog: Catalog): string[] {
-  return listCanonicalEvents(catalog).map((resolved) => resolved.event.slug);
+  return listCanonicalEvents(catalog).flatMap((resolved) => eventPublicSlugs(resolved.event));
+}
+
+export type EventStaticPath = {
+  slug: string;
+  redirectTo?: string;
+};
+
+/** Canonical event pages plus historical slug redirects. */
+export function listEventStaticPaths(catalog: Catalog): EventStaticPath[] {
+  const paths: EventStaticPath[] = [];
+  for (const resolved of listCanonicalEvents(catalog)) {
+    paths.push({ slug: resolved.event.slug });
+    for (const alias of resolved.event.slugAliases ?? []) {
+      paths.push({ slug: alias, redirectTo: resolved.event.slug });
+    }
+  }
+  return paths;
 }
 
 export function buildEventPageModel(

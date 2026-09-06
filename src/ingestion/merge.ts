@@ -157,6 +157,7 @@ export function mergeExistingEvent(existing: Event, proposal: EventProposal, now
     schemaVersion: existing.schemaVersion,
     id: existing.id,
     slug: existing.slug,
+    ...(existing.slugAliases ? { slugAliases: existing.slugAliases } : {}),
     title: title.value,
     status,
     venueId: proposal.venueId ?? existing.venueId,

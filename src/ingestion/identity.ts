@@ -30,6 +30,12 @@ export const EVENT_IDENTITY_ALIASES: readonly EventIdentityAlias[] = [
     url: 'https://auditorionacional.inaem.gob.es/es/programacion/excelentia-violin-chaikovsky-y-sinfonia-2-sibelius',
   },
   {
+    eventId: 'evt_auditorio_nacional_cndm_lucie_zakova',
+    catalogSourceId: 'src_cndm',
+    externalId: '23846',
+    url: 'https://cndm.inaem.gob.es/node/23846',
+  },
+  {
     eventId: 'evt_madrid_tempo_inauguracion_20260901',
     catalogSourceId: 'src_madrid_a_tempo',
     externalId: 'cc99d72e-7aa5-4eea-b32c-8eb17a8dce00',

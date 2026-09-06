@@ -29,6 +29,7 @@ export {
 } from './filters.ts';
 export { isMadridMunicipality, normalizeText, textMatchesQuery } from './normalize.ts';
 export {
+  eventPublicSlugs,
   findEventBySlug,
   findVenueBySlug,
   listCanonicalEvents,

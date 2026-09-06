@@ -1,5 +1,6 @@
 import { isExclusiveScheduleVenueId } from '../lib/domain/venues.ts';
 import type { Catalog } from '../lib/domain/catalog.ts';
+import { eventPublicSlugs } from '../lib/domain/queries.ts';
 import type { Candidate } from '../lib/schemas/candidate.ts';
 import type { Event } from '../lib/schemas/index.ts';
 import type { AiCallDiagnostics } from './classification/ai.ts';
@@ -100,7 +101,7 @@ export function reconcileHarvest(options: {
   const { catalog, now } = options;
   const window = options.window ?? defaultIngestWindow(now);
   const usedIds = new Set(catalog.events.map((event) => event.id));
-  const usedSlugs = new Set(catalog.events.map((event) => event.slug));
+  const usedSlugs = new Set(catalog.events.flatMap(eventPublicSlugs));
   const byIndex = new Map<number, ObservationReconcile>();
   const seenEventIds = new Set<string>();
   const stats: ReconcileStats = {

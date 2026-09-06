@@ -18,7 +18,7 @@ Intérpretes, compositores y obras **no** son entidades propias en v1: van embeb
 
 - IDs estables, ASCII, con prefijo: `evt_carmen_2026`.
 - El nombre del fichero debe coincidir con el ID: `evt_carmen_2026.json`.
-- `slug` en kebab-case, único dentro de su colección. Una vez publicado un evento o un lugar, su slug es permanente. El ID tampoco cambia. No hay aliases ni redirects históricos: no se renombra un slug ya publicado.
+- `slug` en kebab-case, único dentro de su colección. Una vez publicado un evento o un lugar, su slug es permanente. El ID tampoco cambia. No se renombra un slug ya publicado. `slugAliases` es opcional y limitado: slugs históricos retirados al consolidar un duplicado, que siguen resolviendo a la ficha canónica. Cada alias es único en la colección y no sustituye a `slug`.
 
 ## Evento
 
@@ -26,6 +26,7 @@ Campos principales:
 
 - `schemaVersion`: `1`
 - `id`, `slug`, `title`
+- `slugAliases` (opcional): slugs históricos que siguen resolviendo a este evento
 - `status`: `scheduled` | `cancelled` | `postponed`
 - `venueId` (obligatorio)
 - `organizerIds` (puede ser `[]`)

@@ -1,6 +1,7 @@
 import type { SitemapItem } from '@astrojs/sitemap';
 import type { Catalog } from '../domain/catalog.ts';
 import { loadPublishedCatalog } from '../repository/load.ts';
+import { eventPublicSlugs } from '../domain/queries.ts';
 import { eventPath, publicPath, venuePath, VENUES_INDEX_PATH } from './urls.ts';
 
 export async function serializeSitemapItem(item: SitemapItem): Promise<SitemapItem> {
@@ -44,7 +45,9 @@ export function sitemapLastmodMap(catalog: Catalog): Map<string, string> {
     bump(event.venueId);
     const parentId = venuesById.get(event.venueId)?.parentVenueId;
     if (parentId) bump(parentId);
-    map.set(eventPath(event.slug), event.lastVerifiedAt);
+    for (const slug of eventPublicSlugs(event)) {
+      map.set(eventPath(slug), event.lastVerifiedAt);
+    }
   }
   for (const venue of catalog.venues) {
     const lastmod = maxDate([venue.lastVerifiedAt, latestByVenue.get(venue.id)]);

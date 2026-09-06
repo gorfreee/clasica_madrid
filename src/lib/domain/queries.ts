@@ -3,6 +3,11 @@ import type { Clock } from './dates.ts';
 import { compareDateTime, isScheduledUpcoming, systemClock } from './dates.ts';
 import { resolveCatalog, type ResolvedEvent, type ResolvedOccurrence } from './resolve.ts';
 
+/** Canonical slug plus any reviewed historical aliases. */
+export function eventPublicSlugs(event: { slug: string; slugAliases?: readonly string[] }): string[] {
+  return event.slugAliases?.length ? [event.slug, ...event.slugAliases] : [event.slug];
+}
+
 export function listUpcomingOccurrences(
   catalog: Catalog,
   clock: Clock = systemClock,
@@ -38,7 +43,10 @@ export function listCanonicalEvents(catalog: Catalog): ResolvedEvent[] {
 }
 
 export function findEventBySlug(catalog: Catalog, slug: string): ResolvedEvent | null {
-  return listCanonicalEvents(catalog).find((resolved) => resolved.event.slug === slug) ?? null;
+  return (
+    listCanonicalEvents(catalog).find((resolved) => eventPublicSlugs(resolved.event).includes(slug)) ??
+    null
+  );
 }
 
 export function listVenuesWithUpcoming(
