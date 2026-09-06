@@ -99,9 +99,21 @@ describe('CNDM official monthly calendar', () => {
   });
 
   it('extracts all Madrid events, stable Drupal ids and observed schedule facts without cycle filtering', async () => {
-    const events = await adapter.extract(await fixture('listing-202610'), octoberUrl, ctx);
+    const discards: Array<{ reason: string; title?: string; externalId?: string }> = [];
+    const events = await adapter.extract(await fixture('listing-202610'), octoberUrl, {
+      ...ctx,
+      reportDiscard: (discard) => discards.push(discard),
+    });
     expect(events).toHaveLength(11);
     expect(events.some((event) => event.externalId === '23895')).toBe(false);
+    expect(discards).toEqual([
+      {
+        reason: 'venue-outside-madrid',
+        title: '4SONORA',
+        sourceUrl: 'https://cndm.inaem.gob.es/node/23895',
+        externalId: '23895',
+      },
+    ]);
     const concert = events.find((event) => event.externalId === '23799')!;
     expect(concert).toMatchObject({
       sourceUrl: 'https://cndm.inaem.gob.es/node/23799',

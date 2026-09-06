@@ -32,7 +32,7 @@ export const madridATempoAdapter: SourceAdapter = {
       }
       const parsed = parseMadridFeed(pageBody, pageUrl);
       if (parsed.page !== page) throw new Error('madrid-a-tempo: paginación no secuencial');
-      for (const event of extractMadridListing(pageBody, pageUrl, ctx.source.id, ctx.window)) {
+      for (const event of extractMadridListing(pageBody, pageUrl, ctx)) {
         absorb(events, event);
       }
       if (!parsed.next) return sortEvents(events);

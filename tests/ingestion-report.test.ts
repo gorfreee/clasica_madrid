@@ -171,6 +171,8 @@ describe('ingest event report', () => {
     expect(decision.publishable).toBe(true);
     expect(decision.candidateGenerated).toBe(true);
     expect(decision.identity?.action).toBe('new');
+    expect(decision.outcome).toBe('created');
+    expect(decision.outcomeReason).toBeUndefined();
     expect(decision.candidate).toBeDefined();
     expect(decision.candidate?.id).toBe(run.candidates[0]!.event.id);
     expect(decision.candidate?.slug).toBe(run.candidates[0]!.event.slug);
@@ -194,6 +196,8 @@ describe('ingest event report', () => {
 
     const decision = decisionNamed(run, 'Jazz en el Auditorio');
     expect(decision.eligibility?.value).toBe('exclude');
+    expect(decision.outcome).toBe('excluded');
+    expect(decision.outcomeReason).toBeTruthy();
     expect(decision.eligibility?.method).toBe('rule');
     expect(decision.aiAttempted).toBe(false);
     expect(decision.publishable).toBe(false);
@@ -281,6 +285,7 @@ describe('ingest event report', () => {
 
     const decision = decisionNamed(run, 'Concierto extraordinario');
     expect(decision.eligibility?.value).toBe('uncertain');
+    expect(decision.outcome).toBe('uncertain');
     expect(decision.aiAttempted).toBe(false);
     expect(decision.publishable).toBe(false);
     expect(decision.candidateGenerated).toBe(false);
@@ -302,6 +307,8 @@ describe('ingest event report', () => {
 
     const decision = decisionNamed(run, 'Fuera de ventana');
     expect(decision.structuralSkip?.reason).toBe('fuera de ventana');
+    expect(decision.outcome).toBe('structural-skip');
+    expect(decision.outcomeReason).toBe('fuera de ventana');
     expect(decision.eligibility).toBeUndefined();
     expect(decision.aiAttempted).toBe(false);
     expect(decision.publishable).toBe(false);
@@ -505,6 +512,7 @@ describe('ingest event report', () => {
     });
 
     expect(run.decisions[0]!.identity?.action).toBe('updated');
+    expect(run.decisions[0]!.outcome).toBe('updated');
     expect(run.decisions[0]!.identity?.method).toBe('externalId');
     expect(run.decisions[0]!.identity?.eventId).toBe('evt_ocne_existente');
     expect(run.decisions[0]!.candidateGenerated).toBe(true);

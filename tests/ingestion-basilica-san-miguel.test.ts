@@ -56,6 +56,33 @@ describe('Basílica de San Miguel listing', () => {
     expect(adapter.requiresDetailSchedule).toBeFalsy();
   });
 
+  it('reports adapter discards for recognized TEC items without changing extracted events', async () => {
+    const sample = JSON.parse(await fixture('listing.json')) as { events: unknown[]; total: number; total_pages: number };
+    const discards: Array<{ reason: string; title?: string }> = [];
+    const baseline = await adapter.extract(JSON.stringify(sample), listingUrl, ctx);
+    const withJunk = {
+      ...sample,
+      total: sample.events.length + 1,
+      events: [
+        ...sample.events,
+        {
+          id: 9999,
+          status: 'publish',
+          url: 'https://basilicadesanmiguel.org/actividad/sin-fecha/',
+          title: 'Sin fecha',
+        },
+      ],
+    };
+    const events = await adapter.extract(JSON.stringify(withJunk), listingUrl, {
+      ...ctx,
+      reportDiscard: (discard) => discards.push(discard),
+    });
+    expect(events.map((event) => event.externalId)).toEqual(baseline.map((event) => event.externalId));
+    expect(discards).toEqual([
+      expect.objectContaining({ reason: 'missing-date', title: 'Sin fecha' }),
+    ]);
+  });
+
   it('keeps liturgical posts and HTML descriptions without mining a programme', async () => {
     const events = await adapter.extract(await fixture('listing-sample.json'), listingUrl, ctx);
     expect(events).toHaveLength(4);

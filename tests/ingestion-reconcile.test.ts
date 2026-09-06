@@ -937,6 +937,7 @@ describe('pipeline — new, unchanged, updates', () => {
     expect(created.run.candidates).toEqual([]);
     expect(created.run.summary.newEvents).toBe(0);
     expect(created.run.decisions[0]?.structuralSkip?.reason).toBe('cancelado');
+    expect(created.run.decisions[0]?.outcome).toBe('cancelled-not-created');
   });
 
   it('no despublica un evento existente reclasificado como exclude o uncertain', async () => {
@@ -1160,6 +1161,7 @@ describe('pipeline — new, unchanged, updates', () => {
     });
     expect(conflict.run.summary.newEvents).toBe(0);
     expect(conflict.run.summary.ambiguous).toBeGreaterThan(0);
+    expect(conflict.run.decisions.every((item) => item.outcome === 'ambiguous')).toBe(true);
     expect(conflict.run.candidates).toEqual([]);
   });
 });

@@ -725,6 +725,7 @@ describe('pipeline Madrid Datos', () => {
     }
 
     expect(skipped.map((row) => row.externalId)).toEqual(['50341121']);
+    expect(skipped.every((row) => row.outcome === 'structural-skip')).toBe(true);
     expect(run.summary.skippedUnusable).toBe(1);
   });
 });

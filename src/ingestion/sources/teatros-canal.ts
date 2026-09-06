@@ -7,7 +7,7 @@ import {
 import { decodeHtmlEntities } from '../html.ts';
 import { createListingGet } from '../listing-retry.ts';
 import { emptyObservedLists } from '../observed.ts';
-import type { AdapterContext, RawEvent, SourceAdapter, SourceDefinition } from '../types.ts';
+import { reportAdapterDiscard, type AdapterContext, type RawEvent, type SourceAdapter, type SourceDefinition } from '../types.ts';
 import type { IngestWindow } from '../dates.ts';
 
 const PER_PAGE = 50;
@@ -119,17 +119,46 @@ function withPage(url: string, page: number): string {
 function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
   if (!value || typeof value !== 'object') return undefined;
   const item = value as TecEvent;
-  if (asNonEmptyString(item.status) && asNonEmptyString(item.status) !== 'publish') return undefined;
   const title = asNonEmptyString(item.title);
   const sourceUrl = typeof item.url === 'string' ? canalEventUrl(item.url) : undefined;
   const id = asId(item.id);
   const start = asNonEmptyString(item.start_date);
   const end = asNonEmptyString(item.end_date);
-  if (!title || !sourceUrl || !id || !start || !end) return undefined;
+  const discard = (reason: string) => {
+    reportAdapterDiscard(ctx, {
+      reason,
+      ...(title ? { title } : {}),
+      ...(sourceUrl ? { sourceUrl } : {}),
+      ...(id ? { externalId: id } : {}),
+    });
+  };
+  if (asNonEmptyString(item.status) && asNonEmptyString(item.status) !== 'publish') {
+    discard('unpublished');
+    return undefined;
+  }
+  if (!title) {
+    discard('missing-title');
+    return undefined;
+  }
+  if (!sourceUrl) {
+    discard('missing-url');
+    return undefined;
+  }
+  if (!id) {
+    discard('missing-id');
+    return undefined;
+  }
+  if (!start || !end) {
+    discard('missing-date');
+    return undefined;
+  }
   const allDay = item.all_day === true || item.all_day === '1' || item.all_day === 1;
   const startOcc = parseListingDateTime(start, allDay);
   const endOcc = parseListingDateTime(end, true);
-  if (!startOcc?.date || !endOcc?.date) return undefined;
+  if (!startOcc?.date || !endOcc?.date) {
+    discard('invalid-date');
+    return undefined;
+  }
   const sameDay = startOcc.date === endOcc.date;
   const categories = categoryNames(item.categories);
   const cancelled = categories.some((item) => /^(cancelado|suspendido)$/i.test(item.slug));

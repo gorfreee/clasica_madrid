@@ -76,6 +76,45 @@ describe('Teatros del Canal discovery', () => {
     expect(await adapter.extract('{"events":[],"total":0,"total_pages":0}', listingUrl, ctx)).toEqual([]);
   });
 
+  it('reports adapter discards for recognized TEC items without changing extracted events', async () => {
+    const sample = JSON.parse(await fixture('listing-sample.json')) as {
+      events: unknown[];
+      total: number;
+      total_pages: number;
+    };
+    const discards: Array<{ reason: string; title?: string }> = [];
+    const baseline = await adapter.extract(JSON.stringify(sample), listingUrl, ctx);
+    const withJunk = {
+      ...sample,
+      total: sample.events.length + 2,
+      events: [
+        ...sample.events,
+        {
+          id: 9,
+          status: 'draft',
+          url: 'https://www.teatroscanal.com/espectaculo/borrador/',
+          title: 'Borrador',
+          start_date: '2026-09-10 00:00:00',
+          end_date: '2026-09-10 23:59:59',
+        },
+        {
+          id: 10,
+          status: 'publish',
+          url: 'https://www.teatroscanal.com/espectaculo/sin-fecha/',
+          title: 'Sin fecha',
+        },
+      ],
+    };
+    const events = await adapter.extract(JSON.stringify(withJunk), listingUrl, {
+      ...ctx,
+      reportDiscard: (discard) => discards.push(discard),
+    });
+    expect(events.map((event) => event.externalId)).toEqual(baseline.map((event) => event.externalId));
+    expect(discards.map((item) => item.reason).sort()).toEqual(['missing-date', 'unpublished']);
+    expect(discards.find((item) => item.reason === 'unpublished')?.title).toBe('Borrador');
+    expect(discards.find((item) => item.reason === 'missing-date')?.title).toBe('Sin fecha');
+  });
+
   it('follows extra TEC pages and rejects a declared total that does not match', async () => {
     const page1 = {
       events: [

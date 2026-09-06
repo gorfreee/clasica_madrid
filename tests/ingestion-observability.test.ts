@@ -123,6 +123,7 @@ describe('observabilidad de ingestión', () => {
     expect(report.events[0]!.observed?.title).toBe('OCNE. Sinfónico 01');
     expect(report.events[0]!.normalized?.title).toBe('OCNE. Sinfónico 01');
     expect(report.events[0]!.eligibility?.value).toBe('include');
+    expect(report.events[0]!.outcome).toBe('created');
     expect(report.events[0]!.listing).toBeDefined();
 
     const manifest = JSON.parse(await readFile(path.join(obsDir, RUN_MANIFEST_FILE), 'utf8')) as IngestRunManifest;
@@ -138,6 +139,7 @@ describe('observabilidad de ingestión', () => {
     const journal = await readJsonl(path.join(obsDir, EVENT_JOURNAL_FILE));
     expect(journal.some((entry) => entry.kind === 'observation' && entry.observed)).toBe(true);
     expect(journal.some((entry) => entry.kind === 'decision' && entry.classification?.eligibility?.value === 'include')).toBe(true);
+    expect(journal.some((entry) => entry.kind === 'decision' && entry.outcome === 'created')).toBe(true);
     for (const entry of journal) {
       expect(entry.schemaVersion).toBe(1);
       expect(['observation', 'decision', 'source-failure', 'adapter-discard']).toContain(entry.kind);

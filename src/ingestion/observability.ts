@@ -133,6 +133,8 @@ export type IngestJournalEntry = {
   candidate?: IngestEventDecision['candidate'];
   aiAttempted?: boolean;
   ai?: IngestEventDecision['ai'];
+  outcome?: IngestEventDecision['outcome'];
+  outcomeReason?: string;
 };
 
 export type FailureContext = {
@@ -382,6 +384,8 @@ export class IngestObservability {
       }
       if (decision.candidate) entry.candidate = decision.candidate;
       if (decision.ai) entry.ai = decision.ai;
+      if (decision.outcome) entry.outcome = decision.outcome;
+      if (decision.outcomeReason) entry.outcomeReason = decision.outcomeReason;
       this.append(entry);
     });
   }

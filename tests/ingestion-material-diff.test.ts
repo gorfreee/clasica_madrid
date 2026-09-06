@@ -274,6 +274,7 @@ describe('reverificación sin cambios materiales', () => {
     expect(run.summary.written).toEqual([]);
     expect(run.candidates).toEqual([]);
     expect(run.decisions[0]?.identity?.action).toBe('unchanged');
+    expect(run.decisions[0]?.outcome).toBe('unchanged');
     expect(await readFile(path.join(dir, 'events', 'evt_ocne_existente.json'), 'utf8')).toBe(before);
   });
 
@@ -296,6 +297,7 @@ describe('reverificación sin cambios materiales', () => {
     expect(run.summary.written).toEqual(['events/evt_ocne_existente.json']);
     expect(run.candidates).toHaveLength(1);
     expect(run.decisions[0]?.identity?.action).toBe('updated');
+    expect(run.decisions[0]?.outcome).toBe('updated');
     expect(run.decisions[0]?.fieldDiffs).toBeUndefined();
     const written = JSON.parse(await readFile(path.join(dir, 'events', 'evt_ocne_existente.json'), 'utf8'));
     expect(written.lastVerifiedAt).toBe(today);
