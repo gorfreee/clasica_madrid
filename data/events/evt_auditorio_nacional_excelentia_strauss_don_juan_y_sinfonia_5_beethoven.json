@@ -26,13 +26,27 @@
   ],
   "composers": [
     {
-      "name": "Respighi.- Pinos de Roma"
+      "name": "Richard Strauss"
+    },
+    {
+      "name": "Ottorino Respighi"
+    },
+    {
+      "name": "Ludwig van Beethoven"
     }
   ],
   "works": [
     {
-      "title": "Beethoven.- Sinfonía núm 5",
-      "composerName": "Respighi.- Pinos de Roma"
+      "title": "Don Juan, poema sinfónico",
+      "composerName": "Richard Strauss"
+    },
+    {
+      "title": "Pinos de Roma",
+      "composerName": "Ottorino Respighi"
+    },
+    {
+      "title": "Sinfonía núm 5",
+      "composerName": "Ludwig van Beethoven"
     }
   ],
   "eras": [
