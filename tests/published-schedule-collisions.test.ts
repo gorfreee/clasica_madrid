@@ -37,6 +37,7 @@ describe('catálogo publicado tras la limpieza de duplicados de hueco exclusivo'
     const catalog = await loadCatalogFromDir(defaultDataDir());
     const collisions = findScheduleCollisions(catalog);
     expect(collisions.filter((item) => item.kind === 'duplicate')).toEqual([]);
+    expect(collisions.filter((item) => item.kind === 'review')).toEqual([]);
     expect(catalog.events.some((event) => event.id === 'evt_cndm_23900')).toBe(false);
 
     const oratorio = catalog.events.find(

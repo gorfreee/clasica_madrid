@@ -128,6 +128,45 @@ function auditorioOratorioFacts(overrides: Partial<NormalizedEvent> = {}): Norma
   };
 }
 
+const FESTIVAL_COMPOSERS = [
+  { name: 'Robert Schumann' },
+  { name: 'Frédéric Chopin' },
+  { name: 'Johannes Brahms' },
+  { name: 'Ludwig van Beethoven' },
+  { name: 'Maurice Ravel' },
+  { name: 'Franz Liszt' },
+];
+
+function festivalLarrochaFacts(overrides: Partial<NormalizedEvent> = {}): NormalizedEvent {
+  return {
+    sourceId: auditorio.id,
+    sourceUrl: 'https://auditorionacional.inaem.gob.es/es/programacion/iv-festival-alicia-de-larrocha',
+    externalId: 'iv-festival-alicia-de-larrocha',
+    title: 'IV Edición Festival Alicia de Larrocha',
+    occurrences: [{ date: '2026-09-12', time: '19:30' }],
+    venueText: 'Sala Sinfónica',
+    performers: [],
+    composers: FESTIVAL_COMPOSERS,
+    works: [],
+    ...overrides,
+  };
+}
+
+function tretyakovFacts(overrides: Partial<NormalizedEvent> = {}): NormalizedEvent {
+  return {
+    sourceId: cndm.id,
+    sourceUrl: 'https://cndm.inaem.gob.es/node/2187',
+    externalId: '2187',
+    title: 'VICTOR TRETYAKOV, Piano',
+    occurrences: [{ date: '2026-09-12', time: '19:30' }],
+    venueText: 'Sala Sinfónica',
+    performers: [],
+    composers: FESTIVAL_COMPOSERS,
+    works: [],
+    ...overrides,
+  };
+}
+
 function observation(index: number, source: typeof cndm, event: NormalizedEvent): HarvestObservation {
   const raw: RawEvent = {
     sourceId: source.id,
@@ -202,6 +241,10 @@ describe('compareMusicalFacts', () => {
       composers: [{ name: 'J. S. Bach' }],
       works: [],
     }).kind).toBe('insufficient');
+  });
+
+  it('treats Tretyakov-like editorial titles with shared composers as insufficient', () => {
+    expect(compareMusicalFacts(festivalLarrochaFacts(), tretyakovFacts()).kind).toBe('insufficient');
   });
 });
 
@@ -320,6 +363,47 @@ describe('identity slot matching', () => {
     expect(result.candidates).toEqual([]);
   });
 
+  it('quarantines a Tretyakov-like exclusive slot as schedule-review, not a merge or a second event', () => {
+    const catalog = hallCatalog([makeEvent({
+      id: 'evt_festival',
+      slug: 'iv-festival-alicia-de-larrocha',
+      title: 'IV Edición Festival Alicia de Larrocha',
+      venueId: 'ven_auditorio_nacional_sala_sinfonica',
+      organizerIds: [],
+      seriesId: null,
+      occurrences: [{ id: 'occ_festival_01', date: '2026-09-12', time: '19:30', status: 'scheduled' }],
+      performers: [],
+      composers: FESTIVAL_COMPOSERS,
+      works: [],
+      citations: [{
+        sourceId: auditorio.catalogSourceId,
+        url: 'https://auditorionacional.inaem.gob.es/es/programacion/iv-festival-alicia-de-larrocha',
+        checkedAt: '2026-09-01',
+        externalId: 'iv-festival-alicia-de-larrocha',
+      }],
+      primarySourceId: auditorio.catalogSourceId,
+    })]);
+    const match = matchEventIdentity(catalog, tretyakovFacts(), {
+      catalogSourceId: cndm.catalogSourceId,
+      venueId: 'ven_auditorio_nacional_sala_sinfonica',
+    });
+    expect(match.kind).toBe('ambiguous');
+    if (match.kind === 'ambiguous') {
+      expect(match.methods).toEqual(['slot']);
+      expect(match.reason).toContain('schedule-review');
+      expect(match.events.map((event) => event.id)).toEqual(['evt_festival']);
+    }
+    const result = reconcile(catalog, [observation(0, cndm, tretyakovFacts())]);
+    expect(result.stats.newEvents).toBe(0);
+    expect(result.stats.ambiguous).toBe(1);
+    expect(result.candidates).toEqual([]);
+    expect(result.byIndex.get(0)).toMatchObject({
+      action: 'ambiguous',
+      method: 'slot',
+      candidateGenerated: false,
+    });
+  });
+
   it('does not merge two legitimate distinct concerts from a weak shared composer', () => {
     const catalog = hallCatalog();
     const other = cndmOratorioFacts({
@@ -327,7 +411,7 @@ describe('identity slot matching', () => {
       externalId: '1',
       title: 'Tarde de órgano',
       occurrences: [{ date: '2026-12-17', time: '19:30' }],
-      performers: [{ name: 'Ana Ruiz', role: 'soloist' }],
+      performers: [],
       composers: [{ name: 'Johann Sebastian Bach' }],
       works: [],
     });
@@ -335,7 +419,8 @@ describe('identity slot matching', () => {
       catalogSourceId: cndm.catalogSourceId,
       venueId: 'ven_auditorio_nacional_sala_sinfonica',
     });
-    expect(match.kind).not.toBe('matched');
+    expect(match.kind).toBe('ambiguous');
+    if (match.kind === 'ambiguous') expect(match.reason).toContain('schedule-review');
   });
 
   it('ignores the same hall and day when the time differs', () => {
@@ -446,6 +531,35 @@ describe('identity slot matching', () => {
       venueId: 'ven_auditorio_nacional',
     }).kind).toBe('unmatched');
   });
+
+  it('does not occupy an exclusive slot when the incoming time is unknown', () => {
+    const catalog = hallCatalog();
+    expect(matchEventIdentity(catalog, cndmOratorioFacts({
+      occurrences: [{ date: '2026-12-17', time: null }],
+    }), {
+      catalogSourceId: cndm.catalogSourceId,
+      venueId: 'ven_auditorio_nacional_sala_sinfonica',
+    }).kind).toBe('unmatched');
+  });
+
+  it('does not occupy an exclusive slot against a cancelled published event', () => {
+    const catalog = hallCatalog([makeEvent({
+      ...oratorioPublished(),
+      status: 'cancelled',
+      occurrences: [{
+        id: 'occ_auditorio_nacional_la_filarmonica_oratorio_de_navidad_1_01',
+        date: '2026-12-17',
+        time: '19:30',
+        status: 'cancelled',
+      }],
+    })]);
+    expect(matchEventIdentity(catalog, tretyakovFacts({
+      occurrences: [{ date: '2026-12-17', time: '19:30' }],
+    }), {
+      catalogSourceId: cndm.catalogSourceId,
+      venueId: 'ven_auditorio_nacional_sala_sinfonica',
+    }).kind).toBe('unmatched');
+  });
 });
 
 describe('batch slot grouping', () => {
@@ -474,6 +588,34 @@ describe('batch slot grouping', () => {
     expect(result.stats.newEvents).toBe(0);
     expect(result.stats.ambiguous).toBe(2);
     expect(result.byIndex.get(0)?.ambiguousReason).toContain('schedule-conflict');
+  });
+
+  it('quarantines two new Tretyakov-like listings that share an exclusive slot without musical identity', () => {
+    const catalog = hallCatalog([]);
+    const result = reconcile(catalog, [
+      observation(0, auditorio, festivalLarrochaFacts()),
+      observation(1, cndm, tretyakovFacts()),
+    ]);
+    expect(result.stats.newEvents).toBe(0);
+    expect(result.stats.ambiguous).toBe(2);
+    expect(result.candidates).toEqual([]);
+    expect(result.byIndex.get(0)?.ambiguousReason).toContain('schedule-review');
+    expect(result.byIndex.get(1)?.ambiguousReason).toContain('schedule-review');
+    expect(result.byIndex.get(0)?.candidateGenerated).toBe(false);
+    expect(result.byIndex.get(1)?.candidateGenerated).toBe(false);
+  });
+
+  it('still publishes a third concert at a different exclusive-slot time', () => {
+    const catalog = hallCatalog([]);
+    const result = reconcile(catalog, [
+      observation(0, auditorio, festivalLarrochaFacts()),
+      observation(1, cndm, tretyakovFacts()),
+      observation(2, cndm, cndmOratorioFacts()),
+    ]);
+    expect(result.stats.newEvents).toBe(1);
+    expect(result.stats.ambiguous).toBe(2);
+    expect(result.candidates).toHaveLength(1);
+    expect(result.candidates[0]?.event.occurrences[0]).toMatchObject({ date: '2026-12-17', time: '19:30' });
   });
 });
 
@@ -540,13 +682,51 @@ describe('catalog schedule collisions', () => {
         }],
         primarySourceId: cndm.catalogSourceId,
       }),
+      makeEvent({
+        id: 'evt_festival',
+        slug: 'iv-festival-alicia-de-larrocha',
+        title: 'IV Edición Festival Alicia de Larrocha',
+        venueId: 'ven_auditorio_nacional_sala_sinfonica',
+        organizerIds: [],
+        seriesId: null,
+        occurrences: [{ id: 'occ_festival_01', date: '2026-09-12', time: '19:30', status: 'scheduled' }],
+        performers: [],
+        composers: FESTIVAL_COMPOSERS,
+        works: [],
+        citations: [{
+          sourceId: auditorio.catalogSourceId,
+          url: 'https://auditorionacional.inaem.gob.es/es/programacion/iv-festival-alicia-de-larrocha',
+          checkedAt: '2026-09-03',
+        }],
+        primarySourceId: auditorio.catalogSourceId,
+      }),
+      makeEvent({
+        id: 'evt_tretyakov',
+        slug: 'victor-tretyakov-piano',
+        title: 'VICTOR TRETYAKOV, Piano',
+        venueId: 'ven_auditorio_nacional_sala_sinfonica',
+        organizerIds: [],
+        seriesId: null,
+        occurrences: [{ id: 'occ_tretyakov_01', date: '2026-09-12', time: '19:30', status: 'scheduled' }],
+        performers: [],
+        composers: FESTIVAL_COMPOSERS,
+        works: [],
+        citations: [{
+          sourceId: cndm.catalogSourceId,
+          url: 'https://cndm.inaem.gob.es/node/2187',
+          checkedAt: '2026-09-03',
+          externalId: '2187',
+        }],
+        primarySourceId: cndm.catalogSourceId,
+      }),
     ]);
     const collisions = findScheduleCollisions(catalog);
     expect(collisions.find((item) => item.eventIds.includes('evt_cndm_23900'))?.kind).toBe('duplicate');
     expect(collisions.find((item) => item.eventIds.includes('evt_ospital'))?.kind).toBe('conflict');
+    expect(collisions.find((item) => item.eventIds.includes('evt_tretyakov'))?.kind).toBe('review');
     const issues = findScheduleCollisionIssues(catalog);
-    expect(issues.every((issue) => issue.severity === 'warning')).toBe(true);
-    expect(issues.some((issue) => issue.code === 'schedule-duplicate')).toBe(true);
-    expect(issues.some((issue) => issue.code === 'schedule-conflict')).toBe(true);
+    expect(issues.find((issue) => issue.code === 'schedule-duplicate')?.severity).toBe('warning');
+    expect(issues.find((issue) => issue.code === 'schedule-conflict')?.severity).toBe('warning');
+    expect(issues.find((issue) => issue.code === 'schedule-review')?.severity).toBe('error');
   });
 });

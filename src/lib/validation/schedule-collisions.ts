@@ -3,15 +3,18 @@
  *
  * Same precise venue + date + explicit time is physically suspicious, but it
  * is not automatically a duplicate: sources may disagree, a parent building
- * may still have rooms, or a listing may be thin. Warnings only — never a
- * hard validation error — so historical catalog rows remain publishable.
+ * may still have rooms, or a listing may be thin.
+ *
+ * `schedule-review` (insufficient musical evidence in an exclusive slot) is a
+ * hard error: it must not be introduced or kept silently. True
+ * `schedule-conflict` stays a warning and is never auto-resolved.
  */
 
 import type { Catalog } from '../domain/catalog.ts';
 import { isExclusiveScheduleVenueId } from '../domain/venues.ts';
 import type { Event } from '../schemas/event.ts';
 import { compareMusicalFacts, musicalFactsFrom } from '../../ingestion/musical-identity.ts';
-import { warningIssue, type ValidationIssue } from './report.ts';
+import { errorIssue, warningIssue, type ValidationIssue } from './report.ts';
 
 export type ScheduleCollisionKind = 'duplicate' | 'conflict' | 'review';
 
@@ -68,7 +71,7 @@ export function findScheduleCollisionIssues(catalog: Catalog): ValidationIssue[]
         path,
       );
     }
-    return warningIssue(
+    return errorIssue(
       'schedule-review',
       `hueco exclusivo ${collision.venueId} ${collision.date} ${collision.time}: revisar ${collision.eventIds.join(', ')} (evidencia insuficiente para fusionar o contradecir)`,
       path,

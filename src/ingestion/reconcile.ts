@@ -186,9 +186,9 @@ export function reconcileHarvest(options: {
   }
 
   const freshGroups = groupNewObservations(fresh, catalog);
-  const { publishable, conflicting } = partitionFreshSlotConflicts(freshGroups, catalog);
-  for (const group of conflicting) {
-    const reason = group[0] ? slotConflictReason(group[0], catalog) : 'schedule-conflict';
+  const { publishable, held } = partitionFreshSlotHolds(freshGroups, catalog);
+  for (const { group, kind } of held) {
+    const reason = group[0] ? slotHoldReason(group[0], kind) : `schedule-${kind}`;
     stats.ambiguous += group.length;
     recordGroupedObservations(group, stats, { conflicting: true });
     for (const item of group) {
@@ -527,11 +527,15 @@ function groupNewObservations(items: PreparedItem[], catalog: Catalog): Prepared
   );
 }
 
-function partitionFreshSlotConflicts(
+function partitionFreshSlotHolds(
   groups: PreparedItem[][],
   catalog: Catalog,
-): { publishable: PreparedItem[][]; conflicting: PreparedItem[][] } {
-  const conflictRoots = new Set<number>();
+): { publishable: PreparedItem[][]; held: Array<{ group: PreparedItem[]; kind: 'conflict' | 'review' }> } {
+  const holds = new Map<number, 'conflict' | 'review'>();
+  const mark = (index: number, kind: 'conflict' | 'review') => {
+    if (holds.get(index) === 'conflict') return;
+    holds.set(index, kind);
+  };
   const indexed = groups.map((group, index) => ({ group, index }));
   for (const left of indexed) {
     const leftItem = left.group[0];
@@ -541,19 +545,20 @@ function partitionFreshSlotConflicts(
       const rightItem = right.group[0];
       if (!rightItem || rightItem.venueId !== leftItem.venueId) continue;
       if (!groupsShareSlot(left.group, right.group)) continue;
-      const conflict = groupsHaveSlotConflict(left.group, right.group);
-      if (!conflict) continue;
-      conflictRoots.add(left.index);
-      conflictRoots.add(right.index);
+      const kind = groupsSlotHoldKind(left.group, right.group);
+      if (!kind) continue;
+      mark(left.index, kind);
+      mark(right.index, kind);
     }
   }
   const publishable: PreparedItem[][] = [];
-  const conflicting: PreparedItem[][] = [];
+  const held: Array<{ group: PreparedItem[]; kind: 'conflict' | 'review' }> = [];
   for (const [index, group] of groups.entries()) {
-    if (conflictRoots.has(index)) conflicting.push(group);
+    const kind = holds.get(index);
+    if (kind) held.push({ group, kind });
     else publishable.push(group);
   }
-  return { publishable, conflicting };
+  return { publishable, held };
 }
 
 function isExclusiveSlotItem(item: PreparedItem, catalog: Catalog): boolean {
@@ -570,19 +575,26 @@ function groupsShareSlot(left: PreparedItem[], right: PreparedItem[]): boolean {
   return left.some((item) => right.some((other) => sharesPreparedSlot(item, other)));
 }
 
-function groupsHaveSlotConflict(left: PreparedItem[], right: PreparedItem[]): boolean {
-  return left.some((item) =>
-    right.some((other) =>
-      sharesPreparedSlot(item, other) &&
-      slotIdentityVerdict(item.observation.event, other.observation.event).kind === 'conflict',
-    ),
-  );
+function groupsSlotHoldKind(
+  left: PreparedItem[],
+  right: PreparedItem[],
+): 'conflict' | 'review' | undefined {
+  let review = false;
+  for (const item of left) {
+    for (const other of right) {
+      if (!sharesPreparedSlot(item, other)) continue;
+      const kind = slotIdentityVerdict(item.observation.event, other.observation.event).kind;
+      if (kind === 'conflict') return 'conflict';
+      if (kind === 'insufficient') review = true;
+    }
+  }
+  return review ? 'review' : undefined;
 }
 
-function slotConflictReason(item: PreparedItem, _catalog: Catalog): string {
+function slotHoldReason(item: PreparedItem, kind: 'conflict' | 'review'): string {
   const keys = exclusiveSlotKeys(item.venueId, item.observation.event.occurrences);
   const sample = keys[0]?.replace(/^slot:/, '') ?? item.venueId ?? '';
-  return `schedule-conflict: ${sample}`;
+  return `schedule-${kind}: ${sample}`;
 }
 
 function groupBy<T>(items: T[], keyOf: (item: T) => string): Map<string, T[]> {

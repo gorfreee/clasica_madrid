@@ -241,17 +241,19 @@ function matchExclusiveSlot(
 
   const matches: Event[] = [];
   const conflicts: Array<{ event: Event; reasons: string[] }> = [];
+  const reviews: Event[] = [];
   for (const event of catalog.events) {
     if (event.venueId !== venueId) continue;
     if (event.status === 'cancelled') continue;
     const eventKeys = exclusiveSlotKeys(event.venueId, event.occurrences);
     if (!eventKeys.some((key) => observedKeys.includes(key))) continue;
-    const verdict = compareMusicalFacts(musicalFactsFrom(observed), musicalFactsFrom(event));
+    const verdict = slotIdentityVerdict(observed, event);
     if (verdict.kind === 'match') matches.push(event);
-    if (verdict.kind === 'conflict') conflicts.push({ event, reasons: verdict.reasons });
+    else if (verdict.kind === 'conflict') conflicts.push({ event, reasons: verdict.reasons });
+    else reviews.push(event);
   }
 
-  const ids = [...new Set([...matches, ...conflicts.map((item) => item.event)].map((event) => event.id))];
+  const conflictIds = [...new Set([...matches, ...conflicts.map((item) => item.event)].map((event) => event.id))];
   if (conflicts.length > 0 && matches.length === 0) {
     const first = conflicts[0]!;
     return {
@@ -269,7 +271,16 @@ function matchExclusiveSlot(
       kind: 'ambiguous',
       events: [...matches, ...conflicts.map((item) => item.event)],
       methods: ['slot'],
-      reason: `schedule-conflict: ${slotConflictLabel(venueId!, observed)}: varios eventos en el mismo hueco (${ids.join(', ')})`,
+      reason: `schedule-conflict: ${slotConflictLabel(venueId!, observed)}: varios eventos en el mismo hueco (${conflictIds.join(', ')})`,
+    };
+  }
+  if (reviews.length > 0) {
+    const ids = reviews.map((event) => event.id).join(', ');
+    return {
+      kind: 'ambiguous',
+      events: reviews,
+      methods: ['slot'],
+      reason: `schedule-review: ${slotConflictLabel(venueId!, observed)}: evidencia insuficiente para fusionar o contradecir (${ids})`,
     };
   }
   return { kind: 'unmatched' };
