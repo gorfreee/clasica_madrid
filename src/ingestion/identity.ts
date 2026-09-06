@@ -247,7 +247,7 @@ function matchExclusiveSlot(
     if (event.status === 'cancelled') continue;
     const eventKeys = exclusiveSlotKeys(event.venueId, event.occurrences);
     if (!eventKeys.some((key) => observedKeys.includes(key))) continue;
-    const verdict = slotIdentityVerdict(observed, event);
+    const verdict = compareMusicalFacts(musicalFactsFrom(observed), musicalFactsFrom(event));
     if (verdict.kind === 'match') matches.push(event);
     else if (verdict.kind === 'conflict') conflicts.push({ event, reasons: verdict.reasons });
     else reviews.push(event);
