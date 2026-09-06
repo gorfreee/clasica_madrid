@@ -17,7 +17,10 @@ const { model } = Astro.props;
         <span class="visually-hidden">Buscar en la agenda</span>
         <input type="search" name="q" value={model.query} placeholder="Busca conciertos, intérpretes, compositores o lugares" />
       </label>
-      <button class="search-submit" type="submit" aria-label="Aplicar filtros">Buscar</button>
+      <button class="search-submit" type="submit" aria-label="Aplicar filtros">
+        <span class="search-submit__compact" aria-hidden="true">→</span>
+        <span class="search-submit__label">Buscar</span>
+      </button>
     </div>
 
     <nav class="shortcuts" aria-label="Accesos rápidos de agenda" data-agenda-shortcuts>

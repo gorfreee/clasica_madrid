@@ -62,6 +62,17 @@ export const sourceKindLabels: Record<SourceKind, string> = {
   secondary: 'Secundaria',
 };
 
+export function formatSourceCitationMeta(params: {
+  kindLabel: string;
+  isPrimary: boolean;
+  checkedAt: string;
+}): string {
+  const parts = [`Fuente ${params.kindLabel.toLowerCase()}`];
+  if (params.isPrimary) parts.push('principal');
+  parts.push(`comprobada el ${params.checkedAt}`);
+  return parts.join(' · ');
+}
+
 export const occurrenceStatusLabels: Record<OccurrenceStatus, string> = {
   scheduled: 'Programada',
   cancelled: 'Cancelada',

@@ -130,6 +130,11 @@ button, input, select { font: inherit; }
   letter-spacing: .14em;
   text-transform: uppercase;
 }
+a.eyebrow {
+  display: inline-block;
+  text-decoration: none;
+}
+a.eyebrow:hover { color: var(--blue); }
 .lede {
   max-width: 37rem;
   margin: 1.3rem 0 0;
@@ -208,6 +213,7 @@ button, input, select { font: inherit; }
   font-weight: 800;
 }
 .search-submit { min-width: 9rem; border-left: 2px solid var(--ink); }
+.search-submit__compact { display: none; }
 .search-submit:hover, .filters__actions button:hover { background: var(--blue); }
 .shortcuts { display: flex; flex-wrap: wrap; gap: 0; margin-top: -2px; }
 .shortcut {
@@ -294,7 +300,6 @@ button, input, select { font: inherit; }
   letter-spacing: .1em;
 }
 .agenda-status p { margin: 0; }
-.agenda-status > span { text-transform: uppercase; }
 .agenda-more {
   display: grid;
   justify-items: center;
@@ -603,21 +608,21 @@ button, input, select { font: inherit; }
 .detail-section { margin-top: 5rem; }
 .section-heading {
   display: grid;
-  grid-template-columns: 9rem minmax(0, 1fr) 3rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
   align-items: baseline;
   padding: .75rem 0;
   border-block: 2px solid var(--ink);
 }
-.section-heading p, .section-heading h2, .section-heading span { margin: 0; }
-.section-heading p, .section-heading span { font-size: .68rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.section-heading h2, .section-heading span { margin: 0; }
 .section-heading h2 { font-size: clamp(1.7rem, 4.5vw, 4rem); font-weight: 800; letter-spacing: -.065em; line-height: .9; }
-.section-heading span { color: var(--blue); font-size: 1.2rem; text-align: right; }
+.section-heading span { color: var(--blue); font-size: 1.2rem; font-weight: 800; text-align: right; }
 .occurrence-list, .editorial-list, .programme-list, .source-list { list-style: none; margin: 0; padding: 0; }
 .occurrence-list li {
   display: grid;
   grid-template-columns: 1fr 10rem 8rem;
   gap: 1rem;
-  padding: 1.15rem 0 1.15rem 9rem;
+  padding: 1.15rem 0;
   border-bottom: 1px solid var(--line);
   font-size: .9rem;
 }
@@ -627,7 +632,7 @@ button, input, select { font: inherit; }
   display: grid;
   grid-template-columns: 1fr minmax(10rem, 18rem);
   gap: 2rem;
-  padding: 1.15rem 0 1.15rem 9rem;
+  padding: 1.15rem 0;
   border-bottom: 1px solid var(--line);
   font-size: clamp(1.1rem, 2.2vw, 1.75rem);
   font-weight: 700;
@@ -635,22 +640,22 @@ button, input, select { font: inherit; }
 }
 .editorial-list small, .programme-list small { color: var(--muted); font-size: .75rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
 .programme-list { counter-reset: works; }
-.programme-list li { position: relative; counter-increment: works; }
+.programme-list li { position: relative; padding-left: 2.5rem; counter-increment: works; }
 .programme-list li::before { content: counter(works, decimal-leading-zero); position: absolute; left: 0; color: var(--coral); font-size: .7rem; letter-spacing: .08em; }
 .fact-list--compact { grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; }
-.fact-list--compact > div { min-height: 8rem; padding: 1.25rem 1.25rem 1.25rem 9rem; border-bottom: 1px solid var(--line); }
+.fact-list--compact > div { min-height: 8rem; padding: 1.25rem; border-bottom: 1px solid var(--line); }
 .fact-list--compact > div:nth-child(odd) { border-right: 1px solid var(--line); }
 .source-list li {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
-  padding: 1rem 0 1rem 9rem;
+  padding: 1rem 0;
   border-bottom: 1px solid var(--line);
   font-size: .78rem;
 }
 .source-list a { font-weight: 800; }
 .source-list span, .verified { color: var(--muted); }
-.verified { margin: 1rem 0 0 9rem; }
+.verified { margin: 1rem 0 0; }
 .detail-hero--venue { min-height: 30rem; }
 .venue-detail__practical { position: relative; z-index: 1; max-width: 42rem; margin-top: 2.5rem; }
 .venue-detail__practical p { color: var(--muted); }
@@ -724,8 +729,15 @@ button, input, select { font: inherit; }
   .agenda-intro .lede { position: relative; z-index: 1; max-width: calc(100% - 4rem); font-size: .95rem; }
   .agenda-intro__graphic { position: absolute; right: -3rem; top: 2rem; width: 10rem; height: 10rem; opacity: .95; }
   .search-field input { min-height: 3.8rem; padding-inline: .75rem; font-size: .9rem; }
-  .search-submit { min-width: 4rem; width: 4rem; overflow: hidden; color: transparent; }
-  .search-submit::after { content: "→"; color: var(--paper-light); font-size: 1.3rem; }
+  .search-submit {
+    min-width: 4rem;
+    width: 4rem;
+    padding: 0;
+    display: grid;
+    place-items: center;
+  }
+  .search-submit__label { display: none; }
+  .search-submit__compact { display: block; font-size: 1.3rem; line-height: 1; }
   .shortcuts { display: grid; grid-template-columns: repeat(2, 1fr); }
   .shortcut, .shortcut:last-child { min-width: 0; border-right-width: 2px; margin-top: -2px; }
   .shortcut:nth-child(even) { margin-left: -2px; }
@@ -767,16 +779,14 @@ button, input, select { font: inherit; }
   .event-facts > div + div, .event-facts__access { border-top: 1px solid var(--line); }
   .official-link { grid-template-columns: 1fr; gap: .7rem; padding: 1rem; }
   .detail-section { margin-top: 3.5rem; }
-  .section-heading { grid-template-columns: 4.3rem 1fr 2rem; }
   .section-heading h2 { font-size: 2.2rem; }
-  .occurrence-list li, .editorial-list li, .programme-list li, .source-list li { padding-left: 4.3rem; }
+  .programme-list li { padding-left: 2.5rem; }
   .occurrence-list li { grid-template-columns: 1fr auto; }
   .occurrence-list li span { grid-column: 1 / -1; }
   .editorial-list li, .programme-list li { grid-template-columns: 1fr; gap: .45rem; font-size: 1.15rem; }
   .fact-list--compact { grid-template-columns: 1fr; }
-  .fact-list--compact > div { min-height: auto; padding: 1rem 0 1rem 4.3rem; border-right: 0 !important; }
+  .fact-list--compact > div { min-height: auto; padding: 1rem 0; border-right: 0 !important; }
   .source-list li { grid-template-columns: 1fr; gap: .35rem; }
-  .verified { margin-left: 4.3rem; }
   .venue-detail__practical { margin-top: 4rem; }
   .error-page { min-height: 35rem; }
   .error-page h1 { margin-top: 8rem; font-size: 4.3rem; }

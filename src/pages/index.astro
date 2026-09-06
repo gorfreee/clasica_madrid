@@ -41,7 +41,6 @@ const model = await loadAgendaPage(Astro.url);
         >
           <div class="agenda-status">
             <p class="result-count" data-result-count aria-live="polite">{model.resultCountLabel}</p>
-            <span aria-hidden="true">CM / 01</span>
           </div>
           <AgendaList days={model.days} />
           {
