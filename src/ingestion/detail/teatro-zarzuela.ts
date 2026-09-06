@@ -5,16 +5,26 @@ import { inferScheduleFromText } from './schedule.ts';
 import { parseZarzuelaSchedule } from './zarzuela-schedule.ts';
 
 const ROLE = /^(?:soprano|mezzosoprano|contralto|tenor|bar[ií]tono|bajo|piano|viol[ií]n|viola|violonchelo|flauta|clave|direcci[oó]n musical(?: y clave)?)$/i;
+const VENUE_HEADING =
+  /^EN (?:LA|EL) (.+?)(?:\s*\([^)]*\))?\s*$/i;
 
-export function parseZarzuelaDetail(_event: RawEvent, body: string): ObservedFactPatch {
+export class ZarzuelaStructuralSkipError extends Error {
+  readonly reason = 'structural-skip' as const;
+  constructor(message: string) {
+    super(message);
+    this.name = 'ZarzuelaStructuralSkipError';
+  }
+}
+
+export function parseZarzuelaDetail(event: RawEvent, body: string): ObservedFactPatch {
   const content = /<span\b[^>]*id=["']startOfPageId\d+["'][^>]*>[\s\S]*?(?=<!--END CONTENT-->)/i.exec(body)?.[0];
   if (!content || !/descripcionWrapper/.test(content)) {
     throw new Error('teatro-zarzuela: ficha K2 no reconocible');
   }
   const titleEnd = /<h3\b[^>]*class=["']titulo["'][^>]*>[\s\S]*?<\/h3>/i.exec(content);
   const sections = [...content.matchAll(/<div\b[^>]*class=["']encabezado-bloque["'][^>]*>\s*<h3[^>]*>([\s\S]*?)<\/h3>\s*<\/div>/gi)];
-  if (!titleEnd || !sections.length) throw new Error('teatro-zarzuela: ficha sin título o secciones');
-  const introHtml = content.slice(titleEnd.index + titleEnd[0].length, sections[0]!.index)
+  if (!titleEnd) throw new Error('teatro-zarzuela: ficha sin título o secciones');
+  const introHtml = content.slice(titleEnd.index + titleEnd[0].length, sections[0]?.index ?? content.length)
     .split('<!-- BOTONES COMPRA')[0]!;
   const section = (name: RegExp): string => {
     const index = sections.findIndex((s) => name.test(stripTags(s[1]!)));
@@ -30,15 +40,31 @@ export function parseZarzuelaDetail(_event: RawEvent, body: string): ObservedFac
   const introText = flattenHtmlBlocks(introHtml);
   const artisticText = flattenHtmlBlocks(artistic);
   const description = [introText, artisticText].filter(Boolean).join('\n');
-  const scheduleText = stripTags(scheduleHtml);
-  // A single RawEvent cannot assign different venues to its performances.
-  // Never assign an external co-production to this theatre by default.
-  if (hasExternalZarzuelaVenue(scheduleText)) {
-    throw new Error('teatro-zarzuela: sede externa o múltiple; requiere calendario por sede');
+  const hasScheduleSection = Boolean(scheduleHtml.trim());
+  const venueSource = flattenHtmlBlocks(hasScheduleSection ? scheduleHtml : introHtml);
+  const venues = extractZarzuelaVenues(venueSource);
+  if (venues.length > 1) {
+    throw new ZarzuelaStructuralSkipError(
+      'teatro-zarzuela: varias sedes explícitas; no se publica un único lugar',
+    );
   }
-  const occurrences = parseZarzuelaSchedule(scheduleHtml);
+  let occurrences;
+  try {
+    occurrences = parseZarzuelaSchedule(hasScheduleSection ? scheduleHtml : introHtml, {
+      hintHtml: introHtml,
+      listingDateText: event.listingDateText,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (!hasScheduleSection && /ausentes o ambiguas|falta el año|no enumeradas/.test(message)) {
+      throw new ZarzuelaStructuralSkipError(
+        'teatro-zarzuela: ficha K2 sin Fechas y Horarios ni calendario explícito',
+      );
+    }
+    throw error;
+  }
   const performers: ObservedPerson[] = [];
-  for (const pair of artistic.matchAll(/<dt\b[^>]*>([\s\S]*?)<\/dt>\s*<dd\b[^>]*>([\s\S]*?)<\/dd>/gi)) {
+  for (const pair of (artistic || introHtml).matchAll(/<dt\b[^>]*>([\s\S]*?)<\/dt>\s*<dd\b[^>]*>([\s\S]*?)<\/dd>/gi)) {
     const label = stripTags(pair[1]!);
     const value = stripTags(pair[2]!);
     if (!label || !value) continue;
@@ -49,12 +75,12 @@ export function parseZarzuelaDetail(_event: RawEvent, body: string): ObservedFac
   }
   const composers = extractZarzuelaMusicCredits(introHtml).map((name) => ({ name }));
   const programText = flattenHtmlBlocks(program) || undefined;
-  const status = inferScheduleFromText(`${description} ${scheduleText}`).eventStatus;
+  const status = inferScheduleFromText(`${description} ${stripTags(scheduleHtml)}`).eventStatus;
   return {
     description: description || undefined,
     categoryText: categoryText || undefined,
     programText,
-    venueText: 'Teatro de la Zarzuela',
+    venueText: venues[0] ?? 'Teatro de la Zarzuela',
     occurrences,
     performers: normalizePersonList(performers),
     composers: normalizeComposerList(composers),
@@ -95,15 +121,24 @@ function extractZarzuelaMusicCredits(introHtml: string): string[] {
 }
 
 /**
- * "En la sala principal del Teatro de la Zarzuela" is this theatre's hall, not
- * an external SALA. Fundación / other theatres / auditorios stay external.
+ * Explicit `EN LA/EL …` headings in Fechas y Horarios (and the matching intro
+ * line). "Sala principal / Ambigú del Teatro de la Zarzuela" is this theatre.
+ * A single other named place is returned for the pipeline to resolve.
+ * Several distinct places are a structural skip, not a default to this theatre.
  */
-function hasExternalZarzuelaVenue(scheduleText: string): boolean {
-  const pattern = /\bEN (?:LA|EL) (?:FUNDACI[ÓO]N|TEATRO (?!DE LA ZARZUELA)|AUDITORIO|ESPACIO|SALA)\b/gi;
-  for (const match of scheduleText.matchAll(pattern)) {
-    const around = scheduleText.slice(match.index, match.index + 80);
-    if (/sala principal(?: del teatro de la zarzuela)?/i.test(around)) continue;
-    return true;
+export function extractZarzuelaVenues(scheduleText: string): string[] {
+  const names: string[] = [];
+  const seen = new Set<string>();
+  for (const rawLine of scheduleText.split('\n')) {
+    const line = rawLine.replace(/\s+/g, ' ').trim();
+    const match = VENUE_HEADING.exec(line.replace(/[.:]+$/, ''));
+    if (!match) continue;
+    const name = match[1]!.replace(/\s+/g, ' ').trim();
+    if (!name || /teatro de la zarzuela/i.test(name)) continue;
+    const key = name.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    names.push(name);
   }
-  return false;
+  return names;
 }

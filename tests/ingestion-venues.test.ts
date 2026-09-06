@@ -114,6 +114,18 @@ describe('resolución de venue — aliases existentes', () => {
     expect(matchVenue('Teatro de la Abadía', catalog)?.venue.id).toBe('ven_teatro_abadia');
     expect(matchVenue('Teatro Fernando de Rojas', catalog)?.venue.id).toBe('ven_circulo_bellas_artes_teatro_fernando_de_rojas');
     expect(matchVenue('Sala de Columnas', catalog)?.venue.id).toBe('ven_circulo_bellas_artes_sala_columnas');
+    expect(matchVenue('Auditorio de la Fundación Juan March', catalog)?.venue.id).toBe(
+      'ven_fundacion_juan_march_auditorio',
+    );
+    expect(
+      matchVenue(
+        { venueText: 'AUDITORIO DE LA FUNDACIÓN JUAN MARCH', sourceId: 'teatro-zarzuela' },
+        catalog,
+      )?.venue.id,
+    ).toBe('ven_fundacion_juan_march_auditorio');
+    expect(matchVenue('Auditorio de la Fundación Juan March', catalog)?.venue.id).not.toBe(
+      'ven_fundacion_juan_march',
+    );
   });
 });
 
