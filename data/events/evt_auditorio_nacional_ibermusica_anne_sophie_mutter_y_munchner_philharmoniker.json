@@ -26,8 +26,24 @@
       "name": "Anne-Sophie Mutter"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "BRAHMS"
+    },
+    {
+      "name": "SCHUBERT"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para violín en Re Mayor Op.77",
+      "composerName": "BRAHMS"
+    },
+    {
+      "title": "Sinfonía núm. 9 en Do Mayor, “La Grande” D.944",
+      "composerName": "SCHUBERT"
+    }
+  ],
   "eras": [
     "romantic"
   ],
@@ -40,10 +56,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-anne-sophie-mutter-y-munchner-philharmoniker",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "ibermusica-anne-sophie-mutter-y-munchner-philharmoniker"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

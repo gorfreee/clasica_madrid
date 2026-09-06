@@ -23,8 +23,25 @@
       "name": "Daniele Gatti"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "BEETHOVEN"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sinfonía núm. 1 en Do Mayor, op. 21",
+      "composerName": "BEETHOVEN"
+    },
+    {
+      "title": "Sinfonía núm. 4 en Si bemol Mayor, op.60",
+      "composerName": "BEETHOVEN"
+    },
+    {
+      "title": "Sinfonía núm. 5 en Do menor, op.67",
+      "composerName": "BEETHOVEN"
+    }
+  ],
   "eras": [
     "classical",
     "romantic"
@@ -38,10 +55,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-staatskapelle-dresden-3",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "ibermusica-staatskapelle-dresden-3"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

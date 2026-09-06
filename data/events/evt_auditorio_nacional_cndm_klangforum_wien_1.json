@@ -30,8 +30,17 @@
       "name": "Peter Tantsits"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Hans Werner Henze (1926-2012)"
+    }
+  ],
+  "works": [
+    {
+      "title": "Voices-Stimmen. Eine Sammlung von Liedern (1973)",
+      "composerName": "Hans Werner Henze (1926-2012)"
+    }
+  ],
   "eras": [
     "contemporary"
   ],
@@ -45,16 +54,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-klangforum-wien-1",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "cndm-klangforum-wien-1"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23775",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "23775"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

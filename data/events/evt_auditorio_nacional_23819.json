@@ -32,6 +32,10 @@
     {
       "title": "À la carte, obras sin anuncio previo que elegirá el pianista",
       "composerName": "Fazıl Say (1970)"
+    },
+    {
+      "title": "Cuadros de una exposición (1874)",
+      "composerName": "Modest Mussorgski (1839-1881)"
     }
   ],
   "eras": [
@@ -52,7 +56,7 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23819",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "23819"
     }
   ],

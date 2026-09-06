@@ -69,6 +69,10 @@
     {
       "title": "Glorificatio (1990)",
       "composerName": "René Eespere (1953)"
+    },
+    {
+      "title": "Aita gurea (1946)",
+      "composerName": "Francisco Madina (1907-1972)"
     }
   ],
   "eras": [
@@ -91,7 +95,7 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23848",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "23848"
     }
   ],

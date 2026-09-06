@@ -43,6 +43,14 @@
     {
       "title": "Gougalōn (2009)",
       "composerName": "Unsuk Chin (1961)"
+    },
+    {
+      "title": "Such’ ich des Wildes Tritt (2019)",
+      "composerName": "Alberto Posadas (1967)"
+    },
+    {
+      "title": "Rondeau sauvage (2013)",
+      "composerName": "Arnulf Herrmann (1968)"
     }
   ],
   "eras": [
@@ -57,10 +65,10 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23858",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "23858"
     }
   ],
   "primarySourceId": "src_cndm",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

@@ -46,6 +46,10 @@
     {
       "title": "Sonata n.º 23 en fa menor ‘Appassionata’, op. 57 (1804-1805)",
       "composerName": "L. van Beethoven"
+    },
+    {
+      "title": "Musica ricercata (1951-1953)",
+      "composerName": "György Ligeti (1923-2006)"
     }
   ],
   "eras": [
@@ -61,16 +65,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-5",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "cndm-5"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23821",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "23821"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

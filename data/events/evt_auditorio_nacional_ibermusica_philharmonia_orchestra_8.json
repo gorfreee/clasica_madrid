@@ -26,8 +26,17 @@
       "name": "Leila Josefowicz"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "SIBELIUS"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sinfonía núm. 1",
+      "composerName": "SIBELIUS"
+    }
+  ],
   "eras": [
     "romantic"
   ],
@@ -40,10 +49,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-philharmonia-orchestra-8",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "ibermusica-philharmonia-orchestra-8"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

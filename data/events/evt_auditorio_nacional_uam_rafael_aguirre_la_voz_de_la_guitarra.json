@@ -47,6 +47,9 @@
     },
     {
       "name": "Julián Arcas (1832 - 1882)"
+    },
+    {
+      "name": "A. Villamil (1929 - 2010)"
     }
   ],
   "works": [
@@ -85,6 +88,10 @@
     {
       "title": "Fantasía sobre motivos de La Traviata",
       "composerName": "Julián Arcas (1832 - 1882)"
+    },
+    {
+      "title": "Piazzollesco",
+      "composerName": "A. Villamil (1929 - 2010)"
     }
   ],
   "eras": [
@@ -101,10 +108,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/uam-rafael-aguirre-la-voz-de-la-guitarra",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "uam-rafael-aguirre-la-voz-de-la-guitarra"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

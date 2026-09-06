@@ -57,6 +57,10 @@
     {
       "title": "Vltava (El Moldava), de Má vlast, op. 111, n.º 2 (1874, arr. J. Scott)",
       "composerName": "Bedřich Smetana (1824-1884)"
+    },
+    {
+      "title": "Mad rush (1979)",
+      "composerName": "P. Glass"
     }
   ],
   "eras": [
@@ -74,10 +78,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-lucie-zakova",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "cndm-lucie-zakova"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

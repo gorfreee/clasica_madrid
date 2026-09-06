@@ -91,6 +91,18 @@
     {
       "title": "Wir schreiten in goldener Fülle , n.º 2",
       "composerName": "Richard Strauss (1864-1949)"
+    },
+    {
+      "title": "Sieben frühe Lieder (1905-1908)",
+      "composerName": "Alban Berg (1885-1935)"
+    },
+    {
+      "title": "De Fünf Lieder (1900-1901)",
+      "composerName": "Alma Mahler (1879-1964)"
+    },
+    {
+      "title": "De Rückert Lieder (1901-1902)",
+      "composerName": "Gustav Mahler (1860-1911)"
     }
   ],
   "eras": [
@@ -107,16 +119,16 @@
     {
       "sourceId": "src_teatro_zarzuela",
       "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/ciclo-de-lied-2026-2027/christiane-karg",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "/es/temporada/ciclo-de-lied-2026-2027/christiane-karg"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23777",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "23777"
     }
   ],
   "primarySourceId": "src_teatro_zarzuela",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

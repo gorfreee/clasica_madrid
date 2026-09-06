@@ -15,7 +15,21 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "José Miguel Pérez-Sierra",
+      "role": "conductor"
+    },
+    {
+      "name": "Yolanda Auyanet"
+    },
+    {
+      "name": "Ismael Jodri"
+    },
+    {
+      "name": "Simón Orfila"
+    }
+  ],
   "composers": [],
   "works": [],
   "eras": [],
@@ -28,10 +42,10 @@
     {
       "sourceId": "src_teatro_zarzuela",
       "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/conciertos-2026-2027/homenaje-a-alfredo-kraus",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "/es/temporada/conciertos-2026-2027/homenaje-a-alfredo-kraus"
     }
   ],
   "primarySourceId": "src_teatro_zarzuela",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

@@ -64,6 +64,10 @@
     {
       "title": "Obra a determinar, para ondas Martenot y ensemble * (2027)",
       "composerName": "Tristan Murail (1947)"
+    },
+    {
+      "title": "Gran cadenza (2018)",
+      "composerName": "Unsuk Chin (1961)"
     }
   ],
   "eras": [
@@ -79,10 +83,10 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23861",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "23861"
     }
   ],
   "primarySourceId": "src_cndm",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }
