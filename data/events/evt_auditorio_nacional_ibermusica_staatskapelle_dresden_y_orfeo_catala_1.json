@@ -40,24 +40,24 @@
   ],
   "composers": [
     {
-      "name": "BEETHOVEN"
+      "name": "Ludwig van Beethoven"
     },
     {
-      "name": "WIDMANN"
+      "name": "Jörg Widmann"
     }
   ],
   "works": [
     {
       "title": "Sinfonía núm. 8",
-      "composerName": "BEETHOVEN"
+      "composerName": "Ludwig van Beethoven"
     },
     {
       "title": "Obra a determinar. Estreno",
-      "composerName": "WIDMANN"
+      "composerName": "Jörg Widmann"
     },
     {
       "title": "Sinfonía núm. 9 “Coral”",
-      "composerName": "BEETHOVEN"
+      "composerName": "Ludwig van Beethoven"
     }
   ],
   "eras": [

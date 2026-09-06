@@ -25,45 +25,42 @@
   ],
   "composers": [
     {
-      "name": "Johann Sebastian Bach (1685-1750)"
+      "name": "Johann Sebastian Bach"
     },
     {
-      "name": "Philip Glass (1937)"
+      "name": "Philip Glass"
     },
     {
-      "name": "J. S. Bach"
+      "name": "Bedřich Antonín Wiedermann"
     },
     {
-      "name": "Bedřich Antonín Wiedermann (1883-1951)"
-    },
-    {
-      "name": "Bedřich Smetana (1824-1884)"
+      "name": "Bedřich Smetana"
     }
   ],
   "works": [
     {
       "title": "Preludio y fuga en la menor, BWV 543 (d. 1715)",
-      "composerName": "Johann Sebastian Bach (1685-1750)"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Dance n.º 4 (1979)",
-      "composerName": "Philip Glass (1937)"
+      "composerName": "Philip Glass"
     },
     {
       "title": "Ich ruf zu dir, Herr Jesu Christ (Orgelbüchlein), BWV 639 (1713-1715)",
-      "composerName": "J. S. Bach"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Toccata y fuga en fa menor (1912)",
-      "composerName": "Bedřich Antonín Wiedermann (1883-1951)"
+      "composerName": "Bedřich Antonín Wiedermann"
     },
     {
       "title": "Vltava (El Moldava), de Má vlast, op. 111, n.º 2 (1874, arr. J. Scott)",
-      "composerName": "Bedřich Smetana (1824-1884)"
+      "composerName": "Bedřich Smetana"
     },
     {
       "title": "Mad rush (1979)",
-      "composerName": "P. Glass"
+      "composerName": "Philip Glass"
     }
   ],
   "eras": [

@@ -28,20 +28,20 @@
   ],
   "composers": [
     {
-      "name": "RACHMANINOFF"
+      "name": "Serguéi Rajmáninov"
     },
     {
-      "name": "SMETANA"
+      "name": "Bedřich Smetana"
     }
   ],
   "works": [
     {
       "title": "Concierto para piano núm. 3",
-      "composerName": "RACHMANINOFF"
+      "composerName": "Serguéi Rajmáninov"
     },
     {
       "title": "Mi patria (selección) (El alto castillo/Moldava/Sarka)",
-      "composerName": "SMETANA"
+      "composerName": "Bedřich Smetana"
     }
   ],
   "eras": [

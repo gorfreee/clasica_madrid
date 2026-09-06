@@ -25,36 +25,36 @@
   ],
   "composers": [
     {
-      "name": "J. S. Bach"
+      "name": "Johann Sebastian Bach"
     },
     {
-      "name": "C. P. E. Bach"
+      "name": "Carl Philipp Emanuel Bach"
     }
   ],
   "works": [
     {
       "title": "Concierto para violín en Mi mayor, BWV 1042",
-      "composerName": "J. S. Bach"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Suite n.º 3 en Re mayor, BWV 1068",
-      "composerName": "J. S. Bach"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Concierto en sol menor, BWV 1056R",
-      "composerName": "J. S. Bach"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Sinfonía en sol mayor, Wq 182/1",
-      "composerName": "C. P. E. Bach"
+      "composerName": "Carl Philipp Emanuel Bach"
     },
     {
       "title": "Concierto para violín y oboe en Do menor, BWV 1060",
-      "composerName": "J. S. Bach"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Concierto para violín en La menor, BWV 1041",
-      "composerName": "J. S. Bach"
+      "composerName": "Johann Sebastian Bach"
     }
   ],
   "eras": [

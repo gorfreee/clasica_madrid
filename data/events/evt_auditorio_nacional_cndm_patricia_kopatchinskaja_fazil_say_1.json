@@ -25,35 +25,35 @@
   ],
   "composers": [
     {
-      "name": "Karol Szymanowski (1882-1937)"
+      "name": "Karol Szymanowski"
     },
     {
-      "name": "Fazıl Say (1970)"
+      "name": "Fazıl Say"
     },
     {
-      "name": "Serguéi Prokófiev (1891-1953)"
+      "name": "Serguéi Prokófiev"
     }
   ],
   "works": [
     {
       "title": "Mythes, op. 30 (1921)",
-      "composerName": "Karol Szymanowski (1882-1937)"
+      "composerName": "Karol Szymanowski"
     },
     {
       "title": "Sonata para violín y piano n.º 3 ‘Lost screams’, op. 119 (1997)",
-      "composerName": "Fazıl Say (1970)"
+      "composerName": "Fazıl Say"
     },
     {
       "title": "PatKop (1977)",
-      "composerName": "Fazıl Say (1970)"
+      "composerName": "Fazıl Say"
     },
     {
       "title": "UniSolo, para violín y piano ** (2024)",
-      "composerName": "Fazıl Say (1970)"
+      "composerName": "Fazıl Say"
     },
     {
       "title": "Sonata para piano n.º 1 en fa menor, op. 1 (1907, rev. 1909)",
-      "composerName": "Serguéi Prokófiev (1891-1953)"
+      "composerName": "Serguéi Prokófiev"
     }
   ],
   "eras": [

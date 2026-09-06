@@ -25,21 +25,21 @@
   ],
   "composers": [
     {
-      "name": "BEETHOVEN"
+      "name": "Ludwig van Beethoven"
     }
   ],
   "works": [
     {
       "title": "Sinfonía núm. 1 en Do Mayor, op. 21",
-      "composerName": "BEETHOVEN"
+      "composerName": "Ludwig van Beethoven"
     },
     {
       "title": "Sinfonía núm. 4 en Si bemol Mayor, op.60",
-      "composerName": "BEETHOVEN"
+      "composerName": "Ludwig van Beethoven"
     },
     {
       "title": "Sinfonía núm. 5 en Do menor, op.67",
-      "composerName": "BEETHOVEN"
+      "composerName": "Ludwig van Beethoven"
     }
   ],
   "eras": [

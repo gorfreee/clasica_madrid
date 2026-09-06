@@ -25,77 +25,77 @@
   ],
   "composers": [
     {
-      "name": "Franz Schubert (1797-1828)"
+      "name": "Franz Schubert"
     },
     {
-      "name": "Manuel de Falla (1876-1946)"
+      "name": "Manuel de Falla"
     },
     {
-      "name": "Gabriel Fauré (1845-1924)"
+      "name": "Gabriel Fauré"
     },
     {
-      "name": "Henri Duparc (1848-1933)"
+      "name": "Henri Duparc"
     },
     {
-      "name": "Richard Strauss (1864-1949)"
+      "name": "Richard Strauss"
     }
   ],
   "works": [
     {
       "title": "An den Mond , D 193 (1815)",
-      "composerName": "Franz Schubert (1797-1828)"
+      "composerName": "Franz Schubert"
     },
     {
       "title": "Suleika II , D 717 (1824)",
-      "composerName": "Franz Schubert (1797-1828)"
+      "composerName": "Franz Schubert"
     },
     {
       "title": "An die untergehende Sonne , D 457 (1816-1817)",
-      "composerName": "Franz Schubert (1797-1828)"
+      "composerName": "Franz Schubert"
     },
     {
       "title": "Auf dem See, op. 92, n.º 2 (1828)",
-      "composerName": "Franz Schubert (1797-1828)"
+      "composerName": "Franz Schubert"
     },
     {
       "title": "Auf dem Wasser zu singen , D 774 (1823)",
-      "composerName": "Franz Schubert (1797-1828)"
+      "composerName": "Franz Schubert"
     },
     {
       "title": "Suleika I , D 720 (1821)",
-      "composerName": "Franz Schubert (1797-1828)"
+      "composerName": "Franz Schubert"
     },
     {
       "title": "Notre amour , op. 23, n.º 2 (1879)",
-      "composerName": "Gabriel Fauré (1845-1924)"
+      "composerName": "Gabriel Fauré"
     },
     {
       "title": "Le papillon et la fleur , op. 1, n.º 1 (1861)",
-      "composerName": "Gabriel Fauré (1845-1924)"
+      "composerName": "Gabriel Fauré"
     },
     {
       "title": "Les roses d’Ispahan, op. 39, n.º 4 (1884)",
-      "composerName": "Gabriel Fauré (1845-1924)"
+      "composerName": "Gabriel Fauré"
     },
     {
       "title": "Chanson triste , IHD 4 (1868)",
-      "composerName": "Henri Duparc (1848-1933)"
+      "composerName": "Henri Duparc"
     },
     {
       "title": "Phidylé , IHD 14 (1882)",
-      "composerName": "Henri Duparc (1848-1933)"
+      "composerName": "Henri Duparc"
     },
     {
       "title": "L’invitation au voyage , IHD 10 (ca. 1870)",
-      "composerName": "Henri Duparc (1848-1933)"
+      "composerName": "Henri Duparc"
     },
     {
       "title": "Vier Lieder , op. 27 (1894)",
-      "composerName": "Richard Strauss (1864-1949)"
+      "composerName": "Richard Strauss"
     },
     {
       "title": "Siete canciones populares españolas (1914)",
-      "composerName": "Manuel de Falla (1876-1946)"
+      "composerName": "Manuel de Falla"
     }
   ],
   "eras": [

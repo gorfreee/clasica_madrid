@@ -18,53 +18,53 @@
   "performers": [],
   "composers": [
     {
-      "name": "Krzysztof Penderecki (1933-2020)"
+      "name": "Krzysztof Penderecki"
     },
     {
-      "name": "Arvo Pärt (1935)"
+      "name": "Arvo Pärt"
     },
     {
-      "name": "Fazıl Say (1970)"
+      "name": "Fazıl Say"
     },
     {
-      "name": "Rodión Shchedrín (1932-2025)"
+      "name": "Rodion Shchedrin"
     },
     {
-      "name": "Òscar Colomina i Bosch (1977)"
+      "name": "Òscar Colomina i Bosch"
     }
   ],
   "works": [
     {
       "title": "Ciaconna (2005, arr. L. Krupiński)",
-      "composerName": "Krzysztof Penderecki (1933-2020)"
+      "composerName": "Krzysztof Penderecki"
     },
     {
       "title": "Lacrimosa , del Réquiem polaco (1980, arr. L. Krupiński)",
-      "composerName": "Krzysztof Penderecki (1933-2020)"
+      "composerName": "Krzysztof Penderecki"
     },
     {
       "title": "Serenade (1996-1997, arr. L. Krupiński)",
-      "composerName": "Krzysztof Penderecki (1933-2020)"
+      "composerName": "Krzysztof Penderecki"
     },
     {
       "title": "Mozart-Adagio , para trío con piano (1992)",
-      "composerName": "Arvo Pärt (1935)"
+      "composerName": "Arvo Pärt"
     },
     {
       "title": "Trío para clarinete, violonchelo y piano (1973)",
-      "composerName": "Arvo Pärt (1935)"
+      "composerName": "Arvo Pärt"
     },
     {
       "title": "Estreno absoluto. Obra encargo del CNDM *+ (2027)",
-      "composerName": "Òscar Colomina i Bosch (1977)"
+      "composerName": "Òscar Colomina i Bosch"
     },
     {
       "title": "Space jump (2013)",
-      "composerName": "Fazıl Say (1970)"
+      "composerName": "Fazıl Say"
     },
     {
       "title": "Three funny pieces (1997)",
-      "composerName": "Rodión Shchedrín (1932-2025)"
+      "composerName": "Rodion Shchedrin"
     }
   ],
   "eras": [

@@ -25,41 +25,41 @@
   ],
   "composers": [
     {
-      "name": "Carl Philipp Emanuel Bach (1714-1788)"
+      "name": "Carl Philipp Emanuel Bach"
     },
     {
-      "name": "Johann Sebastian Bach (1685-1750)"
+      "name": "Johann Sebastian Bach"
     },
     {
-      "name": "Felix Mendelssohn (1809-1847)"
+      "name": "Felix Mendelssohn"
     },
     {
-      "name": "Wilhelm Friedemann Bach (1710-1784)"
+      "name": "Wilhelm Friedemann Bach"
     },
     {
-      "name": "Fanny Hensel-Mendelssohn (1805-1847)"
+      "name": "Fanny Hensel"
     }
   ],
   "works": [
     {
       "title": "Sinfonía para cuerda y bajo continuo en do mayor, Wq 182, n.º 3 (1773)",
-      "composerName": "Carl Philipp Emanuel Bach (1714-1788)"
+      "composerName": "Carl Philipp Emanuel Bach"
     },
     {
       "title": "Sinfonía en fa menor, BWV 795 (1723, arr. para orquesta)",
-      "composerName": "Johann Sebastian Bach (1685-1750)"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Concierto para violín y cuerda en re menor, MWV O 3 (1822)",
-      "composerName": "Felix Mendelssohn (1809-1847)"
+      "composerName": "Felix Mendelssohn"
     },
     {
       "title": "Sinfonía para cuerda y bajo continuo en fa mayor ‘Disonancias’, F 67 (ca. 1740-1745)",
-      "composerName": "Wilhelm Friedemann Bach (1710-1784)"
+      "composerName": "Wilhelm Friedemann Bach"
     },
     {
       "title": "Cuarteto de cuerda en mi bemol mayor, H 277 (1834, arr. para orquesta)",
-      "composerName": "Fanny Hensel-Mendelssohn (1805-1847)"
+      "composerName": "Fanny Hensel"
     }
   ],
   "eras": [

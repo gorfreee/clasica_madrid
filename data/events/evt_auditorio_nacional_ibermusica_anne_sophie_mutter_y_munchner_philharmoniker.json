@@ -28,20 +28,20 @@
   ],
   "composers": [
     {
-      "name": "BRAHMS"
+      "name": "Johannes Brahms"
     },
     {
-      "name": "SCHUBERT"
+      "name": "Franz Schubert"
     }
   ],
   "works": [
     {
       "title": "Concierto para violín en Re Mayor Op.77",
-      "composerName": "BRAHMS"
+      "composerName": "Johannes Brahms"
     },
     {
       "title": "Sinfonía núm. 9 en Do Mayor, “La Grande” D.944",
-      "composerName": "SCHUBERT"
+      "composerName": "Franz Schubert"
     }
   ],
   "eras": [

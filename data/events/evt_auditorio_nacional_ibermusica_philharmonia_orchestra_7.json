@@ -28,20 +28,20 @@
   ],
   "composers": [
     {
-      "name": "BEETHOVEN"
+      "name": "Ludwig van Beethoven"
     },
     {
-      "name": "BRUCKNER"
+      "name": "Anton Bruckner"
     }
   ],
   "works": [
     {
       "title": "Concierto para piano núm. 3",
-      "composerName": "BEETHOVEN"
+      "composerName": "Ludwig van Beethoven"
     },
     {
       "title": "Sinfonía núm. 6",
-      "composerName": "BRUCKNER"
+      "composerName": "Anton Bruckner"
     }
   ],
   "eras": [

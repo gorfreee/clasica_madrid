@@ -22,64 +22,55 @@
   ],
   "composers": [
     {
-      "name": "Philip Glass (1937)"
+      "name": "Philip Glass"
     },
     {
-      "name": "Claude Debussy (1862-1918)"
+      "name": "Claude Debussy"
     },
     {
-      "name": "P. Glass"
-    },
-    {
-      "name": "Jean-Philippe Rameau (1683-1764)"
-    },
-    {
-      "name": "C. Debussy"
-    },
-    {
-      "name": "J.-P. Rameau"
+      "name": "Jean-Philippe Rameau"
     }
   ],
   "works": [
     {
       "title": "Opening , de Glassworks (1981)",
-      "composerName": "Philip Glass (1937)"
+      "composerName": "Philip Glass"
     },
     {
       "title": "Ondine , de Préludes , livre 2, n.º 8, CD 131 (1912-1913)",
-      "composerName": "Claude Debussy (1862-1918)"
+      "composerName": "Claude Debussy"
     },
     {
       "title": "Étude n.º 15, de Études para piano , vol. 2 (2012)",
-      "composerName": "P. Glass"
+      "composerName": "Philip Glass"
     },
     {
       "title": "Suite en re mayor, RCT 3, selección[MBF11.1] (1724)",
-      "composerName": "Jean-Philippe Rameau (1683-1764)"
+      "composerName": "Jean-Philippe Rameau"
     },
     {
       "title": "Serenade for the doll, de Children’s corner , CD 119, n.º 3 (1906-1908)",
-      "composerName": "C. Debussy"
+      "composerName": "Claude Debussy"
     },
     {
       "title": "Suite en mi menor, RCT 2, selección (1724)",
-      "composerName": "J.-P. Rameau"
+      "composerName": "Jean-Philippe Rameau"
     },
     {
       "title": "Jardins sous la pluie , de Estampes , CD 108 (1903)",
-      "composerName": "C. Debussy"
+      "composerName": "Claude Debussy"
     },
     {
       "title": "Étude n.º 3, de Études para piano , vol. 1 (1994)",
-      "composerName": "P. Glass"
+      "composerName": "Philip Glass"
     },
     {
       "title": "The snow is dancing , de Children’s corner, CD 119, n.º 4 (1906-1908)",
-      "composerName": "C. Debussy"
+      "composerName": "Claude Debussy"
     },
     {
       "title": "Suite en la menor , RCT 5 (1727)",
-      "composerName": "J.-P. Rameau"
+      "composerName": "Jean-Philippe Rameau"
     }
   ],
   "eras": [

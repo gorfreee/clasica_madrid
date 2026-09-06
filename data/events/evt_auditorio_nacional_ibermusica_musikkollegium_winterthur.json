@@ -28,20 +28,20 @@
   ],
   "composers": [
     {
-      "name": "ELGAR"
+      "name": "Edward Elgar"
     },
     {
-      "name": "MENDELSSOHN"
+      "name": "Felix Mendelssohn"
     }
   ],
   "works": [
     {
       "title": "Concierto para violonchelo",
-      "composerName": "ELGAR"
+      "composerName": "Edward Elgar"
     },
     {
       "title": "Sinfonía núm. 5 “De la Reforma”",
-      "composerName": "MENDELSSOHN"
+      "composerName": "Felix Mendelssohn"
     }
   ],
   "eras": [

@@ -25,43 +25,40 @@
   ],
   "composers": [
     {
-      "name": "Gustav Mahler (1860-1911)"
+      "name": "Gustav Mahler"
     },
     {
-      "name": "Benjamin Britten (1913-1976)"
-    },
-    {
-      "name": "G. Mahler"
+      "name": "Benjamin Britten"
     }
   ],
   "works": [
     {
       "title": "Des Knaben Wunderhorn , selección (1892-1896, rev. 1899-1901)",
-      "composerName": "Gustav Mahler (1860-1911)"
+      "composerName": "Gustav Mahler"
     },
     {
       "title": "De Who are these children? , op. 84 (1969)",
-      "composerName": "Benjamin Britten (1913-1976)"
+      "composerName": "Benjamin Britten"
     },
     {
       "title": "A laddie’s sang, n.º 2",
-      "composerName": "Benjamin Britten (1913-1976)"
+      "composerName": "Benjamin Britten"
     },
     {
       "title": "The children , n.º 11",
-      "composerName": "Benjamin Britten (1913-1976)"
+      "composerName": "Benjamin Britten"
     },
     {
       "title": "Slaughter , n.º 6",
-      "composerName": "Benjamin Britten (1913-1976)"
+      "composerName": "Benjamin Britten"
     },
     {
       "title": "Who are these children? , n.º 9",
-      "composerName": "Benjamin Britten (1913-1976)"
+      "composerName": "Benjamin Britten"
     },
     {
       "title": "Winter words , op. 52 (1953)",
-      "composerName": "Benjamin Britten (1913-1976)"
+      "composerName": "Benjamin Britten"
     }
   ],
   "eras": [

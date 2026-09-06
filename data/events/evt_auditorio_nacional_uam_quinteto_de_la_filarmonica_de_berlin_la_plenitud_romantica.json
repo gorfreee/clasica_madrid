@@ -37,38 +37,38 @@
   ],
   "composers": [
     {
-      "name": "Carl Maria von Weber (1782-1826)"
+      "name": "Carl Maria von Weber"
     },
     {
-      "name": "Piotr Ilich Tchaikovsky (1840-1893)"
+      "name": "Piotr Ilich Chaikovski"
     },
     {
-      "name": "Giovanni Bottesini (1821-1889)"
+      "name": "Giovanni Bottesini"
     },
     {
-      "name": "Giuseppe Verdi (1813-1901)"
+      "name": "Giuseppe Verdi"
     }
   ],
   "works": [
     {
       "title": "Quinteto para clarinete, op. 34",
-      "composerName": "Carl Maria von Weber (1782-1826)"
+      "composerName": "Carl Maria von Weber"
     },
     {
       "title": "Aria de Lenski \"Kuda, Kuda\" de Eugen Onegin para violonchelo y cuerdas",
-      "composerName": "Piotr Ilich Tchaikovsky (1840-1893)"
+      "composerName": "Piotr Ilich Chaikovski"
     },
     {
       "title": "Fantasía sobre La Sonámbula, de V. Bellini, para contrabajo y cuerdas",
-      "composerName": "Giovanni Bottesini (1821-1889)"
+      "composerName": "Giovanni Bottesini"
     },
     {
       "title": "Romanza y Aria para Soprano y viola de El Cazador furtivo",
-      "composerName": "Carl Maria von Weber (1782-1826)"
+      "composerName": "Carl Maria von Weber"
     },
     {
       "title": "Rigoletto-Fantasía para 2 violines y cuerda",
-      "composerName": "Giuseppe Verdi (1813-1901)"
+      "composerName": "Giuseppe Verdi"
     }
   ],
   "eras": [

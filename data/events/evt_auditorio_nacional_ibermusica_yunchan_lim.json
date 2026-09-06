@@ -22,29 +22,29 @@
   ],
   "composers": [
     {
-      "name": "MOZART"
+      "name": "Wolfgang Amadeus Mozart"
     }
   ],
   "works": [
     {
       "title": "Sonata núm. 4 en Mi bemol Mayor",
-      "composerName": "MOZART"
+      "composerName": "Wolfgang Amadeus Mozart"
     },
     {
       "title": "Sonata núm. 13 em Si bemol Mayor",
-      "composerName": "MOZART"
+      "composerName": "Wolfgang Amadeus Mozart"
     },
     {
       "title": "Sonata núm. 9 en Re Mayor",
-      "composerName": "MOZART"
+      "composerName": "Wolfgang Amadeus Mozart"
     },
     {
       "title": "Sonata núm. 7 en Do Mayor",
-      "composerName": "MOZART"
+      "composerName": "Wolfgang Amadeus Mozart"
     },
     {
       "title": "Sonata núm. 11 “Alla turca”",
-      "composerName": "MOZART"
+      "composerName": "Wolfgang Amadeus Mozart"
     }
   ],
   "eras": [

@@ -29,20 +29,20 @@
   ],
   "composers": [
     {
-      "name": "J. Haydn"
+      "name": "Franz Joseph Haydn"
     },
     {
-      "name": "W. A. Mozart"
+      "name": "Wolfgang Amadeus Mozart"
     }
   ],
   "works": [
     {
       "title": "Missa in Angustiis en Re menor, Hob.XXII:11 – Misa Nelson",
-      "composerName": "J. Haydn"
+      "composerName": "Franz Joseph Haydn"
     },
     {
       "title": "Misa de Réquiem en re menor, K. 626",
-      "composerName": "W. A. Mozart"
+      "composerName": "Wolfgang Amadeus Mozart"
     }
   ],
   "eras": [

@@ -41,20 +41,20 @@
   ],
   "composers": [
     {
-      "name": "Schumann"
+      "name": "Robert Schumann"
     },
     {
-      "name": "Mozart"
+      "name": "Wolfgang Amadeus Mozart"
     }
   ],
   "works": [
     {
       "title": "Sinfonía nº 3 “Renana”",
-      "composerName": "Schumann"
+      "composerName": "Robert Schumann"
     },
     {
       "title": "Réquiem",
-      "composerName": "Mozart"
+      "composerName": "Wolfgang Amadeus Mozart"
     }
   ],
   "eras": [

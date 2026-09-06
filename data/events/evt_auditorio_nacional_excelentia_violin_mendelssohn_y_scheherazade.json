@@ -29,27 +29,27 @@
   ],
   "composers": [
     {
-      "name": "Borodin"
+      "name": "Alexander Borodin"
     },
     {
-      "name": "Mendelssohn"
+      "name": "Felix Mendelssohn"
     },
     {
-      "name": "Rimsky-Korsakov"
+      "name": "Nikolai Rimsky-Korsakov"
     }
   ],
   "works": [
     {
       "title": "Príncipe Ígor, obertura",
-      "composerName": "Borodin"
+      "composerName": "Alexander Borodin"
     },
     {
       "title": "Concierto para violín y orquesta en mi menor, op. 64",
-      "composerName": "Mendelssohn"
+      "composerName": "Felix Mendelssohn"
     },
     {
       "title": "Scheherazade, op. 35",
-      "composerName": "Rimsky-Korsakov"
+      "composerName": "Nikolai Rimsky-Korsakov"
     }
   ],
   "eras": [

@@ -25,25 +25,25 @@
   ],
   "composers": [
     {
-      "name": "J. S. Bach"
+      "name": "Johann Sebastian Bach"
     }
   ],
   "works": [
     {
       "title": "Suite orquestal n.º 1 en do mayor, BWV 1066",
-      "composerName": "J. S. Bach"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Concierto de Brandeburgo n.º 2 en fa mayor, BWV 1047",
-      "composerName": "J. S. Bach"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Concierto de Brandeburgo n.º 4 en sol mayor, BWV 1049",
-      "composerName": "J. S. Bach"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Concierto de Brandeburgo n.º 5 en re mayor, BWV 1050",
-      "composerName": "J. S. Bach"
+      "composerName": "Johann Sebastian Bach"
     }
   ],
   "eras": [

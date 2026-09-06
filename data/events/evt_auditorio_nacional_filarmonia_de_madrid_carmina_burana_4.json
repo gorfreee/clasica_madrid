@@ -48,20 +48,20 @@
   ],
   "composers": [
     {
-      "name": "R. Strauss"
+      "name": "Richard Strauss"
     },
     {
-      "name": "C. Orff"
+      "name": "Carl Orff"
     }
   ],
   "works": [
     {
       "title": "Concierto para Trompa y Orquesta N.1",
-      "composerName": "R. Strauss"
+      "composerName": "Richard Strauss"
     },
     {
       "title": "Carmina Burana",
-      "composerName": "C. Orff"
+      "composerName": "Carl Orff"
     }
   ],
   "eras": [

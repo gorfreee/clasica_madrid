@@ -32,20 +32,20 @@
   ],
   "composers": [
     {
-      "name": "J. Brahms"
+      "name": "Johannes Brahms"
     },
     {
-      "name": "L. Beethoven"
+      "name": "Ludwig van Beethoven"
     }
   ],
   "works": [
     {
       "title": "Obertura del festival académico, Op.80",
-      "composerName": "J. Brahms"
+      "composerName": "Johannes Brahms"
     },
     {
       "title": "Sinfonía nº 9, Op. 125 “Coral”",
-      "composerName": "L. Beethoven"
+      "composerName": "Ludwig van Beethoven"
     }
   ],
   "eras": [

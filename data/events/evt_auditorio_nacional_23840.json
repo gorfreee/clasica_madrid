@@ -22,21 +22,21 @@
   ],
   "composers": [
     {
-      "name": "Johann Sebastian Bach (1685-1750)"
+      "name": "Johann Sebastian Bach"
     }
   ],
   "works": [
     {
       "title": "Partita en si bemol mayor , BWV 825 (1726)",
-      "composerName": "Johann Sebastian Bach (1685-1750)"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Partita en do menor, BWV 826 (1726)",
-      "composerName": "Johann Sebastian Bach (1685-1750)"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Partita en re mayor, BWV 828 (1728)",
-      "composerName": "Johann Sebastian Bach (1685-1750)"
+      "composerName": "Johann Sebastian Bach"
     }
   ],
   "eras": [

@@ -29,27 +29,27 @@
   ],
   "composers": [
     {
-      "name": "Elgar"
+      "name": "Edward Elgar"
     },
     {
-      "name": "Schumann"
+      "name": "Robert Schumann"
     },
     {
-      "name": "Beethoven"
+      "name": "Ludwig van Beethoven"
     }
   ],
   "works": [
     {
       "title": "In the South “Alassio”, op.50",
-      "composerName": "Elgar"
+      "composerName": "Edward Elgar"
     },
     {
       "title": "Concierto para piano y orquesta en la menor, op. 54",
-      "composerName": "Schumann"
+      "composerName": "Robert Schumann"
     },
     {
       "title": "Sinfonía n.º 7",
-      "composerName": "Beethoven"
+      "composerName": "Ludwig van Beethoven"
     }
   ],
   "eras": [

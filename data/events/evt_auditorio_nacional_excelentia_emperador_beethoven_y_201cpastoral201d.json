@@ -25,24 +25,24 @@
   ],
   "composers": [
     {
-      "name": "Cherubini"
+      "name": "Luigi Cherubini"
     },
     {
-      "name": "Beethoven"
+      "name": "Ludwig van Beethoven"
     }
   ],
   "works": [
     {
       "title": "Médée, obertura",
-      "composerName": "Cherubini"
+      "composerName": "Luigi Cherubini"
     },
     {
       "title": "Concierto para piano n.º 5 “Emperador”",
-      "composerName": "Beethoven"
+      "composerName": "Ludwig van Beethoven"
     },
     {
       "title": "Sinfonía n.º 6 “Pastoral”",
-      "composerName": "Beethoven"
+      "composerName": "Ludwig van Beethoven"
     }
   ],
   "eras": [

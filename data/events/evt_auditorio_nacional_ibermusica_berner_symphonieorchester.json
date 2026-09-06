@@ -28,27 +28,27 @@
   ],
   "composers": [
     {
-      "name": "MUSSORGSKI"
+      "name": "Modest Mussorgski"
     },
     {
-      "name": "SHOSTAKÓVICH"
+      "name": "Dmitri Shostakóvich"
     },
     {
-      "name": "STRAVINSKI"
+      "name": "Ígor Stravinski"
     }
   ],
   "works": [
     {
       "title": "Una noche en Monte pelado",
-      "composerName": "MUSSORGSKI"
+      "composerName": "Modest Mussorgski"
     },
     {
       "title": "Concierto para violonchelo núm. 1",
-      "composerName": "SHOSTAKÓVICH"
+      "composerName": "Dmitri Shostakóvich"
     },
     {
       "title": "Pájaro de fuego (1945)",
-      "composerName": "STRAVINSKI"
+      "composerName": "Ígor Stravinski"
     }
   ],
   "eras": [

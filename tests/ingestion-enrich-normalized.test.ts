@@ -137,10 +137,10 @@ describe('catálogo publicado: Jean Rondeau 18 vs 19', () => {
     expect(sisyphus?.works).toEqual([]);
     expect(structured?.performers).toEqual([{ name: 'Jean Rondeau' }]);
     expect(structured?.composers).toEqual([
-      { name: 'Louis Couperin (1626-1661)' },
-      { name: 'Jean-Philippe Rameau (1683-1764)' },
-      { name: 'François Couperin (1668-1733)' },
-      { name: 'Joseph-Nicolas-Pancrace Royer (1703-1755)' },
+      { name: 'Louis Couperin' },
+      { name: 'Jean-Philippe Rameau' },
+      { name: 'François Couperin' },
+      { name: 'Joseph-Nicolas-Pancrace Royer' },
     ]);
     expect(structured?.works.length).toBeGreaterThan(0);
   });

@@ -25,28 +25,28 @@
   ],
   "composers": [
     {
-      "name": "Mozart"
+      "name": "Wolfgang Amadeus Mozart"
     },
     {
-      "name": "Chopin"
+      "name": "Frédéric Chopin"
     }
   ],
   "works": [
     {
       "title": "Divertimento en Re mayor, K. 136 (Allegro)",
-      "composerName": "Mozart"
+      "composerName": "Wolfgang Amadeus Mozart"
     },
     {
       "title": "Concierto para piano y orquesta n.º 1",
-      "composerName": "Chopin"
+      "composerName": "Frédéric Chopin"
     },
     {
       "title": "Andante spianato y Gran Polonesa brillante, op. 22",
-      "composerName": "Chopin"
+      "composerName": "Frédéric Chopin"
     },
     {
       "title": "Concierto para piano y orquesta n.º 2",
-      "composerName": "Chopin"
+      "composerName": "Frédéric Chopin"
     }
   ],
   "eras": [

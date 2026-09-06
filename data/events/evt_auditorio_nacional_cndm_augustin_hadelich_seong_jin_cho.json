@@ -25,34 +25,34 @@
   ],
   "composers": [
     {
-      "name": "Johannes Brahms (1833-1897)"
+      "name": "Johannes Brahms"
     },
     {
-      "name": "Leoš Janáček (1854-1928)"
+      "name": "Leoš Janáček"
     },
     {
-      "name": "Amy Beach (1867-1944)"
+      "name": "Amy Beach"
     },
     {
-      "name": "Serguéi Prokófiev (1891-1953)"
+      "name": "Serguéi Prokófiev"
     }
   ],
   "works": [
     {
       "title": "Sonata para violín y piano n.º 1 en sol mayor, op. 78 (1878-1879)",
-      "composerName": "Johannes Brahms (1833-1897)"
+      "composerName": "Johannes Brahms"
     },
     {
       "title": "Sonata para violín (1914-1915, rev. 1916-1922)",
-      "composerName": "Leoš Janáček (1854-1928)"
+      "composerName": "Leoš Janáček"
     },
     {
       "title": "Romance para violín y piano, op. 23 (1893)",
-      "composerName": "Amy Beach (1867-1944)"
+      "composerName": "Amy Beach"
     },
     {
       "title": "Sonata para violín y piano n.º 2 en re mayor, op. 94a (1943-1944)",
-      "composerName": "Serguéi Prokófiev (1891-1953)"
+      "composerName": "Serguéi Prokófiev"
     }
   ],
   "eras": [

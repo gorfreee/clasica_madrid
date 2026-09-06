@@ -22,76 +22,76 @@
   ],
   "composers": [
     {
-      "name": "J.S. Bach (1685 - 1750)"
+      "name": "Johann Sebastian Bach"
     },
     {
-      "name": "Lennox Berkeley (1903 - 1989)"
+      "name": "Lennox Berkeley"
     },
     {
-      "name": "G.F. Händel (1685 - 1759)"
+      "name": "Georg Friedrich Händel"
     },
     {
-      "name": "Joaquín Rodrigo (1901 - 1999)"
+      "name": "Joaquín Rodrigo"
     },
     {
-      "name": "Manuel de Falla (1876 - 1946)"
+      "name": "Manuel de Falla"
     },
     {
-      "name": "Agustín Pío Barrios \"Mangoré\" (1885 - 1944)"
+      "name": "Agustín Barrios"
     },
     {
-      "name": "Abel Fleury (1903 - 1958)"
+      "name": "Abel Fleury"
     },
     {
-      "name": "Gioachino Rossini (1792 - 1868)"
+      "name": "Gioachino Rossini"
     },
     {
-      "name": "Julián Arcas (1832 - 1882)"
+      "name": "Julián Arcas"
     },
     {
-      "name": "A. Villamil (1929 - 2010)"
+      "name": "A. Villamil"
     }
   ],
   "works": [
     {
       "title": "Preludio, Fuga y Allegro, BWV998",
-      "composerName": "J.S. Bach (1685 - 1750)"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Theme and variations, op.77",
-      "composerName": "Lennox Berkeley (1903 - 1989)"
+      "composerName": "Lennox Berkeley"
     },
     {
       "title": "\"Lascia ch'io pianga\", de la opera Rinaldo",
-      "composerName": "G.F. Händel (1685 - 1759)"
+      "composerName": "Georg Friedrich Händel"
     },
     {
       "title": "Invocación y danza (Homenaje a Manuel de Falla)",
-      "composerName": "Joaquín Rodrigo (1901 - 1999)"
+      "composerName": "Joaquín Rodrigo"
     },
     {
       "title": "\"Danza española nº1\" de La Vida Breve",
-      "composerName": "Manuel de Falla (1876 - 1946)"
+      "composerName": "Manuel de Falla"
     },
     {
       "title": "Un sueño en la floresta",
-      "composerName": "Agustín Pío Barrios \"Mangoré\" (1885 - 1944)"
+      "composerName": "Agustín Barrios"
     },
     {
       "title": "Milongueo del ayer",
-      "composerName": "Abel Fleury (1903 - 1958)"
+      "composerName": "Abel Fleury"
     },
     {
       "title": "La danza (tarantella napolitana)",
-      "composerName": "Gioachino Rossini (1792 - 1868)"
+      "composerName": "Gioachino Rossini"
     },
     {
       "title": "Fantasía sobre motivos de La Traviata",
-      "composerName": "Julián Arcas (1832 - 1882)"
+      "composerName": "Julián Arcas"
     },
     {
       "title": "Piazzollesco",
-      "composerName": "A. Villamil (1929 - 2010)"
+      "composerName": "A. Villamil"
     }
   ],
   "eras": [

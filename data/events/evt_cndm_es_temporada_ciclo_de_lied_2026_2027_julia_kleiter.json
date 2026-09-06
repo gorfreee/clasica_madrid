@@ -25,78 +25,75 @@
   ],
   "composers": [
     {
-      "name": "Richard Strauss (1864-1949)"
+      "name": "Richard Strauss"
     },
     {
-      "name": "Carl Loewe (1796-1869)"
+      "name": "Carl Loewe"
     },
     {
-      "name": "Robert Schumann (1810-1856)"
-    },
-    {
-      "name": "R. Strauss"
+      "name": "Robert Schumann"
     }
   ],
   "works": [
     {
       "title": "Das Rosenband , op. 36, n.º 1 (1897-1898)",
-      "composerName": "Richard Strauss (1864-1949)"
+      "composerName": "Richard Strauss"
     },
     {
       "title": "Rote Rosen , AV 76 (1883)",
-      "composerName": "Richard Strauss (1864-1949)"
+      "composerName": "Richard Strauss"
     },
     {
       "title": "Traum durch die Dämmerung , op. 29, n.º 1 (1895)",
-      "composerName": "Richard Strauss (1864-1949)"
+      "composerName": "Richard Strauss"
     },
     {
       "title": "Traum der eignen Tage , op. 60, n.º 9 (1836)",
-      "composerName": "Carl Loewe (1796-1869)"
+      "composerName": "Carl Loewe"
     },
     {
       "title": "Frauenliebe und -Leben , op. 42 (1840)",
-      "composerName": "Robert Schumann (1810-1856)"
+      "composerName": "Robert Schumann"
     },
     {
       "title": "Lieder und Gesänge , vol. II, op. 51 (1842)",
-      "composerName": "Robert Schumann (1810-1856)"
+      "composerName": "Robert Schumann"
     },
     {
       "title": "De Sechs Lieder , op. 17, n.º 3 (1885-1887)",
-      "composerName": "R. Strauss"
+      "composerName": "Richard Strauss"
     },
     {
       "title": "Das Geheimnis , n.º 3 (1886)",
-      "composerName": "R. Strauss"
+      "composerName": "Richard Strauss"
     },
     {
       "title": "Ständchen , n.º 2 (1886)",
-      "composerName": "R. Strauss"
+      "composerName": "Richard Strauss"
     },
     {
       "title": "Geduld , op. 10, n.º 5 (1885)",
-      "composerName": "R. Strauss"
+      "composerName": "Richard Strauss"
     },
     {
       "title": "Begegnung , AV 72 (1880)",
-      "composerName": "R. Strauss"
+      "composerName": "Richard Strauss"
     },
     {
       "title": "Freundliche Vision , op. 48, n.º 1 (1900)",
-      "composerName": "R. Strauss"
+      "composerName": "Richard Strauss"
     },
     {
       "title": "Wiegenlied , op. 41, n.º 1 (1899)",
-      "composerName": "R. Strauss"
+      "composerName": "Richard Strauss"
     },
     {
       "title": "Ach Lieb, ich muss nun scheiden , op. 21, n.º 3 (1889-1890)",
-      "composerName": "R. Strauss"
+      "composerName": "Richard Strauss"
     },
     {
       "title": "Befreit , op. 39, n.º 4 (1897-1898)",
-      "composerName": "R. Strauss"
+      "composerName": "Richard Strauss"
     }
   ],
   "eras": [

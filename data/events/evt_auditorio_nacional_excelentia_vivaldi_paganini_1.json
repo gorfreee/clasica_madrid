@@ -22,43 +22,43 @@
   ],
   "composers": [
     {
-      "name": "Vivaldi"
+      "name": "Antonio Vivaldi"
     },
     {
-      "name": "Tartini"
+      "name": "Giuseppe Tartini"
     },
     {
-      "name": "Paganini"
+      "name": "Niccolò Paganini"
     }
   ],
   "works": [
     {
       "title": "Concierto L’estro Armonico Op.3 N8",
-      "composerName": "Vivaldi"
+      "composerName": "Antonio Vivaldi"
     },
     {
       "title": "Concerto grosso Op.3 N11",
-      "composerName": "Vivaldi"
+      "composerName": "Antonio Vivaldi"
     },
     {
       "title": "“Invierno” de las cuatro estaciones. Allegro",
-      "composerName": "Vivaldi"
+      "composerName": "Antonio Vivaldi"
     },
     {
       "title": "“Invierno” de las cuatro estaciones. Largo",
-      "composerName": "Vivaldi"
+      "composerName": "Antonio Vivaldi"
     },
     {
       "title": "Concierto “Alla Rústica” RV151",
-      "composerName": "Vivaldi"
+      "composerName": "Antonio Vivaldi"
     },
     {
       "title": "“Verano” de las cuatro estaciones. Presto",
-      "composerName": "Vivaldi"
+      "composerName": "Antonio Vivaldi"
     },
     {
       "title": "según San Mateo, BWV 244",
-      "composerName": "Vivaldi"
+      "composerName": "Antonio Vivaldi"
     }
   ],
   "eras": [

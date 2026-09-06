@@ -29,27 +29,27 @@
   ],
   "composers": [
     {
-      "name": "C. SAINT-SÄENS"
+      "name": "Camille Saint-Saëns"
     },
     {
-      "name": "A. DVORÁK"
+      "name": "Antonín Dvořák"
     },
     {
-      "name": "G. PUCCINI"
+      "name": "Giacomo Puccini"
     }
   ],
   "works": [
     {
       "title": "Concierto para violonchelo n.º 1",
-      "composerName": "C. SAINT-SÄENS"
+      "composerName": "Camille Saint-Saëns"
     },
     {
       "title": "Sinfonía nº9 “Del Nuevo Mundo”",
-      "composerName": "A. DVORÁK"
+      "composerName": "Antonín Dvořák"
     },
     {
       "title": "Preludio Sinfónico",
-      "composerName": "G. PUCCINI"
+      "composerName": "Giacomo Puccini"
     }
   ],
   "eras": [

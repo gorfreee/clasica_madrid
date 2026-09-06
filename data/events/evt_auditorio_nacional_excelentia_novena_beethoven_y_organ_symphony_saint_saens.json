@@ -29,20 +29,20 @@
   ],
   "composers": [
     {
-      "name": "Saint-Saëns"
+      "name": "Camille Saint-Saëns"
     },
     {
-      "name": "Beethoven"
+      "name": "Ludwig van Beethoven"
     }
   ],
   "works": [
     {
       "title": "Sinfonía n.º 3 “con órgano”",
-      "composerName": "Saint-Saëns"
+      "composerName": "Camille Saint-Saëns"
     },
     {
       "title": "Sinfonía n.º 9 “Coral”",
-      "composerName": "Beethoven"
+      "composerName": "Ludwig van Beethoven"
     }
   ],
   "eras": [

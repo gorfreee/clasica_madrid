@@ -29,24 +29,24 @@
   ],
   "composers": [
     {
-      "name": "Chaikovski"
+      "name": "Piotr Ilich Chaikovski"
     },
     {
-      "name": "Korngold"
+      "name": "Erich Wolfgang Korngold"
     }
   ],
   "works": [
     {
       "title": "Romeo y Julieta, obertura-fantasía",
-      "composerName": "Chaikovski"
+      "composerName": "Piotr Ilich Chaikovski"
     },
     {
       "title": "Concierto para violín y orquesta",
-      "composerName": "Korngold"
+      "composerName": "Erich Wolfgang Korngold"
     },
     {
       "title": "Sinfonía n.º 5",
-      "composerName": "Chaikovski"
+      "composerName": "Piotr Ilich Chaikovski"
     }
   ],
   "eras": [

@@ -23,56 +23,56 @@
   ],
   "composers": [
     {
-      "name": "Johann Sebastian Bach (1685-1750)"
+      "name": "Johann Sebastian Bach"
     },
     {
-      "name": "Maurice Duruflé (1902-1986)"
+      "name": "Maurice Duruflé"
     },
     {
-      "name": "Francisco Madina (1907-1972)"
+      "name": "Francisco Madina"
     },
     {
-      "name": "Gabriel Fauré (1845-1924)"
+      "name": "Gabriel Fauré"
     },
     {
-      "name": "Vicente Goicoechea (1854-1916)"
+      "name": "Vicente Goicoechea"
     },
     {
-      "name": "René Eespere (1953)"
+      "name": "René Eespere"
     }
   ],
   "works": [
     {
       "title": "Concierto en re menor, sobre el Concierto para dos violines y violonchelo en re menor de A. Vivaldi, BWV 596 (1713-1714)",
-      "composerName": "Johann Sebastian Bach (1685-1750)"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Toccata de la Suite para órgano , op. 5 (1933)",
-      "composerName": "Maurice Duruflé (1902-1986)"
+      "composerName": "Maurice Duruflé"
     },
     {
       "title": "Messe ‘Cum jubilo’ , op. 11 (1967)",
-      "composerName": "Maurice Duruflé (1902-1986)"
+      "composerName": "Maurice Duruflé"
     },
     {
       "title": "Euge serve bone",
-      "composerName": "Francisco Madina (1907-1972)"
+      "composerName": "Francisco Madina"
     },
     {
       "title": "Ave Maria , op. posth. (1871)",
-      "composerName": "Gabriel Fauré (1845-1924)"
+      "composerName": "Gabriel Fauré"
     },
     {
       "title": "Ave, verum corpus",
-      "composerName": "Vicente Goicoechea (1854-1916)"
+      "composerName": "Vicente Goicoechea"
     },
     {
       "title": "Glorificatio (1990)",
-      "composerName": "René Eespere (1953)"
+      "composerName": "René Eespere"
     },
     {
       "title": "Aita gurea (1946)",
-      "composerName": "Francisco Madina (1907-1972)"
+      "composerName": "Francisco Madina"
     }
   ],
   "eras": [

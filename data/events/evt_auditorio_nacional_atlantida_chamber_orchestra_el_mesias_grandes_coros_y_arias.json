@@ -32,24 +32,24 @@
   ],
   "composers": [
     {
-      "name": "Joseph Haydn (1732–1809)"
+      "name": "Franz Joseph Haydn"
     },
     {
-      "name": "Georg Friedrich Haendel (1685–1759)"
+      "name": "Georg Friedrich Händel"
     }
   ],
   "works": [
     {
       "title": "Sinfonía nº 1 en Re mayor, Hob. I:1",
-      "composerName": "Joseph Haydn (1732–1809)"
+      "composerName": "Franz Joseph Haydn"
     },
     {
       "title": "Concierto para piano nº 11 en Re mayor, Hob. XVIII:11",
-      "composerName": "Joseph Haydn (1732–1809)"
+      "composerName": "Franz Joseph Haydn"
     },
     {
       "title": "El Mesías (selección)",
-      "composerName": "Georg Friedrich Haendel (1685–1759)"
+      "composerName": "Georg Friedrich Händel"
     }
   ],
   "eras": [

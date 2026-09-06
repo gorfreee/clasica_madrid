@@ -29,21 +29,21 @@
   ],
   "composers": [
     {
-      "name": "Wolfgang Amadeus Mozart (1756–1791)"
+      "name": "Wolfgang Amadeus Mozart"
     }
   ],
   "works": [
     {
       "title": "Sinfonía nº1 en Mi bemol mayor, KV 16",
-      "composerName": "Wolfgang Amadeus Mozart (1756–1791)"
+      "composerName": "Wolfgang Amadeus Mozart"
     },
     {
       "title": "Concierto para flauta nº1 en Sol mayor, KV 313",
-      "composerName": "Wolfgang Amadeus Mozart (1756–1791)"
+      "composerName": "Wolfgang Amadeus Mozart"
     },
     {
       "title": "Réquiem en Re menor, KV 626",
-      "composerName": "Wolfgang Amadeus Mozart (1756–1791)"
+      "composerName": "Wolfgang Amadeus Mozart"
     }
   ],
   "eras": [

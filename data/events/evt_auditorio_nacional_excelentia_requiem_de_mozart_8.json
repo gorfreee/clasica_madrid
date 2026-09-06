@@ -25,17 +25,17 @@
   ],
   "composers": [
     {
-      "name": "Mozart"
+      "name": "Wolfgang Amadeus Mozart"
     }
   ],
   "works": [
     {
       "title": "Sinfonía n.º 40",
-      "composerName": "Mozart"
+      "composerName": "Wolfgang Amadeus Mozart"
     },
     {
       "title": "Réquiem",
-      "composerName": "Mozart"
+      "composerName": "Wolfgang Amadeus Mozart"
     }
   ],
   "eras": [

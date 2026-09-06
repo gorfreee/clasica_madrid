@@ -35,27 +35,27 @@
   ],
   "composers": [
     {
-      "name": "M. de Falla"
+      "name": "Manuel de Falla"
     },
     {
-      "name": "E. Granados"
+      "name": "Enrique Granados"
     },
     {
-      "name": "R. Chapí"
+      "name": "Ruperto Chapí"
     }
   ],
   "works": [
     {
       "title": "El Sombrero de Tres Picos",
-      "composerName": "M. de Falla"
+      "composerName": "Manuel de Falla"
     },
     {
       "title": "Goyescas",
-      "composerName": "E. Granados"
+      "composerName": "Enrique Granados"
     },
     {
       "title": "El Barbero de Sevilla",
-      "composerName": "R. Chapí"
+      "composerName": "Ruperto Chapí"
     }
   ],
   "eras": [

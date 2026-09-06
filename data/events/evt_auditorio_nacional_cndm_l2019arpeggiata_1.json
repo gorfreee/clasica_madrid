@@ -31,113 +31,98 @@
   ],
   "composers": [
     {
-      "name": "Tradicional de Venezuela"
-    },
-    {
-      "name": "Hilda Herrera (1932)"
+      "name": "Hilda Herrera"
     },
     {
       "name": "Agustín Rivas Chupacaña"
     },
     {
-      "name": "Tradicional de México"
+      "name": "Violeta Parra"
     },
     {
-      "name": "Violeta Parra (1917-1967)"
+      "name": "Santiago de Murcia"
     },
     {
-      "name": "Santiago de Murcia (1673-1739)"
+      "name": "Alonso Mudarra"
     },
     {
-      "name": "A. Mudarra"
+      "name": "Reynaldo Armas"
     },
     {
-      "name": "Reynaldo Armas (1953)"
-    },
-    {
-      "name": "Simón Díaz (1928-2014)"
+      "name": "Simón Díaz"
     }
   ],
   "works": [
     {
-      "title": "Guayabo zarandeao (joropo central)",
-      "composerName": "Tradicional de Venezuela"
+      "title": "Guayabo zarandeao (joropo central)"
     },
     {
-      "title": "Tradicional de Venezuela/Alonso Mudarra (ca. 1510-1580)",
-      "composerName": "Tradicional de Venezuela"
+      "title": "Tradicional de Venezuela/Alonso Mudarra (ca. 1510-1580)"
     },
     {
-      "title": "Cumaná 500 años (polo margariteño y romanesca) (arr. M. A. Sánchez y C. Pluhar)",
-      "composerName": "Tradicional de Venezuela"
+      "title": "Cumaná 500 años (polo margariteño y romanesca) (arr. M. A. Sánchez y C. Pluhar)"
     },
     {
       "title": "La diablera (zamba) (arr. L’Arpeggiata)",
-      "composerName": "Hilda Herrera (1932)"
+      "composerName": "Hilda Herrera"
     },
     {
       "title": "Coplas-Yo vengo regando flores (merengue venezolano) (arr. M. A. Sánchez y C. Pluhar)",
       "composerName": "Agustín Rivas Chupacaña"
     },
     {
-      "title": "Que me entierren en un arpa (joropo llanero)",
-      "composerName": "Tradicional de Venezuela"
+      "title": "Que me entierren en un arpa (joropo llanero)"
     },
     {
-      "title": "La sirena (arr. C. Pluhar)",
-      "composerName": "Tradicional de México"
+      "title": "La sirena (arr. C. Pluhar)"
     },
     {
-      "title": "La Martiniana (arr. L’Arpeggiata)",
-      "composerName": "Tradicional de México"
+      "title": "La Martiniana (arr. L’Arpeggiata)"
     },
     {
-      "title": "El coco (arr. C. Pluhar)",
-      "composerName": "Tradicional de México"
+      "title": "El coco (arr. C. Pluhar)"
     },
     {
       "title": "La lavandera (arr. L’Arpeggiata)",
-      "composerName": "Violeta Parra (1917-1967)"
+      "composerName": "Violeta Parra"
     },
     {
       "title": "Ignacio ‘Indio’ Figueredo (1899-1995)",
-      "composerName": "Violeta Parra (1917-1967)"
+      "composerName": "Violeta Parra"
     },
     {
       "title": "El gavilán (joropo llanero)",
-      "composerName": "Violeta Parra (1917-1967)"
+      "composerName": "Violeta Parra"
     },
     {
       "title": "Fandango (arr. J. M. Martí Duran)",
-      "composerName": "Santiago de Murcia (1673-1739)"
+      "composerName": "Santiago de Murcia"
     },
     {
       "title": "Claros y frescos ríos (Tres libros de música en cifras para vihuela, 1546)",
-      "composerName": "A. Mudarra"
+      "composerName": "Alonso Mudarra"
     },
     {
-      "title": "La petenera (arr. C. Pluhar)",
-      "composerName": "Tradicional de México"
+      "title": "La petenera (arr. C. Pluhar)"
     },
     {
       "title": "La mañana de sant Juan (arr. C. Pluhar)",
-      "composerName": "A. Mudarra"
+      "composerName": "Alonso Mudarra"
     },
     {
       "title": "El indio (pasaje llanero) (1981)",
-      "composerName": "Reynaldo Armas (1953)"
+      "composerName": "Reynaldo Armas"
     },
     {
       "title": "Si me llaman (Tres libros de música en cifras para vihuela, 1546)",
-      "composerName": "A. Mudarra"
+      "composerName": "Alonso Mudarra"
     },
     {
-      "title": "Pajarito (joropo llanero) (arr. L’Arpeggiata)",
-      "composerName": "Tradicional de Venezuela"
+      "title": "Pajarito (joropo llanero) (arr. L’Arpeggiata)"
     },
     {
       "title": "Tonada de luna llena",
-      "composerName": "Simón Díaz (1928-2014)"
+      "composerName": "Simón Díaz"
     }
   ],
   "eras": [

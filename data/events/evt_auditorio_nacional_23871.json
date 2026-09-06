@@ -25,34 +25,34 @@
   ],
   "composers": [
     {
-      "name": "Arvo Pärt (1935)"
+      "name": "Arvo Pärt"
     },
     {
-      "name": "Karol Szymanowski (1882-1937)"
+      "name": "Karol Szymanowski"
     },
     {
-      "name": "Laura Vega Santana (1978)"
+      "name": "Laura Vega"
     },
     {
-      "name": "Gabriel Fauré (1845-1924)"
+      "name": "Gabriel Fauré"
     }
   ],
   "works": [
     {
       "title": "Fratres (1980)",
-      "composerName": "Arvo Pärt (1935)"
+      "composerName": "Arvo Pärt"
     },
     {
       "title": "Sonata para violín y piano en re menor, op. 9 (1904)",
-      "composerName": "Karol Szymanowski (1882-1937)"
+      "composerName": "Karol Szymanowski"
     },
     {
       "title": "Estreno absoluto. Obra encargo del CNDM *+ (2027)",
-      "composerName": "Laura Vega Santana (1978)"
+      "composerName": "Laura Vega"
     },
     {
       "title": "Sonata para violín y piano n.º 1 en la mayor , op. 13 (1875-1876)",
-      "composerName": "Gabriel Fauré (1845-1924)"
+      "composerName": "Gabriel Fauré"
     }
   ],
   "eras": [

@@ -22,27 +22,27 @@
   ],
   "composers": [
     {
-      "name": "Franz Joseph Haydn (1732-1809)"
+      "name": "Franz Joseph Haydn"
     },
     {
-      "name": "Raquel García-Tomás (1984)"
+      "name": "Raquel García-Tomás"
     },
     {
-      "name": "Felix Mendelssohn (1809-1847)"
+      "name": "Felix Mendelssohn"
     }
   ],
   "works": [
     {
       "title": "Cuarteto de cuerda en fa menor, op. 20, n.º 5 (1772)",
-      "composerName": "Franz Joseph Haydn (1732-1809)"
+      "composerName": "Franz Joseph Haydn"
     },
     {
       "title": "Estreno absoluto. Obra encargo del CNDM, la Kölner Philharmonie y la Musikverein Wien *+ (2026)",
-      "composerName": "Raquel García-Tomás (1984)"
+      "composerName": "Raquel García-Tomás"
     },
     {
       "title": "Cuarteto de cuerda n.º 3 en re mayor, op. 44, n.º 1 (1838)",
-      "composerName": "Felix Mendelssohn (1809-1847)"
+      "composerName": "Felix Mendelssohn"
     }
   ],
   "eras": [

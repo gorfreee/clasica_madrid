@@ -32,35 +32,35 @@
   ],
   "composers": [
     {
-      "name": "Johann Sebastian Bach (1685–1750)"
+      "name": "Johann Sebastian Bach"
     },
     {
-      "name": "Tomaso Albinoni (1671–1751)"
+      "name": "Tomaso Albinoni"
     },
     {
-      "name": "Antonio Vivaldi (1678–1741)"
+      "name": "Antonio Vivaldi"
     }
   ],
   "works": [
     {
       "title": "Concierto para teclado y cuerdas en Fa menor, BWV 1056",
-      "composerName": "Johann Sebastian Bach (1685–1750)"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Concierto para teclado y cuerdas en Sol menor, BWV 1058",
-      "composerName": "Johann Sebastian Bach (1685–1750)"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Sinfonía en Sol menor, T.Si 7",
-      "composerName": "Tomaso Albinoni (1671–1751)"
+      "composerName": "Tomaso Albinoni"
     },
     {
       "title": "Concierto a cinque en La menor, Op. 5 nº 5",
-      "composerName": "Tomaso Albinoni (1671–1751)"
+      "composerName": "Tomaso Albinoni"
     },
     {
       "title": "Las Cuatro Estaciones, Op. 8, nº 1–4",
-      "composerName": "Antonio Vivaldi (1678–1741)"
+      "composerName": "Antonio Vivaldi"
     }
   ],
   "eras": [

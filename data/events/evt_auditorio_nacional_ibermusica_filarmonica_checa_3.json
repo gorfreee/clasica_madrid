@@ -28,20 +28,20 @@
   ],
   "composers": [
     {
-      "name": "SMETANA"
+      "name": "Bedřich Smetana"
     },
     {
-      "name": "RACHMANINOFF"
+      "name": "Serguéi Rajmáninov"
     }
   ],
   "works": [
     {
       "title": "La novia vendida, obertura, Furiant y danza de los comediantes",
-      "composerName": "SMETANA"
+      "composerName": "Bedřich Smetana"
     },
     {
       "title": "Danzas sinfónicas",
-      "composerName": "RACHMANINOFF"
+      "composerName": "Serguéi Rajmáninov"
     }
   ],
   "eras": [

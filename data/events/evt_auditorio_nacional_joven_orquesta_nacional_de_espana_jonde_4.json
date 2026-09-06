@@ -26,31 +26,31 @@
   ],
   "composers": [
     {
-      "name": "Luis Tabuenca (1979)"
+      "name": "Luis Tabuenca"
     },
     {
-      "name": "Wolfgang Amadeus Mozart (1756-1791)"
+      "name": "Wolfgang Amadeus Mozart"
     },
     {
-      "name": "Gustav Mahler (1860 - 1911)"
+      "name": "Gustav Mahler"
     }
   ],
   "works": [
     {
       "title": "Rémanence (2025)",
-      "composerName": "Luis Tabuenca (1979)"
+      "composerName": "Luis Tabuenca"
     },
     {
       "title": "XLIII Premio Reina Sofía de Composición Musical",
-      "composerName": "Luis Tabuenca (1979)"
+      "composerName": "Luis Tabuenca"
     },
     {
       "title": "Sinfonía concertante para oboe, clarinete, fagot, trompa y orquesta en mi bemol mayor, K.297b (1778)",
-      "composerName": "Wolfgang Amadeus Mozart (1756-1791)"
+      "composerName": "Wolfgang Amadeus Mozart"
     },
     {
       "title": "Sinfonía nº 1 en re mayor, “Titán” (1884–1889)",
-      "composerName": "Gustav Mahler (1860 - 1911)"
+      "composerName": "Gustav Mahler"
     }
   ],
   "eras": [

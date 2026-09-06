@@ -25,78 +25,78 @@
   ],
   "composers": [
     {
-      "name": "Franz Schubert (1797-1828)"
+      "name": "Franz Schubert"
     },
     {
-      "name": "Richard Strauss (1864-1949)"
+      "name": "Richard Strauss"
     },
     {
-      "name": "Claude Debussy (1862-1918)"
+      "name": "Claude Debussy"
     },
     {
-      "name": "Federico Mompou (1893-1987)"
+      "name": "Frederic Mompou"
     }
   ],
   "works": [
     {
       "title": "An die Leier , D 737 (1822)",
-      "composerName": "Franz Schubert (1797-1828)"
+      "composerName": "Franz Schubert"
     },
     {
       "title": "Der Zwerg , D 771 (1822-1823)",
-      "composerName": "Franz Schubert (1797-1828)"
+      "composerName": "Franz Schubert"
     },
     {
       "title": "Litanei auf das Fest Allerseelen , D 343 (1816)",
-      "composerName": "Franz Schubert (1797-1828)"
+      "composerName": "Franz Schubert"
     },
     {
       "title": "Allerseelen , op. 10, n.º 8 (1885)",
-      "composerName": "Richard Strauss (1864-1949)"
+      "composerName": "Richard Strauss"
     },
     {
       "title": "De Vier Lieder , op. 27 (1894)",
-      "composerName": "Richard Strauss (1864-1949)"
+      "composerName": "Richard Strauss"
     },
     {
       "title": "Morgen! , n.º 4",
-      "composerName": "Richard Strauss (1864-1949)"
+      "composerName": "Richard Strauss"
     },
     {
       "title": "Heimliche Aufforderung , n.º 3",
-      "composerName": "Richard Strauss (1864-1949)"
+      "composerName": "Richard Strauss"
     },
     {
       "title": "Trois ballades de François Villon , CD 126 (1910)",
-      "composerName": "Claude Debussy (1862-1918)"
+      "composerName": "Claude Debussy"
     },
     {
       "title": "Tres canciones * (2027)",
-      "composerName": "Claude Debussy (1862-1918)"
+      "composerName": "Claude Debussy"
     },
     {
       "title": "Hoy la tierra y los cielos me sonríen , n.º 1",
-      "composerName": "Federico Mompou (1893-1987)"
+      "composerName": "Frederic Mompou"
     },
     {
       "title": "Los invisibles átomos del aire , n.º 2",
-      "composerName": "Federico Mompou (1893-1987)"
+      "composerName": "Frederic Mompou"
     },
     {
       "title": "Olas gigantes , n.º 6",
-      "composerName": "Federico Mompou (1893-1987)"
+      "composerName": "Frederic Mompou"
     },
     {
       "title": "De Becquerianas (1970-1971)",
-      "composerName": "Federico Mompou (1893-1987)"
+      "composerName": "Frederic Mompou"
     },
     {
       "title": "Dos canciones de juventud (1959)",
-      "composerName": "Federico Mompou (1893-1987)"
+      "composerName": "Frederic Mompou"
     },
     {
       "title": "Canciones para niños (1953)",
-      "composerName": "Federico Mompou (1893-1987)"
+      "composerName": "Frederic Mompou"
     }
   ],
   "eras": [

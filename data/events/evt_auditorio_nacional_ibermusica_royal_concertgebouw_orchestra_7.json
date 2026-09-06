@@ -28,27 +28,27 @@
   ],
   "composers": [
     {
-      "name": "SCHUMANN"
+      "name": "Robert Schumann"
     },
     {
-      "name": "SIBELIUS"
+      "name": "Jean Sibelius"
     },
     {
-      "name": "DVOŘÁK"
+      "name": "Antonín Dvořák"
     }
   ],
   "works": [
     {
       "title": "Manfredo, obertura",
-      "composerName": "SCHUMANN"
+      "composerName": "Robert Schumann"
     },
     {
       "title": "Concierto para violín",
-      "composerName": "SIBELIUS"
+      "composerName": "Jean Sibelius"
     },
     {
       "title": "Sinfonía núm. 7",
-      "composerName": "DVOŘÁK"
+      "composerName": "Antonín Dvořák"
     }
   ],
   "eras": [

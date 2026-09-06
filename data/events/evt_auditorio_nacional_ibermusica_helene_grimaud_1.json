@@ -22,20 +22,20 @@
   ],
   "composers": [
     {
-      "name": "BEETHOVEN"
+      "name": "Ludwig van Beethoven"
     },
     {
-      "name": "SCHUBERT"
+      "name": "Franz Schubert"
     }
   ],
   "works": [
     {
       "title": "Sonata para piano núm. 32 en Do menor op. 111",
-      "composerName": "BEETHOVEN"
+      "composerName": "Ludwig van Beethoven"
     },
     {
       "title": "Sonata para piano núm. 21 en Si bemol Mayor D.960",
-      "composerName": "SCHUBERT"
+      "composerName": "Franz Schubert"
     }
   ],
   "eras": [
