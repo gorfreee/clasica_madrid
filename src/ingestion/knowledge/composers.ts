@@ -5,7 +5,8 @@ import type { Era } from '../../lib/schemas/taxonomies.ts';
  *
  * Observed composers plus habitual concert repertoire for Madrid programming.
  * Aliases also scan editorial prose and can decide eligibility: prefer full
- * names over ambiguous surnames. Not an encyclopedia or publication normalizer.
+ * names over ambiguous surnames. `canonicalName` is the published identity of
+ * a known composer. Not an encyclopedia.
  * Era assignments follow docs/classification-policy.md, not lifespan alone.
  * Duplicate aliases for the same composer are fine; a folded/compact collision
  * between two canonical names fails at index build.
@@ -2397,12 +2398,33 @@ const ALIASES_BY_LENGTH = [...new Set(COMPOSERS.flatMap((entry) => entry.aliases
   (left, right) => right.length - left.length,
 );
 
+/**
+ * Trailing biographical year annotation only: `(1685-1750)`, `(1937)`,
+ * `(ca. 1650-1710)`, open spans such as `(1944-)`. Does not match other
+ * parentheticals that happen to contain digits (`(s. XVII)`, `(Op. 123)`).
+ */
+export const COMPOSER_LIFESPAN_ANNOTATION =
+  /\(\s*(?:ca\.?\s*)?\*?\d{3,4}\s*[–—-]\s*(?:(?:ca\.?\s*)?\*?\d{3,4})?\s*\)|\(\s*(?:ca\.?\s*)?\*?\d{4}\s*\)/;
+
+const TRAILING_COMPOSER_LIFESPAN = new RegExp(
+  String.raw`\s*(?:${COMPOSER_LIFESPAN_ANNOTATION.source})\s*$`,
+  'u',
+);
+
+export function hasComposerLifespanAnnotation(text: string): boolean {
+  return COMPOSER_LIFESPAN_ANNOTATION.test(text);
+}
+
+export function stripTrailingBiographicalYears(name: string): string {
+  return name.replace(TRAILING_COMPOSER_LIFESPAN, '').trim();
+}
+
 export function matchComposer(name: string): ComposerKnowledge | undefined {
   const folded = foldName(name);
   if (!folded) return undefined;
   const direct = INDEX.byFolded.get(folded) ?? INDEX.byCompact.get(compactName(name));
   if (direct) return direct;
-  const withoutYears = name.replace(/\s*\([^)]*\d{3,4}[^)]*\)\s*$/u, '').trim();
+  const withoutYears = stripTrailingBiographicalYears(name);
   if (withoutYears && withoutYears !== name) return matchComposer(withoutYears);
   return undefined;
 }
