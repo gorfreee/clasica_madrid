@@ -5,6 +5,7 @@ import {
   looksLikeComposerLine,
   looksLikeEnsembleName,
   looksLikeMovementLine,
+  looksLikeNonWorkCredit,
   looksLikePartHeader,
   looksLikeProductionNote,
   looksLikeProgramHeader,
@@ -12,6 +13,7 @@ import {
   looksLikeTextCredit,
   looksLikeUnequivocalWorkLine,
   looksLikeWorkInstrumentation,
+  looksLikeWorkLine,
   parseExplicitTitleAuthorWork,
 } from '../observed-cleanup.ts';
 
@@ -68,7 +70,7 @@ const STRONG_CATALOG =
   /\b(?:bwv|hwv|hob\.?|buxwv|swwv|rct|k\.?\s*\d|kv\.?\s*\d|op\.?\s*\d|opus\s+\d|g\.\s*\d|h\.?\s*\d{2,}|n[úu]m\.?\s*\d)\b/i;
 
 const WORK_GENRE =
-  /\b(?:concierto|concerto|sinfon[ií]a|symphony|sonata|suite|quinteto|cuarteto|cuartet|tr[ií]o|obertura|ouverture|r[eé]quiem|misa|missa|toccata|fuga|fugue|preludio|pr[eé]lude|nocturne|mazurka|scherzo|impromptu|variaciones|variations|cantata|oratorio|fantas[ií]a|romance|rhapsod|rapsodia|divertimento|polonesa|polonaise)\b/i;
+  /\b(?:concierto|concerto|sinfon[ií]a|symphony|sonata|suite|quinteto|cuarteto|cuartet|tr[ií]o|obertura|ouverture|r[eé]quiem|misa|missa|toccata|fuga|fugue|preludio|pr[eé]lude|nocturne|mazurka|scherzo|impromptu|variaciones|variations|cantata|oratorio|fantas[ií]a|romance|rhapsod|rapsodia|divertimento|polonesa|polonaise|cancionero)\b/i;
 
 const NAME_PARTICLE = /^(?:de|del|van|von|di|da|el|la|los|las)$/i;
 
@@ -151,7 +153,12 @@ export function findProgramStartIndex(lines: string[]): number {
     const line = lines[index] ?? '';
     const next = lines[index + 1];
     if (hasExplicitPerformerSignal(line) || looksLikeRoleOnlyLine(line)) continue;
-    if (looksLikeMovementLine(line) || looksLikeProductionNote(line) || looksLikeTextCredit(line)) {
+    if (
+      looksLikeMovementLine(line) ||
+      looksLikeProductionNote(line) ||
+      looksLikeTextCredit(line) ||
+      looksLikeNonWorkCredit(line)
+    ) {
       continue;
     }
     if (looksLikeProgramHeader(line) || ANONYMOUS_COMPOSER.test(line) || /^obras de\b/i.test(line)) {
@@ -230,7 +237,12 @@ function parseSingleAuditorioPerson(
   if (!cleaned) return undefined;
   if (looksLikeScheduleNotice(cleaned) || looksLikeProgramHeader(cleaned)) return undefined;
   if (looksLikeRoleOnlyLine(cleaned) || ANONYMOUS_COMPOSER.test(cleaned)) return undefined;
-  if (looksLikeMovementLine(cleaned) || looksLikeProductionNote(cleaned) || looksLikeTextCredit(cleaned)) {
+  if (
+    looksLikeMovementLine(cleaned) ||
+    looksLikeProductionNote(cleaned) ||
+    looksLikeTextCredit(cleaned) ||
+    looksLikeNonWorkCredit(cleaned)
+  ) {
     return undefined;
   }
 
@@ -573,7 +585,12 @@ function isMusicalFormFragment(text: string): boolean {
 
 function isTitleContinuationLine(next: string, composerName: string): boolean {
   if (!next || looksLikeProgramHeader(next) || looksLikePartHeader(next)) return false;
-  if (looksLikeProductionNote(next) || looksLikeTextCredit(next) || looksLikeMovementLine(next)) {
+  if (
+    looksLikeProductionNote(next) ||
+    looksLikeTextCredit(next) ||
+    looksLikeNonWorkCredit(next) ||
+    looksLikeMovementLine(next)
+  ) {
     return false;
   }
   if (looksLikeObrasDeLine(next) || looksLikeComposerNameList(next)) return false;
@@ -592,7 +609,12 @@ export function looksLikeAuditorioRepertoireLine(text: string): boolean {
   const cleaned = cleanLine(text);
   if (!cleaned) return false;
   if (looksLikeProgramHeader(cleaned) || looksLikeRoleOnlyLine(cleaned)) return false;
-  if (looksLikeScheduleNotice(cleaned) || looksLikeProductionNote(cleaned) || looksLikeTextCredit(cleaned)) {
+  if (
+    looksLikeScheduleNotice(cleaned) ||
+    looksLikeProductionNote(cleaned) ||
+    looksLikeTextCredit(cleaned) ||
+    looksLikeNonWorkCredit(cleaned)
+  ) {
     return false;
   }
   if (isNamedCastEnsemble(cleaned)) return false;
@@ -773,7 +795,12 @@ function looksLikeCastEnsemble(text: string): boolean {
 
 function isComposerHeading(line: string): boolean {
   if (looksLikeProgramHeader(line) || looksLikeRoleOnlyLine(line)) return false;
-  if (looksLikeMovementLine(line) || looksLikeProductionNote(line) || looksLikeTextCredit(line)) {
+  if (
+    looksLikeMovementLine(line) ||
+    looksLikeProductionNote(line) ||
+    looksLikeTextCredit(line) ||
+    looksLikeNonWorkCredit(line)
+  ) {
     return false;
   }
   if (/^de\s+/i.test(line)) return false;
@@ -791,17 +818,18 @@ function looksLikeStrongWorkLine(text: string): boolean {
   if (!trimmed || looksLikeScheduleNotice(trimmed) || hasExplicitPerformerSignal(trimmed)) {
     return false;
   }
-  if (looksLikeRoleOnlyLine(trimmed) || looksLikeUnlabeledPerson(trimmed)) return false;
-  if (STRONG_CATALOG.test(trimmed)) return true;
-  if (looksLikeCastEnsemble(trimmed)) return false;
-  if (looksLikeWorkInstrumentation(trimmed)) return true;
-  return WORK_GENRE.test(trimmed);
+  if (looksLikeRoleOnlyLine(trimmed) || looksLikeNonWorkCredit(trimmed)) return false;
+  if (STRONG_CATALOG.test(trimmed) || looksLikeWorkInstrumentation(trimmed) || WORK_GENRE.test(trimmed)) {
+    return true;
+  }
+  if (looksLikeUnlabeledPerson(trimmed) || looksLikeCastEnsemble(trimmed)) return false;
+  return false;
 }
 
 function looksLikeWorkishLine(text: string): boolean {
   const trimmed = text.trim();
   if (!trimmed) return false;
-  if (hasExplicitPerformerSignal(trimmed)) return false;
+  if (hasExplicitPerformerSignal(trimmed) || looksLikeNonWorkCredit(trimmed)) return false;
   if (looksLikeRoleOnlyLine(trimmed) || looksLikeScheduleNotice(trimmed)) return false;
   if (ROLE_SUFFIX.test(trimmed) && !looksLikeWorkInstrumentation(trimmed) && !STRONG_CATALOG.test(trimmed)) {
     return false;
@@ -827,7 +855,12 @@ function looksLikeUnlabeledPerson(text: string): boolean {
   const cleaned = text.replace(/[“”«»"']/g, '').trim();
   if (!cleaned || cleaned.length > 80) return false;
   if (/[¡!?,;:]/.test(cleaned) || /\d/.test(cleaned) || /[&/]/.test(cleaned)) return false;
-  if (/ y$/i.test(cleaned) || looksLikeRoleOnlyLine(cleaned)) return false;
+  if (/ y$/i.test(cleaned) || looksLikeRoleOnlyLine(cleaned) || looksLikeNonWorkCredit(cleaned)) {
+    return false;
+  }
+  if (WORK_GENRE.test(cleaned) || STRONG_CATALOG.test(cleaned) || looksLikeWorkInstrumentation(cleaned)) {
+    return false;
+  }
   const words = cleaned.split(/\s+/).filter(Boolean);
   if (words.length < 2 || words.length > 6) return false;
   return words.every(
@@ -877,7 +910,12 @@ function isCastBoundary(line: string): boolean {
 export function canPairAsAuditorioComposer(text: string): boolean {
   const cleaned = cleanLine(text);
   if (!cleaned || looksLikeProgramHeader(cleaned) || looksLikeRoleOnlyLine(cleaned)) return false;
-  if (looksLikeMovementLine(cleaned) || looksLikeProductionNote(cleaned) || looksLikeTextCredit(cleaned)) {
+  if (
+    looksLikeMovementLine(cleaned) ||
+    looksLikeProductionNote(cleaned) ||
+    looksLikeTextCredit(cleaned) ||
+    looksLikeNonWorkCredit(cleaned)
+  ) {
     return false;
   }
   if (/^de\s+/i.test(cleaned)) return false;
@@ -887,6 +925,69 @@ export function canPairAsAuditorioComposer(text: string): boolean {
   if (isCastBoundary(cleaned) || STRONG_CATALOG.test(cleaned)) return false;
   if (looksLikeWorkInstrumentation(cleaned)) return false;
   return isComposerHeading(cleaned) || ANONYMOUS_COMPOSER.test(cleaned);
+}
+
+/**
+ * Unknown personal name as a new sticky heading, only with look-ahead:
+ * the line looks like a person and the next line has work evidence.
+ * Two-word work titles (Jeromita Linares) stay works unless the next line
+ * is itself an unequivocal work. Callers must also require an already-open
+ * composer→work sequence so the first title after a heading is not stolen.
+ */
+export function canPairAsLookaheadComposer(text: string, next?: string): boolean {
+  const cleaned = cleanLine(text);
+  const following = next ? cleanLine(next) : '';
+  if (!cleaned || !following) return false;
+  if (canPairAsAuditorioComposer(cleaned)) return false;
+  if (looksLikeNonWorkCredit(cleaned) || looksLikeRoleOnlyLine(cleaned)) return false;
+  if (looksLikeMovementLine(cleaned) || looksLikeProductionNote(cleaned) || looksLikeTextCredit(cleaned)) {
+    return false;
+  }
+  if (looksLikeUnequivocalWorkLine(cleaned) || looksLikeCatalogWorkLine(cleaned)) return false;
+  if (looksLikeAuditorioRepertoireLine(cleaned) || looksLikeProgramSectionLetters(cleaned)) return false;
+  if (!looksLikeUnlabeledPerson(cleaned)) return false;
+  return hasLookaheadWorkEvidence(following, cleaned);
+}
+
+function hasLookaheadWorkEvidence(next: string, candidateComposer: string): boolean {
+  if (looksLikeProgramHeader(next) || looksLikePartHeader(next) || looksLikeMovementLine(next)) {
+    return false;
+  }
+  if (looksLikeProductionNote(next) || looksLikeTextCredit(next) || looksLikeNonWorkCredit(next)) {
+    return false;
+  }
+  if (looksLikeRoleOnlyLine(next) || hasExplicitPerformerSignal(next)) return false;
+  if (canPairAsAuditorioComposer(next) || looksLikeComposerLine(next)) return false;
+  if (titleBeginsWithExplicitComposer(next, candidateComposer)) return false;
+  if (looksLikeProgramSectionLetters(next)) return false;
+
+  if (
+    looksLikeUnequivocalWorkLine(next) ||
+    looksLikeCatalogWorkLine(next) ||
+    looksLikeStrongWorkLine(next) ||
+    hasStrongWorkTitleEvidence(next)
+  ) {
+    return true;
+  }
+
+  // Weaker title evidence only for stronger person-name headings
+  // (three given/surname tokens, or a hyphenated surname).
+  if (!isStrongPersonNameHeading(candidateComposer)) return false;
+  if (!looksLikeWorkLine(next) || looksLikeUnlabeledPerson(next)) return false;
+  return /\p{Ll}/u.test(next);
+}
+
+function isStrongPersonNameHeading(text: string): boolean {
+  const stripped = text.replace(/\s*\([^)]*\)\s*$/u, '').trim();
+  const words = stripped.split(/\s+/).filter((word) => word && !NAME_PARTICLE.test(word));
+  if (words.length >= 3) return true;
+  return words.length === 2 && words.some((word) => word.includes('-'));
+}
+
+function looksLikeProgramSectionLetters(text: string): boolean {
+  const letters = text.replace(/[^\p{L}]/gu, '');
+  if (letters.length < 4) return false;
+  return letters === letters.toLocaleUpperCase('es');
 }
 
 function looksLikeInitialsComposerName(text: string): boolean {

@@ -664,6 +664,62 @@ describe('parser de ficha Auditorio Nacional', () => {
     expect(facts.programText).toMatch(/Jeromita Linares/);
   });
 
+  it('no convierte un compositor desconocido ni un crédito Arr. en título de obra', async () => {
+    const rautavaara = parseAuditorioNacionalDetail(
+      await readFile(path.join(detailDir, 'auditorio-rautavaara-lorca.excerpt.html'), 'utf8'),
+    );
+    const weill = parseAuditorioNacionalDetail(
+      await readFile(path.join(detailDir, 'auditorio-ocne-sinfonico-10-weill.excerpt.html'), 'utf8'),
+    );
+    const raices = parseAuditorioNacionalDetail(
+      await readFile(path.join(detailDir, 'auditorio-ocne-satelite-02.excerpt.html'), 'utf8'),
+    );
+    const amorBrujo = parseAuditorioNacionalDetail(
+      await readFile(path.join(detailDir, 'auditorio-amor-brujo.excerpt.html'), 'utf8'),
+    );
+
+    expect(rautavaara.works).toEqual([
+      { title: 'Suite Lorca', composerName: 'Einojuhani Rautavaara' },
+      { title: 'Lorquiana', composerName: 'Héctor Eliel Márquez' },
+      { title: 'Nocturnos de la ventana', composerName: 'Francesc Vila' },
+    ]);
+    expect(weill.works).toEqual([
+      { title: 'Obertura de Fidelio, op. 72', composerName: 'Ludwig van Beethoven' },
+      { title: 'Las VII tentaciones actuales', composerName: 'Rodolphe Bruneau-Boulmier' },
+      { title: 'Obertura Egmont, op. 84', composerName: 'Ludwig van Beethoven' },
+      { title: 'Los siete pecados capitales', composerName: 'Kurt Weill' },
+    ]);
+    expect(raices.works).toEqual([
+      { title: 'Jeromita Linares', composerName: 'Carlos Guastavino' },
+      { title: 'Cuatro canciones opulares argentinas', composerName: 'Carlos Guastavino' },
+      { title: 'Canción del atardecer (del opus 5)', composerName: 'Alicia Terzian' },
+      { title: 'Luz de mundos', composerName: 'Irma Urteaga' },
+      { title: 'Cancionero de Lampião', composerName: 'Marlos Nobre' },
+      { title: 'Marcha del Inca (De cantos populares incaicos)', composerName: 'Luis Gianneo' },
+      { title: 'Zamba de Juan Panadero', composerName: 'C. Leguizamón' },
+    ]);
+    expect(amorBrujo.works).toEqual(
+      expect.arrayContaining([
+        { title: 'Canciones españolas antiguas', composerName: 'FEDERICO GARCÍA LORCA (1898–1936)' },
+        { title: 'El amor brujo (versión 1914)', composerName: 'MANUEL DE FALLA (1876–1946)' },
+      ]),
+    );
+    expect(amorBrujo.programText).toMatch(/Arr\.\s*Manuel Tévar/);
+
+    const forbiddenTitles = [
+      'Arr. Manuel Tévar',
+      'Héctor Eliel Márquez',
+      'Marlos Nobre',
+      'Rodolphe Bruneau-Boulmier',
+    ];
+    for (const facts of [rautavaara, weill, raices, amorBrujo]) {
+      const titles = facts.works?.map((work) => work.title) ?? [];
+      for (const forbidden of forbiddenTitles) {
+        expect(titles, forbidden).not.toContain(forbidden);
+      }
+    }
+  });
+
   it('entiende el programa Excelentia Composer · Work en un h4 de producción', () => {
     const html = `
       <article id="content">
@@ -1145,6 +1201,8 @@ describe('parser de ficha Auditorio Nacional', () => {
       ]),
     );
     expect(facts.works?.some((work) => /^VIII\./i.test(work.title) || /^IX\./i.test(work.title))).toBe(false);
+    expect(facts.works?.some((work) => /^Arr\.\s*Manuel Tévar$/i.test(work.title))).toBe(false);
+    expect(facts.programText).toMatch(/Arr\.\s*Manuel Tévar/);
   });
 
   it('Mischa Maisky: Puccini, Saint-Saëns y Dvořák, sin I. Adagio como compositor', async () => {
