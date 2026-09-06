@@ -8,7 +8,8 @@ const PROGRAM_HEADING =
 const PART_HEADER =
   /^(?:(?:i{1,3}|iv|[1-4])\s*parte|parte\s*(?:i{1,3}|iv|[1-4]|[úu]nica))[:.\s]*$/i;
 const SEPARATOR = /^-{2,}.*-{2,}$|^\*{2,}$|^·+$/;
-const LIFESPAN = /\(\s*(?:ca\.?\s*)?\d{3,4}\s*[–—-]\s*(?:ca\.?\s*)?\d{3,4}\s*\)|\(\s*(?:ca\.?\s*)?\d{4}\s*\)/;
+const LIFESPAN =
+  /\(\s*(?:ca\.?\s*)?\*?\d{3,4}\s*[–—-]\s*(?:(?:ca\.?\s*)?\*?\d{3,4})?\s*\)|\(\s*(?:ca\.?\s*)?\*?\d{4}\s*\)/;
 const CATALOG =
   /\b(?:bwv|hwv|hob\.?|buxwv|swwv|rct|k\.?\s*\d|kv\.?\s*\d|op\.?\s*\d|opus\s+\d|g\.\s*\d|h\.?\s*\d{2,})\b/i;
 const MOVEMENT = /^(?:x{0,3}(?:ix|iv|v?i{0,3})|[1-9]\d*)\.\s*\S+/i;
@@ -32,6 +33,8 @@ const PRODUCTION_NOTE = /\(?\s*adaptaci[oó]n\s+escenificada\s*\)?/i;
 const TEXT_CREDIT = /^(?:texto|libreto|letra)\s*:/i;
 const INITIALS_AUTHOR = /^(?:[\p{Lu}\p{Lt}]\.\s*){1,3}[\p{L}’'-]+$/u;
 const CONTEXTUAL_DE_PREFIX = /(?:tema|un tema|sobre un tema|basad[oa]|inspirad[oa]|homenaje)\s+$/iu;
+const NAME_PARTICLE = /^(?:de|del|van|von|di|da|el|la|los|las)$/i;
+const LEADING_ARTICLE = /^(?:el|la|los|las|le|les|the|a|an|un|una|der|die|das)$/i;
 
 export type TitleAuthorWork = {
   title: string;
@@ -72,7 +75,7 @@ export function looksLikeComposerLine(text: string): boolean {
   if (matchComposer(stripped)) return true;
   // Unknown authors: clear personal-name syntax plus biographical years.
   // Negative checks already ran — this fallback cannot bypass them.
-  return LIFESPAN.test(trimmed) && looksLikePersonName(stripped);
+  return LIFESPAN.test(trimmed) && looksLikeBiographicalComposerName(stripped, trimmed);
 }
 
 export function looksLikeWorkLine(text: string): boolean {
@@ -208,6 +211,7 @@ export function isUnreliableComposerName(text: string): boolean {
 function rejectedComposerHeading(trimmed: string): boolean {
   if (!trimmed || looksLikeProgramHeader(trimmed)) return true;
   if (/^obras de\b/i.test(trimmed)) return true;
+  if (/^de\s+/i.test(trimmed)) return true;
   if (/^(varios autores|an[oó]nimo)\b/i.test(trimmed)) return true;
   if (looksLikeEnsembleName(trimmed)) return true;
   if (looksLikeMovementLine(trimmed)) return true;
@@ -243,7 +247,30 @@ function looksLikePersonName(text: string): boolean {
   if (/[¡!?]/.test(cleaned)) return false;
   const words = cleaned.split(/\s+/).filter(Boolean);
   if (words.length < 2 || words.length > 5) return false;
-  return words.every((word) => /^[\p{L}.’-]+$/u.test(word));
+  // "La Bohème" / "Le roi" are work titles, not biographical names.
+  if (LEADING_ARTICLE.test(words[0] ?? '') && words.length === 2) return false;
+  return words.every((word) => isPersonNameWord(word));
+}
+
+/** Given+surname, particle names, open-ended/span years, or ALL CAPS — not Title Case work titles. */
+function looksLikeBiographicalComposerName(text: string, original: string): boolean {
+  if (!looksLikePersonName(text)) return false;
+  if (hasOpenOrSpanYears(original)) return true;
+  const words = text.split(/\s+/).filter(Boolean);
+  const content = words.filter((word) => !NAME_PARTICLE.test(word) && !/^[dD][’']/.test(word));
+  if (content.length <= 2) return true;
+  const letters = text.replace(/[^\p{L}]/gu, '');
+  return letters.length > 0 && letters === letters.toLocaleUpperCase('es');
+}
+
+function hasOpenOrSpanYears(text: string): boolean {
+  return /\(\s*(?:ca\.?\s*)?\*?\d{3,4}\s*[–—-]\s*(?:(?:ca\.?\s*)?\*?\d{3,4})?\s*\)/.test(text);
+}
+
+function isPersonNameWord(word: string): boolean {
+  if (NAME_PARTICLE.test(word)) return true;
+  if (/^[dD][’'][\p{Lu}\p{Lt}]/u.test(word)) return true;
+  return /^[\p{Lu}\p{Lt}][\p{L}.’-]*$/u.test(word);
 }
 
 function stripTrailingYears(text: string): string {

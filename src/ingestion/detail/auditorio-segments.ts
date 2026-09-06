@@ -61,6 +61,9 @@ const ANONYMOUS_COMPOSER = /^(?:an[oó]nimo|varios autores)\b/i;
 const INITIALS_COMPOSER =
   /^(?:[\p{Lu}\p{Lt}]\.\s*){1,3}[\p{L}’'-]+(?:\s+\([^)]*\d{3,4}[^)]*\))?$/u;
 
+const MOVEMENT_TEMPO =
+  /^(?:adagio|adagietto|allegro|allegretto|andante|andantino|largo|larghetto|lento|presto|prestissimo|vivace|vivo|moderato|grave|maestoso|sostenuto|scherzo|minuetto|menuetto|menuet|rondo|finale|introducci[oó]n|aria|recitativo|attacca|tempo)\b/iu;
+
 const STRONG_CATALOG =
   /\b(?:bwv|hwv|hob\.?|buxwv|swwv|rct|k\.?\s*\d|kv\.?\s*\d|op\.?\s*\d|opus\s+\d|g\.\s*\d|h\.?\s*\d{2,}|n[úu]m\.?\s*\d)\b/i;
 
@@ -275,6 +278,7 @@ export function parseComposerColonWork(
   text: string,
 ): { title: string; composerName: string } | undefined {
   const cleaned = cleanLine(text);
+  if (looksLikeMovementLine(cleaned)) return undefined;
   if (parseDashRoleCredit(cleaned)) return undefined;
   if (looksLikeComposerNameList(cleaned)) return undefined;
   const dotDash = COMPOSER_DOT_DASH.exec(cleaned);
@@ -305,7 +309,7 @@ export function parseComposerColonWork(
   const isDash = Boolean(colon && COMPOSER_DASH.test(cleaned) && !/:\s+/.test(cleaned) && !/\s+[·•]\s+/.test(cleaned));
   if (!colon && comma) {
     if (/^(?:para|for)\b/i.test(title)) return undefined;
-    if (!looksLikeComposerLine(composerName) && !INITIALS_COMPOSER.test(composerName)) {
+    if (!looksLikeComposerLine(composerName) && !looksLikeInitialsComposerName(composerName)) {
       return undefined;
     }
     if (!hasStrongWorkTitleEvidence(title)) return undefined;
@@ -324,7 +328,7 @@ function parseComposerDashWork(
 ): { title: string; composerName: string } | undefined {
   const composerOk =
     looksLikeComposerLine(composerName) ||
-    INITIALS_COMPOSER.test(composerName) ||
+    looksLikeInitialsComposerName(composerName) ||
     looksLikeUnlabeledPerson(composerName);
   if (!composerOk) return undefined;
   if (looksLikeComposerNameList(title) || looksLikeRoleOnlyLine(title)) return undefined;
@@ -486,7 +490,7 @@ export function extractStandaloneKnownComposers(text: string): string[] {
   if (looksLikeObrasDeLine(text) || !looksLikeComposerNameList(text)) return [];
   const names = extractObrasDeComposers(text);
   if (names.length < 2) return [];
-  if (!names.every((name) => looksLikeComposerLine(name))) return [];
+  if (!names.every((name) => Boolean(matchComposer(name)))) return [];
   return names;
 }
 
@@ -546,7 +550,7 @@ function isComposerListToken(text: string): boolean {
   const cleaned = text.trim();
   if (!cleaned || WORK_GENRE.test(cleaned) || STRONG_CATALOG.test(cleaned)) return false;
   if (looksLikeWorkInstrumentation(cleaned) || looksLikeRoleOnlyLine(cleaned)) return false;
-  if (matchComposer(cleaned) || looksLikeComposerLine(cleaned) || INITIALS_COMPOSER.test(cleaned)) {
+  if (matchComposer(cleaned) || looksLikeComposerLine(cleaned) || looksLikeInitialsComposerName(cleaned)) {
     return true;
   }
   if (looksLikeUnlabeledPerson(cleaned)) return true;
@@ -620,7 +624,7 @@ export function parseWorkThenPersonCredit(text: string): {
   const attributed = parseExplicitTitleAuthorWork(`${title} (${composerName})`);
   const composerOk =
     Boolean(attributed) ||
-    INITIALS_COMPOSER.test(composerName) ||
+    looksLikeInitialsComposerName(composerName) ||
     looksLikeComposerLine(composerName);
   if (!composerOk) return undefined;
   const person = parseTrailingPersonCredit(rest);
@@ -772,12 +776,13 @@ function isComposerHeading(line: string): boolean {
   if (looksLikeMovementLine(line) || looksLikeProductionNote(line) || looksLikeTextCredit(line)) {
     return false;
   }
+  if (/^de\s+/i.test(line)) return false;
   if (looksLikeCatalogOnlyLine(line) || parseExplicitTitleAuthorWork(line)) return false;
   if (looksLikeObrasDeLine(line) || looksLikeComposerNameList(line)) return false;
   if (looksLikeAuditorioRepertoireLine(line)) return false;
   if (hasExplicitPerformerSignal(line) || looksLikeCastEnsemble(line)) return false;
   if (looksLikeComposerLine(line)) return true;
-  if (INITIALS_COMPOSER.test(line)) return true;
+  if (looksLikeInitialsComposerName(line)) return true;
   return false;
 }
 
@@ -839,7 +844,7 @@ function walkBackComposers(lines: string[], index: number): number {
       isComposerHeading(prev) ||
       looksLikeUnlabeledPerson(prev) ||
       ANONYMOUS_COMPOSER.test(prev) ||
-      INITIALS_COMPOSER.test(prev) ||
+      looksLikeInitialsComposerName(prev) ||
       looksLikeWorkishLine(prev)
     ) {
       start -= 1;
@@ -864,19 +869,31 @@ function isCastBoundary(line: string): boolean {
   return hasExplicitPerformerSignal(line) || looksLikeCastEnsemble(line) || looksLikeRoleOnlyLine(line);
 }
 
-/** Composer heading in a program block, including unlabeled names not in the knowledge base. */
+/**
+ * Composer heading in a program block. Personal-name syntax alone is not enough:
+ * require a knowledge-base match, initials+surname, biographical years, or
+ * an anonymous-author label. `looksLikeUnlabeledPerson` stays a cast heuristic.
+ */
 export function canPairAsAuditorioComposer(text: string): boolean {
   const cleaned = cleanLine(text);
   if (!cleaned || looksLikeProgramHeader(cleaned) || looksLikeRoleOnlyLine(cleaned)) return false;
   if (looksLikeMovementLine(cleaned) || looksLikeProductionNote(cleaned) || looksLikeTextCredit(cleaned)) {
     return false;
   }
+  if (/^de\s+/i.test(cleaned)) return false;
   if (parseExplicitTitleAuthorWork(cleaned) || looksLikeCatalogOnlyLine(cleaned)) return false;
   if (looksLikeObrasDeLine(cleaned) || looksLikeComposerNameList(cleaned)) return false;
   if (looksLikeAuditorioRepertoireLine(cleaned)) return false;
   if (isCastBoundary(cleaned) || STRONG_CATALOG.test(cleaned)) return false;
   if (looksLikeWorkInstrumentation(cleaned)) return false;
-  return isComposerHeading(cleaned) || looksLikeUnlabeledPerson(cleaned) || ANONYMOUS_COMPOSER.test(cleaned);
+  return isComposerHeading(cleaned) || ANONYMOUS_COMPOSER.test(cleaned);
+}
+
+function looksLikeInitialsComposerName(text: string): boolean {
+  const cleaned = text.trim();
+  if (!INITIALS_COMPOSER.test(cleaned) || looksLikeMovementLine(cleaned)) return false;
+  const last = cleaned.replace(/\s*\([^)]*\d{3,4}[^)]*\)\s*$/u, '').trim().split(/\s+/).pop() ?? '';
+  return !MOVEMENT_TEMPO.test(last);
 }
 
 function stripCharacterCue(role: string): string {
