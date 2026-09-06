@@ -495,6 +495,8 @@ function hasConcertIdentityBesidesOrganRole(facts: ObservedFacts, haystack: stri
   );
 }
 
+const NON_PERFORMANCE_LABELS = ['taller', 'conferencia', 'coloquio', 'charla'] as const;
+
 function workshopIdentity(
   facts: ObservedFacts,
   category: string,
@@ -502,26 +504,94 @@ function workshopIdentity(
   description: string,
   program: string,
 ): Exclusion | undefined {
-  if (
-    hasWord(category, 'taller') ||
-    hasWord(category, 'conferencia') ||
-    hasWord(category, 'coloquio') ||
-    hasPhrase(title, 'taller de') ||
-    hasPhrase(title, 'un taller') ||
-    hasWord(title, 'conferencia') ||
-    hasWord(title, 'charla') ||
-    hasPhrase(title, 'charla sobre') ||
-    hasWord(category, 'charla') ||
-    hasPhrase(description, 'un taller') ||
-    hasPhrase(description, 'taller de') ||
-    hasPhrase(description, 'taller musical') ||
-    hasPhrase(program, 'un taller') ||
-    hasPhrase(program, 'taller de') ||
-    hasPhrase(program, 'taller musical')
-  ) {
-    return exclusion('non-performance-activity', [facts.categoryText ?? facts.title], true);
+  const evidence = facts.categoryText ?? facts.title;
+  if (nonPerformanceCategory(category)) {
+    return exclusion('non-performance-activity', [evidence], true);
+  }
+
+  const titleIsActivity = titleIdentifiesNonPerformance(title);
+  const concertIdentity = hasConcertOrRecitalIdentity(facts, title, category);
+  const bodyIsActivity = bodyIdentifiesNonPerformance(description, program);
+  const weakMention = weakNonPerformanceMention(title, description, program);
+  const leadingPerformance = titleStartsWithConcertOrRecital(title);
+
+  // A title that names the event as a talk/workshop stays exclude even when it
+  // mentions a concert as the subject ("Charla sobre el concierto de…").
+  // A leading recital/concert with a later talk clause is secondary, not identity.
+  if (titleIsActivity && !leadingPerformance) {
+    return exclusion('non-performance-activity', [facts.title], true);
+  }
+
+  if (bodyIsActivity && !concertIdentity) {
+    return exclusion('non-performance-activity', [evidence], true);
+  }
+
+  // A real concert/recital that also mentions a talk or workshop keeps the
+  // performance as the identity. Do not strong-exclude on a secondary mention.
+  if (concertIdentity || leadingPerformance) return undefined;
+
+  if (titleIsActivity || bodyIsActivity || weakMention) {
+    if (knownClassicalNames(facts).length > 0) {
+      return exclusion('non-performance-activity', [evidence], false, true);
+    }
+    if (titleIsActivity || bodyIsActivity) {
+      return exclusion('non-performance-activity', [evidence], true);
+    }
   }
   return undefined;
+}
+
+function nonPerformanceCategory(category: string): boolean {
+  return NON_PERFORMANCE_LABELS.some((label) => hasWord(category, label));
+}
+
+function titleStartsWithNonPerformance(title: string): boolean {
+  return /^(charla|conferencia|coloquio|taller)\b/.test(title);
+}
+
+function titleStartsWithConcertOrRecital(title: string): boolean {
+  return /^(concierto|recital)\b/.test(title);
+}
+
+function titleIdentifiesNonPerformance(title: string): boolean {
+  if (titleStartsWithNonPerformance(title)) return true;
+  if (/[:·|]\s*(charla|conferencia|coloquio|taller)\b/.test(title)) return true;
+  if (hasPhrase(title, 'taller de') || hasPhrase(title, 'un taller') || hasPhrase(title, 'taller musical')) {
+    return true;
+  }
+  if (hasPhrase(title, 'conferencia sobre') || hasPhrase(title, 'coloquio sobre')) return true;
+  if (hasPhrase(title, 'charla sobre') && !/\bcon charla\b/.test(title)) return true;
+  return false;
+}
+
+function bodyIdentifiesNonPerformance(description: string, program: string): boolean {
+  const body = `${description} ${program}`.trim();
+  return (
+    hasPhrase(body, 'un taller') ||
+    hasPhrase(body, 'taller de') ||
+    hasPhrase(body, 'taller musical')
+  );
+}
+
+function weakNonPerformanceMention(title: string, description: string, program: string): boolean {
+  const haystack = `${title} ${description} ${program}`.trim();
+  return NON_PERFORMANCE_LABELS.some((label) => hasWord(haystack, label));
+}
+
+function hasConcertOrRecitalIdentity(
+  facts: ObservedFacts,
+  title: string,
+  category: string,
+): boolean {
+  const series = fieldFolded(facts.seriesText);
+  return (
+    hasWord(title, 'concierto') ||
+    hasWord(title, 'recital') ||
+    hasWord(category, 'concierto') ||
+    hasWord(category, 'recital') ||
+    hasWord(series, 'concierto') ||
+    hasWord(series, 'recital')
+  );
 }
 
 function participatoryActivity(
@@ -595,13 +665,6 @@ function popularMusicIdentity(
   }
   if (hasPhrase(description, 'melodias populares') || hasPhrase(description, 'villancicos mas famosos')) {
     strong.push('gala popular');
-  }
-  if (
-    knownClassicalNames(facts).length === 0 &&
-    (hasPhrase(description, 'su repertorio') || hasPhrase(description, 'la obra de')) &&
-    (hasPhrase(haystack, 'octeto') || hasWord(haystack, 'cuerdas') || hasWord(haystack, 'orquesta'))
-  ) {
-    strong.push('repertorio popular con ensemble clásico');
   }
 
   const adjacent: string[] = [];

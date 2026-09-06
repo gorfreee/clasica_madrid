@@ -75,7 +75,7 @@ No clasificar **solo** por palabras del título si existe ficha de detalle.
 
 Excluir cuando la identidad principal del evento sea una de estas:
 
-**Pop / rock / canción / música popular** arreglada para ensemble clásico. Orquesta, coro o cuerdas no cambian la decisión. Ejemplos: Fito Páez con cuerdas; ABBA, Queen o Beatles con orquesta; Pastora Soler; Jeanette; homenajes pop sinfónicos.
+**Pop / rock / canción / música popular** arreglada para ensemble clásico. Orquesta, coro o cuerdas no cambian la decisión. Ejemplos: Fito Páez con cuerdas; ABBA, Queen o Beatles con orquesta; Pastora Soler; Jeanette; homenajes pop sinfónicos. La mera combinación de «su repertorio» / «la obra de» con octeto, cuerdas u orquesta, sin evidencia popular explícita, **no** es `exclude` determinista: también aparece en conciertos clásicos contemporáneos. En ese caso `uncertain` (fallback de IA) es preferible a un falso negativo.
 
 **DJ / electrónica / crossover** cuyo repertorio principal no sea clásico, o cuya identidad sea el formato DJ aunque cite una obra clásica. Ejemplos: DJ Symphonic; Red Bull Symphonic; DJ + Vivaldi como producto crossover.
 
@@ -91,7 +91,7 @@ No excluir por la palabra *flamenco* cuando el contexto es claramente musicológ
 
 **Cine / proyecciones**: películas, cine familiar, cine mudo con acompañamiento, ciclos cuya actividad principal sea ver una película. Una proyección con acompañamiento de órgano sigue `exclude`. Si excepcionalmente la componente principal es una **interpretación musical clásica en directo** —por ejemplo un concierto, recital o ciclo de órgano que usa la proyección como soporte—, no asumir exclusión automática: hace falta evidencia positiva de identidad concertística además del órgano (declaración de concierto/recital/ciclo, serie clásica reconocida, o improvisación presentada como actuación). Un performer con rol órgano/organista no basta. Una proyección con banda sonora o «música en vivo» genérica sigue fuera.
 
-**Talleres / actividades educativas no interpretativas**: talleres, encuentros, charlas, conferencias, actividades paralelas, actividades infantiles tipo taller. Ejemplo: `¿Te suena Manon Lescaut?`. Un concierto real con mediación (p. ej. OCNE «Descubre» con narradora y repertorio clásico) **sí** puede ser `include`: la actividad principal sigue siendo el concierto.
+**Talleres / actividades educativas no interpretativas**: la identidad principal del evento es un taller, una charla, una conferencia, un coloquio u otra actividad educativa no interpretativa. Una categoría oficial explícita de ese tipo, o un título que se identifica realmente como `Charla…`, `Conferencia…`, `Taller…`, etc., es evidencia fuerte de `exclude`. Ejemplo: `¿Te suena Manon Lescaut?`. Una mención secundaria de charla, introducción, taller o mediación en un concierto o recital real **no** basta para `exclude`: un concierto con mediación (p. ej. OCNE «Descubre» con narradora y repertorio clásico, o `Recital de Bach con charla introductoria`) **sí** puede ser `include` si la actividad principal sigue siendo el concierto. Si no se puede saber cuál de las dos es principal, `uncertain`; no inventar un `include`.
 
 **Actividades participativas sin concierto programado**: poner un instrumento a disposición del público, jam participativa, open piano u otras sesiones donde no hay una interpretación concertística anunciada. No se publican como eventos de la agenda. Un recital o concierto real del mismo festival o ciclo se evalúa aparte.
 

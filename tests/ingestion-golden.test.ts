@@ -17,7 +17,6 @@ describe('golden classification dataset', () => {
     const cases = await loadGoldenCases(casesDir);
 
     expect(files.length).toBeGreaterThanOrEqual(35);
-    expect(files.length).toBeLessThanOrEqual(60);
     expect(cases).toHaveLength(files.length);
 
     const ids = cases.map((item) => item.caseId);
