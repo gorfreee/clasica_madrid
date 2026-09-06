@@ -546,7 +546,8 @@ function nonPerformanceCategory(category: string): boolean {
 }
 
 function titleStartsWithNonPerformance(title: string): boolean {
-  return /^(charla|conferencia|coloquio|taller)\b/.test(title);
+  if (/^(charla|conferencia|coloquio)\b/.test(title)) return true;
+  return /^taller\s+(de|musical|en)\b/.test(title);
 }
 
 function titleStartsWithConcertOrRecital(title: string): boolean {
@@ -555,7 +556,9 @@ function titleStartsWithConcertOrRecital(title: string): boolean {
 
 function titleIdentifiesNonPerformance(title: string): boolean {
   if (titleStartsWithNonPerformance(title)) return true;
-  if (/[:·|]\s*(charla|conferencia|coloquio|taller)\b/.test(title)) return true;
+  // After a separator, charla/conferencia/coloquio name the activity.
+  // Bare "Taller" is not enough: "Festival: TALLER SONORO" is an ensemble.
+  if (/[:·|]\s*(charla|conferencia|coloquio)\b/.test(title)) return true;
   if (hasPhrase(title, 'taller de') || hasPhrase(title, 'un taller') || hasPhrase(title, 'taller musical')) {
     return true;
   }

@@ -288,6 +288,20 @@ describe('eligibility — exclusiones de identidad', () => {
     expect(result.eligibility.value).not.toBe('include');
   });
 
+  it('no trata Taller Sonoro como actividad educativa', () => {
+    const result = classify(
+      facts({
+        title: 'XVII Festival de Ensembles: TALLER SONORO',
+        categoryText: 'Música contemporánea',
+        description:
+          'PluralEnsemble presenta el festival. Participa Taller Sonoro. El objetivo es estrenar nuevas obras y fomentar el repertorio musical contemporáneo.',
+        performers: [{ name: 'Taller Sonoro' }],
+      }),
+    );
+    expect(result.eligibility.ruleId).not.toBe('non-performance-activity');
+    expect(result.eligibility.value).toBe('include');
+  });
+
   it('excluye pop anunciado como identidad, aunque haya orquesta', () => {
     const result = classify(
       facts({
