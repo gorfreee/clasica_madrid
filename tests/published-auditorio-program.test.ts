@@ -11,7 +11,9 @@ import { defaultDataDir } from '../src/lib/repository/fs.ts';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { Event } from '../src/lib/schemas/index.ts';
-import { canonicalizeComposerName } from '../src/ingestion/composer-name.ts';
+import { canonicalizeComposerList, canonicalizeComposerName, canonicalizeWorkList } from '../src/ingestion/composer-name.ts';
+import { canonicalizePerformerName } from '../src/ingestion/event-title.ts';
+import { resolvePerformerRole } from '../src/ingestion/classification/performer-role.ts';
 
 const AUDITORIO = 'src_auditorio_nacional';
 
@@ -144,5 +146,40 @@ describe('catálogo publicado: programa del Auditorio', () => {
       expect(canonical, `composer ${name} no canonicaliza a una persona`).toBeTruthy();
       expect(published.has(canonical!), `composer ${name} missing from published UAM`).toBe(true);
     }
+  });
+
+  it('Excelentia Strauss/Respighi/Beethoven publica el programa del parser actual', async () => {
+    const html = await readFile(
+      path.join(import.meta.dirname, 'fixtures/ingestion/detail/auditorio-excelentia-respighi.excerpt.html'),
+      'utf8',
+    );
+    const facts = parseAuditorioNacionalDetail(html);
+    const catalog = await loadCatalogFromDir(defaultDataDir());
+    const event = catalog.events.find(
+      (item) => item.id === 'evt_auditorio_nacional_excelentia_strauss_don_juan_y_sinfonia_5_beethoven',
+    );
+    expect(event).toBeTruthy();
+    expect(event?.slug).toBe('excelentia-strauss-don-juan-y-sinfonia-5-beethoven');
+    expect(event?.performers).toEqual(
+      (facts.performers ?? []).map((item) => {
+        const name = canonicalizePerformerName(item.name);
+        const role = resolvePerformerRole(item.roleText);
+        return role ? { name, role } : { name };
+      }),
+    );
+    expect(event?.composers).toEqual(canonicalizeComposerList(facts.composers ?? []));
+    expect(event?.works).toEqual(canonicalizeWorkList(facts.works ?? []));
+    expect(event?.composers).toEqual([
+      { name: 'Richard Strauss' },
+      { name: 'Ottorino Respighi' },
+      { name: 'Ludwig van Beethoven' },
+    ]);
+    expect(event?.works).toEqual([
+      { title: 'Don Juan, poema sinfónico', composerName: 'Richard Strauss' },
+      { title: 'Pinos de Roma', composerName: 'Ottorino Respighi' },
+      { title: 'Sinfonía núm 5', composerName: 'Ludwig van Beethoven' },
+    ]);
+    expect(event?.composers.some((item) => /pinos de roma/i.test(item.name))).toBe(false);
+    expect(event?.works.some((work) => /pinos de roma/i.test(work.composerName ?? ''))).toBe(false);
   });
 });

@@ -6,6 +6,8 @@ import { defaultDataDir } from '../src/lib/repository/fs.ts';
 import { findScheduleCollisionIssues, findScheduleCollisions } from '../src/lib/validation/schedule-collisions.ts';
 
 const cndm = getSourceDefinition('cndm');
+const madridDatos = getSourceDefinition('madrid-datos');
+const piuMosso = getSourceDefinition('fundacion-piu-mosso');
 
 const ABSORBED_CNDM: Array<{ externalId: string; eventId: string }> = [
   { externalId: '23773', eventId: 'evt_auditorio_nacional_cndm_joven_orquesta_nacional_de_espana_jonde_1' },
@@ -41,8 +43,8 @@ describe('catálogo publicado tras la limpieza de duplicados de hueco exclusivo'
     const issues = findScheduleCollisionIssues(catalog);
     expect(issues.filter((issue) => issue.code === 'schedule-conflict').every((issue) => issue.severity === 'warning')).toBe(true);
     expect(issues.filter((issue) => issue.code === 'schedule-review')).toEqual([]);
-    expect(catalog.events.some((event) => event.id === 'evt_madrid_datos_50265531')).toBe(false);
     expect(catalog.events.some((event) => event.id === 'evt_madrid_datos_50221891')).toBe(false);
+    expect(catalog.events.some((event) => event.id === 'evt_fundacion_piu_mosso_2187')).toBe(false);
     expect(catalog.events.some((event) => event.id === 'evt_cndm_23900')).toBe(false);
 
     const oratorio = catalog.events.find(
@@ -81,6 +83,76 @@ describe('catálogo publicado tras la limpieza de duplicados de hueco exclusivo'
     expect(zakova?.slug).toBe('cndm-lucie-zakova');
     expect(zakova?.slugAliases).toEqual(['lucie-zakova']);
     expect(zakova?.occurrences[0]).toMatchObject({ date: '2027-02-20', time: '12:00' });
+
+    const tempo = catalog.events.find((event) => event.id === 'evt_madrid_tempo_clausura_20260906');
+    expect(tempo).toBeTruthy();
+    expect(tempo?.slug).toBe('madrid-a-tempo-concierto-clausura');
+    expect(tempo?.slugAliases).toEqual(['ii-festival-internacional-de-piano']);
+    expect(tempo?.title).toBe('Madrid a Tempo: Concierto de clausura de alumnos');
+    expect(tempo?.organizerIds).toEqual(['org_madrid_a_tempo']);
+    expect(tempo?.seriesId).toBe('ser_festival_madrid_a_tempo_2026');
+    expect(tempo?.occurrences[0]).toMatchObject({ date: '2026-09-06', time: '12:00' });
+    expect(tempo?.citations.map((item) => item.sourceId)).toEqual([
+      'src_madrid_a_tempo',
+      'src_ayuntamiento_madrid',
+    ]);
+    expect(tempo?.citations.find((item) => item.sourceId === 'src_ayuntamiento_madrid')).toMatchObject({
+      url: 'https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=5e05cff3cf74c910VgnVCM100000891ecb1aRCRD',
+      checkedAt: '2026-09-03',
+      externalId: '50221891',
+    });
+    expect(tempo?.citations.find((item) => item.sourceId === 'src_madrid_a_tempo')).toMatchObject({
+      url: 'https://www.madridatempo.com/programacion-2023',
+      checkedAt: '2026-08-28',
+    });
+
+    const larrocha = catalog.events.find((event) => event.id === 'evt_madrid_datos_50265531');
+    expect(larrocha).toBeTruthy();
+    expect(larrocha?.slug).toBe('iv-edicion-festival-alicia-de-larrocha');
+    expect(larrocha?.slugAliases).toEqual(['victor-tretyakov-piano']);
+    expect(larrocha?.title).toBe('IV Edición Festival Alicia de Larrocha');
+    expect(larrocha?.performers).toEqual([{ name: 'Victor Tretyakov' }]);
+    expect(larrocha?.composers.map((item) => item.name)).toEqual([
+      'Robert Schumann',
+      'Frédéric Chopin',
+      'Johannes Brahms',
+      'Ludwig van Beethoven',
+      'Maurice Ravel',
+      'Franz Liszt',
+    ]);
+    expect(larrocha?.composers.some((item) => /moszkowski/i.test(item.name))).toBe(false);
+    expect(larrocha?.occurrences[0]).toMatchObject({ date: '2026-09-12', time: '19:30' });
+    expect(larrocha?.citations.map((item) => item.sourceId)).toEqual([
+      'src_ayuntamiento_madrid',
+      'src_fundacionpiumosso_com',
+    ]);
+    expect(larrocha?.citations.find((item) => item.sourceId === 'src_fundacionpiumosso_com')).toMatchObject({
+      url: 'https://www.fundacionpiumosso.com/evento/victor-tretyakov-piano',
+      checkedAt: '2026-09-06',
+      externalId: '2187',
+    });
+    expect(larrocha?.citations.find((item) => item.sourceId === 'src_ayuntamiento_madrid')).toMatchObject({
+      url: 'https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=a8d5e042bd42d910VgnVCM200000f921e388RCRD',
+      checkedAt: '2026-09-06',
+      externalId: '50265531',
+    });
+
+    const casaVacas = collisions.filter((item) => item.venueId === 'ven_casa_vacas_retiro');
+    expect(casaVacas).toEqual([]);
+
+    const kavakosOrcam = collisions.find((item) =>
+      item.eventIds.includes('evt_auditorio_nacional_fundacion_scherzo_leonidas_kavakos_y_enrico_pace')
+      && item.eventIds.includes('evt_fundacion_orcam_4861'),
+    );
+    expect(kavakosOrcam?.kind).toBe('conflict');
+    expect(kavakosOrcam).toMatchObject({ date: '2027-05-11', time: '19:30' });
+
+    const excelentiaOrcam = collisions.find((item) =>
+      item.eventIds.includes('evt_auditorio_nacional_excelentia_strauss_don_juan_y_sinfonia_5_beethoven')
+      && item.eventIds.includes('evt_fundacion_orcam_4865'),
+    );
+    expect(excelentiaOrcam?.kind).toBe('conflict');
+    expect(excelentiaOrcam).toMatchObject({ date: '2027-06-01', time: '19:30' });
   });
 
   it('reconoce la siguiente observación CNDM 23900 sobre el evento canónico', async () => {
@@ -127,6 +199,55 @@ describe('catálogo publicado tras la limpieza de duplicados de hueco exclusivo'
       kind: 'matched',
       method: 'externalId',
       event: { id: 'evt_auditorio_nacional_cndm_lucie_zakova' },
+    });
+  });
+
+  it('reconoce la siguiente observación municipal 50221891 sobre la clausura de Madrid a Tempo', async () => {
+    const catalog = await loadCatalogFromDir(defaultDataDir());
+    const match = matchEventIdentity(catalog, {
+      sourceUrl: 'https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=5e05cff3cf74c910VgnVCM100000891ecb1aRCRD',
+      externalId: '50221891',
+      title: 'II Festival Internacional de Piano',
+      occurrences: [{ date: '2026-09-06', time: '12:00' }],
+      performers: [],
+      composers: [],
+      works: [],
+    }, {
+      catalogSourceId: madridDatos.catalogSourceId,
+      venueId: 'ven_casa_vacas_retiro',
+    });
+    expect(match).toMatchObject({
+      kind: 'matched',
+      method: 'externalId',
+      event: { id: 'evt_madrid_tempo_clausura_20260906' },
+    });
+  });
+
+  it('reconoce la siguiente observación Più Mosso 2187 sobre el Festival Alicia de Larrocha', async () => {
+    const catalog = await loadCatalogFromDir(defaultDataDir());
+    const match = matchEventIdentity(catalog, {
+      sourceUrl: 'https://www.fundacionpiumosso.com/evento/victor-tretyakov-piano',
+      externalId: '2187',
+      title: 'VICTOR TRETYAKOV, Piano',
+      occurrences: [{ date: '2026-09-12', time: '19:30' }],
+      performers: [],
+      composers: [
+        { name: 'Robert Schumann' },
+        { name: 'Frédéric Chopin' },
+        { name: 'Johannes Brahms' },
+        { name: 'Ludwig van Beethoven' },
+        { name: 'Maurice Ravel' },
+        { name: 'Franz Liszt' },
+      ],
+      works: [],
+    }, {
+      catalogSourceId: piuMosso.catalogSourceId,
+      venueId: 'ven_casa_vacas_retiro',
+    });
+    expect(match).toMatchObject({
+      kind: 'matched',
+      method: 'externalId',
+      event: { id: 'evt_madrid_datos_50265531' },
     });
   });
 });

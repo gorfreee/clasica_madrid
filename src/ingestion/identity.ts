@@ -41,6 +41,18 @@ export const EVENT_IDENTITY_ALIASES: readonly EventIdentityAlias[] = [
     externalId: 'cc99d72e-7aa5-4eea-b32c-8eb17a8dce00',
     url: 'https://www.madridatempo.com/post/ii-festival-internacional-de-piano-madrid-a-tempo-concierto-de-inauguración',
   },
+  {
+    eventId: 'evt_madrid_tempo_clausura_20260906',
+    catalogSourceId: 'src_ayuntamiento_madrid',
+    externalId: '50221891',
+    url: 'https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=5e05cff3cf74c910VgnVCM100000891ecb1aRCRD',
+  },
+  {
+    eventId: 'evt_madrid_datos_50265531',
+    catalogSourceId: 'src_fundacionpiumosso_com',
+    externalId: '2187',
+    url: 'https://www.fundacionpiumosso.com/evento/victor-tretyakov-piano',
+  },
 ];
 
 export type IdentityFacts = {
