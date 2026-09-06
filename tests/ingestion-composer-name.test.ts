@@ -112,6 +112,12 @@ describe('canonicalizeComposerName', () => {
     expect(canonicalizeComposerName('Marina Vespertilio')).toBe('Marina Vespertilio');
   });
 
+  it('un alias ALL CAPS conocido usa canonicalName, no sólo title-case', () => {
+    expect(canonicalizeComposerName('BACH')).toBe('Johann Sebastian Bach');
+    expect(canonicalizeComposerName('FRANCISCO ASENJO BARBIERI')).toBe('Francisco Asenjo Barbieri');
+    expect(canonicalizeArtificiallyUppercase('BACH')).toBe('Bach');
+  });
+
   it('aplica sólo la canonicalización ALL CAPS existente a un desconocido', () => {
     expect(canonicalizeComposerName('JAVIER MARTÍNEZ CAMPOS')).toBe(
       canonicalizeArtificiallyUppercase('JAVIER MARTÍNEZ CAMPOS'),

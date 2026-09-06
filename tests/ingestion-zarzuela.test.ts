@@ -504,7 +504,7 @@ describe('Zarzuela programText y crédito de autor', () => {
     const patch = parseZarzuelaDetail(raw('el-barbarillo-de-lavapies'), await fixture('detail-barberillo'));
     const { enriched, candidate } = zarzuelaPublishable(patch);
     expect(enriched.composers).toEqual([{ name: 'FRANCISCO ASENJO BARBIERI' }]);
-    expect(candidate?.composers).toEqual([{ name: 'FRANCISCO ASENJO BARBIERI' }]);
+    expect(candidate?.composers).toEqual([{ name: 'Francisco Asenjo Barbieri' }]);
     expect(enriched.programText).toBeUndefined();
     expect(enriched.description).toContain('CÉSAR ARRIETA');
     expect(enriched.composers.map((item) => item.name).join(' ')).not.toMatch(/Emilio Arrieta/i);
