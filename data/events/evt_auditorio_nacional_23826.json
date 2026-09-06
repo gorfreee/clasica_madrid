@@ -22,42 +22,36 @@
   ],
   "composers": [
     {
-      "name": "Antonio Vivaldi (1678-1741)"
+      "name": "Antonio Vivaldi"
     },
     {
-      "name": "Johann Georg Pisendel (1687-1755)"
-    },
-    {
-      "name": "A. Vivaldi"
-    },
-    {
-      "name": "J. G. Pisendel"
+      "name": "Johann Georg Pisendel"
     }
   ],
   "works": [
     {
       "title": "Concierto para violín en fa mayor , RV 292 (ca. 1716-1717)",
-      "composerName": "Antonio Vivaldi (1678-1741)"
+      "composerName": "Antonio Vivaldi"
     },
     {
       "title": "Concierto para violín en sol menor, JunP I.1",
-      "composerName": "Johann Georg Pisendel (1687-1755)"
+      "composerName": "Johann Georg Pisendel"
     },
     {
       "title": "Concierto para violín en si menor, RV 389 (1720-1724)",
-      "composerName": "A. Vivaldi"
+      "composerName": "Antonio Vivaldi"
     },
     {
       "title": "[Largo] y Allegro de la Sonata para violín solo sin bajo en la menor, JunP IV.2",
-      "composerName": "J. G. Pisendel"
+      "composerName": "Johann Georg Pisendel"
     },
     {
       "title": "Sinfonía de L’olimpiade, RV 725 (1733)",
-      "composerName": "A. Vivaldi"
+      "composerName": "Antonio Vivaldi"
     },
     {
       "title": "Concierto para violín en re menor ‘Per monsieur Pisendel’ , op. 8, n.º 7",
-      "composerName": "A. Vivaldi"
+      "composerName": "Antonio Vivaldi"
     }
   ],
   "eras": [

@@ -25,20 +25,20 @@
   ],
   "composers": [
     {
-      "name": "SCHUMANN"
+      "name": "Robert Schumann"
     },
     {
-      "name": "BERLIOZ"
+      "name": "Hector Berlioz"
     }
   ],
   "works": [
     {
       "title": "Sinfonía núm. 1 en Si bemol Mayor, Op. 38 “Primavera”",
-      "composerName": "SCHUMANN"
+      "composerName": "Robert Schumann"
     },
     {
       "title": "Sinfonía Fantástic",
-      "composerName": "BERLIOZ"
+      "composerName": "Hector Berlioz"
     }
   ],
   "eras": [

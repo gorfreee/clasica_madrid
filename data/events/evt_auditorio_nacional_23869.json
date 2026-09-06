@@ -18,20 +18,20 @@
   "performers": [],
   "composers": [
     {
-      "name": "Franz Schubert (1797-1828)"
+      "name": "Franz Schubert"
     },
     {
-      "name": "Johannes Brahms (1833-1897)"
+      "name": "Johannes Brahms"
     }
   ],
   "works": [
     {
       "title": "Trío con piano n.º 1 en si bemol mayor , op. 99 (1827)",
-      "composerName": "Franz Schubert (1797-1828)"
+      "composerName": "Franz Schubert"
     },
     {
       "title": "Trío con piano n.º 1 en si mayor, op. 8 (versión de 1889)",
-      "composerName": "Johannes Brahms (1833-1897)"
+      "composerName": "Johannes Brahms"
     }
   ],
   "eras": [

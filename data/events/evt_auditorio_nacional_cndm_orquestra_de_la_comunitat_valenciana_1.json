@@ -23,24 +23,24 @@
   ],
   "composers": [
     {
-      "name": "Ernest Chausson (1855-1899)"
+      "name": "Ernest Chausson"
     },
     {
-      "name": "Claude Debussy (1862-1918)"
+      "name": "Claude Debussy"
     }
   ],
   "works": [
     {
       "title": "Poème de l’amour et de la mer, op. 19 (1882-1890)",
-      "composerName": "Ernest Chausson (1855-1899)"
+      "composerName": "Ernest Chausson"
     },
     {
       "title": "Prélude à l’après-midi d’un faune, CD 87 (1891-1894)",
-      "composerName": "Claude Debussy (1862-1918)"
+      "composerName": "Claude Debussy"
     },
     {
       "title": "La mer, CD 111 (1903-1905, rev. 1908)",
-      "composerName": "Claude Debussy (1862-1918)"
+      "composerName": "Claude Debussy"
     }
   ],
   "eras": [

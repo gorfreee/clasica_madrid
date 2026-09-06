@@ -31,34 +31,34 @@
   ],
   "composers": [
     {
-      "name": "Manuel de Falla (1876-1946)"
+      "name": "Manuel de Falla"
     },
     {
-      "name": "Joaquín Nin-Culmell (1908-2004)"
+      "name": "Joaquín Nin-Culmell"
     },
     {
-      "name": "Fernando Remacha (1898-1984)"
+      "name": "Fernando Remacha"
     },
     {
-      "name": "Jesús Torres (1965)"
+      "name": "Jesús Torres"
     }
   ],
   "works": [
     {
       "title": "Concierto para clave, flauta, oboe, clarinete, violín y violonchelo (1923-1926)",
-      "composerName": "Manuel de Falla (1876-1946)"
+      "composerName": "Manuel de Falla"
     },
     {
       "title": "Quinteto para piano y cuarteto de cuerda (1934-1936)",
-      "composerName": "Joaquín Nin-Culmell (1908-2004)"
+      "composerName": "Joaquín Nin-Culmell"
     },
     {
       "title": "Cuarteto con piano (1932)",
-      "composerName": "Fernando Remacha (1898-1984)"
+      "composerName": "Fernando Remacha"
     },
     {
       "title": "Concertante. Cuatro miradas de Luis Cernuda, para flauta, oboe, clarinete, violín, violonchelo y clave *+ (2026)",
-      "composerName": "Jesús Torres (1965)"
+      "composerName": "Jesús Torres"
     }
   ],
   "eras": [

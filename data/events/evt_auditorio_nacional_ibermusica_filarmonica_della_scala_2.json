@@ -25,20 +25,20 @@
   ],
   "composers": [
     {
-      "name": "SHOSTAKÓVICH"
+      "name": "Dmitri Shostakóvich"
     },
     {
-      "name": "DVOŘÁK"
+      "name": "Antonín Dvořák"
     }
   ],
   "works": [
     {
       "title": "Concierto para violonchelo núm. 2",
-      "composerName": "SHOSTAKÓVICH"
+      "composerName": "Dmitri Shostakóvich"
     },
     {
       "title": "Sinfonía núm. 9 “Del Nuevo Mundo”",
-      "composerName": "DVOŘÁK"
+      "composerName": "Antonín Dvořák"
     }
   ],
   "eras": [

@@ -34,27 +34,24 @@
   ],
   "composers": [
     {
-      "name": "Johannes Brahms (1833-1897)"
+      "name": "Johannes Brahms"
     },
     {
-      "name": "George Benjamin (1960)"
-    },
-    {
-      "name": "J. Brahms"
+      "name": "George Benjamin"
     }
   ],
   "works": [
     {
       "title": "Quinteto de cuerda n.º 1 en fa mayor, op. 88 (1882)",
-      "composerName": "Johannes Brahms (1833-1897)"
+      "composerName": "Johannes Brahms"
     },
     {
       "title": "Viola, viola (1997)",
-      "composerName": "George Benjamin (1960)"
+      "composerName": "George Benjamin"
     },
     {
       "title": "Quinteto de cuerda n.º 2 en sol mayor, op. 111 (1890)",
-      "composerName": "J. Brahms"
+      "composerName": "Johannes Brahms"
     }
   ],
   "eras": [

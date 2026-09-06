@@ -25,17 +25,17 @@
   ],
   "composers": [
     {
-      "name": "BEETHOVEN"
+      "name": "Ludwig van Beethoven"
     }
   ],
   "works": [
     {
       "title": "Sinfonía núm. 6 en Fa Mayor, op. 68 \"Pastoral\"",
-      "composerName": "BEETHOVEN"
+      "composerName": "Ludwig van Beethoven"
     },
     {
       "title": "Sinfonía núm. 7 La Mayor op.92",
-      "composerName": "BEETHOVEN"
+      "composerName": "Ludwig van Beethoven"
     }
   ],
   "eras": [

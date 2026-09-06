@@ -18,109 +18,106 @@
   "performers": [],
   "composers": [
     {
-      "name": "John Adams (1947)"
+      "name": "John Adams"
     },
     {
-      "name": "Nik Bärtsch (1971)"
+      "name": "Nik Bärtsch"
     },
     {
-      "name": "John Cage (1912-1992)"
+      "name": "John Cage"
     },
     {
-      "name": "Philip Glass (1937)"
+      "name": "Philip Glass"
     },
     {
-      "name": "Karen Tanaka (1961)"
+      "name": "Karen Tanaka"
     },
     {
-      "name": "Ricardo Descalzo (1970)"
+      "name": "Ricardo Descalzo"
     },
     {
-      "name": "P. Glass"
+      "name": "Nahre Sol"
     },
     {
-      "name": "Nahre Sol (1991)"
+      "name": "Alfonso Peduto"
     },
     {
-      "name": "Alfonso Peduto (1978)"
+      "name": "Hania Rani"
     },
     {
-      "name": "Hania Rani (1990)"
+      "name": "Nils Frahm"
     },
     {
-      "name": "Nils Frahm (1982)"
+      "name": "Christopher Cerrone"
     },
     {
-      "name": "Christopher Cerrone (1984)"
-    },
-    {
-      "name": "Mario Carro (1979)"
+      "name": "Mario Carro"
     }
   ],
   "works": [
     {
       "title": "Modul 5 (2001)",
-      "composerName": "Nik Bärtsch (1971)"
+      "composerName": "Nik Bärtsch"
     },
     {
       "title": "Mysterious adventure , para piano preparado (1945)",
-      "composerName": "John Cage (1912-1992)"
+      "composerName": "John Cage"
     },
     {
       "title": "Étude n.º 3, de Études para pian o, vol. 1 (1994)",
-      "composerName": "Philip Glass (1937)"
+      "composerName": "Philip Glass"
     },
     {
       "title": "Techno etudes, II y III (1999)",
-      "composerName": "Karen Tanaka (1961)"
+      "composerName": "Karen Tanaka"
     },
     {
       "title": "Living automata *+ (2026)",
-      "composerName": "Ricardo Descalzo (1970)"
+      "composerName": "Ricardo Descalzo"
     },
     {
       "title": "Étude n.º 9, de Études para piano, vol. 1 (1994)",
-      "composerName": "P. Glass"
+      "composerName": "Philip Glass"
     },
     {
       "title": "De Pocket pieces, para teclado electrónico (2018)",
-      "composerName": "Nahre Sol (1991)"
+      "composerName": "Nahre Sol"
     },
     {
       "title": "Ostinato , n.º 6",
-      "composerName": "Nahre Sol (1991)"
+      "composerName": "Nahre Sol"
     },
     {
       "title": "Funk excursion , n.º 7",
-      "composerName": "Nahre Sol (1991)"
+      "composerName": "Nahre Sol"
     },
     {
       "title": "Glass (2019)",
-      "composerName": "Hania Rani (1990)"
+      "composerName": "Hania Rani"
     },
     {
       "title": "Hammers (2013)",
-      "composerName": "Nils Frahm (1982)"
+      "composerName": "Nils Frahm"
     },
     {
       "title": "Hoyt-Schermerhorn , para piano amplificado y electrónica (2010)",
-      "composerName": "Christopher Cerrone (1984)"
+      "composerName": "Christopher Cerrone"
     },
     {
       "title": "Impromptu (2010)",
-      "composerName": "Mario Carro (1979)"
+      "composerName": "Mario Carro"
     },
     {
       "title": "Concierto amplificado",
-      "composerName": "Mario Carro (1979)"
+      "composerName": "Mario Carro"
     },
     {
       "title": "China gates (1977)",
-      "composerName": "John Adams (1947)"
+      "composerName": "John Adams"
     },
     {
       "title": "Étude noire V (2021)",
-      "composerName": "Alfonso Peduto (1978)"
+      "composerName": "Alfonso Peduto"
     }
   ],
   "eras": [

@@ -32,27 +32,27 @@
   ],
   "composers": [
     {
-      "name": "Camille Saint-Saëns (1835–1921)"
+      "name": "Camille Saint-Saëns"
     },
     {
-      "name": "Richard Strauss (1864–1949)"
+      "name": "Richard Strauss"
     },
     {
-      "name": "Piotr Ilich Tchaikovsky (1840–1893)"
+      "name": "Piotr Ilich Chaikovski"
     }
   ],
   "works": [
     {
       "title": "Introducción y Rondó Caprichoso, Op. 28es",
-      "composerName": "Camille Saint-Saëns (1835–1921)"
+      "composerName": "Camille Saint-Saëns"
     },
     {
       "title": "Cuatro últimas canciones (Vier letzte Lieder)",
-      "composerName": "Richard Strauss (1864–1949)"
+      "composerName": "Richard Strauss"
     },
     {
       "title": "Suite de El lago de los cisnes, Op. 20a",
-      "composerName": "Piotr Ilich Tchaikovsky (1840–1893)"
+      "composerName": "Piotr Ilich Chaikovski"
     }
   ],
   "eras": [

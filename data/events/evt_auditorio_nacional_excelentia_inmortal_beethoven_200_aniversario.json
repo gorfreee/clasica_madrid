@@ -25,17 +25,17 @@
   ],
   "composers": [
     {
-      "name": "Beethoven"
+      "name": "Ludwig van Beethoven"
     }
   ],
   "works": [
     {
       "title": "Concierto para piano n.º 3",
-      "composerName": "Beethoven"
+      "composerName": "Ludwig van Beethoven"
     },
     {
       "title": "Sinfonía n.º 5",
-      "composerName": "Beethoven"
+      "composerName": "Ludwig van Beethoven"
     }
   ],
   "eras": [

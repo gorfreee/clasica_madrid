@@ -29,17 +29,17 @@
   ],
   "composers": [
     {
-      "name": "Beethoven"
+      "name": "Ludwig van Beethoven"
     }
   ],
   "works": [
     {
       "title": "Concierto para piano y orquesta núm. 4",
-      "composerName": "Beethoven"
+      "composerName": "Ludwig van Beethoven"
     },
     {
       "title": "Sinfonía núm. 3, “Heroica”",
-      "composerName": "Beethoven"
+      "composerName": "Ludwig van Beethoven"
     }
   ],
   "eras": [

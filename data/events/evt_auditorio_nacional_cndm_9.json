@@ -25,27 +25,27 @@
   ],
   "composers": [
     {
-      "name": "Felix Mendelssohn (1809-1847)"
+      "name": "Felix Mendelssohn"
     },
     {
-      "name": "Bernard Herrmann (1911-1975)"
+      "name": "Bernard Herrmann"
     },
     {
-      "name": "Antonín Dvořák (1841-1904)"
+      "name": "Antonín Dvořák"
     }
   ],
   "works": [
     {
       "title": "Quinteto de cuerda n.º 1 en la mayor, op. 18 (1826-1832)",
-      "composerName": "Felix Mendelssohn (1809-1847)"
+      "composerName": "Felix Mendelssohn"
     },
     {
       "title": "Echoes, para cuarteto de cuerda (1965)",
-      "composerName": "Bernard Herrmann (1911-1975)"
+      "composerName": "Bernard Herrmann"
     },
     {
       "title": "Quinteto de cuerda n.º 3 en mi bemol mayor ‘Americano’, op. 97 (1893)",
-      "composerName": "Antonín Dvořák (1841-1904)"
+      "composerName": "Antonín Dvořák"
     }
   ],
   "eras": [

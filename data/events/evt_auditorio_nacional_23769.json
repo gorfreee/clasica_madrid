@@ -25,20 +25,20 @@
   ],
   "composers": [
     {
-      "name": "Antonio Vivaldi (1678-1741)"
+      "name": "Antonio Vivaldi"
     },
     {
-      "name": "Philip Glass (1937)"
+      "name": "Philip Glass"
     }
   ],
   "works": [
     {
       "title": "Las cuatro estaciones (Il cimento dell’armonia e dell’inventione , op. 8, 1725)",
-      "composerName": "Antonio Vivaldi (1678-1741)"
+      "composerName": "Antonio Vivaldi"
     },
     {
       "title": "Concierto para violín n.º 2 ‘Las cuatro estaciones americanas’ (2009)",
-      "composerName": "Philip Glass (1937)"
+      "composerName": "Philip Glass"
     }
   ],
   "eras": [

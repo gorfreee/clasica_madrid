@@ -32,26 +32,26 @@
   ],
   "composers": [
     {
-      "name": "A. Ginastera"
+      "name": "Alberto Ginastera"
     },
     {
-      "name": "G. Gershwin"
+      "name": "George Gershwin"
     },
     {
       "name": "H. Villa-Lobos"
     },
     {
-      "name": "L. Bernstein"
+      "name": "Leonard Bernstein"
     }
   ],
   "works": [
     {
       "title": "Ballet La Estancia, Op. 8",
-      "composerName": "A. Ginastera"
+      "composerName": "Alberto Ginastera"
     },
     {
       "title": "Rhapsody in Blue",
-      "composerName": "G. Gershwin"
+      "composerName": "George Gershwin"
     },
     {
       "title": "Ciranda das Sete Notas",
@@ -59,7 +59,7 @@
     },
     {
       "title": "Mambo (West Side Story)",
-      "composerName": "L. Bernstein"
+      "composerName": "Leonard Bernstein"
     }
   ],
   "eras": [

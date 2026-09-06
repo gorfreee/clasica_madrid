@@ -22,27 +22,27 @@
   ],
   "composers": [
     {
-      "name": "Benedetto Marcello (1686 - 1739)"
+      "name": "Benedetto Marcello"
     },
     {
-      "name": "Antonio Vivaldi (1678-1741)"
+      "name": "Antonio Vivaldi"
     },
     {
-      "name": "Francesco Corselli (1705-1778)"
+      "name": "Francesco Corselli"
     }
   ],
   "works": [
     {
       "title": "Concierto para oboe en re menor, S.Z799",
-      "composerName": "Benedetto Marcello (1686 - 1739)"
+      "composerName": "Benedetto Marcello"
     },
     {
       "title": "Concierto para flautino en Do mayor RV 443",
-      "composerName": "Antonio Vivaldi (1678-1741)"
+      "composerName": "Antonio Vivaldi"
     },
     {
       "title": "Invitatorio de Difuntos",
-      "composerName": "Francesco Corselli (1705-1778)"
+      "composerName": "Francesco Corselli"
     }
   ],
   "eras": [

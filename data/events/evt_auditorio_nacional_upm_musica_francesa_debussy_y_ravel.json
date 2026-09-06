@@ -26,24 +26,24 @@
   ],
   "composers": [
     {
-      "name": "C. Debussy"
+      "name": "Claude Debussy"
     },
     {
-      "name": "M. Ravel"
+      "name": "Maurice Ravel"
     }
   ],
   "works": [
     {
       "title": "Preludio a la siesta de un fauno",
-      "composerName": "C. Debussy"
+      "composerName": "Claude Debussy"
     },
     {
       "title": "Concierto para piano y orquesta en sol mayor",
-      "composerName": "M. Ravel"
+      "composerName": "Maurice Ravel"
     },
     {
       "title": "Daphnis y Cloé",
-      "composerName": "M. Ravel"
+      "composerName": "Maurice Ravel"
     }
   ],
   "eras": [

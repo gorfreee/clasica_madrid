@@ -22,78 +22,72 @@
   ],
   "composers": [
     {
-      "name": "Antonio de Cabezón (1510-1566)"
+      "name": "Antonio de Cabezón"
     },
     {
-      "name": "William Byrd (1543-1623)"
-    },
-    {
-      "name": "A. de Cabezón"
-    },
-    {
-      "name": "W. Byrd"
+      "name": "William Byrd"
     }
   ],
   "works": [
     {
       "title": "De Obras de música para tecla, arpa y vihuela (1578)",
-      "composerName": "Antonio de Cabezón (1510-1566)"
+      "composerName": "Antonio de Cabezón"
     },
     {
       "title": "Tiento de primer tono , LX",
-      "composerName": "Antonio de Cabezón (1510-1566)"
+      "composerName": "Antonio de Cabezón"
     },
     {
       "title": "Diferencias sobre el villancico ‘Quién te me enojó, Ysabel?’ (arr. A. Cea)",
-      "composerName": "Antonio de Cabezón (1510-1566)"
+      "composerName": "Antonio de Cabezón"
     },
     {
       "title": "John, come kiss me now , MB 81",
-      "composerName": "William Byrd (1543-1623)"
+      "composerName": "William Byrd"
     },
     {
       "title": "De Obras de música para tecla, arpa y vihuela (1578)",
-      "composerName": "A. de Cabezón"
+      "composerName": "Antonio de Cabezón"
     },
     {
       "title": "Discante sobre la pavana italiana",
-      "composerName": "A. de Cabezón"
+      "composerName": "Antonio de Cabezón"
     },
     {
       "title": "Diferencias sobre la gallarda milanesa",
-      "composerName": "A. de Cabezón"
+      "composerName": "Antonio de Cabezón"
     },
     {
       "title": "Pavan en re menor, MB 52a",
-      "composerName": "W. Byrd"
+      "composerName": "William Byrd"
     },
     {
       "title": "Galliard en re menor, MB 52b",
-      "composerName": "W. Byrd"
+      "composerName": "William Byrd"
     },
     {
       "title": "Duuiensela (D’où vient cela), de Obras de música para tecla, arpa y vihuela (1578)",
-      "composerName": "A. de Cabezón"
+      "composerName": "Antonio de Cabezón"
     },
     {
       "title": "Fantasia en sol mayor, MB 62",
-      "composerName": "W. Byrd"
+      "composerName": "William Byrd"
     },
     {
       "title": "Tiento de quinto tono, LXVI",
-      "composerName": "A. de Cabezón"
+      "composerName": "Antonio de Cabezón"
     },
     {
       "title": "Diferencias sobre ‘El canto llano del caballero’",
-      "composerName": "A. de Cabezón"
+      "composerName": "Antonio de Cabezón"
     },
     {
       "title": "Prelude en la menor, MB 12",
-      "composerName": "W. Byrd"
+      "composerName": "William Byrd"
     },
     {
       "title": "Fantasia en la menor, MB 13",
-      "composerName": "W. Byrd"
+      "composerName": "William Byrd"
     }
   ],
   "eras": [

@@ -22,34 +22,28 @@
   ],
   "composers": [
     {
-      "name": "Johann Sebastian Bach (1685-1750)"
+      "name": "Johann Sebastian Bach"
     },
     {
-      "name": "Mieczysław Weinberg (1919-1996)"
-    },
-    {
-      "name": "J. S. Bach"
-    },
-    {
-      "name": "M. Weinberg"
+      "name": "Mieczysław Weinberg"
     }
   ],
   "works": [
     {
       "title": "Suite para violonchelo n.º 3 en do mayor, BWV 1009 (1717-1723)",
-      "composerName": "Johann Sebastian Bach (1685-1750)"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Sonata para violonchelo n.º 2, op. 121 (1977)",
-      "composerName": "Mieczysław Weinberg (1919-1996)"
+      "composerName": "Mieczysław Weinberg"
     },
     {
       "title": "Suite para violonchelo n.º 4 en mi bemol mayor, BWV 1010 (1717-1723)",
-      "composerName": "J. S. Bach"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Sonata para violonchelo n.º 4, op. 140bis (1986)",
-      "composerName": "M. Weinberg"
+      "composerName": "Mieczysław Weinberg"
     }
   ],
   "eras": [

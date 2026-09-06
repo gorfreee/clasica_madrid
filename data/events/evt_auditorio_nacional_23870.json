@@ -25,20 +25,20 @@
   ],
   "composers": [
     {
-      "name": "Johann Nepomuk Hummel (1778-1837)"
+      "name": "Johann Nepomuk Hummel"
     },
     {
-      "name": "Franz Schubert (1797-1828)"
+      "name": "Franz Schubert"
     }
   ],
   "works": [
     {
       "title": "Cuarteto de cuerda en do mayor, op. 30, n.º 1 (1804-1808)",
-      "composerName": "Johann Nepomuk Hummel (1778-1837)"
+      "composerName": "Johann Nepomuk Hummel"
     },
     {
       "title": "Quinteto de cuerda en do mayor, op. 163 (1828)",
-      "composerName": "Franz Schubert (1797-1828)"
+      "composerName": "Franz Schubert"
     }
   ],
   "eras": [

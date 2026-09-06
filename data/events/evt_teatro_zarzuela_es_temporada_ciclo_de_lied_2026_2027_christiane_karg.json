@@ -25,84 +25,84 @@
   ],
   "composers": [
     {
-      "name": "Amy Beach (1867-1944)"
+      "name": "Amy Beach"
     },
     {
-      "name": "Claude Debussy (1862-1918)"
+      "name": "Claude Debussy"
     },
     {
-      "name": "Alban Berg (1885-1935)"
+      "name": "Alban Berg"
     },
     {
-      "name": "Alma Mahler (1879-1964)"
+      "name": "Alma Mahler"
     },
     {
-      "name": "Gustav Mahler (1860-1911)"
+      "name": "Gustav Mahler"
     },
     {
-      "name": "Richard Strauss (1864-1949)"
+      "name": "Richard Strauss"
     }
   ],
   "works": [
     {
       "title": "Four songs, op. 51 (1903)",
-      "composerName": "Amy Beach (1867-1944)"
+      "composerName": "Amy Beach"
     },
     {
       "title": "Fêtes galantes , deuxième recueil, CD 114 (1904)",
-      "composerName": "Claude Debussy (1862-1918)"
+      "composerName": "Claude Debussy"
     },
     {
       "title": "Laue Sommernacht, n.º 3",
-      "composerName": "Alma Mahler (1879-1964)"
+      "composerName": "Alma Mahler"
     },
     {
       "title": "Bei dir ist es traut, n.º 4",
-      "composerName": "Alma Mahler (1879-1964)"
+      "composerName": "Alma Mahler"
     },
     {
       "title": "Ich wandle unter Blumen , n.º 5",
-      "composerName": "Alma Mahler (1879-1964)"
+      "composerName": "Alma Mahler"
     },
     {
       "title": "Blicke mir nicht in die Lieder, n.º 1",
-      "composerName": "Gustav Mahler (1860-1911)"
+      "composerName": "Gustav Mahler"
     },
     {
       "title": "Ich atmet’ einen linden Duft, n.º 2",
-      "composerName": "Gustav Mahler (1860-1911)"
+      "composerName": "Gustav Mahler"
     },
     {
       "title": "Liebst du um Schönheit, n.º 5",
-      "composerName": "Gustav Mahler (1860-1911)"
+      "composerName": "Gustav Mahler"
     },
     {
       "title": "Freundliche Vision, op. 48, n.º 1 (1900)",
-      "composerName": "Richard Strauss (1864-1949)"
+      "composerName": "Richard Strauss"
     },
     {
       "title": "De Acht Lieder, op. 49 (1900-1901)",
-      "composerName": "Richard Strauss (1864-1949)"
+      "composerName": "Richard Strauss"
     },
     {
       "title": "Waldseligkeit , n.º 1",
-      "composerName": "Richard Strauss (1864-1949)"
+      "composerName": "Richard Strauss"
     },
     {
       "title": "Wir schreiten in goldener Fülle , n.º 2",
-      "composerName": "Richard Strauss (1864-1949)"
+      "composerName": "Richard Strauss"
     },
     {
       "title": "Sieben frühe Lieder (1905-1908)",
-      "composerName": "Alban Berg (1885-1935)"
+      "composerName": "Alban Berg"
     },
     {
       "title": "De Fünf Lieder (1900-1901)",
-      "composerName": "Alma Mahler (1879-1964)"
+      "composerName": "Alma Mahler"
     },
     {
       "title": "De Rückert Lieder (1901-1902)",
-      "composerName": "Gustav Mahler (1860-1911)"
+      "composerName": "Gustav Mahler"
     }
   ],
   "eras": [

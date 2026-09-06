@@ -22,34 +22,31 @@
   ],
   "composers": [
     {
-      "name": "Ludwig van Beethoven (1770-1827)"
+      "name": "Ludwig van Beethoven"
     },
     {
-      "name": "L. van Beethoven"
+      "name": "György Ligeti"
     },
     {
-      "name": "György Ligeti (1923-2006)"
-    },
-    {
-      "name": "Karlheinz Stockhausen (1928-2007)"
+      "name": "Karlheinz Stockhausen"
     }
   ],
   "works": [
     {
       "title": "Bagatelas, op. 119, selección (1822)",
-      "composerName": "Ludwig van Beethoven (1770-1827)"
+      "composerName": "Ludwig van Beethoven"
     },
     {
       "title": "Bagatelas, op. 33, selección (1782, rev. 1802)",
-      "composerName": "Ludwig van Beethoven (1770-1827)"
+      "composerName": "Ludwig van Beethoven"
     },
     {
       "title": "Sonata n.º 23 en fa menor ‘Appassionata’, op. 57 (1804-1805)",
-      "composerName": "L. van Beethoven"
+      "composerName": "Ludwig van Beethoven"
     },
     {
       "title": "Musica ricercata (1951-1953)",
-      "composerName": "György Ligeti (1923-2006)"
+      "composerName": "György Ligeti"
     }
   ],
   "eras": [

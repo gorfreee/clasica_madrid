@@ -34,10 +34,10 @@
       "name": "Arthur Benjamin"
     },
     {
-      "name": "Pyotr Ilyich Tchaikovsky"
+      "name": "Piotr Ilich Chaikovski"
     },
     {
-      "name": "Igor Stravinsky"
+      "name": "Ígor Stravinski"
     },
     {
       "name": "Ludwig van Beethoven"
@@ -46,7 +46,7 @@
       "name": "York Bowen"
     },
     {
-      "name": "Dmitriĭ Shostakovich"
+      "name": "Dmitri Shostakóvich"
     }
   ],
   "works": [
@@ -64,18 +64,18 @@
     },
     {
       "title": "Nur wer die Sehnsucht kennt [Nadie sino el corazón solitario] , de Seis romanzas, op. 6",
-      "composerName": "Pyotr Ilyich Tchaikovsky"
+      "composerName": "Piotr Ilich Chaikovski"
     },
     {
       "title": "Divertimento, para violín solo , de Le baiser de la fée, ballet en homenaje a Pyotr Ilyich Tchaikovsky",
-      "composerName": "Igor Stravinsky"
+      "composerName": "Ígor Stravinski"
     },
     {
       "title": "In Moonlight, arreglo para viola y piano del Adagio sostenuto de la Sonata para piano op. 27 nº 2, “Claro de luna”"
     },
     {
       "title": "Adagio “En memoria del gran Beethoven” , de Sonata para viola y piano, op. 147",
-      "composerName": "Dmitriĭ Shostakovich"
+      "composerName": "Dmitri Shostakóvich"
     }
   ],
   "eras": [

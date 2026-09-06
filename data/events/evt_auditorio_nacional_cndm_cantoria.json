@@ -25,94 +25,82 @@
   ],
   "composers": [
     {
-      "name": "José de San Juan (1687-1735)"
+      "name": "José de San Juan"
     },
     {
-      "name": "Francisco Hernández Illana (ca. 1700-1780)"
+      "name": "Francisco Hernández Illana"
     },
     {
-      "name": "José Martínez de Arce (ca. 1662-1721)"
+      "name": "José Martínez de Arce"
     },
     {
-      "name": "José de Torres (ca. 1670-1738)"
+      "name": "José de Torres"
     },
     {
-      "name": "Juan Francés de Iribarren (1699-1767)"
-    },
-    {
-      "name": "Varios autores"
-    },
-    {
-      "name": "J. de San Juan"
-    },
-    {
-      "name": "Anónimo (s. XVII)"
+      "name": "Juan Francés de Iribarren"
     }
   ],
   "works": [
     {
       "title": "¡A la fiesta, zagales! (1728)",
-      "composerName": "José de San Juan (1687-1735)"
+      "composerName": "José de San Juan"
     },
     {
       "title": "Céfiros corra, pájaros vaya (1723)",
-      "composerName": "José de San Juan (1687-1735)"
+      "composerName": "José de San Juan"
     },
     {
       "title": "Una noche que los Reyes (Xácara de Reyes)",
-      "composerName": "José de San Juan (1687-1735)"
+      "composerName": "José de San Juan"
     },
     {
       "title": "Recercada a tres sobre el ‘Pange lingua’",
-      "composerName": "Francisco Hernández Illana (ca. 1700-1780)"
+      "composerName": "Francisco Hernández Illana"
     },
     {
       "title": "Gitanillas cortesanas",
-      "composerName": "José de Torres (ca. 1670-1738)"
+      "composerName": "José de Torres"
     },
     {
       "title": "Xácara de fandanguillo",
-      "composerName": "Juan Francés de Iribarren (1699-1767)"
+      "composerName": "Juan Francés de Iribarren"
     },
     {
-      "title": "Españoletas",
-      "composerName": "Varios autores"
+      "title": "Españoletas"
     },
     {
       "title": "El portugués ø+",
-      "composerName": "J. de San Juan"
+      "composerName": "José de San Juan"
     },
     {
       "title": "Un cantante italiano ø+1",
-      "composerName": "J. de San Juan"
+      "composerName": "José de San Juan"
     },
     {
-      "title": "Xácaras",
-      "composerName": "Varios autores"
+      "title": "Xácaras"
     },
     {
       "title": "Oye, dueño de mi vida ø+ (1723)",
-      "composerName": "J. de San Juan"
+      "composerName": "José de San Juan"
     },
     {
-      "title": "Soberana María (Romances y letras de a tres vozes, s. XVII, atrib. Mateo Romero)",
-      "composerName": "Anónimo (s. XVII)"
+      "title": "Soberana María (Romances y letras de a tres vozes, s. XVII, atrib. Mateo Romero)"
     },
     {
       "title": "ø+ Recuperación histórica, estreno en tiempos modernos",
-      "composerName": "J. de San Juan"
+      "composerName": "José de San Juan"
     },
     {
       "title": "ø+1 Recuperación histórica, estreno en tiempos modernos en España",
-      "composerName": "J. de San Juan"
+      "composerName": "José de San Juan"
     },
     {
       "title": "Jilguerillo canoro (1694)",
-      "composerName": "José Martínez de Arce (ca. 1662-1721)"
+      "composerName": "José Martínez de Arce"
     },
     {
       "title": "De repiques de campanas (1734)",
-      "composerName": "J. de San Juan"
+      "composerName": "José de San Juan"
     }
   ],
   "eras": [

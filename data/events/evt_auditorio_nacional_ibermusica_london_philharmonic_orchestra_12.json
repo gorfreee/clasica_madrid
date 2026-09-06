@@ -28,20 +28,20 @@
   ],
   "composers": [
     {
-      "name": "BRAHMS"
+      "name": "Johannes Brahms"
     },
     {
-      "name": "CHAIKOVSKI"
+      "name": "Piotr Ilich Chaikovski"
     }
   ],
   "works": [
     {
       "title": "Concierto para violín",
-      "composerName": "BRAHMS"
+      "composerName": "Johannes Brahms"
     },
     {
       "title": "Sinfonía Manfredo en Si menor op. 58",
-      "composerName": "CHAIKOVSKI"
+      "composerName": "Piotr Ilich Chaikovski"
     }
   ],
   "eras": [

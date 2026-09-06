@@ -29,20 +29,20 @@
   ],
   "composers": [
     {
-      "name": "Beethoven"
+      "name": "Ludwig van Beethoven"
     },
     {
-      "name": "Bartók"
+      "name": "Béla Bartók"
     }
   ],
   "works": [
     {
       "title": "Concierto para piano y orquesta núm. 5, “Emperador”",
-      "composerName": "Beethoven"
+      "composerName": "Ludwig van Beethoven"
     },
     {
       "title": "Concierto para orquesta",
-      "composerName": "Bartók"
+      "composerName": "Béla Bartók"
     }
   ],
   "eras": [

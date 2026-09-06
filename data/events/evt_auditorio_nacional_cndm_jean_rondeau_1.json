@@ -22,50 +22,50 @@
   ],
   "composers": [
     {
-      "name": "Louis Couperin (1626-1661)"
+      "name": "Louis Couperin"
     },
     {
-      "name": "Jean-Philippe Rameau (1683-1764)"
+      "name": "Jean-Philippe Rameau"
     },
     {
-      "name": "François Couperin (1668-1733)"
+      "name": "François Couperin"
     },
     {
-      "name": "Joseph-Nicolas-Pancrace Royer (1703-1755)"
+      "name": "Joseph-Nicolas-Pancrace Royer"
     }
   ],
   "works": [
     {
       "title": "Suite en la menor, de Pièces de clavecin",
-      "composerName": "Louis Couperin (1626-1661)"
+      "composerName": "Louis Couperin"
     },
     {
       "title": "Prélude de la Suite en la menor, RCT 1, de Premier livre de pièces de clavecin (1706)",
-      "composerName": "Jean-Philippe Rameau (1683-1764)"
+      "composerName": "Jean-Philippe Rameau"
     },
     {
       "title": "Suite en la menor, RCT 5, de Troisième livre de pièces de clavecin (1727)",
-      "composerName": "Jean-Philippe Rameau (1683-1764)"
+      "composerName": "Jean-Philippe Rameau"
     },
     {
       "title": "Premier prélude en do mayor , de L’Art de toucher le clavecin (1716)",
-      "composerName": "François Couperin (1668-1733)"
+      "composerName": "François Couperin"
     },
     {
       "title": "De Pièces de clavecin, livre I (1713)",
-      "composerName": "François Couperin (1668-1733)"
+      "composerName": "François Couperin"
     },
     {
       "title": "La Ténébreuse. Allemande (troisième ordre, n.º 1)",
-      "composerName": "François Couperin (1668-1733)"
+      "composerName": "François Couperin"
     },
     {
       "title": "La Favorite. Chaconne à deux tems (troisième ordre, n.º 12)",
-      "composerName": "François Couperin (1668-1733)"
+      "composerName": "François Couperin"
     },
     {
       "title": "La marche des scythes, de Pièces de clavecin (1746)",
-      "composerName": "Joseph-Nicolas-Pancrace Royer (1703-1755)"
+      "composerName": "Joseph-Nicolas-Pancrace Royer"
     }
   ],
   "eras": [

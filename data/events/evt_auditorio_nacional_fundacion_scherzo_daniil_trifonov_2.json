@@ -22,61 +22,61 @@
   ],
   "composers": [
     {
-      "name": "George Frideric Händel (1685-1759)"
+      "name": "Georg Friedrich Händel"
     },
     {
-      "name": "Igor Stravinsky (1882–1971)"
+      "name": "Ígor Stravinski"
     },
     {
-      "name": "Franz Schubert (1797–1828)"
+      "name": "Franz Schubert"
     },
     {
-      "name": "Juan Francisco García (1892 -1974)"
+      "name": "Juan Francisco García"
     },
     {
-      "name": "Heitor Villa-Lobos (1887 -1959)"
+      "name": "Heitor Villa-Lobos"
     },
     {
-      "name": "Rafael Bullumba Landestoy (1924–2018)"
+      "name": "Rafael Bullumba Landestoy"
     },
     {
-      "name": "Alberto Ginastera (1916–1983)"
+      "name": "Alberto Ginastera"
     },
     {
       "name": "Daniil Trifonov (b. 1991)"
     },
     {
-      "name": "Mozart Camargo Guarnieri (1907 – 1993)"
+      "name": "Mozart Camargo Guarnieri"
     }
   ],
   "works": [
     {
       "title": "Suite in E Major",
-      "composerName": "George Frideric Händel (1685-1759)"
+      "composerName": "Georg Friedrich Händel"
     },
     {
       "title": "Piano Sonata",
-      "composerName": "Igor Stravinsky (1882–1971)"
+      "composerName": "Ígor Stravinski"
     },
     {
       "title": "Fantasie in C Major, D.760, «Wanderer-Fantasie»",
-      "composerName": "Franz Schubert (1797–1828)"
+      "composerName": "Franz Schubert"
     },
     {
       "title": "Sambumbia (Rapsodia Dominicana)",
-      "composerName": "Juan Francisco García (1892 -1974)"
+      "composerName": "Juan Francisco García"
     },
     {
       "title": "Valsa da Dor, W. 316",
-      "composerName": "Heitor Villa-Lobos (1887 -1959)"
+      "composerName": "Heitor Villa-Lobos"
     },
     {
       "title": "El Vals de Santo Domingo",
-      "composerName": "Rafael Bullumba Landestoy (1924–2018)"
+      "composerName": "Rafael Bullumba Landestoy"
     },
     {
       "title": "Milonga, Op. 2, No. 1",
-      "composerName": "Alberto Ginastera (1916–1983)"
+      "composerName": "Alberto Ginastera"
     },
     {
       "title": "Tango",
@@ -84,15 +84,15 @@
     },
     {
       "title": "Estudio en Zamba",
-      "composerName": "Rafael Bullumba Landestoy (1924–2018)"
+      "composerName": "Rafael Bullumba Landestoy"
     },
     {
       "title": "Dança Negra",
-      "composerName": "Mozart Camargo Guarnieri (1907 – 1993)"
+      "composerName": "Mozart Camargo Guarnieri"
     },
     {
       "title": "Bachianas Brasileiras No. 4",
-      "composerName": "Heitor Villa-Lobos (1887 -1959)"
+      "composerName": "Heitor Villa-Lobos"
     }
   ],
   "eras": [

@@ -22,28 +22,28 @@
   ],
   "composers": [
     {
-      "name": "Johann Sebastian Bach (1685-1750)"
+      "name": "Johann Sebastian Bach"
     },
     {
-      "name": "Asís Márquez (1987)"
+      "name": "Asís Márquez"
     }
   ],
   "works": [
     {
       "title": "Suite orquestal n.º 3 en re mayor, BWV 1068 (ca. 1730)",
-      "composerName": "Johann Sebastian Bach (1685-1750)"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Suite orquestal n.º 4 en re mayor , BWV 1069 (1725)",
-      "composerName": "Johann Sebastian Bach (1685-1750)"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Danzas de suites y partitas para tecla, selección (arr. R. Egarr y A. Martínez) *",
-      "composerName": "Johann Sebastian Bach (1685-1750)"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Suite orquestal *+ (2027)",
-      "composerName": "Asís Márquez (1987)"
+      "composerName": "Asís Márquez"
     }
   ],
   "eras": [

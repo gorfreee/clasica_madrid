@@ -23,53 +23,53 @@
   ],
   "composers": [
     {
-      "name": "Louis Couperin (1626-1661)"
+      "name": "Louis Couperin"
     },
     {
-      "name": "Michael Ippolito (1985)"
+      "name": "Michael Ippolito"
     },
     {
-      "name": "Caroline Shaw (1982)"
+      "name": "Caroline Shaw"
     },
     {
-      "name": "John Adams (1947)"
+      "name": "John Adams"
     },
     {
-      "name": "Ludwig van Beethoven (1770-1827)"
+      "name": "Ludwig van Beethoven"
     }
   ],
   "works": [
     {
       "title": "Prélude non mesuré n.º 1 en re menor (ca. 1650, arr. G. Kahane)",
-      "composerName": "Louis Couperin (1626-1661)"
+      "composerName": "Louis Couperin"
     },
     {
       "title": "Radiohead",
-      "composerName": "Michael Ippolito (1985)"
+      "composerName": "Michael Ippolito"
     },
     {
       "title": "Pyramid song (2001, arr. A. Schroeder)",
-      "composerName": "Michael Ippolito (1985)"
+      "composerName": "Michael Ippolito"
     },
     {
       "title": "Sarabande de la Partita para ocho voces (2012, arr. A. Yee)",
-      "composerName": "Caroline Shaw (1982)"
+      "composerName": "Caroline Shaw"
     },
     {
       "title": "Shye Ben-Tzur (1975)/ Jonny Greenwood (1971)/ The Rajasthan Express",
-      "composerName": "Caroline Shaw (1982)"
+      "composerName": "Caroline Shaw"
     },
     {
       "title": "Junun (2015, arr. N. Schram)",
-      "composerName": "Caroline Shaw (1982)"
+      "composerName": "Caroline Shaw"
     },
     {
       "title": "Iron jig ** (2026)",
-      "composerName": "John Adams (1947)"
+      "composerName": "John Adams"
     },
     {
       "title": "Gran fuga , op. 133 (1825-1826)",
-      "composerName": "Ludwig van Beethoven (1770-1827)"
+      "composerName": "Ludwig van Beethoven"
     }
   ],
   "eras": [

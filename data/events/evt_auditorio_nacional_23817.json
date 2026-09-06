@@ -25,27 +25,27 @@
   ],
   "composers": [
     {
-      "name": "Robert Schumann (1810-1856)"
+      "name": "Robert Schumann"
     },
     {
-      "name": "Fazıl Say (1970)"
+      "name": "Fazıl Say"
     },
     {
-      "name": "G.Gershwin"
+      "name": "George Gershwin"
     }
   ],
   "works": [
     {
       "title": "Quinteto con piano en mi bemol mayor, op. 44 (1842, arr. Signum)",
-      "composerName": "Robert Schumann (1810-1856)"
+      "composerName": "Robert Schumann"
     },
     {
       "title": "Claros. Temple of prophecies, para piano, op. 112 (2024)",
-      "composerName": "Fazıl Say (1970)"
+      "composerName": "Fazıl Say"
     },
     {
       "title": "Rhapsody in blue (1924, arr. Signum)",
-      "composerName": "G.Gershwin"
+      "composerName": "George Gershwin"
     }
   ],
   "eras": [

@@ -28,20 +28,20 @@
   ],
   "composers": [
     {
-      "name": "ELGAR"
+      "name": "Edward Elgar"
     },
     {
-      "name": "CHAIKOVSKI"
+      "name": "Piotr Ilich Chaikovski"
     }
   ],
   "works": [
     {
       "title": "Concierto para violonchelo",
-      "composerName": "ELGAR"
+      "composerName": "Edward Elgar"
     },
     {
       "title": "Sinfonía núm. 6",
-      "composerName": "CHAIKOVSKI"
+      "composerName": "Piotr Ilich Chaikovski"
     }
   ],
   "eras": [

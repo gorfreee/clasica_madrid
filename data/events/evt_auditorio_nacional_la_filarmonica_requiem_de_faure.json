@@ -35,31 +35,31 @@
   ],
   "composers": [
     {
-      "name": "Schubert,"
+      "name": "Franz Schubert"
     },
     {
-      "name": "Barber,"
+      "name": "Samuel Barber"
     },
     {
-      "name": "Fauré,"
+      "name": "Gabriel Fauré"
     }
   ],
   "works": [
     {
       "title": "Gesang der geister über den wassern",
-      "composerName": "Schubert,"
+      "composerName": "Franz Schubert"
     },
     {
       "title": "Agnus dei",
-      "composerName": "Barber,"
+      "composerName": "Samuel Barber"
     },
     {
       "title": "Cantique de jean racine",
-      "composerName": "Fauré,"
+      "composerName": "Gabriel Fauré"
     },
     {
       "title": "Réquiem",
-      "composerName": "Fauré"
+      "composerName": "Gabriel Fauré"
     }
   ],
   "eras": [

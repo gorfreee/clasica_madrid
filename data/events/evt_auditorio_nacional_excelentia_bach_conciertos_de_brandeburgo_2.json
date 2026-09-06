@@ -22,17 +22,17 @@
   ],
   "composers": [
     {
-      "name": "Bach"
+      "name": "Johann Sebastian Bach"
     }
   ],
   "works": [
     {
       "title": "Suite orquestal núm 2 BWV. 1067",
-      "composerName": "Bach"
+      "composerName": "Johann Sebastian Bach"
     },
     {
       "title": "Conciertos de Brandeburgo núm 1, 3, 6",
-      "composerName": "Bach"
+      "composerName": "Johann Sebastian Bach"
     }
   ],
   "eras": [

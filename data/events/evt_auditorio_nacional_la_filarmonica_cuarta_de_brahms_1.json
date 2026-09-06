@@ -29,20 +29,20 @@
   ],
   "composers": [
     {
-      "name": "Chaikovski"
+      "name": "Piotr Ilich Chaikovski"
     },
     {
-      "name": "Brahms"
+      "name": "Johannes Brahms"
     }
   ],
   "works": [
     {
       "title": "Concierto para piano núm. 1",
-      "composerName": "Chaikovski"
+      "composerName": "Piotr Ilich Chaikovski"
     },
     {
       "title": "Sinfonía núm. 4",
-      "composerName": "Brahms"
+      "composerName": "Johannes Brahms"
     }
   ],
   "eras": [

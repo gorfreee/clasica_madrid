@@ -25,21 +25,21 @@
   ],
   "composers": [
     {
-      "name": "Mozart"
+      "name": "Wolfgang Amadeus Mozart"
     }
   ],
   "works": [
     {
       "title": "Obertura de Las bodas de Fígaro",
-      "composerName": "Mozart"
+      "composerName": "Wolfgang Amadeus Mozart"
     },
     {
       "title": "Concierto para violín n.º 3",
-      "composerName": "Mozart"
+      "composerName": "Wolfgang Amadeus Mozart"
     },
     {
       "title": "Sinfonía n.º 41 “Júpiter”",
-      "composerName": "Mozart"
+      "composerName": "Wolfgang Amadeus Mozart"
     }
   ],
   "eras": [

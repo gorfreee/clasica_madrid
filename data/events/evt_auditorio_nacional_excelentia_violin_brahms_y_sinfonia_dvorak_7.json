@@ -29,27 +29,27 @@
   ],
   "composers": [
     {
-      "name": "Brahms"
+      "name": "Johannes Brahms"
     },
     {
-      "name": "Dvořák"
+      "name": "Antonín Dvořák"
     },
     {
-      "name": "Mahler"
+      "name": "Gustav Mahler"
     }
   ],
   "works": [
     {
       "title": "Concierto para violín y orquesta",
-      "composerName": "Brahms"
+      "composerName": "Johannes Brahms"
     },
     {
       "title": "Sinfonía n.º 7",
-      "composerName": "Dvořák"
+      "composerName": "Antonín Dvořák"
     },
     {
       "title": "Blumine",
-      "composerName": "Mahler"
+      "composerName": "Gustav Mahler"
     }
   ],
   "eras": [

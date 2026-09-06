@@ -31,20 +31,20 @@
   ],
   "composers": [
     {
-      "name": "BRAHMS"
+      "name": "Johannes Brahms"
     },
     {
-      "name": "SIBELIUS"
+      "name": "Jean Sibelius"
     }
   ],
   "works": [
     {
       "title": "Concierto doble para violín y violonchelo",
-      "composerName": "BRAHMS"
+      "composerName": "Johannes Brahms"
     },
     {
       "title": "Sinfonía núm. 5",
-      "composerName": "SIBELIUS"
+      "composerName": "Jean Sibelius"
     }
   ],
   "eras": [

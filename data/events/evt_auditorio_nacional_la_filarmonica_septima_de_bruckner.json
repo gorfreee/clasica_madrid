@@ -29,24 +29,24 @@
   ],
   "composers": [
     {
-      "name": "Sibelius"
+      "name": "Jean Sibelius"
     },
     {
-      "name": "Bruckner"
+      "name": "Anton Bruckner"
     }
   ],
   "works": [
     {
       "title": "La tempestad. Obertura",
-      "composerName": "Sibelius"
+      "composerName": "Jean Sibelius"
     },
     {
       "title": "Concierto per a violín",
-      "composerName": "Sibelius"
+      "composerName": "Jean Sibelius"
     },
     {
       "title": "Sinfonía núm. 7",
-      "composerName": "Bruckner"
+      "composerName": "Anton Bruckner"
     }
   ],
   "eras": [

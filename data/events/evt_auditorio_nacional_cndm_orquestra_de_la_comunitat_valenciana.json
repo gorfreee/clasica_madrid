@@ -23,20 +23,20 @@
   ],
   "composers": [
     {
-      "name": "Johannes Brahms (1833-1897)"
+      "name": "Johannes Brahms"
     },
     {
-      "name": "Robert Schumann (1810-1856)"
+      "name": "Robert Schumann"
     }
   ],
   "works": [
     {
       "title": "Concierto para violín en re mayor, op. 77 (1878)",
-      "composerName": "Johannes Brahms (1833-1897)"
+      "composerName": "Johannes Brahms"
     },
     {
       "title": "Sinfonía n.º 2 en do mayor, op. 61 (1845-1846)",
-      "composerName": "Robert Schumann (1810-1856)"
+      "composerName": "Robert Schumann"
     }
   ],
   "eras": [
