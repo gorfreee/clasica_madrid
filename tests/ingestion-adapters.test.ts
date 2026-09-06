@@ -6,11 +6,12 @@ import { madridDatosAdapter } from '../src/ingestion/sources/madrid-datos.ts';
 import { teatroRealAdapter } from '../src/ingestion/sources/teatro-real.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { TEST_NOW, TEST_WINDOW } from './helpers.ts';
-import type { AdapterContext } from '../src/ingestion/types.ts';
+import type { AdapterContext, AdapterDiscardReport } from '../src/ingestion/types.ts';
+import { normalizeRawEvent } from '../src/ingestion/normalize.ts';
 
 const fixtures = path.join(import.meta.dirname, 'fixtures', 'ingestion');
 
-function ctx(sourceId: string): AdapterContext {
+function ctx(sourceId: string, reportDiscard?: (discard: AdapterDiscardReport) => void): AdapterContext {
   return {
     source: getSourceDefinition(sourceId),
     now: TEST_NOW,
@@ -18,6 +19,7 @@ function ctx(sourceId: string): AdapterContext {
     get: async () => {
       throw new Error('no debe pedirse red en tests de fixtures');
     },
+    ...(reportDiscard ? { reportDiscard } : {}),
   };
 }
 
@@ -126,7 +128,7 @@ describe('adapter Teatro Real (HTML)', () => {
 });
 
 describe('adapter Madrid datos (JSON-LD)', () => {
-  it('se queda solo con música puntual que tiene título, URL, fecha, hora y lugar', async () => {
+  it('se queda solo con música puntual que tiene título, URL, fecha y lugar', async () => {
     const body = await readFile(path.join(fixtures, 'madrid-agenda.json'), 'utf8');
     const events = madridDatosAdapter.extract(body, 'https://datos.madrid.es/agenda.json', ctx('madrid-datos'));
     expect(events).toHaveLength(8);
@@ -212,5 +214,55 @@ describe('adapter Madrid datos (JSON-LD)', () => {
         ctx('madrid-datos'),
       ),
     ).toThrow(/no hay eventos de música/);
+  });
+
+  it('conserva un concierto con fecha válida y hora desconocida, sin inventar hora', () => {
+    const body = JSON.stringify({
+      '@graph': [
+        {
+          '@type': 'https://datos.madrid.es/egob/kos/actividades/Musica',
+          id: '50400001',
+          title: 'Recital de Bach',
+          dtstart: '2026-09-20',
+          time: '',
+          link: 'http://www.madrid.es/evento/recital-bach-sin-hora',
+          'event-location': 'Teatro Real',
+        },
+        {
+          '@type': 'https://datos.madrid.es/egob/kos/actividades/Musica',
+          id: '50400002',
+          title: 'Concierto municipal',
+          dtstart: '2026-09-21 00:00:00.0',
+          time: '',
+          link: 'http://www.madrid.es/evento/concierto-medianoche-sentinel',
+          'event-location': 'Teatro Real',
+        },
+      ],
+    });
+    const events = madridDatosAdapter.extract(body, 'https://datos.madrid.es/agenda.json', ctx('madrid-datos'));
+    expect(events).toHaveLength(2);
+    for (const event of events) {
+      expect(event.observed.occurrences[0]?.date).toMatch(/^2026-09-2[01]$/);
+      expect(event.observed.occurrences[0]?.time).toBeUndefined();
+      const normalized = normalizeRawEvent(event);
+      expect(normalized?.occurrences).toEqual([
+        { date: event.observed.occurrences[0]!.date, time: null },
+      ]);
+    }
+  });
+
+  it('cuenta descartes de candidatos Musica y no infla con exposiciones', async () => {
+    const discards: AdapterDiscardReport[] = [];
+    const body = await readFile(path.join(fixtures, 'madrid-agenda.json'), 'utf8');
+    const events = madridDatosAdapter.extract(
+      body,
+      'https://datos.madrid.es/agenda.json',
+      ctx('madrid-datos', (discard) => discards.push(discard)),
+    );
+    expect(events).toHaveLength(8);
+    expect(discards.map((item) => item.reason).sort()).toEqual(['missing-venue', 'recurrence-unsupported']);
+    expect(discards.some((item) => item.externalId === '50341118')).toBe(true);
+    expect(discards.some((item) => item.externalId === '50390002')).toBe(true);
+    expect(discards.some((item) => item.reason === 'missing-time')).toBe(false);
   });
 });

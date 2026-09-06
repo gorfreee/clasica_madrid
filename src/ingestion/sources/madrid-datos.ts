@@ -8,7 +8,14 @@ import {
   normalizeWorkList,
   type ObservedFactPatch,
 } from '../observed.ts';
-import type { AdapterContext, RawEvent, SourceAdapter, SourceDefinition } from '../types.ts';
+import {
+  reportAdapterDiscard,
+  type AdapterContext,
+  type AdapterDiscardReport,
+  type RawEvent,
+  type SourceAdapter,
+  type SourceDefinition,
+} from '../types.ts';
 
 /**
  * Madrid Datos JSON-LD is the primary source for identity, date/time, venue,
@@ -66,7 +73,7 @@ export const madridDatosAdapter: SourceAdapter = {
       if (raw) events.push(raw);
     }
     if (graph.length > 0 && events.length === 0) {
-      throw new Error('madrid-datos: no hay eventos de música con fecha, hora, título y lugar');
+      throw new Error('madrid-datos: no hay eventos de música con fecha, título, URL, identificador y lugar');
     }
     return events.sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
   },
@@ -80,20 +87,53 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
   const item = value as GraphEvent;
   const type = typeof item['@type'] === 'string' ? item['@type'] : '';
   if (!MUSICA_TYPE.test(type)) return undefined;
-  // Recurrence is a weekly/interval schedule (expos, talleres, ciclos), not a
-  // single concert date. Expanding it needs occurrence semantics this source
-  // does not have yet; a one-off music listing never carries this field today.
-  if (item.recurrence && typeof item.recurrence === 'object') return undefined;
+
   const title = asNonEmptyString(item.title);
   const link = asNonEmptyString(item.link);
   const dtstart = asNonEmptyString(item.dtstart);
   const venueText = asNonEmptyString(item['event-location']);
   const id = asNonEmptyString(item.id) ?? asNonEmptyString(item.uid);
-  if (!title || !link || !dtstart || !venueText || !id) return undefined;
+  const discard = (reason: string) =>
+    discardMadridDatos(ctx, reason, { title, link, id });
+
+  // Recurrence is a weekly/interval schedule (expos, talleres, ciclos), not a
+  // single concert date. Expanding it needs occurrence semantics this source
+  // does not have yet; a one-off music listing never carries this field today.
+  if (item.recurrence && typeof item.recurrence === 'object') {
+    discard('recurrence-unsupported');
+    return undefined;
+  }
+  if (!title) {
+    discard('missing-title');
+    return undefined;
+  }
+  if (!link) {
+    discard('missing-url');
+    return undefined;
+  }
+  if (!id) {
+    discard('missing-id');
+    return undefined;
+  }
+  if (!dtstart) {
+    discard('missing-date');
+    return undefined;
+  }
   const parsed = parseObservedDateTime(dtstart);
-  if (!parsed) return undefined;
-  const time = asNonEmptyString(item.time) ? parseObservedTime(String(item.time)) : parsed.time;
-  if (!time) return undefined;
+  if (!parsed) {
+    discard('invalid-date');
+    return undefined;
+  }
+  if (!venueText) {
+    discard('missing-venue');
+    return undefined;
+  }
+
+  const listedTime = asNonEmptyString(item.time);
+  const explicitTime = listedTime ? parseObservedTime(listedTime) : undefined;
+  // Empty `time` plus midnight in dtstart is the source's "hora desconocida"
+  // sentinel. Do not invent 00:00; omit RawOccurrence.time so normalize yields null.
+  const time = explicitTime ?? (parsed.time && parsed.time !== '00:00' ? parsed.time : undefined);
   const httpsUrl = link.replace(/^http:\/\//i, 'https://');
   const venueFacilityId = facilityIdFromRelation(item.relation);
   return {
@@ -104,12 +144,24 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
     observed: {
       title,
       description: asNonEmptyString(item.description),
-      occurrences: [{ raw: dtstart, date: parsed.date, time }],
+      occurrences: [{ raw: dtstart, date: parsed.date, ...(time ? { time } : {}) }],
       venueText,
       accessText: item.free === 1 || item.free === '1' ? 'free' : item.free === 0 || item.free === '0' ? 'paid' : undefined,
       ...emptyObservedLists(),
     },
   };
+}
+
+function discardMadridDatos(
+  ctx: AdapterContext,
+  reason: string,
+  fields: { title?: string; link?: string; id?: string },
+): void {
+  const discard: AdapterDiscardReport = { reason };
+  if (fields.title) discard.title = fields.title;
+  if (fields.link) discard.sourceUrl = fields.link.replace(/^http:\/\//i, 'https://');
+  if (fields.id) discard.externalId = fields.id;
+  reportAdapterDiscard(ctx, discard);
 }
 
 /** Numeric id from `…/entidadesyorganismos/{id}-….json`. */

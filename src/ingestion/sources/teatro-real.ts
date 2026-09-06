@@ -3,7 +3,14 @@ import { firstMatch, stripTags } from '../html.ts';
 import { emptyObservedLists } from '../observed.ts';
 import { parseObservedTime } from '../dates.ts';
 import { resolveUrl, urlPathIdentity } from '../urls.ts';
-import type { AdapterContext, RawEvent, RawOccurrence, SourceAdapter, SourceDefinition } from '../types.ts';
+import {
+  reportAdapterDiscard,
+  type AdapterContext,
+  type RawEvent,
+  type RawOccurrence,
+  type SourceAdapter,
+  type SourceDefinition,
+} from '../types.ts';
 
 const BOX_ID = /id="box(\d{2})-(\d{4})-(\d{2})"/g;
 const SHOW_HREF = /href="(\/es\/espectaculo\/[a-z0-9-]+)"/i;
@@ -99,15 +106,21 @@ function parseContentBox(
 ): RawEvent | undefined {
   const href = firstMatch(chunk, SHOW_HREF);
   if (!href) return undefined;
+  const sourceUrl = resolveUrl(href, pageUrl);
   const titleHtml = firstMatch(chunk, TITLE_H3);
   const title = titleHtml ? stripTags(titleHtml) : undefined;
-  if (!title) return undefined;
+  if (!title) {
+    reportAdapterDiscard(ctx, { reason: 'missing-title', sourceUrl });
+    return undefined;
+  }
   const times = [...chunk.matchAll(TIME_BTN)]
     .map((match) => parseObservedTime(stripTags(match[1] ?? '')))
     .filter((time): time is string => Boolean(time));
-  if (times.length === 0) return undefined;
+  if (times.length === 0) {
+    reportAdapterDiscard(ctx, { reason: 'missing-time', title, sourceUrl });
+    return undefined;
+  }
   const uniqueTimes = [...new Set(times)];
-  const sourceUrl = resolveUrl(href, pageUrl);
   const category = firstMatch(chunk, CATEGORY_SPAN)?.trim() || undefined;
   const occurrences: RawOccurrence[] = uniqueTimes.map((time) => ({
     raw: `${date}T${time}`,
