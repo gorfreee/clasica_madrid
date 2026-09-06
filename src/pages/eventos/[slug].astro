@@ -1,6 +1,8 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import { formatSourceCitationMeta } from '../../lib/presentation/labels.ts';
 import { loadEventPage, loadEventSlugs } from '../../lib/presentation/site.ts';
+import { AGENDA_PATH } from '../../lib/presentation/urls.ts';
 
 export async function getStaticPaths() {
   const slugs = await loadEventSlugs();
@@ -22,7 +24,7 @@ const featured = model.featuredOccurrence;
 <Layout title={model.documentTitle} description={model.description} canonicalPath={model.canonicalPath} jsonLd={model.jsonLd}>
   <article class="detail event-detail">
     <header class="detail-hero detail-hero--event">
-      <p class="eyebrow">{model.isPast ? 'Archivo / Evento pasado' : 'Agenda / Evento'}</p>
+      <a class="eyebrow" href={AGENDA_PATH}>{model.isPast ? 'Archivo / Evento pasado' : 'Agenda / Evento'}</a>
       {model.statusLabel !== 'Programado' && <p class="status-alert">{model.statusLabel}</p>}
       <h1>{model.title}</h1>
       {model.seriesName && <p class="detail-hero__series">{model.seriesKind} / {model.seriesName}</p>}
@@ -55,7 +57,7 @@ const featured = model.featuredOccurrence;
     {primarySource && <a class="official-link" href={primarySource.url} rel="noopener noreferrer"><span>Consulta entradas, condiciones y posibles cambios</span><strong>Ver información oficial ↗</strong></a>}
 
     <section class="detail-section" aria-labelledby="fechas-titulo">
-      <div class="section-heading"><p>Cuándo</p><h2 id="fechas-titulo">Fechas</h2><span>{model.occurrences.length}</span></div>
+      <div class="section-heading"><h2 id="fechas-titulo">Fechas</h2><span>{model.occurrences.length}</span></div>
       <ol class="occurrence-list">
         {
           model.occurrences.map((occurrence) => (
@@ -72,7 +74,7 @@ const featured = model.featuredOccurrence;
     {
       model.performers.length > 0 && (
         <section class="detail-section" aria-labelledby="interpretes-titulo">
-          <div class="section-heading"><p>Quién</p><h2 id="interpretes-titulo">Intérpretes</h2></div>
+          <div class="section-heading"><h2 id="interpretes-titulo">Intérpretes</h2></div>
           <ul class="editorial-list performer-list">
             {model.performers.map((performer) => (
               <li>
@@ -88,7 +90,7 @@ const featured = model.featuredOccurrence;
     {
       model.composers.length > 0 && (
         <section class="detail-section" aria-labelledby="compositores-titulo">
-          <div class="section-heading"><p>Autores</p><h2 id="compositores-titulo">Compositores</h2></div>
+          <div class="section-heading"><h2 id="compositores-titulo">Compositores</h2></div>
           <ul class="editorial-list">
             {model.composers.map((composer) => (
               <li>{composer}</li>
@@ -101,7 +103,7 @@ const featured = model.featuredOccurrence;
     {
       model.works.length > 0 && (
         <section class="detail-section programme" aria-labelledby="obras-titulo">
-          <div class="section-heading"><p>Obras</p><h2 id="obras-titulo">Programa</h2></div>
+          <div class="section-heading"><h2 id="obras-titulo">Programa</h2></div>
           <ol class="programme-list">
             {model.works.map((work) => (
               <li>
@@ -115,7 +117,7 @@ const featured = model.featuredOccurrence;
     }
 
     <section class="detail-section detail-meta" aria-labelledby="datos-titulo">
-      <div class="section-heading"><p>Contexto</p><h2 id="datos-titulo">Sobre el concierto</h2></div>
+      <div class="section-heading"><h2 id="datos-titulo">Sobre el concierto</h2></div>
       <dl class="fact-list fact-list--compact">
         <div><dt>Contexto</dt><dd>{model.kind.label}</dd></div>
         {model.formats.length > 0 && <div><dt>Formato</dt><dd>{model.formats.map((item) => item.label).join(', ')}</dd></div>}
@@ -125,7 +127,7 @@ const featured = model.featuredOccurrence;
     </section>
 
     <section class="detail-section sources" aria-labelledby="fuentes-titulo">
-      <div class="section-heading"><p>Trazabilidad</p><h2 id="fuentes-titulo">Fuentes</h2></div>
+      <div class="section-heading"><h2 id="fuentes-titulo">Fuentes</h2></div>
       <ul class="source-list">
         {
           model.sources.map((source) => (
@@ -133,7 +135,13 @@ const featured = model.featuredOccurrence;
               <a href={source.url} rel="noopener noreferrer">
                 {source.name}
               </a>
-              <span>{source.kind}{source.isPrimary ? ' / principal' : ''} / comprobada {source.checkedAt}</span>
+              <span>
+                {formatSourceCitationMeta({
+                  kindLabel: source.kind,
+                  isPrimary: source.isPrimary,
+                  checkedAt: source.checkedAt,
+                })}
+              </span>
             </li>
           ))
         }
