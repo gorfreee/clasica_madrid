@@ -5,6 +5,7 @@ import { reconcileHarvest, type HarvestObservation } from '../src/ingestion/reco
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { eventIdSourceKey } from '../src/ingestion/to-candidate.ts';
 import { emptyIngestAiSummary } from '../src/ingestion/types.ts';
+import { normalizeUrl } from '../src/ingestion/urls.ts';
 import type { ClassificationResult } from '../src/ingestion/classification/types.ts';
 import type { NormalizedEvent } from '../src/ingestion/normalize.ts';
 import type { RawEvent } from '../src/ingestion/types.ts';
@@ -116,12 +117,12 @@ function expectAtomicCreacionProvenance(event: Event, options?: { sharedUrl?: st
   expect(event.citations).toHaveLength(2);
   expect(citationOf(event, auditorio.catalogSourceId)).toMatchObject({
     sourceId: auditorio.catalogSourceId,
-    url: options?.sharedUrl ?? AUDITORIO_URL,
+    url: normalizeUrl(options?.sharedUrl ?? AUDITORIO_URL),
     externalId: AUDITORIO_EXTERNAL_ID,
   });
   expect(citationOf(event, orcam.catalogSourceId)).toMatchObject({
     sourceId: orcam.catalogSourceId,
-    url: options?.sharedUrl ?? ORCAM_URL,
+    url: normalizeUrl(options?.sharedUrl ?? ORCAM_URL),
     externalId: ORCAM_EXTERNAL_ID,
   });
   expect(citationOf(event, auditorio.catalogSourceId)?.externalId).not.toBe(ORCAM_EXTERNAL_ID);
@@ -280,7 +281,7 @@ describe('corroboración cross-source vs duplicados del lote', () => {
     expect(updated.occurrences.map((item) => item.date)).toEqual([movedDate]);
     expect(citationOf(updated, auditorio.catalogSourceId)).toMatchObject({
       sourceId: auditorio.catalogSourceId,
-      url: AUDITORIO_URL,
+      url: normalizeUrl(AUDITORIO_URL),
       externalId: AUDITORIO_EXTERNAL_ID,
     });
   });

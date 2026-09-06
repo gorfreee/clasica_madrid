@@ -1123,7 +1123,8 @@ describe('pipeline — new, unchanged, updates', () => {
     expect(duplicates.run.summary.newEvents).toBe(1);
     expect(duplicates.run.summary.batchDuplicates).toBe(1);
     expect(duplicates.run.candidates).toHaveLength(1);
-    expect(duplicates.run.candidates[0]!.event.citations.length).toBeGreaterThan(1);
+    expect(duplicates.run.candidates[0]!.event.citations).toHaveLength(1);
+    expect(duplicates.run.candidates[0]!.event.citations[0]?.sourceId).toBe('src_auditorio_nacional');
 
     const conflict = await runAuditorio({
       items: [
