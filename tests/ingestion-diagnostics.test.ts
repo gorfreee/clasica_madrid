@@ -291,6 +291,45 @@ describe('funnel e invariantes', () => {
     ]);
   });
 
+  it('describe unresolved-taxonomy por campos vacíos, no por el ruleId de include', () => {
+    const items = attentionItems(
+      report({
+        events: [
+          decision({
+            title: 'Sin taxonomía',
+            publishable: true,
+            candidateGenerated: true,
+            identity: { action: 'new' },
+            eligibility: { value: 'include', method: 'knowledge', ruleId: 'known-classical-composer', evidence: [] },
+            candidate: {
+              id: 'evt_x',
+              slug: 'x',
+              status: 'scheduled',
+              venueId: 'ven_x',
+              performers: [],
+              composers: [],
+              works: [],
+              eras: [],
+              formats: [],
+              kind: 'established',
+              access: 'unknown',
+              occurrences: [],
+            },
+          }),
+        ],
+        possiblyMissing: [],
+      }),
+    );
+    expect(items).toEqual([
+      expect.objectContaining({
+        title: 'Sin taxonomía',
+        problems: 'unresolved-taxonomy',
+        reason: 'eras+formats',
+        outcome: 'created',
+      }),
+    ]);
+  });
+
   it('el Markdown humano contiene las secciones y datos semánticos', () => {
     const markdown = formatAutomationSummary(built, 'https://example.com/run');
     expect(markdown).toContain('### Resumen');

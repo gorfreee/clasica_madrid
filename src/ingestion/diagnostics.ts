@@ -222,7 +222,18 @@ function attentionReason(decision: IngestEventDecision, outcomeReason: string | 
   if (decision.hydration.status === 'failed') {
     return decision.hydration.reason ?? decision.hydration.message ?? outcomeReason;
   }
+  const missingTaxonomy = unresolvedTaxonomyReason(decision);
+  if (missingTaxonomy) return missingTaxonomy;
   return outcomeReason ?? decision.eligibility?.ruleId;
+}
+
+function unresolvedTaxonomyReason(decision: IngestEventDecision): string | undefined {
+  const snapshot = decision.candidate;
+  if (!decision.publishable || !decision.candidateGenerated || !snapshot) return undefined;
+  const missing: string[] = [];
+  if (snapshot.eras.length === 0) missing.push('eras');
+  if (snapshot.formats.length === 0) missing.push('formats');
+  return missing.length > 0 ? missing.join('+') : undefined;
 }
 
 function compareAttention(left: AttentionItem, right: AttentionItem): number {
