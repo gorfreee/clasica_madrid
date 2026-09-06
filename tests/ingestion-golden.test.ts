@@ -1,9 +1,8 @@
-import { readdir } from 'node:fs/promises';
+import { mkdtemp, readdir, writeFile } from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
-  ELIGIBILITIES,
-  goldenCaseSchema,
   isAutomaticallyPublishable,
   type GoldenCase,
 } from '../src/ingestion/classification/golden-case.ts';
@@ -12,7 +11,7 @@ import { loadGoldenCases } from '../src/ingestion/classification/load-golden-cas
 const casesDir = path.join(import.meta.dirname, 'fixtures', 'ingestion', 'golden', 'cases');
 
 describe('golden classification dataset', () => {
-  it('carga todos los casos, el schema es válido y los caseId son únicos', async () => {
+  it('carga al menos 35 casos, 1:1 con los ficheros y caseId únicos coincidentes con el nombre', async () => {
     const files = (await readdir(casesDir)).filter((name) => name.endsWith('.json')).sort();
     const cases = await loadGoldenCases(casesDir);
 
@@ -24,30 +23,15 @@ describe('golden classification dataset', () => {
 
     for (const item of cases) {
       expect(files).toContain(`${item.caseId}.json`);
-      expect(goldenCaseSchema.parse(item).caseId).toBe(item.caseId);
     }
   });
 
-  it('cada caso tiene fuente, título observado y expected mínimo', async () => {
-    const cases = await loadGoldenCases(casesDir);
-    for (const item of cases) {
-      expect(item.sourceId.length).toBeGreaterThan(0);
-      expect(item.sourceUrl.startsWith('http')).toBe(true);
-      expect(item.listingTitle.length).toBeGreaterThan(0);
-      expect(item.observed.title.length).toBeGreaterThan(0);
-      expect(ELIGIBILITIES).toContain(item.expected.eligibility);
-      expect(item.reason.length).toBeGreaterThan(0);
-      expect(item.checkedAt).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-    }
-  });
-
-  it('los casos uncertain explican la evidencia que falta y no son publicables', async () => {
+  it('el golden set incluye casos uncertain y no los trata como publicables', async () => {
     const cases = await loadGoldenCases(casesDir);
     const uncertain = cases.filter((item) => item.expected.eligibility === 'uncertain');
     expect(uncertain.length).toBeGreaterThanOrEqual(4);
 
     for (const item of uncertain) {
-      expect(item.missingEvidence?.trim().length).toBeGreaterThan(0);
       expect(isAutomaticallyPublishable(item.expected.eligibility)).toBe(false);
     }
   });
@@ -62,7 +46,6 @@ describe('golden classification dataset', () => {
 
     for (const item of include) {
       expect(isAutomaticallyPublishable(item.expected.eligibility)).toBe(true);
-      expect(item.expected.kind).toBeDefined();
     }
     for (const item of exclude) {
       expect(isAutomaticallyPublishable(item.expected.eligibility)).toBe(false);
@@ -85,16 +68,31 @@ describe('golden classification dataset', () => {
     expect(cndmCasals?.expected.eligibility).toBe('include');
   });
 
-  it('no usa observed composers/works inventados: los expected eras no obligan a inventar nombres', async () => {
-    const cases = await loadGoldenCases(casesDir);
-    for (const item of cases) {
-      for (const composer of item.observed.composers) {
-        expect(composer.name.trim().length).toBeGreaterThan(0);
-      }
-      for (const work of item.observed.works) {
-        expect(work.title.trim().length).toBeGreaterThan(0);
-      }
-    }
+  it('rechaza un JSON parseable que no cumple goldenCaseSchema', async () => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), 'clasica-golden-invalid-'));
+    await writeFile(
+      path.join(dir, 'golden_invalid_schema.json'),
+      JSON.stringify({
+        schemaVersion: 1,
+        caseId: 'golden_invalid_schema',
+        origin: 'phase1-smoke',
+        sourceId: '',
+        sourceUrl: 'https://example.test/listing',
+        listingTitle: 'Título observado',
+        observed: { title: 'Título observado' },
+        expected: {
+          eligibility: 'exclude',
+          formats: [],
+          eras: [],
+          access: 'unknown',
+        },
+        reason: 'Caso sintético inválido: sourceId vacío',
+        checkedAt: '2026-09-06',
+      }),
+      'utf8',
+    );
+
+    await expect(loadGoldenCases(dir)).rejects.toThrow(/golden case golden_invalid_schema\.json/);
   });
 });
 
