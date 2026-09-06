@@ -41,7 +41,11 @@ export const KNOWN_VENUES: KnownVenue[] = [
     },
   },
   {
-    keys: ['fundacion juan march auditorio'],
+    keys: [
+      'fundacion juan march auditorio',
+      'auditorio de la fundacion juan march',
+      'auditorio fundacion juan march',
+    ],
     venue: {
       schemaVersion: 1,
       id: 'ven_fundacion_juan_march_auditorio',
@@ -549,6 +553,10 @@ export const KNOWN_VENUES: KnownVenue[] = [
 const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
   'fundacion-juan-march': {
     'fundacion juan march madrid': 'ven_fundacion_juan_march_auditorio',
+  },
+  'teatro-zarzuela': {
+    'auditorio de la fundacion juan march': 'ven_fundacion_juan_march_auditorio',
+    'fundacion juan march': 'ven_fundacion_juan_march',
   },
   'fundacion-canal': {
     'auditorio mateo inurria 2': 'ven_auditorio_fundacion_canal',

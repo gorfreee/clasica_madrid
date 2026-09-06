@@ -1,5 +1,6 @@
 import { mergeObserved, type ObservedFactPatch } from './observed.ts';
 import { normalizeUrl } from './urls.ts';
+import { ZarzuelaStructuralSkipError } from './detail/teatro-zarzuela.ts';
 import { createZarzuelaDetailClient, zarzuelaOutsideWindow } from './detail/zarzuela-hydration.ts';
 import type { AdapterContext, HydrationMeta, RawEvent, RawOccurrence, SourceAdapter } from './types.ts';
 
@@ -59,6 +60,15 @@ export async function hydrateEvents(
       }
       hydrated.push(hydratedEvent);
     } catch (error) {
+      if (error instanceof ZarzuelaStructuralSkipError) {
+        hydrated.push(withHydration(event, {
+          ...meta,
+          status: 'succeeded',
+          reason: 'structural-skip',
+          message: error.message,
+        }));
+        continue;
+      }
       const message = error instanceof Error ? error.message : String(error);
       hydrated.push(withHydration(event, { ...meta, status: 'failed', message, ...(zarzuelaGet ? { reason: 'parse-failed' as const } : {}) }));
     }

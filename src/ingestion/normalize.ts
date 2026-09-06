@@ -51,6 +51,9 @@ export type NormalizedEvent = {
 };
 
 export function normalizeSkipReason(raw: RawEvent): string | undefined {
+  if (raw.hydration?.reason === 'structural-skip') {
+    return raw.hydration.message ?? 'estructura no publicable';
+  }
   if (normalizeRawEvent(raw)) return undefined;
   if (raw.hydration?.reason === 'outside-window') return 'fuera de ventana (hint del listing; ficha no solicitada)';
   if (raw.hydration?.reason === 'circuit-open') return 'ficha no solicitada: circuito abierto';

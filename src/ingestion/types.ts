@@ -29,7 +29,7 @@ export type HydrationMeta = {
   status: HydrationStatus;
   detailUrl?: string;
   message?: string;
-  reason?: 'outside-window' | 'circuit-open' | 'request-failed' | 'parse-failed';
+  reason?: 'outside-window' | 'circuit-open' | 'request-failed' | 'parse-failed' | 'structural-skip';
   requestAttempts?: number;
   httpStatuses?: number[];
   retryDelaysMs?: number[];

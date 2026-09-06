@@ -3,9 +3,9 @@ import path from 'node:path';
 import os from 'node:os';
 import { describe, expect, it, vi, afterEach } from 'vitest';
 import { parseZarzuelaListing, teatroZarzuelaAdapter } from '../src/ingestion/sources/teatro-zarzuela.ts';
-import { parseZarzuelaDetail } from '../src/ingestion/detail/teatro-zarzuela.ts';
+import { parseZarzuelaDetail, ZarzuelaStructuralSkipError } from '../src/ingestion/detail/teatro-zarzuela.ts';
 import { parseZarzuelaSchedule } from '../src/ingestion/detail/zarzuela-schedule.ts';
-import { hydrateEvents } from '../src/ingestion/hydrate.ts';
+import { hydrateEvents, requiredHydrationCoverage } from '../src/ingestion/hydrate.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { runIngest } from '../src/ingestion/pipeline.ts';
 import { emptyCatalog } from '../src/lib/domain/catalog.ts';
@@ -18,6 +18,7 @@ import { toCandidate } from '../src/ingestion/to-candidate.ts';
 import { IncompleteListingError, type AdapterContext, type RawEvent } from '../src/ingestion/types.ts';
 import { HttpError } from '../src/ingestion/http.ts';
 import { resetZarzuelaOriginSessions, setZarzuelaClock } from '../src/ingestion/detail/zarzuela-transport.ts';
+import { matchVenue, unpublishedMatchedVenue } from '../src/ingestion/venues.ts';
 import { TEST_NOW, TEST_WINDOW, makeEvent, makeVenue } from './helpers.ts';
 
 const base = 'https://teatrodelazarzuela.inaem.gob.es';
@@ -227,15 +228,120 @@ describe('fichas y horarios de Zarzuela', () => {
     expect(double.occurrences?.filter((o) => o.date === '2027-04-16')).toHaveLength(1);
   });
 
+  it('expande un rango explícito de ficha con varias horas y un día aparte', async () => {
+    const patch = parseZarzuelaDetail(
+      raw('el-duo-de-la-africana-escolares'),
+      await fixture('detail-africana-escolares'),
+    );
+    expect(patch.venueText).toBe('Teatro de la Zarzuela');
+    expect(patch.occurrences?.map((o) => `${o.date} ${o.time}`)).toEqual([
+      '2027-04-12 10:00', '2027-04-12 12:30',
+      '2027-04-13 10:00', '2027-04-13 12:30',
+      '2027-04-14 10:00', '2027-04-14 12:30',
+      '2027-04-15 10:00', '2027-04-15 12:30',
+      '2027-04-16 11:00',
+    ]);
+    expect(parseZarzuelaSchedule(
+      '<p>Del 12 al 15 de abril de 2027 (10:00 y 12:30 horas), 16 de abril (11:00 horas)</p>',
+    ).map((o) => `${o.date} ${o.time}`)).toEqual([
+      '2027-04-12 10:00', '2027-04-12 12:30',
+      '2027-04-13 10:00', '2027-04-13 12:30',
+      '2027-04-14 10:00', '2027-04-14 12:30',
+      '2027-04-15 10:00', '2027-04-15 12:30',
+      '2027-04-16 11:00',
+    ]);
+  });
+
+  it('hidrata una única sede externa resoluble, sin atribuirla al Teatro de la Zarzuela', async () => {
+    const patch = parseZarzuelaDetail(
+      raw('andromeda-y-perseo-escolares'),
+      await fixture('detail-andromeda-escolares'),
+    );
+    expect(patch.venueText).toMatch(/auditorio de la fundaci[oó]n juan march/i);
+    expect(patch.venueText).not.toBe('Teatro de la Zarzuela');
+    expect(patch.occurrences?.map((o) => `${o.date} ${o.time}`)).toEqual([
+      '2026-09-29 11:30', '2026-10-02 11:30', '2026-10-06 11:30',
+    ]);
+    const catalog = emptyCatalog();
+    catalog.venues = [
+      makeVenue({ id: 'ven_teatro_zarzuela', slug: 'teatro-de-la-zarzuela', name: 'Teatro de la Zarzuela', url: base }),
+      makeVenue({
+        id: 'ven_fundacion_juan_march',
+        slug: 'fundacion-juan-march',
+        name: 'Fundación Juan March',
+        url: 'https://www.march.es/es/madrid',
+      }),
+      makeVenue({
+        id: 'ven_fundacion_juan_march_auditorio',
+        slug: 'fundacion-juan-march-auditorio',
+        name: 'Fundación Juan March — Auditorio',
+        url: 'https://www.march.es/es/madrid',
+        parentVenueId: 'ven_fundacion_juan_march',
+        spaceName: 'Auditorio',
+      }),
+    ];
+    const match = matchVenue({ venueText: patch.venueText, sourceId: source.id }, catalog);
+    expect(match?.venue.id).toBe('ven_fundacion_juan_march_auditorio');
+    expect(unpublishedMatchedVenue(match, catalog)).toBeUndefined();
+  });
+
+  it('no aplasta varias sedes ni usa expand; es un skip estructural diagnosticado', async () => {
+    expect(teatroZarzuelaAdapter.expand).toBeUndefined();
+    const html = await fixture('detail-external');
+    expect(() => parseZarzuelaDetail(raw('andromeda-y-perseo'), html)).toThrow(ZarzuelaStructuralSkipError);
+    expect(() => parseZarzuelaDetail(raw('andromeda-y-perseo'), html)).toThrow(/varias sedes/);
+    vi.useFakeTimers();
+    try {
+      const event = raw('andromeda-y-perseo');
+      const pending = hydrateEvents([event], teatroZarzuelaAdapter, {
+        ...context,
+        get: async () => html,
+      });
+      await vi.runAllTimersAsync();
+      const [hydrated] = await pending;
+      expect(hydrated?.hydration).toMatchObject({
+        status: 'succeeded',
+        reason: 'structural-skip',
+      });
+      expect(hydrated?.hydration?.message).toMatch(/varias sedes/);
+      expect(hydrated?.observed.occurrences).toEqual([]);
+      expect(hydrated?.observed.venueText).toBeUndefined();
+      expect(requiredHydrationCoverage([hydrated!])).toMatchObject({
+        succeeded: 1, unavailable: 0, incomplete: false, severe: false,
+      });
+    } finally { vi.useRealTimers(); }
+  });
+
+  it('reconoce la ficha K2 sin Fechas y Horarios y no inventa un calendario', async () => {
+    const html = await fixture('detail-missing-schedule');
+    expect(() => parseZarzuelaDetail(raw(), html)).toThrow(ZarzuelaStructuralSkipError);
+    expect(() => parseZarzuelaDetail(raw(), html)).toThrow(/sin Fechas y Horarios/);
+    expect(() => parseZarzuelaDetail(raw(), '<html>error</html>')).toThrow(/K2/);
+  });
+
+  it('lee el elenco del intro y corrige un mes contradictorio con un listing de un único día', async () => {
+    const html = await fixture('detail-don-manuel');
+    expect(() => parseZarzuelaDetail(raw(), html)).toThrow(/d[ií]a de la semana/);
+    const patch = parseZarzuelaDetail({
+      ...raw('feliz-cumplea%C3%B1os-don-manuel'),
+      listingDateText: 'Lunes, 23 de noviembre de 2026',
+    }, html);
+    expect(patch.occurrences).toEqual([
+      expect.objectContaining({ date: '2026-11-23', time: '19:30' }),
+    ]);
+    expect(patch.venueText).toBe('Teatro de la Zarzuela');
+    expect(patch.performers).toEqual([
+      { name: 'CAROLINA ALCAIDE', roleText: 'Mezzosoprano' },
+      { name: 'RAMÓN GRAU', roleText: 'Piano' },
+      { name: 'SYLVIA TORÁN', roleText: 'Piano' },
+    ]);
+    expect(patch.performers?.some((item) => /bail/i.test(item.name) || /bail/i.test(item.roleText ?? ''))).toBe(false);
+  });
+
   it('no clasifica danza ni asigna sedes externas por ser una programación de Zarzuela', async () => {
     const patch = parseZarzuelaDetail(raw(), await fixture('detail-dance'));
     expect(patch.categoryText).toBe('Danza');
     expect(patch).not.toHaveProperty('eligibility');
-    expect(() => parseZarzuelaDetail(raw(), '<html>error</html>')).toThrow(/K2/);
-    const external = await fixture('detail-external');
-    expect(() => parseZarzuelaDetail(raw(), external)).toThrow(/sede externa/);
-    const missing = await fixture('detail-missing-schedule');
-    expect(() => parseZarzuelaDetail(raw(), missing)).toThrow(/secciones/);
   });
 
   it('hidrata funciones escolares en la sala principal, sin tratarla como sede externa', async () => {
@@ -256,13 +362,14 @@ describe('fichas y horarios de Zarzuela', () => {
   });
 
   it.each([
-    'Del 1 al 4 de octubre de 2026 19:30 horas',
     '1 de octubre 19:30 horas',
     '31 de febrero de 2027 19:30 horas',
     '1 de octubre de 2026 25:00 horas',
     '1 de octubre de 2026 19:30 horas, excepto festivos',
     'Lunes, 23 de octubre de 2026 19:30 horas',
     '1 de octubre de 2026',
+    'Del 12 al 15 de abril de 2027',
+    'Del 1 de enero al 31 de diciembre de 2027 19:30 horas',
   ])('rechaza un calendario incompleto o contradictorio: %s', (text) => {
     expect(() => parseZarzuelaSchedule(`<p>${text}</p>`)).toThrow(/teatro-zarzuela/);
   });
@@ -294,10 +401,14 @@ describe('fichas y horarios de Zarzuela', () => {
     ]);
   });
 
-  it('no toma un rango ni una lista de días sin mes y año explícitos', () => {
-    expect(() => parseZarzuelaSchedule('<p>Del 12 al 15 de abril de 2027 (10:00 y 12:30 horas)</p>')).toThrow(
-      /teatro-zarzuela/,
-    );
+  it('no usa un rango del listing para reparar un weekday contradictorio de la ficha', () => {
+    expect(() => parseZarzuelaSchedule('<p>Lunes, 23 de octubre de 2026 19:30 horas</p>', {
+      listingDateText: 'Del 23 de octubre al 25 de octubre de 2026',
+    })).toThrow(/d[ií]a de la semana/);
+  });
+
+  it('no toma un rango del listing ni una lista de días sin mes y año explícitos', () => {
+    expect(() => parseZarzuelaSchedule('<p>Del 12 al 15 de abril de 2027</p>')).toThrow(/teatro-zarzuela/);
     expect(() => parseZarzuelaSchedule('<p>9, 10, 11, 12 y 13. 19:30 horas</p>')).toThrow(/teatro-zarzuela/);
   });
 
@@ -358,7 +469,23 @@ function zarzuelaPublishable(patch: ReturnType<typeof parseZarzuelaDetail>, titl
   const classification = classify(observedFactsFromNormalized(enriched));
   expect(isPublishableInclude(classification), classification.eligibility.ruleId).toBe(true);
   const catalog = emptyCatalog();
-  catalog.venues = [makeVenue({ id: 'ven_teatro_zarzuela', slug: 'teatro-de-la-zarzuela', name: 'Teatro de la Zarzuela', url: base })];
+  catalog.venues = [
+    makeVenue({ id: 'ven_teatro_zarzuela', slug: 'teatro-de-la-zarzuela', name: 'Teatro de la Zarzuela', url: base }),
+    makeVenue({
+      id: 'ven_fundacion_juan_march',
+      slug: 'fundacion-juan-march',
+      name: 'Fundación Juan March',
+      url: 'https://www.march.es/es/madrid',
+    }),
+    makeVenue({
+      id: 'ven_fundacion_juan_march_auditorio',
+      slug: 'fundacion-juan-march-auditorio',
+      name: 'Fundación Juan March — Auditorio',
+      url: 'https://www.march.es/es/madrid',
+      parentVenueId: 'ven_fundacion_juan_march',
+      spaceName: 'Auditorio',
+    }),
+  ];
   const built = toCandidate(
     enriched,
     source,
