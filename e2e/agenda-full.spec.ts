@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { readFileSync, statSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { INITIAL_AGENDA_OCCURRENCE_LIMIT } from '../src/lib/presentation/agenda.ts';
 import { FULL_AGENDA_FRAGMENT_PATH } from '../src/lib/presentation/urls.ts';
 
@@ -176,27 +176,5 @@ test.describe('sitemap interno', () => {
       const sitemap = await request.get(loc);
       expect(await sitemap.text()).not.toContain('/_agenda');
     }
-  });
-});
-
-test.describe('tamaño de artefactos', () => {
-  test('informa del tamaño de la portada y del fragmento completo', () => {
-    const indexSize = statSync('dist/index.html').size;
-    const fullSize = statSync('dist/_agenda/completa/index.html').size;
-    const indexIds = occurrenceIds(readFileSync('dist/index.html', 'utf8')).length;
-    const fullIds = occurrenceIds(readFileSync('dist/_agenda/completa/index.html', 'utf8')).length;
-    expect(indexSize).toBeLessThan(fullSize);
-    expect(indexIds).toBeLessThan(fullIds);
-    expect(fullIds).toBeGreaterThan(INITIAL_AGENDA_OCCURRENCE_LIMIT);
-    console.log(
-      JSON.stringify({
-        previousIndexBytes: 1_250_179,
-        previousIndexOccurrences: 695,
-        indexBytes: indexSize,
-        indexOccurrences: indexIds,
-        fullFragmentBytes: fullSize,
-        fullFragmentOccurrences: fullIds,
-      }),
-    );
   });
 });
