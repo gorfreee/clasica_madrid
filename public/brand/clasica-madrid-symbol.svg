@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="80" viewBox="0 0 100 80" role="img" aria-labelledby="title desc">
+  <title id="title">Clásica Madrid — símbolo Patio de butacas</title>
+  <desc id="desc">Tres semicírculos concéntricos rodean un punto de interpretación, como una sala vista en planta.</desc>
+  <g fill="#0055A0">
+    <path d="M1 30A49 49 0 0 0 99 30H90A40 40 0 0 1 10 30Z"/>
+    <path d="M16 30A34 34 0 0 0 84 30H75A25 25 0 0 1 25 30Z"/>
+    <path d="M31 30A19 19 0 0 0 69 30H60A10 10 0 0 1 40 30Z"/>
+    <path d="M44 22a6 6 0 1 0 12 0 6 6 0 1 0-12 0Z"/>
+  </g>
+</svg>

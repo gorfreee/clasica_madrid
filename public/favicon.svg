@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="-6 -8.5 112 112" role="img" aria-labelledby="title desc">
+  <title id="title">Clásica Madrid</title>
+  <desc id="desc">Versión óptica del símbolo Patio de butacas, simplificada para tamaños pequeños.</desc>
+  <g fill="#0055A0">
+    <path d="M1 30A49 49 0 0 0 99 30H86A36 36 0 0 1 14 30Z"/>
+    <path d="M22 30A28 28 0 0 0 78 30H65A15 15 0 0 1 35 30Z"/>
+    <path d="M43 22a7 7 0 1 0 14 0 7 7 0 1 0-14 0Z"/>
+  </g>
+</svg>
