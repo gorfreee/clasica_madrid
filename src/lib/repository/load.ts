@@ -41,9 +41,13 @@ export function clearPublishedCatalogCache(): void {
 export async function loadCatalogFromDir(rootDir: string): Promise<Catalog> {
   const files = await readRawCatalogFiles(rootDir);
   const report = validateRawFiles(files);
-  if (!report.ok) {
-    const details = report.issues
-      .filter((issue) => issue.severity === 'error')
+  // `schedule-review` is a CI/validate error, but the site still has to load
+  // historically published rows until a separate editorial cleanup.
+  const blocking = report.issues.filter(
+    (issue) => issue.severity === 'error' && issue.code !== 'schedule-review',
+  );
+  if (blocking.length > 0) {
+    const details = blocking
       .map((issue) => `${issue.path ?? '?'}: ${issue.message}`)
       .join('\n');
     throw new CatalogValidationError(`Catálogo inválido:\n${details}`);
