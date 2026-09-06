@@ -478,7 +478,13 @@ function withOccurrenceStatus(occurrence: Occurrence, cancelled: boolean): Occur
   return cancelled ? { ...occurrence, status: 'cancelled' } : occurrence;
 }
 
-function mergeCitationLists(existing: Citation[], incoming: Citation[]): Citation[] {
+/**
+ * Union citations without mixing identity across sources.
+ * Same source + equivalent URL (or the same source with a later observation)
+ * collapses to one citation. Two sources may keep two citations even when they
+ * happen to share a URL.
+ */
+export function mergeCitationLists(existing: Citation[], incoming: Citation[]): Citation[] {
   const result = [...existing];
   for (const citation of incoming) {
     const index = result.findIndex(

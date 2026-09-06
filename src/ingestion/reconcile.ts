@@ -17,6 +17,7 @@ import {
 } from './identity.ts';
 import {
   materialProposalConflict,
+  mergeCitationLists,
   mergeExistingEvent,
   mergeProposals,
   proposalFromObservation,
@@ -420,10 +421,8 @@ function applyNewGroup(
 
   const primary = group[0]!;
   let mergedEvent = primary.observation.event;
-  const extraCitations = [...primary.proposal.citations];
   for (const item of group.slice(1)) {
-    mergedEvent = overlayNormalized(mergedEvent, item.observation.event);
-    extraCitations.push(...item.proposal.citations);
+    mergedEvent = overlayNormalizedFacts(mergedEvent, item.observation.event);
   }
 
   const classification = primary.observation.classification;
@@ -453,12 +452,10 @@ function applyNewGroup(
   }
 
   const candidate = built.candidate;
-  const seenUrls = new Set(candidate.event.citations.map((item) => item.url));
-  for (const citation of extraCitations) {
-    if (seenUrls.has(citation.url)) continue;
-    seenUrls.add(citation.url);
-    candidate.event.citations.push(citation);
-  }
+  candidate.event.citations = mergeCitationLists(
+    candidate.event.citations,
+    group.flatMap((item) => item.proposal.citations),
+  );
   candidates.push(candidate);
   stats.newEvents += 1;
   const grouped = recordGroupedObservations(group, stats);
@@ -686,7 +683,14 @@ function driftOf(
   return { eligibility: eligibility.value, ruleId: eligibility.ruleId };
 }
 
-function overlayNormalized(base: NormalizedEvent, incoming: NormalizedEvent): NormalizedEvent {
+/**
+ * Combine event facts from a secondary observation onto the primary.
+ * Provenance is atomic per observation: sourceId, sourceUrl, externalId and
+ * source-specific venueFacilityId stay on the primary and are never mixed
+ * field-by-field with another scrape. Secondary citations are attached
+ * separately from each observation's own proposal.
+ */
+function overlayNormalizedFacts(base: NormalizedEvent, incoming: NormalizedEvent): NormalizedEvent {
   return {
     ...base,
     title: incoming.title || base.title,
@@ -698,13 +702,15 @@ function overlayNormalized(base: NormalizedEvent, incoming: NormalizedEvent): No
     // (Cámara) | Madrid" used to replace Auditorio's "Sala de Cámara" and then
     // fail matchVenue because the surviving sourceId is auditorio-nacional.
     venueText: base.venueText ?? incoming.venueText,
-    venueFacilityId: incoming.venueFacilityId ?? base.venueFacilityId,
     performers: incoming.performers.length > 0 ? incoming.performers : base.performers,
     composers: incoming.composers.length > 0 ? incoming.composers : base.composers,
     works: incoming.works.length > 0 ? incoming.works : base.works,
     programText: incoming.programText ?? base.programText,
     accessText: incoming.accessText ?? base.accessText,
-    externalId: incoming.externalId ?? base.externalId,
+    sourceId: base.sourceId,
+    sourceUrl: base.sourceUrl,
+    externalId: base.externalId,
+    venueFacilityId: base.venueFacilityId,
   };
 }
 
