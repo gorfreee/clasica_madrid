@@ -494,6 +494,17 @@ describe('composer knowledge base', () => {
     expect(looksLikeComposerLine('IX. Adagio')).toBe(false);
     expect(looksLikeComposerLine('VIII.Nana de Sevilla')).toBe(false);
     expect(looksLikeComposerLine('Johannes Brahms (1833-1897)')).toBe(true);
+    expect(looksLikeComposerLine('Marina Vespertilio (1991)')).toBe(true);
+    expect(looksLikeComposerLine('Sebastian Bartmann (*1979)')).toBe(true);
+    expect(looksLikeComposerLine('Michael Nyman (1944-)')).toBe(true);
+    expect(looksLikeComposerLine('Christian Fritz (1988 -)')).toBe(true);
+    expect(looksLikeComposerLine('Improvisaciones sobre la película Amanecer (1927)')).toBe(false);
+    expect(looksLikeComposerLine('de Friedrich Wilhelm Murnau (1888-1931)')).toBe(false);
+    expect(looksLikeComposerLine('La Bohème (1965)')).toBe(false);
+    expect(looksLikeComposerLine("Le roi s'amuse (1882)")).toBe(false);
+    expect(looksLikeComposerLine('Fast Blue Village (2022)')).toBe(false);
+    expect(looksLikeComposerLine('Adam Ilyas Kuruc (1984-)')).toBe(true);
+    expect(looksLikeComposerLine('JAVIER MARTÍNEZ CAMPOS (1989)')).toBe(true);
     expect(looksLikeProgramHeader('I PARTE')).toBe(true);
     expect(looksLikeProgramHeader('II PARTE')).toBe(true);
     expect(looksLikeProgramHeader('PARTE I')).toBe(true);

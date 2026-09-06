@@ -1146,6 +1146,118 @@ describe('parser de ficha Auditorio Nacional', () => {
     );
     expect(facts.works?.some((work) => /^VIII\./i.test(work.title) || /^IX\./i.test(work.title))).toBe(false);
   });
+
+  it('Mischa Maisky: Puccini, Saint-Saëns y Dvořák, sin I. Adagio como compositor', async () => {
+    const html = await readFile(path.join(detailDir, 'auditorio-mischa-maisky.excerpt.html'), 'utf8');
+    const facts = parseAuditorioNacionalDetail(html);
+    const composerNames = facts.composers?.map((item) => item.name) ?? [];
+    const works = facts.works ?? [];
+
+    expect(composerNames.some((name) => /puccini/i.test(name))).toBe(true);
+    expect(composerNames.some((name) => /saint-s[aä]ens/i.test(name))).toBe(true);
+    expect(composerNames.some((name) => /dvor[aá]k/i.test(name))).toBe(true);
+    expect(composerNames.some((name) => /^I\.\s*Adagio$/i.test(name))).toBe(false);
+    expect(works.some((work) => /adagio/i.test(work.composerName ?? ''))).toBe(false);
+    expect(works.some((work) => /^Allegro molto$/i.test(work.title) && /adagio/i.test(work.composerName ?? ''))).toBe(
+      false,
+    );
+    expect(works).toEqual(
+      expect.arrayContaining([
+        { title: 'Preludio Sinfónico', composerName: 'G. PUCCINI' },
+        { title: 'Concierto para violonchelo n.º 1', composerName: 'C. SAINT-SÄENS' },
+        { title: 'Sinfonía nº9 “Del Nuevo Mundo”', composerName: 'A. DVORÁK' },
+      ]),
+    );
+    expect(facts.programText).toMatch(/I\. Adagio – Allegro molto/);
+  });
+
+  it('Thomas Ospital: conserva el programa y no inventa compositores ni obras', async () => {
+    const html = await readFile(path.join(detailDir, 'auditorio-thomas-ospital.excerpt.html'), 'utf8');
+    const facts = parseAuditorioNacionalDetail(html);
+    const composerBlob = JSON.stringify(facts.composers ?? []);
+
+    expect(facts.programText).toMatch(/Improvisaciones sobre la película Amanecer \(1927\)/);
+    expect(facts.programText).toMatch(/Friedrich Wilhelm Murnau \(1888-1931\)/);
+    expect(facts.composers).toEqual([]);
+    expect(facts.works).toEqual([]);
+    expect(composerBlob).not.toMatch(/Improvisaciones sobre la pel[ií]cula/i);
+    expect(composerBlob).not.toMatch(/Murnau/i);
+    expect(composerBlob).not.toMatch(/^de /i);
+  });
+
+  it('UAM Spark: encabezados de sección no se encadenan como composerName', async () => {
+    const html = await readFile(path.join(detailDir, 'auditorio-uam-spark.excerpt.html'), 'utf8');
+    const facts = parseAuditorioNacionalDetail(html);
+    const composerNames = facts.composers?.map((item) => item.name) ?? [];
+    const works = facts.works ?? [];
+    const heading = /like a boho|rapsodia roman[ií]|baile y enso[nñ]aci[oó]n|flauta bohemia|fascinaci[oó]n carmen|utop[ií]as|^overture$/i;
+
+    expect(composerNames.some((name) => heading.test(name))).toBe(false);
+    expect(works.some((work) => heading.test(work.composerName ?? ''))).toBe(false);
+    expect(works.some((work) => heading.test(work.title))).toBe(false);
+    expect(composerNames.some((name) => /poulenc/i.test(name))).toBe(true);
+    expect(composerNames.some((name) => /delibes/i.test(name))).toBe(true);
+    expect(composerNames.some((name) => /nyman/i.test(name))).toBe(true);
+    expect(composerNames.some((name) => /bartmann/i.test(name))).toBe(true);
+    expect(composerNames.some((name) => /kats-chernin/i.test(name))).toBe(true);
+    expect(works).toEqual(
+      expect.arrayContaining([
+        { title: 'Toccata FP 48:3 (1928)', composerName: 'Francis Poulenc (1899-1963)' },
+        { title: 'Chasing Sheep is best left to Shepherds (1982)', composerName: 'Michael Nyman (1944-)' },
+        { title: 'Bohemian Suite (2025/26)', composerName: 'Adam Ilyas Kuruc (1984-)' },
+        { title: 'Fast Blue Village (2022)', composerName: 'Elena Kats-Chernin (1957-)' },
+      ]),
+    );
+    expect(facts.programText).toMatch(/LIKE A BOHO/);
+    expect(facts.programText).toMatch(/RAPSODIA ROMANÍ/);
+  });
+
+  it('un movimiento con guion no abre un compositor; un contemporáneo con años sí', () => {
+    const facts = parseAuditorioNacionalDetail(
+      auditorioPage('Sinfonía y estreno', [
+        'G. VERDI<br />Sinfonía en Re<br />I. Adagio – Allegro molto<br />II. Largo<br />Marina Vespertilio (1991)<br />Nocturno de los tilos, op. 8',
+      ]),
+    );
+    const composerNames = facts.composers?.map((item) => item.name) ?? [];
+    expect(composerNames.some((name) => /^I\.\s*Adagio$/i.test(name))).toBe(false);
+    expect(facts.works?.some((work) => /adagio/i.test(work.composerName ?? ''))).toBe(false);
+    expect(facts.works).toEqual(
+      expect.arrayContaining([
+        { title: 'Sinfonía en Re', composerName: 'G. VERDI' },
+        { title: 'Nocturno de los tilos, op. 8', composerName: 'Marina Vespertilio (1991)' },
+      ]),
+    );
+  });
+
+  it('un encabezado en mayúsculas no se convierte en compositor de la línea siguiente', () => {
+    const facts = parseAuditorioNacionalDetail(
+      auditorioPage('Ciclo de cámara', [
+        'Programa<br />FIRST GROUPING<br />Marina Vespertilio (1991)<br />Nocturno de los tilos, op. 8<br />SECOND GROUPING<br />JAVIER MARTÍNEZ CAMPOS (1989) Kaerlud',
+      ]),
+    );
+    const composerNames = facts.composers?.map((item) => item.name) ?? [];
+    expect(composerNames.some((name) => /first grouping|second grouping/i.test(name))).toBe(false);
+    expect(facts.works?.some((work) => /grouping/i.test(work.composerName ?? ''))).toBe(false);
+    expect(facts.works?.some((work) => /grouping/i.test(work.title))).toBe(false);
+    expect(facts.works).toEqual(
+      expect.arrayContaining([
+        { title: 'Nocturno de los tilos, op. 8', composerName: 'Marina Vespertilio (1991)' },
+        { title: 'Kaerlud', composerName: 'JAVIER MARTÍNEZ CAMPOS (1989)' },
+      ]),
+    );
+    expect(facts.programText).toMatch(/FIRST GROUPING/);
+  });
+
+  it('una frase descriptiva con año y de Autor no fabrica composers ni works', () => {
+    const facts = parseAuditorioNacionalDetail(
+      auditorioPage('Improvisación de órgano', [
+        'THOMAS EJEMPLO órgano<br />Variaciones sobre una película muda (1927), de Un Director De Cine (1888-1931)',
+      ]),
+    );
+    expect(facts.programText).toMatch(/Variaciones sobre una película muda \(1927\)/);
+    expect(facts.composers).toEqual([]);
+    expect(facts.works).toEqual([]);
+  });
 });
 
 describe('parser de ficha Teatro Real', () => {

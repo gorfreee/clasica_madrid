@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  canPairAsAuditorioComposer,
   extractStandaloneKnownComposers,
   findProgramStartIndex,
   looksLikeComposerNameList,
@@ -520,5 +521,50 @@ describe('segmentación performer/programa del Auditorio', () => {
       composerName: 'Edvard Grieg',
       title: 'Danza de Anitra (de Peer Gynt)',
     });
+  });
+
+  it('un movimiento numerado con guion no es Composer – Work', () => {
+    expect(parseComposerColonWork('I. Adagio – Allegro molto')).toBeUndefined();
+    expect(parseComposerColonWork('II. Largo – Andante')).toBeUndefined();
+    expect(parseComposerColonWork('IV. Scherzo – Allegro con fuoco')).toBeUndefined();
+    expect(parseComposerColonWork('Astor Piazzolla – Oblivion')).toEqual({
+      composerName: 'Astor Piazzolla',
+      title: 'Oblivion',
+    });
+    expect(parseComposerColonWork('G. Puccini – Preludio Sinfónico')).toEqual({
+      composerName: 'G. Puccini',
+      title: 'Preludio Sinfónico',
+    });
+  });
+
+  it('canPairAsAuditorioComposer exige evidencia fuerte, no un nombre capitalizado', () => {
+    expect(canPairAsAuditorioComposer('LIKE A BOHO')).toBe(false);
+    expect(canPairAsAuditorioComposer('BAILE Y ENSOÑACIÓN')).toBe(false);
+    expect(canPairAsAuditorioComposer('FIRST GROUPING')).toBe(false);
+    expect(canPairAsAuditorioComposer('I. Adagio')).toBe(false);
+    expect(canPairAsAuditorioComposer('de Friedrich Wilhelm Murnau (1888-1931)')).toBe(false);
+    expect(canPairAsAuditorioComposer('Improvisaciones sobre la película Amanecer (1927)')).toBe(false);
+    expect(canPairAsAuditorioComposer('La Bohème (1965)')).toBe(false);
+    expect(canPairAsAuditorioComposer('G. PUCCINI')).toBe(true);
+    expect(canPairAsAuditorioComposer('Marina Vespertilio (1991)')).toBe(true);
+    expect(canPairAsAuditorioComposer('Christian Fritz (1988 -)')).toBe(true);
+    expect(canPairAsAuditorioComposer('Sebastian Bartmann (*1979)')).toBe(true);
+    expect(canPairAsAuditorioComposer('Johann Sebastian Bach')).toBe(true);
+  });
+
+  it('una frase con año y de Director no es una lista de compositores', () => {
+    expect(
+      extractStandaloneKnownComposers(
+        'Improvisaciones sobre la película Amanecer (1927), de Friedrich Wilhelm Murnau (1888-1931)',
+      ),
+    ).toEqual([]);
+    expect(
+      extractStandaloneKnownComposers('Variaciones sobre una película muda (1927), de Un Director De Cine (1888-1931)'),
+    ).toEqual([]);
+    expect(extractStandaloneKnownComposers('Schubert, Debussy y Ravel')).toEqual([
+      'Schubert',
+      'Debussy',
+      'Ravel',
+    ]);
   });
 });

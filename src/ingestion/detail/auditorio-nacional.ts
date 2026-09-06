@@ -19,6 +19,7 @@ import {
   titleBeginsWithExplicitComposer,
 } from './auditorio-segments.ts';
 import {
+  hasComposerYears,
   looksLikeCatalogOnlyLine,
   looksLikeCatalogWorkLine,
   looksLikeEnsembleName,
@@ -281,6 +282,7 @@ function groupWorksByComposer(lines: string[]): { works: ObservedWork[]; extraCo
       continue;
     }
     if (looksLikeMovementLine(line)) continue;
+    if (looksLikeProgramSectionHeading(line)) continue;
     if (composerName) {
       if (titleBeginsWithExplicitComposer(line, composerName)) {
         composerName = undefined;
@@ -408,6 +410,7 @@ function isStickyComposerHeading(text: string): boolean {
   if (looksLikeMovementLine(text) || looksLikeProductionNote(text) || looksLikeTextCredit(text)) {
     return false;
   }
+  if (/^de\s+/i.test(text)) return false;
   if (looksLikeObrasDeLine(text) || looksLikeComposerNameList(text)) return false;
   if (looksLikeUnequivocalWorkLine(text) || looksLikeCatalogWorkLine(text)) return false;
   if (parseWorkThenPersonCredit(text) || parseComposerColonWork(text) || parseComposerYearWork(text)) {
@@ -415,15 +418,25 @@ function isStickyComposerHeading(text: string): boolean {
   }
   if (parseKnownComposerPrefixWork(text)) return false;
   if (!canPairAsAuditorioComposer(text)) return false;
-  if (hasLifespanYears(text)) return true;
+  if (hasComposerYears(text)) return true;
   // "(Homenaje a Falla)" is a work subtitle, not a lifespan we can strip to a name.
   if (/\([^)]+\)\s*$/u.test(text)) return false;
   const words = text.replace(/\s*\([^)]*\)\s*$/u, '').trim().split(/\s+/).filter(Boolean);
   return words.length >= 2;
 }
 
-function hasLifespanYears(text: string): boolean {
-  return /\(\s*(?:ca\.?\s*)?\d{3,4}/u.test(text);
+function looksLikeProgramSectionHeading(text: string): boolean {
+  const trimmed = text.trim();
+  if (!trimmed || hasComposerYears(trimmed) || looksLikeMovementLine(trimmed)) return false;
+  if (looksLikeUnequivocalWorkLine(trimmed) || looksLikeCatalogWorkLine(trimmed)) return false;
+  if (parseExplicitTitleAuthorWork(trimmed) || parseComposerColonWork(trimmed) || parseComposerYearWork(trimmed)) {
+    return false;
+  }
+  const letters = trimmed.replace(/[^\p{L}]/gu, '');
+  if (letters.length < 4) return false;
+  if (letters !== letters.toLocaleUpperCase('es')) return false;
+  const words = trimmed.split(/\s+/).filter(Boolean);
+  return words.length >= 1 && words.length <= 6;
 }
 
 function pairComposerWorks(lines: string[]): ObservedWork[] {
