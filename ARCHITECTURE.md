@@ -70,7 +70,7 @@ Todo dato publicado debe:
 
 Los eventos pasados se conservan en el repositorio para disponer de histórico y permitir futuras estadísticas. La agenda pública está orientada a presente y futuro; cada evento canónico conserva una página pública estable `/eventos/{slug}` aunque todas sus representaciones hayan pasado. Cada lugar publicado conserva una página `/lugares/{slug}` aunque ya no tenga conciertos próximos; el índice de lugares puede listar sólo espacios con agenda vigente.
 
-Una vez publicado un evento o un lugar, su `slug` es permanente. No hay aliases ni redirects históricos todavía: no se renombra un slug ya publicado. El identificador (`id`) tampoco cambia.
+Una vez publicado un evento o un lugar, su `slug` es permanente. El identificador (`id`) tampoco cambia. No se renombra un slug ya publicado. Si hay que consolidar dos eventos publicados que son el mismo concierto, el canónico conserva su `id`/`slug` y el slug retirado puede quedar como alias histórico explícito que resuelve a esa ficha.
 
 ## Build y publicación
 

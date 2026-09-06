@@ -688,6 +688,25 @@ describe('merge conservador', () => {
     expect(merged.diagnostics.some((diff) => diff.startsWith('title:'))).toBe(true);
     expect(merged.diffs.some((diff) => diff.startsWith('title:'))).toBe(false);
   });
+
+  it('conserva slugAliases históricos al fusionar una observación', () => {
+    const existing = makeEvent({ slugAliases: ['matinees-antigua'] });
+    const proposal = proposalFromObservation(
+      {
+        sourceId: 'auditorio-nacional',
+        sourceUrl: 'https://www.auditorionacional.mcu.es/eventos/matinees',
+        title: 'Matinées de otoño',
+        occurrences: [{ date: '2026-09-15', time: '19:30' }],
+        performers: [{ name: 'OCNE' }],
+        composers: [{ name: 'Ludwig van Beethoven' }],
+        works: [{ title: 'Sinfonía n.º 7' }],
+      },
+      { catalogSourceId: 'src_auditorio', now: TEST_NOW, venueId: existing.venueId },
+    );
+    const merged = mergeExistingEvent(existing, proposal, TEST_NOW);
+    expect(merged.event.slug).toBe(existing.slug);
+    expect(merged.event.slugAliases).toEqual(['matinees-antigua']);
+  });
 });
 
 describe('pipeline — new, unchanged, updates', () => {

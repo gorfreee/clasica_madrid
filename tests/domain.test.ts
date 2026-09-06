@@ -16,7 +16,7 @@ import {
 } from '../src/lib/domain/filters.ts';
 import { findEventBySlug, listCanonicalEvents, listUpcomingOccurrences } from '../src/lib/domain/queries.ts';
 import { buildAgendaPageModel } from '../src/lib/presentation/agenda.ts';
-import { buildEventPageModel, listEventPageSlugs } from '../src/lib/presentation/event.ts';
+import { buildEventPageModel, listEventPageSlugs, listEventStaticPaths } from '../src/lib/presentation/event.ts';
 import { buildVenuePageModel, buildVenuesIndexModel, listVenuePageSlugs } from '../src/lib/presentation/venue.ts';
 import { emptyCatalog } from '../src/lib/domain/catalog.ts';
 import { makeCatalog, makeEvent, makeVenue, richCatalog, testClock } from './helpers.ts';
@@ -100,6 +100,34 @@ describe('consultas de agenda', () => {
     expect(slugs).toContain('concierto-de-verano');
     expect(slugs).toContain('carmen');
     expect(findEventBySlug(richCatalog(), 'concierto-de-verano')?.event.slug).toBe('concierto-de-verano');
+  });
+
+  it('resuelve un slugAlias histórico al evento canónico sin duplicar la agenda', () => {
+    const catalog = makeCatalog({
+      events: [
+        makeEvent({
+          id: 'evt_auditorio_nacional_cndm_lucie_zakova',
+          slug: 'cndm-lucie-zakova',
+          slugAliases: ['lucie-zakova'],
+          title: 'CNDM. Lucie Žáková',
+          occurrences: [{ id: 'occ_zakova_01', date: '2027-02-20', time: '12:00', status: 'scheduled' }],
+        }),
+      ],
+    });
+    expect(findEventBySlug(catalog, 'lucie-zakova')?.event.id).toBe('evt_auditorio_nacional_cndm_lucie_zakova');
+    expect(findEventBySlug(catalog, 'cndm-lucie-zakova')?.event.id).toBe(
+      'evt_auditorio_nacional_cndm_lucie_zakova',
+    );
+    const page = buildEventPageModel(catalog, 'lucie-zakova', testClock);
+    expect(page?.slug).toBe('cndm-lucie-zakova');
+    expect(page?.canonicalPath).toBe('/eventos/cndm-lucie-zakova/');
+    expect(listEventPageSlugs(catalog).sort()).toEqual(['cndm-lucie-zakova', 'lucie-zakova']);
+    expect(listEventStaticPaths(catalog)).toEqual([
+      { slug: 'cndm-lucie-zakova' },
+      { slug: 'lucie-zakova', redirectTo: 'cndm-lucie-zakova' },
+    ]);
+    const upcoming = listUpcomingOccurrences(catalog, testClock);
+    expect(upcoming.map((item) => item.resolved.event.slug)).toEqual(['cndm-lucie-zakova']);
   });
 
   it('elige la próxima representación futura, no la primera scheduled', () => {

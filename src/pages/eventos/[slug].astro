@@ -1,12 +1,16 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { formatSourceCitationMeta } from '../../lib/presentation/labels.ts';
-import { loadEventPage, loadEventSlugs } from '../../lib/presentation/site.ts';
-import { AGENDA_PATH } from '../../lib/presentation/urls.ts';
+import { loadEventPage, loadEventStaticPaths } from '../../lib/presentation/site.ts';
+import { AGENDA_PATH, eventPath } from '../../lib/presentation/urls.ts';
 
 export async function getStaticPaths() {
-  const slugs = await loadEventSlugs();
-  return slugs.map((slug) => ({ params: { slug } }));
+  const paths = await loadEventStaticPaths();
+  return paths.map((item) =>
+    item.redirectTo
+      ? { params: { slug: item.slug }, redirect: eventPath(item.redirectTo) }
+      : { params: { slug: item.slug } },
+  );
 }
 
 const { slug } = Astro.params;
@@ -16,6 +20,9 @@ if (!slug) {
 const model = await loadEventPage(slug);
 if (!model) {
   throw new Error(`Evento no encontrado: ${slug}`);
+}
+if (model.slug !== slug) {
+  return Astro.redirect(model.canonicalPath, 301);
 }
 const primarySource = model.sources.find((source) => source.isPrimary) ?? model.sources[0];
 const featured = model.featuredOccurrence;

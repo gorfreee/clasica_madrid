@@ -110,4 +110,11 @@ describe('sitemap', () => {
     expect(map.get('/')).toBe('2026-08-21');
     expect(map.get('/lugares/auditorio-nacional/')).toBe('2026-08-20');
   });
+
+  it('incluye lastmod del slug histórico de un evento consolidado', () => {
+    const catalog = richCatalog();
+    catalog.events[0] = { ...catalog.events[0]!, slugAliases: ['carmen-antigua'] };
+    const map = sitemapLastmodMap(catalog);
+    expect(map.get('/eventos/carmen-antigua/')).toBe(catalog.events[0]?.lastVerifiedAt);
+  });
 });

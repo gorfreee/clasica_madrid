@@ -29,6 +29,7 @@ const ABSORBED_CNDM: Array<{ externalId: string; eventId: string }> = [
   { externalId: '23813', eventId: 'evt_auditorio_nacional_cndm_le_concert_de_la_loge' },
   { externalId: '23770', eventId: 'evt_auditorio_nacional_cndm_neopercusion' },
   { externalId: '23834', eventId: 'evt_auditorio_nacional_cndm_orquesta_barroca_de_la_universidad_de_salamanca_2' },
+  { externalId: '23846', eventId: 'evt_auditorio_nacional_cndm_lucie_zakova' },
 ];
 
 describe('catálogo publicado tras la limpieza de duplicados de hueco exclusivo', () => {
@@ -66,10 +67,14 @@ describe('catálogo publicado tras la limpieza de duplicados de hueco exclusivo'
     }
 
     const ospital = collisions.find((item) => item.eventIds.includes('evt_auditorio_nacional_cndm_thomas_ospital'));
-    expect(ospital?.kind).toBe('conflict');
-    expect(ospital?.eventIds).toEqual(
-      expect.arrayContaining(['evt_auditorio_nacional_cndm_thomas_ospital', 'evt_cndm_23846']),
+    expect(ospital).toBeUndefined();
+    expect(catalog.events.some((event) => event.id === 'evt_cndm_23846')).toBe(false);
+    const zakova = catalog.events.find(
+      (event) => event.id === 'evt_auditorio_nacional_cndm_lucie_zakova',
     );
+    expect(zakova?.slug).toBe('cndm-lucie-zakova');
+    expect(zakova?.slugAliases).toEqual(['lucie-zakova']);
+    expect(zakova?.occurrences[0]).toMatchObject({ date: '2027-02-20', time: '12:00' });
   });
 
   it('reconoce la siguiente observación CNDM 23900 sobre el evento canónico', async () => {
@@ -92,6 +97,30 @@ describe('catálogo publicado tras la limpieza de duplicados de hueco exclusivo'
       kind: 'matched',
       method: 'externalId',
       event: { id: 'evt_auditorio_nacional_la_filarmonica_oratorio_de_navidad_1' },
+    });
+  });
+
+  it('reconoce la siguiente observación CNDM 23846 sobre Lucie Žáková canónica', async () => {
+    const catalog = await loadCatalogFromDir(defaultDataDir());
+    const match = matchEventIdentity(catalog, {
+      sourceUrl: 'https://cndm.inaem.gob.es/node/23846',
+      externalId: '23846',
+      title: 'Lucie Žáková',
+      occurrences: [{ date: '2027-02-20', time: '12:00' }],
+      performers: [{ name: 'Lucie Žáková' }],
+      composers: [{ name: 'Johann Sebastian Bach (1685-1750)' }],
+      works: [{
+        title: 'Preludio y fuga en la menor, BWV 543 (d. 1715)',
+        composerName: 'Johann Sebastian Bach (1685-1750)',
+      }],
+    }, {
+      catalogSourceId: cndm.catalogSourceId,
+      venueId: 'ven_auditorio_nacional_sala_sinfonica',
+    });
+    expect(match).toMatchObject({
+      kind: 'matched',
+      method: 'externalId',
+      event: { id: 'evt_auditorio_nacional_cndm_lucie_zakova' },
     });
   });
 });

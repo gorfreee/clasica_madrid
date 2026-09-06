@@ -2,6 +2,9 @@
   "schemaVersion": 1,
   "id": "evt_auditorio_nacional_cndm_lucie_zakova",
   "slug": "cndm-lucie-zakova",
+  "slugAliases": [
+    "lucie-zakova"
+  ],
   "title": "CNDM. Lucie Žáková",
   "status": "scheduled",
   "venueId": "ven_auditorio_nacional_sala_sinfonica",
@@ -80,6 +83,12 @@
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-lucie-zakova",
       "checkedAt": "2026-09-06",
       "externalId": "cndm-lucie-zakova"
+    },
+    {
+      "sourceId": "src_cndm",
+      "url": "https://cndm.inaem.gob.es/node/23846",
+      "checkedAt": "2026-09-06",
+      "externalId": "23846"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
