@@ -269,7 +269,7 @@ function buildSelectFilters(upcoming: ResolvedOccurrence[], filters: AgendaFilte
   return [
     {
       name: 'area',
-      label: 'Ámbito',
+      label: 'Zona',
       value: filters.area ?? '',
       options: [
         { value: '', label: 'Madrid y alrededores' },
@@ -305,10 +305,10 @@ function buildSelectFilters(upcoming: ResolvedOccurrence[], filters: AgendaFilte
     },
     {
       name: 'kind',
-      label: 'Contexto',
+      label: 'Programación',
       value: filters.kind ?? '',
       options: [
-        { value: '', label: 'Cualquier contexto' },
+        { value: '', label: 'Cualquier programación' },
         ...EVENT_KINDS.map((id) => ({ value: id, label: kindLabels[id] })),
       ],
     },

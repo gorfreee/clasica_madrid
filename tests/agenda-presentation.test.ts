@@ -189,3 +189,12 @@ describe('ruta interna de la agenda completa', () => {
     expect(sitemapPageFilter('https://clasicamadrid.com/eventos/carmen/')).toBe(true);
   });
 });
+
+describe('etiquetas de recuento de la agenda', () => {
+  it('usa concierto/conciertos en singular y plural', () => {
+    expect(occurrenceCountLabel(1)).toBe('1 concierto próximo');
+    expect(occurrenceCountLabel(87)).toBe('87 conciertos próximos');
+    expect(showingOccurrenceCountLabel(150, 237)).toBe('Mostrando 150 de 237 conciertos próximos');
+    expect(showingOccurrenceCountLabel(1, 1)).toBe('Mostrando 1 de 1 concierto próximo');
+  });
+});

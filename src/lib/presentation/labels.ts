@@ -88,11 +88,11 @@ export function eventStatusLabel(status: 'scheduled' | 'cancelled' | 'postponed'
 }
 
 export function occurrenceCountLabel(count: number): string {
-  return count === 1 ? '1 representación próxima' : `${count} representaciones próximas`;
+  return count === 1 ? '1 concierto próximo' : `${count} conciertos próximos`;
 }
 
 export function showingOccurrenceCountLabel(shown: number, total: number): string {
-  return `Mostrando ${shown} de ${total} representaciones próximas`;
+  return `Mostrando ${shown} de ${total} ${total === 1 ? 'concierto próximo' : 'conciertos próximos'}`;
 }
 
 export const showAllAgendaLabel = 'Mostrar todos';

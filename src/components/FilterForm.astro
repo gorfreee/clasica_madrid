@@ -15,7 +15,7 @@ const { model } = Astro.props;
     <div class="search-line">
       <label class="search-field">
         <span class="visually-hidden">Buscar en la agenda</span>
-        <input type="search" name="q" value={model.query} placeholder="Busca una obra, intérprete, compositor o lugar" />
+        <input type="search" name="q" value={model.query} placeholder="Busca conciertos, intérpretes, compositores o lugares" />
       </label>
       <button class="search-submit" type="submit" aria-label="Aplicar filtros">Buscar</button>
     </div>
@@ -30,7 +30,7 @@ const { model } = Astro.props;
 
     <details class="filters__advanced">
       <summary>
-        <span>Filtros avanzados</span>
+        <span>Más filtros</span>
         <span class="filters__summary-mark" aria-hidden="true">+</span>
       </summary>
       <div class="filters__panel">
@@ -80,7 +80,7 @@ const { model } = Astro.props;
 
     <div class="active-filters" data-active-filters aria-live="polite"></div>
     <div class="filters__clear-row">
-      <a class="filters__clear" href="/" data-clear-filters hidden>Limpiar todo</a>
+      <a class="filters__clear" href="/" data-clear-filters hidden>Limpiar filtros</a>
     </div>
   </form>
   <noscript>

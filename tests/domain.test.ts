@@ -177,8 +177,11 @@ describe('modelos de presentación', () => {
   it('etiqueta established como Circuito habitual en los filtros', () => {
     const model = buildAgendaPageModel(richCatalog(), new URL('https://clasicamadrid.com/'), testClock);
     const kindField = model.selectFilters.find((field) => field.name === 'kind');
+    const areaField = model.selectFilters.find((field) => field.name === 'area');
+    expect(kindField?.label).toBe('Programación');
+    expect(areaField?.label).toBe('Zona');
     expect(kindField?.options.map((option) => option.label)).toEqual([
-      'Cualquier contexto',
+      'Cualquier programación',
       'Circuito habitual',
       'Alternativo',
     ]);
