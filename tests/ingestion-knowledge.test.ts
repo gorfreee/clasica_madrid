@@ -6,6 +6,7 @@ import {
   isObviousNonPerformer,
   looksLikeComposerLine,
   looksLikeEnsembleName,
+  looksLikeNonWorkCredit,
   looksLikeProgramHeader,
   looksLikeWorkLine,
   parseExplicitTitleAuthorWork,
@@ -530,6 +531,15 @@ describe('composer knowledge base', () => {
     expect(looksLikeEnsembleName('Dona nobis pacem, Tres cánones a capella,')).toBe(false);
     expect(looksLikeWorkLine('Der Schwanendreher, para viola y pequeña orquesta')).toBe(true);
     expect(looksLikeWorkLine('Cuarteto «Americano», op. 96 (arr. David Walter)')).toBe(true);
+    expect(looksLikeWorkLine('Arr. Manuel Tévar')).toBe(false);
+    expect(looksLikeWorkLine('Arreglo de Manuel Tévar')).toBe(false);
+    expect(looksLikeWorkLine('Orquestación de Manuel Tévar')).toBe(false);
+    expect(looksLikeNonWorkCredit('Arr. Manuel Tévar')).toBe(true);
+    expect(looksLikeNonWorkCredit('Arreglo Manuel Tévar')).toBe(true);
+    expect(looksLikeNonWorkCredit('Arreglo de Manuel Tévar')).toBe(true);
+    expect(looksLikeNonWorkCredit('Orquestación Manuel Tévar')).toBe(true);
+    expect(looksLikeNonWorkCredit('Texto: Friedrich Hölderlin')).toBe(true);
+    expect(looksLikeNonWorkCredit('Cuarteto «Americano», op. 96 (arr. David Walter)')).toBe(false);
     expect(parseExplicitTitleAuthorWork('Concierto para Trompa y Orquesta N.1 de R. Strauss')).toEqual({
       title: 'Concierto para Trompa y Orquesta N.1',
       composerName: 'R. Strauss',

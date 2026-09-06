@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   canPairAsAuditorioComposer,
+  canPairAsLookaheadComposer,
   extractStandaloneKnownComposers,
   findProgramStartIndex,
   looksLikeComposerNameList,
@@ -535,6 +536,22 @@ describe('segmentación performer/programa del Auditorio', () => {
       composerName: 'G. Puccini',
       title: 'Preludio Sinfónico',
     });
+  });
+
+  it('canPairAsLookaheadComposer exige nombre de persona y obra siguiente, no cualquier dos palabras', () => {
+    expect(canPairAsLookaheadComposer('Héctor Eliel Márquez', 'Lorquiana')).toBe(true);
+    expect(canPairAsLookaheadComposer('Rodolphe Bruneau-Boulmier', 'Las VII tentaciones actuales')).toBe(
+      true,
+    );
+    expect(canPairAsLookaheadComposer('Marlos Nobre', 'Cancionero de Lampião')).toBe(true);
+    expect(canPairAsLookaheadComposer('Jeromita Linares', 'Cuatro canciones opulares argentinas')).toBe(
+      false,
+    );
+    expect(canPairAsLookaheadComposer('LIKE A BOHO', 'Suite Lorca')).toBe(false);
+    expect(canPairAsLookaheadComposer('Arr. Manuel Tévar', 'I. Anda, jaleo')).toBe(false);
+    expect(canPairAsAuditorioComposer('Héctor Eliel Márquez')).toBe(false);
+    expect(canPairAsAuditorioComposer('Marlos Nobre')).toBe(false);
+    expect(canPairAsAuditorioComposer('Rodolphe Bruneau-Boulmier')).toBe(false);
   });
 
   it('canPairAsAuditorioComposer exige evidencia fuerte, no un nombre capitalizado', () => {

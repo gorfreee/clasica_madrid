@@ -16,7 +16,7 @@ const MOVEMENT = /^(?:x{0,3}(?:ix|iv|v?i{0,3})|[1-9]\d*)\.\s*\S+/i;
 const CATALOG_ONLY =
   /^(?:(?:op(?:us)?|bwv|hwv|hob\.?|k(?:v)?\.?|woo)\s*\.?\s*\d+[a-z]?)(?:\s*\([^)]*\d{3,4}[^)]*\))?\s*$/i;
 const WORK_GENRE =
-  /\b(?:concierto|concerto|sinfon[ií]a|symphony|sonata|suite|quinteto|cuarteto|cuartet|tr[ií]o|obertura|ouverture|r[eé]quiem|misa|missa|toccata|fuga|fugue|preludio|pr[eé]lude|nocturne|mazurka|scherzo|impromptu|variaciones|variations|cantata|oratorio|fantas[ií]a|romance|divertimento|polonesa|polonaise)\b/i;
+  /\b(?:concierto|concerto|sinfon[ií]a|symphony|sonata|suite|quinteto|cuarteto|cuartet|tr[ií]o|obertura|ouverture|r[eé]quiem|misa|missa|toccata|fuga|fugue|preludio|pr[eé]lude|nocturne|mazurka|scherzo|impromptu|variaciones|variations|cantata|oratorio|fantas[ií]a|romance|divertimento|polonesa|polonaise|cancionero)\b/i;
 const MONTH =
   'enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre';
 const SCHEDULE_NOTICE = new RegExp(
@@ -31,6 +31,9 @@ const ENSEMBLE_SUBJECT =
   /^(?:orquesta|orquestra|orchestra|orchester|coro|choir|escolan[ií]a|ensemble|ensamble|camerata|cuarteto|quinteto|agrupaci[oó]n|sociedad coral|capella|cappella|chapelle|compa[ñn][ií]a\b.*\bballet|ballet)\b/i;
 const PRODUCTION_NOTE = /\(?\s*adaptaci[oó]n\s+escenificada\s*\)?/i;
 const TEXT_CREDIT = /^(?:texto|libreto|letra)\s*:/i;
+/** Standalone arrangement/orchestration lines. Not a parenthetical `(arr. Name)` inside a title. */
+const NON_WORK_CREDIT =
+  /^(?:arr\.|arreglos?|orquestaci[oó]n(?:es)?|orchestrations?|orch\.)\s*(?:de\s+|:\s*)?\S/i;
 const INITIALS_AUTHOR = /^(?:[\p{Lu}\p{Lt}]\.\s*){1,3}[\p{L}’'-]+$/u;
 const CONTEXTUAL_DE_PREFIX = /(?:tema|un tema|sobre un tema|basad[oa]|inspirad[oa]|homenaje)\s+$/iu;
 const NAME_PARTICLE = /^(?:de|del|van|von|di|da|el|la|los|las)$/i;
@@ -81,7 +84,13 @@ export function looksLikeComposerLine(text: string): boolean {
 export function looksLikeWorkLine(text: string): boolean {
   const trimmed = text.trim();
   if (!trimmed || looksLikeProgramHeader(trimmed)) return false;
-  if (looksLikeProductionNote(trimmed) || looksLikeTextCredit(trimmed)) return false;
+  if (
+    looksLikeProductionNote(trimmed) ||
+    looksLikeTextCredit(trimmed) ||
+    looksLikeNonWorkCredit(trimmed)
+  ) {
+    return false;
+  }
   if (looksLikeCatalogOnlyLine(trimmed)) return false;
   if (looksLikeComposerLine(trimmed) && !CATALOG.test(trimmed) && !WORK_GENRE.test(trimmed)) {
     return false;
@@ -135,7 +144,13 @@ export function looksLikeUnequivocalWorkLine(text: string): boolean {
   if (!trimmed || looksLikeProgramHeader(trimmed) || trimmed.startsWith('*')) {
     return false;
   }
-  if (looksLikeProductionNote(trimmed) || looksLikeTextCredit(trimmed)) return false;
+  if (
+    looksLikeProductionNote(trimmed) ||
+    looksLikeTextCredit(trimmed) ||
+    looksLikeNonWorkCredit(trimmed)
+  ) {
+    return false;
+  }
   return WORK_GENRE.test(trimmed) || CATALOG.test(trimmed) || looksLikeWorkInstrumentation(trimmed);
 }
 
@@ -161,6 +176,17 @@ export function looksLikeProductionNote(text: string): boolean {
 
 export function looksLikeTextCredit(text: string): boolean {
   return TEXT_CREDIT.test(text.trim());
+}
+
+/**
+ * Arrangement/orchestration (and existing texto/libreto/letra) credits.
+ * They may remain in programText; they must never become works[].
+ */
+export function looksLikeNonWorkCredit(text: string): boolean {
+  const trimmed = text.trim().replace(/^[()]+|[()]+$/g, '').trim();
+  if (!trimmed) return false;
+  if (looksLikeTextCredit(trimmed)) return true;
+  return NON_WORK_CREDIT.test(trimmed);
 }
 
 /**
@@ -202,7 +228,13 @@ export function isUnreliableComposerName(text: string): boolean {
   if (!trimmed || looksLikeProgramHeader(trimmed)) return true;
   if (/^obras de\b/i.test(trimmed)) return true;
   if (looksLikeEnsembleName(trimmed)) return true;
-  if (looksLikeProductionNote(trimmed) || looksLikeTextCredit(trimmed)) return true;
+  if (
+    looksLikeProductionNote(trimmed) ||
+    looksLikeTextCredit(trimmed) ||
+    looksLikeNonWorkCredit(trimmed)
+  ) {
+    return true;
+  }
   if (WORK_GENRE.test(trimmed) || CATALOG.test(trimmed)) return true;
   if (/^[¡!]/.test(trimmed)) return true;
   return false;
@@ -215,7 +247,13 @@ function rejectedComposerHeading(trimmed: string): boolean {
   if (/^(varios autores|an[oó]nimo)\b/i.test(trimmed)) return true;
   if (looksLikeEnsembleName(trimmed)) return true;
   if (looksLikeMovementLine(trimmed)) return true;
-  if (looksLikeProductionNote(trimmed) || looksLikeTextCredit(trimmed)) return true;
+  if (
+    looksLikeProductionNote(trimmed) ||
+    looksLikeTextCredit(trimmed) ||
+    looksLikeNonWorkCredit(trimmed)
+  ) {
+    return true;
+  }
   if (looksLikeCatalogOnlyLine(trimmed)) return true;
   if (parseExplicitTitleAuthorWork(trimmed)) return true;
   if (CATALOG.test(trimmed)) return true;

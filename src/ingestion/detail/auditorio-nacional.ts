@@ -2,6 +2,7 @@ import { allCaptures, firstMatch, splitBreaks, stripTags } from '../html.ts';
 import { inferScheduleFromText } from './schedule.ts';
 import {
   canPairAsAuditorioComposer,
+  canPairAsLookaheadComposer,
   composersAreDistinct,
   extractObrasDeComposers,
   extractStandaloneKnownComposers,
@@ -24,6 +25,7 @@ import {
   looksLikeCatalogWorkLine,
   looksLikeEnsembleName,
   looksLikeMovementLine,
+  looksLikeNonWorkCredit,
   looksLikePartHeader,
   looksLikeProductionNote,
   looksLikeProgramHeader,
@@ -217,26 +219,32 @@ function groupWorksByComposer(lines: string[]): { works: ObservedWork[]; extraCo
   const works: ObservedWork[] = [];
   const extraComposers: ObservedComposer[] = [];
   let composerName: string | undefined;
+  let justOpenedComposer = false;
   for (let index = 0; index < lines.length; index++) {
     const line = lines[index] ?? '';
     if (looksLikePartHeader(line) || looksLikeProgramLabel(line)) {
       composerName = undefined;
+      justOpenedComposer = false;
       continue;
     }
     if (looksLikeProgramHeader(line)) continue;
-    if (looksLikeProductionNote(line) || looksLikeTextCredit(line)) continue;
+    if (looksLikeProductionNote(line) || looksLikeTextCredit(line) || looksLikeNonWorkCredit(line)) {
+      continue;
+    }
     if (isCastLineInsideProgram(line)) continue;
 
     const obras = consumeObrasDeList(lines, index);
     if (obras) {
       extraComposers.push(...obras.composers.map((name) => ({ name })));
       composerName = undefined;
+      justOpenedComposer = false;
       index = obras.endIndex;
       continue;
     }
     if (looksLikeComposerNameList(line)) {
       extraComposers.push(...extractStandaloneKnownComposers(line).map((name) => ({ name })));
       composerName = undefined;
+      justOpenedComposer = false;
       continue;
     }
 
@@ -258,6 +266,7 @@ function groupWorksByComposer(lines: string[]): { works: ObservedWork[]; extraCo
       }
       works.push(attributed);
       composerName = undefined;
+      justOpenedComposer = false;
       continue;
     }
 
@@ -267,6 +276,7 @@ function groupWorksByComposer(lines: string[]): { works: ObservedWork[]; extraCo
         works.push({ title: prefixWork.title, composerName: prefixWork.composerName });
       }
       composerName = undefined;
+      justOpenedComposer = false;
       if (prefixWork.consumedNext) index += 1;
       continue;
     }
@@ -279,6 +289,15 @@ function groupWorksByComposer(lines: string[]): { works: ObservedWork[]; extraCo
     if (looksLikeColonPair(line)) continue;
     if (isStickyComposerHeading(line)) {
       composerName = line;
+      justOpenedComposer = true;
+      continue;
+    }
+    if (
+      composerHasAttachedWork(works, composerName) &&
+      canPairAsLookaheadComposer(line, lines[index + 1])
+    ) {
+      composerName = line;
+      justOpenedComposer = true;
       continue;
     }
     if (looksLikeMovementLine(line)) continue;
@@ -286,13 +305,15 @@ function groupWorksByComposer(lines: string[]): { works: ObservedWork[]; extraCo
     if (composerName) {
       if (titleBeginsWithExplicitComposer(line, composerName)) {
         composerName = undefined;
+        justOpenedComposer = false;
         index -= 1;
         continue;
       }
       if (!looksLikeWorkLine(line)) continue;
-      if (!/\s/.test(line) && !looksLikeUnequivocalWorkLine(line)) continue;
+      if (!/\s/.test(line) && !looksLikeUnequivocalWorkLine(line) && !justOpenedComposer) continue;
       if (titleStartsWithForeignComposer(line, composerName)) continue;
       works.push({ title: line, composerName });
+      justOpenedComposer = false;
     }
   }
   return { works, extraComposers };
@@ -405,9 +426,19 @@ function looksLikeColonPair(line: string): boolean {
   return /^.+?:\s+\S/.test(line);
 }
 
+function composerHasAttachedWork(works: ObservedWork[], composerName: string | undefined): boolean {
+  if (!composerName) return false;
+  return works.some((work) => work.composerName === composerName);
+}
+
 function isStickyComposerHeading(text: string): boolean {
   if (looksLikePartHeader(text) || parseExplicitTitleAuthorWork(text)) return false;
-  if (looksLikeMovementLine(text) || looksLikeProductionNote(text) || looksLikeTextCredit(text)) {
+  if (
+    looksLikeMovementLine(text) ||
+    looksLikeProductionNote(text) ||
+    looksLikeTextCredit(text) ||
+    looksLikeNonWorkCredit(text)
+  ) {
     return false;
   }
   if (/^de\s+/i.test(text)) return false;
