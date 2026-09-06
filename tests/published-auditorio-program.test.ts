@@ -11,6 +11,7 @@ import { defaultDataDir } from '../src/lib/repository/fs.ts';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { Event } from '../src/lib/schemas/index.ts';
+import { canonicalizeComposerName } from '../src/ingestion/composer-name.ts';
 
 const AUDITORIO = 'src_auditorio_nacional';
 
@@ -99,27 +100,27 @@ describe('catálogo publicado: programa del Auditorio', () => {
     expect(composers.some((name) => CONFIRMED_SECTION_HEADINGS.test(name))).toBe(false);
     expect(composers).toEqual(
       expect.arrayContaining([
-        'Sebastian Bartmann (*1979)',
-        'Léo Delibes (1836-1891)',
-        'Francis Poulenc (1899-1963)',
-        'Michael Nyman (1944-)',
-        'Adam Ilyas Kuruc (1984-)',
-        'Charles Aznavour (1924-2018)',
-        'Elena Kats-Chernin (1957-)',
+        'Sebastian Bartmann',
+        'Léo Delibes',
+        'Francis Poulenc',
+        'Michael Nyman',
+        'Adam Ilyas Kuruc',
+        'Charles Aznavour',
+        'Elena Kats-Chernin',
       ]),
     );
     expect(composers.some((name) => /^le roi s'amuse/i.test(name))).toBe(false);
     expect(composers.some((name) => /la boh[eè]me/i.test(name))).toBe(false);
     expect(works).toEqual(
       expect.arrayContaining([
-        { title: 'Toccata FP 48:3 (1928)', composerName: 'Francis Poulenc (1899-1963)' },
+        { title: 'Toccata FP 48:3 (1928)', composerName: 'Francis Poulenc' },
         {
           title: 'Chasing Sheep is best left to Shepherds (1982)',
-          composerName: 'Michael Nyman (1944-)',
+          composerName: 'Michael Nyman',
         },
-        { title: 'Bohemian Suite (2025/26)', composerName: 'Adam Ilyas Kuruc (1984-)' },
-        { title: 'La Bohème (1965)', composerName: 'Charles Aznavour (1924-2018)' },
-        { title: 'Fast Blue Village (2022)', composerName: 'Elena Kats-Chernin (1957-)' },
+        { title: 'Bohemian Suite (2025/26)', composerName: 'Adam Ilyas Kuruc' },
+        { title: 'La Bohème (1965)', composerName: 'Charles Aznavour' },
+        { title: 'Fast Blue Village (2022)', composerName: 'Elena Kats-Chernin' },
       ]),
     );
     expect(works.some((work) => CONFIRMED_SECTION_HEADINGS.test(work.composerName ?? ''))).toBe(false);
@@ -139,11 +140,9 @@ describe('catálogo publicado: programa del Auditorio', () => {
     for (const name of facts.composers?.map((item) => item.name) ?? []) {
       if (isHighConfidenceFalseAuditorioComposer(name)) continue;
       if (/^georges bizet$/i.test(name)) continue;
-      const normalized = name.replace(/\s+/g, ' ').replace(/\(1988\s*-\)/, '(1988-)');
-      expect(
-        [...published].some((item) => item.replace(/\s+/g, ' ').replace(/\(1988\s*-\)/, '(1988-)') === normalized),
-        `composer ${name} missing from published UAM`,
-      ).toBe(true);
+      const canonical = canonicalizeComposerName(name);
+      expect(canonical, `composer ${name} no canonicaliza a una persona`).toBeTruthy();
+      expect(published.has(canonical!), `composer ${name} missing from published UAM`).toBe(true);
     }
   });
 });
