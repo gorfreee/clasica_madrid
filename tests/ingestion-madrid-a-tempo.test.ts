@@ -76,7 +76,11 @@ function listedPost(input: { sourceUrl: string; externalId: string; title: strin
 
 describe('Madrid a Tempo listing', () => {
   it('reads the Wix blog feed with stable post ids, official URLs and only observed listing facts', async () => {
-    const events = await adapter.extract(await fixture('listing-sample'), listingUrl, ctx);
+    const discards: Array<{ reason: string; sourceUrl?: string }> = [];
+    const events = await adapter.extract(await fixture('listing-sample'), listingUrl, {
+      ...ctx,
+      reportDiscard: (discard) => discards.push(discard),
+    });
     expect(events.map((event) => event.externalId).sort()).toEqual([
       '1f75b64b-f81d-44cb-bda5-0af16d0951eb',
       'cc99d72e-7aa5-4eea-b32c-8eb17a8dce00',
@@ -105,6 +109,12 @@ describe('Madrid a Tempo listing', () => {
     expect(maurizio.observed.description).toContain('Entrada 15€');
     expect(events.some((event) => event.sourceUrl.includes('ciclo-25-26'))).toBe(false);
     expect(events.some((event) => event.sourceUrl.includes('ivo-lago'))).toBe(false);
+    expect(discards).toHaveLength(1);
+    expect(discards[0]).toMatchObject({
+      reason: 'outside-window',
+      sourceUrl: expect.stringContaining('ivo-lago'),
+    });
+    expect(discards.some((item) => item.sourceUrl?.includes('ciclo-25-26'))).toBe(false);
 
     expect(parseMadridSchedule('5 de julio de 2026 a las 12:00h Centro Cultural Casa de Vacas del Parque del Retiro - Madrid').occurrences)
       .toEqual([{ raw: '5 de julio de 2026 a las 12:00h', date: '2026-07-05', time: '12:00' }]);

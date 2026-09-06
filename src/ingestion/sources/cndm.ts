@@ -2,7 +2,7 @@ import { addIsoDays, parseObservedTime, type IngestWindow } from '../dates.ts';
 import { cndmDiv, cndmDivs, cndmEventUrl, parseCndmDetail } from '../detail/cndm.ts';
 import { stripTags } from '../html.ts';
 import { emptyObservedLists } from '../observed.ts';
-import { IncompleteListingError, type RawEvent, type RawOccurrence, type SourceAdapter } from '../types.ts';
+import { IncompleteListingError, reportAdapterDiscard, type AdapterContext, type RawEvent, type RawOccurrence, type SourceAdapter } from '../types.ts';
 
 const MONTH_NAMES = [
   'Enero',
@@ -70,9 +70,7 @@ export const cndmAdapter: SourceAdapter = {
       }
     }
 
-    const collected = [...events.values()]
-      .filter((event) => !event.observed.venueText || isMadridVenue(event.observed.venueText))
-      .sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
+    const collected = keepMadridEvents(events, ctx);
     if (failedMonths.length && collected.length) {
       throw new IncompleteListingError(
         `cndm: meses no disponibles (${failedMonths.join(', ')})`,
@@ -275,6 +273,23 @@ function nextMonth(firstOfMonth: string): string {
   const [year, month] = firstOfMonth.split('-').map(Number);
   const next = new Date(Date.UTC(year!, month!, 1));
   return next.toISOString().slice(0, 10);
+}
+
+function keepMadridEvents(events: Map<string, RawEvent>, ctx: AdapterContext): RawEvent[] {
+  const collected: RawEvent[] = [];
+  for (const event of events.values()) {
+    if (event.observed.venueText && !isMadridVenue(event.observed.venueText)) {
+      reportAdapterDiscard(ctx, {
+        reason: 'venue-outside-madrid',
+        title: event.observed.title,
+        sourceUrl: event.sourceUrl,
+        ...(event.externalId ? { externalId: event.externalId } : {}),
+      });
+      continue;
+    }
+    collected.push(event);
+  }
+  return collected.sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
 }
 
 function isMadridVenue(venueText: string): boolean {

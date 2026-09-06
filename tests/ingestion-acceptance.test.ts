@@ -13,6 +13,9 @@ import {
 import { runIngest } from '../src/ingestion/pipeline.ts';
 import { formatRunSummary } from '../src/ingestion/summary.ts';
 import { TEST_NOW, makeSource, makeVenue } from './helpers.ts';
+import { accountingHolds } from '../src/ingestion/diagnostics.ts';
+import { countOutcomes, tallyOutcomes } from '../src/ingestion/outcome.ts';
+import { buildIngestReport } from '../src/ingestion/report.ts';
 
 const MUSICA = 'https://datos.madrid.es/egob/kos/actividades/Musica';
 
@@ -119,8 +122,12 @@ describe('aceptación ingestión — Madrid Datos sin hora', () => {
 
     const decision = run.decisions.find((item) => item.externalId === '50410001');
     expect(decision?.eligibility?.value).toBe('include');
+    expect(decision?.outcome).toBe('created');
     expect(decision?.structuralSkip).toBeUndefined();
     expect(run.candidates).toHaveLength(1);
+    expect(run.rawEvents).toHaveLength(run.decisions.length);
+    expect(countOutcomes(tallyOutcomes(run.decisions))).toBe(run.decisions.length);
+    expect(accountingHolds(buildIngestReport(run, new Date('2026-09-01T10:00:00Z'))).ok).toBe(true);
     expect(run.candidates[0]?.event.occurrences[0]).toMatchObject({ date: '2026-09-20', time: null });
     expect(run.summary.adapterDiscards).toEqual({
       total: 1,
@@ -183,6 +190,7 @@ describe('aceptación ingestión — Madrid Datos sin hora', () => {
       reason: 'missing-venue',
       externalId: '50410003',
     });
+    expect(journal.some((entry) => entry.kind === 'decision' && entry.outcome === 'created')).toBe(true);
     expect(journal.some((entry) => entry.kind === 'decision' && entry.classification?.eligibility?.value === 'include')).toBe(
       true,
     );

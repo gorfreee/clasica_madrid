@@ -67,7 +67,15 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
   const title = asNonEmptyString(item.title);
   const sourceUrl = asNonEmptyString(item.url);
   const start = asNonEmptyString(item.start);
-  if (!title || !sourceUrl) return undefined;
+  if (!title && !sourceUrl) return undefined;
+  if (!title) {
+    reportAdapterDiscard(ctx, { reason: 'missing-title', sourceUrl });
+    return undefined;
+  }
+  if (!sourceUrl) {
+    reportAdapterDiscard(ctx, { reason: 'missing-url', title });
+    return undefined;
+  }
   if (!start) {
     reportAdapterDiscard(ctx, { reason: 'missing-date', title, sourceUrl });
     return undefined;

@@ -12,8 +12,9 @@ import type { IdentityMethod } from './identity.ts';
 import type { ReconcileAction } from './reconcile.ts';
 import type { NormalizedEvent } from './normalize.ts';
 import type { ObservedComposer, ObservedPerson, ObservedWork } from './observed.ts';
-import type { IngestRunSummary, RawEvent } from './types.ts';
+import type { AdapterDiscard, IngestRunSummary, RawEvent } from './types.ts';
 import { emptyIngestAiSummary } from './types.ts';
+import { deriveIngestOutcome, type IngestOutcome } from './outcome.ts';
 import type { IngestWindow } from './dates.ts';
 import type { AiCallDiagnostics } from './classification/ai.ts';
 
@@ -147,6 +148,13 @@ export type IngestEventDecision = {
    * Present only when a Candidate exists. Not sent to the classifier.
    */
   candidate?: ReportCandidateSnapshot;
+  /**
+   * Single diagnostic result of this observation. Derived from the decision
+   * the pipeline already took. Not an editorial source of truth.
+   */
+  outcome?: IngestOutcome;
+  /** Canonical skip / eligibility / identity reason when the outcome has one. */
+  outcomeReason?: string;
 };
 
 /**
@@ -181,6 +189,11 @@ export type IngestReport = {
   summary: IngestRunSummary;
   events: IngestEventDecision[];
   possiblyMissing: PossiblyMissingEvent[];
+  /**
+   * Recognized adapter candidates dropped before RawEvent. Diagnostic only.
+   * Counts also live on `summary.adapterDiscards`.
+   */
+  adapterDiscards?: AdapterDiscard[];
   failure?: IngestFailureInfo;
 };
 
@@ -256,6 +269,10 @@ export function buildEventDecision(input: DecisionInput): IngestEventDecision {
     if (access) decision.access = access;
   }
 
+  const derived = deriveIngestOutcome(decision);
+  decision.outcome = derived.outcome;
+  if (derived.reason) decision.outcomeReason = derived.reason;
+
   return decision;
 }
 
@@ -264,10 +281,11 @@ export function buildIngestReport(
     summary: IngestRunSummary;
     decisions: IngestEventDecision[];
     possiblyMissing?: PossiblyMissingEvent[];
+    adapterDiscards?: AdapterDiscard[];
   },
   generatedAt: Date,
 ): IngestReport {
-  return {
+  const report: IngestReport = {
     schemaVersion: 1,
     generatedAt: generatedAt.toISOString(),
     dryRun: run.summary.dryRun,
@@ -279,6 +297,10 @@ export function buildIngestReport(
     events: run.decisions,
     possiblyMissing: run.possiblyMissing ?? [],
   };
+  if (run.adapterDiscards && run.adapterDiscards.length > 0) {
+    report.adapterDiscards = run.adapterDiscards;
+  }
+  return report;
 }
 
 export function buildFatalIngestReport(options: {

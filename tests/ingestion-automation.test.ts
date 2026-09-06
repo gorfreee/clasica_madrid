@@ -6,9 +6,22 @@ import {
   formatAutomationSummary,
   formatMissingReportSummary,
 } from '../src/ingestion/automation.ts';
-import { buildFatalIngestReport, type IngestReport } from '../src/ingestion/report.ts';
+import { buildFatalIngestReport, type IngestEventDecision, type IngestReport } from '../src/ingestion/report.ts';
 import type { IngestRunManifest } from '../src/ingestion/observability.ts';
 import { emptyIngestAiSummary } from '../src/ingestion/types.ts';
+
+function decision(overrides: Partial<IngestEventDecision>): IngestEventDecision {
+  return {
+    sourceId: 'auditorio-nacional',
+    sourceUrl: 'https://example.com/evento',
+    title: 'Evento',
+    hydration: { status: 'succeeded' },
+    aiAttempted: false,
+    publishable: false,
+    candidateGenerated: false,
+    ...overrides,
+  };
+}
 
 function report(): IngestReport {
   return {
@@ -27,7 +40,7 @@ function report(): IngestReport {
       sourcesAttempted: ['auditorio-nacional', 'teatro-real'],
       sourcesSucceeded: ['auditorio-nacional'],
       sourcesFailed: [{ sourceId: 'teatro-real', message: 'estructura inesperada' }],
-      rawEvents: 15,
+      rawEvents: 2,
       skippedUnusable: 1,
       eligibility: { include: 10, exclude: 3, uncertain: 1 },
       ai: {
@@ -50,31 +63,44 @@ function report(): IngestReport {
       detailHydrationAttempted: 4,
       detailHydrationSucceeded: 4,
       detailHydrationFailed: 0,
+      adapterDiscards: { total: 1, bySource: { 'madrid-datos': 1 }, byReason: { 'missing-date': 1 } },
     },
     events: [
-      {
-        sourceId: 'auditorio-nacional',
+      decision({
         sourceUrl: 'https://example.com/1',
         title: 'Cancelado',
-        hydration: { status: 'succeeded' },
-        aiAttempted: false,
         publishable: true,
         candidateGenerated: true,
+        identity: { action: 'updated' },
         scheduleChange: 'cancelled',
         classificationDrift: { eligibility: 'exclude', ruleId: 'test' },
-      },
-      {
-        sourceId: 'auditorio-nacional',
+      }),
+      decision({
         sourceUrl: 'https://example.com/2',
         title: 'Aplazado',
-        hydration: { status: 'succeeded' },
-        aiAttempted: false,
         publishable: true,
         candidateGenerated: true,
+        identity: { action: 'updated' },
         scheduleChange: 'postponed',
+      }),
+    ],
+    possiblyMissing: [
+      {
+        eventId: 'evt_missing',
+        slug: 'desaparecido',
+        title: 'Concierto desaparecido',
+        harvestSourceId: 'teatro-real',
+        catalogSourceId: 'src_teatro_real',
       },
     ],
-    possiblyMissing: [],
+    adapterDiscards: [
+      {
+        sourceId: 'madrid-datos',
+        reason: 'missing-date',
+        title: 'Sin fecha',
+        sourceUrl: 'https://www.madrid.es/sin-fecha',
+      },
+    ],
   };
 }
 
@@ -87,26 +113,35 @@ describe('reporting de la automatización', () => {
     });
   });
 
-  it('genera summary y body con las métricas operativas y el Actions run', () => {
+  it('genera summary y body con funnel, atención y descartes concretos', () => {
     const runUrl = 'https://github.com/gorfreee/clasica_madrid/actions/runs/123';
     const summary = formatAutomationSummary(report(), runUrl);
     const body = formatAutomationPrBody(report(), runUrl);
 
     for (const expected of [
+      '### Resumen',
       '2026-08-30 → 2026-12-28',
       '**review**',
       'auditorio-nacional',
       'teatro-real: estructura inesperada',
-      '| Nuevos | 3 |',
-      '| Actualizados | 2 |',
-      '| Sin cambios | 4 |',
-      '| Ambiguos | 1 |',
+      '| Observaciones | 2 |',
+      '| Adapter discards | 1 |',
+      '| Eventos escritos (nuevos / actualizados) | 3 / 2 |',
+      '| Ambiguos | 0 |',
       '| Posiblemente desaparecidos | 2 |',
       '| Duplicados del lote | 0 |',
       '| Corroboraciones entre fuentes | 0 |',
       '| Classification drift | 1 |',
-      '| Cancelaciones | 1 |',
-      '| Aplazamientos | 1 |',
+      '### Funnel por fuente',
+      '### Requiere atención',
+      'Cancelado',
+      'classification-drift',
+      'Concierto desaparecido',
+      'possibly-missing',
+      '### Eventos no publicados',
+      '<details>',
+      'adapter-discard',
+      'missing-date',
       '| IA: requests HTTP | 7 |',
       '| IA: cache hits | 4 |',
       '| IA: fallbacks | 2 |',
@@ -117,6 +152,8 @@ describe('reporting de la automatización', () => {
       expect(body).toContain(expected);
     }
     expect(body).toContain('`data/**`');
+    expect(summary).toContain('### Observabilidad');
+    expect(body).toContain('### Observabilidad');
   });
 
   it('añade estado, artifact y fallo conciso al Job Summary', () => {
@@ -144,7 +181,7 @@ describe('reporting de la automatización', () => {
     expect(summary).toContain('| Último stage | classification |');
     expect(summary).toContain('ingestion-run-123-1');
     expect(summary).toContain('unexpected-exception (classification)');
-    expect(formatAutomationPrBody(report(), 'https://example.com/run')).not.toContain('### Observabilidad');
+    expect(formatAutomationPrBody(report(), 'https://example.com/run')).not.toContain('ingestion-run-123-1');
   });
 
   it('resume una run sin report.json usando el manifest', () => {

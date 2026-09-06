@@ -63,6 +63,7 @@ export type IngestRun = {
   candidates: Candidate[];
   decisions: IngestEventDecision[];
   possiblyMissing: PossiblyMissingEvent[];
+  adapterDiscards: AdapterDiscard[];
 };
 
 export type DiscoveryIngestOptions = Omit<IngestOptions, 'sourceIds' | 'get'> & {
@@ -512,7 +513,7 @@ async function ingestPreparedEvents(
     adapterDiscards: adapterDiscards.length > 0 ? tallyAdapterDiscards(adapterDiscards) : emptyAdapterDiscardCounts(),
   };
 
-  return { summary, apply, rawEvents, candidates: reconciled.candidates, decisions, possiblyMissing };
+  return { summary, apply, rawEvents, candidates: reconciled.candidates, decisions, possiblyMissing, adapterDiscards };
 }
 
 function venueHint(event: {

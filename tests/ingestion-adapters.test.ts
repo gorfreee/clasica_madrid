@@ -56,6 +56,32 @@ describe('adapter Auditorio Nacional (JSON)', () => {
     );
   });
 
+  it('registra missing-url/missing-title en candidatos reconocidos y no cambia los extraídos', () => {
+    const discards: AdapterDiscardReport[] = [];
+    const good = {
+      title: 'OCNE. Sinfónico 01',
+      url: 'https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-01-1',
+      start: '2026-09-18T19:30:00+02:00',
+      className: 'sinfonica',
+      id: 'ocne-0',
+    };
+    const events = auditorioNacionalAdapter.extract(
+      JSON.stringify([
+        good,
+        { title: 'Sin URL', start: '2026-09-19T19:30:00+02:00', id: 'sin-url' },
+        { url: 'https://auditorionacional.inaem.gob.es/es/programacion/sin-titulo', start: '2026-09-20T19:30:00+02:00' },
+        { foo: 1 },
+      ]),
+      'https://example.test/events.json',
+      ctx('auditorio-nacional', (discard) => discards.push(discard)),
+    );
+    expect(events).toHaveLength(1);
+    expect(events[0]?.observed.title).toBe('OCNE. Sinfónico 01');
+    expect(discards.map((item) => item.reason).sort()).toEqual(['missing-title', 'missing-url']);
+    expect(discards.find((item) => item.reason === 'missing-url')?.title).toBe('Sin URL');
+    expect(discards.find((item) => item.reason === 'missing-title')?.sourceUrl).toContain('sin-titulo');
+  });
+
   it('usa exactamente start/end de la ventana solicitada', () => {
     const source = getSourceDefinition('auditorio-nacional');
     expect(source.useFetchRelay).toBe(true);

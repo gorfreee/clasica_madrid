@@ -1,8 +1,8 @@
-import { parseObservedTime, parseSpanishCalendarDate, type IngestWindow } from '../dates.ts';
+import { parseObservedTime, parseSpanishCalendarDate } from '../dates.ts';
 import { collapseWhitespace, decodeHtmlEntities, stripTags } from '../html.ts';
 import { emptyObservedLists, type ObservedFactPatch } from '../observed.ts';
 import { normalizeUrl } from '../urls.ts';
-import type { RawEvent, RawOccurrence } from '../types.ts';
+import { reportAdapterDiscard, type AdapterContext, type AdapterDiscardReport, type RawEvent, type RawOccurrence } from '../types.ts';
 
 const HOSTS = new Set(['www.madridatempo.com', 'madridatempo.com']);
 const HOST = 'www.madridatempo.com';
@@ -48,7 +48,7 @@ export function madridNextListingUrl(current: string): string {
   return next;
 }
 
-export function extractMadridListing(body: string, url: string, sourceId: string, window: IngestWindow): RawEvent[] {
+export function extractMadridListing(body: string, url: string, ctx: AdapterContext): RawEvent[] {
   const listingUrl = madridListingUrl(url, url);
   if (!listingUrl || madridListingPage(listingUrl) < 1) {
     throw new Error('madrid-a-tempo: URL de listado no reconocible');
@@ -57,17 +57,26 @@ export function extractMadridListing(body: string, url: string, sourceId: string
   const events: RawEvent[] = [];
   const seen = new Set<string>();
   for (const post of parsed.posts) {
-    const event = toRawEvent(post, sourceId);
+    const event = toRawEvent(post, ctx.source.id);
     if (!event) continue;
     if (seen.has(event.sourceUrl) || (event.externalId && seen.has(event.externalId))) {
       throw new Error('madrid-a-tempo: evento duplicado');
     }
     seen.add(event.sourceUrl);
     if (event.externalId) seen.add(event.externalId);
-    if (!listingInScope(event, window.from)) continue;
+    if (!listingInScope(event, ctx.window.from)) {
+      reportAdapterDiscard(ctx, discardFromEvent(event, 'outside-window'));
+      continue;
+    }
     events.push(event);
   }
   return events.sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
+}
+
+function discardFromEvent(event: RawEvent, reason: string): AdapterDiscardReport {
+  const discard: AdapterDiscardReport = { reason, title: event.observed.title, sourceUrl: event.sourceUrl };
+  if (event.externalId) discard.externalId = event.externalId;
+  return discard;
 }
 
 export function parseMadridFeed(body: string, pageUrl: string): {
