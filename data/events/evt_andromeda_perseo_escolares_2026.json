@@ -106,9 +106,10 @@
     {
       "sourceId": "src_teatro_zarzuela",
       "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/nuevos-publicos-2026-2027/andromeda-y-perseo-escolares",
-      "checkedAt": "2026-08-28"
+      "checkedAt": "2026-09-06",
+      "externalId": "/es/temporada/nuevos-publicos-2026-2027/andromeda-y-perseo-escolares"
     }
   ],
   "primarySourceId": "src_teatro_zarzuela",
-  "lastVerifiedAt": "2026-08-28"
+  "lastVerifiedAt": "2026-09-06"
 }

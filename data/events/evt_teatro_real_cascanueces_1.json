@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_real_cascanueces_1",
+  "slug": "el-cascanueces",
+  "title": "El Cascanueces",
+  "status": "scheduled",
+  "venueId": "ven_real_teatro_retiro_sala_principal",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_real_cascanueces_1_01",
+      "date": "2026-12-19",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_cascanueces_1_02",
+      "date": "2026-12-19",
+      "time": "17:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_cascanueces_1_03",
+      "date": "2026-12-20",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_cascanueces_1_04",
+      "date": "2026-12-20",
+      "time": "17:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_cascanueces_1_05",
+      "date": "2026-12-21",
+      "time": "18:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_cascanueces_1_06",
+      "date": "2026-12-22",
+      "time": "18:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_cascanueces_1_07",
+      "date": "2026-12-23",
+      "time": "18:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_cascanueces_1_08",
+      "date": "2026-12-26",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_cascanueces_1_09",
+      "date": "2026-12-26",
+      "time": "17:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_cascanueces_1_10",
+      "date": "2026-12-27",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_cascanueces_1_11",
+      "date": "2026-12-27",
+      "time": "17:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_cascanueces_1_12",
+      "date": "2026-12-28",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_cascanueces_1_13",
+      "date": "2026-12-28",
+      "time": "17:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_cascanueces_1_14",
+      "date": "2026-12-29",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_cascanueces_1_15",
+      "date": "2026-12-29",
+      "time": "17:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_cascanueces_1_16",
+      "date": "2026-12-30",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_cascanueces_1_17",
+      "date": "2026-12-30",
+      "time": "17:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Piotr Ilich Chaikovski"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "other"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_teatro_real",
+      "url": "https://www.teatroreal.es/es/espectaculo/cascanueces-1",
+      "checkedAt": "2026-09-06",
+      "externalId": "cascanueces-1"
+    }
+  ],
+  "primarySourceId": "src_teatro_real",
+  "lastVerifiedAt": "2026-09-06"
+}

@@ -22,10 +22,22 @@
     {
       "name": "Leonardo García-Alarcón",
       "role": "conductor"
+    },
+    {
+      "name": "Cappella Mediterranea"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "C. Monteverdi"
+    }
+  ],
+  "works": [
+    {
+      "title": "Orfeo (versión semiescénica)",
+      "composerName": "C. Monteverdi"
+    }
+  ],
   "eras": [
     "early",
     "baroque"
@@ -39,10 +51,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/impacta-orfeo-de-monteverdi",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "impacta-orfeo-de-monteverdi"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

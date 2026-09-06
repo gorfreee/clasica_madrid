@@ -26,8 +26,24 @@
       "name": "Leif Ove Andsnes"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "BEETHOVEN"
+    },
+    {
+      "name": "BRUCKNER"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para piano núm. 3",
+      "composerName": "BEETHOVEN"
+    },
+    {
+      "title": "Sinfonía núm. 6",
+      "composerName": "BRUCKNER"
+    }
+  ],
   "eras": [
     "classical",
     "romantic"
@@ -41,10 +57,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-philharmonia-orchestra-7",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "ibermusica-philharmonia-orchestra-7"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

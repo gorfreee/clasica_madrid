@@ -20,8 +20,33 @@
       "name": "Yunchan Lim"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "MOZART"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata núm. 4 en Mi bemol Mayor",
+      "composerName": "MOZART"
+    },
+    {
+      "title": "Sonata núm. 13 em Si bemol Mayor",
+      "composerName": "MOZART"
+    },
+    {
+      "title": "Sonata núm. 9 en Re Mayor",
+      "composerName": "MOZART"
+    },
+    {
+      "title": "Sonata núm. 7 en Do Mayor",
+      "composerName": "MOZART"
+    },
+    {
+      "title": "Sonata núm. 11 “Alla turca”",
+      "composerName": "MOZART"
+    }
+  ],
   "eras": [
     "classical"
   ],
@@ -34,10 +59,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-yunchan-lim",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-06",
       "externalId": "ibermusica-yunchan-lim"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-06"
 }

@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_zarzuela_es_temporada_conciertos_2026_2027_feliz_cumplea_c3_b1os_don_manuel",
+  "slug": "feliz-cumpleanos-don-manuel",
+  "title": "Feliz cumpleaños: Don Manuel",
+  "status": "scheduled",
+  "venueId": "ven_teatro_zarzuela",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_conciertos_2026_2027_feliz_cumplea_c3_b1os_don_manuel_01",
+      "date": "2026-11-23",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Carolina Alcaide"
+    },
+    {
+      "name": "Ramón Grau"
+    },
+    {
+      "name": "Sylvia Torán"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_teatro_zarzuela",
+      "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/conciertos-2026-2027/feliz-cumplea%C3%B1os-don-manuel",
+      "checkedAt": "2026-09-06",
+      "externalId": "/es/temporada/conciertos-2026-2027/feliz-cumplea%C3%B1os-don-manuel"
+    }
+  ],
+  "primarySourceId": "src_teatro_zarzuela",
+  "lastVerifiedAt": "2026-09-06"
+}

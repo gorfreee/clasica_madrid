@@ -132,6 +132,18 @@
     {
       "title": "‘Amours divins’, de La belle Hélène (1864)",
       "composerName": "Jacques Offenbach (1819-1880)"
+    },
+    {
+      "title": "Le temps de l’amour (1966)",
+      "composerName": "Françoise Hardy (1944-2024)"
+    },
+    {
+      "title": "Le premier bonheur du jour (1963)",
+      "composerName": "Françoise Hardy (1944-2024)"
+    },
+    {
+      "title": "De Airs (1689)",
+      "composerName": "Michel Lambert (1610-1696)"
     }
   ],
   "eras": [
@@ -148,16 +160,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-lea-desandre-thomas-dunford",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "cndm-lea-desandre-thomas-dunford"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23818",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "23818"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

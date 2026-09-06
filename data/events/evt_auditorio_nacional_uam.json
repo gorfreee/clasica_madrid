@@ -77,6 +77,9 @@
     },
     {
       "name": "Elena Kats-Chernin (1957-)"
+    },
+    {
+      "name": "Georges Bizet"
     }
   ],
   "works": [
@@ -147,6 +150,22 @@
     {
       "title": "Fast Blue Village (2022)",
       "composerName": "Elena Kats-Chernin (1957-)"
+    },
+    {
+      "title": "Con motivos de piezas de Hector Berlioz, Giacomo Meyerbeer y Frédéric Chopin",
+      "composerName": "Sebastian Bartmann (*1979)"
+    },
+    {
+      "title": "Temas de la ópera Carmen (1875)",
+      "composerName": "Georges Bizet"
+    },
+    {
+      "title": "Música de la película \"El contrato del dibujante”",
+      "composerName": "Michael Nyman (1944-)"
+    },
+    {
+      "title": "Con motivos y melodías de los Manuscritos Uhrovska",
+      "composerName": "Adam Ilyas Kuruc (1984-)"
     }
   ],
   "eras": [
@@ -164,10 +183,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/uam",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "uam"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

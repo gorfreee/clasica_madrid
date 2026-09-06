@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_zarzuela_es_temporada_nuevos_publicos_2026_2027_el_duo_de_la_africana_escolares",
+  "slug": "el-duo-de-la-africana-2",
+  "title": "El dúo de «La africana»",
+  "status": "scheduled",
+  "venueId": "ven_teatro_zarzuela",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_nuevos_publicos_2026_2027_el_duo_de_la_africana_escolares_01",
+      "date": "2027-04-12",
+      "time": "10:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_nuevos_publicos_2026_2027_el_duo_de_la_africana_escolares_02",
+      "date": "2027-04-12",
+      "time": "12:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_nuevos_publicos_2026_2027_el_duo_de_la_africana_escolares_03",
+      "date": "2027-04-13",
+      "time": "10:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_nuevos_publicos_2026_2027_el_duo_de_la_africana_escolares_04",
+      "date": "2027-04-13",
+      "time": "12:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_nuevos_publicos_2026_2027_el_duo_de_la_africana_escolares_05",
+      "date": "2027-04-14",
+      "time": "10:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_nuevos_publicos_2026_2027_el_duo_de_la_africana_escolares_06",
+      "date": "2027-04-14",
+      "time": "12:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_nuevos_publicos_2026_2027_el_duo_de_la_africana_escolares_07",
+      "date": "2027-04-15",
+      "time": "10:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_nuevos_publicos_2026_2027_el_duo_de_la_africana_escolares_08",
+      "date": "2027-04-15",
+      "time": "12:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_zarzuela_es_temporada_nuevos_publicos_2026_2027_el_duo_de_la_africana_escolares_09",
+      "date": "2027-04-16",
+      "time": "11:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Julia Cruz",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "MANUEL FERNÁNDEZ CABALLERO"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "opera",
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_teatro_zarzuela",
+      "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/nuevos-publicos-2026-2027/el-duo-de-la-africana-escolares",
+      "checkedAt": "2026-09-06",
+      "externalId": "/es/temporada/nuevos-publicos-2026-2027/el-duo-de-la-africana-escolares"
+    }
+  ],
+  "primarySourceId": "src_teatro_zarzuela",
+  "lastVerifiedAt": "2026-09-06"
+}

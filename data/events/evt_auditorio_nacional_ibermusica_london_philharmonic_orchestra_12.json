@@ -26,8 +26,24 @@
       "name": "Julia Fischer"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "BRAHMS"
+    },
+    {
+      "name": "CHAIKOVSKI"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para violín",
+      "composerName": "BRAHMS"
+    },
+    {
+      "title": "Sinfonía Manfredo en Si menor op. 58",
+      "composerName": "CHAIKOVSKI"
+    }
+  ],
   "eras": [
     "romantic"
   ],
@@ -40,10 +56,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-london-philharmonic-orchestra-12",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-06",
       "externalId": "ibermusica-london-philharmonic-orchestra-12"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-06"
 }

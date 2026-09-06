@@ -32,7 +32,12 @@
       "name": "Steve Reich (1936)"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "Music for eighteen musicians (1974-1976)",
+      "composerName": "Steve Reich (1936)"
+    }
+  ],
   "eras": [
     "contemporary"
   ],
@@ -45,16 +50,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-neopercusion",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "cndm-neopercusion"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23770",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "23770"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

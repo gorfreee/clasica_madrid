@@ -42,12 +42,19 @@
   "composers": [
     {
       "name": "Mario Castelnuovo-Tedesco"
+    },
+    {
+      "name": "Franz Schubert"
     }
   ],
   "works": [
     {
       "title": "Concierto para guitarra y orquesta núm. 1 en Re mayor",
       "composerName": "Mario Castelnuovo-Tedesco"
+    },
+    {
+      "title": "Rosamunde",
+      "composerName": "Franz Schubert"
     }
   ],
   "eras": [
@@ -62,10 +69,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-17-4",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "b9547b211b764d0f81df773d97d9bdfd"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

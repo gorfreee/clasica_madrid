@@ -33,6 +33,9 @@
     },
     {
       "name": "Dvořák"
+    },
+    {
+      "name": "Mahler"
     }
   ],
   "works": [
@@ -43,6 +46,10 @@
     {
       "title": "Sinfonía n.º 7",
       "composerName": "Dvořák"
+    },
+    {
+      "title": "Blumine",
+      "composerName": "Mahler"
     }
   ],
   "eras": [
@@ -57,10 +64,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-violin-brahms-y-sinfonia-dvorak-7",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "excelentia-violin-brahms-y-sinfonia-dvorak-7"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

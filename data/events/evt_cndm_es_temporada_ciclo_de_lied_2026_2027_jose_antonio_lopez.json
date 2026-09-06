@@ -85,6 +85,18 @@
     {
       "title": "Olas gigantes , n.º 6",
       "composerName": "Federico Mompou (1893-1987)"
+    },
+    {
+      "title": "De Becquerianas (1970-1971)",
+      "composerName": "Federico Mompou (1893-1987)"
+    },
+    {
+      "title": "Dos canciones de juventud (1959)",
+      "composerName": "Federico Mompou (1893-1987)"
+    },
+    {
+      "title": "Canciones para niños (1953)",
+      "composerName": "Federico Mompou (1893-1987)"
     }
   ],
   "eras": [
@@ -101,16 +113,16 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23798",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "23798"
     },
     {
       "sourceId": "src_teatro_zarzuela",
       "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/ciclo-de-lied-2026-2027/jose-antonio-lopez",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-06",
       "externalId": "/es/temporada/ciclo-de-lied-2026-2027/jose-antonio-lopez"
     }
   ],
   "primarySourceId": "src_cndm",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-06"
 }

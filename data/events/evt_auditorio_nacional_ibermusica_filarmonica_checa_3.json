@@ -26,8 +26,24 @@
       "name": "Mao Fujita"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "SMETANA"
+    },
+    {
+      "name": "RACHMANINOFF"
+    }
+  ],
+  "works": [
+    {
+      "title": "La novia vendida, obertura, Furiant y danza de los comediantes",
+      "composerName": "SMETANA"
+    },
+    {
+      "title": "Danzas sinfónicas",
+      "composerName": "RACHMANINOFF"
+    }
+  ],
   "eras": [
     "romantic",
     "twentieth"
@@ -42,10 +58,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-filarmonica-checa-3",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-06",
       "externalId": "ibermusica-filarmonica-checa-3"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-06"
 }
