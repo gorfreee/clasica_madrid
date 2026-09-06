@@ -37,20 +37,12 @@ describe('catálogo publicado tras la limpieza de duplicados de hueco exclusivo'
     const catalog = await loadCatalogFromDir(defaultDataDir());
     const collisions = findScheduleCollisions(catalog);
     expect(collisions.filter((item) => item.kind === 'duplicate')).toEqual([]);
-    // Known Casa de Vacas reviews predate slot quarantine. A third review
-    // must not land; after editorial cleanup this expectation becomes [].
-    expect(
-      collisions
-        .filter((item) => item.kind === 'review')
-        .map((item) => [...item.eventIds].sort().join('|'))
-        .sort(),
-    ).toEqual([
-      'evt_fundacion_piu_mosso_2187|evt_madrid_datos_50265531',
-      'evt_madrid_datos_50221891|evt_madrid_tempo_clausura_20260906',
-    ]);
+    expect(collisions.filter((item) => item.kind === 'review')).toEqual([]);
     const issues = findScheduleCollisionIssues(catalog);
     expect(issues.filter((issue) => issue.code === 'schedule-conflict').every((issue) => issue.severity === 'warning')).toBe(true);
-    expect(issues.filter((issue) => issue.code === 'schedule-review').every((issue) => issue.severity === 'error')).toBe(true);
+    expect(issues.filter((issue) => issue.code === 'schedule-review')).toEqual([]);
+    expect(catalog.events.some((event) => event.id === 'evt_madrid_datos_50265531')).toBe(false);
+    expect(catalog.events.some((event) => event.id === 'evt_madrid_datos_50221891')).toBe(false);
     expect(catalog.events.some((event) => event.id === 'evt_cndm_23900')).toBe(false);
 
     const oratorio = catalog.events.find(

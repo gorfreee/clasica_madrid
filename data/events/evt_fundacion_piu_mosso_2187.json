@@ -2,6 +2,9 @@
   "schemaVersion": 1,
   "id": "evt_fundacion_piu_mosso_2187",
   "slug": "victor-tretyakov-piano",
+  "slugAliases": [
+    "iv-edicion-festival-alicia-de-larrocha"
+  ],
   "title": "VICTOR TRETYAKOV, Piano",
   "status": "scheduled",
   "venueId": "ven_casa_vacas_retiro",
@@ -53,6 +56,12 @@
       "url": "https://www.fundacionpiumosso.com/evento/victor-tretyakov-piano",
       "checkedAt": "2026-09-06",
       "externalId": "2187"
+    },
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=a8d5e042bd42d910VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-09-06",
+      "externalId": "50265531"
     }
   ],
   "primarySourceId": "src_fundacionpiumosso_com",
