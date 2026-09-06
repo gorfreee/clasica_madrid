@@ -624,7 +624,10 @@ describe('identity matching', () => {
       venueId: 'ven_auditorio_nacional_sala_sinfonica',
     };
 
-    expect(matchEventIdentity(catalog, observed, { ...options, aliases: [] }).kind).toBe('unmatched');
+    expect(matchEventIdentity(catalog, observed, { ...options, aliases: [] })).toMatchObject({
+      kind: 'ambiguous',
+      methods: ['slot'],
+    });
     expect(matchEventIdentity(catalog, observed, options)).toMatchObject({
       kind: 'matched',
       method: 'alias',

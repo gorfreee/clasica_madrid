@@ -3,7 +3,7 @@ import { matchEventIdentity } from '../src/ingestion/identity.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { loadCatalogFromDir } from '../src/lib/repository/load.ts';
 import { defaultDataDir } from '../src/lib/repository/fs.ts';
-import { findScheduleCollisions } from '../src/lib/validation/schedule-collisions.ts';
+import { findScheduleCollisionIssues, findScheduleCollisions } from '../src/lib/validation/schedule-collisions.ts';
 
 const cndm = getSourceDefinition('cndm');
 
@@ -37,6 +37,12 @@ describe('catálogo publicado tras la limpieza de duplicados de hueco exclusivo'
     const catalog = await loadCatalogFromDir(defaultDataDir());
     const collisions = findScheduleCollisions(catalog);
     expect(collisions.filter((item) => item.kind === 'duplicate')).toEqual([]);
+    expect(collisions.filter((item) => item.kind === 'review')).toEqual([]);
+    const issues = findScheduleCollisionIssues(catalog);
+    expect(issues.filter((issue) => issue.code === 'schedule-conflict').every((issue) => issue.severity === 'warning')).toBe(true);
+    expect(issues.filter((issue) => issue.code === 'schedule-review')).toEqual([]);
+    expect(catalog.events.some((event) => event.id === 'evt_madrid_datos_50265531')).toBe(false);
+    expect(catalog.events.some((event) => event.id === 'evt_madrid_datos_50221891')).toBe(false);
     expect(catalog.events.some((event) => event.id === 'evt_cndm_23900')).toBe(false);
 
     const oratorio = catalog.events.find(

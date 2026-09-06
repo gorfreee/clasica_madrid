@@ -175,8 +175,11 @@ describe('ORCAM pipeline safety', () => {
     const observed = { sourceUrl: (await sample()).sourceUrl, title: 'La creación de un todo', occurrences: [{ date: '2026-10-06', time: '19:30' }] };
     const options = { catalogSourceId: source.catalogSourceId, venueId: published.venueId };
     expect(matchEventIdentity(catalog, observed, options).kind).toBe('matched');
+    expect(matchEventIdentity(catalog, { ...observed, title: 'Otro concierto' }, options)).toMatchObject({
+      kind: 'ambiguous',
+      methods: ['slot'],
+    });
     for (const changed of [
-      { ...observed, title: 'Otro concierto' },
       { ...observed, occurrences: [{ date: '2026-10-07', time: '19:30' }] },
       { ...observed, occurrences: [{ date: '2026-10-06', time: '21:00' }] },
       { ...observed, occurrences: [{ date: '2026-10-06', time: null }] },

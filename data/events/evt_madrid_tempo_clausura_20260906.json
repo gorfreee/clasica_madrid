@@ -2,6 +2,9 @@
   "schemaVersion": 1,
   "id": "evt_madrid_tempo_clausura_20260906",
   "slug": "madrid-a-tempo-concierto-clausura",
+  "slugAliases": [
+    "ii-festival-internacional-de-piano"
+  ],
   "title": "Madrid a Tempo: Concierto de clausura de alumnos",
   "status": "scheduled",
   "venueId": "ven_casa_vacas_retiro",
@@ -31,8 +34,14 @@
       "sourceId": "src_madrid_a_tempo",
       "url": "https://www.madridatempo.com/programacion-2023",
       "checkedAt": "2026-08-28"
+    },
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=5e05cff3cf74c910VgnVCM100000891ecb1aRCRD",
+      "checkedAt": "2026-09-03",
+      "externalId": "50221891"
     }
   ],
   "primarySourceId": "src_madrid_a_tempo",
-  "lastVerifiedAt": "2026-08-28"
+  "lastVerifiedAt": "2026-09-03"
 }
