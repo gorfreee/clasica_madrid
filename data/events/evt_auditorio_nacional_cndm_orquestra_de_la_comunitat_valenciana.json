@@ -23,9 +23,6 @@
   ],
   "composers": [
     {
-      "name": "ORQUESTRA DE LA COMUNITAT VALENCIANA"
-    },
-    {
       "name": "Johannes Brahms (1833-1897)"
     },
     {
@@ -33,10 +30,6 @@
     }
   ],
   "works": [
-    {
-      "title": "(Titular del Palau de les Arts)",
-      "composerName": "ORQUESTRA DE LA COMUNITAT VALENCIANA"
-    },
     {
       "title": "Concierto para violín en re mayor, op. 77 (1878)",
       "composerName": "Johannes Brahms (1833-1897)"

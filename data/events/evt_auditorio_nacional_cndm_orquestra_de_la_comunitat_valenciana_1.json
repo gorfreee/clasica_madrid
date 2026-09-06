@@ -23,9 +23,6 @@
   ],
   "composers": [
     {
-      "name": "ORQUESTRA DE LA COMUNITAT VALENCIANA"
-    },
-    {
       "name": "Ernest Chausson (1855-1899)"
     },
     {
@@ -33,10 +30,6 @@
     }
   ],
   "works": [
-    {
-      "title": "(Titular del Palau de les Arts)",
-      "composerName": "ORQUESTRA DE LA COMUNITAT VALENCIANA"
-    },
     {
       "title": "Poème de l’amour et de la mer, op. 19 (1882-1890)",
       "composerName": "Ernest Chausson (1855-1899)"

@@ -37,13 +37,19 @@
   ],
   "composers": [
     {
-      "name": "BAILE Y ENSOÑACIÓN"
+      "name": "Sebastian Bartmann (*1979)"
     },
     {
-      "name": "Le roi s'amuse (1882)"
+      "name": "Christian Fritz (1988-)"
+    },
+    {
+      "name": "Léo Delibes (1836-1891)"
     },
     {
       "name": "Francis Poulenc (1899-1963)"
+    },
+    {
+      "name": "Chiel Meijering (1954-)"
     },
     {
       "name": "Ernest Krähmer (1795-1837)"
@@ -52,39 +58,55 @@
       "name": "Pauline Viardot-García (1821-1910)"
     },
     {
-      "name": "LIKE A BOHO"
+      "name": "Michael Nyman (1944-)"
     },
     {
-      "name": "RAPSODIA ROMANÍ"
+      "name": "Giovanni Sollima (1962-)"
     },
     {
-      "name": "La Bohème (1965)"
+      "name": "Andrea Ritter (1978-)"
+    },
+    {
+      "name": "Adam Ilyas Kuruc (1984-)"
+    },
+    {
+      "name": "Robert Lakatos (1991-)"
+    },
+    {
+      "name": "Charles Aznavour (1924-2018)"
+    },
+    {
+      "name": "Elena Kats-Chernin (1957-)"
     }
   ],
   "works": [
     {
-      "title": "Christian Fritz (1988 -)",
-      "composerName": "BAILE Y ENSOÑACIÓN"
+      "title": "Paris 1830 (2025)",
+      "composerName": "Sebastian Bartmann (*1979)"
+    },
+    {
+      "title": "Waltz of the ladybirds (2024)",
+      "composerName": "Christian Fritz (1988-)"
+    },
+    {
+      "title": "Le roi s'amuse (1882)",
+      "composerName": "Léo Delibes (1836-1891)"
     },
     {
       "title": "Pavane \"Belle qui tiens ma vie\"",
-      "composerName": "Le roi s'amuse (1882)"
+      "composerName": "Léo Delibes (1836-1891)"
     },
     {
       "title": "Scène du Bouquet",
-      "composerName": "Le roi s'amuse (1882)"
+      "composerName": "Léo Delibes (1836-1891)"
     },
     {
       "title": "Toccata FP 48:3 (1928)",
       "composerName": "Francis Poulenc (1899-1963)"
     },
     {
-      "title": "Chiel Meijering (1954-)",
-      "composerName": "Francis Poulenc (1899-1963)"
-    },
-    {
       "title": "Es War Einmal ein König / Érase una vez un Rey (2007)",
-      "composerName": "Francis Poulenc (1899-1963)"
+      "composerName": "Chiel Meijering (1954-)"
     },
     {
       "title": "Introducción y Variaciones sobre un tema original, Op. 32",
@@ -95,64 +117,36 @@
       "composerName": "Pauline Viardot-García (1821-1910)"
     },
     {
-      "title": "Christian Fritz (1988-)",
-      "composerName": "Pauline Viardot-García (1821-1910)"
-    },
-    {
       "title": "Fantasie sur Carmen (2025/26)",
-      "composerName": "Pauline Viardot-García (1821-1910)"
-    },
-    {
-      "title": "Michael Nyman (1944-)",
-      "composerName": "LIKE A BOHO"
+      "composerName": "Christian Fritz (1988-)"
     },
     {
       "title": "Chasing Sheep is best left to Shepherds (1982)",
-      "composerName": "LIKE A BOHO"
-    },
-    {
-      "title": "Música de la película \"El contrato del dibujante”",
-      "composerName": "LIKE A BOHO"
-    },
-    {
-      "title": "Giovanni Sollima (1962-)",
-      "composerName": "LIKE A BOHO"
+      "composerName": "Michael Nyman (1944-)"
     },
     {
       "title": "La Tempesta (del “Viaggio in Italia”, 2000)",
-      "composerName": "LIKE A BOHO"
-    },
-    {
-      "title": "Andrea Ritter (1978-)",
-      "composerName": "LIKE A BOHO"
+      "composerName": "Giovanni Sollima (1962-)"
     },
     {
       "title": "Pauline (2025)",
-      "composerName": "LIKE A BOHO"
-    },
-    {
-      "title": "Adam Ilyas Kuruc (1984-)",
-      "composerName": "RAPSODIA ROMANÍ"
+      "composerName": "Andrea Ritter (1978-)"
     },
     {
       "title": "Bohemian Suite (2025/26)",
-      "composerName": "RAPSODIA ROMANÍ"
-    },
-    {
-      "title": "Con motivos y melodías de los Manuscritos Uhrovska",
-      "composerName": "RAPSODIA ROMANÍ"
-    },
-    {
-      "title": "Robert Lakatos (1991-)",
-      "composerName": "RAPSODIA ROMANÍ"
+      "composerName": "Adam Ilyas Kuruc (1984-)"
     },
     {
       "title": "Alom para dos instrumentos de cuerda (2022)",
-      "composerName": "RAPSODIA ROMANÍ"
+      "composerName": "Robert Lakatos (1991-)"
     },
     {
-      "title": "Elena Kats-Chernin (1957-)",
-      "composerName": "La Bohème (1965)"
+      "title": "La Bohème (1965)",
+      "composerName": "Charles Aznavour (1924-2018)"
+    },
+    {
+      "title": "Fast Blue Village (2022)",
+      "composerName": "Elena Kats-Chernin (1957-)"
     }
   ],
   "eras": [

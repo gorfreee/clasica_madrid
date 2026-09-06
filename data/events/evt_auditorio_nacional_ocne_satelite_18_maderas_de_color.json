@@ -34,12 +34,6 @@
   ],
   "composers": [
     {
-      "name": "José María Ferrero"
-    },
-    {
-      "name": "Eduardo Raimundo"
-    },
-    {
       "name": "Franz Schubert"
     },
     {
@@ -50,40 +44,31 @@
     },
     {
       "name": "Eddie Mora"
+    },
+    {
+      "name": "Amparo Edo Biol"
     }
   ],
   "works": [
-    {
-      "title": "Corno inglés",
-      "composerName": "José María Ferrero"
-    },
-    {
-      "title": "Clarinete bajo",
-      "composerName": "Eduardo Raimundo"
-    },
     {
       "title": "Trío de cuerda en Si bemol mayor, D.471",
       "composerName": "Franz Schubert"
     },
     {
-      "title": "Cuarteto con flauta núm.6 en Mi menor",
+      "title": "Cuarteto con flauta núm.6 en Mi menor (versión para piccolo)",
       "composerName": "Federigo Fiorillo"
     },
     {
-      "title": "(versión para piccolo)",
-      "composerName": "Federigo Fiorillo"
-    },
-    {
-      "title": "Cuarteto para corno inglés,",
+      "title": "Cuarteto para corno inglés, violín, viola y violonchelo",
       "composerName": "Jean Françaix"
     },
     {
-      "title": "Silencio III, para clarinete bajo,",
+      "title": "Silencio III, para clarinete bajo, violín, viola y violoncello",
       "composerName": "Eddie Mora"
     },
     {
-      "title": "violín, viola y violoncello",
-      "composerName": "Eddie Mora"
+      "title": "Quimera",
+      "composerName": "Amparo Edo Biol"
     }
   ],
   "eras": [

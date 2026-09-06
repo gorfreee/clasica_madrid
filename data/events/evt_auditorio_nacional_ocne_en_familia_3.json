@@ -22,21 +22,16 @@
   ],
   "composers": [
     {
-      "name": "Ballet Nacional de España"
+      "name": "Domenico Scarlatti"
+    },
+    {
+      "name": "Miguel Ángel Coria"
     }
   ],
   "works": [
     {
-      "title": "Rubén Olmo, director artístico BNE",
-      "composerName": "Ballet Nacional de España"
-    },
-    {
-      "title": "Domenico Scarlatti / Miguel Ángel Coria",
-      "composerName": "Ballet Nacional de España"
-    },
-    {
       "title": "Seis sonatas para la reina de España",
-      "composerName": "Ballet Nacional de España"
+      "composerName": "Domenico Scarlatti / Miguel Ángel Coria"
     }
   ],
   "eras": [

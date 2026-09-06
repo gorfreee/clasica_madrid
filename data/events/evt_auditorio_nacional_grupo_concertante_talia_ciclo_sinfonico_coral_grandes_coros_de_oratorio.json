@@ -27,17 +27,8 @@
       "role": "conductor"
     }
   ],
-  "composers": [
-    {
-      "name": "GRANDES COROS DE ORATORIOS"
-    }
-  ],
-  "works": [
-    {
-      "title": "El Mesias, Paulus, La Pasión, Las estaciones…",
-      "composerName": "GRANDES COROS DE ORATORIOS"
-    }
-  ],
+  "composers": [],
+  "works": [],
   "eras": [
     "baroque",
     "classical",

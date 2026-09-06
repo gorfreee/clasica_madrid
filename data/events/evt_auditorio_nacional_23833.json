@@ -22,33 +22,58 @@
   ],
   "composers": [
     {
-      "name": "I. PRÍNCIPE HEREDERO (1527-1547)"
+      "name": "T. Susato (ca. 1515-d. 1570)"
     },
     {
-      "name": "II. EL FELICÍSIMO VIAJE (1548-1555)"
+      "name": "J. Desprez (ca. 1440-1521)"
     },
     {
-      "name": "IV. OCASO DEL REY PRUDENTE (1580-1598)"
+      "name": "N. Gombert (ca. 1495-ca. 1560)"
+    },
+    {
+      "name": "J. del Encina (1468-1529)"
+    },
+    {
+      "name": "P. de Pastrana (ca. 1495-1563)"
+    },
+    {
+      "name": "A. Mudarra (ca. 1510-1580)"
+    },
+    {
+      "name": "L. de Milán (ca. 1500-ca. 1561)"
+    },
+    {
+      "name": "A. Le Roy (ca. 1520-1589)"
+    },
+    {
+      "name": "A. de Cabezón (1510-1566)"
+    },
+    {
+      "name": "D. Pisador (ca. 1509-d. 1557)"
+    },
+    {
+      "name": "M. Flecha el Viejo (1481-1553)"
+    },
+    {
+      "name": "C. de Morales (1500-1553)"
+    },
+    {
+      "name": "T. Arbeau (1519-1595)"
+    },
+    {
+      "name": "C. Negri (ca. 1536-ca. 1604)"
+    },
+    {
+      "name": "J. Brudieu (ca. 1520-1591)"
+    },
+    {
+      "name": "D. Ortiz (ca. 1510-ca. 1570)"
+    },
+    {
+      "name": "A. Cotes (ca. 1550-1603)"
     }
   ],
-  "works": [
-    {
-      "title": "Obras de T. Susato (ca. 1515-d. 1570), J. Desprez (ca. 1440-1521), N. Gombert (ca. 1495-ca. 1560), J. del Encina (1468-1529), P. de Pastrana (ca. 1495-1563), A. Mudarra (ca. 1510-1580) y L. de Milán (ca. 1500-ca. 1561)",
-      "composerName": "I. PRÍNCIPE HEREDERO (1527-1547)"
-    },
-    {
-      "title": "Obras de A. Le Roy (ca. 1520-1589), A. de Cabezón (1510-1566) y D. Pisador (ca. 1509-d. 1557)",
-      "composerName": "II. EL FELICÍSIMO VIAJE (1548-1555)"
-    },
-    {
-      "title": "Obras de M. Flecha el Viejo (1481-1553), C. de Morales (1500-1553), T. Arbeau (1519-1595), C. Negri (ca. 1536-ca. 1604) y J. Brudieu (ca. 1520-1591)",
-      "composerName": "II. EL FELICÍSIMO VIAJE (1548-1555)"
-    },
-    {
-      "title": "Obras de D. Ortiz (ca. 1510-ca. 1570), A. Cotes (ca. 1550-1603) y anónimos",
-      "composerName": "IV. OCASO DEL REY PRUDENTE (1580-1598)"
-    }
-  ],
+  "works": [],
   "eras": [
     "renaissance"
   ],

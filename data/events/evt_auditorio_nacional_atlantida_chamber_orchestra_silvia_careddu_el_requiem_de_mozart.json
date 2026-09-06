@@ -30,15 +30,6 @@
   "composers": [
     {
       "name": "Wolfgang Amadeus Mozart (1756–1791)"
-    },
-    {
-      "name": "III. Presto"
-    },
-    {
-      "name": "Wolfgang Amadeus Mozart"
-    },
-    {
-      "name": "I. Introitus"
     }
   ],
   "works": [
@@ -48,15 +39,11 @@
     },
     {
       "title": "Concierto para flauta nº1 en Sol mayor, KV 313",
-      "composerName": "III. Presto"
+      "composerName": "Wolfgang Amadeus Mozart (1756–1791)"
     },
     {
       "title": "Réquiem en Re menor, KV 626",
-      "composerName": "Wolfgang Amadeus Mozart"
-    },
-    {
-      "title": "Requiem aeternam",
-      "composerName": "I. Introitus"
+      "composerName": "Wolfgang Amadeus Mozart (1756–1791)"
     }
   ],
   "eras": [

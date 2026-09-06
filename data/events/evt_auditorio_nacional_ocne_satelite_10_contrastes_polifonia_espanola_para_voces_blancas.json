@@ -22,44 +22,16 @@
   ],
   "composers": [
     {
-      "name": "Rosa de Segovia"
+      "name": "Francisco Guerrero"
     },
     {
-      "name": "Pilar Pujol"
+      "name": "Pablo Sorozábal"
     },
     {
-      "name": "Marta Bornaechea"
-    },
-    {
-      "name": "Nuria Llopis"
+      "name": "Valentín Ruiz"
     }
   ],
-  "works": [
-    {
-      "title": "Voces agudas",
-      "composerName": "Rosa de Segovia"
-    },
-    {
-      "title": "Voces medias",
-      "composerName": "Pilar Pujol"
-    },
-    {
-      "title": "Voces graves",
-      "composerName": "Marta Bornaechea"
-    },
-    {
-      "title": "El Siglo de Oro (s. XVI)",
-      "composerName": "Nuria Llopis"
-    },
-    {
-      "title": "Obras del Cancionero de Medinaceli y Francisco Guerrero",
-      "composerName": "Nuria Llopis"
-    },
-    {
-      "title": "El Siglo de Plata (s. XX) Obras de Pablo Sorozábal, Valentín Ruiz",
-      "composerName": "Nuria Llopis"
-    }
-  ],
+  "works": [],
   "eras": [
     "twentieth"
   ],
