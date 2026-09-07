@@ -246,7 +246,7 @@ describe('parser de ficha Auditorio Nacional', () => {
       { title: 'Chants de terre et de ciel (1938)', composerName: 'Olivier Messiaen (1908-1992)' },
       { title: 'Poème-nocturne, op. 61 (1911)', composerName: 'Alexander Scriabin (1872-1915)' },
       { title: 'Vers la flamme, op. 72 (1914)', composerName: 'Alexander Scriabin (1872-1915)' },
-      { title: 'Jumalattaret ** (2012)', composerName: 'John Zorn (1953)' },
+      { title: 'Jumalattaret (2012)', composerName: 'John Zorn (1953)' },
     ]);
   });
 
@@ -1315,6 +1315,132 @@ describe('parser de ficha Auditorio Nacional', () => {
     expect(facts.programText).toMatch(/Variaciones sobre una película muda \(1927\)/);
     expect(facts.composers).toEqual([]);
     expect(facts.works).toEqual([]);
+  });
+
+  it('Anónimo corta el compositor sticky: Soberana María no hereda a José de San Juan', () => {
+    const facts = parseAuditorioNacionalDetail(
+      auditorioPage('CNDM. Cantoría', [
+        [
+          'CANTORÍA',
+          'José de San Juan (1687-1735)',
+          '¡A la fiesta, zagales! (1728)',
+          'Anónimo (s. XVII)',
+          'Soberana María (Romances y letras de a tres vozes, s. XVII, atrib. Mateo Romero)',
+          'J. de San Juan',
+          'De repiques de campanas (1734)',
+        ].join('<br />'),
+      ]),
+    );
+    const soberana = facts.works?.find((work) => /Soberana Mar[ií]a/i.test(work.title));
+    const fiesta = facts.works?.find((work) => /A la fiesta, zagales/i.test(work.title));
+    const repiques = facts.works?.find((work) => /De repiques de campanas/i.test(work.title));
+
+    expect(fiesta?.composerName).toMatch(/Jos[eé] de San Juan/i);
+    expect(soberana).toEqual(expect.objectContaining({ title: expect.stringMatching(/Soberana Mar[ií]a/i) }));
+    expect(soberana?.composerName ?? '').not.toMatch(/San Juan/i);
+    expect(facts.works?.some((work) => /Soberana Mar[ií]a/i.test(work.title) && /San Juan/i.test(work.composerName ?? ''))).toBe(
+      false,
+    );
+    expect(repiques?.composerName).toMatch(/San Juan/i);
+    expect(facts.works?.some((work) => /^An[oó]nimo/i.test(work.title))).toBe(false);
+  });
+
+  it('Tradicional de… corta el compositor sticky y no se publica como composerName', () => {
+    const facts = parseAuditorioNacionalDetail(
+      auditorioPage("CNDM. L’Arpeggiata", [
+        [
+          'A. Mudarra',
+          'Claros y frescos ríos (Tres libros de música en cifras para vihuela, 1546)',
+          'Agustín Rivas Chupacaña',
+          'Coplas-Yo vengo regando flores (merengue venezolano)',
+          'Tradicional de Venezuela',
+          'Que me entierren en un arpa (joropo llanero)',
+          'A. Mudarra',
+          'Si me llaman (Tres libros de música en cifras para vihuela, 1546)',
+          'Tradicional de Venezuela',
+          'Pajarito (joropo llanero)',
+          'Ignacio ‘Indio’ Figueredo (1899-1995)',
+          'El gavilán (joropo llanero)',
+        ].join('<br />'),
+      ]),
+    );
+    const coplas = facts.works?.find((work) => /Yo vengo regando flores/i.test(work.title));
+    const arpa = facts.works?.find((work) => /Que me entierren en un arpa/i.test(work.title));
+    const siMeLlaman = facts.works?.find((work) => /^Si me llaman/i.test(work.title));
+    const pajarito = facts.works?.find((work) => /^Pajarito/i.test(work.title));
+    const gavilan = facts.works?.find((work) => /El gavil[aá]n/i.test(work.title));
+
+    expect(coplas?.composerName).toMatch(/Agust[ií]n Rivas/i);
+    expect(arpa).toEqual(expect.objectContaining({ title: expect.stringMatching(/Que me entierren en un arpa/i) }));
+    expect(arpa?.composerName ?? '').not.toMatch(/Rivas/i);
+    expect(siMeLlaman?.composerName).toMatch(/Mudarra/i);
+    expect(pajarito).toEqual(expect.objectContaining({ title: expect.stringMatching(/^Pajarito/i) }));
+    expect(pajarito?.composerName ?? '').not.toMatch(/Mudarra/i);
+    expect(facts.works?.some((work) => /Indio.*Figueredo|Figueredo/i.test(work.title))).toBe(false);
+    expect(gavilan).toEqual(expect.objectContaining({ title: expect.stringMatching(/El gavil[aá]n/i) }));
+    expect(gavilan?.composerName).toMatch(/Figueredo/i);
+    expect(facts.composers?.some((item) => /^Tradicional/i.test(item.name))).toBe(false);
+    expect(facts.works?.some((work) => /^Tradicional/i.test(work.title))).toBe(false);
+  });
+
+  it('un concepto Monteverdi y Schütz: subtítulo no es una obra de Monteverdi', () => {
+    const facts = parseAuditorioNacionalDetail(
+      auditorioPage('Universo Barroco', [
+        [
+          'Monteverdi y Schütz: la huella veneciana',
+          'Claudio Monteverdi',
+          'Vespro della Beata Vergine',
+          'Heinrich Schütz (1585-1672)',
+          'Musikalische Exequien',
+        ].join('<br />'),
+      ]),
+    );
+    expect(facts.works?.some((work) => /huella veneciana/i.test(work.title))).toBe(false);
+    expect(facts.works?.some((work) => /^y Schütz/i.test(work.title))).toBe(false);
+    expect(facts.works).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          title: expect.stringMatching(/Vespro della Beata Vergine/i),
+          composerName: expect.stringMatching(/Monteverdi/i),
+        }),
+        expect.objectContaining({
+          title: expect.stringMatching(/Musikalische Exequien/i),
+          composerName: expect.stringMatching(/Schütz|Schutz/i),
+        }),
+      ]),
+    );
+    expect(parseAuditorioNacionalDetail(
+      auditorioPage('Excelentia', ['Mozart: Divertimento en Re mayor, K. 136']),
+    ).works).toEqual([
+      { title: 'Divertimento en Re mayor, K. 136', composerName: 'Mozart' },
+    ]);
+  });
+
+  it('quita la llamada de nota **+ del título y conserva Composer: Obra y agrupación normal', () => {
+    const facts = parseAuditorioNacionalDetail(
+      auditorioPage('Liceo de Cámara', [
+        [
+          'Raquel García-Tomás (1984)',
+          'Cuarteto para saxofones, op. 126 **+ (2026)',
+          'Johann Sebastian Bach (1685-1750)',
+          'El clave bien temperado, libro I',
+          'Suite francesa n.º 5',
+        ].join('<br />'),
+      ]),
+    );
+    const quartet = facts.works?.find((work) => /Cuarteto para saxofones/i.test(work.title));
+    expect(quartet?.title).toBe('Cuarteto para saxofones, op. 126 (2026)');
+    expect(quartet?.title).not.toMatch(/\*\*/);
+    expect(quartet?.title).not.toMatch(/\+/);
+    expect(facts.works).toEqual(
+      expect.arrayContaining([
+        {
+          title: 'El clave bien temperado, libro I',
+          composerName: 'Johann Sebastian Bach (1685-1750)',
+        },
+        { title: 'Suite francesa n.º 5', composerName: 'Johann Sebastian Bach (1685-1750)' },
+      ]),
+    );
   });
 });
 

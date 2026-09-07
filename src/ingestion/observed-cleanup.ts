@@ -86,6 +86,7 @@ export function looksLikeComposerLine(text: string): boolean {
 export function looksLikeWorkLine(text: string): boolean {
   const trimmed = text.trim();
   if (!trimmed || looksLikeProgramHeader(trimmed)) return false;
+  if (isNonPersonComposerAttribution(trimmed) || isEditorialNoteLegend(trimmed)) return false;
   if (
     looksLikeProductionNote(trimmed) ||
     looksLikeTextCredit(trimmed) ||
@@ -239,6 +240,24 @@ export function isNonPersonComposerAttribution(name: string): boolean {
   return false;
 }
 
+/**
+ * CNDM/Auditorio footnote calls attached to a title: `*`, `**`, `*+`, `**+`,
+ * `ø+`, `ø+1`. Only when they sit at the end of the title or immediately
+ * before trailing parentheticals, so musical punctuation in the middle of a
+ * title is left alone.
+ */
+const EDITORIAL_NOTE_CALL = /\s+(?:\*+\+?|ø\+)\d*(?=\s*(?:\([^)]*\)\s*)*$)/u;
+
+/** Strip source footnote markers from a work title. */
+export function stripEditorialNoteMarkers(text: string): string {
+  return text.replace(EDITORIAL_NOTE_CALL, '').replace(/\*+\s*$/u, '').replace(/\s+/g, ' ').trim();
+}
+
+/** A line that is itself a footnote legend (`* Estreno`, `ø+ Recuperación…`). */
+export function isEditorialNoteLegend(text: string): boolean {
+  return /^(?:\*+|ø\+)\d*(?:\s+|$)/.test(text.trim());
+}
+
 /** Names that must not appear as `composers[]` / `works[].composerName`. */
 export function isUnreliableComposerName(text: string): boolean {
   const trimmed = text.trim();
@@ -326,6 +345,8 @@ function hasOpenOrSpanYears(text: string): boolean {
 function isPersonNameWord(word: string): boolean {
   if (NAME_PARTICLE.test(word)) return true;
   if (/^[dD][’'][\p{Lu}\p{Lt}]/u.test(word)) return true;
+  const unquoted = word.replace(/^[“”«»"'‘’]+|[“”«»"'‘’]+$/gu, '');
+  if (unquoted !== word && unquoted) return isPersonNameWord(unquoted);
   return /^[\p{Lu}\p{Lt}][\p{L}.’-]*$/u.test(word);
 }
 

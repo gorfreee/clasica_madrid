@@ -1,5 +1,6 @@
 import { matchComposer, matchComposerPrefix } from '../knowledge/composers.ts';
 import {
+  isNonPersonComposerAttribution,
   looksLikeCatalogOnlyLine,
   looksLikeCatalogWorkLine,
   looksLikeComposerLine,
@@ -57,8 +58,6 @@ const FORM_ONLY =
   /^(?:concierto|concerto|sinfon[ií]a|symphony|sonata|suite|quinteto|cuarteto|tr[ií]o|obertura|ouverture|r[eé]quiem|misa|missa|toccata|fuga|fugue|preludio|pr[eé]lude|nocturne|mazurka|scherzo|impromptu|variaciones|variations|cantata|oratorio|fantas[ií]a|romance|rhapsod(?:y|ie)?|rapsodia|divertimento|polonesa|polonaise)$/i;
 
 const PARENTHETICAL_ROLE = new RegExp(`^(.+?)\\s*\\((${ROLE_TOKEN})\\)$`, 'i');
-
-const ANONYMOUS_COMPOSER = /^(?:an[oó]nimo|varios autores)\b/i;
 
 const INITIALS_COMPOSER =
   /^(?:[\p{Lu}\p{Lt}]\.\s*){1,3}[\p{L}’'-]+(?:\s+\([^)]*\d{3,4}[^)]*\))?$/u;
@@ -161,7 +160,7 @@ export function findProgramStartIndex(lines: string[]): number {
     ) {
       continue;
     }
-    if (looksLikeProgramHeader(line) || ANONYMOUS_COMPOSER.test(line) || /^obras de\b/i.test(line)) {
+    if (looksLikeProgramHeader(line) || isNonPersonComposerAttribution(line) || /^obras de\b/i.test(line)) {
       return index;
     }
     if (parseComposerYearWork(line)) return index;
@@ -236,7 +235,7 @@ function parseSingleAuditorioPerson(
   const cleaned = cleanLine(text);
   if (!cleaned) return undefined;
   if (looksLikeScheduleNotice(cleaned) || looksLikeProgramHeader(cleaned)) return undefined;
-  if (looksLikeRoleOnlyLine(cleaned) || ANONYMOUS_COMPOSER.test(cleaned)) return undefined;
+  if (looksLikeRoleOnlyLine(cleaned) || isNonPersonComposerAttribution(cleaned)) return undefined;
   if (
     looksLikeMovementLine(cleaned) ||
     looksLikeProductionNote(cleaned) ||
@@ -312,6 +311,9 @@ export function parseComposerColonWork(
   if (hasExplicitPerformerSignal(title) || looksLikeRoleOnlyLine(title)) return undefined;
   if (parseCommaRole(title)) return undefined;
   if (looksLikeComposerNameList(title)) return undefined;
+  if (looksLikeComposerNameList(composerName) || looksLikeKnownComposerPairHeading(cleaned)) {
+    return undefined;
+  }
   if (isNamedCastEnsemble(title) && !looksLikeColonWorkTitle(title) && !/\([^)]+\)/.test(title)) {
     return undefined;
   }
@@ -411,8 +413,12 @@ export function parseKnownComposerPrefixWork(
   const prefix = matchComposerPrefix(cleaned);
   if (!prefix || !prefix.rest) return undefined;
   if (parseDashRoleCredit(cleaned) || looksLikeComposerNameList(cleaned)) return undefined;
+  if (looksLikeKnownComposerPairHeading(cleaned)) return undefined;
   const title = stripLeadingWorkDelimiter(prefix.rest);
   if (!title) return undefined;
+  if (/^(?:y|and)\s+/i.test(title) && matchComposerPrefix(title.replace(/^(?:y|and)\s+/i, ''))) {
+    return undefined;
+  }
   if (hasExplicitPerformerSignal(title) || looksLikeRoleOnlyLine(title) || parseCommaRole(title)) {
     return undefined;
   }
@@ -492,6 +498,26 @@ export function extractObrasDeComposers(text: string): string[] {
 
 export function looksLikeObrasDeLine(text: string): boolean {
   return /^obras de\b/i.test(cleanLine(text));
+}
+
+/**
+ * Programme concept `KnownComposer y KnownComposer: subtitle`.
+ * Not a `Composer: Work` line and not a work of the first composer.
+ */
+export function looksLikeKnownComposerPairHeading(text: string): boolean {
+  const cleaned = cleanLine(text);
+  if (!cleaned || looksLikeProgramHeader(cleaned)) return false;
+  const named = /^(.+?)\s+(?:y|and)\s+(.+?)\s*:\s+(.+)$/u.exec(cleaned);
+  if (!named?.[1] || !named[2] || !named[3]) return false;
+  const left = named[1].trim();
+  const right = named[2].trim();
+  const subtitle = named[3].trim();
+  if (!left || !right || !subtitle) return false;
+  if (WORK_GENRE.test(left) || STRONG_CATALOG.test(left) || looksLikeWorkInstrumentation(left)) {
+    return false;
+  }
+  if (!matchComposer(left) || !matchComposer(right)) return false;
+  return true;
 }
 
 /**
@@ -854,6 +880,7 @@ function looksLikePersonOrGroupName(text: string): boolean {
 function looksLikeUnlabeledPerson(text: string): boolean {
   const cleaned = text.replace(/[“”«»"']/g, '').trim();
   if (!cleaned || cleaned.length > 80) return false;
+  if (isNonPersonComposerAttribution(cleaned) || isNonPersonComposerAttribution(text.trim())) return false;
   if (/[¡!?,;:]/.test(cleaned) || /\d/.test(cleaned) || /[&/]/.test(cleaned)) return false;
   if (/ y$/i.test(cleaned) || looksLikeRoleOnlyLine(cleaned) || looksLikeNonWorkCredit(cleaned)) {
     return false;
@@ -876,7 +903,7 @@ function walkBackComposers(lines: string[], index: number): number {
     if (
       isComposerHeading(prev) ||
       looksLikeUnlabeledPerson(prev) ||
-      ANONYMOUS_COMPOSER.test(prev) ||
+      isNonPersonComposerAttribution(prev) ||
       looksLikeInitialsComposerName(prev) ||
       looksLikeWorkishLine(prev)
     ) {
@@ -904,8 +931,9 @@ function isCastBoundary(line: string): boolean {
 
 /**
  * Composer heading in a program block. Personal-name syntax alone is not enough:
- * require a knowledge-base match, initials+surname, biographical years, or
- * an anonymous-author label. `looksLikeUnlabeledPerson` stays a cast heuristic.
+ * require a knowledge-base match, initials+surname, or biographical years.
+ * Non-person labels are grouping boundaries, not pairable composers.
+ * `looksLikeUnlabeledPerson` stays a cast heuristic.
  */
 export function canPairAsAuditorioComposer(text: string): boolean {
   const cleaned = cleanLine(text);
@@ -924,7 +952,8 @@ export function canPairAsAuditorioComposer(text: string): boolean {
   if (looksLikeAuditorioRepertoireLine(cleaned)) return false;
   if (isCastBoundary(cleaned) || STRONG_CATALOG.test(cleaned)) return false;
   if (looksLikeWorkInstrumentation(cleaned)) return false;
-  return isComposerHeading(cleaned) || ANONYMOUS_COMPOSER.test(cleaned);
+  if (isNonPersonComposerAttribution(cleaned) || looksLikeKnownComposerPairHeading(cleaned)) return false;
+  return isComposerHeading(cleaned);
 }
 
 /**
@@ -939,6 +968,7 @@ export function canPairAsLookaheadComposer(text: string, next?: string): boolean
   const following = next ? cleanLine(next) : '';
   if (!cleaned || !following) return false;
   if (canPairAsAuditorioComposer(cleaned)) return false;
+  if (isNonPersonComposerAttribution(cleaned) || looksLikeKnownComposerPairHeading(cleaned)) return false;
   if (looksLikeNonWorkCredit(cleaned) || looksLikeRoleOnlyLine(cleaned)) return false;
   if (looksLikeMovementLine(cleaned) || looksLikeProductionNote(cleaned) || looksLikeTextCredit(cleaned)) {
     return false;

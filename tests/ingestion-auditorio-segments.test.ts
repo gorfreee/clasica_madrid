@@ -5,6 +5,7 @@ import {
   extractStandaloneKnownComposers,
   findProgramStartIndex,
   looksLikeComposerNameList,
+  looksLikeKnownComposerPairHeading,
   looksLikeRoleOnlyLine,
   parseAuditorioPersonCredits,
   parseAuditorioPersonLine,
@@ -522,6 +523,14 @@ describe('segmentación performer/programa del Auditorio', () => {
       composerName: 'Edvard Grieg',
       title: 'Danza de Anitra (de Peer Gynt)',
     });
+    expect(parseKnownComposerPrefixWork('Monteverdi y Schütz: la huella veneciana')).toBeUndefined();
+    expect(looksLikeKnownComposerPairHeading('Monteverdi y Schütz: la huella veneciana')).toBe(true);
+    expect(looksLikeKnownComposerPairHeading('Mozart: Divertimento en Re mayor, K. 136')).toBe(false);
+    expect(parseComposerColonWork('Monteverdi y Schütz: la huella veneciana')).toBeUndefined();
+    expect(parseComposerColonWork('Mozart: Divertimento en Re mayor, K. 136')).toEqual({
+      composerName: 'Mozart',
+      title: 'Divertimento en Re mayor, K. 136',
+    });
   });
 
   it('un movimiento numerado con guion no es Composer – Work', () => {
@@ -549,6 +558,10 @@ describe('segmentación performer/programa del Auditorio', () => {
     );
     expect(canPairAsLookaheadComposer('LIKE A BOHO', 'Suite Lorca')).toBe(false);
     expect(canPairAsLookaheadComposer('Arr. Manuel Tévar', 'I. Anda, jaleo')).toBe(false);
+    expect(canPairAsLookaheadComposer('Tradicional de Venezuela', 'Que me entierren en un arpa (joropo llanero)')).toBe(
+      false,
+    );
+    expect(canPairAsLookaheadComposer('Anónimo (s. XVII)', 'Soberana María')).toBe(false);
     expect(canPairAsAuditorioComposer('Héctor Eliel Márquez')).toBe(false);
     expect(canPairAsAuditorioComposer('Marlos Nobre')).toBe(false);
     expect(canPairAsAuditorioComposer('Rodolphe Bruneau-Boulmier')).toBe(false);

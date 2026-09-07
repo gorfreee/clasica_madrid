@@ -4,12 +4,15 @@ import { canPairAsAuditorioComposer } from './auditorio-segments.ts';
 import { matchComposer } from '../knowledge/composers.ts';
 import {
   hasComposerYears,
+  isEditorialNoteLegend,
+  isNonPersonComposerAttribution,
   isUnreliableComposerName,
   looksLikeComposerLine,
   looksLikeEnsembleName,
   looksLikeProgramHeader,
   looksLikeUnequivocalWorkLine,
   looksLikeWorkLine,
+  stripEditorialNoteMarkers,
 } from '../observed-cleanup.ts';
 import {
   normalizeComposerList,
@@ -184,14 +187,22 @@ function parseCndmProgram(html: string | undefined): {
     const following = lines[index + 1]?.text;
     const strongText = line.strong.join(' ');
     if (line.strong.length > 0 && strongText === line.text) {
+      if (isNonPersonComposerAttribution(line.text)) {
+        composerName = undefined;
+        continue;
+      }
       if (isCndmComposerHeading(line.text, following)) {
         composerName = line.text;
         composers.push({ name: line.text });
       }
       continue;
     }
-    if (composerName && !line.text.startsWith('*') && looksLikeWorkLine(line.text)) {
-      works.push({ title: line.text, composerName });
+    if (isNonPersonComposerAttribution(line.text) || isEditorialNoteLegend(line.text)) {
+      composerName = undefined;
+      continue;
+    }
+    if (composerName && !isEditorialNoteLegend(line.text) && looksLikeWorkLine(line.text)) {
+      works.push({ title: stripEditorialNoteMarkers(line.text), composerName });
     }
   }
   return {
