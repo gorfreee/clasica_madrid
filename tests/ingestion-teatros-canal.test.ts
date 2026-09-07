@@ -3,7 +3,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { describe, expect, it } from 'vitest';
 import { teatrosCanalAdapter as adapter } from '../src/ingestion/sources/teatros-canal.ts';
-import { canalEventUrl, expandTeatrosCanalEvent, parseCanalProgrammeConcerts, parseScheduleDates, parseTeatrosCanalDetail } from '../src/ingestion/detail/teatros-canal.ts';
+import { canalEventUrl, expandTeatrosCanalEvent, parseCanalProgrammeConcerts, parseListingDateTime, parseScheduleDates, parseTeatrosCanalDetail } from '../src/ingestion/detail/teatros-canal.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { hydrateEvents } from '../src/ingestion/hydrate.ts';
 import { runIngest } from '../src/ingestion/pipeline.ts';
@@ -279,6 +279,20 @@ describe('Teatros del Canal ficha', () => {
         to: '2026-10-27',
       }).map((item) => item.date),
     ).toEqual(['2026-09-22', '2026-09-26', '2026-09-30', '2026-10-06', '2026-10-13', '2026-10-27']);
+  });
+
+  it('keeps an explicit source year even when the listing range is a different year', () => {
+    expect(
+      parseScheduleDates('23 de septiembre de 2025, a las 19:30 h', {
+        from: '2026-09-01',
+        to: '2026-12-31',
+      }),
+    ).toEqual([{ raw: '23 de septiembre de 2025, a las 19:30', date: '2025-09-23', time: '19:30' }]);
+    expect(parseListingDateTime('2025-09-23 19:30:00', false)).toEqual({
+      raw: '2025-09-23 19:30:00',
+      date: '2025-09-23',
+      time: '19:30',
+    });
   });
 
   it('fails locally for a missing identity and keeps listing facts when hydration fails', async () => {
