@@ -30,50 +30,65 @@ export async function hydrateEvents(
   adapter: SourceAdapter,
   ctx: AdapterContext,
 ): Promise<RawEvent[]> {
-  if (!adapter.hydrate) {
+  const parseDetail = adapter.hydrate;
+  if (!parseDetail) {
     return events.map((event) => withHydration(event, { status: 'not-requested' }));
   }
 
   const hydrated: RawEvent[] = [];
   const zarzuelaGet = adapter.id === 'teatro-zarzuela' ? createZarzuelaDetailClient(ctx.get) : undefined;
-  for (const event of events) {
-    const detailUrl = event.sourceUrl;
-    if (zarzuelaGet && zarzuelaOutsideWindow(event, ctx.window)) {
-      hydrated.push(withHydration(event, { status: 'not-requested', detailUrl, reason: 'outside-window', message: 'listing completamente fuera de ventana', requestAttempts: 0 }));
-      continue;
+  try {
+    for (const event of events) {
+      const detailUrl = event.sourceUrl;
+      if (zarzuelaGet && zarzuelaOutsideWindow(event, ctx.window)) {
+        hydrated.push(withHydration(event, { status: 'not-requested', detailUrl, reason: 'outside-window', message: 'listing completamente fuera de ventana', requestAttempts: 0 }));
+        continue;
+      }
+      let meta: HydrationMeta = { status: 'succeeded', detailUrl };
+      try {
+        const response = zarzuelaGet
+          ? await zarzuelaGet(detailUrl)
+          : { body: await readDetailBody(adapter, ctx, detailUrl), hydration: meta };
+        meta = response.hydration;
+        if (response.body === undefined) {
+          hydrated.push(withHydration(event, meta));
+          continue;
+        }
+        const body = response.body;
+        const patch = parseDetail(event, body, ctx);
+        const hydratedEvent = withHydration(applyDetailPatch(event, patch), meta);
+        const expanded = adapter.expand?.(hydratedEvent, body);
+        if (expanded && expanded.length > 1) {
+          hydrated.push(...expanded.map((item) => withHydration(item, meta)));
+          continue;
+        }
+        hydrated.push(hydratedEvent);
+      } catch (error) {
+        if (error instanceof ZarzuelaStructuralSkipError) {
+          hydrated.push(withHydration(event, {
+            ...meta,
+            status: 'succeeded',
+            reason: 'structural-skip',
+            message: error.message,
+          }));
+          continue;
+        }
+        const message = error instanceof Error ? error.message : String(error);
+        hydrated.push(withHydration(event, { ...meta, status: 'failed', message, ...(zarzuelaGet ? { reason: 'parse-failed' as const } : {}) }));
+      }
     }
-    let meta: HydrationMeta = { status: 'succeeded', detailUrl };
-    try {
-      const response = zarzuelaGet ? await zarzuelaGet(detailUrl) : { body: await ctx.get(detailUrl), hydration: meta };
-      meta = response.hydration;
-      if (response.body === undefined) {
-        hydrated.push(withHydration(event, meta));
-        continue;
-      }
-      const body = response.body;
-      const patch = adapter.hydrate(event, body, ctx);
-      const hydratedEvent = withHydration(applyDetailPatch(event, patch), meta);
-      const expanded = adapter.expand?.(hydratedEvent, body);
-      if (expanded && expanded.length > 1) {
-        hydrated.push(...expanded.map((item) => withHydration(item, meta)));
-        continue;
-      }
-      hydrated.push(hydratedEvent);
-    } catch (error) {
-      if (error instanceof ZarzuelaStructuralSkipError) {
-        hydrated.push(withHydration(event, {
-          ...meta,
-          status: 'succeeded',
-          reason: 'structural-skip',
-          message: error.message,
-        }));
-        continue;
-      }
-      const message = error instanceof Error ? error.message : String(error);
-      hydrated.push(withHydration(event, { ...meta, status: 'failed', message, ...(zarzuelaGet ? { reason: 'parse-failed' as const } : {}) }));
-    }
+    return hydrated;
+  } finally {
+    await adapter.endHydration?.();
   }
-  return hydrated;
+}
+
+async function readDetailBody(
+  adapter: SourceAdapter,
+  ctx: AdapterContext,
+  url: string,
+): Promise<string> {
+  return adapter.fetchDetail ? adapter.fetchDetail(url, ctx) : ctx.get(url);
 }
 
 export function countHydration(events: RawEvent[]): {

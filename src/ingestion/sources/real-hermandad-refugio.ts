@@ -5,6 +5,7 @@ import {
 } from '../browser-fetch.ts';
 import {
   parseRefugioConcertArchive,
+  parseRefugioDetail,
   REFUGIO_CONCERT_ARCHIVE_URL,
   refugioArchivePageUrl,
   refugioEventUrl,
@@ -23,6 +24,7 @@ import type { AdapterContext, RawEvent, SourceAdapter, SourceDefinition } from '
 export const REFUGIO_PER_PAGE = 50;
 export const REFUGIO_MAX_PAGES = 20;
 export const REFUGIO_ARCHIVE_READY_SELECTOR = '.jet-listing-grid__items[data-pages]';
+export const REFUGIO_DETAIL_READY_SELECTOR = '[data-elementor-type="single-post"]';
 export { REFUGIO_CONCERT_ARCHIVE_URL };
 export const REFUGIO_REST_COLLECTION_URL = 'https://realhermandaddelrefugio.org/wp-json/wp/v2/calendario-eventos';
 
@@ -63,8 +65,9 @@ const CONCERT_CATEGORY_ID = 47;
  *
  * Transport is one conventional HTTP GET, then a real Chrome session if that
  * hop is an undelivered page (HTTP 202 / SG-Captcha). REST is not part of
- * the production path. The archive cards are complete enough to publish
- * without hydrating each ficha.
+ * the production path. Archive cards already carry a usable calendar;
+ * fichas are hydrated for the full description used in classification.
+ * A ficha failure keeps listing facts and does not fail the source.
  */
 export const realHermandadRefugioAdapter: SourceAdapter = {
   id: 'real-hermandad-refugio',
@@ -76,6 +79,9 @@ export const realHermandadRefugioAdapter: SourceAdapter = {
   fetchListing(url, ctx) {
     return fetchRefugioListing(url, ctx.get);
   },
+  hydrate: parseRefugioDetail,
+  fetchDetail: fetchRefugioDetail,
+  endHydration: closeRefugioDetailSession,
   async extract(body, _url, ctx) {
     if (body.trimStart().startsWith('<')) {
       if (isSiteGroundChallenge(body)) {
@@ -178,9 +184,64 @@ async function readArchivePages(
 }
 
 function assertArchiveDocument(body: string): void {
+  assertRefugioHtml(body, 'el archivo de conciertos');
+}
+
+function assertDetailDocument(body: string): void {
+  assertRefugioHtml(body, 'la ficha del concierto');
+}
+
+function assertRefugioHtml(body: string, what: string): void {
   if (isSiteGroundChallenge(body)) {
-    throw new Error('real-hermandad-refugio: se recibió HTML de desafío SiteGround (captcha) en lugar del archivo de conciertos');
+    throw new Error(`real-hermandad-refugio: se recibió HTML de desafío SiteGround (captcha) en lugar de ${what}`);
   }
+}
+
+/**
+ * Same HTTP-then-Chrome fallback as the archive, scoped to one ficha.
+ * A shared BrowserContext covers every detail of the hydration loop.
+ */
+export async function fetchRefugioDetail(
+  url: string,
+  ctx: AdapterContext,
+): Promise<string> {
+  try {
+    const body = await ctx.get(url);
+    assertDetailDocument(body);
+    return body;
+  } catch (error) {
+    if (!isUndeliveredListing(error)) throw error;
+    const session = await openSharedDetailSession();
+    const body = await session.get(url, { waitForSelector: REFUGIO_DETAIL_READY_SELECTOR });
+    assertDetailDocument(body);
+    return body;
+  }
+}
+
+let detailSession: BrowserDocumentSession | undefined;
+let detailSessionPending: Promise<BrowserDocumentSession> | undefined;
+
+async function openSharedDetailSession(): Promise<BrowserDocumentSession> {
+  if (detailSession) return detailSession;
+  if (!detailSessionPending) {
+    detailSessionPending = openSession()
+      .then((raw) => {
+        detailSession = recordedBrowserSession(raw, realHermandadRefugioAdapter.id);
+        return detailSession;
+      })
+      .catch((error: unknown) => {
+        detailSessionPending = undefined;
+        throw error;
+      });
+  }
+  return detailSessionPending;
+}
+
+export async function closeRefugioDetailSession(): Promise<void> {
+  const session = detailSession;
+  detailSession = undefined;
+  detailSessionPending = undefined;
+  await session?.close();
 }
 
 function eventsFromHtmlArchive(body: string, ctx: AdapterContext): RawEvent[] {
@@ -232,7 +293,7 @@ function parseWpList(body: string): unknown[] {
 function isUndeliveredListing(error: unknown): boolean {
   if (isRecoverableTransportError(error)) return true;
   const message = error instanceof Error ? error.message : String(error);
-  return /HTML de desafío|sgcaptcha|en lugar del archivo de conciertos|Chrome del sistema no disponible/i.test(message);
+  return /HTML de desafío|sgcaptcha|en lugar del archivo de conciertos|en lugar de la ficha|Chrome del sistema no disponible/i.test(message);
 }
 
 export function refugioRestListingUrl(page = 1): string {

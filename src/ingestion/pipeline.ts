@@ -131,6 +131,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
       const ctx: AdapterContext = { source, now: options.now, window, get: sourceGet };
       const hydrated = await measureSourcePhase(obs, source.id, 'hydration', () =>
         hydrateEvents(extracted, adapter, ctx));
+      flushBrowserFetchAttempts(source.id, obs);
       const coverage = adapter.requiresDetailSchedule ? requiredHydrationCoverage(hydrated) : undefined;
       const failure = coverage?.severe
         ? {
