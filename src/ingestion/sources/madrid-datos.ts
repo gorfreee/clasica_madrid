@@ -29,8 +29,12 @@ import {
  */
 
 const MUSICA_TYPE = /\/actividades\/Musica(\/|$)/i;
+/** Official municipal concert label, also used when the kos @type is a street-activity bucket. */
+const MUSIC_PERFORMANCE_TITLE = /^actuaci[oó]n m[uú]sica(l)?\b/i;
+const MUSIC_PERFORMANCE_ID = /(?:^|-)actuacion-musica(l)?(?:-|\.json|$)/i;
 
 type GraphEvent = {
+  '@id'?: unknown;
   '@type'?: unknown;
   id?: unknown;
   uid?: unknown;
@@ -85,8 +89,7 @@ export const madridDatosAdapter: SourceAdapter = {
 function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
   if (!value || typeof value !== 'object') return undefined;
   const item = value as GraphEvent;
-  const type = typeof item['@type'] === 'string' ? item['@type'] : '';
-  if (!MUSICA_TYPE.test(type)) return undefined;
+  if (!isMadridDatosMusicActivity(item)) return undefined;
 
   const title = asNonEmptyString(item.title);
   const link = asNonEmptyString(item.link);
@@ -150,6 +153,23 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
       ...emptyObservedLists(),
     },
   };
+}
+
+/**
+ * In-scope musical activities: kos type `Musica` (and subtypes), or Madrid's
+ * official "Actuación música/musical" label when the event is filed under a
+ * non-music kos bucket such as `ActividadesCalleArteUrbano`.
+ *
+ * Theatre, workshops, exhibitions, astronomy talks and other street
+ * activities stay out of scope and are not reported as adapter discards.
+ */
+function isMadridDatosMusicActivity(item: GraphEvent): boolean {
+  const type = typeof item['@type'] === 'string' ? item['@type'] : '';
+  if (MUSICA_TYPE.test(type)) return true;
+  const title = asNonEmptyString(item.title);
+  if (title && MUSIC_PERFORMANCE_TITLE.test(title)) return true;
+  const jsonLdId = asNonEmptyString(item['@id']);
+  return Boolean(jsonLdId && MUSIC_PERFORMANCE_ID.test(jsonLdId));
 }
 
 function discardMadridDatos(

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { normalizeRawEvent } from '../src/ingestion/normalize.ts';
-import { normalizeUrl, urlsEquivalent } from '../src/ingestion/urls.ts';
+import { madridVgnextoid, normalizeUrl, urlsEquivalent } from '../src/ingestion/urls.ts';
 import type { RawEvent } from '../src/ingestion/types.ts';
 
 describe('normalizeUrl', () => {
@@ -21,6 +21,21 @@ describe('normalizeUrl', () => {
       'https://example.org/evento?id=12&lang=es',
     );
     expect(urlsEquivalent('https://example.org/evento?id=12', 'https://example.org/evento?id=13')).toBe(false);
+  });
+
+  it('trata como la misma ficha de Madrid dos URLs con el mismo vgnextoid', () => {
+    const portal =
+      'https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Ciudad-Lineal/Retransmision-del-Pleno-en-directo/Actuacion-musica-Musica-clasica/?vgnextchannel=cd0a32e941f22610VgnVCM1000008a4a900aRCRD&vgnextfmt=default&vgnextoid=aab47760175ff910VgnVCM100000891ecb1aRCRD';
+    const listing =
+      'https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=aab47760175ff910VgnVCM100000891ecb1aRCRD';
+    expect(urlsEquivalent(portal, listing)).toBe(true);
+    expect(madridVgnextoid(portal)).toBe('aab47760175ff910vgnvcm100000891ecb1arcrd');
+    expect(
+      urlsEquivalent(
+        listing,
+        'https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=0c4c7760175ff910VgnVCM100000891ecb1aRCRD',
+      ),
+    ).toBe(false);
   });
 });
 

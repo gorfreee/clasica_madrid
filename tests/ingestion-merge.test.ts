@@ -453,4 +453,42 @@ describe('invariantes de identidad canónica', () => {
     expect(merged.event.slug).toBe(existing.slug);
     assertNeverLosesPublishedIdentity(merged.event);
   });
+
+  it('conserva la URL portal de Madrid si el listing comparte vgnextoid y añade externalId', () => {
+    const portal =
+      'https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Ciudad-Lineal/Retransmision-del-Pleno-en-directo/Actuacion-musica-Musica-clasica/?vgnextchannel=cd0a32e941f22610VgnVCM1000008a4a900aRCRD&vgnextfmt=default&vgnextoid=aab47760175ff910VgnVCM100000891ecb1aRCRD';
+    const listing =
+      'https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=aab47760175ff910VgnVCM100000891ecb1aRCRD';
+    const existing = makeEvent({
+      id: 'evt_sonidos_universo_20260927',
+      slug: 'los-sonidos-del-universo',
+      title: 'Los sonidos del universo',
+      citations: [{ sourceId: 'src_ayuntamiento_madrid', url: portal, checkedAt: '2026-08-28' }],
+      primarySourceId: 'src_ayuntamiento_madrid',
+    });
+    const merged = mergeExistingEvent(
+      existing,
+      proposal({
+        title: 'Actuación música. Música clásica',
+        citations: [
+          {
+            sourceId: 'src_ayuntamiento_madrid',
+            url: listing,
+            checkedAt: '2026-09-01',
+            externalId: '50379624',
+          },
+        ],
+      }),
+      TEST_NOW,
+    );
+    expect(merged.event.citations).toEqual([
+      {
+        sourceId: 'src_ayuntamiento_madrid',
+        url: portal,
+        checkedAt: '2026-09-01',
+        externalId: '50379624',
+      },
+    ]);
+    expect(merged.event.title).toBe('Los sonidos del universo');
+  });
 });

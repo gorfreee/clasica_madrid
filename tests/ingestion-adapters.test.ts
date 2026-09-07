@@ -291,4 +291,72 @@ describe('adapter Madrid datos (JSON-LD)', () => {
     expect(discards.some((item) => item.externalId === '50390002')).toBe(true);
     expect(discards.some((item) => item.reason === 'missing-time')).toBe(false);
   });
+
+  it('observa Los sonidos del universo aunque el kos @type sea ActividadesCalleArteUrbano', async () => {
+    const discards: AdapterDiscardReport[] = [];
+    const body = await readFile(path.join(fixtures, 'madrid-agenda-sonidos-universo.json'), 'utf8');
+    const events = madridDatosAdapter.extract(
+      body,
+      'https://datos.madrid.es/agenda.json',
+      ctx('madrid-datos', (discard) => discards.push(discard)),
+    );
+    expect(events.map((event) => event.externalId).sort()).toEqual(['50376447', '50379614', '50379624']);
+    const sonidos = events.find((event) => event.externalId === '50379624');
+    expect(sonidos?.observed.title).toBe('Actuación música. Música clásica');
+    expect(sonidos?.observed.occurrences).toEqual([
+      { raw: '2026-09-27 21:00:00.0', date: '2026-09-27', time: '21:00' },
+    ]);
+    expect(sonidos?.observed.venueText).toBe('Parque Lineal de Palomeras');
+    expect(sonidos?.venueFacilityId).toBe('5977748');
+    expect(sonidos?.sourceUrl).toContain('vgnextoid=aab47760175ff910');
+    expect(events.some((event) => event.externalId === '50379622')).toBe(false);
+    expect(events.some((event) => event.externalId === '50322723')).toBe(false);
+    expect(events.some((event) => event.externalId === '50366129')).toBe(false);
+    expect(events.some((event) => event.externalId === '50286330')).toBe(false);
+    expect(discards).toEqual([]);
+  });
+
+  it('un Actuación música sin lugar se reporta; teatro y exposiciones siguen fuera de ámbito', () => {
+    const discards: AdapterDiscardReport[] = [];
+    const body = JSON.stringify({
+      '@graph': [
+        {
+          '@id': 'https://datos.madrid.es/egob/catalogo/tipo/evento/50990001-actuacion-musica-musica-clasica.json',
+          '@type': 'https://datos.madrid.es/egob/kos/actividades/ActividadesCalleArteUrbano',
+          id: '50990001',
+          title: 'Actuación música. Música clásica',
+          dtstart: '2026-09-27 21:00:00.0',
+          time: '21:00',
+          link: 'http://www.madrid.es/evento/sonidos',
+          'event-location': '',
+        },
+        {
+          '@type': 'https://datos.madrid.es/egob/kos/actividades/Musica',
+          id: '50990003',
+          title: 'Recital de piano',
+          dtstart: '2026-09-20 19:00:00.0',
+          time: '19:00',
+          link: 'http://www.madrid.es/evento/recital',
+          'event-location': 'Centro Cultural Casa de Vacas',
+        },
+        {
+          '@type': 'https://datos.madrid.es/egob/kos/actividades/TeatroPerformance',
+          id: '50990002',
+          title: 'Obra de teatro',
+          dtstart: '2026-09-27 19:00:00.0',
+          link: 'http://www.madrid.es/evento/teatro',
+          'event-location': 'Centro cultural',
+        },
+      ],
+    });
+    const events = madridDatosAdapter.extract(
+      body,
+      'https://datos.madrid.es/agenda.json',
+      ctx('madrid-datos', (discard) => discards.push(discard)),
+    );
+    expect(events.map((event) => event.externalId)).toEqual(['50990003']);
+    expect(discards).toEqual([
+      expect.objectContaining({ reason: 'missing-venue', externalId: '50990001', title: 'Actuación música. Música clásica' }),
+    ]);
+  });
 });
