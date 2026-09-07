@@ -18,7 +18,7 @@ import {
 } from './composer-name.ts';
 import { canonicalizeEventTitle, canonicalizePerformerName } from './event-title.ts';
 import { publicationOccurrences } from './to-candidate.ts';
-import { normalizeUrl } from './urls.ts';
+import { normalizeUrl, urlsEquivalent } from './urls.ts';
 import type { IngestWindow } from './dates.ts';
 
 export type EventProposal = {
@@ -496,7 +496,7 @@ export function mergeCitationLists(existing: Citation[], incoming: Citation[]): 
   const result = [...existing];
   for (const citation of incoming) {
     const index = result.findIndex(
-      (item) => item.sourceId === citation.sourceId && urlsEquivalentish(item.url, citation.url),
+      (item) => item.sourceId === citation.sourceId && urlsEquivalent(item.url, citation.url),
     );
     const sameSource = index < 0 ? result.findIndex((item) => item.sourceId === citation.sourceId) : index;
     if (sameSource < 0) {
@@ -506,7 +506,7 @@ export function mergeCitationLists(existing: Citation[], incoming: Citation[]): 
     const current = result[sameSource]!;
     result[sameSource] = {
       sourceId: current.sourceId,
-      url: citation.url || current.url,
+      url: urlsEquivalent(current.url, citation.url) ? current.url : citation.url || current.url,
       checkedAt: citation.checkedAt || current.checkedAt,
       ...(citation.externalId || current.externalId
         ? { externalId: citation.externalId ?? current.externalId }
@@ -514,10 +514,6 @@ export function mergeCitationLists(existing: Citation[], incoming: Citation[]): 
     };
   }
   return result;
-}
-
-function urlsEquivalentish(left: string, right: string): boolean {
-  return normalizeUrl(left) === normalizeUrl(right);
 }
 
 function compareOccurrence(

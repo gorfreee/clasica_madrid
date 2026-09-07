@@ -28,5 +28,25 @@ export function urlPathIdentity(url: string): string {
 }
 
 export function urlsEquivalent(left: string, right: string): boolean {
-  return normalizeUrl(left) === normalizeUrl(right);
+  if (normalizeUrl(left) === normalizeUrl(right)) return true;
+  const leftId = madridVgnextoid(left);
+  const rightId = madridVgnextoid(right);
+  return Boolean(leftId && rightId && leftId === rightId);
+}
+
+/**
+ * Madrid.es fichas share a CMS object id (`vgnextoid`) across portal SEO URLs
+ * and the `sites/v/index.jsp` listing links. Channel (`vgnextchannel`) is
+ * presentation, not identity.
+ */
+export function madridVgnextoid(value: string): string | undefined {
+  try {
+    const url = new URL(value.trim());
+    const host = url.hostname.replace(/^www\./i, '').toLowerCase();
+    if (host !== 'madrid.es') return undefined;
+    const id = url.searchParams.get('vgnextoid')?.trim();
+    return id && /^[a-z0-9]+$/i.test(id) ? id.toLowerCase() : undefined;
+  } catch {
+    return undefined;
+  }
 }

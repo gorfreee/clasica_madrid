@@ -1,0 +1,94 @@
+{
+  "@graph": [
+    {
+      "@id": "https://datos.madrid.es/egob/catalogo/tipo/evento/50379624-actuacion-musica-musica-clasica.json",
+      "@type": "https://datos.madrid.es/egob/kos/actividades/ActividadesCalleArteUrbano",
+      "id": "50379624",
+      "uid": "50379624",
+      "title": "Actuación música. Música clásica",
+      "description": "Los sonidos del universo.  Un exquisito recorrido por algunas de las grandes obras de la música clásica y las bandas sonoras más emblemáticas del cine. La delicadeza del violín, la elegancia del arpa y la calidez de la guitarra se unen para ofrecer un concierto lleno de belleza, sensibilidad y emoción, convirtiéndose en el broche de oro de una experiencia única bajo el cielo estrellado.",
+      "free": 1,
+      "dtstart": "2026-09-27 21:00:00.0",
+      "dtend": "2026-09-27 23:59:00.0",
+      "time": "21:00",
+      "link": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=aab47760175ff910VgnVCM100000891ecb1aRCRD",
+      "event-location": "Parque Lineal de Palomeras",
+      "relation": {
+        "@id": "https://datos.madrid.es/egob/catalogo/tipo/entidadesyorganismos/5977748-parque-lineal-palomeras.json"
+      }
+    },
+    {
+      "@id": "https://datos.madrid.es/egob/catalogo/tipo/evento/50379614-actuacion-musical-estrellas-hollywood-piano-voz-.json",
+      "@type": "https://datos.madrid.es/egob/kos/actividades/ActividadesCalleArteUrbano",
+      "id": "50379614",
+      "uid": "50379614",
+      "title": "Actuación musical. Estrellas de Hollywood (piano y voz)",
+      "description": "Las melodías más emblemáticas del cine cobran vida en un concierto para piano y voz.",
+      "free": 1,
+      "dtstart": "2026-09-25 21:00:00.0",
+      "time": "21:00",
+      "link": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=0c4c7760175ff910VgnVCM100000891ecb1aRCRD",
+      "event-location": "Parque Lineal de Palomeras",
+      "relation": {
+        "@id": "https://datos.madrid.es/egob/catalogo/tipo/entidadesyorganismos/5977748-parque-lineal-palomeras.json"
+      }
+    },
+    {
+      "@id": "https://datos.madrid.es/egob/catalogo/tipo/evento/50379622-charla-astronomica-fragmentos-otros-mundos-.json",
+      "@type": "https://datos.madrid.es/egob/kos/actividades/ActividadesCalleArteUrbano",
+      "id": "50379622",
+      "uid": "50379622",
+      "title": "Charla astronómica. 'Fragmentos de otros mundos'",
+      "dtstart": "2026-09-27 20:00:00.0",
+      "time": "20:00",
+      "link": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=766d7760175ff910VgnVCM100000891ecb1aRCRD",
+      "event-location": "Parque Lineal de Palomeras"
+    },
+    {
+      "@id": "https://datos.madrid.es/egob/catalogo/tipo/evento/50376447-concierto-musica-renacentista.json",
+      "@type": "https://datos.madrid.es/egob/kos/actividades/Musica",
+      "id": "50376447",
+      "uid": "50376447",
+      "title": "Concierto de música renacentista",
+      "dtstart": "2026-09-19 19:00:00.0",
+      "time": "19:00",
+      "link": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=3da1e3ca4e0df910VgnVCM200000f921e388RCRD",
+      "event-location": "Centro Cultural Casa de Vacas (Retiro)",
+      "relation": {
+        "@id": "https://datos.madrid.es/egob/catalogo/tipo/entidadesyorganismos/1945-centro-cultural-casa-de-vacas-retiro-.json"
+      }
+    },
+    {
+      "@id": "https://datos.madrid.es/egob/catalogo/tipo/evento/50322723-aldonza-encarada.json",
+      "@type": "https://datos.madrid.es/egob/kos/actividades/TeatroPerformance",
+      "id": "50322723",
+      "uid": "50322723",
+      "title": "Aldonza, la encarada",
+      "dtstart": "2026-09-18 19:00:00.0",
+      "time": "19:00",
+      "link": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=teatro-aldonza",
+      "event-location": "Centro Cultural"
+    },
+    {
+      "@id": "https://datos.madrid.es/egob/catalogo/tipo/evento/50366129-25-anos-museo-san-isidro.json",
+      "@type": "https://datos.madrid.es/egob/kos/actividades/Exposiciones",
+      "id": "50366129",
+      "uid": "50366129",
+      "title": "25 años del Museo de San Isidro. Los Orígenes de Madrid",
+      "dtstart": "2026-07-21 00:00:00.0",
+      "link": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=expo-san-isidro",
+      "event-location": "Museo de San Isidro. Los Orígenes de Madrid"
+    },
+    {
+      "@id": "https://datos.madrid.es/egob/catalogo/tipo/evento/50286330-aprende-identificar-mariposas.json",
+      "@type": "https://datos.madrid.es/egob/kos/actividades/CursosTalleres",
+      "id": "50286330",
+      "uid": "50286330",
+      "title": "Aprende a identificar las mariposas de Madrid",
+      "dtstart": "2026-09-12 11:00:00.0",
+      "time": "11:00",
+      "link": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=taller-mariposas",
+      "event-location": "Aula ambiental"
+    }
+  ]
+}
