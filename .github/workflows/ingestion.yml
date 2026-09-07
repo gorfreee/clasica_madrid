@@ -19,6 +19,11 @@ on:
         type: string
         default: all
         required: true
+      exclude_sources:
+        description: "IDs a excluir, separados por coma"
+        type: string
+        default: ""
+        required: false
       from:
         description: Fecha inicial YYYY-MM-DD (requiere to)
         type: string
@@ -74,6 +79,7 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           DISPATCH_MODE: ${{ inputs.mode }}
           DISPATCH_SOURCES: ${{ inputs.sources }}
+          DISPATCH_EXCLUDE_SOURCES: ${{ inputs.exclude_sources }}
           DISPATCH_FROM: ${{ inputs.from }}
           DISPATCH_TO: ${{ inputs.to }}
           DISPATCH_AUTO_MERGE: ${{ inputs.auto_merge }}
@@ -84,6 +90,7 @@ jobs:
           if [[ "$EVENT_NAME" == "schedule" ]]; then
             mode="publish"
             sources="all"
+            exclude_sources=""
             from=""
             to=""
             season_window="true"
@@ -92,6 +99,7 @@ jobs:
           else
             mode="$DISPATCH_MODE"
             sources="$DISPATCH_SOURCES"
+            exclude_sources="$DISPATCH_EXCLUDE_SOURCES"
             from="$DISPATCH_FROM"
             to="$DISPATCH_TO"
             season_window="false"
@@ -109,6 +117,10 @@ jobs:
           fi
           if [[ "$sources" == *$'\n'* || "$sources" == *$'\r'* ]]; then
             echo "sources debe ser una lista de una sola línea" >&2
+            exit 1
+          fi
+          if [[ "$exclude_sources" == *$'\n'* || "$exclude_sources" == *$'\r'* ]]; then
+            echo "exclude_sources debe ser una lista de una sola línea" >&2
             exit 1
           fi
           if [[ "$season_window" == "true" && ( -n "$from" || -n "$to" ) ]]; then
@@ -136,6 +148,7 @@ jobs:
           {
             echo "mode=$mode"
             echo "sources=$sources"
+            echo "exclude_sources=$exclude_sources"
             echo "from=$from"
             echo "to=$to"
             echo "season_window=$season_window"
@@ -168,6 +181,7 @@ jobs:
         env:
           MODE: ${{ steps.config.outputs.mode }}
           SOURCES: ${{ steps.config.outputs.sources }}
+          EXCLUDE_SOURCES: ${{ steps.config.outputs.exclude_sources }}
           FROM_DATE: ${{ steps.config.outputs.from }}
           TO_DATE: ${{ steps.config.outputs.to }}
           SEASON_WINDOW: ${{ steps.config.outputs.season_window }}
@@ -185,6 +199,9 @@ jobs:
           fi
           if [[ "$SOURCES" != "all" ]]; then
             args+=(--sources "$SOURCES")
+          fi
+          if [[ -n "$EXCLUDE_SOURCES" ]]; then
+            args+=(--exclude-sources "$EXCLUDE_SOURCES")
           fi
           if [[ "$SEASON_WINDOW" == "true" ]]; then
             args+=(--season-window)

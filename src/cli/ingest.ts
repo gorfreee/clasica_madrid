@@ -145,6 +145,9 @@ try {
           now,
           dryRun,
           sourceIds: parsed.command === 'source' ? [parsed.sourceId] : parsed.sourceIds,
+          ...(parsed.command === 'sync' && parsed.excludeSourceIds
+            ? { excludeSourceIds: parsed.excludeSourceIds }
+            : {}),
           window,
           ai,
           observability,

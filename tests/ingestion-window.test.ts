@@ -225,4 +225,45 @@ describe('selección de sources', () => {
     expect(subset.summary.sourcesAttempted).toEqual(['madrid-datos', 'teatro-real']);
     expect(subset.rawEvents.every((event) => event.sourceId === 'madrid-datos')).toBe(true);
   });
+
+  it('resta excludeSourceIds de una selección explícita', async () => {
+    const dir = await emptyDataDir();
+    const run = await runIngest({
+      dataDir: dir,
+      catalog: emptyCatalog(),
+      now: TEST_NOW,
+      dryRun: true,
+      sourceIds: ['madrid-datos', 'teatro-real'],
+      excludeSourceIds: ['teatro-real'],
+      get: async (url) => {
+        if (url.includes('agenda-eventos-culturales-100')) {
+          return readFile(path.join(fixtures, 'madrid-agenda.json'), 'utf8');
+        }
+        if (url.includes('madrid.es')) return '<article><h1>Ficha</h1></article>';
+        throw new Error(`no debía pedirse ${url}`);
+      },
+    });
+    expect(run.summary.sourcesAttempted).toEqual(['madrid-datos']);
+    expect(run.rawEvents.every((event) => event.sourceId === 'madrid-datos')).toBe(true);
+  });
+
+  it('propaga exclusiones desconocidas o un conjunto vacío como error', async () => {
+    const dir = await emptyDataDir();
+    const options = {
+      dataDir: dir,
+      catalog: emptyCatalog(),
+      now: TEST_NOW,
+      dryRun: true,
+      get: async () => {
+        throw new Error('no debía pedirse ninguna URL');
+      },
+    };
+
+    await expect(runIngest({ ...options, excludeSourceIds: ['fuente-inexistente'] })).rejects.toThrow(
+      /fuente desconocida: fuente-inexistente/,
+    );
+    await expect(
+      runIngest({ ...options, sourceIds: ['teatro-real'], excludeSourceIds: ['teatro-real'] }),
+    ).rejects.toThrow(/tras aplicar las exclusiones no queda ninguna fuente/);
+  });
 });

@@ -15,7 +15,7 @@ export type IngestCliSuccess = {
 };
 
 export type IngestCliCommand =
-  | (IngestCliSuccess & { command: 'sync'; sourceIds?: string[] })
+  | (IngestCliSuccess & { command: 'sync'; sourceIds?: string[]; excludeSourceIds?: string[] })
   | (IngestCliSuccess & { command: 'source'; sourceId: string })
   | (IngestCliSuccess & { command: 'discovery'; batchPath: string })
   | { ok: false; message: string };
@@ -41,6 +41,7 @@ export function parseIngestArgs(argv: string[], knownSources: string[]): IngestC
   let to: string | undefined;
   let seasonWindow = false;
   let sourceIds: string[] | undefined;
+  let excludeSourceIds: string[] | undefined;
   const aiFlags: Pick<IngestCliSuccess, 'aiModel' | 'aiNoCache' | 'aiMaxRequests'> = {};
   const positionals: string[] = [];
   const rest = argv.slice(1);
@@ -109,26 +110,36 @@ export function parseIngestArgs(argv: string[], knownSources: string[]): IngestC
       index += 1;
       continue;
     }
-    if (arg === '--sources') {
+    if (arg === '--sources' || arg === '--exclude-sources') {
       if (command === 'source') {
         return {
           ok: false,
-          message: 'ingest:source no admite --sources; indica la fuente como argumento',
+          message:
+            arg === '--sources'
+              ? 'ingest:source no admite --sources; indica la fuente como argumento'
+              : 'ingest:source no admite --exclude-sources; indica la fuente como argumento',
         };
       }
       if (command === 'discovery') {
         return {
           ok: false,
-          message: 'ingest:discovery no admite --sources; las fuentes van en el lote observado',
+          message:
+            arg === '--sources'
+              ? 'ingest:discovery no admite --sources; las fuentes van en el lote observado'
+              : 'ingest:discovery no admite --exclude-sources; las fuentes van en el lote observado',
         };
       }
       const value = rest[index + 1];
       if (!value || value.startsWith('--')) {
-        return { ok: false, message: '--sources requiere una lista de fuentes separadas por coma' };
+        return {
+          ok: false,
+          message: `${arg} requiere una lista de fuentes separadas por coma`,
+        };
       }
-      const parsed = parseSelectedSources(value, knownSources);
+      const parsed = parseSelectedSources(value, knownSources, arg);
       if (!parsed.ok) return parsed;
-      sourceIds = parsed.sourceIds;
+      if (arg === '--sources') sourceIds = parsed.sourceIds;
+      else excludeSourceIds = parsed.sourceIds;
       index += 1;
       continue;
     }
@@ -158,6 +169,7 @@ export function parseIngestArgs(argv: string[], knownSources: string[]): IngestC
       command: 'sync',
       ...flags,
       ...(sourceIds ? { sourceIds } : {}),
+      ...(excludeSourceIds ? { excludeSourceIds } : {}),
     };
   }
 
@@ -205,13 +217,14 @@ export function parseIngestArgs(argv: string[], knownSources: string[]): IngestC
 export function parseSelectedSources(
   raw: string,
   knownSources: string[],
+  flag: '--sources' | '--exclude-sources' = '--sources',
 ): { ok: true; sourceIds: string[] } | { ok: false; message: string } {
   const ids = raw
     .split(',')
     .map((item) => item.trim())
     .filter((item) => item.length > 0);
   if (ids.length === 0) {
-    return { ok: false, message: '--sources requiere al menos una fuente' };
+    return { ok: false, message: `${flag} requiere al menos una fuente` };
   }
   const unknown = ids.filter((id) => !knownSources.includes(id));
   if (unknown.length > 0) {
@@ -287,7 +300,7 @@ export function ingestExitCode(run: {
 
 export function ingestUsage(knownSources: string[]): string {
   return `Uso:
-  npm run ingest:sync [-- --dry-run] [-- --from YYYY-MM-DD --to YYYY-MM-DD] [-- --season-window] [-- --sources fuente-a,fuente-b] [-- --data-dir <ruta>] [-- --report <fichero.json>] [-- --observability-dir <ruta>]
+  npm run ingest:sync [-- --dry-run] [-- --from YYYY-MM-DD --to YYYY-MM-DD] [-- --season-window] [-- --sources fuente-a,fuente-b] [-- --exclude-sources fuente-a,fuente-b] [-- --data-dir <ruta>] [-- --report <fichero.json>] [-- --observability-dir <ruta>]
   npm run ingest:source -- <fuente> [--from YYYY-MM-DD --to YYYY-MM-DD] [--dry-run] [--data-dir <ruta>] [--report <fichero.json>] [--observability-dir <ruta>]
   npm run ingest:discovery -- <lote.json> [--from YYYY-MM-DD --to YYYY-MM-DD] [--dry-run] [--data-dir <ruta>] [--report <fichero.json>] [--observability-dir <ruta>]
   npm run ingest:discovery-context [-- --from YYYY-MM-DD --to YYYY-MM-DD] [-- --output <fichero.json>] [-- --data-dir <ruta>]

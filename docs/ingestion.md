@@ -55,6 +55,8 @@ npm run ingest:sync
 npm run ingest:sync -- --dry-run
 npm run ingest:sync -- --dry-run --report ingestion/reports/sync.json
 npm run ingest:sync -- --from 2026-09-01 --to 2027-06-01 --sources auditorio-nacional,teatro-real
+npm run ingest:sync -- --dry-run --exclude-sources auditorio-nacional,cndm
+npm run ingest:sync -- --sources auditorio-nacional,cndm,teatro-real --exclude-sources cndm
 npm run ingest:sync -- --season-window --dry-run
 npm run ingest:source -- auditorio-nacional
 npm run ingest:source -- auditorio-nacional --from 2026-09-01 --to 2027-06-01
@@ -66,7 +68,7 @@ npm run ingest:discovery-context -- --from 2026-09-01 --to 2027-01-01 --output i
 
 `--dry-run` valida y resume sin escribir el catálogo. `--data-dir` apunta a otro árbol (por defecto `data/` o `DATA_DIR`). `--report` escribe un JSON diagnóstico por evento (incluye `window`, `health`, `autoMergeEligible` y `healthReasons`); no cambia la clasificación ni qué se publica. `--observability-dir` escribe además `run.json` y el journal `events.jsonl`. Si hay `--report` y no se indica directorio, esos ficheros van junto al report. `ingestion/reports/` está gitignorado.
 
-Sin `--from`/`--to`, la ventana es hoy en Europe/Madrid → +120 días. `--season-window` (el job programado) usa hoy → el 31 de julio más cercano y no se combina con `--from`/`--to`. Si se indica uno de `--from`/`--to`, hay que indicar ambos. Un rango manual no tiene tope de 120 días. Sin `--sources`, `ingest:sync` ejecuta las fuentes del registry que no marcan `skipDefaultSync`. `ingest:source` y `--sources` explícitos siguen ejecutando cualquier fuente del registry, incluida una marcada así, y un fallo sigue siendo un fallo.
+Sin `--from`/`--to`, la ventana es hoy en Europe/Madrid → +120 días. `--season-window` (el job programado) usa hoy → el 31 de julio más cercano y no se combina con `--from`/`--to`. Si se indica uno de `--from`/`--to`, hay que indicar ambos. Un rango manual no tiene tope de 120 días. Sin `--sources`, `ingest:sync` ejecuta las fuentes del registry que no marcan `skipDefaultSync`. `ingest:source` y `--sources` explícitos siguen ejecutando cualquier fuente del registry, incluida una marcada así, y un fallo sigue siendo un fallo. `--exclude-sources fuente-a,fuente-b` resta IDs de ese conjunto base (el default o la selección explícita), conserva el orden, elimina duplicados y rechaza IDs desconocidos. Si no queda ninguna fuente, la ejecución falla. No hace falta una sintaxis especial dentro de `--sources`.
 
 ## Discovery v1
 
@@ -125,9 +127,12 @@ En **Actions → Production ingestion → Run workflow**:
 
 - `mode`: `dry-run` (default) o `publish`;
 - `sources`: `all` o uno o varios IDs separados por coma;
+- `exclude_sources`: IDs a excluir, separados por coma (opcional; vacío por defecto);
 - `from` y `to`: rango opcional; deben informarse juntos;
 - `auto_merge`: opt-in adicional para un publish manual;
 - `ai_max_requests`: presupuesto HTTP opcional para Gemini.
+
+`sources=all` con `exclude_sources=auditorio-nacional,cndm` ejecuta el conjunto normal de `all` menos esas dos fuentes. Una selección explícita también admite exclusiones (`sources=auditorio-nacional,cndm,teatro-real` y `exclude_sources=cndm` deja auditorio-nacional y teatro-real). El job programado no pasa exclusiones: con `exclude_sources` vacío sigue ejecutando exactamente las mismas fuentes que hoy.
 
 El dry-run usa el ref seleccionado en «Run workflow» y nunca puede modificar `data/**` ni crear una PR. `schedule` y `publish` ejecutan siempre el código de `main`, de modo que una rama no fusionada no puede escribir el catálogo. En publish, un no-op tampoco crea branch, commit ni PR. Si ya existe una PR abierta cuyo branch empieza por `automation/ingestion-`, la ejecución conserva su report pero no crea ni actualiza otra PR.
 
