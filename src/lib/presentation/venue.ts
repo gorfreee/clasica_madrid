@@ -21,7 +21,6 @@ export type VenueListItemModel = {
   href: string;
   municipality: string;
   showMunicipality: boolean;
-  areaLabel: string;
   upcomingCount: number;
   nextDate: string | null;
   nextDateLabel: string | null;
@@ -48,7 +47,6 @@ export type VenuesIndexModel = {
   canonicalPath: string;
   isEmpty: boolean;
   venues: VenueListItemModel[];
-  inactiveVenues: VenueListItemModel[];
 };
 
 export function buildVenuesIndexModel(catalog: Catalog, clock: Clock = systemClock): VenuesIndexModel {
@@ -62,7 +60,6 @@ export function buildVenuesIndexModel(catalog: Catalog, clock: Clock = systemClo
       href: venuePath(venue.slug),
       municipality: venue.municipality,
       showMunicipality: !isMadridMunicipality(venue.municipality),
-      areaLabel: areaLabels[venue.area],
       upcomingCount: occurrences.length,
       nextDate,
       nextDateLabel: nextDate ? shortDate(nextDate) : null,
@@ -79,7 +76,6 @@ export function buildVenuesIndexModel(catalog: Catalog, clock: Clock = systemClo
       href: venuePath(venue.slug),
       municipality: venue.municipality,
       showMunicipality: !isMadridMunicipality(venue.municipality),
-      areaLabel: areaLabels[venue.area],
       upcomingCount: 0,
       nextDate: null,
       nextDateLabel: null,
@@ -87,11 +83,10 @@ export function buildVenuesIndexModel(catalog: Catalog, clock: Clock = systemClo
     .sort((left, right) => left.name.localeCompare(right.name, 'es'));
   return {
     title: 'Lugares de conciertos en Madrid',
-    description: 'Espacios con conciertos de música clásica próximos en Madrid y su entorno.',
+    description: 'Teatros, auditorios, iglesias y otros espacios de conciertos de música clásica en Madrid y su entorno.',
     canonicalPath: VENUES_INDEX_PATH,
-    isEmpty: venues.length === 0,
-    venues,
-    inactiveVenues,
+    isEmpty: venues.length === 0 && inactiveVenues.length === 0,
+    venues: [...venues, ...inactiveVenues],
   };
 }
 
