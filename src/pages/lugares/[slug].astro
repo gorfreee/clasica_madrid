@@ -38,7 +38,6 @@ const mapQuery = encodeURIComponent([model.address, model.municipality].filter(B
     <section class="detail-section venue-programme" aria-labelledby="proximos-titulo">
       <div class="section-heading">
         <h2 id="proximos-titulo">Próximos conciertos</h2>
-        <span>{model.upcoming.length}</span>
       </div>
       {
         model.upcoming.length === 0 ? (

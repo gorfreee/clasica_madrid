@@ -9,7 +9,7 @@
  *   (`venueSlug` / `venueId` are the principal place; `venueKeys` also
  *   includes child room ids/slugs so old URLs still match)
  * - `[data-agenda-filters]` — filter form (names match URL params)
- * - `[data-agenda-shortcuts]` — quick-filter links (Hoy, Mañana, Fin de semana, Gratis)
+ * - `[data-agenda-shortcuts]` — quick-filter links (Fin de semana, Gratis)
  * - `[data-agenda-root]` — list + load controls; `aria-busy` while fetching the full agenda
  * - `[data-agenda-complete]` — present when the in-DOM list is the full catalog
  * - `[data-upcoming-count]` — total upcoming occurrences at build time
@@ -54,6 +54,23 @@ type AgendaRuntime = {
 
 let runtime: AgendaRuntime | null = null;
 
+const SEARCH_PLACEHOLDER_WIDE_MQ = '(min-width: 901px)';
+
+function bindSearchPlaceholder(form: HTMLFormElement | null): void {
+  const input = form?.querySelector<HTMLInputElement>('input[name="q"]');
+  const wide = input?.dataset.searchPlaceholderWide;
+  const narrow = input?.dataset.searchPlaceholderNarrow;
+  if (!input || !wide || !narrow) return;
+
+  const mq = window.matchMedia(SEARCH_PLACEHOLDER_WIDE_MQ);
+  const sync = () => {
+    input.placeholder = mq.matches ? wide : narrow;
+  };
+
+  sync();
+  mq.addEventListener('change', sync);
+}
+
 export function initAgendaFilters(): void {
   const root = document.querySelector<HTMLElement>('[data-agenda-root]');
   const dataNode = document.getElementById('agenda-filter-data');
@@ -85,6 +102,8 @@ export function initAgendaFilters(): void {
     fullLoaded: root.hasAttribute('data-agenda-complete'),
     loadPromise: null,
   };
+
+  bindSearchPlaceholder(form);
 
   form?.addEventListener('submit', (event) => {
     event.preventDefault();
