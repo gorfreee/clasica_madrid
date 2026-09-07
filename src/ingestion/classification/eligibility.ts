@@ -636,8 +636,7 @@ function filmMusicIdentity(facts: ObservedFacts, haystack: string): Exclusion | 
     hasPhrase(haystack, 'john williams') ||
     hasPhrase(haystack, 'ennio morricone') ||
     hasPhrase(haystack, 'film symphony') ||
-    hasPhrase(haystack, 'royal film concert') ||
-    hasPhrase(haystack, 'musica de cine');
+    hasPhrase(haystack, 'royal film concert');
   const classicalBlock =
     knownClassicalNames(facts).length > 0 ||
     hasPhrase(haystack, 'musica clasica') ||
