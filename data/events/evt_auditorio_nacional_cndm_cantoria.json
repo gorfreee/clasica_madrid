@@ -84,7 +84,8 @@
       "composerName": "José de San Juan"
     },
     {
-      "title": "Soberana María (Romances y letras de a tres vozes, s. XVII, atrib. Mateo Romero)"
+      "title": "Soberana María (Romances y letras de a tres vozes, s. XVII, atrib. Mateo Romero)",
+      "composerName": "José de San Juan"
     },
     {
       "title": "ø+ Recuperación histórica, estreno en tiempos modernos",
@@ -116,7 +117,7 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-cantoria",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-07",
       "externalId": "cndm-cantoria"
     },
     {
@@ -127,5 +128,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-07"
 }

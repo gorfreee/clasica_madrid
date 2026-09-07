@@ -36,15 +36,15 @@
     "recital"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-deutsche-radio-philharmonie",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-07",
       "externalId": "ibermusica-deutsche-radio-philharmonie"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-07"
 }

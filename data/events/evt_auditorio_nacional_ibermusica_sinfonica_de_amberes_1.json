@@ -49,15 +49,15 @@
     "symphonic"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-sinfonica-de-amberes-1",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-07",
       "externalId": "ibermusica-sinfonica-de-amberes-1"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-07"
 }

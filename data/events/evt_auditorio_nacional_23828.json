@@ -18,6 +18,9 @@
   "performers": [
     {
       "name": "Richard Egarr"
+    },
+    {
+      "name": "Hippocampus"
     }
   ],
   "composers": [
@@ -59,7 +62,7 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-hippocampus-1",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-07",
       "externalId": "cndm-hippocampus-1"
     },
     {
@@ -70,5 +73,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-07"
 }

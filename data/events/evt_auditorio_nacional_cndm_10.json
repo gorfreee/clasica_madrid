@@ -88,6 +88,10 @@
     {
       "title": "De Psalmen Davids sampt etlichen Moteten und Concerten , op. 2 (1619)",
       "composerName": "Heinrich Schütz"
+    },
+    {
+      "title": "y Schütz: la huella veneciana",
+      "composerName": "Claudio Monteverdi"
     }
   ],
   "eras": [
@@ -103,7 +107,7 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-10",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-07",
       "externalId": "cndm-10"
     },
     {
@@ -114,5 +118,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-07"
 }

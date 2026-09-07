@@ -71,7 +71,8 @@
       "composerName": "Agustín Rivas Chupacaña"
     },
     {
-      "title": "Que me entierren en un arpa (joropo llanero)"
+      "title": "Que me entierren en un arpa (joropo llanero)",
+      "composerName": "Agustín Rivas Chupacaña"
     },
     {
       "title": "La sirena (arr. C. Pluhar)"
@@ -118,7 +119,8 @@
       "composerName": "Alonso Mudarra"
     },
     {
-      "title": "Pajarito (joropo llanero) (arr. L’Arpeggiata)"
+      "title": "Pajarito (joropo llanero) (arr. L’Arpeggiata)",
+      "composerName": "Alonso Mudarra"
     },
     {
       "title": "Tonada de luna llena",
@@ -141,7 +143,7 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-l2019arpeggiata-1",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-07",
       "externalId": "cndm-l2019arpeggiata-1"
     },
     {
@@ -152,5 +154,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-07"
 }

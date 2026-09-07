@@ -55,15 +55,15 @@
     "opera"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-el-mesias-de-haendel",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-07",
       "externalId": "ibermusica-el-mesias-de-haendel"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-07"
 }
