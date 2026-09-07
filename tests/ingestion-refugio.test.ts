@@ -2,10 +2,12 @@ import { readFile, mkdtemp } from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import { afterEach, describe, expect, it } from 'vitest';
-import { realHermandadRefugioAdapter as adapter, REFUGIO_PER_PAGE, REFUGIO_MAX_PAGES, REFUGIO_CONCERT_ARCHIVE_URL, refugioRestListingUrl, setRefugioBrowserSessionForTests } from '../src/ingestion/sources/real-hermandad-refugio.ts';
+import { realHermandadRefugioAdapter as adapter, REFUGIO_PER_PAGE, REFUGIO_MAX_PAGES, REFUGIO_CONCERT_ARCHIVE_URL, REFUGIO_DETAIL_READY_SELECTOR, refugioRestListingUrl, setRefugioBrowserSessionForTests } from '../src/ingestion/sources/real-hermandad-refugio.ts';
 import { parseRefugioConcertArchive, parseRefugioDate, parseRefugioDetail, refugioEventUrl } from '../src/ingestion/detail/real-hermandad-refugio.ts';
+import { classify } from '../src/ingestion/classification/classify.ts';
 import { fetchRelayHosts, getSourceDefinition } from '../src/ingestion/registry.ts';
 import { hydrateEvents } from '../src/ingestion/hydrate.ts';
+import { normalizeRawEvent, observedFactsFromNormalized } from '../src/ingestion/normalize.ts';
 import { runIngest } from '../src/ingestion/pipeline.ts';
 import { mergeCandidateBatch } from '../src/ingestion/batch.ts';
 import { matchEventIdentity } from '../src/ingestion/identity.ts';
@@ -31,6 +33,25 @@ const ctx: AdapterContext = {
   },
 };
 
+const DETAIL_FIXTURES: Record<string, string> = {
+  'https://realhermandaddelrefugio.org/calendario-de-eventos/un-recorrido-por-la-historia-de-la-musica-espanola-concierto-benefico/': 'detail-recorrido.html',
+  'https://realhermandaddelrefugio.org/calendario-de-eventos/festival-internacional-de-organo-san-antonio-de-los-alemanes-2026-2/': 'detail-organo-2026.html',
+  'https://realhermandaddelrefugio.org/calendario-de-eventos/musica-que-nos-une-concierto/': 'detail-musica.html',
+};
+
+async function pageBody(url: string): Promise<string> {
+  if (url === listingUrl || url.startsWith(`${listingUrl}page/`)) return fixture('listing-archive.html');
+  const name = DETAIL_FIXTURES[url];
+  if (name) return fixture(name);
+  throw new Error(`URL de test no mapeada: ${url}`);
+}
+
+afterEach(async () => {
+  await adapter.endHydration?.();
+  setRefugioBrowserSessionForTests();
+  takeBrowserFetchAttempts(adapter.id);
+});
+
 async function listingItem(id: string): Promise<string> {
   const items = JSON.parse(await fixture('listing.json')) as Array<{ id: number }>;
   return JSON.stringify(items.filter((item) => String(item.id) === id));
@@ -40,7 +61,8 @@ describe('Real Hermandad del Refugio listing', () => {
   it('usa el archivo oficial de conciertos como superficie primaria', async () => {
     expect(listingUrl).toBe(REFUGIO_CONCERT_ARCHIVE_URL);
     expect(adapter.requiresDetailSchedule).toBeFalsy();
-    expect(adapter.hydrate).toBeUndefined();
+    expect(adapter.hydrate).toBe(parseRefugioDetail);
+    expect(adapter.fetchDetail).toBeTypeOf('function');
     expect(source.useFetchRelay).toBeFalsy();
     expect(source.fetchTransport).toBeUndefined();
     expect(source.catalogSourceId).toBe('src_real_hermandad_refugio');
@@ -244,9 +266,134 @@ describe('Real Hermandad del Refugio ficha hydration', () => {
     ]) {
       expect(() => parseRefugioDetail(event, broken)).toThrow(/real-hermandad-refugio/);
     }
-    const [failed] = await hydrateEvents([event], { ...adapter, hydrate: parseRefugioDetail }, { ...ctx, get: async () => '<html>Unavailable</html>' });
+    const [failed] = await hydrateEvents([event], adapter, { ...ctx, get: async () => '<html>Unavailable</html>' });
     expect(failed?.hydration?.status).toBe('failed');
     expect(failed?.observed).toEqual(event.observed);
+  });
+
+  it('enriches listing facts from a complete ficha without inventing programme', async () => {
+    const listed = (await adapter.extract(await fixture('listing-archive.html'), listingUrl, ctx))
+      .find((event) => event.externalId === '10538')!;
+    const [hydrated] = await hydrateEvents([listed], adapter, {
+      ...ctx,
+      get: async (url) => {
+        expect(url).toBe(listed.sourceUrl);
+        return fixture('detail-recorrido.html');
+      },
+    });
+    expect(hydrated?.hydration?.status).toBe('succeeded');
+    expect(hydrated?.observed.title).toBe(listed.observed.title);
+    expect(hydrated?.observed.occurrences[0]).toMatchObject({ date: '2026-09-24', time: '19:30' });
+    expect(hydrated?.observed.venueText).toBe('Iglesia de San Antonio de los Alemanes');
+    expect(hydrated?.observed.accessText).toBe('Entrada libre');
+    expect(hydrated?.observed.description).toMatch(/visita guiada/);
+    expect(hydrated?.observed.composers).toEqual([]);
+    expect(hydrated?.observed.works).toEqual([]);
+    expect(hydrated?.observed.performers).toEqual([]);
+  });
+
+  it('rejects a ficha whose canonical, externalId or title does not match before mixing facts', async () => {
+    const listed = (await adapter.extract(await fixture('listing-archive.html'), listingUrl, ctx))
+      .find((event) => event.externalId === '10538')!;
+    const html = await fixture('detail-recorrido.html');
+    for (const [label, broken] of [
+      ['canonical', html.replace(
+        'https://realhermandaddelrefugio.org/calendario-de-eventos/un-recorrido-por-la-historia-de-la-musica-espanola-concierto-benefico/',
+        'https://realhermandaddelrefugio.org/calendario-de-eventos/otra-ficha/',
+      )],
+      ['externalId', html.replace('postid-10538', 'postid-9999')],
+      ['title', html.replace('Un Recorrido por la Historia de la Música Española. Concierto Benéfico.', 'Otro concierto')],
+    ] as const) {
+      const [rejected] = await hydrateEvents([listed], adapter, { ...ctx, get: async () => broken });
+      expect(rejected?.hydration?.status, label).toBe('failed');
+      expect(rejected?.observed, label).toEqual(listed.observed);
+      expect(rejected?.observed.description, label).not.toMatch(/visita guiada/);
+    }
+  });
+
+  it('la descripción completa de Música que nos une sustituye el snippet truncado antes de clasificar', async () => {
+    const listed = (await adapter.extract(await fixture('listing-archive.html'), listingUrl, ctx))
+      .find((event) => event.externalId === '10557')!;
+    expect(listed.observed.description).toMatch(/conciertos y\.\.\.\s*$/);
+    const [hydrated] = await hydrateEvents([listed], adapter, {
+      ...ctx,
+      get: async (url) => {
+        expect(url).toBe(listed.sourceUrl);
+        return fixture('detail-musica.html');
+      },
+    });
+    expect(hydrated?.hydration?.status).toBe('succeeded');
+    expect(hydrated?.observed.description).toMatch(/repertorio musical clásico/);
+    expect(hydrated?.observed.description).toMatch(/Juan Sebastián Bach/);
+    expect(hydrated?.observed.description).not.toMatch(/\.\.\.\s*$/);
+    const normalized = normalizeRawEvent(hydrated!)!;
+    const facts = observedFactsFromNormalized(normalized);
+    expect(facts.description).toMatch(/repertorio musical clásico \(desde el Renacimiento hasta el siglo XXI\)/);
+    expect(facts.description).not.toBe(listed.observed.description);
+    expect(classify({
+      title: listed.observed.title,
+      description: listed.observed.description,
+      categoryText: listed.observed.categoryText,
+      performers: [],
+      composers: [],
+      works: [],
+    }).eligibility.ruleId).toBe('insufficient-evidence');
+    expect(classify(facts).eligibility.ruleId).toBe('classical-and-nonclassical-coprincipal');
+  });
+
+  it('HTTP 202 de una ficha reutiliza el fallback de navegador y no pide REST', async () => {
+    const listed = (await adapter.extract(await fixture('listing-archive.html'), listingUrl, ctx))
+      .find((event) => event.externalId === '10557')!;
+    const html = await fixture('detail-musica.html');
+    const browserUrls: string[] = [];
+    const requested: string[] = [];
+    setRefugioBrowserSessionForTests(async () => ({
+      async get(url, options) {
+        browserUrls.push(url);
+        expect(options.waitForSelector).toBe(REFUGIO_DETAIL_READY_SELECTOR);
+        return html;
+      },
+      async close() {},
+    }));
+    const [hydrated] = await hydrateEvents([listed], adapter, {
+      ...ctx,
+      get: async (url) => {
+        requested.push(url);
+        throw new HttpError(202, url);
+      },
+    });
+    expect(requested).toEqual([listed.sourceUrl]);
+    expect(requested.every((url) => !url.includes('/wp-json/'))).toBe(true);
+    expect(browserUrls).toEqual([listed.sourceUrl]);
+    expect(hydrated?.hydration?.status).toBe('succeeded');
+    expect(hydrated?.observed.description).toMatch(/repertorio musical clásico/);
+  });
+
+  it('varias fichas 202 reutilizan la misma BrowserContext', async () => {
+    const events = await adapter.extract(await fixture('listing-archive.html'), listingUrl, ctx);
+    const browserUrls: string[] = [];
+    let sessions = 0;
+    setRefugioBrowserSessionForTests(async () => {
+      sessions += 1;
+      return {
+        async get(url: string) {
+          browserUrls.push(url);
+          const name = DETAIL_FIXTURES[url];
+          if (!name) throw new Error(`ficha de navegador no mapeada: ${url}`);
+          return fixture(name);
+        },
+        async close() {},
+      };
+    });
+    const hydrated = await hydrateEvents(events, adapter, {
+      ...ctx,
+      get: async (url) => {
+        throw new HttpError(202, url);
+      },
+    });
+    expect(sessions).toBe(1);
+    expect(browserUrls).toEqual(events.map((event) => event.sourceUrl));
+    expect(hydrated.every((event) => event.hydration?.status === 'succeeded')).toBe(true);
   });
 });
 
@@ -259,10 +406,7 @@ describe('Real Hermandad del Refugio pipeline safety', () => {
       window,
       sourceIds: [source.id],
       dataDir: await mkdtemp(path.join(os.tmpdir(), 'refugio-test-')),
-      get: async (url) => {
-        if (url === listingUrl || url.startsWith(`${listingUrl}page/`)) return fixture('listing-archive.html');
-        throw new Error(`no debía hidratar ${url}`);
-      },
+      get: pageBody,
     });
   }
 
@@ -312,21 +456,46 @@ describe('Real Hermandad del Refugio pipeline safety', () => {
     return catalog;
   }
 
-  it('el archivo aporta fecha, sede y precio sin hidratar fichas', async () => {
+  it('el archivo aporta fecha, sede y precio; la ficha enriquece la descripción', async () => {
     const first = await run();
     expect(first.summary.sourcesFailed).toEqual([]);
     const recorrido = first.rawEvents.find((event) => event.externalId === '10538');
-    expect(recorrido?.hydration?.status).toBe('not-requested');
-    expect(recorrido?.observed.occurrences).toEqual([
-      { raw: 'Fecha inicio: septiembre 24, 2026 Hora: 19:30', date: '2026-09-24', time: '19:30' },
-    ]);
+    expect(recorrido?.hydration?.status).toBe('succeeded');
+    expect(recorrido?.observed.occurrences[0]).toMatchObject({ date: '2026-09-24', time: '19:30' });
     expect(recorrido?.observed.venueText).toBe('Iglesia de San Antonio de los Alemanes');
+    expect(recorrido?.observed.description).toMatch(/visita guiada/);
     expect(matchVenue({ venueText: recorrido?.observed.venueText, sourceId: source.id }, emptyCatalog())?.venue.id)
       .toBe('ven_iglesia_san_antonio_alemanes');
     expect(first.summary.possiblyMissing).toBe(0);
   });
 
-  it('no pide fichas y conserva el schedule del listing', async () => {
+  it('un fallo de ficha conserva los hechos del listing y no tumba la fuente', async () => {
+    const result = await runIngest({
+      now: TEST_NOW,
+      dryRun: true,
+      catalog: emptyCatalog(),
+      window: TEST_WINDOW,
+      sourceIds: [source.id],
+      dataDir: await mkdtemp(path.join(os.tmpdir(), 'refugio-detail-fail-')),
+      get: async (url) => {
+        if (url === listingUrl || url.startsWith(`${listingUrl}page/`)) return fixture('listing-archive.html');
+        throw new Error(`ficha no disponible ${url}`);
+      },
+    });
+    expect(result.summary.sourcesFailed).toEqual([]);
+    expect(result.summary.disappearanceSuppressedSources ?? []).not.toContain(source.id);
+    const musica = result.rawEvents.find((event) => event.externalId === '10557');
+    expect(musica?.hydration?.status).toBe('failed');
+    expect(musica?.observed.description).toMatch(/conciertos y\.\.\.\s*$/);
+    expect(musica?.observed.occurrences[0]).toMatchObject({ date: '2026-09-26' });
+    expect(musica?.observed.venueText).toBeUndefined();
+    const recorrido = result.rawEvents.find((event) => event.externalId === '10538');
+    expect(recorrido?.hydration?.status).toBe('failed');
+    expect(recorrido?.observed.occurrences[0]).toMatchObject({ date: '2026-09-24', time: '19:30' });
+    expect(recorrido?.observed.venueText).toBe('Iglesia de San Antonio de los Alemanes');
+  });
+
+  it('hidrata fichas sin exigirlas para el calendario y conserva el schedule del listing', async () => {
     expect((await run(emptyCatalog(), { from: '2026-11-01', to: '2026-11-30' })).summary.candidates).toBe(0);
     const catalog = publishedCatalog();
     const result = await run(catalog);
@@ -334,7 +503,7 @@ describe('Real Hermandad del Refugio pipeline safety', () => {
     expect(result.summary.disappearanceSuppressedSources ?? []).not.toContain(source.id);
     expect(result.summary.possiblyMissing).toBe(0);
     const recorrido = result.rawEvents.find((event) => event.externalId === '10538');
-    expect(recorrido?.hydration?.status).toBe('not-requested');
+    expect(recorrido?.hydration?.status).toBe('succeeded');
     expect(recorrido?.observed.occurrences[0]).toMatchObject({ date: '2026-09-24', time: '19:30' });
     expect(recorrido?.observed.venueText).toBe('Iglesia de San Antonio de los Alemanes');
     expect(result.summary.updatedEvents + result.summary.unchangedEvents).toBeGreaterThan(0);
@@ -392,11 +561,6 @@ describe('Real Hermandad del Refugio pipeline safety', () => {
 
 describe('Real Hermandad del Refugio HTML archive', () => {
   const archiveUrl = REFUGIO_CONCERT_ARCHIVE_URL;
-
-  afterEach(() => {
-    setRefugioBrowserSessionForTests();
-    takeBrowserFetchAttempts(adapter.id);
-  });
 
   it('pide el archivo oficial primero y no usa /conciertos ni REST ni navegador', async () => {
     const requested: string[] = [];
@@ -660,10 +824,7 @@ describe('Real Hermandad del Refugio HTML archive', () => {
       sourceIds: [source.id],
       dataDir: await mkdtemp(path.join(os.tmpdir(), 'refugio-archive-data-')),
       observability,
-      get: async (url) => {
-        if (url === archiveUrl || url.startsWith(`${archiveUrl}page/`)) return fixture('listing-archive.html');
-        throw new Error(`no debía hidratar ${url}`);
-      },
+      get: pageBody,
     });
     observability.complete();
     observability.close();
@@ -673,6 +834,8 @@ describe('Real Hermandad del Refugio HTML archive', () => {
     expect(manifest.timings?.sources[source.id]?.http.browserFallbacks).toBe(0);
     expect(manifest.timings?.sources[source.id]?.http.browserRequests).toBe(0);
     expect(manifest.timings?.sources[source.id]?.extractedEvents).toBe(3);
+    expect(manifest.timings?.sources[source.id]?.hydrationSucceeded).toBe(3);
+    expect(manifest.timings?.sources[source.id]?.hydrationFailed).toBe(0);
   });
 
   it('registra HTTP 202 y el fallback de navegador en run.json', async () => {
@@ -710,9 +873,10 @@ describe('Real Hermandad del Refugio HTML archive', () => {
     expect(timing?.listingTransport).toBe('browser');
     expect(timing?.http.statusCounts['202']).toBeGreaterThan(0);
     expect(timing?.http.challengeCount).toBeGreaterThan(0);
-    expect(timing?.http.browserFallbacks).toBe(1);
-    expect(timing?.http.browserRequests).toBeGreaterThan(0);
+    expect(timing?.http.browserFallbacks).toBe(2);
+    expect(timing?.http.browserRequests).toBeGreaterThanOrEqual(4);
     expect(timing?.extractedEvents).toBe(3);
+    expect(timing?.hydrationAttempted).toBe(3);
     expect(timing?.listingError).toBeUndefined();
   });
 });

@@ -13,8 +13,9 @@ uses the official taxonomy archive:
 
 That archive lists future concerts with canonical ficha URLs, `data-post-id`,
 `data-pages`, and card fields (`Fecha inicio`, `Fecha fin`, `Hora`, `Lugar`,
-`Precio`). It is complete for upcoming concerts; `/conciertos/` is not used.
-WordPress REST remains an optional secondary fallback.
+`Precio`). The cards already carry a usable calendar; individual fichas are
+hydrated for the full description used in classification. `/conciertos/` is
+not used. WordPress REST remains an optional secondary fallback.
 
 - `listing.json`: five CPT rows (upcoming concerts, a past recital, and the
   2025 festival season landing).

@@ -363,6 +363,19 @@ describe('eligibility — exclusiones de identidad', () => {
     expect(result.eligibility.value).toBe('exclude');
     expect(result.eligibility.ruleId).toBe('film-music-identity');
   });
+
+  it('no excluye por mencionar música de cine junto a un repertorio clásico declarado', () => {
+    const result = classify(
+      facts({
+        title: 'Música que nos une | Concierto',
+        categoryText: 'Conciertos',
+        description:
+          'El grupo interpreta un amplio y diverso repertorio musical clásico (desde el Renacimiento hasta el siglo XXI) y de otros géneros musicales: famosas arias de ópera, lied alemán, romanzas de zarzuela, canción popular española, boleros, canción francesa, música de cine. El órgano permite la interpretación del rico repertorio organístico (incluidas famosas composiciones de Juan Sebastián Bach y música antigua ibérica).',
+      }),
+    );
+    expect(result.eligibility.value).toBe('uncertain');
+    expect(result.eligibility.ruleId).toBe('classical-and-nonclassical-coprincipal');
+  });
 });
 
 describe('eligibility — conflictos y fallback', () => {

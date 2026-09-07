@@ -196,6 +196,16 @@ export type SourceAdapter = {
    */
   fetchListing?(url: string, ctx: AdapterContext): Promise<string>;
   /**
+   * Optional source-specific detail transport. Default is `ctx.get(event.sourceUrl)`.
+   * Use this for origin-specific fallbacks (HTTP then a shared browser session).
+   * Do not fetch inside `hydrate`.
+   */
+  fetchDetail?(url: string, ctx: AdapterContext): Promise<string>;
+  /**
+   * Optional cleanup after the hydration loop (close a shared detail session).
+   */
+  endHydration?(): Promise<void> | void;
+  /**
    * Parse one fetched listing/feed body. May be sync or async.
    * Throw if the document is not the expected structure. Skip individual
    * items that lack required facts. Do not treat a suspiciously empty
@@ -204,7 +214,8 @@ export type SourceAdapter = {
   extract(body: string, url: string, ctx: AdapterContext): Promise<RawEvent[]> | RawEvent[];
   /**
    * Source-specific detail parser. The pipeline fetches `event.sourceUrl`
-   * and calls this; do not fetch inside `hydrate`.
+   * (`fetchDetail` when present, otherwise `ctx.get`) and calls this; do
+   * not fetch inside `hydrate`.
    *
    * Throw if the document is not the expected structure. The pipeline treats
    * that as an event-local hydration failure and keeps the listing facts.
