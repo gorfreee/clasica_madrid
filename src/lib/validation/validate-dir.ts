@@ -6,6 +6,7 @@ import { sourceSchema } from '../schemas/source.ts';
 import { venueSchema } from '../schemas/venue.ts';
 import { emptyCatalog, type Catalog } from '../domain/catalog.ts';
 import type { RawEntityFile } from '../repository/fs.ts';
+import { findCanonicalCasingIssues } from './canonical-casing.ts';
 import { findComposerIdentityIssues } from './composer-identity.ts';
 import { findDuplicateEvents } from './duplicates.ts';
 import { findScheduleCollisionIssues } from './schedule-collisions.ts';
@@ -72,6 +73,7 @@ export function validateRawFiles(files: RawEntityFile[]): ValidationReport {
   issues.push(...findDuplicateEvents(catalog));
   issues.push(...findScheduleCollisionIssues(catalog));
   issues.push(...findComposerIdentityIssues(catalog));
+  issues.push(...findCanonicalCasingIssues(catalog));
 
   return makeReport(issues);
 }
