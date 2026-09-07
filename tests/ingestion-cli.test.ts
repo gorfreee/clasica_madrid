@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ingestExitCode, parseIngestArgs } from '../src/cli/ingest-args.ts';
+import { ingestExitCode, ingestUsage, parseIngestArgs } from '../src/cli/ingest-args.ts';
 
 const sources = ['auditorio-nacional', 'teatro-real', 'madrid-datos'];
 
@@ -38,6 +38,10 @@ describe('parseIngestArgs', () => {
     const sourcesFlag = parseIngestArgs(['discovery', 'a.json', '--sources', 'teatro-real'], sources);
     expect(sourcesFlag.ok).toBe(false);
     if (!sourcesFlag.ok) expect(sourcesFlag.message).toMatch(/no admite --sources/);
+
+    const excludeFlag = parseIngestArgs(['discovery', 'a.json', '--exclude-sources', 'teatro-real'], sources);
+    expect(excludeFlag.ok).toBe(false);
+    if (!excludeFlag.ok) expect(excludeFlag.message).toMatch(/no admite --exclude-sources/);
   });
 
   it('entiende sync y source con flags opcionales', () => {
@@ -180,6 +184,49 @@ describe('parseIngestArgs', () => {
     if (!onSource.ok) expect(onSource.message).toMatch(/no admite --sources/);
   });
 
+  it('acepta --exclude-sources en ingest:sync y lo resta del conjunto base', () => {
+    expect(parseIngestArgs(['sync', '--exclude-sources', 'teatro-real, auditorio-nacional'], sources)).toEqual({
+      ok: true,
+      command: 'sync',
+      dryRun: false,
+      excludeSourceIds: ['teatro-real', 'auditorio-nacional'],
+    });
+    expect(
+      parseIngestArgs(
+        ['sync', '--sources', 'auditorio-nacional,madrid-datos,teatro-real', '--exclude-sources', 'madrid-datos'],
+        sources,
+      ),
+    ).toEqual({
+      ok: true,
+      command: 'sync',
+      dryRun: false,
+      sourceIds: ['auditorio-nacional', 'madrid-datos', 'teatro-real'],
+      excludeSourceIds: ['madrid-datos'],
+    });
+
+    expect(parseIngestArgs(['sync', '--exclude-sources', 'teatro-real,teatro-real'], sources)).toEqual({
+      ok: true,
+      command: 'sync',
+      dryRun: false,
+      excludeSourceIds: ['teatro-real'],
+    });
+
+    const unknown = parseIngestArgs(['sync', '--exclude-sources', 'fuente-inexistente'], sources);
+    expect(unknown.ok).toBe(false);
+    if (!unknown.ok) {
+      expect(unknown.message).toMatch(/fuente desconocida: fuente-inexistente/);
+      expect(unknown.message).toMatch(/Disponibles: auditorio-nacional, teatro-real, madrid-datos/);
+    }
+
+    const empty = parseIngestArgs(['sync', '--exclude-sources', ' , '], sources);
+    expect(empty.ok).toBe(false);
+    if (!empty.ok) expect(empty.message).toMatch(/--exclude-sources requiere al menos una fuente/);
+
+    const onSource = parseIngestArgs(['source', 'teatro-real', '--exclude-sources', 'madrid-datos'], sources);
+    expect(onSource.ok).toBe(false);
+    if (!onSource.ok) expect(onSource.message).toMatch(/no admite --exclude-sources/);
+  });
+
   it('acepta --season-window y lo rechaza junto a --from/--to', () => {
     expect(parseIngestArgs(['sync', '--season-window'], sources)).toEqual({
       ok: true,
@@ -200,6 +247,13 @@ describe('parseIngestArgs', () => {
     );
     expect(mixed.ok).toBe(false);
     if (!mixed.ok) expect(mixed.message).toMatch(/no se combina con --from\/--to/);
+  });
+
+  it('rechaza --exclude-sources sin valor e incluye el flag en el usage', () => {
+    const parsed = parseIngestArgs(['sync', '--exclude-sources'], sources);
+    expect(parsed.ok).toBe(false);
+    if (!parsed.ok) expect(parsed.message).toMatch(/--exclude-sources requiere una lista/);
+    expect(ingestUsage(sources)).toMatch(/--exclude-sources fuente-a,fuente-b/);
   });
 });
 

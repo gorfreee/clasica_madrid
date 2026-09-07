@@ -52,8 +52,16 @@ describe('workflow de ingestión: artifact de observabilidad', () => {
     expect(config).toContain('season_window="true"');
     expect(config).toContain('season_window="false"');
     expect(config).toContain('echo "season_window=$season_window"');
+    expect(config).toContain('exclude_sources=""');
+    expect(config).toContain('exclude_sources="$DISPATCH_EXCLUDE_SOURCES"');
+    expect(config).toContain('echo "exclude_sources=$exclude_sources"');
+    expect(config).toContain('DISPATCH_EXCLUDE_SOURCES');
+    expect(yaml).toContain('exclude_sources:');
+    expect(yaml).toMatch(/description:\s*"IDs a excluir, separados por coma"/);
     expect(ingest).toContain('--season-window');
     expect(ingest).toContain('SEASON_WINDOW: ${{ steps.config.outputs.season_window }}');
+    expect(ingest).toContain('EXCLUDE_SOURCES: ${{ steps.config.outputs.exclude_sources }}');
+    expect(ingest).toContain('--exclude-sources');
     expect(ingest).toContain('GITHUB_SHA: ${{ steps.config.outputs.code_sha }}');
     expect(ingest).toContain('INGEST_FETCH_RELAY_URL: ${{ vars.INGEST_FETCH_RELAY_URL }}');
     expect(ingest).toContain('INGEST_FETCH_RELAY_TOKEN: ${{ secrets.INGEST_FETCH_RELAY_TOKEN }}');

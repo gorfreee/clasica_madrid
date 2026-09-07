@@ -5,7 +5,8 @@ import { classifyObserved } from './classification/enrich.ts';
 import type { ClassificationResult } from './classification/types.ts';
 import { collapseWhitespace } from './html.ts';
 import { discoveryToRawEvents, type DiscoveryBatch } from './discovery.ts';
-import { getAdapter, getSourceDefinition, listSourceDefinitions } from './registry.ts';
+import { getAdapter } from './registry.ts';
+import { resolveIngestSources } from './select-sources.ts';
 import { enrichNormalizedEvent } from './enrich-normalized.ts';
 import { normalizeRawEvent, normalizeSkipReason, observedFactsFromNormalized } from './normalize.ts';
 import { applyCandidateBatch, type BatchApplyResult } from './batch.ts';
@@ -45,6 +46,7 @@ export type IngestOptions = {
   now: Date;
   dryRun: boolean;
   sourceIds?: string[];
+  excludeSourceIds?: string[];
   window?: IngestWindow;
   get?: (url: string) => Promise<string>;
   /** Injected by the CLI. Absent → deterministic path only; uncertain stays unpublished. */
@@ -89,7 +91,10 @@ type HarvestSourceResult = {
 
 export async function runIngest(options: IngestOptions): Promise<IngestRun> {
   const window = options.window ?? defaultIngestWindow(options.now);
-  const sources = selectSources(options.sourceIds);
+  const sources = resolveIngestSources({
+    sourceIds: options.sourceIds,
+    excludeSourceIds: options.excludeSourceIds,
+  });
   const get = memoizeGet(options.get ?? getText);
   const failures: SourceFailure[] = [];
   const succeeded: string[] = [];
@@ -629,13 +634,6 @@ function mergeProviderStats(usage: IngestAiSummary, ai: AiClassifier | undefined
   usage.deferred = stats.deferred ?? 0;
   usage.inputTokensByModel = stats.inputTokensByModel ?? {};
   usage.dailyRequestsByModel = stats.dailyRequestsByModel ?? {};
-}
-
-function selectSources(ids: string[] | undefined): SourceDefinition[] {
-  if (!ids || ids.length === 0) {
-    return listSourceDefinitions().filter((source) => !source.skipDefaultSync);
-  }
-  return ids.map((id) => getSourceDefinition(id));
 }
 
 function measureSourcePhase<T>(
