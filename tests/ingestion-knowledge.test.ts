@@ -10,6 +10,7 @@ import {
   looksLikeProgramHeader,
   looksLikeWorkLine,
   parseExplicitTitleAuthorWork,
+  stripEditorialNoteMarkers,
 } from '../src/ingestion/observed-cleanup.ts';
 import {
   normalizeComposerList,
@@ -506,6 +507,12 @@ describe('composer knowledge base', () => {
     expect(looksLikeComposerLine('Fast Blue Village (2022)')).toBe(false);
     expect(looksLikeComposerLine('Adam Ilyas Kuruc (1984-)')).toBe(true);
     expect(looksLikeComposerLine('JAVIER MARTÍNEZ CAMPOS (1989)')).toBe(true);
+    expect(looksLikeComposerLine('Ignacio ‘Indio’ Figueredo (1899-1995)')).toBe(true);
+    expect(looksLikeComposerLine('Tradicional de Venezuela')).toBe(false);
+    expect(looksLikeComposerLine('Anónimo (s. XVII)')).toBe(false);
+    expect(looksLikeWorkLine('Tradicional de Venezuela')).toBe(false);
+    expect(looksLikeWorkLine('Anónimo (s. XVII)')).toBe(false);
+    expect(looksLikeWorkLine('Varios autores')).toBe(false);
     expect(looksLikeProgramHeader('I PARTE')).toBe(true);
     expect(looksLikeProgramHeader('II PARTE')).toBe(true);
     expect(looksLikeProgramHeader('PARTE I')).toBe(true);
@@ -570,6 +577,16 @@ describe('composer knowledge base', () => {
     expect(matchComposer('F. Lehár')?.canonicalName).toBe('Franz Lehár');
     expect(matchComposer('J. Strauss')).toBeUndefined();
     expect(looksLikeWorkLine('Invocación y danza (Homenaje a Manuel de Falla)')).toBe(true);
+    expect(stripEditorialNoteMarkers('Cuarteto para saxofones, op. 126 **+ (2026)')).toBe(
+      'Cuarteto para saxofones, op. 126 (2026)',
+    );
+    expect(stripEditorialNoteMarkers('El portugués ø+')).toBe('El portugués');
+    expect(stripEditorialNoteMarkers('Un cantante italiano ø+1')).toBe('Un cantante italiano');
+    expect(stripEditorialNoteMarkers('Oye, dueño de mi vida ø+ (1723)')).toBe('Oye, dueño de mi vida (1723)');
+    expect(stripEditorialNoteMarkers('Demolition*')).toBe('Demolition');
+    expect(stripEditorialNoteMarkers('Cuarteto «Americano», op. 96 (arr. David Walter)')).toBe(
+      'Cuarteto «Americano», op. 96 (arr. David Walter)',
+    );
     const composers = [{ name: 'Luis de Narvaez' }, { name: 'Sergei Prokofiev' }];
     const works = [{ title: 'Mille regretz', composerName: 'Josquin Desprez' }];
     expect(normalizeComposerList(composers)).toEqual(composers);

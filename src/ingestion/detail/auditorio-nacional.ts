@@ -8,6 +8,7 @@ import {
   extractStandaloneKnownComposers,
   hasExplicitPerformerSignal,
   looksLikeComposerNameList,
+  looksLikeKnownComposerPairHeading,
   looksLikeNameListContinuation,
   looksLikeObrasDeLine,
   looksLikeRoleOnlyLine,
@@ -21,6 +22,8 @@ import {
 } from './auditorio-segments.ts';
 import {
   hasComposerYears,
+  isEditorialNoteLegend,
+  isNonPersonComposerAttribution,
   looksLikeCatalogOnlyLine,
   looksLikeCatalogWorkLine,
   looksLikeEnsembleName,
@@ -35,6 +38,7 @@ import {
   looksLikeUnequivocalWorkLine,
   looksLikeWorkLine,
   parseExplicitTitleAuthorWork,
+  stripEditorialNoteMarkers,
 } from '../observed-cleanup.ts';
 import { matchComposer } from '../knowledge/composers.ts';
 import {
@@ -193,8 +197,8 @@ function parseComposerDashWork(text: string): ObservedWork {
 
 function worksFromProgramLines(lines: string[]): { works: ObservedWork[]; extraComposers: ObservedComposer[] } {
   const usable = lines
-    .map((line) => line.replace(/\*+\s*$/, '').trim())
-    .filter((line) => line && !line.startsWith('*'));
+    .map((line) => stripEditorialNoteMarkers(line))
+    .filter((line) => line && !isEditorialNoteLegend(line));
   if (usable.length === 0) return { works: [], extraComposers: [] };
   const grouped = groupWorksByComposer(usable);
   if (grouped.works.length > 0 || grouped.extraComposers.length > 0) {
@@ -220,11 +224,30 @@ function groupWorksByComposer(lines: string[]): { works: ObservedWork[]; extraCo
   const extraComposers: ObservedComposer[] = [];
   let composerName: string | undefined;
   let justOpenedComposer = false;
+  let openWithoutComposer = false;
+
+  const closeHeading = () => {
+    composerName = undefined;
+    justOpenedComposer = false;
+    openWithoutComposer = false;
+  };
+
   for (let index = 0; index < lines.length; index++) {
     const line = lines[index] ?? '';
     if (looksLikePartHeader(line) || looksLikeProgramLabel(line)) {
+      closeHeading();
+      continue;
+    }
+    // Non-person labels (Anónimo, Tradicional de…, Varios autores) are not
+    // publishable composerName values, but they are hard grouping boundaries.
+    if (isNonPersonComposerAttribution(line)) {
       composerName = undefined;
-      justOpenedComposer = false;
+      openWithoutComposer = true;
+      justOpenedComposer = true;
+      continue;
+    }
+    if (looksLikeKnownComposerPairHeading(line)) {
+      closeHeading();
       continue;
     }
     if (looksLikeProgramHeader(line)) continue;
@@ -236,15 +259,13 @@ function groupWorksByComposer(lines: string[]): { works: ObservedWork[]; extraCo
     const obras = consumeObrasDeList(lines, index);
     if (obras) {
       extraComposers.push(...obras.composers.map((name) => ({ name })));
-      composerName = undefined;
-      justOpenedComposer = false;
+      closeHeading();
       index = obras.endIndex;
       continue;
     }
     if (looksLikeComposerNameList(line)) {
       extraComposers.push(...extractStandaloneKnownComposers(line).map((name) => ({ name })));
-      composerName = undefined;
-      justOpenedComposer = false;
+      closeHeading();
       continue;
     }
 
@@ -265,8 +286,7 @@ function groupWorksByComposer(lines: string[]): { works: ObservedWork[]; extraCo
         continue;
       }
       works.push(attributed);
-      composerName = undefined;
-      justOpenedComposer = false;
+      closeHeading();
       continue;
     }
 
@@ -275,13 +295,12 @@ function groupWorksByComposer(lines: string[]): { works: ObservedWork[]; extraCo
       if (!titleStartsWithForeignComposer(prefixWork.title, prefixWork.composerName)) {
         works.push({ title: prefixWork.title, composerName: prefixWork.composerName });
       }
-      composerName = undefined;
-      justOpenedComposer = false;
+      closeHeading();
       if (prefixWork.consumedNext) index += 1;
       continue;
     }
 
-    if (!composerName && looksLikeCatalogWorkLine(line) && looksLikeWorkLine(line)) {
+    if (!composerName && !openWithoutComposer && looksLikeCatalogWorkLine(line) && looksLikeWorkLine(line)) {
       works.push({ title: line });
       continue;
     }
@@ -289,6 +308,7 @@ function groupWorksByComposer(lines: string[]): { works: ObservedWork[]; extraCo
     if (looksLikeColonPair(line)) continue;
     if (isStickyComposerHeading(line)) {
       composerName = line;
+      openWithoutComposer = false;
       justOpenedComposer = true;
       continue;
     }
@@ -297,22 +317,22 @@ function groupWorksByComposer(lines: string[]): { works: ObservedWork[]; extraCo
       canPairAsLookaheadComposer(line, lines[index + 1])
     ) {
       composerName = line;
+      openWithoutComposer = false;
       justOpenedComposer = true;
       continue;
     }
     if (looksLikeMovementLine(line)) continue;
     if (looksLikeProgramSectionHeading(line)) continue;
-    if (composerName) {
-      if (titleBeginsWithExplicitComposer(line, composerName)) {
-        composerName = undefined;
-        justOpenedComposer = false;
+    if (composerName || openWithoutComposer) {
+      if (composerName && titleBeginsWithExplicitComposer(line, composerName)) {
+        closeHeading();
         index -= 1;
         continue;
       }
       if (!looksLikeWorkLine(line)) continue;
       if (!/\s/.test(line) && !looksLikeUnequivocalWorkLine(line) && !justOpenedComposer) continue;
       if (titleStartsWithForeignComposer(line, composerName)) continue;
-      works.push({ title: line, composerName });
+      works.push(composerName ? { title: line, composerName } : { title: line });
       justOpenedComposer = false;
     }
   }
@@ -433,6 +453,7 @@ function composerHasAttachedWork(works: ObservedWork[], composerName: string | u
 
 function isStickyComposerHeading(text: string): boolean {
   if (looksLikePartHeader(text) || parseExplicitTitleAuthorWork(text)) return false;
+  if (isNonPersonComposerAttribution(text) || looksLikeKnownComposerPairHeading(text)) return false;
   if (
     looksLikeMovementLine(text) ||
     looksLikeProductionNote(text) ||
@@ -508,8 +529,8 @@ function uniqueComposersByIdentity(items: ObservedComposer[]): ObservedComposer[
 
 function collapseProgram(lines: string[]): string | undefined {
   const text = lines
-    .map((line) => line.replace(/\*+\s*$/, '').trim())
-    .filter((line) => line && !line.startsWith('*'))
+    .map((line) => stripEditorialNoteMarkers(line))
+    .filter((line) => line && !isEditorialNoteLegend(line))
     .join('. ');
   return text || undefined;
 }
