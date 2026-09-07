@@ -15,6 +15,8 @@
   --font-sans: Arial, "Helvetica Neue", Helvetica, sans-serif;
   --page: min(76rem, calc(100% - 2.5rem));
   --focus: #ff5a3d;
+  --hero-gutter-top: 1.5rem;
+  --hero-title-size: clamp(3.2rem, 6.5vw, 6.5rem);
 }
 
 * { box-sizing: border-box; }
@@ -113,7 +115,7 @@ button, input, select { font: inherit; }
 }
 .nav-list a:hover, .nav-list a[aria-current="page"] { background: var(--blue); }
 .nav-list a[aria-current="page"]::after { background: var(--coral); }
-.page { padding: 2.4rem 0 7rem; }
+.page { padding: 0 0 7rem; }
 .eyebrow {
   margin: 0;
   font-size: .72rem;
@@ -122,7 +124,7 @@ button, input, select { font: inherit; }
   text-transform: uppercase;
 }
 a.eyebrow {
-  display: inline-block;
+  display: block;
   text-decoration: none;
 }
 a.eyebrow:hover { color: var(--blue); }
@@ -140,19 +142,19 @@ a.eyebrow:hover { color: var(--blue); }
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(16rem, .36fr);
   gap: 3rem;
-  align-items: end;
-  padding: 1.6rem 0 2.7rem;
+  align-items: start;
+  padding: var(--hero-gutter-top) 0 2.7rem;
   border-bottom: 2px solid var(--ink);
 }
+.agenda-intro__graphic { align-self: end; position: relative; height: 19rem; overflow: hidden; background: var(--blue); }
 .agenda-intro h1, .section-intro h1, .detail-hero h1, .error-page h1 {
   margin: 1rem 0 0;
   font-family: var(--font-display);
   font-weight: 800;
   letter-spacing: -.085em;
   line-height: .83;
+  font-size: var(--hero-title-size);
 }
-.agenda-intro h1 { font-size: clamp(4rem, 8.2vw, 8.2rem); }
-.agenda-intro__graphic { position: relative; height: 19rem; overflow: hidden; background: var(--blue); }
 .agenda-intro__graphic::before {
   content: "";
   position: absolute;
@@ -171,16 +173,6 @@ a.eyebrow:hover { color: var(--blue); }
   right: 14%;
   background: var(--coral);
   mix-blend-mode: multiply;
-}
-.agenda-intro__graphic span {
-  position: absolute;
-  z-index: 1;
-  right: 1rem;
-  bottom: .8rem;
-  color: var(--paper-light);
-  font-size: .75rem;
-  font-weight: 800;
-  letter-spacing: .18em;
 }
 
 .filters { margin-top: 2rem; }
@@ -463,8 +455,8 @@ a.eyebrow:hover { color: var(--blue); }
 .empty-state h2 { max-width: 34rem; margin: 0; font-size: clamp(1.7rem, 4vw, 3rem); letter-spacing: -.055em; line-height: .95; }
 .empty-state p { max-width: 38rem; margin: .8rem 0 0; color: var(--muted); }
 
-.section-intro { min-height: 24rem; padding: 1.5rem 0 2.8rem; border-bottom: 2px solid var(--ink); }
-.section-intro h1 { max-width: 60rem; font-size: clamp(4rem, 9.4vw, 9rem); }
+.section-intro { min-height: 24rem; padding: var(--hero-gutter-top) 0 2.8rem; border-bottom: 2px solid var(--ink); }
+.section-intro h1 { max-width: 60rem; }
 .section-intro--venues { position: relative; }
 .section-intro--venues::after {
   content: "";
@@ -524,7 +516,7 @@ a.eyebrow:hover { color: var(--blue); }
 .detail-hero {
   position: relative;
   min-height: 28rem;
-  padding: 1.6rem 0 3rem;
+  padding: var(--hero-gutter-top) 0 3rem;
   overflow: hidden;
   border-bottom: 2px solid var(--ink);
 }
@@ -532,8 +524,6 @@ a.eyebrow:hover { color: var(--blue); }
   position: relative;
   z-index: 1;
   max-width: 58rem;
-  margin-top: 3rem;
-  font-size: clamp(3.4rem, 8.8vw, 8.5rem);
   overflow-wrap: anywhere;
 }
 .detail-hero__series {
@@ -594,16 +584,10 @@ a.eyebrow:hover { color: var(--blue); }
 .official-link:hover { background: var(--ink); }
 .detail-section { margin-top: 5rem; }
 .section-heading {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 1rem;
-  align-items: baseline;
   padding: .75rem 0;
   border-block: 2px solid var(--ink);
 }
-.section-heading h2, .section-heading span { margin: 0; }
-.section-heading h2 { font-size: clamp(1.7rem, 4.5vw, 4rem); font-weight: 800; letter-spacing: -.065em; line-height: .9; }
-.section-heading span { color: var(--blue); font-size: 1.2rem; font-weight: 800; text-align: right; }
+.section-heading h2 { margin: 0; font-size: clamp(1.7rem, 4.5vw, 4rem); font-weight: 800; letter-spacing: -.065em; line-height: .9; }
 .occurrence-list, .editorial-list, .programme-list, .source-list { list-style: none; margin: 0; padding: 0; }
 .occurrence-list li {
   display: grid;
@@ -665,7 +649,7 @@ a.eyebrow:hover { color: var(--blue); }
   line-height: .78;
   opacity: .18;
 }
-.error-page h1 { position: relative; max-width: 55rem; margin-top: 8rem; font-size: clamp(4rem, 10vw, 9rem); }
+.error-page h1 { position: relative; max-width: 55rem; margin-top: 8rem; }
 .error-page > p:not(.eyebrow) { position: relative; max-width: 32rem; margin: 2rem 0; color: var(--muted); }
 .site-footer {
   display: grid;
@@ -682,7 +666,10 @@ a.eyebrow:hover { color: var(--blue); }
 .site-footer__note { color: var(--muted); font-size: .72rem; text-align: right; }
 
 @media (max-width: 900px) {
-  :root { --page: min(100% - 2rem, 46rem); }
+  :root {
+    --page: min(100% - 2rem, 46rem);
+    --hero-gutter-top: 1.15rem;
+  }
   .agenda-intro { min-height: 22rem; grid-template-columns: minmax(0, 1fr) 9rem; gap: 1.5rem; }
   .agenda-intro__graphic { height: 15rem; }
   .filters__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -705,15 +692,18 @@ a.eyebrow:hover { color: var(--blue); }
 }
 
 @media (max-width: 620px) {
-  :root { --page: calc(100% - 1.25rem); }
+  :root {
+    --page: calc(100% - 1.25rem);
+    --hero-gutter-top: 0.75rem;
+  }
   .site-header__inner { min-height: 4.8rem; }
   .site-mark { gap: .65rem; font-size: .92rem; }
   .site-mark__symbol { width: 2.5rem; }
   .nav-list a { min-width: auto; padding: 1rem .75rem; font-size: .65rem; }
   .nav-list a::after { display: none; }
-  .page { padding-top: 1.2rem; padding-bottom: 4.5rem; }
-  .agenda-intro { min-height: 20rem; display: block; padding-top: .8rem; overflow: hidden; }
-  .agenda-intro h1 { position: relative; z-index: 1; margin-top: 2rem; font-size: clamp(3.35rem, 16vw, 5rem); }
+  .page { padding-bottom: 4.5rem; }
+  .agenda-intro { min-height: 20rem; display: block; overflow: hidden; }
+  .agenda-intro h1 { position: relative; z-index: 1; }
   .agenda-intro .lede { position: relative; z-index: 1; max-width: calc(100% - 4rem); font-size: .95rem; }
   .agenda-intro__graphic { position: absolute; right: -3rem; top: 2rem; width: 10rem; height: 10rem; opacity: .95; }
   .search-field input { min-height: 3.8rem; padding-inline: .75rem; font-size: .9rem; }
@@ -727,7 +717,8 @@ a.eyebrow:hover { color: var(--blue); }
   .search-submit__label { display: none; }
   .search-submit__compact { display: block; font-size: 1.3rem; line-height: 1; }
   .shortcuts { display: grid; grid-template-columns: repeat(2, 1fr); }
-  .shortcut, .shortcut:last-child { min-width: 0; border-right-width: 2px; margin-top: -2px; }
+  .shortcut, .shortcut:last-child { min-width: 0; border-right-width: 2px; }
+  .shortcut:nth-child(n+3) { margin-top: -2px; }
   .shortcut:nth-child(even) { margin-left: -2px; }
   .filters__grid { grid-template-columns: 1fr; }
   .filters__actions button { width: 100%; }
@@ -748,7 +739,6 @@ a.eyebrow:hover { color: var(--blue); }
   .agenda-item__title { font-size: 1.08rem; }
   .agenda-item__people { -webkit-line-clamp: 1; }
   .section-intro { min-height: 19rem; }
-  .section-intro h1 { margin-top: 2.5rem; font-size: 3.8rem; }
   .section-intro--venues::after { width: 8rem; height: 7rem; }
   .venue-search { grid-template-columns: 1fr; }
   .venue-search span { padding: .6rem 0; }
@@ -758,7 +748,6 @@ a.eyebrow:hover { color: var(--blue); }
   .venue-list__next, .venue-list__meta { grid-column: 2; padding-block: .55rem !important; border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
   .venue-list__next { display: none; }
   .detail-hero { min-height: 24rem; }
-  .detail-hero h1 { margin-top: 4rem; font-size: clamp(3rem, 15vw, 5.2rem); }
   .detail-hero__shape { right: -5rem; top: 0; width: 13rem; height: 13rem; border-width: 3.3rem; }
   .detail-hero__shape::after { inset: -3.3rem 48%; }
   .event-facts { display: block; }
@@ -776,7 +765,7 @@ a.eyebrow:hover { color: var(--blue); }
   .source-list li { grid-template-columns: 1fr; gap: .35rem; }
   .venue-detail__practical { margin-top: 4rem; }
   .error-page { min-height: 35rem; }
-  .error-page h1 { margin-top: 8rem; font-size: 4.3rem; }
+  .error-page h1 { margin-top: 8rem; }
   .site-footer { grid-template-columns: 4rem 1fr; padding-bottom: 2rem; }
   .site-footer__mark { width: 3.3rem; }
   .site-footer__note { grid-column: 2; text-align: left; }

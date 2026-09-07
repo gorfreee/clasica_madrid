@@ -323,13 +323,10 @@ function buildSelectFilters(upcoming: ResolvedOccurrence[], filters: AgendaFilte
 
 function buildShortcuts(now: Date): AgendaShortcutModel[] {
   const today = madridToday(now);
-  const tomorrow = shiftIsoDate(today, 1);
   const weekday = fromMadridLocal(today, '12:00').getUTCDay();
   const weekendStart = weekday === 0 ? today : shiftIsoDate(today, (6 - weekday + 7) % 7);
   const weekendEnd = weekday === 0 ? today : shiftIsoDate(weekendStart, 1);
   return [
-    { label: 'Hoy', href: `/?from=${today}&to=${today}` },
-    { label: 'Mañana', href: `/?from=${tomorrow}&to=${tomorrow}` },
     { label: 'Fin de semana', href: `/?from=${weekendStart}&to=${weekendEnd}` },
     { label: 'Gratis', href: '/?access=free', emphasis: true },
   ];

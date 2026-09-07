@@ -64,7 +64,7 @@ const featured = model.featuredOccurrence;
     {primarySource && <a class="official-link" href={primarySource.url} rel="noopener noreferrer"><span>Consulta entradas, condiciones y posibles cambios</span><strong>Ver información oficial ↗</strong></a>}
 
     <section class="detail-section" aria-labelledby="fechas-titulo">
-      <div class="section-heading"><h2 id="fechas-titulo">Fechas</h2><span>{model.occurrences.length}</span></div>
+      <div class="section-heading"><h2 id="fechas-titulo">Fechas</h2></div>
       <ol class="occurrence-list">
         {
           model.occurrences.map((occurrence) => (
@@ -126,7 +126,7 @@ const featured = model.featuredOccurrence;
     <section class="detail-section detail-meta" aria-labelledby="datos-titulo">
       <div class="section-heading"><h2 id="datos-titulo">Sobre el concierto</h2></div>
       <dl class="fact-list fact-list--compact">
-        <div><dt>Contexto</dt><dd>{model.kind.label}</dd></div>
+        <div><dt>Programación</dt><dd>{model.kind.label}</dd></div>
         {model.formats.length > 0 && <div><dt>Formato</dt><dd>{model.formats.map((item) => item.label).join(', ')}</dd></div>}
         {model.eras.length > 0 && <div><dt>Época</dt><dd>{model.eras.map((item) => item.label).join(', ')}</dd></div>}
         {model.organizers.length > 0 && <div><dt>Organiza</dt><dd>{model.organizers.join(', ')}</dd></div>}

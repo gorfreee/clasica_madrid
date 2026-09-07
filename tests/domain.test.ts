@@ -224,14 +224,10 @@ describe('modelos de presentación', () => {
       items: [],
     });
     expect(model.shortcuts.map((shortcut) => shortcut.label)).toEqual([
-      'Hoy',
-      'Mañana',
       'Fin de semana',
       'Gratis',
     ]);
     expect(model.shortcuts.map((shortcut) => shortcut.href)).toEqual([
-      '/?from=2026-09-01&to=2026-09-01',
-      '/?from=2026-09-02&to=2026-09-02',
       '/?from=2026-09-05&to=2026-09-06',
       '/?access=free',
     ]);
