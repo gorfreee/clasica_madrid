@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_orquesta_coro_rtve_eventos_ensayo_general_a_15",
+  "slug": "ensayo-general-a-15",
+  "title": "Ensayo General A/15",
+  "status": "scheduled",
+  "venueId": "ven_teatro_monumental",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_orquesta_coro_rtve_eventos_ensayo_general_a_15_01",
+      "date": "2027-04-15",
+      "time": "10:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Rodion Shchedrin"
+    },
+    {
+      "name": "Johannes Brahms"
+    },
+    {
+      "name": "Arnold Schoenberg"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic",
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_orquesta_coro_rtve",
+      "url": "https://www.teatromonumental.es/eventos/ensayo-general-a-15",
+      "checkedAt": "2026-09-08",
+      "externalId": "/eventos/ensayo-general-a-15/"
+    }
+  ],
+  "primarySourceId": "src_orquesta_coro_rtve",
+  "lastVerifiedAt": "2026-09-08"
+}
