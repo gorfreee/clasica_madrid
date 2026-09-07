@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "evt_teatros_canal_71611_2026_10_06",
   "slug": "coma-26-joan-castello-y-geni-unon-percusion",
-  "title": "COMA’26: JOAN CASTELLÓ Y GENI UÑÓN, percusión",
+  "title": "COMA’26: Joan Castelló y Geni Uñón, percusión",
   "status": "scheduled",
   "venueId": "ven_teatros_canal_sala_negra",
   "organizerIds": [],
@@ -17,7 +17,7 @@
   ],
   "performers": [
     {
-      "name": "JOAN CASTELLÓ Y GENI UÑÓN, percusión"
+      "name": "Joan Castelló y Geni Uñón, percusión"
     }
   ],
   "composers": [],
