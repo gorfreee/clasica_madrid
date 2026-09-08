@@ -110,7 +110,7 @@ button, input, select { font: inherit; }
 }
 .skip-link:focus { transform: none; }
 
-.site-header { background: var(--ink); color: var(--paper-light); }
+.site-header { position: relative; z-index: 20; background: var(--ink); color: var(--paper-light); }
 .site-header__inner, .page, .site-footer { width: var(--page); margin-inline: auto; }
 .site-header__inner {
   min-height: 6.25rem;
@@ -123,6 +123,7 @@ button, input, select { font: inherit; }
   display: inline-flex;
   align-items: center;
   gap: .9rem;
+  min-width: 0;
   padding-block: 1.15rem;
   color: inherit;
   font-size: 1.12rem;
@@ -138,22 +139,30 @@ button, input, select { font: inherit; }
   height: auto;
   fill: currentColor;
 }
+.site-nav {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: stretch;
+  align-self: stretch;
+}
 .nav-list { display: flex; height: 100%; list-style: none; margin: 0; padding: 0; }
-.nav-list li { display: flex; }
-.nav-list a {
+.nav-list > li { display: flex; }
+.nav-link {
   position: relative;
   display: flex;
   align-items: center;
   min-width: 8.5rem;
   padding: 1rem 1.2rem;
   border-left: 1px solid #44443f;
+  color: inherit;
   font-size: .78rem;
   font-weight: 700;
   letter-spacing: var(--type-tracking-label);
   text-decoration: none;
   text-transform: uppercase;
+  white-space: nowrap;
 }
-.nav-list a::after {
+.nav-link::after {
   content: "";
   position: absolute;
   right: 1rem;
@@ -163,8 +172,85 @@ button, input, select { font: inherit; }
   border-radius: 50%;
   background: transparent;
 }
-.nav-list a:hover, .nav-list a[aria-current="page"] { background: var(--blue); }
-.nav-list a[aria-current="page"]::after { background: var(--coral); }
+.nav-link:hover,
+.nav-link[aria-current="page"],
+.nav-link[aria-current="true"],
+.nav-disclosure[data-nav-open="true"] > .nav-trigger { background: var(--blue); }
+.nav-link[aria-current="page"]::after,
+.nav-link[aria-current="true"]::after { background: var(--coral); }
+.nav-disclosure {
+  position: relative;
+  display: flex;
+  height: 100%;
+}
+.nav-trigger {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-left: 1px solid #44443f;
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  user-select: none;
+}
+.nav-trigger--menu {
+  min-width: 3.35rem;
+  padding-inline: 1rem;
+  justify-content: center;
+}
+.nav-trigger--menu::after { display: none; }
+.nav-trigger__icon {
+  display: flex;
+  width: 1.15rem;
+  height: .9rem;
+}
+.nav-trigger__icon svg { display: block; width: 100%; height: 100%; fill: currentColor; }
+.nav-popover,
+.nav-panel {
+  z-index: 30;
+  margin: 0;
+  list-style: none;
+  background: var(--ink);
+  color: var(--paper-light);
+}
+.nav-popover {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 12.5rem;
+  padding: .3rem 0;
+  border: 1px solid #44443f;
+  border-top: 0;
+}
+.nav-popover a,
+.nav-panel a {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: .85rem 1.1rem;
+  color: inherit;
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: var(--type-tracking-label);
+  text-decoration: none;
+  text-transform: uppercase;
+}
+.nav-popover a:hover,
+.nav-panel a:hover,
+.nav-popover a[aria-current="page"],
+.nav-panel a[aria-current="page"] { background: var(--blue); }
+.nav-mobile { display: none; position: static; }
+.nav-panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  padding: .35rem calc((100% - var(--page)) / 2) .55rem;
+  border-top: 1px solid #44443f;
+}
+.nav-panel a { min-height: 3rem; padding: 1rem .2rem; }
 .page { padding: 0 0 7rem; }
 .eyebrow {
   margin: 0;
@@ -781,11 +867,14 @@ a.eyebrow:hover { color: var(--blue); }
     --page: calc(100% - 1.25rem);
     --hero-gutter-top: 0.75rem;
   }
-  .site-header__inner { min-height: 4.8rem; }
+  .site-header__inner { min-height: 4.8rem; gap: .75rem; }
   .site-mark { gap: .65rem; font-size: .92rem; }
   .site-mark__symbol { width: 2.5rem; }
-  .nav-list a { min-width: auto; padding: 1rem .75rem; font-size: .7rem; }
-  .nav-list a::after { display: none; }
+  .nav-list > .nav-item--desktop { display: none; }
+  .nav-mobile { display: flex; }
+  .nav-link { min-width: auto; padding: 1rem .85rem; font-size: .7rem; }
+  .nav-link::after { display: none; }
+  .nav-trigger--menu { min-width: 3.1rem; padding-inline: .9rem; }
   .page { padding-bottom: 4.5rem; }
   .agenda-intro { min-height: 20rem; display: block; overflow: hidden; }
   .agenda-intro h1 { position: relative; z-index: 1; }
