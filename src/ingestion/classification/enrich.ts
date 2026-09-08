@@ -14,7 +14,7 @@ import {
   type AiClassifier,
 } from './ai.ts';
 import type { ClassificationResult, Resolution, ResolutionMethod } from './types.ts';
-import type { EventKind, Format } from '../../lib/schemas/taxonomies.ts';
+import type { Era, EventKind, Format } from '../../lib/schemas/taxonomies.ts';
 import {
   accessEvidenceAppears,
   composerAiHasUsableEvidence,
@@ -36,7 +36,9 @@ export type ClassifyObservedOptions = {
  * Deterministic classify(), then AI only where it is allowed:
  * - eligibility: only if deterministic is uncertain. Include/exclude are never reopened.
  * - composers/access: only for included events with unresolved values and observed evidence.
- * - taxonomy: only if the final eligibility is include and eras/formats remain unresolved.
+ * - taxonomy: only if the final eligibility is include and formats remain unresolved.
+ *   Eras never come from eligibility/taxonomy AI; they are derived from observed
+ *   composers/works (including after composer-extraction) via resolveEras().
  * Every metadata failure keeps the deterministic value and the ingest continues.
  */
 export async function classifyObserved(
@@ -75,8 +77,8 @@ export async function enrichWithAiIfNeeded(
     if (result.composers && result.composers.value.length > 0) {
       enrichedFacts = { ...facts, composers: result.composers.value };
       const eras = resolveEras(enrichedFacts);
-      // A validated observed composer restores deterministic precedence over
-      // an era suggested by the earlier eligibility call.
+      // Composer-extraction can surface names that resolveEras() did not see
+      // on the first pass. Knowledge then fills eras; AI taxonomy never does.
       if (eras.value.length > 0) result = { ...result, eras };
     }
   }
@@ -238,7 +240,7 @@ function applyEligibilityAi(
   return {
     eligibility,
     formats: keepResolvedList(base.formats, ai.formats, ai.evidence, 'ai-formats', () => resolveFormats(facts)),
-    eras: keepResolvedList(base.eras, ai.eras, ai.evidence, 'ai-eras', () => resolveEras(facts)),
+    eras: keepResolvedEras(base.eras, facts, ai.eras),
     kind: keepResolvedKind(base.kind, facts, venue),
     access: resolveAccess(facts.accessText),
   };
@@ -254,7 +256,7 @@ function applyTaxonomyAi(
   return {
     eligibility: current.eligibility,
     formats: keepResolvedFormats(current.formats, ai.formats, ai.evidence, facts),
-    eras: keepResolvedList(current.eras, ai.eras, ai.evidence, 'ai-eras', () => resolveEras(facts)),
+    eras: keepResolvedEras(current.eras, facts, ai.eras),
     kind: keepResolvedKind(current.kind, facts, venue),
     access: current.access ?? resolveAccess(facts.accessText),
     ...(current.composers ? { composers: current.composers } : {}),
@@ -277,9 +279,28 @@ function ensureTaxonomy(
 }
 
 function taxonomyNeedsAi(result: ClassificationResult): boolean {
-  const formatsMissing = !result.formats || result.formats.value.length === 0;
-  const erasMissing = !result.eras || result.eras.value.length === 0;
-  return formatsMissing || erasMissing;
+  return !result.formats || result.formats.value.length === 0;
+}
+
+/**
+ * Eras are never taken from eligibility/taxonomy AI. Empty is the correct
+ * result when resolveEras() has no observed composers/works to interpret.
+ * Proposed AI eras are dropped without failing the ingest.
+ */
+function keepResolvedEras(
+  current: Resolution<Era[]> | undefined,
+  facts: ObservedFacts,
+  aiEras: Era[] | undefined,
+): Resolution<Era[]> {
+  if (current && current.value.length > 0) return current;
+  const deterministic = current ?? resolveEras(facts);
+  if (deterministic.value.length > 0) return deterministic;
+  if (aiEras && aiEras.length > 0) {
+    return resolution([], 'fallback', 'ai-eras-rejected', [
+      'sin evidencia musical específica (compositores u obras observados)',
+    ]);
+  }
+  return deterministic;
 }
 
 function keepResolvedList<T>(

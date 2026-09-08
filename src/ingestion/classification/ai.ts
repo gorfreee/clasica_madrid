@@ -263,7 +263,7 @@ export const AI_CLASSIFICATION_JSON_SCHEMA = {
       type: 'array',
       items: { type: 'string', enum: [...ERAS] },
       description:
-        'Musical eras from observed works, composers or programText. Empty only if the programme cannot support a reasonable estimate.',
+        'Always empty. Eras are derived in code from observed composers and works; do not infer repertoire from venue, festival, instrument or likely programmes.',
     },
     kind: { type: 'string', enum: [...EVENT_KINDS] },
     evidence: { type: 'array', maxItems: 12, items: { type: 'string' } },

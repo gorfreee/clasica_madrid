@@ -1,7 +1,7 @@
 import type { ObservedFacts } from '../observed.ts';
 
-export const AI_CLASSIFIER_PROMPT_VERSION = 8 as const;
-export const AI_TAXONOMY_PROMPT_VERSION = 3 as const;
+export const AI_CLASSIFIER_PROMPT_VERSION = 9 as const;
+export const AI_TAXONOMY_PROMPT_VERSION = 4 as const;
 export const AI_ACCESS_PROMPT_VERSION = 1 as const;
 export const AI_COMPOSER_PROMPT_VERSION = 1 as const;
 
@@ -17,7 +17,7 @@ export function buildAiTaxonomyUserMessage(observed: ObservedFacts): string {
   return [
     `promptVersion: ${AI_TAXONOMY_PROMPT_VERSION}`,
     'purpose: taxonomy',
-    'Eligibility ya es include. No la cambies. Completa formats/eras/kind si los hechos lo permiten.',
+    'Eligibility ya es include. No la cambies. Completa formats si los hechos lo permiten. No rellenes eras.',
     'Hechos observados (JSON). No inventes campos ausentes.',
     JSON.stringify(observed, null, 2),
   ].join('\n');
@@ -97,7 +97,9 @@ Taxonomías cerradas:
 - eras: early, renaissance, baroque, classical, romantic, twentieth, contemporary
 - kind: established | alternative (solo si eligibility=include; established = circuito profesional/estable; si no hay evidencia, alternative)
 
-eras: si eligibility=include, intenta rellenarlas en la misma respuesta. Derívalas de (1) obras observadas, (2) compositores observados, (3) programText cuando nombra explícitamente compositores u obras. Puedes usar conocimiento musical general sobre esos nombres. Ejemplos: Bach/Händel → baroque; Mozart/Haydn → classical; Beethoven → classical y/o romantic según la obra; Brahms/Mahler → romantic; Falla/Mompou/Satie → twentieth; compositor vivo o encargo contemporáneo (~después de 1970) → contemporary. Una obra académica de ~1900–1970 (p. ej. Música callada, 1959–1967) es twentieth, no contemporary: no añadas contemporary porque el lenguaje sea «moderno», «intimista» o «del siglo XX». Un programa mixto puede tener varias eras. eras=[] sólo si el contenido no permite una estimación razonable. No deduzcas época por ensemble, ciclo o venue. No conviertas eras vacías en exclude.
+eras: no las rellenes. El pipeline las deriva en código de compositores u obras explícitamente observados. eras=[] es correcto y preferible a adivinar. No deduzcas época por venue, festival, ciclo, instrumento, tipo de concierto, descripción promocional, «historia de la música» ni repertorio probable de un intérprete. Si eligibility=include, deja eras=[].
+
+Frontera twentieth/contemporary al interpretar repertorio YA observado (no para inventar épocas): Falla/Mompou/Satie → twentieth; una obra académica de ~1900–1970 (p. ej. Música callada, 1959–1967) es twentieth, no contemporary. No añadas contemporary porque el lenguaje sea «moderno», «intimista» o «del siglo XX». Bach/Händel son baroque; Mozart/Haydn, classical; Brahms/Mahler, romantic: ese conocimiento sirve para leer un nombre presente, no para imaginar el programa.
 
 Devuelve ÚNICAMENTE un objeto JSON con esta forma:
 {
@@ -117,7 +119,7 @@ No añadas otros campos. No escribas prosa fuera del JSON.`;
  */
 export const AI_TAXONOMY_SYSTEM_PROMPT = `Eres el enriquecedor de taxonomía de Clásica Madrid. El evento YA es eligibility=include. NO cambies eligibility. NO decidas include/exclude/uncertain.
 
-Tu única tarea: completar formats, eras y kind a partir de los hechos observados, sin inventar.
+Tu única tarea: completar formats (y kind si hace falta) a partir de los hechos observados, sin inventar. NO rellenes eras.
 
 Taxonomías cerradas:
 - formats: symphonic, chamber, recital, choral, organ, early-music, opera, zarzuela, lied, other
@@ -126,14 +128,13 @@ Taxonomías cerradas:
 
 Reglas:
 - no inventes performers, instrumentos, composers, works, fechas, venue, repertorio ni hechos ausentes;
-- sí puedes usar conocimiento musical general para interpretar hechos ya observados (Bach → baroque; una sinfonía u orquesta → symphonic; un cuarteto → chamber; un recital de piano o un rol de soprano/violín → recital; un coro → choral; órgano → organ; ópera/zarzuela/lied cuando esos géneros están en los hechos o se infieren con seguridad de ellos);
-- una obra académica ~1900–1970 es twentieth, no contemporary;
-- no deduzcas época por ensemble, ciclo o venue;
+- sí puedes usar conocimiento musical general para interpretar hechos ya observados (una sinfonía u orquesta → symphonic; un cuarteto → chamber; un recital de piano o un rol de soprano/violín → recital; un coro → choral; órgano → organ; ópera/zarzuela/lied cuando esos géneros están en los hechos o se infieren con seguridad de ellos);
+- no deduzcas época por venue, festival, ciclo, instrumento, ensemble, tipo de concierto, descripción promocional ni repertorio probable;
 - rationale breve; no repitas evidence.
 
 formats: asigna al menos un formato cuando los hechos observados permitan una inferencia musical razonable. formats=[] sólo si realmente no hay evidencia suficiente para ninguna etiqueta. No uses other simplemente para evitar un array vacío: other queda para identidades híbridas o no clasificables de verdad, no como comodín. Vacío es preferible a adivinar; no es la salida normal cuando hay una lectura musical razonable.
 
-eras: derívalas de (1) obras observadas, (2) compositores observados, (3) programText cuando nombra explícitamente compositores u obras. Puedes usar conocimiento musical general sobre esos nombres. eras=[] sólo si el contenido no permite una estimación razonable.
+eras: siempre []. El pipeline las ignora y las deriva en código de compositores u obras observados. No infieras repertorio.
 
 Devuelve ÚNICAMENTE un objeto JSON con esta forma:
 {

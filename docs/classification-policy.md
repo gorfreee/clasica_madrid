@@ -13,7 +13,7 @@ observed facts → deterministic rules → musical knowledge → AI → safe unc
 
 Preferimos perder temporalmente un evento antes que publicar un falso positivo.
 
-Un `include` o `exclude` determinista no se reabre con IA para eligibility. El fallback de IA sólo actúa sobre `uncertain` para decidir include/exclude. Si el resultado final es `include`, fallbacks separados pueden interpretar composers o access aún no resueltos, pero únicamente cuando existe evidencia observada específica. Después se recalculan `eras` por knowledge; si `eras`/`formats` siguen sin resolver, taxonomy puede completarlos sin cambiar eligibility. Si cualquier llamada falla, el evento conserva el resultado determinista y continúa.
+Un `include` o `exclude` determinista no se reabre con IA para eligibility. El fallback de IA sólo actúa sobre `uncertain` para decidir include/exclude. Si el resultado final es `include`, fallbacks separados pueden interpretar composers o access aún no resueltos, pero únicamente cuando existe evidencia observada específica. Después se recalculan `eras` por knowledge a partir de compositores/obras observados (incluidos los extraídos y validados). Si `formats` siguen sin resolver, taxonomy puede completarlos sin cambiar eligibility ni rellenar `eras`. Si cualquier llamada falla, el evento conserva el resultado determinista y continúa.
 
 ## Separación de responsabilidades
 
@@ -26,7 +26,9 @@ eligibility          ← puerta de publicación
       ↓
 composers / access (determinista → IA sólo con evidencia)
       ↓
-eras deterministas → formats / eras taxonomy / kind
+eras deterministas (obras / compositores observados, incluida extracción validada)
+      ↓
+formats taxonomy / kind
       ↓
 Candidate
 ```
@@ -182,7 +184,7 @@ Orden de evidencia:
 1. obras identificadas;
 2. si no hay obras, compositores declarados por la fuente;
 3. si no hay arrays estructurados, `programText` (o la descripción) cuando nombra explícitamente compositores u obras conocidos;
-4. si no hay ninguna de esas evidencias, vacío. No deducir época por el nombre del ensemble, del ciclo o del venue.
+4. si no hay ninguna de esas evidencias, vacío. No deducir época por el nombre del ensemble, del ciclo, del venue, del instrumento, de un festival, de una descripción promocional ni del repertorio probable de un intérprete. La IA de eligibility/taxonomy no puede rellenar `eras`: vacío es correcto y preferible a adivinar.
 
 Ejemplo: Bach + Mozart + Mahler → `baroque` + `classical` + `romantic`.
 

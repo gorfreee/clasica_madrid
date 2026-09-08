@@ -250,6 +250,41 @@ describe('composer AI fallback y validación determinista', () => {
       ruleId: 'eras-from-composers',
     });
   });
+
+  it('un compositor extraído y conocido vuelve a resolver eras; taxonomy no las inventa', async () => {
+    const casulana = facts({
+      title: 'Recital de piano de música clásica',
+      categoryText: 'Música clásica',
+      performers: [{ name: 'Solista invitada', roleText: 'piano' }],
+      composers: [],
+      works: [],
+      programText: PROGRAMME,
+    });
+    const ai = composerAi([{ name: 'Maddalena Casulana', evidence: PROGRAMME }]);
+    const unknown = await classifyObserved(casulana, { ai });
+    expect(ai.purposes[0]).toBe('composer-extraction');
+    expect(unknown.composers?.value).toEqual([{ name: 'Maddalena Casulana' }]);
+    expect(unknown.eras?.value).toEqual([]);
+    expect(unknown.eras?.method).not.toBe('ai');
+
+    const bachProgramme = 'Obras de compositor: Johann Sebastian Bach — Variaciones Goldberg';
+    const bachObserved = facts({
+      title: 'Recital de piano de música clásica',
+      categoryText: 'Música clásica',
+      performers: [{ name: 'Solista invitada', roleText: 'piano' }],
+      composers: [],
+      works: [],
+      programText: bachProgramme,
+    });
+    const withBach = await classifyObserved(bachObserved, {
+      ai: composerAi([{
+        name: 'Johann Sebastian Bach',
+        evidence: 'Johann Sebastian Bach — Variaciones Goldberg',
+      }]),
+    });
+    expect(withBach.eras).toMatchObject({ value: ['baroque'], method: 'knowledge' });
+    expect(withBach.eras?.ruleId).not.toBe('ai-eras');
+  });
 });
 
 describe('contratos y prompts de metadata AI', () => {
@@ -402,15 +437,15 @@ describe('pipeline y budget compartido', () => {
     expect(run.candidates).toHaveLength(1);
     expect(run.candidates[0]!.event.composers).toEqual([{ name: 'Maddalena Casulana' }]);
     expect(run.candidates[0]!.event.access).toBe('free');
-    expect(run.candidates[0]!.event.eras).toEqual(['renaissance']);
-    expect(ai.purposes).toEqual(['composer-extraction', 'access-classification', 'taxonomy']);
-    expect(run.summary.ai.attempted).toBe(3);
+    expect(run.candidates[0]!.event.eras).toEqual([]);
+    expect(ai.purposes).toEqual(['composer-extraction', 'access-classification']);
+    expect(run.summary.ai.attempted).toBe(2);
     expect(run.summary.ai.byPurpose['composer-extraction']).toMatchObject({ attempted: 1, resolved: 1 });
     expect(run.summary.ai.byPurpose['access-classification']).toMatchObject({ attempted: 1, resolved: 1 });
-    expect(run.summary.ai.byPurpose.taxonomy).toMatchObject({ attempted: 1, resolved: 1 });
+    expect(run.summary.ai.byPurpose.taxonomy).toMatchObject({ attempted: 0 });
     expect(run.summary.quality).toMatchObject({
       composers: { populated: 1, unresolved: 0 },
-      eras: { populated: 1, unresolved: 0 },
+      eras: { populated: 0, unresolved: 1 },
       formats: { populated: 1, unresolved: 0 },
       access: { free: 1, paid: 0, unresolved: 0 },
     });
