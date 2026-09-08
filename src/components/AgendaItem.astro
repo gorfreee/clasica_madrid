@@ -1,5 +1,5 @@
 ---
-import type { AgendaItemModel } from '../lib/presentation/agenda.ts';
+import { agendaItemSignal, type AgendaItemModel } from '../lib/presentation/agenda.ts';
 
 type Props = {
   item: AgendaItemModel;
@@ -9,7 +9,7 @@ type Props = {
 const { item, showDate = true } = Astro.props;
 const timeLabel = item.time ?? 'Hora por confirmar';
 const context = item.performers.length > 0 ? item.performers : item.composers;
-const signal = item.formats[0] ?? item.kind;
+const signal = agendaItemSignal(item);
 ---
 {/* Contrato UI interno: [data-occurrence-id] lo usa agenda-client.ts. */}
 
@@ -28,7 +28,7 @@ const signal = item.formats[0] ?? item.kind;
     {item.showMunicipality && <span> / {item.municipality}</span>}
   </p>
   <p class="agenda-item__signal">
-    {item.access.id === 'free' && <span class="signal-free">Entrada libre</span>}
-    {item.access.id !== 'free' && <span>{signal.label}</span>}
+    <span class="agenda-item__format">{signal.formatLabel}</span>
+    {signal.freeLabel && <span class="agenda-item__free">{signal.freeLabel}</span>}
   </p>
 </article>

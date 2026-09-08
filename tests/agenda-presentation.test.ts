@@ -1,12 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import {
+  agendaItemSignal,
   buildAgendaPageModel,
   buildFullAgendaFragmentModel,
   INITIAL_AGENDA_OCCURRENCE_LIMIT,
   selectInitialAgendaOccurrences,
 } from '../src/lib/presentation/agenda.ts';
 import {
+  accessLabels,
+  freeAgendaSignalLabel,
   fullAgendaLoadErrorMessage,
+  kindLabels,
+  missingFormatLabel,
   occurrenceCountLabel,
   showAllAgendaLabel,
   showingOccurrenceCountLabel,
@@ -196,5 +201,82 @@ describe('etiquetas de recuento de la agenda', () => {
     expect(occurrenceCountLabel(87)).toBe('87 conciertos próximos');
     expect(showingOccurrenceCountLabel(150, 237)).toBe('Mostrando 150 de 237 conciertos próximos');
     expect(showingOccurrenceCountLabel(1, 1)).toBe('Mostrando 1 de 1 concierto próximo');
+  });
+});
+
+describe('señal derecha de la agenda', () => {
+  function itemFor(overrides: Partial<Event>) {
+    const event = makeEvent(overrides);
+    const model = buildAgendaPageModel(
+      makeCatalog({ events: [event] }),
+      new URL('https://clasicamadrid.com/'),
+      testClock,
+    );
+    const item = model.days.flatMap((day) => day.items).find((row) => row.eventId === event.id);
+    expect(item).toBeDefined();
+    return item!;
+  }
+
+  it('muestra el formato principal cuando hay uno', () => {
+    const signal = agendaItemSignal(itemFor({ formats: ['recital'], access: 'paid' }));
+    expect(signal.formatLabel).toBe('Recital');
+    expect(signal.freeLabel).toBeNull();
+  });
+
+  it('con varios formatos muestra solo el principal', () => {
+    const item = itemFor({ formats: ['symphonic', 'choral'], access: 'paid' });
+    const signal = agendaItemSignal(item);
+    expect(item.formats.map((format) => format.id)).toEqual(['symphonic', 'choral']);
+    expect(signal.formatLabel).toBe('Sinfónico');
+    expect(signal.formatLabel).not.toBe('Coral');
+  });
+
+  it('sin formato muestra un guion', () => {
+    expect(agendaItemSignal(itemFor({ formats: [] })).formatLabel).toBe(missingFormatLabel);
+    expect(missingFormatLabel).toBe('—');
+  });
+
+  it('access=free añade Gratis junto al formato', () => {
+    const signal = agendaItemSignal(itemFor({ formats: ['organ'], access: 'free' }));
+    expect(signal.formatLabel).toBe('Órgano');
+    expect(signal.freeLabel).toBe(freeAgendaSignalLabel);
+    expect(freeAgendaSignalLabel).toBe('Gratis');
+  });
+
+  it('access=paid no muestra etiqueta de acceso', () => {
+    const signal = agendaItemSignal(itemFor({ formats: ['opera'], access: 'paid' }));
+    expect(signal.freeLabel).toBeNull();
+    expect(signal.formatLabel).not.toBe(accessLabels.paid);
+    expect(signal.formatLabel).not.toBe('Entrada libre');
+  });
+
+  it('access=unknown no muestra etiqueta de acceso', () => {
+    const signal = agendaItemSignal(itemFor({ formats: ['chamber'], access: 'unknown' }));
+    expect(signal.freeLabel).toBeNull();
+    expect(signal.formatLabel).not.toBe(accessLabels.unknown);
+    expect(signal.formatLabel).not.toBe('Entrada libre');
+  });
+
+  it('kind=alternative sin formato muestra — y nunca Alternativo', () => {
+    const item = itemFor({ formats: [], kind: 'alternative', access: 'unknown' });
+    const signal = agendaItemSignal(item);
+    expect(item.kind.label).toBe(kindLabels.alternative);
+    expect(signal.formatLabel).toBe(missingFormatLabel);
+    expect(signal.formatLabel).not.toBe('Alternativo');
+    expect(signal.freeLabel).toBeNull();
+  });
+
+  it('kind=established sin formato muestra — y nunca Circuito habitual', () => {
+    const item = itemFor({ formats: [], kind: 'established', access: 'paid' });
+    const signal = agendaItemSignal(item);
+    expect(item.kind.label).toBe(kindLabels.established);
+    expect(signal.formatLabel).toBe(missingFormatLabel);
+    expect(signal.formatLabel).not.toBe('Circuito habitual');
+    expect(signal.freeLabel).toBeNull();
+  });
+
+  it('gratis sin formato combina — y Gratis', () => {
+    const signal = agendaItemSignal(itemFor({ formats: [], kind: 'alternative', access: 'free' }));
+    expect(signal).toEqual({ formatLabel: '—', freeLabel: 'Gratis' });
   });
 });

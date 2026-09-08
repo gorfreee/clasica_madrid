@@ -9,8 +9,10 @@ import {
   areaLabels,
   eraLabels,
   formatLabels,
+  freeAgendaSignalLabel,
   fullAgendaLoadErrorMessage,
   kindLabels,
+  missingFormatLabel,
   occurrenceCountLabel,
   showAllAgendaLabel,
   showingOccurrenceCountLabel,
@@ -51,6 +53,22 @@ export type AgendaItemModel = {
   sourceUrl: string;
   sourceLabel: string;
 };
+
+export type AgendaItemSignal = {
+  formatLabel: string;
+  freeLabel: string | null;
+};
+
+/**
+ * Right-column copy for an agenda row: principal format plus an optional
+ * free marker. `formats[0]` is the principal format; `kind` is never a fallback.
+ */
+export function agendaItemSignal(item: Pick<AgendaItemModel, 'formats' | 'access'>): AgendaItemSignal {
+  return {
+    formatLabel: item.formats[0]?.label ?? missingFormatLabel,
+    freeLabel: item.access.id === 'free' ? freeAgendaSignalLabel : null,
+  };
+}
 
 export type AgendaDayModel = {
   date: string;
