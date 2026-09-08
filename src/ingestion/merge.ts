@@ -3,7 +3,7 @@ import { normalizeText } from '../lib/domain/normalize.ts';
 import { canonicalValuesEqual } from '../lib/validation/promote.ts';
 import type { Candidate } from '../lib/schemas/candidate.ts';
 import type { Citation, Composer, Event, Occurrence, Performer, Venue, Work } from '../lib/schemas/index.ts';
-import { resolvePerformerRole } from './classification/performer-role.ts';
+import { canonicalizePerformerList } from './classification/performer-role.ts';
 import { isPublishableInclude, type ClassificationResult } from './classification/types.ts';
 import { occurrenceIdFor, uniqueId } from './ids.ts';
 import { materialEventDiffs } from './material-diff.ts';
@@ -72,11 +72,7 @@ export function proposalFromObservation(
     status: observedStatus(event),
     venueId: options.venueId,
     occurrences: observedSchedule(event, options.now, options.window),
-    performers: event.performers.map((item) => {
-      const name = canonicalizePerformerName(item.name);
-      const role = resolvePerformerRole(item.roleText);
-      return role ? { name, role } : { name };
-    }),
+    performers: canonicalizePerformerList(event.performers),
     composers: canonicalizeComposerList(event.composers),
     works: canonicalizeWorkList(event.works),
     citations: [citation],

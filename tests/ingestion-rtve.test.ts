@@ -3,6 +3,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { describe, expect, it } from 'vitest';
 import { orquestaCoroRtveAdapter as adapter } from '../src/ingestion/sources/orquesta-coro-rtve.ts';
+import { canonicalizePerformerList } from '../src/ingestion/classification/performer-role.ts';
 import { parseRtveDetail, rtveBlocks, rtveConcertUrl } from '../src/ingestion/detail/orquesta-coro-rtve.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { hydrateEvents } from '../src/ingestion/hydrate.ts';
@@ -103,6 +104,10 @@ describe('RTVE / Monumental ficha', () => {
     if (slug === 'traffic-strings') expect(patch.programText).toBeUndefined();
     else expect(patch.programText).toBeTruthy();
     expect(patch.programText ?? '').not.toContain('Comprar entradas');
+    const canonical = canonicalizePerformerList(patch.performers ?? []);
+    expect(canonical.map((item) => `${item.name}|${item.role ?? ''}`)).toEqual([
+      ...new Set(canonical.map((item) => `${item.name}|${item.role ?? ''}`)),
+    ]);
   });
 
   it('extracts explicit Monumental credits for Fuego y Duende without mining programme titles', async () => {
@@ -119,6 +124,18 @@ describe('RTVE / Monumental ficha', () => {
     );
     expect(patch.programText).toContain('PROGRAMA');
     expect(patch).not.toHaveProperty('composers');
+  });
+
+  it('keeps two observed voice credits for the same singer in Concierto Sinfónico B/2', async () => {
+    const patch = parseRtveDetail(await sample('concierto-sinfonico-b-2'), await fixture('detail-concierto-sinfonico-b-2'));
+    expect(patch.performers).toEqual([
+      { name: 'ORQUESTA Y CORO RTVE' },
+      { name: 'Thomas Herzog', roleText: 'director' },
+      { name: 'Damián del Castillo', roleText: 'barítono' },
+      { name: 'Esmeralda Espinosa', roleText: 'mezzosoprano' },
+      { name: 'Ekaterina Antipova', roleText: 'alto' },
+      { name: 'Damián del Castillo', roleText: 'bajo' },
+    ]);
   });
 
   it('extracts the Gala de Ópera & Zarzuela orchestra, conductor and labelled singers', async () => {
@@ -194,6 +211,24 @@ describe('RTVE pipeline safety', () => {
       },
     });
   }
+
+  it('publishes Concierto Sinfónico B/2 with one canonical credit for the doubled singer', async () => {
+    const first = await run(emptyCatalog(), false, TEST_WINDOW, 'concierto-sinfonico-b-2');
+    expect(first.summary.candidates).toBe(1);
+    const catalog = mergeCandidateBatch(emptyCatalog(), first.candidates).catalog;
+    const event = catalog.events[0]!;
+    expect(event.title).toBe('Concierto Sinfónico B/2');
+    expect(event.performers).toEqual([
+      { name: 'Orquesta y Coro RTVE' },
+      { name: 'Thomas Herzog', role: 'conductor' },
+      { name: 'Damián del Castillo' },
+      { name: 'Esmeralda Espinosa' },
+      { name: 'Ekaterina Antipova' },
+    ]);
+    expect(event.performers.map((item) => item.name)).toEqual([
+      ...new Set(event.performers.map((item) => item.name)),
+    ]);
+  });
 
   it('publishes a classical concert with both dates, seeds provenance and venue, then remains idempotent', async () => {
     const first = await run();
