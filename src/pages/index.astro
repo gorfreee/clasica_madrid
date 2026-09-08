@@ -39,9 +39,6 @@ const model = await loadAgendaPage(Astro.url);
           data-upcoming-count={model.upcomingCount}
           data-agenda-complete={model.hasMoreOccurrences ? undefined : ''}
         >
-          <div class="agenda-status">
-            <p class="result-count" data-result-count aria-live="polite">{model.resultCountLabel}</p>
-          </div>
           <AgendaList days={model.days} />
           {
             model.hasMoreOccurrences && (
