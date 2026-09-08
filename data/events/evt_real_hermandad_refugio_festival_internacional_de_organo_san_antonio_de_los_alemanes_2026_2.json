@@ -22,7 +22,13 @@
   ],
   "composers": [],
   "works": [],
-  "eras": [],
+  "eras": [
+    "baroque",
+    "classical",
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
   "formats": [
     "recital",
     "organ"
@@ -33,10 +39,10 @@
     {
       "sourceId": "src_real_hermandad_refugio",
       "url": "https://realhermandaddelrefugio.org/calendario-de-eventos/festival-internacional-de-organo-san-antonio-de-los-alemanes-2026-2",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-08",
       "externalId": "10559"
     }
   ],
   "primarySourceId": "src_real_hermandad_refugio",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-08"
 }

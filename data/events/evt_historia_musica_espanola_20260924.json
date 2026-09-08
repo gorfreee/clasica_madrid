@@ -24,7 +24,13 @@
   "performers": [],
   "composers": [],
   "works": [],
-  "eras": [],
+  "eras": [
+    "renaissance",
+    "baroque",
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
   "formats": [
     "other"
   ],
@@ -34,10 +40,10 @@
     {
       "sourceId": "src_real_hermandad_refugio",
       "url": "https://realhermandaddelrefugio.org/calendario-de-eventos/un-recorrido-por-la-historia-de-la-musica-espanola-concierto-benefico",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-08",
       "externalId": "10538"
     }
   ],
   "primarySourceId": "src_real_hermandad_refugio",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-08"
 }
