@@ -65,9 +65,9 @@ export function parseZarzuelaDetail(event: RawEvent, body: string): ObservedFact
   }
   const performers: ObservedPerson[] = [];
   for (const pair of (artistic || introHtml).matchAll(/<dt\b[^>]*>([\s\S]*?)<\/dt>\s*<dd\b[^>]*>([\s\S]*?)<\/dd>/gi)) {
-    const label = stripTags(pair[1]!);
-    const value = stripTags(pair[2]!);
-    if (!label || !value) continue;
+    const label = stripZarzuelaNameFootnotes(stripTags(pair[1]!));
+    const value = stripZarzuelaNameFootnotes(stripTags(pair[2]!));
+    if (!label || !value || isZarzuelaFootnoteLegend(value)) continue;
     if (ROLE.test(label) && !/<dl\b/i.test(pair[2]!)) performers.push({ name: value, roleText: label });
     else if (ROLE.test(value)) performers.push({ name: label, roleText: value });
     // Alternating casts remain in description, never flattened into an
@@ -141,4 +141,16 @@ export function extractZarzuelaVenues(scheduleText: string): string[] {
     names.push(name);
   }
   return names;
+}
+
+/**
+ * Trailing `*` on a Ficha Artística name is an editorial footnote
+ * ("Primera vez en el Ciclo de Lied"), not part of the name.
+ */
+function stripZarzuelaNameFootnotes(name: string): string {
+  return name.replace(/(?:\s*\*)+\s*$/u, '').trim();
+}
+
+function isZarzuelaFootnoteLegend(text: string): boolean {
+  return /^\*+\s*primera vez\b/i.test(text) || /^primera vez en el ciclo\b/i.test(text);
 }

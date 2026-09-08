@@ -15,7 +15,24 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Orquesta Sinfónica y Coro RTVE"
+    },
+    {
+      "name": "Marc Korovitch",
+      "role": "conductor"
+    },
+    {
+      "name": "Juan Manuel Cañizares"
+    },
+    {
+      "name": "Antonio Najarro"
+    },
+    {
+      "name": "Bailarines de la compañía de Antonio Najarro"
+    }
+  ],
   "composers": [
     {
       "name": "Nikolai Rimsky-Korsakov"

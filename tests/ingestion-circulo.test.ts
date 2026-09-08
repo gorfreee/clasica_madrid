@@ -3,7 +3,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { describe, expect, it } from 'vitest';
 import { circuloBellasArtesAdapter as adapter } from '../src/ingestion/sources/circulo-bellas-artes.ts';
-import { cbaDivs, cbaEventUrl, parseCbaDetail } from '../src/ingestion/detail/circulo-bellas-artes.ts';
+import { cbaDivs, cbaEventUrl, parseCbaDetail, performersFromCbaTitle } from '../src/ingestion/detail/circulo-bellas-artes.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { hydrateEvents } from '../src/ingestion/hydrate.ts';
 import { runIngest } from '../src/ingestion/pipeline.ts';
@@ -158,6 +158,7 @@ describe('Círculo de Bellas Artes ficha', () => {
     expect(patch.composers).toEqual([{ name: 'Johannes Brahms' }, { name: 'Ludwig van Beethoven' }]);
     expect(patch.works).toContainEqual({ title: 'Sonata para piano no. 32 en do menor, op. 111', composerName: 'Ludwig van Beethoven' });
     expect(patch.works?.some((work) => work.title.includes('Intermezzo en si menor'))).toBe(true);
+    expect(patch.performers).toEqual([{ name: 'Piotr Anderszewski', roleText: 'piano' }]);
     expect(patch.programText).toContain('Johannes Brahms');
     expect(patch.programText).not.toMatch(/Plazos de venta/);
     expect(patch).not.toHaveProperty('eligibility');
@@ -177,6 +178,7 @@ describe('Círculo de Bellas Artes ficha', () => {
     expect(patch.accessText).toMatch(/gratuita/i);
     expect(patch.composers).toEqual([]);
     expect(patch.works).toEqual([]);
+    expect(patch.performers).toEqual([]);
   });
 
   it('keeps jazz cycle facts and organisers, without inventing a programme list', async () => {
@@ -186,6 +188,7 @@ describe('Círculo de Bellas Artes ficha', () => {
     expect(jazz.organizerText).toBe('Círculo de Bellas Artes');
     expect(jazz.composers).toEqual([]);
     expect(jazz.works).toEqual([]);
+    expect(jazz.performers).toEqual([]);
     expect(jazz.description).toMatch(/jazz contemporáneo/i);
     const chamber = parseCbaDetail(await sample('132451'), await fixture('detail-casals'));
     expect(chamber.composers).toEqual([
@@ -194,6 +197,21 @@ describe('Círculo de Bellas Artes ficha', () => {
       { name: 'Franz Schubert' },
     ]);
     expect(chamber.works?.every((work) => work.composerName)).toBe(true);
+    expect(chamber.performers).toEqual([]);
+  });
+
+  it('reads an unequivocal Name, instrument title and ignores generic commas', () => {
+    expect(performersFromCbaTitle('Piotr Anderszewski, piano')).toEqual([
+      { name: 'Piotr Anderszewski', roleText: 'piano' },
+    ]);
+    expect(performersFromCbaTitle('Elisabeth Leonskaja, piano')).toEqual([
+      { name: 'Elisabeth Leonskaja', roleText: 'piano' },
+    ]);
+    expect(performersFromCbaTitle('In Honour of the Moon')).toEqual([]);
+    expect(performersFromCbaTitle('Lucía Rey Quartet')).toEqual([]);
+    expect(performersFromCbaTitle('Cuarteto Cosmos y Vicent Alberola, clarinete')).toEqual([]);
+    expect(performersFromCbaTitle('Benjamin Alard, clavecín y dirección & Friends #Falla150')).toEqual([]);
+    expect(performersFromCbaTitle('Madrid, otoño')).toEqual([]);
   });
 
   it('fails locally for wrong identity or a mismatched room, without inventing a clock for ranges', async () => {

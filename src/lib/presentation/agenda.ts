@@ -70,6 +70,15 @@ export function agendaItemSignal(item: Pick<AgendaItemModel, 'formats' | 'access
   };
 }
 
+/**
+ * People line under the title: known performers only.
+ * Composers are never a fallback; omit the line when the cast is unknown.
+ */
+export function agendaItemPeopleLine(item: Pick<AgendaItemModel, 'performers'>): string | null {
+  if (item.performers.length === 0) return null;
+  return item.performers.join(', ');
+}
+
 export type AgendaDayModel = {
   date: string;
   dateLabel: string;
