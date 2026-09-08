@@ -19,6 +19,52 @@ function visibleOccurrences(page: Page) {
 }
 
 test.describe('agenda', () => {
+  test('precarga una única fuente autohospedada y la aplica a la interfaz', async ({ page }) => {
+    const fontRequests: string[] = [];
+    page.on('request', (request) => {
+      if (request.resourceType() === 'font') fontRequests.push(request.url());
+    });
+    const fontResponsePromise = page.waitForResponse(
+      (response) => response.request().resourceType() === 'font',
+    );
+
+    await page.goto('/');
+    const fontResponse = await fontResponsePromise;
+    await page.evaluate(() => document.fonts.ready);
+
+    expect(await page.evaluate(() => document.fonts.check('16px Archivo'))).toBe(true);
+    expect(
+      await page.locator('body').evaluate((element) => getComputedStyle(element).fontFamily),
+    ).toContain('Archivo');
+    expect(fontRequests).toHaveLength(1);
+    expect(new URL(fontRequests[0]!).origin).toBe(new URL(page.url()).origin);
+
+    const preload = page.locator('link[rel="preload"][as="font"][type="font/woff2"]');
+    await expect(preload).toHaveCount(1);
+    const href = await preload.getAttribute('href');
+    expect(href).toMatch(/archivo-latin-ext-wght\.[\w-]+\.woff2$/);
+    expect(fontResponse.ok()).toBe(true);
+    expect(fontResponse.headers()['content-type']).toContain('font/woff2');
+    expect((await fontResponse.body()).byteLength).toBeLessThan(70_000);
+  });
+
+  test('mantiene la tipografía y evita desbordamiento en móvil', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/');
+    await page.evaluate(() => document.fonts.ready);
+
+    const layout = await page.evaluate(() => ({
+      clientWidth: document.documentElement.clientWidth,
+      scrollWidth: document.documentElement.scrollWidth,
+      headingFont: getComputedStyle(document.querySelector('h1')!).fontFamily,
+    }));
+
+    expect(layout.scrollWidth).toBe(layout.clientWidth);
+    expect(layout.headingFont).toContain('Archivo');
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page.locator('[data-agenda-list]')).toBeVisible();
+  });
+
   test('la portada carga y muestra representaciones próximas', async ({ page }) => {
     await page.goto('/');
 

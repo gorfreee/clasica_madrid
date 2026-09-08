@@ -1,5 +1,47 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Archivo";
+  src: url("../assets/fonts/archivo-latin-ext-wght.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  unicode-range:
+    U+0020-007E,
+    U+00A0-024F,
+    U+0300-036F,
+    U+1E00-1EFF,
+    U+2000-206F,
+    U+20A0-20CF,
+    U+2100-214F,
+    U+2190-21FF;
+}
+
+/* Metric-compatible local fallbacks keep the first paint stable while the
+   single self-hosted font is loading. Values are generated from Archivo,
+   Arial and Roboto metrics with Capsize. */
+@font-face {
+  font-family: "Archivo Fallback: Arial";
+  src: local("Arial"), local("ArialMT");
+  font-style: normal;
+  font-weight: 400 800;
+  ascent-override: 88.9575%;
+  descent-override: 21.2769%;
+  line-gap-override: 0%;
+  size-adjust: 98.6988%;
+}
+
+@font-face {
+  font-family: "Archivo Fallback: Roboto";
+  src: local("Roboto Regular"), local("Roboto-Regular");
+  font-style: normal;
+  font-weight: 400 800;
+  ascent-override: 88.7627%;
+  descent-override: 21.2302%;
+  line-gap-override: 0%;
+  size-adjust: 98.9155%;
+}
+
 :root {
   color: #11110f;
   background: #f1efe8;
@@ -11,8 +53,16 @@
   --line: #aaa9a2;
   --blue: #3346ff;
   --coral: #ff5a3d;
-  --font-display: Arial, "Helvetica Neue", Helvetica, sans-serif;
-  --font-sans: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  --font-sans: "Archivo", "Archivo Fallback: Arial", "Archivo Fallback: Roboto", Arial, Roboto, sans-serif;
+  --font-display: var(--font-sans);
+  --type-tracking-display: -.055em;
+  --type-tracking-heading: -.035em;
+  --type-tracking-label: .1em;
+  --type-tracking-label-wide: .14em;
+  --type-size-label: .72rem;
+  --type-size-meta: .78rem;
+  --icon-external:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 13 13 3M6 3h7v7' fill='none' stroke='black' stroke-width='2'/%3E%3C/svg%3E");
   --page: min(76rem, calc(100% - 2.5rem));
   --focus: #ff5a3d;
   --hero-gutter-top: 1.5rem;
@@ -78,7 +128,7 @@ button, input, select { font: inherit; }
   font-size: 1.12rem;
   font-weight: 800;
   line-height: .86;
-  letter-spacing: -.055em;
+  letter-spacing: -.04em;
   text-decoration: none;
 }
 .site-mark__symbol {
@@ -99,7 +149,7 @@ button, input, select { font: inherit; }
   border-left: 1px solid #44443f;
   font-size: .78rem;
   font-weight: 700;
-  letter-spacing: .12em;
+  letter-spacing: var(--type-tracking-label);
   text-decoration: none;
   text-transform: uppercase;
 }
@@ -118,9 +168,9 @@ button, input, select { font: inherit; }
 .page { padding: 0 0 7rem; }
 .eyebrow {
   margin: 0;
-  font-size: .72rem;
+  font-size: var(--type-size-label);
   font-weight: 800;
-  letter-spacing: .14em;
+  letter-spacing: var(--type-tracking-label-wide);
   text-transform: uppercase;
 }
 a.eyebrow {
@@ -151,8 +201,8 @@ a.eyebrow:hover { color: var(--blue); }
   margin: 1rem 0 0;
   font-family: var(--font-display);
   font-weight: 800;
-  letter-spacing: -.085em;
-  line-height: .83;
+  letter-spacing: var(--type-tracking-display);
+  line-height: .86;
   font-size: var(--hero-title-size);
 }
 .agenda-intro__graphic::before {
@@ -223,7 +273,7 @@ a.eyebrow:hover { color: var(--blue); }
   cursor: pointer;
   font-size: .8rem;
   font-weight: 800;
-  letter-spacing: .1em;
+  letter-spacing: var(--type-tracking-label);
   list-style: none;
   text-transform: uppercase;
 }
@@ -278,9 +328,9 @@ a.eyebrow:hover { color: var(--blue); }
   margin-top: 2.5rem;
   padding: .55rem 0;
   border-bottom: 2px solid var(--ink);
-  font-size: .72rem;
+  font-size: var(--type-size-label);
   font-weight: 800;
-  letter-spacing: .1em;
+  letter-spacing: var(--type-tracking-label);
 }
 .agenda-status p { margin: 0; }
 .agenda-more {
@@ -315,7 +365,7 @@ a.eyebrow:hover { color: var(--blue); }
   color: var(--paper-light);
   font-size: .72rem;
   font-weight: 800;
-  letter-spacing: .16em;
+  letter-spacing: var(--type-tracking-label-wide);
   text-align: center;
   text-transform: uppercase;
 }
@@ -327,7 +377,7 @@ a.eyebrow:hover { color: var(--blue); }
   color: var(--blue);
   font-size: clamp(3.5rem, 4.2vw, 4.8rem);
   font-weight: 800;
-  letter-spacing: -.09em;
+  letter-spacing: -.06em;
   line-height: .78;
 }
 .agenda-day__words {
@@ -337,7 +387,7 @@ a.eyebrow:hover { color: var(--blue); }
   gap: .12rem;
   min-width: 0;
   padding-top: .15rem;
-  font-size: .68rem;
+  font-size: .7rem;
   font-weight: 800;
   letter-spacing: .04em;
   line-height: 1.15;
@@ -355,7 +405,7 @@ a.eyebrow:hover { color: var(--blue); }
   flex-direction: column;
   gap: .08rem;
   color: var(--muted);
-  font-size: .6rem;
+  font-size: .7rem;
   font-weight: 600;
 }
 .agenda-day--today .agenda-day__number { color: var(--coral); }
@@ -388,11 +438,21 @@ a.eyebrow:hover { color: var(--blue); }
   margin: 0;
   font-size: clamp(1.02rem, 1.5vw, 1.3rem);
   font-weight: 800;
-  letter-spacing: -.035em;
+  letter-spacing: var(--type-tracking-heading);
   line-height: 1.08;
 }
 .agenda-item__title a { text-decoration: none; }
-.agenda-item__title a::after { content: " ↗"; color: var(--blue); font-size: .65em; vertical-align: top; }
+.agenda-item__title a::after {
+  content: "";
+  display: inline-block;
+  width: .62em;
+  height: .62em;
+  margin-left: .24em;
+  background: var(--blue);
+  -webkit-mask: var(--icon-external) center / contain no-repeat;
+  mask: var(--icon-external) center / contain no-repeat;
+  vertical-align: .08em;
+}
 .agenda-item__title a:hover, .agenda-item__title a:focus-visible, .agenda-item__venue a:hover {
   text-decoration: underline;
   text-underline-offset: .18em;
@@ -402,14 +462,14 @@ a.eyebrow:hover { color: var(--blue); }
   overflow: hidden;
   margin: .45rem 0 0;
   color: var(--muted);
-  font-size: .78rem;
+  font-size: var(--type-size-meta);
   line-height: 1.3;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
 .agenda-item__series {
   color: var(--blue);
-  font-size: .69rem;
+  font-size: .7rem;
   font-weight: 700;
   letter-spacing: .04em;
   text-transform: uppercase;
@@ -418,7 +478,7 @@ a.eyebrow:hover { color: var(--blue); }
 .agenda-item__venue {
   grid-area: venue;
   border-left: 1px solid var(--line);
-  font-size: .78rem;
+  font-size: var(--type-size-meta);
   font-weight: 700;
   line-height: 1.25;
 }
@@ -428,7 +488,7 @@ a.eyebrow:hover { color: var(--blue); }
   grid-area: signal;
   border-left: 1px solid var(--line);
   color: var(--muted);
-  font-size: .65rem;
+  font-size: .7rem;
   font-weight: 800;
   letter-spacing: .05em;
   text-transform: uppercase;
@@ -452,7 +512,7 @@ a.eyebrow:hover { color: var(--blue); }
   border: 2.2rem solid var(--blue);
   border-radius: 50%;
 }
-.empty-state h2 { max-width: 34rem; margin: 0; font-size: clamp(1.7rem, 4vw, 3rem); letter-spacing: -.055em; line-height: .95; }
+.empty-state h2 { max-width: 34rem; margin: 0; font-size: clamp(1.7rem, 4vw, 3rem); letter-spacing: var(--type-tracking-display); line-height: .95; }
 .empty-state p { max-width: 38rem; margin: .8rem 0 0; color: var(--muted); }
 
 .section-intro { min-height: 24rem; padding: var(--hero-gutter-top) 0 2.8rem; border-bottom: 2px solid var(--ink); }
@@ -476,7 +536,7 @@ a.eyebrow:hover { color: var(--blue); }
   border-block: 1px solid var(--ink);
   font-size: .72rem;
   font-weight: 800;
-  letter-spacing: .1em;
+  letter-spacing: var(--type-tracking-label);
   text-transform: uppercase;
 }
 .venue-search input {
@@ -508,7 +568,7 @@ a.eyebrow:hover { color: var(--blue); }
   letter-spacing: .04em;
   text-transform: uppercase;
 }
-.venue-list__name { font-size: clamp(1.15rem, 2vw, 1.6rem); font-weight: 800; letter-spacing: -.045em; line-height: 1; }
+.venue-list__name { font-size: clamp(1.15rem, 2vw, 1.6rem); font-weight: 800; letter-spacing: var(--type-tracking-heading); line-height: 1; }
 .venue-list__meta { color: var(--muted); }
 .venue-list__meta--inactive { grid-column: 3 / -1; }
 .venue-list a:hover .venue-list__meta { color: inherit; }
@@ -555,12 +615,12 @@ a.eyebrow:hover { color: var(--blue); }
 .fact-list dt {
   margin-bottom: .55rem;
   color: var(--muted);
-  font-size: .66rem;
+  font-size: .7rem;
   font-weight: 800;
-  letter-spacing: .12em;
+  letter-spacing: var(--type-tracking-label);
   text-transform: uppercase;
 }
-.fact-list dd { margin: 0; font-size: clamp(1.1rem, 2vw, 1.55rem); font-weight: 700; letter-spacing: -.035em; line-height: 1.1; }
+.fact-list dd { margin: 0; font-size: clamp(1.1rem, 2vw, 1.55rem); font-weight: 700; letter-spacing: var(--type-tracking-heading); line-height: 1.1; }
 .event-facts__when dd { display: flex; flex-direction: column; gap: .35rem; }
 .event-facts__when strong { color: var(--blue); font-size: 2rem; font-variant-numeric: tabular-nums; }
 .event-facts__venue a { text-decoration-thickness: 1px; text-underline-offset: .16em; }
@@ -587,7 +647,7 @@ a.eyebrow:hover { color: var(--blue); }
   padding: .75rem 0;
   border-block: 2px solid var(--ink);
 }
-.section-heading h2 { margin: 0; font-size: clamp(1.7rem, 4.5vw, 4rem); font-weight: 800; letter-spacing: -.065em; line-height: .9; }
+.section-heading h2 { margin: 0; font-size: clamp(1.7rem, 4.5vw, 4rem); font-weight: 800; letter-spacing: -.045em; line-height: .92; }
 .occurrence-list, .editorial-list, .programme-list, .source-list { list-style: none; margin: 0; padding: 0; }
 .occurrence-list li {
   display: grid;
@@ -607,7 +667,7 @@ a.eyebrow:hover { color: var(--blue); }
   border-bottom: 1px solid var(--line);
   font-size: clamp(1.1rem, 2.2vw, 1.75rem);
   font-weight: 700;
-  letter-spacing: -.035em;
+  letter-spacing: var(--type-tracking-heading);
 }
 .editorial-list small, .programme-list small { color: var(--muted); font-size: .75rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
 .programme-list { counter-reset: works; }
@@ -645,7 +705,7 @@ a.eyebrow:hover { color: var(--blue); }
   color: var(--blue);
   font-size: clamp(12rem, 34vw, 31rem);
   font-weight: 800;
-  letter-spacing: -.12em;
+  letter-spacing: -.08em;
   line-height: .78;
   opacity: .18;
 }
@@ -662,7 +722,7 @@ a.eyebrow:hover { color: var(--blue); }
 .site-footer__mark { width: 5rem; color: var(--blue); }
 .site-footer__mark svg { display: block; width: 100%; height: auto; fill: currentColor; }
 .site-footer__statement, .site-footer__note { margin: 0; }
-.site-footer__statement { font-size: clamp(1.5rem, 3vw, 2.5rem); font-weight: 800; letter-spacing: -.055em; line-height: .95; }
+.site-footer__statement { font-size: clamp(1.5rem, 3vw, 2.5rem); font-weight: 800; letter-spacing: -.04em; line-height: .98; }
 .site-footer__note { color: var(--muted); font-size: .72rem; text-align: right; }
 
 @media (max-width: 900px) {
@@ -699,7 +759,7 @@ a.eyebrow:hover { color: var(--blue); }
   .site-header__inner { min-height: 4.8rem; }
   .site-mark { gap: .65rem; font-size: .92rem; }
   .site-mark__symbol { width: 2.5rem; }
-  .nav-list a { min-width: auto; padding: 1rem .75rem; font-size: .65rem; }
+  .nav-list a { min-width: auto; padding: 1rem .75rem; font-size: .7rem; }
   .nav-list a::after { display: none; }
   .page { padding-bottom: 4.5rem; }
   .agenda-intro { min-height: 20rem; display: block; overflow: hidden; }
