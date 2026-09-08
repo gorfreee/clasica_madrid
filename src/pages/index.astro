@@ -39,9 +39,6 @@ const model = await loadAgendaPage(Astro.url);
           data-upcoming-count={model.upcomingCount}
           data-agenda-complete={model.hasMoreOccurrences ? undefined : ''}
         >
-          <div class="agenda-status">
-            <p class="result-count" data-result-count aria-live="polite">{model.resultCountLabel}</p>
-          </div>
           <AgendaList days={model.days} />
           {
             model.hasMoreOccurrences && (
@@ -52,7 +49,7 @@ const model = await loadAgendaPage(Astro.url);
               </div>
             )
           }
-          {/* data-result-count / data-no-results: contrato de agenda-client.ts */}
+          {/* data-no-results: contrato de agenda-client.ts */}
           <div data-no-results hidden>
             <EmptyState
               title="No hay conciertos con estos filtros"
