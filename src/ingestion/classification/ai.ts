@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ERAS, EVENT_KINDS, FORMATS } from '../../lib/schemas/taxonomies.ts';
+import { ACCESS_MODES, ERAS, EVENT_KINDS, FORMATS } from '../../lib/schemas/taxonomies.ts';
 import type { Era, EventKind, Format } from '../../lib/schemas/taxonomies.ts';
 import type { ObservedFacts } from '../observed.ts';
 import { ELIGIBILITIES, type Eligibility } from './golden-case.ts';
@@ -12,7 +12,13 @@ import { ELIGIBILITIES, type Eligibility } from './golden-case.ts';
  * Optional hooks stay provider-agnostic: Gemini uses them for rate-limit
  * diagnostics; OpenAI and test fakes omit them.
  */
-export type AiCallPurpose = 'eligibility' | 'taxonomy';
+export const AI_CALL_PURPOSES = [
+  'eligibility',
+  'composer-extraction',
+  'access-classification',
+  'taxonomy',
+] as const;
+export type AiCallPurpose = (typeof AI_CALL_PURPOSES)[number];
 
 export type AiFailureKind =
   | 'malformed-output'
@@ -56,7 +62,7 @@ export type AiCallDiagnostics = {
 export type AiCallContext = {
   signal?: AbortSignal;
   onDiagnostics?: (diagnostics: AiCallDiagnostics) => void;
-  /** Eligibility fallback vs taxonomy-only completion. Default eligibility. */
+  /** Versioned task routed through the shared provider/budget. Default eligibility. */
   purpose?: AiCallPurpose;
   /**
    * Taxonomy completion: formats were empty before this call, so an empty or
@@ -192,6 +198,20 @@ export type AiClassificationResult = {
   evidence: string[];
 };
 
+export type AiAccessResult = {
+  classification: 'free' | 'paid' | 'unknown';
+  evidence: string;
+};
+
+export type AiComposerCandidate = {
+  name: string;
+  evidence: string;
+};
+
+export type AiComposerExtractionResult = {
+  candidates: AiComposerCandidate[];
+};
+
 export const aiClassificationSchema = z.object({
   eligibility: z.enum(ELIGIBILITIES),
   formats: z.array(z.enum(FORMATS)).optional(),
@@ -200,6 +220,28 @@ export const aiClassificationSchema = z.object({
   evidence: z.array(z.string().trim().min(1).max(400)).max(12).optional(),
   rationale: z.string().trim().min(1).max(800).optional(),
 });
+
+export const aiAccessSchema = z
+  .object({
+    classification: z.enum(ACCESS_MODES),
+    evidence: z.string().trim().min(1).max(400),
+  })
+  .strict();
+
+export const aiComposerExtractionSchema = z
+  .object({
+    candidates: z
+      .array(
+        z
+          .object({
+            name: z.string().trim().min(1).max(200),
+            evidence: z.string().trim().min(1).max(400),
+          })
+          .strict(),
+      )
+      .max(20),
+  })
+  .strict();
 
 /**
  * JSON Schema for provider structured-output requests.
@@ -231,6 +273,49 @@ export const AI_CLASSIFICATION_JSON_SCHEMA = {
     },
   },
 } as const;
+
+export const AI_ACCESS_JSON_SCHEMA = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['classification', 'evidence'],
+  properties: {
+    classification: { type: 'string', enum: [...ACCESS_MODES] },
+    evidence: {
+      type: 'string',
+      description: 'Brief verbatim excerpt from accessText supporting the classification.',
+    },
+  },
+} as const;
+
+export const AI_COMPOSER_EXTRACTION_JSON_SCHEMA = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['candidates'],
+  properties: {
+    candidates: {
+      type: 'array',
+      maxItems: 20,
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['name', 'evidence'],
+        properties: {
+          name: { type: 'string' },
+          evidence: {
+            type: 'string',
+            description: 'Verbatim span from the observed programme containing the proposed name.',
+          },
+        },
+      },
+    },
+  },
+} as const;
+
+export function aiJsonSchemaForPurpose(purpose: AiCallPurpose): object {
+  if (purpose === 'access-classification') return AI_ACCESS_JSON_SCHEMA;
+  if (purpose === 'composer-extraction') return AI_COMPOSER_EXTRACTION_JSON_SCHEMA;
+  return AI_CLASSIFICATION_JSON_SCHEMA;
+}
 
 export type ParseAiClassification =
   | { ok: true; value: AiClassificationResult }
@@ -266,6 +351,34 @@ export function parseAiClassification(raw: unknown): ParseAiClassification {
       evidence,
     },
   };
+}
+
+export type ParseAiAccess =
+  | { ok: true; value: AiAccessResult }
+  | { ok: false; ruleId: 'ai-malformed-output' | 'ai-invalid-output'; reason: string };
+
+export function parseAiAccess(raw: unknown): ParseAiAccess {
+  return parseStrictOutput(raw, aiAccessSchema);
+}
+
+export type ParseAiComposerExtraction =
+  | { ok: true; value: AiComposerExtractionResult }
+  | { ok: false; ruleId: 'ai-malformed-output' | 'ai-invalid-output'; reason: string };
+
+export function parseAiComposerExtraction(raw: unknown): ParseAiComposerExtraction {
+  return parseStrictOutput(raw, aiComposerExtractionSchema);
+}
+
+export function parseAiOutputForPurpose(
+  purpose: AiCallPurpose,
+  raw: unknown,
+): { ok: true } | { ok: false; ruleId: 'ai-malformed-output' | 'ai-invalid-output'; reason: string } {
+  const parsed = purpose === 'access-classification'
+    ? parseAiAccess(raw)
+    : purpose === 'composer-extraction'
+      ? parseAiComposerExtraction(raw)
+      : parseAiClassification(raw);
+  return parsed.ok ? { ok: true } : parsed;
 }
 
 /** Empty or omitted formats: valid JSON, but not a completed format assignment. */
@@ -308,6 +421,25 @@ function coerceObject(raw: unknown): { ok: true; value: unknown } | { ok: false;
     return { ok: false, reason: 'respuesta de IA no es un objeto' };
   }
   return { ok: true, value: raw };
+}
+
+function parseStrictOutput<T>(
+  raw: unknown,
+  schema: z.ZodType<T>,
+): { ok: true; value: T } | { ok: false; ruleId: 'ai-malformed-output' | 'ai-invalid-output'; reason: string } {
+  const asObject = coerceObject(raw);
+  if (!asObject.ok) {
+    return { ok: false, ruleId: 'ai-malformed-output', reason: asObject.reason };
+  }
+  const parsed = schema.safeParse(asObject.value);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      ruleId: 'ai-invalid-output',
+      reason: parsed.error.issues.map((issue) => issue.message).join('; ') || 'schema de IA inválido',
+    };
+  }
+  return { ok: true, value: parsed.data };
 }
 
 function uniqueKeepOrder<T>(items: T[]): T[] {

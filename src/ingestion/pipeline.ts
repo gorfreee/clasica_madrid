@@ -1,8 +1,8 @@
 import type { Catalog } from '../lib/domain/catalog.ts';
 import type { Candidate } from '../lib/schemas/candidate.ts';
-import type { AiClassifier, AiCallDiagnostics } from './classification/ai.ts';
+import type { AiClassifier, AiCallDiagnostics, AiCallPurpose } from './classification/ai.ts';
 import { classifyObserved } from './classification/enrich.ts';
-import type { ClassificationResult } from './classification/types.ts';
+import { isTechnicalClassificationFailure, type ClassificationResult } from './classification/types.ts';
 import { collapseWhitespace } from './html.ts';
 import { discoveryToRawEvents, type DiscoveryBatch } from './discovery.ts';
 import { getAdapter } from './registry.ts';
@@ -35,7 +35,13 @@ import type {
   SourceDefinition,
   SourceFailure,
 } from './types.ts';
-import { emptyAdapterDiscardCounts, emptyIngestAiSummary, IncompleteListingError, tallyAdapterDiscards } from './types.ts';
+import {
+  emptyAdapterDiscardCounts,
+  emptyIngestAiSummary,
+  emptyIngestQualitySummary,
+  IncompleteListingError,
+  tallyAdapterDiscards,
+} from './types.ts';
 import { takeBrowserFetchAttempts } from './browser-fetch.ts';
 import { getText, HttpError, resolveFetchRelay, takeRecordedHttpAttempts, takeRelayRecoveries } from './http.ts';
 import { normalizeUrl } from './urls.ts';
@@ -306,11 +312,19 @@ async function ingestPreparedEvents(
     try {
       let aiAttempted = false;
       let aiCall: AiCallDiagnostics | undefined;
+      const attemptedPurposes = new Set<AiCallPurpose>();
+      const failedPurposes = new Set<AiCallPurpose>();
       const eventAi: AiClassifier | undefined = ai ? {
         classifyBudgetMs: ai.classifyBudgetMs,
         async classify(observed, context) {
           aiAttempted = true;
+          const purpose = context?.purpose ?? 'eligibility';
+          attemptedPurposes.add(purpose);
           try { return await ai.classify(observed, context); }
+          catch (error) {
+            failedPurposes.add(purpose);
+            throw error;
+          }
           finally {
             // Legacy/fake providers are sequential by default. Concurrent providers
             // must emit diagnostics through the per-call context, never shared state.
@@ -325,7 +339,17 @@ async function ingestPreparedEvents(
           ? { id: venueMatch.venue.id, name: venueMatch.venue.name }
           : undefined,
       });
-      return { classification, aiAttempted, aiCall };
+      const enrichedEvent = classification.composers?.value.length
+        ? { ...event, composers: classification.composers.value }
+        : event;
+      return {
+        classification,
+        event: enrichedEvent,
+        aiAttempted,
+        aiCall,
+        attemptedPurposes: [...attemptedPurposes],
+        failedPurposes: [...failedPurposes],
+      };
     } catch (error) {
       attachFailureContext(error, {
         stage: 'classification',
@@ -342,12 +366,18 @@ async function ingestPreparedEvents(
       eligibility[classifiedAt.classification.eligibility.value] += 1;
       recordAiOutcome(aiUsage, classifiedAt.classification);
       recordTaxonomyOutcome(aiUsage, classifiedAt.classification, classifiedAt.aiCall);
+      recordAiPurposeOutcomes(
+        aiUsage,
+        classifiedAt.classification,
+        classifiedAt.attemptedPurposes,
+        classifiedAt.failedPurposes,
+      );
     }
     if (!event || !source) continue;
     observations.push({
       index,
       raw,
-      event,
+      event: classifiedAt?.event ?? event,
       source,
       classification: classifiedAt?.classification,
       aiAttempted: classifiedAt?.aiAttempted ?? false,
@@ -365,6 +395,7 @@ async function ingestPreparedEvents(
   });
 
   for (const [index, { raw, event, source }] of prepared.entries()) {
+    const finalEvent = classified[index]?.event ?? event;
     if (!event) {
       skippedUnusable += 1;
       decisions.push(
@@ -385,13 +416,13 @@ async function ingestPreparedEvents(
       decisions.push(
         buildEventDecision({
           raw,
-          title: event.title,
+          title: finalEvent!.title,
           structuralSkip: 'fuente desconocida',
           aiAttempted: false,
           publishable: false,
           candidateGenerated: false,
           listing: listingByRaw.get(raw),
-          normalizedEvent: event,
+          normalizedEvent: finalEvent,
         }),
       );
       continue;
@@ -411,7 +442,7 @@ async function ingestPreparedEvents(
     decisions.push(
       buildEventDecision({
         raw,
-        title: event.title,
+        title: finalEvent!.title,
         structuralSkip: result?.skippedReason,
         classification: classified[index]?.classification,
         aiAttempted: classified[index]?.aiAttempted ?? false,
@@ -425,7 +456,7 @@ async function ingestPreparedEvents(
         batchDuplicate: result?.batchDuplicate,
         mergeDiagnostics: result?.mergeDiagnostics,
         listing: listingByRaw.get(raw),
-        normalizedEvent: event,
+        normalizedEvent: finalEvent,
         candidate: result?.candidate,
       }),
     );
@@ -500,6 +531,7 @@ async function ingestPreparedEvents(
     skippedUnusable,
     eligibility,
     ai: aiUsage,
+    quality: summarizeQuality(decisions),
     candidates: reconciled.candidates.length,
     newEvents: apply.newEvents,
     updatedEvents: apply.updatedEvents,
@@ -565,7 +597,9 @@ function wrapAi(inner: AiClassifier | undefined, usage: IngestAiSummary): AiClas
     snapshotStats: inner.snapshotStats?.bind(inner),
     async classify(observed, context) {
       usage.attempted += 1;
-      if (context?.purpose === 'taxonomy') usage.taxonomyAttempted += 1;
+      const purpose = context?.purpose ?? 'eligibility';
+      usage.byPurpose[purpose].attempted += 1;
+      if (purpose === 'taxonomy') usage.taxonomyAttempted += 1;
       return inner.classify(observed, context);
     },
   };
@@ -621,6 +655,75 @@ function recordTaxonomyOutcome(
     (classification.eras?.method === 'ai' && (classification.eras.value.length ?? 0) > 0) ||
     (classification.kind?.method === 'ai' && classification.eligibility.method !== 'ai');
   if (filled) usage.taxonomyFilled += 1;
+}
+
+function recordAiPurposeOutcomes(
+  usage: IngestAiSummary,
+  classification: ClassificationResult,
+  attemptedPurposes: readonly AiCallPurpose[],
+  failedPurposes: readonly AiCallPurpose[],
+): void {
+  const failed = new Set(failedPurposes);
+  for (const purpose of attemptedPurposes) {
+    const bucket = usage.byPurpose[purpose];
+    const resolution = purpose === 'eligibility'
+      ? classification.eligibility
+      : purpose === 'composer-extraction'
+        ? classification.composers
+        : purpose === 'access-classification'
+          ? classification.access
+          : undefined;
+    const resolved = purpose === 'eligibility'
+      ? classification.eligibility.method === 'ai' && classification.eligibility.value !== 'uncertain'
+      : purpose === 'composer-extraction'
+        ? Boolean(classification.composers?.value.length)
+        : purpose === 'access-classification'
+          ? classification.access?.value !== 'unknown'
+          : Boolean(
+              (classification.formats?.method === 'ai' && classification.formats.value.length > 0) ||
+              (classification.eras?.method === 'ai' && classification.eras.value.length > 0),
+            );
+    if (resolved) bucket.resolved += 1;
+    else bucket.unresolved += 1;
+    if (
+      failed.has(purpose) ||
+      (resolution && isTechnicalClassificationFailure(resolution.ruleId))
+    ) {
+      bucket.errors += 1;
+    }
+  }
+}
+
+function summarizeQuality(decisions: readonly IngestEventDecision[]) {
+  const quality = emptyIngestQualitySummary();
+  for (const decision of decisions) {
+    const candidate = decision.publishable && decision.candidateGenerated ? decision.candidate : undefined;
+    if (!candidate) continue;
+
+    if (candidate.composers.length > 0) quality.composers.populated += 1;
+    else {
+      quality.composers.unresolved += 1;
+      const hasProgrammeEvidence = Boolean(
+        decision.normalized?.programText ||
+        decision.normalized?.works.some((work) => Boolean(work.composerName)),
+      );
+      if (!hasProgrammeEvidence) quality.composers.unresolvedNoProgramEvidence += 1;
+    }
+
+    if (candidate.eras.length > 0) quality.eras.populated += 1;
+    else quality.eras.unresolved += 1;
+    if (candidate.formats.length > 0) quality.formats.populated += 1;
+    else quality.formats.unresolved += 1;
+
+    if (candidate.access === 'free') quality.access.free += 1;
+    else if (candidate.access === 'paid') quality.access.paid += 1;
+    else {
+      quality.access.unresolved += 1;
+      if (decision.normalized?.accessText) quality.access.unresolvedWithEvidence += 1;
+      else quality.access.unresolvedNoEvidence += 1;
+    }
+  }
+  return quality;
 }
 
 function mergeProviderStats(usage: IngestAiSummary, ai: AiClassifier | undefined): void {

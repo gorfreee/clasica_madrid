@@ -1,5 +1,6 @@
 import type { AccessMode, Era, EventKind, Format } from '../../lib/schemas/taxonomies.ts';
 import type { Eligibility } from './golden-case.ts';
+import type { ObservedComposer } from '../observed.ts';
 
 export type ResolutionMethod = 'rule' | 'knowledge' | 'fallback' | 'ai';
 
@@ -20,6 +21,8 @@ export type ClassificationResult = {
   eras?: Resolution<Era[]>;
   kind?: Resolution<EventKind>;
   access?: Resolution<AccessMode>;
+  /** AI-only observed enrichment; pipeline copies validated values to the normalized event. */
+  composers?: Resolution<ObservedComposer[]>;
 };
 
 /**

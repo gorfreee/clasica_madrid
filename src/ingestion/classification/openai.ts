@@ -1,8 +1,9 @@
 import type { ObservedFacts } from '../observed.ts';
 import { AI_CLASSIFY_TIMEOUT_MS, AiUnusableOutputError, type AiCallContext, type AiClassifier } from './ai.ts';
 import {
-  AI_CLASSIFIER_SYSTEM_PROMPT, AI_TAXONOMY_SYSTEM_PROMPT,
-  buildAiClassifierUserMessage, buildAiTaxonomyUserMessage,
+  AI_ACCESS_SYSTEM_PROMPT, AI_CLASSIFIER_SYSTEM_PROMPT, AI_COMPOSER_SYSTEM_PROMPT,
+  AI_TAXONOMY_SYSTEM_PROMPT, buildAiAccessUserMessage, buildAiClassifierUserMessage,
+  buildAiComposerUserMessage, buildAiTaxonomyUserMessage,
 } from './ai-prompt.ts';
 
 export const OPENAI_DEFAULT_MODEL = 'gpt-4o-mini';
@@ -42,7 +43,7 @@ export class OpenAiClassifier implements AiClassifier {
   async classify(observed: ObservedFacts, context: AiCallContext = {}): Promise<unknown> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.timeoutMs);
-    const taxonomy = context.purpose === 'taxonomy';
+    const prompt = promptForPurpose(observed, context.purpose ?? 'eligibility');
     try {
       const response = await this.fetchImpl(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
@@ -57,8 +58,8 @@ export class OpenAiClassifier implements AiClassifier {
           max_tokens: 600,
           response_format: { type: 'json_object' },
           messages: [
-            { role: 'system', content: taxonomy ? AI_TAXONOMY_SYSTEM_PROMPT : AI_CLASSIFIER_SYSTEM_PROMPT },
-            { role: 'user', content: taxonomy ? buildAiTaxonomyUserMessage(observed) : buildAiClassifierUserMessage(observed) },
+            { role: 'system', content: prompt.system },
+            { role: 'user', content: prompt.user },
           ],
         }),
       });
@@ -100,6 +101,22 @@ export class OpenAiClassifier implements AiClassifier {
       clearTimeout(timer);
     }
   }
+}
+
+function promptForPurpose(
+  observed: ObservedFacts,
+  purpose: NonNullable<AiCallContext['purpose']>,
+): { system: string; user: string } {
+  if (purpose === 'taxonomy') {
+    return { system: AI_TAXONOMY_SYSTEM_PROMPT, user: buildAiTaxonomyUserMessage(observed) };
+  }
+  if (purpose === 'access-classification') {
+    return { system: AI_ACCESS_SYSTEM_PROMPT, user: buildAiAccessUserMessage(observed) };
+  }
+  if (purpose === 'composer-extraction') {
+    return { system: AI_COMPOSER_SYSTEM_PROMPT, user: buildAiComposerUserMessage(observed) };
+  }
+  return { system: AI_CLASSIFIER_SYSTEM_PROMPT, user: buildAiClassifierUserMessage(observed) };
 }
 
 function messageContent(payload: unknown): string | undefined {
