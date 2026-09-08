@@ -21,7 +21,18 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Orquesta y Coro RTVE"
+    },
+    {
+      "name": "Alexandre Bloch",
+      "role": "conductor"
+    },
+    {
+      "name": "Siobhan Stagg"
+    }
+  ],
   "composers": [
     {
       "name": "Ludwig van Beethoven"
@@ -45,10 +56,10 @@
     {
       "sourceId": "src_orquesta_coro_rtve",
       "url": "https://www.teatromonumental.es/eventos/concierto-sinfonico-a-19",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-09",
       "externalId": "/eventos/concierto-sinfonico-a-19/"
     }
   ],
   "primarySourceId": "src_orquesta_coro_rtve",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-09"
 }

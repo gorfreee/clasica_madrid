@@ -15,7 +15,15 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Jaehyuck Choi",
+      "role": "conductor"
+    },
+    {
+      "name": "Javier Sanz"
+    }
+  ],
   "composers": [
     {
       "name": "Wolfgang Amadeus Mozart"
@@ -35,10 +43,10 @@
     {
       "sourceId": "src_orquesta_coro_rtve",
       "url": "https://www.teatromonumental.es/eventos/jovenes-musicos-ii",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-09",
       "externalId": "/eventos/jovenes-musicos-ii/"
     }
   ],
   "primarySourceId": "src_orquesta_coro_rtve",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-09"
 }

@@ -15,7 +15,15 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Daniel Huertas",
+      "role": "conductor"
+    },
+    {
+      "name": "Yerassyl Khamit"
+    }
+  ],
   "composers": [
     {
       "name": "Ludwig van Beethoven"
@@ -38,10 +46,10 @@
     {
       "sourceId": "src_orquesta_coro_rtve",
       "url": "https://www.teatromonumental.es/eventos/jovenes-musicos-i",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-09",
       "externalId": "/eventos/jovenes-musicos-i/"
     }
   ],
   "primarySourceId": "src_orquesta_coro_rtve",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-09"
 }
