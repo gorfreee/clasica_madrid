@@ -21,6 +21,12 @@ export const accessLabels: Record<AccessMode, string> = {
   unknown: 'Acceso no indicado',
 };
 
+/** Visible when the agenda row has no classified format. Not an access label. */
+export const missingFormatLabel = '—';
+
+/** Optional agenda-row marker. Filters keep using `accessLabels.free`. */
+export const freeAgendaSignalLabel = 'Gratis';
+
 export const eraLabels: Record<Era, string> = {
   early: 'Música antigua',
   renaissance: 'Renacimiento',

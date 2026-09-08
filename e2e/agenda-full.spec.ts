@@ -82,7 +82,7 @@ test.describe('carga diferida de la agenda', () => {
     await expect(page.locator('[data-result-count]')).toBeVisible();
     const sample = Math.min(await visibleOccurrences(page).count(), 8);
     for (let index = 0; index < sample; index += 1) {
-      await expect(visibleOccurrences(page).nth(index).locator('.signal-free')).toBeVisible();
+      await expect(visibleOccurrences(page).nth(index).getByText('Gratis', { exact: true })).toBeVisible();
     }
   });
 
