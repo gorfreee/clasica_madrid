@@ -162,6 +162,42 @@ test.describe('navegación del encabezado', () => {
     expect((await request.get('/favicon.ico')).ok()).toBe(true);
   });
 
+  test('publica social sharing e identidad desde el HTML generado', async ({ page, request }) => {
+    await page.goto('/');
+
+    const socialImage = 'https://clasicamadrid.com/brand/clasica-madrid-social-card.png';
+    const socialAlt = 'Clásica Madrid — Agenda de música clásica en Madrid';
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', socialImage);
+    await expect(page.locator('meta[property="og:image:width"]')).toHaveAttribute('content', '1200');
+    await expect(page.locator('meta[property="og:image:height"]')).toHaveAttribute('content', '630');
+    await expect(page.locator('meta[property="og:image:type"]')).toHaveAttribute('content', 'image/png');
+    await expect(page.locator('meta[property="og:image:alt"]')).toHaveAttribute('content', socialAlt);
+    await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary_large_image');
+    await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute('content', socialImage);
+    await expect(page.locator('meta[name="twitter:image:alt"]')).toHaveAttribute('content', socialAlt);
+    await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#0055A0');
+    await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute('href', '/apple-touch-icon.png');
+    await expect(page.locator('link[rel="manifest"]')).toHaveAttribute('href', '/site.webmanifest');
+
+    for (const asset of [
+      '/brand/clasica-madrid-social-card.png',
+      '/apple-touch-icon.png',
+      '/site.webmanifest',
+      '/brand/clasica-madrid-icon-192.png',
+      '/brand/clasica-madrid-icon-512.png',
+    ]) {
+      expect((await request.get(asset)).ok(), asset).toBe(true);
+    }
+
+    const eventHref = await page
+      .locator('[data-agenda-list] [data-occurrence-id] h3 a')
+      .first()
+      .getAttribute('href');
+    expect(eventHref).toBeTruthy();
+    await page.goto(eventHref!);
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', socialImage);
+  });
+
   test('desde otras rutas el logo y Agenda llevan a la portada', async ({ page }) => {
     await page.goto('/lugares/');
     await page.getByRole('link', { name: 'Clásica Madrid, ir a la agenda' }).click();
