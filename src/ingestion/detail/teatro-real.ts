@@ -1,4 +1,5 @@
-import { allCaptures, firstMatch, splitBreaks, stripTags } from '../html.ts';
+import { explicitAccessText } from './access-evidence.ts';
+import { allCaptures, collapseWhitespace, firstMatch, splitBreaks, stripTags } from '../html.ts';
 import { inferScheduleFromText } from './schedule.ts';
 import {
   composersFromWorks,
@@ -76,12 +77,14 @@ function parseProduction(html: string): ObservedFactPatch {
   const works = normalizeWorkList(listItems.map(parseTitleComposerWork));
   const declaredComposers = parseDeclaredComposers(introHtml);
   const schedule = inferScheduleFromText([programText, description].filter(Boolean).join(' '));
+  const accessText = teatroRealAccessText(html, introHtml);
 
   return {
     ...(description ? { description } : {}),
     ...(categoryText ? { categoryText } : {}),
     ...(organizerText ? { organizerText } : {}),
     ...(venueText ? { venueText } : {}),
+    ...(accessText ? { accessText } : {}),
     ...(programText ? { programText } : {}),
     ...(schedule.eventStatus ? { eventStatus: schedule.eventStatus } : {}),
     ...(schedule.occurrences ? { occurrences: schedule.occurrences } : {}),
@@ -254,6 +257,32 @@ function foldTeamLabel(value: string): string {
     .toLowerCase()
     .replace(/[^a-z]+/g, ' ')
     .trim();
+}
+
+function precioParagraphs(scope: string): string | undefined {
+  for (const paragraph of allCaptures(scope, /<p\b[^>]*>([\s\S]*?)<\/p>/gi)) {
+    const text = collapseWhitespace(stripTags(paragraph));
+    if (!/^precio\b/i.test(text)) continue;
+    const evidence = explicitAccessText(text);
+    if (evidence) return evidence;
+  }
+  return undefined;
+}
+
+/**
+ * Observed access copy only: intro `<p>` headed Precio, or `.ticket-col-2`
+ * ("Desde 15 euros"). `.ticket-col-1` ("Compra tus entradas") and Abonos
+ * letters in `.functions-show__block--item-prices` are not evidence.
+ */
+function teatroRealAccessText(html: string, introHtml: string): string | undefined {
+  const fromPrecio = precioParagraphs(introHtml);
+  if (fromPrecio) return fromPrecio;
+
+  const ticketCol2 = firstMatch(
+    html,
+    /<span[^>]*class="[^"]*\bticket-col-2\b[^"]*"[^>]*>([\s\S]*?)<\/span>/i,
+  );
+  return explicitAccessText(ticketCol2 ? stripTags(ticketCol2) : undefined);
 }
 
 function parsePersonLine(text: string): ObservedPerson {

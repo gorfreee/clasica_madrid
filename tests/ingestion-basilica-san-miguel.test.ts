@@ -12,6 +12,7 @@ import { matchVenue } from '../src/ingestion/venues.ts';
 import { emptyCatalog, type Catalog } from '../src/lib/domain/catalog.ts';
 import type { AdapterContext } from '../src/ingestion/types.ts';
 import { TEST_NOW, TEST_WINDOW, makeEvent } from './helpers.ts';
+import { resolveAccess } from '../src/ingestion/classification/access.ts';
 
 const source = getSourceDefinition(adapter.id);
 const listingUrl = adapter.resolveFetchUrls(source, TEST_NOW, TEST_WINDOW)[0]!;
@@ -54,6 +55,42 @@ describe('Basílica de San Miguel listing', () => {
     expect(source.urls).toEqual(['https://basilicadesanmiguel.org/wp-json/tribe/events/v1/events']);
     expect(adapter.hydrate).toBeUndefined();
     expect(adapter.requiresDetailSchedule).toBeFalsy();
+  });
+
+  it('reads an explicit TEC cost as paid evidence', async () => {
+    const event = await extractWithCost('18 €');
+    expect(event.observed.accessText).toBe('18 €');
+    expect(resolveAccess(event.observed.accessText).value).toBe('paid');
+  });
+
+  it('reads explicit free admission from TEC cost', async () => {
+    const event = await extractWithCost('Entrada gratuita');
+    expect(event.observed.accessText).toBe('Entrada gratuita');
+    expect(resolveAccess(event.observed.accessText).value).toBe('free');
+  });
+
+  it('reads free admission with reservation from cost_details when cost is empty', async () => {
+    const event = await extractWithCost('', { values: ['Gratuito con reserva previa'] });
+    expect(event.observed.accessText).toBe('Gratuito con reserva previa');
+    expect(resolveAccess(event.observed.accessText).value).toBe('free');
+  });
+
+  it('does not treat a Tickets CTA as paid access', async () => {
+    const event = await extractWithCost('Tickets');
+    expect(event.observed.accessText).toBeUndefined();
+    expect(resolveAccess(event.observed.accessText).value).toBe('unknown');
+  });
+
+  it('keeps unknown when TEC cost and cost_details are empty', async () => {
+    const event = await extractWithCost('', { values: [] });
+    expect(event.observed.accessText).toBeUndefined();
+    expect(resolveAccess(event.observed.accessText).value).toBe('unknown');
+  });
+
+  it('does not invent access from unexpected TEC markup', async () => {
+    const event = await extractWithCost('Consultar taquilla');
+    expect(event.observed.accessText).toBeUndefined();
+    expect(resolveAccess(event.observed.accessText).value).toBe('unknown');
   });
 
   it('reports adapter discards for recognized TEC items without changing extracted events', async () => {
@@ -368,3 +405,14 @@ describe('Basílica de San Miguel pipeline safety', () => {
     expect(empty.summary.possiblyMissing).toBe(2);
   });
 });
+
+async function extractWithCost(cost: string, costDetails?: { values: unknown[] }) {
+  const doc = JSON.parse(await fixture('listing.json')) as {
+    events: Array<Record<string, unknown>>;
+    total: number;
+    total_pages: number;
+  };
+  const first = { ...doc.events[0]!, cost, ...(costDetails ? { cost_details: costDetails } : {}) };
+  const events = await adapter.extract(JSON.stringify({ events: [first], total: 1, total_pages: 1 }), listingUrl, ctx);
+  return events[0]!;
+}
