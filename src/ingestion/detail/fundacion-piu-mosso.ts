@@ -102,8 +102,10 @@ export function parsePiumossoDetail(event: RawEvent, body: string): ObservedFact
   if (!dateTitle) throw new Error('fundacion-piu-mosso: fecha de ficha no reconocible');
   const parsedDate = parseObservedDateTime(dateTitle);
   if (!parsedDate) throw new Error('fundacion-piu-mosso: fecha de ficha no reconocible');
-  const time = parseStartClock(timeText);
-  if (timeText && !time) throw new Error('fundacion-piu-mosso: hora de ficha no reconocible');
+  const descriptionHtml = fichaDescriptionHtml(body);
+  const pendingSchedule = isPendingEventInfo(descriptionHtml);
+  const time = pendingSchedule ? undefined : parseStartClock(timeText);
+  if (timeText && !pendingSchedule && !time) throw new Error('fundacion-piu-mosso: hora de ficha no reconocible');
   const occurrence: RawOccurrence = {
     raw: timeText ? `${dateTitle} ${timeText}` : dateTitle,
     date: parsedDate.date,
@@ -119,7 +121,6 @@ export function parsePiumossoDetail(event: RawEvent, body: string): ObservedFact
   const categoryText = categoryNames(
     /<span\b[^>]*class=["'][^"']*\btribe-events-event-categories\b(?!-)[^"']*["'][^>]*>([\s\S]*?)<\/span>/i.exec(details)?.[1] ?? '',
   );
-  const descriptionHtml = fichaDescriptionHtml(body);
   const description = descriptionHtml ? fichaDescriptionText(descriptionHtml) : undefined;
   const programText = descriptionHtml ? extractPiumossoProgramText(descriptionHtml) : undefined;
   const eventStatus = statusFromBody(body);
@@ -147,6 +148,7 @@ type LdEvent = {
   endDate?: string;
   venueText?: string;
   description?: string;
+  pendingSchedule?: boolean;
   eventStatus?: 'scheduled' | 'cancelled' | 'postponed';
 };
 
@@ -216,6 +218,8 @@ function parseLdEvent(item: Record<string, unknown>): LdEvent {
     ? (item.location as Record<string, unknown>)
     : undefined;
   const venueText = location ? asText(location.name) : undefined;
+  const rawDescription = asText(item.description);
+  const pendingSchedule = isPendingEventInfo(rawDescription);
   const description = asHtmlText(item.description);
   const eventStatus = statusFromSchema(asText(item.eventStatus));
   return {
@@ -225,6 +229,7 @@ function parseLdEvent(item: Record<string, unknown>): LdEvent {
     endDate: asText(item.endDate),
     venueText,
     description,
+    ...(pendingSchedule ? { pendingSchedule } : {}),
     eventStatus,
   };
 }
@@ -256,7 +261,7 @@ function toRawEvent(item: LdEvent, card: ListingCard | undefined, sourceId: stri
   if (!card) {
     throw new Error(`fundacion-piu-mosso: cobertura distinta entre JSON-LD y tarjetas (${item.sourceUrl})`);
   }
-  const occurrence = occurrenceFromLd(item.startDate, item.endDate);
+  const occurrence = occurrenceFromLd(item.startDate, item.endDate, item.pendingSchedule);
   if (!occurrence.date) throw new Error('fundacion-piu-mosso: fecha de listado no reconocible');
   return {
     sourceId,
@@ -276,7 +281,11 @@ function toRawEvent(item: LdEvent, card: ListingCard | undefined, sourceId: stri
   };
 }
 
-function occurrenceFromLd(startDate: string, endDate: string | undefined): RawOccurrence {
+function occurrenceFromLd(
+  startDate: string,
+  endDate: string | undefined,
+  pendingSchedule = false,
+): RawOccurrence {
   const start = parseObservedDateTime(startDate);
   if (!start) throw new Error('fundacion-piu-mosso: fecha de listado no reconocible');
   const end = endDate ? parseObservedDateTime(endDate) : undefined;
@@ -284,7 +293,7 @@ function occurrenceFromLd(startDate: string, endDate: string | undefined): RawOc
   return {
     raw: startDate,
     date: start.date,
-    ...(start.time && !allDay ? { time: start.time } : {}),
+    ...(start.time && !allDay && !pendingSchedule ? { time: start.time } : {}),
   };
 }
 
@@ -319,8 +328,24 @@ function fichaDescriptionHtml(html: string): string | undefined {
 
 function fichaDescriptionText(html: string): string | undefined {
   const text = stripTags(html);
-  if (!text || /^estamos esperando informaci[oó]n$/i.test(text)) return undefined;
+  if (!text || isPendingEventInfo(text)) return undefined;
   return text;
+}
+
+/**
+ * The Events Calendar fills a default 08:00–17:00 slot while the ficha still
+ * says the programme is pending. Keep the date; do not treat that plugin
+ * clock as a concert time. A later ficha with a real hour is parsed normally.
+ */
+function isPendingEventInfo(text: string | undefined): boolean {
+  if (!text) return false;
+  const plain = collapseWhitespace(stripTags(decodeHtmlEntities(text.replace(/\\n/g, ' '))));
+  if (!plain) return false;
+  return (
+    /estamos esperando informaci[oó]n/i.test(plain) ||
+    /\binformaci[oó]n(?: del evento)?(?:\s+est[aá])?\s+pendiente\b/i.test(plain) ||
+    /\bpendiente de informaci[oó]n\b/i.test(plain)
+  );
 }
 
 const PROGRAM_HEADING =
@@ -433,7 +458,7 @@ function asHtmlText(value: unknown): string | undefined {
   const raw = asText(value);
   if (!raw) return undefined;
   const text = stripTags(decodeHtmlEntities(raw.replace(/\\n/g, ' ')));
-  if (!text || /^estamos esperando informaci[oó]n$/i.test(text)) return undefined;
+  if (!text || isPendingEventInfo(text)) return undefined;
   return text;
 }
 
