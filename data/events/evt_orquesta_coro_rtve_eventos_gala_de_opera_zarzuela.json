@@ -15,7 +15,36 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Orquesta y Coro RTVE"
+    },
+    {
+      "name": "Miquel Ortega",
+      "role": "conductor"
+    },
+    {
+      "name": "Ana Lucrecia García"
+    },
+    {
+      "name": "Aquiles Machado"
+    },
+    {
+      "name": "José Bros"
+    },
+    {
+      "name": "Borja Quiza"
+    },
+    {
+      "name": "Beatriz Diaz"
+    },
+    {
+      "name": "Mónica Redondo"
+    },
+    {
+      "name": "Beatríz Díaz"
+    }
+  ],
   "composers": [
     {
       "name": "Georges Bizet"

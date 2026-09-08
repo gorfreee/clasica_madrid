@@ -78,8 +78,14 @@ describe('RTVE / Monumental ficha', () => {
     expect(patch.accessText).toBe('Precio desde: 20€');
     expect(patch.programText).toContain('Johannes Brahms (1833-1897) Im Herbst');
     expect(patch.programText).toContain('Carol García');
+    expect(patch.performers).toEqual([
+      { name: 'ORQUESTA Y CORO RTVE' },
+      { name: 'Alexandre Bloch', roleText: 'director' },
+      { name: 'Elena Sancho-Pèreg', roleText: 'soprano' },
+      { name: 'Carol García', roleText: 'mezzosoprano' },
+    ]);
+    expect(patch.performers?.some((item) => /brahms|mahler/i.test(item.name))).toBe(false);
     expect(patch).not.toHaveProperty('composers');
-    expect(patch).not.toHaveProperty('performers');
     expect(patch).not.toHaveProperty('eligibility');
     expect(patch).not.toHaveProperty('eventStatus');
   });
@@ -97,6 +103,55 @@ describe('RTVE / Monumental ficha', () => {
     if (slug === 'traffic-strings') expect(patch.programText).toBeUndefined();
     else expect(patch.programText).toBeTruthy();
     expect(patch.programText ?? '').not.toContain('Comprar entradas');
+  });
+
+  it('extracts explicit Monumental credits for Fuego y Duende without mining programme titles', async () => {
+    const patch = parseRtveDetail(await sample('fuego-y-duende'), await fixture('detail-fuego-y-duende'));
+    expect(patch.performers).toEqual([
+      { name: 'Orquesta Sinfónica y Coro RTVE' },
+      { name: 'Marc Korovitch', roleText: 'director' },
+      { name: 'Juan Manuel Cañizares', roleText: 'guitarra' },
+      { name: 'Antonio Najarro', roleText: 'bailarín' },
+      { name: 'Bailarines de la compañía de Antonio Najarro' },
+    ]);
+    expect(patch.performers?.some((item) => /rimski|verdi|albéniz|falla|soutullo|vives|bizet/i.test(item.name))).toBe(
+      false,
+    );
+    expect(patch.programText).toContain('PROGRAMA');
+    expect(patch).not.toHaveProperty('composers');
+  });
+
+  it('extracts the Gala de Ópera & Zarzuela orchestra, conductor and labelled singers', async () => {
+    const patch = parseRtveDetail(await sample('gala-de-opera-zarzuela'), await fixture('detail-gala-de-opera-zarzuela'));
+    expect(patch.performers).toEqual(
+      expect.arrayContaining([
+        { name: 'Orquesta y Coro RTVE' },
+        { name: 'Miquel Ortega', roleText: 'director' },
+        { name: 'Ana Lucrecia García', roleText: 'soprano' },
+        { name: 'Aquiles Machado', roleText: 'tenor' },
+        { name: 'José Bros', roleText: 'tenor' },
+        { name: 'Borja Quiza', roleText: 'barítono' },
+        { name: 'Mónica Redondo', roleText: 'mezzo' },
+      ]),
+    );
+    expect(patch.performers?.some((item) => /todos los cantantes/i.test(item.name))).toBe(false);
+    expect(patch.performers?.some((item) => /giordano|puccini|verdi|donizetti/i.test(item.name))).toBe(false);
+    expect(new Set(patch.performers?.map((item) => `${item.name}|${item.roleText ?? ''}`)).size).toBe(
+      patch.performers?.length,
+    );
+  });
+
+  it('does not treat unlabelled programme names or song titles as performers', async () => {
+    const abba = parseRtveDetail(await sample('siempre-abba'), await fixture('detail-siempre-abba'));
+    expect(abba.performers).toEqual([
+      { name: 'ORQUESTA Y CORO RTVE' },
+      { name: 'Raúl Benavent', roleText: 'director' },
+    ]);
+    expect(abba.performers?.some((item) => /nogales|mallagarai|ambrosini|santos|chiquitita/i.test(item.name))).toBe(
+      false,
+    );
+    const empty = parseRtveDetail(await sample('traffic-strings'), await fixture('detail-traffic-strings'));
+    expect(empty.performers).toEqual([]);
   });
 
   it('prefers the full text over a read-more preview and excludes footer hours', async () => {

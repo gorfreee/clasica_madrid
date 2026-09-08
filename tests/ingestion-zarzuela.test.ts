@@ -184,6 +184,25 @@ describe('fichas y horarios de Zarzuela', () => {
     expect(patch.accessText).toBeUndefined();
   });
 
+  it('elimina el asterisco de nota al pie en nombres de la Ficha Artística', () => {
+    const patch = parseZarzuelaDetail(
+      raw('andreas-schager'),
+      zarzuelaFicha({
+        title: 'Andreas Schager',
+        intro: '<p>XXXIII Ciclo de Lied</p>',
+        artistic:
+          '<dl><dt>Tenor</dt><dd>ANDREAS SCHAGER *</dd><dt>Piano</dt><dd>GUILLERMO GARCÍA CALVO *</dd></dl><p>* Primera vez en el Ciclo de Lied</p>',
+      }),
+    );
+    expect(patch.performers).toEqual([
+      { name: 'ANDREAS SCHAGER', roleText: 'Tenor' },
+      { name: 'GUILLERMO GARCÍA CALVO', roleText: 'Piano' },
+    ]);
+    expect(patch.performers?.every((item) => !item.name.includes('*'))).toBe(true);
+    expect(patch.performers?.some((item) => /primera vez/i.test(item.name))).toBe(false);
+    expect(patch.description).toMatch(/Primera vez en el Ciclo de Lied/);
+  });
+
   it('completa días enumerados sin mes con el mes y año explícitos de la función accesible', async () => {
     const patch = parseZarzuelaDetail(raw('el-barbarillo-de-lavapies'), await fixture('detail-barberillo'));
     expect(patch.categoryText).toBe('Lírica');

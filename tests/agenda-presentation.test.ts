@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  agendaItemPeopleLine,
   agendaItemSignal,
   buildAgendaPageModel,
   buildFullAgendaFragmentModel,
@@ -278,5 +279,43 @@ describe('señal derecha de la agenda', () => {
   it('gratis sin formato combina — y Gratis', () => {
     const signal = agendaItemSignal(itemFor({ formats: [], kind: 'alternative', access: 'free' }));
     expect(signal).toEqual({ formatLabel: '—', freeLabel: 'Gratis' });
+  });
+});
+
+describe('línea de intérpretes de la agenda', () => {
+  function itemFor(overrides: Partial<Event>) {
+    const event = makeEvent(overrides);
+    const model = buildAgendaPageModel(
+      makeCatalog({ events: [event] }),
+      new URL('https://clasicamadrid.com/'),
+      testClock,
+    );
+    const item = model.days.flatMap((day) => day.items).find((row) => row.eventId === event.id);
+    expect(item).toBeDefined();
+    return item!;
+  }
+
+  it('muestra los performers conocidos', () => {
+    const item = itemFor({
+      performers: [{ name: 'Piotr Anderszewski' }, { name: 'Marc Korovitch', role: 'conductor' }],
+      composers: [{ name: 'Johannes Brahms' }],
+    });
+    expect(agendaItemPeopleLine(item)).toBe('Piotr Anderszewski, Marc Korovitch');
+    expect(item.performers).toEqual(['Piotr Anderszewski', 'Marc Korovitch']);
+  });
+
+  it('no muestra compositores en la línea de intérpretes cuando el elenco es desconocido', () => {
+    const item = itemFor({
+      performers: [],
+      composers: [{ name: 'Johannes Brahms' }, { name: 'Ludwig van Beethoven' }],
+    });
+    expect(item.composers).toEqual(['Johannes Brahms', 'Ludwig van Beethoven']);
+    expect(item.performers).toEqual([]);
+    expect(agendaItemPeopleLine(item)).toBeNull();
+  });
+
+  it('no deja markup de personas cuando no hay performers', () => {
+    const item = itemFor({ performers: [], composers: [] });
+    expect(agendaItemPeopleLine(item)).toBeNull();
   });
 });

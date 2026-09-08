@@ -66,6 +66,29 @@ describe('parser de ficha Auditorio Nacional', () => {
     expect(facts.composers).toEqual([{ name: 'Mikel Urquiza' }, { name: 'Gustav Mahler' }]);
   });
 
+  it('no pega Nacionalesde España al retirar etiquetas inline', () => {
+    const html = `
+      <article id="content">
+        <h1>OCNE. Descubre 01</h1>
+        <div class="content">
+          <h4>Orquesta y Coro Nacionales<span></span>de España<br />Irene Delgado-Jiménez, directora</h4>
+        </div>
+        <div class="rightcolumn">
+          <p class="rightColumn__item">
+            <label class="rightColumn__item__label">Sala:</label>
+            <span class="location sinfonica rightColumn__item__text">Sala Sinfónica</span>
+          </p>
+        </div>
+      </article>
+    `;
+    const facts = parseAuditorioNacionalDetail(html);
+    expect(facts.performers).toEqual([
+      { name: 'Orquesta y Coro Nacionales de España' },
+      { name: 'Irene Delgado-Jiménez', roleText: 'directora' },
+    ]);
+    expect(facts.performers?.some((item) => /nacionalesde/i.test(item.name))).toBe(false);
+  });
+
   it('un programa largo no convierte Bach, BWV, movimientos ni PAUSA en performers', () => {
     const html = `
       <article id="content">

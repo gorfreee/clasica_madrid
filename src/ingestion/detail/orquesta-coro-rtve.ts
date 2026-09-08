@@ -1,7 +1,14 @@
 import { parseObservedDateTime, parseObservedTime } from '../dates.ts';
-import { decodeHtmlEntities, stripTags } from '../html.ts';
-import type { ObservedFactPatch } from '../observed.ts';
+import { flattenHtmlBlocks, decodeHtmlEntities, stripTags } from '../html.ts';
+import {
+  hasComposerYears,
+  looksLikeEnsembleName,
+  looksLikePartHeader,
+  looksLikeProgramHeader,
+} from '../observed-cleanup.ts';
+import { normalizePersonList, type ObservedFactPatch, type ObservedPerson } from '../observed.ts';
 import type { RawEvent, RawOccurrence } from '../types.ts';
+import { parseAuditorioPersonCredits } from './auditorio-segments.ts';
 
 export function parseRtveDetail(event: RawEvent, body: string): ObservedFactPatch {
   const clean = rtveCleanHtml(body);
@@ -58,9 +65,85 @@ export function parseRtveDetail(event: RawEvent, body: string): ObservedFactPatc
     accessText: [...prices].join('; ') || undefined,
     description: programText,
     programText,
-    // Editorial divs do not label composers/works/roles consistently. Preserve
-    // their text for the common pipeline rather than guess from bold names.
+    performers: extractRtvePerformers(content),
+    // Composers and works stay with the common pipeline: names in the programme
+    // are preserved as text rather than guessed from bold type.
   };
+}
+
+const RTVE_ROLE =
+  'mezzosoprano|mezzo|soprano|contratenor|bajo-bar[ií]tono|bar[ií]tono|tenor|bajo|alto|piano|viol[ií]n|viola|violonchelo|violoncelo|cello|contrabajo|flauta|guitarra|arpa|clave|directora|director|direcci[oó]n|solista|bailar[ií]n|bailarina';
+
+const RTVE_PAIRED_ROLES = new RegExp(
+  `^(.+?),\\s+(${RTVE_ROLE})\\s+y\\s+(.+?),\\s+(${RTVE_ROLE})$`,
+  'i',
+);
+
+const RTVE_DANCE_ROLE = /^(.+?),\s+(bailar[ií]n|bailarina)$/i;
+
+/**
+ * Structured credits from a Monumental ficha. The block before PROGRAMA / I PARTE
+ * (or a composer-with-years heading) may include ensembles and explicit roles.
+ * Inside the programme, only unequivocal `Name, role` lines are kept.
+ */
+export function extractRtvePerformers(contentHtml: string): ObservedPerson[] {
+  const performers: ObservedPerson[] = [];
+  let inProgram = false;
+  for (const rawLine of flattenHtmlBlocks(contentHtml).split('\n')) {
+    const line = rawLine.replace(/\s+/g, ' ').trim();
+    if (!line) continue;
+    if (isRtveProgramFrontier(line)) {
+      inProgram = true;
+      continue;
+    }
+    performers.push(...parseRtveCreditLine(line, inProgram));
+  }
+  return normalizePersonList(performers);
+}
+
+function isRtveProgramFrontier(line: string): boolean {
+  if (looksLikeProgramHeader(line) || looksLikePartHeader(line)) return true;
+  return hasComposerYears(line);
+}
+
+function parseRtveCreditLine(line: string, inProgram: boolean): ObservedPerson[] {
+  if (/^todos los cantantes$/i.test(line)) return [];
+
+  const paired = parseRtvePairedRoleCredits(line);
+  if (paired) return paired;
+
+  const dance = RTVE_DANCE_ROLE.exec(line);
+  if (dance?.[1] && dance[2]) {
+    const name = dance[1].trim();
+    if (name && !hasComposerYears(name)) return [{ name, roleText: dance[2].trim() }];
+  }
+
+  const people = parseAuditorioPersonCredits(line).filter((person) => Boolean(person.roleText));
+  if (people.length > 0) return people;
+
+  if (inProgram) return [];
+  if (looksLikeRtveCreditEnsemble(line) && !hasComposerYears(line)) return [{ name: line }];
+  return [];
+}
+
+function parseRtvePairedRoleCredits(line: string): ObservedPerson[] | undefined {
+  const match = RTVE_PAIRED_ROLES.exec(line);
+  if (!match?.[1] || !match[2] || !match[3] || !match[4]) return undefined;
+  const left = parseRtveSingleRoleCredit(match[1], match[2]);
+  const right = parseRtveSingleRoleCredit(match[3], match[4]);
+  if (!left || !right) return undefined;
+  return [left, right];
+}
+
+function parseRtveSingleRoleCredit(name: string, role: string): ObservedPerson | undefined {
+  const people = parseAuditorioPersonCredits(`${name.trim()}, ${role.trim()}`);
+  const person = people.find((item) => item.roleText);
+  return person;
+}
+
+function looksLikeRtveCreditEnsemble(line: string): boolean {
+  if (looksLikeEnsembleName(line)) return true;
+  return /^(?:bailarines?\b.+|compa[ñn][ií]a\s+de\b.+)$/i.test(line);
 }
 
 export function rtveDate(text: string): string {

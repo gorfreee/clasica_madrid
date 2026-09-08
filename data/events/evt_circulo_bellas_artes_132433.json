@@ -15,7 +15,11 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Piotr Anderszewski"
+    }
+  ],
   "composers": [
     {
       "name": "Johannes Brahms"
