@@ -1,64 +1,71 @@
 import { NAV_COLLAPSE_QUERY } from './nav.ts';
 
 /**
- * Progressive enhancement for header disclosures (`<details>`).
- * Open/close already works without JS; this adds Escape, click-outside,
- * exclusive open, and explicit `aria-expanded`.
+ * Header disclosures: Más (desktop) and the mobile section menu.
+ * Markup is a `<button>` plus a `hidden` panel so the trigger is a real
+ * button with `aria-expanded` / `aria-controls`.
  */
 export function initSiteNav(root: ParentNode = document): void {
   const nav = root.querySelector<HTMLElement>('[data-site-nav]');
   if (!nav || nav.dataset.navReady === 'true') return;
   nav.dataset.navReady = 'true';
 
-  const disclosures = [...nav.querySelectorAll<HTMLDetailsElement>('[data-nav-disclosure]')];
+  const disclosures = [...nav.querySelectorAll<HTMLElement>('[data-nav-disclosure]')];
   if (disclosures.length === 0) return;
 
-  const syncExpanded = (details: HTMLDetailsElement) => {
-    const trigger = details.querySelector<HTMLElement>('[data-nav-trigger]');
-    trigger?.setAttribute('aria-expanded', details.open ? 'true' : 'false');
+  const triggerOf = (disclosure: HTMLElement) =>
+    disclosure.querySelector<HTMLElement>('[data-nav-trigger]');
+  const panelOf = (disclosure: HTMLElement) =>
+    disclosure.querySelector<HTMLElement>('[data-nav-panel]');
+  const isOpen = (disclosure: HTMLElement) => disclosure.dataset.navOpen === 'true';
+
+  const setOpen = (disclosure: HTMLElement, open: boolean) => {
+    disclosure.dataset.navOpen = open ? 'true' : 'false';
+    triggerOf(disclosure)?.setAttribute('aria-expanded', open ? 'true' : 'false');
+    const panel = panelOf(disclosure);
+    if (panel) panel.hidden = !open;
   };
 
-  const close = (details: HTMLDetailsElement) => {
-    if (!details.open) return;
-    details.open = false;
-    syncExpanded(details);
-  };
-
-  const closeAll = (except?: HTMLDetailsElement) => {
-    for (const details of disclosures) {
-      if (details !== except) close(details);
+  const close = (disclosure: HTMLElement) => setOpen(disclosure, false);
+  const closeAll = (except?: HTMLElement) => {
+    for (const disclosure of disclosures) {
+      if (disclosure !== except) close(disclosure);
     }
   };
 
-  for (const details of disclosures) {
-    syncExpanded(details);
-    details.addEventListener('toggle', () => {
-      if (details.open) closeAll(details);
-      syncExpanded(details);
+  for (const disclosure of disclosures) {
+    setOpen(disclosure, false);
+    triggerOf(disclosure)?.addEventListener('click', () => {
+      if (isOpen(disclosure)) {
+        close(disclosure);
+        return;
+      }
+      closeAll(disclosure);
+      setOpen(disclosure, true);
     });
 
-    details.addEventListener('focusout', (event) => {
+    disclosure.addEventListener('focusout', (event) => {
       const next = event.relatedTarget;
-      if (next instanceof Node && details.contains(next)) return;
+      if (next instanceof Node && disclosure.contains(next)) return;
       if (!(next instanceof Node)) return;
-      close(details);
+      close(disclosure);
     });
   }
 
   nav.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape') return;
-    const open = disclosures.find((details) => details.open);
+    const open = disclosures.find(isOpen);
     if (!open) return;
     event.preventDefault();
     close(open);
-    open.querySelector<HTMLElement>('[data-nav-trigger]')?.focus();
+    triggerOf(open)?.focus();
   });
 
   document.addEventListener('pointerdown', (event) => {
     const target = event.target;
     if (!(target instanceof Node)) return;
-    for (const details of disclosures) {
-      if (details.open && !details.contains(target)) close(details);
+    for (const disclosure of disclosures) {
+      if (isOpen(disclosure) && !disclosure.contains(target)) close(disclosure);
     }
   });
 
@@ -67,13 +74,9 @@ export function initSiteNav(root: ParentNode = document): void {
     if (!(target instanceof Element)) return;
     const link = target.closest('a');
     if (!link) return;
-    const details = link.closest('details');
-    if (details instanceof HTMLDetailsElement && disclosures.includes(details)) {
-      close(details);
-    }
+    const disclosure = link.closest<HTMLElement>('[data-nav-disclosure]');
+    if (disclosure && disclosures.includes(disclosure)) close(disclosure);
   });
 
-  const media = window.matchMedia(NAV_COLLAPSE_QUERY);
-  const onViewportChange = () => closeAll();
-  media.addEventListener('change', onViewportChange);
+  window.matchMedia(NAV_COLLAPSE_QUERY).addEventListener('change', () => closeAll());
 }

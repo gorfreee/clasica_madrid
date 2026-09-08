@@ -175,7 +175,7 @@ button, input, select { font: inherit; }
 .nav-link:hover,
 .nav-link[aria-current="page"],
 .nav-link[aria-current="true"],
-.nav-disclosure[open] > .nav-trigger { background: var(--blue); }
+.nav-disclosure[data-nav-open="true"] > .nav-trigger { background: var(--blue); }
 .nav-link[aria-current="page"]::after,
 .nav-link[aria-current="true"]::after { background: var(--coral); }
 .nav-disclosure {
@@ -187,16 +187,14 @@ button, input, select { font: inherit; }
   box-sizing: border-box;
   width: 100%;
   margin: 0;
+  border: 0;
+  border-left: 1px solid #44443f;
   border-radius: 0;
   background: transparent;
   cursor: pointer;
   font: inherit;
-  list-style: none;
   user-select: none;
-  appearance: none;
 }
-.nav-trigger::-webkit-details-marker,
-.nav-trigger::marker { display: none; content: none; }
 .nav-trigger--menu {
   min-width: 3.35rem;
   padding-inline: 1rem;
@@ -872,7 +870,7 @@ a.eyebrow:hover { color: var(--blue); }
   .site-header__inner { min-height: 4.8rem; gap: .75rem; }
   .site-mark { gap: .65rem; font-size: .92rem; }
   .site-mark__symbol { width: 2.5rem; }
-  .nav-item--desktop { display: none; }
+  .nav-list > .nav-item--desktop { display: none; }
   .nav-mobile { display: flex; }
   .nav-link { min-width: auto; padding: 1rem .85rem; font-size: .7rem; }
   .nav-link::after { display: none; }

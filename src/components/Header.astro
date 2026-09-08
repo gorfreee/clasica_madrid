@@ -34,17 +34,18 @@ const nav = headerNavigation(Astro.url.pathname);
         {
           nav.showMore && (
             <li class="nav-item--desktop">
-              <details class="nav-disclosure" data-nav-disclosure>
-                <summary
+              <div class="nav-disclosure" data-nav-disclosure>
+                <button
                   class="nav-link nav-trigger"
+                  type="button"
                   data-nav-trigger
                   aria-expanded="false"
                   aria-controls="nav-more-panel"
                   aria-current={nav.moreCurrent ? 'true' : undefined}
                 >
                   <span>{nav.moreLabel}</span>
-                </summary>
-                <ul id="nav-more-panel" class="nav-popover">
+                </button>
+                <ul id="nav-more-panel" class="nav-popover" hidden data-nav-panel>
                   {nav.secondaryLinks.map((link) => (
                     <li>
                       <a href={link.href} aria-current={link.current ? 'page' : undefined}>
@@ -53,16 +54,17 @@ const nav = headerNavigation(Astro.url.pathname);
                     </li>
                   ))}
                 </ul>
-              </details>
+              </div>
             </li>
           )
         }
       </ul>
       {
         nav.mobileMenuLinks.length > 0 && (
-          <details class="nav-disclosure nav-mobile" data-nav-disclosure>
-            <summary
+          <div class="nav-disclosure nav-mobile" data-nav-disclosure>
+            <button
               class="nav-link nav-trigger nav-trigger--menu"
+              type="button"
               data-nav-trigger
               aria-expanded="false"
               aria-controls="nav-mobile-panel"
@@ -75,8 +77,8 @@ const nav = headerNavigation(Astro.url.pathname);
                   <rect width="18" height="2" y="12"></rect>
                 </svg>
               </span>
-            </summary>
-            <ul id="nav-mobile-panel" class="nav-panel">
+            </button>
+            <ul id="nav-mobile-panel" class="nav-panel" hidden data-nav-panel>
               {nav.mobileMenuLinks.map((link) => (
                 <li>
                   <a href={link.href} aria-current={link.current ? 'page' : undefined}>
@@ -85,12 +87,18 @@ const nav = headerNavigation(Astro.url.pathname);
                 </li>
               ))}
             </ul>
-          </details>
+          </div>
         )
       }
     </nav>
   </div>
 </header>
+<noscript>
+  <style>
+    .nav-list > .nav-item--desktop { display: flex !important; }
+    .nav-mobile { display: none !important; }
+  </style>
+</noscript>
 <script>
   import { initSiteNav } from '../lib/presentation/nav-client.ts';
   initSiteNav();
