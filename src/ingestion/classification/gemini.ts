@@ -1,15 +1,16 @@
 import { randomUUID } from 'node:crypto';
 import type { ObservedFacts } from '../observed.ts';
 import {
-  AI_CLASSIFICATION_JSON_SCHEMA, AI_CLASSIFY_TIMEOUT_MS, AiRateLimitedError,
+  AI_CLASSIFY_TIMEOUT_MS, AiRateLimitedError, aiJsonSchemaForPurpose,
   AiUnusableOutputError, failureKindForUnusable, parseAiClassification,
-  sanitizeAiOutputExcerpt, taxonomyFormatsStillUnresolved, type AiAttemptFailure,
+  parseAiOutputForPurpose, sanitizeAiOutputExcerpt, taxonomyFormatsStillUnresolved, type AiAttemptFailure,
   type AiCallContext, type AiCallDiagnostics, type AiCallPurpose, type AiClassifier,
   type AiProviderStats, type AiTokenCounts,
 } from './ai.ts';
 import {
-  AI_CLASSIFIER_SYSTEM_PROMPT, AI_TAXONOMY_SYSTEM_PROMPT,
-  buildAiClassifierUserMessage, buildAiTaxonomyUserMessage,
+  AI_ACCESS_SYSTEM_PROMPT, AI_CLASSIFIER_SYSTEM_PROMPT, AI_COMPOSER_SYSTEM_PROMPT,
+  AI_TAXONOMY_SYSTEM_PROMPT, buildAiAccessUserMessage, buildAiClassifierUserMessage,
+  buildAiComposerUserMessage, buildAiTaxonomyUserMessage,
 } from './ai-prompt.ts';
 import {
   GEMINI_DEFAULT_CONCURRENCY, GEMINI_DEFAULT_LIMITS, intervalMsForRpm, resolveGeminiModels,
@@ -213,7 +214,7 @@ export class GeminiClassifier implements AiClassifier {
       this.stats.httpRequests++;
       bump(this.stats.requestsByModel, model);
       try {
-        const result = await this.request(model, spec, signal);
+        const result = await this.request(model, spec, signal, diagnostics.purpose ?? 'eligibility');
         const state = this.state.model(model, this.clock.now());
         if (result.tokens?.input !== undefined) {
           const recent = state.recent.find((r) => r.id === id);
@@ -224,7 +225,7 @@ export class GeminiClassifier implements AiClassifier {
         }
         diagnostics.status = result.status;
         diagnostics.tokens = result.tokens;
-        const parsed = parseAiClassification(result.value);
+        const parsed = parseAiOutputForPurpose(diagnostics.purpose ?? 'eligibility', result.value);
         if (parsed.ok) {
           // Valid JSON, including legitimate eligibility: uncertain, stops here.
           // Never shop another model to turn uncertain into include.
@@ -394,7 +395,12 @@ export class GeminiClassifier implements AiClassifier {
 
   private get baseUrl(): string { return (this.options.baseUrl ?? GEMINI_DEFAULT_BASE_URL).replace(/\/$/, ''); }
 
-  private async request(model: string, spec: RequestSpec, signal: AbortSignal): Promise<RequestResult> {
+  private async request(
+    model: string,
+    spec: RequestSpec,
+    signal: AbortSignal,
+    purpose: AiCallPurpose,
+  ): Promise<RequestResult> {
     const controller = new AbortController();
     const abort = () => controller.abort();
     signal.addEventListener('abort', abort, { once: true });
@@ -418,7 +424,7 @@ export class GeminiClassifier implements AiClassifier {
         throw httpError(response.status, body.replaceAll(this.options.apiKey, '[redacted]'), response.headers.get('retry-after'), model, this.clock.now());
       }
       const payload = await abortable(response.json(), controller.signal);
-      return this.parseInteraction(model, payload);
+      return this.parseInteraction(model, payload, purpose);
     } catch (error) {
       if (controller.signal.aborted) throw new Error(`tiempo agotado en la clasificación con IA (${timeoutMs}ms)`);
       if (error instanceof SyntaxError) {
@@ -435,7 +441,7 @@ export class GeminiClassifier implements AiClassifier {
     }
   }
 
-  private parseInteraction(model: string, payload: unknown): RequestResult {
+  private parseInteraction(model: string, payload: unknown, purpose: AiCallPurpose): RequestResult {
     const inspected = inspectInteraction(payload, this.options.apiKey);
     let value: unknown | undefined;
     if (inspected.content) {
@@ -454,7 +460,7 @@ export class GeminiClassifier implements AiClassifier {
         );
       }
     }
-    if (value !== undefined && parseAiClassification(value).ok) {
+    if (value !== undefined && parseAiOutputForPurpose(purpose, value).ok) {
       return { value, tokens: inspected.tokens, status: inspected.status, finishReason: inspected.finishReason };
     }
     if (isIncompleteStatus(inspected.status)) {
@@ -484,14 +490,27 @@ function isUnsatisfactoryTaxonomyFormats(
 }
 
 function requestSpec(observed: ObservedFacts, purpose: AiCallPurpose = 'eligibility') {
-  const taxonomy = purpose === 'taxonomy';
+  const prompt = promptForPurpose(observed, purpose);
   return {
     store: false,
-    system_instruction: taxonomy ? AI_TAXONOMY_SYSTEM_PROMPT : AI_CLASSIFIER_SYSTEM_PROMPT,
-    input: taxonomy ? buildAiTaxonomyUserMessage(observed) : buildAiClassifierUserMessage(observed),
-    response_format: { type: 'text', mime_type: 'application/json', schema: AI_CLASSIFICATION_JSON_SCHEMA },
+    system_instruction: prompt.system,
+    input: prompt.user,
+    response_format: { type: 'text', mime_type: 'application/json', schema: aiJsonSchemaForPurpose(purpose) },
     generation_config: { max_output_tokens: 600, tool_choice: 'none' },
   };
+}
+
+function promptForPurpose(observed: ObservedFacts, purpose: AiCallPurpose): { system: string; user: string } {
+  if (purpose === 'taxonomy') {
+    return { system: AI_TAXONOMY_SYSTEM_PROMPT, user: buildAiTaxonomyUserMessage(observed) };
+  }
+  if (purpose === 'access-classification') {
+    return { system: AI_ACCESS_SYSTEM_PROMPT, user: buildAiAccessUserMessage(observed) };
+  }
+  if (purpose === 'composer-extraction') {
+    return { system: AI_COMPOSER_SYSTEM_PROMPT, user: buildAiComposerUserMessage(observed) };
+  }
+  return { system: AI_CLASSIFIER_SYSTEM_PROMPT, user: buildAiClassifierUserMessage(observed) };
 }
 
 function route(diagnostics: AiCallDiagnostics, model: string, reason: string): void {

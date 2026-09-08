@@ -1,6 +1,7 @@
-import type { IngestRunSummary } from './types.ts';
+import { emptyIngestQualitySummary, type IngestRunSummary } from './types.ts';
 
 export function formatRunSummary(summary: IngestRunSummary): string {
+  const quality = summary.quality ?? emptyIngestQualitySummary();
   const lines = [
     `Ventana: ${summary.window.from} → ${summary.window.to}`,
     `Salud: ${summary.health}`,
@@ -39,6 +40,9 @@ export function formatRunSummary(summary: IngestRunSummary): string {
     `  ai-error: ${summary.ai.error}`,
     `  taxonomy intentadas: ${summary.ai.taxonomyAttempted}`,
     `  taxonomy rellenadas: ${summary.ai.taxonomyFilled}`,
+    ...Object.entries(summary.ai.byPurpose).map(([purpose, counts]) =>
+      `  ${purpose}: intentadas ${counts.attempted}, resueltas ${counts.resolved}, sin resolver ${counts.unresolved}, errores ${counts.errors}`,
+    ),
     `  http: ${summary.ai.httpRequests}`,
     `  caché: ${summary.ai.cacheHits}`,
     `  pendientes recuperables: ${summary.ai.deferred}`,
@@ -48,6 +52,11 @@ export function formatRunSummary(summary: IngestRunSummary): string {
     ...formatCountMap('clasificaciones por modelo', summary.ai.classificationsByModel),
     ...formatCountMap('tokens de entrada medidos', summary.ai.inputTokensByModel),
     ...formatCountMap('requests del día (local)', summary.ai.dailyRequestsByModel),
+    'Calidad de metadatos (candidatos de la run):',
+    `  composers: poblados ${quality.composers.populated}, sin resolver ${quality.composers.unresolved}, sin evidencia de programa ${quality.composers.unresolvedNoProgramEvidence}`,
+    `  eras: pobladas ${quality.eras.populated}, sin resolver ${quality.eras.unresolved}`,
+    `  formats: poblados ${quality.formats.populated}, sin resolver ${quality.formats.unresolved}`,
+    `  access: free ${quality.access.free}, paid ${quality.access.paid}, sin resolver ${quality.access.unresolved}, sin evidencia ${quality.access.unresolvedNoEvidence}, con texto ambiguo ${quality.access.unresolvedWithEvidence}`,
     `Descartados estructuralmente: ${summary.skippedUnusable}`,
     `Descartes internos de adapters: ${summary.adapterDiscards?.total ?? 0}`,
     ...formatCountMap('descartes por fuente', summary.adapterDiscards?.bySource ?? {}),

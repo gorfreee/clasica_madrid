@@ -4,7 +4,9 @@ import {
   AI_CLASSIFY_TIMEOUT_MS,
   AiRateLimitedError,
   AiUnusableOutputError,
+  parseAiAccess,
   parseAiClassification,
+  parseAiComposerExtraction,
   type AiCallContext,
   type AiCallDiagnostics,
   type AiCallPurpose,
@@ -13,6 +15,11 @@ import {
 } from './ai.ts';
 import type { ClassificationResult, Resolution, ResolutionMethod } from './types.ts';
 import type { EventKind, Format } from '../../lib/schemas/taxonomies.ts';
+import {
+  accessEvidenceAppears,
+  composerAiHasUsableEvidence,
+  validateAiComposerCandidates,
+} from './ai-metadata.ts';
 
 export { AI_CLASSIFY_TIMEOUT_MS };
 
@@ -28,8 +35,9 @@ export type ClassifyObservedOptions = {
 /**
  * Deterministic classify(), then AI only where it is allowed:
  * - eligibility: only if deterministic is uncertain. Include/exclude are never reopened.
+ * - composers/access: only for included events with unresolved values and observed evidence.
  * - taxonomy: only if the final eligibility is include and eras/formats remain unresolved.
- * Failures of eligibility AI stay uncertain. Failures of taxonomy AI keep the include.
+ * Every metadata failure keeps the deterministic value and the ingest continues.
  */
 export async function classifyObserved(
   facts: ObservedFacts,
@@ -60,9 +68,26 @@ export async function enrichWithAiIfNeeded(
   if (result.eligibility.value !== 'include') return result;
 
   result = ensureTaxonomy(result, facts, options.venue);
+  let enrichedFacts = facts;
+
+  if (options.ai && composerAiHasUsableEvidence(facts)) {
+    result = await enrichComposersWithAi(result, facts, callOptions);
+    if (result.composers && result.composers.value.length > 0) {
+      enrichedFacts = { ...facts, composers: result.composers.value };
+      const eras = resolveEras(enrichedFacts);
+      // A validated observed composer restores deterministic precedence over
+      // an era suggested by the earlier eligibility call.
+      if (eras.value.length > 0) result = { ...result, eras };
+    }
+  }
+
+  if (options.ai && result.access?.value === 'unknown' && facts.accessText?.trim()) {
+    result = await enrichAccessWithAi(result, facts, callOptions);
+  }
+
   if (!taxonomyNeedsAi(result) || !options.ai) return result;
 
-  return enrichTaxonomyWithAi(result, facts, callOptions);
+  return enrichTaxonomyWithAi(result, enrichedFacts, callOptions);
 }
 
 export class AiTimeoutError extends Error {
@@ -102,6 +127,72 @@ async function enrichTaxonomyWithAi(
   const parsed = parseAiClassification(called.value);
   if (!parsed.ok) return current;
   return applyTaxonomyAi(current, facts, parsed.value, options.venue);
+}
+
+async function enrichAccessWithAi(
+  current: ClassificationResult,
+  facts: ObservedFacts,
+  options: ClassifyObservedOptions,
+): Promise<ClassificationResult> {
+  const access = current.access ?? resolveAccess(facts.accessText);
+  if (access.value !== 'unknown' || !facts.accessText?.trim()) return current;
+  const called = await invokeAi(facts, options, 'access-classification');
+  if (!called.ok) {
+    return { ...current, access: keepValueAfterAiError(access, called.error) };
+  }
+  const parsed = parseAiAccess(called.value);
+  if (!parsed.ok) {
+    return { ...current, access: resolution('unknown', 'ai', parsed.ruleId, [parsed.reason]) };
+  }
+  if (!accessEvidenceAppears(facts.accessText, parsed.value.evidence)) {
+    return {
+      ...current,
+      access: resolution('unknown', 'ai', 'ai-access-invalid-evidence', [parsed.value.evidence]),
+    };
+  }
+  return {
+    ...current,
+    access: resolution(
+      parsed.value.classification,
+      'ai',
+      `ai-access-${parsed.value.classification}`,
+      [parsed.value.evidence],
+    ),
+  };
+}
+
+async function enrichComposersWithAi(
+  current: ClassificationResult,
+  facts: ObservedFacts,
+  options: ClassifyObservedOptions,
+): Promise<ClassificationResult> {
+  const called = await invokeAi(facts, options, 'composer-extraction');
+  if (!called.ok) {
+    return {
+      ...current,
+      composers: keepValueAfterAiError(
+        { value: facts.composers, method: 'fallback', ruleId: 'composers-unresolved', evidence: [] },
+        called.error,
+      ),
+    };
+  }
+  const parsed = parseAiComposerExtraction(called.value);
+  if (!parsed.ok) {
+    return {
+      ...current,
+      composers: resolution([], 'ai', parsed.ruleId, [parsed.reason]),
+    };
+  }
+  const validated = validateAiComposerCandidates(parsed.value.candidates, facts);
+  return {
+    ...current,
+    composers: resolution(
+      validated.composers,
+      'ai',
+      validated.composers.length > 0 ? 'ai-composers-validated' : 'ai-composers-unresolved',
+      validated.evidence,
+    ),
+  };
 }
 
 async function invokeAi(
@@ -166,6 +257,7 @@ function applyTaxonomyAi(
     eras: keepResolvedList(current.eras, ai.eras, ai.evidence, 'ai-eras', () => resolveEras(facts)),
     kind: keepResolvedKind(current.kind, facts, venue),
     access: current.access ?? resolveAccess(facts.accessText),
+    ...(current.composers ? { composers: current.composers } : {}),
   };
 }
 
@@ -180,6 +272,7 @@ function ensureTaxonomy(
     eras: result.eras ?? resolveEras(facts),
     kind: result.kind ?? resolveKind(facts, venue),
     access: result.access ?? resolveAccess(facts.accessText),
+    ...(result.composers ? { composers: result.composers } : {}),
   };
 }
 
@@ -248,6 +341,22 @@ function degradeFromError(deterministic: ClassificationResult, error: unknown): 
     return degrade(deterministic, 'ai', error.ruleId, [errorMessage(error)]);
   }
   return degrade(deterministic, 'ai', 'ai-error', [errorMessage(error)]);
+}
+
+function keepValueAfterAiError<T>(current: Resolution<T>, error: unknown): Resolution<T> {
+  return {
+    value: current.value,
+    method: 'ai',
+    ruleId: aiErrorRuleId(error),
+    evidence: uniqueStrings([...current.evidence, errorMessage(error)]),
+  };
+}
+
+function aiErrorRuleId(error: unknown): string {
+  if (isTimeoutError(error)) return 'ai-timeout';
+  if (error instanceof AiRateLimitedError) return 'ai-rate-limited';
+  if (error instanceof AiUnusableOutputError) return error.ruleId;
+  return 'ai-error';
 }
 
 function degrade(

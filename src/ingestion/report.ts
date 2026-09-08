@@ -13,7 +13,7 @@ import type { ReconcileAction } from './reconcile.ts';
 import type { NormalizedEvent } from './normalize.ts';
 import type { ObservedComposer, ObservedPerson, ObservedWork } from './observed.ts';
 import type { AdapterDiscard, IngestRunSummary, RawEvent } from './types.ts';
-import { emptyIngestAiSummary } from './types.ts';
+import { emptyIngestAiSummary, emptyIngestQualitySummary } from './types.ts';
 import { deriveIngestOutcome, type IngestOutcome } from './outcome.ts';
 import type { IngestWindow } from './dates.ts';
 import type { AiCallDiagnostics } from './classification/ai.ts';
@@ -109,6 +109,7 @@ export type IngestEventDecision = {
   eras?: FieldResolution<Era[]>;
   kind?: FieldResolution<EventKind>;
   access?: FieldResolution<AccessMode>;
+  composers?: FieldResolution<ObservedComposer[]>;
   publishable: boolean;
   candidateGenerated: boolean;
   identity?: {
@@ -267,6 +268,8 @@ export function buildEventDecision(input: DecisionInput): IngestEventDecision {
     if (kind) decision.kind = kind;
     const access = fieldOf(classification.access);
     if (access) decision.access = access;
+    const composers = fieldOf(classification.composers);
+    if (composers) decision.composers = composers;
   }
 
   const derived = deriveIngestOutcome(decision);
@@ -322,6 +325,7 @@ export function buildFatalIngestReport(options: {
     skippedUnusable: 0,
     eligibility: { include: 0, exclude: 0, uncertain: 0 },
     ai: emptyIngestAiSummary(),
+    quality: emptyIngestQualitySummary(),
     candidates: 0,
     newEvents: 0,
     updatedEvents: 0,

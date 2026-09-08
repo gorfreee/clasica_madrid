@@ -180,6 +180,18 @@ describe('ingest event report', () => {
     expect(decision.candidate?.venueId).toBe(run.candidates[0]!.event.venueId);
     expect(ai.calls).toBe(0);
     expect(run.candidates).toHaveLength(1);
+    expect(run.summary.quality).toEqual({
+      composers: { populated: 1, unresolved: 0, unresolvedNoProgramEvidence: 0 },
+      eras: { populated: 1, unresolved: 0 },
+      formats: { populated: 1, unresolved: 0 },
+      access: {
+        free: 0,
+        paid: 1,
+        unresolved: 0,
+        unresolvedNoEvidence: 0,
+        unresolvedWithEvidence: 0,
+      },
+    });
   });
 
   it('exclude determinista: no Candidate y sin llamada a IA', async () => {
@@ -238,6 +250,8 @@ describe('ingest event report', () => {
       attempts: 3,
     });
     expect(run.summary.ai.include).toBe(1);
+    expect(run.summary.ai.byPurpose.eligibility).toMatchObject({ attempted: 1, resolved: 1 });
+    expect(run.summary.ai.byPurpose.taxonomy.attempted).toBe(1);
     expect(run.summary.ai.httpRequests).toBe(4);
     expect(run.summary.ai.retries).toBe(2);
     expect(run.summary.ai.modelFallbacks).toBe(1);
@@ -246,6 +260,12 @@ describe('ingest event report', () => {
       'gemini-2.5-flash': 1,
     });
     expect(run.summary.ai.classificationsByModel).toEqual({ 'gemini-2.5-flash': 1 });
+    expect(run.summary.quality).toMatchObject({
+      composers: { populated: 0, unresolved: 1, unresolvedNoProgramEvidence: 1 },
+      eras: { populated: 0, unresolved: 1 },
+      formats: { populated: 0, unresolved: 1 },
+      access: { unresolved: 1, unresolvedNoEvidence: 1, unresolvedWithEvidence: 0 },
+    });
     expect(run.summary.written).toEqual([]);
   });
 

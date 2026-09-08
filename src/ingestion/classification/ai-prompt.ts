@@ -2,6 +2,8 @@ import type { ObservedFacts } from '../observed.ts';
 
 export const AI_CLASSIFIER_PROMPT_VERSION = 8 as const;
 export const AI_TAXONOMY_PROMPT_VERSION = 3 as const;
+export const AI_ACCESS_PROMPT_VERSION = 1 as const;
+export const AI_COMPOSER_PROMPT_VERSION = 1 as const;
 
 export function buildAiClassifierUserMessage(observed: ObservedFacts): string {
   return [
@@ -18,6 +20,32 @@ export function buildAiTaxonomyUserMessage(observed: ObservedFacts): string {
     'Eligibility ya es include. No la cambies. Completa formats/eras/kind si los hechos lo permiten.',
     'Hechos observados (JSON). No inventes campos ausentes.',
     JSON.stringify(observed, null, 2),
+  ].join('\n');
+}
+
+export function buildAiAccessUserMessage(observed: ObservedFacts): string {
+  return [
+    `promptVersion: ${AI_ACCESS_PROMPT_VERSION}`,
+    'purpose: access-classification',
+    'Única evidencia observada permitida (accessText):',
+    observed.accessText ?? '',
+  ].join('\n');
+}
+
+export function buildAiComposerUserMessage(observed: ObservedFacts): string {
+  return [
+    `promptVersion: ${AI_COMPOSER_PROMPT_VERSION}`,
+    'purpose: composer-extraction',
+    'Hechos musicales observados permitidos (JSON):',
+    JSON.stringify(
+      {
+        ...(observed.programText ? { programText: observed.programText } : {}),
+        ...(observed.works.length > 0 ? { works: observed.works } : {}),
+        performers: observed.performers,
+      },
+      null,
+      2,
+    ),
   ].join('\n');
 }
 
@@ -118,3 +146,46 @@ Devuelve ÚNICAMENTE un objeto JSON con esta forma:
 }
 
 No añadas otros campos. No escribas prosa fuera del JSON. Eligibility debe ser "include".`;
+
+/** Interpret only the source's observed access wording. No institutional priors. */
+export const AI_ACCESS_SYSTEM_PROMPT = `Eres el clasificador de acceso de Clásica Madrid.
+
+Principio fundamental: puedes interpretar hechos ya observados, pero no inventar hechos ausentes.
+
+Recibirás exclusivamente accessText copiado de una fuente. Clasifícalo como:
+- free: acceso sin coste, aunque exija reserva, invitación o retirada de entrada; también aportación/donativo voluntario o taquilla inversa;
+- paid: existe un precio, compra, abono o ticket de pago obligatorio; "incluido en otra entrada" también es paid;
+- unknown: el texto no permite saberlo con seguridad.
+
+Guardrails obligatorios:
+- usa únicamente accessText;
+- no infieras por venue, organizador, source, ciclo, tipo de concierto, institución, costumbre ni conocimiento externo;
+- una reserva o ticket sin indicar si tiene coste no basta por sí solo;
+- unknown es una respuesta correcta y preferible a adivinar;
+- evidence debe ser un fragmento literal breve de accessText que respalde la salida.
+
+Devuelve ÚNICAMENTE:
+{"classification":"free"|"paid"|"unknown","evidence":"fragmento literal de accessText"}
+
+No añadas campos ni prosa fuera del JSON.`;
+
+/** Extract people explicitly acting as composers; validation still happens in code. */
+export const AI_COMPOSER_SYSTEM_PROMPT = `Eres el extractor conservador de compositores de Clásica Madrid.
+
+Principio fundamental: puedes interpretar hechos ya observados, pero no inventar hechos ausentes.
+
+Identifica únicamente personas explícitamente mencionadas en el texto musical observado que estén actuando como compositores de obras del programa. No averigües quién es probablemente el compositor.
+
+Guardrails obligatorios:
+- usa sólo programText/works y la lista de performers recibida; no uses navegación, venue, source, organizador ni conocimiento del repertorio habitual de un intérprete;
+- cada name debe aparecer literalmente en el programa o ser la canonicalización inequívoca de una variante que sí aparece;
+- evidence debe ser un fragmento literal del programa que contenga esa mención;
+- no propongas intérpretes, directores, solistas, ensembles, arreglistas ni autores sólo mencionados como homenaje/inspiración;
+- "Jean Rondeau — clave" no permite inferir Bach ni convierte a Jean Rondeau en compositor;
+- "Orquesta X interpreta repertorio romántico" no permite inventar compositores;
+- candidates=[] es correcto cuando la evidencia no basta.
+
+Devuelve ÚNICAMENTE:
+{"candidates":[{"name":"nombre observado","evidence":"fragmento literal del programa"}]}
+
+No añadas campos ni prosa fuera del JSON.`;

@@ -2,6 +2,7 @@ import type { Area, Source } from '../lib/schemas/index.ts';
 import type { IngestHealth } from './health.ts';
 import type { ObservedFactPatch, ObservedFacts } from './observed.ts';
 import type { IngestWindow } from './dates.ts';
+import type { AiCallPurpose } from './classification/ai.ts';
 
 /**
  * Facts observed in a source, before editorial or musical interpretation.
@@ -270,7 +271,19 @@ export type IngestAiSummary = {
   deferred: number;
   inputTokensByModel: Record<string, number>;
   dailyRequestsByModel: Record<string, number>;
+  byPurpose: Record<AiCallPurpose, IngestAiPurposeSummary>;
 };
+
+export type IngestAiPurposeSummary = {
+  attempted: number;
+  resolved: number;
+  unresolved: number;
+  errors: number;
+};
+
+function emptyAiPurposeSummary(): IngestAiPurposeSummary {
+  return { attempted: 0, resolved: 0, unresolved: 0, errors: 0 };
+}
 
 export function emptyIngestAiSummary(): IngestAiSummary {
   return {
@@ -297,6 +310,40 @@ export function emptyIngestAiSummary(): IngestAiSummary {
     deferred: 0,
     inputTokensByModel: {},
     dailyRequestsByModel: {},
+    byPurpose: {
+      eligibility: emptyAiPurposeSummary(),
+      'composer-extraction': emptyAiPurposeSummary(),
+      'access-classification': emptyAiPurposeSummary(),
+      taxonomy: emptyAiPurposeSummary(),
+    },
+  };
+}
+
+export type IngestQualitySummary = {
+  composers: { populated: number; unresolved: number; unresolvedNoProgramEvidence: number };
+  eras: { populated: number; unresolved: number };
+  formats: { populated: number; unresolved: number };
+  access: {
+    free: number;
+    paid: number;
+    unresolved: number;
+    unresolvedNoEvidence: number;
+    unresolvedWithEvidence: number;
+  };
+};
+
+export function emptyIngestQualitySummary(): IngestQualitySummary {
+  return {
+    composers: { populated: 0, unresolved: 0, unresolvedNoProgramEvidence: 0 },
+    eras: { populated: 0, unresolved: 0 },
+    formats: { populated: 0, unresolved: 0 },
+    access: {
+      free: 0,
+      paid: 0,
+      unresolved: 0,
+      unresolvedNoEvidence: 0,
+      unresolvedWithEvidence: 0,
+    },
   };
 }
 
@@ -316,6 +363,8 @@ export type IngestRunSummary = {
     uncertain: number;
   };
   ai: IngestAiSummary;
+  /** Final candidate snapshots produced/reverified by this run. */
+  quality?: IngestQualitySummary;
   candidates: number;
   newEvents: number;
   updatedEvents: number;
