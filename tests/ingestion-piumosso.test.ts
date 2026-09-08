@@ -92,14 +92,19 @@ describe('Fundación Più Mosso listing', () => {
     expect(prisuelos.observed.programText).toBeUndefined();
 
     const festival = events.find((event) => event.externalId === '2195')!;
+    expect(festival.sourceUrl).toBe(
+      'https://www.fundacionpiumosso.com/evento/festival-alicia-de-larrocha-casa-de-vacas-del-retiro',
+    );
     expect(festival.observed.occurrences).toEqual([
-      { raw: '2026-10-10T08:00:00+02:00', date: '2026-10-10', time: '08:00' },
+      { raw: '2026-10-10T08:00:00+02:00', date: '2026-10-10' },
     ]);
+    expect(festival.observed.occurrences[0]?.time).toBeUndefined();
     expect(festival.observed.description).toBeUndefined();
 
     const getafe = events.find((event) => event.externalId === '2197')!;
     expect(getafe.observed.venueText).toBe('Teatro Federico García Lorca');
     expect(getafe.observed.categoryText).toBeUndefined();
+    expect(getafe.observed.occurrences[0]).toMatchObject({ date: '2026-10-17', time: '08:00' });
 
     expect(source.skipDefaultSync).toBeFalsy();
     expect(source.useFetchRelay).toBeFalsy();
@@ -196,11 +201,41 @@ describe('Fundación Più Mosso ficha', () => {
     expect(patch.programText).toBeUndefined();
   });
 
-  it('keeps the published 08:00–17:00 slot and does not invent a concert hour', async () => {
-    const patch = parsePiumossoDetail(await sample('2195'), await fixture('detail-festival'));
-    expect(patch.occurrences).toEqual([{ raw: '2026-10-10 08:00 - 17:00', date: '2026-10-10', time: '08:00' }]);
+  it('keeps the festival date and does not treat a pending 08:00–17:00 plugin slot as a concert hour', async () => {
+    const event = await sample('2195');
+    expect(event.sourceUrl).toBe(
+      'https://www.fundacionpiumosso.com/evento/festival-alicia-de-larrocha-casa-de-vacas-del-retiro',
+    );
+    expect(event.externalId).toBe('2195');
+    const patch = parsePiumossoDetail(event, await fixture('detail-festival'));
+    expect(patch.occurrences).toEqual([{ raw: '2026-10-10 08:00 - 17:00', date: '2026-10-10' }]);
+    expect(patch.occurrences?.[0]?.time).toBeUndefined();
     expect(patch.venueText).toBe('Centro Cultural "Casa de Vacas"');
     expect(patch.description).toBeUndefined();
+
+    const [hydrated] = await hydrateEvents([event], adapter, { ...ctx, get: pages });
+    expect(hydrated?.externalId).toBe('2195');
+    expect(hydrated?.sourceUrl).toBe(event.sourceUrl);
+    expect(hydrated?.observed.occurrences).toEqual([
+      { raw: '2026-10-10 08:00 - 17:00', date: '2026-10-10' },
+    ]);
+    expect(hydrated?.observed.occurrences[0]?.time).toBeUndefined();
+  });
+
+  it('captures a real hour once the ficha is no longer waiting for information', async () => {
+    const event = await sample('2195');
+    const html = (await fixture('detail-festival'))
+      .replace('<p>Estamos esperando información</p>', '<p>Recital de piano.</p>')
+      .replace('08:00 - 17:00', '19:30');
+    const patch = parsePiumossoDetail(event, html);
+    expect(patch.occurrences).toEqual([{ raw: '2026-10-10 19:30', date: '2026-10-10', time: '19:30' }]);
+  });
+
+  it('keeps an explicit 08:00 when the ficha publishes a real concert hour', async () => {
+    const event = await sample();
+    const html = (await fixture('detail-tretyakov')).replaceAll('19:30', '08:00');
+    const patch = parsePiumossoDetail(event, html);
+    expect(patch.occurrences).toEqual([{ raw: '2026-09-12 08:00', date: '2026-09-12', time: '08:00' }]);
   });
 
   it('matches a ficha heading when the listing title only differs by extra spaces', async () => {
@@ -376,6 +411,12 @@ describe('Fundación Più Mosso pipeline safety', () => {
     expect(merged.events.some((event) => event.id === 'evt_fundacionpiumosso_com_mario_prisuelos_musica_callada_de_frederic_mompou')).toBe(true);
     expect(merged.events.some((event) => event.venueId === 'ven_casa_vacas_retiro' && event.citations[0]?.url.includes('victor-tretyakov'))).toBe(true);
     expect(merged.events.some((event) => event.citations[0]?.url.includes('festival-alicia-de-larrocha'))).toBe(true);
+    const festival = merged.events.find((event) =>
+      event.citations[0]?.url.includes('festival-alicia-de-larrocha-casa-de-vacas-del-retiro'),
+    );
+    expect(festival?.occurrences).toEqual([
+      expect.objectContaining({ date: '2026-10-10', time: null }),
+    ]);
     expect(merged.events.some((event) => event.citations[0]?.url.includes('getafe'))).toBe(false);
 
     const second = await runIngest({
