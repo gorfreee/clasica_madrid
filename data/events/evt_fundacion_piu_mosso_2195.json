@@ -11,7 +11,7 @@
     {
       "id": "occ_fundacion_piu_mosso_2195_01",
       "date": "2026-10-10",
-      "time": "08:00",
+      "time": null,
       "status": "scheduled"
     }
   ],
@@ -28,10 +28,10 @@
     {
       "sourceId": "src_fundacionpiumosso_com",
       "url": "https://www.fundacionpiumosso.com/evento/festival-alicia-de-larrocha-casa-de-vacas-del-retiro",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-08",
       "externalId": "2195"
     }
   ],
   "primarySourceId": "src_fundacionpiumosso_com",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-08"
 }

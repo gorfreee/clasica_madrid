@@ -13,7 +13,7 @@
     {
       "id": "occ_coma_coro_cam_20260926_01",
       "date": "2026-09-26",
-      "time": null,
+      "time": "12:00",
       "status": "scheduled"
     }
   ],
@@ -45,10 +45,10 @@
     {
       "sourceId": "src_teatros_canal",
       "url": "https://www.teatroscanal.com/espectaculo/festival-coma-2026",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-08",
       "externalId": "71611:2026-09-26"
     }
   ],
   "primarySourceId": "src_teatros_canal",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-08"
 }
