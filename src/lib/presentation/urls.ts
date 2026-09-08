@@ -17,6 +17,11 @@ export function publicUrl(path: string): string {
   return new URL(publicPath(path), SITE_ORIGIN).href;
 }
 
+/** Public files keep their filename and must not receive the page trailing slash. */
+export function publicAssetUrl(path: string): string {
+  return new URL(path.trim(), `${SITE_ORIGIN}/`).href;
+}
+
 export function eventPath(slug: string): string {
   return publicPath(`/eventos/${slug}`);
 }

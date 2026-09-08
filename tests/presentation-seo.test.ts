@@ -1,13 +1,36 @@
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { buildAgendaPageModel } from '../src/lib/presentation/agenda.ts';
+import {
+  BRAND_BLUE,
+  DEFAULT_SOCIAL_IMAGE_ALT,
+  DEFAULT_SOCIAL_IMAGE_PATH,
+  SITE_BACKGROUND,
+} from '../src/lib/presentation/constants.ts';
 import { buildEventPageModel } from '../src/lib/presentation/event.ts';
+import { buildSocialImageMetadata } from '../src/lib/presentation/social.ts';
 import { sitemapLastmodMap, sitemapPageFilter } from '../src/lib/presentation/sitemap.ts';
-import { eventPath, publicPath, publicUrl, venuePath } from '../src/lib/presentation/urls.ts';
+import {
+  eventPath,
+  publicAssetUrl,
+  publicPath,
+  publicUrl,
+  venuePath,
+} from '../src/lib/presentation/urls.ts';
 import { buildVenuePageModel, buildVenuesIndexModel } from '../src/lib/presentation/venue.ts';
 import { richCatalog, testClock } from './helpers.ts';
 
 function musicEvents(jsonLd: Record<string, unknown>[]) {
   return jsonLd.filter((item) => item['@type'] === 'MusicEvent');
+}
+
+const publicDir = path.join(import.meta.dirname, '..', 'public');
+
+function pngDimensions(relativePath: string): { width: number; height: number } {
+  const png = readFileSync(path.join(publicDir, relativePath));
+  expect(png.subarray(1, 4).toString('ascii')).toBe('PNG');
+  return { width: png.readUInt32BE(16), height: png.readUInt32BE(20) };
 }
 
 describe('URLs públicas', () => {
@@ -18,6 +41,56 @@ describe('URLs públicas', () => {
     expect(eventPath('carmen')).toBe('/eventos/carmen/');
     expect(venuePath('auditorio-nacional')).toBe('/lugares/auditorio-nacional/');
     expect(publicUrl('/eventos/carmen')).toBe('https://clasicamadrid.com/eventos/carmen/');
+    expect(publicAssetUrl('/brand/card.png')).toBe('https://clasicamadrid.com/brand/card.png');
+  });
+});
+
+describe('social sharing e identidad', () => {
+  it('usa por defecto la social card global con URL pública absoluta', () => {
+    expect(buildSocialImageMetadata()).toEqual({
+      url: `https://clasicamadrid.com${DEFAULT_SOCIAL_IMAGE_PATH}`,
+      alt: DEFAULT_SOCIAL_IMAGE_ALT,
+    });
+  });
+
+  it('respeta una socialImage alternativa y la convierte en URL pública absoluta', () => {
+    expect(buildSocialImageMetadata('/brand/evento-especial.png', 'Evento especial')).toEqual({
+      url: 'https://clasicamadrid.com/brand/evento-especial.png',
+      alt: 'Evento especial',
+    });
+  });
+
+  it('publica el manifest mínimo con colores e iconos reales', () => {
+    const manifest = JSON.parse(readFileSync(path.join(publicDir, 'site.webmanifest'), 'utf8'));
+    expect(manifest).toMatchObject({
+      name: 'Clásica Madrid',
+      short_name: 'Clásica Madrid',
+      start_url: '/',
+      scope: '/',
+      display: 'browser',
+      theme_color: BRAND_BLUE,
+      background_color: SITE_BACKGROUND,
+    });
+    expect(manifest.icons).toEqual([
+      { src: '/brand/clasica-madrid-icon-192.png', sizes: '192x192', type: 'image/png' },
+      { src: '/brand/clasica-madrid-icon-512.png', sizes: '512x512', type: 'image/png' },
+    ]);
+  });
+
+  it('mantiene las dimensiones requeridas de todos los PNG declarados', () => {
+    expect(pngDimensions('brand/clasica-madrid-social-card.png')).toEqual({
+      width: 1200,
+      height: 630,
+    });
+    expect(pngDimensions('apple-touch-icon.png')).toEqual({ width: 180, height: 180 });
+    expect(pngDimensions('brand/clasica-madrid-icon-192.png')).toEqual({
+      width: 192,
+      height: 192,
+    });
+    expect(pngDimensions('brand/clasica-madrid-icon-512.png')).toEqual({
+      width: 512,
+      height: 512,
+    });
   });
 });
 
