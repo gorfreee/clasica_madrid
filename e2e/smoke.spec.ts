@@ -201,3 +201,17 @@ test.describe('ficha de evento', () => {
     ).toBeVisible();
   });
 });
+
+test.describe('dirección', () => {
+  test('la ficha de un lugar con calle abre instrucciones en Google Maps', async ({ page }) => {
+    await page.goto('/lugares/teatro-real/');
+    const maps = page.getByRole('link', { name: /Cómo llegar a / });
+    await expect(maps).toBeVisible();
+    await expect(maps).toHaveAttribute(
+      'href',
+      /^https:\/\/www\.google\.com\/maps\/dir\/\?api=1&destination=/,
+    );
+    await expect(maps).toHaveAttribute('target', '_blank');
+    await expect(maps).toHaveAttribute('rel', 'noopener noreferrer');
+  });
+});

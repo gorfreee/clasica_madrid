@@ -1,0 +1,32 @@
+---
+import type { PlaceAddressModel } from '../lib/presentation/place-address.ts';
+
+type Props = {
+  address: PlaceAddressModel;
+  variant?: 'compact' | 'hero';
+};
+
+const { address, variant = 'compact' } = Astro.props;
+---
+
+<a
+  class:list={['place-address', `place-address--${variant}`]}
+  href={address.mapsUrl}
+  target="_blank"
+  rel="noopener noreferrer"
+  aria-label={address.accessibleLabel}
+>
+  <span class="place-address__pin" aria-hidden="true">
+    <svg viewBox="0 0 24 24" focusable="false">
+      <path
+        fill-rule="evenodd"
+        d="M12 2.25c-4.28 0-7.75 3.32-7.75 7.85 0 5.72 6.38 11.18 7.42 12.04a.5.5 0 0 0 .66 0c1.04-.86 7.42-6.32 7.42-12.04 0-4.53-3.47-7.85-7.75-7.85Zm0 5.15a2.7 2.7 0 1 1 0 5.4 2.7 2.7 0 0 1 0-5.4Z"
+      ></path>
+    </svg>
+  </span>
+  <span class="place-address__body">
+    <span class="place-address__line">{address.line}</span>
+    {address.locality && <span class="place-address__locality">{address.locality}</span>}
+  </span>
+  <span class="place-address__action" aria-hidden="true">{address.actionLabel}</span>
+</a>
