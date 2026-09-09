@@ -995,8 +995,8 @@ describe('taxonomy enrichment — separado de eligibility', () => {
 describe('taxonomy AI prompt', () => {
   const prompt = AI_TAXONOMY_SYSTEM_PROMPT;
 
-  it('is version 4 so results are distinguishable from earlier taxonomy prompts', () => {
-    expect(AI_TAXONOMY_PROMPT_VERSION).toBe(4);
+  it('is version 5 so results are distinguishable from earlier taxonomy prompts', () => {
+    expect(AI_TAXONOMY_PROMPT_VERSION).toBe(5);
   });
 
   it('asks for a format when observed facts support a musical inference', () => {
@@ -1006,6 +1006,7 @@ describe('taxonomy AI prompt', () => {
     expect(prompt).toMatch(/formats=\[\] s[oó]lo si realmente no hay evidencia suficiente/);
     expect(prompt).toMatch(/No uses other simplemente para evitar un array vac[ií]o/);
     expect(prompt).toMatch(/no inventes performers, instrumentos/);
+    expect(prompt).toMatch(/biograf[ií]a o el historial/);
     expect(prompt).toMatch(/NO rellenes eras/);
     expect(prompt).toMatch(/eras: siempre \[\]/);
     expect(prompt).not.toMatch(/formats y eras vac[ií]os son preferibles a adivinar/);

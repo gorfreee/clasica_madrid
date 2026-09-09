@@ -1265,18 +1265,31 @@ describe('formats', () => {
     ).toEqual(['choral']);
   });
 
-  it('usa señales inequívocas de sinfonía, orquesta, órgano, coro, trío y rol solista', () => {
+  it('usa señales inequívocas de sinfonía, orquesta, órgano, coro, trío, dúo y rol solista', () => {
+    expect(
+      resolveFormats(facts({ title: 'Concierto sinfónico' })).value,
+    ).toEqual(['symphonic']);
+
     expect(
       resolveFormats(
         facts({
-          title: 'Programa clásico',
-          programText: 'Johannes Brahms: Sinfonía núm. 1',
+          title: 'Temporada',
+          categoryText: 'Concierto sinfónico',
         }),
       ).value,
     ).toEqual(['symphonic']);
 
     expect(
       resolveFormats(facts({ title: 'Orquesta Nacional de España. Temporada' })).value,
+    ).toEqual(['symphonic']);
+
+    expect(
+      resolveFormats(
+        facts({
+          title: 'Temporada',
+          performers: [{ name: 'Orquesta Sinfónica de Madrid' }],
+        }),
+      ).value,
     ).toEqual(['symphonic']);
 
     expect(
@@ -1292,6 +1305,10 @@ describe('formats', () => {
     ).toEqual(['chamber']);
 
     expect(
+      resolveFormats(facts({ title: 'Dúo Mujeres Compositoras. Del Clásico a lo Conceptual' })).value,
+    ).toEqual(['chamber']);
+
+    expect(
       resolveFormats(
         facts({
           title: 'CNDM. Recital',
@@ -1299,6 +1316,70 @@ describe('formats', () => {
         }),
       ).value,
     ).toEqual(['recital']);
+  });
+
+  it('no clasifica formato por biografías que mencionan otras formaciones', () => {
+    const pianistWithOrchestraBio = resolveFormats(
+      facts({
+        title: 'Martín Llade y Darío Meta. Los Románticos y la Poesía',
+        description:
+          'Darío Meta, pianista. Ha colaborado con the Orchestra of the Americas y otras orquestas sinfónicas. Recital de piano y poesía.',
+        performers: [
+          { name: 'Martín Llade' },
+          { name: 'Darío Meta', roleText: 'piano' },
+        ],
+      }),
+    );
+    expect(pianistWithOrchestraBio.value).not.toContain('symphonic');
+    expect(pianistWithOrchestraBio.value).toContain('recital');
+
+    const flutePianoDuo = resolveFormats(
+      facts({
+        title: 'Dúo flauta y piano',
+        description:
+          'La flautista ha sido solista de varias orquestas y de the Orchestra of the Americas. El pianista ha tocado con orquestas sinfónicas de Europa.',
+        performers: [
+          { name: 'Ana Flauta', roleText: 'flauta' },
+          { name: 'Luis Piano', roleText: 'piano' },
+        ],
+      }),
+    );
+    expect(flutePianoDuo.value).toContain('chamber');
+    expect(flutePianoDuo.value).not.toContain('symphonic');
+
+    const soloistWithChamberBio = resolveFormats(
+      facts({
+        title: 'Karin Lechner, la gran pianista y la vida y obra de Cécile Chaminade',
+        description:
+          'Karin Lechner ha cultivado la música de cámara y ha formado parte de tríos y cuartetos a lo largo de su carrera. Este programa es un recital de piano dedicado a Chaminade.',
+        performers: [{ name: 'Karin Lechner', roleText: 'piano' }],
+      }),
+    );
+    expect(soloistWithChamberBio.value).not.toContain('chamber');
+    expect(soloistWithChamberBio.value).toContain('recital');
+  });
+
+  it('no infiere symphonic de una sinfonía en el programa sin formación orquestal del evento', () => {
+    expect(
+      resolveFormats(
+        facts({
+          title: 'Programa clásico',
+          programText: 'Johannes Brahms: Sinfonía núm. 1',
+        }),
+      ).value,
+    ).toEqual([]);
+  });
+
+  it('no trata a los solistas de una orquesta como concierto sinfónico', () => {
+    expect(
+      resolveFormats(
+        facts({
+          title: 'Domingos de Cámara I',
+          categoryText: 'Domingos de Cámara',
+          performers: [{ name: 'solistas de la Orquesta Titular del Teatro Real' }],
+        }),
+      ).value,
+    ).toEqual(['chamber']);
   });
 
   it('asigna chamber/symphonic a categorías municipales inequívocas', () => {
