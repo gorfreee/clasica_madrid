@@ -245,8 +245,9 @@ function apply(): void {
     userExpanded: runtime.userExpanded,
     hasMoreOccurrences: runtime.hasMoreOccurrences,
   });
+  const initialIds = runtime.initialOccurrenceIds;
   const visible = truncated
-    ? new Set([...matching].filter((id) => runtime.initialOccurrenceIds.has(id)))
+    ? new Set([...matching].filter((id) => initialIds.has(id)))
     : matching;
 
   for (const article of list.querySelectorAll<HTMLElement>('[data-occurrence-id]')) {
