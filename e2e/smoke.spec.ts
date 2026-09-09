@@ -201,3 +201,23 @@ test.describe('ficha de evento', () => {
     ).toBeVisible();
   });
 });
+
+test.describe('pie de página', () => {
+  test('el logotipo del pie vuelve al comienzo de la página', async ({ page }) => {
+    await page.goto('/');
+    await expect(visibleOccurrences(page).first()).toBeVisible();
+
+    const footerLogo = page
+      .locator('footer')
+      .getByRole('link', { name: 'Clásica Madrid, volver al comienzo' });
+    await footerLogo.scrollIntoViewIfNeeded();
+    await expect(footerLogo).toHaveAttribute('href', '#top');
+
+    const scrolled = await page.evaluate(() => window.scrollY);
+    expect(scrolled).toBeGreaterThan(200);
+
+    await footerLogo.click();
+    await expect.poll(async () => page.evaluate(() => window.scrollY)).toBeLessThan(20);
+    await expect(page).toHaveURL(/#top$/);
+  });
+});
