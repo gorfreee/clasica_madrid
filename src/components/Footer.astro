@@ -1,13 +1,12 @@
 ---
+import { SITE_NAME } from '../lib/presentation/constants.ts';
 import LogoSymbol from './LogoSymbol.astro';
 ---
 
 <footer class="site-footer">
-  <div class="site-footer__mark" aria-hidden="true">
+  <a class="site-footer__mark" href="#top" aria-label={`${SITE_NAME}, volver al comienzo`}>
     <LogoSymbol />
-  </div>
+  </a>
   <p class="site-footer__statement">Toda la clásica.<br />Todo Madrid.</p>
-  <p class="site-footer__note">
-    Agenda pública con fuentes originales.<br />Sin cookies ni analítica.
-  </p>
+  <p class="site-footer__note">© {SITE_NAME}</p>
 </footer>

@@ -824,7 +824,13 @@ a.eyebrow:hover { color: var(--blue); }
   padding: 2.5rem 0 4rem;
   border-top: 2px solid var(--ink);
 }
-.site-footer__mark { width: 5rem; color: var(--blue); }
+.site-footer__mark {
+  display: block;
+  width: 5rem;
+  color: var(--blue);
+  text-decoration: none;
+}
+.site-footer__mark:hover { text-decoration: none; }
 .site-footer__mark svg { display: block; width: 100%; height: auto; fill: currentColor; }
 .site-footer__statement, .site-footer__note { margin: 0; }
 .site-footer__statement { font-size: clamp(1.5rem, 3vw, 2.5rem); font-weight: 800; letter-spacing: -.04em; line-height: .98; }
