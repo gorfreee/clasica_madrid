@@ -3,7 +3,7 @@ import { explicitAccessText } from './access-evidence.ts';
 import { collapseWhitespace, decodeHtmlEntities, flattenHtmlBlocks, stripTags } from '../html.ts';
 import { emptyObservedLists, type ObservedFactPatch } from '../observed.ts';
 import { normalizeUrl } from '../urls.ts';
-import type { RawEvent, RawOccurrence } from '../types.ts';
+import { reportAdapterDiscard, type AdapterContext, type RawEvent, type RawOccurrence } from '../types.ts';
 
 const HOSTS = new Set(['www.fundacionpiumosso.com', 'fundacionpiumosso.com']);
 const EVENT_PATH = /^\/evento\/[a-z0-9_-]+$/i;
@@ -29,7 +29,7 @@ export function piumossoEventUrl(href: string, base?: string): string | undefine
   }
 }
 
-export function extractPiumossoListing(body: string, url: string, sourceId: string): RawEvent[] {
+export function extractPiumossoListing(body: string, url: string, ctx: AdapterContext): RawEvent[] {
   assertListingSurface(body, url);
   const grids = piumossoDivs(body, /<div\b[^>]*id=["']ect-grid-wrapper["'][^>]*>/i);
   if (grids.length === 0) throw new Error('fundacion-piu-mosso: falta la cuadrícula de programación');
@@ -53,7 +53,7 @@ export function extractPiumossoListing(body: string, url: string, sourceId: stri
 
   const events = new Map<string, RawEvent>();
   for (const item of ldEvents) {
-    const raw = toRawEvent(item, byUrl.get(item.sourceUrl), sourceId);
+    const raw = toRawEvent(item, byUrl.get(item.sourceUrl), ctx.source.id);
     if (events.has(raw.sourceUrl) || (raw.externalId && [...events.values()].some((event) => event.externalId === raw.externalId))) {
       throw new Error('fundacion-piu-mosso: evento duplicado');
     }
@@ -72,7 +72,23 @@ export function extractPiumossoListing(body: string, url: string, sourceId: stri
       `fundacion-piu-mosso: cobertura distinta entre JSON-LD y tarjetas (${missingFromLd[0]})`,
     );
   }
-  return [...events.values()].sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
+
+  const kept: RawEvent[] = [];
+  for (const item of ldEvents) {
+    const raw = events.get(item.sourceUrl);
+    if (!raw) continue;
+    if (item.pendingSchedule) {
+      reportAdapterDiscard(ctx, {
+        reason: 'pending-information',
+        title: raw.observed.title,
+        sourceUrl: raw.sourceUrl,
+        ...(raw.externalId ? { externalId: raw.externalId } : {}),
+      });
+      continue;
+    }
+    kept.push(raw);
+  }
+  return kept.sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
 }
 
 export function parsePiumossoDetail(event: RawEvent, body: string): ObservedFactPatch {
@@ -104,7 +120,7 @@ export function parsePiumossoDetail(event: RawEvent, body: string): ObservedFact
   const parsedDate = parseObservedDateTime(dateTitle);
   if (!parsedDate) throw new Error('fundacion-piu-mosso: fecha de ficha no reconocible');
   const descriptionHtml = fichaDescriptionHtml(body);
-  const pendingSchedule = isPendingEventInfo(descriptionHtml);
+  const pendingSchedule = isPendingEventInfo(listingTitle) || isPendingEventInfo(descriptionHtml);
   const time = pendingSchedule ? undefined : parseStartClock(timeText);
   if (timeText && !pendingSchedule && !time) throw new Error('fundacion-piu-mosso: hora de ficha no reconocible');
   const occurrence: RawOccurrence = {
@@ -222,7 +238,7 @@ function parseLdEvent(item: Record<string, unknown>): LdEvent {
     : undefined;
   const venueText = location ? asText(location.name) : undefined;
   const rawDescription = asText(item.description);
-  const pendingSchedule = isPendingEventInfo(rawDescription);
+  const pendingSchedule = isPendingEventInfo(title) || isPendingEventInfo(rawDescription);
   const description = asHtmlText(item.description);
   const eventStatus = statusFromSchema(asText(item.eventStatus));
   return {
@@ -337,17 +353,19 @@ function fichaDescriptionText(html: string): string | undefined {
 
 /**
  * The Events Calendar fills a default 08:00–17:00 slot while the ficha still
- * says the programme is pending. Keep the date; do not treat that plugin
- * clock as a concert time. A later ficha with a real hour is parsed normally.
+ * says the programme is pending. Placeholder copy also appears in the event
+ * title (`… - Esperando Información`). Those slots are discarded at extract so
+ * they never become canonical events; a later listing with a real title is
+ * accepted normally. Do not treat the plugin clock as a concert time.
  */
 function isPendingEventInfo(text: string | undefined): boolean {
   if (!text) return false;
-  const plain = collapseWhitespace(stripTags(decodeHtmlEntities(text.replace(/\\n/g, ' '))));
+  const plain = normalizeLoose(decodeHtmlEntities(text.replace(/\\n/g, ' ')));
   if (!plain) return false;
   return (
-    /estamos esperando informaci[oó]n/i.test(plain) ||
-    /\binformaci[oó]n(?: del evento)?(?:\s+est[aá])?\s+pendiente\b/i.test(plain) ||
-    /\bpendiente de informaci[oó]n\b/i.test(plain)
+    /\besperando informacion\b/.test(plain) ||
+    /\binformacion(?: del evento)?(?: esta)? pendiente\b/.test(plain) ||
+    /\bpendiente de informacion\b/.test(plain)
   );
 }
 
