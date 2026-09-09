@@ -19,13 +19,15 @@
  * - `[data-result-count]` — live result count (always over the full catalog)
  * - `[data-no-results]` — empty-filter state
  * - `[data-clear-filters]` — reset to `/`
- * - `[data-agenda-more]` — truncated-state controls (`Mostrar todos`)
+ * - `[data-agenda-more]` — truncated-state controls (`Mostrar todos`);
+ *   hidden while filters are active or after the user expands the list
  * - `[data-agenda-showing]` — “Mostrando X de Y” while truncated
  * - `[data-load-full-agenda]` — fetches `/_agenda/completa/` once
  * - `[data-agenda-load-error]` — fetch failure alert
  *
  * The homepage serializes only the initial subset. The full index and markup
- * live at `FULL_AGENDA_FRAGMENT_PATH` and are fetched on demand.
+ * live at `FULL_AGENDA_FRAGMENT_PATH` and are fetched on demand. Clearing
+ * filters restores that subset unless the user has clicked «Mostrar todos».
  */
 import {
   canonicalVenueFilter,
@@ -48,6 +50,9 @@ type AgendaRuntime = {
   dataNode: HTMLElement;
   upcomingTotal: number;
   items: FilterableOccurrence[];
+  initialOccurrenceIds: Set<string>;
+  hasMoreOccurrences: boolean;
+  userExpanded: boolean;
   fullLoaded: boolean;
   loadPromise: Promise<boolean> | null;
 };
@@ -55,6 +60,20 @@ type AgendaRuntime = {
 let runtime: AgendaRuntime | null = null;
 
 const SEARCH_PLACEHOLDER_WIDE_MQ = '(min-width: 901px)';
+
+/**
+ * Unfiltered homepage stays on the initial subset until the user clicks
+ * «Mostrar todos». Applying a filter loads the full catalog so matches
+ * beyond the cutoff are visible; clearing filters must not keep that
+ * expanded list unless the user already asked to see everything.
+ */
+export function showTruncatedAgenda(options: {
+  hasActiveFilters: boolean;
+  userExpanded: boolean;
+  hasMoreOccurrences: boolean;
+}): boolean {
+  return options.hasMoreOccurrences && !options.hasActiveFilters && !options.userExpanded;
+}
 
 function bindSearchPlaceholder(form: HTMLFormElement | null): void {
   const input = form?.querySelector<HTMLInputElement>('input[name="q"]');
@@ -89,6 +108,7 @@ export function initAgendaFilters(): void {
   }
   if (!Array.isArray(parsedItems)) return;
 
+  const upcomingTotal = Number(root.dataset.upcomingCount) || parsedItems.length;
   runtime = {
     root,
     form,
@@ -97,8 +117,11 @@ export function initAgendaFilters(): void {
     clear,
     activeFilters,
     dataNode,
-    upcomingTotal: Number(root.dataset.upcomingCount) || parsedItems.length,
+    upcomingTotal,
     items: parsedItems,
+    initialOccurrenceIds: new Set(parsedItems.map((item) => item.occurrenceId)),
+    hasMoreOccurrences: parsedItems.length < upcomingTotal,
+    userExpanded: false,
     fullLoaded: root.hasAttribute('data-agenda-complete'),
     loadPromise: null,
   };
@@ -134,7 +157,10 @@ export function initAgendaFilters(): void {
     });
   });
   root.querySelector('[data-load-full-agenda]')?.addEventListener('click', () => {
+    if (!runtime) return;
+    runtime.userExpanded = true;
     void ensureFullAgendaLoaded().then((ok) => {
+      if (!ok && runtime) runtime.userExpanded = false;
       if (ok) apply();
     });
   });
@@ -212,8 +238,16 @@ function apply(): void {
   const venue = canonicalVenueFilter(runtime.items, parsed.venue);
   const filters: AgendaFilters = venue ? { ...parsed, venue } : { ...parsed, venue: undefined };
   const visibleItems = selectVisibleOccurrences(runtime.items, filters, new Date());
-  const visible = new Set(visibleItems.map((item) => item.occurrenceId));
+  const matching = new Set(visibleItems.map((item) => item.occurrenceId));
   const active = hasActiveFilters(filters);
+  const truncated = showTruncatedAgenda({
+    hasActiveFilters: active,
+    userExpanded: runtime.userExpanded,
+    hasMoreOccurrences: runtime.hasMoreOccurrences,
+  });
+  const visible = truncated
+    ? new Set([...matching].filter((id) => runtime.initialOccurrenceIds.has(id)))
+    : matching;
 
   for (const article of list.querySelectorAll<HTMLElement>('[data-occurrence-id]')) {
     const id = article.dataset.occurrenceId;
@@ -240,14 +274,24 @@ function apply(): void {
   }
 
   if (runtime.count) {
-    const displayed = !runtime.fullLoaded && !active ? runtime.upcomingTotal : visible.size;
+    const displayed = active ? matching.size : runtime.upcomingTotal;
     runtime.count.textContent = occurrenceCountLabel(displayed);
-    runtime.count.hidden = active && visible.size === 0;
+    runtime.count.hidden = active && matching.size === 0;
   }
-  if (runtime.noResults) runtime.noResults.hidden = visible.size > 0;
+  if (runtime.noResults) runtime.noResults.hidden = matching.size > 0;
   if (runtime.clear) runtime.clear.hidden = !active;
+  syncMoreControls(truncated);
   syncForm(runtime.form, filters);
   renderActiveFilters(runtime.activeFilters, runtime.form, filters);
+}
+
+function syncMoreControls(truncated: boolean): void {
+  if (!runtime) return;
+  const more = runtime.root.querySelector<HTMLElement>('[data-agenda-more]');
+  const button = runtime.root.querySelector<HTMLButtonElement>('[data-load-full-agenda]');
+  if (!more) return;
+  more.hidden = !truncated;
+  if (button && truncated) button.disabled = false;
 }
 
 function showFailedFilterState(href: string): void {
@@ -263,7 +307,6 @@ function showFailedFilterState(href: string): void {
 async function loadFullAgenda(state: AgendaRuntime): Promise<boolean> {
   const button = state.root.querySelector<HTMLButtonElement>('[data-load-full-agenda]');
   const errorEl = state.root.querySelector<HTMLElement>('[data-agenda-load-error]');
-  const more = state.root.querySelector<HTMLElement>('[data-agenda-more]');
   state.root.setAttribute('aria-busy', 'true');
   if (button) button.disabled = true;
   if (errorEl) errorEl.hidden = true;
@@ -285,8 +328,6 @@ async function loadFullAgenda(state: AgendaRuntime): Promise<boolean> {
     state.items = parsed.items;
     state.fullLoaded = true;
     state.root.setAttribute('data-agenda-complete', '');
-    if (more) more.hidden = true;
-    apply();
     const list = state.root.querySelector<HTMLElement>('[data-agenda-list]');
     list?.setAttribute('tabindex', '-1');
     list?.focus({ preventScroll: true });

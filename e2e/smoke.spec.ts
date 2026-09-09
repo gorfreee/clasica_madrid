@@ -98,6 +98,7 @@ test.describe('agenda', () => {
     await expect(visibleOccurrences(page).first()).toBeVisible();
     const initialCount = await visibleOccurrences(page).count();
     const initialLabel = await page.locator('[data-result-count]').innerText();
+    const hadMore = await page.getByRole('button', { name: 'Mostrar todos' }).isVisible();
 
     const form = page.locator('[data-agenda-filters]');
     await form.getByRole('searchbox').fill(NO_MATCH_QUERY);
@@ -108,11 +109,14 @@ test.describe('agenda', () => {
 
     await expect(page).toHaveURL('/');
     const restoredCount = await visibleOccurrences(page).count();
-    expect(restoredCount).toBeGreaterThanOrEqual(initialCount);
+    expect(restoredCount).toBe(initialCount);
     await expect(page.locator('[data-result-count]')).toHaveText(initialLabel);
     await expect(page.locator('[data-no-results]')).toBeHidden();
     await expect(page.locator('[data-clear-filters]')).toBeHidden();
     await expect(form.getByRole('searchbox')).toHaveValue('');
+    if (hadMore) {
+      await expect(page.getByRole('button', { name: 'Mostrar todos' })).toBeVisible();
+    }
   });
 
   test('atrás del navegador restaura la agenda vía popstate', async ({ page }) => {
@@ -130,7 +134,7 @@ test.describe('agenda', () => {
 
     await expect(page).toHaveURL('/');
     const restoredCount = await visibleOccurrences(page).count();
-    expect(restoredCount).toBeGreaterThanOrEqual(initialCount);
+    expect(restoredCount).toBe(initialCount);
     await expect(page.locator('[data-no-results]')).toBeHidden();
     await expect(form.getByRole('searchbox')).toHaveValue('');
 
