@@ -15,7 +15,15 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Nil Venditti",
+      "role": "conductor"
+    },
+    {
+      "name": "Álvaro Lozano"
+    }
+  ],
   "composers": [
     {
       "name": "Dmitri Shostakóvich"
@@ -37,10 +45,10 @@
     {
       "sourceId": "src_orquesta_coro_rtve",
       "url": "https://www.teatromonumental.es/eventos/jovenes-musicos-iv",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-09",
       "externalId": "/eventos/jovenes-musicos-iv/"
     }
   ],
   "primarySourceId": "src_orquesta_coro_rtve",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-09"
 }

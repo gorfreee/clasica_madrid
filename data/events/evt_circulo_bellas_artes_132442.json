@@ -15,7 +15,11 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Elisabeth Leonskaja"
+    }
+  ],
   "composers": [],
   "works": [],
   "eras": [
@@ -31,10 +35,10 @@
     {
       "sourceId": "src_circulo_bellas_artes",
       "url": "https://www.circulobellasartes.com/eventos/elisabeth-leonskaja-piano-2026-27",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-09",
       "externalId": "132442"
     }
   ],
   "primarySourceId": "src_circulo_bellas_artes",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-09"
 }

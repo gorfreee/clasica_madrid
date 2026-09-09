@@ -21,7 +21,27 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Orquesta y Coro RTVE"
+    },
+    {
+      "name": "Marc Korovitch",
+      "role": "conductor"
+    },
+    {
+      "name": "Axelle Fanyo"
+    },
+    {
+      "name": "Floriane Hasler"
+    },
+    {
+      "name": "Kevin Amiel"
+    },
+    {
+      "name": "Alejandro Baliñas"
+    }
+  ],
   "composers": [
     {
       "name": "Giuseppe Verdi"
@@ -40,10 +60,10 @@
     {
       "sourceId": "src_orquesta_coro_rtve",
       "url": "https://www.teatromonumental.es/eventos/concierto-sinfonico-a-17",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-09",
       "externalId": "/eventos/concierto-sinfonico-a-17/"
     }
   ],
   "primarySourceId": "src_orquesta_coro_rtve",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-09"
 }

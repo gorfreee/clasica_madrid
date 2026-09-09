@@ -15,7 +15,15 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Orquesta RTVE"
+    },
+    {
+      "name": "Jordi Francés",
+      "role": "conductor"
+    }
+  ],
   "composers": [
     {
       "name": "Gustav Mahler"
@@ -34,10 +42,10 @@
     {
       "sourceId": "src_orquesta_coro_rtve",
       "url": "https://www.teatromonumental.es/eventos/ensayo-general-b-18",
-      "checkedAt": "2026-09-08",
+      "checkedAt": "2026-09-09",
       "externalId": "/eventos/ensayo-general-b-18/"
     }
   ],
   "primarySourceId": "src_orquesta_coro_rtve",
-  "lastVerifiedAt": "2026-09-08"
+  "lastVerifiedAt": "2026-09-09"
 }

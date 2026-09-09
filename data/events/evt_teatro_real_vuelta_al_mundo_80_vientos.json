@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_real_vuelta_al_mundo_80_vientos",
+  "slug": "la-vuelta-al-mundo-en-80-vientos",
+  "title": "La vuelta al mundo en 80 vientos",
+  "status": "scheduled",
+  "venueId": "ven_real_teatro_retiro_sala_pacifico",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_real_vuelta_al_mundo_80_vientos_01",
+      "date": "2027-01-16",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_vuelta_al_mundo_80_vientos_02",
+      "date": "2027-01-16",
+      "time": "17:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_vuelta_al_mundo_80_vientos_03",
+      "date": "2027-01-17",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_vuelta_al_mundo_80_vientos_04",
+      "date": "2027-01-23",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_vuelta_al_mundo_80_vientos_05",
+      "date": "2027-01-23",
+      "time": "17:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatro_real_vuelta_al_mundo_80_vientos_06",
+      "date": "2027-01-24",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_teatro_real",
+      "url": "https://www.teatroreal.es/es/espectaculo/vuelta-al-mundo-80-vientos",
+      "checkedAt": "2026-09-09",
+      "externalId": "vuelta-al-mundo-80-vientos"
+    }
+  ],
+  "primarySourceId": "src_teatro_real",
+  "lastVerifiedAt": "2026-09-09"
+}
