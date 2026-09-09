@@ -19,7 +19,7 @@ import { isPublishableInclude } from '../src/ingestion/classification/types.ts';
 import { enrichNormalizedEvent } from '../src/ingestion/enrich-normalized.ts';
 import { normalizeRawEvent, observedFactsFromNormalized } from '../src/ingestion/normalize.ts';
 import { toCandidate } from '../src/ingestion/to-candidate.ts';
-import type { AdapterContext, RawEvent } from '../src/ingestion/types.ts';
+import type { AdapterContext, AdapterDiscardReport, RawEvent } from '../src/ingestion/types.ts';
 import { TEST_NOW, TEST_WINDOW, makeEvent } from './helpers.ts';
 
 const source = getSourceDefinition(adapter.id);
@@ -59,10 +59,18 @@ async function sample(id = '2187'): Promise<RawEvent> {
 
 describe('Fundación Più Mosso listing', () => {
   it('reads JSON-LD events with stable CMS ids and only observed listing facts', async () => {
-    const events = await adapter.extract(await fixture('listing'), listingUrl, ctx);
-    expect(events).toHaveLength(4);
-    expect(new Set(events.map((event) => event.externalId)).size).toBe(4);
+    const { events, discards } = await extractListed(await fixture('listing'));
+    expect(events).toHaveLength(3);
+    expect(new Set(events.map((event) => event.externalId)).size).toBe(3);
+    expect(events.map((event) => event.externalId).sort()).toEqual(['2187', '2192', '2197']);
     expect(events.every((event) => event.sourceUrl.startsWith('https://www.fundacionpiumosso.com/evento/'))).toBe(true);
+    expect(discards).toEqual([
+      expect.objectContaining({
+        reason: 'pending-information',
+        externalId: '2195',
+        sourceUrl: 'https://www.fundacionpiumosso.com/evento/festival-alicia-de-larrocha-casa-de-vacas-del-retiro',
+      }),
+    ]);
 
     const piano = events.find((event) => event.externalId === '2187')!;
     expect(piano.sourceUrl).toBe('https://www.fundacionpiumosso.com/evento/victor-tretyakov-piano');
@@ -91,16 +99,6 @@ describe('Fundación Più Mosso listing', () => {
     expect(prisuelos.observed.accessText).toBeUndefined();
     expect(prisuelos.observed.occurrences[0]).toMatchObject({ date: '2026-09-20', time: '19:30' });
     expect(prisuelos.observed.programText).toBeUndefined();
-
-    const festival = events.find((event) => event.externalId === '2195')!;
-    expect(festival.sourceUrl).toBe(
-      'https://www.fundacionpiumosso.com/evento/festival-alicia-de-larrocha-casa-de-vacas-del-retiro',
-    );
-    expect(festival.observed.occurrences).toEqual([
-      { raw: '2026-10-10T08:00:00+02:00', date: '2026-10-10' },
-    ]);
-    expect(festival.observed.occurrences[0]?.time).toBeUndefined();
-    expect(festival.observed.description).toBeUndefined();
 
     const getafe = events.find((event) => event.externalId === '2197')!;
     expect(getafe.observed.venueText).toBe('Teatro Federico García Lorca');
@@ -253,7 +251,7 @@ describe('Fundación Più Mosso ficha', () => {
   });
 
   it('keeps the festival date and does not treat a pending 08:00–17:00 plugin slot as a concert hour', async () => {
-    const event = await sample('2195');
+    const event = await festivalListingEvent();
     expect(event.sourceUrl).toBe(
       'https://www.fundacionpiumosso.com/evento/festival-alicia-de-larrocha-casa-de-vacas-del-retiro',
     );
@@ -264,7 +262,14 @@ describe('Fundación Più Mosso ficha', () => {
     expect(patch.venueText).toBe('Centro Cultural "Casa de Vacas"');
     expect(patch.description).toBeUndefined();
 
-    const [hydrated] = await hydrateEvents([event], adapter, { ...ctx, get: pages });
+    const listedWithoutPluginHour: RawEvent = {
+      ...event,
+      observed: {
+        ...event.observed,
+        occurrences: [{ raw: event.observed.occurrences[0]!.raw, date: '2026-10-10' }],
+      },
+    };
+    const [hydrated] = await hydrateEvents([listedWithoutPluginHour], adapter, { ...ctx, get: pages });
     expect(hydrated?.externalId).toBe('2195');
     expect(hydrated?.sourceUrl).toBe(event.sourceUrl);
     expect(hydrated?.observed.occurrences).toEqual([
@@ -274,7 +279,7 @@ describe('Fundación Più Mosso ficha', () => {
   });
 
   it('captures a real hour once the ficha is no longer waiting for information', async () => {
-    const event = await sample('2195');
+    const event = await festivalListingEvent();
     const html = (await fixture('detail-festival'))
       .replace('<p>Estamos esperando información</p>', '<p>Recital de piano.</p>')
       .replace('08:00 - 17:00', '19:30');
@@ -434,6 +439,204 @@ describe('Fundación Più Mosso programText', () => {
   });
 });
 
+describe('Fundación Più Mosso pending information', () => {
+  it('does not extract a slot whose title is the only pending-information signal', async () => {
+    const title = 'Festival Alicia de Larrocha en la Casa de Vacas - Esperando Información';
+    const { events, discards } = await extractListed(
+      programacionPage(
+        oneCardListing(
+          '5001',
+          'https://www.fundacionpiumosso.com/evento/festival-placeholder-titulo/',
+          title,
+          '2026-09-12T08:00:00+02:00',
+        ),
+      ),
+    );
+    expect(events).toEqual([]);
+    expect(discards).toEqual([
+      expect.objectContaining({
+        reason: 'pending-information',
+        externalId: '5001',
+        title,
+        sourceUrl: 'https://www.fundacionpiumosso.com/evento/festival-placeholder-titulo',
+      }),
+    ]);
+  });
+
+  it('does not extract a slot whose title and description both wait for information', async () => {
+    const title = 'IV. Edición del Festival Alicia de Larrocha. Casa de Vacas del Retiro - Esperando Información';
+    const { events, discards } = await extractListed(
+      programacionPage(
+        oneCardListing(
+          '5002',
+          'https://www.fundacionpiumosso.com/evento/festival-placeholder-ambos/',
+          title,
+          '2026-09-09T08:00:00+02:00',
+          'Estamos esperando información',
+        ),
+      ),
+    );
+    expect(events).toEqual([]);
+    expect(discards).toEqual([
+      expect.objectContaining({
+        reason: 'pending-information',
+        externalId: '5002',
+        title,
+      }),
+    ]);
+  });
+
+  it('does not keep a plugin calendar hour on a pending slot and does not hydrate it', async () => {
+    const title = 'Festival Alicia de Larrocha en Casa de Vacas IV. EDICIÓN - Esperando Información';
+    const html = programacionPage(
+      oneCardListing(
+        '5003',
+        'https://www.fundacionpiumosso.com/evento/festival-placeholder-hora/',
+        title,
+        '2026-09-12T08:00:00+02:00',
+        undefined,
+        'Gratuito',
+        'Centro Cultural "Casa de Vacas"',
+      ),
+    );
+    const listingEvent = await festivalListingEvent();
+    const patch = parsePiumossoDetail(listingEvent, await fixture('detail-festival'));
+    expect(patch.occurrences?.[0]?.time).toBeUndefined();
+    expect(patch.occurrences).toEqual([{ raw: '2026-10-10 08:00 - 17:00', date: '2026-10-10' }]);
+
+    const run = await runIngest({
+      now: TEST_NOW,
+      dryRun: true,
+      catalog: catalogWithMompou(),
+      window: TEST_WINDOW,
+      sourceIds: [source.id],
+      dataDir: await mkdtemp(path.join(os.tmpdir(), 'piumosso-pending-hour-')),
+      get: async (url) => {
+        if (url === listingUrl) return html;
+        throw new Error(`no debe hidratarse un placeholder: ${url}`);
+      },
+    });
+    expect(run.summary.sourcesFailed).toEqual([]);
+    expect(run.rawEvents).toHaveLength(0);
+    expect(run.candidates).toHaveLength(0);
+    expect(run.summary.newEvents).toBe(0);
+    expect(run.summary.adapterDiscards).toEqual({
+      total: 1,
+      bySource: { 'fundacion-piu-mosso': 1 },
+      byReason: { 'pending-information': 1 },
+    });
+    expect(run.adapterDiscards[0]).toMatchObject({
+      reason: 'pending-information',
+      externalId: '5003',
+    });
+  });
+
+  it('still extracts a normal Più Mosso concert', async () => {
+    const { events, discards } = await extractListed(
+      programacionPage(
+        oneCardListing(
+          '2187',
+          'https://www.fundacionpiumosso.com/evento/victor-tretyakov-piano/',
+          'VICTOR TRETYAKOV, Piano',
+          '2026-09-12T19:30:00+02:00',
+          'Schumann - Chopin',
+        ),
+      ),
+    );
+    expect(discards).toEqual([]);
+    expect(events).toHaveLength(1);
+    expect(events[0]?.externalId).toBe('2187');
+    expect(events[0]?.observed.title).toBe('VICTOR TRETYAKOV, Piano');
+    expect(events[0]?.observed.occurrences[0]).toMatchObject({ date: '2026-09-12', time: '19:30' });
+    expect(events[0]?.observed.description).toContain('Schumann');
+  });
+
+  it('accepts the same externalId once the source replaces the placeholder with a real title', async () => {
+    const url = 'https://www.fundacionpiumosso.com/evento/recital-ana-perez/';
+    const pending = await extractListed(
+      programacionPage(
+        oneCardListing(
+          '4001',
+          url,
+          'Festival Alicia de Larrocha en Su IV. EDICIÓN. Casa de Vacas - Esperando Información',
+          '2026-09-18T08:00:00+02:00',
+        ),
+      ),
+    );
+    expect(pending.events).toHaveLength(0);
+    expect(pending.discards).toEqual([
+      expect.objectContaining({ reason: 'pending-information', externalId: '4001' }),
+    ]);
+
+    const ready = await extractListed(
+      programacionPage(
+        oneCardListing(
+          '4001',
+          url,
+          'Ana Pérez, piano',
+          '2026-09-18T19:30:00+02:00',
+          'Obras de Chopin',
+        ),
+      ),
+    );
+    expect(ready.discards).toEqual([]);
+    expect(ready.events).toHaveLength(1);
+    expect(ready.events[0]?.externalId).toBe('4001');
+    expect(ready.events[0]?.observed.title).toBe('Ana Pérez, piano');
+    expect(ready.events[0]?.observed.occurrences[0]).toMatchObject({ date: '2026-09-18', time: '19:30' });
+    expect(ready.events[0]?.observed.description).toContain('Chopin');
+  });
+
+  it('matches pending copy case-insensitively and without diacritics, without obvious false positives', async () => {
+    const pendingTitles = [
+      'Festival Alicia de Larrocha - Esperando Información',
+      'Festival Alicia de Larrocha - ESPERANDO INFORMACION',
+      'Festival Alicia de Larrocha - esperando   información',
+      'Festival Alicia de Larrocha - Esperando informacion',
+    ];
+    for (const title of pendingTitles) {
+      const { events, discards } = await extractListed(
+        programacionPage(
+          oneCardListing(
+            '6001',
+            'https://www.fundacionpiumosso.com/evento/festival-pending-case/',
+            title,
+            '2026-09-12T19:30:00+02:00',
+          ),
+        ),
+      );
+      expect(events, title).toEqual([]);
+      expect(discards, title).toEqual([
+        expect.objectContaining({ reason: 'pending-information', externalId: '6001' }),
+      ]);
+    }
+
+    const realTitles = [
+      'Recital de piano. Más información en taquilla',
+      'Próximamente en Casa de Vacas: recital de Chopin',
+      'Esperando a los solistas del conservatorio',
+      'Información al público',
+    ];
+    for (const title of realTitles) {
+      const { events, discards } = await extractListed(
+        programacionPage(
+          oneCardListing(
+            '6002',
+            'https://www.fundacionpiumosso.com/evento/festival-real-titulo/',
+            title,
+            '2026-09-12T19:30:00+02:00',
+            'Recital de piano.',
+          ),
+        ),
+      );
+      expect(discards, title).toEqual([]);
+      expect(events, title).toHaveLength(1);
+      expect(events[0]?.observed.title).toBe(title);
+      expect(events[0]?.observed.occurrences[0]?.time).toBe('19:30');
+    }
+  });
+});
+
 describe('Fundación Più Mosso pipeline safety', () => {
   it('publishes Madrid concerts, skips an unrecognized venue, matches the existing Mompou event and stays idempotent', async () => {
     expect(matchVenue({ venueText: 'Ateneo de Madrid', sourceId: source.id }, emptyCatalog())?.venue.id).toBe(
@@ -454,20 +657,19 @@ describe('Fundación Più Mosso pipeline safety', () => {
       get: pages,
     });
     expect(first.summary.sourcesFailed).toEqual([]);
-    expect(first.rawEvents).toHaveLength(4);
+    expect(first.rawEvents).toHaveLength(3);
     expect(first.summary.possiblyMissing).toBe(0);
-    expect(first.summary.newEvents).toBe(2);
+    expect(first.summary.newEvents).toBe(1);
     expect(first.summary.updatedEvents + first.summary.unchangedEvents).toBe(1);
+    expect(first.summary.adapterDiscards).toEqual({
+      total: 1,
+      bySource: { 'fundacion-piu-mosso': 1 },
+      byReason: { 'pending-information': 1 },
+    });
     const merged = mergeCandidateBatch(catalog, first.candidates).catalog;
     expect(merged.events.some((event) => event.id === 'evt_fundacionpiumosso_com_mario_prisuelos_musica_callada_de_frederic_mompou')).toBe(true);
     expect(merged.events.some((event) => event.venueId === 'ven_casa_vacas_retiro' && event.citations[0]?.url.includes('victor-tretyakov'))).toBe(true);
-    expect(merged.events.some((event) => event.citations[0]?.url.includes('festival-alicia-de-larrocha'))).toBe(true);
-    const festival = merged.events.find((event) =>
-      event.citations[0]?.url.includes('festival-alicia-de-larrocha-casa-de-vacas-del-retiro'),
-    );
-    expect(festival?.occurrences).toEqual([
-      expect.objectContaining({ date: '2026-10-10', time: null }),
-    ]);
+    expect(merged.events.some((event) => event.citations[0]?.url.includes('festival-alicia-de-larrocha'))).toBe(false);
     expect(merged.events.some((event) => event.citations[0]?.url.includes('getafe'))).toBe(false);
 
     const second = await runIngest({
@@ -539,6 +741,7 @@ function oneCardListing(
   startDate: string,
   description?: string,
   cost?: string,
+  venue = 'Ateneo de Madrid',
 ): string {
   const ld = JSON.stringify([
     {
@@ -547,7 +750,7 @@ function oneCardListing(
       name: title,
       url,
       startDate,
-      location: { '@type': 'Place', name: 'Ateneo de Madrid' },
+      location: { '@type': 'Place', name: venue },
       ...(description ? { description } : {}),
     },
   ]);
@@ -555,6 +758,38 @@ function oneCardListing(
     ? `<div class="ect-grid-cost"><div class="ect-rate-area"><span class="ect-rate">${cost}</span></div></div>`
     : '';
   return `<script type="application/ld+json">${ld}</script><div id="ect-grid-wrapper"><div id="event-${id}" class="ect-grid-event"><div class="ect-grid-title"><h4><a class="ect-event-url" href="${url}">${title}</a></h4></div>${costBlock}</div></div>`;
+}
+
+function programacionPage(...cards: string[]): string {
+  return `<body class="page"><h1>Programación</h1>${cards.join('')}</body>`;
+}
+
+async function extractListed(html: string): Promise<{ events: RawEvent[]; discards: AdapterDiscardReport[] }> {
+  const discards: AdapterDiscardReport[] = [];
+  const events = await adapter.extract(html, listingUrl, {
+    ...ctx,
+    reportDiscard: (discard) => discards.push(discard),
+  });
+  return { events, discards };
+}
+
+async function festivalListingEvent(): Promise<RawEvent> {
+  const { events, discards } = await extractListed(
+    programacionPage(
+      oneCardListing(
+        '2195',
+        'https://www.fundacionpiumosso.com/evento/festival-alicia-de-larrocha-casa-de-vacas-del-retiro/',
+        'FESTIVAL ALICIA DE LARROCHA, Casa de Vacas del Retiro',
+        '2026-10-10T08:00:00+02:00',
+        undefined,
+        undefined,
+        'Centro Cultural "Casa de Vacas"',
+      ),
+    ),
+  );
+  expect(discards).toEqual([]);
+  expect(events[0]).toBeDefined();
+  return events[0]!;
 }
 
 function tretyakovWithCost(html: string, cost: string): string {

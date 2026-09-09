@@ -8,7 +8,7 @@ export const fundacionPiuMossoAdapter: SourceAdapter = {
     return [source.urls[0]];
   },
   extract(body, url, ctx) {
-    return extractPiumossoListing(body, url, ctx.source.id);
+    return extractPiumossoListing(body, url, ctx);
   },
   hydrate: parsePiumossoDetail,
 };
