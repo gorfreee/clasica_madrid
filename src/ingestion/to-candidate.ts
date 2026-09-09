@@ -2,7 +2,7 @@ import { madridToday } from '../lib/domain/dates.ts';
 import type { Catalog } from '../lib/domain/catalog.ts';
 import type { Candidate } from '../lib/schemas/candidate.ts';
 import type { Event, Occurrence, Venue } from '../lib/schemas/index.ts';
-import { resolvePerformerRole } from './classification/performer-role.ts';
+import { canonicalizePerformerList } from './classification/performer-role.ts';
 import type { PublishableClassification } from './classification/types.ts';
 import { eventIdFor, occurrenceIdFor, uniqueId, uniqueSlug } from './ids.ts';
 import { normalizeUrl, urlPathIdentity } from './urls.ts';
@@ -13,7 +13,7 @@ import { defaultIngestWindow, isDateInHarvestScope, type IngestWindow } from './
 import { ID_PREFIX } from '../lib/schemas/taxonomies.ts';
 import { SOURCE_REGISTRY, resolveCatalogSource } from './registry.ts';
 import { canonicalizeComposerList, canonicalizeWorkList } from './composer-name.ts';
-import { canonicalizeEventTitle, canonicalizePerformerName } from './event-title.ts';
+import { canonicalizeEventTitle } from './event-title.ts';
 
 export type CandidateBuild = {
   candidate?: Candidate;
@@ -82,11 +82,7 @@ export function toCandidate(
     organizerIds: [],
     seriesId: null,
     occurrences,
-    performers: event.performers.map((item) => {
-      const name = canonicalizePerformerName(item.name);
-      const role = resolvePerformerRole(item.roleText);
-      return role ? { name, role } : { name };
-    }),
+    performers: canonicalizePerformerList(event.performers),
     composers: canonicalizeComposerList(event.composers),
     works: canonicalizeWorkList(event.works),
     eras: classification.eras?.value ?? [],
