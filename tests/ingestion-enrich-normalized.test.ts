@@ -84,6 +84,46 @@ describe('enriquecimiento determinista de compositores conocidos', () => {
     expect(enriched.composers).toEqual([]);
   });
 
+  it('no añade el pariente homónimo cuando el programText nombra a otro miembro de la familia', () => {
+    expect(
+      enrichNormalizedEvent(
+        event({
+          title: 'Recital de clave',
+          programText: [
+            'Johann Christian Bach (1735-1782)',
+            'Sinfonía en sol menor, op. 6 n.º 6',
+            'Concierto para clave en mi bemol mayor, op. 7 n.º 5',
+          ].join('\n'),
+        }),
+      ).composers,
+    ).toEqual([{ name: 'Johann Christian Bach' }]);
+
+    expect(
+      enrichNormalizedEvent(
+        event({
+          title: 'Recital de piano',
+          programText: 'Clara Schumann — Notturno, op. 6 n.º 2',
+        }),
+      ).composers,
+    ).toEqual([{ name: 'Clara Schumann' }]);
+
+    expect(
+      enrichNormalizedEvent(
+        event({
+          title: 'Recital de piano',
+          programText: [
+            'Clara Schumann — Notturno, op. 6 n.º 2',
+            'Robert Schumann — Carnaval, op. 9',
+          ].join('\n'),
+        }),
+      ).composers.map((item) => item.name),
+    ).toEqual(['Clara Schumann', 'Robert Schumann']);
+
+    expect(
+      enrichNormalizedEvent(event({ title: 'Recital', programText: 'Bach: Suite n.º 1' })).composers,
+    ).toEqual([{ name: 'Johann Sebastian Bach' }]);
+  });
+
   it('no infiere compositores de menciones contextuales ya protegidas', () => {
     for (const programText of [
       'Un homenaje a Rameau en clave contemporánea',
