@@ -1,4 +1,5 @@
 import { parseObservedDateTime, parseObservedTime } from '../dates.ts';
+import { explicitAccessText } from './access-evidence.ts';
 import { collapseWhitespace, decodeHtmlEntities, flattenHtmlBlocks, stripTags } from '../html.ts';
 import { emptyObservedLists, type ObservedFactPatch } from '../observed.ts';
 import { normalizeUrl } from '../urls.ts';
@@ -115,9 +116,11 @@ export function parsePiumossoDetail(event: RawEvent, body: string): ObservedFact
   const venueText = stripTags(
     /<li\b[^>]*\btribe-venue\b[^>]*>([\s\S]*?)<\/li>/i.exec(body)?.[1] ?? '',
   ) || undefined;
-  const accessText = stripTags(
-    /<span\b[^>]*class=["'][^"']*\btribe-events-event-cost\b(?!-)[^"']*["'][^>]*>([\s\S]*?)<\/span>/i.exec(details)?.[1] ?? '',
-  ) || undefined;
+  const accessText = explicitAccessText(
+    stripTags(
+      /<span\b[^>]*class=["'][^"']*\btribe-events-event-cost\b(?!-)[^"']*["'][^>]*>([\s\S]*?)<\/span>/i.exec(details)?.[1] ?? '',
+    ),
+  );
   const categoryText = categoryNames(
     /<span\b[^>]*class=["'][^"']*\btribe-events-event-categories\b(?!-)[^"']*["'][^>]*>([\s\S]*?)<\/span>/i.exec(details)?.[1] ?? '',
   );
@@ -307,7 +310,7 @@ function cardCost(card: string): string | undefined {
   const block = /<div\b[^>]*\bect-grid-cost\b[^>]*>([\s\S]*?)<\/div>/i.exec(card)?.[1];
   if (!block) return undefined;
   const withoutLinks = block.replace(/<a\b[\s\S]*?<\/a>/gi, ' ');
-  return stripTags(withoutLinks) || undefined;
+  return explicitAccessText(stripTags(withoutLinks));
 }
 
 function categoryNames(html: string): string | undefined {

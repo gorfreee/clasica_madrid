@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { parseAuditorioNacionalDetail } from '../src/ingestion/detail/auditorio-nacional.ts';
 import { parseMadridDatosDetail } from '../src/ingestion/detail/madrid-datos.ts';
 import { parseTeatroRealDetail } from '../src/ingestion/detail/teatro-real.ts';
+import { resolveAccess } from '../src/ingestion/classification/access.ts';
 import { matchComposer } from '../src/ingestion/knowledge/composers.ts';
 import { normalizeRawEvent } from '../src/ingestion/normalize.ts';
 import { emptyObservedLists } from '../src/ingestion/observed.ts';
@@ -1712,7 +1713,135 @@ describe('parser de ficha Teatro Real', () => {
   it('falla si el HTML no es una ficha reconocible', () => {
     expect(() => parseTeatroRealDetail('<div class="home">Teatro Real</div>')).toThrow(/estructura esperada/);
   });
+
+  it('extrae Desde N euros del span ticket-col-2 y lo clasifica como paid', () => {
+    const facts = parseTeatroRealDetail(teatroRealFicha(`
+      <div class="container new-ticket-description">
+        <a class="link-ticket new-link-ticket" href="https://tickets.teatroreal.es/selection/event/date?productId=1">
+          <span class="ticket-col-1">Compra tus entradas</span>
+          <span class="ticket-col-2">Desde 15 euros</span>
+        </a>
+      </div>
+      <section class="text-intro-show">
+        <div class="wrap-text-free">
+          <p>Recital de canción lírica.</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+    `));
+    expect(facts.accessText).toBe('Desde 15 euros');
+    expect(resolveAccess(facts.accessText).value).toBe('paid');
+  });
+
+  it('prefiere el párrafo Precio de la intro frente al Desde del ticket', () => {
+    const facts = parseTeatroRealDetail(teatroRealFicha(`
+      <div class="container new-ticket-description">
+        <a class="link-ticket new-link-ticket" href="https://tickets.teatroreal.es/x">
+          <span class="ticket-col-1">Compra tus entradas</span>
+          <span class="ticket-col-2">Desde 8 euros</span>
+        </a>
+      </div>
+      <section class="text-intro-show">
+        <div class="wrap-text-free">
+          <p>Taller para bebés y familias.</p>
+          <p><strong>Precio</strong><br />Bebés entre 0 y 2 años: 1€<br />General: 8€</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+    `));
+    expect(facts.accessText).toMatch(/^Precio\b/);
+    expect(facts.accessText).toMatch(/1€/);
+    expect(facts.accessText).toMatch(/8€/);
+    expect(resolveAccess(facts.accessText).value).toBe('paid');
+  });
+
+  it('extrae gratuidad explícita del párrafo Precio', () => {
+    const facts = parseTeatroRealDetail(teatroRealFicha(`
+      <section class="text-intro-show">
+        <div class="wrap-text-free">
+          <p>Concierto didáctico.</p>
+          <p><strong>Precio</strong><br />Entrada gratuita</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+    `));
+    expect(facts.accessText).toBe('Precio Entrada gratuita');
+    expect(resolveAccess(facts.accessText).value).toBe('free');
+  });
+
+  it('conserva la gratuidad con reserva previa como evidencia observada', () => {
+    const facts = parseTeatroRealDetail(teatroRealFicha(`
+      <section class="text-intro-show">
+        <div class="wrap-text-free">
+          <p>Ensayo abierto.</p>
+          <p><strong>Precio</strong><br />Gratuito con reserva previa</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+    `));
+    expect(facts.accessText).toBe('Precio Gratuito con reserva previa');
+    expect(resolveAccess(facts.accessText).value).toBe('free');
+  });
+
+  it('un botón Compra tus entradas sin precio no es evidencia de acceso', () => {
+    const facts = parseTeatroRealDetail(teatroRealFicha(`
+      <div class="container new-ticket-description">
+        <a class="link-ticket new-link-ticket" href="https://tickets.teatroreal.es/x">
+          <span class="ticket-col-1">Compra tus entradas</span>
+        </a>
+      </div>
+      <section class="text-intro-show">
+        <div class="wrap-text-free">
+          <p>Ópera en cuatro actos.</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+    `));
+    expect(facts.accessText).toBeUndefined();
+    expect(resolveAccess(facts.accessText).value).toBe('unknown');
+  });
+
+  it('sin ticket ni párrafo Precio conserva unknown', () => {
+    const facts = parseTeatroRealDetail(teatroRealFicha(`
+      <section class="text-intro-show">
+        <div class="wrap-text-free">
+          <p>Ópera de Richard Wagner.</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+    `));
+    expect(facts.accessText).toBeUndefined();
+    expect(resolveAccess(facts.accessText).value).toBe('unknown');
+  });
+
+  it('no inventa acceso a partir de Abonos, letras de zona o Comprar Entradas del calendario de funciones', () => {
+    const facts = parseTeatroRealDetail(teatroRealFicha(`
+      <section class="text-intro-show">
+        <div class="wrap-text-free">
+          <p>El Mesías de Händel.</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+      <div class="functions-show__block--item-prices">Abonos A Comprar Entradas Ver más</div>
+    `));
+    expect(facts.accessText).toBeUndefined();
+    expect(resolveAccess(facts.accessText).value).toBe('unknown');
+  });
 });
+
+function teatroRealFicha(inner: string): string {
+  return `
+    <div class="wrap-content-hero">
+      <h4>Conciertos</h4>
+      <h1>Recital</h1>
+    </div>
+    <div class="back-image"></div>
+    ${inner}
+    <section class="functions-show">
+      <div class="functions-show__block--item-space"><p>Sala Principal</p></div>
+    </section>
+  `;
+}
 
 describe('parser de ficha Madrid Datos', () => {
   it('extrae descripción ampliada, intérpretes y compositores del excerpt renacentista', async () => {

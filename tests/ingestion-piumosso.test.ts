@@ -14,6 +14,7 @@ import { mergeCandidateBatch } from '../src/ingestion/batch.ts';
 import { matchVenue } from '../src/ingestion/venues.ts';
 import { emptyCatalog, type Catalog } from '../src/lib/domain/catalog.ts';
 import { classify } from '../src/ingestion/classification/classify.ts';
+import { resolveAccess } from '../src/ingestion/classification/access.ts';
 import { isPublishableInclude } from '../src/ingestion/classification/types.ts';
 import { enrichNormalizedEvent } from '../src/ingestion/enrich-normalized.ts';
 import { normalizeRawEvent, observedFactsFromNormalized } from '../src/ingestion/normalize.ts';
@@ -188,6 +189,56 @@ describe('Fundación Più Mosso ficha', () => {
     expect(patch.works).toEqual([]);
     expect(patch).not.toHaveProperty('eligibility');
     expect(patch).not.toHaveProperty('eras');
+    expect(resolveAccess(patch.accessText).value).toBe('free');
+  });
+
+  it('reads an explicit listing price as paid evidence', async () => {
+    const html = `<body class="page"><h1>Programación</h1>${oneCardListing(
+      '3001',
+      'https://www.fundacionpiumosso.com/evento/recital-de-pago/',
+      'Recital de pago',
+      '2026-09-18T19:30:00+02:00',
+      undefined,
+      '18 €',
+    )}</body>`;
+    const events = await adapter.extract(html, listingUrl, ctx);
+    expect(events[0]?.observed.accessText).toBe('18 €');
+    expect(resolveAccess(events[0]?.observed.accessText).value).toBe('paid');
+  });
+
+  it('reads free admission with reservation from the labelled cost field', async () => {
+    const patch = parsePiumossoDetail(await sample(), tretyakovWithCost(await fixture('detail-tretyakov'), 'Gratuito con reserva previa'));
+    expect(patch.accessText).toBe('Gratuito con reserva previa');
+    expect(resolveAccess(patch.accessText).value).toBe('free');
+  });
+
+  it('does not treat an Entradas button as access evidence', async () => {
+    const html = `<body class="page"><h1>Programación</h1>${oneCardListing(
+      '3002',
+      'https://www.fundacionpiumosso.com/evento/solo-entradas/',
+      'Solo entradas',
+      '2026-09-19T19:30:00+02:00',
+      undefined,
+      'Entradas',
+    )}</body>`;
+    const events = await adapter.extract(html, listingUrl, ctx);
+    expect(events[0]?.observed.accessText).toBeUndefined();
+    expect(resolveAccess(events[0]?.observed.accessText).value).toBe('unknown');
+
+    const patch = parsePiumossoDetail(await sample(), tretyakovWithCost(await fixture('detail-tretyakov'), 'Entradas'));
+    expect(patch.accessText).toBeUndefined();
+  });
+
+  it('keeps unknown when the cost field is missing', async () => {
+    const patch = parsePiumossoDetail(await sample('2192'), await fixture('detail-prisuelos'));
+    expect(patch.accessText).toBeUndefined();
+    expect(resolveAccess(patch.accessText).value).toBe('unknown');
+  });
+
+  it('does not invent access from unexpected cost markup', async () => {
+    const patch = parsePiumossoDetail(await sample(), tretyakovWithCost(await fixture('detail-tretyakov'), 'Consultar taquilla'));
+    expect(patch.accessText).toBeUndefined();
+    expect(resolveAccess(patch.accessText).value).toBe('unknown');
   });
 
   it('hydrates the published Mompou recital without inventing a ticket price', async () => {
@@ -481,7 +532,14 @@ function catalogWithMompou(): Catalog {
   };
 }
 
-function oneCardListing(id: string, url: string, title: string, startDate: string, description?: string): string {
+function oneCardListing(
+  id: string,
+  url: string,
+  title: string,
+  startDate: string,
+  description?: string,
+  cost?: string,
+): string {
   const ld = JSON.stringify([
     {
       '@context': 'http://schema.org',
@@ -493,7 +551,17 @@ function oneCardListing(id: string, url: string, title: string, startDate: strin
       ...(description ? { description } : {}),
     },
   ]);
-  return `<script type="application/ld+json">${ld}</script><div id="ect-grid-wrapper"><div id="event-${id}" class="ect-grid-event"><div class="ect-grid-title"><h4><a class="ect-event-url" href="${url}">${title}</a></h4></div></div></div>`;
+  const costBlock = cost
+    ? `<div class="ect-grid-cost"><div class="ect-rate-area"><span class="ect-rate">${cost}</span></div></div>`
+    : '';
+  return `<script type="application/ld+json">${ld}</script><div id="ect-grid-wrapper"><div id="event-${id}" class="ect-grid-event"><div class="ect-grid-title"><h4><a class="ect-event-url" href="${url}">${title}</a></h4></div>${costBlock}</div></div>`;
+}
+
+function tretyakovWithCost(html: string, cost: string): string {
+  return html.replace(
+    '<span class="tribe-events-event-cost tribe-events-meta-value"> Gratuito </span>',
+    `<span class="tribe-events-event-cost tribe-events-meta-value"> ${cost} </span>`,
+  );
 }
 
 function allDayListing(): string {

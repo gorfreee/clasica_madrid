@@ -4,6 +4,7 @@ import os from 'node:os';
 import { describe, expect, it } from 'vitest';
 import { fundacionOrcamAdapter as adapter } from '../src/ingestion/sources/fundacion-orcam.ts';
 import { parseOrcamDetail, orcamDiv } from '../src/ingestion/detail/fundacion-orcam.ts';
+import { resolveAccess } from '../src/ingestion/classification/access.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { hydrateEvents } from '../src/ingestion/hydrate.ts';
 import { runIngest } from '../src/ingestion/pipeline.ts';
@@ -84,6 +85,49 @@ describe('ORCAM ficha hydration', () => {
     expect(patch).not.toHaveProperty('eras');
   });
 
+  it('reads an explicit price from the tickets widget and classifies it as paid', async () => {
+    const patch = parseOrcamDetail(await sample(), withTicketsWidget(await fixture('detail-symphonic'), 'Desde 12 €'));
+    expect(patch.accessText).toBe('Desde 12 €');
+    expect(resolveAccess(patch.accessText).value).toBe('paid');
+  });
+
+  it('reads explicit free admission from the tickets widget', async () => {
+    const patch = parseOrcamDetail(await sample(), withTicketsWidget(await fixture('detail-symphonic'), 'Entrada gratuita'));
+    expect(patch.accessText).toBe('Entrada gratuita');
+    expect(resolveAccess(patch.accessText).value).toBe('free');
+  });
+
+  it('keeps free admission with prior reservation as observed evidence', async () => {
+    const patch = parseOrcamDetail(
+      await sample(),
+      withTicketsWidget(await fixture('detail-symphonic'), 'Gratuito con reserva previa'),
+    );
+    expect(patch.accessText).toBe('Gratuito con reserva previa');
+    expect(resolveAccess(patch.accessText).value).toBe('free');
+  });
+
+  it('does not treat Compra la entrada as access evidence', async () => {
+    const patch = parseOrcamDetail(await sample(), withTicketsWidget(await fixture('detail-symphonic'), 'Compra la entrada'));
+    expect(patch.accessText).toBeUndefined();
+    expect(resolveAccess(patch.accessText).value).toBe('unknown');
+  });
+
+  it('keeps unknown when the tickets widget is absent', async () => {
+    const patch = parseOrcamDetail(await sample(), await fixture('detail-symphonic'));
+    expect(patch.accessText).toBeUndefined();
+    expect(resolveAccess(patch.accessText).value).toBe('unknown');
+  });
+
+  it('does not invent access from related-carousel copy or a season blurb widget', async () => {
+    const html = `${await fixture('detail-symphonic')}`.replace(
+      '</div></body>',
+      `<div data-widget_type="loop-carousel.post"><div data-id="d9fd9af">Entrada 18 €</div></div></div></body>`,
+    );
+    const patch = parseOrcamDetail(await sample(), html);
+    expect(patch.accessText).toBeUndefined();
+    expect(resolveAccess(patch.accessText).value).toBe('unknown');
+  });
+
   it('preserves chamber and multi-composer concert facts, without forcing symphonic format', async () => {
     const events = await adapter.extract(await fixture('listing'), listingUrl, ctx);
     const chamber = parseOrcamDetail(events.find((e) => e.externalId === '4866')!, await fixture('detail-chamber'));
@@ -108,6 +152,12 @@ describe('ORCAM ficha hydration', () => {
     expect(failed?.observed).toEqual(event.observed);
   });
 });
+
+function withTicketsWidget(html: string, label: string): string {
+  const widget =
+    `<div data-id="d9fd9af" data-widget_type="button.default"><span class="elementor-button-text">${label}</span></div>`;
+  return html.replace('</div></body>', `${widget}</div></body>`);
+}
 
 describe('ORCAM pipeline safety', () => {
   async function run(catalog: Catalog = emptyCatalog(), fail = false, window = TEST_WINDOW) {

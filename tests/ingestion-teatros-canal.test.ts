@@ -299,6 +299,25 @@ describe('Teatros del Canal ficha', () => {
     expect(n9.occurrences?.[0]?.time).toBeUndefined();
     expect(n9.venueText).toBe('Sala Roja Concha Velasco');
     expect(n9.programText).toMatch(/Beethoven/);
+    expect(n9.accessText).toBeUndefined();
+  });
+
+  it('does not treat unpublished horario y precio copy as access evidence', async () => {
+    const event: RawEvent = {
+      sourceId: source.id,
+      sourceUrl: 'https://www.teatroscanal.com/espectaculo/joven-camerata-de-la-orcam-concierto-fin-de-curso',
+      externalId: '105999',
+      listingDateText: '2027-06-22',
+      observed: {
+        title: 'Joven Camerata de la ORCAM',
+        occurrences: [{ raw: '2027-06-22 00:00:00', date: '2027-06-22' }],
+        performers: [],
+        composers: [],
+        works: [],
+      },
+    };
+    const patch = parseTeatrosCanalDetail(event, await fixture('detail-orcam-joven.html'));
+    expect(patch.accessText).toBeUndefined();
   });
 
   it('maps the fourth Canal room when the ficha names Sala de Cristal', async () => {

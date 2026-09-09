@@ -1,4 +1,5 @@
 import { basilicaEventUrl, parseBasilicaDateTime } from '../detail/basilica-san-miguel.ts';
+import { explicitAccessText } from '../detail/access-evidence.ts';
 import { decodeHtmlEntities, stripTags } from '../html.ts';
 import { emptyObservedLists } from '../observed.ts';
 import { reportAdapterDiscard, type AdapterContext, type RawEvent, type SourceAdapter, type SourceDefinition } from '../types.ts';
@@ -23,6 +24,7 @@ type TecEvent = {
   end_date?: unknown;
   all_day?: unknown;
   cost?: unknown;
+  cost_details?: unknown;
   categories?: unknown;
   venue?: unknown;
   organizer?: unknown;
@@ -154,7 +156,7 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
   const venueText = venueName(item.venue);
   const organizerText = organizerName(item.organizer);
   const description = htmlText(item.description);
-  const accessText = asNonEmptyString(item.cost);
+  const accessText = basilicaAccessText(item);
   const cycle = categories.find((item) => /ciclo/i.test(item.name) || /ciclo/i.test(item.slug));
   return {
     sourceId: ctx.source.id,
@@ -205,6 +207,20 @@ function organizerName(value: unknown): string | undefined {
     })
     .filter((item): item is string => Boolean(item));
   return names.join('; ') || undefined;
+}
+
+function basilicaAccessText(item: TecEvent): string | undefined {
+  const fromCost = explicitAccessText(asNonEmptyString(item.cost));
+  if (fromCost) return fromCost;
+  const details = item.cost_details;
+  if (!details || typeof details !== 'object' || Array.isArray(details)) return undefined;
+  const values = (details as { values?: unknown }).values;
+  if (!Array.isArray(values)) return undefined;
+  const joined = values
+    .map((value) => asNonEmptyString(value))
+    .filter((value): value is string => Boolean(value))
+    .join(' ');
+  return explicitAccessText(joined);
 }
 
 function htmlText(value: unknown): string | undefined {
