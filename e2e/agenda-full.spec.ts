@@ -74,6 +74,9 @@ test.describe('carga diferida de la agenda', () => {
   });
 
   test('una URL filtrada abierta directamente carga y filtra todo el catálogo', async ({ page }) => {
+    await page.goto('/');
+    const initialCount = await visibleOccurrences(page).count();
+
     await page.goto('/?access=free');
     await expect(visibleOccurrences(page).first()).toBeVisible();
     await expect(page.getByRole('button', { name: 'Mostrar todos' })).toBeHidden();
@@ -84,6 +87,74 @@ test.describe('carga diferida de la agenda', () => {
     for (let index = 0; index < sample; index += 1) {
       await expect(visibleOccurrences(page).nth(index).getByText('Gratis', { exact: true })).toBeVisible();
     }
+
+    await page.locator('[data-clear-filters]').click();
+    await expect(page).toHaveURL('/');
+    expect(await visibleOccurrences(page).count()).toBe(initialCount);
+    await expect(page.getByRole('button', { name: 'Mostrar todos' })).toBeVisible();
+  });
+
+  test('limpiar filtros restaura el recorte inicial y «Mostrar todos»', async ({ page }) => {
+    await page.goto('/');
+    const initialCount = await visibleOccurrences(page).count();
+    await expect(page.getByRole('button', { name: 'Mostrar todos' })).toBeVisible();
+    await expect(page.locator('[data-agenda-showing]')).toBeVisible();
+
+    const form = page.locator('[data-agenda-filters]');
+    await form.getByRole('searchbox').fill('Bach');
+    await form.getByRole('button', { name: 'Aplicar filtros' }).click();
+    await expect(page).toHaveURL(/\?q=/);
+    await expect(page.getByRole('button', { name: 'Mostrar todos' })).toBeHidden();
+    await expect(page.locator('[data-agenda-root][data-agenda-complete]')).toHaveCount(1);
+
+    await page.locator('[data-clear-filters]').click();
+    await expect(page).toHaveURL('/');
+    expect(await visibleOccurrences(page).count()).toBe(initialCount);
+    await expect(page.getByRole('button', { name: 'Mostrar todos' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Mostrar todos' })).toBeEnabled();
+    await expect(page.locator('[data-agenda-showing]')).toBeVisible();
+  });
+
+  test('tras restaurar el recorte, «Mostrar todos» expande sin volver a descargar', async ({ page }) => {
+    let fragmentRequests = 0;
+    await page.route(isFullAgendaUrl, async (route) => {
+      fragmentRequests += 1;
+      await route.continue();
+    });
+    await page.goto('/');
+    const initialCount = await visibleOccurrences(page).count();
+
+    const form = page.locator('[data-agenda-filters]');
+    await form.getByRole('searchbox').fill('Bach');
+    await form.getByRole('button', { name: 'Aplicar filtros' }).click();
+    await expect(page).toHaveURL(/\?q=/);
+    await page.locator('[data-clear-filters]').click();
+    await expect(page.getByRole('button', { name: 'Mostrar todos' })).toBeVisible();
+    expect(fragmentRequests).toBe(1);
+
+    await page.getByRole('button', { name: 'Mostrar todos' }).click();
+    await expect(page.getByRole('button', { name: 'Mostrar todos' })).toBeHidden();
+    expect(await visibleOccurrences(page).count()).toBeGreaterThan(initialCount);
+    expect(fragmentRequests).toBe(1);
+  });
+
+  test('si el usuario ya expandió, limpiar filtros no vuelve a recortar', async ({ page }) => {
+    await page.goto('/');
+    const initialCount = await visibleOccurrences(page).count();
+    await page.getByRole('button', { name: 'Mostrar todos' }).click();
+    await expect(page.getByRole('button', { name: 'Mostrar todos' })).toBeHidden();
+    const expandedCount = await visibleOccurrences(page).count();
+    expect(expandedCount).toBeGreaterThan(initialCount);
+
+    const form = page.locator('[data-agenda-filters]');
+    await form.getByRole('searchbox').fill('Bach');
+    await form.getByRole('button', { name: 'Aplicar filtros' }).click();
+    await expect(page).toHaveURL(/\?q=/);
+
+    await page.locator('[data-clear-filters]').click();
+    await expect(page).toHaveURL('/');
+    expect(await visibleOccurrences(page).count()).toBe(expandedCount);
+    await expect(page.getByRole('button', { name: 'Mostrar todos' })).toBeHidden();
   });
 
   test('los accesos rápidos siguen funcionando sin recargar', async ({ page }) => {

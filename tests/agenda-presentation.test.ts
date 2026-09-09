@@ -7,6 +7,7 @@ import {
   INITIAL_AGENDA_OCCURRENCE_LIMIT,
   selectInitialAgendaOccurrences,
 } from '../src/lib/presentation/agenda.ts';
+import { showTruncatedAgenda } from '../src/lib/presentation/agenda-client.ts';
 import {
   accessLabels,
   freeAgendaSignalLabel,
@@ -193,6 +194,32 @@ describe('ruta interna de la agenda completa', () => {
     expect(sitemapPageFilter('https://clasicamadrid.com/_agenda/completa/')).toBe(false);
     expect(sitemapPageFilter('https://clasicamadrid.com/_agenda/completa')).toBe(false);
     expect(sitemapPageFilter('https://clasicamadrid.com/eventos/carmen/')).toBe(true);
+  });
+});
+
+describe('vista recortada de la agenda', () => {
+  it('se mantiene recortada hasta que el usuario pide ver todos', () => {
+    expect(
+      showTruncatedAgenda({ hasActiveFilters: false, userExpanded: false, hasMoreOccurrences: true }),
+    ).toBe(true);
+  });
+
+  it('no recorta mientras hay filtros activos', () => {
+    expect(
+      showTruncatedAgenda({ hasActiveFilters: true, userExpanded: false, hasMoreOccurrences: true }),
+    ).toBe(false);
+  });
+
+  it('no recorta después de «Mostrar todos»', () => {
+    expect(
+      showTruncatedAgenda({ hasActiveFilters: false, userExpanded: true, hasMoreOccurrences: true }),
+    ).toBe(false);
+  });
+
+  it('no recorta cuando el catálogo cabe en la carga inicial', () => {
+    expect(
+      showTruncatedAgenda({ hasActiveFilters: false, userExpanded: false, hasMoreOccurrences: false }),
+    ).toBe(false);
   });
 });
 
