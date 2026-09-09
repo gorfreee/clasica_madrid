@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_piu_mosso_2244",
+  "slug": "iv-edicion-del-festival-alicia-de-larrocha-casa-de-vacas-del-retiro-esperando-informacion",
+  "title": "IV. Edición del Festival Alicia de Larrocha. Casa de Vacas del Retiro - Esperando Información",
+  "status": "scheduled",
+  "venueId": "ven_casa_vacas_retiro",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_piu_mosso_2244_01",
+      "date": "2026-09-09",
+      "time": "08:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_fundacionpiumosso_com",
+      "url": "https://www.fundacionpiumosso.com/evento/iv-edicion-del-festival-alicia-de-larrocha-casa-de-vacas-del-retiro-esperando-informacion",
+      "checkedAt": "2026-09-09",
+      "externalId": "2244"
+    }
+  ],
+  "primarySourceId": "src_fundacionpiumosso_com",
+  "lastVerifiedAt": "2026-09-09"
+}

@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_piu_mosso_2236",
+  "slug": "duo-mujeres-compositoras-del-clasico-a-lo-conceptual",
+  "title": "Dúo Mujeres Compositoras. Del Clásico a lo Conceptual.",
+  "status": "scheduled",
+  "venueId": "ven_ateneo_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_piu_mosso_2236_01",
+      "date": "2027-03-27",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Cécile Chaminade"
+    },
+    {
+      "name": "Amy Beach"
+    },
+    {
+      "name": "Clara Schumann"
+    },
+    {
+      "name": "Robert Schumann"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic",
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_fundacionpiumosso_com",
+      "url": "https://www.fundacionpiumosso.com/evento/duo-mujeres-compositoras-del-clasico-a-lo-conceptual",
+      "checkedAt": "2026-09-09",
+      "externalId": "2236"
+    }
+  ],
+  "primarySourceId": "src_fundacionpiumosso_com",
+  "lastVerifiedAt": "2026-09-09"
+}

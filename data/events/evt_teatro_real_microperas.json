@@ -32,15 +32,15 @@
     "opera"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_teatro_real",
       "url": "https://www.teatroreal.es/es/espectaculo/microperas",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-09",
       "externalId": "microperas"
     }
   ],
   "primarySourceId": "src_teatro_real",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-09"
 }

@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_piu_mosso_2246",
+  "slug": "karin-lechner-la-gran-pianista-y-la-vida-y-obra-de-cecile-chaminade",
+  "title": "Karin Lechner, la gran pianista y la vida y obra de Cecile Chaminade.",
+  "status": "scheduled",
+  "venueId": "ven_ateneo_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_piu_mosso_2246_01",
+      "date": "2027-05-22",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Cécile Chaminade"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_fundacionpiumosso_com",
+      "url": "https://www.fundacionpiumosso.com/evento/karin-lechner-la-gran-pianista-y-la-vida-y-obra-de-cecile-chaminade",
+      "checkedAt": "2026-09-09",
+      "externalId": "2246"
+    }
+  ],
+  "primarySourceId": "src_fundacionpiumosso_com",
+  "lastVerifiedAt": "2026-09-09"
+}

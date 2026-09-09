@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_piu_mosso_2229",
+  "slug": "martin-llade-y-dario-meta-los-romanticos-y-la-poesia",
+  "title": "Martín Llade y Darío Meta. Los Románticos y la Poesía.",
+  "status": "scheduled",
+  "venueId": "ven_ateneo_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_piu_mosso_2229_01",
+      "date": "2027-02-21",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "classical",
+    "romantic",
+    "contemporary"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_fundacionpiumosso_com",
+      "url": "https://www.fundacionpiumosso.com/evento/martin-llade-y-dario-meta-los-romanticos-y-la-poesia",
+      "checkedAt": "2026-09-09",
+      "externalId": "2229"
+    }
+  ],
+  "primarySourceId": "src_fundacionpiumosso_com",
+  "lastVerifiedAt": "2026-09-09"
+}

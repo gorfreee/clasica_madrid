@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "id": "evt_fundacion_piu_mosso_2208",
-  "slug": "festival-alicia-de-larrocha-casa-de-vacas-del-retiro-2",
-  "title": "Festival Alicia de Larrocha, Casa de Vacas del Retiro",
+  "id": "evt_fundacion_piu_mosso_2232",
+  "slug": "festival-alicia-de-larrocha-en-la-casa-de-vacas-esperando-informacion",
+  "title": "Festival Alicia de Larrocha en la Casa de Vacas - Esperando Información",
   "status": "scheduled",
   "venueId": "ven_casa_vacas_retiro",
   "organizerIds": [],
   "seriesId": null,
   "occurrences": [
     {
-      "id": "occ_fundacion_piu_mosso_2208_01",
-      "date": "2026-11-14",
+      "id": "occ_fundacion_piu_mosso_2232_01",
+      "date": "2027-02-27",
       "time": "19:00",
       "status": "scheduled"
     }
@@ -19,17 +19,15 @@
   "composers": [],
   "works": [],
   "eras": [],
-  "formats": [
-    "recital"
-  ],
+  "formats": [],
   "kind": "alternative",
   "access": "unknown",
   "citations": [
     {
       "sourceId": "src_fundacionpiumosso_com",
-      "url": "https://www.fundacionpiumosso.com/evento/festival-alicia-de-larrocha-casa-de-vacas-del-retiro-2",
+      "url": "https://www.fundacionpiumosso.com/evento/festival-alicia-de-larrocha-en-la-casa-de-vacas-esperando-informacion",
       "checkedAt": "2026-09-09",
-      "externalId": "2208"
+      "externalId": "2232"
     }
   ],
   "primarySourceId": "src_fundacionpiumosso_com",

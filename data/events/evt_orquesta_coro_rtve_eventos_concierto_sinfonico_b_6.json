@@ -21,7 +21,18 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Orquesta RTVE"
+    },
+    {
+      "name": "Antonio Méndez",
+      "role": "conductor"
+    },
+    {
+      "name": "Pablo Ferrández"
+    }
+  ],
   "composers": [
     {
       "name": "Antonín Dvořák"
@@ -40,10 +51,10 @@
     {
       "sourceId": "src_orquesta_coro_rtve",
       "url": "https://www.teatromonumental.es/eventos/concierto-sinfonico-b-6",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-09",
       "externalId": "/eventos/concierto-sinfonico-b-6/"
     }
   ],
   "primarySourceId": "src_orquesta_coro_rtve",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-09"
 }
