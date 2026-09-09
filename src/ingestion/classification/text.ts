@@ -44,16 +44,39 @@ export function identityHaystack(facts: ObservedFacts): string {
   ]);
 }
 
-export function formatHaystack(facts: ObservedFacts): string {
-  return joinFolded([
-    facts.title,
-    facts.categoryText,
-    facts.description,
-    facts.programText,
-    facts.seriesText,
-    ...facts.performers.map((item) => [item.name, item.roleText].filter(Boolean).join(' ')),
-    ...facts.works.map((item) => item.title),
-  ]);
+/**
+ * Format evidence grouped by field, so generic formation words are not
+ * matched in performer biographies sitting in `description`.
+ *
+ * - `identity`: title, official category, series — names this event.
+ * - `performers`: structured names/roles of who is performing this concert.
+ * - `program`: program listing and work titles of this concert.
+ * - `narrative`: editorial description; often includes CVs and historical asides.
+ */
+export type FormatEvidence = {
+  identity: string;
+  performers: string[];
+  program: string;
+  narrative: string;
+};
+
+export function formatEvidence(facts: ObservedFacts): FormatEvidence {
+  return {
+    identity: joinFolded([facts.title, facts.categoryText, facts.seriesText]),
+    performers: facts.performers.map((item) =>
+      foldText([item.name, item.roleText].filter(Boolean).join(' ')),
+    ),
+    program: joinFolded([facts.programText, ...facts.works.map((item) => item.title)]),
+    narrative: fieldFolded(facts.description),
+  };
+}
+
+export function evidenceHasWord(fields: Array<string | undefined>, word: string): boolean {
+  return fields.some((field) => Boolean(field) && hasWord(field!, word));
+}
+
+export function evidenceHasPhrase(fields: Array<string | undefined>, phrase: string): boolean {
+  return fields.some((field) => Boolean(field) && hasPhrase(field!, phrase));
 }
 
 function joinFolded(parts: Array<string | undefined>): string {

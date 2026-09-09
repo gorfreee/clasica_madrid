@@ -1,7 +1,7 @@
 import type { ObservedFacts } from '../observed.ts';
 
 export const AI_CLASSIFIER_PROMPT_VERSION = 9 as const;
-export const AI_TAXONOMY_PROMPT_VERSION = 4 as const;
+export const AI_TAXONOMY_PROMPT_VERSION = 5 as const;
 export const AI_ACCESS_PROMPT_VERSION = 1 as const;
 export const AI_COMPOSER_PROMPT_VERSION = 1 as const;
 
@@ -128,11 +128,13 @@ Taxonomías cerradas:
 
 Reglas:
 - no inventes performers, instrumentos, composers, works, fechas, venue, repertorio ni hechos ausentes;
-- sí puedes usar conocimiento musical general para interpretar hechos ya observados (una sinfonía u orquesta → symphonic; un cuarteto → chamber; un recital de piano o un rol de soprano/violín → recital; un coro → choral; órgano → organ; ópera/zarzuela/lied cuando esos géneros están en los hechos o se infieren con seguridad de ellos);
+- sí puedes usar conocimiento musical general para interpretar hechos ya observados (una orquesta estructurada como intérprete de ESTE concierto, o un título/categoría «concierto sinfónico» → symphonic; un cuarteto/trío/dúo del evento → chamber; un recital de piano o un rol de soprano/violín → recital; un coro → choral; órgano → organ; ópera/zarzuela/lied cuando esos géneros están en los hechos o se infieren con seguridad de ellos);
+- no asignes formats por la biografía o el historial de un intérprete (p. ej. «tocó con la Orchestra of the Americas», «hizo música de cámara») ni por una mención aislada a orquesta/cámara/trío en prosa editorial; sólo cuenta la formación o naturaleza de ESTE concierto;
+- no inventes performers para compensar una ficha incompleta;
 - no deduzcas época por venue, festival, ciclo, instrumento, ensemble, tipo de concierto, descripción promocional ni repertorio probable;
 - rationale breve; no repitas evidence.
 
-formats: asigna al menos un formato cuando los hechos observados permitan una inferencia musical razonable. formats=[] sólo si realmente no hay evidencia suficiente para ninguna etiqueta. No uses other simplemente para evitar un array vacío: other queda para identidades híbridas o no clasificables de verdad, no como comodín. Vacío es preferible a adivinar; no es la salida normal cuando hay una lectura musical razonable.
+formats: asigna al menos un formato cuando los hechos observados permitan una inferencia musical razonable. formats=[] sólo si realmente no hay evidencia suficiente para ninguna etiqueta. Vacío es preferible a un formato incorrecto. No uses other simplemente para evitar un array vacío: other queda para identidades híbridas o no clasificables de verdad, no como comodín. Vacío es preferible a adivinar; no es la salida normal cuando hay una lectura musical razonable.
 
 eras: siempre []. El pipeline las ignora y las deriva en código de compositores u obras observados. No infieras repertorio.
 

@@ -155,6 +155,8 @@ Taxonomía: `src/lib/schemas/taxonomies.ts`. Pueden ser múltiples. Vacío es me
 
 El fallback de IA debe intentar asignar al menos un formato cuando los hechos observados permitan una inferencia musical razonable. `formats: []` queda para casos sin evidencia suficiente, no como respuesta por defecto. No rellenar con `other` sólo para evitar el vacío.
 
+Los formatos describen la formación o la naturaleza **de este concierto**, no el historial profesional de sus intérpretes. Evidencia fuerte: título, categoría explícita de la fuente, nombres/roles estructurados, formación explícita del evento. Una mención aislada a orquesta, música de cámara o trío en una biografía o en prosa editorial genérica no basta. Vacío es preferible a un formato incorrecto.
+
 Derivación preferida a partir de hechos:
 
 | Hecho | Format típico |
