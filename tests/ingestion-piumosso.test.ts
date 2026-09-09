@@ -437,6 +437,30 @@ describe('Fundación Più Mosso programText', () => {
     expect(patch.programText).toContain('Moszkowski');
     expect(patch.description).toContain('Francisco Fierro');
   });
+
+  it('does not turn biography composers into eras when the ficha declares Romanticism', async () => {
+    const event = await sample();
+    const html = withPiumossoDescription(
+      await fixture('detail-tretyakov'),
+      [
+        '<p>Darío Meta nos tocará a los compositores DEL ROMANTICISMO. Estamos esperando el programa.</p>',
+        '<p><strong>BIOGRAFÍAS DE AMBOS:</strong></p>',
+        '<p>Actuaciones en el Beethoven Haus de Bonn. Mentoría de Gabriela Montero.</p>',
+        '<p>Se estrena Lazarillo de Tormes con música de David del Puerto. Ludwig van Beethoven como detective.</p>',
+      ].join(''),
+    );
+    const patch = parsePiumossoDetail(event, html);
+    expect(patch.programText).toBeUndefined();
+    expect(patch.description).toContain('Beethoven');
+    expect(patch.description).toContain('David del Puerto');
+    const raw = { ...event, observed: { ...event.observed, ...patch } };
+    const { classification, enriched } = publishableFrom(raw);
+    expect(enriched.composers).toEqual([]);
+    expect(classification.eras?.value).toEqual(['romantic']);
+    expect(classification.eras?.ruleId).toBe('eras-declared-programme');
+    expect(classification.eras?.value).not.toContain('classical');
+    expect(classification.eras?.value).not.toContain('contemporary');
+  });
 });
 
 describe('Fundación Più Mosso pending information', () => {
