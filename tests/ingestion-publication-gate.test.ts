@@ -215,7 +215,7 @@ describe('publication gate — pipeline completo', () => {
     expect(run.summary.ai).toEqual(expect.objectContaining({ attempted: 1, resolved: 1, unresolved: 0, include: 1 }));
     expect(run.candidates).toHaveLength(1);
     expect(run.candidates[0]!.event.formats).toEqual(['chamber']);
-    expect(run.candidates[0]!.event.eras).toEqual(['baroque']);
+    expect(run.candidates[0]!.event.eras).toEqual([]);
     expect(run.candidates[0]!.event.kind).toBe('established');
   });
 

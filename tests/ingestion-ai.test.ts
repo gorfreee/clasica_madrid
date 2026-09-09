@@ -80,8 +80,8 @@ const uncertainFacts = facts({ title: 'Concierto extraordinario' });
 describe('AI classifier prompt v2', () => {
   const prompt = AI_CLASSIFIER_SYSTEM_PROMPT;
 
-  it('is version 6 so results are distinguishable from earlier prompts', () => {
-    expect(AI_CLASSIFIER_PROMPT_VERSION).toBe(8);
+  it('is version 9 so results are distinguishable from earlier prompts', () => {
+    expect(AI_CLASSIFIER_PROMPT_VERSION).toBe(9);
   });
 
   it('keeps precision, uncertain as a valid output, and the ban on inventing facts', () => {
@@ -191,13 +191,14 @@ describe('AI classifier prompt v2', () => {
     expect(prompt).not.toMatch(/chain[- ]of[- ]thought/i);
   });
 
-  it('asks the same call to fill eras from works, composers and programText', () => {
-    expect(prompt).toMatch(/si eligibility=include, intenta rellenarlas/);
-    expect(prompt).toMatch(/programText cuando nombra expl[ií]citamente/);
-    expect(prompt).toMatch(/Bach\/H[äa]ndel → baroque/);
-    expect(prompt).toMatch(/Mozart\/Haydn → classical/);
-    expect(prompt).toMatch(/Brahms\/Mahler → romantic/);
-    expect(prompt).toMatch(/eras=\[\] s[oó]lo si/);
+  it('does not ask eligibility AI to fill eras', () => {
+    expect(prompt).toMatch(/eras: no las rellenes/);
+    expect(prompt).toMatch(/eras=\[\] es correcto y preferible a adivinar/);
+    expect(prompt).toMatch(/deja eras=\[\]/);
+    expect(prompt).toMatch(/Bach\/H[äa]ndel son baroque/);
+    expect(prompt).toMatch(/Mozart\/Haydn, classical/);
+    expect(prompt).toMatch(/Brahms\/Mahler, romantic/);
+    expect(prompt).not.toMatch(/si eligibility=include, intenta rellenarlas/);
   });
 });
 
@@ -865,8 +866,8 @@ describe('taxonomy enrichment — separado de eligibility', () => {
     expect(result.eligibility.method).toBe('ai');
     expect(result.formats?.value).toEqual(['chamber']);
     expect(result.formats?.method).toBe('rule');
-    expect(result.eras?.value).toEqual(['contemporary']);
-    expect(result.eras?.method).toBe('ai');
+    expect(result.eras?.value).toEqual([]);
+    expect(result.eras?.ruleId).toBe('ai-eras-rejected');
     expect(ai.calls).toBe(1);
   });
 
@@ -916,7 +917,7 @@ describe('taxonomy enrichment — separado de eligibility', () => {
     expect(ai.calls).toBe(1);
   });
 
-  it('include con format determinista no pide formats a taxonomy AI', async () => {
+  it('include con format determinista no llama a taxonomy sólo para rellenar eras', async () => {
     const ai = countingAi({
       async classify() {
         return { eligibility: 'include', eras: ['contemporary'], evidence: ['creación actual'] };
@@ -926,10 +927,8 @@ describe('taxonomy enrichment — separado de eligibility', () => {
     expect(result.eligibility.value).toBe('include');
     expect(result.formats?.value).toEqual(['opera']);
     expect(result.formats?.method).toBe('rule');
-    expect(result.eras?.value).toEqual(['contemporary']);
-    expect(ai.calls).toBe(1);
-    expect(ai.contexts[0]?.purpose).toBe('taxonomy');
-    expect(ai.contexts[0]?.requireFormats).toBe(false);
+    expect(result.eras?.value).toEqual([]);
+    expect(ai.calls).toBe(0);
   });
 
   it('include sin format aplica el format que devuelve taxonomy AI', async () => {
@@ -971,7 +970,7 @@ describe('taxonomy enrichment — separado de eligibility', () => {
     expect(result.eras?.method).toBe('knowledge');
   });
 
-  it('formats omitido rellena eras vacías y deja formats sin resolver', async () => {
+  it('formats omitido no rellena eras y deja formats sin resolver', async () => {
     const ai = countingAi({
       async classify() {
         return { eligibility: 'include', eras: ['romantic'], evidence: ['repertorio español romántico'] };
@@ -985,8 +984,8 @@ describe('taxonomy enrichment — separado de eligibility', () => {
       { ai },
     );
     expect(result.eligibility.value).toBe('include');
-    expect(result.eras?.value).toEqual(['romantic']);
-    expect(result.eras?.method).toBe('ai');
+    expect(result.eras?.value).toEqual([]);
+    expect(result.eras?.ruleId).toBe('ai-eras-rejected');
     expect(result.formats?.value).toEqual([]);
     expect(result.formats?.ruleId).toBe('ai-formats-unresolved');
     expect(result.formats?.value).not.toContain('other');
@@ -996,8 +995,8 @@ describe('taxonomy enrichment — separado de eligibility', () => {
 describe('taxonomy AI prompt', () => {
   const prompt = AI_TAXONOMY_SYSTEM_PROMPT;
 
-  it('is version 3 so results are distinguishable from earlier taxonomy prompts', () => {
-    expect(AI_TAXONOMY_PROMPT_VERSION).toBe(3);
+  it('is version 4 so results are distinguishable from earlier taxonomy prompts', () => {
+    expect(AI_TAXONOMY_PROMPT_VERSION).toBe(4);
   });
 
   it('asks for a format when observed facts support a musical inference', () => {
@@ -1007,7 +1006,158 @@ describe('taxonomy AI prompt', () => {
     expect(prompt).toMatch(/formats=\[\] s[oó]lo si realmente no hay evidencia suficiente/);
     expect(prompt).toMatch(/No uses other simplemente para evitar un array vac[ií]o/);
     expect(prompt).toMatch(/no inventes performers, instrumentos/);
+    expect(prompt).toMatch(/NO rellenes eras/);
+    expect(prompt).toMatch(/eras: siempre \[\]/);
     expect(prompt).not.toMatch(/formats y eras vac[ií]os son preferibles a adivinar/);
+    expect(prompt).not.toMatch(/der[ií]valas de \(1\) obras observadas/);
+  });
+});
+
+describe('eras AI guardrail — solo evidencia musical observada', () => {
+  const inventedEras = ['baroque', 'classical', 'romantic', 'twentieth', 'contemporary'] as const;
+
+  it('concierto de órgano sin programa ni compositores no publica épocas inventadas', async () => {
+    const result = await classifyObserved(
+      facts({
+        title: 'Festival Internacional de Órgano San Antonio de los Alemanes 2026',
+        venueText: 'Iglesia de San Antonio de los Alemanes',
+        performers: [{ name: 'Margreeth de Jong' }],
+        composers: [],
+        works: [],
+      }),
+      {
+        ai: {
+          async classify() {
+            return {
+              eligibility: 'include',
+              formats: ['organ', 'recital'],
+              eras: [...inventedEras],
+              evidence: ['festival de órgano: repertorio habitual del instrumento'],
+            };
+          },
+        },
+      },
+    );
+    expect(result.eligibility.value).toBe('include');
+    expect(result.eras?.value).toEqual([]);
+    expect(result.eras?.ruleId).toBe('ai-eras-rejected');
+  });
+
+  it('un recorrido por la historia de la música española sin repertorio no inventa cinco épocas', async () => {
+    const result = await classifyObserved(
+      facts({
+        title: 'Un Recorrido por la Historia de la Música Española. Concierto Benéfico.',
+        description: 'Concierto benéfico a favor de la Real Hermandad del Refugio.',
+        composers: [],
+        works: [],
+      }),
+      {
+        ai: {
+          async classify() {
+            return {
+              eligibility: 'include',
+              formats: ['other'],
+              eras: ['renaissance', 'baroque', 'classical', 'romantic', 'twentieth'],
+              evidence: ['recorrido por la historia de la música española'],
+            };
+          },
+        },
+      },
+    );
+    expect(result.eligibility.value).toBe('include');
+    expect(result.eras?.value).toEqual([]);
+    expect(result.eras?.ruleId).toBe('ai-eras-rejected');
+  });
+
+  it('Bach observado explícitamente resuelve Barroco y no se pisa', async () => {
+    const result = await classifyObserved(
+      facts({
+        title: 'Recital de música clásica',
+        categoryText: 'Música clásica',
+        composers: [{ name: 'Johann Sebastian Bach' }],
+      }),
+      {
+        ai: {
+          async classify() {
+            return { eligibility: 'include', formats: ['recital'], eras: [...inventedEras] };
+          },
+        },
+      },
+    );
+    expect(result.eras).toMatchObject({ value: ['baroque'], method: 'knowledge' });
+  });
+
+  it('Mozart observado explícitamente resuelve Clasicismo', async () => {
+    const result = await classifyObserved(
+      facts({
+        title: 'Recital de música clásica',
+        categoryText: 'Música clásica',
+        composers: [{ name: 'Wolfgang Amadeus Mozart' }],
+      }),
+      { ai: { async classify() { return { eligibility: 'include', eras: ['romantic'] }; } } },
+    );
+    expect(result.eras).toMatchObject({ value: ['classical'], method: 'knowledge' });
+  });
+
+  it('varios compositores observados de épocas distintas resuelven varias épocas', async () => {
+    const result = await classifyObserved(
+      facts({
+        title: 'Programa mixto',
+        composers: [
+          { name: 'Johann Sebastian Bach' },
+          { name: 'Wolfgang Amadeus Mozart' },
+          { name: 'Johannes Brahms' },
+        ],
+      }),
+      { ai: { async classify() { return { eligibility: 'include', eras: ['contemporary'] }; } } },
+    );
+    expect(result.eras).toMatchObject({
+      value: ['baroque', 'classical', 'romantic'],
+      method: 'knowledge',
+    });
+  });
+
+  it('una respuesta IA con eras sin evidencia válida se rechaza sin fallar la ingestión', async () => {
+    const result = await classifyObserved(
+      facts({
+        title: 'Concierto extraordinario',
+        description: 'Concierto de música clásica.',
+      }),
+      {
+        ai: {
+          async classify() {
+            return {
+              eligibility: 'include',
+              formats: ['recital'],
+              eras: [...inventedEras],
+              evidence: ['probable repertorio de temporada'],
+            };
+          },
+        },
+      },
+    );
+    expect(result.eligibility.value).toBe('include');
+    expect(result.eras?.value).toEqual([]);
+    expect(result.eras?.ruleId).toBe('ai-eras-rejected');
+    expect(result.formats?.value).toEqual(['recital']);
+  });
+
+  it('valores deterministas ya resueltos no se sobrescriben', async () => {
+    const observed = facts({
+      title: 'Programa clásico',
+      programText: 'Johannes Brahms',
+    });
+    const deterministic = classify(observed);
+    expect(deterministic.eras?.value).toEqual(['romantic']);
+    const result = await enrichWithAiIfNeeded(deterministic, observed, {
+      ai: {
+        async classify() {
+          return { eligibility: 'include', formats: ['chamber'], eras: [...inventedEras] };
+        },
+      },
+    });
+    expect(result.eras).toMatchObject({ value: ['romantic'], method: 'knowledge' });
+    expect(result.formats?.value).toEqual(['chamber']);
   });
 });
 

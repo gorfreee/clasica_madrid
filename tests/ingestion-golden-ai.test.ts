@@ -50,7 +50,7 @@ describe('golden set → classify + AI fake', () => {
     expect(result.eligibility.value).toBe('include');
     expect(result.eligibility.method).toBe('ai');
     expect(result.formats?.value).toEqual(['early-music', 'chamber']);
-    expect(result.eras?.value).toEqual(['early']);
+    expect(result.eras?.value).toEqual([]);
     expect(result.kind?.value).toBe('alternative');
     expect(isAutomaticallyPublishable(result.eligibility.value)).toBe(true);
   });
