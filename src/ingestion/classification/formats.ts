@@ -268,6 +268,11 @@ function chamberEvidence(facts: ObservedFacts): string {
   return ensemble?.name ?? facts.categoryText ?? facts.title;
 }
 
+function recitalEvidence(facts: ObservedFacts): string {
+  const solo = facts.performers[0];
+  return solo ? `${solo.name}${solo.roleText ? ` (${solo.roleText})` : ''}` : facts.title;
+}
+
 function isNamedWorkEvent(facts: ObservedFacts): boolean {
   if (facts.works.length !== 1 || !facts.works[0]) return false;
   return foldName(facts.works[0].title) === foldName(facts.title);
