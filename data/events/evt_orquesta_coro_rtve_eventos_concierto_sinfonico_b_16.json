@@ -21,7 +21,18 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Orquesta y Coro RTVE"
+    },
+    {
+      "name": "José Miguel Pérez Sierra",
+      "role": "conductor"
+    },
+    {
+      "name": "Juan Jesús Rodríguez"
+    }
+  ],
   "composers": [
     {
       "name": "Giuseppe Verdi"
@@ -49,10 +60,10 @@
     {
       "sourceId": "src_orquesta_coro_rtve",
       "url": "https://www.teatromonumental.es/eventos/concierto-sinfonico-b-16",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-09",
       "externalId": "/eventos/concierto-sinfonico-b-16/"
     }
   ],
   "primarySourceId": "src_orquesta_coro_rtve",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-09"
 }

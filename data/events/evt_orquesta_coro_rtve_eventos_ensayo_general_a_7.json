@@ -15,7 +15,30 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Orquesta y Coro RTVE"
+    },
+    {
+      "name": "Marc Korovitch",
+      "role": "conductor"
+    },
+    {
+      "name": "Roman Simovic"
+    },
+    {
+      "name": "Galyna Gurina"
+    },
+    {
+      "name": "Ekaterina Antipova"
+    },
+    {
+      "name": "Ígor Peral"
+    },
+    {
+      "name": "Vicente Martínez"
+    }
+  ],
   "composers": [
     {
       "name": "Camille Saint-Saëns"
@@ -34,10 +57,10 @@
     {
       "sourceId": "src_orquesta_coro_rtve",
       "url": "https://www.teatromonumental.es/eventos/ensayo-general-a-7",
-      "checkedAt": "2026-09-08",
+      "checkedAt": "2026-09-09",
       "externalId": "/eventos/ensayo-general-a-7/"
     }
   ],
   "primarySourceId": "src_orquesta_coro_rtve",
-  "lastVerifiedAt": "2026-09-08"
+  "lastVerifiedAt": "2026-09-09"
 }

@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_piu_mosso_2226",
+  "slug": "cuarteto-avlos-y-la-magia-del-xviii",
+  "title": "Cuarteto Avlós y la Magia del XVIII",
+  "status": "scheduled",
+  "venueId": "ven_iglesia_san_antonio_alemanes",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_piu_mosso_2226_01",
+      "date": "2027-01-23",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Johann Christian Bach"
+    },
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "classical"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_fundacionpiumosso_com",
+      "url": "https://www.fundacionpiumosso.com/evento/cuarteto-avlos-y-la-magia-del-xviii",
+      "checkedAt": "2026-09-09",
+      "externalId": "2226"
+    }
+  ],
+  "primarySourceId": "src_fundacionpiumosso_com",
+  "lastVerifiedAt": "2026-09-09"
+}

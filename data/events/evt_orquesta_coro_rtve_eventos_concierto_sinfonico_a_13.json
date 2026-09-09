@@ -21,7 +21,18 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Orquesta RTVE"
+    },
+    {
+      "name": "Alexandre Bloch",
+      "role": "conductor"
+    },
+    {
+      "name": "Francisco Fullana"
+    }
+  ],
   "composers": [
     {
       "name": "Maurice Ravel"
@@ -46,10 +57,10 @@
     {
       "sourceId": "src_orquesta_coro_rtve",
       "url": "https://www.teatromonumental.es/eventos/concierto-sinfonico-a-13",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-09",
       "externalId": "/eventos/concierto-sinfonico-a-13/"
     }
   ],
   "primarySourceId": "src_orquesta_coro_rtve",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-09"
 }
