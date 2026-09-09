@@ -185,8 +185,9 @@ Orden de evidencia:
 
 1. obras identificadas;
 2. si no hay obras, compositores declarados por la fuente;
-3. si no hay arrays estructurados, `programText` (o la descripción) cuando nombra explícitamente compositores u obras conocidos;
-4. si no hay ninguna de esas evidencias, vacío. No deducir época por el nombre del ensemble, del ciclo, del venue, del instrumento, de un festival, de una descripción promocional ni del repertorio probable de un intérprete. La IA de eligibility/taxonomy no puede rellenar `eras`: vacío es correcto y preferible a adivinar.
+3. si no hay arrays estructurados, `programText` cuando nombra explícitamente compositores u obras conocidos;
+4. si el programa no nombra compositores, una declaración musical explícita y no ambigua de época (p. ej. «compositores del Romanticismo»). No escanear `description` buscando compositores: una biografía o un contexto editorial no es repertorio;
+5. si no hay ninguna de esas evidencias, vacío. No deducir época por el nombre del ensemble, del ciclo, del venue, del instrumento, de un festival, de una descripción promocional, de un título poético ni del repertorio probable de un intérprete. La IA de eligibility/taxonomy no puede rellenar `eras`: vacío es correcto y preferible a adivinar.
 
 Ejemplo: Bach + Mozart + Mahler → `baroque` + `classical` + `romantic`.
 

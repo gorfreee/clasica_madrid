@@ -1136,6 +1136,16 @@ describe('eras', () => {
     ).toEqual(['baroque', 'classical', 'romantic']);
 
     expect(resolveEras(facts({ title: 'Concierto extraordinario' })).value).toEqual([]);
+
+    expect(
+      resolveEras(
+        facts({
+          title: 'Bach y una nota editorial',
+          programText: 'Johann Sebastian Bach: Suite n.º 1.',
+          description: 'El solista también ha grabado a los compositores del Romanticismo y a David del Puerto.',
+        }),
+      ).value,
+    ).toEqual(['baroque']);
   });
 
   it('no toma CIM ANTONIO SOLER ni un tema de Rameau como época barroca', () => {
@@ -1168,6 +1178,49 @@ describe('eras', () => {
         }),
       ).value,
     ).toEqual(['contemporary']);
+  });
+
+  it('toma una declaración explícita de época y no las menciones biográficas', () => {
+    const piuMosso = resolveEras(
+      facts({
+        title: 'Martín Llade y Darío Meta. Los Románticos y la Poesía.',
+        description: [
+          'Darío Meta nos tocará a los compositores del Romanticismo. Estamos esperando el programa.',
+          'BIOGRAFÍAS DE AMBOS:',
+          'Actuaciones en el Beethoven Haus de Bonn y mentoría de Gabriela Montero.',
+          'Se estrena la ópera de cámara Lazarillo de Tormes con música del Premio Nacional David del Puerto.',
+          'El misterio Razumovski, con Ludwig van Beethoven como detective.',
+        ].join(' '),
+      }),
+    );
+    expect(piuMosso).toMatchObject({
+      value: ['romantic'],
+      method: 'rule',
+      ruleId: 'eras-declared-programme',
+    });
+    expect(piuMosso.value).not.toContain('classical');
+    expect(piuMosso.value).not.toContain('contemporary');
+
+    expect(
+      resolveEras(
+        facts({
+          title: 'Los Románticos y la Poesía',
+          description: 'Un recital de piano y poesía. Estamos esperando el programa.',
+        }),
+      ).value,
+    ).toEqual([]);
+  });
+
+  it('no añade época porque una biografía nombre a un compositor', () => {
+    expect(
+      resolveEras(
+        facts({
+          title: 'Recital de piano',
+          description:
+            'El pianista se formó interpretando a Beethoven y ha estrenado obras de Tomás Marco y Mauricio Sotelo. No se anuncia el programa de este concierto.',
+        }),
+      ).value,
+    ).toEqual([]);
   });
 });
 

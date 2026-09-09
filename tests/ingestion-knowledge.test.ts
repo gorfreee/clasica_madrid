@@ -572,7 +572,6 @@ describe('composer knowledge base', () => {
       { composers: [{ name: 'Tomas Luis de Victoria' }] },
       { works: [{ title: 'O magnum mysterium', composerName: 'Tomas Luis de Victoria' }] },
       { programText: 'Tomás Luis de Victoria: O magnum mysterium.' },
-      { description: 'Se interpretará O magnum mysterium de Tomás Luis de Victoria.' },
     ]) {
       const result = classify(facts(overrides));
       expect(result.eligibility).toMatchObject({
@@ -580,6 +579,14 @@ describe('composer knowledge base', () => {
       });
       expect(result.eras?.value).toEqual(['renaissance']);
     }
+
+    const fromDescription = classify(
+      facts({ description: 'Se interpretará O magnum mysterium de Tomás Luis de Victoria.' }),
+    );
+    expect(fromDescription.eligibility).toMatchObject({
+      value: 'include', method: 'knowledge', ruleId: 'known-classical-composer',
+    });
+    expect(fromDescription.eras?.value).toEqual([]);
   });
 
   it('respeta romantic / twentieth / contemporary en un programa mixto', () => {
