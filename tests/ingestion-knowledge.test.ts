@@ -23,6 +23,12 @@ function facts(overrides: Partial<ObservedFacts>): ObservedFacts {
   return { title: 'Concierto de temporada', performers: [], composers: [], works: [], ...overrides };
 }
 
+function expectCanonicalNames(text: string, expected: string[]): void {
+  expect(findKnownComposersInText(text).map((item) => item.canonicalName).sort()).toEqual(
+    [...expected].sort(),
+  );
+}
+
 describe('composer knowledge base', () => {
   it('resuelve Bach, Mozart y Mahler a las épocas canónicas', () => {
     expect(matchComposer('Johann Sebastian Bach')?.eras).toEqual(['baroque']);
@@ -421,6 +427,124 @@ describe('composer knowledge base', () => {
     expect(matchComposer('Schumann')?.canonicalName).toBe('Robert Schumann');
     expect(matchComposer('Alma Mahler')?.canonicalName).toBe('Alma Mahler');
     expect(matchComposer('Mahler')?.canonicalName).toBe('Gustav Mahler');
+  });
+
+  it('no atribuye un apellido ambiguo contenido en el nombre de otro compositor', () => {
+    expectCanonicalNames('Johann Christian Bach', ['Johann Christian Bach']);
+    expectCanonicalNames('Clara Schumann', ['Clara Schumann']);
+    expectCanonicalNames('C. P. E. Bach', ['Carl Philipp Emanuel Bach']);
+    expectCanonicalNames('W. F. Bach', ['Wilhelm Friedemann Bach']);
+    expectCanonicalNames('J. C. Bach', ['Johann Christian Bach']);
+    expectCanonicalNames('Michael Haydn', ['Michael Haydn']);
+    expectCanonicalNames('Alma Mahler', ['Alma Mahler']);
+    expectCanonicalNames('Fanny Mendelssohn', ['Fanny Hensel']);
+  });
+
+  it('conserva el alias corto cuando aparece aislado y no está subsumido', () => {
+    expectCanonicalNames('Bach: Suite n.º 1', ['Johann Sebastian Bach']);
+    expectCanonicalNames('Bach: Suite ...', ['Johann Sebastian Bach']);
+    expectCanonicalNames('Schumann: Carnaval, op. 9', ['Robert Schumann']);
+    expectCanonicalNames('Schumann: ...', ['Robert Schumann']);
+    expectCanonicalNames('Haydn: Sinfonía n.º 104', ['Franz Joseph Haydn']);
+    expectCanonicalNames('Mahler: Adagio', ['Gustav Mahler']);
+    expectCanonicalNames('Bach: Suite. Mozart: Concierto.', [
+      'Johann Sebastian Bach',
+      'Wolfgang Amadeus Mozart',
+    ]);
+  });
+
+  it('conserva dos nombres completos distintos aunque compartan apellido', () => {
+    expectCanonicalNames(
+      'Johann Christian Bach ... Johann Sebastian Bach ...',
+      ['Johann Christian Bach', 'Johann Sebastian Bach'],
+    );
+    expectCanonicalNames(
+      'Clara Schumann ... Robert Schumann ...',
+      ['Clara Schumann', 'Robert Schumann'],
+    );
+    expectCanonicalNames(
+      'Johann Christian Bach: Sinfonía. Johann Sebastian Bach: Suite.',
+      ['Johann Christian Bach', 'Johann Sebastian Bach'],
+    );
+  });
+
+  it('resuelve menciones con puntuación, tildes y saltos de línea', () => {
+    expectCanonicalNames('Johann Christian Bach:', ['Johann Christian Bach']);
+    expectCanonicalNames('Johann Christian Bach — Sinfonía en sol menor', ['Johann Christian Bach']);
+    expectCanonicalNames('Johann Christian Bach (1735-1782)', ['Johann Christian Bach']);
+    expectCanonicalNames('JOHANN CHRISTIAN BACH', ['Johann Christian Bach']);
+    expectCanonicalNames('Johann\nChristian\nBach', ['Johann Christian Bach']);
+    expectCanonicalNames('Clara  Schumann', ['Clara Schumann']);
+    expectCanonicalNames('Clara Schümann', ['Clara Schumann']);
+    expectCanonicalNames('Clára Schumann', ['Clara Schumann']);
+    expectCanonicalNames('Clara Schumann: Notturno, op. 6 n.º 2', ['Clara Schumann']);
+    expectCanonicalNames('Bach:\nSuite n.º 2', ['Johann Sebastian Bach']);
+    expectCanonicalNames('Schumann:\nCarnaval', ['Robert Schumann']);
+  });
+
+  it('no contamina un programText realista con el pariente homónimo', () => {
+    const jcProgram = [
+      'Johann Christian Bach (1735-1782)',
+      'Sinfonía en sol menor, op. 6 n.º 6',
+      'Concierto para clave en mi bemol mayor, op. 7 n.º 5',
+    ].join('\n');
+    expectCanonicalNames(jcProgram, ['Johann Christian Bach']);
+
+    const claraProgram = [
+      'Programa:',
+      'Clara Schumann — Notturno, op. 6 n.º 2',
+      'Clara Schumann — Scherzo op. 14',
+      'Intervalo',
+      'Robert Schumann — Carnaval, op. 9',
+    ].join('\n');
+    expectCanonicalNames(claraProgram, ['Clara Schumann', 'Robert Schumann']);
+
+    const mixedBach = [
+      'Obras de Johann Christian Bach y de Johann Sebastian Bach',
+      'J. C. Bach: Sinfonía op. 6 n.º 6',
+      'J. S. Bach: Suite inglesa n.º 2',
+    ].join('\n');
+    expectCanonicalNames(mixedBach, ['Johann Christian Bach', 'Johann Sebastian Bach']);
+  });
+
+  it('propaga la resolución por spans a composers[], eras[] y eligibility', () => {
+    const jcOnly = facts({
+      programText: [
+        'Johann Christian Bach (1735-1782)',
+        'Sinfonía en sol menor, op. 6 n.º 6',
+      ].join('\n'),
+    });
+    const jcClassified = classify(jcOnly);
+    expect(jcClassified.eligibility).toMatchObject({
+      value: 'include',
+      method: 'knowledge',
+      ruleId: 'known-classical-composer',
+    });
+    expect(jcClassified.eligibility.evidence).toEqual(['Johann Christian Bach']);
+    expect(jcClassified.eras?.value).toEqual(['classical']);
+    expect(jcClassified.eras?.ruleId).toBe('eras-from-program-text');
+    expect(jcClassified.eras?.evidence).toEqual(['Johann Christian Bach (classical)']);
+
+    const claraOnly = facts({ programText: 'Clara Schumann: Notturno, op. 6 n.º 2.' });
+    const claraClassified = classify(claraOnly);
+    expect(claraClassified.eligibility.evidence).toEqual(['Clara Schumann']);
+    expect(claraClassified.eligibility.evidence).not.toContain('Robert Schumann');
+    expect(claraClassified.eras?.value).toEqual(['romantic']);
+    expect(claraClassified.eras?.evidence).toEqual(['Clara Schumann (romantic)']);
+
+    const bothSchumann = classify(
+      facts({
+        programText: 'Clara Schumann: Notturno. Robert Schumann: Carnaval.',
+      }),
+    );
+    expect(bothSchumann.eligibility.evidence.sort()).toEqual(
+      ['Clara Schumann', 'Robert Schumann'].sort(),
+    );
+    expect(bothSchumann.eras?.value).toEqual(['romantic']);
+
+    const isolatedBach = classify(facts({ programText: 'Bach: Suite n.º 1 para violonchelo solo.' }));
+    expect(isolatedBach.eligibility.evidence).toEqual(['Johann Sebastian Bach']);
+    expect(isolatedBach.eras?.value).toEqual(['baroque']);
   });
 
   it('detecta colisiones de alias normalizado entre compositores distintos', () => {

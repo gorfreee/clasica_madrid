@@ -2394,9 +2394,6 @@ type ComposerIndex = {
 };
 
 const INDEX: ComposerIndex = buildIndex(COMPOSERS);
-const ALIASES_BY_LENGTH = [...new Set(COMPOSERS.flatMap((entry) => entry.aliases))].sort(
-  (left, right) => right.length - left.length,
-);
 
 /**
  * Trailing biographical year annotation only: `(1685-1750)`, `(1937)`,
@@ -2468,25 +2465,38 @@ function isDelimiterToken(token: string): boolean {
   return /^(?:[:·•]|[—–-])$/.test(token);
 }
 
+type ComposerMentionHit = {
+  start: number;
+  end: number;
+  knowledge: ComposerKnowledge;
+};
+
 /**
  * Conservative scan of observed prose for known composer names.
- * Longest alias first; word-boundary only. Does not invent names.
+ * Collects alias spans, then keeps the longest match when spans overlap so a
+ * short surname alias cannot add a second identity already named more
+ * specifically in the same span (`Bach` inside `Johann Christian Bach`).
+ * Word-boundary only. Does not invent names.
  * Skips names inside institutions/centres and contextual mentions
  * (tema de, basado en, inspirado en, homenaje a).
  */
 export function findKnownComposersInText(text: string): ComposerKnowledge[] {
   const folded = foldName(text);
   if (!folded) return [];
+  const hits: ComposerMentionHit[] = [];
+  for (const [needle, knowledge] of INDEX.byFolded) {
+    if (needle.length < 4) continue;
+    for (const span of unguardedAliasSpans(folded, needle)) {
+      hits.push({ start: span.start, end: span.end, knowledge });
+    }
+  }
+
   const found: ComposerKnowledge[] = [];
   const seen = new Set<string>();
-  for (const alias of ALIASES_BY_LENGTH) {
-    const needle = foldName(alias);
-    if (!needle || needle.length < 4) continue;
-    if (!hasAttributedComposerPhrase(folded, needle)) continue;
-    const match = INDEX.byFolded.get(needle);
-    if (!match || seen.has(match.canonicalName)) continue;
-    seen.add(match.canonicalName);
-    found.push(match);
+  for (const hit of resolveOverlappingComposerHits(hits)) {
+    if (seen.has(hit.knowledge.canonicalName)) continue;
+    seen.add(hit.knowledge.canonicalName);
+    found.push(hit.knowledge);
   }
   return found;
 }
@@ -2517,13 +2527,43 @@ const INSTITUTION_COMPOSER_PREFIXES = [
   'fundacio',
 ];
 
-function hasAttributedComposerPhrase(haystack: string, phrase: string): boolean {
+function unguardedAliasSpans(
+  haystack: string,
+  phrase: string,
+): Array<{ start: number; end: number }> {
   const pattern = new RegExp(`(?:^| )${escapeRegExp(phrase)}(?: |$)`, 'g');
+  const spans: Array<{ start: number; end: number }> = [];
   for (const match of haystack.matchAll(pattern)) {
     const start = match[0].startsWith(' ') ? match.index! + 1 : match.index!;
-    if (!isGuardedComposerContext(haystack.slice(0, start))) return true;
+    if (isGuardedComposerContext(haystack.slice(0, start))) continue;
+    spans.push({ start, end: start + phrase.length });
   }
-  return false;
+  return spans;
+}
+
+/**
+ * Longest span wins when mentions overlap. Distinct non-overlapping names
+ * are all kept, including two full names that share a family surname.
+ */
+function resolveOverlappingComposerHits(hits: ComposerMentionHit[]): ComposerMentionHit[] {
+  const ranked = [...hits].sort((left, right) => {
+    const lengthDelta = right.end - right.start - (left.end - left.start);
+    if (lengthDelta !== 0) return lengthDelta;
+    if (left.start !== right.start) return left.start - right.start;
+    return left.knowledge.canonicalName.localeCompare(right.knowledge.canonicalName);
+  });
+
+  const accepted: ComposerMentionHit[] = [];
+  for (const hit of ranked) {
+    if (accepted.some((kept) => composerSpansOverlap(kept, hit))) continue;
+    accepted.push(hit);
+  }
+  accepted.sort((left, right) => left.start - right.start || left.end - right.end);
+  return accepted;
+}
+
+function composerSpansOverlap(left: ComposerMentionHit, right: ComposerMentionHit): boolean {
+  return left.start < right.end && right.start < left.end;
 }
 
 function isGuardedComposerContext(prefix: string): boolean {
