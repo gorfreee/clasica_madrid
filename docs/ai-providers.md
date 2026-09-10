@@ -29,11 +29,13 @@ Los defaults son:
 6. `zai:glm-4.7-flash` y `zai:glm-4.5-flash`;
 7. `cloudflare:@cf/zai-org/glm-4.7-flash` y `cloudflare:@cf/google/gemma-4-26b-a4b-it`.
 
-Cada lista puede reordenarse con `*_MODELS`. En zero-cost mode, Z.AI, Cloudflare y Gemini rechazan IDs fuera de su allowlist. Mistral no recibe cuotas públicas inventadas: aprende de `429`/`Retry-After` y admite overrides `MISTRAL_MODEL_RPM`, `MISTRAL_MODEL_TPM` y `MISTRAL_MODEL_RPD`. Groq empieza con los límites Free publicados y también admite overrides por modelo.
+Cada lista puede reordenarse con `*_MODELS`. En zero-cost mode, Z.AI, Cloudflare y Gemini rechazan IDs fuera de su allowlist. Mistral no recibe cuotas públicas inventadas: aprende de `429`/`Retry-After` y admite overrides `MISTRAL_MODEL_RPM`, `MISTRAL_MODEL_TPM`, `MISTRAL_MODEL_RPD`, `MISTRAL_MODEL_MAX_CONCURRENT`, `MISTRAL_MODEL_MIN_INTERVAL_MS`, `MISTRAL_MAX_CONCURRENT` y `MISTRAL_MIN_INTERVAL_MS`. Groq, Z.AI y Cloudflare admiten los mismos overrides genéricos de presión. El scheduler no hardcodea reglas por provider: `maxConcurrent` / `minIntervalMs` se declaran en la route.
+
+Durante una ejecución, una route que acumula varios fallos consecutivos relevantes (empty/incomplete/timeout/transport/output inválido) sin un resultado válido entre medias abre un circuit breaker in-memory. Rate limits, RPM/RPD y cuota diaria siguen sus mecanismos propios. El circuito no se persiste entre runs y nunca introduce un provider de pago.
 
 `--ai-max-requests` limita los HTTP requests del pool completo, incluidos fallos, retries y fallbacks. `--ai-route provider:model` fija una sola route para diagnóstico.
 
-El `report.json`, el resumen de consola y el Job Summary separan provider, modelo y `routeId`; incluyen requests HTTP totales y por provider/route/purpose, resultados válidos por route, retries, fallbacks, rate limits, cuotas agotadas, outputs inválidos, caché y tokens disponibles. Así, un mismo modelo servido por proveedores distintos nunca se mezcla.
+El `report.json`, el resumen de consola y el Job Summary separan provider, modelo y `routeId`. Distinguen llamadas lógicas, requests HTTP, retries de la misma route, HTTP de fallback, llamadas con fallback, caché, deferred, rate limits, cuotas agotadas y circuitos abiertos. Hay una tabla compacta por route (HTTP, válidas, rate limits, circuito). El detalle completo permanece en el artifact.
 
 ## Smoke tests manuales
 

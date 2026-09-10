@@ -247,6 +247,21 @@ export type SourceFailure = {
   stage?: 'hydration';
 };
 
+export type IngestAiRouteSummary = {
+  routeId: string;
+  provider: string;
+  model: string;
+  httpRequests: number;
+  valid: number;
+  failures: number;
+  failuresByKind: Record<string, number>;
+  rateLimits: number;
+  quotaExhausted: number;
+  circuitOpen: boolean;
+  circuitReason?: string;
+  consecutiveFailures: number;
+};
+
 export type IngestAiSummary = {
   attempted: number;
   resolved: number;
@@ -265,6 +280,11 @@ export type IngestAiSummary = {
   httpRequests: number;
   retries: number;
   modelFallbacks: number;
+  logicalCalls: number;
+  sameRouteRetries: number;
+  httpFallbacks: number;
+  fallbackCalls: number;
+  circuitOpenRoutes: number;
   requestsByModel: Record<string, number>;
   classificationsByModel: Record<string, number>;
   requestsByRoute: Record<string, number>;
@@ -275,6 +295,9 @@ export type IngestAiSummary = {
   failuresByKind: Record<string, number>;
   rateLimits: number;
   quotaExhausted: number;
+  rateLimitsByRoute: Record<string, number>;
+  rateLimitsByProvider: Record<string, number>;
+  routes: IngestAiRouteSummary[];
   cacheHits: number;
   deferred: number;
   inputTokensByModel: Record<string, number>;
@@ -316,6 +339,11 @@ export function emptyIngestAiSummary(): IngestAiSummary {
     httpRequests: 0,
     retries: 0,
     modelFallbacks: 0,
+    logicalCalls: 0,
+    sameRouteRetries: 0,
+    httpFallbacks: 0,
+    fallbackCalls: 0,
+    circuitOpenRoutes: 0,
     requestsByModel: {},
     classificationsByModel: {},
     requestsByRoute: {},
@@ -326,6 +354,9 @@ export function emptyIngestAiSummary(): IngestAiSummary {
     failuresByKind: {},
     rateLimits: 0,
     quotaExhausted: 0,
+    rateLimitsByRoute: {},
+    rateLimitsByProvider: {},
+    routes: [],
     cacheHits: 0,
     deferred: 0,
     inputTokensByModel: {},

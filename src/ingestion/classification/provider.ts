@@ -53,21 +53,40 @@ export type AiEnv = GeminiConfigEnv & {
   GROQ_MODEL_RPM?: string;
   GROQ_MODEL_TPM?: string;
   GROQ_MODEL_RPD?: string;
+  GROQ_MODEL_MAX_CONCURRENT?: string;
+  GROQ_MODEL_MIN_INTERVAL_MS?: string;
+  GROQ_MAX_CONCURRENT?: string;
+  GROQ_MIN_INTERVAL_MS?: string;
   MISTRAL_API_KEY?: string;
   MISTRAL_MODELS?: string;
   MISTRAL_FREE_MODE_CONFIRMED?: string;
   MISTRAL_MODEL_RPM?: string;
   MISTRAL_MODEL_TPM?: string;
   MISTRAL_MODEL_RPD?: string;
+  MISTRAL_MODEL_MAX_CONCURRENT?: string;
+  MISTRAL_MODEL_MIN_INTERVAL_MS?: string;
+  MISTRAL_MAX_CONCURRENT?: string;
+  MISTRAL_MIN_INTERVAL_MS?: string;
   ZAI_API_KEY?: string;
   ZAI_MODELS?: string;
   ZAI_MODEL_RPM?: string;
   ZAI_MODEL_TPM?: string;
   ZAI_MODEL_RPD?: string;
+  ZAI_MODEL_MAX_CONCURRENT?: string;
+  ZAI_MODEL_MIN_INTERVAL_MS?: string;
+  ZAI_MAX_CONCURRENT?: string;
+  ZAI_MIN_INTERVAL_MS?: string;
   CLOUDFLARE_API_TOKEN?: string;
   CLOUDFLARE_ACCOUNT_ID?: string;
   CLOUDFLARE_MODELS?: string;
   CLOUDFLARE_WORKERS_FREE_CONFIRMED?: string;
+  CLOUDFLARE_MODEL_RPM?: string;
+  CLOUDFLARE_MODEL_TPM?: string;
+  CLOUDFLARE_MODEL_RPD?: string;
+  CLOUDFLARE_MODEL_MAX_CONCURRENT?: string;
+  CLOUDFLARE_MODEL_MIN_INTERVAL_MS?: string;
+  CLOUDFLARE_MAX_CONCURRENT?: string;
+  CLOUDFLARE_MIN_INTERVAL_MS?: string;
 };
 
 /** New production providers only participate in an explicit fail-closed zero-cost pool. */
@@ -168,7 +187,7 @@ function freeRoutes(env: AiEnv, zeroCost: boolean): AiRoute[] {
       responseFormat: 'none',
       quotaExhausted: (_status, body) => cloudflareDailyAllocationExhausted(body),
       unavailableError: (status, body) => status === 403 && /\b(?:5016|5018|5035|3041)\b/.test(body),
-    }, selected, {}, UTC_DAILY_RESET));
+    }, selected, providerLimitMaps(env, 'CLOUDFLARE'), UTC_DAILY_RESET));
   }
   return routes.map((route, priority) => ({ ...route, priority }));
 }
@@ -261,21 +280,44 @@ function geminiFromEnv(env: AiEnv, pinnedModel?: string, zeroCost = false): AiCl
   });
 }
 
-type LimitMaps = { rpm?: Record<string, number>; tpm?: Record<string, number>; rpd?: Record<string, number> };
+type LimitMaps = {
+  rpm?: Record<string, number>;
+  tpm?: Record<string, number>;
+  rpd?: Record<string, number>;
+  maxConcurrent?: Record<string, number>;
+  minIntervalMs?: Record<string, number>;
+  providerMaxConcurrent?: number;
+  providerMinIntervalMs?: number;
+};
 
-function providerLimitMaps(env: AiEnv, prefix: 'GROQ' | 'MISTRAL' | 'ZAI'): LimitMaps {
+function providerLimitMaps(
+  env: AiEnv,
+  prefix: 'GROQ' | 'MISTRAL' | 'ZAI' | 'CLOUDFLARE',
+): LimitMaps {
   return {
     rpm: parseLimitMap(env[`${prefix}_MODEL_RPM`], `${prefix}_MODEL_RPM`),
     tpm: parseLimitMap(env[`${prefix}_MODEL_TPM`], `${prefix}_MODEL_TPM`),
     rpd: parseLimitMap(env[`${prefix}_MODEL_RPD`], `${prefix}_MODEL_RPD`),
+    maxConcurrent: parseLimitMap(env[`${prefix}_MODEL_MAX_CONCURRENT`], `${prefix}_MODEL_MAX_CONCURRENT`),
+    minIntervalMs: parseLimitMap(env[`${prefix}_MODEL_MIN_INTERVAL_MS`], `${prefix}_MODEL_MIN_INTERVAL_MS`),
+    providerMaxConcurrent: parseNonnegativeInteger(env[`${prefix}_MAX_CONCURRENT`], `${prefix}_MAX_CONCURRENT`),
+    providerMinIntervalMs: parseNonnegativeInteger(env[`${prefix}_MIN_INTERVAL_MS`], `${prefix}_MIN_INTERVAL_MS`),
   };
 }
 
 function limitsFor(model: string, maps: LimitMaps, defaults: AiRouteLimits): AiRouteLimits {
   const limits: AiRouteLimits = {};
-  for (const key of ['rpm', 'tpm', 'rpd'] as const) {
+  for (const key of ['rpm', 'tpm', 'rpd', 'maxConcurrent', 'minIntervalMs'] as const) {
     const value = maps[key]?.[model] ?? defaults[key];
     if (value !== undefined) limits[key] = value;
+  }
+  if (maps.providerMaxConcurrent !== undefined) limits.providerMaxConcurrent = maps.providerMaxConcurrent;
+  else if (defaults.providerMaxConcurrent !== undefined) {
+    limits.providerMaxConcurrent = defaults.providerMaxConcurrent;
+  }
+  if (maps.providerMinIntervalMs !== undefined) limits.providerMinIntervalMs = maps.providerMinIntervalMs;
+  else if (defaults.providerMinIntervalMs !== undefined) {
+    limits.providerMinIntervalMs = defaults.providerMinIntervalMs;
   }
   return limits;
 }

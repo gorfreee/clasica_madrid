@@ -76,10 +76,43 @@ export type AiCallContext = {
   requireFormats?: boolean;
 };
 
+/** Per-route runtime snapshot for reports. Not persisted across runs. */
+export type AiRouteRuntimeStats = {
+  routeId: string;
+  provider: string;
+  model: string;
+  httpRequests: number;
+  valid: number;
+  failures: number;
+  failuresByKind: Partial<Record<AiFailureKind, number>>;
+  rateLimits: number;
+  quotaExhausted: number;
+  circuitOpen: boolean;
+  circuitReason?: string;
+  consecutiveFailures: number;
+};
+
 export type AiProviderStats = {
   httpRequests: number;
   retries: number;
+  /**
+   * Legacy alias of `httpFallbacks`. Historically counted every HTTP selection
+   * that was not the pool's first route, including RPM/cooldown skips.
+   */
   modelFallbacks: number;
+  /** classify() executions that entered the scheduler (not in-flight coalescing). */
+  logicalCalls?: number;
+  /** Extra HTTP attempts on the same route inside one logical call. */
+  sameRouteRetries?: number;
+  /** HTTP attempts performed after another route already failed in this call. */
+  httpFallbacks?: number;
+  /** Logical calls that issued at least one `httpFallbacks` attempt. */
+  fallbackCalls?: number;
+  /** Routes whose circuit opened during this execution. */
+  circuitOpenRoutes?: number;
+  rateLimitsByRoute?: Record<string, number>;
+  rateLimitsByProvider?: Record<string, number>;
+  routes?: AiRouteRuntimeStats[];
   /** Canonical provider-aware aggregates. Keys are stable `provider:model` route IDs. */
   requestsByRoute: Record<string, number>;
   classificationsByRoute: Record<string, number>;

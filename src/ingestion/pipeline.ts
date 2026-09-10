@@ -731,7 +731,12 @@ function mergeProviderStats(usage: IngestAiSummary, ai: AiClassifier | undefined
   if (!stats) return;
   usage.httpRequests = stats.httpRequests;
   usage.retries = stats.retries;
-  usage.modelFallbacks = stats.modelFallbacks;
+  usage.modelFallbacks = stats.httpFallbacks ?? stats.modelFallbacks;
+  usage.logicalCalls = stats.logicalCalls ?? 0;
+  usage.sameRouteRetries = stats.sameRouteRetries ?? 0;
+  usage.httpFallbacks = stats.httpFallbacks ?? 0;
+  usage.fallbackCalls = stats.fallbackCalls ?? 0;
+  usage.circuitOpenRoutes = stats.circuitOpenRoutes ?? 0;
   usage.requestsByRoute = stats.requestsByRoute;
   usage.classificationsByRoute = stats.classificationsByRoute;
   usage.requestsByProvider = stats.requestsByProvider ?? {};
@@ -740,6 +745,9 @@ function mergeProviderStats(usage: IngestAiSummary, ai: AiClassifier | undefined
   usage.failuresByKind = stats.failuresByKind ?? {};
   usage.rateLimits = stats.rateLimits ?? 0;
   usage.quotaExhausted = stats.quotaExhausted ?? 0;
+  usage.rateLimitsByRoute = stats.rateLimitsByRoute ?? {};
+  usage.rateLimitsByProvider = stats.rateLimitsByProvider ?? {};
+  usage.routes = stats.routes ?? [];
   usage.requestsByModel = stats.requestsByModel ?? stats.requestsByRoute;
   usage.classificationsByModel = stats.classificationsByModel ?? stats.classificationsByRoute;
   usage.cacheHits = stats.cacheHits ?? 0;

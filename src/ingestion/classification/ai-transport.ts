@@ -6,6 +6,20 @@ export type AiRouteLimits = {
   rpm?: number;
   tpm?: number;
   rpd?: number;
+  /** Max in-flight HTTP requests for this route. 0 disables the route. */
+  maxConcurrent?: number;
+  /** Minimum milliseconds between starting HTTP requests for this route. */
+  minIntervalMs?: number;
+  /**
+   * Max in-flight HTTP requests across every route of this provider.
+   * The scheduler uses the most restrictive declared value.
+   */
+  providerMaxConcurrent?: number;
+  /**
+   * Minimum milliseconds between starting HTTP requests for this provider.
+   * The scheduler uses the most restrictive declared value.
+   */
+  providerMinIntervalMs?: number;
 };
 
 export type AiTransportResult = {
