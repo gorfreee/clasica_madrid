@@ -27,7 +27,7 @@ import {
 import { ingestExitCode, parseIngestArgs } from './ingest-args.ts';
 import { loadLocalAiEnv } from './load-local-env.ts';
 import type { AiClassifier } from '../ingestion/classification/ai.ts';
-import { GeminiClassifier } from '../ingestion/classification/gemini.ts';
+import { AiPoolClassifier } from '../ingestion/classification/ai-pool.ts';
 
 loadLocalAiEnv();
 
@@ -118,12 +118,13 @@ process.once('SIGTERM', () => shutdown('SIGTERM'));
 try {
   ai = createAiClassifierFromEnv({
     ...process.env,
-    ...(parsed.aiModel ? { GEMINI_MODELS: parsed.aiModel } : {}),
-    ...(parsed.aiNoCache ? { GEMINI_CACHE: 'off' } : {}),
-    ...(parsed.aiMaxRequests !== undefined ? { GEMINI_MAX_REQUESTS: String(parsed.aiMaxRequests) } : {}),
+    ...(parsed.aiRoute ? { AI_ROUTE: parsed.aiRoute } : {}),
+    ...(parsed.aiModel && !parsed.aiRoute ? { AI_ROUTE: `gemini:${parsed.aiModel}` } : {}),
+    ...(parsed.aiNoCache ? { AI_CACHE: 'off' } : {}),
+    ...(parsed.aiMaxRequests !== undefined ? { AI_MAX_REQUESTS: String(parsed.aiMaxRequests) } : {}),
   });
-  if ((parsed.aiModel || parsed.aiNoCache || parsed.aiMaxRequests !== undefined) && !(ai instanceof GeminiClassifier)) {
-    throw new Error('Las opciones --ai-* requieren el provider Gemini y GEMINI_API_KEY');
+  if ((parsed.aiRoute || parsed.aiModel || parsed.aiNoCache || parsed.aiMaxRequests !== undefined) && !(ai instanceof AiPoolClassifier)) {
+    throw new Error('Las opciones --ai-* requieren un pool de IA configurado');
   }
   ai?.initialize?.();
   const catalog = await loadCatalogFromDir(dataDir);

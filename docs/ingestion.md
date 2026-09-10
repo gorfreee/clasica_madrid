@@ -116,13 +116,13 @@ Los reports incluyen cobertura final de composers, eras, formats y access (inclu
 
 `ingest:sync` / `ingest:source` / `ingest:discovery` cargan `.local/ai.env` (gitignorado) si existe; el entorno del proceso gana. Plantilla y variables: `.env.example`. No commits ni imprimas la clave.
 
-El estado local (caché, cuota, pendientes, lock) vive bajo `.local/ai/` por defecto, fuera de Git y de `data/`. `--dry-run` no escribe el catálogo, pero sí puede gastar cuota y guardar ese estado. No hay rotación de claves ni coordinación entre máquinas: Google limita por proyecto y modelo.
+El estado local v2 (caché, cuota, pendientes, lock) vive bajo `.local/ai/` por defecto, fuera de Git y de `data/`, e indexa cuotas por `routeId` (`provider:model`). Al leer un `quota.json` v1, los contadores por modelo se migran a routes Gemini; un fichero corrupto sigue fallando sin reset silencioso. La caché v2 incluye purpose, prompt/schema efectivos, hechos observados, provider/model y configuración relevante del transport, por lo que las entradas v1 se invalidan de forma segura. `--dry-run` no escribe el catálogo, pero sí puede gastar cuota y guardar ese estado.
 
-Flags `--ai-*` (modelo, sin caché, tope de requests) existen para pruebas acotadas. Requieren Gemini. Los tests ordinarios no las necesitan.
+Flags `--ai-*` existen para pruebas acotadas: `--ai-route provider:model`, `--ai-no-cache` y el presupuesto HTTP global `--ai-max-requests`. `--ai-model` se conserva como alias legacy de una route Gemini. Los tests ordinarios no las necesitan.
 
 ## Automatización en GitHub Actions
 
-`.github/workflows/ingestion.yml` serializa todas las ejecuciones en el concurrency group `ingestion-production`; una scheduled y una manual nunca comparten simultáneamente cuota ni state de Gemini.
+`.github/workflows/ingestion.yml` serializa todas las ejecuciones en el concurrency group `ingestion-production`; una scheduled y una manual nunca comparten simultáneamente cuota ni state del pool. Producción mantiene `AI_PROVIDER=gemini` y no configura ningún proveedor adicional.
 
 `auditorio-nacional`, `fundacion-juan-march`, `teatro-zarzuela`, `cndm` y `real-hermandad-refugio` forman parte del `all` programado. March, Zarzuela, Auditorio y CNDM salen por el fetch relay (`useFetchRelay`). Ver [infra/fetch-relay](../infra/fetch-relay/README.md). El Worker se despliega con [deploy-fetch-relay.yml](../.github/workflows/deploy-fetch-relay.yml) o desde el Dashboard; añadir otra fuente al relay es `useFetchRelay: true` en el registry. Las peticiones a `/wp-json/` envían `Accept: application/json` sin `text/html` ni `*/*`. Un HTTP 202 de captcha no se acepta como documento; el Worker puede reintentarlo si hay cookie nueva o cuerpo `sgcaptcha`. Refugio pide el archivo oficial `/categoria-eventos/conciertos/` (no `/conciertos/` ni REST) por HTTP directo; si SiteGround responde 202/SG-Captcha, el mismo archivo se carga en Chrome del runner y las páginas extra reutilizan esa sesión. Las fichas individuales (`/calendario-de-eventos/{slug}/`) usan el mismo GET directo y, si hace falta, una sesión Chrome compartida del bucle de hydration; un fallo de ficha conserva los hechos del listing. Zarzuela mantiene pacing de origen, `Retry-After` y un circuito por fichas distintas.
 
@@ -139,7 +139,7 @@ En **Actions → Production ingestion → Run workflow**:
 - `exclude_sources`: IDs a excluir, separados por coma (opcional; vacío por defecto);
 - `from` y `to`: rango opcional; deben informarse juntos;
 - `auto_merge`: opt-in adicional para un publish manual;
-- `ai_max_requests`: presupuesto HTTP opcional para Gemini.
+- `ai_max_requests`: presupuesto HTTP global opcional para el pool de IA.
 
 `sources=all` con `exclude_sources=auditorio-nacional,cndm` ejecuta el conjunto normal de `all` menos esas dos fuentes. Una selección explícita también admite exclusiones (`sources=auditorio-nacional,cndm,teatro-real` y `exclude_sources=cndm` deja auditorio-nacional y teatro-real). El job programado no pasa exclusiones: con `exclude_sources` vacío sigue ejecutando exactamente las mismas fuentes que hoy.
 
@@ -153,7 +153,7 @@ El dry-run usa el ref seleccionado en «Run workflow» y nunca puede modificar `
 - repository variable `INGEST_FETCH_RELAY_URL`: URL del Worker (no es sensible). El pipeline sólo la usa para fuentes con `useFetchRelay` en el registry. Ausentes, el resto de fuentes no cambia; las fuentes con `useFetchRelay` fallan de forma visible, también dentro del `all` programado;
 - repository variable `INGESTION_AUTO_MERGE_ENABLED`: kill switch global; sólo el valor exacto `true` habilita auto-merge.
 
-El state persistente recupera `quota.json`, `cache/**` y `pending/**` mediante `actions/cache`. Cada run guarda una key inmutable y restaura la más reciente; `run.lock` nunca se persiste. Cada ejecución sube un artifact de observabilidad (`ingestion-run-<run_id>-<attempt>`) con retención de 90 días, incluso si la ingestión falla. Ese bundle no se commitea. El estado persistente de Gemini (`.local/ai/`) no forma parte del artifact.
+El state persistente recupera `quota.json`, `cache/**` y `pending/**` mediante `actions/cache`. Cada run guarda una key inmutable y restaura la más reciente, incluido el prefijo legacy de Gemini durante la transición; `run.lock` nunca se persiste. Cada ejecución sube un artifact de observabilidad (`ingestion-run-<run_id>-<attempt>`) con retención de 90 días, incluso si la ingestión falla. Ese bundle no se commitea. El estado persistente del pool (`.local/ai/`) no forma parte del artifact.
 
 ### Dónde está una run
 
@@ -180,7 +180,7 @@ La hydratación que expande una ficha en varios conciertos (`expand`) puede hace
 
 Empieza por el Job Summary (estado, último stage, motivo conciso) y descarga el artifact. `run.json` dice si fue `failed` o `interrupted` y en qué stage. `events.jsonl` conserva lo ya procesado. `report.json` está cuando el proceso pudo escribirlo. Los logs de Actions siguen siendo la interfaz inmediata; `run.log` hace que el artifact sea autocontenido para un agente.
 
-`SIGINT`/`SIGTERM` (cancelación o timeout de Actions) se tratan como `interrupted`: se flushea el journal, se actualiza `run.json`, se libera el lock de Gemini y se sale 130/143. **`SIGKILL` no es interceptable**; si el runner mata el proceso, el journal puede perder las últimas líneas no flusheadas.
+`SIGINT`/`SIGTERM` (cancelación o timeout de Actions) se tratan como `interrupted`: se flushea el journal, se actualiza `run.json`, se libera el lock del pool de IA y se sale 130/143. **`SIGKILL` no es interceptable**; si el runner mata el proceso, el journal puede perder las últimas líneas no flusheadas.
 
 Preguntas útiles para un agente con el bundle:
 
@@ -198,14 +198,14 @@ Compara dos run artifacts e identifica regresiones.
 
 La trazabilidad por evento en `report.json` sigue `listing → observed → normalized → classification → identity → candidate`. Sirve para distinguir si un performer salió del adapter, de la hidratación de ficha, de la normalización o del merge.
 
-### Observabilidad frente a estado persistente de Gemini
+### Observabilidad frente a estado persistente del pool de IA
 
 | Qué | Dónde | Para qué |
 |---|---|---|
 | Artifact de la run | Actions artifact, 90 días | Entender esa ejecución |
-| `quota.json`, `cache/**`, `pending/**` | `.local/ai/` vía `actions/cache` | Operar Gemini en la siguiente run |
+| `quota.json`, `cache/**`, `pending/**` | `.local/ai/` vía `actions/cache` | Operar el pool de IA en la siguiente run |
 
-No conviertas el state de Gemini en historial de runs ni lo metas en el artifact.
+No conviertas el state del pool en historial de runs ni lo metas en el artifact.
 
 `--observability-dir` (o, si sólo hay `--report`, el directorio del report) escribe `run.json` y `events.jsonl` en local. El flag no cambia clasificación ni publicación.
 

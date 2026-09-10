@@ -732,12 +732,16 @@ function mergeProviderStats(usage: IngestAiSummary, ai: AiClassifier | undefined
   usage.httpRequests = stats.httpRequests;
   usage.retries = stats.retries;
   usage.modelFallbacks = stats.modelFallbacks;
-  usage.requestsByModel = stats.requestsByModel;
-  usage.classificationsByModel = stats.classificationsByModel;
+  usage.requestsByRoute = stats.requestsByRoute;
+  usage.classificationsByRoute = stats.classificationsByRoute;
+  usage.requestsByModel = stats.requestsByModel ?? stats.requestsByRoute;
+  usage.classificationsByModel = stats.classificationsByModel ?? stats.classificationsByRoute;
   usage.cacheHits = stats.cacheHits ?? 0;
   usage.deferred = stats.deferred ?? 0;
   usage.inputTokensByModel = stats.inputTokensByModel ?? {};
   usage.dailyRequestsByModel = stats.dailyRequestsByModel ?? {};
+  usage.inputTokensByRoute = stats.inputTokensByRoute ?? stats.inputTokensByModel ?? {};
+  usage.dailyRequestsByRoute = stats.dailyRequestsByRoute ?? stats.dailyRequestsByModel ?? {};
 }
 
 function measureSourcePhase<T>(

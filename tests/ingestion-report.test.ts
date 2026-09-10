@@ -226,7 +226,9 @@ describe('ingest event report', () => {
         return { eligibility: 'include', kind: 'alternative', evidence: ['fake'] };
       },
       lastDiagnostics: () => ({
+        provider: 'gemini',
         model: 'gemini-3.1-flash-lite',
+        routeId: 'gemini:gemini-3.1-flash-lite',
         fallbackUsed: true,
         attempts: 3,
       }),
@@ -236,6 +238,8 @@ describe('ingest event report', () => {
         modelFallbacks: 1,
         requestsByModel: { 'gemini-3.1-flash-lite': 3, 'gemini-2.5-flash': 1 },
         classificationsByModel: { 'gemini-2.5-flash': 1 },
+        requestsByRoute: { 'gemini:gemini-3.1-flash-lite': 3, 'gemini:gemini-2.5-flash': 1 },
+        classificationsByRoute: { 'gemini:gemini-2.5-flash': 1 },
       }),
     };
     const { run } = await runAuditorio({
@@ -245,7 +249,9 @@ describe('ingest event report', () => {
 
     expect(run.decisions[0]!.aiAttempted).toBe(true);
     expect(run.decisions[0]!.ai).toEqual({
+      provider: 'gemini',
       model: 'gemini-3.1-flash-lite',
+      routeId: 'gemini:gemini-3.1-flash-lite',
       fallbackUsed: true,
       attempts: 3,
     });
@@ -260,6 +266,11 @@ describe('ingest event report', () => {
       'gemini-2.5-flash': 1,
     });
     expect(run.summary.ai.classificationsByModel).toEqual({ 'gemini-2.5-flash': 1 });
+    expect(run.summary.ai.requestsByRoute).toEqual({
+      'gemini:gemini-3.1-flash-lite': 3,
+      'gemini:gemini-2.5-flash': 1,
+    });
+    expect(run.summary.ai.classificationsByRoute).toEqual({ 'gemini:gemini-2.5-flash': 1 });
     expect(run.summary.quality).toMatchObject({
       composers: { populated: 0, unresolved: 1, unresolvedNoProgramEvidence: 1 },
       eras: { populated: 0, unresolved: 1 },

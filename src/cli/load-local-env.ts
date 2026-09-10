@@ -12,6 +12,10 @@ export const LOCAL_AI_ENV_RELATIVE = '.local/ai.env';
  */
 export const LOCAL_AI_ENV_KEYS = [
   'AI_PROVIDER',
+  'AI_ROUTE',
+  'AI_MAX_REQUESTS',
+  'AI_STATE_DIR',
+  'AI_CACHE',
   'OPENAI_API_KEY',
   'OPENAI_MODEL',
   'OPENAI_BASE_URL',

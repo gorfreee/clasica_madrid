@@ -1,0 +1,565 @@
+import { randomUUID } from 'node:crypto';
+import type { ObservedFacts } from '../observed.ts';
+import {
+  AI_CLASSIFY_TIMEOUT_MS,
+  AiRateLimitedError,
+  AiUnusableOutputError,
+  failureKindForUnusable,
+  parseAiClassification,
+  parseAiOutputForPurpose,
+  sanitizeAiOutputExcerpt,
+  taxonomyFormatsStillUnresolved,
+  type AiAttemptFailure,
+  type AiCallContext,
+  type AiCallDiagnostics,
+  type AiCallPurpose,
+  type AiClassifier,
+  type AiProviderStats,
+} from './ai.ts';
+import { buildAiRequest, type AiRequest } from './ai-request.ts';
+import { AiPoolState, hashAiInput } from './ai-state.ts';
+import { AiTransportError, type AiRoute } from './ai-transport.ts';
+
+export const AI_POOL_MAX_RETRIES = 2;
+export const AI_POOL_BACKOFF_BASE_MS = 2_000;
+export const AI_POOL_MAX_RETRY_WAIT_MS = 60_000;
+export const AI_POOL_CLASSIFY_BUDGET_MS = 180_000;
+export const AI_POOL_DEFAULT_CONCURRENCY = 8;
+
+export type SleepClock = { now(): number; sleep(ms: number): Promise<void> };
+export type AiPoolClassifierOptions = {
+  routes: AiRoute[];
+  maxRetries?: number;
+  timeoutMs?: number;
+  classifyBudgetMs?: number;
+  concurrency?: number;
+  maxRequests?: number;
+  stateDir?: string;
+  cacheEnabled?: boolean;
+  clock?: SleepClock;
+  random?: () => number;
+};
+
+type Reservation = { route: AiRoute; id: string; estimated: number };
+type CallResult = { value: unknown; diagnostics: AiCallDiagnostics };
+
+const systemClock: SleepClock = {
+  now: () => Date.now(),
+  sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+};
+
+/** Provider-neutral ordered-route scheduler. Editorial validation stays outside transports. */
+export class AiPoolClassifier implements AiClassifier {
+  readonly routes: readonly AiRoute[];
+  readonly classifyBudgetMs: number;
+  readonly concurrency: number;
+  private readonly options: AiPoolClassifierOptions;
+  private readonly clock: SleepClock;
+  private readonly state: AiPoolState;
+  private readonly disabledRoutes = new Set<string>();
+  private readonly fatalProviders = new Map<string, Error>();
+  private readonly inFlight = new Map<string, Promise<CallResult>>();
+  private active = 0;
+  private reservedRequests = 0;
+  private lastCall?: AiCallDiagnostics;
+  private readonly stats = {
+    httpRequests: 0,
+    retries: 0,
+    modelFallbacks: 0,
+    cacheHits: 0,
+    deferred: 0,
+    requestsByRoute: {} as Record<string, number>,
+    classificationsByRoute: {} as Record<string, number>,
+    inputTokensByRoute: {} as Record<string, number>,
+  };
+
+  constructor(options: AiPoolClassifierOptions) {
+    if (options.routes.length === 0) throw new Error('IA: el pool necesita al menos una route');
+    const seen = new Set<string>();
+    for (const route of options.routes) {
+      if (route.routeId !== `${route.provider}:${route.model}`) throw new Error(`IA: routeId inválido: ${route.routeId}`);
+      if (seen.has(route.routeId)) throw new Error(`IA: route duplicada: ${route.routeId}`);
+      if (route.transport.provider !== route.provider) throw new Error(`IA: transport incorrecto para ${route.routeId}`);
+      seen.add(route.routeId);
+      for (const [name, limit] of Object.entries(route.limits ?? {})) {
+        if (limit !== undefined && (!Number.isFinite(limit) || limit < 0)) {
+          throw new Error(`IA: límite ${name} inválido para ${route.routeId}`);
+        }
+      }
+      if (route.limits?.rpd !== undefined && route.limits.rpd > 0 && !route.reset) {
+        throw new Error(`IA: ${route.routeId} declara RPD sin política de reset`);
+      }
+    }
+    this.routes = [...options.routes];
+    this.options = options;
+    this.classifyBudgetMs = options.classifyBudgetMs ?? AI_POOL_CLASSIFY_BUDGET_MS;
+    this.concurrency = options.concurrency ?? AI_POOL_DEFAULT_CONCURRENCY;
+    if (!Number.isInteger(this.concurrency) || this.concurrency < 1 || this.concurrency > 16) {
+      throw new Error('IA: concurrency debe estar entre 1 y 16');
+    }
+    for (const [name, value] of Object.entries({
+      maxRetries: options.maxRetries ?? AI_POOL_MAX_RETRIES,
+      maxRequests: options.maxRequests ?? Number.MAX_SAFE_INTEGER,
+    })) {
+      if (!Number.isSafeInteger(value) || value < 0) throw new Error(`IA: ${name} inválido`);
+    }
+    for (const value of [this.classifyBudgetMs, options.timeoutMs ?? AI_CLASSIFY_TIMEOUT_MS]) {
+      if (!Number.isFinite(value) || value <= 0) throw new Error('IA: timeout inválido');
+    }
+    this.clock = options.clock ?? systemClock;
+    this.state = new AiPoolState(options.stateDir);
+  }
+
+  initialize(): void { this.state.initialize(); }
+  close(): void { this.state.close(); }
+  lastDiagnostics(): AiCallDiagnostics | undefined { return this.lastCall ? structuredClone(this.lastCall) : undefined; }
+
+  snapshotStats(): AiProviderStats {
+    const requestsByRoute = structuredClone(this.stats.requestsByRoute);
+    const classificationsByRoute = structuredClone(this.stats.classificationsByRoute);
+    const inputTokensByRoute = structuredClone(this.stats.inputTokensByRoute);
+    const dailyRequestsByRoute = this.state.dailyCounts(this.clock.now(), this.routes);
+    return {
+      httpRequests: this.stats.httpRequests,
+      retries: this.stats.retries,
+      modelFallbacks: this.stats.modelFallbacks,
+      cacheHits: this.stats.cacheHits,
+      deferred: this.stats.deferred,
+      requestsByRoute,
+      classificationsByRoute,
+      inputTokensByRoute,
+      dailyRequestsByRoute,
+      requestsByModel: requestsByRoute,
+      classificationsByModel: classificationsByRoute,
+      inputTokensByModel: inputTokensByRoute,
+      dailyRequestsByModel: dailyRequestsByRoute,
+    };
+  }
+
+  async classify(observed: ObservedFacts, context: AiCallContext = {}): Promise<unknown> {
+    this.initialize();
+    const purpose: AiCallPurpose = context.purpose ?? 'eligibility';
+    const requireFormats = Boolean(context.requireFormats);
+    const request = buildAiRequest(observed, purpose);
+    const requestKey = hashAiInput({ purpose, request, observed, requireFormats });
+    const flightKey = hashAiInput({
+      requestKey,
+      routes: this.routes.map((route) => ({
+        routeId: route.routeId,
+        transport: route.transport.cacheIdentity(route.model),
+      })),
+    });
+    const diagnostics: AiCallDiagnostics = {
+      attempts: 0,
+      fallbackUsed: false,
+      cacheHit: false,
+      routing: [],
+      failures: [],
+      purpose,
+    };
+    const publishDiagnostics = () => {
+      this.lastCall = structuredClone(diagnostics);
+      context.onDiagnostics?.(structuredClone(diagnostics));
+    };
+    const controller = new AbortController();
+    const abort = () => controller.abort();
+    context.signal?.addEventListener('abort', abort, { once: true });
+    if (context.signal?.aborted) controller.abort();
+    const timer = setTimeout(abort, this.classifyBudgetMs);
+    let flight: Promise<CallResult> | undefined;
+    try {
+      controller.signal.throwIfAborted();
+      const existing = this.options.cacheEnabled !== false ? this.inFlight.get(flightKey) : undefined;
+      if (existing) {
+        const result = await abortable(existing, controller.signal);
+        Object.assign(diagnostics, result.diagnostics, {
+          attempts: 0,
+          cacheHit: true,
+          routing: [routingEntry(this.routeForDiagnostics(result.diagnostics), 'in-flight-cache')],
+        });
+        this.stats.cacheHits++;
+        return structuredClone(result.value);
+      }
+      flight = this.classifyOnce(request, requestKey, diagnostics, controller.signal, requireFormats);
+      if (this.options.cacheEnabled !== false) this.inFlight.set(flightKey, flight);
+      return (await flight).value;
+    } catch (error) {
+      diagnostics.deferred = true;
+      this.stats.deferred++;
+      const reason = this.redactError(error);
+      this.state.defer(requestKey, observed, request, diagnostics, reason);
+      if (controller.signal.aborted) throw new Error('tiempo agotado en la clasificación con IA');
+      if (error instanceof Error && error.message !== reason) error.message = reason;
+      throw error;
+    } finally {
+      if (flight && this.inFlight.get(flightKey) === flight) this.inFlight.delete(flightKey);
+      clearTimeout(timer);
+      context.signal?.removeEventListener('abort', abort);
+      publishDiagnostics();
+    }
+  }
+
+  private async classifyOnce(
+    request: AiRequest,
+    requestKey: string,
+    diagnostics: AiCallDiagnostics,
+    signal: AbortSignal,
+    requireFormats: boolean,
+  ): Promise<CallResult> {
+    const deadline = this.clock.now() + this.classifyBudgetMs;
+    const maxAttempts = 1 + (this.options.maxRetries ?? AI_POOL_MAX_RETRIES);
+    const skippedThisCall = new Set<string>();
+    let lastError: unknown;
+
+    while (diagnostics.attempts! < maxAttempts) {
+      signal.throwIfAborted();
+      if (this.options.cacheEnabled !== false) {
+        for (const route of this.routes) {
+          if (!this.enabled(route) || skippedThisCall.has(route.routeId)) continue;
+          const value = this.state.cached(this.cacheKey(requestKey, route), request.purpose);
+          if (value === undefined || isUnsatisfactoryTaxonomyFormats(request.purpose, requireFormats, value)) continue;
+          this.selectDiagnostics(diagnostics, route, 'cache');
+          diagnostics.cacheHit = true;
+          this.stats.cacheHits++;
+          this.state.resolvePending(requestKey);
+          return { value, diagnostics };
+        }
+      }
+
+      const { route, id, estimated } = await this.acquire(request, deadline, signal, diagnostics, skippedThisCall);
+      if (diagnostics.attempts! > 0) this.stats.retries++;
+      diagnostics.attempts!++;
+      this.selectDiagnostics(diagnostics, route);
+      this.stats.httpRequests++;
+      bump(this.stats.requestsByRoute, route.routeId);
+      try {
+        const result = await route.transport.request({
+          model: route.model,
+          request,
+          signal,
+          timeoutMs: this.options.timeoutMs ?? AI_CLASSIFY_TIMEOUT_MS,
+        });
+        const state = this.state.route(route.routeId, this.clock.now(), route.reset);
+        if (result.tokens?.input !== undefined) {
+          const recent = state.recent.find((item) => item.id === id);
+          if (recent) recent.tokens = result.tokens.input;
+          state.tokenScale = Math.max(state.tokenScale, result.tokens.input / estimated * state.tokenScale);
+          bump(this.stats.inputTokensByRoute, route.routeId, result.tokens.input);
+          this.state.save();
+        }
+        diagnostics.status = result.status;
+        diagnostics.tokens = result.tokens;
+        const parsed = parseAiOutputForPurpose(request.purpose, result.value);
+        if (!parsed.ok) {
+          throw new AiUnusableOutputError(`IA: output no cumple el schema (${parsed.reason})`, {
+            kind: parsed.ruleId === 'ai-invalid-output' ? 'invalid' : 'malformed',
+            model: route.model,
+            status: result.status,
+            finishReason: result.finishReason,
+            tokens: result.tokens,
+            excerpt: sanitizeAiOutputExcerpt(typeof result.value === 'string' ? result.value : JSON.stringify(result.value)),
+          });
+        }
+        const unresolvedFormats = isUnsatisfactoryTaxonomyFormats(request.purpose, requireFormats, result.value);
+        if (unresolvedFormats && diagnostics.attempts! < maxAttempts) {
+          throw new AiUnusableOutputError('IA: formats vacío no resuelve la taxonomía', {
+            kind: 'incomplete', model: route.model, status: result.status,
+            finishReason: result.finishReason, tokens: result.tokens,
+            excerpt: sanitizeAiOutputExcerpt(typeof result.value === 'string' ? result.value : JSON.stringify(result.value)),
+          });
+        }
+        if (!unresolvedFormats && this.options.cacheEnabled !== false) {
+          this.state.cache(this.cacheKey(requestKey, route), request.purpose, result.value);
+        }
+        this.state.resolvePending(requestKey);
+        bump(this.stats.classificationsByRoute, route.routeId);
+        return { value: result.value, diagnostics };
+      } catch (error) {
+        lastError = error;
+        signal.throwIfAborted();
+        this.handleAttemptError(error, route, diagnostics, skippedThisCall);
+      } finally {
+        this.active--;
+      }
+    }
+    if (lastError instanceof AiTransportError && lastError.kind === 'rate-limit') {
+      throw new AiRateLimitedError(lastError.message, {
+        retryAfterMs: lastError.retryAfterMs,
+        quotaExhausted: lastError.quotaExhausted,
+        model: diagnostics.model,
+      });
+    }
+    throw lastError ?? new Error('IA: máximo de intentos alcanzado');
+  }
+
+  private handleAttemptError(
+    error: unknown,
+    route: AiRoute,
+    diagnostics: AiCallDiagnostics,
+    skippedThisCall: Set<string>,
+  ): void {
+    if (error instanceof AiUnusableOutputError) {
+      diagnostics.status = error.status ?? error.kind;
+      diagnostics.tokens = error.tokens;
+      pushFailure(diagnostics, route, {
+        model: route.model,
+        kind: failureKindForUnusable(error.kind),
+        status: error.status,
+        finishReason: error.finishReason,
+        tokens: error.tokens,
+        excerpt: error.excerpt,
+      });
+      skipRouteWhenAlternativeExists(
+        skippedThisCall,
+        route,
+        this.routes,
+        (candidate) => this.available(candidate, skippedThisCall),
+      );
+      addRoute(diagnostics, route, failureKindForUnusable(error.kind));
+      return;
+    }
+    if (!(error instanceof AiTransportError)) throw error;
+
+    diagnostics.status = error.status === undefined ? error.kind : String(error.status);
+
+    const state = this.state.route(route.routeId, this.clock.now(), route.reset);
+    if (error.kind === 'rate-limit') {
+      if (error.quotaExhausted && route.reset) state.dailyUntil = route.reset.nextReset(this.clock.now());
+      else state.cooldownUntil = Math.max(
+        state.cooldownUntil,
+        this.clock.now() + this.retryWait(error, diagnostics.attempts! - 1),
+      );
+      this.state.save();
+      addRoute(diagnostics, route, error.quotaExhausted ? 'daily-quota' : 'rate-limit');
+    } else if (error.kind === 'unavailable') {
+      this.disabledRoutes.add(route.routeId);
+      addRoute(diagnostics, route, 'unavailable-model-or-config');
+    } else if (error.kind === 'auth') {
+      this.fatalProviders.set(route.provider, error);
+      addRoute(diagnostics, route, 'fatal-auth');
+    } else {
+      state.cooldownUntil = this.clock.now() + this.retryWait(undefined, diagnostics.attempts! - 1);
+      this.state.save();
+      addRoute(diagnostics, route, error.kind);
+    }
+    pushFailure(diagnostics, route, {
+      model: route.model,
+      kind: error.kind === 'rate-limit' ? 'rate-limit' : error.kind === 'timeout' ? 'timeout' : 'transport-error',
+      status: error.status === undefined ? undefined : String(error.status),
+      excerpt: sanitizeAiOutputExcerpt(this.redactForRoute(route, error.message)),
+    });
+  }
+
+  private async acquire(
+    request: AiRequest,
+    deadline: number,
+    signal: AbortSignal,
+    diagnostics: AiCallDiagnostics,
+    skippedThisCall: ReadonlySet<string>,
+  ): Promise<Reservation> {
+    while (true) {
+      signal.throwIfAborted();
+      if (this.reservedRequests >= (this.options.maxRequests ?? Number.MAX_SAFE_INTEGER)) {
+        throw new AiRateLimitedError('IA: presupuesto HTTP global de esta ejecución agotado');
+      }
+      const now = this.clock.now();
+      if (now >= deadline) throw new Error('tiempo agotado esperando cuota de IA');
+      let earliest = Infinity;
+      let hasPotentialRoute = false;
+      for (const route of this.routes) {
+        if (!this.available(route, skippedThisCall)) {
+          const reason = skippedThisCall.has(route.routeId)
+            ? 'unusable-output'
+            : this.fatalProviders.has(route.provider) ? 'fatal-provider' : 'disabled';
+          addRoute(diagnostics, route, reason);
+          continue;
+        }
+        hasPotentialRoute = true;
+        const state = this.state.route(route.routeId, now, route.reset);
+        const rpd = route.limits?.rpd ?? Infinity;
+        if (state.requests >= rpd || state.dailyUntil > now) {
+          addRoute(diagnostics, route, state.dailyUntil > now ? 'daily-quota' : 'daily-budget');
+          continue;
+        }
+        const estimated = Math.ceil(this.estimateInputTokens(request, route) * state.tokenScale);
+        const tpm = route.limits?.tpm ?? Infinity;
+        if (estimated > tpm) {
+          addRoute(diagnostics, route, 'input-over-tpm');
+          continue;
+        }
+        if (state.nextAt > now) addRoute(diagnostics, route, 'rpm-wait');
+        if (state.cooldownUntil > now) addRoute(diagnostics, route, 'cooldown');
+        let next = Math.max(now, state.nextAt, state.cooldownUntil);
+        let tokens = state.recent.reduce((sum, item) => sum + item.tokens, 0);
+        if (tokens + estimated > tpm) addRoute(diagnostics, route, 'tpm-wait');
+        for (const item of state.recent) {
+          if (tokens + estimated <= tpm) break;
+          tokens -= item.tokens;
+          next = Math.max(next, item.at + 60_000);
+        }
+        if (next <= now && this.active < this.concurrency) {
+          const id = randomUUID();
+          state.requests++;
+          state.nextAt = now + intervalMsForRpm(route.limits?.rpm);
+          state.recent.push({ id, at: now, tokens: estimated });
+          this.state.save();
+          this.reservedRequests++;
+          this.active++;
+          addRoute(
+            diagnostics,
+            route,
+            route.routeId === this.routes[0]!.routeId ? 'preferred-ready' : 'next-available',
+          );
+          return { route, id, estimated };
+        }
+        earliest = Math.min(earliest, next);
+      }
+      if (!Number.isFinite(earliest)) {
+        const fatal = this.routes.map((route) => this.fatalProviders.get(route.provider)).find(Boolean);
+        if (!hasPotentialRoute && fatal) throw fatal;
+        throw new AiRateLimitedError('IA: ninguna route tiene cuota, configuración o capacidad TPM disponible');
+      }
+      if (earliest >= deadline) {
+        throw new AiRateLimitedError('IA: próxima disponibilidad fuera del presupuesto de espera');
+      }
+      const wait = Math.min(1_000, Math.max(25, earliest - now), deadline - now);
+      await sleep(this.clock, wait, signal);
+    }
+  }
+
+  private enabled(route: AiRoute): boolean {
+    return !Object.values(route.limits ?? {}).some((limit) => limit === 0);
+  }
+
+  private available(route: AiRoute, skipped: ReadonlySet<string>): boolean {
+    return this.enabled(route)
+      && !this.disabledRoutes.has(route.routeId)
+      && !this.fatalProviders.has(route.provider)
+      && !skipped.has(route.routeId);
+  }
+
+  private estimateInputTokens(request: AiRequest, route: AiRoute): number {
+    return route.transport.estimateInputTokens?.(request, route.model)
+      ?? Math.ceil(Buffer.byteLength(JSON.stringify(request), 'utf8') / 3) + 128;
+  }
+
+  private retryWait(error: AiTransportError | undefined, attempt: number): number {
+    if (error?.retryAfterMs !== undefined) return Math.max(0, error.retryAfterMs);
+    return Math.min(
+      AI_POOL_MAX_RETRY_WAIT_MS,
+      AI_POOL_BACKOFF_BASE_MS * 2 ** attempt
+        + (this.options.random ?? Math.random)() * AI_POOL_BACKOFF_BASE_MS,
+    );
+  }
+
+  private cacheKey(requestKey: string, route: AiRoute): string {
+    return hashAiInput({
+      requestKey,
+      provider: route.provider,
+      model: route.model,
+      routeId: route.routeId,
+      transport: route.transport.cacheIdentity(route.model),
+    });
+  }
+
+  private selectDiagnostics(diagnostics: AiCallDiagnostics, route: AiRoute, reason?: string): void {
+    diagnostics.provider = route.provider;
+    diagnostics.model = route.model;
+    diagnostics.routeId = route.routeId;
+    diagnostics.fallbackUsed = route.routeId !== this.routes[0]!.routeId;
+    if (diagnostics.fallbackUsed && reason !== 'cache') this.stats.modelFallbacks++;
+    if (reason) addRoute(diagnostics, route, reason);
+  }
+
+  private routeForDiagnostics(diagnostics: AiCallDiagnostics): AiRoute {
+    return this.routes.find((route) => route.routeId === diagnostics.routeId) ?? this.routes[0]!;
+  }
+
+  private redactForRoute(route: AiRoute, message: string): string {
+    return route.transport.redact?.(message) ?? message;
+  }
+
+  private redactError(error: unknown): string {
+    let message = error instanceof Error ? error.message : String(error);
+    for (const route of this.routes) message = this.redactForRoute(route, message);
+    return message;
+  }
+}
+
+function isUnsatisfactoryTaxonomyFormats(
+  purpose: AiCallPurpose,
+  requireFormats: boolean,
+  value: unknown,
+): boolean {
+  if (purpose !== 'taxonomy' || !requireFormats) return false;
+  const parsed = parseAiClassification(value);
+  return parsed.ok && taxonomyFormatsStillUnresolved(parsed.value);
+}
+
+function addRoute(diagnostics: AiCallDiagnostics, route: AiRoute, reason: string): void {
+  const entry = routingEntry(route, reason);
+  if (!diagnostics.routing!.some((item) => item.routeId === route.routeId && item.reason === reason)) {
+    diagnostics.routing!.push(entry);
+  }
+}
+
+function routingEntry(route: AiRoute, reason: string) {
+  return { provider: route.provider, model: route.model, routeId: route.routeId, reason };
+}
+
+function pushFailure(
+  diagnostics: AiCallDiagnostics,
+  route: AiRoute,
+  failure: AiAttemptFailure,
+): void {
+  diagnostics.failures = [
+    ...(diagnostics.failures ?? []),
+    { ...failure, provider: route.provider, model: route.model, routeId: route.routeId },
+  ];
+}
+
+function skipRouteWhenAlternativeExists(
+  skipped: Set<string>,
+  route: AiRoute,
+  pool: readonly AiRoute[],
+  available: (candidate: AiRoute) => boolean,
+): void {
+  if (pool.some((candidate) => candidate.routeId !== route.routeId && available(candidate))) {
+    skipped.add(route.routeId);
+  }
+}
+
+function intervalMsForRpm(rpm: number | undefined): number {
+  if (rpm === undefined) return 0;
+  return Math.ceil(60_000 / rpm);
+}
+
+function bump(map: Record<string, number>, key: string, amount = 1): void {
+  map[key] = (map[key] ?? 0) + amount;
+}
+
+async function abortable<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
+  signal.throwIfAborted();
+  let abort!: () => void;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<never>((_resolve, reject) => {
+        abort = () => reject(new DOMException('Aborted', 'AbortError'));
+        signal.addEventListener('abort', abort, { once: true });
+      }),
+    ]);
+  } finally {
+    signal.removeEventListener('abort', abort);
+  }
+}
+
+async function sleep(clock: SleepClock, ms: number, signal: AbortSignal): Promise<void> {
+  if (clock !== systemClock) return abortable(clock.sleep(ms), signal);
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    await abortable(new Promise<void>((resolve) => { timer = setTimeout(resolve, ms); }), signal);
+  } finally {
+    clearTimeout(timer);
+  }
+}

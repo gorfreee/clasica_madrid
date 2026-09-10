@@ -10,7 +10,7 @@ describe('workflow de ingestión: artifact de observabilidad', () => {
     const upload = section(yaml, 'Upload ingestion run artifact');
     const ingest = section(yaml, 'Run ingestion');
     const format = section(yaml, 'Render report and PR body');
-    const gemini = section(yaml, 'Restore persistent Gemini state');
+    const aiState = section(yaml, 'Restore persistent AI pool state');
     const publish = section(yaml, 'Publish data pull request');
     const dryRun = section(yaml, 'Record dry-run outcome');
     const checkout = section(yaml, 'Checkout');
@@ -33,10 +33,14 @@ describe('workflow de ingestión: artifact de observabilidad', () => {
     expect(format).toContain('--run-manifest');
     expect(format).toContain('--artifact-name');
 
-    expect(gemini).toContain('.local/ai/quota.json');
-    expect(gemini).toContain('.local/ai/cache/**');
-    expect(gemini).toContain('.local/ai/pending/**');
-    expect(gemini).not.toContain('run.lock');
+    expect(aiState).toContain('.local/ai/quota.json');
+    expect(aiState).toContain('.local/ai/cache/**');
+    expect(aiState).toContain('.local/ai/pending/**');
+    expect(aiState).toContain('ingestion-gemini-${{ runner.os }}-');
+    expect(aiState).not.toContain('run.lock');
+    expect(yaml).toContain('AI_PROVIDER: gemini');
+    expect(yaml).toContain('AI_STATE_DIR: ${{ github.workspace }}/.local/ai');
+    expect(yaml).not.toMatch(/(GROQ|MISTRAL|ZAI|CLOUDFLARE)_API_KEY/);
 
     expect(publish).toContain("steps.config.outputs.mode == 'publish'");
     expect(dryRun).toContain("steps.config.outputs.mode == 'dry-run'");

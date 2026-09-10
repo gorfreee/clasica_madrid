@@ -37,7 +37,9 @@ export type AiTokenCounts = {
 
 /** One technically failed HTTP/model attempt. No secrets; excerpt is truncated. */
 export type AiAttemptFailure = {
+  provider?: string;
   model: string;
+  routeId?: string;
   kind: AiFailureKind;
   status?: string;
   finishReason?: string;
@@ -46,13 +48,15 @@ export type AiAttemptFailure = {
 };
 
 export type AiCallDiagnostics = {
+  provider?: string;
   model?: string;
+  routeId?: string;
   purpose?: AiCallPurpose;
   fallbackUsed?: boolean;
   attempts?: number;
   cacheHit?: boolean;
   deferred?: boolean;
-  routing?: Array<{ model: string; reason: string }>;
+  routing?: Array<{ provider?: string; model: string; routeId?: string; reason: string }>;
   failures?: AiAttemptFailure[];
   status?: string;
   tokens?: AiTokenCounts;
@@ -76,8 +80,14 @@ export type AiProviderStats = {
   httpRequests: number;
   retries: number;
   modelFallbacks: number;
-  requestsByModel: Record<string, number>;
-  classificationsByModel: Record<string, number>;
+  /** Canonical provider-aware aggregates. Keys are stable `provider:model` route IDs. */
+  requestsByRoute: Record<string, number>;
+  classificationsByRoute: Record<string, number>;
+  inputTokensByRoute?: Record<string, number>;
+  dailyRequestsByRoute?: Record<string, number>;
+  /** Legacy compatibility aliases; new consumers must use route-keyed maps. */
+  requestsByModel?: Record<string, number>;
+  classificationsByModel?: Record<string, number>;
   cacheHits?: number;
   deferred?: number;
   inputTokensByModel?: Record<string, number>;

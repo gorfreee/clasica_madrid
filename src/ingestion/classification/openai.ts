@@ -1,10 +1,6 @@
 import type { ObservedFacts } from '../observed.ts';
 import { AI_CLASSIFY_TIMEOUT_MS, AiUnusableOutputError, type AiCallContext, type AiClassifier } from './ai.ts';
-import {
-  AI_ACCESS_SYSTEM_PROMPT, AI_CLASSIFIER_SYSTEM_PROMPT, AI_COMPOSER_SYSTEM_PROMPT,
-  AI_TAXONOMY_SYSTEM_PROMPT, buildAiAccessUserMessage, buildAiClassifierUserMessage,
-  buildAiComposerUserMessage, buildAiTaxonomyUserMessage,
-} from './ai-prompt.ts';
+import { buildAiRequest } from './ai-request.ts';
 
 export const OPENAI_DEFAULT_MODEL = 'gpt-4o-mini';
 export const OPENAI_DEFAULT_BASE_URL = 'https://api.openai.com/v1';
@@ -43,7 +39,7 @@ export class OpenAiClassifier implements AiClassifier {
   async classify(observed: ObservedFacts, context: AiCallContext = {}): Promise<unknown> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.timeoutMs);
-    const prompt = promptForPurpose(observed, context.purpose ?? 'eligibility');
+    const prompt = buildAiRequest(observed, context.purpose ?? 'eligibility');
     try {
       const response = await this.fetchImpl(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
@@ -55,7 +51,7 @@ export class OpenAiClassifier implements AiClassifier {
         body: JSON.stringify({
           model: this.model,
           temperature: 0,
-          max_tokens: 600,
+          max_tokens: prompt.generation.maxOutputTokens,
           response_format: { type: 'json_object' },
           messages: [
             { role: 'system', content: prompt.system },
@@ -101,22 +97,6 @@ export class OpenAiClassifier implements AiClassifier {
       clearTimeout(timer);
     }
   }
-}
-
-function promptForPurpose(
-  observed: ObservedFacts,
-  purpose: NonNullable<AiCallContext['purpose']>,
-): { system: string; user: string } {
-  if (purpose === 'taxonomy') {
-    return { system: AI_TAXONOMY_SYSTEM_PROMPT, user: buildAiTaxonomyUserMessage(observed) };
-  }
-  if (purpose === 'access-classification') {
-    return { system: AI_ACCESS_SYSTEM_PROMPT, user: buildAiAccessUserMessage(observed) };
-  }
-  if (purpose === 'composer-extraction') {
-    return { system: AI_COMPOSER_SYSTEM_PROMPT, user: buildAiComposerUserMessage(observed) };
-  }
-  return { system: AI_CLASSIFIER_SYSTEM_PROMPT, user: buildAiClassifierUserMessage(observed) };
 }
 
 function messageContent(payload: unknown): string | undefined {
