@@ -35,12 +35,10 @@ describe('enriquecimiento determinista de compositores conocidos', () => {
     expect(enriched.performers).toEqual([{ name: 'JEAN RONDEAU' }]);
   });
 
-  it('conserva composers estructurados y no los sustituye por el fallback textual', () => {
+  it('conserva la grafía estructurada y no la sustituye por el canónico del knowledge', () => {
     const structured = [
       { name: 'Louis Couperin (1626-1661)' },
       { name: 'Jean-Philippe Rameau (1683-1764)' },
-      { name: 'François Couperin (1668-1733)' },
-      { name: 'Joseph-Nicolas-Pancrace Royer (1703-1755)' },
     ];
     const works = [
       { title: 'Suite en la menor, de Pièces de clavecin', composerName: 'Louis Couperin (1626-1661)' },
@@ -49,18 +47,89 @@ describe('enriquecimiento determinista de compositores conocidos', () => {
       event({
         composers: structured,
         works,
-        programText: SISYPHUS_PROGRAM,
+        programText: 'Louis Couperin (1626-1661) — Suite. J. S. Bach — Variaciones Goldberg',
       }),
     );
-    expect(enriched.composers).toEqual(structured);
+    expect(enriched.composers).toEqual([
+      { name: 'Louis Couperin (1626-1661)' },
+      { name: 'Johann Sebastian Bach' },
+      { name: 'Jean-Philippe Rameau (1683-1764)' },
+    ]);
     expect(enriched.works).toEqual(works);
   });
 
-  it('usa composers explícitos de works[] como evidencia estructurada', () => {
+  it('usa composers explícitos de works[] y completa otros inequívocos del programa', () => {
     const works = [{ title: 'Suite en la menor', composerName: 'Louis Couperin (1626-1661)' }];
-    const enriched = enrichNormalizedEvent(event({ composers: [], works, programText: SISYPHUS_PROGRAM }));
-    expect(enriched.composers).toEqual([{ name: 'Louis Couperin (1626-1661)' }]);
+    const enriched = enrichNormalizedEvent(
+      event({
+        composers: [],
+        works,
+        programText: 'Louis Couperin (1626-1661) — Suite. György Ligeti — Continuum',
+      }),
+    );
+    expect(enriched.composers).toEqual([
+      { name: 'Louis Couperin (1626-1661)' },
+      { name: 'György Ligeti' },
+    ]);
     expect(enriched.works).toEqual(works);
+  });
+
+  it('completa composers estructurados con otros inequívocos del programText, sin duplicar', () => {
+    const enriched = enrichNormalizedEvent(
+      event({
+        title: 'Divina Proportione: un viaje por la riqueza sonora del Renacimiento',
+        composers: [{ name: 'Juan del Encina' }, { name: 'Francisco Guerrero' }],
+        programText:
+          'Obras de Josquin des Prez, Juan del Encina, Francisco Guerrero y Antonio de Cabezón.',
+      }),
+    );
+    expect(enriched.composers.map((item) => item.name)).toEqual([
+      'Josquin des Prez',
+      'Juan del Encina',
+      'Francisco Guerrero',
+      'Antonio de Cabezón',
+    ]);
+  });
+
+  it('no añade un intérprete aunque su nombre aparezca en el programText y exista en el knowledge', () => {
+    const enriched = enrichNormalizedEvent(
+      event({
+        composers: [{ name: 'Johann Sebastian Bach' }, { name: 'Wolfgang Amadeus Mozart' }],
+        performers: [{ name: 'Clara Schumann', roleText: 'piano' }],
+        programText: 'Obras de Beethoven y Schubert. Piano: Clara Schumann',
+      }),
+    );
+    expect(enriched.composers.map((item) => item.name)).toEqual([
+      'Ludwig van Beethoven',
+      'Franz Schubert',
+      'Johann Sebastian Bach',
+      'Wolfgang Amadeus Mozart',
+    ]);
+  });
+
+  it('conserva un compositor estructurado aunque también figure como intérprete', () => {
+    const enriched = enrichNormalizedEvent(
+      event({
+        composers: [{ name: 'Clara Schumann' }],
+        performers: [{ name: 'Clara Schumann', roleText: 'piano' }],
+        programText: 'Clara Schumann — Notturno, op. 6 n.º 2. Robert Schumann — Carnaval, op. 9',
+      }),
+    );
+    expect(enriched.composers.map((item) => item.name)).toEqual([
+      'Clara Schumann',
+      'Robert Schumann',
+    ]);
+  });
+
+  it('no completa composers estructurados desde el título si no hay programText', () => {
+    const enriched = enrichNormalizedEvent(
+      event({
+        title: SISYPHUS_PROGRAM,
+        composers: [{ name: 'Juan del Encina' }],
+        programText: undefined,
+      }),
+    );
+    expect(enriched.composers).toEqual([{ name: 'Juan del Encina' }]);
   });
 
   it('puede usar el título como fallback inequívoco si no hay programText', () => {

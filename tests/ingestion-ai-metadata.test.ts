@@ -11,6 +11,7 @@ import {
 } from '../src/ingestion/classification/ai.ts';
 import {
   accessEvidenceAppears,
+  composerAiHasUsableEvidence,
   validateAiComposerCandidates,
 } from '../src/ingestion/classification/ai-metadata.ts';
 import {
@@ -144,7 +145,7 @@ describe('composer AI fallback y validación determinista', () => {
     });
   }
 
-  it('no llama al purpose de compositores con dato estructurado, obra o sin programText', async () => {
+  it('no llama al purpose de compositores sin programText, sin cue, o si knowledge ya resolvió el programa', async () => {
     for (const observed of [
       facts(),
       facts({ composers: [], works: [{ title: 'Sinfonía', composerName: 'Gustav Mahler' }] }),
@@ -162,6 +163,66 @@ describe('composer AI fallback y validación determinista', () => {
       await classifyObserved(observed, { ai });
       expect(ai.purposes).not.toContain('composer-extraction');
     }
+  });
+
+  it('no llama a IA cuando el knowledge ya cubre los compositores detectables del programa', async () => {
+    const ai = composerAi([]);
+    await classifyObserved(
+      facts({
+        title: 'Recital de piano de música clásica',
+        categoryText: 'Música clásica',
+        performers: [{ name: 'Solista invitada', roleText: 'piano' }],
+        composers: [{ name: 'Juan del Encina' }, { name: 'Francisco Guerrero' }],
+        works: [],
+        programText: 'Obras de Josquin des Prez, Juan del Encina, Francisco Guerrero y Antonio de Cabezón.',
+      }),
+      { ai },
+    );
+    expect(ai.purposes).not.toContain('composer-extraction');
+  });
+
+  it('completa composers estructurados con un candidato de IA inequívoco y no borra los existentes', async () => {
+    const observed = facts({
+      title: 'Recital de piano de música clásica',
+      categoryText: 'Música clásica',
+      performers: [{ name: 'Solista invitada', roleText: 'piano' }],
+      composers: [{ name: 'Gustav Mahler' }],
+      works: [],
+      programText: PROGRAMME,
+    });
+    const ai = composerAi([{ name: 'Maddalena Casulana', evidence: PROGRAMME }]);
+    const result = await classifyObserved(observed, { ai });
+    expect(ai.purposes).toContain('composer-extraction');
+    expect(result.composers).toMatchObject({
+      value: [{ name: 'Maddalena Casulana' }, { name: 'Gustav Mahler' }],
+      method: 'ai',
+      ruleId: 'ai-composers-completed',
+    });
+  });
+
+  it('el gate de IA exige cues de programa y candidatos no resueltos por knowledge', () => {
+    expect(composerAiHasUsableEvidence(facts({ composers: [], works: [], programText: PROGRAMME }))).toBe(true);
+    expect(
+      composerAiHasUsableEvidence(
+        facts({
+          composers: [{ name: 'Juan del Encina' }],
+          works: [],
+          programText: 'Obras de Josquin des Prez y Antonio de Cabezón.',
+        }),
+      ),
+    ).toBe(false);
+    expect(
+      composerAiHasUsableEvidence(
+        facts({
+          composers: [{ name: 'Gustav Mahler' }],
+          works: [],
+          programText: PROGRAMME,
+        }),
+      ),
+    ).toBe(true);
+    expect(composerAiHasUsableEvidence(facts({ composers: [], works: [], programText: 'Concierto de temporada' }))).toBe(
+      false,
+    );
   });
 
   it('acepta solo el compositor explícito respaldado por el programa', async () => {
@@ -193,10 +254,10 @@ describe('composer AI fallback y validación determinista', () => {
       programText: 'Jean Rondeau — clave',
       performers: [{ name: 'Jean Rondeau', roleText: 'clave' }],
     });
-    const result = await classifyObserved(performerFacts, {
-      ai: composerAi([{ name: 'Jean Rondeau', evidence: 'Jean Rondeau — clave' }]),
-    });
-    expect(result.composers?.value).toEqual([]);
+    const ai = composerAi([{ name: 'Jean Rondeau', evidence: 'Jean Rondeau — clave' }]);
+    const result = await classifyObserved(performerFacts, { ai });
+    expect(ai.purposes).not.toContain('composer-extraction');
+    expect(result.composers).toBeUndefined();
   });
 
   it('rechaza también roles y menciones contextuales explícitas en el propio span', () => {

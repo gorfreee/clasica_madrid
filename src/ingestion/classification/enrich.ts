@@ -16,10 +16,16 @@ import {
 import type { ClassificationResult, Resolution, ResolutionMethod } from './types.ts';
 import type { Era, EventKind, Format } from '../../lib/schemas/taxonomies.ts';
 import {
+  sortComposersByAppearance,
+  uniqueByCanonicalIdentity,
+} from '../composer-lists.ts';
+import { composersFromWorks } from '../observed.ts';
+import {
   accessEvidenceAppears,
   composerAiHasUsableEvidence,
   validateAiComposerCandidates,
 } from './ai-metadata.ts';
+import { rejectSpeculativeAiFormats } from './format-alternatives.ts';
 
 export { AI_CLASSIFY_TIMEOUT_MS };
 
@@ -35,7 +41,9 @@ export type ClassifyObservedOptions = {
 /**
  * Deterministic classify(), then AI only where it is allowed:
  * - eligibility: only if deterministic is uncertain. Include/exclude are never reopened.
- * - composers/access: only for included events with unresolved values and observed evidence.
+ * - composers: included events with leftover composer-like programme evidence
+ *   that structured/knowledge lists have not already resolved. Existing names are kept.
+ * - access: only for included events with unresolved values and observed evidence.
  * - taxonomy: only if the final eligibility is include and formats remain unresolved.
  *   Eras never come from eligibility/taxonomy AI; they are derived from observed
  *   composers/works (including after composer-extraction) via resolveEras().
@@ -168,30 +176,47 @@ async function enrichComposersWithAi(
   facts: ObservedFacts,
   options: ClassifyObservedOptions,
 ): Promise<ClassificationResult> {
+  const existing = uniqueByCanonicalIdentity([
+    ...facts.composers,
+    ...composersFromWorks(facts.works),
+  ]);
+  const existingResolution = {
+    value: existing,
+    method: existing.length > 0 ? ('rule' as const) : ('fallback' as const),
+    ruleId: existing.length > 0 ? 'composers-structured' : 'composers-unresolved',
+    evidence: [] as string[],
+  };
   const called = await invokeAi(facts, options, 'composer-extraction');
   if (!called.ok) {
     return {
       ...current,
-      composers: keepValueAfterAiError(
-        { value: facts.composers, method: 'fallback', ruleId: 'composers-unresolved', evidence: [] },
-        called.error,
-      ),
+      composers: keepValueAfterAiError(existingResolution, called.error),
     };
   }
   const parsed = parseAiComposerExtraction(called.value);
   if (!parsed.ok) {
+    if (existing.length > 0) return { ...current, composers: existingResolution };
     return {
       ...current,
       composers: resolution([], 'ai', parsed.ruleId, [parsed.reason]),
     };
   }
   const validated = validateAiComposerCandidates(parsed.value.candidates, facts);
+  if (validated.composers.length === 0) {
+    if (existing.length > 0) return { ...current, composers: existingResolution };
+    return {
+      ...current,
+      composers: resolution([], 'ai', 'ai-composers-unresolved', validated.evidence),
+    };
+  }
+  const merged = uniqueByCanonicalIdentity([...existing, ...validated.composers]);
+  const ordered = facts.programText ? sortComposersByAppearance(facts.programText, merged) : merged;
   return {
     ...current,
     composers: resolution(
-      validated.composers,
+      ordered,
       'ai',
-      validated.composers.length > 0 ? 'ai-composers-validated' : 'ai-composers-unresolved',
+      existing.length > 0 ? 'ai-composers-completed' : 'ai-composers-validated',
       validated.evidence,
     ),
   };
@@ -239,7 +264,7 @@ function applyEligibilityAi(
   const base = ensureTaxonomy({ eligibility }, facts, venue);
   return {
     eligibility,
-    formats: keepResolvedList(base.formats, ai.formats, ai.evidence, 'ai-formats', () => resolveFormats(facts)),
+    formats: keepResolvedFormats(base.formats, ai.formats, ai.evidence, facts),
     eras: keepResolvedEras(base.eras, facts, ai.eras),
     kind: keepResolvedKind(base.kind, facts, venue),
     access: resolveAccess(facts.accessText),
@@ -303,22 +328,11 @@ function keepResolvedEras(
   return deterministic;
 }
 
-function keepResolvedList<T>(
-  current: Resolution<T[]> | undefined,
-  aiValue: T[] | undefined,
-  evidence: string[],
-  ruleId: string,
-  fallback: () => Resolution<T[]>,
-): Resolution<T[]> {
-  if (current && current.value.length > 0) return current;
-  if (aiValue && aiValue.length > 0) return resolution(aiValue, 'ai', ruleId, evidence);
-  return current ?? fallback();
-}
-
 /**
- * Formats already filled stay. AI formats apply only when non-empty.
- * An empty AI formats array does not wipe eras/kind and does not invent `other`.
- * After a taxonomy call, leftover empty formats are marked unresolved for health.
+ * Formats already filled stay. AI formats apply only when non-empty and not
+ * a speculative union of exclusive alternatives. An empty AI formats array
+ * does not wipe eras/kind and does not invent `other`. After a taxonomy call,
+ * leftover empty formats are marked unresolved for health.
  */
 function keepResolvedFormats(
   current: Resolution<Format[]> | undefined,
@@ -327,7 +341,21 @@ function keepResolvedFormats(
   facts: ObservedFacts,
 ): Resolution<Format[]> {
   if (current && current.value.length > 0) return current;
-  if (aiValue && aiValue.length > 0) return resolution(aiValue, 'ai', 'ai-formats', evidence);
+  if (aiValue && aiValue.length > 0) {
+    const sanitized = rejectSpeculativeAiFormats(aiValue, facts);
+    if (sanitized.length === 0) {
+      return {
+        value: [],
+        method: 'ai',
+        ruleId: 'ai-formats-exclusive-alternatives',
+        evidence: uniqueStrings([
+          ...evidence,
+          'la fuente enumera alternativas o programación no determinada, no varios formatos afirmados',
+        ]),
+      };
+    }
+    return resolution(sanitized, 'ai', 'ai-formats', evidence);
+  }
   const fallback = current ?? resolveFormats(facts);
   if (fallback.value.length > 0) return fallback;
   return {

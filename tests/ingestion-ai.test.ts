@@ -80,8 +80,8 @@ const uncertainFacts = facts({ title: 'Concierto extraordinario' });
 describe('AI classifier prompt v2', () => {
   const prompt = AI_CLASSIFIER_SYSTEM_PROMPT;
 
-  it('is version 9 so results are distinguishable from earlier prompts', () => {
-    expect(AI_CLASSIFIER_PROMPT_VERSION).toBe(9);
+  it('is version 10 so results are distinguishable from earlier prompts', () => {
+    expect(AI_CLASSIFIER_PROMPT_VERSION).toBe(10);
   });
 
   it('keeps precision, uncertain as a valid output, and the ban on inventing facts', () => {
@@ -90,6 +90,7 @@ describe('AI classifier prompt v2', () => {
     expect(prompt).toMatch(/no inventes performers, composers, works/);
     expect(prompt).toMatch(/no uses source ni venue/);
     expect(prompt).toContain('eligibility ≠ format ≠ kind');
+    expect(prompt).toMatch(/pianista o un grupo de c[aá]mara/);
   });
 
   it('keeps decided exclusions for pop, DJ, film, jazz, flamenco, dance, cinema and workshops', () => {
@@ -992,11 +993,62 @@ describe('taxonomy enrichment — separado de eligibility', () => {
   });
 });
 
+describe('taxonomy AI — alternativas exclusivas vs formaciones combinadas', () => {
+  const alternativeFacts = facts({
+    title: 'Festival Alicia de Larrocha: Consagración, la maestría musical',
+    description:
+      'Concierto de música clásica. En este concierto actuará un pianista o un grupo de cámara, según la programación que se anuncie.',
+    programText: 'Actuará un pianista o un grupo de cámara.',
+  });
+
+  it('no convierte «pianista o grupo de cámara» en [recital, chamber]', async () => {
+    const ai = countingAi({
+      async classify() {
+        return {
+          eligibility: 'include',
+          formats: ['chamber', 'recital'],
+          eras: [],
+          evidence: ['un pianista o un grupo de cámara'],
+        };
+      },
+    });
+    const result = await classifyObserved(alternativeFacts, { ai });
+    expect(result.eligibility.value).toBe('include');
+    expect(result.formats?.value).toEqual([]);
+    expect(result.formats?.value).not.toContain('other');
+    expect(result.formats?.ruleId).toBe('ai-formats-exclusive-alternatives');
+    expect(ai.calls).toBe(1);
+  });
+
+  it('conserva varios formats cuando la fuente afirma que el evento combina formaciones', async () => {
+    const combined = facts({
+      title: 'Programa doble de piano y cámara',
+      description:
+        'Concierto de música clásica. El concierto combina un recital de piano y un grupo de cámara: primera parte recital, segunda parte cuarteto.',
+      programText: 'Primera parte: piano. Segunda parte: cuarteto de cuerda.',
+    });
+    const ai = countingAi({
+      async classify() {
+        return {
+          eligibility: 'include',
+          formats: ['chamber', 'recital'],
+          eras: [],
+          evidence: ['primera parte recital, segunda parte cuarteto'],
+        };
+      },
+    });
+    const result = await classifyObserved(combined, { ai });
+    expect(result.formats?.value).toEqual(['chamber', 'recital']);
+    expect(result.formats?.method).toBe('ai');
+    expect(result.formats?.ruleId).toBe('ai-formats');
+  });
+});
+
 describe('taxonomy AI prompt', () => {
   const prompt = AI_TAXONOMY_SYSTEM_PROMPT;
 
-  it('is version 5 so results are distinguishable from earlier taxonomy prompts', () => {
-    expect(AI_TAXONOMY_PROMPT_VERSION).toBe(5);
+  it('is version 6 so results are distinguishable from earlier taxonomy prompts', () => {
+    expect(AI_TAXONOMY_PROMPT_VERSION).toBe(6);
   });
 
   it('asks for a format when observed facts support a musical inference', () => {
@@ -1009,6 +1061,8 @@ describe('taxonomy AI prompt', () => {
     expect(prompt).toMatch(/biograf[ií]a o el historial/);
     expect(prompt).toMatch(/NO rellenes eras/);
     expect(prompt).toMatch(/eras: siempre \[\]/);
+    expect(prompt).toMatch(/alternativas exclusivas/);
+    expect(prompt).toMatch(/pianista o un grupo de c[aá]mara/);
     expect(prompt).not.toMatch(/formats y eras vac[ií]os son preferibles a adivinar/);
     expect(prompt).not.toMatch(/der[ií]valas de \(1\) obras observadas/);
   });

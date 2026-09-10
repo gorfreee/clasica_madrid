@@ -1,7 +1,7 @@
 import type { ObservedFacts } from '../observed.ts';
 
-export const AI_CLASSIFIER_PROMPT_VERSION = 9 as const;
-export const AI_TAXONOMY_PROMPT_VERSION = 5 as const;
+export const AI_CLASSIFIER_PROMPT_VERSION = 10 as const;
+export const AI_TAXONOMY_PROMPT_VERSION = 6 as const;
 export const AI_ACCESS_PROMPT_VERSION = 1 as const;
 export const AI_COMPOSER_PROMPT_VERSION = 1 as const;
 
@@ -90,6 +90,7 @@ Reglas:
 - ese conocimiento NO puede inventar que un compositor, obra, performer, precio, fecha, venue o repertorio está en el programa si no aparece en los hechos;
 - no clasifiques solo por un título genérico o poético si el resto de hechos no basta;
 - eligibility ≠ format ≠ kind;
+- no transformes «A o B» / «un pianista o un grupo de cámara» / programación por determinar en varios formats: eso son alternativas, no un concierto con ambas formaciones. formats múltiples sólo si la fuente afirma que este evento combina formaciones. Si no hay evidencia suficiente, formats=[] (nunca other como comodín);
 - rationale es metadata auxiliar muy breve (máximo 1–2 frases). No repitas evidence. No escribas un ensayo.
 
 Taxonomías cerradas:
@@ -134,7 +135,7 @@ Reglas:
 - no deduzcas época por venue, festival, ciclo, instrumento, ensemble, tipo de concierto, descripción promocional ni repertorio probable;
 - rationale breve; no repitas evidence.
 
-formats: asigna al menos un formato cuando los hechos observados permitan una inferencia musical razonable. formats=[] sólo si realmente no hay evidencia suficiente para ninguna etiqueta. Vacío es preferible a un formato incorrecto. No uses other simplemente para evitar un array vacío: other queda para identidades híbridas o no clasificables de verdad, no como comodín. Vacío es preferible a adivinar; no es la salida normal cuando hay una lectura musical razonable.
+formats: asigna al menos un formato cuando los hechos observados permitan una inferencia musical razonable. formats=[] sólo si realmente no hay evidencia suficiente para ninguna etiqueta. Vacío es preferible a un formato incorrecto. No uses other simplemente para evitar un array vacío: other queda para identidades híbridas o no clasificables de verdad, no como comodín. Vacío es preferible a adivinar; no es la salida normal cuando hay una lectura musical razonable. No transformes alternativas exclusivas en varios formats: «un pianista o un grupo de cámara», «A o B», «o bien», «por determinar» o programación todavía no anunciada no significan que ESTE concierto sea ambas cosas. Formats múltiples sólo cuando la fuente afirma que este evento combina formaciones (primera y segunda parte, combina X e Y, orquesta y coro, tanto X como Y). Si la formación de este concierto no está determinada, formats=[] es correcto y va a revisión.
 
 eras: siempre []. El pipeline las ignora y las deriva en código de compositores u obras observados. No infieras repertorio.
 
