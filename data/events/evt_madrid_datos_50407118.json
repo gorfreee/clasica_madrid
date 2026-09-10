@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50407118",
+  "slug": "divina-proportione-un-viaje-por-la-riqueza-sonora-del-renacimiento",
+  "title": "Divina Proportione: un viaje por la riqueza sonora del Renacimiento",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_6779450",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50407118_01",
+      "date": "2026-09-18",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Juan del Encina"
+    },
+    {
+      "name": "Francisco Guerrero"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "renaissance"
+  ],
+  "formats": [
+    "early-music"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=68926972fd480a10VgnVCM100000891ecb1aRCRD",
+      "checkedAt": "2026-09-11",
+      "externalId": "50407118"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-09-11"
+}

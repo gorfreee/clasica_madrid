@@ -11,7 +11,7 @@
     {
       "id": "occ_basilica_san_miguel_4627_01",
       "date": "2026-11-04",
-      "time": "20:00",
+      "time": "19:30",
       "status": "scheduled"
     }
   ],
@@ -29,10 +29,10 @@
     {
       "sourceId": "src_basilica_san_miguel",
       "url": "https://basilicadesanmiguel.org/actividad/concierto-de-juan-de-la-rubia",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-11",
       "externalId": "4627"
     }
   ],
   "primarySourceId": "src_basilica_san_miguel",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-11"
 }
