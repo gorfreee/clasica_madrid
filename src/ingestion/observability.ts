@@ -150,6 +150,11 @@ const SECRET_ENV_KEYS = [
   'GH_TOKEN',
   'GITHUB_TOKEN',
   'OPENAI_API_KEY',
+  'GROQ_API_KEY',
+  'MISTRAL_API_KEY',
+  'ZAI_API_KEY',
+  'CLOUDFLARE_API_TOKEN',
+  'CLOUDFLARE_ACCOUNT_ID',
 ] as const;
 
 const MAX_FAILURE_MESSAGE = 2000;
@@ -596,7 +601,7 @@ export function readFailureContext(error: unknown): FailureContext | undefined {
 }
 
 export function classifyFailureCode(message: string): string {
-  if (/GEMINI_|requieren el provider Gemini/.test(message)) return 'ai-config-fatal';
+  if (/\b(?:AI_|GEMINI_|GROQ_|MISTRAL_|ZAI_|CLOUDFLARE_)|pool de IA|pool gratuito/i.test(message)) return 'ai-config-fatal';
   return 'unexpected-exception';
 }
 

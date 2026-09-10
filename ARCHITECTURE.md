@@ -4,7 +4,7 @@ Este documento define la arquitectura técnica base del proyecto. Debe manteners
 
 ## Principios
 
-1. **Coste de infraestructura: 0 €**. El proyecto debe funcionar dentro de los planes gratuitos de GitHub y Cloudflare. El coste de las herramientas de IA queda fuera de esta restricción.
+1. **Coste de infraestructura y del pipeline: 0 €**. El proyecto debe funcionar dentro de los planes gratuitos de GitHub y Cloudflare. La IA de ingestión automática sólo puede usar capacidad explícitamente gratuita y debe detenerse al agotarla; las herramientas personales de desarrollo quedan fuera de esta restricción.
 2. **GitHub es la fuente de verdad**. Los datos publicados viven en ficheros versionados dentro del repositorio, no en una base de datos en producción.
 3. **Sitio estático por defecto**. La web se genera en build time y se sirve como HTML/CSS/JS estático.
 4. **Rendimiento y usabilidad primero**. La experiencia debe ser excelente en móvil y escritorio, con poco JavaScript, HTML semántico y diseño responsive.

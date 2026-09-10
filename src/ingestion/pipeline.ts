@@ -734,6 +734,12 @@ function mergeProviderStats(usage: IngestAiSummary, ai: AiClassifier | undefined
   usage.modelFallbacks = stats.modelFallbacks;
   usage.requestsByRoute = stats.requestsByRoute;
   usage.classificationsByRoute = stats.classificationsByRoute;
+  usage.requestsByProvider = stats.requestsByProvider ?? {};
+  usage.classificationsByProvider = stats.classificationsByProvider ?? {};
+  usage.requestsByPurpose = stats.requestsByPurpose ?? {};
+  usage.failuresByKind = stats.failuresByKind ?? {};
+  usage.rateLimits = stats.rateLimits ?? 0;
+  usage.quotaExhausted = stats.quotaExhausted ?? 0;
   usage.requestsByModel = stats.requestsByModel ?? stats.requestsByRoute;
   usage.classificationsByModel = stats.classificationsByModel ?? stats.classificationsByRoute;
   usage.cacheHits = stats.cacheHits ?? 0;
@@ -741,6 +747,8 @@ function mergeProviderStats(usage: IngestAiSummary, ai: AiClassifier | undefined
   usage.inputTokensByModel = stats.inputTokensByModel ?? {};
   usage.dailyRequestsByModel = stats.dailyRequestsByModel ?? {};
   usage.inputTokensByRoute = stats.inputTokensByRoute ?? stats.inputTokensByModel ?? {};
+  usage.outputTokensByRoute = stats.outputTokensByRoute ?? {};
+  usage.thoughtTokensByRoute = stats.thoughtTokensByRoute ?? {};
   usage.dailyRequestsByRoute = stats.dailyRequestsByRoute ?? stats.dailyRequestsByModel ?? {};
 }
 

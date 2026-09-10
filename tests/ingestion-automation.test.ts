@@ -49,6 +49,11 @@ function report(): IngestReport {
         cacheHits: 4,
         modelFallbacks: 2,
         deferred: 1,
+        rateLimits: 3,
+        quotaExhausted: 1,
+        requestsByProvider: { gemini: 5, groq: 2 },
+        classificationsByRoute: { 'gemini:flash': 4 },
+        requestsByPurpose: { eligibility: 7 },
       },
       candidates: 9,
       newEvents: 3,
@@ -146,6 +151,10 @@ describe('reporting de la automatización', () => {
       '| IA: cache hits | 4 |',
       '| IA: fallbacks | 2 |',
       '| IA: deferred | 1 |',
+      '| IA: rate limits / cuota agotada | 3 / 1 |',
+      'gemini: 5, groq: 2',
+      'gemini:flash: 4',
+      'eligibility: 7',
       runUrl,
     ]) {
       expect(summary).toContain(expected);

@@ -269,11 +269,19 @@ export type IngestAiSummary = {
   classificationsByModel: Record<string, number>;
   requestsByRoute: Record<string, number>;
   classificationsByRoute: Record<string, number>;
+  requestsByProvider: Record<string, number>;
+  classificationsByProvider: Record<string, number>;
+  requestsByPurpose: Partial<Record<AiCallPurpose, number>>;
+  failuresByKind: Record<string, number>;
+  rateLimits: number;
+  quotaExhausted: number;
   cacheHits: number;
   deferred: number;
   inputTokensByModel: Record<string, number>;
   dailyRequestsByModel: Record<string, number>;
   inputTokensByRoute: Record<string, number>;
+  outputTokensByRoute: Record<string, number>;
+  thoughtTokensByRoute: Record<string, number>;
   dailyRequestsByRoute: Record<string, number>;
   byPurpose: Record<AiCallPurpose, IngestAiPurposeSummary>;
 };
@@ -312,11 +320,19 @@ export function emptyIngestAiSummary(): IngestAiSummary {
     classificationsByModel: {},
     requestsByRoute: {},
     classificationsByRoute: {},
+    requestsByProvider: {},
+    classificationsByProvider: {},
+    requestsByPurpose: {},
+    failuresByKind: {},
+    rateLimits: 0,
+    quotaExhausted: 0,
     cacheHits: 0,
     deferred: 0,
     inputTokensByModel: {},
     dailyRequestsByModel: {},
     inputTokensByRoute: {},
+    outputTokensByRoute: {},
+    thoughtTokensByRoute: {},
     dailyRequestsByRoute: {},
     byPurpose: {
       eligibility: emptyAiPurposeSummary(),

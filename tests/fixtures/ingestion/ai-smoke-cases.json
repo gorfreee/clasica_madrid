@@ -1,0 +1,43 @@
+[
+  {
+    "purpose": "eligibility",
+    "observed": {
+      "title": "Concierto de música de cámara",
+      "description": "Recital con repertorio de Bach y Falla.",
+      "performers": [{ "name": "Ensemble de Cámara de Madrid" }],
+      "composers": [],
+      "works": []
+    }
+  },
+  {
+    "purpose": "composer-extraction",
+    "observed": {
+      "title": "Música para tecla",
+      "programText": "Johann Sebastian Bach: Variaciones Goldberg, BWV 988",
+      "performers": [{ "name": "Ana López", "roleText": "piano" }],
+      "composers": [],
+      "works": []
+    }
+  },
+  {
+    "purpose": "access-classification",
+    "observed": {
+      "title": "Concierto de otoño",
+      "accessText": "Entrada libre hasta completar aforo.",
+      "performers": [],
+      "composers": [],
+      "works": []
+    }
+  },
+  {
+    "purpose": "taxonomy",
+    "requireFormats": true,
+    "observed": {
+      "title": "Cuarteto de cuerda",
+      "programText": "Ludwig van Beethoven: Cuarteto de cuerda op. 59 n.º 1",
+      "performers": [{ "name": "Cuarteto Ejemplo" }],
+      "composers": [{ "name": "Ludwig van Beethoven" }],
+      "works": [{ "title": "Cuarteto de cuerda op. 59 n.º 1", "composerName": "Ludwig van Beethoven" }]
+    }
+  }
+]
