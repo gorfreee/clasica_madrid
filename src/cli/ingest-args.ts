@@ -9,6 +9,7 @@ export type IngestCliSuccess = {
   observabilityDir?: string;
   window?: IngestWindow;
   seasonWindow?: boolean;
+  aiRoute?: string;
   aiModel?: string;
   aiNoCache?: boolean;
   aiMaxRequests?: number;
@@ -42,7 +43,7 @@ export function parseIngestArgs(argv: string[], knownSources: string[]): IngestC
   let seasonWindow = false;
   let sourceIds: string[] | undefined;
   let excludeSourceIds: string[] | undefined;
-  const aiFlags: Pick<IngestCliSuccess, 'aiModel' | 'aiNoCache' | 'aiMaxRequests'> = {};
+  const aiFlags: Pick<IngestCliSuccess, 'aiRoute' | 'aiModel' | 'aiNoCache' | 'aiMaxRequests'> = {};
   const positionals: string[] = [];
   const rest = argv.slice(1);
 
@@ -52,10 +53,16 @@ export function parseIngestArgs(argv: string[], knownSources: string[]): IngestC
       aiFlags.aiNoCache = true;
       continue;
     }
-    if (arg === '--ai-model' || arg === '--ai-max-requests') {
+    if (arg === '--ai-route' || arg === '--ai-model' || arg === '--ai-max-requests') {
       const value = rest[++index]?.trim();
       if (!value || value.startsWith('--')) return { ok: false, message: `${arg} requiere un valor` };
-      if (arg === '--ai-model') {
+      if (arg === '--ai-route') {
+        const separator = value.indexOf(':');
+        if (separator <= 0 || separator === value.length - 1 || value.includes(',')) {
+          return { ok: false, message: '--ai-route requiere provider:model' };
+        }
+        aiFlags.aiRoute = value;
+      } else if (arg === '--ai-model') {
         if (value.includes(',')) return { ok: false, message: '--ai-model requiere un único modelo' };
         aiFlags.aiModel = value;
       } else {
@@ -149,6 +156,9 @@ export function parseIngestArgs(argv: string[], knownSources: string[]): IngestC
     positionals.push(arg);
   }
 
+  if (aiFlags.aiRoute && aiFlags.aiModel) {
+    return { ok: false, message: '--ai-route y --ai-model no se pueden combinar' };
+  }
   const windowResult = resolveCliWindow(from, to, seasonWindow);
   if (!windowResult.ok) return windowResult;
   const window = windowResult.window;
@@ -305,7 +315,8 @@ export function ingestUsage(knownSources: string[]): string {
   npm run ingest:discovery -- <lote.json> [--from YYYY-MM-DD --to YYYY-MM-DD] [--dry-run] [--data-dir <ruta>] [--report <fichero.json>] [--observability-dir <ruta>]
   npm run ingest:discovery-context [-- --from YYYY-MM-DD --to YYYY-MM-DD] [-- --output <fichero.json>] [-- --data-dir <ruta>]
 
-Gemini: --ai-model <modelo> (fija modelo sin fallback), --ai-no-cache, --ai-max-requests <n>
+IA: --ai-route <provider:model> (fija una route), --ai-no-cache, --ai-max-requests <n>
+Compatibilidad Gemini: --ai-model <modelo> equivale a --ai-route gemini:<modelo>
 
 Fuentes de harvesting: ${knownSources.join(', ')}`;
 }

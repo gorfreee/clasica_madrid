@@ -58,7 +58,7 @@ jobs:
     env:
       AI_PROVIDER: gemini
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-      GEMINI_STATE_DIR: ${{ github.workspace }}/.local/ai
+      AI_STATE_DIR: ${{ github.workspace }}/.local/ai
       REPORT_PATH: ingestion/reports/ingestion-run-${{ github.run_id }}-${{ github.run_attempt }}/report.json
       OBS_DIR: ingestion/reports/ingestion-run-${{ github.run_id }}-${{ github.run_attempt }}
       ARTIFACT_NAME: ingestion-run-${{ github.run_id }}-${{ github.run_attempt }}
@@ -163,15 +163,16 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Restore persistent Gemini state
+      - name: Restore persistent AI pool state
         uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
         with:
           path: |
             .local/ai/quota.json
             .local/ai/cache/**
             .local/ai/pending/**
-          key: ingestion-gemini-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          key: ingestion-ai-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
+            ingestion-ai-${{ runner.os }}-
             ingestion-gemini-${{ runner.os }}-
 
       - name: Install

@@ -16,6 +16,10 @@ describe('parseLocalAiEnv', () => {
     const parsed = parseLocalAiEnv(`
 # comment
 AI_PROVIDER=gemini
+AI_ROUTE=gemini:gemini-3.1-flash-lite
+AI_MAX_REQUESTS=20
+AI_CACHE=off
+AI_STATE_DIR=.local/ai-v2
 GEMINI_API_KEY="test-key"
 GEMINI_MODEL=gemini-3.1-flash-lite
 GEMINI_MODELS=gemini-3.1-flash-lite,gemini-2.5-flash
@@ -28,6 +32,10 @@ export OPENAI_MODEL=gpt-4o-mini
 `);
     expect(parsed).toEqual({
       AI_PROVIDER: 'gemini',
+      AI_ROUTE: 'gemini:gemini-3.1-flash-lite',
+      AI_MAX_REQUESTS: '20',
+      AI_CACHE: 'off',
+      AI_STATE_DIR: '.local/ai-v2',
       GEMINI_API_KEY: 'test-key',
       GEMINI_MODEL: 'gemini-3.1-flash-lite',
       GEMINI_MODELS: 'gemini-3.1-flash-lite,gemini-2.5-flash',
@@ -76,5 +84,16 @@ describe('loadLocalAiEnv', () => {
     expect(loadLocalAiEnv({ rootDir: root, env })).toBe(false);
     expect(env).toEqual({});
     expect(createAiClassifierFromEnv(env)).toBeUndefined();
+  });
+
+  it('AI_ROUTE fija una route Gemini aunque exista una key OpenAI legacy', () => {
+    const built = createAiClassifierFromEnv({
+      AI_ROUTE: 'gemini:gemma-4-31b-it',
+      AI_MAX_REQUESTS: '0',
+      GEMINI_API_KEY: 'gemini-test',
+      OPENAI_API_KEY: 'openai-test',
+    });
+    expect(built).toBeInstanceOf(GeminiClassifier);
+    expect((built as GeminiClassifier).routes.map((route) => route.routeId)).toEqual(['gemini:gemma-4-31b-it']);
   });
 });

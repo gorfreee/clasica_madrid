@@ -267,10 +267,14 @@ export type IngestAiSummary = {
   modelFallbacks: number;
   requestsByModel: Record<string, number>;
   classificationsByModel: Record<string, number>;
+  requestsByRoute: Record<string, number>;
+  classificationsByRoute: Record<string, number>;
   cacheHits: number;
   deferred: number;
   inputTokensByModel: Record<string, number>;
   dailyRequestsByModel: Record<string, number>;
+  inputTokensByRoute: Record<string, number>;
+  dailyRequestsByRoute: Record<string, number>;
   byPurpose: Record<AiCallPurpose, IngestAiPurposeSummary>;
 };
 
@@ -306,10 +310,14 @@ export function emptyIngestAiSummary(): IngestAiSummary {
     modelFallbacks: 0,
     requestsByModel: {},
     classificationsByModel: {},
+    requestsByRoute: {},
+    classificationsByRoute: {},
     cacheHits: 0,
     deferred: 0,
     inputTokensByModel: {},
     dailyRequestsByModel: {},
+    inputTokensByRoute: {},
+    dailyRequestsByRoute: {},
     byPurpose: {
       eligibility: emptyAiPurposeSummary(),
       'composer-extraction': emptyAiPurposeSummary(),

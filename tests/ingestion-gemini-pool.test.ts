@@ -294,14 +294,18 @@ describe('quota accounting and bounded scheduling', () => {
     } });
     await expect(p.classify(facts)).resolves.toEqual({ eligibility: 'include' });
     expect(p.lastDiagnostics()).toMatchObject({ attempts: 2, fallbackUsed: true, model: 'working' });
-    expect(p.lastDiagnostics()?.routing).toContainEqual({ model: 'unavailable', reason: 'unavailable-model-or-config' });
+    expect(p.lastDiagnostics()?.routing).toEqual(expect.arrayContaining([
+      expect.objectContaining({ model: 'unavailable', reason: 'unavailable-model-or-config' }),
+    ]));
     expect(p.lastDiagnostics()?.failures?.[0]?.excerpt).toContain(`Gemini HTTP ${status}`);
     // Beyond RPM/cooldown windows: a permanent failure must still be disabled.
     time.set(time.now() + 120_000);
     for (const purpose of ['eligibility', 'taxonomy'] as const) {
       await expect(p.classify({ ...facts, title: 'Otro concierto' }, { purpose })).resolves.toEqual({ eligibility: 'include' });
       expect(p.lastDiagnostics()).toMatchObject({ attempts: 1, failures: [] });
-      expect(p.lastDiagnostics()?.routing).toContainEqual({ model: 'unavailable', reason: 'disabled' });
+      expect(p.lastDiagnostics()?.routing).toEqual(expect.arrayContaining([
+        expect.objectContaining({ model: 'unavailable', reason: 'disabled' }),
+      ]));
     }
     expect(sent).toEqual(['unavailable', 'working', 'working', 'working']);
     expect(p.snapshotStats()).toMatchObject({
@@ -395,6 +399,10 @@ describe('Pacific day and configuration', () => {
   });
 
   it('parses pinned benchmark and request budget flags, rejecting missing/invalid values', () => {
+    expect(parseIngestArgs(['sync', '--ai-route', 'gemini:gemini-3.8-flash'], [])).toMatchObject({
+      ok: true, aiRoute: 'gemini:gemini-3.8-flash',
+    });
+    expect(parseIngestArgs(['sync', '--ai-route', 'gemini:a', '--ai-model', 'b'], []).ok).toBe(false);
     expect(parseIngestArgs(['sync', '--dry-run', '--ai-model', 'gemma-4-31b-it', '--ai-no-cache', '--ai-max-requests', '40'], [])).toMatchObject({ ok: true, aiModel: 'gemma-4-31b-it', aiNoCache: true, aiMaxRequests: 40 });
     for (const args of [['sync', '--ai-model'], ['sync', '--ai-model', 'a,b'], ['sync', '--ai-max-requests', '-1'], ['sync', '--ai-max-requests', 'NaN']]) {
       expect(parseIngestArgs(args, []).ok).toBe(false);
