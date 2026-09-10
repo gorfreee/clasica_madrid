@@ -70,6 +70,10 @@ describe('generic ordered routes', () => {
     expect(classifier.snapshotStats()).toMatchObject({
       requestsByRoute: { 'groq:shared-model': 1, 'mistral:shared-model': 1 },
       classificationsByRoute: { 'mistral:shared-model': 1 },
+      requestsByProvider: { groq: 1, mistral: 1 },
+      classificationsByProvider: { mistral: 1 },
+      requestsByPurpose: { eligibility: 2 },
+      failuresByKind: { 'rate-limit': 1 },
     });
   });
 

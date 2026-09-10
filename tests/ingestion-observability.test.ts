@@ -255,6 +255,10 @@ describe('observabilidad de ingestión', () => {
       'relay=[INGEST_FETCH_RELAY_TOKEN]',
     );
     expect(sanitizeErrorMessage('Authorization: Bearer abc.def')).toBe('Authorization: Bearer [redacted]');
+    for (const key of ['GROQ_API_KEY', 'MISTRAL_API_KEY', 'ZAI_API_KEY', 'CLOUDFLARE_API_TOKEN'] as const) {
+      expect(sanitizeErrorMessage('provider=another-provider-secret', { [key]: 'another-provider-secret' }))
+        .toBe(`provider=[${key}]`);
+    }
     expect(classifyFailureCode('Las opciones --ai-* requieren el provider Gemini y GEMINI_API_KEY')).toBe(
       'ai-config-fatal',
     );

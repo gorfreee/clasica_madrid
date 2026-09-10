@@ -9,6 +9,7 @@ import {
 } from './ai-pool.ts';
 import { PACIFIC_DAILY_RESET } from './ai-state.ts';
 import { makeRoute } from './ai-transport.ts';
+import type { AiRoute } from './ai-transport.ts';
 import {
   GEMINI_DEFAULT_CONCURRENCY,
   GEMINI_DEFAULT_LIMITS,
@@ -58,23 +59,9 @@ export class GeminiClassifier extends AiPoolClassifier {
   constructor(options: GeminiClassifierOptions) {
     const models = resolveGeminiModels(options);
     const clock = options.clock;
-    const transport = new GeminiTransport({
-      apiKey: options.apiKey,
-      baseUrl: options.baseUrl,
-      fetch: options.fetch,
-      now: clock?.now,
-    });
-    const limits = Object.fromEntries(models.map((model) => [model, limitsForModel(model, options)]));
+    const routes = createGeminiRoutes({ ...options, models });
     super({
-      routes: models.map((model, priority) => makeRoute({
-        provider: 'gemini',
-        model,
-        transport,
-        limits: limits[model],
-        reset: PACIFIC_DAILY_RESET,
-        capabilities: ['structured-json'],
-        priority,
-      })),
+      routes,
       maxRetries: options.maxRetries,
       timeoutMs: options.timeoutMs,
       classifyBudgetMs: options.classifyBudgetMs,
@@ -99,6 +86,26 @@ export class GeminiClassifier extends AiPoolClassifier {
       dailyRequestsByModel: stripGeminiPrefix(stats.dailyRequestsByRoute),
     };
   }
+}
+
+/** Build Gemini routes for the shared multi-provider pool without another scheduler. */
+export function createGeminiRoutes(options: GeminiClassifierOptions): AiRoute[] {
+  const models = resolveGeminiModels(options);
+  const transport = new GeminiTransport({
+    apiKey: options.apiKey,
+    baseUrl: options.baseUrl,
+    fetch: options.fetch,
+    now: options.clock?.now,
+  });
+  return models.map((model, priority) => makeRoute({
+    provider: 'gemini',
+    model,
+    transport,
+    limits: limitsForModel(model, options),
+    reset: PACIFIC_DAILY_RESET,
+    capabilities: ['structured-json'],
+    priority,
+  }));
 }
 
 function limitsForModel(model: string, options: GeminiClassifierOptions): ModelLimits {

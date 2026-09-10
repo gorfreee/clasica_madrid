@@ -38,9 +38,17 @@ describe('workflow de ingestión: artifact de observabilidad', () => {
     expect(aiState).toContain('.local/ai/pending/**');
     expect(aiState).toContain('ingestion-gemini-${{ runner.os }}-');
     expect(aiState).not.toContain('run.lock');
-    expect(yaml).toContain('AI_PROVIDER: gemini');
+    expect(yaml).toContain('AI_PROVIDER: pool');
+    expect(yaml).toContain("AI_ZERO_COST_ONLY: 'true'");
     expect(yaml).toContain('AI_STATE_DIR: ${{ github.workspace }}/.local/ai');
-    expect(yaml).not.toMatch(/(GROQ|MISTRAL|ZAI|CLOUDFLARE)_API_KEY/);
+    expect(yaml).toContain('GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}');
+    expect(yaml).toContain('MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}');
+    expect(yaml).toContain('ZAI_API_KEY: ${{ secrets.ZAI_API_KEY }}');
+    expect(yaml).toContain('CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}');
+    expect(yaml).toContain('CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}');
+    expect(yaml).toContain('GROQ_FREE_TIER_CONFIRMED: ${{ vars.GROQ_FREE_TIER_CONFIRMED }}');
+    expect(yaml).toContain('MISTRAL_FREE_MODE_CONFIRMED: ${{ vars.MISTRAL_FREE_MODE_CONFIRMED }}');
+    expect(yaml).toContain('CLOUDFLARE_WORKERS_FREE_CONFIRMED: ${{ vars.CLOUDFLARE_WORKERS_FREE_CONFIRMED }}');
 
     expect(publish).toContain("steps.config.outputs.mode == 'publish'");
     expect(dryRun).toContain("steps.config.outputs.mode == 'dry-run'");

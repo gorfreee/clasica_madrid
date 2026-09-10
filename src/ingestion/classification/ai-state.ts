@@ -203,3 +203,17 @@ export const PACIFIC_DAILY_RESET: AiQuotaResetPolicy = {
   day: pacificQuotaDay,
   nextReset: nextPacificQuotaReset,
 };
+
+export function utcQuotaDay(now: number): string {
+  return new Date(now).toISOString().slice(0, 10);
+}
+
+export function nextUtcQuotaReset(now: number): number {
+  const date = new Date(now);
+  return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + 1);
+}
+
+export const UTC_DAILY_RESET: AiQuotaResetPolicy = {
+  day: utcQuotaDay,
+  nextReset: nextUtcQuotaReset,
+};

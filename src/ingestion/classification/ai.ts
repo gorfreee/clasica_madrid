@@ -85,6 +85,14 @@ export type AiProviderStats = {
   classificationsByRoute: Record<string, number>;
   inputTokensByRoute?: Record<string, number>;
   dailyRequestsByRoute?: Record<string, number>;
+  requestsByProvider?: Record<string, number>;
+  classificationsByProvider?: Record<string, number>;
+  requestsByPurpose?: Partial<Record<AiCallPurpose, number>>;
+  failuresByKind?: Partial<Record<AiFailureKind, number>>;
+  rateLimits?: number;
+  quotaExhausted?: number;
+  outputTokensByRoute?: Record<string, number>;
+  thoughtTokensByRoute?: Record<string, number>;
   /** Legacy compatibility aliases; new consumers must use route-keyed maps. */
   requestsByModel?: Record<string, number>;
   classificationsByModel?: Record<string, number>;

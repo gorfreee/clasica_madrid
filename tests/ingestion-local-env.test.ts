@@ -47,6 +47,13 @@ export OPENAI_MODEL=gpt-4o-mini
     });
     expect(parsed).not.toHaveProperty('PATH');
     expect(LOCAL_AI_ENV_KEYS).toContain('GEMINI_API_KEY');
+    expect(LOCAL_AI_ENV_KEYS).toEqual(expect.arrayContaining([
+      'AI_ZERO_COST_ONLY',
+      'GROQ_API_KEY', 'GROQ_FREE_TIER_CONFIRMED',
+      'MISTRAL_API_KEY', 'MISTRAL_FREE_MODE_CONFIRMED',
+      'ZAI_API_KEY', 'ZAI_MODELS',
+      'CLOUDFLARE_API_TOKEN', 'CLOUDFLARE_ACCOUNT_ID', 'CLOUDFLARE_WORKERS_FREE_CONFIRMED',
+    ]));
   });
 });
 

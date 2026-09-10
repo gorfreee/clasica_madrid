@@ -13,6 +13,10 @@ export type AiTransportResult = {
   tokens?: AiTokenCounts;
   status?: string;
   finishReason?: string;
+  rateLimit?: {
+    remainingRequests?: number;
+    resetAfterMs?: number;
+  };
 };
 
 export type AiTransportCall = {

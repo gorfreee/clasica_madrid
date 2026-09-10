@@ -71,6 +71,14 @@ export class AiPoolClassifier implements AiClassifier {
     requestsByRoute: {} as Record<string, number>,
     classificationsByRoute: {} as Record<string, number>,
     inputTokensByRoute: {} as Record<string, number>,
+    outputTokensByRoute: {} as Record<string, number>,
+    thoughtTokensByRoute: {} as Record<string, number>,
+    requestsByProvider: {} as Record<string, number>,
+    classificationsByProvider: {} as Record<string, number>,
+    requestsByPurpose: {} as Partial<Record<AiCallPurpose, number>>,
+    failuresByKind: {} as Partial<Record<AiAttemptFailure['kind'], number>>,
+    rateLimits: 0,
+    quotaExhausted: 0,
   };
 
   constructor(options: AiPoolClassifierOptions) {
@@ -129,6 +137,14 @@ export class AiPoolClassifier implements AiClassifier {
       classificationsByRoute,
       inputTokensByRoute,
       dailyRequestsByRoute,
+      outputTokensByRoute: structuredClone(this.stats.outputTokensByRoute),
+      thoughtTokensByRoute: structuredClone(this.stats.thoughtTokensByRoute),
+      requestsByProvider: structuredClone(this.stats.requestsByProvider),
+      classificationsByProvider: structuredClone(this.stats.classificationsByProvider),
+      requestsByPurpose: structuredClone(this.stats.requestsByPurpose),
+      failuresByKind: structuredClone(this.stats.failuresByKind),
+      rateLimits: this.stats.rateLimits,
+      quotaExhausted: this.stats.quotaExhausted,
       requestsByModel: requestsByRoute,
       classificationsByModel: classificationsByRoute,
       inputTokensByModel: inputTokensByRoute,
@@ -232,6 +248,8 @@ export class AiPoolClassifier implements AiClassifier {
       this.selectDiagnostics(diagnostics, route);
       this.stats.httpRequests++;
       bump(this.stats.requestsByRoute, route.routeId);
+      bump(this.stats.requestsByProvider, route.provider);
+      bump(this.stats.requestsByPurpose as Record<string, number>, request.purpose);
       try {
         const result = await route.transport.request({
           model: route.model,
@@ -245,6 +263,12 @@ export class AiPoolClassifier implements AiClassifier {
           if (recent) recent.tokens = result.tokens.input;
           state.tokenScale = Math.max(state.tokenScale, result.tokens.input / estimated * state.tokenScale);
           bump(this.stats.inputTokensByRoute, route.routeId, result.tokens.input);
+          this.state.save();
+        }
+        if (result.tokens?.output !== undefined) bump(this.stats.outputTokensByRoute, route.routeId, result.tokens.output);
+        if (result.tokens?.thought !== undefined) bump(this.stats.thoughtTokensByRoute, route.routeId, result.tokens.thought);
+        if (result.rateLimit?.remainingRequests === 0 && result.rateLimit.resetAfterMs !== undefined) {
+          state.cooldownUntil = Math.max(state.cooldownUntil, this.clock.now() + result.rateLimit.resetAfterMs);
           this.state.save();
         }
         diagnostics.status = result.status;
@@ -273,6 +297,7 @@ export class AiPoolClassifier implements AiClassifier {
         }
         this.state.resolvePending(requestKey);
         bump(this.stats.classificationsByRoute, route.routeId);
+        bump(this.stats.classificationsByProvider, route.provider);
         return { value: result.value, diagnostics };
       } catch (error) {
         lastError = error;
@@ -299,6 +324,7 @@ export class AiPoolClassifier implements AiClassifier {
     skippedThisCall: Set<string>,
   ): void {
     if (error instanceof AiUnusableOutputError) {
+      bump(this.stats.failuresByKind as Record<string, number>, failureKindForUnusable(error.kind));
       diagnostics.status = error.status ?? error.kind;
       diagnostics.tokens = error.tokens;
       pushFailure(diagnostics, route, {
@@ -324,6 +350,8 @@ export class AiPoolClassifier implements AiClassifier {
 
     const state = this.state.route(route.routeId, this.clock.now(), route.reset);
     if (error.kind === 'rate-limit') {
+      this.stats.rateLimits++;
+      if (error.quotaExhausted) this.stats.quotaExhausted++;
       if (error.quotaExhausted && route.reset) state.dailyUntil = route.reset.nextReset(this.clock.now());
       else state.cooldownUntil = Math.max(
         state.cooldownUntil,
@@ -348,6 +376,10 @@ export class AiPoolClassifier implements AiClassifier {
       status: error.status === undefined ? undefined : String(error.status),
       excerpt: sanitizeAiOutputExcerpt(this.redactForRoute(route, error.message)),
     });
+    bump(
+      this.stats.failuresByKind as Record<string, number>,
+      error.kind === 'rate-limit' ? 'rate-limit' : error.kind === 'timeout' ? 'timeout' : 'transport-error',
+    );
   }
 
   private async acquire(

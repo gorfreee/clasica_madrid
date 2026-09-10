@@ -12,6 +12,7 @@ Puerta de entrada operativa: qué hay implementado y cómo ejecutarlo.
 | Prompt del fallback de IA | `src/ingestion/classification/ai-prompt.ts` |
 | Golden evaluation set | `tests/fixtures/ingestion/golden/` |
 | Variables de entorno de IA | `.env.example` |
+| Pool gratuito multi-provider y setup | [`ai-providers.md`](ai-providers.md) |
 | Histórico (no es requisito vigente) | [`docs/archive/`](archive/) |
 
 La web no escribe datos. Todo lo publicado entra por Git, pasa validación determinista y CI, y entonces se fusiona.
@@ -122,7 +123,7 @@ Flags `--ai-*` existen para pruebas acotadas: `--ai-route provider:model`, `--ai
 
 ## Automatización en GitHub Actions
 
-`.github/workflows/ingestion.yml` serializa todas las ejecuciones en el concurrency group `ingestion-production`; una scheduled y una manual nunca comparten simultáneamente cuota ni state del pool. Producción mantiene `AI_PROVIDER=gemini` y no configura ningún proveedor adicional.
+`.github/workflows/ingestion.yml` serializa todas las ejecuciones en el concurrency group `ingestion-production`; una scheduled y una manual nunca comparten simultáneamente cuota ni state del pool. Producción usa `AI_PROVIDER=pool` y `AI_ZERO_COST_ONLY=true`; Gemini conserva la prioridad y los providers adicionales sólo se habilitan con credenciales y guardias gratuitas válidas. Véase [`ai-providers.md`](ai-providers.md).
 
 `auditorio-nacional`, `fundacion-juan-march`, `teatro-zarzuela`, `cndm` y `real-hermandad-refugio` forman parte del `all` programado. March, Zarzuela, Auditorio y CNDM salen por el fetch relay (`useFetchRelay`). Ver [infra/fetch-relay](../infra/fetch-relay/README.md). El Worker se despliega con [deploy-fetch-relay.yml](../.github/workflows/deploy-fetch-relay.yml) o desde el Dashboard; añadir otra fuente al relay es `useFetchRelay: true` en el registry. Las peticiones a `/wp-json/` envían `Accept: application/json` sin `text/html` ni `*/*`. Un HTTP 202 de captcha no se acepta como documento; el Worker puede reintentarlo si hay cookie nueva o cuerpo `sgcaptcha`. Refugio pide el archivo oficial `/categoria-eventos/conciertos/` (no `/conciertos/` ni REST) por HTTP directo; si SiteGround responde 202/SG-Captcha, el mismo archivo se carga en Chrome del runner y las páginas extra reutilizan esa sesión. Las fichas individuales (`/calendario-de-eventos/{slug}/`) usan el mismo GET directo y, si hace falta, una sesión Chrome compartida del bucle de hydration; un fallo de ficha conserva los hechos del listing. Zarzuela mantiene pacing de origen, `Retry-After` y un circuito por fichas distintas.
 

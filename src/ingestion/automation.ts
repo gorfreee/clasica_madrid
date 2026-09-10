@@ -224,6 +224,10 @@ function formatObservabilitySection(
     rows.push(`| IA: cache hits | ${summary.ai.cacheHits} |`);
     rows.push(`| IA: fallbacks | ${summary.ai.modelFallbacks} |`);
     rows.push(`| IA: deferred | ${summary.ai.deferred} |`);
+    rows.push(`| IA: rate limits / cuota agotada | ${summary.ai.rateLimits} / ${summary.ai.quotaExhausted} |`);
+    rows.push(`| IA: requests por provider | ${cell(compactCounts(summary.ai.requestsByProvider))} |`);
+    rows.push(`| IA: válidas por route | ${cell(compactCounts(summary.ai.classificationsByRoute))} |`);
+    rows.push(`| IA: requests por purpose | ${cell(compactCounts(summary.ai.requestsByPurpose))} |`);
   }
 
   const stageEntries = Object.entries(timings?.stagesMs ?? {}).filter(
@@ -268,6 +272,13 @@ function formatDuration(ms: number): string {
   if (seconds < 60) return `${seconds}s`;
   const minutes = Math.floor(seconds / 60);
   return `${minutes}m ${String(seconds % 60).padStart(2, '0')}s`;
+}
+
+function compactCounts(counts: Partial<Record<string, number>>): string {
+  return Object.entries(counts)
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([key, value]) => `${key}: ${value}`)
+    .join(', ') || 'ninguno';
 }
 
 function formatSourceStatus(timing: IngestSourceTiming): string {
