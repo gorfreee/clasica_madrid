@@ -5,6 +5,7 @@ import { UTC_DAILY_RESET } from './ai-state.ts';
 import { makeRoute, type AiRoute, type AiRouteLimits } from './ai-transport.ts';
 import { createGeminiRoutes, GeminiClassifier, resolveGeminiConfig } from './gemini.ts';
 import { GEMINI_DEFAULT_MODELS, type GeminiConfigEnv } from './gemini-config.ts';
+import { openaiCompatibleModelProfile } from './openai-compatible-profiles.ts';
 import {
   OpenAiCompatibleTransport,
   type OpenAiCompatibleProfile,
@@ -141,7 +142,6 @@ function freeRoutes(env: AiEnv, zeroCost: boolean): AiRoute[] {
     models: modelList(env.MISTRAL_MODELS, MISTRAL_DEFAULT_MODELS),
     baseUrl: MISTRAL_DEFAULT_BASE_URL,
     limits: providerLimitMaps(env, 'MISTRAL'),
-    extraBody: { service_tier: 'standard_only' },
   }));
 
   const zaiKey = env.ZAI_API_KEY?.trim();
@@ -149,7 +149,6 @@ function freeRoutes(env: AiEnv, zeroCost: boolean): AiRoute[] {
     const selected = validateAllowlist('ZAI_MODELS', modelList(env.ZAI_MODELS, ZAI_ZERO_COST_MODELS), ZAI_ZERO_COST_MODELS);
     routes.push(...routesForProfile({
       provider: 'zai', baseUrl: ZAI_DEFAULT_BASE_URL, apiKey: zaiKey,
-      responseFormat: 'none',
     }, selected, providerLimitMaps(env, 'ZAI')));
   }
 
@@ -165,7 +164,6 @@ function freeRoutes(env: AiEnv, zeroCost: boolean): AiRoute[] {
       provider: 'cloudflare',
       baseUrl: `${CLOUDFLARE_API_BASE_URL}/${encodeURIComponent(accountId)}/ai/v1`,
       apiKey: cloudflareToken,
-      responseFormat: 'none',
       quotaExhausted: (_status, body) => cloudflareDailyAllocationExhausted(body),
       unavailableError: (status, body) => status === 403 && /\b(?:5016|5018|5035|3041)\b/.test(body),
     }, selected, {}, UTC_DAILY_RESET));
@@ -182,7 +180,6 @@ function compatibleProviderRoutes(
     baseUrl: string;
     defaultLimits?: AiRouteLimits;
     limits: LimitMaps;
-    extraBody?: Record<string, unknown>;
   },
 ): AiRoute[] {
   const key = options.key?.trim();
@@ -191,8 +188,6 @@ function compatibleProviderRoutes(
     provider,
     baseUrl: options.baseUrl,
     apiKey: key,
-    responseFormat: 'json-object',
-    extraBody: options.extraBody,
   }, options.models, options.limits, UTC_DAILY_RESET, options.defaultLimits);
 }
 
@@ -203,7 +198,11 @@ function routesForProfile(
   reset = UTC_DAILY_RESET,
   defaultLimits: AiRouteLimits = {},
 ): AiRoute[] {
-  const transport = new OpenAiCompatibleTransport(profile);
+  const models: NonNullable<OpenAiCompatibleProfile['models']> = {};
+  for (const model of routeModels) {
+    models[model] = openaiCompatibleModelProfile(profile.provider, model);
+  }
+  const transport = new OpenAiCompatibleTransport({ ...profile, models });
   return routeModels.map((model) => {
     const limits = limitsFor(model, maps, defaultLimits);
     return makeRoute({

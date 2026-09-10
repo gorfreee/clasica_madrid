@@ -29,7 +29,20 @@ Los defaults son:
 6. `zai:glm-4.7-flash` y `zai:glm-4.5-flash`;
 7. `cloudflare:@cf/zai-org/glm-4.7-flash` y `cloudflare:@cf/google/gemma-4-26b-a4b-it`.
 
-Cada lista puede reordenarse con `*_MODELS`. En zero-cost mode, Z.AI, Cloudflare y Gemini rechazan IDs fuera de su allowlist. Mistral no recibe cuotas públicas inventadas: aprende de `429`/`Retry-After` y admite overrides `MISTRAL_MODEL_RPM`, `MISTRAL_MODEL_TPM` y `MISTRAL_MODEL_RPD`. Groq empieza con los límites Free publicados y también admite overrides por modelo.
+Cada lista puede reordenarse con `*_MODELS`. En zero-cost mode, Z.AI, Cloudflare y Gemini rechazan IDs fuera de su allowlist. Mistral no recibe cuotas públicas inventadas: aprende de `429`/`Retry-After`/`X-RateLimit-*` y admite overrides `MISTRAL_MODEL_RPM`, `MISTRAL_MODEL_TPM` y `MISTRAL_MODEL_RPD`. Groq empieza con los límites Free publicados y también admite overrides por modelo. Z.AI admite los mismos overrides; tampoco hay un default numérico inventado.
+
+Esos `*_MODEL_RPM` / `*_MODEL_TPM` / `*_MODEL_RPD` son configuración no sensible. En producción el workflow las lee de `vars.*` (nunca de secrets). Si la variable de repositorio está vacía, se aplican los defaults de código descritos arriba. En local viven en `.local/ai.env`.
+
+## Perfiles HTTP por modelo
+
+Las tareas del pool (eligibility, compositores, acceso, taxonomy) piden JSON corto. El transport OpenAI-compatible es único; cada route declara el payload que su proveedor admite:
+
+| Route | JSON mode | Thinking / reasoning | Notas |
+|---|---|---|---|
+| `groq:*` | `response_format: json_object` | no se envía | No añadir `thinking` ni `chat_template_kwargs`. |
+| `mistral:mistral-small-latest` | `response_format: json_object` | no se envía | `service_tier=standard_only` (Free / Standard). |
+| `zai:glm-4.7-flash`, `zai:glm-4.5-flash` | `response_format: json_object` | `thinking: { type: "disabled" }` | El thinking de GLM-4.7 está on por defecto y consume `max_tokens`. |
+| `cloudflare:@cf/zai-org/glm-4.7-flash`, `cloudflare:@cf/google/gemma-4-26b-a4b-it` | no se envía `response_format` | `reasoning_effort: null` y `chat_template_kwargs.enable_thinking: false` | La allowlist oficial de JSON Mode de Workers AI no incluye estos IDs; el schema editorial externo sigue validando. |
 
 `--ai-max-requests` limita los HTTP requests del pool completo, incluidos fallos, retries y fallbacks. `--ai-route provider:model` fija una sola route para diagnóstico.
 
@@ -71,9 +84,21 @@ Las keys ausentes dejan fuera su provider sin romper la ingestión. Gemini sigue
 - Groq: modelos, límites Free y rate-limit headers: <https://console.groq.com/docs/rate-limits>
 - Groq: compatibilidad OpenAI: <https://console.groq.com/docs/openai>
 - Mistral: Free mode y primer request: <https://docs.mistral.ai/getting-started/quickstarts/developer/first-api-request>
-- Mistral Chat Completions: <https://docs.mistral.ai/api>
+- Mistral Chat Completions y JSON mode: <https://docs.mistral.ai/api>
+- Mistral rate limits y `X-RateLimit-Remaining`: <https://docs.mistral.ai/resources/known-limitations>
+- Mistral `service_tier=standard_only`: <https://docs.mistral.ai/inference/priority-tier>
+- Mistral 429 en Free mode: <https://help.mistral.ai/en/articles/698531-why-am-i-hitting-api-rate-limits-and-how-do-i-increase-them>
+- Z.AI: thinking (default on en GLM-4.7; `thinking.type=disabled`): <https://docs.z.ai/guides/capabilities/thinking-mode>
+- Z.AI: parámetros, incluido `thinking`: <https://docs.z.ai/guides/overview/concept-param>
+- Z.AI: JSON mode / structured output: <https://docs.z.ai/guides/capabilities/struct-output>
+- Z.AI: Chat Completions: <https://docs.z.ai/api-reference/llm/chat-completion>
+- Z.AI: GLM-4.7 (incluye Flash): <https://docs.z.ai/guides/llm/glm-4.7>
+- Z.AI: GLM-4.5 / Flash y structured output: <https://docs.z.ai/guides/llm/glm-4.5>
 - Z.AI: precios por modelo: <https://docs.z.ai/guides/overview/pricing>
 - Z.AI: endpoint general: <https://docs.z.ai/guides/develop/http/introduction>
 - Cloudflare: Free frente a Paid: <https://developers.cloudflare.com/workers-ai/platform/pricing/>
 - Cloudflare: endpoint OpenAI-compatible: <https://developers.cloudflare.com/workers-ai/configuration/open-ai-compatibility/>
 - Cloudflare: errores, incluido `3036`: <https://developers.cloudflare.com/workers-ai/platform/errors/>
+- Cloudflare JSON Mode (allowlist de modelos): <https://developers.cloudflare.com/workers-ai/features/json-mode/>
+- Cloudflare `@cf/zai-org/glm-4.7-flash` (`reasoning_effort`, `chat_template_kwargs`, `response_format`): <https://developers.cloudflare.com/workers-ai/models/glm-4.7-flash/>
+- Cloudflare `@cf/google/gemma-4-26b-a4b-it`: <https://developers.cloudflare.com/ai/models/@cf/google/gemma-4-26b-a4b-it/>
