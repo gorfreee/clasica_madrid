@@ -14,6 +14,7 @@ import {
 } from './ai-transport.ts';
 import {
   openaiCompatibleBusinessPressure,
+  openaiCompatibleErrorCode,
   openaiCompatibleModelProfile,
   openaiCompatibleRateLimitSignal,
   type OpenAiCompatibleModelProfile,
@@ -101,7 +102,7 @@ export class OpenAiCompatibleTransport implements AiTransport {
       }), controller.signal);
       if (!response.ok) {
         const body = this.redact(await abortable(response.text(), controller.signal));
-        throw httpError(this.profile, response.status, body, response.headers, this.now());
+        throw httpError(this.profile, call.model, response.status, body, response.headers, this.now());
       }
       let payload: unknown;
       try { payload = await abortable(response.json(), controller.signal); }
@@ -114,11 +115,15 @@ export class OpenAiCompatibleTransport implements AiTransport {
       return parseCompletion(this.provider, call.model, payload, this.profile.apiKey, response.headers, this.now());
     } catch (error) {
       if (controller.signal.aborted && !call.signal.aborted) {
-        throw new AiTransportError(`tiempo agotado en ${this.provider} (${call.timeoutMs}ms)`, { kind: 'timeout' });
+        throw new AiTransportError(`tiempo agotado en ${this.provider} (${call.timeoutMs}ms)`, {
+          kind: 'timeout', provider: this.provider, model: call.model,
+        });
       }
       if (error instanceof AiUnusableOutputError || error instanceof AiTransportError) throw error;
       if (isNetworkError(error)) {
-        throw new AiTransportError(this.redact(error instanceof Error ? error.message : String(error)), { kind: 'transport' });
+        throw new AiTransportError(this.redact(error instanceof Error ? error.message : String(error)), {
+          kind: 'transport', provider: this.provider, model: call.model,
+        });
       }
       throw error;
     } finally {
@@ -147,9 +152,36 @@ function requestBody(model: string, request: AiRequest, profile: OpenAiCompatibl
       { role: 'system', content: request.system },
       { role: 'user', content: request.user },
     ],
-    ...(capabilities.responseFormat === 'none' ? {} : { response_format: { type: 'json_object' } }),
+    ...responseFormatFields(capabilities.responseFormat, request),
     ...capabilities.extraBody,
   };
+}
+
+function responseFormatFields(
+  format: OpenAiCompatibleResponseFormat,
+  request: AiRequest,
+): Record<string, unknown> {
+  if (format === 'none') return {};
+  if (format === 'json-schema') {
+    return {
+      response_format: {
+        type: 'json_schema',
+        json_schema: {
+          name: jsonSchemaName(request.purpose),
+          // Classification schemas keep optional fields (formats, kind, rationale).
+          // Groq strict mode requires every property in `required` plus
+          // additionalProperties: false, which would deform that contract.
+          strict: false,
+          schema: request.schema,
+        },
+      },
+    };
+  }
+  return { response_format: { type: 'json_object' } };
+}
+
+function jsonSchemaName(purpose: AiRequest['purpose']): string {
+  return `clasica_${purpose.replaceAll('-', '_')}`;
 }
 
 export function resolveOpenAiCompatibleCapabilities(
@@ -282,6 +314,7 @@ function validCount(value: unknown): value is number {
 
 function httpError(
   profile: OpenAiCompatibleProfile,
+  model: string,
   status: number,
   body: string,
   headers: Headers,
@@ -289,6 +322,13 @@ function httpError(
 ): AiTransportError {
   const excerpt = sanitizeAiOutputExcerpt(body, profile.apiKey);
   const message = `${profile.provider} HTTP ${status}${excerpt ? `: ${excerpt}` : ''}`;
+  const code = openaiCompatibleErrorCode(body);
+  const identity = {
+    status,
+    provider: profile.provider,
+    model,
+    ...(code ? { code } : {}),
+  };
   if (
     status === 429
     || profile.rateLimitError?.(status, body)
@@ -297,7 +337,7 @@ function httpError(
     const rateLimit = rateLimitSnapshot(profile.provider, body, headers, now);
     return new AiTransportError(message, {
       kind: 'rate-limit',
-      status,
+      ...identity,
       retryAfterMs: rateLimit.retryAfterMs ?? rateLimit.resetAfterMs,
       // A bare 429 / Mistral 1300 is never daily quota by itself.
       quotaExhausted: profile.quotaExhausted?.(status, body) ?? false,
@@ -305,14 +345,19 @@ function httpError(
       rateLimit,
     });
   }
-  if (profile.unavailableError?.(status, body) || status === 400 || status === 404 || status === 422) {
-    return new AiTransportError(message, { kind: 'unavailable', status });
+  if (profile.unavailableError?.(status, body) || status === 404) {
+    return new AiTransportError(message, { kind: 'unavailable', ...identity });
   }
   if (status === 401 || status === 402 || status === 403) {
-    return new AiTransportError(message, { kind: 'auth', status });
+    return new AiTransportError(message, { kind: 'auth', ...identity });
+  }
+  if (status === 400 || status === 422) {
+    return new AiTransportError(message, { kind: 'bad-request', ...identity });
   }
   return new AiTransportError(message, {
-    kind: status === 408 || status >= 500 ? 'transport' : 'transport', status,
+    kind: 'transport',
+    ...identity,
+    retryable: status === 408 || status >= 500,
   });
 }
 
