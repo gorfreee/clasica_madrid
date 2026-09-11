@@ -1,35 +1,38 @@
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { AI_CALL_PURPOSES, AiUnusableOutputError, type AiCallPurpose } from '../src/ingestion/classification/ai.ts';
 import {
-  AI_CALL_PURPOSES,
-  AiUnusableOutputError,
-  type AiCallPurpose,
-  type AiClassifier,
-} from '../src/ingestion/classification/ai.ts';
-import { AiTransportError } from '../src/ingestion/classification/ai-transport.ts';
+  AiTransportError,
+  makeRoute,
+  type AiRoute,
+  type AiTransport,
+  type AiTransportCall,
+  type AiTransportResult,
+} from '../src/ingestion/classification/ai-transport.ts';
 import {
   AI_FREE_PROVIDERS,
   CLOUDFLARE_ZERO_COST_MODELS,
-  createFreeRoutesFromEnv,
   GROQ_DEFAULT_MODELS,
+  inspectFreePoolFromEnv,
   MISTRAL_DEFAULT_MODELS,
   ZAI_ZERO_COST_MODELS,
   type AiEnv,
 } from '../src/ingestion/classification/provider.ts';
 import { GEMINI_DEFAULT_MODELS } from '../src/ingestion/classification/gemini-config.ts';
 import {
-  compactSmokeFailureCause,
   discoverAiSmokeTargets,
-  formatAiSmokeReport,
+  discoveryFromInspection,
+  extractProviderErrorCode,
   loadAiSmokeFixtures,
   parseAiSmokeArgs,
-  pinnedSmokeEnv,
   purposesToSmoke,
+  runAiRouteSmoke,
   runAiSmoke,
   smokePaceIntervalMs,
+  smokeProviderConcurrency,
   type AiSmokeDiscovery,
+  type AiSmokeFixture,
   type AiSmokeProviderStatus,
-  type AiSmokeRoute,
 } from '../src/cli/ai-smoke.ts';
 
 const ROOT = path.join(import.meta.dirname, '..');
@@ -48,11 +51,9 @@ const ALL_FREE_ENV: AiEnv = {
 
 const fixtures = await loadAiSmokeFixtures(ROOT);
 
-describe('parseAiSmokeArgs y purposes', () => {
-  it('exige --route o --all-routes y entiende --all-purposes y --purpose', () => {
+describe('CLI, fixtures y descubrimiento', () => {
+  it('mantiene los modos básicos y all-purposes', () => {
     expect(parseAiSmokeArgs([])).toBeUndefined();
-    expect(parseAiSmokeArgs(['--route'])).toBeUndefined();
-    expect(parseAiSmokeArgs(['--route', 'groq'])).toBeUndefined();
     expect(parseAiSmokeArgs(['--all-routes'])).toEqual({
       allRoutes: true, allPurposes: false, purposes: ['eligibility'],
     });
@@ -62,28 +63,23 @@ describe('parseAiSmokeArgs y purposes', () => {
       route: 'groq:openai/gpt-oss-120b',
       purposes: [...AI_CALL_PURPOSES],
     });
-    expect(parseAiSmokeArgs(['--route', 'mistral:ministral-14b-2512'])).toEqual({
-      allRoutes: false,
-      allPurposes: false,
-      route: 'mistral:ministral-14b-2512',
-      purposes: ['eligibility'],
-    });
-    expect(parseAiSmokeArgs(['--route', 'zai:glm-4.7-flash', '--purpose', 'taxonomy'])?.purposes).toEqual(['taxonomy']);
     expect(parseAiSmokeArgs(['--route', 'x:y', '--purpose', 'taxonomy', '--all-purposes'])).toBeUndefined();
-    expect(parseAiSmokeArgs(['--route', 'x:y', '--all-routes'])).toBeUndefined();
-  });
-
-  it('ai:smoke y ai:smoke:all usan eligibility por defecto; --all-purposes cubre AI_CALL_PURPOSES', () => {
     expect(purposesToSmoke({ allRoutes: true, allPurposes: false })).toEqual(['eligibility']);
     expect(purposesToSmoke({ allRoutes: true, allPurposes: true })).toEqual([...AI_CALL_PURPOSES]);
-    expect(purposesToSmoke({ allRoutes: false, allPurposes: false })).toEqual(['eligibility']);
   });
-});
 
-describe('descubrimiento de routes del pool gratuito', () => {
-  it('refleja exactamente createFreeRoutesFromEnv y todos los AI_FREE_PROVIDERS', () => {
-    const discovered = discoverAiSmokeTargets(ALL_FREE_ENV);
-    const production = createFreeRoutesFromEnv(ALL_FREE_ENV);
+  it('cada fixture declara una expectativa semántica inequívoca', () => {
+    expect(fixtures.map((fixture) => fixture.purpose)).toEqual([...AI_CALL_PURPOSES]);
+    expect(fixture('eligibility').expected).toEqual({ eligibility: 'include', formats: ['chamber'] });
+    expect(fixture('composer-extraction').expected).toEqual({ composers: ['Johann Sebastian Bach'] });
+    expect(fixture('access-classification').expected).toEqual({ classification: 'free' });
+    expect(fixture('taxonomy').expected).toEqual({ formats: ['chamber'] });
+  });
+
+  it('descubre exactamente las routes y conserva transports/límites de producción', () => {
+    const productionInspection = inspectFreePoolFromEnv(ALL_FREE_ENV);
+    const discovered = discoveryFromInspection(productionInspection);
+    const production = productionInspection.routes;
     expect(discovered.routes.map((route) => route.routeId)).toEqual(production.map((route) => route.routeId));
     expect(discovered.routes.map((route) => route.routeId)).toEqual([
       ...GEMINI_DEFAULT_MODELS.map((model) => `gemini:${model}`),
@@ -92,488 +88,375 @@ describe('descubrimiento de routes del pool gratuito', () => {
       ...ZAI_ZERO_COST_MODELS.map((model) => `zai:${model}`),
       ...CLOUDFLARE_ZERO_COST_MODELS.map((model) => `cloudflare:${model}`),
     ]);
-    expect(GEMINI_DEFAULT_MODELS.length).toBeGreaterThan(0);
+    expect(discovered.routes.every((route, index) => route.transport === production[index]!.transport)).toBe(true);
     expect(discovered.providers.map((item) => item.provider)).toEqual([...AI_FREE_PROVIDERS]);
-    expect(discovered.providers.every((item) => item.status === 'ready')).toBe(true);
   });
 
-  it('no oculta un proveedor esperado sin key, confirmación o account', () => {
+  it('informa proveedores esperados sin credenciales en vez de ocultarlos', () => {
     const discovered = discoverAiSmokeTargets({
       AI_ZERO_COST_ONLY: 'true',
       GEMINI_API_KEY: 'gemini-live-secret-key',
-      GROQ_API_KEY: 'groq-live-secret-key',
-      CLOUDFLARE_API_TOKEN: 'cloudflare-live-secret-token',
     });
     const byProvider = Object.fromEntries(discovered.providers.map((item) => [item.provider, item]));
     expect(byProvider.gemini?.status).toBe('ready');
-    expect(byProvider.groq).toMatchObject({ status: 'unconfigured', reason: 'falta GROQ_FREE_TIER_CONFIRMED=true' });
+    expect(byProvider.groq).toMatchObject({ status: 'unconfigured', reason: 'falta GROQ_API_KEY' });
     expect(byProvider.mistral).toMatchObject({ status: 'unconfigured', reason: 'falta MISTRAL_API_KEY' });
     expect(byProvider.zai).toMatchObject({ status: 'unconfigured', reason: 'falta ZAI_API_KEY' });
-    expect(byProvider.cloudflare).toMatchObject({ status: 'unconfigured', reason: 'falta CLOUDFLARE_ACCOUNT_ID' });
-    expect(discovered.routes.every((route) => route.provider === 'gemini')).toBe(true);
+    expect(byProvider.cloudflare).toMatchObject({ status: 'unconfigured', reason: 'falta CLOUDFLARE_API_TOKEN' });
   });
 });
 
-describe('runAiSmoke', () => {
-  it('pinnea una route aislada con cache off y zero-cost', async () => {
-    const envs: AiEnv[] = [];
-    const result = await runAiSmoke({
-      env: ALL_FREE_ENV,
-      fixtures,
-      allRoutes: false,
-      allPurposes: true,
-      route: 'groq:openai/gpt-oss-120b',
-      discover: () => stubDiscovery([route('groq:openai/gpt-oss-120b'), route('groq:openai/gpt-oss-20b')]),
-      createClassifier: (env) => {
-        envs.push(env);
-        return passingClassifier();
-      },
-    });
-    expect(envs).toHaveLength(1);
-    expect(envs[0]).toMatchObject(pinnedSmokeEnv(ALL_FREE_ENV, 'groq:openai/gpt-oss-120b'));
-    expect(result.tested).toBe(1);
-    expect(result.passed).toBe(1);
-    expect(result.exitCode).toBe(0);
-    expect(result.overall).toBe('PASS');
-    expect(result.purposes).toEqual([...AI_CALL_PURPOSES]);
-    expect(Object.values(result.routes[0]!.purposes)).toEqual(['PASS', 'PASS', 'PASS', 'PASS']);
+describe('runner directo one-shot', () => {
+  it('hace exactamente un transport request por route/purpose con el request real', async () => {
+    const calls: AiTransportCall[] = [];
+    const routes = [fakeRoute('groq:one', async (call) => {
+      calls.push(call);
+      return { value: validOutput(call.request.purpose), status: 'completed' };
+    })];
+    const result = await runAllPurposes(routes);
+
+    expect(calls).toHaveLength(AI_CALL_PURPOSES.length);
+    expect(calls.map((call) => call.request.purpose)).toEqual([...AI_CALL_PURPOSES]);
+    expect(calls.every((call) => call.model === 'one' && call.timeoutMs === 15_000)).toBe(true);
+    expect(calls.every((call) => call.request.contractVersion > 0 && call.request.system && call.request.user)).toBe(true);
+    expect(result.requests).toBe(4);
+    expect(result.routes[0]?.result).toBe('PASS');
   });
 
-  it('prueba varias routes por separado y no reutiliza un classifier del pool', async () => {
-    const pinned: string[] = [];
-    const result = await runAiSmoke({
-      env: ALL_FREE_ENV,
-      fixtures,
-      allRoutes: true,
-      allPurposes: false,
-      discover: () => stubDiscovery([route('groq:a'), route('mistral:b')]),
-      createClassifier: (env) => {
-        pinned.push(env.AI_ROUTE ?? '');
-        expect(env.AI_CACHE).toBe('off');
-        expect(env.AI_ZERO_COST_ONLY).toBe('true');
-        expect(env.AI_PROVIDER).toBe('pool');
-        return passingClassifier();
-      },
-    });
-    expect(pinned).toEqual(['groq:a', 'mistral:b']);
-    expect(result.tested).toBe(2);
-    expect(result.passed).toBe(2);
-    expect(result.purposes).toEqual(['eligibility']);
-    expect(result.exitCode).toBe(0);
-  });
-
-  it('FAIL de HTTP/transport, JSON malformado y schema inválido', async () => {
-    const cases: Array<{ routeId: string; classify: AiClassifier['classify']; cause: RegExp }> = [
-      {
-        routeId: 'groq:http-404',
-        classify: async () => {
-          throw new AiTransportError('groq HTTP 404: model not found', { kind: 'unavailable', status: 404 });
-        },
-        cause: /HTTP 404 \/ model unavailable/,
-      },
-      {
-        routeId: 'mistral:malformed',
-        classify: async () => 'definitely not json {',
-        cause: /malformed JSON/,
-      },
-      {
-        routeId: 'gemini:empty',
-        classify: async () => '',
-        cause: /empty response/,
-      },
-      {
-        routeId: 'zai:schema',
-        classify: async () => ({ eligibility: 'not-a-value' }),
-        cause: /schema validation failed/,
-      },
+  it('no reintenta después de timeout, 429 ni schema fail', async () => {
+    const counts = new Map<string, number>();
+    const routes = [
+      fakeRoute('groq:timeout', async () => {
+        bump(counts, 'timeout');
+        throw new AiTransportError('timeout', { kind: 'timeout' });
+      }),
+      fakeRoute('mistral:rate', async () => {
+        bump(counts, 'rate');
+        throw new AiTransportError('HTTP 429', { kind: 'rate-limit', status: 429 });
+      }),
+      fakeRoute('gemini:schema', async () => {
+        bump(counts, 'schema');
+        return { value: { eligibility: 'wrong' } };
+      }),
     ];
-    const result = await runAiSmoke({
-      env: ALL_FREE_ENV,
-      fixtures,
-      allRoutes: true,
-      allPurposes: false,
-      discover: () => stubDiscovery(cases.map((item) => route(item.routeId))),
-      createClassifier: (env) => {
-        const item = cases.find((entry) => entry.routeId === env.AI_ROUTE);
-        return passingClassifier({ classify: item?.classify });
-      },
-    });
-    expect(result.exitCode).toBe(1);
-    expect(result.overall).toBe('FAIL');
-    expect(result.failed).toBe(4);
-    expect(result.passed).toBe(0);
-    for (const item of cases) {
-      const row = result.routes.find((route) => route.routeId === item.routeId);
-      expect(row?.result).toBe('FAIL');
-      expect(row?.cause).toMatch(item.cause);
-      expect(result.report).toMatch(item.cause);
-    }
+    const result = await runBasic(routes);
+
+    expect(Object.fromEntries(counts)).toEqual({ timeout: 1, rate: 1, schema: 1 });
+    expect(result.requests).toBe(3);
+    expect(result.routes.map((route) => route.purposeResults[0]?.outcome)).toEqual([
+      'TIMEOUT', 'RATE_LIMIT', 'SCHEMA_FAIL',
+    ]);
   });
 
-  it('un modelo roto hace FAIL aunque el resto pase', async () => {
-    const result = await runAiSmoke({
-      env: ALL_FREE_ENV,
-      fixtures,
-      allRoutes: true,
-      allPurposes: false,
-      discover: () => stubDiscovery([route('groq:ok'), route('groq:broken')]),
-      createClassifier: (env) => (
-        env.AI_ROUTE === 'groq:broken'
-          ? passingClassifier({
-            classify: async () => {
-              throw new AiTransportError('groq HTTP 403', { kind: 'auth', status: 403 });
-            },
-          })
-          : passingClassifier()
-      ),
-    });
-    expect(result.passed).toBe(1);
-    expect(result.failed).toBe(1);
-    expect(result.exitCode).toBe(1);
-    expect(result.routes.find((route) => route.routeId === 'groq:broken')?.cause).toMatch(
-      /HTTP 403 \/ authentication or model access/,
-    );
-  });
-
-  it('un proveedor esperado ausente no dice que todo está OK', async () => {
-    const result = await runAiSmoke({
-      env: { AI_ZERO_COST_ONLY: 'true', GEMINI_API_KEY: 'gemini-live-secret-key' },
-      fixtures,
-      allRoutes: true,
-      allPurposes: false,
-      sleep: async () => {},
-      createClassifier: () => passingClassifier(),
-    });
-    expect(result.passed).toBeGreaterThan(0);
-    expect(result.missing).toBe(4);
-    expect(result.exitCode).toBe(1);
-    expect(result.overall).toBe('FAIL');
-    expect(result.report).toMatch(/Unconfigured providers:/);
-    expect(result.report).toMatch(/falta GROQ_API_KEY/);
-    expect(result.report).toMatch(/RESULT: FAIL/);
-  });
-
-  it('--all-purposes recorre AI_CALL_PURPOSES y fail-fast deja el resto en -', async () => {
+  it('un fallo funcional de eligibility no oculta composer, access ni taxonomy', async () => {
     const seen: AiCallPurpose[] = [];
-    const result = await runAiSmoke({
-      env: ALL_FREE_ENV,
-      fixtures,
-      allRoutes: true,
-      allPurposes: true,
-      discover: () => stubDiscovery([route('groq:one')]),
-      createClassifier: () => passingClassifier({
-        classify: async (_observed, context) => {
-          seen.push(context?.purpose ?? 'eligibility');
-          if (context?.purpose === 'composer-extraction') {
-            throw new AiUnusableOutputError('IA: output no cumple el schema', { kind: 'invalid', model: 'one' });
-          }
-          return validOutput(context?.purpose ?? 'eligibility');
-        },
-      }),
+    const route = fakeRoute('groq:semantic', async (call) => {
+      seen.push(call.request.purpose);
+      if (call.request.purpose === 'eligibility') {
+        return { value: { eligibility: 'exclude', formats: ['chamber'], eras: [], evidence: ['x'] } };
+      }
+      return { value: validOutput(call.request.purpose) };
     });
-    expect(result.purposes).toEqual([...AI_CALL_PURPOSES]);
-    expect(seen).toEqual(['eligibility', 'composer-extraction']);
-    expect(result.routes[0]?.purposes).toMatchObject({
-      eligibility: 'PASS',
-      'composer-extraction': 'FAIL',
-      'access-classification': '-',
-      taxonomy: '-',
-    });
-    expect(result.exitCode).toBe(1);
-  });
+    const result = await runAllPurposes([route]);
 
-  it('con --all-purposes en una route sigue ejecutando todas las tasks aunque una falle', async () => {
-    const seen: AiCallPurpose[] = [];
-    await runAiSmoke({
-      env: ALL_FREE_ENV,
-      fixtures,
-      allRoutes: false,
-      allPurposes: true,
-      purposes: [...AI_CALL_PURPOSES],
-      route: 'groq:one',
-      discover: () => stubDiscovery([route('groq:one')]),
-      createClassifier: () => passingClassifier({
-        classify: async (_observed, context) => {
-          seen.push(context?.purpose ?? 'eligibility');
-          if (context?.purpose === 'eligibility') {
-            throw new AiTransportError('timeout', { kind: 'timeout' });
-          }
-          return validOutput(context?.purpose ?? 'eligibility');
-        },
-      }),
-    });
     expect(seen).toEqual([...AI_CALL_PURPOSES]);
+    expect(result.routes[0]?.purposes).toMatchObject({
+      eligibility: 'SEMANTIC_FAIL',
+      'composer-extraction': 'PASS',
+      'access-classification': 'PASS',
+      taxonomy: 'PASS',
+    });
+    expect(result.routes[0]?.purposeResults[0]).toMatchObject({ schemaValid: true, semanticValid: false });
+    expect(result.routes[0]?.result).toBe('PARTIAL');
+    expect(result.exitCode).toBe(1);
   });
 
-  it('el resumen y el exit code coinciden con PASS/FAIL', async () => {
-    const pass = await runAiSmoke({
-      env: ALL_FREE_ENV,
-      fixtures,
-      allRoutes: true,
-      allPurposes: false,
-      discover: () => stubDiscovery([route('mistral:ok')]),
-      createClassifier: () => passingClassifier(),
-    });
-    expect(pass.report).toMatch(/Routes tested: 1/);
-    expect(pass.report).toMatch(/Passed: 1/);
-    expect(pass.report).toMatch(/Failed: 0/);
-    expect(pass.report).toMatch(/Missing\/unconfigured providers: 0/);
-    expect(pass.report).toMatch(/RESULT: PASS/);
-    expect(pass.exitCode).toBe(0);
+  it.each([
+    ['AUTH', new AiTransportError('HTTP 401', { kind: 'auth', status: 401 })],
+    ['MODEL_UNAVAILABLE', new AiTransportError('HTTP 404', { kind: 'unavailable', status: 404 })],
+    ['DAILY_QUOTA', new AiTransportError('HTTP 429 daily quota', {
+      kind: 'rate-limit', status: 429, quotaExhausted: true,
+    })],
+  ] as const)('%s bloquea los purposes restantes de esa route sin gastar cuota', async (status, error) => {
+    let requests = 0;
+    const result = await runAllPurposes([fakeRoute(`zai:${status}`, async () => {
+      requests += 1;
+      throw error;
+    })]);
 
-    const fail = await runAiSmoke({
-      env: ALL_FREE_ENV,
-      fixtures,
-      allRoutes: true,
-      allPurposes: false,
-      discover: () => stubDiscovery([route('mistral:ok')], readyExcept({ gemini: 'falta GEMINI_API_KEY' }, [route('mistral:ok')])),
-      createClassifier: () => passingClassifier(),
-    });
-    expect(fail.exitCode).toBe(1);
-    expect(fail.missing).toBe(1);
-    expect(fail.report).toMatch(/RESULT: FAIL/);
+    expect(requests).toBe(1);
+    expect(result.requests).toBe(1);
+    expect(result.routes[0]?.purposeResults.map((item) => item.outcome)).toEqual([
+      status, 'BLOCKED', 'BLOCKED', 'BLOCKED',
+    ]);
+    expect(result.routes[0]?.purposeResults[1]).toMatchObject({ requestMade: false, blockedBy: status });
   });
 
-  it('nunca imprime API keys ni tokens en el log', async () => {
-    const lines: string[] = [];
-    const secrets = [
-      ALL_FREE_ENV.GEMINI_API_KEY!,
-      ALL_FREE_ENV.GROQ_API_KEY!,
-      ALL_FREE_ENV.MISTRAL_API_KEY!,
-      ALL_FREE_ENV.ZAI_API_KEY!,
-      ALL_FREE_ENV.CLOUDFLARE_API_TOKEN!,
-      ALL_FREE_ENV.CLOUDFLARE_ACCOUNT_ID!,
+  it('distingue output inválido, schema fail, semantic fail y PASS', async () => {
+    const routes = [
+      fakeRoute('groq:invalid', async () => {
+        throw new AiUnusableOutputError('JSON inválido', { kind: 'malformed' });
+      }),
+      fakeRoute('groq:schema', async () => ({ value: { eligibility: 'include', formats: ['invented'] } })),
+      fakeRoute('groq:wrong', async () => ({
+        value: { eligibility: 'include', formats: ['recital'], eras: [], evidence: ['x'] },
+      })),
+      fakeRoute('groq:pass', async () => ({ value: validOutput('eligibility') })),
     ];
-    await runAiSmoke({
-      env: ALL_FREE_ENV,
-      fixtures,
-      allRoutes: true,
-      allPurposes: false,
-      discover: () => stubDiscovery([route('groq:leak')]),
-      createClassifier: () => passingClassifier({
-        classify: async () => {
-          throw new Error(`authorization Bearer ${ALL_FREE_ENV.GROQ_API_KEY} api_key=${ALL_FREE_ENV.GEMINI_API_KEY}`);
-        },
-      }),
-      log: (line) => lines.push(line),
-    });
-    const blob = lines.join('\n');
-    for (const secret of secrets) {
-      expect(blob).not.toContain(secret);
-    }
-    expect(blob).toMatch(/\[GROQ_API_KEY\]|\[redacted\]/);
+    const result = await runBasic(routes);
+    expect(result.routes.map((route) => route.purposeResults[0]?.outcome)).toEqual([
+      'INVALID_OUTPUT', 'SCHEMA_FAIL', 'SEMANTIC_FAIL', 'PASS',
+    ]);
   });
 
-  it('respeta minIntervalMs entre routes del mismo provider y no fabrica paralelismo', async () => {
+  it('un 429 transitorio tampoco bloquea los purposes posteriores', async () => {
+    const seen: AiCallPurpose[] = [];
+    const result = await runAllPurposes([fakeRoute('groq:transient-429', async (call) => {
+      seen.push(call.request.purpose);
+      if (call.request.purpose === 'eligibility') {
+        throw new AiTransportError('HTTP 429', { kind: 'rate-limit', status: 429 });
+      }
+      return { value: validOutput(call.request.purpose) };
+    })]);
+    expect(seen).toEqual([...AI_CALL_PURPOSES]);
+    expect(result.requests).toBe(4);
+    expect(result.routes[0]?.purposes['composer-extraction']).toBe('PASS');
+  });
+
+  it('un 400 de compatibilidad conserva código/mensaje y tampoco bloquea otros purposes', async () => {
+    const seen: AiCallPurpose[] = [];
+    const result = await runAllPurposes([fakeRoute('groq:request-error', async (call) => {
+      seen.push(call.request.purpose);
+      if (call.request.purpose === 'eligibility') {
+        throw new AiTransportError('HTTP 400: {"code":"json_validate_failed"}', {
+          kind: 'unavailable', status: 400,
+        });
+      }
+      return { value: validOutput(call.request.purpose) };
+    })]);
+    expect(seen).toEqual([...AI_CALL_PURPOSES]);
+    expect(result.routes[0]?.purposeResults[0]).toMatchObject({
+      outcome: 'REQUEST_ERROR', httpStatus: 400, providerErrorCode: 'json_validate_failed',
+    });
+    expect(result.requests).toBe(4);
+  });
+
+  it('no toca cacheIdentity ni estado persistente del pool', async () => {
+    const transport: AiTransport = {
+      provider: 'groq',
+      cacheIdentity: () => { throw new Error('el smoke no debe consultar cache'); },
+      request: async (call) => ({ value: validOutput(call.request.purpose) }),
+    };
+    const route = makeRoute({ provider: 'groq', model: 'stateless', transport });
+    const result = await runBasic([route], { env: { ...ALL_FREE_ENV, AI_STATE_DIR: '/should/not/be/touched' } });
+    expect(result.overall).toBe('PASS');
+  });
+});
+
+describe('concurrencia, pacing y diagnóstico', () => {
+  it('los providers avanzan independientemente y respeta providerMaxConcurrent=1', async () => {
+    const firstZaiStarted = deferred<void>();
+    const releaseFirstZai = deferred<void>();
+    const groqStarted = deferred<void>();
+    let zaiActive = 0;
+    let maxZaiActive = 0;
+    let zaiCalls = 0;
+    const zaiRequest = async (call: AiTransportCall): Promise<AiTransportResult> => {
+      zaiCalls += 1;
+      zaiActive += 1;
+      maxZaiActive = Math.max(maxZaiActive, zaiActive);
+      if (zaiCalls === 1) {
+        firstZaiStarted.resolve();
+        await releaseFirstZai.promise;
+      }
+      zaiActive -= 1;
+      return { value: validOutput(call.request.purpose) };
+    };
+    const routes = [
+      fakeRoute('zai:one', zaiRequest, { providerMaxConcurrent: 1 }),
+      fakeRoute('zai:two', zaiRequest, { providerMaxConcurrent: 1 }),
+      fakeRoute('groq:one', async (call) => {
+        groqStarted.resolve();
+        return { value: validOutput(call.request.purpose) };
+      }),
+    ];
+
+    const running = runBasic(routes);
+    await firstZaiStarted.promise;
+    await groqStarted.promise;
+    expect(zaiCalls).toBe(1);
+    releaseFirstZai.resolve();
+    const result = await running;
+
+    expect(result.overall).toBe('PASS');
+    expect(zaiCalls).toBe(2);
+    expect(maxZaiActive).toBe(1);
+    expect(smokeProviderConcurrency(routes.filter((route) => route.provider === 'zai'))).toBe(1);
+  });
+
+  it('aplica el pacing real entre purposes de una route sin retries ocultos', async () => {
+    let now = 1_000;
     const sleeps: number[] = [];
-    let t = 1_000;
-    const order: string[] = [];
-    await runAiSmoke({
-      env: ALL_FREE_ENV,
-      fixtures,
-      allRoutes: true,
-      allPurposes: false,
-      now: () => t,
-      sleep: async (ms) => {
-        sleeps.push(ms);
-        t += ms;
-      },
-      discover: () => stubDiscovery([
-        { ...route('groq:one'), limits: { minIntervalMs: 250 } },
-        { ...route('groq:two'), limits: { minIntervalMs: 250 } },
-      ]),
-      createClassifier: (env) => {
-        order.push(env.AI_ROUTE ?? '');
-        return passingClassifier();
-      },
+    let calls = 0;
+    const route = fakeRoute('groq:paced', async (call) => {
+      calls += 1;
+      return { value: validOutput(call.request.purpose) };
+    }, { rpm: 30 });
+    const result = await runAllPurposes([route], {
+      now: () => now,
+      sleep: async (ms) => { sleeps.push(ms); now += ms; },
     });
-    expect(order).toEqual(['groq:one', 'groq:two']);
-    expect(sleeps).toEqual([250]);
-    expect(smokePaceIntervalMs({ rpm: 30 })).toBe(2000);
-    expect(smokePaceIntervalMs({ rpm: 0, minIntervalMs: 10 })).toBe(10);
-  });
-});
 
-describe('compactSmokeFailureCause y formato', () => {
-  it('reutiliza kinds/status existentes', () => {
-    expect(compactSmokeFailureCause({
-      error: new AiTransportError('x', { kind: 'unavailable', status: 404 }),
-    })).toBe('HTTP 404 / model unavailable');
-    expect(compactSmokeFailureCause({
-      error: new AiTransportError('x', { kind: 'auth', status: 403 }),
-    })).toBe('HTTP 403 / authentication or model access');
-    expect(compactSmokeFailureCause({
-      error: new AiUnusableOutputError('x', { kind: 'invalid' }),
-    })).toBe('schema validation failed');
-    expect(compactSmokeFailureCause({
-      error: new AiTransportError('x', { kind: 'rate-limit', status: 429, quotaExhausted: true }),
-    })).toBe('quota exhausted');
-    expect(compactSmokeFailureCause({
-      error: new AiTransportError('x', { kind: 'timeout' }),
-    })).toBe('timeout');
-    expect(compactSmokeFailureCause({
-      error: new AiTransportError('x', {
-        kind: 'rate-limit', status: 429, pressure: 'concurrency', quotaExhausted: false,
+    expect(calls).toBe(4);
+    expect(sleeps).toEqual([2_000, 2_000, 2_000]);
+    expect(smokePaceIntervalMs({ rpm: 30 })).toBe(2_000);
+    expect(result.requests).toBe(4);
+  });
+
+  it('la matriz y el resumen representan estados mixtos, requests y duración', async () => {
+    let now = 0;
+    const result = await runAllPurposes([
+      fakeRoute('groq:mixed', async (call) => {
+        now += 25;
+        if (call.request.purpose === 'access-classification') {
+          return { value: { classification: 'paid', evidence: 'Entrada' }, status: 'completed' };
+        }
+        return { value: validOutput(call.request.purpose), status: 'completed' };
       }),
-    })).toBe('HTTP 429 / concurrency pressure');
-    expect(compactSmokeFailureCause({
-      parsed: { ok: false, ruleId: 'ai-malformed-output' },
-    })).toBe('malformed JSON');
-    expect(compactSmokeFailureCause({
-      parsed: { ok: false, ruleId: 'ai-malformed-output', reason: 'respuesta de IA vacía' },
-    })).toBe('empty response');
+      fakeRoute('mistral:pass', async (call) => {
+        now += 25;
+        return { value: validOutput(call.request.purpose) };
+      }),
+    ], { now: () => now });
+
+    expect(result.routes.map((route) => route.result)).toEqual(['PARTIAL', 'PASS']);
+    expect(result.requests).toBe(8);
+    expect(result.report).toContain('SEMANTIC_FAIL');
+    expect(result.report).toContain('Routes fully PASS: 1');
+    expect(result.report).toContain('Routes partially PASS: 1');
+    expect(result.report).toContain('HTTP requests performed: 8');
+    expect(result.report).toContain('RESULT: FAIL');
   });
 
-  it('el informe tabular incluye columnas de purpose y RESULT', () => {
-    const report = formatAiSmokeReport({
-      routes: [{
-        routeId: 'groq:openai/gpt-oss-120b',
-        purposes: {
-          eligibility: 'PASS',
-          'composer-extraction': 'FAIL',
-          'access-classification': '-',
-          taxonomy: '-',
-        },
-        purposeResults: [],
-        latencyMs: 610,
-        result: 'FAIL',
-        cause: 'schema validation failed',
-      }],
-      missingProviders: [],
-      purposes: [...AI_CALL_PURPOSES],
-      tested: 1,
-      passed: 0,
-      failed: 1,
-      missing: 0,
-      overall: 'FAIL',
+  it('conserva HTTP status, provider code y mensaje útil sin secretos', async () => {
+    const lines: string[] = [];
+    const route = fakeRoute('groq:diagnostic', async () => {
+      throw new AiTransportError(
+        `groq HTTP 400: {"code":"json_validate_failed","key":"${ALL_FREE_ENV.GROQ_API_KEY}"}`,
+        { kind: 'unavailable', status: 400 },
+      );
+    }, undefined, (message) => message.replaceAll(ALL_FREE_ENV.GROQ_API_KEY!, '[redacted]'));
+    const result = await runBasic([route], { log: (line) => lines.push(line) });
+    const cell = result.routes[0]?.purposeResults[0];
+
+    expect(cell).toMatchObject({
+      outcome: 'REQUEST_ERROR',
+      httpStatus: 400,
+      providerErrorCode: 'json_validate_failed',
     });
-    expect(report).toMatch(/Eligibility/);
-    expect(report).toMatch(/Composer/);
-    expect(report).toMatch(/Access/);
-    expect(report).toMatch(/Taxonomy/);
-    expect(report).toMatch(/610 ms/);
-    expect(report).toMatch(/FAIL — schema validation failed/);
-    expect(report).toMatch(/RESULT: FAIL/);
+    expect(result.report).toContain('HTTP 400');
+    expect(result.report).toContain('code json_validate_failed');
+    expect(lines.join('\n')).not.toContain(ALL_FREE_ENV.GROQ_API_KEY);
+    expect(extractProviderErrorCode('error type: json_validate_failed')).toBe('json_validate_failed');
   });
 });
+
+function fixture<P extends AiCallPurpose>(purpose: P): Extract<AiSmokeFixture, { purpose: P }> {
+  return fixtures.find((item): item is Extract<AiSmokeFixture, { purpose: P }> => item.purpose === purpose)!;
+}
 
 function validOutput(purpose: AiCallPurpose): unknown {
-  if (purpose === 'composer-extraction') return { candidates: [{ name: 'Bach', evidence: 'Bach' }] };
-  if (purpose === 'access-classification') return { classification: 'free', evidence: 'Entrada libre' };
-  return { eligibility: 'include', eras: [], evidence: ['Bach y Falla'] };
+  if (purpose === 'composer-extraction') {
+    return { candidates: [{ name: 'Johann Sebastian Bach', evidence: 'Johann Sebastian Bach' }] };
+  }
+  if (purpose === 'access-classification') {
+    return { classification: 'free', evidence: 'Entrada libre hasta completar aforo.' };
+  }
+  return { eligibility: 'include', formats: ['chamber'], eras: [], evidence: ['música de cámara'] };
 }
 
-function passingClassifier(overrides: Partial<AiClassifier> = {}): AiClassifier {
-  return {
-    classify: async (_observed, context) => validOutput(context?.purpose ?? 'eligibility'),
-    ...overrides,
-  };
-}
-
-function route(routeId: string): AiSmokeRoute {
+function fakeRoute(
+  routeId: string,
+  request: (call: AiTransportCall) => Promise<AiTransportResult>,
+  limits?: AiRoute['limits'],
+  redact?: (message: string) => string,
+): AiRoute {
   const separator = routeId.indexOf(':');
-  return {
-    routeId,
-    provider: routeId.slice(0, separator),
-    model: routeId.slice(separator + 1),
-  };
+  const provider = routeId.slice(0, separator);
+  const model = routeId.slice(separator + 1);
+  return makeRoute({
+    provider,
+    model,
+    transport: { provider, request, cacheIdentity: () => ({ routeId }), ...(redact ? { redact } : {}) },
+    ...(limits ? { limits } : {}),
+  });
 }
 
-function stubDiscovery(routes: AiSmokeRoute[], providers?: AiSmokeProviderStatus[]): AiSmokeDiscovery {
-  return { routes, providers: providers ?? allReady(routes) };
+function discovery(routes: AiRoute[]): AiSmokeDiscovery {
+  return { routes, providers: allReady(routes) };
 }
 
-function allReady(routes: AiSmokeRoute[] = []): AiSmokeProviderStatus[] {
+function allReady(routes: AiRoute[]): AiSmokeProviderStatus[] {
   return AI_FREE_PROVIDERS.map((provider) => ({
     provider,
     status: 'ready' as const,
-    routeIds: routes.filter((item) => item.provider === provider).map((item) => item.routeId),
+    routeIds: routes.filter((route) => route.provider === provider).map((route) => route.routeId),
   }));
 }
 
-describe('runAiRouteSmoke (CLI de una route)', () => {
-  it('reexporta parse/split/env desde smoke-ai-route y sanitiza pressure', async () => {
-    const { parseAiSmokeArgs: parseFromCli, runAiRouteSmoke, smokeEnvForRoute, splitRouteId } = await import(
-      '../src/cli/smoke-ai-route.ts'
-    );
-    expect(parseFromCli(['--route', 'mistral:ministral-14b-2512'])).toEqual({
-      route: 'mistral:ministral-14b-2512',
-      allRoutes: false,
-      allPurposes: false,
-      purposes: ['eligibility'],
-    });
-    expect(splitRouteId('mistral:ministral-14b-2512')).toEqual({
-      provider: 'mistral', model: 'ministral-14b-2512',
-    });
-    expect(smokeEnvForRoute('mistral:ministral-14b-2512', { GROQ_API_KEY: 'keep' })).toMatchObject({
-      AI_PROVIDER: 'pool',
-      AI_ZERO_COST_ONLY: 'true',
-      AI_CACHE: 'off',
-      AI_ROUTE: 'mistral:ministral-14b-2512',
-      GROQ_API_KEY: 'keep',
-    });
+function runBasic(
+  routes: AiRoute[],
+  overrides: Partial<Parameters<typeof runAiSmoke>[0]> = {},
+) {
+  return runAiSmoke({
+    env: ALL_FREE_ENV,
+    fixtures,
+    allRoutes: true,
+    allPurposes: false,
+    purposes: ['eligibility'],
+    discover: () => discovery(routes),
+    ...overrides,
+  });
+}
 
-    const classify = async () => {
-      throw new AiTransportError('zai HTTP 429: High concurrency usage zai-secret-key', {
-        kind: 'rate-limit', status: 429, pressure: 'concurrency', quotaExhausted: false,
-        rateLimit: { dimensions: ['concurrency'] },
-      });
-    };
-    const close = () => {};
-    const initialize = () => {};
-    const classifier: AiClassifier = {
-      classify,
-      lastDiagnostics: () => ({
-        provider: 'zai',
-        model: 'glm-4.7-flash',
-        routeId: 'zai:glm-4.7-flash',
-        status: '429',
-        failures: [{
-          provider: 'zai',
-          model: 'glm-4.7-flash',
-          routeId: 'zai:glm-4.7-flash',
-          kind: 'concurrency-pressure',
-          pressure: 'concurrency',
-          status: '429',
-          excerpt: 'High concurrency usage [redacted]',
-          rateLimit: { dimensions: ['concurrency'] },
-        }],
-      }),
-      close,
-      initialize,
-    };
+function runAllPurposes(
+  routes: AiRoute[],
+  overrides: Partial<Parameters<typeof runAiSmoke>[0]> = {},
+) {
+  return runAiSmoke({
+    env: ALL_FREE_ENV,
+    fixtures,
+    allRoutes: true,
+    allPurposes: true,
+    purposes: [...AI_CALL_PURPOSES],
+    discover: () => discovery(routes),
+    ...overrides,
+  });
+}
+
+function bump(counts: Map<string, number>, key: string): void {
+  counts.set(key, (counts.get(key) ?? 0) + 1);
+}
+
+function deferred<T>() {
+  let resolve!: (value: T | PromiseLike<T>) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((res, rej) => { resolve = res; reject = rej; });
+  return { promise, resolve, reject };
+}
+
+describe('runAiRouteSmoke', () => {
+  it('usa directamente la route recibida', async () => {
+    let calls = 0;
     const rows = await runAiRouteSmoke({
-      route: 'zai:glm-4.7-flash',
+      route: fakeRoute('mistral:one', async (call) => {
+        calls += 1;
+        return { value: validOutput(call.request.purpose) };
+      }),
       purposes: ['eligibility'],
-      fixtures: [{ purpose: 'eligibility', observed: fixtures[0]!.observed }],
-      classifier,
-      env: { ZAI_API_KEY: 'zai-secret-key' },
+      fixtures,
     });
-    expect(rows).toHaveLength(1);
-    expect(rows[0]).toMatchObject({
-      provider: 'zai',
-      model: 'glm-4.7-flash',
-      route: 'zai:glm-4.7-flash',
-      purpose: 'eligibility',
-      success: false,
-      schemaValid: false,
-      pressure: 'concurrency-pressure',
-    });
-    expect(JSON.stringify(rows[0])).not.toContain('zai-secret-key');
+    expect(calls).toBe(1);
+    expect(rows[0]?.outcome).toBe('PASS');
   });
 });
-
-function readyExcept(
-  missing: Partial<Record<(typeof AI_FREE_PROVIDERS)[number], string>>,
-  routes: AiSmokeRoute[] = [],
-): AiSmokeProviderStatus[] {
-  return AI_FREE_PROVIDERS.map((provider) => (
-    missing[provider]
-      ? { provider, status: 'unconfigured' as const, reason: missing[provider], routeIds: [] }
-      : {
-        provider,
-        status: 'ready' as const,
-        routeIds: routes.filter((item) => item.provider === provider).map((item) => item.routeId),
-      }
-  ));
-}

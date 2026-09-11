@@ -440,13 +440,15 @@ export function parseAiComposerExtraction(raw: unknown): ParseAiComposerExtracti
 export function parseAiOutputForPurpose(
   purpose: AiCallPurpose,
   raw: unknown,
-): { ok: true } | { ok: false; ruleId: 'ai-malformed-output' | 'ai-invalid-output'; reason: string } {
+):
+  | { ok: true; value: AiClassificationResult | AiAccessResult | AiComposerExtractionResult }
+  | { ok: false; ruleId: 'ai-malformed-output' | 'ai-invalid-output'; reason: string } {
   const parsed = purpose === 'access-classification'
     ? parseAiAccess(raw)
     : purpose === 'composer-extraction'
       ? parseAiComposerExtraction(raw)
       : parseAiClassification(raw);
-  return parsed.ok ? { ok: true } : parsed;
+  return parsed;
 }
 
 /** Empty or omitted formats: valid JSON, but not a completed format assignment. */
