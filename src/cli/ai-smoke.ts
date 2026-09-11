@@ -70,6 +70,7 @@ export type AiSmokeRow = {
   failures?: unknown;
   parseRuleId?: string;
   parseReason?: string;
+  cause?: string;
 };
 
 export type AiSmokeRoute = {
@@ -217,18 +218,25 @@ export async function runAiRouteSmoke(options: {
           requireFormats: fixture.requireFormats,
         });
         const parsed = parseAiOutputForPurpose(fixture.purpose, value);
+        const diagnostic = options.classifier.lastDiagnostics?.();
         rows.push(smokeRow({
           provider, model, route: options.route, purpose: fixture.purpose,
           success: parsed.ok, schemaValid: parsed.ok, latencyMs: Math.round(now() - started),
           classifier: options.classifier, env: options.env,
-          ...(!parsed.ok ? { parseRuleId: parsed.ruleId, parseReason: parsed.reason } : {}),
+          ...(!parsed.ok ? {
+            parseRuleId: parsed.ruleId,
+            parseReason: parsed.reason,
+            cause: compactSmokeFailureCause({ parsed, diagnostic, env: options.env }),
+          } : {}),
         }));
       } catch (error) {
+        const diagnostic = options.classifier.lastDiagnostics?.();
         rows.push(smokeRow({
           provider, model, route: options.route, purpose: fixture.purpose,
           success: false, schemaValid: false, latencyMs: Math.round(now() - started),
           classifier: options.classifier, env: options.env,
           error: sanitizeErrorMessage(error instanceof Error ? error.message : String(error), options.env),
+          cause: compactSmokeFailureCause({ error, diagnostic, env: options.env }),
         }));
       }
     }
@@ -251,6 +259,7 @@ function smokeRow(input: {
   error?: string;
   parseRuleId?: string;
   parseReason?: string;
+  cause?: string;
 }): AiSmokeRow {
   const diagnostic = input.classifier.lastDiagnostics?.();
   const failure = diagnostic?.failures?.at(-1);
@@ -269,6 +278,7 @@ function smokeRow(input: {
     ...(input.error ? { error: input.error } : {}),
     failures: diagnostic?.failures,
     ...(input.parseRuleId ? { parseRuleId: input.parseRuleId, parseReason: input.parseReason } : {}),
+    ...(input.cause ? { cause: input.cause } : {}),
   };
 }
 
@@ -593,7 +603,7 @@ function purposeResultFromRow(row: AiSmokeRow, env: AiEnv): AiSmokePurposeResult
     ? undefined
     : row.pressure === 'concurrency-pressure' || row.pressure === 'concurrency'
       ? causeFromStatus(row.status ?? 429, 'concurrency pressure')
-      : compactSmokeFailureCause({
+      : row.cause ?? compactSmokeFailureCause({
         error: row.error,
         diagnostic,
         parsed: row.parseRuleId
