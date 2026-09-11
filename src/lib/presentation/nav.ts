@@ -1,4 +1,4 @@
-import { AGENDA_PATH, VENUES_INDEX_PATH } from './urls.ts';
+import { ABOUT_PATH, AGENDA_PATH, VENUES_INDEX_PATH } from './urls.ts';
 
 export type NavItemDefinition = {
   href: string;
@@ -48,11 +48,13 @@ export const PRIMARY_NAV: readonly NavItemDefinition[] = [
   },
 ];
 
-/**
- * Secondary pages grouped under «Más» on desktop and inside the mobile menu.
- * Add a real page here when it exists. «Más» is not rendered while empty.
- */
-export const SECONDARY_NAV: readonly NavItemDefinition[] = [];
+/** Secondary pages grouped under «Más» on desktop and the mobile menu. */
+export const SECONDARY_NAV: readonly NavItemDefinition[] = [
+  {
+    href: ABOUT_PATH,
+    label: 'Acerca de',
+  },
+];
 
 export const MORE_LABEL = 'Más';
 export const MOBILE_MENU_LABEL = 'Menú de secciones';

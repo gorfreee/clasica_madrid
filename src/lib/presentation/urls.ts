@@ -40,5 +40,6 @@ export function venueUrl(slug: string): string {
 
 export const AGENDA_PATH = '/';
 export const VENUES_INDEX_PATH = publicPath('/lugares');
+export const ABOUT_PATH = publicPath('/acerca-de');
 /** Internal prerendered fragment with the full upcoming agenda. Not in the sitemap. */
 export const FULL_AGENDA_FRAGMENT_PATH = publicPath('/_agenda/completa');

@@ -44,6 +44,11 @@ const nav = headerNavigation(Astro.url.pathname);
                   aria-current={nav.moreCurrent ? 'true' : undefined}
                 >
                   <span>{nav.moreLabel}</span>
+                  <span class="nav-trigger__chevron" aria-hidden="true">
+                    <svg viewBox="0 0 10 6" width="10" height="6" focusable="false">
+                      <path d="m1 1 4 4 4-4"></path>
+                    </svg>
+                  </span>
                 </button>
                 <ul id="nav-more-panel" class="nav-popover" hidden data-nav-panel>
                   {nav.secondaryLinks.map((link) => (
@@ -103,3 +108,167 @@ const nav = headerNavigation(Astro.url.pathname);
   import { initSiteNav } from '../lib/presentation/nav-client.ts';
   initSiteNav();
 </script>
+
+<style>
+  .site-header__inner {
+    min-height: 5.5rem;
+    align-items: center;
+    gap: 2.25rem;
+  }
+
+  .site-mark {
+    padding-block: 1rem;
+  }
+
+  .site-nav {
+    align-items: center;
+    align-self: stretch;
+  }
+
+  .nav-list {
+    align-items: stretch;
+    gap: .2rem;
+  }
+
+  .nav-list > li {
+    align-items: stretch;
+  }
+
+  .nav-link {
+    min-width: 0;
+    padding: 1rem .95rem;
+    border-left: 0;
+    letter-spacing: .11em;
+    transition: color 140ms ease;
+  }
+
+  .nav-link::after {
+    right: .95rem;
+    bottom: .8rem;
+    left: .95rem;
+    width: auto;
+    height: 2px;
+    border-radius: 0;
+  }
+
+  .nav-link:hover,
+  .nav-link[aria-current='page'],
+  .nav-link[aria-current='true'],
+  .nav-disclosure[data-nav-open='true'] > .nav-trigger {
+    background: transparent;
+  }
+
+  .nav-link:hover {
+    color: var(--coral);
+  }
+
+  .nav-link[aria-current='page']::after,
+  .nav-link[aria-current='true']::after {
+    background: var(--coral);
+  }
+
+  .nav-trigger {
+    gap: .45rem;
+    border-left: 0;
+  }
+
+  .nav-trigger__chevron {
+    display: inline-flex;
+    width: .65rem;
+    height: .4rem;
+    transition: transform 140ms ease;
+  }
+
+  .nav-trigger__chevron svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+  }
+
+  .nav-disclosure[data-nav-open='true'] .nav-trigger__chevron {
+    transform: rotate(180deg);
+  }
+
+  .nav-popover {
+    top: calc(100% - .45rem);
+    right: .25rem;
+    min-width: 11.75rem;
+    padding: .35rem;
+    border: 1px solid #44443f;
+    box-shadow: 0 .8rem 2rem rgb(0 0 0 / 24%);
+  }
+
+  .nav-popover a {
+    min-height: 2.6rem;
+    padding: .75rem .85rem;
+    letter-spacing: .08em;
+  }
+
+  .nav-popover a:hover,
+  .nav-popover a[aria-current='page'] {
+    background: #242421;
+  }
+
+  .nav-popover a[aria-current='page'] {
+    color: var(--coral);
+  }
+
+  @media (max-width: 620px) {
+    .site-header__inner {
+      min-height: 4.55rem;
+      gap: .45rem;
+    }
+
+    .site-mark {
+      padding-block: .8rem;
+    }
+
+    .nav-list {
+      gap: 0;
+    }
+
+    .nav-link {
+      padding: .9rem .65rem;
+      font-size: .68rem;
+    }
+
+    .nav-link[aria-current='page'] {
+      color: var(--coral);
+    }
+
+    .nav-link::after {
+      display: none;
+    }
+
+    .nav-trigger--menu {
+      min-width: 2.8rem;
+      padding-inline: .65rem;
+    }
+
+    .nav-panel {
+      padding-top: .2rem;
+      padding-bottom: .35rem;
+      border-top-color: #353531;
+    }
+
+    .nav-panel a {
+      min-height: 2.9rem;
+      padding: .95rem .15rem;
+      border-bottom: 1px solid #2d2d29;
+      letter-spacing: .09em;
+    }
+
+    .nav-panel li:last-child a {
+      border-bottom: 0;
+    }
+
+    .nav-panel a:hover,
+    .nav-panel a[aria-current='page'] {
+      background: transparent;
+      color: var(--coral);
+    }
+  }
+</style>
