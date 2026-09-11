@@ -280,18 +280,38 @@ test.describe('navegación del encabezado', () => {
     await expect(page).toHaveURL('/');
   });
 
-  test('en escritorio Agenda y Lugares están a la vista y no hay Más vacío', async ({ page }) => {
+  test('en escritorio Agenda y Lugares están a la vista y Más abre Acerca de', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto('/');
     const nav = page.getByRole('navigation', { name: 'Principal' });
+    const more = nav.getByRole('button', { name: 'Más' });
     await expect(nav.getByRole('link', { name: 'Agenda' })).toBeVisible();
     await expect(nav.getByRole('link', { name: 'Lugares' })).toBeVisible();
     await expect(nav.getByRole('link', { name: 'Agenda' })).toHaveAttribute('aria-current', 'page');
-    await expect(nav.getByRole('button', { name: 'Más' })).toHaveCount(0);
+    await expect(more).toBeVisible();
+    await expect(more).toHaveAttribute('aria-expanded', 'false');
+    await expect(more).not.toHaveAttribute('aria-current');
     await expect(nav.getByRole('button', { name: 'Menú de secciones' })).toHaveCount(0);
+
+    await more.click();
+    await expect(more).toHaveAttribute('aria-expanded', 'true');
+    await expect(nav.getByRole('link', { name: 'Acerca de' })).toBeVisible();
 
     await page.goto('/lugares/');
     await expect(nav.getByRole('link', { name: 'Lugares' })).toHaveAttribute('aria-current', 'page');
+    await expect(nav.getByRole('link', { name: 'Agenda' })).not.toHaveAttribute('aria-current');
+    await expect(nav.getByRole('button', { name: 'Más' })).not.toHaveAttribute('aria-current');
+  });
+
+  test('en escritorio Más lleva a Acerca de y marca la sección activa', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/');
+    const nav = page.getByRole('navigation', { name: 'Principal' });
+    await nav.getByRole('button', { name: 'Más' }).click();
+    await nav.getByRole('link', { name: 'Acerca de' }).click();
+    await expect(page).toHaveURL('/acerca-de/');
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(nav.getByRole('button', { name: 'Más' })).toHaveAttribute('aria-current', 'true');
     await expect(nav.getByRole('link', { name: 'Agenda' })).not.toHaveAttribute('aria-current');
   });
 
@@ -309,10 +329,12 @@ test.describe('navegación del encabezado', () => {
     await menu.click();
     await expect(menu).toHaveAttribute('aria-expanded', 'true');
     await expect(nav.getByRole('link', { name: 'Lugares' })).toBeVisible();
+    await expect(nav.getByRole('link', { name: 'Acerca de' })).toBeVisible();
 
     await menu.click();
     await expect(menu).toHaveAttribute('aria-expanded', 'false');
     await expect(nav.getByRole('link', { name: 'Lugares' })).toHaveCount(0);
+    await expect(nav.getByRole('link', { name: 'Acerca de' })).toHaveCount(0);
   });
 
   test('el menú móvil se cierra con Escape y al pulsar fuera', async ({ page }) => {
