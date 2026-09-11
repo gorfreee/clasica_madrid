@@ -27,6 +27,7 @@ import {
 } from './labels.ts';
 import type { Occurrence } from '../schemas/event.ts';
 import { buildMusicEventJsonLd } from './json-ld.ts';
+import { buildPlaceAddress, type PlaceAddressModel } from './place-address.ts';
 import { eventPath, venuePath } from './urls.ts';
 
 export { musicEventSchemaStatus } from './event-status.ts';
@@ -52,7 +53,7 @@ export type EventPageModel = {
   venueName: string;
   venueHref: string;
   spaceName: string | null;
-  venueAddress: string | null;
+  placeAddress: PlaceAddressModel | null;
   municipality: string;
   showMunicipality: boolean;
   seriesName: string | null;
@@ -120,6 +121,7 @@ export function toEventPageModel(resolved: ResolvedEvent, clock: Clock = systemC
     .sort((a, b) => a.date.localeCompare(b.date) || (a.time ?? '').localeCompare(b.time ?? ''))
     .map(toOccurrenceModel);
   const featuredCanonical = next ?? (isPast ? lastScheduledOccurrence(event.occurrences) : undefined);
+  const showMunicipality = !isMadridMunicipality(rootVenue.municipality);
   return {
     title: event.title,
     documentTitle: eventDocumentTitle(event.title, rootVenue.name),
@@ -131,9 +133,13 @@ export function toEventPageModel(resolved: ResolvedEvent, clock: Clock = systemC
     venueName: rootVenue.name,
     venueHref: venuePath(rootVenue.slug),
     spaceName,
-    venueAddress: rootVenue.address ?? venue.address ?? null,
+    placeAddress: buildPlaceAddress({
+      address: rootVenue.address ?? venue.address,
+      municipality: rootVenue.municipality,
+      showMunicipality,
+    }),
     municipality: rootVenue.municipality,
-    showMunicipality: !isMadridMunicipality(rootVenue.municipality),
+    showMunicipality,
     seriesName: series?.name ?? null,
     seriesKind: series ? seriesKindLabels[series.kind] : null,
     organizers: organizers.map((organizer) => organizer.name),
