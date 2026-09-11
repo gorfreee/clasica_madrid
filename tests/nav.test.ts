@@ -31,23 +31,29 @@ describe('navegación del encabezado', () => {
     expect(headerNavigation('/eventos/carmen/').desktopLinks[0]?.current).toBe(false);
   });
 
-  it('mantiene Agenda y Lugares como destinos primarios', () => {
+  it('mantiene Agenda y Lugares como destinos primarios y agrupa Acerca de', () => {
     const nav = headerNavigation('/');
     expect(nav.agenda.label).toBe('Agenda');
     expect(PRIMARY_NAV.map((item) => item.label)).toEqual(['Lugares']);
     expect(nav.desktopLinks.map((link) => link.label)).toEqual(['Lugares']);
-    expect(nav.mobileMenuLinks.map((link) => link.label)).toEqual(['Lugares']);
+    expect(SECONDARY_NAV.map((item) => item.label)).toEqual(['Acerca de']);
+    expect(nav.secondaryLinks.map((link) => link.label)).toEqual(['Acerca de']);
+    expect(nav.mobileMenuLinks.map((link) => link.label)).toEqual(['Lugares', 'Acerca de']);
+    expect(nav.showMore).toBe(true);
   });
 
-  it('no expone Más mientras no hay páginas secundarias publicadas', () => {
-    expect(SECONDARY_NAV).toEqual([]);
-    const nav = headerNavigation('/');
-    expect(nav.showMore).toBe(false);
-    expect(nav.moreCurrent).toBe(false);
-    expect(nav.secondaryLinks).toEqual([]);
+  it('marca Acerca de como activa dentro de Más y del menú móvil', () => {
+    const nav = headerNavigation('/acerca-de/');
+    expect(nav.agenda.current).toBe(false);
+    expect(nav.desktopLinks[0]?.current).toBe(false);
+    expect(nav.secondaryLinks).toEqual([
+      { href: '/acerca-de/', label: 'Acerca de', current: true },
+    ]);
+    expect(nav.moreCurrent).toBe(true);
+    expect(nav.mobileMenuLinks[1]?.current).toBe(true);
   });
 
-  it('agrupa las páginas secundarias en Más y en el menú móvil', () => {
+  it('agrupa varias páginas secundarias en Más y en el menú móvil', () => {
     const nav = headerNavigation('/recursos/', { secondary: sampleSecondary });
     expect(nav.showMore).toBe(true);
     expect(nav.moreCurrent).toBe(true);
@@ -65,15 +71,13 @@ describe('navegación del encabezado', () => {
     expect(nav.agenda.current).toBe(false);
   });
 
-  it('marca Acerca de como activa y no arrastra Más en Agenda o Lugares', () => {
-    const about = headerNavigation('/acerca-de/', { secondary: sampleSecondary });
-    expect(about.secondaryLinks[0]?.current).toBe(true);
-    expect(about.moreCurrent).toBe(true);
-    expect(about.agenda.current).toBe(false);
-    expect(about.desktopLinks[0]?.current).toBe(false);
-
-    const agenda = headerNavigation('/', { secondary: sampleSecondary });
+  it('no arrastra Más como activo en Agenda o Lugares', () => {
+    const agenda = headerNavigation('/');
     expect(agenda.agenda.current).toBe(true);
     expect(agenda.moreCurrent).toBe(false);
+
+    const venues = headerNavigation('/lugares/');
+    expect(venues.desktopLinks[0]?.current).toBe(true);
+    expect(venues.moreCurrent).toBe(false);
   });
 });
