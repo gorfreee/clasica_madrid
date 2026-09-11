@@ -74,21 +74,50 @@ El `report.json`, el resumen de consola y el Job Summary separan provider, model
 
 ## Smoke tests manuales
 
-No se ejecutan en CI, no escriben `data/**` y no crean PRs. Reutilizan el pool/transport reales con caché desactivada.
+Son llamadas **live** a las APIs de los proveedores: consumen quota real. No se ejecutan automáticamente en CI (ni en push ni en pull request), no escriben `data/**` y no crean PRs. Conviene lanzarlos tras cambiar providers, modelos, transports o prompts, o cuando una ingestión muestre comportamientos sospechosos.
+
+Descubren las routes con la misma configuración que el pool de producción (`inspectFreePoolFromEnv` / `createFreeRoutesFromEnv`). Cada route se prueba aislada con `AI_ROUTE=provider:model`, `AI_CACHE=off` y `AI_ZERO_COST_ONLY=true`, sin fallback a otro modelo. Un proveedor esperado sin key o sin confirmación gratuita no desaparece: cuenta como FAIL.
+
+Por defecto prueba un solo purpose (`eligibility`, un HTTP). `--purpose taxonomy` cambia el fixture; `--all-purposes` recorre eligibility, composer extraction, access y taxonomy. `ai:smoke:all` recorre las routes en serie, respetando `rpm` / `minIntervalMs` para no fabricar 429 por concurrencia.
 
 ```bash
+# una sola route (eligibility)
 npm run ai:smoke -- --route groq:openai/gpt-oss-120b
 npm run ai:smoke -- --route mistral:ministral-14b-2512
 npm run ai:smoke -- --route mistral:ministral-8b-2512
 npm run ai:smoke -- --route zai:glm-4.7-flash
 npm run ai:smoke -- --route cloudflare:@cf/zai-org/glm-4.7-flash
+
+# una sola route, las cuatro tasks
+npm run ai:smoke -- --route groq:openai/gpt-oss-120b --all-purposes
+
+# todas las routes, una petición de eligibility por modelo
+npm run ai:smoke:all
+
+# todas las tasks (`AI_CALL_PURPOSES`) en todas las routes
+npm run ai:smoke:all -- --all-purposes
 ```
 
-Por defecto prueba un solo purpose (`eligibility`, un HTTP). `--purpose taxonomy` cambia el fixture; `--all-purposes` recorre eligibility, composer extraction, access y taxonomy.
+El comando carga `.local/ai.env`, fuerza `AI_ZERO_COST_ONLY=true`, `AI_CACHE=off` y `AI_ROUTE`, e imprime una línea JSON por petición (provider, model, route, purpose, éxito, schema, latencia, tokens, status, pressure/rate-limit sanitizados, error sin secrets) más un resumen tabular:
 
-El comando carga `.local/ai.env`, fuerza `AI_ZERO_COST_ONLY=true`, `AI_CACHE=off` y `AI_ROUTE`, e imprime provider, model, route, purpose, éxito, validez de schema, latencia, tokens, status, pressure/rate-limit sanitizados y error sin secrets.
+```text
+AI LIVE SMOKE TEST
 
-En GitHub hay un workflow manual `AI route smoke` (`workflow_dispatch`) con los mismos secrets y `contents: read`. Acepta una route exacta. No publica datos.
+Route                                  Eligibility  Latency   Result
+gemini:gemini-3.8-flash                PASS         1320 ms   PASS
+
+Routes tested: 18
+Passed: 16
+Failed: 2
+Missing/unconfigured providers: 0
+
+RESULT: FAIL
+```
+
+En GitHub hay dos workflows manuales (`workflow_dispatch`, `contents: read`, mismos secrets/`vars` que la ingestión). No publican datos:
+
+- **AI route smoke** — una route exacta (`provider:model`) y un purpose (o `all`).
+- **AI live smoke test** — `npm run ai:smoke:all`, con el input `all_purposes`.
 
 ## Checklist después del merge
 
@@ -103,7 +132,7 @@ En GitHub hay un workflow manual `AI route smoke` (`workflow_dispatch`) con los 
 9. Añadir únicamente `CLOUDFLARE_WORKERS_FREE_CONFIRMED=true` como repository/environment variable, tras confirmar Workers Free.
 10. Añadir el secret `ZAI_API_KEY`.
 11. Verificar que `ZAI_MODELS` sólo contiene modelos explícitamente gratuitos; por defecto no hace falta crear esta variable.
-12. Ejecutar los smoke tests de cada route (`npm run ai:smoke` o el workflow manual `AI route smoke`).
+12. Ejecutar `npm run ai:smoke:all` (y `--all-purposes` si cambian las tasks), o una route concreta con `npm run ai:smoke -- --route …` / el workflow **AI route smoke**. El workflow **AI live smoke test** cubre el barrido completo.
 13. Lanzar un `workflow_dispatch` en `dry-run` antes del primer publish.
 
 No hace falta crear repository variables de `*_MODELS`, `*_MODEL_TPM` ni `*_MAX_CONCURRENT` para que producción funcione: esos defaults viven en el código. Las variables siguen siendo overrides de emergencia.

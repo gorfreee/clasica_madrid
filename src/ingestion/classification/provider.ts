@@ -14,6 +14,27 @@ import { OpenAiClassifier } from './openai.ts';
 
 export const AI_FREE_PROVIDERS = ['gemini', 'groq', 'mistral', 'cloudflare', 'zai'] as const;
 export const AI_PROVIDERS = [...AI_FREE_PROVIDERS, 'openai'] as const;
+export type AiFreeProvider = (typeof AI_FREE_PROVIDERS)[number];
+
+/**
+ * Construction order of the zero-cost pool. Distinct from `AI_FREE_PROVIDERS`
+ * listing order (`cloudflare` is listed before `zai` there).
+ */
+const FREE_ROUTE_BUILD_ORDER = ['gemini', 'groq', 'mistral', 'zai', 'cloudflare'] as const satisfies readonly AiFreeProvider[];
+
+export type FreeProviderInspectionStatus = 'ready' | 'unconfigured' | 'empty' | 'error';
+
+export type FreeProviderInspection = {
+  provider: AiFreeProvider;
+  status: FreeProviderInspectionStatus;
+  reason?: string;
+  routes: AiRoute[];
+};
+
+export type FreePoolInspection = {
+  routes: AiRoute[];
+  providers: FreeProviderInspection[];
+};
 
 export const GROQ_DEFAULT_BASE_URL = 'https://api.groq.com/openai/v1';
 export const MISTRAL_DEFAULT_BASE_URL = 'https://api.mistral.ai/v1';
@@ -132,7 +153,11 @@ export function createAiClassifierFromEnv(env: AiEnv = process.env): AiClassifie
   if (pinned?.provider === 'gemini') return geminiFromEnv(env, pinned.model, zeroCost);
   if (pinned) {
     requireZeroCostPolicy(env, `AI_ROUTE ${env.AI_ROUTE}`);
-    const routes = freeRoutes(env, true).filter((route) => route.routeId === `${pinned.provider}:${pinned.model}`);
+    if (!(AI_FREE_PROVIDERS as readonly string[]).includes(pinned.provider)) {
+      throw new Error(`AI_ROUTE ${env.AI_ROUTE}: route no configurada, no autorizada o no incluida en la lista de modelos`);
+    }
+    const routes = routesForFreeProvider(pinned.provider as AiFreeProvider, env, true)
+      .filter((route) => route.routeId === `${pinned.provider}:${pinned.model}`);
     if (!routes.length) {
       throw new Error(`AI_ROUTE ${env.AI_ROUTE}: route no configurada, no autorizada o no incluida en la lista de modelos`);
     }
@@ -166,58 +191,148 @@ export function createFreeRoutesFromEnv(env: AiEnv): AiRoute[] {
   return freeRoutes(env, true);
 }
 
+/**
+ * Why a free-pool provider cannot currently produce routes.
+ * Returns `undefined` when credentials/confirmations are present; route
+ * construction may still fail later (invalid allowlist, empty model list).
+ * Reasons name env vars only — never secret values.
+ */
+export function freeProviderUnconfiguredReason(
+  provider: AiFreeProvider,
+  env: AiEnv,
+): string | undefined {
+  if (provider === 'gemini') {
+    return env.GEMINI_API_KEY?.trim() ? undefined : 'falta GEMINI_API_KEY';
+  }
+  if (provider === 'groq') {
+    if (!env.GROQ_API_KEY?.trim()) return 'falta GROQ_API_KEY';
+    if (!isTrue(env.GROQ_FREE_TIER_CONFIRMED)) return 'falta GROQ_FREE_TIER_CONFIRMED=true';
+    return undefined;
+  }
+  if (provider === 'mistral') {
+    if (!env.MISTRAL_API_KEY?.trim()) return 'falta MISTRAL_API_KEY';
+    if (!isTrue(env.MISTRAL_FREE_MODE_CONFIRMED)) return 'falta MISTRAL_FREE_MODE_CONFIRMED=true';
+    return undefined;
+  }
+  if (provider === 'zai') {
+    return env.ZAI_API_KEY?.trim() ? undefined : 'falta ZAI_API_KEY';
+  }
+  if (!env.CLOUDFLARE_API_TOKEN?.trim()) return 'falta CLOUDFLARE_API_TOKEN';
+  if (!env.CLOUDFLARE_ACCOUNT_ID?.trim()) return 'falta CLOUDFLARE_ACCOUNT_ID';
+  if (!isTrue(env.CLOUDFLARE_WORKERS_FREE_CONFIRMED)) return 'falta CLOUDFLARE_WORKERS_FREE_CONFIRMED=true';
+  return undefined;
+}
+
+/**
+ * Inspect every expected free provider against the same gates and builders
+ * used by the production pool. A missing key/confirmation is reported instead
+ * of being silently omitted.
+ */
+export function inspectFreePoolFromEnv(env: AiEnv): FreePoolInspection {
+  requireZeroCostPolicy(env, 'pool gratuito');
+  const byProvider = new Map<AiFreeProvider, FreeProviderInspection>();
+  for (const provider of AI_FREE_PROVIDERS) {
+    byProvider.set(provider, inspectFreeProvider(provider, env, true));
+  }
+  const providers = AI_FREE_PROVIDERS.map((provider) => byProvider.get(provider)!);
+  const routes = FREE_ROUTE_BUILD_ORDER.flatMap((provider) => byProvider.get(provider)?.routes ?? [])
+    .map((route, priority) => ({ ...route, priority }));
+  return { routes, providers };
+}
+
+function inspectFreeProvider(
+  provider: AiFreeProvider,
+  env: AiEnv,
+  zeroCost: boolean,
+): FreeProviderInspection {
+  const unconfigured = freeProviderUnconfiguredReason(provider, env);
+  if (unconfigured) {
+    return { provider, status: 'unconfigured', reason: unconfigured, routes: [] };
+  }
+  try {
+    const routes = routesForFreeProvider(provider, env, zeroCost);
+    if (!routes.length) {
+      return {
+        provider,
+        status: 'empty',
+        reason: `proveedor ${provider} configurado pero sin routes resultantes`,
+        routes: [],
+      };
+    }
+    return { provider, status: 'ready', routes };
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    return { provider, status: 'error', reason, routes: [] };
+  }
+}
+
 function freeRoutes(env: AiEnv, zeroCost: boolean): AiRoute[] {
-  const routes: AiRoute[] = [];
+  return FREE_ROUTE_BUILD_ORDER
+    .flatMap((provider) => routesForFreeProvider(provider, env, zeroCost))
+    .map((route, priority) => ({ ...route, priority }));
+}
+
+function routesForFreeProvider(provider: AiFreeProvider, env: AiEnv, zeroCost: boolean): AiRoute[] {
+  if (provider === 'gemini') return geminiFreeRoutes(env, zeroCost);
+  if (provider === 'groq') {
+    return compatibleProviderRoutes('groq', {
+      key: env.GROQ_API_KEY,
+      confirmed: env.GROQ_FREE_TIER_CONFIRMED,
+      models: modelList(env.GROQ_MODELS, GROQ_DEFAULT_MODELS),
+      baseUrl: GROQ_DEFAULT_BASE_URL,
+      defaultLimits: GROQ_FREE_LIMITS,
+      limits: providerLimitMaps(env, 'GROQ'),
+    });
+  }
+  if (provider === 'mistral') {
+    return compatibleProviderRoutes('mistral', {
+      key: env.MISTRAL_API_KEY,
+      confirmed: env.MISTRAL_FREE_MODE_CONFIRMED,
+      models: modelList(env.MISTRAL_MODELS, MISTRAL_DEFAULT_MODELS),
+      baseUrl: MISTRAL_DEFAULT_BASE_URL,
+      limits: providerLimitMaps(env, 'MISTRAL'),
+      modelDefaults: MISTRAL_PRODUCTION_MODEL_LIMITS,
+    });
+  }
+  if (provider === 'zai') return zaiFreeRoutes(env, zeroCost);
+  return cloudflareFreeRoutes(env, zeroCost);
+}
+
+function geminiFreeRoutes(env: AiEnv, zeroCost: boolean): AiRoute[] {
   const geminiKey = env.GEMINI_API_KEY?.trim();
-  if (geminiKey) {
-    const config = resolveGeminiConfig(env);
-    const selected = zeroCost
-      ? validateAllowlist('GEMINI_MODELS', config.models, GEMINI_DEFAULT_MODELS)
-      : config.models;
-    routes.push(...createGeminiRoutes({ apiKey: geminiKey, ...config, models: selected }));
-  }
-  routes.push(...compatibleProviderRoutes('groq', {
-    key: env.GROQ_API_KEY,
-    confirmed: env.GROQ_FREE_TIER_CONFIRMED,
-    models: modelList(env.GROQ_MODELS, GROQ_DEFAULT_MODELS),
-    baseUrl: GROQ_DEFAULT_BASE_URL,
-    defaultLimits: GROQ_FREE_LIMITS,
-    limits: providerLimitMaps(env, 'GROQ'),
-  }));
-  routes.push(...compatibleProviderRoutes('mistral', {
-    key: env.MISTRAL_API_KEY,
-    confirmed: env.MISTRAL_FREE_MODE_CONFIRMED,
-    models: modelList(env.MISTRAL_MODELS, MISTRAL_DEFAULT_MODELS),
-    baseUrl: MISTRAL_DEFAULT_BASE_URL,
-    limits: providerLimitMaps(env, 'MISTRAL'),
-    modelDefaults: MISTRAL_PRODUCTION_MODEL_LIMITS,
-  }));
+  if (!geminiKey) return [];
+  const config = resolveGeminiConfig(env);
+  const selected = zeroCost
+    ? validateAllowlist('GEMINI_MODELS', config.models, GEMINI_DEFAULT_MODELS)
+    : config.models;
+  return createGeminiRoutes({ apiKey: geminiKey, ...config, models: selected });
+}
 
+function zaiFreeRoutes(env: AiEnv, _zeroCost: boolean): AiRoute[] {
   const zaiKey = env.ZAI_API_KEY?.trim();
-  if (zaiKey) {
-    const selected = validateAllowlist('ZAI_MODELS', modelList(env.ZAI_MODELS, ZAI_ZERO_COST_MODELS), ZAI_ZERO_COST_MODELS);
-    routes.push(...routesForProfile({
-      provider: 'zai', baseUrl: ZAI_DEFAULT_BASE_URL, apiKey: zaiKey,
-    }, selected, providerLimitMaps(env, 'ZAI'), UTC_DAILY_RESET, ZAI_PRODUCTION_LIMITS));
-  }
+  if (!zaiKey) return [];
+  const selected = validateAllowlist('ZAI_MODELS', modelList(env.ZAI_MODELS, ZAI_ZERO_COST_MODELS), ZAI_ZERO_COST_MODELS);
+  return routesForProfile({
+    provider: 'zai', baseUrl: ZAI_DEFAULT_BASE_URL, apiKey: zaiKey,
+  }, selected, providerLimitMaps(env, 'ZAI'), UTC_DAILY_RESET, ZAI_PRODUCTION_LIMITS);
+}
 
+function cloudflareFreeRoutes(env: AiEnv, _zeroCost: boolean): AiRoute[] {
   const cloudflareToken = env.CLOUDFLARE_API_TOKEN?.trim();
   const accountId = env.CLOUDFLARE_ACCOUNT_ID?.trim();
-  if (cloudflareToken && accountId && isTrue(env.CLOUDFLARE_WORKERS_FREE_CONFIRMED)) {
-    const selected = validateAllowlist(
-      'CLOUDFLARE_MODELS',
-      modelList(env.CLOUDFLARE_MODELS, CLOUDFLARE_ZERO_COST_MODELS),
-      CLOUDFLARE_ZERO_COST_MODELS,
-    );
-    routes.push(...routesForProfile({
-      provider: 'cloudflare',
-      baseUrl: `${CLOUDFLARE_API_BASE_URL}/${encodeURIComponent(accountId)}/ai/v1`,
-      apiKey: cloudflareToken,
-      quotaExhausted: (_status, body) => cloudflareDailyAllocationExhausted(body),
-      unavailableError: (status, body) => status === 403 && /\b(?:5016|5018|5035|3041)\b/.test(body),
-    }, selected, providerLimitMaps(env, 'CLOUDFLARE'), UTC_DAILY_RESET));
-  }
-  return routes.map((route, priority) => ({ ...route, priority }));
+  if (!cloudflareToken || !accountId || !isTrue(env.CLOUDFLARE_WORKERS_FREE_CONFIRMED)) return [];
+  const selected = validateAllowlist(
+    'CLOUDFLARE_MODELS',
+    modelList(env.CLOUDFLARE_MODELS, CLOUDFLARE_ZERO_COST_MODELS),
+    CLOUDFLARE_ZERO_COST_MODELS,
+  );
+  return routesForProfile({
+    provider: 'cloudflare',
+    baseUrl: `${CLOUDFLARE_API_BASE_URL}/${encodeURIComponent(accountId)}/ai/v1`,
+    apiKey: cloudflareToken,
+    quotaExhausted: (_status, body) => cloudflareDailyAllocationExhausted(body),
+    unavailableError: (status, body) => status === 403 && /\b(?:5016|5018|5035|3041)\b/.test(body),
+  }, selected, providerLimitMaps(env, 'CLOUDFLARE'), UTC_DAILY_RESET);
 }
 
 function compatibleProviderRoutes(

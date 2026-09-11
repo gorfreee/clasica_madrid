@@ -30,6 +30,15 @@ npm run ingest:source -- auditorio-nacional
 npm run ingest:promote -- ingestion/inbox/evento.json   # legacy: un candidato en disco
 ```
 
+Diagnóstico live del pool de IA (quota real; no corre en CI de push/PR): [`docs/ai-providers.md`](docs/ai-providers.md). En GitHub: Actions → **AI live smoke test** (todas las routes) o **AI route smoke** (una route).
+
+```bash
+npm run ai:smoke:all
+npm run ai:smoke:all -- --all-purposes
+npm run ai:smoke -- --route provider:model
+npm run ai:smoke -- --route provider:model --all-purposes
+```
+
 ## Dónde están los datos
 
 Los datos canónicos están versionados en Git, no en una base de datos:
