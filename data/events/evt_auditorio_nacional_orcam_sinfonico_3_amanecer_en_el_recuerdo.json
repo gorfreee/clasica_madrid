@@ -42,6 +42,9 @@
   "composers": [
     {
       "name": "Johannes Brahms / Guy Braunstein"
+    },
+    {
+      "name": "Johannes Brahms"
     }
   ],
   "works": [
@@ -68,10 +71,10 @@
     {
       "sourceId": "src_fundacion_orcam",
       "url": "https://fundacionorcam.org/conciertos/2026-27/amanecer-en-el-recuerdo",
-      "checkedAt": "2026-08-31",
+      "checkedAt": "2026-09-11",
       "externalId": "4844"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-31"
+  "lastVerifiedAt": "2026-09-11"
 }

@@ -22,7 +22,11 @@
     }
   ],
   "performers": [],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Plaza Daoíz"
+    }
+  ],
   "works": [],
   "eras": [
     "classical",
@@ -37,10 +41,10 @@
     {
       "sourceId": "src_teatro_real",
       "url": "https://www.teatroreal.es/es/espectaculo/microperas",
-      "checkedAt": "2026-09-09",
+      "checkedAt": "2026-09-11",
       "externalId": "microperas"
     }
   ],
   "primarySourceId": "src_teatro_real",
-  "lastVerifiedAt": "2026-09-09"
+  "lastVerifiedAt": "2026-09-11"
 }

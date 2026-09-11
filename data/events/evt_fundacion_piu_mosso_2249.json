@@ -16,7 +16,11 @@
     }
   ],
   "performers": [],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Festival Alicia de Larrocha"
+    }
+  ],
   "works": [],
   "eras": [],
   "formats": [],
@@ -26,10 +30,10 @@
     {
       "sourceId": "src_fundacionpiumosso_com",
       "url": "https://www.fundacionpiumosso.com/evento/festival-alicia-de-larrocha-consagracion-la-maestria-musical",
-      "checkedAt": "2026-09-09",
+      "checkedAt": "2026-09-11",
       "externalId": "2249"
     }
   ],
   "primarySourceId": "src_fundacionpiumosso_com",
-  "lastVerifiedAt": "2026-09-09"
+  "lastVerifiedAt": "2026-09-11"
 }

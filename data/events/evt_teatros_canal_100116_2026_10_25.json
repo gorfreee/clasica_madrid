@@ -20,7 +20,11 @@
       "name": "Taller Sonoro"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "XVII Festival de Ensembles"
+    }
+  ],
   "works": [],
   "eras": [
     "contemporary"
@@ -34,10 +38,10 @@
     {
       "sourceId": "src_teatros_canal",
       "url": "https://www.teatroscanal.com/espectaculo/xvii-festival-de-ensembles-2026",
-      "checkedAt": "2026-09-08",
+      "checkedAt": "2026-09-11",
       "externalId": "100116:2026-10-25"
     }
   ],
   "primarySourceId": "src_teatros_canal",
-  "lastVerifiedAt": "2026-09-08"
+  "lastVerifiedAt": "2026-09-11"
 }
