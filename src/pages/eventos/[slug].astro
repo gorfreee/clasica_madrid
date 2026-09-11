@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import PlaceAddress from '../../components/PlaceAddress.astro';
 import { formatSourceCitationMeta } from '../../lib/presentation/labels.ts';
 import { loadEventPage, loadEventStaticPaths } from '../../lib/presentation/site.ts';
 import { AGENDA_PATH, eventPath } from '../../lib/presentation/urls.ts';
@@ -52,7 +53,14 @@ const featured = model.featuredOccurrence;
             <dd class="event-facts__space">{model.spaceName}</dd>
           </>
         )}
-        {model.venueAddress && <dd class="event-facts__address">{model.venueAddress}</dd>}
+        {model.placeAddress && (
+          <>
+            <dt class="visually-hidden">Dirección</dt>
+            <dd class="event-facts__address">
+              <PlaceAddress address={model.placeAddress} />
+            </dd>
+          </>
+        )}
       </div>
       <div class="event-facts__access">
         <dt>Acceso</dt>

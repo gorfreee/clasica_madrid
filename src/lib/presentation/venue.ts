@@ -13,6 +13,7 @@ import { isMadridMunicipality } from '../domain/normalize.ts';
 import { areaLabels } from './labels.ts';
 import { buildVenueJsonLd } from './json-ld.ts';
 import { toAgendaItem, type AgendaItemModel } from './agenda.ts';
+import { buildPlaceAddress, type PlaceAddressModel } from './place-address.ts';
 import { venuePath, VENUES_INDEX_PATH } from './urls.ts';
 
 export type VenueListItemModel = {
@@ -36,6 +37,7 @@ export type VenuePageModel = {
   showMunicipality: boolean;
   areaLabel: string;
   address: string | null;
+  placeAddress: PlaceAddressModel | null;
   url: string | null;
   upcoming: AgendaItemModel[];
   jsonLd: Record<string, unknown>[];
@@ -110,6 +112,8 @@ export function buildVenuePageModel(
     ? principal.name
     : `${principal.name}, ${principal.municipality}`;
   const pageName = isChildVenue(venue) ? venue.name : principal.name;
+  const showMunicipality = !isMadridMunicipality(principal.municipality);
+  const address = principal.address ?? venue.address ?? null;
   return {
     title: pageName,
     description:
@@ -120,9 +124,14 @@ export function buildVenuePageModel(
     name: pageName,
     slug: venue.slug,
     municipality: principal.municipality,
-    showMunicipality: !isMadridMunicipality(principal.municipality),
+    showMunicipality,
     areaLabel: areaLabels[principal.area],
-    address: principal.address ?? venue.address ?? null,
+    address,
+    placeAddress: buildPlaceAddress({
+      address,
+      municipality: principal.municipality,
+      showMunicipality,
+    }),
     url: principal.url ?? venue.url ?? null,
     upcoming,
     jsonLd: buildVenueJsonLd(venue, principal),
