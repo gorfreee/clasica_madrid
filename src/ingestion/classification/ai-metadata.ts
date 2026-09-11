@@ -1,26 +1,69 @@
-import { normalizeText } from '../../lib/domain/normalize.ts';
 import { canonicalizeComposerName, publishedComposerIdentity } from '../composer-name.ts';
+import {
+  composerIdentityKeys,
+  identityKeySet,
+  matchesIdentitySet,
+} from '../composer-lists.ts';
 import { collapseWhitespace } from '../html.ts';
 import { findKnownComposersInText, matchComposer } from '../knowledge/composers.ts';
 import type { ObservedComposer, ObservedFacts } from '../observed.ts';
 import type { AiComposerCandidate } from './ai.ts';
 import { foldName } from './text.ts';
 
+const COMPOSER_ATTRIBUTION_CUE =
+  /\b(?:obras?|m[uú]sica|composici[oó]n(?:es)?|programa)\s+(?:(?:de|del)\b|:)/iu;
+const COMPOSER_WORD_CUE = /\b(?:compositor|compositora|composer)\b/iu;
+const COMPOSER_SEPARATOR_CUE = /\S\s(?:—|–|:\s|\s-\s)\s*\S/u;
+
 /**
- * Cheap deterministic gate before composer AI. Existing structured/knowledge
- * evidence wins; without programme-like observed text there is no AI call.
+ * Cheap deterministic gate before composer AI.
+ *
+ * Structured or knowledge-resolved names do not block the call by themselves:
+ * AI may still complete leftover composer-like mentions that those layers
+ * could not resolve. Without programme-like cues, or when every detectable
+ * candidate is already resolved, there is no AI call.
  */
 export function composerAiHasUsableEvidence(facts: ObservedFacts): boolean {
-  if (facts.composers.length > 0) return false;
-  if (facts.works.some((work) => Boolean(work.composerName))) return false;
   const programme = facts.programText?.trim();
   if (!programme || programme.length < 8) return false;
-  if (findKnownComposersInText(programme).length > 0) return false;
+  if (!hasComposerCueEvidence(programme)) return false;
+  return unresolvedComposerLikeMentions(programme, facts).length > 0;
+}
+
+export function hasComposerCueEvidence(programme: string): boolean {
   return (
-    /\b(?:obras?|m[uú]sica|composici[oó]n(?:es)?|programa)\s+(?:(?:de|del)\b|:)/iu.test(programme) ||
-    /\b(?:compositor|compositora|composer)\b/iu.test(programme) ||
-    /\S\s(?:—|–|:\s|\s-\s)\s*\S/u.test(programme)
+    COMPOSER_ATTRIBUTION_CUE.test(programme) ||
+    COMPOSER_WORD_CUE.test(programme) ||
+    COMPOSER_SEPARATOR_CUE.test(programme)
   );
+}
+
+/**
+ * Person-like spans in composer-cue contexts that knowledge and structured
+ * lists have not already resolved. Conservative: an empty result means no AI.
+ */
+export function unresolvedComposerLikeMentions(programme: string, facts: ObservedFacts): string[] {
+  const resolved = identityKeySet([
+    ...facts.composers.map((item) => item.name),
+    ...facts.works.flatMap((work) => (work.composerName ? [work.composerName] : [])),
+    ...findKnownComposersInText(programme).map((item) => item.canonicalName),
+  ]);
+  const performerKeys = identityKeySet(facts.performers.map((person) => person.name));
+  const seen = new Set<string>();
+  const leftover: string[] = [];
+
+  for (const candidate of extractComposerLikeNames(programme)) {
+    if (!looksLikePersonName(candidate.name)) continue;
+    if (matchesIdentitySet(candidate.name, resolved)) continue;
+    if (matchesIdentitySet(candidate.name, performerKeys)) continue;
+    if (matchComposer(candidate.name)) continue;
+    if (clearlyNonComposerContext(candidate.name, candidate.evidence)) continue;
+    const identity = composerIdentityKeys(candidate.name)[0];
+    if (!identity || seen.has(identity)) continue;
+    seen.add(identity);
+    leftover.push(candidate.name);
+  }
+  return leftover;
 }
 
 /**
@@ -33,7 +76,7 @@ export function validateAiComposerCandidates(
   facts: ObservedFacts,
 ): { composers: ObservedComposer[]; evidence: string[] } {
   const programme = facts.programText ?? '';
-  const performerKeys = new Set(facts.performers.flatMap((person) => personIdentityKeys(person.name)));
+  const performerKeys = new Set(facts.performers.flatMap((person) => composerIdentityKeys(person.name)));
   const seen = new Set<string>();
   const composers: ObservedComposer[] = [];
   const evidence: string[] = [];
@@ -44,7 +87,7 @@ export function validateAiComposerCandidates(
     if (!sourceName || !sourceEvidence) continue;
     if (!containsNormalizedSpan(programme, sourceEvidence)) continue;
     if (!candidateNameAppears(sourceName, sourceEvidence, programme)) continue;
-    if (personIdentityKeys(sourceName).some((key) => performerKeys.has(key))) continue;
+    if (composerIdentityKeys(sourceName).some((key) => performerKeys.has(key))) continue;
     if (clearlyNonComposerContext(sourceName, sourceEvidence)) continue;
 
     const name = canonicalizeComposerName(sourceName);
@@ -63,6 +106,62 @@ export function accessEvidenceAppears(accessText: string, evidence: string): boo
   return containsNormalizedSpan(accessText, evidence);
 }
 
+function extractComposerLikeNames(programme: string): Array<{ name: string; evidence: string }> {
+  const found: Array<{ name: string; evidence: string }> = [];
+
+  for (const match of programme.matchAll(
+    /(?:^|[\n;]|[.!?]\s)([^.\n]{2,80}?)\s+(?:—|–|(?<!\w):|\s-\s)\s+([^\n]+)/gu,
+  )) {
+    const name = collapseWhitespace(match[1] ?? '');
+    if (name) found.push({ name, evidence: collapseWhitespace(match[0] ?? '') });
+  }
+
+  for (const match of programme.matchAll(
+    /\b(?:obras?|m[uú]sica|composici[oó]n(?:es)?|programa)\s+(?:de|del|:)\s+([^.;:\n]+)/giu,
+  )) {
+    const evidence = collapseWhitespace(match[0] ?? '');
+    for (const name of splitNameList(match[1] ?? '')) {
+      found.push({ name, evidence });
+    }
+  }
+
+  for (const match of programme.matchAll(
+    /\b(?:autores?|compositores?)\b(?:(?![.]).){0,80}?\bcomo\s+(.+?)(?:\s*,\s*cuyas|\s*,\s*que|\.|$)/giu,
+  )) {
+    const evidence = collapseWhitespace(match[0] ?? '');
+    for (const name of splitNameList(match[1] ?? '')) {
+      found.push({ name, evidence });
+    }
+  }
+
+  for (const match of programme.matchAll(/\bcompositor(?:a|es)?\s*:\s*([^.\n]+)/giu)) {
+    const evidence = collapseWhitespace(match[0] ?? '');
+    for (const name of splitNameList(match[1] ?? '')) {
+      found.push({ name, evidence });
+    }
+  }
+
+  return found;
+}
+
+function splitNameList(value: string): string[] {
+  return collapseWhitespace(value)
+    .replace(/[.;:]+$/u, '')
+    .split(/\s*,\s*|\s+y\s+|\s+e\s+(?=[A-ZÁÉÍÓÚÜÑ])/u)
+    .map((part) => collapseWhitespace(part))
+    .filter((part) => part.length >= 3 && part.length <= 80);
+}
+
+function looksLikePersonName(name: string): boolean {
+  if (matchComposer(name)) return true;
+  const words = name.split(/\s+/).filter(Boolean);
+  if (words.length < 2 || words.length > 8) return false;
+  return words.every((word, index) => {
+    if (/^(de|del|la|las|los|van|von|di|da|el)$/i.test(word) && index > 0) return true;
+    return /^\p{Lu}/u.test(word);
+  });
+}
+
 function candidateNameAppears(name: string, evidence: string, programme: string): boolean {
   if (containsName(evidence, name) && containsName(programme, name)) return true;
   const known = matchComposer(name);
@@ -70,12 +169,6 @@ function candidateNameAppears(name: string, evidence: string, programme: string)
   return known.aliases.some(
     (alias) => containsName(evidence, alias) && containsName(programme, alias),
   );
-}
-
-function personIdentityKeys(name: string): string[] {
-  const normalized = normalizeText(name);
-  const known = matchComposer(name)?.canonicalName;
-  return [...new Set([normalized, known ? normalizeText(known) : ''].filter(Boolean))];
 }
 
 const NON_COMPOSER_ROLES = [

@@ -10,6 +10,7 @@ import {
   hasWord,
   type FormatEvidence,
 } from './text.ts';
+import { observedFormatChoiceIsUnresolved } from './format-alternatives.ts';
 import type { Resolution } from './types.ts';
 
 const FORMAT_ORDER: Format[] = [
@@ -68,6 +69,14 @@ export function resolveFormats(facts: ObservedFacts): Resolution<Format[]> {
       method: 'fallback',
       ruleId: 'formats-insufficient',
       evidence: [],
+    };
+  }
+  if (unique.length > 1 && observedFormatChoiceIsUnresolved(facts)) {
+    return {
+      value: [],
+      method: 'fallback',
+      ruleId: 'formats-exclusive-alternatives',
+      evidence: [...new Set(hits.map((item) => item.evidence).filter(Boolean))],
     };
   }
   return {
