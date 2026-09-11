@@ -53,11 +53,14 @@ export function formatRunSummary(summary: IngestRunSummary): string {
     `  circuitos abiertos: ${summary.ai.circuitOpenRoutes}`,
     `  rate limits: ${summary.ai.rateLimits}`,
     `  cuotas diarias agotadas: ${summary.ai.quotaExhausted}`,
+    `  concurrency-pressure: ${summary.ai.concurrencyPressure}`,
     ...formatCountMap('requests por provider', summary.ai.requestsByProvider),
     ...formatCountMap('clasificaciones por provider', summary.ai.classificationsByProvider),
     ...formatCountMap('requests HTTP por purpose', summary.ai.requestsByPurpose),
     ...formatCountMap('fallos técnicos por tipo', summary.ai.failuresByKind),
     ...formatCountMap('rate limits por provider', summary.ai.rateLimitsByProvider),
+    ...formatCountMap('concurrency-pressure por provider', summary.ai.concurrencyPressureByProvider),
+    ...formatCountMap('presión por dimensión', summary.ai.pressureByKind),
     ...formatAiRouteLines(summary.ai.routes),
     ...formatCountMap('tokens de entrada medidos por route', summary.ai.inputTokensByRoute),
     ...formatCountMap('tokens de salida medidos por route', summary.ai.outputTokensByRoute),
@@ -100,6 +103,12 @@ function formatCountMap(label: string, counts: Record<string, number>): string[]
   return [`  ${label}: ${entries.map(([name, value]) => `${name}=${value}`).join(', ')}`];
 }
 
+function formatPressureKinds(counts: Record<string, number> | undefined): string | undefined {
+  const entries = Object.entries(counts ?? {}).filter(([, value]) => value > 0);
+  if (entries.length === 0) return undefined;
+  return `presión ${entries.map(([name, value]) => `${name} ${value}`).join(', ')}`;
+}
+
 function formatAiRouteLines(routes: IngestAiRouteSummary[]): string[] {
   const active = routes.filter((route) => route.httpRequests > 0 || route.circuitOpen);
   if (active.length === 0) return [];
@@ -109,6 +118,8 @@ function formatAiRouteLines(routes: IngestAiRouteSummary[]): string[] {
       const extra = [
         route.circuitOpen ? `circuito abierto${route.circuitReason ? ` (${route.circuitReason})` : ''}` : undefined,
         route.rateLimits ? `rate-limit ${route.rateLimits}` : undefined,
+        route.concurrencyPressure ? `concurrency-pressure ${route.concurrencyPressure}` : undefined,
+        formatPressureKinds(route.pressureByKind),
       ].filter(Boolean);
       return `    ${route.routeId}: ${route.httpRequests} HTTP, ${route.valid} válidas${extra.length ? `; ${extra.join('; ')}` : ''}`;
     }),

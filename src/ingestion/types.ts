@@ -257,6 +257,8 @@ export type IngestAiRouteSummary = {
   failuresByKind: Record<string, number>;
   rateLimits: number;
   quotaExhausted: number;
+  concurrencyPressure: number;
+  pressureByKind: Record<string, number>;
   circuitOpen: boolean;
   circuitReason?: string;
   consecutiveFailures: number;
@@ -295,6 +297,10 @@ export type IngestAiSummary = {
   failuresByKind: Record<string, number>;
   rateLimits: number;
   quotaExhausted: number;
+  concurrencyPressure: number;
+  pressureByKind: Record<string, number>;
+  concurrencyPressureByRoute: Record<string, number>;
+  concurrencyPressureByProvider: Record<string, number>;
   rateLimitsByRoute: Record<string, number>;
   rateLimitsByProvider: Record<string, number>;
   routes: IngestAiRouteSummary[];
@@ -354,6 +360,10 @@ export function emptyIngestAiSummary(): IngestAiSummary {
     failuresByKind: {},
     rateLimits: 0,
     quotaExhausted: 0,
+    concurrencyPressure: 0,
+    pressureByKind: {},
+    concurrencyPressureByRoute: {},
+    concurrencyPressureByProvider: {},
     rateLimitsByRoute: {},
     rateLimitsByProvider: {},
     routes: [],
