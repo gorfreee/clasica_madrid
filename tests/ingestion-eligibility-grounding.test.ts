@@ -243,6 +243,36 @@ describe('classifyObserved — guardrails de eligibility AI', () => {
     expect(result.eligibility.ruleId).toBe('academic-contemporary');
   });
 
+  it('no deja que la IA convierta en exclude un concierto vienés con evidencia clásica observada', async () => {
+    const viennese = facts({
+      title: 'Pequeño concierto de Año Nuevo',
+      description: 'Música y danza',
+      categoryText: 'El Real Junior',
+      programText:
+        'Repertorio de valses, mazurkas y polkas interpretado por Solistas de la Orquesta Titular del Teatro Real. Un cuarteto de cuerdas de la Orquesta Sinfónica de Madrid introducirá al público en los ritmos de Viena. Valses, mazurkas y polkas serán los protagonistas. En Navidad, vamos a bailar como si estuviéramos en Viena.',
+      composers: [{ name: 'y danza' }],
+    });
+    const deterministic = classify(viennese);
+    expect(deterministic.eligibility.value).toBe('include');
+    expect(deterministic.eligibility.ruleId).toBe('described-classical-repertoire');
+
+    const ai = countingAi({
+      async classify(_observed, context) {
+        expect(context?.purpose).not.toBe('eligibility');
+        return {
+          eligibility: 'exclude',
+          evidence: ['Música y danza', 'vamos a bailar como si estuviéramos en Viena'],
+          rationale: 'Hay danza, luego no es un concierto clásico.',
+        };
+      },
+    });
+    const result = await classifyObserved(viennese, { ai });
+    expect(result.eligibility.value).toBe('include');
+    expect(result.eligibility.method).not.toBe('ai');
+    expect(result.eligibility.ruleId).toBe('described-classical-repertoire');
+    expect(result.eligibility.ruleId).not.toBe('ai-exclude');
+  });
+
   it('rechaza evidence que no aparece en los hechos observados', async () => {
     const result = await classifyObserved(resolvableChamberFacts, {
       ai: {

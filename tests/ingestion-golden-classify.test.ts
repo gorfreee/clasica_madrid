@@ -24,6 +24,21 @@ describe('golden set → deterministic classifier', () => {
     }
   });
 
+  it('incluye Pequeño concierto de Año Nuevo por el programText, no por título ni por «y danza»', async () => {
+    const cases = await loadGoldenCases();
+    const anoNuevo = cases.find((item) => item.caseId === 'golden_pequeno_concierto_ano_nuevo');
+    expect(anoNuevo).toBeDefined();
+    expect(anoNuevo!.expected.eligibility).toBe('include');
+    expect(anoNuevo!.observed.title).toBe('Pequeño concierto de Año Nuevo');
+    expect(anoNuevo!.observed.performers).toEqual([]);
+    expect(anoNuevo!.observed.composers).toEqual([{ name: 'y danza' }]);
+    const actual = classify(anoNuevo!.observed);
+    expect(actual.eligibility.value).toBe('include');
+    expect(actual.eligibility.ruleId).toBe('described-classical-repertoire');
+    expect(actual.eligibility.ruleId).not.toBe('known-classical-composer');
+    expect(actual.eligibility.ruleId).not.toBe('dance-spectacle');
+  });
+
   it('mantiene Sarao Barroco como golden uncertain sin excepción por título', async () => {
     const cases = await loadGoldenCases();
     const sarao = cases.find((item) => item.caseId === 'golden_sarao_barroco');
@@ -105,5 +120,10 @@ describe('golden set → deterministic classifier', () => {
 
     const myra = classify(byId.golden_myra_melford!.observed);
     expect(myra.eligibility.value).toBe('exclude');
+
+    const anoNuevo = classify(byId.golden_pequeno_concierto_ano_nuevo!.observed);
+    expect(anoNuevo.eligibility.value).toBe('include');
+    expect(anoNuevo.eligibility.ruleId).toBe('described-classical-repertoire');
+    expect(anoNuevo.eligibility.ruleId).not.toBe('known-classical-composer');
   });
 });
