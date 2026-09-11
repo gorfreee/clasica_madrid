@@ -3,6 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AiRateLimitedError, AiUnusableOutputError, type AiCallDiagnostics } from '../src/ingestion/classification/ai.ts';
+import { AI_MAX_OUTPUT_TOKENS_BY_PURPOSE } from '../src/ingestion/classification/ai-request.ts';
 import { classifyObserved } from '../src/ingestion/classification/enrich.ts';
 import {
   GeminiClassifier, GEMINI_DEFAULT_MODELS, resolveGeminiConfig, resolveRetryAfterMs,
@@ -603,7 +604,11 @@ describe('recoverable unusable output and thinking', () => {
       const fetch = vi.fn<typeof globalThis.fetch>(async (_url, init) => {
         const body = JSON.parse(String(init?.body));
         expect(body.model).toBe(model);
-        expect(body.generation_config).toEqual({ max_output_tokens: 600, tool_choice: 'none', ...thinking });
+        expect(body.generation_config).toEqual({
+          max_output_tokens: AI_MAX_OUTPUT_TOKENS_BY_PURPOSE[purpose],
+          tool_choice: 'none',
+          ...thinking,
+        });
         return response();
       });
       const p = provider({ ...resolveGeminiConfig({ GEMINI_MODEL: model }), fetch });

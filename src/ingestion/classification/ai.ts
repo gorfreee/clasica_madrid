@@ -351,12 +351,12 @@ export const AI_CLASSIFICATION_JSON_SCHEMA = {
       maxItems: 12,
       items: { type: 'string' },
       description:
-        'Brief verbatim excerpts copied from observed facts (title, description, category, series, programme, performers/roles, composers, works). Not conclusions. Required for include/exclude; omit or empty only for uncertain.',
+        '1-4 brief verbatim excerpts copied from observed facts (title, description, category, series, programme, performers/roles, composers, works). A phrase or less each. Not conclusions, not the full input. Required for include/exclude; omit or empty only for uncertain.',
     },
     rationale: {
       type: 'string',
       description:
-        'Optional interpretation of the cited evidence. 1-2 short sentences. Do not put rationale inside evidence. Keep well under 800 characters.',
+        'Optional interpretation of the cited evidence. 1-2 short sentences. Do not repeat evidence or the input. Do not put rationale inside evidence. Keep well under 800 characters.',
     },
   },
 } as const;
@@ -369,7 +369,7 @@ export const AI_ACCESS_JSON_SCHEMA = {
     classification: { type: 'string', enum: [...ACCESS_MODES] },
     evidence: {
       type: 'string',
-      description: 'Brief verbatim excerpt from accessText supporting the classification.',
+      description: 'Short verbatim excerpt from accessText supporting the classification. Not the full text if it is long.',
     },
   },
 } as const;
@@ -390,7 +390,7 @@ export const AI_COMPOSER_EXTRACTION_JSON_SCHEMA = {
           name: { type: 'string' },
           evidence: {
             type: 'string',
-            description: 'Verbatim span from the observed programme containing the proposed name.',
+            description: 'Short verbatim span from the observed programme containing the proposed name. Not the whole programme.',
           },
         },
       },
