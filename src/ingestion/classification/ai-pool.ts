@@ -21,6 +21,7 @@ import {
 import { buildAiRequest, type AiRequest } from './ai-request.ts';
 import { AiPoolState, hashAiInput } from './ai-state.ts';
 import { AiTransportError, type AiRoute } from './ai-transport.ts';
+import { observedFormatChoiceIsUnresolved } from './format-alternatives.ts';
 
 export const AI_POOL_MAX_RETRIES = 2;
 export const AI_POOL_BACKOFF_BASE_MS = 2_000;
@@ -216,7 +217,8 @@ export class AiPoolClassifier implements AiClassifier {
     const purpose: AiCallPurpose = context.purpose ?? 'eligibility';
     const requireFormats = Boolean(context.requireFormats);
     const request = buildAiRequest(observed, purpose);
-    const requestKey = hashAiInput({ purpose, request, observed, requireFormats });
+    const acceptEmptyFormats = acceptEmptyTaxonomyFormats(purpose, requireFormats, observed);
+    const requestKey = hashAiInput({ purpose, request, observed, requireFormats, acceptEmptyFormats });
     const flightKey = hashAiInput({
       requestKey,
       routes: this.routes.map((route) => ({
@@ -255,7 +257,9 @@ export class AiPoolClassifier implements AiClassifier {
         this.stats.cacheHits++;
         return structuredClone(result.value);
       }
-      flight = this.classifyOnce(request, requestKey, diagnostics, controller.signal, requireFormats);
+      flight = this.classifyOnce(
+        request, requestKey, diagnostics, controller.signal, requireFormats, acceptEmptyFormats,
+      );
       if (this.options.cacheEnabled !== false) this.inFlight.set(flightKey, flight);
       return (await flight).value;
     } catch (error) {
@@ -280,6 +284,7 @@ export class AiPoolClassifier implements AiClassifier {
     diagnostics: AiCallDiagnostics,
     signal: AbortSignal,
     requireFormats: boolean,
+    acceptEmptyFormats: boolean,
   ): Promise<CallResult> {
     const deadline = this.clock.now() + this.classifyBudgetMs;
     const maxAttempts = 1 + (this.options.maxRetries ?? AI_POOL_MAX_RETRIES);
@@ -295,7 +300,7 @@ export class AiPoolClassifier implements AiClassifier {
         for (const route of this.routes) {
           if (!this.enabled(route) || skippedThisCall.has(route.routeId)) continue;
           const value = this.state.cached(this.cacheKey(requestKey, route), request.purpose);
-          if (value === undefined || isUnsatisfactoryTaxonomyFormats(request.purpose, requireFormats, value)) continue;
+          if (value === undefined || isUnsatisfactoryTaxonomyFormats(request.purpose, requireFormats, value, acceptEmptyFormats)) continue;
           this.selectDiagnostics(diagnostics, route, 'cache');
           diagnostics.cacheHit = true;
           this.stats.cacheHits++;
@@ -358,7 +363,9 @@ export class AiPoolClassifier implements AiClassifier {
             excerpt: sanitizeAiOutputExcerpt(typeof result.value === 'string' ? result.value : JSON.stringify(result.value)),
           });
         }
-        const unresolvedFormats = isUnsatisfactoryTaxonomyFormats(request.purpose, requireFormats, result.value);
+        const unresolvedFormats = isUnsatisfactoryTaxonomyFormats(
+          request.purpose, requireFormats, result.value, acceptEmptyFormats,
+        );
         if (unresolvedFormats && diagnostics.attempts! < maxAttempts) {
           throw new AiUnusableOutputError('IA: formats vacío no resuelve la taxonomía', {
             kind: 'incomplete', model: route.model, status: result.status,
@@ -716,12 +723,29 @@ export class AiPoolClassifier implements AiClassifier {
   }
 }
 
+/**
+ * Taxonomy asked for formats, but empty is the correct final answer when the
+ * source enumerates exclusive alternatives or still-undetermined programming.
+ * Derived from observed facts — not a caller-set flag — so transports stay
+ * provider-agnostic. Included in requestKey/flightKey so cache and in-flight
+ * coalescing cannot reuse a resolved-empty result for a case that still needs
+ * a concrete format.
+ */
+function acceptEmptyTaxonomyFormats(
+  purpose: AiCallPurpose,
+  requireFormats: boolean,
+  observed: ObservedFacts,
+): boolean {
+  return purpose === 'taxonomy' && requireFormats && observedFormatChoiceIsUnresolved(observed);
+}
+
 function isUnsatisfactoryTaxonomyFormats(
   purpose: AiCallPurpose,
   requireFormats: boolean,
   value: unknown,
+  acceptEmptyFormats: boolean,
 ): boolean {
-  if (purpose !== 'taxonomy' || !requireFormats) return false;
+  if (purpose !== 'taxonomy' || !requireFormats || acceptEmptyFormats) return false;
   const parsed = parseAiClassification(value);
   return parsed.ok && taxonomyFormatsStillUnresolved(parsed.value);
 }
