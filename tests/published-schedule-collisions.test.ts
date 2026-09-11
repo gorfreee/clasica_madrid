@@ -3,6 +3,7 @@ import { matchEventIdentity } from '../src/ingestion/identity.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { loadCatalogFromDir } from '../src/lib/repository/load.ts';
 import { defaultDataDir } from '../src/lib/repository/fs.ts';
+import { isRealIsoDate } from '../src/lib/util/iso-date.ts';
 import { findScheduleCollisionIssues, findScheduleCollisions } from '../src/lib/validation/schedule-collisions.ts';
 
 const cndm = getSourceDefinition('cndm');
@@ -96,14 +97,14 @@ describe('catálogo publicado tras la limpieza de duplicados de hueco exclusivo'
       'src_madrid_a_tempo',
       'src_ayuntamiento_madrid',
     ]);
-    expect(tempo?.citations.find((item) => item.sourceId === 'src_ayuntamiento_madrid')).toMatchObject({
+    expectStableCitation(tempo?.citations.find((item) => item.sourceId === 'src_ayuntamiento_madrid'), {
+      sourceId: 'src_ayuntamiento_madrid',
       url: 'https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=5e05cff3cf74c910VgnVCM100000891ecb1aRCRD',
-      checkedAt: '2026-09-03',
       externalId: '50221891',
     });
-    expect(tempo?.citations.find((item) => item.sourceId === 'src_madrid_a_tempo')).toMatchObject({
+    expectStableCitation(tempo?.citations.find((item) => item.sourceId === 'src_madrid_a_tempo'), {
+      sourceId: 'src_madrid_a_tempo',
       url: 'https://www.madridatempo.com/programacion-2023',
-      checkedAt: '2026-08-28',
     });
 
     const larrocha = catalog.events.find((event) => event.id === 'evt_madrid_datos_50265531');
@@ -117,14 +118,14 @@ describe('catálogo publicado tras la limpieza de duplicados de hueco exclusivo'
       'src_ayuntamiento_madrid',
       'src_fundacionpiumosso_com',
     ]);
-    expect(larrocha?.citations.find((item) => item.sourceId === 'src_fundacionpiumosso_com')).toMatchObject({
+    expectStableCitation(larrocha?.citations.find((item) => item.sourceId === 'src_fundacionpiumosso_com'), {
+      sourceId: 'src_fundacionpiumosso_com',
       url: 'https://www.fundacionpiumosso.com/evento/victor-tretyakov-piano',
-      checkedAt: '2026-09-06',
       externalId: '2187',
     });
-    expect(larrocha?.citations.find((item) => item.sourceId === 'src_ayuntamiento_madrid')).toMatchObject({
+    expectStableCitation(larrocha?.citations.find((item) => item.sourceId === 'src_ayuntamiento_madrid'), {
+      sourceId: 'src_ayuntamiento_madrid',
       url: 'https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=a8d5e042bd42d910VgnVCM200000f921e388RCRD',
-      checkedAt: '2026-09-06',
       externalId: '50265531',
     });
 
@@ -234,3 +235,16 @@ describe('catálogo publicado tras la limpieza de duplicados de hueco exclusivo'
     });
   });
 });
+
+function expectStableCitation(
+  citation:
+    | { sourceId: string; url: string; externalId?: string; checkedAt: string }
+    | undefined,
+  identity: { sourceId: string; url: string; externalId?: string },
+) {
+  expect(citation).toMatchObject(identity);
+  expect(citation?.checkedAt, `${identity.sourceId} checkedAt`).toBeTruthy();
+  expect(isRealIsoDate(citation!.checkedAt), `${identity.sourceId} checkedAt is a calendar date`).toBe(
+    true,
+  );
+}

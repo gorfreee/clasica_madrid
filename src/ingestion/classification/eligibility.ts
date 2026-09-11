@@ -300,11 +300,7 @@ function flamencoTokenRemainsAfterFlemishGuards(haystack: string): boolean {
 
 function danceIdentity(facts: ObservedFacts, category: string, title: string): Exclusion | undefined {
   const principalEvidence: string[] = [];
-  if (
-    hasWord(category, 'danza') ||
-    hasWord(category, 'ballet') ||
-    hasPhrase(category, 'danza contemporanea')
-  ) {
+  if (isDanceOnlyCategory(category)) {
     principalEvidence.push(facts.categoryText ?? '');
   }
   if (titleIdentifiesDanceOrBallet(title)) {
@@ -341,6 +337,17 @@ function titleIdentifiesDanceOrBallet(title: string): boolean {
 }
 
 /**
+ * Category "Danza" / "Ballet" names the spectacle. "Música y danza" is mixed
+ * billing, not a dance-only identity — a concert of classical repertoire with
+ * a dancer stays a concert unless title/company say otherwise.
+ */
+function isDanceOnlyCategory(category: string): boolean {
+  if (hasWord(category, 'ballet') || hasPhrase(category, 'danza contemporanea')) return true;
+  if (!hasWord(category, 'danza')) return false;
+  return !hasWord(category, 'musica');
+}
+
+/**
  * A dance company is coprincipal only when the bill also has a live musical
  * performance of its own: orchestra/ensemble/musicians, or an unequivocal
  * concert/recital declaration. Named classical composers are not enough — a
@@ -361,7 +368,8 @@ function hasIndependentLiveMusicalPerformance(facts: ObservedFacts): boolean {
     return true;
   }
   if (classicalSeriesIdentity(facts)) return true;
-  return facts.performers.some((item) => isLiveMusicalPerformer(item));
+  if (facts.performers.some((item) => isLiveMusicalPerformer(item))) return true;
+  return hasProgrammeLinkedMusicalEnsemble(facts);
 }
 
 function isLiveMusicalPerformer(item: { name: string; roleText?: string }): boolean {
@@ -721,6 +729,7 @@ export function hasSubstantialClassicalBlock(facts: ObservedFacts): boolean {
   const known = knownClassicalNames(facts);
   if (known.length >= 2) return true;
   if (liveOrganPerformance(facts, identityHaystack(facts))) return true;
+  if (describedConcertWithUnequivocalClassicalRepertoire(facts)) return true;
   if (known.length === 0) return false;
   if (classicalFirstHalf(facts, known)) return true;
   return explicitListedClassicalWork(facts, known);
@@ -828,15 +837,114 @@ function explicitClassicalConcertDeclaration(facts: ObservedFacts): Inclusion | 
 }
 
 function describedClassicalPerformance(facts: ObservedFacts, _haystack: string): boolean {
-  // Naming the theatre is not a declaration of the repertoire performed there.
-  const description = fieldFolded(facts.description).replace(/\bteatro (?:de la )?zarzuela\b/g, '');
-  if (!description) return false;
-  const performs = /interpreta/.test(description);
-  const repertoire =
-    hasWord(description, 'opera') ||
-    hasWord(description, 'zarzuela') ||
-    hasPhrase(description, 'temas de zarzuela');
-  return performs && repertoire;
+  return (
+    describedLyricPerformance(facts) || describedConcertWithUnequivocalClassicalRepertoire(facts)
+  );
+}
+
+function describedLyricPerformance(facts: ObservedFacts): boolean {
+  const programme = eventProgrammeText(facts);
+  if (!programme) return false;
+  const performs = /interpreta/.test(programme);
+  const lyricRepertoire =
+    hasWord(programme, 'opera') ||
+    hasWord(programme, 'zarzuela') ||
+    hasPhrase(programme, 'temas de zarzuela');
+  return performs && lyricRepertoire;
+}
+
+/**
+ * Concert of THIS event: performance declaration + the musicians who play it +
+ * unequivocal classical repertoire. Used both as an inclusion and as a
+ * substantial classical block. A passing lyric mention in a mixed bill is not
+ * enough — that stays on describedLyricPerformance, which does not count as a
+ * mixed-programme block.
+ */
+function describedConcertWithUnequivocalClassicalRepertoire(facts: ObservedFacts): boolean {
+  return (
+    hasThisEventPerformanceDeclaration(facts) &&
+    hasProgrammeLinkedMusicalEnsemble(facts) &&
+    hasUnequivocalClassicalRepertoireOfThisEvent(facts)
+  );
+}
+
+function eventProgrammeText(facts: ObservedFacts): string {
+  return `${fieldFolded(facts.programText)} ${fieldFolded(facts.description)}`
+    .replace(/\bteatro (?:de la )?zarzuela\b/g, '')
+    .trim();
+}
+
+function hasThisEventPerformanceDeclaration(facts: ObservedFacts): boolean {
+  const title = fieldFolded(facts.title);
+  const category = fieldFolded(facts.categoryText);
+  if (hasConcertOrRecitalIdentity(facts, title, category)) return true;
+  const programme = eventProgrammeText(facts);
+  return hasPhrase(programme, 'interpretado por') || hasPhrase(programme, 'repertorio de');
+}
+
+/**
+ * Ensemble or musicians performing THIS event. Structured performers[] when
+ * the adapter extracted them; otherwise programme language that names the
+ * formation as the one interpreting the concert. Bare "orquesta", "cuerdas"
+ * or "piano", and accompaniment framing ("acompañado por"), are not enough.
+ */
+function hasProgrammeLinkedMusicalEnsemble(facts: ObservedFacts): boolean {
+  if (facts.performers.some((item) => isLiveMusicalPerformer(item))) return true;
+  const programme = eventProgrammeText(facts);
+  if (!programme) return false;
+  if (hasAccompanimentFraming(programme) && !hasPhrase(programme, 'interpretado por')) {
+    return false;
+  }
+  if (hasPhrase(programme, 'cuarteto de cuerdas')) return true;
+  if (hasPhrase(programme, 'solistas de la orquesta')) return true;
+  return hasPhrase(programme, 'interpretado por') && hasConcertEnsembleNoun(programme);
+}
+
+function hasAccompanimentFraming(programme: string): boolean {
+  return (
+    hasPhrase(programme, 'acompanad') ||
+    hasPhrase(programme, 'acompanamiento') ||
+    hasPhrase(programme, 'en el foso')
+  );
+}
+
+function hasConcertEnsembleNoun(programme: string): boolean {
+  return (
+    hasWord(programme, 'orquesta') ||
+    hasWord(programme, 'cuarteto') ||
+    hasWord(programme, 'solistas') ||
+    hasWord(programme, 'ensemble') ||
+    hasWord(programme, 'filarmonica') ||
+    hasWord(programme, 'octeto') ||
+    hasWord(programme, 'quinteto')
+  );
+}
+
+/**
+ * Repertoire of THIS concert, not a biographical aside. Viennese New Year
+ * programmes name the dance-music forms and the salon tradition without
+ * listing Strauss; that block is still unequivocal classical repertoire.
+ */
+function hasUnequivocalClassicalRepertoireOfThisEvent(facts: ObservedFacts): boolean {
+  const programme = eventProgrammeText(facts);
+  if (!programme) return false;
+  const vienneseForms =
+    (hasWord(programme, 'valses') || hasWord(programme, 'vals') || hasWord(programme, 'walzer')) &&
+    (hasWord(programme, 'mazurkas') ||
+      hasWord(programme, 'mazurcas') ||
+      hasWord(programme, 'polkas') ||
+      hasWord(programme, 'polcas'));
+  const vienneseTradition =
+    hasWord(programme, 'viena') ||
+    hasPhrase(programme, 'salon vienes') ||
+    hasPhrase(programme, 'salones vieneses') ||
+    hasWord(programme, 'vieneses') ||
+    hasWord(programme, 'vienes');
+  const presentedAsProgramme =
+    hasPhrase(programme, 'repertorio de') ||
+    hasPhrase(programme, 'interpretado por') ||
+    hasWord(programme, 'protagonistas');
+  return vienneseForms && vienneseTradition && presentedAsProgramme;
 }
 
 function academicContemporary(facts: ObservedFacts, haystack: string): boolean {
