@@ -11,7 +11,7 @@ import {
   buildAiTaxonomyUserMessage,
 } from './ai-prompt.ts';
 
-export const AI_REQUEST_CONTRACT_VERSION = 1;
+export const AI_REQUEST_CONTRACT_VERSION = 2;
 
 export type AiGenerationParameters = {
   maxOutputTokens: number;

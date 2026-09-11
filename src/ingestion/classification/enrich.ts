@@ -26,6 +26,7 @@ import {
   validateAiComposerCandidates,
 } from './ai-metadata.ts';
 import { rejectSpeculativeAiFormats } from './format-alternatives.ts';
+import { evaluateEligibilityAi } from './eligibility-grounding.ts';
 
 export { AI_CLASSIFY_TIMEOUT_MS };
 
@@ -122,7 +123,11 @@ async function resolveEligibilityWithAi(
   if (!parsed.ok) {
     return degrade(deterministic, 'ai', parsed.ruleId, [parsed.reason]);
   }
-  return applyEligibilityAi(deterministic, facts, parsed.value, options.venue);
+  const gated = evaluateEligibilityAi(facts, parsed.value, deterministic.eligibility);
+  if (!gated.accepted) {
+    return degrade(deterministic, 'ai', gated.ruleId, gated.evidence);
+  }
+  return applyEligibilityAi(deterministic, facts, { ...parsed.value, evidence: gated.evidence }, options.venue);
 }
 
 async function enrichTaxonomyWithAi(

@@ -8,7 +8,7 @@ import { collapseWhitespace } from '../html.ts';
 import { findKnownComposersInText, matchComposer } from '../knowledge/composers.ts';
 import type { ObservedComposer, ObservedFacts } from '../observed.ts';
 import type { AiComposerCandidate } from './ai.ts';
-import { foldName } from './text.ts';
+import { containsNormalizedSpan, foldName } from './text.ts';
 
 const COMPOSER_ATTRIBUTION_CUE =
   /\b(?:obras?|m[uú]sica|composici[oó]n(?:es)?|programa)\s+(?:(?:de|del)\b|:)/iu;
@@ -200,12 +200,6 @@ function clearlyNonComposerContext(name: string, evidence: string): boolean {
     })) return true;
   }
   return false;
-}
-
-function containsNormalizedSpan(container: string, span: string): boolean {
-  const haystack = foldName(container);
-  const needle = foldName(span);
-  return Boolean(needle && (` ${haystack} `).includes(` ${needle} `));
 }
 
 function containsName(container: string, name: string): boolean {
