@@ -157,6 +157,8 @@ El fallback de IA debe intentar asignar al menos un formato cuando los hechos ob
 
 Los formatos describen la formación o la naturaleza **de este concierto**, no el historial profesional de sus intérpretes. Evidencia fuerte: título, categoría explícita de la fuente, nombres/roles estructurados, formación explícita del evento. Una mención aislada a orquesta, música de cámara o trío en una biografía o en prosa editorial genérica no basta. Vacío es preferible a un formato incorrecto.
 
+No tratar alternativas exclusivas como formatos múltiples. Un texto del estilo «actuará un pianista o un grupo de cámara», «A o B», «o bien» o programación todavía no determinada no afirma que el evento sea ambas cosas. Varios formats a la vez sólo cuando la fuente declara que **este** concierto combina formaciones (primera y segunda parte, combina X e Y, orquesta y coro). Si no hay evidencia suficiente, `formats: []` y revisión; no rellenar con `other`.
+
 Derivación preferida a partir de hechos:
 
 | Hecho | Format típico |

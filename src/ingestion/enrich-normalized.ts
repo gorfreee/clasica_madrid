@@ -1,16 +1,24 @@
-import { normalizeText } from '../lib/domain/normalize.ts';
-import { findKnownComposersInText, matchComposer } from './knowledge/composers.ts';
+import {
+  identityKeySet,
+  matchesIdentitySet,
+  sortComposersByAppearance,
+  uniqueByCanonicalIdentity,
+} from './composer-lists.ts';
+import { findKnownComposersInText } from './knowledge/composers.ts';
 import type { NormalizedEvent } from './normalize.ts';
 import { composersFromWorks, type ObservedComposer } from './observed.ts';
 
 /**
  * Deterministic musical enrichment of a normalized observation.
  *
- * Structured `composers[]` / `works[].composerName` always win. A knowledge-base
- * scan of `programText` (and, if still empty, an unambiguous title hit) fills
- * `composers[]` only when that structured evidence is absent. Does not invent
- * works, does not scan editorial `description`, and does not rewrite source
- * spellings that already came from the adapter.
+ * Priority: structured `composers[]` / `works[].composerName`, then known
+ * composers derived from those works, then a knowledge-base scan of
+ * `programText`. Finding some composers by one path does not skip the rest:
+ * additional unequivocal names in the programme are appended, deduplicated
+ * by canonical identity, and ordered by appearance. Title is a fallback only
+ * when every other path is empty. Does not invent works, does not scan
+ * editorial `description`, does not rewrite adapter spellings, and does not
+ * promote observed performers to composers.
  */
 export function enrichNormalizedEvent(event: NormalizedEvent): NormalizedEvent {
   const composers = enrichComposers(event);
@@ -23,40 +31,40 @@ function enrichComposers(event: NormalizedEvent): ObservedComposer[] {
     ...event.composers,
     ...composersFromWorks(event.works),
   ]);
-  if (structured.length > 0) return structured;
+  const performerKeys = identityKeySet(event.performers.map((person) => person.name));
+  const fromProgram = event.programText
+    ? programComposers(event.programText, structured, performerKeys)
+    : [];
 
-  const fromProgram = event.programText ? findKnownComposersInText(event.programText) : [];
-  const found = fromProgram.length > 0 ? fromProgram : findKnownComposersInText(event.title);
-  if (found.length === 0) return event.composers;
-
-  const sourceText = fromProgram.length > 0 ? event.programText! : event.title;
-  return uniqueByCanonicalIdentity(
-    sortByAppearance(sourceText, found).map((item) => ({ name: item.canonicalName })),
-  );
-}
-
-function uniqueByCanonicalIdentity(items: ObservedComposer[]): ObservedComposer[] {
-  const seen = new Set<string>();
-  const result: ObservedComposer[] = [];
-  for (const item of items) {
-    const key = matchComposer(item.name)?.canonicalName ?? normalizeText(item.name);
-    if (!key || seen.has(key)) continue;
-    seen.add(key);
-    result.push(item);
+  if (structured.length > 0) {
+    if (fromProgram.length === 0) return structured;
+    const sourceText = event.programText ?? '';
+    return sortComposersByAppearance(
+      sourceText,
+      uniqueByCanonicalIdentity([...structured, ...fromProgram]),
+    );
   }
-  return result;
-}
 
-function sortByAppearance<T extends { aliases: string[] }>(text: string, items: T[]): T[] {
-  return [...items].sort((left, right) => firstAppearance(text, left) - firstAppearance(text, right));
-}
-
-function firstAppearance(text: string, item: { aliases: string[] }): number {
-  const haystack = text.toLocaleLowerCase('es');
-  let best = Number.POSITIVE_INFINITY;
-  for (const alias of item.aliases) {
-    const index = haystack.indexOf(alias.toLocaleLowerCase('es'));
-    if (index >= 0 && index < best) best = index;
+  if (fromProgram.length > 0) {
+    return sortComposersByAppearance(event.programText!, fromProgram);
   }
-  return best;
+
+  const fromTitle = findKnownComposersInText(event.title)
+    .filter((item) => !matchesIdentitySet(item.canonicalName, performerKeys))
+    .map((item) => ({ name: item.canonicalName }));
+  if (fromTitle.length === 0) return event.composers;
+  return uniqueByCanonicalIdentity(sortComposersByAppearance(event.title, fromTitle));
+}
+
+function programComposers(
+  programText: string,
+  structured: ObservedComposer[],
+  performerKeys: Set<string>,
+): ObservedComposer[] {
+  const structuredKeys = identityKeySet(structured.map((item) => item.name));
+  return findKnownComposersInText(programText).flatMap((item) => {
+    if (matchesIdentitySet(item.canonicalName, structuredKeys)) return [];
+    if (matchesIdentitySet(item.canonicalName, performerKeys)) return [];
+    return [{ name: item.canonicalName }];
+  });
 }

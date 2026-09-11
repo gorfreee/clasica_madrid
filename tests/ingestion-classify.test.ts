@@ -1519,6 +1519,34 @@ describe('formats', () => {
     ).toEqual(['recital']);
   });
 
+  it('no asigna recital y chamber a la vez cuando la fuente enumera alternativas', () => {
+    expect(
+      resolveFormats(
+        facts({
+          title: 'Festival Alicia de Larrocha: Consagración, la maestría musical',
+          description: 'Concierto de música clásica. Actuará un pianista o un grupo de cámara.',
+          programText: 'Actuará un pianista o un grupo de cámara.',
+        }),
+      ).value,
+    ).toEqual([]);
+  });
+
+  it('conserva varios formats cuando la fuente afirma que el concierto combina formaciones', () => {
+    expect(
+      resolveFormats(
+        facts({
+          title: 'Programa doble',
+          performers: [
+            { name: 'Ana Piano', roleText: 'piano' },
+            { name: 'Cuarteto Casals', roleText: 'cuarteto' },
+          ],
+          description:
+            'El concierto combina un recital de piano y un grupo de cámara: primera parte recital, segunda parte cuarteto.',
+        }),
+      ).value,
+    ).toEqual(['chamber', 'recital']);
+  });
+
   it('varios cantantes con piano no se fuerzan a recital ni a chamber por la sala', () => {
     expect(
       resolveFormats(
