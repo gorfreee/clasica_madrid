@@ -1,4 +1,4 @@
-import { emptyIngestQualitySummary, type IngestRunSummary } from './types.ts';
+import { emptyIngestQualitySummary, type IngestAiRouteSummary, type IngestRunSummary } from './types.ts';
 
 export function formatRunSummary(summary: IngestRunSummary): string {
   const quality = summary.quality ?? emptyIngestQualitySummary();
@@ -44,18 +44,21 @@ export function formatRunSummary(summary: IngestRunSummary): string {
       `  ${purpose}: intentadas ${counts.attempted}, resueltas ${counts.resolved}, sin resolver ${counts.unresolved}, errores ${counts.errors}`,
     ),
     `  http: ${summary.ai.httpRequests}`,
+    `  llamadas lógicas: ${summary.ai.logicalCalls}`,
     `  caché: ${summary.ai.cacheHits}`,
     `  pendientes recuperables: ${summary.ai.deferred}`,
-    `  retries: ${summary.ai.retries}`,
-    `  fallbacks de modelo: ${summary.ai.modelFallbacks}`,
+    `  retries (misma route): ${summary.ai.sameRouteRetries}`,
+    `  HTTP de fallback: ${summary.ai.httpFallbacks}`,
+    `  llamadas con fallback: ${summary.ai.fallbackCalls}`,
+    `  circuitos abiertos: ${summary.ai.circuitOpenRoutes}`,
     `  rate limits: ${summary.ai.rateLimits}`,
     `  cuotas diarias agotadas: ${summary.ai.quotaExhausted}`,
     ...formatCountMap('requests por provider', summary.ai.requestsByProvider),
     ...formatCountMap('clasificaciones por provider', summary.ai.classificationsByProvider),
     ...formatCountMap('requests HTTP por purpose', summary.ai.requestsByPurpose),
     ...formatCountMap('fallos técnicos por tipo', summary.ai.failuresByKind),
-    ...formatCountMap('requests por route', summary.ai.requestsByRoute),
-    ...formatCountMap('clasificaciones por route', summary.ai.classificationsByRoute),
+    ...formatCountMap('rate limits por provider', summary.ai.rateLimitsByProvider),
+    ...formatAiRouteLines(summary.ai.routes),
     ...formatCountMap('tokens de entrada medidos por route', summary.ai.inputTokensByRoute),
     ...formatCountMap('tokens de salida medidos por route', summary.ai.outputTokensByRoute),
     ...formatCountMap('tokens de razonamiento medidos por route', summary.ai.thoughtTokensByRoute),
@@ -95,6 +98,21 @@ function formatCountMap(label: string, counts: Record<string, number>): string[]
   const entries = Object.entries(counts).filter(([, value]) => value > 0);
   if (entries.length === 0) return [];
   return [`  ${label}: ${entries.map(([name, value]) => `${name}=${value}`).join(', ')}`];
+}
+
+function formatAiRouteLines(routes: IngestAiRouteSummary[]): string[] {
+  const active = routes.filter((route) => route.httpRequests > 0 || route.circuitOpen);
+  if (active.length === 0) return [];
+  return [
+    '  por route:',
+    ...active.map((route) => {
+      const extra = [
+        route.circuitOpen ? `circuito abierto${route.circuitReason ? ` (${route.circuitReason})` : ''}` : undefined,
+        route.rateLimits ? `rate-limit ${route.rateLimits}` : undefined,
+      ].filter(Boolean);
+      return `    ${route.routeId}: ${route.httpRequests} HTTP, ${route.valid} válidas${extra.length ? `; ${extra.join('; ')}` : ''}`;
+    }),
+  ];
 }
 
 function suffixList(ids: string[]): string {

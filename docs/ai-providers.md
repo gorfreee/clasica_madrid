@@ -33,6 +33,10 @@ Cada lista puede reordenarse con `*_MODELS`. En zero-cost mode, Z.AI, Cloudflare
 
 Esos `*_MODEL_RPM` / `*_MODEL_TPM` / `*_MODEL_RPD` son configuración no sensible. En producción el workflow las lee de `vars.*` (nunca de secrets). Si la variable de repositorio está vacía, se aplican los defaults de código descritos arriba. En local viven en `.local/ai.env`.
 
+El scheduler también entiende límites genéricos de presión por route/provider: `maxConcurrent`, `minIntervalMs`, `providerMaxConcurrent` y `providerMinIntervalMs`. Se declaran en la route o con overrides `*_MODEL_MAX_CONCURRENT`, `*_MODEL_MIN_INTERVAL_MS`, `*_MAX_CONCURRENT` y `*_MIN_INTERVAL_MS`. El scheduler no hardcodea reglas por provider.
+
+Durante una ejecución, una route que acumula varios fallos consecutivos relevantes (empty/incomplete/timeout/transport/output inválido) sin un resultado válido entre medias abre un circuit breaker in-memory. Rate limits, RPM/RPD y cuota diaria siguen sus mecanismos propios. El circuito no se persiste entre runs y nunca introduce un provider de pago.
+
 ## Perfiles HTTP por modelo
 
 Las tareas del pool (eligibility, compositores, acceso, taxonomy) piden JSON corto. El transport OpenAI-compatible es único; cada route declara el payload que su proveedor admite:
@@ -46,7 +50,7 @@ Las tareas del pool (eligibility, compositores, acceso, taxonomy) piden JSON cor
 
 `--ai-max-requests` limita los HTTP requests del pool completo, incluidos fallos, retries y fallbacks. `--ai-route provider:model` fija una sola route para diagnóstico.
 
-El `report.json`, el resumen de consola y el Job Summary separan provider, modelo y `routeId`; incluyen requests HTTP totales y por provider/route/purpose, resultados válidos por route, retries, fallbacks, rate limits, cuotas agotadas, outputs inválidos, caché y tokens disponibles. Así, un mismo modelo servido por proveedores distintos nunca se mezcla.
+El `report.json`, el resumen de consola y el Job Summary separan provider, modelo y `routeId`. Distinguen llamadas lógicas, requests HTTP, retries de la misma route, HTTP de fallback, llamadas con fallback, caché, deferred, rate limits, cuotas agotadas y circuitos abiertos. Hay una tabla compacta por route (HTTP, válidas, rate limits, circuito). El detalle completo permanece en el artifact.
 
 ## Smoke tests manuales
 

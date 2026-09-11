@@ -220,14 +220,22 @@ function formatObservabilitySection(
     rows.push(
       `| Desapariciones no evaluables (source incompleta) | ${cell(summary.disappearanceSuppressedSources?.join(', ') || 'ninguna')} |`,
     );
+    rows.push(`| IA: llamadas lógicas | ${summary.ai.logicalCalls} |`);
     rows.push(`| IA: requests HTTP | ${summary.ai.httpRequests} |`);
     rows.push(`| IA: cache hits | ${summary.ai.cacheHits} |`);
-    rows.push(`| IA: fallbacks | ${summary.ai.modelFallbacks} |`);
+    rows.push(`| IA: retries misma route | ${summary.ai.sameRouteRetries} |`);
+    rows.push(`| IA: HTTP de fallback | ${summary.ai.httpFallbacks} |`);
+    rows.push(`| IA: llamadas con fallback | ${summary.ai.fallbackCalls} |`);
     rows.push(`| IA: deferred | ${summary.ai.deferred} |`);
     rows.push(`| IA: rate limits / cuota agotada | ${summary.ai.rateLimits} / ${summary.ai.quotaExhausted} |`);
+    rows.push(`| IA: circuitos abiertos | ${summary.ai.circuitOpenRoutes} |`);
     rows.push(`| IA: requests por provider | ${cell(compactCounts(summary.ai.requestsByProvider))} |`);
-    rows.push(`| IA: válidas por route | ${cell(compactCounts(summary.ai.classificationsByRoute))} |`);
+    rows.push(`| IA: rate limits por provider | ${cell(compactCounts(summary.ai.rateLimitsByProvider))} |`);
     rows.push(`| IA: requests por purpose | ${cell(compactCounts(summary.ai.requestsByPurpose))} |`);
+    const routeRows = formatAiRouteTable(summary.ai.routes ?? []);
+    if (routeRows) {
+      rows.push('', ...routeRows.split('\n'));
+    }
   }
 
   const stageEntries = Object.entries(timings?.stagesMs ?? {}).filter(
@@ -274,11 +282,38 @@ function formatDuration(ms: number): string {
   return `${minutes}m ${String(seconds % 60).padStart(2, '0')}s`;
 }
 
-function compactCounts(counts: Partial<Record<string, number>>): string {
-  return Object.entries(counts)
+function compactCounts(counts: Partial<Record<string, number>> | undefined): string {
+  return Object.entries(counts ?? {})
     .sort(([left], [right]) => left.localeCompare(right))
     .map(([key, value]) => `${key}: ${value}`)
     .join(', ') || 'ninguno';
+}
+
+function formatAiRouteTable(routes: IngestReport['summary']['ai']['routes']): string | undefined {
+  const active = [...routes]
+    .filter((route) => route.httpRequests > 0 || route.circuitOpen)
+    .sort((left, right) => {
+      if (left.circuitOpen !== right.circuitOpen) return left.circuitOpen ? -1 : 1;
+      if (left.valid === 0 && right.valid !== 0) return -1;
+      if (right.valid === 0 && left.valid !== 0) return 1;
+      return right.httpRequests - left.httpRequests;
+    });
+  if (active.length === 0) return undefined;
+  const rows = [
+    '#### IA por route',
+    '',
+    '| Route | HTTP | Válidas | Rate limits | Circuito |',
+    '|---|---:|---:|---:|---|',
+  ];
+  for (const route of active) {
+    const circuit = route.circuitOpen
+      ? `abierto${route.circuitReason ? `: ${route.circuitReason}` : ''}`
+      : 'cerrado';
+    rows.push(
+      `| ${cell(route.routeId)} | ${route.httpRequests} | ${route.valid} | ${route.rateLimits} | ${cell(circuit)} |`,
+    );
+  }
+  return rows.join('\n');
 }
 
 function formatSourceStatus(timing: IngestSourceTiming): string {

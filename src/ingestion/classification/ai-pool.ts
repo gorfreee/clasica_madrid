@@ -14,7 +14,9 @@ import {
   type AiCallDiagnostics,
   type AiCallPurpose,
   type AiClassifier,
+  type AiFailureKind,
   type AiProviderStats,
+  type AiRouteRuntimeStats,
 } from './ai.ts';
 import { buildAiRequest, type AiRequest } from './ai-request.ts';
 import { AiPoolState, hashAiInput } from './ai-state.ts';
@@ -25,6 +27,29 @@ export const AI_POOL_BACKOFF_BASE_MS = 2_000;
 export const AI_POOL_MAX_RETRY_WAIT_MS = 60_000;
 export const AI_POOL_CLASSIFY_BUDGET_MS = 180_000;
 export const AI_POOL_DEFAULT_CONCURRENCY = 8;
+/** Consecutive unhealthy outcomes without a valid result that open a route circuit. */
+export const AI_POOL_CIRCUIT_FAILURE_THRESHOLD = 4;
+const CIRCUIT_UNHEALTHY = new Set<AiFailureKind>([
+  'empty-output',
+  'incomplete',
+  'malformed-output',
+  'invalid-output',
+  'timeout',
+  'transport-error',
+]);
+const INTEGER_LIMITS = [
+  'maxConcurrent',
+  'minIntervalMs',
+  'providerMaxConcurrent',
+  'providerMinIntervalMs',
+] as const;
+const DISABLE_LIMITS = [
+  'rpm',
+  'tpm',
+  'rpd',
+  'maxConcurrent',
+  'providerMaxConcurrent',
+] as const;
 
 export type SleepClock = { now(): number; sleep(ms: number): Promise<void> };
 export type AiPoolClassifierOptions = {
@@ -42,6 +67,15 @@ export type AiPoolClassifierOptions = {
 
 type Reservation = { route: AiRoute; id: string; estimated: number };
 type CallResult = { value: unknown; diagnostics: AiCallDiagnostics };
+type RouteHealth = {
+  consecutiveUnhealthy: number;
+  lastUnhealthyKind?: AiFailureKind;
+  circuitOpen: boolean;
+  circuitReason?: string;
+  failuresByKind: Partial<Record<AiFailureKind, number>>;
+  rateLimits: number;
+  quotaExhausted: number;
+};
 
 const systemClock: SleepClock = {
   now: () => Date.now(),
@@ -59,6 +93,10 @@ export class AiPoolClassifier implements AiClassifier {
   private readonly disabledRoutes = new Set<string>();
   private readonly fatalProviders = new Map<string, Error>();
   private readonly inFlight = new Map<string, Promise<CallResult>>();
+  private readonly health = new Map<string, RouteHealth>();
+  private readonly inFlightByRoute = new Map<string, number>();
+  private readonly inFlightByProvider = new Map<string, number>();
+  private readonly lastStartByProvider = new Map<string, number>();
   private active = 0;
   private reservedRequests = 0;
   private lastCall?: AiCallDiagnostics;
@@ -66,6 +104,11 @@ export class AiPoolClassifier implements AiClassifier {
     httpRequests: 0,
     retries: 0,
     modelFallbacks: 0,
+    logicalCalls: 0,
+    sameRouteRetries: 0,
+    httpFallbacks: 0,
+    fallbackCalls: 0,
+    circuitOpenRoutes: 0,
     cacheHits: 0,
     deferred: 0,
     requestsByRoute: {} as Record<string, number>,
@@ -77,6 +120,8 @@ export class AiPoolClassifier implements AiClassifier {
     classificationsByProvider: {} as Record<string, number>,
     requestsByPurpose: {} as Partial<Record<AiCallPurpose, number>>,
     failuresByKind: {} as Partial<Record<AiAttemptFailure['kind'], number>>,
+    rateLimitsByRoute: {} as Record<string, number>,
+    rateLimitsByProvider: {} as Record<string, number>,
     rateLimits: 0,
     quotaExhausted: 0,
   };
@@ -91,6 +136,12 @@ export class AiPoolClassifier implements AiClassifier {
       seen.add(route.routeId);
       for (const [name, limit] of Object.entries(route.limits ?? {})) {
         if (limit !== undefined && (!Number.isFinite(limit) || limit < 0)) {
+          throw new Error(`IA: límite ${name} inválido para ${route.routeId}`);
+        }
+      }
+      for (const name of INTEGER_LIMITS) {
+        const value = route.limits?.[name];
+        if (value !== undefined && !Number.isSafeInteger(value)) {
           throw new Error(`IA: límite ${name} inválido para ${route.routeId}`);
         }
       }
@@ -130,7 +181,12 @@ export class AiPoolClassifier implements AiClassifier {
     return {
       httpRequests: this.stats.httpRequests,
       retries: this.stats.retries,
-      modelFallbacks: this.stats.modelFallbacks,
+      modelFallbacks: this.stats.httpFallbacks,
+      logicalCalls: this.stats.logicalCalls,
+      sameRouteRetries: this.stats.sameRouteRetries,
+      httpFallbacks: this.stats.httpFallbacks,
+      fallbackCalls: this.stats.fallbackCalls,
+      circuitOpenRoutes: this.stats.circuitOpenRoutes,
       cacheHits: this.stats.cacheHits,
       deferred: this.stats.deferred,
       requestsByRoute,
@@ -143,8 +199,11 @@ export class AiPoolClassifier implements AiClassifier {
       classificationsByProvider: structuredClone(this.stats.classificationsByProvider),
       requestsByPurpose: structuredClone(this.stats.requestsByPurpose),
       failuresByKind: structuredClone(this.stats.failuresByKind),
+      rateLimitsByRoute: structuredClone(this.stats.rateLimitsByRoute),
+      rateLimitsByProvider: structuredClone(this.stats.rateLimitsByProvider),
       rateLimits: this.stats.rateLimits,
       quotaExhausted: this.stats.quotaExhausted,
+      routes: this.routeSnapshots(),
       requestsByModel: requestsByRoute,
       classificationsByModel: classificationsByRoute,
       inputTokensByModel: inputTokensByRoute,
@@ -226,6 +285,9 @@ export class AiPoolClassifier implements AiClassifier {
     const maxAttempts = 1 + (this.options.maxRetries ?? AI_POOL_MAX_RETRIES);
     const skippedThisCall = new Set<string>();
     let lastError: unknown;
+    let firstHttpRouteId: string | undefined;
+    let countedFallbackCall = false;
+    this.stats.logicalCalls++;
 
     while (diagnostics.attempts! < maxAttempts) {
       signal.throwIfAborted();
@@ -243,7 +305,19 @@ export class AiPoolClassifier implements AiClassifier {
       }
 
       const { route, id, estimated } = await this.acquire(request, deadline, signal, diagnostics, skippedThisCall);
-      if (diagnostics.attempts! > 0) this.stats.retries++;
+      if (diagnostics.attempts! > 0) {
+        this.stats.retries++;
+        if (firstHttpRouteId === route.routeId) this.stats.sameRouteRetries++;
+        else {
+          this.stats.httpFallbacks++;
+          if (!countedFallbackCall) {
+            this.stats.fallbackCalls++;
+            countedFallbackCall = true;
+          }
+          diagnostics.fallbackUsed = true;
+        }
+      }
+      firstHttpRouteId ??= route.routeId;
       diagnostics.attempts!++;
       this.selectDiagnostics(diagnostics, route);
       this.stats.httpRequests++;
@@ -296,6 +370,7 @@ export class AiPoolClassifier implements AiClassifier {
           this.state.cache(this.cacheKey(requestKey, route), request.purpose, result.value);
         }
         this.state.resolvePending(requestKey);
+        this.noteSuccess(route);
         bump(this.stats.classificationsByRoute, route.routeId);
         bump(this.stats.classificationsByProvider, route.provider);
         return { value: result.value, diagnostics };
@@ -304,7 +379,7 @@ export class AiPoolClassifier implements AiClassifier {
         signal.throwIfAborted();
         this.handleAttemptError(error, route, diagnostics, skippedThisCall);
       } finally {
-        this.active--;
+        this.release(route);
       }
     }
     if (lastError instanceof AiTransportError && lastError.kind === 'rate-limit') {
@@ -342,6 +417,7 @@ export class AiPoolClassifier implements AiClassifier {
         (candidate) => this.available(candidate, skippedThisCall),
       );
       addRoute(diagnostics, route, failureKindForUnusable(error.kind));
+      this.noteAttemptOutcome(route, failureKindForUnusable(error.kind));
       return;
     }
     if (!(error instanceof AiTransportError)) throw error;
@@ -351,7 +427,12 @@ export class AiPoolClassifier implements AiClassifier {
     const state = this.state.route(route.routeId, this.clock.now(), route.reset);
     if (error.kind === 'rate-limit') {
       this.stats.rateLimits++;
-      if (error.quotaExhausted) this.stats.quotaExhausted++;
+      bump(this.stats.rateLimitsByRoute, route.routeId);
+      bump(this.stats.rateLimitsByProvider, route.provider);
+      if (error.quotaExhausted) {
+        this.stats.quotaExhausted++;
+        this.routeHealth(route.routeId).quotaExhausted++;
+      }
       if (error.quotaExhausted && route.reset) state.dailyUntil = route.reset.nextReset(this.clock.now());
       else state.cooldownUntil = Math.max(
         state.cooldownUntil,
@@ -369,6 +450,12 @@ export class AiPoolClassifier implements AiClassifier {
       state.cooldownUntil = this.clock.now() + this.retryWait(undefined, diagnostics.attempts! - 1);
       this.state.save();
       addRoute(diagnostics, route, error.kind);
+      skipRouteWhenAlternativeExists(
+        skippedThisCall,
+        route,
+        this.routes,
+        (candidate) => this.available(candidate, skippedThisCall),
+      );
     }
     pushFailure(diagnostics, route, {
       model: route.model,
@@ -378,6 +465,10 @@ export class AiPoolClassifier implements AiClassifier {
     });
     bump(
       this.stats.failuresByKind as Record<string, number>,
+      error.kind === 'rate-limit' ? 'rate-limit' : error.kind === 'timeout' ? 'timeout' : 'transport-error',
+    );
+    this.noteAttemptOutcome(
+      route,
       error.kind === 'rate-limit' ? 'rate-limit' : error.kind === 'timeout' ? 'timeout' : 'transport-error',
     );
   }
@@ -402,7 +493,11 @@ export class AiPoolClassifier implements AiClassifier {
         if (!this.available(route, skippedThisCall)) {
           const reason = skippedThisCall.has(route.routeId)
             ? 'unusable-output'
-            : this.fatalProviders.has(route.provider) ? 'fatal-provider' : 'disabled';
+            : this.fatalProviders.has(route.provider)
+              ? 'fatal-provider'
+              : this.routeHealth(route.routeId).circuitOpen
+                ? 'circuit-open'
+                : 'disabled';
           addRoute(diagnostics, route, reason);
           continue;
         }
@@ -419,9 +514,24 @@ export class AiPoolClassifier implements AiClassifier {
           addRoute(diagnostics, route, 'input-over-tpm');
           continue;
         }
+        if (this.atConcurrencyCap(this.inFlightByRoute, route.routeId, route.limits?.maxConcurrent)) {
+          addRoute(diagnostics, route, 'route-concurrency');
+          earliest = Math.min(earliest, now + 25);
+          continue;
+        }
+        const providerConcurrent = this.providerCap(route.provider, 'providerMaxConcurrent');
+        if (this.atConcurrencyCap(this.inFlightByProvider, route.provider, providerConcurrent)) {
+          addRoute(diagnostics, route, 'provider-concurrency');
+          earliest = Math.min(earliest, now + 25);
+          continue;
+        }
         if (state.nextAt > now) addRoute(diagnostics, route, 'rpm-wait');
         if (state.cooldownUntil > now) addRoute(diagnostics, route, 'cooldown');
         let next = Math.max(now, state.nextAt, state.cooldownUntil);
+        const providerInterval = this.providerCap(route.provider, 'providerMinIntervalMs') ?? 0;
+        const providerReadyAt = (this.lastStartByProvider.get(route.provider) ?? 0) + providerInterval;
+        if (providerReadyAt > now) addRoute(diagnostics, route, 'provider-min-interval');
+        next = Math.max(next, providerReadyAt);
         let tokens = state.recent.reduce((sum, item) => sum + item.tokens, 0);
         if (tokens + estimated > tpm) addRoute(diagnostics, route, 'tpm-wait');
         for (const item of state.recent) {
@@ -432,11 +542,17 @@ export class AiPoolClassifier implements AiClassifier {
         if (next <= now && this.active < this.concurrency) {
           const id = randomUUID();
           state.requests++;
-          state.nextAt = now + intervalMsForRpm(route.limits?.rpm);
+          state.nextAt = now + Math.max(
+            intervalMsForRpm(route.limits?.rpm),
+            route.limits?.minIntervalMs ?? 0,
+          );
           state.recent.push({ id, at: now, tokens: estimated });
           this.state.save();
           this.reservedRequests++;
           this.active++;
+          bumpMap(this.inFlightByRoute, route.routeId);
+          bumpMap(this.inFlightByProvider, route.provider);
+          this.lastStartByProvider.set(route.provider, now);
           addRoute(
             diagnostics,
             route,
@@ -460,14 +576,98 @@ export class AiPoolClassifier implements AiClassifier {
   }
 
   private enabled(route: AiRoute): boolean {
-    return !Object.values(route.limits ?? {}).some((limit) => limit === 0);
+    const limits = route.limits ?? {};
+    return DISABLE_LIMITS.every((name) => limits[name] !== 0);
   }
 
   private available(route: AiRoute, skipped: ReadonlySet<string>): boolean {
     return this.enabled(route)
       && !this.disabledRoutes.has(route.routeId)
       && !this.fatalProviders.has(route.provider)
-      && !skipped.has(route.routeId);
+      && !skipped.has(route.routeId)
+      && !this.routeHealth(route.routeId).circuitOpen;
+  }
+
+  private release(route: AiRoute): void {
+    this.active--;
+    bumpMap(this.inFlightByRoute, route.routeId, -1);
+    bumpMap(this.inFlightByProvider, route.provider, -1);
+  }
+
+  private routeHealth(routeId: string): RouteHealth {
+    let health = this.health.get(routeId);
+    if (!health) {
+      health = {
+        consecutiveUnhealthy: 0,
+        circuitOpen: false,
+        failuresByKind: {},
+        rateLimits: 0,
+        quotaExhausted: 0,
+      };
+      this.health.set(routeId, health);
+    }
+    return health;
+  }
+
+  private noteSuccess(route: AiRoute): void {
+    const health = this.routeHealth(route.routeId);
+    health.consecutiveUnhealthy = 0;
+    health.lastUnhealthyKind = undefined;
+  }
+
+  private noteAttemptOutcome(route: AiRoute, kind: AiFailureKind): void {
+    const health = this.routeHealth(route.routeId);
+    bump(health.failuresByKind as Record<string, number>, kind);
+    if (kind === 'rate-limit') {
+      health.rateLimits++;
+      return;
+    }
+    if (!CIRCUIT_UNHEALTHY.has(kind)) return;
+    health.consecutiveUnhealthy++;
+    health.lastUnhealthyKind = kind;
+    if (!health.circuitOpen && health.consecutiveUnhealthy >= AI_POOL_CIRCUIT_FAILURE_THRESHOLD) {
+      health.circuitOpen = true;
+      health.circuitReason =
+        `${kind} × ${health.consecutiveUnhealthy} consecutivos sin resultado válido`;
+      this.stats.circuitOpenRoutes++;
+    }
+  }
+
+  private providerCap(
+    provider: string,
+    key: 'providerMaxConcurrent' | 'providerMinIntervalMs',
+  ): number | undefined {
+    const values = this.routes
+      .filter((route) => route.provider === provider)
+      .map((route) => route.limits?.[key])
+      .filter((value): value is number => value !== undefined);
+    return values.length ? Math.min(...values) : undefined;
+  }
+
+  private atConcurrencyCap(map: Map<string, number>, key: string, cap: number | undefined): boolean {
+    return cap !== undefined && (map.get(key) ?? 0) >= cap;
+  }
+
+  private routeSnapshots(): AiRouteRuntimeStats[] {
+    return this.routes.map((route) => {
+      const health = this.routeHealth(route.routeId);
+      const httpRequests = this.stats.requestsByRoute[route.routeId] ?? 0;
+      const valid = this.stats.classificationsByRoute[route.routeId] ?? 0;
+      return {
+        routeId: route.routeId,
+        provider: route.provider,
+        model: route.model,
+        httpRequests,
+        valid,
+        failures: httpRequests - valid,
+        failuresByKind: structuredClone(health.failuresByKind),
+        rateLimits: health.rateLimits,
+        quotaExhausted: health.quotaExhausted,
+        circuitOpen: health.circuitOpen,
+        ...(health.circuitReason ? { circuitReason: health.circuitReason } : {}),
+        consecutiveFailures: health.consecutiveUnhealthy,
+      };
+    });
   }
 
   private estimateInputTokens(request: AiRequest, route: AiRoute): number {
@@ -498,8 +698,6 @@ export class AiPoolClassifier implements AiClassifier {
     diagnostics.provider = route.provider;
     diagnostics.model = route.model;
     diagnostics.routeId = route.routeId;
-    diagnostics.fallbackUsed = route.routeId !== this.routes[0]!.routeId;
-    if (diagnostics.fallbackUsed && reason !== 'cache') this.stats.modelFallbacks++;
     if (reason) addRoute(diagnostics, route, reason);
   }
 
@@ -568,6 +766,10 @@ function intervalMsForRpm(rpm: number | undefined): number {
 
 function bump(map: Record<string, number>, key: string, amount = 1): void {
   map[key] = (map[key] ?? 0) + amount;
+}
+
+function bumpMap(map: Map<string, number>, key: string, amount = 1): void {
+  map.set(key, (map.get(key) ?? 0) + amount);
 }
 
 async function abortable<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
