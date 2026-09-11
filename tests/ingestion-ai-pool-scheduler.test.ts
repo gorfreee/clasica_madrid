@@ -1,10 +1,14 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { mkdtempSync, readdirSync, rmSync } from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { AiRateLimitedError, AiUnusableOutputError } from '../src/ingestion/classification/ai.ts';
 import {
   AI_POOL_CIRCUIT_FAILURE_THRESHOLD,
   AiPoolClassifier,
   type AiPoolClassifierOptions,
 } from '../src/ingestion/classification/ai-pool.ts';
+import { hashAiInput } from '../src/ingestion/classification/ai-state.ts';
 import {
   AiTransportError,
   makeRoute,
@@ -13,6 +17,7 @@ import {
   type AiTransportCall,
   type AiTransportResult,
 } from '../src/ingestion/classification/ai-transport.ts';
+import { observedFormatChoiceIsUnresolved } from '../src/ingestion/classification/format-alternatives.ts';
 import { GEMINI_DEFAULT_MODELS, GeminiClassifier } from '../src/ingestion/classification/gemini.ts';
 import { createFreeRoutesFromEnv } from '../src/ingestion/classification/provider.ts';
 import type { ObservedFacts } from '../src/ingestion/observed.ts';
@@ -22,7 +27,42 @@ const facts: ObservedFacts = {
   accessText: 'Entrada libre', performers: [], composers: [], works: [],
 };
 const pools: AiPoolClassifier[] = [];
+const directories: string[] = [];
 const reset = { day: () => '2026-09-10', nextReset: () => Date.parse('2026-09-11T00:00:00Z') };
+const taxonomyCtx = { purpose: 'taxonomy' as const, requireFormats: true };
+
+const alternativeFacts: ObservedFacts = {
+  title: 'Festival Alicia de Larrocha: Consagración, la maestría musical',
+  description:
+    'Concierto de música clásica. En este concierto actuará un pianista o un grupo de cámara, según la programación que se anuncie.',
+  programText: 'Actuará un pianista o un grupo de cámara.',
+  performers: [], composers: [], works: [],
+};
+const undeterminedFacts: ObservedFacts = {
+  title: 'Concierto de cámara',
+  description: 'Cuarteto. Programación por determinar.',
+  performers: [], composers: [], works: [],
+};
+const chamberFacts: ObservedFacts = {
+  title: 'Cuarteto Casals',
+  programText: 'Cuarteto de cuerda. Beethoven op. 18 n.º 1.',
+  performers: [], composers: [], works: [],
+};
+const combinedFacts: ObservedFacts = {
+  title: 'Programa doble de piano y cámara',
+  description:
+    'Concierto de música clásica. El concierto combina un recital de piano y un grupo de cámara: primera parte recital, segunda parte cuarteto.',
+  programText: 'Primera parte: piano. Segunda parte: cuarteto de cuerda.',
+  performers: [], composers: [], works: [],
+};
+
+function emptyTaxonomy(evidence = 'formación no determinada') {
+  return { eligibility: 'include', formats: [] as string[], eras: [] as string[], evidence: [evidence] };
+}
+
+function chamberTaxonomy() {
+  return { eligibility: 'include', formats: ['chamber'], eras: [] as string[], evidence: ['cuarteto'] };
+}
 
 function fakeTransport(
   provider: string,
@@ -58,6 +98,7 @@ function observed(index: number): ObservedFacts {
 
 afterEach(() => {
   for (const value of pools.splice(0)) value.close();
+  for (const value of directories.splice(0)) rmSync(value, { recursive: true, force: true });
 });
 
 describe('circuit breaker por route', () => {
@@ -451,25 +492,253 @@ describe('Gemini-only no regresa', () => {
 });
 
 describe('env de presión backwards-compatible', () => {
+  const confirmed = {
+    AI_ZERO_COST_ONLY: 'true',
+    GROQ_API_KEY: 'groq-key',
+    GROQ_FREE_TIER_CONFIRMED: 'true',
+    MISTRAL_API_KEY: 'mistral-key',
+    MISTRAL_FREE_MODE_CONFIRMED: 'true',
+    ZAI_API_KEY: 'zai-key',
+    CLOUDFLARE_API_TOKEN: 'cloudflare-token',
+    CLOUDFLARE_ACCOUNT_ID: 'account-id',
+    CLOUDFLARE_WORKERS_FREE_CONFIRMED: 'true',
+  } as const;
+
   it('aplica maxConcurrent y minIntervalMs declarados por env sin hardcodear provider', () => {
     const routes = createFreeRoutesFromEnv({
-      AI_ZERO_COST_ONLY: 'true',
-      GROQ_API_KEY: 'groq-key',
-      GROQ_FREE_TIER_CONFIRMED: 'true',
+      ...confirmed,
       GROQ_MODEL_MAX_CONCURRENT: 'openai/gpt-oss-120b:1,qwen/qwen3.8-27b:2',
       GROQ_MAX_CONCURRENT: '3',
       GROQ_MIN_INTERVAL_MS: '250',
-      ZAI_API_KEY: 'zai-key',
+      MISTRAL_MODEL_MAX_CONCURRENT: 'mistral-small-latest:1',
+      MISTRAL_MODEL_MIN_INTERVAL_MS: 'mistral-small-latest:1500',
+      MISTRAL_MAX_CONCURRENT: '1',
+      MISTRAL_MIN_INTERVAL_MS: '1500',
       ZAI_MODEL_MIN_INTERVAL_MS: 'glm-4.7-flash:400',
+      ZAI_MAX_CONCURRENT: '2',
+      CLOUDFLARE_MODEL_MAX_CONCURRENT: '@cf/zai-org/glm-4.7-flash:1',
+      CLOUDFLARE_MAX_CONCURRENT: '2',
+      CLOUDFLARE_MIN_INTERVAL_MS: '300',
     });
     const groq120 = routes.find((item) => item.routeId === 'groq:openai/gpt-oss-120b');
     const groqQwen = routes.find((item) => item.routeId === 'groq:qwen/qwen3.8-27b');
+    const mistral = routes.find((item) => item.routeId === 'mistral:mistral-small-latest');
     const zai = routes.find((item) => item.routeId === 'zai:glm-4.7-flash');
+    const cloudflare = routes.find((item) => item.routeId === 'cloudflare:@cf/zai-org/glm-4.7-flash');
     expect(groq120?.limits).toMatchObject({
       maxConcurrent: 1, providerMaxConcurrent: 3, providerMinIntervalMs: 250, rpm: 30,
     });
     expect(groqQwen?.limits).toMatchObject({ maxConcurrent: 2, providerMaxConcurrent: 3 });
-    expect(zai?.limits).toMatchObject({ minIntervalMs: 400 });
+    expect(mistral?.limits).toMatchObject({
+      maxConcurrent: 1, minIntervalMs: 1500, providerMaxConcurrent: 1, providerMinIntervalMs: 1500,
+    });
+    expect(zai?.limits).toMatchObject({ minIntervalMs: 400, providerMaxConcurrent: 2 });
+    expect(routes.find((item) => item.routeId === 'zai:glm-4.5-flash')?.limits).toMatchObject({
+      providerMaxConcurrent: 2,
+    });
     expect(routes.find((item) => item.routeId === 'zai:glm-4.5-flash')?.limits?.minIntervalMs).toBeUndefined();
+    expect(cloudflare?.limits).toMatchObject({
+      maxConcurrent: 1, providerMaxConcurrent: 2, providerMinIntervalMs: 300,
+    });
+  });
+
+  it('una variable no definida no altera el comportamiento y un valor inválido sigue fallando', () => {
+    const unset = createFreeRoutesFromEnv(confirmed);
+    expect(unset.find((item) => item.routeId === 'groq:openai/gpt-oss-120b')?.limits).toEqual({
+      rpm: 30, tpm: 8_000, rpd: 1_000,
+    });
+    expect(unset.find((item) => item.routeId === 'mistral:mistral-small-latest')?.limits).toBeUndefined();
+    expect(unset.find((item) => item.routeId === 'zai:glm-4.7-flash')?.limits).toBeUndefined();
+    expect(unset.find((item) => item.routeId === 'cloudflare:@cf/zai-org/glm-4.7-flash')?.limits).toBeUndefined();
+
+    expect(() => createFreeRoutesFromEnv({ ...confirmed, GROQ_MAX_CONCURRENT: '-1' }))
+      .toThrow(/GROQ_MAX_CONCURRENT: entero fuera de rango/);
+    expect(() => createFreeRoutesFromEnv({ ...confirmed, MISTRAL_MIN_INTERVAL_MS: '1.5' }))
+      .toThrow(/MISTRAL_MIN_INTERVAL_MS: entero fuera de rango/);
+    expect(() => createFreeRoutesFromEnv({
+      ...confirmed, ZAI_MODEL_MAX_CONCURRENT: 'glm-4.7-flash',
+    })).toThrow(/ZAI_MODEL_MAX_CONCURRENT: se esperan pares modelo:entero/);
+    expect(() => createFreeRoutesFromEnv({
+      ...confirmed, CLOUDFLARE_MODEL_MIN_INTERVAL_MS: '@cf/zai-org/glm-4.7-flash:-4',
+    })).toThrow(/CLOUDFLARE_MODEL_MIN_INTERVAL_MS: se esperan pares modelo:entero/);
+  });
+});
+
+describe('formats=[] resuelve taxonomía cuando la formación no es determinable', () => {
+  function taxonomyPool(
+    first: ReturnType<typeof vi.fn>,
+    second: ReturnType<typeof vi.fn>,
+    options: Partial<AiPoolClassifierOptions> = {},
+  ) {
+    return pool([
+      route('one', 'a', fakeTransport('one', first)),
+      route('two', 'b', fakeTransport('two', second)),
+    ], { maxRetries: 1, ...options });
+  }
+
+  it('pianista o grupo de cámara: formats=[] es válido, 1 HTTP y 0 fallback', async () => {
+    expect(observedFormatChoiceIsUnresolved(alternativeFacts)).toBe(true);
+    const first = vi.fn(async () => ({ value: emptyTaxonomy() }));
+    const second = vi.fn(async () => ({ value: chamberTaxonomy() }));
+    const classifier = taxonomyPool(first, second);
+    await expect(classifier.classify(alternativeFacts, taxonomyCtx)).resolves.toMatchObject({
+      eligibility: 'include', formats: [],
+    });
+    expect(first).toHaveBeenCalledOnce();
+    expect(second).not.toHaveBeenCalled();
+    expect(classifier.lastDiagnostics()).toMatchObject({
+      attempts: 1, fallbackUsed: false, routeId: 'one:a', purpose: 'taxonomy',
+    });
+    expect(classifier.lastDiagnostics()?.failures).toEqual([]);
+    expect(classifier.snapshotStats()).toMatchObject({
+      httpRequests: 1, httpFallbacks: 0, fallbackCalls: 0, deferred: 0,
+      failuresByKind: {},
+      classificationsByRoute: { 'one:a': 1 },
+    });
+  });
+
+  it('programación por determinar con cues de formato: vacío es resolución final', async () => {
+    expect(observedFormatChoiceIsUnresolved(undeterminedFacts)).toBe(true);
+    const first = vi.fn(async () => ({ value: emptyTaxonomy('programación por determinar') }));
+    const second = vi.fn(async () => ({ value: chamberTaxonomy() }));
+    const classifier = taxonomyPool(first, second);
+    await expect(classifier.classify(undeterminedFacts, taxonomyCtx)).resolves.toMatchObject({
+      formats: [],
+    });
+    expect(first).toHaveBeenCalledOnce();
+    expect(second).not.toHaveBeenCalled();
+    expect(classifier.snapshotStats()).toMatchObject({
+      httpRequests: 1, httpFallbacks: 0, deferred: 0, failuresByKind: {},
+    });
+  });
+
+  it('cuarteto determinado: formats=[] sigue siendo incomplete y hay fallback', async () => {
+    expect(observedFormatChoiceIsUnresolved(chamberFacts)).toBe(false);
+    const first = vi.fn(async () => ({ value: emptyTaxonomy() }));
+    const second = vi.fn(async () => ({ value: chamberTaxonomy() }));
+    const classifier = taxonomyPool(first, second);
+    await expect(classifier.classify(chamberFacts, taxonomyCtx)).resolves.toMatchObject({
+      formats: ['chamber'],
+    });
+    expect(first).toHaveBeenCalledOnce();
+    expect(second).toHaveBeenCalledOnce();
+    expect(classifier.lastDiagnostics()).toMatchObject({
+      attempts: 2, fallbackUsed: true, routeId: 'two:b',
+    });
+    expect(classifier.lastDiagnostics()?.failures?.[0]).toMatchObject({
+      kind: 'incomplete', routeId: 'one:a',
+    });
+    expect(classifier.snapshotStats()).toMatchObject({
+      httpRequests: 2, httpFallbacks: 1, fallbackCalls: 1, deferred: 0,
+      failuresByKind: { incomplete: 1 },
+      classificationsByRoute: { 'two:b': 1 },
+    });
+  });
+
+  it('recital y grupo de cámara combinados: vacío sigue incomplete', async () => {
+    expect(observedFormatChoiceIsUnresolved(combinedFacts)).toBe(false);
+    const first = vi.fn(async () => ({ value: emptyTaxonomy() }));
+    const second = vi.fn(async () => ({
+      value: { eligibility: 'include', formats: ['chamber', 'recital'], eras: [], evidence: ['programa doble'] },
+    }));
+    const classifier = taxonomyPool(first, second);
+    await expect(classifier.classify(combinedFacts, taxonomyCtx)).resolves.toMatchObject({
+      formats: ['chamber', 'recital'],
+    });
+    expect(second).toHaveBeenCalledOnce();
+    expect(classifier.lastDiagnostics()?.failures?.[0]?.kind).toBe('incomplete');
+    expect(classifier.snapshotStats().httpFallbacks).toBe(1);
+  });
+
+  it('resolved-empty no abre el circuit breaker ni incrementa el streak', async () => {
+    const empty = vi.fn(async () => ({ value: emptyTaxonomy() }));
+    const fallback = vi.fn(async () => ({ value: chamberTaxonomy() }));
+    const classifier = taxonomyPool(empty, fallback);
+    for (let index = 0; index < AI_POOL_CIRCUIT_FAILURE_THRESHOLD + 1; index++) {
+      await classifier.classify(alternativeFacts, taxonomyCtx);
+    }
+    expect(empty).toHaveBeenCalledTimes(AI_POOL_CIRCUIT_FAILURE_THRESHOLD + 1);
+    expect(fallback).not.toHaveBeenCalled();
+    expect(classifier.snapshotStats()).toMatchObject({
+      circuitOpenRoutes: 0,
+      deferred: 0,
+      failuresByKind: {},
+      routes: expect.arrayContaining([
+        expect.objectContaining({
+          routeId: 'one:a', circuitOpen: false, consecutiveFailures: 0,
+          valid: AI_POOL_CIRCUIT_FAILURE_THRESHOLD + 1, failures: 0,
+        }),
+      ]),
+    });
+  });
+
+  it('cache e in-flight distinguen resolved-empty de taxonomy incompleta', async () => {
+    expect(
+      hashAiInput({ purpose: 'taxonomy', requireFormats: true, acceptEmptyFormats: true }),
+    ).not.toBe(
+      hashAiInput({ purpose: 'taxonomy', requireFormats: true, acceptEmptyFormats: false }),
+    );
+
+    const stateDir = mkdtempSync(path.join(os.tmpdir(), 'clasica-ai-empty-formats-'));
+    directories.push(stateDir);
+    const unresolved = vi.fn(async () => ({ value: emptyTaxonomy() }));
+    const cached = pool([
+      route('one', 'a', fakeTransport('one', unresolved)),
+    ], { cacheEnabled: true, stateDir, maxRetries: 1 });
+    await expect(cached.classify(alternativeFacts, taxonomyCtx)).resolves.toMatchObject({ formats: [] });
+    await expect(cached.classify(alternativeFacts, taxonomyCtx)).resolves.toMatchObject({ formats: [] });
+    expect(unresolved).toHaveBeenCalledOnce();
+    expect(cached.snapshotStats()).toMatchObject({
+      logicalCalls: 2, httpRequests: 1, cacheHits: 1, deferred: 0, failuresByKind: {},
+    });
+
+    const first = vi.fn(async () => ({ value: emptyTaxonomy() }));
+    const second = vi.fn(async () => ({ value: chamberTaxonomy() }));
+    const determined = taxonomyPool(first, second, { cacheEnabled: true });
+    await expect(determined.classify(chamberFacts, taxonomyCtx)).resolves.toMatchObject({ formats: ['chamber'] });
+    await expect(determined.classify(chamberFacts, taxonomyCtx)).resolves.toMatchObject({ formats: ['chamber'] });
+    expect(first).toHaveBeenCalledOnce();
+    expect(second).toHaveBeenCalledOnce();
+    expect(determined.lastDiagnostics()).toMatchObject({ cacheHit: true, attempts: 0 });
+
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => { release = resolve; });
+    const mixed = vi.fn(async (call: AiTransportCall) => {
+      if (String(call.request.user).includes('pianista')) {
+        await gate;
+        return { value: emptyTaxonomy() };
+      }
+      return { value: chamberTaxonomy() };
+    });
+    const coalesced = pool([
+      route('one', 'a', fakeTransport('one', mixed)),
+    ], { cacheEnabled: true, concurrency: 8 });
+    const held = coalesced.classify(alternativeFacts, taxonomyCtx);
+    const twin = coalesced.classify(alternativeFacts, taxonomyCtx);
+    await vi.waitFor(() => expect(mixed).toHaveBeenCalledOnce());
+    await expect(coalesced.classify(chamberFacts, taxonomyCtx)).resolves.toMatchObject({ formats: ['chamber'] });
+    expect(mixed).toHaveBeenCalledTimes(2);
+    release();
+    await expect(Promise.all([held, twin])).resolves.toEqual([
+      emptyTaxonomy(), emptyTaxonomy(),
+    ]);
+    expect(mixed).toHaveBeenCalledTimes(2);
+    expect(coalesced.snapshotStats().cacheHits).toBeGreaterThanOrEqual(1);
+  });
+
+  it('resolved-empty borra pending de esa request', async () => {
+    const stateDir = mkdtempSync(path.join(os.tmpdir(), 'clasica-ai-empty-pending-'));
+    directories.push(stateDir);
+    const handler = vi.fn()
+      .mockRejectedValueOnce(new AiTransportError('timeout', { kind: 'timeout' }))
+      .mockResolvedValue({ value: emptyTaxonomy() });
+    const classifier = pool([
+      route('one', 'a', fakeTransport('one', handler)),
+    ], { stateDir, cacheEnabled: true, maxRetries: 0, clock: immediateClock() });
+    await expect(classifier.classify(alternativeFacts, taxonomyCtx)).rejects.toThrow('timeout');
+    expect(readdirSync(path.join(stateDir, 'pending'))).toHaveLength(1);
+    await expect(classifier.classify(alternativeFacts, taxonomyCtx)).resolves.toMatchObject({ formats: [] });
+    expect(readdirSync(path.join(stateDir, 'pending'))).toHaveLength(0);
+    expect(classifier.snapshotStats().deferred).toBe(1);
   });
 });

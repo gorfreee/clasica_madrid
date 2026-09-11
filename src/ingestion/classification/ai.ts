@@ -69,9 +69,10 @@ export type AiCallContext = {
   /** Versioned task routed through the shared provider/budget. Default eligibility. */
   purpose?: AiCallPurpose;
   /**
-   * Taxonomy completion: formats were empty before this call, so an empty or
-   * omitted `formats` array is not a satisfactory resolution. Providers reuse
-   * their existing retry / model-fallback loop. Eligibility calls ignore this.
+   * Taxonomy completion: formats were empty before this call. An empty or
+   * omitted `formats` array is then unsatisfactory — unless the observed facts
+   * show exclusive alternatives or still-undetermined programming, in which
+   * case `formats=[]` is a valid final resolution. Eligibility calls ignore this.
    */
   requireFormats?: boolean;
 };

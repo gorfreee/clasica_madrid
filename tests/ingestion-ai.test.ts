@@ -1020,6 +1020,25 @@ describe('taxonomy AI — alternativas exclusivas vs formaciones combinadas', ()
     expect(ai.calls).toBe(1);
   });
 
+  it('acepta formats=[] de IA cuando la formación sigue por determinar', async () => {
+    const ai = countingAi({
+      async classify() {
+        return {
+          eligibility: 'include',
+          formats: [],
+          eras: [],
+          evidence: ['actuará un pianista o un grupo de cámara'],
+        };
+      },
+    });
+    const result = await classifyObserved(alternativeFacts, { ai });
+    expect(result.eligibility.value).toBe('include');
+    expect(result.formats?.value).toEqual([]);
+    expect(result.formats?.value).not.toContain('other');
+    expect(ai.calls).toBe(1);
+    expect(ai.contexts[0]?.requireFormats).toBe(true);
+  });
+
   it('conserva varios formats cuando la fuente afirma que el evento combina formaciones', async () => {
     const combined = facts({
       title: 'Programa doble de piano y cámara',

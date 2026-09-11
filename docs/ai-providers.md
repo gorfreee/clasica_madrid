@@ -33,9 +33,18 @@ Cada lista puede reordenarse con `*_MODELS`. En zero-cost mode, Z.AI, Cloudflare
 
 Esos `*_MODEL_RPM` / `*_MODEL_TPM` / `*_MODEL_RPD` son configuración no sensible. En producción el workflow las lee de `vars.*` (nunca de secrets). Si la variable de repositorio está vacía, se aplican los defaults de código descritos arriba. En local viven en `.local/ai.env`.
 
-El scheduler también entiende límites genéricos de presión por route/provider: `maxConcurrent`, `minIntervalMs`, `providerMaxConcurrent` y `providerMinIntervalMs`. Se declaran en la route o con overrides `*_MODEL_MAX_CONCURRENT`, `*_MODEL_MIN_INTERVAL_MS`, `*_MAX_CONCURRENT` y `*_MIN_INTERVAL_MS`. El scheduler no hardcodea reglas por provider.
+El scheduler también entiende límites genéricos de presión por route/provider. No hay cuotas RPM/RPD inventadas para Mistral, Z.AI ni Cloudflare, ni `if (provider === …)` en el scheduler: el ajuste llega por configuración.
 
-Durante una ejecución, una route que acumula varios fallos consecutivos relevantes (empty/incomplete/timeout/transport/output inválido) sin un resultado válido entre medias abre un circuit breaker in-memory. Rate limits, RPM/RPD y cuota diaria siguen sus mecanismos propios. El circuito no se persiste entre runs y nunca introduce un provider de pago.
+| Control en la route | Env | Significado |
+|---|---|---|
+| `maxConcurrent` | `*_MODEL_MAX_CONCURRENT` (pares `modelo:entero`) | HTTP simultáneos de esa route |
+| `minIntervalMs` | `*_MODEL_MIN_INTERVAL_MS` (pares `modelo:entero`) | Separación mínima entre comienzos de requests de esa route |
+| `providerMaxConcurrent` | `*_MAX_CONCURRENT` | Límite agregado de HTTP in-flight del provider |
+| `providerMinIntervalMs` | `*_MIN_INTERVAL_MS` | Separación agregada entre comienzos de requests del provider |
+
+El workflow inyecta GROQ, MISTRAL, ZAI y CLOUDFLARE desde `vars.*`. `.local/ai.env` carga las mismas claves. Un valor ausente conserva el comportamiento actual (sin cap extra). `0` conserva la semántica ya soportada por el scheduler: `rpm`/`tpm`/`rpd`/`maxConcurrent`/`providerMaxConcurrent` a 0 deshabilitan esas routes; `minIntervalMs`/`providerMinIntervalMs` a 0 no deshabilitan, sólo no añaden holgura. No uses `0` como sinónimo de unset.
+
+Durante una ejecución, una route que acumula varios fallos consecutivos relevantes (empty/incomplete/timeout/transport/output inválido) sin un resultado válido entre medias abre un circuit breaker in-memory. `formats=[]` **no** cuenta como `incomplete` cuando los hechos observados muestran alternativas exclusivas o programación todavía por determinar (`observedFormatChoiceIsUnresolved`): es una resolución válida, cacheable y final. Rate limits, RPM/RPD y cuota diaria siguen sus mecanismos propios. El circuito no se persiste entre runs y nunca introduce un provider de pago.
 
 ## Perfiles HTTP por modelo
 
