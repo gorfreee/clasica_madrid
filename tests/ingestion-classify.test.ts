@@ -178,6 +178,141 @@ describe('eligibility — exclusiones de identidad', () => {
     expect(balletWithCategory.eligibility.ruleId).toBe('dance-spectacle');
   });
 
+  it('incluye un concierto vienés observado en programText aunque performers[] esté vacío', () => {
+    const observed = facts({
+      title: 'Pequeño concierto de Año Nuevo',
+      description: 'Música y danza',
+      categoryText: 'El Real Junior',
+      venueText: 'HALL Real Teatro de Retiro',
+      programText:
+        'Repertorio de valses, mazurkas y polkas interpretado por Solistas de la Orquesta Titular del Teatro Real. Un cuarteto de cuerdas de la Orquesta Sinfónica de Madrid, Titular del Teatro Real, junto con la bailarina Elisa Bermejo y las voces de los solistas de la Orquesta Titular del Teatro Real, introducirá al público en los ritmos que se escuchan en Viena. Valses, mazurkas y polkas serán los protagonistas. En Navidad, vamos a bailar como si estuviéramos en Viena.',
+    });
+    const result = classify(observed);
+    expect(result.eligibility.value).toBe('include');
+    expect(result.eligibility.ruleId).toBe('described-classical-repertoire');
+    expect(result.eligibility.ruleId).not.toBe('known-classical-composer');
+    expect(result.eligibility.ruleId).not.toBe('dance-spectacle');
+
+    const withSpuriousComposer = classify(
+      facts({
+        ...observed,
+        composers: [{ name: 'y danza' }],
+      }),
+    );
+    expect(withSpuriousComposer.eligibility.value).toBe('include');
+    expect(withSpuriousComposer.eligibility.ruleId).toBe('described-classical-repertoire');
+    expect(withSpuriousComposer.eligibility.ruleId).not.toBe('known-classical-composer');
+
+    const mixedCategory = classify(
+      facts({
+        ...observed,
+        categoryText: 'Música y danza',
+      }),
+    );
+    expect(mixedCategory.eligibility.value).toBe('include');
+    expect(mixedCategory.eligibility.ruleId).not.toBe('dance-spectacle');
+  });
+
+  it('no convierte orquesta, cuerdas, piano o danza aislados en include', () => {
+    expect(
+      classify(
+        facts({
+          title: 'Velada en el salón',
+          description: 'Habrá orquesta, cuerdas y piano. También danza.',
+        }),
+      ).eligibility.value,
+    ).not.toBe('include');
+
+    expect(
+      classify(
+        facts({
+          title: 'Concierto extraordinario',
+          programText: 'Acompañado por un octeto de cuerdas y piano, recorrerá su repertorio.',
+          performers: [{ name: 'octeto de cuerdas', roleText: 'cuerdas' }],
+        }),
+      ).eligibility.value,
+    ).not.toBe('include');
+
+    expect(
+      classify(
+        facts({
+          title: 'Gran baile de salón',
+          description: 'Vamos a bailar valses de Viena con orquesta.',
+        }),
+      ).eligibility.value,
+    ).not.toBe('include');
+
+    expect(
+      classify(
+        facts({
+          title: 'FITO PÁEZ CLÁSICO',
+          description:
+            'Espectáculo especialmente concebido para disfrutar la obra de Fito. Acompañado por un octeto de cuerdas, recorrerá parte fundamental de su repertorio.',
+          performers: [{ name: 'Fito Páez' }, { name: 'octeto de cuerdas', roleText: 'cuerdas' }],
+        }),
+      ).eligibility.value,
+    ).not.toBe('include');
+  });
+
+  it('sigue excluyendo pop con orquesta, cine, jazz, flamenco y ballet como identidad principal', () => {
+    expect(
+      classify(
+        facts({
+          title: 'ABBA, Queen, Beatles y Otros Grandes del Pop',
+          programText:
+            'Repertorio de valses, mazurkas y polkas interpretado por la orquesta. Viaje a Viena.',
+          performers: [{ name: 'Pop Orchestra', roleText: 'orquesta' }],
+        }),
+      ).eligibility,
+    ).toMatchObject({ value: 'exclude', ruleId: 'popular-music-identity' });
+
+    expect(
+      classify(
+        facts({
+          title: 'Film Symphony Orchestra. Especial John Williams',
+          programText:
+            'Repertorio de valses, mazurkas y polkas interpretado por la orquesta en un salón vienés.',
+          composers: [{ name: 'John Williams' }],
+          performers: [{ name: 'Film Symphony Orchestra', roleText: 'orquesta' }],
+        }),
+      ).eligibility.ruleId,
+    ).toBe('film-music-identity');
+
+    expect(
+      classify(
+        facts({
+          title: 'Jazz en el Auditorio',
+          categoryText: 'Jazz en el Auditorio',
+          programText:
+            'Repertorio de valses, mazurkas y polkas interpretado por el cuarteto de cuerdas en Viena.',
+        }),
+      ).eligibility.ruleId,
+    ).toBe('jazz-identity');
+
+    expect(
+      classify(
+        facts({
+          title: 'Gala de jóvenes flamencos',
+          categoryText: 'Andalucía Flamenca',
+          programText:
+            'Repertorio de valses, mazurkas y polkas interpretado por un cuarteto de cuerdas. Salón vienés.',
+        }),
+      ).eligibility.ruleId,
+    ).toBe('flamenco-identity');
+
+    expect(
+      classify(
+        facts({
+          title: 'Gala de ballet',
+          categoryText: 'Danza',
+          programText:
+            'Repertorio de valses, mazurkas y polkas interpretado por Solistas de la Orquesta Titular. Un cuarteto de cuerdas en un salón vienés.',
+          performers: [{ name: 'Compañía Nacional de Ballet' }],
+        }),
+      ).eligibility,
+    ).toMatchObject({ value: 'exclude', ruleId: 'dance-spectacle' });
+  });
+
   it('excluye cine cuando ver la película es la actividad principal', () => {
     const result = classify(
       facts({

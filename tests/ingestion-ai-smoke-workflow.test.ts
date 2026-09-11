@@ -43,6 +43,11 @@ describe('workflow AI live smoke test', () => {
       expect(ingestion, line).toContain(line);
     }
 
+    expect(yaml).toContain('GROQ_MODELS: ${{ vars.GROQ_MODELS }}');
+    expect(yaml).toContain('MISTRAL_MODELS: ${{ vars.MISTRAL_MODELS }}');
+    expect(yaml).toContain('ZAI_MODELS: ${{ vars.ZAI_MODELS }}');
+    expect(yaml).toContain('CLOUDFLARE_MODELS: ${{ vars.CLOUDFLARE_MODELS }}');
+
     expect(ci).not.toContain('ai:smoke');
     expect(ci).not.toContain('ai-live-smoke');
   });

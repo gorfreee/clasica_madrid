@@ -1,4 +1,5 @@
 import { explicitAccessText } from './access-evidence.ts';
+import { stripLeadingComposerCreditLabel } from '../composer-name.ts';
 import { allCaptures, collapseWhitespace, firstMatch, splitBreaks, stripTags } from '../html.ts';
 import { inferScheduleFromText } from './schedule.ts';
 import {
@@ -235,9 +236,10 @@ function parseCast(html: string): ObservedPerson[] {
   });
 }
 
-const MUSIC_CREDIT = /^(?:m[úu]sica|music)(?:\s+(?:de|by))?\s*[:.]?\s*(.+)$/i;
+const MUSIC_CREDIT_ES = /^(?:m[úu]sica)\s+(?:de|:)\s*(.+)$/i;
+const MUSIC_CREDIT_EN = /^(?:music)(?:\s+by\b|:)?\s+(.+)$/i;
 const MUSIC_GENRE_VALUE =
-  /^(?:c[áa]mara|cl[áa]sica|vocal|instrumental|antigua|contempor[áa]nea|barroca|sinf[oó]nica|l[íi]rica)\b/i;
+  /^(?:c[áa]mara|cl[áa]sica|vocal|instrumental|antigua|contempor[áa]nea|barroca|sinf[oó]nica|l[íi]rica|y\s+danza)\b/i;
 const INLINE_NEXT_CREDIT =
   /\s+(?=libreto\b|texto(?:\s+del)?\b|letra\b|versi[oó]n\b|adaptaci[oó]n\b|orquestaci[oó]n\b|premio\b|coproducci[oó]n\b|producci[oó]n\b)/i;
 const NAME_LIST_SPLIT = /\s*,\s*|\s+y\s+|\s+e\s+(?=\p{Lu})/u;
@@ -245,15 +247,17 @@ const NAME_LIST_SPLIT = /\s*,\s*|\s+y\s+|\s+e\s+(?=\p{Lu})/u;
 function parseDeclaredComposers(html: string): string[] {
   const names: string[] = [];
   for (const paragraph of allCaptures(html, /<p\b[^>]*>([\s\S]*?)<\/p>/gi).map((part) => stripTags(part))) {
-    const declared = MUSIC_CREDIT.exec(paragraph);
+    const declared = MUSIC_CREDIT_ES.exec(paragraph) ?? MUSIC_CREDIT_EN.exec(paragraph);
     if (!declared?.[1]) continue;
-    const credit = declared[1]
-      .split(INLINE_NEXT_CREDIT)[0]
-      ?.replace(/\s*\(\s*(?:ca\.?\s*)?\d{3,4}[^)]*\)\s*/gu, ' ')
-      .replace(/[.,;]+$/u, '')
-      .replace(/\s+/g, ' ')
-      .trim();
-    if (!credit || MUSIC_GENRE_VALUE.test(credit)) continue;
+    const credit = stripLeadingComposerCreditLabel(
+      declared[1]
+        .split(INLINE_NEXT_CREDIT)[0]
+        ?.replace(/\s*\(\s*(?:ca\.?\s*)?\d{3,4}[^)]*\)\s*/gu, ' ')
+        .replace(/[.,;]+$/u, '')
+        .replace(/\s+/g, ' ')
+        .trim() ?? '',
+    );
+    if (!credit || MUSIC_GENRE_VALUE.test(credit) || /^(?:y|e)\s+/i.test(credit)) continue;
     names.push(...splitDeclaredComposerCredit(credit));
   }
   return names;

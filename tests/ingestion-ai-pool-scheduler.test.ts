@@ -19,7 +19,7 @@ import {
 } from '../src/ingestion/classification/ai-transport.ts';
 import { observedFormatChoiceIsUnresolved } from '../src/ingestion/classification/format-alternatives.ts';
 import { GEMINI_DEFAULT_MODELS, GeminiClassifier } from '../src/ingestion/classification/gemini.ts';
-import { createFreeRoutesFromEnv } from '../src/ingestion/classification/provider.ts';
+import { createFreeRoutesFromEnv, MISTRAL_DEFAULT_MODELS, MISTRAL_PRODUCTION_MODEL_LIMITS, ZAI_PRODUCTION_LIMITS } from '../src/ingestion/classification/provider.ts';
 import type { ObservedFacts } from '../src/ingestion/observed.ts';
 
 const facts: ObservedFacts = {
@@ -388,6 +388,40 @@ describe('presión genérica por route y provider', () => {
     ])).resolves.toEqual([{ eligibility: 'include' }, { eligibility: 'include' }]);
     expect(send).toHaveBeenCalledTimes(2);
   });
+
+  it('minIntervalMs se respeta cuando varios acquire despiertan a la vez', async () => {
+    const started: number[] = [];
+    const send = vi.fn(async () => {
+      started.push(Date.now());
+      return { value: { eligibility: 'include' } };
+    });
+    const classifier = pool([
+      route('one', 'a', fakeTransport('one', send), { minIntervalMs: 80, maxConcurrent: 8 }),
+    ], { concurrency: 8 });
+    await classifier.classify(observed(1));
+    await Promise.all([2, 3, 4].map((index) => classifier.classify(observed(index))));
+    expect(started).toHaveLength(4);
+    const gaps = started.slice(1).map((at, index) => at - started[index]!);
+    expect(Math.min(...gaps)).toBeGreaterThanOrEqual(70);
+  });
+
+  it('maxConcurrent=1 impide dos HTTP simultáneos en la misma route', async () => {
+    let inFlight = 0;
+    let maxSeen = 0;
+    const send = vi.fn(async () => {
+      inFlight += 1;
+      maxSeen = Math.max(maxSeen, inFlight);
+      await new Promise((resolve) => setTimeout(resolve, 25));
+      inFlight -= 1;
+      return { value: { eligibility: 'include' } };
+    });
+    const classifier = pool([
+      route('one', 'a', fakeTransport('one', send), { maxConcurrent: 1, minIntervalMs: 0 }),
+    ], { concurrency: 8 });
+    await Promise.all([1, 2, 3].map((index) => classifier.classify(observed(index))));
+    expect(maxSeen).toBe(1);
+    expect(send).toHaveBeenCalledTimes(3);
+  });
 });
 
 describe('métricas inequívocas del pool', () => {
@@ -510,8 +544,8 @@ describe('env de presión backwards-compatible', () => {
       GROQ_MODEL_MAX_CONCURRENT: 'openai/gpt-oss-120b:1,qwen/qwen3.8-27b:2',
       GROQ_MAX_CONCURRENT: '3',
       GROQ_MIN_INTERVAL_MS: '250',
-      MISTRAL_MODEL_MAX_CONCURRENT: 'mistral-small-latest:1',
-      MISTRAL_MODEL_MIN_INTERVAL_MS: 'mistral-small-latest:1500',
+      MISTRAL_MODEL_MAX_CONCURRENT: 'ministral-14b-2512:2',
+      MISTRAL_MODEL_MIN_INTERVAL_MS: 'ministral-14b-2512:1500',
       MISTRAL_MAX_CONCURRENT: '1',
       MISTRAL_MIN_INTERVAL_MS: '1500',
       ZAI_MODEL_MIN_INTERVAL_MS: 'glm-4.7-flash:400',
@@ -522,7 +556,7 @@ describe('env de presión backwards-compatible', () => {
     });
     const groq120 = routes.find((item) => item.routeId === 'groq:openai/gpt-oss-120b');
     const groqQwen = routes.find((item) => item.routeId === 'groq:qwen/qwen3.8-27b');
-    const mistral = routes.find((item) => item.routeId === 'mistral:mistral-small-latest');
+    const mistral = routes.find((item) => item.routeId === 'mistral:ministral-14b-2512');
     const zai = routes.find((item) => item.routeId === 'zai:glm-4.7-flash');
     const cloudflare = routes.find((item) => item.routeId === 'cloudflare:@cf/zai-org/glm-4.7-flash');
     expect(groq120?.limits).toMatchObject({
@@ -530,7 +564,8 @@ describe('env de presión backwards-compatible', () => {
     });
     expect(groqQwen?.limits).toMatchObject({ maxConcurrent: 2, providerMaxConcurrent: 3 });
     expect(mistral?.limits).toMatchObject({
-      maxConcurrent: 1, minIntervalMs: 1500, providerMaxConcurrent: 1, providerMinIntervalMs: 1500,
+      maxConcurrent: 2, minIntervalMs: 1500, providerMaxConcurrent: 1, providerMinIntervalMs: 1500,
+      tpm: MISTRAL_PRODUCTION_MODEL_LIMITS['ministral-14b-2512']!.tpm,
     });
     expect(zai?.limits).toMatchObject({ minIntervalMs: 400, providerMaxConcurrent: 2 });
     expect(routes.find((item) => item.routeId === 'zai:glm-4.5-flash')?.limits).toMatchObject({
@@ -547,8 +582,16 @@ describe('env de presión backwards-compatible', () => {
     expect(unset.find((item) => item.routeId === 'groq:openai/gpt-oss-120b')?.limits).toEqual({
       rpm: 30, tpm: 8_000, rpd: 1_000,
     });
-    expect(unset.find((item) => item.routeId === 'mistral:mistral-small-latest')?.limits).toBeUndefined();
-    expect(unset.find((item) => item.routeId === 'zai:glm-4.7-flash')?.limits).toBeUndefined();
+    expect(unset.map((item) => item.routeId).filter((id) => id.startsWith('mistral:'))).toEqual(
+      MISTRAL_DEFAULT_MODELS.map((model) => `mistral:${model}`),
+    );
+    expect(unset.find((item) => item.routeId === 'mistral:ministral-14b-2512')?.limits).toEqual(
+      MISTRAL_PRODUCTION_MODEL_LIMITS['ministral-14b-2512'],
+    );
+    expect(unset.find((item) => item.routeId === 'mistral:ministral-8b-2512')?.limits).toEqual(
+      MISTRAL_PRODUCTION_MODEL_LIMITS['ministral-8b-2512'],
+    );
+    expect(unset.find((item) => item.routeId === 'zai:glm-4.7-flash')?.limits).toEqual(ZAI_PRODUCTION_LIMITS);
     expect(unset.find((item) => item.routeId === 'cloudflare:@cf/zai-org/glm-4.7-flash')?.limits).toBeUndefined();
 
     expect(() => createFreeRoutesFromEnv({ ...confirmed, GROQ_MAX_CONCURRENT: '-1' }))
@@ -742,3 +785,85 @@ describe('formats=[] resuelve taxonomía cuando la formación no es determinable
     expect(classifier.snapshotStats().deferred).toBe(1);
   });
 });
+
+describe('concurrency-pressure genérico', () => {
+  const zai1302 = new AiTransportError('zai HTTP 429: High concurrency usage of this API, please reduce concurrency', {
+    kind: 'rate-limit',
+    status: 429,
+    quotaExhausted: false,
+    pressure: 'concurrency',
+    rateLimit: { dimensions: ['concurrency'] },
+  });
+
+  it('1302 no abre circuito ni marca cuota y se reporta como concurrency-pressure', async () => {
+    const zai = vi.fn(async () => { throw zai1302; });
+    const groq = vi.fn(async () => ({ value: { eligibility: 'include' } }));
+    const classifier = pool([
+      route('zai', 'glm-4.7-flash', fakeTransport('zai', zai), { providerMaxConcurrent: 4 }),
+      route('groq', 'ok', fakeTransport('groq', groq)),
+    ], { maxRetries: 1, clock: immediateClock() });
+    await expect(classifier.classify(observed(1))).resolves.toEqual({ eligibility: 'include' });
+    expect(classifier.lastDiagnostics()?.failures?.[0]).toMatchObject({
+      kind: 'concurrency-pressure', pressure: 'concurrency', routeId: 'zai:glm-4.7-flash',
+    });
+    expect(classifier.snapshotStats()).toMatchObject({
+      quotaExhausted: 0,
+      circuitOpenRoutes: 0,
+      concurrencyPressure: 1,
+      failuresByKind: { 'concurrency-pressure': 1 },
+      rateLimits: 0,
+      httpFallbacks: 1,
+    });
+    expect(classifier.snapshotStats().routes?.find((item) => item.routeId === 'zai:glm-4.7-flash')).toMatchObject({
+      circuitOpen: false, concurrencyPressure: 1, quotaExhausted: 0, rateLimits: 0,
+    });
+  });
+
+  it('tras 1302 la presión restante del provider converge a 1 HTTP simultáneo', async () => {
+    const pressure = new AiTransportError('zai HTTP 429: High concurrency usage of this API', {
+      kind: 'rate-limit', status: 429, quotaExhausted: false, pressure: 'concurrency', retryAfterMs: 0,
+      rateLimit: { dimensions: ['concurrency'] },
+    });
+    let inFlight = 0;
+    let maxSeen = 0;
+    let calls = 0;
+    const send = vi.fn(async () => {
+      calls += 1;
+      if (calls === 1) throw pressure;
+      inFlight += 1;
+      maxSeen = Math.max(maxSeen, inFlight);
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      inFlight -= 1;
+      return { value: { eligibility: 'include' } };
+    });
+    const classifier = pool([
+      route('zai', 'glm-4.7-flash', fakeTransport('zai', send), { providerMaxConcurrent: 8, minIntervalMs: 0 }),
+      route('zai', 'glm-4.5-flash', fakeTransport('zai', send), { providerMaxConcurrent: 8, minIntervalMs: 0 }),
+    ], { concurrency: 8, maxRetries: 0 });
+    await expect(classifier.classify(observed(1))).rejects.toBeInstanceOf(AiRateLimitedError);
+    await Promise.all([2, 3, 4, 5].map((index) => classifier.classify(observed(index))));
+    expect(maxSeen).toBe(1);
+    expect(classifier.snapshotStats().quotaExhausted).toBe(0);
+    expect(classifier.snapshotStats().circuitOpenRoutes).toBe(0);
+  });
+
+  it('tras 1302 el fallback a otro provider sigue funcionando', async () => {
+    const zai = vi.fn(async () => { throw zai1302; });
+    const groq = vi.fn(async () => ({ value: { eligibility: 'include' } }));
+    const classifier = pool([
+      route('zai', 'glm-4.7-flash', fakeTransport('zai', zai), { providerMaxConcurrent: 8 }),
+      route('groq', 'gpt', fakeTransport('groq', groq)),
+    ], { maxRetries: 1, clock: immediateClock() });
+    await expect(classifier.classify(observed(1))).resolves.toEqual({ eligibility: 'include' });
+    expect(zai).toHaveBeenCalledOnce();
+    expect(groq).toHaveBeenCalledOnce();
+    expect(classifier.snapshotStats()).toMatchObject({
+      httpFallbacks: 1,
+      fallbackCalls: 1,
+      quotaExhausted: 0,
+      circuitOpenRoutes: 0,
+      concurrencyPressure: 1,
+    });
+  });
+});
+

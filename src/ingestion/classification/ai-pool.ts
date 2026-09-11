@@ -20,7 +20,7 @@ import {
 } from './ai.ts';
 import { buildAiRequest, type AiRequest } from './ai-request.ts';
 import { AiPoolState, hashAiInput } from './ai-state.ts';
-import { AiTransportError, type AiRoute } from './ai-transport.ts';
+import { AiTransportError, type AiPressureKind, type AiRoute } from './ai-transport.ts';
 import { observedFormatChoiceIsUnresolved } from './format-alternatives.ts';
 
 export const AI_POOL_MAX_RETRIES = 2;
@@ -76,6 +76,8 @@ type RouteHealth = {
   failuresByKind: Partial<Record<AiFailureKind, number>>;
   rateLimits: number;
   quotaExhausted: number;
+  concurrencyPressure: number;
+  pressureByKind: Partial<Record<AiPressureKind, number>>;
 };
 
 const systemClock: SleepClock = {
@@ -97,7 +99,11 @@ export class AiPoolClassifier implements AiClassifier {
   private readonly health = new Map<string, RouteHealth>();
   private readonly inFlightByRoute = new Map<string, number>();
   private readonly inFlightByProvider = new Map<string, number>();
+  private readonly lastStartByRoute = new Map<string, number>();
   private readonly lastStartByProvider = new Map<string, number>();
+  /** Run-local cap after an explicit concurrency-pressure signal. Never persisted. */
+  private readonly runtimeProviderMaxConcurrent = new Map<string, number>();
+  private reservationTail = Promise.resolve();
   private active = 0;
   private reservedRequests = 0;
   private lastCall?: AiCallDiagnostics;
@@ -125,6 +131,10 @@ export class AiPoolClassifier implements AiClassifier {
     rateLimitsByProvider: {} as Record<string, number>,
     rateLimits: 0,
     quotaExhausted: 0,
+    concurrencyPressure: 0,
+    pressureByKind: {} as Partial<Record<AiPressureKind, number>>,
+    concurrencyPressureByProvider: {} as Record<string, number>,
+    concurrencyPressureByRoute: {} as Record<string, number>,
   };
 
   constructor(options: AiPoolClassifierOptions) {
@@ -204,6 +214,10 @@ export class AiPoolClassifier implements AiClassifier {
       rateLimitsByProvider: structuredClone(this.stats.rateLimitsByProvider),
       rateLimits: this.stats.rateLimits,
       quotaExhausted: this.stats.quotaExhausted,
+      concurrencyPressure: this.stats.concurrencyPressure,
+      pressureByKind: structuredClone(this.stats.pressureByKind),
+      concurrencyPressureByProvider: structuredClone(this.stats.concurrencyPressureByProvider),
+      concurrencyPressureByRoute: structuredClone(this.stats.concurrencyPressureByRoute),
       routes: this.routeSnapshots(),
       requestsByModel: requestsByRoute,
       classificationsByModel: classificationsByRoute,
@@ -433,9 +447,19 @@ export class AiPoolClassifier implements AiClassifier {
 
     const state = this.state.route(route.routeId, this.clock.now(), route.reset);
     if (error.kind === 'rate-limit') {
-      this.stats.rateLimits++;
-      bump(this.stats.rateLimitsByRoute, route.routeId);
-      bump(this.stats.rateLimitsByProvider, route.provider);
+      const pressure = error.pressure ?? primaryPressure(error.rateLimit?.dimensions);
+      const failureKind: AiFailureKind = pressure === 'concurrency' ? 'concurrency-pressure' : 'rate-limit';
+      if (failureKind === 'concurrency-pressure') {
+        this.stats.concurrencyPressure++;
+        bump(this.stats.concurrencyPressureByRoute, route.routeId);
+        bump(this.stats.concurrencyPressureByProvider, route.provider);
+        this.tightenProviderConcurrency(route.provider);
+      } else {
+        this.stats.rateLimits++;
+        bump(this.stats.rateLimitsByRoute, route.routeId);
+        bump(this.stats.rateLimitsByProvider, route.provider);
+      }
+      if (pressure) bump(this.stats.pressureByKind as Record<string, number>, pressure);
       if (error.quotaExhausted) {
         this.stats.quotaExhausted++;
         this.routeHealth(route.routeId).quotaExhausted++;
@@ -446,7 +470,22 @@ export class AiPoolClassifier implements AiClassifier {
         this.clock.now() + this.retryWait(error, diagnostics.attempts! - 1),
       );
       this.state.save();
-      addRoute(diagnostics, route, error.quotaExhausted ? 'daily-quota' : 'rate-limit');
+      addRoute(
+        diagnostics,
+        route,
+        error.quotaExhausted ? 'daily-quota' : failureKind === 'concurrency-pressure' ? 'concurrency-pressure' : pressureReason(pressure),
+      );
+      pushFailure(diagnostics, route, {
+        model: route.model,
+        kind: failureKind,
+        status: error.status === undefined ? undefined : String(error.status),
+        excerpt: sanitizeAiOutputExcerpt(this.redactForRoute(route, error.message)),
+        ...(pressure ? { pressure } : {}),
+        ...(error.rateLimit ? { rateLimit: error.rateLimit } : {}),
+      });
+      bump(this.stats.failuresByKind as Record<string, number>, failureKind);
+      this.noteAttemptOutcome(route, failureKind, pressure);
+      return;
     } else if (error.kind === 'unavailable') {
       this.disabledRoutes.add(route.routeId);
       addRoute(diagnostics, route, 'unavailable-model-or-config');
@@ -464,20 +503,15 @@ export class AiPoolClassifier implements AiClassifier {
         (candidate) => this.available(candidate, skippedThisCall),
       );
     }
+    const failureKind: AiFailureKind = error.kind === 'timeout' ? 'timeout' : 'transport-error';
     pushFailure(diagnostics, route, {
       model: route.model,
-      kind: error.kind === 'rate-limit' ? 'rate-limit' : error.kind === 'timeout' ? 'timeout' : 'transport-error',
+      kind: failureKind,
       status: error.status === undefined ? undefined : String(error.status),
       excerpt: sanitizeAiOutputExcerpt(this.redactForRoute(route, error.message)),
     });
-    bump(
-      this.stats.failuresByKind as Record<string, number>,
-      error.kind === 'rate-limit' ? 'rate-limit' : error.kind === 'timeout' ? 'timeout' : 'transport-error',
-    );
-    this.noteAttemptOutcome(
-      route,
-      error.kind === 'rate-limit' ? 'rate-limit' : error.kind === 'timeout' ? 'timeout' : 'transport-error',
-    );
+    bump(this.stats.failuresByKind as Record<string, number>, failureKind);
+    this.noteAttemptOutcome(route, failureKind);
   }
 
   private async acquire(
@@ -489,97 +523,131 @@ export class AiPoolClassifier implements AiClassifier {
   ): Promise<Reservation> {
     while (true) {
       signal.throwIfAborted();
-      if (this.reservedRequests >= (this.options.maxRequests ?? Number.MAX_SAFE_INTEGER)) {
-        throw new AiRateLimitedError('IA: presupuesto HTTP global de esta ejecución agotado');
-      }
-      const now = this.clock.now();
-      if (now >= deadline) throw new Error('tiempo agotado esperando cuota de IA');
-      let earliest = Infinity;
-      let hasPotentialRoute = false;
-      for (const route of this.routes) {
-        if (!this.available(route, skippedThisCall)) {
-          const reason = skippedThisCall.has(route.routeId)
-            ? 'unusable-output'
-            : this.fatalProviders.has(route.provider)
-              ? 'fatal-provider'
-              : this.routeHealth(route.routeId).circuitOpen
-                ? 'circuit-open'
-                : 'disabled';
-          addRoute(diagnostics, route, reason);
-          continue;
-        }
-        hasPotentialRoute = true;
-        const state = this.state.route(route.routeId, now, route.reset);
-        const rpd = route.limits?.rpd ?? Infinity;
-        if (state.requests >= rpd || state.dailyUntil > now) {
-          addRoute(diagnostics, route, state.dailyUntil > now ? 'daily-quota' : 'daily-budget');
-          continue;
-        }
-        const estimated = Math.ceil(this.estimateInputTokens(request, route) * state.tokenScale);
-        const tpm = route.limits?.tpm ?? Infinity;
-        if (estimated > tpm) {
-          addRoute(diagnostics, route, 'input-over-tpm');
-          continue;
-        }
-        if (this.atConcurrencyCap(this.inFlightByRoute, route.routeId, route.limits?.maxConcurrent)) {
-          addRoute(diagnostics, route, 'route-concurrency');
-          earliest = Math.min(earliest, now + 25);
-          continue;
-        }
-        const providerConcurrent = this.providerCap(route.provider, 'providerMaxConcurrent');
-        if (this.atConcurrencyCap(this.inFlightByProvider, route.provider, providerConcurrent)) {
-          addRoute(diagnostics, route, 'provider-concurrency');
-          earliest = Math.min(earliest, now + 25);
-          continue;
-        }
-        if (state.nextAt > now) addRoute(diagnostics, route, 'rpm-wait');
-        if (state.cooldownUntil > now) addRoute(diagnostics, route, 'cooldown');
-        let next = Math.max(now, state.nextAt, state.cooldownUntil);
-        const providerInterval = this.providerCap(route.provider, 'providerMinIntervalMs') ?? 0;
-        const providerReadyAt = (this.lastStartByProvider.get(route.provider) ?? 0) + providerInterval;
-        if (providerReadyAt > now) addRoute(diagnostics, route, 'provider-min-interval');
-        next = Math.max(next, providerReadyAt);
-        let tokens = state.recent.reduce((sum, item) => sum + item.tokens, 0);
-        if (tokens + estimated > tpm) addRoute(diagnostics, route, 'tpm-wait');
-        for (const item of state.recent) {
-          if (tokens + estimated <= tpm) break;
-          tokens -= item.tokens;
-          next = Math.max(next, item.at + 60_000);
-        }
-        if (next <= now && this.active < this.concurrency) {
-          const id = randomUUID();
-          state.requests++;
-          state.nextAt = now + Math.max(
-            intervalMsForRpm(route.limits?.rpm),
-            route.limits?.minIntervalMs ?? 0,
-          );
-          state.recent.push({ id, at: now, tokens: estimated });
-          this.state.save();
-          this.reservedRequests++;
-          this.active++;
-          bumpMap(this.inFlightByRoute, route.routeId);
-          bumpMap(this.inFlightByProvider, route.provider);
-          this.lastStartByProvider.set(route.provider, now);
-          addRoute(
-            diagnostics,
-            route,
-            route.routeId === this.routes[0]!.routeId ? 'preferred-ready' : 'next-available',
-          );
-          return { route, id, estimated };
-        }
-        earliest = Math.min(earliest, next);
-      }
-      if (!Number.isFinite(earliest)) {
-        const fatal = this.routes.map((route) => this.fatalProviders.get(route.provider)).find(Boolean);
-        if (!hasPotentialRoute && fatal) throw fatal;
-        throw new AiRateLimitedError('IA: ninguna route tiene cuota, configuración o capacidad TPM disponible');
-      }
-      if (earliest >= deadline) {
-        throw new AiRateLimitedError('IA: próxima disponibilidad fuera del presupuesto de espera');
-      }
-      const wait = Math.min(1_000, Math.max(25, earliest - now), deadline - now);
-      await sleep(this.clock, wait, signal);
+      const decision = await this.withReservationLock(() => this.tryReserve(
+        request, deadline, diagnostics, skippedThisCall,
+      ));
+      if (decision.kind === 'reserved') return decision.reservation;
+      if (decision.kind === 'fail') throw decision.error;
+      await sleep(this.clock, decision.wait, signal);
     }
+  }
+
+  /**
+   * Check-and-reserve must be atomic: concurrent classify() waiters can otherwise
+   * all wake from minInterval/cooldown sleep and skip the same route interval.
+   */
+  private withReservationLock<T>(work: () => T): Promise<T> {
+    const run = this.reservationTail.then(work, work);
+    this.reservationTail = run.then(() => undefined, () => undefined);
+    return run;
+  }
+
+  private tryReserve(
+    request: AiRequest,
+    deadline: number,
+    diagnostics: AiCallDiagnostics,
+    skippedThisCall: ReadonlySet<string>,
+  ): { kind: 'reserved'; reservation: Reservation } | { kind: 'wait'; wait: number } | { kind: 'fail'; error: Error } {
+    if (this.reservedRequests >= (this.options.maxRequests ?? Number.MAX_SAFE_INTEGER)) {
+      return { kind: 'fail', error: new AiRateLimitedError('IA: presupuesto HTTP global de esta ejecución agotado') };
+    }
+    const now = this.clock.now();
+    if (now >= deadline) return { kind: 'fail', error: new Error('tiempo agotado esperando cuota de IA') };
+    let earliest = Infinity;
+    let hasPotentialRoute = false;
+    for (const route of this.routes) {
+      if (!this.available(route, skippedThisCall)) {
+        const reason = skippedThisCall.has(route.routeId)
+          ? 'unusable-output'
+          : this.fatalProviders.has(route.provider)
+            ? 'fatal-provider'
+            : this.routeHealth(route.routeId).circuitOpen
+              ? 'circuit-open'
+              : 'disabled';
+        addRoute(diagnostics, route, reason);
+        continue;
+      }
+      hasPotentialRoute = true;
+      const state = this.state.route(route.routeId, now, route.reset);
+      const rpd = route.limits?.rpd ?? Infinity;
+      if (state.requests >= rpd || state.dailyUntil > now) {
+        addRoute(diagnostics, route, state.dailyUntil > now ? 'daily-quota' : 'daily-budget');
+        continue;
+      }
+      const estimated = Math.ceil(this.estimateInputTokens(request, route) * state.tokenScale);
+      const tpm = route.limits?.tpm ?? Infinity;
+      if (estimated > tpm) {
+        addRoute(diagnostics, route, 'input-over-tpm');
+        continue;
+      }
+      if (this.atConcurrencyCap(this.inFlightByRoute, route.routeId, route.limits?.maxConcurrent)) {
+        addRoute(diagnostics, route, 'route-concurrency');
+        earliest = Math.min(earliest, now + 25);
+        continue;
+      }
+      const providerConcurrent = this.effectiveProviderMaxConcurrent(route.provider);
+      if (this.atConcurrencyCap(this.inFlightByProvider, route.provider, providerConcurrent)) {
+        addRoute(diagnostics, route, 'provider-concurrency');
+        earliest = Math.min(earliest, now + 25);
+        continue;
+      }
+      if (state.nextAt > now) addRoute(diagnostics, route, 'rpm-wait');
+      if (state.cooldownUntil > now) addRoute(diagnostics, route, 'cooldown');
+      let next = Math.max(now, state.nextAt, state.cooldownUntil);
+      const routeInterval = route.limits?.minIntervalMs ?? 0;
+      const routeReadyAt = (this.lastStartByRoute.get(route.routeId) ?? 0) + routeInterval;
+      if (routeReadyAt > now) addRoute(diagnostics, route, 'route-min-interval');
+      next = Math.max(next, routeReadyAt);
+      const providerInterval = this.providerCap(route.provider, 'providerMinIntervalMs') ?? 0;
+      const providerReadyAt = (this.lastStartByProvider.get(route.provider) ?? 0) + providerInterval;
+      if (providerReadyAt > now) addRoute(diagnostics, route, 'provider-min-interval');
+      next = Math.max(next, providerReadyAt);
+      let tokens = state.recent.reduce((sum, item) => sum + item.tokens, 0);
+      if (tokens + estimated > tpm) addRoute(diagnostics, route, 'tpm-wait');
+      for (const item of state.recent) {
+        if (tokens + estimated <= tpm) break;
+        tokens -= item.tokens;
+        next = Math.max(next, item.at + 60_000);
+      }
+      if (next <= now && this.active < this.concurrency) {
+        const id = randomUUID();
+        state.requests++;
+        state.nextAt = now + Math.max(
+          intervalMsForRpm(route.limits?.rpm),
+          route.limits?.minIntervalMs ?? 0,
+        );
+        state.recent.push({ id, at: now, tokens: estimated });
+        this.state.save();
+        this.reservedRequests++;
+        this.active++;
+        bumpMap(this.inFlightByRoute, route.routeId);
+        bumpMap(this.inFlightByProvider, route.provider);
+        this.lastStartByRoute.set(route.routeId, now);
+        this.lastStartByProvider.set(route.provider, now);
+        addRoute(
+          diagnostics,
+          route,
+          route.routeId === this.routes[0]!.routeId ? 'preferred-ready' : 'next-available',
+        );
+        return { kind: 'reserved', reservation: { route, id, estimated } };
+      }
+      earliest = Math.min(earliest, next);
+    }
+    if (!Number.isFinite(earliest)) {
+      const fatal = this.routes.map((route) => this.fatalProviders.get(route.provider)).find(Boolean);
+      if (!hasPotentialRoute && fatal) return { kind: 'fail', error: fatal };
+      return {
+        kind: 'fail',
+        error: new AiRateLimitedError('IA: ninguna route tiene cuota, configuración o capacidad TPM disponible'),
+      };
+    }
+    if (earliest >= deadline) {
+      return {
+        kind: 'fail',
+        error: new AiRateLimitedError('IA: próxima disponibilidad fuera del presupuesto de espera'),
+      };
+    }
+    return { kind: 'wait', wait: Math.min(1_000, Math.max(25, earliest - now), deadline - now) };
   }
 
   private enabled(route: AiRoute): boolean {
@@ -610,6 +678,8 @@ export class AiPoolClassifier implements AiClassifier {
         failuresByKind: {},
         rateLimits: 0,
         quotaExhausted: 0,
+        concurrencyPressure: 0,
+        pressureByKind: {},
       };
       this.health.set(routeId, health);
     }
@@ -622,9 +692,14 @@ export class AiPoolClassifier implements AiClassifier {
     health.lastUnhealthyKind = undefined;
   }
 
-  private noteAttemptOutcome(route: AiRoute, kind: AiFailureKind): void {
+  private noteAttemptOutcome(route: AiRoute, kind: AiFailureKind, pressure?: AiPressureKind): void {
     const health = this.routeHealth(route.routeId);
     bump(health.failuresByKind as Record<string, number>, kind);
+    if (pressure) bump(health.pressureByKind as Record<string, number>, pressure);
+    if (kind === 'concurrency-pressure') {
+      health.concurrencyPressure++;
+      return;
+    }
     if (kind === 'rate-limit') {
       health.rateLimits++;
       return;
@@ -651,6 +726,23 @@ export class AiPoolClassifier implements AiClassifier {
     return values.length ? Math.min(...values) : undefined;
   }
 
+  /**
+   * After an explicit concurrency-pressure signal, remaining in-flight work
+   * towards that provider converges to 1 for the rest of this run. It does not
+   * open a circuit or mark quota exhaustion.
+   */
+  private tightenProviderConcurrency(provider: string): void {
+    this.runtimeProviderMaxConcurrent.set(provider, 1);
+  }
+
+  private effectiveProviderMaxConcurrent(provider: string): number | undefined {
+    const declared = this.providerCap(provider, 'providerMaxConcurrent');
+    const runtime = this.runtimeProviderMaxConcurrent.get(provider);
+    if (declared === undefined) return runtime;
+    if (runtime === undefined) return declared;
+    return Math.min(declared, runtime);
+  }
+
   private atConcurrencyCap(map: Map<string, number>, key: string, cap: number | undefined): boolean {
     return cap !== undefined && (map.get(key) ?? 0) >= cap;
   }
@@ -670,6 +762,8 @@ export class AiPoolClassifier implements AiClassifier {
         failuresByKind: structuredClone(health.failuresByKind),
         rateLimits: health.rateLimits,
         quotaExhausted: health.quotaExhausted,
+        concurrencyPressure: health.concurrencyPressure,
+        pressureByKind: structuredClone(health.pressureByKind),
         circuitOpen: health.circuitOpen,
         ...(health.circuitReason ? { circuitReason: health.circuitReason } : {}),
         consecutiveFailures: health.consecutiveUnhealthy,
@@ -786,6 +880,20 @@ function skipRouteWhenAlternativeExists(
 function intervalMsForRpm(rpm: number | undefined): number {
   if (rpm === undefined) return 0;
   return Math.ceil(60_000 / rpm);
+}
+
+function pressureReason(pressure: AiPressureKind | undefined): string {
+  if (pressure === 'tpm') return 'rate-limit-tpm';
+  if (pressure === 'monthly') return 'rate-limit-monthly';
+  if (pressure === 'request-frequency') return 'rate-limit-request-frequency';
+  if (pressure === 'concurrency') return 'concurrency-pressure';
+  return 'rate-limit';
+}
+
+function primaryPressure(dimensions: AiPressureKind[] | undefined): AiPressureKind | undefined {
+  if (!dimensions?.length) return undefined;
+  const rank: AiPressureKind[] = ['concurrency', 'monthly', 'tpm', 'request-frequency', 'indeterminate'];
+  return rank.find((kind) => dimensions.includes(kind)) ?? dimensions[0];
 }
 
 function bump(map: Record<string, number>, key: string, amount = 1): void {

@@ -49,24 +49,34 @@ const ALL_FREE_ENV: AiEnv = {
 const fixtures = await loadAiSmokeFixtures(ROOT);
 
 describe('parseAiSmokeArgs y purposes', () => {
-  it('exige --route o --all-routes y entiende --all-purposes', () => {
-    expect(parseAiSmokeArgs([]).ok).toBe(false);
-    expect(parseAiSmokeArgs(['--route']).ok).toBe(false);
-    expect(parseAiSmokeArgs(['--route', 'groq']).ok).toBe(false);
-    expect(parseAiSmokeArgs(['--wat']).ok).toBe(false);
+  it('exige --route o --all-routes y entiende --all-purposes y --purpose', () => {
+    expect(parseAiSmokeArgs([])).toBeUndefined();
+    expect(parseAiSmokeArgs(['--route'])).toBeUndefined();
+    expect(parseAiSmokeArgs(['--route', 'groq'])).toBeUndefined();
     expect(parseAiSmokeArgs(['--all-routes'])).toEqual({
-      ok: true, value: { allRoutes: true, allPurposes: false },
+      allRoutes: true, allPurposes: false, purposes: ['eligibility'],
     });
     expect(parseAiSmokeArgs(['--route', 'groq:openai/gpt-oss-120b', '--all-purposes'])).toEqual({
-      ok: true,
-      value: { allRoutes: false, allPurposes: true, route: 'groq:openai/gpt-oss-120b' },
+      allRoutes: false,
+      allPurposes: true,
+      route: 'groq:openai/gpt-oss-120b',
+      purposes: [...AI_CALL_PURPOSES],
     });
+    expect(parseAiSmokeArgs(['--route', 'mistral:ministral-14b-2512'])).toEqual({
+      allRoutes: false,
+      allPurposes: false,
+      route: 'mistral:ministral-14b-2512',
+      purposes: ['eligibility'],
+    });
+    expect(parseAiSmokeArgs(['--route', 'zai:glm-4.7-flash', '--purpose', 'taxonomy'])?.purposes).toEqual(['taxonomy']);
+    expect(parseAiSmokeArgs(['--route', 'x:y', '--purpose', 'taxonomy', '--all-purposes'])).toBeUndefined();
+    expect(parseAiSmokeArgs(['--route', 'x:y', '--all-routes'])).toBeUndefined();
   });
 
-  it('ai:smoke:all usa eligibility; --route o --all-purposes cubren AI_CALL_PURPOSES', () => {
+  it('ai:smoke y ai:smoke:all usan eligibility por defecto; --all-purposes cubre AI_CALL_PURPOSES', () => {
     expect(purposesToSmoke({ allRoutes: true, allPurposes: false })).toEqual(['eligibility']);
     expect(purposesToSmoke({ allRoutes: true, allPurposes: true })).toEqual([...AI_CALL_PURPOSES]);
-    expect(purposesToSmoke({ allRoutes: false, allPurposes: false })).toEqual([...AI_CALL_PURPOSES]);
+    expect(purposesToSmoke({ allRoutes: false, allPurposes: false })).toEqual(['eligibility']);
   });
 });
 
@@ -272,13 +282,14 @@ describe('runAiSmoke', () => {
     expect(result.exitCode).toBe(1);
   });
 
-  it('sin --all-routes sigue ejecutando todas las tasks aunque una falle', async () => {
+  it('con --all-purposes en una route sigue ejecutando todas las tasks aunque una falle', async () => {
     const seen: AiCallPurpose[] = [];
     await runAiSmoke({
       env: ALL_FREE_ENV,
       fixtures,
       allRoutes: false,
-      allPurposes: false,
+      allPurposes: true,
+      purposes: [...AI_CALL_PURPOSES],
       route: 'groq:one',
       discover: () => stubDiscovery([route('groq:one')]),
       createClassifier: () => passingClassifier({
@@ -401,6 +412,11 @@ describe('compactSmokeFailureCause y formato', () => {
       error: new AiTransportError('x', { kind: 'timeout' }),
     })).toBe('timeout');
     expect(compactSmokeFailureCause({
+      error: new AiTransportError('x', {
+        kind: 'rate-limit', status: 429, pressure: 'concurrency', quotaExhausted: false,
+      }),
+    })).toBe('HTTP 429 / concurrency pressure');
+    expect(compactSmokeFailureCause({
       parsed: { ok: false, ruleId: 'ai-malformed-output' },
     })).toBe('malformed JSON');
     expect(compactSmokeFailureCause({
@@ -474,6 +490,78 @@ function allReady(routes: AiSmokeRoute[] = []): AiSmokeProviderStatus[] {
     routeIds: routes.filter((item) => item.provider === provider).map((item) => item.routeId),
   }));
 }
+
+describe('runAiRouteSmoke (CLI de una route)', () => {
+  it('reexporta parse/split/env desde smoke-ai-route y sanitiza pressure', async () => {
+    const { parseAiSmokeArgs: parseFromCli, runAiRouteSmoke, smokeEnvForRoute, splitRouteId } = await import(
+      '../src/cli/smoke-ai-route.ts'
+    );
+    expect(parseFromCli(['--route', 'mistral:ministral-14b-2512'])).toEqual({
+      route: 'mistral:ministral-14b-2512',
+      allRoutes: false,
+      allPurposes: false,
+      purposes: ['eligibility'],
+    });
+    expect(splitRouteId('mistral:ministral-14b-2512')).toEqual({
+      provider: 'mistral', model: 'ministral-14b-2512',
+    });
+    expect(smokeEnvForRoute('mistral:ministral-14b-2512', { GROQ_API_KEY: 'keep' })).toMatchObject({
+      AI_PROVIDER: 'pool',
+      AI_ZERO_COST_ONLY: 'true',
+      AI_CACHE: 'off',
+      AI_ROUTE: 'mistral:ministral-14b-2512',
+      GROQ_API_KEY: 'keep',
+    });
+
+    const classify = async () => {
+      throw new AiTransportError('zai HTTP 429: High concurrency usage zai-secret-key', {
+        kind: 'rate-limit', status: 429, pressure: 'concurrency', quotaExhausted: false,
+        rateLimit: { dimensions: ['concurrency'] },
+      });
+    };
+    const close = () => {};
+    const initialize = () => {};
+    const classifier: AiClassifier = {
+      classify,
+      lastDiagnostics: () => ({
+        provider: 'zai',
+        model: 'glm-4.7-flash',
+        routeId: 'zai:glm-4.7-flash',
+        status: '429',
+        failures: [{
+          provider: 'zai',
+          model: 'glm-4.7-flash',
+          routeId: 'zai:glm-4.7-flash',
+          kind: 'concurrency-pressure',
+          pressure: 'concurrency',
+          status: '429',
+          excerpt: 'High concurrency usage [redacted]',
+          rateLimit: { dimensions: ['concurrency'] },
+        }],
+      }),
+      close,
+      initialize,
+    };
+    const rows = await runAiRouteSmoke({
+      route: 'zai:glm-4.7-flash',
+      purposes: ['eligibility'],
+      fixtures: [{ purpose: 'eligibility', observed: fixtures[0]!.observed }],
+      classifier,
+      env: { ZAI_API_KEY: 'zai-secret-key' },
+    });
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      provider: 'zai',
+      model: 'glm-4.7-flash',
+      route: 'zai:glm-4.7-flash',
+      purpose: 'eligibility',
+      success: false,
+      schemaValid: false,
+      pressure: 'concurrency-pressure',
+    });
+    expect(JSON.stringify(rows[0])).not.toContain('zai-secret-key');
+  });
+});
 
 function readyExcept(
   missing: Partial<Record<(typeof AI_FREE_PROVIDERS)[number], string>>,

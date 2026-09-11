@@ -4,19 +4,27 @@ import { AiPoolClassifier } from '../src/ingestion/classification/ai-pool.ts';
 import type { AiRequest } from '../src/ingestion/classification/ai-request.ts';
 import { AiTransportError, makeRoute } from '../src/ingestion/classification/ai-transport.ts';
 import {
+  openaiCompatibleBusinessPressure,
+  openaiCompatibleErrorCode,
   openaiCompatibleModelProfile,
   openaiCompatibleRateLimitSignal,
 } from '../src/ingestion/classification/openai-compatible-profiles.ts';
 import {
   OpenAiCompatibleTransport,
   durationHeaderMs,
+  rateLimitSnapshot,
 } from '../src/ingestion/classification/openai-compatible-transport.ts';
 import {
   CLOUDFLARE_ZERO_COST_MODELS,
   GROQ_DEFAULT_BASE_URL,
   GROQ_DEFAULT_MODELS,
   MISTRAL_DEFAULT_BASE_URL,
+  MISTRAL_DEFAULT_MODELS,
+  MISTRAL_OPTIONAL_MODELS,
+  MISTRAL_PRODUCTION_MODEL_LIMITS,
   ZAI_DEFAULT_BASE_URL,
+  ZAI_PRODUCTION_LIMITS,
+  ZAI_ZERO_COST_MODELS,
   cloudflareDailyAllocationExhausted,
   createAiClassifierFromEnv,
   createFreeRoutesFromEnv,
@@ -118,7 +126,7 @@ describe('factory multi-provider zero cost', () => {
     });
     expect(routes.map((route) => route.routeId)).toEqual([
       ...GROQ_DEFAULT_MODELS.map((model) => `groq:${model}`),
-      'mistral:mistral-small-latest',
+      ...MISTRAL_DEFAULT_MODELS.map((model) => `mistral:${model}`),
       'zai:glm-4.7-flash', 'zai:glm-4.5-flash',
       ...CLOUDFLARE_ZERO_COST_MODELS.map((model) => `cloudflare:${model}`),
     ]);
@@ -157,27 +165,74 @@ describe('factory multi-provider zero cost', () => {
       'groq:openai/gpt-oss-120b',
     ]);
   });
-  it('aplica overrides de cuota por modelo sin inventar defaults de Mistral/Z.AI', () => {
+
+  it('aplica defaults versionados de Mistral/Z.AI y deja que el env los sobrescriba', () => {
     const routes = createFreeRoutesFromEnv({
       AI_ZERO_COST_ONLY: 'true',
       GROQ_API_KEY: 'groq-key', GROQ_FREE_TIER_CONFIRMED: 'true',
       GROQ_MODEL_RPM: 'openai/gpt-oss-120b:12',
       MISTRAL_API_KEY: 'mistral-key', MISTRAL_FREE_MODE_CONFIRMED: 'true',
-      MISTRAL_MODEL_RPM: 'mistral-small-latest:1',
+      MISTRAL_MODEL_RPM: 'ministral-14b-2512:1',
       ZAI_API_KEY: 'zai-key',
       ZAI_MODEL_RPM: 'glm-4.7-flash:2,glm-4.5-flash:3',
     });
     expect(routes.find((route) => route.routeId === 'groq:openai/gpt-oss-120b')?.limits).toMatchObject({
       rpm: 12, tpm: 8_000, rpd: 1_000,
     });
-    expect(routes.find((route) => route.routeId === 'mistral:mistral-small-latest')?.limits).toEqual({ rpm: 1 });
-    expect(routes.find((route) => route.routeId === 'zai:glm-4.7-flash')?.limits).toEqual({ rpm: 2 });
-    expect(routes.find((route) => route.routeId === 'zai:glm-4.5-flash')?.limits).toEqual({ rpm: 3 });
-    const plainMistral = createFreeRoutesFromEnv({
+    expect(routes.find((route) => route.routeId === 'mistral:ministral-14b-2512')?.limits).toMatchObject({
+      rpm: 1,
+      tpm: MISTRAL_PRODUCTION_MODEL_LIMITS['ministral-14b-2512']!.tpm,
+      maxConcurrent: 1,
+      minIntervalMs: 2_100,
+    });
+    expect(routes.find((route) => route.routeId === 'zai:glm-4.7-flash')?.limits).toMatchObject({
+      rpm: 2, providerMaxConcurrent: ZAI_PRODUCTION_LIMITS.providerMaxConcurrent,
+    });
+    expect(routes.find((route) => route.routeId === 'zai:glm-4.5-flash')?.limits).toMatchObject({
+      rpm: 3, providerMaxConcurrent: 1,
+    });
+    const plain = createFreeRoutesFromEnv({
       AI_ZERO_COST_ONLY: 'true',
       MISTRAL_API_KEY: 'mistral-key', MISTRAL_FREE_MODE_CONFIRMED: 'true',
+      ZAI_API_KEY: 'zai-key',
     });
-    expect(plainMistral[0]?.limits).toBeUndefined();
+    expect(plain.map((route) => route.routeId)).toEqual([
+      'mistral:ministral-14b-2512',
+      'mistral:ministral-8b-2512',
+      'zai:glm-4.7-flash',
+      'zai:glm-4.5-flash',
+    ]);
+    expect(plain.find((route) => route.routeId === 'mistral:ministral-14b-2512')?.limits).toEqual(
+      MISTRAL_PRODUCTION_MODEL_LIMITS['ministral-14b-2512'],
+    );
+    expect(plain.find((route) => route.routeId === 'mistral:ministral-8b-2512')?.limits).toEqual(
+      MISTRAL_PRODUCTION_MODEL_LIMITS['ministral-8b-2512'],
+    );
+    expect(plain.find((route) => route.routeId === 'zai:glm-4.7-flash')?.limits).toEqual(ZAI_PRODUCTION_LIMITS);
+  });
+
+  it('MISTRAL_MODELS / límites env tienen precedencia y 3B no entra por defecto', () => {
+    expect([...MISTRAL_DEFAULT_MODELS]).toEqual(['ministral-14b-2512', 'ministral-8b-2512']);
+    expect([...MISTRAL_OPTIONAL_MODELS]).toEqual(['ministral-3b-2512']);
+    expect(MISTRAL_DEFAULT_MODELS).not.toContain('mistral-small-latest');
+    expect(MISTRAL_DEFAULT_MODELS).not.toContain('ministral-3b-2512');
+
+    const overridden = createFreeRoutesFromEnv({
+      AI_ZERO_COST_ONLY: 'true',
+      MISTRAL_API_KEY: 'mistral-key',
+      MISTRAL_FREE_MODE_CONFIRMED: 'true',
+      MISTRAL_MODELS: 'ministral-8b-2512,mistral-small-latest',
+      MISTRAL_MODEL_TPM: 'ministral-8b-2512:100',
+      MISTRAL_MODEL_MAX_CONCURRENT: 'ministral-8b-2512:3',
+      MISTRAL_MODEL_MIN_INTERVAL_MS: 'ministral-8b-2512:10',
+    });
+    expect(overridden.map((route) => route.routeId)).toEqual([
+      'mistral:ministral-8b-2512',
+      'mistral:mistral-small-latest',
+    ]);
+    expect(overridden[0]?.limits).toMatchObject({ tpm: 100, maxConcurrent: 3, minIntervalMs: 10 });
+    expect(overridden[1]?.limits?.tpm).toBeUndefined();
+    expect(overridden[1]?.limits?.minIntervalMs).toBeUndefined();
   });
 });
 
@@ -210,16 +265,18 @@ describe('payload HTTP por provider/modelo', () => {
     }
   });
 
-  it('Mistral conserva JSON mode y service_tier=standard_only sin parámetros de thinking', async () => {
-    const body = await captureBody('mistral', 'mistral-small-latest');
-    expect(body).toMatchObject({
-      model: 'mistral-small-latest',
-      response_format: { type: 'json_object' },
-      service_tier: 'standard_only',
-    });
-    expect(body).not.toHaveProperty('thinking');
-    expect(body).not.toHaveProperty('chat_template_kwargs');
-    expect(body).not.toHaveProperty('reasoning_effort');
+  it('Mistral pide JSON mode y service_tier=standard_only en los IDs versionados', async () => {
+    for (const model of ['ministral-14b-2512', 'ministral-8b-2512', 'mistral-small-latest'] as const) {
+      const body = await captureBody('mistral', model);
+      expect(body).toMatchObject({
+        model,
+        response_format: { type: 'json_object' },
+        service_tier: 'standard_only',
+      });
+      expect(body).not.toHaveProperty('thinking');
+      expect(body).not.toHaveProperty('chat_template_kwargs');
+      expect(body).not.toHaveProperty('reasoning_effort');
+    }
   });
 
   it('Groq conserva JSON mode y no recibe parámetros de thinking de otros providers', async () => {
@@ -248,7 +305,10 @@ describe('payload HTTP por provider/modelo', () => {
     expect(identityByRoute(routes, 'groq:openai/gpt-oss-120b')).toMatchObject({
       responseFormat: 'json-object', extraBody: {},
     });
-    expect(identityByRoute(routes, 'mistral:mistral-small-latest')).toMatchObject({
+    expect(identityByRoute(routes, 'mistral:ministral-14b-2512')).toMatchObject({
+      responseFormat: 'json-object', extraBody: { service_tier: 'standard_only' },
+    });
+    expect(identityByRoute(routes, 'mistral:ministral-8b-2512')).toMatchObject({
       responseFormat: 'json-object', extraBody: { service_tier: 'standard_only' },
     });
     expect(identityByRoute(routes, 'zai:glm-4.7-flash')).toMatchObject({
@@ -269,7 +329,10 @@ describe('perfiles HTTP declarativos', () => {
     expect(openaiCompatibleModelProfile('groq', 'openai/gpt-oss-120b')).toEqual({
       responseFormat: 'json-object', extraBody: {},
     });
-    expect(openaiCompatibleModelProfile('mistral', 'mistral-small-latest').extraBody).toEqual({
+    expect(openaiCompatibleModelProfile('mistral', 'ministral-14b-2512').extraBody).toEqual({
+      service_tier: 'standard_only',
+    });
+    expect(openaiCompatibleModelProfile('mistral', 'ministral-8b-2512').extraBody).toEqual({
       service_tier: 'standard_only',
     });
     expect(openaiCompatibleModelProfile('zai', 'glm-4.7-flash')).toEqual({
@@ -291,6 +354,9 @@ describe('perfiles HTTP declarativos', () => {
     expect(openaiCompatibleRateLimitSignal('mistral', 429, '{"code":"1300"}')).toBe(true);
     expect(openaiCompatibleRateLimitSignal('zai', 503, '{"error":{"code":"1305"}}')).toBe(true);
     expect(openaiCompatibleRateLimitSignal('zai', 429, '{"error":{"code":"1302"}}')).toBe(true);
+    expect(openaiCompatibleBusinessPressure('zai', '{"error":{"code":"1302","message":"High concurrency usage of this API"}}')).toBe('concurrency');
+    expect(openaiCompatibleErrorCode('{"object":"error","type":"rate_limited","code":"1300"}')).toBe('1300');
+    expect(openaiCompatibleBusinessPressure('mistral', '{"code":"1300"}')).toBeUndefined();
     expect(openaiCompatibleRateLimitSignal('groq', 400, 'invalid')).toBe(false);
     expect(openaiCompatibleRateLimitSignal('mistral', 401, 'rate_limited')).toBe(false);
   });
@@ -359,8 +425,10 @@ describe('OpenAiCompatibleTransport', () => {
         { status: 429, headers: { 'x-ratelimit-remaining': '0', 'x-ratelimit-reset': '3' } },
       ),
     });
-    await expect(mistral.request({ model: 'mistral-small-latest', request, signal, timeoutMs: 1_000 }))
-      .rejects.toMatchObject({ kind: 'rate-limit', status: 429, retryAfterMs: 3_000 });
+    await expect(mistral.request({ model: 'ministral-14b-2512', request, signal, timeoutMs: 1_000 }))
+      .rejects.toMatchObject({
+        kind: 'rate-limit', status: 429, retryAfterMs: 3_000, quotaExhausted: false, pressure: 'request-frequency',
+      });
 
     const zaiOverload = new OpenAiCompatibleTransport({
       provider: 'zai', baseUrl: 'https://example.test/v1', apiKey: 'provider-secret',
@@ -375,12 +443,14 @@ describe('OpenAiCompatibleTransport', () => {
     const zaiRate = new OpenAiCompatibleTransport({
       provider: 'zai', baseUrl: 'https://example.test/v1', apiKey: 'provider-secret',
       fetch: async () => new Response(
-        '{"error":{"code":"1302","message":"Rate limit reached for requests"}}',
+        '{"error":{"code":"1302","message":"High concurrency usage of this API, please reduce concurrency or contact customer service to increase limits"}}',
         { status: 429 },
       ),
     });
     await expect(zaiRate.request({ model: 'glm-4.5-flash', request, signal, timeoutMs: 1_000 }))
-      .rejects.toMatchObject({ kind: 'rate-limit', status: 429 });
+      .rejects.toMatchObject({
+        kind: 'rate-limit', status: 429, quotaExhausted: false, pressure: 'concurrency',
+      });
 
     const wrapped = new OpenAiCompatibleTransport({
       provider: 'cloudflare', baseUrl: 'https://example.test/v1', apiKey: 'provider-secret',
@@ -407,6 +477,80 @@ describe('OpenAiCompatibleTransport', () => {
     expect(durationHeaderMs('Wed, 10 Sep 2026 12:00:03 GMT', Date.parse('2026-09-10T12:00:00Z'))).toBe(3_000);
     expect(durationHeaderMs('3', 0)).toBe(3_000);
     expect(durationHeaderMs('1750000003', 1_750_000_000_000)).toBe(3_000);
+  });
+
+  it('un 429 de Mistral sin headers extra es rate-limit indeterminado, no cuota', async () => {
+    const mistral = new OpenAiCompatibleTransport({
+      provider: 'mistral', baseUrl: 'https://example.test/v1', apiKey: 'provider-secret',
+      fetch: async () => new Response(
+        '{"object":"error","message":"Rate limit exceeded","type":"rate_limited","code":"1300"}',
+        { status: 429 },
+      ),
+    });
+    await expect(mistral.request({ model: 'ministral-8b-2512', request, signal, timeoutMs: 1_000 }))
+      .rejects.toMatchObject({
+        kind: 'rate-limit', status: 429, quotaExhausted: false, pressure: 'indeterminate',
+      });
+  });
+
+  it('conserva headers Mistral de request/TPM/monthly y Retry-After sin secrets', () => {
+    const headers = new Headers({
+      'x-ratelimit-limit-tokens-minute': '937500',
+      'x-ratelimit-remaining-tokens-minute': '0',
+      'x-ratelimit-limit-tokens-month': '1000000000',
+      'x-ratelimit-remaining-tokens-month': '12',
+      'x-ratelimit-limit-req-minute': '30',
+      'x-ratelimit-remaining-req-minute': '0',
+      'retry-after': '2',
+      authorization: 'Bearer provider-secret',
+      'set-cookie': 'session=secret-cookie',
+    });
+    const snapshot = rateLimitSnapshot(
+      'mistral',
+      '{"object":"error","type":"rate_limited","code":"1300"}',
+      headers,
+      Date.parse('2026-09-11T12:00:00Z'),
+    );
+    expect(snapshot).toMatchObject({
+      remainingRequests: 0,
+      remainingTokensMinute: 0,
+      remainingTokensMonth: 12,
+      limitTokensMinute: 937_500,
+      limitRequests: 30,
+      retryAfterMs: 2_000,
+    });
+    expect(snapshot.dimensions).toEqual(expect.arrayContaining(['request-frequency', 'tpm']));
+    expect(JSON.stringify(snapshot)).not.toContain('provider-secret');
+    expect(JSON.stringify(snapshot)).not.toContain('secret-cookie');
+
+    const fiveMinute = rateLimitSnapshot('mistral', '{"code":"1300"}', new Headers({
+      'x-ratelimit-remaining-tokens-5-minute': '0',
+      'x-ratelimit-limit-tokens-5-minute': '8000',
+      'x-ratelimit-reset-req-minute': '1',
+    }), 0);
+    expect(fiveMinute).toMatchObject({
+      remainingTokensMinute: 0, limitTokensMinute: 8_000, resetAfterMs: 1_000, dimensions: ['tpm'],
+    });
+
+    const monthly = rateLimitSnapshot('mistral', '{"code":"1300"}', new Headers({
+      'x-ratelimit-remaining-tokens-month': '0',
+      'x-ratelimit-remaining-tokens-minute': '8000',
+      'x-ratelimit-remaining-req-minute': '4',
+    }), 0);
+    expect(monthly.dimensions).toEqual(['monthly']);
+  });
+
+  it('Z.AI 1302 de la run #194 es concurrency-pressure y no cuota', async () => {
+    const official = '{"error":{"code":"1302","message":"Rate limit reached for requests"}}';
+    const production = '{"error":{"code":"1302","message":"High concurrency usage of this API, please reduce concurrency or contact customer service to increase limits"}}';
+    for (const body of [official, production]) {
+      const transport = new OpenAiCompatibleTransport({
+        provider: 'zai', baseUrl: 'https://example.test/v1', apiKey: 'zai-secret-key',
+        fetch: async () => new Response(body, { status: 429 }),
+      });
+      await expect(transport.request({ model: 'glm-4.7-flash', request, signal, timeoutMs: 1_000 }))
+        .rejects.toMatchObject({ kind: 'rate-limit', pressure: 'concurrency', quotaExhausted: false, status: 429 });
+    }
   });
 
   it('propaga quotaExhausted para que el pool degrade limpiamente', async () => {

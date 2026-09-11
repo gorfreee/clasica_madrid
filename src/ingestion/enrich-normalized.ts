@@ -71,11 +71,12 @@ function programComposers(
 
 /**
  * Title is last resort. Attribution frames (`Obras de…`) and an explicit
- * `TÍTULO de AUTOR` reading are both programme-like; a bare name scan is not.
+ * `TÍTULO de AUTOR` reading are both programme-like. A generic editorial
+ * `X: Y` never invents an unknown composer; known `Bach: Suite` still counts.
  */
 function titleFallbackComposers(title: string, performerKeys: Set<string>): ObservedComposer[] {
   const found = uniqueByCanonicalIdentity([
-    ...attributedProgrammeComposers(title),
+    ...attributedProgrammeComposers(title, 'title'),
     ...composersFromExplicitTitleAuthor(title),
   ]);
   return found.filter((item) => !matchesIdentitySet(item.name, performerKeys));

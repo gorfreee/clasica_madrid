@@ -278,6 +278,72 @@ describe('enriquecimiento determinista de compositores conocidos', () => {
     expect(enriched.composers).toEqual([{ name: 'Frederic Mompou' }]);
   });
 
+  it('un título editorial X: Y no inventa composers; Bach: Suite y Obras de sí', () => {
+    expect(
+      enrichNormalizedEvent(
+        event({
+          title: 'Festival Alicia de Larrocha: Consagración, la Maestría Musical.',
+          performers: [],
+          programText: undefined,
+        }),
+      ).composers,
+    ).toEqual([]);
+    expect(
+      enrichNormalizedEvent(
+        event({
+          title: 'XVII Festival de Ensembles: PLURALENSEMBLE',
+          performers: [{ name: 'PLURALENSEMBLE' }],
+          programText: undefined,
+        }),
+      ).composers,
+    ).toEqual([]);
+    expect(
+      enrichNormalizedEvent(
+        event({
+          title: 'Divina Proportione: un viaje por la riqueza sonora del Renacimiento',
+          performers: [],
+          programText: undefined,
+        }),
+      ).composers,
+    ).toEqual([]);
+    expect(
+      enrichNormalizedEvent(event({ title: 'Bach: Suite n.º 1', performers: [], programText: undefined })).composers,
+    ).toEqual([{ name: 'Johann Sebastian Bach' }]);
+    expect(
+      enrichNormalizedEvent(
+        event({
+          title: 'Obras de Josquin des Prez, Juan del Encina, Francisco Guerrero y Antonio de Cabezón',
+          performers: [],
+          programText: undefined,
+        }),
+      ).composers.map((item) => item.name),
+    ).toEqual(['Josquin des Prez', 'Juan del Encina', 'Francisco Guerrero', 'Antonio de Cabezón']);
+  });
+
+  it('no promociona Plaza Daoíz desde un Conservatorio de Música de, ni y danza, ni el marco Obras de', () => {
+    const microperas = enrichNormalizedEvent(
+      event({
+        title: 'Micróperas',
+        performers: [],
+        programText:
+          'Óperas de nueva creación para niños y niñas. Producción del Real Teatro de Retiro en colaboración con el Real Conservatorio Superior de Música de Madrid, la Escuela Superior de Canto de Madrid y la Real Escuela Superior de Arte Dramático (RESAD). SALA PRINCIPAL Real Teatro de Retiro, Plaza Daoíz y Velarde, 4. Metro Pacífico Precio único: 5€ Edad recomendada: a partir de 8 años',
+      }),
+    );
+    expect(microperas.composers.map((item) => item.name)).not.toContain('Plaza Daoíz');
+    expect(microperas.composers).toEqual([]);
+
+    const colon = enrichNormalizedEvent(
+      event({
+        title: 'IV Edición Festival Alicia de Larrocha',
+        performers: [{ name: 'Victor Tretyakov' }],
+        programText:
+          'Victor Tretyakov. Obras de: Schumann – Moszkowski – Chopin – Brahms – Beethoven – Ravel – Liszt',
+      }),
+    );
+    expect(colon.composers.map((item) => item.name)).toContain('Moszkowski');
+    expect(colon.composers.some((item) => /tretyakov|obras de/i.test(item.name))).toBe(false);
+  });
+
   it('no añade a Arrigo Boito desde un crédito de libreto', () => {
     const enriched = enrichNormalizedEvent(
       event({

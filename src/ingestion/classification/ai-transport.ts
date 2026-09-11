@@ -22,15 +22,39 @@ export type AiRouteLimits = {
   providerMinIntervalMs?: number;
 };
 
+/**
+ * Which capacity dimension a rate-limit / 429 actually exhausted.
+ * `concurrency` is in-flight pressure, not daily quota.
+ * `indeterminate` is a 429/Retry-After without a clearer signal.
+ */
+export const AI_PRESSURE_KINDS = [
+  'concurrency',
+  'request-frequency',
+  'tpm',
+  'monthly',
+  'indeterminate',
+] as const;
+export type AiPressureKind = (typeof AI_PRESSURE_KINDS)[number];
+
+/** Sanitized numeric snapshot. Never includes secrets, cookies, or raw payload. */
+export type AiRateLimitSnapshot = {
+  remainingRequests?: number;
+  remainingTokensMinute?: number;
+  remainingTokensMonth?: number;
+  limitRequests?: number;
+  limitTokensMinute?: number;
+  limitTokensMonth?: number;
+  resetAfterMs?: number;
+  retryAfterMs?: number;
+  dimensions?: AiPressureKind[];
+};
+
 export type AiTransportResult = {
   value: unknown;
   tokens?: AiTokenCounts;
   status?: string;
   finishReason?: string;
-  rateLimit?: {
-    remainingRequests?: number;
-    resetAfterMs?: number;
-  };
+  rateLimit?: AiRateLimitSnapshot;
 };
 
 export type AiTransportCall = {
@@ -68,6 +92,9 @@ export class AiTransportError extends Error {
   readonly status?: number;
   readonly retryAfterMs?: number;
   readonly quotaExhausted: boolean;
+  /** Present on rate-limit errors when the transport could classify the dimension. */
+  readonly pressure?: AiPressureKind;
+  readonly rateLimit?: AiRateLimitSnapshot;
 
   constructor(
     message: string,
@@ -76,6 +103,8 @@ export class AiTransportError extends Error {
       status?: number;
       retryAfterMs?: number;
       quotaExhausted?: boolean;
+      pressure?: AiPressureKind;
+      rateLimit?: AiRateLimitSnapshot;
     },
   ) {
     super(message);
@@ -84,6 +113,8 @@ export class AiTransportError extends Error {
     this.status = options.status;
     this.retryAfterMs = options.retryAfterMs;
     this.quotaExhausted = options.quotaExhausted ?? false;
+    this.pressure = options.pressure;
+    this.rateLimit = options.rateLimit;
   }
 }
 

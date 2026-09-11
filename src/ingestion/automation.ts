@@ -228,9 +228,12 @@ function formatObservabilitySection(
     rows.push(`| IA: llamadas con fallback | ${summary.ai.fallbackCalls} |`);
     rows.push(`| IA: deferred | ${summary.ai.deferred} |`);
     rows.push(`| IA: rate limits / cuota agotada | ${summary.ai.rateLimits} / ${summary.ai.quotaExhausted} |`);
+    rows.push(`| IA: concurrency-pressure | ${summary.ai.concurrencyPressure} |`);
     rows.push(`| IA: circuitos abiertos | ${summary.ai.circuitOpenRoutes} |`);
     rows.push(`| IA: requests por provider | ${cell(compactCounts(summary.ai.requestsByProvider))} |`);
     rows.push(`| IA: rate limits por provider | ${cell(compactCounts(summary.ai.rateLimitsByProvider))} |`);
+    rows.push(`| IA: concurrency-pressure por provider | ${cell(compactCounts(summary.ai.concurrencyPressureByProvider))} |`);
+    rows.push(`| IA: presión por dimensión | ${cell(compactCounts(summary.ai.pressureByKind))} |`);
     rows.push(`| IA: requests por purpose | ${cell(compactCounts(summary.ai.requestsByPurpose))} |`);
     const routeRows = formatAiRouteTable(summary.ai.routes ?? []);
     if (routeRows) {
@@ -302,18 +305,29 @@ function formatAiRouteTable(routes: IngestReport['summary']['ai']['routes']): st
   const rows = [
     '#### IA por route',
     '',
-    '| Route | HTTP | Válidas | Rate limits | Circuito |',
-    '|---|---:|---:|---:|---|',
+    '| Route | HTTP | Válidas | Rate limits | Pressure | Circuito |',
+    '|---|---:|---:|---:|---|---|',
   ];
   for (const route of active) {
     const circuit = route.circuitOpen
       ? `abierto${route.circuitReason ? `: ${route.circuitReason}` : ''}`
       : 'cerrado';
+    const pressure = formatRoutePressure(route);
     rows.push(
-      `| ${cell(route.routeId)} | ${route.httpRequests} | ${route.valid} | ${route.rateLimits} | ${cell(circuit)} |`,
+      `| ${cell(route.routeId)} | ${route.httpRequests} | ${route.valid} | ${route.rateLimits} | ${cell(pressure)} | ${cell(circuit)} |`,
     );
   }
   return rows.join('\n');
+}
+
+function formatRoutePressure(route: IngestReport['summary']['ai']['routes'][number]): string {
+  const counts = { ...(route.pressureByKind ?? {}) };
+  if (route.concurrencyPressure && !counts.concurrency) counts.concurrency = route.concurrencyPressure;
+  const entries = Object.entries(counts).filter(([, value]) => value > 0);
+  if (entries.length === 0) return '—';
+  return entries
+    .map(([name, value]) => `${name === 'concurrency' ? 'concurrency-pressure' : name} × ${value}`)
+    .join(', ');
 }
 
 function formatSourceStatus(timing: IngestSourceTiming): string {

@@ -3,6 +3,7 @@ import { ACCESS_MODES, ERAS, EVENT_KINDS, FORMATS } from '../../lib/schemas/taxo
 import type { Era, EventKind, Format } from '../../lib/schemas/taxonomies.ts';
 import type { ObservedFacts } from '../observed.ts';
 import { ELIGIBILITIES, type Eligibility } from './golden-case.ts';
+import type { AiPressureKind, AiRateLimitSnapshot } from './ai-transport.ts';
 
 /**
  * Provider-agnostic AI classification. Implementations return a JSON-compatible
@@ -26,6 +27,7 @@ export type AiFailureKind =
   | 'incomplete'
   | 'empty-output'
   | 'rate-limit'
+  | 'concurrency-pressure'
   | 'timeout'
   | 'transport-error';
 
@@ -45,6 +47,8 @@ export type AiAttemptFailure = {
   finishReason?: string;
   tokens?: AiTokenCounts;
   excerpt?: string;
+  pressure?: AiPressureKind;
+  rateLimit?: AiRateLimitSnapshot;
 };
 
 export type AiCallDiagnostics = {
@@ -88,6 +92,8 @@ export type AiRouteRuntimeStats = {
   failuresByKind: Partial<Record<AiFailureKind, number>>;
   rateLimits: number;
   quotaExhausted: number;
+  concurrencyPressure: number;
+  pressureByKind: Partial<Record<AiPressureKind, number>>;
   circuitOpen: boolean;
   circuitReason?: string;
   consecutiveFailures: number;
@@ -125,6 +131,10 @@ export type AiProviderStats = {
   failuresByKind?: Partial<Record<AiFailureKind, number>>;
   rateLimits?: number;
   quotaExhausted?: number;
+  concurrencyPressure?: number;
+  pressureByKind?: Partial<Record<AiPressureKind, number>>;
+  concurrencyPressureByProvider?: Record<string, number>;
+  concurrencyPressureByRoute?: Record<string, number>;
   outputTokensByRoute?: Record<string, number>;
   thoughtTokensByRoute?: Record<string, number>;
   /** Legacy compatibility aliases; new consumers must use route-keyed maps. */

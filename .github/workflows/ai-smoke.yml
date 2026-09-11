@@ -1,32 +1,42 @@
-name: AI live smoke test
-
-# Live checks of every configured AI pool route. Manual only: this consumes
-# real provider quota and must never run on push, PR, or a schedule.
+name: AI route smoke
 
 on:
   workflow_dispatch:
     inputs:
-      all_purposes:
-        description: Probar todos los purposes (eligibility, composer, access, taxonomy)
-        type: boolean
-        default: false
+      route:
+        description: "Route exacta provider:model, p. ej. mistral:ministral-14b-2512"
+        type: string
+        required: true
+      purpose:
+        description: Purpose a probar. Vacío = eligibility (un solo HTTP).
+        type: choice
+        options:
+          - eligibility
+          - composer-extraction
+          - access-classification
+          - taxonomy
+          - all
+        default: eligibility
+        required: true
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
-  group: ai-live-smoke
+  group: ai-smoke-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   smoke:
-    name: Live-smoke every AI route
+    name: Smoke one AI route
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 15
     env:
       AI_PROVIDER: pool
       AI_ZERO_COST_ONLY: 'true'
       AI_CACHE: 'off'
+      AI_STATE_DIR: ${{ runner.temp }}/ai-smoke-state
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
       GROQ_FREE_TIER_CONFIRMED: ${{ vars.GROQ_FREE_TIER_CONFIRMED }}
@@ -68,13 +78,23 @@ jobs:
       CLOUDFLARE_MODEL_MIN_INTERVAL_MS: ${{ vars.CLOUDFLARE_MODEL_MIN_INTERVAL_MS }}
       CLOUDFLARE_MAX_CONCURRENT: ${{ vars.CLOUDFLARE_MAX_CONCURRENT }}
       CLOUDFLARE_MIN_INTERVAL_MS: ${{ vars.CLOUDFLARE_MIN_INTERVAL_MS }}
-      AI_STATE_DIR: ${{ github.workspace }}/.local/ai-smoke
 
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+
+      - name: Validate route
+        env:
+          ROUTE: ${{ inputs.route }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! "$ROUTE" =~ ^[a-z0-9._-]+:.+$ ]]; then
+            echo "route debe ser provider:model, p. ej. mistral:ministral-14b-2512" >&2
+            exit 1
+          fi
 
       - name: Setup Node
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -85,14 +105,18 @@ jobs:
       - name: Install
         run: npm ci
 
-      - name: Run AI live smoke
+      - name: Smoke route
         env:
-          ALL_PURPOSES: ${{ inputs.all_purposes }}
+          ROUTE: ${{ inputs.route }}
+          PURPOSE: ${{ inputs.purpose }}
         shell: bash
         run: |
           set -euo pipefail
-          args=()
-          if [[ "$ALL_PURPOSES" == "true" ]]; then
+          mkdir -p "$AI_STATE_DIR"
+          args=(--route "$ROUTE")
+          if [[ "$PURPOSE" == "all" ]]; then
             args+=(--all-purposes)
+          else
+            args+=(--purpose "$PURPOSE")
           fi
-          npm run ai:smoke:all -- "${args[@]}"
+          npm run ai:smoke -- "${args[@]}"

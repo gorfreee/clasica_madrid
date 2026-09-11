@@ -23,7 +23,7 @@ import { observedFactsSchema, type ObservedFacts } from '../ingestion/observed.t
 import { sanitizeErrorMessage } from '../ingestion/observability.ts';
 
 export const AI_SMOKE_USAGE = [
-  'Uso: npm run ai:smoke -- --route provider:model [--all-purposes]',
+  'Uso: npm run ai:smoke -- --route provider:model [--purpose eligibility] [--all-purposes]',
   '     npm run ai:smoke:all [-- --all-purposes]',
 ].join('\n');
 
@@ -51,6 +51,25 @@ export type AiSmokeArgs = {
   route?: string;
   allRoutes: boolean;
   allPurposes: boolean;
+  purposes: readonly AiCallPurpose[];
+};
+
+export type AiSmokeRow = {
+  provider: string;
+  model: string;
+  route: string;
+  purpose: AiCallPurpose;
+  success: boolean;
+  schemaValid: boolean;
+  latencyMs: number;
+  tokens?: unknown;
+  status?: string;
+  pressure?: string;
+  rateLimit?: unknown;
+  error?: string;
+  failures?: unknown;
+  parseRuleId?: string;
+  parseReason?: string;
 };
 
 export type AiSmokeRoute = {
@@ -127,33 +146,25 @@ export async function loadAiSmokeFixtures(rootDir: string): Promise<AiSmokeFixtu
   return fixtureSchema.parse(raw);
 }
 
-export function parseAiSmokeArgs(argv: string[]):
-  | { ok: true; value: AiSmokeArgs }
-  | { ok: false; message: string } {
-  const value: AiSmokeArgs = { allRoutes: false, allPurposes: false };
-  for (let i = 0; i < argv.length; i++) {
-    const arg = argv[i];
-    if (arg === '--all-routes') {
-      value.allRoutes = true;
-      continue;
-    }
-    if (arg === '--all-purposes') {
-      value.allPurposes = true;
-      continue;
-    }
-    if (arg === '--route') {
-      const next = argv[i + 1];
-      if (!next || next.startsWith('--')) return { ok: false, message: AI_SMOKE_USAGE };
-      const route = parseRouteId(next);
-      if (!route) return { ok: false, message: AI_SMOKE_USAGE };
-      value.route = route;
-      i += 1;
-      continue;
-    }
-    return { ok: false, message: AI_SMOKE_USAGE };
-  }
-  if (!value.route && !value.allRoutes) return { ok: false, message: AI_SMOKE_USAGE };
-  return { ok: true, value };
+export function parseAiSmokeArgs(argv: string[]): AiSmokeArgs | undefined {
+  const routeRaw = flagValue(argv, '--route');
+  const allRoutes = argv.includes('--all-routes');
+  const allPurposes = argv.includes('--all-purposes');
+  const purpose = flagValue(argv, '--purpose');
+  if (purpose && allPurposes) return undefined;
+  if (purpose && !AI_CALL_PURPOSES.includes(purpose as AiCallPurpose)) return undefined;
+  const route = routeRaw ? parseRouteId(routeRaw) : undefined;
+  if (routeRaw && !route) return undefined;
+  if (Boolean(route) === allRoutes) return undefined;
+  const purposes = allPurposes
+    ? AI_CALL_PURPOSES
+    : [((purpose as AiCallPurpose | undefined) ?? 'eligibility')];
+  return { route, allRoutes, allPurposes, purposes };
+}
+
+function flagValue(argv: string[], name: string): string | undefined {
+  const index = argv.indexOf(name);
+  return index >= 0 ? argv[index + 1]?.trim() : undefined;
 }
 
 export function parseRouteId(value: string): string | undefined {
@@ -162,9 +173,103 @@ export function parseRouteId(value: string): string | undefined {
   return trimmed;
 }
 
-export function purposesToSmoke(args: Pick<AiSmokeArgs, 'allRoutes' | 'allPurposes'>): AiCallPurpose[] {
-  if (args.allPurposes || !args.allRoutes) return [...AI_CALL_PURPOSES];
+export function purposesToSmoke(args: Pick<AiSmokeArgs, 'purposes' | 'allRoutes' | 'allPurposes'> | {
+  allRoutes?: boolean;
+  allPurposes?: boolean;
+  purposes?: readonly AiCallPurpose[];
+}): AiCallPurpose[] {
+  if (args.purposes?.length) return [...args.purposes];
+  if (args.allPurposes) return [...AI_CALL_PURPOSES];
   return ['eligibility'];
+}
+
+export function splitRouteId(route: string): { provider: string; model: string } {
+  const separator = route.indexOf(':');
+  return { provider: route.slice(0, separator), model: route.slice(separator + 1) };
+}
+
+export function smokeEnvForRoute(route: string, env: AiEnv = process.env): AiEnv {
+  return pinnedSmokeEnv(env, route);
+}
+
+export async function runAiRouteSmoke(options: {
+  route: string;
+  purposes: readonly AiCallPurpose[];
+  fixtures: AiSmokeFixture[];
+  classifier: AiClassifier;
+  now?: () => number;
+  env?: NodeJS.ProcessEnv;
+  manageLifecycle?: boolean;
+}): Promise<AiSmokeRow[]> {
+  const { provider, model } = splitRouteId(options.route);
+  const selected = options.fixtures.filter((fixture) => options.purposes.includes(fixture.purpose));
+  if (!selected.length) throw new Error(`Ningún fixture para ${options.purposes.join(', ')}`);
+  const rows: AiSmokeRow[] = [];
+  const now = options.now ?? (() => performance.now());
+  const manage = options.manageLifecycle !== false;
+  try {
+    if (manage) options.classifier.initialize?.();
+    for (const fixture of selected) {
+      const started = now();
+      try {
+        const value = await options.classifier.classify(fixture.observed, {
+          purpose: fixture.purpose,
+          requireFormats: fixture.requireFormats,
+        });
+        const parsed = parseAiOutputForPurpose(fixture.purpose, value);
+        rows.push(smokeRow({
+          provider, model, route: options.route, purpose: fixture.purpose,
+          success: parsed.ok, schemaValid: parsed.ok, latencyMs: Math.round(now() - started),
+          classifier: options.classifier, env: options.env,
+          ...(!parsed.ok ? { parseRuleId: parsed.ruleId, parseReason: parsed.reason } : {}),
+        }));
+      } catch (error) {
+        rows.push(smokeRow({
+          provider, model, route: options.route, purpose: fixture.purpose,
+          success: false, schemaValid: false, latencyMs: Math.round(now() - started),
+          classifier: options.classifier, env: options.env,
+          error: sanitizeErrorMessage(error instanceof Error ? error.message : String(error), options.env),
+        }));
+      }
+    }
+  } finally {
+    if (manage) options.classifier.close?.();
+  }
+  return rows;
+}
+
+function smokeRow(input: {
+  provider: string;
+  model: string;
+  route: string;
+  purpose: AiCallPurpose;
+  success: boolean;
+  schemaValid: boolean;
+  latencyMs: number;
+  classifier: AiClassifier;
+  env?: NodeJS.ProcessEnv;
+  error?: string;
+  parseRuleId?: string;
+  parseReason?: string;
+}): AiSmokeRow {
+  const diagnostic = input.classifier.lastDiagnostics?.();
+  const failure = diagnostic?.failures?.at(-1);
+  return {
+    provider: diagnostic?.provider ?? input.provider,
+    model: diagnostic?.model ?? input.model,
+    route: diagnostic?.routeId ?? input.route,
+    purpose: input.purpose,
+    success: input.success,
+    schemaValid: input.schemaValid,
+    latencyMs: input.latencyMs,
+    tokens: diagnostic?.tokens,
+    status: diagnostic?.status,
+    pressure: failure?.pressure === 'concurrency' ? 'concurrency-pressure' : failure?.pressure,
+    rateLimit: failure?.rateLimit ?? undefined,
+    ...(input.error ? { error: input.error } : {}),
+    failures: diagnostic?.failures,
+    ...(input.parseRuleId ? { parseRuleId: input.parseRuleId, parseReason: input.parseReason } : {}),
+  };
 }
 
 export function pinnedSmokeEnv(env: AiEnv, routeId: string): AiEnv {
@@ -443,10 +548,21 @@ async function smokeOneRoute(input: {
       }
       await pace(input.route, input.now, input.sleep, input.lastStartByProvider);
       input.lastStartByProvider.set(input.route.provider, input.now());
-      const purposeResult = await smokePurpose(classifier, fixture, pinned);
+      const [row] = await runAiRouteSmoke({
+        route: input.route.routeId,
+        purposes: [fixture.purpose],
+        fixtures: [fixture],
+        classifier,
+        env: pinned as NodeJS.ProcessEnv,
+        manageLifecycle: false,
+      });
+      const purposeResult = purposeResultFromRow(row!, pinned);
       purposeResults.push(purposeResult);
       purposes[fixture.purpose] = purposeResult.outcome;
-      logJson(input.log, purposeLog(input.route.routeId, purposeResult), pinned);
+      logJson(input.log, {
+        ...row,
+        cause: purposeResult.cause,
+      }, pinned);
       if (purposeResult.outcome === 'FAIL') {
         failed = true;
         if (input.failFast) skipped = true;
@@ -468,60 +584,35 @@ async function smokeOneRoute(input: {
   };
 }
 
-async function smokePurpose(
-  classifier: AiClassifier,
-  fixture: AiSmokeFixture,
-  env: AiEnv,
-): Promise<AiSmokePurposeResult> {
-  const started = performance.now();
-  try {
-    const value = await classifier.classify(fixture.observed, {
-      purpose: fixture.purpose,
-      requireFormats: fixture.requireFormats,
-    });
-    const parsed = parseAiOutputForPurpose(fixture.purpose, value);
-    const diagnostic = classifier.lastDiagnostics?.();
-    const latencyMs = Math.round(performance.now() - started);
-        if (!parsed.ok) {
-          const cause = compactSmokeFailureCause({ diagnostic, parsed, env });
-      return {
-        purpose: fixture.purpose,
-        outcome: 'FAIL',
-        success: false,
-        schemaValid: false,
-        latencyMs,
-        tokens: diagnostic?.tokens,
-        status: diagnostic?.status,
-        failures: diagnostic?.failures,
-        cause,
-      };
-    }
-    return {
-      purpose: fixture.purpose,
-      outcome: 'PASS',
-      success: true,
-      schemaValid: true,
-      latencyMs,
-      tokens: diagnostic?.tokens,
-      status: diagnostic?.status,
-      failures: diagnostic?.failures,
-    };
-  } catch (error) {
-    const diagnostic = classifier.lastDiagnostics?.();
-    const cause = compactSmokeFailureCause({ error, diagnostic, env });
-    return {
-      purpose: fixture.purpose,
-      outcome: 'FAIL',
-      success: false,
-      schemaValid: false,
-      latencyMs: Math.round(performance.now() - started),
-      tokens: diagnostic?.tokens,
-      status: diagnostic?.status,
-      error: sanitizeErrorMessage(error instanceof Error ? error.message : String(error), env as NodeJS.ProcessEnv),
-      failures: diagnostic?.failures,
-      cause,
-    };
-  }
+function purposeResultFromRow(row: AiSmokeRow, env: AiEnv): AiSmokePurposeResult {
+  const diagnostic: AiCallDiagnostics = {
+    status: row.status,
+    failures: row.failures as AiCallDiagnostics['failures'],
+  };
+  const cause = row.success
+    ? undefined
+    : row.pressure === 'concurrency-pressure' || row.pressure === 'concurrency'
+      ? causeFromStatus(row.status ?? 429, 'concurrency pressure')
+      : compactSmokeFailureCause({
+        error: row.error,
+        diagnostic,
+        parsed: row.parseRuleId
+          ? { ok: false, ruleId: row.parseRuleId, reason: row.parseReason }
+          : undefined,
+        env,
+      });
+  return {
+    purpose: row.purpose,
+    outcome: row.success ? 'PASS' : 'FAIL',
+    success: row.success,
+    schemaValid: row.schemaValid,
+    latencyMs: row.latencyMs,
+    tokens: row.tokens as AiCallDiagnostics['tokens'],
+    status: row.status,
+    error: row.error,
+    failures: diagnostic.failures,
+    cause,
+  };
 }
 
 async function pace(
@@ -605,21 +696,6 @@ function fillPurposeMap(
   return out;
 }
 
-function purposeLog(routeId: string, result: AiSmokePurposeResult): Record<string, unknown> {
-  return {
-    route: routeId,
-    purpose: result.purpose,
-    success: result.success,
-    schemaValid: result.schemaValid,
-    latencyMs: result.latencyMs,
-    tokens: result.tokens,
-    status: result.status,
-    error: result.error,
-    failures: result.failures,
-    cause: result.cause,
-  };
-}
-
 function logJson(log: (line: string) => void, value: Record<string, unknown>, env: AiEnv): void {
   const payload: Record<string, unknown> = {};
   for (const [key, item] of Object.entries(value)) {
@@ -639,6 +715,7 @@ function formatLatency(ms: number): string {
 
 function causeFromTransport(error: AiTransportError): string {
   if (error.kind === 'rate-limit') {
+    if (error.pressure === 'concurrency') return causeFromStatus(error.status ?? 429, 'concurrency pressure');
     return error.quotaExhausted ? 'quota exhausted' : causeFromStatus(error.status ?? 429, 'rate limit');
   }
   if (error.kind === 'timeout') return 'timeout';
@@ -659,6 +736,9 @@ function causeFromUnusable(error: AiUnusableOutputError): string {
 }
 
 function causeFromFailure(failure: NonNullable<AiCallDiagnostics['failures']>[number]): string {
+  if (failure.pressure === 'concurrency' || failure.kind === 'concurrency-pressure') {
+    return causeFromStatus(failure.status ?? 429, 'concurrency pressure');
+  }
   const status = failure.status !== undefined ? Number(failure.status) : undefined;
   const numeric = status !== undefined && Number.isFinite(status) ? status : undefined;
   return causeFromKind(failure.kind, numeric ?? failure.status);
@@ -666,6 +746,7 @@ function causeFromFailure(failure: NonNullable<AiCallDiagnostics['failures']>[nu
 
 function causeFromKind(kind: AiFailureKind, status?: number | string): string {
   if (kind === 'rate-limit') return causeFromStatus(status ?? 429, 'rate limit');
+  if (kind === 'concurrency-pressure') return causeFromStatus(status ?? 429, 'concurrency pressure');
   if (kind === 'timeout') return 'timeout';
   if (kind === 'empty-output') return 'empty response';
   if (kind === 'malformed-output') return 'malformed JSON';

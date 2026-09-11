@@ -264,6 +264,19 @@ export function isUnreliableComposerName(text: string): boolean {
   if (!trimmed || looksLikeProgramHeader(trimmed)) return true;
   if (isNonPersonComposerAttribution(trimmed)) return true;
   if (/^obras de\b/i.test(trimmed)) return true;
+  if (/\b(?:obras?|m[uú]sica)\s+(?:de|del|:)\s*$/i.test(trimmed)) return true;
+  if (/^(?:y|e)\s+/i.test(trimmed)) return true;
+  if (
+    /^(?:festival|festivales|certamen|ciclo|temporada|encuentro|jornadas|concurso|muestra)\b/i.test(
+      trimmed,
+    )
+  ) {
+    return true;
+  }
+  if (/^(?:x{0,3}(?:ix|iv|v?i{0,3})|\d{1,2}(?:[ªºo]|er|o)?)\s+festival\b/i.test(trimmed)) {
+    return true;
+  }
+  if (/^(?:plaza|calle|avenida|paseo|metro|estaci[oó]n|sala|hall)\b/i.test(trimmed)) return true;
   if (looksLikeEnsembleName(trimmed)) return true;
   if (
     looksLikeProductionNote(trimmed) ||

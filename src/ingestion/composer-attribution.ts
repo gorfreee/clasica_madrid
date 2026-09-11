@@ -28,14 +28,26 @@ export type AttributedComposerName = {
   evidence: string;
 };
 
+/** Where the text came from. Editorial titles are not programme copy. */
+export type AttributionSurface = 'programme' | 'title';
+
+/**
+ * `Música de X` is a credit. `Conservatorio … de Música de Madrid` is not:
+ * the noun `música` is part of the institution, not an attribution frame.
+ */
 const LABELLED_CREDIT =
-  /\b(?:obras?|m[uú]sica(?:\s+y\s+(?:libreto|texto|letra))?|composici[oó]n(?:es)?)\s+(?:de|del|:)\s+([^;\n]+)/giu;
+  /(?<!\bde\s)\b(?:obras?|m[uú]sica(?:\s+y\s+(?:libreto|texto|letra))?|composici[oó]n(?:es)?)\s+(?:de|del|:)\s*:?\s*([^;\n]+)/giu;
 const NAME_WORK_SEPARATOR =
   /(?:^|[\n;]|[.!?]\s)([^\n;]{2,80}?)(?:\s+(?:—|–|\s-\s)|\s*(?<!\d):(?!\d))\s+([^\n]+?)(?=\.(?:\s+\p{Lu})|$)/gmu;
 const COMPOSER_LABEL = /\bcompositor(?:a|es)?\s*:\s*([^.\n]+)/giu;
 const AUTORES_COMO =
   /\b(?:autores?|compositores?)\b(?:(?![.]).){0,80}?\bcomo\s+(.+?)(?:\s*,\s*cuyas|\s*,\s*que|\.|$)/giu;
-const SENTENCE_AFTER_WORD = /(?<=\p{L}{2,})[.…](?=\s+\p{Lu})/u;
+const SENTENCE_AFTER_WORD = /(?<=\p{L}{2,}|\))[.…](?=\s+\p{Lu})/u;
+const ATTRIBUTION_FRAME_LEFT =
+  /\b(?:obras?|m[uú]sica|composici[oó]n(?:es)?|compositores?|autores?)\s+(?:de|del|:)\s*$/iu;
+const NON_PERSON_HEAD =
+  /^(?:festival|festivales|certamen|ciclo|temporada|encuentro|encuentros|jornadas|concurso|muestra|plaza|calle|avenida|paseo|metro|estacion|sala|hall|teatro|auditorio|iglesia|basilica|conservatorio|escuela|instituto|universidad|fundacion|real)\b/i;
+const ORDINAL_FESTIVAL = /^(?:x{0,3}(?:ix|iv|v?i{0,3})|\d{1,2}(?:[ªºo]|er|o)?)\s+festival\b/i;
 const LIST_SPLIT = /\s*[-–—·•]\s*/u;
 const NAME_LIST_SPLIT = /\s*,\s*|\s+y\s+|\s+e\s+(?=\p{Lu})/u;
 const NAME_PARTICLE = /^(?:de|del|des|la|las|los|le|van|von|di|da|el)$/i;
@@ -71,23 +83,29 @@ const INLINE_NON_MUSIC_CREDIT =
  * Unknown spellings are kept so composer AI can complete them; known aliases
  * are resolved by `findAttributedKnownComposers`.
  */
-export function extractAttributedComposerNames(text: string): AttributedComposerName[] {
+export function extractAttributedComposerNames(
+  text: string,
+  surface: AttributionSurface = 'programme',
+): AttributedComposerName[] {
   const source = text.replace(/\r\n/g, '\n');
   if (!source.trim()) return [];
   const found: AttributedComposerName[] = [
     ...fromRepertoireLists(source),
     ...fromLabelledCredits(source),
-    ...fromNameWorkSeparators(source),
+    ...fromNameWorkSeparators(source, surface),
     ...fromComposerHeadings(source),
   ];
   return uniqueAttributedNames(found);
 }
 
 /** Known composers whose mention is attributed to this event's repertoire. */
-export function findAttributedKnownComposers(text: string): ComposerKnowledge[] {
+export function findAttributedKnownComposers(
+  text: string,
+  surface: AttributionSurface = 'programme',
+): ComposerKnowledge[] {
   const found: ComposerKnowledge[] = [];
   const seen = new Set<string>();
-  for (const item of attributedProgrammeComposers(text)) {
+  for (const item of attributedProgrammeComposers(text, surface)) {
     const known = matchComposer(item.name);
     if (!known || seen.has(known.canonicalName)) continue;
     seen.add(known.canonicalName);
@@ -101,10 +119,13 @@ export function findAttributedKnownComposers(text: string): ComposerKnowledge[] 
  * canonical knowledge spelling; unknown spellings in a strong frame keep
  * the source form so enrichment can complete a list without inventing.
  */
-export function attributedProgrammeComposers(text: string): ObservedComposer[] {
+export function attributedProgrammeComposers(
+  text: string,
+  surface: AttributionSurface = 'programme',
+): ObservedComposer[] {
   const found: ObservedComposer[] = [];
   const seen = new Set<string>();
-  for (const span of extractAttributedComposerNames(text)) {
+  for (const span of extractAttributedComposerNames(text, surface)) {
     if (clearlyNonComposerContext(span.name, span.evidence)) continue;
     const known = composersMentionedInNameSlot(span.name);
     if (known.length > 0) {
@@ -135,7 +156,7 @@ export function isComposerMentionAttributed(name: string, evidence: string): boo
   if (!name.trim() || !sourceEvidence) return false;
   if (clearlyNonComposerContext(name, sourceEvidence)) return false;
 
-  for (const span of extractAttributedComposerNames(sourceEvidence)) {
+  for (const span of extractAttributedComposerNames(sourceEvidence, 'programme')) {
     if (sameComposerMention(name, span.name)) return true;
   }
   return false;
@@ -169,6 +190,12 @@ function fromLabelledCredits(text: string): AttributedComposerName[] {
       if (!rawList.trim() || !evidence) continue;
       if (careerPrefixBefore(text, match.index ?? 0)) continue;
       if (nonMusicCreditBefore(text, match.index ?? 0)) continue;
+      const repertoire = parseRepertoireList(rawList);
+      if (repertoire) {
+        const listEvidence = collapseWhitespace(rawList);
+        for (const name of repertoire) found.push({ name, evidence: listEvidence || evidence });
+        continue;
+      }
       for (const name of splitNameList(rawList)) {
         found.push({ name, evidence });
       }
@@ -177,7 +204,10 @@ function fromLabelledCredits(text: string): AttributedComposerName[] {
   return found;
 }
 
-function fromNameWorkSeparators(text: string): AttributedComposerName[] {
+function fromNameWorkSeparators(
+  text: string,
+  surface: AttributionSurface,
+): AttributedComposerName[] {
   const found: AttributedComposerName[] = [];
   NAME_WORK_SEPARATOR.lastIndex = 0;
   for (const match of text.matchAll(NAME_WORK_SEPARATOR)) {
@@ -187,13 +217,64 @@ function fromNameWorkSeparators(text: string): AttributedComposerName[] {
     );
     const right = collapseWhitespace(match[2] ?? '');
     if (!left || !right) continue;
-    if (parseRepertoireList(`${left} — ${right}`)) continue;
     const evidence = collapseWhitespace(match[0] ?? '');
+    if (isAttributionFrameLeft(left)) {
+      found.push(...namesFromLabelledRight(right, evidence));
+      continue;
+    }
+    if (parseRepertoireList(`${left} — ${right}`)) continue;
     if (clearlyNonComposerContext(left, evidence)) continue;
     if (isPerformerRole(left) || isPerformerRole(right)) continue;
+    if (!matchComposer(left) && !acceptableUnknownNameWork(left, right, surface)) continue;
     found.push({ name: stripTrailingBiographicalYears(left) || left, evidence });
   }
   return found;
+}
+
+function namesFromLabelledRight(rawList: string, evidence: string): AttributedComposerName[] {
+  const repertoire = parseRepertoireList(rawList);
+  if (repertoire) {
+    const listEvidence = collapseWhitespace(rawList);
+    return repertoire.map((name) => ({ name, evidence: listEvidence || evidence }));
+  }
+  return splitNameList(clipLabelledList(rawList)).map((name) => ({ name, evidence }));
+}
+
+/**
+ * Unknown `X: Y` / `X — Y` is a composer-work pair only with a person-like
+ * left and a repertoire-like right. Editorial titles never invent an unknown
+ * name from a generic colon. Known names (`Bach: Suite`) stay attributed.
+ */
+function acceptableUnknownNameWork(
+  left: string,
+  right: string,
+  surface: AttributionSurface,
+): boolean {
+  if (surface === 'title') return false;
+  if (looksLikeEditorialMaterial(left) || looksLikeEditorialMaterial(right)) return false;
+  if (!looksLikeRepertoireRightHand(right)) return false;
+  return looksLikePromotableUnknownName(left, `${left} — ${right}`);
+}
+
+function looksLikeRepertoireRightHand(right: string): boolean {
+  if (looksLikeUnequivocalWorkLine(right) || looksLikeWorkTitle(right)) return true;
+  if (parseRepertoireList(right)) return true;
+  const words = collapseWhitespace(right).split(/\s+/).filter(Boolean);
+  return words.length >= 2 && !isPerformerRole(right);
+}
+
+function looksLikeEditorialMaterial(value: string): boolean {
+  const folded = foldName(value);
+  if (!folded) return true;
+  if (NON_PERSON_HEAD.test(folded) || ORDINAL_FESTIVAL.test(folded)) return true;
+  if (/^(?:funciones|duracion|precio|edad recomendada|abonos|entradas|produccion)\b/.test(folded)) {
+    return true;
+  }
+  return false;
+}
+
+function isAttributionFrameLeft(left: string): boolean {
+  return ATTRIBUTION_FRAME_LEFT.test(left);
 }
 
 function fromRepertoireLists(text: string): AttributedComposerName[] {
@@ -255,10 +336,15 @@ function looksLikeWorkTitle(value: string): boolean {
 
 function looksLikePromotableUnknownName(name: string, evidence: string): boolean {
   if (!name || isPerformerRole(name) || looksLikeWorkTitle(name)) return false;
+  if (looksLikeEditorialMaterial(name)) return false;
+  if (ATTRIBUTION_FRAME_LEFT.test(name)) return false;
+  if (/^(?:y|e)\s+/i.test(name)) return false;
   const words = name.split(/\s+/).filter(Boolean);
   if (words.length === 0 || words.length > 6) return false;
   const nameLike = words.every((word, index) => {
     if (NAME_PARTICLE.test(word) && index > 0) return true;
+    if (/^\p{Lu}\.$/u.test(word)) return true;
+    if (/\.$/u.test(word)) return false;
     return /^\p{Lu}[\p{L}.'’\-]*$/u.test(word);
   });
   if (!nameLike) return false;
