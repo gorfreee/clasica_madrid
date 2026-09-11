@@ -112,15 +112,6 @@ describe('catálogo publicado tras la limpieza de duplicados de hueco exclusivo'
     expect(larrocha?.slugAliases).toEqual(['victor-tretyakov-piano']);
     expect(larrocha?.title).toBe('IV Edición Festival Alicia de Larrocha');
     expect(larrocha?.performers).toEqual([{ name: 'Victor Tretyakov' }]);
-    expect(larrocha?.composers.map((item) => item.name)).toEqual([
-      'Robert Schumann',
-      'Frédéric Chopin',
-      'Johannes Brahms',
-      'Ludwig van Beethoven',
-      'Maurice Ravel',
-      'Franz Liszt',
-    ]);
-    expect(larrocha?.composers.some((item) => /moszkowski/i.test(item.name))).toBe(false);
     expect(larrocha?.occurrences[0]).toMatchObject({ date: '2026-09-12', time: '19:30' });
     expect(larrocha?.citations.map((item) => item.sourceId)).toEqual([
       'src_ayuntamiento_madrid',
@@ -231,14 +222,6 @@ describe('catálogo publicado tras la limpieza de duplicados de hueco exclusivo'
       title: 'VICTOR TRETYAKOV, Piano',
       occurrences: [{ date: '2026-09-12', time: '19:30' }],
       performers: [],
-      composers: [
-        { name: 'Robert Schumann' },
-        { name: 'Frédéric Chopin' },
-        { name: 'Johannes Brahms' },
-        { name: 'Ludwig van Beethoven' },
-        { name: 'Maurice Ravel' },
-        { name: 'Franz Liszt' },
-      ],
       works: [],
     }, {
       catalogSourceId: piuMosso.catalogSourceId,

@@ -235,19 +235,52 @@ function parseCast(html: string): ObservedPerson[] {
   });
 }
 
+const MUSIC_CREDIT = /^(?:m[úu]sica|music)(?:\s+(?:de|by))?\s*[:.]?\s*(.+)$/i;
+const MUSIC_GENRE_VALUE =
+  /^(?:c[áa]mara|cl[áa]sica|vocal|instrumental|antigua|contempor[áa]nea|barroca|sinf[oó]nica|l[íi]rica)\b/i;
+const INLINE_NEXT_CREDIT =
+  /\s+(?=libreto\b|texto(?:\s+del)?\b|letra\b|versi[oó]n\b|adaptaci[oó]n\b|orquestaci[oó]n\b|premio\b|coproducci[oó]n\b|producci[oó]n\b)/i;
+const NAME_LIST_SPLIT = /\s*,\s*|\s+y\s+|\s+e\s+(?=\p{Lu})/u;
+
 function parseDeclaredComposers(html: string): string[] {
   const names: string[] = [];
   for (const paragraph of allCaptures(html, /<p\b[^>]*>([\s\S]*?)<\/p>/gi).map((part) => stripTags(part))) {
-    const declared = /^Música\s+de\s+(.+)$/i.exec(paragraph);
+    const declared = MUSIC_CREDIT.exec(paragraph);
     if (!declared?.[1]) continue;
-    const name = declared[1]
-      .replace(/\s*\(\s*(?:ca\.?\s*)?\d{3,4}[^)]*\)\s*/gu, ' ')
+    const credit = declared[1]
+      .split(INLINE_NEXT_CREDIT)[0]
+      ?.replace(/\s*\(\s*(?:ca\.?\s*)?\d{3,4}[^)]*\)\s*/gu, ' ')
       .replace(/[.,;]+$/u, '')
       .replace(/\s+/g, ' ')
       .trim();
-    if (name) names.push(name);
+    if (!credit || MUSIC_GENRE_VALUE.test(credit)) continue;
+    names.push(...splitDeclaredComposerCredit(credit));
   }
   return names;
+}
+
+/**
+ * One music-credit paragraph may list several people (`A, B y C`) or trail
+ * into a libretto/version credit. Do not keep those fused into a single name.
+ */
+function splitDeclaredComposerCredit(credit: string): string[] {
+  const parts = credit
+    .split(NAME_LIST_SPLIT)
+    .map((part) => part.replace(/\s+/g, ' ').trim())
+    .filter((part) => part.length >= 3 && part.length <= 80);
+  if (parts.length >= 2 && parts.every((part) => looksLikeDeclaredPersonName(part))) {
+    return parts;
+  }
+  return credit ? [credit] : [];
+}
+
+function looksLikeDeclaredPersonName(value: string): boolean {
+  const words = value.split(/\s+/).filter(Boolean);
+  if (words.length < 2 || words.length > 8) return false;
+  return words.every((word, index) => {
+    if (/^(de|del|des|van|von|di|da|el|la)$/i.test(word) && index > 0) return true;
+    return /^\p{Lu}/u.test(word);
+  });
 }
 
 function foldTeamLabel(value: string): string {

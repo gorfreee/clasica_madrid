@@ -1649,6 +1649,57 @@ describe('parser de ficha Teatro Real', () => {
     expect(facts.composers).toEqual([{ name: 'Vincenzo Bellini' }]);
   });
 
+  it('no fusiona el crédito de música con el libreto ni con varios nombres', () => {
+    const libretto = parseTeatroRealDetail(`
+      <div class="wrap-content-hero"><h4>Ópera</h4><h1>El barbero de Sevilla</h1></div>
+      <div class="back-image"></div>
+      <section class="text-intro-show">
+        <div class="wrap-text-free">
+          <p><strong>Música</strong> de Gioachino Rossini Libreto de Cesare Sterbini, basado en El barbero de Sevilla Versión para la infancia.</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+      <section class="functions-show">
+        <div class="functions-show__block--item-space"><p>Sala Principal</p></div>
+      </section>
+    `);
+    expect(libretto.composers).toEqual([{ name: 'Gioachino Rossini' }]);
+
+    const english = parseTeatroRealDetail(`
+      <div class="wrap-content-hero"><h4>Ópera</h4><h1>The Barber of Seville</h1></div>
+      <div class="back-image"></div>
+      <section class="text-intro-show">
+        <div class="wrap-text-free">
+          <p><strong>Music</strong> Gioachino Rossini</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+      <section class="functions-show">
+        <div class="functions-show__block--item-space"><p>Sala Principal</p></div>
+      </section>
+    `);
+    expect(english.composers).toEqual([{ name: 'Gioachino Rossini' }]);
+
+    const listed = parseTeatroRealDetail(`
+      <div class="wrap-content-hero"><h4>Recital</h4><h1>He Who Loves Beauty</h1></div>
+      <div class="back-image"></div>
+      <section class="text-intro-show">
+        <div class="wrap-text-free">
+          <p><strong>Música</strong> de Benjamin Britten, Henry Purcell y John Dowland.</p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+      <section class="functions-show">
+        <div class="functions-show__block--item-space"><p>Sala Principal</p></div>
+      </section>
+    `);
+    expect(listed.composers).toEqual([
+      { name: 'Benjamin Britten' },
+      { name: 'Henry Purcell' },
+      { name: 'John Dowland' },
+    ]);
+  });
+
   it('no inventa un programa a partir del título', () => {
     const facts = parseTeatroRealDetail(
       '<article><h1>CONCIERTO DE NAVIDAD</h1><p>También en el Real</p></article>',

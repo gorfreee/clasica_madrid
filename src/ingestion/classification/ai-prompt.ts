@@ -3,7 +3,7 @@ import type { ObservedFacts } from '../observed.ts';
 export const AI_CLASSIFIER_PROMPT_VERSION = 11 as const;
 export const AI_TAXONOMY_PROMPT_VERSION = 7 as const;
 export const AI_ACCESS_PROMPT_VERSION = 1 as const;
-export const AI_COMPOSER_PROMPT_VERSION = 1 as const;
+export const AI_COMPOSER_PROMPT_VERSION = 2 as const;
 
 export function buildAiClassifierUserMessage(observed: ObservedFacts): string {
   return [
@@ -186,6 +186,8 @@ Guardrails obligatorios:
 - cada name debe aparecer literalmente en el programa o ser la canonicalización inequívoca de una variante que sí aparece;
 - evidence debe ser un fragmento literal del programa que contenga esa mención;
 - no propongas intérpretes, directores, solistas, ensembles, arreglistas ni autores sólo mencionados como homenaje/inspiración;
+- no propongas libretistas, autores de texto/letra, ni nombres citados en biografías o como contexto editorial (contemporáneo de, basado en, trabajó con, estrenó una obra de en la carrera del intérprete);
+- no infieras un compositor porque su apellido coincida dentro del título de una obra;
 - "Jean Rondeau — clave" no permite inferir Bach ni convierte a Jean Rondeau en compositor;
 - "Orquesta X interpreta repertorio romántico" no permite inventar compositores;
 - candidates=[] es correcto cuando la evidencia no basta.
