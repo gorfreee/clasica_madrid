@@ -4,6 +4,10 @@ import type { Eligibility } from './golden-case.ts';
 import { fieldFolded, foldName, hasPhrase, hasWord, identityHaystack } from './text.ts';
 import type { Resolution } from './types.ts';
 
+/** Deterministic mix: classical identity + excluded identity, no substantial classical block. */
+export const CLASSICAL_AND_NONCLASSICAL_COPRINCIPAL_RULE_ID =
+  'classical-and-nonclassical-coprincipal' as const;
+
 type Exclusion = {
   ruleId: string;
   evidence: string[];
@@ -40,7 +44,7 @@ export function resolveEligibility(facts: ObservedFacts): Resolution<Eligibility
     return resolution(
       'uncertain',
       'rule',
-      'classical-and-nonclassical-coprincipal',
+      CLASSICAL_AND_NONCLASSICAL_COPRINCIPAL_RULE_ID,
       [...flattenEvidence(inclusions), ...flattenEvidence(coprincipal)],
     );
   }
@@ -58,7 +62,7 @@ export function resolveEligibility(facts: ObservedFacts): Resolution<Eligibility
     return resolution(
       'uncertain',
       'rule',
-      'classical-and-nonclassical-coprincipal',
+      CLASSICAL_AND_NONCLASSICAL_COPRINCIPAL_RULE_ID,
       [...flattenEvidence(inclusions), ...flattenEvidence(hardExclude)],
     );
   }
@@ -699,10 +703,21 @@ function popularProgramHit(text: string): boolean {
 }
 
 /**
+ * Observed classical/academic identity already recognised by the deterministic
+ * policy (inclusions or a substantial classical block). Used as an AI include
+ * gate; does not invent new policy.
+ */
+export function hasObservedClassicalAcademicAnchor(facts: ObservedFacts): boolean {
+  const haystack = identityHaystack(facts);
+  if (collectInclusions(facts, haystack).length > 0) return true;
+  return hasSubstantialClassicalBlock(facts);
+}
+
+/**
  * Mixed programmes are include only when classical is a listed block, not one
  * named composer inside an otherwise popular bill.
  */
-function hasSubstantialClassicalBlock(facts: ObservedFacts): boolean {
+export function hasSubstantialClassicalBlock(facts: ObservedFacts): boolean {
   const known = knownClassicalNames(facts);
   if (known.length >= 2) return true;
   if (liveOrganPerformance(facts, identityHaystack(facts))) return true;

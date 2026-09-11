@@ -247,6 +247,7 @@ export type AiClassificationResult = {
   eras?: Era[];
   kind?: EventKind;
   evidence: string[];
+  rationale?: string;
 };
 
 export type AiAccessResult = {
@@ -317,10 +318,17 @@ export const AI_CLASSIFICATION_JSON_SCHEMA = {
         'Always empty. Eras are derived in code from observed composers and works; do not infer repertoire from venue, festival, instrument or likely programmes.',
     },
     kind: { type: 'string', enum: [...EVENT_KINDS] },
-    evidence: { type: 'array', maxItems: 12, items: { type: 'string' } },
+    evidence: {
+      type: 'array',
+      maxItems: 12,
+      items: { type: 'string' },
+      description:
+        'Brief verbatim excerpts copied from observed facts (title, description, category, series, programme, performers/roles, composers, works). Not conclusions. Required for include/exclude; omit or empty only for uncertain.',
+    },
     rationale: {
       type: 'string',
-      description: '1-2 short sentences. Do not repeat evidence. Keep well under 800 characters.',
+      description:
+        'Optional interpretation of the cited evidence. 1-2 short sentences. Do not put rationale inside evidence. Keep well under 800 characters.',
     },
   },
 } as const;
@@ -387,10 +395,7 @@ export function parseAiClassification(raw: unknown): ParseAiClassification {
     };
   }
 
-  const evidence = [
-    ...(parsed.data.evidence ?? []),
-    ...(parsed.data.rationale ? [parsed.data.rationale] : []),
-  ];
+  const evidence = uniqueKeepOrder((parsed.data.evidence ?? []).map((item) => item.trim()).filter(Boolean));
 
   return {
     ok: true,
@@ -400,6 +405,7 @@ export function parseAiClassification(raw: unknown): ParseAiClassification {
       eras: parsed.data.eras ? uniqueKeepOrder(parsed.data.eras) : undefined,
       kind: parsed.data.kind,
       evidence,
+      ...(parsed.data.rationale ? { rationale: parsed.data.rationale } : {}),
     },
   };
 }

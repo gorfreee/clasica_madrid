@@ -1,7 +1,7 @@
 import type { ObservedFacts } from '../observed.ts';
 
-export const AI_CLASSIFIER_PROMPT_VERSION = 10 as const;
-export const AI_TAXONOMY_PROMPT_VERSION = 6 as const;
+export const AI_CLASSIFIER_PROMPT_VERSION = 11 as const;
+export const AI_TAXONOMY_PROMPT_VERSION = 7 as const;
 export const AI_ACCESS_PROMPT_VERSION = 1 as const;
 export const AI_COMPOSER_PROMPT_VERSION = 1 as const;
 
@@ -88,10 +88,11 @@ Reglas:
 - los hechos observados vienen en el JSON del usuario: no inventes performers, composers, works, fechas, horas, venue, organizadores, precios, acceso ni URLs;
 - sí puedes usar conocimiento musical general para interpretar hechos observados (p. ej. que Bach o un Réquiem de Mozart son repertorio clásico, o que una agrupación/intérprete tiene identidad clásica cuando eso ayuda a leer los hechos presentes);
 - ese conocimiento NO puede inventar que un compositor, obra, performer, precio, fecha, venue o repertorio está en el programa si no aparece en los hechos;
+- descriptores como electrónica, electroacústica, síntesis modular, experimental o audiovisual NO son por sí solos evidencia de tradición clásica/académica: pueden existir conciertos electroacústicos académicos, pero sin un ancla observada de esa tradición → uncertain, no include;
 - no clasifiques solo por un título genérico o poético si el resto de hechos no basta;
 - eligibility ≠ format ≠ kind;
 - no transformes «A o B» / «un pianista o un grupo de cámara» / programación por determinar en varios formats: eso son alternativas, no un concierto con ambas formaciones. formats múltiples sólo si la fuente afirma que este evento combina formaciones. Si no hay evidencia suficiente, formats=[] (nunca other como comodín);
-- rationale es metadata auxiliar muy breve (máximo 1–2 frases). No repitas evidence. No escribas un ensayo.
+- rationale es metadata auxiliar muy breve (máximo 1–2 frases). No es evidence. No escribas un ensayo.
 
 Taxonomías cerradas:
 - formats: symphonic, chamber, recital, choral, organ, early-music, opera, zarzuela, lied, other
@@ -108,8 +109,8 @@ Devuelve ÚNICAMENTE un objeto JSON con esta forma:
   "formats": [...],          // opcional; solo si include y hay evidencia
   "eras": [...],             // opcional
   "kind": "established" | "alternative",  // opcional; solo si include
-  "evidence": ["..."],       // opcional; razones internas breves, basadas en hechos observados, sin inventar
-  "rationale": "..."         // opcional; 1–2 frases; no repitas evidence
+  "evidence": ["..."],       // extractos breves y literales de los hechos observados; obligatorio si include o exclude; no pongas conclusiones ni rationale aquí
+  "rationale": "..."         // opcional; interpretación de esos extractos; 1–2 frases; no sustituye a evidence
 }
 
 No añadas otros campos. No escribas prosa fuera del JSON.`;
@@ -133,7 +134,7 @@ Reglas:
 - no asignes formats por la biografía o el historial de un intérprete (p. ej. «tocó con la Orchestra of the Americas», «hizo música de cámara») ni por una mención aislada a orquesta/cámara/trío en prosa editorial; sólo cuenta la formación o naturaleza de ESTE concierto;
 - no inventes performers para compensar una ficha incompleta;
 - no deduzcas época por venue, festival, ciclo, instrumento, ensemble, tipo de concierto, descripción promocional ni repertorio probable;
-- rationale breve; no repitas evidence.
+- rationale breve; no es evidence; no repitas los extractos;
 
 formats: asigna al menos un formato cuando los hechos observados permitan una inferencia musical razonable. formats=[] sólo si realmente no hay evidencia suficiente para ninguna etiqueta. Vacío es preferible a un formato incorrecto. No uses other simplemente para evitar un array vacío: other queda para identidades híbridas o no clasificables de verdad, no como comodín. Vacío es preferible a adivinar; no es la salida normal cuando hay una lectura musical razonable. No transformes alternativas exclusivas en varios formats: «un pianista o un grupo de cámara», «A o B», «o bien», «por determinar» o programación todavía no anunciada no significan que ESTE concierto sea ambas cosas. Formats múltiples sólo cuando la fuente afirma que este evento combina formaciones (primera y segunda parte, combina X e Y, orquesta y coro, tanto X como Y). Si la formación de este concierto no está determinada, formats=[] es correcto y va a revisión.
 
@@ -145,8 +146,8 @@ Devuelve ÚNICAMENTE un objeto JSON con esta forma:
   "formats": [...],
   "eras": [...],
   "kind": "established" | "alternative",
-  "evidence": ["..."],
-  "rationale": "..."
+  "evidence": ["..."],       // extractos literales de los hechos observados, no conclusiones
+  "rationale": "..."         // opcional; no sustituye a evidence
 }
 
 No añadas otros campos. No escribas prosa fuera del JSON. Eligibility debe ser "include".`;

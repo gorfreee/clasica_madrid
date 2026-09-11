@@ -3,6 +3,7 @@ import type { Candidate } from '../lib/schemas/candidate.ts';
 import type { AiClassifier, AiCallDiagnostics, AiCallPurpose } from './classification/ai.ts';
 import { classifyObserved } from './classification/enrich.ts';
 import { isTechnicalClassificationFailure, type ClassificationResult } from './classification/types.ts';
+import { isEditorialAiUncertain } from './classification/eligibility-grounding.ts';
 import { collapseWhitespace } from './html.ts';
 import { discoveryToRawEvents, type DiscoveryBatch } from './discovery.ts';
 import { getAdapter } from './registry.ts';
@@ -617,9 +618,6 @@ function recordAiOutcome(usage: IngestAiSummary, classification: ClassificationR
     case 'ai-exclude':
       usage.exclude += 1;
       break;
-    case 'ai-uncertain':
-      usage.uncertain += 1;
-      break;
     case 'ai-invalid-output':
       usage.invalidOutput += 1;
       break;
@@ -636,6 +634,10 @@ function recordAiOutcome(usage: IngestAiSummary, classification: ClassificationR
       usage.timeout += 1;
       break;
     default:
+      if (isEditorialAiUncertain(classification.eligibility.ruleId)) {
+        usage.uncertain += 1;
+        break;
+      }
       usage.error += 1;
   }
 }

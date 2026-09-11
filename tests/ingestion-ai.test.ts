@@ -14,6 +14,7 @@ import {
   AI_TAXONOMY_SYSTEM_PROMPT,
   buildAiClassifierUserMessage,
 } from '../src/ingestion/classification/ai-prompt.ts';
+import { AI_REQUEST_CONTRACT_VERSION, buildAiRequest } from '../src/ingestion/classification/ai-request.ts';
 import { classify } from '../src/ingestion/classification/classify.ts';
 import { classifyObserved, enrichWithAiIfNeeded } from '../src/ingestion/classification/enrich.ts';
 import {
@@ -77,11 +78,24 @@ const excludeFacts = facts({
 
 const uncertainFacts = facts({ title: 'Concierto extraordinario' });
 
+const chamberUncertainFacts = facts({
+  title: 'Concierto extraordinario',
+  description: 'Programa de repertorio de música antigua.',
+});
+
+const popularUncertainFacts = facts({
+  title: 'Concierto extraordinario',
+  description: 'Noche de canción popular y rumba urbana.',
+});
+
 describe('AI classifier prompt v2', () => {
   const prompt = AI_CLASSIFIER_SYSTEM_PROMPT;
 
-  it('is version 10 so results are distinguishable from earlier prompts', () => {
-    expect(AI_CLASSIFIER_PROMPT_VERSION).toBe(10);
+  it('is version 11 so results are distinguishable from earlier prompts', () => {
+    expect(AI_CLASSIFIER_PROMPT_VERSION).toBe(11);
+    expect(AI_REQUEST_CONTRACT_VERSION).toBe(2);
+    expect(buildAiRequest(uncertainFacts).contractVersion).toBe(2);
+    expect(buildAiRequest(uncertainFacts).user).toContain('promptVersion: 11');
   });
 
   it('keeps precision, uncertain as a valid output, and the ban on inventing facts', () => {
@@ -187,7 +201,11 @@ describe('AI classifier prompt v2', () => {
     expect(prompt).toContain('"rationale"');
     expect(prompt).toMatch(/rationale es metadata auxiliar muy breve/);
     expect(prompt).toMatch(/m[aá]ximo 1[–-]2 frases/);
-    expect(prompt).toMatch(/No repitas evidence/);
+    expect(prompt).toMatch(/No es evidence/);
+    expect(prompt).toMatch(/extractos breves y literales/);
+    expect(prompt).toMatch(/obligatorio si include o exclude/);
+    expect(prompt).toMatch(/no pongas conclusiones ni rationale/);
+    expect(prompt).toMatch(/electr[oó]nica, electroac[uú]stica, s[ií]ntesis modular/);
     expect(prompt).not.toMatch(/confidence/i);
     expect(prompt).not.toMatch(/chain[- ]of[- ]thought/i);
   });
@@ -276,8 +294,9 @@ describe('parseAiClassification', () => {
     if (!parsed.ok) return;
     expect(parsed.value.eligibility).toBe('include');
     expect(parsed.value.kind).toBe('alternative');
-    const rationale = parsed.value.evidence.find((item) => item.length === 800);
-    expect(rationale).toBe('x'.repeat(800));
+    expect(parsed.value.evidence).toEqual(['ciclo de órgano']);
+    expect(parsed.value.rationale).toBe('x'.repeat(800));
+    expect(parsed.value.evidence).not.toContain(parsed.value.rationale);
   });
 
   it('un output semánticamente inválido sigue siendo ai-invalid-output aunque rationale sea largo', () => {
@@ -334,7 +353,7 @@ describe('classifyObserved — fallback cuando el determinista es uncertain', ()
         };
       },
     });
-    const result = await classifyObserved(uncertainFacts, { ai });
+    const result = await classifyObserved(chamberUncertainFacts, { ai });
     expect(result.eligibility.value).toBe('include');
     expect(result.eligibility.method).toBe('ai');
     expect(result.eligibility.ruleId).toBe('ai-include');
@@ -345,7 +364,7 @@ describe('classifyObserved — fallback cuando el determinista es uncertain', ()
   });
 
   it('AI exclude → exclude', async () => {
-    const result = await classifyObserved(uncertainFacts, {
+    const result = await classifyObserved(popularUncertainFacts, {
       ai: {
         async classify() {
           return { eligibility: 'exclude', evidence: ['canción popular'] };
@@ -359,17 +378,34 @@ describe('classifyObserved — fallback cuando el determinista es uncertain', ()
     expect(result.kind).toBeUndefined();
   });
 
-  it('rationale > 800 no tira una clasificación AI válida', async () => {
-    const result = await classifyObserved(uncertainFacts, {
+  it('rationale > 800 no tira una clasificación AI válida si hay evidence grounded', async () => {
+    const result = await classifyObserved(popularUncertainFacts, {
+      ai: {
+        async classify() {
+          return {
+            eligibility: 'exclude',
+            evidence: ['canción popular'],
+            rationale: 'z'.repeat(900),
+          };
+        },
+      },
+    });
+    expect(result.eligibility.value).toBe('exclude');
+    expect(result.eligibility.ruleId).toBe('ai-exclude');
+    expect(result.eligibility.evidence).toContain('canción popular');
+    expect(result.eligibility.evidence.every((item) => item.length < 800)).toBe(true);
+  });
+
+  it('rationale sola no justifica un exclude', async () => {
+    const result = await classifyObserved(popularUncertainFacts, {
       ai: {
         async classify() {
           return { eligibility: 'exclude', rationale: 'z'.repeat(900) };
         },
       },
     });
-    expect(result.eligibility.value).toBe('exclude');
-    expect(result.eligibility.ruleId).toBe('ai-exclude');
-    expect(result.eligibility.evidence.some((item) => item.length === 800)).toBe(true);
+    expect(result.eligibility.value).toBe('uncertain');
+    expect(result.eligibility.ruleId).toBe('ai-ungrounded-evidence');
   });
 
   it('AI uncertain → uncertain', async () => {
@@ -451,7 +487,7 @@ describe('classifyObserved — degradación segura', () => {
       async classify() {
         calls += 1;
         if (calls === 1) throw new Error('fallo puntual');
-        return { eligibility: 'exclude' };
+        return { eligibility: 'exclude', evidence: ['Otro concierto'] };
       },
     };
     const first = await classifyObserved(uncertainFacts, { ai });
@@ -852,7 +888,7 @@ describe('taxonomy enrichment — separado de eligibility', () => {
           formats: ['recital'],
           eras: ['contemporary'],
           kind: 'established',
-          evidence: ['ciclo de cámara'],
+          evidence: ['camara'],
         };
       },
     });
@@ -886,7 +922,7 @@ describe('taxonomy enrichment — separado de eligibility', () => {
         };
       },
     });
-    const result = await classifyObserved(uncertainFacts, { ai });
+    const result = await classifyObserved(chamberUncertainFacts, { ai });
     expect(result.eligibility.value).toBe('include');
     expect(result.formats?.value).toEqual(['early-music']);
     expect(ai.calls).toBe(1);
@@ -1047,8 +1083,8 @@ describe('taxonomy AI — alternativas exclusivas vs formaciones combinadas', ()
 describe('taxonomy AI prompt', () => {
   const prompt = AI_TAXONOMY_SYSTEM_PROMPT;
 
-  it('is version 6 so results are distinguishable from earlier taxonomy prompts', () => {
-    expect(AI_TAXONOMY_PROMPT_VERSION).toBe(6);
+  it('is version 7 so results are distinguishable from earlier taxonomy prompts', () => {
+    expect(AI_TAXONOMY_PROMPT_VERSION).toBe(7);
   });
 
   it('asks for a format when observed facts support a musical inference', () => {
@@ -1087,7 +1123,7 @@ describe('eras AI guardrail — solo evidencia musical observada', () => {
               eligibility: 'include',
               formats: ['organ', 'recital'],
               eras: [...inventedEras],
-              evidence: ['festival de órgano: repertorio habitual del instrumento'],
+              evidence: ['Festival Internacional de Órgano'],
             };
           },
         },
@@ -1185,7 +1221,7 @@ describe('eras AI guardrail — solo evidencia musical observada', () => {
               eligibility: 'include',
               formats: ['recital'],
               eras: [...inventedEras],
-              evidence: ['probable repertorio de temporada'],
+              evidence: ['Concierto de música clásica.'],
             };
           },
         },

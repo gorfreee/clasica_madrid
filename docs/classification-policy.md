@@ -145,7 +145,7 @@ La knowledge base puede asociar `Bach → baroque`. No puede afirmar que Beethov
 
 CI y tests no deben depender de llamadas live a un LLM. Si la IA no está disponible, hace timeout o devuelve algo inválido, el pipeline degrada: reglas y knowledge si bastan; si no, `uncertain` / campos vacíos.
 
-La IA de enrichment no recibe navegación web ni contexto institucional para completar hechos. `composer-extraction` sólo ve programa/obras e intérpretes observados y sus propuestas pasan validación determinista de nombre + span; un intérprete, director o solista no se acepta como compositor. `access-classification` sólo ve `accessText`: venue, source, organizer y costumbres históricas están excluidos. Sin texto observado no hay llamada.
+La IA de enrichment no recibe navegación web ni contexto institucional para completar hechos. `composer-extraction` sólo ve programa/obras e intérpretes observados y sus propuestas pasan validación determinista de nombre + span; un intérprete, director o solista no se acepta como compositor. `access-classification` sólo ve `accessText`: venue, source, organizer y costumbres históricas están excluidos. Sin texto observado no hay llamada. Eligibility AI puede interpretar hechos ya observados, nunca inventarlos: `include`/`exclude` exigen extractos literales verificables en esos hechos (`evidence` ≠ `rationale`); si el span no está, o si la política determinista dejó el caso en coprincipalidad sin bloque clásico, o si descriptores contemporáneos/electrónicos no tienen ancla académica observada, la decisión válida se degrada a `uncertain` editorial (no es un fallo técnico del modelo).
 
 ---
 

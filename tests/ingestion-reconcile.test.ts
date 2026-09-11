@@ -1130,6 +1130,9 @@ describe('pipeline — new, unchanged, updates', () => {
       expect(isTechnicalClassificationFailure(ruleId)).toBe(true);
     }
     expect(isTechnicalClassificationFailure('ai-uncertain')).toBe(false);
+    expect(isTechnicalClassificationFailure('ai-ungrounded-evidence')).toBe(false);
+    expect(isTechnicalClassificationFailure('ai-coprincipal-without-classical-block')).toBe(false);
+    expect(isTechnicalClassificationFailure('ai-ambiguous-contemporary')).toBe(false);
     expect(isTechnicalClassificationFailure('ai-exclude')).toBe(false);
     expect(isTechnicalClassificationFailure('jazz-event')).toBe(false);
   });
