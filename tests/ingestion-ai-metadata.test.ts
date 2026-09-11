@@ -223,6 +223,15 @@ describe('composer AI fallback y validación determinista', () => {
     expect(composerAiHasUsableEvidence(facts({ composers: [], works: [], programText: 'Concierto de temporada' }))).toBe(
       false,
     );
+    expect(
+      composerAiHasUsableEvidence(
+        facts({
+          composers: [{ name: 'Umberto Giordano' }],
+          works: [],
+          programText: 'Libreto de Arrigo Boito. Contemporáneo de Puccini.',
+        }),
+      ),
+    ).toBe(false);
   });
 
   it('acepta solo el compositor explícito respaldado por el programa', async () => {
@@ -271,6 +280,77 @@ describe('composer AI fallback y validación determinista', () => {
       facts({ composers: [], works: [], programText: 'Homenaje a Rameau', performers: [] }),
     );
     expect(homage.composers).toEqual([]);
+  });
+
+  it('acepta Moszkowski en una lista de repertorio y rechaza menciones no atribuidas', () => {
+    const list = 'Schumann – Moszkowski – Chopin – Brahms – Beethoven – Ravel – Liszt';
+    const observed = facts({
+      composers: [
+        { name: 'Robert Schumann' },
+        { name: 'Frédéric Chopin' },
+        { name: 'Johannes Brahms' },
+        { name: 'Ludwig van Beethoven' },
+        { name: 'Maurice Ravel' },
+        { name: 'Franz Liszt' },
+      ],
+      works: [],
+      programText: list,
+    });
+    expect(composerAiHasUsableEvidence(observed)).toBe(true);
+    expect(validateAiComposerCandidates([{ name: 'Moszkowski', evidence: list }], observed).composers).toEqual([
+      { name: 'Moszkowski' },
+    ]);
+
+    expect(
+      validateAiComposerCandidates(
+        [{ name: 'Arrigo Boito', evidence: 'Libreto de Arrigo Boito' }],
+        facts({
+          composers: [{ name: 'Amilcare Ponchielli' }],
+          works: [],
+          programText: 'Música de Amilcare Ponchielli. Libreto de Arrigo Boito.',
+        }),
+      ).composers,
+    ).toEqual([]);
+
+    expect(
+      validateAiComposerCandidates(
+        [{ name: 'Giacomo Puccini', evidence: 'Contemporáneo de Puccini' }],
+        facts({
+          composers: [{ name: 'Umberto Giordano' }],
+          works: [],
+          programText: 'Fedora de Umberto Giordano, contemporáneo de Puccini.',
+        }),
+      ).composers,
+    ).toEqual([]);
+
+    expect(
+      validateAiComposerCandidates(
+        [{ name: 'Robert Carl', evidence: 'ha estrenado una obra de Robert Carl en Hartford' }],
+        facts({
+          composers: [{ name: 'Clara Schumann' }],
+          works: [],
+          programText: 'Clara Schumann — Notturno. La flautista ha estrenado una obra de Robert Carl en Hartford.',
+        }),
+      ).composers,
+    ).toEqual([]);
+
+    expect(
+      validateAiComposerCandidates(
+        [{ name: 'Johann Sebastian Bach', evidence: 'Am Bach im Frühling' }],
+        facts({
+          composers: [{ name: 'Franz Schubert' }],
+          works: [],
+          programText: 'Franz Schubert — Am Bach im Frühling [Junto al arroyo en primavera], D 361',
+        }),
+      ).composers,
+    ).toEqual([]);
+
+    expect(
+      validateAiComposerCandidates(
+        [{ name: 'Johann Sebastian Bach', evidence: 'J. S. Bach — Suite' }],
+        facts({ composers: [], works: [], programText: 'J. S. Bach — Suite' }),
+      ).composers,
+    ).toEqual([{ name: 'Johann Sebastian Bach' }]);
   });
 
   it('mantiene vacío ante evidencia insuficiente o fallo del provider', async () => {
@@ -499,9 +579,9 @@ describe('pipeline y budget compartido', () => {
     expect(run.candidates[0]!.event.composers).toEqual([{ name: 'Maddalena Casulana' }]);
     expect(run.candidates[0]!.event.access).toBe('free');
     expect(run.candidates[0]!.event.eras).toEqual([]);
-    expect(ai.purposes).toEqual(['composer-extraction', 'access-classification']);
-    expect(run.summary.ai.attempted).toBe(2);
-    expect(run.summary.ai.byPurpose['composer-extraction']).toMatchObject({ attempted: 1, resolved: 1 });
+    expect(ai.purposes).toEqual(['access-classification']);
+    expect(run.summary.ai.attempted).toBe(1);
+    expect(run.summary.ai.byPurpose['composer-extraction']).toMatchObject({ attempted: 0 });
     expect(run.summary.ai.byPurpose['access-classification']).toMatchObject({ attempted: 1, resolved: 1 });
     expect(run.summary.ai.byPurpose.taxonomy).toMatchObject({ attempted: 0 });
     expect(run.summary.quality).toMatchObject({

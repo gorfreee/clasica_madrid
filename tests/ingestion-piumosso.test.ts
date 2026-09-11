@@ -401,6 +401,7 @@ describe('Fundación Più Mosso programText', () => {
     const { enriched } = publishableFrom(hydrated!);
     expect(enriched.composers.map((item) => item.name)).toEqual([
       'Robert Schumann',
+      'Moszkowski',
       'Frédéric Chopin',
       'Johannes Brahms',
       'Ludwig van Beethoven',

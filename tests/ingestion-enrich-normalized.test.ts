@@ -219,6 +219,125 @@ describe('enriquecimiento determinista de compositores conocidos', () => {
     expect(enriched.composers).toEqual([{ name: 'J. S. Bach' }]);
   });
 
+  it('añade los cuatro compositores de una lista Obras de inequívoca', () => {
+    const enriched = enrichNormalizedEvent(
+      event({
+        performers: [],
+        programText:
+          'Obras de Josquin des Prez, Juan del Encina, Francisco Guerrero y Antonio de Cabezón',
+      }),
+    );
+    expect(enriched.composers.map((item) => item.name)).toEqual([
+      'Josquin des Prez',
+      'Juan del Encina',
+      'Francisco Guerrero',
+      'Antonio de Cabezón',
+    ]);
+  });
+
+  it('conserva Moszkowski en una lista real de repertorio y completa los conocidos', () => {
+    const program =
+      'Schumann – Moszkowski – Chopin – Brahms – Beethoven – Ravel – Liszt';
+    const fromList = enrichNormalizedEvent(
+      event({
+        performers: [],
+        composers: [],
+        programText: program,
+      }),
+    );
+    expect(fromList.composers.map((item) => item.name)).toContain('Moszkowski');
+    expect(fromList.composers.map((item) => item.name)).toEqual([
+      'Robert Schumann',
+      'Moszkowski',
+      'Frédéric Chopin',
+      'Johannes Brahms',
+      'Ludwig van Beethoven',
+      'Maurice Ravel',
+      'Franz Liszt',
+    ]);
+
+    const structured = enrichNormalizedEvent(
+      event({
+        performers: [],
+        composers: [{ name: 'Moszkowski' }],
+        programText: program,
+      }),
+    );
+    expect(structured.composers.map((item) => item.name)).toContain('Moszkowski');
+    expect(structured.composers[1]).toEqual({ name: 'Moszkowski' });
+  });
+
+  it('el fallback de título reconoce TÍTULO de AUTOR inequívoco', () => {
+    const enriched = enrichNormalizedEvent(
+      event({
+        title: 'MARIO PRISUELOS. MÚSICA CALLADA DE FREDERIC MOMPOU.',
+        performers: [{ name: 'Mario Prisuelos' }],
+        programText: undefined,
+      }),
+    );
+    expect(enriched.composers).toEqual([{ name: 'Frederic Mompou' }]);
+  });
+
+  it('no añade a Arrigo Boito desde un crédito de libreto', () => {
+    const enriched = enrichNormalizedEvent(
+      event({
+        performers: [],
+        composers: [{ name: 'Amilcare Ponchielli' }],
+        programText: 'Música de Amilcare Ponchielli. Libreto de Arrigo Boito.',
+      }),
+    );
+    expect(enriched.composers.map((item) => item.name)).toEqual(['Amilcare Ponchielli']);
+  });
+
+  it('no añade a Puccini por una mención contextual a otra ópera', () => {
+    const enriched = enrichNormalizedEvent(
+      event({
+        performers: [],
+        composers: [{ name: 'Umberto Giordano' }],
+        programText:
+          'Fedora, de Umberto Giordano. Contemporáneo de Puccini, el verismo de Tosca sirve aquí de contexto editorial, no de repertorio.',
+      }),
+    );
+    expect(enriched.composers.map((item) => item.name)).toEqual(['Umberto Giordano']);
+    expect(enriched.composers.some((item) => /puccini/i.test(item.name))).toBe(false);
+  });
+
+  it('no añade un compositor citado en la biografía de una intérprete', () => {
+    const enriched = enrichNormalizedEvent(
+      event({
+        performers: [],
+        composers: [{ name: 'Clara Schumann' }],
+        programText:
+          'Programa: Clara Schumann — Notturno. La flautista ha estrenado una obra de Robert Carl en Hartford y trabaja con Katherine Hoover.',
+      }),
+    );
+    expect(enriched.composers.map((item) => item.name)).toEqual(['Clara Schumann']);
+    expect(enriched.composers.some((item) => /robert carl/i.test(item.name))).toBe(false);
+  });
+
+  it('no infiere Bach desde Am Bach im Frühling y sí desde Bach — Suite', () => {
+    const lied = enrichNormalizedEvent(
+      event({
+        performers: [],
+        composers: [{ name: 'Franz Schubert' }],
+        works: [{ title: 'Am Bach im Frühling', composerName: 'Franz Schubert' }],
+        programText: 'Franz Schubert — Am Bach im Frühling [Junto al arroyo en primavera], D 361',
+      }),
+    );
+    expect(lied.composers.map((item) => item.name)).toEqual(['Franz Schubert']);
+    expect(lied.works).toEqual([
+      { title: 'Am Bach im Frühling', composerName: 'Franz Schubert' },
+    ]);
+
+    const suite = enrichNormalizedEvent(
+      event({
+        performers: [],
+        programText: 'Bach — Suite\nJ. S. Bach — Suite',
+      }),
+    );
+    expect(suite.composers).toEqual([{ name: 'Johann Sebastian Bach' }]);
+  });
+
   it('el fallback ocurre sobre el NormalizedEvent, antes de clasificar o publicar', () => {
     const normalized = normalizeRawEvent({
       sourceId: 'cndm',
