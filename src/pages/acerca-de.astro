@@ -1,0 +1,101 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { ABOUT_PATH } from '../lib/presentation/urls.ts';
+---
+
+<Layout
+  title="Acerca de"
+  description="Clásica Madrid reúne en una sola agenda conciertos y eventos de música clásica en Madrid."
+  canonicalPath={ABOUT_PATH}
+>
+  <header class="section-intro about-intro">
+    <p class="eyebrow">Acerca de / Clásica Madrid</p>
+    <h1>Una agenda para<br />escuchar Madrid.</h1>
+    <p class="lede">
+      Clásica Madrid reúne en un único lugar la programación de música clásica de la ciudad.
+    </p>
+  </header>
+
+  <section class="about-copy" aria-labelledby="about-title">
+    <h2 id="about-title">Muchas fuentes, una sola agenda.</h2>
+    <div class="about-copy__text">
+      <p>
+        La información sobre conciertos está repartida entre teatros, auditorios, iglesias,
+        conservatorios, universidades, fundaciones y muchas otras entidades. Clásica Madrid nace
+        para hacerla más fácil de encontrar y consultar.
+      </p>
+      <p>
+        El objetivo es ofrecer una agenda clara y amplia, desde las grandes programaciones hasta
+        conciertos pequeños, gratuitos o menos visibles, siempre con la información presentada de
+        forma sencilla y consistente.
+      </p>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .about-intro {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .about-intro::after {
+    content: '';
+    position: absolute;
+    right: 2rem;
+    bottom: -5rem;
+    width: 11rem;
+    height: 11rem;
+    border: 2.8rem solid var(--blue);
+    border-radius: 50%;
+    opacity: .95;
+  }
+
+  .about-copy {
+    display: grid;
+    grid-template-columns: minmax(13rem, .55fr) minmax(0, 1fr);
+    gap: 3rem;
+    max-width: 58rem;
+    padding: 3.5rem 0 1rem;
+  }
+
+  .about-copy h2 {
+    margin: 0;
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    font-weight: 800;
+    letter-spacing: var(--type-tracking-heading);
+    line-height: .98;
+  }
+
+  .about-copy__text {
+    max-width: 38rem;
+  }
+
+  .about-copy__text p {
+    margin: 0;
+    color: var(--muted);
+    font-size: clamp(1rem, 1.5vw, 1.15rem);
+    line-height: 1.55;
+  }
+
+  .about-copy__text p + p {
+    margin-top: 1.35rem;
+  }
+
+  @media (max-width: 620px) {
+    .about-intro::after {
+      right: -3.5rem;
+      bottom: -3.5rem;
+      width: 8rem;
+      height: 8rem;
+      border-width: 2rem;
+      opacity: .75;
+    }
+
+    .about-copy {
+      grid-template-columns: 1fr;
+      gap: 1.4rem;
+      padding-top: 2.5rem;
+    }
+  }
+</style>
