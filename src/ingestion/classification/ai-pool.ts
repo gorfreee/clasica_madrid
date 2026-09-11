@@ -503,20 +503,15 @@ export class AiPoolClassifier implements AiClassifier {
         (candidate) => this.available(candidate, skippedThisCall),
       );
     }
+    const failureKind: AiFailureKind = error.kind === 'timeout' ? 'timeout' : 'transport-error';
     pushFailure(diagnostics, route, {
       model: route.model,
-      kind: error.kind === 'rate-limit' ? 'rate-limit' : error.kind === 'timeout' ? 'timeout' : 'transport-error',
+      kind: failureKind,
       status: error.status === undefined ? undefined : String(error.status),
       excerpt: sanitizeAiOutputExcerpt(this.redactForRoute(route, error.message)),
     });
-    bump(
-      this.stats.failuresByKind as Record<string, number>,
-      error.kind === 'rate-limit' ? 'rate-limit' : error.kind === 'timeout' ? 'timeout' : 'transport-error',
-    );
-    this.noteAttemptOutcome(
-      route,
-      error.kind === 'rate-limit' ? 'rate-limit' : error.kind === 'timeout' ? 'timeout' : 'transport-error',
-    );
+    bump(this.stats.failuresByKind as Record<string, number>, failureKind);
+    this.noteAttemptOutcome(route, failureKind);
   }
 
   private async acquire(

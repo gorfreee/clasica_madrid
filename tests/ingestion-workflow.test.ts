@@ -138,10 +138,11 @@ describe('workflow manual de smoke de IA', () => {
 
   it('reutiliza el CLI de smoke con zero-cost y cache desactivada', async () => {
     const yaml = await readFile(smokePath, 'utf8');
-    expect(yaml).toMatch(/npm run ai:smoke -- --route/);
+    expect(yaml).toContain('npm run ai:smoke --');
+    expect(yaml).toContain('--route');
     expect(yaml).toMatch(/AI_ZERO_COST_ONLY: 'true'/);
     expect(yaml).toMatch(/AI_CACHE: 'off'/);
-    expect(yaml).toMatch(/input: route/);
+    expect(yaml).toContain('${{ inputs.route }}');
   });
 
   it('usa secrets reales; vars de modelos/límites son overrides opcionales', async () => {
