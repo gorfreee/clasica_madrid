@@ -61,6 +61,7 @@ describe('workflow de ingestión: artifact de observabilidad', () => {
     expect(yaml).not.toContain('secrets.GROQ_MODEL_RPM');
     expect(yaml).not.toContain('secrets.MISTRAL_MODEL_RPM');
     expect(yaml).not.toContain('secrets.ZAI_MODEL_RPM');
+    expect(yaml).not.toContain('secrets.CLOUDFLARE_MODEL_RPM');
 
     expect(publish).toContain("steps.config.outputs.mode == 'publish'");
     expect(dryRun).toContain("steps.config.outputs.mode == 'dry-run'");
@@ -92,6 +93,25 @@ describe('workflow de ingestión: artifact de observabilidad', () => {
     expect(ingest).not.toContain('secrets.INGEST_FETCH_RELAY_URL');
     expect(ingest).not.toContain('workers.dev');
     expect(yaml).not.toMatch(/INGEST_FETCH_RELAY_TOKEN:\s*['\"]?[A-Za-z0-9_-]{8,}/);
+  });
+
+  it('inyecta controles de presión y cuotas Cloudflare desde vars, sin hardcodear números', async () => {
+    const yaml = await readFile(workflowPath, 'utf8');
+    const pressure = [
+      'GROQ_MODEL_MAX_CONCURRENT', 'GROQ_MODEL_MIN_INTERVAL_MS', 'GROQ_MAX_CONCURRENT', 'GROQ_MIN_INTERVAL_MS',
+      'MISTRAL_MODEL_MAX_CONCURRENT', 'MISTRAL_MODEL_MIN_INTERVAL_MS', 'MISTRAL_MAX_CONCURRENT', 'MISTRAL_MIN_INTERVAL_MS',
+      'ZAI_MODEL_MAX_CONCURRENT', 'ZAI_MODEL_MIN_INTERVAL_MS', 'ZAI_MAX_CONCURRENT', 'ZAI_MIN_INTERVAL_MS',
+      'CLOUDFLARE_MODEL_MAX_CONCURRENT', 'CLOUDFLARE_MODEL_MIN_INTERVAL_MS', 'CLOUDFLARE_MAX_CONCURRENT', 'CLOUDFLARE_MIN_INTERVAL_MS',
+      'CLOUDFLARE_MODEL_RPM', 'CLOUDFLARE_MODEL_TPM', 'CLOUDFLARE_MODEL_RPD',
+    ] as const;
+    for (const name of pressure) {
+      expect(yaml, name).toContain(`${name}: \${{ vars.${name} }}`);
+      expect(yaml, name).not.toContain(`secrets.${name}`);
+    }
+    expect(yaml).not.toMatch(/GROQ_MAX_CONCURRENT:\s*['\"]?\d+/);
+    expect(yaml).not.toMatch(/MISTRAL_MIN_INTERVAL_MS:\s*['\"]?\d+/);
+    expect(yaml).not.toMatch(/ZAI_MAX_CONCURRENT:\s*['\"]?\d+/);
+    expect(yaml).not.toMatch(/CLOUDFLARE_MIN_INTERVAL_MS:\s*['\"]?\d+/);
   });
 });
 

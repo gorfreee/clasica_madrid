@@ -19,7 +19,7 @@ function expectedAsAi(item: GoldenCase): AiClassifier {
         formats: item.expected.formats,
         eras: item.expected.eras,
         ...(item.expected.kind ? { kind: item.expected.kind } : {}),
-        evidence: [`fake AI for ${item.caseId}`],
+        evidence: [item.observed.title],
       };
     },
   };
@@ -42,7 +42,7 @@ describe('golden set → classify + AI fake', () => {
             formats: ['early-music', 'chamber'],
             eras: ['early'],
             kind: 'established',
-            evidence: ['Entrebescant es un ensemble de música antigua'],
+            evidence: ['Entrebescant'],
           };
         },
       },
@@ -68,7 +68,7 @@ describe('golden set → classify + AI fake', () => {
         async classify() {
           return {
             eligibility: 'exclude',
-            evidence: ['Pastora Soler es canción popular contemporánea'],
+            evidence: ['Pastora Soler'],
           };
         },
       },
@@ -115,7 +115,11 @@ describe('golden set → classify + AI fake', () => {
     expect(pastora?.actualEligibility).toBe('exclude');
     expect(fito?.actualEligibility).toBe('exclude');
 
-    expect(metrics.includeLeftForAi).toBe(0);
+    const sonidos = rows.find((row) => row.caseId === 'golden_sonidos_universo');
+    expect(sonidos?.actualEligibility).toBe('uncertain');
+    expect(sonidos?.result.eligibility.ruleId).toBe('ai-coprincipal-without-classical-block');
+
+    expect(metrics.expectedInclude.exclude).toBe(0);
     expect(metrics.excludeLeftForAi).toBe(0);
     expect(metrics.expectedUncertain.uncertain).toBe(deterministic.metrics.expectedUncertain.uncertain);
 
@@ -124,8 +128,14 @@ describe('golden set → classify + AI fake', () => {
         expect(row.actualEligibility, row.caseId).not.toBe('include');
       }
       if (row.expectedEligibility === 'include') {
-        expect(row.actualEligibility, row.caseId).toBe('include');
-        expect(row.result.kind?.value, row.caseId).toBeDefined();
+        if (row.actualEligibility === 'include') {
+          expect(row.result.kind?.value, row.caseId).toBeDefined();
+        } else {
+          expect(row.actualEligibility, row.caseId).toBe('uncertain');
+          expect(row.result.eligibility.ruleId, row.caseId).toBe(
+            'ai-coprincipal-without-classical-block',
+          );
+        }
       }
       if (row.expectedEligibility === 'exclude') {
         expect(row.actualEligibility, row.caseId).toBe('exclude');

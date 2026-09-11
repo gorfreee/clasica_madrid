@@ -15,6 +15,17 @@ export function foldName(value: string): string {
     .trim();
 }
 
+/**
+ * Conservative literal-span check: Unicode, case and trivial punctuation
+ * collapse, but a paraphrase does not match. Shared by access, composer
+ * extraction and eligibility grounding.
+ */
+export function containsNormalizedSpan(container: string, span: string): boolean {
+  const haystack = foldName(container);
+  const needle = foldName(span);
+  return Boolean(needle && (` ${haystack} `).includes(` ${needle} `));
+}
+
 export function hasWord(haystack: string, word: string): boolean {
   const foldedWord = foldText(word);
   if (!foldedWord) return false;

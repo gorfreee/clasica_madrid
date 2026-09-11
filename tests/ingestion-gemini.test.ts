@@ -58,8 +58,11 @@ function geminiStepsResponse(text: string): Response {
   });
 }
 
-function classification(eligibility: string): Response {
-  return geminiStepsResponse(JSON.stringify({ eligibility }));
+function classification(eligibility: string, evidence?: string[]): Response {
+  return geminiStepsResponse(JSON.stringify({
+    eligibility,
+    ...(evidence && evidence.length > 0 ? { evidence } : {}),
+  }));
 }
 
 type RecordedRequest = { model: string; apiKey: string | null };
@@ -318,7 +321,7 @@ describe('Gemini 429 + retries', () => {
     const { fetch } = recordingFetch(() => {
       calls += 1;
       if (calls === 1) return new Response('quota', { status: 429 });
-      return classification('exclude');
+      return classification('exclude', ['Otro concierto']);
     });
     const provider = classifier(fetch, { maxRetries: 0 });
     const first = await classifyObserved(observed, { ai: provider });
