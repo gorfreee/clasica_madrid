@@ -25,7 +25,18 @@ export const GROQ_DEFAULT_MODELS = [
   'qwen/qwen3.8-27b',
   'openai/gpt-oss-20b',
 ] as const;
-export const MISTRAL_DEFAULT_MODELS = ['mistral-small-latest'] as const;
+/**
+ * Versioned production defaults for THIS Clásica Madrid Mistral organization.
+ * Verified against the account dashboard in September 2026. These are not
+ * universal Mistral quotas: another workspace can have different TPM/RPS.
+ *
+ * `mistral-small-latest` is a mutable alias whose current backing model only
+ * had 20_000 TPM / 1 RPS here. Production uses explicit Ministral IDs instead.
+ * `ministral-3b-2512` remains a possible future fallback but is not enabled
+ * by default while 14B/8B have enough capacity.
+ */
+export const MISTRAL_DEFAULT_MODELS = ['ministral-14b-2512', 'ministral-8b-2512'] as const;
+export const MISTRAL_OPTIONAL_MODELS = ['ministral-3b-2512'] as const;
 export const ZAI_ZERO_COST_MODELS = ['glm-4.7-flash', 'glm-4.5-flash'] as const;
 export const CLOUDFLARE_ZERO_COST_MODELS = [
   '@cf/zai-org/glm-4.7-flash',
@@ -33,6 +44,24 @@ export const CLOUDFLARE_ZERO_COST_MODELS = [
 ] as const;
 
 const GROQ_FREE_LIMITS: AiRouteLimits = { rpm: 30, tpm: 8_000, rpd: 1_000 };
+/**
+ * Conservative production caps for the verified Clásica Madrid Mistral account
+ * (September 2026). Real dashboard values were:
+ * - ministral-14b-2512: 937_500 TPM / 0.50 RPS
+ * - ministral-8b-2512: 625_000 TPM / 3.13 RPS
+ * minIntervalMs is slightly above 1000/RPS so we do not sit on the request
+ * frequency limit. Env `MISTRAL_MODEL_*` / `MISTRAL_*` still override these.
+ */
+export const MISTRAL_PRODUCTION_MODEL_LIMITS: Record<string, AiRouteLimits> = {
+  'ministral-14b-2512': { tpm: 937_500, maxConcurrent: 1, minIntervalMs: 2_100 },
+  'ministral-8b-2512': { tpm: 625_000, maxConcurrent: 1, minIntervalMs: 350 },
+};
+/**
+ * Z.AI 1302 means high concurrency, not daily quota. Production therefore
+ * starts at one in-flight request across the provider. `ZAI_MAX_CONCURRENT`
+ * and `ZAI_MODEL_MAX_CONCURRENT` remain emergency overrides.
+ */
+export const ZAI_PRODUCTION_LIMITS: AiRouteLimits = { providerMaxConcurrent: 1 };
 const DEFAULT_STATE_DIR = fileURLToPath(new URL('../../../.local/ai/', import.meta.url));
 
 export type AiEnv = GeminiConfigEnv & {
@@ -161,6 +190,7 @@ function freeRoutes(env: AiEnv, zeroCost: boolean): AiRoute[] {
     models: modelList(env.MISTRAL_MODELS, MISTRAL_DEFAULT_MODELS),
     baseUrl: MISTRAL_DEFAULT_BASE_URL,
     limits: providerLimitMaps(env, 'MISTRAL'),
+    modelDefaults: MISTRAL_PRODUCTION_MODEL_LIMITS,
   }));
 
   const zaiKey = env.ZAI_API_KEY?.trim();
@@ -168,7 +198,7 @@ function freeRoutes(env: AiEnv, zeroCost: boolean): AiRoute[] {
     const selected = validateAllowlist('ZAI_MODELS', modelList(env.ZAI_MODELS, ZAI_ZERO_COST_MODELS), ZAI_ZERO_COST_MODELS);
     routes.push(...routesForProfile({
       provider: 'zai', baseUrl: ZAI_DEFAULT_BASE_URL, apiKey: zaiKey,
-    }, selected, providerLimitMaps(env, 'ZAI')));
+    }, selected, providerLimitMaps(env, 'ZAI'), UTC_DAILY_RESET, ZAI_PRODUCTION_LIMITS));
   }
 
   const cloudflareToken = env.CLOUDFLARE_API_TOKEN?.trim();
@@ -198,6 +228,7 @@ function compatibleProviderRoutes(
     models: string[];
     baseUrl: string;
     defaultLimits?: AiRouteLimits;
+    modelDefaults?: Record<string, AiRouteLimits>;
     limits: LimitMaps;
   },
 ): AiRoute[] {
@@ -207,7 +238,7 @@ function compatibleProviderRoutes(
     provider,
     baseUrl: options.baseUrl,
     apiKey: key,
-  }, options.models, options.limits, UTC_DAILY_RESET, options.defaultLimits);
+  }, options.models, options.limits, UTC_DAILY_RESET, options.defaultLimits, options.modelDefaults);
 }
 
 function routesForProfile(
@@ -216,6 +247,7 @@ function routesForProfile(
   maps: LimitMaps,
   reset = UTC_DAILY_RESET,
   defaultLimits: AiRouteLimits = {},
+  modelDefaults: Record<string, AiRouteLimits> = {},
 ): AiRoute[] {
   const models: NonNullable<OpenAiCompatibleProfile['models']> = {};
   for (const model of routeModels) {
@@ -223,7 +255,7 @@ function routesForProfile(
   }
   const transport = new OpenAiCompatibleTransport({ ...profile, models });
   return routeModels.map((model) => {
-    const limits = limitsFor(model, maps, defaultLimits);
+    const limits = limitsFor(model, maps, { ...defaultLimits, ...modelDefaults[model] });
     return makeRoute({
       provider: profile.provider,
       model,

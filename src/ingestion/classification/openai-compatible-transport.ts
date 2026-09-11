@@ -6,11 +6,14 @@ import {
 import type { AiRequest } from './ai-request.ts';
 import {
   AiTransportError,
+  type AiPressureKind,
+  type AiRateLimitSnapshot,
   type AiTransport,
   type AiTransportCall,
   type AiTransportResult,
 } from './ai-transport.ts';
 import {
+  openaiCompatibleBusinessPressure,
   openaiCompatibleModelProfile,
   openaiCompatibleRateLimitSignal,
   type OpenAiCompatibleModelProfile,
@@ -291,10 +294,15 @@ function httpError(
     || profile.rateLimitError?.(status, body)
     || openaiCompatibleRateLimitSignal(profile.provider, status, body)
   ) {
+    const rateLimit = rateLimitSnapshot(profile.provider, body, headers, now);
     return new AiTransportError(message, {
-      kind: 'rate-limit', status,
-      retryAfterMs: retryAfterMs(headers, now),
+      kind: 'rate-limit',
+      status,
+      retryAfterMs: rateLimit.retryAfterMs ?? rateLimit.resetAfterMs,
+      // A bare 429 / Mistral 1300 is never daily quota by itself.
       quotaExhausted: profile.quotaExhausted?.(status, body) ?? false,
+      pressure: primaryPressure(rateLimit.dimensions),
+      rateLimit,
     });
   }
   if (profile.unavailableError?.(status, body) || status === 400 || status === 404 || status === 422) {
@@ -308,28 +316,97 @@ function httpError(
   });
 }
 
-const REMAINING_HEADERS = [
+const REQUEST_REMAINING_HEADERS = [
+  'x-ratelimit-remaining-req-minute',
   'x-ratelimit-remaining-requests',
   'x-ratelimit-remaining',
   'ratelimit-remaining',
 ] as const;
-
+const REQUEST_LIMIT_HEADERS = [
+  'x-ratelimit-limit-req-minute',
+  'x-ratelimit-limit-requests',
+  'x-ratelimit-limit',
+  'ratelimit-limit',
+] as const;
+const TOKEN_REMAINING_MINUTE_HEADERS = [
+  'x-ratelimit-remaining-tokens-minute',
+  'x-ratelimit-remaining-tokens-5-minute',
+  'x-ratelimit-remaining-tokens',
+] as const;
+const TOKEN_LIMIT_MINUTE_HEADERS = [
+  'x-ratelimit-limit-tokens-minute',
+  'x-ratelimit-limit-tokens-5-minute',
+  'x-ratelimit-limit-tokens',
+] as const;
+const TOKEN_REMAINING_MONTH_HEADERS = ['x-ratelimit-remaining-tokens-month'] as const;
+const TOKEN_LIMIT_MONTH_HEADERS = ['x-ratelimit-limit-tokens-month'] as const;
 const RESET_HEADERS = [
   'retry-after',
+  'x-ratelimit-reset-req-minute',
   'x-ratelimit-reset-requests',
+  'x-ratelimit-reset-tokens-minute',
+  'x-ratelimit-reset-tokens-5-minute',
+  'x-ratelimit-reset-tokens-month',
   'x-ratelimit-reset',
   'ratelimit-reset',
 ] as const;
 
-function rateLimitFromHeaders(headers: Headers, now: number) {
-  const remaining = firstNumericHeader(headers, REMAINING_HEADERS);
-  const resetAfterMs = firstDurationHeader(headers, RESET_HEADERS, now);
-  if (remaining === undefined && resetAfterMs === undefined) return undefined;
-  return { remainingRequests: remaining, resetAfterMs };
+function rateLimitFromHeaders(headers: Headers, now: number): AiRateLimitSnapshot | undefined {
+  return emptyToUndefined(rateLimitSnapshot(undefined, undefined, headers, now));
 }
 
-function retryAfterMs(headers: Headers, now: number): number | undefined {
-  return firstDurationHeader(headers, RESET_HEADERS, now);
+/**
+ * Parse the rate-limit headers that Groq, Mistral and similar OpenAI-compatible
+ * APIs actually send. Only known numeric/duration names are kept.
+ */
+export function rateLimitSnapshot(
+  provider: string | undefined,
+  body: string | undefined,
+  headers: Headers,
+  now: number,
+): AiRateLimitSnapshot {
+  const remainingRequests = firstNumericHeader(headers, REQUEST_REMAINING_HEADERS);
+  const remainingTokensMinute = firstNumericHeader(headers, TOKEN_REMAINING_MINUTE_HEADERS);
+  const remainingTokensMonth = firstNumericHeader(headers, TOKEN_REMAINING_MONTH_HEADERS);
+  const snapshot: AiRateLimitSnapshot = {
+    remainingRequests,
+    remainingTokensMinute,
+    remainingTokensMonth,
+    limitRequests: firstNumericHeader(headers, REQUEST_LIMIT_HEADERS),
+    limitTokensMinute: firstNumericHeader(headers, TOKEN_LIMIT_MINUTE_HEADERS),
+    limitTokensMonth: firstNumericHeader(headers, TOKEN_LIMIT_MONTH_HEADERS),
+    resetAfterMs: firstDurationHeader(headers, RESET_HEADERS, now),
+    retryAfterMs: durationHeaderMs(headers.get('retry-after'), now)
+      ?? firstDurationHeader(headers, RESET_HEADERS, now),
+  };
+  const dimensions: AiPressureKind[] = [];
+  const business = provider && body !== undefined
+    ? openaiCompatibleBusinessPressure(provider, body)
+    : undefined;
+  if (business) dimensions.push(business);
+  if (remainingRequests === 0) dimensions.push('request-frequency');
+  if (remainingTokensMinute === 0) dimensions.push('tpm');
+  if (remainingTokensMonth === 0) dimensions.push('monthly');
+  snapshot.dimensions = uniquePressure(dimensions);
+  if (snapshot.dimensions.length === 0 && (provider || body !== undefined)) {
+    snapshot.dimensions = ['indeterminate'];
+  }
+  return snapshot;
+}
+
+function uniquePressure(values: AiPressureKind[]): AiPressureKind[] {
+  return [...new Set(values)];
+}
+
+function primaryPressure(dimensions: AiPressureKind[] | undefined): AiPressureKind | undefined {
+  if (!dimensions?.length) return undefined;
+  const rank: AiPressureKind[] = ['concurrency', 'monthly', 'tpm', 'request-frequency', 'indeterminate'];
+  return rank.find((kind) => dimensions.includes(kind)) ?? dimensions[0];
+}
+
+function emptyToUndefined(snapshot: AiRateLimitSnapshot): AiRateLimitSnapshot | undefined {
+  const { dimensions: _dimensions, ...rest } = snapshot;
+  return Object.values(rest).some((value) => value !== undefined) ? snapshot : undefined;
 }
 
 function firstNumericHeader(headers: Headers, names: readonly string[]): number | undefined {

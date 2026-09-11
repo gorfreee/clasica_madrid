@@ -747,6 +747,10 @@ function mergeProviderStats(usage: IngestAiSummary, ai: AiClassifier | undefined
   usage.failuresByKind = stats.failuresByKind ?? {};
   usage.rateLimits = stats.rateLimits ?? 0;
   usage.quotaExhausted = stats.quotaExhausted ?? 0;
+  usage.concurrencyPressure = stats.concurrencyPressure ?? 0;
+  usage.pressureByKind = stats.pressureByKind ?? {};
+  usage.concurrencyPressureByRoute = stats.concurrencyPressureByRoute ?? {};
+  usage.concurrencyPressureByProvider = stats.concurrencyPressureByProvider ?? {};
   usage.rateLimitsByRoute = stats.rateLimitsByRoute ?? {};
   usage.rateLimitsByProvider = stats.rateLimitsByProvider ?? {};
   usage.routes = stats.routes ?? [];

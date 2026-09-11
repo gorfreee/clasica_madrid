@@ -47,17 +47,21 @@ describe('workflow de ingestión: artifact de observabilidad', () => {
     expect(yaml).toContain('CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}');
     expect(yaml).toContain('CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}');
     expect(yaml).toContain('GROQ_FREE_TIER_CONFIRMED: ${{ vars.GROQ_FREE_TIER_CONFIRMED }}');
+    expect(yaml).toContain('GROQ_MODELS: ${{ vars.GROQ_MODELS }}');
     expect(yaml).toContain('GROQ_MODEL_RPM: ${{ vars.GROQ_MODEL_RPM }}');
     expect(yaml).toContain('GROQ_MODEL_TPM: ${{ vars.GROQ_MODEL_TPM }}');
     expect(yaml).toContain('GROQ_MODEL_RPD: ${{ vars.GROQ_MODEL_RPD }}');
     expect(yaml).toContain('MISTRAL_FREE_MODE_CONFIRMED: ${{ vars.MISTRAL_FREE_MODE_CONFIRMED }}');
+    expect(yaml).toContain('MISTRAL_MODELS: ${{ vars.MISTRAL_MODELS }}');
     expect(yaml).toContain('MISTRAL_MODEL_RPM: ${{ vars.MISTRAL_MODEL_RPM }}');
     expect(yaml).toContain('MISTRAL_MODEL_TPM: ${{ vars.MISTRAL_MODEL_TPM }}');
     expect(yaml).toContain('MISTRAL_MODEL_RPD: ${{ vars.MISTRAL_MODEL_RPD }}');
     expect(yaml).toContain('ZAI_MODEL_RPM: ${{ vars.ZAI_MODEL_RPM }}');
+    expect(yaml).toContain('ZAI_MODELS: ${{ vars.ZAI_MODELS }}');
     expect(yaml).toContain('ZAI_MODEL_TPM: ${{ vars.ZAI_MODEL_TPM }}');
     expect(yaml).toContain('ZAI_MODEL_RPD: ${{ vars.ZAI_MODEL_RPD }}');
     expect(yaml).toContain('CLOUDFLARE_WORKERS_FREE_CONFIRMED: ${{ vars.CLOUDFLARE_WORKERS_FREE_CONFIRMED }}');
+    expect(yaml).toContain('CLOUDFLARE_MODELS: ${{ vars.CLOUDFLARE_MODELS }}');
     expect(yaml).not.toContain('secrets.GROQ_MODEL_RPM');
     expect(yaml).not.toContain('secrets.MISTRAL_MODEL_RPM');
     expect(yaml).not.toContain('secrets.ZAI_MODEL_RPM');
@@ -112,6 +116,43 @@ describe('workflow de ingestión: artifact de observabilidad', () => {
     expect(yaml).not.toMatch(/MISTRAL_MIN_INTERVAL_MS:\s*['\"]?\d+/);
     expect(yaml).not.toMatch(/ZAI_MAX_CONCURRENT:\s*['\"]?\d+/);
     expect(yaml).not.toMatch(/CLOUDFLARE_MIN_INTERVAL_MS:\s*['\"]?\d+/);
+    expect(yaml).not.toMatch(/MISTRAL_MODELS:\s*['\"]?ministral/);
+    expect(yaml).not.toMatch(/ZAI_MODELS:\s*['\"]?glm/);
+  });
+});
+
+describe('workflow manual de smoke de IA', () => {
+  const smokePath = path.join(import.meta.dirname, '..', '.github', 'workflows', 'ai-smoke.yml');
+
+  it('es workflow_dispatch read-only, sin ingest ni PR', async () => {
+    const yaml = await readFile(smokePath, 'utf8');
+    expect(yaml).toMatch(/on:\s*\n\s*workflow_dispatch:/);
+    expect(yaml).toMatch(/contents: read/);
+    expect(yaml).not.toMatch(/contents: write/);
+    expect(yaml).not.toMatch(/pull-requests: write/);
+    expect(yaml).not.toMatch(/ingest:sync/);
+    expect(yaml).not.toMatch(/gh pr create/);
+    expect(yaml).not.toMatch(/git commit/);
+    expect(yaml).not.toMatch(/data\/events/);
+  });
+
+  it('reutiliza el CLI de smoke con zero-cost y cache desactivada', async () => {
+    const yaml = await readFile(smokePath, 'utf8');
+    expect(yaml).toMatch(/npm run ai:smoke -- --route/);
+    expect(yaml).toMatch(/AI_ZERO_COST_ONLY: 'true'/);
+    expect(yaml).toMatch(/AI_CACHE: 'off'/);
+    expect(yaml).toMatch(/input: route/);
+  });
+
+  it('usa secrets reales; vars de modelos/límites son overrides opcionales', async () => {
+    const yaml = await readFile(smokePath, 'utf8');
+    expect(yaml).toContain('MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}');
+    expect(yaml).toContain('ZAI_API_KEY: ${{ secrets.ZAI_API_KEY }}');
+    expect(yaml).toContain('MISTRAL_MODELS: ${{ vars.MISTRAL_MODELS }}');
+    expect(yaml).toContain('ZAI_MAX_CONCURRENT: ${{ vars.ZAI_MAX_CONCURRENT }}');
+    expect(yaml).not.toMatch(/MISTRAL_MODELS:\s*['\"]?ministral/);
+    expect(yaml).not.toMatch(/ZAI_MAX_CONCURRENT:\s*['\"]?\d+/);
+    expect(yaml).not.toMatch(/MISTRAL_MODEL_TPM:\s*['\"]?ministral/);
   });
 });
 
