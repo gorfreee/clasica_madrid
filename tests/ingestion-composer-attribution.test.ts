@@ -84,4 +84,51 @@ describe('atribución de compositores al programa actual', () => {
       ).map((item) => item.canonicalName),
     ).toEqual(['Johann Christian Bach']);
   });
+
+  it('no inventa composers desde títulos editoriales X: Y ni desde Música de institucional', () => {
+    expect(
+      attributedProgrammeComposers('Festival Alicia de Larrocha: Consagración, la Maestría Musical.', 'title').map(
+        (item) => item.name,
+      ),
+    ).toEqual([]);
+    expect(
+      attributedProgrammeComposers('XVII Festival de Ensembles: PLURALENSEMBLE', 'title').map((item) => item.name),
+    ).toEqual([]);
+    expect(
+      attributedProgrammeComposers('Divina Proportione: un viaje por la riqueza sonora del Renacimiento', 'title').map(
+        (item) => item.name,
+      ),
+    ).toEqual([]);
+
+    const conservatorio =
+      'Producción del Real Teatro de Retiro en colaboración con el Real Conservatorio Superior de Música de Madrid, la Escuela Superior de Canto de Madrid y la Real Escuela Superior de Arte Dramático (RESAD). SALA PRINCIPAL Real Teatro de Retiro, Plaza Daoíz y Velarde, 4. Metro Pacífico';
+    expect(attributedProgrammeComposers(conservatorio).map((item) => item.name)).not.toContain('Plaza Daoíz');
+    expect(attributedProgrammeComposers(conservatorio).map((item) => item.name)).not.toContain('Madrid');
+  });
+
+  it('Obras de: con lista de repertorio no promociona el marco ni pierde apellidos desconocidos', () => {
+    const colon =
+      'Victor Tretyakov. Obras de: Schumann – Moszkowski – Chopin – Brahms – Beethoven – Ravel – Liszt';
+    expect(attributedProgrammeComposers(colon).map((item) => item.name)).toEqual([
+      'Robert Schumann',
+      'Moszkowski',
+      'Frédéric Chopin',
+      'Johannes Brahms',
+      'Ludwig van Beethoven',
+      'Maurice Ravel',
+      'Franz Liszt',
+    ]);
+    expect(attributedProgrammeComposers(colon).some((item) => /tretyakov|obras de/i.test(item.name))).toBe(false);
+  });
+
+  it('un desconocido en programa X — obra sigue atribuyéndose; el mismo patrón en título no', () => {
+    expect(
+      attributedProgrammeComposers('Maddalena Casulana — Morir non può il mio cuore').map((item) => item.name),
+    ).toEqual(['Maddalena Casulana']);
+    expect(
+      attributedProgrammeComposers('Maddalena Casulana — Morir non può il mio cuore', 'title').map(
+        (item) => item.name,
+      ),
+    ).toEqual([]);
+  });
 });

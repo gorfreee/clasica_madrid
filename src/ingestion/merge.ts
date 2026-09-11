@@ -15,6 +15,7 @@ import {
   publishedComposerIdentity,
   rewritePublishedComposerName,
   rewritePublishedWorkComposer,
+  stripLeadingComposerCreditLabel,
 } from './composer-name.ts';
 import { canonicalizeEventTitle, canonicalizePerformerName } from './event-title.ts';
 import { publicationOccurrences } from './to-candidate.ts';
@@ -122,6 +123,9 @@ export function mergeProposals(base: EventProposal, incoming: EventProposal): Ev
  * `performers`, `composers` and `works` grow monotonically: a later observation
  * may append identities only when it is a compatible superset of everything
  * already published. Matching items may still gain `role` / `composerName`.
+ * A Music/Música credit label is the same identity as the person it wraps, so
+ * a cleaner observation can replace `Music Gioachino Rossini` with
+ * `Gioachino Rossini` without dropping other published composers.
  * A poorer or conflicting observation never deletes published identities.
  * Typographic title equivalents are not a disagreement.
  */
@@ -145,7 +149,7 @@ export function mergeExistingEvent(existing: Event, proposal: EventProposal, now
     existing.composers.map(rewritePublishedComposerName),
     canonicalizeComposerList(proposal.composers),
     (item) => publishedComposerIdentity(item.name),
-    (canonical: Composer) => canonical,
+    enrichComposer,
   );
   const works = mergePublishedList(
     'works',
@@ -360,6 +364,25 @@ function withCanonicalPerformerName(performer: Performer): Performer {
 function enrichPerformer(canonical: Performer, observed: Performer): Performer {
   if (canonical.role || !observed.role) return canonical;
   return { name: canonical.name, role: observed.role };
+}
+
+function enrichComposer(canonical: Composer, observed: Composer): Composer {
+  if (canonical.name === observed.name) return canonical;
+  if (!isCleanerComposerCredit(observed.name, canonical.name)) return canonical;
+  return { name: observed.name };
+}
+
+/**
+ * Same person, cleaner spelling: published still has a Music/Música wrapper
+ * that the incoming observation no longer carries.
+ */
+function isCleanerComposerCredit(observed: string, published: string): boolean {
+  if (publishedComposerIdentity(observed) !== publishedComposerIdentity(published)) return false;
+  const publishedStripped = stripLeadingComposerCreditLabel(published);
+  const observedStripped = stripLeadingComposerCreditLabel(observed);
+  const publishedHadLabel = publishedStripped !== published.trim();
+  const observedHadLabel = observedStripped !== observed.trim();
+  return publishedHadLabel && !observedHadLabel;
 }
 
 function enrichWork(canonical: Work, observed: Work): Work {

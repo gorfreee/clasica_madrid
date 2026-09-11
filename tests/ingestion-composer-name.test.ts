@@ -3,6 +3,7 @@ import {
   canonicalizeComposerList,
   canonicalizeComposerName,
   canonicalizeWorkList,
+  publishedComposerIdentity,
 } from '../src/ingestion/composer-name.ts';
 import { parseCndmDetail } from '../src/ingestion/detail/cndm.ts';
 import { canonicalizeArtificiallyUppercase } from '../src/ingestion/event-title.ts';
@@ -148,6 +149,16 @@ describe('canonicalizeComposerName', () => {
 
   it('acepta anotaciones ca. y las quita del nombre publicado', () => {
     expect(canonicalizeComposerName('Johann Pachelbel (ca. 1653-1706)')).toBe('Johann Pachelbel');
+  });
+
+  it('un prefijo Music/Música es el mismo crédito, no otra persona', () => {
+    expect(canonicalizeComposerName('Music Gioachino Rossini')).toBe('Music Gioachino Rossini');
+    expect(publishedComposerIdentity('Music Gioachino Rossini')).toBe(
+      publishedComposerIdentity('Gioachino Rossini'),
+    );
+    expect(
+      canonicalizeComposerList([{ name: 'Gioachino Rossini' }, { name: 'Music Gioachino Rossini' }]),
+    ).toEqual([{ name: 'Gioachino Rossini' }]);
   });
 });
 

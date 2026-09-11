@@ -1700,6 +1700,35 @@ describe('parser de ficha Teatro Real', () => {
     ]);
   });
 
+  it('no trata Música y danza ni géneros como crédito musical, y limpia Music anidado', () => {
+    const category = (paragraph: string) =>
+      parseTeatroRealDetail(`
+        <div class="wrap-content-hero"><h4>Música</h4><h1>Pequeño concierto de Año Nuevo</h1></div>
+        <div class="back-image"></div>
+        <section class="text-intro-show">
+          <div class="wrap-text-free">
+            <p>${paragraph}</p>
+            <div class="text-collapsible-cover"></div>
+          </div>
+        </section>
+        <section class="functions-show">
+          <div class="functions-show__block--item-space"><p>Real Teatro de Retiro</p></div>
+        </section>
+      `);
+
+    expect(category('Música y danza').composers).toEqual([]);
+    expect(category('Música clásica').composers).toEqual([]);
+    expect(category('Música contemporánea').composers).toEqual([]);
+    expect(category('<strong>Música</strong> de Music Gioachino Rossini (1792-1868).').composers).toEqual([
+      { name: 'Gioachino Rossini' },
+    ]);
+    expect(category('<strong>Música</strong> de Giacomo Puccini (1858-1924).').composers).toEqual([
+      { name: 'Giacomo Puccini' },
+    ]);
+    expect(category('<strong>Music</strong> by Benjamin Britten').composers).toEqual([{ name: 'Benjamin Britten' }]);
+    expect(category('<strong>Música</strong>: Vincenzo Bellini').composers).toEqual([{ name: 'Vincenzo Bellini' }]);
+  });
+
   it('no inventa un programa a partir del título', () => {
     const facts = parseTeatroRealDetail(
       '<article><h1>CONCIERTO DE NAVIDAD</h1><p>También en el Real</p></article>',
