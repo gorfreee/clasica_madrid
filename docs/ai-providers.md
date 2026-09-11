@@ -63,7 +63,9 @@ Las tareas del pool (eligibility, compositores, acceso, taxonomy) piden JSON cor
 
 | Route | JSON mode | Thinking / reasoning | Notas |
 |---|---|---|---|
-| `groq:*` | `response_format: json_object` | no se envía | No añadir `thinking` ni `chat_template_kwargs`. |
+| `groq:openai/gpt-oss-20b`, `groq:openai/gpt-oss-120b` | `response_format: json_schema` con el schema editorial (`strict: false`) | `include_reasoning: false` | Structured Outputs best-effort. No `strict: true`: el schema de eligibility tiene campos opcionales. `reasoning_format` no está soportado en GPT-OSS. |
+| `groq:qwen/qwen3.8-27b` | `response_format: json_schema` (`strict: false`) | no se envía | Mismo schema editorial. No enviar `include_reasoning` (no documentado para Qwen 3.8). |
+| otros `groq:*` | `response_format: json_object` | no se envía | Modelos sin Structured Outputs documentado. No añadir `thinking` ni `chat_template_kwargs`. |
 | `mistral:ministral-14b-2512`, `mistral:ministral-8b-2512` | `response_format: json_object` | no se envía | `service_tier=standard_only` (Free / Standard). El mismo perfil aplica a otros IDs Mistral si se activan por override. |
 | `zai:glm-4.7-flash`, `zai:glm-4.5-flash` | `response_format: json_object` | `thinking: { type: "disabled" }` | El thinking de GLM-4.7 está on por defecto y consume `max_tokens`. |
 | `cloudflare:@cf/zai-org/glm-4.7-flash`, `cloudflare:@cf/google/gemma-4-26b-a4b-it` | no se envía `response_format` | `reasoning_effort: null` y `chat_template_kwargs.enable_thinking: false` | La allowlist oficial de JSON Mode de Workers AI no incluye estos IDs; el schema editorial externo sigue validando. |
@@ -76,9 +78,11 @@ El `report.json`, el resumen de consola y el Job Summary separan provider, model
 
 Son llamadas **live** a las APIs de los proveedores: consumen quota real. No se ejecutan automáticamente en CI (ni en push ni en pull request), no escriben `data/**` y no crean PRs. Conviene lanzarlos tras cambiar providers, modelos, transports o prompts, o cuando una ingestión muestre comportamientos sospechosos.
 
-Descubren las routes con la misma configuración que el pool de producción (`inspectFreePoolFromEnv` / `createFreeRoutesFromEnv`). Cada route se prueba aislada con `AI_ROUTE=provider:model`, `AI_CACHE=off` y `AI_ZERO_COST_ONLY=true`, sin fallback a otro modelo. Un proveedor esperado sin key o sin confirmación gratuita no desaparece: cuenta como FAIL.
+Descubren las routes con la misma configuración que el pool de producción (`inspectFreePoolFromEnv`) y reutilizan directamente cada transport, payload, prompt, schema y parser real. El runner llama una sola vez a `route.transport.request()` por celda, con el timeout HTTP de producción (15 s): no usa `AiPoolClassifier`, retries, fallback, cache, scheduler, circuit breaker ni estado persistente. Un proveedor esperado sin key o sin confirmación gratuita no desaparece: cuenta como FAIL.
 
-Por defecto prueba un solo purpose (`eligibility`, un HTTP). `--purpose taxonomy` cambia el fixture; `--all-purposes` recorre eligibility, composer extraction, access y taxonomy. `ai:smoke:all` recorre las routes en serie, respetando `rpm` / `minIntervalMs` para no fabricar 429 por concurrencia.
+Por defecto prueba un solo purpose (`eligibility`, como máximo un HTTP por route). `--purpose taxonomy` cambia el fixture; `--all-purposes` recorre eligibility, composer extraction, access y taxonomy (como máximo un HTTP por `route × purpose`). Cada fixture declara una expectativa semántica mínima y no ambigua; no basta con devolver JSON compatible.
+
+Los providers avanzan en paralelo. Dentro de cada provider hay como máximo dos workers —o menos si `providerMaxConcurrent` es más restrictivo—, cada route mantiene un único request en vuelo y los inicios respetan sus `rpm` / `minIntervalMs` y el `providerMinIntervalMs`. No hay retries ocultos. Un fallo funcional, output inválido, timeout o 429 transitorio no impide probar los demás purposes. Sólo auth, modelo inequívocamente inexistente/no disponible y cuota diaria explícitamente agotada bloquean los purposes restantes de esa route.
 
 ```bash
 # una sola route (eligibility)
@@ -98,18 +102,29 @@ npm run ai:smoke:all
 npm run ai:smoke:all -- --all-purposes
 ```
 
-El comando carga `.local/ai.env`, fuerza `AI_ZERO_COST_ONLY=true`, `AI_CACHE=off` y `AI_ROUTE`, e imprime una línea JSON por petición (provider, model, route, purpose, éxito, schema, latencia, tokens, status, pressure/rate-limit sanitizados, error sin secrets) más un resumen tabular:
+El comando carga `.local/ai.env`, fuerza `AI_ZERO_COST_ONLY=true` e imprime una línea JSON por celda (provider, model, route, purpose, estado, validez estructural/semántica, HTTP status, provider error code, latencia, tokens/rate-limit y mensaje sanitizado) más el informe completo. Los estados son:
+
+- `PASS`: estructura y semántica esperadas;
+- `SEMANTIC_FAIL`: schema válido, resultado equivocado;
+- `SCHEMA_FAIL`: objeto parseable que incumple el schema;
+- `INVALID_OUTPUT`: vacío, JSON malformado o respuesta incompleta;
+- `RATE_LIMIT` / `DAILY_QUOTA`: límite transitorio o cuota diaria explícita;
+- `TIMEOUT`, `AUTH`, `MODEL_UNAVAILABLE`, `REQUEST_ERROR` o `TRANSPORT_ERROR`: causa técnica concreta;
+- `CONFIG_ERROR`: route/provider no configurado;
+- `BLOCKED`: no hizo request porque un fallo global previo de esa route lo hacía inútil.
 
 ```text
-AI LIVE SMOKE TEST
+AI LIVE SMOKE TEST — DIRECT ONE-SHOT
 
 Route                                  Eligibility  Latency   Result
 gemini:gemini-3.8-flash                PASS         1320 ms   PASS
 
-Routes tested: 18
-Passed: 16
-Failed: 2
+Routes fully PASS: 16
+Routes partially PASS: 1
+Routes FAIL: 1
 Missing/unconfigured providers: 0
+HTTP requests performed: 18
+Total duration: 42.3 s
 
 RESULT: FAIL
 ```
@@ -143,6 +158,8 @@ Las keys ausentes dejan fuera su provider sin romper la ingestión. Gemini sigue
 
 - Groq: modelos, límites Free y rate-limit headers: <https://console.groq.com/docs/rate-limits>
 - Groq: compatibilidad OpenAI: <https://console.groq.com/docs/openai>
+- Groq: Structured Outputs / JSON Schema: <https://console.groq.com/docs/structured-outputs>
+- Groq: reasoning (`include_reasoning` en GPT-OSS): <https://console.groq.com/docs/reasoning>
 - Mistral: Free mode y primer request: <https://docs.mistral.ai/getting-started/quickstarts/developer/first-api-request>
 - Mistral Chat Completions y JSON mode: <https://docs.mistral.ai/api>
 - Mistral rate limits (RPS y TPM independientes; `X-RateLimit-Remaining`): <https://docs.mistral.ai/resources/known-limitations>

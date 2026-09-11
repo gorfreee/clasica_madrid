@@ -30,7 +30,7 @@ npm run ingest:source -- auditorio-nacional
 npm run ingest:promote -- ingestion/inbox/evento.json   # legacy: un candidato en disco
 ```
 
-Diagnóstico live del pool de IA (quota real; no corre en CI de push/PR): [`docs/ai-providers.md`](docs/ai-providers.md). En GitHub: Actions → **AI live smoke test** (todas las routes) o **AI route smoke** (una route).
+Diagnóstico live one-shot del pool de IA (quota real; sin retries/fallback y no corre en CI de push/PR): [`docs/ai-providers.md`](docs/ai-providers.md). En GitHub: Actions → **AI live smoke test** (todas las routes) o **AI route smoke** (una route).
 
 ```bash
 npm run ai:smoke:all

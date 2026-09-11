@@ -1,9 +1,13 @@
 [
   {
     "purpose": "eligibility",
+    "expected": {
+      "eligibility": "include",
+      "formats": ["chamber"]
+    },
     "observed": {
-      "title": "Concierto de música de cámara",
-      "description": "Recital con repertorio de Bach y Falla.",
+      "title": "Concierto de música de cámara: Trío con piano",
+      "description": "Trío con piano interpreta obras de Beethoven y Schubert.",
       "performers": [{ "name": "Ensemble de Cámara de Madrid" }],
       "composers": [],
       "works": []
@@ -11,6 +15,9 @@
   },
   {
     "purpose": "composer-extraction",
+    "expected": {
+      "composers": ["Johann Sebastian Bach"]
+    },
     "observed": {
       "title": "Música para tecla",
       "programText": "Johann Sebastian Bach: Variaciones Goldberg, BWV 988",
@@ -21,6 +28,9 @@
   },
   {
     "purpose": "access-classification",
+    "expected": {
+      "classification": "free"
+    },
     "observed": {
       "title": "Concierto de otoño",
       "accessText": "Entrada libre hasta completar aforo.",
@@ -32,6 +42,9 @@
   {
     "purpose": "taxonomy",
     "requireFormats": true,
+    "expected": {
+      "formats": ["chamber"]
+    },
     "observed": {
       "title": "Cuarteto de cuerda",
       "programText": "Ludwig van Beethoven: Cuarteto de cuerda op. 59 n.º 1",

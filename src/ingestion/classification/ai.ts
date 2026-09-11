@@ -3,7 +3,7 @@ import { ACCESS_MODES, ERAS, EVENT_KINDS, FORMATS } from '../../lib/schemas/taxo
 import type { Era, EventKind, Format } from '../../lib/schemas/taxonomies.ts';
 import type { ObservedFacts } from '../observed.ts';
 import { ELIGIBILITIES, type Eligibility } from './golden-case.ts';
-import type { AiPressureKind, AiRateLimitSnapshot } from './ai-transport.ts';
+import type { AiPressureKind, AiRateLimitSnapshot, AiTransportErrorKind } from './ai-transport.ts';
 
 /**
  * Provider-agnostic AI classification. Implementations return a JSON-compatible
@@ -29,6 +29,9 @@ export type AiFailureKind =
   | 'rate-limit'
   | 'concurrency-pressure'
   | 'timeout'
+  | 'auth'
+  | 'unavailable'
+  | 'bad-request'
   | 'transport-error';
 
 export type AiTokenCounts = {
@@ -44,6 +47,8 @@ export type AiAttemptFailure = {
   routeId?: string;
   kind: AiFailureKind;
   status?: string;
+  code?: string;
+  retryable?: boolean;
   finishReason?: string;
   tokens?: AiTokenCounts;
   excerpt?: string;
@@ -240,6 +245,18 @@ export function failureKindForUnusable(kind: AiUnusableOutputKind): AiFailureKin
   if (kind === 'incomplete') return 'incomplete';
   if (kind === 'empty') return 'empty-output';
   return 'malformed-output';
+}
+
+export function failureKindForTransport(
+  kind: AiTransportErrorKind,
+  pressure?: AiPressureKind,
+): AiFailureKind {
+  if (kind === 'timeout') return 'timeout';
+  if (kind === 'auth') return 'auth';
+  if (kind === 'unavailable') return 'unavailable';
+  if (kind === 'bad-request') return 'bad-request';
+  if (kind === 'rate-limit') return pressure === 'concurrency' ? 'concurrency-pressure' : 'rate-limit';
+  return 'transport-error';
 }
 
 /** Truncate and strip obvious secrets. Never store API keys or huge blobs. */
@@ -440,13 +457,15 @@ export function parseAiComposerExtraction(raw: unknown): ParseAiComposerExtracti
 export function parseAiOutputForPurpose(
   purpose: AiCallPurpose,
   raw: unknown,
-): { ok: true } | { ok: false; ruleId: 'ai-malformed-output' | 'ai-invalid-output'; reason: string } {
+):
+  | { ok: true; value: AiClassificationResult | AiAccessResult | AiComposerExtractionResult }
+  | { ok: false; ruleId: 'ai-malformed-output' | 'ai-invalid-output'; reason: string } {
   const parsed = purpose === 'access-classification'
     ? parseAiAccess(raw)
     : purpose === 'composer-extraction'
       ? parseAiComposerExtraction(raw)
       : parseAiClassification(raw);
-  return parsed.ok ? { ok: true } : parsed;
+  return parsed;
 }
 
 /** Empty or omitted formats: valid JSON, but not a completed format assignment. */

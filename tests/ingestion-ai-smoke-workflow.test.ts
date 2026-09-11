@@ -3,12 +3,14 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const smokePath = path.join(import.meta.dirname, '..', '.github', 'workflows', 'ai-live-smoke.yml');
+const routeSmokePath = path.join(import.meta.dirname, '..', '.github', 'workflows', 'ai-smoke.yml');
 const ingestionPath = path.join(import.meta.dirname, '..', '.github', 'workflows', 'ingestion.yml');
 const ciPath = path.join(import.meta.dirname, '..', '.github', 'workflows', 'ci.yml');
 
 describe('workflow AI live smoke test', () => {
   it('sólo se lanza a mano, reutiliza secrets de ingestión y ejecuta ai:smoke:all', async () => {
     const yaml = await readFile(smokePath, 'utf8');
+    const routeYaml = await readFile(routeSmokePath, 'utf8');
     const ingestion = await readFile(ingestionPath, 'utf8');
     const ci = await readFile(ciPath, 'utf8');
 
@@ -22,6 +24,10 @@ describe('workflow AI live smoke test', () => {
 
     expect(yaml).toContain("AI_ZERO_COST_ONLY: 'true'");
     expect(yaml).toContain("AI_CACHE: 'off'");
+    expect(yaml).toContain('timeout-minutes: 15');
+    expect(yaml).not.toContain('AI_STATE_DIR');
+    expect(routeYaml).not.toContain('AI_STATE_DIR');
+    expect(routeYaml).not.toContain('mkdir -p');
     expect(yaml).toContain('npm run ai:smoke:all');
     expect(yaml).toContain('--all-purposes');
     expect(yaml).not.toContain('ingest:sync');
