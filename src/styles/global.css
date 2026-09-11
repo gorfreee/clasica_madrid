@@ -191,8 +191,10 @@ button, input, select { font: inherit; }
   border-left: 1px solid #44443f;
   border-radius: 0;
   background: transparent;
+  color: inherit;
   cursor: pointer;
-  font: inherit;
+  /* Do not set `font` here: the shorthand would override `.nav-link`
+     size/weight on the Más button. `button { font: inherit }` is enough. */
   user-select: none;
 }
 .nav-trigger--menu {

@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { INITIAL_AGENDA_OCCURRENCE_LIMIT } from '../src/lib/presentation/agenda.ts';
 import { FULL_AGENDA_FRAGMENT_PATH } from '../src/lib/presentation/urls.ts';
@@ -292,6 +292,13 @@ test.describe('navegación del encabezado', () => {
     await expect(more).toHaveAttribute('aria-expanded', 'false');
     await expect(more).not.toHaveAttribute('aria-current');
     await expect(nav.getByRole('button', { name: 'Menú de secciones' })).toHaveCount(0);
+    await page.evaluate(() => document.fonts.ready);
+    const navType = (locator: Locator) =>
+      locator.evaluate((el) => {
+        const style = getComputedStyle(el);
+        return { family: style.fontFamily, size: style.fontSize, weight: style.fontWeight };
+      });
+    expect(await navType(more)).toEqual(await navType(nav.getByRole('link', { name: 'Agenda' })));
 
     await more.click();
     await expect(more).toHaveAttribute('aria-expanded', 'true');
