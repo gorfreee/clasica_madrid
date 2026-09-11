@@ -1,25 +1,34 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { z } from 'zod';
+import { FORMATS } from '../lib/schemas/taxonomies.ts';
 import {
   AI_CALL_PURPOSES,
+  AI_CLASSIFY_TIMEOUT_MS,
   AiUnusableOutputError,
   parseAiOutputForPurpose,
-  type AiCallDiagnostics,
+  type AiAccessResult,
   type AiCallPurpose,
-  type AiClassifier,
-  type AiFailureKind,
+  type AiClassificationResult,
+  type AiComposerExtractionResult,
+  type AiTokenCounts,
 } from '../ingestion/classification/ai.ts';
+import { buildAiRequest } from '../ingestion/classification/ai-request.ts';
 import {
   inspectFreePoolFromEnv,
-  createAiClassifierFromEnv,
   type AiEnv,
   type AiFreeProvider,
   type FreePoolInspection,
   type FreeProviderInspectionStatus,
 } from '../ingestion/classification/provider.ts';
-import { AiTransportError, type AiRouteLimits } from '../ingestion/classification/ai-transport.ts';
-import { observedFactsSchema, type ObservedFacts } from '../ingestion/observed.ts';
+import {
+  AiTransportError,
+  type AiRateLimitSnapshot,
+  type AiRoute,
+  type AiRouteLimits,
+  type AiTransportResult,
+} from '../ingestion/classification/ai-transport.ts';
+import { observedFactsSchema } from '../ingestion/observed.ts';
 import { sanitizeErrorMessage } from '../ingestion/observability.ts';
 
 export const AI_SMOKE_USAGE = [
@@ -35,17 +44,59 @@ export const AI_SMOKE_PURPOSE_COLUMNS = {
   taxonomy: 'Taxonomy',
 } as const satisfies Record<AiCallPurpose, string>;
 
-const fixtureSchema = z.array(z.object({
-  purpose: z.enum(AI_CALL_PURPOSES),
-  requireFormats: z.boolean().optional(),
-  observed: observedFactsSchema,
-}).strict()).length(AI_CALL_PURPOSES.length);
+export const AI_SMOKE_STATUSES = [
+  'PASS',
+  'SEMANTIC_FAIL',
+  'SCHEMA_FAIL',
+  'INVALID_OUTPUT',
+  'RATE_LIMIT',
+  'DAILY_QUOTA',
+  'TIMEOUT',
+  'AUTH',
+  'MODEL_UNAVAILABLE',
+  'REQUEST_ERROR',
+  'TRANSPORT_ERROR',
+  'CONFIG_ERROR',
+  'BLOCKED',
+] as const;
+export type AiSmokeStatus = (typeof AI_SMOKE_STATUSES)[number];
 
-export type AiSmokeFixture = {
-  purpose: AiCallPurpose;
-  requireFormats?: boolean;
-  observed: ObservedFacts;
-};
+const fixtureSchema = z.discriminatedUnion('purpose', [
+  z.object({
+    purpose: z.literal('eligibility'),
+    observed: observedFactsSchema,
+    expected: z.object({
+      eligibility: z.literal('include'),
+      formats: z.array(z.enum(FORMATS)).min(1),
+    }).strict(),
+  }).strict(),
+  z.object({
+    purpose: z.literal('composer-extraction'),
+    observed: observedFactsSchema,
+    expected: z.object({ composers: z.array(z.string().trim().min(1)).min(1) }).strict(),
+  }).strict(),
+  z.object({
+    purpose: z.literal('access-classification'),
+    observed: observedFactsSchema,
+    expected: z.object({ classification: z.literal('free') }).strict(),
+  }).strict(),
+  z.object({
+    purpose: z.literal('taxonomy'),
+    requireFormats: z.boolean().optional(),
+    observed: observedFactsSchema,
+    expected: z.object({ formats: z.array(z.enum(FORMATS)).min(1) }).strict(),
+  }).strict(),
+]);
+
+const fixturesSchema = z.array(fixtureSchema).length(AI_CALL_PURPOSES.length).superRefine((fixtures, ctx) => {
+  for (const purpose of AI_CALL_PURPOSES) {
+    if (fixtures.filter((fixture) => fixture.purpose === purpose).length !== 1) {
+      ctx.addIssue({ code: 'custom', message: `Debe existir exactamente un fixture para ${purpose}` });
+    }
+  }
+});
+
+export type AiSmokeFixture = z.infer<typeof fixtureSchema>;
 
 export type AiSmokeArgs = {
   route?: string;
@@ -54,31 +105,7 @@ export type AiSmokeArgs = {
   purposes: readonly AiCallPurpose[];
 };
 
-export type AiSmokeRow = {
-  provider: string;
-  model: string;
-  route: string;
-  purpose: AiCallPurpose;
-  success: boolean;
-  schemaValid: boolean;
-  latencyMs: number;
-  tokens?: unknown;
-  status?: string;
-  pressure?: string;
-  rateLimit?: unknown;
-  error?: string;
-  failures?: unknown;
-  parseRuleId?: string;
-  parseReason?: string;
-  cause?: string;
-};
-
-export type AiSmokeRoute = {
-  routeId: string;
-  provider: string;
-  model: string;
-  limits?: AiRouteLimits;
-};
+export type AiSmokeRoute = AiRoute;
 
 export type AiSmokeProviderStatus = {
   provider: AiFreeProvider;
@@ -92,27 +119,41 @@ export type AiSmokeDiscovery = {
   providers: AiSmokeProviderStatus[];
 };
 
-export type AiSmokePurposeOutcome = 'PASS' | 'FAIL' | '-';
+export type AiSmokePurposeOutcome = AiSmokeStatus | '-';
 
 export type AiSmokePurposeResult = {
+  provider: string;
+  model: string;
+  routeId: string;
   purpose: AiCallPurpose;
-  outcome: AiSmokePurposeOutcome;
+  outcome: AiSmokeStatus;
   success: boolean;
   schemaValid: boolean;
+  semanticValid: boolean;
+  requestMade: boolean;
   latencyMs: number;
-  tokens?: AiCallDiagnostics['tokens'];
-  status?: string;
-  error?: string;
-  failures?: AiCallDiagnostics['failures'];
-  cause?: string;
+  httpStatus?: number;
+  providerStatus?: string;
+  providerErrorCode?: string;
+  finishReason?: string;
+  tokens?: AiTokenCounts;
+  rateLimit?: AiRateLimitSnapshot;
+  message?: string;
+  blockedBy?: AiSmokeStatus;
 };
+
+/** Compatibility alias for callers that consumed per-purpose rows. */
+export type AiSmokeRow = AiSmokePurposeResult;
 
 export type AiSmokeRouteResult = {
   routeId: string;
+  provider: string;
+  model: string;
   purposes: Record<AiCallPurpose, AiSmokePurposeOutcome>;
   purposeResults: AiSmokePurposeResult[];
   latencyMs: number;
-  result: 'PASS' | 'FAIL';
+  requests: number;
+  result: 'PASS' | 'PARTIAL' | 'FAIL';
   cause?: string;
 };
 
@@ -121,8 +162,11 @@ export type AiSmokeRunResult = {
   missingProviders: AiSmokeProviderStatus[];
   tested: number;
   passed: number;
+  partial: number;
   failed: number;
   missing: number;
+  requests: number;
+  durationMs: number;
   exitCode: 0 | 1;
   overall: 'PASS' | 'FAIL';
   purposes: AiCallPurpose[];
@@ -133,18 +177,23 @@ export type AiSmokeRunOptions = AiSmokeArgs & {
   env: AiEnv;
   fixtures: AiSmokeFixture[];
   discover?: (env: AiEnv) => AiSmokeDiscovery;
-  createClassifier?: (env: AiEnv) => AiClassifier | undefined;
   now?: () => number;
   sleep?: (ms: number) => Promise<void>;
   log?: (line: string) => void;
+  timeoutMs?: number;
+  /** Test-only override. Production CLI deliberately uses the conservative default. */
+  maxProviderConcurrency?: number;
 };
+
+const DEFAULT_PROVIDER_CONCURRENCY = 2;
+const BLOCKING_STATUSES = new Set<AiSmokeStatus>(['AUTH', 'MODEL_UNAVAILABLE', 'DAILY_QUOTA']);
 
 export async function loadAiSmokeFixtures(rootDir: string): Promise<AiSmokeFixture[]> {
   const raw = JSON.parse(await readFile(
     path.join(rootDir, 'tests/fixtures/ingestion/ai-smoke-cases.json'),
     'utf8',
   ));
-  return fixtureSchema.parse(raw);
+  return fixturesSchema.parse(raw);
 }
 
 export function parseAiSmokeArgs(argv: string[]): AiSmokeArgs | undefined {
@@ -189,105 +238,13 @@ export function splitRouteId(route: string): { provider: string; model: string }
   return { provider: route.slice(0, separator), model: route.slice(separator + 1) };
 }
 
+/** Retained for CLI/API compatibility; the direct smoke runner never creates a classifier. */
 export function smokeEnvForRoute(route: string, env: AiEnv = process.env): AiEnv {
-  return pinnedSmokeEnv(env, route);
-}
-
-export async function runAiRouteSmoke(options: {
-  route: string;
-  purposes: readonly AiCallPurpose[];
-  fixtures: AiSmokeFixture[];
-  classifier: AiClassifier;
-  now?: () => number;
-  env?: NodeJS.ProcessEnv;
-  manageLifecycle?: boolean;
-}): Promise<AiSmokeRow[]> {
-  const { provider, model } = splitRouteId(options.route);
-  const selected = options.fixtures.filter((fixture) => options.purposes.includes(fixture.purpose));
-  if (!selected.length) throw new Error(`Ningún fixture para ${options.purposes.join(', ')}`);
-  const rows: AiSmokeRow[] = [];
-  const now = options.now ?? (() => performance.now());
-  const manage = options.manageLifecycle !== false;
-  try {
-    if (manage) options.classifier.initialize?.();
-    for (const fixture of selected) {
-      const started = now();
-      try {
-        const value = await options.classifier.classify(fixture.observed, {
-          purpose: fixture.purpose,
-          requireFormats: fixture.requireFormats,
-        });
-        const parsed = parseAiOutputForPurpose(fixture.purpose, value);
-        const diagnostic = options.classifier.lastDiagnostics?.();
-        rows.push(smokeRow({
-          provider, model, route: options.route, purpose: fixture.purpose,
-          success: parsed.ok, schemaValid: parsed.ok, latencyMs: Math.round(now() - started),
-          classifier: options.classifier, env: options.env,
-          ...(!parsed.ok ? {
-            parseRuleId: parsed.ruleId,
-            parseReason: parsed.reason,
-            cause: compactSmokeFailureCause({ parsed, diagnostic, env: options.env }),
-          } : {}),
-        }));
-      } catch (error) {
-        const diagnostic = options.classifier.lastDiagnostics?.();
-        rows.push(smokeRow({
-          provider, model, route: options.route, purpose: fixture.purpose,
-          success: false, schemaValid: false, latencyMs: Math.round(now() - started),
-          classifier: options.classifier, env: options.env,
-          error: sanitizeErrorMessage(error instanceof Error ? error.message : String(error), options.env),
-          cause: compactSmokeFailureCause({ error, diagnostic, env: options.env }),
-        }));
-      }
-    }
-  } finally {
-    if (manage) options.classifier.close?.();
-  }
-  return rows;
-}
-
-function smokeRow(input: {
-  provider: string;
-  model: string;
-  route: string;
-  purpose: AiCallPurpose;
-  success: boolean;
-  schemaValid: boolean;
-  latencyMs: number;
-  classifier: AiClassifier;
-  env?: NodeJS.ProcessEnv;
-  error?: string;
-  parseRuleId?: string;
-  parseReason?: string;
-  cause?: string;
-}): AiSmokeRow {
-  const diagnostic = input.classifier.lastDiagnostics?.();
-  const failure = diagnostic?.failures?.at(-1);
-  return {
-    provider: diagnostic?.provider ?? input.provider,
-    model: diagnostic?.model ?? input.model,
-    route: diagnostic?.routeId ?? input.route,
-    purpose: input.purpose,
-    success: input.success,
-    schemaValid: input.schemaValid,
-    latencyMs: input.latencyMs,
-    tokens: diagnostic?.tokens,
-    status: diagnostic?.status,
-    pressure: failure?.pressure === 'concurrency' ? 'concurrency-pressure' : failure?.pressure,
-    rateLimit: failure?.rateLimit ?? undefined,
-    ...(input.error ? { error: input.error } : {}),
-    failures: diagnostic?.failures,
-    ...(input.parseRuleId ? { parseRuleId: input.parseRuleId, parseReason: input.parseReason } : {}),
-    ...(input.cause ? { cause: input.cause } : {}),
-  };
-}
-
-export function pinnedSmokeEnv(env: AiEnv, routeId: string): AiEnv {
   return {
     ...env,
     AI_PROVIDER: 'pool',
     AI_ZERO_COST_ONLY: 'true',
-    AI_ROUTE: routeId,
+    AI_ROUTE: route,
     AI_CACHE: 'off',
   };
 }
@@ -298,12 +255,8 @@ export function discoverAiSmokeTargets(env: AiEnv): AiSmokeDiscovery {
 
 export function discoveryFromInspection(inspection: FreePoolInspection): AiSmokeDiscovery {
   return {
-    routes: inspection.routes.map((route) => ({
-      routeId: route.routeId,
-      provider: route.provider,
-      model: route.model,
-      limits: route.limits,
-    })),
+    // Keep the real route objects: they contain the exact production transports and limits.
+    routes: [...inspection.routes],
     providers: inspection.providers.map((item) => ({
       provider: item.provider,
       status: item.status,
@@ -313,33 +266,23 @@ export function discoveryFromInspection(inspection: FreePoolInspection): AiSmoke
   };
 }
 
+/** Minimum interval for repeated requests to one route/model. */
 export function smokePaceIntervalMs(limits?: AiRouteLimits): number {
   const rpm = limits?.rpm;
   const fromRpm = rpm !== undefined && rpm > 0 ? Math.ceil(60_000 / rpm) : 0;
-  return Math.max(limits?.minIntervalMs ?? 0, limits?.providerMinIntervalMs ?? 0, fromRpm);
+  return Math.max(limits?.minIntervalMs ?? 0, fromRpm);
 }
 
-export function compactSmokeFailureCause(input: {
-  error?: unknown;
-  diagnostic?: AiCallDiagnostics;
-  parsed?: { ok: false; ruleId: string; reason?: string };
-  env?: AiEnv;
-}): string {
-  const env = input.env ?? {};
-  if (input.error instanceof AiTransportError) return causeFromTransport(input.error);
-  if (input.error instanceof AiUnusableOutputError) return causeFromUnusable(input.error);
-  const failure = input.diagnostic?.failures?.at(-1);
-  if (failure) return causeFromFailure(failure);
-  if (input.parsed) return causeFromParseRule(input.parsed.ruleId, input.parsed.reason);
-  const status = input.diagnostic?.status;
-  if (status) return causeFromStatus(status);
-  if (input.error instanceof Error && input.error.message.trim()) {
-    return sanitizeErrorMessage(input.error.message, env as NodeJS.ProcessEnv);
-  }
-  if (typeof input.error === 'string' && input.error.trim()) {
-    return sanitizeErrorMessage(input.error, env as NodeJS.ProcessEnv);
-  }
-  return 'unknown error';
+/** Conservative provider worker count, capped even when production allows larger bursts. */
+export function smokeProviderConcurrency(
+  routes: readonly AiSmokeRoute[],
+  maxConcurrency = DEFAULT_PROVIDER_CONCURRENCY,
+): number {
+  const declared = routes
+    .map((route) => route.limits?.providerMaxConcurrent)
+    .filter((value): value is number => value !== undefined && value > 0);
+  const providerLimit = declared.length ? Math.min(...declared) : maxConcurrency;
+  return Math.max(1, Math.min(maxConcurrency, providerLimit, routes.length || 1));
 }
 
 export async function runAiSmoke(options: AiSmokeRunOptions): Promise<AiSmokeRunResult> {
@@ -348,48 +291,71 @@ export async function runAiSmoke(options: AiSmokeRunOptions): Promise<AiSmokeRun
   const purposes = purposesToSmoke(options);
   const fixtures = fixturesForPurposes(options.fixtures, purposes);
   const discover = options.discover ?? discoverAiSmokeTargets;
-  const createClassifier = options.createClassifier ?? createAiClassifierFromEnv;
   const now = options.now ?? Date.now;
   const sleep = options.sleep ?? defaultSleep;
+  const timeoutMs = options.timeoutMs ?? AI_CLASSIFY_TIMEOUT_MS;
+  const started = now();
 
   const discovery = discover(env);
   const missingProviders = discovery.providers.filter((item) => item.status !== 'ready');
   const selected = selectRoutes(discovery, options);
-  const lastStartByProvider = new Map<string, number>();
-  const routes: AiSmokeRouteResult[] = [];
+  const routes = new Array<AiSmokeRouteResult>(selected.length);
+  const groups = new Map<string, Array<{ index: number; route: AiSmokeRoute }>>();
 
-  for (const target of selected) {
+  selected.forEach((target, index) => {
     if (target.kind === 'missing') {
-      routes.push(failedRoute(target.routeId, purposes, target.reason, env));
-      continue;
+      routes[index] = failedRoute(target.routeId, purposes, target.reason, env);
+      return;
     }
-    routes.push(await smokeOneRoute({
-      route: target.route,
-      purposes,
-      fixtures,
-      env,
-      createClassifier,
-      now,
-      sleep,
-      lastStartByProvider,
-      failFast: options.allRoutes,
-      log,
-    }));
-  }
+    const group = groups.get(target.route.provider) ?? [];
+    group.push({ index, route: target.route });
+    groups.set(target.route.provider, group);
+  });
+
+  await Promise.all([...groups.values()].map(async (group) => {
+    const providerRoutes = group.map((item) => item.route);
+    const concurrency = smokeProviderConcurrency(
+      providerRoutes,
+      options.maxProviderConcurrency ?? DEFAULT_PROVIDER_CONCURRENCY,
+    );
+    const providerMinIntervalMs = Math.max(
+      0,
+      ...providerRoutes.map((route) => route.limits?.providerMinIntervalMs ?? 0),
+    );
+    const pacer = new ProviderPacer(now, sleep, providerMinIntervalMs);
+    await mapWithConcurrency(group, concurrency, async (item) => {
+      routes[item.index] = await smokeOneRoute({
+        route: item.route,
+        purposes,
+        fixtures,
+        env,
+        now,
+        timeoutMs,
+        pacer,
+        log,
+      });
+    });
+  }));
 
   const tested = routes.length;
   const passed = routes.filter((route) => route.result === 'PASS').length;
+  const partial = routes.filter((route) => route.result === 'PARTIAL').length;
   const failed = routes.filter((route) => route.result === 'FAIL').length;
-  const missing = missingProviders.length;
-  const overall: 'PASS' | 'FAIL' = failed === 0 && (!options.allRoutes || missing === 0) ? 'PASS' : 'FAIL';
+  const missing = options.allRoutes ? missingProviders.length : 0;
+  const requests = routes.reduce((sum, route) => sum + route.requests, 0);
+  const durationMs = Math.max(0, Math.round(now() - started));
+  const overall: 'PASS' | 'FAIL' = partial === 0 && failed === 0 && missing === 0 ? 'PASS' : 'FAIL';
   const report = formatAiSmokeReport({
     routes,
     missingProviders: options.allRoutes ? missingProviders : [],
     purposes,
     tested,
     passed,
+    partial,
     failed,
-    missing: options.allRoutes ? missing : 0,
+    missing,
+    requests,
+    durationMs,
     overall,
   });
   log(sanitizeErrorMessage(report, env as NodeJS.ProcessEnv));
@@ -398,13 +364,40 @@ export async function runAiSmoke(options: AiSmokeRunOptions): Promise<AiSmokeRun
     missingProviders: options.allRoutes ? missingProviders : [],
     tested,
     passed,
+    partial,
     failed,
-    missing: options.allRoutes ? missing : 0,
+    missing,
+    requests,
+    durationMs,
     exitCode: overall === 'PASS' ? 0 : 1,
     overall,
     purposes,
     report,
   };
+}
+
+export async function runAiRouteSmoke(options: {
+  route: AiSmokeRoute;
+  purposes: readonly AiCallPurpose[];
+  fixtures: AiSmokeFixture[];
+  env?: AiEnv;
+  now?: () => number;
+  sleep?: (ms: number) => Promise<void>;
+  timeoutMs?: number;
+}): Promise<AiSmokePurposeResult[]> {
+  const now = options.now ?? Date.now;
+  const selected = fixturesForPurposes(options.fixtures, [...options.purposes]);
+  const result = await smokeOneRoute({
+    route: options.route,
+    purposes: [...options.purposes],
+    fixtures: selected,
+    env: options.env ?? {},
+    now,
+    timeoutMs: options.timeoutMs ?? AI_CLASSIFY_TIMEOUT_MS,
+    pacer: new ProviderPacer(now, options.sleep ?? defaultSleep, options.route.limits?.providerMinIntervalMs ?? 0),
+    log: () => {},
+  });
+  return result.purposeResults;
 }
 
 export function formatAiSmokeReport(input: {
@@ -413,11 +406,14 @@ export function formatAiSmokeReport(input: {
   purposes: AiCallPurpose[];
   tested: number;
   passed: number;
+  partial: number;
   failed: number;
   missing: number;
+  requests: number;
+  durationMs: number;
   overall: 'PASS' | 'FAIL';
 }): string {
-  const lines = ['AI LIVE SMOKE TEST', '', formatAiSmokeTable(input.routes, input.purposes)];
+  const lines = ['AI LIVE SMOKE TEST — DIRECT ONE-SHOT', '', formatAiSmokeTable(input.routes, input.purposes)];
   if (input.missingProviders.length) {
     lines.push('', 'Unconfigured providers:');
     const width = Math.max(8, ...input.missingProviders.map((item) => item.provider.length));
@@ -425,20 +421,21 @@ export function formatAiSmokeReport(input: {
       lines.push(`  ${item.provider.padEnd(width)}  ${item.reason ?? item.status}`);
     }
   }
-  const failedRoutes = input.routes.filter((route) => route.result === 'FAIL');
-  if (failedRoutes.length) {
-    lines.push('', 'Failures:');
-    for (const route of failedRoutes) {
-      lines.push(`  ${route.routeId}`);
-      lines.push(`  FAIL — ${route.cause ?? 'unknown error'}`);
-    }
+
+  const failures = input.routes.flatMap((route) => route.purposeResults.filter((item) => item.outcome !== 'PASS'));
+  if (failures.length) {
+    lines.push('', 'Failure details:');
+    for (const failure of failures) lines.push(`  ${formatFailure(failure)}`);
   }
+
   lines.push(
     '',
-    `Routes tested: ${input.tested}`,
-    `Passed: ${input.passed}`,
-    `Failed: ${input.failed}`,
+    `Routes fully PASS: ${input.passed}`,
+    `Routes partially PASS: ${input.partial}`,
+    `Routes FAIL: ${input.failed}`,
     `Missing/unconfigured providers: ${input.missing}`,
+    `HTTP requests performed: ${input.requests}`,
+    `Total duration: ${formatLatency(input.durationMs)}`,
     '',
     `RESULT: ${input.overall}`,
   );
@@ -479,29 +476,15 @@ function selectRoutes(
   discovery: AiSmokeDiscovery,
   args: AiSmokeArgs,
 ): Array<{ kind: 'route'; route: AiSmokeRoute } | { kind: 'missing'; routeId: string; reason: string }> {
-  if (!args.route) {
-    return discovery.routes.map((route) => ({ kind: 'route', route }));
-  }
+  if (!args.route) return discovery.routes.map((route) => ({ kind: 'route', route }));
   const existing = discovery.routes.find((route) => route.routeId === args.route);
   if (existing) return [{ kind: 'route', route: existing }];
-  const separator = args.route.indexOf(':');
-  const provider = args.route.slice(0, separator).toLowerCase();
-  const inspection = discovery.providers.find((item) => item.provider === provider);
-  if (inspection && inspection.status !== 'ready') {
-    return [{
-      kind: 'missing',
-      routeId: args.route,
-      reason: inspection.reason ?? `proveedor ${provider} no disponible`,
-    }];
-  }
-  return [{
-    kind: 'route',
-    route: {
-      routeId: args.route,
-      provider,
-      model: args.route.slice(separator + 1),
-    },
-  }];
+  const { provider } = splitRouteId(args.route);
+  const inspection = discovery.providers.find((item) => item.provider === provider.toLowerCase());
+  const reason = inspection && inspection.status !== 'ready'
+    ? inspection.reason ?? `proveedor ${provider} no disponible`
+    : 'route no configurada en el pool de producción';
+  return [{ kind: 'missing', routeId: args.route, reason }];
 }
 
 async function smokeOneRoute(input: {
@@ -509,134 +492,292 @@ async function smokeOneRoute(input: {
   purposes: AiCallPurpose[];
   fixtures: AiSmokeFixture[];
   env: AiEnv;
-  createClassifier: (env: AiEnv) => AiClassifier | undefined;
   now: () => number;
-  sleep: (ms: number) => Promise<void>;
-  lastStartByProvider: Map<string, number>;
-  failFast: boolean;
+  timeoutMs: number;
+  pacer: ProviderPacer;
   log: (line: string) => void;
 }): Promise<AiSmokeRouteResult> {
-  const purposes = blankPurposeMap(input.purposes);
   const purposeResults: AiSmokePurposeResult[] = [];
-  const pinned = pinnedSmokeEnv(input.env, input.route.routeId);
-  let classifier: AiClassifier | undefined;
-  try {
-    classifier = input.createClassifier(pinned);
-  } catch (error) {
-    const cause = compactSmokeFailureCause({ error, env: pinned });
-    const result = failedRoute(input.route.routeId, input.purposes, cause, pinned);
-    logJson(input.log, {
-      route: input.route.routeId,
-      success: false,
-      schemaValid: false,
-      error: cause,
-      cause,
-    }, pinned);
-    return result;
-  }
-  if (!classifier) {
-    const cause = `No se pudo configurar ${input.route.routeId}`;
-    logJson(input.log, {
-      route: input.route.routeId,
-      success: false,
-      schemaValid: false,
-      error: cause,
-      cause,
-    }, pinned);
-    return failedRoute(input.route.routeId, input.purposes, cause, pinned);
-  }
+  let blockedBy: AiSmokePurposeResult | undefined;
 
-  let failed = false;
-  let skipped = false;
-  try {
-    classifier.initialize?.();
-    for (const fixture of input.fixtures) {
-      if (skipped) {
-        purposes[fixture.purpose] = '-';
-        purposeResults.push(skippedPurpose(fixture.purpose));
-        continue;
-      }
-      await pace(input.route, input.now, input.sleep, input.lastStartByProvider);
-      input.lastStartByProvider.set(input.route.provider, input.now());
-      const [row] = await runAiRouteSmoke({
-        route: input.route.routeId,
-        purposes: [fixture.purpose],
-        fixtures: [fixture],
-        classifier,
-        env: pinned as NodeJS.ProcessEnv,
-        manageLifecycle: false,
+  for (const fixture of input.fixtures) {
+    let result: AiSmokePurposeResult;
+    if (blockedBy) {
+      result = blockedPurpose(input.route, fixture.purpose, blockedBy);
+    } else {
+      await input.pacer.wait(input.route);
+      result = await directOneShot({
+        route: input.route,
+        fixture,
+        env: input.env,
+        now: input.now,
+        timeoutMs: input.timeoutMs,
       });
-      const purposeResult = purposeResultFromRow(row!, pinned);
-      purposeResults.push(purposeResult);
-      purposes[fixture.purpose] = purposeResult.outcome;
-      logJson(input.log, {
-        ...row,
-        cause: purposeResult.cause,
-      }, pinned);
-      if (purposeResult.outcome === 'FAIL') {
-        failed = true;
-        if (input.failFast) skipped = true;
-      }
+      if (BLOCKING_STATUSES.has(result.outcome)) blockedBy = result;
     }
-  } finally {
-    classifier.close?.();
+    purposeResults.push(result);
+    logJson(input.log, result, input.env);
   }
 
-  const attempted = purposeResults.filter((item) => item.outcome !== '-');
-  const cause = attempted.find((item) => item.outcome === 'FAIL')?.cause;
+  const passed = purposeResults.filter((item) => item.outcome === 'PASS').length;
+  const result = passed === purposeResults.length ? 'PASS' : passed > 0 ? 'PARTIAL' : 'FAIL';
   return {
     routeId: input.route.routeId,
-    purposes: fillPurposeMap(input.purposes, purposes),
+    provider: input.route.provider,
+    model: input.route.model,
+    purposes: fillPurposeMap(input.purposes, Object.fromEntries(
+      purposeResults.map((item) => [item.purpose, item.outcome]),
+    ) as Partial<Record<AiCallPurpose, AiSmokePurposeOutcome>>),
     purposeResults,
-    latencyMs: attempted.reduce((sum, item) => sum + item.latencyMs, 0),
-    result: failed ? 'FAIL' : 'PASS',
-    cause,
+    latencyMs: purposeResults.reduce((sum, item) => sum + item.latencyMs, 0),
+    requests: purposeResults.filter((item) => item.requestMade).length,
+    result,
+    cause: purposeResults.find((item) => item.outcome !== 'PASS')?.message,
   };
 }
 
-function purposeResultFromRow(row: AiSmokeRow, env: AiEnv): AiSmokePurposeResult {
-  const diagnostic: AiCallDiagnostics = {
-    status: row.status,
-    failures: row.failures as AiCallDiagnostics['failures'],
-  };
-  const cause = row.success
-    ? undefined
-    : row.pressure === 'concurrency-pressure' || row.pressure === 'concurrency'
-      ? causeFromStatus(row.status ?? 429, 'concurrency pressure')
-      : row.cause ?? compactSmokeFailureCause({
-        error: row.error,
-        diagnostic,
-        parsed: row.parseRuleId
-          ? { ok: false, ruleId: row.parseRuleId, reason: row.parseReason }
-          : undefined,
-        env,
-      });
-  return {
-    purpose: row.purpose,
-    outcome: row.success ? 'PASS' : 'FAIL',
-    success: row.success,
-    schemaValid: row.schemaValid,
-    latencyMs: row.latencyMs,
-    tokens: row.tokens as AiCallDiagnostics['tokens'],
-    status: row.status,
-    error: row.error,
-    failures: diagnostic.failures,
-    cause,
-  };
+async function directOneShot(input: {
+  route: AiSmokeRoute;
+  fixture: AiSmokeFixture;
+  env: AiEnv;
+  now: () => number;
+  timeoutMs: number;
+}): Promise<AiSmokePurposeResult> {
+  const started = input.now();
+  const request = buildAiRequest(input.fixture.observed, input.fixture.purpose);
+  const controller = new AbortController();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    const result = await Promise.race([
+      input.route.transport.request({
+        model: input.route.model,
+        request,
+        signal: controller.signal,
+        timeoutMs: input.timeoutMs,
+      }),
+      new Promise<never>((_resolve, reject) => {
+        timer = setTimeout(() => {
+          controller.abort();
+          reject(new AiTransportError(`timeout after ${input.timeoutMs}ms`, { kind: 'timeout' }));
+        }, input.timeoutMs);
+      }),
+    ]);
+    return resultFromTransport(input.route, input.fixture, result, elapsed(input.now, started));
+  } catch (error) {
+    return resultFromError(input.route, input.fixture.purpose, error, input.env, elapsed(input.now, started));
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
 }
 
-async function pace(
+function resultFromTransport(
   route: AiSmokeRoute,
-  now: () => number,
-  sleep: (ms: number) => Promise<void>,
-  lastStartByProvider: Map<string, number>,
+  fixture: AiSmokeFixture,
+  transport: AiTransportResult,
+  latencyMs: number,
+): AiSmokePurposeResult {
+  const parsed = parseAiOutputForPurpose(fixture.purpose, transport.value);
+  if (!parsed.ok) {
+    const outcome: AiSmokeStatus = parsed.ruleId === 'ai-invalid-output' ? 'SCHEMA_FAIL' : 'INVALID_OUTPUT';
+    return basePurposeResult(route, fixture.purpose, outcome, latencyMs, {
+      schemaValid: false,
+      providerStatus: transport.status,
+      finishReason: transport.finishReason,
+      tokens: transport.tokens,
+      rateLimit: transport.rateLimit,
+      message: parsed.reason,
+    });
+  }
+  const semantic = assertSemanticResult(fixture, parsed.value);
+  return basePurposeResult(route, fixture.purpose, semantic.ok ? 'PASS' : 'SEMANTIC_FAIL', latencyMs, {
+    schemaValid: true,
+    semanticValid: semantic.ok,
+    providerStatus: transport.status,
+    finishReason: transport.finishReason,
+    tokens: transport.tokens,
+    rateLimit: transport.rateLimit,
+    message: semantic.ok ? undefined : semantic.message,
+  });
+}
+
+function resultFromError(
+  route: AiSmokeRoute,
+  purpose: AiCallPurpose,
+  error: unknown,
+  env: AiEnv,
+  latencyMs: number,
+): AiSmokePurposeResult {
+  const message = safeErrorMessage(route, error, env);
+  if (error instanceof AiTransportError) {
+    const providerErrorCode = extractProviderErrorCode(message);
+    const outcome: AiSmokeStatus = error.kind === 'rate-limit'
+      ? error.quotaExhausted ? 'DAILY_QUOTA' : 'RATE_LIMIT'
+      : error.kind === 'timeout' ? 'TIMEOUT'
+        : error.kind === 'auth' ? 'AUTH'
+          : error.kind === 'unavailable'
+            ? isClearlyUnavailable(error, message, providerErrorCode) ? 'MODEL_UNAVAILABLE' : 'REQUEST_ERROR'
+            : 'TRANSPORT_ERROR';
+    return basePurposeResult(route, purpose, outcome, latencyMs, {
+      schemaValid: false,
+      httpStatus: error.status,
+      providerErrorCode,
+      rateLimit: error.rateLimit,
+      message,
+    });
+  }
+  if (error instanceof AiUnusableOutputError) {
+    return basePurposeResult(
+      route,
+      purpose,
+      error.kind === 'invalid' ? 'SCHEMA_FAIL' : 'INVALID_OUTPUT',
+      latencyMs,
+      {
+        schemaValid: false,
+        providerStatus: error.status,
+        providerErrorCode: extractProviderErrorCode(message),
+        finishReason: error.finishReason,
+        tokens: error.tokens,
+        message,
+      },
+    );
+  }
+  return basePurposeResult(route, purpose, 'TRANSPORT_ERROR', latencyMs, {
+    schemaValid: false,
+    providerErrorCode: extractProviderErrorCode(message),
+    message,
+  });
+}
+
+function isClearlyUnavailable(
+  error: AiTransportError,
+  message: string,
+  providerErrorCode: string | undefined,
+): boolean {
+  // Compatible transports also use `unavailable` for generic 400/422 request
+  // incompatibilities. Those can be purpose-specific and must not fail-fast.
+  if (error.status !== 400 && error.status !== 422) return true;
+  if (providerErrorCode && /model.*(?:not.?found|unavailable|invalid)/i.test(providerErrorCode)) return true;
+  return /\bmodel\b[^\n]{0,80}\b(?:not found|does not exist|unavailable|unknown)\b/i.test(message);
+}
+
+function basePurposeResult(
+  route: AiSmokeRoute,
+  purpose: AiCallPurpose,
+  outcome: AiSmokeStatus,
+  latencyMs: number,
+  extra: Partial<AiSmokePurposeResult>,
+): AiSmokePurposeResult {
+  return {
+    provider: route.provider,
+    model: route.model,
+    routeId: route.routeId,
+    purpose,
+    outcome,
+    success: outcome === 'PASS',
+    schemaValid: false,
+    semanticValid: false,
+    requestMade: true,
+    latencyMs,
+    ...withoutUndefined(extra),
+  };
+}
+
+function blockedPurpose(
+  route: AiSmokeRoute,
+  purpose: AiCallPurpose,
+  blocker: AiSmokePurposeResult,
+): AiSmokePurposeResult {
+  return {
+    provider: route.provider,
+    model: route.model,
+    routeId: route.routeId,
+    purpose,
+    outcome: 'BLOCKED',
+    success: false,
+    schemaValid: false,
+    semanticValid: false,
+    requestMade: false,
+    latencyMs: 0,
+    blockedBy: blocker.outcome,
+    message: `blocked after ${blocker.purpose}: ${blocker.outcome}${blocker.message ? ` — ${blocker.message}` : ''}`,
+  };
+}
+
+function assertSemanticResult(
+  fixture: AiSmokeFixture,
+  parsed: AiClassificationResult | AiAccessResult | AiComposerExtractionResult,
+): { ok: true } | { ok: false; message: string } {
+  if (fixture.purpose === 'composer-extraction') {
+    const actual = (parsed as AiComposerExtractionResult).candidates.map((candidate) => normalizeName(candidate.name));
+    const missing = fixture.expected.composers.filter((name) => !actual.includes(normalizeName(name)));
+    return missing.length
+      ? { ok: false, message: `expected composers [${fixture.expected.composers.join(', ')}]; missing [${missing.join(', ')}]` }
+      : { ok: true };
+  }
+  if (fixture.purpose === 'access-classification') {
+    const actual = (parsed as AiAccessResult).classification;
+    return actual === fixture.expected.classification
+      ? { ok: true }
+      : { ok: false, message: `expected classification=${fixture.expected.classification}; received ${actual}` };
+  }
+  const actual = parsed as AiClassificationResult;
+  if (fixture.purpose === 'eligibility' && actual.eligibility !== fixture.expected.eligibility) {
+    return { ok: false, message: `expected eligibility=${fixture.expected.eligibility}; received ${actual.eligibility}` };
+  }
+  const expectedFormats = fixture.expected.formats;
+  const actualFormats = actual.formats ?? [];
+  const missing = expectedFormats.filter((format) => !actualFormats.includes(format));
+  return missing.length
+    ? { ok: false, message: `expected formats to include [${expectedFormats.join(', ')}]; received [${actualFormats.join(', ')}]` }
+    : { ok: true };
+}
+
+function normalizeName(value: string): string {
+  return value.normalize('NFKD').replace(/\p{Diacritic}/gu, '').replace(/\s+/g, ' ').trim().toLowerCase();
+}
+
+class ProviderPacer {
+  private tail: Promise<void> = Promise.resolve();
+  private providerLastStart?: number;
+  private readonly routeLastStart = new Map<string, number>();
+
+  constructor(
+    private readonly now: () => number,
+    private readonly sleep: (ms: number) => Promise<void>,
+    private readonly providerMinIntervalMs: number,
+  ) {}
+
+  async wait(route: AiSmokeRoute): Promise<void> {
+    const turn = this.tail.then(async () => {
+      const current = this.now();
+      const routeReady = (this.routeLastStart.get(route.routeId) ?? Number.NEGATIVE_INFINITY)
+        + smokePaceIntervalMs(route.limits);
+      const providerReady = (this.providerLastStart ?? Number.NEGATIVE_INFINITY)
+        + this.providerMinIntervalMs;
+      const waitMs = Math.max(0, routeReady, providerReady) - current;
+      if (waitMs > 0) await this.sleep(waitMs);
+      const started = this.now();
+      this.routeLastStart.set(route.routeId, started);
+      this.providerLastStart = started;
+    });
+    this.tail = turn.catch(() => {});
+    await turn;
+  }
+}
+
+async function mapWithConcurrency<T>(
+  items: readonly T[],
+  concurrency: number,
+  worker: (item: T) => Promise<void>,
 ): Promise<void> {
-  const interval = smokePaceIntervalMs(route.limits);
-  if (interval <= 0) return;
-  const last = lastStartByProvider.get(route.provider);
-  if (last === undefined) return;
-  const wait = last + interval - now();
-  if (wait > 0) await sleep(wait);
+  let cursor = 0;
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+    while (cursor < items.length) {
+      const index = cursor;
+      cursor += 1;
+      await worker(items[index]!);
+    }
+  }));
 }
 
 function fixturesForPurposes(fixtures: AiSmokeFixture[], purposes: AiCallPurpose[]): AiSmokeFixture[] {
@@ -654,45 +795,47 @@ function failedRoute(
   cause: string,
   env: AiEnv,
 ): AiSmokeRouteResult {
+  const { provider, model } = splitRouteId(routeId);
   const safe = sanitizeErrorMessage(cause, env as NodeJS.ProcessEnv);
-  const purposeResults = purposes.map((purpose, index) => (
-    index === 0
-      ? {
-        purpose,
-        outcome: 'FAIL' as const,
-        success: false,
-        schemaValid: false,
-        latencyMs: 0,
-        cause: safe,
-      }
-      : skippedPurpose(purpose)
-  ));
+  const route = missingRoute(routeId);
+  const first = basePurposeResult(
+    route,
+    purposes[0]!,
+    'CONFIG_ERROR',
+    0,
+    { schemaValid: false, requestMade: false, message: safe },
+  );
+  const purposeResults = [
+    first,
+    ...purposes.slice(1).map((purpose) => blockedPurpose(route, purpose, first)),
+  ];
   return {
     routeId,
+    provider,
+    model,
     purposes: fillPurposeMap(purposes, Object.fromEntries(
       purposeResults.map((item) => [item.purpose, item.outcome]),
-    ) as Record<AiCallPurpose, AiSmokePurposeOutcome>),
+    ) as Partial<Record<AiCallPurpose, AiSmokePurposeOutcome>>),
     purposeResults,
     latencyMs: 0,
+    requests: 0,
     result: 'FAIL',
     cause: safe,
   };
 }
 
-function skippedPurpose(purpose: AiCallPurpose): AiSmokePurposeResult {
+function missingRoute(routeId: string): AiSmokeRoute {
+  const { provider, model } = splitRouteId(routeId);
   return {
-    purpose,
-    outcome: '-',
-    success: false,
-    schemaValid: false,
-    latencyMs: 0,
+    provider,
+    model,
+    routeId,
+    transport: {
+      provider,
+      request: async () => { throw new Error('unreachable'); },
+      cacheIdentity: () => 'unreachable',
+    },
   };
-}
-
-function blankPurposeMap(purposes: AiCallPurpose[]): Partial<Record<AiCallPurpose, AiSmokePurposeOutcome>> {
-  const out: Partial<Record<AiCallPurpose, AiSmokePurposeOutcome>> = {};
-  for (const purpose of purposes) out[purpose] = '-';
-  return out;
 }
 
 function fillPurposeMap(
@@ -706,13 +849,38 @@ function fillPurposeMap(
   return out;
 }
 
-function logJson(log: (line: string) => void, value: Record<string, unknown>, env: AiEnv): void {
-  const payload: Record<string, unknown> = {};
-  for (const [key, item] of Object.entries(value)) {
-    if (item === undefined) continue;
-    payload[key] = item;
-  }
-  log(sanitizeErrorMessage(JSON.stringify(payload), env as NodeJS.ProcessEnv));
+function safeErrorMessage(route: AiSmokeRoute, error: unknown, env: AiEnv): string {
+  const raw = error instanceof Error ? error.message : String(error);
+  const redacted = route.transport.redact?.(raw) ?? raw;
+  return sanitizeErrorMessage(redacted, env as NodeJS.ProcessEnv).replace(/\s+/g, ' ').trim().slice(0, 500)
+    || 'unknown transport error';
+}
+
+export function extractProviderErrorCode(message: string): string | undefined {
+  const json = /["'](?:code|type)["']\s*:\s*(?:["']([^"']+)["']|(\d+))/i.exec(message);
+  if (json) return json[1] ?? json[2];
+  const known = /\b(json_validate_failed|model_not_found|invalid_api_key|insufficient_quota)\b/i.exec(message);
+  return known?.[1];
+}
+
+function formatFailure(result: AiSmokePurposeResult): string {
+  const details = [
+    `${result.routeId} / ${result.purpose}: ${result.outcome}`,
+    result.httpStatus !== undefined ? `HTTP ${result.httpStatus}` : undefined,
+    result.providerErrorCode ? `code ${result.providerErrorCode}` : undefined,
+    result.providerStatus ? `provider status ${result.providerStatus}` : undefined,
+    formatLatency(result.latencyMs),
+    result.message,
+  ].filter((value): value is string => Boolean(value));
+  return details.join(' | ');
+}
+
+function logJson(log: (line: string) => void, value: AiSmokePurposeResult, env: AiEnv): void {
+  log(sanitizeErrorMessage(JSON.stringify(withoutUndefined(value)), env as NodeJS.ProcessEnv));
+}
+
+function withoutUndefined<T extends object>(value: T): T {
+  return Object.fromEntries(Object.entries(value).filter(([, item]) => item !== undefined)) as T;
 }
 
 function cellFor(outcome: AiSmokePurposeOutcome | undefined): string {
@@ -720,68 +888,12 @@ function cellFor(outcome: AiSmokePurposeOutcome | undefined): string {
 }
 
 function formatLatency(ms: number): string {
+  if (ms >= 1_000) return `${(ms / 1_000).toFixed(1)} s`;
   return `${ms} ms`;
 }
 
-function causeFromTransport(error: AiTransportError): string {
-  if (error.kind === 'rate-limit') {
-    if (error.pressure === 'concurrency') return causeFromStatus(error.status ?? 429, 'concurrency pressure');
-    return error.quotaExhausted ? 'quota exhausted' : causeFromStatus(error.status ?? 429, 'rate limit');
-  }
-  if (error.kind === 'timeout') return 'timeout';
-  if (error.kind === 'auth') {
-    return causeFromStatus(error.status, 'authentication or model access');
-  }
-  if (error.kind === 'unavailable') {
-    return causeFromStatus(error.status, 'model unavailable');
-  }
-  return error.status === undefined ? 'transport error' : causeFromStatus(error.status, 'transport error');
-}
-
-function causeFromUnusable(error: AiUnusableOutputError): string {
-  if (error.kind === 'invalid') return 'schema validation failed';
-  if (error.kind === 'malformed') return 'malformed JSON';
-  if (error.kind === 'empty') return 'empty response';
-  return 'incomplete output';
-}
-
-function causeFromFailure(failure: NonNullable<AiCallDiagnostics['failures']>[number]): string {
-  if (failure.pressure === 'concurrency' || failure.kind === 'concurrency-pressure') {
-    return causeFromStatus(failure.status ?? 429, 'concurrency pressure');
-  }
-  const status = failure.status !== undefined ? Number(failure.status) : undefined;
-  const numeric = status !== undefined && Number.isFinite(status) ? status : undefined;
-  return causeFromKind(failure.kind, numeric ?? failure.status);
-}
-
-function causeFromKind(kind: AiFailureKind, status?: number | string): string {
-  if (kind === 'rate-limit') return causeFromStatus(status ?? 429, 'rate limit');
-  if (kind === 'concurrency-pressure') return causeFromStatus(status ?? 429, 'concurrency pressure');
-  if (kind === 'timeout') return 'timeout';
-  if (kind === 'empty-output') return 'empty response';
-  if (kind === 'malformed-output') return 'malformed JSON';
-  if (kind === 'invalid-output') return 'schema validation failed';
-  if (kind === 'incomplete') return 'incomplete output';
-  return causeFromStatus(status, 'transport error');
-}
-
-function causeFromParseRule(ruleId: string, reason?: string): string {
-  if (reason && /vacía|empty/i.test(reason)) return 'empty response';
-  return ruleId === 'ai-invalid-output' ? 'schema validation failed' : 'malformed JSON';
-}
-
-function causeFromStatus(status: number | string | undefined, fallback?: string): string {
-  const code = typeof status === 'number' ? status : Number(status);
-  const hint = fallback ?? hintForStatus(code);
-  if (!Number.isFinite(code)) return hint ?? 'transport error';
-  return hint ? `HTTP ${code} / ${hint}` : `HTTP ${code}`;
-}
-
-function hintForStatus(status: number): string | undefined {
-  if (status === 401 || status === 403) return 'authentication or model access';
-  if (status === 404) return 'model unavailable';
-  if (status === 429) return 'rate limit';
-  return undefined;
+function elapsed(now: () => number, started: number): number {
+  return Math.max(0, Math.round(now() - started));
 }
 
 function defaultSleep(ms: number): Promise<void> {

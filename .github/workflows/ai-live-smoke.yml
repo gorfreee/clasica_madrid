@@ -1,13 +1,13 @@
 name: AI live smoke test
 
-# Live checks of every configured AI pool route. Manual only: this consumes
-# real provider quota and must never run on push, PR, or a schedule.
+# Direct one-shot checks of every configured AI pool route. Manual only: this
+# consumes real provider quota and must never run on push, PR, or a schedule.
 
 on:
   workflow_dispatch:
     inputs:
       all_purposes:
-        description: Probar todos los purposes (eligibility, composer, access, taxonomy)
+        description: Una llamada directa por route × purpose (eligibility, composer, access, taxonomy)
         type: boolean
         default: false
 
@@ -20,9 +20,9 @@ concurrency:
 
 jobs:
   smoke:
-    name: Live-smoke every AI route
+    name: Direct one-shot smoke for every AI route
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 15
     env:
       AI_PROVIDER: pool
       AI_ZERO_COST_ONLY: 'true'
@@ -68,8 +68,6 @@ jobs:
       CLOUDFLARE_MODEL_MIN_INTERVAL_MS: ${{ vars.CLOUDFLARE_MODEL_MIN_INTERVAL_MS }}
       CLOUDFLARE_MAX_CONCURRENT: ${{ vars.CLOUDFLARE_MAX_CONCURRENT }}
       CLOUDFLARE_MIN_INTERVAL_MS: ${{ vars.CLOUDFLARE_MIN_INTERVAL_MS }}
-      AI_STATE_DIR: ${{ github.workspace }}/.local/ai-smoke
-
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
