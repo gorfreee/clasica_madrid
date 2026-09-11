@@ -69,6 +69,9 @@
   "composers": [
     {
       "name": "Amilcare Ponchielli"
+    },
+    {
+      "name": "Arrigo Boito"
     }
   ],
   "works": [],
@@ -86,10 +89,10 @@
     {
       "sourceId": "src_teatro_real",
       "url": "https://www.teatroreal.es/es/espectaculo/gioconda",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-11",
       "externalId": "gioconda"
     }
   ],
   "primarySourceId": "src_teatro_real",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-11"
 }

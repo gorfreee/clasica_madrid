@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatros_canal_98895",
+  "slug": "juan-echanove-dir-enrico-amerio",
+  "title": "Juan Echanove | Dir.: Enrico Amerio",
+  "status": "scheduled",
+  "venueId": "ven_teatros_canal_sala_roja",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatros_canal_98895_01",
+      "date": "2027-03-25",
+      "time": null,
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatros_canal_98895_02",
+      "date": "2027-03-26",
+      "time": null,
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_teatros_canal",
+      "url": "https://www.teatroscanal.com/espectaculo/mujeres-y-hombres-del-27-juan-echanove",
+      "checkedAt": "2026-09-11",
+      "externalId": "98895"
+    }
+  ],
+  "primarySourceId": "src_teatros_canal",
+  "lastVerifiedAt": "2026-09-11"
+}

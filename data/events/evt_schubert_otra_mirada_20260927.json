@@ -54,6 +54,9 @@
   "composers": [
     {
       "name": "Franz Schubert"
+    },
+    {
+      "name": "Ludwig van Beethoven"
     }
   ],
   "works": [
@@ -74,7 +77,7 @@
     {
       "sourceId": "src_fundacion_canal",
       "url": "https://www.fundacioncanal.com/ciclo-musica-camara/schubert-desde-otra-mirada",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-11",
       "externalId": "/ciclo-musica-camara/schubert-desde-otra-mirada"
     },
     {
@@ -84,5 +87,5 @@
     }
   ],
   "primarySourceId": "src_fundacion_canal",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-11"
 }

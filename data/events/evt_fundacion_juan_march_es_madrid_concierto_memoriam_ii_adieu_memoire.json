@@ -53,6 +53,9 @@
     },
     {
       "name": "Olivier Messiaen"
+    },
+    {
+      "name": "John Dowland"
     }
   ],
   "works": [
@@ -121,10 +124,10 @@
     {
       "sourceId": "src_fundacion_juan_march",
       "url": "https://www.march.es/es/madrid/concierto/memoriam-ii-adieu-memoire",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-11",
       "externalId": "/es/madrid/concierto/memoriam-ii-adieu-memoire"
     }
   ],
   "primarySourceId": "src_fundacion_juan_march",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-11"
 }

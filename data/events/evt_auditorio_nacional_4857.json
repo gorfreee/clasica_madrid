@@ -43,6 +43,9 @@
     },
     {
       "name": "Gabriel Fauré"
+    },
+    {
+      "name": "Francis Poulenc"
     }
   ],
   "works": [
@@ -74,10 +77,10 @@
     {
       "sourceId": "src_fundacion_orcam",
       "url": "https://fundacionorcam.org/conciertos/2026-27/arquitecturas-del-espiritu",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-11",
       "externalId": "4857"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-11"
 }

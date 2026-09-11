@@ -50,6 +50,9 @@
     },
     {
       "name": "Jesús Torres"
+    },
+    {
+      "name": "Juan Antonio Simarro"
     }
   ],
   "works": [
@@ -76,6 +79,10 @@
     {
       "title": "Trío para saxo soprano, viola y piano",
       "composerName": "Jesús Torres"
+    },
+    {
+      "title": "Tiempo al Tiempo",
+      "composerName": "Juan Antonio Simarro"
     }
   ],
   "eras": [
@@ -90,10 +97,10 @@
     {
       "sourceId": "src_real_academia_bellas_artes_san_fernando",
       "url": "https://www.realacademiabellasartessanfernando.com/actividades/conciertos/paraisos-nocturnos",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-11",
       "externalId": "paraisos-nocturnos"
     }
   ],
   "primarySourceId": "src_real_academia_bellas_artes_san_fernando",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-11"
 }

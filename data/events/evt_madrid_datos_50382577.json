@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50382577",
+  "slug": "l-e-v-2026-conciertos-viernes-18-septiembre-drew-mcdowall-amp-pedro-maia-y-kyria-libia",
+  "title": "L.E.V. 2026: Conciertos viernes 18 septiembre. Drew McDowall &amp; Pedro Maia y Kyria Libia",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_12551784",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50382577_01",
+      "date": "2026-09-18",
+      "time": "20:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "organ",
+    "other"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=d63fea4110e10a10VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-09-11",
+      "externalId": "50382577"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-09-11"
+}

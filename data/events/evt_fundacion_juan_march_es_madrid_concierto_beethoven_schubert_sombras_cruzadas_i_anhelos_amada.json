@@ -32,6 +32,9 @@
     },
     {
       "name": "Franz Schubert"
+    },
+    {
+      "name": "Johann Sebastian Bach"
     }
   ],
   "works": [
@@ -113,10 +116,10 @@
     {
       "sourceId": "src_fundacion_juan_march",
       "url": "https://www.march.es/es/madrid/concierto/beethoven-schubert-sombras-cruzadas-i-anhelos-amada",
-      "checkedAt": "2026-08-31",
+      "checkedAt": "2026-09-11",
       "externalId": "/es/madrid/concierto/beethoven-schubert-sombras-cruzadas-i-anhelos-amada"
     }
   ],
   "primarySourceId": "src_fundacion_juan_march",
-  "lastVerifiedAt": "2026-08-31"
+  "lastVerifiedAt": "2026-09-11"
 }
