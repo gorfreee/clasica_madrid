@@ -63,7 +63,9 @@ Las tareas del pool (eligibility, compositores, acceso, taxonomy) piden JSON cor
 
 | Route | JSON mode | Thinking / reasoning | Notas |
 |---|---|---|---|
-| `groq:*` | `response_format: json_object` | no se envía | No añadir `thinking` ni `chat_template_kwargs`. |
+| `groq:openai/gpt-oss-20b`, `groq:openai/gpt-oss-120b` | `response_format: json_schema` con el schema editorial (`strict: false`) | `include_reasoning: false` | Structured Outputs best-effort. No `strict: true`: el schema de eligibility tiene campos opcionales. `reasoning_format` no está soportado en GPT-OSS. |
+| `groq:qwen/qwen3.8-27b` | `response_format: json_schema` (`strict: false`) | no se envía | Mismo schema editorial. No enviar `include_reasoning` (no documentado para Qwen 3.8). |
+| otros `groq:*` | `response_format: json_object` | no se envía | Modelos sin Structured Outputs documentado. No añadir `thinking` ni `chat_template_kwargs`. |
 | `mistral:ministral-14b-2512`, `mistral:ministral-8b-2512` | `response_format: json_object` | no se envía | `service_tier=standard_only` (Free / Standard). El mismo perfil aplica a otros IDs Mistral si se activan por override. |
 | `zai:glm-4.7-flash`, `zai:glm-4.5-flash` | `response_format: json_object` | `thinking: { type: "disabled" }` | El thinking de GLM-4.7 está on por defecto y consume `max_tokens`. |
 | `cloudflare:@cf/zai-org/glm-4.7-flash`, `cloudflare:@cf/google/gemma-4-26b-a4b-it` | no se envía `response_format` | `reasoning_effort: null` y `chat_template_kwargs.enable_thinking: false` | La allowlist oficial de JSON Mode de Workers AI no incluye estos IDs; el schema editorial externo sigue validando. |
@@ -114,6 +116,8 @@ Las keys ausentes dejan fuera su provider sin romper la ingestión. Gemini sigue
 
 - Groq: modelos, límites Free y rate-limit headers: <https://console.groq.com/docs/rate-limits>
 - Groq: compatibilidad OpenAI: <https://console.groq.com/docs/openai>
+- Groq: Structured Outputs / JSON Schema: <https://console.groq.com/docs/structured-outputs>
+- Groq: reasoning (`include_reasoning` en GPT-OSS): <https://console.groq.com/docs/reasoning>
 - Mistral: Free mode y primer request: <https://docs.mistral.ai/getting-started/quickstarts/developer/first-api-request>
 - Mistral Chat Completions y JSON mode: <https://docs.mistral.ai/api>
 - Mistral rate limits (RPS y TPM independientes; `X-RateLimit-Remaining`): <https://docs.mistral.ai/resources/known-limitations>

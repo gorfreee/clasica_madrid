@@ -84,12 +84,22 @@ export type AiRoute = {
   priority?: number;
 };
 
-export type AiTransportErrorKind = 'rate-limit' | 'timeout' | 'unavailable' | 'auth' | 'transport';
+export type AiTransportErrorKind =
+  | 'rate-limit'
+  | 'timeout'
+  | 'unavailable'
+  | 'auth'
+  | 'bad-request'
+  | 'transport';
 
 /** Normalized provider/HTTP error consumed by the generic scheduler. */
 export class AiTransportError extends Error {
   readonly kind: AiTransportErrorKind;
   readonly status?: number;
+  readonly code?: string;
+  readonly retryable: boolean;
+  readonly provider?: string;
+  readonly model?: string;
   readonly retryAfterMs?: number;
   readonly quotaExhausted: boolean;
   /** Present on rate-limit errors when the transport could classify the dimension. */
@@ -101,16 +111,25 @@ export class AiTransportError extends Error {
     options: {
       kind: AiTransportErrorKind;
       status?: number;
+      code?: string;
+      retryable?: boolean;
+      provider?: string;
+      model?: string;
       retryAfterMs?: number;
       quotaExhausted?: boolean;
       pressure?: AiPressureKind;
       rateLimit?: AiRateLimitSnapshot;
+      cause?: unknown;
     },
   ) {
-    super(message);
+    super(message, options.cause !== undefined ? { cause: options.cause } : undefined);
     this.name = 'AiTransportError';
     this.kind = options.kind;
     this.status = options.status;
+    this.code = options.code;
+    this.retryable = options.retryable ?? (options.kind !== 'auth' && options.kind !== 'unavailable');
+    this.provider = options.provider;
+    this.model = options.model;
     this.retryAfterMs = options.retryAfterMs;
     this.quotaExhausted = options.quotaExhausted ?? false;
     this.pressure = options.pressure;

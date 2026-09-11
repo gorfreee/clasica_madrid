@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { AiUnusableOutputError, type AiCallPurpose } from '../src/ingestion/classification/ai.ts';
+import { AiRateLimitedError, AiUnusableOutputError, type AiCallPurpose } from '../src/ingestion/classification/ai.ts';
 import { AiPoolClassifier, type AiPoolClassifierOptions } from '../src/ingestion/classification/ai-pool.ts';
 import { AiPoolState } from '../src/ingestion/classification/ai-state.ts';
 import {
@@ -29,8 +29,9 @@ function fakeTransport(
   provider: string,
   handler: (call: AiTransportCall) => Promise<AiTransportResult> | AiTransportResult,
   identity: unknown = { revision: 1 },
+  extras: Partial<Pick<AiTransport, 'redact'>> = {},
 ): AiTransport {
-  return { provider, request: handler, cacheIdentity: () => identity, estimateInputTokens: () => 100 };
+  return { provider, request: handler, cacheIdentity: () => identity, estimateInputTokens: () => 100, ...extras };
 }
 
 const reset = { day: () => '2026-09-10', nextReset: () => Date.parse('2026-09-11T00:00:00Z') };
@@ -209,6 +210,141 @@ describe('cache identity and state migration', () => {
     expect(JSON.parse(readFileSync(path.join(stateDir, 'quota.json'), 'utf8'))).toMatchObject({
       version: 2, routes: { 'gemini:model': { requests: 7 } },
     });
+  });
+});
+
+describe('preserva la causa raíz al agotar routes', () => {
+  it('un json_validate_failed no acaba convertido en “sin capacidad”', async () => {
+    const broken = vi.fn(async () => {
+      throw new AiTransportError('groq HTTP 400: json_validate_failed: Failed to validate JSON', {
+        kind: 'unavailable',
+        status: 400,
+        code: 'json_validate_failed',
+        provider: 'groq',
+        model: 'openai/gpt-oss-20b',
+      });
+    });
+    const classifier = pool([
+      route('groq', 'openai/gpt-oss-20b', fakeTransport('groq', broken)),
+    ], { maxRetries: 2, clock: immediateClock() });
+
+    const error = await classifier.classify(facts).catch((thrown: Error) => thrown);
+    expect(error).toMatchObject({
+      name: 'AiTransportError',
+      kind: 'unavailable',
+      status: 400,
+      code: 'json_validate_failed',
+    });
+    expect(error.message).toContain('json_validate_failed');
+    expect(error.message).toContain('Failed to validate JSON');
+    expect(error.message).not.toMatch(/^IA: ninguna route tiene cuota/);
+    expect(classifier.lastDiagnostics()?.failures).toEqual([
+      expect.objectContaining({
+        routeId: 'groq:openai/gpt-oss-20b',
+        kind: 'unavailable',
+        status: '400',
+        code: 'json_validate_failed',
+      }),
+    ]);
+  });
+
+  it('un bad-request json_validate_failed conserva mensaje y código', async () => {
+    const broken = vi.fn(async () => {
+      throw new AiTransportError('groq HTTP 400: Failed to validate JSON', {
+        kind: 'bad-request',
+        status: 400,
+        code: 'json_validate_failed',
+        provider: 'groq',
+        model: 'openai/gpt-oss-20b',
+      });
+    });
+    const classifier = pool([
+      route('groq', 'openai/gpt-oss-20b', fakeTransport('groq', broken)),
+      route('mistral', 'ministral-8b-2512', fakeTransport('mistral', async () => {
+        throw new AiTransportError('mistral HTTP 404: model gone', {
+          kind: 'unavailable', status: 404, provider: 'mistral', model: 'ministral-8b-2512',
+        });
+      })),
+    ], { maxRetries: 2, clock: immediateClock() });
+
+    const error = await classifier.classify(facts).catch((thrown: Error) => thrown);
+    expect(error.message).toContain('json_validate_failed');
+    expect(error.message).toContain('HTTP 400');
+    expect(error.message).toMatch(/causas:.*groq:openai\/gpt-oss-20b bad-request HTTP 400 json_validate_failed/);
+    expect(error.message).not.toMatch(/^IA: ninguna route tiene cuota/);
+    expect(classifier.lastDiagnostics()?.failures?.map((failure) => failure.kind)).toEqual([
+      'bad-request', 'unavailable',
+    ]);
+  });
+
+  it('un timeout no acaba convertido simplemente en “sin capacidad”', async () => {
+    const classifier = pool([
+      route('groq', 'slow', fakeTransport('groq', async () => {
+        throw new AiTransportError('tiempo agotado en groq (15000ms)', {
+          kind: 'timeout', provider: 'groq', model: 'slow',
+        });
+      })),
+    ], { maxRetries: 2, clock: immediateClock() });
+
+    const error = await classifier.classify(facts).catch((thrown: Error) => thrown);
+    expect(error).toBeInstanceOf(AiTransportError);
+    expect(error).toMatchObject({ kind: 'timeout' });
+    expect(error.message).toContain('tiempo agotado');
+    expect(error.message).not.toMatch(/ninguna route tiene cuota/);
+    expect(error).not.toBeInstanceOf(AiRateLimitedError);
+  });
+
+  it('agotamiento real de todas las routes resume las causas y no filtra credenciales', async () => {
+    const classifier = pool([
+      route('groq', 'a', fakeTransport('groq', async () => {
+        throw new AiTransportError('groq HTTP 400: json_validate_failed groq-secret-key', {
+          kind: 'bad-request',
+          status: 400,
+          code: 'json_validate_failed',
+          provider: 'groq',
+          model: 'a',
+        });
+      }, { revision: 1 }, {
+        redact: (message) => message.replaceAll('groq-secret-key', '[redacted]'),
+      })),
+      route('mistral', 'b', fakeTransport('mistral', async () => {
+        throw new AiTransportError('mistral HTTP 401: unauthorized mistral-secret-key', {
+          kind: 'auth', status: 401, provider: 'mistral', model: 'b',
+        });
+      }, { revision: 1 }, {
+        redact: (message) => message.replaceAll('mistral-secret-key', '[redacted]'),
+      })),
+    ], { maxRetries: 1, clock: immediateClock() });
+
+    const error = await classifier.classify(facts).catch((thrown: Error) => thrown);
+    expect(error.message).not.toContain('groq-secret-key');
+    expect(error.message).not.toContain('mistral-secret-key');
+    expect(error.message).toContain('[redacted]');
+    expect(error.message).toMatch(/causas:.*groq:a bad-request HTTP 400 json_validate_failed/);
+    expect(classifier.lastDiagnostics()?.failures).toEqual(expect.arrayContaining([
+      expect.objectContaining({ routeId: 'groq:a', kind: 'bad-request', code: 'json_validate_failed' }),
+      expect.objectContaining({ routeId: 'mistral:b', kind: 'auth', status: '401' }),
+    ]));
+    expect(JSON.stringify(classifier.lastDiagnostics())).not.toContain('groq-secret-key');
+    expect(JSON.stringify(classifier.lastDiagnostics())).not.toContain('mistral-secret-key');
+  });
+
+  it('un 429 transitorio sigue siendo distinguible de daily quota al agotar routes', async () => {
+    const classifier = pool([
+      route('groq', 'a', fakeTransport('groq', async () => {
+        throw new AiTransportError('groq HTTP 429: Rate limit reached', {
+          kind: 'rate-limit', status: 429, quotaExhausted: false, retryAfterMs: 60_000, provider: 'groq', model: 'a',
+        });
+      })),
+    ], { maxRetries: 0, clock: immediateClock() });
+    const error = await classifier.classify(facts).catch((thrown: Error) => thrown);
+    expect(error).toBeInstanceOf(AiRateLimitedError);
+    expect(error).toMatchObject({ quotaExhausted: false });
+    expect(error.message).toContain('HTTP 429');
+    expect(classifier.lastDiagnostics()?.failures).toEqual([
+      expect.objectContaining({ kind: 'rate-limit', status: '429' }),
+    ]);
+    expect(classifier.snapshotStats()).toMatchObject({ rateLimits: 1, quotaExhausted: 0 });
   });
 });
 

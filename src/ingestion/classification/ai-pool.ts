@@ -5,6 +5,7 @@ import {
   AiRateLimitedError,
   AiUnusableOutputError,
   failureKindForUnusable,
+  failureKindForTransport,
   parseAiClassification,
   parseAiOutputForPurpose,
   sanitizeAiOutputExcerpt,
@@ -36,6 +37,7 @@ const CIRCUIT_UNHEALTHY = new Set<AiFailureKind>([
   'malformed-output',
   'invalid-output',
   'timeout',
+  'bad-request',
   'transport-error',
 ]);
 const INTEGER_LIMITS = [
@@ -93,7 +95,7 @@ export class AiPoolClassifier implements AiClassifier {
   private readonly options: AiPoolClassifierOptions;
   private readonly clock: SleepClock;
   private readonly state: AiPoolState;
-  private readonly disabledRoutes = new Set<string>();
+  private readonly disabledRoutes = new Map<string, Error>();
   private readonly fatalProviders = new Map<string, Error>();
   private readonly inFlight = new Map<string, Promise<CallResult>>();
   private readonly health = new Map<string, RouteHealth>();
@@ -323,7 +325,9 @@ export class AiPoolClassifier implements AiClassifier {
         }
       }
 
-      const { route, id, estimated } = await this.acquire(request, deadline, signal, diagnostics, skippedThisCall);
+      const { route, id, estimated } = await this.acquire(
+        request, deadline, signal, diagnostics, skippedThisCall, lastError,
+      );
       if (diagnostics.attempts! > 0) {
         this.stats.retries++;
         if (firstHttpRouteId === route.routeId) this.stats.sameRouteRetries++;
@@ -403,14 +407,9 @@ export class AiPoolClassifier implements AiClassifier {
         this.release(route);
       }
     }
-    if (lastError instanceof AiTransportError && lastError.kind === 'rate-limit') {
-      throw new AiRateLimitedError(lastError.message, {
-        retryAfterMs: lastError.retryAfterMs,
-        quotaExhausted: lastError.quotaExhausted,
-        model: diagnostics.model,
-      });
-    }
-    throw lastError ?? new Error('IA: máximo de intentos alcanzado');
+    throw lastError
+      ? this.finalizeLastError(lastError, diagnostics)
+      : new Error('IA: máximo de intentos alcanzado');
   }
 
   private handleAttemptError(
@@ -479,6 +478,8 @@ export class AiPoolClassifier implements AiClassifier {
         model: route.model,
         kind: failureKind,
         status: error.status === undefined ? undefined : String(error.status),
+        ...(error.code ? { code: error.code } : {}),
+        retryable: error.retryable,
         excerpt: sanitizeAiOutputExcerpt(this.redactForRoute(route, error.message)),
         ...(pressure ? { pressure } : {}),
         ...(error.rateLimit ? { rateLimit: error.rateLimit } : {}),
@@ -487,7 +488,7 @@ export class AiPoolClassifier implements AiClassifier {
       this.noteAttemptOutcome(route, failureKind, pressure);
       return;
     } else if (error.kind === 'unavailable') {
-      this.disabledRoutes.add(route.routeId);
+      this.disabledRoutes.set(route.routeId, error);
       addRoute(diagnostics, route, 'unavailable-model-or-config');
     } else if (error.kind === 'auth') {
       this.fatalProviders.set(route.provider, error);
@@ -503,11 +504,13 @@ export class AiPoolClassifier implements AiClassifier {
         (candidate) => this.available(candidate, skippedThisCall),
       );
     }
-    const failureKind: AiFailureKind = error.kind === 'timeout' ? 'timeout' : 'transport-error';
+    const failureKind = failureKindForTransport(error.kind, error.pressure);
     pushFailure(diagnostics, route, {
       model: route.model,
       kind: failureKind,
       status: error.status === undefined ? undefined : String(error.status),
+      ...(error.code ? { code: error.code } : {}),
+      retryable: error.retryable,
       excerpt: sanitizeAiOutputExcerpt(this.redactForRoute(route, error.message)),
     });
     bump(this.stats.failuresByKind as Record<string, number>, failureKind);
@@ -520,11 +523,12 @@ export class AiPoolClassifier implements AiClassifier {
     signal: AbortSignal,
     diagnostics: AiCallDiagnostics,
     skippedThisCall: ReadonlySet<string>,
+    lastError: unknown,
   ): Promise<Reservation> {
     while (true) {
       signal.throwIfAborted();
       const decision = await this.withReservationLock(() => this.tryReserve(
-        request, deadline, diagnostics, skippedThisCall,
+        request, deadline, diagnostics, skippedThisCall, lastError,
       ));
       if (decision.kind === 'reserved') return decision.reservation;
       if (decision.kind === 'fail') throw decision.error;
@@ -547,12 +551,15 @@ export class AiPoolClassifier implements AiClassifier {
     deadline: number,
     diagnostics: AiCallDiagnostics,
     skippedThisCall: ReadonlySet<string>,
+    lastError: unknown,
   ): { kind: 'reserved'; reservation: Reservation } | { kind: 'wait'; wait: number } | { kind: 'fail'; error: Error } {
     if (this.reservedRequests >= (this.options.maxRequests ?? Number.MAX_SAFE_INTEGER)) {
       return { kind: 'fail', error: new AiRateLimitedError('IA: presupuesto HTTP global de esta ejecución agotado') };
     }
     const now = this.clock.now();
-    if (now >= deadline) return { kind: 'fail', error: new Error('tiempo agotado esperando cuota de IA') };
+    if (now >= deadline) {
+      return { kind: 'fail', error: this.deadlineWaitError(lastError, diagnostics) };
+    }
     let earliest = Infinity;
     let hasPotentialRoute = false;
     for (const route of this.routes) {
@@ -635,17 +642,13 @@ export class AiPoolClassifier implements AiClassifier {
     }
     if (!Number.isFinite(earliest)) {
       const fatal = this.routes.map((route) => this.fatalProviders.get(route.provider)).find(Boolean);
-      if (!hasPotentialRoute && fatal) return { kind: 'fail', error: fatal };
-      return {
-        kind: 'fail',
-        error: new AiRateLimitedError('IA: ninguna route tiene cuota, configuración o capacidad TPM disponible'),
-      };
+      if (!hasPotentialRoute && fatal) {
+        return { kind: 'fail', error: this.finalizeLastError(fatal, diagnostics) };
+      }
+      return { kind: 'fail', error: this.noUsableRouteError(lastError, diagnostics) };
     }
     if (earliest >= deadline) {
-      return {
-        kind: 'fail',
-        error: new AiRateLimitedError('IA: próxima disponibilidad fuera del presupuesto de espera'),
-      };
+      return { kind: 'fail', error: this.nextAvailabilityError(lastError, diagnostics) };
     }
     return { kind: 'wait', wait: Math.min(1_000, Math.max(25, earliest - now), deadline - now) };
   }
@@ -815,6 +818,62 @@ export class AiPoolClassifier implements AiClassifier {
     for (const route of this.routes) message = this.redactForRoute(route, message);
     return message;
   }
+
+  private noUsableRouteError(lastError: unknown, diagnostics: AiCallDiagnostics): Error {
+    const remembered = lastError
+      ?? [...this.disabledRoutes.values()].at(-1)
+      ?? [...this.fatalProviders.values()].at(-1);
+    if (remembered !== undefined) {
+      return this.finalizeLastError(remembered, diagnostics, 'IA: ninguna route restante utilizable');
+    }
+    return new AiRateLimitedError('IA: ninguna route tiene cuota, configuración o capacidad TPM disponible');
+  }
+
+  private nextAvailabilityError(lastError: unknown, diagnostics: AiCallDiagnostics): Error {
+    if (lastError !== undefined) {
+      return this.finalizeLastError(
+        lastError,
+        diagnostics,
+        'IA: próxima disponibilidad fuera del presupuesto de espera',
+      );
+    }
+    return new AiRateLimitedError('IA: próxima disponibilidad fuera del presupuesto de espera');
+  }
+
+  private deadlineWaitError(lastError: unknown, diagnostics: AiCallDiagnostics): Error {
+    if (lastError !== undefined) {
+      return this.finalizeLastError(lastError, diagnostics, 'tiempo agotado esperando cuota de IA');
+    }
+    return new Error('tiempo agotado esperando cuota de IA');
+  }
+
+  /**
+   * Keep the original typed failure (timeout, HTTP 400, auth, …) and only add
+   * scheduler context. Never replace a concrete provider error with a generic
+   * "no capacity" rate-limit.
+   */
+  private finalizeLastError(
+    lastError: unknown,
+    diagnostics: AiCallDiagnostics,
+    schedulerContext?: string,
+  ): Error {
+    const error = lastError instanceof Error ? lastError : new Error(String(lastError));
+    const redacted = this.redactError(error);
+    if (error.message !== redacted) error.message = redacted;
+    const causes = formatAttemptCauses(diagnostics.failures);
+    const context = [schedulerContext, causes ? `causas: ${causes}` : undefined]
+      .filter((part): part is string => Boolean(part))
+      .join('. ');
+    if (context) appendErrorContext(error, context);
+    if (error instanceof AiTransportError && error.kind === 'rate-limit') {
+      return new AiRateLimitedError(error.message, {
+        retryAfterMs: error.retryAfterMs,
+        quotaExhausted: error.quotaExhausted,
+        model: diagnostics.model ?? error.model,
+      });
+    }
+    return error;
+  }
 }
 
 /**
@@ -864,6 +923,24 @@ function pushFailure(
     ...(diagnostics.failures ?? []),
     { ...failure, provider: route.provider, model: route.model, routeId: route.routeId },
   ];
+}
+
+function formatAttemptCauses(failures: AiAttemptFailure[] | undefined): string | undefined {
+  if (!failures?.length) return undefined;
+  return failures.map((failure) => (
+    [
+      failure.routeId ?? failure.model,
+      failure.kind,
+      failure.status ? `HTTP ${failure.status}` : undefined,
+      failure.code,
+    ].filter(Boolean).join(' ')
+  )).join('; ');
+}
+
+function appendErrorContext(error: Error, context: string): Error {
+  if (!context || error.message.includes(context)) return error;
+  error.message = `${error.message} (${context})`;
+  return error;
 }
 
 function skipRouteWhenAlternativeExists(

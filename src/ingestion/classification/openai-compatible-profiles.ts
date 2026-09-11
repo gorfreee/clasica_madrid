@@ -17,11 +17,13 @@
  * - Mistral rate limits: https://docs.mistral.ai/resources/known-limitations
  * - Mistral service_tier: https://docs.mistral.ai/inference/priority-tier
  * - Groq OpenAI compatibility: https://console.groq.com/docs/openai
+ * - Groq Structured Outputs: https://console.groq.com/docs/structured-outputs
+ * - Groq Reasoning (GPT-OSS `include_reasoning`): https://console.groq.com/docs/reasoning
  */
 
 import type { AiPressureKind } from './ai-transport.ts';
 
-export type OpenAiCompatibleResponseFormat = 'json-object' | 'none';
+export type OpenAiCompatibleResponseFormat = 'json-object' | 'json-schema' | 'none';
 
 export type OpenAiCompatibleModelProfile = {
   responseFormat: OpenAiCompatibleResponseFormat;
@@ -32,6 +34,36 @@ const JSON_OBJECT: OpenAiCompatibleModelProfile = {
   responseFormat: 'json-object',
   extraBody: {},
 };
+
+const GROQ_JSON_SCHEMA: OpenAiCompatibleModelProfile = {
+  responseFormat: 'json-schema',
+  extraBody: {},
+};
+
+const GROQ_GPT_OSS: OpenAiCompatibleModelProfile = {
+  responseFormat: 'json-schema',
+  extraBody: { include_reasoning: false },
+};
+
+/**
+ * Groq models documented to support Structured Outputs (`json_schema`).
+ * Checked 2026-09-11: https://console.groq.com/docs/structured-outputs
+ */
+export const GROQ_JSON_SCHEMA_MODELS = new Set([
+  'openai/gpt-oss-20b',
+  'openai/gpt-oss-120b',
+  'openai/gpt-oss-safeguard-20b',
+  'qwen/qwen3.8-27b',
+]);
+
+/**
+ * GPT-OSS on Groq documents `include_reasoning`; `reasoning_format` is not
+ * supported on these IDs. Do not send this flag to Qwen or other Groq models.
+ */
+export const GROQ_GPT_OSS_INCLUDE_REASONING_MODELS = new Set([
+  'openai/gpt-oss-20b',
+  'openai/gpt-oss-120b',
+]);
 
 const ZAI_FLASH: OpenAiCompatibleModelProfile = {
   responseFormat: 'json-object',
@@ -69,6 +101,8 @@ export function openaiCompatibleModelProfile(
   const name = model.trim();
   switch (provider.trim().toLowerCase()) {
     case 'groq':
+      if (GROQ_GPT_OSS_INCLUDE_REASONING_MODELS.has(name)) return GROQ_GPT_OSS;
+      if (GROQ_JSON_SCHEMA_MODELS.has(name)) return GROQ_JSON_SCHEMA;
       return JSON_OBJECT;
     case 'mistral':
       return MISTRAL_STANDARD;

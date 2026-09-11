@@ -1,7 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
-import { AiRateLimitedError } from '../src/ingestion/classification/ai.ts';
+import {
+  AI_CLASSIFICATION_JSON_SCHEMA,
+  AiRateLimitedError,
+  failureKindForTransport,
+} from '../src/ingestion/classification/ai.ts';
 import { AiPoolClassifier } from '../src/ingestion/classification/ai-pool.ts';
-import type { AiRequest } from '../src/ingestion/classification/ai-request.ts';
+import { buildAiRequest, type AiRequest } from '../src/ingestion/classification/ai-request.ts';
 import { AiTransportError, makeRoute } from '../src/ingestion/classification/ai-transport.ts';
 import {
   openaiCompatibleBusinessPressure,
@@ -11,6 +15,7 @@ import {
 } from '../src/ingestion/classification/openai-compatible-profiles.ts';
 import {
   OpenAiCompatibleTransport,
+  buildOpenAiCompatibleRequestBody,
   durationHeaderMs,
   rateLimitSnapshot,
 } from '../src/ingestion/classification/openai-compatible-transport.ts';
@@ -236,18 +241,73 @@ describe('payload HTTP por provider/modelo', () => {
     }
   });
 
-  it('Groq conserva JSON mode y no recibe parámetros de thinking de otros providers', async () => {
-    for (const model of GROQ_DEFAULT_MODELS) {
+  it('Groq GPT-OSS usa JSON Schema y apaga el reasoning documentado', async () => {
+    for (const model of ['openai/gpt-oss-20b', 'openai/gpt-oss-120b'] as const) {
       const body = await captureBody('groq', model);
       expect(body).toMatchObject({
         model,
-        response_format: { type: 'json_object' },
+        temperature: 0,
+        stream: false,
+        include_reasoning: false,
+        response_format: {
+          type: 'json_schema',
+          json_schema: {
+            name: 'clasica_eligibility',
+            strict: false,
+            schema: request.schema,
+          },
+        },
       });
       expect(body).not.toHaveProperty('thinking');
       expect(body).not.toHaveProperty('chat_template_kwargs');
       expect(body).not.toHaveProperty('reasoning_effort');
+      expect(body).not.toHaveProperty('reasoning_format');
       expect(body).not.toHaveProperty('service_tier');
     }
+  });
+
+  it('Groq Qwen 3.8 usa el mismo JSON Schema sin parámetros de reasoning', async () => {
+    const body = await captureBody('groq', 'qwen/qwen3.8-27b');
+    expect(body.response_format).toEqual({
+      type: 'json_schema',
+      json_schema: {
+        name: 'clasica_eligibility',
+        strict: false,
+        schema: request.schema,
+      },
+    });
+    expect(body).not.toHaveProperty('include_reasoning');
+    expect(body).not.toHaveProperty('reasoning_format');
+    expect(body).not.toHaveProperty('thinking');
+  });
+
+  it('un modelo Groq sin Structured Outputs documentado no recibe json_schema ni include_reasoning', async () => {
+    const body = await captureBody('groq', 'llama-3.1-8b-instant');
+    expect(body).toMatchObject({
+      model: 'llama-3.1-8b-instant',
+      response_format: { type: 'json_object' },
+    });
+    expect(body).not.toHaveProperty('include_reasoning');
+    expect(body.response_format).not.toMatchObject({ type: 'json_schema' });
+  });
+
+  it('reutiliza el schema editorial existente en el payload Groq GPT-OSS', () => {
+    const editorial = buildAiRequest({
+      title: 'Concierto de Bach', performers: [], composers: [], works: [],
+    }, 'eligibility');
+    const body = buildOpenAiCompatibleRequestBody('openai/gpt-oss-20b', editorial, {
+      provider: 'groq', baseUrl: 'https://example.test/v1', apiKey: 'provider-secret',
+    });
+    expect(body.response_format).toEqual({
+      type: 'json_schema',
+      json_schema: {
+        name: 'clasica_eligibility',
+        strict: false,
+        schema: AI_CLASSIFICATION_JSON_SCHEMA,
+      },
+    });
+    expect((body.response_format as { json_schema: { schema: unknown } }).json_schema.schema)
+      .toBe(editorial.schema);
   });
 
   it('el factory expone la misma identidad de caché que el payload por route', () => {
@@ -260,7 +320,13 @@ describe('payload HTTP por provider/modelo', () => {
       CLOUDFLARE_WORKERS_FREE_CONFIRMED: 'true',
     });
     expect(identityByRoute(routes, 'groq:openai/gpt-oss-120b')).toMatchObject({
-      responseFormat: 'json-object', extraBody: {},
+      responseFormat: 'json-schema', extraBody: { include_reasoning: false },
+    });
+    expect(identityByRoute(routes, 'groq:openai/gpt-oss-20b')).toMatchObject({
+      responseFormat: 'json-schema', extraBody: { include_reasoning: false },
+    });
+    expect(identityByRoute(routes, 'groq:qwen/qwen3.8-27b')).toMatchObject({
+      responseFormat: 'json-schema', extraBody: {},
     });
     expect(identityByRoute(routes, 'mistral:ministral-14b-2512')).toMatchObject({
       responseFormat: 'json-object', extraBody: { service_tier: 'standard_only' },
@@ -284,6 +350,15 @@ describe('payload HTTP por provider/modelo', () => {
 describe('perfiles HTTP declarativos', () => {
   it('distingue JSON mode y thinking por modelo sin heredar parámetros ajenos', () => {
     expect(openaiCompatibleModelProfile('groq', 'openai/gpt-oss-120b')).toEqual({
+      responseFormat: 'json-schema', extraBody: { include_reasoning: false },
+    });
+    expect(openaiCompatibleModelProfile('groq', 'openai/gpt-oss-20b')).toEqual({
+      responseFormat: 'json-schema', extraBody: { include_reasoning: false },
+    });
+    expect(openaiCompatibleModelProfile('groq', 'qwen/qwen3.8-27b')).toEqual({
+      responseFormat: 'json-schema', extraBody: {},
+    });
+    expect(openaiCompatibleModelProfile('groq', 'llama-3.1-8b-instant')).toEqual({
       responseFormat: 'json-object', extraBody: {},
     });
     expect(openaiCompatibleModelProfile('mistral', 'ministral-14b-2512').extraBody).toEqual({
@@ -352,6 +427,66 @@ describe('OpenAiCompatibleTransport', () => {
     }));
     const result = await transport.request({ model: 'model', request, signal, timeoutMs: 1_000 });
     expect(result.rateLimit).toBeUndefined();
+  });
+
+  it('conserva json_validate_failed como bad-request con código y sin filtrar el secret', async () => {
+    const body = JSON.stringify({
+      error: {
+        message: 'Failed to validate JSON provider-secret',
+        type: 'invalid_request_error',
+        code: 'json_validate_failed',
+      },
+    });
+    const transport = compatible(async () => new Response(body, { status: 400 }));
+    await expect(transport.request({
+      model: 'openai/gpt-oss-20b', request, signal, timeoutMs: 1_000,
+    })).rejects.toMatchObject({
+      kind: 'bad-request',
+      status: 400,
+      code: 'json_validate_failed',
+      retryable: true,
+      provider: 'groq',
+      model: 'openai/gpt-oss-20b',
+    });
+    try {
+      await compatible(async () => new Response(body, { status: 400 }))
+        .request({ model: 'openai/gpt-oss-20b', request, signal, timeoutMs: 1_000 });
+    } catch (error) {
+      expect(error).toBeInstanceOf(AiTransportError);
+      expect((error as Error).message).toContain('json_validate_failed');
+      expect((error as Error).message).toContain('HTTP 400');
+      expect((error as Error).message).toContain('Failed to validate JSON');
+      expect((error as Error).message).not.toContain('provider-secret');
+    }
+  });
+
+  it('distingue 404 de modelo, 401/403 auth, 429 transitorio y cuota diaria explícita', async () => {
+    const missing = compatible(async () => new Response('{"error":{"message":"model not found"}}', { status: 404 }));
+    await expect(missing.request({ model: 'openai/gpt-oss-20b', request, signal, timeoutMs: 1_000 }))
+      .rejects.toMatchObject({ kind: 'unavailable', status: 404, retryable: false });
+
+    const transient = compatible(async () => new Response(
+      '{"error":{"message":"Rate limit reached for model","type":"tokens"}}',
+      { status: 429, headers: { 'retry-after': '2' } },
+    ));
+    await expect(transient.request({ model: 'openai/gpt-oss-20b', request, signal, timeoutMs: 1_000 }))
+      .rejects.toMatchObject({ kind: 'rate-limit', status: 429, quotaExhausted: false, retryAfterMs: 2_000 });
+
+    const quota = new OpenAiCompatibleTransport({
+      provider: 'cloudflare', baseUrl: 'https://example.test/v1', apiKey: 'provider-secret',
+      fetch: async () => new Response('{"errors":[{"code":3036}]}', { status: 429 }),
+      quotaExhausted: (_status, body) => cloudflareDailyAllocationExhausted(body),
+    });
+    await expect(quota.request({ model: 'free', request, signal, timeoutMs: 1_000 }))
+      .rejects.toMatchObject({ kind: 'rate-limit', status: 429, quotaExhausted: true });
+
+    expect(failureKindForTransport('bad-request')).toBe('bad-request');
+    expect(failureKindForTransport('unavailable')).toBe('unavailable');
+    expect(failureKindForTransport('auth')).toBe('auth');
+    expect(failureKindForTransport('timeout')).toBe('timeout');
+    expect(failureKindForTransport('rate-limit')).toBe('rate-limit');
+    expect(failureKindForTransport('rate-limit', 'concurrency')).toBe('concurrency-pressure');
+    expect(failureKindForTransport('transport')).toBe('transport-error');
   });
 
   it('normaliza JSON inválido, 429/Retry-After, 401/403 y nunca filtra el secret', async () => {
@@ -508,6 +643,38 @@ describe('OpenAiCompatibleTransport', () => {
       await expect(transport.request({ model: 'glm-4.7-flash', request, signal, timeoutMs: 1_000 }))
         .rejects.toMatchObject({ kind: 'rate-limit', pressure: 'concurrency', quotaExhausted: false, status: 429 });
     }
+  });
+
+  it('el pool conserva json_validate_failed de Groq y no filtra la key', async () => {
+    let now = Date.parse('2026-09-11T12:00:00Z');
+    const transport = new OpenAiCompatibleTransport({
+      provider: 'groq',
+      baseUrl: 'https://example.test/v1',
+      apiKey: 'groq-secret-key',
+      fetch: async () => new Response(JSON.stringify({
+        error: {
+          message: 'Failed to validate JSON',
+          type: 'invalid_request_error',
+          code: 'json_validate_failed',
+        },
+      }), { status: 400 }),
+    });
+    const classifier = new AiPoolClassifier({
+      routes: [makeRoute({ provider: 'groq', model: 'openai/gpt-oss-20b', transport })],
+      maxRetries: 2,
+      random: () => 0,
+      clock: { now: () => now, sleep: async (ms) => { now += ms; } },
+    });
+    const error = await classifier.classify({ title: 'Concierto', performers: [], composers: [], works: [] })
+      .catch((thrown: Error) => thrown);
+    expect(error).toMatchObject({
+      kind: 'bad-request', status: 400, code: 'json_validate_failed', model: 'openai/gpt-oss-20b',
+    });
+    expect(error.message).toContain('json_validate_failed');
+    expect(error.message).toContain('Failed to validate JSON');
+    expect(error.message).not.toContain('groq-secret-key');
+    expect(error.message).not.toMatch(/^IA: ninguna route tiene cuota/);
+    expect(JSON.stringify(classifier.lastDiagnostics())).not.toContain('groq-secret-key');
   });
 
   it('propaga quotaExhausted para que el pool degrade limpiamente', async () => {
