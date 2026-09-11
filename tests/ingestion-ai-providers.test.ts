@@ -20,6 +20,7 @@ import {
   cloudflareDailyAllocationExhausted,
   createAiClassifierFromEnv,
   createFreeRoutesFromEnv,
+  inspectFreePoolFromEnv,
 } from '../src/ingestion/classification/provider.ts';
 
 const request: AiRequest = {
@@ -62,6 +63,32 @@ describe('factory multi-provider zero cost', () => {
     expect(createAiClassifierFromEnv({
       AI_PROVIDER: 'groq', AI_ZERO_COST_ONLY: 'true', GROQ_API_KEY: 'groq-key',
     })).toBeUndefined();
+  });
+
+  it('inspectFreePoolFromEnv reporta providers ausentes y aísla allowlists inválidas', () => {
+    const env = {
+      AI_ZERO_COST_ONLY: 'true',
+      GEMINI_API_KEY: 'gemini-key',
+      GROQ_API_KEY: 'groq-key',
+      ZAI_API_KEY: 'zai-key',
+      ZAI_MODELS: 'glm-5.x',
+    } as const;
+    expect(() => createFreeRoutesFromEnv(env)).toThrow(/ZAI_MODELS.*no autorizados/);
+    const inspection = inspectFreePoolFromEnv(env);
+    expect(inspection.providers.map((item) => [item.provider, item.status])).toEqual([
+      ['gemini', 'ready'],
+      ['groq', 'unconfigured'],
+      ['mistral', 'unconfigured'],
+      ['cloudflare', 'unconfigured'],
+      ['zai', 'error'],
+    ]);
+    expect(inspection.providers.find((item) => item.provider === 'groq')?.reason).toMatch(/GROQ_FREE_TIER_CONFIRMED/);
+    expect(inspection.providers.find((item) => item.provider === 'mistral')?.reason).toMatch(/MISTRAL_API_KEY/);
+    expect(inspection.providers.find((item) => item.provider === 'zai')?.reason).toMatch(/ZAI_MODELS/);
+    expect(inspection.routes.every((route) => route.provider === 'gemini')).toBe(true);
+    expect(inspection.routes.map((route) => route.routeId)).toEqual(
+      createFreeRoutesFromEnv({ AI_ZERO_COST_ONLY: 'true', GEMINI_API_KEY: 'gemini-key' }).map((route) => route.routeId),
+    );
   });
 
   it('bloquea OpenAI y modelos no allowlisted antes de cualquier HTTP', () => {
@@ -109,6 +136,21 @@ describe('factory multi-provider zero cost', () => {
       AI_ROUTE: 'groq:openai/gpt-oss-120b',
       GROQ_API_KEY: 'groq-key',
       GROQ_FREE_TIER_CONFIRMED: 'true',
+    });
+    expect(classifier).toBeInstanceOf(AiPoolClassifier);
+    expect((classifier as AiPoolClassifier).routes.map((route) => route.routeId)).toEqual([
+      'groq:openai/gpt-oss-120b',
+    ]);
+  });
+
+  it('AI_ROUTE no construye el resto del pool: un allowlist ajeno no oculta la route pinneada', () => {
+    const classifier = createAiClassifierFromEnv({
+      AI_ZERO_COST_ONLY: 'true',
+      AI_ROUTE: 'groq:openai/gpt-oss-120b',
+      GROQ_API_KEY: 'groq-key',
+      GROQ_FREE_TIER_CONFIRMED: 'true',
+      ZAI_API_KEY: 'zai-key',
+      ZAI_MODELS: 'glm-5.x',
     });
     expect(classifier).toBeInstanceOf(AiPoolClassifier);
     expect((classifier as AiPoolClassifier).routes.map((route) => route.routeId)).toEqual([

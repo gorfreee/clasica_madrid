@@ -63,16 +63,41 @@ El `report.json`, el resumen de consola y el Job Summary separan provider, model
 
 ## Smoke tests manuales
 
-No se ejecutan en CI y nunca escriben `data/**`:
+Son llamadas **live** a las APIs de los proveedores: consumen quota real. No se ejecutan automáticamente en CI (ni en push ni en pull request) y nunca escriben `data/**`. Conviene lanzarlos tras cambiar providers, modelos, transports o prompts, o cuando una ingestión muestre comportamientos sospechosos.
+
+Descubren las routes con la misma configuración que el pool de producción (`inspectFreePoolFromEnv` / `createFreeRoutesFromEnv`). Cada route se prueba aislada con `AI_ROUTE=provider:model`, `AI_CACHE=off` y `AI_ZERO_COST_ONLY=true`, sin fallback a otro modelo. Un proveedor esperado sin key o sin confirmación gratuita no desaparece: cuenta como FAIL.
 
 ```bash
-npm run ai:smoke -- --route groq:openai/gpt-oss-120b
-npm run ai:smoke -- --route mistral:mistral-small-latest
-npm run ai:smoke -- --route zai:glm-4.7-flash
-npm run ai:smoke -- --route cloudflare:@cf/zai-org/glm-4.7-flash
+# todas las routes, una petición de eligibility por modelo
+npm run ai:smoke:all
+
+# todas las tasks (`AI_CALL_PURPOSES`) en todas las routes
+npm run ai:smoke:all -- --all-purposes
+
+# una sola route, las cuatro tasks
+npm run ai:smoke -- --route groq:openai/gpt-oss-120b --all-purposes
 ```
 
-El comando carga `.local/ai.env`, fuerza una route, desactiva caché y prueba fixtures de eligibility, composer extraction, access y taxonomy. Imprime route, purpose, éxito, validez de schema, latencia, tokens y error/status sanitizado.
+`ai:smoke -- --route` sin `--all-purposes` sigue ejecutando las cuatro tasks, como antes. `ai:smoke:all` es barato por defecto (sólo `eligibility`) y recorre las routes en serie, respetando `rpm` / `minIntervalMs` para no fabricar 429 por concurrencia.
+
+También hay un workflow manual **AI live smoke test** (`workflow_dispatch`) que ejecuta exactamente `npm run ai:smoke:all`, con el input `all_purposes` y los mismos secrets/`vars` que la ingestión.
+
+El comando imprime una línea JSON por petición y un resumen:
+
+```text
+AI LIVE SMOKE TEST
+
+Route                                  Eligibility  Latency   Result
+gemini:gemini-3.8-flash                PASS         1320 ms   PASS
+
+Routes tested: 18
+Passed: 16
+Failed: 2
+Missing/unconfigured providers: 0
+
+RESULT: FAIL
+```
+
 
 ## Checklist después del merge
 
@@ -87,7 +112,7 @@ El comando carga `.local/ai.env`, fuerza una route, desactiva caché y prueba fi
 9. Añadir únicamente `CLOUDFLARE_WORKERS_FREE_CONFIRMED=true` como repository/environment variable, tras confirmar Workers Free.
 10. Añadir el secret `ZAI_API_KEY`.
 11. Verificar que `ZAI_MODELS` sólo contiene modelos explícitamente gratuitos; por defecto no hace falta crear esta variable.
-12. Ejecutar los smoke tests de cada route.
+12. Ejecutar `npm run ai:smoke:all` (y `--all-purposes` si cambian las tasks).
 13. Lanzar un `workflow_dispatch` en `dry-run` antes del primer publish.
 
 Las keys ausentes dejan fuera su provider sin romper la ingestión. Gemini sigue funcionando por sí solo.
