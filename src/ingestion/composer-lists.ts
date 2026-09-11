@@ -1,15 +1,19 @@
 import { normalizeText } from '../lib/domain/normalize.ts';
+import { stripLeadingComposerCreditLabel } from './composer-name.ts';
+import { collapseWhitespace } from './html.ts';
 import { matchComposer } from './knowledge/composers.ts';
 import type { ObservedComposer } from './observed.ts';
 
 /** Canonical identity for deduplication: known alias, otherwise folded source spelling. */
 export function composerIdentityKey(name: string): string {
-  return matchComposer(name)?.canonicalName ?? normalizeText(name);
+  const cleaned = stripLeadingComposerCreditLabel(name);
+  return matchComposer(cleaned)?.canonicalName ?? normalizeText(cleaned);
 }
 
 export function composerIdentityKeys(name: string): string[] {
-  const normalized = normalizeText(name);
-  const known = matchComposer(name)?.canonicalName;
+  const cleaned = stripLeadingComposerCreditLabel(name);
+  const normalized = normalizeText(cleaned);
+  const known = matchComposer(cleaned)?.canonicalName;
   return [...new Set([normalized, known ? normalizeText(known) : ''].filter(Boolean))];
 }
 
@@ -20,6 +24,11 @@ export function uniqueByCanonicalIdentity(items: ObservedComposer[]): ObservedCo
     const key = composerIdentityKey(item.name);
     if (!key || seen.has(key)) continue;
     seen.add(key);
+    const stripped = stripLeadingComposerCreditLabel(item.name);
+    if (stripped !== collapseWhitespace(item.name)) {
+      result.push({ name: matchComposer(stripped)?.canonicalName ?? stripped });
+      continue;
+    }
     result.push(item);
   }
   return result;

@@ -4,6 +4,23 @@ import { collapseWhitespace } from './html.ts';
 import { matchComposer, stripTrailingBiographicalYears } from './knowledge/composers.ts';
 import { isNonPersonComposerAttribution, isUnreliableComposerName } from './observed-cleanup.ts';
 
+const LEADING_MUSIC_CREDIT = /^(?:m[úu]sica|music)(?:\s+(?:de|by|:))?\s+/iu;
+
+/**
+ * Source pages sometimes nest a language label inside the credit
+ * (`Música de Music Gioachino Rossini`). That prefix is the same person,
+ * not a second composer.
+ */
+export function stripLeadingComposerCreditLabel(name: string): string {
+  let current = collapseWhitespace(name);
+  for (let step = 0; step < 3; step += 1) {
+    const next = current.replace(LEADING_MUSIC_CREDIT, '').trim();
+    if (!next || next === current) break;
+    current = next;
+  }
+  return current;
+}
+
 /**
  * Publication-time composer identity.
  *
@@ -48,7 +65,8 @@ export function canonicalizeWorkList(
 }
 
 export function publishedComposerIdentity(name: string): string {
-  return matchComposer(name)?.canonicalName ?? normalizeText(name);
+  const cleaned = stripLeadingComposerCreditLabel(name);
+  return matchComposer(cleaned)?.canonicalName ?? normalizeText(cleaned);
 }
 
 /**

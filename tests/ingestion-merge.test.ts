@@ -424,6 +424,41 @@ describe('enriquecimiento monotónico de performers, composers y works', () => {
     expect(merged.event.works).toEqual([]);
     expect(merged.diagnostics.filter((item) => item.startsWith('composers:'))).toEqual([]);
   });
+
+  it('una observación autoritativa corrige un crédito Music contaminado sin borrar otros composers', () => {
+    const existing = makeEvent({
+      composers: [{ name: 'Music Gioachino Rossini' }],
+    });
+    const merged = mergeExistingEvent(
+      existing,
+      proposal({
+        title: existing.title,
+        composers: [{ name: 'Gioachino Rossini' }],
+      }),
+      TEST_NOW,
+    );
+
+    expect(merged.event.composers).toEqual([{ name: 'Gioachino Rossini' }]);
+    expect(merged.diagnostics.filter((item) => item.startsWith('composers:'))).toEqual([]);
+    expect(merged.diffs.some((item) => item.startsWith('composers:'))).toBe(true);
+
+    const incomplete = mergeExistingEvent(
+      makeEvent({
+        composers: [{ name: 'Gioachino Rossini' }, { name: 'Wolfgang Amadeus Mozart' }],
+      }),
+      proposal({
+        title: existing.title,
+        composers: [{ name: 'Gioachino Rossini' }],
+      }),
+      TEST_NOW,
+    );
+    expect(incomplete.event.composers).toEqual([
+      { name: 'Gioachino Rossini' },
+      { name: 'Wolfgang Amadeus Mozart' },
+    ]);
+    expect(incomplete.diagnostics.some((item) => item.startsWith('composers:'))).toBe(true);
+    expect(incomplete.diffs.some((item) => item.startsWith('composers:'))).toBe(false);
+  });
 });
 
 function assertNeverLosesPublishedIdentity(event: Event): void {
