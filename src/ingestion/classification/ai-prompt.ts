@@ -1,9 +1,9 @@
 import type { ObservedFacts } from '../observed.ts';
 
-export const AI_CLASSIFIER_PROMPT_VERSION = 11 as const;
-export const AI_TAXONOMY_PROMPT_VERSION = 7 as const;
-export const AI_ACCESS_PROMPT_VERSION = 1 as const;
-export const AI_COMPOSER_PROMPT_VERSION = 2 as const;
+export const AI_CLASSIFIER_PROMPT_VERSION = 12 as const;
+export const AI_TAXONOMY_PROMPT_VERSION = 8 as const;
+export const AI_ACCESS_PROMPT_VERSION = 2 as const;
+export const AI_COMPOSER_PROMPT_VERSION = 3 as const;
 
 export function buildAiClassifierUserMessage(observed: ObservedFacts): string {
   return [
@@ -92,7 +92,9 @@ Reglas:
 - no clasifiques solo por un título genérico o poético si el resto de hechos no basta;
 - eligibility ≠ format ≠ kind;
 - no transformes «A o B» / «un pianista o un grupo de cámara» / programación por determinar en varios formats: eso son alternativas, no un concierto con ambas formaciones. formats múltiples sólo si la fuente afirma que este evento combina formaciones. Si no hay evidencia suficiente, formats=[] (nunca other como comodín);
-- rationale es metadata auxiliar muy breve (máximo 1–2 frases). No es evidence. No escribas un ensayo.
+- rationale es metadata auxiliar muy breve (máximo 1–2 frases). No es evidence. No escribas un ensayo ni copies el JSON de entrada;
+- evidence: 1–4 extractos literales cortos (una frase o menos cada uno). No copies párrafos ni el JSON de entrada;
+- no expliques el razonamiento paso a paso; el JSON debe ser compacto;
 
 Taxonomías cerradas:
 - formats: symphonic, chamber, recital, choral, organ, early-music, opera, zarzuela, lied, other
@@ -109,8 +111,8 @@ Devuelve ÚNICAMENTE un objeto JSON con esta forma:
   "formats": [...],          // opcional; solo si include y hay evidencia
   "eras": [...],             // opcional
   "kind": "established" | "alternative",  // opcional; solo si include
-  "evidence": ["..."],       // extractos breves y literales de los hechos observados; obligatorio si include o exclude; no pongas conclusiones ni rationale aquí
-  "rationale": "..."         // opcional; interpretación de esos extractos; 1–2 frases; no sustituye a evidence
+  "evidence": ["..."],       // 1–4 extractos breves y literales; obligatorio si include o exclude; no pongas conclusiones ni rationale aquí
+  "rationale": "..."         // opcional; 1–2 frases; no repitas evidence ni el input; no sustituye a evidence
 }
 
 No añadas otros campos. No escribas prosa fuera del JSON.`;
@@ -134,7 +136,8 @@ Reglas:
 - no asignes formats por la biografía o el historial de un intérprete (p. ej. «tocó con la Orchestra of the Americas», «hizo música de cámara») ni por una mención aislada a orquesta/cámara/trío en prosa editorial; sólo cuenta la formación o naturaleza de ESTE concierto;
 - no inventes performers para compensar una ficha incompleta;
 - no deduzcas época por venue, festival, ciclo, instrumento, ensemble, tipo de concierto, descripción promocional ni repertorio probable;
-- rationale breve; no es evidence; no repitas los extractos;
+- rationale breve (1–2 frases); no es evidence; no repitas los extractos ni copies el JSON de entrada;
+- evidence: 1–4 extractos literales cortos; JSON compacto; no expliques el razonamiento paso a paso;
 
 formats: asigna al menos un formato cuando los hechos observados permitan una inferencia musical razonable. formats=[] sólo si realmente no hay evidencia suficiente para ninguna etiqueta. Vacío es preferible a un formato incorrecto. No uses other simplemente para evitar un array vacío: other queda para identidades híbridas o no clasificables de verdad, no como comodín. Vacío es preferible a adivinar; no es la salida normal cuando hay una lectura musical razonable. No transformes alternativas exclusivas en varios formats: «un pianista o un grupo de cámara», «A o B», «o bien», «por determinar» o programación todavía no anunciada no significan que ESTE concierto sea ambas cosas. Formats múltiples sólo cuando la fuente afirma que este evento combina formaciones (primera y segunda parte, combina X e Y, orquesta y coro, tanto X como Y). Si la formación de este concierto no está determinada, formats=[] es correcto y va a revisión.
 
@@ -146,8 +149,8 @@ Devuelve ÚNICAMENTE un objeto JSON con esta forma:
   "formats": [...],
   "eras": [...],
   "kind": "established" | "alternative",
-  "evidence": ["..."],       // extractos literales de los hechos observados, no conclusiones
-  "rationale": "..."         // opcional; no sustituye a evidence
+  "evidence": ["..."],       // 1–4 extractos literales cortos, no conclusiones ni el JSON de entrada
+  "rationale": "..."         // opcional; 1–2 frases; no sustituye a evidence
 }
 
 No añadas otros campos. No escribas prosa fuera del JSON. Eligibility debe ser "include".`;
@@ -167,7 +170,7 @@ Guardrails obligatorios:
 - no infieras por venue, organizador, source, ciclo, tipo de concierto, institución, costumbre ni conocimiento externo;
 - una reserva o ticket sin indicar si tiene coste no basta por sí solo;
 - unknown es una respuesta correcta y preferible a adivinar;
-- evidence debe ser un fragmento literal breve de accessText que respalde la salida.
+- evidence debe ser un fragmento literal breve de accessText que respalde la salida. No copies accessText entero si es largo.
 
 Devuelve ÚNICAMENTE:
 {"classification":"free"|"paid"|"unknown","evidence":"fragmento literal de accessText"}
@@ -184,7 +187,7 @@ Identifica únicamente personas explícitamente mencionadas en el texto musical 
 Guardrails obligatorios:
 - usa sólo programText/works y la lista de performers recibida; no uses navegación, venue, source, organizador ni conocimiento del repertorio habitual de un intérprete;
 - cada name debe aparecer literalmente en el programa o ser la canonicalización inequívoca de una variante que sí aparece;
-- evidence debe ser un fragmento literal del programa que contenga esa mención;
+- evidence debe ser un fragmento literal corto del programa que contenga esa mención; no copies el programa entero;
 - no propongas intérpretes, directores, solistas, ensembles, arreglistas ni autores sólo mencionados como homenaje/inspiración;
 - no propongas libretistas, autores de texto/letra, ni nombres citados en biografías o como contexto editorial (contemporáneo de, basado en, trabajó con, estrenó una obra de en la carrera del intérprete);
 - no infieras un compositor porque su apellido coincida dentro del título de una obra;

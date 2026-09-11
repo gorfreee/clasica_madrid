@@ -9,6 +9,7 @@ import {
   parseAiComposerExtraction,
   type AiClassifier,
 } from '../src/ingestion/classification/ai.ts';
+import { AI_MAX_OUTPUT_TOKENS_BY_PURPOSE } from '../src/ingestion/classification/ai-request.ts';
 import {
   accessEvidenceAppears,
   composerAiHasUsableEvidence,
@@ -454,7 +455,9 @@ describe('contratos y prompts de metadata AI', () => {
     expect(composers).not.toContain('Teatro Real');
     expect(composers).not.toContain('Fundación X');
     expect(AI_ACCESS_SYSTEM_PROMPT).toMatch(/usa únicamente accessText/);
+    expect(AI_ACCESS_SYSTEM_PROMPT).toMatch(/No copies accessText entero/);
     expect(AI_COMPOSER_SYSTEM_PROMPT).toMatch(/no inventar hechos ausentes/);
+    expect(AI_COMPOSER_SYSTEM_PROMPT).toMatch(/no copies el programa entero/);
     expect(accessEvidenceAppears(observed.accessText!, 'condiciones de acceso')).toBe(true);
   });
 
@@ -472,6 +475,9 @@ describe('contratos y prompts de metadata AI', () => {
         expect(body.input).toContain(observed.accessText);
         expect(body.input).not.toContain('Teatro Real');
         expect(body.response_format.schema).toEqual(AI_ACCESS_JSON_SCHEMA);
+        expect(body.generation_config.max_output_tokens).toBe(
+          AI_MAX_OUTPUT_TOKENS_BY_PURPOSE['access-classification'],
+        );
         return new Response(JSON.stringify({
           steps: [{
             type: 'model_output',
@@ -503,6 +509,7 @@ describe('contratos y prompts de metadata AI', () => {
         expect(body.messages[0].content).toBe(AI_COMPOSER_SYSTEM_PROMPT);
         expect(body.messages[1].content).toContain(PROGRAMME);
         expect(body.messages[1].content).not.toContain('Teatro Real');
+        expect(body.max_tokens).toBe(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE['composer-extraction']);
         return new Response(JSON.stringify({
           choices: [{
             message: {

@@ -2,9 +2,12 @@ import { describe, expect, it } from 'vitest';
 import type { ObservedFacts } from '../src/ingestion/observed.ts';
 import type { AiClassifier } from '../src/ingestion/classification/ai.ts';
 import {
+  AI_CALL_PURPOSES,
   AI_CLASSIFICATION_JSON_SCHEMA,
   AiRateLimitedError,
+  parseAiAccess,
   parseAiClassification,
+  parseAiComposerExtraction,
   taxonomyFormatsStillUnresolved,
 } from '../src/ingestion/classification/ai.ts';
 import {
@@ -14,7 +17,12 @@ import {
   AI_TAXONOMY_SYSTEM_PROMPT,
   buildAiClassifierUserMessage,
 } from '../src/ingestion/classification/ai-prompt.ts';
-import { AI_REQUEST_CONTRACT_VERSION, buildAiRequest } from '../src/ingestion/classification/ai-request.ts';
+import {
+  AI_MAX_OUTPUT_TOKENS_BY_PURPOSE,
+  AI_REQUEST_CONTRACT_VERSION,
+  buildAiRequest,
+  maxOutputTokensForPurpose,
+} from '../src/ingestion/classification/ai-request.ts';
 import { classify } from '../src/ingestion/classification/classify.ts';
 import { classifyObserved, enrichWithAiIfNeeded } from '../src/ingestion/classification/enrich.ts';
 import {
@@ -91,11 +99,11 @@ const popularUncertainFacts = facts({
 describe('AI classifier prompt v2', () => {
   const prompt = AI_CLASSIFIER_SYSTEM_PROMPT;
 
-  it('is version 11 so results are distinguishable from earlier prompts', () => {
-    expect(AI_CLASSIFIER_PROMPT_VERSION).toBe(11);
-    expect(AI_REQUEST_CONTRACT_VERSION).toBe(2);
-    expect(buildAiRequest(uncertainFacts).contractVersion).toBe(2);
-    expect(buildAiRequest(uncertainFacts).user).toContain('promptVersion: 11');
+  it('is version 12 so results are distinguishable from earlier prompts', () => {
+    expect(AI_CLASSIFIER_PROMPT_VERSION).toBe(12);
+    expect(AI_REQUEST_CONTRACT_VERSION).toBe(3);
+    expect(buildAiRequest(uncertainFacts).contractVersion).toBe(3);
+    expect(buildAiRequest(uncertainFacts).user).toContain('promptVersion: 12');
   });
 
   it('keeps precision, uncertain as a valid output, and the ban on inventing facts', () => {
@@ -203,6 +211,9 @@ describe('AI classifier prompt v2', () => {
     expect(prompt).toMatch(/m[aá]ximo 1[–-]2 frases/);
     expect(prompt).toMatch(/No es evidence/);
     expect(prompt).toMatch(/extractos breves y literales/);
+    expect(prompt).toMatch(/1[–-]4 extractos/);
+    expect(prompt).toMatch(/JSON debe ser compacto/);
+    expect(prompt).toMatch(/no expliques el razonamiento paso a paso/);
     expect(prompt).toMatch(/obligatorio si include o exclude/);
     expect(prompt).toMatch(/no pongas conclusiones ni rationale/);
     expect(prompt).toMatch(/electr[oó]nica, electroac[uú]stica, s[ií]ntesis modular/);
@@ -218,6 +229,59 @@ describe('AI classifier prompt v2', () => {
     expect(prompt).toMatch(/Mozart\/Haydn, classical/);
     expect(prompt).toMatch(/Brahms\/Mahler, romantic/);
     expect(prompt).not.toMatch(/si eligibility=include, intenta rellenarlas/);
+  });
+});
+
+describe('AI output token budgets by purpose', () => {
+  it('asigna un presupuesto explícito y distinto a cada purpose', () => {
+    expect(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE).toEqual({
+      'access-classification': 256,
+      'composer-extraction': 768,
+      taxonomy: 1024,
+      eligibility: 1536,
+    });
+    expect(Object.keys(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE).sort()).toEqual([...AI_CALL_PURPOSES].sort());
+    expect(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE.eligibility).toBeGreaterThan(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE.taxonomy);
+    expect(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE.taxonomy).toBeGreaterThan(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE['composer-extraction']);
+    expect(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE['composer-extraction']).toBeGreaterThan(
+      AI_MAX_OUTPUT_TOKENS_BY_PURPOSE['access-classification'],
+    );
+  });
+
+  it('el request builder transmite el budget del purpose y no aplica un 600 global', () => {
+    for (const purpose of AI_CALL_PURPOSES) {
+      const request = buildAiRequest(uncertainFacts, purpose);
+      expect(request.purpose).toBe(purpose);
+      expect(request.generation.maxOutputTokens).toBe(maxOutputTokensForPurpose(purpose));
+      expect(request.generation.maxOutputTokens).toBe(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE[purpose]);
+      expect(request.generation.maxOutputTokens).not.toBe(600);
+      expect(request.generation.temperature).toBe(0);
+    }
+    expect(new Set(Object.values(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE)).size).toBe(AI_CALL_PURPOSES.length);
+  });
+
+  it('sigue parseando respuestas válidas actuales de cada purpose', () => {
+    const eligibility = parseAiClassification({
+      eligibility: 'include',
+      formats: ['symphonic'],
+      eras: [],
+      kind: 'established',
+      evidence: ['OCNE. Sinfónico 01', 'Gustav Mahler'],
+      rationale: 'Concierto sinfónico de repertorio clásico.',
+    });
+    expect(eligibility.ok).toBe(true);
+    const taxonomy = parseAiClassification({
+      eligibility: 'include',
+      formats: ['chamber'],
+      eras: [],
+      kind: 'alternative',
+      evidence: ['cuarteto de cuerda'],
+    });
+    expect(taxonomy.ok).toBe(true);
+    expect(parseAiAccess({ classification: 'free', evidence: 'entrada gratuita previa reserva' }).ok).toBe(true);
+    expect(parseAiComposerExtraction({
+      candidates: [{ name: 'Johann Sebastian Bach', evidence: 'J.S. Bach — Clave bien temperado' }],
+    }).ok).toBe(true);
   });
 });
 
@@ -524,6 +588,7 @@ describe('OpenAI provider (fetch inyectado, sin red)', () => {
         expect(body.messages[0].content).toBe(AI_CLASSIFIER_SYSTEM_PROMPT);
         expect(body.messages[1].content).toContain(`promptVersion: ${AI_CLASSIFIER_PROMPT_VERSION}`);
         expect(body.messages[1].content).toContain('Concierto extraordinario');
+        expect(body.max_tokens).toBe(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE.eligibility);
         return new Response(
           JSON.stringify({
             choices: [
@@ -629,6 +694,7 @@ describe('Gemini provider (fetch inyectado, sin red)', () => {
         expect(body.tools).toBeUndefined();
         expect(body.generation_config?.tool_choice).toBe('none');
         expect(body.generation_config?.thinking_level).toBe('low');
+        expect(body.generation_config?.max_output_tokens).toBe(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE.eligibility);
         expect(body.response_format).toEqual({
           type: 'text',
           mime_type: 'application/json',
@@ -1102,8 +1168,8 @@ describe('taxonomy AI — alternativas exclusivas vs formaciones combinadas', ()
 describe('taxonomy AI prompt', () => {
   const prompt = AI_TAXONOMY_SYSTEM_PROMPT;
 
-  it('is version 7 so results are distinguishable from earlier taxonomy prompts', () => {
-    expect(AI_TAXONOMY_PROMPT_VERSION).toBe(7);
+  it('is version 8 so results are distinguishable from earlier taxonomy prompts', () => {
+    expect(AI_TAXONOMY_PROMPT_VERSION).toBe(8);
   });
 
   it('asks for a format when observed facts support a musical inference', () => {
@@ -1118,6 +1184,8 @@ describe('taxonomy AI prompt', () => {
     expect(prompt).toMatch(/eras: siempre \[\]/);
     expect(prompt).toMatch(/alternativas exclusivas/);
     expect(prompt).toMatch(/pianista o un grupo de c[aá]mara/);
+    expect(prompt).toMatch(/1[–-]4 extractos literales cortos/);
+    expect(prompt).toMatch(/JSON compacto/);
     expect(prompt).not.toMatch(/formats y eras vac[ií]os son preferibles a adivinar/);
     expect(prompt).not.toMatch(/der[ií]valas de \(1\) obras observadas/);
   });

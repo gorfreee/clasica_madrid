@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { AiRateLimitedError } from '../src/ingestion/classification/ai.ts';
 import { AiPoolClassifier } from '../src/ingestion/classification/ai-pool.ts';
-import type { AiRequest } from '../src/ingestion/classification/ai-request.ts';
+import { AI_MAX_OUTPUT_TOKENS_BY_PURPOSE, buildAiRequest, type AiRequest } from '../src/ingestion/classification/ai-request.ts';
 import { AiTransportError, makeRoute } from '../src/ingestion/classification/ai-transport.ts';
 import {
   openaiCompatibleBusinessPressure,
@@ -291,6 +291,24 @@ describe('payload HTTP por provider/modelo', () => {
       expect(body).not.toHaveProperty('reasoning_effort');
       expect(body).not.toHaveProperty('service_tier');
     }
+  });
+
+  it('propaga maxOutputTokens del request a max_tokens en Groq, Mistral, Z.AI y Cloudflare', async () => {
+    const samples = [
+      ['groq', GROQ_DEFAULT_MODELS[0]!],
+      ['mistral', MISTRAL_DEFAULT_MODELS[0]!],
+      ['zai', ZAI_ZERO_COST_MODELS[0]!],
+      ['cloudflare', CLOUDFLARE_ZERO_COST_MODELS[0]!],
+    ] as const;
+    for (const [provider, model] of samples) {
+      const body = await captureBody(provider, model);
+      expect(body.max_tokens).toBe(request.generation.maxOutputTokens);
+      expect(body.max_tokens).toBe(100);
+      expect(body.max_tokens).not.toBe(600);
+    }
+    const eligibility = buildAiRequest({ title: 'Bach', performers: [], composers: [], works: [] }, 'eligibility');
+    expect(eligibility.generation.maxOutputTokens).toBe(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE.eligibility);
+    expect(eligibility.generation.maxOutputTokens).not.toBe(600);
   });
 
   it('el factory expone la misma identidad de caché que el payload por route', () => {
