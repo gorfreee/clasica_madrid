@@ -4,6 +4,10 @@ import { AiPoolClassifier } from '../src/ingestion/classification/ai-pool.ts';
 import type { AiRequest } from '../src/ingestion/classification/ai-request.ts';
 import { AiTransportError, makeRoute } from '../src/ingestion/classification/ai-transport.ts';
 import {
+  openaiCompatibleModelProfile,
+  openaiCompatibleRateLimitSignal,
+} from '../src/ingestion/classification/openai-compatible-profiles.ts';
+import {
   OpenAiCompatibleTransport,
   durationHeaderMs,
 } from '../src/ingestion/classification/openai-compatible-transport.ts';
@@ -111,6 +115,143 @@ describe('factory multi-provider zero cost', () => {
       'groq:openai/gpt-oss-120b',
     ]);
   });
+  it('aplica overrides de cuota por modelo sin inventar defaults de Mistral/Z.AI', () => {
+    const routes = createFreeRoutesFromEnv({
+      AI_ZERO_COST_ONLY: 'true',
+      GROQ_API_KEY: 'groq-key', GROQ_FREE_TIER_CONFIRMED: 'true',
+      GROQ_MODEL_RPM: 'openai/gpt-oss-120b:12',
+      MISTRAL_API_KEY: 'mistral-key', MISTRAL_FREE_MODE_CONFIRMED: 'true',
+      MISTRAL_MODEL_RPM: 'mistral-small-latest:1',
+      ZAI_API_KEY: 'zai-key',
+      ZAI_MODEL_RPM: 'glm-4.7-flash:2,glm-4.5-flash:3',
+    });
+    expect(routes.find((route) => route.routeId === 'groq:openai/gpt-oss-120b')?.limits).toMatchObject({
+      rpm: 12, tpm: 8_000, rpd: 1_000,
+    });
+    expect(routes.find((route) => route.routeId === 'mistral:mistral-small-latest')?.limits).toEqual({ rpm: 1 });
+    expect(routes.find((route) => route.routeId === 'zai:glm-4.7-flash')?.limits).toEqual({ rpm: 2 });
+    expect(routes.find((route) => route.routeId === 'zai:glm-4.5-flash')?.limits).toEqual({ rpm: 3 });
+    const plainMistral = createFreeRoutesFromEnv({
+      AI_ZERO_COST_ONLY: 'true',
+      MISTRAL_API_KEY: 'mistral-key', MISTRAL_FREE_MODE_CONFIRMED: 'true',
+    });
+    expect(plainMistral[0]?.limits).toBeUndefined();
+  });
+});
+
+describe('payload HTTP por provider/modelo', () => {
+  it('Z.AI desactiva thinking y pide json_object en glm-4.7-flash y glm-4.5-flash', async () => {
+    for (const model of ['glm-4.7-flash', 'glm-4.5-flash'] as const) {
+      const body = await captureBody('zai', model);
+      expect(body).toMatchObject({
+        model,
+        temperature: 0,
+        stream: false,
+        response_format: { type: 'json_object' },
+        thinking: { type: 'disabled' },
+      });
+      expect(body).not.toHaveProperty('chat_template_kwargs');
+      expect(body).not.toHaveProperty('reasoning_effort');
+      expect(body).not.toHaveProperty('service_tier');
+    }
+  });
+
+  it('Cloudflare apaga thinking por modelo y no envía JSON mode no allowlisted', async () => {
+    for (const model of CLOUDFLARE_ZERO_COST_MODELS) {
+      const body = await captureBody('cloudflare', model);
+      expect(body.model).toBe(model);
+      expect(body.reasoning_effort).toBeNull();
+      expect(body.chat_template_kwargs).toEqual({ enable_thinking: false });
+      expect(body).not.toHaveProperty('response_format');
+      expect(body).not.toHaveProperty('thinking');
+      expect(body).not.toHaveProperty('service_tier');
+    }
+  });
+
+  it('Mistral conserva JSON mode y service_tier=standard_only sin parámetros de thinking', async () => {
+    const body = await captureBody('mistral', 'mistral-small-latest');
+    expect(body).toMatchObject({
+      model: 'mistral-small-latest',
+      response_format: { type: 'json_object' },
+      service_tier: 'standard_only',
+    });
+    expect(body).not.toHaveProperty('thinking');
+    expect(body).not.toHaveProperty('chat_template_kwargs');
+    expect(body).not.toHaveProperty('reasoning_effort');
+  });
+
+  it('Groq conserva JSON mode y no recibe parámetros de thinking de otros providers', async () => {
+    for (const model of GROQ_DEFAULT_MODELS) {
+      const body = await captureBody('groq', model);
+      expect(body).toMatchObject({
+        model,
+        response_format: { type: 'json_object' },
+      });
+      expect(body).not.toHaveProperty('thinking');
+      expect(body).not.toHaveProperty('chat_template_kwargs');
+      expect(body).not.toHaveProperty('reasoning_effort');
+      expect(body).not.toHaveProperty('service_tier');
+    }
+  });
+
+  it('el factory expone la misma identidad de caché que el payload por route', () => {
+    const routes = createFreeRoutesFromEnv({
+      AI_ZERO_COST_ONLY: 'true',
+      GROQ_API_KEY: 'groq-key', GROQ_FREE_TIER_CONFIRMED: 'true',
+      MISTRAL_API_KEY: 'mistral-key', MISTRAL_FREE_MODE_CONFIRMED: 'true',
+      ZAI_API_KEY: 'zai-key',
+      CLOUDFLARE_API_TOKEN: 'cloudflare-token', CLOUDFLARE_ACCOUNT_ID: 'account-id',
+      CLOUDFLARE_WORKERS_FREE_CONFIRMED: 'true',
+    });
+    expect(identityByRoute(routes, 'groq:openai/gpt-oss-120b')).toMatchObject({
+      responseFormat: 'json-object', extraBody: {},
+    });
+    expect(identityByRoute(routes, 'mistral:mistral-small-latest')).toMatchObject({
+      responseFormat: 'json-object', extraBody: { service_tier: 'standard_only' },
+    });
+    expect(identityByRoute(routes, 'zai:glm-4.7-flash')).toMatchObject({
+      responseFormat: 'json-object', extraBody: { thinking: { type: 'disabled' } },
+    });
+    expect(identityByRoute(routes, 'cloudflare:@cf/zai-org/glm-4.7-flash')).toMatchObject({
+      responseFormat: 'none',
+      extraBody: {
+        reasoning_effort: null,
+        chat_template_kwargs: { enable_thinking: false },
+      },
+    });
+  });
+});
+
+describe('perfiles HTTP declarativos', () => {
+  it('distingue JSON mode y thinking por modelo sin heredar parámetros ajenos', () => {
+    expect(openaiCompatibleModelProfile('groq', 'openai/gpt-oss-120b')).toEqual({
+      responseFormat: 'json-object', extraBody: {},
+    });
+    expect(openaiCompatibleModelProfile('mistral', 'mistral-small-latest').extraBody).toEqual({
+      service_tier: 'standard_only',
+    });
+    expect(openaiCompatibleModelProfile('zai', 'glm-4.7-flash')).toEqual({
+      responseFormat: 'json-object', extraBody: { thinking: { type: 'disabled' } },
+    });
+    expect(openaiCompatibleModelProfile('zai', 'glm-4.5-flash').extraBody).toEqual({
+      thinking: { type: 'disabled' },
+    });
+    expect(openaiCompatibleModelProfile('cloudflare', '@cf/zai-org/glm-4.7-flash')).toEqual({
+      responseFormat: 'none',
+      extraBody: { reasoning_effort: null, chat_template_kwargs: { enable_thinking: false } },
+    });
+    expect(openaiCompatibleModelProfile('cloudflare', '@cf/meta/llama-3.1-8b-instruct')).toEqual({
+      responseFormat: 'none', extraBody: {},
+    });
+  });
+
+  it('reconoce rate-limit de Mistral/Z.AI sin tratar 400/401 como cuota', () => {
+    expect(openaiCompatibleRateLimitSignal('mistral', 429, '{"code":"1300"}')).toBe(true);
+    expect(openaiCompatibleRateLimitSignal('zai', 503, '{"error":{"code":"1305"}}')).toBe(true);
+    expect(openaiCompatibleRateLimitSignal('zai', 429, '{"error":{"code":"1302"}}')).toBe(true);
+    expect(openaiCompatibleRateLimitSignal('groq', 400, 'invalid')).toBe(false);
+    expect(openaiCompatibleRateLimitSignal('mistral', 401, 'rate_limited')).toBe(false);
+  });
 });
 
 describe('OpenAiCompatibleTransport', () => {
@@ -168,11 +309,62 @@ describe('OpenAiCompatibleTransport', () => {
     }
   });
 
+  it('interpreta 429/503 de Mistral y Z.AI, headers X-RateLimit y envuelve Cloudflare', async () => {
+    const mistral = new OpenAiCompatibleTransport({
+      provider: 'mistral', baseUrl: 'https://example.test/v1', apiKey: 'provider-secret',
+      fetch: async () => new Response(
+        '{"object":"error","message":"Rate limit exceeded","type":"rate_limited","code":"1300"}',
+        { status: 429, headers: { 'x-ratelimit-remaining': '0', 'x-ratelimit-reset': '3' } },
+      ),
+    });
+    await expect(mistral.request({ model: 'mistral-small-latest', request, signal, timeoutMs: 1_000 }))
+      .rejects.toMatchObject({ kind: 'rate-limit', status: 429, retryAfterMs: 3_000 });
+
+    const zaiOverload = new OpenAiCompatibleTransport({
+      provider: 'zai', baseUrl: 'https://example.test/v1', apiKey: 'provider-secret',
+      fetch: async () => new Response(
+        '{"error":{"code":"1305","message":"The service may be temporarily overloaded, please try again later"}}',
+        { status: 503 },
+      ),
+    });
+    await expect(zaiOverload.request({ model: 'glm-4.7-flash', request, signal, timeoutMs: 1_000 }))
+      .rejects.toMatchObject({ kind: 'rate-limit', status: 503 });
+
+    const zaiRate = new OpenAiCompatibleTransport({
+      provider: 'zai', baseUrl: 'https://example.test/v1', apiKey: 'provider-secret',
+      fetch: async () => new Response(
+        '{"error":{"code":"1302","message":"Rate limit reached for requests"}}',
+        { status: 429 },
+      ),
+    });
+    await expect(zaiRate.request({ model: 'glm-4.5-flash', request, signal, timeoutMs: 1_000 }))
+      .rejects.toMatchObject({ kind: 'rate-limit', status: 429 });
+
+    const wrapped = new OpenAiCompatibleTransport({
+      provider: 'cloudflare', baseUrl: 'https://example.test/v1', apiKey: 'provider-secret',
+      fetch: async () => response({
+        result: { choices: [{ message: { content: '{"eligibility":"include"}' }, finish_reason: 'stop' }] },
+      }),
+    });
+    await expect(wrapped.request({
+      model: '@cf/google/gemma-4-26b-a4b-it', request, signal, timeoutMs: 1_000,
+    })).resolves.toMatchObject({ value: { eligibility: 'include' } });
+
+    const groqOk = compatible(async () => new Response(
+      JSON.stringify({ choices: [{ message: { content: '{"eligibility":"include"}' }, finish_reason: 'stop' }] }),
+      { headers: { 'x-ratelimit-remaining-requests': '4', 'x-ratelimit-reset-requests': '1s' } },
+    ));
+    await expect(groqOk.request({ model: 'openai/gpt-oss-120b', request, signal, timeoutMs: 1_000 }))
+      .resolves.toMatchObject({ value: { eligibility: 'include' }, rateLimit: { remainingRequests: 4, resetAfterMs: 1_000 } });
+  });
+
   it('reconoce exactamente la asignación gratuita diaria de Cloudflare', () => {
     expect(cloudflareDailyAllocationExhausted('{"errors":[{"code":3036}]}')).toBe(true);
     expect(cloudflareDailyAllocationExhausted('used up your daily free allocation of 10,000 neurons')).toBe(true);
     expect(cloudflareDailyAllocationExhausted('{"errors":[{"code":3040}]}')).toBe(false);
     expect(durationHeaderMs('Wed, 10 Sep 2026 12:00:03 GMT', Date.parse('2026-09-10T12:00:00Z'))).toBe(3_000);
+    expect(durationHeaderMs('3', 0)).toBe(3_000);
+    expect(durationHeaderMs('1750000003', 1_750_000_000_000)).toBe(3_000);
   });
 
   it('propaga quotaExhausted para que el pool degrade limpiamente', async () => {
@@ -197,6 +389,24 @@ function compatible(fetchImpl: typeof fetch): OpenAiCompatibleTransport {
   });
 }
 
+async function captureBody(provider: string, model: string): Promise<Record<string, unknown>> {
+  let captured: Record<string, unknown> | undefined;
+  const transport = new OpenAiCompatibleTransport({
+    provider,
+    baseUrl: 'https://example.test/v1',
+    apiKey: 'provider-secret',
+    fetch: async (_input, init) => {
+      captured = JSON.parse(String(init?.body)) as Record<string, unknown>;
+      return response({
+        choices: [{ message: { content: '{"eligibility":"include"}' }, finish_reason: 'stop' }],
+      });
+    },
+  });
+  await transport.request({ model, request, signal, timeoutMs: 1_000 });
+  expect(captured).toBeDefined();
+  return captured!;
+}
+
 function response(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status });
 }
@@ -207,5 +417,10 @@ function routeProviders(routes: ReturnType<typeof createFreeRoutesFromEnv>): str
 
 function identity(routes: ReturnType<typeof createFreeRoutesFromEnv>, provider: string): Record<string, unknown> {
   const route = routes.find((item) => item.provider === provider)!;
+  return route.transport.cacheIdentity(route.model) as Record<string, unknown>;
+}
+
+function identityByRoute(routes: ReturnType<typeof createFreeRoutesFromEnv>, routeId: string): Record<string, unknown> {
+  const route = routes.find((item) => item.routeId === routeId)!;
   return route.transport.cacheIdentity(route.model) as Record<string, unknown>;
 }

@@ -10,19 +10,29 @@ import {
   type AiTransportCall,
   type AiTransportResult,
 } from './ai-transport.ts';
+import {
+  openaiCompatibleModelProfile,
+  openaiCompatibleRateLimitSignal,
+  type OpenAiCompatibleModelProfile,
+  type OpenAiCompatibleResponseFormat,
+} from './openai-compatible-profiles.ts';
 
 export type OpenAiCompatibleProfile = {
   provider: string;
   baseUrl: string;
   apiKey: string;
   /** Omit only for a provider/model that does not implement OpenAI JSON mode. */
-  responseFormat?: 'json-object' | 'none';
+  responseFormat?: OpenAiCompatibleResponseFormat;
   extraHeaders?: Record<string, string>;
   extraBody?: Record<string, unknown>;
+  /** Explicit per-model HTTP extras. Looked up at request time. */
+  models?: Record<string, Partial<OpenAiCompatibleModelProfile>>;
   /** Provider-specific permanent model/configuration errors. */
   unavailableError?: (status: number, body: string) => boolean;
   /** Provider-specific daily/free allocation exhaustion signal. */
   quotaExhausted?: (status: number, body: string) => boolean;
+  /** Extra rate-limit/overload signals beyond HTTP 429. */
+  rateLimitError?: (status: number, body: string) => boolean;
 };
 
 export type OpenAiCompatibleTransportOptions = OpenAiCompatibleProfile & {
@@ -50,17 +60,18 @@ export class OpenAiCompatibleTransport implements AiTransport {
     this.now = options.now ?? Date.now;
   }
 
-  cacheIdentity(_model: string): unknown {
+  cacheIdentity(model: string): unknown {
+    const capabilities = resolveCapabilities(this.profile, model);
     return {
       baseUrl: this.profile.baseUrl,
       protocol: 'openai-chat-completions-v1',
-      responseFormat: this.profile.responseFormat ?? 'json-object',
-      extraBody: this.profile.extraBody ?? {},
+      responseFormat: capabilities.responseFormat,
+      extraBody: capabilities.extraBody,
     };
   }
 
-  estimateInputTokens(request: AiRequest): number {
-    return Math.ceil(Buffer.byteLength(JSON.stringify(requestBody('estimate', request, this.profile)), 'utf8') / 3) + 128;
+  estimateInputTokens(request: AiRequest, model = 'estimate'): number {
+    return Math.ceil(Buffer.byteLength(JSON.stringify(requestBody(model, request, this.profile)), 'utf8') / 3) + 128;
   }
 
   redact(message: string): string {
@@ -114,7 +125,16 @@ export class OpenAiCompatibleTransport implements AiTransport {
   }
 }
 
+export function buildOpenAiCompatibleRequestBody(
+  model: string,
+  request: AiRequest,
+  profile: OpenAiCompatibleProfile,
+): Record<string, unknown> {
+  return requestBody(model, request, profile);
+}
+
 function requestBody(model: string, request: AiRequest, profile: OpenAiCompatibleProfile) {
+  const capabilities = resolveCapabilities(profile, model);
   return {
     model,
     temperature: 0,
@@ -124,8 +144,27 @@ function requestBody(model: string, request: AiRequest, profile: OpenAiCompatibl
       { role: 'system', content: request.system },
       { role: 'user', content: request.user },
     ],
-    ...(profile.responseFormat === 'none' ? {} : { response_format: { type: 'json_object' } }),
-    ...profile.extraBody,
+    ...(capabilities.responseFormat === 'none' ? {} : { response_format: { type: 'json_object' } }),
+    ...capabilities.extraBody,
+  };
+}
+
+export function resolveOpenAiCompatibleCapabilities(
+  profile: Pick<OpenAiCompatibleProfile, 'provider' | 'responseFormat' | 'extraBody' | 'models'>,
+  model: string,
+): OpenAiCompatibleModelProfile {
+  return resolveCapabilities(profile, model);
+}
+
+function resolveCapabilities(
+  profile: Pick<OpenAiCompatibleProfile, 'provider' | 'responseFormat' | 'extraBody' | 'models'>,
+  model: string,
+): OpenAiCompatibleModelProfile {
+  const declared = openaiCompatibleModelProfile(profile.provider, model);
+  const override = profile.models?.[model];
+  return {
+    responseFormat: override?.responseFormat ?? profile.responseFormat ?? declared.responseFormat,
+    extraBody: { ...declared.extraBody, ...profile.extraBody, ...override?.extraBody },
   };
 }
 
@@ -247,7 +286,11 @@ function httpError(
 ): AiTransportError {
   const excerpt = sanitizeAiOutputExcerpt(body, profile.apiKey);
   const message = `${profile.provider} HTTP ${status}${excerpt ? `: ${excerpt}` : ''}`;
-  if (status === 429) {
+  if (
+    status === 429
+    || profile.rateLimitError?.(status, body)
+    || openaiCompatibleRateLimitSignal(profile.provider, status, body)
+  ) {
     return new AiTransportError(message, {
       kind: 'rate-limit', status,
       retryAfterMs: retryAfterMs(headers, now),
@@ -265,16 +308,44 @@ function httpError(
   });
 }
 
+const REMAINING_HEADERS = [
+  'x-ratelimit-remaining-requests',
+  'x-ratelimit-remaining',
+  'ratelimit-remaining',
+] as const;
+
+const RESET_HEADERS = [
+  'retry-after',
+  'x-ratelimit-reset-requests',
+  'x-ratelimit-reset',
+  'ratelimit-reset',
+] as const;
+
 function rateLimitFromHeaders(headers: Headers, now: number) {
-  const remaining = numericHeader(headers, 'x-ratelimit-remaining-requests');
-  const resetAfterMs = durationHeaderMs(headers.get('x-ratelimit-reset-requests'), now);
+  const remaining = firstNumericHeader(headers, REMAINING_HEADERS);
+  const resetAfterMs = firstDurationHeader(headers, RESET_HEADERS, now);
   if (remaining === undefined && resetAfterMs === undefined) return undefined;
   return { remainingRequests: remaining, resetAfterMs };
 }
 
 function retryAfterMs(headers: Headers, now: number): number | undefined {
-  return durationHeaderMs(headers.get('retry-after'), now)
-    ?? durationHeaderMs(headers.get('x-ratelimit-reset-requests'), now);
+  return firstDurationHeader(headers, RESET_HEADERS, now);
+}
+
+function firstNumericHeader(headers: Headers, names: readonly string[]): number | undefined {
+  for (const name of names) {
+    const value = numericHeader(headers, name);
+    if (value !== undefined) return value;
+  }
+  return undefined;
+}
+
+function firstDurationHeader(headers: Headers, names: readonly string[], now: number): number | undefined {
+  for (const name of names) {
+    const value = durationHeaderMs(headers.get(name), now);
+    if (value !== undefined) return value;
+  }
+  return undefined;
 }
 
 function numericHeader(headers: Headers, name: string): number | undefined {
@@ -284,12 +355,19 @@ function numericHeader(headers: Headers, name: string): number | undefined {
   return Number.isFinite(value) && value >= 0 ? value : undefined;
 }
 
-/** Supports Retry-After seconds/date and Groq durations such as 2m59.56s. */
+/**
+ * Supports Retry-After seconds/HTTP-date, Groq durations such as 2m59.56s,
+ * and epoch timestamps used by some providers in X-RateLimit-Reset.
+ */
 export function durationHeaderMs(raw: string | null | undefined, now: number): number | undefined {
   if (!raw?.trim()) return undefined;
   const value = raw.trim();
   const seconds = Number(value);
-  if (Number.isFinite(seconds) && seconds >= 0) return seconds * 1000;
+  if (Number.isFinite(seconds) && seconds >= 0) {
+    if (seconds >= 1e12) return Math.max(0, seconds - now);
+    if (seconds >= 1e9) return Math.max(0, seconds * 1000 - now);
+    return seconds * 1000;
+  }
   const duration = /^(?:(\d+(?:\.\d+)?)h)?(?:(\d+(?:\.\d+)?)m)?(?:(\d+(?:\.\d+)?)s)?$/i.exec(value);
   if (duration && duration[0] && (duration[1] || duration[2] || duration[3])) {
     return ((Number(duration[1] ?? 0) * 3600) + (Number(duration[2] ?? 0) * 60) + Number(duration[3] ?? 0)) * 1000;

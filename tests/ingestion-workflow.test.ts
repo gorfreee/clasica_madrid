@@ -47,8 +47,20 @@ describe('workflow de ingestión: artifact de observabilidad', () => {
     expect(yaml).toContain('CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}');
     expect(yaml).toContain('CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}');
     expect(yaml).toContain('GROQ_FREE_TIER_CONFIRMED: ${{ vars.GROQ_FREE_TIER_CONFIRMED }}');
+    expect(yaml).toContain('GROQ_MODEL_RPM: ${{ vars.GROQ_MODEL_RPM }}');
+    expect(yaml).toContain('GROQ_MODEL_TPM: ${{ vars.GROQ_MODEL_TPM }}');
+    expect(yaml).toContain('GROQ_MODEL_RPD: ${{ vars.GROQ_MODEL_RPD }}');
     expect(yaml).toContain('MISTRAL_FREE_MODE_CONFIRMED: ${{ vars.MISTRAL_FREE_MODE_CONFIRMED }}');
+    expect(yaml).toContain('MISTRAL_MODEL_RPM: ${{ vars.MISTRAL_MODEL_RPM }}');
+    expect(yaml).toContain('MISTRAL_MODEL_TPM: ${{ vars.MISTRAL_MODEL_TPM }}');
+    expect(yaml).toContain('MISTRAL_MODEL_RPD: ${{ vars.MISTRAL_MODEL_RPD }}');
+    expect(yaml).toContain('ZAI_MODEL_RPM: ${{ vars.ZAI_MODEL_RPM }}');
+    expect(yaml).toContain('ZAI_MODEL_TPM: ${{ vars.ZAI_MODEL_TPM }}');
+    expect(yaml).toContain('ZAI_MODEL_RPD: ${{ vars.ZAI_MODEL_RPD }}');
     expect(yaml).toContain('CLOUDFLARE_WORKERS_FREE_CONFIRMED: ${{ vars.CLOUDFLARE_WORKERS_FREE_CONFIRMED }}');
+    expect(yaml).not.toContain('secrets.GROQ_MODEL_RPM');
+    expect(yaml).not.toContain('secrets.MISTRAL_MODEL_RPM');
+    expect(yaml).not.toContain('secrets.ZAI_MODEL_RPM');
 
     expect(publish).toContain("steps.config.outputs.mode == 'publish'");
     expect(dryRun).toContain("steps.config.outputs.mode == 'dry-run'");
