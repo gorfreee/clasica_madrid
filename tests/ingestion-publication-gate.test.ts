@@ -202,7 +202,7 @@ describe('publication gate — pipeline completo', () => {
           formats: ['chamber'],
           eras: ['baroque'],
           kind: 'alternative',
-          evidence: ['fake include'],
+          evidence: ['Concierto extraordinario'],
         };
       },
     });
@@ -220,7 +220,7 @@ describe('publication gate — pipeline completo', () => {
   });
 
   it('E. uncertain + fake AI exclude: no Candidate', async () => {
-    const ai = countingAi({ async classify() { return { eligibility: 'exclude' }; } });
+    const ai = countingAi({ async classify() { return { eligibility: 'exclude', evidence: ['Concierto extraordinario'] }; } });
     const run = await runAuditorio({
       items: [{ title: 'Concierto extraordinario', slug: 'gala-exclude' }],
       ai,
@@ -292,7 +292,7 @@ describe('publication gate — pipeline completo', () => {
   it('I. include con eras vacías sigue generando Candidate', async () => {
     const ai = countingAi({
       async classify() {
-        return { eligibility: 'include', kind: 'alternative', formats: [], eras: [] };
+        return { eligibility: 'include', kind: 'alternative', formats: [], eras: [], evidence: ['Concierto extraordinario'] };
       },
     });
     const run = await runAuditorio({

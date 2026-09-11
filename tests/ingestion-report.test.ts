@@ -223,7 +223,7 @@ describe('ingest event report', () => {
   it('recoge diagnósticos de transporte de IA en el summary y por evento', async () => {
     const ai: AiClassifier = {
       async classify() {
-        return { eligibility: 'include', kind: 'alternative', evidence: ['fake'] };
+        return { eligibility: 'include', kind: 'alternative', evidence: ['Concierto extraordinario'] };
       },
       lastDiagnostics: () => ({
         provider: 'gemini',
@@ -286,7 +286,7 @@ describe('ingest event report', () => {
       { title: 'Concierto extraordinario B', slug: 'b' },
       { title: 'Concierto extraordinario C', slug: 'c' },
     ];
-    const sequential = await runAuditorio({ items, ai: { async classify() { return { eligibility: 'include', formats: ['other'], eras: ['contemporary'], kind: 'alternative' }; } } });
+    const sequential = await runAuditorio({ items, ai: { async classify(observed) { return { eligibility: 'include', formats: ['other'], eras: ['contemporary'], kind: 'alternative', evidence: [observed.title] }; } } });
     let releaseA!: () => void;
     const holdA = new Promise<void>((resolve) => { releaseA = resolve; });
     const completion: string[] = [];
@@ -298,7 +298,7 @@ describe('ingest event report', () => {
         completion.push(observed.title);
         context?.onDiagnostics?.({ model: observed.title, attempts: 1, cacheHit: false });
         if (observed.title.endsWith('B')) releaseA();
-        return { eligibility: 'include', formats: ['other'], eras: ['contemporary'], kind: 'alternative' };
+        return { eligibility: 'include', formats: ['other'], eras: ['contemporary'], kind: 'alternative', evidence: [observed.title] };
       },
     } });
     expect(completion[0]).toBe('Concierto extraordinario B');
