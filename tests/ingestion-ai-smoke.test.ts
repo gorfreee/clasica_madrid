@@ -1,6 +1,9 @@
 import path from 'node:path';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { describe, expect, it } from 'vitest';
 import { AI_CALL_PURPOSES, AiUnusableOutputError, type AiCallPurpose } from '../src/ingestion/classification/ai.ts';
+import { maxOutputTokensForPurpose } from '../src/ingestion/classification/ai-request.ts';
 import {
   AiTransportError,
   makeRoute,
@@ -20,11 +23,14 @@ import {
 } from '../src/ingestion/classification/provider.ts';
 import { GEMINI_DEFAULT_MODELS } from '../src/ingestion/classification/gemini-config.ts';
 import {
+  AI_SMOKE_SLOW_THRESHOLD_MS,
+  AI_SMOKE_TIMEOUT_MS,
   discoverAiSmokeTargets,
   discoveryFromInspection,
   extractProviderErrorCode,
   loadAiSmokeFixtures,
   parseAiSmokeArgs,
+  parseAiSmokeOutputArgs,
   purposesToSmoke,
   runAiRouteSmoke,
   runAiSmoke,
@@ -34,6 +40,7 @@ import {
   type AiSmokeFixture,
   type AiSmokeProviderStatus,
 } from '../src/cli/ai-smoke.ts';
+import { writeAiSmokeArtifacts } from '../src/cli/ai-smoke-report.ts';
 
 const ROOT = path.join(import.meta.dirname, '..');
 const ALL_FREE_ENV: AiEnv = {
@@ -117,7 +124,7 @@ describe('runner directo one-shot', () => {
 
     expect(calls).toHaveLength(AI_CALL_PURPOSES.length);
     expect(calls.map((call) => call.request.purpose)).toEqual([...AI_CALL_PURPOSES]);
-    expect(calls.every((call) => call.model === 'one' && call.timeoutMs === 15_000)).toBe(true);
+    expect(calls.every((call) => call.model === 'one' && call.timeoutMs === 30_000)).toBe(true);
     expect(calls.every((call) => call.request.contractVersion > 0 && call.request.system && call.request.user)).toBe(true);
     expect(result.requests).toBe(4);
     expect(result.routes[0]?.result).toBe('PASS');
@@ -332,10 +339,13 @@ describe('concurrencia, pacing y diagnóstico', () => {
     expect(result.routes.map((route) => route.result)).toEqual(['PARTIAL', 'PASS']);
     expect(result.requests).toBe(8);
     expect(result.report).toContain('SEMANTIC_FAIL');
-    expect(result.report).toContain('Routes fully PASS: 1');
-    expect(result.report).toContain('Routes partially PASS: 1');
-    expect(result.report).toContain('HTTP requests performed: 8');
-    expect(result.report).toContain('RESULT: FAIL');
+    expect(result.report).toContain('**1 PASS**');
+    expect(result.report).toContain('**1 PARTIAL**');
+    expect(result.report).toContain('HTTP requests: **8**');
+    expect(result.report).toContain('Resultado global: **FAIL**');
+    expect(result.markdown).toContain('| Provider | Model |');
+    expect(result.json.overall).toBe('FAIL');
+    expect(result.json.requests).toBe(8);
   });
 
   it('conserva HTTP status, provider code y mensaje útil sin secretos', async () => {
@@ -458,5 +468,183 @@ describe('runAiRouteSmoke', () => {
     });
     expect(calls).toBe(1);
     expect(rows[0]?.outcome).toBe('PASS');
+  });
+});
+
+describe('timeout SLOW, output limit y reportes', () => {
+  it('usa 30 s de hard timeout y marca 15 s como SLOW, no TIMEOUT', async () => {
+    const timeouts: number[] = [];
+    let now = 0;
+    const result = await runBasic([fakeRoute('groq:slow', async (call) => {
+      timeouts.push(call.timeoutMs);
+      now += 18_000;
+      return { value: validOutput(call.request.purpose) };
+    })], { now: () => now });
+
+    expect(timeouts).toEqual([AI_SMOKE_TIMEOUT_MS]);
+    expect(AI_SMOKE_TIMEOUT_MS).toBe(30_000);
+    expect(AI_SMOKE_SLOW_THRESHOLD_MS).toBe(15_000);
+    expect(result.routes[0]?.purposeResults[0]).toMatchObject({
+      outcome: 'SLOW', success: true, slow: true, latencyMs: 18_000,
+    });
+    expect(result.routes[0]?.result).toBe('PASS');
+    expect(result.overall).toBe('PASS');
+    expect(result.exitCode).toBe(0);
+    expect(result.report).toContain('SLOW');
+    expect(result.report).toContain('### Slow');
+  });
+
+  it('15 s exactos son SLOW y un corte a 30 s es TIMEOUT', async () => {
+    let now = 0;
+    const slow = await runBasic([fakeRoute('groq:edge', async (call) => {
+      now += 15_000;
+      return { value: validOutput(call.request.purpose) };
+    })], { now: () => now });
+    expect(slow.routes[0]?.purposeResults[0]?.outcome).toBe('SLOW');
+
+    now = 0;
+    const timedOut = await runBasic([fakeRoute('groq:timeout', async () => {
+      now += 30_000;
+      throw new AiTransportError('timeout after 30000ms', { kind: 'timeout' });
+    })], { now: () => now });
+    expect(timedOut.routes[0]?.purposeResults[0]).toMatchObject({
+      outcome: 'TIMEOUT', success: false, latencyMs: 30_000,
+    });
+  });
+
+  it('incomplete por tope de tokens es OUTPUT_LIMIT, no INVALID_OUTPUT', async () => {
+    const max = maxOutputTokensForPurpose('eligibility');
+    const result = await runBasic([fakeRoute('gemini:capped', async () => {
+      throw new AiUnusableOutputError('Gemini devolvió una interacción incompleta', {
+        kind: 'incomplete',
+        status: 'incomplete',
+        finishReason: 'max_tokens',
+        tokens: { input: 1002, output: max - 10, thought: 0 },
+      });
+    })]);
+    const cell = result.routes[0]?.purposeResults[0];
+    expect(cell).toMatchObject({
+      outcome: 'OUTPUT_LIMIT',
+      outputReachedLimit: true,
+      requestedMaxOutputTokens: max,
+      finishReason: 'max_tokens',
+    });
+    expect(cell?.message).toContain(`outputTokens ${max - 10} / requestedMaxOutputTokens ${max}`);
+    expect(result.report).toContain('OUTPUT_LIMIT');
+    expect(result.report).toContain('### Output truncated');
+    expect(result.json.routes[0]?.purposeResults[0]?.outcome).toBe('OUTPUT_LIMIT');
+  });
+
+  it('JSON realmente malformado sin señal de recorte sigue INVALID_OUTPUT', async () => {
+    const result = await runBasic([fakeRoute('gemini:junk', async () => {
+      throw new AiUnusableOutputError('Gemini devolvió JSON inválido', {
+        kind: 'malformed',
+        status: 'completed',
+        tokens: { input: 100, output: 20 },
+      });
+    })]);
+    expect(result.routes[0]?.purposeResults[0]?.outcome).toBe('INVALID_OUTPUT');
+    expect(result.report).toContain('### Malformed JSON');
+  });
+
+  it('clasifica cuota diaria, RPM, OTPM, concurrency y overload de Z.AI', async () => {
+    const result = await runBasic([
+      fakeRoute('gemini:daily', async () => {
+        throw new AiTransportError('Gemini HTTP 429', {
+          kind: 'rate-limit', status: 429, quotaExhausted: true, pressure: 'daily',
+          rateLimit: { quotaId: 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', dailyQuota: true, dimensions: ['daily'] },
+        });
+      }),
+      fakeRoute('groq:rpm', async () => {
+        throw new AiTransportError('groq HTTP 429', {
+          kind: 'rate-limit', status: 429, pressure: 'request-frequency',
+          rateLimit: { remainingRequests: 0, dimensions: ['request-frequency'] },
+        });
+      }),
+      fakeRoute('gemini:otpm', async () => {
+        throw new AiTransportError('Gemini HTTP 429', {
+          kind: 'rate-limit', status: 429, pressure: 'otpm',
+          rateLimit: { quotaMetric: 'generate_content_free_tier_output_tokens', dimensions: ['otpm'] },
+        });
+      }),
+      fakeRoute('zai:busy', async () => {
+        throw new AiTransportError('zai HTTP 503', {
+          kind: 'rate-limit', status: 503, code: '1305', pressure: 'capacity',
+          rateLimit: { providerCode: '1305', dimensions: ['capacity'] },
+        });
+      }),
+      fakeRoute('zai:conc', async () => {
+        throw new AiTransportError('zai HTTP 429', {
+          kind: 'rate-limit', status: 429, code: '1302', pressure: 'concurrency',
+          rateLimit: { providerCode: '1302', dimensions: ['concurrency'] },
+        });
+      }),
+    ]);
+    expect(result.routes.map((route) => route.purposeResults[0]?.outcome)).toEqual([
+      'DAILY_QUOTA', 'RPM', 'OTPM', 'PROVIDER_BUSY', 'CONCURRENCY',
+    ]);
+    expect(result.report).toContain('### Daily quota');
+    expect(result.report).toContain('### Request/minute');
+    expect(result.report).toContain('### Output-tokens/minute');
+    expect(result.report).toContain('### Provider overloaded');
+    expect(result.report).toContain('### Concurrency');
+  });
+
+  it('publica Job Summary y artifacts en PASS y FAIL, sin secretos', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'ai-smoke-report-'));
+    try {
+      const fail = await runBasic([fakeRoute('groq:fail', async () => {
+        throw new AiTransportError(
+          `groq HTTP 401 key=${ALL_FREE_ENV.GROQ_API_KEY}`,
+          { kind: 'auth', status: 401, requestId: 'req_fail_1' },
+        );
+      })], { commitSha: 'abc1234', timestamp: '2026-09-12T08:00:00.000Z' });
+      const pass = await runBasic([fakeRoute('groq:ok', async (call) => ({
+        value: validOutput(call.request.purpose), requestId: 'req_ok_1',
+      }))], { commitSha: 'abc1234', timestamp: '2026-09-12T08:00:00.000Z' });
+
+      const failSummary = path.join(dir, 'fail-summary.md');
+      const passSummary = path.join(dir, 'pass-summary.md');
+      await writeAiSmokeArtifacts({
+        result: fail, reportDir: path.join(dir, 'fail'), summaryPath: failSummary, env: ALL_FREE_ENV as NodeJS.ProcessEnv,
+      });
+      await writeAiSmokeArtifacts({
+        result: pass, reportDir: path.join(dir, 'pass'), summaryPath: passSummary, env: ALL_FREE_ENV as NodeJS.ProcessEnv,
+      });
+
+      const failMd = await readFile(path.join(dir, 'fail', 'ai-smoke-report.md'), 'utf8');
+      const failJson = JSON.parse(await readFile(path.join(dir, 'fail', 'ai-smoke-report.json'), 'utf8')) as typeof fail.json;
+      const failSum = await readFile(failSummary, 'utf8');
+      const passMd = await readFile(path.join(dir, 'pass', 'ai-smoke-report.md'), 'utf8');
+      const passJson = JSON.parse(await readFile(path.join(dir, 'pass', 'ai-smoke-report.json'), 'utf8')) as typeof pass.json;
+
+      expect(fail.exitCode).toBe(1);
+      expect(pass.exitCode).toBe(0);
+      expect(failMd).toBe(failSum);
+      expect(failMd).toContain('Resultado global: **FAIL**');
+      expect(passMd).toContain('Resultado global: **PASS**');
+      expect(failJson).toMatchObject({
+        schemaVersion: 1, commitSha: 'abc1234', overall: 'FAIL',
+      });
+      expect(failJson.routes[0]?.purposeResults[0]).toMatchObject({
+        outcome: 'AUTH', providerRequestId: 'req_fail_1', httpStatus: 401,
+      });
+      expect(passJson.routes[0]?.purposeResults[0]?.providerRequestId).toBe('req_ok_1');
+      expect(`${failMd}\n${JSON.stringify(failJson)}`).not.toContain(ALL_FREE_ENV.GROQ_API_KEY);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('parsea overrides de timeout y report-dir', () => {
+    expect(parseAiSmokeOutputArgs([
+      '--all-routes', '--report-dir', '/tmp/out', '--timeout-ms', '45000', '--slow-threshold-ms', '20000',
+    ], {})).toEqual({
+      reportDir: '/tmp/out',
+      summaryPath: undefined,
+      timeoutMs: 45_000,
+      slowThresholdMs: 20_000,
+    });
+    expect(parseAiSmokeOutputArgs([], { GITHUB_STEP_SUMMARY: '/tmp/summary.md' }).summaryPath).toBe('/tmp/summary.md');
   });
 });

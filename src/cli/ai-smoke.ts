@@ -4,7 +4,6 @@ import { z } from 'zod';
 import { FORMATS } from '../lib/schemas/taxonomies.ts';
 import {
   AI_CALL_PURPOSES,
-  AI_CLASSIFY_TIMEOUT_MS,
   AiUnusableOutputError,
   parseAiOutputForPurpose,
   type AiAccessResult,
@@ -13,7 +12,7 @@ import {
   type AiComposerExtractionResult,
   type AiTokenCounts,
 } from '../ingestion/classification/ai.ts';
-import { buildAiRequest } from '../ingestion/classification/ai-request.ts';
+import { buildAiRequest, maxOutputTokensForPurpose } from '../ingestion/classification/ai-request.ts';
 import {
   inspectFreePoolFromEnv,
   type AiEnv,
@@ -23,18 +22,28 @@ import {
 } from '../ingestion/classification/provider.ts';
 import {
   AiTransportError,
+  outputReachedBudget,
+  primaryPressure,
+  type AiPressureKind,
   type AiRateLimitSnapshot,
   type AiRoute,
   type AiRouteLimits,
   type AiTransportResult,
 } from '../ingestion/classification/ai-transport.ts';
 import { observedFactsSchema } from '../ingestion/observed.ts';
-import { sanitizeErrorMessage } from '../ingestion/observability.ts';
+import { redactSecrets, sanitizeErrorMessage } from '../ingestion/observability.ts';
+import { buildAiSmokeReportJson, formatAiSmokeMarkdown, formatMarkdownTable } from './ai-smoke-report.ts';
 
 export const AI_SMOKE_USAGE = [
   'Uso: npm run ai:smoke -- --route provider:model [--purpose eligibility] [--all-purposes]',
   '     npm run ai:smoke:all [-- --all-purposes]',
+  '     [--report-dir DIR] [--summary FILE] [--timeout-ms 30000] [--slow-threshold-ms 15000]',
 ].join('\n');
+
+/** Live smoke hard timeout. Production classify timeout stays `AI_CLASSIFY_TIMEOUT_MS` (15s). */
+export const AI_SMOKE_TIMEOUT_MS = 30_000;
+/** Successful replies at or above this latency are PASS marked SLOW, not TIMEOUT. */
+export const AI_SMOKE_SLOW_THRESHOLD_MS = 15_000;
 
 /** Exhaustive labels; a new `AI_CALL_PURPOSES` entry must add a column name. */
 export const AI_SMOKE_PURPOSE_COLUMNS = {
@@ -46,10 +55,17 @@ export const AI_SMOKE_PURPOSE_COLUMNS = {
 
 export const AI_SMOKE_STATUSES = [
   'PASS',
+  'SLOW',
   'SEMANTIC_FAIL',
   'SCHEMA_FAIL',
   'INVALID_OUTPUT',
+  'OUTPUT_LIMIT',
   'RATE_LIMIT',
+  'RPM',
+  'TPM',
+  'OTPM',
+  'CONCURRENCY',
+  'PROVIDER_BUSY',
   'DAILY_QUOTA',
   'TIMEOUT',
   'AUTH',
@@ -60,6 +76,29 @@ export const AI_SMOKE_STATUSES = [
   'BLOCKED',
 ] as const;
 export type AiSmokeStatus = (typeof AI_SMOKE_STATUSES)[number];
+
+export const AI_SMOKE_CAUSES = [
+  'timeout',
+  'slow',
+  'output truncated',
+  'malformed JSON',
+  'schema failure',
+  'semantic failure',
+  'daily quota',
+  'request/minute',
+  'tokens/minute',
+  'output-tokens/minute',
+  'concurrency',
+  'provider overloaded',
+  'auth',
+  'unavailable',
+  'unknown rate limit',
+  'request error',
+  'transport error',
+  'config',
+  'blocked',
+] as const;
+export type AiSmokeCause = (typeof AI_SMOKE_CAUSES)[number];
 
 const fixtureSchema = z.discriminatedUnion('purpose', [
   z.object({
@@ -128,6 +167,7 @@ export type AiSmokePurposeResult = {
   purpose: AiCallPurpose;
   outcome: AiSmokeStatus;
   success: boolean;
+  slow: boolean;
   schemaValid: boolean;
   semanticValid: boolean;
   requestMade: boolean;
@@ -135,9 +175,13 @@ export type AiSmokePurposeResult = {
   httpStatus?: number;
   providerStatus?: string;
   providerErrorCode?: string;
+  providerRequestId?: string;
   finishReason?: string;
   tokens?: AiTokenCounts;
+  requestedMaxOutputTokens?: number;
+  outputReachedLimit?: boolean;
   rateLimit?: AiRateLimitSnapshot;
+  cause?: AiSmokeCause;
   message?: string;
   blockedBy?: AiSmokeStatus;
 };
@@ -170,7 +214,13 @@ export type AiSmokeRunResult = {
   exitCode: 0 | 1;
   overall: 'PASS' | 'FAIL';
   purposes: AiCallPurpose[];
+  timestamp: string;
+  commitSha?: string;
+  timeoutMs: number;
+  slowThresholdMs: number;
   report: string;
+  markdown: string;
+  json: ReturnType<typeof buildAiSmokeReportJson>;
 };
 
 export type AiSmokeRunOptions = AiSmokeArgs & {
@@ -181,6 +231,9 @@ export type AiSmokeRunOptions = AiSmokeArgs & {
   sleep?: (ms: number) => Promise<void>;
   log?: (line: string) => void;
   timeoutMs?: number;
+  slowThresholdMs?: number;
+  timestamp?: string;
+  commitSha?: string;
   /** Test-only override. Production CLI deliberately uses the conservative default. */
   maxProviderConcurrency?: number;
 };
@@ -210,6 +263,32 @@ export function parseAiSmokeArgs(argv: string[]): AiSmokeArgs | undefined {
     ? AI_CALL_PURPOSES
     : [((purpose as AiCallPurpose | undefined) ?? 'eligibility')];
   return { route, allRoutes, allPurposes, purposes };
+}
+
+export type AiSmokeOutputArgs = {
+  reportDir?: string;
+  summaryPath?: string;
+  timeoutMs?: number;
+  slowThresholdMs?: number;
+};
+
+export function parseAiSmokeOutputArgs(
+  argv: string[],
+  env: NodeJS.ProcessEnv = process.env,
+): AiSmokeOutputArgs {
+  return {
+    reportDir: flagValue(argv, '--report-dir'),
+    summaryPath: flagValue(argv, '--summary') ?? env.GITHUB_STEP_SUMMARY,
+    timeoutMs: optionalPositiveInt(flagValue(argv, '--timeout-ms')) ?? optionalPositiveInt(env.AI_SMOKE_TIMEOUT_MS),
+    slowThresholdMs: optionalPositiveInt(flagValue(argv, '--slow-threshold-ms'))
+      ?? optionalPositiveInt(env.AI_SMOKE_SLOW_THRESHOLD_MS),
+  };
+}
+
+function optionalPositiveInt(value: string | undefined): number | undefined {
+  if (!value) return undefined;
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
 }
 
 function flagValue(argv: string[], name: string): string | undefined {
@@ -293,8 +372,11 @@ export async function runAiSmoke(options: AiSmokeRunOptions): Promise<AiSmokeRun
   const discover = options.discover ?? discoverAiSmokeTargets;
   const now = options.now ?? Date.now;
   const sleep = options.sleep ?? defaultSleep;
-  const timeoutMs = options.timeoutMs ?? AI_CLASSIFY_TIMEOUT_MS;
+  const timeoutMs = options.timeoutMs ?? AI_SMOKE_TIMEOUT_MS;
+  const slowThresholdMs = options.slowThresholdMs ?? AI_SMOKE_SLOW_THRESHOLD_MS;
   const started = now();
+  const timestamp = options.timestamp ?? new Date(started).toISOString();
+  const commitSha = options.commitSha ?? process.env.GITHUB_SHA;
 
   const discovery = discover(env);
   const missingProviders = discovery.providers.filter((item) => item.status !== 'ready');
@@ -331,6 +413,7 @@ export async function runAiSmoke(options: AiSmokeRunOptions): Promise<AiSmokeRun
         env,
         now,
         timeoutMs,
+        slowThresholdMs,
         pacer,
         log,
       });
@@ -345,7 +428,7 @@ export async function runAiSmoke(options: AiSmokeRunOptions): Promise<AiSmokeRun
   const requests = routes.reduce((sum, route) => sum + route.requests, 0);
   const durationMs = Math.max(0, Math.round(now() - started));
   const overall: 'PASS' | 'FAIL' = partial === 0 && failed === 0 && missing === 0 ? 'PASS' : 'FAIL';
-  const report = formatAiSmokeReport({
+  const reportInput = {
     routes,
     missingProviders: options.allRoutes ? missingProviders : [],
     purposes,
@@ -357,8 +440,18 @@ export async function runAiSmoke(options: AiSmokeRunOptions): Promise<AiSmokeRun
     requests,
     durationMs,
     overall,
+    timeoutMs,
+    slowThresholdMs,
+  };
+  const markdown = formatAiSmokeMarkdown(reportInput);
+  const report = formatAiSmokeReport(reportInput);
+  const json = buildAiSmokeReportJson({
+    ...reportInput,
+    timestamp,
+    commitSha,
+    exitCode: overall === 'PASS' ? 0 : 1,
   });
-  log(sanitizeErrorMessage(report, env as NodeJS.ProcessEnv));
+  log(redactSecrets(report, env as NodeJS.ProcessEnv));
   return {
     routes,
     missingProviders: options.allRoutes ? missingProviders : [],
@@ -372,7 +465,13 @@ export async function runAiSmoke(options: AiSmokeRunOptions): Promise<AiSmokeRun
     exitCode: overall === 'PASS' ? 0 : 1,
     overall,
     purposes,
+    timestamp,
+    commitSha,
+    timeoutMs,
+    slowThresholdMs,
     report,
+    markdown,
+    json,
   };
 }
 
@@ -384,6 +483,7 @@ export async function runAiRouteSmoke(options: {
   now?: () => number;
   sleep?: (ms: number) => Promise<void>;
   timeoutMs?: number;
+  slowThresholdMs?: number;
 }): Promise<AiSmokePurposeResult[]> {
   const now = options.now ?? Date.now;
   const selected = fixturesForPurposes(options.fixtures, [...options.purposes]);
@@ -393,7 +493,8 @@ export async function runAiRouteSmoke(options: {
     fixtures: selected,
     env: options.env ?? {},
     now,
-    timeoutMs: options.timeoutMs ?? AI_CLASSIFY_TIMEOUT_MS,
+    timeoutMs: options.timeoutMs ?? AI_SMOKE_TIMEOUT_MS,
+    slowThresholdMs: options.slowThresholdMs ?? AI_SMOKE_SLOW_THRESHOLD_MS,
     pacer: new ProviderPacer(now, options.sleep ?? defaultSleep, options.route.limits?.providerMinIntervalMs ?? 0),
     log: () => {},
   });
@@ -412,64 +513,18 @@ export function formatAiSmokeReport(input: {
   requests: number;
   durationMs: number;
   overall: 'PASS' | 'FAIL';
+  timeoutMs?: number;
+  slowThresholdMs?: number;
 }): string {
-  const lines = ['AI LIVE SMOKE TEST — DIRECT ONE-SHOT', '', formatAiSmokeTable(input.routes, input.purposes)];
-  if (input.missingProviders.length) {
-    lines.push('', 'Unconfigured providers:');
-    const width = Math.max(8, ...input.missingProviders.map((item) => item.provider.length));
-    for (const item of input.missingProviders) {
-      lines.push(`  ${item.provider.padEnd(width)}  ${item.reason ?? item.status}`);
-    }
-  }
-
-  const failures = input.routes.flatMap((route) => route.purposeResults.filter((item) => item.outcome !== 'PASS'));
-  if (failures.length) {
-    lines.push('', 'Failure details:');
-    for (const failure of failures) lines.push(`  ${formatFailure(failure)}`);
-  }
-
-  lines.push(
-    '',
-    `Routes fully PASS: ${input.passed}`,
-    `Routes partially PASS: ${input.partial}`,
-    `Routes FAIL: ${input.failed}`,
-    `Missing/unconfigured providers: ${input.missing}`,
-    `HTTP requests performed: ${input.requests}`,
-    `Total duration: ${formatLatency(input.durationMs)}`,
-    '',
-    `RESULT: ${input.overall}`,
-  );
-  return lines.join('\n');
+  return formatAiSmokeMarkdown({
+    ...input,
+    timeoutMs: input.timeoutMs ?? AI_SMOKE_TIMEOUT_MS,
+    slowThresholdMs: input.slowThresholdMs ?? AI_SMOKE_SLOW_THRESHOLD_MS,
+  });
 }
 
 export function formatAiSmokeTable(routes: AiSmokeRouteResult[], purposes: AiCallPurpose[]): string {
-  const routeHeader = 'Route';
-  const latencyHeader = 'Latency';
-  const resultHeader = 'Result';
-  const purposeHeaders = purposes.map((purpose) => AI_SMOKE_PURPOSE_COLUMNS[purpose]);
-  const routeWidth = Math.max(routeHeader.length, 36, ...routes.map((route) => route.routeId.length));
-  const purposeWidth = purposeHeaders.map((header, index) => Math.max(
-    header.length,
-    ...routes.map((route) => cellFor(route.purposes[purposes[index]!]).length),
-  ));
-  const latencyWidth = Math.max(
-    latencyHeader.length,
-    ...routes.map((route) => formatLatency(route.latencyMs).length),
-    9,
-  );
-  const header = [
-    routeHeader.padEnd(routeWidth),
-    ...purposeHeaders.map((header, index) => header.padEnd(purposeWidth[index]!)),
-    latencyHeader.padStart(latencyWidth),
-    resultHeader,
-  ].join('  ');
-  const rows = routes.map((route) => [
-    route.routeId.padEnd(routeWidth),
-    ...purposes.map((purpose, index) => cellFor(route.purposes[purpose]).padEnd(purposeWidth[index]!)),
-    formatLatency(route.latencyMs).padStart(latencyWidth),
-    route.result,
-  ].join('  '));
-  return [header, ...rows].join('\n');
+  return formatMarkdownTable(routes, purposes);
 }
 
 function selectRoutes(
@@ -494,6 +549,7 @@ async function smokeOneRoute(input: {
   env: AiEnv;
   now: () => number;
   timeoutMs: number;
+  slowThresholdMs: number;
   pacer: ProviderPacer;
   log: (line: string) => void;
 }): Promise<AiSmokeRouteResult> {
@@ -512,6 +568,7 @@ async function smokeOneRoute(input: {
         env: input.env,
         now: input.now,
         timeoutMs: input.timeoutMs,
+        slowThresholdMs: input.slowThresholdMs,
       });
       if (BLOCKING_STATUSES.has(result.outcome)) blockedBy = result;
     }
@@ -519,7 +576,7 @@ async function smokeOneRoute(input: {
     logJson(input.log, result, input.env);
   }
 
-  const passed = purposeResults.filter((item) => item.outcome === 'PASS').length;
+  const passed = purposeResults.filter((item) => item.success).length;
   const result = passed === purposeResults.length ? 'PASS' : passed > 0 ? 'PARTIAL' : 'FAIL';
   return {
     routeId: input.route.routeId,
@@ -532,7 +589,7 @@ async function smokeOneRoute(input: {
     latencyMs: purposeResults.reduce((sum, item) => sum + item.latencyMs, 0),
     requests: purposeResults.filter((item) => item.requestMade).length,
     result,
-    cause: purposeResults.find((item) => item.outcome !== 'PASS')?.message,
+    cause: purposeResults.find((item) => !item.success)?.message,
   };
 }
 
@@ -542,6 +599,7 @@ async function directOneShot(input: {
   env: AiEnv;
   now: () => number;
   timeoutMs: number;
+  slowThresholdMs: number;
 }): Promise<AiSmokePurposeResult> {
   const started = input.now();
   const request = buildAiRequest(input.fixture.observed, input.fixture.purpose);
@@ -562,9 +620,23 @@ async function directOneShot(input: {
         }, input.timeoutMs);
       }),
     ]);
-    return resultFromTransport(input.route, input.fixture, result, elapsed(input.now, started));
+    return resultFromTransport(
+      input.route,
+      input.fixture,
+      result,
+      elapsed(input.now, started),
+      request.generation.maxOutputTokens,
+      input.slowThresholdMs,
+    );
   } catch (error) {
-    return resultFromError(input.route, input.fixture.purpose, error, input.env, elapsed(input.now, started));
+    return resultFromError(
+      input.route,
+      input.fixture.purpose,
+      error,
+      input.env,
+      elapsed(input.now, started),
+      request.generation.maxOutputTokens,
+    );
   } finally {
     if (timer) clearTimeout(timer);
   }
@@ -575,26 +647,47 @@ function resultFromTransport(
   fixture: AiSmokeFixture,
   transport: AiTransportResult,
   latencyMs: number,
+  requestedMaxOutputTokens: number,
+  slowThresholdMs: number,
 ): AiSmokePurposeResult {
+  const capped = outputReachedBudget({
+    status: transport.status,
+    finishReason: transport.finishReason,
+    tokens: transport.tokens,
+    requestedMaxOutputTokens,
+  });
   const parsed = parseAiOutputForPurpose(fixture.purpose, transport.value);
   if (!parsed.ok) {
-    const outcome: AiSmokeStatus = parsed.ruleId === 'ai-invalid-output' ? 'SCHEMA_FAIL' : 'INVALID_OUTPUT';
+    const outcome: AiSmokeStatus = capped
+      ? 'OUTPUT_LIMIT'
+      : parsed.ruleId === 'ai-invalid-output' ? 'SCHEMA_FAIL' : 'INVALID_OUTPUT';
     return basePurposeResult(route, fixture.purpose, outcome, latencyMs, {
       schemaValid: false,
       providerStatus: transport.status,
+      providerRequestId: transport.requestId,
       finishReason: transport.finishReason,
       tokens: transport.tokens,
+      requestedMaxOutputTokens,
+      outputReachedLimit: capped,
       rateLimit: transport.rateLimit,
-      message: parsed.reason,
+      message: capped
+        ? `${parsed.reason} (outputTokens ${transport.tokens?.output ?? '?'} / requestedMaxOutputTokens ${requestedMaxOutputTokens})`
+        : parsed.reason,
     });
   }
   const semantic = assertSemanticResult(fixture, parsed.value);
-  return basePurposeResult(route, fixture.purpose, semantic.ok ? 'PASS' : 'SEMANTIC_FAIL', latencyMs, {
+  const outcome: AiSmokeStatus = !semantic.ok
+    ? 'SEMANTIC_FAIL'
+    : latencyMs >= slowThresholdMs ? 'SLOW' : 'PASS';
+  return basePurposeResult(route, fixture.purpose, outcome, latencyMs, {
     schemaValid: true,
     semanticValid: semantic.ok,
     providerStatus: transport.status,
+    providerRequestId: transport.requestId,
     finishReason: transport.finishReason,
     tokens: transport.tokens,
+    requestedMaxOutputTokens,
+    outputReachedLimit: capped || undefined,
     rateLimit: transport.rateLimit,
     message: semantic.ok ? undefined : semantic.message,
   });
@@ -606,30 +699,38 @@ function resultFromError(
   error: unknown,
   env: AiEnv,
   latencyMs: number,
+  requestedMaxOutputTokens: number,
 ): AiSmokePurposeResult {
   const message = safeErrorMessage(route, error, env);
   if (error instanceof AiTransportError) {
-    const providerErrorCode = extractProviderErrorCode(message);
-    const outcome: AiSmokeStatus = error.kind === 'rate-limit'
-      ? error.quotaExhausted ? 'DAILY_QUOTA' : 'RATE_LIMIT'
-      : error.kind === 'timeout' ? 'TIMEOUT'
-        : error.kind === 'auth' ? 'AUTH'
-          : error.kind === 'unavailable'
-            ? isClearlyUnavailable(error, message, providerErrorCode) ? 'MODEL_UNAVAILABLE' : 'REQUEST_ERROR'
-            : 'TRANSPORT_ERROR';
+    const providerErrorCode = error.code ?? extractProviderErrorCode(message);
+    const pressure = error.pressure ?? primaryPressure(error.rateLimit?.dimensions);
+    const outcome = outcomeFromTransportError(error, pressure);
     return basePurposeResult(route, purpose, outcome, latencyMs, {
       schemaValid: false,
       httpStatus: error.status,
       providerErrorCode,
+      providerRequestId: error.requestId ?? error.rateLimit?.requestId,
+      providerStatus: error.rateLimit?.providerStatus,
       rateLimit: error.rateLimit,
+      requestedMaxOutputTokens,
       message,
     });
   }
   if (error instanceof AiUnusableOutputError) {
+    const capped = error.kind === 'incomplete' || outputReachedBudget({
+      status: error.status,
+      finishReason: error.finishReason,
+      tokens: error.tokens,
+      requestedMaxOutputTokens,
+    });
+    const outcome: AiSmokeStatus = error.kind === 'invalid'
+      ? 'SCHEMA_FAIL'
+      : capped ? 'OUTPUT_LIMIT' : 'INVALID_OUTPUT';
     return basePurposeResult(
       route,
       purpose,
-      error.kind === 'invalid' ? 'SCHEMA_FAIL' : 'INVALID_OUTPUT',
+      outcome,
       latencyMs,
       {
         schemaValid: false,
@@ -637,15 +738,61 @@ function resultFromError(
         providerErrorCode: extractProviderErrorCode(message),
         finishReason: error.finishReason,
         tokens: error.tokens,
-        message,
+        requestedMaxOutputTokens,
+        outputReachedLimit: capped,
+        message: capped
+          ? `${message} (outputTokens ${error.tokens?.output ?? '?'} / requestedMaxOutputTokens ${requestedMaxOutputTokens})`
+          : message,
       },
     );
   }
   return basePurposeResult(route, purpose, 'TRANSPORT_ERROR', latencyMs, {
     schemaValid: false,
     providerErrorCode: extractProviderErrorCode(message),
+    requestedMaxOutputTokens,
     message,
   });
+}
+
+function outcomeFromTransportError(error: AiTransportError, pressure?: AiPressureKind): AiSmokeStatus {
+  if (error.kind === 'timeout') return 'TIMEOUT';
+  if (error.kind === 'auth') return 'AUTH';
+  if (error.kind === 'unavailable') {
+    return isClearlyUnavailable(error, error.message, error.code) ? 'MODEL_UNAVAILABLE' : 'REQUEST_ERROR';
+  }
+  if (error.kind !== 'rate-limit') return 'TRANSPORT_ERROR';
+  if (error.quotaExhausted || pressure === 'daily') return 'DAILY_QUOTA';
+  if (pressure === 'concurrency') return 'CONCURRENCY';
+  if (pressure === 'request-frequency') return 'RPM';
+  if (pressure === 'tpm') return 'TPM';
+  if (pressure === 'otpm') return 'OTPM';
+  if (pressure === 'capacity') return 'PROVIDER_BUSY';
+  return 'RATE_LIMIT';
+}
+
+export function smokeCause(result: Pick<AiSmokePurposeResult, 'outcome'>): AiSmokeCause | undefined {
+  switch (result.outcome) {
+    case 'PASS': return undefined;
+    case 'SLOW': return 'slow';
+    case 'TIMEOUT': return 'timeout';
+    case 'OUTPUT_LIMIT': return 'output truncated';
+    case 'INVALID_OUTPUT': return 'malformed JSON';
+    case 'SCHEMA_FAIL': return 'schema failure';
+    case 'SEMANTIC_FAIL': return 'semantic failure';
+    case 'DAILY_QUOTA': return 'daily quota';
+    case 'RPM': return 'request/minute';
+    case 'TPM': return 'tokens/minute';
+    case 'OTPM': return 'output-tokens/minute';
+    case 'CONCURRENCY': return 'concurrency';
+    case 'PROVIDER_BUSY': return 'provider overloaded';
+    case 'AUTH': return 'auth';
+    case 'MODEL_UNAVAILABLE': return 'unavailable';
+    case 'RATE_LIMIT': return 'unknown rate limit';
+    case 'REQUEST_ERROR': return 'request error';
+    case 'TRANSPORT_ERROR': return 'transport error';
+    case 'CONFIG_ERROR': return 'config';
+    case 'BLOCKED': return 'blocked';
+  }
 }
 
 function isClearlyUnavailable(
@@ -667,18 +814,29 @@ function basePurposeResult(
   latencyMs: number,
   extra: Partial<AiSmokePurposeResult>,
 ): AiSmokePurposeResult {
+  const {
+    success: _success,
+    slow,
+    outcome: _outcome,
+    cause,
+    requestedMaxOutputTokens,
+    ...rest
+  } = withoutUndefined(extra);
   return {
     provider: route.provider,
     model: route.model,
     routeId: route.routeId,
     purpose,
     outcome,
-    success: outcome === 'PASS',
+    success: outcome === 'PASS' || outcome === 'SLOW',
+    slow: slow ?? outcome === 'SLOW',
     schemaValid: false,
     semanticValid: false,
     requestMade: true,
     latencyMs,
-    ...withoutUndefined(extra),
+    requestedMaxOutputTokens: requestedMaxOutputTokens ?? maxOutputTokensForPurpose(purpose),
+    cause: cause ?? smokeCause({ outcome }),
+    ...rest,
   };
 }
 
@@ -694,11 +852,14 @@ function blockedPurpose(
     purpose,
     outcome: 'BLOCKED',
     success: false,
+    slow: false,
     schemaValid: false,
     semanticValid: false,
     requestMade: false,
     latencyMs: 0,
     blockedBy: blocker.outcome,
+    cause: 'blocked',
+    requestedMaxOutputTokens: maxOutputTokensForPurpose(purpose),
     message: `blocked after ${blocker.purpose}: ${blocker.outcome}${blocker.message ? ` — ${blocker.message}` : ''}`,
   };
 }
@@ -863,33 +1024,12 @@ export function extractProviderErrorCode(message: string): string | undefined {
   return known?.[1];
 }
 
-function formatFailure(result: AiSmokePurposeResult): string {
-  const details = [
-    `${result.routeId} / ${result.purpose}: ${result.outcome}`,
-    result.httpStatus !== undefined ? `HTTP ${result.httpStatus}` : undefined,
-    result.providerErrorCode ? `code ${result.providerErrorCode}` : undefined,
-    result.providerStatus ? `provider status ${result.providerStatus}` : undefined,
-    formatLatency(result.latencyMs),
-    result.message,
-  ].filter((value): value is string => Boolean(value));
-  return details.join(' | ');
-}
-
 function logJson(log: (line: string) => void, value: AiSmokePurposeResult, env: AiEnv): void {
-  log(sanitizeErrorMessage(JSON.stringify(withoutUndefined(value)), env as NodeJS.ProcessEnv));
+  log(redactSecrets(JSON.stringify(withoutUndefined(value)), env as NodeJS.ProcessEnv));
 }
 
 function withoutUndefined<T extends object>(value: T): T {
   return Object.fromEntries(Object.entries(value).filter(([, item]) => item !== undefined)) as T;
-}
-
-function cellFor(outcome: AiSmokePurposeOutcome | undefined): string {
-  return outcome ?? '-';
-}
-
-function formatLatency(ms: number): string {
-  if (ms >= 1_000) return `${(ms / 1_000).toFixed(1)} s`;
-  return `${ms} ms`;
 }
 
 function elapsed(now: () => number, started: number): number {

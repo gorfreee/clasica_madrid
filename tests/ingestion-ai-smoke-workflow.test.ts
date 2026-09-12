@@ -27,9 +27,19 @@ describe('workflow AI live smoke test', () => {
     expect(yaml).toContain('timeout-minutes: 15');
     expect(yaml).not.toContain('AI_STATE_DIR');
     expect(routeYaml).not.toContain('AI_STATE_DIR');
-    expect(routeYaml).not.toContain('mkdir -p');
+    expect(routeYaml).toContain('--report-dir');
+    expect(routeYaml).toContain('ai-smoke-report.md');
+    expect(routeYaml).toMatch(/if:\s*always\(\)/);
     expect(yaml).toContain('npm run ai:smoke:all');
     expect(yaml).toContain('--all-purposes');
+    expect(yaml).toContain('--report-dir');
+    expect(yaml).toContain('GITHUB_STEP_SUMMARY');
+    expect(yaml).toContain('ai-smoke-report.md');
+    expect(yaml).toContain('ai-smoke-report.json');
+    expect(yaml).toContain('set +e');
+    expect(yaml).toMatch(/if:\s*always\(\)/);
+    expect(yaml).toContain('Fail if smoke failed');
+    expect(yaml).toContain('actions/upload-artifact@');
     expect(yaml).not.toContain('ingest:sync');
     expect(yaml).not.toContain('data/**');
 
@@ -56,5 +66,19 @@ describe('workflow AI live smoke test', () => {
 
     expect(ci).not.toContain('ai:smoke');
     expect(ci).not.toContain('ai-live-smoke');
+  });
+
+  it('publica summary y artifacts aunque el smoke devuelva exit 1', async () => {
+    const yaml = await readFile(smokePath, 'utf8');
+    const runStep = yaml.split('- name: Run AI live smoke')[1]?.split('- name: Publish smoke report')[0] ?? '';
+    const publishStep = yaml.split('- name: Publish smoke report')[1]?.split('- name: Fail if smoke failed')[0] ?? '';
+    const failStep = yaml.split('- name: Fail if smoke failed')[1] ?? '';
+    expect(runStep).toContain('set +e');
+    expect(runStep).toContain('exit 0');
+    expect(runStep).toContain('exit_code=$status');
+    expect(publishStep).toMatch(/if:\s*always\(\)/);
+    expect(publishStep).toContain('upload-artifact');
+    expect(publishStep).toContain('ai-smoke-report.md');
+    expect(failStep).toMatch(/if:\s*always\(\) && steps\.smoke\.outputs\.exit_code != '0'/);
   });
 });
