@@ -170,9 +170,9 @@ function responseFormatFields(
         type: 'json_schema',
         json_schema: {
           name: jsonSchemaName(request.purpose),
-          // Classification schemas keep optional fields (formats, kind, rationale).
-          // Groq strict mode requires every property in `required` plus
-          // additionalProperties: false, which would deform that contract.
+          // Classification purpose schemas require their fields and set
+          // additionalProperties: false. Groq strict mode is left off: enabling
+          // it is a provider-specific change outside this contract split.
           strict: false,
           schema: request.schema,
         },

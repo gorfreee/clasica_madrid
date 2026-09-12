@@ -6,8 +6,8 @@ import {
   AiUnusableOutputError,
   failureKindForUnusable,
   failureKindForTransport,
-  parseAiClassification,
   parseAiOutputForPurpose,
+  parseAiTaxonomy,
   sanitizeAiOutputExcerpt,
   taxonomyFormatsStillUnresolved,
   type AiAttemptFailure,
@@ -899,7 +899,7 @@ function isUnsatisfactoryTaxonomyFormats(
   acceptEmptyFormats: boolean,
 ): boolean {
   if (purpose !== 'taxonomy' || !requireFormats || acceptEmptyFormats) return false;
-  const parsed = parseAiClassification(value);
+  const parsed = parseAiTaxonomy(value);
   return parsed.ok && taxonomyFormatsStillUnresolved(parsed.value);
 }
 

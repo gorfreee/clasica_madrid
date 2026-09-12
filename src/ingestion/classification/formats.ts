@@ -11,7 +11,14 @@ import {
   type FormatEvidence,
 } from './text.ts';
 import { observedFormatChoiceIsUnresolved } from './format-alternatives.ts';
-import type { Resolution } from './types.ts';
+import type { DeterministicStrength, Resolution } from './types.ts';
+
+type FormatHit = {
+  format: Format;
+  ruleId: string;
+  evidence: string;
+  strength: 'strong' | 'weak';
+};
 
 const FORMAT_ORDER: Format[] = [
   'opera',
@@ -27,41 +34,7 @@ const FORMAT_ORDER: Format[] = [
 ];
 
 export function resolveFormats(facts: ObservedFacts): Resolution<Format[]> {
-  const evidence = formatEvidence(facts);
-  const hits: Array<{ format: Format; ruleId: string; evidence: string }> = [];
-
-  if (isOperaFormat(facts, evidence)) {
-    hits.push({ format: 'opera', ruleId: 'opera-format', evidence: facts.categoryText ?? facts.title });
-  }
-  if (isZarzuelaFormat(facts, evidence)) {
-    hits.push({ format: 'zarzuela', ruleId: 'zarzuela-format', evidence: facts.title });
-  }
-  if (isOrganFormat(facts, evidence)) {
-    hits.push({ format: 'organ', ruleId: 'organ-format', evidence: organEvidence(facts) });
-  }
-  if (isChoralFormat(facts, evidence)) {
-    hits.push({ format: 'choral', ruleId: 'choral-format', evidence: choralEvidence(facts) });
-  }
-  if (isSymphonicFormat(facts, evidence)) {
-    hits.push({ format: 'symphonic', ruleId: 'symphonic-format', evidence: orchestraEvidence(facts) });
-  }
-  if (isChamberFormat(facts, evidence)) {
-    hits.push({ format: 'chamber', ruleId: 'chamber-format', evidence: chamberEvidence(facts) });
-  }
-  if (isRecitalFormat(facts, evidence, hits.map((item) => item.format))) {
-    hits.push({ format: 'recital', ruleId: 'recital-format', evidence: recitalEvidence(facts) });
-  }
-  if (isEarlyMusicFormat(evidence)) {
-    hits.push({
-      format: 'early-music',
-      ruleId: 'early-music-format',
-      evidence: facts.categoryText ?? facts.title,
-    });
-  }
-  if (isLiedFormat(evidence)) {
-    hits.push({ format: 'lied', ruleId: 'lied-format', evidence: facts.title });
-  }
-
+  const hits = collectFormatHits(facts);
   const unique = uniqueFormats(hits.map((item) => item.format));
   if (unique.length === 0) {
     return {
@@ -69,6 +42,7 @@ export function resolveFormats(facts: ObservedFacts): Resolution<Format[]> {
       method: 'fallback',
       ruleId: 'formats-insufficient',
       evidence: [],
+      strength: 'unresolved',
     };
   }
   if (unique.length > 1 && observedFormatChoiceIsUnresolved(facts)) {
@@ -77,6 +51,7 @@ export function resolveFormats(facts: ObservedFacts): Resolution<Format[]> {
       method: 'fallback',
       ruleId: 'formats-exclusive-alternatives',
       evidence: [...new Set(hits.map((item) => item.evidence).filter(Boolean))],
+      strength: 'unresolved',
     };
   }
   return {
@@ -84,7 +59,179 @@ export function resolveFormats(facts: ObservedFacts): Resolution<Format[]> {
     method: 'rule',
     ruleId: hits[0]!.ruleId,
     evidence: [...new Set(hits.map((item) => item.evidence).filter(Boolean))],
+    strength: overallFormatStrength(hits),
   };
+}
+
+/** Formats backed by an unequivocal identity signal. AI must retain these. */
+export function strongFormatValues(facts: ObservedFacts): Format[] {
+  return uniqueFormats(
+    collectFormatHits(facts)
+      .filter((hit) => hit.strength === 'strong')
+      .map((hit) => hit.format),
+  );
+}
+
+function collectFormatHits(facts: ObservedFacts): FormatHit[] {
+  const evidence = formatEvidence(facts);
+  const hits: FormatHit[] = [];
+
+  if (isOperaFormat(facts, evidence)) {
+    hits.push({
+      format: 'opera',
+      ruleId: 'opera-format',
+      evidence: facts.categoryText ?? facts.title,
+      strength: operaStrength(facts),
+    });
+  }
+  if (isZarzuelaFormat(facts, evidence)) {
+    hits.push({
+      format: 'zarzuela',
+      ruleId: 'zarzuela-format',
+      evidence: facts.title,
+      strength: zarzuelaStrength(facts),
+    });
+  }
+  if (isOrganFormat(facts, evidence)) {
+    hits.push({
+      format: 'organ',
+      ruleId: 'organ-format',
+      evidence: organEvidence(facts),
+      strength: organStrength(facts, evidence),
+    });
+  }
+  if (isChoralFormat(facts, evidence)) {
+    hits.push({
+      format: 'choral',
+      ruleId: 'choral-format',
+      evidence: choralEvidence(facts),
+      strength: 'strong',
+    });
+  }
+  if (isSymphonicFormat(facts, evidence)) {
+    hits.push({
+      format: 'symphonic',
+      ruleId: 'symphonic-format',
+      evidence: orchestraEvidence(facts),
+      strength: 'strong',
+    });
+  }
+  if (isChamberFormat(facts, evidence)) {
+    hits.push({
+      format: 'chamber',
+      ruleId: 'chamber-format',
+      evidence: chamberEvidence(facts),
+      strength: chamberStrength(facts, evidence),
+    });
+  }
+  if (isRecitalFormat(facts, evidence, hits.map((item) => item.format))) {
+    hits.push({
+      format: 'recital',
+      ruleId: 'recital-format',
+      evidence: recitalEvidence(facts),
+      strength: recitalStrength(facts, evidence),
+    });
+  }
+  if (isEarlyMusicFormat(evidence)) {
+    hits.push({
+      format: 'early-music',
+      ruleId: 'early-music-format',
+      evidence: facts.categoryText ?? facts.title,
+      strength: earlyMusicStrength(evidence),
+    });
+  }
+  if (isLiedFormat(evidence)) {
+    hits.push({
+      format: 'lied',
+      ruleId: 'lied-format',
+      evidence: facts.title,
+      strength: 'strong',
+    });
+  }
+  return hits;
+}
+
+function overallFormatStrength(hits: FormatHit[]): DeterministicStrength {
+  if (hits.length === 0) return 'unresolved';
+  return hits.some((hit) => hit.strength === 'weak') ? 'weak' : 'strong';
+}
+
+function operaStrength(facts: ObservedFacts): 'strong' | 'weak' {
+  const category = fieldFolded(facts.categoryText);
+  const title = fieldFolded(facts.title);
+  if (hasWord(category, 'opera') || hasWord(title, 'opera') || /\bmicroperas?\b/u.test(title)) {
+    return 'strong';
+  }
+  return 'weak';
+}
+
+function zarzuelaStrength(facts: ObservedFacts): 'strong' | 'weak' {
+  const category = fieldFolded(facts.categoryText);
+  const title = fieldFolded(facts.title);
+  if (hasWord(category, 'zarzuela') || hasWord(title, 'zarzuela')) return 'strong';
+  return 'weak';
+}
+
+function organStrength(_facts: ObservedFacts, evidence: FormatEvidence): 'strong' | 'weak' {
+  const eventFields = eventFieldsOf(evidence);
+  if (
+    evidenceHasPhrase(eventFields, 'conciertos de organo') ||
+    evidenceHasPhrase(eventFields, 'concierto de organo') ||
+    evidenceHasPhrase(eventFields, 'recital de organo') ||
+    evidenceHasPhrase(eventFields, 'ciclo internacional de organo') ||
+    (evidenceHasWord(eventFields, 'organo') &&
+      (evidenceHasWord(eventFields, 'concierto') ||
+        evidenceHasWord(eventFields, 'recital') ||
+        evidenceHasWord(eventFields, 'ciclo')))
+  ) {
+    return 'strong';
+  }
+  return 'weak';
+}
+
+function chamberStrength(facts: ObservedFacts, evidence: FormatEvidence): 'strong' | 'weak' {
+  const category = fieldFolded(facts.categoryText);
+  if (isMusicalChamberCategory(category, evidence.identity)) return 'strong';
+  if (hasStrongChamberFormation(evidence.identity)) return 'strong';
+  if (evidence.performers.some((text) => hasStrongChamberFormation(text))) return 'strong';
+  if (facts.performers.some((item) => hasWord(fieldFolded(item.roleText), 'cuarteto'))) return 'strong';
+  if (facts.performers.some((item) => hasPhrase(fieldFolded(item.name), 'chamber orchestra'))) {
+    return 'strong';
+  }
+  return 'weak';
+}
+
+function recitalStrength(_facts: ObservedFacts, evidence: FormatEvidence): 'strong' | 'weak' {
+  if (evidenceHasWord([evidence.identity, evidence.program], 'recital')) return 'strong';
+  return 'weak';
+}
+
+function earlyMusicStrength(evidence: FormatEvidence): 'strong' | 'weak' {
+  const eventFields = eventFieldsOf(evidence);
+  if (
+    evidenceHasPhrase(eventFields, 'universo barroco') ||
+    evidenceHasPhrase(eventFields, 'musica antigua') ||
+    evidenceHasPhrase(eventFields, 'alte musik') ||
+    evidenceHasPhrase(eventFields, 'historicamente informad')
+  ) {
+    return 'strong';
+  }
+  return 'weak';
+}
+
+function hasStrongChamberFormation(text: string): boolean {
+  if (!text) return false;
+  return (
+    hasWord(text, 'cuarteto') ||
+    hasWord(text, 'quinteto') ||
+    hasWord(text, 'sexteto') ||
+    hasWord(text, 'octeto') ||
+    hasPhrase(text, 'liceo de camara') ||
+    hasPhrase(text, 'domingos de camara') ||
+    hasPhrase(text, 'musica de camara') ||
+    hasPhrase(text, 'festival de ensembles') ||
+    isChamberOrchestraName(text)
+  );
 }
 
 function isOperaFormat(facts: ObservedFacts, evidence: FormatEvidence): boolean {

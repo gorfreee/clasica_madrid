@@ -5,15 +5,17 @@ import {
   AiRateLimitedError,
   AiUnusableOutputError,
   parseAiAccess,
-  parseAiClassification,
   parseAiComposerExtraction,
+  parseAiEligibility,
+  parseAiTaxonomy,
   type AiCallContext,
   type AiCallDiagnostics,
   type AiCallPurpose,
-  type AiClassificationResult,
+  type AiEligibilityResult,
+  type AiTaxonomyResult,
   type AiClassifier,
 } from './ai.ts';
-import type { ClassificationResult, Resolution, ResolutionMethod } from './types.ts';
+import type { ClassificationResult, DeterministicStrength, Resolution, ResolutionMethod } from './types.ts';
 import type { Era, EventKind, Format } from '../../lib/schemas/taxonomies.ts';
 import {
   sortComposersByAppearance,
@@ -26,7 +28,16 @@ import {
   validateAiComposerCandidates,
 } from './ai-metadata.ts';
 import { rejectSpeculativeAiFormats } from './format-alternatives.ts';
-import { evaluateEligibilityAi } from './eligibility-grounding.ts';
+import { evaluateEligibilityAi, musicalEvidenceIsGrounded } from './eligibility-grounding.ts';
+import { strongFormatValues } from './formats.ts';
+import { orderedUniqueEras } from './eras.ts';
+import {
+  formatsNeedAi,
+  hasObservedRepertoireForEras,
+  observedComposersWithoutEraKnowledge,
+  resolutionStrength,
+  taxonomyNeedsAi as resultNeedsTaxonomyAi,
+} from './strength.ts';
 
 export { AI_CLASSIFY_TIMEOUT_MS };
 
@@ -40,14 +51,15 @@ export type ClassifyObservedOptions = {
 };
 
 /**
- * Deterministic classify(), then AI only where it is allowed:
+ * Deterministic classify(), then AI where interpretation is needed:
  * - eligibility: only if deterministic is uncertain. Include/exclude are never reopened.
  * - composers: included events with leftover composer-like programme evidence
  *   that structured/knowledge lists have not already resolved. Existing names are kept.
  * - access: only for included events with unresolved values and observed evidence.
- * - taxonomy: only if the final eligibility is include and formats remain unresolved.
- *   Eras never come from eligibility/taxonomy AI; they are derived from observed
- *   composers/works (including after composer-extraction) via resolveEras().
+ * - taxonomy: include events whose formats are unresolved or weak, or whose eras
+ *   are unresolved for observed composers/works (including names absent from the
+ *   knowledge base). Strong deterministic formats/eras are not overwritten.
+ *   Eligibility AI may also fill well-grounded formats to avoid a later call.
  * Every metadata failure keeps the deterministic value and the ingest continues.
  */
 export async function classifyObserved(
@@ -86,8 +98,9 @@ export async function enrichWithAiIfNeeded(
     if (result.composers && result.composers.value.length > 0) {
       enrichedFacts = { ...facts, composers: result.composers.value };
       const eras = resolveEras(enrichedFacts);
-      // Composer-extraction can surface names that resolveEras() did not see
-      // on the first pass. Knowledge then fills eras; AI taxonomy never does.
+      // Composer-extraction can surface names that the first knowledge pass
+      // did not see. Strong knowledge eras fill here; taxonomy may still
+      // complete leftover unmatched names later.
       if (eras.value.length > 0) result = { ...result, eras };
     }
   }
@@ -96,7 +109,7 @@ export async function enrichWithAiIfNeeded(
     result = await enrichAccessWithAi(result, facts, callOptions);
   }
 
-  if (!taxonomyNeedsAi(result) || !options.ai) return result;
+  if (!resultNeedsTaxonomyAi(result, enrichedFacts) || !options.ai) return result;
 
   return enrichTaxonomyWithAi(result, enrichedFacts, callOptions);
 }
@@ -119,7 +132,7 @@ async function resolveEligibilityWithAi(
   const called = await invokeAi(facts, options, 'eligibility');
   if (!called.ok) return degradeFromError(deterministic, called.error);
 
-  const parsed = parseAiClassification(called.value);
+  const parsed = parseAiEligibility(called.value);
   if (!parsed.ok) {
     return degrade(deterministic, 'ai', parsed.ruleId, [parsed.reason]);
   }
@@ -135,11 +148,11 @@ async function enrichTaxonomyWithAi(
   facts: ObservedFacts,
   options: ClassifyObservedOptions,
 ): Promise<ClassificationResult> {
-  const formatsMissing = !current.formats || current.formats.value.length === 0;
+  const formatsMissing = formatsNeedAi(current.formats) && resolutionStrength(current.formats) === 'unresolved';
   const called = await invokeAi(facts, options, 'taxonomy', { requireFormats: formatsMissing });
   if (!called.ok) return current;
 
-  const parsed = parseAiClassification(called.value);
+  const parsed = parseAiTaxonomy(called.value);
   if (!parsed.ok) return current;
   return applyTaxonomyAi(current, facts, parsed.value, options.venue);
 }
@@ -172,6 +185,7 @@ async function enrichAccessWithAi(
       'ai',
       `ai-access-${parsed.value.classification}`,
       [parsed.value.evidence],
+      'strong',
     ),
   };
 }
@@ -255,7 +269,7 @@ async function invokeAi(
 function applyEligibilityAi(
   deterministic: ClassificationResult,
   facts: ObservedFacts,
-  ai: AiClassificationResult,
+  ai: AiEligibilityResult,
   venue?: KindVenue,
 ): ClassificationResult {
   const eligibility = resolution(
@@ -270,7 +284,7 @@ function applyEligibilityAi(
   return {
     eligibility,
     formats: keepResolvedFormats(base.formats, ai.formats, ai.evidence, facts),
-    eras: keepResolvedEras(base.eras, facts, ai.eras),
+    eras: keepResolvedEras(base.eras, facts),
     kind: keepResolvedKind(base.kind, facts, venue),
     access: resolveAccess(facts.accessText),
   };
@@ -279,14 +293,14 @@ function applyEligibilityAi(
 function applyTaxonomyAi(
   current: ClassificationResult,
   facts: ObservedFacts,
-  ai: AiClassificationResult,
+  ai: AiTaxonomyResult,
   venue?: KindVenue,
 ): ClassificationResult {
   // Eligibility is already include and must not change. Kind stays deterministic.
   return {
     eligibility: current.eligibility,
     formats: keepResolvedFormats(current.formats, ai.formats, ai.evidence, facts),
-    eras: keepResolvedEras(current.eras, facts, ai.eras),
+    eras: keepResolvedEras(current.eras, facts, ai.eras, ai.evidence),
     kind: keepResolvedKind(current.kind, facts, venue),
     access: current.access ?? resolveAccess(facts.accessText),
     ...(current.composers ? { composers: current.composers } : {}),
@@ -308,36 +322,62 @@ function ensureTaxonomy(
   };
 }
 
-function taxonomyNeedsAi(result: ClassificationResult): boolean {
-  return !result.formats || result.formats.value.length === 0;
-}
-
 /**
- * Eras are never taken from eligibility/taxonomy AI. Empty is the correct
- * result when resolveEras() has no observed composers/works to interpret.
- * Proposed AI eras are dropped without failing the ingest.
+ * Strong deterministic eras stay. Unresolved eras, or leftover composers
+ * absent from the knowledge base, may take grounded AI eras. AI never
+ * drops a strong deterministic era.
  */
 function keepResolvedEras(
   current: Resolution<Era[]> | undefined,
   facts: ObservedFacts,
-  aiEras: Era[] | undefined,
+  aiEras?: Era[],
+  evidence: string[] = [],
 ): Resolution<Era[]> {
-  if (current && current.value.length > 0) return current;
   const deterministic = current ?? resolveEras(facts);
-  if (deterministic.value.length > 0) return deterministic;
-  if (aiEras && aiEras.length > 0) {
-    return resolution([], 'fallback', 'ai-eras-rejected', [
-      'sin evidencia musical específica (compositores u obras observados)',
-    ]);
+  const unmatched = observedComposersWithoutEraKnowledge(facts);
+  const strength = resolutionStrength(deterministic);
+  const proposed = aiEras && aiEras.length > 0 ? orderedUniqueEras(aiEras) : [];
+  const acceptable = proposed.length > 0 && eraAiMayApply(facts, evidence);
+
+  if (strength === 'strong' && unmatched.length === 0) return deterministic;
+
+  if (strength === 'strong' && unmatched.length > 0) {
+    if (!acceptable) return deterministic;
+    const merged = orderedUniqueEras([...deterministic.value, ...proposed]);
+    if (merged.length === deterministic.value.length) return deterministic;
+    return resolution(
+      merged,
+      'ai',
+      'eras-ai-completed',
+      [...deterministic.evidence, ...evidence],
+      'strong',
+    );
+  }
+
+  if (acceptable) {
+    return resolution(proposed, 'ai', 'ai-eras', evidence, 'strong');
+  }
+  if (proposed.length > 0) {
+    return resolution(
+      [],
+      'fallback',
+      'ai-eras-rejected',
+      ['sin evidencia musical específica (compositores u obras observados)'],
+      'unresolved',
+    );
   }
   return deterministic;
 }
 
+function eraAiMayApply(facts: ObservedFacts, evidence: string[]): boolean {
+  return musicalEvidenceIsGrounded(facts, evidence) && hasObservedRepertoireForEras(facts);
+}
+
 /**
- * Formats already filled stay. AI formats apply only when non-empty and not
- * a speculative union of exclusive alternatives. An empty AI formats array
- * does not wipe eras/kind and does not invent `other`. After a taxonomy call,
- * leftover empty formats are marked unresolved for health.
+ * Strong deterministic formats stay. Weak heuristics may be replaced by
+ * grounded AI formats; strong hits in a mixed set are retained as a floor.
+ * Unresolved formats take grounded AI values. Speculative A-or-B unions
+ * are dropped. Empty AI does not invent `other`.
  */
 function keepResolvedFormats(
   current: Resolution<Format[]> | undefined,
@@ -345,22 +385,43 @@ function keepResolvedFormats(
   evidence: string[],
   facts: ObservedFacts,
 ): Resolution<Format[]> {
-  if (current && current.value.length > 0) return current;
-  if (aiValue && aiValue.length > 0) {
-    const sanitized = rejectSpeculativeAiFormats(aiValue, facts);
-    if (sanitized.length === 0) {
-      return {
-        value: [],
-        method: 'ai',
-        ruleId: 'ai-formats-exclusive-alternatives',
-        evidence: uniqueStrings([
-          ...evidence,
-          'la fuente enumera alternativas o programación no determinada, no varios formatos afirmados',
-        ]),
-      };
-    }
-    return resolution(sanitized, 'ai', 'ai-formats', evidence);
+  const strength = resolutionStrength(current);
+  if (strength === 'strong' && current && current.value.length > 0) return current;
+
+  const sanitized = aiValue && aiValue.length > 0
+    ? rejectSpeculativeAiFormats(uniqueKeepOrder(aiValue), facts)
+    : [];
+  const grounded = musicalEvidenceIsGrounded(facts, evidence);
+
+  if (strength === 'weak' && current && current.value.length > 0) {
+    if (!grounded || sanitized.length === 0) return current;
+    const floor = strongFormatValues(facts);
+    return resolution(
+      uniqueKeepOrder([...floor, ...sanitized.filter((item) => !floor.includes(item))]),
+      'ai',
+      'ai-formats',
+      evidence,
+      'strong',
+    );
   }
+
+  if (aiValue && aiValue.length > 0 && sanitized.length === 0) {
+    return {
+      value: [],
+      method: 'ai',
+      ruleId: 'ai-formats-exclusive-alternatives',
+      evidence: uniqueStrings([
+        ...evidence,
+        'la fuente enumera alternativas o programación no determinada, no varios formatos afirmados',
+      ]),
+      strength: 'unresolved',
+    };
+  }
+
+  if (sanitized.length > 0 && grounded) {
+    return resolution(sanitized, 'ai', 'ai-formats', evidence, 'strong');
+  }
+
   const fallback = current ?? resolveFormats(facts);
   if (fallback.value.length > 0) return fallback;
   return {
@@ -368,6 +429,7 @@ function keepResolvedFormats(
     method: 'ai',
     ruleId: 'ai-formats-unresolved',
     evidence: uniqueStrings([...fallback.evidence, ...evidence]),
+    strength: 'unresolved',
   };
 }
 
@@ -434,12 +496,30 @@ function resolution<T>(
   method: ResolutionMethod,
   ruleId: string,
   evidence: string[],
+  strength?: DeterministicStrength,
 ): Resolution<T> {
-  return { value, method, ruleId, evidence: uniqueStrings(evidence) };
+  return {
+    value,
+    method,
+    ruleId,
+    evidence: uniqueStrings(evidence),
+    ...(strength ? { strength } : {}),
+  };
 }
 
 function uniqueStrings(items: string[]): string[] {
   return [...new Set(items.map((item) => item.trim()).filter(Boolean))];
+}
+
+function uniqueKeepOrder<T>(items: T[]): T[] {
+  const seen = new Set<T>();
+  const out: T[] = [];
+  for (const item of items) {
+    if (seen.has(item)) continue;
+    seen.add(item);
+    out.push(item);
+  }
+  return out;
 }
 
 function isTimeoutError(error: unknown): boolean {

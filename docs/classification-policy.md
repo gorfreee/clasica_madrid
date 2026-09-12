@@ -13,7 +13,7 @@ observed facts → deterministic rules → musical knowledge → AI → safe unc
 
 Preferimos perder temporalmente un evento antes que publicar un falso positivo.
 
-Un `include` o `exclude` determinista no se reabre con IA para eligibility. El fallback de IA sólo actúa sobre `uncertain` para decidir include/exclude. Si el resultado final es `include`, fallbacks separados pueden interpretar composers o access aún no resueltos, pero únicamente cuando existe evidencia observada específica. Después se recalculan `eras` por knowledge a partir de compositores/obras observados (incluidos los extraídos y validados). Si `formats` siguen sin resolver, taxonomy puede completarlos sin cambiar eligibility ni rellenar `eras`. Si cualquier llamada falla, el evento conserva el resultado determinista y continúa.
+Un `include` o `exclude` determinista no se reabre con IA para eligibility. El fallback de IA sólo actúa sobre `uncertain` para decidir include/exclude. Si el resultado final es `include`, fallbacks separados pueden interpretar composers o access aún no resueltos, pero únicamente cuando existe evidencia observada específica. Después se recalculan `eras` por knowledge a partir de compositores/obras observados (incluidos los extraídos y validados). Taxonomy puede completar `formats` unresolved o corregir heurísticas débiles, y puede completar `eras` cuando el conocimiento determinista no las resuelve. Una era determinista fuerte (p. ej. Bach → baroque) no se sobrescribe. Eligibility no pide `eras`, `kind` ni `rationale`. Si cualquier llamada falla, el evento conserva el resultado determinista y continúa.
 
 ## Separación de responsabilidades
 
@@ -28,7 +28,7 @@ composers / access (determinista → IA sólo con evidencia)
       ↓
 eras deterministas (obras / compositores observados, incluida extracción validada)
       ↓
-formats taxonomy / kind
+formats / eras taxonomy (IA si formats débiles o unresolved; eras si knowledge no basta)
       ↓
 Candidate
 ```
@@ -147,7 +147,7 @@ La knowledge base puede asociar `Bach → baroque`. No puede afirmar que Beethov
 
 CI y tests no deben depender de llamadas live a un LLM. Si la IA no está disponible, hace timeout o devuelve algo inválido, el pipeline degrada: reglas y knowledge si bastan; si no, `uncertain` / campos vacíos.
 
-La IA de enrichment no recibe navegación web ni contexto institucional para completar hechos. `composer-extraction` sólo ve programa/obras e intérpretes observados y sus propuestas pasan validación determinista de nombre + span; un intérprete, director o solista no se acepta como compositor. `access-classification` sólo ve `accessText`: venue, source, organizer y costumbres históricas están excluidos. Sin texto observado no hay llamada. Eligibility AI puede interpretar hechos ya observados, nunca inventarlos: `include`/`exclude` exigen extractos literales verificables en esos hechos (`evidence` ≠ `rationale`); si el span no está, o si la política determinista dejó el caso en coprincipalidad sin bloque clásico, o si descriptores contemporáneos/electrónicos no tienen ancla académica observada, la decisión válida se degrada a `uncertain` editorial (no es un fallo técnico del modelo).
+La IA de enrichment no recibe navegación web ni contexto institucional para completar hechos. `composer-extraction` sólo ve programa/obras e intérpretes observados y sus propuestas pasan validación determinista de nombre + span; un intérprete, director o solista no se acepta como compositor. `access-classification` sólo ve `accessText`: venue, source, organizer y costumbres históricas están excluidos. Sin texto observado no hay llamada. Eligibility AI puede interpretar hechos ya observados, nunca inventarlos: `include`/`exclude` exigen extractos literales verificables en esos hechos (`evidence` ≠ `rationale`); si el span no está, o si la política determinista dejó el caso en coprincipalidad sin bloque clásico, o si descriptores contemporáneos/electrónicos no tienen ancla académica observada, la decisión válida se degrada a `uncertain` editorial (no es un fallo técnico del modelo). Taxonomy puede corregir formats de heurística débil y completar eras de compositores/obras observados que la knowledge no resuelve; no infiere época por venue, festival ni instrumento.
 
 ---
 
@@ -191,7 +191,7 @@ Orden de evidencia:
 2. si no hay obras, compositores declarados por la fuente;
 3. si no hay arrays estructurados, `programText` cuando nombra explícitamente compositores u obras conocidos;
 4. si el programa no nombra compositores, una declaración musical explícita y no ambigua de época (p. ej. «compositores del Romanticismo»). No escanear `description` buscando compositores: una biografía o un contexto editorial no es repertorio;
-5. si no hay ninguna de esas evidencias, vacío. No deducir época por el nombre del ensemble, del ciclo, del venue, del instrumento, de un festival, de una descripción promocional, de un título poético ni del repertorio probable de un intérprete. La IA de eligibility/taxonomy no puede rellenar `eras`: vacío es correcto y preferible a adivinar.
+5. si no hay ninguna de esas evidencias, vacío. No deducir época por el nombre del ensemble, del ciclo, del venue, del instrumento, de un festival, de una descripción promocional, de un título poético ni del repertorio probable de un intérprete. Si hay compositores u obras observados que la knowledge no resuelve, taxonomy puede completar `eras` con evidencia literal. Eligibility no pide ni aplica `eras`. Una era determinista fuerte no se sustituye.
 
 Ejemplo: Bach + Mozart + Mahler → `baroque` + `classical` + `romantic`.
 
@@ -263,6 +263,6 @@ La implementación no debe inventar performers, composers, works, fechas, venues
 
 `eras` / `formats`: preferimos vacío a incorrecto; pueden ser múltiples; no bloquean publicación si eligibility es `include` y los datos esenciales son válidos.
 
-La IA interpreta `ObservedFacts` acotados por purpose. No inventa hechos. Los prompts versionados están en `src/ingestion/classification/ai-prompt.ts`; no son una copia literal de esta política. Valores fuera de schema son inválidos y conservan el fallback seguro del campo (`uncertain`, `unknown` o vacío). CI no llama a un LLM. Tests usan fakes. Los eventos ya publicados no se borran ni pierden valores conocidos por esta puerta; el merge sigue siendo conservador.
+La IA interpreta `ObservedFacts` acotados por purpose. No inventa hechos. Los prompts versionados están en `src/ingestion/classification/ai-prompt.ts`; no son una copia literal de esta política. Cada purpose tiene su propio schema (`additionalProperties: false`); valores fuera de schema son inválidos y conservan el fallback seguro del campo (`uncertain`, `unknown` o vacío). CI no llama a un LLM. Tests usan fakes. Los eventos ya publicados no se borran ni pierden valores conocidos por esta puerta; el merge sigue siendo conservador.
 
 Forma de cada caso y cómo añadir uno: `tests/fixtures/ingestion/golden/README.md`.

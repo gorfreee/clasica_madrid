@@ -569,7 +569,7 @@ describe('pipeline y budget compartido', () => {
         return { classification: 'free', evidence: 'La invitación no supone coste alguno.' };
       }
       if (context?.purpose === 'taxonomy') {
-        return { eligibility: 'include', formats: ['recital'], eras: ['renaissance'] };
+        return { formats: ['recital'], eras: ['renaissance'], evidence: ['Maddalena Casulana'] };
       }
       throw new Error(`purpose inesperado: ${context?.purpose}`);
     });
@@ -585,15 +585,15 @@ describe('pipeline y budget compartido', () => {
     expect(run.candidates).toHaveLength(1);
     expect(run.candidates[0]!.event.composers).toEqual([{ name: 'Maddalena Casulana' }]);
     expect(run.candidates[0]!.event.access).toBe('free');
-    expect(run.candidates[0]!.event.eras).toEqual([]);
-    expect(ai.purposes).toEqual(['access-classification']);
-    expect(run.summary.ai.attempted).toBe(1);
+    expect(run.candidates[0]!.event.eras).toEqual(['renaissance']);
+    expect(ai.purposes).toEqual(['access-classification', 'taxonomy']);
+    expect(run.summary.ai.attempted).toBe(2);
     expect(run.summary.ai.byPurpose['composer-extraction']).toMatchObject({ attempted: 0 });
     expect(run.summary.ai.byPurpose['access-classification']).toMatchObject({ attempted: 1, resolved: 1 });
-    expect(run.summary.ai.byPurpose.taxonomy).toMatchObject({ attempted: 0 });
+    expect(run.summary.ai.byPurpose.taxonomy).toMatchObject({ attempted: 1, resolved: 1 });
     expect(run.summary.quality).toMatchObject({
       composers: { populated: 1, unresolved: 0 },
-      eras: { populated: 0, unresolved: 1 },
+      eras: { populated: 1, unresolved: 0 },
       formats: { populated: 1, unresolved: 0 },
       access: { free: 1, paid: 0, unresolved: 0 },
     });

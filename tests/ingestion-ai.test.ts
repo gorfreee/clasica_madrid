@@ -3,11 +3,13 @@ import type { ObservedFacts } from '../src/ingestion/observed.ts';
 import type { AiClassifier } from '../src/ingestion/classification/ai.ts';
 import {
   AI_CALL_PURPOSES,
-  AI_CLASSIFICATION_JSON_SCHEMA,
+  AI_ELIGIBILITY_JSON_SCHEMA,
   AiRateLimitedError,
   parseAiAccess,
   parseAiClassification,
   parseAiComposerExtraction,
+  parseAiEligibility,
+  parseAiTaxonomy,
   taxonomyFormatsStillUnresolved,
 } from '../src/ingestion/classification/ai.ts';
 import {
@@ -99,11 +101,11 @@ const popularUncertainFacts = facts({
 describe('AI classifier prompt v2', () => {
   const prompt = AI_CLASSIFIER_SYSTEM_PROMPT;
 
-  it('is version 12 so results are distinguishable from earlier prompts', () => {
-    expect(AI_CLASSIFIER_PROMPT_VERSION).toBe(12);
-    expect(AI_REQUEST_CONTRACT_VERSION).toBe(3);
-    expect(buildAiRequest(uncertainFacts).contractVersion).toBe(3);
-    expect(buildAiRequest(uncertainFacts).user).toContain('promptVersion: 12');
+  it('is version 13 so results are distinguishable from earlier prompts', () => {
+    expect(AI_CLASSIFIER_PROMPT_VERSION).toBe(13);
+    expect(AI_REQUEST_CONTRACT_VERSION).toBe(4);
+    expect(buildAiRequest(uncertainFacts).contractVersion).toBe(4);
+    expect(buildAiRequest(uncertainFacts).user).toContain('promptVersion: 13');
   });
 
   it('keeps precision, uncertain as a valid output, and the ban on inventing facts', () => {
@@ -189,9 +191,8 @@ describe('AI classifier prompt v2', () => {
   });
 
   it('keeps twentieth vs contemporary as a conservative academic boundary', () => {
-    expect(prompt).toMatch(/Falla\/Mompou\/Satie → twentieth/);
-    expect(prompt).toMatch(/Música callada, 1959–1967/);
-    expect(prompt).toMatch(/es twentieth, no contemporary/);
+    expect(AI_TAXONOMY_SYSTEM_PROMPT).toMatch(/Falla\/Mompou\/Satie → twentieth/);
+    expect(AI_TAXONOMY_SYSTEM_PROMPT).toMatch(/obra acad[eé]mica de ~1900[–-]1970 es twentieth, no contemporary/);
   });
 
   it('allows musical knowledge only to interpret observed facts', () => {
@@ -201,33 +202,24 @@ describe('AI classifier prompt v2', () => {
   });
 
   it('keeps the structured JSON contract without extra fields', () => {
-    expect(prompt).toContain('"eligibility": "include" | "exclude" | "uncertain"');
-    expect(prompt).toContain('"formats"');
-    expect(prompt).toContain('"eras"');
-    expect(prompt).toContain('"kind": "established" | "alternative"');
-    expect(prompt).toContain('"evidence"');
-    expect(prompt).toContain('"rationale"');
-    expect(prompt).toMatch(/rationale es metadata auxiliar muy breve/);
-    expect(prompt).toMatch(/m[aá]ximo 1[–-]2 frases/);
-    expect(prompt).toMatch(/No es evidence/);
-    expect(prompt).toMatch(/extractos breves y literales/);
+    expect(prompt).toContain('Tarea: decidir eligibility');
+    expect(prompt).toMatch(/extractos literales cortos/);
     expect(prompt).toMatch(/1[–-]4 extractos/);
-    expect(prompt).toMatch(/JSON debe ser compacto/);
     expect(prompt).toMatch(/no expliques el razonamiento paso a paso/);
-    expect(prompt).toMatch(/obligatorio si include o exclude/);
-    expect(prompt).toMatch(/no pongas conclusiones ni rationale/);
+    expect(prompt).toMatch(/Obligatorio si include o exclude/);
     expect(prompt).toMatch(/electr[oó]nica, electroac[uú]stica, s[ií]ntesis modular/);
+    expect(prompt).toMatch(/El schema define la forma JSON/);
     expect(prompt).not.toMatch(/confidence/i);
     expect(prompt).not.toMatch(/chain[- ]of[- ]thought/i);
+    expect(prompt).not.toContain('"kind"');
+    expect(prompt).not.toContain('"rationale"');
+    expect(prompt).not.toContain('"eras"');
   });
 
-  it('does not ask eligibility AI to fill eras', () => {
-    expect(prompt).toMatch(/eras: no las rellenes/);
-    expect(prompt).toMatch(/eras=\[\] es correcto y preferible a adivinar/);
-    expect(prompt).toMatch(/deja eras=\[\]/);
-    expect(prompt).toMatch(/Bach\/H[äa]ndel son baroque/);
-    expect(prompt).toMatch(/Mozart\/Haydn, classical/);
-    expect(prompt).toMatch(/Brahms\/Mahler, romantic/);
+  it('does not ask eligibility AI to fill eras, kind or rationale', () => {
+    expect(prompt).toMatch(/No pidas ni devuelvas eras, kind ni rationale/);
+    expect(prompt).not.toMatch(/eras: no las rellenes/);
+    expect(prompt).not.toMatch(/deja eras=\[\]/);
     expect(prompt).not.toMatch(/si eligibility=include, intenta rellenarlas/);
   });
 });
@@ -235,15 +227,15 @@ describe('AI classifier prompt v2', () => {
 describe('AI output token budgets by purpose', () => {
   it('asigna un presupuesto explícito y distinto a cada purpose', () => {
     expect(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE).toEqual({
-      'access-classification': 256,
-      'composer-extraction': 768,
-      taxonomy: 1024,
-      eligibility: 1536,
+      'access-classification': 192,
+      taxonomy: 384,
+      'composer-extraction': 512,
+      eligibility: 768,
     });
     expect(Object.keys(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE).sort()).toEqual([...AI_CALL_PURPOSES].sort());
-    expect(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE.eligibility).toBeGreaterThan(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE.taxonomy);
-    expect(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE.taxonomy).toBeGreaterThan(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE['composer-extraction']);
-    expect(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE['composer-extraction']).toBeGreaterThan(
+    expect(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE.eligibility).toBeGreaterThan(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE['composer-extraction']);
+    expect(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE['composer-extraction']).toBeGreaterThan(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE.taxonomy);
+    expect(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE.taxonomy).toBeGreaterThan(
       AI_MAX_OUTPUT_TOKENS_BY_PURPOSE['access-classification'],
     );
   });
@@ -261,7 +253,7 @@ describe('AI output token budgets by purpose', () => {
   });
 
   it('sigue parseando respuestas válidas actuales de cada purpose', () => {
-    const eligibility = parseAiClassification({
+    const eligibility = parseAiEligibility({
       eligibility: 'include',
       formats: ['symphonic'],
       eras: [],
@@ -270,7 +262,10 @@ describe('AI output token budgets by purpose', () => {
       rationale: 'Concierto sinfónico de repertorio clásico.',
     });
     expect(eligibility.ok).toBe(true);
-    const taxonomy = parseAiClassification({
+    if (!eligibility.ok) return;
+    expect(eligibility.value.formats).toEqual(['symphonic']);
+    expect(eligibility.value).not.toHaveProperty('rationale');
+    const taxonomy = parseAiTaxonomy({
       eligibility: 'include',
       formats: ['chamber'],
       eras: [],
@@ -278,6 +273,8 @@ describe('AI output token budgets by purpose', () => {
       evidence: ['cuarteto de cuerda'],
     });
     expect(taxonomy.ok).toBe(true);
+    if (!taxonomy.ok) return;
+    expect(taxonomy.value.formats).toEqual(['chamber']);
     expect(parseAiAccess({ classification: 'free', evidence: 'entrada gratuita previa reserva' }).ok).toBe(true);
     expect(parseAiComposerExtraction({
       candidates: [{ name: 'Johann Sebastian Bach', evidence: 'J.S. Bach — Clave bien temperado' }],
@@ -299,8 +296,8 @@ describe('parseAiClassification', () => {
     if (!parsed.ok) return;
     expect(parsed.value.eligibility).toBe('include');
     expect(parsed.value.formats).toEqual(['early-music', 'chamber']);
-    expect(parsed.value.eras).toEqual(['early']);
-    expect(parsed.value.kind).toBe('established');
+    expect(parsed.value).not.toHaveProperty('eras');
+    expect(parsed.value).not.toHaveProperty('kind');
   });
 
   it('parsea JSON en string y rechaza prosa', () => {
@@ -344,10 +341,10 @@ describe('parseAiClassification', () => {
     expect(omitted.ok).toBe(true);
     if (!omitted.ok) return;
     expect(taxonomyFormatsStillUnresolved(omitted.value)).toBe(true);
-    expect(omitted.value.eras).toEqual(['romantic']);
+    expect(omitted.value).not.toHaveProperty('eras');
   });
 
-  it('trunca rationale > 800 y conserva una clasificación válida', () => {
+  it('ignora rationale legacy y conserva una clasificación válida', () => {
     const parsed = parseAiClassification({
       eligibility: 'include',
       kind: 'alternative',
@@ -357,10 +354,9 @@ describe('parseAiClassification', () => {
     expect(parsed.ok).toBe(true);
     if (!parsed.ok) return;
     expect(parsed.value.eligibility).toBe('include');
-    expect(parsed.value.kind).toBe('alternative');
     expect(parsed.value.evidence).toEqual(['ciclo de órgano']);
-    expect(parsed.value.rationale).toBe('x'.repeat(800));
-    expect(parsed.value.evidence).not.toContain(parsed.value.rationale);
+    expect(parsed.value).not.toHaveProperty('kind');
+    expect(parsed.value).not.toHaveProperty('rationale');
   });
 
   it('un output semánticamente inválido sigue siendo ai-invalid-output aunque rationale sea largo', () => {
@@ -698,14 +694,14 @@ describe('Gemini provider (fetch inyectado, sin red)', () => {
         expect(body.response_format).toEqual({
           type: 'text',
           mime_type: 'application/json',
-          schema: AI_CLASSIFICATION_JSON_SCHEMA,
+          schema: AI_ELIGIBILITY_JSON_SCHEMA,
         });
         expect(body.response_format.schema.properties).toHaveProperty('eligibility');
         expect(body.response_format.schema.properties).toHaveProperty('formats');
-        expect(body.response_format.schema.properties).toHaveProperty('eras');
-        expect(body.response_format.schema.properties).toHaveProperty('kind');
         expect(body.response_format.schema.properties).toHaveProperty('evidence');
-        expect(body.response_format.schema.properties).toHaveProperty('rationale');
+        expect(body.response_format.schema.properties).not.toHaveProperty('eras');
+        expect(body.response_format.schema.properties).not.toHaveProperty('kind');
+        expect(body.response_format.schema.properties).not.toHaveProperty('rationale');
         return geminiStepsResponse(JSON.stringify({ eligibility: 'uncertain', evidence: ['ficha genérica'] }));
       },
     });
@@ -925,7 +921,7 @@ describe('taxonomy enrichment — separado de eligibility', () => {
           formats: ['chamber'],
           eras: ['romantic'],
           kind: 'alternative',
-          evidence: ['Brahms en el programa'],
+          evidence: ['Johannes Brahms'],
         };
       },
     });
@@ -970,7 +966,7 @@ describe('taxonomy enrichment — separado de eligibility', () => {
     expect(result.formats?.value).toEqual(['chamber']);
     expect(result.formats?.method).toBe('rule');
     expect(result.eras?.value).toEqual([]);
-    expect(result.eras?.ruleId).toBe('ai-eras-rejected');
+    expect(result.eras?.ruleId).toBe('eras-unknown');
     expect(ai.calls).toBe(1);
   });
 
@@ -1041,7 +1037,7 @@ describe('taxonomy enrichment — separado de eligibility', () => {
           eligibility: 'include',
           formats: ['recital'],
           eras: ['romantic'],
-          evidence: ['solista de piano en el programa'],
+          evidence: ['Johannes Brahms'],
         };
       },
     });
@@ -1168,8 +1164,8 @@ describe('taxonomy AI — alternativas exclusivas vs formaciones combinadas', ()
 describe('taxonomy AI prompt', () => {
   const prompt = AI_TAXONOMY_SYSTEM_PROMPT;
 
-  it('is version 8 so results are distinguishable from earlier taxonomy prompts', () => {
-    expect(AI_TAXONOMY_PROMPT_VERSION).toBe(8);
+  it('is version 9 so results are distinguishable from earlier taxonomy prompts', () => {
+    expect(AI_TAXONOMY_PROMPT_VERSION).toBe(9);
   });
 
   it('asks for a format when observed facts support a musical inference', () => {
@@ -1180,14 +1176,16 @@ describe('taxonomy AI prompt', () => {
     expect(prompt).toMatch(/No uses other simplemente para evitar un array vac[ií]o/);
     expect(prompt).toMatch(/no inventes performers, instrumentos/);
     expect(prompt).toMatch(/biograf[ií]a o el historial/);
-    expect(prompt).toMatch(/NO rellenes eras/);
-    expect(prompt).toMatch(/eras: siempre \[\]/);
+    expect(prompt).toMatch(/si los hechos lo permiten, eras/);
+    expect(prompt).toMatch(/No deduzcas [eé]poca por venue/);
     expect(prompt).toMatch(/alternativas exclusivas/);
     expect(prompt).toMatch(/pianista o un grupo de c[aá]mara/);
     expect(prompt).toMatch(/1[–-]4 extractos literales cortos/);
-    expect(prompt).toMatch(/JSON compacto/);
-    expect(prompt).not.toMatch(/formats y eras vac[ií]os son preferibles a adivinar/);
-    expect(prompt).not.toMatch(/der[ií]valas de \(1\) obras observadas/);
+    expect(prompt).not.toMatch(/NO rellenes eras/);
+    expect(prompt).not.toMatch(/eras: siempre \[\]/);
+    expect(prompt).not.toMatch(/"eligibility"/);
+    expect(prompt).not.toMatch(/"kind"/);
+    expect(prompt).not.toMatch(/"rationale"/);
   });
 });
 
@@ -1218,7 +1216,7 @@ describe('eras AI guardrail — solo evidencia musical observada', () => {
     );
     expect(result.eligibility.value).toBe('include');
     expect(result.eras?.value).toEqual([]);
-    expect(result.eras?.ruleId).toBe('ai-eras-rejected');
+    expect(['eras-unknown', 'ai-eras-rejected']).toContain(result.eras?.ruleId);
   });
 
   it('un recorrido por la historia de la música española sin repertorio no inventa cinco épocas', async () => {
@@ -1244,7 +1242,7 @@ describe('eras AI guardrail — solo evidencia musical observada', () => {
     );
     expect(result.eligibility.value).toBe('include');
     expect(result.eras?.value).toEqual([]);
-    expect(result.eras?.ruleId).toBe('ai-eras-rejected');
+    expect(['eras-unknown', 'ai-eras-rejected']).toContain(result.eras?.ruleId);
   });
 
   it('Bach observado explícitamente resuelve Barroco y no se pisa', async () => {
@@ -1330,7 +1328,7 @@ describe('eras AI guardrail — solo evidencia musical observada', () => {
     const result = await enrichWithAiIfNeeded(deterministic, observed, {
       ai: {
         async classify() {
-          return { eligibility: 'include', formats: ['chamber'], eras: [...inventedEras] };
+          return { eligibility: 'include', formats: ['chamber'], eras: [...inventedEras], evidence: ['Johannes Brahms'] };
         },
       },
     });
