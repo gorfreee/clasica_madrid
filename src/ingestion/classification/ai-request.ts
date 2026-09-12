@@ -5,13 +5,10 @@ import {
   AI_CLASSIFIER_SYSTEM_PROMPT,
   AI_COMPOSER_SYSTEM_PROMPT,
   AI_TAXONOMY_SYSTEM_PROMPT,
-  buildAiAccessUserMessage,
-  buildAiClassifierUserMessage,
-  buildAiComposerUserMessage,
-  buildAiTaxonomyUserMessage,
+  buildAiUserMessage,
 } from './ai-prompt.ts';
 
-export const AI_REQUEST_CONTRACT_VERSION = 3;
+export const AI_REQUEST_CONTRACT_VERSION = 4;
 
 export type AiGenerationParameters = {
   maxOutputTokens: number;
@@ -22,23 +19,24 @@ export type AiGenerationParameters = {
  * Output token cap per purpose. Every provider reads this from `AiRequest.generation`;
  * do not special-case Gemini/Groq/Mistral/Z.AI/Cloudflare here.
  *
- * Sized from the JSON actually returned (not Zod theoretical maxima) plus headroom
- * so a valid reply never has to stop at the cap. Some providers count thinking
- * tokens against this budget (Gemini `thinking_level`; Z.AI thinking is disabled
- * in the transport profile for the same reason). Eligibility historically
- * truncated around 581–600 tokens.
+ * Sized from the compact JSON each purpose actually returns after the contract
+ * split (no rationale/kind; eligibility no longer asks for eras; evidence ≤ 4
+ * spans), plus modest headroom. Not raised to paper over repetition/MAX_TOKENS
+ * loops: a small schema that loops will still loop with a bigger cap.
  *
- * access ≪ composer < taxonomy < eligibility. Not a global 600.
+ * Typical payloads:
+ * - access: `{"classification":"free","evidence":"…"}` (~40–80 tokens)
+ * - taxonomy: formats[] + eras[] + ≤4 short spans (~80–200 tokens)
+ * - composer: a handful of `{name, evidence}` objects, not the 20-item ceiling
+ * - eligibility: eligibility + optional formats + ≤4 spans (~80–250 tokens)
+ *
+ * access < taxonomy < composer < eligibility.
  */
 export const AI_MAX_OUTPUT_TOKENS_BY_PURPOSE = {
-  /** classification + one short evidence span. */
-  'access-classification': 256,
-  /** a few leftover names, each with a short evidence span. */
-  'composer-extraction': 768,
-  /** same JSON shape as eligibility, less reasoning. */
-  taxonomy: 1024,
-  /** largest JSON + thinking headroom after 581–600 truncation. */
-  eligibility: 1536,
+  'access-classification': 192,
+  taxonomy: 384,
+  'composer-extraction': 512,
+  eligibility: 768,
 } as const satisfies Record<AiCallPurpose, number>;
 
 export function maxOutputTokensForPurpose(purpose: AiCallPurpose): number {
@@ -59,29 +57,19 @@ export function buildAiRequest(
   observed: ObservedFacts,
   purpose: AiCallPurpose = 'eligibility',
 ): AiRequest {
-  const prompt = promptForPurpose(observed, purpose);
   return {
     purpose,
-    system: prompt.system,
-    user: prompt.user,
+    system: systemForPurpose(purpose),
+    user: buildAiUserMessage(observed, purpose),
     schema: aiJsonSchemaForPurpose(purpose),
     generation: { maxOutputTokens: maxOutputTokensForPurpose(purpose), temperature: 0 },
     contractVersion: AI_REQUEST_CONTRACT_VERSION,
   };
 }
 
-function promptForPurpose(
-  observed: ObservedFacts,
-  purpose: AiCallPurpose,
-): { system: string; user: string } {
-  if (purpose === 'taxonomy') {
-    return { system: AI_TAXONOMY_SYSTEM_PROMPT, user: buildAiTaxonomyUserMessage(observed) };
-  }
-  if (purpose === 'access-classification') {
-    return { system: AI_ACCESS_SYSTEM_PROMPT, user: buildAiAccessUserMessage(observed) };
-  }
-  if (purpose === 'composer-extraction') {
-    return { system: AI_COMPOSER_SYSTEM_PROMPT, user: buildAiComposerUserMessage(observed) };
-  }
-  return { system: AI_CLASSIFIER_SYSTEM_PROMPT, user: buildAiClassifierUserMessage(observed) };
+function systemForPurpose(purpose: AiCallPurpose): string {
+  if (purpose === 'taxonomy') return AI_TAXONOMY_SYSTEM_PROMPT;
+  if (purpose === 'access-classification') return AI_ACCESS_SYSTEM_PROMPT;
+  if (purpose === 'composer-extraction') return AI_COMPOSER_SYSTEM_PROMPT;
+  return AI_CLASSIFIER_SYSTEM_PROMPT;
 }

@@ -141,7 +141,7 @@ describe('evaluateEligibilityAi', () => {
     expect(parsed.ok).toBe(true);
     if (!parsed.ok) return;
     expect(parsed.value.evidence).toEqual(['repertorio lírico y canción académica']);
-    expect(parsed.value.rationale).toMatch(/barítono/);
+    expect(parsed.value).not.toHaveProperty('rationale');
     const gated = evaluateEligibilityAi(spokenWordFacts, parsed.value, {
       ruleId: 'insufficient-evidence',
     });

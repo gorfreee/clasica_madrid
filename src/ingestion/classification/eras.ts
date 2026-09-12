@@ -44,6 +44,7 @@ export function resolveEras(facts: ObservedFacts): Resolution<Era[]> {
       method: 'knowledge',
       ruleId: 'eras-from-works',
       evidence: fromWorks.evidence,
+      strength: 'strong',
     };
   }
 
@@ -54,6 +55,7 @@ export function resolveEras(facts: ObservedFacts): Resolution<Era[]> {
       method: 'knowledge',
       ruleId: 'eras-from-composers',
       evidence: fromComposers.evidence,
+      strength: 'strong',
     };
   }
 
@@ -63,6 +65,7 @@ export function resolveEras(facts: ObservedFacts): Resolution<Era[]> {
       method: 'rule',
       ruleId: 'eras-declared-contemporary',
       evidence: [facts.categoryText ?? facts.title],
+      strength: 'strong',
     };
   }
 
@@ -79,6 +82,7 @@ export function resolveEras(facts: ObservedFacts): Resolution<Era[]> {
       method: 'knowledge',
       ruleId: 'eras-from-program-text',
       evidence,
+      strength: 'strong',
     };
   }
 
@@ -90,7 +94,13 @@ export function resolveEras(facts: ObservedFacts): Resolution<Era[]> {
     method: 'fallback',
     ruleId: 'eras-unknown',
     evidence: [],
+    strength: 'unresolved',
   };
+}
+
+export function orderedUniqueEras(eras: Era[]): Era[] {
+  const set = new Set(eras);
+  return ERA_ORDER.filter((item) => set.has(item));
 }
 
 function erasFromNames(names: string[]): { eras: Era[]; evidence: string[] } {
@@ -137,6 +147,7 @@ function declaredProgrammeEras(facts: ObservedFacts): Resolution<Era[]> | undefi
     method: 'rule',
     ruleId: 'eras-declared-programme',
     evidence,
+    strength: 'strong',
   };
 }
 

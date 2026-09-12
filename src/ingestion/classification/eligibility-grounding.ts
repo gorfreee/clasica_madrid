@@ -1,6 +1,6 @@
 import { collapseWhitespace } from '../html.ts';
 import type { ObservedFacts } from '../observed.ts';
-import type { AiClassificationResult } from './ai.ts';
+import type { AiEligibilityResult } from './ai.ts';
 import {
   CLASSICAL_AND_NONCLASSICAL_COPRINCIPAL_RULE_ID,
   hasObservedClassicalAcademicAnchor,
@@ -45,7 +45,7 @@ export type EligibilityAiDecision =
  */
 export function evaluateEligibilityAi(
   facts: ObservedFacts,
-  ai: Pick<AiClassificationResult, 'eligibility' | 'evidence' | 'rationale'>,
+  ai: Pick<AiEligibilityResult, 'eligibility' | 'evidence'>,
   deterministic: Pick<Resolution<Eligibility>, 'ruleId'>,
 ): EligibilityAiDecision {
   if (ai.eligibility === 'uncertain') {
@@ -130,6 +130,14 @@ export function evidenceSpanIsGrounded(facts: ObservedFacts, span: string): bool
   const needle = collapseWhitespace(span);
   if (!needle) return false;
   return eligibilityEvidenceFields(facts).some((field) => containsNormalizedSpan(field, needle));
+}
+
+export function musicalEvidenceIsGrounded(
+  facts: ObservedFacts,
+  evidence: readonly string[] | undefined,
+): boolean {
+  const items = uniqueEvidence(evidence);
+  return items.length > 0 && items.every((span) => evidenceSpanIsGrounded(facts, span));
 }
 
 function hasAmbiguousContemporaryDescriptors(facts: ObservedFacts): boolean {

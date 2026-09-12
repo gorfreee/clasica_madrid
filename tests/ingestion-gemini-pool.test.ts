@@ -78,7 +78,7 @@ describe('persistent cache and recovery', () => {
   it('does not cache transport errors or invalid enums; pending is cleared on success', async () => {
     const stateDir = directory();
     const fetch = vi.fn()
-      .mockResolvedValueOnce(response({ eligibility: 'include', eras: ['invented'] }))
+      .mockResolvedValueOnce(response({ eligibility: 'include', formats: ['invented'] }))
       .mockResolvedValueOnce(new Response('unavailable', { status: 503 }))
       .mockResolvedValueOnce(response({ eligibility: 'exclude' }));
     const p = provider({ stateDir, fetch, maxRetries: 0 });
@@ -514,7 +514,12 @@ describe('recoverable unusable output and thinking', () => {
         if (model === 'gemini-3.1-flash-lite') {
           return response({ eligibility: 'include', formats: [], eras: ['romantic'] });
         }
-        return response({ eligibility: 'include', formats: ['symphonic'], eras: ['romantic'] });
+        return response({
+          eligibility: 'include',
+          formats: ['symphonic'],
+          eras: ['romantic'],
+          evidence: ['Johannes Brahms'],
+        });
       },
     });
     const result = await classifyObserved(includeFacts, { ai: p });

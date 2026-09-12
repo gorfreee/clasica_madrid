@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
-  AI_CLASSIFICATION_JSON_SCHEMA,
+  AI_ELIGIBILITY_JSON_SCHEMA,
   AiRateLimitedError,
   failureKindForTransport,
 } from '../src/ingestion/classification/ai.ts';
@@ -346,7 +346,7 @@ describe('payload HTTP por provider/modelo', () => {
       json_schema: {
         name: 'clasica_eligibility',
         strict: false,
-        schema: AI_CLASSIFICATION_JSON_SCHEMA,
+        schema: AI_ELIGIBILITY_JSON_SCHEMA,
       },
     });
     expect((body.response_format as { json_schema: { schema: unknown } }).json_schema.schema)

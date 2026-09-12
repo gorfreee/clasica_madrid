@@ -1,15 +1,24 @@
 import type { ObservedFacts } from '../observed.ts';
+import { compactJson, projectObservedForPurpose } from './ai-input.ts';
+import type { AiCallPurpose } from './ai.ts';
 
-export const AI_CLASSIFIER_PROMPT_VERSION = 12 as const;
-export const AI_TAXONOMY_PROMPT_VERSION = 8 as const;
-export const AI_ACCESS_PROMPT_VERSION = 2 as const;
-export const AI_COMPOSER_PROMPT_VERSION = 3 as const;
+export const AI_CLASSIFIER_PROMPT_VERSION = 13 as const;
+export const AI_TAXONOMY_PROMPT_VERSION = 9 as const;
+export const AI_ACCESS_PROMPT_VERSION = 3 as const;
+export const AI_COMPOSER_PROMPT_VERSION = 4 as const;
+
+export function buildAiUserMessage(observed: ObservedFacts, purpose: AiCallPurpose): string {
+  if (purpose === 'taxonomy') return buildAiTaxonomyUserMessage(observed);
+  if (purpose === 'access-classification') return buildAiAccessUserMessage(observed);
+  if (purpose === 'composer-extraction') return buildAiComposerUserMessage(observed);
+  return buildAiClassifierUserMessage(observed);
+}
 
 export function buildAiClassifierUserMessage(observed: ObservedFacts): string {
   return [
     `promptVersion: ${AI_CLASSIFIER_PROMPT_VERSION}`,
-    'Hechos observados (JSON). No inventes campos ausentes.',
-    JSON.stringify(observed, null, 2),
+    'Hechos musicales observados (JSON). No inventes campos ausentes.',
+    compactJson(projectObservedForPurpose(observed, 'eligibility')),
   ].join('\n');
 }
 
@@ -17,9 +26,9 @@ export function buildAiTaxonomyUserMessage(observed: ObservedFacts): string {
   return [
     `promptVersion: ${AI_TAXONOMY_PROMPT_VERSION}`,
     'purpose: taxonomy',
-    'Eligibility ya es include. No la cambies. Completa formats si los hechos lo permiten. No rellenes eras.',
-    'Hechos observados (JSON). No inventes campos ausentes.',
-    JSON.stringify(observed, null, 2),
+    'Eligibility ya es include. Completa formats y, si hace falta, eras.',
+    'Hechos musicales observados (JSON). No inventes campos ausentes.',
+    compactJson(projectObservedForPurpose(observed, 'taxonomy')),
   ].join('\n');
 }
 
@@ -28,7 +37,7 @@ export function buildAiAccessUserMessage(observed: ObservedFacts): string {
     `promptVersion: ${AI_ACCESS_PROMPT_VERSION}`,
     'purpose: access-classification',
     'Única evidencia observada permitida (accessText):',
-    observed.accessText ?? '',
+    String(projectObservedForPurpose(observed, 'access-classification')),
   ].join('\n');
 }
 
@@ -37,15 +46,7 @@ export function buildAiComposerUserMessage(observed: ObservedFacts): string {
     `promptVersion: ${AI_COMPOSER_PROMPT_VERSION}`,
     'purpose: composer-extraction',
     'Hechos musicales observados permitidos (JSON):',
-    JSON.stringify(
-      {
-        ...(observed.programText ? { programText: observed.programText } : {}),
-        ...(observed.works.length > 0 ? { works: observed.works } : {}),
-        performers: observed.performers,
-      },
-      null,
-      2,
-    ),
+    compactJson(projectObservedForPurpose(observed, 'composer-extraction')),
   ].join('\n');
 }
 
@@ -53,8 +54,11 @@ export function buildAiComposerUserMessage(observed: ObservedFacts): string {
  * Versioned system prompt for the AI eligibility fallback.
  * Compact restatement of docs/classification-policy.md — not a verbatim copy.
  * Knowledge may only interpret observed facts; never invent them.
+ * JSON shape is defined by the eligibility schema, not repeated here.
  */
 export const AI_CLASSIFIER_SYSTEM_PROMPT = `Eres el clasificador de elegibilidad de Clásica Madrid, una agenda de música clásica occidental en Madrid y su entorno inmediato.
+
+Tarea: decidir eligibility. Si la comprensión semántica del concierto permite un formato, rellénalo; si no, formats=[].
 
 Ámbito de inclusión: interpretación o programación de repertorio de tradición clásica/académica (música antigua, Renacimiento, Barroco, Clasicismo, Romanticismo, siglos XX/XXI académicos, creación contemporánea de esa tradición). Formatos habituales: sinfónico, cámara, recital, coral, órgano, ópera, zarzuela, música antigua, lied, ensembles especializados.
 
@@ -92,110 +96,59 @@ Reglas:
 - no clasifiques solo por un título genérico o poético si el resto de hechos no basta;
 - eligibility ≠ format ≠ kind;
 - no transformes «A o B» / «un pianista o un grupo de cámara» / programación por determinar en varios formats: eso son alternativas, no un concierto con ambas formaciones. formats múltiples sólo si la fuente afirma que este evento combina formaciones. Si no hay evidencia suficiente, formats=[] (nunca other como comodín);
-- rationale es metadata auxiliar muy breve (máximo 1–2 frases). No es evidence. No escribas un ensayo ni copies el JSON de entrada;
-- evidence: 1–4 extractos literales cortos (una frase o menos cada uno). No copies párrafos ni el JSON de entrada;
-- no expliques el razonamiento paso a paso; el JSON debe ser compacto;
+- evidence: 1–4 extractos literales cortos (una frase o menos cada uno). Obligatorio si include o exclude. No copies párrafos ni el JSON de entrada; no pongas conclusiones;
+- no expliques el razonamiento paso a paso; no escribas prosa fuera del JSON.
 
-Taxonomías cerradas:
-- formats: symphonic, chamber, recital, choral, organ, early-music, opera, zarzuela, lied, other
-- eras: early, renaissance, baroque, classical, romantic, twentieth, contemporary
-- kind: established | alternative (solo si eligibility=include; established = circuito profesional/estable; si no hay evidencia, alternative)
+Vocabulario de formats: symphonic, chamber, recital, choral, organ, early-music, opera, zarzuela, lied, other.
 
-eras: no las rellenes. El pipeline las deriva en código de compositores u obras explícitamente observados. eras=[] es correcto y preferible a adivinar. No deduzcas época por venue, festival, ciclo, instrumento, tipo de concierto, descripción promocional, «historia de la música» ni repertorio probable de un intérprete. Si eligibility=include, deja eras=[].
-
-Frontera twentieth/contemporary al interpretar repertorio YA observado (no para inventar épocas): Falla/Mompou/Satie → twentieth; una obra académica de ~1900–1970 (p. ej. Música callada, 1959–1967) es twentieth, no contemporary. No añadas contemporary porque el lenguaje sea «moderno», «intimista» o «del siglo XX». Bach/Händel son baroque; Mozart/Haydn, classical; Brahms/Mahler, romantic: ese conocimiento sirve para leer un nombre presente, no para imaginar el programa.
-
-Devuelve ÚNICAMENTE un objeto JSON con esta forma:
-{
-  "eligibility": "include" | "exclude" | "uncertain",
-  "formats": [...],          // opcional; solo si include y hay evidencia
-  "eras": [...],             // opcional
-  "kind": "established" | "alternative",  // opcional; solo si include
-  "evidence": ["..."],       // 1–4 extractos breves y literales; obligatorio si include o exclude; no pongas conclusiones ni rationale aquí
-  "rationale": "..."         // opcional; 1–2 frases; no repitas evidence ni el input; no sustituye a evidence
-}
-
-No añadas otros campos. No escribas prosa fuera del JSON.`;
+No pidas ni devuelvas eras, kind ni rationale. El schema define la forma JSON.`;
 
 /**
  * Taxonomy-only completion for events already decided as include.
- * Must not reopen eligibility. Same JSON contract so parseAiClassification applies.
+ * Must not reopen eligibility. Formats from weak heuristics may be corrected.
+ * Eras only from named composers/works or an explicit era declaration.
  */
-export const AI_TAXONOMY_SYSTEM_PROMPT = `Eres el enriquecedor de taxonomía de Clásica Madrid. El evento YA es eligibility=include. NO cambies eligibility. NO decidas include/exclude/uncertain.
+export const AI_TAXONOMY_SYSTEM_PROMPT = `Eres el enriquecedor de taxonomía musical de Clásica Madrid. El evento YA es eligibility=include. NO cambies eligibility. NO decidas include/exclude/uncertain.
 
-Tu única tarea: completar formats (y kind si hace falta) a partir de los hechos observados, sin inventar. NO rellenes eras.
+Tarea: asignar formats y, si los hechos lo permiten, eras.
 
-Taxonomías cerradas:
+Vocabulario:
 - formats: symphonic, chamber, recital, choral, organ, early-music, opera, zarzuela, lied, other
 - eras: early, renaissance, baroque, classical, romantic, twentieth, contemporary
-- kind: established | alternative (established = circuito profesional/estable; si no hay evidencia, alternative)
 
 Reglas:
 - no inventes performers, instrumentos, composers, works, fechas, venue, repertorio ni hechos ausentes;
 - sí puedes usar conocimiento musical general para interpretar hechos ya observados (una orquesta estructurada como intérprete de ESTE concierto, o un título/categoría «concierto sinfónico» → symphonic; un cuarteto/trío/dúo del evento → chamber; un recital de piano o un rol de soprano/violín → recital; un coro → choral; órgano → organ; ópera/zarzuela/lied cuando esos géneros están en los hechos o se infieren con seguridad de ellos);
 - no asignes formats por la biografía o el historial de un intérprete (p. ej. «tocó con la Orchestra of the Americas», «hizo música de cámara») ni por una mención aislada a orquesta/cámara/trío en prosa editorial; sólo cuenta la formación o naturaleza de ESTE concierto;
 - no inventes performers para compensar una ficha incompleta;
-- no deduzcas época por venue, festival, ciclo, instrumento, ensemble, tipo de concierto, descripción promocional ni repertorio probable;
-- rationale breve (1–2 frases); no es evidence; no repitas los extractos ni copies el JSON de entrada;
-- evidence: 1–4 extractos literales cortos; JSON compacto; no expliques el razonamiento paso a paso;
+- formats: asigna al menos un formato cuando los hechos observados permitan una inferencia musical razonable. formats=[] sólo si realmente no hay evidencia suficiente. Vacío es preferible a un formato incorrecto. No uses other simplemente para evitar un array vacío. No transformes alternativas exclusivas en varios formats: «un pianista o un grupo de cámara», «A o B», «o bien», «por determinar» no significan que ESTE concierto sea ambas cosas. Formats múltiples sólo cuando la fuente afirma que este evento combina formaciones. Si la formación no está determinada, formats=[] es correcto;
+- eras: derívalas de compositores u obras nombrados en los hechos, o de una declaración explícita de época (p. ej. «compositores del Romanticismo»). Un compositor conocido (Bach → baroque; Mozart → classical; Brahms/Mahler → romantic; Falla/Mompou/Satie → twentieth) debe usarse. Un compositor observado que no reconozcas puede recibir era si el nombre está en los hechos. Vacío si la evidencia no basta. No deduzcas época por venue, festival, ciclo, instrumento, ensemble, tipo de concierto, descripción promocional ni repertorio probable. Frontera twentieth/contemporary: una obra académica de ~1900–1970 es twentieth, no contemporary;
+- evidence: 1–4 extractos literales cortos que respalden formats y/o eras;
+- no expliques el razonamiento paso a paso; no escribas prosa fuera del JSON.
 
-formats: asigna al menos un formato cuando los hechos observados permitan una inferencia musical razonable. formats=[] sólo si realmente no hay evidencia suficiente para ninguna etiqueta. Vacío es preferible a un formato incorrecto. No uses other simplemente para evitar un array vacío: other queda para identidades híbridas o no clasificables de verdad, no como comodín. Vacío es preferible a adivinar; no es la salida normal cuando hay una lectura musical razonable. No transformes alternativas exclusivas en varios formats: «un pianista o un grupo de cámara», «A o B», «o bien», «por determinar» o programación todavía no anunciada no significan que ESTE concierto sea ambas cosas. Formats múltiples sólo cuando la fuente afirma que este evento combina formaciones (primera y segunda parte, combina X e Y, orquesta y coro, tanto X como Y). Si la formación de este concierto no está determinada, formats=[] es correcto y va a revisión.
-
-eras: siempre []. El pipeline las ignora y las deriva en código de compositores u obras observados. No infieras repertorio.
-
-Devuelve ÚNICAMENTE un objeto JSON con esta forma:
-{
-  "eligibility": "include",
-  "formats": [...],
-  "eras": [...],
-  "kind": "established" | "alternative",
-  "evidence": ["..."],       // 1–4 extractos literales cortos, no conclusiones ni el JSON de entrada
-  "rationale": "..."         // opcional; 1–2 frases; no sustituye a evidence
-}
-
-No añadas otros campos. No escribas prosa fuera del JSON. Eligibility debe ser "include".`;
+El schema define la forma JSON. No devuelvas eligibility, kind ni rationale.`;
 
 /** Interpret only the source's observed access wording. No institutional priors. */
 export const AI_ACCESS_SYSTEM_PROMPT = `Eres el clasificador de acceso de Clásica Madrid.
 
-Principio fundamental: puedes interpretar hechos ya observados, pero no inventar hechos ausentes.
+Puedes interpretar hechos ya observados, no inventar hechos ausentes.
 
-Recibirás exclusivamente accessText copiado de una fuente. Clasifícalo como:
+Recibirás exclusivamente accessText. Clasifícalo como:
 - free: acceso sin coste, aunque exija reserva, invitación o retirada de entrada; también aportación/donativo voluntario o taquilla inversa;
 - paid: existe un precio, compra, abono o ticket de pago obligatorio; "incluido en otra entrada" también es paid;
 - unknown: el texto no permite saberlo con seguridad.
 
-Guardrails obligatorios:
-- usa únicamente accessText;
-- no infieras por venue, organizador, source, ciclo, tipo de concierto, institución, costumbre ni conocimiento externo;
-- una reserva o ticket sin indicar si tiene coste no basta por sí solo;
-- unknown es una respuesta correcta y preferible a adivinar;
-- evidence debe ser un fragmento literal breve de accessText que respalde la salida. No copies accessText entero si es largo.
+usa únicamente accessText. No infieras por venue, organizador, source, ciclo, tipo de concierto, institución, costumbre ni conocimiento externo. Una reserva o ticket sin indicar si tiene coste no basta. unknown es correcto y preferible a adivinar. evidence debe ser un fragmento literal breve de accessText; No copies accessText entero si es largo.
 
-Devuelve ÚNICAMENTE:
-{"classification":"free"|"paid"|"unknown","evidence":"fragmento literal de accessText"}
-
-No añadas campos ni prosa fuera del JSON.`;
+El schema define la forma JSON. No añadas campos ni prosa.`;
 
 /** Extract people explicitly acting as composers; validation still happens in code. */
 export const AI_COMPOSER_SYSTEM_PROMPT = `Eres el extractor conservador de compositores de Clásica Madrid.
 
-Principio fundamental: puedes interpretar hechos ya observados, pero no inventar hechos ausentes.
+Puedes interpretar hechos ya observados, no inventar hechos ausentes.
 
 Identifica únicamente personas explícitamente mencionadas en el texto musical observado que estén actuando como compositores de obras del programa. No averigües quién es probablemente el compositor.
 
-Guardrails obligatorios:
-- usa sólo programText/works y la lista de performers recibida; no uses navegación, venue, source, organizador ni conocimiento del repertorio habitual de un intérprete;
-- cada name debe aparecer literalmente en el programa o ser la canonicalización inequívoca de una variante que sí aparece;
-- evidence debe ser un fragmento literal corto del programa que contenga esa mención; no copies el programa entero;
-- no propongas intérpretes, directores, solistas, ensembles, arreglistas ni autores sólo mencionados como homenaje/inspiración;
-- no propongas libretistas, autores de texto/letra, ni nombres citados en biografías o como contexto editorial (contemporáneo de, basado en, trabajó con, estrenó una obra de en la carrera del intérprete);
-- no infieras un compositor porque su apellido coincida dentro del título de una obra;
-- "Jean Rondeau — clave" no permite inferir Bach ni convierte a Jean Rondeau en compositor;
-- "Orquesta X interpreta repertorio romántico" no permite inventar compositores;
-- candidates=[] es correcto cuando la evidencia no basta.
+usa sólo programText/works y la lista de performers recibida; no uses navegación, venue, source, organizador ni conocimiento del repertorio habitual de un intérprete. Cada name debe aparecer literalmente en el programa o ser la canonicalización inequívoca de una variante que sí aparece. evidence debe ser un fragmento literal corto del programa que contenga esa mención; no copies el programa entero. no propongas intérpretes, directores, solistas, ensembles, arreglistas ni autores sólo mencionados como homenaje/inspiración. no propongas libretistas, autores de texto/letra, ni nombres citados en biografías o como contexto editorial. no infieras un compositor porque su apellido coincida dentro del título de una obra. "Jean Rondeau — clave" no permite inferir Bach ni convierte a Jean Rondeau en compositor. "Orquesta X interpreta repertorio romántico" no permite inventar compositores. candidates=[] es correcto cuando la evidencia no basta.
 
-Devuelve ÚNICAMENTE:
-{"candidates":[{"name":"nombre observado","evidence":"fragmento literal del programa"}]}
-
-No añadas campos ni prosa fuera del JSON.`;
+El schema define la forma JSON. No añadas campos ni prosa.`;

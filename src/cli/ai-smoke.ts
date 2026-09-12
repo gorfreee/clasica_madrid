@@ -8,8 +8,9 @@ import {
   parseAiOutputForPurpose,
   type AiAccessResult,
   type AiCallPurpose,
-  type AiClassificationResult,
   type AiComposerExtractionResult,
+  type AiEligibilityResult,
+  type AiTaxonomyResult,
   type AiTokenCounts,
 } from '../ingestion/classification/ai.ts';
 import { buildAiRequest, maxOutputTokensForPurpose } from '../ingestion/classification/ai-request.ts';
@@ -866,7 +867,7 @@ function blockedPurpose(
 
 function assertSemanticResult(
   fixture: AiSmokeFixture,
-  parsed: AiClassificationResult | AiAccessResult | AiComposerExtractionResult,
+  parsed: AiEligibilityResult | AiTaxonomyResult | AiAccessResult | AiComposerExtractionResult,
 ): { ok: true } | { ok: false; message: string } {
   if (fixture.purpose === 'composer-extraction') {
     const actual = (parsed as AiComposerExtractionResult).candidates.map((candidate) => normalizeName(candidate.name));
@@ -881,12 +882,17 @@ function assertSemanticResult(
       ? { ok: true }
       : { ok: false, message: `expected classification=${fixture.expected.classification}; received ${actual}` };
   }
-  const actual = parsed as AiClassificationResult;
-  if (fixture.purpose === 'eligibility' && actual.eligibility !== fixture.expected.eligibility) {
-    return { ok: false, message: `expected eligibility=${fixture.expected.eligibility}; received ${actual.eligibility}` };
+  if (fixture.purpose === 'eligibility') {
+    const actual = parsed as AiEligibilityResult;
+    if (actual.eligibility !== fixture.expected.eligibility) {
+      return { ok: false, message: `expected eligibility=${fixture.expected.eligibility}; received ${actual.eligibility}` };
+    }
+    return formatsCover(fixture.expected.formats, actual.formats);
   }
-  const expectedFormats = fixture.expected.formats;
-  const actualFormats = actual.formats ?? [];
+  return formatsCover(fixture.expected.formats, (parsed as AiTaxonomyResult).formats);
+}
+
+function formatsCover(expectedFormats: readonly string[], actualFormats: readonly string[]): { ok: true } | { ok: false; message: string } {
   const missing = expectedFormats.filter((format) => !actualFormats.includes(format));
   return missing.length
     ? { ok: false, message: `expected formats to include [${expectedFormats.join(', ')}]; received [${actualFormats.join(', ')}]` }
