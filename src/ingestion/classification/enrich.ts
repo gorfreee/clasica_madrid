@@ -98,8 +98,9 @@ export async function enrichWithAiIfNeeded(
     if (result.composers && result.composers.value.length > 0) {
       enrichedFacts = { ...facts, composers: result.composers.value };
       const eras = resolveEras(enrichedFacts);
-      // Composer-extraction can surface names that resolveEras() did not see
-      // on the first pass. Knowledge then fills eras; AI taxonomy never does.
+      // Composer-extraction can surface names that the first knowledge pass
+      // did not see. Strong knowledge eras fill here; taxonomy may still
+      // complete leftover unmatched names later.
       if (eras.value.length > 0) result = { ...result, eras };
     }
   }
