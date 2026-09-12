@@ -10,6 +10,7 @@ import {
   parseGithubAttempt,
   readFailureContext,
   resolveObservabilityDir,
+  redactSecrets,
   sanitizeErrorMessage,
   startObservability,
   EVENT_JOURNAL_FILE,
@@ -263,6 +264,13 @@ describe('observabilidad de ingestión', () => {
       'ai-config-fatal',
     );
     expect(classifyFailureCode('ENOENT')).toBe('unexpected-exception');
+    const long = `report ${'PASS '.repeat(1_000)}secret=super-secret-key-value`;
+    expect(long.length).toBeGreaterThan(2_000);
+    expect(sanitizeErrorMessage(long, { GEMINI_API_KEY: 'super-secret-key-value' })).toContain('…[truncated]');
+    const redacted = redactSecrets(long, { GEMINI_API_KEY: 'super-secret-key-value' });
+    expect(redacted.length).toBeGreaterThan(2_000);
+    expect(redacted).not.toContain('super-secret-key-value');
+    expect(redacted).toContain('[GEMINI_API_KEY]');
   });
 
   it('anota el contexto de fallo sin cambiar el mensaje original', () => {

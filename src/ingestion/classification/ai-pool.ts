@@ -21,7 +21,7 @@ import {
 } from './ai.ts';
 import { buildAiRequest, type AiRequest } from './ai-request.ts';
 import { AiPoolState, hashAiInput } from './ai-state.ts';
-import { AiTransportError, type AiPressureKind, type AiRoute } from './ai-transport.ts';
+import { AiTransportError, primaryPressure, type AiPressureKind, type AiRoute } from './ai-transport.ts';
 import { observedFormatChoiceIsUnresolved } from './format-alternatives.ts';
 
 export const AI_POOL_MAX_RETRIES = 2;
@@ -961,16 +961,13 @@ function intervalMsForRpm(rpm: number | undefined): number {
 
 function pressureReason(pressure: AiPressureKind | undefined): string {
   if (pressure === 'tpm') return 'rate-limit-tpm';
+  if (pressure === 'otpm') return 'rate-limit-otpm';
   if (pressure === 'monthly') return 'rate-limit-monthly';
+  if (pressure === 'daily') return 'daily-quota';
   if (pressure === 'request-frequency') return 'rate-limit-request-frequency';
   if (pressure === 'concurrency') return 'concurrency-pressure';
+  if (pressure === 'capacity') return 'provider-busy';
   return 'rate-limit';
-}
-
-function primaryPressure(dimensions: AiPressureKind[] | undefined): AiPressureKind | undefined {
-  if (!dimensions?.length) return undefined;
-  const rank: AiPressureKind[] = ['concurrency', 'monthly', 'tpm', 'request-frequency', 'indeterminate'];
-  return rank.find((kind) => dimensions.includes(kind)) ?? dimensions[0];
 }
 
 function bump(map: Record<string, number>, key: string, amount = 1): void {

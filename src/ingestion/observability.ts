@@ -616,7 +616,7 @@ export function sanitizeFailure(failure: IngestFailureInfo): IngestFailureInfo {
   return sanitized;
 }
 
-export function sanitizeErrorMessage(message: string, env: NodeJS.ProcessEnv = process.env): string {
+export function redactSecrets(message: string, env: NodeJS.ProcessEnv = process.env): string {
   let result = message;
   for (const key of SECRET_ENV_KEYS) {
     const value = env[key];
@@ -624,6 +624,11 @@ export function sanitizeErrorMessage(message: string, env: NodeJS.ProcessEnv = p
   }
   result = result.replace(/Bearer\s+\S+/gi, 'Bearer [redacted]');
   result = result.replace(/(api[_-]?key\s*[=:]\s*)\S+/gi, '$1[redacted]');
+  return result;
+}
+
+export function sanitizeErrorMessage(message: string, env: NodeJS.ProcessEnv = process.env): string {
+  const result = redactSecrets(message, env);
   if (result.length <= MAX_FAILURE_MESSAGE) return result;
   return `${result.slice(0, MAX_FAILURE_MESSAGE)}…[truncated]`;
 }
