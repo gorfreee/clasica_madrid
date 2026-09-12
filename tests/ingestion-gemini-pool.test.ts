@@ -2,12 +2,20 @@ import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'n
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { AiRateLimitedError, AiUnusableOutputError, type AiCallDiagnostics } from '../src/ingestion/classification/ai.ts';
-import { AI_MAX_OUTPUT_TOKENS_BY_PURPOSE } from '../src/ingestion/classification/ai-request.ts';
+import {
+  AI_ACCESS_JSON_SCHEMA,
+  AI_COMPOSER_EXTRACTION_JSON_SCHEMA,
+  AI_ELIGIBILITY_JSON_SCHEMA,
+  AI_TAXONOMY_JSON_SCHEMA,
+  AiRateLimitedError,
+  AiUnusableOutputError,
+  type AiCallDiagnostics,
+} from '../src/ingestion/classification/ai.ts';
+import { AI_MAX_OUTPUT_TOKENS_BY_PURPOSE, buildAiRequest } from '../src/ingestion/classification/ai-request.ts';
 import { classifyObserved } from '../src/ingestion/classification/enrich.ts';
 import {
   GeminiClassifier, GEMINI_DEFAULT_MODELS, resolveGeminiConfig, resolveRetryAfterMs,
-  thinkingConfigForModel,
+  thinkingConfigForModel, buildGeminiRequestBody, geminiModelProfile,
   type GeminiClassifierOptions,
 } from '../src/ingestion/classification/gemini.ts';
 import { nextQuotaReset, quotaDay } from '../src/ingestion/classification/gemini-state.ts';
@@ -622,5 +630,32 @@ describe('recoverable unusable output and thinking', () => {
     }
     expect(thinkingConfigForModel(' GEMINI-3.7-FLASH ')).toEqual({ thinking_level: 'low' });
     expect(thinkingConfigForModel('')).toBeUndefined();
+  });
+
+  it('el payload Gemini usa el schema del purpose y no sube max_output_tokens', () => {
+    const observed = { title: 'Concierto de Bach', performers: [], composers: [], works: [] };
+    const cases = [
+      ['eligibility', AI_ELIGIBILITY_JSON_SCHEMA],
+      ['taxonomy', AI_TAXONOMY_JSON_SCHEMA],
+      ['access-classification', AI_ACCESS_JSON_SCHEMA],
+      ['composer-extraction', AI_COMPOSER_EXTRACTION_JSON_SCHEMA],
+    ] as const;
+    for (const [purpose, schema] of cases) {
+      const request = buildAiRequest(observed, purpose);
+      const body = buildGeminiRequestBody('gemini-3.8-flash', request);
+      expect(body.response_format).toEqual({
+        type: 'text', mime_type: 'application/json', schema,
+      });
+      expect(body.generation_config).toEqual({
+        max_output_tokens: AI_MAX_OUTPUT_TOKENS_BY_PURPOSE[purpose],
+        tool_choice: 'none',
+        thinking_level: 'low',
+      });
+      expect(body.generation_config.max_output_tokens).toBe(request.generation.maxOutputTokens);
+    }
+    expect(geminiModelProfile('gemini-3.8-flash')).toEqual({
+      structuredOutput: 'schema', thinking: { thinking_level: 'low' },
+    });
+    expect(geminiModelProfile('gemma-4-26b-a4b-it')).toEqual({ structuredOutput: 'schema' });
   });
 });

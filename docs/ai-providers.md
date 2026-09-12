@@ -15,7 +15,7 @@ El workflow declara `AI_ZERO_COST_ONLY=true`. Con esa política:
 
 La confirmación de Cloudflare significa que la cuenta permanece en **Workers Free**. Workers Free corta las llamadas al agotar la asignación diaria; Workers Paid cobra automáticamente el exceso y por tanto no cumple esta política. El error Workers AI `3036` se registra como asignación diaria agotada y bloquea esas routes hasta el reset UTC.
 
-Los modelos y condiciones se verificaron en documentación oficial el 10-09-2026. Los proveedores pueden cambiar su oferta: antes de actualizar una allowlist o confirmar de nuevo un plan, hay que volver a comprobarla. La seguridad prima sobre la disponibilidad.
+Los modelos y condiciones se verificaron en documentación oficial el 12-09-2026. Los proveedores pueden cambiar su oferta: antes de actualizar una allowlist o confirmar de nuevo un plan, hay que volver a comprobarla. La seguridad prima sobre la disponibilidad.
 
 ## Orden y configuración
 
@@ -59,16 +59,21 @@ Durante una ejecución, una route que acumula varios fallos consecutivos relevan
 
 ## Perfiles HTTP por modelo
 
-Las tareas del pool (eligibility, compositores, acceso, taxonomy) piden JSON corto. El transport OpenAI-compatible es único; cada route declara el payload que su proveedor admite:
+Las tareas del pool (eligibility, compositores, acceso, taxonomy) piden JSON corto. Cada route declara sus capacidades en `openaiCompatibleModelProfile` / `geminiModelProfile`; el transport no adivina flags. Timeout productivo de cada HTTP: 15 s (`AI_CLASSIFY_TIMEOUT_MS`). El live smoke usa 30 s y no cambia este valor.
 
-| Route | JSON mode | Thinking / reasoning | Notas |
-|---|---|---|---|
-| `groq:openai/gpt-oss-20b`, `groq:openai/gpt-oss-120b` | `response_format: json_schema` con el schema editorial (`strict: false`) | `include_reasoning: false` | Structured Outputs best-effort. No `strict: true`: el schema de eligibility tiene campos opcionales. `reasoning_format` no está soportado en GPT-OSS. |
-| `groq:qwen/qwen3.8-27b` | `response_format: json_schema` (`strict: false`) | no se envía | Mismo schema editorial. No enviar `include_reasoning` (no documentado para Qwen 3.8). |
-| otros `groq:*` | `response_format: json_object` | no se envía | Modelos sin Structured Outputs documentado. No añadir `thinking` ni `chat_template_kwargs`. |
-| `mistral:ministral-14b-2512`, `mistral:ministral-8b-2512` | `response_format: json_object` | no se envía | `service_tier=standard_only` (Free / Standard). El mismo perfil aplica a otros IDs Mistral si se activan por override. |
-| `zai:glm-4.7-flash`, `zai:glm-4.5-flash` | `response_format: json_object` | `thinking: { type: "disabled" }` | El thinking de GLM-4.7 está on por defecto y consume `max_tokens`. |
-| `cloudflare:@cf/zai-org/glm-4.7-flash`, `cloudflare:@cf/google/gemma-4-26b-a4b-it` | no se envía `response_format` | `reasoning_effort: null` y `chat_template_kwargs.enable_thinking: false` | La allowlist oficial de JSON Mode de Workers AI no incluye estos IDs; el schema editorial externo sigue validando. |
+| Route | Structured output | Reasoning / thinking | Tokens | Por qué |
+|---|---|---|---|---|
+| Gemini `gemini-3.8-flash`, `gemini-3.7-flash`, `gemini-2.5-flash` | Interactions API + schema del purpose (`response_format.schema`) | `thinking_level: low` (el mínimo documentado; `minimal` no está permitido) | `max_output_tokens` por purpose | Structured output nativo. No se sube el tope para tapar `MAX_TOKENS`. |
+| Gemini `gemini-3.6-flash`, `gemini-3.5-flash`, `gemini-3-flash-preview`, `gemini-3.5-flash-lite`, `gemini-3.1-flash-lite` | igual | `thinking_level: minimal` | igual | `minimal` está en el set documentado. `gemini-3.1-flash-lite` no aparece en la tabla oficial 2026-09-12 (sí `…-image`); se mantiene `minimal` porque este proyecto ya lo verificó. |
+| Gemini `gemma-4-31b-it`, `gemma-4-26b-a4b-it` | igual | no se envía `thinking_level` | igual | Gemma no documenta esos niveles en Interactions API. |
+| `groq:openai/gpt-oss-20b`, `groq:openai/gpt-oss-120b` | `json_schema` + `strict: true` (constrained decoding) | `include_reasoning: false` y `reasoning_effort: low` | `max_tokens` | Strict está documentado para estos dos IDs. `include_reasoning: false` sólo oculta el campo; `low` reduce thought tokens. `reasoning_format` no está soportado. Los schemas por purpose ya tienen `additionalProperties: false` y todos los campos required. |
+| `groq:qwen/qwen3.8-27b` | `json_schema` + `strict: false` | `reasoning_effort: none` | `max_tokens` | JSON Schema sí está documentado. Strict aparece en una tabla y se contradice en otra de la misma página (y en el partner LangChain: sólo GPT-OSS). Conservador: best-effort. `none` está documentado para desactivar reasoning en Qwen 3.8. Preview: se mantiene en el pool. |
+| otros `groq:*` | `json_object` | no se envía | `max_tokens` | Sin Structured Outputs documentado. |
+| `mistral:ministral-14b-2512`, `mistral:ministral-8b-2512` | `json_schema` + `strict: true` | no se envía | `max_tokens` | Custom structured outputs / `json_schema` está en la API de Chat Completions; el ejemplo oficial usa Ministral 8B. `service_tier=standard_only` (Free / Standard). Validación local sigue. Un override tipo `mistral-small-latest` permanece en `json_object`. |
+| `zai:glm-4.7-flash`, `zai:glm-4.5-flash` | `json_object` | `thinking: { type: "disabled" }` | `max_tokens` | Z.AI documenta JSON mode, no `json_schema`. Thinking on por defecto en GLM-4.7 y consume el presupuesto de salida. 4.5-flash se mantiene aunque sea más lento. |
+| `cloudflare:@cf/zai-org/glm-4.7-flash`, `cloudflare:@cf/google/gemma-4-26b-a4b-it` | no se envía `response_format` | `reasoning_effort: null` y `chat_template_kwargs.enable_thinking: false` | `max_completion_tokens` | La allowlist oficial de JSON Mode no incluye estos IDs. `max_tokens` está deprecated en las páginas de modelo a favor de `max_completion_tokens`. Prompt + parseo + schema local. |
+
+Un 1305 de Z.AI (oficialmente HTTP 429, «temporarily overloaded»; también se ha visto 503) se clasifica como `capacity` / `PROVIDER_BUSY`. El pool salta esa route en la misma llamada si hay otra lista; no convierte el busy en una espera larga de Retry-After. El live smoke no reintenta.
 
 `--ai-max-requests` limita los HTTP requests del pool completo, incluidos fallos, retries y fallbacks. `--ai-route provider:model` fija una sola route para diagnóstico.
 
@@ -123,7 +128,7 @@ El comando carga `.local/ai.env`, fuerza `AI_ZERO_COST_ONLY=true` e imprime una 
 - `CONFIG_ERROR`: route/provider no configurado;
 - `BLOCKED`: no hizo request porque un fallo global previo de esa route lo hacía inútil.
 
-Z.AI, tabla oficial comprobada el 2026-09-12 ([códigos de error](https://docs.z.ai/api-reference/api-code)): `1302` es concurrency (el mensaje oficial dice "Rate limit reached for requests"; en producción también aparece "High concurrency usage…"); `1305` es overload/capacity **sólo si el body lo dice** (el mensaje oficial sí lo dice). `1303` (frequency) y `1304` (daily) **no** están en esa tabla; si aparecen en un body los clasificamos así, sin inventar semántica cuando el código/mensaje no permiten distinguirla.
+Z.AI, tabla oficial comprobada el 2026-09-12 ([códigos de error](https://docs.z.ai/api-reference/api-code)): `1302` es concurrency (el mensaje oficial dice "Rate limit reached for requests"; en producción también aparece "High concurrency usage…"); `1305` es overload/capacity (HTTP 429 oficial; el código basta, no hace falta que el body repita "overload"). `1303` (frequency) y `1304` (daily) **no** están en esa tabla; si aparecen en un body los clasificamos así, sin inventar semántica cuando el código/mensaje no permiten distinguirla.
 
 ```text
 # AI live smoke — FAIL
@@ -168,18 +173,20 @@ Las keys ausentes dejan fuera su provider sin romper la ingestión. Gemini sigue
 
 - Groq: modelos, límites Free y rate-limit headers: <https://console.groq.com/docs/rate-limits>
 - Groq: compatibilidad OpenAI: <https://console.groq.com/docs/openai>
-- Groq: Structured Outputs / JSON Schema: <https://console.groq.com/docs/structured-outputs>
-- Groq: reasoning (`include_reasoning` en GPT-OSS): <https://console.groq.com/docs/reasoning>
+- Groq: Structured Outputs / JSON Schema (`strict: true` en GPT-OSS 20B/120B): <https://console.groq.com/docs/structured-outputs>
+- Groq: reasoning (`include_reasoning` y `reasoning_effort` en GPT-OSS; `none` en Qwen 3.8): <https://console.groq.com/docs/reasoning>
+- Groq: API reference (`reasoning_effort`): <https://console.groq.com/docs/api-reference>
 - Mistral: Free mode y primer request: <https://docs.mistral.ai/getting-started/quickstarts/developer/first-api-request>
-- Mistral Chat Completions y JSON mode: <https://docs.mistral.ai/api>
+- Mistral Chat Completions (`json_object` y `json_schema`): <https://docs.mistral.ai/api>
+- Mistral custom structured outputs (ejemplo Ministral 8B): <https://docs.mistral.ai/capabilities/structured_output/custom>
 - Mistral rate limits (RPS y TPM independientes; `X-RateLimit-Remaining`): <https://docs.mistral.ai/resources/known-limitations>
 - Mistral `service_tier=standard_only`: <https://docs.mistral.ai/inference/priority-tier>
 - Mistral 429 en Free mode: <https://help.mistral.ai/en/articles/698531-why-am-i-hitting-api-rate-limits-and-how-do-i-increase-them>
 - Z.AI: thinking (default on en GLM-4.7; `thinking.type=disabled`): <https://docs.z.ai/guides/capabilities/thinking-mode>
 - Z.AI: parámetros, incluido `thinking`: <https://docs.z.ai/guides/overview/concept-param>
-- Z.AI: JSON mode / structured output: <https://docs.z.ai/guides/capabilities/struct-output>
+- Z.AI: JSON mode / structured output (`json_object`, no json_schema): <https://docs.z.ai/guides/capabilities/struct-output>
 - Z.AI: Chat Completions: <https://docs.z.ai/api-reference/llm/chat-completion>
-- Z.AI: códigos de error (`1302` concurrency; `1305` overload cuando el body lo dice; `1303`/`1304` no oficiales): <https://docs.z.ai/api-reference/api-code>
+- Z.AI: códigos de error (`1302` concurrency; `1305` overload/capacity, HTTP 429; `1303`/`1304` no oficiales): <https://docs.z.ai/api-reference/api-code>
 - Z.AI: GLM-4.7 (incluye Flash): <https://docs.z.ai/guides/llm/glm-4.7>
 - Z.AI: GLM-4.5 / Flash y structured output: <https://docs.z.ai/guides/llm/glm-4.5>
 - Z.AI: precios por modelo: <https://docs.z.ai/guides/overview/pricing>
@@ -188,5 +195,6 @@ Las keys ausentes dejan fuera su provider sin romper la ingestión. Gemini sigue
 - Cloudflare: endpoint OpenAI-compatible: <https://developers.cloudflare.com/workers-ai/configuration/open-ai-compatibility/>
 - Cloudflare: errores, incluido `3036`: <https://developers.cloudflare.com/workers-ai/platform/errors/>
 - Cloudflare JSON Mode (allowlist de modelos): <https://developers.cloudflare.com/workers-ai/features/json-mode/>
-- Cloudflare `@cf/zai-org/glm-4.7-flash` (`reasoning_effort`, `chat_template_kwargs`, `response_format`): <https://developers.cloudflare.com/workers-ai/models/glm-4.7-flash/>
+- Cloudflare `@cf/zai-org/glm-4.7-flash` (`max_completion_tokens`, `reasoning_effort`, `chat_template_kwargs`, `response_format`): <https://developers.cloudflare.com/workers-ai/models/glm-4.7-flash/>
 - Cloudflare `@cf/google/gemma-4-26b-a4b-it`: <https://developers.cloudflare.com/ai/models/@cf/google/gemma-4-26b-a4b-it/>
+- Gemini thinking (`thinking_level`): <https://ai.google.dev/gemini-api/docs/thinking>

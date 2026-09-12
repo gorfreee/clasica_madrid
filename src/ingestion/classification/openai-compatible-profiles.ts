@@ -3,57 +3,138 @@
  *
  * One shared transport builds the request from these profiles. Do not scatter
  * `if (provider === ...)` around retries, scheduling, or editorial validation.
+ * Look up a route here to see which structured-output / reasoning / token
+ * parameter it actually sends.
  *
- * Sources checked 2026-09-10 / 2026-09-11 / 2026-09-12:
- * - Z.AI thinking: https://docs.z.ai/guides/capabilities/thinking-mode
- * - Z.AI parameters: https://docs.z.ai/guides/overview/concept-param
- * - Z.AI JSON mode: https://docs.z.ai/guides/capabilities/struct-output
- * - Z.AI Chat Completions: https://docs.z.ai/api-reference/llm/chat-completion
- * - Z.AI error codes: https://docs.z.ai/api-reference/api-code
- *   Official table as of 2026-09-12 lists 1302 (rate limit reached for
- *   requests), 1305 (temporarily overloaded), 1308 (usage limit with reset),
- *   1310 (weekly/monthly). It does **not** list 1303 or 1304. When those
- *   codes appear in a body we still classify them: 1303 → request-frequency,
- *   1304 → daily quota. 1305 is capacity/overload only when the body says so
- *   (the official message does); otherwise it stays an indeterminate 429.
- * - Cloudflare GLM: https://developers.cloudflare.com/workers-ai/models/glm-4.7-flash/
- * - Cloudflare Gemma: https://developers.cloudflare.com/ai/models/@cf/google/gemma-4-26b-a4b-it/
- * - Cloudflare JSON Mode (supported-model list, no GLM/Gemma): https://developers.cloudflare.com/workers-ai/features/json-mode/
- * - Mistral Chat Completions / JSON: https://docs.mistral.ai/api
- * - Mistral rate limits: https://docs.mistral.ai/resources/known-limitations
+ * Sources checked 2026-09-12:
+ * - Groq Structured Outputs (strict vs best-effort, model lists):
+ *   https://console.groq.com/docs/structured-outputs
+ * - Groq Reasoning (`include_reasoning`, `reasoning_effort`):
+ *   https://console.groq.com/docs/reasoning
+ * - Groq API reference (`reasoning_effort` allowed values):
+ *   https://console.groq.com/docs/api-reference
+ * - Mistral Chat Completions (`response_format.json_schema`):
+ *   https://docs.mistral.ai/api
+ * - Mistral custom structured outputs (example uses Ministral 8B):
+ *   https://docs.mistral.ai/capabilities/structured_output/custom
+ * - Mistral SDK `json_schema` + `strict: true`:
+ *   https://github.com/mistralai/client-python/blob/main/docs/sdks/chat/README.md
  * - Mistral service_tier: https://docs.mistral.ai/inference/priority-tier
- * - Groq OpenAI compatibility: https://console.groq.com/docs/openai
- * - Groq Structured Outputs: https://console.groq.com/docs/structured-outputs
- * - Groq Reasoning (GPT-OSS `include_reasoning`): https://console.groq.com/docs/reasoning
+ * - Z.AI thinking (default on in GLM-4.7; `thinking.type=disabled`):
+ *   https://docs.z.ai/guides/capabilities/thinking-mode
+ * - Z.AI JSON mode (`response_format: json_object` only; no json_schema):
+ *   https://docs.z.ai/guides/capabilities/struct-output
+ * - Z.AI error codes (1302 concurrency, 1305 overload / HTTP 429):
+ *   https://docs.z.ai/api-reference/api-code
+ * - Cloudflare JSON Mode allowlist (does not include our GLM/Gemma IDs):
+ *   https://developers.cloudflare.com/workers-ai/features/json-mode/
+ * - Cloudflare GLM / Gemma OpenAI schemas (`max_completion_tokens`,
+ *   `reasoning_effort`, `chat_template_kwargs`; `max_tokens` deprecated):
+ *   https://developers.cloudflare.com/workers-ai/models/glm-4.7-flash/
+ *   https://developers.cloudflare.com/ai/models/@cf/google/gemma-4-26b-a4b-it/
  */
 
 import type { AiPressureKind } from './ai-transport.ts';
 
 export type OpenAiCompatibleResponseFormat = 'json-object' | 'json-schema' | 'none';
+export type OpenAiCompatibleTokenParameter = 'max_tokens' | 'max_completion_tokens';
 
 export type OpenAiCompatibleModelProfile = {
+  /** Strongest structured-output mode this model officially supports. */
   responseFormat: OpenAiCompatibleResponseFormat;
+  /**
+   * Constrained decoding (`json_schema.strict: true`). Only true when the
+   * provider documents strict support for this model. Requires every object
+   * in the schema to set `additionalProperties: false` and list all properties
+   * in `required` — our purpose schemas already do that.
+   */
+  jsonSchemaStrict: boolean;
+  /** Official completion-length field for this endpoint. Never send both. */
+  tokenParameter: OpenAiCompatibleTokenParameter;
   extraBody: Record<string, unknown>;
 };
 
 const JSON_OBJECT: OpenAiCompatibleModelProfile = {
   responseFormat: 'json-object',
+  jsonSchemaStrict: false,
+  tokenParameter: 'max_tokens',
   extraBody: {},
+};
+
+/**
+ * Groq GPT-OSS: official strict Structured Outputs + `reasoning_effort: low`.
+ * `include_reasoning: false` only hides the reasoning field; the model still
+ * thinks unless effort is set. `reasoning_format` is not supported on GPT-OSS.
+ */
+const GROQ_GPT_OSS: OpenAiCompatibleModelProfile = {
+  responseFormat: 'json-schema',
+  jsonSchemaStrict: true,
+  tokenParameter: 'max_tokens',
+  extraBody: { include_reasoning: false, reasoning_effort: 'low' },
+};
+
+/**
+ * Groq Qwen 3.8: json_schema is documented. Strict mode is listed on the
+ * Structured Outputs model table *and* contradicted by the same page's
+ * comparison table ("strict limited to GPT-OSS 20B/120B") and by Groq's
+ * LangChain partner (strict ignored except GPT-OSS). Conservative: best-effort
+ * schema, no `strict: true`. Reasoning: the Reasoning page and API reference
+ * both document `reasoning_effort: none` for Qwen 3.8; `include_reasoning` is
+ * not documented for this ID.
+ */
+const GROQ_QWEN: OpenAiCompatibleModelProfile = {
+  responseFormat: 'json-schema',
+  jsonSchemaStrict: false,
+  tokenParameter: 'max_tokens',
+  extraBody: { reasoning_effort: 'none' },
 };
 
 const GROQ_JSON_SCHEMA: OpenAiCompatibleModelProfile = {
   responseFormat: 'json-schema',
+  jsonSchemaStrict: false,
+  tokenParameter: 'max_tokens',
   extraBody: {},
 };
 
-const GROQ_GPT_OSS: OpenAiCompatibleModelProfile = {
+const MISTRAL_JSON_SCHEMA: OpenAiCompatibleModelProfile = {
   responseFormat: 'json-schema',
-  extraBody: { include_reasoning: false },
+  jsonSchemaStrict: true,
+  tokenParameter: 'max_tokens',
+  extraBody: { service_tier: 'standard_only' },
+};
+
+const MISTRAL_JSON_OBJECT: OpenAiCompatibleModelProfile = {
+  responseFormat: 'json-object',
+  jsonSchemaStrict: false,
+  tokenParameter: 'max_tokens',
+  extraBody: { service_tier: 'standard_only' },
+};
+
+const ZAI_FLASH: OpenAiCompatibleModelProfile = {
+  responseFormat: 'json-object',
+  jsonSchemaStrict: false,
+  tokenParameter: 'max_tokens',
+  extraBody: { thinking: { type: 'disabled' } },
+};
+
+const CLOUDFLARE_PROMPT: OpenAiCompatibleModelProfile = {
+  // Workers AI JSON Mode allowlist (checked 2026-09-12) does not include
+  // these two models. Their OpenAI schema lists response_format, but a 400
+  // would disable the route for the rest of the run. Keep prompt + local
+  // schema validation. `max_tokens` is deprecated on these model pages in
+  // favour of `max_completion_tokens`.
+  responseFormat: 'none',
+  jsonSchemaStrict: false,
+  tokenParameter: 'max_completion_tokens',
+  extraBody: {
+    reasoning_effort: null,
+    chat_template_kwargs: { enable_thinking: false },
+  },
 };
 
 /**
  * Groq models documented to support Structured Outputs (`json_schema`).
- * Checked 2026-09-11: https://console.groq.com/docs/structured-outputs
+ * Checked 2026-09-12: https://console.groq.com/docs/structured-outputs
  */
 export const GROQ_JSON_SCHEMA_MODELS = new Set([
   'openai/gpt-oss-20b',
@@ -62,44 +143,45 @@ export const GROQ_JSON_SCHEMA_MODELS = new Set([
   'qwen/qwen3.8-27b',
 ]);
 
+/** Official strict constrained decoding: GPT-OSS 20B/120B only. */
+export const GROQ_STRICT_JSON_SCHEMA_MODELS = new Set([
+  'openai/gpt-oss-20b',
+  'openai/gpt-oss-120b',
+]);
+
 /**
- * GPT-OSS on Groq documents `include_reasoning`; `reasoning_format` is not
- * supported on these IDs. Do not send this flag to Qwen or other Groq models.
+ * GPT-OSS on Groq documents `include_reasoning` and `reasoning_effort`
+ * low|medium|high. Do not send these flags to Qwen.
  */
 export const GROQ_GPT_OSS_INCLUDE_REASONING_MODELS = new Set([
   'openai/gpt-oss-20b',
   'openai/gpt-oss-120b',
 ]);
 
-const ZAI_FLASH: OpenAiCompatibleModelProfile = {
-  responseFormat: 'json-object',
-  extraBody: { thinking: { type: 'disabled' } },
-};
+/** Qwen 3.8 documents `reasoning_effort: none` to disable thinking tokens. */
+export const GROQ_QWEN_REASONING_NONE_MODELS = new Set(['qwen/qwen3.8-27b']);
 
-const CLOUDFLARE_REASONING_OFF: OpenAiCompatibleModelProfile = {
-  // The Workers AI JSON Mode allowlist (checked 2026-09-10) does not include
-  // these two models. Their OpenAI schema lists response_format, but a 400
-  // would disable the route for the rest of the run. Keep prompt + schema
-  // validation and spend the output budget on JSON, not thinking.
-  responseFormat: 'none',
-  extraBody: {
-    reasoning_effort: null,
-    chat_template_kwargs: { enable_thinking: false },
-  },
-};
-
-const MISTRAL_STANDARD: OpenAiCompatibleModelProfile = {
-  responseFormat: 'json-object',
-  extraBody: { service_tier: 'standard_only' },
-};
+/**
+ * Ministral 3 IDs. Custom structured outputs docs use Ministral 8B as the
+ * example; 14B/3B are the same family. Other Mistral IDs (e.g. a
+ * `mistral-small-latest` override) stay on JSON object mode.
+ */
+export const MISTRAL_JSON_SCHEMA_MODELS = new Set([
+  'ministral-14b-2512',
+  'ministral-8b-2512',
+  'ministral-3b-2512',
+]);
 
 const ZAI_FLASH_MODELS = new Set(['glm-4.7-flash', 'glm-4.5-flash']);
-const CLOUDFLARE_REASONING_MODELS = new Set([
+const CLOUDFLARE_PROMPT_MODELS = new Set([
   '@cf/zai-org/glm-4.7-flash',
   '@cf/google/gemma-4-26b-a4b-it',
 ]);
 
-/** Exact HTTP extras for a provider/model. Unknown IDs get conservative defaults. */
+/**
+ * Exact HTTP extras for a provider/model. Unknown IDs get conservative
+ * defaults: JSON object (or none on Cloudflare), no undocumented flags.
+ */
 export function openaiCompatibleModelProfile(
   provider: string,
   model: string,
@@ -108,16 +190,17 @@ export function openaiCompatibleModelProfile(
   switch (provider.trim().toLowerCase()) {
     case 'groq':
       if (GROQ_GPT_OSS_INCLUDE_REASONING_MODELS.has(name)) return GROQ_GPT_OSS;
+      if (GROQ_QWEN_REASONING_NONE_MODELS.has(name)) return GROQ_QWEN;
       if (GROQ_JSON_SCHEMA_MODELS.has(name)) return GROQ_JSON_SCHEMA;
       return JSON_OBJECT;
     case 'mistral':
-      return MISTRAL_STANDARD;
+      return MISTRAL_JSON_SCHEMA_MODELS.has(name) ? MISTRAL_JSON_SCHEMA : MISTRAL_JSON_OBJECT;
     case 'zai':
       return ZAI_FLASH_MODELS.has(name) ? ZAI_FLASH : JSON_OBJECT;
     case 'cloudflare':
-      return CLOUDFLARE_REASONING_MODELS.has(name)
-        ? CLOUDFLARE_REASONING_OFF
-        : { responseFormat: 'none', extraBody: {} };
+      return CLOUDFLARE_PROMPT_MODELS.has(name)
+        ? CLOUDFLARE_PROMPT
+        : { responseFormat: 'none', jsonSchemaStrict: false, tokenParameter: 'max_completion_tokens', extraBody: {} };
     default:
       return JSON_OBJECT;
   }
@@ -127,8 +210,8 @@ export function openaiCompatibleModelProfile(
  * Rate-limit / overload signals that are not always a bare HTTP 429 with Groq
  * headers. Mistral publishes `X-RateLimit-*` and error code 1300. Z.AI uses
  * 1302 (high concurrency / request pressure), 1303 (frequency, unofficial),
- * 1304 (daily limit, unofficial), 1305 (temporary overload when the body
- * says so), and 1308+ usage/period limits.
+ * 1304 (daily limit, unofficial), 1305 (temporary overload; official HTTP 429),
+ * and 1308+ usage/period limits.
  */
 export function openaiCompatibleRateLimitSignal(
   provider: string,
@@ -145,7 +228,7 @@ export function openaiCompatibleRateLimitSignal(
     return (status === 429 || status === 503)
       && (
         ZAI_RATE_LIMIT_CODES.has(code ?? '')
-        || /rate limit reached|temporarily overloaded|high concurrency|usage limit reached/i.test(body)
+        || /rate limit reached|temporarily overloaded|high concurrency|usage limit reached|provider busy|capacity/i.test(body)
       );
   }
   return false;
@@ -157,7 +240,10 @@ export const ZAI_CONCURRENCY_PRESSURE_CODE = '1302';
 export const ZAI_FREQUENCY_PRESSURE_CODE = '1303';
 /** Observed daily-limit sibling; not in the official 2026-09-12 table. */
 export const ZAI_DAILY_LIMIT_CODE = '1304';
-/** Official: "The service may be temporarily overloaded, please try again later". */
+/**
+ * Official 2026-09-12 table: HTTP 429, "The service may be temporarily
+ * overloaded, please try again later". Capacity, not a quota.
+ */
 export const ZAI_OVERLOAD_CODE = '1305';
 
 const ZAI_RATE_LIMIT_CODES = new Set([
@@ -191,7 +277,9 @@ export function openaiCompatibleErrorCode(body: string): string | undefined {
  *   bodies also say "High concurrency usage of this API")
  * - 1303 → request-frequency (code seen in the wild; not in the official table)
  * - 1304 → daily (code seen in the wild; not in the official table)
- * - 1305 → capacity only when the body mentions overload; otherwise indeterminate
+ * - 1305 → capacity. The official meaning of this code is temporary overload
+ *   (HTTP 429 in the table; 503 has also been observed). Do not wait for the
+ *   body to repeat the word "overload": production can fail over immediately.
  * - 1308 usage-limit / 1310 weekly-monthly → monthly unless the unit is day
  */
 export function openaiCompatibleBusinessPressure(
@@ -204,8 +292,8 @@ export function openaiCompatibleBusinessPressure(
     if (code === ZAI_CONCURRENCY_PRESSURE_CODE || /high concurrency/i.test(body)) return 'concurrency';
     if (code === ZAI_FREQUENCY_PRESSURE_CODE) return 'request-frequency';
     if (code === ZAI_DAILY_LIMIT_CODE || /\b(daily limit|per day|requests per day)\b/i.test(body)) return 'daily';
-    if (code === ZAI_OVERLOAD_CODE) {
-      return /overload|temporarily overloaded|capacity/i.test(body) ? 'capacity' : 'indeterminate';
+    if (code === ZAI_OVERLOAD_CODE || /temporarily overloaded|provider busy|overloaded/i.test(body)) {
+      return 'capacity';
     }
     if (code === '1310' || /weekly|monthly limit/i.test(body)) return 'monthly';
     if (code === '1308') {

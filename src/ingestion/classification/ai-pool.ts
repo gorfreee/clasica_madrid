@@ -469,6 +469,17 @@ export class AiPoolClassifier implements AiClassifier {
         this.clock.now() + this.retryWait(error, diagnostics.attempts! - 1),
       );
       this.state.save();
+      if (pressure === 'capacity') {
+        // Provider busy is transient capacity, not a quota we must wait out.
+        // Skip this route for the rest of the call so the pool can try another
+        // route immediately instead of sleeping on Retry-After.
+        skipRouteWhenAlternativeExists(
+          skippedThisCall,
+          route,
+          this.routes,
+          (candidate) => this.available(candidate, skippedThisCall),
+        );
+      }
       addRoute(
         diagnostics,
         route,

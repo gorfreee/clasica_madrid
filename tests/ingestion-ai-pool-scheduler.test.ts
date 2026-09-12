@@ -865,5 +865,53 @@ describe('concurrency-pressure genérico', () => {
       concurrencyPressure: 1,
     });
   });
+
+  it('1305 provider-busy no espera Retry-After si hay otra route lista', async () => {
+    const busy = new AiTransportError('zai HTTP 429 code 1305', {
+      kind: 'rate-limit',
+      status: 429,
+      code: '1305',
+      quotaExhausted: false,
+      pressure: 'capacity',
+      retryAfterMs: 60_000,
+      rateLimit: { providerCode: '1305', dimensions: ['capacity'], retryAfterMs: 60_000 },
+    });
+    const zai = vi.fn(async () => { throw busy; });
+    const groq = vi.fn(async () => ({ value: { eligibility: 'include' } }));
+    const slept: number[] = [];
+    const start = Date.parse('2026-09-12T12:00:00Z');
+    let now = start;
+    const classifier = pool([
+      route('zai', 'glm-4.7-flash', fakeTransport('zai', zai), { providerMaxConcurrent: 1 }),
+      route('groq', 'gpt', fakeTransport('groq', groq)),
+    ], {
+      maxRetries: 1,
+      clock: {
+        now: () => now,
+        sleep: async (ms: number) => { slept.push(ms); now += ms; },
+      },
+    });
+    await expect(classifier.classify(observed(1))).resolves.toEqual({ eligibility: 'include' });
+    expect(zai).toHaveBeenCalledOnce();
+    expect(groq).toHaveBeenCalledOnce();
+    expect(slept.every((ms) => ms < 5_000)).toBe(true);
+    expect(now - start).toBeLessThan(5_000);
+    expect(classifier.lastDiagnostics()).toMatchObject({
+      fallbackUsed: true,
+      routeId: 'groq:gpt',
+    });
+    expect(classifier.lastDiagnostics()?.routing).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ routeId: 'zai:glm-4.7-flash', reason: 'provider-busy' }),
+        expect.objectContaining({ routeId: 'groq:gpt' }),
+      ]),
+    );
+    expect(classifier.snapshotStats()).toMatchObject({
+      httpFallbacks: 1,
+      fallbackCalls: 1,
+      quotaExhausted: 0,
+      pressureByKind: { capacity: 1 },
+    });
+  });
 });
 

@@ -22,6 +22,7 @@ export * from './gemini-config.ts';
 export {
   GEMINI_API_REVISION,
   GEMINI_DEFAULT_BASE_URL,
+  buildGeminiRequestBody,
   detectDailyQuotaExhausted,
   estimateInputTokens,
   inspectGeminiError,
