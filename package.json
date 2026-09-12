@@ -19,6 +19,7 @@
     "ingest:discovery-context": "tsx src/cli/discovery-context.ts",
     "ai:smoke": "tsx src/cli/smoke-ai-route.ts",
     "ai:smoke:all": "tsx src/cli/smoke-ai-route.ts --all-routes",
+    "ai:qualify": "tsx src/cli/qualify-ai-route.ts",
     "export:excel": "tsx src/cli/export-excel.ts",
     "build": "astro build",
     "preview": "astro preview"

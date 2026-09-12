@@ -11,6 +11,7 @@ Puerta de entrada operativa: qué hay implementado y cómo ejecutarlo.
 | Registry de fuentes | `src/ingestion/registry.ts` |
 | Prompt del fallback de IA | `src/ingestion/classification/ai-prompt.ts` |
 | Golden evaluation set | `tests/fixtures/ingestion/golden/` |
+| Qualification benchmark (calidad de models, no smoke) | `tests/fixtures/ingestion/ai-qualification/` · `npm run ai:qualify` |
 | Variables de entorno de IA | `.env.example` |
 | Pool gratuito multi-provider y setup | [`ai-providers.md`](ai-providers.md) |
 | Histórico (no es requisito vigente) | [`docs/archive/`](archive/) |
