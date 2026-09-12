@@ -25,28 +25,64 @@ export type AiRouteLimits = {
 /**
  * Which capacity dimension a rate-limit / 429 actually exhausted.
  * `concurrency` is in-flight pressure, not daily quota.
+ * `capacity` is provider overload / temporary unavailability of capacity.
+ * `daily` is an explicit per-day quota; `otpm` is output-tokens per minute.
  * `indeterminate` is a 429/Retry-After without a clearer signal.
  */
 export const AI_PRESSURE_KINDS = [
   'concurrency',
   'request-frequency',
   'tpm',
+  'otpm',
+  'daily',
   'monthly',
+  'capacity',
   'indeterminate',
 ] as const;
 export type AiPressureKind = (typeof AI_PRESSURE_KINDS)[number];
 
-/** Sanitized numeric snapshot. Never includes secrets, cookies, or raw payload. */
+/**
+ * Most specific exhausted dimension first. Used by transports and the
+ * scheduler; adding kinds must not reorder production pool selection.
+ */
+export const AI_PRESSURE_RANK = [
+  'concurrency',
+  'daily',
+  'monthly',
+  'otpm',
+  'tpm',
+  'request-frequency',
+  'capacity',
+  'indeterminate',
+] as const satisfies readonly AiPressureKind[];
+
+export function primaryPressure(dimensions: readonly AiPressureKind[] | undefined): AiPressureKind | undefined {
+  if (!dimensions?.length) return undefined;
+  return AI_PRESSURE_RANK.find((kind) => dimensions.includes(kind)) ?? dimensions[0];
+}
+
+/** Sanitized numeric/diagnostic snapshot. Never includes secrets, cookies, or raw payload. */
 export type AiRateLimitSnapshot = {
   remainingRequests?: number;
   remainingTokensMinute?: number;
   remainingTokensMonth?: number;
+  remainingOutputTokensMinute?: number;
   limitRequests?: number;
   limitTokensMinute?: number;
   limitTokensMonth?: number;
+  limitOutputTokensMinute?: number;
   resetAfterMs?: number;
   retryAfterMs?: number;
   dimensions?: AiPressureKind[];
+  quotaMetric?: string;
+  quotaId?: string;
+  quotaDimension?: string;
+  quotaModel?: string;
+  quotaLimit?: number;
+  providerStatus?: string;
+  providerCode?: string;
+  requestId?: string;
+  dailyQuota?: boolean;
 };
 
 export type AiTransportResult = {
@@ -55,7 +91,44 @@ export type AiTransportResult = {
   status?: string;
   finishReason?: string;
   rateLimit?: AiRateLimitSnapshot;
+  requestId?: string;
 };
+
+const OUTPUT_LIMIT_FINISH_REASONS = new Set([
+  'length',
+  'max_tokens',
+  'max_output_tokens',
+  'maxoutputtokens',
+  'token_limit',
+  'budget_exceeded',
+]);
+
+const OUTPUT_LIMIT_STATUSES = new Set([
+  'incomplete',
+  'budget_exceeded',
+]);
+
+/**
+ * Unequivocal signal that generation stopped because the output budget was
+ * reached. Used by the live smoke to distinguish truncated replies from
+ * generic malformed JSON. Production pool still treats this as incomplete.
+ */
+export function outputReachedBudget(input: {
+  status?: string;
+  finishReason?: string;
+  tokens?: AiTokenCounts;
+  requestedMaxOutputTokens?: number;
+}): boolean {
+  const status = input.status?.trim().toLowerCase();
+  if (status && OUTPUT_LIMIT_STATUSES.has(status)) return true;
+  const reason = input.finishReason?.trim().toLowerCase().replace(/[\s-]+/g, '_');
+  if (reason && OUTPUT_LIMIT_FINISH_REASONS.has(reason)) return true;
+  const requested = input.requestedMaxOutputTokens;
+  if (requested === undefined || !(requested > 0)) return false;
+  const used = (input.tokens?.output ?? 0) + (input.tokens?.thought ?? 0);
+  if (used <= 0) return false;
+  return used >= requested || used >= requested * 0.95 || requested - used <= 32;
+}
 
 export type AiTransportCall = {
   model: string;
@@ -105,6 +178,7 @@ export class AiTransportError extends Error {
   /** Present on rate-limit errors when the transport could classify the dimension. */
   readonly pressure?: AiPressureKind;
   readonly rateLimit?: AiRateLimitSnapshot;
+  readonly requestId?: string;
 
   constructor(
     message: string,
@@ -119,6 +193,7 @@ export class AiTransportError extends Error {
       quotaExhausted?: boolean;
       pressure?: AiPressureKind;
       rateLimit?: AiRateLimitSnapshot;
+      requestId?: string;
       cause?: unknown;
     },
   ) {
@@ -134,6 +209,7 @@ export class AiTransportError extends Error {
     this.quotaExhausted = options.quotaExhausted ?? false;
     this.pressure = options.pressure;
     this.rateLimit = options.rateLimit;
+    this.requestId = options.requestId;
   }
 }
 

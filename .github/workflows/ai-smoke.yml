@@ -105,16 +105,39 @@ jobs:
         run: npm ci
 
       - name: Smoke route
+        id: smoke
         env:
           ROUTE: ${{ inputs.route }}
           PURPOSE: ${{ inputs.purpose }}
+          REPORT_DIR: ${{ runner.temp }}/ai-smoke-report
         shell: bash
         run: |
-          set -euo pipefail
-          args=(--route "$ROUTE")
+          set +e
+          set -uo pipefail
+          mkdir -p "$REPORT_DIR"
+          args=(--route "$ROUTE" --report-dir "$REPORT_DIR" --summary "$GITHUB_STEP_SUMMARY")
           if [[ "$PURPOSE" == "all" ]]; then
             args+=(--all-purposes)
           else
             args+=(--purpose "$PURPOSE")
           fi
           npm run ai:smoke -- "${args[@]}"
+          status=$?
+          echo "exit_code=$status" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Publish smoke report
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: ai-smoke-report-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/ai-smoke-report/ai-smoke-report.md
+            ${{ runner.temp }}/ai-smoke-report/ai-smoke-report.json
+          if-no-files-found: warn
+          retention-days: 90
+
+      - name: Fail if smoke failed
+        if: always() && steps.smoke.outputs.exit_code != '0'
+        shell: bash
+        run: exit "${{ steps.smoke.outputs.exit_code }}"

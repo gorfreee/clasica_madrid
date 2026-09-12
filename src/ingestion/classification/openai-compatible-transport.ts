@@ -6,6 +6,7 @@ import {
 import type { AiRequest } from './ai-request.ts';
 import {
   AiTransportError,
+  primaryPressure,
   type AiPressureKind,
   type AiRateLimitSnapshot,
   type AiTransport,
@@ -16,6 +17,7 @@ import {
   openaiCompatibleBusinessPressure,
   openaiCompatibleErrorCode,
   openaiCompatibleModelProfile,
+  openaiCompatibleQuotaExhausted,
   openaiCompatibleRateLimitSignal,
   type OpenAiCompatibleModelProfile,
   type OpenAiCompatibleResponseFormat,
@@ -244,12 +246,14 @@ function parseCompletion(
       excerpt: sanitizeAiOutputExcerpt(content, secret),
     });
   }
+  const requestId = requestIdFromHeaders(headers);
   return {
     value,
     tokens,
     status: 'completed',
     finishReason,
     rateLimit: rateLimitFromHeaders(headers, now),
+    ...(requestId ? { requestId } : {}),
   };
 }
 
@@ -321,26 +325,30 @@ function httpError(
   now: number,
 ): AiTransportError {
   const excerpt = sanitizeAiOutputExcerpt(body, profile.apiKey);
-  const message = `${profile.provider} HTTP ${status}${excerpt ? `: ${excerpt}` : ''}`;
   const code = openaiCompatibleErrorCode(body);
+  const requestId = requestIdFromHeaders(headers);
+  const rateLimit = rateLimitSnapshot(profile.provider, body, headers, now, requestId);
+  const message = formatCompatibleErrorMessage(profile.provider, status, excerpt, rateLimit, requestId, code);
   const identity = {
     status,
     provider: profile.provider,
     model,
     ...(code ? { code } : {}),
+    ...(requestId ? { requestId } : {}),
   };
   if (
     status === 429
     || profile.rateLimitError?.(status, body)
     || openaiCompatibleRateLimitSignal(profile.provider, status, body)
   ) {
-    const rateLimit = rateLimitSnapshot(profile.provider, body, headers, now);
+    const quotaExhausted = profile.quotaExhausted?.(status, body)
+      ?? openaiCompatibleQuotaExhausted(profile.provider, body);
     return new AiTransportError(message, {
       kind: 'rate-limit',
       ...identity,
       retryAfterMs: rateLimit.retryAfterMs ?? rateLimit.resetAfterMs,
       // A bare 429 / Mistral 1300 is never daily quota by itself.
-      quotaExhausted: profile.quotaExhausted?.(status, body) ?? false,
+      quotaExhausted,
       pressure: primaryPressure(rateLimit.dimensions),
       rateLimit,
     });
@@ -359,6 +367,24 @@ function httpError(
     ...identity,
     retryable: status === 408 || status >= 500,
   });
+}
+
+function formatCompatibleErrorMessage(
+  provider: string,
+  status: number,
+  excerpt: string,
+  rateLimit: AiRateLimitSnapshot,
+  requestId?: string,
+  code?: string,
+): string {
+  const parts = [`${provider} HTTP ${status}`];
+  if (code) parts.push(`code ${code}`);
+  if (rateLimit.dimensions?.length) parts.push(`pressure=${rateLimit.dimensions.join(',')}`);
+  if (rateLimit.dailyQuota) parts.push('dailyQuota');
+  if (rateLimit.retryAfterMs !== undefined) parts.push(`retryAfter=${Math.round(rateLimit.retryAfterMs)}ms`);
+  if (requestId) parts.push(`requestId=${requestId}`);
+  if (excerpt) parts.push(excerpt);
+  return parts.join(' | ');
 }
 
 const REQUEST_REMAINING_HEADERS = [
@@ -385,6 +411,22 @@ const TOKEN_LIMIT_MINUTE_HEADERS = [
 ] as const;
 const TOKEN_REMAINING_MONTH_HEADERS = ['x-ratelimit-remaining-tokens-month'] as const;
 const TOKEN_LIMIT_MONTH_HEADERS = ['x-ratelimit-limit-tokens-month'] as const;
+const OUTPUT_TOKEN_REMAINING_MINUTE_HEADERS = [
+  'x-ratelimit-remaining-tokens-output',
+  'x-ratelimit-remaining-output-tokens',
+  'x-ratelimit-remaining-tokens-output-minute',
+] as const;
+const OUTPUT_TOKEN_LIMIT_MINUTE_HEADERS = [
+  'x-ratelimit-limit-tokens-output',
+  'x-ratelimit-limit-output-tokens',
+  'x-ratelimit-limit-tokens-output-minute',
+] as const;
+const REQUEST_ID_HEADERS = [
+  'x-request-id',
+  'x-groq-id',
+  'x-goog-request-id',
+  'cf-ray',
+] as const;
 const RESET_HEADERS = [
   'retry-after',
   'x-ratelimit-reset-req-minute',
@@ -409,20 +451,27 @@ export function rateLimitSnapshot(
   body: string | undefined,
   headers: Headers,
   now: number,
+  requestId?: string,
 ): AiRateLimitSnapshot {
   const remainingRequests = firstNumericHeader(headers, REQUEST_REMAINING_HEADERS);
   const remainingTokensMinute = firstNumericHeader(headers, TOKEN_REMAINING_MINUTE_HEADERS);
   const remainingTokensMonth = firstNumericHeader(headers, TOKEN_REMAINING_MONTH_HEADERS);
+  const remainingOutputTokensMinute = firstNumericHeader(headers, OUTPUT_TOKEN_REMAINING_MINUTE_HEADERS);
   const snapshot: AiRateLimitSnapshot = {
     remainingRequests,
     remainingTokensMinute,
     remainingTokensMonth,
+    remainingOutputTokensMinute,
     limitRequests: firstNumericHeader(headers, REQUEST_LIMIT_HEADERS),
     limitTokensMinute: firstNumericHeader(headers, TOKEN_LIMIT_MINUTE_HEADERS),
     limitTokensMonth: firstNumericHeader(headers, TOKEN_LIMIT_MONTH_HEADERS),
+    limitOutputTokensMinute: firstNumericHeader(headers, OUTPUT_TOKEN_LIMIT_MINUTE_HEADERS),
     resetAfterMs: firstDurationHeader(headers, RESET_HEADERS, now),
     retryAfterMs: durationHeaderMs(headers.get('retry-after'), now)
       ?? firstDurationHeader(headers, RESET_HEADERS, now),
+    requestId: requestId ?? requestIdFromHeaders(headers),
+    providerCode: body ? openaiCompatibleErrorCode(body) : undefined,
+    dailyQuota: provider && body ? openaiCompatibleQuotaExhausted(provider, body) || undefined : undefined,
   };
   const dimensions: AiPressureKind[] = [];
   const business = provider && body !== undefined
@@ -431,6 +480,7 @@ export function rateLimitSnapshot(
   if (business) dimensions.push(business);
   if (remainingRequests === 0) dimensions.push('request-frequency');
   if (remainingTokensMinute === 0) dimensions.push('tpm');
+  if (remainingOutputTokensMinute === 0) dimensions.push('otpm');
   if (remainingTokensMonth === 0) dimensions.push('monthly');
   snapshot.dimensions = uniquePressure(dimensions);
   if (snapshot.dimensions.length === 0 && (provider || body !== undefined)) {
@@ -443,10 +493,12 @@ function uniquePressure(values: AiPressureKind[]): AiPressureKind[] {
   return [...new Set(values)];
 }
 
-function primaryPressure(dimensions: AiPressureKind[] | undefined): AiPressureKind | undefined {
-  if (!dimensions?.length) return undefined;
-  const rank: AiPressureKind[] = ['concurrency', 'monthly', 'tpm', 'request-frequency', 'indeterminate'];
-  return rank.find((kind) => dimensions.includes(kind)) ?? dimensions[0];
+export function requestIdFromHeaders(headers: Headers): string | undefined {
+  for (const name of REQUEST_ID_HEADERS) {
+    const value = headers.get(name)?.trim();
+    if (value) return value;
+  }
+  return undefined;
 }
 
 function emptyToUndefined(snapshot: AiRateLimitSnapshot): AiRateLimitSnapshot | undefined {

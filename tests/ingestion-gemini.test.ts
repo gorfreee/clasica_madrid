@@ -10,13 +10,16 @@ import {
   GEMINI_DEFAULT_MODELS,
   GEMINI_DEFAULT_RPM,
   GEMINI_MAX_RETRIES,
+  inspectGeminiError,
   intervalMsForRpm,
   parseGeminiModelRpm,
+  pressureFromQuota,
   resolveGeminiConfig,
   resolveGeminiModels,
   resolveRetryAfterMs,
   type SleepClock,
 } from '../src/ingestion/classification/gemini.ts';
+import { GeminiTransport } from '../src/ingestion/classification/gemini-transport.ts';
 import { createAiClassifierFromEnv } from '../src/ingestion/classification/provider.ts';
 import type { ObservedFacts } from '../src/ingestion/observed.ts';
 
@@ -208,6 +211,86 @@ describe('Gemini 429 inspection', () => {
     expect(detectDailyQuotaExhausted('GenerateRequestsPerDayPerProjectPerModel-FreeTier')).toBe(true);
     expect(detectDailyQuotaExhausted('GenerateRequestsPerMinutePerProjectPerModel-FreeTier')).toBe(false);
     expect(detectDailyQuotaExhausted('RESOURCE_EXHAUSTED')).toBe(false);
+  });
+
+  it('conserva quota metric/dimension de un 429 largo, no un recorte a 200 chars', async () => {
+    const body = JSON.stringify({
+      error: {
+        code: 429,
+        message: `${'You exceeded your current quota. '.repeat(40)}See rate-limits.`,
+        status: 'RESOURCE_EXHAUSTED',
+        details: [
+          {
+            '@type': 'type.googleapis.com/google.rpc.QuotaFailure',
+            violations: [{
+              quotaMetric: 'generativelanguage.googleapis.com/generate_content_free_tier_requests',
+              quotaId: 'GenerateRequestsPerDayPerProjectPerModel-FreeTier',
+              quotaDimensions: { model: 'gemini-3.8-flash', location: 'global' },
+              quotaValue: '20',
+            }],
+          },
+          { '@type': 'type.googleapis.com/google.rpc.RetryInfo', retryDelay: '8s' },
+        ],
+      },
+    });
+    expect(body.length).toBeGreaterThan(200);
+    const inspected = inspectGeminiError(body);
+    expect(inspected).toMatchObject({
+      providerStatus: 'RESOURCE_EXHAUSTED',
+      dailyQuota: true,
+      quotaId: 'GenerateRequestsPerDayPerProjectPerModel-FreeTier',
+      quotaMetric: 'generativelanguage.googleapis.com/generate_content_free_tier_requests',
+      quotaModel: 'gemini-3.8-flash',
+      quotaLimit: 20,
+      retryAfterMs: 8_000,
+    });
+    expect(inspected.dimensions).toContain('daily');
+
+    const transport = new GeminiTransport({
+      apiKey: 'gemini-secret-key',
+      fetch: async () => new Response(body, {
+        status: 429,
+        headers: { 'retry-after': '8', 'x-goog-request-id': 'req-gemini-1' },
+      }),
+    });
+    const error = await transport.request({
+      model: 'gemini-3.8-flash',
+      request: {
+        purpose: 'eligibility', system: 's', user: 'u', schema: {}, generation: { maxOutputTokens: 256 },
+        contractVersion: 3,
+      },
+      signal: new AbortController().signal,
+      timeoutMs: 1_000,
+    }).catch((thrown: unknown) => thrown);
+    expect(error).toMatchObject({
+      kind: 'rate-limit',
+      status: 429,
+      quotaExhausted: true,
+      pressure: 'daily',
+      requestId: 'req-gemini-1',
+      retryAfterMs: 8_000,
+    });
+    expect((error as Error).message).toContain('GenerateRequestsPerDayPerProjectPerModel-FreeTier');
+    expect((error as Error).message).toContain('generate_content_free_tier_requests');
+    expect((error as Error).message).not.toContain('gemini-secret-key');
+  });
+
+  it('distingue RPM, TPM y OTPM desde quotaId/metric', () => {
+    expect(pressureFromQuota('GenerateRequestsPerMinutePerProjectPerModel-FreeTier')).toEqual(['request-frequency']);
+    expect(pressureFromQuota('GenerateContentInputTokensPerModelPerMinute')).toEqual(['tpm']);
+    expect(pressureFromQuota(
+      'GenerateContentOutputTokensPerModelPerMinute',
+      'generativelanguage.googleapis.com/generate_content_free_tier_output_tokens',
+    )).toEqual(['otpm']);
+    expect(inspectGeminiError(JSON.stringify({
+      error: {
+        status: 'RESOURCE_EXHAUSTED',
+        details: [{
+          '@type': 'type.googleapis.com/google.rpc.QuotaFailure',
+          violations: [{ quotaId: 'GenerateContentOutputTokensPerModelPerMinute' }],
+        }],
+      },
+    })).dimensions).toEqual(['otpm']);
   });
 });
 

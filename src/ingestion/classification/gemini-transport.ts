@@ -4,7 +4,15 @@ import {
   type AiTokenCounts,
 } from './ai.ts';
 import type { AiRequest } from './ai-request.ts';
-import { AiTransportError, type AiTransport, type AiTransportCall, type AiTransportResult } from './ai-transport.ts';
+import {
+  AiTransportError,
+  primaryPressure,
+  type AiPressureKind,
+  type AiRateLimitSnapshot,
+  type AiTransport,
+  type AiTransportCall,
+  type AiTransportResult,
+} from './ai-transport.ts';
 import { thinkingConfigForModel } from './gemini-config.ts';
 
 export const GEMINI_DEFAULT_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta';
@@ -70,7 +78,7 @@ export class GeminiTransport implements AiTransport {
         throw geminiHttpError(
           response.status,
           this.redact(body),
-          response.headers.get('retry-after'),
+          response.headers,
           call.model,
           this.now(),
         );
@@ -83,7 +91,9 @@ export class GeminiTransport implements AiTransport {
           excerpt: sanitizeAiOutputExcerpt(error instanceof Error ? error.message : String(error), this.apiKey),
         });
       }
-      return parseInteraction(call.model, payload, this.apiKey);
+      const parsed = parseInteraction(call.model, payload, this.apiKey);
+      const requestId = requestIdFromHeaders(response.headers);
+      return requestId ? { ...parsed, requestId } : parsed;
     } catch (error) {
       if (controller.signal.aborted && !call.signal.aborted) {
         throw new AiTransportError(`tiempo agotado en la clasificación con IA (${call.timeoutMs}ms)`, { kind: 'timeout' });
@@ -212,30 +222,298 @@ function modelOutputText(step: unknown): string | undefined {
 }
 
 export function detectDailyQuotaExhausted(body: string): boolean {
+  return inspectGeminiError(body).dailyQuota;
+}
+
+export function resolveRetryAfterMs(header: string | null | undefined, body: string, now: number): number | undefined {
+  const fromHeader = parseRetryAfterHeader(header, now);
+  return fromHeader ?? inspectGeminiError(body).retryAfterMs ?? parseRetryDelayFromBody(body);
+}
+
+export function inspectGeminiError(body: string): GeminiErrorInspection {
+  const parsed = parseJsonObject(body);
+  const error = nestedRecord(parsed?.error) ?? parsed;
+  const details = Array.isArray(error?.details) ? error.details : [];
+  const violations = details.flatMap(quotaViolations);
+  const retryAfterMs = findRetryDelay(parsed) ?? parseRetryDelayFromBody(body);
+  const providerStatus = typeof error?.status === 'string' ? error.status : undefined;
+  const providerCode = typeof error?.code === 'string'
+    ? error.code
+    : typeof error?.code === 'number'
+      ? String(error.code)
+      : undefined;
+  const message = typeof error?.message === 'string'
+    ? error.message.replace(/\s+/g, ' ').trim()
+    : parsed
+      ? undefined
+      : body.replace(/\s+/g, ' ').trim().slice(0, 180) || undefined;
+  const first = violations[0];
+  const quotaId = first?.quotaId;
+  const quotaMetric = first?.quotaMetric;
+  const quotaModel = first?.quotaModel;
+  const quotaDimension = first?.quotaDimension;
+  const quotaLimit = first?.quotaLimit;
+  const dimensions = uniquePressure(violations.flatMap((item) => item.dimensions));
+  const dailyQuota = dimensions.includes('daily') || dailyQuotaFromText(body);
+  if (dailyQuota && !dimensions.includes('daily')) dimensions.unshift('daily');
+  if (dimensions.length === 0 && /RESOURCE_EXHAUSTED|rate[_ ]limit|quota/i.test(body)) {
+    dimensions.push('indeterminate');
+  }
+  return {
+    providerStatus,
+    providerCode,
+    message,
+    retryAfterMs,
+    quotaId,
+    quotaMetric,
+    quotaModel,
+    quotaDimension,
+    quotaLimit,
+    dailyQuota,
+    dimensions,
+  };
+}
+
+export type GeminiErrorInspection = {
+  providerStatus?: string;
+  providerCode?: string;
+  message?: string;
+  retryAfterMs?: number;
+  quotaId?: string;
+  quotaMetric?: string;
+  quotaModel?: string;
+  quotaDimension?: string;
+  quotaLimit?: number;
+  dailyQuota: boolean;
+  dimensions: AiPressureKind[];
+};
+
+function geminiHttpError(
+  status: number,
+  body: string,
+  headers: Headers,
+  model: string,
+  now: number,
+): Error {
+  const inspected = inspectGeminiError(body);
+  const requestId = requestIdFromHeaders(headers);
+  const retryAfterMs = parseRetryAfterHeader(headers.get('retry-after'), now) ?? inspected.retryAfterMs;
+  const rateLimit = geminiRateLimitSnapshot(inspected, headers, now, requestId);
+  const message = formatGeminiErrorMessage(status, inspected, rateLimit, requestId);
+  const identity = {
+    status,
+    provider: 'gemini' as const,
+    model,
+    ...(inspected.quotaId || inspected.providerStatus || inspected.providerCode
+      ? { code: inspected.quotaId ?? inspected.providerStatus ?? inspected.providerCode }
+      : {}),
+    ...(requestId ? { requestId } : {}),
+  };
+  if (status === 429) {
+    return new AiTransportError(message, {
+      kind: 'rate-limit',
+      ...identity,
+      retryAfterMs,
+      quotaExhausted: inspected.dailyQuota,
+      pressure: primaryPressure(rateLimit.dimensions),
+      rateLimit,
+    });
+  }
+  if (status === 401 || status === 403) {
+    return new AiTransportError(message, { kind: 'auth', ...identity, rateLimit });
+  }
+  if (status === 400 || status === 404) {
+    return new AiTransportError(message, { kind: 'unavailable', ...identity, rateLimit });
+  }
+  return new AiTransportError(message, {
+    kind: 'transport',
+    ...identity,
+    rateLimit,
+    retryable: status === 408 || status >= 500,
+  });
+}
+
+function geminiRateLimitSnapshot(
+  inspected: GeminiErrorInspection,
+  headers: Headers,
+  now: number,
+  requestId?: string,
+): AiRateLimitSnapshot {
+  const snapshot: AiRateLimitSnapshot = {
+    retryAfterMs: parseRetryAfterHeader(headers.get('retry-after'), now) ?? inspected.retryAfterMs,
+    resetAfterMs: parseRetryAfterHeader(headers.get('retry-after'), now) ?? inspected.retryAfterMs,
+    quotaMetric: inspected.quotaMetric,
+    quotaId: inspected.quotaId,
+    quotaDimension: inspected.quotaDimension,
+    quotaModel: inspected.quotaModel,
+    quotaLimit: inspected.quotaLimit,
+    providerStatus: inspected.providerStatus,
+    providerCode: inspected.providerCode,
+    requestId,
+    dailyQuota: inspected.dailyQuota || undefined,
+    dimensions: inspected.dimensions.length ? inspected.dimensions : undefined,
+  };
+  return withoutUndefinedSnapshot(snapshot);
+}
+
+function formatGeminiErrorMessage(
+  status: number,
+  inspected: GeminiErrorInspection,
+  rateLimit: AiRateLimitSnapshot,
+  requestId?: string,
+): string {
+  const parts = [`Gemini HTTP ${status}`];
+  if (inspected.providerStatus) parts.push(inspected.providerStatus);
+  if (rateLimit.quotaId) parts.push(`quotaId=${rateLimit.quotaId}`);
+  if (rateLimit.quotaMetric) parts.push(`metric=${compactMetric(rateLimit.quotaMetric)}`);
+  if (rateLimit.quotaModel) parts.push(`model=${rateLimit.quotaModel}`);
+  if (rateLimit.quotaDimension) parts.push(`dimension=${rateLimit.quotaDimension}`);
+  if (rateLimit.quotaLimit !== undefined) parts.push(`limit=${rateLimit.quotaLimit}`);
+  if (inspected.dailyQuota) parts.push('dailyQuota');
+  if (rateLimit.dimensions?.length) parts.push(`pressure=${rateLimit.dimensions.join(',')}`);
+  if (rateLimit.retryAfterMs !== undefined) parts.push(`retryDelay=${Math.round(rateLimit.retryAfterMs)}ms`);
+  if (requestId) parts.push(`requestId=${requestId}`);
+  if (inspected.message) parts.push(inspected.message.slice(0, 180));
+  return parts.join(' | ');
+}
+
+function compactMetric(metric: string): string {
+  return metric.replace(/^generativelanguage\.googleapis\.com\//, '');
+}
+
+function quotaViolations(detail: unknown): Array<{
+  quotaId?: string;
+  quotaMetric?: string;
+  quotaModel?: string;
+  quotaDimension?: string;
+  quotaLimit?: number;
+  dimensions: AiPressureKind[];
+}> {
+  const record = nestedRecord(detail);
+  if (!record) return [];
+  const type = typeof record['@type'] === 'string' ? record['@type'] : '';
+  const out: Array<{
+    quotaId?: string;
+    quotaMetric?: string;
+    quotaModel?: string;
+    quotaDimension?: string;
+    quotaLimit?: number;
+    dimensions: AiPressureKind[];
+  }> = [];
+  if (type.includes('QuotaFailure') && Array.isArray(record.violations)) {
+    for (const violation of record.violations) {
+      const item = nestedRecord(violation);
+      if (!item) continue;
+      const quotaId = stringField(item.quotaId);
+      const quotaMetric = stringField(item.quotaMetric);
+      const quotaValue = numericField(item.quotaValue);
+      const dimensionsRecord = nestedRecord(item.quotaDimensions);
+      const quotaModel = stringField(dimensionsRecord?.model);
+      const location = stringField(dimensionsRecord?.location);
+      const quotaDimension = [quotaModel ? `model=${quotaModel}` : undefined, location ? `location=${location}` : undefined]
+        .filter((value): value is string => Boolean(value))
+        .join(' ');
+      out.push({
+        quotaId,
+        quotaMetric,
+        quotaModel,
+        quotaDimension: quotaDimension || undefined,
+        quotaLimit: quotaValue,
+        dimensions: pressureFromQuota(quotaId, quotaMetric),
+      });
+    }
+  }
+  if (type.includes('ErrorInfo')) {
+    const metadata = nestedRecord(record.metadata);
+    const quotaId = stringField(metadata?.quota_limit) ?? stringField(metadata?.quotaId);
+    const quotaMetric = stringField(metadata?.quota_metric) ?? stringField(metadata?.quotaMetric);
+    const quotaLimit = numericField(metadata?.quota_limit_value);
+    if (quotaId || quotaMetric) {
+      out.push({
+        quotaId,
+        quotaMetric,
+        quotaLimit,
+        dimensions: pressureFromQuota(quotaId, quotaMetric),
+      });
+    }
+  }
+  return out;
+}
+
+export function pressureFromQuota(
+  quotaId?: string,
+  quotaMetric?: string,
+): AiPressureKind[] {
+  const text = `${quotaId ?? ''} ${quotaMetric ?? ''}`;
+  if (!text.trim()) return [];
+  const dimensions: AiPressureKind[] = [];
+  const perDay = /PerDay|per_day|RequestsPerDay|GenerateRequestsPerDay|RPD/i.test(text);
+  const perMinute = /PerMinute|per_minute|RPM|TPM|OTPM/i.test(text);
+  const outputTokens = /OutputToken/i.test(text);
+  const anyTokens = /Token/i.test(text);
+  if (perDay) dimensions.push('daily');
+  if (outputTokens && (perMinute || /output_tokens/i.test(text))) dimensions.push('otpm');
+  else if (anyTokens && perMinute) dimensions.push('tpm');
+  if (/Request/i.test(text) && perMinute && !anyTokens) dimensions.push('request-frequency');
+  else if (perMinute && dimensions.length === 0) dimensions.push('request-frequency');
+  if (/concurrent|concurrency/i.test(text)) dimensions.push('concurrency');
+  return uniquePressure(dimensions);
+}
+
+function dailyQuotaFromText(body: string): boolean {
   if (!body) return false;
   if (/PerDay|per_day|RequestsPerDay|GenerateRequestsPerDay/i.test(body)) return true;
   return /daily(?:\s+quota)?|quota[^\n]{0,80}(?:per\s+day|for the (?:rest of the )?day)/i.test(body);
 }
 
-export function resolveRetryAfterMs(header: string | null | undefined, body: string, now: number): number | undefined {
-  const fromHeader = parseRetryAfterHeader(header, now);
-  return fromHeader ?? parseRetryDelayFromBody(body);
+function requestIdFromHeaders(headers: Headers): string | undefined {
+  for (const name of ['x-goog-request-id', 'x-request-id', 'x-gemini-request-id']) {
+    const value = headers.get(name)?.trim();
+    if (value) return value;
+  }
+  return undefined;
 }
 
-function geminiHttpError(status: number, body: string, retryAfter: string | null, model: string, now: number): Error {
-  const excerpt = body.trim().slice(0, 200);
-  const suffix = excerpt ? `: ${excerpt}` : '';
-  if (status === 429) {
-    return new AiTransportError(`Gemini HTTP 429${suffix}`, {
-      kind: 'rate-limit', status,
-      retryAfterMs: resolveRetryAfterMs(retryAfter, body, now),
-      quotaExhausted: detectDailyQuotaExhausted(body),
-    });
+function parseJsonObject(body: string): Record<string, unknown> | undefined {
+  const trimmed = body.trim();
+  if (!trimmed.startsWith('{')) return undefined;
+  try {
+    const value = JSON.parse(trimmed) as unknown;
+    return value && typeof value === 'object' && !Array.isArray(value)
+      ? value as Record<string, unknown>
+      : undefined;
+  } catch {
+    return undefined;
   }
-  if (status === 401 || status === 403) return new AiTransportError(`Gemini HTTP ${status}${suffix}`, { kind: 'auth', status });
-  if (status === 400 || status === 404) return new AiTransportError(`Gemini HTTP ${status}${suffix || ` al pedir el modelo ${model}`}`, { kind: 'unavailable', status });
-  if (status === 408 || status >= 500) return new AiTransportError(`Gemini HTTP ${status}${suffix}`, { kind: 'transport', status });
-  return new AiTransportError(`Gemini HTTP ${status}${suffix || ` al pedir el modelo ${model}`}`, { kind: 'transport', status });
+}
+
+function nestedRecord(value: unknown): Record<string, unknown> | undefined {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : undefined;
+}
+
+function stringField(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim() ? value.trim() : undefined;
+}
+
+function numericField(value: unknown): number | undefined {
+  if (typeof value === 'number' && Number.isFinite(value) && value >= 0) return value;
+  if (typeof value === 'string' && value.trim()) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined;
+  }
+  return undefined;
+}
+
+function uniquePressure(values: AiPressureKind[]): AiPressureKind[] {
+  return [...new Set(values)];
+}
+
+function withoutUndefinedSnapshot(snapshot: AiRateLimitSnapshot): AiRateLimitSnapshot {
+  return Object.fromEntries(
+    Object.entries(snapshot).filter(([, value]) => value !== undefined && !(Array.isArray(value) && value.length === 0)),
+  ) as AiRateLimitSnapshot;
 }
 
 function parseRetryAfterHeader(header: string | null | undefined, now: number): number | undefined {

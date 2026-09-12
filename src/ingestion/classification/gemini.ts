@@ -24,6 +24,8 @@ export {
   GEMINI_DEFAULT_BASE_URL,
   detectDailyQuotaExhausted,
   estimateInputTokens,
+  inspectGeminiError,
+  pressureFromQuota,
   resolveRetryAfterMs,
 } from './gemini-transport.ts';
 export type { SleepClock } from './ai-pool.ts';

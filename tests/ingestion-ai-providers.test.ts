@@ -450,6 +450,13 @@ describe('perfiles HTTP declarativos', () => {
     expect(openaiCompatibleRateLimitSignal('zai', 503, '{"error":{"code":"1305"}}')).toBe(true);
     expect(openaiCompatibleRateLimitSignal('zai', 429, '{"error":{"code":"1302"}}')).toBe(true);
     expect(openaiCompatibleBusinessPressure('zai', '{"error":{"code":"1302","message":"High concurrency usage of this API"}}')).toBe('concurrency');
+    expect(openaiCompatibleBusinessPressure('zai', '{"error":{"code":"1303","message":"Rate limit reached"}}')).toBe('request-frequency');
+    expect(openaiCompatibleBusinessPressure('zai', '{"error":{"code":"1304","message":"Daily limit reached"}}')).toBe('daily');
+    expect(openaiCompatibleBusinessPressure(
+      'zai',
+      '{"error":{"code":"1305","message":"The service may be temporarily overloaded, please try again later"}}',
+    )).toBe('capacity');
+    expect(openaiCompatibleBusinessPressure('zai', '{"error":{"code":"1305","message":"Rate limit reached"}}')).toBe('indeterminate');
     expect(openaiCompatibleErrorCode('{"object":"error","type":"rate_limited","code":"1300"}')).toBe('1300');
     expect(openaiCompatibleBusinessPressure('mistral', '{"code":"1300"}')).toBeUndefined();
     expect(openaiCompatibleRateLimitSignal('groq', 400, 'invalid')).toBe(false);
@@ -593,7 +600,7 @@ describe('OpenAiCompatibleTransport', () => {
       ),
     });
     await expect(zaiOverload.request({ model: 'glm-4.7-flash', request, signal, timeoutMs: 1_000 }))
-      .rejects.toMatchObject({ kind: 'rate-limit', status: 503 });
+      .rejects.toMatchObject({ kind: 'rate-limit', status: 503, pressure: 'capacity', quotaExhausted: false, code: '1305' });
 
     const zaiRate = new OpenAiCompatibleTransport({
       provider: 'zai', baseUrl: 'https://example.test/v1', apiKey: 'provider-secret',
@@ -706,6 +713,46 @@ describe('OpenAiCompatibleTransport', () => {
       await expect(transport.request({ model: 'glm-4.7-flash', request, signal, timeoutMs: 1_000 }))
         .rejects.toMatchObject({ kind: 'rate-limit', pressure: 'concurrency', quotaExhausted: false, status: 429 });
     }
+  });
+
+  it('Z.AI 1303/1304/1305 y OTPM/request-id quedan en el snapshot sanitizado', async () => {
+    const frequency = new OpenAiCompatibleTransport({
+      provider: 'zai', baseUrl: 'https://example.test/v1', apiKey: 'zai-secret-key',
+      fetch: async () => new Response(
+        '{"error":{"code":"1303","message":"Rate limit reached for requests"}}',
+        { status: 429, headers: { 'x-request-id': 'zai-req-1303' } },
+      ),
+    });
+    await expect(frequency.request({ model: 'glm-4.7-flash', request, signal, timeoutMs: 1_000 }))
+      .rejects.toMatchObject({
+        kind: 'rate-limit', pressure: 'request-frequency', quotaExhausted: false, code: '1303', requestId: 'zai-req-1303',
+      });
+
+    const daily = new OpenAiCompatibleTransport({
+      provider: 'zai', baseUrl: 'https://example.test/v1', apiKey: 'zai-secret-key',
+      fetch: async () => new Response('{"error":{"code":"1304","message":"Daily limit reached"}}', { status: 429 }),
+    });
+    await expect(daily.request({ model: 'glm-4.7-flash', request, signal, timeoutMs: 1_000 }))
+      .rejects.toMatchObject({ kind: 'rate-limit', pressure: 'daily', quotaExhausted: true, code: '1304' });
+
+    const otpm = rateLimitSnapshot('groq', '{"error":{"message":"rate"}}', new Headers({
+      'x-ratelimit-remaining-output-tokens': '0',
+      'x-ratelimit-limit-output-tokens': '8000',
+      'x-request-id': 'groq-req-1',
+    }), 0);
+    expect(otpm).toMatchObject({
+      remainingOutputTokensMinute: 0, limitOutputTokensMinute: 8_000, requestId: 'groq-req-1', dimensions: ['otpm'],
+    });
+  });
+
+  it('finish_reason=length es incomplete por tope de output', async () => {
+    const transport = compatible(async () => response({
+      choices: [{ message: { content: '{"eligibility":' }, finish_reason: 'length' }],
+      usage: { prompt_tokens: 10, completion_tokens: 100 },
+    }));
+    await expect(transport.request({ model: 'model', request, signal, timeoutMs: 1_000 })).rejects.toMatchObject({
+      kind: 'incomplete', finishReason: 'length', tokens: { output: 100, input: 10 },
+    });
   });
 
   it('el pool conserva json_validate_failed de Groq y no filtra la key', async () => {

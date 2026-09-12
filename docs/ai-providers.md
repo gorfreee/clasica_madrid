@@ -78,11 +78,13 @@ El `report.json`, el resumen de consola y el Job Summary separan provider, model
 
 Son llamadas **live** a las APIs de los proveedores: consumen quota real. No se ejecutan automáticamente en CI (ni en push ni en pull request), no escriben `data/**` y no crean PRs. Conviene lanzarlos tras cambiar providers, modelos, transports o prompts, o cuando una ingestión muestre comportamientos sospechosos.
 
-Descubren las routes con la misma configuración que el pool de producción (`inspectFreePoolFromEnv`) y reutilizan directamente cada transport, payload, prompt, schema y parser real. El runner llama una sola vez a `route.transport.request()` por celda, con el timeout HTTP de producción (15 s): no usa `AiPoolClassifier`, retries, fallback, cache, scheduler, circuit breaker ni estado persistente. Un proveedor esperado sin key o sin confirmación gratuita no desaparece: cuenta como FAIL.
+Descubren las routes con la misma configuración que el pool de producción (`inspectFreePoolFromEnv`) y reutilizan directamente cada transport, payload, prompt, schema y parser real. El runner llama una sola vez a `route.transport.request()` por celda: no usa `AiPoolClassifier`, retries, fallback, cache, scheduler, circuit breaker ni estado persistente. Un proveedor esperado sin key o sin confirmación gratuita no desaparece: cuenta como FAIL.
+
+El timeout productivo del pool sigue en 15 s. El **live smoke** usa un hard timeout de 30 s y marca como `SLOW` (sigue siendo PASS funcional) cualquier respuesta correcta ≥ 15 s. Un corte a 30 s es `TIMEOUT`. `--timeout-ms` / `--slow-threshold-ms` (o `AI_SMOKE_TIMEOUT_MS` / `AI_SMOKE_SLOW_THRESHOLD_MS`) permiten override explícito.
 
 Por defecto prueba un solo purpose (`eligibility`, como máximo un HTTP por route). `--purpose taxonomy` cambia el fixture; `--all-purposes` recorre eligibility, composer extraction, access y taxonomy (como máximo un HTTP por `route × purpose`). Cada fixture declara una expectativa semántica mínima y no ambigua; no basta con devolver JSON compatible.
 
-Los providers avanzan en paralelo. Dentro de cada provider hay como máximo dos workers —o menos si `providerMaxConcurrent` es más restrictivo—, cada route mantiene un único request en vuelo y los inicios respetan sus `rpm` / `minIntervalMs` y el `providerMinIntervalMs`. No hay retries ocultos. Un fallo funcional, output inválido, timeout o 429 transitorio no impide probar los demás purposes. Sólo auth, modelo inequívocamente inexistente/no disponible y cuota diaria explícitamente agotada bloquean los purposes restantes de esa route.
+Los providers avanzan en paralelo. Dentro de cada provider hay como máximo dos workers —o menos si `providerMaxConcurrent` es más restrictivo—, cada route mantiene un único request en vuelo y los inicios respetan sus `rpm` / `minIntervalMs` y el `providerMinIntervalMs`. No hay retries ocultos. Un fallo funcional, output inválido, timeout, `SLOW` o 429 transitorio no impide probar los demás purposes. Sólo auth, modelo inequívocamente inexistente/no disponible y cuota diaria explícitamente agotada bloquean los purposes restantes de esa route.
 
 ```bash
 # una sola route (eligibility)
@@ -100,33 +102,41 @@ npm run ai:smoke:all
 
 # todas las tasks (`AI_CALL_PURPOSES`) en todas las routes
 npm run ai:smoke:all -- --all-purposes
+
+# artefactos locales (Job Summary / GitHub artifact en el workflow)
+npm run ai:smoke:all -- --all-purposes --report-dir /tmp/ai-smoke-report
 ```
 
-El comando carga `.local/ai.env`, fuerza `AI_ZERO_COST_ONLY=true` e imprime una línea JSON por celda (provider, model, route, purpose, estado, validez estructural/semántica, HTTP status, provider error code, latencia, tokens/rate-limit y mensaje sanitizado) más el informe completo. Los estados son:
+El comando carga `.local/ai.env`, fuerza `AI_ZERO_COST_ONLY=true` e imprime una línea JSON por celda más el informe Markdown. En GitHub Actions el mismo Markdown se publica en `$GITHUB_STEP_SUMMARY` y se suben `ai-smoke-report.md` / `ai-smoke-report.json` aunque el smoke falle. Los estados son:
 
-- `PASS`: estructura y semántica esperadas;
+- `PASS`: estructura y semántica esperadas en menos de 15 s;
+- `SLOW`: igual que PASS, pero la respuesta tardó ≥ 15 s (no es un fallo funcional);
 - `SEMANTIC_FAIL`: schema válido, resultado equivocado;
-- `SCHEMA_FAIL`: objeto parseable que incumple el schema;
-- `INVALID_OUTPUT`: vacío, JSON malformado o respuesta incompleta;
-- `RATE_LIMIT` / `DAILY_QUOTA`: límite transitorio o cuota diaria explícita;
+- `SCHEMA_FAIL`: objeto parseable que incumple el schema, sin señal de recorte de output;
+- `INVALID_OUTPUT`: JSON realmente malformado/vacío, sin mejor explicación;
+- `OUTPUT_LIMIT`: la generación se cortó al alcanzar el presupuesto de salida (`incomplete`, `finish_reason=length`/`max_tokens`, o tokens de salida ≈ `maxOutputTokens`);
+- `RATE_LIMIT`: 429/límite transitorio sin dimensión clara;
+- `RPM` / `TPM` / `OTPM` / `CONCURRENCY`: requests/minuto, tokens/minuto, output-tokens/minuto o presión de concurrencia;
+- `PROVIDER_BUSY`: capacidad/overload del proveedor (p. ej. Z.AI `1305` con cuerpo de overload);
+- `DAILY_QUOTA`: cuota diaria explícita;
 - `TIMEOUT`, `AUTH`, `MODEL_UNAVAILABLE`, `REQUEST_ERROR` o `TRANSPORT_ERROR`: causa técnica concreta;
 - `CONFIG_ERROR`: route/provider no configurado;
 - `BLOCKED`: no hizo request porque un fallo global previo de esa route lo hacía inútil.
 
+Z.AI, tabla oficial comprobada el 2026-09-12 ([códigos de error](https://docs.z.ai/api-reference/api-code)): `1302` es concurrency (el mensaje oficial dice "Rate limit reached for requests"; en producción también aparece "High concurrency usage…"); `1305` es overload/capacity **sólo si el body lo dice** (el mensaje oficial sí lo dice). `1303` (frequency) y `1304` (daily) **no** están en esa tabla; si aparecen en un body los clasificamos así, sin inventar semántica cuando el código/mensaje no permiten distinguirla.
+
 ```text
-AI LIVE SMOKE TEST — DIRECT ONE-SHOT
+# AI live smoke — FAIL
 
-Route                                  Eligibility  Latency   Result
-gemini:gemini-3.8-flash                PASS         1320 ms   PASS
+- Resultado global: **FAIL**
+- Routes: **12 PASS** / **3 PARTIAL** / **1 FAIL**
+- HTTP requests: **54**
+- Duración: **3.8 min**
 
-Routes fully PASS: 16
-Routes partially PASS: 1
-Routes FAIL: 1
-Missing/unconfigured providers: 0
-HTTP requests performed: 18
-Total duration: 42.3 s
-
-RESULT: FAIL
+| Provider | Model | Eligibility | Composer | Access | Taxonomy | Latency | Result |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| gemini | gemini-3.8-flash | TIMEOUT | PASS | SLOW | DAILY_QUOTA | 41.0 s | PARTIAL |
+| groq | openai/gpt-oss-120b | PASS | PASS | PASS | PASS | 3.5 s | PASS |
 ```
 
 En GitHub hay dos workflows manuales (`workflow_dispatch`, `contents: read`, mismos secrets/`vars` que la ingestión). No publican datos:
@@ -169,7 +179,7 @@ Las keys ausentes dejan fuera su provider sin romper la ingestión. Gemini sigue
 - Z.AI: parámetros, incluido `thinking`: <https://docs.z.ai/guides/overview/concept-param>
 - Z.AI: JSON mode / structured output: <https://docs.z.ai/guides/capabilities/struct-output>
 - Z.AI: Chat Completions: <https://docs.z.ai/api-reference/llm/chat-completion>
-- Z.AI: códigos de error (`1302` high concurrency / rate limit reached for requests; `1305` overload): <https://docs.z.ai/api-reference/api-code>
+- Z.AI: códigos de error (`1302` concurrency; `1305` overload cuando el body lo dice; `1303`/`1304` no oficiales): <https://docs.z.ai/api-reference/api-code>
 - Z.AI: GLM-4.7 (incluye Flash): <https://docs.z.ai/guides/llm/glm-4.7>
 - Z.AI: GLM-4.5 / Flash y structured output: <https://docs.z.ai/guides/llm/glm-4.5>
 - Z.AI: precios por modelo: <https://docs.z.ai/guides/overview/pricing>

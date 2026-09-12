@@ -4,12 +4,18 @@
  * One shared transport builds the request from these profiles. Do not scatter
  * `if (provider === ...)` around retries, scheduling, or editorial validation.
  *
- * Sources checked 2026-09-10 / 2026-09-11:
+ * Sources checked 2026-09-10 / 2026-09-11 / 2026-09-12:
  * - Z.AI thinking: https://docs.z.ai/guides/capabilities/thinking-mode
  * - Z.AI parameters: https://docs.z.ai/guides/overview/concept-param
  * - Z.AI JSON mode: https://docs.z.ai/guides/capabilities/struct-output
  * - Z.AI Chat Completions: https://docs.z.ai/api-reference/llm/chat-completion
  * - Z.AI error codes: https://docs.z.ai/api-reference/api-code
+ *   Official table as of 2026-09-12 lists 1302 (rate limit reached for
+ *   requests), 1305 (temporarily overloaded), 1308 (usage limit with reset),
+ *   1310 (weekly/monthly). It does **not** list 1303 or 1304. When those
+ *   codes appear in a body we still classify them: 1303 → request-frequency,
+ *   1304 → daily quota. 1305 is capacity/overload only when the body says so
+ *   (the official message does); otherwise it stays an indeterminate 429.
  * - Cloudflare GLM: https://developers.cloudflare.com/workers-ai/models/glm-4.7-flash/
  * - Cloudflare Gemma: https://developers.cloudflare.com/ai/models/@cf/google/gemma-4-26b-a4b-it/
  * - Cloudflare JSON Mode (supported-model list, no GLM/Gemma): https://developers.cloudflare.com/workers-ai/features/json-mode/
@@ -120,7 +126,9 @@ export function openaiCompatibleModelProfile(
 /**
  * Rate-limit / overload signals that are not always a bare HTTP 429 with Groq
  * headers. Mistral publishes `X-RateLimit-*` and error code 1300. Z.AI uses
- * 1302 (high concurrency / request pressure) and 1305 (temporary overload).
+ * 1302 (high concurrency / request pressure), 1303 (frequency, unofficial),
+ * 1304 (daily limit, unofficial), 1305 (temporary overload when the body
+ * says so), and 1308+ usage/period limits.
  */
 export function openaiCompatibleRateLimitSignal(
   provider: string,
@@ -135,13 +143,31 @@ export function openaiCompatibleRateLimitSignal(
   if (name === 'zai') {
     const code = openaiCompatibleErrorCode(body);
     return (status === 429 || status === 503)
-      && (code === '1302' || code === '1305' || /rate limit reached|temporarily overloaded|high concurrency/i.test(body));
+      && (
+        ZAI_RATE_LIMIT_CODES.has(code ?? '')
+        || /rate limit reached|temporarily overloaded|high concurrency|usage limit reached/i.test(body)
+      );
   }
   return false;
 }
 
 /** Z.AI 1302 is high concurrency, not daily quota and not an invalid key. */
 export const ZAI_CONCURRENCY_PRESSURE_CODE = '1302';
+/** Observed sibling of 1302; not in the official 2026-09-12 table. */
+export const ZAI_FREQUENCY_PRESSURE_CODE = '1303';
+/** Observed daily-limit sibling; not in the official 2026-09-12 table. */
+export const ZAI_DAILY_LIMIT_CODE = '1304';
+/** Official: "The service may be temporarily overloaded, please try again later". */
+export const ZAI_OVERLOAD_CODE = '1305';
+
+const ZAI_RATE_LIMIT_CODES = new Set([
+  ZAI_CONCURRENCY_PRESSURE_CODE,
+  ZAI_FREQUENCY_PRESSURE_CODE,
+  ZAI_DAILY_LIMIT_CODE,
+  ZAI_OVERLOAD_CODE,
+  '1308',
+  '1310',
+]);
 
 export function openaiCompatibleErrorCode(body: string): string | undefined {
   const parsed = parseJsonObject(body);
@@ -159,6 +185,14 @@ export function openaiCompatibleErrorCode(body: string): string | undefined {
  * Classify the exhausted dimension from a provider business code / message.
  * Header-based dimensions are layered on by the transport. A bare 429 is
  * indeterminate — never quota exhaustion.
+ *
+ * Z.AI decisions (official table checked 2026-09-12, https://docs.z.ai/api-reference/api-code):
+ * - 1302 → concurrency (official "Rate limit reached for requests"; production
+ *   bodies also say "High concurrency usage of this API")
+ * - 1303 → request-frequency (code seen in the wild; not in the official table)
+ * - 1304 → daily (code seen in the wild; not in the official table)
+ * - 1305 → capacity only when the body mentions overload; otherwise indeterminate
+ * - 1308 usage-limit / 1310 weekly-monthly → monthly unless the unit is day
  */
 export function openaiCompatibleBusinessPressure(
   provider: string,
@@ -166,10 +200,29 @@ export function openaiCompatibleBusinessPressure(
 ): AiPressureKind | undefined {
   const name = provider.trim().toLowerCase();
   const code = openaiCompatibleErrorCode(body);
-  if (name === 'zai' && (code === ZAI_CONCURRENCY_PRESSURE_CODE || /high concurrency/i.test(body))) {
-    return 'concurrency';
+  if (name === 'zai') {
+    if (code === ZAI_CONCURRENCY_PRESSURE_CODE || /high concurrency/i.test(body)) return 'concurrency';
+    if (code === ZAI_FREQUENCY_PRESSURE_CODE) return 'request-frequency';
+    if (code === ZAI_DAILY_LIMIT_CODE || /\b(daily limit|per day|requests per day)\b/i.test(body)) return 'daily';
+    if (code === ZAI_OVERLOAD_CODE) {
+      return /overload|temporarily overloaded|capacity/i.test(body) ? 'capacity' : 'indeterminate';
+    }
+    if (code === '1310' || /weekly|monthly limit/i.test(body)) return 'monthly';
+    if (code === '1308') {
+      if (/\bday|daily\b/i.test(body)) return 'daily';
+      if (/\bmonth|week\b/i.test(body)) return 'monthly';
+      return 'indeterminate';
+    }
   }
   return undefined;
+}
+
+export function openaiCompatibleQuotaExhausted(
+  provider: string,
+  body: string,
+): boolean {
+  const pressure = openaiCompatibleBusinessPressure(provider, body);
+  return pressure === 'daily';
 }
 
 function parseJsonObject(body: string): { code?: unknown; error?: unknown } | undefined {
