@@ -349,7 +349,7 @@ export function addCellToTotals(totals: QualifyRouteTotals, input: {
   }
   if (input.score.contract === 'ok') totals.schemaOk += 1;
   if (input.score.semantic === 'ok') totals.semanticOk += 1;
-  if (input.score.evidence === 'ok' && input.score.semantic === 'ok') totals.evidenceOk += 1;
+  if (input.score.evidence === 'ok') totals.evidenceOk += 1;
   totals.inputTokens += input.tokens?.input ?? 0;
   totals.outputTokens += input.tokens?.output ?? 0;
   totals.thoughtTokens += input.tokens?.thought ?? 0;
@@ -373,6 +373,7 @@ export type QualifyRankingRow = {
   rank: number;
   insufficientSample: boolean;
   semanticRate?: number;
+  evidenceRate?: number;
   schemaRate?: number;
   transportRate?: number;
   p50Ms?: number;
@@ -390,6 +391,7 @@ export function rankRoutes(
 ): QualifyRankingRow[] {
   const decorated = rows.map((row) => {
     const semanticRate = rate(row.totals.semanticOk, row.totals.schemaOk);
+    const evidenceRate = rate(row.totals.evidenceOk, row.totals.schemaOk);
     const schemaRate = rate(row.totals.schemaOk, row.totals.transportOk);
     const transportRate = rate(row.totals.transportOk, row.totals.requests);
     const p50Ms = row.totals.latencies.length >= 2 ? percentile(row.totals.latencies, 0.5) : undefined;
@@ -401,6 +403,7 @@ export function rankRoutes(
       rank: 0,
       insufficientSample: insufficientSample(row.totals),
       semanticRate,
+      evidenceRate,
       schemaRate,
       transportRate,
       p50Ms,
@@ -411,6 +414,8 @@ export function rankRoutes(
     if (a.insufficientSample !== b.insufficientSample) return a.insufficientSample ? 1 : -1;
     const semantic = compareDesc(a.semanticRate, b.semanticRate);
     if (semantic) return semantic;
+    const evidence = compareDesc(a.evidenceRate, b.evidenceRate);
+    if (evidence) return evidence;
     const schema = compareDesc(a.schemaRate, b.schemaRate);
     if (schema) return schema;
     const transport = compareDesc(a.transportRate, b.transportRate);

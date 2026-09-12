@@ -101,7 +101,7 @@ export function formatAiQualifyMarkdown(input: {
     `- HTTP requests: **${json.requests}** · duración **${formatLatency(json.durationMs)}** · timeout ${formatLatency(json.config.timeoutMs)}`,
     `- Coste: **0 €** (AI_ZERO_COST_ONLY). Esto no es el live smoke.`,
     '',
-    'Las tres capas no se mezclan: transporte (¿la llamada funciona?), contrato (¿JSON válido?) y semántica (¿la respuesta es correcta?).',
+    'Las tres capas no se mezclan: transporte (¿la llamada funciona?), contrato (¿JSON válido?) y semántica (¿la respuesta es correcta?). Evidence grounded se reporta aparte: un label correcto con spans inventados no se oculta en un score único.',
     '',
     '## Resumen general',
     '',
@@ -127,7 +127,7 @@ export function formatAiQualifyMarkdown(input: {
   }
 
   lines.push('## Suggested route ranking by purpose', '');
-  lines.push('Ordenación informativa. **No cambia producción.** Prioridad: corrección semántica → schema → transporte → latencia p50 → tokens de salida. Una muestra insuficiente se marca y queda al final.', '');
+  lines.push('Ordenación informativa. **No cambia producción.** Prioridad: corrección semántica → evidence grounded → schema → transporte → latencia p50 → tokens de salida. Una muestra insuficiente se marca y queda al final.', '');
   for (const purpose of purposes) {
     const ranking = json.rankingByPurpose[purpose] ?? [];
     lines.push(`### ${PURPOSE_TITLES[purpose]}`, '');
@@ -136,11 +136,11 @@ export function formatAiQualifyMarkdown(input: {
       continue;
     }
     lines.push(
-      '| Rank | Route | Semantic | Schema | Transport | p50 | Out tokens | Sample |',
-      '| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |',
+      '| Rank | Route | Semantic | Evidence | Schema | Transport | p50 | Out tokens | Sample |',
+      '| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |',
     );
     for (const row of ranking) {
-      lines.push(`| ${row.rank} | ${escapeCell(row.routeId)} | ${fmtRate(row.semanticRate)} | ${fmtRate(row.schemaRate)} | ${fmtRate(row.transportRate)} | ${row.p50Ms === undefined ? '—' : formatLatency(row.p50Ms)} | ${row.outputTokens} | ${row.insufficientSample ? 'insufficient' : 'ok'} |`);
+      lines.push(`| ${row.rank} | ${escapeCell(row.routeId)} | ${fmtRate(row.semanticRate)} | ${fmtRate(row.evidenceRate)} | ${fmtRate(row.schemaRate)} | ${fmtRate(row.transportRate)} | ${row.p50Ms === undefined ? '—' : formatLatency(row.p50Ms)} | ${row.outputTokens} | ${row.insufficientSample ? 'insufficient' : 'ok'} |`);
     }
     lines.push('');
   }
@@ -188,7 +188,7 @@ export async function writeAiQualifyArtifacts(input: {
 
 function formatRouteTable(routes: QualifyRouteSummary[]): string {
   const header = [
-    'Provider', 'Model', 'Semantic', 'Schema', 'Transport', 'p50', 'p95',
+    'Provider', 'Model', 'Semantic', 'Evidence', 'Schema', 'Transport', 'p50', 'p95',
     'In tok', 'Out tok', 'Reason tok', 'Cases',
   ];
   const rows = routes.map((route) => {
@@ -197,6 +197,7 @@ function formatRouteTable(routes: QualifyRouteSummary[]): string {
       escapeCell(route.provider),
       escapeCell(route.model),
       fmtRate(rate(t.semanticOk, t.schemaOk), t.semanticOk, t.schemaOk),
+      fmtRate(rate(t.evidenceOk, t.schemaOk), t.evidenceOk, t.schemaOk),
       fmtRate(rate(t.schemaOk, t.transportOk), t.schemaOk, t.transportOk),
       fmtRate(rate(t.transportOk, t.requests), t.transportOk, t.requests),
       t.latencies.length >= 2 ? formatLatency(percentile(t.latencies, 0.5) ?? 0) : '—',
@@ -211,16 +212,17 @@ function formatRouteTable(routes: QualifyRouteSummary[]): string {
 }
 
 function formatPurposeTable(routes: QualifyRouteSummary[], purpose: AiQualifyPurpose): string {
-  const header = ['Provider', 'Model', 'Semantic', 'Schema', 'Transport', 'p50', 'Cases'];
+  const header = ['Provider', 'Model', 'Semantic', 'Evidence', 'Schema', 'Transport', 'p50', 'Cases'];
   const rows = routes.map((route) => {
     const t = route.byPurpose[purpose];
     if (!t) {
-      return [escapeCell(route.provider), escapeCell(route.model), '—', '—', '—', '—', '0'];
+      return [escapeCell(route.provider), escapeCell(route.model), '—', '—', '—', '—', '—', '0'];
     }
     return [
       escapeCell(route.provider),
       escapeCell(route.model),
       fmtRate(rate(t.semanticOk, t.schemaOk), t.semanticOk, t.schemaOk),
+      fmtRate(rate(t.evidenceOk, t.schemaOk), t.evidenceOk, t.schemaOk),
       fmtRate(rate(t.schemaOk, t.transportOk), t.schemaOk, t.transportOk),
       fmtRate(rate(t.transportOk, t.requests), t.transportOk, t.requests),
       t.latencies.length >= 2 ? formatLatency(percentile(t.latencies, 0.5) ?? 0) : '—',
@@ -251,5 +253,5 @@ function escapeCell(value: string): string {
 
 function formatLatency(ms: number): string {
   if (ms >= 1_000) return `${(ms / 1_000).toFixed(1)} s`;
-  return `${ms} ms`;
+  return `${Math.round(ms)} ms`;
 }

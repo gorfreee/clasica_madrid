@@ -212,6 +212,7 @@ describe('fallos de transporte/contrato y agregados', () => {
     ]);
     expect(ranking.map((row) => row.routeId)).toEqual(['groq:strong', 'groq:weak', 'groq:tiny']);
     expect(ranking[0]?.semanticRate).toBe(1);
+    expect(ranking[0]?.evidenceRate).toBe(1);
     expect(ranking[1]?.semanticRate).toBe(0.5);
     expect(ranking[2]?.insufficientSample).toBe(true);
   });
@@ -413,7 +414,7 @@ describe('markdown summary', () => {
           eligibility: [{
             purpose: 'eligibility', routeId: 'groq:openai/gpt-oss-120b', provider: 'groq',
             model: 'openai/gpt-oss-120b', rank: 1, insufficientSample: true,
-            semanticRate: 1, schemaRate: 1, transportRate: 1, p50Ms: 100, outputTokens: 6,
+            semanticRate: 1, evidenceRate: 1, schemaRate: 1, transportRate: 1, p50Ms: 100, outputTokens: 6,
           }],
         },
       },
@@ -424,6 +425,7 @@ describe('markdown summary', () => {
     expect(markdown).toContain('## Eligibility');
     expect(markdown).toContain('## Formats');
     expect(markdown).toContain('Suggested route ranking');
+    expect(markdown).toContain('| Provider | Model | Semantic | Evidence | Schema | Transport |');
     expect(markdown).toContain('insufficient');
     expect(markdown).toContain('deadbeef');
   });

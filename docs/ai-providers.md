@@ -169,7 +169,7 @@ npm run ai:qualify -- --route mistral:ministral-14b-2512 --max-cases 8 --report-
 
 Coste aproximado: `casos × routes` HTTP. `core` × pool por defecto ≈ 17 × N; `full` ≈ 32 × N. Gemini flash declara RPD 18: `full` puede terminar en `daily-quota` en esos models; no se oculta con fallback. Timeout del workflow: 60 min. Hard timeout por request: 30 s, igual que el smoke, sin retries.
 
-El Job Summary (y `ai-qualify-report.md` / `ai-qualify-report.json`) separa transporte, contrato y semántica. El ranking por purpose es informativo: semántica → schema → transporte → p50 → tokens de salida. Una muestra insuficiente se marca. El JSON guarda timestamp, commit SHA, dataset id, contract/prompt versions y la config de la run para comparar ejecuciones.
+El Job Summary (y `ai-qualify-report.md` / `ai-qualify-report.json`) separa transporte, contrato, semántica y evidence grounded. El ranking por purpose es informativo: semántica → evidence → schema → transporte → p50 → tokens de salida. Una muestra insuficiente se marca. El JSON guarda timestamp, commit SHA, dataset id, contract/prompt versions y la config de la run para comparar ejecuciones.
 
 Workflow manual: **AI live qualification** (`.github/workflows/ai-live-qualification.yml`).
 
