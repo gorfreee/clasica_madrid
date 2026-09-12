@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
+  AI_ACCESS_JSON_SCHEMA,
+  AI_COMPOSER_EXTRACTION_JSON_SCHEMA,
   AI_ELIGIBILITY_JSON_SCHEMA,
+  AI_TAXONOMY_JSON_SCHEMA,
   AiRateLimitedError,
   failureKindForTransport,
 } from '../src/ingestion/classification/ai.ts';
@@ -270,33 +273,17 @@ describe('payload HTTP por provider/modelo', () => {
     }
   });
 
-  it('Mistral pide JSON mode y service_tier=standard_only en los IDs versionados', async () => {
-    for (const model of ['ministral-14b-2512', 'ministral-8b-2512', 'mistral-small-latest'] as const) {
+  it('Mistral Ministral usa JSON Schema estricto y service_tier=standard_only', async () => {
+    for (const model of ['ministral-14b-2512', 'ministral-8b-2512'] as const) {
       const body = await captureBody('mistral', model);
       expect(body).toMatchObject({
         model,
-        response_format: { type: 'json_object' },
         service_tier: 'standard_only',
-      });
-      expect(body).not.toHaveProperty('thinking');
-      expect(body).not.toHaveProperty('chat_template_kwargs');
-      expect(body).not.toHaveProperty('reasoning_effort');
-    }
-  });
-
-  it('Groq GPT-OSS usa JSON Schema y apaga el reasoning documentado', async () => {
-    for (const model of ['openai/gpt-oss-20b', 'openai/gpt-oss-120b'] as const) {
-      const body = await captureBody('groq', model);
-      expect(body).toMatchObject({
-        model,
-        temperature: 0,
-        stream: false,
-        include_reasoning: false,
         response_format: {
           type: 'json_schema',
           json_schema: {
             name: 'clasica_eligibility',
-            strict: false,
+            strict: true,
             schema: request.schema,
           },
         },
@@ -304,12 +291,45 @@ describe('payload HTTP por provider/modelo', () => {
       expect(body).not.toHaveProperty('thinking');
       expect(body).not.toHaveProperty('chat_template_kwargs');
       expect(body).not.toHaveProperty('reasoning_effort');
+    }
+  });
+
+  it('un ID Mistral fuera de Ministral 3 conserva JSON object mode', async () => {
+    const body = await captureBody('mistral', 'mistral-small-latest');
+    expect(body).toMatchObject({
+      model: 'mistral-small-latest',
+      response_format: { type: 'json_object' },
+      service_tier: 'standard_only',
+    });
+    expect(body.response_format).not.toMatchObject({ type: 'json_schema' });
+  });
+
+  it('Groq GPT-OSS usa JSON Schema strict y reasoning_effort=low', async () => {
+    for (const model of ['openai/gpt-oss-20b', 'openai/gpt-oss-120b'] as const) {
+      const body = await captureBody('groq', model);
+      expect(body).toMatchObject({
+        model,
+        temperature: 0,
+        stream: false,
+        include_reasoning: false,
+        reasoning_effort: 'low',
+        response_format: {
+          type: 'json_schema',
+          json_schema: {
+            name: 'clasica_eligibility',
+            strict: true,
+            schema: request.schema,
+          },
+        },
+      });
+      expect(body).not.toHaveProperty('thinking');
+      expect(body).not.toHaveProperty('chat_template_kwargs');
       expect(body).not.toHaveProperty('reasoning_format');
       expect(body).not.toHaveProperty('service_tier');
     }
   });
 
-  it('Groq Qwen 3.8 usa el mismo JSON Schema sin parámetros de reasoning', async () => {
+  it('Groq Qwen 3.8 usa JSON Schema best-effort y reasoning_effort=none', async () => {
     const body = await captureBody('groq', 'qwen/qwen3.8-27b');
     expect(body.response_format).toEqual({
       type: 'json_schema',
@@ -319,6 +339,7 @@ describe('payload HTTP por provider/modelo', () => {
         schema: request.schema,
       },
     });
+    expect(body.reasoning_effort).toBe('none');
     expect(body).not.toHaveProperty('include_reasoning');
     expect(body).not.toHaveProperty('reasoning_format');
     expect(body).not.toHaveProperty('thinking');
@@ -345,7 +366,7 @@ describe('payload HTTP por provider/modelo', () => {
       type: 'json_schema',
       json_schema: {
         name: 'clasica_eligibility',
-        strict: false,
+        strict: true,
         schema: AI_ELIGIBILITY_JSON_SCHEMA,
       },
     });
@@ -353,20 +374,54 @@ describe('payload HTTP por provider/modelo', () => {
       .toBe(editorial.schema);
     expect(body.max_tokens).toBe(editorial.generation.maxOutputTokens);
     expect(body.max_tokens).toBe(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE.eligibility);
+    expect(body.reasoning_effort).toBe('low');
+    expect(body.include_reasoning).toBe(false);
   });
 
-  it('propaga maxOutputTokens del request a max_tokens en Groq, Mistral, Z.AI y Cloudflare', async () => {
-    const samples = [
+  it('envía el schema específico del purpose en Groq GPT-OSS y Mistral Ministral', () => {
+    const observed = { title: 'Concierto de Bach', performers: [], composers: [], works: [] };
+    const cases = [
+      ['eligibility', AI_ELIGIBILITY_JSON_SCHEMA, 'clasica_eligibility'],
+      ['taxonomy', AI_TAXONOMY_JSON_SCHEMA, 'clasica_taxonomy'],
+      ['access-classification', AI_ACCESS_JSON_SCHEMA, 'clasica_access_classification'],
+      ['composer-extraction', AI_COMPOSER_EXTRACTION_JSON_SCHEMA, 'clasica_composer_extraction'],
+    ] as const;
+    for (const [purpose, schema, name] of cases) {
+      const editorial = buildAiRequest(observed, purpose);
+      const groq = buildOpenAiCompatibleRequestBody('openai/gpt-oss-120b', editorial, {
+        provider: 'groq', baseUrl: 'https://example.test/v1', apiKey: 'provider-secret',
+      });
+      const mistral = buildOpenAiCompatibleRequestBody('ministral-14b-2512', editorial, {
+        provider: 'mistral', baseUrl: 'https://example.test/v1', apiKey: 'provider-secret',
+      });
+      for (const body of [groq, mistral]) {
+        expect(body.response_format).toEqual({
+          type: 'json_schema',
+          json_schema: { name, strict: true, schema },
+        });
+        expect((body.response_format as { json_schema: { schema: unknown } }).json_schema.schema)
+          .toBe(editorial.schema);
+      }
+    }
+  });
+
+  it('propaga maxOutputTokens al parámetro oficial de cada provider', async () => {
+    const maxTokenRoutes = [
       ['groq', GROQ_DEFAULT_MODELS[0]!],
       ['mistral', MISTRAL_DEFAULT_MODELS[0]!],
       ['zai', ZAI_ZERO_COST_MODELS[0]!],
-      ['cloudflare', CLOUDFLARE_ZERO_COST_MODELS[0]!],
     ] as const;
-    for (const [provider, model] of samples) {
+    for (const [provider, model] of maxTokenRoutes) {
       const body = await captureBody(provider, model);
       expect(body.max_tokens).toBe(request.generation.maxOutputTokens);
       expect(body.max_tokens).toBe(100);
-      expect(body.max_tokens).not.toBe(600);
+      expect(body).not.toHaveProperty('max_completion_tokens');
+    }
+    for (const model of CLOUDFLARE_ZERO_COST_MODELS) {
+      const body = await captureBody('cloudflare', model);
+      expect(body.max_completion_tokens).toBe(request.generation.maxOutputTokens);
+      expect(body.max_completion_tokens).toBe(100);
+      expect(body).not.toHaveProperty('max_tokens');
     }
     const eligibility = buildAiRequest({ title: 'Bach', performers: [], composers: [], works: [] }, 'eligibility');
     expect(eligibility.generation.maxOutputTokens).toBe(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE.eligibility);
@@ -383,25 +438,37 @@ describe('payload HTTP por provider/modelo', () => {
       CLOUDFLARE_WORKERS_FREE_CONFIRMED: 'true',
     });
     expect(identityByRoute(routes, 'groq:openai/gpt-oss-120b')).toMatchObject({
-      responseFormat: 'json-schema', extraBody: { include_reasoning: false },
+      responseFormat: 'json-schema',
+      jsonSchemaStrict: true,
+      tokenParameter: 'max_tokens',
+      extraBody: { include_reasoning: false, reasoning_effort: 'low' },
     });
     expect(identityByRoute(routes, 'groq:openai/gpt-oss-20b')).toMatchObject({
-      responseFormat: 'json-schema', extraBody: { include_reasoning: false },
+      responseFormat: 'json-schema',
+      jsonSchemaStrict: true,
+      extraBody: { include_reasoning: false, reasoning_effort: 'low' },
     });
     expect(identityByRoute(routes, 'groq:qwen/qwen3.8-27b')).toMatchObject({
-      responseFormat: 'json-schema', extraBody: {},
+      responseFormat: 'json-schema',
+      jsonSchemaStrict: false,
+      extraBody: { reasoning_effort: 'none' },
     });
     expect(identityByRoute(routes, 'mistral:ministral-14b-2512')).toMatchObject({
-      responseFormat: 'json-object', extraBody: { service_tier: 'standard_only' },
+      responseFormat: 'json-schema',
+      jsonSchemaStrict: true,
+      extraBody: { service_tier: 'standard_only' },
     });
     expect(identityByRoute(routes, 'mistral:ministral-8b-2512')).toMatchObject({
-      responseFormat: 'json-object', extraBody: { service_tier: 'standard_only' },
+      responseFormat: 'json-schema',
+      jsonSchemaStrict: true,
+      extraBody: { service_tier: 'standard_only' },
     });
     expect(identityByRoute(routes, 'zai:glm-4.7-flash')).toMatchObject({
       responseFormat: 'json-object', extraBody: { thinking: { type: 'disabled' } },
     });
     expect(identityByRoute(routes, 'cloudflare:@cf/zai-org/glm-4.7-flash')).toMatchObject({
       responseFormat: 'none',
+      tokenParameter: 'max_completion_tokens',
       extraBody: {
         reasoning_effort: null,
         chat_template_kwargs: { enable_thinking: false },
@@ -413,35 +480,62 @@ describe('payload HTTP por provider/modelo', () => {
 describe('perfiles HTTP declarativos', () => {
   it('distingue JSON mode y thinking por modelo sin heredar parámetros ajenos', () => {
     expect(openaiCompatibleModelProfile('groq', 'openai/gpt-oss-120b')).toEqual({
-      responseFormat: 'json-schema', extraBody: { include_reasoning: false },
+      responseFormat: 'json-schema',
+      jsonSchemaStrict: true,
+      tokenParameter: 'max_tokens',
+      extraBody: { include_reasoning: false, reasoning_effort: 'low' },
     });
     expect(openaiCompatibleModelProfile('groq', 'openai/gpt-oss-20b')).toEqual({
-      responseFormat: 'json-schema', extraBody: { include_reasoning: false },
+      responseFormat: 'json-schema',
+      jsonSchemaStrict: true,
+      tokenParameter: 'max_tokens',
+      extraBody: { include_reasoning: false, reasoning_effort: 'low' },
     });
     expect(openaiCompatibleModelProfile('groq', 'qwen/qwen3.8-27b')).toEqual({
-      responseFormat: 'json-schema', extraBody: {},
+      responseFormat: 'json-schema',
+      jsonSchemaStrict: false,
+      tokenParameter: 'max_tokens',
+      extraBody: { reasoning_effort: 'none' },
     });
     expect(openaiCompatibleModelProfile('groq', 'llama-3.1-8b-instant')).toEqual({
-      responseFormat: 'json-object', extraBody: {},
+      responseFormat: 'json-object',
+      jsonSchemaStrict: false,
+      tokenParameter: 'max_tokens',
+      extraBody: {},
     });
-    expect(openaiCompatibleModelProfile('mistral', 'ministral-14b-2512').extraBody).toEqual({
-      service_tier: 'standard_only',
+    expect(openaiCompatibleModelProfile('mistral', 'ministral-14b-2512')).toEqual({
+      responseFormat: 'json-schema',
+      jsonSchemaStrict: true,
+      tokenParameter: 'max_tokens',
+      extraBody: { service_tier: 'standard_only' },
     });
-    expect(openaiCompatibleModelProfile('mistral', 'ministral-8b-2512').extraBody).toEqual({
-      service_tier: 'standard_only',
+    expect(openaiCompatibleModelProfile('mistral', 'ministral-8b-2512')).toEqual({
+      responseFormat: 'json-schema',
+      jsonSchemaStrict: true,
+      tokenParameter: 'max_tokens',
+      extraBody: { service_tier: 'standard_only' },
     });
+    expect(openaiCompatibleModelProfile('mistral', 'mistral-small-latest').responseFormat).toBe('json-object');
     expect(openaiCompatibleModelProfile('zai', 'glm-4.7-flash')).toEqual({
-      responseFormat: 'json-object', extraBody: { thinking: { type: 'disabled' } },
+      responseFormat: 'json-object',
+      jsonSchemaStrict: false,
+      tokenParameter: 'max_tokens',
+      extraBody: { thinking: { type: 'disabled' } },
     });
     expect(openaiCompatibleModelProfile('zai', 'glm-4.5-flash').extraBody).toEqual({
       thinking: { type: 'disabled' },
     });
     expect(openaiCompatibleModelProfile('cloudflare', '@cf/zai-org/glm-4.7-flash')).toEqual({
       responseFormat: 'none',
+      jsonSchemaStrict: false,
+      tokenParameter: 'max_completion_tokens',
       extraBody: { reasoning_effort: null, chat_template_kwargs: { enable_thinking: false } },
     });
     expect(openaiCompatibleModelProfile('cloudflare', '@cf/meta/llama-3.1-8b-instruct')).toEqual({
-      responseFormat: 'none', extraBody: {},
+      responseFormat: 'none',
+      jsonSchemaStrict: false,
+      tokenParameter: 'max_completion_tokens',
+      extraBody: {},
     });
   });
 
@@ -456,7 +550,8 @@ describe('perfiles HTTP declarativos', () => {
       'zai',
       '{"error":{"code":"1305","message":"The service may be temporarily overloaded, please try again later"}}',
     )).toBe('capacity');
-    expect(openaiCompatibleBusinessPressure('zai', '{"error":{"code":"1305","message":"Rate limit reached"}}')).toBe('indeterminate');
+    expect(openaiCompatibleBusinessPressure('zai', '{"error":{"code":"1305","message":"Rate limit reached"}}')).toBe('capacity');
+    expect(openaiCompatibleBusinessPressure('zai', '{"error":{"code":"1305"}}')).toBe('capacity');
     expect(openaiCompatibleErrorCode('{"object":"error","type":"rate_limited","code":"1300"}')).toBe('1300');
     expect(openaiCompatibleBusinessPressure('mistral', '{"code":"1300"}')).toBeUndefined();
     expect(openaiCompatibleRateLimitSignal('groq', 400, 'invalid')).toBe(false);
@@ -601,6 +696,16 @@ describe('OpenAiCompatibleTransport', () => {
     });
     await expect(zaiOverload.request({ model: 'glm-4.7-flash', request, signal, timeoutMs: 1_000 }))
       .rejects.toMatchObject({ kind: 'rate-limit', status: 503, pressure: 'capacity', quotaExhausted: false, code: '1305' });
+
+    const zaiOverload429 = new OpenAiCompatibleTransport({
+      provider: 'zai', baseUrl: 'https://example.test/v1', apiKey: 'provider-secret',
+      fetch: async () => new Response(
+        '{"error":{"code":"1305","message":"The service may be temporarily overloaded, please try again later"}}',
+        { status: 429 },
+      ),
+    });
+    await expect(zaiOverload429.request({ model: 'glm-4.5-flash', request, signal, timeoutMs: 1_000 }))
+      .rejects.toMatchObject({ kind: 'rate-limit', status: 429, pressure: 'capacity', quotaExhausted: false, code: '1305' });
 
     const zaiRate = new OpenAiCompatibleTransport({
       provider: 'zai', baseUrl: 'https://example.test/v1', apiKey: 'provider-secret',

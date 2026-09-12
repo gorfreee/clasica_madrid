@@ -32,14 +32,27 @@ export type ModelLimits = { rpm: number; tpm: number; rpd: number };
 
 export type GeminiThinkingConfig = { thinking_level: 'minimal' | 'low' };
 
+export type GeminiModelProfile = {
+  /** Interactions API structured output with the purpose JSON schema. */
+  structuredOutput: 'schema';
+  /** Lowest documented thinking level for this ID. Omitted when unsupported. */
+  thinking?: GeminiThinkingConfig;
+};
+
 /**
  * Structured JSON classification does not need deep reasoning.
  * Only send parameters the model family is known to accept; unsupported
  * fields would 400 and disable the model for the rest of the run.
  *
  * Explicit IDs only: future models must not inherit another model's levels.
- * Interactions API levels: https://ai.google.dev/gemini-api/docs/thinking
- * Gemma, 2.5 Flash-Lite and unknown IDs use the provider's default.
+ * Interactions API levels checked 2026-09-12:
+ * https://ai.google.dev/gemini-api/docs/thinking
+ * - 3.8 / 3.7 Flash and 2.5 Flash: low is the lowest documented level
+ *   (minimal is not in the allowed set).
+ * - 3.6 / 3.5 Flash, 3-flash-preview, 3.5-flash-lite: minimal.
+ * - Gemma, 2.5 Flash-Lite and unknown IDs: omit thinking_level.
+ * gemini-3.1-flash-lite is not in that table (only gemini-3.1-flash-lite-image
+ * is). Keep sending `minimal`, which this project previously verified.
  */
 export function thinkingConfigForModel(model: string): GeminiThinkingConfig | undefined {
   const name = model.trim().toLowerCase();
@@ -57,6 +70,13 @@ export function thinkingConfigForModel(model: string): GeminiThinkingConfig | un
     default:
       return undefined;
   }
+}
+
+export function geminiModelProfile(model: string): GeminiModelProfile {
+  const thinking = thinkingConfigForModel(model);
+  return thinking
+    ? { structuredOutput: 'schema', thinking }
+    : { structuredOutput: 'schema' };
 }
 
 export type GeminiConfigEnv = {

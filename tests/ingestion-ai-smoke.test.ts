@@ -155,6 +155,31 @@ describe('runner directo one-shot', () => {
     ]);
   });
 
+  it('provider-busy y 429 no adquieren retries, scheduler ni fallback interno', async () => {
+    const counts = new Map<string, number>();
+    const routes = [
+      fakeRoute('zai:busy', async () => {
+        bump(counts, 'busy');
+        throw new AiTransportError('zai HTTP 429 code 1305', {
+          kind: 'rate-limit', status: 429, code: '1305', pressure: 'capacity',
+          retryAfterMs: 60_000,
+          rateLimit: { providerCode: '1305', dimensions: ['capacity'] },
+        });
+      }),
+      fakeRoute('groq:ok', async (call) => {
+        bump(counts, 'ok');
+        return { value: validOutput(call.request.purpose) };
+      }),
+    ];
+    const result = await runBasic(routes);
+    expect(Object.fromEntries(counts)).toEqual({ busy: 1, ok: 1 });
+    expect(result.requests).toBe(2);
+    expect(result.routes.map((route) => route.purposeResults[0]?.outcome)).toEqual([
+      'PROVIDER_BUSY', 'PASS',
+    ]);
+    expect(result.routes[0]?.purposeResults[0]?.httpStatus).toBe(429);
+  });
+
   it('un fallo funcional de eligibility no oculta composer, access ni taxonomy', async () => {
     const seen: AiCallPurpose[] = [];
     const route = fakeRoute('groq:semantic', async (call) => {
@@ -583,6 +608,7 @@ describe('timeout SLOW, output limit y reportes', () => {
     expect(result.routes.map((route) => route.purposeResults[0]?.outcome)).toEqual([
       'DAILY_QUOTA', 'RPM', 'OTPM', 'PROVIDER_BUSY', 'CONCURRENCY',
     ]);
+    expect(result.requests).toBe(5);
     expect(result.report).toContain('### Daily quota');
     expect(result.report).toContain('### Request/minute');
     expect(result.report).toContain('### Output-tokens/minute');

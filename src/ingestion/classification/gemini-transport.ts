@@ -13,7 +13,7 @@ import {
   type AiTransportCall,
   type AiTransportResult,
 } from './ai-transport.ts';
-import { thinkingConfigForModel } from './gemini-config.ts';
+import { geminiModelProfile } from './gemini-config.ts';
 
 export const GEMINI_DEFAULT_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta';
 export const GEMINI_API_REVISION = '2026-05-20';
@@ -41,16 +41,18 @@ export class GeminiTransport implements AiTransport {
   }
 
   cacheIdentity(model: string): unknown {
+    const profile = geminiModelProfile(model);
     return {
       baseUrl: this.baseUrl,
       revision: GEMINI_API_REVISION,
-      thinking: thinkingConfigForModel(model),
+      structuredOutput: profile.structuredOutput,
+      thinking: profile.thinking,
       generation: { toolChoice: 'none' },
     };
   }
 
   estimateInputTokens(request: AiRequest, model: string): number {
-    return estimateInputTokens(geminiRequestBody(model, request));
+    return estimateInputTokens(buildGeminiRequestBody(model, request));
   }
 
   redact(message: string): string { return message.replaceAll(this.apiKey, '[redacted]'); }
@@ -71,7 +73,7 @@ export class GeminiTransport implements AiTransport {
           'content-type': 'application/json',
           'api-revision': GEMINI_API_REVISION,
         },
-        body: JSON.stringify(geminiRequestBody(call.model, call.request)),
+        body: JSON.stringify(buildGeminiRequestBody(call.model, call.request)),
       }), controller.signal);
       if (!response.ok) {
         const body = await abortable(response.text(), controller.signal);
@@ -110,7 +112,8 @@ export class GeminiTransport implements AiTransport {
   }
 }
 
-function geminiRequestBody(model: string, request: AiRequest) {
+export function buildGeminiRequestBody(model: string, request: AiRequest) {
+  const profile = geminiModelProfile(model);
   return {
     model,
     store: false,
@@ -120,7 +123,7 @@ function geminiRequestBody(model: string, request: AiRequest) {
     generation_config: {
       max_output_tokens: request.generation.maxOutputTokens,
       tool_choice: 'none',
-      ...thinkingConfigForModel(model),
+      ...profile.thinking,
     },
   };
 }

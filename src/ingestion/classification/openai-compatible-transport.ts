@@ -72,6 +72,8 @@ export class OpenAiCompatibleTransport implements AiTransport {
       baseUrl: this.profile.baseUrl,
       protocol: 'openai-chat-completions-v1',
       responseFormat: capabilities.responseFormat,
+      jsonSchemaStrict: capabilities.jsonSchemaStrict,
+      tokenParameter: capabilities.tokenParameter,
       extraBody: capabilities.extraBody,
     };
   }
@@ -145,35 +147,35 @@ export function buildOpenAiCompatibleRequestBody(
 
 function requestBody(model: string, request: AiRequest, profile: OpenAiCompatibleProfile) {
   const capabilities = resolveCapabilities(profile, model);
+  const tokenField = capabilities.tokenParameter === 'max_completion_tokens'
+    ? { max_completion_tokens: request.generation.maxOutputTokens }
+    : { max_tokens: request.generation.maxOutputTokens };
   return {
     model,
     temperature: 0,
-    max_tokens: request.generation.maxOutputTokens,
+    ...tokenField,
     stream: false,
     messages: [
       { role: 'system', content: request.system },
       { role: 'user', content: request.user },
     ],
-    ...responseFormatFields(capabilities.responseFormat, request),
+    ...responseFormatFields(capabilities, request),
     ...capabilities.extraBody,
   };
 }
 
 function responseFormatFields(
-  format: OpenAiCompatibleResponseFormat,
+  capabilities: OpenAiCompatibleModelProfile,
   request: AiRequest,
 ): Record<string, unknown> {
-  if (format === 'none') return {};
-  if (format === 'json-schema') {
+  if (capabilities.responseFormat === 'none') return {};
+  if (capabilities.responseFormat === 'json-schema') {
     return {
       response_format: {
         type: 'json_schema',
         json_schema: {
           name: jsonSchemaName(request.purpose),
-          // Classification purpose schemas require their fields and set
-          // additionalProperties: false. Groq strict mode is left off: enabling
-          // it is a provider-specific change outside this contract split.
-          strict: false,
+          strict: capabilities.jsonSchemaStrict,
           schema: request.schema,
         },
       },
@@ -201,6 +203,8 @@ function resolveCapabilities(
   const override = profile.models?.[model];
   return {
     responseFormat: override?.responseFormat ?? profile.responseFormat ?? declared.responseFormat,
+    jsonSchemaStrict: override?.jsonSchemaStrict ?? declared.jsonSchemaStrict,
+    tokenParameter: override?.tokenParameter ?? declared.tokenParameter,
     extraBody: { ...declared.extraBody, ...profile.extraBody, ...override?.extraBody },
   };
 }
