@@ -139,10 +139,39 @@ Z.AI, tabla oficial comprobada el 2026-09-12 ([códigos de error](https://docs.z
 | groq | openai/gpt-oss-120b | PASS | PASS | PASS | PASS | 3.5 s | PASS |
 ```
 
-En GitHub hay dos workflows manuales (`workflow_dispatch`, `contents: read`, mismos secrets/`vars` que la ingestión). No publican datos:
+En GitHub hay workflows manuales (`workflow_dispatch`, `contents: read`, mismos secrets/`vars` que la ingestión). No publican datos:
 
 - **AI route smoke** — una route exacta (`provider:model`) y un purpose (o `all`).
 - **AI live smoke test** — `npm run ai:smoke:all`, con el input `all_purposes`.
+- **AI live qualification** — `npm run ai:qualify`, benchmark de calidad (sección siguiente).
+
+## Qualification benchmark
+
+Herramienta **distinta** del smoke. El smoke responde «¿esta route acepta nuestro request y devuelve JSON compatible?». El qualification responde «¿qué models son fiables en eligibility, composers, formats, eras y access con casos representativos?».
+
+No se ejecuta en PR, push ni schedule. No cambia el orden de producción, no elimina routes y no usa un LLM como juez. Cada celda llama exactamente a la route seleccionada: mismo `route.transport.request()`, prompt, schema y parser que producción; sin pool, retry, fallback ni circuit breaker. Un 429 o provider-busy se registra como tal.
+
+El dataset vive en `tests/fixtures/ingestion/ai-qualification/dataset.json`. Reutiliza golden cases y añade extras sólo donde el golden no cubre el hueco (intérprete vs compositor, arreglista, texto desordenado, keyword de biografía, Casulana, reserva/invitación). Suite `core` (~17 casos, pensada para el RPD 18 de Gemini flash) o `full` (32 casos).
+
+```bash
+# por defecto: suite core (~17 casos), todas las routes del pool
+npm run ai:qualify
+
+# suite completa (32 casos; más cuota; Gemini flash puede llegar a daily-quota)
+npm run ai:qualify -- --suite full
+
+# un purpose, un provider
+npm run ai:qualify -- --suite full --purpose eligibility --providers groq
+
+# una route y un tope de casos
+npm run ai:qualify -- --route mistral:ministral-14b-2512 --max-cases 8 --report-dir /tmp/ai-qualify-report
+```
+
+Coste aproximado: `casos × routes` HTTP. `core` × pool por defecto ≈ 17 × N; `full` ≈ 32 × N. Gemini flash declara RPD 18: `full` puede terminar en `daily-quota` en esos models; no se oculta con fallback. Timeout del workflow: 60 min. Hard timeout por request: 30 s, igual que el smoke, sin retries.
+
+El Job Summary (y `ai-qualify-report.md` / `ai-qualify-report.json`) separa transporte, contrato y semántica. El ranking por purpose es informativo: semántica → schema → transporte → p50 → tokens de salida. Una muestra insuficiente se marca. El JSON guarda timestamp, commit SHA, dataset id, contract/prompt versions y la config de la run para comparar ejecuciones.
+
+Workflow manual: **AI live qualification** (`.github/workflows/ai-live-qualification.yml`).
 
 ## Checklist después del merge
 

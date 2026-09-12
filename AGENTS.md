@@ -12,7 +12,7 @@ Canonical event data lives in `data/` and is validated at build/CI time. An empt
 |---|---|---|
 | Astro site | `npm run dev` | Serves on `http://localhost:4321`. This is the entire product. |
 
-Scripts live in `package.json`. Use those names rather than duplicating flags here. The usual loop is `dev`, `validate`, `test`, `test:e2e` (Playwright smokes against `dist/`; needs a prior `build`), `check` (Astro/TS diagnostics; there is no ESLint/Prettier), `build` (static output to `dist/`), and `preview`. Harvesting is `ingest:sync` / `ingest:source`. `ingest:promote` is the legacy candidate-file path.
+Scripts live in `package.json`. Use those names rather than duplicating flags here. The usual loop is `dev`, `validate`, `test`, `test:e2e` (Playwright smokes against `dist/`; needs a prior `build`), `check` (Astro/TS diagnostics; there is no ESLint/Prettier), `build` (static output to `dist/`), and `preview`. Harvesting is `ingest:sync` / `ingest:source`. `ingest:promote` is the legacy candidate-file path. Live AI checks are `ai:smoke` (connectivity) and `ai:qualify` (quality benchmark); both are manual, never part of PR CI.
 
 ### Documentation
 

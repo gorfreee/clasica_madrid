@@ -13,6 +13,20 @@ import {
   type AiTaxonomyResult,
   type AiTokenCounts,
 } from '../ingestion/classification/ai.ts';
+import {
+  AI_DIRECT_BLOCKING_FAILURES,
+  AI_DIRECT_DEFAULT_PROVIDER_CONCURRENCY,
+  ProviderPacer,
+  callAiRouteDirect,
+  classifyDirectContractFailure,
+  classifyDirectTransportError,
+  defaultSleep,
+  extractProviderErrorCode,
+  mapWithConcurrency,
+  paceIntervalMs,
+  providerConcurrency,
+  withoutUndefined,
+} from '../ingestion/classification/ai-direct.ts';
 import { buildAiRequest, maxOutputTokensForPurpose } from '../ingestion/classification/ai-request.ts';
 import {
   inspectFreePoolFromEnv,
@@ -23,9 +37,6 @@ import {
 } from '../ingestion/classification/provider.ts';
 import {
   AiTransportError,
-  outputReachedBudget,
-  primaryPressure,
-  type AiPressureKind,
   type AiRateLimitSnapshot,
   type AiRoute,
   type AiRouteLimits,
@@ -239,8 +250,9 @@ export type AiSmokeRunOptions = AiSmokeArgs & {
   maxProviderConcurrency?: number;
 };
 
-const DEFAULT_PROVIDER_CONCURRENCY = 2;
-const BLOCKING_STATUSES = new Set<AiSmokeStatus>(['AUTH', 'MODEL_UNAVAILABLE', 'DAILY_QUOTA']);
+export { extractProviderErrorCode };
+
+const BLOCKING_STATUSES = AI_DIRECT_BLOCKING_FAILURES as ReadonlySet<AiSmokeStatus>;
 
 export async function loadAiSmokeFixtures(rootDir: string): Promise<AiSmokeFixture[]> {
   const raw = JSON.parse(await readFile(
@@ -348,21 +360,15 @@ export function discoveryFromInspection(inspection: FreePoolInspection): AiSmoke
 
 /** Minimum interval for repeated requests to one route/model. */
 export function smokePaceIntervalMs(limits?: AiRouteLimits): number {
-  const rpm = limits?.rpm;
-  const fromRpm = rpm !== undefined && rpm > 0 ? Math.ceil(60_000 / rpm) : 0;
-  return Math.max(limits?.minIntervalMs ?? 0, fromRpm);
+  return paceIntervalMs(limits);
 }
 
 /** Conservative provider worker count, capped even when production allows larger bursts. */
 export function smokeProviderConcurrency(
   routes: readonly AiSmokeRoute[],
-  maxConcurrency = DEFAULT_PROVIDER_CONCURRENCY,
+  maxConcurrency = AI_DIRECT_DEFAULT_PROVIDER_CONCURRENCY,
 ): number {
-  const declared = routes
-    .map((route) => route.limits?.providerMaxConcurrent)
-    .filter((value): value is number => value !== undefined && value > 0);
-  const providerLimit = declared.length ? Math.min(...declared) : maxConcurrency;
-  return Math.max(1, Math.min(maxConcurrency, providerLimit, routes.length || 1));
+  return providerConcurrency(routes, maxConcurrency);
 }
 
 export async function runAiSmoke(options: AiSmokeRunOptions): Promise<AiSmokeRunResult> {
@@ -399,7 +405,7 @@ export async function runAiSmoke(options: AiSmokeRunOptions): Promise<AiSmokeRun
     const providerRoutes = group.map((item) => item.route);
     const concurrency = smokeProviderConcurrency(
       providerRoutes,
-      options.maxProviderConcurrency ?? DEFAULT_PROVIDER_CONCURRENCY,
+      options.maxProviderConcurrency ?? AI_DIRECT_DEFAULT_PROVIDER_CONCURRENCY,
     );
     const providerMinIntervalMs = Math.max(
       0,
@@ -602,45 +608,31 @@ async function directOneShot(input: {
   timeoutMs: number;
   slowThresholdMs: number;
 }): Promise<AiSmokePurposeResult> {
-  const started = input.now();
   const request = buildAiRequest(input.fixture.observed, input.fixture.purpose);
-  const controller = new AbortController();
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  try {
-    const result = await Promise.race([
-      input.route.transport.request({
-        model: input.route.model,
-        request,
-        signal: controller.signal,
-        timeoutMs: input.timeoutMs,
-      }),
-      new Promise<never>((_resolve, reject) => {
-        timer = setTimeout(() => {
-          controller.abort();
-          reject(new AiTransportError(`timeout after ${input.timeoutMs}ms`, { kind: 'timeout' }));
-        }, input.timeoutMs);
-      }),
-    ]);
-    return resultFromTransport(
-      input.route,
-      input.fixture,
-      result,
-      elapsed(input.now, started),
-      request.generation.maxOutputTokens,
-      input.slowThresholdMs,
-    );
-  } catch (error) {
+  const called = await callAiRouteDirect({
+    route: input.route,
+    request,
+    timeoutMs: input.timeoutMs,
+    now: input.now,
+  });
+  if (!called.ok) {
     return resultFromError(
       input.route,
       input.fixture.purpose,
-      error,
+      called.error,
       input.env,
-      elapsed(input.now, started),
+      called.latencyMs,
       request.generation.maxOutputTokens,
     );
-  } finally {
-    if (timer) clearTimeout(timer);
   }
+  return resultFromTransport(
+    input.route,
+    input.fixture,
+    called.transport,
+    called.latencyMs,
+    request.generation.maxOutputTokens,
+    input.slowThresholdMs,
+  );
 }
 
 function resultFromTransport(
@@ -651,27 +643,23 @@ function resultFromTransport(
   requestedMaxOutputTokens: number,
   slowThresholdMs: number,
 ): AiSmokePurposeResult {
-  const capped = outputReachedBudget({
-    status: transport.status,
-    finishReason: transport.finishReason,
-    tokens: transport.tokens,
-    requestedMaxOutputTokens,
-  });
   const parsed = parseAiOutputForPurpose(fixture.purpose, transport.value);
   if (!parsed.ok) {
-    const outcome: AiSmokeStatus = capped
-      ? 'OUTPUT_LIMIT'
-      : parsed.ruleId === 'ai-invalid-output' ? 'SCHEMA_FAIL' : 'INVALID_OUTPUT';
-    return basePurposeResult(route, fixture.purpose, outcome, latencyMs, {
+    const contract = classifyDirectContractFailure({
+      ruleId: parsed.ruleId,
+      transport,
+      requestedMaxOutputTokens,
+    });
+    return basePurposeResult(route, fixture.purpose, contract.kind, latencyMs, {
       schemaValid: false,
       providerStatus: transport.status,
       providerRequestId: transport.requestId,
       finishReason: transport.finishReason,
       tokens: transport.tokens,
       requestedMaxOutputTokens,
-      outputReachedLimit: capped,
+      outputReachedLimit: contract.outputReachedLimit,
       rateLimit: transport.rateLimit,
-      message: capped
+      message: contract.outputReachedLimit
         ? `${parsed.reason} (outputTokens ${transport.tokens?.output ?? '?'} / requestedMaxOutputTokens ${requestedMaxOutputTokens})`
         : parsed.reason,
     });
@@ -688,7 +676,10 @@ function resultFromTransport(
     finishReason: transport.finishReason,
     tokens: transport.tokens,
     requestedMaxOutputTokens,
-    outputReachedLimit: capped || undefined,
+    outputReachedLimit: classifyDirectContractFailure({
+      transport,
+      requestedMaxOutputTokens,
+    }).outputReachedLimit || undefined,
     rateLimit: transport.rateLimit,
     message: semantic.ok ? undefined : semantic.message,
   });
@@ -705,8 +696,7 @@ function resultFromError(
   const message = safeErrorMessage(route, error, env);
   if (error instanceof AiTransportError) {
     const providerErrorCode = error.code ?? extractProviderErrorCode(message);
-    const pressure = error.pressure ?? primaryPressure(error.rateLimit?.dimensions);
-    const outcome = outcomeFromTransportError(error, pressure);
+    const outcome = classifyDirectTransportError(error);
     return basePurposeResult(route, purpose, outcome, latencyMs, {
       schemaValid: false,
       httpStatus: error.status,
@@ -719,19 +709,15 @@ function resultFromError(
     });
   }
   if (error instanceof AiUnusableOutputError) {
-    const capped = error.kind === 'incomplete' || outputReachedBudget({
-      status: error.status,
-      finishReason: error.finishReason,
-      tokens: error.tokens,
+    const contract = classifyDirectContractFailure({
+      unusableKind: error.kind,
+      error,
       requestedMaxOutputTokens,
     });
-    const outcome: AiSmokeStatus = error.kind === 'invalid'
-      ? 'SCHEMA_FAIL'
-      : capped ? 'OUTPUT_LIMIT' : 'INVALID_OUTPUT';
     return basePurposeResult(
       route,
       purpose,
-      outcome,
+      contract.kind,
       latencyMs,
       {
         schemaValid: false,
@@ -740,8 +726,8 @@ function resultFromError(
         finishReason: error.finishReason,
         tokens: error.tokens,
         requestedMaxOutputTokens,
-        outputReachedLimit: capped,
-        message: capped
+        outputReachedLimit: contract.outputReachedLimit,
+        message: contract.outputReachedLimit
           ? `${message} (outputTokens ${error.tokens?.output ?? '?'} / requestedMaxOutputTokens ${requestedMaxOutputTokens})`
           : message,
       },
@@ -753,22 +739,6 @@ function resultFromError(
     requestedMaxOutputTokens,
     message,
   });
-}
-
-function outcomeFromTransportError(error: AiTransportError, pressure?: AiPressureKind): AiSmokeStatus {
-  if (error.kind === 'timeout') return 'TIMEOUT';
-  if (error.kind === 'auth') return 'AUTH';
-  if (error.kind === 'unavailable') {
-    return isClearlyUnavailable(error, error.message, error.code) ? 'MODEL_UNAVAILABLE' : 'REQUEST_ERROR';
-  }
-  if (error.kind !== 'rate-limit') return 'TRANSPORT_ERROR';
-  if (error.quotaExhausted || pressure === 'daily') return 'DAILY_QUOTA';
-  if (pressure === 'concurrency') return 'CONCURRENCY';
-  if (pressure === 'request-frequency') return 'RPM';
-  if (pressure === 'tpm') return 'TPM';
-  if (pressure === 'otpm') return 'OTPM';
-  if (pressure === 'capacity') return 'PROVIDER_BUSY';
-  return 'RATE_LIMIT';
 }
 
 export function smokeCause(result: Pick<AiSmokePurposeResult, 'outcome'>): AiSmokeCause | undefined {
@@ -794,18 +764,6 @@ export function smokeCause(result: Pick<AiSmokePurposeResult, 'outcome'>): AiSmo
     case 'CONFIG_ERROR': return 'config';
     case 'BLOCKED': return 'blocked';
   }
-}
-
-function isClearlyUnavailable(
-  error: AiTransportError,
-  message: string,
-  providerErrorCode: string | undefined,
-): boolean {
-  // Compatible transports also use `unavailable` for generic 400/422 request
-  // incompatibilities. Those can be purpose-specific and must not fail-fast.
-  if (error.status !== 400 && error.status !== 422) return true;
-  if (providerErrorCode && /model.*(?:not.?found|unavailable|invalid)/i.test(providerErrorCode)) return true;
-  return /\bmodel\b[^\n]{0,80}\b(?:not found|does not exist|unavailable|unknown)\b/i.test(message);
 }
 
 function basePurposeResult(
@@ -903,50 +861,6 @@ function normalizeName(value: string): string {
   return value.normalize('NFKD').replace(/\p{Diacritic}/gu, '').replace(/\s+/g, ' ').trim().toLowerCase();
 }
 
-class ProviderPacer {
-  private tail: Promise<void> = Promise.resolve();
-  private providerLastStart?: number;
-  private readonly routeLastStart = new Map<string, number>();
-
-  constructor(
-    private readonly now: () => number,
-    private readonly sleep: (ms: number) => Promise<void>,
-    private readonly providerMinIntervalMs: number,
-  ) {}
-
-  async wait(route: AiSmokeRoute): Promise<void> {
-    const turn = this.tail.then(async () => {
-      const current = this.now();
-      const routeReady = (this.routeLastStart.get(route.routeId) ?? Number.NEGATIVE_INFINITY)
-        + smokePaceIntervalMs(route.limits);
-      const providerReady = (this.providerLastStart ?? Number.NEGATIVE_INFINITY)
-        + this.providerMinIntervalMs;
-      const waitMs = Math.max(0, routeReady, providerReady) - current;
-      if (waitMs > 0) await this.sleep(waitMs);
-      const started = this.now();
-      this.routeLastStart.set(route.routeId, started);
-      this.providerLastStart = started;
-    });
-    this.tail = turn.catch(() => {});
-    await turn;
-  }
-}
-
-async function mapWithConcurrency<T>(
-  items: readonly T[],
-  concurrency: number,
-  worker: (item: T) => Promise<void>,
-): Promise<void> {
-  let cursor = 0;
-  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, async () => {
-    while (cursor < items.length) {
-      const index = cursor;
-      cursor += 1;
-      await worker(items[index]!);
-    }
-  }));
-}
-
 function fixturesForPurposes(fixtures: AiSmokeFixture[], purposes: AiCallPurpose[]): AiSmokeFixture[] {
   const byPurpose = new Map(fixtures.map((fixture) => [fixture.purpose, fixture]));
   return purposes.map((purpose) => {
@@ -1023,25 +937,6 @@ function safeErrorMessage(route: AiSmokeRoute, error: unknown, env: AiEnv): stri
     || 'unknown transport error';
 }
 
-export function extractProviderErrorCode(message: string): string | undefined {
-  const json = /["'](?:code|type)["']\s*:\s*(?:["']([^"']+)["']|(\d+))/i.exec(message);
-  if (json) return json[1] ?? json[2];
-  const known = /\b(json_validate_failed|model_not_found|invalid_api_key|insufficient_quota)\b/i.exec(message);
-  return known?.[1];
-}
-
 function logJson(log: (line: string) => void, value: AiSmokePurposeResult, env: AiEnv): void {
   log(redactSecrets(JSON.stringify(withoutUndefined(value)), env as NodeJS.ProcessEnv));
-}
-
-function withoutUndefined<T extends object>(value: T): T {
-  return Object.fromEntries(Object.entries(value).filter(([, item]) => item !== undefined)) as T;
-}
-
-function elapsed(now: () => number, started: number): number {
-  return Math.max(0, Math.round(now() - started));
-}
-
-function defaultSleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }

@@ -1,0 +1,373 @@
+{
+  "schemaVersion": 1,
+  "id": "clasica-madrid-ai-qualify-v1",
+  "notes": "Conjunto pequeño y difícil. Prioriza golden reales. No es el live smoke.",
+  "cases": [
+    {
+      "id": "elig-clasica-ocne",
+      "purpose": "eligibility",
+      "category": "clasica-clara",
+      "core": true,
+      "source": { "kind": "golden", "caseId": "golden_ocne_sinfonico_01" },
+      "expected": { "eligibility": "include" },
+      "notes": "OCNE sinfónico con Mahler y coro: include inequívoco."
+    },
+    {
+      "id": "elig-no-clasica-pastora",
+      "purpose": "eligibility",
+      "category": "no-clasica-clara",
+      "core": true,
+      "source": { "kind": "golden", "caseId": "golden_pastora_soler" },
+      "expected": { "eligibility": "exclude" },
+      "notes": "Canción popular en un teatro clásico: venue no decide."
+    },
+    {
+      "id": "elig-crossover-zimmer",
+      "purpose": "eligibility",
+      "category": "crossover",
+      "core": true,
+      "source": { "kind": "golden", "caseId": "golden_candlelight_zimmer" },
+      "expected": { "eligibility": "exclude" },
+      "notes": "Tributo a Hans Zimmer / bandas sonoras, no concierto clásico."
+    },
+    {
+      "id": "elig-flamenco-jovenes",
+      "purpose": "eligibility",
+      "category": "flamenco",
+      "core": true,
+      "source": { "kind": "golden", "caseId": "golden_jovenes_flamencos" },
+      "expected": { "eligibility": "exclude" },
+      "notes": "Gala de flamenco musical español, no escuela franco-flamenca."
+    },
+    {
+      "id": "elig-danza-ailey",
+      "purpose": "eligibility",
+      "category": "ballet-danza",
+      "core": true,
+      "source": { "kind": "golden", "caseId": "golden_alvin_ailey" },
+      "expected": { "eligibility": "exclude" },
+      "notes": "Compañía de danza como espectáculo, no concierto."
+    },
+    {
+      "id": "elig-cine-caligari",
+      "purpose": "eligibility",
+      "category": "cine-con-musica",
+      "core": true,
+      "source": { "kind": "golden", "caseId": "golden_cineclasica_caligari" },
+      "expected": { "eligibility": "exclude" },
+      "notes": "Cine mudo con música en vivo: la actividad principal es la proyección."
+    },
+    {
+      "id": "elig-jazz-melford",
+      "purpose": "eligibility",
+      "category": "jazz",
+      "core": true,
+      "source": { "kind": "golden", "caseId": "golden_myra_melford" },
+      "expected": { "eligibility": "exclude" },
+      "notes": "Ciclo Jazz en el Auditorio: identidad jazz, no programa mixto."
+    },
+    {
+      "id": "elig-mixto-raices",
+      "purpose": "eligibility",
+      "category": "eventos-mixtos",
+      "core": true,
+      "source": { "kind": "golden", "caseId": "golden_raices_sinfonicas" },
+      "expected": { "eligibility": "include" },
+      "notes": "Primera parte clásica autónoma (Saint-Saëns, Falla) y segunda popular: include."
+    },
+    {
+      "id": "elig-enganoso-chigi",
+      "purpose": "eligibility",
+      "category": "titulos-enganosos",
+      "core": true,
+      "source": { "kind": "golden", "caseId": "golden_chigi_codex" },
+      "expected": { "eligibility": "uncertain" },
+      "notes": "«Compositores flamencos» del Códice de Chigi = Flemish. Sin obras nombradas: uncertain, no exclude."
+    },
+    {
+      "id": "comp-claro-varias-obras",
+      "purpose": "composer-extraction",
+      "category": "compositor-claro",
+      "core": true,
+      "source": {
+        "kind": "golden",
+        "caseId": "golden_beatrice_rana",
+        "stripStructuredComposers": true
+      },
+      "expected": {
+        "composers": ["Johann Sebastian Bach", "Muzio Clementi", "Robert Schumann"],
+        "composerMatch": "exact"
+      },
+      "notes": "Programa con tres compositores explícitos; no promover a la pianista."
+    },
+    {
+      "id": "comp-interprete",
+      "purpose": "composer-extraction",
+      "category": "compositor-interprete",
+      "source": { "kind": "inline" },
+      "observed": {
+        "title": "Recital de piano",
+        "programText": "Ana López, piano. Wolfgang Amadeus Mozart: Sonata KV 331.",
+        "performers": [{ "name": "Ana López", "roleText": "piano" }],
+        "composers": [],
+        "works": []
+      },
+      "expected": {
+        "composers": ["Wolfgang Amadeus Mozart"],
+        "composerMatch": "exact",
+        "forbiddenComposers": ["Ana López"]
+      },
+      "notes": "El intérprete aparece junto al compositor; no debe extraerse como compositor."
+    },
+    {
+      "id": "comp-arreglista",
+      "purpose": "composer-extraction",
+      "category": "compositor-arreglista",
+      "source": { "kind": "inline" },
+      "observed": {
+        "title": "Música para cuerdas",
+        "programText": "J. S. Bach (arr. Webern): Ricercar a 6.",
+        "performers": [{ "name": "Ensemble de Cuerda" }],
+        "composers": [],
+        "works": []
+      },
+      "expected": {
+        "composers": ["Johann Sebastian Bach"],
+        "composerMatch": "exact",
+        "forbiddenComposers": ["Webern", "Anton Webern"]
+      },
+      "notes": "El arreglista no es compositor del programa."
+    },
+    {
+      "id": "comp-abreviado-bach",
+      "purpose": "composer-extraction",
+      "category": "nombres-abreviados",
+      "source": {
+        "kind": "golden",
+        "caseId": "golden_bach_brandeburgo",
+        "stripStructuredComposers": true
+      },
+      "expected": {
+        "composers": ["Johann Sebastian Bach"],
+        "composerMatch": "exact"
+      },
+      "notes": "«J. S. Bach» en el programa; canonicalización inequívoca permitida."
+    },
+    {
+      "id": "comp-desordenado",
+      "purpose": "composer-extraction",
+      "category": "texto-desordenado",
+      "source": { "kind": "inline" },
+      "observed": {
+        "title": "Ciclo de cámara",
+        "programText": "obra:   las 4 estaciones   —vivaldi /  verano ;  otoño",
+        "performers": [{ "name": "Cuarteto del ciclo" }],
+        "composers": [],
+        "works": []
+      },
+      "expected": {
+        "composers": ["Antonio Vivaldi"],
+        "composerMatch": "exact"
+      },
+      "notes": "Atribución real pero con puntuación y orden descuidados."
+    },
+    {
+      "id": "comp-no-inventar",
+      "purpose": "composer-extraction",
+      "category": "sin-inventar",
+      "core": true,
+      "source": { "kind": "golden", "caseId": "golden_scherzo_sokolov" },
+      "expected": {
+        "composers": [],
+        "composerMatch": "exact"
+      },
+      "notes": "Programa pendiente de confirmación: candidates=[] . No inferir repertorio de Sokolov."
+    },
+    {
+      "id": "fmt-sinfonico-ocne",
+      "purpose": "formats",
+      "category": "sinfonico",
+      "core": true,
+      "source": { "kind": "golden", "caseId": "golden_ocne_sinfonico_01" },
+      "expected": {
+        "formats": ["symphonic", "choral"],
+        "formatAlternatives": [["symphonic"]]
+      },
+      "notes": "Orquesta y coro nacionales. chamber/recital serían incorrectos."
+    },
+    {
+      "id": "fmt-camara-casals",
+      "purpose": "formats",
+      "category": "camara",
+      "source": { "kind": "golden", "caseId": "golden_cuarteto_casals" },
+      "expected": { "formats": ["chamber"] },
+      "notes": "Cuarteto de cuerda: cámara, no sinfónico."
+    },
+    {
+      "id": "fmt-recital-rana",
+      "purpose": "formats",
+      "category": "recital",
+      "source": { "kind": "golden", "caseId": "golden_beatrice_rana" },
+      "expected": { "formats": ["recital"] },
+      "notes": "Piano solo. No chamber por el ciclo ni symphonic por Bach."
+    },
+    {
+      "id": "fmt-coral-mesias",
+      "purpose": "formats",
+      "category": "coral",
+      "source": { "kind": "golden", "caseId": "golden_mesias_teatro_real" },
+      "expected": {
+        "formats": ["choral", "early-music"],
+        "formatAlternatives": [["choral"], ["choral", "early-music", "symphonic"]]
+      },
+      "notes": "El Mesías: oratorio coral barroco. other sería incorrecto."
+    },
+    {
+      "id": "fmt-zarzuela-verbena",
+      "purpose": "formats",
+      "category": "opera-zarzuela",
+      "source": { "kind": "golden", "caseId": "golden_verbena_paloma" },
+      "expected": { "formats": ["zarzuela"] },
+      "notes": "Zarzuela, no ópera genérica ni other."
+    },
+    {
+      "id": "fmt-hibrido-anduaga",
+      "purpose": "formats",
+      "category": "agrupaciones-hibridas",
+      "source": { "kind": "golden", "caseId": "golden_xabier_anduaga" },
+      "expected": {
+        "formats": ["opera", "zarzuela", "symphonic"],
+        "formatAlternatives": [
+          ["opera", "zarzuela"],
+          ["opera", "symphonic"],
+          ["opera", "zarzuela", "recital"],
+          ["opera", "zarzuela", "symphonic", "recital"]
+        ]
+      },
+      "notes": "Arias de ópera y zarzuela con orquesta. Un único keyword no basta."
+    },
+    {
+      "id": "fmt-trampa-biografia",
+      "purpose": "formats",
+      "category": "keyword-simplista",
+      "core": true,
+      "source": { "kind": "inline" },
+      "observed": {
+        "title": "Recital de piano",
+        "description": "Laura Ruiz ha colaborado con la Orquesta Nacional de España y con ensembles de cámara europeos. Esta velada presenta un programa de piano solo.",
+        "categoryText": "Música clásica",
+        "performers": [{ "name": "Laura Ruiz", "roleText": "piano" }],
+        "composers": [],
+        "works": []
+      },
+      "expected": { "formats": ["recital"] },
+      "notes": "«Orquesta» y «cámara» están en la biografía, no en ESTE concierto."
+    },
+    {
+      "id": "era-conocido-bach",
+      "purpose": "eras",
+      "category": "compositor-conocido",
+      "core": true,
+      "source": { "kind": "golden", "caseId": "golden_bach_brandeburgo" },
+      "expected": { "eras": ["baroque"] },
+      "notes": "Bach observado → baroque. No classical por «orquesta clásica»."
+    },
+    {
+      "id": "era-varias-rana",
+      "purpose": "eras",
+      "category": "varias-eras",
+      "source": { "kind": "golden", "caseId": "golden_beatrice_rana" },
+      "expected": { "eras": ["baroque", "classical", "romantic"] },
+      "notes": "Bach + Clementi + Schumann. Falta alguna era o inventar contemporary es fallo."
+    },
+    {
+      "id": "era-casulana",
+      "purpose": "eras",
+      "category": "compositor-poco-conocido",
+      "source": { "kind": "inline" },
+      "observed": {
+        "title": "Recital de música antigua",
+        "categoryText": "Música clásica",
+        "programText": "Maddalena Casulana — Morir non può il mio cuore",
+        "performers": [{ "name": "Capella de Madrid" }],
+        "composers": [{ "name": "Maddalena Casulana" }],
+        "works": [{ "title": "Morir non può il mio cuore", "composerName": "Maddalena Casulana" }]
+      },
+      "expected": { "eras": ["renaissance"] },
+      "notes": "Compositora observada ausente de la knowledge base; renaissance, no adivinar por el venue."
+    },
+    {
+      "id": "era-contemporaneo-einaudi",
+      "purpose": "eras",
+      "category": "contemporaneo",
+      "source": { "kind": "golden", "caseId": "golden_candlelight_einaudi" },
+      "expected": { "eras": ["contemporary"] },
+      "notes": "Einaudi nombrado. twentieth sería la frontera incorrecta."
+    },
+    {
+      "id": "era-sin-evidencia-ecos",
+      "purpose": "eras",
+      "category": "ausencia-evidencia",
+      "core": true,
+      "source": { "kind": "golden", "caseId": "golden_ecos_tres_culturas" },
+      "expected": { "eras": [] },
+      "notes": "Ensemble de música antigua sin obras ni compositores observados: eras=[] ."
+    },
+    {
+      "id": "acc-libre-vertixe",
+      "purpose": "access-classification",
+      "category": "entrada-libre",
+      "core": true,
+      "source": { "kind": "golden", "caseId": "golden_vertixe_sonora" },
+      "expected": { "access": "free" },
+      "notes": "Entrada libre hasta completar aforo."
+    },
+    {
+      "id": "acc-pago-ocne",
+      "purpose": "access-classification",
+      "category": "pago",
+      "source": { "kind": "golden", "caseId": "golden_ocne_sinfonico_01" },
+      "expected": { "access": "paid" },
+      "notes": "Precios explícitos en euros."
+    },
+    {
+      "id": "acc-invitacion",
+      "purpose": "access-classification",
+      "category": "invitacion-reserva",
+      "source": { "kind": "inline" },
+      "observed": {
+        "title": "Concierto de mediodía",
+        "accessText": "Entrada gratuita previa reserva. Invitaciones en taquilla.",
+        "performers": [],
+        "composers": [],
+        "works": []
+      },
+      "expected": { "access": "free" },
+      "notes": "Gratis con reserva/invitación sigue siendo free."
+    },
+    {
+      "id": "acc-ambiguo",
+      "purpose": "access-classification",
+      "category": "lenguaje-ambiguo",
+      "core": true,
+      "source": { "kind": "inline" },
+      "observed": {
+        "title": "Sesión de órgano",
+        "accessText": "Reserva de plaza en taquilla. Aforo limitado.",
+        "performers": [],
+        "composers": [],
+        "works": []
+      },
+      "expected": { "access": "unknown" },
+      "notes": "Reserva sin decir si hay coste: unknown, no paid ni free."
+    },
+    {
+      "id": "acc-ausente",
+      "purpose": "access-classification",
+      "category": "ausencia-informacion",
+      "source": { "kind": "golden", "caseId": "golden_bach_brandeburgo" },
+      "expected": { "access": "unknown" },
+      "notes": "Sin accessText: unknown. No inferir por el venue."
+    }
+  ]
+}
