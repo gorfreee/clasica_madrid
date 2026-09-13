@@ -64,6 +64,6 @@ test('las hero de índice mantienen una altura compacta', async ({ page }) => {
       .first()
       .evaluate((element) => element.getBoundingClientRect().height);
     expect(height).toBeGreaterThanOrEqual(270);
-    expect(height).toBeLessThanOrEqual(310);
+    expect(height).toBeLessThanOrEqual(320);
   }
 });

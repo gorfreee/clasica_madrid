@@ -277,7 +277,7 @@ a.eyebrow:hover { color: var(--blue); }
 .agenda-intro {
   position: relative;
   min-height: 19rem;
-  padding: var(--hero-gutter-top) 0 2.25rem;
+  padding: .9rem 0 1.35rem;
   overflow: hidden;
   border-bottom: 2px solid var(--ink);
 }
@@ -294,6 +294,8 @@ a.eyebrow:hover { color: var(--blue); }
   line-height: .86;
   font-size: var(--hero-title-size);
 }
+.agenda-intro h1, .section-intro h1 { margin-top: .85rem; }
+.agenda-intro .lede, .section-intro .lede { margin-top: 1rem; }
 .agenda-intro__motif {
   position: absolute;
   right: -1rem;
@@ -614,7 +616,7 @@ a.eyebrow:hover { color: var(--blue); }
 .section-intro {
   position: relative;
   min-height: 18.5rem;
-  padding: var(--hero-gutter-top) 0 2.25rem;
+  padding: .9rem 0 1.35rem;
   overflow: hidden;
   border-bottom: 2px solid var(--ink);
 }
@@ -925,6 +927,7 @@ a.eyebrow:hover { color: var(--blue); }
   .agenda-item__main, .agenda-item__venue, .agenda-item__signal { padding-right: 0; }
   .agenda-item__title { font-size: 1.08rem; }
   .agenda-item__people { -webkit-line-clamp: 1; }
+  .agenda-intro, .section-intro { padding-top: var(--hero-gutter-top); }
   .section-intro { min-height: 15rem; padding-bottom: 1.5rem; }
   .section-intro .lede { max-width: calc(100% - 3.5rem); font-size: .95rem; }
   .section-intro__motif {
