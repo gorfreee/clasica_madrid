@@ -4,6 +4,7 @@ import {
   type AiTokenCounts,
 } from './ai.ts';
 import type { AiRequest } from './ai-request.ts';
+import { systemWithOutputContract } from './ai-output-contract.ts';
 import {
   AiTransportError,
   primaryPressure,
@@ -74,6 +75,7 @@ export class OpenAiCompatibleTransport implements AiTransport {
       responseFormat: capabilities.responseFormat,
       jsonSchemaStrict: capabilities.jsonSchemaStrict,
       tokenParameter: capabilities.tokenParameter,
+      promptOutputContract: capabilities.responseFormat !== 'json-schema',
       extraBody: capabilities.extraBody,
     };
   }
@@ -156,7 +158,7 @@ function requestBody(model: string, request: AiRequest, profile: OpenAiCompatibl
     ...tokenField,
     stream: false,
     messages: [
-      { role: 'system', content: request.system },
+      { role: 'system', content: systemWithOutputContract(request.system, request.schema, capabilities.responseFormat) },
       { role: 'user', content: request.user },
     ],
     ...responseFormatFields(capabilities, request),

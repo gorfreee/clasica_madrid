@@ -269,6 +269,19 @@ export function sanitizeAiOutputExcerpt(raw: string, secret?: string): string {
   return text.slice(0, AI_OUTPUT_EXCERPT_MAX_CHARS);
 }
 
+/** Compact sanitized excerpt of a model payload. Omits empty content. */
+export function excerptAiOutput(value: unknown, secret?: string): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  let raw: string;
+  if (typeof value === 'string') raw = value;
+  else {
+    try { raw = JSON.stringify(value); }
+    catch { raw = String(value); }
+  }
+  const excerpt = sanitizeAiOutputExcerpt(raw, secret);
+  return excerpt || undefined;
+}
+
 export type AiEligibilityResult = {
   eligibility: Eligibility;
   formats: Format[];

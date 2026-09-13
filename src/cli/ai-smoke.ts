@@ -5,6 +5,7 @@ import { FORMATS } from '../lib/schemas/taxonomies.ts';
 import {
   AI_CALL_PURPOSES,
   AiUnusableOutputError,
+  excerptAiOutput,
   parseAiOutputForPurpose,
   type AiAccessResult,
   type AiCallPurpose,
@@ -195,6 +196,7 @@ export type AiSmokePurposeResult = {
   rateLimit?: AiRateLimitSnapshot;
   cause?: AiSmokeCause;
   message?: string;
+  outputExcerpt?: string;
   blockedBy?: AiSmokeStatus;
 };
 
@@ -632,6 +634,7 @@ async function directOneShot(input: {
     called.latencyMs,
     request.generation.maxOutputTokens,
     input.slowThresholdMs,
+    input.env,
   );
 }
 
@@ -642,6 +645,7 @@ function resultFromTransport(
   latencyMs: number,
   requestedMaxOutputTokens: number,
   slowThresholdMs: number,
+  env: AiEnv,
 ): AiSmokePurposeResult {
   const parsed = parseAiOutputForPurpose(fixture.purpose, transport.value);
   if (!parsed.ok) {
@@ -659,6 +663,7 @@ function resultFromTransport(
       requestedMaxOutputTokens,
       outputReachedLimit: contract.outputReachedLimit,
       rateLimit: transport.rateLimit,
+      outputExcerpt: smokeOutputExcerpt(transport.value, route, env),
       message: contract.outputReachedLimit
         ? `${parsed.reason} (outputTokens ${transport.tokens?.output ?? '?'} / requestedMaxOutputTokens ${requestedMaxOutputTokens})`
         : parsed.reason,
@@ -681,6 +686,7 @@ function resultFromTransport(
       requestedMaxOutputTokens,
     }).outputReachedLimit || undefined,
     rateLimit: transport.rateLimit,
+    outputExcerpt: semantic.ok ? undefined : smokeOutputExcerpt(transport.value, route, env),
     message: semantic.ok ? undefined : semantic.message,
   });
 }
@@ -727,6 +733,7 @@ function resultFromError(
         tokens: error.tokens,
         requestedMaxOutputTokens,
         outputReachedLimit: contract.outputReachedLimit,
+        outputExcerpt: smokeOutputExcerpt(error.excerpt, route, env),
         message: contract.outputReachedLimit
           ? `${message} (outputTokens ${error.tokens?.output ?? '?'} / requestedMaxOutputTokens ${requestedMaxOutputTokens})`
           : message,
@@ -928,6 +935,13 @@ function fillPurposeMap(
     out[purpose] = purposes.includes(purpose) ? values[purpose] ?? '-' : '-';
   }
   return out;
+}
+
+function smokeOutputExcerpt(value: unknown, route: AiSmokeRoute, env: AiEnv): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  const raw = typeof value === 'string' ? value : JSON.stringify(value);
+  const withRoute = route.transport.redact?.(raw) ?? raw;
+  return excerptAiOutput(redactSecrets(withRoute, env as NodeJS.ProcessEnv));
 }
 
 function safeErrorMessage(route: AiSmokeRoute, error: unknown, env: AiEnv): string {

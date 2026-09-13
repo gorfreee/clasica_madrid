@@ -229,6 +229,7 @@ function formatFailureDetail(result: AiSmokePurposeResult): string {
     result.providerRequestId ? `requestId=${result.providerRequestId}` : undefined,
     formatLatency(result.latencyMs),
     result.message,
+    result.outputExcerpt ? `output \`${escapeExcerpt(result.outputExcerpt)}\`` : undefined,
   ].filter((value): value is string => Boolean(value));
   return details.join(' — ');
 }
@@ -240,6 +241,10 @@ function formatTokenBudget(result: AiSmokePurposeResult): string | undefined {
   const used = output === undefined ? '?' : String(output);
   const max = requested === undefined ? '?' : String(requested);
   return `outputTokens ${used} / requestedMaxOutputTokens ${max}`;
+}
+
+function escapeExcerpt(value: string): string {
+  return value.replaceAll('`', "'");
 }
 
 function escapeCell(value: string): string {
