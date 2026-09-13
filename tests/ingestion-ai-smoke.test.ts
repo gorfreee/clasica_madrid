@@ -2,7 +2,7 @@ import path from 'node:path';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { describe, expect, it } from 'vitest';
-import { AI_CALL_PURPOSES, AiUnusableOutputError, type AiCallPurpose } from '../src/ingestion/classification/ai.ts';
+import { AI_CALL_PURPOSES, AiUnusableOutputError, excerptAiOutput, type AiCallPurpose } from '../src/ingestion/classification/ai.ts';
 import { maxOutputTokensForPurpose } from '../src/ingestion/classification/ai-request.ts';
 import {
   AiTransportError,
@@ -57,6 +57,16 @@ const ALL_FREE_ENV: AiEnv = {
 };
 
 const fixtures = await loadAiSmokeFixtures(ROOT);
+
+describe('excerptAiOutput', () => {
+  it('reutiliza la sanitización existente y omite contenido vacío', () => {
+    expect(excerptAiOutput({ eligibility: 'eligible' })).toBe('{"eligibility":"eligible"}');
+    expect(excerptAiOutput('sk-abcdefghijklmnopqrstuvwxyz')).toBe('[redacted]');
+    expect(excerptAiOutput(undefined)).toBeUndefined();
+    expect(excerptAiOutput(null)).toBeUndefined();
+    expect(excerptAiOutput('  a\n\nb  ')).toBe('a b');
+  });
+});
 
 describe('CLI, fixtures y descubrimiento', () => {
   it('mantiene los modos básicos y all-purposes', () => {
@@ -224,6 +234,75 @@ describe('runner directo one-shot', () => {
     expect(result.routes[0]?.purposeResults[1]).toMatchObject({ requestMade: false, blockedBy: status });
   });
 
+  it('un JSON válido con enum inválido es SCHEMA_FAIL y guarda un outputExcerpt sanitizado', async () => {
+    const payload = {
+      eligibility: 'eligible',
+      formats: ['recital'],
+      evidence: ['piano de Bach', ALL_FREE_ENV.GROQ_API_KEY],
+    };
+    const result = await runBasic([fakeRoute('zai:enum', async () => ({ value: payload }))]);
+    const cell = result.routes[0]?.purposeResults[0];
+
+    expect(cell?.outcome).toBe('SCHEMA_FAIL');
+    expect(cell?.message).toMatch(/include.*exclude.*uncertain/i);
+    expect(cell?.outputExcerpt).toContain('"eligibility":"eligible"');
+    expect(cell?.outputExcerpt).toContain('"formats":["recital"]');
+    expect(cell?.outputExcerpt).not.toContain(ALL_FREE_ENV.GROQ_API_KEY);
+    expect(cell?.outputExcerpt).toContain('[GROQ_API_KEY]');
+    expect(result.json.routes[0]?.purposeResults[0]?.outputExcerpt).toBe(cell?.outputExcerpt);
+    expect(result.markdown).toContain('output `');
+    expect(result.markdown).toContain('"eligibility":"eligible"');
+    expect(result.markdown).not.toContain(ALL_FREE_ENV.GROQ_API_KEY!);
+    expect(result.report).toContain('"eligibility":"eligible"');
+  });
+
+  it('INVALID_OUTPUT, OUTPUT_LIMIT y SEMANTIC_FAIL también pueden mostrar excerpt', async () => {
+    const result = await runBasic([
+      fakeRoute('groq:invalid', async () => {
+        throw new AiUnusableOutputError('JSON inválido', {
+          kind: 'malformed',
+          excerpt: `not-json sk-live-secret-zzzz ${ALL_FREE_ENV.GROQ_API_KEY}`,
+        });
+      }),
+      fakeRoute('gemini:capped', async () => {
+        throw new AiUnusableOutputError('incompleta', {
+          kind: 'incomplete',
+          finishReason: 'max_tokens',
+          tokens: { output: maxOutputTokensForPurpose('eligibility') },
+          excerpt: '{"eligibility":"include","formats":["chamber"]',
+        });
+      }),
+      fakeRoute('mistral:semantic', async () => ({
+        value: { eligibility: 'exclude', formats: ['chamber'], evidence: ['x'] },
+      })),
+    ]);
+    expect(result.routes.map((route) => route.purposeResults[0]?.outcome)).toEqual([
+      'INVALID_OUTPUT', 'OUTPUT_LIMIT', 'SEMANTIC_FAIL',
+    ]);
+    expect(result.routes[0]?.purposeResults[0]?.outputExcerpt).toContain('not-json');
+    expect(result.routes[0]?.purposeResults[0]?.outputExcerpt).toContain('[redacted]');
+    expect(result.routes[0]?.purposeResults[0]?.outputExcerpt).not.toContain('sk-live-secret-zzzz');
+    expect(result.routes[0]?.purposeResults[0]?.outputExcerpt).not.toContain(ALL_FREE_ENV.GROQ_API_KEY);
+    expect(result.routes[1]?.purposeResults[0]?.outputExcerpt).toContain('"eligibility":"include"');
+    expect(result.routes[2]?.purposeResults[0]?.outputExcerpt).toContain('"eligibility":"exclude"');
+    expect(result.markdown).toContain('output `{"eligibility":"exclude"');
+  });
+
+  it('omite outputExcerpt cuando no hay contenido del modelo', async () => {
+    const result = await runBasic([
+      fakeRoute('groq:empty', async () => {
+        throw new AiUnusableOutputError('JSON inválido', { kind: 'malformed' });
+      }),
+      fakeRoute('groq:auth', async () => {
+        throw new AiTransportError('HTTP 401', { kind: 'auth', status: 401 });
+      }),
+    ]);
+    expect(result.routes[0]?.purposeResults[0]).toMatchObject({ outcome: 'INVALID_OUTPUT' });
+    expect(result.routes[0]?.purposeResults[0]?.outputExcerpt).toBeUndefined();
+    expect(result.routes[1]?.purposeResults[0]?.outputExcerpt).toBeUndefined();
+    expect(result.markdown).not.toContain('output `');
+  });
+
   it('distingue output inválido, schema fail, semantic fail y PASS', async () => {
     const routes = [
       fakeRoute('groq:invalid', async () => {
@@ -239,6 +318,7 @@ describe('runner directo one-shot', () => {
     expect(result.routes.map((route) => route.purposeResults[0]?.outcome)).toEqual([
       'INVALID_OUTPUT', 'SCHEMA_FAIL', 'SEMANTIC_FAIL', 'PASS',
     ]);
+    expect(result.routes[3]?.purposeResults[0]?.outputExcerpt).toBeUndefined();
   });
 
   it('un 429 transitorio tampoco bloquea los purposes posteriores', async () => {
