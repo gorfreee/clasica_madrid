@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import HeroMotif from '../components/HeroMotif.astro';
 import { ABOUT_PATH } from '../lib/presentation/urls.ts';
 ---
 
@@ -14,6 +15,7 @@ import { ABOUT_PATH } from '../lib/presentation/urls.ts';
     <p class="lede">
       Clásica Madrid reúne en un único lugar la programación de música clásica de la ciudad.
     </p>
+    <HeroMotif variant="about" class="section-intro__motif" />
   </header>
 
   <section class="about-copy" aria-labelledby="about-title">
@@ -34,23 +36,6 @@ import { ABOUT_PATH } from '../lib/presentation/urls.ts';
 </Layout>
 
 <style>
-  .about-intro {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .about-intro::after {
-    content: '';
-    position: absolute;
-    right: 2rem;
-    bottom: -5rem;
-    width: 11rem;
-    height: 11rem;
-    border: 2.8rem solid var(--blue);
-    border-radius: 50%;
-    opacity: .95;
-  }
-
   .about-copy {
     display: grid;
     grid-template-columns: minmax(13rem, .55fr) minmax(0, 1fr);
@@ -83,15 +68,6 @@ import { ABOUT_PATH } from '../lib/presentation/urls.ts';
   }
 
   @media (max-width: 620px) {
-    .about-intro::after {
-      right: -3.5rem;
-      bottom: -3.5rem;
-      width: 8rem;
-      height: 8rem;
-      border-width: 2rem;
-      opacity: .75;
-    }
-
     .about-copy {
       grid-template-columns: 1fr;
       gap: 1.4rem;

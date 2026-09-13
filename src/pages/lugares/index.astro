@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import EmptyState from '../../components/EmptyState.astro';
+import HeroMotif from '../../components/HeroMotif.astro';
 import { loadVenuesIndex } from '../../lib/presentation/site.ts';
 import { venueUpcomingSummary } from '../../lib/presentation/venue.ts';
 
@@ -12,6 +13,7 @@ const model = await loadVenuesIndex();
     <p class="eyebrow">Lugares / Madrid</p>
     <h1>La ciudad<br />como escenario.</h1>
     <p class="lede">Teatros, auditorios, iglesias y otros espacios donde escuchar música clásica en Madrid.</p>
+    <HeroMotif variant="venues" class="section-intro__motif" />
   </header>
 
   <label class="venue-search">
