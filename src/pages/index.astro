@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import FilterForm from '../components/FilterForm.astro';
 import AgendaList from '../components/AgendaList.astro';
 import EmptyState from '../components/EmptyState.astro';
+import HeroMotif from '../components/HeroMotif.astro';
 import { loadAgendaPage } from '../lib/presentation/site.ts';
 import { serializeJsonForScript } from '../lib/util/json-script.ts';
 
@@ -16,7 +17,7 @@ const model = await loadAgendaPage(Astro.url);
       <h1>La clásica<br />que está sonando.</h1>
       <p class="lede">De las grandes salas a los pequeños espacios, todos los conciertos de música clásica reunidos en una sola agenda</p>
     </div>
-    <div class="agenda-intro__graphic" aria-hidden="true"></div>
+    <HeroMotif variant="agenda" class="agenda-intro__motif" />
   </header>
 
   {

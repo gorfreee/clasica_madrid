@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import HeroMotif from '../../components/HeroMotif.astro';
 import PlaceAddress from '../../components/PlaceAddress.astro';
 import { formatSourceCitationMeta } from '../../lib/presentation/labels.ts';
 import { loadEventPage, loadEventStaticPaths } from '../../lib/presentation/site.ts';
@@ -36,7 +37,7 @@ const featured = model.featuredOccurrence;
       {model.statusLabel !== 'Programado' && <p class="status-alert">{model.statusLabel}</p>}
       <h1>{model.title}</h1>
       {model.seriesName && <p class="detail-hero__series">{model.seriesKind} / {model.seriesName}</p>}
-      <span class="detail-hero__shape" aria-hidden="true"></span>
+      <HeroMotif variant="event" class="detail-hero__motif" />
     </header>
 
     <dl class="event-facts fact-list">
