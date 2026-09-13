@@ -1,4 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import {
   AI_ACCESS_JSON_SCHEMA,
   AI_COMPOSER_EXTRACTION_JSON_SCHEMA,
@@ -10,6 +12,11 @@ import {
 import { AiPoolClassifier } from '../src/ingestion/classification/ai-pool.ts';
 import { AI_MAX_OUTPUT_TOKENS_BY_PURPOSE, buildAiRequest, type AiRequest } from '../src/ingestion/classification/ai-request.ts';
 import { AiTransportError, makeRoute } from '../src/ingestion/classification/ai-transport.ts';
+import {
+  compactJsonSchemaContract,
+  OUTPUT_CONTRACT_INSTRUCTION,
+  systemWithOutputContract,
+} from '../src/ingestion/classification/ai-output-contract.ts';
 import {
   openaiCompatibleBusinessPressure,
   openaiCompatibleErrorCode,
@@ -465,15 +472,125 @@ describe('payload HTTP por provider/modelo', () => {
     });
     expect(identityByRoute(routes, 'zai:glm-4.7-flash')).toMatchObject({
       responseFormat: 'json-object', extraBody: { thinking: { type: 'disabled' } },
+      promptOutputContract: true,
     });
     expect(identityByRoute(routes, 'cloudflare:@cf/zai-org/glm-4.7-flash')).toMatchObject({
       responseFormat: 'none',
       tokenParameter: 'max_completion_tokens',
+      promptOutputContract: true,
       extraBody: {
         reasoning_effort: null,
         chat_template_kwargs: { enable_thinking: false },
       },
     });
+    expect(identityByRoute(routes, 'groq:openai/gpt-oss-120b')).toMatchObject({
+      promptOutputContract: false,
+    });
+  });
+});
+
+describe('schema-in-prompt para routes sin json_schema', () => {
+  const observed = { title: 'Concierto de Bach', performers: [], composers: [], works: [] };
+
+  it('json-schema no duplica el contrato en el prompt', () => {
+    const editorial = buildAiRequest(observed, 'eligibility');
+    for (const [model, provider] of [
+      ['openai/gpt-oss-20b', 'groq'],
+      ['openai/gpt-oss-120b', 'groq'],
+      ['qwen/qwen3.8-27b', 'groq'],
+      ['ministral-14b-2512', 'mistral'],
+    ] as const) {
+      const body = buildOpenAiCompatibleRequestBody(model, editorial, {
+        provider, baseUrl: 'https://example.test/v1', apiKey: 'provider-secret',
+      });
+      const messages = body.messages as Array<{ role: string; content: string }>;
+      expect(messages[0]?.content).toBe(editorial.system);
+      expect(messages[1]?.content).toBe(editorial.user);
+      expect(messages[0]?.content).not.toContain(OUTPUT_CONTRACT_INSTRUCTION);
+      expect(messages[1]?.content).not.toContain(OUTPUT_CONTRACT_INSTRUCTION);
+      expect(body.response_format).toMatchObject({ type: 'json_schema' });
+    }
+  });
+
+  it('json-object recibe un contrato compacto derivado de request.schema', () => {
+    const editorial = buildAiRequest(observed, 'eligibility');
+    const routes = [
+      ['glm-4.7-flash', 'zai'],
+      ['llama-3.1-8b-instant', 'groq'],
+      ['mistral-small-latest', 'mistral'],
+    ] as const;
+    for (const [model, provider] of routes) {
+      const body = buildOpenAiCompatibleRequestBody(model, editorial, {
+        provider, baseUrl: 'https://example.test/v1', apiKey: 'provider-secret',
+      });
+      const messages = body.messages as Array<{ role: string; content: string }>;
+      expect(body.response_format).toEqual({ type: 'json_object' });
+      expect(body.response_format).not.toMatchObject({ type: 'json_schema' });
+      expect(messages[0]?.content).toBe(systemWithOutputContract(
+        editorial.system, editorial.schema, 'json-object',
+      ));
+      expect(messages[0]?.content.startsWith(editorial.system)).toBe(true);
+      expect(messages[0]?.content).toContain(OUTPUT_CONTRACT_INSTRUCTION);
+      expect(messages[0]?.content).toContain(compactJsonSchemaContract(editorial.schema));
+      expect(messages[0]?.content).toContain('"include"|"exclude"|"uncertain"');
+      expect(messages[1]?.content).toBe(editorial.user);
+    }
+  });
+
+  it('none también recibe el contrato compacto y no envía response_format', () => {
+    const editorial = buildAiRequest(observed, 'eligibility');
+    const body = buildOpenAiCompatibleRequestBody('@cf/zai-org/glm-4.7-flash', editorial, {
+      provider: 'cloudflare', baseUrl: 'https://example.test/v1', apiKey: 'provider-secret',
+    });
+    const messages = body.messages as Array<{ role: string; content: string }>;
+    expect(body).not.toHaveProperty('response_format');
+    expect(messages[0]?.content).toContain(OUTPUT_CONTRACT_INSTRUCTION);
+    expect(messages[0]?.content).toContain('"include"|"exclude"|"uncertain"');
+    expect(messages[1]?.content).toBe(editorial.user);
+  });
+
+  it('el contrato genérico cubre eligibility, composer, access y taxonomy', () => {
+    const cases = [
+      ['eligibility', '"include"|"exclude"|"uncertain"'],
+      ['composer-extraction', 'name:string'],
+      ['access-classification', '"free"|"paid"|"unknown"'],
+      ['taxonomy', '"early"|"renaissance"|"baroque"'],
+    ] as const;
+    for (const [purpose, expected] of cases) {
+      const editorial = buildAiRequest(observed, purpose);
+      const zai = buildOpenAiCompatibleRequestBody('glm-4.5-flash', editorial, {
+        provider: 'zai', baseUrl: 'https://example.test/v1', apiKey: 'provider-secret',
+      });
+      const cloudflare = buildOpenAiCompatibleRequestBody('@cf/google/gemma-4-26b-a4b-it', editorial, {
+        provider: 'cloudflare', baseUrl: 'https://example.test/v1', apiKey: 'provider-secret',
+      });
+      for (const body of [zai, cloudflare]) {
+        const system = (body.messages as Array<{ content: string }>)[0]?.content ?? '';
+        expect(system).toContain(OUTPUT_CONTRACT_INSTRUCTION);
+        expect(system).toContain(compactJsonSchemaContract(editorial.schema));
+        expect(system).toContain(expected);
+      }
+    }
+  });
+
+  it('deriva enums del schema editorial y no mantiene una copia manual', () => {
+    const helperPath = path.join(import.meta.dirname, '../src/ingestion/classification/ai-output-contract.ts');
+    const helperSource = readFileSync(helperPath, 'utf8');
+    expect(helperSource).not.toMatch(/include.*exclude.*uncertain/);
+    expect(helperSource).not.toContain('symphonic');
+    expect(helperSource).not.toContain('AI_ELIGIBILITY_JSON_SCHEMA');
+
+    const mutated = structuredClone(AI_ELIGIBILITY_JSON_SCHEMA) as {
+      properties: { eligibility: { enum: string[] } };
+    };
+    mutated.properties.eligibility.enum = ['alpha', 'beta'];
+    const compact = compactJsonSchemaContract(mutated);
+    expect(compact).toContain('"alpha"|"beta"');
+    expect(compact).not.toContain('"include"');
+    expect(compactJsonSchemaContract(AI_ELIGIBILITY_JSON_SCHEMA)).toContain('"include"|"exclude"|"uncertain"');
+    expect(compactJsonSchemaContract(AI_ACCESS_JSON_SCHEMA)).toContain('"free"|"paid"|"unknown"');
+    expect(compactJsonSchemaContract(AI_COMPOSER_EXTRACTION_JSON_SCHEMA)).toContain('candidates:');
+    expect(compactJsonSchemaContract(AI_TAXONOMY_JSON_SCHEMA)).toContain('"baroque"');
   });
 });
 
