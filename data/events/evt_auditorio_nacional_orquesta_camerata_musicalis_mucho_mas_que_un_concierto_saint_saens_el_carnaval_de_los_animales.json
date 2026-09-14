@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_orquesta_camerata_musicalis_mucho_mas_que_un_concierto_saint_saens_el_carnaval_de_los_animales",
+  "slug": "orquesta-camerata-musicalis-mucho-mas-que-un-concierto-saint-saens",
+  "title": "Orquesta Camerata Musicalis. Mucho Más que un Concierto. Saint-Saëns",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_orquesta_camerata_musicalis_mucho_mas_que_un_concierto_saint_saens_el_carnaval_de_los_animales_01",
+      "date": "2026-11-29",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Camerata Musicalis"
+    },
+    {
+      "name": "Edgar Martín Jiménez",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Camille Saint-Saëns"
+    }
+  ],
+  "works": [
+    {
+      "title": "El carnaval de los Animales.",
+      "composerName": "Camille Saint-Saëns"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/orquesta-camerata-musicalis-mucho-mas-que-un-concierto-saint-saens-el-carnaval-de-los-animales",
+      "checkedAt": "2026-09-14",
+      "externalId": "orquesta-camerata-musicalis-mucho-mas-que-un-concierto-saint-saens-el-carnaval-de-los-animales"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-14"
+}

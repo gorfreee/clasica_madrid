@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_patrimonio_nacional_43485fb0_ccec_4018_a3b0_36b3cae0d2c9",
+  "slug": "milano-spagnola",
+  "title": "Milano Spagnola",
+  "status": "scheduled",
+  "venueId": "ven_palacio_real_madrid_capilla_real",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_patrimonio_nacional_43485fb0_ccec_4018_a3b0_36b3cae0d2c9_01",
+      "date": "2027-02-06",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Mauricio Croci"
+    },
+    {
+      "name": "Evangelina Mascardi"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "renaissance"
+  ],
+  "formats": [
+    "organ",
+    "chamber",
+    "early-music"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_patrimonio_nacional",
+      "url": "https://www.patrimonionacional.es/actualidad/concierto/2026/milano-spagnola-2027-02-06",
+      "checkedAt": "2026-09-14",
+      "externalId": "43485fb0-ccec-4018-a3b0-36b3cae0d2c9"
+    }
+  ],
+  "primarySourceId": "src_patrimonio_nacional",
+  "lastVerifiedAt": "2026-09-14"
+}

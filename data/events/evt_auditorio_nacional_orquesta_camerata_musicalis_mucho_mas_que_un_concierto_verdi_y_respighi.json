@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_orquesta_camerata_musicalis_mucho_mas_que_un_concierto_verdi_y_respighi",
+  "slug": "orquesta-camerata-musicalis-mucho-mas-que-un-concierto-verdi-y-respighi",
+  "title": "Orquesta Camerata Musicalis. Mucho Más que un Concierto. Verdi y Respighi",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_orquesta_camerata_musicalis_mucho_mas_que_un_concierto_verdi_y_respighi_01",
+      "date": "2027-04-25",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Camerata Musicalis"
+    },
+    {
+      "name": "Edgar Martín Jiménez",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/orquesta-camerata-musicalis-mucho-mas-que-un-concierto-verdi-y-respighi",
+      "checkedAt": "2026-09-14",
+      "externalId": "orquesta-camerata-musicalis-mucho-mas-que-un-concierto-verdi-y-respighi"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-14"
+}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_patrimonio_nacional_873c62c8_89c6_407d_a969_2ba1f79ecdfb",
+  "slug": "75-aniversario-recuperacion-viola-stradivarius",
+  "title": "75 Aniversario recuperación Viola Stradivarius",
+  "status": "scheduled",
+  "venueId": "ven_palacio_real_madrid_capilla_real",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_patrimonio_nacional_873c62c8_89c6_407d_a969_2ba1f79ecdfb_01",
+      "date": "2026-12-12",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Lola Fernández"
+    },
+    {
+      "name": "Roberto Alonso"
+    },
+    {
+      "name": "Jorge García Martín"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "organ",
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_patrimonio_nacional",
+      "url": "https://www.patrimonionacional.es/actualidad/concierto/2027/75-aniversario-recuperacion-viola-stradivarius-2026-12-12",
+      "checkedAt": "2026-09-14",
+      "externalId": "873c62c8-89c6-407d-a969-2ba1f79ecdfb"
+    }
+  ],
+  "primarySourceId": "src_patrimonio_nacional",
+  "lastVerifiedAt": "2026-09-14"
+}

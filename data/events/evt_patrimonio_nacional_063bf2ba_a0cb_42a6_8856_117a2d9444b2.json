@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_patrimonio_nacional_063bf2ba_a0cb_42a6_8856_117a2d9444b2",
+  "slug": "andres-cea",
+  "title": "Andrés Cea",
+  "status": "scheduled",
+  "venueId": "ven_palacio_real_madrid_capilla_real",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_patrimonio_nacional_063bf2ba_a0cb_42a6_8856_117a2d9444b2_01",
+      "date": "2027-04-29",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Andrés Cea"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "organ",
+    "early-music",
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_patrimonio_nacional",
+      "url": "https://www.patrimonionacional.es/actualidad/concierto/2026/andres-cea-2027-04-29",
+      "checkedAt": "2026-09-14",
+      "externalId": "063bf2ba-a0cb-42a6-8856-117a2d9444b2"
+    }
+  ],
+  "primarySourceId": "src_patrimonio_nacional",
+  "lastVerifiedAt": "2026-09-14"
+}

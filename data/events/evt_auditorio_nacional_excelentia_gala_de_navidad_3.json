@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_gala_de_navidad_3",
+  "slug": "excelentia-gala-de-navidad",
+  "title": "Excelentia. Gala de Navidad",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_gala_de_navidad_3_01",
+      "date": "2026-12-22",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "chamber",
+    "early-music"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-gala-de-navidad-3",
+      "checkedAt": "2026-09-14",
+      "externalId": "excelentia-gala-de-navidad-3"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-14"
+}

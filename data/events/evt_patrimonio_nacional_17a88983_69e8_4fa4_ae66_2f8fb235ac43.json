@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_patrimonio_nacional_17a88983_69e8_4fa4_ae66_2f8fb235ac43",
+  "slug": "gara-quartet",
+  "title": "Gara Quartet",
+  "status": "scheduled",
+  "venueId": "ven_palacio_real_madrid_salon_columnas",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_patrimonio_nacional_17a88983_69e8_4fa4_ae66_2f8fb235ac43_01",
+      "date": "2026-12-03",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Jesús Merino"
+    },
+    {
+      "name": "Lorena Padrón"
+    },
+    {
+      "name": "Iván Sáez Schwartz"
+    },
+    {
+      "name": "Candela Gómez"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "classical"
+  ],
+  "formats": [],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_patrimonio_nacional",
+      "url": "https://www.patrimonionacional.es/actualidad/concierto/2026/gara-quartet-2026-12-03",
+      "checkedAt": "2026-09-14",
+      "externalId": "17a88983-69e8-4fa4-ae66-2f8fb235ac43"
+    }
+  ],
+  "primarySourceId": "src_patrimonio_nacional",
+  "lastVerifiedAt": "2026-09-14"
+}

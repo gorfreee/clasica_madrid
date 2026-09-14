@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_patrimonio_nacional_0b818c27_0ac2_4405_9ee1_d9b9f5fd8aa9",
+  "slug": "saskia-roures-y-francisco-gil",
+  "title": "Saskia Roures y Francisco Gil",
+  "status": "scheduled",
+  "venueId": "ven_palacio_real_madrid_capilla_real",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_patrimonio_nacional_0b818c27_0ac2_4405_9ee1_d9b9f5fd8aa9_01",
+      "date": "2027-01-28",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Saskia Roures"
+    },
+    {
+      "name": "Francisco Gil"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "organ"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_patrimonio_nacional",
+      "url": "https://www.patrimonionacional.es/actualidad/concierto/2026/saskia-roures-y-francisco-gil-2027-01-28",
+      "checkedAt": "2026-09-14",
+      "externalId": "0b818c27-0ac2-4405-9ee1-d9b9f5fd8aa9"
+    }
+  ],
+  "primarySourceId": "src_patrimonio_nacional",
+  "lastVerifiedAt": "2026-09-14"
+}

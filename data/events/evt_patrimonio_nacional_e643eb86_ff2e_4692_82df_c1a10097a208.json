@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_patrimonio_nacional_e643eb86_ff2e_4692_82df_c1a10097a208",
+  "slug": "de-hondas-raices-y-vientos-ajenos",
+  "title": "De hondas raíces y vientos ajenos",
+  "status": "scheduled",
+  "venueId": "ven_palacio_real_madrid_capilla_real",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_patrimonio_nacional_e643eb86_ff2e_4692_82df_c1a10097a208_01",
+      "date": "2027-04-17",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Roberto Alonso"
+    },
+    {
+      "name": "Beatriz Lafont"
+    },
+    {
+      "name": "Laura Puerto"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_patrimonio_nacional",
+      "url": "https://www.patrimonionacional.es/actualidad/concierto/2026/de-hondas-raices-y-vientos-ajenos-2027-04-17",
+      "checkedAt": "2026-09-14",
+      "externalId": "e643eb86-ff2e-4692-82df-c1a10097a208"
+    }
+  ],
+  "primarySourceId": "src_patrimonio_nacional",
+  "lastVerifiedAt": "2026-09-14"
+}
