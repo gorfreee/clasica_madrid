@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import AgendaItem from '../../components/AgendaItem.astro';
+import HeroMotif from '../../components/HeroMotif.astro';
 import PlaceAddress from '../../components/PlaceAddress.astro';
 import { loadVenuePage, loadVenueSlugs } from '../../lib/presentation/site.ts';
 import { VENUES_INDEX_PATH } from '../../lib/presentation/urls.ts';
@@ -33,7 +34,7 @@ if (!model) {
         )}
         {model.url && <a class="text-link" href={model.url} rel="noopener noreferrer">Web oficial ↗</a>}
       </div>
-      <span class="detail-hero__shape" aria-hidden="true"></span>
+      <HeroMotif variant="venue" class="detail-hero__motif" />
     </header>
 
     <section class="detail-section venue-programme" aria-labelledby="proximos-titulo">

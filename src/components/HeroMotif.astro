@@ -1,0 +1,104 @@
+---
+type Variant = 'agenda' | 'venues' | 'event' | 'venue' | 'about';
+
+type Props = {
+  variant: Variant;
+  class?: string;
+};
+
+const { variant, class: className } = Astro.props;
+const architectural = variant === 'venues' || variant === 'venue';
+---
+
+<svg
+  class:list={['hero-motif', `hero-motif--${variant}`, className]}
+  viewBox="0 0 240 180"
+  width="240"
+  height="180"
+  aria-hidden="true"
+  focusable="false"
+  data-hero-motif={variant}
+>
+  {
+    architectural ? (
+      <>
+        <path
+          class="hero-motif__resonance"
+          d="M20 154A100 100 0 0 1 220 154M48 154A72 72 0 0 1 192 154M76 154A44 44 0 0 1 164 154"
+        />
+        <path class="hero-motif__score" d="M12 154H228" />
+        <circle class="hero-motif__pulse hero-motif__pulse--primary" cx="120" cy="154" r="5" />
+      </>
+    ) : variant === 'about' ? (
+      <>
+        <path
+          class="hero-motif__resonance"
+          d="M20 50A100 100 0 0 0 220 50M48 50A72 72 0 0 0 192 50M76 50A44 44 0 0 0 164 50"
+        />
+        <path class="hero-motif__score" d="M20 116H92M20 136H72M20 156H108" />
+        <circle class="hero-motif__pulse hero-motif__pulse--primary" cx="120" cy="30" r="6" />
+        <circle class="hero-motif__pulse hero-motif__pulse--quiet" cx="92" cy="156" r="4" />
+      </>
+    ) : (
+      <>
+        <path
+          class="hero-motif__resonance"
+          d="M96 146A88 88 0 0 1 184 58M124 146A60 60 0 0 1 184 86M152 146A32 32 0 0 1 184 114"
+        />
+        <path
+          class="hero-motif__score"
+          d={variant === 'event' ? 'M18 70H122M18 94H102M18 118H134' : 'M18 48H126M18 72H106M18 96H136M18 120H84'}
+        />
+        <circle
+          class="hero-motif__pulse hero-motif__pulse--primary"
+          cx={variant === 'event' ? 102 : 58}
+          cy={variant === 'event' ? 94 : 48}
+          r="5"
+        />
+        <circle class="hero-motif__pulse hero-motif__pulse--quiet" cx="184" cy="146" r="4" />
+      </>
+    )
+  }
+</svg>
+
+<style>
+  .hero-motif {
+    display: block;
+    color: var(--blue);
+    pointer-events: none;
+  }
+
+  .hero-motif__resonance,
+  .hero-motif__score {
+    fill: none;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .hero-motif__resonance {
+    stroke: currentColor;
+    stroke-width: 2.25;
+  }
+
+  .hero-motif__score {
+    stroke: var(--ink);
+    stroke-width: 1;
+    opacity: .42;
+  }
+
+  .hero-motif__pulse { fill: var(--coral); }
+  .hero-motif__pulse--quiet { opacity: .72; }
+
+  .hero-motif--event .hero-motif__resonance { stroke-width: 1.75; }
+  .hero-motif--event .hero-motif__score { opacity: .3; }
+
+  @media (max-width: 620px) {
+    .hero-motif--agenda .hero-motif__score,
+    .hero-motif--event .hero-motif__score,
+    .hero-motif--agenda .hero-motif__pulse--primary,
+    .hero-motif--event .hero-motif__pulse--primary { display: none; }
+
+    .hero-motif--agenda .hero-motif__pulse--quiet,
+    .hero-motif--event .hero-motif__pulse--quiet,
+    .hero-motif--about .hero-motif__pulse--quiet { display: none; }
+  }
+</style>
