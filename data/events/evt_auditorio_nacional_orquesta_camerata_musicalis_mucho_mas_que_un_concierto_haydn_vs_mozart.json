@@ -17,7 +17,7 @@
   ],
   "performers": [
     {
-      "name": "Orquesta Camerata Musi calis"
+      "name": "Orquesta Camerata Musicalis"
     },
     {
       "name": "Edgar Martín Jiménez",
@@ -29,12 +29,7 @@
       "name": "Franz Joseph Haydn"
     }
   ],
-  "works": [
-    {
-      "title": "vs Mozart\"",
-      "composerName": "Franz Joseph Haydn"
-    }
-  ],
+  "works": [],
   "eras": [
     "classical"
   ],
