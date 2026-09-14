@@ -48,6 +48,32 @@ test.describe('eyebrow de sección y retorno', () => {
     await expect(page.locator('.section-intro .eyebrow')).toHaveText('Lugares');
   });
 
+  test('el eyebrow de ficha queda a la misma altura que el de sección', async ({ page }) => {
+    const viewports = [
+      { width: 1440, height: 900 },
+      { width: 390, height: 844 },
+    ] as const;
+    const sectionPath = '/';
+    const detailPath = '/eventos/excelentia-noches-en-los-jardines-de-espana-y-concierto-de-aranjuez/';
+
+    for (const viewport of viewports) {
+      await page.setViewportSize(viewport);
+      await page.goto(sectionPath);
+      await page.evaluate(() => document.fonts.ready);
+      const sectionTop = await page.locator('.agenda-intro .eyebrow').evaluate((element) => {
+        return element.getBoundingClientRect().top;
+      });
+
+      await page.goto(detailPath);
+      await page.evaluate(() => document.fonts.ready);
+      const detailTop = await page.locator('.detail-hero .eyebrow').evaluate((element) => {
+        return element.getBoundingClientRect().top;
+      });
+
+      expect(detailTop, `desalineado a ${viewport.width}px`).toBeCloseTo(sectionTop, 0);
+    }
+  });
+
   test('no conserva las fórmulas ambiguas anteriores', async ({ page }) => {
     const paths = [
       '/',
