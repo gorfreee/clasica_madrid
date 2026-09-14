@@ -1,0 +1,116 @@
+{
+  "jsonapi": { "version": "1.0" },
+  "data": [
+    {
+      "type": "node--eventos",
+      "id": "61247ae0-3b35-4873-a574-39967a65f8f2",
+      "attributes": {
+        "drupal_internal__nid": 23537,
+        "langcode": "es",
+        "status": true,
+        "title": "Él a ella y ella a él",
+        "path": { "alias": "/actualidad/concierto/2026/el-ella-y-ella-el-2026-09-19" },
+        "body": null,
+        "field_autor": "Coro de Cámara Amadeus",
+        "field_entrada": "Libre hasta completar el aforo",
+        "field_entrada_largo_": null,
+        "field_entradas": null,
+        "field_fecha_inicio": "2026-09-19T12:00:00+02:00",
+        "field_lugar": "Iglesia del Monasterio de San Jerónimo de Yuste",
+        "field_organizador": null,
+        "field_programa": "Canto 1-2. En la fuente del rosel. J. Vázquez (Badajoz, ca. 1505 – Sevilla, 1563)"
+      },
+      "relationships": {
+        "field_ciclo_de_conciertos": { "data": { "type": "node--concert_serie", "id": "1b37da0b-aea3-40ba-bc42-9508892b5f66" } },
+        "field_sitio": { "data": { "type": "node--royal_site", "id": "adb7e9b5-8788-45a3-b143-70aa342e2c04" } },
+        "field_tipo_de_evento": { "data": { "type": "taxonomy_term--tipo_de_evento", "id": "f524a1ae-d5a2-4a5e-87c2-3aaf2c34aa7e" } }
+      }
+    },
+    {
+      "type": "node--eventos",
+      "id": "5f8f42ba-6dc0-42d6-9d6b-2fd68680785e",
+      "attributes": {
+        "drupal_internal__nid": 23484,
+        "langcode": "es",
+        "status": true,
+        "title": "FERNANDO BRAMBILA. PINTOR DE LOS REALES SITIOS",
+        "path": { "alias": "/actualidad/conferencia/fernando-brambila-pintor-de-los-reales-sitios-2026-09-22" },
+        "body": { "processed": "<p>Conferencia Magistral con ocasión de la Exposición Temporal de Fernando Brambila, pintor de los Reales Sitios</p>" },
+        "field_autor": null,
+        "field_entrada": "Entrada libre hasta completar aforo",
+        "field_entrada_largo_": null,
+        "field_entradas": null,
+        "field_fecha_inicio": "2026-09-22T18:30:00+02:00",
+        "field_lugar": "Galería de las Colecciones Reales, auditorio",
+        "field_organizador": null,
+        "field_programa": null
+      },
+      "relationships": {
+        "field_ciclo_de_conciertos": { "data": null },
+        "field_sitio": { "data": { "type": "node--royal_site", "id": "d11092e7-8f5c-41be-8836-b2a59bf5a0e3" } },
+        "field_tipo_de_evento": { "data": { "type": "taxonomy_term--tipo_de_evento", "id": "718c55f7-f900-44e9-ac2d-c198444df108" } }
+      }
+    },
+    {
+      "type": "node--eventos",
+      "id": "a489320b-abea-46ec-a43c-80003f093a83",
+      "attributes": {
+        "drupal_internal__nid": 23560,
+        "langcode": "es",
+        "status": true,
+        "title": "Bernard Foccroulle ",
+        "path": { "alias": "/actualidad/concierto/2026/bernard-foccroulle-2026-10-17" },
+        "body": null,
+        "field_autor": "Bernard Foccroulle",
+        "field_entrada": "Próximamente",
+        "field_entrada_largo_": null,
+        "field_entradas": null,
+        "field_fecha_inicio": "2026-10-17T19:30:00+02:00",
+        "field_lugar": "Capilla. Palacio Real de Madrid",
+        "field_organizador": null,
+        "field_programa": "Girolamo Frescobaldi (1583–1643)\r\nCapriccio sopra la Bassa fiaminga\r\n\r\nJohann Sebastian Bach (1685–1750)\r\nFuga sopra il Magnificat, BWV 733"
+      },
+      "relationships": {
+        "field_ciclo_de_conciertos": { "data": { "type": "node--concert_serie", "id": "6a95d4b5-7b0a-4ae7-863c-00c1123bcb4b" } },
+        "field_sitio": { "data": { "type": "node--royal_site", "id": "40a447af-1c15-455f-ba02-556bdc866ffe" } },
+        "field_tipo_de_evento": { "data": { "type": "taxonomy_term--tipo_de_evento", "id": "f524a1ae-d5a2-4a5e-87c2-3aaf2c34aa7e" } }
+      }
+    },
+    {
+      "type": "node--eventos",
+      "id": "dc39d137-65ba-4deb-a939-48a577c89a01",
+      "attributes": {
+        "drupal_internal__nid": 23550,
+        "langcode": "es",
+        "status": true,
+        "title": "Quinteto Schubert",
+        "path": { "alias": "/actualidad/concierto/2026/quinteto-schubert-2026-10-22" },
+        "body": null,
+        "field_autor": "Sophie Druml (violín), Benjamin Herzl (violín), Eike Coetzee (viola), Ania Druml (violonchelo) y Simon Tetzlaff (violonchelo)",
+        "field_entrada": "Venta de entradas online",
+        "field_entrada_largo_": null,
+        "field_entradas": { "uri": "https://tickets.patrimonionacional.es/es/tickets/quinteto-schubert-xliii-ciclo-de-camara-753353?taxonomies=842102", "title": "Venta de entradas online" },
+        "field_fecha_inicio": "2026-10-22T19:30:00+02:00",
+        "field_lugar": "Salón de Columnas. Palacio Real de Madrid",
+        "field_organizador": null,
+        "field_programa": "Franz Schubert (Viena, 1797 - 1828)\r\nQuinteto para cuerda en do mayor"
+      },
+      "relationships": {
+        "field_ciclo_de_conciertos": { "data": { "type": "node--concert_serie", "id": "6c59e063-bb93-4ea9-89e9-cce1c7d02d3d" } },
+        "field_sitio": { "data": { "type": "node--royal_site", "id": "40a447af-1c15-455f-ba02-556bdc866ffe" } },
+        "field_tipo_de_evento": { "data": { "type": "taxonomy_term--tipo_de_evento", "id": "f524a1ae-d5a2-4a5e-87c2-3aaf2c34aa7e" } }
+      }
+    }
+  ],
+  "included": [
+    { "type": "node--royal_site", "id": "adb7e9b5-8788-45a3-b143-70aa342e2c04", "attributes": { "title": "Monasterio de San Jerónimo de Yuste" } },
+    { "type": "node--royal_site", "id": "d11092e7-8f5c-41be-8836-b2a59bf5a0e3", "attributes": { "title": "Galería de las Colecciones Reales" } },
+    { "type": "node--royal_site", "id": "40a447af-1c15-455f-ba02-556bdc866ffe", "attributes": { "title": "Palacio Real de Madrid" } },
+    { "type": "taxonomy_term--tipo_de_evento", "id": "f524a1ae-d5a2-4a5e-87c2-3aaf2c34aa7e", "attributes": { "name": "Concierto" } },
+    { "type": "taxonomy_term--tipo_de_evento", "id": "718c55f7-f900-44e9-ac2d-c198444df108", "attributes": { "name": "conferencia" } },
+    { "type": "node--concert_serie", "id": "1b37da0b-aea3-40ba-bc42-9508892b5f66", "attributes": { "title": "MÚSICA EN YUSTE 2026" } },
+    { "type": "node--concert_serie", "id": "6a95d4b5-7b0a-4ae7-863c-00c1123bcb4b", "attributes": { "title": "XX CICLO DE ÓRGANO" } },
+    { "type": "node--concert_serie", "id": "6c59e063-bb93-4ea9-89e9-cce1c7d02d3d", "attributes": { "title": "XLIII CICLO DE CÁMARA" } }
+  ],
+  "links": { "self": { "href": "REPLACED_BY_TEST" } }
+}

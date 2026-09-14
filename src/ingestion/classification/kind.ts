@@ -79,6 +79,9 @@ const ALTERNATIVE_VENUE_IDS = new Set([
   'ven_goethe_institut_madrid',
   'ven_real_monasterio_santa_isabel',
   'ven_palacio_real_el_pardo',
+  'ven_palacio_real_madrid',
+  'ven_palacio_real_madrid_capilla_real',
+  'ven_palacio_real_madrid_salon_columnas',
   'ven_hinves_pianos',
 ]);
 

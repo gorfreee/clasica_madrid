@@ -17,6 +17,7 @@ import { realHermandadRefugioAdapter } from './sources/real-hermandad-refugio.ts
 import { realAcademiaBellasArtesAdapter } from './sources/real-academia-bellas-artes.ts';
 import { fundacionGoetheAdapter } from './sources/fundacion-goethe.ts';
 import { madridATempoAdapter } from './sources/madrid-a-tempo.ts';
+import { patrimonioNacionalAdapter } from './sources/patrimonio-nacional.ts';
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
@@ -37,6 +38,7 @@ const ADAPTERS: Record<string, SourceAdapter> = {
   [realAcademiaBellasArtesAdapter.id]: realAcademiaBellasArtesAdapter,
   [fundacionGoetheAdapter.id]: fundacionGoetheAdapter,
   [madridATempoAdapter.id]: madridATempoAdapter,
+  [patrimonioNacionalAdapter.id]: patrimonioNacionalAdapter,
 };
 
 const srcAuditorio: Source = {
@@ -310,6 +312,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Madrid a Tempo',
       kind: 'official',
       url: 'https://www.madridatempo.com/',
+    },
+  },
+  {
+    id: 'patrimonio-nacional',
+    name: 'Patrimonio Nacional',
+    urls: ['https://www.patrimonionacional.es/jsonapi/node/eventos'],
+    adapterId: patrimonioNacionalAdapter.id,
+    catalogSourceId: 'src_patrimonio_nacional',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_patrimonio_nacional',
+      slug: 'patrimonio-nacional',
+      name: 'Patrimonio Nacional',
+      kind: 'official',
+      url: 'https://www.patrimonionacional.es/',
     },
   },
 ];
