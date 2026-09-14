@@ -262,10 +262,20 @@ button, input, select { font: inherit; }
   text-transform: uppercase;
 }
 a.eyebrow {
-  display: block;
+  display: inline-block;
+  color: inherit;
   text-decoration: none;
+  transition: color 140ms ease;
 }
-a.eyebrow:hover { color: var(--blue); }
+a.eyebrow:hover,
+a.eyebrow:focus-visible {
+  color: var(--blue);
+}
+.eyebrow__arrow {
+  display: inline-block;
+  margin-right: .42em;
+  letter-spacing: 0;
+}
 .lede {
   max-width: 37rem;
   margin: 1.3rem 0 0;
