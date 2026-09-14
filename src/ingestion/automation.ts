@@ -8,6 +8,23 @@ import {
 import type { IngestRunManifest, IngestSourceHttpStats, IngestSourceTiming } from './observability.ts';
 import type { IngestReport } from './report.ts';
 
+/** GitHub GraphQL `createPullRequest` rejects bodies over this length. */
+export const GITHUB_PR_BODY_MAX_CHARS = 65_536;
+
+/**
+ * Conservative cap for automated ingestion PR bodies.
+ * Compact formatting should stay far below this; the clip is a last-resort guard.
+ */
+export const AUTOMATION_PR_BODY_MAX_CHARS = 50_000;
+
+/** Rows shown in compact PR incident samples. */
+export const AUTOMATION_PR_SAMPLE_LIMIT = 8;
+
+/** Max visible characters for a compact PR table cell or joined token. */
+export const AUTOMATION_PR_CELL_MAX_CHARS = 96;
+
+const PR_JOIN_SAMPLE_LIMIT = 16;
+
 export type AutomationReportMetrics = {
   classificationDrift: number;
   cancellations: number;
@@ -35,10 +52,58 @@ export function formatAutomationSummary(
   return formatAutomationMarkdown(report, runUrl, 'Ingestión de producción', extras);
 }
 
-export function formatAutomationPrBody(report: IngestReport, runUrl: string): string {
-  return `${formatAutomationMarkdown(report, runUrl, 'Actualización automática de datos')}
+export function formatAutomationPrBody(
+  report: IngestReport,
+  runUrl: string,
+  extras?: AutomationSummaryExtras,
+): string {
+  const view = buildIngestDiagnosticView(report);
+  const metrics = automationReportMetrics(report);
+  const sections = [
+    '## Actualización automática de datos',
+    '',
+    ...formatPrDraftNotice(report),
+    formatPrOverview(report, view, metrics),
+    '',
+    formatPrAttentionSample(view.attention),
+    '',
+    formatPrDetailLinks(runUrl, extras),
+    '',
+    'Esta PR sólo contiene cambios materiales bajo `data/**`.',
+  ];
+  return clipAutomationMarkdown(sections.join('\n'), {
+    limit: AUTOMATION_PR_BODY_MAX_CHARS,
+    runUrl,
+    artifactName: extras?.artifactName,
+  });
+}
 
-Esta PR sólo contiene cambios materiales bajo \`data/**\`. El report JSON completo está adjunto a la ejecución de Actions.`;
+export function clipAutomationMarkdown(
+  markdown: string,
+  options: { limit: number; runUrl: string; artifactName?: string },
+): string {
+  const notice = formatPrClipNotice(options.runUrl, options.artifactName);
+  if (markdown.length <= options.limit) return markdown;
+
+  const closerBudget = 32;
+  const budget = options.limit - notice.length - closerBudget - 2;
+  if (budget < 64) {
+    return notice.slice(0, options.limit);
+  }
+
+  let prefix = markdown.slice(0, budget);
+  const lastNewline = prefix.lastIndexOf('\n');
+  if (lastNewline > 0) prefix = prefix.slice(0, lastNewline);
+  let result = `${closeOpenMarkdown(prefix).trimEnd()}\n\n${notice}`;
+  if (result.length <= options.limit) return result;
+
+  const lines = closeOpenMarkdown(prefix).trimEnd().split('\n');
+  while (lines.length > 0) {
+    lines.pop();
+    result = `${closeOpenMarkdown(lines.join('\n')).trimEnd()}\n\n${notice}`;
+    if (result.length <= options.limit) return result;
+  }
+  return notice.slice(0, options.limit);
 }
 
 export function formatMissingReportSummary(runUrl: string, extras?: AutomationSummaryExtras): string {
@@ -89,6 +154,144 @@ function formatAutomationMarkdown(
   if (observability) sections.push('', observability);
   sections.push('', `[Ver ejecución de GitHub Actions](${runUrl})`);
   return sections.join('\n');
+}
+
+function formatPrDraftNotice(report: IngestReport): string[] {
+  if (report.health !== 'review') return [];
+  return [
+    '> [!WARNING]',
+    '> Esta PR se publica como **draft** porque `health` es `review`. Auto-merge queda deshabilitado.',
+    '',
+  ];
+}
+
+function formatPrOverview(
+  report: IngestReport,
+  view: IngestDiagnosticView,
+  metrics: AutomationReportMetrics,
+): string {
+  const summary = report.summary;
+  const outcomes = view.outcomeCounts;
+  const hydration = `${summary.detailHydrationAttempted} / ${summary.detailHydrationSucceeded} / ${summary.detailHydrationFailed}`;
+  return `### Resumen
+
+| Métrica | Resultado |
+|---|---:|
+| Ventana | ${compactCell(`${report.window.from} → ${report.window.to}`)} |
+| Health | **${compactCell(report.health)}** |
+| Motivos | ${boundedJoin(report.healthReasons, 'ninguno')} |
+| Fuentes correctas | ${boundedJoin(summary.sourcesSucceeded, 'ninguna')} |
+| Fuentes fallidas | ${boundedJoin(
+    summary.sourcesFailed.map((failure) => `${failure.sourceId}: ${failure.message}`),
+    'ninguna',
+    '; ',
+  )} |
+| Observaciones | ${summary.rawEvents} |
+| Creados / actualizados / sin cambios | ${outcomes.created} / ${outcomes.updated} / ${outcomes.unchanged} |
+| Posiblemente desaparecidos | ${summary.possiblyMissing} |
+| Ambiguos | ${outcomes.ambiguous} |
+| Duplicados del lote | ${summary.batchDuplicates} |
+| Classification drift | ${metrics.classificationDrift} |
+| Hydration | ${hydration} |
+| IA | ${compactCell(formatPrAiSummary(summary.ai))} |`;
+}
+
+function formatPrAiSummary(ai: IngestReport['summary']['ai']): string {
+  const parts = [
+    `${ai.logicalCalls} llamadas`,
+    `${ai.httpRequests} HTTP`,
+    `${ai.cacheHits} cache`,
+    `${ai.deferred} deferred`,
+    `${ai.rateLimits} rate limits`,
+    `${ai.quotaExhausted} cuota`,
+    `${ai.circuitOpenRoutes} circuito${ai.circuitOpenRoutes === 1 ? '' : 's'}`,
+  ];
+  const openRoutes = (ai.routes ?? [])
+    .filter((route) => route.circuitOpen)
+    .map((route) => route.routeId);
+  if (openRoutes.length > 0) {
+    parts.push(`abiertos: ${boundedJoin(openRoutes, '', ', ', 4)}`);
+  }
+  return parts.join(' · ');
+}
+
+function formatPrAttentionSample(items: AttentionItem[]): string {
+  const lines = ['### Requiere atención', ''];
+  if (items.length === 0) {
+    lines.push('Ningún evento requiere atención.');
+    return lines.join('\n');
+  }
+  const sample = items.slice(0, AUTOMATION_PR_SAMPLE_LIMIT);
+  const omitted = items.length - sample.length;
+  if (omitted > 0) {
+    lines.push(
+      `Muestra de ${sample.length} de ${items.length}. El resto está en el Job Summary, el artifact y \`report.json\`.`,
+      '',
+    );
+  }
+  lines.push('| Fuente | Evento | Problema | Motivo |', '|---|---|---|---|');
+  for (const item of sample) {
+    lines.push(
+      `| ${compactCell(item.sourceName)} | ${compactCell(item.title)} | ${compactCell(item.problems)} | ${compactCell(item.reason ?? '')} |`,
+    );
+  }
+  if (omitted > 0) {
+    lines.push('', `_${omitted} incidencias más omitidas de esta muestra._`);
+  }
+  return lines.join('\n');
+}
+
+function formatPrDetailLinks(runUrl: string, extras?: AutomationSummaryExtras): string {
+  const artifact = extras?.artifactName
+    ? `[\`${compactCell(extras.artifactName, 80)}\`](${runUrl})`
+    : `[artifact de la ejecución](${runUrl})`;
+  return `### Detalle completo
+
+El diagnóstico (funnel, observabilidad, IA por route, eventos no publicados) no se vuelca aquí. Está en:
+
+- [Job Summary de la ejecución](${runUrl})
+- Artifact ${artifact} (\`report.json\`, \`events.jsonl\`, \`run.json\`)`;
+}
+
+function formatPrClipNotice(runUrl: string, artifactName?: string): string {
+  const artifact = artifactName ? ` \`${compactCell(artifactName, 80)}\`` : '';
+  return `> [!WARNING]
+> Se omitió detalle para no superar el límite de GitHub. El report completo está en el [Job Summary y artifact${artifact} de la ejecución](${runUrl}) (\`report.json\`, \`events.jsonl\`, \`run.json\`).`;
+}
+
+function closeOpenMarkdown(text: string): string {
+  if (!text) return text;
+  const closers: string[] = [];
+  const openDetails = countMatches(text, /<details\b/gi) - countMatches(text, /<\/details>/gi);
+  for (let index = 0; index < Math.max(0, openDetails); index += 1) closers.push('</details>');
+  const fenceCount = countMatches(text, /^```/gm);
+  if (fenceCount % 2 === 1) closers.push('```');
+  return closers.length === 0 ? text : `${text}\n${closers.join('\n')}`;
+}
+
+function countMatches(text: string, pattern: RegExp): number {
+  return (text.match(pattern) ?? []).length;
+}
+
+function compactCell(value: string, max = AUTOMATION_PR_CELL_MAX_CHARS): string {
+  const escaped = cell(value);
+  if (escaped.length <= max) return escaped;
+  if (max <= 1) return '…';
+  return `${escaped.slice(0, max - 1)}…`;
+}
+
+function boundedJoin(
+  values: readonly string[],
+  empty: string,
+  separator = ', ',
+  sample = PR_JOIN_SAMPLE_LIMIT,
+): string {
+  if (values.length === 0) return empty;
+  const shown = values.slice(0, sample).map((value) => compactCell(value));
+  const omitted = values.length - shown.length;
+  const joined = shown.join(separator);
+  if (omitted <= 0) return joined;
+  return `${joined}${separator}… y ${omitted} más`;
 }
 
 function formatGlobalSummary(report: IngestReport, view: IngestDiagnosticView): string {

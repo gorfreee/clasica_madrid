@@ -27,7 +27,7 @@ assertIngestReport(raw);
 
 await appendFile(options.summary, `${formatAutomationSummary(raw, options.runUrl, extras)}\n`, 'utf8');
 if (options.prBody) {
-  await writeFile(options.prBody, `${formatAutomationPrBody(raw, options.runUrl)}\n`, 'utf8');
+  await writeFile(options.prBody, `${formatAutomationPrBody(raw, options.runUrl, extras)}\n`, 'utf8');
 }
 await appendFile(
   options.output,
