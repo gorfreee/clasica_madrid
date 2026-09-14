@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import Eyebrow from '../../components/Eyebrow.astro';
 import HeroMotif from '../../components/HeroMotif.astro';
 import PlaceAddress from '../../components/PlaceAddress.astro';
 import { formatSourceCitationMeta } from '../../lib/presentation/labels.ts';
@@ -34,7 +35,7 @@ const featured = model.featuredOccurrence;
   <article class="detail event-detail">
     <header class="detail-hero detail-hero--event">
       <div class="detail-hero__copy">
-        <a class="eyebrow" href={AGENDA_PATH}>{model.isPast ? 'Archivo / Evento pasado' : 'Agenda / Evento'}</a>
+        <Eyebrow label="Agenda" href={AGENDA_PATH} />
         {model.statusLabel !== 'Programado' && <p class="status-alert">{model.statusLabel}</p>}
         <h1>{model.title}</h1>
         {model.seriesName && <p class="detail-hero__series">{model.seriesKind} / {model.seriesName}</p>}

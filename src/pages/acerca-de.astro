@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Eyebrow from '../components/Eyebrow.astro';
 import HeroMotif from '../components/HeroMotif.astro';
 import { ABOUT_PATH } from '../lib/presentation/urls.ts';
 ---
@@ -11,7 +12,7 @@ import { ABOUT_PATH } from '../lib/presentation/urls.ts';
 >
   <header class="section-intro about-intro">
     <div class="section-intro__copy">
-      <p class="eyebrow">Acerca de / Clásica Madrid</p>
+      <Eyebrow label="Acerca de" />
       <h1>Una agenda para<br />escuchar Madrid.</h1>
       <p class="lede">
         Clásica Madrid reúne en un único lugar la programación de música clásica de la ciudad.
