@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_zarzuelita",
+  "origin": "published-catalog",
+  "sourceId": "teatro-zarzuela",
+  "sourceUrl": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/nuevos-publicos-2026-2027/zarzuelita-2026-2027-escolares",
+  "listingTitle": "Zarzuelita",
+  "observed": {
+    "title": "Zarzuelita",
+    "description": "Género chico para grandes oyentes. La primera producción del Teatro de la Zarzuela en formato concierto dirigida a grupos de educación infantil (3 a 5 años). Correo electrónico de contacto del centro. LUCÍA BELTRÁN Soprano. ADRIÁN QUIÑONES Tenor.",
+    "categoryText": "Nuevos públicos",
+    "venueText": "Teatro de la Zarzuela",
+    "performers": [
+      { "name": "LUCÍA BELTRÁN", "roleText": "Soprano" },
+      { "name": "ADRIÁN QUIÑONES", "roleText": "Tenor" },
+      { "name": "ANGELO CHIU LEE", "roleText": "Violín" },
+      { "name": "RAMÓN GRAU", "roleText": "Piano" }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": ["zarzuela"],
+    "eras": [],
+    "kind": "established",
+    "access": "unknown"
+  },
+  "reason": "Concierto de zarzuela (género chico) anunciado como concierto. Sin programa obra-por-obra; eras vacías. El formulario escolar con correo electrónico no es un descriptor de electrónica.",
+  "checkedAt": "2026-09-14"
+}

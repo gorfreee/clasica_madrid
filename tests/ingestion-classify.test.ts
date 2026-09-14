@@ -375,6 +375,30 @@ describe('eligibility — exclusiones de identidad', () => {
     expect(nosferatu.eligibility.ruleId).toBe('cinema-projection');
   });
 
+  it('no trata cine experimental como proyección cuando es el medio de un concierto electrónico', () => {
+    const result = classify(
+      facts({
+        title: 'L.E.V. 2026: Conciertos. Síntesis modular y cine experimental',
+        description:
+          'Un encuentro entre composición electroacústica y cine experimental en tiempo real. El compositor presenta un universo sonoro donde la síntesis modular, la composición electroacústica y los samples se entrelazan.',
+      }),
+    );
+    expect(result.eligibility.value).toBe('uncertain');
+    expect(result.eligibility.ruleId).not.toBe('cinema-projection');
+    expect(result.eligibility.value).not.toBe('include');
+  });
+
+  it('sigue excluyendo un ciclo de cine experimental cuya actividad es ver películas', () => {
+    const result = classify(
+      facts({
+        title: 'Ciclo de cine experimental',
+        description: 'Proyección de cortometrajes. Película muda con música en vivo.',
+      }),
+    );
+    expect(result.eligibility.value).toBe('exclude');
+    expect(result.eligibility.ruleId).toBe('cinema-projection');
+  });
+
   it('excluye un taller aunque cite a Puccini', () => {
     const result = classify(
       facts({
@@ -420,6 +444,140 @@ describe('eligibility — exclusiones de identidad', () => {
       }),
     );
     expect(result.eligibility.value).toBe('uncertain');
+    expect(result.eligibility.value).not.toBe('include');
+  });
+
+  it('incluye un concierto barroco con pie de charlas previas al ciclo', () => {
+    const result = classify(
+      facts({
+        title: 'LES MUSICIENS DU LOUVRE',
+        seriesText: 'Universo Barroco',
+        description:
+          'Marc Minkowski inaugura el ciclo Universo Barroco con los Concerti grossi, op. 3, de George Frideric Haendel. CONTEXTOS BARROCOS Charlas previas al ciclo de conciertos. Charla sobre el concierto de Les Musiciens du Louvre.',
+        programText: 'George Frideric Haendel (1685-1759) Concerti grossi, op. 3 (1710-1718)',
+        composers: [{ name: 'George Frideric Haendel (1685-1759)' }],
+        works: [
+          {
+            title: 'Concerti grossi, op. 3 (1710-1718)',
+            composerName: 'George Frideric Haendel (1685-1759)',
+          },
+        ],
+        performers: [{ name: 'Marc Minkowski', roleText: 'director' }],
+      }),
+    );
+    expect(result.eligibility.value).toBe('include');
+    expect(result.eligibility.ruleId).not.toBe('classical-and-nonclassical-coprincipal');
+    expect(result.eligibility.ruleId).not.toBe('non-performance-activity');
+  });
+
+  it('incluye una ópera barroca listada aunque el pie mencione una conferencia educativa', () => {
+    const result = classify(
+      facts({
+        title: 'LES ACCENTS: "AGRIPPINA" (G. F. HAENDEL)',
+        seriesText: 'Universo Barroco',
+        description:
+          'Les Accents interpretan Agrippina, la ópera de George Frideric Haendel. Educación: Conferencia de Thibault Noally. Charlas previas al ciclo de conciertos. Charla sobre el concierto de Les Accents.',
+        programText: 'George Frideric Haendel (1685-1759) Agrippina, HWV 6 (1709)',
+        composers: [{ name: 'George Frideric Haendel (1685-1759)' }],
+        works: [{ title: 'Agrippina, HWV 6 (1709)', composerName: 'George Frideric Haendel (1685-1759)' }],
+      }),
+    );
+    expect(result.eligibility.value).toBe('include');
+  });
+
+  it('un listing sin programa queda uncertain y la ficha hidratada incluye', () => {
+    const listing = classify(
+      facts({
+        title: 'LES MUSICIENS DU LOUVRE',
+      }),
+    );
+    expect(listing.eligibility.value).toBe('uncertain');
+
+    const hydrated = classify(
+      facts({
+        title: 'LES MUSICIENS DU LOUVRE',
+        seriesText: 'Universo Barroco',
+        programText: 'George Frideric Haendel (1685-1759) Concerti grossi, op. 3 (1710-1718)',
+        composers: [{ name: 'George Frideric Haendel (1685-1759)' }],
+        works: [
+          {
+            title: 'Concerti grossi, op. 3 (1710-1718)',
+            composerName: 'George Frideric Haendel (1685-1759)',
+          },
+        ],
+      }),
+    );
+    expect(hydrated.eligibility.value).toBe('include');
+  });
+
+  it('incluye una zarzuela barroca listada aunque el pie mencione charlas previas', () => {
+    const result = classify(
+      facts({
+        title: 'IL FERVORE: "JÚPITER Y CALISTO" (G. B. MELE)',
+        seriesText: 'Universo Barroco',
+        description:
+          'Il Fervore recupera Júpiter y Calisto, zarzuela barroca en dos jornadas de Giovanni Battista Mele. CONTEXTOS BARROCOS Charlas previas al ciclo de conciertos. Charla sobre el concierto de Il Fervore.',
+        programText:
+          'Giovanni Battista Mele (ca. 1701-1752) Júpiter y Calisto, zarzuela barroca en dos jornadas (ca. 1736)',
+        composers: [{ name: 'Giovanni Battista Mele (ca. 1701-1752)' }],
+        works: [
+          {
+            title: 'Júpiter y Calisto, zarzuela barroca en dos jornadas (ca. 1736)',
+            composerName: 'Giovanni Battista Mele (ca. 1701-1752)',
+          },
+        ],
+      }),
+    );
+    expect(result.eligibility.value).toBe('include');
+    expect(result.formats?.value).toContain('zarzuela');
+    expect(result.eligibility.ruleId).not.toBe('classical-and-nonclassical-coprincipal');
+  });
+
+  it('incluye Andrómeda y Perseo por Juan Hidalgo, no por correo electrónico', () => {
+    const result = classify(
+      facts({
+        title: 'Andrómeda y Perseo',
+        description:
+          'Fábula mitológica. Música atribuida a JUAN DE HIDALGO. Libreto de PEDRO CALDERÓN DE LA BARCA. Correo electrónico de contacto: reservas@example.test',
+        categoryText: 'Nuevos públicos',
+        composers: [{ name: 'atribuida a JUAN DE HIDALGO' }],
+        performers: [{ name: 'AARÓN ZAPICO', roleText: 'Dirección musical y clave' }],
+      }),
+    );
+    expect(result.eligibility.value).toBe('include');
+    expect(result.eligibility.ruleId).toBe('known-classical-composer');
+    expect(result.eras?.value).toEqual(['baroque']);
+  });
+
+  it('incluye Zarzuelita como concierto de género chico, no como electrónica', () => {
+    const result = classify(
+      facts({
+        title: 'Zarzuelita',
+        description:
+          'Género chico para grandes oyentes. Formato concierto. Correo electrónico de contacto del centro escolar.',
+        categoryText: 'Nuevos públicos',
+        performers: [
+          { name: 'Lucía Beltrán', roleText: 'Soprano' },
+          { name: 'Adrián Quiñones', roleText: 'Tenor' },
+        ],
+      }),
+    );
+    expect(result.eligibility.value).toBe('include');
+    expect(result.formats?.value).toContain('zarzuela');
+  });
+
+  it('no trata un cuarteto aislado de Saint-Saëns en un tributo pop como bloque clásico', () => {
+    const result = classify(
+      facts({
+        title: 'Tribute to Tom Petty',
+        programText: 'Free Fallin’; Refugee; El cisne de Saint-Saëns.',
+        composers: [{ name: 'Tom Petty' }, { name: 'Camille Saint-Saëns' }],
+        works: [
+          { title: 'Free Fallin’', composerName: 'Tom Petty' },
+          { title: 'Le cygne', composerName: 'Camille Saint-Saëns' },
+        ],
+      }),
+    );
     expect(result.eligibility.value).not.toBe('include');
   });
 
@@ -1490,6 +1648,10 @@ describe('formats', () => {
 
     expect(
       resolveFormats(facts({ title: 'Trío Arbós' })).value,
+    ).toEqual(['chamber']);
+
+    expect(
+      resolveFormats(facts({ title: 'Gara Quartet' })).value,
     ).toEqual(['chamber']);
 
     expect(

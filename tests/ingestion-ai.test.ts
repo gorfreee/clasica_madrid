@@ -101,11 +101,11 @@ const popularUncertainFacts = facts({
 describe('AI classifier prompt v2', () => {
   const prompt = AI_CLASSIFIER_SYSTEM_PROMPT;
 
-  it('is version 13 so results are distinguishable from earlier prompts', () => {
-    expect(AI_CLASSIFIER_PROMPT_VERSION).toBe(13);
+  it('is version 14 so results are distinguishable from earlier prompts', () => {
+    expect(AI_CLASSIFIER_PROMPT_VERSION).toBe(14);
     expect(AI_REQUEST_CONTRACT_VERSION).toBe(4);
     expect(buildAiRequest(uncertainFacts).contractVersion).toBe(4);
-    expect(buildAiRequest(uncertainFacts).user).toContain('promptVersion: 13');
+    expect(buildAiRequest(uncertainFacts).user).toContain('promptVersion: 14');
   });
 
   it('keeps precision, uncertain as a valid output, and the ban on inventing facts', () => {
@@ -147,6 +147,10 @@ describe('AI classifier prompt v2', () => {
     expect(prompt).toMatch(/Hans Zimmer\/Morricone/);
     expect(prompt).toMatch(/coprincipales/);
     expect(prompt).toMatch(/NUNCA exclude autom[aá]tico por coprincipalidad/);
+    expect(prompt).toMatch(/tango\/nuevo tango/);
+    expect(prompt).toMatch(/charla sobre el concierto/);
+    expect(prompt).toMatch(/exclude exige una identidad excluida positiva/);
+    expect(prompt).toMatch(/correo electr[oó]nico/);
     expect(prompt).toMatch(/Fito P[aá]ez con cuerdas/);
     expect(prompt).toMatch(/musical de Broadway/);
     expect(prompt).toMatch(/compositor cl[aá]sico aislado/);
@@ -1164,8 +1168,8 @@ describe('taxonomy AI — alternativas exclusivas vs formaciones combinadas', ()
 describe('taxonomy AI prompt', () => {
   const prompt = AI_TAXONOMY_SYSTEM_PROMPT;
 
-  it('is version 9 so results are distinguishable from earlier taxonomy prompts', () => {
-    expect(AI_TAXONOMY_PROMPT_VERSION).toBe(9);
+  it('is version 10 so results are distinguishable from earlier taxonomy prompts', () => {
+    expect(AI_TAXONOMY_PROMPT_VERSION).toBe(10);
   });
 
   it('asks for a format when observed facts support a musical inference', () => {

@@ -223,6 +223,8 @@ function hasStrongChamberFormation(text: string): boolean {
   if (!text) return false;
   return (
     hasWord(text, 'cuarteto') ||
+    hasWord(text, 'quartet') ||
+    hasWord(text, 'quartett') ||
     hasWord(text, 'quinteto') ||
     hasWord(text, 'sexteto') ||
     hasWord(text, 'octeto') ||
@@ -254,9 +256,15 @@ function isOperaFormat(facts: ObservedFacts, evidence: FormatEvidence): boolean 
 function isZarzuelaFormat(facts: ObservedFacts, evidence: FormatEvidence): boolean {
   const category = fieldFolded(facts.categoryText);
   const title = fieldFolded(facts.title);
-  if (hasWord(category, 'zarzuela') || hasWord(title, 'zarzuela')) return true;
+  if (hasWord(category, 'zarzuela') || hasWord(title, 'zarzuela') || hasWord(title, 'zarzuelita')) {
+    return true;
+  }
   const genreFields = genreFieldsOf(evidence);
-  return evidenceHasPhrase(genreFields, 'de zarzuelas') || evidenceHasPhrase(genreFields, 'zarzuela de');
+  if (evidenceHasPhrase(genreFields, 'de zarzuelas') || evidenceHasPhrase(genreFields, 'zarzuela de')) {
+    return true;
+  }
+  // A listed work/program that names the piece as a zarzuela, not a biography.
+  return evidenceHasWord([evidence.identity, evidence.program], 'zarzuela');
 }
 
 function isOrganFormat(facts: ObservedFacts, evidence: FormatEvidence): boolean {
@@ -486,6 +494,8 @@ function hasChamberFormation(text: string): boolean {
   if (!text) return false;
   return (
     hasWord(text, 'cuarteto') ||
+    hasWord(text, 'quartet') ||
+    hasWord(text, 'quartett') ||
     hasWord(text, 'quinteto') ||
     hasWord(text, 'sexteto') ||
     hasWord(text, 'octeto') ||

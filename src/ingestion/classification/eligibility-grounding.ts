@@ -1,4 +1,5 @@
 import { collapseWhitespace } from '../html.ts';
+import { findKnownComposersInText, matchComposer } from '../knowledge/composers.ts';
 import type { ObservedFacts } from '../observed.ts';
 import type { AiEligibilityResult } from './ai.ts';
 import {
@@ -129,7 +130,52 @@ export function eligibilityEvidenceFields(facts: ObservedFacts): string[] {
 export function evidenceSpanIsGrounded(facts: ObservedFacts, span: string): boolean {
   const needle = collapseWhitespace(span);
   if (!needle) return false;
-  return eligibilityEvidenceFields(facts).some((field) => containsNormalizedSpan(field, needle));
+  const normalized = stripEvidenceMarkup(needle);
+  if (eligibilityEvidenceFields(facts).some((field) => containsNormalizedSpan(field, normalized))) {
+    return true;
+  }
+  if (ellipsisFragmentsAreGrounded(facts, normalized)) return true;
+  return observedComposerAliasIsGrounded(facts, normalized);
+}
+
+/**
+ * A cited composer name is grounded when it is a knowledge-base spelling of a
+ * composer already present in the observed facts (Händel / Haendel / Handel).
+ * A longer paraphrase that merely contains a composer name is not.
+ */
+function observedComposerAliasIsGrounded(facts: ObservedFacts, span: string): boolean {
+  const cited = matchComposer(span);
+  if (!cited) return false;
+  const observedNames = [
+    ...facts.composers.map((person) => person.name),
+    ...facts.works.flatMap((work) => (work.composerName ? [work.composerName] : [])),
+    facts.programText,
+    facts.title,
+  ].filter((value): value is string => Boolean(value?.trim()));
+  return observedNames.some((text) => {
+    if (matchComposer(text)?.canonicalName === cited.canonicalName) return true;
+    return findKnownComposersInText(text).some((item) => item.canonicalName === cited.canonicalName);
+  });
+}
+
+function stripEvidenceMarkup(span: string): string {
+  return collapseWhitespace(span.replace(/[*_`]+/g, ' '));
+}
+
+/**
+ * Models often cite a literal extract with a middle ellipsis. Each remaining
+ * fragment must still appear verbatim; the omitted middle is not invented.
+ */
+function ellipsisFragmentsAreGrounded(facts: ObservedFacts, span: string): boolean {
+  if (!/(?:\.{3}|…|\[\.{3}\]|\[…\])/.test(span)) return false;
+  const fragments = span
+    .split(/(?:\[\.{3}\]|\[…\]|…|\.{3})/)
+    .map((part) => collapseWhitespace(part))
+    .filter((part) => part.length >= 12);
+  if (fragments.length < 2) return false;
+  return fragments.every((fragment) =>
+    eligibilityEvidenceFields(facts).some((field) => containsNormalizedSpan(field, fragment)),
+  );
 }
 
 export function musicalEvidenceIsGrounded(
@@ -141,7 +187,10 @@ export function musicalEvidenceIsGrounded(
 }
 
 function hasAmbiguousContemporaryDescriptors(facts: ObservedFacts): boolean {
-  const haystack = fieldFolded(eligibilityEvidenceFields(facts).join('\n'));
+  const haystack = fieldFolded(eligibilityEvidenceFields(facts).join('\n')).replace(
+    /correo electronico\w*/g,
+    ' ',
+  );
   return (
     hasWord(haystack, 'electronica') ||
     hasWord(haystack, 'electronico') ||

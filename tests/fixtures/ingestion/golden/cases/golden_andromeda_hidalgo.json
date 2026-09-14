@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_andromeda_hidalgo",
+  "origin": "published-catalog",
+  "sourceId": "teatro-zarzuela",
+  "sourceUrl": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/nuevos-publicos-2026-2027/andromeda-y-perseo-escolares",
+  "listingTitle": "Andrómeda y Perseo",
+  "observed": {
+    "title": "Andrómeda y Perseo",
+    "description": "Fábula mitológica. Música atribuida a JUAN DE HIDALGO. Libreto de PEDRO CALDERÓN DE LA BARCA. Leyenda mitológica en clave barroca. Dirección musical y clave AARÓN ZAPICO. Correo electrónico de contacto: reservas@example.test",
+    "categoryText": "Nuevos públicos",
+    "venueText": "AUDITORIO DE LA FUNDACIÓN JUAN MARCH",
+    "performers": [
+      { "name": "AARÓN ZAPICO", "roleText": "Dirección musical y clave" }
+    ],
+    "composers": [
+      { "name": "atribuida a JUAN DE HIDALGO" }
+    ],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": ["recital", "early-music"],
+    "eras": ["baroque"],
+    "kind": "established",
+    "access": "unknown"
+  },
+  "reason": "Teatro musical barroco español con compositor observado (Juan Hidalgo). «Correo electrónico» de un formulario de reservas no es música electrónica.",
+  "checkedAt": "2026-09-14"
+}

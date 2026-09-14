@@ -50,7 +50,15 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Johann Sebastian Bach',
-    aliases: ['Johann Sebastian Bach', 'J. S. Bach', 'J.S. Bach', 'J.S.Bach', 'Bach'],
+    aliases: [
+      'Johann Sebastian Bach',
+      'Juan Sebastián Bach',
+      'Juan Sebastian Bach',
+      'J. S. Bach',
+      'J.S. Bach',
+      'J.S.Bach',
+      'Bach',
+    ],
     eras: ['baroque'],
   },
   {
@@ -543,6 +551,26 @@ export const COMPOSERS: ComposerKnowledge[] = [
     canonicalName: 'Giovanni Battista Mele',
     aliases: ['Giovanni Battista Mele'],
     eras: ['baroque'],
+  },
+  {
+    canonicalName: 'Juan Hidalgo',
+    aliases: ['Juan Hidalgo', 'Juan de Hidalgo', 'J. Hidalgo', 'J. de Hidalgo'],
+    eras: ['baroque'],
+  },
+  {
+    canonicalName: 'José Lidón',
+    aliases: ['José Lidón', 'Jose Lidon', 'J. Lidón', 'J. Lidon'],
+    eras: ['classical'],
+  },
+  {
+    canonicalName: 'Francisco Corselli',
+    aliases: ['Francisco Corselli', 'Francesco Corselli', 'F. Corselli'],
+    eras: ['baroque', 'classical'],
+  },
+  {
+    canonicalName: 'Gaetano Brunetti',
+    aliases: ['Gaetano Brunetti', 'G. Brunetti'],
+    eras: ['classical'],
   },
   {
     canonicalName: 'Luis Misón',
@@ -2416,6 +2444,14 @@ export function stripTrailingBiographicalYears(name: string): string {
   return name.replace(TRAILING_COMPOSER_LIFESPAN, '').trim();
 }
 
+const COMPOSER_ATTRIBUTION_PREFIX =
+  /^(?:atribuid[oa]s?\s+a|attributed\s+to|attr(?:ib(?:uted)?)?\.?\s*a(?:\s+)?)\s+/i;
+
+/** Source wording such as "atribuida a Juan de Hidalgo", not a second identity. */
+export function stripComposerAttributionPrefix(name: string): string {
+  return name.replace(COMPOSER_ATTRIBUTION_PREFIX, '').trim();
+}
+
 export function matchComposer(name: string): ComposerKnowledge | undefined {
   const folded = foldName(name);
   if (!folded) return undefined;
@@ -2423,6 +2459,8 @@ export function matchComposer(name: string): ComposerKnowledge | undefined {
   if (direct) return direct;
   const withoutYears = stripTrailingBiographicalYears(name);
   if (withoutYears && withoutYears !== name) return matchComposer(withoutYears);
+  const withoutAttribution = stripComposerAttributionPrefix(name);
+  if (withoutAttribution && withoutAttribution !== name) return matchComposer(withoutAttribution);
   return undefined;
 }
 
