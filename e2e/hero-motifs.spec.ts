@@ -1,30 +1,37 @@
 import { expect, test } from '@playwright/test';
 
 const pages = [
-  { path: '/', variant: 'agenda', hero: '.agenda-intro' },
-  { path: '/lugares/', variant: 'venues', hero: '.section-intro' },
-  { path: '/acerca-de/', variant: 'about', hero: '.section-intro' },
+  { path: '/', variant: 'agenda', hero: '.agenda-intro', kind: 'index' },
+  { path: '/lugares/', variant: 'venues', hero: '.section-intro', kind: 'index' },
+  { path: '/acerca-de/', variant: 'about', hero: '.section-intro', kind: 'index' },
   {
     path: '/eventos/excelentia-noches-en-los-jardines-de-espana-y-concierto-de-aranjuez/',
     variant: 'event',
     hero: '.detail-hero',
+    kind: 'detail',
   },
   {
     path: '/lugares/basilica-pontificia-de-san-miguel/',
     variant: 'venue',
     hero: '.detail-hero',
+    kind: 'detail',
   },
 ] as const;
 
-for (const viewport of [
-  { name: 'escritorio', width: 1440, height: 900 },
-  { name: 'móvil estrecho', width: 320, height: 700 },
-] as const) {
-  test.describe(`motivos de hero en ${viewport.name}`, () => {
+const viewports = [
+  { name: '1440', width: 1440, height: 900 },
+  { name: '1024', width: 1024, height: 768 },
+  { name: '768', width: 768, height: 900 },
+  { name: '412', width: 412, height: 915 },
+  { name: '320', width: 320, height: 700 },
+] as const;
+
+for (const viewport of viewports) {
+  test.describe(`motivos de hero a ${viewport.name}px`, () => {
     test.use({ viewport: { width: viewport.width, height: viewport.height } });
 
     for (const pageCase of pages) {
-      test(`${pageCase.variant} es decorativo, ligero y no desborda`, async ({ page }) => {
+      test(`${pageCase.variant} conserva la composición y no desborda`, async ({ page }) => {
         await page.goto(pageCase.path);
 
         const hero = page.locator(pageCase.hero).first();
@@ -35,35 +42,45 @@ for (const viewport of [
         await expect(motif).toHaveAttribute('focusable', 'false');
         await expect(motif.locator('image, filter, script, animate, animateTransform')).toHaveCount(0);
 
-        const layout = await page.evaluate(() => ({
-          clientWidth: document.documentElement.clientWidth,
-          scrollWidth: document.documentElement.scrollWidth,
-        }));
-        expect(layout.scrollWidth).toBe(layout.clientWidth);
-
-        const contentFits = await hero.evaluate((element) => {
+        const layout = await hero.evaluate((element, { variant, kind }) => {
           const heroRect = element.getBoundingClientRect();
-          const content = element.querySelectorAll<HTMLElement>(
-            ':scope > .eyebrow, :scope > .agenda-intro__copy, :scope > h1, :scope > .status-alert, :scope > .detail-hero__series, :scope > .venue-detail__practical',
+          const svg = element.querySelector<SVGElement>(`[data-hero-motif="${variant}"]`);
+          const copy = element.querySelector<HTMLElement>(
+            '.agenda-intro__copy, .section-intro__copy, .detail-hero__copy',
           );
-          return [...content].every((child) => child.getBoundingClientRect().bottom <= heroRect.bottom + 1);
-        });
-        expect(contentFits).toBe(true);
+          if (!svg || !copy) throw new Error('Falta el motivo o el bloque de contenido de la hero');
+
+          const motifRect = svg.getBoundingClientRect();
+          const overlapWidth = Math.max(
+            0,
+            Math.min(heroRect.right, motifRect.right) - Math.max(heroRect.left, motifRect.left),
+          );
+          const overlapHeight = Math.max(
+            0,
+            Math.min(heroRect.bottom, motifRect.bottom) - Math.max(heroRect.top, motifRect.top),
+          );
+          const motifArea = motifRect.width * motifRect.height;
+          const computed = getComputedStyle(svg);
+
+          return {
+            pageClientWidth: document.documentElement.clientWidth,
+            pageScrollWidth: document.documentElement.scrollWidth,
+            contentFits: copy.getBoundingClientRect().bottom <= heroRect.bottom + 1,
+            motifVisibleFraction: motifArea > 0 ? (overlapWidth * overlapHeight) / motifArea : 0,
+            clipPath: computed.clipPath,
+            heroHeight: heroRect.height,
+            kind,
+          };
+        }, { variant: pageCase.variant, kind: pageCase.kind });
+
+        expect(layout.pageScrollWidth).toBe(layout.pageClientWidth);
+        expect(layout.contentFits).toBe(true);
+        expect(layout.clipPath).toBe('none');
+        expect(layout.motifVisibleFraction).toBeGreaterThanOrEqual(.95);
+        if (layout.kind === 'index') {
+          expect(layout.heroHeight).toBeLessThanOrEqual(viewport.height * .48);
+        }
       });
     }
   });
 }
-
-test('las hero de índice mantienen una altura compacta', async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
-
-  for (const path of ['/', '/lugares/', '/acerca-de/']) {
-    await page.goto(path);
-    const height = await page
-      .locator('header.agenda-intro, header.section-intro')
-      .first()
-      .evaluate((element) => element.getBoundingClientRect().height);
-    expect(height).toBeGreaterThanOrEqual(270);
-    expect(height).toBeLessThanOrEqual(320);
-  }
-});

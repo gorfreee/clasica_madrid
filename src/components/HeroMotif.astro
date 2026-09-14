@@ -6,57 +6,122 @@ type Props = {
   class?: string;
 };
 
+type MotifConfig = {
+  center: { x: number; y: number };
+  radii: readonly [number, number, number];
+  rotation: number;
+  dashes: readonly [string, string, string];
+  offsets: readonly [number, number, number];
+  score: readonly string[];
+  accent: { x: number; y: number; radius: number };
+  echo?: { x: number; y: number; radius: number };
+};
+
+const motifs: Record<Variant, MotifConfig> = {
+  agenda: {
+    center: { x: 171, y: 95 },
+    radii: [72, 49, 27],
+    rotation: -38,
+    dashes: ['83 17', '76 24', '68 32'],
+    offsets: [0, 2, 4],
+    score: ['M18 95H238', 'M30 69H91', 'M48 121H108'],
+    accent: { x: 65, y: 95, radius: 4 },
+    echo: { x: 218, y: 45, radius: 3.5 },
+  },
+  venues: {
+    center: { x: 168, y: 101 },
+    radii: [70, 48, 26],
+    rotation: 24,
+    dashes: ['78 22', '72 28', '64 36'],
+    offsets: [0, 3, 6],
+    score: ['M20 138H240', 'M60 138V103H103', 'M168 25V52'],
+    accent: { x: 60, y: 138, radius: 4 },
+    echo: { x: 168, y: 31, radius: 3.5 },
+  },
+  about: {
+    center: { x: 151, y: 93 },
+    radii: [71, 49, 27],
+    rotation: 148,
+    dashes: ['82 18', '74 26', '66 34'],
+    offsets: [0, 3, 5],
+    score: ['M20 56H92', 'M24 93H238', 'M48 128H109'],
+    accent: { x: 216, y: 93, radius: 4 },
+    echo: { x: 48, y: 56, radius: 3.5 },
+  },
+  event: {
+    center: { x: 183, y: 96 },
+    radii: [62, 42, 23],
+    rotation: -30,
+    dashes: ['80 20', '72 28', '63 37'],
+    offsets: [0, 2, 5],
+    score: ['M22 96H238', 'M38 72H105'],
+    accent: { x: 58, y: 96, radius: 3.5 },
+  },
+  venue: {
+    center: { x: 176, y: 101 },
+    radii: [64, 44, 24],
+    rotation: 72,
+    dashes: ['79 21', '71 29', '62 38'],
+    offsets: [0, 3, 5],
+    score: ['M22 137H238', 'M58 137V101H111'],
+    accent: { x: 58, y: 137, radius: 3.5 },
+  },
+};
+
 const { variant, class: className } = Astro.props;
-const architectural = variant === 'venues' || variant === 'venue';
+const motif = motifs[variant];
 ---
 
 <svg
   class:list={['hero-motif', `hero-motif--${variant}`, className]}
-  viewBox="0 0 240 180"
-  width="240"
-  height="180"
+  viewBox="0 0 260 190"
+  width="260"
+  height="190"
   aria-hidden="true"
   focusable="false"
   data-hero-motif={variant}
 >
-  {
-    architectural ? (
-      <>
-        <path
-          class="hero-motif__resonance"
-          d="M20 154A100 100 0 0 1 220 154M48 154A72 72 0 0 1 192 154M76 154A44 44 0 0 1 164 154"
-        />
-        <path class="hero-motif__score" d="M12 154H228" />
-        <circle class="hero-motif__pulse hero-motif__pulse--primary" cx="120" cy="154" r="5" />
-      </>
-    ) : variant === 'about' ? (
-      <>
-        <path
-          class="hero-motif__resonance"
-          d="M20 50A100 100 0 0 0 220 50M48 50A72 72 0 0 0 192 50M76 50A44 44 0 0 0 164 50"
-        />
-        <path class="hero-motif__score" d="M20 116H92M20 136H72M20 156H108" />
-        <circle class="hero-motif__pulse hero-motif__pulse--primary" cx="120" cy="30" r="6" />
-        <circle class="hero-motif__pulse hero-motif__pulse--quiet" cx="92" cy="156" r="4" />
-      </>
-    ) : (
-      <>
-        <path
-          class="hero-motif__resonance"
-          d="M96 146A88 88 0 0 1 184 58M124 146A60 60 0 0 1 184 86M152 146A32 32 0 0 1 184 114"
-        />
-        <path
-          class="hero-motif__score"
-          d={variant === 'event' ? 'M18 70H122M18 94H102M18 118H134' : 'M18 48H126M18 72H106M18 96H136M18 120H84'}
-        />
+  <g
+    class="hero-motif__rings"
+    transform={`rotate(${motif.rotation} ${motif.center.x} ${motif.center.y})`}
+  >
+    {
+      motif.radii.map((radius, index) => (
         <circle
-          class="hero-motif__pulse hero-motif__pulse--primary"
-          cx={variant === 'event' ? 102 : 58}
-          cy={variant === 'event' ? 94 : 48}
-          r="5"
+          class:list={['hero-motif__resonance', `hero-motif__resonance--${index + 1}`]}
+          cx={motif.center.x}
+          cy={motif.center.y}
+          r={radius}
+          pathLength="100"
+          stroke-dasharray={motif.dashes[index]}
+          stroke-dashoffset={motif.offsets[index]}
         />
-        <circle class="hero-motif__pulse hero-motif__pulse--quiet" cx="184" cy="146" r="4" />
-      </>
+      ))
+    }
+  </g>
+
+  {motif.score.map((path) => <path class="hero-motif__score" d={path} />)}
+
+  <circle
+    class="hero-motif__pulse hero-motif__pulse--primary"
+    cx={motif.center.x}
+    cy={motif.center.y}
+    r="5.5"
+  />
+  <circle
+    class="hero-motif__pulse hero-motif__pulse--accent"
+    cx={motif.accent.x}
+    cy={motif.accent.y}
+    r={motif.accent.radius}
+  />
+  {
+    motif.echo && (
+      <circle
+        class="hero-motif__pulse hero-motif__pulse--echo"
+        cx={motif.echo.x}
+        cy={motif.echo.y}
+        r={motif.echo.radius}
+      />
     )
   }
 </svg>
@@ -76,29 +141,29 @@ const architectural = variant === 'venues' || variant === 'venue';
 
   .hero-motif__resonance {
     stroke: currentColor;
-    stroke-width: 2.25;
+    stroke-linecap: butt;
   }
+
+  .hero-motif__resonance--1 { stroke-width: 2.6; }
+  .hero-motif__resonance--2 { stroke-width: 2.05; }
+  .hero-motif__resonance--3 { stroke-width: 1.55; }
 
   .hero-motif__score {
     stroke: var(--ink);
-    stroke-width: 1;
-    opacity: .42;
+    stroke-width: 1.1;
+    opacity: .44;
   }
 
   .hero-motif__pulse { fill: var(--coral); }
-  .hero-motif__pulse--quiet { opacity: .72; }
-
-  .hero-motif--event .hero-motif__resonance { stroke-width: 1.75; }
-  .hero-motif--event .hero-motif__score { opacity: .3; }
-
-  @media (max-width: 620px) {
-    .hero-motif--agenda .hero-motif__score,
-    .hero-motif--event .hero-motif__score,
-    .hero-motif--agenda .hero-motif__pulse--primary,
-    .hero-motif--event .hero-motif__pulse--primary { display: none; }
-
-    .hero-motif--agenda .hero-motif__pulse--quiet,
-    .hero-motif--event .hero-motif__pulse--quiet,
-    .hero-motif--about .hero-motif__pulse--quiet { display: none; }
+  .hero-motif__pulse--accent { opacity: .82; }
+  .hero-motif__pulse--echo {
+    fill: var(--ink);
+    opacity: .48;
   }
+
+  .hero-motif--event .hero-motif__resonance,
+  .hero-motif--venue .hero-motif__resonance { opacity: .88; }
+
+  .hero-motif--event .hero-motif__score,
+  .hero-motif--venue .hero-motif__score { opacity: .3; }
 </style>
