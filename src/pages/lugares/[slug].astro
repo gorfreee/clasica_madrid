@@ -24,15 +24,17 @@ if (!model) {
 <Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath} jsonLd={model.jsonLd}>
   <article class="detail venue-detail">
     <header class="detail-hero detail-hero--venue">
-      <a class="eyebrow" href={VENUES_INDEX_PATH}>Lugar / {model.areaLabel}</a>
-      <h1>{model.name}</h1>
-      <div class="venue-detail__practical">
-        {model.placeAddress ? (
-          <PlaceAddress address={model.placeAddress} variant="hero" />
-        ) : (
-          <p class="venue-detail__locality">{model.municipality}</p>
-        )}
-        {model.url && <a class="text-link" href={model.url} rel="noopener noreferrer">Web oficial ↗</a>}
+      <div class="detail-hero__copy">
+        <a class="eyebrow" href={VENUES_INDEX_PATH}>Lugar / {model.areaLabel}</a>
+        <h1>{model.name}</h1>
+        <div class="venue-detail__practical">
+          {model.placeAddress ? (
+            <PlaceAddress address={model.placeAddress} variant="hero" />
+          ) : (
+            <p class="venue-detail__locality">{model.municipality}</p>
+          )}
+          {model.url && <a class="text-link" href={model.url} rel="noopener noreferrer">Web oficial ↗</a>}
+        </div>
       </div>
       <HeroMotif variant="venue" class="detail-hero__motif" />
     </header>

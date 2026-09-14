@@ -10,9 +10,11 @@ const model = await loadVenuesIndex();
 
 <Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath}>
   <header class="section-intro section-intro--venues">
-    <p class="eyebrow">Lugares / Madrid</p>
-    <h1>La ciudad<br />como escenario.</h1>
-    <p class="lede">Teatros, auditorios, iglesias y otros espacios donde escuchar música clásica en Madrid.</p>
+    <div class="section-intro__copy">
+      <p class="eyebrow">Lugares / Madrid</p>
+      <h1>La ciudad<br />como escenario.</h1>
+      <p class="lede">Teatros, auditorios, iglesias y otros espacios donde escuchar música clásica en Madrid.</p>
+    </div>
     <HeroMotif variant="venues" class="section-intro__motif" />
   </header>
 
