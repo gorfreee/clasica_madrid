@@ -174,7 +174,7 @@ El state persistente recupera `quota.json`, `cache/**` y `pending/**` mediante `
 
 Cada RawEvent termina en exactamente un `outcome` diagnóstico (`created`, `updated`, `unchanged`, `excluded`, `uncertain`, `structural-skip`, `ambiguous`, `cancelled-not-created`). Se deriva de la decisión ya tomada; no es una fuente de verdad editorial. Flags como `batchDuplicate`, `classificationDrift` o fallos de hydration siguen siendo flags. Un `adapter-discard` es un candidato que el adapter reconoció y tiró **antes** de RawEvent: no entra en el funnel de observaciones.
 
-El Job Summary (y el cuerpo de la PR de datos) muestra: resumen global, funnel por source, casos concretos que requieren atención y bloques plegables de eventos no publicados. `report.json` y `events.jsonl` siguen siendo la fuente completa para debugging.
+El Job Summary muestra el diagnóstico razonable de la ejecución: resumen, funnel por source, observabilidad, health, IA, casos que requieren atención y bloques plegables de eventos no publicados. El cuerpo de la PR de datos es un resumen compacto (ventana, health, contadores, muestra corta de incidencias y enlaces al run/artifact); no vuelca tablas enormes. `report.json` y `events.jsonl` siguen siendo la fuente completa para debugging.
 
 La hydratación que expande una ficha en varios conciertos (`expand`) puede hacer que el número de RawEvents hidratados no coincida con el listing extraído. El cierre `RawEvents = suma de outcomes` se evalúa **después** de hydrate/expand. `extracted + adapterDiscards` sólo es un invariante cuando el adapter define con claridad los candidatos reconocidos (p. ej. ítems Musica de Madrid Datos, tarjetas CNDM antes del filtro de sede).
 
@@ -218,7 +218,7 @@ No conviertas el state del pool en historial de runs ni lo metas en el artifact.
 - `clean` / `degraded`: con cambios crea una PR normal. El scheduled solicita auto-merge si el kill switch está activo; el manual publish necesita además `auto_merge=true`;
 - antes de solicitar squash auto-merge, el workflow espera la ejecución `pull_request` real de `ci.yml` para el SHA publicado y exige que termine verde.
 
-Ante un fallo, empieza por el Job Summary y el artifact de observabilidad. Si hay una PR de ingestión abierta, revísala y fusiónala o ciérrala antes de reintentar. Si el token expiró, rota `INGESTION_BOT_TOKEN`. Si el state restaurado está corrupto, no reinicies contadores a ciegas: conserva o recupera `quota.json`, o espera al siguiente reset diario antes de retirar el cache afectado. Un rerun es seguro porque no reutiliza `run.lock` y la reconciliación filtra reverificaciones sin cambios materiales.
+Ante un fallo, empieza por el Job Summary y el artifact de observabilidad. Si el push de `data/**` llegó al remoto pero `gh pr create` falló, el Job Summary deja branch, commit y un recetario de recuperación manual; no se crea una segunda PR automática si ya hay una de ingestión abierta. Si hay una PR de ingestión abierta, revísala y fusiónala o ciérrala antes de reintentar. Si el token expiró, rota `INGESTION_BOT_TOKEN`. Si el state restaurado está corrupto, no reinicies contadores a ciegas: conserva o recupera `quota.json`, o espera al siguiente reset diario antes de retirar el cache afectado. Un rerun es seguro porque no reutiliza `run.lock` y la reconciliación filtra reverificaciones sin cambios materiales.
 
 ## Candidatos JSON (legacy)
 

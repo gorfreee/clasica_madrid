@@ -68,6 +68,15 @@ describe('workflow de ingestión: artifact de observabilidad', () => {
     expect(yaml).not.toContain('secrets.CLOUDFLARE_MODEL_RPM');
 
     expect(publish).toContain("steps.config.outputs.mode == 'publish'");
+    expect(publish).toContain('commit_sha=$(git rev-parse HEAD)');
+    expect(publish).toContain('Branch publicada:');
+    expect(publish).toContain('ya están en el remoto. Si la creación de la PR falla');
+    expect(publish).toContain('::error::Falló la creación de la PR de ingestión');
+    expect(publish).toContain('pull/new/${branch}');
+    expect(publish).toContain('Recuperación manual:');
+    expect(publish).toContain('Ya existe una PR de ingestión abierta');
+    expect(publish).toContain('startswith("automation/ingestion-")');
+    expect(publish.match(/gh pr create/g)?.length).toBe(2);
     expect(dryRun).toContain("steps.config.outputs.mode == 'dry-run'");
     expect(yaml).not.toContain('if-no-files-found: error');
 
