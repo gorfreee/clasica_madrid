@@ -523,6 +523,54 @@ export const KNOWN_VENUES: KnownVenue[] = [
     },
   },
   {
+    keys: ['palacio real de madrid'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_palacio_real_madrid',
+      slug: 'palacio-real-de-madrid',
+      name: 'Palacio Real de Madrid',
+      ...MADRID,
+      address: 'Calle de Bailén, s/n, 28071 Madrid',
+      url: 'https://www.patrimonionacional.es/visita/palacio-real-de-madrid',
+    },
+  },
+  {
+    keys: [
+      'capilla palacio real de madrid',
+      'capilla real de madrid',
+      'palacio real de madrid capilla',
+      'palacio real de madrid capilla real',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_palacio_real_madrid_capilla_real',
+      slug: 'palacio-real-de-madrid-capilla-real',
+      name: 'Palacio Real de Madrid — Capilla Real',
+      ...MADRID,
+      address: 'Calle de Bailén, s/n, 28071 Madrid',
+      url: 'https://www.patrimonionacional.es/visita/palacio-real-de-madrid',
+      parentVenueId: 'ven_palacio_real_madrid',
+      spaceName: 'Capilla Real',
+    },
+  },
+  {
+    keys: [
+      'salon de columnas palacio real de madrid',
+      'palacio real de madrid salon de columnas',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_palacio_real_madrid_salon_columnas',
+      slug: 'palacio-real-de-madrid-salon-de-columnas',
+      name: 'Palacio Real de Madrid — Salón de Columnas',
+      ...MADRID,
+      address: 'Calle de Bailén, s/n, 28071 Madrid',
+      url: 'https://www.patrimonionacional.es/visita/palacio-real-de-madrid',
+      parentVenueId: 'ven_palacio_real_madrid',
+      spaceName: 'Salón de Columnas',
+    },
+  },
+  {
     keys: ['real monasterio de santa isabel', 'monasterio de santa isabel'],
     venue: {
       schemaVersion: 1,
@@ -606,6 +654,12 @@ const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
     'centro cultural casa de vacas parque del retiro madrid': 'ven_casa_vacas_retiro',
     'centro cultural casa de vacas parque del retiro': 'ven_casa_vacas_retiro',
     'casa de vacas del parque del retiro': 'ven_casa_vacas_retiro',
+  },
+  'patrimonio-nacional': {
+    'capilla palacio real de madrid': 'ven_palacio_real_madrid_capilla_real',
+    'palacio real de madrid capilla': 'ven_palacio_real_madrid_capilla_real',
+    'salon de columnas palacio real de madrid': 'ven_palacio_real_madrid_salon_columnas',
+    'palacio real de madrid salon de columnas': 'ven_palacio_real_madrid_salon_columnas',
   },
 };
 
