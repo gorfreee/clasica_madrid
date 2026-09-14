@@ -633,6 +633,7 @@ const REGRESSION_SOURCES = [
   'fundacion-goethe',
   'madrid-a-tempo',
   'patrimonio-nacional',
+  'ateneo-madrid',
 ] as const;
 
 function regressionReport34898871978(): IngestReport {

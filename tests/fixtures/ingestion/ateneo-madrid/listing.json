@@ -1,0 +1,88 @@
+{
+  "events": [
+    {
+      "id": 62899,
+      "status": "publish",
+      "url": "https://ateneodemadrid.com/evento/betta-the-groovers-2-cafe-central-ateneo/",
+      "title": "BETTA &#038; THE GROOVERS",
+      "description": "<p><strong>Información y entradas (aquí). Socios, código descuento en el Área del Socio. Santa Catalina, 10. Pases: 20:00h. y 22:00h.</strong></p><p><strong>Betta Berodia &#8211; voz</strong><br><strong>Javier Díaz &#8211; piano</strong></p><p>Música afroamericana con mucho groove.</p>",
+      "start_date": "2026-09-14 20:00:00",
+      "end_date": "2026-09-15 22:00:00",
+      "all_day": false,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "cost_details": { "currency_symbol": "€", "values": [] },
+      "categories": [
+        { "name": "Conciertos Ateneo-Café Central", "slug": "conciertos-ateneo-cafe-central" }
+      ],
+      "venue": { "venue": "Café Central Ateneo" },
+      "organizer": []
+    },
+    {
+      "id": 62725,
+      "status": "publish",
+      "url": "https://ateneodemadrid.com/evento/concierto-mario-prisuelos-piano-musica-callada-de-frederic-mompou/",
+      "title": "Concierto Mario Prisuelos piano &#8211; Música callada de Frederic Mompou",
+      "description": "<p><strong>Venta de entradas (aquí). Socios, código de descuento en el Área del Socio.</strong></p><p><strong>Mario Prisuelos piano &#8211; Música callada de Frederic Mompou. Cátedra Mayor. 19:30h.</strong></p>",
+      "start_date": "2026-09-20 20:00:00",
+      "end_date": "2026-09-20 20:00:00",
+      "all_day": false,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "cost_details": { "currency_symbol": "€", "values": [] },
+      "categories": [{ "name": "Concierto", "slug": "concierto" }],
+      "venue": [],
+      "organizer": []
+    },
+    {
+      "id": 63406,
+      "status": "publish",
+      "url": "https://ateneodemadrid.com/evento/la-voz-infinita-una-manana-de-gala/",
+      "title": "«La voz infinita. (Una mañana de gala)»",
+      "description": "<p><strong>Venta de entradas (aquí). Socios, código descuento en el Área del Socio.</strong> Ciclo «Matinales de Amalgama». Intérpretes: Alba Chantar (soprano), Ekaterina Antipova (mezzosoprano), Igor Peral (tenor), Javier Franco (barítono), Javier Carmena (piano), Ismael García (oboe). <strong>Cátedra Mayor. 12:00h.</strong></p>",
+      "start_date": "2026-09-20 12:00:00",
+      "end_date": "2026-09-20 12:00:00",
+      "all_day": false,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "cost_details": { "currency_symbol": "€", "values": [] },
+      "categories": [{ "name": "Concierto", "slug": "concierto" }],
+      "venue": [],
+      "organizer": []
+    },
+    {
+      "id": 63540,
+      "status": "publish",
+      "url": "https://ateneodemadrid.com/evento/ciclo-el-salon-del-ateneo-apollo5-a-day-in-paradise/",
+      "title": "Ciclo El Salón del Ateneo. APOLLO5 &#8211; ‘A Day in Paradise’",
+      "description": "<p>Venta de entradas: (aquí) | Socios: código en el Área de Socios.</p><p>Obras de Morley, Monteverdi, Grieg, Gershwin, Whitacre, Saint-Saëns, Tom Petty y otros. APOLLO5 es un grupo vocal.</p><h2><b>PROGRAMA</b></h2><p><b>Thomas Morley (1557-1602)</b> Arise, Awake. <b>Claudio Monteverdi (1567-1643)</b> Sfogava con le stelle. <b>Camille Saint-Saëns (1835-1921)</b> Les fleurs et les arbres.</p>",
+      "start_date": "2026-09-27 19:00:00",
+      "end_date": "2026-09-27 19:00:00",
+      "all_day": false,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "cost_details": { "currency_symbol": "€", "values": [] },
+      "categories": [{ "name": "Concierto", "slug": "concierto" }],
+      "venue": [],
+      "organizer": []
+    },
+    {
+      "id": 60600,
+      "status": "publish",
+      "url": "https://ateneodemadrid.com/evento/cantar-del-alma-ciclo-de-conciertos-manuel-de-falla-2/",
+      "title": "«Cantar del Alma». Ciclo de Conciertos Manuel de Falla",
+      "description": "<p><strong>Las entradas se pueden adquirir en este enlace o en la taquilla del Ateneo. El precio es de 19€ (13€ para los socios del Ateneo de Madrid).</strong></p><p><strong>Laura Fdez. Alcalde, soprano e Irene de Juan Bernabeu, piano. Cátedra Mayor. 12:30h.</strong></p>",
+      "start_date": "2026-11-22 12:30:00",
+      "end_date": "2026-11-22 12:30:00",
+      "all_day": false,
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "cost_details": { "currency_symbol": "€", "values": [] },
+      "categories": [{ "name": "Concierto", "slug": "concierto" }],
+      "venue": [],
+      "organizer": []
+    }
+  ],
+  "total": 5,
+  "total_pages": 1
+}
