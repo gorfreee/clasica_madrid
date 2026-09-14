@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_impacta_vocal_no_program",
+  "origin": "published-catalog",
+  "sourceId": "auditorio-nacional",
+  "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/impacta-pretty-yende-y-javier-camarena",
+  "listingTitle": "Impacta. Pretty Yende y Javier Camarena",
+  "observed": {
+    "title": "Impacta. Pretty Yende y Javier Camarena",
+    "venueText": "Sala Sinfónica",
+    "performers": [
+      { "name": "Pretty Yende", "roleText": "soprano" },
+      { "name": "Javier Camarena", "roleText": "tenor" },
+      { "name": "Orquesta Sinfónica de las Islas Baleares" },
+      { "name": "Pablo Mielgo", "roleText": "director" }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "uncertain",
+    "formats": [],
+    "eras": [],
+    "access": "unknown"
+  },
+  "reason": "Soprano, tenor y orquesta sinfónica sin programa. Impacta no es un ciclo clásico establecido. La ausencia de programa no es exclude: falta evidencia para include.",
+  "missingEvidence": "Falta el repertorio de esta función o una declaración explícita de concierto de música clásica.",
+  "checkedAt": "2026-09-14"
+}

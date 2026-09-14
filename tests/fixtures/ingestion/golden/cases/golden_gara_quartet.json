@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_gara_quartet",
+  "origin": "published-catalog",
+  "sourceId": "patrimonio-nacional",
+  "sourceUrl": "https://www.patrimonionacional.es/conciertos/gara-quartet",
+  "listingTitle": "Gara Quartet",
+  "observed": {
+    "title": "Gara Quartet",
+    "categoryText": "Concierto",
+    "seriesText": "XLIII CICLO DE CÁMARA",
+    "programText": "Gaetano Brunetti (Fano, 1744 - Madrid 1798) Cuarteto de cuerda en Sol menor, Op. 2 n.º 1. Luigi Boccherini (Lucca, 1743 - Madrid, 1805) Cuarteto de cuerda en do menor, Op. 41 n.º 1. Franz Joseph Haydn (Rohrau, 1732 - Viena, 1809) Cuarteto de cuerda en Mi♭ mayor, Op. 33 n.º 2.",
+    "performers": [
+      { "name": "Jesús Merino", "roleText": "violín" },
+      { "name": "Lorena Padrón", "roleText": "violín" },
+      { "name": "Iván Sáez Schwartz", "roleText": "viola" },
+      { "name": "Candela Gómez", "roleText": "violonchelo" }
+    ],
+    "composers": [],
+    "works": []
+  },
+  "expected": {
+    "eligibility": "include",
+    "formats": ["chamber"],
+    "eras": ["classical"],
+    "kind": "established",
+    "access": "unknown"
+  },
+  "reason": "Cuartetos de cuerda de Brunetti, Boccherini y Haydn en el programa. El título nombra un quartet; las eras salen de compositores observados en el programText.",
+  "checkedAt": "2026-09-14"
+}

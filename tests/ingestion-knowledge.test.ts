@@ -54,6 +54,13 @@ describe('composer knowledge base', () => {
   it('acepta variantes de Handel y Puccini observadas en el golden set', () => {
     expect(matchComposer('Georg Friedrich Händel')?.canonicalName).toBe('Georg Friedrich Händel');
     expect(matchComposer('George Frideric Haendel')?.canonicalName).toBe('Georg Friedrich Händel');
+    expect(matchComposer('Juan Sebastián Bach')?.canonicalName).toBe('Johann Sebastian Bach');
+    expect(matchComposer('Juan Hidalgo')?.canonicalName).toBe('Juan Hidalgo');
+    expect(matchComposer('Juan de Hidalgo')?.canonicalName).toBe('Juan Hidalgo');
+    expect(matchComposer('atribuida a JUAN DE HIDALGO')?.canonicalName).toBe('Juan Hidalgo');
+    expect(matchComposer('José Lidón')?.eras).toEqual(['classical']);
+    expect(matchComposer('Francisco Corselli')?.eras).toEqual(['baroque', 'classical']);
+    expect(matchComposer('Gaetano Brunetti')?.eras).toEqual(['classical']);
     expect(matchComposer('G. Puccini')?.canonicalName).toBe('Giacomo Puccini');
     expect(matchComposer('Chaikovski')?.eras).toEqual(['romantic']);
     expect(matchComposer('Camille Saint-Saëns')?.eras).toEqual(['romantic']);

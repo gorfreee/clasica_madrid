@@ -289,6 +289,69 @@ describe('classifyObserved — guardrails de eligibility AI', () => {
     expect(classify(resolvableChamberFacts).eligibility.value).toBe('uncertain');
   });
 
+  it('acepta un alias ortográfico de un compositor ya observado', () => {
+    const handelFacts = facts({
+      title: 'LES MUSICIENS DU LOUVRE',
+      programText: 'George Frideric Haendel (1685-1759) Concerti grossi, op. 3',
+      composers: [{ name: 'George Frideric Haendel (1685-1759)' }],
+      works: [{ title: 'Concerti grossi, op. 3', composerName: 'George Frideric Haendel (1685-1759)' }],
+    });
+    expect(evidenceSpanIsGrounded(handelFacts, 'Georg Friedrich Händel')).toBe(true);
+    expect(evidenceSpanIsGrounded(handelFacts, 'Juan Sebastián Bach')).toBe(false);
+
+    const gated = evaluateEligibilityAi(
+      handelFacts,
+      {
+        eligibility: 'include',
+        evidence: ['Georg Friedrich Händel', 'Concerti grossi'],
+      },
+      { ruleId: 'insufficient-evidence' },
+    );
+    expect(gated.accepted).toBe(true);
+    expect(gated.eligibility).toBe('include');
+  });
+
+  it('acepta un extracto con elipsis si cada fragmento aparece en los hechos', () => {
+    const operaFacts = facts({
+      title: 'Andrómeda y Perseo',
+      description:
+        'Esta fábula mitológica congregó a los mayores ingenios de la corte. Estrenada con música atribuida a Juan Hidalgo.',
+      programText: 'con música atribuida a Juan Hidalgo',
+    });
+    expect(
+      evidenceSpanIsGrounded(
+        operaFacts,
+        'Esta fábula mitológica [...] con música atribuida a Juan Hidalgo',
+      ),
+    ).toBe(true);
+    expect(
+      evidenceSpanIsGrounded(operaFacts, 'programa secreto de Mahler y Strauss'),
+    ).toBe(false);
+  });
+
+  it('no trata correo electrónico como descriptor de música electrónica', async () => {
+    const recitalFacts = facts({
+      title: 'Velada de invierno',
+      description: 'Recital de piano en la tradición concertística. Correo electrónico de contacto para reservas.',
+      performers: [{ name: 'Ana Ruiz', roleText: 'piano' }],
+    });
+    expect(classify(recitalFacts).eligibility.value).toBe('uncertain');
+    const result = await classifyObserved(recitalFacts, {
+      ai: {
+        async classify() {
+          return {
+            eligibility: 'include',
+            formats: ['recital'],
+            evidence: ['Recital de piano en la tradición concertística'],
+          };
+        },
+      },
+    });
+    expect(result.eligibility.value).toBe('include');
+    expect(result.eligibility.ruleId).toBe('ai-include');
+    expect(result.eligibility.ruleId).not.toBe(AI_AMBIGUOUS_CONTEMPORARY_RULE_ID);
+  });
+
   it('acepta include cuando la evidence es literal y no dispara guardrails', async () => {
     expect(classify(resolvableChamberFacts).eligibility.value).toBe('uncertain');
     const ai = countingAi({

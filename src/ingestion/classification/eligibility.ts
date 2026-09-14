@@ -138,7 +138,7 @@ function collectInclusions(facts: ObservedFacts, haystack: string): Inclusion[] 
   if (hasWord(category, 'lirica') && !hasWord(category, 'taller')) {
     found.push({ ruleId: 'lyric-theatre-event', evidence: [facts.categoryText ?? ''] });
   }
-  if (hasWord(category, 'zarzuela') || hasWord(title, 'zarzuela')) {
+  if (hasWord(category, 'zarzuela') || titleNamesZarzuela(title)) {
     found.push({ ruleId: 'zarzuela-event', evidence: [facts.categoryText ?? facts.title] });
   }
   if (organConcertInclusion(facts, haystack)) {
@@ -358,12 +358,9 @@ function hasIndependentLiveMusicalPerformance(facts: ObservedFacts): boolean {
   const category = fieldFolded(facts.categoryText);
   const series = fieldFolded(facts.seriesText);
   if (
-    hasWord(title, 'concierto') ||
-    hasWord(title, 'recital') ||
-    hasWord(category, 'concierto') ||
-    hasWord(category, 'recital') ||
-    hasWord(series, 'concierto') ||
-    hasWord(series, 'recital')
+    hasConcertOrRecitalWord(title) ||
+    hasConcertOrRecitalWord(category) ||
+    hasConcertOrRecitalWord(series)
   ) {
     return true;
   }
@@ -442,10 +439,10 @@ function cinemaIdentity(
     !(
       hasWord(category, 'proyeccion') ||
       hasPhrase(category, 'cine mudo') ||
-      hasWord(category, 'cine') ||
+      hasBareCineScreeningWord(category) ||
       hasPhrase(title, 'cineclasica') ||
       hasPhrase(title, 'de cine') ||
-      hasWord(title, 'cine') ||
+      hasBareCineScreeningWord(title) ||
       hasWord(title, 'proyeccion') ||
       hasPhrase(title, 'pelicula muda') ||
       hasPhrase(description, 'proyeccion de') ||
@@ -485,12 +482,9 @@ function hasConcertIdentityBesidesOrganRole(facts: ObservedFacts, haystack: stri
   const category = fieldFolded(facts.categoryText);
   const series = fieldFolded(facts.seriesText);
   if (
-    hasWord(title, 'concierto') ||
-    hasWord(title, 'recital') ||
-    hasWord(category, 'concierto') ||
-    hasWord(category, 'recital') ||
-    hasWord(series, 'concierto') ||
-    hasWord(series, 'recital')
+    hasConcertOrRecitalWord(title) ||
+    hasConcertOrRecitalWord(category) ||
+    hasConcertOrRecitalWord(series)
   ) {
     return true;
   }
@@ -543,6 +537,16 @@ function workshopIdentity(
   if (concertIdentity || leadingPerformance) return undefined;
 
   if (titleIsActivity || bodyIsActivity || weakMention) {
+    // Related-activity footers ("Charlas previas", "Charla sobre el concierto")
+    // and a listed classical programme are not coprincipal educational identity.
+    if (
+      weakMention &&
+      !titleIsActivity &&
+      !bodyIsActivity &&
+      secondaryTalkDoesNotOverrideConcert(facts, description, program)
+    ) {
+      return undefined;
+    }
     if (knownClassicalNames(facts).length > 0) {
       return exclusion('non-performance-activity', [evidence], false, true);
     }
@@ -551,6 +555,31 @@ function workshopIdentity(
     }
   }
   return undefined;
+}
+
+/**
+ * A concert page that also advertises the pre-concert talk, or that already
+ * lists a classical work/composer, is still that concert. A title that *is*
+ * the talk stays an activity; an ambiguous "encuentro" with no programme does
+ * not use this path.
+ */
+function secondaryTalkDoesNotOverrideConcert(
+  facts: ObservedFacts,
+  description: string,
+  program: string,
+): boolean {
+  const body = `${description} ${program}`.trim();
+  if (
+    hasPhrase(body, 'charla sobre el concierto') ||
+    hasPhrase(body, 'charlas previas') ||
+    hasPhrase(body, 'previas al ciclo de conciertos')
+  ) {
+    return true;
+  }
+  if (knownClassicalNames(facts).length === 0) return false;
+  if (facts.works.some((work) => Boolean(work.title?.trim()))) return true;
+  if (classicalSeriesIdentity(facts)) return true;
+  return hasSubstantialClassicalBlock(facts);
 }
 
 function nonPerformanceCategory(category: string): boolean {
@@ -563,7 +592,7 @@ function titleStartsWithNonPerformance(title: string): boolean {
 }
 
 function titleStartsWithConcertOrRecital(title: string): boolean {
-  return /^(concierto|recital)\b/.test(title);
+  return /^(conciertos?|recitales?)\b/.test(title);
 }
 
 function titleIdentifiesNonPerformance(title: string): boolean {
@@ -600,13 +629,31 @@ function hasConcertOrRecitalIdentity(
 ): boolean {
   const series = fieldFolded(facts.seriesText);
   return (
-    hasWord(title, 'concierto') ||
-    hasWord(title, 'recital') ||
-    hasWord(category, 'concierto') ||
-    hasWord(category, 'recital') ||
-    hasWord(series, 'concierto') ||
-    hasWord(series, 'recital')
+    hasConcertOrRecitalWord(title) ||
+    hasConcertOrRecitalWord(category) ||
+    hasConcertOrRecitalWord(series)
   );
+}
+
+function hasConcertOrRecitalWord(text: string): boolean {
+  return (
+    hasWord(text, 'concierto') ||
+    hasWord(text, 'conciertos') ||
+    hasWord(text, 'recital') ||
+    hasWord(text, 'recitales')
+  );
+}
+
+/**
+ * Bare "cine" names a screening. The art-form phrase "cine experimental", used
+ * as an electroacoustic/audiovisual medium, is not a film-cycle identity.
+ * "Ciclo de cine", "cine mudo" or "proyección" still are.
+ */
+function hasBareCineScreeningWord(text: string): boolean {
+  if (!hasWord(text, 'cine')) return false;
+  const cineHits = text.match(/(?:^|[^a-z0-9])cine(?=[^a-z0-9]|$)/g) ?? [];
+  const experimentalHits = text.match(/\bcine experimental\b/g) ?? [];
+  return cineHits.length !== experimentalHits.length;
 }
 
 function participatoryActivity(
@@ -732,7 +779,8 @@ export function hasSubstantialClassicalBlock(facts: ObservedFacts): boolean {
   if (describedConcertWithUnequivocalClassicalRepertoire(facts)) return true;
   if (known.length === 0) return false;
   if (classicalFirstHalf(facts, known)) return true;
-  return explicitListedClassicalWork(facts, known);
+  if (explicitListedClassicalWork(facts, known)) return true;
+  return listedWorkWithClassicalSignal(facts, known);
 }
 
 const CLASSICAL_WORK_NOUNS = [
@@ -742,6 +790,8 @@ const CLASSICAL_WORK_NOUNS = [
   'sinfonias',
   'concierto',
   'conciertos',
+  'concerti',
+  'concerto',
   'suite',
   'suites',
   'misa',
@@ -756,13 +806,42 @@ const CLASSICAL_WORK_NOUNS = [
   'preludio',
   'nocturno',
   'partita',
+  'opera',
+  'zarzuela',
+  'pasion',
+  'passion',
+  'motete',
+  'magnificat',
 ];
 
 function explicitListedClassicalWork(facts: ObservedFacts, known: string[]): boolean {
   const program = fieldFolded(facts.programText);
   if (!program) return false;
   if (!known.some((name) => hasPhrase(program, name))) return false;
-  return CLASSICAL_WORK_NOUNS.some((noun) => hasWord(program, noun));
+  return hasClassicalWorkSignal(program);
+}
+
+/**
+ * One listed concert work by a known composer is a classical block: a Handel
+ * opera or Bach passion is the programme, not an isolated popular-bill citation.
+ * A work title without a concert-work signal (e.g. "Le cygne") is not.
+ */
+function listedWorkWithClassicalSignal(facts: ObservedFacts, known: string[]): boolean {
+  if (known.length === 0) return false;
+  return facts.works.some((work) => {
+    const composer = fieldFolded(work.composerName);
+    const composerKnown =
+      Boolean(work.composerName && matchComposer(work.composerName)) ||
+      known.some((name) => Boolean(composer && hasPhrase(composer, foldName(name))));
+    if (!composerKnown) return false;
+    return hasClassicalWorkSignal(fieldFolded(work.title));
+  });
+}
+
+function hasClassicalWorkSignal(text: string): boolean {
+  if (!text) return false;
+  if (CLASSICAL_WORK_NOUNS.some((noun) => hasWord(text, noun))) return true;
+  return /\bbwv\b|\bhwv\b|\brv\b/.test(text);
 }
 
 function organConcertInclusion(facts: ObservedFacts, haystack: string): boolean {
@@ -972,9 +1051,9 @@ function classicalConcertSeries(facts: ObservedFacts, haystack: string): Inclusi
   const description = fieldFolded(facts.description);
   const namedCycle = classicalSeriesIdentity(facts);
   const concertCue =
-    hasWord(title, 'concierto') ||
+    hasConcertOrRecitalWord(title) ||
     hasPhrase(haystack, 'serie de conciertos') ||
-    (description.length > 0 && hasWord(description, 'conciertos')) ||
+    (description.length > 0 && hasConcertOrRecitalWord(description)) ||
     Boolean(namedCycle);
   if (!concertCue) return undefined;
 
@@ -1056,6 +1135,10 @@ function isOperaCategory(category: string): boolean {
 
 function isOperaTitle(title: string): boolean {
   return hasWord(title, 'opera') || /\bmicroperas?\b/u.test(title);
+}
+
+function titleNamesZarzuela(title: string): boolean {
+  return hasWord(title, 'zarzuela') || hasWord(title, 'zarzuelita');
 }
 
 function knownClassicalNames(facts: ObservedFacts): string[] {
