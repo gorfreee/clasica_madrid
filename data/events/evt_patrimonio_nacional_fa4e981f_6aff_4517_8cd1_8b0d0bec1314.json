@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_patrimonio_nacional_fa4e981f_6aff_4517_8cd1_8b0d0bec1314",
+  "slug": "sonatas-de-lidon-maestro-de-estilo-italiano",
+  "title": "Sonatas de Lidón: maestro de estilo italiano",
+  "status": "scheduled",
+  "venueId": "ven_palacio_real_madrid_capilla_real",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_patrimonio_nacional_fa4e981f_6aff_4517_8cd1_8b0d0bec1314_01",
+      "date": "2026-11-28",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ignacio Ramal"
+    },
+    {
+      "name": "Eva del Campo"
+    },
+    {
+      "name": "Guillermo Turina"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_patrimonio_nacional",
+      "url": "https://www.patrimonionacional.es/actualidad/concierto/2026/sonatas-de-lidon-maestro-de-estilo-italiano-2026-11-28",
+      "checkedAt": "2026-09-14",
+      "externalId": "fa4e981f-6aff-4517-8cd1-8b0d0bec1314"
+    }
+  ],
+  "primarySourceId": "src_patrimonio_nacional",
+  "lastVerifiedAt": "2026-09-14"
+}

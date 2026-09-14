@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50387637",
+  "slug": "concierto-benefico-a-favor-del-alzheimer",
+  "title": "Concierto benéfico a favor del Alzheimer",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_5498725",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50387637_01",
+      "date": "2026-09-21",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=036d7f9c80d30a10VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-09-14",
+      "externalId": "50387637"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-09-14"
+}

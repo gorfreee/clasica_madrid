@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_grupo_concertante_talia_musica_y_juguetes_8",
+  "slug": "grupo-concertante-talia-musica-y-juguetes",
+  "title": "Grupo Concertante Talía. Música y Juguetes",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_grupo_concertante_talia_musica_y_juguetes_8_01",
+      "date": "2027-01-23",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Metropolitana de Madrid"
+    },
+    {
+      "name": "Coro Talía Mini"
+    },
+    {
+      "name": "Coro Talía"
+    },
+    {
+      "name": "Silvia Sanz",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/grupo-concertante-talia-musica-y-juguetes-8",
+      "checkedAt": "2026-09-14",
+      "externalId": "grupo-concertante-talia-musica-y-juguetes-8"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-14"
+}

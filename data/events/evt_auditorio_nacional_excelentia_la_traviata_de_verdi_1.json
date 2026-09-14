@@ -30,6 +30,18 @@
   "composers": [
     {
       "name": "Giuseppe Verdi"
+    },
+    {
+      "name": "Violetta Valery"
+    },
+    {
+      "name": "Alfredo Germont"
+    },
+    {
+      "name": "Flora Bervoix"
+    },
+    {
+      "name": "Giorgio Germont"
     }
   ],
   "works": [
@@ -50,10 +62,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-la-traviata-de-verdi-1",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-14",
       "externalId": "excelentia-la-traviata-de-verdi-1"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-14"
 }

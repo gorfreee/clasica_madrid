@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_patrimonio_nacional_a489320b_abea_46ec_a43c_80003f093a83",
+  "slug": "bernard-foccroulle",
+  "title": "Bernard Foccroulle",
+  "status": "scheduled",
+  "venueId": "ven_palacio_real_madrid_capilla_real",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_patrimonio_nacional_a489320b_abea_46ec_a43c_80003f093a83_01",
+      "date": "2026-10-17",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Bernard Foccroulle"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "baroque",
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "organ",
+    "early-music"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_patrimonio_nacional",
+      "url": "https://www.patrimonionacional.es/actualidad/concierto/2026/bernard-foccroulle-2026-10-17",
+      "checkedAt": "2026-09-14",
+      "externalId": "a489320b-abea-46ec-a43c-80003f093a83"
+    }
+  ],
+  "primarySourceId": "src_patrimonio_nacional",
+  "lastVerifiedAt": "2026-09-14"
+}

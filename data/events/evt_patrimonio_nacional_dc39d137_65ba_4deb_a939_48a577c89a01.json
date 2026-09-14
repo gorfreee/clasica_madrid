@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_patrimonio_nacional_dc39d137_65ba_4deb_a939_48a577c89a01",
+  "slug": "quinteto-schubert",
+  "title": "Quinteto Schubert",
+  "status": "scheduled",
+  "venueId": "ven_palacio_real_madrid_salon_columnas",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_patrimonio_nacional_dc39d137_65ba_4deb_a939_48a577c89a01_01",
+      "date": "2026-10-22",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Sophie Druml"
+    },
+    {
+      "name": "Benjamin Herzl"
+    },
+    {
+      "name": "Eike Coetzee"
+    },
+    {
+      "name": "Ania Druml"
+    },
+    {
+      "name": "Simon Tetzlaff"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_patrimonio_nacional",
+      "url": "https://www.patrimonionacional.es/actualidad/concierto/2026/quinteto-schubert-2026-10-22",
+      "checkedAt": "2026-09-14",
+      "externalId": "dc39d137-65ba-4deb-a939-48a577c89a01"
+    }
+  ],
+  "primarySourceId": "src_patrimonio_nacional",
+  "lastVerifiedAt": "2026-09-14"
+}

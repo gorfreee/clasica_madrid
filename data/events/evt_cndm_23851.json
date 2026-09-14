@@ -59,6 +59,10 @@
     {
       "title": "Concertante. Cuatro miradas de Luis Cernuda, para flauta, oboe, clarinete, violín, violonchelo y clave *+ (2026)",
       "composerName": "Jesús Torres"
+    },
+    {
+      "title": "*+ Estreno absoluto. Encargo del CNDM y el Festival de Cádiz. Música española",
+      "composerName": "Jesús Torres"
     }
   ],
   "eras": [
@@ -73,10 +77,10 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23851",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-14",
       "externalId": "23851"
     }
   ],
   "primarySourceId": "src_cndm",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-14"
 }

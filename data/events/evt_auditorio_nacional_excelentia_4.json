@@ -35,6 +35,15 @@
     },
     {
       "name": "Enrique Granados"
+    },
+    {
+      "name": "Luigi Boccherini"
+    },
+    {
+      "name": "Pablo de Sarasate"
+    },
+    {
+      "name": "Isaac Albéniz"
     }
   ],
   "works": [
@@ -88,10 +97,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-4",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-14",
       "externalId": "excelentia-4"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-14"
 }

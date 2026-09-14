@@ -43,6 +43,10 @@
     {
       "title": "Cuarteto de cuerda n.º 3 en re mayor, op. 44, n.º 1 (1838)",
       "composerName": "Felix Mendelssohn"
+    },
+    {
+      "title": "*+ Estreno absoluto. Encargo del CNDM, la Kölner Philharmonie y la Musikverein Wien",
+      "composerName": "Felix Mendelssohn"
     }
   ],
   "eras": [
@@ -59,16 +63,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-cuarteto-casals-4",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-14",
       "externalId": "cndm-cuarteto-casals-4"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23866",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-14",
       "externalId": "23866"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-14"
 }

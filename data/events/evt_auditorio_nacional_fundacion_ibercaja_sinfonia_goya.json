@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_fundacion_ibercaja_sinfonia_goya",
+  "slug": "fundacion-ibercaja-sinfonia-goya",
+  "title": "Fundación Ibercaja. Sinfonía Goya",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_fundacion_ibercaja_sinfonia_goya_01",
+      "date": "2026-10-05",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Clásica Santa Cecilia"
+    },
+    {
+      "name": "Grzegorz Nowak",
+      "role": "conductor"
+    },
+    {
+      "name": "Sabina Puértolas"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/fundacion-ibercaja-sinfonia-goya",
+      "checkedAt": "2026-09-14",
+      "externalId": "fundacion-ibercaja-sinfonia-goya"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-14"
+}

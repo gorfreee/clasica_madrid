@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ibermusica_sinfonica_nacional_juvenil_de_venezuela",
+  "slug": "ibermusica-sinfonica-nacional-juvenil-de-venezuela",
+  "title": "Ibermúsica. Sinfónica Nacional Juvenil de Venezuela",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ibermusica_sinfonica_nacional_juvenil_de_venezuela_01",
+      "date": "2026-11-05",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Sinfónica Nacional Juvenil de Venezuela"
+    },
+    {
+      "name": "Gustavo Dudamel"
+    }
+  ],
+  "composers": [],
+  "works": [
+    {
+      "title": "Sinfonía nº 7 en Do Mayor, op. 60 “Leningrado”"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-sinfonica-nacional-juvenil-de-venezuela",
+      "checkedAt": "2026-09-14",
+      "externalId": "ibermusica-sinfonica-nacional-juvenil-de-venezuela"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-14"
+}

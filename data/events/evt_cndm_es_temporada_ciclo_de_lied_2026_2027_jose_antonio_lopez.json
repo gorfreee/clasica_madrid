@@ -97,6 +97,10 @@
     {
       "title": "Canciones para niños (1953)",
       "composerName": "Frederic Mompou"
+    },
+    {
+      "title": "*Estreno absoluto",
+      "composerName": "Frederic Mompou"
     }
   ],
   "eras": [
@@ -113,16 +117,16 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23798",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-14",
       "externalId": "23798"
     },
     {
       "sourceId": "src_teatro_zarzuela",
       "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/ciclo-de-lied-2026-2027/jose-antonio-lopez",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-14",
       "externalId": "/es/temporada/ciclo-de-lied-2026-2027/jose-antonio-lopez"
     }
   ],
   "primarySourceId": "src_cndm",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-14"
 }

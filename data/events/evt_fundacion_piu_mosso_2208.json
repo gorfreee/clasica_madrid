@@ -19,17 +19,19 @@
   "composers": [],
   "works": [],
   "eras": [],
-  "formats": [],
+  "formats": [
+    "recital"
+  ],
   "kind": "alternative",
   "access": "unknown",
   "citations": [
     {
       "sourceId": "src_fundacionpiumosso_com",
       "url": "https://www.fundacionpiumosso.com/evento/festival-alicia-de-larrocha-casa-de-vacas-del-retiro-2",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-14",
       "externalId": "2208"
     }
   ],
   "primarySourceId": "src_fundacionpiumosso_com",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-14"
 }

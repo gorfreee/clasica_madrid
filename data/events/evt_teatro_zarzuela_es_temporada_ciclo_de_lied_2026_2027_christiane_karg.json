@@ -41,6 +41,9 @@
     },
     {
       "name": "Richard Strauss"
+    },
+    {
+      "name": "Arnold Schoenberg"
     }
   ],
   "works": [
@@ -103,6 +106,10 @@
     {
       "title": "De Rückert Lieder (1901-1902)",
       "composerName": "Gustav Mahler"
+    },
+    {
+      "title": "Vier Lieder, nº 2 (1899)",
+      "composerName": "Arnold Schoenberg"
     }
   ],
   "eras": [
@@ -119,16 +126,16 @@
     {
       "sourceId": "src_teatro_zarzuela",
       "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/ciclo-de-lied-2026-2027/christiane-karg",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-14",
       "externalId": "/es/temporada/ciclo-de-lied-2026-2027/christiane-karg"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23777",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-14",
       "externalId": "23777"
     }
   ],
   "primarySourceId": "src_teatro_zarzuela",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-14"
 }

@@ -30,6 +30,15 @@
     },
     {
       "name": "Miguel de Fuenllana"
+    },
+    {
+      "name": "N. Payen"
+    },
+    {
+      "name": "J. de Bonmarché"
+    },
+    {
+      "name": "F. Corteccia"
     }
   ],
   "works": [],
@@ -46,16 +55,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-la-grande-chapelle-5",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-14",
       "externalId": "cndm-la-grande-chapelle-5"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23772",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-14",
       "externalId": "23772"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-14"
 }

@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_fundacion_scherzo_daniel_hope_marie_sophie_hauzel",
+  "slug": "fundacion-scherzo-daniel-hope-marie-sophie-hauzel",
+  "title": "Fundación Scherzo. Daniel Hope & Marie Sophie Hauzel",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_fundacion_scherzo_daniel_hope_marie_sophie_hauzel_01",
+      "date": "2026-10-06",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Daniel Hope"
+    },
+    {
+      "name": "Marie Sophie Hauzel"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antonín Dvořák"
+    },
+    {
+      "name": "Alexey Shor"
+    },
+    {
+      "name": "Manuel de Falla"
+    },
+    {
+      "name": "César Franck"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonatina en Sol mayor, Op. 10",
+      "composerName": "Antonín Dvořák"
+    },
+    {
+      "title": "Sonata No. 1 en re menor",
+      "composerName": "Alexey Shor"
+    },
+    {
+      "title": "Suite popular española",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Sonata en La mayor",
+      "composerName": "César Franck"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/fundacion-scherzo-daniel-hope-marie-sophie-hauzel",
+      "checkedAt": "2026-09-14",
+      "externalId": "fundacion-scherzo-daniel-hope-marie-sophie-hauzel"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-14"
+}

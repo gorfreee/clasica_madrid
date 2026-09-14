@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_fundacion_albeniz_escuela_superior_de_musica_reina_sofia_concierto_de_inauguracion_del_curso_acad",
+  "slug": "fundacion-albeniz-escuela-superior-de-musica-reina-sofia-concierto-de-inauguracion-del-curso-academico-26-27",
+  "title": "Fundación Albéniz. Escuela Superior de Música Reina Sofía. Concierto de Inauguracion del Curso Academico 26/27",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_fundacion_albeniz_escuela_superior_de_musica_reina_sofia_concierto_de_inauguracion_del_curso_acad",
+      "date": "2026-10-01",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Sinfónica Freixenet de la"
+    },
+    {
+      "name": "Escuela Superior de Música Reina Sofía"
+    },
+    {
+      "name": "Josep Pons",
+      "role": "conductor"
+    },
+    {
+      "name": "Luis Aracama"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antonín Dvořák"
+    },
+    {
+      "name": "Johannes Brahms"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para violonchelo",
+      "composerName": "Antonín Dvořák"
+    },
+    {
+      "title": "Cuarta Sinfonía",
+      "composerName": "Johannes Brahms"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/fundacion-albeniz-escuela-superior-de-musica-reina-sofia-concierto-de-inauguracion-del-curso-academico-26-27",
+      "checkedAt": "2026-09-14",
+      "externalId": "fundacion-albeniz-escuela-superior-de-musica-reina-sofia-concierto-de-inauguracion-del-curso-academico-26-27"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-14"
+}

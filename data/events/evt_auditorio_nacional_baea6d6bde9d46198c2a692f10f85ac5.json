@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_baea6d6bde9d46198c2a692f10f85ac5",
+  "slug": "fundacion-la-caixa-el-mesias-participativo",
+  "title": "Fundación “la Caixa”. El Mesías Participativo",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_baea6d6bde9d46198c2a692f10f85ac5_01",
+      "date": "2026-12-14",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_baea6d6bde9d46198c2a692f10f85ac5_02",
+      "date": "2026-12-15",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Laurence Cummings",
+      "role": "conductor"
+    },
+    {
+      "name": "Anna Devin"
+    },
+    {
+      "name": "Reginald Mobley"
+    },
+    {
+      "name": "Jonathan Brown"
+    },
+    {
+      "name": "Gwilym Bowen"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Georg Friedrich Händel"
+    }
+  ],
+  "works": [
+    {
+      "title": "El Mesías",
+      "composerName": "Georg Friedrich Händel"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "choral",
+    "early-music"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/fundacion-201cla-caixa201d-el-mesias-participativo-4",
+      "checkedAt": "2026-09-14",
+      "externalId": "baea6d6bde9d46198c2a692f10f85ac5"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-14"
+}

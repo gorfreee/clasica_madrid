@@ -41,6 +41,9 @@
     },
     {
       "name": "Franz Liszt"
+    },
+    {
+      "name": "Moszkowski"
     }
   ],
   "works": [],
@@ -64,10 +67,10 @@
     {
       "sourceId": "src_fundacionpiumosso_com",
       "url": "https://www.fundacionpiumosso.com/evento/victor-tretyakov-piano",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-14",
       "externalId": "2187"
     }
   ],
   "primarySourceId": "src_ayuntamiento_madrid",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-14"
 }

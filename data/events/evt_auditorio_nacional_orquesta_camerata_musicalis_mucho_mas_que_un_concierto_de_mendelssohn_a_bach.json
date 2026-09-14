@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_orquesta_camerata_musicalis_mucho_mas_que_un_concierto_de_mendelssohn_a_bach",
+  "slug": "orquesta-camerata-musicalis-mucho-mas-que-un-concierto-de-mendelssohn-a-bach",
+  "title": "Orquesta Camerata Musicalis. Mucho Más que un Concierto. De Mendelssohn a Bach",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_orquesta_camerata_musicalis_mucho_mas_que_un_concierto_de_mendelssohn_a_bach_01",
+      "date": "2027-03-07",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Camerata Musi calis"
+    },
+    {
+      "name": "Edgar Martín Jiménez",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "baroque",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/orquesta-camerata-musicalis-mucho-mas-que-un-concierto-de-mendelssohn-a-bach",
+      "checkedAt": "2026-09-14",
+      "externalId": "orquesta-camerata-musicalis-mucho-mas-que-un-concierto-de-mendelssohn-a-bach"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-14"
+}

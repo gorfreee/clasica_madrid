@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_patrimonio_nacional_72987360_19de_4697_b0ed_2cfd4e7cb04f",
+  "slug": "cuarteto-bennewitz",
+  "title": "Cuarteto Bennewitz",
+  "status": "scheduled",
+  "venueId": "ven_palacio_real_madrid_salon_columnas",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_patrimonio_nacional_72987360_19de_4697_b0ed_2cfd4e7cb04f_01",
+      "date": "2027-06-04",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Jakub Fiser"
+    },
+    {
+      "name": "Stepán Jezek"
+    },
+    {
+      "name": "Jirí Pinkas"
+    },
+    {
+      "name": "Stepán Dolezal"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_patrimonio_nacional",
+      "url": "https://www.patrimonionacional.es/actualidad/concierto/2026/cuarteto-bennewitz-2027-06-04",
+      "checkedAt": "2026-09-14",
+      "externalId": "72987360-19de-4697-b0ed-2cfd4e7cb04f"
+    }
+  ],
+  "primarySourceId": "src_patrimonio_nacional",
+  "lastVerifiedAt": "2026-09-14"
+}

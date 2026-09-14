@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_patrimonio_nacional_ac46bb34_77e9_464e_b625_89e8cc87106b",
+  "slug": "cuarteto-gropius",
+  "title": "Cuarteto Gropius",
+  "status": "scheduled",
+  "venueId": "ven_palacio_real_madrid_salon_columnas",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_patrimonio_nacional_ac46bb34_77e9_464e_b625_89e8cc87106b_01",
+      "date": "2027-02-25",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Friedemann Eichhorn"
+    },
+    {
+      "name": "Indira Koch"
+    },
+    {
+      "name": "Alexia Eichhorn"
+    },
+    {
+      "name": "Wolfgang Emanuel Schmidt"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_patrimonio_nacional",
+      "url": "https://www.patrimonionacional.es/actualidad/concierto/2026/cuarteto-gropius-2027-02-25",
+      "checkedAt": "2026-09-14",
+      "externalId": "ac46bb34-77e9-464e-b625-89e8cc87106b"
+    }
+  ],
+  "primarySourceId": "src_patrimonio_nacional",
+  "lastVerifiedAt": "2026-09-14"
+}

@@ -53,6 +53,10 @@
     {
       "title": "Sonata para violín y piano n.º 1 en la mayor , op. 13 (1875-1876)",
       "composerName": "Gabriel Fauré"
+    },
+    {
+      "title": "*+ Estreno absoluto. Encargo del CNDM",
+      "composerName": "Gabriel Fauré"
     }
   ],
   "eras": [
@@ -67,16 +71,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-ana-maria-valderrama-judith-jauregui",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-14",
       "externalId": "cndm-ana-maria-valderrama-judith-jauregui"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23871",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-14",
       "externalId": "23871"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-14"
 }
