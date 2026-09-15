@@ -4,6 +4,9 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { emptyCatalog, type Catalog } from '../src/lib/domain/catalog.ts';
 import { mergeCandidateBatch } from '../src/ingestion/batch.ts';
+import { canonicalizePerformerList } from '../src/ingestion/classification/performer-role.ts';
+import { enrichNormalizedEvent } from '../src/ingestion/enrich-normalized.ts';
+import { normalizeRawEvent } from '../src/ingestion/normalize.ts';
 import { runIngest } from '../src/ingestion/pipeline.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import {
@@ -138,14 +141,43 @@ describe('agenda del Real Conservatorio Superior de Música de Madrid', () => {
       { raw: '18 Sep 2026 19:00', date: '2026-09-18', time: '19:00' },
     ]);
     expect(patch.performers).toEqual([
-      { name: 'Ana Payá Ramírez', roleText: 'flauta de pico' },
-      { name: 'Arturo de las Casas Escolar', roleText: 'viola da gamba' },
+      { name: 'Ana Payá Ramírez', roleText: 'solista, flauta de pico' },
+      { name: 'Arturo de las Casas Escolar', roleText: 'solista, viola da gamba' },
       { name: 'Jaime Martín Garcés', roleText: 'solista' },
       { name: 'Elvira Martínez Gabaldón', roleText: 'directora' },
+    ]);
+    expect(canonicalizePerformerList(patch.performers ?? [])).toEqual([
+      { name: 'Ana Payá Ramírez', role: 'soloist' },
+      { name: 'Arturo de las Casas Escolar', role: 'soloist' },
+      { name: 'Jaime Martín Garcés', role: 'soloist' },
+      { name: 'Elvira Martínez Gabaldón', role: 'conductor' },
     ]);
 
     const wrong = (await fixture('detail-2557.html')).replace('data-history-node-id="2557"', 'data-history-node-id="9999"');
     expect(() => adapter.hydrate!(barroca, wrong, context())).toThrow(/no coincide/);
+  });
+
+  it('tras hidratar, normalizar y enriquecer el fixture 2557 conserva programa y compositores', async () => {
+    const events = await adapter.extract(await fixture('listing.html'), listingUrl, context());
+    const barroca = events.find((event) => event.externalId === '2557')!;
+    const patch = adapter.hydrate!(barroca, await fixture('detail-2557.html'), context());
+    const normalized = normalizeRawEvent({
+      ...barroca,
+      observed: { ...barroca.observed, ...patch },
+    });
+    expect(normalized?.programText).toContain('\n');
+    expect(normalized?.programText).toContain('Ouverture GWV 473 de Ch. Graupner');
+    expect(enrichNormalizedEvent(normalized!).composers.map((item) => item.name)).toEqual([
+      'Georg Philipp Telemann',
+      'Ch. Graupner',
+      'Johann Sebastian Bach',
+    ]);
+    expect(canonicalizePerformerList(normalized!.performers)).toEqual(
+      expect.arrayContaining([
+        { name: 'Ana Payá Ramírez', role: 'soloist' },
+        { name: 'Arturo de las Casas Escolar', role: 'soloist' },
+      ]),
+    );
   });
 
   it('normaliza únicamente URLs oficiales y valida fechas civiles', () => {

@@ -12,7 +12,10 @@ import {
 import type { ObservedComposer } from './observed.ts';
 import {
   looksLikeComposerLine,
+  looksLikeNonWorkCredit,
+  looksLikeTextCredit,
   looksLikeUnequivocalWorkLine,
+  parseExplicitTitleAuthorWork,
 } from './observed-cleanup.ts';
 
 /**
@@ -32,11 +35,13 @@ export type AttributedComposerName = {
 export type AttributionSurface = 'programme' | 'title';
 
 /**
- * `Música de X` is a credit. `Conservatorio … de Música de Madrid` is not:
- * the noun `música` is part of the institution, not an attribution frame.
+ * `obras de X` is a credit even after `de` (`transcripciones … de obras de`).
+ * `Música de X` is a credit; `Conservatorio … de Música de Madrid` is not.
  */
-const LABELLED_CREDIT =
-  /(?<!\bde\s)\b(?:obras?|m[uú]sica(?:\s+y\s+(?:libreto|texto|letra))?|composici[oó]n(?:es)?)\s+(?:de|del|:)\s*:?\s*([^;\n]+)/giu;
+const OBRAS_CREDIT = /\bobras?\s+(?:de|del|:)\s*:?\s*([^;\n]+)/giu;
+const MUSICA_CREDIT =
+  /(?<!\bde\s)\bm[uú]sica(?:\s+y\s+(?:libreto|texto|letra))?\s+(?:de|del|:)\s*:?\s*([^;\n]+)/giu;
+const COMPOSICION_CREDIT = /\bcomposici[oó]n(?:es)?\s+(?:de|del|:)\s*:?\s*([^;\n]+)/giu;
 const NAME_WORK_SEPARATOR =
   /(?:^|[\n;]|[.!?]\s)([^\n;]{2,80}?)(?:\s+(?:—|–|\s-\s)|\s*(?<!\d):(?!\d))\s+([^\n]+?)(?=\.(?:\s+\p{Lu})|$)/gmu;
 const COMPOSER_LABEL = /\bcompositor(?:a|es)?\s*:\s*([^.\n]+)/giu;
@@ -52,7 +57,7 @@ const LIST_SPLIT = /\s*[-–—·•]\s*/u;
 const NAME_LIST_SPLIT = /\s*,\s*|\s+y\s+|\s+e\s+(?=\p{Lu})/u;
 const NAME_PARTICLE = /^(?:de|del|des|la|las|los|le|van|von|di|da|el)$/i;
 const WORK_GENRE =
-  /\b(?:concierto|concerto|sinfon[ií]a|symphony|sonata|suite|quinteto|cuarteto|tr[ií]o|obertura|r[eé]quiem|misa|toccata|fuga|preludio|nocturne|mazurka|scherzo|impromptu|variaciones|cantata|oratorio|fantas[ií]a)\b/i;
+  /\b(?:concierto|concerto|sinfon[ií]a|symphony|sonata|suite|quinteto|cuarteto|tr[ií]o|obertura|ouverture|r[eé]quiem|misa|toccata|fuga|preludio|nocturne|mazurka|scherzo|impromptu|variaciones|cantata|oratorio|fantas[ií]a)\b/i;
 const CATALOG = /\b(?:bwv|hwv|hob\.?|op\.?\s*\d|opus\s+\d|d\s*\d{2,}|k\.?\s*\d|kv\.?\s*\d)\b/i;
 
 const NON_COMPOSER_ROLES = [
@@ -68,6 +73,8 @@ const CONTEXTUAL_PREFIXES = [
   'basado en', 'basada en', 'sobre un tema de', 'un tema de', 'tema de',
   'libreto de', 'libreto', 'texto de', 'texto del', 'letra de',
   'poema de', 'poesia de', 'version de', 'adaptacion de',
+  'realizadas por', 'realizado por', 'transcripcion de', 'transcripciones de',
+  'arreglo de', 'arreglos de', 'orquestacion de',
   'trabajo con', 'colaboro con', 'estudio con', 'alumno de', 'alumna de',
   'contemporaneo de', 'contemporanea de', 'rival de',
   'influido por', 'influida por',
@@ -77,6 +84,14 @@ const CAREER_WORK_PREFIX =
   /(?:^| )(?:(?:ha|habia|habiendo) )?(?:estreno|estrenado|interpreto|interpretado|encargo|encargado)(?: una| varias)?$/u;
 const INLINE_NON_MUSIC_CREDIT =
   /\s+(?=libreto\b|texto(?:\s+del)?\b|letra\b|versi[oó]n\b|adaptaci[oó]n\b|premio\b)/i;
+const TITLE_CONTEXTUAL_DE =
+  /(?:tema|un tema|sobre un tema|basad[oa]|inspirad[oa]|homenaje)\s+$/iu;
+const CREDIT_LABEL_TITLE =
+  /^(?:libreto|texto(?:\s+del)?|letra|poema|poes[ií]a|versi[oó]n|adaptaci[oó]n|transcripciones?|arreglos?|orquestaci[oó]n)\b/i;
+const PERFORMER_LINE =
+  /^(?:solistas?|directora?|director\s*\/\s*concertino|actor(?:\s+y\s+solista)?|int[ée]rpretes?)\s*:/i;
+const WORK_ANNOTATION =
+  /\s*\((?:(?:obra de )?estreno|versi[oó]n|adaptaci[oó]n)[^)]*\)\s*$/iu;
 
 /**
  * Names that sit in a current-programme attribution frame.
@@ -92,6 +107,7 @@ export function extractAttributedComposerNames(
   const found: AttributedComposerName[] = [
     ...fromRepertoireLists(source),
     ...fromLabelledCredits(source),
+    ...fromWorkDeComposer(source),
     ...fromNameWorkSeparators(source, surface),
     ...fromComposerHeadings(source),
   ];
@@ -182,11 +198,14 @@ export function clearlyNonComposerContext(name: string, evidence: string): boole
 
 function fromLabelledCredits(text: string): AttributedComposerName[] {
   const found: AttributedComposerName[] = [];
-  for (const pattern of [LABELLED_CREDIT, COMPOSER_LABEL, AUTORES_COMO]) {
+  for (const pattern of [OBRAS_CREDIT, MUSICA_CREDIT, COMPOSICION_CREDIT, COMPOSER_LABEL, AUTORES_COMO]) {
     pattern.lastIndex = 0;
     for (const match of text.matchAll(pattern)) {
-      const rawList = clipLabelledList(match[1] ?? '');
-      const evidence = collapseWhitespace(match[0] ?? '');
+      const matchEnd = (match.index ?? 0) + match[0].length;
+      const rawList = clipLabelledList(
+        extendLabelledListAcrossLines(text, matchEnd, match[1] ?? ''),
+      );
+      const evidence = collapseWhitespace(rawList) || collapseWhitespace(match[0] ?? '');
       if (!rawList.trim() || !evidence) continue;
       if (careerPrefixBefore(text, match.index ?? 0)) continue;
       if (nonMusicCreditBefore(text, match.index ?? 0)) continue;
@@ -202,6 +221,146 @@ function fromLabelledCredits(text: string): AttributedComposerName[] {
     }
   }
   return found;
+}
+
+function fromWorkDeComposer(text: string): AttributedComposerName[] {
+  const found: AttributedComposerName[] = [];
+  for (const line of programmeLines(text)) {
+    if (PERFORMER_LINE.test(line) || looksLikeTextCredit(line) || looksLikeNonWorkCredit(line)) continue;
+    if (isLabelledCreditLine(line)) continue;
+    const parsed = parseWorkDeComposerLine(line);
+    if (!parsed) continue;
+    found.push({ name: parsed.composerName, evidence: line });
+  }
+  return found;
+}
+
+function isLabelledCreditLine(line: string): boolean {
+  return (
+    /^(?:obras?|m[uú]sica(?:\s+y\s+(?:libreto|texto|letra))?|composici[oó]n(?:es)?)\s+(?:de|del|:)/i.test(line)
+    || /^compositor(?:a|es)?\s*:/i.test(line)
+  );
+}
+
+function parseWorkDeComposerLine(line: string): { title: string; composerName: string } | undefined {
+  const cleaned = stripTrailingWorkAnnotation(line);
+  if (!cleaned) return undefined;
+  const quoted = parseQuotedWorkDeAuthor(cleaned);
+  if (quoted) return quoted;
+  const known = parseExplicitTitleAuthorWork(cleaned);
+  if (known) return known;
+  return parseUnknownWorkDeAuthor(cleaned);
+}
+
+function parseQuotedWorkDeAuthor(line: string): { title: string; composerName: string } | undefined {
+  const match = /^\s*[«“”"'](.+?)[»“”"']\s+(?:de|by)\s+(.+?)\s*$/u.exec(line);
+  if (!match?.[1] || !match[2]) return undefined;
+  const title = collapseWhitespace(match[1]);
+  const composerName = collapseWhitespace(stripTrailingWorkAnnotation(match[2]));
+  if (!title || !composerName) return undefined;
+  if (clearlyNonComposerContext(composerName, line)) return undefined;
+  if (looksLikeEditorialMaterial(composerName) || looksLikeWorkTitle(composerName)) return undefined;
+  if (!matchComposer(composerName) && !looksLikePromotableUnknownName(composerName, line)) return undefined;
+  const words = composerName.split(/\s+/).filter(Boolean);
+  if (words.filter((word) => !NAME_PARTICLE.test(word)).length < 2 && !matchComposer(composerName)) {
+    return undefined;
+  }
+  return { title, composerName };
+}
+
+function parseUnknownWorkDeAuthor(line: string): { title: string; composerName: string } | undefined {
+  const matches = [...line.matchAll(/\s+(?:de|by)\s+/gi)];
+  let best: { title: string; composerName: string; score: number } | undefined;
+  for (let index = matches.length - 1; index >= 0; index -= 1) {
+    const match = matches[index]!;
+    if (match.index === undefined) continue;
+    const rawTitle = collapseWhitespace(line.slice(0, match.index));
+    const rawAuthor = collapseWhitespace(stripTrailingWorkAnnotation(line.slice(match.index + match[0].length)));
+    if (!rawTitle || !rawAuthor) continue;
+    if (TITLE_CONTEXTUAL_DE.test(`${rawTitle} `)) continue;
+    if (CREDIT_LABEL_TITLE.test(rawTitle) || looksLikeEditorialMaterial(rawTitle)) continue;
+    if (looksLikeEditorialMaterial(rawAuthor) || looksLikeWorkTitle(rawAuthor)) continue;
+
+    const completed = completeAuthorFromTitle(rawTitle, rawAuthor);
+    const title = completed.title;
+    const composerName = completed.author;
+    if (!title || !composerName) continue;
+    if (CREDIT_LABEL_TITLE.test(title) || looksLikeEditorialMaterial(title)) continue;
+    if (clearlyNonComposerContext(composerName, line)) continue;
+
+    const strongWork = looksLikeUnequivocalWorkLine(title) || looksLikeWorkTitle(title);
+    if (!strongWork) continue;
+    if (
+      !matchComposer(composerName)
+      && !looksLikePromotableUnknownName(composerName, `${title} de ${composerName}`)
+    ) continue;
+
+    const contentWords = composerName.split(/\s+/).filter((word) => !NAME_PARTICLE.test(word));
+    const score = matchComposer(composerName) ? 3 : contentWords.length >= 2 ? 2 : 1;
+    if (!best || score > best.score) best = { title, composerName, score };
+    if (score >= 2) break;
+  }
+  return best ? { title: best.title, composerName: best.composerName } : undefined;
+}
+
+function completeAuthorFromTitle(title: string, author: string): { title: string; author: string } {
+  const titleWords = title.split(/\s+/).filter(Boolean);
+  const authorWords = author.split(/\s+/).filter(Boolean);
+  if (titleWords.length === 0 || authorWords.length === 0) return { title, author };
+
+  let end = titleWords.length - 1;
+  const particles: string[] = [];
+  while (end >= 0 && NAME_PARTICLE.test(titleWords[end]!)) {
+    particles.unshift(titleWords[end]!);
+    end -= 1;
+  }
+  const given = end >= 0 ? titleWords[end] : undefined;
+  if (!given || !looksLikeAbsorbableGivenName(given)) return { title, author };
+  const remainderTitle = titleWords.slice(0, end).join(' ');
+  if (!remainderTitle) return { title, author };
+  if (!looksLikeUnequivocalWorkLine(remainderTitle) && !looksLikeWorkTitle(remainderTitle)) {
+    return { title, author };
+  }
+  const authorWithGiven = particles.length > 0
+    ? [given, ...particles, ...authorWords].join(' ')
+    : [given, 'de', ...authorWords].join(' ');
+  return { title: remainderTitle, author: authorWithGiven };
+}
+
+function looksLikeAbsorbableGivenName(word: string): boolean {
+  if (WORK_GENRE.test(word) || looksLikeWorkTitle(word) || looksLikeEditorialMaterial(word)) return false;
+  if (isNameInitialToken(word)) return true;
+  return /^\p{Lu}[\p{Ll}’'-]{1,19}$/u.test(word);
+}
+
+function stripTrailingWorkAnnotation(value: string): string {
+  return collapseWhitespace(value.replace(WORK_ANNOTATION, '').replace(/[.;,]+$/u, ''));
+}
+
+function extendLabelledListAcrossLines(text: string, matchEnd: number, rawList: string): string {
+  const start = collapseWhitespace(rawList);
+  if (!start || !isOpenNameList(start)) return start;
+  const parts = [start];
+  for (const line of text.slice(matchEnd).split('\n')) {
+    const trimmed = collapseWhitespace(line);
+    if (!trimmed) continue;
+    if (!looksLikeNameListContinuation(trimmed)) break;
+    parts.push(trimmed);
+    if (/\bentre otros\b/i.test(trimmed) || !isOpenNameList(trimmed)) break;
+  }
+  return parts.join(' ');
+}
+
+function isOpenNameList(value: string): boolean {
+  return /[,;]\s*$/.test(value) || /\b(?:y|e)\s*$/i.test(value);
+}
+
+function looksLikeNameListContinuation(line: string): boolean {
+  if (looksLikeUnequivocalWorkLine(line) || looksLikeTextCredit(line) || looksLikeNonWorkCredit(line)) {
+    return false;
+  }
+  if (PERFORMER_LINE.test(line) || looksLikeEditorialMaterial(line)) return false;
+  return /^(?:\p{Lu}|[«“"'])/u.test(line);
 }
 
 function fromNameWorkSeparators(
@@ -343,18 +502,34 @@ function looksLikePromotableUnknownName(name: string, evidence: string): boolean
   if (words.length === 0 || words.length > 6) return false;
   const nameLike = words.every((word, index) => {
     if (NAME_PARTICLE.test(word) && index > 0) return true;
-    if (/^\p{Lu}\.$/u.test(word)) return true;
+    if (isNameInitialToken(word)) return true;
     if (/\.$/u.test(word)) return false;
     return /^\p{Lu}[\p{L}.'’\-]*$/u.test(word);
   });
   if (!nameLike) return false;
   if (words.length >= 2) return true;
-  return name.length >= 4 && Boolean(parseRepertoireList(evidence));
+  return name.length >= 4 && (
+    Boolean(parseRepertoireList(evidence)) ||
+    strongWorkDeComposerSurname(evidence, name)
+  );
+}
+
+function isNameInitialToken(word: string): boolean {
+  return /^(?:\p{Lu}\.){1,3}$/u.test(word) || /^\p{Lu}\p{Ll}{1,2}\.$/u.test(word);
+}
+
+function strongWorkDeComposerSurname(evidence: string, name: string): boolean {
+  const source = collapseWhitespace(evidence);
+  const pattern = new RegExp(`\\s+(?:de|by)\\s+${escapeRegExp(name)}\\s*$`, 'iu');
+  if (!pattern.test(source)) return false;
+  const title = source.replace(pattern, '');
+  return looksLikeUnequivocalWorkLine(title) || looksLikeWorkTitle(title);
 }
 
 function clipLabelledList(raw: string): string {
   const sentence = raw.split(SENTENCE_AFTER_WORD)[0] ?? raw;
-  return sentence.split(INLINE_NON_MUSIC_CREDIT)[0] ?? '';
+  const withoutOthers = sentence.split(/,?\s*entre otros\b/iu)[0] ?? '';
+  return withoutOthers.split(INLINE_NON_MUSIC_CREDIT)[0] ?? '';
 }
 
 function splitNameList(value: string): string[] {
@@ -421,4 +596,8 @@ function foldName(value: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

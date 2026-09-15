@@ -2066,8 +2066,21 @@ describe('normalización de hechos observados', () => {
     expect(normalized?.programText).toBe('Mahler 2');
     expect(normalized?.performers).toEqual([{ name: 'Kent Nagano', roleText: 'director' }]);
     expect(normalized?.works).toEqual([{ title: 'Sinfonía 2', composerName: 'Gustav Mahler' }]);
-    expect(
-      normalizeRawEvent({
+    const multiline = normalizeRawEvent({
+      sourceId: 'auditorio-nacional',
+      sourceUrl: 'https://example.org/evento',
+      observed: {
+        title: 'OCNE',
+        occurrences: [{ raw: '2026-09-18T19:30:00+02:00' }],
+        programText: 'Obertura - Suite en sol menor TWV 55:g1 de G.P. Telemann\r\n\n  Ouverture GWV 473 de Ch. Graupner  \n\nConcierto para clave en la mayor BWV 1055 de J. S. Bach',
+        ...emptyObservedLists(),
+      },
+    });
+    expect(multiline?.programText).toBe(
+      'Obertura - Suite en sol menor TWV 55:g1 de G.P. Telemann\nOuverture GWV 473 de Ch. Graupner\nConcierto para clave en la mayor BWV 1055 de J. S. Bach',
+    );
+    expect(multiline?.programText).toContain('\n');
+    expect(normalizeRawEvent({
         sourceId: 'x',
         sourceUrl: 'https://example.org/e',
         observed: {

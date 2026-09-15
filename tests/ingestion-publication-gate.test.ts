@@ -479,6 +479,8 @@ describe('resolvePerformerRole', () => {
     expect(resolvePerformerRole('ensemble')).toBe('ensemble');
     expect(resolvePerformerRole('solista')).toBe('soloist');
     expect(resolvePerformerRole('soloist')).toBe('soloist');
+    expect(resolvePerformerRole('solista, flauta de pico')).toBe('soloist');
+    expect(resolvePerformerRole('solista, viola da gamba')).toBe('soloist');
 
     expect(resolvePerformerRole('piano')).toBeUndefined();
     expect(resolvePerformerRole('violín')).toBeUndefined();

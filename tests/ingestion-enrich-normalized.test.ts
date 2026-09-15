@@ -404,6 +404,51 @@ describe('enriquecimiento determinista de compositores conocidos', () => {
     expect(suite.composers).toEqual([{ name: 'Johann Sebastian Bach' }]);
   });
 
+  it('completa WORK de COMPOSER conocidos y desconocidos inequívocos', () => {
+    expect(
+      enrichNormalizedEvent(
+        event({
+          performers: [],
+          programText: [
+            'Obertura - Suite en sol menor TWV 55:g1 de G.P. Telemann',
+            'Ouverture GWV 473 de Ch. Graupner',
+            'Concierto para clave en la mayor BWV 1055 de J. S. Bach',
+          ].join('\n'),
+        }),
+      ).composers.map((item) => item.name),
+    ).toEqual(['Georg Philipp Telemann', 'Ch. Graupner', 'Johann Sebastian Bach']);
+
+    expect(
+      enrichNormalizedEvent(
+        event({
+          performers: [],
+          programText: '“Sinew” de Guillermo Rodríguez Peinado (obra de estreno)',
+        }),
+      ).composers.map((item) => item.name),
+    ).toEqual(['Guillermo Rodríguez Peinado']);
+
+    const brass = enrichNormalizedEvent(
+      event({
+        performers: [],
+        programText: [
+          'Transcripciones para Brass Band realizadas por César Guerrero de obras de G. Rossini,',
+          'S. Joplin, J.S. Bach, H. Mancini, L. Bernstein, J. Williams y Nino Rota, entre otros',
+          'compositores.',
+        ].join('\n'),
+      }),
+    );
+    expect(brass.composers.map((item) => item.name)).toEqual([
+      'Gioachino Rossini',
+      'S. Joplin',
+      'Johann Sebastian Bach',
+      'H. Mancini',
+      'Leonard Bernstein',
+      'J. Williams',
+      'Nino Rota',
+    ]);
+    expect(brass.composers.some((item) => /guerrero/i.test(item.name))).toBe(false);
+  });
+
   it('el fallback ocurre sobre el NormalizedEvent, antes de clasificar o publicar', () => {
     const normalized = normalizeRawEvent({
       sourceId: 'cndm',
