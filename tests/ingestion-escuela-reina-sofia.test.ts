@@ -449,10 +449,10 @@ describe('hidratación musical de la ficha Reina Sofía', () => {
     });
     const patch = parseReinaSofiaDetail(event, await fixture('detail-83108.html'));
     expect(patch.seriesText).toBe('Solistas del Siglo XXI');
-    expect(patch.performers).toEqual(expect.arrayContaining([
+    expect(patch.performers).toEqual([
       { name: 'Luis Aracama', roleText: 'violonchelista' },
       { name: 'Yiqi Chen', roleText: 'violonchelista' },
-    ]));
+    ]);
     expect(patch.works).toEqual([]);
   });
 
@@ -469,9 +469,9 @@ describe('hidratación musical de la ficha Reina Sofía', () => {
       },
     });
     const patch = parseReinaSofiaDetail(event, await fixture('detail-83109.html'));
-    expect(patch.performers).toEqual(expect.arrayContaining([
+    expect(patch.performers).toEqual([
       { name: 'Uladzislau Khandohi', roleText: 'pianista' },
-    ]));
+    ]);
     expect(patch.composers?.map((item) => item.name)).toEqual(expect.arrayContaining([
       'Chopin',
       'Liszt',
@@ -493,10 +493,10 @@ describe('hidratación musical de la ficha Reina Sofía', () => {
       },
     });
     const patch = parseReinaSofiaDetail(event, await fixture('detail-83111.html'));
-    expect(patch.performers).toEqual(expect.arrayContaining([
+    expect(patch.performers).toEqual([
       { name: 'Daisy Noton', roleText: 'flautista' },
       { name: 'Flavio Castellanos', roleText: 'clarinetista' },
-    ]));
+    ]);
     expect(patch.works).toEqual([]);
   });
 
@@ -517,11 +517,11 @@ describe('hidratación musical de la ficha Reina Sofía', () => {
       },
     });
     const patch = parseReinaSofiaDetail(event, await fixture('detail-83051.html'));
-    expect(patch.performers).toEqual(expect.arrayContaining([
+    expect(patch.performers).toEqual([
       { name: 'Orquesta Sinfónica Freixenet' },
       { name: 'Josep Pons', roleText: 'Director' },
       { name: 'Luis Aracama', roleText: 'Violonchelo' },
-    ]));
+    ]);
     expect(patch.composers?.map((item) => item.name)).toEqual(expect.arrayContaining(['Dvořák', 'Brahms']));
     expect(patch.programText).toBeUndefined();
     expect(patch.works).toEqual([]);

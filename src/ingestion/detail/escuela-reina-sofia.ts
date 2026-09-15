@@ -55,11 +55,11 @@ export function parseReinaSofiaDetail(event: RawEvent, body: string): ObservedFa
   const program = parseReinaSofiaProgram(body);
   const titlePeople = reinaSofiaTitlePerformers(event.observed.title);
   const descriptionPeople = description ? parseDescriptionPerformers(description) : [];
-  const performers = normalizePersonList([
+  const performers = collapseSameNamePeople(normalizePersonList([
     ...program.performers,
     ...titlePeople,
     ...descriptionPeople,
-  ]);
+  ]));
   const works = program.works;
   const composers = normalizeComposerList([
     ...program.composers,
@@ -88,7 +88,7 @@ export function reinaSofiaSeriesText(title: string): string | undefined {
 
 export function reinaSofiaTitlePerformers(title: string): ObservedPerson[] {
   const labeled = extractRoleLabeledCredits(title);
-  const people = labeled.performers.map((item) => ({ name: item.name, roleText: item.roleText }));
+  const people: ObservedPerson[] = labeled.performers.map((item) => ({ name: item.name, roleText: item.roleText }));
   const remainder = labeled.remainder.replace(/[.:]\s*$/u, '').trim();
   if (remainder && looksLikeEnsembleName(remainder)) {
     people.unshift({ name: remainder });
@@ -194,8 +194,11 @@ function reversedCatalogName(text: string): string {
 
 function parseDescriptionPerformers(description: string): ObservedPerson[] {
   const people: ObservedPerson[] = [];
-  const pair =
-    /\b(?:la|el)\s+(\w+)\s+([\p{L}][\p{L}'’.-]+(?:\s+[\p{L}][\p{L}'’.-]+){0,3})\s+y\s+(?:el|la)\s+(\w+)\s+([\p{L}][\p{L}'’.-]+(?:\s+[\p{L}][\p{L}'’.-]+){0,3})/giu;
+  const name = String.raw`[\p{L}][\p{L}'’.-]+(?:\s+[\p{L}][\p{L}'’.-]+){0,2}`;
+  const pair = new RegExp(
+    String.raw`\b(?:la|el)\s+(\w+)\s+(${name})\s+y\s+(?:el|la)\s+(\w+)\s+(${name})(?=[\s,]+(?:ofrecer|interpretar|como solista)|[.,]|$)`,
+    'giu',
+  );
   for (const match of description.matchAll(pair)) {
     const roleA = match[1] ?? '';
     const roleB = match[3] ?? '';
@@ -204,7 +207,7 @@ function parseDescriptionPerformers(description: string): ObservedPerson[] {
   }
 
   const plural = new RegExp(
-    String.raw`\b(?:los|las)\s+(${INSTRUMENT_ROLE})s\s+([\p{L}][\p{L}'’.-]+(?:\s+[\p{L}][\p{L}'’.-]+){0,3})\s+y\s+([\p{L}][\p{L}'’.-]+(?:\s+[\p{L}][\p{L}'’.-]+){0,3})\s+ofrecer`,
+    String.raw`\b(?:los|las)\s+(${INSTRUMENT_ROLE})s\s+(${name})\s+y\s+(${name})\s+ofrecer`,
     'giu',
   );
   for (const match of description.matchAll(plural)) {
@@ -213,14 +216,32 @@ function parseDescriptionPerformers(description: string): ObservedPerson[] {
   }
 
   const singular = new RegExp(
-    String.raw`\b(?:el|la)\s+(${INSTRUMENT_ROLE})\s+([\p{L}][\p{L}'’.-]+(?:\s+[\p{L}][\p{L}'’.-]+){0,3})(?=[\s,]+(?:ofrecer|interpretar|como solista))`,
+    String.raw`\b(?:el|la)\s+(${INSTRUMENT_ROLE})\s+(${name})(?=[\s,]+(?:ofrecer|interpretar|como solista))`,
     'giu',
   );
   for (const match of description.matchAll(singular)) {
     people.push({ name: match[2]!.trim(), roleText: match[1] });
   }
 
-  return normalizePersonList(people);
+  return normalizePersonList(people).filter((person) => looksLikePersonName(person.name));
+}
+
+function looksLikePersonName(name: string): boolean {
+  return !/\b(ofrecer\w*|interpretar\w*|recital|concierto)\b/iu.test(name);
+}
+
+function collapseSameNamePeople(people: ObservedPerson[]): ObservedPerson[] {
+  const byName = new Map<string, ObservedPerson>();
+  for (const person of people) {
+    const key = person.name.toLocaleLowerCase('es');
+    const existing = byName.get(key);
+    if (!existing) {
+      byName.set(key, person);
+      continue;
+    }
+    if (!existing.roleText && person.roleText) byName.set(key, person);
+  }
+  return [...byName.values()];
 }
 
 /**
