@@ -28,6 +28,8 @@
  * The homepage serializes only the initial subset. The full index and markup
  * live at `FULL_AGENDA_FRAGMENT_PATH` and are fetched on demand. Clearing
  * filters restores that subset unless the user has clicked «Mostrar todos».
+ * Expanding the list preserves a visible occurrence as a viewport anchor so
+ * the extra concerts appear below instead of jumping to the end.
  */
 import {
   canonicalVenueFilter,
@@ -161,7 +163,10 @@ export function initAgendaFilters(): void {
     runtime.userExpanded = true;
     void ensureFullAgendaLoaded().then((ok) => {
       if (!ok && runtime) runtime.userExpanded = false;
-      if (ok) apply();
+      if (!ok || !runtime) return;
+      // Extra occurrences may already be in the DOM (hidden after a filter
+      // cycle). Un-hiding them must keep the same visual point as replaceWith.
+      preservingAgendaViewport(runtime.root, () => apply());
     });
   });
   window.addEventListener('popstate', () => {
@@ -295,6 +300,54 @@ function syncMoreControls(truncated: boolean): void {
   if (button && truncated) button.disabled = false;
 }
 
+type AgendaViewportAnchor = {
+  occurrenceId: string;
+  top: number;
+};
+
+/**
+ * Last truncated occurrence still intersecting the viewport, or the last
+ * rendered one. Used as a stable visual reference while the list grows.
+ */
+function captureAgendaViewportAnchor(list: Element): AgendaViewportAnchor | null {
+  const items = [...list.querySelectorAll<HTMLElement>('[data-occurrence-id]')].filter(
+    (item) => !item.hidden,
+  );
+  const viewportBottom = window.innerHeight;
+  let visible: HTMLElement | null = null;
+  for (const item of items) {
+    const rect = item.getBoundingClientRect();
+    if (rect.bottom > 0 && rect.top < viewportBottom) visible = item;
+  }
+  const anchor = visible ?? items.at(-1) ?? null;
+  const occurrenceId = anchor?.dataset.occurrenceId;
+  if (!anchor || !occurrenceId) return null;
+  return { occurrenceId, top: anchor.getBoundingClientRect().top };
+}
+
+function restoreAgendaViewportAnchor(list: Element, anchor: AgendaViewportAnchor | null): void {
+  if (!anchor) return;
+  const el = list.querySelector<HTMLElement>(
+    `[data-occurrence-id="${CSS.escape(anchor.occurrenceId)}"]`,
+  );
+  if (!el || el.hidden) return;
+  const delta = el.getBoundingClientRect().top - anchor.top;
+  if (delta === 0) return;
+  const scrollingElement = document.documentElement;
+  const previous = scrollingElement.style.scrollBehavior;
+  scrollingElement.style.scrollBehavior = 'auto';
+  window.scrollBy(0, delta);
+  scrollingElement.style.scrollBehavior = previous;
+}
+
+function preservingAgendaViewport(root: HTMLElement, mutate: () => void): void {
+  const list = root.querySelector('[data-agenda-list]');
+  const anchor = list ? captureAgendaViewportAnchor(list) : null;
+  mutate();
+  const nextList = root.querySelector('[data-agenda-list]');
+  if (nextList) restoreAgendaViewportAnchor(nextList, anchor);
+}
+
 function showFailedFilterState(href: string): void {
   if (!runtime) return;
   const url = new URL(href, window.location.origin);
@@ -324,7 +377,14 @@ async function loadFullAgenda(state: AgendaRuntime): Promise<boolean> {
     const currentList = state.root.querySelector('[data-agenda-list]');
     if (!currentList) throw new Error('full-agenda-missing-list');
     const imported = document.importNode(parsed.list, true);
-    currentList.replaceWith(imported);
+    const insertFullList = () => {
+      currentList.replaceWith(imported);
+    };
+    // The «Mostrar todos» button sits after the list and is focused on click.
+    // Replacing the truncated list with a taller one would otherwise scroll
+    // the viewport down (scroll anchoring keeps that button in place).
+    if (state.userExpanded) preservingAgendaViewport(state.root, insertFullList);
+    else insertFullList();
     state.dataNode.textContent = JSON.stringify(parsed.items);
     state.items = parsed.items;
     state.fullLoaded = true;
