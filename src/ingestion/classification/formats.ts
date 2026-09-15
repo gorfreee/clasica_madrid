@@ -207,16 +207,7 @@ function recitalStrength(_facts: ObservedFacts, evidence: FormatEvidence): 'stro
 }
 
 function earlyMusicStrength(evidence: FormatEvidence): 'strong' | 'weak' {
-  const eventFields = eventFieldsOf(evidence);
-  if (
-    evidenceHasPhrase(eventFields, 'universo barroco') ||
-    evidenceHasPhrase(eventFields, 'musica antigua') ||
-    evidenceHasPhrase(eventFields, 'alte musik') ||
-    evidenceHasPhrase(eventFields, 'historicamente informad')
-  ) {
-    return 'strong';
-  }
-  return 'weak';
+  return hasEarlyMusicPhrase(eventFieldsOf(evidence)) ? 'strong' : 'weak';
 }
 
 /**
@@ -387,16 +378,24 @@ function isRecitalFormat(facts: ObservedFacts, evidence: FormatEvidence, already
   return false;
 }
 
+const EARLY_MUSIC_PHRASES = [
+  'universo barroco',
+  'musica antigua',
+  'musica barroca',
+  'musica medieval',
+  'musica renacentista',
+  'alte musik',
+  'historicamente informad',
+  'les arts florissants',
+  'les musiciens du louvre',
+] as const;
+
 function isEarlyMusicFormat(evidence: FormatEvidence): boolean {
-  const eventFields = eventFieldsOf(evidence);
-  return (
-    evidenceHasPhrase(eventFields, 'universo barroco') ||
-    evidenceHasPhrase(eventFields, 'musica antigua') ||
-    evidenceHasPhrase(eventFields, 'alte musik') ||
-    evidenceHasPhrase(eventFields, 'historicamente informad') ||
-    evidenceHasPhrase(eventFields, 'les arts florissants') ||
-    evidenceHasPhrase(eventFields, 'les musiciens du louvre')
-  );
+  return hasEarlyMusicPhrase(eventFieldsOf(evidence));
+}
+
+function hasEarlyMusicPhrase(fields: string[]): boolean {
+  return EARLY_MUSIC_PHRASES.some((phrase) => evidenceHasPhrase(fields, phrase));
 }
 
 function isLiedFormat(evidence: FormatEvidence): boolean {

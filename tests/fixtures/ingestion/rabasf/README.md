@@ -19,5 +19,6 @@ Event feed. The harvest surface is the `actividad_type=conciertos` archive.
 - `detail-la-folia.html`: https://www.realacademiabellasartessanfernando.com/actividades/conciertos/la-folia/
 - `detail-trio-arbos.html`: https://www.realacademiabellasartessanfernando.com/actividades/conciertos/trio-arbos-3/
 - `detail-rogelio-villar.html`: https://www.realacademiabellasartessanfernando.com/actividades/conciertos/rogelio-villar/
+- `detail-after-the-dance.html`: https://www.realacademiabellasartessanfernando.com/actividades/conciertos/after-the-dance/
 - `detail-piano.html`: https://www.realacademiabellasartessanfernando.com/actividades/conciertos/concierto-ii-del-festival-caprichos-del-romanticismo/
 - `detail-seikilos.html`: https://www.realacademiabellasartessanfernando.com/actividades/conciertos/seikilos/
