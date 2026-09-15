@@ -532,7 +532,6 @@ describe('toCandidate usa el matching source-aware', () => {
         venueText: 'Centro Cultural Buenavista (Salamanca)',
         venueFacilityId: '64851',
         venueAddress: 'Avenida Toreros, 5, 28028 Madrid',
-        venueAddress: 'Avenida Toreros, 5, 28028 Madrid',
       }),
       getSourceDefinition('madrid-datos'),
       catalog,
