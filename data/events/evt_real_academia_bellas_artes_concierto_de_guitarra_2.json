@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_real_academia_bellas_artes_concierto_de_guitarra_2",
+  "slug": "festival-internacional-de-guitarra-joaquin-rodrigo-de-madrid",
+  "title": "Festival Internacional de Guitarra “Joaquín Rodrigo” de Madrid",
+  "status": "scheduled",
+  "venueId": "ven_real_academia_bellas_artes_salon_actos",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_real_academia_bellas_artes_concierto_de_guitarra_2_01",
+      "date": "2026-10-05",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Presenta"
+    },
+    {
+      "name": "José Luis Ruiz del Puerto",
+      "role": "conductor"
+    },
+    {
+      "name": "Manuel Coves"
+    },
+    {
+      "name": "Ausiàs Parejo"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Luys Milan"
+    },
+    {
+      "name": "Gaspar Sanz"
+    },
+    {
+      "name": "Manuel de Falla"
+    },
+    {
+      "name": "Joaquín Rodrigo"
+    },
+    {
+      "name": "Transcripción de Ausiàs Parejo"
+    }
+  ],
+  "works": [
+    {
+      "title": "Dos fantasías",
+      "composerName": "Luys Milan"
+    },
+    {
+      "title": "El Maestro",
+      "composerName": "Luys Milan"
+    },
+    {
+      "title": "Danzas españolas",
+      "composerName": "Gaspar Sanz"
+    },
+    {
+      "title": "Homenaje a Debussy",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Invocación y danza",
+      "composerName": "Joaquín Rodrigo"
+    },
+    {
+      "title": "El amor brujo",
+      "composerName": "Manuel de Falla"
+    }
+  ],
+  "eras": [
+    "renaissance",
+    "baroque",
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_real_academia_bellas_artes_san_fernando",
+      "url": "https://www.realacademiabellasartessanfernando.com/actividades/conciertos/concierto-de-guitarra-2",
+      "checkedAt": "2026-09-15",
+      "externalId": "concierto-de-guitarra-2"
+    }
+  ],
+  "primarySourceId": "src_real_academia_bellas_artes_san_fernando",
+  "lastVerifiedAt": "2026-09-15"
+}

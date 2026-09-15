@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_real_academia_bellas_artes_la_folia",
+  "slug": "musica-en-torno-a-la-independencia-de-los-estados-unidos-de-america",
+  "title": "Música en torno a la Independencia de los Estados Unidos de América",
+  "status": "scheduled",
+  "venueId": "ven_real_academia_bellas_artes_salon_actos",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_real_academia_bellas_artes_la_folia_01",
+      "date": "2026-10-02",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Grupo de música barroca “La Folía”"
+    },
+    {
+      "name": "Pedro Bonet",
+      "role": "conductor"
+    },
+    {
+      "name": "Celia Alcedo"
+    },
+    {
+      "name": "Pedro Bonet"
+    },
+    {
+      "name": "Ignacio Zaragoza"
+    },
+    {
+      "name": "Pedro Bonet González"
+    },
+    {
+      "name": "Jorge López Escribano"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Juan Mathías de los Reyes Mapamundi"
+    },
+    {
+      "name": "Jean-Jacques Rousseau"
+    },
+    {
+      "name": "Luigi Boccherini"
+    },
+    {
+      "name": "Manuel Espinosa de los Monteros"
+    },
+    {
+      "name": "José Lidón"
+    },
+    {
+      "name": "Nicolas Bernier"
+    },
+    {
+      "name": "Giuseppe Cristiano Lidarti"
+    },
+    {
+      "name": "James Hewitt"
+    },
+    {
+      "name": "John Tufts"
+    },
+    {
+      "name": "Anne Hunter"
+    },
+    {
+      "name": "Esteban Salas"
+    }
+  ],
+  "works": [
+    {
+      "title": "Les consolations des misères de ma vie ou Recueil d’airs, romances et duos",
+      "composerName": "Jean-Jacques Rousseau"
+    },
+    {
+      "title": "Six Sonatas for the Violoncello",
+      "composerName": "Luigi Boccherini"
+    },
+    {
+      "title": "Libro de la Ordenanza de los toques de pífanos y tambores…",
+      "composerName": "Manuel Espinosa de los Monteros"
+    },
+    {
+      "title": "Seguidillas con acompañamiento de Forte-Piano",
+      "composerName": "José Lidón"
+    },
+    {
+      "title": "Cantates françoises… avec et sans symphonie. Troisième livre",
+      "composerName": "Nicolas Bernier"
+    },
+    {
+      "title": "VI Trio a due flauti traversi e violoncello col cimbalo",
+      "composerName": "Giuseppe Cristiano Lidarti"
+    },
+    {
+      "title": "(The New Federal Overture",
+      "composerName": "James Hewitt"
+    },
+    {
+      "title": "An Introduction to the singing of Psalm-Tunes,",
+      "composerName": "John Tufts"
+    },
+    {
+      "title": "Bay Psalm Book",
+      "composerName": "John Tufts"
+    },
+    {
+      "title": "New Edition,",
+      "composerName": "John Tufts"
+    },
+    {
+      "title": "El último mohicano",
+      "composerName": "John Tufts"
+    },
+    {
+      "title": "Hymns and Spiritual Songs…",
+      "composerName": "John Tufts"
+    },
+    {
+      "title": "Scottish songs,",
+      "composerName": "Anne Hunter"
+    },
+    {
+      "title": "The celebrated",
+      "composerName": "Anne Hunter"
+    },
+    {
+      "title": "Death Song…",
+      "composerName": "Anne Hunter"
+    }
+  ],
+  "eras": [
+    "classical"
+  ],
+  "formats": [],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_real_academia_bellas_artes_san_fernando",
+      "url": "https://www.realacademiabellasartessanfernando.com/actividades/conciertos/la-folia",
+      "checkedAt": "2026-09-15",
+      "externalId": "la-folia"
+    }
+  ],
+  "primarySourceId": "src_real_academia_bellas_artes_san_fernando",
+  "lastVerifiedAt": "2026-09-15"
+}
