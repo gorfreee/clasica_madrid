@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_escuela_reina_sofia_83109",
+  "slug": "solistas-del-siglo-xxi-fantasmas-de-la-forma-recital-de-piano",
+  "title": "Solistas del Siglo XXI. «Fantasmas de la forma»: recital de piano",
+  "status": "scheduled",
+  "venueId": "ven_escuela_superior_musica_reina_sofia_auditorio_sony",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_escuela_reina_sofia_83109_01",
+      "date": "2026-10-17",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_escuela_superior_musica_reina_sofia",
+      "url": "https://www.escuelasuperiordemusicareinasofia.es/evento/solistas-del-siglo-xxi-fantasmas-de-la-forma-recital-de-piano",
+      "checkedAt": "2026-09-15",
+      "externalId": "83109"
+    }
+  ],
+  "primarySourceId": "src_escuela_superior_musica_reina_sofia",
+  "lastVerifiedAt": "2026-09-15"
+}
