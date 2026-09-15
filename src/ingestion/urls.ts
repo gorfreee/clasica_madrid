@@ -27,6 +27,158 @@ export function urlPathIdentity(url: string): string {
   }
 }
 
+/**
+ * Whether a source URL can identify one event by itself.
+ *
+ * `event-detail`: the path or query contains a token that is likely unique to
+ * one concert (numeric/CMS id, UUID, a multi-token slug, or a non-collection
+ * last segment such as `/espectaculo/bayreuth`).
+ *
+ * `listing`: homepage or a reusable collection page (`/agenda`, `/eventos`,
+ * `/programacion`, …) that can host different events over time or several
+ * events at once. These URLs remain valid evidence/citations; they must not
+ * be used as the sole identity key.
+ */
+export type SourceUrlKind = 'event-detail' | 'listing';
+
+const UUID_SEGMENT =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Last-segment collection pages. Not an internet registry of every CMS. */
+const LISTING_PATH_SEGMENTS = new Set([
+  'actividad',
+  'actividades',
+  'actualidad',
+  'agenda',
+  'agendas',
+  'blog',
+  'buscar',
+  'busqueda',
+  'calendario',
+  'calendar',
+  'cartelera',
+  'concierto',
+  'conciertos',
+  'contact',
+  'contacto',
+  'event',
+  'evento',
+  'eventos',
+  'events',
+  'home',
+  'index',
+  'inicio',
+  'listing',
+  'listings',
+  'news',
+  'noticias',
+  'programa',
+  'programacion',
+  'programacion-cultural',
+  'programas',
+  'programmes',
+  'resultados',
+  'search',
+  'temporada',
+]);
+
+const IDENTITY_QUERY_KEYS = new Set([
+  'eid',
+  'event',
+  'event_id',
+  'eventid',
+  'evento',
+  'guid',
+  'id',
+  'nid',
+  'node',
+  'slug',
+  'uuid',
+  'vgnextoid',
+]);
+
+const NON_IDENTITY_QUERY_KEYS = new Set([
+  'filter',
+  'from',
+  'gclid',
+  'lang',
+  'limit',
+  'locale',
+  'mc_cid',
+  'mc_eid',
+  'mes',
+  'month',
+  'offset',
+  'order',
+  'page',
+  'pagina',
+  'q',
+  'query',
+  'search',
+  'sort',
+  'to',
+  'utm_campaign',
+  'utm_content',
+  'utm_medium',
+  'utm_source',
+  'utm_term',
+  'year',
+]);
+
+export function sourceUrlKind(url: string): SourceUrlKind {
+  try {
+    const parsed = new URL(normalizeUrl(url));
+    if (madridVgnextoid(url) || hasIdentifyingQuery(parsed)) return 'event-detail';
+    const segments = parsed.pathname.split('/').filter(Boolean).map(foldPathSegment).filter(Boolean);
+    if (segments.length === 0) return 'listing';
+    if (segments.some(pathSegmentIdentifiesEvent)) return 'event-detail';
+    const last = segments.at(-1);
+    if (last && LISTING_PATH_SEGMENTS.has(last)) return 'listing';
+    return 'event-detail';
+  } catch {
+    return 'listing';
+  }
+}
+
+export function urlIdentifiesSingleEvent(url: string): boolean {
+  return sourceUrlKind(url) === 'event-detail';
+}
+
+function pathSegmentIdentifiesEvent(segment: string): boolean {
+  if (UUID_SEGMENT.test(segment)) return true;
+  if (/\d/.test(segment)) return true;
+  const tokens = segment.split('-').filter(Boolean);
+  return tokens.length >= 3;
+}
+
+function hasIdentifyingQuery(url: URL): boolean {
+  for (const [rawKey, rawValue] of url.searchParams) {
+    const key = rawKey.trim().toLowerCase();
+    const value = rawValue.trim();
+    if (!key || !value) continue;
+    if (NON_IDENTITY_QUERY_KEYS.has(key) || key.startsWith('utm_')) continue;
+    if (IDENTITY_QUERY_KEYS.has(key)) return true;
+    if (UUID_SEGMENT.test(value)) return true;
+    if (/\d/.test(value) && value.length >= 8) return true;
+  }
+  return false;
+}
+
+function foldPathSegment(segment: string): string {
+  let decoded = segment;
+  try {
+    decoded = decodeURIComponent(segment);
+  } catch {
+    decoded = segment;
+  }
+  return decoded
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 export function urlsEquivalent(left: string, right: string): boolean {
   if (normalizeUrl(left) === normalizeUrl(right)) return true;
   const leftId = madridVgnextoid(left);

@@ -8,7 +8,13 @@ import {
   parseDiscoveryBatch,
   discoveryToRawEvents,
   type DiscoveryBatch,
+  type DiscoveryResearchManifest,
 } from './discovery.ts';
+import {
+  assessDiscoveryBatchEvidence,
+  discoveryResearchNotes,
+  type DiscoveryEvidenceDiagnostics,
+} from './discovery-evidence.ts';
 import { SOURCE_REGISTRY } from './registry.ts';
 import type { IngestHealth } from './health.ts';
 import {
@@ -66,6 +72,10 @@ export type DiscoveryBatchMeta = {
   batchSha256: string;
   observationCount: number;
   adapterCoverageGaps: AdapterCoverageGap[];
+  researchPresent: boolean;
+  research?: DiscoveryResearchManifest;
+  evidence: DiscoveryEvidenceDiagnostics;
+  researchNotes: string[];
   codeSha?: string;
 };
 
@@ -241,6 +251,8 @@ export function loadDiscoveryBatchFromGit(options: {
   const bytes = reader.readFileAtCommit(input.batchSha, input.batchPath);
   const parsed = parseDiscoveryBatchBytes(bytes);
   const catalog = options.catalog ?? emptyCatalog();
+  const evidence = assessDiscoveryBatchEvidence(parsed.batch);
+  const researchNotes = discoveryResearchNotes(parsed.batch, parsed.batch.research);
   return {
     batch: parsed.batch,
     bytes,
@@ -251,6 +263,10 @@ export function loadDiscoveryBatchFromGit(options: {
       batchSha256: parsed.sha256,
       observationCount: parsed.batch.observations.length,
       adapterCoverageGaps: findAdapterCoverageGaps(parsed.batch, catalog),
+      researchPresent: Boolean(parsed.batch.research),
+      ...(parsed.batch.research ? { research: parsed.batch.research } : {}),
+      evidence,
+      researchNotes,
       ...(options.codeSha ? { codeSha: options.codeSha } : {}),
     },
   };
@@ -465,6 +481,8 @@ export function formatDiscoveryAutomationPrBody(
     ...discoveryHumanReviewNotice(report),
     formatDiscoveryExecutionTable(report, extras),
     '',
+    formatDiscoveryResearchSection(extras.batch),
+    '',
     formatAdapterCoverageSection(extras.batch?.adapterCoverageGaps ?? []),
     '',
     'Esta PR sólo contiene cambios materiales bajo `data/**`. El DiscoveryBatch, reports y artefactos no se commitean. No se solicita auto-merge.',
@@ -541,6 +559,8 @@ function formatDiscoveryExecutionSections(
     '',
     formatDiscoveryCatalogExtras(extras.catalogDiff),
     '',
+    formatDiscoveryResearchSection(extras.batch),
+    '',
     formatAdapterCoverageSection(extras.batch?.adapterCoverageGaps ?? []),
   ].join('\n');
 }
@@ -597,6 +617,83 @@ function formatDiscoveryCatalogExtras(diff: CatalogPublicationDiff | undefined):
     `| Eventos nuevos en el diff | ${cell(listOrNone(diff?.newEvents))} |`,
     `| Eventos modificados en el diff | ${cell(listOrNone(diff?.modifiedEvents))} |`,
   ];
+  return lines.join('\n');
+}
+
+function formatDiscoveryResearchSection(batch: DiscoveryBatchMeta | undefined): string {
+  const lines = [
+    '### Investigación previa al batch',
+    '',
+    'Diagnóstico. No influye en eligibility ni en la publicación.',
+    '',
+  ];
+  if (!batch) {
+    lines.push('Sin metadatos de batch; no hay manifest de investigación.');
+    return lines.join('\n');
+  }
+
+  const research = batch.research;
+  if (!research) {
+    lines.push('Sin `DiscoveryResearchManifest` en el batch. No se puede distinguir “no había más eventos” de “se investigó poco”.');
+  } else {
+    lines.push('| Campo | Valor |', '|---|---|');
+    lines.push(`| Categorías investigadas | ${cell(listOrNone(research.investigatedCategories))} |`);
+    lines.push(`| Candidatos revisados (aprox.) | ${research.candidatesReviewedApprox} |`);
+    lines.push(`| Enviados al batch (manifest) | ${research.submittedToBatch} |`);
+    lines.push(`| Observaciones recibidas | ${batch.observationCount} |`);
+    lines.push(`| Fichas oficiales revisadas | ${cell(research.officialDetailReviewed)} |`);
+    lines.push(`| Leads / búsquedas | ${research.leads.length} |`);
+    lines.push('');
+    if (research.leads.length > 0) {
+      lines.push('Leads relevantes:', '');
+      for (const lead of research.leads.slice(0, AUTOMATION_PR_SAMPLE_LIMIT)) {
+        const kind = lead.kind ? `${lead.kind}: ` : '';
+        lines.push(`- ${kind}${lead.query}`);
+      }
+      if (research.leads.length > AUTOMATION_PR_SAMPLE_LIMIT) {
+        lines.push(`- … ${research.leads.length - AUTOMATION_PR_SAMPLE_LIMIT} más`);
+      }
+      lines.push('');
+    }
+    if (research.exclusions.length > 0) {
+      lines.push('| Motivo de no inclusión | Cantidad |', '|---|---:|');
+      for (const exclusion of research.exclusions) {
+        lines.push(`| ${cell(exclusion.reason)} | ${exclusion.count} |`);
+      }
+      lines.push('');
+    }
+    if (research.notes) {
+      lines.push(`Notas del agente: ${research.notes}`, '');
+    }
+  }
+
+  const evidence = batch.evidence;
+  lines.push('### Evidencia del batch', '');
+  lines.push('| Campo | Valor |', '|---|---|');
+  lines.push(`| Observaciones | ${evidence.observationCount} |`);
+  lines.push(`| Ricas / parciales / pobres | ${evidence.richCount} / ${evidence.partialCount} / ${evidence.sparseCount} |`);
+  lines.push(`| URL de ficha / listing | ${evidence.detailUrlCount} / ${evidence.listingUrlCount} |`);
+  lines.push(`| Fichas con evidencia pobre | ${evidence.detailUrlSparseCount} |`);
+  lines.push('');
+  if (evidence.warnings.length === 0) {
+    lines.push('Ninguna observación con URL de ficha y evidencia sospechosamente pobre.');
+  } else {
+    lines.push(
+      'Posible extracción incompleta (URL de ficha específica con casi sólo título/fecha/lugar). No bloquea la publicación; una fuente realmente escueta también puede aparecer aquí.',
+      '',
+    );
+    lines.push('| Evento | URL |', '|---|---|');
+    for (const warning of evidence.warnings.slice(0, AUTOMATION_PR_SAMPLE_LIMIT)) {
+      lines.push(`| ${cell(warning.title)} | ${cell(warning.url)} |`);
+    }
+  }
+
+  if (batch.researchNotes.length > 0) {
+    lines.push('', 'Notas:', '');
+    for (const note of batch.researchNotes) {
+      lines.push(`- ${note}`);
+    }
+  }
   return lines.join('\n');
 }
 

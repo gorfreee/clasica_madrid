@@ -252,6 +252,8 @@ describe('DiscoveryContext', () => {
     expect(
       context.evidenceInstructions.some((line) => /programa, compositores u obras/i.test(line)),
     ).toBe(true);
+    expect(context.evidenceInstructions.some((line) => /DiscoveryResearchManifest/i.test(line))).toBe(true);
+    expect(context.evidenceInstructions.some((line) => /ficha de detalle/i.test(line))).toBe(true);
     expect(parseDiscoveryContext(context).coveredEvents).toEqual([]);
   });
 
@@ -305,7 +307,8 @@ describe('DiscoveryContext', () => {
       expect.arrayContaining(['eligibility', 'kind', 'eras', 'formats', 'slug', 'id']),
     );
     expect(JSON.stringify(context.output.jsonSchema)).not.toContain('eligibility');
-    expect(JSON.stringify(context.output).length).toBeLessThan(12_000);
+    expect(JSON.stringify(context.output).length).toBeLessThan(20_000);
+    expect(JSON.stringify(context.output.jsonSchema)).toContain('research');
 
     const sample = parseDiscoveryBatch({
       schemaVersion: 1,

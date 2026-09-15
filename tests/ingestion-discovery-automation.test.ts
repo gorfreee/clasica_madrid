@@ -20,9 +20,11 @@ import {
   parseDiscoveryBatchPath,
   parseDiscoveryRequestRef,
   parseDiscoveryWorkflowInput,
+  type DiscoveryBatchMeta,
   type GitBatchReader,
 } from '../src/ingestion/discovery-automation.ts';
 import { parseDiscoveryBatch, type DiscoveryBatch } from '../src/ingestion/discovery.ts';
+import type { DiscoveryEvidenceDiagnostics } from '../src/ingestion/discovery-evidence.ts';
 
 const SHA = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 
@@ -53,6 +55,35 @@ function churchBatch(): DiscoveryBatch {
       },
     ],
   });
+}
+
+function sampleEvidence(overrides: Partial<DiscoveryEvidenceDiagnostics> = {}): DiscoveryEvidenceDiagnostics {
+  return {
+    observationCount: 3,
+    sparseCount: 0,
+    partialCount: 1,
+    richCount: 2,
+    listingUrlCount: 0,
+    detailUrlCount: 3,
+    detailUrlSparseCount: 0,
+    warnings: [],
+    ...overrides,
+  };
+}
+
+function sampleBatchMeta(overrides: Partial<DiscoveryBatchMeta> = {}): DiscoveryBatchMeta {
+  return {
+    batchRef: 'discovery-request/demo',
+    batchSha: SHA,
+    batchPath: DEFAULT_DISCOVERY_BATCH_PATH,
+    batchSha256: 'd'.repeat(64),
+    observationCount: 3,
+    adapterCoverageGaps: [],
+    researchPresent: false,
+    evidence: sampleEvidence(),
+    researchNotes: ['sin DiscoveryResearchManifest: no se puede auditar la cobertura de la búsqueda previa al batch'],
+    ...overrides,
+  };
 }
 
 function report(overrides: Partial<IngestReport> = {}): IngestReport {
@@ -225,6 +256,9 @@ describe('DiscoveryBatch como dato no confiable', () => {
     expect(loaded.meta.batchSha256).toMatch(/^[0-9a-f]{64}$/);
     expect(loaded.meta.adapterCoverageGaps).toEqual([]);
     expect(loaded.meta.codeSha).toBe('cccccccccccccccccccccccccccccccccccccccc');
+    expect(loaded.meta.researchPresent).toBe(false);
+    expect(loaded.meta.evidence.observationCount).toBe(1);
+    expect(loaded.meta.researchNotes[0]).toMatch(/sin DiscoveryResearchManifest/);
   });
 
   it('rechaza path traversal antes de hablar con git', () => {
@@ -376,12 +410,7 @@ describe('diff de publicación y health', () => {
 describe('report de Discovery', () => {
   it('incluye ventana, SHA del batch, clasificación, gaps y venues/sources nuevos', () => {
     const markdown = formatDiscoveryAutomationSummary(report(), 'https://example.test/run/1', {
-      batch: {
-        batchRef: 'discovery-request/demo',
-        batchSha: SHA,
-        batchPath: DEFAULT_DISCOVERY_BATCH_PATH,
-        batchSha256: 'd'.repeat(64),
-        observationCount: 3,
+      batch: sampleBatchMeta({
         adapterCoverageGaps: [
           {
             registryId: 'ateneo-madrid',
@@ -390,7 +419,19 @@ describe('report de Discovery', () => {
           },
         ],
         codeSha: 'c'.repeat(40),
-      },
+        researchPresent: true,
+        research: {
+          schemaVersion: 1,
+          investigatedCategories: ['coros', 'iglesias/parroquias'],
+          leads: [{ kind: 'search', query: 'concierto coro Madrid' }],
+          candidatesReviewedApprox: 24,
+          submittedToBatch: 3,
+          exclusions: [{ reason: 'already-covered', count: 10 }],
+          officialDetailReviewed: 'some',
+        },
+        researchNotes: [],
+        evidence: sampleEvidence({ detailUrlSparseCount: 1, warnings: [{ title: 'Recital COIIM', url: 'https://www.coiim.es/eventos/recital', reason: 'detail-url-sparse-evidence' }] }),
+      }),
       catalogDiff: {
         dataChanges: true,
         files: [{ path: 'data/venues/ven_iglesia.json', state: 'untracked' }],
@@ -413,6 +454,10 @@ describe('report de Discovery', () => {
     expect(markdown).toContain('| IA: clasificaciones por modelo | gemini-3.1-flash-lite: 7, llama-3.1-8b-instant: 2 |');
     expect(markdown).toContain('| IA: requests por provider | gemini: 8, groq: 3 |');
     expect(markdown).toContain('| IA: clasificaciones por provider | ninguno |');
+    expect(markdown).toContain('Investigación previa al batch');
+    expect(markdown).toContain('coros, iglesias/parroquias');
+    expect(markdown).toContain('already-covered');
+    expect(markdown).toContain('Recital COIIM');
     expect(markdown).not.toContain(process.env.GEMINI_API_KEY ?? 'GEMINI_API_KEY_PLACEHOLDER_SHOULD_NOT_MATCH_IF_UNSET');
   });
 
@@ -434,14 +479,10 @@ describe('report de Discovery', () => {
 
   it('el body de la PR exige revisión humana y no habla de auto-merge', () => {
     const body = formatDiscoveryAutomationPrBody(report({ health: 'review' }), 'https://example.test/run/1', {
-      batch: {
-        batchRef: 'discovery-request/demo',
-        batchSha: SHA,
-        batchPath: DEFAULT_DISCOVERY_BATCH_PATH,
+      batch: sampleBatchMeta({
         batchSha256: 'e'.repeat(64),
-        observationCount: 3,
-        adapterCoverageGaps: [],
-      },
+        researchNotes: [],
+      }),
     });
     expect(body).toContain('Actualización de catálogo desde Discovery');
     expect(body).toContain('revisión humana');

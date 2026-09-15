@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { normalizeRawEvent } from '../src/ingestion/normalize.ts';
-import { madridVgnextoid, normalizeUrl, urlsEquivalent } from '../src/ingestion/urls.ts';
+import {
+  madridVgnextoid,
+  normalizeUrl,
+  sourceUrlKind,
+  urlIdentifiesSingleEvent,
+  urlsEquivalent,
+} from '../src/ingestion/urls.ts';
 import type { RawEvent } from '../src/ingestion/types.ts';
 
 describe('normalizeUrl', () => {
@@ -36,6 +42,40 @@ describe('normalizeUrl', () => {
         'https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=0c4c7760175ff910VgnVCM100000891ecb1aRCRD',
       ),
     ).toBe(false);
+  });
+});
+
+describe('sourceUrlKind', () => {
+  it('trata agendas permanentes, homepages y listados como listing', () => {
+    expect(sourceUrlKind('https://corofrancispoulenc.com/agenda')).toBe('listing');
+    expect(sourceUrlKind('https://corofrancispoulenc.com/agenda/')).toBe('listing');
+    expect(sourceUrlKind('https://corofrancispoulenc.com/')).toBe('listing');
+    expect(sourceUrlKind('https://example.org/eventos')).toBe('listing');
+    expect(sourceUrlKind('https://example.org/programacion')).toBe('listing');
+    expect(sourceUrlKind('https://example.org/conciertos')).toBe('listing');
+    expect(sourceUrlKind('https://auditorionacional.inaem.gob.es/es/programacion')).toBe('listing');
+    expect(sourceUrlKind('https://caixaforum.org/es/madrid/agenda')).toBe('listing');
+    expect(sourceUrlKind('https://example.org/agenda?page=2')).toBe('listing');
+    expect(urlIdentifiesSingleEvent('https://corofrancispoulenc.com/agenda')).toBe(false);
+  });
+
+  it('trata fichas con id, slug largo o segmento no genérico como event-detail', () => {
+    expect(
+      sourceUrlKind(
+        'https://www.coiim.es/eventos/recital-de-violin-y-piano-de-bruch-a-rachmaninoff-paisajes-del-romanticismo',
+      ),
+    ).toBe('event-detail');
+    expect(sourceUrlKind('https://caixaforum.org/es/madrid/p/a-delta-trio-madrid')).toBe('event-detail');
+    expect(sourceUrlKind('https://www.teatroreal.es/es/espectaculo/demo')).toBe('event-detail');
+    expect(sourceUrlKind('https://cndm.inaem.gob.es/node/23846')).toBe('event-detail');
+    expect(sourceUrlKind('https://www.parroquia.example/conciertos/bach')).toBe('event-detail');
+    expect(sourceUrlKind('https://example.org/evento?id=12')).toBe('event-detail');
+    expect(
+      sourceUrlKind(
+        'https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=aab47760175ff910VgnVCM100000891ecb1aRCRD',
+      ),
+    ).toBe('event-detail');
+    expect(urlIdentifiesSingleEvent('https://www.teatroreal.es/es/espectaculo/bayreuth')).toBe(true);
   });
 });
 
