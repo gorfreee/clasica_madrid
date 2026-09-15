@@ -1,0 +1,370 @@
+name: Manual discovery
+
+on:
+  workflow_dispatch:
+    inputs:
+      batch_ref:
+        description: Rama de petición discovery-request/… que contiene el DiscoveryBatch
+        type: string
+        required: true
+      batch_sha:
+        description: SHA completo (40 hex) del commit que contiene el batch
+        type: string
+        required: true
+      batch_path:
+        description: JSON del batch dentro de ese commit
+        type: string
+        default: ingestion/requests/discovery-batch.json
+        required: true
+      from:
+        description: Fecha inicial YYYY-MM-DD (requiere to; misma ventana que el DiscoveryContext)
+        type: string
+        required: false
+      to:
+        description: Fecha final YYYY-MM-DD (requiere from)
+        type: string
+        required: false
+      ai_max_requests:
+        description: Tope opcional de requests HTTP de IA
+        type: string
+        required: false
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: ingestion-production
+  cancel-in-progress: false
+
+jobs:
+  discover:
+    name: Ingest discovery batch and publish data PR
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      AI_PROVIDER: pool
+      AI_ZERO_COST_ONLY: 'true'
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      GROQ_FREE_TIER_CONFIRMED: ${{ vars.GROQ_FREE_TIER_CONFIRMED }}
+      GROQ_MODELS: ${{ vars.GROQ_MODELS }}
+      GROQ_MODEL_RPM: ${{ vars.GROQ_MODEL_RPM }}
+      GROQ_MODEL_TPM: ${{ vars.GROQ_MODEL_TPM }}
+      GROQ_MODEL_RPD: ${{ vars.GROQ_MODEL_RPD }}
+      GROQ_MODEL_MAX_CONCURRENT: ${{ vars.GROQ_MODEL_MAX_CONCURRENT }}
+      GROQ_MODEL_MIN_INTERVAL_MS: ${{ vars.GROQ_MODEL_MIN_INTERVAL_MS }}
+      GROQ_MAX_CONCURRENT: ${{ vars.GROQ_MAX_CONCURRENT }}
+      GROQ_MIN_INTERVAL_MS: ${{ vars.GROQ_MIN_INTERVAL_MS }}
+      MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+      MISTRAL_FREE_MODE_CONFIRMED: ${{ vars.MISTRAL_FREE_MODE_CONFIRMED }}
+      MISTRAL_MODELS: ${{ vars.MISTRAL_MODELS }}
+      MISTRAL_MODEL_RPM: ${{ vars.MISTRAL_MODEL_RPM }}
+      MISTRAL_MODEL_TPM: ${{ vars.MISTRAL_MODEL_TPM }}
+      MISTRAL_MODEL_RPD: ${{ vars.MISTRAL_MODEL_RPD }}
+      MISTRAL_MODEL_MAX_CONCURRENT: ${{ vars.MISTRAL_MODEL_MAX_CONCURRENT }}
+      MISTRAL_MODEL_MIN_INTERVAL_MS: ${{ vars.MISTRAL_MODEL_MIN_INTERVAL_MS }}
+      MISTRAL_MAX_CONCURRENT: ${{ vars.MISTRAL_MAX_CONCURRENT }}
+      MISTRAL_MIN_INTERVAL_MS: ${{ vars.MISTRAL_MIN_INTERVAL_MS }}
+      ZAI_API_KEY: ${{ secrets.ZAI_API_KEY }}
+      ZAI_MODELS: ${{ vars.ZAI_MODELS }}
+      ZAI_MODEL_RPM: ${{ vars.ZAI_MODEL_RPM }}
+      ZAI_MODEL_TPM: ${{ vars.ZAI_MODEL_TPM }}
+      ZAI_MODEL_RPD: ${{ vars.ZAI_MODEL_RPD }}
+      ZAI_MODEL_MAX_CONCURRENT: ${{ vars.ZAI_MODEL_MAX_CONCURRENT }}
+      ZAI_MODEL_MIN_INTERVAL_MS: ${{ vars.ZAI_MODEL_MIN_INTERVAL_MS }}
+      ZAI_MAX_CONCURRENT: ${{ vars.ZAI_MAX_CONCURRENT }}
+      ZAI_MIN_INTERVAL_MS: ${{ vars.ZAI_MIN_INTERVAL_MS }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_WORKERS_FREE_CONFIRMED: ${{ vars.CLOUDFLARE_WORKERS_FREE_CONFIRMED }}
+      CLOUDFLARE_MODELS: ${{ vars.CLOUDFLARE_MODELS }}
+      CLOUDFLARE_MODEL_RPM: ${{ vars.CLOUDFLARE_MODEL_RPM }}
+      CLOUDFLARE_MODEL_TPM: ${{ vars.CLOUDFLARE_MODEL_TPM }}
+      CLOUDFLARE_MODEL_RPD: ${{ vars.CLOUDFLARE_MODEL_RPD }}
+      CLOUDFLARE_MODEL_MAX_CONCURRENT: ${{ vars.CLOUDFLARE_MODEL_MAX_CONCURRENT }}
+      CLOUDFLARE_MODEL_MIN_INTERVAL_MS: ${{ vars.CLOUDFLARE_MODEL_MIN_INTERVAL_MS }}
+      CLOUDFLARE_MAX_CONCURRENT: ${{ vars.CLOUDFLARE_MAX_CONCURRENT }}
+      CLOUDFLARE_MIN_INTERVAL_MS: ${{ vars.CLOUDFLARE_MIN_INTERVAL_MS }}
+      AI_STATE_DIR: ${{ github.workspace }}/.local/ai
+      REPORT_PATH: ingestion/reports/discovery-run-${{ github.run_id }}-${{ github.run_attempt }}/report.json
+      OBS_DIR: ingestion/reports/discovery-run-${{ github.run_id }}-${{ github.run_attempt }}
+      ARTIFACT_NAME: discovery-run-${{ github.run_id }}-${{ github.run_attempt }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+    steps:
+      - name: Require workflow from main
+        env:
+          EVENT_REF: ${{ github.ref }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_REF" != "refs/heads/main" ]]; then
+            echo "Manual discovery solo se ejecuta desde main. Recibido: $EVENT_REF" >&2
+            echo 'Usa: gh workflow run "Manual discovery" --ref main ...' >&2
+            exit 1
+          fi
+
+      - name: Checkout trusted main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: true
+          fetch-depth: 1
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Restore persistent AI pool state
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: |
+            .local/ai/quota.json
+            .local/ai/cache/**
+            .local/ai/pending/**
+          key: ingestion-ai-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            ingestion-ai-${{ runner.os }}-
+            ingestion-gemini-${{ runner.os }}-
+
+      - name: Install
+        run: npm ci
+
+      - name: Resolve and validate inputs
+        id: config
+        env:
+          BATCH_REF: ${{ inputs.batch_ref }}
+          BATCH_SHA: ${{ inputs.batch_sha }}
+          BATCH_PATH: ${{ inputs.batch_path }}
+          FROM_DATE: ${{ inputs.from }}
+          TO_DATE: ${{ inputs.to }}
+          AI_MAX_REQUESTS: ${{ inputs.ai_max_requests }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx tsx src/cli/discovery-automation.ts validate-input --output "$GITHUB_OUTPUT"
+
+      - name: Load untrusted DiscoveryBatch
+        id: batch
+        env:
+          BATCH_REF: ${{ steps.config.outputs.batch_ref }}
+          BATCH_SHA: ${{ steps.config.outputs.batch_sha }}
+          BATCH_PATH: ${{ steps.config.outputs.batch_path }}
+          CODE_SHA: ${{ steps.config.outputs.code_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$OBS_DIR"
+          npx tsx src/cli/discovery-automation.ts load-batch \
+            --ref "$BATCH_REF" \
+            --sha "$BATCH_SHA" \
+            --path "$BATCH_PATH" \
+            --code-sha "$CODE_SHA" \
+            --output "$OBS_DIR/discovery-batch.json" \
+            --meta "$OBS_DIR/batch-meta.json" \
+            --github-output "$GITHUB_OUTPUT"
+
+      - name: Run discovery ingest
+        env:
+          FROM_DATE: ${{ steps.config.outputs.from }}
+          TO_DATE: ${{ steps.config.outputs.to }}
+          AI_MAX_REQUESTS: ${{ steps.config.outputs.ai_max_requests }}
+          GITHUB_SHA: ${{ steps.config.outputs.code_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$OBS_DIR"
+          args=("$OBS_DIR/discovery-batch.json" --report "$REPORT_PATH" --observability-dir "$OBS_DIR")
+          if [[ -n "$FROM_DATE" && -n "$TO_DATE" ]]; then
+            args+=(--from "$FROM_DATE" --to "$TO_DATE")
+          fi
+          if [[ -n "$AI_MAX_REQUESTS" ]]; then
+            args+=(--ai-max-requests "$AI_MAX_REQUESTS")
+          fi
+          npm run ingest:discovery -- "${args[@]}" 2>&1 | tee "$OBS_DIR/run.log"
+
+      - name: Enforce publication diff boundary
+        id: changes
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx tsx src/cli/discovery-automation.ts inspect-diff \
+            --output "$GITHUB_OUTPUT" \
+            --json "$OBS_DIR/catalog-diff.json"
+
+      - name: Render report and PR body
+        id: report
+        if: always()
+        env:
+          PR_BODY_PATH: ${{ runner.temp }}/discovery-pr-body.md
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=(
+            --summary "$GITHUB_STEP_SUMMARY"
+            --pr-body "$PR_BODY_PATH"
+            --run-url "$RUN_URL"
+            --output "$GITHUB_OUTPUT"
+            --artifact-name "$ARTIFACT_NAME"
+          )
+          if [[ -f "$REPORT_PATH" ]]; then
+            args+=(--report "$REPORT_PATH")
+          fi
+          if [[ -f "$OBS_DIR/run.json" ]]; then
+            args+=(--run-manifest "$OBS_DIR/run.json")
+          fi
+          if [[ -f "$OBS_DIR/batch-meta.json" ]]; then
+            args+=(--batch-meta "$OBS_DIR/batch-meta.json")
+          fi
+          if [[ -f "$OBS_DIR/catalog-diff.json" ]]; then
+            args+=(--catalog-diff "$OBS_DIR/catalog-diff.json")
+          fi
+          npx tsx src/cli/discovery-automation.ts format-report "${args[@]}"
+
+      - name: Annotate non-clean health
+        if: always() && steps.report.outputs.report_available == 'true' && steps.report.outputs.health != 'clean'
+        env:
+          HEALTH: ${{ steps.report.outputs.health }}
+        shell: bash
+        run: |
+          if [[ "$HEALTH" == "fatal" ]]; then
+            echo "::error::Discovery terminó con health fatal; no se publicará ninguna PR."
+          else
+            echo "::warning::Discovery terminó con health $HEALTH; revisa los motivos en el summary y el report."
+          fi
+
+      - name: Upload discovery run artifact
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: discovery-run-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.OBS_DIR }}
+          if-no-files-found: ignore
+          retention-days: 90
+
+      - name: Publish data pull request
+        id: publish
+        if: success() && steps.report.outputs.report_available == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.INGESTION_BOT_TOKEN }}
+          PR_BODY_PATH: ${{ runner.temp }}/discovery-pr-body.md
+          DATA_CHANGES: ${{ steps.changes.outputs.data_changes }}
+          HEALTH: ${{ steps.report.outputs.health }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          decision_path="${RUNNER_TEMP}/discovery-publish-decision.txt"
+          npx tsx src/cli/discovery-automation.ts decide-publish \
+            --health "$HEALTH" \
+            --data-changes "$DATA_CHANGES" \
+            --report-available true \
+            --output "$decision_path"
+          cat "$decision_path" >> "$GITHUB_OUTPUT"
+
+          publish_flag=""
+          draft_flag=""
+          action=""
+          while IFS= read -r line; do
+            case "$line" in
+              publish=*) publish_flag="${line#publish=}" ;;
+              draft=*) draft_flag="${line#draft=}" ;;
+              action=*) action="${line#action=}" ;;
+            esac
+          done < "$decision_path"
+
+          if [[ "$action" == "no-op" || "$publish_flag" != "true" ]]; then
+            if [[ "$HEALTH" == "review" ]]; then
+              echo "::warning::Health review sin cambios materiales; no se crea PR."
+            fi
+            {
+              echo
+              echo "### Publicación"
+              echo "No-op: no hay cambios materiales en \`data/**\`; no se creó branch, commit ni PR."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          branch="automation/discovery-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git switch -c "$branch"
+          git config user.name "Clásica Madrid Ingestion Bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- data
+          if git diff --cached --quiet; then
+            echo "El diff material desapareció antes del commit" >&2
+            exit 1
+          fi
+          if git diff --cached --name-only | grep -Ev '^data/' >/dev/null; then
+            echo "El commit contendría cambios fuera de data/**" >&2
+            exit 1
+          fi
+          git commit -m "Update catalog from manual discovery"
+          commit_sha=$(git rev-parse HEAD)
+          gh auth setup-git
+          git push --set-upstream origin "$branch"
+
+          {
+            echo
+            echo "### Publicación"
+            echo "Branch publicada: [\`$branch\`](https://github.com/${GITHUB_REPOSITORY}/tree/${branch})"
+            echo "Commit: \`$commit_sha\`"
+            echo
+            echo "Los cambios de \`data/**\` ya están en el remoto. Si la creación de la PR falla a continuación, Discovery no se ha perdido."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          draft_args=()
+          if [[ "$draft_flag" == "true" || "$HEALTH" == "review" ]]; then
+            draft_args+=(--draft)
+          fi
+
+          pr_create_err=$(mktemp)
+          set +e
+          pr_url=$(gh pr create \
+            --repo "$GITHUB_REPOSITORY" \
+            --base main \
+            --head "$branch" \
+            --title "Discovery catalog update" \
+            --body-file "$PR_BODY_PATH" \
+            "${draft_args[@]}" 2>"$pr_create_err")
+          pr_create_status=$?
+          set -e
+          pr_create_message=$(cat "$pr_create_err")
+          rm -f "$pr_create_err"
+
+          if [[ "$pr_create_status" -ne 0 || "$pr_url" == *$'\n'* || "$pr_url" != https://github.com/*/pull/* ]]; then
+            echo "::error::Falló la creación de la PR de Discovery tras publicar \`$branch\` ($commit_sha). La ingestión no se perdió; falta abrir la PR. ${pr_create_message}"
+            {
+              echo
+              echo "> [!CAUTION]"
+              echo "> No se pudo crear la PR automática. Branch y commit ya están en el remoto."
+              echo
+              echo "Error: ${pr_create_message}"
+              echo
+              echo "Recuperación manual:"
+              echo
+              echo "1. Abrir https://github.com/${GITHUB_REPOSITORY}/pull/new/${branch}"
+              echo "2. O crear la PR con un body corto que enlace a esta ejecución:"
+              echo
+              echo "\`\`\`bash"
+              echo "gh pr create --repo $GITHUB_REPOSITORY --base main --head $branch --title \"Discovery catalog update\" --body \"Discovery manual. Detalle en $RUN_URL\""
+              echo "\`\`\`"
+              if [[ "$HEALTH" == "review" ]]; then
+                echo
+                echo "Health es \`review\`: crea la PR como draft (\`--draft\`)."
+              fi
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          echo "pr_url=$pr_url" >> "$GITHUB_OUTPUT"
+          {
+            echo
+            echo "PR creada: $pr_url"
+            echo "No se solicita auto-merge; requiere revisión humana."
+            if [[ "$HEALTH" == "review" ]]; then
+              echo "Se creó como draft por health review."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

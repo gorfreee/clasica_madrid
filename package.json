@@ -17,6 +17,7 @@
     "ingest:source": "tsx src/cli/ingest.ts source",
     "ingest:discovery": "tsx src/cli/ingest.ts discovery",
     "ingest:discovery-context": "tsx src/cli/discovery-context.ts",
+    "ingest:discovery-automation": "tsx src/cli/discovery-automation.ts",
     "ai:smoke": "tsx src/cli/smoke-ai-route.ts",
     "ai:smoke:all": "tsx src/cli/smoke-ai-route.ts --all-routes",
     "ai:qualify": "tsx src/cli/qualify-ai-route.ts",

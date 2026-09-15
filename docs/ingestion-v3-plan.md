@@ -67,6 +67,7 @@ Cada descubrimiento debe intentar reducir trabajo futuro: si proviene de una fue
 | Reconciliation determinista | En producción | [`docs/ingestion.md`](ingestion.md) |
 | Automatización y publicación (Actions, PR, CI, auto-merge condicionado) | En producción | [`docs/ingestion.md`](ingestion.md), `.github/workflows/` |
 | Discovery v1 (contexto / batch estructurado) | En producción | [`docs/ingestion.md`](ingestion.md) |
+| Discovery manual en Actions (código de `main` + AI pool) | En producción | [`docs/run-discovery-agent.md`](run-discovery-agent.md), `.github/workflows/discovery.yml` |
 | Observabilidad de ejecuciones | En producción | [`docs/ingestion.md`](ingestion.md) |
 | Búsqueda web automática de discovery | Pendiente | este documento |
 | Scheduling propio de discovery | Pendiente | este documento |
@@ -115,7 +116,7 @@ El flujo objetivo —hoy el flujo real de harvesting— es:
                     RawEvent[]  →  mismo pipeline
 ```
 
-Harvesting y discovery convergen en `RawEvent` / `PipelineSource` antes de normalize. Discovery v1 exporta un contexto compacto para un agente externo e importa un batch de hechos observados; no extrae la web ni evalúa desapariciones.
+Harvesting y discovery convergen en `RawEvent` / `PipelineSource` antes de normalize. Discovery v1 exporta un contexto compacto para un agente externo e importa un batch de hechos observados; no extrae la web ni evalúa desapariciones. El workflow manual de Actions consume ese batch con código de `main` y el AI pool; no programa Discovery.
 
 Mientras el volumen lo permita, la implementación es TypeScript en esta repo. Copiar patrones (adapter por fuente, modelo intermedio, strict interpretation, aislamiento de fallos, IA después de reglas baratas), no plataformas completas. La estructura de carpetas es la del código, no una especulación de este documento.
 
@@ -165,7 +166,7 @@ No añadas branch protection ni required checks. El detalle de health, kill swit
 
 ## 9. Discovery: qué hay y qué falta
 
-El harvesting de fuentes conocidas nunca cubrirá la larga cola. Discovery v1 ya permite que un agente externo reciba un contexto compacto y devuelva un batch estructurado al pipeline común. El código de esta repo no busca en la web ni programa esas ejecuciones.
+El harvesting de fuentes conocidas nunca cubrirá la larga cola. Discovery v1 ya permite que un agente externo reciba un contexto compacto y devuelva un batch estructurado al pipeline común. Un workflow manual de GitHub Actions importa ese batch con código de `main` y el AI pool de producción. El código de esta repo no busca en la web ni programa esas ejecuciones.
 
 Siguen pendientes, y no deben añadirse de pasada:
 
@@ -174,7 +175,7 @@ Siguen pendientes, y no deben añadirse de pasada:
 - un ledger o aprendizaje que promocione fuentes recurrentes a adapters;
 - fuzzy reconciliation para encajar descubrimientos ambiguos con el catálogo.
 
-Tarea conceptual de un agente de discovery: eventos de los próximos 120 días que probablemente no estén cubiertos; devolver hechos estructurados y señalar fuentes recurrentes nuevas para evaluación humana o una tarea posterior de adapter.
+Tarea conceptual de un agente de discovery: eventos de los próximos 120 días que probablemente no estén cubiertos; devolver hechos estructurados y señalar fuentes recurrentes nuevas para evaluación humana o una tarea posterior de adapter. Playbook operativo: [`docs/run-discovery-agent.md`](run-discovery-agent.md).
 
 ---
 

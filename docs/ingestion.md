@@ -12,6 +12,8 @@ Puerta de entrada operativa: qué hay implementado y cómo ejecutarlo.
 | Prompt del fallback de IA | `src/ingestion/classification/ai-prompt.ts` |
 | Golden evaluation set | `tests/fixtures/ingestion/golden/` |
 | Qualification benchmark (calidad de models, no smoke) | `tests/fixtures/ingestion/ai-qualification/` · `npm run ai:qualify` |
+| Discovery: playbook para un agente externo | [`run-discovery-agent.md`](run-discovery-agent.md) |
+| Discovery: pistas de búsqueda (no es un registry) | [`discovery-search-hints.md`](discovery-search-hints.md) |
 | Variables de entorno de IA | `.env.example` |
 | Pool gratuito multi-provider y setup | [`ai-providers.md`](ai-providers.md) |
 | Histórico (no es requisito vigente) | [`docs/archive/`](archive/) |
@@ -22,7 +24,7 @@ La web no escribe datos. Todo lo publicado entra por Git, pasa validación deter
 
 Harvesting de fuentes conocidas y automatización de producción: extraer, hidratar fichas cuando el adapter lo soporta, normalizar, resolver identidad, clasificar y reconciliar contra el catálogo; después, publicar cambios materiales mediante PR y CI.
 
-Discovery v1 (dos piezas): un comando determinista exporta un `DiscoveryContext` compacto para un agente externo con web search; el agente devuelve un `DiscoveryBatch` de hechos observados y el mismo pipeline lo normaliza, clasifica y reconcilia. No hay búsqueda web, scheduling ni promoción a adapters dentro de esta repo.
+Discovery v1: un comando determinista exporta un `DiscoveryContext` compacto para un agente externo con web search; el agente devuelve un `DiscoveryBatch` de hechos observados. El mismo pipeline lo normaliza, clasifica y reconcilia. Un workflow manual de GitHub Actions (`Manual discovery`) importa ese batch usando **código de `main`** y el AI pool de producción. No hay búsqueda web dentro de esta repo, ni scheduling de Discovery, ni promoción a adapters.
 
 ```text
 registry → extract → hydrate → normalize → deterministic enrich → identity → classify/enrich → publication gate → reconcile → validate → write
@@ -46,7 +48,7 @@ registry → extract → hydrate → normalize → deterministic enrich → iden
 - Una reverificación que sólo cambia `event.lastVerifiedAt` y/o `citation.checkedAt` **no** es un cambio material (`materialEventDiffs` ignora esos timestamps) y **no** reescribe el JSON en cada ejecución. La frescura cotidiana queda en el report (`unchangedEvents`, `window`, `health`). Excepción operativa: si la reverificación es correcta, no hay cambio material y el `lastVerifiedAt` publicado tiene **30 días o más** de antigüedad respecto a la fecha civil de la ejecución en `Europe/Madrid`, se escribe el evento para refrescar `lastVerifiedAt` y los `checkedAt` de las citas realmente reverificadas. Ese caso cuenta como `updatedEvents` porque hay escritura; no genera `fieldDiffs` editoriales. El umbral está centralizado en `VERIFICATION_REFRESH_AFTER_DAYS`. Si hay algún cambio material, se escribe el evento completo con los timestamps de verificación actuales, aunque no se haya alcanzado el umbral. `--dry-run` reporta esa escritura prevista sin tocar `data/**`.
 - Cada ejecución evalúa `health`: `clean` | `degraded` | `review` | `fatal`. `autoMergeEligible` es true sólo en `clean` y `degraded`. El workflow de producción consume exclusivamente estos campos machine-readable para decidir si falla, crea draft o permite auto-merge.
 
-No están implementados (no los añadas salvo que una tarea pida esa capacidad): búsqueda web de discovery, scheduling de discovery, aprendizaje de sources ni reconciliación fuzzy. GitHub Actions no genera ni consume `DiscoveryContext`.
+No están implementados (no los añadas salvo que una tarea pida esa capacidad): búsqueda web de discovery dentro del repo, scheduling de discovery, aprendizaje de sources ni reconciliación fuzzy. GitHub Actions no genera `DiscoveryContext` ni navega la web. El workflow manual **Manual discovery** sí consume un `DiscoveryBatch` ya producido por un agente, siempre con código de `main`.
 
 Las fuentes concretas, adapters, flags de CLI y detalles de matching viven en el código. No los dupliques aquí.
 
@@ -76,10 +78,11 @@ Sin `--from`/`--to`, la ventana es hoy en Europe/Madrid → +120 días. `--seaso
 
 El harvesting cubre fuentes del registry. Discovery cubre lo que todavía no tiene adapter: una parroquia, un conservatorio, un concierto puntual. Un agente (Cursor, ChatGPT u otro, con web search) busca fuera; el código de ingestión no navega la web.
 
-Hay dos piezas, y sólo esas:
+Hay tres piezas:
 
 1. **Contexto.** `npm run ingest:discovery-context` vuelca un `DiscoveryContext` JSON compacto: ventana (por defecto la misma de Ingestion v3: hoy en Europe/Madrid → +120 días), sources harvesteadas y canónicas ya conocidas, venues, fingerprints de eventos cuya representación intersecta la ventana, un resumen editorial estable, reglas breves de evidencia y el contrato de output (`DiscoveryBatch` schemaVersion 1, derivado del schema ejecutable). El alcance geográfico del resumen es el municipio de Madrid, con `nearby` sólo para municipios muy próximos; no cubre toda la Comunidad de Madrid. Sirve para que el agente evite rebuscar Teatro Real / Auditorio / March y reconozca un redescubrimiento. No es la Classification Policy ejecutable ni un volcado del catálogo.
-2. **Import.** El agente escribe un `DiscoveryBatch` de **hechos observados** (título, fechas, URL que respalda el evento, venue, intérpretes/obras si la fuente los declara). No entrega `eligibility`, `kind`, `formats`, `eras`, slugs ni Candidates canónicos. `npm run ingest:discovery` lo pasa al pipeline común, que clasifica y publica exactamente como en harvesting.
+2. **Import local.** El agente escribe un `DiscoveryBatch` de **hechos observados** (título, fechas, URL que respalda el evento, venue, intérpretes/obras si la fuente los declara). No entrega `eligibility`, `kind`, `formats`, `eras`, slugs ni Candidates canónicos. `npm run ingest:discovery` lo pasa al pipeline común, que clasifica y publica exactamente como en harvesting.
+3. **Import en producción.** El playbook [`run-discovery-agent.md`](run-discovery-agent.md) describe cómo publicar el batch en una rama `discovery-request/…` y lanzar **Actions → Manual discovery** contra `main`. El job hace checkout de `main`, lee sólo el JSON anclado a un SHA, ejecuta `ingest:discovery` una vez con el AI pool, y abre una PR de `data/**` si hay cambios. No ejecuta código de la rama de petición. No hay auto-merge.
 
 El `DiscoveryContext` es input del agente. El `DiscoveryBatch` es output del agente, no una cola de producción. Forma conceptual:
 
@@ -87,7 +90,8 @@ El `DiscoveryContext` es input del agente. El `DiscoveryBatch` es output del age
 npm run ingest:discovery-context → DiscoveryContext JSON
         → agente externo (web search)
         → DiscoveryBatch JSON
-        → npm run ingest:discovery → normalize → classify → reconcile → Candidate → data/**
+        → rama discovery-request/… (sólo el JSON) + workflow Manual discovery en main
+        → npm run ingest:discovery (código de main + AI pool) → normalize → classify → reconcile → PR de data/**
 ```
 
 `--output` escribe el contexto donde se indique (p. ej. `ingestion/work/`, gitignorado). Sin `--output`, el JSON va a stdout. El comando no escribe en `data/**`.
@@ -101,7 +105,7 @@ npm run ingest:discovery-context → DiscoveryContext JSON
 
 `ingest:promote` sigue siendo el import manual de Candidates ya interpretados. Discovery no lo usa: el agente no debe saltarse classification.
 
-CI no llama a un LLM ni lanza web search. Tests inyectan fakes. No hay workflow de GitHub Actions que genere el contexto, busque en la web ni importe un batch de discovery de forma programada.
+CI de sitio no llama a un LLM ni lanza web search. Tests inyectan fakes. El workflow **Manual discovery** sí usa el AI pool de producción, con secrets, sobre código de `main`; no genera el contexto ni busca en la web. No está programado.
 
 ## IA
 
@@ -124,7 +128,7 @@ Flags `--ai-*` existen para pruebas acotadas: `--ai-route provider:model`, `--ai
 
 ## Automatización en GitHub Actions
 
-`.github/workflows/ingestion.yml` serializa todas las ejecuciones en el concurrency group `ingestion-production`; una scheduled y una manual nunca comparten simultáneamente cuota ni state del pool. Producción usa `AI_PROVIDER=pool` y `AI_ZERO_COST_ONLY=true`; Gemini conserva la prioridad y los providers adicionales sólo se habilitan con credenciales y guardias gratuitas válidas. Véase [`ai-providers.md`](ai-providers.md).
+`.github/workflows/ingestion.yml` serializa las ejecuciones de harvesting en el concurrency group `ingestion-production`. `.github/workflows/discovery.yml` (**Manual discovery**) comparte el mismo group para no solapar cuota ni state del pool. Producción usa `AI_PROVIDER=pool` y `AI_ZERO_COST_ONLY=true`; Gemini conserva la prioridad y los providers adicionales sólo se habilitan con credenciales y guardias gratuitas válidas. Véase [`ai-providers.md`](ai-providers.md).
 
 `auditorio-nacional`, `fundacion-juan-march`, `teatro-zarzuela`, `cndm` y `real-hermandad-refugio` forman parte del `all` programado. March, Zarzuela, Auditorio y CNDM salen por el fetch relay (`useFetchRelay`). Ver [infra/fetch-relay](../infra/fetch-relay/README.md). El Worker se despliega con [deploy-fetch-relay.yml](../.github/workflows/deploy-fetch-relay.yml) o desde el Dashboard; añadir otra fuente al relay es `useFetchRelay: true` en el registry. Las peticiones a `/wp-json/` envían `Accept: application/json` sin `text/html` ni `*/*`. Un HTTP 202 de captcha no se acepta como documento; el Worker puede reintentarlo si hay cookie nueva o cuerpo `sgcaptcha`. Refugio pide el archivo oficial `/categoria-eventos/conciertos/` (no `/conciertos/` ni REST) por HTTP directo; si SiteGround responde 202/SG-Captcha, el mismo archivo se carga en Chrome del runner y las páginas extra reutilizan esa sesión. Las fichas individuales (`/calendario-de-eventos/{slug}/`) usan el mismo GET directo y, si hace falta, una sesión Chrome compartida del bucle de hydration; un fallo de ficha conserva los hechos del listing. Zarzuela mantiene pacing de origen, `Retry-After` y un circuito por fichas distintas.
 
@@ -146,6 +150,20 @@ En **Actions → Production ingestion → Run workflow**:
 `sources=all` con `exclude_sources=auditorio-nacional,cndm` ejecuta el conjunto normal de `all` menos esas dos fuentes. Una selección explícita también admite exclusiones (`sources=auditorio-nacional,cndm,teatro-real` y `exclude_sources=cndm` deja auditorio-nacional y teatro-real). El job programado no pasa exclusiones: con `exclude_sources` vacío sigue ejecutando exactamente las mismas fuentes que hoy.
 
 El dry-run usa el ref seleccionado en «Run workflow» y nunca puede modificar `data/**` ni crear una PR. `schedule` y `publish` ejecutan siempre el código de `main`, de modo que una rama no fusionada no puede escribir el catálogo. En publish, un no-op tampoco crea branch, commit ni PR. Si ya existe una PR abierta cuyo branch empieza por `automation/ingestion-`, la ejecución conserva su report pero no crea ni actualiza otra PR.
+
+### Manual discovery
+
+En **Actions → Manual discovery → Run workflow**, siempre contra `main` (el job aborta si el workflow no se disparó desde `main`):
+
+- `batch_ref`: rama de petición `discovery-request/…`;
+- `batch_sha`: SHA completo del commit que contiene el JSON;
+- `batch_path`: por defecto `ingestion/requests/discovery-batch.json`;
+- `from` y `to`: la ventana del `DiscoveryContext`; deben informarse juntos;
+- `ai_max_requests`: presupuesto HTTP global opcional.
+
+El job hace checkout de `main`, extrae **sólo** ese JSON (dato no confiable), valida el schema `DiscoveryBatch` y ejecuta **una** pasada de `ingest:discovery` con el mismo AI pool que Production ingestion. No hay `schedule`. No hay dry-run + publish duplicados. Un no-op no crea PR. `fatal` no publica. `review` crea draft. `clean`/`degraded` crean PR normal **sin** auto-merge. Playbook: [`run-discovery-agent.md`](run-discovery-agent.md).
+
+El artifact `discovery-run-<run_id>-<attempt>` incluye el batch exacto, `batch-meta.json` (SHA/ref/path e hash), `report.json`, `run.json`, `events.jsonl` y `run.log`.
 
 ### Secrets, variables y permisos
 
@@ -230,7 +248,7 @@ npm run ingest:promote -- ingestion/inbox/evento.json
 
 El candidato usa el esquema de `src/lib/schemas/candidate.ts`. El script valida, fusiona en memoria con `data/` y, si todo es correcto, escribe ficheros nuevos. No sobrescribe un evento existente. Si el candidato trae una entidad cuyo ID ya está en el catálogo, debe coincidir campo a campo.
 
-Directorios de trabajo gitignorados: `ingestion/inbox/`, `ingestion/work/`, `ingestion/rejected/`, `ingestion/reports/`.
+Directorios de trabajo gitignorados: `ingestion/inbox/`, `ingestion/work/`, `ingestion/rejected/`, `ingestion/reports/`, `ingestion/requests/`.
 
 En el diseño v3 los candidatos del flujo automático existen en memoria. `ingestion/inbox/` queda para imports manuales, debugging y casos excepcionales.
 
