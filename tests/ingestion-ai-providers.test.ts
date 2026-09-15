@@ -1279,6 +1279,8 @@ describe('OpenAiCompatibleTransport', () => {
     });
     expect(JSON.stringify(classifier.lastDiagnostics())).not.toContain('openrouter-secret');
   });
+
+  it('propaga quotaExhausted para que el pool degrade limpiamente', async () => {
     const transport = new OpenAiCompatibleTransport({
       provider: 'cloudflare', baseUrl: 'https://example.test/v1', apiKey: 'provider-secret',
       fetch: async () => new Response('{"errors":[{"code":3036}]}', { status: 429 }),
