@@ -250,6 +250,10 @@ describe('líneas de programa WORK de COMPOSER', () => {
     ).toEqual([]);
     expect(attributedProgrammeComposers('Directora: Elvira Martínez Gabaldón').map((item) => item.name)).toEqual([]);
     expect(
+      attributedProgrammeComposers('Concierto de Mineko Kojima', 'title').map((item) => item.name),
+    ).toEqual([]);
+    expect(attributedProgrammeComposers('Concierto de Mineko Kojima').map((item) => item.name)).toEqual([]);
+    expect(
       attributedProgrammeComposers('Pieza basada en Mozart e inspirada en Bach').map((item) => item.name),
     ).toEqual([]);
     expect(

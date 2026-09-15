@@ -92,6 +92,8 @@ const PERFORMER_LINE =
   /^(?:solistas?|directora?|director\s*\/\s*concertino|actor(?:\s+y\s+solista)?|int[ée]rpretes?)\s*:/i;
 const WORK_ANNOTATION =
   /\s*\((?:(?:obra de )?estreno|versi[oó]n|adaptaci[oó]n)[^)]*\)\s*$/iu;
+const BARE_CONCERT_LABEL =
+  /^(?:(?:el|la|los|las|un|una)\s+)?(?:concierto|concerto|recital|audici[oó]n|sesi[oó]n|gala|ciclo|programa)$/i;
 
 /**
  * Names that sit in a current-programme attribution frame.
@@ -107,7 +109,7 @@ export function extractAttributedComposerNames(
   const found: AttributedComposerName[] = [
     ...fromRepertoireLists(source),
     ...fromLabelledCredits(source),
-    ...fromWorkDeComposer(source),
+    ...fromWorkDeComposer(source, surface),
     ...fromNameWorkSeparators(source, surface),
     ...fromComposerHeadings(source),
   ];
@@ -223,7 +225,11 @@ function fromLabelledCredits(text: string): AttributedComposerName[] {
   return found;
 }
 
-function fromWorkDeComposer(text: string): AttributedComposerName[] {
+function fromWorkDeComposer(
+  text: string,
+  surface: AttributionSurface,
+): AttributedComposerName[] {
+  if (surface === 'title') return [];
   const found: AttributedComposerName[] = [];
   for (const line of programmeLines(text)) {
     if (PERFORMER_LINE.test(line) || looksLikeTextCredit(line) || looksLikeNonWorkCredit(line)) continue;
@@ -286,6 +292,7 @@ function parseUnknownWorkDeAuthor(line: string): { title: string; composerName: 
     const composerName = completed.author;
     if (!title || !composerName) continue;
     if (CREDIT_LABEL_TITLE.test(title) || looksLikeEditorialMaterial(title)) continue;
+    if (BARE_CONCERT_LABEL.test(title)) continue;
     if (clearlyNonComposerContext(composerName, line)) continue;
 
     const strongWork = looksLikeUnequivocalWorkLine(title) || looksLikeWorkTitle(title);

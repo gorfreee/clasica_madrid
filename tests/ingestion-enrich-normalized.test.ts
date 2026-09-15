@@ -312,6 +312,15 @@ describe('enriquecimiento determinista de compositores conocidos', () => {
     expect(
       enrichNormalizedEvent(
         event({
+          title: 'Concierto de Mineko Kojima',
+          performers: [{ name: 'Mineko Kojima' }],
+          programText: undefined,
+        }),
+      ).composers,
+    ).toEqual([]);
+    expect(
+      enrichNormalizedEvent(
+        event({
           title: 'Obras de Josquin des Prez, Juan del Encina, Francisco Guerrero y Antonio de Cabezón',
           performers: [],
           programText: undefined,
