@@ -621,6 +621,22 @@ export const KNOWN_VENUES: KnownVenue[] = [
       spaceName: 'Auditorio Sony',
     },
   },
+  {
+    keys: [
+      'real conservatorio superior de musica de madrid',
+      'real conservatorio superior de musica madrid',
+      'rcsmm',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_rcsmm',
+      slug: 'real-conservatorio-superior-musica-madrid',
+      name: 'Real Conservatorio Superior de Música de Madrid',
+      ...MADRID,
+      address: 'Calle del Doctor Mata, 2, 28012 Madrid',
+      url: 'https://rcsmm.eu/',
+    },
+  },
 ];
 
 /**

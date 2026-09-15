@@ -20,6 +20,7 @@ import { madridATempoAdapter } from './sources/madrid-a-tempo.ts';
 import { patrimonioNacionalAdapter } from './sources/patrimonio-nacional.ts';
 import { ateneoMadridAdapter } from './sources/ateneo-madrid.ts';
 import { escuelaReinaSofiaAdapter } from './sources/escuela-reina-sofia.ts';
+import { rcsmmAdapter } from './sources/rcsmm.ts';
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
@@ -43,6 +44,7 @@ const ADAPTERS: Record<string, SourceAdapter> = {
   [patrimonioNacionalAdapter.id]: patrimonioNacionalAdapter,
   [ateneoMadridAdapter.id]: ateneoMadridAdapter,
   [escuelaReinaSofiaAdapter.id]: escuelaReinaSofiaAdapter,
+  [rcsmmAdapter.id]: rcsmmAdapter,
 };
 
 const srcAuditorio: Source = {
@@ -361,6 +363,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Escuela Superior de Música Reina Sofía',
       kind: 'official',
       url: 'https://www.escuelasuperiordemusicareinasofia.es/',
+    },
+  },
+  {
+    id: 'rcsmm',
+    name: 'Real Conservatorio Superior de Música de Madrid',
+    urls: ['https://rcsmm.eu/eventos'],
+    adapterId: rcsmmAdapter.id,
+    catalogSourceId: 'src_rcsmm',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_rcsmm',
+      slug: 'real-conservatorio-superior-musica-madrid',
+      name: 'Real Conservatorio Superior de Música de Madrid',
+      kind: 'official',
+      url: 'https://rcsmm.eu/',
     },
   },
 ];
