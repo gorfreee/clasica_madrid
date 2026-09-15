@@ -156,19 +156,19 @@ El dry-run usa el ref seleccionado en «Run workflow» y nunca puede modificar `
 En **Actions → Manual discovery → Run workflow**, siempre contra `main` (el job aborta si el workflow no se disparó desde `main`):
 
 - `batch_ref`: rama de petición `discovery-request/…`;
-- `batch_sha`: SHA completo del commit que contiene el JSON;
+- `batch_sha`: SHA completo que debe ser **exactamente el tip** actual de esa rama;
 - `batch_path`: por defecto `ingestion/requests/discovery-batch.json`;
 - `from` y `to`: la ventana del `DiscoveryContext`; deben informarse juntos;
 - `ai_max_requests`: presupuesto HTTP global opcional.
 
-El job hace checkout de `main`, extrae **sólo** ese JSON (dato no confiable), valida el schema `DiscoveryBatch` y ejecuta **una** pasada de `ingest:discovery` con el mismo AI pool que Production ingestion. No hay `schedule`. No hay dry-run + publish duplicados. Un no-op no crea PR. `fatal` no publica. `review` crea draft. `clean`/`degraded` crean PR normal **sin** auto-merge. Playbook: [`run-discovery-agent.md`](run-discovery-agent.md).
+El job hace checkout de `main` con `persist-credentials: false` (el `GITHUB_TOKEN` de solo lectura del job no queda grabado en Git). Extrae **sólo** el JSON (dato no confiable): fetch autenticado de `refs/heads/<batch_ref>` hacia un ref local temporal con el token de la run (`github.token`), comprueba que ese tip es `batch_sha` y lee `<batch_sha>:<batch_path>`. Un SHA existente que no sea el tip de esa rama se rechaza. Valida el schema `DiscoveryBatch` y ejecuta **una** pasada de `ingest:discovery` con el mismo AI pool que Production ingestion. La PR de `data/**` se publica con `INGESTION_BOT_TOKEN` (mismo patrón que Production ingestion: `gh auth setup-git` en el paso de publicación). No hay `schedule`. No hay dry-run + publish duplicados. Un no-op no crea PR. `fatal` no publica. `review` crea draft. `clean`/`degraded` crean PR normal **sin** auto-merge. Playbook: [`run-discovery-agent.md`](run-discovery-agent.md).
 
 El artifact `discovery-run-<run_id>-<attempt>` incluye el batch exacto, `batch-meta.json` (SHA/ref/path e hash), `report.json`, `run.json`, `events.jsonl` y `run.log`.
 
 ### Secrets, variables y permisos
 
 - secret `GEMINI_API_KEY`: key del proyecto de Google AI Studio;
-- secret `INGESTION_BOT_TOKEN`: token fine-grained con acceso a esta repo para Contents read/write, Pull requests read/write y Actions read. Se usa para push, creación de PR y auto-merge, de modo que el evento `pull_request` dispare CI;
+- secret `INGESTION_BOT_TOKEN`: token fine-grained con acceso a esta repo para Contents read/write, Pull requests read/write y Actions read. Production ingestion lo usa para push, creación de PR y auto-merge; Manual discovery lo usa **sólo** para push y creación de PR (nunca auto-merge). En ambos casos el checkout de código confiable usa `persist-credentials: false` y el token del bot no se inyecta hasta el paso de publicación, de modo que el evento `pull_request` dispare CI;
 - secret `INGEST_FETCH_RELAY_TOKEN`: Bearer del Worker de Cloudflare usado como egress;
 - repository variable `INGEST_FETCH_RELAY_URL`: URL del Worker (no es sensible). El pipeline sólo la usa para fuentes con `useFetchRelay` en el registry. Ausentes, el resto de fuentes no cambia; las fuentes con `useFetchRelay` fallan de forma visible, también dentro del `all` programado;
 - repository variable `INGESTION_AUTO_MERGE_ENABLED`: kill switch global; sólo el valor exacto `true` habilita auto-merge.

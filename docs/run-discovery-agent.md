@@ -163,9 +163,9 @@ BATCH_SHA=$(git rev-parse HEAD)
 BATCH_REF=$(git rev-parse --abbrev-ref HEAD)
 ```
 
-El commit no debe contener código, scripts ni cambios de `data/**`. El workflow **ignora** cualquier otro fichero de esa rama: no ejecuta npm de la petición ni hace checkout de ella. Sólo lee ese JSON en el SHA indicado. La rama debe existir **en este repositorio** (no en un fork): Actions la obtiene con el token de la repo.
+El commit no debe contener código, scripts ni cambios de `data/**`. El workflow **ignora** cualquier otro fichero de esa rama: no ejecuta npm de la petición ni hace checkout de ella. Sólo lee ese JSON si el tip actual de `refs/heads/<batch_ref>` es exactamente `batch_sha`. La rama debe existir **en este repositorio** (no en un fork).
 
-Registra el SHA completo (40 caracteres). Es el ancla inmutable del batch.
+Registra el SHA completo (40 caracteres) del commit que acabas de empujar. El workflow comprueba que ese SHA **sigue siendo el tip** de la rama de petición; si alguien empuja otro commit encima, la run aborta. Un SHA que exista en el repositorio (por ejemplo `main` u otra `discovery-request/…`) no basta.
 
 ---
 
@@ -185,6 +185,8 @@ gh workflow run "Manual discovery" --ref main \
 ```
 
 `from`/`to` son la ventana del contexto. Si los omites, Actions usa hoy → +120 días en el momento de la run (puede no coincidir con el contexto que usaste).
+
+El job hace checkout de `main` **sin** persistir credenciales del `GITHUB_TOKEN` de solo lectura. Lee el batch con ese token de la run (`github.token`, `contents: read`): `git fetch` de `refs/heads/<batch_ref>` hacia un ref local temporal, comprueba que el tip es `batch_sha` y entonces `git cat-file` del blob. La publicación de `automation/discovery-*` se autentica aparte con `INGESTION_BOT_TOKEN`, igual que Production ingestion. No pongas tokens en la línea de comando.
 
 Sigue la ejecución (no pidas al usuario que lo haga):
 
@@ -239,11 +241,15 @@ No pegues API keys, tokens ni el contenido de `.local/ai.env`.
 ```text
 rama de petición (DiscoveryBatch JSON)
         │
-        │ sólo el fichero JSON, anclado a un SHA
+        │ fetch de refs/heads/<batch_ref> → tip exacto = batch_sha
+        │ después, blob <batch_sha>:<batch_path>
         ▼
 workflow lanzado desde main
         │
+        │ checkout de main (sin persistir credenciales)
+        │ lectura del batch con el token de la run (solo lectura)
         │ código de main + secrets del AI pool
+        │ publicación con INGESTION_BOT_TOKEN
         ▼
 npm run ingest:discovery → pipeline común → PR de data/**
 ```
