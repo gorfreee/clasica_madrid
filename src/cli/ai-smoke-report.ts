@@ -5,6 +5,7 @@ import { redactSecrets } from '../ingestion/observability.ts';
 import type {
   AiSmokeCause,
   AiSmokeProviderStatus,
+  AiSmokeProviderSummary,
   AiSmokePurposeResult,
   AiSmokeRouteResult,
   AiSmokeRunResult,
@@ -17,7 +18,7 @@ const PURPOSE_COLUMNS = {
   taxonomy: 'Taxonomy',
 } as const satisfies Record<AiCallPurpose, string>;
 
-export const AI_SMOKE_REPORT_SCHEMA_VERSION = 1;
+export const AI_SMOKE_REPORT_SCHEMA_VERSION = 2;
 export const AI_SMOKE_REPORT_MD = 'ai-smoke-report.md';
 export const AI_SMOKE_REPORT_JSON = 'ai-smoke-report.json';
 
@@ -37,6 +38,7 @@ export type AiSmokeReportJson = {
   timeoutMs: number;
   slowThresholdMs: number;
   purposes: AiCallPurpose[];
+  providerSummaries: AiSmokeProviderSummary[];
   routes: AiSmokeRouteResult[];
   missingProviders: AiSmokeProviderStatus[];
 };
@@ -58,6 +60,7 @@ export function buildAiSmokeReportJson(input: {
   purposes: AiCallPurpose[];
   routes: AiSmokeRouteResult[];
   missingProviders: AiSmokeProviderStatus[];
+  providerSummaries?: AiSmokeProviderSummary[];
 }): AiSmokeReportJson {
   return {
     schemaVersion: AI_SMOKE_REPORT_SCHEMA_VERSION,
@@ -75,6 +78,7 @@ export function buildAiSmokeReportJson(input: {
     timeoutMs: input.timeoutMs,
     slowThresholdMs: input.slowThresholdMs,
     purposes: input.purposes,
+    providerSummaries: input.providerSummaries ?? [],
     routes: input.routes,
     missingProviders: input.missingProviders,
   };
@@ -94,7 +98,9 @@ export function formatAiSmokeMarkdown(input: {
   overall: 'PASS' | 'FAIL';
   timeoutMs: number;
   slowThresholdMs: number;
+  providerSummaries?: AiSmokeProviderSummary[];
 }): string {
+  const summaries = input.providerSummaries ?? [];
   const lines = [
     `# AI live smoke — ${input.overall}`,
     '',
@@ -104,7 +110,11 @@ export function formatAiSmokeMarkdown(input: {
     `- Duración: **${formatLatency(input.durationMs)}**`,
     `- Timeout: ${formatLatency(input.timeoutMs)} (SLOW ≥ ${formatLatency(input.slowThresholdMs)})`,
     '',
+    formatProviderSummary(summaries),
+    '',
     formatMarkdownTable(input.routes, input.purposes),
+    '',
+    formatDiagnosticsTable(input.routes),
   ];
 
   if (input.missingProviders.length) {
@@ -134,12 +144,13 @@ export function formatMarkdownTable(
   purposes: AiCallPurpose[],
 ): string {
   const purposeHeaders = purposes.map((purpose) => PURPOSE_COLUMNS[purpose]);
-  const header = ['Provider', 'Model', ...purposeHeaders, 'Latency', 'Result'];
+  const header = ['Provider', 'Model', ...purposeHeaders, 'Health', 'Latency', 'Result'];
   const separator = header.map(() => '---');
   const rows = routes.map((route) => [
     escapeCell(route.provider),
     escapeCell(route.model),
     ...purposes.map((purpose) => escapeCell(cellFor(route.purposes[purpose]))),
+    escapeCell(route.health),
     escapeCell(formatLatency(route.latencyMs)),
     escapeCell(route.result),
   ]);
@@ -214,10 +225,79 @@ function causeLabel(cause: AiSmokeCause): string {
   return cause.charAt(0).toUpperCase() + cause.slice(1);
 }
 
+function formatProviderSummary(summaries: AiSmokeProviderSummary[]): string {
+  if (!summaries.length) return '';
+  const lines = ['## Provider health', ''];
+  for (const item of summaries) {
+    lines.push(titleCase(item.provider), `  HEALTHY: ${item.HEALTHY}`, `  DEGRADED: ${item.DEGRADED}`, `  FAIL: ${item.FAIL}`);
+    if (item.quarantined) lines.push(`  QUARANTINED: ${item.quarantined}`);
+    lines.push('');
+  }
+  return lines.join('\n').trimEnd();
+}
+
+function formatDiagnosticsTable(routes: AiSmokeRouteResult[]): string {
+  if (!routes.length) return '';
+  const header = [
+    'Provider', 'Model', 'Health', 'Result', 'Latency', 'Attempts',
+    'HTTP', 'Category', 'Finish', 'Out tok', 'Think tok',
+  ];
+  const separator = header.map(() => '---');
+  const rows = routes.map((route) => {
+    const cell = representativeCell(route);
+    return [
+      escapeCell(route.provider),
+      escapeCell(route.model),
+      escapeCell(route.health),
+      escapeCell(route.result),
+      escapeCell(formatLatency(route.latencyMs)),
+      escapeCell(String(route.purposeResults.reduce((sum, item) => sum + item.attempts, 0))),
+      escapeCell(cell?.httpStatus !== undefined ? String(cell.httpStatus) : '-'),
+      escapeCell(cell?.outcome ?? '-'),
+      escapeCell(cell?.finishReason ?? '-'),
+      escapeCell(formatCount(cell?.tokens?.output)),
+      escapeCell(formatCount(cell?.tokens?.thought)),
+    ];
+  });
+  return [
+    '## Route diagnostics',
+    '',
+    `| ${header.join(' | ')} |`,
+    `| ${separator.join(' | ')} |`,
+    ...rows.map((row) => `| ${row.join(' | ')} |`),
+  ].join('\n');
+}
+
+function representativeCell(route: AiSmokeRouteResult): AiSmokePurposeResult | undefined {
+  return route.purposeResults.find((item) => item.health === route.health && !item.success)
+    ?? route.purposeResults.find((item) => item.health === route.health)
+    ?? route.purposeResults[0];
+}
+
+function formatCount(value: number | undefined): string {
+  return value === undefined ? '-' : String(value);
+}
+
+function titleCase(value: string): string {
+  return PROVIDER_TITLES[value] ?? (value ? value.charAt(0).toUpperCase() + value.slice(1) : value);
+}
+
+const PROVIDER_TITLES: Record<string, string> = {
+  gemini: 'Gemini',
+  groq: 'Groq',
+  mistral: 'Mistral',
+  zai: 'Z.AI',
+  cloudflare: 'Cloudflare',
+  vercel: 'Vercel',
+  kilo: 'Kilo',
+  openrouter: 'OpenRouter',
+};
+
 function formatFailureDetail(result: AiSmokePurposeResult): string {
   const tokens = formatTokenBudget(result);
   const details = [
-    `\`${result.routeId}\` / ${result.purpose}: **${result.outcome}**`,
+    `\`${result.routeId}\` / ${result.purpose}: **${result.outcome}** (${result.health})`,
+    `attempts ${result.attempts}`,
     result.httpStatus !== undefined ? `HTTP ${result.httpStatus}` : undefined,
     result.providerErrorCode ? `code ${result.providerErrorCode}` : undefined,
     result.providerStatus ? `status ${result.providerStatus}` : undefined,
@@ -240,7 +320,10 @@ function formatTokenBudget(result: AiSmokePurposeResult): string | undefined {
   if (output === undefined && requested === undefined) return undefined;
   const used = output === undefined ? '?' : String(output);
   const max = requested === undefined ? '?' : String(requested);
-  return `outputTokens ${used} / requestedMaxOutputTokens ${max}`;
+  const thought = result.tokens?.thought;
+  const parts = [`outputTokens ${used} / requestedMaxOutputTokens ${max}`];
+  if (thought !== undefined) parts.push(`thoughtTokens ${thought}`);
+  return parts.join(', ');
 }
 
 function escapeExcerpt(value: string): string {
