@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_rcsmm_2559",
+  "slug": "concierto-de-la-brass-band-del-rcsmm-elena-romero-en-el-teatro-monumental",
+  "title": "Concierto de la Brass Band del RCSMM \"Elena Romero\" en el Teatro Monumental",
+  "status": "scheduled",
+  "venueId": "ven_teatro_monumental",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_rcsmm_2559_01",
+      "date": "2026-09-20",
+      "time": "11:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Juanma Cifuentes",
+      "role": "soloist"
+    },
+    {
+      "name": "Martín Baeza Rubio",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Gioachino Rossini"
+    },
+    {
+      "name": "S. Joplin"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "H. Mancini"
+    },
+    {
+      "name": "Leonard Bernstein"
+    },
+    {
+      "name": "J. Williams"
+    },
+    {
+      "name": "Nino Rota"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "baroque",
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_rcsmm",
+      "url": "https://rcsmm.eu/concierto-brass-band-rcsmm-elena-romero-teatro-monumental",
+      "checkedAt": "2026-09-15",
+      "externalId": "2559"
+    }
+  ],
+  "primarySourceId": "src_rcsmm",
+  "lastVerifiedAt": "2026-09-15"
+}
