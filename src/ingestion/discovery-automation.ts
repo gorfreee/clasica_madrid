@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { emptyCatalog, type Catalog } from '../lib/domain/catalog.ts';
 import { parseIngestWindow, type IngestWindow } from './dates.ts';
+import { formatProviderCountList } from './ai-provider-counts.ts';
 import {
   DiscoveryBatchError,
   parseDiscoveryBatch,
@@ -568,7 +569,8 @@ function formatDiscoveryExecutionTable(
     `| IA: llamadas lógicas | ${ai.logicalCalls} |`,
     `| IA: cache hits | ${ai.cacheHits} |`,
     `| IA: requests por purpose | ${cell(compactCounts(ai.requestsByPurpose))} |`,
-    `| IA: requests por provider | ${cell(compactCounts(ai.requestsByProvider))} |`,
+    `| IA: requests por provider | ${cell(formatProviderCountList(ai.requestsByProvider, ai.routes, 'colon', 'ninguno'))} |`,
+    `| IA: clasificaciones por provider | ${cell(formatProviderCountList(ai.classificationsByProvider, ai.routes, 'colon', 'ninguno'))} |`,
     `| IA: requests por modelo | ${cell(compactCounts(ai.requestsByModel))} |`,
     `| IA: clasificaciones por modelo | ${cell(compactCounts(ai.classificationsByModel))} |`,
     '',

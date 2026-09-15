@@ -1,3 +1,4 @@
+import { formatProviderCountList } from './ai-provider-counts.ts';
 import { emptyIngestQualitySummary, type IngestAiRouteSummary, type IngestRunSummary } from './types.ts';
 
 export function formatRunSummary(summary: IngestRunSummary): string {
@@ -54,8 +55,8 @@ export function formatRunSummary(summary: IngestRunSummary): string {
     `  rate limits: ${summary.ai.rateLimits}`,
     `  cuotas diarias agotadas: ${summary.ai.quotaExhausted}`,
     `  concurrency-pressure: ${summary.ai.concurrencyPressure}`,
-    ...formatCountMap('requests por provider', summary.ai.requestsByProvider),
-    ...formatCountMap('clasificaciones por provider', summary.ai.classificationsByProvider),
+    ...formatProviderCountMap('requests por provider', summary.ai.requestsByProvider, summary.ai.routes),
+    ...formatProviderCountMap('clasificaciones por provider', summary.ai.classificationsByProvider, summary.ai.routes),
     ...formatCountMap('requests HTTP por purpose', summary.ai.requestsByPurpose),
     ...formatCountMap('fallos técnicos por tipo', summary.ai.failuresByKind),
     ...formatCountMap('rate limits por provider', summary.ai.rateLimitsByProvider),
@@ -101,6 +102,16 @@ function formatCountMap(label: string, counts: Record<string, number>): string[]
   const entries = Object.entries(counts).filter(([, value]) => value > 0);
   if (entries.length === 0) return [];
   return [`  ${label}: ${entries.map(([name, value]) => `${name}=${value}`).join(', ')}`];
+}
+
+function formatProviderCountMap(
+  label: string,
+  counts: Record<string, number> | undefined,
+  routes: IngestAiRouteSummary[] | undefined,
+): string[] {
+  const formatted = formatProviderCountList(counts, routes, 'equals');
+  if (!formatted) return [];
+  return [`  ${label}: ${formatted}`];
 }
 
 function formatPressureKinds(counts: Record<string, number> | undefined): string | undefined {

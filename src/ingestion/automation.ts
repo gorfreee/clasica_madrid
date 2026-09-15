@@ -1,3 +1,4 @@
+import { formatProviderCountList } from './ai-provider-counts.ts';
 import {
   buildIngestDiagnosticView,
   type AttentionItem,
@@ -440,7 +441,8 @@ function formatObservabilitySection(
     rows.push(`| IA: rate limits / cuota agotada | ${summary.ai.rateLimits} / ${summary.ai.quotaExhausted} |`);
     rows.push(`| IA: concurrency-pressure | ${summary.ai.concurrencyPressure} |`);
     rows.push(`| IA: circuitos abiertos | ${summary.ai.circuitOpenRoutes} |`);
-    rows.push(`| IA: requests por provider | ${cell(compactCounts(summary.ai.requestsByProvider))} |`);
+    rows.push(`| IA: requests por provider | ${cell(formatProviderCountList(summary.ai.requestsByProvider, summary.ai.routes, 'colon', 'ninguno'))} |`);
+    rows.push(`| IA: clasificaciones por provider | ${cell(formatProviderCountList(summary.ai.classificationsByProvider, summary.ai.routes, 'colon', 'ninguno'))} |`);
     rows.push(`| IA: rate limits por provider | ${cell(compactCounts(summary.ai.rateLimitsByProvider))} |`);
     rows.push(`| IA: concurrency-pressure por provider | ${cell(compactCounts(summary.ai.concurrencyPressureByProvider))} |`);
     rows.push(`| IA: presión por dimensión | ${cell(compactCounts(summary.ai.pressureByKind))} |`);

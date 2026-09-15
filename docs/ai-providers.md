@@ -1,6 +1,6 @@
 # Pool de IA gratuito
 
-Producción usa un pool ordenado de routes `provider:model`. Gemini conserva la prioridad inicial; Groq, Mistral, Z.AI y Cloudflare Workers AI aportan capacidad adicional. Vercel AI Gateway, Kilo AI Gateway y OpenRouter se añaden al final del pool hasta que el live smoke y la qualification midan su calidad semántica. La primera respuesta que supera el schema del purpose termina la llamada. No hay voting, consensus ni llamadas duplicadas tras un resultado válido.
+Producción usa un pool ordenado de routes `provider:model`. Gemini conserva la prioridad inicial; Groq, Mistral, Cloudflare Workers AI y Vercel AI Gateway aportan capacidad adicional. Z.AI, Kilo AI Gateway y OpenRouter siguen después. La primera respuesta que supera el schema del purpose termina la llamada. No hay voting, consensus ni llamadas duplicadas tras un resultado válido.
 
 ## Garantía operativa de coste cero
 
@@ -41,9 +41,9 @@ Los defaults son:
 3. `groq:qwen/qwen3.8-27b`;
 4. `groq:openai/gpt-oss-20b`;
 5. `mistral:ministral-14b-2512` y `mistral:ministral-8b-2512` (14B primero: más calidad; 8B como fallback más rápido en RPS);
-6. `zai:glm-4.7-flash` y `zai:glm-4.5-flash`;
-7. `cloudflare:@cf/zai-org/glm-4.7-flash` y `cloudflare:@cf/google/gemma-4-26b-a4b-it`;
-8. `vercel:inclusionai/ling-3.0-flash-vl-free` (prioridad alta entre estas rutas nuevas);
+6. `cloudflare:@cf/zai-org/glm-4.7-flash` y `cloudflare:@cf/google/gemma-4-26b-a4b-it`;
+7. `vercel:inclusionai/ling-3.0-flash-vl-free` (prioridad alta entre estas rutas nuevas);
+8. `zai:glm-4.7-flash` y `zai:glm-4.5-flash`;
 9. Kilo: `nex-agi/nex-n2.5-mini:free`, `nex-agi/nex-n2.5-pro:free`, `inclusionai/ling-3.0-flash-vl:free`, `poolside/laguna-xs-2.1:free`;
 10. OpenRouter como capacidad adicional/fallback: `google/gemma-4-26b-a4b-it:free`, `nex-agi/nex-n2.5-mini:free`, `inclusionai/ling-3.0-flash-vl:free`, `poolside/laguna-xs-2.1:free`.
 

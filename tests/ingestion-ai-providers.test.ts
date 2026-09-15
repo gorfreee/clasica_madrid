@@ -188,9 +188,9 @@ describe('factory multi-provider zero cost', () => {
     expect(routes.map((route) => route.routeId)).toEqual([
       ...GROQ_DEFAULT_MODELS.map((model) => `groq:${model}`),
       ...MISTRAL_DEFAULT_MODELS.map((model) => `mistral:${model}`),
-      'zai:glm-4.7-flash', 'zai:glm-4.5-flash',
       ...CLOUDFLARE_ZERO_COST_MODELS.map((model) => `cloudflare:${model}`),
       ...VERCEL_ZERO_COST_MODELS.map((model) => `vercel:${model}`),
+      'zai:glm-4.7-flash', 'zai:glm-4.5-flash',
       ...KILO_ZERO_COST_MODELS.map((model) => `kilo:${model}`),
       ...OPENROUTER_ZERO_COST_MODELS.map((model) => `openrouter:${model}`),
     ]);
@@ -203,6 +203,24 @@ describe('factory multi-provider zero cost', () => {
     expect(identity(routes, 'vercel').baseUrl).toBe(VERCEL_DEFAULT_BASE_URL);
     expect(identity(routes, 'kilo').baseUrl).toBe(KILO_DEFAULT_BASE_URL);
     expect(identity(routes, 'openrouter').baseUrl).toBe(OPENROUTER_DEFAULT_BASE_URL);
+  });
+
+  it('prioriza Cloudflare y Vercel por delante de Z.AI y conserva el resto del orden', () => {
+    const routes = createFreeRoutesFromEnv({
+      AI_ZERO_COST_ONLY: 'true',
+      GEMINI_API_KEY: 'gemini-key',
+      GROQ_API_KEY: 'groq-key', GROQ_FREE_TIER_CONFIRMED: 'true',
+      MISTRAL_API_KEY: 'mistral-key', MISTRAL_FREE_MODE_CONFIRMED: 'true',
+      ZAI_API_KEY: 'zai-key',
+      CLOUDFLARE_API_TOKEN: 'cloudflare-token', CLOUDFLARE_ACCOUNT_ID: 'account-id',
+      CLOUDFLARE_WORKERS_FREE_CONFIRMED: 'true',
+      VERCEL_AI_GATEWAY_API_KEY: 'vercel-key', VERCEL_FREE_TIER_CONFIRMED: 'true',
+      KILO_API_KEY: 'kilo-key', KILO_FREE_TIER_CONFIRMED: 'true',
+      OPENROUTER_API_KEY: 'openrouter-key', OPENROUTER_FREE_TIER_CONFIRMED: 'true',
+    });
+    expect(routeProviders(routes)).toEqual([
+      'gemini', 'groq', 'mistral', 'cloudflare', 'vercel', 'zai', 'kilo', 'openrouter',
+    ]);
   });
 
   it('AI_ROUTE fija exactamente una route compatible', () => {
