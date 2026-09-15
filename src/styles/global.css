@@ -258,6 +258,7 @@ button, input, select { font: inherit; }
   margin: 0;
   font-size: var(--type-size-label);
   font-weight: 800;
+  line-height: 1.35;
   letter-spacing: var(--type-tracking-label-wide);
   text-transform: uppercase;
 }
@@ -290,10 +291,10 @@ a.eyebrow:focus-visible {
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
+  align-items: start;
   column-gap: clamp(2.5rem, 5vw, 5rem);
   min-height: 19rem;
-  padding: 1.15rem 0 1.5rem;
+  padding: var(--hero-gutter-top) 0 1.5rem;
   overflow: hidden;
   border-bottom: 2px solid var(--ink);
 }
@@ -316,6 +317,7 @@ a.eyebrow:focus-visible {
   width: 17.5rem;
   height: auto;
   justify-self: end;
+  align-self: center;
 }
 
 .filters { margin-top: 2rem; }
@@ -631,10 +633,10 @@ a.eyebrow:focus-visible {
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
+  align-items: start;
   column-gap: clamp(2.5rem, 5vw, 5rem);
   min-height: 18.5rem;
-  padding: 1.15rem 0 1.5rem;
+  padding: var(--hero-gutter-top) 0 1.5rem;
   overflow: hidden;
   border-bottom: 2px solid var(--ink);
 }
@@ -648,6 +650,7 @@ a.eyebrow:focus-visible {
   width: 17rem;
   height: auto;
   justify-self: end;
+  align-self: center;
 }
 .venue-search {
   display: grid;
@@ -698,7 +701,7 @@ a.eyebrow:focus-visible {
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
+  align-items: start;
   column-gap: clamp(2rem, 4vw, 4rem);
   padding: var(--hero-gutter-top) 0 2.6rem;
   overflow: hidden;
@@ -725,6 +728,7 @@ a.eyebrow:focus-visible {
   width: 13.5rem;
   height: auto;
   justify-self: end;
+  align-self: center;
   opacity: .72;
 }
 .detail-hero--venue .detail-hero__motif { width: 14.5rem; }
@@ -817,7 +821,7 @@ a.eyebrow:focus-visible {
 .venue-programme .agenda-day__list { border-bottom: 2px solid var(--ink); }
 .venue-programme .agenda-item { grid-template-columns: 12rem minmax(14rem, 1fr) minmax(10rem, 14rem) 7.5rem; }
 
-.error-page { position: relative; min-height: 42rem; padding: 2rem 0; overflow: hidden; }
+.error-page { position: relative; min-height: 42rem; padding: var(--hero-gutter-top) 0 2rem; overflow: hidden; }
 .error-page__code {
   position: absolute;
   right: -2rem;
@@ -905,7 +909,7 @@ a.eyebrow:focus-visible {
   .page { padding-bottom: 4.5rem; }
   .agenda-intro {
     grid-template-columns: minmax(0, 1fr) 7.25rem;
-    align-content: center;
+    align-content: start;
     column-gap: .65rem;
     min-height: 15.5rem;
     padding-bottom: 1.25rem;
@@ -972,7 +976,7 @@ a.eyebrow:focus-visible {
   .section-intro { padding-top: var(--hero-gutter-top); }
   .section-intro {
     grid-template-columns: minmax(0, 1fr) 7.25rem;
-    align-content: center;
+    align-content: start;
     column-gap: .65rem;
     min-height: 15rem;
     padding-bottom: 1.25rem;
