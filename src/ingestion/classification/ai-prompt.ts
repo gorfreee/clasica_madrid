@@ -2,7 +2,7 @@ import type { ObservedFacts } from '../observed.ts';
 import { compactJson, projectObservedForPurpose } from './ai-input.ts';
 import type { AiCallPurpose } from './ai.ts';
 
-export const AI_CLASSIFIER_PROMPT_VERSION = 14 as const;
+export const AI_CLASSIFIER_PROMPT_VERSION = 15 as const;
 export const AI_TAXONOMY_PROMPT_VERSION = 10 as const;
 export const AI_ACCESS_PROMPT_VERSION = 3 as const;
 export const AI_COMPOSER_PROMPT_VERSION = 4 as const;
@@ -68,7 +68,7 @@ Excluye cuando la identidad principal sea una de estas:
 - pop / rock / canción popular, aunque haya orquesta, coro o cuerdas (p. ej. Pastora Soler, ABBA, Queen, Beatles, homenajes pop);
 - DJ / electrónica / crossover cuyo reclamo no sea un concierto clásico;
 - música de cine como contenido principal (Williams, Zimmer, Morricone, bandas sonoras, Film Symphony);
-- jazz como identidad del evento (título, categoría o ciclo). Una mención de jazz sólo en la descripción o el programa como componente estilístico de un programa mixto NO es exclude automático: si no hay bloque clásico sustancial → uncertain;
+- jazz como identidad del evento (título, categoría o ciclo, incluida una programación Café Central / Ateneo-Café Central). Una mención de jazz sólo en la descripción o el programa como componente estilístico de un programa mixto NO es exclude automático: si no hay bloque clásico sustancial → uncertain;
 - flamenco musical español (incluidos homenajes a Paco de Lucía, zambombas, jóvenes flamencos);
 - danza o ballet como espectáculo. Título o categoría de danza/ballet son exclude aunque el repertorio sea Chaikovski o Stravinski (no una suite de ballet dentro de un concierto). Una compañía de danza sólo es coprincipal si hay interpretación musical en directo independiente (orquesta, ensemble, intérpretes musicales, o concierto/recital); los compositores clásicos del ballet no bastan;
 - cine / proyección como actividad principal. Una película con acompañamiento de órgano sigue exclude. Un concierto o recital de órgano que usa una película como soporte de la interpretación en directo no es un ciclo de cine; un performer con rol órgano/organista no basta. «cine experimental» como medio de un concierto electroacústico o audiovisual no es un ciclo de cine: sin ancla clásica/académica → uncertain, no include ni exclude por proyección;
@@ -98,6 +98,7 @@ Reglas:
 - ese conocimiento NO puede inventar que un compositor, obra, performer, precio, fecha, venue o repertorio está en el programa si no aparece en los hechos;
 - descriptores como electrónica, electroacústica, síntesis modular, experimental o audiovisual NO son por sí solos evidencia de tradición clásica/académica: pueden existir conciertos electroacústicos académicos, pero sin un ancla observada de esa tradición → uncertain, no include. «correo electrónico» u otros usos administrativos de «electrónico» NO son música electrónica;
 - no clasifiques solo por un título genérico o poético si el resto de hechos no basta;
+- quinteto, cuarteto, trío, dúo, ensemble, concierto, recital o el nombre de un artista NO demuestran por sí solos tradición clásica/académica. include exige una ancla observada (compositor, obra, declaración explícita, ciclo clásico, o formación de identidad clásica demostrable). Si no está → uncertain;
 - eligibility ≠ format ≠ kind;
 - no transformes «A o B» / «un pianista o un grupo de cámara» / programación por determinar en varios formats: eso son alternativas, no un concierto con ambas formaciones. formats múltiples sólo si la fuente afirma que este evento combina formaciones. Si no hay evidencia suficiente, formats=[] (nunca other como comodín);
 - evidence: 1–4 extractos literales cortos (una frase o menos cada uno). Obligatorio si include o exclude. No copies párrafos ni el JSON de entrada; no pongas conclusiones; no uses elipsis para recortar un extracto si eso impide que el fragmento aparezca tal cual. Un nombre de compositor ya observado puede citarse con una variante ortográfica habitual (Händel/Haendel/Handel; Bach/Juan Sebastián Bach) si esa identidad está en los hechos;

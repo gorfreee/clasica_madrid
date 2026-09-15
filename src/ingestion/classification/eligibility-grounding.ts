@@ -18,6 +18,11 @@ export const AI_COPRINCIPAL_WITHOUT_CLASSICAL_BLOCK_RULE_ID =
   'ai-coprincipal-without-classical-block' as const;
 /** AI include from electronic/experimental descriptors without a classical anchor. */
 export const AI_AMBIGUOUS_CONTEMPORARY_RULE_ID = 'ai-ambiguous-contemporary' as const;
+/**
+ * Deterministic resolution was insufficient-evidence, and the grounded AI
+ * evidence is not a classical/academic anchor (quinteto, recital, artist name…).
+ */
+export const AI_WEAK_INCLUDE_EVIDENCE_RULE_ID = 'ai-weak-include-evidence' as const;
 
 /**
  * Editorial uncertain from a technically valid AI payload. Not a provider
@@ -29,6 +34,7 @@ export const EDITORIAL_AI_UNCERTAIN_RULE_IDS = [
   AI_UNGROUNDED_EVIDENCE_RULE_ID,
   AI_COPRINCIPAL_WITHOUT_CLASSICAL_BLOCK_RULE_ID,
   AI_AMBIGUOUS_CONTEMPORARY_RULE_ID,
+  AI_WEAK_INCLUDE_EVIDENCE_RULE_ID,
 ] as const;
 
 export function isEditorialAiUncertain(ruleId: string): boolean {
@@ -41,8 +47,11 @@ export type EligibilityAiDecision =
 
 /**
  * Post-parse editorial gate. A schema-valid payload is not yet a certainty:
- * include/exclude need verbatim observed spans, and two policy guardrails
- * reuse the deterministic classifier instead of inventing a block.
+ * include/exclude need verbatim observed spans, and policy guardrails reuse
+ * the deterministic classifier instead of inventing a block. An AI include
+ * over insufficient-evidence also needs an observed classical/academic
+ * anchor: grounded evidence that is only a formation-size word or an artist
+ * name is not enough.
  */
 export function evaluateEligibilityAi(
   facts: ObservedFacts,
@@ -91,6 +100,18 @@ export function evaluateEligibilityAi(
       AI_AMBIGUOUS_CONTEMPORARY_RULE_ID,
       ...evidence,
       'descriptores contemporáneos/electrónicos sin ancla clásica/académica observada',
+    );
+  }
+
+  if (
+    ai.eligibility === 'include' &&
+    deterministic.ruleId === 'insufficient-evidence' &&
+    !hasObservedClassicalAcademicAnchor(facts)
+  ) {
+    return reject(
+      AI_WEAK_INCLUDE_EVIDENCE_RULE_ID,
+      ...evidence,
+      'include de IA sin ancla clásica/académica observada',
     );
   }
 

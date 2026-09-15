@@ -7,11 +7,15 @@ import {
   AI_AMBIGUOUS_CONTEMPORARY_RULE_ID,
   AI_COPRINCIPAL_WITHOUT_CLASSICAL_BLOCK_RULE_ID,
   AI_UNGROUNDED_EVIDENCE_RULE_ID,
+  AI_WEAK_INCLUDE_EVIDENCE_RULE_ID,
   evaluateEligibilityAi,
   evidenceSpanIsGrounded,
   isEditorialAiUncertain,
 } from '../src/ingestion/classification/eligibility-grounding.ts';
-import { CLASSICAL_AND_NONCLASSICAL_COPRINCIPAL_RULE_ID } from '../src/ingestion/classification/eligibility.ts';
+import {
+  CLASSICAL_AND_NONCLASSICAL_COPRINCIPAL_RULE_ID,
+  hasObservedClassicalAcademicAnchor,
+} from '../src/ingestion/classification/eligibility.ts';
 import { isTechnicalClassificationFailure } from '../src/ingestion/classification/types.ts';
 import type { ObservedFacts } from '../src/ingestion/observed.ts';
 
@@ -371,6 +375,74 @@ describe('classifyObserved — guardrails de eligibility AI', () => {
     expect(result.eligibility.evidence.join(' ')).not.toMatch(/Un cuarteto con programa/);
     expect(result.formats?.value).toEqual(['chamber']);
     expect(ai.calls).toBe(1);
+  });
+
+  it('no deja que un ai-include débil convierta un quinteto genérico en clásica', async () => {
+    const elorrieta = facts({
+      title: 'JAVIER ELORRIETA QUINTETO',
+      description: 'Información y entradas (aquí). Cátedra Mayor. Pase: 19:30h.',
+    });
+    expect(classify(elorrieta).eligibility.ruleId).toBe('insufficient-evidence');
+    expect(hasObservedClassicalAcademicAnchor(elorrieta)).toBe(false);
+
+    const result = await classifyObserved(elorrieta, {
+      ai: {
+        async classify() {
+          return {
+            eligibility: 'include',
+            formats: ['chamber'],
+            evidence: ['JAVIER ELORRIETA QUINTETO'],
+          };
+        },
+      },
+    });
+    expect(result.eligibility.value).toBe('uncertain');
+    expect(result.eligibility.ruleId).toBe(AI_WEAK_INCLUDE_EVIDENCE_RULE_ID);
+    expect(isEditorialAiUncertain(result.eligibility.ruleId)).toBe(true);
+    expect(isTechnicalClassificationFailure(result.eligibility.ruleId)).toBe(false);
+  });
+
+  it('sigue permitiendo ai-include de un cuarteto o recital con ancla clásica observada', async () => {
+    expect(hasObservedClassicalAcademicAnchor(resolvableChamberFacts)).toBe(true);
+    const quartet = await classifyObserved(
+      facts({
+        title: 'Cuarteto Casals',
+        categoryText: 'Liceo de Cámara XXI',
+        performers: [{ name: 'Cuarteto Casals', roleText: 'cuarteto' }],
+        programText: 'Ludwig van Beethoven: Cuarteto de cuerda op. 18.',
+        composers: [{ name: 'Ludwig van Beethoven' }],
+      }),
+      {
+        ai: {
+          async classify() {
+            throw new Error('eligibility determinista no debe llamar a la IA');
+          },
+        },
+      },
+    );
+    expect(quartet.eligibility.value).toBe('include');
+    expect(quartet.eligibility.method).not.toBe('ai');
+
+    const recital = facts({
+      title: 'Velada de invierno',
+      description: 'Recital de piano en la tradición concertística.',
+      performers: [{ name: 'Ana Ruiz', roleText: 'piano' }],
+    });
+    expect(classify(recital).eligibility.value).toBe('uncertain');
+    expect(hasObservedClassicalAcademicAnchor(recital)).toBe(true);
+    const included = await classifyObserved(recital, {
+      ai: {
+        async classify() {
+          return {
+            eligibility: 'include',
+            formats: ['recital'],
+            evidence: ['Recital de piano en la tradición concertística'],
+          };
+        },
+      },
+    });
+    expect(included.eligibility.value).toBe('include');
+    expect(included.eligibility.ruleId).toBe('ai-include');
   });
 
   it('acepta exclude grounded', async () => {

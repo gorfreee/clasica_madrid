@@ -189,6 +189,9 @@ function jazzIdentity(
   ) {
     return exclusion('jazz-identity', [facts.categoryText ?? facts.seriesText ?? ''], true);
   }
+  if (namedJazzClubCycle(category, series, title)) {
+    return exclusion('jazz-identity', [facts.categoryText ?? facts.seriesText ?? facts.title], false);
+  }
   if (hasWord(title, 'jazz')) {
     return exclusion('jazz-identity', [facts.title], true);
   }
@@ -217,6 +220,21 @@ function explicitJazzConcertIdentity(body: string): boolean {
     hasPhrase(body, 'ciclo de jazz') ||
     hasPhrase(body, 'recital de jazz') ||
     hasPhrase(body, 'jazz en el auditorio')
+  );
+}
+
+/**
+ * Named jazz-club programming (Café Central / Ateneo-Café Central), not a
+ * footer mention of the building. Title, official category or series only.
+ * Hard exclude unless a substantial classical block of THIS event exists.
+ */
+function namedJazzClubCycle(category: string, series: string, title: string): boolean {
+  return (
+    hasPhrase(category, 'cafe central') ||
+    hasPhrase(series, 'cafe central') ||
+    hasPhrase(title, 'cafe central') ||
+    hasPhrase(category, 'ateneo-cafe central') ||
+    hasPhrase(series, 'ateneo-cafe central')
   );
 }
 
@@ -759,13 +777,66 @@ function popularProgramHit(text: string): boolean {
 
 /**
  * Observed classical/academic identity already recognised by the deterministic
- * policy (inclusions or a substantial classical block). Used as an AI include
- * gate; does not invent new policy.
+ * policy, plus conservative interpretation phrases that are still not an
+ * automatic include. Used as an AI include gate; does not invent new policy.
+ * Formation-size words (quinteto, trío, dúo) are not an anchor.
  */
 export function hasObservedClassicalAcademicAnchor(facts: ObservedFacts): boolean {
   const haystack = identityHaystack(facts);
   if (collectInclusions(facts, haystack).length > 0) return true;
-  return hasSubstantialClassicalBlock(facts);
+  if (hasSubstantialClassicalBlock(facts)) return true;
+  return hasConservativeClassicalInterpretationAnchor(facts);
+}
+
+/**
+ * Evidence that a human or model may legitimately read as classical/academic
+ * without it being enough, by itself, for a deterministic include.
+ */
+function hasConservativeClassicalInterpretationAnchor(facts: ObservedFacts): boolean {
+  const haystack = fieldFolded(
+    [
+      facts.title,
+      facts.categoryText,
+      facts.seriesText,
+      facts.description,
+      facts.programText,
+      ...facts.performers.flatMap((item) => [item.name, item.roleText]),
+      ...facts.composers.map((item) => item.name),
+      ...facts.works.flatMap((item) => [item.title, item.composerName]),
+    ]
+      .filter(Boolean)
+      .join('\n'),
+  );
+  if (!haystack) return false;
+  if (
+    hasPhrase(haystack, 'musica clasica') ||
+    hasPhrase(haystack, 'tradicion concertistica') ||
+    hasPhrase(haystack, 'tradicion clasica') ||
+    hasPhrase(haystack, 'tradicion academica') ||
+    hasPhrase(haystack, 'repertorio clasico') ||
+    hasPhrase(haystack, 'repertorio academico') ||
+    hasPhrase(haystack, 'musica antigua') ||
+    hasPhrase(haystack, 'alte musik') ||
+    hasPhrase(haystack, 'historicamente informad') ||
+    hasPhrase(haystack, 'clasicismo vienes') ||
+    hasPhrase(haystack, 'salon vienes') ||
+    hasPhrase(haystack, 'recital de piano clasico') ||
+    hasPhrase(haystack, 'concierto de piano clasico') ||
+    hasPhrase(haystack, 'concierto de musica de camara') ||
+    hasPhrase(haystack, 'festival internacional de organo') ||
+    hasPhrase(haystack, 'festival de organo') ||
+    hasPhrase(haystack, 'ciclo internacional de organo')
+  ) {
+    return true;
+  }
+  if (!hasPhrase(haystack, 'musica de camara')) return false;
+  return (
+    hasPhrase(haystack, 'clasicismo') ||
+    hasPhrase(haystack, 'romanticismo') ||
+    hasPhrase(haystack, 'barroco') ||
+    hasPhrase(haystack, 'renacimiento') ||
+    hasPhrase(haystack, 'clasica')
+  );
 }
 
 /**

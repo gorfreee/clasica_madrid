@@ -8,7 +8,14 @@ import {
   ateneoMadridAdapter as adapter,
   parseAteneoDateTime,
 } from '../src/ingestion/sources/ateneo-madrid.ts';
+import { classify } from '../src/ingestion/classification/classify.ts';
+import { classifyObserved } from '../src/ingestion/classification/enrich.ts';
 import { resolveAccess } from '../src/ingestion/classification/access.ts';
+import {
+  ateneoOfficialProgramUrls,
+  ateneoPerformers,
+} from '../src/ingestion/detail/ateneo-madrid.ts';
+import { flattenHtmlBlocks } from '../src/ingestion/html.ts';
 import { emptyCatalog, type Catalog } from '../src/lib/domain/catalog.ts';
 import { mergeCandidateBatch } from '../src/ingestion/batch.ts';
 import { matchEventIdentity } from '../src/ingestion/identity.ts';
@@ -93,6 +100,9 @@ describe('Ateneo de Madrid REST listing', () => {
       { name: 'Laura Fdez. Alcalde', roleText: 'soprano' },
       { name: 'Irene de Juan Bernabeu', roleText: 'piano' },
     ]);
+    expect(cantar.observed.description).toContain(
+      'https://ateneodemadrid.com/wp-content/uploads/2026/05/Concierto-22-de-Noviembre-de-2026.pdf',
+    );
 
     const mompou = events.find((event) => event.externalId === '62725')!;
     expect(mompou.observed.occurrences).toEqual([
@@ -305,6 +315,9 @@ describe('Ateneo de Madrid pipeline safety', () => {
     expect(matchVenue({ venueText: 'Sala Pérez Galdós', sourceId: source.id }, emptyCatalog())?.venue.id).toBe(
       'ven_ateneo_madrid',
     );
+    expect(matchVenue({ venueText: 'Café Central Ateneo', sourceId: source.id }, emptyCatalog())?.venue.id).toBe(
+      'ven_ateneo_madrid',
+    );
 
     const first = await run();
     expect(first.summary.sourcesFailed).toEqual([]);
@@ -313,6 +326,14 @@ describe('Ateneo de Madrid pipeline safety', () => {
     expect(first.candidates.every((candidate) => candidate.event.primarySourceId === source.catalogSourceId)).toBe(true);
     expect(first.candidates.every((candidate) => candidate.event.venueId === 'ven_ateneo_madrid')).toBe(true);
     expect(first.candidates.every((candidate) => candidate.event.kind === 'alternative')).toBe(true);
+    expect(first.candidates.some((candidate) => /Falla|Mompou|APOLLO5|voz infinita/i.test(candidate.event.title))).toBe(
+      true,
+    );
+    expect(first.candidates.some((candidate) => /GROOVERS|ELORRIETA/i.test(candidate.event.title))).toBe(false);
+    expect(first.decisions.find((decision) => /GROOVERS/i.test(decision.title))?.eligibility).toMatchObject({
+      value: 'exclude',
+      ruleId: 'jazz-identity',
+    });
 
     const catalog = mergeCandidateBatch(emptyCatalog(), first.candidates).catalog;
     const second = await run(catalog);
@@ -348,5 +369,84 @@ describe('Ateneo de Madrid pipeline safety', () => {
     const failed = await run(catalog, true);
     expect(failed.summary.sourcesFailed.map((item) => item.sourceId)).toEqual([source.id]);
     expect(failed.summary.possiblyMissing).toBe(0);
+  });
+});
+
+describe('Ateneo de Madrid regression cases', () => {
+  const regression = (name: string) =>
+    readFile(path.join(import.meta.dirname, 'fixtures/ingestion/ateneo-madrid', name), 'utf8');
+
+  it('extracts Concertista as a performer without inventing include', async () => {
+    const events = await adapter.extract(await regression('regression.json'), listingUrl, ctx);
+    const cadiz = events.find((event) => event.observed.title.includes('Cádiz'))!;
+    expect(cadiz.observed.performers).toEqual([
+      { name: 'Miguel Trápaga', roleText: 'autor' },
+    ]);
+    expect(cadiz.observed.performers.map((item) => item.name)).not.toContain('Luis Ángel de Benito');
+    expect(cadiz.observed.seriesText).toBe('Presentación del disco');
+
+    const classified = classify(cadiz.observed);
+    expect(classified.eligibility.value).not.toBe('include');
+    expect(classified.eligibility.ruleId).not.toBe('chamber-format');
+  });
+
+  it('does not publish Café Central programming as classical from a quinteto title', async () => {
+    const events = await adapter.extract(await regression('regression.json'), listingUrl, ctx);
+    const elorrieta = events.find((event) => event.observed.title.includes('ELORRIETA'))!;
+    expect(elorrieta.observed.categoryText).toMatch(/Café Central/i);
+    expect(elorrieta.observed.seriesText).toMatch(/Café Central/i);
+
+    const classified = classify(elorrieta.observed);
+    expect(classified.eligibility.value).toBe('exclude');
+    expect(classified.eligibility.ruleId).toBe('jazz-identity');
+    expect(classified.formats).toBeUndefined();
+
+    const forced = await classifyObserved(elorrieta.observed, {
+      ai: {
+        async classify() {
+          return {
+            eligibility: 'include',
+            formats: ['chamber'],
+            evidence: [elorrieta.observed.title],
+          };
+        },
+      },
+    });
+    expect(forced.eligibility.value).toBe('exclude');
+    expect(forced.eligibility.method).not.toBe('ai');
+  });
+
+  it('keeps Cantar del Alma as include with soprano and piano, and preserves the official programme URL', async () => {
+    const events = await adapter.extract(await fixture('listing.json'), listingUrl, ctx);
+    const cantar = events.find((event) => event.externalId === '60600')!;
+    expect(classify(cantar.observed).eligibility.value).toBe('include');
+    expect(cantar.observed.performers).toEqual([
+      { name: 'Laura Fdez. Alcalde', roleText: 'soprano' },
+      { name: 'Irene de Juan Bernabeu', roleText: 'piano' },
+    ]);
+    expect(cantar.observed.description).toContain('Concierto-22-de-Noviembre-de-2026.pdf');
+  });
+
+  it('discovers official Ateneo programme PDFs from editorial links, not posters or tickets', () => {
+    const html = [
+      '<p>Información y programa (<a href="https://ateneodemadrid.com/wp-content/uploads/2026/05/Concierto-22-de-Noviembre-de-2026.pdf">ver</a>).</p>',
+      '<p>Concierto inaugural. <a href="https://ateneodemadrid.com/wp-content/uploads/2026/07/Programa-Ateneo.pdf">Programa</a>.</p>',
+      '<p><a href="https://www.giglon.com/todos?idEvent=cantar-del-alma">este enlace</a></p>',
+      '<p><a href="https://ateneodemadrid.com/wp-content/uploads/2026/05/22.11.2026-Manuel-de-Falla.jpg">cartel</a></p>',
+    ].join('');
+    expect(ateneoOfficialProgramUrls(html)).toEqual([
+      'https://ateneodemadrid.com/wp-content/uploads/2026/05/Concierto-22-de-Noviembre-de-2026.pdf',
+      'https://ateneodemadrid.com/wp-content/uploads/2026/07/Programa-Ateneo.pdf',
+    ]);
+  });
+
+  it('parses Concertista and Solista labels from flattened Ateneo copy', () => {
+    const concertista = flattenHtmlBlocks(
+      '<p><strong>Concertista:</strong><strong> Miguel Trápaga &#8211; autor. Cátedra Mayor. 11:30.</strong></p>',
+    );
+    expect(ateneoPerformers(concertista)).toEqual([{ name: 'Miguel Trápaga', roleText: 'autor' }]);
+
+    const solista = flattenHtmlBlocks('<p>Solista: Ana Ruiz (piano). Cátedra Mayor. 19:00h.</p>');
+    expect(ateneoPerformers(solista)).toEqual([{ name: 'Ana Ruiz', roleText: 'piano' }]);
   });
 });
