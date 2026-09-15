@@ -45,6 +45,7 @@ const INTEGER_LIMITS = [
   'minIntervalMs',
   'providerMaxConcurrent',
   'providerMinIntervalMs',
+  'providerRpd',
 ] as const;
 const DISABLE_LIMITS = [
   'rpm',
@@ -52,6 +53,7 @@ const DISABLE_LIMITS = [
   'rpd',
   'maxConcurrent',
   'providerMaxConcurrent',
+  'providerRpd',
 ] as const;
 
 export type SleepClock = { now(): number; sleep(ms: number): Promise<void> };
@@ -160,6 +162,9 @@ export class AiPoolClassifier implements AiClassifier {
       }
       if (route.limits?.rpd !== undefined && route.limits.rpd > 0 && !route.reset) {
         throw new Error(`IA: ${route.routeId} declara RPD sin política de reset`);
+      }
+      if (route.limits?.providerRpd !== undefined && route.limits.providerRpd > 0 && !route.reset) {
+        throw new Error(`IA: ${route.routeId} declara providerRpd sin política de reset`);
       }
     }
     this.routes = [...options.routes];
@@ -592,6 +597,14 @@ export class AiPoolClassifier implements AiClassifier {
         addRoute(diagnostics, route, state.dailyUntil > now ? 'daily-quota' : 'daily-budget');
         continue;
       }
+      const providerRpd = this.providerCap(route.provider, 'providerRpd');
+      if (providerRpd !== undefined) {
+        const providerDaily = this.providerDailyRequests(route.provider, now);
+        if (providerDaily >= providerRpd) {
+          addRoute(diagnostics, route, 'provider-daily-quota');
+          continue;
+        }
+      }
       const estimated = Math.ceil(this.estimateInputTokens(request, route) * state.tokenScale);
       const tpm = route.limits?.tpm ?? Infinity;
       if (estimated > tpm) {
@@ -729,9 +742,15 @@ export class AiPoolClassifier implements AiClassifier {
     }
   }
 
+  private providerDailyRequests(provider: string, now: number): number {
+    return this.routes
+      .filter((route) => route.provider === provider)
+      .reduce((sum, route) => sum + this.state.route(route.routeId, now, route.reset).requests, 0);
+  }
+
   private providerCap(
     provider: string,
-    key: 'providerMaxConcurrent' | 'providerMinIntervalMs',
+    key: 'providerMaxConcurrent' | 'providerMinIntervalMs' | 'providerRpd',
   ): number | undefined {
     const values = this.routes
       .filter((route) => route.provider === provider)

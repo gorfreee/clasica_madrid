@@ -33,10 +33,19 @@ import {
   CLOUDFLARE_ZERO_COST_MODELS,
   GROQ_DEFAULT_BASE_URL,
   GROQ_DEFAULT_MODELS,
+  KILO_DEFAULT_BASE_URL,
+  KILO_PRODUCTION_LIMITS,
+  KILO_ZERO_COST_MODELS,
   MISTRAL_DEFAULT_BASE_URL,
   MISTRAL_DEFAULT_MODELS,
   MISTRAL_OPTIONAL_MODELS,
   MISTRAL_PRODUCTION_MODEL_LIMITS,
+  OPENROUTER_DEFAULT_BASE_URL,
+  OPENROUTER_PRODUCTION_LIMITS,
+  OPENROUTER_ZERO_COST_MODELS,
+  VERCEL_DEFAULT_BASE_URL,
+  VERCEL_PRODUCTION_LIMITS,
+  VERCEL_ZERO_COST_MODELS,
   ZAI_DEFAULT_BASE_URL,
   ZAI_PRODUCTION_LIMITS,
   ZAI_ZERO_COST_MODELS,
@@ -72,6 +81,15 @@ describe('factory multi-provider zero cost', () => {
       CLOUDFLARE_ACCOUNT_ID: 'account-id',
       CLOUDFLARE_WORKERS_FREE_CONFIRMED: 'true',
     }))).toEqual(['cloudflare']);
+    expect(routeProviders(createFreeRoutesFromEnv({
+      ...base, VERCEL_AI_GATEWAY_API_KEY: 'vercel-key', VERCEL_FREE_TIER_CONFIRMED: 'true',
+    }))).toEqual(['vercel']);
+    expect(routeProviders(createFreeRoutesFromEnv({
+      ...base, KILO_API_KEY: 'kilo-key', KILO_FREE_TIER_CONFIRMED: 'true',
+    }))).toEqual(['kilo']);
+    expect(routeProviders(createFreeRoutesFromEnv({
+      ...base, OPENROUTER_API_KEY: 'openrouter-key', OPENROUTER_FREE_TIER_CONFIRMED: 'true',
+    }))).toEqual(['openrouter']);
   });
 
   it('omite key ausente o providers que no tienen confirmación gratuita', () => {
@@ -104,6 +122,9 @@ describe('factory multi-provider zero cost', () => {
       ['mistral', 'unconfigured'],
       ['cloudflare', 'unconfigured'],
       ['zai', 'error'],
+      ['vercel', 'unconfigured'],
+      ['kilo', 'unconfigured'],
+      ['openrouter', 'unconfigured'],
     ]);
     expect(inspection.providers.find((item) => item.provider === 'groq')?.reason).toMatch(/GROQ_FREE_TIER_CONFIRMED/);
     expect(inspection.providers.find((item) => item.provider === 'mistral')?.reason).toMatch(/MISTRAL_API_KEY/);
@@ -128,6 +149,24 @@ describe('factory multi-provider zero cost', () => {
       CLOUDFLARE_WORKERS_FREE_CONFIRMED: 'true',
       CLOUDFLARE_MODELS: '@cf/zai-org/glm-5.3',
     })).toThrow(/CLOUDFLARE_MODELS.*no autorizados/);
+    expect(() => createFreeRoutesFromEnv({
+      AI_ZERO_COST_ONLY: 'true',
+      VERCEL_AI_GATEWAY_API_KEY: 'vercel-key',
+      VERCEL_FREE_TIER_CONFIRMED: 'true',
+      VERCEL_MODELS: 'minimax/minimax-m3',
+    })).toThrow(/VERCEL_MODELS.*no autorizados/);
+    expect(() => createFreeRoutesFromEnv({
+      AI_ZERO_COST_ONLY: 'true',
+      KILO_API_KEY: 'kilo-key',
+      KILO_FREE_TIER_CONFIRMED: 'true',
+      KILO_MODELS: 'minimax/minimax-m2.7',
+    })).toThrow(/KILO_MODELS.*no autorizados/);
+    expect(() => createFreeRoutesFromEnv({
+      AI_ZERO_COST_ONLY: 'true',
+      OPENROUTER_API_KEY: 'openrouter-key',
+      OPENROUTER_FREE_TIER_CONFIRMED: 'true',
+      OPENROUTER_MODELS: 'openai/gpt-oss-20b',
+    })).toThrow(/OPENROUTER_MODELS.*no autorizados/);
   });
 
   it('construye routes ordenadas y endpoints oficiales sin mezclar providers', () => {
@@ -138,12 +177,18 @@ describe('factory multi-provider zero cost', () => {
       ZAI_API_KEY: 'zai-key',
       CLOUDFLARE_API_TOKEN: 'cloudflare-token', CLOUDFLARE_ACCOUNT_ID: 'account-id',
       CLOUDFLARE_WORKERS_FREE_CONFIRMED: 'true',
+      VERCEL_AI_GATEWAY_API_KEY: 'vercel-key', VERCEL_FREE_TIER_CONFIRMED: 'true',
+      KILO_API_KEY: 'kilo-key', KILO_FREE_TIER_CONFIRMED: 'true',
+      OPENROUTER_API_KEY: 'openrouter-key', OPENROUTER_FREE_TIER_CONFIRMED: 'true',
     });
     expect(routes.map((route) => route.routeId)).toEqual([
       ...GROQ_DEFAULT_MODELS.map((model) => `groq:${model}`),
       ...MISTRAL_DEFAULT_MODELS.map((model) => `mistral:${model}`),
       'zai:glm-4.7-flash', 'zai:glm-4.5-flash',
       ...CLOUDFLARE_ZERO_COST_MODELS.map((model) => `cloudflare:${model}`),
+      ...VERCEL_ZERO_COST_MODELS.map((model) => `vercel:${model}`),
+      ...KILO_ZERO_COST_MODELS.map((model) => `kilo:${model}`),
+      ...OPENROUTER_ZERO_COST_MODELS.map((model) => `openrouter:${model}`),
     ]);
     expect(identity(routes, 'groq').baseUrl).toBe(GROQ_DEFAULT_BASE_URL);
     expect(identity(routes, 'mistral').baseUrl).toBe(MISTRAL_DEFAULT_BASE_URL);
@@ -151,6 +196,9 @@ describe('factory multi-provider zero cost', () => {
     expect(identity(routes, 'cloudflare').baseUrl).toBe(
       'https://api.cloudflare.com/client/v4/accounts/account-id/ai/v1',
     );
+    expect(identity(routes, 'vercel').baseUrl).toBe(VERCEL_DEFAULT_BASE_URL);
+    expect(identity(routes, 'kilo').baseUrl).toBe(KILO_DEFAULT_BASE_URL);
+    expect(identity(routes, 'openrouter').baseUrl).toBe(OPENROUTER_DEFAULT_BASE_URL);
   });
 
   it('AI_ROUTE fija exactamente una route compatible', () => {
@@ -248,6 +296,94 @@ describe('factory multi-provider zero cost', () => {
     expect(overridden[0]?.limits).toMatchObject({ tpm: 100, maxConcurrent: 3, minIntervalMs: 10 });
     expect(overridden[1]?.limits?.tpm).toBeUndefined();
     expect(overridden[1]?.limits?.minIntervalMs).toBeUndefined();
+  });
+
+  it('Vercel/Kilo/OpenRouter exigen confirmación, allowlist y límites provider-wide', () => {
+    expect([...VERCEL_ZERO_COST_MODELS]).toEqual(['inclusionai/ling-3.0-flash-vl-free']);
+    expect(VERCEL_ZERO_COST_MODELS).not.toContain('minimax/minimax-m3-free');
+    expect(VERCEL_ZERO_COST_MODELS).not.toContain('minimax/minimax-m3');
+    expect([...KILO_ZERO_COST_MODELS]).toEqual(['dots-studio/dots-3-note-preview:free']);
+    expect(KILO_ZERO_COST_MODELS).not.toContain('minimax/minimax-m2.7:free');
+    expect(KILO_ZERO_COST_MODELS).not.toContain('kilo-auto/free');
+    expect(KILO_ZERO_COST_MODELS.every((model) => model.endsWith(':free'))).toBe(true);
+    expect([...OPENROUTER_ZERO_COST_MODELS]).toEqual([
+      'google/gemma-4-26b-a4b-it:free',
+      'openai/gpt-oss-20b:free',
+    ]);
+    expect(OPENROUTER_ZERO_COST_MODELS).not.toContain('openrouter/free');
+    expect(OPENROUTER_ZERO_COST_MODELS.every((model) => model.endsWith(':free'))).toBe(true);
+
+    expect(createFreeRoutesFromEnv({
+      AI_ZERO_COST_ONLY: 'true', VERCEL_AI_GATEWAY_API_KEY: 'vercel-key',
+    })).toEqual([]);
+    expect(createFreeRoutesFromEnv({
+      AI_ZERO_COST_ONLY: 'true', KILO_API_KEY: 'kilo-key',
+    })).toEqual([]);
+    expect(createFreeRoutesFromEnv({
+      AI_ZERO_COST_ONLY: 'true', OPENROUTER_API_KEY: 'openrouter-key',
+    })).toEqual([]);
+
+    const routes = createFreeRoutesFromEnv({
+      AI_ZERO_COST_ONLY: 'true',
+      VERCEL_AI_GATEWAY_API_KEY: 'vercel-key', VERCEL_FREE_TIER_CONFIRMED: 'true',
+      KILO_API_KEY: 'kilo-key', KILO_FREE_TIER_CONFIRMED: 'true',
+      OPENROUTER_API_KEY: 'openrouter-key', OPENROUTER_FREE_TIER_CONFIRMED: 'true',
+    });
+    expect(routes.find((route) => route.routeId === 'vercel:inclusionai/ling-3.0-flash-vl-free')?.limits)
+      .toEqual(VERCEL_PRODUCTION_LIMITS);
+    expect(routes.find((route) => route.routeId === 'kilo:dots-studio/dots-3-note-preview:free')?.limits)
+      .toEqual(KILO_PRODUCTION_LIMITS);
+    expect(KILO_PRODUCTION_LIMITS.providerMinIntervalMs).toBe(20_000);
+    expect(KILO_PRODUCTION_LIMITS).not.toMatchObject({ rpd: 200 });
+    const openrouter = routes.filter((route) => route.provider === 'openrouter');
+    expect(openrouter).toHaveLength(2);
+    for (const route of openrouter) {
+      expect(route.limits).toEqual(OPENROUTER_PRODUCTION_LIMITS);
+      expect(route.reset).toBeDefined();
+    }
+    expect(OPENROUTER_PRODUCTION_LIMITS.providerRpd).toBe(1_000);
+    expect(openrouter.every((route) => route.limits?.rpd === undefined)).toBe(true);
+    expect(openrouter.reduce((sum, route) => sum + (route.limits?.rpd ?? 0), 0)).not.toBe(1_000);
+
+    expect(() => createFreeRoutesFromEnv({
+      AI_ZERO_COST_ONLY: 'true',
+      KILO_API_KEY: 'kilo-key', KILO_FREE_TIER_CONFIRMED: 'true',
+      KILO_MODELS: 'kilo-auto/free',
+    })).toThrow(/KILO_MODELS.*no autorizados/);
+    expect(() => createFreeRoutesFromEnv({
+      AI_ZERO_COST_ONLY: 'true',
+      KILO_API_KEY: 'kilo-key', KILO_FREE_TIER_CONFIRMED: 'true',
+      KILO_MODELS: 'minimax/minimax-m2.7:free',
+    })).toThrow(/KILO_MODELS.*no autorizados/);
+    expect(() => createFreeRoutesFromEnv({
+      AI_ZERO_COST_ONLY: 'true',
+      OPENROUTER_API_KEY: 'openrouter-key', OPENROUTER_FREE_TIER_CONFIRMED: 'true',
+      OPENROUTER_MODELS: 'openrouter/free',
+    })).toThrow(/OPENROUTER_MODELS.*no autorizados/);
+    expect(() => createFreeRoutesFromEnv({
+      AI_ZERO_COST_ONLY: 'true',
+      VERCEL_AI_GATEWAY_API_KEY: 'vercel-key', VERCEL_FREE_TIER_CONFIRMED: 'true',
+      VERCEL_MODELS: 'minimax/minimax-m3-free',
+    })).toThrow(/VERCEL_MODELS.*no autorizados/);
+  });
+
+  it('AI_ROUTE acepta OpenRouter :free y rechaza la variante pagada', () => {
+    const classifier = createAiClassifierFromEnv({
+      AI_ZERO_COST_ONLY: 'true',
+      AI_ROUTE: 'openrouter:openai/gpt-oss-20b:free',
+      OPENROUTER_API_KEY: 'openrouter-key',
+      OPENROUTER_FREE_TIER_CONFIRMED: 'true',
+    });
+    expect(classifier).toBeInstanceOf(AiPoolClassifier);
+    expect((classifier as AiPoolClassifier).routes.map((route) => route.routeId)).toEqual([
+      'openrouter:openai/gpt-oss-20b:free',
+    ]);
+    expect(() => createAiClassifierFromEnv({
+      AI_ZERO_COST_ONLY: 'true',
+      AI_ROUTE: 'openrouter:openai/gpt-oss-20b',
+      OPENROUTER_API_KEY: 'openrouter-key',
+      OPENROUTER_FREE_TIER_CONFIRMED: 'true',
+    })).toThrow(/OPENROUTER_MODELS.*no autorizados|route no configurada/);
   });
 });
 
@@ -362,6 +498,60 @@ describe('payload HTTP por provider/modelo', () => {
     expect(body.response_format).not.toMatchObject({ type: 'json_schema' });
   });
 
+  it('Vercel Ling Free no envía response_format y apaga reasoning', async () => {
+    const body = await captureBody('vercel', 'inclusionai/ling-3.0-flash-vl-free');
+    expect(body).toMatchObject({
+      model: 'inclusionai/ling-3.0-flash-vl-free',
+      temperature: 0,
+      max_tokens: 100,
+      reasoning: { effort: 'none' },
+    });
+    expect(body).not.toHaveProperty('response_format');
+    expect(body).not.toHaveProperty('include_reasoning');
+    expect(body).not.toHaveProperty('provider');
+  });
+
+  it('Kilo Dots3 Free usa json_schema best-effort sin flags de routing', async () => {
+    const body = await captureBody('kilo', 'dots-studio/dots-3-note-preview:free');
+    expect(body).toMatchObject({
+      model: 'dots-studio/dots-3-note-preview:free',
+      max_tokens: 100,
+      response_format: {
+        type: 'json_schema',
+        json_schema: {
+          name: 'clasica_eligibility',
+          strict: false,
+          schema: request.schema,
+        },
+      },
+    });
+    expect(body).not.toHaveProperty('provider');
+    expect(body).not.toHaveProperty('reasoning');
+    expect(body).not.toHaveProperty('include_reasoning');
+  });
+
+  it('OpenRouter :free usa json_schema y require_parameters sin fallback pagado', async () => {
+    for (const model of OPENROUTER_ZERO_COST_MODELS) {
+      const body = await captureBody('openrouter', model);
+      expect(body).toMatchObject({
+        model,
+        max_tokens: 100,
+        provider: { require_parameters: true },
+        response_format: {
+          type: 'json_schema',
+          json_schema: {
+            name: 'clasica_eligibility',
+            strict: false,
+            schema: request.schema,
+          },
+        },
+      });
+      expect(body).not.toHaveProperty('models');
+      expect(body).not.toHaveProperty('route');
+      expect(body.provider).not.toMatchObject({ allow_fallbacks: true });
+    }
+  });
+
   it('reutiliza el schema editorial existente en el payload Groq GPT-OSS', () => {
     const editorial = buildAiRequest({
       title: 'Concierto de Bach', performers: [], composers: [], works: [],
@@ -443,6 +633,9 @@ describe('payload HTTP por provider/modelo', () => {
       ZAI_API_KEY: 'zai-key',
       CLOUDFLARE_API_TOKEN: 'cloudflare-token', CLOUDFLARE_ACCOUNT_ID: 'account-id',
       CLOUDFLARE_WORKERS_FREE_CONFIRMED: 'true',
+      VERCEL_AI_GATEWAY_API_KEY: 'vercel-key', VERCEL_FREE_TIER_CONFIRMED: 'true',
+      KILO_API_KEY: 'kilo-key', KILO_FREE_TIER_CONFIRMED: 'true',
+      OPENROUTER_API_KEY: 'openrouter-key', OPENROUTER_FREE_TIER_CONFIRMED: 'true',
     });
     expect(identityByRoute(routes, 'groq:openai/gpt-oss-120b')).toMatchObject({
       responseFormat: 'json-schema',
@@ -483,6 +676,25 @@ describe('payload HTTP por provider/modelo', () => {
         chat_template_kwargs: { enable_thinking: false },
       },
     });
+    expect(identityByRoute(routes, 'vercel:inclusionai/ling-3.0-flash-vl-free')).toMatchObject({
+      responseFormat: 'none',
+      jsonSchemaStrict: false,
+      tokenParameter: 'max_tokens',
+      promptOutputContract: true,
+      extraBody: { reasoning: { effort: 'none' } },
+    });
+    expect(identityByRoute(routes, 'kilo:dots-studio/dots-3-note-preview:free')).toMatchObject({
+      responseFormat: 'json-schema',
+      jsonSchemaStrict: false,
+      extraBody: {},
+      promptOutputContract: false,
+    });
+    expect(identityByRoute(routes, 'openrouter:openai/gpt-oss-20b:free')).toMatchObject({
+      responseFormat: 'json-schema',
+      jsonSchemaStrict: false,
+      extraBody: { provider: { require_parameters: true } },
+      promptOutputContract: false,
+    });
     expect(identityByRoute(routes, 'groq:openai/gpt-oss-120b')).toMatchObject({
       promptOutputContract: false,
     });
@@ -499,6 +711,8 @@ describe('schema-in-prompt para routes sin json_schema', () => {
       ['openai/gpt-oss-120b', 'groq'],
       ['qwen/qwen3.8-27b', 'groq'],
       ['ministral-14b-2512', 'mistral'],
+      ['dots-studio/dots-3-note-preview:free', 'kilo'],
+      ['openai/gpt-oss-20b:free', 'openrouter'],
     ] as const) {
       const body = buildOpenAiCompatibleRequestBody(model, editorial, {
         provider, baseUrl: 'https://example.test/v1', apiKey: 'provider-secret',
@@ -539,14 +753,19 @@ describe('schema-in-prompt para routes sin json_schema', () => {
 
   it('none también recibe el contrato compacto y no envía response_format', () => {
     const editorial = buildAiRequest(observed, 'eligibility');
-    const body = buildOpenAiCompatibleRequestBody('@cf/zai-org/glm-4.7-flash', editorial, {
-      provider: 'cloudflare', baseUrl: 'https://example.test/v1', apiKey: 'provider-secret',
-    });
-    const messages = body.messages as Array<{ role: string; content: string }>;
-    expect(body).not.toHaveProperty('response_format');
-    expect(messages[0]?.content).toContain(OUTPUT_CONTRACT_INSTRUCTION);
-    expect(messages[0]?.content).toContain('"include"|"exclude"|"uncertain"');
-    expect(messages[1]?.content).toBe(editorial.user);
+    for (const [model, provider] of [
+      ['@cf/zai-org/glm-4.7-flash', 'cloudflare'],
+      ['inclusionai/ling-3.0-flash-vl-free', 'vercel'],
+    ] as const) {
+      const body = buildOpenAiCompatibleRequestBody(model, editorial, {
+        provider, baseUrl: 'https://example.test/v1', apiKey: 'provider-secret',
+      });
+      const messages = body.messages as Array<{ role: string; content: string }>;
+      expect(body).not.toHaveProperty('response_format');
+      expect(messages[0]?.content).toContain(OUTPUT_CONTRACT_INSTRUCTION);
+      expect(messages[0]?.content).toContain('"include"|"exclude"|"uncertain"');
+      expect(messages[1]?.content).toBe(editorial.user);
+    }
   });
 
   it('el contrato genérico cubre eligibility, composer, access y taxonomy', () => {
@@ -654,6 +873,25 @@ describe('perfiles HTTP declarativos', () => {
       tokenParameter: 'max_completion_tokens',
       extraBody: {},
     });
+    expect(openaiCompatibleModelProfile('vercel', 'inclusionai/ling-3.0-flash-vl-free')).toEqual({
+      responseFormat: 'none',
+      jsonSchemaStrict: false,
+      tokenParameter: 'max_tokens',
+      extraBody: { reasoning: { effort: 'none' } },
+    });
+    expect(openaiCompatibleModelProfile('kilo', 'dots-studio/dots-3-note-preview:free')).toEqual({
+      responseFormat: 'json-schema',
+      jsonSchemaStrict: false,
+      tokenParameter: 'max_tokens',
+      extraBody: {},
+    });
+    expect(openaiCompatibleModelProfile('openrouter', 'openai/gpt-oss-20b:free')).toEqual({
+      responseFormat: 'json-schema',
+      jsonSchemaStrict: false,
+      tokenParameter: 'max_tokens',
+      extraBody: { provider: { require_parameters: true } },
+    });
+    expect(openaiCompatibleModelProfile('openrouter', 'google/gemma-4-26b-a4b-it:free').jsonSchemaStrict).toBe(false);
   });
 
   it('reconoce rate-limit de Mistral/Z.AI sin tratar 400/401 como cuota', () => {
@@ -789,6 +1027,10 @@ describe('OpenAiCompatibleTransport', () => {
         expect(error).toMatchObject({ kind: 'auth', status });
       }
     }
+
+    const payment = compatible(async () => new Response('insufficient credits provider-secret', { status: 402 }));
+    await expect(payment.request({ model: 'model', request, signal, timeoutMs: 1_000 }))
+      .rejects.toMatchObject({ kind: 'unavailable', status: 402, retryable: false });
   });
 
   it('interpreta 429/503 de Mistral y Z.AI, headers X-RateLimit y envuelve Cloudflare', async () => {
@@ -1009,7 +1251,34 @@ describe('OpenAiCompatibleTransport', () => {
     expect(JSON.stringify(classifier.lastDiagnostics())).not.toContain('groq-secret-key');
   });
 
-  it('propaga quotaExhausted para que el pool degrade limpiamente', async () => {
+  it('un 402 deshabilita la route y deja que el pool pruebe otra route gratuita', async () => {
+    const paid = new OpenAiCompatibleTransport({
+      provider: 'openrouter', baseUrl: 'https://example.test/v1', apiKey: 'openrouter-secret',
+      fetch: async () => new Response('{"error":{"message":"Payment required","code":402}}', { status: 402 }),
+    });
+    const free = new OpenAiCompatibleTransport({
+      provider: 'openrouter', baseUrl: 'https://example.test/v1', apiKey: 'openrouter-secret',
+      fetch: async () => response({
+        choices: [{ message: { content: '{"eligibility":"include"}' }, finish_reason: 'stop' }],
+      }),
+    });
+    const classifier = new AiPoolClassifier({
+      routes: [
+        makeRoute({ provider: 'openrouter', model: 'openai/gpt-oss-20b:free', transport: paid }),
+        makeRoute({ provider: 'openrouter', model: 'google/gemma-4-26b-a4b-it:free', transport: free }),
+      ],
+      maxRetries: 1,
+      cacheEnabled: false,
+    });
+    await expect(classifier.classify({ title: 'Concierto', performers: [], composers: [], works: [] }))
+      .resolves.toEqual({ eligibility: 'include' });
+    expect(classifier.lastDiagnostics()).toMatchObject({
+      provider: 'openrouter',
+      model: 'google/gemma-4-26b-a4b-it:free',
+      fallbackUsed: true,
+    });
+    expect(JSON.stringify(classifier.lastDiagnostics())).not.toContain('openrouter-secret');
+  });
     const transport = new OpenAiCompatibleTransport({
       provider: 'cloudflare', baseUrl: 'https://example.test/v1', apiKey: 'provider-secret',
       fetch: async () => new Response('{"errors":[{"code":3036}]}', { status: 429 }),

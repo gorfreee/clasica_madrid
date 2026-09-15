@@ -12,7 +12,7 @@ import {
 } from './openai-compatible-transport.ts';
 import { OpenAiClassifier } from './openai.ts';
 
-export const AI_FREE_PROVIDERS = ['gemini', 'groq', 'mistral', 'cloudflare', 'zai'] as const;
+export const AI_FREE_PROVIDERS = ['gemini', 'groq', 'mistral', 'cloudflare', 'zai', 'vercel', 'kilo', 'openrouter'] as const;
 export const AI_PROVIDERS = [...AI_FREE_PROVIDERS, 'openai'] as const;
 export type AiFreeProvider = (typeof AI_FREE_PROVIDERS)[number];
 
@@ -20,7 +20,9 @@ export type AiFreeProvider = (typeof AI_FREE_PROVIDERS)[number];
  * Construction order of the zero-cost pool. Distinct from `AI_FREE_PROVIDERS`
  * listing order (`cloudflare` is listed before `zai` there).
  */
-const FREE_ROUTE_BUILD_ORDER = ['gemini', 'groq', 'mistral', 'zai', 'cloudflare'] as const satisfies readonly AiFreeProvider[];
+const FREE_ROUTE_BUILD_ORDER = [
+  'gemini', 'groq', 'mistral', 'zai', 'cloudflare', 'vercel', 'kilo', 'openrouter',
+] as const satisfies readonly AiFreeProvider[];
 
 export type FreeProviderInspectionStatus = 'ready' | 'unconfigured' | 'empty' | 'error';
 
@@ -40,6 +42,9 @@ export const GROQ_DEFAULT_BASE_URL = 'https://api.groq.com/openai/v1';
 export const MISTRAL_DEFAULT_BASE_URL = 'https://api.mistral.ai/v1';
 export const ZAI_DEFAULT_BASE_URL = 'https://api.z.ai/api/paas/v4';
 export const CLOUDFLARE_API_BASE_URL = 'https://api.cloudflare.com/client/v4/accounts';
+export const VERCEL_DEFAULT_BASE_URL = 'https://ai-gateway.vercel.sh/v1';
+export const KILO_DEFAULT_BASE_URL = 'https://api.kilo.ai/api/gateway';
+export const OPENROUTER_DEFAULT_BASE_URL = 'https://openrouter.ai/api/v1';
 
 export const GROQ_DEFAULT_MODELS = [
   'openai/gpt-oss-120b',
@@ -63,6 +68,25 @@ export const CLOUDFLARE_ZERO_COST_MODELS = [
   '@cf/zai-org/glm-4.7-flash',
   '@cf/google/gemma-4-26b-a4b-it',
 ] as const;
+/**
+ * Verified 2026-09-15 against GET https://ai-gateway.vercel.sh/v1/models/{id}:
+ * `inclusionai/ling-3.0-flash-vl-free` is tagged free with pricing 0/0.
+ * `minimax/minimax-m3-free` 404s (changelog: GMI Cloud promo ended 2026-09-06)
+ * and is deliberately omitted — do not substitute the paid `minimax/minimax-m3`.
+ */
+export const VERCEL_ZERO_COST_MODELS = ['inclusionai/ling-3.0-flash-vl-free'] as const;
+/**
+ * Verified 2026-09-15 against GET https://api.kilo.ai/api/gateway/models:
+ * `dots-studio/dots-3-note-preview:free` is `isFree` with prompt/completion 0.
+ * `minimax/minimax-m2.7:free` is absent from that catalog (only paid
+ * `minimax/minimax-m2.7` exists) and is omitted. `kilo-auto/free` is excluded
+ * because it routes dynamically.
+ */
+export const KILO_ZERO_COST_MODELS = ['dots-studio/dots-3-note-preview:free'] as const;
+export const OPENROUTER_ZERO_COST_MODELS = [
+  'google/gemma-4-26b-a4b-it:free',
+  'openai/gpt-oss-20b:free',
+] as const;
 
 const GROQ_FREE_LIMITS: AiRouteLimits = { rpm: 30, tpm: 8_000, rpd: 1_000 };
 /**
@@ -83,6 +107,30 @@ export const MISTRAL_PRODUCTION_MODEL_LIMITS: Record<string, AiRouteLimits> = {
  * and `ZAI_MODEL_MAX_CONCURRENT` remain emergency overrides.
  */
 export const ZAI_PRODUCTION_LIMITS: AiRouteLimits = { providerMaxConcurrent: 1 };
+/**
+ * No published RPM/RPD for Vercel free-model endpoints. Cap in-flight work
+ * and rely on generic 429 / Retry-After rather than inventing a quota.
+ */
+export const VERCEL_PRODUCTION_LIMITS: AiRouteLimits = { providerMaxConcurrent: 1 };
+/**
+ * Kilo documents 200 free-model requests/hour/IP, shared across models.
+ * providerMinIntervalMs=20_000 ≈ 180 requests/hour with a margin; do not
+ * model this as 200/hour per route.
+ */
+export const KILO_PRODUCTION_LIMITS: AiRouteLimits = {
+  providerMaxConcurrent: 1,
+  providerMinIntervalMs: 20_000,
+};
+/**
+ * OpenRouter free-model caps for accounts with ≥ $10 purchased credits:
+ * 1_000 RPD + 20 RPM, shared across `:free` models. providerRpd=1000 is the
+ * aggregate, not 1000 per route. 3s interval stays under 20 RPM.
+ * Paid balance is never an authorized route.
+ */
+export const OPENROUTER_PRODUCTION_LIMITS: AiRouteLimits = {
+  providerMinIntervalMs: 3_000,
+  providerRpd: 1_000,
+};
 const DEFAULT_STATE_DIR = fileURLToPath(new URL('../../../.local/ai/', import.meta.url));
 
 export type AiEnv = GeminiConfigEnv & {
@@ -138,6 +186,39 @@ export type AiEnv = GeminiConfigEnv & {
   CLOUDFLARE_MODEL_MIN_INTERVAL_MS?: string;
   CLOUDFLARE_MAX_CONCURRENT?: string;
   CLOUDFLARE_MIN_INTERVAL_MS?: string;
+  VERCEL_AI_GATEWAY_API_KEY?: string;
+  VERCEL_MODELS?: string;
+  VERCEL_FREE_TIER_CONFIRMED?: string;
+  VERCEL_MODEL_RPM?: string;
+  VERCEL_MODEL_TPM?: string;
+  VERCEL_MODEL_RPD?: string;
+  VERCEL_MODEL_MAX_CONCURRENT?: string;
+  VERCEL_MODEL_MIN_INTERVAL_MS?: string;
+  VERCEL_MAX_CONCURRENT?: string;
+  VERCEL_MIN_INTERVAL_MS?: string;
+  VERCEL_RPD?: string;
+  KILO_API_KEY?: string;
+  KILO_MODELS?: string;
+  KILO_FREE_TIER_CONFIRMED?: string;
+  KILO_MODEL_RPM?: string;
+  KILO_MODEL_TPM?: string;
+  KILO_MODEL_RPD?: string;
+  KILO_MODEL_MAX_CONCURRENT?: string;
+  KILO_MODEL_MIN_INTERVAL_MS?: string;
+  KILO_MAX_CONCURRENT?: string;
+  KILO_MIN_INTERVAL_MS?: string;
+  KILO_RPD?: string;
+  OPENROUTER_API_KEY?: string;
+  OPENROUTER_MODELS?: string;
+  OPENROUTER_FREE_TIER_CONFIRMED?: string;
+  OPENROUTER_MODEL_RPM?: string;
+  OPENROUTER_MODEL_TPM?: string;
+  OPENROUTER_MODEL_RPD?: string;
+  OPENROUTER_MODEL_MAX_CONCURRENT?: string;
+  OPENROUTER_MODEL_MIN_INTERVAL_MS?: string;
+  OPENROUTER_MAX_CONCURRENT?: string;
+  OPENROUTER_MIN_INTERVAL_MS?: string;
+  OPENROUTER_RPD?: string;
 };
 
 /** New production providers only participate in an explicit fail-closed zero-cost pool. */
@@ -201,26 +282,37 @@ export function freeProviderUnconfiguredReason(
   provider: AiFreeProvider,
   env: AiEnv,
 ): string | undefined {
-  if (provider === 'gemini') {
-    return env.GEMINI_API_KEY?.trim() ? undefined : 'falta GEMINI_API_KEY';
+  switch (provider) {
+    case 'gemini':
+      return env.GEMINI_API_KEY?.trim() ? undefined : 'falta GEMINI_API_KEY';
+    case 'groq':
+      if (!env.GROQ_API_KEY?.trim()) return 'falta GROQ_API_KEY';
+      if (!isTrue(env.GROQ_FREE_TIER_CONFIRMED)) return 'falta GROQ_FREE_TIER_CONFIRMED=true';
+      return undefined;
+    case 'mistral':
+      if (!env.MISTRAL_API_KEY?.trim()) return 'falta MISTRAL_API_KEY';
+      if (!isTrue(env.MISTRAL_FREE_MODE_CONFIRMED)) return 'falta MISTRAL_FREE_MODE_CONFIRMED=true';
+      return undefined;
+    case 'zai':
+      return env.ZAI_API_KEY?.trim() ? undefined : 'falta ZAI_API_KEY';
+    case 'cloudflare':
+      if (!env.CLOUDFLARE_API_TOKEN?.trim()) return 'falta CLOUDFLARE_API_TOKEN';
+      if (!env.CLOUDFLARE_ACCOUNT_ID?.trim()) return 'falta CLOUDFLARE_ACCOUNT_ID';
+      if (!isTrue(env.CLOUDFLARE_WORKERS_FREE_CONFIRMED)) return 'falta CLOUDFLARE_WORKERS_FREE_CONFIRMED=true';
+      return undefined;
+    case 'vercel':
+      if (!env.VERCEL_AI_GATEWAY_API_KEY?.trim()) return 'falta VERCEL_AI_GATEWAY_API_KEY';
+      if (!isTrue(env.VERCEL_FREE_TIER_CONFIRMED)) return 'falta VERCEL_FREE_TIER_CONFIRMED=true';
+      return undefined;
+    case 'kilo':
+      if (!env.KILO_API_KEY?.trim()) return 'falta KILO_API_KEY';
+      if (!isTrue(env.KILO_FREE_TIER_CONFIRMED)) return 'falta KILO_FREE_TIER_CONFIRMED=true';
+      return undefined;
+    case 'openrouter':
+      if (!env.OPENROUTER_API_KEY?.trim()) return 'falta OPENROUTER_API_KEY';
+      if (!isTrue(env.OPENROUTER_FREE_TIER_CONFIRMED)) return 'falta OPENROUTER_FREE_TIER_CONFIRMED=true';
+      return undefined;
   }
-  if (provider === 'groq') {
-    if (!env.GROQ_API_KEY?.trim()) return 'falta GROQ_API_KEY';
-    if (!isTrue(env.GROQ_FREE_TIER_CONFIRMED)) return 'falta GROQ_FREE_TIER_CONFIRMED=true';
-    return undefined;
-  }
-  if (provider === 'mistral') {
-    if (!env.MISTRAL_API_KEY?.trim()) return 'falta MISTRAL_API_KEY';
-    if (!isTrue(env.MISTRAL_FREE_MODE_CONFIRMED)) return 'falta MISTRAL_FREE_MODE_CONFIRMED=true';
-    return undefined;
-  }
-  if (provider === 'zai') {
-    return env.ZAI_API_KEY?.trim() ? undefined : 'falta ZAI_API_KEY';
-  }
-  if (!env.CLOUDFLARE_API_TOKEN?.trim()) return 'falta CLOUDFLARE_API_TOKEN';
-  if (!env.CLOUDFLARE_ACCOUNT_ID?.trim()) return 'falta CLOUDFLARE_ACCOUNT_ID';
-  if (!isTrue(env.CLOUDFLARE_WORKERS_FREE_CONFIRMED)) return 'falta CLOUDFLARE_WORKERS_FREE_CONFIRMED=true';
-  return undefined;
 }
 
 /**
@@ -273,29 +365,65 @@ function freeRoutes(env: AiEnv, zeroCost: boolean): AiRoute[] {
 }
 
 function routesForFreeProvider(provider: AiFreeProvider, env: AiEnv, zeroCost: boolean): AiRoute[] {
-  if (provider === 'gemini') return geminiFreeRoutes(env, zeroCost);
-  if (provider === 'groq') {
-    return compatibleProviderRoutes('groq', {
-      key: env.GROQ_API_KEY,
-      confirmed: env.GROQ_FREE_TIER_CONFIRMED,
-      models: modelList(env.GROQ_MODELS, GROQ_DEFAULT_MODELS),
-      baseUrl: GROQ_DEFAULT_BASE_URL,
-      defaultLimits: GROQ_FREE_LIMITS,
-      limits: providerLimitMaps(env, 'GROQ'),
-    });
+  switch (provider) {
+    case 'gemini':
+      return geminiFreeRoutes(env, zeroCost);
+    case 'groq':
+      return compatibleProviderRoutes('groq', {
+        key: env.GROQ_API_KEY,
+        confirmed: env.GROQ_FREE_TIER_CONFIRMED,
+        models: modelList(env.GROQ_MODELS, GROQ_DEFAULT_MODELS),
+        baseUrl: GROQ_DEFAULT_BASE_URL,
+        defaultLimits: GROQ_FREE_LIMITS,
+        limits: providerLimitMaps(env, 'GROQ'),
+      });
+    case 'mistral':
+      return compatibleProviderRoutes('mistral', {
+        key: env.MISTRAL_API_KEY,
+        confirmed: env.MISTRAL_FREE_MODE_CONFIRMED,
+        models: modelList(env.MISTRAL_MODELS, MISTRAL_DEFAULT_MODELS),
+        baseUrl: MISTRAL_DEFAULT_BASE_URL,
+        limits: providerLimitMaps(env, 'MISTRAL'),
+        modelDefaults: MISTRAL_PRODUCTION_MODEL_LIMITS,
+      });
+    case 'zai':
+      return zaiFreeRoutes(env, zeroCost);
+    case 'cloudflare':
+      return cloudflareFreeRoutes(env, zeroCost);
+    case 'vercel':
+      return allowlistedCompatibleRoutes('vercel', {
+        key: env.VERCEL_AI_GATEWAY_API_KEY,
+        confirmed: env.VERCEL_FREE_TIER_CONFIRMED,
+        modelsEnv: env.VERCEL_MODELS,
+        modelsEnvName: 'VERCEL_MODELS',
+        defaults: VERCEL_ZERO_COST_MODELS,
+        baseUrl: VERCEL_DEFAULT_BASE_URL,
+        defaultLimits: VERCEL_PRODUCTION_LIMITS,
+        limits: providerLimitMaps(env, 'VERCEL'),
+      });
+    case 'kilo':
+      return allowlistedCompatibleRoutes('kilo', {
+        key: env.KILO_API_KEY,
+        confirmed: env.KILO_FREE_TIER_CONFIRMED,
+        modelsEnv: env.KILO_MODELS,
+        modelsEnvName: 'KILO_MODELS',
+        defaults: KILO_ZERO_COST_MODELS,
+        baseUrl: KILO_DEFAULT_BASE_URL,
+        defaultLimits: KILO_PRODUCTION_LIMITS,
+        limits: providerLimitMaps(env, 'KILO'),
+      });
+    case 'openrouter':
+      return allowlistedCompatibleRoutes('openrouter', {
+        key: env.OPENROUTER_API_KEY,
+        confirmed: env.OPENROUTER_FREE_TIER_CONFIRMED,
+        modelsEnv: env.OPENROUTER_MODELS,
+        modelsEnvName: 'OPENROUTER_MODELS',
+        defaults: OPENROUTER_ZERO_COST_MODELS,
+        baseUrl: OPENROUTER_DEFAULT_BASE_URL,
+        defaultLimits: OPENROUTER_PRODUCTION_LIMITS,
+        limits: providerLimitMaps(env, 'OPENROUTER'),
+      });
   }
-  if (provider === 'mistral') {
-    return compatibleProviderRoutes('mistral', {
-      key: env.MISTRAL_API_KEY,
-      confirmed: env.MISTRAL_FREE_MODE_CONFIRMED,
-      models: modelList(env.MISTRAL_MODELS, MISTRAL_DEFAULT_MODELS),
-      baseUrl: MISTRAL_DEFAULT_BASE_URL,
-      limits: providerLimitMaps(env, 'MISTRAL'),
-      modelDefaults: MISTRAL_PRODUCTION_MODEL_LIMITS,
-    });
-  }
-  if (provider === 'zai') return zaiFreeRoutes(env, zeroCost);
-  return cloudflareFreeRoutes(env, zeroCost);
 }
 
 function geminiFreeRoutes(env: AiEnv, zeroCost: boolean): AiRoute[] {
@@ -356,6 +484,33 @@ function compatibleProviderRoutes(
   }, options.models, options.limits, UTC_DAILY_RESET, options.defaultLimits, options.modelDefaults);
 }
 
+function allowlistedCompatibleRoutes(
+  provider: 'vercel' | 'kilo' | 'openrouter',
+  options: {
+    key?: string;
+    confirmed?: string;
+    modelsEnv?: string;
+    modelsEnvName: string;
+    defaults: readonly string[];
+    baseUrl: string;
+    defaultLimits?: AiRouteLimits;
+    limits: LimitMaps;
+  },
+): AiRoute[] {
+  const key = options.key?.trim();
+  if (!key || !isTrue(options.confirmed)) return [];
+  const selected = validateAllowlist(
+    options.modelsEnvName,
+    modelList(options.modelsEnv, options.defaults),
+    options.defaults,
+  );
+  return routesForProfile({
+    provider,
+    baseUrl: options.baseUrl,
+    apiKey: key,
+  }, selected, options.limits, UTC_DAILY_RESET, options.defaultLimits);
+}
+
 function routesForProfile(
   profile: OpenAiCompatibleProfile,
   routeModels: string[],
@@ -376,7 +531,13 @@ function routesForProfile(
       model,
       transport,
       ...(Object.keys(limits).length ? { limits } : {}),
-      ...(limits.rpd !== undefined || profile.provider === 'cloudflare' ? { reset } : {}),
+      ...(
+        limits.rpd !== undefined
+        || limits.providerRpd !== undefined
+        || profile.provider === 'cloudflare'
+          ? { reset }
+          : {}
+      ),
       capabilities: ['json'],
     });
   });
@@ -434,21 +595,26 @@ type LimitMaps = {
   minIntervalMs?: Record<string, number>;
   providerMaxConcurrent?: number;
   providerMinIntervalMs?: number;
+  providerRpd?: number;
 };
 
-function providerLimitMaps(
-  env: AiEnv,
-  prefix: 'GROQ' | 'MISTRAL' | 'ZAI' | 'CLOUDFLARE',
-): LimitMaps {
+type LimitPrefix = 'GROQ' | 'MISTRAL' | 'ZAI' | 'CLOUDFLARE' | 'VERCEL' | 'KILO' | 'OPENROUTER';
+
+function providerLimitMaps(env: AiEnv, prefix: LimitPrefix): LimitMaps {
   return {
-    rpm: parseLimitMap(env[`${prefix}_MODEL_RPM`], `${prefix}_MODEL_RPM`),
-    tpm: parseLimitMap(env[`${prefix}_MODEL_TPM`], `${prefix}_MODEL_TPM`),
-    rpd: parseLimitMap(env[`${prefix}_MODEL_RPD`], `${prefix}_MODEL_RPD`),
-    maxConcurrent: parseLimitMap(env[`${prefix}_MODEL_MAX_CONCURRENT`], `${prefix}_MODEL_MAX_CONCURRENT`),
-    minIntervalMs: parseLimitMap(env[`${prefix}_MODEL_MIN_INTERVAL_MS`], `${prefix}_MODEL_MIN_INTERVAL_MS`),
-    providerMaxConcurrent: parseNonnegativeInteger(env[`${prefix}_MAX_CONCURRENT`], `${prefix}_MAX_CONCURRENT`),
-    providerMinIntervalMs: parseNonnegativeInteger(env[`${prefix}_MIN_INTERVAL_MS`], `${prefix}_MIN_INTERVAL_MS`),
+    rpm: parseLimitMap(envValue(env, `${prefix}_MODEL_RPM`), `${prefix}_MODEL_RPM`),
+    tpm: parseLimitMap(envValue(env, `${prefix}_MODEL_TPM`), `${prefix}_MODEL_TPM`),
+    rpd: parseLimitMap(envValue(env, `${prefix}_MODEL_RPD`), `${prefix}_MODEL_RPD`),
+    maxConcurrent: parseLimitMap(envValue(env, `${prefix}_MODEL_MAX_CONCURRENT`), `${prefix}_MODEL_MAX_CONCURRENT`),
+    minIntervalMs: parseLimitMap(envValue(env, `${prefix}_MODEL_MIN_INTERVAL_MS`), `${prefix}_MODEL_MIN_INTERVAL_MS`),
+    providerMaxConcurrent: parseNonnegativeInteger(envValue(env, `${prefix}_MAX_CONCURRENT`), `${prefix}_MAX_CONCURRENT`),
+    providerMinIntervalMs: parseNonnegativeInteger(envValue(env, `${prefix}_MIN_INTERVAL_MS`), `${prefix}_MIN_INTERVAL_MS`),
+    providerRpd: parseNonnegativeInteger(envValue(env, `${prefix}_RPD`), `${prefix}_RPD`),
   };
+}
+
+function envValue(env: AiEnv, name: string): string | undefined {
+  return (env as Record<string, string | undefined>)[name];
 }
 
 function limitsFor(model: string, maps: LimitMaps, defaults: AiRouteLimits): AiRouteLimits {
@@ -457,13 +623,9 @@ function limitsFor(model: string, maps: LimitMaps, defaults: AiRouteLimits): AiR
     const value = maps[key]?.[model] ?? defaults[key];
     if (value !== undefined) limits[key] = value;
   }
-  if (maps.providerMaxConcurrent !== undefined) limits.providerMaxConcurrent = maps.providerMaxConcurrent;
-  else if (defaults.providerMaxConcurrent !== undefined) {
-    limits.providerMaxConcurrent = defaults.providerMaxConcurrent;
-  }
-  if (maps.providerMinIntervalMs !== undefined) limits.providerMinIntervalMs = maps.providerMinIntervalMs;
-  else if (defaults.providerMinIntervalMs !== undefined) {
-    limits.providerMinIntervalMs = defaults.providerMinIntervalMs;
+  for (const key of ['providerMaxConcurrent', 'providerMinIntervalMs', 'providerRpd'] as const) {
+    const value = maps[key] ?? defaults[key];
+    if (value !== undefined) limits[key] = value;
   }
   return limits;
 }

@@ -256,7 +256,7 @@ describe('observabilidad de ingestión', () => {
       'relay=[INGEST_FETCH_RELAY_TOKEN]',
     );
     expect(sanitizeErrorMessage('Authorization: Bearer abc.def')).toBe('Authorization: Bearer [redacted]');
-    for (const key of ['GROQ_API_KEY', 'MISTRAL_API_KEY', 'ZAI_API_KEY', 'CLOUDFLARE_API_TOKEN'] as const) {
+    for (const key of ['GROQ_API_KEY', 'MISTRAL_API_KEY', 'ZAI_API_KEY', 'CLOUDFLARE_API_TOKEN', 'VERCEL_AI_GATEWAY_API_KEY', 'KILO_API_KEY', 'OPENROUTER_API_KEY'] as const) {
       expect(sanitizeErrorMessage('provider=another-provider-secret', { [key]: 'another-provider-secret' }))
         .toBe(`provider=[${key}]`);
     }

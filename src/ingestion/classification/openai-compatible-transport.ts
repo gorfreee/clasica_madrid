@@ -362,8 +362,13 @@ function httpError(
   if (profile.unavailableError?.(status, body) || status === 404) {
     return new AiTransportError(message, { kind: 'unavailable', ...identity });
   }
-  if (status === 401 || status === 402 || status === 403) {
+  if (status === 401 || status === 403) {
     return new AiTransportError(message, { kind: 'auth', ...identity });
+  }
+  if (status === 402) {
+    // Payment/policy: this route cannot be used. The pool may try another
+    // already-allowlisted free route. Never rewrite the model to a paid ID.
+    return new AiTransportError(message, { kind: 'unavailable', ...identity });
   }
   if (status === 400 || status === 422) {
     return new AiTransportError(message, { kind: 'bad-request', ...identity });
