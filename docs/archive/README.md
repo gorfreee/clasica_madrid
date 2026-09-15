@@ -2,7 +2,7 @@
 
 Los documentos de esta carpeta conservan decisiones, investigaciones, planes, briefs y validaciones **históricas**.
 
-Pueden describir arquitecturas, flujos, interfaces o comportamientos que **ya no existen**. No son requisitos ni instrucciones vigentes. No los uses para implementar cambios actuales salvo que una tarea pida expresamente investigar decisiones históricas.
+Pueden describir arquitecturas, flujos, interfaces o comportamientos que **ya no existen**. No son requisitos ni instrucciones vigentes. No deben usarse para implementar cambios actuales salvo que una tarea pida expresamente investigar decisiones históricas.
 
 ## Jerarquía de autoridad ante contradicciones
 
