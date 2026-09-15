@@ -7,9 +7,15 @@ import {
 } from '../dates.ts';
 import { explicitAccessText } from '../detail/access-evidence.ts';
 import { inferScheduleFromText } from '../detail/schedule.ts';
+import {
+  ateneoOfficialProgramUrls,
+  ateneoPerformers,
+  ateneoSeriesText,
+  withAteneoProgramUrls,
+} from '../detail/ateneo-madrid.ts';
 import { decodeHtmlEntities, flattenHtmlBlocks } from '../html.ts';
 import { createListingGet, unexpectedHtmlInsteadOfJson } from '../listing-retry.ts';
-import { emptyObservedLists, normalizePersonList } from '../observed.ts';
+import { emptyObservedLists } from '../observed.ts';
 import {
   reportAdapterDiscard,
   type AdapterContext,
@@ -284,7 +290,10 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
   const venueText = venueName(item.venue) ?? ateneoVenueFromText(title, description);
   const organizerText = organizerNames(item.organizer);
   const accessText = ateneoAccessText(item, description);
+  const programUrls = typeof item.description === 'string' ? ateneoOfficialProgramUrls(item.description) : [];
+  const observedDescription = withAteneoProgramUrls(description, programUrls);
   const programText = ateneoProgramText(item.description);
+  const seriesText = ateneoSeriesText(categories);
   const performers = ateneoPerformers(description);
 
   return {
@@ -301,8 +310,9 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
         : {}),
     observed: {
       title,
-      ...(description ? { description } : {}),
+      ...(observedDescription ? { description: observedDescription } : {}),
       ...(categories.length > 0 ? { categoryText: categories.map((category) => category.name).join('; ') } : {}),
+      ...(seriesText ? { seriesText } : {}),
       ...(venueText ? { venueText } : {}),
       ...(organizerText ? { organizerText } : {}),
       ...(accessText ? { accessText } : {}),
@@ -422,38 +432,13 @@ function ateneoProgramText(value: unknown): string | undefined {
   if (start < 0) return undefined;
   const program: string[] = [];
   for (const line of lines.slice(start + 1)) {
-    if (/^(?:intérpretes|interpretes|biograf[ií]a|entradas?|m[aá]s informaci[oó]n)\s*:?$/i.test(line)) break;
+    if (
+      /^(?:intérpretes|interpretes|concertistas?|solistas?|biograf[ií]a|entradas?|m[aá]s informaci[oó]n)\s*:?$/i
+        .test(line)
+    ) break;
     program.push(line);
   }
   return program.join('\n').trim() || undefined;
-}
-
-function ateneoPerformers(description: string | undefined): Array<{ name: string; roleText?: string }> {
-  const match = /\bInt[eé]rpretes?\s*:\s*([^\n]+)/i.exec(description ?? '');
-  const room = /\b(?:Cátedra Mayor|Cacharrería|Sala (?:Pérez Galdós|Ramón y Cajal|Ciudad (?:de )?Úbeda|Laffón|Anselma))\b/i;
-  if (match?.[1]) {
-    const block = match[1].split(room)[0] ?? '';
-    return normalizePersonList(block.split(/\s*[,;]\s*/).flatMap(parsePerformerCredit));
-  }
-
-  const venueLine = description?.split('\n').find((line) => room.test(line));
-  const beforeVenue = venueLine?.split(room)[0]?.replace(/[.\s]+$/, '') ?? '';
-  const people = beforeVenue.split(/\s+(?:y|e)\s+/i).flatMap((credit) => {
-    const parsed = /^(.+?),\s*(soprano|mezzosoprano|contralto|tenor|barítono|bajo|piano|pianista|violín|violinista|viola|violonchelo|chelo|oboe|flauta|clarinete|guitarra|guitarrista|órgano|organista)$/i.exec(credit.trim());
-    return parsed?.[1] && parsed[2] ? [{ name: parsed[1], roleText: parsed[2] }] : [];
-  });
-  return normalizePersonList(people);
-}
-
-function parsePerformerCredit(credit: string): Array<{ name: string; roleText?: string }> {
-    const cleaned = credit.replace(/[.\s]+$/, '').trim();
-    const parenthesized = /^(.+?)\s*\(([^()]+)\)$/.exec(cleaned);
-    if (parenthesized?.[1] && parenthesized[2]) {
-      return [{ name: parenthesized[1], roleText: parenthesized[2] }];
-    }
-    const dashed = /^(.+?)\s*[-–—]\s*([^–—-]+)$/.exec(cleaned);
-    if (dashed?.[1] && dashed[2]) return [{ name: dashed[1], roleText: dashed[2] }];
-    return [];
 }
 
 function htmlText(value: unknown): string | undefined {

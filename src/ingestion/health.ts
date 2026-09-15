@@ -76,6 +76,10 @@ export function evaluateIngestHealth(input: IngestHealthInput): {
     findings.push({ reason: 'unresolved-taxonomy', health: 'degraded' });
   }
 
+  // Weak AI includes never become candidates: evaluateEligibilityAi rejects
+  // them as editorial uncertain. Incomplete taxonomy or an isolated timeout
+  // may still be degraded without blocking auto-merge of the rest of the run.
+
   const health = findings.reduce<IngestHealth>(
     (worst, item) => (HEALTH_RANK[item.health] > HEALTH_RANK[worst] ? item.health : worst),
     'clean',

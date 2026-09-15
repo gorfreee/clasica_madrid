@@ -85,7 +85,7 @@ Excluir cuando la identidad principal del evento sea una de estas:
 
 **Música de cine** como contenido principal: John Williams, Hans Zimmer, Morricone, Film Symphony Orchestra, galas de bandas sonoras. Aunque la música sea orquestal.
 
-**Jazz**, salvo que el evento sea realmente un programa de música clásica y el jazz sea únicamente secundario. Un concierto cuya identidad principal sea jazz → `exclude`. Incluye ciclos institucionales de jazz (p. ej. CNDM «Jazz en el Auditorio»). La palabra *jazz* sólo en descripción o programa, como componente estilístico de un programa mixto, no tiene el mismo peso que un título, categoría o ciclo de identidad jazz: no hay `exclude` automático; las evidencias clásicas deciden entre `include` y `uncertain`.
+**Jazz**, salvo que el evento sea realmente un programa de música clásica y el jazz sea únicamente secundario. Un concierto cuya identidad principal sea jazz → `exclude`. Incluye ciclos institucionales de jazz (p. ej. CNDM «Jazz en el Auditorio») y la programación **Ateneo-Café Central** / Café Central. Un evento de ese ciclo puede ser `include` sólo si los hechos observados de *ese* concierto muestran un bloque clásico sustancial; si no, `exclude`. La palabra *jazz* sólo en descripción o programa, como componente estilístico de un programa mixto, no tiene el mismo peso que un título, categoría o ciclo de identidad jazz: no hay `exclude` automático; las evidencias clásicas deciden entre `include` y `uncertain`.
 
 **Flamenco**, incluidos homenajes a Paco de Lucía, jóvenes flamencos, zambombas, etc.
 
@@ -147,7 +147,7 @@ La knowledge base puede asociar `Bach → baroque`. No puede afirmar que Beethov
 
 CI y tests no deben depender de llamadas live a un LLM. Si la IA no está disponible, hace timeout o devuelve algo inválido, el pipeline degrada: reglas y knowledge si bastan; si no, `uncertain` / campos vacíos.
 
-La IA de enrichment no recibe navegación web ni contexto institucional para completar hechos. `composer-extraction` sólo ve programa/obras e intérpretes observados y sus propuestas pasan validación determinista de nombre + span; un intérprete, director o solista no se acepta como compositor. `access-classification` sólo ve `accessText`: venue, source, organizer y costumbres históricas están excluidos. Sin texto observado no hay llamada. Eligibility AI puede interpretar hechos ya observados, nunca inventarlos: `include`/`exclude` exigen extractos literales verificables en esos hechos (`evidence` ≠ `rationale`); si el span no está, o si la política determinista dejó el caso en coprincipalidad sin bloque clásico, o si descriptores contemporáneos/electrónicos no tienen ancla académica observada, la decisión válida se degrada a `uncertain` editorial (no es un fallo técnico del modelo). Taxonomy puede corregir formats de heurística débil y completar eras de compositores/obras observados que la knowledge no resuelve; no infiere época por venue, festival ni instrumento.
+La IA de enrichment no recibe navegación web ni contexto institucional para completar hechos. `composer-extraction` sólo ve programa/obras e intérpretes observados y sus propuestas pasan validación determinista de nombre + span; un intérprete, director o solista no se acepta como compositor. `access-classification` sólo ve `accessText`: venue, source, organizer y costumbres históricas están excluidos. Sin texto observado no hay llamada. Eligibility AI puede interpretar hechos ya observados, nunca inventarlos: `include`/`exclude` exigen extractos literales verificables en esos hechos (`evidence` ≠ `rationale`); si el span no está, o si la política determinista dejó el caso en coprincipalidad sin bloque clásico, o si descriptores contemporáneos/electrónicos no tienen ancla académica observada, o si un `ai-include` sobre evidencia insuficiente no tiene ancla clásica/académica observada (un quinteto, un recital o el nombre del artista no bastan), la decisión válida se degrada a `uncertain` editorial (no es un fallo técnico del modelo). Taxonomy puede corregir formats de heurística débil y completar eras de compositores/obras observados que la knowledge no resuelve; no infiere época por venue, festival ni instrumento.
 
 ---
 
@@ -167,7 +167,8 @@ Derivación preferida a partir de hechos:
 |---|---|
 | orquesta sinfónica protagonista | `symphonic` |
 | solista solo (piano, violín, canto con piano, etc.) | `recital` |
-| cuarteto / octeto / ensemble de cámara | `chamber` |
+| cuarteto de cuerda / música de cámara / ciclo de cámara | `chamber` (fuerte) |
+| quinteto, trío, dúo o «quartet» sólo en el título | `chamber` débil, y **nunca** como prueba de eligibility. Un grupo de jazz/pop del mismo tamaño no se convierte en música de cámara clásica por la formación. |
 | coro protagonista | `choral` |
 | órgano | `organ` (a menudo + `recital`) |
 | ópera | `opera` |

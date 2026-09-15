@@ -24,6 +24,37 @@ describe('eligibility — exclusiones de identidad', () => {
     expect(result.eligibility.ruleId).toBe('jazz-identity');
   });
 
+  it('excluye la programación Café Central / Ateneo-Café Central, no por quinteto en el título', () => {
+    const elorrieta = classify(
+      facts({
+        title: 'JAVIER ELORRIETA QUINTETO',
+        categoryText: 'Conciertos Ateneo-Café Central',
+        seriesText: 'Conciertos Ateneo-Café Central',
+        description: 'Información y entradas (aquí). Cátedra Mayor. Pase: 19:30h.',
+      }),
+    );
+    expect(elorrieta.eligibility.value).toBe('exclude');
+    expect(elorrieta.eligibility.ruleId).toBe('jazz-identity');
+    expect(elorrieta.formats).toBeUndefined();
+
+    const titleOnly = classify(facts({ title: 'JAVIER ELORRIETA QUINTETO' }));
+    expect(titleOnly.eligibility.value).toBe('uncertain');
+    expect(titleOnly.eligibility.ruleId).toBe('insufficient-evidence');
+  });
+
+  it('permite un bloque clásico sustancial dentro de un ciclo Café Central', () => {
+    const mixed = classify(
+      facts({
+        title: 'Velada de cámara en Café Central',
+        categoryText: 'Conciertos Ateneo-Café Central',
+        programText: 'Johann Sebastian Bach: Suite. Ludwig van Beethoven: Cuarteto de cuerda.',
+        composers: [{ name: 'Johann Sebastian Bach' }, { name: 'Ludwig van Beethoven' }],
+      }),
+    );
+    expect(mixed.eligibility.value).toBe('include');
+    expect(mixed.eligibility.ruleId).toBe('mixed-program-classical-block');
+  });
+
   it('excluye flamenco anunciado como gala, no un concierto que mencione Andalucía', () => {
     const result = classify(
       facts({
@@ -1609,6 +1640,20 @@ describe('formats', () => {
         }),
       ).value,
     ).toEqual(['choral']);
+  });
+
+  it('no trata quinteto, trío o dúo del título como evidencia de eligibility', () => {
+    expect(classify(facts({ title: 'JAVIER ELORRIETA QUINTETO' })).eligibility.value).toBe(
+      'uncertain',
+    );
+    expect(classify(facts({ title: 'Trío Arbós' })).eligibility.value).toBe('uncertain');
+    expect(
+      classify(facts({ title: 'Dúo Mujeres Compositoras. Del Clásico a lo Conceptual' }))
+        .eligibility.value,
+    ).toBe('uncertain');
+    expect(resolveFormats(facts({ title: 'Trío Arbós' })).value).toEqual(['chamber']);
+    expect(resolveFormats(facts({ title: 'JAVIER ELORRIETA QUINTETO' })).value).toEqual(['chamber']);
+    expect(resolveFormats(facts({ title: 'JAVIER ELORRIETA QUINTETO' })).strength).toBe('weak');
   });
 
   it('usa señales inequívocas de sinfonía, orquesta, órgano, coro, trío, dúo y rol solista', () => {

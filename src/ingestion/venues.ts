@@ -233,7 +233,7 @@ export const KNOWN_VENUES: KnownVenue[] = [
     },
   },
   {
-    keys: ['ateneo de madrid', 'ateneo de madrid catedra mayor'],
+    keys: ['ateneo de madrid', 'ateneo de madrid catedra mayor', 'cafe central ateneo'],
     venue: {
       schemaVersion: 1,
       id: 'ven_ateneo_madrid',
@@ -670,6 +670,7 @@ const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
     'sala ciudad de ubeda': 'ven_ateneo_madrid',
     'sala laffon': 'ven_ateneo_madrid',
     'sala anselma': 'ven_ateneo_madrid',
+    'cafe central ateneo': 'ven_ateneo_madrid',
   },
 };
 

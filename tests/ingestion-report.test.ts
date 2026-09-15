@@ -243,7 +243,11 @@ describe('ingest event report', () => {
       }),
     };
     const { run } = await runAuditorio({
-      items: [{ title: 'Concierto extraordinario', slug: 'gala-ai-diag' }],
+      items: [{
+        title: 'Concierto extraordinario',
+        slug: 'gala-ai-diag',
+        description: 'Programa en la tradición concertística.',
+      }],
       ai,
     });
 
@@ -282,9 +286,9 @@ describe('ingest event report', () => {
 
   it('clasificación concurrente conserva orden, IDs y diagnósticos aunque termine al revés', async () => {
     const items = [
-      { title: 'Concierto extraordinario A', slug: 'a' },
-      { title: 'Concierto extraordinario B', slug: 'b' },
-      { title: 'Concierto extraordinario C', slug: 'c' },
+      { title: 'Concierto extraordinario A', slug: 'a', description: 'Programa en la tradición concertística.' },
+      { title: 'Concierto extraordinario B', slug: 'b', description: 'Programa en la tradición concertística.' },
+      { title: 'Concierto extraordinario C', slug: 'c', description: 'Programa en la tradición concertística.' },
     ];
     const sequential = await runAuditorio({ items, ai: { async classify(observed) { return { eligibility: 'include', formats: ['other'], eras: ['contemporary'], kind: 'alternative', evidence: [observed.title] }; } } });
     let releaseA!: () => void;

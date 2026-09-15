@@ -101,11 +101,11 @@ const popularUncertainFacts = facts({
 describe('AI classifier prompt v2', () => {
   const prompt = AI_CLASSIFIER_SYSTEM_PROMPT;
 
-  it('is version 14 so results are distinguishable from earlier prompts', () => {
-    expect(AI_CLASSIFIER_PROMPT_VERSION).toBe(14);
+  it('is version 15 so results are distinguishable from earlier prompts', () => {
+    expect(AI_CLASSIFIER_PROMPT_VERSION).toBe(15);
     expect(AI_REQUEST_CONTRACT_VERSION).toBe(4);
     expect(buildAiRequest(uncertainFacts).contractVersion).toBe(4);
-    expect(buildAiRequest(uncertainFacts).user).toContain('promptVersion: 14');
+    expect(buildAiRequest(uncertainFacts).user).toContain('promptVersion: 15');
   });
 
   it('keeps precision, uncertain as a valid output, and the ban on inventing facts', () => {
@@ -122,6 +122,8 @@ describe('AI classifier prompt v2', () => {
     expect(prompt).toMatch(/DJ\s*\/\s*electr[oó]nica\s*\/\s*crossover/);
     expect(prompt).toMatch(/m[uú]sica de cine como contenido principal/);
     expect(prompt).toMatch(/jazz como identidad del evento/);
+    expect(prompt).toMatch(/Caf[eé] Central/);
+    expect(prompt).toMatch(/quinteto, cuarteto, tr[ií]o, d[uú]o/);
     expect(prompt).toMatch(/componente estil[ií]stico/);
     expect(prompt).toMatch(/flamenco musical espa[nñ]ol/);
     expect(prompt).toMatch(/danza o ballet como espect[aá]culo/);
@@ -962,6 +964,7 @@ describe('taxonomy enrichment — separado de eligibility', () => {
       facts({
         title: 'Concierto extraordinario',
         categoryText: 'camara',
+        description: 'Programa en la tradición concertística.',
       }),
       { ai },
     );
@@ -1244,9 +1247,9 @@ describe('eras AI guardrail — solo evidencia musical observada', () => {
         },
       },
     );
-    expect(result.eligibility.value).toBe('include');
-    expect(result.eras?.value).toEqual([]);
-    expect(['eras-unknown', 'ai-eras-rejected']).toContain(result.eras?.ruleId);
+    expect(result.eligibility.value).toBe('uncertain');
+    expect(result.eligibility.ruleId).toBe('ai-weak-include-evidence');
+    expect(result.eras).toBeUndefined();
   });
 
   it('Bach observado explícitamente resuelve Barroco y no se pisa', async () => {
