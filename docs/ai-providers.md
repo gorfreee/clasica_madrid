@@ -18,7 +18,19 @@ El workflow declara `AI_ZERO_COST_ONLY=true`. Con esa política:
 
 La confirmación de Cloudflare significa que la cuenta permanece en **Workers Free**. Workers Free corta las llamadas al agotar la asignación diaria; Workers Paid cobra automáticamente el exceso y por tanto no cumple esta política. El error Workers AI `3036` se registra como asignación diaria agotada y bloquea esas routes hasta el reset UTC.
 
-Los modelos y condiciones de Gemini, Groq, Mistral, Z.AI y Cloudflare se verificaron en documentación oficial el 12-09-2026. Vercel, Kilo y OpenRouter se verificaron el 15-09-2026. Los proveedores pueden cambiar su oferta: antes de actualizar una allowlist o confirmar de nuevo un plan, hay que volver a comprobarla. La seguridad prima sobre la disponibilidad.
+Los modelos y condiciones de Gemini, Groq, Mistral, Z.AI y Cloudflare se verificaron en documentación oficial el 12-09-2026. Vercel, Kilo y OpenRouter se re-verificaron contra el catálogo live el 15-09-2026. Los proveedores pueden cambiar su oferta: antes de actualizar una allowlist o confirmar de nuevo un plan, hay que volver a comprobarla. La seguridad prima sobre la disponibilidad.
+
+### Cómo se mantiene la allowlist gratuita
+
+La lista es **explícita y manual**. No hay discovery periódico, manifest dinámico, qualification automática ni cron de revalidación.
+
+1. Consultar el catálogo live del provider (`GET` de modelos / página oficial).
+2. Comprobar que input y output son **$0 ahora**, no un crédito promocional ni un ID gemelo de pago.
+3. Comprobar capacidades (JSON / reasoning / tamaño) para clasificación y extracción corta.
+4. Añadir el ID exacto al array versionado (`VERCEL_ZERO_COST_MODELS`, `KILO_ZERO_COST_MODELS`, `OPENROUTER_ZERO_COST_MODELS`) y su profile HTTP.
+5. Si un ID deja de ser gratuito o 404, sacarlo del default. Si sigue siendo útil para diagnóstico, moverlo a `*_QUARANTINED_MODELS` (allowlist, no pool). **Nunca** reescribir `:free` / `-free` al ID de pago.
+
+Fail-closed: con `AI_ZERO_COST_ONLY=true`, un ID fuera de la allowlist, sin sufijo `:free` en Kilo/OpenRouter, o sin confirmación de free tier, hace fallar la configuración **antes** del primer HTTP. `kilo-auto/free` y `openrouter/free` no se activan: no podemos garantizar el modelo real ni que no deriven a una ruta inadecuada.
 
 ## Orden y configuración
 
@@ -31,9 +43,14 @@ Los defaults son:
 5. `mistral:ministral-14b-2512` y `mistral:ministral-8b-2512` (14B primero: más calidad; 8B como fallback más rápido en RPS);
 6. `zai:glm-4.7-flash` y `zai:glm-4.5-flash`;
 7. `cloudflare:@cf/zai-org/glm-4.7-flash` y `cloudflare:@cf/google/gemma-4-26b-a4b-it`;
-8. `vercel:inclusionai/ling-3.0-flash-vl-free`;
-9. `kilo:dots-studio/dots-3-note-preview:free`;
-10. `openrouter:google/gemma-4-26b-a4b-it:free` y `openrouter:openai/gpt-oss-20b:free`.
+8. `vercel:inclusionai/ling-3.0-flash-vl-free` (prioridad alta entre estas rutas nuevas);
+9. Kilo: `nex-agi/nex-n2.5-mini:free`, `nex-agi/nex-n2.5-pro:free`, `inclusionai/ling-3.0-flash-vl:free`, `poolside/laguna-xs-2.1:free`;
+10. OpenRouter como capacidad adicional/fallback: `google/gemma-4-26b-a4b-it:free`, `nex-agi/nex-n2.5-mini:free`, `inclusionai/ling-3.0-flash-vl:free`, `poolside/laguna-xs-2.1:free`.
+
+Quarantined (allowlist de diagnóstico, **fuera** del pool por defecto; activables con `KILO_MODELS` / `OPENROUTER_MODELS` o `AI_ROUTE`):
+
+- `kilo:dots-studio/dots-3-note-preview:free` — sigue siendo $0, pero caduca el 2026-09-30 y agota el presupuesto de salida en reasoning;
+- `openrouter:openai/gpt-oss-20b:free` — ausente del catálogo live (404). **Nunca** se sustituye por `openai/gpt-oss-20b` de pago.
 
 Cada lista puede reordenarse con `*_MODELS`. Unset significa «usar el default versionado en Git». En zero-cost mode, Z.AI, Cloudflare, Gemini, Vercel, Kilo y OpenRouter rechazan IDs fuera de su allowlist.
 
@@ -79,10 +96,14 @@ Las tareas del pool (eligibility, compositores, acceso, taxonomy) piden JSON cor
 | `mistral:ministral-14b-2512`, `mistral:ministral-8b-2512` | `json_schema` + `strict: true` | no se envía | `max_tokens` | Custom structured outputs / `json_schema` está en la API de Chat Completions; el ejemplo oficial usa Ministral 8B. `service_tier=standard_only` (Free / Standard). Validación local sigue. Un override tipo `mistral-small-latest` permanece en `json_object`. |
 | `zai:glm-4.7-flash`, `zai:glm-4.5-flash` | `json_object` | `thinking: { type: "disabled" }` | `max_tokens` | Z.AI documenta JSON mode, no `json_schema`. Thinking on por defecto en GLM-4.7 y consume el presupuesto de salida. 4.5-flash se mantiene aunque sea más lento. |
 | `cloudflare:@cf/zai-org/glm-4.7-flash`, `cloudflare:@cf/google/gemma-4-26b-a4b-it` | no se envía `response_format` | `reasoning_effort: null` y `chat_template_kwargs.enable_thinking: false` | `max_completion_tokens` | La allowlist oficial de JSON Mode no incluye estos IDs. `max_tokens` está deprecated en las páginas de modelo a favor de `max_completion_tokens`. Prompt + parseo + schema local. |
-| `vercel:inclusionai/ling-3.0-flash-vl-free` | no se envía `response_format` | `reasoning: { effort: "none" }` | `max_tokens` | El gateway documenta structured outputs, pero el endpoint free no lista `response_format` (sí `reasoning`). Prompt + validación local. Sin `strict`. |
-| `kilo:dots-studio/dots-3-note-preview:free` | `json_schema` + `strict: false` | no se envía | `max_tokens` | Structured Outputs / JSON Schema documentados en el catálogo. `strict: true` no está inequívoco para este ID. |
-| `openrouter:google/gemma-4-26b-a4b-it:free` | `json_object` | no se envía | `max_tokens` | JSON documentado; no hay enforcement de JSON Schema. No se envía `json_schema`. `provider.require_parameters=true` en el body de Chat Completions (no en el scheduler). Contrato compacto en el system prompt. Validación local sigue. |
-| `openrouter:openai/gpt-oss-20b:free` | `json_schema` + `strict: false` | no se envía | `max_tokens` | JSON Schema documentado. `strict: true` no está inequívoco para este ID free. `provider.require_parameters=true`. Validación local sigue. |
+| `vercel:inclusionai/ling-3.0-flash-vl-free` | no se envía `response_format` | `reasoning: { effort: "none" }` | `max_tokens` | El catálogo lista `reasoning`, no `response_format`. Prompt + validación local. Sin `strict`. |
+| `kilo:nex-agi/nex-n2.5-mini:free`, `kilo:nex-agi/nex-n2.5-pro:free` | `json_schema` + `strict: false` | `reasoning: { effort: "none" }` | `max_tokens` | `response_format` y `structured_outputs` en el catálogo. `none` está en `supported_efforts` (el default de Nex es `high`). |
+| `kilo:inclusionai/ling-3.0-flash-vl:free`, `kilo:poolside/laguna-xs-2.1:free` | no se envía `response_format` | `reasoning: { effort: "none" }` | `max_tokens` | El catálogo lista `reasoning`, no `response_format`. Prompt + validación local. |
+| `kilo:dots-studio/dots-3-note-preview:free` (quarantined) | `json_schema` + `strict: false` | `reasoning: { effort: "none" }` | `max_tokens` con suelo `minMaxOutputTokens=2048` | Structured Outputs documentados. El suelo es **sólo de este modelo**; no cambia `AI_MAX_OUTPUT_TOKENS_BY_PURPOSE`. El catálogo no documenta un flag distinto de `reasoning` para apagar thinking. |
+| `openrouter:google/gemma-4-26b-a4b-it:free` | `json_object` | `reasoning: { effort: "none" }` | `max_tokens` | JSON documentado; no hay enforcement de JSON Schema. `provider.require_parameters=true`. El catálogo lista `reasoning`. |
+| `openrouter:nex-agi/nex-n2.5-mini:free` | `json_schema` + `strict: false` | `reasoning: { effort: "none" }` | `max_tokens` | Igual que en Kilo. `provider.require_parameters=true`. |
+| `openrouter:inclusionai/ling-3.0-flash-vl:free`, `openrouter:poolside/laguna-xs-2.1:free` | no se envía `response_format` | `reasoning: { effort: "none" }` | `max_tokens` | El catálogo lista `reasoning`, no `response_format`. `provider.require_parameters=true`. |
+| `openrouter:openai/gpt-oss-20b:free` (quarantined) | `json_schema` + `strict: false` | `reasoning: { effort: "none" }` | `max_tokens` | Profile conservado sólo para diagnóstico. El ID `:free` 404 en el catálogo live; no se reescribe al ID de pago. |
 
 ## Vercel AI Gateway (verificado 2026-09-15)
 
@@ -90,9 +111,14 @@ Endpoint OpenAI-compatible: `https://ai-gateway.vercel.sh/v1`. Secret: `VERCEL_A
 
 Default / allowlist en producción:
 
-- `inclusionai/ling-3.0-flash-vl-free` — Free. `GET /v1/models/inclusionai/ling-3.0-flash-vl-free` devuelve pricing `0/0` y tag `free`.
+- `inclusionai/ling-3.0-flash-vl-free` — tag `free`, pricing input/output `0`. El listado `GET /v1/models` lo confirma el 2026-09-15. El ID gemelo sin sufijo `-free` (`inclusionai/ling-3.0-flash-vl`) también aparece a $0 hoy, pero producción usa el ID explícitamente gratuito.
 
-Hallazgo: **`minimax/minimax-m3-free` no entra al pool**. La página de modelo y `GET /v1/models/minimax/minimax-m3-free` responden 404. El changelog de Vercel indica que la promo GMI Cloud terminó el 2026-09-06. El ID pagado `minimax/minimax-m3` cuesta $0.24/$0.96 por 1M y **no** se sustituye en silencio.
+Descartados (no se sustituyen por IDs de pago ni por créditos promocionales):
+
+- `inclusionai/ling-3.0-flash-free` — ausente del catálogo. El ID pagado `inclusionai/ling-3.0-flash` cobra input/output > 0;
+- `inclusionai/ling-3.0-flash-fin-free` / `-sante-free` — $0 ahora, pero especialización financiera/sanitaria o promo de corta duración. No equivalen a un free tier estable de clasificación;
+- `minimax/minimax-m3-free` — 404. El ID pagado `minimax/minimax-m3` no es $0;
+- `poolside/laguna-s-2.1-free` — $0, pero es un agente de coding grande, no un clasificador pequeño.
 
 Fuera de zero-cost:
 
@@ -106,15 +132,24 @@ No hay un RPM/RPD global suficientemente documentado para los endpoints free. De
 
 Endpoint OpenAI-compatible: `https://api.kilo.ai/api/gateway`. Secret: `KILO_API_KEY`. Confirmación: `KILO_FREE_TIER_CONFIRMED=true`.
 
-Default / allowlist en producción:
+Defaults / allowlist activa en producción (`GET /api/gateway/models`, 2026-09-15; `isFree: true`, prompt/completion `0`, sin fecha de caducidad):
 
-- `dots-studio/dots-3-note-preview:free` — `isFree: true`, prompt/completion `0`. El catálogo lista `response_format` y `structured_outputs`.
+- `nex-agi/nex-n2.5-mini:free`
+- `nex-agi/nex-n2.5-pro:free`
+- `inclusionai/ling-3.0-flash-vl:free`
+- `poolside/laguna-xs-2.1:free`
 
-Hallazgo: **`minimax/minimax-m2.7:free` no entra al pool**. Está ausente del catálogo live (`GET /api/gateway/models`); sólo existe el ID pagado `minimax/minimax-m2.7`. No se sustituye. El catálogo free puede cambiar: hay que re-verificar antes de ampliar la allowlist.
+Quarantined (sigue en la allowlist para `KILO_MODELS` / `AI_ROUTE`, no en el default):
 
-`:free` = coste $0. Fuera de producción:
+- `dots-studio/dots-3-note-preview:free` — $0 hasta `expiration_date=2026-09-30`. El catálogo lista `reasoning` y `response_format`, pero no un flag inequívoco distinto de `reasoning.effort=none` para desactivar thinking. El profile sube el suelo de `max_tokens` a 2048. Sigue fuera del pool activo porque el output-limit por reasoning lo hace malo para JSON corto.
 
-- `kilo-auto/free` y cualquier `kilo-auto/*` (routing dinámico);
+Candidatos pedidos y **ausentes** del catálogo live (no se sustituyen por IDs de pago): `inclusionai/ling-3.0-flash:free`, `tencent/hy3:free`, `inclusionai/ling-2.6-flash:free`, `google/gemma-4-26b-a4b-it:free`, `minimax/minimax-m3:free`, `minimax/minimax-m2.7:free`.
+
+Otros `:free` vistos y omitidos a propósito: Nemotron enormes (120B/550B), Laguna S (coding grande), Fin/Sante, LFM (reasoning de extracción poco controlable para nuestro caso), `kilo-auto/free`.
+
+`:free` = coste $0. Fail-closed: Kilo exige el sufijo literal `:free`. Fuera de producción:
+
+- `kilo-auto/free` y cualquier `kilo-auto/*` — routing dinámico; el mapping cambia en el servidor (hoy incluye Dots3 y Nemotron 550B) y no garantiza el modelo real que responde;
 - modelos sin `:free`;
 - BYOK;
 - fallbacks a variantes pagadas.
@@ -125,18 +160,30 @@ Límite documentado: **200 requests/hora por IP, compartidas** entre modelos gra
 
 Endpoint OpenAI-compatible: `https://openrouter.ai/api/v1`. Secret: `OPENROUTER_API_KEY`. Confirmación: `OPENROUTER_FREE_TIER_CONFIRMED=true`.
 
-Defaults / allowlist en producción:
+Defaults / allowlist activa en producción (`GET /api/v1/models`, 2026-09-15; prompt/completion `0`):
 
 - `google/gemma-4-26b-a4b-it:free`
-- `openai/gpt-oss-20b:free`
+- `nex-agi/nex-n2.5-mini:free`
+- `inclusionai/ling-3.0-flash-vl:free`
+- `poolside/laguna-xs-2.1:free`
 
-`:free` = variante gratuita de coste $0. La cuenta de Clásica Madrid tiene ≥ $10 de créditos comprados, lo que según la documentación actual da **1.000 requests/día de modelos gratuitos** y **20 requests/minuto**, cuotas **compartidas** entre todos los `:free`. Esos 1.000 RPD **no** se interpretan como 1.000 por route: el scheduler usa `providerRpd=1000`. El intervalo `providerMinIntervalMs=3_200` es un margen conservador frente al límite de 20 RPM (~18,75 RPM). 3000 ms equivaldría exactamente a 20 RPM y no se usa.
+OpenRouter es capacidad adicional: su disponibilidad `:free` sigue siendo irregular. No reordenamos el pool por delante de Gemini/Groq/Mistral/Z.AI/Cloudflare/Vercel/Kilo.
+
+Quarantined:
+
+- `openai/gpt-oss-20b:free` — **ausente** del catálogo (404 real). El ID pagado `openai/gpt-oss-20b` existe y **no** se usa. El profile se conserva sólo para diagnóstico vía `OPENROUTER_MODELS` / `AI_ROUTE`.
+
+Candidatos pedidos y ausentes: `inclusionai/ling-3.0-tiny:free` y las variantes pequeñas Nemotron Nano (`nvidia/nemotron-nano-9b-v2:free`, etc.). `nex-agi/nex-n2.5-pro:free` sí está a $0; no se duplica en OpenRouter para no gastar el RPD compartido (ya está en Kilo).
+
+Otros `:free` omitidos: Gemma 31B, Laguna S, Dots3, LFM, Nemotron 120B/550B, Fin/Sante.
+
+`:free` = variante gratuita de coste $0. Fail-closed: OpenRouter exige el sufijo literal `:free`. La cuenta de Clásica Madrid tiene ≥ $10 de créditos comprados, lo que según la documentación actual da **1.000 requests/día de modelos gratuitos** y **20 requests/minuto**, cuotas **compartidas** entre todos los `:free`. Esos 1.000 RPD **no** se interpretan como 1.000 por route: el scheduler usa `providerRpd=1000`. El intervalo `providerMinIntervalMs=3_200` es un margen conservador frente al límite de 20 RPM (~18,75 RPM). 3000 ms equivaldría exactamente a 20 RPM y no se usa.
 
 El saldo pagado **nunca** se usa. Tener créditos no convierte un modelo de pago en route autorizada.
 
 Fuera de producción:
 
-- `openrouter/free`;
+- `openrouter/free` — router aleatorio; no garantiza el modelo resuelto ni que podamos registrarlo de forma fiable;
 - modelos sin `:free`;
 - fallback automático a la variante pagada del mismo modelo;
 - BYOK;
@@ -144,11 +191,11 @@ Fuera de producción:
 
 El body de Chat Completions incluye `provider: { require_parameters: true }` para que el router elija sólo endpoints que acepten los parámetros enviados. Eso vive en el profile HTTP, no en el scheduler.
 
-Recomendación operativa: configurar un Guardrail externo de OpenRouter con la misma allowlist que el código (`google/gemma-4-26b-a4b-it:free`, `openai/gpt-oss-20b:free`).
+Recomendación operativa: configurar un Guardrail externo de OpenRouter con la misma allowlist activa que el código (`google/gemma-4-26b-a4b-it:free`, `nex-agi/nex-n2.5-mini:free`, `inclusionai/ling-3.0-flash-vl:free`, `poolside/laguna-xs-2.1:free`).
 
 Un HTTP 402 de estos gateways se clasifica como `unavailable`: esa route queda fuera y el pool puede probar otra route gratuita ya allowlisted. Un 401/403 es `auth`. Un 429 es rate-limit/pressure y respeta `Retry-After` si existe. Nunca se reescribe el modelo a un ID de pago.
 
-Un 1305 de Z.AI (oficialmente HTTP 429, «temporarily overloaded»; también se ha visto 503) se clasifica como `capacity` / `PROVIDER_BUSY`. El pool salta esa route en la misma llamada si hay otra lista; no convierte el busy en una espera larga de Retry-After. El live smoke no reintenta.
+Un 1305 de Z.AI (oficialmente HTTP 429, «temporarily overloaded»; también se ha visto 503) se clasifica como `capacity` / `PROVIDER_BUSY`. El pool salta esa route en la misma llamada si hay otra lista; no convierte el busy en una espera larga de Retry-After. El live smoke **sí** reintenta una vez, sólo errores transitorios (ver más abajo). El pool de producción no cambia por este retry del smoke.
 
 `--ai-max-requests` limita los HTTP requests del pool completo, incluidos fallos, retries y fallbacks. `--ai-route provider:model` fija una sola route para diagnóstico.
 
@@ -158,13 +205,27 @@ El `report.json`, el resumen de consola y el Job Summary separan provider, model
 
 Son llamadas **live** a las APIs de los proveedores: consumen quota real. No se ejecutan automáticamente en CI (ni en push ni en pull request), no escriben `data/**` y no crean PRs. Conviene lanzarlos tras cambiar providers, modelos, transports o prompts, o cuando una ingestión muestre comportamientos sospechosos.
 
-Descubren las routes con la misma configuración que el pool de producción (`inspectFreePoolFromEnv`) y reutilizan directamente cada transport, payload, prompt, schema y parser real. El runner llama una sola vez a `route.transport.request()` por celda: no usa `AiPoolClassifier`, retries, fallback, cache, scheduler, circuit breaker ni estado persistente. Un proveedor esperado sin key o sin confirmación gratuita no desaparece: cuenta como FAIL.
+Descubren las routes con la misma configuración que el pool de producción (`inspectFreePoolFromEnv`) y reutilizan directamente cada transport, payload, prompt, schema y parser real. El runner llama a `route.transport.request()` por celda **sin** pool, fallback, cache, scheduler, circuit breaker ni estado persistente. Como máximo **un retry** (backoff 1,5 s) y **sólo** si el fallo es claramente transitorio:
 
-El timeout productivo del pool sigue en 15 s. El **live smoke** usa un hard timeout de 30 s y marca como `SLOW` (sigue siendo PASS funcional) cualquier respuesta correcta ≥ 15 s. Un corte a 30 s es `TIMEOUT`. `--timeout-ms` / `--slow-threshold-ms` (o `AI_SMOKE_TIMEOUT_MS` / `AI_SMOKE_SLOW_THRESHOLD_MS`) permiten override explícito.
+- timeout;
+- 429 de frecuencia/capacidad (RPM, TPM, OTPM, concurrency, provider-busy, rate-limit indeterminado);
+- ciertos 5xx / `retryable`.
+
+**No** hay retry para auth, 400/bad-request, parámetros no soportados, 404/modelo inexistente, schema inválido, output vacío/inválido, output-limit, cuota diaria ni riesgo de ruta de pago. Un proveedor esperado sin key o sin confirmación gratuita no desaparece: cuenta como FAIL.
+
+Cada celda y cada route reciben una salud simple:
+
+- `HEALTHY` — `PASS` o `SLOW` (JSON válido y semántica esperada);
+- `DEGRADED` — saturación o fallo transitorio del provider (429 de capacidad/frecuencia, timeout, 5xx);
+- `FAIL` — error determinista de integración/configuración (auth, 404, 400, schema, output vacío, output-limit, cuota diaria, modelo de pago rechazado).
+
+Los modelos quarantined del catálogo (Dots3, GPT-OSS Free) aparecen como `QUARANTINED: N` en el resumen del provider; no se mezclan con un FAIL live salvo que se activen a propósito y fallen.
+
+El timeout productivo del pool sigue en 15 s. El **live smoke** usa un hard timeout de 30 s y marca como `SLOW` (sigue siendo PASS funcional / HEALTHY) cualquier respuesta correcta ≥ 15 s. Un corte a 30 s es `TIMEOUT` / DEGRADED. `--timeout-ms` / `--slow-threshold-ms` (o `AI_SMOKE_TIMEOUT_MS` / `AI_SMOKE_SLOW_THRESHOLD_MS`) permiten override explícito.
 
 Por defecto prueba un solo purpose (`eligibility`, como máximo un HTTP por route). `--purpose taxonomy` cambia el fixture; `--all-purposes` recorre eligibility, composer extraction, access y taxonomy (como máximo un HTTP por `route × purpose`). Cada fixture declara una expectativa semántica mínima y no ambigua; no basta con devolver JSON compatible.
 
-Los providers avanzan en paralelo. Dentro de cada provider hay como máximo dos workers —o menos si `providerMaxConcurrent` es más restrictivo—, cada route mantiene un único request en vuelo y los inicios respetan sus `rpm` / `minIntervalMs` y el `providerMinIntervalMs`. No hay retries ocultos. Un fallo funcional, output inválido, timeout, `SLOW` o 429 transitorio no impide probar los demás purposes. Sólo auth, modelo inequívocamente inexistente/no disponible y cuota diaria explícitamente agotada bloquean los purposes restantes de esa route.
+Los providers avanzan en paralelo. Dentro de cada provider hay como máximo dos workers —o menos si `providerMaxConcurrent` es más restrictivo—, cada route mantiene un único request en vuelo y los inicios respetan sus `rpm` / `minIntervalMs` y el `providerMinIntervalMs`. Un fallo funcional, output inválido, timeout, `SLOW` o 429 transitorio no impide probar los demás purposes. Sólo auth, modelo inequívocamente inexistente/no disponible y cuota diaria explícitamente agotada bloquean los purposes restantes de esa route.
 
 ```bash
 # una sola route (eligibility)
@@ -174,9 +235,9 @@ npm run ai:smoke -- --route mistral:ministral-8b-2512
 npm run ai:smoke -- --route zai:glm-4.7-flash
 npm run ai:smoke -- --route cloudflare:@cf/zai-org/glm-4.7-flash
 npm run ai:smoke -- --route vercel:inclusionai/ling-3.0-flash-vl-free
+npm run ai:smoke -- --route kilo:nex-agi/nex-n2.5-mini:free
 npm run ai:smoke -- --route kilo:dots-studio/dots-3-note-preview:free
 npm run ai:smoke -- --route openrouter:google/gemma-4-26b-a4b-it:free
-npm run ai:smoke -- --route openrouter:openai/gpt-oss-20b:free
 
 # una sola route, las cuatro tasks
 npm run ai:smoke -- --route groq:openai/gpt-oss-120b --all-purposes
@@ -191,7 +252,7 @@ npm run ai:smoke:all -- --all-purposes
 npm run ai:smoke:all -- --all-purposes --report-dir /tmp/ai-smoke-report
 ```
 
-El comando carga `.local/ai.env`, fuerza `AI_ZERO_COST_ONLY=true` e imprime una línea JSON por celda más el informe Markdown. En GitHub Actions el mismo Markdown se publica en `$GITHUB_STEP_SUMMARY` y se suben `ai-smoke-report.md` / `ai-smoke-report.json` aunque el smoke falle. Los estados son:
+El comando carga `.local/ai.env`, fuerza `AI_ZERO_COST_ONLY=true` e imprime una línea JSON por celda más el informe Markdown. En GitHub Actions el mismo Markdown se publica en `$GITHUB_STEP_SUMMARY` y se suben `ai-smoke-report.md` / `ai-smoke-report.json` aunque el smoke falle. El informe incluye un resumen por provider (`HEALTHY` / `DEGRADED` / `FAIL` / `QUARANTINED`), la matriz por purpose, y una tabla de diagnósticos (latencia, intentos, HTTP, categoría, finish reason, output tokens, thought tokens). Los estados de celda son:
 
 - `PASS`: estructura y semántica esperadas en menos de 15 s;
 - `SLOW`: igual que PASS, pero la respuesta tardó ≥ 15 s (no es un fallo funcional);
@@ -217,10 +278,29 @@ Z.AI, tabla oficial comprobada el 2026-09-12 ([códigos de error](https://docs.z
 - HTTP requests: **54**
 - Duración: **3.8 min**
 
-| Provider | Model | Eligibility | Composer | Access | Taxonomy | Latency | Result |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| gemini | gemini-3.8-flash | TIMEOUT | PASS | SLOW | DAILY_QUOTA | 41.0 s | PARTIAL |
-| groq | openai/gpt-oss-120b | PASS | PASS | PASS | PASS | 3.5 s | PASS |
+## Provider health
+
+Vercel
+  HEALTHY: 1
+  DEGRADED: 0
+  FAIL: 0
+
+Kilo
+  HEALTHY: 3
+  DEGRADED: 1
+  FAIL: 0
+  QUARANTINED: 1
+
+OpenRouter
+  HEALTHY: 2
+  DEGRADED: 1
+  FAIL: 1
+  QUARANTINED: 1
+
+| Provider | Model | Eligibility | Composer | Access | Taxonomy | Health | Latency | Result |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| gemini | gemini-3.8-flash | TIMEOUT | PASS | SLOW | DAILY_QUOTA | FAIL | 41.0 s | PARTIAL |
+| groq | openai/gpt-oss-120b | PASS | PASS | PASS | PASS | HEALTHY | 3.5 s | PASS |
 ```
 
 En GitHub hay workflows manuales (`workflow_dispatch`, `contents: read`, mismos secrets/`vars` que la ingestión). No publican datos:
@@ -318,15 +398,19 @@ Las keys ausentes dejan fuera su provider sin romper la ingestión. Gemini sigue
 - Vercel OpenAI-compatible / Chat Completions: <https://vercel.com/docs/ai-gateway/sdks-and-apis/openai-compat>
 - Vercel structured outputs: <https://vercel.com/docs/ai-gateway/sdks-and-apis/openai-chat-completions/structured-outputs>
 - Vercel Ling 3.0 Flash VL Free: <https://vercel.com/ai-gateway/models/ling-3.0-flash-vl-free>
+- Vercel reasoning (`reasoning.effort`, incluido `none`): <https://vercel.com/docs/ai-gateway/sdks-and-apis/openai-chat-completions/reasoning>
 - Kilo API / Gateway: <https://docs.kilo.ai/integrations/api>
 - Kilo modelos: <https://kilo.ai/models>
+- Kilo catálogo live: `GET https://api.kilo.ai/api/gateway/models`
 - Kilo Dots3 Note Preview Free: <https://kilo.ai/models/dots-studio/dots-3-note-preview:free>
 - Kilo MiniMax M2.7 Free (página de producto; ausente del catálogo live el 2026-09-15): <https://kilo.ai/models/minimax/minimax-m2.7:free>
 - OpenRouter API: <https://openrouter.ai/docs/api/reference/overview>
 - OpenRouter modelos gratuitos: <https://openrouter.ai/docs/guides/routing/model-routing/free-openrouter-endpoints>
+- OpenRouter catálogo live: `GET https://openrouter.ai/api/v1/models`
 - OpenRouter rate limits: <https://openrouter.ai/docs/api-reference/limits>
 - OpenRouter structured outputs: <https://openrouter.ai/docs/guides/features/structured-outputs>
 - OpenRouter provider routing (`require_parameters`): <https://openrouter.ai/docs/guides/routing/provider-selection>
+- OpenRouter reasoning (`reasoning.effort`, incluido `none`): <https://openrouter.ai/docs/guides/best-practices/reasoning-tokens>
 - OpenRouter Guardrails: <https://openrouter.ai/docs/guides/features/guardrails>
 - Gemma 4 26B A4B Free: <https://openrouter.ai/google/gemma-4-26b-a4b-it:free>
-- GPT-OSS 20B Free: <https://openrouter.ai/openai/gpt-oss-20b:free>
+- GPT-OSS 20B (ID de pago; la variante `:free` no está en el catálogo): <https://openrouter.ai/openai/gpt-oss-20b>

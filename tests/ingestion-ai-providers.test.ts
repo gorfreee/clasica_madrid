@@ -18,11 +18,13 @@ import {
   systemWithOutputContract,
 } from '../src/ingestion/classification/ai-output-contract.ts';
 import {
+  effectiveMaxOutputTokens,
   openaiCompatibleBusinessPressure,
   openaiCompatibleErrorCode,
   openaiCompatibleModelProfile,
   openaiCompatibleRateLimitSignal,
 } from '../src/ingestion/classification/openai-compatible-profiles.ts';
+import { isTransientDirectFailure } from '../src/ingestion/classification/ai-direct.ts';
 import {
   OpenAiCompatibleTransport,
   buildOpenAiCompatibleRequestBody,
@@ -35,6 +37,7 @@ import {
   GROQ_DEFAULT_MODELS,
   KILO_DEFAULT_BASE_URL,
   KILO_PRODUCTION_LIMITS,
+  KILO_QUARANTINED_MODELS,
   KILO_ZERO_COST_MODELS,
   MISTRAL_DEFAULT_BASE_URL,
   MISTRAL_DEFAULT_MODELS,
@@ -42,6 +45,7 @@ import {
   MISTRAL_PRODUCTION_MODEL_LIMITS,
   OPENROUTER_DEFAULT_BASE_URL,
   OPENROUTER_PRODUCTION_LIMITS,
+  OPENROUTER_QUARANTINED_MODELS,
   OPENROUTER_ZERO_COST_MODELS,
   VERCEL_DEFAULT_BASE_URL,
   VERCEL_PRODUCTION_LIMITS,
@@ -302,14 +306,27 @@ describe('factory multi-provider zero cost', () => {
     expect([...VERCEL_ZERO_COST_MODELS]).toEqual(['inclusionai/ling-3.0-flash-vl-free']);
     expect(VERCEL_ZERO_COST_MODELS).not.toContain('minimax/minimax-m3-free');
     expect(VERCEL_ZERO_COST_MODELS).not.toContain('minimax/minimax-m3');
-    expect([...KILO_ZERO_COST_MODELS]).toEqual(['dots-studio/dots-3-note-preview:free']);
+    expect(VERCEL_ZERO_COST_MODELS).not.toContain('inclusionai/ling-3.0-flash');
+    expect(VERCEL_ZERO_COST_MODELS).not.toContain('inclusionai/ling-3.0-flash-free');
+    expect(VERCEL_ZERO_COST_MODELS).not.toContain('inclusionai/ling-3.0-flash-fin-free');
+    expect([...KILO_ZERO_COST_MODELS]).toEqual([
+      'nex-agi/nex-n2.5-mini:free',
+      'nex-agi/nex-n2.5-pro:free',
+      'inclusionai/ling-3.0-flash-vl:free',
+      'poolside/laguna-xs-2.1:free',
+    ]);
+    expect(KILO_ZERO_COST_MODELS).not.toContain('dots-studio/dots-3-note-preview:free');
     expect(KILO_ZERO_COST_MODELS).not.toContain('minimax/minimax-m2.7:free');
     expect(KILO_ZERO_COST_MODELS).not.toContain('kilo-auto/free');
     expect(KILO_ZERO_COST_MODELS.every((model) => model.endsWith(':free'))).toBe(true);
     expect([...OPENROUTER_ZERO_COST_MODELS]).toEqual([
       'google/gemma-4-26b-a4b-it:free',
-      'openai/gpt-oss-20b:free',
+      'nex-agi/nex-n2.5-mini:free',
+      'inclusionai/ling-3.0-flash-vl:free',
+      'poolside/laguna-xs-2.1:free',
     ]);
+    expect(OPENROUTER_ZERO_COST_MODELS).not.toContain('openai/gpt-oss-20b:free');
+    expect(OPENROUTER_ZERO_COST_MODELS).not.toContain('openai/gpt-oss-20b');
     expect(OPENROUTER_ZERO_COST_MODELS).not.toContain('openrouter/free');
     expect(OPENROUTER_ZERO_COST_MODELS.every((model) => model.endsWith(':free'))).toBe(true);
 
@@ -331,12 +348,14 @@ describe('factory multi-provider zero cost', () => {
     });
     expect(routes.find((route) => route.routeId === 'vercel:inclusionai/ling-3.0-flash-vl-free')?.limits)
       .toEqual(VERCEL_PRODUCTION_LIMITS);
-    expect(routes.find((route) => route.routeId === 'kilo:dots-studio/dots-3-note-preview:free')?.limits)
-      .toEqual(KILO_PRODUCTION_LIMITS);
+    const kilo = routes.filter((route) => route.provider === 'kilo');
+    expect(kilo.map((route) => route.model)).toEqual([...KILO_ZERO_COST_MODELS]);
+    for (const route of kilo) expect(route.limits).toEqual(KILO_PRODUCTION_LIMITS);
+    expect(routes.find((route) => route.routeId === 'kilo:dots-studio/dots-3-note-preview:free')).toBeUndefined();
     expect(KILO_PRODUCTION_LIMITS.providerMinIntervalMs).toBe(20_000);
     expect(KILO_PRODUCTION_LIMITS).not.toMatchObject({ rpd: 200 });
     const openrouter = routes.filter((route) => route.provider === 'openrouter');
-    expect(openrouter).toHaveLength(2);
+    expect(openrouter).toHaveLength(OPENROUTER_ZERO_COST_MODELS.length);
     for (const route of openrouter) {
       expect(route.limits).toEqual(OPENROUTER_PRODUCTION_LIMITS);
       expect(route.reset).toBeDefined();
@@ -366,6 +385,35 @@ describe('factory multi-provider zero cost', () => {
       VERCEL_AI_GATEWAY_API_KEY: 'vercel-key', VERCEL_FREE_TIER_CONFIRMED: 'true',
       VERCEL_MODELS: 'minimax/minimax-m3-free',
     })).toThrow(/VERCEL_MODELS.*no autorizados/);
+    expect(() => createFreeRoutesFromEnv({
+      AI_ZERO_COST_ONLY: 'true',
+      OPENROUTER_API_KEY: 'openrouter-key', OPENROUTER_FREE_TIER_CONFIRMED: 'true',
+      OPENROUTER_MODELS: 'openai/gpt-oss-20b',
+    })).toThrow(/OPENROUTER_MODELS.*no autorizados/);
+  });
+
+  it('permite diagnosticar modelos quarantined sin activarlos por defecto ni sustituir por pago', () => {
+    const kilo = createFreeRoutesFromEnv({
+      AI_ZERO_COST_ONLY: 'true',
+      KILO_API_KEY: 'kilo-key', KILO_FREE_TIER_CONFIRMED: 'true',
+      KILO_MODELS: 'dots-studio/dots-3-note-preview:free',
+    });
+    expect(kilo.map((route) => route.routeId)).toEqual(['kilo:dots-studio/dots-3-note-preview:free']);
+    expect(kilo[0]?.transport.cacheIdentity('dots-studio/dots-3-note-preview:free')).toMatchObject({
+      minMaxOutputTokens: 2_048,
+      extraBody: { reasoning: { effort: 'none' } },
+    });
+    const openrouter = createFreeRoutesFromEnv({
+      AI_ZERO_COST_ONLY: 'true',
+      OPENROUTER_API_KEY: 'openrouter-key', OPENROUTER_FREE_TIER_CONFIRMED: 'true',
+      OPENROUTER_MODELS: 'openai/gpt-oss-20b:free',
+    });
+    expect(openrouter.map((route) => route.routeId)).toEqual(['openrouter:openai/gpt-oss-20b:free']);
+    expect(() => createFreeRoutesFromEnv({
+      AI_ZERO_COST_ONLY: 'true',
+      OPENROUTER_API_KEY: 'openrouter-key', OPENROUTER_FREE_TIER_CONFIRMED: 'true',
+      OPENROUTER_MODELS: 'openai/gpt-oss-20b',
+    })).toThrow(/OPENROUTER_MODELS.*no autorizados/);
   });
 
   it('AI_ROUTE acepta OpenRouter :free y rechaza la variante pagada', () => {
@@ -512,11 +560,12 @@ describe('payload HTTP por provider/modelo', () => {
     expect(body).not.toHaveProperty('provider');
   });
 
-  it('Kilo Dots3 Free usa json_schema best-effort sin flags de routing', async () => {
+  it('Kilo Dots3 Free usa json_schema, apaga reasoning y sube el suelo de max_tokens', async () => {
     const body = await captureBody('kilo', 'dots-studio/dots-3-note-preview:free');
     expect(body).toMatchObject({
       model: 'dots-studio/dots-3-note-preview:free',
-      max_tokens: 100,
+      max_tokens: 2_048,
+      reasoning: { effort: 'none' },
       response_format: {
         type: 'json_schema',
         json_schema: {
@@ -527,8 +576,9 @@ describe('payload HTTP por provider/modelo', () => {
       },
     });
     expect(body).not.toHaveProperty('provider');
-    expect(body).not.toHaveProperty('reasoning');
     expect(body).not.toHaveProperty('include_reasoning');
+    expect(body.max_tokens).toBeGreaterThan(request.generation.maxOutputTokens);
+    expect(body.max_tokens).not.toBe(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE.eligibility);
   });
 
   it('OpenRouter Gemma Free usa json_object y require_parameters, sin json_schema', async () => {
@@ -537,6 +587,7 @@ describe('payload HTTP por provider/modelo', () => {
       model: 'google/gemma-4-26b-a4b-it:free',
       max_tokens: 100,
       provider: { require_parameters: true },
+      reasoning: { effort: 'none' },
       response_format: { type: 'json_object' },
     });
     expect(body.response_format).not.toMatchObject({ type: 'json_schema' });
@@ -546,12 +597,30 @@ describe('payload HTTP por provider/modelo', () => {
     expect(body.provider).not.toMatchObject({ allow_fallbacks: true });
   });
 
-  it('OpenRouter GPT-OSS Free usa json_schema best-effort y require_parameters', async () => {
+  it('Kilo/OpenRouter Nex Mini piden json_schema y reasoning.effort=none', async () => {
+    for (const provider of ['kilo', 'openrouter'] as const) {
+      const body = await captureBody(provider, 'nex-agi/nex-n2.5-mini:free');
+      expect(body).toMatchObject({
+        model: 'nex-agi/nex-n2.5-mini:free',
+        max_tokens: 100,
+        reasoning: { effort: 'none' },
+        response_format: { type: 'json_schema' },
+      });
+      if (provider === 'openrouter') {
+        expect(body.provider).toEqual({ require_parameters: true });
+      } else {
+        expect(body).not.toHaveProperty('provider');
+      }
+    }
+  });
+
+  it('OpenRouter GPT-OSS Free (quarantined) conserva json_schema y require_parameters', async () => {
     const body = await captureBody('openrouter', 'openai/gpt-oss-20b:free');
     expect(body).toMatchObject({
       model: 'openai/gpt-oss-20b:free',
       max_tokens: 100,
       provider: { require_parameters: true },
+      reasoning: { effort: 'none' },
       response_format: {
         type: 'json_schema',
         json_schema: {
@@ -697,23 +766,28 @@ describe('payload HTTP por provider/modelo', () => {
       promptOutputContract: true,
       extraBody: { reasoning: { effort: 'none' } },
     });
-    expect(identityByRoute(routes, 'kilo:dots-studio/dots-3-note-preview:free')).toMatchObject({
+    expect(identityByRoute(routes, 'kilo:nex-agi/nex-n2.5-mini:free')).toMatchObject({
       responseFormat: 'json-schema',
       jsonSchemaStrict: false,
-      extraBody: {},
+      extraBody: { reasoning: { effort: 'none' } },
       promptOutputContract: false,
     });
-    expect(identityByRoute(routes, 'openrouter:openai/gpt-oss-20b:free')).toMatchObject({
+    expect(identityByRoute(routes, 'kilo:inclusionai/ling-3.0-flash-vl:free')).toMatchObject({
+      responseFormat: 'none',
+      extraBody: { reasoning: { effort: 'none' } },
+      promptOutputContract: true,
+    });
+    expect(identityByRoute(routes, 'openrouter:nex-agi/nex-n2.5-mini:free')).toMatchObject({
       responseFormat: 'json-schema',
       jsonSchemaStrict: false,
-      extraBody: { provider: { require_parameters: true } },
+      extraBody: { provider: { require_parameters: true }, reasoning: { effort: 'none' } },
       promptOutputContract: false,
     });
     expect(identityByRoute(routes, 'openrouter:google/gemma-4-26b-a4b-it:free')).toMatchObject({
       responseFormat: 'json-object',
       jsonSchemaStrict: false,
       tokenParameter: 'max_tokens',
-      extraBody: { provider: { require_parameters: true } },
+      extraBody: { provider: { require_parameters: true }, reasoning: { effort: 'none' } },
       promptOutputContract: true,
     });
     expect(identityByRoute(routes, 'groq:openai/gpt-oss-120b')).toMatchObject({
@@ -733,6 +807,8 @@ describe('schema-in-prompt para routes sin json_schema', () => {
       ['qwen/qwen3.8-27b', 'groq'],
       ['ministral-14b-2512', 'mistral'],
       ['dots-studio/dots-3-note-preview:free', 'kilo'],
+      ['nex-agi/nex-n2.5-mini:free', 'kilo'],
+      ['nex-agi/nex-n2.5-mini:free', 'openrouter'],
       ['openai/gpt-oss-20b:free', 'openrouter'],
     ] as const) {
       const body = buildOpenAiCompatibleRequestBody(model, editorial, {
@@ -781,6 +857,10 @@ describe('schema-in-prompt para routes sin json_schema', () => {
     for (const [model, provider] of [
       ['@cf/zai-org/glm-4.7-flash', 'cloudflare'],
       ['inclusionai/ling-3.0-flash-vl-free', 'vercel'],
+      ['inclusionai/ling-3.0-flash-vl:free', 'kilo'],
+      ['poolside/laguna-xs-2.1:free', 'kilo'],
+      ['poolside/laguna-xs-2.1:free', 'openrouter'],
+      ['inclusionai/ling-3.0-flash-vl:free', 'openrouter'],
     ] as const) {
       const body = buildOpenAiCompatibleRequestBody(model, editorial, {
         provider, baseUrl: 'https://example.test/v1', apiKey: 'provider-secret',
@@ -908,20 +988,73 @@ describe('perfiles HTTP declarativos', () => {
       responseFormat: 'json-schema',
       jsonSchemaStrict: false,
       tokenParameter: 'max_tokens',
-      extraBody: {},
+      extraBody: { reasoning: { effort: 'none' } },
+      minMaxOutputTokens: 2_048,
+    });
+    expect(openaiCompatibleModelProfile('kilo', 'nex-agi/nex-n2.5-mini:free')).toEqual({
+      responseFormat: 'json-schema',
+      jsonSchemaStrict: false,
+      tokenParameter: 'max_tokens',
+      extraBody: { reasoning: { effort: 'none' } },
+    });
+    expect(openaiCompatibleModelProfile('kilo', 'nex-agi/nex-n2.5-pro:free')).toEqual({
+      responseFormat: 'json-schema',
+      jsonSchemaStrict: false,
+      tokenParameter: 'max_tokens',
+      extraBody: { reasoning: { effort: 'none' } },
+    });
+    expect(openaiCompatibleModelProfile('kilo', 'poolside/laguna-xs-2.1:free')).toEqual({
+      responseFormat: 'none',
+      jsonSchemaStrict: false,
+      tokenParameter: 'max_tokens',
+      extraBody: { reasoning: { effort: 'none' } },
+    });
+    expect(openaiCompatibleModelProfile('openrouter', 'inclusionai/ling-3.0-flash-vl:free')).toEqual({
+      responseFormat: 'none',
+      jsonSchemaStrict: false,
+      tokenParameter: 'max_tokens',
+      extraBody: { provider: { require_parameters: true }, reasoning: { effort: 'none' } },
     });
     expect(openaiCompatibleModelProfile('openrouter', 'openai/gpt-oss-20b:free')).toEqual({
       responseFormat: 'json-schema',
       jsonSchemaStrict: false,
       tokenParameter: 'max_tokens',
-      extraBody: { provider: { require_parameters: true } },
+      extraBody: { provider: { require_parameters: true }, reasoning: { effort: 'none' } },
     });
     expect(openaiCompatibleModelProfile('openrouter', 'google/gemma-4-26b-a4b-it:free')).toEqual({
       responseFormat: 'json-object',
       jsonSchemaStrict: false,
       tokenParameter: 'max_tokens',
-      extraBody: { provider: { require_parameters: true } },
+      extraBody: { provider: { require_parameters: true }, reasoning: { effort: 'none' } },
     });
+  });
+
+  it('el suelo de max_tokens es por modelo y no cambia el presupuesto global', () => {
+    expect(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE.eligibility).toBe(768);
+    const dots = openaiCompatibleModelProfile('kilo', 'dots-studio/dots-3-note-preview:free');
+    expect(effectiveMaxOutputTokens(192, dots)).toBe(2_048);
+    expect(effectiveMaxOutputTokens(4_096, dots)).toBe(4_096);
+    expect(effectiveMaxOutputTokens(768, openaiCompatibleModelProfile('kilo', 'nex-agi/nex-n2.5-mini:free'))).toBe(768);
+    expect(effectiveMaxOutputTokens(768, openaiCompatibleModelProfile('groq', 'openai/gpt-oss-20b'))).toBe(768);
+  });
+
+  it('clasifica errores transitorios frente a fallos deterministas de integración', () => {
+    expect(isTransientDirectFailure(new AiTransportError('timeout', { kind: 'timeout' }))).toBe(true);
+    expect(isTransientDirectFailure(new AiTransportError('429', { kind: 'rate-limit', status: 429 }))).toBe(true);
+    expect(isTransientDirectFailure(new AiTransportError('busy', {
+      kind: 'rate-limit', status: 429, pressure: 'capacity',
+    }))).toBe(true);
+    expect(isTransientDirectFailure(new AiTransportError('5xx', {
+      kind: 'transport', status: 503, retryable: true,
+    }))).toBe(true);
+    expect(isTransientDirectFailure(new AiTransportError('auth', { kind: 'auth', status: 401 }))).toBe(false);
+    expect(isTransientDirectFailure(new AiTransportError('404', { kind: 'unavailable', status: 404 }))).toBe(false);
+    expect(isTransientDirectFailure(new AiTransportError('400', { kind: 'bad-request', status: 400 }))).toBe(false);
+    expect(isTransientDirectFailure(new AiTransportError('daily', {
+      kind: 'rate-limit', status: 429, quotaExhausted: true, pressure: 'daily',
+    }))).toBe(false);
+    expect([...KILO_QUARANTINED_MODELS]).toEqual(['dots-studio/dots-3-note-preview:free']);
+    expect([...OPENROUTER_QUARANTINED_MODELS]).toEqual(['openai/gpt-oss-20b:free']);
   });
 
   it('reconoce rate-limit de Mistral/Z.AI sin tratar 400/401 como cuota', () => {
@@ -968,6 +1101,16 @@ describe('OpenAiCompatibleTransport', () => {
       value: { eligibility: 'include' },
       tokens: { input: 12, output: 4, thought: 2 },
       rateLimit: { remainingRequests: 0, resetAfterMs: 121_500 },
+    });
+  });
+
+  it('también lee reasoning_tokens en usage de primer nivel', async () => {
+    const transport = compatible(async () => response({
+      choices: [{ message: { content: '{"eligibility":"include"}' }, finish_reason: 'stop' }],
+      usage: { prompt_tokens: 8, completion_tokens: 6, reasoning_tokens: 3 },
+    }));
+    await expect(transport.request({ model: 'model', request, signal, timeoutMs: 1_000 })).resolves.toMatchObject({
+      tokens: { input: 8, output: 6, thought: 3 },
     });
   });
 

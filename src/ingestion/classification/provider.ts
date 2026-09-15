@@ -71,22 +71,50 @@ export const CLOUDFLARE_ZERO_COST_MODELS = [
 /**
  * Verified 2026-09-15 against GET https://ai-gateway.vercel.sh/v1/models/{id}:
  * `inclusionai/ling-3.0-flash-vl-free` is tagged free with pricing 0/0.
- * `minimax/minimax-m3-free` 404s (changelog: GMI Cloud promo ended 2026-09-06)
- * and is deliberately omitted — do not substitute the paid `minimax/minimax-m3`.
+ * `inclusionai/ling-3.0-flash-free` 404s. The paid ID `inclusionai/ling-3.0-flash`
+ * is $0.06/$0.18 and is never substituted.
+ * `inclusionai/ling-3.0-flash-fin` / `-fin-free` are a promo through 2026-09-25
+ * that then bills or errors — omitted.
+ * `minimax/minimax-m3` still prices input/output above $0 despite a $0 table
+ * row; `minimax/minimax-m3-free` 404s. Do not substitute the paid ID.
+ * `poolside/laguna-s-2.1-free` is $0 but a large coding agent — omitted.
  */
 export const VERCEL_ZERO_COST_MODELS = ['inclusionai/ling-3.0-flash-vl-free'] as const;
+export const VERCEL_QUARANTINED_MODELS = [] as const;
 /**
- * Verified 2026-09-15 against GET https://api.kilo.ai/api/gateway/models:
- * `dots-studio/dots-3-note-preview:free` is `isFree` with prompt/completion 0.
- * `minimax/minimax-m2.7:free` is absent from that catalog (only paid
- * `minimax/minimax-m2.7` exists) and is omitted. `kilo-auto/free` is excluded
- * because it routes dynamically.
+ * Verified 2026-09-15 against GET https://api.kilo.ai/api/gateway/models.
+ * Active defaults are explicit `:free` IDs with prompt/completion 0, no
+ * expiration, and a fit for short JSON classification/extraction.
+ * `dots-studio/dots-3-note-preview:free` remains free today but expires
+ * 2026-09-30 and previously exhausted the output budget on reasoning — it
+ * stays in the allowlist for diagnosis, not in the default pool.
+ * Absent from the live catalog (do not substitute paid IDs):
+ * `inclusionai/ling-3.0-flash:free`, `tencent/hy3:free`,
+ * `inclusionai/ling-2.6-flash:free`, `google/gemma-4-26b-a4b-it:free`,
+ * `minimax/minimax-m3:free`, `minimax/minimax-m2.7:free`.
+ * `kilo-auto/free` is excluded: dynamic routing, mapping changes server-side.
  */
-export const KILO_ZERO_COST_MODELS = ['dots-studio/dots-3-note-preview:free'] as const;
+export const KILO_ZERO_COST_MODELS = [
+  'nex-agi/nex-n2.5-mini:free',
+  'nex-agi/nex-n2.5-pro:free',
+  'inclusionai/ling-3.0-flash-vl:free',
+  'poolside/laguna-xs-2.1:free',
+] as const;
+export const KILO_QUARANTINED_MODELS = ['dots-studio/dots-3-note-preview:free'] as const;
+/**
+ * Verified 2026-09-15 against GET https://openrouter.ai/api/v1/models.
+ * `openai/gpt-oss-20b:free` is absent (404). The paid `openai/gpt-oss-20b`
+ * is never substituted. `inclusionai/ling-3.0-tiny:free` is absent.
+ * `openrouter/free` is excluded: the resolved model is not guaranteed.
+ * `liquid/lfm-2.5-2.6b:free` has mandatory reasoning — omitted.
+ */
 export const OPENROUTER_ZERO_COST_MODELS = [
   'google/gemma-4-26b-a4b-it:free',
-  'openai/gpt-oss-20b:free',
+  'nex-agi/nex-n2.5-mini:free',
+  'inclusionai/ling-3.0-flash-vl:free',
+  'poolside/laguna-xs-2.1:free',
 ] as const;
+export const OPENROUTER_QUARANTINED_MODELS = ['openai/gpt-oss-20b:free'] as const;
 
 const GROQ_FREE_LIMITS: AiRouteLimits = { rpm: 30, tpm: 8_000, rpd: 1_000 };
 /**
@@ -238,7 +266,7 @@ export function createAiClassifierFromEnv(env: AiEnv = process.env): AiClassifie
     if (!(AI_FREE_PROVIDERS as readonly string[]).includes(pinned.provider)) {
       throw new Error(`AI_ROUTE ${env.AI_ROUTE}: route no configurada, no autorizada o no incluida en la lista de modelos`);
     }
-    const routes = routesForFreeProvider(pinned.provider as AiFreeProvider, env, true)
+    const routes = routesForFreeProvider(pinned.provider as AiFreeProvider, envForPinnedModel(env, pinned), true)
       .filter((route) => route.routeId === `${pinned.provider}:${pinned.model}`);
     if (!routes.length) {
       throw new Error(`AI_ROUTE ${env.AI_ROUTE}: route no configurada, no autorizada o no incluida en la lista de modelos`);
@@ -398,6 +426,7 @@ function routesForFreeProvider(provider: AiFreeProvider, env: AiEnv, zeroCost: b
         modelsEnv: env.VERCEL_MODELS,
         modelsEnvName: 'VERCEL_MODELS',
         defaults: VERCEL_ZERO_COST_MODELS,
+        allowed: [...VERCEL_ZERO_COST_MODELS, ...VERCEL_QUARANTINED_MODELS],
         baseUrl: VERCEL_DEFAULT_BASE_URL,
         defaultLimits: VERCEL_PRODUCTION_LIMITS,
         limits: providerLimitMaps(env, 'VERCEL'),
@@ -409,6 +438,7 @@ function routesForFreeProvider(provider: AiFreeProvider, env: AiEnv, zeroCost: b
         modelsEnv: env.KILO_MODELS,
         modelsEnvName: 'KILO_MODELS',
         defaults: KILO_ZERO_COST_MODELS,
+        allowed: [...KILO_ZERO_COST_MODELS, ...KILO_QUARANTINED_MODELS],
         baseUrl: KILO_DEFAULT_BASE_URL,
         defaultLimits: KILO_PRODUCTION_LIMITS,
         limits: providerLimitMaps(env, 'KILO'),
@@ -420,6 +450,7 @@ function routesForFreeProvider(provider: AiFreeProvider, env: AiEnv, zeroCost: b
         modelsEnv: env.OPENROUTER_MODELS,
         modelsEnvName: 'OPENROUTER_MODELS',
         defaults: OPENROUTER_ZERO_COST_MODELS,
+        allowed: [...OPENROUTER_ZERO_COST_MODELS, ...OPENROUTER_QUARANTINED_MODELS],
         baseUrl: OPENROUTER_DEFAULT_BASE_URL,
         defaultLimits: OPENROUTER_PRODUCTION_LIMITS,
         limits: providerLimitMaps(env, 'OPENROUTER'),
@@ -493,6 +524,7 @@ function allowlistedCompatibleRoutes(
     modelsEnv?: string;
     modelsEnvName: string;
     defaults: readonly string[];
+    allowed?: readonly string[];
     baseUrl: string;
     defaultLimits?: AiRouteLimits;
     limits: LimitMaps;
@@ -503,8 +535,11 @@ function allowlistedCompatibleRoutes(
   const selected = validateAllowlist(
     options.modelsEnvName,
     modelList(options.modelsEnv, options.defaults),
-    options.defaults,
+    options.allowed ?? options.defaults,
   );
+  if (provider === 'kilo' || provider === 'openrouter') {
+    assertExplicitFreeModelIds(options.modelsEnvName, selected);
+  }
   return routesForProfile({
     provider,
     baseUrl: options.baseUrl,
@@ -658,12 +693,37 @@ function validateAllowlist(name: string, configured: readonly string[], allowed:
   return [...configured];
 }
 
+/**
+ * Fail closed: Kilo/OpenRouter production IDs must be the explicit `:free`
+ * suffix. `kilo-auto/free` and `openrouter/free` end in `/free`, not `:free`.
+ * Never rewrite a missing `:free` ID to its paid twin.
+ */
+export function assertExplicitFreeModelIds(name: string, models: readonly string[]): void {
+  const rejected = models.filter((model) => !model.endsWith(':free') || model.includes('kilo-auto/') || model === 'openrouter/free');
+  if (rejected.length) {
+    throw new Error(`${name}: modelos no autorizados por AI_ZERO_COST_ONLY=true: ${rejected.join(', ')}`);
+  }
+}
+
 function parsePinnedRoute(value: string | undefined): { provider: string; model: string } | undefined {
   if (!value?.trim()) return undefined;
   const pinned = value.trim();
   const separator = pinned.indexOf(':');
   if (separator <= 0 || separator === pinned.length - 1) throw new Error('AI_ROUTE debe usar provider:model');
   return { provider: pinned.slice(0, separator).toLowerCase(), model: pinned.slice(separator + 1) };
+}
+
+/** Pin a single allowlisted model, including quarantined IDs kept for diagnosis. */
+function envForPinnedModel(env: AiEnv, pinned: { provider: string; model: string }): AiEnv {
+  if (pinned.provider === 'vercel') return { ...env, VERCEL_MODELS: pinned.model };
+  if (pinned.provider === 'kilo') return { ...env, KILO_MODELS: pinned.model };
+  if (pinned.provider === 'openrouter') return { ...env, OPENROUTER_MODELS: pinned.model };
+  if (pinned.provider === 'groq') return { ...env, GROQ_MODELS: pinned.model };
+  if (pinned.provider === 'mistral') return { ...env, MISTRAL_MODELS: pinned.model };
+  if (pinned.provider === 'zai') return { ...env, ZAI_MODELS: pinned.model };
+  if (pinned.provider === 'cloudflare') return { ...env, CLOUDFLARE_MODELS: pinned.model };
+  if (pinned.provider === 'gemini') return { ...env, GEMINI_MODELS: pinned.model };
+  return env;
 }
 
 function requireZeroCostPolicy(env: AiEnv, context: string): void {

@@ -15,6 +15,7 @@ import {
   type AiTransportResult,
 } from './ai-transport.ts';
 import {
+  effectiveMaxOutputTokens,
   openaiCompatibleBusinessPressure,
   openaiCompatibleErrorCode,
   openaiCompatibleModelProfile,
@@ -75,6 +76,7 @@ export class OpenAiCompatibleTransport implements AiTransport {
       responseFormat: capabilities.responseFormat,
       jsonSchemaStrict: capabilities.jsonSchemaStrict,
       tokenParameter: capabilities.tokenParameter,
+      minMaxOutputTokens: capabilities.minMaxOutputTokens,
       promptOutputContract: capabilities.responseFormat !== 'json-schema',
       extraBody: capabilities.extraBody,
     };
@@ -149,9 +151,13 @@ export function buildOpenAiCompatibleRequestBody(
 
 function requestBody(model: string, request: AiRequest, profile: OpenAiCompatibleProfile) {
   const capabilities = resolveCapabilities(profile, model);
+  const maxOutputTokens = effectiveMaxOutputTokens(
+    request.generation.maxOutputTokens,
+    capabilities,
+  );
   const tokenField = capabilities.tokenParameter === 'max_completion_tokens'
-    ? { max_completion_tokens: request.generation.maxOutputTokens }
-    : { max_tokens: request.generation.maxOutputTokens };
+    ? { max_completion_tokens: maxOutputTokens }
+    : { max_tokens: maxOutputTokens };
   return {
     model,
     temperature: 0,
@@ -208,6 +214,7 @@ function resolveCapabilities(
     jsonSchemaStrict: override?.jsonSchemaStrict ?? declared.jsonSchemaStrict,
     tokenParameter: override?.tokenParameter ?? declared.tokenParameter,
     extraBody: { ...declared.extraBody, ...profile.extraBody, ...override?.extraBody },
+    minMaxOutputTokens: override?.minMaxOutputTokens ?? declared.minMaxOutputTokens,
   };
 }
 
@@ -226,6 +233,7 @@ function parseCompletion(
     usage?: {
       prompt_tokens?: unknown;
       completion_tokens?: unknown;
+      reasoning_tokens?: unknown;
       completion_tokens_details?: { reasoning_tokens?: unknown };
       output_tokens_details?: { reasoning_tokens?: unknown };
     };
@@ -305,6 +313,7 @@ function stripJsonFence(content: string): string {
 function tokenCounts(usage: {
   prompt_tokens?: unknown;
   completion_tokens?: unknown;
+  reasoning_tokens?: unknown;
   completion_tokens_details?: { reasoning_tokens?: unknown };
   output_tokens_details?: { reasoning_tokens?: unknown };
 } | undefined): AiTokenCounts | undefined {
@@ -313,7 +322,8 @@ function tokenCounts(usage: {
   if (validCount(usage.prompt_tokens)) tokens.input = usage.prompt_tokens;
   if (validCount(usage.completion_tokens)) tokens.output = usage.completion_tokens;
   const thought = usage.completion_tokens_details?.reasoning_tokens
-    ?? usage.output_tokens_details?.reasoning_tokens;
+    ?? usage.output_tokens_details?.reasoning_tokens
+    ?? usage.reasoning_tokens;
   if (validCount(thought)) tokens.thought = thought;
   return Object.keys(tokens).length ? tokens : undefined;
 }

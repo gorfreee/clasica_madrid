@@ -50,8 +50,12 @@
  *   https://openrouter.ai/docs/guides/routing/provider-selection
  * - OpenRouter Gemma 4 26B A4B Free (`response_format` JSON, no schema enforcement):
  *   https://openrouter.ai/google/gemma-4-26b-a4b-it:free
- * - OpenRouter GPT-OSS 20B Free (`response_format` JSON Schema):
- *   https://openrouter.ai/openai/gpt-oss-20b:free
+ * - OpenRouter reasoning (`reasoning.effort`, including `none`):
+ *   https://openrouter.ai/docs/guides/best-practices/reasoning-tokens
+ * Catalogs re-checked 2026-09-15:
+ * - GET https://api.kilo.ai/api/gateway/models
+ * - GET https://openrouter.ai/api/v1/models
+ * - GET https://ai-gateway.vercel.sh/v1/models/{id}
  */
 
 import type { AiPressureKind } from './ai-transport.ts';
@@ -72,7 +76,22 @@ export type OpenAiCompatibleModelProfile = {
   /** Official completion-length field for this endpoint. Never send both. */
   tokenParameter: OpenAiCompatibleTokenParameter;
   extraBody: Record<string, unknown>;
+  /**
+   * Floor for the completion cap of this model. Used when hidden reasoning
+   * can exhaust the purpose budget. Never changes `AI_MAX_OUTPUT_TOKENS_BY_PURPOSE`.
+   */
+  minMaxOutputTokens?: number;
 };
+
+/** Apply a per-model output-token floor without rewriting the purpose budget. */
+export function effectiveMaxOutputTokens(
+  requested: number,
+  profile: Pick<OpenAiCompatibleModelProfile, 'minMaxOutputTokens'>,
+): number {
+  const floor = profile.minMaxOutputTokens;
+  if (floor === undefined || !Number.isFinite(floor) || floor <= 0) return requested;
+  return Math.max(requested, Math.trunc(floor));
+}
 
 const JSON_OBJECT: OpenAiCompatibleModelProfile = {
   responseFormat: 'json-object',
@@ -166,40 +185,77 @@ const VERCEL_LING_FLASH_VL: OpenAiCompatibleModelProfile = {
 };
 
 /**
+ * OpenRouter-compatible disable. Documented as `reasoning.effort=none`.
+ * Only attached to models whose catalog lists `reasoning`.
+ */
+const REASONING_NONE = { reasoning: { effort: 'none' } } as const;
+
+/**
  * Kilo models that document `response_format` + `structured_outputs`.
  * No unequivocal `strict: true` for these IDs; keep best-effort schema.
+ * `reasoning.effort=none` is documented by OpenRouter (Kilo is compatible)
+ * and listed in these models' `supported_parameters`.
  */
 const KILO_JSON_SCHEMA: OpenAiCompatibleModelProfile = {
   responseFormat: 'json-schema',
   jsonSchemaStrict: false,
   tokenParameter: 'max_tokens',
-  extraBody: {},
+  extraBody: { ...REASONING_NONE },
+};
+
+/**
+ * Dots3 spends completion budget on reasoning. Catalog lists `reasoning`
+ * (not mandatory). Raise the output floor so a small JSON purpose still
+ * has room after thinking. Do not change global purpose budgets.
+ */
+const KILO_DOTS3: OpenAiCompatibleModelProfile = {
+  responseFormat: 'json-schema',
+  jsonSchemaStrict: false,
+  tokenParameter: 'max_tokens',
+  extraBody: { ...REASONING_NONE },
+  minMaxOutputTokens: 2_048,
+};
+
+/** Kilo IDs without documented `response_format`. Prompt + local validation. */
+const KILO_PROMPT: OpenAiCompatibleModelProfile = {
+  responseFormat: 'none',
+  jsonSchemaStrict: false,
+  tokenParameter: 'max_tokens',
+  extraBody: { ...REASONING_NONE },
 };
 
 /**
  * OpenRouter Gemma 4 26B A4B Free: JSON object mode is documented; JSON Schema
  * enforcement is not. `provider.require_parameters` still restricts routing to
- * endpoints that accept `response_format=json_object`. Local schema validation
- * and the compact prompt contract stay.
+ * endpoints that accept the parameters we send. Local schema validation
+ * and the compact prompt contract stay. Reasoning is optional and off by default;
+ * send `effort=none` so a provider that turns it on does not burn the budget.
  */
 const OPENROUTER_JSON_OBJECT: OpenAiCompatibleModelProfile = {
   responseFormat: 'json-object',
   jsonSchemaStrict: false,
   tokenParameter: 'max_tokens',
-  extraBody: { provider: { require_parameters: true } },
+  extraBody: { provider: { require_parameters: true }, ...REASONING_NONE },
 };
 
 /**
- * OpenRouter GPT-OSS 20B Free: JSON Schema is documented. `strict: true` is
- * not unequivocal for this free ID, so keep best-effort schema.
- * `provider.require_parameters` restricts routing to endpoints that accept it.
- * Local validation stays.
+ * OpenRouter IDs that document JSON Schema / `structured_outputs`.
+ * `strict: true` is not unequivocal for these free IDs.
+ * Nex-N2.5 defaults to high reasoning; `none` is in `supported_efforts`.
  */
 const OPENROUTER_JSON_SCHEMA: OpenAiCompatibleModelProfile = {
   responseFormat: 'json-schema',
   jsonSchemaStrict: false,
   tokenParameter: 'max_tokens',
-  extraBody: { provider: { require_parameters: true } },
+  extraBody: { provider: { require_parameters: true }, ...REASONING_NONE },
+};
+
+/** OpenRouter IDs without documented `response_format`. */
+const OPENROUTER_PROMPT: OpenAiCompatibleModelProfile = {
+  responseFormat: 'none',
+  jsonSchemaStrict: false,
+  tokenParameter: 'max_tokens',
+  extraBody: { provider: { require_parameters: true }, ...REASONING_NONE },
 };
 
 /**
@@ -248,9 +304,21 @@ const CLOUDFLARE_PROMPT_MODELS = new Set([
   '@cf/google/gemma-4-26b-a4b-it',
 ]);
 const VERCEL_LING_FLASH_VL_MODELS = new Set(['inclusionai/ling-3.0-flash-vl-free']);
-const KILO_JSON_SCHEMA_MODELS = new Set(['dots-studio/dots-3-note-preview:free']);
-const OPENROUTER_JSON_OBJECT_MODELS = new Set(['google/gemma-4-26b-a4b-it:free']);
-const OPENROUTER_JSON_SCHEMA_MODELS = new Set(['openai/gpt-oss-20b:free']);
+const KILO_MODEL_PROFILES: Record<string, OpenAiCompatibleModelProfile> = {
+  'nex-agi/nex-n2.5-mini:free': KILO_JSON_SCHEMA,
+  'nex-agi/nex-n2.5-pro:free': KILO_JSON_SCHEMA,
+  'inclusionai/ling-3.0-flash-vl:free': KILO_PROMPT,
+  'poolside/laguna-xs-2.1:free': KILO_PROMPT,
+  'dots-studio/dots-3-note-preview:free': KILO_DOTS3,
+};
+const OPENROUTER_MODEL_PROFILES: Record<string, OpenAiCompatibleModelProfile> = {
+  'google/gemma-4-26b-a4b-it:free': OPENROUTER_JSON_OBJECT,
+  'nex-agi/nex-n2.5-mini:free': OPENROUTER_JSON_SCHEMA,
+  'inclusionai/ling-3.0-flash-vl:free': OPENROUTER_PROMPT,
+  'poolside/laguna-xs-2.1:free': OPENROUTER_PROMPT,
+  /** Quarantined (404 on 2026-09-15). Profile kept for diagnosis via OPENROUTER_MODELS. */
+  'openai/gpt-oss-20b:free': OPENROUTER_JSON_SCHEMA,
+};
 
 /**
  * Exact HTTP extras for a provider/model. Unknown IDs get conservative
@@ -278,11 +346,9 @@ export function openaiCompatibleModelProfile(
     case 'vercel':
       return VERCEL_LING_FLASH_VL_MODELS.has(name) ? VERCEL_LING_FLASH_VL : JSON_OBJECT;
     case 'kilo':
-      return KILO_JSON_SCHEMA_MODELS.has(name) ? KILO_JSON_SCHEMA : JSON_OBJECT;
+      return KILO_MODEL_PROFILES[name] ?? JSON_OBJECT;
     case 'openrouter':
-      if (OPENROUTER_JSON_SCHEMA_MODELS.has(name)) return OPENROUTER_JSON_SCHEMA;
-      if (OPENROUTER_JSON_OBJECT_MODELS.has(name)) return OPENROUTER_JSON_OBJECT;
-      return JSON_OBJECT;
+      return OPENROUTER_MODEL_PROFILES[name] ?? JSON_OBJECT;
     default:
       return JSON_OBJECT;
   }

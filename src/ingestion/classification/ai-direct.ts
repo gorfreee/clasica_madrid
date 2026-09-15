@@ -119,6 +119,7 @@ export function classifyDirectTransportError(error: unknown): AiDirectTransportF
   if (error.kind === 'unavailable') {
     return isClearlyUnavailable(error) ? 'MODEL_UNAVAILABLE' : 'REQUEST_ERROR';
   }
+  if (error.kind === 'bad-request') return 'REQUEST_ERROR';
   if (error.kind !== 'rate-limit') return 'TRANSPORT_ERROR';
   const pressure = error.pressure ?? primaryPressure(error.rateLimit?.dimensions);
   if (error.quotaExhausted || pressure === 'daily') return 'DAILY_QUOTA';
@@ -128,6 +129,26 @@ export function classifyDirectTransportError(error: unknown): AiDirectTransportF
   if (pressure === 'otpm') return 'OTPM';
   if (pressure === 'capacity') return 'PROVIDER_BUSY';
   return 'RATE_LIMIT';
+}
+
+/**
+ * Live-smoke retry gate. Deterministic integration failures must not retry.
+ * Transient capacity/rate/timeout/5xx may retry once in the smoke runner.
+ */
+export function isTransientDirectFailure(error: unknown): boolean {
+  if (!(error instanceof AiTransportError)) return false;
+  if (error.kind === 'timeout') return true;
+  if (error.kind === 'auth' || error.kind === 'unavailable' || error.kind === 'bad-request') return false;
+  if (error.kind === 'rate-limit') {
+    if (error.quotaExhausted) return false;
+    const pressure = error.pressure ?? primaryPressure(error.rateLimit?.dimensions);
+    return pressure !== 'daily';
+  }
+  if (error.kind !== 'transport') return false;
+  if (error.status === 400 || error.status === 401 || error.status === 403 || error.status === 404 || error.status === 422) {
+    return false;
+  }
+  return error.retryable || error.status === undefined || error.status === 408 || error.status >= 500;
 }
 
 export function classifyDirectContractFailure(input: {
