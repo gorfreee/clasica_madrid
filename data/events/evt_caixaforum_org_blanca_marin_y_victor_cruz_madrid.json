@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_caixaforum_org_blanca_marin_y_victor_cruz_madrid",
+  "slug": "blanca-marin-y-victor-cruz",
+  "title": "Blanca Marín y Víctor Cruz",
+  "status": "scheduled",
+  "venueId": "ven_caixaforum_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_caixaforum_org_blanca_marin_y_victor_cruz_madrid_01",
+      "date": "2026-10-01",
+      "time": "17:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_caixaforum_org_blanca_marin_y_victor_cruz_madrid_02",
+      "date": "2026-10-01",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Blanca Martín"
+    },
+    {
+      "name": "Víctor Cruz"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Giuseppe Jacchini"
+    },
+    {
+      "name": "Francesco Paolo Scipriani"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Juan Hidalgo"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "chamber",
+    "early-music"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_caixaforum_org",
+      "url": "https://caixaforum.org/es/madrid/p/blanca-marin-y-victor-cruz-madrid",
+      "checkedAt": "2026-09-15"
+    }
+  ],
+  "primarySourceId": "src_caixaforum_org",
+  "lastVerifiedAt": "2026-09-15"
+}

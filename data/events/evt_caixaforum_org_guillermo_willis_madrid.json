@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_caixaforum_org_guillermo_willis_madrid",
+  "slug": "guillermo-willis",
+  "title": "Guillermo Willis",
+  "status": "scheduled",
+  "venueId": "ven_caixaforum_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_caixaforum_org_guillermo_willis_madrid_01",
+      "date": "2026-11-01",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_caixaforum_org_guillermo_willis_madrid_02",
+      "date": "2026-11-01",
+      "time": "13:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Guillermo Willis"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Girolamo Frescobaldi"
+    },
+    {
+      "name": "Domenico Scarlatti"
+    },
+    {
+      "name": "François Couperin"
+    },
+    {
+      "name": "Agustín Bardi"
+    },
+    {
+      "name": "Astor Piazzolla"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "baroque",
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_caixaforum_org",
+      "url": "https://caixaforum.org/es/madrid/p/guillermo-willis-madrid",
+      "checkedAt": "2026-09-15"
+    }
+  ],
+  "primarySourceId": "src_caixaforum_org",
+  "lastVerifiedAt": "2026-09-15"
+}
