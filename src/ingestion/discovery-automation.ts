@@ -26,6 +26,8 @@ export const TRUSTED_DISCOVERY_WORKFLOW_REF = 'refs/heads/main';
 export const DISCOVERY_REQUEST_REF_PREFIX = 'discovery-request/';
 export const DEFAULT_DISCOVERY_BATCH_PATH = 'ingestion/requests/discovery-batch.json';
 export const MAX_DISCOVERY_BATCH_BYTES = 5_000_000;
+/** Local ref used only to pin the request-branch tip. Never a checkout target. */
+export const DISCOVERY_BATCH_LOCAL_REF = 'refs/discovery-batch/input';
 
 const COMMIT_SHA = /^[0-9a-f]{40}$/;
 const REQUEST_ID = /^[A-Za-z0-9][A-Za-z0-9._/-]{0,120}$/;
@@ -228,7 +230,12 @@ export function loadDiscoveryBatchFromGit(options: {
   reader: GitBatchReader;
   codeSha?: string;
 }): { batch: DiscoveryBatch; bytes: Buffer; meta: DiscoveryBatchMeta } {
-  const { input, reader } = options;
+  const { reader } = options;
+  const input = {
+    batchRef: parseDiscoveryRequestRef(options.input.batchRef),
+    batchSha: parseCommitSha(options.input.batchSha),
+    batchPath: parseDiscoveryBatchPath(options.input.batchPath),
+  };
   reader.fetchCommit({ sha: input.batchSha, ref: input.batchRef });
   const bytes = reader.readFileAtCommit(input.batchSha, input.batchPath);
   const parsed = parseDiscoveryBatchBytes(bytes);
@@ -256,25 +263,10 @@ export function createProcessGitBatchReader(options: {
   const cwd = options.cwd;
   return {
     fetchCommit({ sha, ref }) {
-      const bySha = spawnGit(cwd, ['fetch', '--no-tags', '--depth=1', remote, sha]);
-      if (bySha.status === 0 && commitExists(cwd, sha)) return;
-
-      const refspec = `+refs/heads/${ref}:refs/discovery-batch/input`;
-      const byRef = spawnGit(cwd, ['fetch', '--no-tags', '--depth=1', remote, refspec]);
-      if (byRef.status !== 0) {
-        throw new DiscoveryAutomationError(
-          `no se pudo obtener el commit ${sha} desde ${ref}: ${stderrOf(bySha, byRef)}`,
-        );
-      }
-      const fetched = spawnGit(cwd, ['rev-parse', '--verify', 'refs/discovery-batch/input^{commit}']);
-      const fetchedSha = fetched.stdout.trim().toLowerCase();
-      if (fetched.status !== 0 || fetchedSha !== sha) {
-        throw new DiscoveryAutomationError(
-          `el ref ${ref} apunta a ${fetchedSha || '(desconocido)'}, no al SHA inmutable ${sha}`,
-        );
-      }
+      fetchAndVerifyDiscoveryBatchTip(cwd, { sha, ref, remote });
     },
     readFileAtCommit(sha, filePath) {
+      assertSafeDiscoveryBatchObjectPath(filePath);
       const object = `${sha}:${filePath}`;
       const kind = spawnGit(cwd, ['cat-file', '-t', object]);
       if (kind.status !== 0 || kind.stdout.trim() !== 'blob') {
@@ -301,6 +293,51 @@ export function createProcessGitBatchReader(options: {
       return shown.stdout;
     },
   };
+}
+
+/**
+ * Fetch `refs/heads/<batch_ref>` into a local temp ref and require that its
+ * tip is exactly `batch_sha`. A SHA that merely exists in the repository is
+ * not enough: it must be the current tip of the request branch.
+ */
+export function fetchAndVerifyDiscoveryBatchTip(
+  cwd: string,
+  options: { sha: string; ref: string; remote?: string },
+): string {
+  const sha = parseCommitSha(options.sha);
+  const ref = parseDiscoveryRequestRef(options.ref);
+  const remote = options.remote ?? 'origin';
+  const refspec = `+refs/heads/${ref}:${DISCOVERY_BATCH_LOCAL_REF}`;
+  const fetched = spawnGit(cwd, [
+    'fetch',
+    '--no-tags',
+    '--depth=1',
+    '--no-recurse-submodules',
+    remote,
+    refspec,
+  ]);
+  if (fetched.status !== 0) {
+    throw new DiscoveryAutomationError(
+      `no se pudo obtener refs/heads/${ref}: ${fetched.stderr.trim() || fetched.stdout.trim() || 'fetch fallido'}`,
+    );
+  }
+  const parsed = spawnGit(cwd, ['rev-parse', '--verify', `${DISCOVERY_BATCH_LOCAL_REF}^{commit}`]);
+  const tipSha = parsed.stdout.trim().toLowerCase();
+  if (parsed.status !== 0 || !COMMIT_SHA.test(tipSha)) {
+    throw new DiscoveryAutomationError(
+      `no se pudo resolver el tip de refs/heads/${ref}: ${parsed.stderr.trim() || 'rev-parse fallido'}`,
+    );
+  }
+  if (tipSha !== sha) {
+    throw new DiscoveryAutomationError(
+      `el ref ${ref} apunta a ${tipSha}, no al SHA inmutable ${sha}`,
+    );
+  }
+  return tipSha;
+}
+
+function assertSafeDiscoveryBatchObjectPath(filePath: string): void {
+  parseDiscoveryBatchPath(filePath);
 }
 
 export function inspectPublicationDiff(files: readonly PublicationFile[]): CatalogPublicationDiff {
@@ -532,6 +569,8 @@ function formatDiscoveryExecutionTable(
     `| IA: cache hits | ${ai.cacheHits} |`,
     `| IA: requests por purpose | ${cell(compactCounts(ai.requestsByPurpose))} |`,
     `| IA: requests por provider | ${cell(compactCounts(ai.requestsByProvider))} |`,
+    `| IA: requests por modelo | ${cell(compactCounts(ai.requestsByModel))} |`,
+    `| IA: clasificaciones por modelo | ${cell(compactCounts(ai.classificationsByModel))} |`,
     '',
     '### Clasificación',
     '',
@@ -615,18 +654,6 @@ function listOrNone(values: readonly string[] | undefined): string {
 
 function cell(value: string): string {
   return value.replaceAll('|', '\\|').replaceAll('\n', ' ');
-}
-
-function commitExists(cwd: string, sha: string): boolean {
-  const result = spawnGit(cwd, ['cat-file', '-t', sha]);
-  return result.status === 0 && result.stdout.trim() === 'commit';
-}
-
-function stderrOf(
-  first: { stderr: string },
-  second: { stderr: string },
-): string {
-  return [first.stderr, second.stderr].map((text) => text.trim()).filter(Boolean).join('; ') || 'fetch fallido';
 }
 
 function nulPaths(result: { status: number; stdout: string; stderr: string }): string[] {

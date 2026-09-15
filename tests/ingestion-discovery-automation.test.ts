@@ -84,11 +84,13 @@ function report(overrides: Partial<IngestReport> = {}): IngestReport {
       crossSourceCorroborations: 1,
       ai: {
         ...emptyIngestAiSummary(),
-        httpRequests: 4,
+        httpRequests: 11,
         logicalCalls: 3,
         cacheHits: 1,
         requestsByPurpose: { eligibility: 2, taxonomy: 2 },
-        requestsByProvider: { gemini: 4 },
+        requestsByProvider: { gemini: 8, groq: 3 },
+        requestsByModel: { 'gemini-3.1-flash-lite': 8, 'llama-3.1-8b-instant': 3 },
+        classificationsByModel: { 'gemini-3.1-flash-lite': 7, 'llama-3.1-8b-instant': 2 },
       },
     },
     ...overrides,
@@ -223,6 +225,25 @@ describe('DiscoveryBatch como dato no confiable', () => {
     expect(loaded.meta.batchSha256).toMatch(/^[0-9a-f]{64}$/);
     expect(loaded.meta.adapterCoverageGaps).toEqual([]);
     expect(loaded.meta.codeSha).toBe('cccccccccccccccccccccccccccccccccccccccc');
+  });
+
+  it('rechaza path traversal antes de hablar con git', () => {
+    const reader: GitBatchReader = {
+      fetchCommit: vi.fn(),
+      readFileAtCommit: vi.fn(() => Buffer.from('{}')),
+    };
+    expect(() =>
+      loadDiscoveryBatchFromGit({
+        input: {
+          batchRef: 'discovery-request/demo',
+          batchSha: SHA,
+          batchPath: 'ingestion/requests/../../README.md',
+        },
+        reader,
+      }),
+    ).toThrow(/recorrer directorios|batch_path/);
+    expect(reader.fetchCommit).not.toHaveBeenCalled();
+    expect(reader.readFileAtCommit).not.toHaveBeenCalled();
   });
 });
 
@@ -388,7 +409,25 @@ describe('report de Discovery', () => {
     expect(markdown).toContain('ven_iglesia');
     expect(markdown).toContain('src_parroquia');
     expect(markdown).toContain('adapter coverage gap');
+    expect(markdown).toContain('| IA: requests por modelo | gemini-3.1-flash-lite: 8, llama-3.1-8b-instant: 3 |');
+    expect(markdown).toContain('| IA: clasificaciones por modelo | gemini-3.1-flash-lite: 7, llama-3.1-8b-instant: 2 |');
+    expect(markdown).toContain('| IA: requests por provider | gemini: 8, groq: 3 |');
     expect(markdown).not.toContain(process.env.GEMINI_API_KEY ?? 'GEMINI_API_KEY_PLACEHOLDER_SHOULD_NOT_MATCH_IF_UNSET');
+  });
+
+  it('formatea requests y clasificaciones por modelo vacíos como ninguno', () => {
+    const markdown = formatDiscoveryAutomationSummary(
+      report({
+        summary: {
+          ...report().summary,
+          ai: emptyIngestAiSummary(),
+        },
+      }),
+      'https://example.test/run/1',
+    );
+    expect(markdown).toContain('| IA: requests por modelo | ninguno |');
+    expect(markdown).toContain('| IA: clasificaciones por modelo | ninguno |');
+    expect(markdown).toContain('| IA: requests por provider | ninguno |');
   });
 
   it('el body de la PR exige revisión humana y no habla de auto-merge', () => {

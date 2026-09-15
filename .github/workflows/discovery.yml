@@ -109,7 +109,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: main
-          persist-credentials: true
+          persist-credentials: false
           fetch-depth: 1
 
       - name: Setup Node
@@ -154,9 +154,11 @@ jobs:
           BATCH_SHA: ${{ steps.config.outputs.batch_sha }}
           BATCH_PATH: ${{ steps.config.outputs.batch_path }}
           CODE_SHA: ${{ steps.config.outputs.code_sha }}
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
+          gh auth setup-git
           mkdir -p "$OBS_DIR"
           npx tsx src/cli/discovery-automation.ts load-batch \
             --ref "$BATCH_REF" \
