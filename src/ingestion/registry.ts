@@ -18,6 +18,7 @@ import { realAcademiaBellasArtesAdapter } from './sources/real-academia-bellas-a
 import { fundacionGoetheAdapter } from './sources/fundacion-goethe.ts';
 import { madridATempoAdapter } from './sources/madrid-a-tempo.ts';
 import { patrimonioNacionalAdapter } from './sources/patrimonio-nacional.ts';
+import { ateneoMadridAdapter } from './sources/ateneo-madrid.ts';
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
@@ -39,6 +40,7 @@ const ADAPTERS: Record<string, SourceAdapter> = {
   [fundacionGoetheAdapter.id]: fundacionGoetheAdapter,
   [madridATempoAdapter.id]: madridATempoAdapter,
   [patrimonioNacionalAdapter.id]: patrimonioNacionalAdapter,
+  [ateneoMadridAdapter.id]: ateneoMadridAdapter,
 };
 
 const srcAuditorio: Source = {
@@ -327,6 +329,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Patrimonio Nacional',
       kind: 'official',
       url: 'https://www.patrimonionacional.es/',
+    },
+  },
+  {
+    id: 'ateneo-madrid',
+    name: 'Ateneo de Madrid',
+    urls: ['https://ateneodemadrid.com/wp-json/tribe/events/v1/events'],
+    adapterId: ateneoMadridAdapter.id,
+    catalogSourceId: 'src_ateneo_madrid',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_ateneo_madrid',
+      slug: 'ateneo-de-madrid',
+      name: 'Ateneo de Madrid',
+      kind: 'official',
+      url: 'https://ateneodemadrid.com/',
     },
   },
 ];

@@ -310,6 +310,7 @@ function eventMatchesStrong(event: Event, observed: IdentityFacts, venueId: stri
       [orcamIdentityTitle(observed.title, catalogSourceId), orcamIdentityTitle(event.title, event.primarySourceId)],
       [cndmAuditorioIdentityTitle(observed.title, catalogSourceId), cndmAuditorioIdentityTitle(event.title, event.primarySourceId)],
       [cndmZarzuelaIdentityTitle(observed.title, catalogSourceId), cndmZarzuelaIdentityTitle(event.title, event.primarySourceId)],
+      [ateneoIdentityTitle(observed.title, catalogSourceId), ateneoIdentityTitle(event.title, event.primarySourceId)],
     ].some(([incoming, existing]) => Boolean(incoming) && incoming === existing);
     if (!equivalent) return false;
     // This source-specific title equivalence requires two explicit equal
@@ -355,6 +356,24 @@ function cndmZarzuelaIdentityTitle(title: string, catalogSourceId: string): stri
     return principal ? normalizeText(principal) || undefined : undefined;
   }
   return catalogSourceId === 'src_teatro_zarzuela' ? normalizeText(title) || undefined : undefined;
+}
+
+/**
+ * Ateneo prefixes partner listings with its cycle or the word "Concierto",
+ * and sometimes inserts the solo instrument between artist and programme.
+ * This equivalence remains gated by exact venue, date and explicit time.
+ */
+function ateneoIdentityTitle(title: string, catalogSourceId: string): string | undefined {
+  if (![
+    'src_ateneo_madrid',
+    'src_fundacionpiumosso_com',
+    'src_tala_producciones_es',
+  ].includes(catalogSourceId)) return undefined;
+  const comparable = title
+    .replace(/^Ciclo\s+El\s+Sal[oó]n\s+del\s+Ateneo\.\s*/iu, '')
+    .replace(/^Concierto\s+/iu, '')
+    .replace(/\s+piano\s*[-–—]\s*/iu, '. ');
+  return normalizeText(comparable) || undefined;
 }
 
 function timesCompatible(left: string | null, right: string | null): boolean {

@@ -661,6 +661,16 @@ const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
     'salon de columnas palacio real de madrid': 'ven_palacio_real_madrid_salon_columnas',
     'palacio real de madrid salon de columnas': 'ven_palacio_real_madrid_salon_columnas',
   },
+  'ateneo-madrid': {
+    'catedra mayor': 'ven_ateneo_madrid',
+    cacharreria: 'ven_ateneo_madrid',
+    'sala perez galdos': 'ven_ateneo_madrid',
+    'sala ramon y cajal': 'ven_ateneo_madrid',
+    'sala ciudad ubeda': 'ven_ateneo_madrid',
+    'sala ciudad de ubeda': 'ven_ateneo_madrid',
+    'sala laffon': 'ven_ateneo_madrid',
+    'sala anselma': 'ven_ateneo_madrid',
+  },
 };
 
 /**
