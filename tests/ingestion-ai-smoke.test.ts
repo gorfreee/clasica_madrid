@@ -17,8 +17,10 @@ import {
   CLOUDFLARE_ZERO_COST_MODELS,
   GROQ_DEFAULT_MODELS,
   inspectFreePoolFromEnv,
+  KILO_QUARANTINED_MODELS,
   KILO_ZERO_COST_MODELS,
   MISTRAL_DEFAULT_MODELS,
+  OPENROUTER_QUARANTINED_MODELS,
   OPENROUTER_ZERO_COST_MODELS,
   VERCEL_ZERO_COST_MODELS,
   ZAI_ZERO_COST_MODELS,
@@ -28,6 +30,7 @@ import { GEMINI_DEFAULT_MODELS } from '../src/ingestion/classification/gemini-co
 import {
   AI_SMOKE_SLOW_THRESHOLD_MS,
   AI_SMOKE_TIMEOUT_MS,
+  AI_SMOKE_TRANSIENT_RETRY_BACKOFF_MS,
   discoverAiSmokeTargets,
   discoveryFromInspection,
   extractProviderErrorCode,
@@ -37,8 +40,10 @@ import {
   purposesToSmoke,
   runAiRouteSmoke,
   runAiSmoke,
+  smokeHealth,
   smokePaceIntervalMs,
   smokeProviderConcurrency,
+  summarizeProviders,
   type AiSmokeDiscovery,
   type AiSmokeFixture,
   type AiSmokeProviderStatus,
@@ -119,6 +124,11 @@ describe('CLI, fixtures y descubrimiento', () => {
     ]);
     expect(discovered.routes.every((route, index) => route.transport === production[index]!.transport)).toBe(true);
     expect(discovered.providers.map((item) => item.provider)).toEqual([...AI_FREE_PROVIDERS]);
+    expect(discovered.routes.map((route) => route.routeId)).not.toContain('kilo:dots-studio/dots-3-note-preview:free');
+    expect(discovered.routes.map((route) => route.routeId)).not.toContain('openrouter:openai/gpt-oss-20b:free');
+    expect(discovered.routes.map((route) => route.routeId)).not.toContain('openrouter:openai/gpt-oss-20b');
+    expect(KILO_QUARANTINED_MODELS).toEqual(['dots-studio/dots-3-note-preview:free']);
+    expect(OPENROUTER_QUARANTINED_MODELS).toEqual(['openai/gpt-oss-20b:free']);
   });
 
   it('informa proveedores esperados sin credenciales en vez de ocultarlos', () => {
@@ -155,7 +165,7 @@ describe('runner directo one-shot', () => {
     expect(result.routes[0]?.result).toBe('PASS');
   });
 
-  it('no reintenta después de timeout, 429 ni schema fail', async () => {
+  it('reintenta una vez sólo errores transitorios; schema/auth/404/400 no reintentan', async () => {
     const counts = new Map<string, number>();
     const routes = [
       fakeRoute('groq:timeout', async () => {
@@ -166,21 +176,49 @@ describe('runner directo one-shot', () => {
         bump(counts, 'rate');
         throw new AiTransportError('HTTP 429', { kind: 'rate-limit', status: 429 });
       }),
+      fakeRoute('zai:fivexx', async () => {
+        bump(counts, 'fivexx');
+        throw new AiTransportError('HTTP 503', { kind: 'transport', status: 503, retryable: true });
+      }),
       fakeRoute('gemini:schema', async () => {
         bump(counts, 'schema');
         return { value: { eligibility: 'wrong' } };
       }),
+      fakeRoute('groq:auth', async () => {
+        bump(counts, 'auth');
+        throw new AiTransportError('HTTP 401', { kind: 'auth', status: 401 });
+      }),
+      fakeRoute('openrouter:missing', async () => {
+        bump(counts, 'missing');
+        throw new AiTransportError('HTTP 404', { kind: 'unavailable', status: 404 });
+      }),
+      fakeRoute('kilo:bad-request', async () => {
+        bump(counts, 'bad');
+        throw new AiTransportError('HTTP 400', { kind: 'bad-request', status: 400 });
+      }),
     ];
-    const result = await runBasic(routes);
+    const sleeps: number[] = [];
+    const result = await runBasic(routes, { sleep: async (ms) => { sleeps.push(ms); } });
 
-    expect(Object.fromEntries(counts)).toEqual({ timeout: 1, rate: 1, schema: 1 });
-    expect(result.requests).toBe(3);
+    expect(Object.fromEntries(counts)).toEqual({
+      timeout: 2, rate: 2, fivexx: 2, schema: 1, auth: 1, missing: 1, bad: 1,
+    });
+    expect(sleeps).toEqual([
+      AI_SMOKE_TRANSIENT_RETRY_BACKOFF_MS,
+      AI_SMOKE_TRANSIENT_RETRY_BACKOFF_MS,
+      AI_SMOKE_TRANSIENT_RETRY_BACKOFF_MS,
+    ]);
+    expect(result.requests).toBe(10);
     expect(result.routes.map((route) => route.purposeResults[0]?.outcome)).toEqual([
-      'TIMEOUT', 'RATE_LIMIT', 'SCHEMA_FAIL',
+      'TIMEOUT', 'RATE_LIMIT', 'TRANSPORT_ERROR', 'SCHEMA_FAIL', 'AUTH', 'MODEL_UNAVAILABLE', 'REQUEST_ERROR',
+    ]);
+    expect(result.routes.map((route) => route.purposeResults[0]?.attempts)).toEqual([2, 2, 2, 1, 1, 1, 1]);
+    expect(result.routes.map((route) => route.health)).toEqual([
+      'DEGRADED', 'DEGRADED', 'DEGRADED', 'FAIL', 'FAIL', 'FAIL', 'FAIL',
     ]);
   });
 
-  it('provider-busy y 429 no adquieren retries, scheduler ni fallback interno', async () => {
+  it('provider-busy reintenta una vez y no usa scheduler ni fallback interno', async () => {
     const counts = new Map<string, number>();
     const routes = [
       fakeRoute('zai:busy', async () => {
@@ -196,13 +234,15 @@ describe('runner directo one-shot', () => {
         return { value: validOutput(call.request.purpose) };
       }),
     ];
-    const result = await runBasic(routes);
-    expect(Object.fromEntries(counts)).toEqual({ busy: 1, ok: 1 });
-    expect(result.requests).toBe(2);
+    const result = await runBasic(routes, { sleep: async () => {} });
+    expect(Object.fromEntries(counts)).toEqual({ busy: 2, ok: 1 });
+    expect(result.requests).toBe(3);
     expect(result.routes.map((route) => route.purposeResults[0]?.outcome)).toEqual([
       'PROVIDER_BUSY', 'PASS',
     ]);
     expect(result.routes[0]?.purposeResults[0]?.httpStatus).toBe(429);
+    expect(result.routes[0]?.health).toBe('DEGRADED');
+    expect(result.routes[1]?.health).toBe('HEALTHY');
   });
 
   it('un fallo funcional de eligibility no oculta composer, access ni taxonomy', async () => {
@@ -344,9 +384,12 @@ describe('runner directo one-shot', () => {
         throw new AiTransportError('HTTP 429', { kind: 'rate-limit', status: 429 });
       }
       return { value: validOutput(call.request.purpose) };
-    })]);
-    expect(seen).toEqual([...AI_CALL_PURPOSES]);
-    expect(result.requests).toBe(4);
+    })], { sleep: async () => {} });
+    expect(seen).toEqual(['eligibility', 'eligibility', ...AI_CALL_PURPOSES.slice(1)]);
+    expect(result.requests).toBe(5);
+    expect(result.routes[0]?.purposeResults[0]).toMatchObject({
+      outcome: 'RATE_LIMIT', attempts: 2, health: 'DEGRADED',
+    });
     expect(result.routes[0]?.purposes['composer-extraction']).toBe('PASS');
   });
 
@@ -464,8 +507,10 @@ describe('concurrencia, pacing y diagnóstico', () => {
     expect(result.report).toContain('HTTP requests: **8**');
     expect(result.report).toContain('Resultado global: **FAIL**');
     expect(result.markdown).toContain('| Provider | Model |');
+    expect(result.markdown).toContain('| Health |');
     expect(result.json.overall).toBe('FAIL');
     expect(result.json.requests).toBe(8);
+    expect(result.json.schemaVersion).toBe(2);
   });
 
   it('conserva HTTP status, provider code y mensaje útil sin secretos', async () => {
@@ -608,6 +653,7 @@ describe('timeout SLOW, output limit y reportes', () => {
       outcome: 'SLOW', success: true, slow: true, latencyMs: 18_000,
     });
     expect(result.routes[0]?.result).toBe('PASS');
+    expect(result.routes[0]?.health).toBe('HEALTHY');
     expect(result.overall).toBe('PASS');
     expect(result.exitCode).toBe(0);
     expect(result.report).toContain('SLOW');
@@ -626,9 +672,9 @@ describe('timeout SLOW, output limit y reportes', () => {
     const timedOut = await runBasic([fakeRoute('groq:timeout', async () => {
       now += 30_000;
       throw new AiTransportError('timeout after 30000ms', { kind: 'timeout' });
-    })], { now: () => now });
+    })], { now: () => now, sleep: async () => {} });
     expect(timedOut.routes[0]?.purposeResults[0]).toMatchObject({
-      outcome: 'TIMEOUT', success: false, latencyMs: 30_000,
+      outcome: 'TIMEOUT', success: false, latencyMs: 30_000, attempts: 2, health: 'DEGRADED',
     });
   });
 
@@ -668,6 +714,7 @@ describe('timeout SLOW, output limit y reportes', () => {
   });
 
   it('clasifica cuota diaria, RPM, OTPM, concurrency y overload de Z.AI', async () => {
+    const sleeps: number[] = [];
     const result = await runBasic([
       fakeRoute('gemini:daily', async () => {
         throw new AiTransportError('Gemini HTTP 429', {
@@ -699,11 +746,16 @@ describe('timeout SLOW, output limit y reportes', () => {
           rateLimit: { providerCode: '1302', dimensions: ['concurrency'] },
         });
       }),
-    ]);
+    ], { sleep: async (ms) => { sleeps.push(ms); } });
     expect(result.routes.map((route) => route.purposeResults[0]?.outcome)).toEqual([
       'DAILY_QUOTA', 'RPM', 'OTPM', 'PROVIDER_BUSY', 'CONCURRENCY',
     ]);
-    expect(result.requests).toBe(5);
+    expect(result.routes.map((route) => route.health)).toEqual([
+      'FAIL', 'DEGRADED', 'DEGRADED', 'DEGRADED', 'DEGRADED',
+    ]);
+    expect(result.routes.map((route) => route.purposeResults[0]?.attempts)).toEqual([1, 2, 2, 2, 2]);
+    expect(result.requests).toBe(9);
+    expect(sleeps).toEqual(Array(4).fill(AI_SMOKE_TRANSIENT_RETRY_BACKOFF_MS));
     expect(result.report).toContain('### Daily quota');
     expect(result.report).toContain('### Request/minute');
     expect(result.report).toContain('### Output-tokens/minute');
@@ -745,8 +797,18 @@ describe('timeout SLOW, output limit y reportes', () => {
       expect(failMd).toContain('Resultado global: **FAIL**');
       expect(passMd).toContain('Resultado global: **PASS**');
       expect(failJson).toMatchObject({
-        schemaVersion: 1, commitSha: 'abc1234', overall: 'FAIL',
+        schemaVersion: 2, commitSha: 'abc1234', overall: 'FAIL',
       });
+      expect(failJson.providerSummaries).toEqual([
+        { provider: 'groq', HEALTHY: 0, DEGRADED: 0, FAIL: 1, quarantined: 0 },
+      ]);
+      expect(failMd).toContain('## Provider health');
+      expect(failMd).toContain('Groq');
+      expect(failMd).toContain('HEALTHY: 0');
+      expect(failMd).toContain('FAIL: 1');
+      expect(failMd).toContain('## Route diagnostics');
+      expect(failMd).toContain('| Health | Result |');
+      expect(failMd).toContain('| Attempts |');
       expect(failJson.routes[0]?.purposeResults[0]).toMatchObject({
         outcome: 'AUTH', providerRequestId: 'req_fail_1', httpStatus: 401,
       });
@@ -767,5 +829,50 @@ describe('timeout SLOW, output limit y reportes', () => {
       slowThresholdMs: 20_000,
     });
     expect(parseAiSmokeOutputArgs([], { GITHUB_STEP_SUMMARY: '/tmp/summary.md' }).summaryPath).toBe('/tmp/summary.md');
+  });
+});
+
+describe('salud HEALTHY/DEGRADED/FAIL y resumen por provider', () => {
+  it('resume PASS/SLOW como HEALTHY, transitorios como DEGRADED y el resto como FAIL', () => {
+    expect(smokeHealth('PASS')).toBe('HEALTHY');
+    expect(smokeHealth('SLOW')).toBe('HEALTHY');
+    expect(smokeHealth('TIMEOUT')).toBe('DEGRADED');
+    expect(smokeHealth('RATE_LIMIT')).toBe('DEGRADED');
+    expect(smokeHealth('RPM')).toBe('DEGRADED');
+    expect(smokeHealth('PROVIDER_BUSY')).toBe('DEGRADED');
+    expect(smokeHealth('AUTH')).toBe('FAIL');
+    expect(smokeHealth('MODEL_UNAVAILABLE')).toBe('FAIL');
+    expect(smokeHealth('REQUEST_ERROR')).toBe('FAIL');
+    expect(smokeHealth('SCHEMA_FAIL')).toBe('FAIL');
+    expect(smokeHealth('DAILY_QUOTA')).toBe('FAIL');
+    expect(smokeHealth('OUTPUT_LIMIT')).toBe('FAIL');
+  });
+
+  it('el resumen por provider cuenta salud observada y modelos quarantined del catálogo', async () => {
+    const result = await runBasic([
+      fakeRoute('vercel:inclusionai/ling-3.0-flash-vl-free', async (call) => ({
+        value: validOutput(call.request.purpose),
+      })),
+      fakeRoute('kilo:nex-agi/nex-n2.5-mini:free', async () => {
+        throw new AiTransportError('HTTP 429', { kind: 'rate-limit', status: 429 });
+      }),
+      fakeRoute('openrouter:google/gemma-4-26b-a4b-it:free', async () => {
+        throw new AiTransportError('HTTP 404', { kind: 'unavailable', status: 404 });
+      }),
+    ], { sleep: async () => {} });
+
+    expect(summarizeProviders(result.routes)).toEqual([
+      { provider: 'vercel', HEALTHY: 1, DEGRADED: 0, FAIL: 0, quarantined: 0 },
+      { provider: 'kilo', HEALTHY: 0, DEGRADED: 1, FAIL: 0, quarantined: 1 },
+      { provider: 'openrouter', HEALTHY: 0, DEGRADED: 0, FAIL: 1, quarantined: 1 },
+    ]);
+    expect(result.markdown).toContain('## Provider health');
+    expect(result.markdown).toContain('Vercel\n  HEALTHY: 1\n  DEGRADED: 0\n  FAIL: 0');
+    expect(result.markdown).toContain('Kilo\n  HEALTHY: 0\n  DEGRADED: 1\n  FAIL: 0\n  QUARANTINED: 1');
+    expect(result.markdown).toContain('OpenRouter\n  HEALTHY: 0\n  DEGRADED: 0\n  FAIL: 1\n  QUARANTINED: 1');
+    expect(result.markdown).toContain('## Route diagnostics');
+    expect(result.json.routes[0]?.purposeResults[0]?.attempts).toBe(1);
+    expect(result.json.routes[1]?.purposeResults[0]?.attempts).toBe(2);
+    expect(result.report).toContain('attempts 2');
   });
 });
