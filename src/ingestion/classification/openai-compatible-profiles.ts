@@ -177,11 +177,23 @@ const KILO_JSON_SCHEMA: OpenAiCompatibleModelProfile = {
 };
 
 /**
- * OpenRouter Chat Completions: `json_schema` plus `provider.require_parameters`
- * so routing only picks endpoints that accept the parameters we send.
- * `strict: true` is not unequivocal for these free IDs (Gemma free FAQ:
- * JSON without schema enforcement; GPT-OSS documents schema, enforcement
- * still varies by upstream). Local validation stays.
+ * OpenRouter Gemma 4 26B A4B Free: JSON object mode is documented; JSON Schema
+ * enforcement is not. `provider.require_parameters` still restricts routing to
+ * endpoints that accept `response_format=json_object`. Local schema validation
+ * and the compact prompt contract stay.
+ */
+const OPENROUTER_JSON_OBJECT: OpenAiCompatibleModelProfile = {
+  responseFormat: 'json-object',
+  jsonSchemaStrict: false,
+  tokenParameter: 'max_tokens',
+  extraBody: { provider: { require_parameters: true } },
+};
+
+/**
+ * OpenRouter GPT-OSS 20B Free: JSON Schema is documented. `strict: true` is
+ * not unequivocal for this free ID, so keep best-effort schema.
+ * `provider.require_parameters` restricts routing to endpoints that accept it.
+ * Local validation stays.
  */
 const OPENROUTER_JSON_SCHEMA: OpenAiCompatibleModelProfile = {
   responseFormat: 'json-schema',
@@ -237,10 +249,8 @@ const CLOUDFLARE_PROMPT_MODELS = new Set([
 ]);
 const VERCEL_LING_FLASH_VL_MODELS = new Set(['inclusionai/ling-3.0-flash-vl-free']);
 const KILO_JSON_SCHEMA_MODELS = new Set(['dots-studio/dots-3-note-preview:free']);
-const OPENROUTER_JSON_SCHEMA_MODELS = new Set([
-  'google/gemma-4-26b-a4b-it:free',
-  'openai/gpt-oss-20b:free',
-]);
+const OPENROUTER_JSON_OBJECT_MODELS = new Set(['google/gemma-4-26b-a4b-it:free']);
+const OPENROUTER_JSON_SCHEMA_MODELS = new Set(['openai/gpt-oss-20b:free']);
 
 /**
  * Exact HTTP extras for a provider/model. Unknown IDs get conservative
@@ -270,7 +280,9 @@ export function openaiCompatibleModelProfile(
     case 'kilo':
       return KILO_JSON_SCHEMA_MODELS.has(name) ? KILO_JSON_SCHEMA : JSON_OBJECT;
     case 'openrouter':
-      return OPENROUTER_JSON_SCHEMA_MODELS.has(name) ? OPENROUTER_JSON_SCHEMA : JSON_OBJECT;
+      if (OPENROUTER_JSON_SCHEMA_MODELS.has(name)) return OPENROUTER_JSON_SCHEMA;
+      if (OPENROUTER_JSON_OBJECT_MODELS.has(name)) return OPENROUTER_JSON_OBJECT;
+      return JSON_OBJECT;
     default:
       return JSON_OBJECT;
   }

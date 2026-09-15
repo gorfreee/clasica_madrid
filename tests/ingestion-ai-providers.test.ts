@@ -530,26 +530,39 @@ describe('payload HTTP por provider/modelo', () => {
     expect(body).not.toHaveProperty('include_reasoning');
   });
 
-  it('OpenRouter :free usa json_schema y require_parameters sin fallback pagado', async () => {
-    for (const model of OPENROUTER_ZERO_COST_MODELS) {
-      const body = await captureBody('openrouter', model);
-      expect(body).toMatchObject({
-        model,
-        max_tokens: 100,
-        provider: { require_parameters: true },
-        response_format: {
-          type: 'json_schema',
-          json_schema: {
-            name: 'clasica_eligibility',
-            strict: false,
-            schema: request.schema,
-          },
+  it('OpenRouter Gemma Free usa json_object y require_parameters, sin json_schema', async () => {
+    const body = await captureBody('openrouter', 'google/gemma-4-26b-a4b-it:free');
+    expect(body).toMatchObject({
+      model: 'google/gemma-4-26b-a4b-it:free',
+      max_tokens: 100,
+      provider: { require_parameters: true },
+      response_format: { type: 'json_object' },
+    });
+    expect(body.response_format).not.toMatchObject({ type: 'json_schema' });
+    expect(body.response_format).not.toHaveProperty('json_schema');
+    expect(body).not.toHaveProperty('models');
+    expect(body).not.toHaveProperty('route');
+    expect(body.provider).not.toMatchObject({ allow_fallbacks: true });
+  });
+
+  it('OpenRouter GPT-OSS Free usa json_schema best-effort y require_parameters', async () => {
+    const body = await captureBody('openrouter', 'openai/gpt-oss-20b:free');
+    expect(body).toMatchObject({
+      model: 'openai/gpt-oss-20b:free',
+      max_tokens: 100,
+      provider: { require_parameters: true },
+      response_format: {
+        type: 'json_schema',
+        json_schema: {
+          name: 'clasica_eligibility',
+          strict: false,
+          schema: request.schema,
         },
-      });
-      expect(body).not.toHaveProperty('models');
-      expect(body).not.toHaveProperty('route');
-      expect(body.provider).not.toMatchObject({ allow_fallbacks: true });
-    }
+      },
+    });
+    expect(body).not.toHaveProperty('models');
+    expect(body).not.toHaveProperty('route');
+    expect(body.provider).not.toMatchObject({ allow_fallbacks: true });
   });
 
   it('reutiliza el schema editorial existente en el payload Groq GPT-OSS', () => {
@@ -695,6 +708,13 @@ describe('payload HTTP por provider/modelo', () => {
       extraBody: { provider: { require_parameters: true } },
       promptOutputContract: false,
     });
+    expect(identityByRoute(routes, 'openrouter:google/gemma-4-26b-a4b-it:free')).toMatchObject({
+      responseFormat: 'json-object',
+      jsonSchemaStrict: false,
+      tokenParameter: 'max_tokens',
+      extraBody: { provider: { require_parameters: true } },
+      promptOutputContract: true,
+    });
     expect(identityByRoute(routes, 'groq:openai/gpt-oss-120b')).toMatchObject({
       promptOutputContract: false,
     });
@@ -732,6 +752,7 @@ describe('schema-in-prompt para routes sin json_schema', () => {
       ['glm-4.7-flash', 'zai'],
       ['llama-3.1-8b-instant', 'groq'],
       ['mistral-small-latest', 'mistral'],
+      ['google/gemma-4-26b-a4b-it:free', 'openrouter'],
     ] as const;
     for (const [model, provider] of routes) {
       const body = buildOpenAiCompatibleRequestBody(model, editorial, {
@@ -748,6 +769,9 @@ describe('schema-in-prompt para routes sin json_schema', () => {
       expect(messages[0]?.content).toContain(compactJsonSchemaContract(editorial.schema));
       expect(messages[0]?.content).toContain('"include"|"exclude"|"uncertain"');
       expect(messages[1]?.content).toBe(editorial.user);
+      if (provider === 'openrouter') {
+        expect(body.provider).toEqual({ require_parameters: true });
+      }
     }
   });
 
@@ -891,7 +915,12 @@ describe('perfiles HTTP declarativos', () => {
       tokenParameter: 'max_tokens',
       extraBody: { provider: { require_parameters: true } },
     });
-    expect(openaiCompatibleModelProfile('openrouter', 'google/gemma-4-26b-a4b-it:free').jsonSchemaStrict).toBe(false);
+    expect(openaiCompatibleModelProfile('openrouter', 'google/gemma-4-26b-a4b-it:free')).toEqual({
+      responseFormat: 'json-object',
+      jsonSchemaStrict: false,
+      tokenParameter: 'max_tokens',
+      extraBody: { provider: { require_parameters: true } },
+    });
   });
 
   it('reconoce rate-limit de Mistral/Z.AI sin tratar 400/401 como cuota', () => {

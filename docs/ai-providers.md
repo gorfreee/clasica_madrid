@@ -81,7 +81,8 @@ Las tareas del pool (eligibility, compositores, acceso, taxonomy) piden JSON cor
 | `cloudflare:@cf/zai-org/glm-4.7-flash`, `cloudflare:@cf/google/gemma-4-26b-a4b-it` | no se envía `response_format` | `reasoning_effort: null` y `chat_template_kwargs.enable_thinking: false` | `max_completion_tokens` | La allowlist oficial de JSON Mode no incluye estos IDs. `max_tokens` está deprecated en las páginas de modelo a favor de `max_completion_tokens`. Prompt + parseo + schema local. |
 | `vercel:inclusionai/ling-3.0-flash-vl-free` | no se envía `response_format` | `reasoning: { effort: "none" }` | `max_tokens` | El gateway documenta structured outputs, pero el endpoint free no lista `response_format` (sí `reasoning`). Prompt + validación local. Sin `strict`. |
 | `kilo:dots-studio/dots-3-note-preview:free` | `json_schema` + `strict: false` | no se envía | `max_tokens` | Structured Outputs / JSON Schema documentados en el catálogo. `strict: true` no está inequívoco para este ID. |
-| `openrouter:google/gemma-4-26b-a4b-it:free`, `openrouter:openai/gpt-oss-20b:free` | `json_schema` + `strict: false` | no se envía | `max_tokens` | `provider.require_parameters=true` en el body de Chat Completions (no en el scheduler). Gemma 4 Free documenta JSON sin enforcement de schema; GPT-OSS Free documenta JSON Schema. Validación local sigue. |
+| `openrouter:google/gemma-4-26b-a4b-it:free` | `json_object` | no se envía | `max_tokens` | JSON documentado; no hay enforcement de JSON Schema. No se envía `json_schema`. `provider.require_parameters=true` en el body de Chat Completions (no en el scheduler). Contrato compacto en el system prompt. Validación local sigue. |
+| `openrouter:openai/gpt-oss-20b:free` | `json_schema` + `strict: false` | no se envía | `max_tokens` | JSON Schema documentado. `strict: true` no está inequívoco para este ID free. `provider.require_parameters=true`. Validación local sigue. |
 
 ## Vercel AI Gateway (verificado 2026-09-15)
 
