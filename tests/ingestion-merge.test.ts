@@ -287,6 +287,31 @@ describe('enriquecimiento monotónico de performers, composers y works', () => {
     expect(merged.diagnostics.filter((item) => item.startsWith('performers:'))).toEqual([]);
   });
 
+  it('performers: una observación posterior más limpia no borra nombres ni roles publicados', () => {
+    const existing = makeEvent({
+      performers: [
+        { name: 'Intervienen' },
+        { name: 'Josu De Solaun' },
+        { name: 'Paco Moya', role: 'conductor' },
+      ],
+    });
+    const merged = mergeExistingEvent(
+      existing,
+      proposal({
+        title: existing.title,
+        performers: [
+          { name: 'Josu De Solaun' },
+          { name: 'Paco Moya' },
+        ],
+      }),
+      TEST_NOW,
+    );
+
+    expect(merged.event.performers).toEqual(existing.performers);
+    expect(merged.diagnostics.some((item) => item.startsWith('performers:'))).toBe(true);
+    expect(merged.diffs.some((item) => item.startsWith('performers:'))).toBe(false);
+  });
+
   it('works: un superconjunto compatible añade la obra nueva', () => {
     const existing = makeEvent({
       works: [{ title: 'Sinfonía nº 5' }],

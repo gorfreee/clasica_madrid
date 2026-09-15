@@ -10,6 +10,7 @@ import {
   rabasfDates,
 } from '../src/ingestion/detail/real-academia-bellas-artes.ts';
 import { canonicalizePerformerList } from '../src/ingestion/classification/performer-role.ts';
+import { resolveFormats } from '../src/ingestion/classification/formats.ts';
 import { canonicalizeComposerList } from '../src/ingestion/composer-name.ts';
 import { enrichNormalizedEvent } from '../src/ingestion/enrich-normalized.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
@@ -191,6 +192,8 @@ describe('Real Academia ficha hydration', () => {
     expect(seikilos.occurrences?.[0]).toMatchObject({ date: '2026-05-19', time: '12:00' });
     expect(seikilos.performers).toContainEqual({ name: 'Cuarteto Seikilos' });
     expect(seikilos.performers).toContainEqual({ name: 'Pablo Suárez', roleText: 'violín' });
+    expect(seikilos.works).toContainEqual({ title: 'Cuarteto de cuerda', composerName: 'Fernando Remacha' });
+    expect(seikilos.works).toContainEqual({ title: 'Sonata Romántica', composerName: 'María de Pablos' });
     const piano = parseRabasfDetail(
       await sample('concierto-ii-del-festival-caprichos-del-romanticismo'),
       await fixture('detail-piano'),
@@ -226,6 +229,8 @@ describe('Real Academia ficha hydration', () => {
     ]);
     expect(patch.composers?.some((item) => /transcripci[oó]n|ausi[aà]s/i.test(item.name))).toBe(false);
     expect(patch.works).toContainEqual({ title: 'Dos fantasías', composerName: 'Luys Milan' });
+    expect(patch.works?.some((work) => /el maestro/i.test(work.title))).toBe(false);
+    expect(patch.programText).toMatch(/El Maestro/);
     expect(patch.works).toContainEqual({ title: 'Danzas españolas', composerName: 'Gaspar Sanz' });
     expect(patch.works).toContainEqual({ title: 'Homenaje a Debussy', composerName: 'Manuel de Falla' });
     expect(patch.works).toContainEqual({ title: 'Invocación y danza', composerName: 'Joaquín Rodrigo' });
@@ -288,11 +293,83 @@ describe('Real Academia ficha hydration', () => {
       { name: 'Esteban Salas' },
     ]);
     const workTitles = patch.works?.map((work) => work.title) ?? [];
-    expect(workTitles.some((title) => /bay psalm|new edition|último mohicano|scottish songs|the celebrated|death song/i.test(title))).toBe(false);
+    expect(workTitles.some((title) => /bay psalm|new edition|último mohicano|scottish songs|^the celebrated$/i.test(title))).toBe(false);
     expect(workTitles.some((title) => /consolations des misères|six sonatas for the violoncello|libro de la ordenanza|seguidillas con acompañamiento|cantates fran/i.test(title))).toBe(false);
+    expect(patch.works).toContainEqual({ title: 'Chanson nègre', composerName: 'Jean-Jacques Rousseau' });
+    expect(patch.works).toContainEqual({
+      title: 'Celui plus jeune suis que j’ai jadis été',
+      composerName: 'Jean-Jacques Rousseau',
+    });
+    expect(patch.works).toContainEqual({ title: 'Allegro alla militare', composerName: 'Luigi Boccherini' });
+    expect(patch.works).toContainEqual({ title: 'La Generala', composerName: 'Manuel Espinosa de los Monteros' });
+    expect(patch.works).toContainEqual({ title: 'La Marcha de Fusileros', composerName: 'Manuel Espinosa de los Monteros' });
+    expect(patch.works).toContainEqual({ title: 'Le Caffé', composerName: 'Nicolas Bernier' });
+    expect(patch.works).toContainEqual({
+      title: 'Trio IV: Allegro con spirito, Adagio, Presto Assai',
+      composerName: 'Giuseppe Cristiano Lidarti',
+    });
+    expect(patch.works).toContainEqual({ title: 'The New Federal Overture', composerName: 'James Hewitt' });
+    expect(patch.works).toContainEqual({ title: 'Northampton', composerName: 'John Tufts' });
+    expect(patch.works).toContainEqual({
+      title: 'Assí de la Deidad excelsa',
+      composerName: 'Juan Mathías de los Reyes Mapamundi',
+    });
+    expect(patch.works?.some((work) => work.title === 'El Maestro')).toBe(false);
     expect(patch.programText).toMatch(/Bay Psalm Book/);
     expect(patch.programText).toMatch(/Chanson nègre/);
     expect(patch.programText).toMatch(/Northampton/);
+    expect(patch.programText).toMatch(/The New Federal Overture/);
+    expect(
+      resolveFormats({
+        title: event.observed.title,
+        categoryText: patch.categoryText,
+        description: patch.description,
+        programText: patch.programText,
+        performers: patch.performers ?? [],
+        composers: patch.composers ?? [],
+        works: patch.works ?? [],
+      }).value,
+    ).toEqual(['early-music']);
+  });
+
+  it('does not publish Intervienen or an editorial conductor from After the Dance', async () => {
+    const event = ficha('after-the-dance', 'After the Dance');
+    const patch = parseRabasfDetail(event, await fixture('detail-after-the-dance'));
+    expect(patch.occurrences?.[0]).toMatchObject({ date: '2026-09-25', time: '12:00' });
+    expect(patch.performers?.some((item) => item.name === 'Intervienen')).toBe(false);
+    expect(patch.performers).toEqual([
+      { name: 'Josu De Solaun', roleText: 'pianista' },
+      { name: 'Paco Moya', roleText: 'productor y director del sello IBS Classical' },
+      { name: 'María Valverde', roleText: 'pianista y divulgadora de Radio Nacional de España' },
+      {
+        name: 'José Luis García del Busto',
+        roleText: 'musicólogo y académico de número de la Real Academia de Bellas Artes de San Fernando',
+      },
+    ]);
+    const roles = canonicalizePerformerList(patch.performers ?? []);
+    expect(roles.find((item) => item.name === 'Paco Moya')?.role).toBeUndefined();
+    expect(roles.some((item) => item.role === 'conductor')).toBe(false);
+    expect(patch.composers).toEqual([{ name: 'Frédéric Chopin' }]);
+    expect(patch.works).toContainEqual({ title: 'Selección de 19 Mazurcas', composerName: 'Frédéric Chopin' });
+
+    const published = JSON.parse(
+      await readFile(path.join(import.meta.dirname, '../data/events/evt_real_academia_bellas_artes_after_the_dance.json'), 'utf8'),
+    ) as {
+      performers: Array<{ name: string; role?: string }>;
+      composers: Array<{ name: string }>;
+      works: Array<{ title: string; composerName?: string }>;
+      title: string;
+    };
+    expect(published.title).toBe('After the Dance');
+    expect(published.performers.some((item) => item.name === 'Intervienen')).toBe(false);
+    expect(published.performers).toEqual([
+      { name: 'Josu De Solaun' },
+      { name: 'Paco Moya' },
+      { name: 'María Valverde' },
+      { name: 'José Luis García del Busto' },
+    ]);
+    expect(published.composers).toEqual([{ name: 'Frédéric Chopin' }]);
+    expect(published.works).toEqual([{ title: 'Selección de 19 Mazurcas', composerName: 'Frédéric Chopin' }]);
   });
 
   it('joins a composer name split across adjacent strong tags and ignores Presentación labels', async () => {

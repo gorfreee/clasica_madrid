@@ -122,7 +122,11 @@ export function mergeProposals(base: EventProposal, incoming: EventProposal): Ev
  * value when both sides have one (union/replace would drop `choral`).
  * `performers`, `composers` and `works` grow monotonically: a later observation
  * may append identities only when it is a compatible superset of everything
- * already published. Matching items may still gain `role` / `composerName`.
+ * already published. Matching items may still gain `role` / `composerName`;
+ * an incoming item without `role` never removes a published one. A later
+ * scrape of the same source that omits a heading-like name or a previously
+ * inferred role is not a compatible superset, so those corrections are not
+ * applied here.
  * A Music/Música credit label is the same identity as the person it wraps, so
  * a cleaner observation can replace `Music Gioachino Rossini` with
  * `Gioachino Rossini` without dropping other published composers.
