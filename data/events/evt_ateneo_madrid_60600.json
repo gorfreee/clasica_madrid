@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_ateneo_madrid_60600",
+  "slug": "cantar-del-alma-ciclo-de-conciertos-manuel-de-falla",
+  "title": "«Cantar del Alma». Ciclo de Conciertos Manuel de Falla",
+  "status": "scheduled",
+  "venueId": "ven_ateneo_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_ateneo_madrid_60600_01",
+      "date": "2026-11-22",
+      "time": "12:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Laura Fdez. Alcalde"
+    },
+    {
+      "name": "Irene de Juan Bernabeu"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital",
+    "lied"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_ateneo_madrid",
+      "url": "https://ateneodemadrid.com/evento/cantar-del-alma-ciclo-de-conciertos-manuel-de-falla-2",
+      "checkedAt": "2026-09-15",
+      "externalId": "60600"
+    }
+  ],
+  "primarySourceId": "src_ateneo_madrid",
+  "lastVerifiedAt": "2026-09-15"
+}

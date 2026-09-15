@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_ateneo_madrid_63406",
+  "slug": "la-voz-infinita-una-manana-de-gala",
+  "title": "«La voz infinita. (Una mañana de gala)»",
+  "status": "scheduled",
+  "venueId": "ven_ateneo_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_ateneo_madrid_63406_01",
+      "date": "2026-09-20",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Alba Chantar"
+    },
+    {
+      "name": "Ekaterina Antipova"
+    },
+    {
+      "name": "Igor Peral"
+    },
+    {
+      "name": "Javier Franco"
+    },
+    {
+      "name": "Javier Carmena"
+    },
+    {
+      "name": "Ismael García"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_ateneo_madrid",
+      "url": "https://ateneodemadrid.com/evento/la-voz-infinita-una-manana-de-gala",
+      "checkedAt": "2026-09-15",
+      "externalId": "63406"
+    }
+  ],
+  "primarySourceId": "src_ateneo_madrid",
+  "lastVerifiedAt": "2026-09-15"
+}
