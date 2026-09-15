@@ -215,6 +215,29 @@ describe('discovery: venue ya existente', () => {
     expect(candidate.sources?.[0]?.id).toBeTruthy();
     expect(candidate.sources?.[0]?.id).not.toBe('src_auditorio_nacional');
   });
+
+  it('resuelve un venue ya publicado por nombre aunque la observación no aporte dirección', async () => {
+    const catalog = emptyCatalog();
+    catalog.venues.push(
+      makeVenue({
+        id: 'ven_iglesia_san_jose',
+        slug: 'iglesia-de-san-jose',
+        name: 'Iglesia de San José',
+        address: 'Calle de Alcalá, 43, Madrid',
+      }),
+    );
+    const { run } = await runDiscovery(
+      batchOf(
+        observation({
+          venue: { name: 'Iglesia de San José', municipality: 'Madrid', area: 'madrid' },
+        }),
+      ),
+      catalog,
+    );
+    expect(run.candidates).toHaveLength(1);
+    expect(run.candidates[0]?.event.venueId).toBe('ven_iglesia_san_jose');
+    expect(run.candidates[0]?.venue).toBeUndefined();
+  });
 });
 
 describe('discovery: coincidencia con evento publicado', () => {
@@ -357,6 +380,49 @@ describe('discovery: venue insuficiente', () => {
     expect(run.candidates).toEqual([]);
     expect(run.decisions[0]?.structuralSkip?.reason).toBe('lugar nuevo con datos insuficientes');
     expect(run.summary.skippedUnusable).toBe(1);
+  });
+
+  it('no publica un venue raíz nuevo sin dirección suficiente', async () => {
+    const { run } = await runDiscovery(
+      batchOf(
+        observation({
+          venue: { name: 'Iglesia de Santa Rita', municipality: 'Madrid', area: 'madrid' },
+          event: {
+            title: 'Misa en Si menor',
+            venueText: 'Iglesia de Santa Rita',
+            occurrences: [{ raw: '2026-10-12 19:30', date: '2026-10-12', time: '19:30' }],
+            composers: [{ name: 'Johann Sebastian Bach' }],
+            works: [{ title: 'Misa en Si menor', composerName: 'Johann Sebastian Bach' }],
+            performers: [],
+          },
+        }),
+      ),
+      emptyCatalog(),
+    );
+    expect(run.candidates).toEqual([]);
+    expect(run.decisions[0]?.structuralSkip?.reason).toBe('lugar nuevo con datos insuficientes');
+    expect(run.summary.skippedUnusable).toBe(1);
+  });
+
+  it('publica un venue nuevo cuando hay dirección suficiente', async () => {
+    const { run } = await runDiscovery(
+      batchOf(
+        observation({
+          venue: {
+            name: 'Iglesia de Santa Rita',
+            municipality: 'Madrid',
+            area: 'madrid',
+            address: 'Calle de Santa Rita, 12, Madrid',
+            url: 'https://www.parroquia.example/',
+          },
+        }),
+      ),
+      emptyCatalog(),
+    );
+    expect(run.candidates).toHaveLength(1);
+    expect(run.candidates[0]?.venue?.name).toBe('Iglesia de Santa Rita');
+    expect(run.candidates[0]?.venue?.address).toBe('Calle de Santa Rita, 12, Madrid');
+    expect(run.candidates[0]?.venue?.url).toBe('https://www.parroquia.example/');
   });
 });
 

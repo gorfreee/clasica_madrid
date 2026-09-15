@@ -36,6 +36,8 @@ export type NormalizedEvent = {
   venueText?: string;
   /** Source facility id when the adapter observed one. Not a catalog venue id. */
   venueFacilityId?: string;
+  /** Listing address when the adapter observed one. Used to create new venues. */
+  venueAddress?: string;
   organizerText?: string;
   seriesText?: string;
   accessText?: string;
@@ -86,6 +88,7 @@ export function normalizeRawEvent(raw: RawEvent): NormalizedEvent | undefined {
     ...(raw.eventStatus ? { eventStatus: raw.eventStatus } : {}),
     venueText: optionalText(raw.observed.venueText),
     venueFacilityId: optionalText(raw.venueFacilityId),
+    venueAddress: optionalText(raw.venueAddress),
     organizerText: optionalText(raw.observed.organizerText),
     seriesText: optionalText(raw.observed.seriesText),
     accessText,

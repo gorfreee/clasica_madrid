@@ -1,6 +1,7 @@
 import { parseMadridDatosDetail } from '../detail/madrid-datos.ts';
 import { parseObservedDateTime, parseObservedTime } from '../dates.ts';
 import { collapseWhitespace } from '../html.ts';
+import { formatMadridDatosAddress } from '../venues.ts';
 import {
   emptyObservedLists,
   normalizeComposerList,
@@ -25,7 +26,8 @@ import {
  *
  * Venue identity (when present): `event-location` name, plus `relation.@id`
  * (municipal facility). Resolution is source-aware in `matchVenue`. An official
- * facility that is not yet in the catalog may become a new Venue on the Candidate.
+ * facility that is not yet in the catalog may become a new Venue on the Candidate
+ * when the listing also carries a physical `address.area`.
  */
 
 const MUSICA_TYPE = /\/actividades\/Musica(\/|$)/i;
@@ -47,6 +49,7 @@ type GraphEvent = {
   free?: unknown;
   recurrence?: unknown;
   relation?: unknown;
+  address?: unknown;
 };
 
 export const madridDatosAdapter: SourceAdapter = {
@@ -139,11 +142,13 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
   const time = explicitTime ?? (parsed.time && parsed.time !== '00:00' ? parsed.time : undefined);
   const httpsUrl = link.replace(/^http:\/\//i, 'https://');
   const venueFacilityId = facilityIdFromRelation(item.relation);
+  const venueAddress = addressFromListing(item.address);
   return {
     sourceId: ctx.source.id,
     sourceUrl: httpsUrl,
     externalId: id,
     ...(venueFacilityId ? { venueFacilityId } : {}),
+    ...(venueAddress ? { venueAddress } : {}),
     observed: {
       title,
       description: asNonEmptyString(item.description),
@@ -191,6 +196,18 @@ export function facilityIdFromRelation(value: unknown): string | undefined {
   if (!href) return undefined;
   const match = /\/entidadesyorganismos\/(\d+)/.exec(href);
   return match?.[1];
+}
+
+function addressFromListing(value: unknown): string | undefined {
+  if (!value || typeof value !== 'object' || !('area' in value)) return undefined;
+  const area = (value as { area?: unknown }).area;
+  if (!area || typeof area !== 'object') return undefined;
+  const fields = area as { locality?: unknown; 'postal-code'?: unknown; 'street-address'?: unknown };
+  return formatMadridDatosAddress({
+    streetAddress: asNonEmptyString(fields['street-address']),
+    postalCode: asNonEmptyString(fields['postal-code']),
+    locality: asNonEmptyString(fields.locality),
+  });
 }
 
 function asNonEmptyString(value: unknown): string | undefined {

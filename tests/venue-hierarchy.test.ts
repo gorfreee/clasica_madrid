@@ -12,6 +12,7 @@ import {
   rootVenue,
   spaceNameOf,
   toFilterable,
+  venueAddress,
   venueHasExclusiveSchedule,
 } from '../src/lib/domain/index.ts';
 import { toEventExportRow } from '../src/lib/export/catalog-workbook.ts';
@@ -59,7 +60,7 @@ function hierarchyCatalog(): Catalog {
     name: 'Iglesia de San Manuel',
     municipality: 'Alcobendas',
     area: 'nearby',
-    address: undefined,
+    address: 'Calle de la Iglesia, 1, Alcobendas',
     url: 'https://example.org/san-manuel',
   });
   const parish = makeSource({
@@ -203,6 +204,44 @@ describe('jerarquía de lugares — validación', () => {
     expect(findReferenceIssues(onlyParent).some((issue) => issue.code === 'venue-space-mismatch')).toBe(true);
     expect(findReferenceIssues(onlySpace).some((issue) => issue.code === 'venue-space-mismatch')).toBe(true);
   });
+
+  it('rechaza un lugar principal sin dirección', () => {
+    const catalog = makeCatalog({
+      venues: [makeVenue({ address: undefined })],
+    });
+    expect(findReferenceIssues(catalog).some((issue) => issue.code === 'missing-venue-address')).toBe(true);
+  });
+
+  it('acepta una sala hija sin dirección propia si el padre la tiene', () => {
+    const catalog = makeCatalog({
+      venues: [makeVenue(), salaSinfonica({ address: undefined })],
+    });
+    expect(findReferenceIssues(catalog).some((issue) => issue.code === 'missing-venue-address')).toBe(false);
+  });
+
+  it('rechaza una sala hija y un padre sin dirección efectiva', () => {
+    const catalog = makeCatalog({
+      venues: [makeVenue({ address: undefined }), salaSinfonica({ address: undefined })],
+    });
+    const issues = findReferenceIssues(catalog).filter((issue) => issue.code === 'missing-venue-address');
+    expect(issues.length).toBeGreaterThanOrEqual(1);
+    expect(issues.some((issue) => issue.path === 'venues/ven_auditorio_nacional.json')).toBe(true);
+    expect(issues.some((issue) => issue.path === 'venues/ven_auditorio_nacional_sala_sinfonica.json')).toBe(true);
+  });
+
+  it('la jerarquía normal existente sigue siendo válida', () => {
+    expect(findReferenceIssues(hierarchyCatalog()).some((issue) => issue.code === 'missing-venue-address')).toBe(
+      false,
+    );
+  });
+
+  it('un hijo sin dirección propia hereda la del padre', () => {
+    const catalog = makeCatalog({
+      venues: [makeVenue(), salaSinfonica({ address: undefined })],
+    });
+    const child = catalog.venues.find((venue) => venue.id === 'ven_auditorio_nacional_sala_sinfonica')!;
+    expect(venueAddress(child, catalog)).toBe('Príncipe de Vergara, 146');
+  });
 });
 
 describe('jerarquía de lugares — agenda y filtro', () => {
@@ -263,7 +302,14 @@ describe('jerarquía de lugares — /lugares y ficha', () => {
     expect(auditorio[0]?.slug).toBe('auditorio-nacional');
     expect(auditorio[0]?.upcomingCount).toBe(3);
     expect(auditorio[0]?.nextDate).toBe('2026-09-10');
+    expect(auditorio[0]?.programmeLabel).toBe('3 conciertos próximos');
+    expect(auditorio[0]?.showMunicipality).toBe(false);
     expect(index.venues.some((venue) => venue.slug.includes('sala'))).toBe(false);
+    const nearby = index.venues.find((venue) => venue.slug === 'iglesia-san-manuel');
+    expect(nearby?.showMunicipality).toBe(true);
+    expect(nearby?.municipality).toBe('Alcobendas');
+    expect(nearby?.programmeLabel).toBe('1 concierto próximo');
+    expect(nearby?.programmeLabel).not.toContain(nearby?.municipality);
   });
 
   it('la página del Auditorio reúne eventos del padre y de ambas salas', () => {

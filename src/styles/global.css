@@ -693,7 +693,8 @@ a.eyebrow:focus-visible {
   text-transform: uppercase;
 }
 .venue-list__name { font-size: clamp(1.15rem, 2vw, 1.6rem); font-weight: 800; letter-spacing: var(--type-tracking-heading); line-height: 1; }
-.venue-list__meta { color: var(--muted); }
+.venue-list__meta { color: var(--muted); display: flex; flex-direction: column; justify-content: center; gap: .2rem; }
+.venue-list__municipality, .venue-list__programme { display: block; }
 .venue-list__meta--inactive { grid-column: 3 / -1; }
 .venue-list a:hover .venue-list__meta { color: inherit; }
 

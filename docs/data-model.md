@@ -18,7 +18,7 @@ Intérpretes, compositores y obras **no** son entidades propias en v1: van embeb
 
 - IDs estables, ASCII, con prefijo: `evt_carmen_2026`.
 - El nombre del fichero debe coincidir con el ID: `evt_carmen_2026.json`.
-- `slug` en kebab-case, único dentro de su colección. Una vez publicado un evento o un lugar, su slug es permanente. El ID tampoco cambia. No se renombra un slug ya publicado. `slugAliases` es opcional y limitado: slugs históricos retirados al consolidar un duplicado, que siguen resolviendo a la ficha canónica. Cada alias es único en la colección y no sustituye a `slug`.
+- `slug` en kebab-case, único dentro de su colección. Una vez publicado un evento o un lugar, su slug es permanente. El ID tampoco cambia. No se renombra un slug ya publicado. `slugAliases` es opcional y limitado a **eventos**: slugs históricos retirados al consolidar un duplicado, que siguen resolviendo a la ficha canónica. Cada alias es único en la colección y no sustituye a `slug`. Venue no tiene `slugAliases`; los slugs públicos ya publicados, incluidos los de Madrid Datos con facility id (`centrocentro-6013703`, etc.), se conservan. Un alta nueva de Madrid Datos usa slug derivado del nombre y sólo añade el facility id si hay colisión.
 
 ## Evento
 
@@ -55,7 +55,8 @@ Una misma entidad `Event` solo agrupa `occurrences` cuando comparten los atribut
 
 - `municipality`: texto libre (p. ej. `Madrid`, `Alcobendas`)
 - `area`: `madrid` (municipio de Madrid) o `nearby` (municipio próximo integrado en la experiencia)
-- `address` y `url` opcionales
+- `address` opcional en el schema (una sala hija puede heredarla del padre). Todo venue publicado debe tener **dirección efectiva**: la del lugar principal, o la propia si el padre no la declara. Sin ella, la validación del catálogo falla (`missing-venue-address`).
+- `url` opcional
 - `parentVenueId` y `spaceName` opcionales: relacionan una **sala o espacio interno** con su **lugar principal** (edificio o institución física)
 
 ### Lugar principal y sala
