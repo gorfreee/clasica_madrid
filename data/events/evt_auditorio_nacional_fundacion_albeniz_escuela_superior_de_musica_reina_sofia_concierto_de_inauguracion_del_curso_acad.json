@@ -59,8 +59,14 @@
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/fundacion-albeniz-escuela-superior-de-musica-reina-sofia-concierto-de-inauguracion-del-curso-academico-26-27",
       "checkedAt": "2026-09-14",
       "externalId": "fundacion-albeniz-escuela-superior-de-musica-reina-sofia-concierto-de-inauguracion-del-curso-academico-26-27"
+    },
+    {
+      "sourceId": "src_escuela_superior_musica_reina_sofia",
+      "url": "https://www.escuelasuperiordemusicareinasofia.es/evento/orquesta-sinfonica-freixenet-director-josep-pons-violonchelo-luis-aracama",
+      "checkedAt": "2026-09-15",
+      "externalId": "83051"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-14"
+  "lastVerifiedAt": "2026-09-15"
 }

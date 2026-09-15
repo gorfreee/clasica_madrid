@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_escuela_reina_sofia_83111",
+  "slug": "solistas-del-siglo-xxi-caracter-y-ficciones-de-la-danza-concierto-de-flauta-y-clarinete",
+  "title": "Solistas del Siglo XXI. «Carácter y ficciones de la danza»: concierto de flauta y clarinete",
+  "status": "scheduled",
+  "venueId": "ven_escuela_superior_musica_reina_sofia_auditorio_sony",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_escuela_reina_sofia_83111_01",
+      "date": "2026-10-31",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Daisy Noton"
+    },
+    {
+      "name": "Flavio Castellanos"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "chamber",
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_escuela_superior_musica_reina_sofia",
+      "url": "https://www.escuelasuperiordemusicareinasofia.es/evento/solistas-del-siglo-xxi-caracter-y-ficciones-de-la-danza-concierto-de-flauta-y-clarinete",
+      "checkedAt": "2026-09-15",
+      "externalId": "83111"
+    }
+  ],
+  "primarySourceId": "src_escuela_superior_musica_reina_sofia",
+  "lastVerifiedAt": "2026-09-15"
+}
