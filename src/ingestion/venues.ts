@@ -592,6 +592,35 @@ export const KNOWN_VENUES: KnownVenue[] = [
       address: 'Calle de Manuel Alonso, s/n, 28048 Madrid',
     },
   },
+  {
+    keys: ['escuela superior de musica reina sofia'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_escuela_superior_musica_reina_sofia',
+      slug: 'escuela-superior-musica-reina-sofia',
+      name: 'Escuela Superior de Música Reina Sofía',
+      ...MADRID,
+      address: 'Calle de Requena, 1, 28013 Madrid',
+      url: 'https://www.escuelasuperiordemusicareinasofia.es/',
+    },
+  },
+  {
+    keys: [
+      'escuela superior de musica reina sofia auditorio sony',
+      'auditorio sony escuela superior de musica reina sofia',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_escuela_superior_musica_reina_sofia_auditorio_sony',
+      slug: 'escuela-superior-musica-reina-sofia-auditorio-sony',
+      name: 'Escuela Superior de Música Reina Sofía — Auditorio Sony',
+      ...MADRID,
+      address: 'Calle de Requena, 1, 28013 Madrid',
+      url: 'https://www.escuelasuperiordemusicareinasofia.es/auditorio-sony/',
+      parentVenueId: 'ven_escuela_superior_musica_reina_sofia',
+      spaceName: 'Auditorio Sony',
+    },
+  },
 ];
 
 /**
@@ -671,6 +700,10 @@ const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
     'sala laffon': 'ven_ateneo_madrid',
     'sala anselma': 'ven_ateneo_madrid',
     'cafe central ateneo': 'ven_ateneo_madrid',
+  },
+  'escuela-reina-sofia': {
+    'auditorio sony madrid': 'ven_escuela_superior_musica_reina_sofia_auditorio_sony',
+    'sala sinfonica auditorio nacional de musica': 'ven_auditorio_nacional_sala_sinfonica',
   },
 };
 
