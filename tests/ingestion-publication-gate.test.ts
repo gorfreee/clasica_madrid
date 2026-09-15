@@ -475,7 +475,18 @@ describe('resolvePerformerRole', () => {
     expect(resolvePerformerRole('director')).toBe('conductor');
     expect(resolvePerformerRole('directora')).toBe('conductor');
     expect(resolvePerformerRole('dirección musical')).toBe('conductor');
+    expect(resolvePerformerRole('director musical')).toBe('conductor');
     expect(resolvePerformerRole('conductor')).toBe('conductor');
+    expect(resolvePerformerRole('director de orquesta')).toBe('conductor');
+    expect(resolvePerformerRole('directora de orquesta y académica electo de la Sección de Música')).toBe(
+      'conductor',
+    );
+    expect(resolvePerformerRole('director de orquesta y académico electo de la Sección de Música de la RABASF')).toBe(
+      'conductor',
+    );
+    expect(resolvePerformerRole('director artístico y musical')).toBe('conductor');
+    expect(resolvePerformerRole('director titular')).toBe('conductor');
+    expect(resolvePerformerRole('director invitado')).toBe('conductor');
     expect(resolvePerformerRole('ensemble')).toBe('ensemble');
     expect(resolvePerformerRole('solista')).toBe('soloist');
     expect(resolvePerformerRole('soloist')).toBe('soloist');
@@ -488,5 +499,17 @@ describe('resolvePerformerRole', () => {
     expect(resolvePerformerRole('mezzosoprano')).toBeUndefined();
     expect(resolvePerformerRole('other')).toBeUndefined();
     expect(resolvePerformerRole(undefined)).toBeUndefined();
+    expect(
+      resolvePerformerRole(
+        'director de la Fundación Alhambra Guitarras y codirector del Festival Joaquín Rodrigo de Madrid',
+      ),
+    ).toBeUndefined();
+    expect(resolvePerformerRole('codirector del Festival Joaquín Rodrigo de Madrid')).toBeUndefined();
+    expect(resolvePerformerRole('director del Festival de Música Española de León')).toBeUndefined();
+    expect(resolvePerformerRole('violinista y director del Festival de Música Española de León')).toBeUndefined();
+    expect(resolvePerformerRole('productor y director del sello IBS Classical')).toBeUndefined();
+    expect(resolvePerformerRole('director artístico')).toBeUndefined();
+    expect(resolvePerformerRole('directora artística del ciclo')).toBeUndefined();
+    expect(resolvePerformerRole('gerente de la Orquesta de Extremadura')).toBeUndefined();
   });
 });

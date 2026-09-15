@@ -243,6 +243,22 @@ describe('líneas de programa WORK de COMPOSER', () => {
     expect(attributedProgrammeComposers('Libreto de Arrigo Boito').map((item) => item.name)).toEqual([]);
     expect(attributedProgrammeComposers('Texto de Friedrich Hölderlin').map((item) => item.name)).toEqual([]);
     expect(attributedProgrammeComposers('Letra de Federico García Lorca').map((item) => item.name)).toEqual([]);
+    expect(attributedProgrammeComposers('Transcripción de Ausiàs Parejo').map((item) => item.name)).toEqual([]);
+    expect(attributedProgrammeComposers('* Transcripción de Ausiàs Parejo').map((item) => item.name)).toEqual([]);
+    expect(
+      attributedProgrammeComposers(
+        [
+          'Luys Milan (ca.1500-ca.1561) Dos fantasías (VIII & XXII) de El Maestro *',
+          'Manuel de Falla (1876-1946) El amor brujo *',
+          '* Transcripción de Ausiàs Parejo',
+        ].join('\n'),
+      ).some((item) => /ausi|transcrip/i.test(item.name)),
+    ).toBe(false);
+    expect(
+      attributedProgrammeComposers(
+        'Luys Milan (ca.1500-ca.1561) Dos fantasías de El Maestro * Transcripción de Ausiàs Parejo',
+      ).some((item) => /transcripci[oó]n de ausi/i.test(item.name)),
+    ).toBe(false);
     expect(
       attributedProgrammeComposers('Solistas: Ana Payá Ramírez (flauta de pico) y Arturo de las Casas Escolar').map(
         (item) => item.name,

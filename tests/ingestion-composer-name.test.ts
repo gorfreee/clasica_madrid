@@ -145,6 +145,9 @@ describe('canonicalizeComposerName', () => {
     expect(canonicalizeComposerName('Anónimo (s. XVII)')).toBeUndefined();
     expect(canonicalizeComposerName('Tradicional de Venezuela')).toBeUndefined();
     expect(canonicalizeComposerName('Traditional')).toBeUndefined();
+    expect(canonicalizeComposerName('Transcripción de Ausiàs Parejo')).toBeUndefined();
+    expect(canonicalizeComposerName('Arreglo de Manuel Tévar')).toBeUndefined();
+    expect(canonicalizeComposerName('Orquestación de Manuel Tévar')).toBeUndefined();
   });
 
   it('acepta anotaciones ca. y las quita del nombre publicado', () => {
