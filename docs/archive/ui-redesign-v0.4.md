@@ -1,6 +1,10 @@
 # Rediseño de interfaz — dirección de producto y UX
 
-> Estado: **v0.4 / dirección convergida — lista para implementación**  
+> **Documentación histórica.** Este documento fue el brief de producto y UX del rediseño público (v0.4). Sirvió para orientar aquella implementación; la interfaz actual ha evolucionado en iteraciones posteriores y **no** constituye la especificación vigente de la UI.
+>
+> Consérvese como registro de aquella dirección. No lo uses para implementar la interfaz actual salvo que una tarea pida expresamente investigar ese historial.
+
+> Estado original: **v0.4 / dirección convergida — lista para implementación**  
 > Este documento recoge la dirección acordada para el rediseño público de Clásica Madrid. Define producto, UX, restricciones y carácter visual, pero deja deliberadamente margen al agente de implementación para resolver composición, sistema visual y detalles de interacción con criterio.
 
 ## Propósito

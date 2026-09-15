@@ -2,15 +2,26 @@
 
 ## Cursor Cloud specific instructions
 
-This repo is **Clásica Madrid**, a single-product static website built with **Astro 7** and **Tailwind CSS v4** (CSS-first, no `tailwind.config.*`). There is no backend, database, or auxiliary service — the Astro dev/preview server is the only service.
+This repo is **Clásica Madrid**, a single-product static website built with **Astro 7** and **Tailwind CSS v4** (CSS-first, no `tailwind.config.*`). The public site has no backend or database: Git + `data/**` are the source of truth, and Cloudflare Pages serves the built HTML.
+
+Locally, the Astro dev/preview server is the only process you need. In production there is also deliberately small auxiliary infrastructure for catalog maintenance: GitHub Actions for site CI and automated ingestion, plus a Cloudflare fetch relay for sources that GitHub-hosted runners cannot reach. Those pieces are not a public API or a second product. Operational detail lives in `docs/ingestion.md` and `infra/fetch-relay/`.
 
 Canonical event data lives in `data/` and is validated at build/CI time. An empty catalog is valid.
+
+### Shape of the system
+
+- Static public website (Astro build → Cloudflare Pages).
+- Git + `data/**` as the published catalog.
+- Site CI on pushes and pull requests (validate, test, typecheck, build, e2e smoke).
+- Automated ingestion via GitHub Actions (scheduled and manual).
+- Publication of catalog changes via `data/**` PRs, site CI, and conditional auto-merge when health and configuration allow.
+- Minimal auxiliary infrastructure only when a concrete ingestion constraint requires it.
 
 ### Services
 
 | Service | Dev command | Notes |
 |---|---|---|
-| Astro site | `npm run dev` | Serves on `http://localhost:4321`. This is the entire product. |
+| Astro site | `npm run dev` | Serves on `http://localhost:4321`. This is the public product. |
 
 Scripts live in `package.json`. Use those names rather than duplicating flags here. The usual loop is `dev`, `validate`, `test`, `test:e2e` (Playwright smokes against `dist/`; needs a prior `build`), `check` (Astro/TS diagnostics; there is no ESLint/Prettier), `build` (static output to `dist/`), and `preview`. Harvesting is `ingest:sync` / `ingest:source`. `ingest:promote` is the legacy candidate-file path. Live AI checks are `ai:smoke` (connectivity) and `ai:qualify` (quality benchmark); both are manual, never part of PR CI.
 
@@ -22,11 +33,11 @@ Scripts live in `package.json`. Use those names rather than duplicating flags he
 | Architecture principles | `ARCHITECTURE.md` |
 | Data model | `docs/data-model.md` |
 | Ingestion: what is implemented today | `docs/ingestion.md` |
-| Ingestion: target architecture | `docs/ingestion-v3-plan.md` |
+| Ingestion: remaining roadmap | `docs/ingestion-v3-plan.md` |
 | Editorial classification policy | `docs/classification-policy.md` |
 | Historical notes | `docs/archive/` |
 
-`docs/archive/` is not current requirements unless a task asks to research prior decisions. Do not copy implementation details from the repo into these documents.
+`docs/archive/` is not current requirements unless a task asks to research prior decisions. See `docs/archive/README.md` for the authority hierarchy when a historical note contradicts current docs or code. Do not copy volatile implementation details from the repo into general documents; link to the executable source of truth instead.
 
 ### Non-obvious notes
 
@@ -36,10 +47,10 @@ Scripts live in `package.json`. Use those names rather than duplicating flags he
 - Do not invent production events. Fixtures belong in `tests/`.
 - UI must consume `src/lib/presentation`, not raw JSON files.
 - Pagefind is intentionally not installed yet; search is a query-param filter over the built agenda.
-- For ingestion work, follow `docs/ingestion.md` (today) and `docs/ingestion-v3-plan.md` (target). Do not implement later v3 phases (GitHub Actions for ingest, auto-merge, discovery agents, fuzzy reconciliation) unless a task asks for that phase. `possiblyMissing` is diagnostic-only; do not delete or auto-cancel from a disappearance.
+- For ingestion work, follow `docs/ingestion.md` (current operation) and `docs/ingestion-v3-plan.md` (remaining roadmap). Scheduled ingestion, data PRs, conditional auto-merge, the fetch relay, and Discovery v1 (structured context export / batch import) already exist. Do not reimplement them. Remaining v3 work — automatic web search for discovery, discovery scheduling, automatic source learning/promotion, and fuzzy/AI residual reconciliation — is out of scope unless a task asks for that capability. `possiblyMissing` is diagnostic-only; do not delete or auto-cancel from a disappearance.
 - Once an event or venue is published, its `slug` is permanent. Do not rename published slugs. A retired historical event slug may remain as an explicit `slugAliases` entry on the surviving canonical event so the old public URL still resolves; do not add a general redirect system.
 - Every published venue has a `/lugares/{slug}` page, including venues with no upcoming events. The venues index lists every root venue in one list: venues with upcoming events first, followed by the rest.
 - `loadPublishedCatalog()` memoizes the parsed catalog for the process lifetime. Tests that need another tree must call `loadCatalogFromDir`. Restart `astro dev` after editing `data/` if pages look stale.
-- Direct pushes to `main` are allowed. Site CI must stay a single simple workflow: validate, test, typecheck, build, e2e smoke. Do not add required pull requests or required status checks. A scheduled ingestion workflow and auto-merge of data PRs are part of the v3 *target*, not of the current implementation.
+- Direct pushes to `main` are allowed. Site CI must stay a single simple workflow: validate, test, typecheck, build, e2e smoke. Do not add required pull requests or required status checks. Do not fold ingestion orchestration into that site CI workflow.
 - Agenda client filters depend on the `data-*` / `#agenda-filter-data` contract documented in `src/lib/presentation/agenda-client.ts`. Do not remove those attributes while that script exists; `e2e/` smokes guard the behaviour.
 - Do not record the screen unless the task explicitly asks for a video. Default evidence is `test`, `test:e2e`, `check` and `build`. If a UI check is needed, use a few screenshots at most, not recordings.

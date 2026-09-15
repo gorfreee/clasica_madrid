@@ -21,7 +21,7 @@ npm run build        # sitio estático en dist/
 npm run preview      # sirve dist/
 ```
 
-Ingestión: [`docs/ingestion.md`](docs/ingestion.md). Política editorial: [`docs/classification-policy.md`](docs/classification-policy.md). Arquitectura objetivo de la ingestión: [`docs/ingestion-v3-plan.md`](docs/ingestion-v3-plan.md).
+Ingestión (operación actual): [`docs/ingestion.md`](docs/ingestion.md). Política editorial: [`docs/classification-policy.md`](docs/classification-policy.md). Evolución restante de la ingestión: [`docs/ingestion-v3-plan.md`](docs/ingestion-v3-plan.md).
 
 ```bash
 npm run ingest:sync              # extrae las fuentes del registry, valida el lote y escribe
@@ -86,3 +86,5 @@ El resto de la semántica temporal sí se fija en el build: atajos `Hoy` / `Mañ
 ## CI y publicación
 
 Cada push a `main` y cada pull request ejecuta validación de datos, tests, typecheck y build (`.github/workflows/ci.yml`). El push directo a `main` está permitido. Cloudflare Pages despliega el sitio estático desde `main`.
+
+El catálogo también se mantiene de forma automática: una ingestión programada propone cambios en `data/**`, abre una PR, espera la CI del sitio y, cuando el health y la configuración lo permiten, fusiona. El despliegue sigue siendo el de siempre desde `main`. El detalle operativo está en [`docs/ingestion.md`](docs/ingestion.md).

@@ -4,7 +4,7 @@ Puerta de entrada operativa: qué hay implementado y cómo ejecutarlo.
 
 | Qué necesitas | Dónde |
 |---|---|
-| Diseño objetivo (hacia dónde evolucionar) | [`docs/ingestion-v3-plan.md`](ingestion-v3-plan.md) |
+| Diseño objetivo / capacidades pendientes | [`docs/ingestion-v3-plan.md`](ingestion-v3-plan.md) |
 | Política editorial de clasificación | [`docs/classification-policy.md`](classification-policy.md) |
 | Modelo de datos canónico | [`docs/data-model.md`](data-model.md) |
 | Código del pipeline | `src/ingestion/` |
@@ -20,9 +20,9 @@ La web no escribe datos. Todo lo publicado entra por Git, pasa validación deter
 
 ## Qué hay implementado
 
-Harvesting de fuentes conocidas y automatización de producción (fases 1–4 del plan v3): extraer, hidratar fichas cuando el adapter lo soporta, normalizar, resolver identidad, clasificar y reconciliar contra el catálogo; después, publicar cambios materiales mediante PR y CI.
+Harvesting de fuentes conocidas y automatización de producción: extraer, hidratar fichas cuando el adapter lo soporta, normalizar, resolver identidad, clasificar y reconciliar contra el catálogo; después, publicar cambios materiales mediante PR y CI.
 
-Discovery v1 (fase 6, dos piezas): un comando determinista exporta un `DiscoveryContext` compacto para un agente externo con web search; el agente devuelve un `DiscoveryBatch` de hechos observados y el mismo pipeline lo normaliza, clasifica y reconcilia. No hay búsqueda web, scheduling ni promoción a adapters dentro de esta repo.
+Discovery v1 (dos piezas): un comando determinista exporta un `DiscoveryContext` compacto para un agente externo con web search; el agente devuelve un `DiscoveryBatch` de hechos observados y el mismo pipeline lo normaliza, clasifica y reconcilia. No hay búsqueda web, scheduling ni promoción a adapters dentro de esta repo.
 
 ```text
 registry → extract → hydrate → normalize → deterministic enrich → identity → classify/enrich → publication gate → reconcile → validate → write
@@ -46,7 +46,7 @@ registry → extract → hydrate → normalize → deterministic enrich → iden
 - Una reverificación que sólo cambia `event.lastVerifiedAt` y/o `citation.checkedAt` **no** es un cambio material (`materialEventDiffs` ignora esos timestamps) y **no** reescribe el JSON en cada ejecución. La frescura cotidiana queda en el report (`unchangedEvents`, `window`, `health`). Excepción operativa: si la reverificación es correcta, no hay cambio material y el `lastVerifiedAt` publicado tiene **30 días o más** de antigüedad respecto a la fecha civil de la ejecución en `Europe/Madrid`, se escribe el evento para refrescar `lastVerifiedAt` y los `checkedAt` de las citas realmente reverificadas. Ese caso cuenta como `updatedEvents` porque hay escritura; no genera `fieldDiffs` editoriales. El umbral está centralizado en `VERIFICATION_REFRESH_AFTER_DAYS`. Si hay algún cambio material, se escribe el evento completo con los timestamps de verificación actuales, aunque no se haya alcanzado el umbral. `--dry-run` reporta esa escritura prevista sin tocar `data/**`.
 - Cada ejecución evalúa `health`: `clean` | `degraded` | `review` | `fatal`. `autoMergeEligible` es true sólo en `clean` y `degraded`. El workflow de producción consume exclusivamente estos campos machine-readable para decidir si falla, crea draft o permite auto-merge.
 
-No están implementados (no los añadas salvo que una tarea pida esa fase): búsqueda web de discovery, scheduling de discovery, aprendizaje de sources ni reconciliación fuzzy. GitHub Actions no genera ni consume `DiscoveryContext`.
+No están implementados (no los añadas salvo que una tarea pida esa capacidad): búsqueda web de discovery, scheduling de discovery, aprendizaje de sources ni reconciliación fuzzy. GitHub Actions no genera ni consume `DiscoveryContext`.
 
 Las fuentes concretas, adapters, flags de CLI y detalles de matching viven en el código. No los dupliques aquí.
 

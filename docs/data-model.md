@@ -75,7 +75,7 @@ La presentación pública agrupa por el lugar principal:
 
 - la **agenda** muestra sólo el nombre del padre y enlaza a su página
 - el filtro **Lugar** ofrece una opción por padre; filtrar incluye eventos del padre y de todas sus salas
-- `/lugares` lista una entrada por padre, con `upcomingCount` y `nextDate` agregados
+- `/lugares` lista una entrada por padre; la programación futura se agrega a ese padre
 - la página del padre reúne los conciertos propios y de sus salas
 - la **ficha del evento** muestra el lugar principal y, aparte, la sala cuando existe; si el evento apunta a un venue sin sala, no hay campo «Sala»
 
@@ -110,7 +110,7 @@ Un coro parroquial o un concierto ocasional en una iglesia es `alternative` aunq
 2. Añade `data/events/{id}.json` con al menos una representación y una citación.
 3. Ejecuta `npm run validate`.
 
-Harvesting: [`docs/ingestion.md`](ingestion.md). Arquitectura objetivo: [`docs/ingestion-v3-plan.md`](ingestion-v3-plan.md). Elegibilidad y enrichment: [`docs/classification-policy.md`](classification-policy.md) (no es un campo del schema `Event`).
+Harvesting: [`docs/ingestion.md`](ingestion.md). Evolución restante: [`docs/ingestion-v3-plan.md`](ingestion-v3-plan.md). Elegibilidad y enrichment: [`docs/classification-policy.md`](classification-policy.md) (no es un campo del schema `Event`).
 
 No inventes eventos de producción. Los ejemplos de tests están en `tests/`, no en `data/`.
 
@@ -118,4 +118,4 @@ No inventes eventos de producción. Los ejemplos de tests están en `tests/`, no
 
 Los eventos pasados se conservan. La agenda lista presente y futuro (y el navegador oculta representaciones que ya hayan pasado desde el último build, en zona `Europe/Madrid`). Cada evento canónico tiene una página pública `/eventos/{slug}` que permanece tras haber pasado.
 
-Cada lugar publicado tiene una página `/lugares/{slug}` aunque ya no tenga representaciones futuras. El índice `/lugares` lista sólo espacios con próximos conciertos.
+Cada lugar publicado tiene una página `/lugares/{slug}` aunque ya no tenga representaciones futuras. El índice `/lugares` incluye los lugares principales publicados, tengan o no programación próxima; los que tienen conciertos futuros aparecen primero. Las salas hijas conservan ficha propia y no se promocionan en el índice.

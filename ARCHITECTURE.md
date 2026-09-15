@@ -2,6 +2,8 @@
 
 Este documento define la arquitectura técnica base del proyecto. Debe mantenerse estable y cambiar sólo cuando exista una necesidad real demostrada.
 
+Distingue principios duraderos de operación actual. El detalle operativo de la ingestión vive en [`docs/ingestion.md`](docs/ingestion.md); la dirección restante, en [`docs/ingestion-v3-plan.md`](docs/ingestion-v3-plan.md).
+
 ## Principios
 
 1. **Coste de infraestructura y del pipeline: 0 €**. El proyecto debe funcionar dentro de los planes gratuitos de GitHub y Cloudflare. La IA de ingestión automática sólo puede usar capacidad explícitamente gratuita y debe detenerse al agotarla; las herramientas personales de desarrollo quedan fuera de esta restricción.
@@ -9,8 +11,8 @@ Este documento define la arquitectura técnica base del proyecto. Debe manteners
 3. **Sitio estático por defecto**. La web se genera en build time y se sirve como HTML/CSS/JS estático.
 4. **Rendimiento y usabilidad primero**. La experiencia debe ser excelente en móvil y escritorio, con poco JavaScript, HTML semántico y diseño responsive.
 5. **Interfaz desacoplada del dominio**. La presentación debe poder rediseñarse o reemplazarse ampliamente sin modificar los datos canónicos, la ingestión ni la lógica de negocio.
-6. **Automatización auditable**. Los agentes de IA proponen cambios mediante PR; la validación determinista decide si un cambio es estructuralmente válido.
-7. **Añadir infraestructura sólo cuando sea necesaria**. No introducir bases de datos, APIs, colas, servidores o servicios externos antes de que exista un problema concreto que los requiera.
+6. **Automatización auditable**. Los agentes de IA y los jobs de ingestión proponen cambios mediante PR; la validación determinista decide si un cambio es estructuralmente válido.
+7. **Añadir infraestructura sólo cuando sea necesaria**. No introducir bases de datos, APIs, colas, servidores o servicios externos antes de que exista un problema concreto que los requiera. La infraestructura auxiliar de ingestión que ya existe debe permanecer deliberadamente acotada.
 
 ## Stack base
 
@@ -21,11 +23,12 @@ Este documento define la arquitectura técnica base del proyecto. Debe manteners
 - **Zod** para validar esquemas y datos.
 - **Pagefind** para búsqueda estática, si resulta suficiente; todavía no está instalado. La agenda filtra en cliente sobre el HTML generado en build.
 - **Cloudflare Pages** para hosting y despliegue estático.
-- **GitHub Actions** para validación, tests, builds y (como objetivo de ingestión) automatizaciones.
+- **GitHub Actions** para la CI del sitio y para la ingestión automatizada.
+- Un **fetch relay** de Cloudflare, GET y autenticado, como infraestructura auxiliar de ingestión — no como backend de la web. El detalle está en `infra/fetch-relay/`.
 - **Vitest** para lógica y validadores.
 - **Playwright** (Chromium) para unos pocos smoke tests de la agenda y la ficha de evento. No es una suite de regresión visual ni un framework de testing de UI.
 
-No usar inicialmente una base de datos, backend, SSR, API propia, CMS, sistema de autenticación ni servicios de búsqueda externos.
+No usar una base de datos, backend, SSR, API propia, CMS, sistema de autenticación ni servicios de búsqueda externos para servir la agenda pública.
 
 ## Separación entre interfaz y dominio
 
@@ -68,13 +71,13 @@ Todo dato publicado debe:
 - poder validarse de forma determinista;
 - evitar duplicados y referencias rotas.
 
-Los eventos pasados se conservan en el repositorio para disponer de histórico y permitir futuras estadísticas. La agenda pública está orientada a presente y futuro; cada evento canónico conserva una página pública estable `/eventos/{slug}` aunque todas sus representaciones hayan pasado. Cada lugar publicado conserva una página `/lugares/{slug}` aunque ya no tenga conciertos próximos; el índice de lugares puede listar sólo espacios con agenda vigente.
+Los eventos pasados se conservan en el repositorio para disponer de histórico y permitir futuras estadísticas. La agenda pública está orientada a presente y futuro; cada evento canónico conserva una página pública estable `/eventos/{slug}` aunque todas sus representaciones hayan pasado. Cada lugar publicado conserva una página `/lugares/{slug}` aunque ya no tenga conciertos próximos. El índice de lugares lista los lugares principales publicados: primero los que tienen programación futura, después el resto.
 
 Una vez publicado un evento o un lugar, su `slug` es permanente. El identificador (`id`) tampoco cambia. No se renombra un slug ya publicado. Si hay que consolidar dos eventos publicados que son el mismo concierto, el canónico conserva su `id`/`slug` y el slug retirado puede quedar como alias histórico explícito que resuelve a esa ficha.
 
 ## Build y publicación
 
-El flujo de publicación es:
+El flujo de publicación de la web es:
 
 ```text
 GitHub (código + datos)
@@ -96,45 +99,50 @@ Los datos fuente del repositorio no tienen por qué copiarse íntegramente al de
 
 La ingestión está separada de la web pública.
 
-Lo implementado hoy está en [`docs/ingestion.md`](docs/ingestion.md). La arquitectura **objetivo** de la ingestión está en [`docs/ingestion-v3-plan.md`](docs/ingestion-v3-plan.md). El camino legacy de candidatos JSON en disco no es el diseño futuro.
+### Arquitectura actual
+
+Lo implementado hoy está en [`docs/ingestion.md`](docs/ingestion.md). El camino legacy de candidatos JSON en disco no es el flujo rutinario.
 
 ```text
-fuentes conocidas + búsqueda con agentes de IA
-                  ↓
-           eventos candidatos
-                  ↓
-       validación determinista
-                  ↓
-   normalización / deduplicación
-                  ↓
-                  PR
-                  ↓
-            merge en GitHub
-                  ↓
-         despliegue automático
+harvesting / adapters
+        ↓
+normalización / enrichment
+        ↓
+reconciliation / publication gate
+        ↓
+data/**
+        ↓
+PR → CI → merge condicionado
+        ↓
+despliegue desde main
 ```
 
-Los agentes de IA pueden utilizar ChatGPT, Cursor u otras herramientas disponibles. La arquitectura no debe depender de un proveedor o modelo concreto.
+Discovery v1 es un mecanismo complementario: exporta un contexto estructurado e importa un batch de hechos observados al mismo pipeline. No hay búsqueda web automática dentro de esta repo.
 
-Siempre que sea posible, las fuentes conocidas deben procesarse mediante mecanismos deterministas (feeds, JSON, ICS, HTML estructurado, etc.). La IA se reserva especialmente para descubrimiento, extracción ambigua, clasificación y resolución de casos difíciles.
+Siempre que sea posible, las fuentes conocidas se procesan mediante mecanismos deterministas (feeds, JSON, ICS, HTML estructurado, etc.). La IA se reserva especialmente para descubrimiento, extracción ambigua, clasificación y resolución de casos difíciles. La arquitectura no debe depender de un proveedor o modelo concreto.
 
-Un agente nunca debe escribir directamente los datos canónicos publicados. Cualquier salida debe someterse al mismo esquema y validaciones deterministas que un cambio manual antes de fusionarse. En el diseño objetivo, los candidatos pueden existir sólo en memoria durante una ejecución automática; `ingestion/inbox/` no es una cola obligatoria del flujo rutinario.
+Un agente nunca debe escribir directamente los datos canónicos publicados. Cualquier salida debe someterse al mismo esquema y validaciones deterministas que un cambio manual antes de fusionarse. En el flujo automático, los candidatos existen en memoria; `ingestion/inbox/` no es una cola obligatoria.
 
-## PR automáticas
+### Evolución futura
 
-El **objetivo** (arquitectura v3) es que las actualizaciones rutinarias y válidas lleguen a producción sin intervención humana ordinaria.
+Siguen fuera del sistema actual, salvo que una tarea pida esa capacidad:
 
-Eso **no** está implementado todavía: la CI actual no aprueba ni fusiona PRs. Una PR automática sólo podrá autoaprobarse/automergearse cuando pase todas las comprobaciones requeridas, entre ellas:
+- búsqueda web automática para discovery;
+- scheduling propio de discovery;
+- aprendizaje o promoción automática de nuevas fuentes a adapters;
+- reconciliación fuzzy o con IA residual, si se decide implementarla.
 
-- esquema válido;
-- IDs y referencias válidos;
-- ausencia de errores de fechas y campos obligatorios;
-- controles de duplicados;
-- tests del repositorio;
-- build correcto;
-- reglas de confianza que se definan para la fuente o el tipo de cambio.
+La dirección y las restricciones de esa evolución están en [`docs/ingestion-v3-plan.md`](docs/ingestion-v3-plan.md).
 
-Cuando un caso no pueda resolverse con seguridad, el comportamiento preferido en el diseño objetivo es **degradar o excluir ese dato concreto**, no convertir la revisión humana en un paso ordinario del pipeline ni bloquear el resto de una ejecución sana. El detalle está en [`docs/ingestion-v3-plan.md`](docs/ingestion-v3-plan.md).
+## Publicación automática del catálogo
+
+Las actualizaciones rutinarias y válidas pueden llegar a producción sin intervención humana ordinaria.
+
+Eso ya está implementado: la ingestión abre PRs de `data/**`, la CI del sitio corre sobre esas PRs, y el auto-merge se solicita sólo cuando el health y la configuración lo permiten. El detalle operativo pertenece a [`docs/ingestion.md`](docs/ingestion.md) y al workflow, no a este documento.
+
+La confianza no proviene de saltarse controles. Una PR automática sólo puede fusionarse cuando pasa las comprobaciones deterministas del repositorio (esquema, referencias, duplicados, tests, build) y las reglas de confianza de esa ejecución.
+
+Cuando un caso no pueda resolverse con seguridad, el comportamiento preferido es **degradar o excluir ese dato concreto**, no convertir la revisión humana en un paso ordinario del pipeline ni bloquear el resto de una ejecución sana.
 
 ## Rendimiento y experiencia de usuario
 
