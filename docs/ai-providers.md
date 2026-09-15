@@ -130,7 +130,7 @@ Defaults / allowlist en producción:
 - `google/gemma-4-26b-a4b-it:free`
 - `openai/gpt-oss-20b:free`
 
-`:free` = variante gratuita de coste $0. La cuenta de Clásica Madrid tiene ≥ $10 de créditos comprados, lo que según la documentación actual da **1.000 requests/día de modelos gratuitos** y **20 requests/minuto**, cuotas **compartidas** entre todos los `:free`. Esos 1.000 RPD **no** se interpretan como 1.000 por route: el scheduler usa `providerRpd=1000`. El intervalo `providerMinIntervalMs=3_000` se mantiene por debajo de 20 RPM.
+`:free` = variante gratuita de coste $0. La cuenta de Clásica Madrid tiene ≥ $10 de créditos comprados, lo que según la documentación actual da **1.000 requests/día de modelos gratuitos** y **20 requests/minuto**, cuotas **compartidas** entre todos los `:free`. Esos 1.000 RPD **no** se interpretan como 1.000 por route: el scheduler usa `providerRpd=1000`. El intervalo `providerMinIntervalMs=3_200` es un margen conservador frente al límite de 20 RPM (~18,75 RPM). 3000 ms equivaldría exactamente a 20 RPM y no se usa.
 
 El saldo pagado **nunca** se usa. Tener créditos no convierte un modelo de pago en route autorizada.
 

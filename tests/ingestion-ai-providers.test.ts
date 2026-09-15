@@ -342,6 +342,7 @@ describe('factory multi-provider zero cost', () => {
       expect(route.reset).toBeDefined();
     }
     expect(OPENROUTER_PRODUCTION_LIMITS.providerRpd).toBe(1_000);
+    expect(OPENROUTER_PRODUCTION_LIMITS.providerMinIntervalMs).toBe(3_200);
     expect(openrouter.every((route) => route.limits?.rpd === undefined)).toBe(true);
     expect(openrouter.reduce((sum, route) => sum + (route.limits?.rpd ?? 0), 0)).not.toBe(1_000);
 

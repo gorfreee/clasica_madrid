@@ -124,11 +124,12 @@ export const KILO_PRODUCTION_LIMITS: AiRouteLimits = {
 /**
  * OpenRouter free-model caps for accounts with ≥ $10 purchased credits:
  * 1_000 RPD + 20 RPM, shared across `:free` models. providerRpd=1000 is the
- * aggregate, not 1000 per route. 3s interval stays under 20 RPM.
+ * aggregate, not 1000 per route. 3200 ms ≈ 18.75 RPM, a conservative margin
+ * below the documented 20 RPM (3000 ms would sit on that limit).
  * Paid balance is never an authorized route.
  */
 export const OPENROUTER_PRODUCTION_LIMITS: AiRouteLimits = {
-  providerMinIntervalMs: 3_000,
+  providerMinIntervalMs: 3_200,
   providerRpd: 1_000,
 };
 const DEFAULT_STATE_DIR = fileURLToPath(new URL('../../../.local/ai/', import.meta.url));
