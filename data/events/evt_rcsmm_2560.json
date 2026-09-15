@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_rcsmm_2560",
+  "slug": "concierto-de-la-banda-sinfonica-del-rcsmm-pedro-iturralde-en-el-teatro-monumental",
+  "title": "Concierto de la Banda Sinfónica del RCSMM \"Pedro Iturralde\" en el Teatro Monumental",
+  "status": "scheduled",
+  "venueId": "ven_teatro_monumental",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_rcsmm_2560_01",
+      "date": "2026-09-20",
+      "time": "16:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Sara Rapado",
+      "role": "soloist"
+    },
+    {
+      "name": "Miguel Ángel Serrano",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_rcsmm",
+      "url": "https://rcsmm.eu/concierto-banda-sinfonica-rcsmm-pedro-iturralde-teatro-monumental",
+      "checkedAt": "2026-09-15",
+      "externalId": "2560"
+    }
+  ],
+  "primarySourceId": "src_rcsmm",
+  "lastVerifiedAt": "2026-09-15"
+}

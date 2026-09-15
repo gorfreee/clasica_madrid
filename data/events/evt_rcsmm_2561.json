@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_rcsmm_2561",
+  "slug": "concierto-de-la-orquesta-sinfonica-del-rcsmm-maria-rodrigo-en-el-teatro-monumental",
+  "title": "Concierto de la Orquesta Sinfónica del RCSMM \"María Rodrigo\" en el Teatro Monumental",
+  "status": "scheduled",
+  "venueId": "ven_teatro_monumental",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_rcsmm_2561_01",
+      "date": "2026-09-20",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Julio Alberto Flores Bermejo",
+      "role": "soloist"
+    },
+    {
+      "name": "Juan Luis Martínez Navarro",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antonín Dvořák"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_rcsmm",
+      "url": "https://rcsmm.eu/concierto-orquesta-sinfonica-rcsmm-maria-rodrigo-teatro-monumental",
+      "checkedAt": "2026-09-15",
+      "externalId": "2561"
+    }
+  ],
+  "primarySourceId": "src_rcsmm",
+  "lastVerifiedAt": "2026-09-15"
+}

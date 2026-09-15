@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_rcsmm_2557",
+  "slug": "concierto-de-la-orquesta-barroca-del-rcsmm-jose-de-nebra-en-el-museo-del-prado",
+  "title": "Concierto de la Orquesta Barroca del RCSMM \"José de Nebra\" en el Museo del Prado",
+  "status": "scheduled",
+  "venueId": "ven_museo_prado",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_rcsmm_2557_01",
+      "date": "2026-09-18",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ana Payá Ramírez"
+    },
+    {
+      "name": "Arturo de las Casas Escolar"
+    },
+    {
+      "name": "Jaime Martín Garcés",
+      "role": "soloist"
+    },
+    {
+      "name": "Elvira Martínez Gabaldón",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Georg Philipp Telemann"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_rcsmm",
+      "url": "https://rcsmm.eu/concierto-orquesta-barroca-rcsmm-jose-nebra-museo-prado",
+      "checkedAt": "2026-09-15",
+      "externalId": "2557"
+    }
+  ],
+  "primarySourceId": "src_rcsmm",
+  "lastVerifiedAt": "2026-09-15"
+}

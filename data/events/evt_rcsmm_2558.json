@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_rcsmm_2558",
+  "slug": "concierto-de-la-orquesta-clasica-el-rcsmm-mariana-martinez-en-el-real-teatro-de-retiro",
+  "title": "Concierto de la Orquesta Clásica el RCSMM \"Mariana Martínez\" en el Real Teatro de Retiro",
+  "status": "scheduled",
+  "venueId": "ven_real_teatro_retiro",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_rcsmm_2558_01",
+      "date": "2026-09-19",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Antonio Sánchez-Almohalla Iniesta",
+      "role": "soloist"
+    },
+    {
+      "name": "Darío García Martínez",
+      "role": "soloist"
+    },
+    {
+      "name": "Juan Luis Gallego",
+      "role": "conductor"
+    },
+    {
+      "name": "Sebastián Mariné Isidro",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Felix Mendelssohn"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_rcsmm",
+      "url": "https://rcsmm.eu/concierto-orquesta-clasica-rcsmm-mariana-martinez-real-teatro-retiro",
+      "checkedAt": "2026-09-15",
+      "externalId": "2558"
+    }
+  ],
+  "primarySourceId": "src_rcsmm",
+  "lastVerifiedAt": "2026-09-15"
+}
