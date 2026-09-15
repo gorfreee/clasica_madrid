@@ -933,9 +933,21 @@ function hasConservativeClassicalInterpretationAnchor(facts: ObservedFacts): boo
     hasPhrase(haystack, 'recital de piano clasico') ||
     hasPhrase(haystack, 'concierto de piano clasico') ||
     hasPhrase(haystack, 'concierto de musica de camara') ||
+    hasPhrase(haystack, 'repertorio esencial de camara') ||
+    hasPhrase(haystack, 'repertorio de camara') ||
     hasPhrase(haystack, 'festival internacional de organo') ||
     hasPhrase(haystack, 'festival de organo') ||
     hasPhrase(haystack, 'ciclo internacional de organo')
+  ) {
+    return true;
+  }
+  if (
+    hasPhrase(haystack, 'interpretacion historica') &&
+    (hasWord(haystack, 'renacimiento') ||
+      hasWord(haystack, 'barroco') ||
+      hasWord(haystack, 'clasicismo') ||
+      hasPhrase(haystack, 'repertorio antiguo') ||
+      hasPhrase(haystack, 'musica antigua'))
   ) {
     return true;
   }
@@ -1231,15 +1243,21 @@ function classicalConcertSeries(facts: ObservedFacts, haystack: string): Inclusi
   const title = fieldFolded(facts.title);
   const description = fieldFolded(facts.description);
   const namedCycle = classicalSeriesIdentity(facts);
+  const chamberCycle = chamberMusicConcertCycle(title, haystack);
+  const historicalCycle = historicalPerformanceConcertCycle(facts, title, haystack);
   const concertCue =
     hasConcertOrRecitalWord(title) ||
     hasPhrase(haystack, 'serie de conciertos') ||
     (description.length > 0 && hasConcertOrRecitalWord(description)) ||
-    Boolean(namedCycle);
+    Boolean(namedCycle) ||
+    chamberCycle ||
+    historicalCycle;
   if (!concertCue) return undefined;
 
   const seriesCue =
     Boolean(namedCycle) ||
+    chamberCycle ||
+    historicalCycle ||
     hasPhrase(haystack, 'domingos de camara') ||
     hasPhrase(haystack, 'liceo de camara') ||
     hasPhrase(haystack, 'musica de camara') ||
@@ -1253,7 +1271,13 @@ function classicalConcertSeries(facts: ObservedFacts, haystack: string): Inclusi
 
   return {
     ruleId: 'classical-concert-series',
-    evidence: [namedCycle ?? facts.seriesText ?? facts.categoryText ?? facts.title],
+    evidence: [
+      namedCycle
+      ?? (historicalCycle ? (facts.seriesText ?? facts.title) : undefined)
+      ?? facts.seriesText
+      ?? facts.categoryText
+      ?? facts.title,
+    ],
   };
 }
 
@@ -1287,6 +1311,7 @@ function classicalSeriesIdentity(facts: ObservedFacts): string | undefined {
       hasPhrase(folded, 'les arts en madrid') ||
       hasPhrase(folded, 'fronteras') ||
       folded === 'lied' ||
+      officialSchoolConcertCycle(field) ||
       matchesTitleClassicalCycle(field)
     ) {
       return field;
@@ -1296,13 +1321,72 @@ function classicalSeriesIdentity(facts: ObservedFacts): string | undefined {
     const title = foldName(facts.title);
     if (
       matchesTitleClassicalCycle(facts.title) ||
+      officialSchoolConcertCycle(facts.title) ||
       hasPhrase(title, 'miniclasica descubriendo el clasicismo') ||
       hasPhrase(title, 'miniclasica descubriendo la musica antigua')
     ) {
-      return facts.title;
+      return facts.seriesText && officialSchoolConcertCycle(facts.seriesText)
+        ? facts.seriesText
+        : facts.title;
     }
   }
   return undefined;
+}
+
+/**
+ * Named concert cycles whose official identity is itself classical/academic.
+ * Matching is prefix/exact on the cycle name, not a venue or source shortcut.
+ *
+ * - Da Camera: monthly chamber-music concerts of the school's chamber institute.
+ * - Solistas del Siglo XXI: Radio Clásica recital series of the school.
+ * - Interpretación Histórica: HIP concert cycle (Renaissance / Baroque / Classicism).
+ */
+function officialSchoolConcertCycle(text: string): boolean {
+  const named = foldName(text);
+  return (
+    named === 'da camera' ||
+    named.startsWith('ciclo da camera') ||
+    named.startsWith('da camera ') ||
+    named.startsWith('solistas del siglo xxi') ||
+    named.startsWith('interpretacion historica')
+  );
+}
+
+function chamberMusicConcertCycle(title: string, haystack: string): boolean {
+  const cycle =
+    hasWord(title, 'ciclo') ||
+    hasPhrase(haystack, 'un ciclo para') ||
+    hasPhrase(haystack, 'ciclo de conciertos');
+  if (!cycle) return false;
+  return (
+    hasPhrase(haystack, 'musica de camara') ||
+    hasPhrase(haystack, 'repertorio esencial de camara') ||
+    hasPhrase(haystack, 'repertorio de camara') ||
+    hasPhrase(haystack, 'formaciones de camara')
+  );
+}
+
+function historicalPerformanceConcertCycle(
+  facts: ObservedFacts,
+  title: string,
+  haystack: string,
+): boolean {
+  const identity = `${title} ${fieldFolded(facts.seriesText)} ${fieldFolded(facts.categoryText)}`;
+  if (!hasPhrase(identity, 'interpretacion historica') && !hasPhrase(haystack, 'interpretacion historica')) {
+    return false;
+  }
+  const era =
+    hasWord(haystack, 'renacimiento') ||
+    hasWord(haystack, 'barroco') ||
+    hasWord(haystack, 'clasicismo') ||
+    hasPhrase(haystack, 'repertorio antiguo') ||
+    hasPhrase(haystack, 'musica antigua');
+  if (!era) return false;
+  return (
+    hasConcertOrRecitalWord(haystack) ||
+    hasPhrase(haystack, 'ciclo de conciertos') ||
+    hasWord(title, 'conjuntos')
+  );
 }
 
 function matchesTitleClassicalCycle(text: string): boolean {

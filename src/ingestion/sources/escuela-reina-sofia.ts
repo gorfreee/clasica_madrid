@@ -4,10 +4,14 @@ import {
   parseObservedTime,
   type IngestWindow,
 } from '../dates.ts';
-import { inferScheduleFromText } from '../detail/schedule.ts';
 import { explicitAccessText } from '../detail/access-evidence.ts';
-import { decodeHtmlEntities, flattenHtmlBlocks, stripTags } from '../html.ts';
-import { unexpectedHtmlInsteadOfJson } from '../listing-retry.ts';
+import {
+  parseReinaSofiaDetail,
+  reinaSofiaSeriesText,
+  reinaSofiaTitlePerformers,
+} from '../detail/escuela-reina-sofia.ts';
+import { inferScheduleFromText } from '../detail/schedule.ts';
+import { decodeHtmlEntities, stripTags } from '../html.ts';
 import { emptyObservedLists } from '../observed.ts';
 import {
   reportAdapterDiscard,
@@ -86,14 +90,16 @@ export const escuelaReinaSofiaAdapter: SourceAdapter = {
       .sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
   },
   fetchDetail(url, ctx) {
-    return ctx.get(reinaSofiaDetailApiUrl(url));
+    const canonical = reinaSofiaEventUrl(url);
+    if (!canonical) throw new Error(`${SOURCE_ID}: URL de ficha no reconocida`);
+    return ctx.get(`${canonical}/`);
   },
   hydrate(event, body) {
-    const detail = parseDetail(body, event);
-    const schedule = inferScheduleFromText(`${detail.title}\n${detail.description ?? ''}`);
-    const accessText = explicitAccessText(detail.description);
+    const detail = parseReinaSofiaDetail(event, body);
+    const schedule = inferScheduleFromText(`${event.observed.title}\n${detail.description ?? ''}`);
+    const accessText = explicitAccessText(detail.description ?? detail.accessText);
     return {
-      ...(detail.description ? { description: detail.description } : {}),
+      ...detail,
       ...(accessText ? { accessText } : {}),
       ...(schedule.eventStatus ? { eventStatus: schedule.eventStatus } : {}),
       ...(schedule.occurrences ? { occurrences: schedule.occurrences } : {}),
@@ -329,6 +335,8 @@ function parseCard(card: BalancedDiv, pageUrl: string, ctx: AdapterContext): Raw
   }
 
   const schedule = inferScheduleFromText(title);
+  const seriesText = reinaSofiaSeriesText(title);
+  const performers = reinaSofiaTitlePerformers(title);
   return {
     sourceId: SOURCE_ID,
     sourceUrl,
@@ -340,54 +348,10 @@ function parseCard(card: BalancedDiv, pageUrl: string, ctx: AdapterContext): Raw
       venueText,
       occurrences: [occurrence],
       ...emptyObservedLists(),
+      performers,
+      ...(seriesText ? { seriesText } : {}),
     },
   };
-}
-
-function parseDetail(
-  body: string,
-  event: RawEvent,
-): { title: string; description?: string } {
-  const unexpectedHtml = unexpectedHtmlInsteadOfJson(SOURCE_ID, body);
-  if (unexpectedHtml) throw new Error(unexpectedHtml);
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(body);
-  } catch (error) {
-    const detail = error instanceof Error ? error.message : 'JSON inválido';
-    throw new Error(`${SOURCE_ID}: JSON de ficha inválido (${detail})`);
-  }
-  if (!Array.isArray(parsed) || parsed.length !== 1) {
-    throw new Error(`${SOURCE_ID}: la API de ficha no devolvió un evento único`);
-  }
-  const item = parsed[0];
-  if (!item || typeof item !== 'object' || Array.isArray(item)) {
-    throw new Error(`${SOURCE_ID}: ficha REST inválida`);
-  }
-  const doc = item as Record<string, unknown>;
-  const id = typeof doc.id === 'number' && Number.isSafeInteger(doc.id) ? String(doc.id) : undefined;
-  const link = typeof doc.link === 'string' ? reinaSofiaEventUrl(doc.link) : undefined;
-  const title = renderedField(doc.title);
-  const content = renderedField(doc.content);
-  if (
-    doc.status !== 'publish'
-    || !id
-    || id !== event.externalId
-    || !link
-    || link !== event.sourceUrl
-    || !title
-    || content === undefined
-  ) {
-    throw new Error(`${SOURCE_ID}: la ficha REST no coincide con el evento del listado`);
-  }
-  const description = flattenHtmlBlocks(content) || undefined;
-  return { title, ...(description ? { description } : {}) };
-}
-
-function renderedField(value: unknown): string | undefined {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
-  const rendered = (value as Record<string, unknown>).rendered;
-  return typeof rendered === 'string' ? rendered : undefined;
 }
 
 function allIconListTexts(html: string): string[] {

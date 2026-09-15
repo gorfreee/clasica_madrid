@@ -527,3 +527,71 @@ describe('invariantes de identidad canónica', () => {
     expect(merged.event.title).toBe('Los sonidos del universo');
   });
 });
+
+describe('Reina Sofía no degrada el concierto Freixenet ya publicado', () => {
+  it('conserva Dvořák, Brahms y la orquesta canónica si el programa de la Escuela está vacío', () => {
+    const existing = makeEvent({
+      id: 'evt_auditorio_nacional_fundacion_albeniz_escuela_superior_de_musica_reina_sofia_concierto_de_inauguracion_del_curso_acad',
+      slug: 'fundacion-albeniz-escuela-superior-de-musica-reina-sofia-concierto-de-inauguracion-del-curso-academico-26-27',
+      title: 'Fundación Albéniz. Escuela Superior de Música Reina Sofía. Concierto de Inauguracion del Curso Academico 26/27',
+      venueId: 'ven_auditorio_nacional_sala_sinfonica',
+      organizerIds: [],
+      seriesId: null,
+      occurrences: [{
+        id: 'occ_auditorio_nacional_fundacion_albeniz_escuela_superior_de_musica_reina_sofia_concierto_de_inauguracion_del_curso_acad',
+        date: '2026-10-01',
+        time: '19:30',
+        status: 'scheduled',
+      }],
+      performers: [
+        { name: 'Orquesta Sinfónica Freixenet de la Escuela Superior de Música Reina Sofía' },
+        { name: 'Josep Pons', role: 'conductor' },
+        { name: 'Luis Aracama' },
+      ],
+      composers: [{ name: 'Antonín Dvořák' }, { name: 'Johannes Brahms' }],
+      works: [
+        { title: 'Concierto para violonchelo', composerName: 'Antonín Dvořák' },
+        { title: 'Cuarta Sinfonía', composerName: 'Johannes Brahms' },
+      ],
+      eras: ['romantic'],
+      formats: ['symphonic'],
+    });
+    const merged = mergeExistingEvent(
+      existing,
+      proposal({
+        title: 'Orquesta Sinfónica Freixenet. Director: Josep Pons / Violonchelo: Luis Aracama',
+        venueId: existing.venueId,
+        occurrences: [{ date: '2026-10-01', time: '19:30' }],
+        performers: [
+          { name: 'Orquesta Sinfónica Freixenet' },
+          { name: 'Josep Pons', role: 'conductor' },
+          { name: 'Luis Aracama', role: 'soloist' },
+        ],
+        composers: [{ name: 'Dvořák' }, { name: 'Brahms' }],
+        works: [],
+        citations: [{
+          sourceId: 'src_escuela_superior_musica_reina_sofia',
+          url: 'https://www.escuelasuperiordemusicareinasofia.es/evento/orquesta-sinfonica-freixenet-director-josep-pons-violonchelo-luis-aracama',
+          checkedAt: '2026-09-15',
+          externalId: '83051',
+        }],
+      }),
+      TEST_NOW,
+    );
+
+    expect(merged.event.title).toBe(existing.title);
+    expect(merged.event.performers[0]?.name).toBe(
+      'Orquesta Sinfónica Freixenet de la Escuela Superior de Música Reina Sofía',
+    );
+    expect(merged.event.performers).toEqual(expect.arrayContaining([
+      { name: 'Josep Pons', role: 'conductor' },
+      { name: 'Luis Aracama', role: 'soloist' },
+    ]));
+    expect(merged.event.composers).toEqual(existing.composers);
+    expect(merged.event.works).toEqual(existing.works);
+    expect(merged.event.eras).toEqual(['romantic']);
+    expect(merged.event.formats).toEqual(['symphonic']);
+    expect(merged.diffs.some((item) => item.startsWith('composers:'))).toBe(false);
+    expect(merged.diffs.some((item) => item.startsWith('works:'))).toBe(false);
+  });
+});

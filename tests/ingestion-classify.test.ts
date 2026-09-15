@@ -1165,6 +1165,44 @@ describe('eligibility — conflictos y fallback', () => {
     expect(larrocha.eligibility.ruleId).toBe('classical-concert-series');
   });
 
+  it('incluye ciclos oficiales de cámara, interpretación histórica y solistas por evidencia observada', () => {
+    const daCamera = classify(
+      facts({
+        title: 'Ciclo Da Camera: Grupos de Cuerdas',
+        seriesText: 'Da Camera',
+        description:
+          'Un ciclo para escuchar el repertorio esencial de cámara de la mano de formaciones de cámara jóvenes.',
+      }),
+    );
+    expect(daCamera.eligibility.value).toBe('include');
+    expect(daCamera.eligibility.ruleId).toBe('classical-concert-series');
+
+    const historica = classify(
+      facts({
+        title: 'Interpretación Histórica: Conjuntos Barrocos',
+        seriesText: 'Interpretación Histórica',
+        description:
+          'El programa trabaja las tradiciones del Renacimiento, el Barroco y el Clasicismo en este ciclo de conciertos de repertorio antiguo.',
+      }),
+    );
+    expect(historica.eligibility.value).toBe('include');
+    expect(historica.eligibility.ruleId).toBe('classical-concert-series');
+
+    const solistas = classify(
+      facts({
+        title: 'Solistas del Siglo XXI. Recital de violonchelo',
+        seriesText: 'Solistas del Siglo XXI',
+        description: 'Los violonchelistas Luis Aracama y Yiqi Chen ofrecerán un recital.',
+        performers: [
+          { name: 'Luis Aracama', roleText: 'violonchelista' },
+          { name: 'Yiqi Chen', roleText: 'violonchelista' },
+        ],
+      }),
+    );
+    expect(solistas.eligibility.value).toBe('include');
+    expect(solistas.eligibility.ruleId).toBe('classical-concert-series');
+  });
+
   it('no trata un código de temporada OCNE o un Satélite gospel como ciclo clásico', () => {
     const coded = classify(
       facts({
@@ -1181,6 +1219,27 @@ describe('eligibility — conflictos y fallback', () => {
       }),
     );
     expect(gospel.eligibility.value).not.toBe('include');
+  });
+
+  it('no incluye un jam de jazz por el recinto de la Escuela ni relaja un quinteto genérico', () => {
+    const jazz = classify(
+      facts({
+        title: 'Jam de jazz en el Auditorio Sony',
+        venueText: 'Auditorio Sony, Madrid',
+        categoryText: 'Jazz',
+        description: 'Sesión de jazz en la Escuela Superior de Música Reina Sofía.',
+      }),
+    );
+    expect(jazz.eligibility.value).toBe('exclude');
+    expect(jazz.eligibility.ruleId).toBe('jazz-identity');
+
+    const quintet = classify(
+      facts({
+        title: 'Quinteto de cuerda',
+        description: 'Un quinteto ofrece un recital.',
+      }),
+    );
+    expect(quintet.eligibility.value).not.toBe('include');
   });
 
   it('no infiere include por un recital Impacta sin repertorio ni por un gala Bernstein-Gershwin', () => {
