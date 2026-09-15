@@ -42,6 +42,8 @@ export function automationReportMetrics(report: IngestReport): AutomationReportM
 export type AutomationSummaryExtras = {
   manifest?: IngestRunManifest;
   artifactName?: string;
+  /** Heading used in the Job Summary. Defaults to production ingestion. */
+  title?: string;
 };
 
 export function formatAutomationSummary(
@@ -49,7 +51,12 @@ export function formatAutomationSummary(
   runUrl: string,
   extras?: AutomationSummaryExtras,
 ): string {
-  return formatAutomationMarkdown(report, runUrl, 'Ingestión de producción', extras);
+  return formatAutomationMarkdown(
+    report,
+    runUrl,
+    extras?.title ?? 'Ingestión de producción',
+    extras,
+  );
 }
 
 export function formatAutomationPrBody(
@@ -108,7 +115,7 @@ export function clipAutomationMarkdown(
 
 export function formatMissingReportSummary(runUrl: string, extras?: AutomationSummaryExtras): string {
   const lines = [
-    '## Ingestión de producción',
+    `## ${extras?.title ?? 'Ingestión de producción'}`,
     '',
     '> [!ERROR]',
     '> La ejecución terminó antes de que el pipeline pudiera generar el report JSON.',
