@@ -23,7 +23,7 @@ Canonical event data lives in `data/` and is validated at build/CI time. An empt
 |---|---|---|
 | Astro site | `npm run dev` | Serves on `http://localhost:4321`. This is the public product. |
 
-Scripts live in `package.json`. Use those names rather than duplicating flags here. The usual loop is `dev`, `validate`, `test`, `test:e2e` (Playwright smokes against `dist/`; needs a prior `build`), `check` (Astro/TS diagnostics; there is no ESLint/Prettier), `build` (static output to `dist/`), and `preview`. Harvesting is `ingest:sync` / `ingest:source`. `ingest:promote` is the legacy candidate-file path. Live AI checks are `ai:smoke` (connectivity) and `ai:qualify` (quality benchmark); both are manual, never part of PR CI.
+Scripts live in `package.json`. Use those names rather than duplicating flags here. The usual loop is `dev`, `validate`, `test`, `test:e2e` (Playwright smokes against `dist/`; needs a prior `build`), `check` (Astro/TS diagnostics; there is no ESLint/Prettier), `build` (static output to `dist/`), and `preview`. Harvesting is `ingest:sync` / `ingest:source`. Discovery context export is `ingest:discovery-context`; importing a batch locally is `ingest:discovery`. Production Discovery is the manual GitHub Action described in `docs/run-discovery-agent.md`. `ingest:promote` is the legacy candidate-file path. Live AI checks are `ai:smoke` (connectivity) and `ai:qualify` (quality benchmark); both are manual, never part of PR CI.
 
 ### Documentation
 
@@ -34,6 +34,8 @@ Scripts live in `package.json`. Use those names rather than duplicating flags he
 | Data model | `docs/data-model.md` |
 | Ingestion: what is implemented today | `docs/ingestion.md` |
 | Ingestion: remaining roadmap | `docs/ingestion-v3-plan.md` |
+| Discovery: agent playbook | `docs/run-discovery-agent.md` |
+| Discovery: search hints | `docs/discovery-search-hints.md` |
 | Editorial classification policy | `docs/classification-policy.md` |
 | Historical notes | `docs/archive/` |
 
@@ -47,7 +49,7 @@ Scripts live in `package.json`. Use those names rather than duplicating flags he
 - Do not invent production events. Fixtures belong in `tests/`.
 - UI must consume `src/lib/presentation`, not raw JSON files.
 - Pagefind is intentionally not installed yet; search is a query-param filter over the built agenda.
-- For ingestion work, follow `docs/ingestion.md` (current operation) and `docs/ingestion-v3-plan.md` (remaining roadmap). Scheduled ingestion, data PRs, conditional auto-merge, the fetch relay, and Discovery v1 (structured context export / batch import) already exist. Do not reimplement them. Remaining v3 work — automatic web search for discovery, discovery scheduling, automatic source learning/promotion, and fuzzy/AI residual reconciliation — is out of scope unless a task asks for that capability. `possiblyMissing` is diagnostic-only; do not delete or auto-cancel from a disappearance.
+- For ingestion work, follow `docs/ingestion.md` (current operation) and `docs/ingestion-v3-plan.md` (remaining roadmap). Scheduled ingestion, data PRs, conditional auto-merge, the fetch relay, Discovery v1 (structured context export / batch import), and the **manual** Discovery GitHub Action already exist. Do not reimplement them. Remaining v3 work — automatic web search inside the repo, discovery scheduling, automatic source learning/promotion, and fuzzy/IA residual reconciliation — is out of scope unless a task asks for that capability. `possiblyMissing` is diagnostic-only; do not delete or auto-cancel from a disappearance.
 - Once an event or venue is published, its `slug` is permanent. Do not rename published slugs. A retired historical event slug may remain as an explicit `slugAliases` entry on the surviving canonical event so the old public URL still resolves; do not add a general redirect system.
 - Every published venue has a `/lugares/{slug}` page, including venues with no upcoming events. The venues index lists every root venue in one list: venues with upcoming events first, followed by the rest.
 - `loadPublishedCatalog()` memoizes the parsed catalog for the process lifetime. Tests that need another tree must call `loadCatalogFromDir`. Restart `astro dev` after editing `data/` if pages look stale.
