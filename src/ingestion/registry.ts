@@ -19,6 +19,7 @@ import { fundacionGoetheAdapter } from './sources/fundacion-goethe.ts';
 import { madridATempoAdapter } from './sources/madrid-a-tempo.ts';
 import { patrimonioNacionalAdapter } from './sources/patrimonio-nacional.ts';
 import { ateneoMadridAdapter } from './sources/ateneo-madrid.ts';
+import { escuelaReinaSofiaAdapter } from './sources/escuela-reina-sofia.ts';
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
@@ -41,6 +42,7 @@ const ADAPTERS: Record<string, SourceAdapter> = {
   [madridATempoAdapter.id]: madridATempoAdapter,
   [patrimonioNacionalAdapter.id]: patrimonioNacionalAdapter,
   [ateneoMadridAdapter.id]: ateneoMadridAdapter,
+  [escuelaReinaSofiaAdapter.id]: escuelaReinaSofiaAdapter,
 };
 
 const srcAuditorio: Source = {
@@ -344,6 +346,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Ateneo de Madrid',
       kind: 'official',
       url: 'https://ateneodemadrid.com/',
+    },
+  },
+  {
+    id: 'escuela-reina-sofia',
+    name: 'Escuela Superior de Música Reina Sofía',
+    urls: ['https://www.escuelasuperiordemusicareinasofia.es/agenda/'],
+    adapterId: escuelaReinaSofiaAdapter.id,
+    catalogSourceId: 'src_escuela_superior_musica_reina_sofia',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_escuela_superior_musica_reina_sofia',
+      slug: 'escuela-superior-musica-reina-sofia',
+      name: 'Escuela Superior de Música Reina Sofía',
+      kind: 'official',
+      url: 'https://www.escuelasuperiordemusicareinasofia.es/',
     },
   },
 ];
