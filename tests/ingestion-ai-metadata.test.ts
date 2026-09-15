@@ -206,6 +206,32 @@ describe('composer AI fallback y validación determinista', () => {
     expect(
       composerAiHasUsableEvidence(
         facts({
+          composers: [],
+          works: [],
+          programText: 'Ouverture GWV 473 de Ch. Graupner',
+        }),
+      ),
+    ).toBe(true);
+    expect(
+      composerAiHasUsableEvidence(
+        facts({
+          composers: [
+            { name: 'Georg Philipp Telemann' },
+            { name: 'Ch. Graupner' },
+            { name: 'Johann Sebastian Bach' },
+          ],
+          works: [],
+          programText: [
+            'Obertura - Suite en sol menor TWV 55:g1 de G.P. Telemann',
+            'Ouverture GWV 473 de Ch. Graupner',
+            'Concierto para clave en la mayor BWV 1055 de J. S. Bach',
+          ].join('\n'),
+        }),
+      ),
+    ).toBe(false);
+    expect(
+      composerAiHasUsableEvidence(
+        facts({
           composers: [{ name: 'Juan del Encina' }],
           works: [],
           programText: 'Obras de Josquin des Prez y Antonio de Cabezón.',
@@ -352,6 +378,29 @@ describe('composer AI fallback y validación determinista', () => {
         facts({ composers: [], works: [], programText: 'J. S. Bach — Suite' }),
       ).composers,
     ).toEqual([{ name: 'Johann Sebastian Bach' }]);
+
+    expect(
+      validateAiComposerCandidates(
+        [{ name: 'Ch. Graupner', evidence: 'Ouverture GWV 473 de Ch. Graupner' }],
+        facts({
+          composers: [{ name: 'Georg Philipp Telemann' }],
+          works: [],
+          programText: 'Ouverture GWV 473 de Ch. Graupner',
+        }),
+      ).composers,
+    ).toEqual([{ name: 'Ch. Graupner' }]);
+
+    expect(
+      validateAiComposerCandidates(
+        [{ name: 'César Guerrero', evidence: 'realizadas por César Guerrero de obras de G. Rossini' }],
+        facts({
+          composers: [],
+          works: [],
+          programText:
+            'Transcripciones para Brass Band realizadas por César Guerrero de obras de G. Rossini, S. Joplin y J.S. Bach.',
+        }),
+      ).composers,
+    ).toEqual([]);
   });
 
   it('mantiene vacío ante evidencia insuficiente o fallo del provider', async () => {
@@ -596,6 +645,66 @@ describe('pipeline y budget compartido', () => {
       eras: { populated: 1, unresolved: 0 },
       formats: { populated: 1, unresolved: 0 },
       access: { free: 1, paid: 0, unresolved: 0 },
+    });
+  });
+
+  it('no cuenta composer-extraction como resuelta si la IA no añade ningún candidato válido', async () => {
+    const dataDir = await mkdtemp(path.join(os.tmpdir(), 'clasica-ai-composer-report-'));
+    for (const collection of ENTITY_COLLECTIONS) {
+      await mkdir(path.join(dataDir, collection), { recursive: true });
+    }
+    const batch: DiscoveryBatch = {
+      schemaVersion: 1,
+      observations: [{
+        source: {
+          url: 'https://example.org/conciertos/bach-moszkowski',
+          homepage: 'https://example.org/',
+          name: 'Ciclo de prueba',
+          kind: 'official',
+        },
+        venue: {
+          name: 'Sala de prueba',
+          municipality: 'Madrid',
+          area: 'madrid',
+          address: 'Calle de Alcalá, 1, Madrid',
+        },
+        event: {
+          title: 'Recital de piano de música clásica',
+          categoryText: 'Música clásica',
+          venueText: 'Sala de prueba',
+          occurrences: [{ raw: '2026-10-12 19:30', date: '2026-10-12', time: '19:30' }],
+          programText: 'J. S. Bach — Suite. Obras de Moszkowski',
+          performers: [{ name: 'Solista invitada', roleText: 'piano' }],
+          composers: [{ name: 'Johann Sebastian Bach' }],
+          works: [],
+        },
+      }],
+    };
+    const ai = spyAi(async (_observed, context) => {
+      if (context?.purpose === 'composer-extraction') {
+        return { candidates: [] };
+      }
+      if (context?.purpose === 'taxonomy') {
+        return { formats: ['recital'], eras: ['baroque'], evidence: ['J. S. Bach'] };
+      }
+      throw new Error(`purpose inesperado: ${context?.purpose}`);
+    });
+    const run = await runDiscoveryIngest({
+      dataDir,
+      catalog: emptyCatalog(),
+      now: new Date('2026-09-08T12:00:00Z'),
+      dryRun: true,
+      batch,
+      ai,
+    });
+
+    expect(ai.purposes).toContain('composer-extraction');
+    expect(run.decisions[0]?.composers?.method).not.toBe('ai');
+    expect(run.candidates[0]?.event.composers.map((item) => item.name)).toEqual(['Johann Sebastian Bach']);
+    expect(run.summary.ai.byPurpose['composer-extraction']).toMatchObject({
+      attempted: 1,
+      resolved: 0,
+      unresolved: 1,
     });
   });
 });

@@ -207,7 +207,10 @@ export function rcsmmPerformers(programText: string | undefined): ObservedPerson
       const cleaned = credit.replace(/[.;]+$/u, '').trim();
       const parenthetical = /^(.+?)\s*\(([^()]+)\)$/.exec(cleaned);
       const name = (parenthetical?.[1] ?? cleaned).trim();
-      const roleText = (parenthetical?.[2] ?? sharedRole).trim();
+      const instrument = parenthetical?.[2]?.trim();
+      const roleText = instrument
+        ? (sharedRole === 'solista' ? `${sharedRole}, ${instrument}` : instrument)
+        : sharedRole;
       if (name) performers.push({ name, roleText });
     }
   }

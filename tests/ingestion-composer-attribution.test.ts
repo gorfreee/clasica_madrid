@@ -132,3 +132,191 @@ describe('atribución de compositores al programa actual', () => {
     ).toEqual([]);
   });
 });
+
+const BRASS_BAND_PROGRAM = [
+  'Transcripciones para Brass Band realizadas por César Guerrero de obras de G. Rossini,',
+  'S. Joplin, J.S. Bach, H. Mancini, L. Bernstein, J. Williams y Nino Rota, entre otros',
+  'compositores.',
+].join('\n');
+
+describe('líneas de programa WORK de COMPOSER', () => {
+  it('canonicaliza compositores conocidos en WORK de COMPOSER', () => {
+    expect(
+      attributedProgrammeComposers('Concierto para clave en la mayor BWV 1055 de J. S. Bach').map(
+        (item) => item.name,
+      ),
+    ).toEqual(['Johann Sebastian Bach']);
+    expect(
+      attributedProgrammeComposers('Concierto para Violín en mi menor op.64 de F. Mendelssohn').map(
+        (item) => item.name,
+      ),
+    ).toEqual(['Felix Mendelssohn']);
+    expect(
+      attributedProgrammeComposers('Sinfonía nº38 “Praga” de W. A. Mozart').map((item) => item.name),
+    ).toEqual(['Wolfgang Amadeus Mozart']);
+    expect(
+      attributedProgrammeComposers('El Amor Brujo de M. de Falla (versión teatralizada)').map(
+        (item) => item.name,
+      ),
+    ).toEqual(['Manuel de Falla']);
+    expect(
+      attributedProgrammeComposers('Concierto para piano nº1 en re menor, op.15 de J. Brahms').map(
+        (item) => item.name,
+      ),
+    ).toEqual(['Johannes Brahms']);
+    expect(
+      attributedProgrammeComposers('Sinfonía nº7 en re menor, op.70 de A. Dvorak').map((item) => item.name),
+    ).toEqual(['Antonín Dvořák']);
+    expect(
+      attributedProgrammeComposers('Homenaje a la Tempranica de Joaquín Rodrigo').map((item) => item.name),
+    ).toEqual(['Joaquín Rodrigo']);
+  });
+
+  it('conserva un desconocido con nombre completo inequívoco', () => {
+    expect(
+      attributedProgrammeComposers(
+        '"Sobre los reflejos de un espacio habitado" de Alberto Hijón Domarco (obra de estreno)',
+      ).map((item) => item.name),
+    ).toEqual(['Alberto Hijón Domarco']);
+    expect(
+      attributedProgrammeComposers(
+        '“Érase una vez en el bosque de Tórtola de Henares” de Enrique de Andrés Martínez',
+      ).map((item) => item.name),
+    ).toEqual(['Enrique de Andrés Martínez']);
+    expect(
+      attributedProgrammeComposers(
+        'Sinfonía nº 1 “The Lord of the Rings” de Johan de Meij',
+      ).map((item) => item.name),
+    ).toEqual(['Johan de Meij']);
+  });
+
+  it('acepta un apellido único sólo en un marco fuerte de obra', () => {
+    expect(
+      attributedProgrammeComposers(
+        'Concierto para Contrabajo en fa sostenido menor op. 3 de Koussevitzky',
+      ).map((item) => item.name),
+    ).toEqual(['Koussevitzky']);
+    expect(attributedProgrammeComposers('Obras de Moszkowski').map((item) => item.name)).toEqual([]);
+  });
+
+  it('reconoce abreviaturas e iniciales razonables', () => {
+    expect(
+      attributedProgrammeComposers(
+        [
+          'Obertura - Suite en sol menor TWV 55:g1 de G.P. Telemann',
+          'Ouverture GWV 473 de Ch. Graupner',
+          'Sinfonía nº38 “Praga” de W. A. Mozart',
+        ].join('\n'),
+      ).map((item) => item.name),
+    ).toEqual(['Georg Philipp Telemann', 'Ch. Graupner', 'Wolfgang Amadeus Mozart']);
+  });
+
+  it('un título citado contemporáneo atribuye al autor y descarta la anotación', () => {
+    expect(
+      attributedProgrammeComposers('“Sinew” de Guillermo Rodríguez Peinado (obra de estreno)').map(
+        (item) => item.name,
+      ),
+    ).toEqual(['Guillermo Rodríguez Peinado']);
+  });
+
+  it('extrae la lista multiline de obras de y no acredita al transcriptor', () => {
+    expect(attributedProgrammeComposers(BRASS_BAND_PROGRAM).map((item) => item.name)).toEqual([
+      'Gioachino Rossini',
+      'S. Joplin',
+      'Johann Sebastian Bach',
+      'H. Mancini',
+      'Leonard Bernstein',
+      'J. Williams',
+      'Nino Rota',
+    ]);
+    expect(
+      attributedProgrammeComposers(BRASS_BAND_PROGRAM).some((item) => /guerrero/i.test(item.name)),
+    ).toBe(false);
+  });
+
+  it('sigue rechazando institución, libreto, intérprete y menciones contextuales', () => {
+    expect(
+      attributedProgrammeComposers(
+        'Producción del Real Conservatorio Superior de Música de Madrid y la Escuela de Música de Chamberí.',
+      ).map((item) => item.name),
+    ).toEqual([]);
+    expect(attributedProgrammeComposers('Libreto de Arrigo Boito').map((item) => item.name)).toEqual([]);
+    expect(attributedProgrammeComposers('Texto de Friedrich Hölderlin').map((item) => item.name)).toEqual([]);
+    expect(attributedProgrammeComposers('Letra de Federico García Lorca').map((item) => item.name)).toEqual([]);
+    expect(
+      attributedProgrammeComposers('Solistas: Ana Payá Ramírez (flauta de pico) y Arturo de las Casas Escolar').map(
+        (item) => item.name,
+      ),
+    ).toEqual([]);
+    expect(attributedProgrammeComposers('Directora: Elvira Martínez Gabaldón').map((item) => item.name)).toEqual([]);
+    expect(
+      attributedProgrammeComposers('Concierto de Mineko Kojima', 'title').map((item) => item.name),
+    ).toEqual([]);
+    expect(attributedProgrammeComposers('Concierto de Mineko Kojima').map((item) => item.name)).toEqual([]);
+    expect(
+      attributedProgrammeComposers('Pieza basada en Mozart e inspirada en Bach').map((item) => item.name),
+    ).toEqual([]);
+    expect(
+      extractAttributedComposerNames(
+        'La flautista ha estrenado una obra de Robert Carl y trabajó con Katherine Hoover.',
+      ).map((item) => item.name),
+    ).toEqual([]);
+  });
+
+  it('cubre los cinco programas observados de RCSMM con reglas generales', () => {
+    expect(
+      attributedProgrammeComposers(
+        [
+          'Obertura - Suite en sol menor TWV 55:g1 de G.P. Telemann',
+          'Concerto en la menor para flauta de pico y viola da gamba, TWV 52:a1 de G.P. Telemann',
+          'Solistas: Ana Payá Ramírez (flauta de pico) y Arturo de las Casas Escolar (viola da gamba)',
+          'Ouverture GWV 473 de Ch. Graupner',
+          'Concierto para clave en la mayor BWV 1055 de J. S. Bach',
+        ].join('\n'),
+      ).map((item) => item.name),
+    ).toEqual(['Georg Philipp Telemann', 'Ch. Graupner', 'Johann Sebastian Bach']);
+
+    expect(
+      attributedProgrammeComposers(
+        [
+          '"Sobre los reflejos de un espacio habitado" de Alberto Hijón Domarco (obra de estreno)',
+          'Concierto para Violín en mi menor op.64 de F. Mendelssohn',
+          'Concierto para Contrabajo en fa sostenido menor op. 3 de Koussevitzky',
+          'Sinfonía nº38 “Praga” de W. A. Mozart',
+        ].join('\n'),
+      ).map((item) => item.name),
+    ).toEqual(['Alberto Hijón Domarco', 'Felix Mendelssohn', 'Koussevitzky', 'Wolfgang Amadeus Mozart']);
+
+    expect(attributedProgrammeComposers(BRASS_BAND_PROGRAM).map((item) => item.name)).toEqual([
+      'Gioachino Rossini',
+      'S. Joplin',
+      'Johann Sebastian Bach',
+      'H. Mancini',
+      'Leonard Bernstein',
+      'J. Williams',
+      'Nino Rota',
+    ]);
+
+    expect(
+      attributedProgrammeComposers(
+        [
+          'Homenaje a la Tempranica de Joaquín Rodrigo',
+          'El Amor Brujo de M. de Falla (versión teatralizada)',
+          '“Sinew” de Guillermo Rodríguez Peinado (obra de estreno)',
+          'Sinfonía nº 1 “The Lord of the Rings” de Johan de Meij',
+        ].join('\n'),
+      ).map((item) => item.name),
+    ).toEqual(['Joaquín Rodrigo', 'Manuel de Falla', 'Guillermo Rodríguez Peinado', 'Johan de Meij']);
+
+    expect(
+      attributedProgrammeComposers(
+        [
+          'Concierto para piano nº1 en re menor, op.15 de J. Brahms',
+          '“Érase una vez en el bosque de Tórtola de Henares” de Enrique de Andrés Martínez',
+          '(obra de estreno)',
+          'Sinfonía nº7 en re menor, op.70 de A. Dvorak',
+        ].join('\n'),
+      ).map((item) => item.name),
+    ).toEqual(['Johannes Brahms', 'Enrique de Andrés Martínez', 'Antonín Dvořák']);
+  });
+});

@@ -678,7 +678,8 @@ function recordAiPurposeOutcomes(
     const resolved = purpose === 'eligibility'
       ? classification.eligibility.method === 'ai' && classification.eligibility.value !== 'uncertain'
       : purpose === 'composer-extraction'
-        ? Boolean(classification.composers?.value.length)
+        ? classification.composers?.method === 'ai'
+          && /^ai-composers-(?:completed|validated)$/.test(classification.composers.ruleId)
         : purpose === 'access-classification'
           ? classification.access?.value !== 'unknown'
           : Boolean(

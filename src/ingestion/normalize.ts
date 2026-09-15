@@ -90,7 +90,7 @@ export function normalizeRawEvent(raw: RawEvent): NormalizedEvent | undefined {
     seriesText: optionalText(raw.observed.seriesText),
     accessText,
     categoryText: optionalText(raw.observed.categoryText),
-    programText: optionalText(raw.observed.programText),
+    programText: optionalProgramText(raw.observed.programText),
     performers: normalizePersonList(raw.observed.performers),
     composers: normalizeComposerList(raw.observed.composers),
     works: normalizeWorkList(raw.observed.works),
@@ -122,6 +122,22 @@ export function observedFactsFromNormalized(event: NormalizedEvent): ObservedFac
 
 function optionalText(value: string | undefined): string | undefined {
   return value ? collapseWhitespace(value) || undefined : undefined;
+}
+
+/**
+ * Programme copy keeps block boundaries as `\n`. Collapse whitespace inside
+ * each line, drop empty lines, and leave significant line breaks intact.
+ */
+function optionalProgramText(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  const normalized = value
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .split('\n')
+    .map((line) => collapseWhitespace(line))
+    .filter(Boolean)
+    .join('\n');
+  return normalized || undefined;
 }
 
 function parseOccurrence(occurrence: RawOccurrence): { date: string; time: string | null } | undefined {

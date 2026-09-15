@@ -11,7 +11,7 @@ import {
   matchesIdentitySet,
 } from '../composer-lists.ts';
 import { collapseWhitespace } from '../html.ts';
-import { matchComposer } from '../knowledge/composers.ts';
+import { matchComposer, findKnownComposersInText } from '../knowledge/composers.ts';
 import type { ObservedComposer, ObservedFacts } from '../observed.ts';
 import type { AiComposerCandidate } from './ai.ts';
 import { containsNormalizedSpan, foldName } from './text.ts';
@@ -42,7 +42,8 @@ export function hasComposerCueEvidence(programme: string): boolean {
   return (
     COMPOSER_ATTRIBUTION_CUE.test(programme) ||
     COMPOSER_WORD_CUE.test(programme) ||
-    COMPOSER_SEPARATOR_CUE.test(programme)
+    COMPOSER_SEPARATOR_CUE.test(programme) ||
+    extractAttributedComposerNames(programme).length > 0
   );
 }
 
@@ -65,6 +66,11 @@ export function unresolvedComposerLikeMentions(programme: string, facts: Observe
     if (matchesIdentitySet(candidate.name, resolved)) continue;
     if (matchesIdentitySet(candidate.name, performerKeys)) continue;
     if (matchComposer(candidate.name)) continue;
+    const mentioned = findKnownComposersInText(candidate.name);
+    if (
+      mentioned.length > 0
+      && mentioned.every((item) => matchesIdentitySet(item.canonicalName, resolved))
+    ) continue;
     if (clearlyNonComposerContext(candidate.name, candidate.evidence)) continue;
     const identity = composerIdentityKeys(candidate.name)[0];
     if (!identity || seen.has(identity)) continue;
