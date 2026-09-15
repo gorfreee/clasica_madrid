@@ -15,10 +15,59 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
-  "works": [],
-  "eras": [],
+  "performers": [
+    {
+      "name": "Tobías Fernández Borkel"
+    },
+    {
+      "name": "Mikhail Studyonov"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Max Bruch"
+    },
+    {
+      "name": "Serguéi Rajmáninov"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para violín n.º 1 en sol menor, Op. 26: Vorspiel: Allegro moderato; Adagio",
+      "composerName": "Max Bruch"
+    },
+    {
+      "title": "Elegía, Op. 3, n.º 1 (piano solo)",
+      "composerName": "Serguéi Rajmáninov"
+    },
+    {
+      "title": "Preghiera, transcripción para violín y piano de Fritz Kreisler del Concierto para piano n.º 2, Op. 18, II movimiento",
+      "composerName": "Serguéi Rajmáninov"
+    },
+    {
+      "title": "Sonata para violonchelo y piano en sol menor, Op. 19 (arr. para violín)- III. Andante",
+      "composerName": "Serguéi Rajmáninov"
+    },
+    {
+      "title": "Melodía, Op. 21, n.º 9 (arr. para violín)",
+      "composerName": "Serguéi Rajmáninov"
+    },
+    {
+      "title": "Danza oriental, Op. 2, n.º 2 (arr. para violín)",
+      "composerName": "Serguéi Rajmáninov"
+    },
+    {
+      "title": "Romanza, Op. 6, n.º 1",
+      "composerName": "Serguéi Rajmáninov"
+    },
+    {
+      "title": "Danza Húngara, Op. 6, n.º 2",
+      "composerName": "Serguéi Rajmáninov"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
   "formats": [
     "recital"
   ],
