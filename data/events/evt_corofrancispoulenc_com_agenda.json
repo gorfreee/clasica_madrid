@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_corofrancispoulenc_com_agenda",
+  "slug": "dido-y-eneas",
+  "title": "Dido y Eneas",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_del_conservatorio_profesional_de_musica_de_getafe",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_corofrancispoulenc_com_agenda_01",
+      "date": "2026-10-24",
+      "time": null,
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "The New Baroque Times"
+    },
+    {
+      "name": "Paloma Friedhoff"
+    },
+    {
+      "name": "Javier Povedano"
+    },
+    {
+      "name": "Inés Ananda"
+    },
+    {
+      "name": "Coro Francis Poulenc",
+      "role": "choir"
+    },
+    {
+      "name": "Blanca Anabitarte"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Henry Purcell"
+    }
+  ],
+  "works": [
+    {
+      "title": "Dido y Eneas",
+      "composerName": "Henry Purcell"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "opera"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_corofrancispoulenc_com",
+      "url": "https://corofrancispoulenc.com/agenda",
+      "checkedAt": "2026-09-15"
+    }
+  ],
+  "primarySourceId": "src_corofrancispoulenc_com",
+  "lastVerifiedAt": "2026-09-15"
+}

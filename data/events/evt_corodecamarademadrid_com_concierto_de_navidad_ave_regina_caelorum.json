@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_corodecamarademadrid_com_concierto_de_navidad_ave_regina_caelorum",
+  "slug": "concierto-de-navidad-ave-regina-caelorum",
+  "title": "Concierto de Navidad: Ave Regina caelorum",
+  "status": "scheduled",
+  "venueId": "ven_iglesia_del_monasterio_de_la_purisima_concepcion",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_corodecamarademadrid_com_concierto_de_navidad_ave_regina_caelorum_01",
+      "date": "2026-12-13",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro de Cámara de Madrid",
+      "role": "choir"
+    },
+    {
+      "name": "Rodrigo Guerrero",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "G.P. da Palestrina"
+    },
+    {
+      "name": "Nicolas Gombert"
+    },
+    {
+      "name": "Tomás Luis de Victoria"
+    }
+  ],
+  "works": [
+    {
+      "title": "Ave Regina caelorum",
+      "composerName": "Nicolas Gombert"
+    },
+    {
+      "title": "O magnum mysterium",
+      "composerName": "G.P. da Palestrina"
+    },
+    {
+      "title": "O magnum mysterium",
+      "composerName": "Tomás Luis de Victoria"
+    }
+  ],
+  "eras": [
+    "renaissance"
+  ],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_corodecamarademadrid_com",
+      "url": "https://www.corodecamarademadrid.com/concierto-de-navidad-ave-regina-caelorum",
+      "checkedAt": "2026-09-15"
+    }
+  ],
+  "primarySourceId": "src_corodecamarademadrid_com",
+  "lastVerifiedAt": "2026-09-15"
+}

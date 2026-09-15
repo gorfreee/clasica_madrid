@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_caixaforum_madrid",
+  "slug": "caixaforum-madrid",
+  "name": "CaixaForum Madrid",
+  "municipality": "Madrid",
+  "area": "madrid",
+  "address": "Paseo del Prado, 36, 28014 Madrid",
+  "url": "https://caixaforum.org/es/madrid",
+  "lastVerifiedAt": "2026-09-15"
+}
