@@ -412,6 +412,7 @@ describe('report de Discovery', () => {
     expect(markdown).toContain('| IA: requests por modelo | gemini-3.1-flash-lite: 8, llama-3.1-8b-instant: 3 |');
     expect(markdown).toContain('| IA: clasificaciones por modelo | gemini-3.1-flash-lite: 7, llama-3.1-8b-instant: 2 |');
     expect(markdown).toContain('| IA: requests por provider | gemini: 8, groq: 3 |');
+    expect(markdown).toContain('| IA: clasificaciones por provider | ninguno |');
     expect(markdown).not.toContain(process.env.GEMINI_API_KEY ?? 'GEMINI_API_KEY_PLACEHOLDER_SHOULD_NOT_MATCH_IF_UNSET');
   });
 
@@ -428,6 +429,7 @@ describe('report de Discovery', () => {
     expect(markdown).toContain('| IA: requests por modelo | ninguno |');
     expect(markdown).toContain('| IA: clasificaciones por modelo | ninguno |');
     expect(markdown).toContain('| IA: requests por provider | ninguno |');
+    expect(markdown).toContain('| IA: clasificaciones por provider | ninguno |');
   });
 
   it('el body de la PR exige revisión humana y no habla de auto-merge', () => {

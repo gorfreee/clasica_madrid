@@ -18,10 +18,10 @@ export type AiFreeProvider = (typeof AI_FREE_PROVIDERS)[number];
 
 /**
  * Construction order of the zero-cost pool. Distinct from `AI_FREE_PROVIDERS`
- * listing order (`cloudflare` is listed before `zai` there).
+ * listing order.
  */
 const FREE_ROUTE_BUILD_ORDER = [
-  'gemini', 'groq', 'mistral', 'zai', 'cloudflare', 'vercel', 'kilo', 'openrouter',
+  'gemini', 'groq', 'mistral', 'cloudflare', 'vercel', 'zai', 'kilo', 'openrouter',
 ] as const satisfies readonly AiFreeProvider[];
 
 export type FreeProviderInspectionStatus = 'ready' | 'unconfigured' | 'empty' | 'error';

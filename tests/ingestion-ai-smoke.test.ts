@@ -116,9 +116,9 @@ describe('CLI, fixtures y descubrimiento', () => {
       ...GEMINI_DEFAULT_MODELS.map((model) => `gemini:${model}`),
       ...GROQ_DEFAULT_MODELS.map((model) => `groq:${model}`),
       ...MISTRAL_DEFAULT_MODELS.map((model) => `mistral:${model}`),
-      ...ZAI_ZERO_COST_MODELS.map((model) => `zai:${model}`),
       ...CLOUDFLARE_ZERO_COST_MODELS.map((model) => `cloudflare:${model}`),
       ...VERCEL_ZERO_COST_MODELS.map((model) => `vercel:${model}`),
+      ...ZAI_ZERO_COST_MODELS.map((model) => `zai:${model}`),
       ...KILO_ZERO_COST_MODELS.map((model) => `kilo:${model}`),
       ...OPENROUTER_ZERO_COST_MODELS.map((model) => `openrouter:${model}`),
     ]);
