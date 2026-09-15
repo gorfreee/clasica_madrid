@@ -790,6 +790,7 @@ describe('discovery: classifier inyectado y decisiones canónicas', () => {
         venue: churchVenue(),
         event: {
           title: 'Concierto extraordinario',
+          description: 'Programa en la tradición concertística.',
           venueText: 'Iglesia de San José',
           occurrences: [{ raw: '2026-10-12 19:30', date: '2026-10-12', time: '19:30' }],
           composers: [],
