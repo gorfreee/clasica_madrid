@@ -219,15 +219,18 @@ function earlyMusicStrength(evidence: FormatEvidence): 'strong' | 'weak' {
   return 'weak';
 }
 
+/**
+ * Strong chamber is a named chamber series or an explicit chamber-music
+ * formation of THIS concert. Bare quinteto/trío/dúo/cuarteto in a title is
+ * only a weak size cue: it must not freeze format after a weak include,
+ * and it never decides eligibility.
+ */
 function hasStrongChamberFormation(text: string): boolean {
   if (!text) return false;
   return (
-    hasWord(text, 'cuarteto') ||
-    hasWord(text, 'quartet') ||
-    hasWord(text, 'quartett') ||
-    hasWord(text, 'quinteto') ||
-    hasWord(text, 'sexteto') ||
-    hasWord(text, 'octeto') ||
+    hasPhrase(text, 'cuarteto de cuerda') ||
+    hasPhrase(text, 'cuarteto de cuerdas') ||
+    hasPhrase(text, 'string quartet') ||
     hasPhrase(text, 'liceo de camara') ||
     hasPhrase(text, 'domingos de camara') ||
     hasPhrase(text, 'musica de camara') ||

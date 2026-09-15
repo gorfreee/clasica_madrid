@@ -97,7 +97,7 @@ describe('contratos por purpose — ningún mega-schema', () => {
   it('cada purpose tiene schema propio, additionalProperties:false y evidence ≤ 4', () => {
     expect(AI_REQUEST_CONTRACT_VERSION).toBe(4);
     expect(AI_EVIDENCE_MAX_ITEMS).toBe(4);
-    expect(AI_CLASSIFIER_PROMPT_VERSION).toBe(14);
+    expect(AI_CLASSIFIER_PROMPT_VERSION).toBe(15);
     expect(AI_TAXONOMY_PROMPT_VERSION).toBe(10);
 
     expect(AI_ELIGIBILITY_JSON_SCHEMA.additionalProperties).toBe(false);

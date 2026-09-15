@@ -26,7 +26,7 @@ function expectedAsAi(item: GoldenCase): AiClassifier {
 }
 
 describe('golden set → classify + AI fake', () => {
-  it('ecos_tres_culturas: determinista uncertain, fake AI include early-music', async () => {
+  it('ecos_tres_culturas: un ensemble nombrado no basta para que la IA fuerce include', async () => {
     const cases = await loadGoldenCases();
     const ecos = cases.find((item) => item.caseId === 'golden_ecos_tres_culturas');
     expect(ecos).toBeDefined();
@@ -47,12 +47,10 @@ describe('golden set → classify + AI fake', () => {
         },
       },
     });
-    expect(result.eligibility.value).toBe('include');
-    expect(result.eligibility.method).toBe('ai');
-    expect(result.formats?.value).toEqual(['early-music', 'chamber']);
-    expect(result.eras?.value).toEqual([]);
-    expect(result.kind?.value).toBe('alternative');
-    expect(isAutomaticallyPublishable(result.eligibility.value)).toBe(true);
+    expect(result.eligibility.value).toBe('uncertain');
+    expect(result.eligibility.ruleId).toBe('ai-weak-include-evidence');
+    expect(result.formats).toBeUndefined();
+    expect(isAutomaticallyPublishable(result.eligibility.value)).toBe(false);
   });
 
   it('pastora_soler: determinista uncertain, fake AI exclude', async () => {
@@ -111,7 +109,8 @@ describe('golden set → classify + AI fake', () => {
     const ecos = rows.find((row) => row.caseId === 'golden_ecos_tres_culturas');
     const pastora = rows.find((row) => row.caseId === 'golden_pastora_soler');
     const fito = rows.find((row) => row.caseId === 'golden_fito_paez');
-    expect(ecos?.actualEligibility).toBe('include');
+    expect(ecos?.actualEligibility).toBe('uncertain');
+    expect(ecos?.result.eligibility.ruleId).toBe('ai-weak-include-evidence');
     expect(pastora?.actualEligibility).toBe('exclude');
     expect(fito?.actualEligibility).toBe('exclude');
 
@@ -132,9 +131,12 @@ describe('golden set → classify + AI fake', () => {
           expect(row.result.kind?.value, row.caseId).toBeDefined();
         } else {
           expect(row.actualEligibility, row.caseId).toBe('uncertain');
-          expect(row.result.eligibility.ruleId, row.caseId).toBe(
-            'ai-coprincipal-without-classical-block',
-          );
+          expect(
+            ['ai-coprincipal-without-classical-block', 'ai-weak-include-evidence'].includes(
+              row.result.eligibility.ruleId,
+            ),
+            `${row.caseId}: ${row.result.eligibility.ruleId}`,
+          ).toBe(true);
         }
       }
       if (row.expectedEligibility === 'exclude') {

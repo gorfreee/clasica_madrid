@@ -207,7 +207,11 @@ describe('publication gate — pipeline completo', () => {
       },
     });
     const run = await runAuditorio({
-      items: [{ title: 'Concierto extraordinario', slug: 'concierto-extraordinario' }],
+      items: [{
+        title: 'Concierto extraordinario',
+        slug: 'concierto-extraordinario',
+        description: 'Programa en la tradición concertística.',
+      }],
       ai,
     });
 
@@ -296,7 +300,11 @@ describe('publication gate — pipeline completo', () => {
       },
     });
     const run = await runAuditorio({
-      items: [{ title: 'Concierto extraordinario', slug: 'include-vacio' }],
+      items: [{
+        title: 'Concierto extraordinario',
+        slug: 'include-vacio',
+        description: 'Programa en la tradición concertística.',
+      }],
       ai,
     });
 
@@ -306,6 +314,25 @@ describe('publication gate — pipeline completo', () => {
     expect(run.candidates[0]!.event.kind).toBe('established');
     expect(run.candidates[0]!.event.citations[0]?.url).toMatch(/^https:\/\//);
     expect(run.summary.healthReasons).toContain('unresolved-taxonomy');
+    expect(run.summary.autoMergeEligible).toBe(true);
+  });
+
+  it('un AI include débil sobre un título genérico no genera Candidate', async () => {
+    const ai = countingAi({
+      async classify() {
+        return { eligibility: 'include', formats: ['chamber'], evidence: ['Concierto extraordinario'] };
+      },
+    });
+    const run = await runAuditorio({
+      items: [{ title: 'Concierto extraordinario', slug: 'titulo-generico' }],
+      ai,
+    });
+
+    expect(ai.calls).toBe(1);
+    expect(run.candidates).toEqual([]);
+    expect(run.summary.eligibility.include).toBe(0);
+    expect(run.summary.eligibility.uncertain).toBe(1);
+    expect(run.decisions[0]?.eligibility?.ruleId).toBe('ai-weak-include-evidence');
     expect(run.summary.autoMergeEligible).toBe(true);
   });
 
