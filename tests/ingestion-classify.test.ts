@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { classify, resolveAccess, resolveEras, resolveFormats, resolveKind } from '../src/ingestion/classification/classify.ts';
+import {
+  hasClassicalVocalEnsembleAnchor,
+  hasObservedClassicalAcademicAnchor,
+} from '../src/ingestion/classification/eligibility.ts';
 import type { ObservedFacts } from '../src/ingestion/observed.ts';
 
 function facts(overrides: Partial<ObservedFacts> & Pick<ObservedFacts, 'title'>): ObservedFacts {
@@ -1938,6 +1942,77 @@ describe('kind', () => {
     expect(result.value).toBe('established');
     expect(result.evidence.join(' ')).toMatch(/retiro/i);
     expect(result.evidence).not.toContain('ven_teatro_real');
+  });
+});
+
+describe('eligibility — formación vocal lírica', () => {
+  const vozInfinita = facts({
+    title: '«La voz infinita. (Una mañana de gala)»',
+    categoryText: 'Concierto',
+    description: 'Ciclo «Matinales de Amalgama»',
+    performers: [
+      { name: 'Alba Chantar', roleText: 'soprano' },
+      { name: 'Ekaterina Antipova', roleText: 'mezzosoprano' },
+      { name: 'Igor Peral', roleText: 'tenor' },
+      { name: 'Javier Franco', roleText: 'barítono' },
+      { name: 'Javier Carmena', roleText: 'piano' },
+      { name: 'Ismael García', roleText: 'oboe' },
+    ],
+  });
+
+  it('incluye una gala lírica con al menos tres familias vocales y acompañamiento de cámara', () => {
+    expect(hasClassicalVocalEnsembleAnchor(vozInfinita)).toBe(true);
+    expect(hasObservedClassicalAcademicAnchor(vozInfinita)).toBe(true);
+    const result = classify(vozInfinita);
+    expect(result.eligibility.value).toBe('include');
+    expect(result.eligibility.ruleId).toBe('classical-vocal-ensemble');
+  });
+
+  it('no convierte un dúo cantante+piano en clásico', () => {
+    const duo = facts({
+      title: 'Recital de voz y piano',
+      categoryText: 'Concierto',
+      performers: [
+        { name: 'Laura Fdez. Alcalde', roleText: 'soprano' },
+        { name: 'Irene de Juan Bernabeu', roleText: 'piano' },
+      ],
+    });
+    expect(hasClassicalVocalEnsembleAnchor(duo)).toBe(false);
+    expect(classify(duo).eligibility.value).toBe('uncertain');
+  });
+
+  it('no convierte en clásico un concierto pop o jazz con una sola soprano', () => {
+    const popSoprano = facts({
+      title: 'Grandes del pop',
+      categoryText: 'Concierto',
+      performers: [{ name: 'Ana Pop', roleText: 'soprano' }],
+    });
+    expect(hasClassicalVocalEnsembleAnchor(popSoprano)).toBe(false);
+    expect(classify(popSoprano).eligibility.value).toBe('exclude');
+    expect(classify(popSoprano).eligibility.ruleId).toBe('popular-music-identity');
+
+    const jazzSoprano = facts({
+      title: 'Velada en el Auditorio',
+      categoryText: 'Jazz en el Auditorio',
+      performers: [{ name: 'Ana Jazz', roleText: 'soprano' }],
+    });
+    expect(hasClassicalVocalEnsembleAnchor(jazzSoprano)).toBe(false);
+    expect(classify(jazzSoprano).eligibility.value).toBe('exclude');
+    expect(classify(jazzSoprano).eligibility.ruleId).toBe('jazz-identity');
+  });
+
+  it('no toma saxos tenor y soprano como voces líricas', () => {
+    const saxQuintet = facts({
+      title: 'Quinteto en concierto',
+      categoryText: 'Concierto',
+      performers: [
+        { name: 'Ingrid Laubrock', roleText: 'saxos tenor y soprano' },
+        { name: 'Myra Melford', roleText: 'piano' },
+        { name: 'Lesley Mok', roleText: 'batería' },
+      ],
+    });
+    expect(hasClassicalVocalEnsembleAnchor(saxQuintet)).toBe(false);
+    expect(classify(saxQuintet).eligibility.value).not.toBe('include');
   });
 });
 

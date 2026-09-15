@@ -144,6 +144,12 @@ function collectInclusions(facts: ObservedFacts, haystack: string): Inclusion[] 
   if (organConcertInclusion(facts, haystack)) {
     found.push({ ruleId: 'organ-concert', evidence: ['concierto o recital de órgano'] });
   }
+  if (hasClassicalVocalEnsembleAnchor(facts)) {
+    found.push({
+      ruleId: 'classical-vocal-ensemble',
+      evidence: classicalVocalEnsembleEvidence(facts),
+    });
+  }
   const explicitClassical = explicitClassicalConcertDeclaration(facts);
   if (explicitClassical) found.push(explicitClassical);
   if (describedClassicalPerformance(facts, haystack) && known.length === 0) {
@@ -662,6 +668,88 @@ function hasConcertOrRecitalWord(text: string): boolean {
   );
 }
 
+type LyricVocalFamily =
+  | 'soprano'
+  | 'mezzosoprano'
+  | 'contralto'
+  | 'tenor'
+  | 'baritono'
+  | 'bajo';
+
+/**
+ * Title, official category or series names the event as jazz/pop/flamenco/DJ/cinema.
+ * Description mentions are left to collectExclusions; this helper stays conservative.
+ */
+function identityHasDominantNonClassicalCue(facts: ObservedFacts): boolean {
+  const identity = [fieldFolded(facts.title), fieldFolded(facts.categoryText), fieldFolded(facts.seriesText)]
+    .filter(Boolean)
+    .join(' ');
+  if (!identity) return false;
+  return (
+    hasWord(identity, 'jazz') ||
+    hasPhrase(identity, 'cafe central') ||
+    hasWord(identity, 'pop') ||
+    hasPhrase(identity, 'flamenc') ||
+    hasWord(identity, 'dj') ||
+    hasWord(identity, 'cine') ||
+    hasPhrase(identity, 'banda sonora') ||
+    hasPhrase(identity, 'musica de cine')
+  );
+}
+
+function lyricVocalFamily(roleText: string | undefined): LyricVocalFamily | undefined {
+  const role = fieldFolded(roleText);
+  if (!role || roleNamesInstrument(role)) return undefined;
+  if (hasWord(role, 'mezzosoprano') || hasWord(role, 'mezzo')) return 'mezzosoprano';
+  if (hasWord(role, 'soprano')) return 'soprano';
+  if (hasWord(role, 'contralto')) return 'contralto';
+  if (hasWord(role, 'tenor')) return 'tenor';
+  if (hasWord(role, 'baritono')) return 'baritono';
+  if (
+    hasWord(role, 'bajo') &&
+    !hasWord(role, 'contrabajo') &&
+    !hasPhrase(role, 'bajo electrico')
+  ) {
+    return 'bajo';
+  }
+  return undefined;
+}
+
+/** Sax/clarinet/etc. use SATB names; those are instruments, not lyric voices. */
+function roleNamesInstrument(role: string): boolean {
+  return (
+    hasPhrase(role, 'saxo') ||
+    hasPhrase(role, 'saxof') ||
+    hasWord(role, 'clarinete') ||
+    hasWord(role, 'trombon') ||
+    hasWord(role, 'trompeta') ||
+    hasWord(role, 'fliscorno') ||
+    hasWord(role, 'corno')
+  );
+}
+
+function isIncompatibleVocalEnsembleAccompaniment(roleText: string | undefined): boolean {
+  const role = fieldFolded(roleText);
+  if (!role) return false;
+  return (
+    hasWord(role, 'dj') ||
+    hasWord(role, 'bateria') ||
+    hasPhrase(role, 'saxo') ||
+    hasPhrase(role, 'saxof') ||
+    hasPhrase(role, 'bajo electrico') ||
+    hasWord(role, 'cante') ||
+    hasWord(role, 'cantaor') ||
+    hasWord(role, 'cantaora') ||
+    hasPhrase(role, 'guitarra flamenca')
+  );
+}
+
+function classicalVocalEnsembleEvidence(facts: ObservedFacts): string[] {
+  return facts.performers
+    .filter((item) => lyricVocalFamily(item.roleText))
+    .map((item) => [item.name, item.roleText].filter(Boolean).join(', '));
+}
+
 /**
  * Bare "cine" names a screening. The art-form phrase "cine experimental", used
  * as an electroacoustic/audiovisual medium, is not a film-cycle identity.
@@ -785,7 +873,29 @@ export function hasObservedClassicalAcademicAnchor(facts: ObservedFacts): boolea
   const haystack = identityHaystack(facts);
   if (collectInclusions(facts, haystack).length > 0) return true;
   if (hasSubstantialClassicalBlock(facts)) return true;
+  if (hasClassicalVocalEnsembleAnchor(facts)) return true;
   return hasConservativeClassicalInterpretationAnchor(facts);
+}
+
+/**
+ * Concert/recital with an unequivocal lyric vocal formation: at least three
+ * distinct SATB-family roles, compatible accompaniment when present, and no
+ * dominant jazz/pop/flamenco/DJ/cinema identity. A single soprano, or a
+ * singer+piano duo, is not enough.
+ */
+export function hasClassicalVocalEnsembleAnchor(facts: ObservedFacts): boolean {
+  const title = fieldFolded(facts.title);
+  const category = fieldFolded(facts.categoryText);
+  if (!hasConcertOrRecitalIdentity(facts, title, category)) return false;
+  if (identityHasDominantNonClassicalCue(facts)) return false;
+
+  const families = new Set<LyricVocalFamily>();
+  for (const performer of facts.performers) {
+    const family = lyricVocalFamily(performer.roleText);
+    if (family) families.add(family);
+    if (isIncompatibleVocalEnsembleAccompaniment(performer.roleText)) return false;
+  }
+  return families.size >= 3;
 }
 
 /**

@@ -8,6 +8,7 @@ import {
 import { explicitAccessText } from '../detail/access-evidence.ts';
 import { inferScheduleFromText } from '../detail/schedule.ts';
 import {
+  ateneoExplicitCycleName,
   ateneoOfficialProgramUrls,
   ateneoPerformers,
   ateneoSeriesText,
@@ -293,7 +294,7 @@ function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
   const programUrls = typeof item.description === 'string' ? ateneoOfficialProgramUrls(item.description) : [];
   const observedDescription = withAteneoProgramUrls(description, programUrls);
   const programText = ateneoProgramText(item.description);
-  const seriesText = ateneoSeriesText(categories);
+  const seriesText = ateneoExplicitCycleName(description) ?? ateneoSeriesText(categories);
   const performers = ateneoPerformers(description);
 
   return {

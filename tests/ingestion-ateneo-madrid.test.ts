@@ -12,6 +12,7 @@ import { classify } from '../src/ingestion/classification/classify.ts';
 import { classifyObserved } from '../src/ingestion/classification/enrich.ts';
 import { resolveAccess } from '../src/ingestion/classification/access.ts';
 import {
+  ateneoExplicitCycleName,
   ateneoOfficialProgramUrls,
   ateneoPerformers,
 } from '../src/ingestion/detail/ateneo-madrid.ts';
@@ -73,6 +74,7 @@ describe('Ateneo de Madrid REST listing', () => {
     expect(gala.observed).toMatchObject({
       title: '«La voz infinita. (Una mañana de gala)»',
       categoryText: 'Concierto',
+      seriesText: 'Matinales de Amalgama',
       venueText: 'Cátedra Mayor',
       occurrences: [{ raw: 'Cátedra Mayor. 12:00h', date: '2026-09-20', time: '12:00' }],
       performers: [
@@ -87,6 +89,8 @@ describe('Ateneo de Madrid REST listing', () => {
       works: [],
     });
     expect(gala.observed.accessText).toBeUndefined();
+    expect(classify(gala.observed).eligibility.value).toBe('include');
+    expect(classify(gala.observed).eligibility.ruleId).toBe('classical-vocal-ensemble');
 
     const apollo = events.find((event) => event.externalId === '63540')!;
     expect(apollo.observed.venueText).toBe('Ateneo de Madrid');
@@ -329,6 +333,7 @@ describe('Ateneo de Madrid pipeline safety', () => {
     expect(first.candidates.some((candidate) => /Falla|Mompou|APOLLO5|voz infinita/i.test(candidate.event.title))).toBe(
       true,
     );
+    expect(first.candidates.some((candidate) => candidate.event.id === 'evt_ateneo_madrid_63406')).toBe(true);
     expect(first.candidates.some((candidate) => /GROOVERS|ELORRIETA/i.test(candidate.event.title))).toBe(false);
     expect(first.decisions.find((decision) => /GROOVERS/i.test(decision.title))?.eligibility).toMatchObject({
       value: 'exclude',
@@ -380,7 +385,7 @@ describe('Ateneo de Madrid regression cases', () => {
     const events = await adapter.extract(await regression('regression.json'), listingUrl, ctx);
     const cadiz = events.find((event) => event.observed.title.includes('Cádiz'))!;
     expect(cadiz.observed.performers).toEqual([
-      { name: 'Miguel Trápaga', roleText: 'autor' },
+      { name: 'Miguel Trápaga', roleText: 'concertista' },
     ]);
     expect(cadiz.observed.performers.map((item) => item.name)).not.toContain('Luis Ángel de Benito');
     expect(cadiz.observed.seriesText).toBe('Presentación del disco');
@@ -427,6 +432,14 @@ describe('Ateneo de Madrid regression cases', () => {
     expect(cantar.observed.description).toContain('Concierto-22-de-Noviembre-de-2026.pdf');
   });
 
+  it('extracts an explicit Ciclo «…» as seriesText without treating the cycle as classical', () => {
+    expect(ateneoExplicitCycleName('Ciclo «Matinales de Amalgama». Intérpretes: Alba Chantar (soprano).')).toBe(
+      'Matinales de Amalgama',
+    );
+    expect(ateneoExplicitCycleName('Ciclo "Matinales de Amalgama"')).toBe('Matinales de Amalgama');
+    expect(ateneoExplicitCycleName('«Cantar del Alma». Ciclo de Conciertos Manuel de Falla')).toBeUndefined();
+  });
+
   it('discovers official Ateneo programme PDFs from editorial links, not posters or tickets', () => {
     const html = [
       '<p>Información y programa (<a href="https://ateneodemadrid.com/wp-content/uploads/2026/05/Concierto-22-de-Noviembre-de-2026.pdf">ver</a>).</p>',
@@ -444,7 +457,12 @@ describe('Ateneo de Madrid regression cases', () => {
     const concertista = flattenHtmlBlocks(
       '<p><strong>Concertista:</strong><strong> Miguel Trápaga &#8211; autor. Cátedra Mayor. 11:30.</strong></p>',
     );
-    expect(ateneoPerformers(concertista)).toEqual([{ name: 'Miguel Trápaga', roleText: 'autor' }]);
+    expect(ateneoPerformers(concertista)).toEqual([{ name: 'Miguel Trápaga', roleText: 'concertista' }]);
+
+    const labeledAuthor = flattenHtmlBlocks(
+      '<p>Intérpretes: Ana Ruiz – autora. Cátedra Mayor. 19:00h.</p>',
+    );
+    expect(ateneoPerformers(labeledAuthor)).toEqual([{ name: 'Ana Ruiz' }]);
 
     const solista = flattenHtmlBlocks('<p>Solista: Ana Ruiz (piano). Cátedra Mayor. 19:00h.</p>');
     expect(ateneoPerformers(solista)).toEqual([{ name: 'Ana Ruiz', roleText: 'piano' }]);

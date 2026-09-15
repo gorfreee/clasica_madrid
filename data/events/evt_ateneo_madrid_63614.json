@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_ateneo_madrid_63614",
+  "slug": "de-cadiz-a-la-habana",
+  "title": "«De Cádiz a la Habana»",
+  "status": "scheduled",
+  "venueId": "ven_ateneo_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_ateneo_madrid_63614_01",
+      "date": "2026-09-26",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Miguel Trápaga"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ángel Barrios"
+    }
+  ],
+  "works": [
+    {
+      "title": "De Cádiz a La Habana",
+      "composerName": "Ángel Barrios"
+    }
+  ],
+  "eras": [],
+  "formats": [],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_ateneo_madrid",
+      "url": "https://ateneodemadrid.com/evento/de-cadiz-a-la-habana",
+      "checkedAt": "2026-09-15",
+      "externalId": "63614"
+    }
+  ],
+  "primarySourceId": "src_ateneo_madrid",
+  "lastVerifiedAt": "2026-09-15"
+}
