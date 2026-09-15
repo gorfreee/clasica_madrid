@@ -38,7 +38,7 @@ Prioriza siempre una fuente oficial o canónica. Un agregador o una plataforma d
 - Deduplica observaciones repetidas de la misma fuente por una identidad estable y falla ante conflictos materiales que no puedan resolverse sin inferir.
 - Reutiliza helpers comunes de fechas, HTML, URLs, hydration, normalización y matching cuando encajen. Añade lógica compartida sólo si existe un segundo consumidor real o una necesidad clara.
 - No modifiques `data/**` durante el desarrollo ni para guardar resultados de una ejecución. Fixtures sintéticos o capturas representativas pertenecen en `tests/fixtures/`. Si el contrato actual exige excepcionalmente un cambio canónico para que el adapter funcione, justifícalo expresamente y limita el cambio al mínimo indispensable.
-- No implementes fases futuras de Ingestion v3 ni cambies workflows, clasificación, reconciliación, UI o dependencias salvo que esta fuente lo requiera de manera inevitable.
+- No implementes capacidades pendientes de Ingestion v3 (búsqueda web automática, scheduling de discovery, aprendizaje/promoción de fuentes, reconciliación fuzzy) ni cambies workflows, clasificación, reconciliación, UI o dependencias salvo que esta fuente lo requiera de manera inevitable.
 
 ## Tests y validación
 

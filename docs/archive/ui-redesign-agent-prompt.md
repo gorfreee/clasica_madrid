@@ -2,19 +2,19 @@
 
 > **Documentación histórica.** Prompt de una sola ejecución para implementar el rediseño de interfaz. **No** es un requisito vigente ni un procedimiento a reutilizar.
 >
-> La dirección de producto y UX de aquel rediseño está en [`docs/ui-redesign.md`](../ui-redesign.md). El contexto del proyecto está en [`PROJECT_CONTEXT.md`](../../PROJECT_CONTEXT.md).
+> La dirección de producto y UX de aquel rediseño está en [`ui-redesign-v0.4.md`](ui-redesign-v0.4.md). El contexto del proyecto está en [`PROJECT_CONTEXT.md`](../../PROJECT_CONTEXT.md).
 >
-> Consérvese como registro de aquella tarea.
+> Consérvese como registro de aquella tarea. Las rutas y la «fuente de verdad» que menciona el cuerpo del prompt se refieren a aquel momento; la UI actual no se especifica aquí.
 
 Implementa el rediseño visual completo de la interfaz pública de Clásica Madrid y abre una PR.
 
 Antes de modificar nada:
 
-- lee `AGENTS.md`, `PROJECT_CONTEXT.md`, `ARCHITECTURE.md` y, sobre todo, `docs/ui-redesign.md`;
+- lee `AGENTS.md`, `PROJECT_CONTEXT.md`, `ARCHITECTURE.md` y, sobre todo, el brief histórico `docs/archive/ui-redesign-v0.4.md`;
 - inspecciona la UI actual, `src/lib/presentation`, los tests y los contratos que conectan presentación e interacción;
 - recorre el catálogo real para entender la variedad y los casos difíciles de contenido.
 
-`docs/ui-redesign.md` es la fuente de verdad para producto, UX, alcance, dirección visual y restricciones de esta tarea. Las decisiones principales ya están convergidas: no hace falta volver a plantear el producto ni crear varias propuestas separadas antes de implementar.
+El brief histórico `docs/archive/ui-redesign-v0.4.md` era la fuente de verdad para producto, UX, alcance, dirección visual y restricciones de **aquella** tarea. Las decisiones principales ya estaban convergidas: no hacía falta volver a plantear el producto ni crear varias propuestas separadas antes de implementar.
 
 Quiero una implementación fuerte y coherente de toda la experiencia pública —agenda/home, navegación, búsqueda y filtros, fichas de evento, lugares y estados secundarios—, no un simple restyling de los componentes actuales. Usa criterio de diseño para resolver tipografía, paleta, grid, responsive, composición, controles y detalles de interacción dentro de la libertad que deja el documento. Itera si la primera solución resulta genérica o funciona mal con datos reales.
 

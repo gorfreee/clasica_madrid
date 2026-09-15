@@ -1,8 +1,8 @@
-# Ingestión v3 — arquitectura pragmática y automatizada
+# Ingestión v3 — arquitectura objetivo
 
-> Estado: **diseño objetivo vigente** para evolucionar la ingestión. Las fases 1–3 (harvesting, clasificación, puerta de publicación y reconciliation) ya viven en `src/ingestion/` y se operan con `npm run ingest:sync`. Este documento define hacia dónde va el resto; no es un diario de lo ya implementado.
+> Estado: **roadmap / arquitectura de evolución**. Las capacidades núcleo de la v3 ya están en producción. Este documento explica hacia dónde sigue el sistema y qué restricciones deben conservarse; **no** es el manual operativo.
 >
-> Qué hay hoy: [`docs/ingestion.md`](ingestion.md). Política editorial: [`docs/classification-policy.md`](classification-policy.md). Histórico: [`docs/archive/`](archive/).
+> Qué hay implementado hoy: [`docs/ingestion.md`](ingestion.md). Política editorial: [`docs/classification-policy.md`](classification-policy.md). Histórico: [`docs/archive/`](archive/).
 >
 > La v3 no pretende construir una plataforma de datos genérica. Pretende mantener una agenda de descubrimiento de música clásica con buena cobertura, trazabilidad y calidad, minimizando infraestructura, coste y mantenimiento.
 
@@ -10,13 +10,14 @@
 
 ## 1. Decisiones de producto y operación
 
-- la ingestión automática ordinaria se ejecutará aproximadamente **cada 10 días**;
-- la ejecución programada cubre desde el día de la run hasta el **31 de julio más cercano**; el CLI y el dispatch manual sin fechas siguen usando hoy → +120 días;
-- el objetivo operativo es **0 % de intervención humana** en el flujo normal;
+- la ingestión automática ordinaria se ejecuta de forma periódica (aproximadamente cada diez días; el schedule concreto está en el workflow) y cubre la temporada hasta el **31 de julio más cercano**; el CLI y el dispatch manual sin fechas usan una ventana más corta (hoy → +120 días);
+- el objetivo operativo sigue siendo **0 % de intervención humana** en el flujo normal;
 - `eras` y `formats` deben intentarse siempre, pero una clasificación ausente o incierta **no debe bloquear por sí sola** la publicación de un evento fiable;
 - el pipeline fundamental debe poder funcionar aunque temporalmente no haya ningún agente de IA disponible;
-- no se introducen por defecto bases de datos, colas, orquestadores, plataformas ETL ni servicios externos de pago;
-- Git, JSON, TypeScript, GitHub Actions y las validaciones actuales siguen siendo la base mientras sean suficientes.
+- no se introducen por defecto bases de datos, colas, orquestadores, plataformas ETL ni servicios de pago;
+- Git, JSON, TypeScript, GitHub Actions y las validaciones deterministas siguen siendo la base mientras sean suficientes.
+
+El cadence exacto, los inputs del workflow y las reglas de auto-merge viven en [`docs/ingestion.md`](ingestion.md) y en `.github/workflows/ingestion.yml`. No los dupliques aquí.
 
 La meta no es automatizar cualquier caso imaginable. La meta es que el catálogo se mantenga solo en condiciones normales y que los casos difíciles degraden sin comprometer el resto de la ejecución.
 
@@ -53,11 +54,32 @@ No sabemos todavía dónde buscar (iglesias, asociaciones, recitales poco visibl
 
 ### Ciclo de aprendizaje
 
-Cada descubrimiento debe intentar reducir trabajo futuro: si proviene de una fuente recurrente útil, evaluar un adapter; si no, procesarlo como evento puntual. La cobertura determinista debería crecer; la búsqueda abierta sigue existiendo para la larga cola.
+Cada descubrimiento debe intentar reducir trabajo futuro: si proviene de una fuente recurrente útil, evaluar un adapter; si no, procesarlo como evento puntual. La cobertura determinista debería crecer; la búsqueda abierta sigue existiendo para la larga cola. **La promoción automática a adapters todavía no existe.**
 
 ---
 
-## 5. Arquitectura objetivo
+## 5. Estado por capacidad
+
+| Capacidad | Estado | Dónde está el detalle |
+|---|---|---|
+| Harvesting y adapters | En producción | [`docs/ingestion.md`](ingestion.md), `src/ingestion/`, registry |
+| Enrichment / classification | En producción | [`docs/ingestion.md`](ingestion.md), [`docs/classification-policy.md`](classification-policy.md) |
+| Reconciliation determinista | En producción | [`docs/ingestion.md`](ingestion.md) |
+| Automatización y publicación (Actions, PR, CI, auto-merge condicionado) | En producción | [`docs/ingestion.md`](ingestion.md), `.github/workflows/` |
+| Discovery v1 (contexto / batch estructurado) | En producción | [`docs/ingestion.md`](ingestion.md) |
+| Observabilidad de ejecuciones | En producción | [`docs/ingestion.md`](ingestion.md) |
+| Búsqueda web automática de discovery | Pendiente | este documento |
+| Scheduling propio de discovery | Pendiente | este documento |
+| Aprendizaje / promoción automática de fuentes | Pendiente | este documento |
+| Reconciliación fuzzy o con IA residual | Pendiente, sólo si se decide | este documento |
+
+No implementes una capacidad pendiente salvo que una tarea la pida.
+
+---
+
+## 6. Arquitectura
+
+El flujo objetivo —hoy el flujo real de harvesting— es:
 
 ```text
                      ┌────────────────────────┐
@@ -99,203 +121,85 @@ Mientras el volumen lo permita, la implementación es TypeScript en esta repo. C
 
 ---
 
-## 6. Registry, adapters y hechos
+## 7. Contratos que deben conservarse
 
-El registry describe **cómo encontrar y extraer** eventos, no la procedencia editorial de `data/sources/`. Debe empezar pequeño. `Event.kind` no es un atributo de la source.
+Estos principios ya gobiernan el código. Cualquier evolución futura debe respetarlos. El detalle ejecutable no se duplica aquí.
 
-Cada adapter convierte una fuente en `RawEvent[]` de información **observada**. No decide cómo publicar, no escribe `data/**`, no infiere `kind` ni elegibilidad editorial.
+**Registry y adapters.** El registry describe cómo encontrar y extraer eventos, no la procedencia editorial de `data/sources/`. Cada adapter convierte una fuente en `RawEvent[]` de información **observada**. No decide cómo publicar, no escribe `data/**`, no infiere `kind` ni elegibilidad editorial. Preferir, cuando sea razonable: JSON público → JSON-LD → ICS/feeds → HTML estructurado → adapter custom → IA si la estructura no admite una solución robusta.
 
-Preferir, cuando sea razonable: JSON público → JSON-LD → ICS/feeds → HTML estructurado → adapter custom → IA si la estructura no admite una solución robusta.
+**Strict interpretation.** Si el parser ya no entiende una sección, fallo visible para esa fuente; el resto continúa. Una extracción vacía es sospechosa cuando el documento *parece* contener calendario. Un calendario genuinamente vacío no es un error. `extract` parsea el listing; la hidratación de fichas es posterior.
 
-**Strict interpretation:** si el parser ya no entiende una sección, fallo visible para esa fuente, el resto continúa. Una extracción vacía es sospechosa cuando el documento *parece* contener calendario. Un calendario genuinamente vacío no es un error.
+**Enrichment.** Extraer no es clasificar. Eligibility tiene prioridad: un `exclude` no debe gastar clasificación posterior. Un `uncertain` no se publica automáticamente. Preferencia: hecho explícito → regla determinista segura → knowledge persistido → IA → fallback seguro. Estar publicado en un venue habitualmente clásico **no implica** que el evento pertenezca al alcance.
 
-`extract` parsea el listing. La hidratación de fichas es una etapa posterior. Un fallo de listing es de fuente; un fallo de ficha es local al evento.
+Tri-state interno (no es un campo del schema `Event`): `include` / `exclude` / `uncertain`. `kind` es el contexto del evento (`established` / `alternative`), no un ranking de calidad ni una propiedad de la source.
 
-`RawEvent` es el contrato intermedio entre extracción y dominio. La forma exacta vive en el código. Lo importante: separar hechos extraídos, interpretaciones derivadas y entidades canónicas.
+**IA.** Interpreta hechos ya extraídos; no navega la web en el enrichment. No inventa performers, obras, fechas, venues ni URLs. `uncertain` es una salida válida. Un evento bien identificado no debe quedar fuera **solo** porque `eras`/`formats` no se hayan resuelto. CI no llama a un LLM. La ausencia de IA no debe corromper ni bloquear el catálogo.
 
-Tras extraer, una capa común normaliza textos, fechas, URLs, venues conocidos y aliases. La IA puede ayudar en un caso ambiguo la primera vez; una decisión estable debería convertirse en conocimiento reutilizable.
+**Candidate y lote.** En el flujo automático los candidatos existen **en memoria**. `ingestion/inbox/` sirve para imports manuales, debugging y casos excepcionales. Cada ejecución se procesa como conjunto y se escribe de forma coherente. Un fallo no debe dejar media ejecución aplicada. La v3 evita cursores incrementales hasta que haya evidencia de que hacen falta.
 
----
+**Cambios y desapariciones.** Un evento futuro que desaparece de una fuente **no** se borra automáticamente. Un evento histórico nunca se elimina porque deje de aparecer en la fuente actual. Deduplicación escalonada: identidad estable primero; heurística/fuzzy e IA sólo sobre candidatos ya plausibles, y **eso último aún no está implementado**.
 
-## 7. Enrichment
+**Aislamiento de fallos.** Una fuente rota no debe tirar toda la ejecución. Fallo local: aislar. Fallo global (schema inválido, referencias corruptas, colisión de identidad irresoluble): no publicar el lote afectado.
 
-La v3 separa extracción y clasificación. Un extractor puede conocer orquesta, obras y compositores sin poder concluir `formats` o `eras`.
-
-```text
-hechos observados
-      ↓
-eligibility
-      ↓
-formats / eras / kind / access
-      ↓
-Candidate
-```
-
-Eligibility tiene prioridad: un `exclude` no debe gastar clasificación posterior. Un `uncertain` no se publica automáticamente.
-
-Preferencia:
-
-```text
-hecho explícito → regla determinista segura → knowledge persistido → IA → fallback seguro
-```
-
-Estar publicado en un venue o source habitualmente clásicos **no implica** que el evento pertenezca al alcance. La puerta de elegibilidad es del enrichment, no del harvesting.
-
-Tri-state interno (no es un campo del schema `Event`):
-
-```text
-include   → puede continuar hacia Candidate
-exclude   → se descarta
-uncertain → no se publica automáticamente
-```
-
-La política editorial vigente es [`docs/classification-policy.md`](classification-policy.md). El golden set está en `tests/fixtures/ingestion/golden/`. No se duplican aquí taxonomías ni reglas.
-
-`kind` es el contexto del evento (`established` / «Circuito habitual» o `alternative` / «Alternativo»): el circuito en el que se celebra, no un ranking de calidad ni una propiedad de la source. Un teatro del circuito habitual puede acoger un evento `established` que no es música clásica (`exclude`). Una iglesia es `alternative` aunque toque una orquesta internacional.
+La política editorial vigente es [`docs/classification-policy.md`](classification-policy.md). El golden set está en `tests/fixtures/ingestion/golden/`.
 
 ---
 
-## 8. Uso de IA
+## 8. Automatización y publicación
 
-La IA interpreta hechos ya extraídos; no navega la web en el flujo de enrichment. Recibe contexto acotado (título, descripción, intérpretes, compositores, obras), las taxonomías, la Classification Policy y un schema de salida. No inventa performers, obras, fechas, venues ni URLs. `uncertain` es una salida válida.
+GitHub Actions es el orquestador actual: scheduling, runners, logs, secrets, PRs y CI. No se introduce un orquestador externo mientras esto baste. Debe mantenerse ejecución manual (`workflow_dispatch` o CLI).
 
-`confidence` y `evidence` pueden ser metadata interna; no tienen que publicarse.
-
-Un evento bien identificado, fechado, localizado y respaldado por una fuente fiable no debe quedar fuera de la agenda **solo** porque `eras`/`formats` no se hayan resuelto. Campos vacíos generan señal; el evento puede publicarse si supera las validaciones esenciales.
-
-El pipeline debe funcionar sin un proveedor concreto. Encapsular llamadas detrás de interfaces pequeñas: ejecutar sin IA, cambiar de proveedor, testear con fakes. CI no llama a un LLM.
-
-Si la IA no está disponible: harvesting continúa, reglas y knowledge siguen, los campos no resueltos quedan para una ejecución posterior. La ausencia de IA no debe corromper ni bloquear el catálogo.
-
-Los agentes (Cursor u otros) son útiles para discovery, fuentes difíciles, excepciones, nuevos adapters y tests. No son una dependencia crítica del pipeline esencial.
-
----
-
-## 9. Candidate, batch y ventana
-
-`Candidate` es la frontera entre datos extraídos/enriquecidos y datos canónicos. En el flujo automático normal los candidatos existen **en memoria**:
-
-```text
-RawEvent[] → Candidate[] → validate batch → apply batch
-```
-
-`ingestion/inbox/` sirve para imports manuales, debugging y casos excepcionales. No es una cola persistente obligatoria para cada evento rutinario.
-
-Cuando un agente haga discovery abierto, no debería editar cientos de JSON canónicos uno a uno. Debe entregar un batch estructurado (o invocación de CLI); el código se concentra en IDs, matching, schemas, escritura y validación.
-
-Cada ejecución se procesa como conjunto: cargar catálogo, extraer fuentes sanas, normalizar, enriquecer, resolver entidades, detectar duplicados, comparar, validar en memoria, escribir de forma coherente. Un fallo no debe dejar media ejecución aplicada.
-
-La v3 evita inicialmente cursores o estado incremental. Cada ejecución programada vuelve a revisar desde el día de la run hasta el 31 de julio más cercano. El CLI por defecto usa hoy en Europe/Madrid → +120, y admite un rango manual `--from`/`--to` sin tope de 120 días. La optimización incremental sólo cuando haya evidencia de que hace falta.
-
----
-
-## 10. Cambios, desapariciones y deduplicación
-
-La ingestión no es sólo inserción. Un evento publicado puede cambiar fecha, hora, lugar, programa, estado, URL, acceso o clasificación. Cada ejecución debe reconciliar lo observado con el catálogo actual.
-
-Si un evento futuro desaparece de una fuente, **no** se borra automáticamente. Puede ser cancelación, reorganización, URL cambiada, error temporal o fallo del adapter. Un evento histórico nunca se elimina porque deje de aparecer en la fuente actual.
-
-Deduplicación escalonada: `externalId` estable → URL de origen → IDs/aliases conocidos → coincidencias fuertes de fecha/hora/lugar/título → nombres normalizados → heurística/fuzzy sobre candidatos plausibles → IA para ambigüedad residual. La IA no compara cada evento contra todo el catálogo. Cuando una decisión ambigua se repita, convertirla en regla o alias.
-
----
-
-## 11. Aislamiento de fallos
-
-Una fuente rota no debe tirar toda la ejecución. Las fuentes sanas pueden seguir produciendo cambios. Los resultados dudosos de una fuente problemática no se publican.
-
-**Fallo local** (timeout, HTML inesperado, parser roto, extracción vacía sospechosa): aislar.
-
-**Fallo global** (schema inválido, referencias corruptas, colisión de identidad irresoluble): no publicar el lote afectado.
-
----
-
-## 12. Automatización y publicación
-
-La ejecución ordinaria se programa en GitHub Actions ~cada diez días (p. ej. días 1, 11 y 21). GitHub Actions es orquestador suficiente: scheduling, runners, logs, secrets, PRs, CI. No se introduce un orquestador externo mientras esto baste. Debe mantenerse ejecución manual (`workflow_dispatch` o CLI).
-
-El objetivo es que una ejecución sana complete sola:
+El flujo ordinario ya completa:
 
 ```text
 fetch → extract → normalize → enrich → reconcile → validate → write → PR → CI → auto-merge
 ```
 
-Cero intervención no significa saltarse controles. La confianza viene de adapters versionados, schemas, tests, deduplicación, límites sobre qué paths toca la automatización, CI y auto-merge **sólo** con checks verdes.
+Cero intervención no significa saltarse controles. La confianza viene de adapters versionados, schemas, tests, deduplicación, límites sobre qué paths toca la automatización, CI y auto-merge **sólo** cuando health y configuración lo permiten.
 
 Cuando un caso no pueda resolverse, el comportamiento preferido es **degradar o excluir ese dato**, no pedir revisión humana como paso ordinario del pipeline. Se registra el fallo, se conserva el catálogo anterior, se continúa con el resto.
 
-Esto **no** está implementado todavía: la CI actual no aprueba ni fusiona PRs. No añadas branch protection, required checks ni workflows de ingestión a menos que una tarea lo pida.
+No añadas branch protection ni required checks. El detalle de health, kill switch, permisos y recovery está en [`docs/ingestion.md`](ingestion.md).
 
 ---
 
-## 13. Discovery abierto
+## 9. Discovery: qué hay y qué falta
 
-El harvesting de fuentes conocidas nunca cubrirá la larga cola. Periódicamente, agentes pueden buscar iglesias, conservatorios, centros culturales, asociaciones, festivales pequeños, agendas secundarias y webs de intérpretes, con contexto del catálogo y de las fuentes ya conocidas para concentrarse en huecos.
+El harvesting de fuentes conocidas nunca cubrirá la larga cola. Discovery v1 ya permite que un agente externo reciba un contexto compacto y devuelva un batch estructurado al pipeline común. El código de esta repo no busca en la web ni programa esas ejecuciones.
 
-Tarea conceptual: eventos de los próximos 120 días que probablemente no estén cubiertos; devolver hechos estructurados y detectar nuevas fuentes recurrentes.
+Siguen pendientes, y no deben añadirse de pasada:
 
----
+- búsqueda web automática dentro del repo o de Actions;
+- scheduling propio de discovery;
+- un ledger o aprendizaje que promocione fuentes recurrentes a adapters;
+- fuzzy reconciliation para encajar descubrimientos ambiguos con el catálogo.
 
-## 14. Observabilidad, tests e idempotencia
-
-Cada ejecución debería producir un resumen legible y, cuando sea útil, un artifact estructurado: fuentes intentadas/ok/fallidas, raw events, nuevos/actualizados/sin cambios/posiblemente desaparecidos, duplicados, enriquecidos por reglas vs IA, `eras`/`formats` vacíos, fallos de validación.
-
-Invertir más en tests que en infraestructura: fixtures por adapter (incluido fallo visible ante estructura inesperada), normalización (aliases, IDs, fechas), Classification Policy contra el golden set, reconciliación (nuevo, sin cambios, modificado, desaparecido, duplicado, fallo de una source). CI no llama a un LLM. La IA no es la única definición ejecutable de la política.
-
-Propiedad deseable de `ingest:sync`: ejecutar dos veces consecutivas contra las mismas fuentes debería producir cero cambios en la segunda. Una reverificación cuyo único delta son timestamps de verificación (`lastVerifiedAt` / `citation.checkedAt`) tampoco debe escribir `data/**`; esa frescura vive en el report. Eso simplifica retries, debugging y confianza en la automatización.
+Tarea conceptual de un agente de discovery: eventos de los próximos 120 días que probablemente no estén cubiertos; devolver hechos estructurados y señalar fuentes recurrentes nuevas para evaluación humana o una tarea posterior de adapter.
 
 ---
 
-## 15. CLI y flujo normal
+## 10. Observabilidad, tests e idempotencia
 
-Las operaciones deben ser reproducibles sin manipular archivos a mano. Hoy existen `ingest:sync` y `ingest:source`. Más adelante pueden añadirse process de imports, validate o discover si hay necesidad concreta. No hace falta una familia de comandos especulativa.
+Cada ejecución debe seguir produciendo un resumen legible y, cuando sea útil, un artifact estructurado. Invertir más en tests que en infraestructura: fixtures por adapter, Classification Policy contra el golden set, reconciliación (nuevo, sin cambios, modificado, desaparecido, duplicado, fallo de una source). CI no llama a un LLM.
 
-Flujo completo previsto:
-
-```text
-1. load source registry + canonical catalog
-2. fetch / extract RawEvent[] por fuente
-3. isolate source failures
-4. hydrate detail pages cuando haga falta
-5. normalize
-6. eligibility + enrich (reglas, knowledge, IA con fallback)
-7. reconcile + deduplicate
-8. compare with current catalog window
-9. validate in memory
-10. write coherent changes
-11. PR → CI → auto-merge if green
-12. emit run summary
-```
-
-El flujo hasta el paso 12 está implementado. El dominio expone ventana explícita, selección de sources, diffs materiales, `health` y `autoMergeEligible`; `.github/workflows/ingestion.yml` añade ejecución scheduled/manual, state persistente, report/summary, PR única, CI y squash auto-merge conservador.
+Propiedad deseable de `ingest:sync`: ejecutar dos veces consecutivas contra las mismas fuentes debería producir cero cambios en la segunda. Una reverificación cuyo único delta son timestamps de verificación tampoco debe escribir `data/**`, salvo la política de refresco ya documentada en [`docs/ingestion.md`](ingestion.md).
 
 ---
 
-## 16. Qué NO hacer en v3
+## 11. Qué NO hacer
 
 Salvo necesidad demostrable: PostgreSQL/Supabase, Redis, Kafka, colas, Airbyte, Meltano, Dagster, Prefect, Temporal, scraping comercial, vector DBs para dedup, un microservicio por fuente, Docker obligatorio por adapter, infra multi-agent compleja, revisión humana obligatoria, cursores incrementales sofisticados, data lake de snapshots, schemas dinámicos generados automáticamente.
 
----
-
-## 17. Fases
-
-**Hechas (1, 2, 3 y 4):** contratos, adapters, hidratación, classifier determinista, fallback de IA, puerta de publicación, matching determinista, merge conservador, updates, desapariciones sólo como diagnóstico, escritura atómica, automatización scheduled/manual, PR de datos, observabilidad y auto-merge condicionado. El detalle está en el código y en [`docs/ingestion.md`](ingestion.md).
-
-**Fase 3 — reconciliation (hecha):** matching contra catálogo (`externalId` → URL → alias → coincidencia fuerte única), aliases tipados, deduplicación batch, updates no destructivos, `possiblyMissing` diagnóstico, tests de idempotencia. Queda fuera de esta fase el fuzzy/IA matching y cualquier política que borre o cancele por ausencia.
-
-**Fase 4 — automatización GitHub (hecha):** workflow serializado los días 1/11/21 a las 09:17 de Europe/Madrid (ventana: día de la run → 31 de julio más cercano) y dispatch manual seguro; cache persistente de Gemini sin `run.lock`; report y Job Summary siempre que el pipeline llega a generarlos; no-op sin PR; límite estricto `data/**`; una única PR de ingestión; draft para `review`; y squash auto-merge de `clean`/`degraded` sólo con kill switch, opt-in manual cuando aplica y CI normal verde.
-
-**Fase 5 — ampliar fuentes conocidas:** adapters progresivos; cada fuente recurrente descubierta se evalúa para el registry.
-
-**Fase 6 — discovery con agentes:** están implementados el export compacto de contexto (`DiscoveryContext`, `npm run ingest:discovery-context`) y la entrada estructurada (`DiscoveryBatch` → pipeline común, `npm run ingest:discovery`). Un agente externo consume el JSON de contexto y produce el batch; el pipeline común sigue tomando las decisiones editoriales y canónicas. Siguen fuera: búsqueda web automática, scheduling, Actions de Discovery, source-learning/ledger, promoción a adapters y fuzzy reconciliation.
-
-No implementar una fase posterior salvo que una tarea lo pida.
+No reconstruyas la automatización de publicación que ya existe. No trates `docs/archive/` como especificación de la ingestión actual.
 
 ---
 
-## 18. Criterios de éxito
+## 12. Criterios de éxito que siguen vigentes
 
-1. una ejecución se lanza con un único comando;
-2. GitHub Actions la ejecuta ~cada diez días;
+Varios ya se cumplen en producción; siguen siendo la vara para cualquier evolución:
+
+1. una ejecución se lanza con un único comando o un workflow;
+2. GitHub Actions la ejecuta de forma periódica;
 3. mantiene automáticamente la temporada hasta el próximo 31 de julio;
 4. una fuente rota no bloquea las sanas;
 5. una segunda ejecución sin cambios no modifica la repo;
@@ -307,9 +211,11 @@ No implementar una fase posterior salvo que una tarea lo pida.
 11. todo evento publicado conserva trazabilidad hacia su fuente;
 12. el pipeline sigue siendo entendible por una sola persona leyendo la repo.
 
+El hueco principal respecto a esta lista es la **cobertura de la larga cola** (discovery abierto de verdad), no la orquestación de harvesting.
+
 ---
 
-## 19. Principio final
+## 13. Principio final
 
 La ingestión no necesita convertirse en una plataforma de ingeniería de datos. Necesita ser un pequeño sistema fiable de sincronización y descubrimiento.
 
