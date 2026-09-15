@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_escuela_reina_sofia_83108",
+  "slug": "solistas-del-siglo-xxi-la-voz-del-fondo-del-cuerpo-recital-de-violonchelo",
+  "title": "Solistas del Siglo XXI. «La voz del fondo del cuerpo»: recital de violonchelo",
+  "status": "scheduled",
+  "venueId": "ven_escuela_superior_musica_reina_sofia_auditorio_sony",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_escuela_reina_sofia_83108_01",
+      "date": "2026-10-10",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Luis Aracama"
+    },
+    {
+      "name": "Yiqi Chen"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_escuela_superior_musica_reina_sofia",
+      "url": "https://www.escuelasuperiordemusicareinasofia.es/evento/solistas-del-siglo-xxi-la-voz-del-fondo-del-cuerpo-recital-de-violonchelo",
+      "checkedAt": "2026-09-15",
+      "externalId": "83108"
+    }
+  ],
+  "primarySourceId": "src_escuela_superior_musica_reina_sofia",
+  "lastVerifiedAt": "2026-09-15"
+}

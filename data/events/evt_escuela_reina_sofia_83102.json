@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_escuela_reina_sofia_83102",
+  "slug": "interpretacion-historica-conjuntos-barrocos",
+  "title": "Interpretación Histórica: Conjuntos Barrocos",
+  "status": "scheduled",
+  "venueId": "ven_escuela_superior_musica_reina_sofia_auditorio_sony",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_escuela_reina_sofia_83102_01",
+      "date": "2026-11-05",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "early-music"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_escuela_superior_musica_reina_sofia",
+      "url": "https://www.escuelasuperiordemusicareinasofia.es/evento/interpretacion-historica-conjuntos-barrocos",
+      "checkedAt": "2026-09-15",
+      "externalId": "83102"
+    }
+  ],
+  "primarySourceId": "src_escuela_superior_musica_reina_sofia",
+  "lastVerifiedAt": "2026-09-15"
+}
