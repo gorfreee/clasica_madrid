@@ -161,12 +161,15 @@ function titleSignals(title: string): {
     remaining = remaining.slice(0, trailing.index).trim();
   }
 
-  const performers: string[] = [];
+  const labeled = extractRoleLabeledCredits(remaining);
+  const performers: string[] = labeled.performers.map((item) => item.name);
+  remaining = labeled.remainder;
+
   const [head, tail] = splitOnce(remaining, ':');
-  if (tail) {
+  if (tail && !isRecitalOrConcertPhrase(tail) && !nameEndsWithRoleLabel(head)) {
     for (const name of head.split(/\s*&\s*/u)) {
       const trimmed = name.trim();
-      if (trimmed && !isOrganizerName(trimmed) && !looksLikeWorkPhrase(trimmed)) performers.push(trimmed);
+      if (usableTitlePerformer(trimmed)) performers.push(trimmed);
     }
     remaining = tail.trim();
   } else {
@@ -174,15 +177,15 @@ function titleSignals(title: string): {
   }
 
   for (const part of remaining.split(/\s*[·.|]\s*|\.\s+(?=[A-ZÁÉÍÓÚÑ])/u)) {
-    const trimmed = part.trim();
-    if (!trimmed || isOrganizerName(trimmed)) continue;
+    const trimmed = part.trim().replace(/\.$/u, '');
+    if (!trimmed || isOrganizerName(trimmed) || nameEndsWithRoleLabel(trimmed)) continue;
     if (looksLikeWorkPhrase(trimmed)) {
       const signal = workSignal(trimmed, composers[0]);
       if (signal) works.push(signal);
       continue;
     }
-    if (looksLikeArtistTitle(trimmed) && performers.length === 0) {
-      performers.push(trimmed.replace(/\.$/u, ''));
+    if (looksLikeEnsembleCredit(trimmed) || (looksLikeArtistTitle(trimmed) && performers.length === 0)) {
+      performers.push(trimmed);
     }
   }
 
@@ -193,6 +196,127 @@ function titleSignals(title: string): {
 function looksLikeWorkPhrase(value: string): boolean {
   return /^(oratorio|sinfon[ií]a|concierto|misa|r[eé]quiem|cantata|pasi[oó]n|passion|stabat|magnificat|te deum|carmina|cuarteto|sonata|suit[e]|obertura|variaciones|preludio)\b/iu.test(
     value.trim(),
+  );
+}
+
+/**
+ * Credits written as `Role: Name` in a title. `Director:` is a label, not
+ * part of the preceding ensemble name, so "Orquesta X. Director: Ana" must
+ * never yield a performer called "Orquesta X. Director".
+ */
+const TITLE_CREDIT_ROLES = [
+  'direcci[oó]n musical',
+  'director(?:a)?',
+  'direcci[oó]n',
+  'concertino',
+  'solista',
+  'violonchelo',
+  'violoncelo',
+  'violinista',
+  'viol[ií]n',
+  'viola',
+  'chelo',
+  'cello',
+  'pianista',
+  'piano',
+  'flautista',
+  'flauta',
+  'clarinetista',
+  'clarinete',
+  'oboe',
+  'fagot',
+  'trompa',
+  'trompeta',
+  'guitarra',
+  'arpa',
+  'organista',
+  '[oó]rgano',
+  'clave',
+  'mezzosoprano',
+  'contralto',
+  'soprano',
+  'tenor',
+  'bar[ií]tono',
+  'bajo',
+  'percusi[oó]n',
+  'contrabajo',
+] as const;
+
+const TITLE_CREDIT_ROLE_RE = new RegExp(
+  String.raw`(^|[\s.,;|/•-])(${TITLE_CREDIT_ROLES.join('|')})\s*:`,
+  'giu',
+);
+
+const TITLE_CREDIT_ROLE_NAME_RE = new RegExp(
+  String.raw`^(?:${TITLE_CREDIT_ROLES.join('|')})$`,
+  'iu',
+);
+
+export function extractRoleLabeledCredits(title: string): {
+  performers: Array<{ name: string; roleText: string }>;
+  remainder: string;
+} {
+  const matches = [...title.matchAll(TITLE_CREDIT_ROLE_RE)];
+  if (matches.length === 0) return { performers: [], remainder: title };
+
+  const performers: Array<{ name: string; roleText: string }> = [];
+  const consumed: Array<{ start: number; end: number }> = [];
+  for (let index = 0; index < matches.length; index += 1) {
+    const match = matches[index]!;
+    if (match.index === undefined) continue;
+    const roleText = (match[2] ?? '').trim();
+    const nameStart = match.index + match[0].length;
+    const next = matches[index + 1];
+    const nameEnd = next?.index ?? title.length;
+    const nameSlice = title.slice(nameStart, nameEnd);
+    const name = nameSlice
+      .split(/\s*[/|•;]\s*/u)[0]
+      ?.replace(/[.,;|/•-]+$/u, '')
+      .trim();
+    if (usableTitlePerformer(name ?? '')) {
+      performers.push({ name: name!, roleText });
+    }
+    const nameOffset = name ? nameSlice.indexOf(name) : -1;
+    consumed.push({
+      start: match.index,
+      end: nameOffset >= 0 ? nameStart + nameOffset + name!.length : nameStart,
+    });
+  }
+
+  let remainder = title;
+  for (const span of [...consumed].reverse()) {
+    remainder = `${remainder.slice(0, span.start)} ${remainder.slice(span.end)}`;
+  }
+  remainder = remainder
+    .replace(/\s*[/|•;]+\s*/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/^[\s.,;|/•-]+|[\s.,;|/•-]+$/g, '')
+    .trim();
+  return { performers, remainder };
+}
+
+function usableTitlePerformer(name: string): boolean {
+  const trimmed = name.trim();
+  if (!trimmed || isOrganizerName(trimmed) || looksLikeWorkPhrase(trimmed)) return false;
+  return !nameEndsWithRoleLabel(trimmed);
+}
+
+function nameEndsWithRoleLabel(value: string): boolean {
+  const folded = normalizeText(value).replace(/[.,;|/•-]+$/g, '').trim();
+  if (!folded) return true;
+  if (TITLE_CREDIT_ROLE_NAME_RE.test(folded)) return true;
+  const parts = folded.split(' ');
+  const last = parts[parts.length - 1];
+  return Boolean(last && TITLE_CREDIT_ROLE_NAME_RE.test(last) && parts.length > 1);
+}
+
+function isRecitalOrConcertPhrase(value: string): boolean {
+  return /^(recital|recitales|concierto|conciertos)\b/iu.test(value.trim());
+}
+
+function looksLikeEnsembleCredit(value: string): boolean {
+  return /\b(orquesta|orquestra|orchestra|coro|choir|ensemble|cuarteto|quinteto|agrupaci[oó]n)\b/iu.test(
+    value,
   );
 }
 

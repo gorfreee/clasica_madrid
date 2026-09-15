@@ -3,7 +3,7 @@ import { emptyCatalog, type Catalog } from '../src/lib/domain/catalog.ts';
 import { venueHasExclusiveSchedule } from '../src/lib/domain/venues.ts';
 import { findScheduleCollisions, findScheduleCollisionIssues } from '../src/lib/validation/schedule-collisions.ts';
 import { matchEventIdentity } from '../src/ingestion/identity.ts';
-import { compareMusicalFacts } from '../src/ingestion/musical-identity.ts';
+import { compareMusicalFacts, extractRoleLabeledCredits } from '../src/ingestion/musical-identity.ts';
 import { reconcileHarvest, type HarvestObservation } from '../src/ingestion/reconcile.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import type { ClassificationResult } from '../src/ingestion/classification/types.ts';
@@ -13,6 +13,7 @@ import { makeEvent, makeSource, makeVenue, TEST_NOW } from './helpers.ts';
 
 const auditorio = getSourceDefinition('auditorio-nacional');
 const cndm = getSourceDefinition('cndm');
+const reinaSofia = getSourceDefinition('escuela-reina-sofia');
 const WINDOW = { from: '2026-09-01', to: '2027-06-01' };
 
 const INCLUDE: ClassificationResult = {
@@ -167,6 +168,64 @@ function tretyakovFacts(overrides: Partial<NormalizedEvent> = {}): NormalizedEve
   };
 }
 
+function freixenetPublished() {
+  return makeEvent({
+    id: 'evt_auditorio_nacional_fundacion_albeniz_escuela_superior_de_musica_reina_sofia_concierto_de_inauguracion_del_curso_acad',
+    slug: 'fundacion-albeniz-escuela-superior-de-musica-reina-sofia-concierto-de-inauguracion-del-curso-academico-26-27',
+    title: 'Fundación Albéniz. Escuela Superior de Música Reina Sofía. Concierto de Inauguracion del Curso Academico 26/27',
+    venueId: 'ven_auditorio_nacional_sala_sinfonica',
+    organizerIds: [],
+    seriesId: null,
+    occurrences: [{
+      id: 'occ_auditorio_nacional_fundacion_albeniz_escuela_superior_de_musica_reina_sofia_concierto_de_inauguracion_del_curso_acad',
+      date: '2026-10-01',
+      time: '19:30',
+      status: 'scheduled',
+    }],
+    performers: [
+      { name: 'Orquesta Sinfónica Freixenet de la Escuela Superior de Música Reina Sofía' },
+      { name: 'Josep Pons', role: 'conductor' },
+      { name: 'Luis Aracama' },
+    ],
+    composers: [{ name: 'Antonín Dvořák' }, { name: 'Johannes Brahms' }],
+    works: [
+      { title: 'Concierto para violonchelo', composerName: 'Antonín Dvořák' },
+      { title: 'Cuarta Sinfonía', composerName: 'Johannes Brahms' },
+    ],
+    eras: ['romantic'],
+    formats: ['symphonic'],
+    kind: 'established',
+    access: 'paid',
+    citations: [{
+      sourceId: auditorio.catalogSourceId,
+      url: 'https://auditorionacional.inaem.gob.es/es/programacion/fundacion-albeniz-escuela-superior-de-musica-reina-sofia-concierto-de-inauguracion-del-curso-academico-26-27',
+      checkedAt: '2026-09-14',
+      externalId: 'fundacion-albeniz-escuela-superior-de-musica-reina-sofia-concierto-de-inauguracion-del-curso-academico-26-27',
+    }],
+    primarySourceId: auditorio.catalogSourceId,
+    lastVerifiedAt: '2026-09-14',
+  });
+}
+
+function freixenetIncoming(overrides: Partial<NormalizedEvent> = {}): NormalizedEvent {
+  return {
+    sourceId: reinaSofia.id,
+    sourceUrl: 'https://www.escuelasuperiordemusicareinasofia.es/evento/orquesta-sinfonica-freixenet-director-josep-pons-violonchelo-luis-aracama',
+    externalId: '83051',
+    title: 'Orquesta Sinfónica Freixenet. Director: Josep Pons / Violonchelo: Luis Aracama',
+    occurrences: [{ date: '2026-10-01', time: '19:30' }],
+    venueText: 'Sala Sinfónica, Auditorio Nacional de Música',
+    performers: [
+      { name: 'Orquesta Sinfónica Freixenet' },
+      { name: 'Josep Pons', roleText: 'Director' },
+      { name: 'Luis Aracama', roleText: 'Violonchelo' },
+    ],
+    composers: [{ name: 'Dvořák' }, { name: 'Brahms' }],
+    works: [],
+    ...overrides,
+  };
+}
+
 function observation(index: number, source: typeof cndm, event: NormalizedEvent): HarvestObservation {
   const raw: RawEvent = {
     sourceId: source.id,
@@ -246,6 +305,45 @@ describe('compareMusicalFacts', () => {
   it('treats Tretyakov-like editorial titles with shared composers as insufficient', () => {
     expect(compareMusicalFacts(festivalLarrochaFacts(), tretyakovFacts()).kind).toBe('insufficient');
   });
+
+  it('parses Role: Name credits so Director: is never a performer name', () => {
+    const parsed = extractRoleLabeledCredits(
+      'Orquesta Sinfónica Freixenet. Director: Josep Pons / Violonchelo: Luis Aracama',
+    );
+    expect(parsed.performers).toEqual([
+      { name: 'Josep Pons', roleText: 'Director' },
+      { name: 'Luis Aracama', roleText: 'Violonchelo' },
+    ]);
+    expect(parsed.remainder).toBe('Orquesta Sinfónica Freixenet');
+  });
+
+  it('matches Reina Sofía Freixenet/Pons/Aracama to the published Auditorio inauguration', () => {
+    expect(compareMusicalFacts(freixenetPublished(), freixenetIncoming()).kind).toBe('match');
+    expect(compareMusicalFacts(freixenetPublished(), {
+      title: 'Orquesta Sinfónica Freixenet. Director: Josep Pons / Violonchelo: Luis Aracama',
+      performers: [],
+      composers: [],
+      works: [],
+    }).kind).toBe('match');
+  });
+
+  it('still conflicts a different ensemble in the same Freixenet slot', () => {
+    expect(compareMusicalFacts(freixenetPublished(), {
+      title: 'Cuarteto Casals',
+      performers: [{ name: 'Cuarteto Casals' }],
+      composers: [],
+      works: [],
+    }).kind).toBe('conflict');
+  });
+
+  it('does not treat Brahms-only overlap as Freixenet identity', () => {
+    expect(compareMusicalFacts(freixenetPublished(), {
+      title: 'Matinée',
+      performers: [],
+      composers: [{ name: 'Johannes Brahms' }],
+      works: [],
+    }).kind).toBe('insufficient');
+  });
 });
 
 describe('identity slot matching', () => {
@@ -272,6 +370,62 @@ describe('identity slot matching', () => {
       cndm.catalogSourceId,
     ]);
     expect(result.candidates.some((item) => item.event.id === 'evt_cndm_23900')).toBe(false);
+  });
+
+  it('corrobora Freixenet/Pons/Aracama con el concierto ya publicado del Auditorio', () => {
+    const catalog = emptyCatalog();
+    catalog.venues.push(parentAuditorio(), salaSinfonica(), salaCamara());
+    catalog.sources.push(auditorio.seedSource, reinaSofia.seedSource);
+    catalog.events.push(freixenetPublished());
+
+    const incoming = freixenetIncoming();
+    const match = matchEventIdentity(catalog, incoming, {
+      catalogSourceId: reinaSofia.catalogSourceId,
+      venueId: 'ven_auditorio_nacional_sala_sinfonica',
+    });
+    expect(match).toMatchObject({
+      kind: 'matched',
+      method: 'slot',
+      event: { id: freixenetPublished().id },
+    });
+
+    const result = reconcile(catalog, [observation(0, reinaSofia, incoming)]);
+    expect(result.stats.newEvents).toBe(0);
+    expect(result.stats.ambiguous).toBe(0);
+    expect(result.stats.updatedEvents).toBe(1);
+    expect(result.candidates).toHaveLength(1);
+    expect(result.candidates[0]?.event.id).toBe(freixenetPublished().id);
+    expect(result.candidates[0]?.event.composers).toEqual(freixenetPublished().composers);
+    expect(result.candidates[0]?.event.works).toEqual(freixenetPublished().works);
+    expect(result.candidates[0]?.event.citations.map((item) => item.sourceId)).toEqual([
+      auditorio.catalogSourceId,
+      reinaSofia.catalogSourceId,
+    ]);
+  });
+
+  it('sigue emitiendo schedule-conflict si el mismo hueco tiene intérpretes incompatibles', () => {
+    const catalog = emptyCatalog();
+    catalog.venues.push(parentAuditorio(), salaSinfonica(), salaCamara());
+    catalog.sources.push(auditorio.seedSource, reinaSofia.seedSource);
+    catalog.events.push(freixenetPublished());
+    const incoming = freixenetIncoming({
+      title: 'Cuarteto Casals',
+      performers: [{ name: 'Cuarteto Casals' }],
+      composers: [],
+      works: [],
+    });
+    const match = matchEventIdentity(catalog, incoming, {
+      catalogSourceId: reinaSofia.catalogSourceId,
+      venueId: 'ven_auditorio_nacional_sala_sinfonica',
+    });
+    expect(match.kind).toBe('ambiguous');
+    if (match.kind === 'ambiguous') {
+      expect(match.reason).toContain('schedule-conflict');
+    }
+    const result = reconcile(catalog, [observation(0, reinaSofia, incoming)]);
+    expect(result.stats.newEvents).toBe(0);
+    expect(result.stats.ambiguous).toBe(1);
+    expect(result.candidates).toEqual([]);
   });
 
   it('merges editorially different titles when the musical facts coincide', () => {
