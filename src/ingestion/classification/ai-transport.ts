@@ -20,6 +20,12 @@ export type AiRouteLimits = {
    * The scheduler uses the most restrictive declared value.
    */
   providerMinIntervalMs?: number;
+  /**
+   * Max HTTP requests per reset day across every route of this provider.
+   * The scheduler uses the most restrictive declared value and sums the
+   * persisted per-route counters. 0 disables every route of the provider.
+   */
+  providerRpd?: number;
 };
 
 /**

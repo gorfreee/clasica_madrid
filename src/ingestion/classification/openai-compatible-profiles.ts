@@ -32,6 +32,26 @@
  *   `reasoning_effort`, `chat_template_kwargs`; `max_tokens` deprecated):
  *   https://developers.cloudflare.com/workers-ai/models/glm-4.7-flash/
  *   https://developers.cloudflare.com/ai/models/@cf/google/gemma-4-26b-a4b-it/
+ * Sources checked 2026-09-15:
+ * - Vercel AI Gateway Chat Completions (json_schema; no per-model `strict`):
+ *   https://vercel.com/docs/ai-gateway/sdks-and-apis/openai-chat-completions/structured-outputs
+ * - Vercel Chat Completions reasoning (`reasoning.effort`, including `none`):
+ *   https://vercel.com/docs/ai-gateway/sdks-and-apis/openai-chat-completions/reasoning
+ * - Vercel `inclusionai/ling-3.0-flash-vl-free` (pricing 0; no `response_format`
+ *   in supported_parameters; supports `reasoning` / `include_reasoning`):
+ *   https://vercel.com/ai-gateway/models/ling-3.0-flash-vl-free
+ *   GET https://ai-gateway.vercel.sh/v1/models/inclusionai/ling-3.0-flash-vl-free
+ * - Kilo Chat Completions (`response_format`) and 402/429:
+ *   https://kilo.ai/docs/gateway/api-reference
+ * - Kilo Dots3 Note Preview Free (`response_format`, `structured_outputs`):
+ *   https://kilo.ai/models/dots-studio-dots-3-note-preview-free
+ * - OpenRouter structured outputs (`json_schema`, `provider.require_parameters`):
+ *   https://openrouter.ai/docs/guides/features/structured-outputs
+ *   https://openrouter.ai/docs/guides/routing/provider-selection
+ * - OpenRouter Gemma 4 26B A4B Free (`response_format` JSON, no schema enforcement):
+ *   https://openrouter.ai/google/gemma-4-26b-a4b-it:free
+ * - OpenRouter GPT-OSS 20B Free (`response_format` JSON Schema):
+ *   https://openrouter.ai/openai/gpt-oss-20b:free
  */
 
 import type { AiPressureKind } from './ai-transport.ts';
@@ -133,6 +153,56 @@ const CLOUDFLARE_PROMPT: OpenAiCompatibleModelProfile = {
 };
 
 /**
+ * Vercel Ling 3.0 Flash VL Free: GET /v1/models lists `reasoning` and
+ * `include_reasoning`, not `response_format`. Gateway json_schema exists,
+ * but a 400 on this ID would disable the route. Prompt + local validation.
+ * `reasoning.effort=none` is the documented Chat Completions disable.
+ */
+const VERCEL_LING_FLASH_VL: OpenAiCompatibleModelProfile = {
+  responseFormat: 'none',
+  jsonSchemaStrict: false,
+  tokenParameter: 'max_tokens',
+  extraBody: { reasoning: { effort: 'none' } },
+};
+
+/**
+ * Kilo models that document `response_format` + `structured_outputs`.
+ * No unequivocal `strict: true` for these IDs; keep best-effort schema.
+ */
+const KILO_JSON_SCHEMA: OpenAiCompatibleModelProfile = {
+  responseFormat: 'json-schema',
+  jsonSchemaStrict: false,
+  tokenParameter: 'max_tokens',
+  extraBody: {},
+};
+
+/**
+ * OpenRouter Gemma 4 26B A4B Free: JSON object mode is documented; JSON Schema
+ * enforcement is not. `provider.require_parameters` still restricts routing to
+ * endpoints that accept `response_format=json_object`. Local schema validation
+ * and the compact prompt contract stay.
+ */
+const OPENROUTER_JSON_OBJECT: OpenAiCompatibleModelProfile = {
+  responseFormat: 'json-object',
+  jsonSchemaStrict: false,
+  tokenParameter: 'max_tokens',
+  extraBody: { provider: { require_parameters: true } },
+};
+
+/**
+ * OpenRouter GPT-OSS 20B Free: JSON Schema is documented. `strict: true` is
+ * not unequivocal for this free ID, so keep best-effort schema.
+ * `provider.require_parameters` restricts routing to endpoints that accept it.
+ * Local validation stays.
+ */
+const OPENROUTER_JSON_SCHEMA: OpenAiCompatibleModelProfile = {
+  responseFormat: 'json-schema',
+  jsonSchemaStrict: false,
+  tokenParameter: 'max_tokens',
+  extraBody: { provider: { require_parameters: true } },
+};
+
+/**
  * Groq models documented to support Structured Outputs (`json_schema`).
  * Checked 2026-09-12: https://console.groq.com/docs/structured-outputs
  */
@@ -177,6 +247,10 @@ const CLOUDFLARE_PROMPT_MODELS = new Set([
   '@cf/zai-org/glm-4.7-flash',
   '@cf/google/gemma-4-26b-a4b-it',
 ]);
+const VERCEL_LING_FLASH_VL_MODELS = new Set(['inclusionai/ling-3.0-flash-vl-free']);
+const KILO_JSON_SCHEMA_MODELS = new Set(['dots-studio/dots-3-note-preview:free']);
+const OPENROUTER_JSON_OBJECT_MODELS = new Set(['google/gemma-4-26b-a4b-it:free']);
+const OPENROUTER_JSON_SCHEMA_MODELS = new Set(['openai/gpt-oss-20b:free']);
 
 /**
  * Exact HTTP extras for a provider/model. Unknown IDs get conservative
@@ -201,6 +275,14 @@ export function openaiCompatibleModelProfile(
       return CLOUDFLARE_PROMPT_MODELS.has(name)
         ? CLOUDFLARE_PROMPT
         : { responseFormat: 'none', jsonSchemaStrict: false, tokenParameter: 'max_completion_tokens', extraBody: {} };
+    case 'vercel':
+      return VERCEL_LING_FLASH_VL_MODELS.has(name) ? VERCEL_LING_FLASH_VL : JSON_OBJECT;
+    case 'kilo':
+      return KILO_JSON_SCHEMA_MODELS.has(name) ? KILO_JSON_SCHEMA : JSON_OBJECT;
+    case 'openrouter':
+      if (OPENROUTER_JSON_SCHEMA_MODELS.has(name)) return OPENROUTER_JSON_SCHEMA;
+      if (OPENROUTER_JSON_OBJECT_MODELS.has(name)) return OPENROUTER_JSON_OBJECT;
+      return JSON_OBJECT;
     default:
       return JSON_OBJECT;
   }

@@ -36,6 +36,12 @@ const ALL_FREE_ENV: AiEnv = {
   CLOUDFLARE_API_TOKEN: 'cloudflare-live-secret-token',
   CLOUDFLARE_ACCOUNT_ID: 'cloudflare-account-id-1',
   CLOUDFLARE_WORKERS_FREE_CONFIRMED: 'true',
+  VERCEL_AI_GATEWAY_API_KEY: 'vercel-qualify-secret-key',
+  VERCEL_FREE_TIER_CONFIRMED: 'true',
+  KILO_API_KEY: 'kilo-qualify-secret-key',
+  KILO_FREE_TIER_CONFIRMED: 'true',
+  OPENROUTER_API_KEY: 'openrouter-qualify-secret-key',
+  OPENROUTER_FREE_TIER_CONFIRMED: 'true',
 };
 
 const dataset = await loadQualifyDataset(ROOT);

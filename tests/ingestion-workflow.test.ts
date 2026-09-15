@@ -46,6 +46,9 @@ describe('workflow de ingestión: artifact de observabilidad', () => {
     expect(yaml).toContain('ZAI_API_KEY: ${{ secrets.ZAI_API_KEY }}');
     expect(yaml).toContain('CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}');
     expect(yaml).toContain('CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}');
+    expect(yaml).toContain('VERCEL_AI_GATEWAY_API_KEY: ${{ secrets.VERCEL_AI_GATEWAY_API_KEY }}');
+    expect(yaml).toContain('KILO_API_KEY: ${{ secrets.KILO_API_KEY }}');
+    expect(yaml).toContain('OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}');
     expect(yaml).toContain('GROQ_FREE_TIER_CONFIRMED: ${{ vars.GROQ_FREE_TIER_CONFIRMED }}');
     expect(yaml).toContain('GROQ_MODELS: ${{ vars.GROQ_MODELS }}');
     expect(yaml).toContain('GROQ_MODEL_RPM: ${{ vars.GROQ_MODEL_RPM }}');
@@ -116,6 +119,9 @@ describe('workflow de ingestión: artifact de observabilidad', () => {
       'ZAI_MODEL_MAX_CONCURRENT', 'ZAI_MODEL_MIN_INTERVAL_MS', 'ZAI_MAX_CONCURRENT', 'ZAI_MIN_INTERVAL_MS',
       'CLOUDFLARE_MODEL_MAX_CONCURRENT', 'CLOUDFLARE_MODEL_MIN_INTERVAL_MS', 'CLOUDFLARE_MAX_CONCURRENT', 'CLOUDFLARE_MIN_INTERVAL_MS',
       'CLOUDFLARE_MODEL_RPM', 'CLOUDFLARE_MODEL_TPM', 'CLOUDFLARE_MODEL_RPD',
+      'VERCEL_MODEL_MAX_CONCURRENT', 'VERCEL_MODEL_MIN_INTERVAL_MS', 'VERCEL_MAX_CONCURRENT', 'VERCEL_MIN_INTERVAL_MS', 'VERCEL_RPD',
+      'KILO_MODEL_MAX_CONCURRENT', 'KILO_MODEL_MIN_INTERVAL_MS', 'KILO_MAX_CONCURRENT', 'KILO_MIN_INTERVAL_MS', 'KILO_RPD',
+      'OPENROUTER_MODEL_MAX_CONCURRENT', 'OPENROUTER_MODEL_MIN_INTERVAL_MS', 'OPENROUTER_MAX_CONCURRENT', 'OPENROUTER_MIN_INTERVAL_MS', 'OPENROUTER_RPD',
     ] as const;
     for (const name of pressure) {
       expect(yaml, name).toContain(`${name}: \${{ vars.${name} }}`);

@@ -17,7 +17,10 @@ import {
   CLOUDFLARE_ZERO_COST_MODELS,
   GROQ_DEFAULT_MODELS,
   inspectFreePoolFromEnv,
+  KILO_ZERO_COST_MODELS,
   MISTRAL_DEFAULT_MODELS,
+  OPENROUTER_ZERO_COST_MODELS,
+  VERCEL_ZERO_COST_MODELS,
   ZAI_ZERO_COST_MODELS,
   type AiEnv,
 } from '../src/ingestion/classification/provider.ts';
@@ -54,6 +57,12 @@ const ALL_FREE_ENV: AiEnv = {
   CLOUDFLARE_API_TOKEN: 'cloudflare-live-secret-token',
   CLOUDFLARE_ACCOUNT_ID: 'cloudflare-account-id-1',
   CLOUDFLARE_WORKERS_FREE_CONFIRMED: 'true',
+  VERCEL_AI_GATEWAY_API_KEY: 'vercel-live-secret-key',
+  VERCEL_FREE_TIER_CONFIRMED: 'true',
+  KILO_API_KEY: 'kilo-live-secret-key',
+  KILO_FREE_TIER_CONFIRMED: 'true',
+  OPENROUTER_API_KEY: 'openrouter-live-secret-key',
+  OPENROUTER_FREE_TIER_CONFIRMED: 'true',
 };
 
 const fixtures = await loadAiSmokeFixtures(ROOT);
@@ -104,6 +113,9 @@ describe('CLI, fixtures y descubrimiento', () => {
       ...MISTRAL_DEFAULT_MODELS.map((model) => `mistral:${model}`),
       ...ZAI_ZERO_COST_MODELS.map((model) => `zai:${model}`),
       ...CLOUDFLARE_ZERO_COST_MODELS.map((model) => `cloudflare:${model}`),
+      ...VERCEL_ZERO_COST_MODELS.map((model) => `vercel:${model}`),
+      ...KILO_ZERO_COST_MODELS.map((model) => `kilo:${model}`),
+      ...OPENROUTER_ZERO_COST_MODELS.map((model) => `openrouter:${model}`),
     ]);
     expect(discovered.routes.every((route, index) => route.transport === production[index]!.transport)).toBe(true);
     expect(discovered.providers.map((item) => item.provider)).toEqual([...AI_FREE_PROVIDERS]);
@@ -120,6 +132,9 @@ describe('CLI, fixtures y descubrimiento', () => {
     expect(byProvider.mistral).toMatchObject({ status: 'unconfigured', reason: 'falta MISTRAL_API_KEY' });
     expect(byProvider.zai).toMatchObject({ status: 'unconfigured', reason: 'falta ZAI_API_KEY' });
     expect(byProvider.cloudflare).toMatchObject({ status: 'unconfigured', reason: 'falta CLOUDFLARE_API_TOKEN' });
+    expect(byProvider.vercel).toMatchObject({ status: 'unconfigured', reason: 'falta VERCEL_AI_GATEWAY_API_KEY' });
+    expect(byProvider.kilo).toMatchObject({ status: 'unconfigured', reason: 'falta KILO_API_KEY' });
+    expect(byProvider.openrouter).toMatchObject({ status: 'unconfigured', reason: 'falta OPENROUTER_API_KEY' });
   });
 });
 

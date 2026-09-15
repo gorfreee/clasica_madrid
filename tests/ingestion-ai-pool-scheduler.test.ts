@@ -72,7 +72,10 @@ function fakeTransport(
 }
 
 function route(provider: string, model: string, transport: AiTransport, limits?: AiRoute['limits']): AiRoute {
-  return makeRoute({ provider, model, transport, limits, ...(limits?.rpd ? { reset } : {}) });
+  return makeRoute({
+    provider, model, transport, limits,
+    ...(limits?.rpd || limits?.providerRpd ? { reset } : {}),
+  });
 }
 
 function pool(routes: AiRoute[], options: Partial<AiPoolClassifierOptions> = {}): AiPoolClassifier {
@@ -349,6 +352,23 @@ describe('presión genérica por route y provider', () => {
       { model: 'a', at: Date.parse('2026-09-10T12:00:00Z') },
       { model: 'b', at: Date.parse('2026-09-10T12:00:02.000Z') },
     ]);
+  });
+
+  it('providerRpd es una cuota diaria compartida, no 1000 RPD por route', async () => {
+    const send = vi.fn(async () => ({ value: { eligibility: 'include' } }));
+    const classifier = pool([
+      route('openrouter', 'a', fakeTransport('openrouter', send), { rpd: 1_000, providerRpd: 2, providerMinIntervalMs: 0 }),
+      route('openrouter', 'b', fakeTransport('openrouter', send), { rpd: 1_000, providerRpd: 2, providerMinIntervalMs: 0 }),
+    ], { maxRetries: 0, cacheEnabled: false });
+    await expect(classifier.classify(observed(1))).resolves.toEqual({ eligibility: 'include' });
+    await expect(classifier.classify(observed(2))).resolves.toEqual({ eligibility: 'include' });
+    await expect(classifier.classify(observed(3))).rejects.toBeInstanceOf(AiRateLimitedError);
+    expect(send).toHaveBeenCalledTimes(2);
+    expect(classifier.lastDiagnostics()?.routing).toEqual(expect.arrayContaining([
+      expect.objectContaining({ reason: 'provider-daily-quota' }),
+    ]));
+    const daily = classifier.snapshotStats().dailyRequestsByRoute;
+    expect((daily['openrouter:a'] ?? 0) + (daily['openrouter:b'] ?? 0)).toBe(2);
   });
 
   it('minIntervalMs 0 no deshabilita la route', async () => {

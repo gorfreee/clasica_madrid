@@ -1,6 +1,6 @@
 # Pool de IA gratuito
 
-Producción usa un pool ordenado de routes `provider:model`. Gemini conserva la prioridad inicial; Groq, Mistral, Z.AI y Cloudflare Workers AI aportan capacidad adicional. La primera respuesta que supera el schema del purpose termina la llamada. No hay voting, consensus ni llamadas duplicadas tras un resultado válido.
+Producción usa un pool ordenado de routes `provider:model`. Gemini conserva la prioridad inicial; Groq, Mistral, Z.AI y Cloudflare Workers AI aportan capacidad adicional. Vercel AI Gateway, Kilo AI Gateway y OpenRouter se añaden al final del pool hasta que el live smoke y la qualification midan su calidad semántica. La primera respuesta que supera el schema del purpose termina la llamada. No hay voting, consensus ni llamadas duplicadas tras un resultado válido.
 
 ## Garantía operativa de coste cero
 
@@ -11,11 +11,14 @@ El workflow declara `AI_ZERO_COST_ONLY=true`. Con esa política:
 - Mistral exige `MISTRAL_FREE_MODE_CONFIRMED=true`; la cuenta debe seguir en Free mode y PAYG debe estar desactivado;
 - Z.AI sólo admite `glm-4.7-flash` y `glm-4.5-flash`;
 - Cloudflare sólo admite la allowlist versionada, exige `CLOUDFLARE_WORKERS_FREE_CONFIRMED=true` y llama directamente a Workers AI, nunca a AI Gateway;
+- Vercel exige `VERCEL_FREE_TIER_CONFIRMED=true` y sólo IDs de la allowlist con precio documentado $0. El crédito promocional de $5 **no** forma parte de esta garantía;
+- Kilo exige `KILO_FREE_TIER_CONFIRMED=true` y sólo IDs explícitos `:free` de la allowlist. `kilo-auto/free` queda fuera;
+- OpenRouter exige `OPENROUTER_FREE_TIER_CONFIRMED=true` y sólo IDs explícitos `:free` de la allowlist. El saldo comprado **nunca** autoriza un modelo de pago. `openrouter/free` queda fuera;
 - una route no demostrablemente autorizada se omite o hace fallar la configuración antes del primer HTTP request.
 
 La confirmación de Cloudflare significa que la cuenta permanece en **Workers Free**. Workers Free corta las llamadas al agotar la asignación diaria; Workers Paid cobra automáticamente el exceso y por tanto no cumple esta política. El error Workers AI `3036` se registra como asignación diaria agotada y bloquea esas routes hasta el reset UTC.
 
-Los modelos y condiciones se verificaron en documentación oficial el 12-09-2026. Los proveedores pueden cambiar su oferta: antes de actualizar una allowlist o confirmar de nuevo un plan, hay que volver a comprobarla. La seguridad prima sobre la disponibilidad.
+Los modelos y condiciones de Gemini, Groq, Mistral, Z.AI y Cloudflare se verificaron en documentación oficial el 12-09-2026. Vercel, Kilo y OpenRouter se verificaron el 15-09-2026. Los proveedores pueden cambiar su oferta: antes de actualizar una allowlist o confirmar de nuevo un plan, hay que volver a comprobarla. La seguridad prima sobre la disponibilidad.
 
 ## Orden y configuración
 
@@ -27,9 +30,12 @@ Los defaults son:
 4. `groq:openai/gpt-oss-20b`;
 5. `mistral:ministral-14b-2512` y `mistral:ministral-8b-2512` (14B primero: más calidad; 8B como fallback más rápido en RPS);
 6. `zai:glm-4.7-flash` y `zai:glm-4.5-flash`;
-7. `cloudflare:@cf/zai-org/glm-4.7-flash` y `cloudflare:@cf/google/gemma-4-26b-a4b-it`.
+7. `cloudflare:@cf/zai-org/glm-4.7-flash` y `cloudflare:@cf/google/gemma-4-26b-a4b-it`;
+8. `vercel:inclusionai/ling-3.0-flash-vl-free`;
+9. `kilo:dots-studio/dots-3-note-preview:free`;
+10. `openrouter:google/gemma-4-26b-a4b-it:free` y `openrouter:openai/gpt-oss-20b:free`.
 
-Cada lista puede reordenarse con `*_MODELS`. Unset significa «usar el default versionado en Git». En zero-cost mode, Z.AI, Cloudflare y Gemini rechazan IDs fuera de su allowlist.
+Cada lista puede reordenarse con `*_MODELS`. Unset significa «usar el default versionado en Git». En zero-cost mode, Z.AI, Cloudflare, Gemini, Vercel, Kilo y OpenRouter rechazan IDs fuera de su allowlist.
 
 Los defaults de Mistral son IDs versionados, no aliases `latest`. Los límites de presión asociados son los de **esta** organización de Clásica Madrid, comprobados en el dashboard en septiembre de 2026; no son cuotas universales de Mistral:
 
@@ -52,8 +58,9 @@ El scheduler entiende límites genéricos de presión por route/provider. No hay
 | `minIntervalMs` | `*_MODEL_MIN_INTERVAL_MS` (pares `modelo:entero`) | Separación mínima entre comienzos de requests de esa route |
 | `providerMaxConcurrent` | `*_MAX_CONCURRENT` | Límite agregado de HTTP in-flight del provider |
 | `providerMinIntervalMs` | `*_MIN_INTERVAL_MS` | Separación agregada entre comienzos de requests del provider |
+| `providerRpd` | `*_RPD` | Cuota diaria agregada del provider (suma de contadores de todas sus routes). `0` deshabilita. |
 
-El workflow inyecta GROQ, MISTRAL, ZAI y CLOUDFLARE desde `vars.*` si existen. `.local/ai.env` carga las mismas claves. Un valor ausente usa el default de código. `0` conserva la semántica ya soportada por el scheduler: `rpm`/`tpm`/`rpd`/`maxConcurrent`/`providerMaxConcurrent` a 0 deshabilitan esas routes; `minIntervalMs`/`providerMinIntervalMs` a 0 no deshabilitan, sólo no añaden holgura. No uses `0` como sinónimo de unset.
+El workflow inyecta GROQ, MISTRAL, ZAI, CLOUDFLARE, VERCEL, KILO y OPENROUTER desde `vars.*` si existen. `.local/ai.env` carga las mismas claves. Un valor ausente usa el default de código. `0` conserva la semántica ya soportada por el scheduler: `rpm`/`tpm`/`rpd`/`providerRpd`/`maxConcurrent`/`providerMaxConcurrent` a 0 deshabilitan esas routes; `minIntervalMs`/`providerMinIntervalMs` a 0 no deshabilitan, sólo no añaden holgura. No uses `0` como sinónimo de unset.
 
 Durante una ejecución, una route que acumula varios fallos consecutivos relevantes (empty/incomplete/timeout/transport/output inválido) sin un resultado válido entre medias abre un circuit breaker in-memory. `formats=[]` **no** cuenta como `incomplete` cuando los hechos observados muestran alternativas exclusivas o programación todavía por determinar (`observedFormatChoiceIsUnresolved`): es una resolución válida, cacheable y final. Rate limits, RPM/RPD y cuota diaria siguen sus mecanismos propios. El circuito no se persiste entre runs y nunca introduce un provider de pago.
 
@@ -72,6 +79,74 @@ Las tareas del pool (eligibility, compositores, acceso, taxonomy) piden JSON cor
 | `mistral:ministral-14b-2512`, `mistral:ministral-8b-2512` | `json_schema` + `strict: true` | no se envía | `max_tokens` | Custom structured outputs / `json_schema` está en la API de Chat Completions; el ejemplo oficial usa Ministral 8B. `service_tier=standard_only` (Free / Standard). Validación local sigue. Un override tipo `mistral-small-latest` permanece en `json_object`. |
 | `zai:glm-4.7-flash`, `zai:glm-4.5-flash` | `json_object` | `thinking: { type: "disabled" }` | `max_tokens` | Z.AI documenta JSON mode, no `json_schema`. Thinking on por defecto en GLM-4.7 y consume el presupuesto de salida. 4.5-flash se mantiene aunque sea más lento. |
 | `cloudflare:@cf/zai-org/glm-4.7-flash`, `cloudflare:@cf/google/gemma-4-26b-a4b-it` | no se envía `response_format` | `reasoning_effort: null` y `chat_template_kwargs.enable_thinking: false` | `max_completion_tokens` | La allowlist oficial de JSON Mode no incluye estos IDs. `max_tokens` está deprecated en las páginas de modelo a favor de `max_completion_tokens`. Prompt + parseo + schema local. |
+| `vercel:inclusionai/ling-3.0-flash-vl-free` | no se envía `response_format` | `reasoning: { effort: "none" }` | `max_tokens` | El gateway documenta structured outputs, pero el endpoint free no lista `response_format` (sí `reasoning`). Prompt + validación local. Sin `strict`. |
+| `kilo:dots-studio/dots-3-note-preview:free` | `json_schema` + `strict: false` | no se envía | `max_tokens` | Structured Outputs / JSON Schema documentados en el catálogo. `strict: true` no está inequívoco para este ID. |
+| `openrouter:google/gemma-4-26b-a4b-it:free` | `json_object` | no se envía | `max_tokens` | JSON documentado; no hay enforcement de JSON Schema. No se envía `json_schema`. `provider.require_parameters=true` en el body de Chat Completions (no en el scheduler). Contrato compacto en el system prompt. Validación local sigue. |
+| `openrouter:openai/gpt-oss-20b:free` | `json_schema` + `strict: false` | no se envía | `max_tokens` | JSON Schema documentado. `strict: true` no está inequívoco para este ID free. `provider.require_parameters=true`. Validación local sigue. |
+
+## Vercel AI Gateway (verificado 2026-09-15)
+
+Endpoint OpenAI-compatible: `https://ai-gateway.vercel.sh/v1`. Secret: `VERCEL_AI_GATEWAY_API_KEY`. Confirmación: `VERCEL_FREE_TIER_CONFIRMED=true`.
+
+Default / allowlist en producción:
+
+- `inclusionai/ling-3.0-flash-vl-free` — Free. `GET /v1/models/inclusionai/ling-3.0-flash-vl-free` devuelve pricing `0/0` y tag `free`.
+
+Hallazgo: **`minimax/minimax-m3-free` no entra al pool**. La página de modelo y `GET /v1/models/minimax/minimax-m3-free` responden 404. El changelog de Vercel indica que la promo GMI Cloud terminó el 2026-09-06. El ID pagado `minimax/minimax-m3` cuesta $0.24/$0.96 por 1M y **no** se sustituye en silencio.
+
+Fuera de zero-cost:
+
+- modelos cubiertos sólo por el crédito promocional de **$5** (ese crédito **no** forma parte de la garantía);
+- cualquier ID fuera de la allowlist;
+- fallbacks automáticos a modelos de pago.
+
+No hay un RPM/RPD global suficientemente documentado para los endpoints free. Default: `providerMaxConcurrent=1` y la lógica genérica de HTTP 429 / Retry-After. Un HTTP 402 marca la route como no utilizable (`unavailable`); el pool puede pasar a otra route gratuita allowlisted, nunca a un modelo de pago.
+
+## Kilo AI Gateway (verificado 2026-09-15)
+
+Endpoint OpenAI-compatible: `https://api.kilo.ai/api/gateway`. Secret: `KILO_API_KEY`. Confirmación: `KILO_FREE_TIER_CONFIRMED=true`.
+
+Default / allowlist en producción:
+
+- `dots-studio/dots-3-note-preview:free` — `isFree: true`, prompt/completion `0`. El catálogo lista `response_format` y `structured_outputs`.
+
+Hallazgo: **`minimax/minimax-m2.7:free` no entra al pool**. Está ausente del catálogo live (`GET /api/gateway/models`); sólo existe el ID pagado `minimax/minimax-m2.7`. No se sustituye. El catálogo free puede cambiar: hay que re-verificar antes de ampliar la allowlist.
+
+`:free` = coste $0. Fuera de producción:
+
+- `kilo-auto/free` y cualquier `kilo-auto/*` (routing dinámico);
+- modelos sin `:free`;
+- BYOK;
+- fallbacks a variantes pagadas.
+
+Límite documentado: **200 requests/hora por IP, compartidas** entre modelos gratuitos. No se modela como 200/h por route. Default: `providerMaxConcurrent=1` y `providerMinIntervalMs=20_000` (~180/h, con margen).
+
+## OpenRouter (verificado 2026-09-15)
+
+Endpoint OpenAI-compatible: `https://openrouter.ai/api/v1`. Secret: `OPENROUTER_API_KEY`. Confirmación: `OPENROUTER_FREE_TIER_CONFIRMED=true`.
+
+Defaults / allowlist en producción:
+
+- `google/gemma-4-26b-a4b-it:free`
+- `openai/gpt-oss-20b:free`
+
+`:free` = variante gratuita de coste $0. La cuenta de Clásica Madrid tiene ≥ $10 de créditos comprados, lo que según la documentación actual da **1.000 requests/día de modelos gratuitos** y **20 requests/minuto**, cuotas **compartidas** entre todos los `:free`. Esos 1.000 RPD **no** se interpretan como 1.000 por route: el scheduler usa `providerRpd=1000`. El intervalo `providerMinIntervalMs=3_200` es un margen conservador frente al límite de 20 RPM (~18,75 RPM). 3000 ms equivaldría exactamente a 20 RPM y no se usa.
+
+El saldo pagado **nunca** se usa. Tener créditos no convierte un modelo de pago en route autorizada.
+
+Fuera de producción:
+
+- `openrouter/free`;
+- modelos sin `:free`;
+- fallback automático a la variante pagada del mismo modelo;
+- BYOK;
+- cualquier ruta cuyo coste no sea $0.
+
+El body de Chat Completions incluye `provider: { require_parameters: true }` para que el router elija sólo endpoints que acepten los parámetros enviados. Eso vive en el profile HTTP, no en el scheduler.
+
+Recomendación operativa: configurar un Guardrail externo de OpenRouter con la misma allowlist que el código (`google/gemma-4-26b-a4b-it:free`, `openai/gpt-oss-20b:free`).
+
+Un HTTP 402 de estos gateways se clasifica como `unavailable`: esa route queda fuera y el pool puede probar otra route gratuita ya allowlisted. Un 401/403 es `auth`. Un 429 es rate-limit/pressure y respeta `Retry-After` si existe. Nunca se reescribe el modelo a un ID de pago.
 
 Un 1305 de Z.AI (oficialmente HTTP 429, «temporarily overloaded»; también se ha visto 503) se clasifica como `capacity` / `PROVIDER_BUSY`. El pool salta esa route en la misma llamada si hay otra lista; no convierte el busy en una espera larga de Retry-After. El live smoke no reintenta.
 
@@ -98,6 +173,10 @@ npm run ai:smoke -- --route mistral:ministral-14b-2512
 npm run ai:smoke -- --route mistral:ministral-8b-2512
 npm run ai:smoke -- --route zai:glm-4.7-flash
 npm run ai:smoke -- --route cloudflare:@cf/zai-org/glm-4.7-flash
+npm run ai:smoke -- --route vercel:inclusionai/ling-3.0-flash-vl-free
+npm run ai:smoke -- --route kilo:dots-studio/dots-3-note-preview:free
+npm run ai:smoke -- --route openrouter:google/gemma-4-26b-a4b-it:free
+npm run ai:smoke -- --route openrouter:openai/gpt-oss-20b:free
 
 # una sola route, las cuatro tasks
 npm run ai:smoke -- --route groq:openai/gpt-oss-120b --all-purposes
@@ -165,8 +244,9 @@ npm run ai:qualify
 # suite completa (32 casos; más cuota; Gemini flash puede llegar a daily-quota)
 npm run ai:qualify -- --suite full
 
-# un purpose, un provider
+# un purpose, un provider (también vercel, kilo, openrouter)
 npm run ai:qualify -- --suite full --purpose eligibility --providers groq
+npm run ai:qualify -- --suite core --providers vercel,kilo,openrouter
 
 # una route y un tope de casos
 npm run ai:qualify -- --route mistral:ministral-14b-2512 --max-cases 8 --report-dir /tmp/ai-qualify-report
@@ -191,8 +271,13 @@ Workflow manual: **AI live qualification** (`.github/workflows/ai-live-qualifica
 9. Añadir únicamente `CLOUDFLARE_WORKERS_FREE_CONFIRMED=true` como repository/environment variable, tras confirmar Workers Free.
 10. Añadir el secret `ZAI_API_KEY`.
 11. Verificar que `ZAI_MODELS` sólo contiene modelos explícitamente gratuitos; por defecto no hace falta crear esta variable.
-12. Ejecutar `npm run ai:smoke:all` (y `--all-purposes` si cambian las tasks), o una route concreta con `npm run ai:smoke -- --route …` / el workflow **AI route smoke**. El workflow **AI live smoke test** cubre el barrido completo.
-13. Lanzar un `workflow_dispatch` en `dry-run` antes del primer publish.
+12. Añadir el secret `VERCEL_AI_GATEWAY_API_KEY` y `VERCEL_FREE_TIER_CONFIRMED=true` como repository variable. El crédito promocional de $5 no autoriza modelos de pago.
+13. Añadir el secret `KILO_API_KEY` y `KILO_FREE_TIER_CONFIRMED=true`.
+14. Añadir el secret `OPENROUTER_API_KEY` y `OPENROUTER_FREE_TIER_CONFIRMED=true`. Opcional pero recomendado: Guardrail de OpenRouter con la misma allowlist que el código.
+15. No hace falta crear `VERCEL_MODELS` / `KILO_MODELS` / `OPENROUTER_MODELS` ni overrides de límites: los defaults viven en el código.
+16. Ejecutar `npm run ai:smoke:all` (y `--all-purposes` si cambian las tasks), o una route concreta con `npm run ai:smoke -- --route …` / el workflow **AI route smoke**. El workflow **AI live smoke test** cubre el barrido completo. Un HTTP smoke en verde **no** promociona estas routes por delante de Gemini/Groq/Mistral/Z.AI/Cloudflare.
+17. Ejecutar **AI live qualification** (`npm run ai:qualify -- --providers vercel,kilo,openrouter`) contra el mismo dataset de producción antes de reordenar el pool.
+18. Lanzar un `workflow_dispatch` en `dry-run` antes del primer publish.
 
 No hace falta crear repository variables de `*_MODELS`, `*_MODEL_TPM` ni `*_MAX_CONCURRENT` para que producción funcione: esos defaults viven en el código. Las variables siguen siendo overrides de emergencia.
 
@@ -227,3 +312,21 @@ Las keys ausentes dejan fuera su provider sin romper la ingestión. Gemini sigue
 - Cloudflare `@cf/zai-org/glm-4.7-flash` (`max_completion_tokens`, `reasoning_effort`, `chat_template_kwargs`, `response_format`): <https://developers.cloudflare.com/workers-ai/models/glm-4.7-flash/>
 - Cloudflare `@cf/google/gemma-4-26b-a4b-it`: <https://developers.cloudflare.com/ai/models/@cf/google/gemma-4-26b-a4b-it/>
 - Gemini thinking (`thinking_level`): <https://ai.google.dev/gemini-api/docs/thinking>
+- Vercel AI Gateway: <https://vercel.com/docs/ai-gateway>
+- Vercel autenticación: <https://vercel.com/docs/ai-gateway/authentication-and-byok/authentication>
+- Vercel modelos: <https://vercel.com/docs/ai-gateway/models-and-providers>
+- Vercel OpenAI-compatible / Chat Completions: <https://vercel.com/docs/ai-gateway/sdks-and-apis/openai-compat>
+- Vercel structured outputs: <https://vercel.com/docs/ai-gateway/sdks-and-apis/openai-chat-completions/structured-outputs>
+- Vercel Ling 3.0 Flash VL Free: <https://vercel.com/ai-gateway/models/ling-3.0-flash-vl-free>
+- Kilo API / Gateway: <https://docs.kilo.ai/integrations/api>
+- Kilo modelos: <https://kilo.ai/models>
+- Kilo Dots3 Note Preview Free: <https://kilo.ai/models/dots-studio/dots-3-note-preview:free>
+- Kilo MiniMax M2.7 Free (página de producto; ausente del catálogo live el 2026-09-15): <https://kilo.ai/models/minimax/minimax-m2.7:free>
+- OpenRouter API: <https://openrouter.ai/docs/api/reference/overview>
+- OpenRouter modelos gratuitos: <https://openrouter.ai/docs/guides/routing/model-routing/free-openrouter-endpoints>
+- OpenRouter rate limits: <https://openrouter.ai/docs/api-reference/limits>
+- OpenRouter structured outputs: <https://openrouter.ai/docs/guides/features/structured-outputs>
+- OpenRouter provider routing (`require_parameters`): <https://openrouter.ai/docs/guides/routing/provider-selection>
+- OpenRouter Guardrails: <https://openrouter.ai/docs/guides/features/guardrails>
+- Gemma 4 26B A4B Free: <https://openrouter.ai/google/gemma-4-26b-a4b-it:free>
+- GPT-OSS 20B Free: <https://openrouter.ai/openai/gpt-oss-20b:free>

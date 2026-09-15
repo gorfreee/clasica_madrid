@@ -50,9 +50,15 @@ describe('workflow AI live smoke test', () => {
       'ZAI_API_KEY: ${{ secrets.ZAI_API_KEY }}',
       'CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}',
       'CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}',
+      'VERCEL_AI_GATEWAY_API_KEY: ${{ secrets.VERCEL_AI_GATEWAY_API_KEY }}',
+      'KILO_API_KEY: ${{ secrets.KILO_API_KEY }}',
+      'OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}',
       'GROQ_FREE_TIER_CONFIRMED: ${{ vars.GROQ_FREE_TIER_CONFIRMED }}',
       'MISTRAL_FREE_MODE_CONFIRMED: ${{ vars.MISTRAL_FREE_MODE_CONFIRMED }}',
       'CLOUDFLARE_WORKERS_FREE_CONFIRMED: ${{ vars.CLOUDFLARE_WORKERS_FREE_CONFIRMED }}',
+      'VERCEL_FREE_TIER_CONFIRMED: ${{ vars.VERCEL_FREE_TIER_CONFIRMED }}',
+      'KILO_FREE_TIER_CONFIRMED: ${{ vars.KILO_FREE_TIER_CONFIRMED }}',
+      'OPENROUTER_FREE_TIER_CONFIRMED: ${{ vars.OPENROUTER_FREE_TIER_CONFIRMED }}',
     ];
     for (const line of required) {
       expect(yaml, line).toContain(line);
@@ -63,6 +69,9 @@ describe('workflow AI live smoke test', () => {
     expect(yaml).toContain('MISTRAL_MODELS: ${{ vars.MISTRAL_MODELS }}');
     expect(yaml).toContain('ZAI_MODELS: ${{ vars.ZAI_MODELS }}');
     expect(yaml).toContain('CLOUDFLARE_MODELS: ${{ vars.CLOUDFLARE_MODELS }}');
+    expect(yaml).toContain('VERCEL_MODELS: ${{ vars.VERCEL_MODELS }}');
+    expect(yaml).toContain('KILO_MODELS: ${{ vars.KILO_MODELS }}');
+    expect(yaml).toContain('OPENROUTER_MODELS: ${{ vars.OPENROUTER_MODELS }}');
 
     expect(ci).not.toContain('ai:smoke');
     expect(ci).not.toContain('ai-live-smoke');
