@@ -197,6 +197,8 @@ export const DISCOVERY_EVIDENCE_INSTRUCTIONS: readonly string[] = [
   'No devolver eligibility, kind, eras o formats como hechos observados.',
   'Si hay rastro de búsqueda (URL de resultados, etc.), indicarlo en foundVia aparte de la URL de evidencia.',
   'Cuando la ficha oficial publique programa, compositores u obras, capturarlos con exhaustividad razonable; no detenerse tras una sola señal suficiente para eligibility.',
+  'Si existe ficha de detalle (no sólo la agenda/listado), ábrela y extrae de ahí. Una URL de listing (/agenda, /eventos, homepage) puede respaldar varios eventos: una observación por concierto, no una sola ficha genérica.',
+  'Incluir un DiscoveryResearchManifest en research (diagnóstico de cobertura de la búsqueda). No es dato de catálogo.',
   'En hosts compartidos (output.sharedSourceHosts), source.homepage debe ser el perfil de esa organización, no el origin de la plataforma.',
 ];
 
@@ -224,6 +226,7 @@ export const DISCOVERY_OUTPUT_CONTRACT: DiscoveryContext['output'] = {
     'Incluir siempre performers, composers y works; [] si la fuente no los declara.',
     'venue es opcional; para publicar un lugar nuevo hacen falta name, municipality y area coherentes.',
     'foundVia es rastro de búsqueda, no source canónica ni primarySource.',
+    'research es un DiscoveryResearchManifest diagnóstico; no influye en eligibility ni publicación.',
     'En un host compartido, no usar el origin de la plataforma como identidad de source.',
   ],
 };

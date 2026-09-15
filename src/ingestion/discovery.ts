@@ -95,16 +95,63 @@ export const discoveryObservationSchema = z
   })
   .strict();
 
+export const DISCOVERY_EXCLUSION_REASONS = [
+  'already-covered',
+  'harvested-source',
+  'out-of-window',
+  'out-of-geographic-scope',
+  'non-classical',
+  'insufficient-evidence',
+  'duplicate-lead',
+  'other',
+] as const;
+
+const discoveryLeadSchema = z
+  .object({
+    query: z.string().trim().min(1).max(400),
+    kind: z.enum(['search', 'lead']).optional(),
+  })
+  .strict();
+
+const discoveryExclusionSchema = z
+  .object({
+    reason: z.enum(DISCOVERY_EXCLUSION_REASONS),
+    count: z.number().int().min(0).max(10_000),
+    examples: z.array(z.string().trim().min(1).max(200)).max(5).optional(),
+    notes: z.string().trim().min(1).max(300).optional(),
+  })
+  .strict();
+
+/**
+ * Diagnostic coverage of the agent's pre-batch investigation.
+ * Not catalog data: ignored by eligibility, identity and publication.
+ */
+export const discoveryResearchManifestSchema = z
+  .object({
+    schemaVersion: z.literal(1),
+    investigatedCategories: z.array(z.string().trim().min(1).max(80)).max(30),
+    leads: z.array(discoveryLeadSchema).max(40),
+    candidatesReviewedApprox: z.number().int().min(0).max(10_000),
+    submittedToBatch: z.number().int().min(0).max(10_000),
+    exclusions: z.array(discoveryExclusionSchema).max(20),
+    officialDetailReviewed: z.enum(['all', 'some', 'none', 'not-applicable']),
+    notes: z.string().trim().min(1).max(1000).optional(),
+  })
+  .strict();
+
 export const discoveryBatchSchema = z
   .object({
     schemaVersion: z.literal(1),
     observations: z.array(discoveryObservationSchema),
+    research: discoveryResearchManifestSchema.optional(),
   })
   .strict();
 
 export type DiscoveryVenue = z.infer<typeof discoveryVenueSchema>;
 export type DiscoveryObservation = z.infer<typeof discoveryObservationSchema>;
+export type DiscoveryResearchManifest = z.infer<typeof discoveryResearchManifestSchema>;
 export type DiscoveryBatch = z.infer<typeof discoveryBatchSchema>;
+export type DiscoveryExclusionReason = (typeof DISCOVERY_EXCLUSION_REASONS)[number];
 
 export class DiscoveryBatchError extends Error {
   constructor(message: string) {

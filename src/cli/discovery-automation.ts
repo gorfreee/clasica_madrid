@@ -97,6 +97,12 @@ async function loadBatch(): Promise<void> {
   await mkdir(path.dirname(metaPath), { recursive: true });
   await writeFile(output, loaded.bytes);
   await writeFile(metaPath, `${JSON.stringify(loaded.meta, null, 2)}\n`, 'utf8');
+  if (loaded.meta.research) {
+    const researchPath = path.join(path.dirname(output), 'research-manifest.json');
+    await writeFile(researchPath, `${JSON.stringify(loaded.meta.research, null, 2)}\n`, 'utf8');
+  }
+  const evidencePath = path.join(path.dirname(output), 'evidence-diagnostics.json');
+  await writeFile(evidencePath, `${JSON.stringify(loaded.meta.evidence, null, 2)}\n`, 'utf8');
   if (flags.has('--github-output')) {
     await writeGithubOutput(required(flags, '--github-output'), {
       observation_count: String(loaded.meta.observationCount),

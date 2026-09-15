@@ -5,7 +5,8 @@ import type { Event, Occurrence, Venue } from '../lib/schemas/index.ts';
 import { canonicalizePerformerList } from './classification/performer-role.ts';
 import type { PublishableClassification } from './classification/types.ts';
 import { eventIdFor, occurrenceIdFor, uniqueId, uniqueSlug } from './ids.ts';
-import { normalizeUrl, urlPathIdentity } from './urls.ts';
+import { fallbackEventIdentity } from './observed-identity.ts';
+import { normalizeUrl } from './urls.ts';
 import type { NormalizedEvent } from './normalize.ts';
 import type { PipelineSource } from './types.ts';
 import { isSufficientProposedVenue, matchVenue, unpublishedMatchedVenue, unpublishedParentVenue } from './venues.ts';
@@ -58,7 +59,7 @@ export function toCandidate(
   }
 
   const catalogSource = resolveCatalogSource(source, catalog);
-  const identity = event.externalId ?? urlPathIdentity(event.sourceUrl);
+  const identity = fallbackEventIdentity(event);
   const eventId = uniqueId(eventIdFor(eventIdSourceKey(source), identity), usedIds);
   usedIds.add(eventId);
   const title = canonicalizeEventTitle(event.title);

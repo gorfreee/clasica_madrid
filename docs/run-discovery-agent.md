@@ -19,8 +19,9 @@ Tú:
 * partes del `main` actual;
 * generas un `DiscoveryContext` fresco;
 * investigas en la web;
-* extraes **hechos observados** con la mayor riqueza razonable;
-* publicas un `DiscoveryBatch` JSON en una rama de petición;
+* extraes **hechos observados** con la mayor riqueza razonable (ficha de detalle, no sólo la card del listado);
+* publicas un `DiscoveryBatch` JSON en una rama de petición, **incluyendo** un `research` (`DiscoveryResearchManifest`) de cobertura de la búsqueda;
+* lanzas el workflow **Manual discovery** contra `main`;
 * lanzas el workflow **Manual discovery** contra `main`;
 * sigues la ejecución y reportas el resultado al usuario.
 
@@ -69,7 +70,7 @@ El fichero de contexto está gitignorado. No lo commitees.
 | `coveredEvents` | Fingerprints de la ventana. Evita reenviar lo ya cubierto salvo un coverage gap (abajo). |
 | `editorialScope` | Orientación geográfica y musical. No sustituye la Classification Policy ejecutable. |
 | `evidenceInstructions` | Cómo recoger evidencia. |
-| `output` | Contrato del `DiscoveryBatch`: schema, arrays obligatorios, campos prohibidos. |
+| `output` | Contrato del `DiscoveryBatch`: schema, arrays obligatorios, `research` diagnóstico, campos prohibidos. |
 
 El alcance geográfico es el municipio de Madrid (`area: madrid`), con `nearby` sólo para municipios muy próximos. No es una agenda de toda la Comunidad.
 
@@ -122,7 +123,14 @@ Intenta extraer con exhaustividad razonable cuando la ficha los declare:
 * URL oficial que respalda los hechos (`source.url`);
 * `foundVia` si procede.
 
-Si una página trae programa completo, intérpretes, compositores u obras, **no** te limites al mínimo para demostrar que el evento existe. El pipeline (determinismo + knowledge + AI pool) clasifica mejor con evidencia rica.
+Si una página trae programa completo, intérpretes, compositores u obras, **no** te limites al mínimo para demostrar que el evento existe. El pipeline (determinismo + knowledge + AI pool) clasifica mejor con evidencia rica. Si existe una **ficha de detalle** distinta de la agenda, ábrela y extrae de ahí; el pipeline no vuelve a navegar y no puede recuperar lo que no reciba.
+
+`performers`, `composers` y `works` pueden ser `[]` cuando la fuente no los declara. Eso es válido. Lo que no es válido es dejarlos vacíos si la ficha oficial que estás citando sí los publica.
+
+**URL de evidencia.** `source.url` debe ser la página que declara los hechos. Distingue:
+
+* **Ficha de evento:** path o query que identifica *ese* concierto (`/eventos/recital-de-violin-…`, `/p/a-delta-trio-madrid`, `?vgnextoid=…`, `/node/23846`). Es la preferida.
+* **Listing / URL genérica:** homepage, `/agenda`, `/eventos`, `/programacion`, `/conciertos` u otra agenda permanente. Es evidencia aceptable si no hay ficha individual, pero **no** identifica un único evento. Si esa página lista varios conciertos, envía **una observación por concierto** (mismo `source.url`, distinto título/fecha). No inventes un `externalId`.
 
 **Prohibido** en el JSON (el schema es `strict` y lo rechazará): `eligibility`, `kind`, `formats`, `eras`, `access`, `id`, `slug`, `confidence`, `candidate`.
 
@@ -139,11 +147,44 @@ Forma:
 ```json
 {
   "schemaVersion": 1,
-  "observations": [ ]
+  "observations": [ ],
+  "research": {
+    "schemaVersion": 1,
+    "investigatedCategories": ["coros", "iglesias/parroquias"],
+    "leads": [
+      { "kind": "search", "query": "concierto coro Madrid octubre 2026" },
+      { "kind": "lead", "query": "https://ejemplo.example/agenda-cultural" }
+    ],
+    "candidatesReviewedApprox": 20,
+    "submittedToBatch": 0,
+    "exclusions": [
+      { "reason": "already-covered", "count": 8 },
+      { "reason": "harvested-source", "count": 5 },
+      { "reason": "non-classical", "count": 4 },
+      { "reason": "out-of-window", "count": 3 }
+    ],
+    "officialDetailReviewed": "all",
+    "notes": "Opcional, breve. Qué quedó fuera y por qué el lote es pequeño o vacío."
+  }
 }
 ```
 
-Un batch vacío es válido (no-op). Prefiérelo a inventar eventos.
+Un batch vacío es válido (no-op). Prefiérelo a inventar eventos. **Aunque el lote sea vacío, incluye `research`**: es lo que permite saber después si no había cobertura nueva o si se investigó poco.
+
+`research` es **diagnóstico**. No es catálogo, no se escribe en `data/**`, no cambia eligibility ni publicación. El Job Summary y el artifact lo conservan.
+
+### Qué debe permitir auditar el manifest
+
+Nivel mínimo (no listes cada URL visitada):
+
+| Campo | Para qué |
+|---|---|
+| `investigatedCategories` | Tipologías cubiertas (las de `editorialScope.longTail` u otras equivalentes). |
+| `leads` | Búsquedas o leads relevantes (`kind`: `search` o `lead`). No hace falta el historial completo. |
+| `candidatesReviewedApprox` | Orden de magnitud de fichas/anuncios mirados. |
+| `submittedToBatch` | Cuántos acabaron en `observations` (debe coincidir con `observations.length`). |
+| `exclusions` | Recuentos por motivo: `already-covered`, `harvested-source`, `out-of-window`, `out-of-geographic-scope`, `non-classical`, `insufficient-evidence`, `duplicate-lead`, `other`. `examples` opcionales y cortos. |
+| `officialDetailReviewed` | `all` / `some` / `none` / `not-applicable`. Si citas una ficha de detalle, deberías haberla abierto. |
 
 Publica **solo** el JSON, en la rama de petición, en:
 
@@ -197,7 +238,7 @@ gh run watch <run-id>
 gh run view <run-id>
 ```
 
-Job Summary y artifact `discovery-run-<run-id>-<attempt>` (retención 90 días): batch exacto, `batch-meta.json`, `report.json`, `run.json`, `events.jsonl`, `run.log`. No contienen secrets.
+Job Summary y artifact `discovery-run-<run-id>-<attempt>` (retención 90 días): batch exacto, `batch-meta.json`, `research-manifest.json` (si venía en el batch), `evidence-diagnostics.json`, `report.json`, `run.json`, `events.jsonl`, `run.log`. No contienen secrets. El Job Summary incluye un bloque compacto de cobertura de investigación y avisos si una URL de ficha llega con evidencia sospechosamente pobre. Esos avisos no bloquean la publicación.
 
 La PR de catálogo, si hay cambios válidos, la abre el workflow:
 
@@ -223,6 +264,8 @@ También está enlazada en el Job Summary de la run.
 Cuando termines, informa con claridad:
 
 * URL de la run de GitHub Actions y su conclusión;
+* cobertura de investigación del `research` (categorías, candidatos revisados vs enviados, motivos de exclusión);
+* avisos de evidencia pobre en fichas de detalle, si el Job Summary los lista;
 * `health` y `healthReasons`;
 * eventos nuevos / actualizados / sin cambios;
 * `exclude` / `uncertain` / descartes estructurales;

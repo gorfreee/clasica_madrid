@@ -3,7 +3,7 @@ import { isExclusiveScheduleVenueId } from '../lib/domain/venues.ts';
 import { normalizeText } from '../lib/domain/normalize.ts';
 import type { Event } from '../lib/schemas/index.ts';
 import { compareMusicalFacts, musicalFactsFrom } from './musical-identity.ts';
-import { normalizeUrl, urlsEquivalent } from './urls.ts';
+import { normalizeUrl, urlIdentifiesSingleEvent, urlsEquivalent } from './urls.ts';
 
 export type IdentityMethod = 'externalId' | 'url' | 'alias' | 'strong' | 'slot';
 
@@ -150,12 +150,15 @@ export function eventMatchesExternalId(event: Event, catalogSourceId: string, ex
   );
 }
 
+/** Same-URL matching is only for event-detail URLs. Listing pages are citations, not identity. */
 export function eventMatchesUrl(
   event: Event,
   sourceUrl: string,
   options?: { catalogSourceId?: string; observedExternalId?: string },
 ): boolean {
+  if (!urlIdentifiesSingleEvent(sourceUrl)) return false;
   return event.citations.some((citation) => {
+    if (!urlIdentifiesSingleEvent(citation.url)) return false;
     if (!urlsEquivalent(citation.url, sourceUrl)) return false;
     if (
       options?.observedExternalId &&
@@ -180,17 +183,34 @@ export function newObservationKeys(
   const dated = observed.occurrences.filter((item) => item.date);
   const urlKey = (suffix: string) =>
     observed.externalId ? `${suffix}:ext:${observed.externalId}` : suffix;
-  if (dated.length === 0) {
-    keys.push(urlKey(`url:${url}`));
+  if (urlIdentifiesSingleEvent(url)) {
+    if (dated.length === 0) {
+      keys.push(urlKey(`url:${url}`));
+    } else {
+      for (const occurrence of dated) {
+        keys.push(
+          urlKey(
+            venueId
+              ? `url:${url}:${occurrence.date}:${venueId}`
+              : `url:${url}:${occurrence.date}`,
+          ),
+        );
+      }
+    }
   } else {
-    for (const occurrence of dated) {
-      keys.push(
-        urlKey(
-          venueId
-            ? `url:${url}:${occurrence.date}:${venueId}`
-            : `url:${url}:${occurrence.date}`,
-        ),
-      );
+    const title = normalizeText(observed.title);
+    if (dated.length === 0) {
+      keys.push(urlKey(`listing:${url}:${title}`));
+    } else {
+      for (const occurrence of dated) {
+        keys.push(
+          urlKey(
+            venueId
+              ? `listing:${url}:${occurrence.date}:${venueId}:${title}`
+              : `listing:${url}:${occurrence.date}:${title}`,
+          ),
+        );
+      }
     }
   }
   if (observed.externalId) {
