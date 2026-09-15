@@ -87,7 +87,7 @@ const INLINE_NON_MUSIC_CREDIT =
 const TITLE_CONTEXTUAL_DE =
   /(?:tema|un tema|sobre un tema|basad[oa]|inspirad[oa]|homenaje)\s+$/iu;
 const CREDIT_LABEL_TITLE =
-  /^(?:libreto|texto(?:\s+del)?|letra|poema|poes[ií]a|versi[oó]n|adaptaci[oó]n|transcripciones?|arreglos?|orquestaci[oó]n)\b/i;
+  /^(?:libreto|texto(?:\s+del)?|letra|poema|poes[ií]a|versi[oó]n|adaptaci[oó]n|transcripci[oó]n(?:es)?|arreglos?|orquestaci[oó]n)\b/i;
 const PERFORMER_LINE =
   /^(?:solistas?|directora?|director\s*\/\s*concertino|actor(?:\s+y\s+solista)?|int[ée]rpretes?)\s*:/i;
 const WORK_ANNOTATION =
@@ -232,7 +232,13 @@ function fromWorkDeComposer(
   if (surface === 'title') return [];
   const found: AttributedComposerName[] = [];
   for (const line of programmeLines(text)) {
-    if (PERFORMER_LINE.test(line) || looksLikeTextCredit(line) || looksLikeNonWorkCredit(line)) continue;
+    if (
+      PERFORMER_LINE.test(line) ||
+      looksLikeTextCredit(line) ||
+      looksLikeNonWorkCredit(line.replace(/^\*+\s*/, ''))
+    ) {
+      continue;
+    }
     if (isLabelledCreditLine(line)) continue;
     const parsed = parseWorkDeComposerLine(line);
     if (!parsed) continue;
@@ -336,6 +342,7 @@ function completeAuthorFromTitle(title: string, author: string): { title: string
 
 function looksLikeAbsorbableGivenName(word: string): boolean {
   if (WORK_GENRE.test(word) || looksLikeWorkTitle(word) || looksLikeEditorialMaterial(word)) return false;
+  if (CREDIT_LABEL_TITLE.test(word) || looksLikeNonWorkCredit(word)) return false;
   if (isNameInitialToken(word)) return true;
   return /^\p{Lu}[\p{Ll}’'-]{1,19}$/u.test(word);
 }

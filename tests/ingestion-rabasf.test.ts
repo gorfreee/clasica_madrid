@@ -9,13 +9,17 @@ import {
   rabasfConcertUrl,
   rabasfDates,
 } from '../src/ingestion/detail/real-academia-bellas-artes.ts';
+import { canonicalizePerformerList } from '../src/ingestion/classification/performer-role.ts';
+import { canonicalizeComposerList } from '../src/ingestion/composer-name.ts';
+import { enrichNormalizedEvent } from '../src/ingestion/enrich-normalized.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { hydrateEvents } from '../src/ingestion/hydrate.ts';
 import { runIngest } from '../src/ingestion/pipeline.ts';
 import { mergeCandidateBatch } from '../src/ingestion/batch.ts';
 import { matchVenue } from '../src/ingestion/venues.ts';
 import { emptyCatalog, type Catalog } from '../src/lib/domain/catalog.ts';
-import type { AdapterContext } from '../src/ingestion/types.ts';
+import type { AdapterContext, RawEvent } from '../src/ingestion/types.ts';
+import { emptyObservedLists } from '../src/ingestion/observed.ts';
 import { TEST_NOW, TEST_WINDOW, makeEvent } from './helpers.ts';
 
 const source = getSourceDefinition(adapter.id);
@@ -39,6 +43,15 @@ const ctx: AdapterContext = {
 
 async function sample(slug = 'paraisos-nocturnos') {
   return (await adapter.extract(await fixture('listing'), listingUrl, ctx)).find((event) => event.externalId === slug)!;
+}
+
+function ficha(slug: string, title: string): RawEvent {
+  return {
+    sourceId: source.id,
+    sourceUrl: `https://www.realacademiabellasartessanfernando.com/actividades/conciertos/${slug}/`,
+    externalId: slug,
+    observed: { title, occurrences: [], ...emptyObservedLists() },
+  };
 }
 
 async function smallListing(slug = 'paraisos-nocturnos') {
@@ -184,6 +197,147 @@ describe('Real Academia ficha hydration', () => {
     );
     expect(piano.performers).toEqual([{ name: 'Luis Cabello', roleText: 'piano' }]);
     expect(piano.composers).toContainEqual({ name: 'Frédéric Chopin' });
+  });
+
+  it('does not publish section headings, organizational directors or transcription credits from the guitar festival ficha', async () => {
+    const event = ficha(
+      'concierto-de-guitarra-2',
+      'Festival Internacional de Guitarra “Joaquín Rodrigo” de Madrid',
+    );
+    const patch = parseRabasfDetail(event, await fixture('detail-concierto-guitarra'));
+    expect(patch.venueText).toBe('Salón de actos');
+    expect(patch.occurrences).toEqual([{ raw: '5 de octubre de 2026 12:00 horas', date: '2026-10-05', time: '12:00' }]);
+    expect(patch.accessText).toMatch(/gratuitas/i);
+    expect(patch.performers?.some((item) => item.name === 'Presenta')).toBe(false);
+    expect(patch.performers).toEqual([
+      {
+        name: 'José Luis Ruiz del Puerto',
+        roleText: 'director de la Fundación Alhambra Guitarras y codirector del Festival Joaquín Rodrigo de Madrid',
+      },
+      { name: 'Manuel Coves', roleText: 'codirector del Festival Joaquín Rodrigo de Madrid' },
+      { name: 'Ausiàs Parejo', roleText: 'guitarra' },
+    ]);
+    expect(canonicalizePerformerList(patch.performers ?? []).some((item) => item.role === 'conductor')).toBe(false);
+    expect(patch.composers).toEqual([
+      { name: 'Luys Milan' },
+      { name: 'Gaspar Sanz' },
+      { name: 'Manuel de Falla' },
+      { name: 'Joaquín Rodrigo' },
+    ]);
+    expect(patch.composers?.some((item) => /transcripci[oó]n|ausi[aà]s/i.test(item.name))).toBe(false);
+    expect(patch.works).toContainEqual({ title: 'Dos fantasías', composerName: 'Luys Milan' });
+    expect(patch.works).toContainEqual({ title: 'Danzas españolas', composerName: 'Gaspar Sanz' });
+    expect(patch.works).toContainEqual({ title: 'Homenaje a Debussy', composerName: 'Manuel de Falla' });
+    expect(patch.works).toContainEqual({ title: 'Invocación y danza', composerName: 'Joaquín Rodrigo' });
+    expect(patch.works).toContainEqual({ title: 'El amor brujo', composerName: 'Manuel de Falla' });
+    expect(patch.programText).toMatch(/Transcripción de Ausiàs Parejo/);
+    const publishedComposers = canonicalizeComposerList(patch.composers ?? []);
+    expect(publishedComposers.some((item) => /transcripci[oó]n|ausi/i.test(item.name))).toBe(false);
+    const enriched = enrichNormalizedEvent({
+      sourceId: source.id,
+      sourceUrl: event.sourceUrl,
+      externalId: event.externalId,
+      title: event.observed.title,
+      occurrences: [{ date: '2026-10-05', time: '12:00' }],
+      venueText: patch.venueText,
+      performers: patch.performers ?? [],
+      composers: patch.composers ?? [],
+      works: patch.works ?? [],
+      programText: patch.programText,
+    });
+    expect(enriched.composers.some((item) => /transcripci[oó]n|ausi/i.test(item.name))).toBe(false);
+    const intervienen = parseRabasfDetail(
+      event,
+      (await fixture('detail-concierto-guitarra')).replace('>Presenta<', '>Intervienen<'),
+    );
+    expect(intervienen.performers?.some((item) => item.name === 'Intervienen')).toBe(false);
+  });
+
+  it('keeps the Folía ensemble and composers without turning bibliography into works', async () => {
+    const event = ficha(
+      'la-folia',
+      'Música en torno a la Independencia de los Estados Unidos de América',
+    );
+    const patch = parseRabasfDetail(event, await fixture('detail-la-folia'));
+    expect(patch.occurrences?.[0]).toMatchObject({ date: '2026-10-02', time: '12:00' });
+    expect(patch.venueText).toBe('Salón de actos');
+    expect(patch.performers).toEqual([
+      { name: 'Grupo de música barroca “La Folía”' },
+      { name: 'Pedro Bonet', roleText: 'director' },
+      { name: 'Celia Alcedo', roleText: 'soprano' },
+      { name: 'Pedro Bonet', roleText: 'flautas de pico' },
+      { name: 'Ignacio Zaragoza', roleText: 'flautas de pico y percusión' },
+      { name: 'Pedro Bonet González', roleText: 'violonchelo barroco' },
+      { name: 'Jorge López Escribano', roleText: 'clave' },
+    ]);
+    expect(canonicalizePerformerList(patch.performers ?? [])).toContainEqual({
+      name: 'Pedro Bonet',
+      role: 'conductor',
+    });
+    expect(patch.composers).toEqual([
+      { name: 'Juan Mathías de los Reyes Mapamundi' },
+      { name: 'Jean-Jacques Rousseau' },
+      { name: 'Luigi Boccherini' },
+      { name: 'Manuel Espinosa de los Monteros' },
+      { name: 'José Lidón' },
+      { name: 'Nicolas Bernier' },
+      { name: 'Giuseppe Cristiano Lidarti' },
+      { name: 'James Hewitt' },
+      { name: 'John Tufts' },
+      { name: 'Anne Hunter' },
+      { name: 'Esteban Salas' },
+    ]);
+    const workTitles = patch.works?.map((work) => work.title) ?? [];
+    expect(workTitles.some((title) => /bay psalm|new edition|último mohicano|scottish songs|the celebrated|death song/i.test(title))).toBe(false);
+    expect(workTitles.some((title) => /consolations des misères|six sonatas for the violoncello|libro de la ordenanza|seguidillas con acompañamiento|cantates fran/i.test(title))).toBe(false);
+    expect(patch.programText).toMatch(/Bay Psalm Book/);
+    expect(patch.programText).toMatch(/Chanson nègre/);
+    expect(patch.programText).toMatch(/Northampton/);
+  });
+
+  it('joins a composer name split across adjacent strong tags and ignores Presentación labels', async () => {
+    const turina = parseRabasfDetail(
+      ficha(
+        'trio-arbos-3',
+        '25 años de la primera grabación integral de los Tríos con piano de Joaquín Turina',
+      ),
+      await fixture('detail-trio-arbos'),
+    );
+    expect(turina.performers).toEqual([
+      { name: 'Trío Arbós' },
+      { name: 'Ferdinando Trematore', roleText: 'violín' },
+      { name: 'José Miguel Gómez', roleText: 'violonchelo' },
+      { name: 'Juan Carlos Garvayo', roleText: 'piano' },
+    ]);
+    expect(turina.composers).toEqual([{ name: 'Joaquín Turina' }]);
+    expect(turina.composers?.some((item) => item.name === 'Joaquín')).toBe(false);
+    expect(turina.works).toContainEqual({ title: 'Trío en Fa', composerName: 'Joaquín Turina' });
+    expect(turina.works).toContainEqual({ title: 'Primer trío en Re menor', composerName: 'Joaquín Turina' });
+
+    const villar = parseRabasfDetail(ficha('rogelio-villar', 'Rogelio Villar'), await fixture('detail-rogelio-villar'));
+    expect(villar.performers?.some((item) => /presentaci[oó]n|interpretaci[oó]n musical/i.test(item.name))).toBe(false);
+    expect(villar.performers).toEqual([
+      {
+        name: 'José Luis Temes',
+        roleText: 'director de orquesta y académico electo de la Sección de Música de la RABASF',
+      },
+      { name: 'Hae Won Oh', roleText: 'gerente de la Orquesta de Extremadura' },
+      {
+        name: 'Miguel Fernández Llamazares',
+        roleText: 'violinista y director del Festival de Música Española de León',
+      },
+      { name: 'Julia Franco', roleText: 'piano' },
+      { name: 'Héctor Sánchez', roleText: 'piano' },
+    ]);
+    const roles = canonicalizePerformerList(villar.performers ?? []);
+    expect(roles).toContainEqual({ name: 'José Luis Temes', role: 'conductor' });
+    expect(roles.find((item) => item.name === 'Miguel Fernández Llamazares')?.role).toBeUndefined();
+    expect(roles.find((item) => item.name === 'Hae Won Oh')?.role).toBeUndefined();
+    expect(villar.composers).toEqual([{ name: 'Rogelio Villar' }]);
+    expect(villar.works).toContainEqual({
+      title: 'Canciones leonesas para piano',
+      composerName: 'Rogelio Villar',
+    });
   });
 
   it('fails locally for wrong identity, missing venue, malformed dates or several rooms', async () => {

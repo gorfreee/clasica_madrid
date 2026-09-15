@@ -28,14 +28,22 @@ const SCHEDULE_NOTICE = new RegExp(
 const INSTRUMENT_ONLY =
   /^(?:violines|viol[ií]n|violas?|violonchelos?|cellos?|contrabajos?|tenores|bajos|sopranos?|mezzosopranos?|bar[ií]tonos?|pianos?|flautas?|oboes?|clarinetes?|fagotes?|trompas?|trompetas?|arpas?|claves?|percusi[oó]n|bater[ií]a|directores?|directora|direcci[oó]n)$/i;
 const ENSEMBLE =
-  /\b(?:orquesta|orquestra|orchestra|orchester|coro|choir|escolan[ií]a|ensemble|ensamble|camerata|cuarteto|quinteto|agrupaci[oó]n|sociedad coral|capella|cappella|chapelle|ballet)\b/i;
+  /\b(?:orquesta|orquestra|orchestra|orchester|coro|choir|escolan[ií]a|ensemble|ensamble|camerata|cuarteto|quinteto|tr[ií]o|agrupaci[oó]n|grupo\s+de\s+m[uú]sica|sociedad coral|capella|cappella|chapelle|ballet)\b/i;
 const ENSEMBLE_SUBJECT =
-  /^(?:orquesta|orquestra|orchestra|orchester|coro|choir|escolan[ií]a|ensemble|ensamble|camerata|cuarteto|quinteto|agrupaci[oó]n|sociedad coral|capella|cappella|chapelle|compa[ñn][ií]a\b.*\bballet|ballet)\b/i;
+  /^(?:orquesta|orquestra|orchestra|orchester|coro|choir|escolan[ií]a|ensemble|ensamble|camerata|cuarteto|quinteto|tr[ií]o|agrupaci[oó]n|grupo\s+de\s+m[uú]sica|sociedad coral|capella|cappella|chapelle|compa[ñn][ií]a\b.*\bballet|ballet)\b/i;
 const PRODUCTION_NOTE = /\(?\s*adaptaci[oó]n\s+escenificada\s*\)?/i;
 const TEXT_CREDIT = /^(?:texto|libreto|letra)\s*:/i;
-/** Standalone arrangement/orchestration lines. Not a parenthetical `(arr. Name)` inside a title. */
+/** Editorial section headings that are never a person or ensemble. */
+const CREDIT_SECTION_LABEL =
+  /^(?:int[eé]rpretes?|intervienen|presenta|presentaci[oó]n|interpretaci[oó]n(?:\s+musical)?)$/i;
+/**
+ * Standalone transcription/arrangement/orchestration/libretto lines.
+ * Not a parenthetical `(arr. Name)` inside a title.
+ */
 const NON_WORK_CREDIT =
-  /^(?:arr\.|arreglos?|orquestaci[oó]n(?:es)?|orchestrations?|orch\.)\s*(?:de\s+|:\s*)?\S/i;
+  /^(?:arr\.|arreglos?|orquestaci[oó]n(?:es)?|orchestrations?|orch\.|transcripci[oó]n(?:es)?|versi[oó]n(?:es)?|adaptaci[oó]n(?:es)?)\s*(?:de\s+|:\s*)?\S/i;
+const NON_COMPOSER_CREDIT_NAME =
+  /^(?:transcripci[oó]n(?:es)?|arreglos?|orquestaci[oó]n(?:es)?|versi[oó]n(?:es)?|adaptaci[oó]n(?:es)?|libreto|texto(?:\s+del)?|letra|poema|poes[ií]a)\s+(?:de|del|:)\b/i;
 const INITIALS_AUTHOR = /^(?:[\p{Lu}\p{Lt}]\.\s*){1,3}[\p{L}’'-]+$/u;
 const CONTEXTUAL_DE_PREFIX = /(?:tema|un tema|sobre un tema|basad[oa]|inspirad[oa]|homenaje)\s+$/iu;
 const NAME_PARTICLE = /^(?:de|del|van|von|di|da|el|la|los|las)$/i;
@@ -53,6 +61,7 @@ export type TitleAuthorWork = {
 export function isObviousNonPerformer(name: string, roleText?: string): boolean {
   const text = name.trim();
   if (!text) return true;
+  if (CREDIT_SECTION_LABEL.test(text)) return true;
   // Event.performers[].name is max 300. A longer blob is never a person or ensemble.
   if (text.length > 300) return true;
   if (text.length > 120 && !looksLikeEnsembleName(text)) return true;
@@ -186,10 +195,14 @@ export function looksLikeTextCredit(text: string): boolean {
  * They may remain in programText; they must never become works[].
  */
 export function looksLikeNonWorkCredit(text: string): boolean {
-  const trimmed = text.trim().replace(/^[()]+|[()]+$/g, '').trim();
+  const trimmed = text
+    .trim()
+    .replace(/^[()]+|[()]+$/g, '')
+    .trim()
+    .replace(/^\*+\s*/, '');
   if (!trimmed) return false;
   if (looksLikeTextCredit(trimmed)) return true;
-  return NON_WORK_CREDIT.test(trimmed);
+  return NON_WORK_CREDIT.test(trimmed) || NON_COMPOSER_CREDIT_NAME.test(trimmed);
 }
 
 /**
@@ -281,7 +294,8 @@ export function isUnreliableComposerName(text: string): boolean {
   if (
     looksLikeProductionNote(trimmed) ||
     looksLikeTextCredit(trimmed) ||
-    looksLikeNonWorkCredit(trimmed)
+    looksLikeNonWorkCredit(trimmed) ||
+    NON_COMPOSER_CREDIT_NAME.test(trimmed)
   ) {
     return true;
   }

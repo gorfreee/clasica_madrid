@@ -684,7 +684,16 @@ describe('composer knowledge base', () => {
     expect(looksLikeNonWorkCredit('Arreglo de Manuel Tévar')).toBe(true);
     expect(looksLikeNonWorkCredit('Orquestación Manuel Tévar')).toBe(true);
     expect(looksLikeNonWorkCredit('Texto: Friedrich Hölderlin')).toBe(true);
+    expect(looksLikeNonWorkCredit('Transcripción de Ausiàs Parejo')).toBe(true);
+    expect(looksLikeNonWorkCredit('* Transcripción de Ausiàs Parejo')).toBe(true);
+    expect(looksLikeWorkLine('Transcripción de Ausiàs Parejo')).toBe(false);
     expect(looksLikeNonWorkCredit('Cuarteto «Americano», op. 96 (arr. David Walter)')).toBe(false);
+    expect(looksLikeEnsembleName('Grupo de música barroca “La Folía”')).toBe(true);
+    expect(isObviousNonPerformer('Presenta')).toBe(true);
+    expect(isObviousNonPerformer('Intervienen')).toBe(true);
+    expect(isObviousNonPerformer('Presentación')).toBe(true);
+    expect(isObviousNonPerformer('Interpretación musical')).toBe(true);
+    expect(isObviousNonPerformer('Intérpretes')).toBe(true);
     expect(parseExplicitTitleAuthorWork('Concierto para Trompa y Orquesta N.1 de R. Strauss')).toEqual({
       title: 'Concierto para Trompa y Orquesta N.1',
       composerName: 'R. Strauss',
@@ -728,6 +737,7 @@ describe('composer knowledge base', () => {
     const composers = [{ name: 'Luis de Narvaez' }, { name: 'Sergei Prokofiev' }];
     const works = [{ title: 'Mille regretz', composerName: 'Josquin Desprez' }];
     expect(normalizeComposerList(composers)).toEqual(composers);
+    expect(normalizeComposerList([{ name: 'Transcripción de Ausiàs Parejo' }])).toEqual([]);
     expect(normalizeWorkList(works)).toEqual(works);
   });
 

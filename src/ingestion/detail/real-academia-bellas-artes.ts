@@ -1,5 +1,10 @@
 import { parseObservedTime, parseSpanishCalendarDate } from '../dates.ts';
-import { decodeHtmlEntities, stripTags } from '../html.ts';
+import { decodeHtmlEntities, flattenHtmlBlocks, splitBreaks, stripTags } from '../html.ts';
+import {
+  isUnreliableComposerName,
+  looksLikeEnsembleName,
+  looksLikeNonWorkCredit,
+} from '../observed-cleanup.ts';
 import {
   emptyObservedLists,
   normalizeComposerList,
@@ -19,7 +24,9 @@ const LISTING_DATES = new RegExp(
 const TIME = /^(\d{1,2}):(\d{2})\s*horas?$/i;
 const ACCESS_ITEM =
   /reserva|entrada|acceso|gratuit|aforo|normas|cancel|eventbrite|si, hecha la reserva/i;
-const COMPOSER_YEARS = /\(\s*(?:ca\.?\s*)?\d{3,4}(?:\s*[–—-]\s*(?:ca\.?\s*)?\d{3,4})?\s*\)/g;
+const COMPOSER_YEARS =
+  /\(\s*(?:¿\??\s*[–—-]\s*)?(?:ca\.?|h\.?)?\s*\d{3,4}(?:\s*[–—-]\s*(?:ca\.?|h\.?)?\s*\d{3,4})?\s*\)/g;
+const NAME_PARTICLE = /^(?:de|del|van|von|di|da|el|la|los|las)$/i;
 
 /** The public REST API is authenticated-only. Ficha facts live in the custom
  * `wrapper-rcf` sidebar and Gutenberg blocks of `actividad_post_type`. */
@@ -229,25 +236,26 @@ function parseProgram(html: string): {
   const before = programHeading ? html.slice(0, programHeading.index) : html;
   const after = programHeading ? html.slice(programHeading.index + programHeading[0].length) : '';
   const performers = parsePerformers(before);
+  const programHtml = after || programmeTail(html);
   const composers: { name: string }[] = [];
   const works: { title: string; composerName?: string }[] = [];
   let composerName: string | undefined;
-  for (const paragraph of after.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)) {
+  for (const paragraph of programHtml.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)) {
+    if (/\bnota-pie\b/i.test(paragraph[0]!)) continue;
     const raw = paragraph[1]!;
-    const text = stripTags(raw);
-    if (!text) continue;
-    const strong = stripTags(/<strong\b[^>]*>([\s\S]*?)<\/strong>/i.exec(raw)?.[1] ?? '').replace(COMPOSER_YEARS, '').trim();
-    if (strong) {
-      composerName = strong || undefined;
-      if (composerName) composers.push({ name: composerName });
+    if (!stripTags(raw)) continue;
+    const heading = composerHeadingFromParagraph(raw);
+    if (heading) {
+      composerName = heading;
+      composers.push({ name: heading });
     }
-    for (const work of raw.matchAll(/<em\b[^>]*>([\s\S]*?)<\/em>/gi)) {
-      const title = stripTags(work[1]!);
-      if (title) works.push({ title, ...(composerName ? { composerName } : {}) });
+    if (!composerName) continue;
+    for (const title of italicTitlesOutsideParens(raw)) {
+      works.push({ title, composerName });
     }
   }
   const description = firstParagraphs(before);
-  const programText = stripTags(after) || undefined;
+  const programText = flattenHtmlBlocks(programHtml) || undefined;
   return {
     ...(description ? { description } : {}),
     ...(programText ? { programText } : {}),
@@ -257,12 +265,95 @@ function parseProgram(html: string): {
   };
 }
 
+function programmeTail(html: string): string {
+  for (const paragraph of html.matchAll(/<p\b[^>]*>[\s\S]*?<\/p>/gi)) {
+    if (paragraph.index === undefined) continue;
+    if (composerHeadingFromParagraph(paragraph[0]!)) return html.slice(paragraph.index);
+  }
+  return '';
+}
+
+function composerHeadingFromParagraph(html: string): string | undefined {
+  const first = splitBreaks(html)[0];
+  if (!first) return undefined;
+  const cleaned = first.replace(/^\*+\s*/, '');
+  if (looksLikeNonWorkCredit(cleaned)) return undefined;
+  if (!hasComposerYears(cleaned) && !hasComposerYears(first)) return undefined;
+  const name = collapseComposerHeading(cleaned);
+  if (!name || isUnreliableComposerName(name) || !looksLikeCompleteComposerName(name)) return undefined;
+  return name;
+}
+
+function hasComposerYears(text: string): boolean {
+  return new RegExp(COMPOSER_YEARS.source, 'u').test(text);
+}
+
+function collapseComposerHeading(line: string): string {
+  return line.replace(new RegExp(COMPOSER_YEARS.source, 'gu'), '').replace(/[.,;:]+$/u, '').trim();
+}
+
+function looksLikeCompleteComposerName(name: string): boolean {
+  const words = name.split(/\s+/).filter(Boolean);
+  const content = words.filter((word) => !NAME_PARTICLE.test(word));
+  if (content.length < 2 || content.length > 8) return false;
+  return words.every((word, index) => {
+    if (NAME_PARTICLE.test(word) && index > 0) return true;
+    return /^[\p{Lu}\p{Lt}][\p{L}.'’\-]*$/u.test(word) || /^[dD][’'][\p{Lu}\p{Lt}]/u.test(word);
+  });
+}
+
+/**
+ * RABASF uses italics for works and for bibliographic titles. Italics inside
+ * a parenthetical are kept only when they name the work (`del Cuarteto…`);
+ * publication citations stay in programText.
+ */
+function italicTitlesOutsideParens(html: string): string[] {
+  const titles: string[] = [];
+  let depth = 0;
+  let sinceParen = '';
+  let index = 0;
+  while (index < html.length) {
+    const open = /<em\b[^>]*>/i.exec(html.slice(index));
+    const next = open?.index !== undefined ? index + open.index : html.length;
+    ({ depth, sinceParen } = consumeParens(stripTags(html.slice(index, next)), depth, sinceParen));
+    if (open?.index === undefined) break;
+    const innerStart = next + open[0].length;
+    const close = /<\/em>/i.exec(html.slice(innerStart));
+    if (close?.index === undefined) break;
+    const title = stripTags(html.slice(innerStart, innerStart + close.index));
+    const workFromCitation = /^(?:de las|de los|de la|del|de)\s*$/i.test(sinceParen);
+    if (title && !/^\(/.test(title) && (depth <= 0 || workFromCitation)) titles.push(title);
+    ({ depth, sinceParen } = consumeParens(title, depth, sinceParen));
+    index = innerStart + close.index + close[0].length;
+  }
+  return titles;
+}
+
+function consumeParens(
+  text: string,
+  depth: number,
+  sinceParen: string,
+): { depth: number; sinceParen: string } {
+  for (const char of text) {
+    if (char === '(') {
+      depth += 1;
+      sinceParen = '';
+    } else if (char === ')') {
+      depth -= 1;
+      sinceParen = '';
+    } else if (depth > 0) {
+      sinceParen += char;
+    }
+  }
+  return { depth, sinceParen };
+}
+
 function parsePerformers(html: string): { name: string; roleText?: string }[] {
   const performers: { name: string; roleText?: string }[] = [];
   for (const heading of html.matchAll(/<h4\b[^>]*>([\s\S]*?)<\/h4>/gi)) {
     const label = stripTags(heading[1]!);
     if (!label || /^programa$/i.test(label)) continue;
-    if (!/^int[eé]rpretes?$/i.test(label)) performers.push({ name: label });
+    if (looksLikeEnsembleName(label)) performers.push({ name: label });
     const rest = html.slice(heading.index! + heading[0].length);
     const until = /<h4\b/i.exec(rest);
     const block = until ? rest.slice(0, until.index) : rest;
@@ -270,10 +361,14 @@ function parsePerformers(html: string): { name: string; roleText?: string }[] {
       performers.push(...credits(paragraph[1]!));
     }
   }
+  for (const row of html.matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr>/gi)) {
+    performers.push(...creditsFromTableRow(row[1]!));
+  }
   return performers;
 }
 
 function credits(html: string): { name: string; roleText?: string }[] {
+  if (composerHeadingFromParagraph(html)) return [];
   const items: { name: string; roleText?: string }[] = [];
   for (const chunk of html.split(/<br\s*\/?>/i)) {
     const name = stripTags(/<strong\b[^>]*>([\s\S]*?)<\/strong>/i.exec(chunk)?.[1] ?? '').replace(/,$/, '');
@@ -281,6 +376,17 @@ function credits(html: string): { name: string; roleText?: string }[] {
     if (name) items.push({ name, ...(roleText ? { roleText } : {}) });
   }
   return items;
+}
+
+function creditsFromTableRow(html: string): { name: string; roleText?: string }[] {
+  const cells = [...html.matchAll(/<td\b[^>]*>([\s\S]*?)<\/td>/gi)].map((cell) => cell[1]!);
+  if (!cells[0]) return [];
+  const name = stripTags(/<strong\b[^>]*>([\s\S]*?)<\/strong>/i.exec(cells[0])?.[1] ?? '').replace(/,$/, '');
+  const roleText = cells[1]
+    ? stripTags(/<em\b[^>]*>([\s\S]*?)<\/em>/i.exec(cells[1])?.[1] ?? '') || undefined
+    : undefined;
+  if (!name) return [];
+  return [{ name, ...(roleText ? { roleText } : {}) }];
 }
 
 function firstParagraphs(html: string): string | undefined {

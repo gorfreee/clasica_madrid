@@ -15,5 +15,9 @@ Event feed. The harvest surface is the `actividad_type=conciertos` archive.
   — three historical cards used to prove pagination follow-and-stop.
 - `detail-paraisos.html`: https://www.realacademiabellasartessanfernando.com/actividades/conciertos/paraisos-nocturnos/
 - `detail-guitar.html`: https://www.realacademiabellasartessanfernando.com/actividades/conciertos/festival-internacional-de-guitarra-de-madrid-1-2/
+- `detail-concierto-guitarra.html`: https://www.realacademiabellasartessanfernando.com/actividades/conciertos/concierto-de-guitarra-2/
+- `detail-la-folia.html`: https://www.realacademiabellasartessanfernando.com/actividades/conciertos/la-folia/
+- `detail-trio-arbos.html`: https://www.realacademiabellasartessanfernando.com/actividades/conciertos/trio-arbos-3/
+- `detail-rogelio-villar.html`: https://www.realacademiabellasartessanfernando.com/actividades/conciertos/rogelio-villar/
 - `detail-piano.html`: https://www.realacademiabellasartessanfernando.com/actividades/conciertos/concierto-ii-del-festival-caprichos-del-romanticismo/
 - `detail-seikilos.html`: https://www.realacademiabellasartessanfernando.com/actividades/conciertos/seikilos/
