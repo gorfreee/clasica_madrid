@@ -48,29 +48,43 @@ test.describe('eyebrow de sección y retorno', () => {
     await expect(page.locator('.section-intro .eyebrow')).toHaveText('Lugares');
   });
 
-  test('el eyebrow de ficha queda a la misma altura que el de sección', async ({ page }) => {
+  test('el eyebrow queda a la misma altura en todas las páginas', async ({ page }) => {
     const viewports = [
       { width: 1440, height: 900 },
+      { width: 768, height: 900 },
       { width: 390, height: 844 },
     ] as const;
-    const sectionPath = '/';
-    const detailPath = '/eventos/excelentia-noches-en-los-jardines-de-espana-y-concierto-de-aranjuez/';
+    const pages = [
+      { path: '/', selector: '.agenda-intro .eyebrow' },
+      { path: '/lugares/', selector: '.section-intro .eyebrow' },
+      { path: '/acerca-de/', selector: '.section-intro .eyebrow' },
+      { path: '/eventos/trilogia-andaluza/', selector: '.detail-hero .eyebrow' },
+      { path: '/eventos/concierto-de-mineko-kojima/', selector: '.detail-hero .eyebrow' },
+      {
+        path: '/eventos/excelentia-noches-en-los-jardines-de-espana-y-concierto-de-aranjuez/',
+        selector: '.detail-hero .eyebrow',
+      },
+      { path: '/lugares/teatro-real/', selector: '.detail-hero .eyebrow' },
+      { path: '/lugares/basilica-pontificia-de-san-miguel/', selector: '.detail-hero .eyebrow' },
+      { path: '/pagina-inexistente/', selector: '.error-page .eyebrow' },
+    ] as const;
 
     for (const viewport of viewports) {
       await page.setViewportSize(viewport);
-      await page.goto(sectionPath);
+      await page.goto(pages[0].path);
       await page.evaluate(() => document.fonts.ready);
-      const sectionTop = await page.locator('.agenda-intro .eyebrow').evaluate((element) => {
+      const agendaTop = await page.locator(pages[0].selector).evaluate((element) => {
         return element.getBoundingClientRect().top;
       });
 
-      await page.goto(detailPath);
-      await page.evaluate(() => document.fonts.ready);
-      const detailTop = await page.locator('.detail-hero .eyebrow').evaluate((element) => {
-        return element.getBoundingClientRect().top;
-      });
-
-      expect(detailTop, `desalineado a ${viewport.width}px`).toBeCloseTo(sectionTop, 0);
+      for (const pageCase of pages.slice(1)) {
+        await page.goto(pageCase.path);
+        await page.evaluate(() => document.fonts.ready);
+        const top = await page.locator(pageCase.selector).evaluate((element) => {
+          return element.getBoundingClientRect().top;
+        });
+        expect(top, `${pageCase.path} desalineado a ${viewport.width}px`).toBeCloseTo(agendaTop, 0);
+      }
     }
   });
 
