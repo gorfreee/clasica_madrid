@@ -169,18 +169,22 @@ describe('adapter Madrid datos (JSON-LD)', () => {
     const casaVacas = events.find((event) => event.externalId === '50322790');
     expect(casaVacas?.observed.venueText).toBe('Centro Cultural Casa de Vacas (Retiro)');
     expect(casaVacas?.venueFacilityId).toBe('1945');
+    expect(casaVacas?.venueAddress).toBe('Paseo Colombia, 1, 28009 Madrid');
 
     const sameFacility = events.find((event) => event.externalId === '50322791');
     expect(sameFacility?.venueFacilityId).toBe('1945');
     expect(sameFacility?.observed.venueText).toBe('Centro Cultural Casa de Vacas');
+    expect(sameFacility?.venueAddress).toBeUndefined();
 
     const condeduque = events.find((event) => event.externalId === '50234843');
     expect(condeduque?.observed.venueText).toBe('Centro de Cultura Contemporánea CondeDuque');
     expect(condeduque?.venueFacilityId).toBe('1916');
+    expect(condeduque?.venueAddress).toBe('Calle Conde Duque, 9, 28015 Madrid');
 
     const secondBuenavista = events.find((event) => event.externalId === '50341120');
     expect(secondBuenavista?.venueFacilityId).toBe('64851');
     expect(secondBuenavista?.observed.venueText).toBe('Centro Cultural Buenavista');
+    expect(secondBuenavista?.venueAddress).toBe('Avenida Toreros, 5, 28028 Madrid');
 
     const unidentified = events.find((event) => event.externalId === '50341121');
     expect(unidentified?.observed.venueText).toBe('Sala sin identificar');

@@ -3,7 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { emptyCatalog } from '../src/lib/domain/catalog.ts';
-import { matchVenue, madridDatosFacilityVenueId } from '../src/ingestion/venues.ts';
+import { formatMadridDatosAddress, matchVenue, madridDatosFacilityVenueId } from '../src/ingestion/venues.ts';
 import { runIngest } from '../src/ingestion/pipeline.ts';
 import { mergeCandidateBatch } from '../src/ingestion/batch.ts';
 import { toCandidate } from '../src/ingestion/to-candidate.ts';
@@ -304,39 +304,89 @@ describe('resolución de venue — Madrid Datos', () => {
         catalog,
       ),
     ).toBeUndefined();
+    expect(
+      matchVenue(
+        {
+          venueText: 'Centro de Cultura Contemporánea CondeDuque',
+          sourceId: 'madrid-datos',
+          facilityId: '1916',
+        },
+        catalog,
+      ),
+    ).toBeUndefined();
     const proposed = matchVenue(
       {
         venueText: 'Centro de Cultura Contemporánea CondeDuque',
         sourceId: 'madrid-datos',
         facilityId: '1916',
+        address: 'Calle Conde Duque, 9, 28015 Madrid',
       },
       catalog,
     );
     expect(proposed?.kind).toBe('new');
     expect(proposed?.venue.id).toBe(madridDatosFacilityVenueId('1916'));
     expect(proposed?.venue.id).not.toBe('ven_condeduque_auditorio');
-    expect(proposed?.venue.address).toBeUndefined();
+    expect(proposed?.venue.slug).toBe('centro-de-cultura-contemporanea-condeduque');
+    expect(proposed?.venue.address).toBe('Calle Conde Duque, 9, 28015 Madrid');
     expect(proposed?.venue.url).toBeUndefined();
   });
 
-  it('un facility oficial nuevo propone un venue determinista sin inventar dirección', () => {
+  it('un facility oficial nuevo sin dirección no propone un venue incompleto', () => {
+    const catalog = catalogWith(casaVacas, teatroReal);
+    expect(
+      matchVenue(
+        {
+          venueText: 'Centro Cultural Buenavista (Salamanca)',
+          sourceId: 'madrid-datos',
+          facilityId: '64851',
+        },
+        catalog,
+      ),
+    ).toBeUndefined();
+  });
+
+  it('un facility oficial nuevo con dirección del listing propone un venue con slug humano', () => {
     const catalog = catalogWith(casaVacas, teatroReal);
     const match = matchVenue(
       {
         venueText: 'Centro Cultural Buenavista (Salamanca)',
         sourceId: 'madrid-datos',
         facilityId: '64851',
+        address: 'Avenida Toreros, 5, 28028 Madrid',
+      },
+      catalog,
+    );
+    expect(match?.kind).toBe('new');
+    expect(match?.venue.id).toBe('ven_md_fac_64851');
+    expect(match?.venue.slug).toBe('centro-cultural-buenavista');
+    expect(match?.venue.name).toBe('Centro Cultural Buenavista');
+    expect(match?.venue.municipality).toBe('Madrid');
+    expect(match?.venue.area).toBe('madrid');
+    expect(match?.venue.address).toBe('Avenida Toreros, 5, 28028 Madrid');
+    expect(match?.venue.url).toBeUndefined();
+  });
+
+  it('si el slug del nombre ya existe, el alta nueva de Madrid Datos añade el facility id', () => {
+    const catalog = catalogWith(
+      makeVenue({
+        id: 'ven_otro_centro',
+        slug: 'centro-cultural-buenavista',
+        name: 'Otro centro municipal',
+        address: 'Calle Mayor, 1, 28013 Madrid',
+      }),
+    );
+    const match = matchVenue(
+      {
+        venueText: 'Centro Cultural Buenavista (Salamanca)',
+        sourceId: 'madrid-datos',
+        facilityId: '64851',
+        address: 'Avenida Toreros, 5, 28028 Madrid',
       },
       catalog,
     );
     expect(match?.kind).toBe('new');
     expect(match?.venue.id).toBe('ven_md_fac_64851');
     expect(match?.venue.slug).toBe('centro-cultural-buenavista-64851');
-    expect(match?.venue.name).toBe('Centro Cultural Buenavista');
-    expect(match?.venue.municipality).toBe('Madrid');
-    expect(match?.venue.area).toBe('madrid');
-    expect(match?.venue.address).toBeUndefined();
-    expect(match?.venue.url).toBeUndefined();
   });
 
   it('sin facility id oficial no inventa un venue aunque haya nombre', () => {
@@ -413,7 +463,7 @@ describe('toCandidate usa el matching source-aware', () => {
     expect(candidateSchema.safeParse(built.candidate).success).toBe(true);
   });
 
-  it('Madrid Datos + facility oficial nuevo incluye el venue en el Candidate', () => {
+  it('Madrid Datos + facility nuevo sin dirección no publica un venue incompleto', () => {
     const catalog = catalogWith(teatroReal, casaVacas);
     const built = toCandidate(
       eventAt({
@@ -431,14 +481,84 @@ describe('toCandidate usa el matching source-aware', () => {
       new Set(),
       includeClassification(),
     );
+    expect(built.candidate).toBeUndefined();
+    expect(built.skippedReason).toBe('lugar nuevo con datos insuficientes');
+  });
+
+  it('Madrid Datos + facility oficial nuevo incluye el venue en el Candidate', () => {
+    const catalog = catalogWith(teatroReal, casaVacas);
+    const built = toCandidate(
+      eventAt({
+        sourceId: 'madrid-datos',
+        sourceUrl: 'https://www.madrid.es/evento/buenavista',
+        externalId: '50341119',
+        title: 'Concierto de música renacentista',
+        venueText: 'Biblioteca Pública Municipal Miguel Delibes (Moratalaz)',
+        venueFacilityId: '1752',
+        venueAddress: 'Calle Arroyo Belincoso, 11, 28030 Madrid',
+      }),
+      getSourceDefinition('madrid-datos'),
+      catalog,
+      TEST_NOW,
+      new Set(),
+      new Set(),
+      includeClassification(),
+    );
     expect(built.skippedReason).toBeUndefined();
     expect(built.candidate?.event.venueId).toBe('ven_md_fac_1752');
     expect(built.candidate?.venue?.id).toBe('ven_md_fac_1752');
-    expect(built.candidate?.venue?.slug).toBe('biblioteca-publica-municipal-miguel-delibes-1752');
+    expect(built.candidate?.venue?.slug).toBe('biblioteca-publica-municipal-miguel-delibes');
     expect(built.candidate?.venue?.name).toBe('Biblioteca Pública Municipal Miguel Delibes');
-    expect(built.candidate?.venue?.address).toBeUndefined();
+    expect(built.candidate?.venue?.address).toBe('Calle Arroyo Belincoso, 11, 28030 Madrid');
     expect(built.candidate?.venue?.url).toBeUndefined();
     expect(candidateSchema.safeParse(built.candidate).success).toBe(true);
+  });
+
+  it('un venue ya publicado de Madrid Datos conserva dirección y URL editoriales', () => {
+    const published = makeVenue({
+      id: 'ven_md_fac_64851',
+      slug: 'centro-cultural-buenavista-64851',
+      name: 'Centro Cultural Buenavista',
+      address: 'Avenida de los Toreros, 5, 28028 Madrid',
+      url: 'https://www.madrid.es/centros/buenavista',
+    });
+    const catalog = catalogWith(published);
+    const built = toCandidate(
+      eventAt({
+        sourceId: 'madrid-datos',
+        sourceUrl: 'https://www.madrid.es/evento/buenavista',
+        externalId: '50341119',
+        title: 'Concierto en Buenavista',
+        venueText: 'Centro Cultural Buenavista (Salamanca)',
+        venueFacilityId: '64851',
+        venueAddress: 'Avenida Toreros, 5, 28028 Madrid',
+        venueAddress: 'Avenida Toreros, 5, 28028 Madrid',
+      }),
+      getSourceDefinition('madrid-datos'),
+      catalog,
+      TEST_NOW,
+      new Set(),
+      new Set(),
+      includeClassification(),
+    );
+    expect(built.skippedReason).toBeUndefined();
+    expect(built.candidate?.event.venueId).toBe('ven_md_fac_64851');
+    expect(built.candidate?.venue).toBeUndefined();
+    expect(catalog.venues.find((venue) => venue.id === 'ven_md_fac_64851')?.address).toBe(
+      'Avenida de los Toreros, 5, 28028 Madrid',
+    );
+    expect(catalog.venues.find((venue) => venue.id === 'ven_md_fac_64851')?.url).toBe(
+      'https://www.madrid.es/centros/buenavista',
+    );
+
+    const merged = mergeCandidateBatch(catalog, [built.candidate!]);
+    expect(merged.issues).toEqual([]);
+    expect(merged.filesToWrite.filter((file) => file.relativePath === 'venues/ven_md_fac_64851.json')).toHaveLength(
+      0,
+    );
+    expect(merged.catalog.venues.find((venue) => venue.id === 'ven_md_fac_64851')?.address).toBe(
+      published.address,
+    );
   });
 
   it('el mismo facility en dos eventos reutiliza el mismo venue y el lote no lo duplica', () => {
@@ -451,6 +571,7 @@ describe('toCandidate usa el matching source-aware', () => {
         title: 'Concierto en Buenavista',
         venueText: 'Centro Cultural Buenavista (Salamanca)',
         venueFacilityId: '64851',
+        venueAddress: 'Avenida Toreros, 5, 28028 Madrid',
       }),
       getSourceDefinition('madrid-datos'),
       catalog,
@@ -467,6 +588,7 @@ describe('toCandidate usa el matching source-aware', () => {
         title: 'Bach en guitarra',
         venueText: 'Centro Cultural Buenavista',
         venueFacilityId: '64851',
+        venueAddress: 'Avenida Toreros, 5, 28028 Madrid',
       }),
       getSourceDefinition('madrid-datos'),
       catalog,
@@ -477,6 +599,8 @@ describe('toCandidate usa el matching source-aware', () => {
     );
     expect(first.candidate?.venue?.id).toBe('ven_md_fac_64851');
     expect(second.candidate?.venue?.id).toBe('ven_md_fac_64851');
+    expect(first.candidate?.venue?.slug).toBe('centro-cultural-buenavista');
+    expect(first.candidate?.venue?.address).toBe('Avenida Toreros, 5, 28028 Madrid');
     expect(first.candidate?.venue?.name).toBe(second.candidate?.venue?.name);
     expect(first.candidate?.event.id).not.toBe(second.candidate?.event.id);
 
@@ -497,6 +621,7 @@ describe('toCandidate usa el matching source-aware', () => {
         title: 'Concierto en Buenavista',
         venueText: 'Centro Cultural Buenavista (Salamanca)',
         venueFacilityId: '64851',
+        venueAddress: 'Avenida Toreros, 5, 28028 Madrid',
       }),
       getSourceDefinition('madrid-datos'),
       catalog,
@@ -516,6 +641,7 @@ describe('toCandidate usa el matching source-aware', () => {
         title: 'Concierto en Buenavista',
         venueText: 'Centro Cultural Buenavista (Salamanca)',
         venueFacilityId: '64851',
+        venueAddress: 'Avenida Toreros, 5, 28028 Madrid',
       }),
       getSourceDefinition('madrid-datos'),
       catalog,
@@ -546,6 +672,7 @@ describe('toCandidate usa el matching source-aware', () => {
         sourceUrl: 'https://www.teatroreal.es/es/espectaculo/polideportivo',
         venueText: 'Centro Cultural Buenavista (Salamanca)',
         venueFacilityId: '64851',
+        venueAddress: 'Avenida Toreros, 5, 28028 Madrid',
       }),
       getSourceDefinition('teatro-real'),
       catalog,
@@ -690,6 +817,51 @@ describe('resolución de venue — ProposedVenueFacts', () => {
     expect(first?.venue.id).toBe('ven_iglesia_san_jose');
     expect(second?.venue.id).toBe(first?.venue.id);
   });
+
+  it('no crea un venue raíz nuevo si falta la dirección', () => {
+    const catalog = catalogWith(sanJoseMadrid);
+    expect(
+      matchVenue(
+        proposedSanJose({ municipality: 'Leganés', area: 'nearby', address: undefined }),
+        catalog,
+      ),
+    ).toBeUndefined();
+  });
+});
+
+describe('dirección de Madrid Datos', () => {
+  it('formatea calle, número, CP y localidad del listing oficial', () => {
+    expect(
+      formatMadridDatosAddress({
+        streetAddress: 'AVENIDA TOREROS 5',
+        postalCode: '28028',
+        locality: 'MADRID',
+      }),
+    ).toBe('Avenida Toreros, 5, 28028 Madrid');
+    expect(
+      formatMadridDatosAddress({
+        streetAddress: 'CALLE CONDE DUQUE 9',
+        postalCode: '28015',
+        locality: 'MADRID',
+      }),
+    ).toBe('Calle Conde Duque, 9, 28015 Madrid');
+    expect(
+      formatMadridDatosAddress({
+        streetAddress: 'GLORIETA MARQUES DE VADILLO S/N',
+        postalCode: '28019',
+        locality: 'MADRID',
+      }),
+    ).toBe('Glorieta Marques de Vadillo, s/n, 28019 Madrid');
+  });
+
+  it('no inventa una dirección si el listing no trae calle', () => {
+    expect(
+      formatMadridDatosAddress({
+        postalCode: '28028',
+        locality: 'MADRID',
+      }),
+    ).toBeUndefined();
+  });
 });
 
 describe('pipeline Madrid Datos', () => {
@@ -727,5 +899,8 @@ describe('pipeline Madrid Datos', () => {
     expect(skipped.map((row) => row.externalId)).toEqual(['50341121']);
     expect(skipped.every((row) => row.outcome === 'structural-skip')).toBe(true);
     expect(run.summary.skippedUnusable).toBe(1);
+    for (const venue of run.candidates.map((item) => item.venue).filter(Boolean)) {
+      expect(venue?.address?.trim()).toBeTruthy();
+    }
   });
 });

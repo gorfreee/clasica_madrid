@@ -51,6 +51,7 @@ export function findReferenceIssues(catalog: Catalog): ValidationIssue[] {
       );
     }
     issues.push(...venueHierarchyIssues(venue, venues));
+    issues.push(...venueAddressIssues(venue, venues));
   }
 
   for (const event of catalog.events) {
@@ -196,6 +197,20 @@ function venueHierarchyIssues(
   }
 
   return issues;
+}
+
+function venueAddressIssues(
+  venue: { id: string; address?: string; parentVenueId?: string },
+  venues: Map<string, { id: string; address?: string; parentVenueId?: string }>,
+): ValidationIssue[] {
+  const path = `venues/${venue.id}.json`;
+  const root = venue.parentVenueId ? (venues.get(venue.parentVenueId) ?? venue) : venue;
+  const effective = root.address?.trim() || venue.address?.trim();
+  if (effective) return [];
+  const detail = venue.parentVenueId
+    ? 'ni el lugar ni su padre tienen una dirección física suficiente'
+    : 'un lugar principal publicado debe tener dirección';
+  return [errorIssue('missing-venue-address', detail, path)];
 }
 
 function indexById<T extends { id: string }>(items: T[]): Map<string, T> {

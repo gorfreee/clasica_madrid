@@ -494,7 +494,7 @@ export const KNOWN_VENUES: KnownVenue[] = [
       slug: 'casa-de-america',
       name: 'Casa de América',
       ...MADRID,
-      address: 'acceso por C/ Marqués del Duero, 2',
+      address: 'Calle del Marqués del Duero, 2, 28014 Madrid',
       url: 'https://www.casamerica.es/',
     },
   },
@@ -619,6 +619,41 @@ export const KNOWN_VENUES: KnownVenue[] = [
       url: 'https://www.escuelasuperiordemusicareinasofia.es/auditorio-sony/',
       parentVenueId: 'ven_escuela_superior_musica_reina_sofia',
       spaceName: 'Auditorio Sony',
+    },
+  },
+  {
+    keys: [
+      'conservatorio profesional de musica de getafe',
+      'conservatorio de getafe',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_conservatorio_profesional_de_musica_de_getafe',
+      slug: 'conservatorio-profesional-de-musica-de-getafe',
+      name: 'Conservatorio Profesional de Música de Getafe',
+      municipality: 'Getafe',
+      area: 'nearby',
+      address: 'Avenida de Arcas del Agua, 1, 28905 Getafe',
+      url: 'https://getafe.es/placemarks/conservatorio-profesional-de-musica/',
+    },
+  },
+  {
+    keys: [
+      'auditorio del conservatorio profesional de musica de getafe',
+      'conservatorio profesional de musica de getafe auditorio',
+      'conservatorio profesional de musica de getafe - auditorio',
+    ],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_auditorio_del_conservatorio_profesional_de_musica_de_getafe',
+      slug: 'auditorio-del-conservatorio-profesional-de-musica-de-getafe',
+      name: 'Conservatorio Profesional de Música de Getafe — Auditorio',
+      municipality: 'Getafe',
+      area: 'nearby',
+      address: 'Avenida de Arcas del Agua, 1, 28905 Getafe',
+      url: 'https://getafe.es/placemarks/conservatorio-profesional-de-musica/',
+      parentVenueId: 'ven_conservatorio_profesional_de_musica_de_getafe',
+      spaceName: 'Auditorio',
     },
   },
   {
@@ -754,6 +789,8 @@ export type VenueMatchInput = {
   venueText?: string;
   sourceId?: string;
   facilityId?: string;
+  /** Physical address observed on the source listing, when present. */
+  address?: string;
   proposed?: ProposedVenueFacts;
 };
 
@@ -797,7 +834,7 @@ export function matchVenue(
   }
 
   if (input.sourceId === 'madrid-datos' && input.facilityId && input.venueText) {
-    const proposed = proposeMadridDatosVenue(input.facilityId, input.venueText, catalog);
+    const proposed = proposeMadridDatosVenue(input.facilityId, input.venueText, catalog, input.address);
     if (proposed) return { kind: 'new', venue: proposed };
   }
 
@@ -842,21 +879,30 @@ export function isSufficientProposedVenue(
   return true;
 }
 
+/** A new root venue needs a physical address. Existing catalog matches do not. */
+export function hasSufficientNewVenueLocation(proposed: ProposedVenueFacts | undefined): boolean {
+  return Boolean(proposed?.address?.trim());
+}
+
 /**
  * Official municipal installation that is not yet in the catalog.
  * Identity is the facility id. Name comes from `event-location` (district
  * suffix stripped). municipality/area are inherent to this City of Madrid
- * source; address and URL are omitted because the listing does not publish
- * them reliably.
+ * source. A new root is only proposed when the listing already carries a
+ * physical address; existing catalog venues are resolved by facility id
+ * without requiring the observation to repeat it.
  */
 export function proposeMadridDatosVenue(
   facilityId: string,
   venueText: string,
   catalog: Catalog,
+  address?: string,
 ): Venue | undefined {
   if (!/^\d+$/.test(facilityId)) return undefined;
   const name = stripTrailingParenthetical(venueText);
   if (!name) return undefined;
+  const location = address?.trim();
+  if (!location) return undefined;
   const id = madridDatosFacilityVenueId(facilityId);
   const slug = madridDatosFacilitySlug(name, facilityId, id, catalog);
   if (!slug) return undefined;
@@ -867,7 +913,78 @@ export function proposeMadridDatosVenue(
     name,
     municipality: 'Madrid',
     area: 'madrid',
+    address: location,
   };
+}
+
+/**
+ * Human-readable address from Madrid Datos listing `address.area`.
+ * Uses the official street/number/postal fields; does not geocode or invent.
+ */
+export function formatMadridDatosAddress(input: {
+  streetAddress?: string;
+  postalCode?: string;
+  locality?: string;
+}): string | undefined {
+  const street = formatMadridDatosStreet(input.streetAddress);
+  if (!street) return undefined;
+  const postal = input.postalCode?.trim();
+  const locality = formatMadridDatosLocality(input.locality);
+  const tail = [postal, locality].filter(Boolean).join(' ');
+  return tail ? `${street}, ${tail}` : street;
+}
+
+function formatMadridDatosStreet(raw: string | undefined): string | undefined {
+  const value = raw?.trim().replace(/\s+/g, ' ');
+  if (!value) return undefined;
+  const match = /^(.*?)(?:\s+(\d+(?:\s*[-–]\s*\d+)?|S\/?N))$/i.exec(value);
+  const streetPart = (match?.[1] ?? value).trim();
+  const numberPart = match?.[2];
+  const street = titleCaseMadridDatosStreet(streetPart);
+  if (!street) return undefined;
+  if (!numberPart) return street;
+  const number = /^s\/?n$/i.test(numberPart.replace(/\s+/g, '')) ? 's/n' : numberPart.replace(/\s+/g, '');
+  return `${street}, ${number}`;
+}
+
+function titleCaseMadridDatosStreet(value: string): string {
+  return value
+    .split(/\s+/u)
+    .filter(Boolean)
+    .map((part, index) => {
+      const lower = part.toLocaleLowerCase('es');
+      if (index === 0) return STREET_TYPE_LABEL[lower] ?? capitalizeMadridDatosWord(part);
+      if (SMALL_STREET_WORDS.has(lower)) return lower;
+      return capitalizeMadridDatosWord(part);
+    })
+    .join(' ');
+}
+
+const STREET_TYPE_LABEL: Record<string, string> = {
+  calle: 'Calle',
+  avenida: 'Avenida',
+  plaza: 'Plaza',
+  paseo: 'Paseo',
+  glorieta: 'Glorieta',
+  ronda: 'Ronda',
+  carretera: 'Carretera',
+  camino: 'Camino',
+  travesia: 'Travesía',
+  'travesía': 'Travesía',
+};
+
+const SMALL_STREET_WORDS = new Set(['de', 'del', 'la', 'las', 'el', 'los', 'y']);
+
+function capitalizeMadridDatosWord(value: string): string {
+  const lower = value.toLocaleLowerCase('es');
+  return lower.charAt(0).toLocaleUpperCase('es') + lower.slice(1);
+}
+
+function formatMadridDatosLocality(raw: string | undefined): string | undefined {
+  const value = raw?.trim();
+  if (!value) return undefined;
+  if (isMadridMunicipality(value) || value.toLocaleUpperCase('es') === 'MADRID') return 'Madrid';
+  return titleCaseMadridDatosStreet(value);
 }
 
 function madridDatosFacilitySlug(
@@ -876,9 +993,10 @@ function madridDatosFacilitySlug(
   venueId: string,
   catalog: Catalog,
 ): string | undefined {
-  const preferred = toSlug(`${name} ${facilityId}`);
+  const preferred = toSlug(name);
+  const withFacility = toSlug(`${name} ${facilityId}`);
   const fallback = toSlug(`md fac ${facilityId}`);
-  for (const slug of [preferred, fallback]) {
+  for (const slug of [preferred, withFacility, fallback]) {
     if (!slug || slug === 'evento') continue;
     const taken = catalog.venues.some((venue) => venue.slug === slug && venue.id !== venueId);
     if (!taken) return slug;
@@ -937,10 +1055,12 @@ function knownVenueCompatible(known: KnownVenue, proposed: ProposedVenueFacts): 
 
 /**
  * Discovery venue not yet in the catalog. Identity is the observed name;
- * there is no fuzzy match. municipality/area must already be sufficient.
+ * there is no fuzzy match. A new root needs municipality/area and a
+ * physical address; existing catalog venues may resolve without one.
  */
 export function proposeDiscoveryVenue(proposed: ProposedVenueFacts, catalog: Catalog): Venue | undefined {
   if (!isSufficientProposedVenue(proposed) || !proposed.municipality || !proposed.area) return undefined;
+  if (!hasSufficientNewVenueLocation(proposed)) return undefined;
   const usedIds = new Set(catalog.venues.map((venue) => venue.id));
   const usedSlugs = new Set(catalog.venues.map((venue) => venue.slug));
   const id = uniqueId(venueIdFor(proposed.name), usedIds);
@@ -953,8 +1073,8 @@ export function proposeDiscoveryVenue(proposed: ProposedVenueFacts, catalog: Cat
     name: proposed.name.trim(),
     municipality: proposed.municipality.trim(),
     area: proposed.area,
+    address: proposed.address!.trim(),
   };
-  if (proposed.address) venue.address = proposed.address;
   if (proposed.url) venue.url = proposed.url;
   return venue;
 }
@@ -967,6 +1087,7 @@ function toInput(venueTextOrInput: string | VenueMatchInput | undefined, sourceI
     venueText: venueTextOrInput.venueText,
     sourceId: venueTextOrInput.sourceId ?? sourceId,
     facilityId: venueTextOrInput.facilityId,
+    address: venueTextOrInput.address,
     proposed: venueTextOrInput.proposed,
   };
 }
