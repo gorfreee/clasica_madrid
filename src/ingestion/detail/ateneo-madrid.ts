@@ -57,6 +57,20 @@ export function ateneoSeriesText(categories: Array<{ name: string; slug: string 
   return cycles.map((category) => category.name).join('; ') || undefined;
 }
 
+/**
+ * Explicit editorial cycle declaration in Ateneo copy (`Ciclo «…»`, `Ciclo "…"`).
+ * Fact extraction only: a named cycle is not an eligibility signal.
+ */
+export function ateneoExplicitCycleName(text: string | undefined): string | undefined {
+  if (!text) return undefined;
+  const match =
+    /\bCiclo\s*:?\s*(?:«([^»\n]{2,80})»|"([^"\n]{2,80})"|“([^”\n]{2,80})”|'([^'\n]{2,80})')/u.exec(
+      text,
+    );
+  const name = (match?.[1] ?? match?.[2] ?? match?.[3] ?? match?.[4] ?? '').trim();
+  return name || undefined;
+}
+
 export function ateneoPerformers(description: string | undefined): ObservedPerson[] {
   const labeled = labeledPerformers(description ?? '');
   if (labeled.length > 0) return labeled;
@@ -96,7 +110,7 @@ function parseLabeledCredits(block: string, fallbackRole: string | undefined): O
   for (const segment of splitPerformerSegments(block)) {
     const parsed = parsePerformerCredit(segment);
     if (parsed.length > 0) {
-      people.push(...parsed);
+      people.push(...parsed.map((person) => withPerformerLabelRole(person, fallbackRole)));
       continue;
     }
     if (fallbackRole && looksLikePersonName(segment)) {
@@ -104,6 +118,20 @@ function parseLabeledCredits(block: string, fallbackRole: string | undefined): O
     }
   }
   return people;
+}
+
+const SECONDARY_CREDIT_ROLE = /^(autor|autora|autores|compositor|compositora|compositores)$/i;
+
+function withPerformerLabelRole(
+  person: ObservedPerson,
+  fallbackRole: string | undefined,
+): ObservedPerson {
+  if (!isSecondaryCreditRole(person.roleText)) return person;
+  return fallbackRole ? { name: person.name, roleText: fallbackRole } : { name: person.name };
+}
+
+function isSecondaryCreditRole(roleText: string | undefined): boolean {
+  return Boolean(roleText && SECONDARY_CREDIT_ROLE.test(roleText.trim()));
 }
 
 function splitPerformerSegments(block: string): string[] {

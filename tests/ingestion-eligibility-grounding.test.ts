@@ -14,6 +14,7 @@ import {
 } from '../src/ingestion/classification/eligibility-grounding.ts';
 import {
   CLASSICAL_AND_NONCLASSICAL_COPRINCIPAL_RULE_ID,
+  hasClassicalVocalEnsembleAnchor,
   hasObservedClassicalAcademicAnchor,
 } from '../src/ingestion/classification/eligibility.ts';
 import { isTechnicalClassificationFailure } from '../src/ingestion/classification/types.ts';
@@ -384,6 +385,7 @@ describe('classifyObserved — guardrails de eligibility AI', () => {
     });
     expect(classify(elorrieta).eligibility.ruleId).toBe('insufficient-evidence');
     expect(hasObservedClassicalAcademicAnchor(elorrieta)).toBe(false);
+    expect(hasClassicalVocalEnsembleAnchor(elorrieta)).toBe(false);
 
     const result = await classifyObserved(elorrieta, {
       ai: {
