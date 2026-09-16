@@ -20,7 +20,14 @@
       "name": "Bernard Foccroulle"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Carl Philipp Emanuel Bach"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    }
+  ],
   "works": [],
   "eras": [
     "baroque",
@@ -32,15 +39,15 @@
     "early-music"
   ],
   "kind": "alternative",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_patrimonio_nacional",
       "url": "https://www.patrimonionacional.es/actualidad/concierto/2026/bernard-foccroulle-2026-10-17",
-      "checkedAt": "2026-09-14",
+      "checkedAt": "2026-09-16",
       "externalId": "a489320b-abea-46ec-a43c-80003f093a83"
     }
   ],
   "primarySourceId": "src_patrimonio_nacional",
-  "lastVerifiedAt": "2026-09-14"
+  "lastVerifiedAt": "2026-09-16"
 }

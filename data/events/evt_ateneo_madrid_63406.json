@@ -38,17 +38,20 @@
   "composers": [],
   "works": [],
   "eras": [],
-  "formats": [],
+  "formats": [
+    "chamber",
+    "recital"
+  ],
   "kind": "alternative",
   "access": "unknown",
   "citations": [
     {
       "sourceId": "src_ateneo_madrid",
       "url": "https://ateneodemadrid.com/evento/la-voz-infinita-una-manana-de-gala",
-      "checkedAt": "2026-09-15",
+      "checkedAt": "2026-09-16",
       "externalId": "63406"
     }
   ],
   "primarySourceId": "src_ateneo_madrid",
-  "lastVerifiedAt": "2026-09-15"
+  "lastVerifiedAt": "2026-09-16"
 }

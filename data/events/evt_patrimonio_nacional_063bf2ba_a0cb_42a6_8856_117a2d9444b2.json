@@ -22,7 +22,9 @@
   ],
   "composers": [],
   "works": [],
-  "eras": [],
+  "eras": [
+    "classical"
+  ],
   "formats": [
     "organ",
     "early-music",
@@ -34,10 +36,10 @@
     {
       "sourceId": "src_patrimonio_nacional",
       "url": "https://www.patrimonionacional.es/actualidad/concierto/2026/andres-cea-2027-04-29",
-      "checkedAt": "2026-09-14",
+      "checkedAt": "2026-09-16",
       "externalId": "063bf2ba-a0cb-42a6-8856-117a2d9444b2"
     }
   ],
   "primarySourceId": "src_patrimonio_nacional",
-  "lastVerifiedAt": "2026-09-14"
+  "lastVerifiedAt": "2026-09-16"
 }

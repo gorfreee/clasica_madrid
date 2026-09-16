@@ -23,6 +23,9 @@
   "composers": [
     {
       "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Reina de la Noche"
     }
   ],
   "works": [
@@ -43,10 +46,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-la-flauta-magica-de-mozart",
-      "checkedAt": "2026-09-14",
+      "checkedAt": "2026-09-16",
       "externalId": "excelentia-la-flauta-magica-de-mozart"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-14"
+  "lastVerifiedAt": "2026-09-16"
 }

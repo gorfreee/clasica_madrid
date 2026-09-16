@@ -29,6 +29,9 @@
   "composers": [
     {
       "name": "Serguéi Prokófiev"
+    },
+    {
+      "name": "Encargo de la Fil NY"
     }
   ],
   "works": [
@@ -51,10 +54,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-filarmonica-de-nueva-york",
-      "checkedAt": "2026-09-14",
+      "checkedAt": "2026-09-16",
       "externalId": "ibermusica-filarmonica-de-nueva-york"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-14"
+  "lastVerifiedAt": "2026-09-16"
 }

@@ -26,7 +26,11 @@
       "name": "Laura Puerto"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Risueña el Aurora"
+    }
+  ],
   "works": [],
   "eras": [
     "baroque"
@@ -40,10 +44,10 @@
     {
       "sourceId": "src_patrimonio_nacional",
       "url": "https://www.patrimonionacional.es/actualidad/concierto/2026/de-hondas-raices-y-vientos-ajenos-2027-04-17",
-      "checkedAt": "2026-09-14",
+      "checkedAt": "2026-09-16",
       "externalId": "e643eb86-ff2e-4692-82df-c1a10097a208"
     }
   ],
   "primarySourceId": "src_patrimonio_nacional",
-  "lastVerifiedAt": "2026-09-14"
+  "lastVerifiedAt": "2026-09-16"
 }

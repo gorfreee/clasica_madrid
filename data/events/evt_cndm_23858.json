@@ -51,6 +51,10 @@
     {
       "title": "Rondeau sauvage (2013)",
       "composerName": "Arnulf Herrmann"
+    },
+    {
+      "title": "*+ Estreno absoluto. Encargo del CNDM",
+      "composerName": "Unsuk Chin"
     }
   ],
   "eras": [
@@ -65,10 +69,10 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23858",
-      "checkedAt": "2026-09-14",
+      "checkedAt": "2026-09-16",
       "externalId": "23858"
     }
   ],
   "primarySourceId": "src_cndm",
-  "lastVerifiedAt": "2026-09-14"
+  "lastVerifiedAt": "2026-09-16"
 }

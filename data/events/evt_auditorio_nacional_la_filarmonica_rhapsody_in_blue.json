@@ -27,7 +27,11 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Strauss"
+    }
+  ],
   "works": [],
   "eras": [
     "twentieth"
@@ -41,10 +45,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/la-filarmonica-rhapsody-in-blue",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-16",
       "externalId": "la-filarmonica-rhapsody-in-blue"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-16"
 }

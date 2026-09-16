@@ -65,6 +65,10 @@
     {
       "title": "Three funny pieces (1997)",
       "composerName": "Rodion Shchedrin"
+    },
+    {
+      "title": "*+ Estreno absoluto. Encargo del CNDM y el Festival de Cádiz. Música Española",
+      "composerName": "Òscar Colomina i Bosch"
     }
   ],
   "eras": [
@@ -79,10 +83,10 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23855",
-      "checkedAt": "2026-09-14",
+      "checkedAt": "2026-09-16",
       "externalId": "23855"
     }
   ],
   "primarySourceId": "src_cndm",
-  "lastVerifiedAt": "2026-09-14"
+  "lastVerifiedAt": "2026-09-16"
 }

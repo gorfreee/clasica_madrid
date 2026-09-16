@@ -40,6 +40,10 @@
     {
       "title": "Quatre chants pour franchir le seuil (1996-1998)",
       "composerName": "Gérard Grisey"
+    },
+    {
+      "title": "*+ Estreno absoluto. Encargo del CNDM",
+      "composerName": "Gérard Grisey"
     }
   ],
   "eras": [
@@ -54,10 +58,10 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23856",
-      "checkedAt": "2026-09-14",
+      "checkedAt": "2026-09-16",
       "externalId": "23856"
     }
   ],
   "primarySourceId": "src_cndm",
-  "lastVerifiedAt": "2026-09-14"
+  "lastVerifiedAt": "2026-09-16"
 }

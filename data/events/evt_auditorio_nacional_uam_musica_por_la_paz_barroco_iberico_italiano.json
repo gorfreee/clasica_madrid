@@ -29,6 +29,9 @@
     },
     {
       "name": "Francisco Corselli"
+    },
+    {
+      "name": "Invitatorio de Difuntos"
     }
   ],
   "works": [
@@ -58,10 +61,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/uam-musica-por-la-paz-barroco-iberico-italiano",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-16",
       "externalId": "uam-musica-por-la-paz-barroco-iberico-italiano"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-16"
 }

@@ -36,6 +36,9 @@
     },
     {
       "name": "Unsuk Chin"
+    },
+    {
+      "name": "Nacional de España"
     }
   ],
   "works": [
@@ -64,16 +67,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-joven-orquesta-nacional-de-espana-jonde-2",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-16",
       "externalId": "cndm-joven-orquesta-nacional-de-espana-jonde-2"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23774",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-16",
       "externalId": "23774"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-16"
 }

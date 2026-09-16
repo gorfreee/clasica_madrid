@@ -15,7 +15,11 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Patricia Nolz"
+    }
+  ],
   "composers": [],
   "works": [],
   "eras": [
@@ -32,10 +36,10 @@
     {
       "sourceId": "src_circulo_bellas_artes",
       "url": "https://www.circulobellasartes.com/eventos/patricia-nolz-mezzosoprano-y-malcolm-martineau-piano",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-16",
       "externalId": "132444"
     }
   ],
   "primarySourceId": "src_circulo_bellas_artes",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-16"
 }

@@ -21,6 +21,9 @@
     },
     {
       "name": "Josep Puchades"
+    },
+    {
+      "name": "Trío VibrArt"
     }
   ],
   "composers": [
@@ -60,6 +63,10 @@
     {
       "title": "Estreno absoluto. Obra encargo del CNDM, para clarinete, violín, viola, violonchelo y piano *+ (2027)",
       "composerName": "Unsuk Chin"
+    },
+    {
+      "title": "*+ Estreno absoluto. Encargo del CNDM",
+      "composerName": "Unsuk Chin"
     }
   ],
   "eras": [
@@ -75,10 +82,10 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23860",
-      "checkedAt": "2026-09-14",
+      "checkedAt": "2026-09-16",
       "externalId": "23860"
     }
   ],
   "primarySourceId": "src_cndm",
-  "lastVerifiedAt": "2026-09-14"
+  "lastVerifiedAt": "2026-09-16"
 }

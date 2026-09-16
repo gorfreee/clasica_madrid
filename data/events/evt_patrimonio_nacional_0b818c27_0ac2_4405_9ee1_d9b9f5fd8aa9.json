@@ -25,7 +25,9 @@
   ],
   "composers": [],
   "works": [],
-  "eras": [],
+  "eras": [
+    "classical"
+  ],
   "formats": [
     "organ"
   ],
@@ -35,10 +37,10 @@
     {
       "sourceId": "src_patrimonio_nacional",
       "url": "https://www.patrimonionacional.es/actualidad/concierto/2026/saskia-roures-y-francisco-gil-2027-01-28",
-      "checkedAt": "2026-09-14",
+      "checkedAt": "2026-09-16",
       "externalId": "0b818c27-0ac2-4405-9ee1-d9b9f5fd8aa9"
     }
   ],
   "primarySourceId": "src_patrimonio_nacional",
-  "lastVerifiedAt": "2026-09-14"
+  "lastVerifiedAt": "2026-09-16"
 }
