@@ -418,7 +418,9 @@ test.describe('navegación del encabezado', () => {
 
     await menu.click();
     await expect(menu).toHaveAttribute('aria-expanded', 'true');
-    await page.getByRole('heading', { level: 1 }).click();
+    // The longer home H1 sits under the open panel; the lede is the visible page
+    // surface below it, so it is the click-outside target.
+    await page.locator('.agenda-intro .lede').click();
     await expect(menu).toHaveAttribute('aria-expanded', 'false');
   });
 
