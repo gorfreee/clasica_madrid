@@ -53,12 +53,23 @@ describe('estructura de filtros avanzados', () => {
 
   it('distingue el estado activo de los atajos del hover y el foco', () => {
     expect(toolbarCss).toMatch(/\.filters \.shortcut\[aria-pressed="true"\]\s*\{/);
-    expect(toolbarCss).toMatch(/\.filters \.shortcut:hover,\s*\n\s*\.filters \.shortcut:focus-visible\s*\{/);
-    expect(toolbarCss).toMatch(/\.filters \.shortcut\[aria-pressed="true"\]:hover,\s*\n\s*\.filters \.shortcut\[aria-pressed="true"\]:focus-visible\s*\{/);
+    expect(toolbarCss).toMatch(/@media \(hover: hover\) and \(pointer: fine\)/);
+    expect(toolbarCss).toMatch(/@media \(hover: none\), \(pointer: coarse\)/);
+    expect(toolbarCss).not.toMatch(/\.filters \.shortcut:hover,\s*\n\s*\.filters \.shortcut:focus-visible\s*\{/);
+    expect(toolbarCss).not.toMatch(/\.filters \.filters__toggle:hover,\s*\n\s*\.filters \.filters__toggle:focus-visible/);
     const activeBlock = toolbarCss.match(/\.filters \.shortcut\[aria-pressed="true"\]\s*\{[^}]+\}/)?.[0] ?? '';
-    const hoverBlock = toolbarCss.match(/\.filters \.shortcut:hover,\s*\n\s*\.filters \.shortcut:focus-visible\s*\{[^}]+\}/)?.[0] ?? '';
     expect(activeBlock).toContain('box-shadow');
-    expect(hoverBlock).toContain('background: var(--ink)');
     expect(activeBlock).not.toContain('background: var(--ink)');
+    const hoverStart = toolbarCss.indexOf('@media (hover: hover) and (pointer: fine)');
+    const touchStart = toolbarCss.indexOf('@media (hover: none), (pointer: coarse)');
+    const hoverMedia = toolbarCss.slice(hoverStart, touchStart);
+    const touchMedia = toolbarCss.slice(touchStart, toolbarCss.indexOf('.filters__toggle-mark'));
+    expect(hoverMedia).toContain('.filters .shortcut:hover');
+    expect(hoverMedia).toContain('background: var(--ink)');
+    expect(hoverMedia).toContain('.filters .filters__toggle:hover');
+    expect(touchMedia).toContain('.filters .shortcut:hover');
+    expect(touchMedia).toContain('background: rgba(250, 249, 245, .45)');
+    expect(touchMedia).toContain('.filters .filters__toggle:hover');
+    expect(touchMedia).toContain('background: transparent');
   });
 });
