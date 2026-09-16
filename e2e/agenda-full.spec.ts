@@ -48,6 +48,66 @@ test.describe('carga diferida de la agenda', () => {
     expect(fullCount).toBeGreaterThan(initialCount);
   });
 
+  test('«Mostrar todos» conserva el punto visual y no salta al final de la agenda', async ({ page }) => {
+    await page.goto('/');
+    const button = page.getByRole('button', { name: 'Mostrar todos' });
+    await expect(button).toBeVisible();
+    await button.scrollIntoViewIfNeeded();
+    await expect(button).toBeInViewport();
+
+    const before = await page.evaluate(() => {
+      const items = [...document.querySelectorAll<HTMLElement>('[data-agenda-list] [data-occurrence-id]')].filter(
+        (item) => !item.hidden,
+      );
+      const viewportBottom = window.innerHeight;
+      let visible: HTMLElement | null = null;
+      for (const item of items) {
+        const rect = item.getBoundingClientRect();
+        if (rect.bottom > 0 && rect.top < viewportBottom) visible = item;
+      }
+      const anchor = visible ?? items.at(-1) ?? null;
+      return {
+        count: items.length,
+        anchorId: anchor?.dataset.occurrenceId ?? '',
+        anchorTop: anchor?.getBoundingClientRect().top ?? 0,
+        viewportHeight: window.innerHeight,
+      };
+    });
+    expect(before.anchorId).toBeTruthy();
+    expect(before.count).toBeGreaterThan(0);
+
+    await button.click();
+    await expect(page.locator('[data-agenda-root][data-agenda-complete]')).toHaveCount(1);
+    await expect(button).toBeHidden();
+
+    const after = await page.evaluate((anchorId) => {
+      const items = [...document.querySelectorAll<HTMLElement>('[data-agenda-list] [data-occurrence-id]')].filter(
+        (item) => !item.hidden,
+      );
+      const anchor = document.querySelector<HTMLElement>(
+        `[data-agenda-list] [data-occurrence-id="${anchorId}"]`,
+      );
+      const last = items.at(-1);
+      return {
+        count: items.length,
+        anchorTop: anchor && !anchor.hidden ? anchor.getBoundingClientRect().top : null,
+        lastTop: last?.getBoundingClientRect().top ?? 0,
+        scrollY: window.scrollY,
+        viewportHeight: window.innerHeight,
+        scrollHeight: document.documentElement.scrollHeight,
+      };
+    }, before.anchorId);
+
+    expect(after.count).toBeGreaterThan(before.count);
+    expect(after.anchorTop).not.toBeNull();
+    expect(Math.abs((after.anchorTop ?? 0) - before.anchorTop)).toBeLessThan(before.viewportHeight * 0.25);
+
+    const remainingBelow = after.scrollHeight - (after.scrollY + after.viewportHeight);
+    expect(remainingBelow).toBeGreaterThan(after.viewportHeight * 0.5);
+    expect(after.lastTop).toBeGreaterThan((after.anchorTop ?? 0) + 8);
+    await expect(page.locator('[data-agenda-list]')).toBeFocused();
+  });
+
   test('aplicar un filtro carga antes la agenda completa y puede encontrar una representación posterior', async ({
     page,
   }) => {
