@@ -49,6 +49,7 @@ test.describe('atajos rápidos de la agenda', () => {
     await expectPressed(page, 'free', false);
 
     await shortcut(page, 'free').click();
+    await expect(page).toHaveURL(/access=free/);
     expect(searchParams(page).get('q')).toBe('bach');
     expect(searchParams(page).get('from')).toBe(weekend.from);
     expect(searchParams(page).get('to')).toBe(weekend.to);
@@ -57,6 +58,7 @@ test.describe('atajos rápidos de la agenda', () => {
     await expectPressed(page, 'free', true);
 
     await shortcut(page, 'free').click();
+    await expect(page).not.toHaveURL(/access=/);
     expect(searchParams(page).get('q')).toBe('bach');
     expect(searchParams(page).get('from')).toBe(weekend.from);
     expect(searchParams(page).get('to')).toBe(weekend.to);
@@ -73,6 +75,7 @@ test.describe('atajos rápidos de la agenda', () => {
     await expect(page.locator('[data-active-filters] [data-remove-filter="to"]')).toBeVisible();
 
     await shortcut(page, 'weekend').click();
+    await expect(page).toHaveURL(new RegExp(`from=${weekend.from}`));
     expect(searchParams(page).get('q')).toBe('bach');
     expect(searchParams(page).get('from')).toBe(weekend.from);
     expect(searchParams(page).get('to')).toBe(weekend.to);
@@ -89,6 +92,7 @@ test.describe('atajos rápidos de la agenda', () => {
     await expectPressed(page, 'weekend', true);
 
     await shortcut(page, 'free').click();
+    await expect(page).toHaveURL(/access=free/);
     expect(searchParams(page).get('access')).toBe('free');
     await expectPressed(page, 'free', true);
     await expectPressed(page, 'weekend', true);
@@ -116,11 +120,13 @@ test.describe('atajos rápidos de la agenda', () => {
       (window as Window & { __agendaStay?: boolean }).__agendaStay = true;
     });
     await shortcut(page, 'weekend').evaluate((link, stale) => {
-      (link as HTMLAnchorElement).href = `/?from=${stale}&to=${stale}`;
+      link.setAttribute('href', `/?from=${stale}&to=${stale}`);
     }, '2020-01-01');
     await shortcut(page, 'weekend').click();
+    await expect(page).toHaveURL(new RegExp(`from=${weekend.from}`));
     expect(searchParams(page).get('from')).toBe(weekend.from);
     expect(searchParams(page).get('to')).toBe(weekend.to);
+    expect(searchParams(page).get('from')).not.toBe('2020-01-01');
     expect(await page.evaluate(() => (window as Window & { __agendaStay?: boolean }).__agendaStay)).toBe(true);
     await expectPressed(page, 'weekend', true);
   });
