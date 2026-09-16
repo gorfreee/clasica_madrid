@@ -2,10 +2,6 @@
   margin-top: 2rem;
 }
 
-.filters .search-line {
-  border-width: 1px;
-}
-
 .filters .search-field input {
   min-height: 4.15rem;
   padding-inline: 1.15rem;
@@ -13,7 +9,6 @@
 
 .filters .search-submit {
   min-width: 8.25rem;
-  border-left-width: 1px;
 }
 
 .filters .filters__toolbar {

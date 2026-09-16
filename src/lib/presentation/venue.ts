@@ -10,6 +10,7 @@ import {
   systemClock,
 } from '../domain/index.ts';
 import { isMadridMunicipality } from '../domain/normalize.ts';
+import type { Venue } from '../schemas/venue.ts';
 import { areaLabels } from './labels.ts';
 import { buildVenueJsonLd } from './json-ld.ts';
 import { toAgendaItem, type AgendaItemModel } from './agenda.ts';
@@ -26,7 +27,13 @@ export type VenueListItemModel = {
   programmeLabel: string;
   nextDate: string | null;
   nextDateLabel: string | null;
+  searchHaystack: string;
 };
+
+/** Indexed text for the venues list search: name, municipality and address. */
+export function venueSearchHaystack(venue: Pick<Venue, 'name' | 'municipality' | 'address'>): string {
+  return [venue.name, venue.municipality, venue.address ?? ''].filter(Boolean).join(' ');
+}
 
 export type VenuePageModel = {
   title: string;
@@ -56,35 +63,14 @@ export function buildVenuesIndexModel(catalog: Catalog, clock: Clock = systemClo
   const activeVenueIds = new Set<string>();
   const venues = listVenuesWithUpcoming(catalog, clock).map(({ venue, occurrences }) => {
     activeVenueIds.add(venue.id);
-    const nextDate = occurrences[0]?.occurrence.date ?? null;
-    return {
-      name: venue.name,
-      slug: venue.slug,
-      href: venuePath(venue.slug),
-      municipality: venue.municipality,
-      showMunicipality: !isMadridMunicipality(venue.municipality),
-      upcomingCount: occurrences.length,
-      programmeLabel: venueUpcomingSummary(occurrences.length),
-      nextDate,
-      nextDateLabel: nextDate ? shortDate(nextDate) : null,
-    };
+    return toVenueListItem(venue, occurrences);
   }).sort(
     (left, right) =>
       (left.nextDate ?? '').localeCompare(right.nextDate ?? '') || left.name.localeCompare(right.name, 'es'),
   );
   const inactiveVenues = catalog.venues
     .filter((venue) => !isChildVenue(venue) && !activeVenueIds.has(venue.id))
-    .map((venue) => ({
-      name: venue.name,
-      slug: venue.slug,
-      href: venuePath(venue.slug),
-      municipality: venue.municipality,
-      showMunicipality: !isMadridMunicipality(venue.municipality),
-      upcomingCount: 0,
-      programmeLabel: venueUpcomingSummary(0),
-      nextDate: null,
-      nextDateLabel: null,
-    }))
+    .map((venue) => toVenueListItem(venue, []))
     .sort((left, right) => left.name.localeCompare(right.name, 'es'));
   return {
     title: 'Lugares de conciertos en Madrid',
@@ -145,6 +131,26 @@ export function venueUpcomingSummary(count: number): string {
   if (count <= 0) return 'Sin programación próxima';
   if (count === 1) return '1 concierto próximo';
   return `${count} conciertos próximos`;
+}
+
+function toVenueListItem(
+  venue: Venue,
+  occurrences: ReadonlyArray<{ occurrence: { date: string } }>,
+): VenueListItemModel {
+  const upcomingCount = occurrences.length;
+  const nextDate = occurrences[0]?.occurrence.date ?? null;
+  return {
+    name: venue.name,
+    slug: venue.slug,
+    href: venuePath(venue.slug),
+    municipality: venue.municipality,
+    showMunicipality: !isMadridMunicipality(venue.municipality),
+    upcomingCount,
+    programmeLabel: venueUpcomingSummary(upcomingCount),
+    nextDate,
+    nextDateLabel: nextDate ? shortDate(nextDate) : null,
+    searchHaystack: venueSearchHaystack(venue),
+  };
 }
 
 function shortDate(date: string): string {

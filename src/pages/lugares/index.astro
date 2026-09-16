@@ -3,7 +3,9 @@ import Layout from '../../layouts/Layout.astro';
 import EmptyState from '../../components/EmptyState.astro';
 import Eyebrow from '../../components/Eyebrow.astro';
 import HeroMotif from '../../components/HeroMotif.astro';
+import SearchIcon from '../../components/SearchIcon.astro';
 import { loadVenuesIndex } from '../../lib/presentation/site.ts';
+import { venueCountLabel } from '../../lib/presentation/labels.ts';
 
 const model = await loadVenuesIndex();
 ---
@@ -18,11 +20,6 @@ const model = await loadVenuesIndex();
     <HeroMotif variant="venues" class="section-intro__motif" />
   </header>
 
-  <label class="venue-search">
-    <span>Buscar un lugar</span>
-    <input type="search" placeholder="Nombre o municipio" data-venue-search />
-  </label>
-
   {
     model.isEmpty ? (
       <EmptyState
@@ -30,33 +27,56 @@ const model = await loadVenuesIndex();
         body="Cuando el catálogo tenga espacios verificados, aparecerán aquí."
       />
     ) : (
-      <ul class="venue-list">
-        {model.venues.map((venue, index) => (
-          <li data-venue-entry data-search={`${venue.name} ${venue.municipality}`.toLowerCase()}>
-            <a href={venue.href}>
-              <span class="venue-list__index">{String(index + 1).padStart(2, '0')}</span>
-              <span class="venue-list__name">{venue.name}</span>
-              {venue.nextDateLabel && <span class="venue-list__next">Próximo / {venue.nextDateLabel}</span>}
-              <span class:list={['venue-list__meta', { 'venue-list__meta--inactive': venue.upcomingCount === 0 }]}>
-                {venue.showMunicipality && (
-                  <span class="venue-list__municipality">{venue.municipality}</span>
-                )}
-                <span class="venue-list__programme">{venue.programmeLabel}</span>
+      <>
+        {/* Contrato UI interno: [data-venue-search], [data-venue-search-clear], [data-venue-count], [data-venue-no-results], [data-venue-list] y [data-venue-entry] los usa venue-search-client.ts. */}
+        <div class="venue-search">
+          <div class="search-bar">
+            <label class="search-bar__field">
+              <span class="visually-hidden">Buscar un lugar</span>
+              <span class="search-bar__icon" aria-hidden="true">
+                <SearchIcon />
               </span>
-            </a>
-          </li>
-        ))}
-      </ul>
+              <input
+                type="search"
+                placeholder="Busca un lugar o municipio…"
+                autocomplete="off"
+                spellcheck="false"
+                enterkeyhint="search"
+                data-venue-search
+              />
+            </label>
+            <button type="button" class="search-bar__clear" data-venue-search-clear hidden aria-label="Limpiar búsqueda">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <p class="venue-search__count" data-venue-count>{venueCountLabel(model.venues.length)}</p>
+        </div>
+
+        <p class="venue-search__empty" data-venue-no-results hidden role="status" aria-live="polite"></p>
+
+        <ul class="venue-list" data-venue-list>
+          {model.venues.map((venue, index) => (
+            <li data-venue-entry data-search={venue.searchHaystack}>
+              <a href={venue.href}>
+                <span class="venue-list__index">{String(index + 1).padStart(2, '0')}</span>
+                <span class="venue-list__name">{venue.name}</span>
+                {venue.nextDateLabel && <span class="venue-list__next">Próximo / {venue.nextDateLabel}</span>}
+                <span class:list={['venue-list__meta', { 'venue-list__meta--inactive': venue.upcomingCount === 0 }]}>
+                  {venue.showMunicipality && (
+                    <span class="venue-list__municipality">{venue.municipality}</span>
+                  )}
+                  <span class="venue-list__programme">{venue.programmeLabel}</span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        <script>
+          import { initVenueSearch } from '../../lib/presentation/venue-search-client.ts';
+          initVenueSearch();
+        </script>
+      </>
     )
   }
-
-  <script>
-    const input = document.querySelector<HTMLInputElement>('[data-venue-search]');
-    input?.addEventListener('input', () => {
-      const query = input.value.trim().toLocaleLowerCase('es');
-      for (const entry of document.querySelectorAll<HTMLElement>('[data-venue-entry]')) {
-        entry.hidden = Boolean(query && !entry.dataset.search?.includes(query));
-      }
-    });
-  </script>
 </Layout>
