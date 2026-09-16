@@ -5,6 +5,7 @@ import AgendaList from '../components/AgendaList.astro';
 import EmptyState from '../components/EmptyState.astro';
 import Eyebrow from '../components/Eyebrow.astro';
 import HeroMotif from '../components/HeroMotif.astro';
+import { HOME_TITLE } from '../lib/presentation/constants.ts';
 import { loadAgendaPage } from '../lib/presentation/site.ts';
 import { serializeJsonForScript } from '../lib/util/json-script.ts';
 
@@ -15,7 +16,7 @@ const model = await loadAgendaPage(Astro.url);
   <header class="agenda-intro">
     <div class="agenda-intro__copy">
       <Eyebrow label="Agenda" />
-      <h1>La clásica<br />que está sonando.</h1>
+      <h1>{HOME_TITLE}</h1>
       <p class="lede">De las grandes salas a los pequeños espacios, todos los conciertos de música clásica reunidos en una sola agenda</p>
     </div>
     <HeroMotif variant="agenda" class="agenda-intro__motif" />
