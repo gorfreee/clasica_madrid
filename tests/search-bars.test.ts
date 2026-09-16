@@ -8,12 +8,12 @@ import { makeCatalog, makeVenue, richCatalog, testClock } from './helpers.ts';
 describe('barra de búsqueda de la agenda', () => {
   const source = readFileSync('src/components/FilterForm.astro', 'utf8');
 
-  it('declara un placeholder amplio de escritorio y uno compacto que no recorta el alcance', () => {
+  it('declara un placeholder amplio de escritorio y uno compacto para móvil', () => {
     expect(source).toContain(
       'data-search-placeholder-wide="Busca conciertos, intérpretes, compositores o lugares"',
     );
-    expect(source).toContain('data-search-placeholder-narrow="Buscar en la agenda…"');
-    expect(source).toContain('placeholder="Buscar en la agenda…"');
+    expect(source).toContain('data-search-placeholder-narrow="Busca conciertos, compositores..."');
+    expect(source).toContain('placeholder="Busca conciertos, compositores..."');
   });
 
   it('mantiene un botón de búsqueda accesible por nombre', () => {

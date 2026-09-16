@@ -9,7 +9,7 @@ test.describe('búsqueda de lugares', () => {
     await page.goto('/lugares/');
     const search = page.getByRole('searchbox', { name: 'Buscar un lugar' });
     await expect(search).toHaveAttribute('type', 'search');
-    await expect(search).toHaveAttribute('placeholder', 'Busca un lugar o municipio…');
+    await expect(search).toHaveAttribute('placeholder', 'Busca un lugar o municipio');
     await expect(page.getByRole('button', { name: 'Limpiar búsqueda' })).toBeHidden();
 
     const initialCount = await visibleVenues(page).count();

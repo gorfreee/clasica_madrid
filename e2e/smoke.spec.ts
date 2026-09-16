@@ -174,7 +174,7 @@ test.describe('agenda', () => {
     );
 
     await page.setViewportSize({ width: 390, height: 844 });
-    await expect(search).toHaveAttribute('placeholder', 'Buscar en la agenda…');
+    await expect(search).toHaveAttribute('placeholder', 'Busca conciertos, compositores...');
   });
 
   test('el botón compacto de búsqueda es accesible y aplica el filtro', async ({ page }) => {
