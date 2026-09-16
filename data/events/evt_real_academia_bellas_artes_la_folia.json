@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_real_academia_bellas_artes_la_folia",
+  "slug": "musica-en-torno-a-la-independencia-de-los-estados-unidos-de-america",
+  "title": "Música en torno a la Independencia de los Estados Unidos de América",
+  "status": "scheduled",
+  "venueId": "ven_real_academia_bellas_artes_salon_actos",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_real_academia_bellas_artes_la_folia_01",
+      "date": "2026-10-02",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Grupo de música barroca “La Folía”"
+    },
+    {
+      "name": "Pedro Bonet",
+      "role": "conductor"
+    },
+    {
+      "name": "Celia Alcedo"
+    },
+    {
+      "name": "Pedro Bonet"
+    },
+    {
+      "name": "Ignacio Zaragoza"
+    },
+    {
+      "name": "Pedro Bonet González"
+    },
+    {
+      "name": "Jorge López Escribano"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Juan Mathías de los Reyes Mapamundi"
+    },
+    {
+      "name": "Jean-Jacques Rousseau"
+    },
+    {
+      "name": "Luigi Boccherini"
+    },
+    {
+      "name": "Manuel Espinosa de los Monteros"
+    },
+    {
+      "name": "José Lidón"
+    },
+    {
+      "name": "Nicolas Bernier"
+    },
+    {
+      "name": "Giuseppe Cristiano Lidarti"
+    },
+    {
+      "name": "James Hewitt"
+    },
+    {
+      "name": "John Tufts"
+    },
+    {
+      "name": "Anne Hunter"
+    },
+    {
+      "name": "Esteban Salas"
+    }
+  ],
+  "works": [
+    {
+      "title": "Assí de la Deidad excelsa",
+      "composerName": "Juan Mathías de los Reyes Mapamundi"
+    },
+    {
+      "title": "Llega mostrando el poder",
+      "composerName": "Juan Mathías de los Reyes Mapamundi"
+    },
+    {
+      "title": "Chanson nègre",
+      "composerName": "Jean-Jacques Rousseau"
+    },
+    {
+      "title": "Celui plus jeune suis que j’ai jadis été",
+      "composerName": "Jean-Jacques Rousseau"
+    },
+    {
+      "title": "Allegro alla militare",
+      "composerName": "Luigi Boccherini"
+    },
+    {
+      "title": "La Generala",
+      "composerName": "Manuel Espinosa de los Monteros"
+    },
+    {
+      "title": "La Marcha de Fusileros",
+      "composerName": "Manuel Espinosa de los Monteros"
+    },
+    {
+      "title": "La Marcha Granadera",
+      "composerName": "Manuel Espinosa de los Monteros"
+    },
+    {
+      "title": "La Asamblea que tocan las Guardias españolas",
+      "composerName": "Manuel Espinosa de los Monteros"
+    },
+    {
+      "title": "Es amor una planta tan delicada. En el mundo no hay ojos como los tuyos",
+      "composerName": "José Lidón"
+    },
+    {
+      "title": "Le Caffé",
+      "composerName": "Nicolas Bernier"
+    },
+    {
+      "title": "Prélude; Agréable caffé; Favorable liqueur",
+      "composerName": "Nicolas Bernier"
+    },
+    {
+      "title": "Trio IV: Allegro con spirito, Adagio, Presto Assai",
+      "composerName": "Giuseppe Cristiano Lidarti"
+    },
+    {
+      "title": "The New Federal Overture",
+      "composerName": "James Hewitt"
+    },
+    {
+      "title": "Largo, Yanky Doodle (Allegretto), Washingston’s New March (Maestoso)",
+      "composerName": "James Hewitt"
+    },
+    {
+      "title": "Northampton",
+      "composerName": "John Tufts"
+    },
+    {
+      "title": "The Death Song of the Cherokee Indians by Mrs. Hunter, brought to England by a gentleman named Turner",
+      "composerName": "Anne Hunter"
+    },
+    {
+      "title": "¡Tú mi Dios entre pajas!",
+      "composerName": "Esteban Salas"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "classical"
+  ],
+  "formats": [
+    "early-music"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_real_academia_bellas_artes_san_fernando",
+      "url": "https://www.realacademiabellasartessanfernando.com/actividades/conciertos/la-folia",
+      "checkedAt": "2026-09-16",
+      "externalId": "la-folia"
+    }
+  ],
+  "primarySourceId": "src_real_academia_bellas_artes_san_fernando",
+  "lastVerifiedAt": "2026-09-16"
+}
