@@ -989,6 +989,9 @@ a.eyebrow:focus-visible {
     grid-column: 1 / -1;
     grid-row: 2;
   }
+  .agenda-intro h1 {
+    font-size: clamp(2.75rem, 9vw, 3.2rem);
+  }
   .agenda-intro__copy > .lede,
   .section-intro__copy > .lede {
     grid-column: 1;
