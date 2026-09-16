@@ -45,6 +45,7 @@ function observation(overrides: Partial<DiscoveryObservation> & {
       name: 'Sede COIIM',
       municipality: 'Madrid',
       area: 'madrid',
+      address: 'Calle de Alcalá, 43, Madrid',
     },
     ...(overrides.foundVia ? { foundVia: overrides.foundVia } : {}),
   };
@@ -101,6 +102,7 @@ describe('DiscoveryResearchManifest', () => {
             name: 'Iglesia de San José',
             municipality: 'Madrid',
             area: 'madrid',
+            address: 'Calle de Alcalá, 43, Madrid',
           },
         }),
       ],

@@ -559,12 +559,14 @@ function venueHint(event: {
   venueText?: string;
   sourceId: string;
   venueFacilityId?: string;
+  venueAddress?: string;
   proposedVenue?: ProposedVenueFacts;
 }) {
   return {
     venueText: event.venueText,
     sourceId: event.sourceId,
     facilityId: event.venueFacilityId,
+    address: event.venueAddress,
     proposed: event.proposedVenue,
   };
 }

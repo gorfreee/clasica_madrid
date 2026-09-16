@@ -63,7 +63,11 @@ describe('dirección en fichas', () => {
   });
 
   it('un evento en un lugar sin calle no inventa un enlace a mapas', () => {
-    const page = buildEventPageModel(richCatalog(), 'recital-de-organo', testClock);
+    const catalog = makeCatalog({
+      venues: [makeVenue({ address: undefined })],
+      events: [makeEvent()],
+    });
+    const page = buildEventPageModel(catalog, 'matinees-de-otono', testClock);
     expect(page?.placeAddress).toBeNull();
   });
 

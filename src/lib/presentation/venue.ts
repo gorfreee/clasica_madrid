@@ -23,6 +23,7 @@ export type VenueListItemModel = {
   municipality: string;
   showMunicipality: boolean;
   upcomingCount: number;
+  programmeLabel: string;
   nextDate: string | null;
   nextDateLabel: string | null;
 };
@@ -63,6 +64,7 @@ export function buildVenuesIndexModel(catalog: Catalog, clock: Clock = systemClo
       municipality: venue.municipality,
       showMunicipality: !isMadridMunicipality(venue.municipality),
       upcomingCount: occurrences.length,
+      programmeLabel: venueUpcomingSummary(occurrences.length),
       nextDate,
       nextDateLabel: nextDate ? shortDate(nextDate) : null,
     };
@@ -79,6 +81,7 @@ export function buildVenuesIndexModel(catalog: Catalog, clock: Clock = systemClo
       municipality: venue.municipality,
       showMunicipality: !isMadridMunicipality(venue.municipality),
       upcomingCount: 0,
+      programmeLabel: venueUpcomingSummary(0),
       nextDate: null,
       nextDateLabel: null,
     }))
@@ -139,6 +142,7 @@ export function buildVenuePageModel(
 }
 
 export function venueUpcomingSummary(count: number): string {
+  if (count <= 0) return 'Sin programación próxima';
   if (count === 1) return '1 concierto próximo';
   return `${count} conciertos próximos`;
 }

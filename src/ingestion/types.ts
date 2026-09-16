@@ -39,8 +39,9 @@ export type HydrationMeta = {
 /**
  * Venue facts supplied by discovery when the place may not be in the catalog.
  * Not ObservedFacts: never sent to classification. Matching uses exact name
- * plus compatible municipality, and an explicit address only to disambiguate
- * homonyms. Ambiguous matches stay unpublished; there is no fuzzy matching.
+ * plus compatible municipality. A new root also needs a physical address;
+ * an explicit address is otherwise only used to disambiguate homonyms.
+ * Ambiguous matches stay unpublished; there is no fuzzy matching.
  */
 export type ProposedVenueFacts = {
   name: string;
@@ -77,6 +78,12 @@ export type RawEvent = {
    * source-aware venue resolution; never copied onto ObservedFacts.
    */
   venueFacilityId?: string;
+  /**
+   * Physical address observed on the source listing (e.g. Madrid Datos
+   * `address.area`). Used only when creating a new municipal venue;
+   * never copied onto ObservedFacts and never overwrites a published venue.
+   */
+  venueAddress?: string;
   /**
    * Discovery-only proposed venue. Harvest adapters leave this unset.
    * Matching prefers an existing catalog/known venue over creating one.

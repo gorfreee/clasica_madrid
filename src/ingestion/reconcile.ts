@@ -724,6 +724,7 @@ function overlayNormalizedFacts(base: NormalizedEvent, incoming: NormalizedEvent
     sourceUrl: base.sourceUrl,
     externalId: base.externalId,
     venueFacilityId: base.venueFacilityId,
+    venueAddress: incoming.venueAddress ?? base.venueAddress,
   };
 }
 
@@ -732,6 +733,7 @@ function venueHint(event: NormalizedEvent) {
     venueText: event.venueText,
     sourceId: event.sourceId,
     facilityId: event.venueFacilityId,
+    address: event.venueAddress,
     proposed: event.proposedVenue,
   };
 }

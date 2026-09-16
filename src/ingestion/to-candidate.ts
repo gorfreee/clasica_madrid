@@ -1,4 +1,5 @@
 import { madridToday } from '../lib/domain/dates.ts';
+import { normalizeText } from '../lib/domain/normalize.ts';
 import type { Catalog } from '../lib/domain/catalog.ts';
 import type { Candidate } from '../lib/schemas/candidate.ts';
 import type { Event, Occurrence, Venue } from '../lib/schemas/index.ts';
@@ -9,7 +10,7 @@ import { fallbackEventIdentity } from './observed-identity.ts';
 import { normalizeUrl } from './urls.ts';
 import type { NormalizedEvent } from './normalize.ts';
 import type { PipelineSource } from './types.ts';
-import { isSufficientProposedVenue, matchVenue, unpublishedMatchedVenue, unpublishedParentVenue } from './venues.ts';
+import { hasSufficientNewVenueLocation, isSufficientProposedVenue, matchVenue, unpublishedMatchedVenue, unpublishedParentVenue } from './venues.ts';
 import { defaultIngestWindow, isDateInHarvestScope, type IngestWindow } from './dates.ts';
 import { ID_PREFIX } from '../lib/schemas/taxonomies.ts';
 import { SOURCE_REGISTRY, resolveCatalogSource } from './registry.ts';
@@ -31,7 +32,7 @@ export function newEventPublicationSkip(
     return emptyScheduleSkipReason(event, now);
   }
   if (!matchVenue(venueHint(event), catalog)) {
-    return unrecognizedVenueReason(event);
+    return unrecognizedVenueReason(event, catalog);
   }
   return undefined;
 }
@@ -55,7 +56,7 @@ export function toCandidate(
   }
   const venueMatch = matchVenue(venueHint(event), catalog);
   if (!venueMatch) {
-    return { skippedReason: unrecognizedVenueReason(event) };
+    return { skippedReason: unrecognizedVenueReason(event, catalog) };
   }
 
   const catalogSource = resolveCatalogSource(source, catalog);
@@ -154,9 +155,25 @@ function emptyScheduleSkipReason(event: NormalizedEvent, now: Date): string {
   return 'fuera de ventana';
 }
 
-function unrecognizedVenueReason(event: NormalizedEvent): string {
-  if (!event.proposedVenue) return 'lugar no reconocido';
+function unrecognizedVenueReason(event: NormalizedEvent, catalog: Catalog): string {
+  if (!event.proposedVenue) {
+    if (event.sourceId === 'madrid-datos' && event.venueFacilityId) {
+      return 'lugar nuevo con datos insuficientes';
+    }
+    return 'lugar no reconocido';
+  }
   if (!isSufficientProposedVenue(event.proposedVenue)) {
+    return 'lugar nuevo con datos insuficientes';
+  }
+  const needle = normalizeText(event.proposedVenue.name);
+  const named = catalog.venues.filter((venue) => normalizeText(venue.name) === needle);
+  const located = event.proposedVenue.municipality
+    ? named.filter(
+        (venue) => normalizeText(venue.municipality) === normalizeText(event.proposedVenue!.municipality!),
+      )
+    : named;
+  if (located.length > 1) return 'lugar ambiguo';
+  if (located.length === 0 && !hasSufficientNewVenueLocation(event.proposedVenue)) {
     return 'lugar nuevo con datos insuficientes';
   }
   return 'lugar ambiguo';
@@ -180,6 +197,7 @@ function venueHint(event: NormalizedEvent) {
     venueText: event.venueText,
     sourceId: event.sourceId,
     facilityId: event.venueFacilityId,
+    address: event.venueAddress,
     proposed: event.proposedVenue,
   };
 }

@@ -112,7 +112,7 @@ Intenta extraer con exhaustividad razonable cuando la ficha los declare:
 * título;
 * descripción;
 * fecha/hora (`occurrences`: `raw` obligatorio; `date`/`time` si la fuente los deja claros);
-* venue (`venueText` y, si el lugar puede ser nuevo, el objeto `venue` con `name`, `municipality` y `area`);
+* venue (`venueText` y, si el lugar puede ser nuevo, el objeto `venue` con `name`, `municipality`, `area`, `address` y `url` oficial cuando exista);
 * organizador / ciclo (`organizerText`, `seriesText`);
 * intérpretes (`performers`; `[]` si la fuente no los declara);
 * compositores (`composers`);
@@ -136,7 +136,17 @@ Si una página trae programa completo, intérpretes, compositores u obras, **no*
 
 `formats` y `eras` los resuelve el pipeline común. El AI pool del proyecto puede intervenir, sólo cuando hace falta, en `eligibility`, `composer-extraction`, `access-classification` y `taxonomy`. Una decisión determinista fuerte no se reabre; un fallo técnico de IA no corrompe datos deterministas válidos.
 
-Un venue nuevo necesita `name` + `municipality` + `area` coherentes. Sin eso no se publica el lugar. No hagas fuzzy matching de salas.
+Un venue **ya publicado** puede resolverse por nombre o alias; no hace falta volver a aportar su dirección.
+
+Un venue **nuevo** necesita:
+
+* nombre canónico razonable;
+* `municipality`;
+* `area` coherente (`madrid` en el municipio de Madrid, `nearby` sólo en un municipio muy próximo);
+* **dirección física suficiente** para que alguien pueda llegar;
+* URL oficial del lugar cuando esté disponible.
+
+Sin localización suficiente **no** se propone como publicable. Si identificas el sitio pero no puedes localizarlo con confianza, déjalo fuera del lote (revisión), no inventes la dirección ni crees un registro incompleto. No hagas fuzzy matching de salas.
 
 ---
 
