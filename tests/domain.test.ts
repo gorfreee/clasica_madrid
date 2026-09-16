@@ -228,9 +228,28 @@ describe('modelos de presentación', () => {
       'Gratis',
     ]);
     expect(model.shortcuts.map((shortcut) => shortcut.href)).toEqual([
-      '/?from=2026-09-05&to=2026-09-06',
+      '/?from=2026-09-04&to=2026-09-06',
       '/?access=free',
     ]);
+    expect(model.shortcuts.map((shortcut) => shortcut.active)).toEqual([false, false]);
+  });
+
+  it('los atajos de agenda preservan los filtros de la URL en el href de fallback', () => {
+    const model = buildAgendaPageModel(
+      richCatalog(),
+      new URL('https://clasicamadrid.com/?q=bach&access=free'),
+      testClock,
+    );
+    expect(model.shortcuts[0]).toMatchObject({
+      id: 'weekend',
+      active: false,
+      href: '/?q=bach&from=2026-09-04&to=2026-09-06&access=free',
+    });
+    expect(model.shortcuts[1]).toMatchObject({
+      id: 'free',
+      active: true,
+      href: '/?q=bach',
+    });
   });
 
   it('distingue catálogo vacío de filtros sin resultados', () => {

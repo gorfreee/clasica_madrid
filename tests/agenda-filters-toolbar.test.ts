@@ -29,6 +29,11 @@ describe('estructura de filtros avanzados', () => {
     expect(filterForm).not.toMatch(/<summary[\s>]/);
   });
 
+  it('marca los atajos rápidos como interruptores con aria-pressed', () => {
+    expect(filterForm).toContain('data-agenda-shortcut={shortcut.id}');
+    expect(filterForm).toContain("aria-pressed={shortcut.active ? 'true' : 'false'}");
+  });
+
   it('usa un chevron de expansión y no un símbolo de cierre', () => {
     expect(filterForm).toContain('filters__toggle-mark');
     expect(filterForm).toContain('viewBox="0 0 10 6"');
@@ -44,5 +49,16 @@ describe('estructura de filtros avanzados', () => {
       expect(css).not.toMatch(/filters__toggle[^{]*\{[^}]*flex:\s*0\s+0\s+100%/);
       expect(css).not.toMatch(/filters__panel[^{]*\{[^}]*\border\s*:/);
     }
+  });
+
+  it('distingue el estado activo de los atajos del hover y el foco', () => {
+    expect(toolbarCss).toMatch(/\.filters \.shortcut\[aria-pressed="true"\]\s*\{/);
+    expect(toolbarCss).toMatch(/\.filters \.shortcut:hover,\s*\n\s*\.filters \.shortcut:focus-visible\s*\{/);
+    expect(toolbarCss).toMatch(/\.filters \.shortcut\[aria-pressed="true"\]:hover,\s*\n\s*\.filters \.shortcut\[aria-pressed="true"\]:focus-visible\s*\{/);
+    const activeBlock = toolbarCss.match(/\.filters \.shortcut\[aria-pressed="true"\]\s*\{[^}]+\}/)?.[0] ?? '';
+    const hoverBlock = toolbarCss.match(/\.filters \.shortcut:hover,\s*\n\s*\.filters \.shortcut:focus-visible\s*\{[^}]+\}/)?.[0] ?? '';
+    expect(activeBlock).toContain('box-shadow');
+    expect(hoverBlock).toContain('background: var(--ink)');
+    expect(activeBlock).not.toContain('background: var(--ink)');
   });
 });

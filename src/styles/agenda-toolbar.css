@@ -50,6 +50,19 @@
   color: var(--paper-light);
 }
 
+.filters .shortcut[aria-pressed="true"] {
+  border-color: var(--ink);
+  background: var(--paper-light);
+  box-shadow: inset 0 -2px 0 var(--blue);
+}
+
+.filters .shortcut[aria-pressed="true"]:hover,
+.filters .shortcut[aria-pressed="true"]:focus-visible {
+  background: var(--ink);
+  color: var(--paper-light);
+  box-shadow: inset 0 -2px 0 var(--coral);
+}
+
 .filters .shortcut--emphasis {
   gap: .45rem;
   background: rgba(250, 249, 245, .45);
