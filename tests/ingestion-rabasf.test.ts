@@ -62,6 +62,27 @@ async function smallListing(slug = 'paraisos-nocturnos') {
   return `<body class="archive tax-actividad_type term-conciertos term-33"><main><h1>Conciertos</h1><div class="rc-actividades-block__container"><ul class="rc-actividades-block__list">${card}</ul></div></main></body>`;
 }
 
+function withProgramme(html: string, inner: string): string {
+  return html.replace(
+    /<h4 class="wp-block-heading">Programa<\/h4>[\s\S]*?<\/div>/,
+    `<h4 class="wp-block-heading">Programa</h4>\n${inner}\n</div>`,
+  );
+}
+
+function expectIndependentComposerBlocks(
+  patch: ReturnType<typeof parseRabasfDetail>,
+  blocks: Array<{ composer: string; work: string }>,
+) {
+  for (const block of blocks) {
+    expect(patch.composers).toContainEqual({ name: block.composer });
+    expect(patch.works).toContainEqual({ title: block.work, composerName: block.composer });
+  }
+  expect(patch.works?.some((work) => /\(\s*\d{3,4}\s*\)/.test(work.title) && /simarro|marco|vega/i.test(work.title))).toBe(
+    false,
+  );
+  expect(patch.works?.some((work) => /juan antonio simarro/i.test(work.title))).toBe(false);
+}
+
 describe('Real Academia listing', () => {
   it('reads the concert archive with stable slugs, official URLs and only observed listing facts', async () => {
     const fetched: string[] = [];
@@ -168,16 +189,74 @@ describe('Real Academia ficha hydration', () => {
     ]);
     expect(patch.composers).toEqual([
       { name: 'Tomás Marco' },
+      { name: 'Juan Antonio Simarro' },
       { name: 'Laura Vega' },
       { name: 'José Luis Greco' },
       { name: 'David del Puerto' },
       { name: 'Jesús Torres' },
     ]);
     expect(patch.works).toContainEqual({ title: 'Desgarradura', composerName: 'Tomás Marco' });
+    expect(patch.works).toContainEqual({ title: 'Tiempo al Tiempo', composerName: 'Juan Antonio Simarro' });
+    expect(patch.works).toContainEqual({ title: 'Paraísos perdidos', composerName: 'Laura Vega' });
     expect(patch.works).toContainEqual({ title: 'Trío para saxo soprano, viola y piano', composerName: 'Jesús Torres' });
+    expect(patch.works?.some((work) => /juan antonio simarro/i.test(work.title))).toBe(false);
     expect(patch.works?.some((work) => work.title === 'Rapsódico')).toBe(false);
     expect(patch).not.toHaveProperty('eligibility');
     expect(patch).not.toHaveProperty('eras');
+  });
+
+  it('does not treat a later composer heading as a work of the previous composer', async () => {
+    const event = await sample();
+    const html = await fixture('detail-paraisos');
+    const live = parseRabasfDetail(event, html);
+    expectIndependentComposerBlocks(live, [
+      { composer: 'Tomás Marco', work: 'Desgarradura' },
+      { composer: 'Juan Antonio Simarro', work: 'Tiempo al Tiempo' },
+    ]);
+    expect(live.works?.some((work) => work.title === 'Tiempo al Tiempo' && work.composerName === 'Tomás Marco')).toBe(
+      false,
+    );
+
+    const sharedParagraph = parseRabasfDetail(
+      event,
+      withProgramme(
+        html,
+        [
+          '<p class="wp-block-paragraph">',
+          '<strong>Tomás Marco</strong> (1942)<br>',
+          '<em>Desgarradura</em><br>',
+          '<strong>Juan Antonio Simarro</strong> (1973)<br>',
+          '<em>Tiempo al Tiempo</em><br>',
+          '<strong>Laura Vega</strong> (1978)<br>',
+          '<em>Paraísos perdidos</em>',
+          '</p>',
+        ].join(''),
+      ),
+    );
+    expectIndependentComposerBlocks(sharedParagraph, [
+      { composer: 'Tomás Marco', work: 'Desgarradura' },
+      { composer: 'Juan Antonio Simarro', work: 'Tiempo al Tiempo' },
+      { composer: 'Laura Vega', work: 'Paraísos perdidos' },
+    ]);
+
+    const plainAndMixed = parseRabasfDetail(
+      event,
+      withProgramme(
+        html,
+        [
+          '<p class="wp-block-paragraph">',
+          'Tomás Marco (1942)<br>',
+          'Desgarradura<br>',
+          'Juan Antonio Simarro (1973) **<br>',
+          'Tiempo al Tiempo',
+          '</p>',
+        ].join(''),
+      ),
+    );
+    expectIndependentComposerBlocks(plainAndMixed, [
+      { composer: 'Tomás Marco', work: 'Desgarradura' },
+      { composer: 'Juan Antonio Simarro', work: 'Tiempo al Tiempo' },
+    ]);
   });
 
   it('preserves a two-day concert and an italic listing title', async () => {

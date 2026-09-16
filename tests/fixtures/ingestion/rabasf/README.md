@@ -14,6 +14,9 @@ Event feed. The harvest surface is the `actividad_type=conciertos` archive.
 - `listing-page2.html`: https://www.realacademiabellasartessanfernando.com/actividades/conciertos/page/2/
   — three historical cards used to prove pagination follow-and-stop.
 - `detail-paraisos.html`: https://www.realacademiabellasartessanfernando.com/actividades/conciertos/paraisos-nocturnos/
+  — live programme: one composer+work block per `<p>`, including
+  `Juan Antonio Simarro` with a footnote `**` after the birth year. Tests also
+  rewrite this ficha into a single `<p>` with several `<br>`-separated headings.
 - `detail-guitar.html`: https://www.realacademiabellasartessanfernando.com/actividades/conciertos/festival-internacional-de-guitarra-de-madrid-1-2/
 - `detail-concierto-guitarra.html`: https://www.realacademiabellasartessanfernando.com/actividades/conciertos/concierto-de-guitarra-2/
 - `detail-la-folia.html`: https://www.realacademiabellasartessanfernando.com/actividades/conciertos/la-folia/
