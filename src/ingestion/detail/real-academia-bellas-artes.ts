@@ -1,5 +1,5 @@
 import { parseObservedTime, parseSpanishCalendarDate } from '../dates.ts';
-import { collapseWhitespace, decodeHtmlEntities, flattenHtmlBlocks, splitBreaks, stripTags } from '../html.ts';
+import { collapseWhitespace, decodeHtmlEntities, flattenHtmlBlocks, stripTags } from '../html.ts';
 import {
   isUnreliableComposerName,
   looksLikeCatalogOnlyLine,
@@ -252,18 +252,24 @@ function parseProgram(html: string): {
   const composers: { name: string }[] = [];
   const works: { title: string; composerName?: string }[] = [];
   let composerName: string | undefined;
+  // Gutenberg may put several composer+work blocks in one <p>, split by <br>,
+  // or one composer per paragraph. Walk every segment in order so a later
+  // heading updates the active composer instead of inheriting the previous one.
   for (const paragraph of programHtml.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)) {
     if (/\bnota-pie\b/i.test(paragraph[0]!)) continue;
     const raw = paragraph[1]!;
     if (!stripTags(raw)) continue;
-    const heading = composerHeadingFromParagraph(raw);
-    if (heading) {
-      composerName = heading;
-      composers.push({ name: heading });
-    }
-    if (!composerName) continue;
-    for (const title of programmeWorkTitles(raw)) {
-      works.push({ title, composerName });
+    for (const segment of programmeSegments(raw)) {
+      const heading = composerHeadingFromSegment(segment);
+      if (heading) {
+        composerName = heading;
+        composers.push({ name: heading });
+        continue;
+      }
+      if (!composerName) continue;
+      for (const title of programmeTitlesFromLine(segment)) {
+        works.push({ title, composerName });
+      }
     }
   }
   const description = firstParagraphs(before);
@@ -285,15 +291,27 @@ function programmeTail(html: string): string {
   return '';
 }
 
+function programmeSegments(html: string): string[] {
+  return html.split(/<br\s*\/?>/i).filter((part) => stripTags(part));
+}
+
 function composerHeadingFromParagraph(html: string): string | undefined {
-  const first = splitBreaks(html)[0];
-  if (!first) return undefined;
-  const cleaned = first.replace(/^\*+\s*/, '');
+  return composerHeadingFromSegment(programmeSegments(html)[0] ?? '');
+}
+
+function composerHeadingFromSegment(html: string): string | undefined {
+  const text = stripTags(html);
+  if (!text) return undefined;
+  const cleaned = stripEditorialAsterisks(text);
   if (looksLikeNonWorkCredit(cleaned)) return undefined;
-  if (!hasComposerYears(cleaned) && !hasComposerYears(first)) return undefined;
-  const name = collapseComposerHeading(cleaned);
+  if (!hasComposerYears(cleaned) && !hasComposerYears(text)) return undefined;
+  const name = stripEditorialAsterisks(collapseComposerHeading(cleaned));
   if (!name || isUnreliableComposerName(name) || !looksLikeCompleteComposerName(name)) return undefined;
   return name;
+}
+
+function stripEditorialAsterisks(text: string): string {
+  return text.replace(/^\*+\s*/u, '').replace(/\s*\*+\s*$/u, '');
 }
 
 function hasComposerYears(text: string): boolean {
@@ -322,21 +340,6 @@ function looksLikeCompleteComposerName(name: string): boolean {
  * a parenthetical are kept only when they name the work (`del Cuarteto…`).
  * Publication citations stay in programText.
  */
-function programmeWorkTitles(html: string): string[] {
-  const body = programmeBodyHtml(html);
-  if (!body) return [];
-  const titles: string[] = [];
-  for (const line of body.split(/<br\s*\/?>/i)) {
-    titles.push(...programmeTitlesFromLine(line));
-  }
-  return titles;
-}
-
-function programmeBodyHtml(html: string): string {
-  if (!composerHeadingFromParagraph(html)) return html;
-  return html.split(/<br\s*\/?>/i).slice(1).join('<br>');
-}
-
 function programmeTitlesFromLine(html: string): string[] {
   if (!stripTags(html)) return [];
   const quoted = quotedTitlesOutsideParens(html).flatMap(usableWorkTitle);
@@ -409,6 +412,7 @@ function italicProgrammeTitles(html: string): string[] {
 function usableWorkTitle(title: string): string[] {
   const cleaned = cleanProgrammeTitle(title);
   if (!cleaned || cleaned.length < 3 || /^\(/.test(cleaned)) return [];
+  if (composerHeadingFromSegment(cleaned)) return [];
   if (looksLikeCatalogOnlyLine(cleaned) || looksLikeMovementLine(cleaned)) return [];
   if (isBibliographicCitation(cleaned) || !looksLikeWorkLine(cleaned)) return [];
   return [cleaned];
