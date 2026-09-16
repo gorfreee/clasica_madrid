@@ -10,6 +10,9 @@
  *   includes child room ids/slugs so old URLs still match)
  * - `[data-agenda-filters]` — filter form (names match URL params)
  * - `[data-agenda-shortcuts]` — quick-filter links (Fin de semana, Gratis)
+ * - `[data-agenda-shortcut]` — `weekend` | `free`; live click recalculates
+ *   the weekend range in Europe/Madrid and toggles only that shortcut
+ * - `[aria-pressed]` on those links — visual/accessible active state
  * - `[data-advanced-filters-toggle]` / `[data-advanced-filters-panel]` —
  *   button + sibling panel for advanced filters (`aria-expanded` / `hidden`)
  * - `[data-agenda-root]` — list + load controls; `aria-busy` while fetching the full agenda
@@ -41,6 +44,13 @@ import {
   type AgendaFilters,
   type FilterableOccurrence,
 } from '../domain/filters.ts';
+import {
+  activeFilterChips,
+  filtersToAgendaHref,
+  isAgendaShortcutActive,
+  isAgendaShortcutId,
+  toggleAgendaShortcut,
+} from './agenda-shortcuts.ts';
 import { occurrenceCountLabel } from './labels.ts';
 import { FULL_AGENDA_FRAGMENT_PATH } from './urls.ts';
 
@@ -156,11 +166,19 @@ export function initAgendaFilters(): void {
     void applyFromUrl(params.toString() ? `/?${params.toString()}` : '/', { push: true, requireFull: Boolean(params.toString()) });
   });
   form?.querySelector<HTMLElement>('[data-agenda-shortcuts]')?.addEventListener('click', (event) => {
-    const link = (event.target as HTMLElement).closest('a');
+    const link = (event.target as HTMLElement).closest<HTMLAnchorElement>('a[data-agenda-shortcut]');
     if (!link || event.defaultPrevented) return;
     if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
-    void applyFromUrl(link.getAttribute('href') || '/', { push: true, requireFull: true });
+    const shortcut = link.dataset.agendaShortcut;
+    const current = parseAgendaFilters(new URLSearchParams(window.location.search));
+    const next = isAgendaShortcutId(shortcut)
+      ? toggleAgendaShortcut(current, shortcut, new Date())
+      : parseAgendaFilters(new URL(link.getAttribute('href') || '/', window.location.origin).searchParams);
+    const href = isAgendaShortcutId(shortcut)
+      ? filtersToAgendaHref(next)
+      : link.getAttribute('href') || '/';
+    void applyFromUrl(href, { push: true, requireFull: hasActiveFilters(next) });
   });
   clear?.addEventListener('click', (event) => {
     event.preventDefault();
@@ -170,8 +188,12 @@ export function initAgendaFilters(): void {
   activeFilters?.addEventListener('click', (event) => {
     const button = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-remove-filter]');
     if (!button || !form) return;
-    const field = form.elements.namedItem(button.dataset.removeFilter ?? '');
-    if (field instanceof HTMLInputElement || field instanceof HTMLSelectElement) field.value = '';
+    const names = (button.dataset.removeFilter ?? '').split(/[,\s]+/).filter(Boolean);
+    if (names.length === 0) return;
+    for (const name of names) {
+      const field = form.elements.namedItem(name);
+      if (field instanceof HTMLInputElement || field instanceof HTMLSelectElement) field.value = '';
+    }
     const params = formDataToParams(new FormData(form));
     void applyFromUrl(params.toString() ? `/?${params.toString()}` : '/', {
       push: true,
@@ -309,6 +331,7 @@ function apply(): void {
   syncMoreControls(truncated);
   syncForm(runtime.form, filters);
   renderActiveFilters(runtime.activeFilters, runtime.form, filters);
+  syncShortcuts(runtime.form, filters);
 }
 
 function syncMoreControls(truncated: boolean): void {
@@ -374,6 +397,7 @@ function showFailedFilterState(href: string): void {
   const filters = parseAgendaFilters(url.searchParams);
   syncForm(runtime.form, filters);
   renderActiveFilters(runtime.activeFilters, runtime.form, filters);
+  syncShortcuts(runtime.form, filters);
   if (runtime.clear) runtime.clear.hidden = !hasActiveFilters(filters);
   if (runtime.noResults) runtime.noResults.hidden = true;
 }
@@ -445,21 +469,42 @@ function renderActiveFilters(
 ): void {
   if (!container || !form) return;
   container.replaceChildren();
-  for (const [name, value] of Object.entries(filters)) {
-    if (!value) continue;
-    const field = form.elements.namedItem(name);
-    if (!(field instanceof HTMLInputElement || field instanceof HTMLSelectElement)) continue;
-    const label = field.closest('label')?.querySelector('span')?.textContent?.trim() || 'Filtro';
-    const shownValue = field instanceof HTMLSelectElement
-      ? field.selectedOptions[0]?.textContent?.trim() || value
-      : value;
+  const chips = activeFilterChips(
+    filters,
+    (name) => {
+      const field = form.elements.namedItem(name);
+      if (!(field instanceof HTMLElement)) return 'Filtro';
+      return field.closest('label')?.querySelector('span')?.textContent?.trim() || 'Filtro';
+    },
+    (name, value) => {
+      const field = form.elements.namedItem(name);
+      if (field instanceof HTMLSelectElement) return field.selectedOptions[0]?.textContent?.trim() || value;
+      return value;
+    },
+  );
+  for (const chip of chips) {
+    if (chip.fields.length === 1) {
+      const field = form.elements.namedItem(chip.fields[0] ?? '');
+      if (!(field instanceof HTMLInputElement || field instanceof HTMLSelectElement)) continue;
+    }
     const button = document.createElement('button');
     button.type = 'button';
-    button.dataset.removeFilter = name;
+    button.dataset.removeFilter = chip.fields.join(',');
     button.className = 'active-filter';
-    button.setAttribute('aria-label', `Quitar filtro ${label}: ${shownValue}`);
-    button.textContent = `${label}: ${shownValue} ×`;
+    const caption = chip.fields.length > 1 ? chip.label : `${chip.label}: ${chip.value}`;
+    button.setAttribute('aria-label', `Quitar filtro ${caption}`);
+    button.textContent = `${caption} ×`;
     container.append(button);
+  }
+}
+
+function syncShortcuts(form: HTMLFormElement | null, filters: AgendaFilters, now = new Date()): void {
+  if (!form) return;
+  for (const link of form.querySelectorAll<HTMLAnchorElement>('[data-agenda-shortcut]')) {
+    const shortcut = link.dataset.agendaShortcut;
+    if (!isAgendaShortcutId(shortcut)) continue;
+    link.setAttribute('aria-pressed', isAgendaShortcutActive(filters, shortcut, now) ? 'true' : 'false');
+    link.setAttribute('href', filtersToAgendaHref(toggleAgendaShortcut(filters, shortcut, now)));
   }
 }
 

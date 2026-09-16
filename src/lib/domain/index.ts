@@ -3,16 +3,20 @@ export {
   fromMadridLocal,
   formatMadridDate,
   hasUpcomingOccurrence,
+  isMadridWeekendRange,
   isScheduledUpcoming,
   isUpcomingOccurrence,
   madridDateTimeIso,
   madridNowTime,
   madridToday,
+  madridWeekendRange,
   MADRID_TIME_ZONE,
   nextUpcomingOccurrence,
+  shiftIsoDate,
   systemClock,
   type Clock,
   type DatedOccurrence,
+  type IsoDateRange,
 } from './dates.ts';
 export { emptyCatalog, type Catalog } from './catalog.ts';
 export {

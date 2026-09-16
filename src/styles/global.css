@@ -435,7 +435,9 @@ a.eyebrow:focus-visible {
   text-transform: uppercase;
 }
 .shortcut:last-child { border-right-width: 2px; }
-.shortcut:hover { background: var(--ink); color: var(--paper-light); }
+@media (hover: hover) and (pointer: fine) {
+  .shortcut:hover { background: var(--ink); color: var(--paper-light); }
+}
 .shortcut--emphasis { background: var(--coral); }
 .filters__panel { padding: 1.4rem 0 1.6rem; border-top: 1px solid var(--line); }
 .filters__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.1rem 1.4rem; }
