@@ -68,18 +68,6 @@ function expectUnmoved(label: string, before: Box, after: Box) {
 
 const INK = 'rgb(17, 17, 15)';
 
-async function emulateCoarsePointer(page: Page) {
-  const session = await page.context().newCDPSession(page);
-  await session.send('Emulation.setEmulatedMedia', {
-    features: [
-      { name: 'hover', value: 'none' },
-      { name: 'any-hover', value: 'none' },
-      { name: 'pointer', value: 'coarse' },
-      { name: 'any-pointer', value: 'coarse' },
-    ],
-  });
-}
-
 function backgroundOf(locator: ReturnType<Page['locator']>) {
   return locator.evaluate((el) => getComputedStyle(el).backgroundColor);
 }
@@ -191,30 +179,40 @@ test.describe('filtros avanzados de la agenda', () => {
       }
     });
   }
+});
 
-  test('en táctil el tap no deja Filtros ni los atajos invertidos en negro', async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 844 });
-    await emulateCoarsePointer(page);
+test.describe('táctil', () => {
+  test.use({
+    viewport: { width: 390, height: 844 },
+    hasTouch: true,
+    isMobile: true,
+  });
+
+  test('el tap no deja Filtros ni los atajos invertidos en negro', async ({ page }) => {
     await page.goto('/');
-    expect(await page.evaluate(() => matchMedia('(pointer: coarse)').matches)).toBe(true);
+    const media = await page.evaluate(() => ({
+      hover: matchMedia('(hover: hover)').matches,
+      coarse: matchMedia('(pointer: coarse)').matches,
+    }));
+    expect(media.hover && !media.coarse).toBe(false);
 
     const filtersButton = toggle(page);
     const weekend = page.locator('[data-agenda-shortcut="weekend"]');
     await expect(filtersButton).toBeVisible();
 
-    await filtersButton.click();
+    await filtersButton.tap();
     await expect(filtersButton).toHaveAttribute('aria-expanded', 'true');
     expect(await backgroundOf(filtersButton)).toBe(INK);
 
-    await filtersButton.click();
+    await filtersButton.tap();
     await expect(filtersButton).toHaveAttribute('aria-expanded', 'false');
     expect(await backgroundOf(filtersButton)).not.toBe(INK);
 
-    await weekend.click();
+    await weekend.tap();
     await expect(weekend).toHaveAttribute('aria-pressed', 'true');
     expect(await backgroundOf(weekend)).not.toBe(INK);
 
-    await weekend.click();
+    await weekend.tap();
     await expect(weekend).toHaveAttribute('aria-pressed', 'false');
     expect(await backgroundOf(weekend)).not.toBe(INK);
   });
