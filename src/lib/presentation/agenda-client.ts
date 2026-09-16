@@ -10,6 +10,8 @@
  *   includes child room ids/slugs so old URLs still match)
  * - `[data-agenda-filters]` — filter form (names match URL params)
  * - `[data-agenda-shortcuts]` — quick-filter links (Fin de semana, Gratis)
+ * - `[data-advanced-filters-toggle]` / `[data-advanced-filters-panel]` —
+ *   button + sibling panel for advanced filters (`aria-expanded` / `hidden`)
  * - `[data-agenda-root]` — list + load controls; `aria-busy` while fetching the full agenda
  * - `[data-agenda-complete]` — present when the in-DOM list is the full catalog
  * - `[data-upcoming-count]` — total upcoming occurrences at build time
@@ -92,7 +94,25 @@ function bindSearchPlaceholder(form: HTMLFormElement | null): void {
   mq.addEventListener('change', sync);
 }
 
+export function initAdvancedFiltersToggle(root: ParentNode = document): void {
+  const toggle = root.querySelector<HTMLButtonElement>('[data-advanced-filters-toggle]');
+  const panel = root.querySelector<HTMLElement>('[data-advanced-filters-panel]');
+  if (!toggle || !panel || toggle.dataset.advancedFiltersReady === 'true') return;
+  toggle.dataset.advancedFiltersReady = 'true';
+
+  const sync = (open: boolean) => {
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    panel.hidden = !open;
+  };
+
+  sync(toggle.getAttribute('aria-expanded') === 'true');
+  toggle.addEventListener('click', () => {
+    sync(toggle.getAttribute('aria-expanded') !== 'true');
+  });
+}
+
 export function initAgendaFilters(): void {
+  initAdvancedFiltersToggle();
   const root = document.querySelector<HTMLElement>('[data-agenda-root]');
   const dataNode = document.getElementById('agenda-filter-data');
   const form = document.querySelector<HTMLFormElement>('[data-agenda-filters]');

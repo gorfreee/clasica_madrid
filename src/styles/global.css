@@ -359,22 +359,6 @@ a.eyebrow:focus-visible {
 .shortcut:last-child { border-right-width: 2px; }
 .shortcut:hover { background: var(--ink); color: var(--paper-light); }
 .shortcut--emphasis { background: var(--coral); }
-.filters__advanced { margin-top: 1rem; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
-.filters__advanced summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: .85rem 0;
-  cursor: pointer;
-  font-size: .8rem;
-  font-weight: 800;
-  letter-spacing: var(--type-tracking-label);
-  list-style: none;
-  text-transform: uppercase;
-}
-.filters__advanced summary::-webkit-details-marker { display: none; }
-.filters__summary-mark { font-size: 1.5rem; font-weight: 400; line-height: 1; transition: transform 180ms ease; }
-.filters__advanced[open] .filters__summary-mark { transform: rotate(45deg); }
 .filters__panel { padding: 1.4rem 0 1.6rem; border-top: 1px solid var(--line); }
 .filters__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.1rem 1.4rem; }
 .field {
