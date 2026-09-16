@@ -9,7 +9,7 @@ const VIEWPORTS = [
 ] as const;
 
 function toggle(page: Page) {
-  return page.getByRole('button', { name: 'Filtros' });
+  return page.locator('[data-advanced-filters-toggle]');
 }
 
 function panel(page: Page) {
@@ -73,6 +73,7 @@ test.describe('filtros avanzados de la agenda', () => {
     const advanced = panel(page);
 
     await expect(button).toBeVisible();
+    await expect(button).toHaveAccessibleName('Filtros');
     await expect(button).toHaveAttribute('aria-expanded', 'false');
     await expect(button).toHaveAttribute('aria-controls', 'agenda-advanced-filters');
     await expect(advanced).toBeHidden();
