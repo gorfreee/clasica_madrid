@@ -39,6 +39,9 @@ const FORMAT_CUE_PATTERNS: Array<{ format: Format; pattern: RegExp }> = [
   { format: 'opera', pattern: /\bopera\b/g },
   { format: 'zarzuela', pattern: /\bzarzuela\b/g },
   { format: 'early-music', pattern: /\bmusica antigua\b/g },
+  { format: 'early-music', pattern: /\bmusica barroca\b/g },
+  { format: 'early-music', pattern: /\bmusica medieval\b/g },
+  { format: 'early-music', pattern: /\bmusica renacentista\b/g },
 ];
 
 const EXCLUSIVE_OR = /(?:^|\s)(?:o(?:\s+bien)?|u)(?:\s|$)/;

@@ -1667,6 +1667,22 @@ describe('formats', () => {
   it('no fuerza un format ambiguo', () => {
     expect(resolveFormats(facts({ title: 'Concierto' })).value).toEqual([]);
     expect(resolveFormats(facts({ title: 'Concierto' })).value).not.toContain('other');
+    expect(
+      resolveFormats(
+        facts({
+          title: 'Música en torno a la Independencia de los Estados Unidos de América',
+          performers: [{ name: 'Grupo de música barroca “La Folía”' }],
+        }),
+      ),
+    ).toMatchObject({ value: ['early-music'], strength: 'strong' });
+    expect(
+      resolveFormats(
+        facts({
+          title: 'Concierto',
+          description: 'El clavecinista ha grabado música barroca y tocó con un grupo de música antigua.',
+        }),
+      ).value,
+    ).toEqual([]);
   });
 
   it('alinea opera/recital/choral/symphonic con hechos ya extraídos, sin inventar era', () => {

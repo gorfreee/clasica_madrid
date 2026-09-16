@@ -1,9 +1,12 @@
 import { parseObservedTime, parseSpanishCalendarDate } from '../dates.ts';
-import { decodeHtmlEntities, flattenHtmlBlocks, splitBreaks, stripTags } from '../html.ts';
+import { collapseWhitespace, decodeHtmlEntities, flattenHtmlBlocks, splitBreaks, stripTags } from '../html.ts';
 import {
   isUnreliableComposerName,
+  looksLikeCatalogOnlyLine,
   looksLikeEnsembleName,
+  looksLikeMovementLine,
   looksLikeNonWorkCredit,
+  looksLikeWorkLine,
 } from '../observed-cleanup.ts';
 import {
   emptyObservedLists,
@@ -27,6 +30,15 @@ const ACCESS_ITEM =
 const COMPOSER_YEARS =
   /\(\s*(?:¿\??\s*[–—-]\s*)?(?:ca\.?|h\.?)?\s*\d{3,4}(?:\s*[–—-]\s*(?:ca\.?|h\.?)?\s*\d{3,4})?\s*\)/g;
 const NAME_PARTICLE = /^(?:de|del|van|von|di|da|el|la|los|las)$/i;
+/** `X de <em>colección</em>` outside parens is a source, not a second work. */
+const SOURCE_PREPOSITION_TAIL = /(?:^|[\s,;:*])(?:de las|de los|de la|del|de)\s*$/iu;
+const WORK_FROM_CITATION = /^(?:de las|de los|de la|del|de)\s*$/iu;
+const QUOTE_CLOSE: Record<string, string> = { '“': '”', '«': '»', '"': '"' };
+const PUBLICATION_MARK =
+  /\b(?:Ms\.?|s\.f\.|vol\.?|Biblioteca|edici[oó]n(?:es)?|New Edition|edition)\b/iu;
+const PUBLICATION_PLACE =
+  /\b(?:Londres|London|Par[ií]s|Paris|Madrid|Boston|Nueva York|New York|La Habana|Oaxaca|M[eé]xico|Mexico|Viena|Vienna|Venecia|Amsterdam|Lisboa|Roma|Berl[ií]n|Leipzig)\b/iu;
+const PUBLICATION_YEAR = /\b(?:h\.?\s*)?(?:1[5-9]\d{2}|20\d{2})\b/u;
 
 /** The public REST API is authenticated-only. Ficha facts live in the custom
  * `wrapper-rcf` sidebar and Gutenberg blocks of `actividad_post_type`. */
@@ -250,7 +262,7 @@ function parseProgram(html: string): {
       composers.push({ name: heading });
     }
     if (!composerName) continue;
-    for (const title of italicTitlesOutsideParens(raw)) {
+    for (const title of programmeWorkTitles(raw)) {
       works.push({ title, composerName });
     }
   }
@@ -303,11 +315,72 @@ function looksLikeCompleteComposerName(name: string): boolean {
 }
 
 /**
- * RABASF uses italics for works and for bibliographic titles. Italics inside
- * a parenthetical are kept only when they name the work (`del Cuarteto…`);
- * publication citations stay in programText.
+ * Programme items after a composer heading. RABASF mixes three conventions:
+ * italic work titles, typographic quotes, and a plain line before a
+ * bibliographic parenthetical. Italics after `de`/`del`/`de la` at depth 0
+ * name the collection or book, not a second performed work. Italics inside
+ * a parenthetical are kept only when they name the work (`del Cuarteto…`).
+ * Publication citations stay in programText.
  */
-function italicTitlesOutsideParens(html: string): string[] {
+function programmeWorkTitles(html: string): string[] {
+  const body = programmeBodyHtml(html);
+  if (!body) return [];
+  const titles: string[] = [];
+  for (const line of body.split(/<br\s*\/?>/i)) {
+    titles.push(...programmeTitlesFromLine(line));
+  }
+  return titles;
+}
+
+function programmeBodyHtml(html: string): string {
+  if (!composerHeadingFromParagraph(html)) return html;
+  return html.split(/<br\s*\/?>/i).slice(1).join('<br>');
+}
+
+function programmeTitlesFromLine(html: string): string[] {
+  if (!stripTags(html)) return [];
+  const quoted = quotedTitlesOutsideParens(html).flatMap(usableWorkTitle);
+  const italics = italicProgrammeTitles(html).flatMap(usableWorkTitle);
+  if (quoted.length > 0 || italics.length > 0) return [...quoted, ...italics];
+  const fallback = usableWorkTitle(stripTrailingBibliographicParens(stripTags(html)))[0];
+  return fallback ? [fallback] : [];
+}
+
+function quotedTitlesOutsideParens(html: string): string[] {
+  const text = stripTags(html);
+  const titles: string[] = [];
+  let depth = 0;
+  let index = 0;
+  while (index < text.length) {
+    const char = text[index]!;
+    if (char === '(') {
+      depth += 1;
+      index += 1;
+      continue;
+    }
+    if (char === ')') {
+      depth -= 1;
+      index += 1;
+      continue;
+    }
+    const close = QUOTE_CLOSE[char];
+    if (!close || depth > 0) {
+      index += 1;
+      continue;
+    }
+    const end = text.indexOf(close, index + 1);
+    if (end < 0) {
+      index += 1;
+      continue;
+    }
+    const title = collapseWhitespace(text.slice(index + 1, end));
+    if (title) titles.push(title);
+    index = end + 1;
+  }
+  return titles;
+}
+
+function italicProgrammeTitles(html: string): string[] {
   const titles: string[] = [];
   let depth = 0;
   let sinceParen = '';
@@ -315,18 +388,67 @@ function italicTitlesOutsideParens(html: string): string[] {
   while (index < html.length) {
     const open = /<em\b[^>]*>/i.exec(html.slice(index));
     const next = open?.index !== undefined ? index + open.index : html.length;
-    ({ depth, sinceParen } = consumeParens(stripTags(html.slice(index, next)), depth, sinceParen));
+    const between = stripTags(html.slice(index, next));
+    ({ depth, sinceParen } = consumeParens(between, depth, sinceParen));
     if (open?.index === undefined) break;
     const innerStart = next + open[0].length;
     const close = /<\/em>/i.exec(html.slice(innerStart));
     if (close?.index === undefined) break;
     const title = stripTags(html.slice(innerStart, innerStart + close.index));
-    const workFromCitation = /^(?:de las|de los|de la|del|de)\s*$/i.test(sinceParen);
-    if (title && !/^\(/.test(title) && (depth <= 0 || workFromCitation)) titles.push(title);
+    const workFromCitation = WORK_FROM_CITATION.test(sinceParen);
+    const collectionSource = depth <= 0 && SOURCE_PREPOSITION_TAIL.test(between);
+    if (title && !/^\(/.test(title) && (depth <= 0 || workFromCitation) && !collectionSource) {
+      titles.push(title);
+    }
     ({ depth, sinceParen } = consumeParens(title, depth, sinceParen));
     index = innerStart + close.index + close[0].length;
   }
   return titles;
+}
+
+function usableWorkTitle(title: string): string[] {
+  const cleaned = cleanProgrammeTitle(title);
+  if (!cleaned || cleaned.length < 3 || /^\(/.test(cleaned)) return [];
+  if (looksLikeCatalogOnlyLine(cleaned) || looksLikeMovementLine(cleaned)) return [];
+  if (isBibliographicCitation(cleaned) || !looksLikeWorkLine(cleaned)) return [];
+  return [cleaned];
+}
+
+function cleanProgrammeTitle(title: string): string {
+  return collapseWhitespace(
+    title.replace(/\*+\s*$/u, '').replace(/\s*\[(?:selecci[oó]n|texto de [^\]]+)\]/giu, ''),
+  ).replace(/[.,;:]+$/u, '');
+}
+
+function stripTrailingBibliographicParens(text: string): string {
+  let result = collapseWhitespace(text);
+  while (result.endsWith(')')) {
+    let depth = 0;
+    let start = -1;
+    for (let index = result.length - 1; index >= 0; index -= 1) {
+      const char = result[index];
+      if (char === ')') depth += 1;
+      else if (char === '(') {
+        depth -= 1;
+        if (depth === 0) {
+          start = index;
+          break;
+        }
+      }
+    }
+    if (start < 0) break;
+    const inner = result.slice(start + 1, -1);
+    if (!isBibliographicCitation(inner)) break;
+    result = collapseWhitespace(result.slice(0, start));
+  }
+  return result;
+}
+
+function isBibliographicCitation(text: string): boolean {
+  const inner = collapseWhitespace(text.replace(/^[()]+|[()]+$/gu, ''));
+  if (!inner) return false;
+  if (PUBLICATION_MARK.test(inner)) return true;
+  return PUBLICATION_YEAR.test(inner) && PUBLICATION_PLACE.test(inner);
 }
 
 function consumeParens(
