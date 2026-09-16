@@ -1,0 +1,169 @@
+---
+import ExternalMark from './ExternalMark.astro';
+
+type Props = {
+  href: string;
+  label: string;
+  accessibleLabel: string;
+  variant: 'cta' | 'utility';
+  description?: string;
+};
+
+const { href, label, accessibleLabel, variant, description } = Astro.props;
+---
+
+<a
+  class:list={['external-action', `external-action--${variant}`]}
+  href={href}
+  target="_blank"
+  rel="noopener noreferrer"
+  aria-label={accessibleLabel}
+>
+  {
+    variant === 'utility' && (
+      <span class="external-action__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false">
+          <circle cx="12" cy="12" r="8"></circle>
+          <path d="M4 12h16"></path>
+          <path d="M12 4c2.4 2.2 3.7 5.1 3.7 8s-1.3 5.8-3.7 8c-2.4-2.2-3.7-5.1-3.7-8s1.3-5.8 3.7-8Z"></path>
+        </svg>
+      </span>
+    )
+  }
+  <span class="external-action__body">
+    <span class="external-action__lead">
+      <span class="external-action__label">{label}</span>
+      <ExternalMark />
+    </span>
+    {description && <span class="external-action__hint">{description}</span>}
+  </span>
+</a>
+
+<style>
+  .external-action {
+    display: flex;
+    align-items: flex-start;
+    gap: .42rem;
+    width: fit-content;
+    max-width: 100%;
+    color: inherit;
+    text-decoration: none;
+    transition: color 140ms ease, border-color 140ms ease, background-color 140ms ease;
+  }
+
+  .external-action:hover {
+    text-decoration: none;
+  }
+
+  .external-action__icon {
+    display: block;
+    flex: 0 0 auto;
+    width: .95rem;
+    height: .95rem;
+    margin-top: .08rem;
+  }
+
+  .external-action__icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.7;
+  }
+
+  .external-action__body {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+  }
+
+  .external-action__lead {
+    display: flex;
+    align-items: flex-start;
+    gap: .22rem;
+    min-width: 0;
+  }
+
+  .external-action__label {
+    overflow-wrap: anywhere;
+    text-decoration-line: underline;
+    text-decoration-color: transparent;
+    text-decoration-thickness: 1px;
+    text-underline-offset: .16em;
+    transition: text-decoration-color 140ms ease;
+  }
+
+  .external-action:hover .external-action__label,
+  .external-action:focus-visible .external-action__label {
+    text-decoration-color: currentColor;
+  }
+
+  .external-action--cta {
+    margin-top: 1.5rem;
+    padding: .85rem 1rem;
+    border: 1px solid var(--line);
+    background: var(--paper-light);
+  }
+
+  .external-action--cta .external-action__body {
+    gap: .28rem;
+  }
+
+  .external-action--cta .external-action__label {
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: var(--type-tracking-heading);
+    line-height: 1.2;
+  }
+
+  .external-action--cta .external-action__hint {
+    max-width: 28rem;
+    color: var(--muted);
+    font-size: .78rem;
+    font-weight: 500;
+    line-height: 1.35;
+  }
+
+  .external-action--cta:hover,
+  .external-action--cta:focus-visible {
+    border-color: var(--blue);
+    color: var(--blue);
+  }
+
+  .external-action--cta:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 4px;
+  }
+
+  .external-action--utility {
+    padding: .18rem 0;
+    color: var(--muted);
+    font-size: .94rem;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .external-action--utility:hover,
+  .external-action--utility:focus-visible {
+    color: var(--blue);
+  }
+
+  .external-action--utility:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 4px;
+  }
+
+  @media (max-width: 620px) {
+    .external-action--cta {
+      max-width: 100%;
+      padding: .75rem .85rem;
+    }
+
+    .external-action--cta .external-action__label {
+      font-size: .95rem;
+    }
+  }
+</style>

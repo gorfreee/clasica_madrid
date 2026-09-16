@@ -754,20 +754,6 @@ a.eyebrow:focus-visible {
 .event-facts__space { color: var(--ink); font-size: clamp(.95rem, 1.6vw, 1.15rem) !important; font-weight: 600 !important; letter-spacing: -.02em !important; }
 .event-facts__address { margin-top: .75rem !important; color: var(--muted); font-size: .76rem !important; font-weight: 500 !important; letter-spacing: 0 !important; }
 .past-notice, .quiet-state { margin: 1.5rem 0 0; padding: 1rem; border-left: .75rem solid var(--coral); color: var(--muted); }
-.official-link {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 2rem;
-  align-items: center;
-  margin-top: 2rem;
-  padding: 1.4rem;
-  background: var(--blue);
-  color: var(--paper-light);
-  text-decoration: none;
-}
-.official-link span { max-width: 32rem; font-size: .8rem; }
-.official-link strong { font-size: 1.08rem; }
-.official-link:hover { background: var(--ink); }
 .detail-section { margin-top: 5rem; }
 .section-heading {
   padding: .75rem 0;
@@ -813,12 +799,24 @@ a.eyebrow:focus-visible {
 .source-list a { font-weight: 800; }
 .source-list span, .verified { color: var(--muted); }
 .verified { margin: 1rem 0 0; }
-.venue-detail__practical { position: relative; z-index: 1; max-width: 42rem; margin-top: 2.5rem; }
-.venue-detail__practical p { color: var(--muted); }
+.venue-detail__practical {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: .12rem;
+  max-width: 42rem;
+  margin-top: 2.5rem;
+}
+.venue-detail__practical p {
+  margin: 0;
+  padding: .18rem 0;
+  color: var(--muted);
+}
 .button-row { display: flex; flex-wrap: wrap; gap: 1.2rem; align-items: center; margin-top: 1rem; }
 .button-link { display: inline-block; padding: .8rem 1rem; background: var(--ink); color: var(--paper-light); font-size: .8rem; font-weight: 800; text-decoration: none; }
 .button-link:hover { background: var(--blue); }
-.text-link { font-size: .8rem; font-weight: 800; }
 .venue-programme .agenda-day__list { border-bottom: 2px solid var(--ink); }
 .venue-programme .agenda-item { grid-template-columns: 12rem minmax(14rem, 1fr) minmax(10rem, 14rem) 7.5rem; }
 
@@ -1007,7 +1005,6 @@ a.eyebrow:focus-visible {
   .event-facts { display: block; }
   .event-facts > div { min-height: auto; padding: 1rem 0; border-left: 0 !important; }
   .event-facts > div + div, .event-facts__access { border-top: 1px solid var(--line); }
-  .official-link { grid-template-columns: 1fr; gap: .7rem; padding: 1rem; }
   .detail-section { margin-top: 3.5rem; }
   .section-heading h2 { font-size: 2.2rem; }
   .programme-list li { padding-left: 2.5rem; }

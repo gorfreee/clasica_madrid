@@ -26,6 +26,8 @@ import {
   sourceKindLabels,
 } from './labels.ts';
 import type { Occurrence } from '../schemas/event.ts';
+import type { SourceKind } from '../schemas/taxonomies.ts';
+import { buildEventSourceAction, type EventSourceActionModel } from './external-action.ts';
 import { buildMusicEventJsonLd } from './json-ld.ts';
 import { buildPlaceAddress, type PlaceAddressModel } from './place-address.ts';
 import { eventPath, venuePath } from './urls.ts';
@@ -40,6 +42,15 @@ export type EventOccurrenceModel = {
   status: string;
   isCancelled: boolean;
   startIso: string;
+};
+
+export type EventSourceModel = {
+  name: string;
+  url: string;
+  kindId: SourceKind;
+  kindLabel: string;
+  checkedAt: string;
+  isPrimary: boolean;
 };
 
 export type EventPageModel = {
@@ -68,13 +79,8 @@ export type EventPageModel = {
   access: { id: string; label: string };
   occurrences: EventOccurrenceModel[];
   featuredOccurrence: EventOccurrenceModel | null;
-  sources: {
-    name: string;
-    url: string;
-    kind: string;
-    checkedAt: string;
-    isPrimary: boolean;
-  }[];
+  sources: EventSourceModel[];
+  sourceAction: EventSourceActionModel | null;
   lastVerifiedAt: string;
   jsonLd: Record<string, unknown>[];
 };
@@ -122,6 +128,14 @@ export function toEventPageModel(resolved: ResolvedEvent, clock: Clock = systemC
     .map(toOccurrenceModel);
   const featuredCanonical = next ?? (isPast ? lastScheduledOccurrence(event.occurrences) : undefined);
   const showMunicipality = !isMadridMunicipality(rootVenue.municipality);
+  const sources: EventSourceModel[] = citations.map((citation) => ({
+    name: citation.source.name,
+    url: citation.url,
+    kindId: citation.source.kind,
+    kindLabel: sourceKindLabels[citation.source.kind],
+    checkedAt: citation.checkedAt,
+    isPrimary: citation.isPrimary,
+  }));
   return {
     title: event.title,
     documentTitle: eventDocumentTitle(event.title, rootVenue.name),
@@ -160,13 +174,8 @@ export function toEventPageModel(resolved: ResolvedEvent, clock: Clock = systemC
     featuredOccurrence: featuredCanonical
       ? occurrences.find((occurrence) => occurrence.id === featuredCanonical.id) ?? null
       : null,
-    sources: citations.map((citation) => ({
-      name: citation.source.name,
-      url: citation.url,
-      kind: sourceKindLabels[citation.source.kind],
-      checkedAt: citation.checkedAt,
-      isPrimary: citation.isPrimary,
-    })),
+    sources,
+    sourceAction: buildEventSourceAction(sources),
     lastVerifiedAt: event.lastVerifiedAt,
     jsonLd: buildMusicEventJsonLd(resolved),
   };

@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import AgendaItem from '../../components/AgendaItem.astro';
+import ExternalAction from '../../components/ExternalAction.astro';
 import Eyebrow from '../../components/Eyebrow.astro';
 import HeroMotif from '../../components/HeroMotif.astro';
 import PlaceAddress from '../../components/PlaceAddress.astro';
@@ -34,7 +35,16 @@ if (!model) {
           ) : (
             <p class="venue-detail__locality">{model.municipality}</p>
           )}
-          {model.url && <a class="text-link" href={model.url} rel="noopener noreferrer">Web oficial ↗</a>}
+          {
+            model.officialWeb && (
+              <ExternalAction
+                variant="utility"
+                href={model.officialWeb.href}
+                label={model.officialWeb.label}
+                accessibleLabel={model.officialWeb.accessibleLabel}
+              />
+            )
+          }
         </div>
       </div>
       <HeroMotif variant="venue" class="detail-hero__motif" />
