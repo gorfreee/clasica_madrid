@@ -7,6 +7,7 @@ import {
   BRAND_BLUE,
   DEFAULT_DESCRIPTION,
   DEFAULT_TITLE,
+  pageDocumentTitle,
   SITE_NAME,
 } from '../lib/presentation/constants.ts';
 import { buildSocialImageMetadata } from '../lib/presentation/social.ts';
@@ -33,7 +34,7 @@ const {
   socialImageAlt,
 } = Astro.props;
 
-const pageTitle = title === DEFAULT_TITLE || title.includes(SITE_NAME) ? title : `${title} — ${SITE_NAME}`;
+const pageTitle = pageDocumentTitle(title);
 const canonical = indexable ? publicUrl(canonicalPath) : null;
 const jsonLdScript = jsonLd ? serializeJsonForScript(jsonLd) : null;
 const social = buildSocialImageMetadata(socialImage, socialImageAlt);

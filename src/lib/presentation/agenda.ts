@@ -19,6 +19,7 @@ import {
 } from './labels.ts';
 import { ACCESS_MODES, AREAS, ERAS, EVENT_KINDS, FORMATS } from '../schemas/taxonomies.ts';
 import { isMadridMunicipality } from '../domain/normalize.ts';
+import { HOME_DESCRIPTION, HOME_TITLE } from './constants.ts';
 import { buildWebsiteJsonLd } from './json-ld.ts';
 import { AGENDA_PATH, eventPath, venuePath } from './urls.ts';
 
@@ -170,9 +171,8 @@ export function buildAgendaPageModel(
   const days = groupByDate(initial.map(toAgendaItem), now);
   const filters = parseAgendaFilters(_url?.searchParams ?? new URLSearchParams());
   return {
-    title: 'Agenda de música clásica en Madrid',
-    description:
-      'Conciertos y eventos de música clásica en Madrid y su entorno inmediato, con fuente original.',
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
     canonicalPath: AGENDA_PATH,
     jsonLd: [buildWebsiteJsonLd()],
     isEmptyCatalog: catalog.events.length === 0,
