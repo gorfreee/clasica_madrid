@@ -24,6 +24,9 @@
   margin-top: .8rem;
 }
 
+/* The advanced panel is a sibling of the toolbar, not a flex item. Opening
+   it must not change the order or flex-basis of the toolbar controls. */
+
 .filters .shortcuts {
   display: flex;
   flex-wrap: wrap;
@@ -66,59 +69,56 @@
   background: var(--coral);
 }
 
-.filters .filters__advanced {
-  margin: 0;
-  border: 0;
-}
-
-.filters .filters__advanced summary {
+.filters .filters__toggle {
   display: inline-flex;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: center;
   gap: .45rem;
   min-height: 2.35rem;
   padding: .58rem .78rem;
   border: 1px solid var(--line);
+  border-radius: 0;
   background: transparent;
+  color: inherit;
   cursor: pointer;
   font-size: .72rem;
   font-weight: 800;
   letter-spacing: .07em;
   line-height: 1;
-  list-style: none;
   text-transform: uppercase;
 }
 
-.filters .filters__advanced summary:hover,
-.filters .filters__advanced summary:focus-visible,
-.filters .filters__advanced[open] summary {
+.filters .filters__toggle:hover,
+.filters .filters__toggle:focus-visible,
+.filters .filters__toggle[aria-expanded="true"] {
   border-color: var(--ink);
   background: var(--ink);
   color: var(--paper-light);
 }
 
-.filters .filters__advanced summary::-webkit-details-marker {
-  display: none;
-}
-
-.filters .filters__summary-mark {
-  font-size: 1rem;
-  font-weight: 500;
-  line-height: 1;
+.filters .filters__toggle-mark {
+  display: inline-flex;
+  width: .65rem;
+  height: .4rem;
   transition: transform 180ms ease;
 }
 
-.filters .filters__advanced[open] {
-  order: 2;
-  flex: 0 0 100%;
-  margin-top: .15rem;
+.filters .filters__toggle-mark svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
 }
 
-.filters .filters__advanced[open] .filters__summary-mark {
-  transform: rotate(45deg);
+.filters .filters__toggle[aria-expanded="true"] .filters__toggle-mark {
+  transform: rotate(180deg);
 }
 
 .filters .filters__panel {
+  width: 100%;
   margin-top: .7rem;
   padding: 1.25rem;
   border: 0;
@@ -238,7 +238,7 @@
     margin: 0;
   }
 
-  .filters .filters__advanced summary {
+  .filters .filters__toggle {
     min-height: 2.25rem;
     padding: .55rem .65rem;
     font-size: .68rem;
@@ -249,11 +249,6 @@
     flex: 0 0 100%;
     margin: .05rem 0 0;
     font-size: .7rem;
-  }
-
-  .filters .filters__advanced[open] {
-    order: 3;
-    margin-top: .1rem;
   }
 
   .filters .filters__panel {
