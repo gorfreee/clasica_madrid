@@ -83,7 +83,7 @@ test.describe('agenda', () => {
 
     const form = page.locator('[data-agenda-filters]');
     await form.getByRole('searchbox').fill(NO_MATCH_QUERY);
-    await form.getByRole('button', { name: 'Aplicar filtros' }).click();
+    await form.getByRole('button', { name: 'Buscar' }).click();
 
     await expect(page).toHaveURL(new RegExp(`[?&]q=${NO_MATCH_QUERY}`));
     await expect(page.locator('[data-no-results]')).toBeVisible();
@@ -102,7 +102,7 @@ test.describe('agenda', () => {
 
     const form = page.locator('[data-agenda-filters]');
     await form.getByRole('searchbox').fill(NO_MATCH_QUERY);
-    await form.getByRole('button', { name: 'Aplicar filtros' }).click();
+    await form.getByRole('button', { name: 'Buscar' }).click();
     await expect(page.locator('[data-no-results]')).toBeVisible();
 
     await page.locator('[data-clear-filters]').click();
@@ -126,7 +126,7 @@ test.describe('agenda', () => {
 
     const form = page.locator('[data-agenda-filters]');
     await form.getByRole('searchbox').fill(NO_MATCH_QUERY);
-    await form.getByRole('button', { name: 'Aplicar filtros' }).click();
+    await form.getByRole('button', { name: 'Buscar' }).click();
     await expect(page).toHaveURL(new RegExp(`[?&]q=${NO_MATCH_QUERY}`));
     await expect(visibleOccurrences(page)).toHaveCount(0);
 
@@ -162,6 +162,43 @@ test.describe('agenda', () => {
       await expect(items.nth(index).getByRole('link').nth(1)).not.toHaveText(/Sala Sinfónica/);
     }
     await expect(page.locator('[data-result-count]')).toBeVisible();
+  });
+
+  test('el placeholder de búsqueda es amplio en escritorio y compacto en móvil', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/');
+    const search = page.locator('[data-agenda-filters]').getByRole('searchbox', { name: 'Buscar en la agenda' });
+    await expect(search).toHaveAttribute(
+      'placeholder',
+      'Busca conciertos, intérpretes, compositores o lugares',
+    );
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(search).toHaveAttribute('placeholder', 'Busca conciertos, compositores...');
+  });
+
+  test('el botón compacto de búsqueda es accesible y aplica el filtro', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/');
+    const form = page.locator('[data-agenda-filters]');
+    const submit = form.getByRole('button', { name: 'Buscar' });
+    await expect(submit).toBeVisible();
+    await form.getByRole('searchbox').fill(NO_MATCH_QUERY);
+    await submit.click();
+
+    await expect(page).toHaveURL(new RegExp(`[?&]q=${NO_MATCH_QUERY}`));
+    await expect(page.locator('[data-no-results]')).toBeVisible();
+    await expect(visibleOccurrences(page)).toHaveCount(0);
+  });
+
+  test('Enter en el buscador aplica el filtro de la agenda', async ({ page }) => {
+    await page.goto('/');
+    const form = page.locator('[data-agenda-filters]');
+    await form.getByRole('searchbox').fill(NO_MATCH_QUERY);
+    await form.getByRole('searchbox').press('Enter');
+
+    await expect(page).toHaveURL(new RegExp(`[?&]q=${NO_MATCH_QUERY}`));
+    await expect(page.locator('[data-no-results]')).toBeVisible();
   });
 });
 

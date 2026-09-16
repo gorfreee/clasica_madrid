@@ -1,5 +1,6 @@
 ---
 import type { AgendaPageModel } from '../lib/presentation/agenda.ts';
+import SearchIcon from './SearchIcon.astro';
 import '../styles/agenda-toolbar.css';
 
 type Props = {
@@ -25,8 +26,10 @@ const { model } = Astro.props;
           placeholder="Busca conciertos, compositores..."
         />
       </label>
-      <button class="search-submit" type="submit" aria-label="Aplicar filtros">
-        <span class="search-submit__compact" aria-hidden="true">→</span>
+      <button class="search-submit" type="submit" aria-label="Buscar">
+        <span class="search-submit__compact" aria-hidden="true">
+          <SearchIcon />
+        </span>
         <span class="search-submit__label">Buscar</span>
       </button>
     </div>

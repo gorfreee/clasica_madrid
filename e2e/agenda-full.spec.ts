@@ -123,7 +123,7 @@ test.describe('carga diferida de la agenda', () => {
     const initialCount = await visibleOccurrences(page).count();
     const form = page.locator('[data-agenda-filters]');
     await form.getByRole('searchbox').fill(title);
-    await form.getByRole('button', { name: 'Aplicar filtros' }).click();
+    await form.getByRole('button', { name: 'Buscar' }).click();
 
     await expect(page).toHaveURL(/\?q=/);
     await expect(page.getByRole('button', { name: 'Mostrar todos' })).toBeHidden();
@@ -162,7 +162,7 @@ test.describe('carga diferida de la agenda', () => {
 
     const form = page.locator('[data-agenda-filters]');
     await form.getByRole('searchbox').fill('Bach');
-    await form.getByRole('button', { name: 'Aplicar filtros' }).click();
+    await form.getByRole('button', { name: 'Buscar' }).click();
     await expect(page).toHaveURL(/\?q=/);
     await expect(page.getByRole('button', { name: 'Mostrar todos' })).toBeHidden();
     await expect(page.locator('[data-agenda-root][data-agenda-complete]')).toHaveCount(1);
@@ -186,7 +186,7 @@ test.describe('carga diferida de la agenda', () => {
 
     const form = page.locator('[data-agenda-filters]');
     await form.getByRole('searchbox').fill('Bach');
-    await form.getByRole('button', { name: 'Aplicar filtros' }).click();
+    await form.getByRole('button', { name: 'Buscar' }).click();
     await expect(page).toHaveURL(/\?q=/);
     await page.locator('[data-clear-filters]').click();
     await expect(page.getByRole('button', { name: 'Mostrar todos' })).toBeVisible();
@@ -208,7 +208,7 @@ test.describe('carga diferida de la agenda', () => {
 
     const form = page.locator('[data-agenda-filters]');
     await form.getByRole('searchbox').fill('Bach');
-    await form.getByRole('button', { name: 'Aplicar filtros' }).click();
+    await form.getByRole('button', { name: 'Buscar' }).click();
     await expect(page).toHaveURL(/\?q=/);
 
     await page.locator('[data-clear-filters]').click();

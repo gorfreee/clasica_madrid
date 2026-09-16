@@ -108,6 +108,14 @@ export function occurrenceCountLabel(count: number): string {
   return count === 1 ? '1 concierto próximo' : `${count} conciertos próximos`;
 }
 
+export function venueCountLabel(count: number): string {
+  return count === 1 ? '1 lugar' : `${count} lugares`;
+}
+
+export function venueNoResultsMessage(query: string): string {
+  return `No encontramos ningún lugar para “${query}”.`;
+}
+
 export function showingOccurrenceCountLabel(shown: number, total: number): string {
   return `Mostrando ${shown} de ${total} ${total === 1 ? 'concierto próximo' : 'conciertos próximos'}`;
 }
