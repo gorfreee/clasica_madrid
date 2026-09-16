@@ -14,6 +14,7 @@ import type { Venue } from '../schemas/venue.ts';
 import { areaLabels } from './labels.ts';
 import { buildVenueJsonLd } from './json-ld.ts';
 import { toAgendaItem, type AgendaItemModel } from './agenda.ts';
+import { buildVenueOfficialWebAction, type VenueOfficialWebModel } from './external-action.ts';
 import { buildPlaceAddress, type PlaceAddressModel } from './place-address.ts';
 import { venuePath, VENUES_INDEX_PATH } from './urls.ts';
 
@@ -47,6 +48,7 @@ export type VenuePageModel = {
   address: string | null;
   placeAddress: PlaceAddressModel | null;
   url: string | null;
+  officialWeb: VenueOfficialWebModel | null;
   upcoming: AgendaItemModel[];
   jsonLd: Record<string, unknown>[];
 };
@@ -103,6 +105,7 @@ export function buildVenuePageModel(
   const pageName = isChildVenue(venue) ? venue.name : principal.name;
   const showMunicipality = !isMadridMunicipality(principal.municipality);
   const address = principal.address ?? venue.address ?? null;
+  const url = principal.url ?? venue.url ?? null;
   return {
     title: pageName,
     description:
@@ -121,7 +124,8 @@ export function buildVenuePageModel(
       municipality: principal.municipality,
       showMunicipality,
     }),
-    url: principal.url ?? venue.url ?? null,
+    url,
+    officialWeb: buildVenueOfficialWebAction(url),
     upcoming,
     jsonLd: buildVenueJsonLd(venue, principal),
   };

@@ -68,6 +68,13 @@ export const sourceKindLabels: Record<SourceKind, string> = {
   secondary: 'Secundaria',
 };
 
+export const opensInNewTabLabel = 'Se abre en una pestaña nueva.';
+
+export const eventOfficialSourceActionLabel = 'Entradas e información oficial';
+export const eventOriginalSourceActionLabel = 'Ver fuente original';
+export const eventSourceActionDescription = 'Consulta precios, disponibilidad y posibles cambios.';
+export const venueOfficialWebLabel = 'Web oficial';
+
 export function formatSourceCitationMeta(params: {
   kindLabel: string;
   isPrimary: boolean;

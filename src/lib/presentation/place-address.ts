@@ -6,6 +6,8 @@
  * only repeated on screen when it is not Madrid, but it is always included in
  * the Maps query unless the address already names it.
  */
+import { opensInNewTabLabel } from './labels.ts';
+
 export type PlaceAddressInput = {
   address: string | null | undefined;
   municipality: string;
@@ -37,7 +39,7 @@ export function buildPlaceAddress(input: PlaceAddressInput): PlaceAddressModel |
     line: address,
     locality,
     mapsUrl: `${GOOGLE_MAPS_SEARCH}${encodeURIComponent(query)}`,
-    accessibleLabel: `Ver ${spoken} en Google Maps. Se abre en una pestaña nueva.`,
+    accessibleLabel: `Ver ${spoken} en Google Maps. ${opensInNewTabLabel}`,
   };
 }
 

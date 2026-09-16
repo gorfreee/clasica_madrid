@@ -1,5 +1,6 @@
 ---
 import type { PlaceAddressModel } from '../lib/presentation/place-address.ts';
+import ExternalMark from './ExternalMark.astro';
 
 type Props = {
   address: PlaceAddressModel;
@@ -26,7 +27,7 @@ const { address, variant = 'compact' } = Astro.props;
     <span class="place-address__line">{address.line}</span>
     {address.locality && <span class="place-address__locality">{address.locality}</span>}
   </span>
-  <span class="place-address__external" aria-hidden="true">↗</span>
+  <ExternalMark />
 </a>
 
 <style>
@@ -104,20 +105,11 @@ const { address, variant = 'compact' } = Astro.props;
     opacity: .78;
   }
 
-  .place-address__external {
-    flex: 0 0 auto;
-    margin-left: .04rem;
-    font-size: .72em;
-    line-height: 1.45;
-    opacity: .55;
-  }
-
   .place-address--compact {
     font-size: .82rem;
   }
 
   .place-address--hero {
-    margin: .85rem 0 .95rem;
     font-size: .94rem;
   }
 </style>

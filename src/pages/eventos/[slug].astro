@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import ExternalAction from '../../components/ExternalAction.astro';
 import Eyebrow from '../../components/Eyebrow.astro';
 import HeroMotif from '../../components/HeroMotif.astro';
 import PlaceAddress from '../../components/PlaceAddress.astro';
@@ -27,7 +28,6 @@ if (!model) {
 if (model.slug !== slug) {
   return Astro.redirect(model.canonicalPath, 301);
 }
-const primarySource = model.sources.find((source) => source.isPrimary) ?? model.sources[0];
 const featured = model.featuredOccurrence;
 ---
 
@@ -73,7 +73,17 @@ const featured = model.featuredOccurrence;
     </dl>
 
     {model.isPast && <p class="past-notice">Este evento ya ha tenido lugar. Conservamos la ficha como parte del archivo.</p>}
-    {primarySource && <a class="official-link" href={primarySource.url} rel="noopener noreferrer"><span>Consulta entradas, condiciones y posibles cambios</span><strong>Ver información oficial ↗</strong></a>}
+    {
+      model.sourceAction && (
+        <ExternalAction
+          variant="cta"
+          href={model.sourceAction.href}
+          label={model.sourceAction.label}
+          description={model.sourceAction.description}
+          accessibleLabel={model.sourceAction.accessibleLabel}
+        />
+      )
+    }
 
     <section class="detail-section" aria-labelledby="fechas-titulo">
       <div class="section-heading"><h2 id="fechas-titulo">Fechas</h2></div>
@@ -156,7 +166,7 @@ const featured = model.featuredOccurrence;
               </a>
               <span>
                 {formatSourceCitationMeta({
-                  kindLabel: source.kind,
+                  kindLabel: source.kindLabel,
                   isPrimary: source.isPrimary,
                   checkedAt: source.checkedAt,
                 })}
