@@ -103,6 +103,6 @@ describe('búsqueda de lugares', () => {
   });
 
   it('describe el estado sin resultados con la consulta original', () => {
-    expect(venueNoResultsMessage('chamberí')).toBe('No encontramos ningún lugar para “chamberí”.');
+    expect(venueNoResultsMessage('chamberí')).toBe('No encontramos ningún lugar para “chamberí”');
   });
 });

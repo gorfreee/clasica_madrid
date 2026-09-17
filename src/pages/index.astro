@@ -23,12 +23,12 @@ const model = await loadAgendaPage(Astro.url);
     model.isEmptyCatalog ? (
       <EmptyState
         title="Todavía no hay conciertos publicados"
-        body="Estamos construyendo el catálogo. Cuando haya eventos verificados, aparecerán aquí en orden cronológico."
+        body="Estamos construyendo el catálogo. Cuando haya eventos verificados, aparecerán aquí en orden cronológico"
       />
     ) : !model.hasUpcoming ? (
       <EmptyState
         title="No hay conciertos próximos"
-        body="El catálogo conserva eventos que ya han tenido lugar, pero ahora mismo no hay representaciones vigentes en la agenda."
+        body="El catálogo conserva eventos que ya han tenido lugar, pero ahora mismo no hay representaciones vigentes en la agenda"
       />
     ) : (
       <>
@@ -53,7 +53,7 @@ const model = await loadAgendaPage(Astro.url);
           <div data-no-results hidden>
             <EmptyState
               title="No hay conciertos con estos filtros"
-              body="Prueba a quitar alguno o ampliar el intervalo de fechas."
+              body="Prueba a quitar alguno o ampliar el intervalo de fechas"
             />
           </div>
           <script

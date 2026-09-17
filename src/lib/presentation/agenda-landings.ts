@@ -55,10 +55,10 @@ const LANDING_COPY: Record<AgendaLandingSlug, LandingCopy> = {
     description:
       'Agenda actualizada de conciertos gratis de música clásica en Madrid y alrededores, con fechas, lugares e intérpretes.',
     intro: () =>
-      'Próximos conciertos de acceso gratuito en Madrid y alrededores, con fechas, lugares e intérpretes.',
+      'Próximos conciertos de acceso gratuito en Madrid y alrededores, con fechas, lugares e intérpretes',
     emptyTitle: 'No hay conciertos gratuitos publicados ahora mismo',
     emptyBody: () =>
-      'Cuando haya conciertos de acceso gratuito en Madrid y alrededores, aparecerán aquí en orden cronológico.',
+      'Cuando haya conciertos de acceso gratuito en Madrid y alrededores, aparecerán aquí en orden cronológico',
   },
   'fin-de-semana': {
     title: 'Conciertos de música clásica en Madrid este fin de semana',
@@ -143,9 +143,9 @@ function weekendCopy(now: Date, kind: 'intro' | 'empty'): string {
   const label = formatWeekendRangeLabel(range);
   const span = range.from === range.to ? `para el ${label}` : `del ${label}`;
   if (kind === 'intro') {
-    return `Programación de música clásica en Madrid y alrededores ${span}.`;
+    return `Programación de música clásica en Madrid y alrededores ${span}`;
   }
-  return `No hay conciertos de música clásica en la agenda ${span}. Cuando se publiquen, aparecerán aquí.`;
+  return `No hay conciertos de música clásica en la agenda ${span}. Cuando se publiquen, aparecerán aquí`;
 }
 
 function maxDate(values: (string | undefined)[]): string | undefined {

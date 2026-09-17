@@ -188,8 +188,10 @@ describe('landing /agenda/fin-de-semana/', () => {
     expect(fridayPage?.intro).toContain(formatWeekendRangeLabel(madridWeekendRange(friday)));
     expect(fridayPage?.intro).toMatch(/18/);
     expect(fridayPage?.intro).toMatch(/20/);
+    expect(fridayPage?.intro).not.toMatch(/\.$/);
     expect(sundayPage?.intro).toContain(formatWeekendRangeLabel(madridWeekendRange(sunday)));
     expect(sundayPage?.intro).not.toMatch(/18 de septiembre/);
+    expect(sundayPage?.intro).not.toMatch(/\.$/);
   });
 });
 
