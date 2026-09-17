@@ -337,6 +337,11 @@ a.eyebrow:focus-visible {
 }
 .page-hero--index h1, .section-intro h1 { margin-top: .85rem; }
 .page-hero--index .lede, .section-intro .lede { margin-top: 1rem; }
+.page-hero--agenda h1 {
+  display: flex;
+  flex-direction: column;
+}
+.page-hero--agenda h1 span { white-space: nowrap; }
 .page-hero--detail h1 {
   max-width: 58rem;
   overflow-wrap: anywhere;
