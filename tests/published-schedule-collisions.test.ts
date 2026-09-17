@@ -139,12 +139,23 @@ describe('catálogo publicado tras la limpieza de duplicados de hueco exclusivo'
     expect(kavakosOrcam?.kind).toBe('conflict');
     expect(kavakosOrcam).toMatchObject({ date: '2027-05-11', time: '19:30' });
 
+    expect(catalog.events.some((event) => event.id === 'evt_fundacion_orcam_4865')).toBe(false);
+    const geometrias = catalog.events.find(
+      (event) => event.id === 'evt_auditorio_nacional_orcam_sinfonico_13_geometrias_sonoras',
+    );
+    expect(geometrias?.slug).toBe('orcam-sinfonico-13-geometrias-sonoras');
+    expect(geometrias?.slugAliases).toEqual(['geometrias-sonoras']);
+    expect(geometrias?.occurrences[0]).toMatchObject({ date: '2027-06-29', time: '19:30' });
+    expectStableCitation(geometrias?.citations.find((item) => item.sourceId === 'src_fundacion_orcam'), {
+      sourceId: 'src_fundacion_orcam',
+      url: 'https://fundacionorcam.org/conciertos/2026-27/geometrias-sonoras',
+      externalId: '4865',
+    });
     const excelentiaOrcam = collisions.find((item) =>
       item.eventIds.includes('evt_auditorio_nacional_excelentia_strauss_don_juan_y_sinfonia_5_beethoven')
-      && item.eventIds.includes('evt_fundacion_orcam_4865'),
+      && item.eventIds.includes('evt_auditorio_nacional_orcam_sinfonico_13_geometrias_sonoras'),
     );
-    expect(excelentiaOrcam?.kind).toBe('conflict');
-    expect(excelentiaOrcam).toMatchObject({ date: '2027-06-01', time: '19:30' });
+    expect(excelentiaOrcam).toBeUndefined();
   });
 
   it('reconoce la siguiente observación CNDM 23900 sobre el evento canónico', async () => {
