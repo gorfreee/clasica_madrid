@@ -16,8 +16,57 @@
     }
   ],
   "performers": [],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Ernesto Lecuona"
+    },
+    {
+      "name": "Carlos Gardel"
+    },
+    {
+      "name": "Heitor Villa-Lobos"
+    },
+    {
+      "name": "Carlos Guastavino"
+    },
+    {
+      "name": "Ennio Morricone"
+    }
+  ],
+  "works": [
+    {
+      "title": "Romanza María la O",
+      "composerName": "Ernesto Lecuona"
+    },
+    {
+      "title": "Por eso te quiero",
+      "composerName": "Ernesto Lecuona"
+    },
+    {
+      "title": "El día que me quieras",
+      "composerName": "Carlos Gardel"
+    },
+    {
+      "title": "Por una cabeza (instrumental)",
+      "composerName": "Carlos Gardel"
+    },
+    {
+      "title": "Bachianas Brasileiras",
+      "composerName": "Heitor Villa-Lobos"
+    },
+    {
+      "title": "Se equivocó la paloma",
+      "composerName": "Carlos Guastavino"
+    },
+    {
+      "title": "Piececitos de niño",
+      "composerName": "Carlos Guastavino"
+    },
+    {
+      "title": "La Misión",
+      "composerName": "Ennio Morricone"
+    }
+  ],
   "eras": [
     "twentieth"
   ],

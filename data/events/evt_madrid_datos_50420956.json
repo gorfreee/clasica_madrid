@@ -16,8 +16,48 @@
     }
   ],
   "performers": [],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Manuel de Falla"
+    },
+    {
+      "name": "Federico García Lorca"
+    }
+  ],
+  "works": [
+    {
+      "title": "Andaluza",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Cubana",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Danza ritual del fuego de El Amor Brujo",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Siete canciones populares españolas",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Anda jaleo",
+      "composerName": "Federico García Lorca"
+    },
+    {
+      "title": "Los cuatro muleros",
+      "composerName": "Federico García Lorca"
+    },
+    {
+      "title": "Las morillas de Jaén",
+      "composerName": "Federico García Lorca"
+    },
+    {
+      "title": "La tarara",
+      "composerName": "Federico García Lorca"
+    }
+  ],
   "eras": [
     "twentieth"
   ],

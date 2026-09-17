@@ -15,22 +15,56 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Cuarteto Avlós",
+      "role": "ensemble"
+    },
+    {
+      "name": "Salvador Barberá"
+    },
+    {
+      "name": "David Mata"
+    },
+    {
+      "name": "María Cámara"
+    },
+    {
+      "name": "Javier Albarés"
+    }
+  ],
   "composers": [
     {
       "name": "Johann Christian Bach"
     },
     {
-      "name": "Wolfgang Amadeus Mozart"
+      "name": "Christian Cannabich"
     },
     {
-      "name": "Christian Cannabich"
+      "name": "Wolfgang Amadeus Mozart"
     },
     {
       "name": "Georg Druschetzky"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "Cuarteto para oboe y trío de cuerda W:B60",
+      "composerName": "Johann Christian Bach"
+    },
+    {
+      "title": "Cuarteto para oboe y trío de cuerdas",
+      "composerName": "Christian Cannabich"
+    },
+    {
+      "title": "Cuarteto para oboe y cuarteto de cuerda KV 470",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Cuarteto para oboe y trío de cuerdas Nº. 4 en sol menor",
+      "composerName": "Georg Druschetzky"
+    }
+  ],
   "eras": [
     "classical"
   ],

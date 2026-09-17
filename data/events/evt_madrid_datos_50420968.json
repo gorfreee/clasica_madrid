@@ -16,8 +16,64 @@
     }
   ],
   "performers": [],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Rudolf Sieczynski"
+    },
+    {
+      "name": "Francis Poulenc"
+    },
+    {
+      "name": "Erik Satie"
+    },
+    {
+      "name": "Carl Zeller"
+    },
+    {
+      "name": "Johann Strauss II"
+    },
+    {
+      "name": "Piotr Ilich Chaikovski"
+    }
+  ],
+  "works": [
+    {
+      "title": "Viena, tú, ciudad de mis sueños",
+      "composerName": "Rudolf Sieczynski"
+    },
+    {
+      "title": "Los caminos del amor",
+      "composerName": "Francis Poulenc"
+    },
+    {
+      "title": "Yo te quiero",
+      "composerName": "Erik Satie"
+    },
+    {
+      "title": "No te enfades",
+      "composerName": "Carl Zeller"
+    },
+    {
+      "title": "Sangre vienesa",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "En medio de un ruidoso baile",
+      "composerName": "Piotr Ilich Chaikovski"
+    },
+    {
+      "title": "Vals de La Bella Durmiente para piano y violín",
+      "composerName": "Piotr Ilich Chaikovski"
+    },
+    {
+      "title": "El Danubio Azul",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Mi señor Marqués",
+      "composerName": "Johann Strauss II"
+    }
+  ],
   "eras": [
     "romantic",
     "twentieth"

@@ -15,9 +15,79 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
-  "works": [],
+  "performers": [
+    {
+      "name": "Sergio Casas",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Julián Palanca"
+    },
+    {
+      "name": "Charles Strouse"
+    },
+    {
+      "name": "John Barry"
+    },
+    {
+      "name": "Santiago Lope"
+    },
+    {
+      "name": "Gerónimo Giménez"
+    },
+    {
+      "name": "Pablo Luna"
+    },
+    {
+      "name": "Ruperto Chapí"
+    },
+    {
+      "name": "Agustín Lara"
+    },
+    {
+      "name": "Ignacio Hidalgo"
+    }
+  ],
+  "works": [
+    {
+      "title": "Goya",
+      "composerName": "Julián Palanca"
+    },
+    {
+      "title": "Highlights From “Annie”",
+      "composerName": "Charles Strouse"
+    },
+    {
+      "title": "Memorias de África",
+      "composerName": "John Barry"
+    },
+    {
+      "title": "Dauder",
+      "composerName": "Santiago Lope"
+    },
+    {
+      "title": "La Torre del Oro",
+      "composerName": "Gerónimo Giménez"
+    },
+    {
+      "title": "Danza del Fuego",
+      "composerName": "Pablo Luna"
+    },
+    {
+      "title": "La Revoltosa",
+      "composerName": "Ruperto Chapí"
+    },
+    {
+      "title": "Madrid",
+      "composerName": "Agustín Lara"
+    },
+    {
+      "title": "De la Villa y Corte",
+      "composerName": "Ignacio Hidalgo"
+    }
+  ],
   "eras": [
     "romantic"
   ],

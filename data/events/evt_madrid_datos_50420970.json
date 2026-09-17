@@ -16,8 +16,17 @@
     }
   ],
   "performers": [],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Camille Saint-Saëns"
+    }
+  ],
+  "works": [
+    {
+      "title": "Carnaval de los animales",
+      "composerName": "Camille Saint-Saëns"
+    }
+  ],
   "eras": [
     "romantic"
   ],
