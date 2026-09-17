@@ -4,7 +4,7 @@ import FilterForm from '../components/FilterForm.astro';
 import AgendaList from '../components/AgendaList.astro';
 import EmptyState from '../components/EmptyState.astro';
 import Eyebrow from '../components/Eyebrow.astro';
-import HeroMotif from '../components/HeroMotif.astro';
+import PageHero from '../components/PageHero.astro';
 import { HOME_TITLE } from '../lib/presentation/constants.ts';
 import { loadAgendaPage } from '../lib/presentation/site.ts';
 import { serializeJsonForScript } from '../lib/util/json-script.ts';
@@ -13,14 +13,11 @@ const model = await loadAgendaPage(Astro.url);
 ---
 
 <Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath} jsonLd={model.jsonLd}>
-  <header class="agenda-intro">
-    <div class="agenda-intro__copy">
-      <Eyebrow label="Agenda" />
-      <h1>{HOME_TITLE}</h1>
-      <p class="lede">De las grandes salas a los pequeños espacios, todos los conciertos de música clásica reunidos en una sola agenda</p>
-    </div>
-    <HeroMotif variant="agenda" class="agenda-intro__motif" />
-  </header>
+  <PageHero layout="index" motif="agenda">
+    <Eyebrow label="Agenda" />
+    <h1>{HOME_TITLE}</h1>
+    <p class="lede">De las grandes salas a los pequeños espacios, todos los conciertos de música clásica reunidos en una sola agenda</p>
+  </PageHero>
 
   {
     model.isEmptyCatalog ? (

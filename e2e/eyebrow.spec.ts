@@ -12,13 +12,13 @@ const LEGACY_EYEBROWS = [
 test.describe('eyebrow de sección y retorno', () => {
   test('las páginas de sección muestran una etiqueta estática, sin enlace', async ({ page }) => {
     await page.goto('/');
-    const agenda = page.locator('.agenda-intro .eyebrow');
+    const agenda = page.locator('.page-hero--agenda .eyebrow');
     await expect(agenda).toHaveText('Agenda');
     await expect(agenda).toHaveCount(1);
     expect(await agenda.evaluate((element) => element.tagName)).toBe('P');
 
     await page.goto('/lugares/');
-    const venues = page.locator('.section-intro .eyebrow');
+    const venues = page.locator('.page-hero--venues .eyebrow');
     await expect(venues).toHaveText('Lugares');
     expect(await venues.evaluate((element) => element.tagName)).toBe('P');
 
@@ -30,22 +30,22 @@ test.describe('eyebrow de sección y retorno', () => {
 
   test('la ficha de evento vuelve a la agenda', async ({ page }) => {
     await page.goto('/eventos/excelentia-noches-en-los-jardines-de-espana-y-concierto-de-aranjuez/');
-    const back = page.locator('.detail-hero a.eyebrow');
+    const back = page.locator('.page-hero--event a.eyebrow');
     await expect(back).toHaveText(/←\s*Agenda/);
     await expect(back).toHaveAttribute('href', '/');
     await back.click();
     await expect(page).toHaveURL('/');
-    await expect(page.locator('.agenda-intro .eyebrow')).toHaveText('Agenda');
+    await expect(page.locator('.page-hero--agenda .eyebrow')).toHaveText('Agenda');
   });
 
   test('la ficha de lugar vuelve al índice de lugares', async ({ page }) => {
     await page.goto('/lugares/basilica-pontificia-de-san-miguel/');
-    const back = page.locator('.detail-hero a.eyebrow');
+    const back = page.locator('.page-hero--venue a.eyebrow');
     await expect(back).toHaveText(/←\s*Lugares/);
     await expect(back).toHaveAttribute('href', '/lugares/');
     await back.click();
     await expect(page).toHaveURL(/\/lugares\/?$/);
-    await expect(page.locator('.section-intro .eyebrow')).toHaveText('Lugares');
+    await expect(page.locator('.page-hero--venues .eyebrow')).toHaveText('Lugares');
   });
 
   test('el eyebrow queda a la misma altura en todas las páginas', async ({ page }) => {
@@ -55,17 +55,17 @@ test.describe('eyebrow de sección y retorno', () => {
       { width: 390, height: 844 },
     ] as const;
     const pages = [
-      { path: '/', selector: '.agenda-intro .eyebrow' },
-      { path: '/lugares/', selector: '.section-intro .eyebrow' },
+      { path: '/', selector: '.page-hero--agenda .eyebrow' },
+      { path: '/lugares/', selector: '.page-hero--venues .eyebrow' },
       { path: '/acerca-de/', selector: '.section-intro .eyebrow' },
-      { path: '/eventos/trilogia-andaluza/', selector: '.detail-hero .eyebrow' },
-      { path: '/eventos/concierto-de-mineko-kojima/', selector: '.detail-hero .eyebrow' },
+      { path: '/eventos/trilogia-andaluza/', selector: '.page-hero--event .eyebrow' },
+      { path: '/eventos/concierto-de-mineko-kojima/', selector: '.page-hero--event .eyebrow' },
       {
         path: '/eventos/excelentia-noches-en-los-jardines-de-espana-y-concierto-de-aranjuez/',
-        selector: '.detail-hero .eyebrow',
+        selector: '.page-hero--event .eyebrow',
       },
-      { path: '/lugares/teatro-real/', selector: '.detail-hero .eyebrow' },
-      { path: '/lugares/basilica-pontificia-de-san-miguel/', selector: '.detail-hero .eyebrow' },
+      { path: '/lugares/teatro-real/', selector: '.page-hero--venue .eyebrow' },
+      { path: '/lugares/basilica-pontificia-de-san-miguel/', selector: '.page-hero--venue .eyebrow' },
       { path: '/pagina-inexistente/', selector: '.error-page .eyebrow' },
     ] as const;
 

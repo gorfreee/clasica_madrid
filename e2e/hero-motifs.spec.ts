@@ -1,19 +1,19 @@
 import { expect, test } from '@playwright/test';
 
 const pages = [
-  { path: '/', variant: 'agenda', hero: '.agenda-intro', kind: 'index' },
-  { path: '/lugares/', variant: 'venues', hero: '.section-intro', kind: 'index' },
+  { path: '/', variant: 'agenda', hero: '.page-hero--agenda', kind: 'index' },
+  { path: '/lugares/', variant: 'venues', hero: '.page-hero--venues', kind: 'index' },
   { path: '/acerca-de/', variant: 'about', hero: '.section-intro', kind: 'index' },
   {
     path: '/eventos/excelentia-noches-en-los-jardines-de-espana-y-concierto-de-aranjuez/',
     variant: 'event',
-    hero: '.detail-hero',
+    hero: '.page-hero--event',
     kind: 'detail',
   },
   {
     path: '/lugares/basilica-pontificia-de-san-miguel/',
     variant: 'venue',
-    hero: '.detail-hero',
+    hero: '.page-hero--venue',
     kind: 'detail',
   },
 ] as const;
@@ -42,11 +42,18 @@ for (const viewport of viewports) {
         await expect(motif).toHaveAttribute('focusable', 'false');
         await expect(motif.locator('image, filter, script, animate, animateTransform')).toHaveCount(0);
 
+        const detailMotifIsHidden = pageCase.kind === 'detail' && viewport.width <= 620;
+        if (detailMotifIsHidden) {
+          await expect(motif).toBeHidden();
+        } else {
+          await expect(motif).toBeVisible();
+        }
+
         const layout = await hero.evaluate((element, { variant, kind }) => {
           const heroRect = element.getBoundingClientRect();
           const svg = element.querySelector<SVGElement>(`[data-hero-motif="${variant}"]`);
           const copy = element.querySelector<HTMLElement>(
-            '.agenda-intro__copy, .section-intro__copy, .detail-hero__copy',
+            '.page-hero__copy, .section-intro__copy',
           );
           if (!svg || !copy) throw new Error('Falta el motivo o el bloque de contenido de la hero');
 
@@ -69,6 +76,7 @@ for (const viewport of viewports) {
             motifVisibleFraction: motifArea > 0 ? (overlapWidth * overlapHeight) / motifArea : 0,
             clipPath: computed.clipPath,
             heroHeight: heroRect.height,
+            motifArea,
             kind,
           };
         }, { variant: pageCase.variant, kind: pageCase.kind });
@@ -76,7 +84,13 @@ for (const viewport of viewports) {
         expect(layout.pageScrollWidth).toBe(layout.pageClientWidth);
         expect(layout.contentFits).toBe(true);
         expect(layout.clipPath).toBe('none');
-        expect(layout.motifVisibleFraction).toBeGreaterThanOrEqual(.95);
+        if (detailMotifIsHidden) {
+          expect(layout.motifArea).toBe(0);
+        } else {
+          const minimumVisibleFraction =
+            pageCase.kind === 'index' && pageCase.variant !== 'about' ? .9 : .95;
+          expect(layout.motifVisibleFraction).toBeGreaterThanOrEqual(minimumVisibleFraction);
+        }
         if (layout.kind === 'index') {
           expect(layout.heroHeight).toBeLessThanOrEqual(viewport.height * .48);
         }

@@ -3,7 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import AgendaItem from '../../components/AgendaItem.astro';
 import ExternalAction from '../../components/ExternalAction.astro';
 import Eyebrow from '../../components/Eyebrow.astro';
-import HeroMotif from '../../components/HeroMotif.astro';
+import PageHero from '../../components/PageHero.astro';
 import PlaceAddress from '../../components/PlaceAddress.astro';
 import { loadVenuePage, loadVenueSlugs } from '../../lib/presentation/site.ts';
 import { VENUES_INDEX_PATH } from '../../lib/presentation/urls.ts';
@@ -25,30 +25,27 @@ if (!model) {
 
 <Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath} jsonLd={model.jsonLd}>
   <article class="detail venue-detail">
-    <header class="detail-hero detail-hero--venue">
-      <div class="detail-hero__copy">
-        <Eyebrow label="Lugares" href={VENUES_INDEX_PATH} />
-        <h1>{model.name}</h1>
-        <div class="venue-detail__practical">
-          {model.placeAddress ? (
-            <PlaceAddress address={model.placeAddress} variant="hero" />
-          ) : (
-            <p class="venue-detail__locality">{model.municipality}</p>
-          )}
-          {
-            model.officialWeb && (
-              <ExternalAction
-                variant="utility"
-                href={model.officialWeb.href}
-                label={model.officialWeb.label}
-                accessibleLabel={model.officialWeb.accessibleLabel}
-              />
-            )
-          }
-        </div>
+    <PageHero layout="detail" motif="venue">
+      <Eyebrow label="Lugares" href={VENUES_INDEX_PATH} />
+      <h1>{model.name}</h1>
+      <div class="venue-detail__practical">
+        {model.placeAddress ? (
+          <PlaceAddress address={model.placeAddress} variant="hero" />
+        ) : (
+          <p class="venue-detail__locality">{model.municipality}</p>
+        )}
+        {
+          model.officialWeb && (
+            <ExternalAction
+              variant="utility"
+              href={model.officialWeb.href}
+              label={model.officialWeb.label}
+              accessibleLabel={model.officialWeb.accessibleLabel}
+            />
+          )
+        }
       </div>
-      <HeroMotif variant="venue" class="detail-hero__motif" />
-    </header>
+    </PageHero>
 
     <section class="detail-section venue-programme" aria-labelledby="proximos-titulo">
       <div class="section-heading">

@@ -1,0 +1,31 @@
+---
+import HeroMotif from './HeroMotif.astro';
+
+type Layout = 'index' | 'detail';
+type Motif = 'agenda' | 'venues' | 'event' | 'venue';
+
+type Props = {
+  layout: Layout;
+  motif: Motif;
+  class?: string;
+};
+
+const { layout, motif, class: className } = Astro.props;
+---
+
+<header
+  class:list={[
+    'page-hero',
+    `page-hero--${layout}`,
+    `page-hero--${motif}`,
+    className,
+  ]}
+  data-page-hero={layout}
+>
+  <div class="page-hero__copy">
+    <slot />
+  </div>
+  <div class="page-hero__artwork" aria-hidden="true">
+    <HeroMotif variant={motif} class="page-hero__motif" />
+  </div>
+</header>
