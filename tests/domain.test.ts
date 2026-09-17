@@ -231,6 +231,7 @@ describe('modelos de presentación', () => {
       '/?from=2026-09-04&to=2026-09-06',
       '/?access=free',
     ]);
+    expect(model.shortcuts.every((shortcut) => !shortcut.href.includes('/agenda/'))).toBe(true);
     expect(model.shortcuts.map((shortcut) => shortcut.active)).toEqual([false, false]);
   });
 

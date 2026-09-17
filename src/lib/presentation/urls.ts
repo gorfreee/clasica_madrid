@@ -43,3 +43,8 @@ export const VENUES_INDEX_PATH = publicPath('/lugares');
 export const ABOUT_PATH = publicPath('/acerca-de');
 /** Internal prerendered fragment with the full upcoming agenda. Not in the sitemap. */
 export const FULL_AGENDA_FRAGMENT_PATH = publicPath('/_agenda/completa');
+
+/** Explicit SEO landing under `/agenda/{slug}/`. Not derived from query params. */
+export function agendaLandingPath(slug: string): string {
+  return publicPath(`/agenda/${slug}`);
+}

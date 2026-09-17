@@ -40,6 +40,16 @@ describe('navegación del encabezado', () => {
     expect(nav.secondaryLinks.map((link) => link.label)).toEqual(['Acerca de']);
     expect(nav.mobileMenuLinks.map((link) => link.label)).toEqual(['Lugares', 'Acerca de']);
     expect(nav.showMore).toBe(true);
+    expect(PRIMARY_NAV.concat(SECONDARY_NAV).some((item) => item.href.includes('/agenda/'))).toBe(false);
+  });
+
+  it('las landings SEO de agenda no forman parte de la navegación ni marcan Agenda como actual', () => {
+    for (const path of ['/agenda/gratis/', '/agenda/fin-de-semana/']) {
+      const nav = headerNavigation(path);
+      expect(nav.agenda).toMatchObject({ href: '/', label: 'Agenda', current: false });
+      expect(nav.desktopLinks.map((link) => link.href)).toEqual(['/lugares/']);
+      expect(nav.secondaryLinks.map((link) => link.href)).toEqual(['/acerca-de/']);
+    }
   });
 
   it('marca Acerca de como activa dentro de Más y del menú móvil', () => {

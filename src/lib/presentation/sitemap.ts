@@ -2,6 +2,7 @@ import type { SitemapItem } from '@astrojs/sitemap';
 import type { Catalog } from '../domain/catalog.ts';
 import { loadPublishedCatalog } from '../repository/load.ts';
 import { eventPublicSlugs } from '../domain/queries.ts';
+import { agendaLandingLastmods, isAgendaLandingSlug } from './agenda-landings.ts';
 import { eventPath, publicPath, venuePath, VENUES_INDEX_PATH } from './urls.ts';
 
 export async function serializeSitemapItem(item: SitemapItem): Promise<SitemapItem> {
@@ -12,7 +13,12 @@ export async function serializeSitemapItem(item: SitemapItem): Promise<SitemapIt
 
 export function sitemapPageFilter(page: string): boolean {
   const path = pathnameOf(page);
-  return !path.startsWith('/404') && !path.startsWith('/_agenda');
+  if (path.startsWith('/404') || path.startsWith('/_agenda')) return false;
+  if (path.startsWith('/agenda/')) {
+    const slug = path.slice('/agenda/'.length).replace(/\/$/, '');
+    return isAgendaLandingSlug(slug);
+  }
+  return true;
 }
 
 async function lastmodByPath(): Promise<Map<string, string>> {
@@ -22,7 +28,7 @@ async function lastmodByPath(): Promise<Map<string, string>> {
 
 let cachedLastmods: Map<string, string> | undefined;
 
-export function sitemapLastmodMap(catalog: Catalog): Map<string, string> {
+export function sitemapLastmodMap(catalog: Catalog, now = new Date()): Map<string, string> {
   const map = new Map<string, string>();
   const eventDates = catalog.events.map((event) => event.lastVerifiedAt);
   const venueDates = catalog.venues
@@ -52,6 +58,9 @@ export function sitemapLastmodMap(catalog: Catalog): Map<string, string> {
   for (const venue of catalog.venues) {
     const lastmod = maxDate([venue.lastVerifiedAt, latestByVenue.get(venue.id)]);
     if (lastmod) map.set(venuePath(venue.slug), lastmod);
+  }
+  for (const [path, lastmod] of agendaLandingLastmods(catalog, now)) {
+    map.set(path, lastmod);
   }
   return map;
 }

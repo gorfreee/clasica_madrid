@@ -1,0 +1,38 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import AgendaList from '../../components/AgendaList.astro';
+import EmptyState from '../../components/EmptyState.astro';
+import Eyebrow from '../../components/Eyebrow.astro';
+import PageHero from '../../components/PageHero.astro';
+import { loadAgendaLandingPage, listAgendaLandingSlugs } from '../../lib/presentation/site.ts';
+import { AGENDA_PATH } from '../../lib/presentation/urls.ts';
+
+export function getStaticPaths() {
+  return listAgendaLandingSlugs().map((slug) => ({ params: { slug } }));
+}
+
+const { slug } = Astro.params;
+if (!slug) {
+  throw new Error('Falta el slug de la landing de agenda');
+}
+const model = await loadAgendaLandingPage(slug);
+if (!model) {
+  throw new Error(`Landing de agenda no encontrada: ${slug}`);
+}
+---
+
+<Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath} jsonLd={model.jsonLd}>
+  <PageHero layout="index" motif="agenda">
+    <Eyebrow label="Agenda" href={AGENDA_PATH} />
+    <h1>{model.heading}</h1>
+    <p class="lede">{model.intro}</p>
+  </PageHero>
+
+  {
+    model.days.length === 0 ? (
+      <EmptyState title={model.emptyTitle} body={model.emptyBody} />
+    ) : (
+      <AgendaList days={model.days} />
+    )
+  }
+</Layout>
