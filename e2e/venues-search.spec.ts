@@ -41,7 +41,7 @@ test.describe('búsqueda de lugares', () => {
     await expect(page.locator('[data-venue-list]')).toBeHidden();
     await expect(page.locator('[data-venue-count]')).toBeHidden();
     await expect(page.locator('[data-venue-no-results]')).toHaveText(
-      'No encontramos ningún lugar para “chamberí xyz”.',
+      'No encontramos ningún lugar para “chamberí xyz”',
     );
 
     await page.getByRole('button', { name: 'Limpiar búsqueda' }).click();

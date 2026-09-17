@@ -48,7 +48,7 @@ export function buildEventSourceAction(sources: EventSourceRef[]): EventSourceAc
     label,
     description,
     isOfficial,
-    accessibleLabel: `${label}. ${description} ${opensInNewTabLabel}`,
+    accessibleLabel: `${label}. ${description}. ${opensInNewTabLabel}`,
   };
 }
 

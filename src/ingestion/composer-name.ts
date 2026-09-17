@@ -1,5 +1,5 @@
 import { normalizeText } from '../lib/domain/normalize.ts';
-import { canonicalizeArtificiallyUppercase } from './event-title.ts';
+import { canonicalizeArtificiallyUppercase, stripTrailingPeriod } from './event-title.ts';
 import { collapseWhitespace } from './html.ts';
 import { matchComposer, stripTrailingBiographicalYears } from './knowledge/composers.ts';
 import { isNonPersonComposerAttribution, isUnreliableComposerName } from './observed-cleanup.ts';
@@ -59,8 +59,9 @@ export function canonicalizeWorkList(
   items: Array<{ title: string; composerName?: string }>,
 ): Array<{ title: string; composerName?: string }> {
   return items.map((item) => {
+    const title = stripTrailingPeriod(item.title);
     const composerName = item.composerName ? canonicalizeComposerName(item.composerName) : undefined;
-    return composerName ? { title: item.title, composerName } : { title: item.title };
+    return composerName ? { title, composerName } : { title };
   });
 }
 

@@ -74,7 +74,7 @@ export const opensInNewTabLabel = 'Se abre en una pestaña nueva.';
 
 export const eventOfficialSourceActionLabel = 'Entradas e información oficial';
 export const eventOriginalSourceActionLabel = 'Ver fuente original';
-export const eventSourceActionDescription = 'Consulta precios, disponibilidad y posibles cambios.';
+export const eventSourceActionDescription = 'Consulta precios, disponibilidad y posibles cambios';
 export const venueOfficialWebLabel = 'Web oficial';
 
 export function formatSourceCitationMeta(params: {
@@ -122,7 +122,7 @@ export function venueCountLabel(count: number): string {
 }
 
 export function venueNoResultsMessage(query: string): string {
-  return `No encontramos ningún lugar para “${query}”.`;
+  return `No encontramos ningún lugar para “${query}”`;
 }
 
 export function showingOccurrenceCountLabel(shown: number, total: number): string {
@@ -131,4 +131,4 @@ export function showingOccurrenceCountLabel(shown: number, total: number): strin
 
 export const showAllAgendaLabel = 'Mostrar todos';
 
-export const fullAgendaLoadErrorMessage = 'No se ha podido cargar la agenda completa.';
+export const fullAgendaLoadErrorMessage = 'No se ha podido cargar la agenda completa';

@@ -190,6 +190,12 @@ describe('listas publicadas', () => {
       { title: 'Canción' },
     ]);
   });
+
+  it('quita el punto final decorativo de un título de obra', () => {
+    expect(
+      canonicalizeWorkList([{ title: 'El carnaval de los Animales.', composerName: 'Saint-Saëns' }]),
+    ).toEqual([{ title: 'El carnaval de los Animales', composerName: 'Camille Saint-Saëns' }]);
+  });
 });
 
 describe('NormalizedEvent → Event publicado', () => {

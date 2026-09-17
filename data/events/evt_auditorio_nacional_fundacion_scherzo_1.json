@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "evt_auditorio_nacional_fundacion_scherzo_1",
   "slug": "fundacion-scherzo",
-  "title": "Fundación Scherzo.",
+  "title": "Fundación Scherzo",
   "status": "scheduled",
   "venueId": "ven_auditorio_nacional_sala_sinfonica",
   "organizerIds": [],

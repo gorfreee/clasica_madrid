@@ -134,7 +134,18 @@ export function canonicalizeArtificiallyUppercase(value: string): string {
 }
 
 export function canonicalizeEventTitle(title: string): string {
-  return canonicalizeArtificiallyUppercase(title);
+  return stripTrailingPeriod(canonicalizeArtificiallyUppercase(title));
+}
+
+/**
+ * Drop a decorative trailing period from a title. Keep `CNDM.` and similar
+ * preserved acronyms, and do not touch ellipses.
+ */
+export function stripTrailingPeriod(value: string): string {
+  if (!/(?<!\.)\.$/u.test(value)) return value;
+  const without = value.slice(0, -1);
+  if (preservedForm(without)) return value;
+  return without;
 }
 
 export function canonicalizePerformerName(name: string): string {
