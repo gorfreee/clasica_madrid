@@ -166,15 +166,15 @@ describe('títulos y canonicals de ficha', () => {
     const index = buildVenuesIndexModel(richCatalog(), testClock);
     expect(index.canonicalPath).toBe('/lugares/');
     expect(index.title).toBe('Lugares de conciertos en Madrid');
-    expect(index.title).not.toMatch(/^Conciertos en el /);
+    expect(index.title).not.toMatch(/^Conciertos en /);
   });
 
   it('la ficha de lugar usa un title SEO genérico y deja el nombre canónico para el h1', () => {
     const page = buildVenuePageModel(richCatalog(), 'auditorio-nacional', testClock);
     expect(page?.name).toBe('Auditorio Nacional de Música');
-    expect(page?.title).toBe('Conciertos en el Auditorio Nacional de Música');
+    expect(page?.title).toBe('Conciertos en Auditorio Nacional de Música');
     expect(pageDocumentTitle(page?.title ?? '')).toBe(
-      'Conciertos en el Auditorio Nacional de Música — Clásica Madrid',
+      'Conciertos en Auditorio Nacional de Música — Clásica Madrid',
     );
     expect(pageDocumentTitle(page?.title ?? '')).not.toMatch(/Clásica Madrid.*Clásica Madrid/);
     expect(page?.description).toBe(
@@ -197,9 +197,9 @@ describe('títulos y canonicals de ficha', () => {
       testClock,
     );
     expect(teatro?.name).toBe('Teatro Real');
-    expect(teatro?.title).toBe('Conciertos en el Teatro Real');
+    expect(teatro?.title).toBe('Conciertos en Teatro Real');
     expect(pageDocumentTitle(teatro?.title ?? '')).toBe(
-      'Conciertos en el Teatro Real — Clásica Madrid',
+      'Conciertos en Teatro Real — Clásica Madrid',
     );
     expect(teatro?.description).toBe('Conciertos de música clásica en Teatro Real.');
     expect(teatro?.canonicalPath).toBe('/lugares/teatro-real/');
@@ -209,16 +209,35 @@ describe('títulos y canonicals de ficha', () => {
     const catalog = await loadCatalogFromDir(defaultDataDir());
     const teatro = buildVenuePageModel(catalog, 'teatro-real', testClock);
     expect(teatro?.name).toBe('Teatro Real');
-    expect(teatro?.title).toBe('Conciertos en el Teatro Real');
+    expect(teatro?.title).toBe('Conciertos en Teatro Real');
     expect(pageDocumentTitle(teatro?.title ?? '')).toBe(
-      'Conciertos en el Teatro Real — Clásica Madrid',
+      'Conciertos en Teatro Real — Clásica Madrid',
     );
 
     const auditorio = buildVenuePageModel(catalog, 'auditorio-nacional-de-musica', testClock);
     expect(auditorio?.name).toBe('Auditorio Nacional de Música');
-    expect(auditorio?.title).toBe('Conciertos en el Auditorio Nacional de Música');
+    expect(auditorio?.title).toBe('Conciertos en Auditorio Nacional de Música');
     expect(pageDocumentTitle(auditorio?.title ?? '')).toBe(
-      'Conciertos en el Auditorio Nacional de Música — Clásica Madrid',
+      'Conciertos en Auditorio Nacional de Música — Clásica Madrid',
+    );
+  });
+
+  it('no infiere artículo: el mismo prefijo vale para nombres femeninos', async () => {
+    const catalog = await loadCatalogFromDir(defaultDataDir());
+    const basilica = buildVenuePageModel(catalog, 'basilica-pontificia-de-san-miguel', testClock);
+    expect(basilica?.name).toBe('Basílica Pontificia de San Miguel');
+    expect(basilica?.title).toBe('Conciertos en Basílica Pontificia de San Miguel');
+    expect(basilica?.title).not.toMatch(/\ben el\b|\ben la\b/);
+    expect(pageDocumentTitle(basilica?.title ?? '')).toBe(
+      'Conciertos en Basílica Pontificia de San Miguel — Clásica Madrid',
+    );
+
+    const sala = buildVenuePageModel(catalog, 'sala-manuel-de-falla-sgae', testClock);
+    expect(sala?.name).toBe('Sala Manuel de Falla — SGAE');
+    expect(sala?.title).toBe('Conciertos en Sala Manuel de Falla — SGAE');
+    expect(sala?.title).not.toMatch(/\ben el\b|\ben la\b/);
+    expect(pageDocumentTitle(sala?.title ?? '')).toBe(
+      'Conciertos en Sala Manuel de Falla — SGAE — Clásica Madrid',
     );
   });
 });

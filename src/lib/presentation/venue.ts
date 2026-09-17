@@ -133,7 +133,7 @@ export function buildVenuePageModel(
 
 /** SEO / document title for a venue ficha. Layout appends the site brand. */
 export function venueDocumentTitle(venueName: string): string {
-  return `Conciertos en el ${venueName}`;
+  return `Conciertos en ${venueName}`;
 }
 
 export function venueUpcomingSummary(count: number): string {
