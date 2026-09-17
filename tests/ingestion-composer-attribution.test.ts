@@ -336,3 +336,57 @@ describe('líneas de programa WORK de COMPOSER', () => {
     ).toEqual(['Johannes Brahms', 'Enrique de Andrés Martínez', 'Antonín Dvořák']);
   });
 });
+
+function composerNames(text: string): string[] {
+  return attributedProgrammeComposers(text).map((item) => item.name);
+}
+
+describe('regresiones de atribución débil (PR #253)', () => {
+  it('no promociona un elenco Character: Intérprete ni varios créditos de La Traviata', () => {
+    expect(composerNames('Violetta Valery: Letitia Vitelaru')).toEqual([]);
+    expect(isComposerMentionAttributed('Violetta Valery', 'Violetta Valery: Letitia Vitelaru')).toBe(false);
+
+    const traviata = [
+      'Violetta Valery: Letitia Vitelaru',
+      'Alfredo Germont: Juan Francisco Elvira',
+      'Flora Bervoix: Marifé Nogales',
+      'Giorgio Germont: Damián del Castillo',
+    ].join('\n');
+    expect(composerNames(traviata)).toEqual([]);
+    expect(composerNames(traviata).some((name) => /valery|germont|bervoix|traviata/i.test(name))).toBe(false);
+  });
+
+  it('un X: Y genérico no basta para un desconocido; Bach: Suite y Name — obra sí', () => {
+    expect(composerNames('Reina de la Noche: Elena de la Merced')).toEqual([]);
+    expect(composerNames('Invitatorio de Difuntos: Francisco Corselli')).toEqual([]);
+    expect(composerNames('Francisco Corselli: Invitatorio de Difuntos')).toEqual(['Francisco Corselli']);
+    expect(composerNames('Nacional de España: Isabel Rubio')).toEqual([]);
+    expect(composerNames('Encargo de la Fil NY: Sinfonía núm. 5')).toEqual([]);
+    expect(composerNames('Bach: Suite n.º 1')).toEqual(['Johann Sebastian Bach']);
+    expect(composerNames('Maddalena Casulana — Morir non può il mio cuore')).toEqual(['Maddalena Casulana']);
+  });
+
+  it('no toma instrumentos, títulos de obra ni lugares como composers por WORK de COMPOSER débil', () => {
+    expect(composerNames('Sonata de Violón')).toEqual([]);
+    expect(composerNames('Fantasía sobre motivos de La Traviata')).toEqual([]);
+    expect(composerNames('Sinfonía de la Joven Orquesta Nacional de España')).toEqual([]);
+    expect(composerNames('Sonata de Santa María del Pi')).toEqual([]);
+    expect(composerNames('Cantata de Risueña el Aurora')).toEqual([]);
+    expect(composerNames('Risueña el Aurora — Folías de España')).toEqual([]);
+    expect(composerNames('Encargo de la Fil NY')).toEqual([]);
+  });
+
+  it('sigue aceptando desconocidos en marcos inequívocos de obra', () => {
+    expect(composerNames('"Sobre los reflejos de un espacio habitado" de Alberto Hijón Domarco (obra de estreno)')).toEqual([
+      'Alberto Hijón Domarco',
+    ]);
+    expect(composerNames('“Érase una vez en el bosque de Tórtola de Henares” de Enrique de Andrés Martínez')).toEqual([
+      'Enrique de Andrés Martínez',
+    ]);
+    expect(composerNames('Sinfonía nº 1 “The Lord of the Rings” de Johan de Meij')).toEqual(['Johan de Meij']);
+    expect(composerNames('Concierto para Contrabajo en fa sostenido menor op. 3 de Koussevitzky')).toEqual([
+      'Koussevitzky',
+    ]);
+    expect(composerNames('Maddalena Casulana — Morir non può il mio cuore')).toEqual(['Maddalena Casulana']);
+  });
+});

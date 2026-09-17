@@ -11,7 +11,10 @@ import {
 } from './knowledge/composers.ts';
 import type { ObservedComposer } from './observed.ts';
 import {
+  isEditorialNoteLegend,
   looksLikeComposerLine,
+  looksLikeEnsembleName,
+  looksLikeInstrumentOnly,
   looksLikeNonWorkCredit,
   looksLikeTextCredit,
   looksLikeUnequivocalWorkLine,
@@ -26,9 +29,21 @@ import {
  * only names in an attribution frame of the current programme are promoted.
  */
 
+/** Structural provenance of an attributed name. Used internally to require
+ * stronger evidence for unknown spellings than for knowledge-base hits. */
+export type AttributionFrame =
+  | 'labelled-credit'
+  | 'repertoire-list'
+  | 'composer-heading'
+  | 'quoted-work-de'
+  | 'work-de'
+  | 'dash-name-work'
+  | 'colon-name-work';
+
 export type AttributedComposerName = {
   name: string;
   evidence: string;
+  frame: AttributionFrame;
 };
 
 /** Where the text came from. Editorial titles are not programme copy. */
@@ -43,7 +58,7 @@ const MUSICA_CREDIT =
   /(?<!\bde\s)\bm[uú]sica(?:\s+y\s+(?:libreto|texto|letra))?\s+(?:de|del|:)\s*:?\s*([^;\n]+)/giu;
 const COMPOSICION_CREDIT = /\bcomposici[oó]n(?:es)?\s+(?:de|del|:)\s*:?\s*([^;\n]+)/giu;
 const NAME_WORK_SEPARATOR =
-  /(?:^|[\n;]|[.!?]\s)([^\n;]{2,80}?)(?:\s+(?:—|–|\s-\s)|\s*(?<!\d):(?!\d))\s+([^\n]+?)(?=\.(?:\s+\p{Lu})|$)/gmu;
+  /(?:^|[\n;]|[.!?]\s)([^\n;]{2,80}?)(\s+(?:—|–|\s-\s)|\s*(?<!\d):(?!\d))\s+([^\n]+?)(?=\.(?:\s+\p{Lu})|$)/gmu;
 const COMPOSER_LABEL = /\bcompositor(?:a|es)?\s*:\s*([^.\n]+)/giu;
 const AUTORES_COMO =
   /\b(?:autores?|compositores?)\b(?:(?![.]).){0,80}?\bcomo\s+(.+?)(?:\s*,\s*cuyas|\s*,\s*que|\.|$)/giu;
@@ -57,7 +72,11 @@ const LIST_SPLIT = /\s*[-–—·•]\s*/u;
 const NAME_LIST_SPLIT = /\s*,\s*|\s+y\s+|\s+e\s+(?=\p{Lu})/u;
 const NAME_PARTICLE = /^(?:de|del|des|la|las|los|le|van|von|di|da|el)$/i;
 const WORK_GENRE =
-  /\b(?:concierto|concerto|sinfon[ií]a|symphony|sonata|suite|quinteto|cuarteto|tr[ií]o|obertura|ouverture|r[eé]quiem|misa|toccata|fuga|preludio|nocturne|mazurka|scherzo|impromptu|variaciones|cantata|oratorio|fantas[ií]a)\b/i;
+  /\b(?:concierto|concerto|sinfon[ií]a|symphony|sonata|suite|quinteto|cuarteto|tr[ií]o|obertura|ouverture|r[eé]quiem|misa|invitatorio|toccata|fuga|preludio|nocturne|mazurka|scherzo|impromptu|variaciones|cantata|oratorio|fantas[ií]a)\b/i;
+const ENSEMBLE_TAIL =
+  /\b(?:orquesta|orquestra|orchestra|orchester|coro|choir|filarm[oó]nica|ensemble|ensamble|camerata|cuarteto|quinteto|tr[ií]o)\s*$/i;
+const LEADING_ARTICLE = /^(?:el|la|los|las|le|les|the|a|an|un|una|der|die|das)$/i;
+const BARE_ARTICLE = /^(?:el|la|los|las)$/i;
 const CATALOG = /\b(?:bwv|hwv|hob\.?|op\.?\s*\d|opus\s+\d|d\s*\d{2,}|k\.?\s*\d|kv\.?\s*\d)\b/i;
 
 const NON_COMPOSER_ROLES = [
@@ -155,6 +174,7 @@ export function attributedProgrammeComposers(
       continue;
     }
     const name = collapseWhitespace(stripTrailingBiographicalYears(span.name) || span.name);
+    if (span.frame === 'colon-name-work') continue;
     if (!looksLikePromotableUnknownName(name, span.evidence)) continue;
     const key = foldName(name);
     if (!key || seen.has(key)) continue;
@@ -173,11 +193,7 @@ export function isComposerMentionAttributed(name: string, evidence: string): boo
   const sourceEvidence = collapseWhitespace(evidence);
   if (!name.trim() || !sourceEvidence) return false;
   if (clearlyNonComposerContext(name, sourceEvidence)) return false;
-
-  for (const span of extractAttributedComposerNames(sourceEvidence, 'programme')) {
-    if (sameComposerMention(name, span.name)) return true;
-  }
-  return false;
+  return attributedProgrammeComposers(sourceEvidence).some((item) => sameComposerMention(name, item.name));
 }
 
 export function clearlyNonComposerContext(name: string, evidence: string): boolean {
@@ -214,11 +230,11 @@ function fromLabelledCredits(text: string): AttributedComposerName[] {
       const repertoire = parseRepertoireList(rawList);
       if (repertoire) {
         const listEvidence = collapseWhitespace(rawList);
-        for (const name of repertoire) found.push({ name, evidence: listEvidence || evidence });
+        for (const name of repertoire) found.push({ name, evidence: listEvidence || evidence, frame: 'labelled-credit' });
         continue;
       }
       for (const name of splitNameList(rawList)) {
-        found.push({ name, evidence });
+        found.push({ name, evidence, frame: 'labelled-credit' });
       }
     }
   }
@@ -235,14 +251,19 @@ function fromWorkDeComposer(
     if (
       PERFORMER_LINE.test(line) ||
       looksLikeTextCredit(line) ||
-      looksLikeNonWorkCredit(line.replace(/^\*+\s*/, ''))
+      looksLikeNonWorkCredit(line.replace(/^\*+\s*/, '')) ||
+      isEditorialNoteLegend(line)
     ) {
       continue;
     }
     if (isLabelledCreditLine(line)) continue;
     const parsed = parseWorkDeComposerLine(line);
     if (!parsed) continue;
-    found.push({ name: parsed.composerName, evidence: line });
+    found.push({
+      name: parsed.composerName,
+      evidence: line,
+      frame: parsed.quoted ? 'quoted-work-de' : 'work-de',
+    });
   }
   return found;
 }
@@ -254,14 +275,17 @@ function isLabelledCreditLine(line: string): boolean {
   );
 }
 
-function parseWorkDeComposerLine(line: string): { title: string; composerName: string } | undefined {
+function parseWorkDeComposerLine(
+  line: string,
+): { title: string; composerName: string; quoted: boolean } | undefined {
   const cleaned = stripTrailingWorkAnnotation(line);
   if (!cleaned) return undefined;
   const quoted = parseQuotedWorkDeAuthor(cleaned);
-  if (quoted) return quoted;
+  if (quoted) return { ...quoted, quoted: true };
   const known = parseExplicitTitleAuthorWork(cleaned);
-  if (known) return known;
-  return parseUnknownWorkDeAuthor(cleaned);
+  if (known) return { ...known, quoted: false };
+  const unknown = parseUnknownWorkDeAuthor(cleaned);
+  return unknown ? { ...unknown, quoted: false } : undefined;
 }
 
 function parseQuotedWorkDeAuthor(line: string): { title: string; composerName: string } | undefined {
@@ -289,6 +313,7 @@ function parseUnknownWorkDeAuthor(line: string): { title: string; composerName: 
     const rawTitle = collapseWhitespace(line.slice(0, match.index));
     const rawAuthor = collapseWhitespace(stripTrailingWorkAnnotation(line.slice(match.index + match[0].length)));
     if (!rawTitle || !rawAuthor) continue;
+    if (/(?<!\d):\s+\S/.test(rawTitle)) continue;
     if (TITLE_CONTEXTUAL_DE.test(`${rawTitle} `)) continue;
     if (CREDIT_LABEL_TITLE.test(rawTitle) || looksLikeEditorialMaterial(rawTitle)) continue;
     if (looksLikeEditorialMaterial(rawAuthor) || looksLikeWorkTitle(rawAuthor)) continue;
@@ -299,6 +324,7 @@ function parseUnknownWorkDeAuthor(line: string): { title: string; composerName: 
     if (!title || !composerName) continue;
     if (CREDIT_LABEL_TITLE.test(title) || looksLikeEditorialMaterial(title)) continue;
     if (BARE_CONCERT_LABEL.test(title)) continue;
+    if (looksLikeEnsembleName(composerName)) continue;
     if (clearlyNonComposerContext(composerName, line)) continue;
 
     const strongWork = looksLikeUnequivocalWorkLine(title) || looksLikeWorkTitle(title);
@@ -309,6 +335,10 @@ function parseUnknownWorkDeAuthor(line: string): { title: string; composerName: 
     ) continue;
 
     const contentWords = composerName.split(/\s+/).filter((word) => !NAME_PARTICLE.test(word));
+    if (!matchComposer(composerName) && contentWords.length < 2 && /\s+(?:de|by)\s+/i.test(title)) {
+      continue;
+    }
+
     const score = matchComposer(composerName) ? 3 : contentWords.length >= 2 ? 2 : 1;
     if (!best || score > best.score) best = { title, composerName, score };
     if (score >= 2) break;
@@ -334,6 +364,9 @@ function completeAuthorFromTitle(title: string, author: string): { title: string
   if (!looksLikeUnequivocalWorkLine(remainderTitle) && !looksLikeWorkTitle(remainderTitle)) {
     return { title, author };
   }
+  if (looksLikeEnsembleName(remainderTitle) || ENSEMBLE_TAIL.test(remainderTitle)) {
+    return { title, author };
+  }
   const authorWithGiven = particles.length > 0
     ? [given, ...particles, ...authorWords].join(' ')
     : [given, 'de', ...authorWords].join(' ');
@@ -342,7 +375,7 @@ function completeAuthorFromTitle(title: string, author: string): { title: string
 
 function looksLikeAbsorbableGivenName(word: string): boolean {
   if (WORK_GENRE.test(word) || looksLikeWorkTitle(word) || looksLikeEditorialMaterial(word)) return false;
-  if (CREDIT_LABEL_TITLE.test(word) || looksLikeNonWorkCredit(word)) return false;
+  if (CREDIT_LABEL_TITLE.test(word) || looksLikeNonWorkCredit(word) || looksLikeInstrumentOnly(word)) return false;
   if (isNameInitialToken(word)) return true;
   return /^\p{Lu}[\p{Ll}’'-]{1,19}$/u.test(word);
 }
@@ -388,9 +421,11 @@ function fromNameWorkSeparators(
       /^(?:programa|repertorio|obras?)\s*:\s*/i,
       '',
     );
-    const right = collapseWhitespace(match[2] ?? '');
+    const separator = match[2] ?? '';
+    const right = collapseWhitespace(match[3] ?? '');
     if (!left || !right) continue;
     const evidence = collapseWhitespace(match[0] ?? '');
+    const frame: AttributionFrame = /:/.test(separator) ? 'colon-name-work' : 'dash-name-work';
     if (isAttributionFrameLeft(left)) {
       found.push(...namesFromLabelledRight(right, evidence));
       continue;
@@ -398,8 +433,8 @@ function fromNameWorkSeparators(
     if (parseRepertoireList(`${left} — ${right}`)) continue;
     if (clearlyNonComposerContext(left, evidence)) continue;
     if (isPerformerRole(left) || isPerformerRole(right)) continue;
-    if (!matchComposer(left) && !acceptableUnknownNameWork(left, right, surface)) continue;
-    found.push({ name: stripTrailingBiographicalYears(left) || left, evidence });
+    if (!matchComposer(left) && !acceptableUnknownNameWork(left, right, surface, frame)) continue;
+    found.push({ name: stripTrailingBiographicalYears(left) || left, evidence, frame });
   }
   return found;
 }
@@ -408,22 +443,25 @@ function namesFromLabelledRight(rawList: string, evidence: string): AttributedCo
   const repertoire = parseRepertoireList(rawList);
   if (repertoire) {
     const listEvidence = collapseWhitespace(rawList);
-    return repertoire.map((name) => ({ name, evidence: listEvidence || evidence }));
+    return repertoire.map((name) => ({ name, evidence: listEvidence || evidence, frame: 'labelled-credit' }));
   }
-  return splitNameList(clipLabelledList(rawList)).map((name) => ({ name, evidence }));
+  return splitNameList(clipLabelledList(rawList)).map((name) => ({ name, evidence, frame: 'labelled-credit' }));
 }
 
 /**
- * Unknown `X: Y` / `X — Y` is a composer-work pair only with a person-like
- * left and a repertoire-like right. Editorial titles never invent an unknown
- * name from a generic colon. Known names (`Bach: Suite`) stay attributed.
+ * Unknown `X — Y` is a composer-work pair only with a person-like left and a
+ * repertoire-like right. A generic `X: Y` is too ambiguous (character:cast,
+ * work:composer reversed, labelled credits) to invent an unknown name.
+ * Known names (`Bach: Suite`) stay attributed via `matchComposer`.
  */
 function acceptableUnknownNameWork(
   left: string,
   right: string,
   surface: AttributionSurface,
+  frame: AttributionFrame,
 ): boolean {
   if (surface === 'title') return false;
+  if (frame === 'colon-name-work') return false;
   if (looksLikeEditorialMaterial(left) || looksLikeEditorialMaterial(right)) return false;
   if (!looksLikeRepertoireRightHand(right)) return false;
   return looksLikePromotableUnknownName(left, `${left} — ${right}`);
@@ -433,14 +471,15 @@ function looksLikeRepertoireRightHand(right: string): boolean {
   if (looksLikeUnequivocalWorkLine(right) || looksLikeWorkTitle(right)) return true;
   if (parseRepertoireList(right)) return true;
   const words = collapseWhitespace(right).split(/\s+/).filter(Boolean);
-  return words.length >= 2 && !isPerformerRole(right);
+  if (words.length < 2 || isPerformerRole(right) || looksLikePersonNameSlot(right)) return false;
+  return true;
 }
 
 function looksLikeEditorialMaterial(value: string): boolean {
   const folded = foldName(value);
   if (!folded) return true;
   if (NON_PERSON_HEAD.test(folded) || ORDINAL_FESTIVAL.test(folded)) return true;
-  if (/^(?:funciones|duracion|precio|edad recomendada|abonos|entradas|produccion)\b/.test(folded)) {
+  if (/^(?:funciones|duracion|precio|edad recomendada|abonos|entradas|produccion|encargo|estreno)\b/.test(folded)) {
     return true;
   }
   return false;
@@ -456,7 +495,7 @@ function fromRepertoireLists(text: string): AttributedComposerName[] {
     const names = parseRepertoireList(line);
     if (!names) continue;
     const evidence = collapseWhitespace(line);
-    for (const name of names) found.push({ name, evidence });
+    for (const name of names) found.push({ name, evidence, frame: 'repertoire-list' });
   }
   return found;
 }
@@ -470,7 +509,7 @@ function fromComposerHeadings(text: string): AttributedComposerName[] {
     if (!next || !looksLikeUnequivocalWorkLine(next)) continue;
     if (!looksLikeComposerLine(line) && !matchComposer(stripTrailingBiographicalYears(line))) continue;
     const name = stripTrailingBiographicalYears(line) || line;
-    found.push({ name, evidence: `${line} ${next}` });
+    found.push({ name, evidence: `${line} ${next}`, frame: 'composer-heading' });
   }
   return found;
 }
@@ -509,9 +548,14 @@ function looksLikeWorkTitle(value: string): boolean {
 
 function looksLikePromotableUnknownName(name: string, evidence: string): boolean {
   if (!name || isPerformerRole(name) || looksLikeWorkTitle(name)) return false;
-  if (looksLikeEditorialMaterial(name)) return false;
+  if (looksLikeEditorialMaterial(name) || looksLikeInstrumentOnly(name) || looksLikeEnsembleName(name)) {
+    return false;
+  }
   if (ATTRIBUTION_FRAME_LEFT.test(name)) return false;
   if (/^(?:y|e)\s+/i.test(name)) return false;
+  if (looksLikeArticleWorkTitle(name) || looksLikeSaintPlaceName(name) || hasBareArticleParticle(name)) {
+    return false;
+  }
   const words = name.split(/\s+/).filter(Boolean);
   if (words.length === 0 || words.length > 6) return false;
   const nameLike = words.every((word, index) => {
@@ -526,6 +570,37 @@ function looksLikePromotableUnknownName(name: string, evidence: string): boolean
     Boolean(parseRepertoireList(evidence)) ||
     strongWorkDeComposerSurname(evidence, name)
   );
+}
+
+function looksLikePersonNameSlot(value: string): boolean {
+  if (looksLikeWorkTitle(value) || looksLikeUnequivocalWorkLine(value) || looksLikeEditorialMaterial(value)) {
+    return false;
+  }
+  const words = collapseWhitespace(value).split(/\s+/).filter(Boolean);
+  if (words.length < 2 || words.length > 4) return false;
+  return words.every((word, index) => {
+    if (NAME_PARTICLE.test(word) && index > 0) return true;
+    if (isNameInitialToken(word)) return true;
+    return /^\p{Lu}[\p{L}.'’\-]*$/u.test(word);
+  });
+}
+
+function looksLikeArticleWorkTitle(name: string): boolean {
+  const words = name.split(/\s+/).filter(Boolean);
+  return words.length === 2 && LEADING_ARTICLE.test(words[0] ?? '');
+}
+
+function looksLikeSaintPlaceName(name: string): boolean {
+  return /^sant[ao]s?\b/iu.test(name) && /\b(?:de|del|de\s+la|de\s+los|de\s+las)\b/iu.test(name);
+}
+
+function hasBareArticleParticle(name: string): boolean {
+  const words = name.split(/\s+/).filter(Boolean);
+  for (let index = 1; index < words.length; index += 1) {
+    if (!BARE_ARTICLE.test(words[index] ?? '')) continue;
+    if (!/^(?:de|del)$/i.test(words[index - 1] ?? '')) return true;
+  }
+  return false;
 }
 
 function isNameInitialToken(word: string): boolean {

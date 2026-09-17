@@ -18,7 +18,7 @@ const MOVEMENT = /^(?:x{0,3}(?:ix|iv|v?i{0,3})|[1-9]\d*)\.\s*\S+/i;
 const CATALOG_ONLY =
   /^(?:(?:op(?:us)?|bwv|hwv|hob\.?|k(?:v)?\.?|woo)\s*\.?\s*\d+[a-z]?)(?:\s*\([^)]*\d{3,4}[^)]*\))?\s*$/i;
 const WORK_GENRE =
-  /\b(?:concierto|concerto|sinfon[ií]a|symphony|sonata|suite|quinteto|cuarteto|cuartet|tr[ií]o|obertura|ouverture|r[eé]quiem|misa|missa|toccata|fuga|fugue|preludio|pr[eé]lude|nocturne|mazurka|scherzo|impromptu|variaciones|variations|cantata|oratorio|fantas[ií]a|romance|divertimento|polonesa|polonaise|cancionero)\b/i;
+  /\b(?:concierto|concerto|sinfon[ií]a|symphony|sonata|suite|quinteto|cuarteto|cuartet|tr[ií]o|obertura|ouverture|r[eé]quiem|misa|missa|invitatorio|toccata|fuga|fugue|preludio|pr[eé]lude|nocturne|mazurka|scherzo|impromptu|variaciones|variations|cantata|oratorio|fantas[ií]a|romance|divertimento|polonesa|polonaise|cancionero)\b/i;
 const MONTH =
   'enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre';
 const SCHEDULE_NOTICE = new RegExp(
@@ -26,7 +26,7 @@ const SCHEDULE_NOTICE = new RegExp(
   'i',
 );
 const INSTRUMENT_ONLY =
-  /^(?:violines|viol[ií]n|violas?|violonchelos?|cellos?|contrabajos?|tenores|bajos|sopranos?|mezzosopranos?|bar[ií]tonos?|pianos?|flautas?|oboes?|clarinetes?|fagotes?|trompas?|trompetas?|arpas?|claves?|percusi[oó]n|bater[ií]a|directores?|directora|direcci[oó]n)$/i;
+  /^(?:violines|viol[ií]n|viol[oó]n(?:es)?|violas?|violonchelos?|cellos?|contrabajos?|tenores|bajos|sopranos?|mezzosopranos?|bar[ií]tonos?|pianos?|flautas?|oboes?|clarinetes?|fagotes?|trompas?|trompetas?|arpas?|claves?|percusi[oó]n|bater[ií]a|directores?|directora|direcci[oó]n)$/i;
 const ENSEMBLE =
   /\b(?:orquesta|orquestra|orchestra|orchester|coro|choir|escolan[ií]a|ensemble|ensamble|camerata|cuarteto|quinteto|tr[ií]o|agrupaci[oó]n|grupo\s+de\s+m[uú]sica|sociedad coral|capella|cappella|chapelle|ballet)\b/i;
 const ENSEMBLE_SUBJECT =
@@ -254,21 +254,30 @@ export function isNonPersonComposerAttribution(name: string): boolean {
 }
 
 /**
- * CNDM/Auditorio footnote calls attached to a title: `*`, `**`, `*+`, `**+`,
- * `ø+`, `ø+1`. Only when they sit at the end of the title or immediately
- * before trailing parentheticals, so musical punctuation in the middle of a
- * title is left alone.
+ * CNDM/Auditorio footnote markers: `*`, `**`, `*+`, `**+`, `ø+`, `ø+1`.
+ * Shared by trailing title-calls and standalone legend lines so `*+ Estreno…`
+ * cannot slip through as a work.
  */
-const EDITORIAL_NOTE_CALL = /\s+(?:\*+\+?|ø\+)\d*(?=\s*(?:\([^)]*\)\s*)*$)/u;
+const EDITORIAL_NOTE_MARKERS = String.raw`\*+\+?|ø\+`;
+const EDITORIAL_NOTE_CALL = new RegExp(
+  String.raw`\s+(?:${EDITORIAL_NOTE_MARKERS})\d*(?=\s*(?:\([^)]*\)\s*)*$)`,
+  'u',
+);
+const EDITORIAL_NOTE_LEGEND = new RegExp(String.raw`^(?:${EDITORIAL_NOTE_MARKERS})\d*`, 'u');
 
 /** Strip source footnote markers from a work title. */
 export function stripEditorialNoteMarkers(text: string): string {
   return text.replace(EDITORIAL_NOTE_CALL, '').replace(/\*+\s*$/u, '').replace(/\s+/g, ' ').trim();
 }
 
-/** A line that is itself a footnote legend (`* Estreno`, `ø+ Recuperación…`). */
+/** A line that is itself a footnote legend (`* Estreno`, `*+ Encargo…`, `ø+ Recuperación…`). */
 export function isEditorialNoteLegend(text: string): boolean {
-  return /^(?:\*+|ø\+)\d*(?:\s+|$)/.test(text.trim());
+  return EDITORIAL_NOTE_LEGEND.test(text.trim());
+}
+
+/** Bare instrument/role labels. Never a person, ensemble or composer. */
+export function looksLikeInstrumentOnly(text: string): boolean {
+  return INSTRUMENT_ONLY.test(text.trim());
 }
 
 /** Names that must not appear as `composers[]` / `works[].composerName`. */

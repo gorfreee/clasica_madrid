@@ -9,6 +9,7 @@ import {
   looksLikeNonWorkCredit,
   looksLikeProgramHeader,
   looksLikeWorkLine,
+  isEditorialNoteLegend,
   parseExplicitTitleAuthorWork,
   stripEditorialNoteMarkers,
 } from '../src/ingestion/observed-cleanup.ts';
@@ -734,11 +735,31 @@ describe('composer knowledge base', () => {
     expect(stripEditorialNoteMarkers('Cuarteto «Americano», op. 96 (arr. David Walter)')).toBe(
       'Cuarteto «Americano», op. 96 (arr. David Walter)',
     );
+    expect(isEditorialNoteLegend('* Estreno absoluto')).toBe(true);
+    expect(isEditorialNoteLegend('** Estreno')).toBe(true);
+    expect(isEditorialNoteLegend('*+ Estreno absoluto. Encargo del CNDM')).toBe(true);
+    expect(isEditorialNoteLegend('*+ Estreno absoluto. Encargo del CNDM y el Festival de Cádiz')).toBe(true);
+    expect(isEditorialNoteLegend('**+ Recuperación')).toBe(true);
+    expect(isEditorialNoteLegend('ø+ Recuperación histórica')).toBe(true);
+    expect(isEditorialNoteLegend('ø+1 Recuperación')).toBe(true);
+    expect(isEditorialNoteLegend('*Estreno absoluto')).toBe(true);
+    expect(looksLikeWorkLine('*+ Estreno absoluto. Encargo del CNDM')).toBe(false);
+    expect(looksLikeWorkLine('*+ Estreno absoluto. Encargo del CNDM y el Festival de Cádiz')).toBe(false);
+    expect(looksLikeWorkLine('Cuarteto para saxofones, op. 126 **+ (2026)')).toBe(true);
+    expect(looksLikeWorkLine('Concertante. Cuatro miradas de Luis Cernuda, para flauta, oboe, clarinete, violín, violonchelo y clave *+ (2026)')).toBe(true);
     const composers = [{ name: 'Luis de Narvaez' }, { name: 'Sergei Prokofiev' }];
     const works = [{ title: 'Mille regretz', composerName: 'Josquin Desprez' }];
     expect(normalizeComposerList(composers)).toEqual(composers);
     expect(normalizeComposerList([{ name: 'Transcripción de Ausiàs Parejo' }])).toEqual([]);
     expect(normalizeWorkList(works)).toEqual(works);
+    expect(
+      normalizeWorkList([{ title: '*+ Estreno absoluto. Encargo del CNDM', composerName: 'Gabriel Fauré' }]),
+    ).toEqual([]);
+    expect(
+      normalizeWorkList([
+        { title: '*+ Estreno absoluto. Encargo del CNDM y el Festival de Cádiz', composerName: 'Jesús Torres' },
+      ]),
+    ).toEqual([]);
   });
 
   it('no trata una charla o un párrafo largo como intérprete', () => {

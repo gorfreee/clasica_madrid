@@ -405,6 +405,29 @@ describe('CNDM detail hydration', () => {
       { title: 'El clave bien temperado, libro I (1722)', composerName: 'Johann Sebastian Bach (1685-1750)' },
     ]);
   });
+
+  it('no publica una leyenda *+ Estreno absoluto como obra del compositor anterior', () => {
+    const event = rawEvent('23852', 'MARIO CARRO', '2026-11-20', '19:30', 'Auditorio Nacional (Cámara) | Madrid');
+    const html = `<head><link rel="canonical" href="https://cndm.inaem.gob.es/node/23852"></head>
+<div class="event-banner"><div class="event-banner__title"><a href="/node/23852">MARIO CARRO</a></div>
+<div class="event-banner__dates">19:30<br>Noviembre/26<br><strong>Vie20</strong></div>
+<div class="event-banner__detail"><p>Mario Carro, piano</p><p class="pt-3">Auditorio Nacional (Cámara) | Madrid</p></div></div>
+<div class="event-place"><h3>Auditorio Nacional (Cámara) | Madrid</h3></div>
+<div class="event-program"><h3>Programa</h3><p><strong>Mario Carro (1979)</strong><br>Étude noire V (2021)<br>*+ Estreno absoluto. Encargo del CNDM<br><strong>Jesús Torres (1965)</strong><br>Concertante. Cuatro miradas de Luis Cernuda, para flauta, oboe, clarinete, violín, violonchelo y clave *+ (2026)<br>*+ Estreno absoluto. Encargo del CNDM y el Festival de Cádiz</p></div>
+<div class="content"><p>Programa de piano contemporáneo.</p></div>
+<div class="tickets"><a>Entradas</a></div>`;
+    const patch = parseCndmDetail(event, html);
+    expect(patch.works?.some((work) => /^\*+\+?/.test(work.title) || /^estreno absoluto\. encargo/i.test(work.title))).toBe(
+      false,
+    );
+    expect(patch.works).toEqual([
+      { title: 'Étude noire V (2021)', composerName: 'Mario Carro (1979)' },
+      {
+        title: 'Concertante. Cuatro miradas de Luis Cernuda, para flauta, oboe, clarinete, violín, violonchelo y clave (2026)',
+        composerName: 'Jesús Torres (1965)',
+      },
+    ]);
+  });
 });
 
 describe('CNDM pipeline and cross-source identity', () => {
