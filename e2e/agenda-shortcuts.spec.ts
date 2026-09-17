@@ -14,6 +14,18 @@ async function expectPressed(page: Page, id: 'weekend' | 'free', pressed: boolea
 }
 
 test.describe('atajos rápidos de la agenda', () => {
+  test('Gratis y Fin de semana siguen siendo filtros de la home, no landings SEO', async ({ page }) => {
+    const weekend = madridWeekendRange();
+    await page.goto('/');
+    await expect(shortcut(page, 'free')).toHaveAttribute('href', '/?access=free');
+    await expect(shortcut(page, 'weekend')).toHaveAttribute(
+      'href',
+      `/?from=${weekend.from}&to=${weekend.to}`,
+    );
+    expect(await shortcut(page, 'free').getAttribute('href')).not.toContain('/agenda/');
+    expect(await shortcut(page, 'weekend').getAttribute('href')).not.toContain('/agenda/');
+  });
+
   test('activar Fin de semana conserva los filtros existentes y se puede desactivar', async ({ page }) => {
     const weekend = madridWeekendRange();
     await page.goto('/?q=bach&access=free');

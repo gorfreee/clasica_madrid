@@ -8,6 +8,12 @@ import {
   type FullAgendaFragmentModel,
 } from './agenda.ts';
 import {
+  buildAgendaLandingPageModel,
+  listAgendaLandingSlugs,
+  type AgendaLandingPageModel,
+  type AgendaLandingSlug,
+} from './agenda-landings.ts';
+import {
   buildEventPageModel,
   listEventPageSlugs,
   listEventStaticPaths,
@@ -28,6 +34,15 @@ export async function loadFullAgendaFragment(
   clock: Clock = systemClock,
 ): Promise<FullAgendaFragmentModel> {
   return buildFullAgendaFragmentModel(await getPublishedCatalog(), clock);
+}
+
+export { listAgendaLandingSlugs };
+
+export async function loadAgendaLandingPage(
+  slug: string,
+  clock: Clock = systemClock,
+): Promise<AgendaLandingPageModel | null> {
+  return buildAgendaLandingPageModel(await getPublishedCatalog(), slug, clock);
 }
 
 export async function loadEventPage(
@@ -60,4 +75,12 @@ export async function loadVenueSlugs(): Promise<string[]> {
   return listVenuePageSlugs(await getPublishedCatalog());
 }
 
-export type { AgendaPageModel, EventPageModel, FullAgendaFragmentModel, VenuePageModel, VenuesIndexModel };
+export type {
+  AgendaLandingPageModel,
+  AgendaLandingSlug,
+  AgendaPageModel,
+  EventPageModel,
+  FullAgendaFragmentModel,
+  VenuePageModel,
+  VenuesIndexModel,
+};

@@ -23,6 +23,7 @@ import {
   publicPath,
   publicUrl,
   venuePath,
+  agendaLandingPath,
 } from '../src/lib/presentation/urls.ts';
 import { buildVenuePageModel, buildVenuesIndexModel } from '../src/lib/presentation/venue.ts';
 import { richCatalog, testClock } from './helpers.ts';
@@ -46,6 +47,8 @@ describe('URLs públicas', () => {
     expect(publicPath('/lugares/')).toBe('/lugares/');
     expect(eventPath('carmen')).toBe('/eventos/carmen/');
     expect(venuePath('auditorio-nacional')).toBe('/lugares/auditorio-nacional/');
+    expect(agendaLandingPath('gratis')).toBe('/agenda/gratis/');
+    expect(agendaLandingPath('fin-de-semana')).toBe('/agenda/fin-de-semana/');
     expect(publicUrl('/eventos/carmen')).toBe('https://clasicamadrid.com/eventos/carmen/');
     expect(publicAssetUrl('/brand/card.png')).toBe('https://clasicamadrid.com/brand/card.png');
   });
@@ -111,6 +114,16 @@ describe('metadata de la home', () => {
       'Agenda de conciertos de música clásica en Madrid, de las grandes salas a los pequeños espacios. Fechas, lugares, intérpretes, compositores y conciertos gratuitos.',
     );
     expect(page.canonicalPath).toBe('/');
+  });
+
+  it('las URLs filtradas de la home conservan el canonical de /', () => {
+    const page = buildAgendaPageModel(
+      richCatalog(),
+      new URL('https://clasicamadrid.com/?access=free&from=2026-09-04&to=2026-09-06'),
+      testClock,
+    );
+    expect(page.canonicalPath).toBe('/');
+    expect(page.title).toBe(HOME_TITLE);
   });
 
   it('el title final de la home añade la marca una sola vez', () => {
@@ -227,13 +240,18 @@ describe('sitemap', () => {
     expect(sitemapPageFilter('https://clasicamadrid.com/404')).toBe(false);
     expect(sitemapPageFilter('https://clasicamadrid.com/_agenda/completa/')).toBe(false);
     expect(sitemapPageFilter('https://clasicamadrid.com/eventos/carmen/')).toBe(true);
+    expect(sitemapPageFilter('https://clasicamadrid.com/agenda/gratis/')).toBe(true);
+    expect(sitemapPageFilter('https://clasicamadrid.com/agenda/fin-de-semana/')).toBe(true);
+    expect(sitemapPageFilter('https://clasicamadrid.com/agenda/opera/')).toBe(false);
   });
 
   it('añade lastmod a partir de lastVerifiedAt', () => {
-    const map = sitemapLastmodMap(richCatalog());
+    const map = sitemapLastmodMap(richCatalog(), testClock.now());
     expect(map.get('/eventos/carmen/')).toBe('2026-08-20');
     expect(map.get('/')).toBe('2026-08-21');
     expect(map.get('/lugares/auditorio-nacional/')).toBe('2026-08-20');
+    expect(map.get('/agenda/gratis/')).toBe('2026-08-21');
+    expect(map.get('/agenda/fin-de-semana/')).toBe('2026-09-01');
   });
 
   it('incluye lastmod del slug histórico de un evento consolidado', () => {

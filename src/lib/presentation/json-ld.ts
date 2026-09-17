@@ -7,6 +7,34 @@ import { musicEventSchemaStatus } from './event-status.ts';
 import { formatLabels } from './labels.ts';
 import { AGENDA_PATH, eventUrl, publicUrl, venueUrl, VENUES_INDEX_PATH } from './urls.ts';
 
+export function buildCollectionPageJsonLd(params: {
+  name: string;
+  description: string;
+  path: string;
+}): Record<string, unknown>[] {
+  const url = publicUrl(params.path);
+  const siteUrl = publicUrl(AGENDA_PATH);
+  return [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: params.name,
+      description: params.description,
+      url,
+      inLanguage: 'es-ES',
+      isPartOf: {
+        '@type': 'WebSite',
+        name: SITE_NAME,
+        url: siteUrl,
+      },
+    },
+    breadcrumbList([
+      { name: 'Agenda', url: siteUrl },
+      { name: params.name, url },
+    ]),
+  ];
+}
+
 export function buildWebsiteJsonLd(): Record<string, unknown> {
   const url = publicUrl(AGENDA_PATH);
   return {

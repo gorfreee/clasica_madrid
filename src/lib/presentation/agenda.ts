@@ -165,7 +165,7 @@ export function buildAgendaPageModel(
   const upcoming = listUpcomingOccurrences(catalog, clock);
   const initial = selectInitialAgendaOccurrences(upcoming, (item) => item.occurrence.date);
   const now = clock.now();
-  const days = groupByDate(initial.map(toAgendaItem), now);
+  const days = groupAgendaDays(initial.map(toAgendaItem), now, { includeEmptyToday: true });
   const filters = parseAgendaFilters(_url?.searchParams ?? new URLSearchParams());
   return {
     title: HOME_TITLE,
@@ -200,7 +200,7 @@ export function buildFullAgendaFragmentModel(
 ): FullAgendaFragmentModel {
   const upcoming = listUpcomingOccurrences(catalog, clock);
   return {
-    days: groupByDate(upcoming.map(toAgendaItem), clock.now()),
+    days: groupAgendaDays(upcoming.map(toAgendaItem), clock.now(), { includeEmptyToday: true }),
     filterIndex: upcoming.map(toFilterable),
   };
 }
@@ -233,7 +233,16 @@ export function toAgendaItem(item: ResolvedOccurrence): AgendaItemModel {
   };
 }
 
-function groupByDate(items: AgendaItemModel[], now: Date): AgendaDayModel[] {
+export type GroupAgendaDaysOptions = {
+  /** Home agenda only: keep a visible "today" row when the first concert is later. */
+  includeEmptyToday?: boolean;
+};
+
+export function groupAgendaDays(
+  items: AgendaItemModel[],
+  now: Date,
+  options: GroupAgendaDaysOptions = {},
+): AgendaDayModel[] {
   const days: AgendaDayModel[] = [];
   const today = madridToday(now);
   const tomorrow = shiftIsoDate(today, 1);
@@ -245,7 +254,7 @@ function groupByDate(items: AgendaItemModel[], now: Date): AgendaDayModel[] {
       days.push(buildDay(item.date, [item], today, tomorrow));
     }
   }
-  if (days.length > 0 && days[0]?.date !== today) {
+  if (options.includeEmptyToday && days.length > 0 && days[0]?.date !== today) {
     days.unshift(buildDay(today, [], today, tomorrow));
   }
   return days;
