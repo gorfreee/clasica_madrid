@@ -29,29 +29,20 @@
     },
     {
       "name": "Serguéi Rajmáninov"
-    },
-    {
-      "name": "CHOPIN, Fryderyck Franciszek"
-    },
-    {
-      "name": "LISZT, Franz"
-    },
-    {
-      "name": "RACHMANINOV, Sergey"
     }
   ],
   "works": [
     {
       "title": "Sonata para piano en si bemol menor op 35",
-      "composerName": "CHOPIN, Fryderyck Franciszek"
+      "composerName": "Frédéric Chopin"
     },
     {
       "title": "Réminiscences de Norma (Reminiscencias de Norma) de V. Bellini para dos pianos S 655 (versión para piano solo)",
-      "composerName": "LISZT, Franz"
+      "composerName": "Franz Liszt"
     },
     {
       "title": "Sonata para piano núm. 2 en si bemol menor op 36 (revisión de 1931)",
-      "composerName": "RACHMANINOV, Sergey"
+      "composerName": "Serguéi Rajmáninov"
     }
   ],
   "eras": [

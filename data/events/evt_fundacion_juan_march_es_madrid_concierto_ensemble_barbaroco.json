@@ -58,9 +58,6 @@
       "name": "Diego Ortiz"
     },
     {
-      "name": "Libro II"
-    },
-    {
       "name": "Francisco de la Torre"
     },
     {
@@ -71,12 +68,6 @@
     },
     {
       "name": "Juan del Encina"
-    },
-    {
-      "name": "Alcalá de Henares"
-    },
-    {
-      "name": "Musical de Palacio"
     }
   ],
   "works": [
@@ -132,7 +123,7 @@
       "composerName": "Miguel de Fuenllana"
     },
     {
-      "title": "Ay, triste que vengo (Cancionero de Palacio, Madrid, c. 1500) 1",
+      "title": "Ay, triste que vengo (Cancionero de Palacio, Madrid, c. 1500)",
       "composerName": "Juan del Encina"
     },
     {

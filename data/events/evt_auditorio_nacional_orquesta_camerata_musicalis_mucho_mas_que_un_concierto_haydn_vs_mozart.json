@@ -27,14 +27,12 @@
   "composers": [
     {
       "name": "Franz Joseph Haydn"
-    }
-  ],
-  "works": [
+    },
     {
-      "title": "vs Mozart\"",
-      "composerName": "Franz Joseph Haydn"
+      "name": "Wolfgang Amadeus Mozart"
     }
   ],
+  "works": [],
   "eras": [
     "classical"
   ],

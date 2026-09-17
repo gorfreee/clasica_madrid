@@ -29,15 +29,35 @@
   ],
   "composers": [
     {
-      "name": "Strauss"
+      "name": "Leonard Bernstein"
+    },
+    {
+      "name": "George Gershwin"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "Wonderful Town. Obertura",
+      "composerName": "Leonard Bernstein"
+    },
+    {
+      "title": "Gershwin in Hollywood",
+      "composerName": "George Gershwin"
+    },
+    {
+      "title": "Rhapsody in blue",
+      "composerName": "George Gershwin"
+    },
+    {
+      "title": "Candide. Obertura & Suite",
+      "composerName": "Leonard Bernstein"
+    }
+  ],
   "eras": [
     "twentieth"
   ],
   "formats": [
-    "recital"
+    "symphonic"
   ],
   "kind": "established",
   "access": "paid",

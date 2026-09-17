@@ -33,21 +33,15 @@
     },
     {
       "name": "Johannes Brahms"
-    },
-    {
-      "name": "DVORÁK, Antonin"
-    },
-    {
-      "name": "BRAHMS, Johannes"
     }
   ],
   "works": [
     {
-      "title": "Concierto para violonchelo",
+      "title": "Concierto para violonchelo y orquesta en si menor op 104",
       "composerName": "Antonín Dvořák"
     },
     {
-      "title": "Cuarta Sinfonía",
+      "title": "Sinfonía núm. 4 en mi menor op 98",
       "composerName": "Johannes Brahms"
     }
   ],

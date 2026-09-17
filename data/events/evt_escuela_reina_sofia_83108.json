@@ -17,9 +17,6 @@
   ],
   "performers": [
     {
-      "name": "Luis Aracama"
-    },
-    {
       "name": "Yiqi Chen"
     },
     {
@@ -31,31 +28,31 @@
   ],
   "composers": [
     {
-      "name": "BRAHMS, Johannes"
+      "name": "Johannes Brahms"
     },
     {
-      "name": "KREISLER, Fritz"
+      "name": "Fritz Kreisler"
     },
     {
-      "name": "MARTINU, Bohuslav"
+      "name": "Bohuslav Martinů"
     }
   ],
   "works": [
     {
       "title": "Sonata para violonchelo y piano núm. 1 en mi menor op 38",
-      "composerName": "BRAHMS, Johannes"
+      "composerName": "Johannes Brahms"
     },
     {
       "title": "Alt-Wiener Tanzweisen (Danzas Vienesas Antiguas) para violín y piano (arreglo para violonchelo y piano)",
-      "composerName": "KREISLER, Fritz"
+      "composerName": "Fritz Kreisler"
     },
     {
       "title": "Sonata para violonchelo y piano núm. 2 en fa mayor op 99",
-      "composerName": "BRAHMS, Johannes"
+      "composerName": "Johannes Brahms"
     },
     {
       "title": "Variaciones sobre un tema de Rossini para violonchelo y piano H 290",
-      "composerName": "MARTINU, Bohuslav"
+      "composerName": "Bohuslav Martinů"
     }
   ],
   "eras": [
