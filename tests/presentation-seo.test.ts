@@ -25,7 +25,9 @@ import {
   venuePath,
 } from '../src/lib/presentation/urls.ts';
 import { buildVenuePageModel, buildVenuesIndexModel } from '../src/lib/presentation/venue.ts';
-import { richCatalog, testClock } from './helpers.ts';
+import { defaultDataDir } from '../src/lib/repository/fs.ts';
+import { loadCatalogFromDir } from '../src/lib/repository/load.ts';
+import { makeCatalog, makeVenue, richCatalog, testClock } from './helpers.ts';
 
 function musicEvents(jsonLd: Record<string, unknown>[]) {
   return jsonLd.filter((item) => item['@type'] === 'MusicEvent');
@@ -163,7 +165,61 @@ describe('títulos y canonicals de ficha', () => {
   it('el índice de lugares canoniciza con barra final', () => {
     const index = buildVenuesIndexModel(richCatalog(), testClock);
     expect(index.canonicalPath).toBe('/lugares/');
-    expect(index.title).toContain('Madrid');
+    expect(index.title).toBe('Lugares de conciertos en Madrid');
+    expect(index.title).not.toMatch(/^Conciertos en el /);
+  });
+
+  it('la ficha de lugar usa un title SEO genérico y deja el nombre canónico para el h1', () => {
+    const page = buildVenuePageModel(richCatalog(), 'auditorio-nacional', testClock);
+    expect(page?.name).toBe('Auditorio Nacional de Música');
+    expect(page?.title).toBe('Conciertos en el Auditorio Nacional de Música');
+    expect(pageDocumentTitle(page?.title ?? '')).toBe(
+      'Conciertos en el Auditorio Nacional de Música — Clásica Madrid',
+    );
+    expect(pageDocumentTitle(page?.title ?? '')).not.toMatch(/Clásica Madrid.*Clásica Madrid/);
+    expect(page?.description).toBe(
+      'Próximos conciertos de música clásica en Auditorio Nacional de Música.',
+    );
+    expect(page?.canonicalPath).toBe('/lugares/auditorio-nacional/');
+    expect(page?.jsonLd[0]).toMatchObject({
+      '@type': 'MusicVenue',
+      name: 'Auditorio Nacional de Música',
+    });
+  });
+
+  it('aplica el mismo prefijo SEO a cualquier ficha de lugar, también sin próximos conciertos', () => {
+    const teatro = buildVenuePageModel(
+      makeCatalog({
+        venues: [makeVenue({ id: 'ven_teatro_real', slug: 'teatro-real', name: 'Teatro Real' })],
+        events: [],
+      }),
+      'teatro-real',
+      testClock,
+    );
+    expect(teatro?.name).toBe('Teatro Real');
+    expect(teatro?.title).toBe('Conciertos en el Teatro Real');
+    expect(pageDocumentTitle(teatro?.title ?? '')).toBe(
+      'Conciertos en el Teatro Real — Clásica Madrid',
+    );
+    expect(teatro?.description).toBe('Conciertos de música clásica en Teatro Real.');
+    expect(teatro?.canonicalPath).toBe('/lugares/teatro-real/');
+  });
+
+  it('el catálogo publicado genera el title SEO de Teatro Real y del Auditorio', async () => {
+    const catalog = await loadCatalogFromDir(defaultDataDir());
+    const teatro = buildVenuePageModel(catalog, 'teatro-real', testClock);
+    expect(teatro?.name).toBe('Teatro Real');
+    expect(teatro?.title).toBe('Conciertos en el Teatro Real');
+    expect(pageDocumentTitle(teatro?.title ?? '')).toBe(
+      'Conciertos en el Teatro Real — Clásica Madrid',
+    );
+
+    const auditorio = buildVenuePageModel(catalog, 'auditorio-nacional-de-musica', testClock);
+    expect(auditorio?.name).toBe('Auditorio Nacional de Música');
+    expect(auditorio?.title).toBe('Conciertos en el Auditorio Nacional de Música');
+    expect(pageDocumentTitle(auditorio?.title ?? '')).toBe(
+      'Conciertos en el Auditorio Nacional de Música — Clásica Madrid',
+    );
   });
 });
 
