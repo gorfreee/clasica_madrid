@@ -27,6 +27,8 @@ export const missingFormatLabel = '—';
 /** Optional agenda-row marker. Filters keep using `accessLabels.free`. */
 export const freeAgendaSignalLabel = 'Gratis';
 
+export const weekendAgendaShortcutLabel = 'Fin de semana';
+
 export const eraLabels: Record<Era, string> = {
   early: 'Música antigua',
   renaissance: 'Renacimiento',

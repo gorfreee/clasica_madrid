@@ -4,9 +4,15 @@ import { describe, expect, it } from 'vitest';
 import { buildAgendaPageModel } from '../src/lib/presentation/agenda.ts';
 import {
   BRAND_BLUE,
+  DEFAULT_DESCRIPTION,
   DEFAULT_SOCIAL_IMAGE_ALT,
   DEFAULT_SOCIAL_IMAGE_PATH,
+  DEFAULT_TITLE,
+  HOME_DESCRIPTION,
+  HOME_TITLE,
+  pageDocumentTitle,
   SITE_BACKGROUND,
+  SITE_NAME,
 } from '../src/lib/presentation/constants.ts';
 import { buildEventPageModel } from '../src/lib/presentation/event.ts';
 import { buildSocialImageMetadata } from '../src/lib/presentation/social.ts';
@@ -94,11 +100,55 @@ describe('social sharing e identidad', () => {
   });
 });
 
+describe('metadata de la home', () => {
+  it('expone title y description de la agenda sin duplicar la marca', () => {
+    const page = buildAgendaPageModel(richCatalog(), new URL('https://clasicamadrid.com/'), testClock);
+    expect(page.title).toBe(HOME_TITLE);
+    expect(page.title).toBe('Conciertos de música clásica en Madrid');
+    expect(page.title).not.toContain(SITE_NAME);
+    expect(page.description).toBe(HOME_DESCRIPTION);
+    expect(page.description).toBe(
+      'Agenda de conciertos de música clásica en Madrid, de las grandes salas a los pequeños espacios. Fechas, lugares, intérpretes, compositores y conciertos gratuitos.',
+    );
+    expect(page.canonicalPath).toBe('/');
+  });
+
+  it('el title final de la home añade la marca una sola vez', () => {
+    const page = buildAgendaPageModel(richCatalog(), new URL('https://clasicamadrid.com/'), testClock);
+    expect(pageDocumentTitle(page.title)).toBe(
+      'Conciertos de música clásica en Madrid — Clásica Madrid',
+    );
+    expect(pageDocumentTitle(page.title)).not.toMatch(/Clásica Madrid.*Clásica Madrid/);
+    expect(pageDocumentTitle(`${HOME_TITLE} — ${SITE_NAME}`)).toBe(
+      'Conciertos de música clásica en Madrid — Clásica Madrid',
+    );
+  });
+});
+
+describe('title de documento', () => {
+  it('añade la marca cuando el title de página todavía no la incluye', () => {
+    expect(pageDocumentTitle('Lugares de conciertos en Madrid')).toBe(
+      'Lugares de conciertos en Madrid — Clásica Madrid',
+    );
+    expect(pageDocumentTitle('Carmen · Auditorio Nacional de Música')).toBe(
+      'Carmen · Auditorio Nacional de Música — Clásica Madrid',
+    );
+  });
+
+  it('no duplica la marca si el title ya la contiene o es el fallback', () => {
+    expect(pageDocumentTitle(DEFAULT_TITLE)).toBe(DEFAULT_TITLE);
+    expect(pageDocumentTitle(`Acerca de — ${SITE_NAME}`)).toBe('Acerca de — Clásica Madrid');
+  });
+});
+
 describe('títulos y canonicals de ficha', () => {
   it('incluye el lugar en el title de documento sin cambiar el h1', () => {
     const page = buildEventPageModel(richCatalog(), 'carmen', testClock);
     expect(page?.title).toBe('Carmen');
     expect(page?.documentTitle).toBe('Carmen · Auditorio Nacional de Música');
+    expect(pageDocumentTitle(page?.documentTitle ?? '')).toBe(
+      'Carmen · Auditorio Nacional de Música — Clásica Madrid',
+    );
     expect(page?.canonicalPath).toBe('/eventos/carmen/');
     expect(page?.venueHref).toBe('/lugares/auditorio-nacional/');
     expect(page?.description).toContain('Ópera');
@@ -166,7 +216,9 @@ describe('JSON-LD de presentación', () => {
       '@type': 'WebSite',
       name: 'Clásica Madrid',
       url: 'https://clasicamadrid.com/',
+      description: DEFAULT_DESCRIPTION,
     });
+    expect(page.jsonLd[0]?.description).not.toBe(HOME_DESCRIPTION);
   });
 });
 

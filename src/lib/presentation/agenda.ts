@@ -1,7 +1,8 @@
 import type { Catalog } from '../domain/catalog.ts';
 import type { AgendaFilters, FilterableOccurrence } from '../domain/filters.ts';
 import { canonicalVenueFilter, parseAgendaFilters, toFilterable } from '../domain/filters.ts';
-import { formatMadridDate, fromMadridLocal, madridToday } from '../domain/dates.ts';
+import { formatMadridDate, fromMadridLocal, madridToday, shiftIsoDate } from '../domain/dates.ts';
+import { buildAgendaShortcuts, type AgendaShortcutModel } from './agenda-shortcuts.ts';
 import { listUpcomingOccurrences, type Clock, systemClock } from '../domain/index.ts';
 import type { ResolvedOccurrence } from '../domain/resolve.ts';
 import {
@@ -19,6 +20,7 @@ import {
 } from './labels.ts';
 import { ACCESS_MODES, AREAS, ERAS, EVENT_KINDS, FORMATS } from '../schemas/taxonomies.ts';
 import { isMadridMunicipality } from '../domain/normalize.ts';
+import { HOME_DESCRIPTION, HOME_TITLE } from './constants.ts';
 import { buildWebsiteJsonLd } from './json-ld.ts';
 import { AGENDA_PATH, eventPath, venuePath } from './urls.ts';
 
@@ -94,11 +96,7 @@ export type AgendaDayModel = {
   items: AgendaItemModel[];
 };
 
-export type AgendaShortcutModel = {
-  label: string;
-  href: string;
-  emphasis?: boolean;
-};
+export type { AgendaShortcutModel } from './agenda-shortcuts.ts';
 
 export type FilterFieldModel = {
   name: string;
@@ -170,9 +168,8 @@ export function buildAgendaPageModel(
   const days = groupByDate(initial.map(toAgendaItem), now);
   const filters = parseAgendaFilters(_url?.searchParams ?? new URLSearchParams());
   return {
-    title: 'Agenda de música clásica en Madrid',
-    description:
-      'Conciertos y eventos de música clásica en Madrid y su entorno inmediato, con fuente original.',
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
     canonicalPath: AGENDA_PATH,
     jsonLd: [buildWebsiteJsonLd()],
     isEmptyCatalog: catalog.events.length === 0,
@@ -193,7 +190,7 @@ export function buildAgendaPageModel(
     composer: filters.composer ?? '',
     composerSuggestions: unique(upcoming.flatMap((item) => item.resolved.event.composers.map((c) => c.name))),
     filterIndex: initial.map(toFilterable),
-    shortcuts: buildShortcuts(now),
+    shortcuts: buildAgendaShortcuts(filters, now),
   };
 }
 
@@ -348,25 +345,8 @@ function buildSelectFilters(upcoming: ResolvedOccurrence[], filters: AgendaFilte
   ];
 }
 
-function buildShortcuts(now: Date): AgendaShortcutModel[] {
-  const today = madridToday(now);
-  const weekday = fromMadridLocal(today, '12:00').getUTCDay();
-  const weekendStart = weekday === 0 ? today : shiftIsoDate(today, (6 - weekday + 7) % 7);
-  const weekendEnd = weekday === 0 ? today : shiftIsoDate(weekendStart, 1);
-  return [
-    { label: 'Fin de semana', href: `/?from=${weekendStart}&to=${weekendEnd}` },
-    { label: 'Gratis', href: '/?access=free', emphasis: true },
-  ];
-}
-
 function selectedVenueFilter(upcoming: ResolvedOccurrence[], value: string | undefined): string {
   return canonicalVenueFilter(upcoming.map(toFilterable), value);
-}
-
-function shiftIsoDate(date: string, days: number): string {
-  const instant = new Date(`${date}T12:00:00Z`);
-  instant.setUTCDate(instant.getUTCDate() + days);
-  return instant.toISOString().slice(0, 10);
 }
 
 function unique(values: string[]): string[] {

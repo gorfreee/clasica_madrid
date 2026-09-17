@@ -9,7 +9,7 @@ type Props = {
 
 const { model } = Astro.props;
 ---
-{/* Contrato UI interno: [data-agenda-filters], [data-agenda-shortcuts], [data-result-count], [data-clear-filters], [data-advanced-filters-toggle] y [data-advanced-filters-panel] los usa agenda-client.ts. */}
+{/* Contrato UI interno: [data-agenda-filters], [data-agenda-shortcuts], [data-agenda-shortcut], [data-result-count], [data-clear-filters], [data-advanced-filters-toggle] y [data-advanced-filters-panel] los usa agenda-client.ts. */}
 
 <section class="filters" aria-labelledby="buscar-titulo">
   <form class="filters__form" method="get" action="/" data-agenda-filters>
@@ -37,7 +37,12 @@ const { model } = Astro.props;
     <div class="filters__toolbar">
       <nav class="shortcuts" aria-label="Accesos rápidos de agenda" data-agenda-shortcuts>
         {model.shortcuts.map((shortcut) => (
-          <a class:list={["shortcut", { "shortcut--emphasis": shortcut.emphasis }]} href={shortcut.href}>
+          <a
+            class:list={["shortcut", { "shortcut--emphasis": shortcut.emphasis }]}
+            href={shortcut.href}
+            data-agenda-shortcut={shortcut.id}
+            aria-pressed={shortcut.active ? 'true' : 'false'}
+          >
             {shortcut.label}
           </a>
         ))}

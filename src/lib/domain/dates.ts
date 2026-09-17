@@ -12,6 +12,48 @@ export function madridToday(now = new Date()): string {
   return now.toLocaleDateString('en-CA', { timeZone: MADRID_TIME_ZONE });
 }
 
+export type IsoDateRange = {
+  from: string;
+  to: string;
+};
+
+/**
+ * Shift a civil ISO date by whole calendar days. Noon UTC keeps the Y-M-D
+ * arithmetic independent of Europe/Madrid offsets and DST.
+ */
+export function shiftIsoDate(date: string, days: number): string {
+  const instant = new Date(`${date}T12:00:00Z`);
+  instant.setUTCDate(instant.getUTCDate() + days);
+  return instant.toISOString().slice(0, 10);
+}
+
+/**
+ * Remaining Friday–Sunday window for Clásica Madrid, in Europe/Madrid.
+ * Past weekend days are excluded: Saturday is Sat–Sun, Sunday is Sunday only.
+ */
+export function madridWeekendRange(now = new Date()): IsoDateRange {
+  const today = madridToday(now);
+  const weekday = isoDateWeekday(today);
+  if (weekday === 0) return { from: today, to: today };
+  if (weekday === 6) return { from: today, to: shiftIsoDate(today, 1) };
+  const from = shiftIsoDate(today, (5 - weekday + 7) % 7);
+  return { from, to: shiftIsoDate(from, 2) };
+}
+
+export function isMadridWeekendRange(
+  range: { from?: string; to?: string },
+  now = new Date(),
+): boolean {
+  if (!range.from || !range.to) return false;
+  const weekend = madridWeekendRange(now);
+  return range.from === weekend.from && range.to === weekend.to;
+}
+
+/** `Date.getUTCDay()`: 0 Sunday … 6 Saturday. ISO dates are civil, not instants. */
+function isoDateWeekday(date: string): number {
+  return new Date(`${date}T12:00:00Z`).getUTCDay();
+}
+
 export function madridNowTime(now = new Date()): string {
   return now.toLocaleTimeString('en-GB', {
     timeZone: MADRID_TIME_ZONE,

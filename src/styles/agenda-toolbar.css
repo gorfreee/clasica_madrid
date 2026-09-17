@@ -41,13 +41,13 @@
   color: var(--ink);
   font-size: .72rem;
   letter-spacing: .07em;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.filters .shortcut:hover,
-.filters .shortcut:focus-visible {
+.filters .shortcut[aria-pressed="true"] {
   border-color: var(--ink);
-  background: var(--ink);
-  color: var(--paper-light);
+  background: var(--paper-light);
+  box-shadow: inset 0 -2px 0 var(--blue);
 }
 
 .filters .shortcut--emphasis {
@@ -82,14 +82,63 @@
   letter-spacing: .07em;
   line-height: 1;
   text-transform: uppercase;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.filters .filters__toggle:hover,
-.filters .filters__toggle:focus-visible,
 .filters .filters__toggle[aria-expanded="true"] {
   border-color: var(--ink);
   background: var(--ink);
   color: var(--paper-light);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .filters .shortcut:hover {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--paper-light);
+  }
+
+  .filters .shortcut[aria-pressed="true"]:hover {
+    background: var(--ink);
+    color: var(--paper-light);
+    box-shadow: inset 0 -2px 0 var(--coral);
+  }
+
+  .filters .filters__toggle:hover {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--paper-light);
+  }
+}
+
+/* Touch browsers keep :hover after a tap. Restore the resting/active styles
+   so the ink fill cannot stick, including against the global .shortcut:hover. */
+@media (hover: none), (pointer: coarse) {
+  .filters .shortcut:hover {
+    border-color: var(--line);
+    background: rgba(250, 249, 245, .45);
+    color: var(--ink);
+    box-shadow: none;
+  }
+
+  .filters .shortcut[aria-pressed="true"]:hover {
+    border-color: var(--ink);
+    background: var(--paper-light);
+    color: var(--ink);
+    box-shadow: inset 0 -2px 0 var(--blue);
+  }
+
+  .filters .filters__toggle:hover {
+    border-color: var(--line);
+    background: transparent;
+    color: inherit;
+  }
+
+  .filters .filters__toggle[aria-expanded="true"]:hover {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--paper-light);
+  }
 }
 
 .filters .filters__toggle-mark {

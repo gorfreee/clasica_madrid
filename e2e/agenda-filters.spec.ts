@@ -66,6 +66,12 @@ function expectUnmoved(label: string, before: Box, after: Box) {
   expect(Math.abs(after.height - before.height), `${label} height`).toBeLessThanOrEqual(1);
 }
 
+const INK = 'rgb(17, 17, 15)';
+
+function backgroundOf(locator: ReturnType<Page['locator']>) {
+  return locator.evaluate((el) => getComputedStyle(el).backgroundColor);
+}
+
 test.describe('filtros avanzados de la agenda', () => {
   test('el panel empieza cerrado y el botón controla visibilidad y aria-expanded', async ({ page }) => {
     await page.goto('/');
@@ -173,4 +179,41 @@ test.describe('filtros avanzados de la agenda', () => {
       }
     });
   }
+});
+
+test.describe('táctil', () => {
+  test.use({
+    viewport: { width: 390, height: 844 },
+    hasTouch: true,
+    isMobile: true,
+  });
+
+  test('el tap no deja Filtros ni los atajos invertidos en negro', async ({ page }) => {
+    await page.goto('/');
+    const media = await page.evaluate(() => ({
+      hover: matchMedia('(hover: hover)').matches,
+      coarse: matchMedia('(pointer: coarse)').matches,
+    }));
+    expect(media.hover && !media.coarse).toBe(false);
+
+    const filtersButton = toggle(page);
+    const weekend = page.locator('[data-agenda-shortcut="weekend"]');
+    await expect(filtersButton).toBeVisible();
+
+    await filtersButton.tap();
+    await expect(filtersButton).toHaveAttribute('aria-expanded', 'true');
+    expect(await backgroundOf(filtersButton)).toBe(INK);
+
+    await filtersButton.tap();
+    await expect(filtersButton).toHaveAttribute('aria-expanded', 'false');
+    expect(await backgroundOf(filtersButton)).not.toBe(INK);
+
+    await weekend.tap();
+    await expect(weekend).toHaveAttribute('aria-pressed', 'true');
+    expect(await backgroundOf(weekend)).not.toBe(INK);
+
+    await weekend.tap();
+    await expect(weekend).toHaveAttribute('aria-pressed', 'false');
+    expect(await backgroundOf(weekend)).not.toBe(INK);
+  });
 });
