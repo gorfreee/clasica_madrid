@@ -107,7 +107,7 @@ export function buildVenuePageModel(
   const address = principal.address ?? venue.address ?? null;
   const url = principal.url ?? venue.url ?? null;
   return {
-    title: pageName,
+    title: venueDocumentTitle(pageName),
     description:
       upcoming.length > 0
         ? `Próximos conciertos de música clásica en ${place}.`
@@ -129,6 +129,11 @@ export function buildVenuePageModel(
     upcoming,
     jsonLd: buildVenueJsonLd(venue, principal),
   };
+}
+
+/** SEO / document title for a venue ficha. Layout appends the site brand. */
+export function venueDocumentTitle(venueName: string): string {
+  return `Conciertos en ${venueName}`;
 }
 
 export function venueUpcomingSummary(count: number): string {
