@@ -390,6 +390,31 @@ describe('enriquecimiento determinista de compositores conocidos', () => {
     expect(enriched.composers.some((item) => /robert carl/i.test(item.name))).toBe(false);
   });
 
+  it('no promociona elenco Character: Intérprete ni fragmentos editoriales del programa', () => {
+    const traviata = enrichNormalizedEvent(
+      event({
+        title: 'Excelentia. La Traviata de Verdi',
+        composers: [{ name: 'Giuseppe Verdi' }],
+        programText: [
+          'Violetta Valery: Letitia Vitelaru',
+          'Alfredo Germont: Juan Francisco Elvira',
+          'Flora Bervoix: Marifé Nogales',
+          'Giorgio Germont: Damián del Castillo',
+        ].join('\n'),
+      }),
+    );
+    expect(traviata.composers.map((item) => item.name)).toEqual(['Giuseppe Verdi']);
+
+    const commission = enrichNormalizedEvent(
+      event({
+        composers: [{ name: 'Serguéi Prokófiev' }],
+        programText: 'Sinfonía núm. 5. Encargo de la Fil NY: primera audición en España',
+      }),
+    );
+    expect(commission.composers.map((item) => item.name)).toEqual(['Serguéi Prokófiev']);
+    expect(commission.composers.some((item) => /encargo|fil ny/i.test(item.name))).toBe(false);
+  });
+
   it('no infiere Bach desde Am Bach im Frühling y sí desde Bach — Suite', () => {
     const lied = enrichNormalizedEvent(
       event({
