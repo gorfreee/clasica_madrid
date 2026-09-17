@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_conciertos_familia_i_cancion_latina_latido_compartido",
+  "slug": "conciertos-en-familia-i-cancion-latina-un-latido-compartido",
+  "title": "Conciertos en familia (I): Canción latina: un latido compartido",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_conciertos_familia_i_cancion_latina_latido_compartido_01",
+      "date": "2026-12-05",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Yeraldín León"
+    },
+    {
+      "name": "Paula López Atanet"
+    },
+    {
+      "name": "Roberto Fernández Duro"
+    },
+    {
+      "name": "Carlos Crooke"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Xavier Montsalvatge"
+    },
+    {
+      "name": "Mario Gareña"
+    },
+    {
+      "name": "Gonzalo Roig"
+    },
+    {
+      "name": "Ernesto Halffter"
+    },
+    {
+      "name": "Consuelo Velázquez"
+    },
+    {
+      "name": "Ángel Cabral"
+    },
+    {
+      "name": "Astor Piazzolla"
+    },
+    {
+      "name": "Ígor Stravinski"
+    },
+    {
+      "name": "Félix Luna"
+    },
+    {
+      "name": "Ariel Ramírez"
+    },
+    {
+      "name": "Elpidio Ramírez"
+    },
+    {
+      "name": "Jayme Ovalle"
+    },
+    {
+      "name": "Bad Bunny"
+    },
+    {
+      "name": "Frederic Rzewski"
+    },
+    {
+      "name": "Violeta Parra"
+    }
+  ],
+  "works": [
+    {
+      "title": "Cinco canciones negras (selección)",
+      "composerName": "Xavier Montsalvatge"
+    },
+    {
+      "title": "Yo me llamo cumbia",
+      "composerName": "Mario Gareña"
+    },
+    {
+      "title": "Entrada de Cecilia (Cecilia Valdés)",
+      "composerName": "Gonzalo Roig"
+    },
+    {
+      "title": "Habanera (Dos piezas cubanas)",
+      "composerName": "Ernesto Halffter"
+    },
+    {
+      "title": "Bésame mucho",
+      "composerName": "Consuelo Velázquez"
+    },
+    {
+      "title": "Que nadie sepa mi sufrir",
+      "composerName": "Ángel Cabral"
+    },
+    {
+      "title": "Yo soy María (María de Buenos Aires)",
+      "composerName": "Astor Piazzolla"
+    },
+    {
+      "title": "Tango, K 062",
+      "composerName": "Ígor Stravinski"
+    },
+    {
+      "title": "Alfonsina y el mar"
+    },
+    {
+      "title": "La Malagueña",
+      "composerName": "Elpidio Ramírez"
+    },
+    {
+      "title": "Azulão, op. 21",
+      "composerName": "Jayme Ovalle"
+    },
+    {
+      "title": "Baile inolvidable",
+      "composerName": "Bad Bunny"
+    },
+    {
+      "title": "The People United Will Never Be Defeated!",
+      "composerName": "Frederic Rzewski"
+    },
+    {
+      "title": "Gracias a la vida",
+      "composerName": "Violeta Parra"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "other"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/conciertos-familia-i-cancion-latina-latido-compartido",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/conciertos-familia-i-cancion-latina-latido-compartido"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

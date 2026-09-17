@@ -29,9 +29,31 @@
     },
     {
       "name": "Serguéi Rajmáninov"
+    },
+    {
+      "name": "CHOPIN, Fryderyck Franciszek"
+    },
+    {
+      "name": "LISZT, Franz"
+    },
+    {
+      "name": "RACHMANINOV, Sergey"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "Sonata para piano en si bemol menor op 35",
+      "composerName": "CHOPIN, Fryderyck Franciszek"
+    },
+    {
+      "title": "Réminiscences de Norma (Reminiscencias de Norma) de V. Bellini para dos pianos S 655 (versión para piano solo)",
+      "composerName": "LISZT, Franz"
+    },
+    {
+      "title": "Sonata para piano núm. 2 en si bemol menor op 36 (revisión de 1931)",
+      "composerName": "RACHMANINOV, Sergey"
+    }
+  ],
   "eras": [
     "romantic"
   ],
@@ -44,10 +66,10 @@
     {
       "sourceId": "src_escuela_superior_musica_reina_sofia",
       "url": "https://www.escuelasuperiordemusicareinasofia.es/evento/solistas-del-siglo-xxi-fantasmas-de-la-forma-recital-de-piano",
-      "checkedAt": "2026-09-15",
+      "checkedAt": "2026-09-18",
       "externalId": "83109"
     }
   ],
   "primarySourceId": "src_escuela_superior_musica_reina_sofia",
-  "lastVerifiedAt": "2026-09-15"
+  "lastVerifiedAt": "2026-09-18"
 }

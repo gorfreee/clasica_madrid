@@ -21,11 +21,47 @@
     },
     {
       "name": "Yiqi Chen"
+    },
+    {
+      "name": "Ofelia Montalván Vázquez"
+    },
+    {
+      "name": "Luis Aracama Alonso"
     }
   ],
-  "composers": [],
-  "works": [],
-  "eras": [],
+  "composers": [
+    {
+      "name": "BRAHMS, Johannes"
+    },
+    {
+      "name": "KREISLER, Fritz"
+    },
+    {
+      "name": "MARTINU, Bohuslav"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata para violonchelo y piano núm. 1 en mi menor op 38",
+      "composerName": "BRAHMS, Johannes"
+    },
+    {
+      "title": "Alt-Wiener Tanzweisen (Danzas Vienesas Antiguas) para violín y piano (arreglo para violonchelo y piano)",
+      "composerName": "KREISLER, Fritz"
+    },
+    {
+      "title": "Sonata para violonchelo y piano núm. 2 en fa mayor op 99",
+      "composerName": "BRAHMS, Johannes"
+    },
+    {
+      "title": "Variaciones sobre un tema de Rossini para violonchelo y piano H 290",
+      "composerName": "MARTINU, Bohuslav"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
   "formats": [
     "recital"
   ],
@@ -35,10 +71,10 @@
     {
       "sourceId": "src_escuela_superior_musica_reina_sofia",
       "url": "https://www.escuelasuperiordemusicareinasofia.es/evento/solistas-del-siglo-xxi-la-voz-del-fondo-del-cuerpo-recital-de-violonchelo",
-      "checkedAt": "2026-09-15",
+      "checkedAt": "2026-09-18",
       "externalId": "83108"
     }
   ],
   "primarySourceId": "src_escuela_superior_musica_reina_sofia",
-  "lastVerifiedAt": "2026-09-15"
+  "lastVerifiedAt": "2026-09-18"
 }

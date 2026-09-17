@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_ossians_dream",
+  "slug": "ossian-s-dream",
+  "title": "Ossian's Dream",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_ossians_dream_01",
+      "date": "2027-04-18",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_ossians_dream_02",
+      "date": "2027-04-19",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ossian’s Dream"
+    },
+    {
+      "name": "Jaume Guri Batlle"
+    },
+    {
+      "name": "Anne Sophie van Riel"
+    },
+    {
+      "name": "Martin Egidi"
+    },
+    {
+      "name": "Claudia Reyes Segovia"
+    },
+    {
+      "name": "Pau Fernández Benlloch"
+    },
+    {
+      "name": "Marina Alegre"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Robert Schumann"
+    },
+    {
+      "name": "Fanny Mendelssohn-Hensel"
+    },
+    {
+      "name": "Felix Mendelssohn-Bartholdy"
+    }
+  ],
+  "works": [
+    {
+      "title": "Lebhaft, nicht zu schnell (Vivo, no rápido) , de Märchenerzählunge, op. 132",
+      "composerName": "Robert Schumann"
+    },
+    {
+      "title": "Die Sennin [La pastora] , de Siete dúos para voz y piano",
+      "composerName": "Fanny Mendelssohn-Hensel"
+    },
+    {
+      "title": "Obertura a Die erste Walpurgisnacht, op. 60 (arreglo de Ossian’s Dream)",
+      "composerName": "Felix Mendelssohn-Bartholdy"
+    },
+    {
+      "title": "Andante espressivo , de Trío con piano en Re menor, op. 11",
+      "composerName": "Fanny Mendelssohn-Hensel"
+    },
+    {
+      "title": "Lebhaft und sehr market (Vivo y muy marcado) , de Märchenerzählunge, op. 132",
+      "composerName": "Robert Schumann"
+    },
+    {
+      "title": "Du bist die Ruh, de los 6 Lieder op. 7, no. 4",
+      "composerName": "Fanny Mendelssohn-Hensel"
+    },
+    {
+      "title": "Allegro molto vivace , de Trío con piano en Re menor, op. 11",
+      "composerName": "Fanny Mendelssohn-Hensel"
+    },
+    {
+      "title": "Larghetto , de Cuarteto con piano en La bemol mayor, H 55",
+      "composerName": "Fanny Mendelssohn-Hensel"
+    },
+    {
+      "title": "September. Am flusse. Andante con moto , de Das Jahr [El año]",
+      "composerName": "Fanny Mendelssohn-Hensel"
+    },
+    {
+      "title": "Waldruhe, H 379",
+      "composerName": "Fanny Mendelssohn-Hensel"
+    },
+    {
+      "title": "August. Allegro, tempo di marcia, allegro assai , de Das Jahr [El año]",
+      "composerName": "Fanny Mendelssohn-Hensel"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "lied"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/ossians-dream",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/ossians-dream"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

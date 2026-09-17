@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50420956",
+  "slug": "falla-y-lorca",
+  "title": "Falla y Lorca",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_1980",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50420956_01",
+      "date": "2026-10-03",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "recital",
+    "lied"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=0f113893f4ba0a10VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-09-18",
+      "externalId": "50420956"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-09-18"
+}

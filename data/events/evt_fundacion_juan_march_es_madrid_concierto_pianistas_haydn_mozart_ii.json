@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_pianistas_haydn_mozart_ii",
+  "slug": "las-pianistas-de-haydn-y-mozart-ii",
+  "title": "Las pianistas de Haydn y Mozart (II)",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_pianistas_haydn_mozart_ii_01",
+      "date": "2027-04-17",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Olga Pashchenko"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Franz Joseph Haydn"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata para piano nº 14 en Do menor, KV 457",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Sonata para piano en Do sostenido menor, Hob. XVI:36",
+      "composerName": "Franz Joseph Haydn"
+    },
+    {
+      "title": "Sonata para piano nº 11 en La mayor, KV 331/300i",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Sonata para piano en Mi bemol mayor, Hob. XVI:52",
+      "composerName": "Franz Joseph Haydn"
+    }
+  ],
+  "eras": [
+    "classical"
+  ],
+  "formats": [],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/pianistas-haydn-mozart-ii",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/pianistas-haydn-mozart-ii"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

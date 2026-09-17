@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_jonde_camara_joven_ensemble_modern_ii",
+  "slug": "jonde-camara-joven-y-ensemble-modern-ii",
+  "title": "JONDE Cámara Joven y Ensemble Modern II",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_jonde_camara_joven_ensemble_modern_ii_01",
+      "date": "2026-10-26",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "JONDE Cámara Joven"
+    },
+    {
+      "name": "Ensemble Modern"
+    },
+    {
+      "name": "Dietmar Wiesner"
+    },
+    {
+      "name": "Iñigo Alonso"
+    },
+    {
+      "name": "Corinna Canzian"
+    },
+    {
+      "name": "Anne Jacobs-Perkins"
+    },
+    {
+      "name": "Ueli Wiget"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Rebecca Saunders"
+    },
+    {
+      "name": "Sofia Gubaidulina"
+    },
+    {
+      "name": "Nina Šenk"
+    },
+    {
+      "name": "Chaya Czernowin"
+    },
+    {
+      "name": "Ursula Mamlok"
+    }
+  ],
+  "works": [
+    {
+      "title": "Stirrings still II, para flauta, oboe, clarinete, contrabajo, percusión y piano",
+      "composerName": "Rebecca Saunders"
+    },
+    {
+      "title": "Quasi hoquetus, para viola, fagot y piano",
+      "composerName": "Sofia Gubaidulina"
+    },
+    {
+      "title": "Movimiento fluido, para flauta alto, violonchelo y piano",
+      "composerName": "Nina Šenk"
+    },
+    {
+      "title": "Lovesong, para flauta, oboe, clarinete, violín, viola, violonchelo, percusión y piano",
+      "composerName": "Chaya Czernowin"
+    },
+    {
+      "title": "Girasol, sexteto para flauta, clarinete, violín, viola, violonchelo y piano",
+      "composerName": "Ursula Mamlok"
+    }
+  ],
+  "eras": [
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/jonde-camara-joven-ensemble-modern-ii",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/jonde-camara-joven-ensemble-modern-ii"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

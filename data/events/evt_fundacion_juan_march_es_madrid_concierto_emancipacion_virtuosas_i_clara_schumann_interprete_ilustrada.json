@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_emancipacion_virtuosas_i_clara_schumann_interprete_ilustrada",
+  "slug": "la-emancipacion-de-las-virtuosas-i-clara-schumann-la-interprete-ilustrada",
+  "title": "La emancipación de las virtuosas (I): Clara Schumann, la intérprete ilustrada",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_emancipacion_virtuosas_i_clara_schumann_interprete_ilustrada_01",
+      "date": "2027-02-24",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Mariam Batsashvili"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Clara Schumann"
+    },
+    {
+      "name": "Domenico Scarlatti"
+    },
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Frédéric Chopin"
+    },
+    {
+      "name": "Robert Schumann"
+    },
+    {
+      "name": "Felix Mendelssohn-Bartholdy"
+    }
+  ],
+  "works": [
+    {
+      "title": "Preludio y fuga nº 6 en Re menor, BWV 851 (El clave bien temperado, Libro 1)",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Preludio y fuga en Re menor, op. 16 nº 3",
+      "composerName": "Clara Schumann"
+    },
+    {
+      "title": "Sonata en La mayor, K 24",
+      "composerName": "Domenico Scarlatti"
+    },
+    {
+      "title": "Sonata nº 23 en Fa menor, op. 57 \"Appassionata\"",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Nocturno nº 20 en Do sostenido menor, op. posth",
+      "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "Preludio improvisatorio nº 6 en Re bemol mayor, “Des Abends”",
+      "composerName": "Clara Schumann"
+    },
+    {
+      "title": "Fantasiestücke, op. 12 (selección)",
+      "composerName": "Robert Schumann"
+    },
+    {
+      "title": "Estudio en Do menor, op. 10 nº 12, \"Revolucionario\"",
+      "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "Preludio improvisatorio nº 9 en Fa menor, “Aufschwung”",
+      "composerName": "Clara Schumann"
+    },
+    {
+      "title": "Canción sin palabras nº 1 en Mi mayor, op. 19",
+      "composerName": "Felix Mendelssohn-Bartholdy"
+    },
+    {
+      "title": "Preludio improvisatorio nº 1 en Do mayor",
+      "composerName": "Clara Schumann"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/emancipacion-virtuosas-i-clara-schumann-interprete-ilustrada",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/emancipacion-virtuosas-i-clara-schumann-interprete-ilustrada"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

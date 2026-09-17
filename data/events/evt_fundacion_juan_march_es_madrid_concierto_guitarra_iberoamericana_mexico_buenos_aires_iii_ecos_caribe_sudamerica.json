@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_guitarra_iberoamericana_mexico_buenos_aires_iii_ecos_caribe_sudamerica",
+  "slug": "guitarra-iberoamericana-de-mexico-a-buenos-aires-iii-ecos-del-caribe-y-sudamerica",
+  "title": "Guitarra iberoamericana: de México a Buenos Aires (III): Ecos del Caribe y Sudamérica",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_guitarra_iberoamericana_mexico_buenos_aires_iii_ecos_caribe_sudamerica_01",
+      "date": "2027-02-27",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Alí Arango"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Agustín Barrios"
+    },
+    {
+      "name": "Leo Brouwer"
+    },
+    {
+      "name": "Antonio Lauro"
+    },
+    {
+      "name": "Alí Arango"
+    }
+  ],
+  "works": [
+    {
+      "title": "Vals, op. 8 nº 3",
+      "composerName": "Agustín Barrios"
+    },
+    {
+      "title": "Vals, op. 8 nº 4",
+      "composerName": "Agustín Barrios"
+    },
+    {
+      "title": "La catedral",
+      "composerName": "Agustín Barrios"
+    },
+    {
+      "title": "El último trémolo",
+      "composerName": "Agustín Barrios"
+    },
+    {
+      "title": "El decamerón negro",
+      "composerName": "Leo Brouwer"
+    },
+    {
+      "title": "Elogio de la danza",
+      "composerName": "Leo Brouwer"
+    },
+    {
+      "title": "Paisaje cubano con tristeza",
+      "composerName": "Leo Brouwer"
+    },
+    {
+      "title": "Valses venezolanos (selección)",
+      "composerName": "Antonio Lauro"
+    },
+    {
+      "title": "Escenas del des-equinoccio",
+      "composerName": "Alí Arango"
+    }
+  ],
+  "eras": [
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/guitarra-iberoamericana-mexico-buenos-aires-iii-ecos-caribe-sudamerica",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/guitarra-iberoamericana-mexico-buenos-aires-iii-ecos-caribe-sudamerica"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_canciones_mundo_i_ecos_lied_japon",
+  "slug": "canciones-del-mundo-i-ecos-del-lied-en-japon",
+  "title": "Canciones del mundo (I): Ecos del Lied en Japón",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_canciones_mundo_i_ecos_lied_japon_01",
+      "date": "2027-05-08",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ema Nikolovska"
+    },
+    {
+      "name": "Hikaru Kanki"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Dai Fujikura"
+    },
+    {
+      "name": "Alma Mahler"
+    },
+    {
+      "name": "Francesco Santoliquido"
+    },
+    {
+      "name": "Claude Debussy"
+    },
+    {
+      "name": "Sato Matsui"
+    },
+    {
+      "name": "Robert Schumann"
+    },
+    {
+      "name": "Ryuichi Sakamoto"
+    },
+    {
+      "name": "Tōru Takemitsu"
+    },
+    {
+      "name": "George Gershwin"
+    },
+    {
+      "name": "Gustav Mahler"
+    }
+  ],
+  "works": [
+    {
+      "title": "Ki i te",
+      "composerName": "Dai Fujikura"
+    },
+    {
+      "title": "Cinco Lieder",
+      "composerName": "Alma Mahler"
+    },
+    {
+      "title": "Petits poèmes japonais",
+      "composerName": "Francesco Santoliquido"
+    },
+    {
+      "title": "La terrasse des audiences du clair de lune , de Preludios. Libro II",
+      "composerName": "Claude Debussy"
+    },
+    {
+      "title": "Fushigi uta",
+      "composerName": "Sato Matsui"
+    },
+    {
+      "title": "Im ruhigen Tempo , de Gesänge der Frühe, op. 133",
+      "composerName": "Robert Schumann"
+    },
+    {
+      "title": "Bibo no Aozora",
+      "composerName": "Ryuichi Sakamoto"
+    },
+    {
+      "title": "To Islands [A las islas]",
+      "composerName": "Tōru Takemitsu"
+    },
+    {
+      "title": "Fascinating Rhythm",
+      "composerName": "George Gershwin"
+    },
+    {
+      "title": "The man I love",
+      "composerName": "George Gershwin"
+    },
+    {
+      "title": "Lieder eines Fahrenden Gesellen [Canciones del aprendiz errante]",
+      "composerName": "Gustav Mahler"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "lied"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/canciones-mundo-i-ecos-lied-japon",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/canciones-mundo-i-ecos-lied-japon"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

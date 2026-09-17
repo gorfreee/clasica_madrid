@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_mireia_tarrago_marc_serra",
+  "slug": "mireia-tarrago-y-marc-serra",
+  "title": "Mireia Tarragó y Marc Serra",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_mireia_tarrago_marc_serra_01",
+      "date": "2027-02-21",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_mireia_tarrago_marc_serra_02",
+      "date": "2027-02-22",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Mireia Tarragó"
+    },
+    {
+      "name": "Marc Serra"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Gabriel Fauré"
+    },
+    {
+      "name": "Mel Bonis"
+    },
+    {
+      "name": "Claude Debussy"
+    },
+    {
+      "name": "Pau Casals"
+    },
+    {
+      "name": "Lluïsa Casagemas"
+    },
+    {
+      "name": "Isaac Albéniz"
+    },
+    {
+      "name": "Enrique Granados"
+    },
+    {
+      "name": "Erik Satie"
+    }
+  ],
+  "works": [
+    {
+      "title": "Clair de lune (Dos melodías, op. 46 nº 2)",
+      "composerName": "Gabriel Fauré"
+    },
+    {
+      "title": "Mandoline , de Cinq mélodies \"de Venise\", op. 58",
+      "composerName": "Gabriel Fauré"
+    },
+    {
+      "title": "Immortelle tendresse [Ternura inmortal], op. 88",
+      "composerName": "Mel Bonis"
+    },
+    {
+      "title": "Le chat sur le toit [El gato sobre el tejado], op. 93",
+      "composerName": "Mel Bonis"
+    },
+    {
+      "title": "Reflets dans l'eau , de Images, Libro I, CD 105",
+      "composerName": "Claude Debussy"
+    },
+    {
+      "title": "Colloque sentimental , de Fêtes Galantes, Cuaderno II, CD 114",
+      "composerName": "Claude Debussy"
+    },
+    {
+      "title": "Ariettes Oublièes (selección)",
+      "composerName": "Claude Debussy"
+    },
+    {
+      "title": "En sourdine",
+      "composerName": "Pau Casals"
+    },
+    {
+      "title": "Que curtes, vida meva, són les hores",
+      "composerName": "Pau Casals"
+    },
+    {
+      "title": "Per què t'estimo tant",
+      "composerName": "Lluïsa Casagemas"
+    },
+    {
+      "title": "Rialla d'abril [Risa de abril]",
+      "composerName": "Lluïsa Casagemas"
+    },
+    {
+      "title": "Evocación , de Iberia. Cuaderno I",
+      "composerName": "Isaac Albéniz"
+    },
+    {
+      "title": "Tonadillas en estilo antiguo (selección)",
+      "composerName": "Enrique Granados"
+    },
+    {
+      "title": "La Diva de l'Empire",
+      "composerName": "Erik Satie"
+    },
+    {
+      "title": "Je te veux",
+      "composerName": "Erik Satie"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/mireia-tarrago-marc-serra",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/mireia-tarrago-marc-serra"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

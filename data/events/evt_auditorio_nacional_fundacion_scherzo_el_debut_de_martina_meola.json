@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_fundacion_scherzo_el_debut_de_martina_meola",
+  "slug": "fundacion-scherzo-el-debut-de-martina-meola",
+  "title": "Fundación Scherzo. El debut de Martina Meola",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_fundacion_scherzo_el_debut_de_martina_meola_01",
+      "date": "2026-10-30",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Martina Meola"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Frédéric Chopin"
+    },
+    {
+      "name": "Franz Liszt"
+    }
+  ],
+  "works": [
+    {
+      "title": "Vals en la bemol mayor, op. 34 núm. 1",
+      "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "Mazurca en do menor, op. 30 núm. 1",
+      "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "Mazurca en do sostenido menor, op. 30 núm. 4",
+      "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "Balada en sol menor, op. 23 núm. 1",
+      "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "Nocturno en si bemol menor, op. 9 núm. 1",
+      "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "Scherzo en si bemol menor, op. 31 núm. 2",
+      "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "Andante spianato y Gran Polonesa brillante en mi bemol mayor, op. 22",
+      "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "Soneto 123 de Petrarca en mi menor, extraído del segundo año de Años de peregrinación, S. 161 n.º 5",
+      "composerName": "Franz Liszt"
+    },
+    {
+      "title": "Après une lecture du Dante (Fantasia quasi sonata) en re menor, extraído del segundo año de Años de peregrinación, S. 161 n.º 7",
+      "composerName": "Franz Liszt"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/fundacion-scherzo-el-debut-de-martina-meola",
+      "checkedAt": "2026-09-18",
+      "externalId": "fundacion-scherzo-el-debut-de-martina-meola"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-18"
+}

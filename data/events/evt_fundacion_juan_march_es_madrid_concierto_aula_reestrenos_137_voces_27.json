@@ -1,0 +1,193 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_aula_reestrenos_137_voces_27",
+  "slug": "aula-de-re-estrenos-137-voces-del-27",
+  "title": "Aula de (Re)estrenos (137). Voces del 27",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_aula_reestrenos_137_voces_27_01",
+      "date": "2027-04-28",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Elena Copons"
+    },
+    {
+      "name": "Irene Alfageme"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Gustavo Pittaluga"
+    },
+    {
+      "name": "Fernando Remacha"
+    },
+    {
+      "name": "Elena Romero"
+    },
+    {
+      "name": "Gustavo Durán"
+    },
+    {
+      "name": "Salvador Bacarisse"
+    },
+    {
+      "name": "Ígor Stravinski"
+    },
+    {
+      "name": "Maurice Ravel"
+    },
+    {
+      "name": "Francis Poulenc"
+    },
+    {
+      "name": "Alicia Terzian"
+    },
+    {
+      "name": "Manuel de Falla"
+    },
+    {
+      "name": "Miquel Ortega"
+    },
+    {
+      "name": "María Rodrigo"
+    },
+    {
+      "name": "Rosa García Ascot"
+    },
+    {
+      "name": "Ernesto Halffter"
+    },
+    {
+      "name": "Antón García Abril"
+    },
+    {
+      "name": "Carlos Guastavino"
+    },
+    {
+      "name": "Óscar Esplá"
+    },
+    {
+      "name": "Xavier Montsalvatge"
+    },
+    {
+      "name": "Agustín Conchs Guick"
+    },
+    {
+      "name": "Federico García Lorca"
+    }
+  ],
+  "works": [
+    {
+      "title": "El loro - tonadilla. El pregón del vendedor de loros (Manuel Abril)",
+      "composerName": "Gustavo Pittaluga"
+    },
+    {
+      "title": "Dos cantares y un cantarcillo",
+      "composerName": "Fernando Remacha"
+    },
+    {
+      "title": "Villancico",
+      "composerName": "Elena Romero"
+    },
+    {
+      "title": "Seguidillas de la noche de San Juan",
+      "composerName": "Gustavo Durán"
+    },
+    {
+      "title": "Dos cantares de Lope de Vega",
+      "composerName": "Salvador Bacarisse"
+    },
+    {
+      "title": "Pastorale",
+      "composerName": "Ígor Stravinski"
+    },
+    {
+      "title": "Soupir. Lent [Suspiro. Lento] , de Trois poèmes de Stéphane Mallarmé, M 64",
+      "composerName": "Maurice Ravel"
+    },
+    {
+      "title": "Trois chansons de Federico García Lorca, FP 136",
+      "composerName": "Francis Poulenc"
+    },
+    {
+      "title": "Tres retratos",
+      "composerName": "Alicia Terzian"
+    },
+    {
+      "title": "El pan de Ronda que sabe a verdad",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Oración de las madres que tienen a sus hijos en brazos",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Pasqua florida (selección)",
+      "composerName": "Miquel Ortega"
+    },
+    {
+      "title": "Tres Ayes",
+      "composerName": "María Rodrigo"
+    },
+    {
+      "title": "La de guitarra, para piano",
+      "composerName": "Rosa García Ascot"
+    },
+    {
+      "title": "La corza blanca , de Dos canciones (Rafael Alberti)",
+      "composerName": "Ernesto Halffter"
+    },
+    {
+      "title": "El mar es un olvido (Tres poéticas de la mar)",
+      "composerName": "Antón García Abril"
+    },
+    {
+      "title": "Jardín antiguo , de Las Nubes",
+      "composerName": "Carlos Guastavino"
+    },
+    {
+      "title": "I El conde de Cabra , de La pájara pinta, op. 25",
+      "composerName": "Óscar Esplá"
+    },
+    {
+      "title": "Seis canciones para niños (F. García Lorca) (selección)",
+      "composerName": "Xavier Montsalvatge"
+    },
+    {
+      "title": "Tu nombre ya me lo han dicho",
+      "composerName": "Agustín Conchs Guick"
+    },
+    {
+      "title": "Anda jaleo , de Canciones populares españolas (arreglo de Samuel Diz)",
+      "composerName": "Federico García Lorca"
+    }
+  ],
+  "eras": [
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "lied"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/aula-reestrenos-137-voces-27",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/aula-reestrenos-137-voces-27"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

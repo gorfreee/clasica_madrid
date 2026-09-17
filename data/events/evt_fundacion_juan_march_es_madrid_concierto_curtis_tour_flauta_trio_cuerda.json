@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_curtis_tour_flauta_trio_cuerda",
+  "slug": "curtis-on-tour-flauta-y-trio-de-cuerda",
+  "title": "Curtis on Tour: Flauta y trío de cuerda",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_curtis_tour_flauta_trio_cuerda_01",
+      "date": "2027-05-16",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Jasmine Choi"
+    },
+    {
+      "name": "Trío de cuerda Curtis on Tour"
+    },
+    {
+      "name": "Anais Feller"
+    },
+    {
+      "name": "Bailin Jian"
+    },
+    {
+      "name": "Jonah Kernis"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Delfin Demiray"
+    },
+    {
+      "name": "Ernst von Dohnányi"
+    }
+  ],
+  "works": [
+    {
+      "title": "Serenata en Re mayor para flauta, violín y viola, op. 25",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Título por confirmar (encargo del Curtis)",
+      "composerName": "Delfin Demiray"
+    },
+    {
+      "title": "Serenata para trío de cuerda en Do mayor, op. 10",
+      "composerName": "Ernst von Dohnányi"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/curtis-tour-flauta-trio-cuerda",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/curtis-tour-flauta-trio-cuerda"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

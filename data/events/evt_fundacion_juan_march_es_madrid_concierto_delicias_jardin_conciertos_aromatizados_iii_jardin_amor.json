@@ -1,0 +1,176 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_delicias_jardin_conciertos_aromatizados_iii_jardin_amor",
+  "slug": "las-delicias-del-jardin-conciertos-aromatizados-iii-el-jardin-del-amor",
+  "title": "Las delicias del jardín: conciertos aromatizados (III): El jardín del amor",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_delicias_jardin_conciertos_aromatizados_iii_jardin_amor_01",
+      "date": "2027-05-19",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Dionysos Now!"
+    },
+    {
+      "name": "Franz Vitzthum"
+    },
+    {
+      "name": "Bernd Oliver Fröhlich"
+    },
+    {
+      "name": "Jan Petryka"
+    },
+    {
+      "name": "Tim Scott Whiteley"
+    },
+    {
+      "name": "Tore Tom Denys"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Philippe Verdelot"
+    },
+    {
+      "name": "Maistre Jhan"
+    },
+    {
+      "name": "Adrian Willaert"
+    },
+    {
+      "name": "Orlande de Lassus"
+    },
+    {
+      "name": "Clément Janequin"
+    },
+    {
+      "name": "Jacquet De Mantua"
+    },
+    {
+      "name": "Perissone Cambio"
+    },
+    {
+      "name": "Jacques Arcadelt"
+    },
+    {
+      "name": "Luca Marenzio"
+    },
+    {
+      "name": "Carlo Gesualdo"
+    },
+    {
+      "name": "Philippe De Monte"
+    },
+    {
+      "name": "Giovanni Pierluigi da Palestrina"
+    },
+    {
+      "name": "Giulio Belli"
+    },
+    {
+      "name": "Andrea Gabrieli"
+    }
+  ],
+  "works": [
+    {
+      "title": "O dolce nocte (Madrigali. Libro 3, nº 6)",
+      "composerName": "Philippe Verdelot"
+    },
+    {
+      "title": "Per aspri boschi (Madrigali a cinque voci, Libro II)",
+      "composerName": "Maistre Jhan"
+    },
+    {
+      "title": "Qual dolcezza giamai (Madrigali a cinque voci)",
+      "composerName": "Adrian Willaert"
+    },
+    {
+      "title": "La nuict froide et sombre [La noche fría y oscura] (Les meslanges)",
+      "composerName": "Orlande de Lassus"
+    },
+    {
+      "title": "Le chant des oiseaux [El canto de los pájaros] (Chansons de maistre Clement Janequin)",
+      "composerName": "Clément Janequin"
+    },
+    {
+      "title": "J'ay veu le regnart et le loup et le lievre [He visto al zorro, al lobo y a la liebre] (La Couronne et Fleur des Chansons a troys)",
+      "composerName": "Adrian Willaert"
+    },
+    {
+      "title": "Dulce padrun (Il primo libro delle Greghesche)",
+      "composerName": "Adrian Willaert"
+    },
+    {
+      "title": "Formoso vermi formosa Camilla (Cipriani musici eccelentissimi, Libro I)",
+      "composerName": "Jacquet De Mantua"
+    },
+    {
+      "title": "Giunto m'à Amor fra belle et crude braccia (Musica nova)",
+      "composerName": "Perissone Cambio"
+    },
+    {
+      "title": "Chiare, fresche et dolci acque [Fresca agua, dulce y clara] (Il primo libro delle muse a cinque voci)",
+      "composerName": "Jacques Arcadelt"
+    },
+    {
+      "title": "Sanctus (Missa chiare fresche acque, Messe del fiore a cinque voci, Libro II)",
+      "composerName": "Jacquet De Mantua"
+    },
+    {
+      "title": "O voi che sospirate [Oh, vosotros que suspiráis] (Madrigali a cinque voci, Libro II)",
+      "composerName": "Luca Marenzio"
+    },
+    {
+      "title": "Zefiro torna (Madrigali a quatre voci, Libro I)",
+      "composerName": "Luca Marenzio"
+    },
+    {
+      "title": "Se la mia morte brami [Si anhelas mi muerte] (Madrigales a cinco voces, Libro sexto, nº 1)",
+      "composerName": "Carlo Gesualdo"
+    },
+    {
+      "title": "Lieti Fiori e felici [Flores alegres y felices]",
+      "composerName": "Philippe De Monte"
+    },
+    {
+      "title": "Vestiva i colli e le campagne (Il Desiderio, secondo libro de madrigali a cinque voci)",
+      "composerName": "Giovanni Pierluigi da Palestrina"
+    },
+    {
+      "title": "Agnus Dei (Missa Vestiva i colli, Missarum quinque vocibus, Libro I)",
+      "composerName": "Giulio Belli"
+    },
+    {
+      "title": "Sassi, Palae, Sabbion, del Adrian lio (Il primo libro delle Grehesche)",
+      "composerName": "Andrea Gabrieli"
+    }
+  ],
+  "eras": [
+    "renaissance",
+    "baroque"
+  ],
+  "formats": [
+    "choral",
+    "early-music"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/delicias-jardin-conciertos-aromatizados-iii-jardin-amor",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/delicias-jardin-conciertos-aromatizados-iii-jardin-amor"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

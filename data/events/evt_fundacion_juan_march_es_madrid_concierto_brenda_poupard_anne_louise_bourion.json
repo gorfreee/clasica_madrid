@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_brenda_poupard_anne_louise_bourion",
+  "slug": "brenda-poupard-y-anne-louise-bourion",
+  "title": "Brenda Poupard y Anne-Louise Bourion",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_brenda_poupard_anne_louise_bourion_01",
+      "date": "2026-11-01",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_brenda_poupard_anne_louise_bourion_02",
+      "date": "2026-11-02",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Brenda Poupard"
+    },
+    {
+      "name": "Anne-Louise Bourion"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Hector Berlioz"
+    },
+    {
+      "name": "Richard Wagner"
+    },
+    {
+      "name": "Pauline Viardot"
+    },
+    {
+      "name": "Louise Bertin"
+    }
+  ],
+  "works": [
+    {
+      "title": "Les nuits d'été, op. 7",
+      "composerName": "Hector Berlioz"
+    },
+    {
+      "title": "La captive, op. 12",
+      "composerName": "Hector Berlioz"
+    },
+    {
+      "title": "Tout n’est qu’images fugitives, WWV 58",
+      "composerName": "Richard Wagner"
+    },
+    {
+      "title": "L’attente, WWV 55 [La espera]",
+      "composerName": "Richard Wagner"
+    },
+    {
+      "title": "La tombe dit à la rose, WWV 56",
+      "composerName": "Richard Wagner"
+    },
+    {
+      "title": "Les ombres de minuit (Doce melodías sobre poemas rusos)",
+      "composerName": "Pauline Viardot"
+    },
+    {
+      "title": "Dix mélodies",
+      "composerName": "Pauline Viardot"
+    },
+    {
+      "title": "Lamento, VWV 1139",
+      "composerName": "Pauline Viardot"
+    },
+    {
+      "title": "Un bal (Un baile). Valse, Allegro non troppo , de Sinfonía Fantástica, op. 14 (arreglo para piano de Franz Liszt)",
+      "composerName": "Hector Berlioz"
+    },
+    {
+      "title": "Aria “Il vago sol del mondo”, de Fausto (Fausto)",
+      "composerName": "Louise Bertin"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "lied"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/brenda-poupard-anne-louise-bourion",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/brenda-poupard-anne-louise-bourion"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

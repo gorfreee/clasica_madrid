@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_aula_reestrenos_135_proyecto_conrado_integral_sus_cuartetos",
+  "slug": "aula-de-re-estrenos-135-proyecto-conrado-integral-de-sus-cuartetos",
+  "title": "Aula de (Re)estrenos 135. Proyecto Conrado: integral de sus cuartetos",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_aula_reestrenos_135_proyecto_conrado_integral_sus_cuartetos_01",
+      "date": "2027-02-17",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Cuarteto Cosmos"
+    },
+    {
+      "name": "Bernat Prat"
+    },
+    {
+      "name": "Helena Satué"
+    },
+    {
+      "name": "Lara Fernández Ponce"
+    },
+    {
+      "name": "Oriol Prat"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Conrado del Campo"
+    }
+  ],
+  "works": [
+    {
+      "title": "Cuarteto nº 13 en La mayor \"Carlos III\"",
+      "composerName": "Conrado del Campo"
+    },
+    {
+      "title": "Cuarteto nº 14 en Re mayor",
+      "composerName": "Conrado del Campo"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/aula-reestrenos-135-proyecto-conrado-integral-sus-cuartetos",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/aula-reestrenos-135-proyecto-conrado-integral-sus-cuartetos"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_stoyan_paskov",
+  "slug": "stoyan-paskov",
+  "title": "Stoyan Paskov",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_stoyan_paskov_01",
+      "date": "2026-11-29",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_stoyan_paskov_02",
+      "date": "2026-11-30",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Stoyan Paskov"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Francisco Tárrega"
+    },
+    {
+      "name": "Joaquín Rodrigo"
+    },
+    {
+      "name": "Isaac Albéniz"
+    },
+    {
+      "name": "Vicente Amigo"
+    },
+    {
+      "name": "Mario Escudero"
+    },
+    {
+      "name": "Antonio Rey"
+    },
+    {
+      "name": "Paco de Lucia"
+    }
+  ],
+  "works": [
+    {
+      "title": "Recuerdos de La Alhambra",
+      "composerName": "Francisco Tárrega"
+    },
+    {
+      "title": "Invocación y danza",
+      "composerName": "Joaquín Rodrigo"
+    },
+    {
+      "title": "Asturias (Leyenda) (Suite española nº 1, op. 47 nº 5) (versión para guitarra)",
+      "composerName": "Isaac Albéniz"
+    },
+    {
+      "title": "Gran jota de concierto",
+      "composerName": "Francisco Tárrega"
+    },
+    {
+      "title": "Callejón de la Luna (Taranta)",
+      "composerName": "Vicente Amigo"
+    },
+    {
+      "title": "Córdoba (Soleá)",
+      "composerName": "Vicente Amigo"
+    },
+    {
+      "title": "Ímpetu (Bulerías)",
+      "composerName": "Mario Escudero"
+    },
+    {
+      "title": "Maestro Riqueni (Canción)",
+      "composerName": "Antonio Rey"
+    },
+    {
+      "title": "La Barrosa (Alegrías)",
+      "composerName": "Paco de Lucia"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/stoyan-paskov",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/stoyan-paskov"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

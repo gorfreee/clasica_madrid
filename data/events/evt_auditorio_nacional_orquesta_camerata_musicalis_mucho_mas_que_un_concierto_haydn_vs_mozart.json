@@ -29,7 +29,12 @@
       "name": "Franz Joseph Haydn"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "vs Mozart\"",
+      "composerName": "Franz Joseph Haydn"
+    }
+  ],
   "eras": [
     "classical"
   ],
@@ -42,10 +47,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/orquesta-camerata-musicalis-mucho-mas-que-un-concierto-haydn-vs-mozart",
-      "checkedAt": "2026-09-14",
+      "checkedAt": "2026-09-18",
       "externalId": "orquesta-camerata-musicalis-mucho-mas-que-un-concierto-haydn-vs-mozart"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-14"
+  "lastVerifiedAt": "2026-09-18"
 }

@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_enescu_raices_mestizaje_i_melodies_lieder",
+  "slug": "enescu-raices-y-mestizaje-i-melodies-y-lieder",
+  "title": "Enescu: raíces y mestizaje (I): Mélodies y Lieder",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_enescu_raices_mestizaje_i_melodies_lieder_01",
+      "date": "2026-11-18",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Anita Hartig"
+    },
+    {
+      "name": "Josu de Solaun"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Paul Constantinescu"
+    },
+    {
+      "name": "Tiberu Brediceanu"
+    },
+    {
+      "name": "Maurice Ravel"
+    },
+    {
+      "name": "Jules Massenet"
+    },
+    {
+      "name": "Johannes Brahms"
+    },
+    {
+      "name": "Gabriel Fauré"
+    },
+    {
+      "name": "George Enescu"
+    }
+  ],
+  "works": [
+    {
+      "title": "Cîntec de adormit Mițura",
+      "composerName": "Paul Constantinescu"
+    },
+    {
+      "title": "Spune mândr'adevǎrat",
+      "composerName": "Tiberu Brediceanu"
+    },
+    {
+      "title": "Floricicǎ de pe apǎ",
+      "composerName": "Tiberu Brediceanu"
+    },
+    {
+      "title": "Mult mǎ 'ntreabǎ inima",
+      "composerName": "Tiberu Brediceanu"
+    },
+    {
+      "title": "Doina Stǎncuței",
+      "composerName": "Tiberu Brediceanu"
+    },
+    {
+      "title": "Cinq mélodies populaires grecques",
+      "composerName": "Maurice Ravel"
+    },
+    {
+      "title": "Nuit d'Espagne",
+      "composerName": "Jules Massenet"
+    },
+    {
+      "title": "Souhait",
+      "composerName": "Jules Massenet"
+    },
+    {
+      "title": "Élégie",
+      "composerName": "Jules Massenet"
+    },
+    {
+      "title": "Wie Melodien zeiht es mir [Como melodías me envuelve] , de Cinco Lieder, op. 105",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Sapphische Ode, op. 94 nº 4",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Cuatro canciones, op. 43 (selección)",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Nº 1. Au bord de l'eau , de Tres melodías, op. 8",
+      "composerName": "Gabriel Fauré"
+    },
+    {
+      "title": "Nº 1. Après un rêve , de Tres melodías, op. 7",
+      "composerName": "Gabriel Fauré"
+    },
+    {
+      "title": "Clair de lune (Dos melodías, op. 46 nº 2)",
+      "composerName": "Gabriel Fauré"
+    },
+    {
+      "title": "Les berceaux , de Tres melodías, op. 23",
+      "composerName": "Gabriel Fauré"
+    },
+    {
+      "title": "Automne (Tres melodías, op. 18 nº 3)",
+      "composerName": "Gabriel Fauré"
+    },
+    {
+      "title": "Notre amour , de Tres melodías, op. 23",
+      "composerName": "Gabriel Fauré"
+    },
+    {
+      "title": "7 Chansons de Clément Marot, op. 15",
+      "composerName": "George Enescu"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "lied"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/enescu-raices-mestizaje-i-melodies-lieder",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/enescu-raices-mestizaje-i-melodies-lieder"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_canciones_mundo_iv_madrid_americas_filipinas",
+  "slug": "canciones-del-mundo-iv-de-madrid-a-las-americas-y-filipinas",
+  "title": "Canciones del mundo (IV): De Madrid a las Américas y Filipinas",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_canciones_mundo_iv_madrid_americas_filipinas_01",
+      "date": "2027-05-29",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Julieth Lozano"
+    },
+    {
+      "name": "Jonathan Lakeland"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Lucrecia Kasilag"
+    },
+    {
+      "name": "Nicanor Abelardo"
+    },
+    {
+      "name": "Modesta Bor"
+    },
+    {
+      "name": "Julieth Lozano Rolong"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/canciones-mundo-iv-madrid-americas-filipinas",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/canciones-mundo-iv-madrid-americas-filipinas"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

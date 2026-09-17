@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_esteban_jimenez",
+  "slug": "esteban-jimenez",
+  "title": "Esteban Jiménez",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_esteban_jimenez_01",
+      "date": "2026-11-15",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_esteban_jimenez_02",
+      "date": "2026-11-16",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Esteban Jiménez"
+    },
+    {
+      "name": "Ignacio Torner"
+    },
+    {
+      "name": "Paloma Pérez Flores"
+    },
+    {
+      "name": "Manuel F. Tirado"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Manuel de Falla"
+    },
+    {
+      "name": "Enrique Granados"
+    },
+    {
+      "name": "Joaquín Turina"
+    },
+    {
+      "name": "Claude Debussy"
+    },
+    {
+      "name": "Maurice Ravel"
+    }
+  ],
+  "works": [
+    {
+      "title": "Canción , de Siete canciones populares españolas",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "El paño moruno , de Siete canciones populares españolas",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Polo , de Siete canciones populares españolas",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Intermezzo (Goyescas) (transcripción de Gaspar Cassadó)",
+      "composerName": "Enrique Granados"
+    },
+    {
+      "title": "IV. Polimnia (Nocturno). Lento , de Las Musas de Andalucía, op. 93",
+      "composerName": "Joaquín Turina"
+    },
+    {
+      "title": "Sonata para violonchelo y piano en Re menor",
+      "composerName": "Claude Debussy"
+    },
+    {
+      "title": "Pieza en forma de habanera",
+      "composerName": "Maurice Ravel"
+    },
+    {
+      "title": "Seguidilla murciana , de Siete canciones populares españolas",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Jota , de Siete canciones populares españolas",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Asturiana , de Siete canciones populares españolas",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Nana , de Siete canciones populares españolas",
+      "composerName": "Manuel de Falla"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/esteban-jimenez",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/esteban-jimenez"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

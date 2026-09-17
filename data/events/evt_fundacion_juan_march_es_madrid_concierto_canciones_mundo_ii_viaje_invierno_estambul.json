@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_canciones_mundo_ii_viaje_invierno_estambul",
+  "slug": "canciones-del-mundo-ii-viaje-de-invierno-a-estambul",
+  "title": "Canciones del mundo (II): Viaje de invierno a Estambul",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_canciones_mundo_ii_viaje_invierno_estambul_01",
+      "date": "2027-05-15",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Stephan Loges"
+    },
+    {
+      "name": "Libby Burgess"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "lied"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/canciones-mundo-ii-viaje-invierno-estambul",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/canciones-mundo-ii-viaje-invierno-estambul"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

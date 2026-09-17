@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_lowe_ensemble",
+  "slug": "lowe-ensemble",
+  "title": "Lowe Ensemble",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_lowe_ensemble_01",
+      "date": "2027-05-23",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_lowe_ensemble_02",
+      "date": "2027-05-24",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Lowe Ensemble"
+    },
+    {
+      "name": "Joseph Lowe"
+    },
+    {
+      "name": "Gabriel Lowe"
+    },
+    {
+      "name": "Xavier Lowe"
+    },
+    {
+      "name": "Santiago Lowe"
+    },
+    {
+      "name": "Myriam Lowe"
+    },
+    {
+      "name": "John Wasserman"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Jean-Baptiste Lully"
+    },
+    {
+      "name": "Marin Marais"
+    },
+    {
+      "name": "Henry de Bailly"
+    },
+    {
+      "name": "Giulio Caccini"
+    },
+    {
+      "name": "Giuseppe Antonio Paganelli"
+    },
+    {
+      "name": "Georg Friedrich Händel"
+    },
+    {
+      "name": "Diego Ortiz"
+    },
+    {
+      "name": "Andrea Falconieri"
+    },
+    {
+      "name": "Antonio de Cabezón"
+    },
+    {
+      "name": "José Marín"
+    },
+    {
+      "name": "Santiago de Murcia"
+    },
+    {
+      "name": "Mateo Flecha"
+    },
+    {
+      "name": "Alessandro Scarlatti"
+    },
+    {
+      "name": "Antonio Soler"
+    }
+  ],
+  "works": [
+    {
+      "title": "Air des Espagnols (Le Bourgeois gentilhomme, LWV 43)",
+      "composerName": "Jean-Baptiste Lully"
+    },
+    {
+      "title": "Sé que me muero (Le Bourgeois gentilhomme, LWV 43)",
+      "composerName": "Jean-Baptiste Lully"
+    },
+    {
+      "title": "Sarabande à l’Espagnole (Pièces de viole, Libro II)",
+      "composerName": "Marin Marais"
+    },
+    {
+      "title": "Le Basque (Pièces de viole, Libro IV)",
+      "composerName": "Marin Marais"
+    },
+    {
+      "title": "Yo soy la locura",
+      "composerName": "Henry de Bailly"
+    },
+    {
+      "title": "Non ha’l ciel cotanti lumi (Nuove musiche)",
+      "composerName": "Giulio Caccini"
+    },
+    {
+      "title": "Sonata para violonchelo en La menor (selección)",
+      "composerName": "Giuseppe Antonio Paganelli"
+    },
+    {
+      "title": "No se enmendará jamás, cantata spagnola, HWV 140",
+      "composerName": "Georg Friedrich Händel"
+    },
+    {
+      "title": "Recercada ottava sobre \"La folía\"",
+      "composerName": "Diego Ortiz"
+    },
+    {
+      "title": "Folias echa para mi Señora Doña Tarolilla de Carallenos",
+      "composerName": "Andrea Falconieri"
+    },
+    {
+      "title": "Diferencias sobre el \"Canto del caballero\"",
+      "composerName": "Antonio de Cabezón"
+    },
+    {
+      "title": "Ojos, pues me desdeñais",
+      "composerName": "José Marín"
+    },
+    {
+      "title": "Grabe",
+      "composerName": "Santiago de Murcia"
+    },
+    {
+      "title": "Ensalada \"San Sabeya gugurumbé\" (La Negrina)",
+      "composerName": "Mateo Flecha"
+    },
+    {
+      "title": "Fandango",
+      "composerName": "Alessandro Scarlatti"
+    },
+    {
+      "title": "Fandango",
+      "composerName": "Antonio Soler"
+    }
+  ],
+  "eras": [
+    "renaissance",
+    "baroque"
+  ],
+  "formats": [
+    "early-music",
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/lowe-ensemble",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/lowe-ensemble"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

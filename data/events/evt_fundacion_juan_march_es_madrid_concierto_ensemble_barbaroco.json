@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_ensemble_barbaroco",
+  "slug": "ensemble-barbaroco",
+  "title": "Ensemble Barbaroco",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_ensemble_barbaroco_01",
+      "date": "2027-01-31",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_ensemble_barbaroco_02",
+      "date": "2027-02-01",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ensemble Barbaroco"
+    },
+    {
+      "name": "Eliaz Hercelin"
+    },
+    {
+      "name": "Hyérine Lassalle"
+    },
+    {
+      "name": "Claire Gravelines"
+    },
+    {
+      "name": "Lukas Schneider"
+    },
+    {
+      "name": "Manon Ducheman"
+    },
+    {
+      "name": "Armin Yaldai"
+    },
+    {
+      "name": "Emma-Lisa Roux"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Francisco Guerrero"
+    },
+    {
+      "name": "Antonio de Cabezón"
+    },
+    {
+      "name": "Diego Ortiz"
+    },
+    {
+      "name": "Libro II"
+    },
+    {
+      "name": "Francisco de la Torre"
+    },
+    {
+      "name": "Juan Cebrián (c. s.XVI)"
+    },
+    {
+      "name": "Miguel de Fuenllana"
+    },
+    {
+      "name": "Juan del Encina"
+    },
+    {
+      "name": "Alcalá de Henares"
+    },
+    {
+      "name": "Musical de Palacio"
+    }
+  ],
+  "works": [
+    {
+      "title": "Pavana del Ré, FVB 16"
+    },
+    {
+      "title": "Oh, desdichado de mí (Cancionero de Palacio, Madrid c. 1500)"
+    },
+    {
+      "title": "Soy serranica (Cancionero de Uppsala, Venecia, 1556)"
+    },
+    {
+      "title": "Si la noche haze escura (Cancionero de Uppsala, Venecia, 1556)",
+      "composerName": "Francisco Guerrero"
+    },
+    {
+      "title": "Canción glosada sobre Cipriano de Rore \"Ancol que col partire\" (Obras de música para tecla, arpa y vihuela, 1578)",
+      "composerName": "Antonio de Cabezón"
+    },
+    {
+      "title": "Recercada primera sobre el canto llano (Tratado de Glosas, Libro II, Roma ,1553)",
+      "composerName": "Diego Ortiz"
+    },
+    {
+      "title": "Dime, triste coraçón (Cancionero de la Colombina)",
+      "composerName": "Francisco de la Torre"
+    },
+    {
+      "title": "Recercada segunda (Tratado de Glosas, Libro II, Roma, 1553)",
+      "composerName": "Diego Ortiz"
+    },
+    {
+      "title": "Canción francesa sobre Clemens non Papa",
+      "composerName": "Antonio de Cabezón"
+    },
+    {
+      "title": "Pámpano verde (Cancionero de Palacio)",
+      "composerName": "Francisco de la Torre"
+    },
+    {
+      "title": "Ojos morenicos (Cancionero de Palacio, Madrid, c. 1500)"
+    },
+    {
+      "title": "Ó voy (Cancionero de Palacio, Madrid, c. 1500)"
+    },
+    {
+      "title": "Lágrimas de mi consuelo (Cancionero de Medinaceli, Medinaceli, s. XVI)",
+      "composerName": "Juan Cebrián (c. s.XVI)"
+    },
+    {
+      "title": "De Antequera sale el Moro (Orphénica Lyra, Sevilla, 1554)",
+      "composerName": "Miguel de Fuenllana"
+    },
+    {
+      "title": "Ay, triste que vengo (Cancionero de Palacio, Madrid, c. 1500) 1",
+      "composerName": "Juan del Encina"
+    },
+    {
+      "title": "Pavana con su glosa (Libro de Cifra Nueva, Alcalá de Henares, 1557)",
+      "composerName": "Antonio de Cabezón"
+    }
+  ],
+  "eras": [
+    "renaissance"
+  ],
+  "formats": [
+    "chamber",
+    "early-music"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/ensemble-barbaroco",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/ensemble-barbaroco"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}
