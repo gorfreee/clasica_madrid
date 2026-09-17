@@ -109,6 +109,24 @@ describe('canonicalizeComposerName', () => {
     expect(canonicalizeComposerName('Antonin Dvorak')).toBe('Antonín Dvořák');
   });
 
+  it.each([
+    ['BRAHMS, Johannes', 'Johannes Brahms'],
+    ['DVORÁK, Antonin', 'Antonín Dvořák'],
+    ['KREISLER, Fritz', 'Fritz Kreisler'],
+    ['MARTINU, Bohuslav', 'Bohuslav Martinů'],
+    ['CHOPIN, Fryderyck Franciszek', 'Frédéric Chopin'],
+    ['LISZT, Franz', 'Franz Liszt'],
+    ['RACHMANINOV, Sergey', 'Serguéi Rajmáninov'],
+  ])('resuelve el nombre invertido conocido %s', (input, expected) => {
+    expect(canonicalizeComposerName(input)).toBe(expected);
+  });
+
+  it('sólo publica un apellido aislado cuando el catálogo lo resuelve sin ambigüedad', () => {
+    expect(canonicalizeComposerName('Bach')).toBe('Johann Sebastian Bach');
+    expect(canonicalizeComposerName('Strauss')).toBeUndefined();
+    expect(canonicalizeComposerName('Moszkowski')).toBe('Moszkowski');
+  });
+
   it('conserva un nombre desconocido con casing mixto razonable', () => {
     expect(canonicalizeComposerName('Marina Vespertilio')).toBe('Marina Vespertilio');
   });
@@ -195,6 +213,25 @@ describe('listas publicadas', () => {
     expect(
       canonicalizeWorkList([{ title: 'El carnaval de los Animales.', composerName: 'Saint-Saëns' }]),
     ).toEqual([{ title: 'El carnaval de los Animales', composerName: 'Camille Saint-Saëns' }]);
+  });
+
+  it('usa la misma identidad canónica en composers[] y works[].composerName', () => {
+    expect(
+      canonicalizeComposerList([
+        { name: 'Johannes Brahms' },
+        { name: 'BRAHMS, Johannes' },
+        { name: 'DVORÁK, Antonin' },
+      ]),
+    ).toEqual([{ name: 'Johannes Brahms' }, { name: 'Antonín Dvořák' }]);
+    expect(
+      canonicalizeWorkList([
+        { title: 'Sonata', composerName: 'BRAHMS, Johannes' },
+        { title: 'Danzas eslavas', composerName: 'DVORÁK, Antonin' },
+      ]),
+    ).toEqual([
+      { title: 'Sonata', composerName: 'Johannes Brahms' },
+      { title: 'Danzas eslavas', composerName: 'Antonín Dvořák' },
+    ]);
   });
 });
 
@@ -310,5 +347,26 @@ describe('NormalizedEvent → Event publicado', () => {
     expect(merged.event.works).toEqual([{ title: 'Preludio', composerName: 'Johann Sebastian Bach' }]);
     expect(merged.event.id).toBe(existing.id);
     expect(merged.event.slug).toBe(existing.slug);
+  });
+
+  it('merge corrige nombres invertidos ya publicados sin duplicar persona ni obra', () => {
+    const existing = makeEvent({
+      composers: [{ name: 'BRAHMS, Johannes' }],
+      works: [{ title: 'Sonata', composerName: 'BRAHMS, Johannes' }],
+    });
+    const merged = mergeExistingEvent(
+      existing,
+      proposalFromObservation(
+        observed({
+          title: existing.title,
+          composers: [{ name: 'Johannes Brahms' }],
+          works: [{ title: 'Sonata', composerName: 'Johannes Brahms' }],
+        }),
+        { catalogSourceId: 'src_auditorio', now: TEST_NOW, venueId: existing.venueId },
+      ),
+      TEST_NOW,
+    );
+    expect(merged.event.composers).toEqual([{ name: 'Johannes Brahms' }]);
+    expect(merged.event.works).toEqual([{ title: 'Sonata', composerName: 'Johannes Brahms' }]);
   });
 });

@@ -556,6 +556,47 @@ describe('Fundación Più Mosso pending information', () => {
     });
   });
 
+  it('counts an exact pending discard as presence without hiding a different absent event', async () => {
+    const pendingUrl = 'https://www.fundacionpiumosso.com/evento/festival-placeholder-hora';
+    const catalog = emptyCatalog();
+    catalog.sources = [source.seedSource];
+    catalog.events = [
+      makeEvent({
+        id: 'evt_piumosso_pending',
+        slug: 'festival-placeholder-hora',
+        occurrences: [{ id: 'occ_piumosso_pending_01', date: '2026-09-12', time: null, status: 'scheduled' }],
+        citations: [{ sourceId: source.catalogSourceId, url: pendingUrl, externalId: '5003', checkedAt: '2026-08-31' }],
+        primarySourceId: source.catalogSourceId,
+      }),
+      makeEvent({
+        id: 'evt_piumosso_really_absent',
+        slug: 'really-absent',
+        occurrences: [{ id: 'occ_piumosso_absent_01', date: '2026-09-13', time: '19:30', status: 'scheduled' }],
+        citations: [{ sourceId: source.catalogSourceId, url: 'https://www.fundacionpiumosso.com/evento/really-absent', externalId: '5999', checkedAt: '2026-08-31' }],
+        primarySourceId: source.catalogSourceId,
+      }),
+    ];
+    const listing = programacionPage(
+      oneCardListing(
+        '5003',
+        `${pendingUrl}/`,
+        'Festival Alicia de Larrocha en Casa de Vacas IV. EDICIÓN - Esperando Información',
+        '2026-09-12T08:00:00+02:00',
+      ),
+    );
+    const run = await runIngest({
+      now: TEST_NOW,
+      dryRun: true,
+      catalog,
+      window: TEST_WINDOW,
+      sourceIds: [source.id],
+      dataDir: await mkdtemp(path.join(os.tmpdir(), 'piumosso-discard-presence-')),
+      get: async () => listing,
+    });
+    expect(run.possiblyMissing.map((item) => item.eventId)).toEqual(['evt_piumosso_really_absent']);
+    expect(run.possiblyMissing.some((item) => item.eventId === 'evt_piumosso_pending')).toBe(false);
+  });
+
   it('still extracts a normal Più Mosso concert', async () => {
     const { events, discards } = await extractListed(
       programacionPage(

@@ -359,6 +359,7 @@ describe('regresiones de atribución débil (PR #253)', () => {
   it('un X: Y genérico no basta para un desconocido; Bach: Suite y Name — obra sí', () => {
     expect(composerNames('Reina de la Noche: Elena de la Merced')).toEqual([]);
     expect(composerNames('Invitatorio de Difuntos: Francisco Corselli')).toEqual([]);
+    expect(composerNames('Invitatorio de Difuntos')).toEqual([]);
     expect(composerNames('Francisco Corselli: Invitatorio de Difuntos')).toEqual(['Francisco Corselli']);
     expect(composerNames('Nacional de España: Isabel Rubio')).toEqual([]);
     expect(composerNames('Encargo de la Fil NY: Sinfonía núm. 5')).toEqual([]);

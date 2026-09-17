@@ -313,7 +313,14 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Frédéric Chopin',
-    aliases: ['Frédéric Chopin', 'Fryderyk Chopin', 'F. Chopin', 'Chopin'],
+    aliases: [
+      'Frédéric Chopin',
+      'Fryderyk Chopin',
+      'Fryderyk Franciszek Chopin',
+      'Fryderyck Franciszek Chopin',
+      'F. Chopin',
+      'Chopin',
+    ],
     eras: ['romantic'],
   },
   {
@@ -362,6 +369,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
       'Serguéi Rajmáninov',
       'Sergei Rachmaninoff',
       'Sergei Rachmaninov',
+      'Sergey Rachmaninov',
       'Rachmaninoff',
       'Rachmaninov',
       'Rachmáninov',
@@ -1890,6 +1898,11 @@ export const COMPOSERS: ComposerKnowledge[] = [
     eras: ['twentieth'],
   },
   {
+    canonicalName: 'Fritz Kreisler',
+    aliases: ['Fritz Kreisler', 'F. Kreisler', 'Kreisler'],
+    eras: ['romantic'],
+  },
+  {
     canonicalName: 'Frank Martin',
     aliases: ['Frank Martin'],
     eras: ['twentieth'],
@@ -2422,6 +2435,13 @@ type ComposerIndex = {
 };
 
 const INDEX: ComposerIndex = buildIndex(COMPOSERS);
+const CANONICAL_SURNAME_COUNTS = new Map<string, number>();
+for (const composer of COMPOSERS) {
+  const words = foldName(composer.canonicalName).split(' ').filter(Boolean);
+  while (/^(?:i|ii|iii|iv|jr|sr)$/.test(words.at(-1) ?? '')) words.pop();
+  const surname = words.at(-1);
+  if (surname) CANONICAL_SURNAME_COUNTS.set(surname, (CANONICAL_SURNAME_COUNTS.get(surname) ?? 0) + 1);
+}
 
 /**
  * Trailing biographical year annotation only: `(1685-1750)`, `(1937)`,
@@ -2462,6 +2482,12 @@ export function matchComposer(name: string): ComposerKnowledge | undefined {
   const withoutAttribution = stripComposerAttributionPrefix(name);
   if (withoutAttribution && withoutAttribution !== name) return matchComposer(withoutAttribution);
   return undefined;
+}
+
+/** A bare surname shared by several catalogued composers cannot identify one. */
+export function isAmbiguousComposerSurname(name: string): boolean {
+  const folded = foldName(name);
+  return Boolean(folded && !folded.includes(' ') && (CANONICAL_SURNAME_COUNTS.get(folded) ?? 0) > 1);
 }
 
 export type ComposerPrefixMatch = {

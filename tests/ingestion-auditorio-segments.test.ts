@@ -525,6 +525,8 @@ describe('segmentación performer/programa del Auditorio', () => {
     });
     expect(parseKnownComposerPrefixWork('Monteverdi y Schütz: la huella veneciana')).toBeUndefined();
     expect(looksLikeKnownComposerPairHeading('Monteverdi y Schütz: la huella veneciana')).toBe(true);
+    expect(looksLikeKnownComposerPairHeading('"Haydn vs Mozart"')).toBe(true);
+    expect(parseKnownComposerPrefixWork('"Haydn vs Mozart"')).toBeUndefined();
     expect(looksLikeKnownComposerPairHeading('Mozart: Divertimento en Re mayor, K. 136')).toBe(false);
     expect(parseComposerColonWork('Monteverdi y Schütz: la huella veneciana')).toBeUndefined();
     expect(parseComposerColonWork('Mozart: Divertimento en Re mayor, K. 136')).toEqual({
