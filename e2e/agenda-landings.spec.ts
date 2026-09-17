@@ -4,11 +4,16 @@ async function sitemapXml(request: { get: (url: string) => Promise<{ ok: () => b
   const index = await request.get('/sitemap-index.xml');
   expect(index.ok()).toBe(true);
   const indexXml = await index.text();
-  const loc = indexXml.match(/<loc>([^<]+)<\/loc>/)?.[1];
-  expect(loc).toBeTruthy();
-  const sitemap = await request.get(loc!);
-  expect(sitemap.ok()).toBe(true);
-  return sitemap.text();
+  const locs = [...indexXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => new URL(match[1]!).pathname);
+  expect(locs.length).toBeGreaterThan(0);
+  const parts = await Promise.all(
+    locs.map(async (path) => {
+      const sitemap = await request.get(path);
+      expect(sitemap.ok()).toBe(true);
+      return sitemap.text();
+    }),
+  );
+  return parts.join('\n');
 }
 
 test.describe('landings SEO de agenda', () => {
