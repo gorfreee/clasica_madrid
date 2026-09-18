@@ -202,16 +202,22 @@ describe('ORCAM pipeline safety', () => {
     expect(failed.summary.written).toEqual([]);
   });
 
-  it('keeps Geometrías ambiguous when the ORCAM identity and Auditorio slot point to different events', async () => {
+  it('matches Geometrías ORCAM 4865 to the consolidated Auditorio concert', async () => {
     const catalog = emptyCatalog();
-    catalog.events = await Promise.all(
-      [
-        'evt_auditorio_nacional_orcam_sinfonico_13_geometrias_sonoras.json',
-        'evt_fundacion_orcam_4865.json',
-      ].map(async (file) =>
-        JSON.parse(await readFile(path.join(import.meta.dirname, '..', 'data', 'events', file), 'utf8')),
+    catalog.events = [
+      JSON.parse(
+        await readFile(
+          path.join(
+            import.meta.dirname,
+            '..',
+            'data',
+            'events',
+            'evt_auditorio_nacional_orcam_sinfonico_13_geometrias_sonoras.json',
+          ),
+          'utf8',
+        ),
       ),
-    );
+    ];
     const identity = matchEventIdentity(
       catalog,
       {
@@ -226,13 +232,10 @@ describe('ORCAM pipeline safety', () => {
       },
     );
     expect(identity).toMatchObject({
-      kind: 'ambiguous',
-      reason: expect.stringContaining('evt_auditorio_nacional_orcam_sinfonico_13_geometrias_sonoras'),
+      kind: 'matched',
+      method: 'externalId',
+      event: { id: 'evt_auditorio_nacional_orcam_sinfonico_13_geometrias_sonoras' },
     });
-    expect(identity.kind === 'ambiguous' ? identity.events.map((event) => event.id).sort() : []).toEqual([
-      'evt_auditorio_nacional_orcam_sinfonico_13_geometrias_sonoras',
-      'evt_fundacion_orcam_4865',
-    ]);
   });
 
   it('adds provenance to the already published Auditorio concert without duplicating or renaming it', async () => {
