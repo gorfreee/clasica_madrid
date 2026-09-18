@@ -15,16 +15,56 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Cuarteto Avlós",
+      "role": "ensemble"
+    },
+    {
+      "name": "Salvador Barberá"
+    },
+    {
+      "name": "David Mata"
+    },
+    {
+      "name": "María Cámara"
+    },
+    {
+      "name": "Javier Albarés"
+    }
+  ],
   "composers": [
     {
       "name": "Johann Christian Bach"
     },
     {
+      "name": "Christian Cannabich"
+    },
+    {
       "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Georg Druschetzky"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "Cuarteto para oboe y trío de cuerda W:B60",
+      "composerName": "Johann Christian Bach"
+    },
+    {
+      "title": "Cuarteto para oboe y trío de cuerdas",
+      "composerName": "Christian Cannabich"
+    },
+    {
+      "title": "Cuarteto para oboe y cuarteto de cuerda KV 470",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Cuarteto para oboe y trío de cuerdas Nº. 4 en sol menor",
+      "composerName": "Georg Druschetzky"
+    }
+  ],
   "eras": [
     "classical"
   ],
@@ -37,10 +77,10 @@
     {
       "sourceId": "src_fundacionpiumosso_com",
       "url": "https://www.fundacionpiumosso.com/evento/cuarteto-avlos-y-la-magia-del-xviii",
-      "checkedAt": "2026-09-09",
+      "checkedAt": "2026-09-18",
       "externalId": "2226"
     }
   ],
   "primarySourceId": "src_fundacionpiumosso_com",
-  "lastVerifiedAt": "2026-09-09"
+  "lastVerifiedAt": "2026-09-18"
 }

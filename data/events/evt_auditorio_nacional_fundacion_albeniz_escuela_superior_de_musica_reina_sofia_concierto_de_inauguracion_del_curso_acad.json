@@ -37,11 +37,11 @@
   ],
   "works": [
     {
-      "title": "Concierto para violonchelo",
+      "title": "Concierto para violonchelo y orquesta en si menor op 104",
       "composerName": "Antonín Dvořák"
     },
     {
-      "title": "Cuarta Sinfonía",
+      "title": "Sinfonía núm. 4 en mi menor op 98",
       "composerName": "Johannes Brahms"
     }
   ],
@@ -57,16 +57,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/fundacion-albeniz-escuela-superior-de-musica-reina-sofia-concierto-de-inauguracion-del-curso-academico-26-27",
-      "checkedAt": "2026-09-14",
+      "checkedAt": "2026-09-18",
       "externalId": "fundacion-albeniz-escuela-superior-de-musica-reina-sofia-concierto-de-inauguracion-del-curso-academico-26-27"
     },
     {
       "sourceId": "src_escuela_superior_musica_reina_sofia",
       "url": "https://www.escuelasuperiordemusicareinasofia.es/evento/orquesta-sinfonica-freixenet-director-josep-pons-violonchelo-luis-aracama",
-      "checkedAt": "2026-09-15",
+      "checkedAt": "2026-09-18",
       "externalId": "83051"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-15"
+  "lastVerifiedAt": "2026-09-18"
 }

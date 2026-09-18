@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_vestigium",
+  "slug": "vestigium",
+  "title": "Vestigium",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_vestigium_01",
+      "date": "2027-02-14",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_vestigium_02",
+      "date": "2027-02-15",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Vestigium"
+    },
+    {
+      "name": "Ana Fernández Anguita"
+    },
+    {
+      "name": "Andrés García Fraile"
+    },
+    {
+      "name": "Eliot Xaquín Dios Martínez"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Jacques Hotteterre"
+    },
+    {
+      "name": "François Couperin"
+    },
+    {
+      "name": "Marin Marais"
+    },
+    {
+      "name": "Georg Philipp Telemann"
+    },
+    {
+      "name": "Jean-Marie Leclair"
+    },
+    {
+      "name": "Jean-Philippe Rameau"
+    },
+    {
+      "name": "Michel Blavet"
+    },
+    {
+      "name": "Arcangelo Corelli"
+    },
+    {
+      "name": "Pierre-Evrard Taillart"
+    }
+  ],
+  "works": [
+    {
+      "title": "Suite nº 3 para flauta y bajo continuo en Sol mayor, op. 2 (Pièces pour la flûte, Libro I)",
+      "composerName": "Jacques Hotteterre"
+    },
+    {
+      "title": "Les baricades mistérieuses , de Suite nº 6 para clave en Si bemol mayor, de Pièces de clavecin, Libro II",
+      "composerName": "François Couperin"
+    },
+    {
+      "title": "Suite nº 1 en Re menor (Pièces de viole, Livre II) (arreglo para flauta y arpa) (selección)",
+      "composerName": "Marin Marais"
+    },
+    {
+      "title": "Sonata en trío para flauta, viola da gamba y bajo continuo en La menor, TWV 42:a7",
+      "composerName": "Georg Philipp Telemann"
+    },
+    {
+      "title": "Sonata en trío nº 8 para flauta, viola da gamba y bajo continuo en Re mayor, op. 2 (selección)",
+      "composerName": "Jean-Marie Leclair"
+    },
+    {
+      "title": "Concierto nº 1 en Do menor, RCT 7 (Pièces de clavecín en concerts)",
+      "composerName": "Jean-Philippe Rameau"
+    },
+    {
+      "title": "Sonata nº 6 para flauta y bajo continuo en Re mayor, op. 3 (selección)",
+      "composerName": "Michel Blavet"
+    },
+    {
+      "title": "Sonata nº 5 para violín y bajo continuo en Sol menor, op. 5",
+      "composerName": "Arcangelo Corelli"
+    },
+    {
+      "title": "Sonata nº 6 para flauta y bajo continuo en Re mayor, op. 2",
+      "composerName": "Pierre-Evrard Taillart"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/vestigium",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/vestigium"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

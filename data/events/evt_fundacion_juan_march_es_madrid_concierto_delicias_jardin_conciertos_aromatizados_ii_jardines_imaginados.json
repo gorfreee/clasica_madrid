@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_delicias_jardin_conciertos_aromatizados_ii_jardines_imaginados",
+  "slug": "las-delicias-del-jardin-conciertos-aromatizados-ii-jardines-imaginados",
+  "title": "Las delicias del jardín: conciertos aromatizados (II): Jardines imaginados",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_delicias_jardin_conciertos_aromatizados_ii_jardines_imaginados_01",
+      "date": "2027-05-12",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Eric Le Sage"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Robert Schumann"
+    },
+    {
+      "name": "Lili Boulanger"
+    },
+    {
+      "name": "Claude Debussy"
+    },
+    {
+      "name": "Leoš Janáček"
+    },
+    {
+      "name": "Franz Liszt"
+    }
+  ],
+  "works": [
+    {
+      "title": "Blumenstück [Pieza floral] en Re bemol mayor, op. 19",
+      "composerName": "Robert Schumann"
+    },
+    {
+      "title": "D’un vieux jardin [De un jardín antiguo] , de Trois morceaux pour piano [Tres piezas para piano]",
+      "composerName": "Lili Boulanger"
+    },
+    {
+      "title": "Les sons et les parfums tournent dans l’air du soir [Los sonidos y los aromas flotan en el aire de la tarde] , de Préludes, Libro I",
+      "composerName": "Claude Debussy"
+    },
+    {
+      "title": "V mlhách [En la niebla], JW VIII/22",
+      "composerName": "Leoš Janáček"
+    },
+    {
+      "title": "Estampes",
+      "composerName": "Claude Debussy"
+    },
+    {
+      "title": "Aux cyprès de la Villa d’Este II. Thrénodie [Junto a los cipreses de la Villa d’Este] , de Années de pèlerinage: Troisième Année, S 163",
+      "composerName": "Franz Liszt"
+    },
+    {
+      "title": "Waldszenen [Escenas del bosque], op. 82",
+      "composerName": "Robert Schumann"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/delicias-jardin-conciertos-aromatizados-ii-jardines-imaginados",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/delicias-jardin-conciertos-aromatizados-ii-jardines-imaginados"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

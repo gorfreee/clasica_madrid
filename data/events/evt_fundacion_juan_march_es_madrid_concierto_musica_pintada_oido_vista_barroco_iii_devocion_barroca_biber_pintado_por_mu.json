@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_musica_pintada_oido_vista_barroco_iii_devocion_barroca_biber_pintado_por_mu",
+  "slug": "musica-pintada-oido-y-vista-en-el-barroco-iii-devocion-barroca-biber-pintado-por-murillo",
+  "title": "Música pintada: oído y vista en el Barroco (III): Devoción barroca: Biber pintado por Murillo",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_musica_pintada_oido_vista_barroco_iii_devocion_barroca_biber_pintado_por_mu",
+      "date": "2027-01-23",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Gli Incogniti"
+    },
+    {
+      "name": "Amandine Beyer"
+    },
+    {
+      "name": "Anna Fontana"
+    },
+    {
+      "name": "Baldomero Barciela"
+    },
+    {
+      "name": "Nacho Laguna"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Heinrich Ignaz Franz Biber"
+    },
+    {
+      "name": "Sara Cubarsi"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata nº 1 en Re menor, \"Anunciación\", de las Sonatas del Rosario",
+      "composerName": "Heinrich Ignaz Franz Biber"
+    },
+    {
+      "title": "Sonata nº 2 en La mayor, \"La Visitación\", de las Sonatas del Rosario",
+      "composerName": "Heinrich Ignaz Franz Biber"
+    },
+    {
+      "title": "Sonata nº 4. Chacona en Re menor, \"La Presentación de Jesús en el Templo\", de las Sonatas del Rosario",
+      "composerName": "Heinrich Ignaz Franz Biber"
+    },
+    {
+      "title": "Sonata nº 6 en Do menor, \"La oración en el huerto\", de las Sonatas del Rosario"
+    },
+    {
+      "title": "Sonata nº 10 en Sol menor, \"La Crucifixión\", de las Sonatas del Rosario",
+      "composerName": "Heinrich Ignaz Franz Biber"
+    },
+    {
+      "title": "Sonata nº 11 en Sol mayor, \"La resurrección\", de las Sonatas del Rosario",
+      "composerName": "Heinrich Ignaz Franz Biber"
+    },
+    {
+      "title": "Sonata nº 14 en Re mayor, \"La Asunción de la Virgen María\", de las Sonatas del Rosario",
+      "composerName": "Heinrich Ignaz Franz Biber"
+    },
+    {
+      "title": "Sonata nº 15 en Do mayor, \"La Coronación de la Virgen\", de las Sonatas del Rosario",
+      "composerName": "Heinrich Ignaz Franz Biber"
+    },
+    {
+      "title": "Passacaglia en Sol menor para violín solo, de las Sonatas del Rosario",
+      "composerName": "Heinrich Ignaz Franz Biber"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "early-music"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/musica-pintada-oido-vista-barroco-iii-devocion-barroca-biber-pintado-por-murillo",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/musica-pintada-oido-vista-barroco-iii-devocion-barroca-biber-pintado-por-murillo"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

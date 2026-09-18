@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_belen_vaquero",
+  "slug": "belen-vaquero",
+  "title": "Belén Vaquero",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_belen_vaquero_01",
+      "date": "2027-03-07",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_belen_vaquero_02",
+      "date": "2027-03-08",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Belén Vaquero"
+    },
+    {
+      "name": "Jorge Robaina"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Francesco Paolo Tosti"
+    },
+    {
+      "name": "Richard Wagner"
+    },
+    {
+      "name": "Richard Strauss"
+    }
+  ],
+  "works": [
+    {
+      "title": "Quatro Canzoni d'Amaranta",
+      "composerName": "Francesco Paolo Tosti"
+    },
+    {
+      "title": "Wesendonck Lieder, WWV 91",
+      "composerName": "Richard Wagner"
+    },
+    {
+      "title": "Isoldens Liebestod [Muerte de amor de Isolda] (Tristan und Isolde, WWV 90) (transcripción para piano solo de Franz Liszt)",
+      "composerName": "Richard Wagner"
+    },
+    {
+      "title": "Geduld , de Acht Gedichte aus \"Letzte Blätter\" [Ocho poemas de ÚItimas hojas], op. 10",
+      "composerName": "Richard Strauss"
+    },
+    {
+      "title": "Befreit (5 Lieder, op. 39 nº 4)",
+      "composerName": "Richard Strauss"
+    },
+    {
+      "title": "Cäcilie , de 4 Lieder, op. 27",
+      "composerName": "Richard Strauss"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "lied"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/belen-vaquero",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/belen-vaquero"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

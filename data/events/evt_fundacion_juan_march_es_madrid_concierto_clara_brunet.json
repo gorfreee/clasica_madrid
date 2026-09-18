@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_clara_brunet",
+  "slug": "clara-brunet",
+  "title": "Clara Brunet",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_clara_brunet_01",
+      "date": "2027-04-11",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_clara_brunet_02",
+      "date": "2027-04-12",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Clara Brunet"
+    },
+    {
+      "name": "Bor Zuljan"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Bor Zuljan"
+    },
+    {
+      "name": "John Dowland"
+    },
+    {
+      "name": "Robert Johnson"
+    },
+    {
+      "name": "Peter Warlock"
+    },
+    {
+      "name": "William Walton"
+    },
+    {
+      "name": "Pink Floyd"
+    }
+  ],
+  "works": [
+    {
+      "title": "Praeludium",
+      "composerName": "Bor Zuljan"
+    },
+    {
+      "title": "Come, Ye Heavy States of Night",
+      "composerName": "John Dowland"
+    },
+    {
+      "title": "A Dream",
+      "composerName": "John Dowland"
+    },
+    {
+      "title": "Care charming sleep",
+      "composerName": "Robert Johnson"
+    },
+    {
+      "title": "A Fancy",
+      "composerName": "Bor Zuljan"
+    },
+    {
+      "title": "Go, Nightly Cares",
+      "composerName": "John Dowland"
+    },
+    {
+      "title": "Mr. Dowland's Midnight",
+      "composerName": "John Dowland"
+    },
+    {
+      "title": "Pavana Johan Douland",
+      "composerName": "John Dowland"
+    },
+    {
+      "title": "Midnight",
+      "composerName": "Bor Zuljan"
+    },
+    {
+      "title": "Sleep",
+      "composerName": "Peter Warlock"
+    },
+    {
+      "title": "Bagatelle nº 2",
+      "composerName": "William Walton"
+    },
+    {
+      "title": "Respiration",
+      "composerName": "Bor Zuljan"
+    },
+    {
+      "title": "Breathe (In The Air)",
+      "composerName": "Pink Floyd"
+    },
+    {
+      "title": "In darkness let me dwell",
+      "composerName": "John Dowland"
+    },
+    {
+      "title": "Darkness (improvisación con texto recitado de Lord Byron, Darkness)",
+      "composerName": "Bor Zuljan"
+    },
+    {
+      "title": "Come Heavy Sleep",
+      "composerName": "John Dowland"
+    }
+  ],
+  "eras": [
+    "renaissance",
+    "twentieth"
+  ],
+  "formats": [],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/clara-brunet",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/clara-brunet"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

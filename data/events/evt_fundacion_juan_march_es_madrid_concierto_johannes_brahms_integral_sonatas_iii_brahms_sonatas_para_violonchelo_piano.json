@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_johannes_brahms_integral_sonatas_iii_brahms_sonatas_para_violonchelo_piano",
+  "slug": "johannes-brahms-integral-de-las-sonatas-iii-brahms-sonatas-para-violonchelo-y-piano",
+  "title": "Johannes Brahms: integral de las sonatas (III): Brahms: Sonatas para violonchelo y piano",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_johannes_brahms_integral_sonatas_iii_brahms_sonatas_para_violonchelo_piano",
+      "date": "2027-02-07",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Alban Gerhardt"
+    },
+    {
+      "name": "Steven Osborne"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johannes Brahms"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata para violonchelo y piano nº 1 en Mi menor, op. 38",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Sonata para violonchelo y piano nº 2 en Fa mayor, op. 99",
+      "composerName": "Johannes Brahms"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/johannes-brahms-integral-sonatas-iii-brahms-sonatas-para-violonchelo-piano",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/johannes-brahms-integral-sonatas-iii-brahms-sonatas-para-violonchelo-piano"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

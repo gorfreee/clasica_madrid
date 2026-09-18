@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_emancipacion_virtuosas_ii_adelina_patti_traves_galdos_precio_diva",
+  "slug": "la-emancipacion-de-las-virtuosas-ii-adelina-patti-a-traves-de-galdos-el-precio-de-la-diva",
+  "title": "La emancipación de las virtuosas (II): Adelina Patti a través de Galdós: el precio de la diva",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_emancipacion_virtuosas_ii_adelina_patti_traves_galdos_precio_diva_01",
+      "date": "2027-03-03",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Rocío Pérez"
+    },
+    {
+      "name": "Rubén Fernández Aguirre"
+    },
+    {
+      "name": "Paco Deniz"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Gioachino Rossini"
+    },
+    {
+      "name": "Vincenzo Bellini"
+    },
+    {
+      "name": "Gaetano Donizetti"
+    },
+    {
+      "name": "Giuseppe Verdi"
+    }
+  ],
+  "works": [
+    {
+      "title": "Aria “Una voce poco fa”, de Rosina (El barbero de Sevilla)",
+      "composerName": "Gioachino Rossini"
+    },
+    {
+      "title": "Escena y aria \"Oh, se una volta sola... Ah! Non credea mirarti... Ah! Non giunge\", de Amina (La sonnambula)",
+      "composerName": "Vincenzo Bellini"
+    },
+    {
+      "title": "Escena y aria \"Regnava nel silenzio\", de Lucia (Lucia di Lammermoor)",
+      "composerName": "Gaetano Donizetti"
+    },
+    {
+      "title": "Escena y aria \"È strano!... Ah, fors'è lui... Sempre libera\", de Violetta (La traviata)",
+      "composerName": "Giuseppe Verdi"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "recital",
+    "opera"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/emancipacion-virtuosas-ii-adelina-patti-traves-galdos-precio-diva",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/emancipacion-virtuosas-ii-adelina-patti-traves-galdos-precio-diva"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

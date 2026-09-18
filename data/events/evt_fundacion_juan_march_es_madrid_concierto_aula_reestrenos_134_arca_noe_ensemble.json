@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_aula_reestrenos_134_arca_noe_ensemble",
+  "slug": "aula-de-re-estrenos-134-el-arca-de-noe-ensemble",
+  "title": "Aula de (Re)estrenos 134. El arca de Noé: ensemble",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_aula_reestrenos_134_arca_noe_ensemble_01",
+      "date": "2026-12-09",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Jordi Francés"
+    },
+    {
+      "name": "Sonido Extremo"
+    },
+    {
+      "name": "Jesús Gómez"
+    },
+    {
+      "name": "Alfonso Pineda"
+    },
+    {
+      "name": "Javier González"
+    },
+    {
+      "name": "Elsa Sánchez"
+    },
+    {
+      "name": "Iván Siso"
+    },
+    {
+      "name": "Beatriz González"
+    },
+    {
+      "name": "Sarai Aguilera"
+    },
+    {
+      "name": "Irene Val Baños"
+    }
+  ],
+  "composers": [
+    {
+      "name": "José Manuel López López"
+    },
+    {
+      "name": "Jesús Rueda"
+    },
+    {
+      "name": "Núria Giménez-Comas"
+    },
+    {
+      "name": "José María Sánchez-Verdú"
+    },
+    {
+      "name": "Josep Planells"
+    },
+    {
+      "name": "Jesús Torres"
+    }
+  ],
+  "works": [
+    {
+      "title": "Jenseits diesseits",
+      "composerName": "José Manuel López López"
+    },
+    {
+      "title": "Absolute!",
+      "composerName": "Jesús Rueda"
+    },
+    {
+      "title": "Notturno II",
+      "composerName": "Núria Giménez-Comas"
+    },
+    {
+      "title": "Machaut Architektur I y V",
+      "composerName": "José María Sánchez-Verdú"
+    },
+    {
+      "title": "Arlecchino",
+      "composerName": "Josep Planells"
+    },
+    {
+      "title": "Pentesilea",
+      "composerName": "Jesús Torres"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/aula-reestrenos-134-arca-noe-ensemble",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/aula-reestrenos-134-arca-noe-ensemble"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

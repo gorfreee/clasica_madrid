@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_pianistas_haydn_mozart_iii",
+  "slug": "las-pianistas-de-haydn-y-mozart-iii",
+  "title": "Las pianistas de Haydn y Mozart (III)",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_pianistas_haydn_mozart_iii_01",
+      "date": "2027-04-24",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Alba Ventura"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Franz Joseph Haydn"
+    },
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata para piano en Do mayor, Hob. XVI:35",
+      "composerName": "Franz Joseph Haydn"
+    },
+    {
+      "title": "Sonata para piano nº 7 en Do mayor, KV 309",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Sonata para piano en Re mayor, Hob. XVI:51",
+      "composerName": "Franz Joseph Haydn"
+    },
+    {
+      "title": "Sonata para piano nº 18 en Re mayor, KV 576",
+      "composerName": "Wolfgang Amadeus Mozart"
+    }
+  ],
+  "eras": [
+    "classical"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/pianistas-haydn-mozart-iii",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/pianistas-haydn-mozart-iii"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

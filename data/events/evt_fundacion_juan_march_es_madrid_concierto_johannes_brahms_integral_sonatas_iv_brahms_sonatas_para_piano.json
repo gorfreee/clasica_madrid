@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_johannes_brahms_integral_sonatas_iv_brahms_sonatas_para_piano",
+  "slug": "johannes-brahms-integral-de-las-sonatas-iv-brahms-sonatas-para-piano",
+  "title": "Johannes Brahms: integral de las sonatas (IV): Brahms: Sonatas para piano",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_johannes_brahms_integral_sonatas_iv_brahms_sonatas_para_piano_01",
+      "date": "2027-02-10",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "François-Frédéric Guy"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johannes Brahms"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata nº 1 en Do mayor, Op. 1",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Sonata nº 2 en Fa sostenido menor, op. 2",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Sonata nº 3 en Fa menor, op. 5",
+      "composerName": "Johannes Brahms"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/johannes-brahms-integral-sonatas-iv-brahms-sonatas-para-piano",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/johannes-brahms-integral-sonatas-iv-brahms-sonatas-para-piano"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

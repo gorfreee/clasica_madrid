@@ -23,7 +23,14 @@
       "name": "Evangelina Mascardi"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Nicolas Gombert"
+    },
+    {
+      "name": "Josquin des Prez"
+    }
+  ],
   "works": [],
   "eras": [
     "renaissance"
@@ -39,10 +46,10 @@
     {
       "sourceId": "src_patrimonio_nacional",
       "url": "https://www.patrimonionacional.es/actualidad/concierto/2026/milano-spagnola-2027-02-06",
-      "checkedAt": "2026-09-14",
+      "checkedAt": "2026-09-18",
       "externalId": "43485fb0-ccec-4018-a3b0-36b3cae0d2c9"
     }
   ],
   "primarySourceId": "src_patrimonio_nacional",
-  "lastVerifiedAt": "2026-09-14"
+  "lastVerifiedAt": "2026-09-18"
 }

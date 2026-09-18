@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_canciones_mundo_iii_londres_lagos",
+  "slug": "canciones-del-mundo-iii-de-londres-a-lagos",
+  "title": "Canciones del mundo (III): De Londres a Lagos",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_canciones_mundo_iii_londres_lagos_01",
+      "date": "2027-05-22",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Francesca Chiejina"
+    },
+    {
+      "name": "Keval Shah"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ayo Bankole"
+    },
+    {
+      "name": "Fela Sowande"
+    },
+    {
+      "name": "Joshua Uzoigwe"
+    },
+    {
+      "name": "Shawn Okpebholo"
+    },
+    {
+      "name": "Paul Ogunboye"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "lied"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/canciones-mundo-iii-londres-lagos",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/canciones-mundo-iii-londres-lagos"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

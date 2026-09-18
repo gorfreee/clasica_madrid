@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_guido_garcia_sanchez",
+  "slug": "guido-garcia-sanchez",
+  "title": "Guido García Sánchez",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_guido_garcia_sanchez_01",
+      "date": "2026-12-06",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_guido_garcia_sanchez_02",
+      "date": "2026-12-07",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Guido García Sánchez"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Louis Marchand"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Georg Friedrich Händel"
+    }
+  ],
+  "works": [
+    {
+      "title": "Suite en Re menor (Pièces de clavecín, Premier livre)",
+      "composerName": "Louis Marchand"
+    },
+    {
+      "title": "Partita nº 5 en Sol mayor, BWV 829",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Suite para clave nº 7 en Sol menor, HWV 432",
+      "composerName": "Georg Friedrich Händel"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "chamber",
+    "early-music"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/guido-garcia-sanchez",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/guido-garcia-sanchez"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

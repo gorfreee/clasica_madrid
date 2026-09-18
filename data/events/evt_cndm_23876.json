@@ -21,6 +21,9 @@
     },
     {
       "name": "Rocío Gómez"
+    },
+    {
+      "name": "Trío Arbós"
     }
   ],
   "composers": [
@@ -42,10 +45,10 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23876",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-18",
       "externalId": "23876"
     }
   ],
   "primarySourceId": "src_cndm",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-18"
 }

@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_javier_comesana_enrique_lapaz",
+  "slug": "javier-comesana-y-enrique-lapaz",
+  "title": "Javier Comesaña y Enrique Lapaz",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_javier_comesana_enrique_lapaz_01",
+      "date": "2027-02-28",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_javier_comesana_enrique_lapaz_02",
+      "date": "2027-03-01",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Javier Comesaña"
+    },
+    {
+      "name": "Enrique Lapaz"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Clara Schumann"
+    },
+    {
+      "name": "Karol Szymanowski"
+    },
+    {
+      "name": "Robert Schumann"
+    }
+  ],
+  "works": [
+    {
+      "title": "Andante molto , de Tres romanzas para violín y piano Op. 22",
+      "composerName": "Clara Schumann"
+    },
+    {
+      "title": "La Fontaine d'Arethuse , de Tres mitos para violín y piano, op. 30",
+      "composerName": "Karol Szymanowski"
+    },
+    {
+      "title": "Allegretto , de Tres romanzas para violín y piano Op. 22",
+      "composerName": "Clara Schumann"
+    },
+    {
+      "title": "Narcisse , de Tres mitos para violín y piano, op. 30",
+      "composerName": "Karol Szymanowski"
+    },
+    {
+      "title": "Leidenschaftlich schnell , de Tres romanzas para violín y piano Op. 22",
+      "composerName": "Clara Schumann"
+    },
+    {
+      "title": "Dryades et Pan , de Tres mitos para violín y piano, op. 30",
+      "composerName": "Karol Szymanowski"
+    },
+    {
+      "title": "Sonata para violín y piano nº 2 en Re menor, op. 121",
+      "composerName": "Robert Schumann"
+    },
+    {
+      "title": "Nocturno y Tarantela, op. 28",
+      "composerName": "Karol Szymanowski"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/javier-comesana-enrique-lapaz",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/javier-comesana-enrique-lapaz"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_musica_pintada_oido_vista_barroco_iv_vermeer_armonia_domestica",
+  "slug": "musica-pintada-oido-y-vista-en-el-barroco-iv-vermeer-y-la-armonia-domestica",
+  "title": "Música pintada: oído y vista en el Barroco (IV): Vermeer y la armonía doméstica",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_musica_pintada_oido_vista_barroco_iv_vermeer_armonia_domestica_01",
+      "date": "2027-01-30",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Menno van Delft"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Kuhnau"
+    },
+    {
+      "name": "Johann Caspar Ferdinand Fischer"
+    },
+    {
+      "name": "Paul Siefert"
+    },
+    {
+      "name": "Samuel Scheidt"
+    },
+    {
+      "name": "Jan Pieterszoon Sweelinck"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Johann Gottfried Müthel"
+    }
+  ],
+  "works": [
+    {
+      "title": "Partita nº 6 en La menor (Neuer Clavier-Übung, Libro II)",
+      "composerName": "Johann Kuhnau"
+    },
+    {
+      "title": "Suite en Fa mayor \"Euterpe\" (Musicalischer Parnassus)",
+      "composerName": "Johann Caspar Ferdinand Fischer"
+    },
+    {
+      "title": "Paduana",
+      "composerName": "Paul Siefert"
+    },
+    {
+      "title": "Galliarda en Sol mayor, SSWV 561",
+      "composerName": "Samuel Scheidt"
+    },
+    {
+      "title": "Fantasia \"contraria\" en Sol dórico, SwWV 270",
+      "composerName": "Jan Pieterszoon Sweelinck"
+    },
+    {
+      "title": "Toccata en Sol menor, BWV 915",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Tres sonatas y dos ariosos con 12 variaciones",
+      "composerName": "Johann Gottfried Müthel"
+    }
+  ],
+  "eras": [
+    "renaissance",
+    "baroque"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/musica-pintada-oido-vista-barroco-iv-vermeer-armonia-domestica",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/musica-pintada-oido-vista-barroco-iv-vermeer-armonia-domestica"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

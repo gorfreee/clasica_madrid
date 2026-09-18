@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50420965",
+  "slug": "del-caribe-a-la-patagonia",
+  "title": "Del Caribe a la Patagonia",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_1980",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50420965_01",
+      "date": "2026-10-24",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Ernesto Lecuona"
+    },
+    {
+      "name": "Carlos Gardel"
+    },
+    {
+      "name": "Heitor Villa-Lobos"
+    },
+    {
+      "name": "Carlos Guastavino"
+    },
+    {
+      "name": "Ennio Morricone"
+    }
+  ],
+  "works": [
+    {
+      "title": "Romanza María la O",
+      "composerName": "Ernesto Lecuona"
+    },
+    {
+      "title": "Por eso te quiero",
+      "composerName": "Ernesto Lecuona"
+    },
+    {
+      "title": "El día que me quieras",
+      "composerName": "Carlos Gardel"
+    },
+    {
+      "title": "Por una cabeza (instrumental)",
+      "composerName": "Carlos Gardel"
+    },
+    {
+      "title": "Bachianas Brasileiras",
+      "composerName": "Heitor Villa-Lobos"
+    },
+    {
+      "title": "Se equivocó la paloma",
+      "composerName": "Carlos Guastavino"
+    },
+    {
+      "title": "Piececitos de niño",
+      "composerName": "Carlos Guastavino"
+    },
+    {
+      "title": "La Misión",
+      "composerName": "Ennio Morricone"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "other"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=35833893f4ba0a10VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-09-18",
+      "externalId": "50420965"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-09-18"
+}

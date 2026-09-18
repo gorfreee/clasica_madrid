@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50420970",
+  "slug": "carnaval-de-los-animales",
+  "title": "Carnaval de los animales",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_1980",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50420970_01",
+      "date": "2026-11-14",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Camille Saint-Saëns"
+    }
+  ],
+  "works": [
+    {
+      "title": "Carnaval de los animales",
+      "composerName": "Camille Saint-Saëns"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=f7f53893f4ba0a10VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-09-18",
+      "externalId": "50420970"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-09-18"
+}

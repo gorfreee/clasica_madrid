@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_claudia_aliaj_xiaolu_zang",
+  "slug": "claudia-aliaj-y-xiaolu-zang",
+  "title": "Claudia Aliaj y Xiaolu Zang",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_claudia_aliaj_xiaolu_zang_01",
+      "date": "2026-11-08",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_claudia_aliaj_xiaolu_zang_02",
+      "date": "2026-11-09",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Claudia Aliaj"
+    },
+    {
+      "name": "Xiaolu Zang"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Felix Mendelssohn-Bartholdy"
+    },
+    {
+      "name": "Franz Schubert"
+    },
+    {
+      "name": "Jörg Widmann"
+    },
+    {
+      "name": "Johannes Brahms"
+    }
+  ],
+  "works": [
+    {
+      "title": "Canciones sin palabras, op. 62 nº 6 en La mayor, Allegretto grazioso",
+      "composerName": "Felix Mendelssohn-Bartholdy"
+    },
+    {
+      "title": "Canciones sin palabras, op. 19 nº 5",
+      "composerName": "Felix Mendelssohn-Bartholdy"
+    },
+    {
+      "title": "Canciones sin palabras, op. 30 nº 1. Andante espressivo",
+      "composerName": "Felix Mendelssohn-Bartholdy"
+    },
+    {
+      "title": "Sonata en La menor D 821, \"Arpeggione\"",
+      "composerName": "Franz Schubert"
+    },
+    {
+      "title": "Fünf Bruchstücke [Cinco fragmentos]",
+      "composerName": "Jörg Widmann"
+    },
+    {
+      "title": "Sonata para clarinete y piano nº 2 en Mi bemol mayor, op. 120 nº 2",
+      "composerName": "Johannes Brahms"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/claudia-aliaj-xiaolu-zang",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/claudia-aliaj-xiaolu-zang"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

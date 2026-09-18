@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_musica_pintada_oido_vista_barroco_i_caravaggio_amor_mundano",
+  "slug": "musica-pintada-oido-y-vista-en-el-barroco-i-caravaggio-y-el-amor-mundano",
+  "title": "Música pintada: oído y vista en el Barroco (I): Caravaggio y el amor mundano",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_musica_pintada_oido_vista_barroco_i_caravaggio_amor_mundano_01",
+      "date": "2027-01-09",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Opera Omnia"
+    },
+    {
+      "name": "Manon Chauvin"
+    },
+    {
+      "name": "Sara Águeda"
+    },
+    {
+      "name": "Calia Álvarez"
+    },
+    {
+      "name": "Isaac M. Pulet"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antonio Martín y Coll"
+    },
+    {
+      "name": "Juan Hidalgo"
+    },
+    {
+      "name": "Sebastián Durón"
+    },
+    {
+      "name": "Diego Ortiz"
+    },
+    {
+      "name": "Manuel de Egüés"
+    }
+  ],
+  "works": [
+    {
+      "title": "Jácaras",
+      "composerName": "Antonio Martín y Coll"
+    },
+    {
+      "title": "Quiero y no saben que quiero",
+      "composerName": "Juan Hidalgo"
+    },
+    {
+      "title": "Ciego que apuntas y aciertas",
+      "composerName": "Juan Hidalgo"
+    },
+    {
+      "title": "Abril floreciente",
+      "composerName": "Sebastián Durón"
+    },
+    {
+      "title": "Recercada V",
+      "composerName": "Diego Ortiz"
+    },
+    {
+      "title": "Recercada II",
+      "composerName": "Diego Ortiz"
+    },
+    {
+      "title": "Antorcha brillante",
+      "composerName": "Juan Hidalgo"
+    },
+    {
+      "title": "Tanta copia de hermosura"
+    },
+    {
+      "title": "¿Quieres estarte quieto, Cupido?",
+      "composerName": "Manuel de Egüés"
+    },
+    {
+      "title": "Folías",
+      "composerName": "Antonio Martín y Coll"
+    },
+    {
+      "title": "Esperar, sentir, morir, adorar",
+      "composerName": "Juan Hidalgo"
+    },
+    {
+      "title": "¡Ay que me río de Amor!",
+      "composerName": "Juan Hidalgo"
+    },
+    {
+      "title": "No hay que decirle el primor"
+    }
+  ],
+  "eras": [
+    "renaissance",
+    "baroque"
+  ],
+  "formats": [],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/musica-pintada-oido-vista-barroco-i-caravaggio-amor-mundano",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/musica-pintada-oido-vista-barroco-i-caravaggio-amor-mundano"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

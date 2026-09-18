@@ -2,6 +2,9 @@
   "schemaVersion": 1,
   "id": "evt_auditorio_nacional_orcam_sinfonico_13_geometrias_sonoras",
   "slug": "orcam-sinfonico-13-geometrias-sonoras",
+  "slugAliases": [
+    "geometrias-sonoras"
+  ],
   "title": "ORCAM. Sinfónico 13. Geometrías Sonoras",
   "status": "scheduled",
   "venueId": "ven_auditorio_nacional_sala_sinfonica",
@@ -23,10 +26,12 @@
       "name": "Coro de la Comunidad de Madrid"
     },
     {
-      "name": "Narek Hakhnazaryan"
+      "name": "Narek Hakhnazaryan",
+      "role": "soloist"
     },
     {
-      "name": "Óscar Rodríguez Director Coro"
+      "name": "Óscar Rodríguez",
+      "role": "conductor"
     },
     {
       "name": "Eduardo Strausser",
@@ -72,10 +77,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-sinfonico-13-geometrias-sonoras",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-18",
       "externalId": "orcam-sinfonico-13-geometrias-sonoras"
+    },
+    {
+      "sourceId": "src_fundacion_orcam",
+      "url": "https://fundacionorcam.org/conciertos/2026-27/geometrias-sonoras",
+      "checkedAt": "2026-09-18",
+      "externalId": "4865"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-18"
 }

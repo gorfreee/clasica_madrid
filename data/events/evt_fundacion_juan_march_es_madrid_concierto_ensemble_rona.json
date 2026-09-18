@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_ensemble_rona",
+  "slug": "ensemble-rona",
+  "title": "Ensemble Rona",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_ensemble_rona_01",
+      "date": "2027-04-25",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ensemble Rona"
+    },
+    {
+      "name": "Valerie Steenken"
+    },
+    {
+      "name": "Montserrat Egea"
+    },
+    {
+      "name": "Juan Barahona"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Francisco Coll"
+    },
+    {
+      "name": "Iannis Xenakis"
+    },
+    {
+      "name": "Piotr Ilich Chaikovski"
+    }
+  ],
+  "works": [
+    {
+      "title": "Trío con piano",
+      "composerName": "Francisco Coll"
+    },
+    {
+      "title": "Dhipli Zyia, para violín y violonchelo",
+      "composerName": "Iannis Xenakis"
+    },
+    {
+      "title": "Trío con piano en La menor, op. 50 ,\"Elegiaco\"",
+      "composerName": "Piotr Ilich Chaikovski"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/ensemble-rona",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/ensemble-rona"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

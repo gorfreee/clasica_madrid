@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_delicias_jardin_conciertos_aromatizados_iv_jardin_eden",
+  "slug": "las-delicias-del-jardin-conciertos-aromatizados-iv-jardin-del-eden",
+  "title": "Las delicias del jardín: conciertos aromatizados (IV): Jardín del Edén",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_delicias_jardin_conciertos_aromatizados_iv_jardin_eden_01",
+      "date": "2027-05-26",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Erika Baikoff"
+    },
+    {
+      "name": "Joseph Middleton"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Richard Strauss"
+    },
+    {
+      "name": "Arnold Schoenberg"
+    },
+    {
+      "name": "Claude Debussy"
+    },
+    {
+      "name": "Gabriel Fauré"
+    }
+  ],
+  "works": [
+    {
+      "title": "Mädchenblumen [Flores de niña], op. 22",
+      "composerName": "Richard Strauss"
+    },
+    {
+      "title": "Das Buch der hängenden Gärten [El libro de los jardines colgantes], op. 15",
+      "composerName": "Arnold Schoenberg"
+    },
+    {
+      "title": "De fleurs [De flores] , de Proses lyriques",
+      "composerName": "Claude Debussy"
+    },
+    {
+      "title": "La chanson d’Ève, op. 95",
+      "composerName": "Gabriel Fauré"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "lied",
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/delicias-jardin-conciertos-aromatizados-iv-jardin-eden",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/delicias-jardin-conciertos-aromatizados-iv-jardin-eden"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

@@ -26,9 +26,21 @@
       "name": "Jorge García Martín"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "José Lidón"
+    },
+    {
+      "name": "Domingo Porretti"
+    },
+    {
+      "name": "Felipe de los Ríos"
+    }
+  ],
   "works": [],
-  "eras": [],
+  "eras": [
+    "classical"
+  ],
   "formats": [
     "organ",
     "chamber"
@@ -39,10 +51,10 @@
     {
       "sourceId": "src_patrimonio_nacional",
       "url": "https://www.patrimonionacional.es/actualidad/concierto/2027/75-aniversario-recuperacion-viola-stradivarius-2026-12-12",
-      "checkedAt": "2026-09-14",
+      "checkedAt": "2026-09-18",
       "externalId": "873c62c8-89c6-407d-a969-2ba1f79ecdfb"
     }
   ],
   "primarySourceId": "src_patrimonio_nacional",
-  "lastVerifiedAt": "2026-09-14"
+  "lastVerifiedAt": "2026-09-18"
 }

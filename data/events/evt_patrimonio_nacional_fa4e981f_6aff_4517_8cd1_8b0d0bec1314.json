@@ -26,9 +26,22 @@
       "name": "Guillermo Turina"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Francisco Corselli"
+    },
+    {
+      "name": "Gaetano Brunetti"
+    },
+    {
+      "name": "José Lidón"
+    }
+  ],
   "works": [],
-  "eras": [],
+  "eras": [
+    "baroque",
+    "classical"
+  ],
   "formats": [
     "recital"
   ],
@@ -38,10 +51,10 @@
     {
       "sourceId": "src_patrimonio_nacional",
       "url": "https://www.patrimonionacional.es/actualidad/concierto/2026/sonatas-de-lidon-maestro-de-estilo-italiano-2026-11-28",
-      "checkedAt": "2026-09-14",
+      "checkedAt": "2026-09-18",
       "externalId": "fa4e981f-6aff-4517-8cd1-8b0d0bec1314"
     }
   ],
   "primarySourceId": "src_patrimonio_nacional",
-  "lastVerifiedAt": "2026-09-14"
+  "lastVerifiedAt": "2026-09-18"
 }

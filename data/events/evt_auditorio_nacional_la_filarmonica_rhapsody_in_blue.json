@@ -27,13 +27,37 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Leonard Bernstein"
+    },
+    {
+      "name": "George Gershwin"
+    }
+  ],
+  "works": [
+    {
+      "title": "Wonderful Town. Obertura",
+      "composerName": "Leonard Bernstein"
+    },
+    {
+      "title": "Gershwin in Hollywood",
+      "composerName": "George Gershwin"
+    },
+    {
+      "title": "Rhapsody in blue",
+      "composerName": "George Gershwin"
+    },
+    {
+      "title": "Candide. Obertura & Suite",
+      "composerName": "Leonard Bernstein"
+    }
+  ],
   "eras": [
     "twentieth"
   ],
   "formats": [
-    "recital"
+    "symphonic"
   ],
   "kind": "established",
   "access": "paid",
@@ -41,10 +65,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/la-filarmonica-rhapsody-in-blue",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-18",
       "externalId": "la-filarmonica-rhapsody-in-blue"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-18"
 }

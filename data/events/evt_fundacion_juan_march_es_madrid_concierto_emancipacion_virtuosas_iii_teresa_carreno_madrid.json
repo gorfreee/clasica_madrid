@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_emancipacion_virtuosas_iii_teresa_carreno_madrid",
+  "slug": "la-emancipacion-de-las-virtuosas-iii-teresa-carreno-en-madrid",
+  "title": "La emancipación de las virtuosas (III): Teresa Carreño en Madrid",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_emancipacion_virtuosas_iii_teresa_carreno_madrid_01",
+      "date": "2027-03-10",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Varvara"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Frédéric Chopin"
+    },
+    {
+      "name": "Johannes Brahms"
+    },
+    {
+      "name": "Robert Schumann"
+    },
+    {
+      "name": "Franz Liszt"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata nº 3 en Si menor, op. 58",
+      "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "Variaciones y fuga sobre un tema de Haendel, op. 24",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Sonata para piano en Sol menor, op. 22 nº 2",
+      "composerName": "Robert Schumann"
+    },
+    {
+      "title": "Nocturno nº 3 en La bemol mayor, S 541, \"Liebesträume\" [Sueño de amor]",
+      "composerName": "Franz Liszt"
+    },
+    {
+      "title": "Nº 4. Au bord d'une source [A la orilla de un manantial] , de Années de pèlerinage: Première Année (Suisse), S 160",
+      "composerName": "Franz Liszt"
+    },
+    {
+      "title": "Rapsodia húngara nº 6, en Re bemol mayor, S. 244",
+      "composerName": "Franz Liszt"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/emancipacion-virtuosas-iii-teresa-carreno-madrid",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/emancipacion-virtuosas-iii-teresa-carreno-madrid"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

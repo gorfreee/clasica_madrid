@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_johannes_brahms_integral_sonatas_i_brahms_sonatas_para_violin_piano",
+  "slug": "johannes-brahms-integral-de-las-sonatas-i-brahms-sonatas-para-violin-y-piano",
+  "title": "Johannes Brahms: integral de las sonatas (I): Brahms: Sonatas para violín y piano",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_johannes_brahms_integral_sonatas_i_brahms_sonatas_para_violin_piano_01",
+      "date": "2027-02-03",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ning Feng"
+    },
+    {
+      "name": "Andrei Banciu"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johannes Brahms"
+    },
+    {
+      "name": "Robert Schumann"
+    },
+    {
+      "name": "Albert Dietrich"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata para violín y piano nº 1 en Sol mayor, op. 78",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Sonata para violín y piano nº 2 en La mayor, op. 100",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Allegro. Scherzo \"Sonatensatz\" , de Sonata F.A.E. para violín y piano, WoO 2"
+    },
+    {
+      "title": "Sonata para violín y piano n.º 3 en Re menor, op. 108",
+      "composerName": "Johannes Brahms"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/johannes-brahms-integral-sonatas-i-brahms-sonatas-para-violin-piano",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/johannes-brahms-integral-sonatas-i-brahms-sonatas-para-violin-piano"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

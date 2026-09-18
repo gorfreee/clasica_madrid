@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_pianistas_haydn_mozart_i",
+  "slug": "las-pianistas-de-haydn-y-mozart-i",
+  "title": "Las pianistas de Haydn y Mozart (I)",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_pianistas_haydn_mozart_i_01",
+      "date": "2027-04-10",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Olga Scheps"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Franz Joseph Haydn"
+    },
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata para piano en Mi bemol mayor, Hob. XVI:37",
+      "composerName": "Franz Joseph Haydn"
+    },
+    {
+      "title": "Sonata para piano en Do mayor, Hob. XVI:50",
+      "composerName": "Franz Joseph Haydn"
+    },
+    {
+      "title": "Sonata para piano nº 8 en Do menor, KV 310",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Sonata para piano nº 16 en Do mayor, KV 545 (arreglo de Enrike Solinís)",
+      "composerName": "Wolfgang Amadeus Mozart"
+    }
+  ],
+  "eras": [
+    "classical"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/pianistas-haydn-mozart-i",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/pianistas-haydn-mozart-i"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

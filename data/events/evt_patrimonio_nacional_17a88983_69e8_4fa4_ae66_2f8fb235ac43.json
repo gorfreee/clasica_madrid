@@ -34,17 +34,19 @@
   "eras": [
     "classical"
   ],
-  "formats": [],
+  "formats": [
+    "chamber"
+  ],
   "kind": "alternative",
   "access": "paid",
   "citations": [
     {
       "sourceId": "src_patrimonio_nacional",
       "url": "https://www.patrimonionacional.es/actualidad/concierto/2026/gara-quartet-2026-12-03",
-      "checkedAt": "2026-09-14",
+      "checkedAt": "2026-09-18",
       "externalId": "17a88983-69e8-4fa4-ae66-2f8fb235ac43"
     }
   ],
   "primarySourceId": "src_patrimonio_nacional",
-  "lastVerifiedAt": "2026-09-14"
+  "lastVerifiedAt": "2026-09-18"
 }

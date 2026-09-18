@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_oro_edad_plata_ii",
+  "slug": "oro-en-la-edad-de-plata-ii",
+  "title": "Oro en la Edad de Plata (II)",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_oro_edad_plata_ii_01",
+      "date": "2027-04-14",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Dúo Cassadó"
+    },
+    {
+      "name": "Damián Martínez"
+    },
+    {
+      "name": "Marta Moll De Alba"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Gaspar Cassadó"
+    },
+    {
+      "name": "Salvador Bacarisse"
+    },
+    {
+      "name": "Ernesto Halffter"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata en La menor para violonchelo y piano",
+      "composerName": "Gaspar Cassadó"
+    },
+    {
+      "title": "Introducción, variaciones y coda, op. 102",
+      "composerName": "Salvador Bacarisse"
+    },
+    {
+      "title": "Fantasía española, para violonchelo y piano",
+      "composerName": "Ernesto Halffter"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/oro-edad-plata-ii",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/oro-edad-plata-ii"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

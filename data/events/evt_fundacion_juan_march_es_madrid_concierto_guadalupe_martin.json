@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_guadalupe_martin",
+  "slug": "guadalupe-martin",
+  "title": "Guadalupe Martín",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_guadalupe_martin_01",
+      "date": "2027-01-17",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_guadalupe_martin_02",
+      "date": "2027-01-18",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Guadalupe Martín"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Salvador Bacarisse"
+    },
+    {
+      "name": "Rosa García Ascot"
+    },
+    {
+      "name": "Óscar Esplá"
+    },
+    {
+      "name": "Antonio José"
+    }
+  ],
+  "works": [
+    {
+      "title": "La fille aux yeux d’or [La muchacha de los ojos de oro]",
+      "composerName": "Salvador Bacarisse"
+    },
+    {
+      "title": "Petite Suite",
+      "composerName": "Rosa García Ascot"
+    },
+    {
+      "title": "Tempo di sonata",
+      "composerName": "Óscar Esplá"
+    },
+    {
+      "title": "Romancillo infantil",
+      "composerName": "Antonio José"
+    },
+    {
+      "title": "Petite suite, op. 120",
+      "composerName": "Salvador Bacarisse"
+    },
+    {
+      "title": "Sonata para guitarra",
+      "composerName": "Antonio José"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/guadalupe-martin",
+      "checkedAt": "2026-09-18",
+      "externalId": "/es/madrid/concierto/guadalupe-martin"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-09-18"
+}

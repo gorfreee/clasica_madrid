@@ -21,6 +21,9 @@
     },
     {
       "name": "Josep Puchades"
+    },
+    {
+      "name": "Trío VibrArt"
     }
   ],
   "composers": [
@@ -75,10 +78,10 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23860",
-      "checkedAt": "2026-09-14",
+      "checkedAt": "2026-09-18",
       "externalId": "23860"
     }
   ],
   "primarySourceId": "src_cndm",
-  "lastVerifiedAt": "2026-09-14"
+  "lastVerifiedAt": "2026-09-18"
 }
