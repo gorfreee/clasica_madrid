@@ -505,14 +505,15 @@ export function looksLikeObrasDeLine(text: string): boolean {
  * Not a `Composer: Work` line and not a work of the first composer.
  */
 export function looksLikeKnownComposerPairHeading(text: string): boolean {
-  const cleaned = cleanLine(text);
+  const cleaned = cleanLine(text).replace(/^[«“"']\s*|\s*[»”"']$/gu, '').trim();
   if (!cleaned || looksLikeProgramHeader(cleaned)) return false;
-  const named = /^(.+?)\s+(?:y|and)\s+(.+?)\s*:\s+(.+)$/u.exec(cleaned);
-  if (!named?.[1] || !named[2] || !named[3]) return false;
+  const named =
+    /^(.+?)\s+(?:y|and)\s+(.+?)\s*:\s+(.+)$/iu.exec(cleaned) ??
+    /^(.+?)\s+(?:vs\.?|versus|contra)\s+(.+?)(?:\s*:\s+(.+))?$/iu.exec(cleaned);
+  if (!named?.[1] || !named[2]) return false;
   const left = named[1].trim();
   const right = named[2].trim();
-  const subtitle = named[3].trim();
-  if (!left || !right || !subtitle) return false;
+  if (!left || !right) return false;
   if (WORK_GENRE.test(left) || STRONG_CATALOG.test(left) || looksLikeWorkInstrumentation(left)) {
     return false;
   }
