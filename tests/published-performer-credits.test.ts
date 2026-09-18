@@ -46,6 +46,24 @@ describe('créditos publicados saneados', () => {
     expect(event.performers).toEqual([{ name: 'Piotr Anderszewski' }]);
   });
 
+  it('Patricia Nolz conserva a Malcolm Martineau de la ficha oficial vigente', async () => {
+    const event = await loadEvent('evt_circulo_bellas_artes_132444');
+    expect(event.title).toBe('Patricia Nolz, mezzosoprano y Malcolm Martineau, piano');
+    expect(event.slug).toBe('patricia-nolz-mezzosoprano-y-malcolm-martineau-piano');
+    expect(event.slugAliases).toEqual(['patricia-nolz-mezzosoprano-y-lukas-sternath-piano']);
+    expect(event.performers).toEqual([{ name: 'Patricia Nolz' }, { name: 'Malcolm Martineau' }]);
+    expect(event.performers.some((item) => /sternath/i.test(item.name))).toBe(false);
+  });
+
+  it('no publica el concierto de cine de la Brass Band Elena Romero', async () => {
+    await expect(loadEvent('evt_rcsmm_2559')).rejects.toMatchObject({ code: 'ENOENT' });
+  });
+
+  it('Saskia Roures no toma classical de una mención contextual a Lidón', async () => {
+    const event = await loadEvent('evt_patrimonio_nacional_0b818c27_0ac2_4405_9ee1_d9b9f5fd8aa9');
+    expect(event.eras).toEqual([]);
+  });
+
   it('Andreas Schager no conserva el asterisco de nota al pie', async () => {
     const event = await loadEvent(
       'evt_teatro_zarzuela_es_temporada_ciclo_de_lied_2026_2027_andreas_schager',

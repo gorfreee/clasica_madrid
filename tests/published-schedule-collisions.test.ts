@@ -146,6 +146,9 @@ describe('catálogo publicado tras la limpieza de duplicados de hueco exclusivo'
     expect(geometrias?.slug).toBe('orcam-sinfonico-13-geometrias-sonoras');
     expect(geometrias?.slugAliases).toEqual(['geometrias-sonoras']);
     expect(geometrias?.occurrences[0]).toMatchObject({ date: '2027-06-29', time: '19:30' });
+    expect(geometrias?.performers.find((item) => item.name === 'Óscar Rodríguez')?.role).toBe(
+      'conductor',
+    );
     expectStableCitation(geometrias?.citations.find((item) => item.sourceId === 'src_fundacion_orcam'), {
       sourceId: 'src_fundacion_orcam',
       url: 'https://fundacionorcam.org/conciertos/2026-27/geometrias-sonoras',

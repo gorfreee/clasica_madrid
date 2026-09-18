@@ -1,8 +1,11 @@
 {
   "schemaVersion": 1,
   "id": "evt_circulo_bellas_artes_132444",
-  "slug": "patricia-nolz-mezzosoprano-y-lukas-sternath-piano",
-  "title": "Patricia Nolz, mezzosoprano y LuKas Sternath, piano",
+  "slug": "patricia-nolz-mezzosoprano-y-malcolm-martineau-piano",
+  "slugAliases": [
+    "patricia-nolz-mezzosoprano-y-lukas-sternath-piano"
+  ],
+  "title": "Patricia Nolz, mezzosoprano y Malcolm Martineau, piano",
   "status": "scheduled",
   "venueId": "ven_circulo_bellas_artes_teatro_fernando_de_rojas",
   "organizerIds": [],
@@ -20,7 +23,7 @@
       "name": "Patricia Nolz"
     },
     {
-      "name": "LuKas Sternath"
+      "name": "Malcolm Martineau"
     }
   ],
   "composers": [],
