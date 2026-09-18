@@ -5,7 +5,6 @@ import AgendaList from '../components/AgendaList.astro';
 import EmptyState from '../components/EmptyState.astro';
 import Eyebrow from '../components/Eyebrow.astro';
 import PageHero from '../components/PageHero.astro';
-import { HOME_TITLE } from '../lib/presentation/constants.ts';
 import { loadAgendaPage } from '../lib/presentation/site.ts';
 import { serializeJsonForScript } from '../lib/util/json-script.ts';
 
@@ -15,7 +14,11 @@ const model = await loadAgendaPage(Astro.url);
 <Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath} jsonLd={model.jsonLd}>
   <PageHero layout="index" motif="agenda">
     <Eyebrow label="Agenda" />
-    <h1>{HOME_TITLE}</h1>
+    <h1>
+      <span>Toda la</span>
+      <span>música clásica</span>
+      <span>en Madrid</span>
+    </h1>
     <p class="lede">De las grandes salas a los pequeños espacios, todos los conciertos de música clásica reunidos en una sola agenda</p>
   </PageHero>
 
@@ -23,12 +26,12 @@ const model = await loadAgendaPage(Astro.url);
     model.isEmptyCatalog ? (
       <EmptyState
         title="Todavía no hay conciertos publicados"
-        body="Estamos construyendo el catálogo. Cuando haya eventos verificados, aparecerán aquí en orden cronológico."
+        body="Estamos construyendo el catálogo. Cuando haya eventos verificados, aparecerán aquí en orden cronológico"
       />
     ) : !model.hasUpcoming ? (
       <EmptyState
         title="No hay conciertos próximos"
-        body="El catálogo conserva eventos que ya han tenido lugar, pero ahora mismo no hay representaciones vigentes en la agenda."
+        body="El catálogo conserva eventos que ya han tenido lugar, pero ahora mismo no hay representaciones vigentes en la agenda"
       />
     ) : (
       <>
@@ -53,7 +56,7 @@ const model = await loadAgendaPage(Astro.url);
           <div data-no-results hidden>
             <EmptyState
               title="No hay conciertos con estos filtros"
-              body="Prueba a quitar alguno o ampliar el intervalo de fechas."
+              body="Prueba a quitar alguno o ampliar el intervalo de fechas"
             />
           </div>
           <script

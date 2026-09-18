@@ -166,6 +166,16 @@ describe('canonicalizeEventTitle', () => {
     }
   });
 
+  it('quita un punto final decorativo y conserva acrónimos como CNDM.', () => {
+    expect(canonicalizeEventTitle('Fundación Scherzo.')).toBe('Fundación Scherzo');
+    expect(canonicalizeEventTitle('FUNDACIÓN SCHERZO.')).toBe('Fundación Scherzo');
+    expect(canonicalizeEventTitle('Festival Alicia de Larrocha IV. Edición. Schubertiada.')).toBe(
+      'Festival Alicia de Larrocha IV. Edición. Schubertiada',
+    );
+    expect(canonicalizeEventTitle('CNDM.')).toBe('CNDM.');
+    expect(canonicalizeEventTitle('CNDM. Jean Rondeau')).toBe('CNDM. Jean Rondeau');
+  });
+
   it('no trata CORO ni MISA como siglas', () => {
     expect(canonicalizeEventTitle('CORO DE CÁMARA')).toBe('Coro de Cámara');
     expect(canonicalizeEventTitle('MISA EN SI MENOR')).toBe('Misa en Si Menor');

@@ -113,6 +113,26 @@ describe('March JSON-LD hydration', () => {
     expect(hydrated[0]?.dateFromDetail).toBe(true);
   });
 
+  it('reads only the primary composer field, not bold volume/place footnotes nested in it', async () => {
+    const html = (await fixture('detail-ayres')).replace(
+      '<li><strong>Matthew Locke</strong> (1621-1677)</li>',
+      '<li><strong>Juan Cebrián (c. s.XVI)</strong> (0) <span>Tratado de Glosas, <strong>Libro II</strong>, <strong>Alcalá de Henares</strong>. Obra conservada en Cancionero <strong>Musical de Palacio</strong></span></li>',
+    );
+    const patch = parseMarchDetail(raw(), html);
+    expect(patch.composers).toContainEqual({ name: 'Juan Cebrián (c. s.XVI)' });
+    expect(patch.composers).not.toEqual(
+      expect.arrayContaining([
+        { name: 'Libro II' },
+        { name: 'Alcalá de Henares' },
+        { name: 'Musical de Palacio' },
+      ]),
+    );
+    expect(patch.works?.[0]).toMatchObject({
+      title: 'Suite nº 5 en Mi menor (The Little Consort)',
+      composerName: 'Juan Cebrián (c. s.XVI)',
+    });
+  });
+
   it('rejects one malformed session, mismatched canonical URL, mixed statuses and non-Madrid/online events', async () => {
     const html = await fixture('detail-ayres');
     for (const broken of [

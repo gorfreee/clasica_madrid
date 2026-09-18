@@ -27,6 +27,39 @@ async function expectSeparateGridTracks(page: Page) {
   expect(geometry.copyRight).toBeLessThanOrEqual(geometry.artworkLeft);
 }
 
+test.describe('título de la home', () => {
+  test('el h1 dice Toda la / música clásica / en Madrid en tres líneas', async ({ page }) => {
+    const heading = page.getByRole('heading', { level: 1 });
+
+    for (const viewport of [
+      { width: 1440, height: 900 },
+      { width: 820, height: 900 },
+      { width: 390, height: 844 },
+      { width: 320, height: 700 },
+    ]) {
+      await page.setViewportSize(viewport);
+      await page.goto('/');
+      await page.evaluate(() => document.fonts.ready);
+
+      await expect(heading).toHaveText('Toda la música clásica en Madrid');
+
+      const lines = await heading.evaluate((element) =>
+        [...element.querySelectorAll('span')].map((line) => ({
+          text: line.textContent?.trim() ?? '',
+          boxes: line.getClientRects().length,
+        })),
+      );
+
+      expect(lines, `líneas a ${viewport.width}px`).toEqual([
+        { text: 'Toda la', boxes: 1 },
+        { text: 'música clásica', boxes: 1 },
+        { text: 'en Madrid', boxes: 1 },
+      ]);
+      await expectNoHorizontalOverflow(page);
+    }
+  });
+});
+
 test.describe('sistema de ilustraciones de hero', () => {
   test('las portadas escalan la ilustración sin solapar ni desbordar', async ({ page }) => {
     for (const viewport of [

@@ -1,7 +1,11 @@
 import { normalizeText } from '../lib/domain/normalize.ts';
-import { canonicalizeArtificiallyUppercase } from './event-title.ts';
+import { canonicalizeArtificiallyUppercase, stripTrailingPeriod } from './event-title.ts';
 import { collapseWhitespace } from './html.ts';
-import { matchComposer, stripTrailingBiographicalYears } from './knowledge/composers.ts';
+import {
+  isAmbiguousComposerSurname,
+  matchComposer,
+  stripTrailingBiographicalYears,
+} from './knowledge/composers.ts';
 import { isNonPersonComposerAttribution, isUnreliableComposerName } from './observed-cleanup.ts';
 
 const LEADING_MUSIC_CREDIT = /^(?:m[úu]sica|music)(?:\s+(?:de|by|:))?\s+/iu;
@@ -35,10 +39,22 @@ export function canonicalizeComposerName(name: string): string | undefined {
   const withoutYears = stripTrailingBiographicalYears(cleaned);
   if (!withoutYears) return undefined;
   if (isNonPersonComposerAttribution(withoutYears)) return undefined;
-  const known = matchComposer(withoutYears);
+  const known = matchPublishedComposer(withoutYears);
   if (known) return known.canonicalName;
   if (isUnreliableComposerName(withoutYears)) return undefined;
+  // Some source structures legitimately provide a surname only. Keep it
+  // unless our own knowledge base proves that it names several composers.
+  if (isAmbiguousComposerSurname(withoutYears)) return undefined;
   return canonicalizeArtificiallyUppercase(withoutYears) || undefined;
+}
+
+/** Resolve provider-style `SURNAME, Given names` only through known aliases. */
+function matchPublishedComposer(name: string) {
+  const direct = matchComposer(name);
+  if (direct) return direct;
+  const parts = name.split(',').map((part) => collapseWhitespace(part));
+  if (parts.length !== 2 || !parts[0] || !parts[1]) return undefined;
+  return matchComposer(`${parts[1]} ${parts[0]}`);
 }
 
 export function canonicalizeComposerList(items: Array<{ name: string }>): Array<{ name: string }> {
@@ -59,14 +75,15 @@ export function canonicalizeWorkList(
   items: Array<{ title: string; composerName?: string }>,
 ): Array<{ title: string; composerName?: string }> {
   return items.map((item) => {
+    const title = stripTrailingPeriod(item.title);
     const composerName = item.composerName ? canonicalizeComposerName(item.composerName) : undefined;
-    return composerName ? { title: item.title, composerName } : { title: item.title };
+    return composerName ? { title, composerName } : { title };
   });
 }
 
 export function publishedComposerIdentity(name: string): string {
   const cleaned = stripLeadingComposerCreditLabel(name);
-  return matchComposer(cleaned)?.canonicalName ?? normalizeText(cleaned);
+  return matchPublishedComposer(cleaned)?.canonicalName ?? normalizeText(cleaned);
 }
 
 /**

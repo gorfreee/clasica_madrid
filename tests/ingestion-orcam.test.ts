@@ -202,6 +202,39 @@ describe('ORCAM pipeline safety', () => {
     expect(failed.summary.written).toEqual([]);
   });
 
+  it('keeps Geometrías ambiguous when the ORCAM identity and Auditorio slot point to different events', async () => {
+    const catalog = emptyCatalog();
+    catalog.events = await Promise.all(
+      [
+        'evt_auditorio_nacional_orcam_sinfonico_13_geometrias_sonoras.json',
+        'evt_fundacion_orcam_4865.json',
+      ].map(async (file) =>
+        JSON.parse(await readFile(path.join(import.meta.dirname, '..', 'data', 'events', file), 'utf8')),
+      ),
+    );
+    const identity = matchEventIdentity(
+      catalog,
+      {
+        sourceUrl: 'https://fundacionorcam.org/conciertos/2026-27/geometrias-sonoras',
+        externalId: '4865',
+        title: 'Geometrías sonoras',
+        occurrences: [{ date: '2027-06-29', time: '19:30' }],
+      },
+      {
+        catalogSourceId: source.catalogSourceId,
+        venueId: 'ven_auditorio_nacional_sala_sinfonica',
+      },
+    );
+    expect(identity).toMatchObject({
+      kind: 'ambiguous',
+      reason: expect.stringContaining('evt_auditorio_nacional_orcam_sinfonico_13_geometrias_sonoras'),
+    });
+    expect(identity.kind === 'ambiguous' ? identity.events.map((event) => event.id).sort() : []).toEqual([
+      'evt_auditorio_nacional_orcam_sinfonico_13_geometrias_sonoras',
+      'evt_fundacion_orcam_4865',
+    ]);
+  });
+
   it('adds provenance to the already published Auditorio concert without duplicating or renaming it', async () => {
     const first = await run();
     const catalog = mergeCandidateBatch(emptyCatalog(), first.candidates).catalog;

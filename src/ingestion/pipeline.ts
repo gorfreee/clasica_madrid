@@ -45,7 +45,7 @@ import {
 } from './types.ts';
 import { takeBrowserFetchAttempts } from './browser-fetch.ts';
 import { getText, HttpError, resolveFetchRelay, takeRecordedHttpAttempts, takeRelayRecoveries } from './http.ts';
-import { normalizeUrl } from './urls.ts';
+import { normalizeUrl, urlIdentifiesSingleEvent } from './urls.ts';
 
 export type IngestOptions = {
   dataDir: string;
@@ -476,6 +476,7 @@ async function ingestPreparedEvents(
   // or is not requested. This must not apply a partial calendar to the event.
   const seenEventIds = new Set(reconciled.seenEventIds);
   const harvestSources = harvest?.attempted ?? [];
+  markDiscardedCatalogEventsSeen(options.catalog, harvestSources, adapterDiscards, seenEventIds);
   for (const source of harvestSources.filter((source) => getAdapter(source.adapterId).requiresDetailSchedule)) {
     const urls = new Set(rawEvents.filter((raw) => raw.sourceId === source.id).map((raw) => normalizeUrl(raw.sourceUrl)));
     for (const event of options.catalog.events) {
@@ -553,6 +554,37 @@ async function ingestPreparedEvents(
   };
 
   return { summary, apply, rawEvents, candidates: reconciled.candidates, decisions, possiblyMissing, adapterDiscards };
+}
+
+/**
+ * A recognized adapter discard is still positive listing evidence for an
+ * already-published event. Exact, source-scoped identities prevent a discarded
+ * placeholder from suppressing a genuinely absent neighbour.
+ */
+function markDiscardedCatalogEventsSeen(
+  catalog: Catalog,
+  sources: readonly SourceDefinition[],
+  discards: readonly AdapterDiscard[],
+  seenEventIds: Set<string>,
+): void {
+  const byId = new Map(sources.map((source) => [source.id, source]));
+  for (const discard of discards) {
+    const source = byId.get(discard.sourceId);
+    if (!source) continue;
+    for (const event of catalog.events) {
+      const seen = event.citations.some((citation) => {
+        if (citation.sourceId !== source.catalogSourceId) return false;
+        if (discard.externalId && citation.externalId === discard.externalId) return true;
+        return Boolean(
+          discard.sourceUrl &&
+            urlIdentifiesSingleEvent(discard.sourceUrl) &&
+            urlIdentifiesSingleEvent(citation.url) &&
+            normalizeUrl(citation.url) === normalizeUrl(discard.sourceUrl),
+        );
+      });
+      if (seen) seenEventIds.add(event.id);
+    }
+  }
 }
 
 function venueHint(event: {

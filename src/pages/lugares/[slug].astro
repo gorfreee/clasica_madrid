@@ -53,7 +53,7 @@ if (!model) {
       </div>
       {
         model.upcoming.length === 0 ? (
-          <p class="quiet-state">No hay conciertos próximos publicados en este espacio.</p>
+          <p class="quiet-state">No hay conciertos próximos publicados en este espacio</p>
         ) : (
           <div class="agenda-day__list">
             {model.upcoming.map((item) => <AgendaItem item={item} />)}

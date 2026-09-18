@@ -36,7 +36,7 @@ const { days } = Astro.props;
               </time>
             </h2>
             {day.isEmptyToday ? (
-              <p class="agenda-day__empty">Hoy no hay conciertos publicados. La agenda continúa en la próxima fecha.</p>
+              <p class="agenda-day__empty">Hoy no hay conciertos publicados. La agenda continúa en la próxima fecha</p>
             ) : (
               <div class="agenda-day__list">
                 {day.items.map((item) => <AgendaItem item={item} showDate={false} />)}

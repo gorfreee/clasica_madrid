@@ -111,8 +111,8 @@ const PERFORMER_LINE =
   /^(?:solistas?|directora?|director\s*\/\s*concertino|actor(?:\s+y\s+solista)?|int[ée]rpretes?)\s*:/i;
 const WORK_ANNOTATION =
   /\s*\((?:(?:obra de )?estreno|versi[oó]n|adaptaci[oó]n)[^)]*\)\s*$/iu;
-const BARE_CONCERT_LABEL =
-  /^(?:(?:el|la|los|las|un|una)\s+)?(?:concierto|concerto|recital|audici[oó]n|sesi[oó]n|gala|ciclo|programa)$/i;
+const BARE_WORK_LABEL =
+  /^(?:(?:el|la|los|las|un|una)\s+)?(?:concierto|concerto|recital|audici[oó]n|sesi[oó]n|gala|ciclo|programa|sinfon[ií]a|symphony|sonata|suite|quinteto|cuarteto|tr[ií]o|obertura|ouverture|r[eé]quiem|misa|invitatorio|toccata|fuga|preludio|nocturne|mazurka|scherzo|impromptu|variaciones|cantata|oratorio|fantas[ií]a)$/i;
 
 /**
  * Names that sit in a current-programme attribution frame.
@@ -323,7 +323,7 @@ function parseUnknownWorkDeAuthor(line: string): { title: string; composerName: 
     const composerName = completed.author;
     if (!title || !composerName) continue;
     if (CREDIT_LABEL_TITLE.test(title) || looksLikeEditorialMaterial(title)) continue;
-    if (BARE_CONCERT_LABEL.test(title)) continue;
+    if (BARE_WORK_LABEL.test(title)) continue;
     if (looksLikeEnsembleName(composerName)) continue;
     if (clearlyNonComposerContext(composerName, line)) continue;
 
@@ -612,6 +612,7 @@ function strongWorkDeComposerSurname(evidence: string, name: string): boolean {
   const pattern = new RegExp(`\\s+(?:de|by)\\s+${escapeRegExp(name)}\\s*$`, 'iu');
   if (!pattern.test(source)) return false;
   const title = source.replace(pattern, '');
+  if (BARE_WORK_LABEL.test(title)) return false;
   return looksLikeUnequivocalWorkLine(title) || looksLikeWorkTitle(title);
 }
 
