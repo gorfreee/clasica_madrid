@@ -31,13 +31,16 @@ export function urlPathIdentity(url: string): string {
  * Whether a source URL can identify one event by itself.
  *
  * `event-detail`: the path or query contains a token that is likely unique to
- * one concert (numeric/CMS id, UUID, a multi-token slug, or a non-collection
- * last segment such as `/espectaculo/bayreuth`).
+ * one concert (numeric/CMS id, UUID, an identifying query, or a last-segment
+ * slug that is not a collection page — `/espectaculo/bayreuth`,
+ * `/eventos/recital-de-violin-…`).
  *
  * `listing`: homepage or a reusable collection page (`/agenda`, `/eventos`,
- * `/programacion`, …) that can host different events over time or several
- * events at once. These URLs remain valid evidence/citations; they must not
- * be used as the sole identity key.
+ * `/programacion`, `/actividades/conciertos-de-tarde`, `eventos-*` without a
+ * CMS id, …) that can host different events over time or several events at
+ * once. A multi-word path segment is not an event id by itself. These URLs
+ * remain valid evidence/citations; they must not be used as the sole identity
+ * key.
  */
 export type SourceUrlKind = 'event-detail' | 'listing';
 
@@ -81,6 +84,34 @@ const LISTING_PATH_SEGMENTS = new Set([
   'search',
   'temporada',
 ]);
+
+/**
+ * First token of a collection slug (`conciertos-de-tarde`, `eventos-octubre`,
+ * `programacion-2026`). Singular `concierto-*` / `evento-*` stay event-like.
+ */
+const COLLECTION_SLUG_HEADS = new Set([
+  'actividades',
+  'actualidad',
+  'agenda',
+  'agendas',
+  'blog',
+  'calendario',
+  'calendar',
+  'cartelera',
+  'conciertos',
+  'eventos',
+  'events',
+  'listings',
+  'news',
+  'noticias',
+  'programacion',
+  'programas',
+  'programmes',
+  'temporada',
+]);
+
+/** CMS/node ids, not a 4-digit calendar year in `programacion-2026`. */
+const CMS_LIKE_ID = /\d{5,}/;
 
 const IDENTITY_QUERY_KEYS = new Set([
   'eid',
@@ -133,7 +164,7 @@ export function sourceUrlKind(url: string): SourceUrlKind {
     if (segments.length === 0) return 'listing';
     if (segments.some(pathSegmentIdentifiesEvent)) return 'event-detail';
     const last = segments.at(-1);
-    if (last && LISTING_PATH_SEGMENTS.has(last)) return 'listing';
+    if (last && isCollectionPathSegment(last)) return 'listing';
     return 'event-detail';
   } catch {
     return 'listing';
@@ -146,9 +177,15 @@ export function urlIdentifiesSingleEvent(url: string): boolean {
 
 function pathSegmentIdentifiesEvent(segment: string): boolean {
   if (UUID_SEGMENT.test(segment)) return true;
-  if (/\d/.test(segment)) return true;
-  const tokens = segment.split('-').filter(Boolean);
-  return tokens.length >= 3;
+  if (isCollectionPathSegment(segment)) return false;
+  return /\d/.test(segment);
+}
+
+function isCollectionPathSegment(segment: string): boolean {
+  if (LISTING_PATH_SEGMENTS.has(segment)) return true;
+  if (UUID_SEGMENT.test(segment) || CMS_LIKE_ID.test(segment)) return false;
+  const head = segment.split('-').filter(Boolean)[0];
+  return Boolean(head && COLLECTION_SLUG_HEADS.has(head));
 }
 
 function hasIdentifyingQuery(url: URL): boolean {
