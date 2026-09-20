@@ -4,7 +4,9 @@ import {
   madridVgnextoid,
   normalizeUrl,
   sourceUrlKind,
+  urlEventIdentity,
   urlIdentifiesSingleEvent,
+  urlPathIdentity,
   urlsEquivalent,
 } from '../src/ingestion/urls.ts';
 import type { RawEvent } from '../src/ingestion/types.ts';
@@ -56,6 +58,9 @@ describe('sourceUrlKind', () => {
     expect(sourceUrlKind('https://auditorionacional.inaem.gob.es/es/programacion')).toBe('listing');
     expect(sourceUrlKind('https://caixaforum.org/es/madrid/agenda')).toBe('listing');
     expect(sourceUrlKind('https://example.org/agenda?page=2')).toBe('listing');
+    expect(sourceUrlKind('https://example.org/agenda?page=2&utm_source=newsletter&lang=es')).toBe(
+      'listing',
+    );
     expect(urlIdentifiesSingleEvent('https://corofrancispoulenc.com/agenda')).toBe(false);
   });
 
@@ -99,10 +104,64 @@ describe('sourceUrlKind', () => {
     expect(sourceUrlKind('https://example.org/evento?id=12')).toBe('event-detail');
     expect(
       sourceUrlKind(
+        'https://www.congreso.es/ca/notas-de-prensa?_notasprensa_mvcPath=detalle&_notasprensa_notaId=52355&p_p_id=notasprensa&p_p_lifecycle=0&p_p_mode=view&p_p_state=normal',
+      ),
+    ).toBe('event-detail');
+    expect(sourceUrlKind('https://example.org/noticias?_notasprensa_notaId=52355')).toBe(
+      'event-detail',
+    );
+    expect(
+      sourceUrlKind(
         'https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=aab47760175ff910VgnVCM100000891ecb1aRCRD',
       ),
     ).toBe('event-detail');
     expect(urlIdentifiesSingleEvent('https://www.teatroreal.es/es/espectaculo/bayreuth')).toBe(true);
+  });
+});
+
+describe('urlEventIdentity', () => {
+  it('conserva la identidad de path cuando el último segmento ya nombra el concierto', () => {
+    expect(urlEventIdentity('https://www.teatroreal.es/es/espectaculo/bayreuth')).toBe('bayreuth');
+    expect(
+      urlEventIdentity('https://www.teatroreal.es/es/espectaculo/bayreuth?utm_source=agenda&lang=es'),
+    ).toBe('bayreuth');
+    expect(urlEventIdentity('https://cndm.inaem.gob.es/node/23846')).toBe('23846');
+    expect(urlPathIdentity('https://www.teatroreal.es/es/espectaculo/bayreuth')).toBe('bayreuth');
+  });
+
+  it('ignora query params de tracking, paginación e idioma', () => {
+    expect(urlEventIdentity('https://coro.example/conciertos/dido-y-eneas?page=2')).toBe(
+      'dido-y-eneas',
+    );
+    expect(
+      urlEventIdentity('https://coro.example/conciertos/dido-y-eneas?fbclid=abc123&utm_medium=email'),
+    ).toBe('dido-y-eneas');
+    expect(urlEventIdentity('https://example.org/agenda?page=2&utm_source=x')).toBe('agenda');
+  });
+
+  it('usa un identificador CMS/query inequívoco cuando el path no basta', () => {
+    expect(urlEventIdentity('https://example.org/evento?id=12')).toBe('12');
+    expect(
+      urlEventIdentity(
+        'https://www.congreso.es/ca/notas-de-prensa?_notasprensa_mvcPath=detalle&_notasprensa_notaId=52355&p_p_id=notasprensa&p_p_lifecycle=0&p_p_mode=view&p_p_state=normal',
+      ),
+    ).toBe('notas-de-prensa-52355');
+    expect(
+      urlEventIdentity(
+        'https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=aab47760175ff910VgnVCM100000891ecb1aRCRD',
+      ),
+    ).toBe('aab47760175ff910VgnVCM100000891ecb1aRCRD');
+  });
+
+  it('distingue fichas distintas bajo el mismo path y distintos IDs de query', () => {
+    const left =
+      'https://www.congreso.es/ca/notas-de-prensa?_notasprensa_notaId=52355&p_p_id=notasprensa';
+    const right =
+      'https://www.congreso.es/ca/notas-de-prensa?_notasprensa_notaId=52356&p_p_id=notasprensa';
+    expect(urlEventIdentity(left)).toBe('notas-de-prensa-52355');
+    expect(urlEventIdentity(right)).toBe('notas-de-prensa-52356');
+    expect(urlEventIdentity(left)).not.toBe(urlEventIdentity(right));
+    expect(urlPathIdentity(left)).toBe(urlPathIdentity(right));
   });
 });
 

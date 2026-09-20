@@ -28,6 +28,32 @@ export function urlPathIdentity(url: string): string {
 }
 
 /**
+ * Stable URL tail used when minting a new Event.id from an event-detail URL.
+ *
+ * A path that already identifies one concert (`/espectaculo/bayreuth`,
+ * `/node/23846`) keeps the historical last-segment tail. Tracking, language,
+ * pagination and filter query params are ignored. When the path is a reusable
+ * section or script (`/evento`, `/notas-de-prensa`, `index.jsp`) and the query
+ * carries an unambiguous ficha/CMS id, that id becomes (part of) the tail so
+ * two fichas under the same path do not collide. Published ids are never
+ * rewritten; this only applies to unmatched creates.
+ */
+export function urlEventIdentity(url: string): string {
+  try {
+    const parsed = new URL(normalizeUrl(url));
+    const pathId = urlPathIdentity(url);
+    const queryId = queryIdentityFrom(parsed);
+    if (!queryId) return pathId;
+    if (pathIdentityIsStrong(pathId)) return pathId;
+    const foldedPath = foldPathSegment(pathId);
+    if (!foldedPath || pathIdentityIsGeneric(foldedPath)) return queryId;
+    return `${pathId}-${queryId}`;
+  } catch {
+    return urlPathIdentity(url);
+  }
+}
+
+/**
  * Whether a source URL can identify one event by itself.
  *
  * `event-detail`: the path or query contains a token that is likely unique to
@@ -129,6 +155,8 @@ const IDENTITY_QUERY_KEYS = new Set([
 ]);
 
 const NON_IDENTITY_QUERY_KEYS = new Set([
+  'dclid',
+  'fbclid',
   'filter',
   'from',
   'gclid',
@@ -139,6 +167,7 @@ const NON_IDENTITY_QUERY_KEYS = new Set([
   'mc_eid',
   'mes',
   'month',
+  'msclkid',
   'offset',
   'order',
   'page',
@@ -148,12 +177,34 @@ const NON_IDENTITY_QUERY_KEYS = new Set([
   'search',
   'sort',
   'to',
+  'ttclid',
+  'twclid',
   'utm_campaign',
   'utm_content',
   'utm_medium',
   'utm_source',
   'utm_term',
+  'vgnextchannel',
+  'vgnextfmt',
+  'yclid',
   'year',
+]);
+
+/** Last path segments that are scripts or chrome, not a concert slug. */
+const GENERIC_SCRIPT_SEGMENTS = new Set([
+  'default',
+  'detail',
+  'detalle',
+  'index',
+  'index-asp',
+  'index-aspx',
+  'index-htm',
+  'index-html',
+  'index-jsp',
+  'index-php',
+  'item',
+  'show',
+  'view',
 ]);
 
 export function sourceUrlKind(url: string): SourceUrlKind {
@@ -189,16 +240,74 @@ function isCollectionPathSegment(segment: string): boolean {
 }
 
 function hasIdentifyingQuery(url: URL): boolean {
+  if (identifyingQueryEntries(url).length > 0) return true;
   for (const [rawKey, rawValue] of url.searchParams) {
     const key = rawKey.trim().toLowerCase();
     const value = rawValue.trim();
-    if (!key || !value) continue;
-    if (NON_IDENTITY_QUERY_KEYS.has(key) || key.startsWith('utm_')) continue;
-    if (IDENTITY_QUERY_KEYS.has(key)) return true;
+    if (!key || !value || isNonIdentityQueryKey(key)) continue;
     if (UUID_SEGMENT.test(value)) return true;
     if (/\d/.test(value) && value.length >= 8) return true;
   }
   return false;
+}
+
+function queryIdentityFrom(url: URL): string | undefined {
+  const entries = identifyingQueryEntries(url);
+  if (entries.length === 0) return undefined;
+  entries.sort((left, right) => left.key.localeCompare(right.key));
+  if (entries.length === 1) return entries[0]!.value;
+  return entries.map((entry) => `${entry.key}-${entry.value}`).join('-');
+}
+
+function identifyingQueryEntries(url: URL): Array<{ key: string; value: string }> {
+  const entries: Array<{ key: string; value: string }> = [];
+  const seen = new Set<string>();
+  for (const [rawKey, rawValue] of url.searchParams) {
+    const key = rawKey.trim().toLowerCase();
+    const value = rawValue.trim();
+    if (!key || !value || isNonIdentityQueryKey(key)) continue;
+    if (!isHighConfidenceQueryIdentity(rawKey, key, value)) continue;
+    const dedupe = `${key}=${value}`;
+    if (seen.has(dedupe)) continue;
+    seen.add(dedupe);
+    entries.push({ key, value });
+  }
+  return entries;
+}
+
+function isHighConfidenceQueryIdentity(rawKey: string, key: string, value: string): boolean {
+  if (IDENTITY_QUERY_KEYS.has(key)) return true;
+  if (UUID_SEGMENT.test(value)) return true;
+  return isEntityIdQueryKey(rawKey) && isRecordIdQueryValue(value);
+}
+
+function isEntityIdQueryKey(rawKey: string): boolean {
+  const key = rawKey.trim();
+  if (/(?:^|_|-)(?:id|nid|eid|uuid|guid)$/i.test(key)) return true;
+  if (/[A-Za-z]Id$/.test(key)) return true;
+  const folded = key.toLowerCase();
+  return (folded.includes('_') || folded.includes('-')) && /(?:id|nid|eid|uuid|guid)$/.test(folded);
+}
+
+function isRecordIdQueryValue(value: string): boolean {
+  return UUID_SEGMENT.test(value) || /^\d{3,}$/.test(value);
+}
+
+function isNonIdentityQueryKey(key: string): boolean {
+  if (NON_IDENTITY_QUERY_KEYS.has(key) || key.startsWith('utm_')) return true;
+  if (key.startsWith('p_p_')) return true;
+  return key.startsWith('vgnext') && key !== 'vgnextoid';
+}
+
+function pathIdentityIsStrong(pathId: string): boolean {
+  const folded = foldPathSegment(pathId);
+  if (!folded || pathIdentityIsGeneric(folded)) return false;
+  if (pathSegmentIdentifiesEvent(folded)) return true;
+  return !folded.includes('-');
+}
+
+function pathIdentityIsGeneric(folded: string): boolean {
+  return GENERIC_SCRIPT_SEGMENTS.has(folded) || isCollectionPathSegment(folded);
 }
 
 function foldPathSegment(segment: string): string {
