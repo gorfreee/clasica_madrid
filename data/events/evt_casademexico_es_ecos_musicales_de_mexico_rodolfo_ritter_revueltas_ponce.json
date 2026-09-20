@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_casademexico_es_ecos_musicales_de_mexico_rodolfo_ritter_revueltas_ponce",
+  "slug": "ecos-musicales-de-mexico-rodolfo-ritter-revueltas-ponce",
+  "title": "Ecos Musicales de México | Rodolfo Ritter | Revueltas & Ponce",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_casa_de_mexico_en_espana_salon_de_usos_multiples",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_casademexico_es_ecos_musicales_de_mexico_rodolfo_ritter_revueltas_ponce_01",
+      "date": "2026-12-03",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Rodolfo Ritter"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Silvestre Revueltas"
+    },
+    {
+      "name": "Manuel M. Ponce"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_casademexico_es",
+      "url": "https://www.casademexico.es/musica/ecos-musicales-de-mexico-rodolfo-ritter-revueltas-ponce",
+      "checkedAt": "2026-09-20"
+    }
+  ],
+  "primarySourceId": "src_casademexico_es",
+  "lastVerifiedAt": "2026-09-20"
+}
