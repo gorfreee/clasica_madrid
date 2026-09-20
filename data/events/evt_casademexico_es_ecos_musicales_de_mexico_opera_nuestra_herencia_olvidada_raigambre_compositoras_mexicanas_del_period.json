@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_casademexico_es_ecos_musicales_de_mexico_opera_nuestra_herencia_olvidada_raigambre_compositoras_mexicanas_del_period",
+  "slug": "ecos-musicales-de-mexico-opera-nuestra-herencia-olvidada-raigambre-compositoras-mexicanas-del-periodo-romantico",
+  "title": "Ecos Musicales de México | Ópera Nuestra Herencia Olvidada | Raigambre. Compositoras mexicanas del período romántico",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_casa_de_mexico_en_espana_salon_de_usos_multiples",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_casademexico_es_ecos_musicales_de_mexico_opera_nuestra_herencia_olvidada_raigambre_compositoras_mexicanas_del_period",
+      "date": "2026-10-10",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ana Rosalía Ramos"
+    },
+    {
+      "name": "Rosa Muñoz"
+    },
+    {
+      "name": "Pierre-Arnaud Le Guérinel"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Guadalupe Olmedo"
+    },
+    {
+      "name": "Guadalupe Unda"
+    },
+    {
+      "name": "Clotilde Crombé"
+    },
+    {
+      "name": "Ignacia Ilizaliturri"
+    },
+    {
+      "name": "María Fajardo"
+    },
+    {
+      "name": "Ángela Guillén"
+    },
+    {
+      "name": "Cuquita Ponce"
+    },
+    {
+      "name": "Leticia Euroza"
+    },
+    {
+      "name": "Beatriz Carrillo"
+    },
+    {
+      "name": "Elena G. de Beltrán"
+    },
+    {
+      "name": "María Elena Curiel"
+    },
+    {
+      "name": "María Garfias"
+    },
+    {
+      "name": "María Pérez Redondo"
+    },
+    {
+      "name": "María Grever"
+    }
+  ],
+  "works": [
+    {
+      "title": "Luz, pensamiento poético para piano",
+      "composerName": "Guadalupe Olmedo"
+    },
+    {
+      "title": "L'ultimo fior",
+      "composerName": "Guadalupe Olmedo"
+    },
+    {
+      "title": "Mayo, melodía para canto y piano",
+      "composerName": "Guadalupe Unda"
+    },
+    {
+      "title": "Los patinadores, polca-mazurka para piano",
+      "composerName": "Clotilde Crombé"
+    },
+    {
+      "title": "La mirada del amor",
+      "composerName": "Ignacia Ilizaliturri"
+    },
+    {
+      "title": "Aves y flores, danza para canto y piano",
+      "composerName": "María Fajardo"
+    },
+    {
+      "title": "Melodía poética",
+      "composerName": "Ángela Guillén"
+    },
+    {
+      "title": "Remembranzas, vals para voz y piano",
+      "composerName": "Cuquita Ponce"
+    },
+    {
+      "title": "Playas de blanca arena",
+      "composerName": "Leticia Euroza"
+    },
+    {
+      "title": "Al ver tus ojos, schottisch para piano",
+      "composerName": "Beatriz Carrillo"
+    },
+    {
+      "title": "Ya no queda ninguna",
+      "composerName": "Elena G. de Beltrán"
+    },
+    {
+      "title": "Desesperanza",
+      "composerName": "María Elena Curiel"
+    },
+    {
+      "title": "Melodía para piano",
+      "composerName": "María Garfias"
+    },
+    {
+      "title": "Lo que es amor, romanza",
+      "composerName": "María Pérez Redondo"
+    },
+    {
+      "title": "El ruiseñor",
+      "composerName": "María Grever"
+    },
+    {
+      "title": "Tus ojos de esmeralda",
+      "composerName": "Leticia Euroza"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_casademexico_es",
+      "url": "https://www.casademexico.es/musica/ecos-musicales-de-mexico-opera-nuestra-herencia-olvidada-raigambre-compositoras-mexicanas-del-periodo-romantico",
+      "checkedAt": "2026-09-20"
+    }
+  ],
+  "primarySourceId": "src_casademexico_es",
+  "lastVerifiedAt": "2026-09-20"
+}
