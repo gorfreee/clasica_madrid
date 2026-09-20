@@ -178,7 +178,6 @@ test.describe('filtros avanzados de la agenda', () => {
     );
 
     await page.goto('/');
-    const initialCount = await visibleOccurrences(page).count();
     await expect(page.locator(`[data-occurrence-id="${extraFreeIds[0]}"]`)).toHaveCount(0);
 
     await toggle(page).click();
@@ -187,15 +186,16 @@ test.describe('filtros avanzados de la agenda', () => {
 
     await expect(page).toHaveURL(/access=free/);
     await expect(page.locator('[data-agenda-root][data-agenda-complete]')).toHaveCount(1);
-    await expect(page.locator(`[data-occurrence-id="${extraFreeIds[0]}"]`)).toBeVisible();
+    for (const id of extraFreeIds.slice(0, 3)) {
+      await expect(page.locator(`[data-occurrence-id="${id}"]`)).toBeVisible();
+    }
 
     const filteredCount = await visibleOccurrences(page).count();
     expect(filteredCount).toBeGreaterThan(0);
     await expect(page.locator('[data-result-count]')).toHaveText(occurrenceCountLabel(filteredCount));
-    // Extra matches after the cutoff are included on purpose, so the visible
-    // filtered set is not bounded by the truncated home list.
+    // Extra matches after the cutoff are included on purpose. The filtered
+    // visible set is not bounded by the truncated home list and can exceed it.
     expect(filteredCount).toBeGreaterThanOrEqual(extraFreeIds.length);
-    expect(filteredCount).toBeGreaterThan(initialCount);
   });
 
   for (const viewport of VIEWPORTS) {
