@@ -96,6 +96,8 @@ Debes:
 
 Cuando encuentres una **agenda, ciclo, listing o página con múltiples eventos**, recorre **todos** los eventos de esa página que caigan dentro de la ventana —incluida paginación o load-more cuando exista— y contabiliza cada uno como `submitted`, `already-covered`, `excluded` o `unresolved` en `research.listingReviews` antes de considerar esa fuente terminada. Si sigues una ficha individual desde ese listing, extrae la ficha como evidencia del evento, pero **sigue reconciliando el listing completo**. No hace falta guardar un historial de todas las páginas visitadas: sólo listings/ciclos relevantes con varios candidatos.
 
+Si al reconciliar una agenda o listing **oficial** el HTML parece incompleto, desactualizado, contradictorio o mezcla programación pasada y futura, y esa misma fuente enlaza PDFs, programas de temporada, folletos, calendarios u otros documentos oficiales relevantes, **consúltalos** antes de marcar candidatos como `unresolved` o `insufficient-evidence`. No rastrees indiscriminadamente todos los PDFs de cada web: sólo cuando la fuente oficial principal deja dudas o hay indicios de programación complementaria. Sigue valiendo fuente primaria primero, no inventar, reconciliar todos los candidatos del listing y exigir evidencia oficial suficiente antes de publicar.
+
 Diferencia **lead** y **evidencia**:
 
 * Lead: Google, Eventbrite, Instagram, una agenda agregada.
