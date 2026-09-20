@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_amcc_es_nov_05_ismael_arroyo_y_eduardo_moreno",
+  "slug": "coma-26-ismael-arroyo-y-eduardo-moreno",
+  "title": "COMA’26: Ismael Arroyo y Eduardo Moreno",
+  "status": "scheduled",
+  "venueId": "ven_sala_manuel_falla_sgae",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_amcc_es_nov_05_ismael_arroyo_y_eduardo_moreno_01",
+      "date": "2026-11-05",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ismael Arroyo"
+    },
+    {
+      "name": "Eduardo Moreno"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Eduardo Pérez Maseda"
+    },
+    {
+      "name": "Jorge Grundman"
+    },
+    {
+      "name": "Jorge Tabarés"
+    },
+    {
+      "name": "Laura de las Heras"
+    },
+    {
+      "name": "Jesús Torres"
+    },
+    {
+      "name": "Fazıl Say"
+    }
+  ],
+  "works": [
+    {
+      "title": "Amalichten",
+      "composerName": "Eduardo Pérez Maseda"
+    },
+    {
+      "title": "As tranquility arises op. 103",
+      "composerName": "Jorge Grundman"
+    },
+    {
+      "title": "Suite para saxofón y piano",
+      "composerName": "Jorge Tabarés"
+    },
+    {
+      "title": "Silencio",
+      "composerName": "Laura de las Heras"
+    },
+    {
+      "title": "Incantatio",
+      "composerName": "Jesús Torres"
+    },
+    {
+      "title": "Suite Op. 55 para saxofón alto y piano",
+      "composerName": "Fazıl Say"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "chamber",
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_amcc_es",
+      "url": "https://amcc.es/coma/coma26/nov-05-ismael-arroyo-y-eduardo-moreno",
+      "checkedAt": "2026-09-20"
+    }
+  ],
+  "primarySourceId": "src_amcc_es",
+  "lastVerifiedAt": "2026-09-20"
+}

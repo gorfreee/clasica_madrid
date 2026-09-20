@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_amcc_es_oct_31_alberto_pico_soriano",
+  "slug": "coma-26-alberto-pico-soriano",
+  "title": "COMA’26: Alberto Picó Soriano",
+  "status": "scheduled",
+  "venueId": "ven_casa_vacas_retiro",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_amcc_es_oct_31_alberto_pico_soriano_01",
+      "date": "2026-10-31",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Alberto Picó Soriano"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Alejandro de la Barrera"
+    },
+    {
+      "name": "Antón García Abril"
+    },
+    {
+      "name": "Ricardo Gassent Balaguer"
+    },
+    {
+      "name": "Manuel Seco de Arpe"
+    }
+  ],
+  "works": [
+    {
+      "title": "Noche y sueño, amanecer y despertar",
+      "composerName": "Alejandro de la Barrera"
+    },
+    {
+      "title": "Tres piezas amantinas",
+      "composerName": "Antón García Abril"
+    },
+    {
+      "title": "Agua",
+      "composerName": "Ricardo Gassent Balaguer"
+    },
+    {
+      "title": "Sonata núm. 6",
+      "composerName": "Manuel Seco de Arpe"
+    }
+  ],
+  "eras": [
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_amcc_es",
+      "url": "https://amcc.es/coma/coma26/oct-31-alberto-pico-soriano",
+      "checkedAt": "2026-09-20"
+    }
+  ],
+  "primarySourceId": "src_amcc_es",
+  "lastVerifiedAt": "2026-09-20"
+}

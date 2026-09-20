@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_amcc_es_oct_29_mario_perez",
+  "slug": "coma-26-mario-perez",
+  "title": "COMA’26: Mario Pérez",
+  "status": "scheduled",
+  "venueId": "ven_sala_manuel_falla_sgae",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_amcc_es_oct_29_mario_perez_01",
+      "date": "2026-10-29",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Mario Pérez"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Beatriz Arzamendi"
+    },
+    {
+      "name": "Sebastián Mariné"
+    },
+    {
+      "name": "José Buenagu"
+    },
+    {
+      "name": "Guillermo Buendía Navas"
+    },
+    {
+      "name": "Claudio Prieto"
+    },
+    {
+      "name": "Mario Pérez"
+    }
+  ],
+  "works": [
+    {
+      "title": "Quorum / Quorum II interference",
+      "composerName": "Beatriz Arzamendi"
+    },
+    {
+      "title": "Fábulas Op. 28",
+      "composerName": "Sebastián Mariné"
+    },
+    {
+      "title": "Compaña",
+      "composerName": "José Buenagu"
+    },
+    {
+      "title": "Suite para viola sola",
+      "composerName": "Guillermo Buendía Navas"
+    },
+    {
+      "title": "Sugerencia",
+      "composerName": "Claudio Prieto"
+    },
+    {
+      "title": "Silent Pulse",
+      "composerName": "Mario Pérez"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_amcc_es",
+      "url": "https://amcc.es/coma/coma26/oct-29-mario-perez",
+      "checkedAt": "2026-09-20"
+    }
+  ],
+  "primarySourceId": "src_amcc_es",
+  "lastVerifiedAt": "2026-09-20"
+}

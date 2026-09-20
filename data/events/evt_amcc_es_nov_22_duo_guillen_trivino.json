@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_amcc_es_nov_22_duo_guillen_trivino",
+  "slug": "coma-26-duo-guillen-trivino",
+  "title": "COMA’26: Dúo Guillén-Triviño",
+  "status": "scheduled",
+  "venueId": "ven_museo_de_america_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_amcc_es_nov_22_duo_guillen_trivino_01",
+      "date": "2026-11-22",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Manuel Guillén"
+    },
+    {
+      "name": "Lorenzo Triviño"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Elena Romero"
+    },
+    {
+      "name": "Manuel Guillén"
+    },
+    {
+      "name": "Elena G. Tofiños"
+    },
+    {
+      "name": "Jorge Castro"
+    },
+    {
+      "name": "Carlos Galán"
+    },
+    {
+      "name": "Zulema de la Cruz"
+    },
+    {
+      "name": "Juan Manuel Ruiz"
+    },
+    {
+      "name": "Tomás Marco"
+    },
+    {
+      "name": "Elena Romero / Manuel Guillén"
+    }
+  ],
+  "works": [
+    {
+      "title": "Danza rústica",
+      "composerName": "Elena Romero / Manuel Guillén"
+    },
+    {
+      "title": "Espacio sin tiempo",
+      "composerName": "Elena G. Tofiños"
+    },
+    {
+      "title": "Reminiscencia de una luz inacabada",
+      "composerName": "Jorge Castro"
+    },
+    {
+      "title": "Estudio de texturas II, op. 138, Música Matérica LXXVI",
+      "composerName": "Carlos Galán"
+    },
+    {
+      "title": "Lamento per due",
+      "composerName": "Zulema de la Cruz"
+    },
+    {
+      "title": "Oriente, dúo núm. 1",
+      "composerName": "Juan Manuel Ruiz"
+    },
+    {
+      "title": "Scala Angelorum",
+      "composerName": "Tomás Marco"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "chamber",
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_amcc_es",
+      "url": "https://amcc.es/coma/coma26/nov-22-duo-guillen-trivino",
+      "checkedAt": "2026-09-20"
+    }
+  ],
+  "primarySourceId": "src_amcc_es",
+  "lastVerifiedAt": "2026-09-20"
+}

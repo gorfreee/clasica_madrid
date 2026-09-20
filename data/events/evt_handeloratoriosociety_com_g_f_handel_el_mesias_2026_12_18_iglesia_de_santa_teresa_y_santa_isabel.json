@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_handeloratoriosociety_com_g_f_handel_el_mesias_2026_12_18_iglesia_de_santa_teresa_y_santa_isabel",
+  "slug": "g-f-handel-el-mesias",
+  "title": "G. F. Händel: El Mesías",
+  "status": "scheduled",
+  "venueId": "ven_iglesia_de_santa_teresa_y_santa_isabel",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_handeloratoriosociety_com_g_f_handel_el_mesias_2026_12_18_iglesia_de_santa_teresa_y_santa_isabel_01",
+      "date": "2026-12-18",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Barroca Handel Oratorio Society",
+      "role": "orchestra"
+    },
+    {
+      "name": "Inma Férez"
+    },
+    {
+      "name": "Marta Infante"
+    },
+    {
+      "name": "Fran R. Braojos"
+    },
+    {
+      "name": "John Heath"
+    },
+    {
+      "name": "Oscar Gershensohn"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Georg Friedrich Händel"
+    }
+  ],
+  "works": [
+    {
+      "title": "El Mesías",
+      "composerName": "Georg Friedrich Händel"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_handeloratoriosociety_com",
+      "url": "https://handeloratoriosociety.com/",
+      "checkedAt": "2026-09-20"
+    }
+  ],
+  "primarySourceId": "src_handeloratoriosociety_com",
+  "lastVerifiedAt": "2026-09-20"
+}

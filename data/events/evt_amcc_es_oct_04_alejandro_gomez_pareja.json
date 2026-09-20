@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_amcc_es_oct_04_alejandro_gomez_pareja",
+  "slug": "coma-26-alejandro-gomez-pareja",
+  "title": "COMA’26: Alejandro Gómez Pareja",
+  "status": "scheduled",
+  "venueId": "ven_museo_de_america_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_amcc_es_oct_04_alejandro_gomez_pareja_01",
+      "date": "2026-10-04",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Alejandro Gómez Pareja"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Luis Navarro Valcárcel"
+    },
+    {
+      "name": "Carlos Hernández Sánchez"
+    },
+    {
+      "name": "Rafael Blázquez"
+    },
+    {
+      "name": "Adolfo Núñez"
+    },
+    {
+      "name": "Ignacio Ferrando"
+    },
+    {
+      "name": "Thomas Demenga"
+    },
+    {
+      "name": "Jorge Díaz"
+    }
+  ],
+  "works": [
+    {
+      "title": "Umbrales imaginados",
+      "composerName": "Luis Navarro Valcárcel"
+    },
+    {
+      "title": "Suite itinerante",
+      "composerName": "Carlos Hernández Sánchez"
+    },
+    {
+      "title": "Geometría del eco",
+      "composerName": "Rafael Blázquez"
+    },
+    {
+      "title": "Dole",
+      "composerName": "Adolfo Núñez"
+    },
+    {
+      "title": "Degradados",
+      "composerName": "Ignacio Ferrando"
+    },
+    {
+      "title": "EFEU para violonchelo solo",
+      "composerName": "Thomas Demenga"
+    },
+    {
+      "title": "Escultura I – La muerte de Ícaro",
+      "composerName": "Jorge Díaz"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_amcc_es",
+      "url": "https://amcc.es/coma/coma26/oct-04-alejandro-gomez-pareja",
+      "checkedAt": "2026-09-20"
+    }
+  ],
+  "primarySourceId": "src_amcc_es",
+  "lastVerifiedAt": "2026-09-20"
+}

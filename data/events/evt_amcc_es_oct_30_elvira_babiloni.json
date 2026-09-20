@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_amcc_es_oct_30_elvira_babiloni",
+  "slug": "coma-26-elvira-babiloni",
+  "title": "COMA’26: Elvira Babiloni",
+  "status": "scheduled",
+  "venueId": "ven_real_academia_bellas_artes_salon_actos",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_amcc_es_oct_30_elvira_babiloni_01",
+      "date": "2026-10-30",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Elvira Babiloni"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Jesús Legido"
+    },
+    {
+      "name": "Pilar Jurado"
+    },
+    {
+      "name": "Luis de Pablo"
+    },
+    {
+      "name": "José Susi"
+    },
+    {
+      "name": "Ramón Paús"
+    }
+  ],
+  "works": [
+    {
+      "title": "Aromas de infancia",
+      "composerName": "Jesús Legido"
+    },
+    {
+      "title": "De campanas y rosas",
+      "composerName": "Pilar Jurado"
+    },
+    {
+      "title": "Tango",
+      "composerName": "Luis de Pablo"
+    },
+    {
+      "title": "Fantasía para piano sobre la introducción del Himno a Jaén de E. Cebrián",
+      "composerName": "José Susi"
+    },
+    {
+      "title": "Nice et la peur",
+      "composerName": "Ramón Paús"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_amcc_es",
+      "url": "https://amcc.es/coma/coma26/oct-30-elvira-babiloni",
+      "checkedAt": "2026-09-20"
+    }
+  ],
+  "primarySourceId": "src_amcc_es",
+  "lastVerifiedAt": "2026-09-20"
+}

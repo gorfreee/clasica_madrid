@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_amcc_es_nov_07_laura_farre_rozada",
+  "slug": "coma-26-laura-farre-rozada",
+  "title": "COMA’26: Laura Farré Rozada",
+  "status": "scheduled",
+  "venueId": "ven_casa_vacas_retiro",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_amcc_es_nov_07_laura_farre_rozada_01",
+      "date": "2026-11-07",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Laura Farré Rozada"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Graciela Jiménez"
+    },
+    {
+      "name": "Gustavo Díaz-Jerez"
+    },
+    {
+      "name": "Miguel Bustamante"
+    },
+    {
+      "name": "Federico Jusid"
+    },
+    {
+      "name": "Ángel Luis Rodríguez"
+    }
+  ],
+  "works": [
+    {
+      "title": "Tres piezas para piano",
+      "composerName": "Graciela Jiménez"
+    },
+    {
+      "title": "Metaludios Book I, selección",
+      "composerName": "Gustavo Díaz-Jerez"
+    },
+    {
+      "title": "Diabolus in musica",
+      "composerName": "Miguel Bustamante"
+    },
+    {
+      "title": "Fleeting Fantasies",
+      "composerName": "Federico Jusid"
+    },
+    {
+      "title": "Preludio, 7 Episodios Interválicos y Fuga",
+      "composerName": "Ángel Luis Rodríguez"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_amcc_es",
+      "url": "https://amcc.es/coma/coma26/nov-07-laura-farre-rozada",
+      "checkedAt": "2026-09-20"
+    }
+  ],
+  "primarySourceId": "src_amcc_es",
+  "lastVerifiedAt": "2026-09-20"
+}

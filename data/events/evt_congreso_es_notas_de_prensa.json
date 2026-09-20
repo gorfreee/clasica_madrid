@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_congreso_es_notas_de_prensa",
+  "slug": "homenaje-a-pau-casals-en-el-dia-internacional-de-la-paz",
+  "title": "Homenaje a Pau Casals en el Día Internacional de la Paz",
+  "status": "scheduled",
+  "venueId": "ven_congreso_de_los_diputados_hemiciclo",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_congreso_es_notas_de_prensa_01",
+      "date": "2026-09-21",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ettore Pagano"
+    },
+    {
+      "name": "Yoko Suzuki"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Enrique Granados"
+    },
+    {
+      "name": "Manuel de Falla"
+    },
+    {
+      "name": "Pau Casals"
+    }
+  ],
+  "works": [
+    {
+      "title": "Preludio, Zarabanda y Giga de la Suite para violonchelo núm. 1",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Intermezzo de la ópera Goyescas",
+      "composerName": "Enrique Granados"
+    },
+    {
+      "title": "Nana y Jota de la Suite populaire espagnole",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "El cant dels ocells",
+      "composerName": "Pau Casals"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_congreso_es",
+      "url": "https://www.congreso.es/ca/notas-de-prensa?_notasprensa_mvcPath=detalle&_notasprensa_notaId=52355&p_p_id=notasprensa&p_p_lifecycle=0&p_p_mode=view&p_p_state=normal",
+      "checkedAt": "2026-09-20"
+    }
+  ],
+  "primarySourceId": "src_congreso_es",
+  "lastVerifiedAt": "2026-09-20"
+}
