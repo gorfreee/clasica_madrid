@@ -61,9 +61,9 @@ function pressNoteObservation(overrides: {
       title: overrides.title,
       venueText: 'Hemiciclo del Congreso de los Diputados',
       occurrences: [{ raw: `${overrides.date} 18:00`, date: overrides.date, time: '18:00' }],
-      composers: [{ name: 'Pau Casals' }],
-      works: [{ title: 'El cant dels ocells', composerName: 'Pau Casals' }],
-      performers: [{ name: 'Ettore Pagano' }],
+      composers: [{ name: 'Henry Purcell' }],
+      works: [{ title: overrides.title, composerName: 'Henry Purcell' }],
+      performers: [{ name: 'Coro Example' }],
     },
   };
 }
@@ -155,12 +155,12 @@ describe('identidad de fichas cuyo id vive en query params', () => {
   it('el Discovery no fusiona ni colisiona dos fichas de query distintas bajo el mismo path', async () => {
     const batch = batchOf(
       pressNoteObservation({
-        title: 'Homenaje a Pau Casals',
+        title: 'Dido y Eneas',
         date: '2026-10-21',
         url: CONGRESO_A,
       }),
       pressNoteObservation({
-        title: 'Concierto de cámara en el Hemiciclo',
+        title: 'Acis y Galatea',
         date: '2026-11-04',
         url: CONGRESO_B,
       }),
