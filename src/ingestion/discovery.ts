@@ -122,6 +122,35 @@ const discoveryExclusionSchema = z
   })
   .strict();
 
+const yearMonthSchema = z
+  .string()
+  .regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'debe ser YYYY-MM');
+
+/**
+ * Completeness audit of one collection/listing page with several in-window
+ * candidates. Not a crawl log: omit homepages and single-event fichas.
+ */
+const discoveryListingReviewSchema = z
+  .object({
+    url: httpUrlSchema,
+    inWindowCandidatesSeen: z.number().int().min(2).max(10_000),
+    submitted: z.number().int().min(0).max(10_000),
+    alreadyCovered: z.number().int().min(0).max(10_000),
+    excluded: z.number().int().min(0).max(10_000),
+    unresolved: z.number().int().min(0).max(10_000),
+    notes: z.string().trim().min(1).max(300).optional(),
+  })
+  .strict()
+  .superRefine((value, ctx) => {
+    const accounted = value.submitted + value.alreadyCovered + value.excluded + value.unresolved;
+    if (accounted !== value.inWindowCandidatesSeen) {
+      ctx.addIssue({
+        code: 'custom',
+        message: `los outcomes (${accounted}) no coinciden con inWindowCandidatesSeen (${value.inWindowCandidatesSeen})`,
+      });
+    }
+  });
+
 /**
  * Diagnostic coverage of the agent's pre-batch investigation.
  * Not catalog data: ignored by eligibility, identity and publication.
@@ -135,9 +164,22 @@ export const discoveryResearchManifestSchema = z
     submittedToBatch: z.number().int().min(0).max(10_000),
     exclusions: z.array(discoveryExclusionSchema).max(20),
     officialDetailReviewed: z.enum(['all', 'some', 'none', 'not-applicable']),
+    listingReviews: z.array(discoveryListingReviewSchema).max(40).optional(),
+    windowMonthsSearched: z.array(yearMonthSchema).max(24).optional(),
     notes: z.string().trim().min(1).max(1000).optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((value, ctx) => {
+    const months = value.windowMonthsSearched;
+    if (!months) return;
+    if (new Set(months).size !== months.length) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'windowMonthsSearched no debe repetir meses',
+        path: ['windowMonthsSearched'],
+      });
+    }
+  });
 
 export const discoveryBatchSchema = z
   .object({
@@ -149,6 +191,7 @@ export const discoveryBatchSchema = z
 
 export type DiscoveryVenue = z.infer<typeof discoveryVenueSchema>;
 export type DiscoveryObservation = z.infer<typeof discoveryObservationSchema>;
+export type DiscoveryListingReview = z.infer<typeof discoveryListingReviewSchema>;
 export type DiscoveryResearchManifest = z.infer<typeof discoveryResearchManifestSchema>;
 export type DiscoveryBatch = z.infer<typeof discoveryBatchSchema>;
 export type DiscoveryExclusionReason = (typeof DISCOVERY_EXCLUSION_REASONS)[number];

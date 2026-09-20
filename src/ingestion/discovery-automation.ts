@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { emptyCatalog, type Catalog } from '../lib/domain/catalog.ts';
-import { parseIngestWindow, type IngestWindow } from './dates.ts';
+import { civilMonthsInWindow, parseIngestWindow, type IngestWindow } from './dates.ts';
 import { formatProviderCountList } from './ai-provider-counts.ts';
 import {
   DiscoveryBatchError,
@@ -481,7 +481,7 @@ export function formatDiscoveryAutomationPrBody(
     ...discoveryHumanReviewNotice(report),
     formatDiscoveryExecutionTable(report, extras),
     '',
-    formatDiscoveryResearchSection(extras.batch),
+    formatDiscoveryResearchSection(extras.batch, report.window),
     '',
     formatAdapterCoverageSection(extras.batch?.adapterCoverageGaps ?? []),
     '',
@@ -559,7 +559,7 @@ function formatDiscoveryExecutionSections(
     '',
     formatDiscoveryCatalogExtras(extras.catalogDiff),
     '',
-    formatDiscoveryResearchSection(extras.batch),
+    formatDiscoveryResearchSection(extras.batch, report.window),
     '',
     formatAdapterCoverageSection(extras.batch?.adapterCoverageGaps ?? []),
   ].join('\n');
@@ -620,7 +620,10 @@ function formatDiscoveryCatalogExtras(diff: CatalogPublicationDiff | undefined):
   return lines.join('\n');
 }
 
-function formatDiscoveryResearchSection(batch: DiscoveryBatchMeta | undefined): string {
+function formatDiscoveryResearchSection(
+  batch: DiscoveryBatchMeta | undefined,
+  window?: IngestWindow,
+): string {
   const lines = [
     '### Investigación previa al batch',
     '',
@@ -643,6 +646,9 @@ function formatDiscoveryResearchSection(batch: DiscoveryBatchMeta | undefined): 
     lines.push(`| Observaciones recibidas | ${batch.observationCount} |`);
     lines.push(`| Fichas oficiales revisadas | ${cell(research.officialDetailReviewed)} |`);
     lines.push(`| Leads / búsquedas | ${research.leads.length} |`);
+    if (research.windowMonthsSearched) {
+      lines.push(`| Meses buscados (declarados) | ${cell(research.windowMonthsSearched.join(', '))} |`);
+    }
     lines.push('');
     if (research.leads.length > 0) {
       lines.push('Leads relevantes:', '');
@@ -661,6 +667,10 @@ function formatDiscoveryResearchSection(batch: DiscoveryBatchMeta | undefined): 
         lines.push(`| ${cell(exclusion.reason)} | ${exclusion.count} |`);
       }
       lines.push('');
+    }
+    const listingLines = formatListingReviews(research);
+    if (listingLines.length > 0) {
+      lines.push(...listingLines, '');
     }
     if (research.notes) {
       lines.push(`Notas del agente: ${research.notes}`, '');
@@ -688,13 +698,69 @@ function formatDiscoveryResearchSection(batch: DiscoveryBatchMeta | undefined): 
     }
   }
 
-  if (batch.researchNotes.length > 0) {
+  const researchNotes = [
+    ...batch.researchNotes,
+    ...discoveryWindowCoverageNotes(research, window),
+  ];
+  if (researchNotes.length > 0) {
     lines.push('', 'Notas:', '');
-    for (const note of batch.researchNotes) {
+    for (const note of uniqueNotes(researchNotes)) {
       lines.push(`- ${note}`);
     }
   }
   return lines.join('\n');
+}
+
+function formatListingReviews(
+  research: DiscoveryResearchManifest,
+): string[] {
+  const reviews = research.listingReviews;
+  if (reviews === undefined) {
+    return [
+      'Sin `listingReviews`. No se puede distinguir “esta búsqueda no encontró más” de “se encontró un listing y sólo se procesaron algunos eventos”.',
+    ];
+  }
+  if (reviews.length === 0) {
+    return ['Ningún listing/ciclo multi-evento declarado en `listingReviews`.'];
+  }
+
+  const lines = [
+    'Listings / ciclos multi-evento revisados:',
+    '',
+    '| URL | En ventana | Enviados | Ya cubiertos | Excluidos | Sin resolver |',
+    '|---|---:|---:|---:|---:|---:|',
+  ];
+  for (const review of reviews.slice(0, AUTOMATION_PR_SAMPLE_LIMIT)) {
+    lines.push(
+      `| ${cell(review.url)} | ${review.inWindowCandidatesSeen} | ${review.submitted} | ${review.alreadyCovered} | ${review.excluded} | ${review.unresolved} |`,
+    );
+  }
+  if (reviews.length > AUTOMATION_PR_SAMPLE_LIMIT) {
+    lines.push(`| … | ${reviews.length - AUTOMATION_PR_SAMPLE_LIMIT} más | | | | |`);
+  }
+  const seen = reviews.reduce((total, item) => total + item.inWindowCandidatesSeen, 0);
+  const unresolved = reviews.reduce((total, item) => total + item.unresolved, 0);
+  lines.push('');
+  lines.push(
+    `Candidatos en ventana en listings: ${seen}. Sin resolver: ${unresolved}. Cada candidato visto debe contabilizarse como submitted, already-covered, excluded o unresolved.`,
+  );
+  return lines;
+}
+
+function discoveryWindowCoverageNotes(
+  research: DiscoveryResearchManifest | undefined,
+  window: IngestWindow | undefined,
+): string[] {
+  if (!research?.windowMonthsSearched || !window) return [];
+  const expected = civilMonthsInWindow(window);
+  const searched = new Set(research.windowMonthsSearched);
+  const missing = expected.filter((month) => !searched.has(month));
+  if (missing.length === 0) return [];
+  return [`la investigación no declara cobertura de: ${missing.join(', ')}`];
+}
+
+function uniqueNotes(notes: readonly string[]): string[] {
+  return [...new Set(notes)];
 }
 
 function formatAdapterCoverageSection(gaps: readonly AdapterCoverageGap[]): string {

@@ -22,7 +22,6 @@ Tú:
 * extraes **hechos observados** con la mayor riqueza razonable (ficha de detalle, no sólo la card del listado);
 * publicas un `DiscoveryBatch` JSON en una rama de petición, **incluyendo** un `research` (`DiscoveryResearchManifest`) de cobertura de la búsqueda;
 * lanzas el workflow **Manual discovery** contra `main`;
-* lanzas el workflow **Manual discovery** contra `main`;
 * sigues la ejecución y reportas el resultado al usuario.
 
 Tú **no**:
@@ -87,12 +86,15 @@ Si durante la investigación aparece un evento relevante de una source que ya ti
 Debes:
 
 * hacer búsqueda web amplia, también fuera de cualquier lista predefinida;
+* **cubrir deliberadamente todos los meses civiles de `window`**, incluidos los parciales de inicio y final (si la ventana es `2026-09-20 → 2027-01-18`, hay que explorar septiembre, octubre, noviembre, diciembre y enero). Puedes agrupar búsquedas; no hace falta una query por cada categoría × mes. Antes de cerrar, verifica que ningún tramo mensual haya quedado sin explorar;
 * priorizar fuentes primarias u oficiales;
 * usar agregadores, buscadores y redes como **leads** cuando ayuden;
 * perseguir la fuente oficial cuando exista;
 * no inventar hechos;
 * incluir siempre una URL http(s) concreta que respalde el evento;
 * usar `foundVia` sólo como trazabilidad de descubrimiento (URL de búsqueda, post de Instagram, ficha de Eventbrite, etc.), nunca como source canónica.
+
+Cuando encuentres una **agenda, ciclo, listing o página con múltiples eventos**, recorre **todos** los eventos de esa página que caigan dentro de la ventana —incluida paginación o load-more cuando exista— y contabiliza cada uno como `submitted`, `already-covered`, `excluded` o `unresolved` en `research.listingReviews` antes de considerar esa fuente terminada. Si sigues una ficha individual desde ese listing, extrae la ficha como evidencia del evento, pero **sigue reconciliando el listing completo**. No hace falta guardar un historial de todas las páginas visitadas: sólo listings/ciclos relevantes con varios candidatos.
 
 Diferencia **lead** y **evidencia**:
 
@@ -130,7 +132,7 @@ Si una página trae programa completo, intérpretes, compositores u obras, **no*
 **URL de evidencia.** `source.url` debe ser la página que declara los hechos. Distingue:
 
 * **Ficha de evento:** path o query que identifica *ese* concierto (`/eventos/recital-de-violin-…`, `/p/a-delta-trio-madrid`, `?vgnextoid=…`, `/node/23846`). Es la preferida.
-* **Listing / URL genérica:** homepage, `/agenda`, `/eventos`, `/programacion`, `/conciertos` u otra agenda permanente. Es evidencia aceptable si no hay ficha individual, pero **no** identifica un único evento. Si esa página lista varios conciertos, envía **una observación por concierto** (mismo `source.url`, distinto título/fecha). No inventes un `externalId`.
+* **Listing / URL genérica:** homepage, `/agenda`, `/eventos`, `/programacion`, `/conciertos`, `/actividades/conciertos-de-tarde` u otra agenda/ciclo permanente. Es evidencia aceptable si no hay ficha individual, pero **no** identifica un único evento. Un slug multi-palabra de colección (`conciertos-de-tarde`, `eventos-*`, `actividades-*`, `programacion-*`) sigue siendo listing. Si esa página lista varios conciertos, envía **una observación por concierto** (mismo `source.url` si no hay ficha, o la ficha individual como `source.url`) y reconcilia el listing entero en `research.listingReviews`. No inventes un `externalId`.
 
 **Prohibido** en el JSON (el schema es `strict` y lo rechazará): `eligibility`, `kind`, `formats`, `eras`, `access`, `id`, `slug`, `confidence`, `candidate`.
 
@@ -174,6 +176,17 @@ Forma:
       { "reason": "out-of-window", "count": 3 }
     ],
     "officialDetailReviewed": "all",
+    "listingReviews": [
+      {
+        "url": "https://ejemplo.example/agenda-cultural",
+        "inWindowCandidatesSeen": 4,
+        "submitted": 1,
+        "alreadyCovered": 1,
+        "excluded": 2,
+        "unresolved": 0
+      }
+    ],
+    "windowMonthsSearched": ["2026-09", "2026-10", "2026-11", "2026-12", "2027-01"],
     "notes": "Opcional, breve. Qué quedó fuera y por qué el lote es pequeño o vacío."
   }
 }
@@ -195,6 +208,8 @@ Nivel mínimo (no listes cada URL visitada):
 | `submittedToBatch` | Cuántos acabaron en `observations` (debe coincidir con `observations.length`). |
 | `exclusions` | Recuentos por motivo: `already-covered`, `harvested-source`, `out-of-window`, `out-of-geographic-scope`, `non-classical`, `insufficient-evidence`, `duplicate-lead`, `other`. `examples` opcionales y cortos. |
 | `officialDetailReviewed` | `all` / `some` / `none` / `not-applicable`. Si citas una ficha de detalle, deberías haberla abierto. |
+| `listingReviews` | Sólo agendas/ciclos/listings con **varios** candidatos en ventana. Para cada URL: cuántos viste en ventana y cuántos acabaron `submitted` / `alreadyCovered` / `excluded` / `unresolved`. Los cuatro outcomes deben sumar `inWindowCandidatesSeen`. No es un historial de páginas visitadas. |
+| `windowMonthsSearched` | Opcional. Meses civiles `YYYY-MM` de `window` que sí exploraste, incluidos los parciales de inicio y final. |
 
 Publica **solo** el JSON, en la rama de petición, en:
 
@@ -274,7 +289,7 @@ También está enlazada en el Job Summary de la run.
 Cuando termines, informa con claridad:
 
 * URL de la run de GitHub Actions y su conclusión;
-* cobertura de investigación del `research` (categorías, candidatos revisados vs enviados, motivos de exclusión);
+* cobertura de investigación del `research` (categorías, candidatos revisados vs enviados, listings multi-evento reconciliados, meses de la ventana, motivos de exclusión);
 * avisos de evidencia pobre en fichas de detalle, si el Job Summary los lista;
 * `health` y `healthReasons`;
 * eventos nuevos / actualizados / sin cambios;

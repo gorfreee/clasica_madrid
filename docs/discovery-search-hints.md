@@ -19,7 +19,9 @@ Una ficha de Eventbrite o un post de Instagram pueden llevar al evento. Si exist
 
 En hosts compartidos (Facebook, Instagram, X, Eventbrite, Meetup, …) no uses el origin de la plataforma como identidad de source. `source.homepage` debe ser el perfil concreto de esa organización.
 
-No inventes fechas, programas, intérpretes ni URLs. Si la ficha oficial trae programa, compositores u obras, recógelos con exhaustividad razonable. Si sólo hay una agenda permanente (`/agenda`, `/eventos`, homepage), extrae **cada** concierto de esa página como observación distinta; no trates el listing como si fuera la ficha de un único evento.
+No inventes fechas, programas, intérpretes ni URLs. Si la ficha oficial trae programa, compositores u obras, recógelos con exhaustividad razonable. Si sólo hay una agenda permanente (`/agenda`, `/eventos`, `/actividades/conciertos-de-tarde`, homepage), extrae **cada** concierto de esa página que caiga en la ventana como observación distinta —incluida paginación o load-more— y reconcilia el listing en `research.listingReviews`; no trates el listing como si fuera la ficha de un único evento.
+
+La estrategia de búsqueda se deriva de `DiscoveryContext.window`. Antes de cerrar, comprueba que **ningún mes civil** de esa ventana (incluidos los parciales de inicio y final) haya quedado sin explorar. Puedes agrupar queries; no hace falta una búsqueda por cada tipología × mes.
 
 ---
 
@@ -121,5 +123,6 @@ Son **leads**. Casi nunca son la source oficial. Úsalas para descubrir títulos
 2. Sigue el lead hasta la fuente primaria.
 3. Contrasta con `coveredEvents` y `sources.*` del contexto.
 4. Si no hay URL concreta que respalde el evento, no lo incluyas.
-5. Si la URL concreta es un listing, una observación por evento; si hay ficha de detalle, esa es `source.url` y extrae el programa de ahí.
-6. Si encuentras una organización recurrente con calendario estable, señálala en el informe al usuario como candidata a un adapter futuro. **No** añadas el adapter en esta tarea de Discovery.
+5. Si la URL concreta es un listing, una observación por evento en ventana y el listing reconciliado en `listingReviews`; si hay ficha de detalle, esa es `source.url` y extrae el programa de ahí, pero no abandones el resto del listing.
+6. Antes de cerrar, verifica cobertura de todos los meses civiles de `window`.
+7. Si encuentras una organización recurrente con calendario estable, señálala en el informe al usuario como candidata a un adapter futuro. **No** añadas el adapter en esta tarea de Discovery.

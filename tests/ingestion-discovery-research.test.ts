@@ -12,6 +12,7 @@ import {
   discoveryResearchNotes,
 } from '../src/ingestion/discovery-evidence.ts';
 import { findAdapterCoverageGaps, loadDiscoveryBatchFromGit, type GitBatchReader } from '../src/ingestion/discovery-automation.ts';
+import { civilMonthsInWindow } from '../src/ingestion/dates.ts';
 import { runDiscoveryIngest } from '../src/ingestion/pipeline.ts';
 import { mkdir, mkdtemp } from 'node:fs/promises';
 import os from 'node:os';
@@ -130,6 +131,92 @@ describe('DiscoveryResearchManifest', () => {
     expect(discoveryResearchNotes(batch, batch.research)).toEqual([
       'sin DiscoveryResearchManifest: no se puede auditar la cobertura de la búsqueda previa al batch',
     ]);
+  });
+
+  it('acepta listingReviews coherentes y avisa si hay candidatos sin resolver', () => {
+    const batch = parseDiscoveryBatch({
+      schemaVersion: 1,
+      observations: [observation()],
+      research: research({
+        submittedToBatch: 1,
+        listingReviews: [
+          {
+            url: 'https://www.museocasadelamoneda.es/actividades/conciertos-de-tarde',
+            inWindowCandidatesSeen: 3,
+            submitted: 1,
+            alreadyCovered: 1,
+            excluded: 0,
+            unresolved: 1,
+          },
+        ],
+        windowMonthsSearched: ['2026-09', '2026-10', '2026-11', '2026-12', '2027-01'],
+      }),
+    });
+    expect(batch.research?.listingReviews).toHaveLength(1);
+    expect(discoveryResearchNotes(batch, batch.research)).toEqual([
+      '1 listing(s) con candidatos en ventana sin resolver',
+    ]);
+    expect(
+      discoveryResearchNotes(batch, batch.research, { from: '2026-09-20', to: '2027-01-18' }),
+    ).toEqual(['1 listing(s) con candidatos en ventana sin resolver']);
+  });
+
+  it('rechaza listingReviews cuyos outcomes no cuadran y batches antiguos siguen siendo válidos', () => {
+    expect(() =>
+      parseDiscoveryBatch({
+        schemaVersion: 1,
+        observations: [],
+        research: research({
+          submittedToBatch: 0,
+          listingReviews: [
+            {
+              url: 'https://example.org/agenda',
+              inWindowCandidatesSeen: 4,
+              submitted: 1,
+              alreadyCovered: 1,
+              excluded: 1,
+              unresolved: 0,
+            },
+          ],
+        }),
+      }),
+    ).toThrow(/no coinciden con inWindowCandidatesSeen/);
+
+    const legacy = parseDiscoveryBatch({
+      schemaVersion: 1,
+      observations: [],
+      research: research({ submittedToBatch: 0 }),
+    });
+    expect(legacy.research?.listingReviews).toBeUndefined();
+    expect(discoveryResearchNotes(legacy, legacy.research)).toEqual([
+      'sin listingReviews: no se puede auditar si una agenda/ciclo encontrada se recorrió por completo',
+    ]);
+  });
+
+  it('señala meses de la ventana no declarados en windowMonthsSearched', () => {
+    const batch = parseDiscoveryBatch({
+      schemaVersion: 1,
+      observations: [],
+      research: research({
+        submittedToBatch: 0,
+        listingReviews: [],
+        windowMonthsSearched: ['2026-10', '2026-11', '2026-12'],
+      }),
+    });
+    expect(
+      discoveryResearchNotes(batch, batch.research, { from: '2026-09-20', to: '2027-01-18' }),
+    ).toContain('la investigación no declara cobertura de: 2026-09, 2027-01');
+  });
+
+  it('deriva los meses civiles de una ventana, incluidos los parciales de inicio y final', () => {
+    expect(civilMonthsInWindow({ from: '2026-09-20', to: '2027-01-18' })).toEqual([
+      '2026-09',
+      '2026-10',
+      '2026-11',
+      '2026-12',
+      '2027-01',
+    ]);
+    expect(civilMonthsInWindow({ from: '2026-03-01', to: '2026-03-31' })).toEqual(['2026-03']);
   });
 });
 
