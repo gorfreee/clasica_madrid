@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_amcc_es_nov_06_trio_contrastes",
+  "slug": "coma-26-trio-contrastes",
+  "title": "COMA’26: Trío Contrastes",
+  "status": "scheduled",
+  "venueId": "ven_real_academia_bellas_artes_salon_actos",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_amcc_es_nov_06_trio_contrastes_01",
+      "date": "2026-11-06",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Marco Pastor"
+    },
+    {
+      "name": "Lara Díaz"
+    },
+    {
+      "name": "Juan Francisco Vicente"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Juan Pagán"
+    },
+    {
+      "name": "Juan Carlos Torres Ochoa"
+    },
+    {
+      "name": "Luis de la Barrera"
+    },
+    {
+      "name": "Marco A. Pastor González"
+    },
+    {
+      "name": "Sergio Blardony"
+    },
+    {
+      "name": "M.ª José Arrillaga"
+    },
+    {
+      "name": "Manuel Angulo"
+    }
+  ],
+  "works": [
+    {
+      "title": "Trío núm. 2",
+      "composerName": "Juan Pagán"
+    },
+    {
+      "title": "En la intemperie II",
+      "composerName": "Juan Carlos Torres Ochoa"
+    },
+    {
+      "title": "Inquietud",
+      "composerName": "Luis de la Barrera"
+    },
+    {
+      "title": "Retorno a Blickling Hall",
+      "composerName": "Marco A. Pastor González"
+    },
+    {
+      "title": "Hilos de eco 2",
+      "composerName": "Sergio Blardony"
+    },
+    {
+      "title": "Limen",
+      "composerName": "M.ª José Arrillaga"
+    },
+    {
+      "title": "Sonoro 3+3",
+      "composerName": "Manuel Angulo"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_amcc_es",
+      "url": "https://amcc.es/coma/coma26/nov-06-trio-contrastes",
+      "checkedAt": "2026-09-20"
+    }
+  ],
+  "primarySourceId": "src_amcc_es",
+  "lastVerifiedAt": "2026-09-20"
+}

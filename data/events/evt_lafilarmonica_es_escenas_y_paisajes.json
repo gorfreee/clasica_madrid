@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_lafilarmonica_es_escenas_y_paisajes",
+  "slug": "escenas-y-paisajes",
+  "title": "Escenas y paisajes",
+  "status": "scheduled",
+  "venueId": "ven_museo_nacional_thyssen_bornemisza",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_lafilarmonica_es_escenas_y_paisajes_01",
+      "date": "2026-09-24",
+      "time": "20:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Daniel Bertomeu"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Franz Joseph Haydn"
+    },
+    {
+      "name": "Franz Liszt"
+    },
+    {
+      "name": "Frederic Mompou"
+    },
+    {
+      "name": "Serguéi Rajmáninov"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata núm. 47",
+      "composerName": "Franz Joseph Haydn"
+    },
+    {
+      "title": "Légendes S.175, núm. 2, Saint Francis de Paule marchant sur les flots",
+      "composerName": "Franz Liszt"
+    },
+    {
+      "title": "Années de Pèlerinage, Italie, VII, Après une lecture du Dante: Fantasia quasi sonata",
+      "composerName": "Franz Liszt"
+    },
+    {
+      "title": "Impresiones íntimas, V, Pájaro triste",
+      "composerName": "Frederic Mompou"
+    },
+    {
+      "title": "Escenas de niños",
+      "composerName": "Frederic Mompou"
+    },
+    {
+      "title": "Sonata núm. 2",
+      "composerName": "Serguéi Rajmáninov"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_lafilarmonica_es",
+      "url": "https://www.lafilarmonica.es/es/madrid/escenas-y-paisajes",
+      "checkedAt": "2026-09-20"
+    }
+  ],
+  "primarySourceId": "src_lafilarmonica_es",
+  "lastVerifiedAt": "2026-09-20"
+}

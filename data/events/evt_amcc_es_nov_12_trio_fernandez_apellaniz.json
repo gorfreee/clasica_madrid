@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_amcc_es_nov_12_trio_fernandez_apellaniz",
+  "slug": "coma-26-trio-fernandez-apellaniz",
+  "title": "COMA’26: Trío Fernández-Apellániz",
+  "status": "scheduled",
+  "venueId": "ven_universidad_complutense_de_madrid_paraninfo_de_las_facultades_de_filologia_y_filosofia",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_amcc_es_nov_12_trio_fernandez_apellaniz_01",
+      "date": "2026-11-12",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "David Apellániz"
+    },
+    {
+      "name": "Luis Fernández Castelló"
+    },
+    {
+      "name": "Carlos Apellániz"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Román Alís"
+    },
+    {
+      "name": "Eduardo Costa Roldán"
+    },
+    {
+      "name": "Ricardo Durán Barney"
+    },
+    {
+      "name": "Gerardo Daniel Gardelin"
+    },
+    {
+      "name": "Carlos M. González Portela"
+    },
+    {
+      "name": "Juan Luis Madrigal"
+    },
+    {
+      "name": "Mercedes Zavala"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata para clarinete y piano op. 54",
+      "composerName": "Román Alís"
+    },
+    {
+      "title": "Horizontes",
+      "composerName": "Eduardo Costa Roldán"
+    },
+    {
+      "title": "Alrisha",
+      "composerName": "Ricardo Durán Barney"
+    },
+    {
+      "title": "Extraño amanecer",
+      "composerName": "Gerardo Daniel Gardelin"
+    },
+    {
+      "title": "Trifariam op. 40",
+      "composerName": "Carlos M. González Portela"
+    },
+    {
+      "title": "El Partenón",
+      "composerName": "Juan Luis Madrigal"
+    },
+    {
+      "title": "Sin pájaros",
+      "composerName": "Mercedes Zavala"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_amcc_es",
+      "url": "https://amcc.es/coma/coma26/nov-12-trio-fernandez-apellaniz",
+      "checkedAt": "2026-09-20"
+    }
+  ],
+  "primarySourceId": "src_amcc_es",
+  "lastVerifiedAt": "2026-09-20"
+}

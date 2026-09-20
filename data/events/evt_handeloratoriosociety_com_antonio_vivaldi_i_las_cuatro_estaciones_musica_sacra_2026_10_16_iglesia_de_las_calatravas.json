@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_handeloratoriosociety_com_antonio_vivaldi_i_las_cuatro_estaciones_musica_sacra_2026_10_16_iglesia_de_las_calatravas",
+  "slug": "antonio-vivaldi-i-las-cuatro-estaciones-musica-sacra",
+  "title": "Antonio Vivaldi (I): Las cuatro estaciones & música sacra",
+  "status": "scheduled",
+  "venueId": "ven_iglesia_de_la_concepcion_real_de_calatrava_iglesia_de_las_calatravas",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_handeloratoriosociety_com_antonio_vivaldi_i_las_cuatro_estaciones_musica_sacra_2026_10_16_iglesia_de_las_calatravas",
+      "date": "2026-10-16",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Barroca Handel Oratorio Society",
+      "role": "orchestra"
+    },
+    {
+      "name": "Abelardo Martín",
+      "role": "soloist"
+    },
+    {
+      "name": "Marta Calvo",
+      "role": "soloist"
+    },
+    {
+      "name": "Inma Férez"
+    },
+    {
+      "name": "María Morellà"
+    },
+    {
+      "name": "Oscar Gershensohn"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antonio Vivaldi"
+    }
+  ],
+  "works": [
+    {
+      "title": "Otoño, Op. 8 RV 293",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "Invierno, Op. 8 RV 297",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "Gloria RV 589",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "Concerto La Notte RV 501",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "Dixit Dominus (di Praga) RV 595",
+      "composerName": "Antonio Vivaldi"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_handeloratoriosociety_com",
+      "url": "https://handeloratoriosociety.com/",
+      "checkedAt": "2026-09-20"
+    }
+  ],
+  "primarySourceId": "src_handeloratoriosociety_com",
+  "lastVerifiedAt": "2026-09-20"
+}

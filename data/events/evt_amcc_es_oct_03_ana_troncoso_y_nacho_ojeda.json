@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_amcc_es_oct_03_ana_troncoso_y_nacho_ojeda",
+  "slug": "coma-26-ana-troncoso-y-nacho-ojeda",
+  "title": "COMA’26: Ana Troncoso y Nacho Ojeda",
+  "status": "scheduled",
+  "venueId": "ven_casa_vacas_retiro",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_amcc_es_oct_03_ana_troncoso_y_nacho_ojeda_01",
+      "date": "2026-10-03",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ana Troncoso"
+    },
+    {
+      "name": "Nacho Ojeda"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Jacobo Durán-Loriga"
+    },
+    {
+      "name": "Agustín González Acilu"
+    },
+    {
+      "name": "Pedro Guajardo"
+    },
+    {
+      "name": "Constancio Hernáez"
+    },
+    {
+      "name": "Andrés Poncela"
+    }
+  ],
+  "works": [
+    {
+      "title": "Tres telearias",
+      "composerName": "Jacobo Durán-Loriga"
+    },
+    {
+      "title": "Hymne an Lesbiarinnen",
+      "composerName": "Agustín González Acilu"
+    },
+    {
+      "title": "American Love Songs",
+      "composerName": "Pedro Guajardo"
+    },
+    {
+      "title": "Al arrullo del canto",
+      "composerName": "Constancio Hernáez"
+    },
+    {
+      "title": "Canción de Nahia",
+      "composerName": "Constancio Hernáez"
+    },
+    {
+      "title": "Fue una ciudad ardiendo",
+      "composerName": "Andrés Poncela"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_amcc_es",
+      "url": "https://amcc.es/coma/coma26/oct-03-ana-troncoso-y-nacho-ojeda",
+      "checkedAt": "2026-09-20"
+    }
+  ],
+  "primarySourceId": "src_amcc_es",
+  "lastVerifiedAt": "2026-09-20"
+}
