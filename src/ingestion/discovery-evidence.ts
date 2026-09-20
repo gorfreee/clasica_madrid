@@ -3,6 +3,7 @@ import {
   type DiscoveryObservation,
   type DiscoveryResearchManifest,
 } from './discovery.ts';
+import { civilMonthsInWindow, type IngestWindow } from './dates.ts';
 import { sourceUrlKind, type SourceUrlKind } from './urls.ts';
 
 export type DiscoveryEvidenceRichness = 'sparse' | 'partial' | 'rich';
@@ -66,6 +67,7 @@ export function assessDiscoveryBatchEvidence(batch: DiscoveryBatch): DiscoveryEv
 export function discoveryResearchNotes(
   batch: DiscoveryBatch,
   research: DiscoveryResearchManifest | undefined,
+  window?: IngestWindow,
 ): string[] {
   if (!research) {
     return [
@@ -88,6 +90,35 @@ export function discoveryResearchNotes(
     research.leads.length === 0
   ) {
     notes.push('el manifest no describe búsquedas ni candidatos revisados');
+  }
+  if (research.listingReviews === undefined) {
+    notes.push(
+      'sin listingReviews: no se puede auditar si una agenda/ciclo encontrada se recorrió por completo',
+    );
+  } else {
+    const unresolvedListings = research.listingReviews.filter((item) => item.unresolved > 0);
+    if (unresolvedListings.length > 0) {
+      notes.push(
+        `${unresolvedListings.length} listing(s) con candidatos en ventana sin resolver`,
+      );
+    }
+    const submittedFromListings = research.listingReviews.reduce(
+      (total, item) => total + item.submitted,
+      0,
+    );
+    if (submittedFromListings > batch.observations.length) {
+      notes.push(
+        `listingReviews.submitted (${submittedFromListings}) supera observations.length (${batch.observations.length})`,
+      );
+    }
+  }
+  if (window && research.windowMonthsSearched) {
+    const expected = civilMonthsInWindow(window);
+    const searched = new Set(research.windowMonthsSearched);
+    const missing = expected.filter((month) => !searched.has(month));
+    if (missing.length > 0) {
+      notes.push(`la investigación no declara cobertura de: ${missing.join(', ')}`);
+    }
   }
   return notes;
 }

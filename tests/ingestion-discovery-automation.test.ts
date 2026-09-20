@@ -461,6 +461,49 @@ describe('report de Discovery', () => {
     expect(markdown).not.toContain(process.env.GEMINI_API_KEY ?? 'GEMINI_API_KEY_PLACEHOLDER_SHOULD_NOT_MATCH_IF_UNSET');
   });
 
+  it('resume listings multi-evento y meses de ventana no cubiertos', () => {
+    const markdown = formatDiscoveryAutomationSummary(report(), 'https://example.test/run/1', {
+      batch: sampleBatchMeta({
+        observationCount: 1,
+        researchPresent: true,
+        research: {
+          schemaVersion: 1,
+          investigatedCategories: ['museos'],
+          leads: [{ kind: 'lead', query: 'https://www.museocasadelamoneda.es/actividades/conciertos-de-tarde' }],
+          candidatesReviewedApprox: 8,
+          submittedToBatch: 1,
+          exclusions: [{ reason: 'already-covered', count: 1 }],
+          officialDetailReviewed: 'all',
+          listingReviews: [
+            {
+              url: 'https://www.museocasadelamoneda.es/actividades/conciertos-de-tarde',
+              inWindowCandidatesSeen: 3,
+              submitted: 1,
+              alreadyCovered: 1,
+              excluded: 0,
+              unresolved: 1,
+            },
+          ],
+          windowMonthsSearched: ['2026-10', '2026-11', '2026-12'],
+        },
+        researchNotes: ['1 listing(s) con candidatos en ventana sin resolver'],
+        evidence: sampleEvidence({
+          observationCount: 1,
+          listingUrlCount: 1,
+          detailUrlCount: 0,
+          richCount: 1,
+          partialCount: 0,
+        }),
+      }),
+    });
+    expect(markdown).toContain('Listings / ciclos multi-evento revisados');
+    expect(markdown).toContain('conciertos-de-tarde');
+    expect(markdown).toContain('| Enviados | Ya cubiertos | Excluidos | Sin resolver |');
+    expect(markdown).toContain('Sin resolver: 1');
+    expect(markdown).toContain('Meses buscados (declarados)');
+    expect(markdown).toContain('la investigación no declara cobertura de: 2026-09, 2027-01');
+  });
+
   it('formatea requests y clasificaciones por modelo vacíos como ninguno', () => {
     const markdown = formatDiscoveryAutomationSummary(
       report({

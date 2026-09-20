@@ -1,6 +1,7 @@
 import { findKnownComposersInText, matchComposer } from '../knowledge/composers.ts';
 import type { ObservedFacts } from '../observed.ts';
 import type { Eligibility } from './golden-case.ts';
+import { isOperaCategory, titleIdentifiesOperaEvent } from './opera.ts';
 import { fieldFolded, foldName, hasPhrase, hasWord, identityHaystack } from './text.ts';
 import type { Resolution } from './types.ts';
 
@@ -132,7 +133,7 @@ function collectInclusions(facts: ObservedFacts, haystack: string): Inclusion[] 
 
   const category = fieldFolded(facts.categoryText);
   const title = fieldFolded(facts.title);
-  if (isOperaCategory(category) || isOperaTitle(title)) {
+  if (isOperaCategory(category) || titleIdentifiesOperaEvent(title)) {
     found.push({ ruleId: 'opera-event', evidence: [facts.categoryText ?? facts.title] });
   }
   if (hasWord(category, 'lirica') && !hasWord(category, 'taller')) {
@@ -1392,14 +1393,6 @@ function historicalPerformanceConcertCycle(
 function matchesTitleClassicalCycle(text: string): boolean {
   const named = foldName(text);
   return TITLE_CLASSICAL_CYCLES.some((cycle) => named.includes(foldName(cycle)));
-}
-
-function isOperaCategory(category: string): boolean {
-  return hasWord(category, 'opera') && !hasWord(category, 'taller');
-}
-
-function isOperaTitle(title: string): boolean {
-  return hasWord(title, 'opera') || /\bmicroperas?\b/u.test(title);
 }
 
 function titleNamesZarzuela(title: string): boolean {

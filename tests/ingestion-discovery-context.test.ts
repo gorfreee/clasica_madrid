@@ -258,6 +258,8 @@ describe('DiscoveryContext', () => {
     ).toBe(true);
     expect(context.evidenceInstructions.some((line) => /DiscoveryResearchManifest/i.test(line))).toBe(true);
     expect(context.evidenceInstructions.some((line) => /ficha de detalle/i.test(line))).toBe(true);
+    expect(context.evidenceInstructions.some((line) => /listingReviews/i.test(line))).toBe(true);
+    expect(context.evidenceInstructions.some((line) => /mes(?:es)? civil/i.test(line))).toBe(true);
     expect(parseDiscoveryContext(context).coveredEvents).toEqual([]);
   });
 

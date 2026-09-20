@@ -171,7 +171,7 @@ Derivación preferida a partir de hechos:
 | quinteto, trío, dúo o «quartet» sólo en el título | `chamber` débil, y **nunca** como prueba de eligibility. Un grupo de jazz/pop del mismo tamaño no se convierte en música de cámara clásica por la formación. |
 | coro protagonista | `choral` |
 | órgano | `organ` (a menudo + `recital`) |
-| ópera | `opera` |
+| ópera | `opera` — categoría oficial «Ópera», título que nombra el evento como ópera (gala, temporada, micróperas, arias de ópera, ópera en N actos) o ficha de detalle (dramma lirico, actos). La mera palabra «ópera» en un título más largo no basta ni debe congelar el format. |
 | zarzuela | `zarzuela` |
 | Lied / mélodie con canto y piano | `lied` + `recital` |
 | música antigua / historicamente informada | `early-music` (combinable) |

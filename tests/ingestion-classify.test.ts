@@ -1328,6 +1328,61 @@ describe('eligibility — conflictos y fallback', () => {
     }
   });
 
+  it('no trata la palabra ópera en un nombre de proyecto o compañía como ópera del evento', () => {
+    const salon = facts({
+      title: 'Ciclo de salón | Compañía Ópera Lírica Joven | Canciones románticas',
+      description: 'Concierto a piano y voz. Recital de canciones y piezas para piano del romanticismo.',
+      categoryText: 'Música',
+      performers: [
+        { name: 'Ana Pérez', roleText: 'soprano' },
+        { name: 'Luis García', roleText: 'piano' },
+      ],
+      composers: [{ name: 'Franz Schubert' }, { name: 'Robert Schumann' }],
+      works: [
+        { title: 'Gretchen am Spinnrade', composerName: 'Franz Schubert' },
+        { title: 'Widmung', composerName: 'Robert Schumann' },
+      ],
+    });
+    const classified = classify(salon);
+    expect(classified.eligibility.value).toBe('include');
+    expect(classified.eligibility.ruleId).not.toBe('opera-event');
+    expect(classified.formats?.value).toEqual(['recital']);
+    expect(classified.formats?.value).not.toContain('opera');
+
+    const titleOnly = classify(
+      facts({ title: 'Ciclo de salón | Compañía Ópera Lírica Joven | Canciones románticas' }),
+    );
+    expect(titleOnly.eligibility.value).not.toBe('include');
+    expect(titleOnly.eligibility.ruleId).not.toBe('opera-event');
+  });
+
+  it('sigue clasificando óperas reales por categoría, título de gala o ficha de detalle', () => {
+    const byCategory = classify(
+      facts({
+        title: 'Manon Lescaut',
+        categoryText: 'Ópera',
+        description: 'Dramma lirico en cuatro actos.',
+      }),
+    );
+    expect(byCategory.eligibility.value).toBe('include');
+    expect(byCategory.eligibility.ruleId).toBe('opera-event');
+    expect(byCategory.formats?.value).toContain('opera');
+    expect(byCategory.formats?.strength).toBe('strong');
+
+    const gala = classify(facts({ title: 'Filarmonía de Madrid. Gala de Ópera' }));
+    expect(gala.eligibility.value).toBe('include');
+    expect(gala.formats?.value).toEqual(['opera']);
+    expect(gala.formats?.strength).toBe('strong');
+
+    const concertVersion = resolveFormats(
+      facts({
+        title: 'Riccardo Primo',
+        description: 'Ópera en tres actos, HWV 23. Ópera en versión de concierto.',
+      }),
+    );
+    expect(concertVersion.value).toContain('opera');
+  });
+
   it('incluye COMA y una categoría explícita de música clásica, y sigue excluyendo jazz en un ciclo mixto', () => {
     const coma = classify(
       facts({

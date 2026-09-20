@@ -59,6 +59,29 @@ describe('sourceUrlKind', () => {
     expect(urlIdentifiesSingleEvent('https://corofrancispoulenc.com/agenda')).toBe(false);
   });
 
+  it('trata slugs de colección multi-palabra como listing, no como ficha', () => {
+    expect(
+      sourceUrlKind('https://www.museocasadelamoneda.es/actividades/conciertos-de-tarde'),
+    ).toBe('listing');
+    expect(sourceUrlKind('https://example.org/actividades/conciertos-de-tarde')).toBe('listing');
+    expect(sourceUrlKind('https://example.org/eventos-octubre')).toBe('listing');
+    expect(sourceUrlKind('https://example.org/eventos-madrid')).toBe('listing');
+    expect(sourceUrlKind('https://example.org/actividades-culturales')).toBe('listing');
+    expect(sourceUrlKind('https://example.org/programacion-2026')).toBe('listing');
+    expect(sourceUrlKind('https://example.org/programacion-otono')).toBe('listing');
+    expect(sourceUrlKind('https://example.org/agenda-cultural')).toBe('listing');
+    expect(urlIdentifiesSingleEvent('https://example.org/actividades/conciertos-de-tarde')).toBe(
+      false,
+    );
+  });
+
+  it('no toma cualquier segmento de tres palabras como identificador de evento', () => {
+    expect(sourceUrlKind('https://example.org/musica-en-madrid')).toBe('event-detail');
+    expect(
+      sourceUrlKind('https://example.org/actividades/ciclo-de-camara/conciertos-de-tarde'),
+    ).toBe('listing');
+  });
+
   it('trata fichas con id, slug largo o segmento no genérico como event-detail', () => {
     expect(
       sourceUrlKind(
@@ -68,6 +91,10 @@ describe('sourceUrlKind', () => {
     expect(sourceUrlKind('https://caixaforum.org/es/madrid/p/a-delta-trio-madrid')).toBe('event-detail');
     expect(sourceUrlKind('https://www.teatroreal.es/es/espectaculo/demo')).toBe('event-detail');
     expect(sourceUrlKind('https://cndm.inaem.gob.es/node/23846')).toBe('event-detail');
+    expect(sourceUrlKind('https://example.org/eventos-12345')).toBe('event-detail');
+    expect(sourceUrlKind('https://example.org/conciertos/recital-de-piano-schubert')).toBe(
+      'event-detail',
+    );
     expect(sourceUrlKind('https://www.parroquia.example/conciertos/bach')).toBe('event-detail');
     expect(sourceUrlKind('https://example.org/evento?id=12')).toBe('event-detail');
     expect(

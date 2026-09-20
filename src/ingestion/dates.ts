@@ -83,6 +83,29 @@ export function isDateInWindow(date: string, window: IngestWindow): boolean {
   return date >= window.from && date <= window.to;
 }
 
+/** Inclusive civil months (`YYYY-MM`) that intersect an ingest window. */
+export function civilMonthsInWindow(window: IngestWindow): string[] {
+  const from = ISO_DATE.exec(window.from);
+  const to = ISO_DATE.exec(window.to);
+  if (!from || !to) {
+    throw new Error(`ventana inválida: ${window.from} → ${window.to}`);
+  }
+  const months: string[] = [];
+  let year = Number(from[1]);
+  let month = Number(from[2]);
+  const endYear = Number(to[1]);
+  const endMonth = Number(to[2]);
+  while (year < endYear || (year === endYear && month <= endMonth)) {
+    months.push(`${year}-${String(month).padStart(2, '0')}`);
+    month += 1;
+    if (month > 12) {
+      month = 1;
+      year += 1;
+    }
+  }
+  return months;
+}
+
 /**
  * Dates that count for new-event publication and possiblyMissing: in the
  * ingest window and not before today in Europe/Madrid. Historical creates
