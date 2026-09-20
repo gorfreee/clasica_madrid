@@ -1,6 +1,26 @@
 import { expect, test, type Page } from '@playwright/test';
+import { readFileSync } from 'node:fs';
+import { occurrenceCountLabel } from '../src/lib/presentation/labels.ts';
 
 type Box = { x: number; y: number; width: number; height: number };
+
+function visibleOccurrences(page: Page) {
+  return page.locator('[data-agenda-list] [data-occurrence-id]').filter({ visible: true });
+}
+
+function occurrenceIds(html: string): string[] {
+  return [...html.matchAll(/data-occurrence-id="([^"]+)"/g)].map((match) => match[1] ?? '');
+}
+
+function extraFreeOccurrenceIds(): string[] {
+  const initialIds = new Set(occurrenceIds(readFileSync('dist/index.html', 'utf8')));
+  const fullHtml = readFileSync('dist/_agenda/completa/index.html', 'utf8');
+  const fullJson = fullHtml.match(/id="agenda-filter-data"[^>]*>(.*?)<\/script>/)?.[1] ?? '[]';
+  const items = JSON.parse(fullJson) as { occurrenceId?: string; access?: string }[];
+  return items
+    .filter((item) => item.access === 'free' && item.occurrenceId && !initialIds.has(item.occurrenceId))
+    .map((item) => item.occurrenceId as string);
+}
 
 const VIEWPORTS = [
   { name: 'escritorio', width: 1280, height: 800 },
@@ -119,11 +139,7 @@ test.describe('filtros avanzados de la agenda', () => {
 
   test('aplicar un filtro desde el panel actualiza la agenda', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('[data-agenda-list] [data-occurrence-id]').first()).toBeVisible();
-    const initialCount = await page
-      .locator('[data-agenda-list] [data-occurrence-id]')
-      .filter({ visible: true })
-      .count();
+    await expect(visibleOccurrences(page).first()).toBeVisible();
 
     await toggle(page).click();
     await expect(panel(page)).toBeVisible();
@@ -132,14 +148,54 @@ test.describe('filtros avanzados de la agenda', () => {
 
     await expect(page).toHaveURL(/access=free/);
     await expect(page.locator('[data-agenda-filters] select[name="access"]')).toHaveValue('free');
+    await expect(page.locator('[data-agenda-shortcut="free"]')).toHaveAttribute('aria-pressed', 'true');
     await expect(page.locator('[data-clear-filters]')).toBeVisible();
-    const filteredCount = await page
-      .locator('[data-agenda-list] [data-occurrence-id]')
-      .filter({ visible: true })
-      .count();
-    expect(filteredCount).toBeGreaterThan(0);
-    expect(filteredCount).toBeLessThanOrEqual(initialCount);
     await expect(page.locator('[data-active-filters] [data-remove-filter="access"]')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Mostrar todos' })).toBeHidden();
+    await expect(page.locator('[data-agenda-root][data-agenda-complete]')).toHaveCount(1);
+    await expect(page.locator('[data-no-results]')).toBeHidden();
+
+    const filtered = visibleOccurrences(page);
+    await expect(filtered.first()).toBeVisible();
+    const filteredCount = await filtered.count();
+    expect(filteredCount).toBeGreaterThan(0);
+    await expect(page.locator('[data-result-count]')).toHaveText(occurrenceCountLabel(filteredCount));
+    await expect(page.locator('[data-result-count]')).toBeVisible();
+
+    const sample = Math.min(filteredCount, 8);
+    for (let index = 0; index < sample; index += 1) {
+      await expect(filtered.nth(index).getByText('Gratis', { exact: true })).toBeVisible();
+    }
+  });
+
+  test('un filtro puede mostrar más representaciones que el recorte inicial de la home', async ({
+    page,
+  }) => {
+    const extraFreeIds = extraFreeOccurrenceIds();
+    test.skip(
+      extraFreeIds.length === 0,
+      'el catálogo no tiene coincidencias gratuitas posteriores al recorte inicial',
+    );
+
+    await page.goto('/');
+    const initialCount = await visibleOccurrences(page).count();
+    await expect(page.locator(`[data-occurrence-id="${extraFreeIds[0]}"]`)).toHaveCount(0);
+
+    await toggle(page).click();
+    await page.locator('[data-advanced-filters-panel] select[name="access"]').selectOption('free');
+    await applyInPanel(page).click();
+
+    await expect(page).toHaveURL(/access=free/);
+    await expect(page.locator('[data-agenda-root][data-agenda-complete]')).toHaveCount(1);
+    await expect(page.locator(`[data-occurrence-id="${extraFreeIds[0]}"]`)).toBeVisible();
+
+    const filteredCount = await visibleOccurrences(page).count();
+    expect(filteredCount).toBeGreaterThan(0);
+    await expect(page.locator('[data-result-count]')).toHaveText(occurrenceCountLabel(filteredCount));
+    // Extra matches after the cutoff are included on purpose, so the visible
+    // filtered set is not bounded by the truncated home list.
+    expect(filteredCount).toBeGreaterThanOrEqual(extraFreeIds.length);
+    expect(filteredCount).toBeGreaterThan(initialCount);
   });
 
   for (const viewport of VIEWPORTS) {
