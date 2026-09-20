@@ -126,4 +126,18 @@ describe('golden set → deterministic classifier', () => {
     expect(anoNuevo.eligibility.ruleId).toBe('described-classical-repertoire');
     expect(anoNuevo.eligibility.ruleId).not.toBe('known-classical-composer');
   });
+
+  it('no convierte un recital en ópera porque el nombre del proyecto contiene Ópera', async () => {
+    const cases = await loadGoldenCases();
+    const salon = cases.find((item) => item.caseId === 'golden_opera_company_salon_recital');
+    expect(salon).toBeDefined();
+    const actual = classify(salon!.observed);
+    expect(actual.eligibility.value).toBe('include');
+    expect(actual.eligibility.ruleId).not.toBe('opera-event');
+    expect(actual.formats?.value).toEqual(['recital']);
+    expect(actual.formats?.value).not.toContain('opera');
+
+    const manon = cases.find((item) => item.caseId === 'golden_manon_lescaut');
+    expect(classify(manon!.observed).formats?.value).toContain('opera');
+  });
 });

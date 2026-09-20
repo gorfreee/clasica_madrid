@@ -11,6 +11,7 @@ import {
   type FormatEvidence,
 } from './text.ts';
 import { observedFormatChoiceIsUnresolved } from './format-alternatives.ts';
+import { isOperaCategory, titleIdentifiesOperaEvent } from './opera.ts';
 import type { DeterministicStrength, Resolution } from './types.ts';
 
 type FormatHit = {
@@ -159,9 +160,7 @@ function overallFormatStrength(hits: FormatHit[]): DeterministicStrength {
 function operaStrength(facts: ObservedFacts): 'strong' | 'weak' {
   const category = fieldFolded(facts.categoryText);
   const title = fieldFolded(facts.title);
-  if (hasWord(category, 'opera') || hasWord(title, 'opera') || /\bmicroperas?\b/u.test(title)) {
-    return 'strong';
-  }
+  if (isOperaCategory(category) || titleIdentifiesOperaEvent(title)) return 'strong';
   return 'weak';
 }
 
@@ -234,8 +233,9 @@ function isOperaFormat(facts: ObservedFacts, evidence: FormatEvidence): boolean 
   const category = fieldFolded(facts.categoryText);
   const title = fieldFolded(facts.title);
   if (hasWord(category, 'taller')) return false;
-  // Same title/category signals as eligibility `opera-event` / `isOperaTitle`.
-  if (hasWord(category, 'opera') || hasWord(title, 'opera') || /\bmicroperas?\b/u.test(title)) {
+  // Same category / event-title signals as eligibility `opera-event`.
+  // A bare "ópera" in a longer title is not enough; detail evidence decides.
+  if (isOperaCategory(category) || titleIdentifiesOperaEvent(title)) {
     return true;
   }
   const genreFields = genreFieldsOf(evidence);
