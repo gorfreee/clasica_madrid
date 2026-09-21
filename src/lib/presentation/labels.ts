@@ -77,6 +77,13 @@ export const eventOriginalSourceActionLabel = 'Ver fuente original';
 export const eventSourceActionDescription = 'Consulta precios, disponibilidad y posibles cambios';
 export const venueOfficialWebLabel = 'Web oficial';
 
+export const shareActionLabel = 'Compartir';
+export const shareWhatsappLabel = 'WhatsApp';
+export const shareCopyLinkLabel = 'Copiar enlace';
+export const shareCopiedLabel = 'Enlace copiado';
+export const shareCopyFailedLabel = 'No se ha podido copiar. Selecciona el enlace.';
+export const shareSeveralDatesLabel = 'varias fechas';
+
 export function formatSourceCitationMeta(params: {
   kindLabel: string;
   isPrimary: boolean;
