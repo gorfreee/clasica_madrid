@@ -106,6 +106,13 @@ export const DISCOVERY_EXCLUSION_REASONS = [
   'other',
 ] as const;
 
+export const DISCOVERY_SEARCH_PASS_KINDS = [
+  'high-recall',
+  'long-tail',
+  'music-vocabulary',
+  'recovery',
+] as const;
+
 const discoveryLeadSchema = z
   .object({
     query: z.string().trim().min(1).max(400),
@@ -118,6 +125,18 @@ const discoveryExclusionSchema = z
     reason: z.enum(DISCOVERY_EXCLUSION_REASONS),
     count: z.number().int().min(0).max(10_000),
     examples: z.array(z.string().trim().min(1).max(200)).max(5).optional(),
+    notes: z.string().trim().min(1).max(300).optional(),
+  })
+  .strict();
+
+/**
+ * Compact evidence of a deliberately different research pass. Approaches are
+ * surfaces, ecosystems or vocabulary groups, not a URL-by-URL crawl log.
+ */
+const discoverySearchPassSchema = z
+  .object({
+    kind: z.enum(DISCOVERY_SEARCH_PASS_KINDS),
+    approaches: z.array(z.string().trim().min(1).max(120)).min(1).max(12),
     notes: z.string().trim().min(1).max(300).optional(),
   })
   .strict();
@@ -164,12 +183,21 @@ export const discoveryResearchManifestSchema = z
     submittedToBatch: z.number().int().min(0).max(10_000),
     exclusions: z.array(discoveryExclusionSchema).max(20),
     officialDetailReviewed: z.enum(['all', 'some', 'none', 'not-applicable']),
+    searchPasses: z.array(discoverySearchPassSchema).max(4).optional(),
     listingReviews: z.array(discoveryListingReviewSchema).max(40).optional(),
     windowMonthsSearched: z.array(yearMonthSchema).max(24).optional(),
     notes: z.string().trim().min(1).max(1000).optional(),
   })
   .strict()
   .superRefine((value, ctx) => {
+    const passKinds = value.searchPasses?.map((pass) => pass.kind) ?? [];
+    if (new Set(passKinds).size !== passKinds.length) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'searchPasses no debe repetir tipos de pasada',
+        path: ['searchPasses'],
+      });
+    }
     const months = value.windowMonthsSearched;
     if (!months) return;
     if (new Set(months).size !== months.length) {
@@ -192,6 +220,7 @@ export const discoveryBatchSchema = z
 export type DiscoveryVenue = z.infer<typeof discoveryVenueSchema>;
 export type DiscoveryObservation = z.infer<typeof discoveryObservationSchema>;
 export type DiscoveryListingReview = z.infer<typeof discoveryListingReviewSchema>;
+export type DiscoverySearchPass = z.infer<typeof discoverySearchPassSchema>;
 export type DiscoveryResearchManifest = z.infer<typeof discoveryResearchManifestSchema>;
 export type DiscoveryBatch = z.infer<typeof discoveryBatchSchema>;
 export type DiscoveryExclusionReason = (typeof DISCOVERY_EXCLUSION_REASONS)[number];

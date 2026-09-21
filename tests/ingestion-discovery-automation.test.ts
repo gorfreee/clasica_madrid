@@ -428,6 +428,12 @@ describe('report de Discovery', () => {
           submittedToBatch: 3,
           exclusions: [{ reason: 'already-covered', count: 10 }],
           officialDetailReviewed: 'some',
+          searchPasses: [
+            { kind: 'high-recall', approaches: ['agendas institucionales'] },
+            { kind: 'long-tail', approaches: ['coros', 'iglesias'] },
+            { kind: 'music-vocabulary', approaches: ['recital', 'oratorio'] },
+          ],
+          windowMonthsSearched: ['2026-09', '2026-10', '2026-11', '2026-12', '2027-01'],
         },
         researchNotes: [],
         evidence: sampleEvidence({ detailUrlSparseCount: 1, warnings: [{ title: 'Recital COIIM', url: 'https://www.coiim.es/eventos/recital', reason: 'detail-url-sparse-evidence' }] }),
@@ -455,6 +461,10 @@ describe('report de Discovery', () => {
     expect(markdown).toContain('| IA: requests por provider | gemini: 8, groq: 3 |');
     expect(markdown).toContain('| IA: clasificaciones por provider | ninguno |');
     expect(markdown).toContain('Investigación previa al batch');
+    expect(markdown).toContain('Research coverage: adequate');
+    expect(markdown).toContain('Pipeline health');
+    expect(markdown).toContain('Yield aproximado');
+    expect(markdown).toContain('Trabajo redundante');
     expect(markdown).toContain('coros, iglesias/parroquias');
     expect(markdown).toContain('already-covered');
     expect(markdown).toContain('Recital COIIM');
@@ -501,7 +511,7 @@ describe('report de Discovery', () => {
     expect(markdown).toContain('| Enviados | Ya cubiertos | Excluidos | Sin resolver |');
     expect(markdown).toContain('Sin resolver: 1');
     expect(markdown).toContain('Meses buscados (declarados)');
-    expect(markdown).toContain('la investigación no declara cobertura de: 2026-09, 2027-01');
+    expect(markdown).toContain('faltan meses civiles de la ventana: 2026-09, 2027-01');
   });
 
   it('formatea requests y clasificaciones por modelo vacíos como ninguno', () => {
@@ -529,6 +539,9 @@ describe('report de Discovery', () => {
     });
     expect(body).toContain('Actualización de catálogo desde Discovery');
     expect(body).toContain('revisión humana');
+    expect(body).toContain('Research coverage: review');
+    expect(body).toContain('Atención sobre eventos procesados');
+    expect(body).toContain('Ningún evento procesado requiere atención.');
     expect(body).toContain(SHA);
     expect(body.toLowerCase()).not.toContain('auto-merge solicitado');
   });
@@ -548,8 +561,17 @@ describe('CLI validate-input', () => {
       TO_DATE: '2027-01-13',
     };
     const ok = spawnSync(
-      path.join(import.meta.dirname, '..', 'node_modules', '.bin', 'tsx'),
-      ['src/cli/discovery-automation.ts', 'validate-input', '--output', output, '--code-sha', SHA],
+      process.execPath,
+      [
+        '--import',
+        'tsx',
+        'src/cli/discovery-automation.ts',
+        'validate-input',
+        '--output',
+        output,
+        '--code-sha',
+        SHA,
+      ],
       { env, encoding: 'utf8', cwd: path.join(import.meta.dirname, '..') },
     );
     expect(ok.status, ok.stderr).toBe(0);
@@ -558,8 +580,8 @@ describe('CLI validate-input', () => {
     expect(written).toContain(`batch_sha=${SHA}`);
 
     const bad = spawnSync(
-      path.join(import.meta.dirname, '..', 'node_modules', '.bin', 'tsx'),
-      ['src/cli/discovery-automation.ts', 'validate-input', '--output', output],
+      process.execPath,
+      ['--import', 'tsx', 'src/cli/discovery-automation.ts', 'validate-input', '--output', output],
       {
         env: { ...env, BATCH_REF: 'discovery-request/foo; rm -rf /' },
         encoding: 'utf8',

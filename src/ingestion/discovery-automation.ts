@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { emptyCatalog, type Catalog } from '../lib/domain/catalog.ts';
-import { civilMonthsInWindow, parseIngestWindow, type IngestWindow } from './dates.ts';
+import { parseIngestWindow, type IngestWindow } from './dates.ts';
 import { formatProviderCountList } from './ai-provider-counts.ts';
 import {
   DiscoveryBatchError,
@@ -12,6 +12,7 @@ import {
 } from './discovery.ts';
 import {
   assessDiscoveryBatchEvidence,
+  assessDiscoveryResearchCoverage,
   discoveryResearchNotes,
   type DiscoveryEvidenceDiagnostics,
 } from './discovery-evidence.ts';
@@ -465,7 +466,7 @@ export function formatDiscoveryAutomationSummary(
     ...extras,
     title: extras.title ?? 'Discovery manual',
   });
-  const [titleLine, ...rest] = body.split('\n');
+  const [titleLine, ...rest] = labelDiscoveryEventAttention(body).split('\n');
   return [titleLine, '', header, ...rest].join('\n').trimEnd();
 }
 
@@ -474,7 +475,7 @@ export function formatDiscoveryAutomationPrBody(
   runUrl: string,
   extras: DiscoveryAutomationExtras = {},
 ): string {
-  const base = formatAutomationPrBody(report, runUrl, extras);
+  const base = labelDiscoveryEventAttention(formatAutomationPrBody(report, runUrl, extras));
   const prefix = [
     '## Actualización de catálogo desde Discovery',
     '',
@@ -577,7 +578,7 @@ function formatDiscoveryExecutionTable(
     '| Campo | Valor |',
     '|---|---|',
     `| Ventana | ${cell(`${report.window.from} → ${report.window.to}`)} |`,
-    `| Health | **${cell(report.health)}** |`,
+    `| Pipeline health | **${cell(report.health)}** |`,
     `| Motivos | ${cell(report.healthReasons.join(', ') || 'ninguno')} |`,
     `| Observaciones recibidas | ${batch?.observationCount ?? report.summary.rawEvents} |`,
     `| SHA del batch | \`${cell(batch?.batchSha ?? 'desconocido')}\` |`,
@@ -622,36 +623,60 @@ function formatDiscoveryCatalogExtras(diff: CatalogPublicationDiff | undefined):
 
 function formatDiscoveryResearchSection(
   batch: DiscoveryBatchMeta | undefined,
-  window?: IngestWindow,
+  window: IngestWindow,
 ): string {
+  const research = batch?.research;
+  const coverage = assessDiscoveryResearchCoverage(
+    research,
+    batch?.observationCount ?? 0,
+    window,
+  );
   const lines = [
     '### Investigación previa al batch',
     '',
-    'Diagnóstico. No influye en eligibility ni en la publicación.',
+    `**Research coverage: ${coverage.status}**`,
+    '',
+    'Señal de cobertura de la investigación, separada de `pipeline health`. No influye en eligibility ni en la publicación.',
     '',
   ];
+  if (coverage.reasons.length > 0) {
+    lines.push('Avisos sobre la investigación:', '');
+    for (const reason of coverage.reasons) lines.push(`- ${reason.message}`);
+    lines.push('');
+  } else {
+    lines.push('Sin avisos de cobertura de investigación.', '');
+  }
   if (!batch) {
     lines.push('Sin metadatos de batch; no hay manifest de investigación.');
     return lines.join('\n');
   }
 
-  const research = batch.research;
   if (!research) {
     lines.push('Sin `DiscoveryResearchManifest` en el batch. No se puede distinguir “no había más eventos” de “se investigó poco”.');
   } else {
+    const listingStats = discoveryListingStats(research);
     lines.push('| Campo | Valor |', '|---|---|');
     lines.push(`| Categorías investigadas | ${cell(listOrNone(research.investigatedCategories))} |`);
     lines.push(`| Candidatos revisados (aprox.) | ${research.candidatesReviewedApprox} |`);
     lines.push(`| Enviados al batch (manifest) | ${research.submittedToBatch} |`);
     lines.push(`| Observaciones recibidas | ${batch.observationCount} |`);
+    lines.push(`| Yield aproximado | ${formatPercent(coverage.approximateYieldPercent)} |`);
+    lines.push(`| Trabajo redundante | ${coverage.redundantCandidates} (${formatPercent(coverage.redundantPercent)}) |`);
+    lines.push(`| Pasadas declaradas | ${cell(listOrNone(coverage.searchPasses))} |`);
+    lines.push(`| Listings multi-evento | ${listingStats.count} (${listingStats.candidates} candidatos; ${listingStats.unresolved} sin resolver) |`);
     lines.push(`| Fichas oficiales revisadas | ${cell(research.officialDetailReviewed)} |`);
     lines.push(`| Leads / búsquedas | ${research.leads.length} |`);
-    if (research.windowMonthsSearched) {
-      lines.push(`| Meses buscados (declarados) | ${cell(research.windowMonthsSearched.join(', '))} |`);
-    }
+    lines.push(`| Meses buscados (declarados) | ${cell(listOrNone(research.windowMonthsSearched))} |`);
     lines.push('');
+    if (research.searchPasses && research.searchPasses.length > 0) {
+      lines.push('| Pasada | Enfoques |', '|---|---|');
+      for (const pass of research.searchPasses) {
+        lines.push(`| ${cell(pass.kind)} | ${cell(pass.approaches.join(', '))} |`);
+      }
+      lines.push('');
+    }
     if (research.leads.length > 0) {
-      lines.push('Leads relevantes:', '');
+      lines.push('<details>', `<summary>Leads relevantes (${research.leads.length})</summary>`, '');
       for (const lead of research.leads.slice(0, AUTOMATION_PR_SAMPLE_LIMIT)) {
         const kind = lead.kind ? `${lead.kind}: ` : '';
         lines.push(`- ${kind}${lead.query}`);
@@ -659,13 +684,15 @@ function formatDiscoveryResearchSection(
       if (research.leads.length > AUTOMATION_PR_SAMPLE_LIMIT) {
         lines.push(`- … ${research.leads.length - AUTOMATION_PR_SAMPLE_LIMIT} más`);
       }
-      lines.push('');
+      lines.push('', '</details>', '');
     }
     if (research.exclusions.length > 0) {
-      lines.push('| Motivo de no inclusión | Cantidad |', '|---|---:|');
-      for (const exclusion of research.exclusions) {
+      lines.push('| Principales motivos de no inclusión | Cantidad |', '|---|---:|');
+      const exclusions = [...research.exclusions].sort((left, right) => right.count - left.count);
+      for (const exclusion of exclusions.slice(0, 5)) {
         lines.push(`| ${cell(exclusion.reason)} | ${exclusion.count} |`);
       }
+      if (exclusions.length > 5) lines.push(`| otros motivos (${exclusions.length - 5}) | — |`);
       lines.push('');
     }
     const listingLines = formatListingReviews(research);
@@ -698,12 +725,9 @@ function formatDiscoveryResearchSection(
     }
   }
 
-  const researchNotes = [
-    ...batch.researchNotes,
-    ...discoveryWindowCoverageNotes(research, window),
-  ];
+  const researchNotes = batch.researchNotes;
   if (researchNotes.length > 0) {
-    lines.push('', 'Notas:', '');
+    lines.push('', 'Otras comprobaciones del manifest:', '');
     for (const note of uniqueNotes(researchNotes)) {
       lines.push(`- ${note}`);
     }
@@ -745,18 +769,6 @@ function formatListingReviews(
     `Candidatos en ventana en listings: ${seen}. Sin resolver: ${unresolved}. Cada candidato visto debe contabilizarse como submitted, already-covered, excluded o unresolved.`,
   );
   return lines;
-}
-
-function discoveryWindowCoverageNotes(
-  research: DiscoveryResearchManifest | undefined,
-  window: IngestWindow | undefined,
-): string[] {
-  if (!research?.windowMonthsSearched || !window) return [];
-  const expected = civilMonthsInWindow(window);
-  const searched = new Set(research.windowMonthsSearched);
-  const missing = expected.filter((month) => !searched.has(month));
-  if (missing.length === 0) return [];
-  return [`la investigación no declara cobertura de: ${missing.join(', ')}`];
 }
 
 function uniqueNotes(notes: readonly string[]): string[] {
@@ -815,6 +827,32 @@ function compactCounts(counts: Partial<Record<string, number>> | undefined): str
 function listOrNone(values: readonly string[] | undefined): string {
   if (!values || values.length === 0) return 'ninguno';
   return values.join(', ');
+}
+
+function discoveryListingStats(research: DiscoveryResearchManifest): {
+  count: number;
+  candidates: number;
+  unresolved: number;
+} {
+  const reviews = research.listingReviews ?? [];
+  return {
+    count: reviews.length,
+    candidates: reviews.reduce((total, item) => total + item.inWindowCandidatesSeen, 0),
+    unresolved: reviews.reduce((total, item) => total + item.unresolved, 0),
+  };
+}
+
+function formatPercent(value: number | undefined): string {
+  return value === undefined ? '—' : `${value.toFixed(1)}%`;
+}
+
+function labelDiscoveryEventAttention(markdown: string): string {
+  return markdown
+    .replaceAll('### Requiere atención', '### Atención sobre eventos procesados')
+    .replaceAll(
+      'Ningún evento requiere atención.',
+      'Ningún evento procesado requiere atención. Los avisos sobre la investigación se muestran en «Investigación previa al batch».',
+    );
 }
 
 function cell(value: string): string {
