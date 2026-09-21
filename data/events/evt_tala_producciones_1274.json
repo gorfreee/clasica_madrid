@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_tala_producciones_1274",
+  "slug": "arnau-tomas-y-kennedy-moretti-las-sonatas-de-gamba",
+  "title": "Arnau Tomás y Kennedy Moretti – ‘Las sonatas de gamba’",
+  "status": "scheduled",
+  "venueId": "ven_ateneo_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_tala_producciones_1274_01",
+      "date": "2027-06-20",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Arnau Tomás"
+    },
+    {
+      "name": "Kennedy Moretti"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "chamber",
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_tala_producciones_es",
+      "url": "https://www.tala-producciones.es/salon-del-ateneo/arnau-tomas-y-kennedy-moretti-las-sonatas-de-gamba",
+      "checkedAt": "2026-09-21",
+      "externalId": "1274"
+    }
+  ],
+  "primarySourceId": "src_tala_producciones_es",
+  "lastVerifiedAt": "2026-09-21"
+}
