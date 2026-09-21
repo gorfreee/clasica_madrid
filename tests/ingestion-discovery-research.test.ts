@@ -9,6 +9,7 @@ import {
 } from '../src/ingestion/discovery.ts';
 import {
   assessDiscoveryBatchEvidence,
+  assessDiscoveryResearchCoverage,
   discoveryResearchNotes,
 } from '../src/ingestion/discovery-evidence.ts';
 import { findAdapterCoverageGaps, loadDiscoveryBatchFromGit, type GitBatchReader } from '../src/ingestion/discovery-automation.ts';
@@ -217,6 +218,148 @@ describe('DiscoveryResearchManifest', () => {
       '2027-01',
     ]);
     expect(civilMonthsInWindow({ from: '2026-03-01', to: '2026-03-31' })).toEqual(['2026-03']);
+  });
+
+  it('marca review para 72 candidatos y 4 envíos sin recuperación aunque los meses estén cubiertos', () => {
+    const manifest = research({
+      candidatesReviewedApprox: 72,
+      submittedToBatch: 4,
+      exclusions: [
+        { reason: 'already-covered', count: 18 },
+        { reason: 'harvested-source', count: 14 },
+      ],
+      searchPasses: [
+        { kind: 'high-recall', approaches: ['agendas institucionales'] },
+        { kind: 'long-tail', approaches: ['iglesias', 'coros', 'conservatorios'] },
+        { kind: 'music-vocabulary', approaches: ['recital', 'órgano', 'oratorio'] },
+      ],
+      windowMonthsSearched: ['2026-09', '2026-10', '2026-11', '2026-12', '2027-01'],
+    });
+    const coverage = assessDiscoveryResearchCoverage(
+      manifest,
+      4,
+      { from: '2026-09-20', to: '2027-01-18' },
+    );
+    expect(coverage.status).toBe('review');
+    expect(coverage.approximateYieldPercent).toBe(5.6);
+    expect(coverage.redundantCandidates).toBe(32);
+    expect(coverage.reasons.map((reason) => reason.code)).toEqual([
+      'low-yield-recovery-missing',
+    ]);
+  });
+
+  it('acepta yield pequeño tras una recuperación diversificada y cobertura suficiente', () => {
+    const manifest = research({
+      candidatesReviewedApprox: 72,
+      submittedToBatch: 2,
+      exclusions: [
+        { reason: 'already-covered', count: 18 },
+        { reason: 'harvested-source', count: 14 },
+      ],
+      searchPasses: [
+        { kind: 'high-recall', approaches: ['agendas institucionales', 'festivales'] },
+        { kind: 'long-tail', approaches: ['iglesias', 'universidades'] },
+        { kind: 'music-vocabulary', approaches: ['recital', 'réquiem', 'cámara'] },
+        {
+          kind: 'recovery',
+          approaches: ['museos estatales', 'institutos culturales', 'coverage gaps'],
+        },
+      ],
+      windowMonthsSearched: ['2026-09', '2026-10', '2026-11', '2026-12', '2027-01'],
+    });
+    const coverage = assessDiscoveryResearchCoverage(
+      manifest,
+      2,
+      { from: '2026-09-20', to: '2027-01-18' },
+    );
+    expect(coverage.status).toBe('adequate');
+    expect(coverage.reasons).toEqual([]);
+  });
+
+  it('no penaliza por sí solo encontrar pocos eventos', () => {
+    const manifest = research({
+      candidatesReviewedApprox: 20,
+      submittedToBatch: 0,
+      searchPasses: [
+        { kind: 'high-recall', approaches: ['agendas institucionales'] },
+        { kind: 'long-tail', approaches: ['coros', 'escuelas'] },
+        { kind: 'music-vocabulary', approaches: ['lied', 'cantata'] },
+      ],
+      windowMonthsSearched: ['2026-09', '2026-10', '2026-11', '2026-12', '2027-01'],
+    });
+    const coverage = assessDiscoveryResearchCoverage(
+      manifest,
+      0,
+      { from: '2026-09-20', to: '2027-01-18' },
+    );
+    expect(coverage.status).toBe('adequate');
+  });
+
+  it('mantiene batches antiguos parseables pero marca su estrategia como no verificable', () => {
+    const legacy = parseDiscoveryBatch({
+      schemaVersion: 1,
+      observations: [],
+      research: research({
+        submittedToBatch: 0,
+        windowMonthsSearched: ['2026-09', '2026-10', '2026-11', '2026-12', '2027-01'],
+      }),
+    });
+    const coverage = assessDiscoveryResearchCoverage(
+      legacy.research,
+      legacy.observations.length,
+      { from: '2026-09-20', to: '2027-01-18' },
+    );
+    expect(coverage.status).toBe('review');
+    expect(coverage.reasons.map((reason) => reason.code)).toEqual([
+      'high-recall-pass-missing',
+      'long-tail-pass-missing',
+      'music-vocabulary-pass-missing',
+    ]);
+  });
+
+  it('marca review por manifest ausente, meses incompletos o redundancia extrema sin diversificación', () => {
+    const window = { from: '2026-09-20', to: '2027-01-18' } as const;
+    expect(assessDiscoveryResearchCoverage(undefined, 0, window)).toMatchObject({
+      status: 'review',
+      reasons: [{ code: 'manifest-missing' }],
+    });
+
+    const incomplete = assessDiscoveryResearchCoverage(
+      research({
+        submittedToBatch: 1,
+        searchPasses: [
+          { kind: 'high-recall', approaches: ['agendas institucionales'] },
+          { kind: 'long-tail', approaches: ['coros'] },
+          { kind: 'music-vocabulary', approaches: ['recital'] },
+        ],
+        windowMonthsSearched: ['2026-10', '2026-11', '2026-12'],
+      }),
+      1,
+      window,
+    );
+    expect(incomplete.reasons.map((reason) => reason.code)).toContain('window-months-missing');
+
+    const redundant = assessDiscoveryResearchCoverage(
+      research({
+        candidatesReviewedApprox: 30,
+        submittedToBatch: 8,
+        exclusions: [
+          { reason: 'already-covered', count: 15 },
+          { reason: 'harvested-source', count: 10 },
+        ],
+        searchPasses: [
+          { kind: 'high-recall', approaches: ['agendas institucionales'] },
+          { kind: 'long-tail', approaches: ['coros'] },
+          { kind: 'music-vocabulary', approaches: ['recital'] },
+        ],
+        windowMonthsSearched: ['2026-09', '2026-10', '2026-11', '2026-12', '2027-01'],
+      }),
+      8,
+      window,
+    );
+    expect(redundant.reasons.map((reason) => reason.code)).toContain(
+      'high-redundancy-recovery-missing',
+    );
   });
 });
 

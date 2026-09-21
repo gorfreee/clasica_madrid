@@ -4,7 +4,7 @@ Este documento **no** es un registry de sources ni una lista exhaustiva.
 
 Son pistas y puntos de partida. Discovery debe buscar también organizaciones, páginas y fuentes similares que **no** aparezcan aquí.
 
-El harvesting ya cubre las sources de `SOURCE_REGISTRY` (ver `sources.harvested` en el `DiscoveryContext`). No hace falta un barrido sistemático de esas agendas. Sí puedes recoger un evento de una source ya adaptada si aparece en la investigación y no está en `coveredEvents`: es un posible coverage gap, no una orden de reimplementar el adapter.
+El harvesting ya cubre las sources de `SOURCE_REGISTRY` (ver `sources.harvested` en el `DiscoveryContext`). No hace falta un barrido sistemático de esas agendas, pero tampoco son territorio prohibido. Si una superficie externa o una búsqueda descubre un evento de una source adaptada que no está en `coveredEvents`, investígalo y puedes recogerlo como posible coverage gap; no es una orden de reimplementar el adapter.
 
 ---
 
@@ -22,6 +22,28 @@ En hosts compartidos (Facebook, Instagram, X, Eventbrite, Meetup, …) no uses e
 No inventes fechas, programas, intérpretes ni URLs. Si la ficha oficial trae programa, compositores u obras, recógelos con exhaustividad razonable. Si sólo hay una agenda permanente (`/agenda`, `/eventos`, `/actividades/conciertos-de-tarde`, homepage), extrae **cada** concierto de esa página que caiga en la ventana como observación distinta —incluida paginación o load-more— y reconcilia el listing en `research.listingReviews`; no trates el listing como si fuera la ficha de un único evento.
 
 La estrategia de búsqueda se deriva de `DiscoveryContext.window`. Antes de cerrar, comprueba que **ningún mes civil** de esa ventana (incluidos los parciales de inicio y final) haya quedado sin explorar. Puedes agrupar queries; no hace falta una búsqueda por cada tipología × mes.
+
+## Estrategia en varias pasadas
+
+### A. Superficies de alto recall
+
+Revisa varias agendas amplias que puedan revelar programación poco visible: Ayuntamiento y distritos, Comunidad de Madrid, 21 DISTRITOS y equivalentes, museos estatales, Ministerio de Cultura, festivales multidisciplinares, esmadrid / Turismo Madrid y otras superficies equivalentes que aparezcan. Son radar, no necesariamente evidencia canónica.
+
+Cuando una superficie liste varios eventos dentro de ventana, recorre la colección suficientemente —paginación y carga adicional incluidas— y reconcilia los resultados. No te limites a la portada ni a los primeros ítems.
+
+### B. Long tail por ecosistemas
+
+Recorre varios de los ecosistemas descritos abajo y otros equivalentes. Cambiar sólo el mes o repetir “música clásica Madrid” no constituye una estrategia diferente.
+
+### C. Vocabulario musical
+
+Combina Madrid, fechas, lugares o ecosistemas con términos como concierto, recital, ópera, zarzuela, barroco, renacentista, música antigua, cámara, cuarteto, trío, ensemble, órgano, coral, coro, oratorio, réquiem, cantata, lied, sinfónico y orquesta. Amplía la lista cuando la investigación sugiera otros términos.
+
+### Recuperación
+
+Si una primera investigación amplia produce aproximadamente 0–4 observaciones después de revisar unos 40–50 candidatos o más, añade una pasada independiente: nuevas superficies, nuevos ecosistemas, otro vocabulario, festivales/programaciones institucionales no explorados y coverage gaps. Un resultado final pequeño o vacío sigue siendo válido; lo que no vale es cerrar sólo porque la primera estrategia rindió poco.
+
+Resume estas pasadas en `research.searchPasses`; registra enfoques, no un log de cada URL.
 
 ---
 
@@ -119,10 +141,10 @@ Son **leads**. Casi nunca son la source oficial. Úsalas para descubrir títulos
 
 ## Cómo usar estas pistas
 
-1. Empieza por tipologías de larga cola, no por el Teatro Real ni el Auditorio.
+1. Ejecuta las pasadas de alto recall, long tail y vocabulario musical; no concentres todo el esfuerzo en territorio ya cubierto.
 2. Sigue el lead hasta la fuente primaria.
-3. Contrasta con `coveredEvents` y `sources.*` del contexto.
+3. Contrasta con `coveredEvents` y `sources.*` del contexto sin descartar automáticamente posibles gaps de adapters.
 4. Si no hay URL concreta que respalde el evento, no lo incluyas.
 5. Si la URL concreta es un listing, una observación por evento en ventana y el listing reconciliado en `listingReviews`; si hay ficha de detalle, esa es `source.url` y extrae el programa de ahí, pero no abandones el resto del listing.
-6. Antes de cerrar, verifica cobertura de todos los meses civiles de `window`.
+6. Antes de cerrar, verifica cobertura de todos los meses civiles de `window` y aplica la regla de recuperación si el yield inicial fue anormalmente bajo.
 7. Si encuentras una organización recurrente con calendario estable, señálala en el informe al usuario como candidata a un adapter futuro. **No** añadas el adapter en esta tarea de Discovery.

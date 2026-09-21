@@ -63,7 +63,7 @@ El fichero de contexto está gitignorado. No lo commitees.
 | Campo | Para qué |
 |---|---|
 | `window` | Sólo eventos cuya representación cae en este rango. Pásala tal cual al workflow (`from` / `to`). |
-| `sources.harvested` | Sources con adapter. **No** hagas una búsqueda sistemática redundante sobre todas ellas. |
+| `sources.harvested` | Sources con adapter. No las barras sistemáticamente como si no tuvieran adapter, pero tampoco las trates como territorio prohibido: un evento ausente de `coveredEvents` puede ser un coverage gap. |
 | `sources.published` | Sources canónicas ya en el catálogo sin adapter. Útiles para no “descubrir” lo ya cubierto. |
 | `venues` | Lugares conocidos y aliases. Reutiliza el nombre exacto cuando coincida. |
 | `coveredEvents` | Fingerprints de la ventana. Evita reenviar lo ya cubierto salvo un coverage gap (abajo). |
@@ -77,22 +77,45 @@ El alcance geográfico es el municipio de Madrid (`area: madrid`), con `nearby` 
 
 ## 2. Investigación
 
-El objetivo principal es encontrar cobertura que **todavía no** proporcionan los adapters.
+El objetivo principal es encontrar cobertura que **todavía no** proporcionan los adapters. La investigación debe ser amplia y seguir estas pasadas deliberadamente distintas; no basta con acumular queries parecidas.
 
-No realices una búsqueda sistemática redundante sobre todas las `sources.harvested`.
+### Pasada A — superficies de alto recall
 
-Si durante la investigación aparece un evento relevante de una source que ya tiene adapter pero **no** parece estar en `coveredEvents`, puedes incluirlo como posible coverage gap. El pipeline reconcilia; el report lo marcará como *adapter coverage gap candidate*. No es un error por sí mismo.
+Revisa varias superficies amplias capaces de revelar programación escondida, aunque no sean la source canónica del evento. Incluye, según lo que exista en la ventana:
 
-Debes:
+* agendas culturales oficiales de Ayuntamiento, Comunidad y distritos;
+* programas como 21 DISTRITOS y equivalentes;
+* museos estatales, Ministerio de Cultura y programación cultural autonómica;
+* festivales multidisciplinares activos;
+* esmadrid / Turismo Madrid y agendas amplias equivalentes descubiertas durante la búsqueda.
 
-* hacer búsqueda web amplia, también fuera de cualquier lista predefinida;
-* **cubrir deliberadamente todos los meses civiles de `window`**, incluidos los parciales de inicio y final (si la ventana es `2026-09-20 → 2027-01-18`, hay que explorar septiembre, octubre, noviembre, diciembre y enero). Puedes agrupar búsquedas; no hace falta una query por cada categoría × mes. Antes de cerrar, verifica que ningún tramo mensual haya quedado sin explorar;
-* priorizar fuentes primarias u oficiales;
-* usar agregadores, buscadores y redes como **leads** cuando ayuden;
-* perseguir la fuente oficial cuando exista;
-* no inventar hechos;
-* incluir siempre una URL http(s) concreta que respalde el evento;
-* usar `foundVia` sólo como trazabilidad de descubrimiento (URL de búsqueda, post de Instagram, ficha de Eventbrite, etc.), nunca como source canónica.
+No es una whitelist. Estas superficies pueden quedar sólo como `foundVia`: cuando exista una ficha oficial mejor, persíguela como evidencia canónica. Si una superficie contiene múltiples eventos dentro de ventana, recórrela suficientemente —incluida paginación o carga adicional— y reconcíliala en `listingReviews`; no te quedes con la portada ni los primeros resultados.
+
+### Pasada B — long tail por ecosistemas
+
+Busca deliberadamente en varios ecosistemas: iglesias, parroquias, basílicas, órgano, coros, asociaciones, conservatorios, escuelas, universidades, colegios mayores, fundaciones, museos, institutos culturales, embajadas, ensembles, páginas de intérpretes, pequeñas salas, ciclos y equivalentes. Usa [`discovery-search-hints.md`](discovery-search-hints.md) como punto de partida, no como límite.
+
+### Pasada C — vocabulario musical
+
+No dependas de la frase “música clásica”. Diversifica con vocabulario que revele programación relevante: concierto, recital, ópera, zarzuela, barroco, renacentista, música antigua, música de cámara, cuarteto, trío, ensemble, órgano, coral, coro, oratorio, réquiem, cantata, lied, sinfónico, orquesta y equivalentes razonables. Tampoco es una whitelist.
+
+Registra cada pasada de forma compacta en `research.searchPasses`: tipo y enfoques usados, no cada URL visitada.
+
+### Recuperación obligatoria cuando el yield es bajo
+
+Después de una primera investigación razonablemente amplia, si el yield es anormalmente bajo —orientativamente, unas 0–4 observaciones tras revisar del orden de 40–50 candidatos o más— **no cierres el Discovery**. Ejecuta una pasada adicional `recovery` con una estrategia razonablemente independiente: nuevas superficies, tipologías, términos musicales, festivales o programaciones institucionales no explorados y posibles coverage gaps.
+
+No hay un mínimo obligatorio de eventos. Un batch pequeño o vacío es válido si la pasada de recuperación tampoco encuentra más. La exigencia es distinguir “hay pocos eventos nuevos” de “la primera estrategia encontró pocos y dejamos de buscar”.
+
+### Reglas transversales
+
+* Haz búsqueda web amplia, también fuera de cualquier lista predefinida.
+* **Cubre deliberadamente todos los meses civiles de `window`**, incluidos los parciales de inicio y final (si la ventana es `2026-09-20 → 2027-01-18`, explora septiembre, octubre, noviembre, diciembre y enero). Puedes agrupar búsquedas; no hace falta una query por categoría × mes.
+* Prioriza fuentes primarias u oficiales; usa agregadores, buscadores y redes como **leads** y persigue la fuente oficial cuando exista.
+* No inventes hechos e incluye siempre una URL http(s) concreta que respalde el evento.
+* Usa `foundVia` sólo como trazabilidad de descubrimiento, nunca como source canónica.
+
+Una source de `sources.harvested` **no** debe volver a barrerse sistemáticamente como si careciera de adapter, pero tampoco es territorio prohibido. Si una superficie externa, festival, buscador u otra investigación descubre un evento de esa source que no aparece en `coveredEvents`, investígalo y puedes enviarlo como *adapter coverage gap candidate*. La frase “no realizar una búsqueda sistemática redundante” nunca significa “ignorar cualquier evento perteneciente a una source adaptada”.
 
 Cuando encuentres una **agenda, ciclo, listing o página con múltiples eventos**, recorre **todos** los eventos de esa página que caigan dentro de la ventana —incluida paginación o load-more cuando exista— y contabiliza cada uno como `submitted`, `already-covered`, `excluded` o `unresolved` en `research.listingReviews` antes de considerar esa fuente terminada. Si sigues una ficha individual desde ese listing, extrae la ficha como evidencia del evento, pero **sigue reconciliando el listing completo**. No hace falta guardar un historial de todas las páginas visitadas: sólo listings/ciclos relevantes con varios candidatos.
 
@@ -178,6 +201,20 @@ Forma:
       { "reason": "out-of-window", "count": 3 }
     ],
     "officialDetailReviewed": "all",
+    "searchPasses": [
+      {
+        "kind": "high-recall",
+        "approaches": ["agendas culturales oficiales", "festivales multidisciplinares"]
+      },
+      {
+        "kind": "long-tail",
+        "approaches": ["iglesias y órgano", "coros", "conservatorios y universidades"]
+      },
+      {
+        "kind": "music-vocabulary",
+        "approaches": ["recital y cámara", "órgano y coral", "oratorio y cantata"]
+      }
+    ],
     "listingReviews": [
       {
         "url": "https://ejemplo.example/agenda-cultural",
@@ -198,6 +235,17 @@ Un batch vacío es válido (no-op). Prefiérelo a inventar eventos. **Aunque el 
 
 `research` es **diagnóstico**. No es catálogo, no se escribe en `data/**`, no cambia eligibility ni publicación. El Job Summary y el artifact lo conservan.
 
+### Señal `Research coverage`
+
+El Job Summary y el body de la PR calculan una señal independiente de `pipeline health`:
+
+* `adequate`: el manifest declara cobertura temporal y las pasadas requeridas, sin activar una regla de recuperación pendiente;
+* `review`: la revisión humana debe comprobar la estrategia declarada.
+
+`review` se activa de forma objetiva si falta el manifest, faltan meses civiles, no se declara alguna pasada base (`high-recall`, `long-tail`, `music-vocabulary`), hay 0–4 observaciones tras al menos 40 candidatos sin `recovery`, o al menos el 70% de 20+ candidatos (y 20+ en términos absolutos) fueron `already-covered + harvested-source` sin diversificación posterior.
+
+Estas reglas evalúan la **estrategia**, no el éxito editorial. Encontrar pocos eventos no activa `review` por sí solo: el caso de bajo yield sólo pide una pasada adicional independiente. La señal no cambia eligibility, `health`, el contenido del catálogo ni la decisión de publicación.
+
 ### Qué debe permitir auditar el manifest
 
 Nivel mínimo (no listes cada URL visitada):
@@ -210,8 +258,11 @@ Nivel mínimo (no listes cada URL visitada):
 | `submittedToBatch` | Cuántos acabaron en `observations` (debe coincidir con `observations.length`). |
 | `exclusions` | Recuentos por motivo: `already-covered`, `harvested-source`, `out-of-window`, `out-of-geographic-scope`, `non-classical`, `insufficient-evidence`, `duplicate-lead`, `other`. `examples` opcionales y cortos. |
 | `officialDetailReviewed` | `all` / `some` / `none` / `not-applicable`. Si citas una ficha de detalle, deberías haberla abierto. |
+| `searchPasses` | Pasadas realizadas: `high-recall`, `long-tail`, `music-vocabulary` y, cuando proceda por bajo yield o exceso de territorio ya cubierto, `recovery`. Cada pasada resume enfoques/superficies; no es un historial de URLs. Es opcional por compatibilidad con batches antiguos, pero su ausencia hace que la cobertura actual requiera revisión. |
 | `listingReviews` | Sólo agendas/ciclos/listings con **varios** candidatos en ventana. Para cada URL: cuántos viste en ventana y cuántos acabaron `submitted` / `alreadyCovered` / `excluded` / `unresolved`. Los cuatro outcomes deben sumar `inWindowCandidatesSeen`. No es un historial de páginas visitadas. |
 | `windowMonthsSearched` | Opcional. Meses civiles `YYYY-MM` de `window` que sí exploraste, incluidos los parciales de inicio y final. |
+
+`searchPasses` es opcional en el schema para que batches anteriores sigan siendo válidos. Un batch antiguo se procesa igual, pero la señal actual será `review` si no puede verificar la estrategia.
 
 Publica **solo** el JSON, en la rama de petición, en:
 
@@ -265,7 +316,7 @@ gh run watch <run-id>
 gh run view <run-id>
 ```
 
-Job Summary y artifact `discovery-run-<run-id>-<attempt>` (retención 90 días): batch exacto, `batch-meta.json`, `research-manifest.json` (si venía en el batch), `evidence-diagnostics.json`, `report.json`, `run.json`, `events.jsonl`, `run.log`. No contienen secrets. El Job Summary incluye un bloque compacto de cobertura de investigación y avisos si una URL de ficha llega con evidencia sospechosamente pobre. Esos avisos no bloquean la publicación.
+Job Summary y artifact `discovery-run-<run-id>-<attempt>` (retención 90 días): batch exacto, `batch-meta.json`, `research-manifest.json` (si venía en el batch), `evidence-diagnostics.json`, `report.json`, `run.json`, `events.jsonl`, `run.log`. No contienen secrets. El Job Summary y el body de la PR separan `pipeline health` de `Research coverage` (`adequate` / `review`) y muestran motivos explícitos, yield aproximado, redundancia, pasadas, listings y meses. `Research coverage` es diagnóstico: no cambia eligibility, health ni publicación. Los avisos de evidencia pobre tampoco bloquean la publicación.
 
 La PR de catálogo, si hay cambios válidos, la abre el workflow:
 
