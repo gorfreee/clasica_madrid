@@ -94,6 +94,28 @@ test.describe('eyebrow de sección y retorno', () => {
     }
   });
 
+  test('acerca de separa el contenido con la misma línea superior que contacto', async ({ page }) => {
+    const rule = async (path: string, selector: string) => {
+      await page.goto(path);
+      return page.locator(selector).evaluate((element) => {
+        const style = getComputedStyle(element);
+        const box = element.getBoundingClientRect();
+        const eyebrow = document.querySelector('.page-label .eyebrow');
+        if (!eyebrow) throw new Error('Falta el eyebrow');
+        return {
+          borderTopWidth: style.borderTopWidth,
+          borderTopStyle: style.borderTopStyle,
+          borderTopColor: style.borderTopColor,
+          gap: Math.round(box.top - eyebrow.getBoundingClientRect().bottom),
+        };
+      });
+    };
+
+    const contact = await rule('/contacto/', '.contact-layout');
+    const about = await rule('/acerca-de/', '.about-copy');
+    expect(about).toEqual(contact);
+  });
+
   test('no conserva las fórmulas ambiguas anteriores', async ({ page }) => {
     const paths = [
       '/',
