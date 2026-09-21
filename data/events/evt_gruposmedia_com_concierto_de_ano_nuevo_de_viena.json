@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_gruposmedia_com_concierto_de_ano_nuevo_de_viena",
+  "slug": "concierto-de-ano-nuevo-de-viena",
+  "title": "Concierto de Año Nuevo de Viena",
+  "status": "scheduled",
+  "venueId": "ven_teatro_gran_via",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_gruposmedia_com_concierto_de_ano_nuevo_de_viena_01",
+      "date": "2027-01-04",
+      "time": "20:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_gruposmedia_com_concierto_de_ano_nuevo_de_viena_02",
+      "date": "2027-01-05",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Johann Strauss Ensemble der Wiener Symphoniker"
+    },
+    {
+      "name": "Matthias Honeck"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Strauss"
+    },
+    {
+      "name": "Josef Strauss"
+    }
+  ],
+  "works": [
+    {
+      "title": "El barón gitano, 1885 – Obertura",
+      "composerName": "Johann Strauss"
+    },
+    {
+      "title": "De vacaciones – Polka rápida",
+      "composerName": "Josef Strauss"
+    },
+    {
+      "title": "Sangre vienesa – Vals",
+      "composerName": "Johann Strauss"
+    },
+    {
+      "title": "Desde la lejanía – Polka-Mazur",
+      "composerName": "Josef Strauss"
+    },
+    {
+      "title": "Tren de la diversión – Polka rápida",
+      "composerName": "Johann Strauss"
+    },
+    {
+      "title": "A prueba de fuego – Polka francesa",
+      "composerName": "Josef Strauss"
+    },
+    {
+      "title": "Rosas del sur – Vals",
+      "composerName": "Johann Strauss"
+    },
+    {
+      "title": "Marcha egipcia – Marcha",
+      "composerName": "Johann Strauss"
+    },
+    {
+      "title": "Tik Tak – Polka rápida",
+      "composerName": "Johann Strauss"
+    },
+    {
+      "title": "La emancipada – Polka-Mazur",
+      "composerName": "Josef Strauss"
+    },
+    {
+      "title": "Diarios de la mañana – Vals",
+      "composerName": "Johann Strauss"
+    },
+    {
+      "title": "Polka del Champán – Polka rápida",
+      "composerName": "Johann Strauss"
+    },
+    {
+      "title": "En el bosque de Krapfen – Polka francesa",
+      "composerName": "Johann Strauss"
+    },
+    {
+      "title": "A orillas del hermoso y azul Danubio – Vals",
+      "composerName": "Johann Strauss"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_gruposmedia_com",
+      "url": "https://gruposmedia.com/cartelera/concierto-de-ano-nuevo-de-viena",
+      "checkedAt": "2026-09-21"
+    }
+  ],
+  "primarySourceId": "src_gruposmedia_com",
+  "lastVerifiedAt": "2026-09-21"
+}

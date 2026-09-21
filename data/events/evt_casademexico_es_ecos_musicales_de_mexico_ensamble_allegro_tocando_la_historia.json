@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_casademexico_es_ecos_musicales_de_mexico_ensamble_allegro_tocando_la_historia",
+  "slug": "ecos-musicales-de-mexico-ensamble-allegro-tocando-la-historia",
+  "title": "Ecos Musicales de México | Ensamble Allegro | Tocando la historia",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_casa_de_mexico_en_espana_salon_de_usos_multiples",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_casademexico_es_ecos_musicales_de_mexico_ensamble_allegro_tocando_la_historia_01",
+      "date": "2026-09-25",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ensamble Allegro"
+    },
+    {
+      "name": "Mikhail Studynov"
+    },
+    {
+      "name": "Vicente Fernández"
+    },
+    {
+      "name": "Janna Guevska"
+    },
+    {
+      "name": "María Teresa Balcázar"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ignacio Fernández Esperón"
+    },
+    {
+      "name": "Manuel M. Ponce"
+    },
+    {
+      "name": "Quirino Mendoza"
+    },
+    {
+      "name": "María Grever"
+    },
+    {
+      "name": "Juventino Rosas"
+    },
+    {
+      "name": "Jesús García"
+    },
+    {
+      "name": "Macedonio Alcalá"
+    },
+    {
+      "name": "Enrique Mora"
+    },
+    {
+      "name": "J.A. Jiménez"
+    },
+    {
+      "name": "Jose Manuel Espinoza Fernandez"
+    }
+  ],
+  "works": [
+    {
+      "title": "La Llorona"
+    },
+    {
+      "title": "Borrachita",
+      "composerName": "Ignacio Fernández Esperón"
+    },
+    {
+      "title": "Rayando el Sol",
+      "composerName": "Manuel M. Ponce"
+    },
+    {
+      "title": "Me he de comer esa tuna",
+      "composerName": "Ignacio Fernández Esperón"
+    },
+    {
+      "title": "Cielito Lindo",
+      "composerName": "Quirino Mendoza"
+    },
+    {
+      "title": "Amor de mi amor",
+      "composerName": "Ignacio Fernández Esperón"
+    },
+    {
+      "title": "Así",
+      "composerName": "María Grever"
+    },
+    {
+      "title": "Sobre las olas",
+      "composerName": "Juventino Rosas"
+    },
+    {
+      "title": "Morir por tu amor",
+      "composerName": "Jesús García"
+    },
+    {
+      "title": "Dios nunca muere",
+      "composerName": "Macedonio Alcalá"
+    },
+    {
+      "title": "Alejandra",
+      "composerName": "Enrique Mora"
+    },
+    {
+      "title": "Un mundo raro",
+      "composerName": "J.A. Jiménez"
+    },
+    {
+      "title": "Amanecí en tus brazos",
+      "composerName": "J.A. Jiménez"
+    },
+    {
+      "title": "México en la piel",
+      "composerName": "Jose Manuel Espinoza Fernandez"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_casademexico_es",
+      "url": "https://www.casademexico.es/musica/ecos-musicales-de-mexico-ensamble-allegro-tocando-la-historia",
+      "checkedAt": "2026-09-21"
+    }
+  ],
+  "primarySourceId": "src_casademexico_es",
+  "lastVerifiedAt": "2026-09-21"
+}
