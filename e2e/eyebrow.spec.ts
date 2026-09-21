@@ -26,6 +26,11 @@ test.describe('eyebrow de sección y retorno', () => {
     const about = page.locator('.section-intro .eyebrow');
     await expect(about).toHaveText('Acerca de');
     expect(await about.evaluate((element) => element.tagName)).toBe('P');
+
+    await page.goto('/contacto/');
+    const contact = page.locator('.section-intro .eyebrow');
+    await expect(contact).toHaveText('Contacto');
+    expect(await contact.evaluate((element) => element.tagName)).toBe('P');
   });
 
   test('la ficha de evento vuelve a la agenda', async ({ page }) => {
@@ -58,6 +63,7 @@ test.describe('eyebrow de sección y retorno', () => {
       { path: '/', selector: '.page-hero--agenda .eyebrow' },
       { path: '/lugares/', selector: '.page-hero--venues .eyebrow' },
       { path: '/acerca-de/', selector: '.section-intro .eyebrow' },
+      { path: '/contacto/', selector: '.section-intro .eyebrow' },
       { path: '/eventos/trilogia-andaluza/', selector: '.page-hero--event .eyebrow' },
       { path: '/eventos/concierto-de-mineko-kojima/', selector: '.page-hero--event .eyebrow' },
       {
@@ -93,6 +99,7 @@ test.describe('eyebrow de sección y retorno', () => {
       '/',
       '/lugares/',
       '/acerca-de/',
+      '/contacto/',
       '/eventos/excelentia-noches-en-los-jardines-de-espana-y-concierto-de-aranjuez/',
       '/lugares/basilica-pontificia-de-san-miguel/',
     ];

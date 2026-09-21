@@ -4,6 +4,7 @@ const pages = [
   { path: '/', variant: 'agenda', hero: '.page-hero--agenda', kind: 'index' },
   { path: '/lugares/', variant: 'venues', hero: '.page-hero--venues', kind: 'index' },
   { path: '/acerca-de/', variant: 'about', hero: '.section-intro', kind: 'index' },
+  { path: '/contacto/', variant: 'contact', hero: '.section-intro', kind: 'index' },
   {
     path: '/eventos/excelentia-noches-en-los-jardines-de-espana-y-concierto-de-aranjuez/',
     variant: 'event',
@@ -88,7 +89,9 @@ for (const viewport of viewports) {
           expect(layout.motifArea).toBe(0);
         } else {
           const minimumVisibleFraction =
-            pageCase.kind === 'index' && pageCase.variant !== 'about' ? .9 : .95;
+            pageCase.kind === 'index' && !['about', 'contact'].includes(pageCase.variant)
+              ? .9
+              : .95;
           expect(layout.motifVisibleFraction).toBeGreaterThanOrEqual(minimumVisibleFraction);
         }
         if (layout.kind === 'index') {
