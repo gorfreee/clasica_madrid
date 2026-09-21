@@ -1,5 +1,5 @@
 import { isTechnicalClassificationFailure } from './classification/types.ts';
-import { hasUnresolvedComposerExtraction } from './classification/ai-metadata.ts';
+import { unresolvedComposerLikeMentions } from './classification/ai-metadata.ts';
 import type { ObservedFacts } from './observed.ts';
 import type { IngestEventDecision } from './report.ts';
 
@@ -149,21 +149,33 @@ function isUnresolvedTaxonomy(decision: IngestEventDecision): boolean {
   );
 }
 
-export function decisionHasUnresolvedComposers(decision: IngestEventDecision): boolean {
-  if (!decision.publishable || !decision.candidateGenerated) return false;
+/**
+ * Explicit composer-like mentions this observation still left unresolved.
+ *
+ * Measures this run's extraction, not the reconciled Candidate: historical
+ * catalog names can both hide a real miss and flag a false positive when the
+ * current programme kept a shorter spelling.
+ */
+export function unresolvedComposerMentionsForDecision(decision: IngestEventDecision): string[] {
+  if (!decision.publishable || !decision.candidateGenerated) return [];
   const facts = observedFactsForComposerHealth(decision);
-  return facts ? hasUnresolvedComposerExtraction(facts) : false;
+  if (!facts?.programText) return [];
+  return unresolvedComposerLikeMentions(facts.programText, facts);
+}
+
+export function decisionHasUnresolvedComposers(decision: IngestEventDecision): boolean {
+  return unresolvedComposerMentionsForDecision(decision).length > 0;
 }
 
 function observedFactsForComposerHealth(decision: IngestEventDecision): ObservedFacts | undefined {
   const normalized = decision.normalized;
   if (!normalized?.programText) return undefined;
   return {
-    title: decision.title,
+    title: normalized.title || decision.title,
     programText: normalized.programText,
-    composers: decision.candidate?.composers ?? normalized.composers,
-    works: decision.candidate?.works ?? normalized.works,
-    performers: decision.candidate?.performers ?? normalized.performers,
+    composers: normalized.composers,
+    works: normalized.works,
+    performers: normalized.performers,
   };
 }
 
