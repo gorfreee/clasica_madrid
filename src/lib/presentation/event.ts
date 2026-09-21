@@ -53,6 +53,14 @@ export type EventSourceModel = {
   isPrimary: boolean;
 };
 
+/** Classification shown in «Sobre el concierto», already filtered and ordered. */
+export type ConcertProfileItem = {
+  label: string;
+  value: string;
+  /** Programación stays available, with less visual weight than the other facts. */
+  quiet: boolean;
+};
+
 export type EventPageModel = {
   title: string;
   documentTitle: string;
@@ -77,6 +85,7 @@ export type EventPageModel = {
   eras: { id: string; label: string }[];
   kind: { id: string; label: string };
   access: { id: string; label: string };
+  concertProfile: ConcertProfileItem[];
   occurrences: EventOccurrenceModel[];
   featuredOccurrence: EventOccurrenceModel | null;
   sources: EventSourceModel[];
@@ -136,6 +145,11 @@ export function toEventPageModel(resolved: ResolvedEvent, clock: Clock = systemC
     checkedAt: citation.checkedAt,
     isPrimary: citation.isPrimary,
   }));
+  const organizerNames = organizers.map((organizer) => organizer.name);
+  const formats = event.formats.map((id) => ({ id, label: formatLabels[id] }));
+  const eras = event.eras.map((id) => ({ id, label: eraLabels[id] }));
+  const kind = { id: event.kind, label: kindLabels[event.kind] };
+  const access = { id: event.access, label: accessLabels[event.access] };
   return {
     title: event.title,
     documentTitle: eventDocumentTitle(event.title, rootVenue.name),
@@ -156,7 +170,7 @@ export function toEventPageModel(resolved: ResolvedEvent, clock: Clock = systemC
     showMunicipality,
     seriesName: series?.name ?? null,
     seriesKind: series ? seriesKindLabels[series.kind] : null,
-    organizers: organizers.map((organizer) => organizer.name),
+    organizers: organizerNames,
     performers: event.performers.map((performer) => ({
       name: performer.name,
       role: performer.role ? performerRoleLabels[performer.role] : undefined,
@@ -166,10 +180,11 @@ export function toEventPageModel(resolved: ResolvedEvent, clock: Clock = systemC
       title: work.title,
       composerName: work.composerName,
     })),
-    formats: event.formats.map((id) => ({ id, label: formatLabels[id] })),
-    eras: event.eras.map((id) => ({ id, label: eraLabels[id] })),
-    kind: { id: event.kind, label: kindLabels[event.kind] },
-    access: { id: event.access, label: accessLabels[event.access] },
+    formats,
+    eras,
+    kind,
+    access,
+    concertProfile: buildConcertProfile({ access, formats, eras, organizers: organizerNames, kind }),
     occurrences,
     featuredOccurrence: featuredCanonical
       ? occurrences.find((occurrence) => occurrence.id === featuredCanonical.id) ?? null
@@ -179,6 +194,38 @@ export function toEventPageModel(resolved: ResolvedEvent, clock: Clock = systemC
     lastVerifiedAt: event.lastVerifiedAt,
     jsonLd: buildMusicEventJsonLd(resolved),
   };
+}
+
+function buildConcertProfile(input: {
+  access: EventPageModel['access'];
+  formats: EventPageModel['formats'];
+  eras: EventPageModel['eras'];
+  organizers: string[];
+  kind: EventPageModel['kind'];
+}): ConcertProfileItem[] {
+  const items: ConcertProfileItem[] = [];
+  if (input.access.id !== 'unknown') {
+    items.push({ label: 'Acceso', value: input.access.label, quiet: false });
+  }
+  if (input.formats.length > 0) {
+    items.push({
+      label: 'Formato',
+      value: input.formats.map((item) => item.label).join(', '),
+      quiet: false,
+    });
+  }
+  if (input.eras.length > 0) {
+    items.push({
+      label: 'Época',
+      value: input.eras.map((item) => item.label).join(', '),
+      quiet: false,
+    });
+  }
+  if (input.organizers.length > 0) {
+    items.push({ label: 'Organiza', value: input.organizers.join(', '), quiet: false });
+  }
+  items.push({ label: 'Programación', value: input.kind.label, quiet: true });
+  return items;
 }
 
 function toOccurrenceModel(occurrence: Occurrence): EventOccurrenceModel {

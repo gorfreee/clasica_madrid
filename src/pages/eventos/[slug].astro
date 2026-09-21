@@ -71,13 +71,8 @@ const share = buildEventShare({
           </>
         )}
       </div>
-      <div class="event-facts__access">
-        <dt>Acceso</dt>
-        <dd>{model.access.label}</dd>
-      </div>
     </dl>
 
-    {model.isPast && <p class="past-notice">Este evento ya ha tenido lugar. Conservamos la ficha como parte del archivo</p>}
     <div class="event-actions">
       {
         model.sourceAction && (
@@ -115,17 +110,17 @@ const share = buildEventShare({
     </section>
 
     {
-      model.performers.length > 0 && (
-        <section class="detail-section" aria-labelledby="interpretes-titulo">
-          <div class="section-heading"><h2 id="interpretes-titulo">Intérpretes</h2></div>
-          <ul class="editorial-list performer-list">
-            {model.performers.map((performer) => (
-              <li>
-                <span>{performer.name}</span>
-                {performer.role && <small>{performer.role}</small>}
-              </li>
+      model.concertProfile.length > 0 && (
+        <section class="detail-section" aria-labelledby="datos-titulo">
+          <div class="section-heading"><h2 id="datos-titulo">Sobre el concierto</h2></div>
+          <dl class="concert-profile">
+            {model.concertProfile.map((item) => (
+              <div class:list={['concert-profile__row', { 'concert-profile__row--quiet': item.quiet }]}>
+                <dt>{item.label}</dt>
+                <dd>{item.value}</dd>
+              </div>
             ))}
-          </ul>
+          </dl>
         </section>
       )
     }
@@ -144,10 +139,26 @@ const share = buildEventShare({
     }
 
     {
+      model.performers.length > 0 && (
+        <section class="detail-section detail-section--supporting" aria-labelledby="interpretes-titulo">
+          <div class="section-heading"><h2 id="interpretes-titulo">Intérpretes</h2></div>
+          <ul class="editorial-list editorial-list--supporting">
+            {model.performers.map((performer) => (
+              <li>
+                <span>{performer.name}</span>
+                {performer.role && <small>{performer.role}</small>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    {
       model.works.length > 0 && (
-        <section class="detail-section programme" aria-labelledby="obras-titulo">
+        <section class="detail-section detail-section--supporting programme" aria-labelledby="obras-titulo">
           <div class="section-heading"><h2 id="obras-titulo">Programa</h2></div>
-          <ol class="programme-list">
+          <ol class="programme-list programme-list--supporting">
             {model.works.map((work) => (
               <li>
                 <span>{work.title}</span>
@@ -158,16 +169,6 @@ const share = buildEventShare({
         </section>
       )
     }
-
-    <section class="detail-section detail-meta" aria-labelledby="datos-titulo">
-      <div class="section-heading"><h2 id="datos-titulo">Sobre el concierto</h2></div>
-      <dl class="fact-list fact-list--compact">
-        <div><dt>Programación</dt><dd>{model.kind.label}</dd></div>
-        {model.formats.length > 0 && <div><dt>Formato</dt><dd>{model.formats.map((item) => item.label).join(', ')}</dd></div>}
-        {model.eras.length > 0 && <div><dt>Época</dt><dd>{model.eras.map((item) => item.label).join(', ')}</dd></div>}
-        {model.organizers.length > 0 && <div><dt>Organiza</dt><dd>{model.organizers.join(', ')}</dd></div>}
-      </dl>
-    </section>
 
     <section class="detail-section sources" aria-labelledby="fuentes-titulo">
       <div class="section-heading"><h2 id="fuentes-titulo">Fuentes</h2></div>
@@ -191,5 +192,6 @@ const share = buildEventShare({
       </ul>
       <p class="verified">Última verificación: {model.lastVerifiedAt}</p>
     </section>
+    {model.isPast && <p class="past-notice">Este evento ya ha tenido lugar. Conservamos la ficha como parte del archivo</p>}
   </article>
 </Layout>
