@@ -2,6 +2,7 @@ import {
   parseTalaDetail,
   talaArchiveUrl,
   talaEventUrl,
+  talaPerformers,
   talaProgramText,
 } from '../detail/tala-producciones.ts';
 import { parseObservedTime } from '../dates.ts';
@@ -117,6 +118,7 @@ function parseCard(
   }
 
   const programText = talaProgramText(description);
+  const performers = talaPerformers(title, description);
   return {
     sourceId: ctx.source.id,
     sourceUrl,
@@ -129,9 +131,10 @@ function parseCard(
       categoryText,
       seriesText: 'Salón del Ateneo',
       venueText: 'Ateneo de Madrid',
-      ...(programText ? { programText } : {}),
       occurrences: [],
       ...emptyObservedLists(),
+      ...(programText ? { programText } : {}),
+      ...(performers.length > 0 ? { performers } : {}),
     },
   };
 }

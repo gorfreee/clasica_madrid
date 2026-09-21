@@ -91,6 +91,20 @@ describe('enriquecimiento determinista de compositores conocidos', () => {
     ]);
   });
 
+  it('en Obras de X, Y y Z conserva apellidos desconocidos sin inventar el nombre completo', () => {
+    const enriched = enrichNormalizedEvent(
+      event({
+        title: 'Cuarteto Iberia – Música en tránsito',
+        programText: 'Obras de Boccherini, Mozart y Glass.',
+      }),
+    );
+    expect(enriched.composers.map((item) => item.name)).toEqual([
+      'Luigi Boccherini',
+      'Wolfgang Amadeus Mozart',
+      'Glass',
+    ]);
+  });
+
   it('no añade un intérprete aunque su nombre aparezca en el programText y exista en el knowledge', () => {
     const enriched = enrichNormalizedEvent(
       event({

@@ -1,6 +1,10 @@
 import { parseObservedTime, parseSpanishCalendarDate } from '../dates.ts';
 import { collapseWhitespace, decodeHtmlEntities, stripTags } from '../html.ts';
-import type { ObservedFactPatch } from '../observed.ts';
+import {
+  isObviousNonPerformer,
+  looksLikeEnsembleName,
+} from '../observed-cleanup.ts';
+import { normalizePersonList, type ObservedFactPatch, type ObservedPerson } from '../observed.ts';
 import { inferScheduleFromText } from './schedule.ts';
 import type { RawEvent } from '../types.ts';
 
@@ -82,6 +86,7 @@ export function parseTalaDetail(event: RawEvent, html: string): ObservedFactPatc
 
   const schedule = inferScheduleFromText(`${title}\n${description}`);
   const programText = talaProgramText(description);
+  const performers = talaPerformers(title, description);
 
   return {
     description,
@@ -89,6 +94,7 @@ export function parseTalaDetail(event: RawEvent, html: string): ObservedFactPatc
     seriesText: 'Salón del Ateneo',
     venueText: 'Ateneo de Madrid',
     ...(programText ? { programText } : {}),
+    ...(performers.length > 0 ? { performers } : {}),
     occurrences: [{ raw: `${dateText} ${timeText}`, date, time }],
     ...(schedule.eventStatus ? { eventStatus: schedule.eventStatus } : {}),
   };
@@ -106,6 +112,130 @@ export function talaProgramText(description: string): string | undefined {
   if (!match?.[1]) return undefined;
   const repertoire = collapseWhitespace(match[1].replace(/^Obras?\s+de\s+/i, ''));
   return repertoire ? `Obras de ${repertoire}` : undefined;
+}
+
+/**
+ * Conservative TALA cast: the official cards name the act before an en-dash
+ * and repeat it in `X presenta…`. Title-left is never enough on its own.
+ */
+export function talaPerformers(title: string, description: string): ObservedPerson[] {
+  const headline = talaHeadline(title);
+  const subject = talaPresentaSubject(description);
+  if (!headline || !subject) return [];
+
+  const people = talaPersonPair(headline);
+  if (people) {
+    if (!people.every((name) => containsTalaName(subject, name))) return [];
+    return normalizePersonList(people.flatMap((name) => (
+      personWithSurvivingRole(name, talaPersonRole(subject, name))
+    )));
+  }
+
+  if (!containsTalaName(subject, headline)) return [];
+  if (isObviousNonPerformer(headline)) return [];
+  return personWithSurvivingRole(headline, talaEnsembleRole(subject, headline));
+}
+
+function personWithSurvivingRole(name: string, roleText: string | undefined): ObservedPerson[] {
+  const withRole = normalizePersonList([{ name, ...(roleText ? { roleText } : {}) }]);
+  if (withRole.length > 0) return withRole;
+  return normalizePersonList([{ name }]);
+}
+
+const TALA_HEADLINE_QUOTES = /^(.+?)\s+[–—]\s+[‘'«“"](.+)$/u;
+const TALA_HEADLINE_HYPHEN = /^(.+?)\s+-\s+[‘'«“"](.+)$/u;
+const TALA_EDITORIAL_HEADLINE = /^(?:abono|ciclo|temporada|festival|concierto)\b/i;
+const TALA_PERSON_ROLE = String.raw`[\p{L}][\p{L}'’-]*ista`;
+const TALA_FORMATION =
+  /\b(?:cuarteto|quinteto|tr[ií]o|ensemble|ensamble|quartet|quintet)\b/iu;
+const TALA_NATIONALITY_ONLY =
+  /^(?:italian[oa]|brit[aá]nic[oa]|espa[ñn]ol[ae]?|franc[eé]s[ae]?|aleman[ae]?)$/iu;
+
+function talaHeadline(title: string): string | undefined {
+  const cleaned = collapseWhitespace(title);
+  const match = TALA_HEADLINE_QUOTES.exec(cleaned) ?? TALA_HEADLINE_HYPHEN.exec(cleaned);
+  if (!match?.[1] || !match[2] || !/[’'»”"]/.test(match[2])) return undefined;
+  const headline = collapseWhitespace(match[1]);
+  if (!headline || TALA_EDITORIAL_HEADLINE.test(headline)) return undefined;
+  return headline;
+}
+
+function talaPresentaSubject(description: string): string | undefined {
+  const cleaned = collapseWhitespace(description);
+  const match = /^(.+?)\s+presentan?\b/iu.exec(cleaned);
+  const subject = collapseWhitespace(match?.[1] ?? '');
+  return subject || undefined;
+}
+
+function talaPersonPair(headline: string): string[] | undefined {
+  const parts = headline.split(/\s+y\s+/iu).map((part) => collapseWhitespace(part)).filter(Boolean);
+  if (parts.length !== 2) return undefined;
+  if (!parts.every((name) => looksLikeTalaPersonName(name))) return undefined;
+  return parts;
+}
+
+function looksLikeTalaPersonName(name: string): boolean {
+  if (!name || looksLikeEnsembleName(name) || isObviousNonPerformer(name)) return false;
+  const words = name.split(/\s+/).filter(Boolean);
+  if (words.length < 2 || words.length > 4) return false;
+  return words.every((word, index) => {
+    if (/^(?:de|del|van|von|di|da)$/i.test(word) && index > 0) return true;
+    return /^\p{Lu}[\p{L}'’.-]*$/u.test(word);
+  });
+}
+
+function talaPersonRole(subject: string, name: string): string | undefined {
+  const pattern = new RegExp(
+    String.raw`\b(?:el|la)\s+(${TALA_PERSON_ROLE})\s+${escapeTalaName(name)}\b`,
+    'iu',
+  );
+  const role = collapseWhitespace(pattern.exec(subject)?.[1] ?? '');
+  return role || undefined;
+}
+
+function talaEnsembleRole(subject: string, headline: string): string | undefined {
+  const match = talaNameMatch(subject, headline);
+  if (!match) return undefined;
+  const before = collapseWhitespace(subject.slice(0, match.index));
+  const prefix = /^(?:el|la|los|las)\s+(.+)$/iu.exec(before);
+  const descriptor = collapseWhitespace(prefix?.[1] ?? '');
+  if (!descriptor || TALA_NATIONALITY_ONLY.test(descriptor)) return undefined;
+  if (!TALA_FORMATION.test(descriptor)) return undefined;
+  return descriptor;
+}
+
+function containsTalaName(haystack: string, needle: string): boolean {
+  return talaNameMatch(haystack, needle) !== undefined;
+}
+
+function talaNameMatch(haystack: string, needle: string): { index: number } | undefined {
+  const foldedHaystack = foldTala(haystack);
+  const foldedNeedle = foldTala(needle);
+  if (!foldedNeedle) return undefined;
+  const folded = new RegExp(
+    `(^|[^\\p{L}\\p{N}])${escapeTalaName(foldedNeedle)}(?=$|[^\\p{L}\\p{N}])`,
+    'u',
+  ).exec(foldedHaystack);
+  if (!folded) return undefined;
+  const original = new RegExp(
+    `(^|[^\\p{L}\\p{N}])${escapeTalaName(needle)}(?=$|[^\\p{L}\\p{N}])`,
+    'iu',
+  ).exec(haystack);
+  const index = original
+    ? original.index + (original[1] ? original[1].length : 0)
+    : folded.index + (folded[1] ? folded[1].length : 0);
+  return { index };
+}
+
+function foldTala(value: string): string {
+  return collapseWhitespace(value)
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase();
+}
+
+function escapeTalaName(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function dynamicFields(html: string): string[] {

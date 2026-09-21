@@ -1,4 +1,6 @@
 import { isTechnicalClassificationFailure } from './classification/types.ts';
+import { hasUnresolvedComposerExtraction } from './classification/ai-metadata.ts';
+import type { ObservedFacts } from './observed.ts';
 import type { IngestEventDecision } from './report.ts';
 
 /**
@@ -131,6 +133,7 @@ export function attentionKinds(decision: IngestEventDecision): string[] {
   if (decision.batchDuplicate) kinds.push('batch-duplicate');
   if (decision.hydration.status === 'failed') kinds.push('hydration-failed');
   if (isUnresolvedTaxonomy(decision)) kinds.push('unresolved-taxonomy');
+  if (decisionHasUnresolvedComposers(decision)) kinds.push('unresolved-composers');
   const aiKind = aiAttentionKind(decision);
   if (aiKind) kinds.push(aiKind);
   return kinds;
@@ -144,6 +147,24 @@ function isUnresolvedTaxonomy(decision: IngestEventDecision): boolean {
       snapshot &&
       (snapshot.eras.length === 0 || snapshot.formats.length === 0),
   );
+}
+
+export function decisionHasUnresolvedComposers(decision: IngestEventDecision): boolean {
+  if (!decision.publishable || !decision.candidateGenerated) return false;
+  const facts = observedFactsForComposerHealth(decision);
+  return facts ? hasUnresolvedComposerExtraction(facts) : false;
+}
+
+function observedFactsForComposerHealth(decision: IngestEventDecision): ObservedFacts | undefined {
+  const normalized = decision.normalized;
+  if (!normalized?.programText) return undefined;
+  return {
+    title: decision.title,
+    programText: normalized.programText,
+    composers: decision.candidate?.composers ?? normalized.composers,
+    works: decision.candidate?.works ?? normalized.works,
+    performers: decision.candidate?.performers ?? normalized.performers,
+  };
 }
 
 function aiAttentionKind(decision: IngestEventDecision): string | undefined {

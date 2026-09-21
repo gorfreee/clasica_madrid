@@ -330,6 +330,56 @@ describe('funnel e invariantes', () => {
     ]);
   });
 
+  it('describe unresolved-composers cuando el programa deja menciones atribuidas sin resolver', () => {
+    const items = attentionItems(
+      report({
+        health: 'degraded',
+        autoMergeEligible: true,
+        healthReasons: ['unresolved-composers'],
+        events: [
+          decision({
+            title: 'Quinteto SenArts',
+            publishable: true,
+            candidateGenerated: true,
+            identity: { action: 'new' },
+            eligibility: { value: 'include', method: 'knowledge', ruleId: 'known-classical-composer', evidence: [] },
+            normalized: {
+              title: 'Quinteto SenArts',
+              programText: 'Obras de Ravel, Migó y Dvořák.',
+              performers: [],
+              composers: [{ name: 'Maurice Ravel' }, { name: 'Antonín Dvořák' }],
+              works: [],
+              occurrences: [],
+            },
+            candidate: {
+              id: 'evt_x',
+              slug: 'x',
+              status: 'scheduled',
+              venueId: 'ven_x',
+              performers: [],
+              composers: [{ name: 'Maurice Ravel' }, { name: 'Antonín Dvořák' }],
+              works: [],
+              eras: ['romantic'],
+              formats: ['chamber'],
+              kind: 'established',
+              access: 'unknown',
+              occurrences: [],
+            },
+          }),
+        ],
+        possiblyMissing: [],
+      }),
+    );
+    expect(items).toEqual([
+      expect.objectContaining({
+        title: 'Quinteto SenArts',
+        problems: 'unresolved-composers',
+        reason: 'Migó',
+        outcome: 'created',
+      }),
+    ]);
+  });
+
   it('el Markdown humano contiene las secciones y datos semánticos', () => {
     const markdown = formatAutomationSummary(built, 'https://example.com/run');
     expect(markdown).toContain('### Resumen');

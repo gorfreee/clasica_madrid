@@ -22,6 +22,7 @@ import {
   type HarvestObservation,
 } from './reconcile.ts';
 import { attachFailureContext, type IngestObservability } from './observability.ts';
+import { decisionHasUnresolvedComposers } from './outcome.ts';
 import { buildEventDecision, type IngestEventDecision } from './report.ts';
 import { matchVenue } from './venues.ts';
 import type {
@@ -507,6 +508,7 @@ async function ingestPreparedEvents(
         (snapshot.eras.length === 0 || snapshot.formats.length === 0),
     );
   }).length;
+  const unresolvedComposers = decisions.filter((item) => decisionHasUnresolvedComposers(item)).length;
   const sourcesAttempted = harvest ? harvest.attempted.map((source) => source.id) : sources.map((source) => source.id);
   const health = evaluateIngestHealth({
     batchOk: apply.report.ok,
@@ -518,6 +520,7 @@ async function ingestPreparedEvents(
     possiblyMissing: possiblyMissing.length,
     hydrationFailed: hydration.failed,
     unresolvedTaxonomy,
+    unresolvedComposers,
     ai: aiUsage,
     requireSourcesSucceeded: harvest ? true : sources.length > 0,
   });

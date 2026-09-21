@@ -9,6 +9,7 @@ import {
   parseTalaDetail,
   talaArchiveUrl,
   talaEventUrl,
+  talaPerformers,
 } from '../src/ingestion/detail/tala-producciones.ts';
 import { emptyCatalog, type Catalog } from '../src/lib/domain/catalog.ts';
 import { runIngest } from '../src/ingestion/pipeline.ts';
@@ -77,8 +78,19 @@ describe('TALA Producciones listing and detail', () => {
         title: "Kebyart Quartet – ‘Punto di fuga’",
         categoryText: 'Ciclo de música de cámara',
         programText: 'Obras de Rameau, Franck, Bach, Schubert y Ligeti',
+        performers: [{ name: 'Kebyart Quartet' }],
       },
     });
+
+    const apollo = events.find((event) => event.externalId === '1242')!;
+    expect(apollo.observed.performers).toEqual([
+      { name: 'APOLLO5' },
+    ]);
+    const cordero = events.find((event) => event.externalId === '1250')!;
+    expect(cordero.observed.performers).toEqual([
+      { name: 'Cristina Cordero', roleText: 'violista' },
+      { name: 'Juan Barahona', roleText: 'pianista' },
+    ]);
   });
 
   it('hydrates an official ficha without inventing access evidence from a ticket CTA', async () => {
@@ -92,6 +104,7 @@ describe('TALA Producciones listing and detail', () => {
       seriesText: 'Salón del Ateneo',
       venueText: 'Ateneo de Madrid',
       programText: 'Obras de Rameau, Franck, Bach, Schubert y Ligeti',
+      performers: [{ name: 'Kebyart Quartet' }],
       occurrences: [{ date: '2026-11-28', time: '19:30' }],
     });
     const classification = classify({ ...kebyart.observed, ...patch });
@@ -129,6 +142,61 @@ describe('TALA Producciones listing and detail', () => {
     expect(talaArchiveUrl('https://evil.example/salon-del-ateneo/')).toBeUndefined();
     expect(talaEventUrl('https://www.tala-producciones.es@evil.example/salon-del-ateneo/test/')).toBeUndefined();
     expect(talaEventUrl('https://www.tala-producciones.es/salon-del-ateneo/')).toBeUndefined();
+  });
+});
+
+describe('TALA Producciones performers', () => {
+  it('extrae ensembles y personas con rol explícito contrastando título y ficha', () => {
+    expect(talaPerformers(
+      "APOLLO5 – ‘A Day in Paradise’",
+      "El quinteto vocal británico APOLLO5 presenta 'A Day in Paradise'. Obras de Monteverdi.",
+    )).toEqual([{ name: 'APOLLO5' }]);
+
+    expect(talaPerformers(
+      "Kebyart Quartet – ‘Punto di fuga’",
+      "El cuarteto de saxofones Kebyart Quartet presenta 'Punto di Fuga'. Obras de Bach.",
+    )).toEqual([{ name: 'Kebyart Quartet' }]);
+
+    expect(talaPerformers(
+      "Cristina Cordero y Juan Barahona – ‘Con B de Viola’",
+      "La violista Cristina Cordero y el pianista Juan Barahona presentan 'Con B de Viola'. Obras de Bach.",
+    )).toEqual([
+      { name: 'Cristina Cordero', roleText: 'violista' },
+      { name: 'Juan Barahona', roleText: 'pianista' },
+    ]);
+
+    expect(talaPerformers(
+      "Arnau Tomás y Kennedy Moretti – ‘Las sonatas de gamba’",
+      "El violonchelista Arnau Tomás y el clavecinista Kennedy Moretti presentan 'Las sonatas de gamba'. Obras de J.S. Bach.",
+    )).toEqual([
+      { name: 'Arnau Tomás', roleText: 'violonchelista' },
+      { name: 'Kennedy Moretti', roleText: 'clavecinista' },
+    ]);
+
+    expect(talaPerformers(
+      "KamBrass Quintet – ‘Denominación de origen’",
+      "El quinteto de metales KamBrass Quintet presenta 'Denominación de origen'. Obras de Granados.",
+    )).toEqual([{ name: 'KamBrass Quintet' }]);
+
+    expect(talaPerformers(
+      "Sentieri Selvaggi – ‘Pasado y presente’",
+      "El ensemble italiano Sentieri Selvaggi presenta 'Pasado y presente'. Obras de Debussy.",
+    )).toEqual([{ name: 'Sentieri Selvaggi', roleText: 'ensemble italiano' }]);
+  });
+
+  it('no convierte un título editorial arbitrario en performer', () => {
+    expect(talaPerformers(
+      'Ciclo de cámara – ‘Noche de otoño’',
+      "El quinteto vocal británico APOLLO5 presenta 'A Day in Paradise'.",
+    )).toEqual([]);
+    expect(talaPerformers(
+      'Noche de otoño en el Ateneo',
+      "El quinteto vocal británico APOLLO5 presenta 'A Day in Paradise'.",
+    )).toEqual([]);
+    expect(talaPerformers(
+      "APOLLO5 – ‘A Day in Paradise’",
+      "Concierto de cámara en el Salón del Ateneo. Obras de Monteverdi.",
+    )).toEqual([]);
   });
 });
 
@@ -174,6 +242,20 @@ describe('TALA Producciones pipeline safety', () => {
     expect(first.candidates.every((candidate) => candidate.event.venueId === 'ven_ateneo_madrid')).toBe(true);
     expect(first.candidates.every((candidate) => candidate.event.primarySourceId === source.catalogSourceId)).toBe(true);
     expect(first.candidates.every((candidate) => candidate.event.access === 'unknown')).toBe(true);
+    expect(first.candidates.every((candidate) => candidate.event.performers.length > 0)).toBe(true);
+    expect(first.candidates.map((candidate) => candidate.event.performers.map((item) => item.name))).toEqual([
+      ['APOLLO5'],
+      ['Cristina Cordero', 'Juan Barahona'],
+      ['Kebyart Quartet'],
+    ]);
+    expect(first.decisions.map((decision) => decision.normalized?.performers)).toEqual([
+      [{ name: 'APOLLO5' }],
+      [
+        { name: 'Cristina Cordero', roleText: 'violista' },
+        { name: 'Juan Barahona', roleText: 'pianista' },
+      ],
+      [{ name: 'Kebyart Quartet' }],
+    ]);
 
     const catalog = mergeCandidateBatch(emptyCatalog(), first.candidates).catalog;
     const second = await run(catalog);
