@@ -30,7 +30,7 @@ const fallbackWhatsapp = whatsappShareHref(text, fallbackUrl);
   data-share-text={text}
   data-share-path={path}
 >
-  <summary class="share-action__trigger">
+  <summary class="share-action__trigger" role="button">
     <span class="share-action__icon" aria-hidden="true">
       <svg viewBox="0 0 24 24" focusable="false">
         <circle cx="6" cy="12" r="2.15"></circle>
@@ -83,6 +83,7 @@ const fallbackWhatsapp = whatsappShareHref(text, fallbackUrl);
     max-width: 100%;
   }
 
+  /* role="button" keeps the summary exposed as a button when it is a flex box. */
   .share-action__trigger {
     display: flex;
     align-items: flex-start;

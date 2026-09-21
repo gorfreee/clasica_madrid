@@ -127,6 +127,10 @@ function alignShareMenu(root: HTMLElement): void {
   if (!menu || !trigger) return;
 
   menu.classList.remove('is-align-end', 'is-align-above');
+  menu.style.position = '';
+  menu.style.top = '';
+  menu.style.right = '';
+  menu.style.bottom = '';
   menu.style.left = '';
   menu.style.maxWidth = '';
 
@@ -143,10 +147,66 @@ function alignShareMenu(root: HTMLElement): void {
     triggerBottom: triggerRect.bottom,
   });
 
+  applyShareMenuPlan(menu, plan);
+  // The venue ficha sits in a hero with overflow:clip. An absolute menu that
+  // crosses that edge is painted and hit-tested as if it were not there.
+  if (isClippedByAncestor(menu)) pinShareMenu(menu, trigger, plan);
+}
+
+function applyShareMenuPlan(menu: HTMLElement, plan: ReturnType<typeof planShareMenuPlacement>): void {
   menu.classList.toggle('is-align-end', plan.alignEnd);
   menu.classList.toggle('is-align-above', plan.alignAbove);
   if (plan.offsetLeft !== null) menu.style.left = `${plan.offsetLeft}px`;
   if (plan.maxWidth !== null) menu.style.maxWidth = `${plan.maxWidth}px`;
+}
+
+function isClippedByAncestor(element: HTMLElement): boolean {
+  const rect = element.getBoundingClientRect();
+  let parent = element.parentElement;
+  while (parent) {
+    const { overflowX, overflowY } = getComputedStyle(parent);
+    if (clips(overflowX) || clips(overflowY)) {
+      const bounds = parent.getBoundingClientRect();
+      if (
+        rect.top < bounds.top - 1 ||
+        rect.bottom > bounds.bottom + 1 ||
+        rect.left < bounds.left - 1 ||
+        rect.right > bounds.right + 1
+      ) {
+        return true;
+      }
+    }
+    parent = parent.parentElement;
+  }
+  return false;
+}
+
+function clips(overflow: string): boolean {
+  return overflow === 'hidden' || overflow === 'clip' || overflow === 'scroll' || overflow === 'auto';
+}
+
+function pinShareMenu(
+  menu: HTMLElement,
+  trigger: HTMLElement,
+  plan: ReturnType<typeof planShareMenuPlacement>,
+): void {
+  const triggerRect = trigger.getBoundingClientRect();
+  const menuRect = menu.getBoundingClientRect();
+  const margin = 8;
+  const width = menuRect.width;
+  const height = menuRect.height;
+  let left = plan.alignEnd ? triggerRect.right - width : triggerRect.left;
+  if (plan.offsetLeft !== null) left = triggerRect.left + plan.offsetLeft;
+  let top = plan.alignAbove ? triggerRect.top - height - 3 : triggerRect.bottom + 3;
+  left = Math.min(Math.max(margin, left), Math.max(margin, window.innerWidth - width - margin));
+  top = Math.min(Math.max(margin, top), Math.max(margin, window.innerHeight - height - margin));
+  menu.classList.remove('is-align-end', 'is-align-above');
+  menu.style.position = 'fixed';
+  menu.style.top = `${top}px`;
+  menu.style.left = `${left}px`;
+  menu.style.right = 'auto';
+  menu.style.bottom = 'auto';
+  menu.style.maxWidth = `${plan.maxWidth ?? Math.max(0, window.innerWidth - margin * 2)}px`;
 }
 
 function setFeedback(root: HTMLElement, message: string): void {
