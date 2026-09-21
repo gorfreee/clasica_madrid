@@ -248,9 +248,10 @@ test.describe('pie de página', () => {
     await page.goto('/');
     await expect(visibleOccurrences(page).first()).toBeVisible();
 
-    const footerLogo = page
-      .locator('footer')
-      .getByRole('link', { name: 'Clásica Madrid, volver al comienzo' });
+    const footer = page.locator('footer');
+    await expect(footer.getByRole('link', { name: 'Contacto' })).toHaveCount(0);
+
+    const footerLogo = footer.getByRole('link', { name: 'Clásica Madrid, volver al comienzo' });
     await footerLogo.scrollIntoViewIfNeeded();
     await expect(footerLogo).toHaveAttribute('href', '#top');
 
