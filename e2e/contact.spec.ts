@@ -34,7 +34,10 @@ test.describe('página de contacto', () => {
     await expect(page.getByLabel('Nombre (opcional)')).toBeVisible();
     await expect(page.getByLabel('Email', { exact: true })).toHaveAttribute('required', '');
     await expect(page.getByLabel('Motivo')).toHaveAttribute('required', '');
-    await expect(page.getByLabel('Mensaje')).toHaveAttribute('required', '');
+    await expect(page.getByRole('textbox', { name: 'Mensaje', exact: true })).toHaveAttribute(
+      'required',
+      '',
+    );
     await expect(page.locator('form[data-contact-form]')).toHaveAttribute('action', '/api/contacto');
     await expect(page.locator('form[data-contact-form]')).toHaveAttribute('method', 'post');
     await expect(page.getByRole('link', { name: 'hola@clasicamadrid.com' })).toHaveAttribute(
@@ -104,7 +107,9 @@ test.describe('página de contacto', () => {
     await page.getByLabel('Nombre (opcional)').fill('Ana');
     await page.getByLabel('Email', { exact: true }).fill('ana@example.com');
     await page.getByLabel('Motivo').selectOption('Corrección');
-    await page.getByLabel('Mensaje').fill('Hay una hora incorrecta.');
+    await page
+      .getByRole('textbox', { name: 'Mensaje', exact: true })
+      .fill('Hay una hora incorrecta.');
     const submit = page.getByRole('button', { name: 'Enviar mensaje' });
     await expect(submit).toBeEnabled();
     await submit.click();
@@ -128,7 +133,9 @@ test.describe('página de contacto', () => {
 
     await page.getByLabel('Email', { exact: true }).fill('ana@example.com');
     await page.getByLabel('Motivo').selectOption('Otro');
-    await page.getByLabel('Mensaje').fill('Mensaje de prueba.');
+    await page
+      .getByRole('textbox', { name: 'Mensaje', exact: true })
+      .fill('Mensaje de prueba.');
     const submit = page.getByRole('button', { name: 'Enviar mensaje' });
     await expect(submit).toBeEnabled();
     await submit.click();
