@@ -13,21 +13,23 @@ import { ABOUT_PATH } from '../lib/presentation/urls.ts';
     <Eyebrow label="Acerca de" />
   </header>
 
-  <section class="about-copy" aria-labelledby="about-title">
-    <h1 id="about-title">Muchas fuentes, una sola agenda</h1>
-    <div class="about-copy__text">
-      <p>
-        La información sobre conciertos está repartida entre teatros, auditorios, iglesias,
-        conservatorios, universidades, fundaciones y muchas otras entidades. Clásica Madrid nace
-        para hacerla más fácil de encontrar y consultar.
-      </p>
-      <p>
-        El objetivo es ofrecer una agenda clara y amplia, desde las grandes programaciones hasta
-        conciertos pequeños, gratuitos o menos visibles, siempre con la información presentada de
-        forma sencilla y consistente.
-      </p>
-    </div>
-  </section>
+  <div class="page-rule">
+    <section class="about-copy" aria-labelledby="about-title">
+      <h1 id="about-title">Muchas fuentes, una sola agenda</h1>
+      <div class="about-copy__text">
+        <p>
+          La información sobre conciertos está repartida entre teatros, auditorios, iglesias,
+          conservatorios, universidades, fundaciones y muchas otras entidades. Clásica Madrid nace
+          para hacerla más fácil de encontrar y consultar.
+        </p>
+        <p>
+          El objetivo es ofrecer una agenda clara y amplia, desde las grandes programaciones hasta
+          conciertos pequeños, gratuitos o menos visibles, siempre con la información presentada de
+          forma sencilla y consistente.
+        </p>
+      </div>
+    </section>
+  </div>
 </Layout>
 
 <style>
@@ -36,9 +38,7 @@ import { ABOUT_PATH } from '../lib/presentation/urls.ts';
     grid-template-columns: minmax(13rem, .55fr) minmax(0, 1fr);
     gap: 3rem;
     max-width: 58rem;
-    margin-top: 2.25rem;
     padding: 2.25rem 0 1rem;
-    border-top: 2px solid var(--ink);
   }
 
   .about-copy h1 {
@@ -68,7 +68,6 @@ import { ABOUT_PATH } from '../lib/presentation/urls.ts';
     .about-copy {
       grid-template-columns: 1fr;
       gap: 1.4rem;
-      margin-top: 1.75rem;
     }
   }
 </style>

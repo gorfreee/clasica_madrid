@@ -106,13 +106,14 @@ test.describe('eyebrow de sección y retorno', () => {
           borderTopWidth: style.borderTopWidth,
           borderTopStyle: style.borderTopStyle,
           borderTopColor: style.borderTopColor,
+          width: Math.round(box.width),
           gap: Math.round(box.top - eyebrow.getBoundingClientRect().bottom),
         };
       });
     };
 
-    const contact = await rule('/contacto/', '.contact-layout');
-    const about = await rule('/acerca-de/', '.about-copy');
+    const contact = await rule('/contacto/', '.page-rule');
+    const about = await rule('/acerca-de/', '.page-rule');
     expect(about).toEqual(contact);
   });
 

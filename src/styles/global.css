@@ -731,6 +731,11 @@ a.eyebrow:focus-visible {
 .page-label {
   padding-top: var(--hero-gutter-top);
 }
+.page-rule {
+  max-width: 67rem;
+  margin-top: 2.25rem;
+  border-top: 2px solid var(--ink);
+}
 .venue-search {
   display: flex;
   flex-wrap: wrap;
@@ -1072,6 +1077,7 @@ a.eyebrow:focus-visible {
   .agenda-item__title { font-size: 1.08rem; }
   .agenda-item__people { -webkit-line-clamp: 1; }
   .page-hero { padding-top: var(--hero-gutter-top); }
+  .page-rule { margin-top: 1.75rem; }
   .venue-search { margin-top: 1.5rem; }
   .venue-search .search-bar,
   .venue-search__count { flex: 1 1 100%; }

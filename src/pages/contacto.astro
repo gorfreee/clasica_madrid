@@ -21,7 +21,7 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
     <Eyebrow label="Contacto" />
   </header>
 
-  <div class="contact-layout">
+  <div class="page-rule contact-layout">
     <section class="contact-form-section" aria-labelledby="contact-form-title">
       <h1 id="contact-form-title">Envíanos un mensaje</h1>
 
@@ -278,9 +278,6 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
   .contact-layout {
     display: grid;
     grid-template-columns: minmax(0, 1.55fr) minmax(15rem, .65fr);
-    max-width: 67rem;
-    margin-top: 2.25rem;
-    border-top: 2px solid var(--ink);
   }
 
   .contact-form-section {
@@ -443,7 +440,6 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
   }
 
   @media (max-width: 620px) {
-    .contact-layout { margin-top: 1.75rem; }
     .contact-form { grid-template-columns: 1fr; gap: 1.15rem; }
     .contact-form__field,
     .contact-form__field:nth-of-type(4),
