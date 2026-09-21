@@ -1,0 +1,269 @@
+---
+import ExternalMark from './ExternalMark.astro';
+import { SITE_ORIGIN } from '../lib/presentation/constants.ts';
+import {
+  opensInNewTabLabel,
+  shareActionLabel,
+  shareCopyFailedLabel,
+  shareCopyLinkLabel,
+  shareWhatsappLabel,
+} from '../lib/presentation/labels.ts';
+import { canonicalShareUrl, whatsappShareHref } from '../lib/presentation/share.ts';
+
+type Props = {
+  title: string;
+  text: string;
+  path: string;
+  /** Optically align the label with a neighbouring CTA that has its own padding. */
+  align?: 'utility' | 'beside-cta';
+};
+
+const { title, text, path, align = 'utility' } = Astro.props;
+const fallbackUrl = canonicalShareUrl(SITE_ORIGIN, path);
+const fallbackWhatsapp = whatsappShareHref(text, fallbackUrl);
+---
+
+<details
+  class:list={['share-action', { 'share-action--beside-cta': align === 'beside-cta' }]}
+  data-share
+  data-share-title={title}
+  data-share-text={text}
+  data-share-path={path}
+>
+  <summary class="share-action__trigger">
+    <span class="share-action__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" focusable="false">
+        <circle cx="6" cy="12" r="2.15"></circle>
+        <circle cx="16.5" cy="6.5" r="2.15"></circle>
+        <circle cx="16.5" cy="17.5" r="2.15"></circle>
+        <path d="M8 11.15 14.4 7.7"></path>
+        <path d="M8 12.85 14.4 16.3"></path>
+      </svg>
+    </span>
+    <span class="share-action__label">{shareActionLabel}</span>
+  </summary>
+  <div class="share-action__menu" data-share-menu>
+    <a
+      class="share-action__option"
+      data-share-whatsapp
+      href={fallbackWhatsapp}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`${shareWhatsappLabel}. ${opensInNewTabLabel}`}
+    >
+      <span>{shareWhatsappLabel}</span>
+      <ExternalMark />
+    </a>
+    <button type="button" class="share-action__option" data-share-copy>
+      {shareCopyLinkLabel}
+    </button>
+    <p class="share-action__feedback" data-share-feedback role="status" aria-live="polite" aria-atomic="true"></p>
+    <input
+      class="share-action__manual"
+      data-share-manual
+      type="text"
+      readonly
+      hidden
+      spellcheck="false"
+      autocomplete="off"
+      aria-label={shareCopyFailedLabel}
+    />
+  </div>
+</details>
+
+<script>
+  import { initShareActions } from '../lib/presentation/share-client.ts';
+  initShareActions();
+</script>
+
+<style>
+  .share-action {
+    position: relative;
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  .share-action__trigger {
+    display: flex;
+    align-items: flex-start;
+    gap: .42rem;
+    width: fit-content;
+    max-width: 100%;
+    min-height: 2.75rem;
+    margin: 0;
+    padding: .18rem 0;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font-size: .94rem;
+    font-weight: 600;
+    line-height: 1.35;
+    list-style: none;
+    cursor: pointer;
+    transition: color 140ms ease;
+  }
+
+  .share-action__trigger::-webkit-details-marker {
+    display: none;
+  }
+
+  .share-action__trigger::marker {
+    content: "";
+  }
+
+  .share-action__trigger:hover,
+  .share-action__trigger:focus-visible,
+  .share-action[open] > .share-action__trigger {
+    color: var(--blue);
+  }
+
+  .share-action__trigger:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 4px;
+  }
+
+  .share-action--beside-cta .share-action__trigger {
+    padding-top: .85rem;
+  }
+
+  .share-action__icon {
+    display: block;
+    flex: 0 0 auto;
+    width: .95rem;
+    height: .95rem;
+    margin-top: .08rem;
+  }
+
+  .share-action__icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.7;
+  }
+
+  .share-action__label {
+    overflow-wrap: anywhere;
+    text-decoration-line: underline;
+    text-decoration-color: transparent;
+    text-decoration-thickness: 1px;
+    text-underline-offset: .16em;
+    transition: text-decoration-color 140ms ease;
+  }
+
+  .share-action__trigger:hover .share-action__label,
+  .share-action__trigger:focus-visible .share-action__label,
+  .share-action[open] > .share-action__trigger .share-action__label {
+    text-decoration-color: currentColor;
+  }
+
+  .share-action__menu {
+    position: absolute;
+    z-index: 5;
+    top: calc(100% + .2rem);
+    left: 0;
+    right: auto;
+    box-sizing: border-box;
+    width: max-content;
+    min-width: 11.5rem;
+    max-width: calc(100vw - 1rem);
+    margin: 0;
+    padding: .25rem 0;
+    border: 1px solid var(--line);
+    background: var(--paper-light);
+  }
+
+  .share-action__menu.is-align-end {
+    left: auto;
+    right: 0;
+  }
+
+  .share-action__menu.is-align-above {
+    top: auto;
+    bottom: calc(100% + .2rem);
+  }
+
+  .share-action__option {
+    display: flex;
+    align-items: flex-start;
+    gap: .35rem;
+    width: 100%;
+    min-height: 2.75rem;
+    margin: 0;
+    padding: .7rem .9rem;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-size: .94rem;
+    font-weight: 600;
+    line-height: 1.35;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .share-action__option:hover,
+  .share-action__option:focus-visible {
+    color: var(--blue);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: .16em;
+  }
+
+  .share-action__option:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: -2px;
+  }
+
+  .share-action__feedback {
+    margin: 0;
+    padding: .15rem .9rem .7rem;
+    color: var(--ink);
+    font-size: .78rem;
+    font-weight: 700;
+    line-height: 1.35;
+  }
+
+  .share-action__feedback:empty {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .share-action__manual {
+    display: block;
+    box-sizing: border-box;
+    width: calc(100% - 1.8rem);
+    max-width: 100%;
+    margin: 0 .9rem .7rem;
+    padding: .45rem .5rem;
+    border: 1px solid var(--line);
+    border-radius: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: inherit;
+    font-size: .78rem;
+    font-weight: 600;
+  }
+
+  .share-action__manual:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 620px) {
+    .share-action--beside-cta .share-action__trigger {
+      padding-top: .18rem;
+    }
+  }
+</style>

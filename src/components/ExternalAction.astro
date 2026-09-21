@@ -7,13 +7,15 @@ type Props = {
   accessibleLabel: string;
   variant: 'cta' | 'utility';
   description?: string;
+  /** Drops the standalone top margin when the CTA sits in a shared actions row. */
+  grouped?: boolean;
 };
 
-const { href, label, accessibleLabel, variant, description } = Astro.props;
+const { href, label, accessibleLabel, variant, description, grouped = false } = Astro.props;
 ---
 
 <a
-  class:list={['external-action', `external-action--${variant}`]}
+  class:list={['external-action', `external-action--${variant}`, { 'external-action--grouped': grouped }]}
   href={href}
   target="_blank"
   rel="noopener noreferrer"
@@ -131,6 +133,10 @@ const { href, label, accessibleLabel, variant, description } = Astro.props;
   .external-action--cta:focus-visible {
     border-color: var(--blue);
     color: var(--blue);
+  }
+
+  .external-action--cta.external-action--grouped {
+    margin-top: 0;
   }
 
   .external-action--cta:focus-visible {

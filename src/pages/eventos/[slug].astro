@@ -4,7 +4,9 @@ import ExternalAction from '../../components/ExternalAction.astro';
 import Eyebrow from '../../components/Eyebrow.astro';
 import PageHero from '../../components/PageHero.astro';
 import PlaceAddress from '../../components/PlaceAddress.astro';
+import ShareAction from '../../components/ShareAction.astro';
 import { formatSourceCitationMeta } from '../../lib/presentation/labels.ts';
+import { buildEventShare } from '../../lib/presentation/share.ts';
 import { loadEventPage, loadEventStaticPaths } from '../../lib/presentation/site.ts';
 import { AGENDA_PATH, eventPath } from '../../lib/presentation/urls.ts';
 
@@ -29,6 +31,12 @@ if (model.slug !== slug) {
   return Astro.redirect(model.canonicalPath, 301);
 }
 const featured = model.featuredOccurrence;
+const share = buildEventShare({
+  title: model.title,
+  venueName: model.venueName,
+  path: model.canonicalPath,
+  occurrences: model.occurrences,
+});
 ---
 
 <Layout title={model.documentTitle} description={model.description} canonicalPath={model.canonicalPath} jsonLd={model.jsonLd}>
@@ -70,17 +78,26 @@ const featured = model.featuredOccurrence;
     </dl>
 
     {model.isPast && <p class="past-notice">Este evento ya ha tenido lugar. Conservamos la ficha como parte del archivo</p>}
-    {
-      model.sourceAction && (
-        <ExternalAction
-          variant="cta"
-          href={model.sourceAction.href}
-          label={model.sourceAction.label}
-          description={model.sourceAction.description}
-          accessibleLabel={model.sourceAction.accessibleLabel}
-        />
-      )
-    }
+    <div class="event-actions">
+      {
+        model.sourceAction && (
+          <ExternalAction
+            grouped
+            variant="cta"
+            href={model.sourceAction.href}
+            label={model.sourceAction.label}
+            description={model.sourceAction.description}
+            accessibleLabel={model.sourceAction.accessibleLabel}
+          />
+        )
+      }
+      <ShareAction
+        title={share.title}
+        text={share.text}
+        path={share.path}
+        align={model.sourceAction ? 'beside-cta' : 'utility'}
+      />
+    </div>
 
     <section class="detail-section" aria-labelledby="fechas-titulo">
       <div class="section-heading"><h2 id="fechas-titulo">Fechas</h2></div>
