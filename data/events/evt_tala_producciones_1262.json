@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_tala_producciones_1262",
+  "slug": "quinteto-senarts-nuevos-mundos",
+  "title": "Quinteto SenArts – ‘Nuevos Mundos’",
+  "status": "scheduled",
+  "venueId": "ven_ateneo_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_tala_producciones_1262_01",
+      "date": "2027-03-21",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Maurice Ravel"
+    },
+    {
+      "name": "Antonín Dvořák"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_tala_producciones_es",
+      "url": "https://www.tala-producciones.es/salon-del-ateneo/quinteto-senarts-nuevos-mundos",
+      "checkedAt": "2026-09-21",
+      "externalId": "1262"
+    }
+  ],
+  "primarySourceId": "src_tala_producciones_es",
+  "lastVerifiedAt": "2026-09-21"
+}

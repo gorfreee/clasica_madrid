@@ -147,7 +147,8 @@
     {
       "sourceId": "src_tala_producciones_es",
       "url": "https://www.tala-producciones.es/salon-del-ateneo/apollo5-a-day-in-paradise",
-      "checkedAt": "2026-08-31"
+      "checkedAt": "2026-09-21",
+      "externalId": "1242"
     },
     {
       "sourceId": "src_ateneo_madrid",
@@ -157,5 +158,5 @@
     }
   ],
   "primarySourceId": "src_tala_producciones_es",
-  "lastVerifiedAt": "2026-09-15"
+  "lastVerifiedAt": "2026-09-21"
 }

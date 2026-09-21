@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_tala_producciones_1270",
+  "slug": "kambrass-quintet-denominacion-de-origen",
+  "title": "KamBrass Quintet – ‘Denominación de origen’",
+  "status": "scheduled",
+  "venueId": "ven_ateneo_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_tala_producciones_1270_01",
+      "date": "2027-05-08",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Joan Guinjoan"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_tala_producciones_es",
+      "url": "https://www.tala-producciones.es/salon-del-ateneo/kambrass-quintet-denominacion-de-origen",
+      "checkedAt": "2026-09-21",
+      "externalId": "1270"
+    }
+  ],
+  "primarySourceId": "src_tala_producciones_es",
+  "lastVerifiedAt": "2026-09-21"
+}

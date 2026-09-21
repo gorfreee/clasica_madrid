@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_tala_producciones_1266",
+  "slug": "sentieri-selvaggi-pasado-y-presente",
+  "title": "Sentieri Selvaggi – ‘Pasado y presente’",
+  "status": "scheduled",
+  "venueId": "ven_ateneo_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_tala_producciones_1266_01",
+      "date": "2027-04-10",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Claude Debussy"
+    },
+    {
+      "name": "García Daganzo"
+    },
+    {
+      "name": "Ígor Stravinski"
+    },
+    {
+      "name": "Paul Hindemith"
+    },
+    {
+      "name": "Del Corno"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_tala_producciones_es",
+      "url": "https://www.tala-producciones.es/salon-del-ateneo/sentieri-selvaggi-pasado-y-presente",
+      "checkedAt": "2026-09-21",
+      "externalId": "1266"
+    }
+  ],
+  "primarySourceId": "src_tala_producciones_es",
+  "lastVerifiedAt": "2026-09-21"
+}

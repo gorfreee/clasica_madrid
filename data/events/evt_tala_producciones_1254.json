@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_tala_producciones_1254",
+  "slug": "quartetto-goldberg-volta",
+  "title": "Quartetto Goldberg – ‘Volta’",
+  "status": "scheduled",
+  "venueId": "ven_ateneo_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_tala_producciones_1254_01",
+      "date": "2027-01-23",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Jörg Widmann"
+    },
+    {
+      "name": "Franz Schubert"
+    },
+    {
+      "name": "Ludwig van Beethoven"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "classical",
+    "romantic",
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_tala_producciones_es",
+      "url": "https://www.tala-producciones.es/salon-del-ateneo/quartetto-goldberg-volta",
+      "checkedAt": "2026-09-21",
+      "externalId": "1254"
+    }
+  ],
+  "primarySourceId": "src_tala_producciones_es",
+  "lastVerifiedAt": "2026-09-21"
+}

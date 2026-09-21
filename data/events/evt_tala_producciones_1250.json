@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_tala_producciones_1250",
+  "slug": "cristina-cordero-y-juan-barahona-con-b-de-viola",
+  "title": "Cristina Cordero y Juan Barahona – ‘Con B de Viola’",
+  "status": "scheduled",
+  "venueId": "ven_ateneo_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_tala_producciones_1250_01",
+      "date": "2026-12-20",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Johannes Brahms"
+    },
+    {
+      "name": "György Kurtág"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "baroque",
+    "classical",
+    "romantic",
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_tala_producciones_es",
+      "url": "https://www.tala-producciones.es/salon-del-ateneo/cristina-cordero-y-juan-barahona-con-b-de-viola",
+      "checkedAt": "2026-09-21",
+      "externalId": "1250"
+    }
+  ],
+  "primarySourceId": "src_tala_producciones_es",
+  "lastVerifiedAt": "2026-09-21"
+}
