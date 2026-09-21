@@ -1,10 +1,14 @@
+import { captureContentShared } from '../analytics/capture.ts';
 import { shareCopiedLabel, shareCopyFailedLabel } from './labels.ts';
 import {
+  attributedShareUrl,
   canUseWebShare,
-  canonicalShareUrl,
+  canonicalSharePath,
   isShareCancellation,
   planShareMenuPlacement,
   whatsappShareHref,
+  type ShareContentType,
+  type ShareMethod,
   type SharePayload,
 } from './share.ts';
 
@@ -40,16 +44,19 @@ function bindShareAction(root: HTMLElement): void {
   const copyButton = root.querySelector<HTMLButtonElement>('[data-share-copy]');
   if (!summary) return;
 
+  const shareUrl = (method: ShareMethod): string =>
+    attributedShareUrl(window.location.origin, root.dataset.sharePath ?? '', method);
+
   const payload = (): SharePayload => ({
     title: root.dataset.shareTitle ?? '',
     text: root.dataset.shareText ?? '',
-    url: canonicalShareUrl(window.location.origin, root.dataset.sharePath ?? ''),
+    url: shareUrl('native_share'),
   });
 
   const refreshWhatsapp = () => {
     if (!whatsapp) return;
     const data = payload();
-    whatsapp.href = whatsappShareHref(data.text, data.url);
+    whatsapp.href = whatsappShareHref(data.text, shareUrl('whatsapp'));
   };
   refreshWhatsapp();
 
@@ -68,6 +75,7 @@ function bindShareAction(root: HTMLElement): void {
       () => {
         suppressOpen = false;
         resetShareFeedback(root);
+        trackShare(root, 'native_share');
       },
       (error: unknown) => {
         suppressOpen = false;
@@ -97,8 +105,12 @@ function bindShareAction(root: HTMLElement): void {
     root.open = false;
   });
 
+  whatsapp?.addEventListener('click', () => {
+    trackShare(root, 'whatsapp');
+  });
+
   copyButton?.addEventListener('click', () => {
-    const url = payload().url;
+    const url = shareUrl('copy_link');
     const writeText = navigator.clipboard?.writeText?.bind(navigator.clipboard);
     if (typeof writeText !== 'function') {
       finishCopy(root, url, copyWithExecCommand(root, url));
@@ -111,10 +123,25 @@ function bindShareAction(root: HTMLElement): void {
   });
 }
 
+function trackShare(root: HTMLElement, method: ShareMethod): void {
+  const contentType = root.dataset.shareContentType;
+  if (!isShareContentType(contentType)) return;
+  captureContentShared({
+    method,
+    content_type: contentType,
+    path: canonicalSharePath(root.dataset.sharePath ?? ''),
+  });
+}
+
+function isShareContentType(value: string | undefined): value is ShareContentType {
+  return value === 'event' || value === 'venue';
+}
+
 function finishCopy(root: HTMLElement, url: string, copied: boolean): void {
   if (copied) {
     hideManualCopy(root);
     setFeedback(root, shareCopiedLabel);
+    trackShare(root, 'copy_link');
     return;
   }
   setFeedback(root, shareCopyFailedLabel);

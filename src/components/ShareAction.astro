@@ -8,19 +8,19 @@ import {
   shareCopyLinkLabel,
   shareWhatsappLabel,
 } from '../lib/presentation/labels.ts';
-import { canonicalShareUrl, whatsappShareHref } from '../lib/presentation/share.ts';
+import { attributedShareUrl, whatsappShareHref, type ShareContentType } from '../lib/presentation/share.ts';
 
 type Props = {
   title: string;
   text: string;
   path: string;
+  contentType: ShareContentType;
   /** Optically align the label with a neighbouring CTA that has its own padding. */
   align?: 'utility' | 'beside-cta';
 };
 
-const { title, text, path, align = 'utility' } = Astro.props;
-const fallbackUrl = canonicalShareUrl(SITE_ORIGIN, path);
-const fallbackWhatsapp = whatsappShareHref(text, fallbackUrl);
+const { title, text, path, contentType, align = 'utility' } = Astro.props;
+const fallbackWhatsapp = whatsappShareHref(text, attributedShareUrl(SITE_ORIGIN, path, 'whatsapp'));
 ---
 
 <details
@@ -29,6 +29,7 @@ const fallbackWhatsapp = whatsappShareHref(text, fallbackUrl);
   data-share-title={title}
   data-share-text={text}
   data-share-path={path}
+  data-share-content-type={contentType}
 >
   <summary class="share-action__trigger" role="button">
     <span class="share-action__icon" aria-hidden="true">

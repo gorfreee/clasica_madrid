@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { canonicalShareUrl, whatsappShareHref } from '../src/lib/presentation/share.ts';
+import { attributedShareUrl, canonicalShareUrl, whatsappShareHref } from '../src/lib/presentation/share.ts';
 
 const SINGLE_EVENT = '/eventos/cuarteto-cosmos/';
 const SEVERAL_DATES_EVENT = '/eventos/el-cascanueces/';
@@ -26,11 +26,67 @@ async function sharePayloadFromDom(page: Page) {
   const title = (await root.getAttribute('data-share-title')) ?? '';
   const text = (await root.getAttribute('data-share-text')) ?? '';
   const path = (await root.getAttribute('data-share-path')) ?? '';
-  const url = canonicalShareUrl(new URL(page.url()).origin, path);
-  return { title, text, path, url };
+  const contentType = (await root.getAttribute('data-share-content-type')) ?? '';
+  const origin = new URL(page.url()).origin;
+  const url = canonicalShareUrl(origin, path);
+  return { title, text, path, contentType, url, origin };
+}
+
+type ContentSharedCall = {
+  event: string;
+  properties: { method: string; content_type: string; path: string };
+};
+
+async function installShareAnalytics(page: Page) {
+  await page.addInitScript(() => {
+    const calls: ContentSharedCall[] = [];
+    (window as unknown as { __contentShared: ContentSharedCall[] }).__contentShared = calls;
+    Object.defineProperty(window, 'posthog', {
+      configurable: true,
+      value: {
+        capture(event: string, properties: ContentSharedCall['properties']) {
+          calls.push({ event, properties });
+        },
+      },
+    });
+  });
+}
+
+async function contentSharedCalls(page: Page) {
+  return page.evaluate(
+    () => (window as unknown as { __contentShared: ContentSharedCall[] }).__contentShared,
+  );
 }
 
 test.describe('compartir en fichas', () => {
+  test('sin JavaScript WhatsApp ya enlaza la URL atribuida', async ({ browser, baseURL }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false, baseURL });
+    try {
+      const page = await context.newPage();
+      await page.goto(VENUE);
+      const root = page.locator('[data-share]');
+      const text = (await root.getAttribute('data-share-text')) ?? '';
+      const path = (await root.getAttribute('data-share-path')) ?? '';
+      const href = await page.locator('[data-share-whatsapp]').getAttribute('href');
+      expect(href).toBe(
+        whatsappShareHref(text, attributedShareUrl('https://clasicamadrid.com', path, 'whatsapp')),
+      );
+      expect(decodeURIComponent(href ?? '')).toContain('utm_source=whatsapp');
+      expect(decodeURIComponent(href ?? '')).toContain('utm_medium=share');
+    } finally {
+      await context.close();
+    }
+  });
+
+  test('sin token de PostHog no se inserta el snippet', async ({ page }) => {
+    await page.goto(SINGLE_EVENT);
+    const html = await page.content();
+    expect(html).not.toContain('eu.i.posthog.com');
+    expect(html).not.toContain('eu-assets.i.posthog.com');
+    expect(html).not.toContain('array.js');
+    expect(await page.evaluate(() => 'posthog' in window)).toBe(false);
+  });
+
   test('la ficha de evento muestra Compartir y los listados no', async ({ page }) => {
     await page.goto(SINGLE_EVENT);
     const share = page.getByRole('button', { name: 'Compartir', exact: true });
@@ -81,6 +137,7 @@ test.describe('compartir en fichas', () => {
   });
 
   test('con navigator.share la acción abre el selector nativo y no el menú', async ({ page }) => {
+    await installShareAnalytics(page);
     await page.addInitScript(() => {
       const calls: ShareData[] = [];
       (window as unknown as { __shareCalls: ShareData[] }).__shareCalls = calls;
@@ -99,19 +156,37 @@ test.describe('compartir en fichas', () => {
 
     await page.goto(`${SINGLE_EVENT}?utm=boletin#programa`);
     const expected = await sharePayloadFromDom(page);
+    const nativeUrl = attributedShareUrl(expected.origin, expected.path, 'native_share');
+    expect(expected.contentType).toBe('event');
     expect(expected.text).toBe('Cuarteto Cosmos — 8 de enero, 19:30 · Auditorio Nacional de Música');
     expect(expected.url).not.toContain('utm');
     expect(expected.url).not.toContain('#');
+    expect(nativeUrl).toBe(`${expected.origin}${expected.path}?utm_source=native_share&utm_medium=share`);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      'href',
+      `https://clasicamadrid.com${expected.path}`,
+    );
+    const siteHrefs = await page
+      .locator('header a, footer a, link[rel="canonical"], meta[property="og:url"]')
+      .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('href') ?? node.getAttribute('content') ?? ''));
+    expect(siteHrefs.some((href) => href.includes('utm_'))).toBe(false);
 
     await page.getByRole('button', { name: 'Compartir', exact: true }).click();
     await expect(page.locator('[data-share-menu]')).toBeHidden();
     await expect(page.locator('[data-share-feedback]')).toHaveText('');
 
     const calls = await page.evaluate(() => (window as unknown as { __shareCalls: ShareData[] }).__shareCalls);
-    expect(calls).toEqual([{ title: expected.title, text: expected.text, url: expected.url }]);
+    expect(calls).toEqual([{ title: expected.title, text: expected.text, url: nativeUrl }]);
+    expect(await contentSharedCalls(page)).toEqual([
+      {
+        event: 'content_shared',
+        properties: { method: 'native_share', content_type: 'event', path: expected.path },
+      },
+    ]);
   });
 
   test('cancelar el selector nativo no muestra error ni el menú', async ({ page }) => {
+    await installShareAnalytics(page);
     await page.addInitScript(() => {
       Object.defineProperty(navigator, 'canShare', {
         configurable: true,
@@ -129,9 +204,11 @@ test.describe('compartir en fichas', () => {
     await expect(page.locator('[data-share-feedback]')).toHaveText('');
     await expect(page.getByText('Enlace copiado')).toHaveCount(0);
     await expect(page.getByRole('alert')).toHaveCount(0);
+    expect(await contentSharedCalls(page)).toEqual([]);
   });
 
   test('si los datos no son compartibles aparece el fallback', async ({ page }) => {
+    await installShareAnalytics(page);
     await page.addInitScript(() => {
       (window as unknown as { __shareCalls: number }).__shareCalls = 0;
       Object.defineProperty(navigator, 'canShare', {
@@ -154,9 +231,11 @@ test.describe('compartir en fichas', () => {
     await page.getByRole('button', { name: 'Compartir', exact: true }).click();
     await expect(page.locator('[data-share-menu]')).toBeVisible();
     expect(await page.evaluate(() => (window as unknown as { __shareCalls: number }).__shareCalls)).toBe(0);
+    expect(await contentSharedCalls(page)).toEqual([]);
   });
 
-  test('sin Web Share el fallback ofrece WhatsApp y copiar el enlace canónico', async ({ page }) => {
+  test('sin Web Share el fallback ofrece WhatsApp y copiar el enlace atribuido', async ({ page }) => {
+    await installShareAnalytics(page);
     await page.addInitScript(() => {
       Object.defineProperty(navigator, 'share', { configurable: true, value: undefined });
       Object.defineProperty(navigator, 'canShare', { configurable: true, value: undefined });
@@ -168,20 +247,49 @@ test.describe('compartir en fichas', () => {
     await share.click();
 
     const expected = await sharePayloadFromDom(page);
+    const whatsappUrl = attributedShareUrl(expected.origin, expected.path, 'whatsapp');
+    const copyUrl = attributedShareUrl(expected.origin, expected.path, 'copy_link');
+    expect(expected.contentType).toBe('venue');
     expect(expected.text).toBe('Teatro Real · Madrid');
+    expect(expected.url).not.toContain('origen');
+    expect(expected.url).not.toContain('#');
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      'href',
+      `https://clasicamadrid.com${expected.path}`,
+    );
     const whatsapp = page.getByRole('link', { name: /WhatsApp/ });
     await expect(whatsapp).toBeVisible();
-    await expect(whatsapp).toHaveAttribute('href', whatsappShareHref(expected.text, expected.url));
+    await expect(whatsapp).toHaveAttribute('href', whatsappShareHref(expected.text, whatsappUrl));
     await expect(whatsapp).toHaveAttribute('target', '_blank');
     await expect(whatsapp).toHaveAttribute('rel', 'noopener noreferrer');
     await expect(page.getByRole('button', { name: 'Copiar enlace', exact: true })).toBeVisible();
     await expect(page.getByRole('link', { name: /Telegram|Facebook|LinkedIn|Correo/ })).toHaveCount(0);
+    const trackedHrefs = await page.locator('a[href*="utm_"]').evaluateAll((nodes) =>
+      nodes
+        .map((node) => node.getAttribute('href') ?? '')
+        .filter((href) => !href.startsWith('https://wa.me/')),
+    );
+    expect(trackedHrefs).toEqual([]);
 
     await page.getByRole('button', { name: 'Copiar enlace', exact: true }).click();
     const feedback = page.locator('[data-share-feedback]');
     await expect(feedback).toHaveAttribute('role', 'status');
     await expect(feedback).toHaveText('Enlace copiado');
-    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(expected.url);
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(copyUrl);
+
+    await page.route('https://wa.me/**', (route) => route.fulfill({ status: 204, body: '' }));
+    const [popup] = await Promise.all([page.waitForEvent('popup'), whatsapp.click()]);
+    await popup.close();
+    expect(await contentSharedCalls(page)).toEqual([
+      {
+        event: 'content_shared',
+        properties: { method: 'copy_link', content_type: 'venue', path: expected.path },
+      },
+      {
+        event: 'content_shared',
+        properties: { method: 'whatsapp', content_type: 'venue', path: expected.path },
+      },
+    ]);
   });
 
   test('un evento sin acción de fuente sigue pudiendo compartirse', async ({ page }) => {
