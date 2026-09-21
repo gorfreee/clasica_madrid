@@ -1,5 +1,5 @@
 ---
-type Variant = 'agenda' | 'venues' | 'event' | 'venue';
+type Variant = 'agenda' | 'venues';
 
 type Props = {
   variant: Variant;
@@ -14,7 +14,7 @@ type MotifConfig = {
   offsets: readonly [number, number, number];
   score: readonly string[];
   accent: { x: number; y: number; radius: number };
-  echo?: { x: number; y: number; radius: number };
+  echo: { x: number; y: number; radius: number };
 };
 
 const motifs: Record<Variant, MotifConfig> = {
@@ -38,24 +38,6 @@ const motifs: Record<Variant, MotifConfig> = {
     accent: { x: 60, y: 138, radius: 4 },
     echo: { x: 168, y: 31, radius: 3.5 },
   },
-  event: {
-    center: { x: 183, y: 96 },
-    radii: [62, 42, 23],
-    rotation: -30,
-    dashes: ['80 20', '72 28', '63 37'],
-    offsets: [0, 2, 5],
-    score: ['M22 96H238', 'M38 72H105'],
-    accent: { x: 58, y: 96, radius: 3.5 },
-  },
-  venue: {
-    center: { x: 176, y: 101 },
-    radii: [64, 44, 24],
-    rotation: 72,
-    dashes: ['79 21', '71 29', '62 38'],
-    offsets: [0, 3, 5],
-    score: ['M22 137H238', 'M58 137V101H111'],
-    accent: { x: 58, y: 137, radius: 3.5 },
-  },
 };
 
 const { variant, class: className } = Astro.props;
@@ -63,7 +45,7 @@ const motif = motifs[variant];
 ---
 
 <svg
-  class:list={['hero-motif', `hero-motif--${variant}`, className]}
+  class:list={['hero-motif', className]}
   viewBox="0 0 260 190"
   width="260"
   height="190"
@@ -104,16 +86,12 @@ const motif = motifs[variant];
     cy={motif.accent.y}
     r={motif.accent.radius}
   />
-  {
-    motif.echo && (
-      <circle
-        class="hero-motif__pulse hero-motif__pulse--echo"
-        cx={motif.echo.x}
-        cy={motif.echo.y}
-        r={motif.echo.radius}
-      />
-    )
-  }
+  <circle
+    class="hero-motif__pulse hero-motif__pulse--echo"
+    cx={motif.echo.x}
+    cy={motif.echo.y}
+    r={motif.echo.radius}
+  />
 </svg>
 
 <style>
@@ -150,10 +128,4 @@ const motif = motifs[variant];
     fill: var(--ink);
     opacity: .48;
   }
-
-  .hero-motif--event .hero-motif__resonance,
-  .hero-motif--venue .hero-motif__resonance { opacity: .88; }
-
-  .hero-motif--event .hero-motif__score,
-  .hero-motif--venue .hero-motif__score { opacity: .3; }
 </style>

@@ -1,9 +1,9 @@
 import { expect, test, type Page } from '@playwright/test';
 
-const INDEX_ROUTES = ['/', '/lugares/'] as const;
+const INDEX_ROUTES = ['/', '/agenda/gratis/', '/agenda/fin-de-semana/', '/lugares/'] as const;
 const DETAIL_ROUTES = [
   '/eventos/cuarteto-cosmos/',
-  '/eventos/concierto-de-la-orquesta-barroca-del-rcsmm-jose-de-nebra-en-el-museo-del-prado/',
+  '/eventos/xxviii-festival-internacional-de-musica-contemporanea-de-madrid-coma-26-orquesta-sinfonica-de-la-universidad-complutense/',
   '/lugares/teatro-real/',
   '/lugares/auditorio-del-conservatorio-profesional-de-musica-de-getafe/',
 ] as const;
@@ -83,42 +83,36 @@ test.describe('sistema de ilustraciones de hero', () => {
     }
   });
 
-  test('las fichas mantienen una columna gráfica discreta en tablet y escritorio', async ({ page }) => {
+  test('las fichas no reservan columna gráfica y el título usa todo el ancho', async ({ page }) => {
     for (const viewport of [
-      { width: 1440, height: 900, minArtwork: 110, maxArtwork: 160 },
-      { width: 820, height: 900, minArtwork: 110, maxArtwork: 160 },
+      { width: 1440, height: 900 },
+      { width: 820, height: 900 },
+      { width: 390, height: 844 },
     ]) {
       await page.setViewportSize(viewport);
 
       for (const route of DETAIL_ROUTES) {
         await page.goto(route);
-        const artwork = page.locator('.page-hero__artwork');
-        await expect(artwork).toBeVisible();
+        await expect(page.locator('[data-hero-motif]')).toHaveCount(0);
+        await expect(page.locator('.page-hero__artwork')).toHaveCount(0);
 
-        const width = await artwork.evaluate((element) => element.getBoundingClientRect().width);
-        expect(width).toBeGreaterThanOrEqual(viewport.minArtwork);
-        expect(width).toBeLessThanOrEqual(viewport.maxArtwork);
-        await expectSeparateGridTracks(page);
+        const geometry = await page.locator('.page-hero--detail').evaluate((hero) => {
+          const heroBox = hero.getBoundingClientRect();
+          const title = hero.querySelector('h1');
+          if (!title) throw new Error('Falta el título de la ficha');
+          const titleBox = title.getBoundingClientRect();
+          return {
+            heroWidth: heroBox.width,
+            titleWidth: titleBox.width,
+            titleLeft: titleBox.left,
+            heroLeft: heroBox.left,
+          };
+        });
+
+        expect(geometry.titleLeft).toBeCloseTo(geometry.heroLeft, 0);
+        expect(geometry.titleWidth).toBeCloseTo(geometry.heroWidth, 0);
         await expectNoHorizontalOverflow(page);
       }
-    }
-  });
-
-  test('las fichas móviles eliminan la ilustración y liberan todo el ancho del título', async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 844 });
-
-    for (const route of DETAIL_ROUTES) {
-      await page.goto(route);
-      await expect(page.locator('.page-hero__artwork')).toBeHidden();
-
-      const geometry = await page.locator('[data-page-hero]').evaluate((hero) => {
-        const heroBox = hero.getBoundingClientRect();
-        const titleBox = hero.querySelector('h1')!.getBoundingClientRect();
-        return { heroWidth: heroBox.width, titleWidth: titleBox.width };
-      });
-
-      expect(geometry.titleWidth).toBeCloseTo(geometry.heroWidth, 0);
-      await expectNoHorizontalOverflow(page);
     }
   });
 });

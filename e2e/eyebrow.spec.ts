@@ -35,7 +35,7 @@ test.describe('eyebrow de sección y retorno', () => {
 
   test('la ficha de evento vuelve a la agenda', async ({ page }) => {
     await page.goto('/eventos/excelentia-noches-en-los-jardines-de-espana-y-concierto-de-aranjuez/');
-    const back = page.locator('.page-hero--event a.eyebrow');
+    const back = page.locator('.event-detail .page-hero a.eyebrow');
     await expect(back).toHaveText(/←\s*Agenda/);
     await expect(back).toHaveAttribute('href', '/');
     await back.click();
@@ -45,7 +45,7 @@ test.describe('eyebrow de sección y retorno', () => {
 
   test('la ficha de lugar vuelve al índice de lugares', async ({ page }) => {
     await page.goto('/lugares/basilica-pontificia-de-san-miguel/');
-    const back = page.locator('.page-hero--venue a.eyebrow');
+    const back = page.locator('.venue-detail .page-hero a.eyebrow');
     await expect(back).toHaveText(/←\s*Lugares/);
     await expect(back).toHaveAttribute('href', '/lugares/');
     await back.click();
@@ -64,14 +64,14 @@ test.describe('eyebrow de sección y retorno', () => {
       { path: '/lugares/', selector: '.page-hero--venues .eyebrow' },
       { path: '/acerca-de/', selector: '.page-label .eyebrow' },
       { path: '/contacto/', selector: '.page-label .eyebrow' },
-      { path: '/eventos/trilogia-andaluza/', selector: '.page-hero--event .eyebrow' },
-      { path: '/eventos/concierto-de-mineko-kojima/', selector: '.page-hero--event .eyebrow' },
+      { path: '/eventos/trilogia-andaluza/', selector: '.event-detail .page-hero .eyebrow' },
+      { path: '/eventos/concierto-de-mineko-kojima/', selector: '.event-detail .page-hero .eyebrow' },
       {
         path: '/eventos/excelentia-noches-en-los-jardines-de-espana-y-concierto-de-aranjuez/',
-        selector: '.page-hero--event .eyebrow',
+        selector: '.event-detail .page-hero .eyebrow',
       },
-      { path: '/lugares/teatro-real/', selector: '.page-hero--venue .eyebrow' },
-      { path: '/lugares/basilica-pontificia-de-san-miguel/', selector: '.page-hero--venue .eyebrow' },
+      { path: '/lugares/teatro-real/', selector: '.venue-detail .page-hero .eyebrow' },
+      { path: '/lugares/basilica-pontificia-de-san-miguel/', selector: '.venue-detail .page-hero .eyebrow' },
       { path: '/pagina-inexistente/', selector: '.error-page .eyebrow' },
     ] as const;
 
