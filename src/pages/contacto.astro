@@ -1,6 +1,5 @@
 ---
 import Eyebrow from '../components/Eyebrow.astro';
-import HeroMotif from '../components/HeroMotif.astro';
 import Layout from '../layouts/Layout.astro';
 import { resolveTurnstileSiteKey } from '../lib/contact/turnstile-site-key.ts';
 import { CONTACT_PATH } from '../lib/presentation/urls.ts';
@@ -18,21 +17,13 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
   description="Contacta con Clásica Madrid para corregir información, añadir un concierto o proponer una colaboración."
   canonicalPath={CONTACT_PATH}
 >
-  <header class="section-intro contact-intro">
-    <div class="section-intro__copy">
-      <Eyebrow label="Contacto" />
-      <h1>Escríbenos</h1>
-      <p class="lede">
-        Si falta un concierto, has encontrado un error o quieres ponerte en contacto con Clásica
-        Madrid, escríbenos.
-      </p>
-    </div>
-    <HeroMotif variant="contact" class="section-intro__motif" />
+  <header class="page-label">
+    <Eyebrow label="Contacto" />
   </header>
 
-  <div class="contact-layout">
+  <div class="page-rule contact-layout">
     <section class="contact-form-section" aria-labelledby="contact-form-title">
-      <h2 id="contact-form-title">Envíanos un mensaje</h2>
+      <h1 id="contact-form-title">Envíanos un mensaje</h1>
 
       <form
         class="contact-form"
@@ -287,9 +278,6 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
   .contact-layout {
     display: grid;
     grid-template-columns: minmax(0, 1.55fr) minmax(15rem, .65fr);
-    max-width: 67rem;
-    margin-top: 3.5rem;
-    border-top: 2px solid var(--ink);
   }
 
   .contact-form-section {
@@ -297,6 +285,7 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
     padding: 2.25rem 3.5rem 1rem 0;
   }
 
+  .contact-layout h1,
   .contact-layout h2 {
     margin: 0;
     font-size: clamp(1.45rem, 2.7vw, 2.15rem);
@@ -451,7 +440,6 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
   }
 
   @media (max-width: 620px) {
-    .contact-layout { margin-top: 2.5rem; }
     .contact-form { grid-template-columns: 1fr; gap: 1.15rem; }
     .contact-form__field,
     .contact-form__field:nth-of-type(4),

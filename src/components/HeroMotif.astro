@@ -1,5 +1,5 @@
 ---
-type Variant = 'agenda' | 'venues' | 'event' | 'venue' | 'about' | 'contact';
+type Variant = 'agenda' | 'venues' | 'event' | 'venue';
 
 type Props = {
   variant: Variant;
@@ -37,26 +37,6 @@ const motifs: Record<Variant, MotifConfig> = {
     score: ['M20 138H240', 'M60 138V103H103', 'M168 25V52'],
     accent: { x: 60, y: 138, radius: 4 },
     echo: { x: 168, y: 31, radius: 3.5 },
-  },
-  about: {
-    center: { x: 151, y: 93 },
-    radii: [71, 49, 27],
-    rotation: 148,
-    dashes: ['82 18', '74 26', '66 34'],
-    offsets: [0, 3, 5],
-    score: ['M20 56H92', 'M24 93H238', 'M48 128H109'],
-    accent: { x: 216, y: 93, radius: 4 },
-    echo: { x: 48, y: 56, radius: 3.5 },
-  },
-  contact: {
-    center: { x: 168, y: 96 },
-    radii: [70, 48, 26],
-    rotation: -112,
-    dashes: ['80 20', '73 27', '65 35'],
-    offsets: [1, 3, 6],
-    score: ['M18 62H100', 'M28 96H240', 'M74 130H224'],
-    accent: { x: 56, y: 96, radius: 4 },
-    echo: { x: 218, y: 130, radius: 3.5 },
   },
   event: {
     center: { x: 183, y: 96 },

@@ -51,12 +51,12 @@ export const PRIMARY_NAV: readonly NavItemDefinition[] = [
 /** Secondary pages grouped under «Más» on desktop and the mobile menu. */
 export const SECONDARY_NAV: readonly NavItemDefinition[] = [
   {
-    href: ABOUT_PATH,
-    label: 'Acerca de',
-  },
-  {
     href: CONTACT_PATH,
     label: 'Contacto',
+  },
+  {
+    href: ABOUT_PATH,
+    label: 'Acerca de',
   },
 ];
 
