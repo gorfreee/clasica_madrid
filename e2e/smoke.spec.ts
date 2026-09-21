@@ -223,7 +223,8 @@ test.describe('ficha de evento', () => {
     await expect(
       page.getByRole('link', { name: venueName, exact: true }).and(page.locator('[href^="/lugares/"]')),
     ).toBeVisible();
-    await expect(page.locator('dt', { hasText: 'Acceso' })).toBeVisible();
+    await expect(page.locator('.event-facts').locator('dt', { hasText: 'Acceso' })).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: 'Sobre el concierto', level: 2 })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Fechas', level: 2 })).toBeVisible();
     await expect(
       page

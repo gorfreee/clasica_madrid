@@ -802,9 +802,14 @@ a.eyebrow:focus-visible {
 .page-hero--detail .page-hero__artwork { opacity: .72; }
 .status-alert { display: inline-block; margin: 1.5rem 0 0; padding: .55rem .75rem; background: var(--coral); font-weight: 800; text-transform: uppercase; }
 .fact-list { display: grid; }
-.event-facts { grid-template-columns: 1.1fr 1.3fr .7fr; gap: 0; margin: 0; border-bottom: 2px solid var(--ink); }
-.event-facts > div { min-height: 10.5rem; padding: 1.4rem; }
-.event-facts > div + div { border-left: 1px solid var(--ink); }
+.event-facts {
+  grid-template-columns: minmax(11.5rem, 0.36fr) minmax(0, 0.64fr);
+  gap: 0;
+  margin: 0;
+  border-bottom: 2px solid var(--ink);
+}
+.event-facts > div { min-width: 0; padding: 1.25rem 1.5rem 1.4rem 0; }
+.event-facts > div + div { padding-left: 1.6rem; border-left: 1px solid var(--ink); }
 .fact-list dt {
   margin-bottom: .55rem;
   color: var(--muted);
@@ -813,14 +818,15 @@ a.eyebrow:focus-visible {
   letter-spacing: var(--type-tracking-label);
   text-transform: uppercase;
 }
-.fact-list dd { margin: 0; font-size: clamp(1.1rem, 2vw, 1.55rem); font-weight: 700; letter-spacing: var(--type-tracking-heading); line-height: 1.1; }
+.fact-list dd { margin: 0; font-size: clamp(1.1rem, 2vw, 1.55rem); font-weight: 700; letter-spacing: var(--type-tracking-heading); line-height: 1.15; overflow-wrap: anywhere; }
 .event-facts__when dd { display: flex; flex-direction: column; gap: .35rem; }
-.event-facts__when strong { color: var(--blue); font-size: 2rem; font-variant-numeric: tabular-nums; }
+.event-facts__when strong { color: var(--blue); font-size: 2rem; font-variant-numeric: tabular-nums; line-height: 1.05; }
 .event-facts__venue a { text-decoration-thickness: 1px; text-underline-offset: .16em; }
 .event-facts__venue dt:not(:first-of-type) { margin-top: .85rem; }
 .event-facts__space { color: var(--ink); font-size: clamp(.95rem, 1.6vw, 1.15rem) !important; font-weight: 600 !important; letter-spacing: -.02em !important; }
 .event-facts__address { margin-top: .75rem !important; color: var(--muted); font-size: .76rem !important; font-weight: 500 !important; letter-spacing: 0 !important; }
 .past-notice, .quiet-state { margin: 1.5rem 0 0; padding: 1rem; border-left: .75rem solid var(--coral); color: var(--muted); }
+.event-detail .past-notice { max-width: 38rem; margin-top: 1.35rem; font-size: .95rem; }
 .event-actions {
   position: relative;
   z-index: 2;
@@ -832,6 +838,7 @@ a.eyebrow:focus-visible {
   margin-top: 1.5rem;
 }
 .detail-section { margin-top: 5rem; }
+.event-detail .detail-section { margin-top: 3.5rem; }
 .section-heading {
   padding: .75rem 0;
   border-block: 2px solid var(--ink);
@@ -859,12 +866,40 @@ a.eyebrow:focus-visible {
   letter-spacing: var(--type-tracking-heading);
 }
 .editorial-list small, .programme-list small { color: var(--muted); font-size: .75rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.editorial-list--supporting li, .programme-list--supporting li {
+  padding-block: .8rem;
+  font-size: clamp(1rem, 1.45vw, 1.22rem);
+  font-weight: 600;
+}
 .programme-list { counter-reset: works; }
 .programme-list li { position: relative; padding-left: 2.5rem; counter-increment: works; }
 .programme-list li::before { content: counter(works, decimal-leading-zero); position: absolute; left: 0; color: var(--coral); font-size: .7rem; letter-spacing: .08em; }
-.fact-list--compact { grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; }
-.fact-list--compact > div { min-height: 8rem; padding: 1.25rem; border-bottom: 1px solid var(--line); }
-.fact-list--compact > div:nth-child(odd) { border-right: 1px solid var(--line); }
+.concert-profile { margin: 0; }
+.concert-profile__row {
+  display: grid;
+  grid-template-columns: 10.5rem minmax(0, 1fr);
+  column-gap: 1.5rem;
+  align-items: baseline;
+  padding: .9rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.concert-profile dt {
+  margin: 0;
+  color: var(--muted);
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: var(--type-tracking-label);
+  text-transform: uppercase;
+}
+.concert-profile dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+  font-weight: 700;
+  letter-spacing: var(--type-tracking-heading);
+  line-height: 1.25;
+}
 .source-list li {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -975,8 +1010,11 @@ a.eyebrow:focus-visible {
   }
   .venue-list a { grid-template-columns: 3.5rem 1fr 8rem; }
   .venue-list__meta { grid-column: 2 / -1; border-top: 1px solid var(--line); }
-  .event-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .event-facts__access { grid-column: 1 / -1; border-top: 1px solid var(--ink); border-left: 0 !important; }
+  .event-facts { grid-template-columns: minmax(0, 0.42fr) minmax(0, 0.58fr); }
+  .event-facts > div { padding: 1.05rem 1rem 1.15rem 0; }
+  .event-facts > div + div { padding-left: 1.05rem; }
+  .event-facts__when strong { font-size: 1.65rem; }
+  .concert-profile__row { grid-template-columns: 8.75rem minmax(0, 1fr); column-gap: 1rem; }
 }
 
 @media (max-width: 620px) {
@@ -1088,16 +1126,21 @@ a.eyebrow:focus-visible {
   .page-hero--detail .page-hero__artwork { display: none; }
   .event-actions { flex-direction: column; align-items: flex-start; }
   .event-facts { display: block; }
-  .event-facts > div { min-height: auto; padding: 1rem 0; border-left: 0 !important; }
-  .event-facts > div + div, .event-facts__access { border-top: 1px solid var(--line); }
+  .event-facts > div { padding: .8rem 0 .9rem; border-left: 0 !important; }
+  .event-facts > div + div { padding-left: 0; border-top: 1px solid var(--line); }
+  .event-facts__when strong { font-size: 1.7rem; }
+  .event-facts__venue dt:not(:first-of-type) { margin-top: .55rem; }
+  .event-facts__address { margin-top: .45rem !important; }
   .detail-section { margin-top: 3.5rem; }
+  .event-detail .detail-section { margin-top: 2.5rem; }
   .section-heading h2 { font-size: 2.2rem; }
   .programme-list li { padding-left: 2.5rem; }
   .occurrence-list li { grid-template-columns: 1fr auto; }
   .occurrence-list li span { grid-column: 1 / -1; }
   .editorial-list li, .programme-list li { grid-template-columns: 1fr; gap: .45rem; font-size: 1.15rem; }
-  .fact-list--compact { grid-template-columns: 1fr; }
-  .fact-list--compact > div { min-height: auto; padding: 1rem 0; border-right: 0 !important; }
+  .editorial-list--supporting li, .programme-list--supporting li { gap: .3rem; padding-block: .7rem; font-size: 1.02rem; }
+  .concert-profile__row { grid-template-columns: minmax(0, 1fr); row-gap: .15rem; padding: .7rem 0; }
+  .concert-profile dd { font-size: 1.05rem; }
   .source-list li { grid-template-columns: 1fr; gap: .35rem; }
   .venue-detail__practical { max-width: none; margin-top: 1.75rem; }
   .error-page { min-height: 35rem; }

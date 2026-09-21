@@ -387,8 +387,10 @@ test.describe('compartir en fichas', () => {
     await page.goto(PAST_EVENT);
     const notice = await page.locator('.past-notice').boundingBox();
     const pastShare = await page.getByRole('button', { name: 'Compartir', exact: true }).boundingBox();
-    expect(notice && pastShare).toBeTruthy();
-    expect(pastShare!.y).toBeGreaterThan(notice!.y);
+    const fuentes = await page.getByRole('heading', { name: 'Fuentes', level: 2 }).boundingBox();
+    expect(notice && pastShare && fuentes).toBeTruthy();
+    expect(notice!.y).toBeGreaterThan(pastShare!.y);
+    expect(notice!.y).toBeGreaterThan(fuentes!.y);
 
     await page.addInitScript(() => {
       Object.defineProperty(navigator, 'share', { configurable: true, value: undefined });
