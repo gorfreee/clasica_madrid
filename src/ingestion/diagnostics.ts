@@ -3,16 +3,15 @@ import type { PossiblyMissingEvent } from './disappear.ts';
 import {
   attentionKinds,
   countOutcomes,
-  decisionHasUnresolvedComposers,
   decisionOutcome,
   emptyOutcomeCounts,
   INGEST_OUTCOMES,
   isNonPublishedOutcome,
   observationDate,
   tallyOutcomes,
+  unresolvedComposerMentionsForDecision,
   type IngestOutcome,
 } from './outcome.ts';
-import { unresolvedComposerLikeMentions } from './classification/ai-metadata.ts';
 import type { IngestEventDecision, IngestReport } from './report.ts';
 import type { AdapterDiscard } from './types.ts';
 
@@ -226,9 +225,8 @@ function attentionReason(decision: IngestEventDecision, outcomeReason: string | 
   }
   const missingTaxonomy = unresolvedTaxonomyReason(decision);
   if (missingTaxonomy) return missingTaxonomy;
-  if (decisionHasUnresolvedComposers(decision)) {
-    return leftoverComposerReason(decision) ?? outcomeReason;
-  }
+  const leftoverComposers = unresolvedComposerMentionsForDecision(decision);
+  if (leftoverComposers.length > 0) return leftoverComposers.join(', ');
   return outcomeReason ?? decision.eligibility?.ruleId;
 }
 
@@ -239,19 +237,6 @@ function unresolvedTaxonomyReason(decision: IngestEventDecision): string | undef
   if (snapshot.eras.length === 0) missing.push('eras');
   if (snapshot.formats.length === 0) missing.push('formats');
   return missing.length > 0 ? missing.join('+') : undefined;
-}
-
-function leftoverComposerReason(decision: IngestEventDecision): string | undefined {
-  const normalized = decision.normalized;
-  if (!normalized?.programText) return undefined;
-  const leftover = unresolvedComposerLikeMentions(normalized.programText, {
-    title: decision.title,
-    programText: normalized.programText,
-    composers: decision.candidate?.composers ?? normalized.composers,
-    works: decision.candidate?.works ?? normalized.works,
-    performers: decision.candidate?.performers ?? normalized.performers,
-  });
-  return leftover.length > 0 ? leftover.join(', ') : undefined;
 }
 
 function compareAttention(left: AttentionItem, right: AttentionItem): number {
