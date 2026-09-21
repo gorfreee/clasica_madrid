@@ -1,0 +1,7 @@
+---
+import { posthogBootstrapScript } from '../lib/analytics/posthog.ts';
+
+const bootstrap = posthogBootstrapScript(import.meta.env.PUBLIC_POSTHOG_TOKEN);
+---
+
+{bootstrap && <script is:inline set:html={bootstrap} />}

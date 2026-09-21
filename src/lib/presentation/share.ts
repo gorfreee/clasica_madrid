@@ -1,4 +1,5 @@
 import { fromMadridLocal, MADRID_TIME_ZONE } from '../domain/dates.ts';
+import { SITE_ORIGIN } from './constants.ts';
 import { shareSeveralDatesLabel } from './labels.ts';
 
 export type ShareContent = {
@@ -18,6 +19,14 @@ export type SharePayload = {
   text: string;
   url: string;
 };
+
+/** Canal que se ejecutó. El selector del sistema queda en `native_share`: no indica la app final. */
+export type ShareMethod = 'native_share' | 'whatsapp' | 'copy_link';
+
+export type ShareContentType = 'event' | 'venue';
+
+/** `utm_medium` común para filtrar en PostHog las visitas que llegan desde un enlace compartido. */
+export const SHARE_UTM_MEDIUM = 'share';
 
 export type ShareMenuPlacement = {
   alignEnd: boolean;
@@ -73,6 +82,22 @@ export function canonicalShareUrl(origin: string, path: string): string {
     url.pathname = `${url.pathname}/`;
   }
   return url.href;
+}
+
+/**
+ * Canonical ficha URL plus the two attribution params for one share channel.
+ * Query and hash from the current visit are still dropped.
+ */
+export function attributedShareUrl(origin: string, path: string, method: ShareMethod): string {
+  const url = new URL(canonicalShareUrl(origin, path));
+  url.searchParams.set('utm_source', method);
+  url.searchParams.set('utm_medium', SHARE_UTM_MEDIUM);
+  return url.href;
+}
+
+/** Path of the ficha without origin, query or hash. Used as the `content_shared` property. */
+export function canonicalSharePath(path: string): string {
+  return new URL(canonicalShareUrl(SITE_ORIGIN, path)).pathname;
 }
 
 /** Official WhatsApp click-to-chat. No phone number: the text is the whole message. */

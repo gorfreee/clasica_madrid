@@ -3,8 +3,10 @@ import { buildEventSourceAction } from '../src/lib/presentation/external-action.
 import { buildEventPageModel } from '../src/lib/presentation/event.ts';
 import { shareSeveralDatesLabel } from '../src/lib/presentation/labels.ts';
 import {
+  attributedShareUrl,
   buildEventShare,
   buildVenueShare,
+  canonicalSharePath,
   canonicalShareUrl,
   canUseWebShare,
   formatShareDate,
@@ -12,6 +14,7 @@ import {
   planShareMenuPlacement,
   whatsappShareHref,
 } from '../src/lib/presentation/share.ts';
+import { publicUrl } from '../src/lib/presentation/urls.ts';
 import { buildVenuePageModel } from '../src/lib/presentation/venue.ts';
 import { makeCatalog, makeEvent, richCatalog, testClock } from './helpers.ts';
 
@@ -191,6 +194,47 @@ describe('url canónica y WhatsApp', () => {
     expect(href).not.toMatch(/wa\.me\/\d/);
     expect(new URL(href).searchParams.get('text')).toBe(
       'Carmen · Teatro Real — varias fechas\nhttps://clasicamadrid.com/eventos/carmen/',
+    );
+  });
+});
+
+describe('atribución de las URLs compartidas', () => {
+  const dirty = '/eventos/carmen/?utm=boletin&utm_campaign=abril#programa';
+
+  it('la URL canónica y las URLs públicas siguen sin parámetros', () => {
+    expect(canonicalShareUrl('https://clasicamadrid.com', dirty)).toBe(
+      'https://clasicamadrid.com/eventos/carmen/',
+    );
+    expect(new URL(canonicalShareUrl('https://clasicamadrid.com', dirty)).search).toBe('');
+    expect(publicUrl('/eventos/carmen')).toBe('https://clasicamadrid.com/eventos/carmen/');
+    expect(new URL(publicUrl('/lugares/teatro-real')).search).toBe('');
+    expect(canonicalSharePath(dirty)).toBe('/eventos/carmen/');
+  });
+
+  it('el compartir nativo añade solo utm_source y utm_medium', () => {
+    const url = attributedShareUrl('https://clasicamadrid.com', dirty, 'native_share');
+    expect(url).toBe(
+      'https://clasicamadrid.com/eventos/carmen/?utm_source=native_share&utm_medium=share',
+    );
+    expect([...new URL(url).searchParams.keys()]).toEqual(['utm_source', 'utm_medium']);
+    expect(url).not.toContain('utm_campaign');
+    expect(url).not.toContain('boletin');
+    expect(url).not.toContain('#');
+  });
+
+  it('WhatsApp usa su propia URL atribuida, sin la query ni el hash de la visita', () => {
+    const url = attributedShareUrl('http://localhost:4321', '/lugares/teatro-real?origen=preview#mapa', 'whatsapp');
+    expect(url).toBe('http://localhost:4321/lugares/teatro-real/?utm_source=whatsapp&utm_medium=share');
+
+    const href = whatsappShareHref('Teatro Real · Madrid', url);
+    expect(new URL(href).searchParams.get('text')).toBe(`Teatro Real · Madrid\n${url}`);
+    expect(decodeURIComponent(href)).not.toContain('origen=preview');
+    expect(decodeURIComponent(href)).not.toContain('#mapa');
+  });
+
+  it('copiar enlace usa su propia URL atribuida', () => {
+    expect(attributedShareUrl('https://preview.example/', dirty, 'copy_link')).toBe(
+      'https://preview.example/eventos/carmen/?utm_source=copy_link&utm_medium=share',
     );
   });
 });
