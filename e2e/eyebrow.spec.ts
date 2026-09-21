@@ -23,12 +23,12 @@ test.describe('eyebrow de sección y retorno', () => {
     expect(await venues.evaluate((element) => element.tagName)).toBe('P');
 
     await page.goto('/acerca-de/');
-    const about = page.locator('.section-intro .eyebrow');
+    const about = page.locator('.page-label .eyebrow');
     await expect(about).toHaveText('Acerca de');
     expect(await about.evaluate((element) => element.tagName)).toBe('P');
 
     await page.goto('/contacto/');
-    const contact = page.locator('.section-intro .eyebrow');
+    const contact = page.locator('.page-label .eyebrow');
     await expect(contact).toHaveText('Contacto');
     expect(await contact.evaluate((element) => element.tagName)).toBe('P');
   });
@@ -62,8 +62,8 @@ test.describe('eyebrow de sección y retorno', () => {
     const pages = [
       { path: '/', selector: '.page-hero--agenda .eyebrow' },
       { path: '/lugares/', selector: '.page-hero--venues .eyebrow' },
-      { path: '/acerca-de/', selector: '.section-intro .eyebrow' },
-      { path: '/contacto/', selector: '.section-intro .eyebrow' },
+      { path: '/acerca-de/', selector: '.page-label .eyebrow' },
+      { path: '/contacto/', selector: '.page-label .eyebrow' },
       { path: '/eventos/trilogia-andaluza/', selector: '.page-hero--event .eyebrow' },
       { path: '/eventos/concierto-de-mineko-kojima/', selector: '.page-hero--event .eyebrow' },
       {

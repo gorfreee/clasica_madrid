@@ -30,7 +30,9 @@ test.describe('página de contacto', () => {
     await stubTurnstile(page);
     await page.goto('/contacto/');
 
-    await expect(page.getByRole('heading', { level: 1, name: 'Escríbenos' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Envíanos un mensaje' })).toBeVisible();
+    await expect(page.locator('.page-label .eyebrow')).toHaveText('Contacto');
+    await expect(page.locator('[data-hero-motif]')).toHaveCount(0);
     await expect(page.getByLabel('Nombre (opcional)')).toBeVisible();
     await expect(page.getByLabel('Email', { exact: true })).toHaveAttribute('required', '');
     await expect(page.getByLabel('Motivo')).toHaveAttribute('required', '');
@@ -72,21 +74,21 @@ test.describe('página de contacto', () => {
     await expect(more).toHaveAttribute('aria-current', 'true');
     await more.click();
     const panel = page.locator('#nav-more-panel');
-    await expect(panel.getByRole('link')).toHaveText(['Acerca de', 'Contacto']);
+    await expect(panel.getByRole('link')).toHaveText(['Contacto', 'Acerca de']);
     await expect(panel.getByRole('link', { name: 'Contacto' })).toHaveAttribute(
       'aria-current',
       'page',
     );
   });
 
-  test('el menú móvil conserva Lugares, Acerca de y Contacto en ese orden', async ({ page }) => {
+  test('el menú móvil deja Acerca de al final', async ({ page }) => {
     await stubTurnstile(page);
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/contacto/');
 
     await page.getByRole('button', { name: 'Menú de secciones' }).click();
     const panel = page.locator('#nav-mobile-panel');
-    await expect(panel.getByRole('link')).toHaveText(['Lugares', 'Acerca de', 'Contacto']);
+    await expect(panel.getByRole('link')).toHaveText(['Lugares', 'Contacto', 'Acerca de']);
     await expect(panel.getByRole('link', { name: 'Contacto' })).toHaveAttribute(
       'aria-current',
       'page',

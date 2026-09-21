@@ -3,8 +3,6 @@ import { expect, test } from '@playwright/test';
 const pages = [
   { path: '/', variant: 'agenda', hero: '.page-hero--agenda', kind: 'index' },
   { path: '/lugares/', variant: 'venues', hero: '.page-hero--venues', kind: 'index' },
-  { path: '/acerca-de/', variant: 'about', hero: '.section-intro', kind: 'index' },
-  { path: '/contacto/', variant: 'contact', hero: '.section-intro', kind: 'index' },
   {
     path: '/eventos/excelentia-noches-en-los-jardines-de-espana-y-concierto-de-aranjuez/',
     variant: 'event',
@@ -53,9 +51,7 @@ for (const viewport of viewports) {
         const layout = await hero.evaluate((element, { variant, kind }) => {
           const heroRect = element.getBoundingClientRect();
           const svg = element.querySelector<SVGElement>(`[data-hero-motif="${variant}"]`);
-          const copy = element.querySelector<HTMLElement>(
-            '.page-hero__copy, .section-intro__copy',
-          );
+          const copy = element.querySelector<HTMLElement>('.page-hero__copy');
           if (!svg || !copy) throw new Error('Falta el motivo o el bloque de contenido de la hero');
 
           const motifRect = svg.getBoundingClientRect();
@@ -88,10 +84,7 @@ for (const viewport of viewports) {
         if (detailMotifIsHidden) {
           expect(layout.motifArea).toBe(0);
         } else {
-          const minimumVisibleFraction =
-            pageCase.kind === 'index' && !['about', 'contact'].includes(pageCase.variant)
-              ? .9
-              : .95;
+          const minimumVisibleFraction = pageCase.kind === 'index' ? .9 : .95;
           expect(layout.motifVisibleFraction).toBeGreaterThanOrEqual(minimumVisibleFraction);
         }
         if (layout.kind === 'index') {
