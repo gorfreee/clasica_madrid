@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_tala_producciones_1246",
+  "slug": "kebyart-quartet-punto-di-fuga",
+  "title": "Kebyart Quartet – ‘Punto di fuga’",
+  "status": "scheduled",
+  "venueId": "ven_ateneo_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_tala_producciones_1246_01",
+      "date": "2026-11-28",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Kebyart Quartet"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Jean-Philippe Rameau"
+    },
+    {
+      "name": "César Franck"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Franz Schubert"
+    },
+    {
+      "name": "György Ligeti"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "baroque",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_tala_producciones_es",
+      "url": "https://www.tala-producciones.es/salon-del-ateneo/kebyart-quartet-punto-di-fuga",
+      "checkedAt": "2026-09-21",
+      "externalId": "1246"
+    }
+  ],
+  "primarySourceId": "src_tala_producciones_es",
+  "lastVerifiedAt": "2026-09-21"
+}

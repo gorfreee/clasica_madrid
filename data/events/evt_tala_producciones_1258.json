@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_tala_producciones_1258",
+  "slug": "cuarteto-iberia-musica-en-transito-el-cuarteto-como-destino",
+  "title": "Cuarteto Iberia – ‘Música en tránsito: el cuarteto como destino’",
+  "status": "scheduled",
+  "venueId": "ven_ateneo_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_tala_producciones_1258_01",
+      "date": "2027-02-20",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Cuarteto Iberia"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Luigi Boccherini"
+    },
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Glass"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "classical",
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_tala_producciones_es",
+      "url": "https://www.tala-producciones.es/salon-del-ateneo/cuarteto-iberia-musica-en-transito-el-cuarteto-como-destino",
+      "checkedAt": "2026-09-21",
+      "externalId": "1258"
+    }
+  ],
+  "primarySourceId": "src_tala_producciones_es",
+  "lastVerifiedAt": "2026-09-21"
+}
