@@ -1,0 +1,465 @@
+---
+import Eyebrow from '../components/Eyebrow.astro';
+import HeroMotif from '../components/HeroMotif.astro';
+import Layout from '../layouts/Layout.astro';
+import { resolveTurnstileSiteKey } from '../lib/contact/turnstile-site-key.ts';
+import { CONTACT_PATH } from '../lib/presentation/urls.ts';
+
+const PUBLIC_EMAIL = 'hola@clasicamadrid.com';
+const turnstileSiteKey = resolveTurnstileSiteKey({
+  configuredSiteKey: import.meta.env.PUBLIC_TURNSTILE_SITE_KEY,
+  cloudflarePages: process.env['CF_PAGES'],
+  cloudflareBranch: process.env['CF_PAGES_BRANCH'],
+});
+---
+
+<Layout
+  title="Contacto"
+  description="Contacta con Clásica Madrid para corregir información, añadir un concierto o proponer una colaboración."
+  canonicalPath={CONTACT_PATH}
+>
+  <header class="section-intro contact-intro">
+    <div class="section-intro__copy">
+      <Eyebrow label="Contacto" />
+      <h1>Escríbenos</h1>
+      <p class="lede">
+        Si falta un concierto, has encontrado un error o quieres ponerte en contacto con Clásica
+        Madrid, escríbenos.
+      </p>
+    </div>
+    <HeroMotif variant="contact" class="section-intro__motif" />
+  </header>
+
+  <div class="contact-layout">
+    <section class="contact-form-section" aria-labelledby="contact-form-title">
+      <h2 id="contact-form-title">Envíanos un mensaje</h2>
+
+      <form
+        class="contact-form"
+        action="/api/contacto"
+        method="post"
+        data-contact-form
+      >
+        <div class="contact-form__field">
+          <label for="contact-name">Nombre <span>(opcional)</span></label>
+          <input
+            id="contact-name"
+            name="nombre"
+            type="text"
+            autocomplete="name"
+            maxlength="100"
+          />
+        </div>
+
+        <div class="contact-form__field">
+          <label for="contact-email">Email</label>
+          <input
+            id="contact-email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            maxlength="254"
+            required
+          />
+        </div>
+
+        <div class="contact-form__field">
+          <label for="contact-reason">Motivo</label>
+          <select id="contact-reason" name="motivo" required>
+            <option value="">Selecciona un motivo</option>
+            <option value="Corrección">Corrección</option>
+            <option value="Añadir un concierto">Añadir un concierto</option>
+            <option value="Colaboración">Colaboración</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+
+        <div class="contact-form__field">
+          <label for="contact-message">Mensaje</label>
+          <textarea
+            id="contact-message"
+            name="mensaje"
+            rows="8"
+            maxlength="5000"
+            required
+          ></textarea>
+        </div>
+
+        <div class="contact-form__trap" aria-hidden="true">
+          <label for="contact-website">No rellenes este campo</label>
+          <input
+            id="contact-website"
+            name="website"
+            type="text"
+            tabindex="-1"
+            autocomplete="off"
+          />
+        </div>
+
+        <input type="hidden" name="cf-turnstile-response" data-turnstile-token />
+        <div
+          id="contact-turnstile"
+          class="contact-form__turnstile"
+          data-turnstile-container
+          data-sitekey={turnstileSiteKey}
+        ></div>
+
+        <p class="contact-form__privacy">
+          Usaremos los datos enviados únicamente para gestionar tu mensaje y responderte.
+        </p>
+
+        <div class="contact-form__actions">
+          <button type="submit" data-contact-submit disabled>Enviar mensaje</button>
+          <p
+            class="contact-form__status"
+            data-contact-status
+            role="status"
+            aria-live="polite"
+          ></p>
+        </div>
+
+        <noscript>
+          <p class="contact-form__noscript">
+            Para usar el formulario necesitas activar JavaScript. También puedes escribirnos a
+            <a href={`mailto:${PUBLIC_EMAIL}`}>{PUBLIC_EMAIL}</a>.
+          </p>
+        </noscript>
+      </form>
+    </section>
+
+    <aside class="contact-direct" aria-labelledby="contact-direct-title">
+      <p class="contact-direct__label">También por email</p>
+      <h2 id="contact-direct-title">Escribe directamente</h2>
+      <p>Si lo prefieres, puedes enviarnos un correo a:</p>
+      <a class="contact-direct__email" href={`mailto:${PUBLIC_EMAIL}`}>{PUBLIC_EMAIL}</a>
+    </aside>
+  </div>
+</Layout>
+
+<script>
+  type TurnstileOptions = {
+    sitekey: string;
+    action: string;
+    language: string;
+    size: 'flexible';
+    'response-field': false;
+    callback: (token: string) => void;
+    'expired-callback': () => void;
+    'error-callback': () => void;
+    'timeout-callback': () => void;
+  };
+
+  type TurnstileApi = {
+    render: (container: HTMLElement, options: TurnstileOptions) => string;
+    reset: (widgetId: string) => void;
+  };
+
+  declare global {
+    interface Window {
+      turnstile?: TurnstileApi;
+    }
+  }
+
+  const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
+  const submit = form?.querySelector<HTMLButtonElement>('[data-contact-submit]');
+  const status = form?.querySelector<HTMLElement>('[data-contact-status]');
+  const tokenInput = form?.querySelector<HTMLInputElement>('[data-turnstile-token]');
+  const turnstileContainer = form?.querySelector<HTMLElement>('[data-turnstile-container]');
+
+  if (form && submit && status && tokenInput && turnstileContainer) {
+    let sending = false;
+    let widgetId: string | undefined;
+
+    const setStatus = (message: string, kind: 'idle' | 'success' | 'error' = 'idle') => {
+      status.textContent = message;
+      status.dataset.status = kind;
+    };
+
+    const setToken = (token = '') => {
+      tokenInput.value = token;
+      submit.disabled = sending || token.length === 0;
+    };
+
+    const resetTurnstile = () => {
+      setToken();
+      if (widgetId && window.turnstile) window.turnstile.reset(widgetId);
+    };
+
+    const renderTurnstile = () => {
+      const sitekey = turnstileContainer.dataset.sitekey;
+      if (!sitekey || !window.turnstile || widgetId) return;
+
+      widgetId = window.turnstile.render(turnstileContainer, {
+        sitekey,
+        action: 'contacto',
+        language: 'es',
+        size: 'flexible',
+        'response-field': false,
+        callback: (token) => {
+          setToken(token);
+        },
+        'expired-callback': () => {
+          setToken();
+          setStatus('La verificación ha caducado. Inténtalo de nuevo.', 'error');
+        },
+        'error-callback': () => {
+          setToken();
+          setStatus(
+            'No hemos podido cargar la verificación. Puedes escribirnos a hola@clasicamadrid.com.',
+            'error',
+          );
+        },
+        'timeout-callback': () => {
+          setToken();
+          setStatus('La verificación ha agotado el tiempo. Inténtalo de nuevo.', 'error');
+        },
+      });
+    };
+
+    const turnstileScript = document.createElement('script');
+    turnstileScript.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+    turnstileScript.async = true;
+    turnstileScript.defer = true;
+    turnstileScript.addEventListener('load', renderTurnstile, { once: true });
+    turnstileScript.addEventListener(
+      'error',
+      () => {
+        setStatus(
+          'No hemos podido cargar la verificación. Puedes escribirnos a hola@clasicamadrid.com.',
+          'error',
+        );
+      },
+      { once: true },
+    );
+    document.head.append(turnstileScript);
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (sending || !form.reportValidity()) return;
+      if (!tokenInput.value) {
+        setStatus('Completa la verificación antes de enviar el mensaje.', 'error');
+        return;
+      }
+
+      sending = true;
+      submit.disabled = true;
+      submit.textContent = 'Enviando…';
+      form.setAttribute('aria-busy', 'true');
+      setStatus('Enviando mensaje…');
+
+      try {
+        const body = new URLSearchParams();
+        for (const [key, value] of new FormData(form)) {
+          if (typeof value === 'string') body.append(key, value);
+        }
+
+        const response = await fetch(form.action, {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+          },
+          body,
+          credentials: 'same-origin',
+        });
+        const result = (await response.json().catch(() => null)) as { ok?: boolean } | null;
+
+        if (!response.ok || !result?.ok) throw new Error('contact-request-failed');
+
+        form.reset();
+        setStatus('Gracias. Tu mensaje se ha enviado.', 'success');
+      } catch {
+        setStatus(
+          'No hemos podido enviar el mensaje. Puedes escribirnos a hola@clasicamadrid.com.',
+          'error',
+        );
+      } finally {
+        sending = false;
+        submit.textContent = 'Enviar mensaje';
+        form.removeAttribute('aria-busy');
+        resetTurnstile();
+      }
+    });
+  }
+</script>
+
+<style>
+  .contact-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(15rem, .65fr);
+    max-width: 67rem;
+    margin-top: 3.5rem;
+    border-top: 2px solid var(--ink);
+  }
+
+  .contact-form-section {
+    min-width: 0;
+    padding: 2.25rem 3.5rem 1rem 0;
+  }
+
+  .contact-layout h2 {
+    margin: 0;
+    font-size: clamp(1.45rem, 2.7vw, 2.15rem);
+    font-weight: 800;
+    letter-spacing: var(--type-tracking-heading);
+    line-height: 1;
+  }
+
+  .contact-form {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.35rem 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .contact-form__field {
+    display: grid;
+    gap: .5rem;
+  }
+
+  .contact-form__field:nth-of-type(4),
+  .contact-form__turnstile,
+  .contact-form__privacy,
+  .contact-form__actions,
+  .contact-form noscript {
+    grid-column: 1 / -1;
+  }
+
+  .contact-form label,
+  .contact-direct__label {
+    margin: 0;
+    font-size: var(--type-size-label);
+    font-weight: 800;
+    letter-spacing: var(--type-tracking-label);
+    text-transform: uppercase;
+  }
+
+  .contact-form label span {
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .contact-form input,
+  .contact-form select,
+  .contact-form textarea {
+    width: 100%;
+    min-width: 0;
+    border: 1px solid var(--ink);
+    border-radius: 0;
+    background: var(--paper-light);
+    color: var(--ink);
+  }
+
+  .contact-form input,
+  .contact-form select {
+    min-height: 3.25rem;
+    padding: .75rem .85rem;
+  }
+
+  .contact-form textarea {
+    min-height: 12rem;
+    padding: .85rem;
+    line-height: 1.5;
+    resize: vertical;
+  }
+
+  .contact-form input:focus,
+  .contact-form select:focus,
+  .contact-form textarea:focus {
+    border-color: var(--blue);
+  }
+
+  .contact-form__trap {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .contact-form__turnstile {
+    width: min(100%, 25rem);
+    min-height: 4.1rem;
+  }
+
+  .contact-form__privacy,
+  .contact-form__status,
+  .contact-form__noscript {
+    margin: 0;
+    color: var(--muted);
+    font-size: .82rem;
+    line-height: 1.5;
+  }
+
+  .contact-form__actions {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 1rem 1.25rem;
+  }
+
+  .contact-form__actions button {
+    min-height: 3.25rem;
+    padding: .8rem 1.2rem;
+    border: 0;
+    border-radius: 0;
+    background: var(--ink);
+    color: var(--paper-light);
+    font-size: .8rem;
+    font-weight: 800;
+    letter-spacing: var(--type-tracking-label);
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .contact-form__actions button:hover:not(:disabled) { background: var(--blue); }
+  .contact-form__actions button:disabled { cursor: not-allowed; opacity: .52; }
+  .contact-form__status[data-status='success'] { color: #176235; font-weight: 700; }
+  .contact-form__status[data-status='error'] { color: #9c2919; font-weight: 700; }
+
+  .contact-direct {
+    padding: 2.25rem 0 1rem 2.5rem;
+    border-left: 1px solid var(--ink);
+  }
+
+  .contact-direct__label { color: var(--blue); }
+  .contact-direct h2 { margin-top: .8rem; }
+  .contact-direct > p:not(.contact-direct__label) {
+    margin: 1.25rem 0 .6rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .contact-direct__email {
+    display: inline-block;
+    color: var(--blue);
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    font-weight: 800;
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 760px) {
+    .contact-layout { grid-template-columns: 1fr; }
+    .contact-form-section { padding-right: 0; }
+    .contact-direct {
+      margin-top: 2.5rem;
+      padding: 2rem 0 0;
+      border-top: 1px solid var(--ink);
+      border-left: 0;
+    }
+  }
+
+  @media (max-width: 620px) {
+    .contact-layout { margin-top: 2.5rem; }
+    .contact-form { grid-template-columns: 1fr; gap: 1.15rem; }
+    .contact-form__field,
+    .contact-form__field:nth-of-type(4),
+    .contact-form__turnstile,
+    .contact-form__privacy,
+    .contact-form__actions,
+    .contact-form noscript { grid-column: 1; }
+    .contact-form__actions { grid-template-columns: 1fr; }
+    .contact-form__actions button { width: 100%; }
+  }
+</style>

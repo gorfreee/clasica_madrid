@@ -315,6 +315,7 @@ describe('sitemap', () => {
     expect(sitemapPageFilter('https://clasicamadrid.com/404')).toBe(false);
     expect(sitemapPageFilter('https://clasicamadrid.com/_agenda/completa/')).toBe(false);
     expect(sitemapPageFilter('https://clasicamadrid.com/eventos/carmen/')).toBe(true);
+    expect(sitemapPageFilter('https://clasicamadrid.com/contacto/')).toBe(true);
     expect(sitemapPageFilter('https://clasicamadrid.com/agenda/gratis/')).toBe(true);
     expect(sitemapPageFilter('https://clasicamadrid.com/agenda/fin-de-semana/')).toBe(true);
     expect(sitemapPageFilter('https://clasicamadrid.com/agenda/opera/')).toBe(false);

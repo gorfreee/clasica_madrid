@@ -2,7 +2,7 @@
 
 ## Cursor Cloud specific instructions
 
-This repo is **Clásica Madrid**, a single-product static website built with **Astro 7** and **Tailwind CSS v4** (CSS-first, no `tailwind.config.*`). The public site has no backend or database: Git + `data/**` are the source of truth, and Cloudflare Pages serves the built HTML.
+This repo is **Clásica Madrid**, a single-product static website built with **Astro 7** and **Tailwind CSS v4** (CSS-first, no `tailwind.config.*`). The public site has no database or application backend: Git + `data/**` are the source of truth, Cloudflare Pages serves the built HTML, and one isolated Pages Function handles `POST /api/contacto` without persistence.
 
 Locally, the Astro dev/preview server is the only process you need. In production there is also deliberately small auxiliary infrastructure for catalog maintenance: GitHub Actions for site CI and automated ingestion, plus a Cloudflare fetch relay for sources that GitHub-hosted runners cannot reach. Those pieces are not a public API or a second product. Operational detail lives in `docs/ingestion.md` and `infra/fetch-relay/`.
 
@@ -10,7 +10,7 @@ Canonical event data lives in `data/` and is validated at build/CI time. An empt
 
 ### Shape of the system
 
-- Static public website (Astro build → Cloudflare Pages).
+- Static public website (Astro build → Cloudflare Pages) plus the isolated contact Pages Function.
 - Git + `data/**` as the published catalog.
 - Site CI on pushes and pull requests (validate, test, typecheck, build, e2e smoke).
 - Automated ingestion via GitHub Actions (scheduled and manual).

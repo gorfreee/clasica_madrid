@@ -31,14 +31,18 @@ describe('navegación del encabezado', () => {
     expect(headerNavigation('/eventos/carmen/').desktopLinks[0]?.current).toBe(false);
   });
 
-  it('mantiene Agenda y Lugares como destinos primarios y agrupa Acerca de', () => {
+  it('mantiene Agenda y Lugares como destinos primarios y agrupa las páginas secundarias', () => {
     const nav = headerNavigation('/');
     expect(nav.agenda.label).toBe('Agenda');
     expect(PRIMARY_NAV.map((item) => item.label)).toEqual(['Lugares']);
     expect(nav.desktopLinks.map((link) => link.label)).toEqual(['Lugares']);
-    expect(SECONDARY_NAV.map((item) => item.label)).toEqual(['Acerca de']);
-    expect(nav.secondaryLinks.map((link) => link.label)).toEqual(['Acerca de']);
-    expect(nav.mobileMenuLinks.map((link) => link.label)).toEqual(['Lugares', 'Acerca de']);
+    expect(SECONDARY_NAV.map((item) => item.label)).toEqual(['Acerca de', 'Contacto']);
+    expect(nav.secondaryLinks.map((link) => link.label)).toEqual(['Acerca de', 'Contacto']);
+    expect(nav.mobileMenuLinks.map((link) => link.label)).toEqual([
+      'Lugares',
+      'Acerca de',
+      'Contacto',
+    ]);
     expect(nav.showMore).toBe(true);
     expect(PRIMARY_NAV.concat(SECONDARY_NAV).some((item) => item.href.includes('/agenda/'))).toBe(false);
   });
@@ -48,7 +52,10 @@ describe('navegación del encabezado', () => {
       const nav = headerNavigation(path);
       expect(nav.agenda).toMatchObject({ href: '/', label: 'Agenda', current: false });
       expect(nav.desktopLinks.map((link) => link.href)).toEqual(['/lugares/']);
-      expect(nav.secondaryLinks.map((link) => link.href)).toEqual(['/acerca-de/']);
+      expect(nav.secondaryLinks.map((link) => link.href)).toEqual([
+        '/acerca-de/',
+        '/contacto/',
+      ]);
     }
   });
 
@@ -58,9 +65,26 @@ describe('navegación del encabezado', () => {
     expect(nav.desktopLinks[0]?.current).toBe(false);
     expect(nav.secondaryLinks).toEqual([
       { href: '/acerca-de/', label: 'Acerca de', current: true },
+      { href: '/contacto/', label: 'Contacto', current: false },
     ]);
     expect(nav.moreCurrent).toBe(true);
     expect(nav.mobileMenuLinks[1]?.current).toBe(true);
+  });
+
+  it('coloca Contacto después de Acerca de y la marca como activa', () => {
+    const nav = headerNavigation('/contacto/');
+    expect(SECONDARY_NAV.map((item) => item.href)).toEqual(['/acerca-de/', '/contacto/']);
+    expect(nav.secondaryLinks).toEqual([
+      { href: '/acerca-de/', label: 'Acerca de', current: false },
+      { href: '/contacto/', label: 'Contacto', current: true },
+    ]);
+    expect(nav.moreCurrent).toBe(true);
+    expect(nav.mobileMenuLinks.map((link) => link.label)).toEqual([
+      'Lugares',
+      'Acerca de',
+      'Contacto',
+    ]);
+    expect(nav.mobileMenuLinks[2]?.current).toBe(true);
   });
 
   it('agrupa varias páginas secundarias en Más y en el menú móvil', () => {
