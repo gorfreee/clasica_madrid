@@ -3,7 +3,6 @@ import Layout from '../../layouts/Layout.astro';
 import AgendaItem from '../../components/AgendaItem.astro';
 import ExternalAction from '../../components/ExternalAction.astro';
 import Eyebrow from '../../components/Eyebrow.astro';
-import PageHero from '../../components/PageHero.astro';
 import PlaceAddress from '../../components/PlaceAddress.astro';
 import ShareAction from '../../components/ShareAction.astro';
 import { buildVenueShare } from '../../lib/presentation/share.ts';
@@ -32,7 +31,7 @@ const share = buildVenueShare({
 
 <Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath} jsonLd={model.jsonLd}>
   <article class="detail venue-detail">
-    <PageHero layout="detail" motif="venue">
+    <header class="page-hero page-hero--detail">
       <Eyebrow label="Lugares" href={VENUES_INDEX_PATH} />
       <h1>{model.name}</h1>
       <div class="venue-detail__practical">
@@ -53,7 +52,7 @@ const share = buildVenueShare({
         }
         <ShareAction title={share.title} text={share.text} path={share.path} contentType="venue" />
       </div>
-    </PageHero>
+    </header>
 
     <section class="detail-section venue-programme" aria-labelledby="proximos-titulo">
       <div class="section-heading">

@@ -2,7 +2,6 @@
 import Layout from '../../layouts/Layout.astro';
 import ExternalAction from '../../components/ExternalAction.astro';
 import Eyebrow from '../../components/Eyebrow.astro';
-import PageHero from '../../components/PageHero.astro';
 import PlaceAddress from '../../components/PlaceAddress.astro';
 import ShareAction from '../../components/ShareAction.astro';
 import { formatSourceCitationMeta } from '../../lib/presentation/labels.ts';
@@ -41,12 +40,12 @@ const share = buildEventShare({
 
 <Layout title={model.documentTitle} description={model.description} canonicalPath={model.canonicalPath} jsonLd={model.jsonLd}>
   <article class="detail event-detail">
-    <PageHero layout="detail" motif="event">
+    <header class="page-hero page-hero--detail">
       <Eyebrow label="Agenda" href={AGENDA_PATH} />
       {model.statusLabel !== 'Programado' && <p class="status-alert">{model.statusLabel}</p>}
       <h1>{model.title}</h1>
       {model.seriesName && <p class="page-hero__series">{model.seriesKind} / {model.seriesName}</p>}
-    </PageHero>
+    </header>
 
     <dl class="event-facts fact-list">
       <div class="event-facts__when">

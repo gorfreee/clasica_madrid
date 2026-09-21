@@ -1,20 +1,19 @@
 import { expect, test } from '@playwright/test';
 
-const pages = [
-  { path: '/', variant: 'agenda', hero: '.page-hero--agenda', kind: 'index' },
-  { path: '/lugares/', variant: 'venues', hero: '.page-hero--venues', kind: 'index' },
-  {
-    path: '/eventos/excelentia-noches-en-los-jardines-de-espana-y-concierto-de-aranjuez/',
-    variant: 'event',
-    hero: '.page-hero--event',
-    kind: 'detail',
-  },
-  {
-    path: '/lugares/basilica-pontificia-de-san-miguel/',
-    variant: 'venue',
-    hero: '.page-hero--venue',
-    kind: 'detail',
-  },
+const indexPages = [
+  { path: '/', variant: 'agenda', hero: '.page-hero--agenda' },
+  { path: '/agenda/gratis/', variant: 'agenda', hero: '.page-hero--agenda' },
+  { path: '/agenda/fin-de-semana/', variant: 'agenda', hero: '.page-hero--agenda' },
+  { path: '/lugares/', variant: 'venues', hero: '.page-hero--venues' },
+] as const;
+
+const pagesWithoutMotif = [
+  '/eventos/excelentia-noches-en-los-jardines-de-espana-y-concierto-de-aranjuez/',
+  '/eventos/xxviii-festival-internacional-de-musica-contemporanea-de-madrid-coma-26-orquesta-sinfonica-de-la-universidad-complutense/',
+  '/lugares/basilica-pontificia-de-san-miguel/',
+  '/lugares/teatro-real/',
+  '/acerca-de/',
+  '/contacto/',
 ] as const;
 
 const viewports = [
@@ -29,8 +28,8 @@ for (const viewport of viewports) {
   test.describe(`motivos de hero a ${viewport.name}px`, () => {
     test.use({ viewport: { width: viewport.width, height: viewport.height } });
 
-    for (const pageCase of pages) {
-      test(`${pageCase.variant} conserva la composición y no desborda`, async ({ page }) => {
+    for (const pageCase of indexPages) {
+      test(`${pageCase.variant} en ${pageCase.path} conserva la composición y no desborda`, async ({ page }) => {
         await page.goto(pageCase.path);
 
         const hero = page.locator(pageCase.hero).first();
@@ -40,15 +39,9 @@ for (const viewport of viewports) {
         await expect(motif).toHaveAttribute('aria-hidden', 'true');
         await expect(motif).toHaveAttribute('focusable', 'false');
         await expect(motif.locator('image, filter, script, animate, animateTransform')).toHaveCount(0);
+        await expect(motif).toBeVisible();
 
-        const detailMotifIsHidden = pageCase.kind === 'detail' && viewport.width <= 620;
-        if (detailMotifIsHidden) {
-          await expect(motif).toBeHidden();
-        } else {
-          await expect(motif).toBeVisible();
-        }
-
-        const layout = await hero.evaluate((element, { variant, kind }) => {
+        const layout = await hero.evaluate((element, variant) => {
           const heroRect = element.getBoundingClientRect();
           const svg = element.querySelector<SVGElement>(`[data-hero-motif="${variant}"]`);
           const copy = element.querySelector<HTMLElement>('.page-hero__copy');
@@ -74,23 +67,26 @@ for (const viewport of viewports) {
             clipPath: computed.clipPath,
             heroHeight: heroRect.height,
             motifArea,
-            kind,
           };
-        }, { variant: pageCase.variant, kind: pageCase.kind });
+        }, pageCase.variant);
 
         expect(layout.pageScrollWidth).toBe(layout.pageClientWidth);
         expect(layout.contentFits).toBe(true);
         expect(layout.clipPath).toBe('none');
-        if (detailMotifIsHidden) {
-          expect(layout.motifArea).toBe(0);
-        } else {
-          const minimumVisibleFraction = pageCase.kind === 'index' ? .9 : .95;
-          expect(layout.motifVisibleFraction).toBeGreaterThanOrEqual(minimumVisibleFraction);
-        }
-        if (layout.kind === 'index') {
-          expect(layout.heroHeight).toBeLessThanOrEqual(viewport.height * .48);
+        expect(layout.motifArea).toBeGreaterThan(0);
+        expect(layout.motifVisibleFraction).toBeGreaterThanOrEqual(0.9);
+        if (pageCase.path === '/' || pageCase.path === '/lugares/') {
+          expect(layout.heroHeight).toBeLessThanOrEqual(viewport.height * 0.48);
         }
       });
     }
   });
 }
+
+test('las fichas y las páginas editoriales no tienen motivo gráfico', async ({ page }) => {
+  for (const path of pagesWithoutMotif) {
+    await page.goto(path);
+    await expect(page.locator('[data-hero-motif]'), path).toHaveCount(0);
+    await expect(page.locator('.page-hero__artwork'), path).toHaveCount(0);
+  }
+});

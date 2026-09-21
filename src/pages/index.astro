@@ -12,7 +12,7 @@ const model = await loadAgendaPage(Astro.url);
 ---
 
 <Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath} jsonLd={model.jsonLd}>
-  <PageHero layout="index" motif="agenda">
+  <PageHero motif="agenda">
     <Eyebrow label="Agenda" />
     <h1>
       <span>Toda la</span>

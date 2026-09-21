@@ -137,6 +137,7 @@ test.describe('jerarquía de la ficha de evento', () => {
         await page.goto(route);
         await expect(page.locator('.event-facts__when')).toBeVisible();
         await expect(page.locator('.event-facts__venue')).toBeVisible();
+        await expect(page.locator('[data-hero-motif], .page-hero__artwork')).toHaveCount(0);
         await expectNoHorizontalOverflow(page);
       }
     }
@@ -153,7 +154,6 @@ test.describe('jerarquía de la ficha de evento', () => {
 
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(LONG_TITLE);
-    await expect(page.locator('.page-hero__artwork')).toBeHidden();
     const [mobileWhen, mobileVenue, mobileCta] = await Promise.all([
       page.locator('.event-facts__when').boundingBox(),
       page.locator('.event-facts__venue').boundingBox(),
