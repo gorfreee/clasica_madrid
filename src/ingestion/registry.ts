@@ -21,6 +21,7 @@ import { patrimonioNacionalAdapter } from './sources/patrimonio-nacional.ts';
 import { ateneoMadridAdapter } from './sources/ateneo-madrid.ts';
 import { escuelaReinaSofiaAdapter } from './sources/escuela-reina-sofia.ts';
 import { rcsmmAdapter } from './sources/rcsmm.ts';
+import { talaProduccionesAdapter } from './sources/tala-producciones.ts';
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
@@ -45,6 +46,7 @@ const ADAPTERS: Record<string, SourceAdapter> = {
   [ateneoMadridAdapter.id]: ateneoMadridAdapter,
   [escuelaReinaSofiaAdapter.id]: escuelaReinaSofiaAdapter,
   [rcsmmAdapter.id]: rcsmmAdapter,
+  [talaProduccionesAdapter.id]: talaProduccionesAdapter,
 };
 
 const srcAuditorio: Source = {
@@ -378,6 +380,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Real Conservatorio Superior de Música de Madrid',
       kind: 'official',
       url: 'https://rcsmm.eu/',
+    },
+  },
+  {
+    id: 'tala-producciones',
+    name: 'TALA Producciones',
+    urls: ['https://www.tala-producciones.es/salon-del-ateneo/'],
+    adapterId: talaProduccionesAdapter.id,
+    catalogSourceId: 'src_tala_producciones_es',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_tala_producciones_es',
+      slug: 'tala-producciones',
+      name: 'TALA Producciones',
+      kind: 'official',
+      url: 'https://www.tala-producciones.es/',
     },
   },
 ];
