@@ -937,11 +937,6 @@ a.eyebrow:focus-visible {
   gap: .7rem;
   font-size: .72rem;
 }
-.site-footer__meta > a {
-  font-weight: 700;
-  letter-spacing: var(--type-tracking-label);
-  text-transform: uppercase;
-}
 
 @media (max-width: 900px) {
   :root {
