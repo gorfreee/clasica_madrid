@@ -2,12 +2,15 @@
 import Eyebrow from '../components/Eyebrow.astro';
 import HeroMotif from '../components/HeroMotif.astro';
 import Layout from '../layouts/Layout.astro';
+import { resolveTurnstileSiteKey } from '../lib/contact/turnstile-site-key.ts';
 import { CONTACT_PATH } from '../lib/presentation/urls.ts';
 
 const PUBLIC_EMAIL = 'hola@clasicamadrid.com';
-const TURNSTILE_TEST_SITE_KEY = '1x00000000000000000000AA';
-const turnstileSiteKey =
-  import.meta.env.PUBLIC_TURNSTILE_SITE_KEY?.trim() || TURNSTILE_TEST_SITE_KEY;
+const turnstileSiteKey = resolveTurnstileSiteKey({
+  configuredSiteKey: import.meta.env.PUBLIC_TURNSTILE_SITE_KEY,
+  cloudflarePages: process.env['CF_PAGES'],
+  cloudflareBranch: process.env['CF_PAGES_BRANCH'],
+});
 ---
 
 <Layout

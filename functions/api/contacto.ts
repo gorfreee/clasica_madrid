@@ -1,6 +1,7 @@
 const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 const CLOUDFLARE_API_ROOT = 'https://api.cloudflare.com/client/v4';
-const DEFAULT_CONTACT_FROM = 'Clásica Madrid <hola@clasicamadrid.com>';
+const DEFAULT_CONTACT_FROM_ADDRESS = 'hola@clasicamadrid.com';
+const CONTACT_FROM_NAME = 'Clásica Madrid';
 const DEFAULT_ALLOWED_HOSTNAMES = 'clasicamadrid.com,www.clasicamadrid.com';
 const EXPECTED_TURNSTILE_ACTION = 'contacto';
 const MAX_BODY_BYTES = 16_384;
@@ -183,7 +184,7 @@ function contactConfig(env: ContactEnv) {
   const accountId = env.CLOUDFLARE_ACCOUNT_ID?.trim();
   const emailApiToken = env.CLOUDFLARE_EMAIL_API_TOKEN?.trim();
   const recipient = env.CONTACT_RECIPIENT?.trim();
-  const from = env.CONTACT_FROM?.trim() || DEFAULT_CONTACT_FROM;
+  const from = env.CONTACT_FROM?.trim() || DEFAULT_CONTACT_FROM_ADDRESS;
   const allowedHostnames = new Set(
     (env.TURNSTILE_ALLOWED_HOSTNAMES || DEFAULT_ALLOWED_HOSTNAMES)
       .split(',')
@@ -191,7 +192,9 @@ function contactConfig(env: ContactEnv) {
       .filter(Boolean),
   );
 
-  if (!turnstileSecret || !accountId || !emailApiToken || !recipient || !from) return null;
+  if (!turnstileSecret || !accountId || !emailApiToken || !recipient || !isValidEmail(from)) {
+    return null;
+  }
   if (allowedHostnames.size === 0) return null;
 
   return {
@@ -263,7 +266,10 @@ async function sendContactEmail(
       },
       body: JSON.stringify({
         to: [config.recipient],
-        from: config.from,
+        from: {
+          address: config.from,
+          name: CONTACT_FROM_NAME,
+        },
         reply_to: payload.email,
         subject: `[Clásica Madrid] ${payload.motivo}`,
         text,

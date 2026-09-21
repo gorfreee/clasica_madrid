@@ -10,7 +10,7 @@ const env: ContactEnv = {
   CLOUDFLARE_ACCOUNT_ID: 'account-test',
   CLOUDFLARE_EMAIL_API_TOKEN: 'email-token-test',
   CONTACT_RECIPIENT: 'private-recipient@example.test',
-  CONTACT_FROM: 'Clásica Madrid <hola@clasicamadrid.com>',
+  CONTACT_FROM: 'hola@clasicamadrid.com',
 };
 
 const validFields = {
@@ -71,12 +71,74 @@ describe('Cloudflare Pages Function de contacto', () => {
     const email = JSON.parse(String(emailCall?.[1]?.body));
     expect(email).toMatchObject({
       to: ['private-recipient@example.test'],
-      from: 'Clásica Madrid <hola@clasicamadrid.com>',
+      from: {
+        address: 'hola@clasicamadrid.com',
+        name: 'Clásica Madrid',
+      },
       reply_to: 'ana@example.com',
       subject: '[Clásica Madrid] Corrección',
     });
+    expect(email.from).toEqual({
+      address: env.CONTACT_FROM,
+      name: 'Clásica Madrid',
+    });
     expect(email.text).toContain('Nombre: Ana');
     expect(email.text).toContain('La hora publicada debería ser las 19:30.');
+  });
+
+  it('ignora from, to y subject enviados por el visitante', async () => {
+    const fetchImpl = successfulExternalFetch();
+    const response = await handleContactRequest(
+      requestWith({
+        ...validFields,
+        motivo: 'Colaboración',
+        from: 'atacante@example.com',
+        to: 'atacante@example.com',
+        subject: 'Asunto libre del visitante',
+      }),
+      env,
+      { fetchImpl },
+    );
+
+    expect(response.status).toBe(200);
+    const email = JSON.parse(String(fetchImpl.mock.calls[1]?.[1]?.body));
+    expect(email.to).toEqual([env.CONTACT_RECIPIENT]);
+    expect(email.from).toEqual({
+      address: 'hola@clasicamadrid.com',
+      name: 'Clásica Madrid',
+    });
+    expect(email.reply_to).toBe('ana@example.com');
+    expect(email.subject).toBe('[Clásica Madrid] Colaboración');
+    expect(email.subject).not.toContain('Asunto libre');
+    expect(JSON.stringify(email)).not.toContain('atacante@example.com');
+  });
+
+  it('usa la dirección por defecto cuando CONTACT_FROM no está definido', async () => {
+    const fetchImpl = successfulExternalFetch();
+    const { CONTACT_FROM: _ignored, ...envWithoutFrom } = env;
+    const response = await handleContactRequest(requestWith(), envWithoutFrom, { fetchImpl });
+
+    expect(response.status).toBe(200);
+    const email = JSON.parse(String(fetchImpl.mock.calls[1]?.[1]?.body));
+    expect(email.from).toEqual({
+      address: 'hola@clasicamadrid.com',
+      name: 'Clásica Madrid',
+    });
+    expect(email.reply_to).toBe(validFields.email);
+    expect(email.to).toEqual([env.CONTACT_RECIPIENT]);
+  });
+
+  it('rechaza un CONTACT_FROM que no es solo una dirección', async () => {
+    const fetchImpl = successfulExternalFetch();
+    const response = await handleContactRequest(
+      requestWith(),
+      { ...env, CONTACT_FROM: 'Clásica Madrid <hola@clasicamadrid.com>' },
+      { fetchImpl },
+    );
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toMatchObject({ code: 'configuration_error' });
+    expect(fetchImpl).not.toHaveBeenCalled();
   });
 
   it('rechaza un email inválido antes de llamar a servicios externos', async () => {

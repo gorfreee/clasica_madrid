@@ -12,15 +12,23 @@ Cloudflare Email Routing.
 
 Variable disponible durante el build:
 
-- `PUBLIC_TURNSTILE_SITE_KEY`: site key pública del widget de Turnstile. Si falta en
-  local o preview, el build usa la site key de test oficial que siempre muestra una
-  verificación válida; un secret real de producción rechazará su token de prueba.
+- `PUBLIC_TURNSTILE_SITE_KEY`: site key pública del widget de Turnstile. En
+  `astro dev`, en `astro build` local, en la CI y en los deployments preview de
+  Cloudflare Pages, si falta esta variable la página usa la site key de test
+  oficial (`1x00000000000000000000AA`), que siempre muestra una verificación
+  válida. Un secret real de producción rechazará ese token de prueba. En el
+  build de producción de Cloudflare Pages (`CF_PAGES=1` y
+  `CF_PAGES_BRANCH=main`) la variable es obligatoria: si falta, el build de
+  `/contacto/` falla y no se publica el formulario con la clave de prueba.
 
 Variables runtime no sensibles:
 
 - `CLOUDFLARE_ACCOUNT_ID`: cuenta desde la que se llama a Email Service.
-- `CONTACT_FROM`: remitente verificado. Valor recomendado:
-  `Clásica Madrid <hola@clasicamadrid.com>`.
+- `CONTACT_FROM`: dirección de email del remitente verificado, sin nombre
+  visible. Ejemplo: `hola@clasicamadrid.com`. Si se omite, la Function usa esa
+  misma dirección. Email Service recibe `from.address` con ese valor y
+  `from.name` fijo `Clásica Madrid`. El visitante no controla el remitente, el
+  destinatario ni el asunto.
 - `TURNSTILE_ALLOWED_HOSTNAMES`: hostnames exactos separados por comas. El default es
   `clasicamadrid.com,www.clasicamadrid.com`. Añade el hostname concreto de preview si
   quieres probar un deployment de preview y autorízalo también en el widget Turnstile.
