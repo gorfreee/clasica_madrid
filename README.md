@@ -39,6 +39,8 @@ npm run ai:smoke -- --route provider:model
 npm run ai:smoke -- --route provider:model --all-purposes
 ```
 
+El formulario público de contacto usa una Cloudflare Pages Function aislada. Variables, secrets y prueba local: [`docs/contact.md`](docs/contact.md).
+
 ## Dónde están los datos
 
 Los datos canónicos están versionados en Git, no en una base de datos:
@@ -85,6 +87,6 @@ El resto de la semántica temporal sí se fija en el build: atajos `Hoy` / `Mañ
 
 ## CI y publicación
 
-Cada push a `main` y cada pull request ejecuta validación de datos, tests, typecheck y build (`.github/workflows/ci.yml`). El push directo a `main` está permitido. Cloudflare Pages despliega el sitio estático desde `main`.
+Cada push a `main` y cada pull request ejecuta validación de datos, tests, typecheck y build (`.github/workflows/ci.yml`). El push directo a `main` está permitido. Cloudflare Pages despliega el sitio estático desde `main`; la única ruta dinámica del producto es la Pages Function acotada de contacto.
 
 El catálogo también se mantiene de forma automática: una ingestión programada propone cambios en `data/**`, abre una PR, espera la CI del sitio y, cuando el health y la configuración lo permiten, fusiona. El despliegue sigue siendo el de siempre desde `main`. El detalle operativo está en [`docs/ingestion.md`](docs/ingestion.md).

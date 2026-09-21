@@ -1,4 +1,4 @@
-import { ABOUT_PATH, AGENDA_PATH, VENUES_INDEX_PATH } from './urls.ts';
+import { ABOUT_PATH, AGENDA_PATH, CONTACT_PATH, VENUES_INDEX_PATH } from './urls.ts';
 
 export type NavItemDefinition = {
   href: string;
@@ -53,6 +53,10 @@ export const SECONDARY_NAV: readonly NavItemDefinition[] = [
   {
     href: ABOUT_PATH,
     label: 'Acerca de',
+  },
+  {
+    href: CONTACT_PATH,
+    label: 'Contacto',
   },
 ];
 

@@ -22,13 +22,13 @@ Distingue principios duraderos de operación actual. El detalle operativo de la 
 - **JSON** versionado en GitHub para los datos canónicos.
 - **Zod** para validar esquemas y datos.
 - **Pagefind** para búsqueda estática, si resulta suficiente; todavía no está instalado. La agenda filtra en cliente sobre el HTML generado en build.
-- **Cloudflare Pages** para hosting y despliegue estático.
+- **Cloudflare Pages** para hosting y despliegue estático, más una Pages Function aislada para el formulario de contacto.
 - **GitHub Actions** para la CI del sitio y para la ingestión automatizada.
 - Un **fetch relay** de Cloudflare, GET y autenticado, como infraestructura auxiliar de ingestión — no como backend de la web. El detalle está en `infra/fetch-relay/`.
 - **Vitest** para lógica y validadores.
 - **Playwright** (Chromium) para unos pocos smoke tests de la agenda y la ficha de evento. No es una suite de regresión visual ni un framework de testing de UI.
 
-No usar una base de datos, backend, SSR, API propia, CMS, sistema de autenticación ni servicios de búsqueda externos para servir la agenda pública.
+No usar una base de datos, SSR, CMS, sistema de autenticación ni servicios de búsqueda externos para servir la agenda pública. La única excepción actual es la Function `POST /api/contacto`, sin persistencia y separada del renderizado estático.
 
 ## Separación entre interfaz y dominio
 
