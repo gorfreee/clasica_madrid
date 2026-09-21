@@ -115,7 +115,7 @@ const share = buildEventShare({
           <div class="section-heading"><h2 id="datos-titulo">Sobre el concierto</h2></div>
           <dl class="concert-profile">
             {model.concertProfile.map((item) => (
-              <div class:list={['concert-profile__row', { 'concert-profile__row--quiet': item.quiet }]}>
+              <div class="concert-profile__row">
                 <dt>{item.label}</dt>
                 <dd>{item.value}</dd>
               </div>
@@ -140,7 +140,7 @@ const share = buildEventShare({
 
     {
       model.performers.length > 0 && (
-        <section class="detail-section detail-section--supporting" aria-labelledby="interpretes-titulo">
+        <section class="detail-section" aria-labelledby="interpretes-titulo">
           <div class="section-heading"><h2 id="interpretes-titulo">Intérpretes</h2></div>
           <ul class="editorial-list editorial-list--supporting">
             {model.performers.map((performer) => (
@@ -156,7 +156,7 @@ const share = buildEventShare({
 
     {
       model.works.length > 0 && (
-        <section class="detail-section detail-section--supporting programme" aria-labelledby="obras-titulo">
+        <section class="detail-section programme" aria-labelledby="obras-titulo">
           <div class="section-heading"><h2 id="obras-titulo">Programa</h2></div>
           <ol class="programme-list programme-list--supporting">
             {model.works.map((work) => (

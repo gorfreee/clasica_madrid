@@ -7,11 +7,11 @@ describe('perfil de la ficha de evento', () => {
     const page = buildEventPageModel(makeCatalog(), 'matinees-de-otono', testClock);
 
     expect(page?.concertProfile).toEqual([
-      { label: 'Acceso', value: 'De pago', quiet: false },
-      { label: 'Formato', value: 'Sinfónico', quiet: false },
-      { label: 'Época', value: 'Clasicismo, Romanticismo', quiet: false },
-      { label: 'Organiza', value: 'Orquesta y Coro Nacionales de España', quiet: false },
-      { label: 'Programación', value: 'Circuito habitual', quiet: true },
+      { label: 'Acceso', value: 'De pago' },
+      { label: 'Formato', value: 'Sinfónico' },
+      { label: 'Época', value: 'Clasicismo, Romanticismo' },
+      { label: 'Organiza', value: 'Orquesta y Coro Nacionales de España' },
+      { label: 'Programación', value: 'Circuito habitual' },
     ]);
   });
 
@@ -33,7 +33,7 @@ describe('perfil de la ficha de evento', () => {
     const page = buildEventPageModel(catalog, 'matinees-de-otono', testClock);
 
     expect(page?.concertProfile).toEqual([
-      { label: 'Programación', value: 'Alternativo', quiet: true },
+      { label: 'Programación', value: 'Alternativo' },
     ]);
     expect(page?.performers).toEqual([]);
     expect(page?.composers).toEqual([]);
@@ -49,7 +49,7 @@ describe('perfil de la ficha de evento', () => {
       'Época',
       'Programación',
     ]);
-    expect(page?.concertProfile[0]).toEqual({ label: 'Acceso', value: 'Gratuito', quiet: false });
+    expect(page?.concertProfile[0]).toEqual({ label: 'Acceso', value: 'Gratuito' });
     expect(page?.composers).toEqual(['Johann Sebastian Bach']);
     expect(page?.works).toEqual([]);
     expect(page?.spaceName).toBeNull();

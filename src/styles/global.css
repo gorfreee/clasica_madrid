@@ -839,12 +839,6 @@ a.eyebrow:focus-visible {
 }
 .detail-section { margin-top: 5rem; }
 .event-detail .detail-section { margin-top: 3.5rem; }
-.event-detail .detail-section--supporting { margin-top: 2.25rem; }
-.event-detail .detail-section--supporting .section-heading { padding-block: .55rem; }
-.event-detail .detail-section--supporting .section-heading h2 {
-  font-size: clamp(1.35rem, 2.2vw, 2.05rem);
-  letter-spacing: -.04em;
-}
 .section-heading {
   padding: .75rem 0;
   border-block: 2px solid var(--ink);
@@ -905,12 +899,6 @@ a.eyebrow:focus-visible {
   font-weight: 700;
   letter-spacing: var(--type-tracking-heading);
   line-height: 1.25;
-}
-.concert-profile__row--quiet dd {
-  color: var(--muted);
-  font-size: .95rem;
-  font-weight: 600;
-  letter-spacing: 0;
 }
 .source-list li {
   display: grid;
@@ -1145,8 +1133,6 @@ a.eyebrow:focus-visible {
   .event-facts__address { margin-top: .45rem !important; }
   .detail-section { margin-top: 3.5rem; }
   .event-detail .detail-section { margin-top: 2.5rem; }
-  .event-detail .detail-section--supporting { margin-top: 1.75rem; }
-  .event-detail .detail-section--supporting .section-heading h2 { font-size: 1.5rem; }
   .section-heading h2 { font-size: 2.2rem; }
   .programme-list li { padding-left: 2.5rem; }
   .occurrence-list li { grid-template-columns: 1fr auto; }
@@ -1155,7 +1141,6 @@ a.eyebrow:focus-visible {
   .editorial-list--supporting li, .programme-list--supporting li { gap: .3rem; padding-block: .7rem; font-size: 1.02rem; }
   .concert-profile__row { grid-template-columns: minmax(0, 1fr); row-gap: .15rem; padding: .7rem 0; }
   .concert-profile dd { font-size: 1.05rem; }
-  .concert-profile__row--quiet dd { font-size: .9rem; }
   .source-list li { grid-template-columns: 1fr; gap: .35rem; }
   .venue-detail__practical { max-width: none; margin-top: 1.75rem; }
   .error-page { min-height: 35rem; }

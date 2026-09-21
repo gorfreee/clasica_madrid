@@ -46,7 +46,23 @@ test.describe('jerarquía de la ficha de evento', () => {
     });
     await expect(about.locator('dt')).toHaveText(['Acceso', 'Formato', 'Época', 'Organiza', 'Programación']);
     await expect(about.locator('dd').first()).toHaveText('Gratuito');
-    await expect(about.locator('.concert-profile__row--quiet dt')).toHaveText('Programación');
+    const type = await page.evaluate(() => {
+      const signature = (element: Element) => {
+        const style = getComputedStyle(element);
+        return [style.fontFamily, style.fontSize, style.fontWeight, style.letterSpacing, style.color].join('|');
+      };
+      const values = [...document.querySelectorAll('.concert-profile dd')];
+      return {
+        fechas: signature(document.querySelector('#fechas-titulo')!),
+        interpretes: signature(document.querySelector('#interpretes-titulo')!),
+        programa: signature(document.querySelector('#obras-titulo')!),
+        acceso: signature(values[0]!),
+        programacion: signature(values.at(-1)!),
+      };
+    });
+    expect(type.interpretes).toBe(type.fechas);
+    expect(type.programa).toBe(type.fechas);
+    expect(type.programacion).toBe(type.acceso);
 
     const fechas = page.getByRole('heading', { name: 'Fechas', level: 2 });
     const actions = page.locator('.event-actions');

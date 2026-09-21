@@ -57,8 +57,6 @@ export type EventSourceModel = {
 export type ConcertProfileItem = {
   label: string;
   value: string;
-  /** Programación stays available, with less visual weight than the other facts. */
-  quiet: boolean;
 };
 
 export type EventPageModel = {
@@ -205,26 +203,24 @@ function buildConcertProfile(input: {
 }): ConcertProfileItem[] {
   const items: ConcertProfileItem[] = [];
   if (input.access.id !== 'unknown') {
-    items.push({ label: 'Acceso', value: input.access.label, quiet: false });
+    items.push({ label: 'Acceso', value: input.access.label });
   }
   if (input.formats.length > 0) {
     items.push({
       label: 'Formato',
       value: input.formats.map((item) => item.label).join(', '),
-      quiet: false,
     });
   }
   if (input.eras.length > 0) {
     items.push({
       label: 'Época',
       value: input.eras.map((item) => item.label).join(', '),
-      quiet: false,
     });
   }
   if (input.organizers.length > 0) {
-    items.push({ label: 'Organiza', value: input.organizers.join(', '), quiet: false });
+    items.push({ label: 'Organiza', value: input.organizers.join(', ') });
   }
-  items.push({ label: 'Programación', value: input.kind.label, quiet: true });
+  items.push({ label: 'Programación', value: input.kind.label });
   return items;
 }
 
