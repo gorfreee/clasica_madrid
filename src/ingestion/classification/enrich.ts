@@ -18,6 +18,8 @@ import {
 import type { ClassificationResult, DeterministicStrength, Resolution, ResolutionMethod } from './types.ts';
 import type { Era, EventKind, Format } from '../../lib/schemas/taxonomies.ts';
 import {
+  identityKeySet,
+  matchesIdentitySet,
   sortComposersByAppearance,
   uniqueByCanonicalIdentity,
 } from '../composer-lists.ts';
@@ -25,6 +27,7 @@ import { composersFromWorks } from '../observed.ts';
 import {
   accessEvidenceAppears,
   composerAiHasUsableEvidence,
+  unresolvedComposerLikeMentions,
   validateAiComposerCandidates,
 } from './ai-metadata.ts';
 import { rejectSpeculativeAiFormats } from './format-alternatives.ts';
@@ -230,14 +233,33 @@ async function enrichComposersWithAi(
   }
   const merged = uniqueByCanonicalIdentity([...existing, ...validated.composers]);
   const ordered = facts.programText ? sortComposersByAppearance(facts.programText, merged) : merged;
+  const leftover = facts.programText
+    ? unresolvedComposerLikeMentions(facts.programText, { ...facts, composers: merged })
+    : [];
+  const existingKeys = identityKeySet(existing.map((item) => item.name));
+  const added = validated.composers.filter((item) => !matchesIdentitySet(item.name, existingKeys));
+
+  if (leftover.length === 0) {
+    return {
+      ...current,
+      composers: resolution(
+        ordered,
+        'ai',
+        existing.length > 0 ? 'ai-composers-completed' : 'ai-composers-validated',
+        validated.evidence,
+      ),
+    };
+  }
+  if (added.length === 0) {
+    if (existing.length > 0) return { ...current, composers: existingResolution };
+    return {
+      ...current,
+      composers: resolution([], 'ai', 'ai-composers-unresolved', validated.evidence),
+    };
+  }
   return {
     ...current,
-    composers: resolution(
-      ordered,
-      'ai',
-      existing.length > 0 ? 'ai-composers-completed' : 'ai-composers-validated',
-      validated.evidence,
-    ),
+    composers: resolution(ordered, 'ai', 'ai-composers-partial', validated.evidence),
   };
 }
 

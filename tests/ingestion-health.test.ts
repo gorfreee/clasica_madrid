@@ -68,6 +68,11 @@ describe('evaluateIngestHealth', () => {
       autoMergeEligible: true,
       healthReasons: ['unresolved-taxonomy'],
     });
+    expect(evaluateIngestHealth({ ...base, unresolvedComposers: 2 })).toMatchObject({
+      health: 'degraded',
+      autoMergeEligible: true,
+      healthReasons: ['unresolved-composers'],
+    });
   });
 
   it('es review y no auto-merge si falla una source o hay anomalías de identidad', () => {

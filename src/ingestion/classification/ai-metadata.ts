@@ -81,6 +81,17 @@ export function unresolvedComposerLikeMentions(programme: string, facts: Observe
 }
 
 /**
+ * A publishable event with programme attribution still has composer-like
+ * mentions that structured lists, knowledge and AI did not resolve.
+ * Absence of `programText` is not a quality problem.
+ */
+export function hasUnresolvedComposerExtraction(facts: ObservedFacts): boolean {
+  const programme = facts.programText?.trim();
+  if (!programme) return false;
+  return unresolvedComposerLikeMentions(programme, facts).length > 0;
+}
+
+/**
  * The model only proposes candidates. Code accepts a name when the evidence
  * span attributes that name to the current repertoire, the span and name
  * occur in the programme, and the person is not already an observed performer.

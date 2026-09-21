@@ -309,6 +309,74 @@ describe('composer AI fallback y validación determinista', () => {
     expect(homage.composers).toEqual([]);
   });
 
+  it('una IA que sólo repite composers ya resueltos no marca ai-composers-completed', async () => {
+    const observed = facts({
+      title: 'Recital de cámara',
+      categoryText: 'Música clásica',
+      performers: [],
+      composers: [{ name: 'Maurice Ravel' }, { name: 'Antonín Dvořák' }],
+      works: [],
+      programText: 'Obras de Ravel, Migó y Dvořák.',
+    });
+    const ai = composerAi([
+      { name: 'Maurice Ravel', evidence: 'Obras de Ravel, Migó y Dvořák.' },
+      { name: 'Antonín Dvořák', evidence: 'Obras de Ravel, Migó y Dvořák.' },
+    ]);
+    const result = await classifyObserved(observed, { ai });
+    expect(ai.purposes).toContain('composer-extraction');
+    expect(result.composers?.value.map((item) => item.name)).toEqual([
+      'Maurice Ravel',
+      'Antonín Dvořák',
+    ]);
+    expect(result.composers?.ruleId).not.toBe('ai-composers-completed');
+    expect(result.composers?.method).not.toBe('ai');
+  });
+
+  it('marca ai-composers-completed cuando la IA cierra todas las menciones pendientes', async () => {
+    const observed = facts({
+      title: 'Recital de cámara',
+      categoryText: 'Música clásica',
+      performers: [],
+      composers: [{ name: 'Maurice Ravel' }, { name: 'Antonín Dvořák' }],
+      works: [],
+      programText: 'Obras de Ravel, Migó y Dvořák.',
+    });
+    const ai = composerAi([{ name: 'Migó', evidence: 'Obras de Ravel, Migó y Dvořák.' }]);
+    const result = await classifyObserved(observed, { ai });
+    expect(result.composers).toMatchObject({
+      method: 'ai',
+      ruleId: 'ai-composers-completed',
+    });
+    expect(result.composers?.value.map((item) => item.name)).toEqual([
+      'Maurice Ravel',
+      'Migó',
+      'Antonín Dvořák',
+    ]);
+  });
+
+  it('marca ai-composers-partial si la IA añade algo y aún queda una mención', async () => {
+    const programText = 'Obras de Ravel, Migó, Gual y Dvořák.';
+    const observed = facts({
+      title: 'Recital de cámara',
+      categoryText: 'Música clásica',
+      performers: [],
+      composers: [{ name: 'Maurice Ravel' }, { name: 'Antonín Dvořák' }],
+      works: [],
+      programText,
+    });
+    const ai = composerAi([{ name: 'Migó', evidence: programText }]);
+    const result = await classifyObserved(observed, { ai });
+    expect(result.composers).toMatchObject({
+      method: 'ai',
+      ruleId: 'ai-composers-partial',
+    });
+    expect(result.composers?.value.map((item) => item.name)).toEqual([
+      'Maurice Ravel',
+      'Migó',
+      'Antonín Dvořák',
+    ]);
+  });
+
   it('acepta Moszkowski en una lista de repertorio y rechaza menciones no atribuidas', () => {
     const list = 'Schumann – Moszkowski – Chopin – Brahms – Beethoven – Ravel – Liszt';
     const observed = facts({
@@ -706,5 +774,7 @@ describe('pipeline y budget compartido', () => {
       resolved: 0,
       unresolved: 1,
     });
+    expect(run.summary.health).toBe('degraded');
+    expect(run.summary.healthReasons).toContain('unresolved-composers');
   });
 });

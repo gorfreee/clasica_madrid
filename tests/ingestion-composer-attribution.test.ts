@@ -337,8 +337,8 @@ describe('líneas de programa WORK de COMPOSER', () => {
   });
 });
 
-function composerNames(text: string): string[] {
-  return attributedProgrammeComposers(text).map((item) => item.name);
+function composerNames(text: string, surface?: 'programme' | 'title'): string[] {
+  return attributedProgrammeComposers(text, surface).map((item) => item.name);
 }
 
 describe('regresiones de atribución débil (PR #253)', () => {
@@ -389,5 +389,55 @@ describe('regresiones de atribución débil (PR #253)', () => {
       'Koussevitzky',
     ]);
     expect(composerNames('Maddalena Casulana — Morir non può il mio cuore')).toEqual(['Maddalena Casulana']);
+  });
+});
+
+describe('listas explícitas Obras de (apellidos desconocidos)', () => {
+  it('conserva apellidos de una sola palabra en un crédito Obras de inequívoco', () => {
+    expect(composerNames('Obras de Boccherini, Mozart y Glass.')).toEqual([
+      'Luigi Boccherini',
+      'Wolfgang Amadeus Mozart',
+      'Glass',
+    ]);
+    expect(composerNames('Obras de Ravel, Migó y Dvořák.')).toEqual([
+      'Maurice Ravel',
+      'Migó',
+      'Antonín Dvořák',
+    ]);
+    expect(
+      composerNames(
+        'Obras de Debussy, Francesconi, Jolivet, Boccadoro, García Daganzo, Stravinski, Hindemith y Del Corno.',
+      ),
+    ).toEqual([
+      'Claude Debussy',
+      'Francesconi',
+      'Jolivet',
+      'Boccadoro',
+      'García Daganzo',
+      'Ígor Stravinski',
+      'Paul Hindemith',
+      'Del Corno',
+    ]);
+    expect(composerNames('Obras de Granados, Guinjoan, Alvear y Gual.')).toEqual([
+      'Granados',
+      'Joan Guinjoan',
+      'Alvear',
+      'Gual',
+    ]);
+  });
+
+  it('no convierte Glass en Philip Glass ni relaja marcos débiles', () => {
+    expect(composerNames('Obras de Boccherini, Mozart y Glass.')).toContain('Glass');
+    expect(composerNames('Obras de Boccherini, Mozart y Glass.')).not.toContain('Philip Glass');
+    expect(composerNames('Obras de Moszkowski')).toEqual([]);
+    expect(composerNames('Glass — Suite')).toEqual([]);
+    expect(composerNames('Recital Glass: noches de cámara', 'title')).toEqual([]);
+    expect(composerNames('Contemporáneo de Glass y alumno de Ravel')).toEqual([]);
+  });
+
+  it('no inventa composers desde instrumentos, gentilicios ni material editorial', () => {
+    expect(composerNames('Obras de piano, violín y violonchelo')).toEqual([]);
+    expect(composerNames('Obras de autores españoles y franceses')).toEqual([]);
+    expect(composerNames('Obras de música clásica y contemporánea')).toEqual([]);
   });
 });

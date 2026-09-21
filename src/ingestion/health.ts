@@ -12,6 +12,8 @@ export type IngestHealthInput = {
   possiblyMissing: number;
   hydrationFailed: number;
   unresolvedTaxonomy: number;
+  /** Explicit composer-like mentions left unresolved/partial after extraction. */
+  unresolvedComposers?: number;
   ai: Pick<
     IngestAiSummary,
     'uncertain' | 'rateLimited' | 'timeout' | 'deferred' | 'error' | 'invalidOutput' | 'malformedOutput' | 'incomplete'
@@ -74,6 +76,9 @@ export function evaluateIngestHealth(input: IngestHealthInput): {
   if (input.ai.incomplete > 0) findings.push({ reason: 'ai-incomplete', health: 'degraded' });
   if (input.unresolvedTaxonomy > 0) {
     findings.push({ reason: 'unresolved-taxonomy', health: 'degraded' });
+  }
+  if ((input.unresolvedComposers ?? 0) > 0) {
+    findings.push({ reason: 'unresolved-composers', health: 'degraded' });
   }
 
   // Weak AI includes never become candidates: evaluateEligibilityAi rejects

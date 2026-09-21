@@ -71,6 +71,9 @@ const ORDINAL_FESTIVAL = /^(?:x{0,3}(?:ix|iv|v?i{0,3})|\d{1,2}(?:[ªºo]|er|o)?)
 const LIST_SPLIT = /\s*[-–—·•]\s*/u;
 const NAME_LIST_SPLIT = /\s*,\s*|\s+y\s+|\s+e\s+(?=\p{Lu})/u;
 const NAME_PARTICLE = /^(?:de|del|des|la|las|los|le|van|von|di|da|el)$/i;
+/** Generic tokens that can appear capitalized in `Obras de …` without being people. */
+const LABELLED_LIST_GENERIC =
+  /^(?:otros|otras|autores?|compositores?|espa[ñn]oles?|frances[ea]s?|italian[oa]s?|alemanes?|ingles[ea]s?|m[uú]sica|c[aá]mara|cl[aá]sica|contempor[aá]nea|barroca|rom[aá]ntica|programa|obras?|ciclo|temporada|festival|varios)$/iu;
 const WORK_GENRE =
   /\b(?:concierto|concerto|sinfon[ií]a|symphony|sonata|suite|quinteto|cuarteto|tr[ií]o|obertura|ouverture|r[eé]quiem|misa|invitatorio|toccata|fuga|preludio|nocturne|mazurka|scherzo|impromptu|variaciones|cantata|oratorio|fantas[ií]a)\b/i;
 const ENSEMBLE_TAIL =
@@ -175,7 +178,7 @@ export function attributedProgrammeComposers(
     }
     const name = collapseWhitespace(stripTrailingBiographicalYears(span.name) || span.name);
     if (span.frame === 'colon-name-work') continue;
-    if (!looksLikePromotableUnknownName(name, span.evidence)) continue;
+    if (!looksLikePromotableUnknownName(name, span.evidence, span.frame)) continue;
     const key = foldName(name);
     if (!key || seen.has(key)) continue;
     seen.add(key);
@@ -546,12 +549,16 @@ function looksLikeWorkTitle(value: string): boolean {
   return WORK_GENRE.test(value) || CATALOG.test(value) || /\[[^\]]+\]/.test(value);
 }
 
-function looksLikePromotableUnknownName(name: string, evidence: string): boolean {
+function looksLikePromotableUnknownName(
+  name: string,
+  evidence: string,
+  frame?: AttributionFrame,
+): boolean {
   if (!name || isPerformerRole(name) || looksLikeWorkTitle(name)) return false;
   if (looksLikeEditorialMaterial(name) || looksLikeInstrumentOnly(name) || looksLikeEnsembleName(name)) {
     return false;
   }
-  if (ATTRIBUTION_FRAME_LEFT.test(name)) return false;
+  if (ATTRIBUTION_FRAME_LEFT.test(name) || LABELLED_LIST_GENERIC.test(name)) return false;
   if (/^(?:y|e)\s+/i.test(name)) return false;
   if (looksLikeArticleWorkTitle(name) || looksLikeSaintPlaceName(name) || hasBareArticleParticle(name)) {
     return false;
@@ -568,8 +575,19 @@ function looksLikePromotableUnknownName(name: string, evidence: string): boolean
   if (words.length >= 2) return true;
   return name.length >= 4 && (
     Boolean(parseRepertoireList(evidence)) ||
-    strongWorkDeComposerSurname(evidence, name)
+    strongWorkDeComposerSurname(evidence, name) ||
+    (frame === 'labelled-credit' && labelledCreditListHasMultipleNames(evidence))
   );
+}
+
+/**
+ * `Obras de X, Y y Z` is an explicit composer credit. A single unknown
+ * surname is still too weak (`Obras de Moszkowski`); a comma/`y` list of
+ * name-like tokens may keep source spellings that knowledge does not yet
+ * know. Weak frames (bare mentions, `X: Y`, biography) do not use this.
+ */
+function labelledCreditListHasMultipleNames(evidence: string): boolean {
+  return splitNameList(evidence).length >= 2;
 }
 
 function looksLikePersonNameSlot(value: string): boolean {
