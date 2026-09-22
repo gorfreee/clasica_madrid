@@ -64,7 +64,7 @@ está, la llamada no hace nada y no se espera.
 | `outbound_event_click` | Clic en un enlace externo del concierto. No espera a PostHog ni cambia la navegación | `event_id`, `event_title`, `venue_id`, `destination_type`, `destination_domain`, `origin`, `access`, `is_free`, `format` | Conversión principal |
 | `venue_opened` | Una vez por carga de una ficha de lugar | `venue_id`, `venue_name`, `origin` | Interés por un espacio |
 | `directions_clicked` | Clic en la dirección, que abre Google Maps. No hay un botón «Cómo llegar» | `venue_id`, `venue_name`, `origin`, `provider` (`google_maps`) | Intención de asistencia |
-| `result_list_exhausted` | El final visible de una lista, una vez por estado de resultados. Otro filtro o búsqueda puede volver a contarlo | `surface`, `results_count`, `active_filter_count`, `has_search_query`, `quick_filter` | Si la gente recorre la lista |
+| `result_list_exhausted` | El final visible de una lista, una vez por estado de resultados ya estabilizado. Otro filtro o búsqueda puede volver a contarlo. En Lugares, las teclas intermedias no son un estado | `surface`, `results_count`, `active_filter_count`, `has_search_query`, `quick_filter` | Si la gente recorre la lista |
 | `share_clicked` | Compartir una ficha de concierto (nativo, WhatsApp o enlace copiado) | `event_id`, `event_title`, `channel` | Difusión de un concierto |
 | `contact_submitted` | El `POST /api/contacto` respondió bien. No al pulsar el botón | `surface` (`contact`), `topic` si el motivo es uno de los cuatro valores del formulario | Contacto útil, sin datos personales |
 | `content_shared` | Ya existía. Sigue registrando el compartir de conciertos y de lugares | `method`, `content_type`, `path` | Atribución del enlace compartido, también en lugares |
@@ -77,19 +77,37 @@ pertenece a un concierto. `destination_domain` es el host, sin ruta ni query.
 
 `origin` se infiere del referrer, sin guardarlo: `search` si la agenda llevaba
 `q` (aunque también hubiera filtros); `quick_filter` si solo estaban el fin de
-semana y/o «Gratis»; `agenda` en el resto de la home o una landing; `venue` desde
+semana y/o «Gratis», y también si el referrer es `/agenda/gratis/` o
+`/agenda/fin-de-semana/` (los mismos atajos, `free` y `weekend`); `agenda` en el
+resto de la home o en cualquier otra landing `/agenda/{slug}/`; `venue` desde
 una ficha de lugar; `internal` desde otra página del sitio; `external` desde
 otro dominio; `direct` si no hay referrer; `unknown` si el referrer no se puede
 leer. Un navegador que oculte el referrer cuenta como `direct`. Volver atrás
 con el historial no emite filtros otra vez.
 
 `active_filter_count` no cuenta la búsqueda. El fin de semana cuenta como un
-filtro, no como dos fechas. `query` y los valores de texto se recortan (120
-caracteres) y se les quita el espacio sobrante.
+filtro, no como dos fechas. En `/agenda/gratis/` y `/agenda/fin-de-semana/` el
+final de lista lleva `quick_filter` `free` o `weekend` y `active_filter_count`
+1. Una lista estática sin ese atajo sigue en 0. `query` y los valores de texto
+se recortan (120 caracteres) y se les quita el espacio sobrante.
 
 La agenda truncada no cuenta como final de lista hasta que la lista mostrada es
 la completa. Una lista vacía no emite `result_list_exhausted`; el cero queda en
 `search_performed` o `filter_changed`.
+
+En Lugares el filtrado visual sigue siendo inmediato. `result_list_exhausted`
+usa la misma query estabilizada que `search_performed` (400 ms): no registra
+`t`, `te` o `tea` mientras se escribe. Sin búsqueda, y al limpiar el campo, se
+vuelve a medir la lista completa.
+
+## Cookieless en producción
+
+El sitio fija `cookieless_mode: 'always'`. PostHog solo acepta esos eventos si
+el proyecto tiene activado **Cookieless server hash mode** (Project Settings →
+Web analytics). Sin ese ajuste, los eventos cookieless se ignoran. Es
+configuración del proyecto de PostHog, no del código de Astro. La referencia
+está en la documentación de PostHog sobre [recogida de datos](https://posthog.com/docs/privacy/data-collection)
+y [configuración del SDK](https://posthog.com/docs/libraries/js/config).
 
 ## Privacidad
 

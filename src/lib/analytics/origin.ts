@@ -1,5 +1,6 @@
 import { isMadridWeekendRange } from '../domain/dates.ts';
 import { parseAgendaFilters, type AgendaFilters } from '../domain/filters.ts';
+import { landingQuickFilter } from './page.ts';
 
 /**
  * How the visitor reached this document, from `document.referrer` only.
@@ -46,7 +47,7 @@ export function inferNavigationOrigin(referrer: string, pageUrl: string, now = n
   if (ref.origin !== page.origin) return 'external';
   const path = ref.pathname.endsWith('/') ? ref.pathname : `${ref.pathname}/`;
   if (path === '/') return agendaOrigin(parseAgendaFilters(ref.searchParams), now);
-  if (path.startsWith('/agenda/')) return 'agenda';
+  if (path.startsWith('/agenda/')) return agendaLandingOrigin(path);
   if (path.startsWith('/lugares/') && path !== '/lugares/') return 'venue';
   return 'internal';
 }
@@ -55,6 +56,12 @@ export function inferNavigationOrigin(referrer: string, pageUrl: string, now = n
  * A query wins over shortcuts. Shortcuts count only when they are the whole
  * filter state; any other agenda filter stays `agenda`.
  */
+/** `/agenda/gratis/` and `/agenda/fin-de-semana/` are the quick-filter landings. Other slugs stay `agenda`. */
+function agendaLandingOrigin(path: string): NavigationOrigin {
+  const slug = path.slice('/agenda/'.length).split('/')[0] ?? '';
+  return landingQuickFilter(slug) ? 'quick_filter' : 'agenda';
+}
+
 function agendaOrigin(filters: AgendaFilters, now: Date): NavigationOrigin {
   if (filters.q) return 'search';
   if (isOnlyQuickFilters(filters, now)) return 'quick_filter';

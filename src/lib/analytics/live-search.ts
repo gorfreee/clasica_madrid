@@ -47,3 +47,14 @@ export function flushLiveSearch(
     query,
   };
 }
+
+/**
+ * Query that analytics may attribute to the list currently on screen.
+ * `null` is the unfiltered list (first paint, or after the field is cleared).
+ * `undefined` means a keystroke is still inside the debounce: do not measure
+ * that intermediate result set. There is no second timer; this reads `reduceLiveSearch`.
+ */
+export function settledLiveSearchQuery(state: LiveSearchState): string | null | undefined {
+  if (state.pendingQuery !== null) return undefined;
+  return state.emittedQuery;
+}

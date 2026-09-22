@@ -1,6 +1,7 @@
 import type { AccessMode, Era, Format } from '../schemas/taxonomies.ts';
 import { ACCESS_MODES, ERAS, FORMATS } from '../schemas/taxonomies.ts';
 import { madridToday } from '../domain/dates.ts';
+import type { AgendaShortcutId } from '../presentation/agenda-shortcuts.ts';
 
 export const ANALYTICS_PAGE_ELEMENT_ID = 'analytics-page';
 
@@ -134,10 +135,18 @@ export function daysUntilEvent(date: string | null | undefined, now = new Date()
   return Math.round((target - today) / 86_400_000);
 }
 
-export function landingQuickFilter(slug: string | undefined): 'weekend' | 'free' | undefined {
-  if (slug === 'gratis') return 'free';
-  if (slug === 'fin-de-semana') return 'weekend';
-  return undefined;
+/**
+ * SEO landings that are the same shortcut as the agenda quick filters.
+ * Any other `/agenda/{slug}/` is not one of these shortcuts.
+ */
+const AGENDA_LANDING_QUICK_FILTERS = {
+  gratis: 'free',
+  'fin-de-semana': 'weekend',
+} as const satisfies Record<string, AgendaShortcutId>;
+
+export function landingQuickFilter(slug: string | undefined): AgendaShortcutId | undefined {
+  if (!slug || !Object.hasOwn(AGENDA_LANDING_QUICK_FILTERS, slug)) return undefined;
+  return AGENDA_LANDING_QUICK_FILTERS[slug as keyof typeof AGENDA_LANDING_QUICK_FILTERS];
 }
 
 export function readPageAnalytics(): PageAnalytics | null {

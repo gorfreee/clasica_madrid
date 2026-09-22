@@ -118,6 +118,25 @@ test.describe('analítica de producto', () => {
       page_type?: string;
     };
     expect(indexContext.page_type).toBe('venues');
+    const listTag = await page.locator('[data-venue-list]').evaluate((list) => {
+      const sentinel = list.querySelector(':scope > [data-results-end]');
+      return {
+        list: list.tagName,
+        sentinel: sentinel?.tagName ?? null,
+        hidden: sentinel?.getAttribute('aria-hidden') ?? null,
+        directDivs: [...list.children].filter((child) => child.tagName === 'DIV').length,
+        borderBottom: sentinel ? getComputedStyle(sentinel).borderBottomWidth : null,
+        height: sentinel ? getComputedStyle(sentinel).height : null,
+      };
+    });
+    expect(listTag).toEqual({
+      list: 'UL',
+      sentinel: 'LI',
+      hidden: 'true',
+      directDivs: 0,
+      borderBottom: '0px',
+      height: '1px',
+    });
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await expect.poll(async () => named(await analyticsCalls(page), 'result_list_exhausted').length).toBe(1);
     await page.evaluate(() => {
@@ -145,6 +164,76 @@ test.describe('analítica de producto', () => {
     const venue = named(await analyticsCalls(page), 'venue_opened')[0];
     expect(String(venue?.properties.venue_id)).toMatch(/^ven_/);
     expect(venue?.properties.venue_name).toBeTruthy();
+  });
+
+  test('escribir en lugares filtra al momento y solo agota la búsqueda estabilizada', async ({ page }) => {
+    await installAnalytics(page);
+    await page.goto('/lugares/');
+    const search = page.locator('[data-venue-search]');
+    const totalVenues = await page.locator('[data-venue-entry]').count();
+    expect(totalVenues).toBeGreaterThan(1);
+    expect(named(await analyticsCalls(page), 'result_list_exhausted')).toEqual([]);
+
+    await search.pressSequentially('hinves', { delay: 20 });
+    expect(named(await analyticsCalls(page), 'search_performed')).toEqual([]);
+    expect(named(await analyticsCalls(page), 'result_list_exhausted')).toEqual([]);
+    const visibleWhileTyping = await page.locator('[data-venue-entry]:not([hidden])').count();
+    expect(visibleWhileTyping).toBeGreaterThan(0);
+    expect(visibleWhileTyping).toBeLessThan(totalVenues);
+
+    await expect.poll(async () => named(await analyticsCalls(page), 'search_performed').length).toBe(1);
+    expect(named(await analyticsCalls(page), 'search_performed')[0]?.properties).toMatchObject({
+      surface: 'venues',
+      query: 'hinves',
+      results_count: visibleWhileTyping,
+    });
+    await page.locator('[data-venue-list] [data-results-end]').scrollIntoViewIfNeeded();
+    await expect.poll(async () => named(await analyticsCalls(page), 'result_list_exhausted').length).toBe(1);
+    const exhausted = named(await analyticsCalls(page), 'result_list_exhausted');
+    expect(exhausted[0]?.properties).toMatchObject({
+      surface: 'venues',
+      has_search_query: true,
+      results_count: visibleWhileTyping,
+      active_filter_count: 0,
+    });
+
+    await page.locator('[data-venue-search-clear]').click();
+    await expect.poll(async () => page.locator('[data-venue-entry]:not([hidden])').count()).toBe(totalVenues);
+    await page.waitForTimeout(450);
+    expect(named(await analyticsCalls(page), 'search_performed')).toHaveLength(1);
+    expect(named(await analyticsCalls(page), 'result_list_exhausted')).toHaveLength(1);
+  });
+
+  test('las landings de atajo abren el concierto como quick_filter', async ({ page, baseURL }) => {
+    test.skip(!baseURL, 'falta baseURL');
+    const originFor = async (refererPath: string) => {
+      await page.goto('/eventos/cuarteto-cosmos/', { referer: new URL(refererPath, baseURL).href });
+      await expect.poll(async () => named(await analyticsCalls(page), 'event_opened').length).toBe(1);
+      return named(await analyticsCalls(page), 'event_opened')[0]?.properties.origin;
+    };
+
+    await installAnalytics(page);
+    expect(await originFor('/agenda/gratis/')).toBe('quick_filter');
+    expect(await originFor('/agenda/fin-de-semana/')).toBe('quick_filter');
+    expect(await originFor('/agenda/opera/')).toBe('agenda');
+
+    for (const landing of [
+      { path: '/agenda/gratis/', quickFilter: 'free' },
+      { path: '/agenda/fin-de-semana/', quickFilter: 'weekend' },
+    ] as const) {
+      await page.goto(landing.path);
+      const list = page.locator('[data-results-surface="agenda"]');
+      if ((await list.count()) === 0) continue;
+      await expect(list).toHaveAttribute('data-quick-filter', landing.quickFilter);
+      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+      await expect.poll(async () => named(await analyticsCalls(page), 'result_list_exhausted').length).toBe(1);
+      expect(named(await analyticsCalls(page), 'result_list_exhausted')[0]?.properties).toMatchObject({
+        surface: 'agenda',
+        quick_filter: landing.quickFilter,
+        active_filter_count: 1,
+        has_search_query: false,
+      });
+    }
   });
 
   test('el contacto solo se registra después de un envío correcto y sin datos del mensaje', async ({ page }) => {

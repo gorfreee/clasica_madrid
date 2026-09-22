@@ -8,14 +8,15 @@ import {
 } from '../src/lib/analytics/agenda-actions.ts';
 import { claimOnce, publishEventOpened } from '../src/lib/analytics/browser.ts';
 import type { AnalyticsProperties } from '../src/lib/analytics/capture.ts';
-import { claimListExhaustion } from '../src/lib/analytics/list-end.ts';
-import { flushLiveSearch, initialLiveSearchState, reduceLiveSearch } from '../src/lib/analytics/live-search.ts';
+import { claimListExhaustion, resultsEndTag, staticResultsObservation, syncResultsEnd } from '../src/lib/analytics/list-end.ts';
+import { flushLiveSearch, initialLiveSearchState, reduceLiveSearch, settledLiveSearchQuery } from '../src/lib/analytics/live-search.ts';
 import { inferNavigationOrigin } from '../src/lib/analytics/origin.ts';
 import {
   buildPageAnalytics,
   daysUntilEvent,
   inferPageType,
   isFreeAccess,
+  landingQuickFilter,
   pageviewBeforeSendSource,
 } from '../src/lib/analytics/page.ts';
 import { posthogBootstrapScript, posthogInitConfig } from '../src/lib/analytics/posthog.ts';
@@ -38,6 +39,7 @@ import {
   trackShareClicked,
 } from '../src/lib/analytics/product.ts';
 import { CONTACT_REASONS } from '../functions/api/contacto.ts';
+import { venueResultsEndForSearch } from '../src/lib/presentation/venue-search-client.ts';
 
 const NOW = new Date('2026-09-22T12:00:00+02:00');
 const PAGE = 'https://clasicamadrid.com/eventos/carmen/';
@@ -147,8 +149,19 @@ describe('origin', () => {
     expect(inferNavigationOrigin('https://clasicamadrid.com/?format=opera', PAGE, NOW)).toBe('agenda');
     expect(inferNavigationOrigin('https://clasicamadrid.com/lugares/teatro-real/', PAGE, NOW)).toBe('venue');
     expect(inferNavigationOrigin('https://clasicamadrid.com/lugares/', PAGE, NOW)).toBe('internal');
-    expect(inferNavigationOrigin('https://clasicamadrid.com/agenda/gratis/', PAGE, NOW)).toBe('agenda');
+    expect(inferNavigationOrigin('https://clasicamadrid.com/agenda/gratis/', PAGE, NOW)).toBe('quick_filter');
+    expect(inferNavigationOrigin('https://clasicamadrid.com/agenda/gratis', PAGE, NOW)).toBe('quick_filter');
+    expect(inferNavigationOrigin('https://clasicamadrid.com/agenda/fin-de-semana/', PAGE, NOW)).toBe('quick_filter');
+    expect(inferNavigationOrigin('https://clasicamadrid.com/agenda/opera/', PAGE, NOW)).toBe('agenda');
+    expect(inferNavigationOrigin('https://clasicamadrid.com/agenda/', PAGE, NOW)).toBe('agenda');
     expect(inferNavigationOrigin('not a url', PAGE, NOW)).toBe('unknown');
+  });
+
+  it('solo gratis y fin de semana son el atajo de la landing', () => {
+    expect(landingQuickFilter('gratis')).toBe('free');
+    expect(landingQuickFilter('fin-de-semana')).toBe('weekend');
+    expect(landingQuickFilter('opera')).toBeUndefined();
+    expect(landingQuickFilter(undefined)).toBeUndefined();
   });
 });
 
@@ -309,6 +322,55 @@ describe('búsqueda en vivo', () => {
     const again = reduceLiveSearch(state, 'bach', start + 10);
     expect(flushLiveSearch(again, start + 10 + 400).query).toBe('bach');
   });
+
+  it('no agota la lista en las queries intermedias aunque ya haya resultados', () => {
+    let state = initialLiveSearchState();
+    const start = 5_000;
+    const steps = [
+      { query: 't', results: 12 },
+      { query: 'te', results: 4 },
+      { query: 'tea', results: 2 },
+      { query: 'teat', results: 2 },
+    ];
+    const gate = new Set<string>();
+    const published: string[] = [];
+
+    const publishIfSettled = (results: number) => {
+      const decision = venueResultsEndForSearch(state, results);
+      if (!decision.enabled || !decision.observation) return;
+      if (claimListExhaustion(gate, decision.observation)) published.push(decision.observation.stateKey);
+    };
+
+    publishIfSettled(40);
+    expect(published).toEqual(['all']);
+
+    for (const [index, step] of steps.entries()) {
+      state = reduceLiveSearch(state, step.query, start + index * 40);
+      expect(settledLiveSearchQuery(state)).toBeUndefined();
+      publishIfSettled(step.results);
+      expect(published).toEqual(['all']);
+    }
+
+    const flushed = flushLiveSearch(state, start + 3 * 40 + 400);
+    state = flushed.state;
+    expect(flushed.query).toBe('teat');
+    expect(settledLiveSearchQuery(state)).toBe('teat');
+    publishIfSettled(2);
+    expect(published).toEqual(['all', 'teat']);
+    expect(venueResultsEndForSearch(state, 2).observation).toMatchObject({
+      surface: 'venues',
+      results_count: 2,
+      active_filter_count: 0,
+      has_search_query: true,
+      stateKey: 'teat',
+    });
+
+    state = reduceLiveSearch(state, '', start + 1_000);
+    expect(state).toEqual(initialLiveSearchState());
+    expect(settledLiveSearchQuery(state)).toBeNull();
+    publishIfSettled(40);
+    expect(published).toEqual(['all', 'teat']);
+  });
 });
 
 describe('fichas', () => {
@@ -432,6 +494,81 @@ describe('final de lista', () => {
     });
     expect(calls[0]?.properties).not.toHaveProperty('stateKey');
   });
+
+  it('las landings de atajo cuentan un filtro y el resto de listas estáticas ninguno', () => {
+    expect(staticResultsObservation({ surface: 'agenda', resultsCount: 6, quickFilter: 'free' })).toMatchObject({
+      surface: 'agenda',
+      results_count: 6,
+      active_filter_count: 1,
+      has_search_query: false,
+      quick_filter: 'free',
+      stateKey: 'free',
+    });
+    expect(staticResultsObservation({ surface: 'agenda', resultsCount: 3, quickFilter: 'weekend' })).toMatchObject({
+      quick_filter: 'weekend',
+      active_filter_count: 1,
+      stateKey: 'weekend',
+    });
+    expect(staticResultsObservation({ surface: 'agenda', resultsCount: 8 })).toMatchObject({
+      active_filter_count: 0,
+      quick_filter: undefined,
+      stateKey: 'static',
+    });
+    expect(staticResultsObservation({ surface: 'venue', resultsCount: 2, quickFilter: 'gratis' })).toMatchObject({
+      active_filter_count: 0,
+      quick_filter: undefined,
+      stateKey: 'static',
+    });
+  });
+
+  it('no mete un div como hijo directo de ul u ol', () => {
+    expect(resultsEndTag('ul')).toBe('li');
+    expect(resultsEndTag('UL')).toBe('li');
+    expect(resultsEndTag('ol')).toBe('li');
+    expect(resultsEndTag('div')).toBe('div');
+    expect(resultsEndTag('section')).toBe('div');
+
+    const previousObserver = globalThis.IntersectionObserver;
+    const previousDocument = globalThis.document;
+    globalThis.IntersectionObserver = class {
+      observe() {}
+      disconnect() {}
+      unobserve() {}
+      takeRecords() {
+        return [];
+      }
+    } as unknown as typeof IntersectionObserver;
+    globalThis.document = {
+      createElement(tag: string) {
+        return fakeResultsNode(tag);
+      },
+    } as unknown as Document;
+    try {
+      const observation = {
+        surface: 'venues' as const,
+        results_count: 2,
+        active_filter_count: 0,
+        has_search_query: false,
+        stateKey: 'static',
+      };
+      for (const tag of ['ul', 'ol'] as const) {
+        const list = fakeResultsNode(tag);
+        syncResultsEnd(list as unknown as HTMLElement, { enabled: true, observation });
+        expect(list.children.map((child) => child.tagName)).toEqual(['LI']);
+        expect(list.children.some((child) => child.tagName === 'DIV')).toBe(false);
+        const sentinel = list.children[0];
+        expect(sentinel?.attributes.get('aria-hidden')).toBe('true');
+        expect(sentinel?.style.height).toBe('1px');
+        expect(sentinel?.style.border).toBe('0');
+      }
+      const panel = fakeResultsNode('div');
+      syncResultsEnd(panel as unknown as HTMLElement, { enabled: true, observation });
+      expect(panel.children.map((child) => child.tagName)).toEqual(['DIV']);
+    } finally {
+      globalThis.IntersectionObserver = previousObserver;
+      globalThis.document = previousDocument;
+    }
+  });
 });
 
 describe('contacto y compartir', () => {
@@ -487,6 +624,48 @@ describe('cookieless', () => {
     expect(source).not.toMatch(/\.register\s*\(/);
   });
 });
+
+type FakeResultsNode = {
+  tagName: string;
+  dataset: Record<string, string>;
+  style: Record<string, string>;
+  attributes: Map<string, string>;
+  children: FakeResultsNode[];
+  setAttribute: (name: string, value: string) => void;
+  append: (child: FakeResultsNode) => void;
+  contains: (node: FakeResultsNode) => boolean;
+  querySelector: (selector: string) => FakeResultsNode | null;
+  getBoundingClientRect: () => { height: number; top: number; bottom: number };
+  remove: () => void;
+};
+
+function fakeResultsNode(tag: string): FakeResultsNode {
+  const node: FakeResultsNode = {
+    tagName: tag.toUpperCase(),
+    dataset: {},
+    style: {},
+    attributes: new Map(),
+    children: [],
+    setAttribute(name, value) {
+      this.attributes.set(name, value);
+    },
+    append(child) {
+      this.children.push(child);
+    },
+    contains(child) {
+      return this.children.includes(child);
+    },
+    querySelector(selector) {
+      if (selector !== ':scope > [data-results-end]') return null;
+      return this.children.find((child) => Object.prototype.hasOwnProperty.call(child.dataset, 'resultsEnd')) ?? null;
+    },
+    getBoundingClientRect() {
+      return { height: 0, top: 10_000, bottom: 10_000 };
+    },
+    remove() {},
+  };
+  return node;
+}
 
 function compileBeforeSend(pageJson: string | null) {
   const documentMock = {

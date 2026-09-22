@@ -11,9 +11,19 @@
  *
  * Filtering is instant on input. It reuses `textMatchesQuery` (the same
  * normalization as Agenda) and does not write URL params.
+ *
+ * `search_performed` and `result_list_exhausted` share the settled live-search
+ * state. Keystrokes update the list immediately and do not open a new
+ * analytics result set until that state leaves the debounce.
  */
-import { syncResultsEnd } from '../analytics/list-end.ts';
-import { flushLiveSearch, initialLiveSearchState, reduceLiveSearch, type LiveSearchState } from '../analytics/live-search.ts';
+import { syncResultsEnd, type ListObservation } from '../analytics/list-end.ts';
+import {
+  flushLiveSearch,
+  initialLiveSearchState,
+  reduceLiveSearch,
+  settledLiveSearchQuery,
+  type LiveSearchState,
+} from '../analytics/live-search.ts';
 import { sanitizeSearchQuery, trackSearchPerformed } from '../analytics/product.ts';
 import { textMatchesQuery } from '../domain/normalize.ts';
 import { venueCountLabel, venueNoResultsMessage } from './labels.ts';
@@ -51,7 +61,11 @@ export function initVenueSearch(root: ParentNode = document): void {
       empty.textContent = noResults ? venueNoResultsMessage(query) : '';
       empty.hidden = !noResults;
     }
-    if (list) syncVenueResultsEnd(list, query, visible);
+  };
+
+  const syncSettledList = () => {
+    if (!list) return;
+    syncResultsEnd(list, venueResultsEndForSearch(searchState, visibleCount));
   };
 
   const scheduleSearch = () => {
@@ -63,6 +77,7 @@ export function initVenueSearch(root: ParentNode = document): void {
     const emitSettledSearch = () => {
       const flushed = flushLiveSearch(searchState, Date.now());
       searchState = flushed.state;
+      syncSettledList();
       if (flushed.query) {
         trackSearchPerformed({
           surface: 'venues',
@@ -80,20 +95,34 @@ export function initVenueSearch(root: ParentNode = document): void {
   input.addEventListener('input', () => {
     apply();
     scheduleSearch();
+    syncSettledList();
   });
   clear?.addEventListener('click', () => {
     input.value = '';
     apply();
     scheduleSearch();
+    syncSettledList();
     input.focus();
   });
   apply();
+  syncSettledList();
 }
 
-function syncVenueResultsEnd(list: HTMLElement, query: string, resultsCount: number): void {
-  const sanitized = sanitizeSearchQuery(query);
-  syncResultsEnd(list, {
-    enabled: resultsCount > 0,
+/**
+ * List-end analytics for Lugares. Visual filtering may already show `resultsCount`
+ * for a query that is still being typed; that count is not a result set until
+ * `settledLiveSearchQuery` returns. Pending keystrokes disable the observer so
+ * a newly visible list end cannot be attributed to the previous query either.
+ */
+export function venueResultsEndForSearch(
+  state: LiveSearchState,
+  resultsCount: number,
+): { enabled: boolean; observation?: ListObservation } {
+  const query = settledLiveSearchQuery(state);
+  if (query === undefined || resultsCount <= 0) return { enabled: false };
+  const sanitized = sanitizeSearchQuery(query ?? '');
+  return {
+    enabled: true,
     observation: {
       surface: 'venues',
       results_count: resultsCount,
@@ -101,5 +130,5 @@ function syncVenueResultsEnd(list: HTMLElement, query: string, resultsCount: num
       has_search_query: Boolean(sanitized),
       stateKey: sanitized || 'all',
     },
-  });
+  };
 }

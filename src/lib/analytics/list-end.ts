@@ -1,3 +1,4 @@
+import { isAgendaShortcutId } from '../presentation/agenda-shortcuts.ts';
 import { trackResultListExhausted, type AnalyticsSurface } from './product.ts';
 
 export type ListObservation = {
@@ -38,8 +39,12 @@ export function claimListExhaustion(gate: Set<string>, observation: ListObservat
  * updates the snapshot. A result set that is already on screen counts once;
  * scrolling away and back does not count again. Filter changes use a new key.
  */
-export function syncResultsEnd(anchor: HTMLElement, options: { enabled: boolean; observation: ListObservation }): void {
-  if (!options.enabled || typeof IntersectionObserver === 'undefined') {
+export function syncResultsEnd(
+  anchor: HTMLElement,
+  options: { enabled: boolean; observation?: ListObservation },
+): void {
+  const observation = options.observation;
+  if (!options.enabled || !observation || typeof IntersectionObserver === 'undefined') {
     clearSession(anchor);
     return;
   }
@@ -50,7 +55,7 @@ export function syncResultsEnd(anchor: HTMLElement, options: { enabled: boolean;
     session = {
       anchor,
       sentinel,
-      observation: options.observation,
+      observation,
       observer: new IntersectionObserver(
         (entries) => {
           if (!entries.some((entry) => entry.isIntersecting)) return;
@@ -63,7 +68,7 @@ export function syncResultsEnd(anchor: HTMLElement, options: { enabled: boolean;
     session.observer.observe(sentinel);
     sessions.set(anchor, session);
   }
-  session.observation = options.observation;
+  session.observation = observation;
   publishIfVisible(session);
 }
 
@@ -76,16 +81,34 @@ export function initMarkedResultsLists(root: ParentNode = document): void {
     const count = anchor.querySelectorAll('[data-occurrence-id], [data-venue-entry]').length;
     syncResultsEnd(anchor, {
       enabled: count > 0,
-      observation: {
+      observation: staticResultsObservation({
         surface,
-        results_count: count,
-        active_filter_count: 0,
-        has_search_query: false,
-        quick_filter: anchor.dataset.quickFilter || undefined,
-        stateKey: anchor.dataset.quickFilter || 'static',
-      },
+        resultsCount: count,
+        quickFilter: anchor.dataset.quickFilter,
+      }),
     });
   }
+}
+
+/**
+ * Static lists (SEO landings, a venue programme) do not parse the agenda URL.
+ * `data-quick-filter` is a shortcut id (`free`, `weekend`), the same ids as the
+ * interactive agenda. One shortcut is one active filter. Anything else counts as none.
+ */
+export function staticResultsObservation(input: {
+  surface: ListObservation['surface'];
+  resultsCount: number;
+  quickFilter?: string;
+}): ListObservation {
+  const quickFilter = isAgendaShortcutId(input.quickFilter) ? input.quickFilter : undefined;
+  return {
+    surface: input.surface,
+    results_count: input.resultsCount,
+    active_filter_count: quickFilter ? 1 : 0,
+    has_search_query: false,
+    quick_filter: quickFilter,
+    stateKey: quickFilter ?? 'static',
+  };
 }
 
 function publishIfVisible(session: Session): void {
@@ -106,14 +129,26 @@ function publish(observation: ListObservation): void {
   });
 }
 
+/** A direct child of `ul`/`ol` has to be an `li`. Other anchors keep a `div`. */
+export function resultsEndTag(containerTag: string): 'li' | 'div' {
+  const tag = containerTag.toUpperCase();
+  return tag === 'UL' || tag === 'OL' ? 'li' : 'div';
+}
+
 function ensureSentinel(anchor: HTMLElement): HTMLElement {
   const existing = anchor.querySelector<HTMLElement>(':scope > [data-results-end]');
   if (existing) return existing;
-  const sentinel = document.createElement('div');
+  const sentinel = document.createElement(resultsEndTag(anchor.tagName));
   sentinel.dataset.resultsEnd = '';
   sentinel.setAttribute('aria-hidden', 'true');
+  sentinel.style.display = 'block';
   sentinel.style.height = '1px';
   sentinel.style.overflow = 'hidden';
+  sentinel.style.margin = '0';
+  sentinel.style.padding = '0';
+  sentinel.style.border = '0';
+  sentinel.style.listStyle = 'none';
+  sentinel.style.pointerEvents = 'none';
   anchor.append(sentinel);
   return sentinel;
 }
