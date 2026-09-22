@@ -91,6 +91,18 @@ export const KNOWN_VENUES: KnownVenue[] = [
     },
   },
   {
+    keys: ['auditorio mutua', 'auditorio mutua madrilena'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_auditorio_mutua_madrilena',
+      slug: 'auditorio-mutua-madrilena',
+      name: 'Auditorio Mutua Madrileña',
+      ...MADRID,
+      address: 'Paseo de Eduardo Dato, 20, 28010 Madrid',
+      url: 'https://www.fundacionmutua.es/cultura/conciertos/',
+    },
+  },
+  {
     keys: ['auditorio nacional', 'auditorio nacional de musica'],
     venue: {
       schemaVersion: 1,
@@ -755,6 +767,13 @@ const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
   'escuela-reina-sofia': {
     'auditorio sony madrid': 'ven_escuela_superior_musica_reina_sofia_auditorio_sony',
     'sala sinfonica auditorio nacional de musica': 'ven_auditorio_nacional_sala_sinfonica',
+  },
+  'fundacion-mutua': {
+    'auditorio mutua': 'ven_auditorio_mutua_madrilena',
+    'fundacion albeniz': 'ven_escuela_superior_musica_reina_sofia_auditorio_sony',
+    'teatro monumental calle atocha 65 28012 madrid': 'ven_teatro_monumental',
+    'sala de camara auditorio nacional principe de vergara 146 28002 madrid': 'ven_auditorio_nacional_sala_camara',
+    'auditorio del centro de cultura contemporanea condeduque c conde duque 11 28005 madrid': 'ven_condeduque_auditorio',
   },
 };
 

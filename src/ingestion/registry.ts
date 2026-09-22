@@ -22,6 +22,7 @@ import { ateneoMadridAdapter } from './sources/ateneo-madrid.ts';
 import { escuelaReinaSofiaAdapter } from './sources/escuela-reina-sofia.ts';
 import { rcsmmAdapter } from './sources/rcsmm.ts';
 import { talaProduccionesAdapter } from './sources/tala-producciones.ts';
+import { fundacionMutuaAdapter } from './sources/fundacion-mutua.ts';
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
@@ -47,6 +48,7 @@ const ADAPTERS: Record<string, SourceAdapter> = {
   [escuelaReinaSofiaAdapter.id]: escuelaReinaSofiaAdapter,
   [rcsmmAdapter.id]: rcsmmAdapter,
   [talaProduccionesAdapter.id]: talaProduccionesAdapter,
+  [fundacionMutuaAdapter.id]: fundacionMutuaAdapter,
 };
 
 const srcAuditorio: Source = {
@@ -395,6 +397,22 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'TALA Producciones',
       kind: 'official',
       url: 'https://www.tala-producciones.es/',
+    },
+  },
+  {
+    id: 'fundacion-mutua',
+    name: 'Fundación Mutua Madrileña',
+    urls: ['https://www.fundacionmutua.es/cultura/conciertos/'],
+    adapterId: fundacionMutuaAdapter.id,
+    catalogSourceId: 'src_fundacion_mutua_madrilena',
+    useFetchRelay: true,
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_fundacion_mutua_madrilena',
+      slug: 'fundacion-mutua-madrilena',
+      name: 'Fundación Mutua Madrileña',
+      kind: 'official',
+      url: 'https://www.fundacionmutua.es/',
     },
   },
 ];
