@@ -1,4 +1,4 @@
-import { isAgendaShortcutId } from '../presentation/agenda-shortcuts.ts';
+import { isAgendaShortcutId } from '../presentation/agenda-shortcut-id.ts';
 import { trackResultListExhausted, type AnalyticsSurface } from './product.ts';
 
 export type ListObservation = {
@@ -92,8 +92,8 @@ export function initMarkedResultsLists(root: ParentNode = document): void {
 
 /**
  * Static lists (SEO landings, a venue programme) do not parse the agenda URL.
- * `data-quick-filter` is a shortcut id (`free`, `weekend`), the same ids as the
- * interactive agenda. One shortcut is one active filter. Anything else counts as none.
+ * `data-quick-filter` is a shortcut id from `agenda-shortcut-id.ts`. One shortcut
+ * is one active filter. Anything else counts as none.
  */
 export function staticResultsObservation(input: {
   surface: ListObservation['surface'];

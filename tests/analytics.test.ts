@@ -39,6 +39,7 @@ import {
   trackShareClicked,
 } from '../src/lib/analytics/product.ts';
 import { CONTACT_REASONS } from '../functions/api/contacto.ts';
+import { isAgendaShortcutId } from '../src/lib/presentation/agenda-shortcut-id.ts';
 import { venueResultsEndForSearch } from '../src/lib/presentation/venue-search-client.ts';
 
 const NOW = new Date('2026-09-22T12:00:00+02:00');
@@ -519,6 +520,12 @@ describe('final de lista', () => {
       quick_filter: undefined,
       stateKey: 'static',
     });
+    for (const quickFilter of ['free', 'weekend', 'gratis', 'fin-de-semana', 'opera', undefined]) {
+      const observation = staticResultsObservation({ surface: 'agenda', resultsCount: 1, quickFilter });
+      const shortcut = isAgendaShortcutId(quickFilter);
+      expect(observation.active_filter_count).toBe(shortcut ? 1 : 0);
+      expect(observation.quick_filter).toBe(shortcut ? quickFilter : undefined);
+    }
   });
 
   it('no mete un div como hijo directo de ul u ol', () => {

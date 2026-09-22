@@ -1,7 +1,7 @@
 import type { AccessMode, Era, Format } from '../schemas/taxonomies.ts';
 import { ACCESS_MODES, ERAS, FORMATS } from '../schemas/taxonomies.ts';
 import { madridToday } from '../domain/dates.ts';
-import type { AgendaShortcutId } from '../presentation/agenda-shortcuts.ts';
+import type { AgendaShortcutId } from '../presentation/agenda-shortcut-id.ts';
 
 export const ANALYTICS_PAGE_ELEMENT_ID = 'analytics-page';
 
