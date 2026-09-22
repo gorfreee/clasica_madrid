@@ -28,42 +28,61 @@
     },
     {
       "name": "Jules Massenet"
+    },
+    {
+      "name": "Vincenzo Bellini"
+    },
+    {
+      "name": "Georges Bizet"
+    },
+    {
+      "name": "Maurice Ravel"
     }
   ],
   "works": [
     {
-      "title": "«Ah, mes amis, quel jour de féte!»"
+      "title": "«Ah, mes amis, quel jour de féte!»",
+      "composerName": "Gaetano Donizetti"
     },
     {
-      "title": "«Tombe degli avi miei»"
+      "title": "«Tombe degli avi miei»",
+      "composerName": "Gaetano Donizetti"
     },
     {
-      "title": "«Spirto gentil»"
+      "title": "«Spirto gentil»",
+      "composerName": "Gaetano Donizetti"
     },
     {
-      "title": "Obertura"
+      "title": "Obertura",
+      "composerName": "Vincenzo Bellini"
     },
     {
-      "title": "«Una furtiva lagrima»"
+      "title": "«Una furtiva lagrima»",
+      "composerName": "Gaetano Donizetti"
     },
     {
-      "title": "«La donna è mobile»"
+      "title": "«La donna è mobile»",
+      "composerName": "Giuseppe Verdi"
     },
     {
-      "title": "«Je crois entendre encore»"
+      "title": "«Je crois entendre encore»",
+      "composerName": "Georges Bizet"
     },
     {
-      "title": "«L’amour! L’amour!... Ah! Lève-toi, soleil!»"
+      "title": "«L’amour! L’amour!... Ah! Lève-toi, soleil!»",
+      "composerName": "Charles Gounod"
     },
     {
       "title": "Pavane pour une infante défunte",
-      "composerName": "M 19"
+      "composerName": "Maurice Ravel"
     },
     {
-      "title": "«Pour me rapprocher de Marie»"
+      "title": "«Pour me rapprocher de Marie»",
+      "composerName": "Gaetano Donizetti"
     },
     {
-      "title": "«Pourquoi me réveiller?»"
+      "title": "«Pourquoi me réveiller?»",
+      "composerName": "Jules Massenet"
     }
   ],
   "eras": [
