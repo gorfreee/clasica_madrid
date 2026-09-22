@@ -278,7 +278,7 @@ test.describe('compartir en fichas', () => {
       'href',
       `https://clasicamadrid.com${expected.path}`,
     );
-    const whatsapp = page.getByRole('link', { name: /WhatsApp/ });
+    const whatsapp = page.locator('[data-share-menu]').getByRole('link', { name: /WhatsApp/ });
     await expect(whatsapp).toBeVisible();
     await expect(whatsapp).toHaveAttribute('href', whatsappShareHref(expected.text, whatsappUrl));
     await expect(whatsapp).toHaveAttribute('target', '_blank');
@@ -343,7 +343,7 @@ test.describe('compartir en fichas', () => {
     const share = page.locator('.event-actions').getByRole('button', { name: 'Compartir', exact: true });
     await expect(share).toBeVisible();
     await share.click();
-    await expect(page.getByRole('link', { name: /WhatsApp/ })).toBeVisible();
+    await expect(page.locator('[data-share-menu]').getByRole('link', { name: /WhatsApp/ })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Copiar enlace', exact: true })).toBeVisible();
   });
 
@@ -358,7 +358,7 @@ test.describe('compartir en fichas', () => {
     await expect(share).toBeFocused();
     await page.keyboard.press('Enter');
 
-    const whatsapp = page.getByRole('link', { name: /WhatsApp/ });
+    const whatsapp = page.locator('[data-share-menu]').getByRole('link', { name: /WhatsApp/ });
     const copy = page.getByRole('button', { name: 'Copiar enlace', exact: true });
     await expect(whatsapp).toBeVisible();
     await page.keyboard.press('Tab');

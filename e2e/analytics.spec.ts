@@ -58,6 +58,20 @@ test.describe('analítica de producto', () => {
     ]);
   });
 
+  test('el canal mantiene foco visible y no provoca desbordamiento en escritorio o móvil', async ({ page }) => {
+    for (const width of [1280, 390, 320]) {
+      await page.setViewportSize({ width, height: 850 });
+      for (const path of ['/', '/acerca-de/']) {
+        await page.goto(path);
+        const link = page.locator('[data-whatsapp-channel="footer"]');
+        await link.focus();
+        await expect(link).toBeFocused();
+        expect(await link.evaluate((node) => getComputedStyle(node).outlineStyle)).not.toBe('none');
+        expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+      }
+    }
+  });
+
   test('la agenda no emite filtros al cargar y la búsqueda espera al envío', async ({ page }) => {
     await installAnalytics(page);
     await page.goto('/?access=free');
