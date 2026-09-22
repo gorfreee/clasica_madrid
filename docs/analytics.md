@@ -4,6 +4,20 @@ Clásica Madrid usa PostHog Cloud EU en modo cookieless. La configuración vive 
 `src/lib/analytics/posthog.ts` y no identifica visitantes: `cookieless_mode: 'always'`,
 `person_profiles: 'never'`, sin `posthog.identify()` ni persistencia propia.
 
+El navegador envía la analítica al Managed Reverse Proxy. `e.clasicamadrid.com`
+(`api_host`) es solo el host de ingestión y assets:
+
+```text
+Browser
+  → https://e.clasicamadrid.com
+  → PostHog Managed Reverse Proxy
+  → PostHog Cloud EU
+```
+
+La interfaz sigue en `https://eu.posthog.com` (`ui_host`). El proxy no cambia el
+modelo cookieless ni añade identificación. Web Vitals sigue apagado
+(`capture_performance: false`).
+
 PostHog ya envía un `$pageview` por carga de documento y un `$pageleave`. El
 autocapture, Session Replay, heatmaps y las flags están apagados. Los eventos de
 esta página no sustituyen esa telemetría ni al revés: el pageview dice qué
