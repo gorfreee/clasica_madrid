@@ -15,10 +15,56 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
-  "works": [],
-  "eras": [],
+  "performers": [
+    {
+      "name": "Trio Archai"
+    },
+    {
+      "name": "Ayla Sahin"
+    },
+    {
+      "name": "Finn Mannion"
+    },
+    {
+      "name": "Mar Valor Navarro"
+    },
+    {
+      "name": "Cuarteto Ineo"
+    },
+    {
+      "name": "Liubov Kalmykova"
+    },
+    {
+      "name": "Nadezda Kalmykova"
+    },
+    {
+      "name": "Patrizia Batik"
+    },
+    {
+      "name": "Constantin Paul Siepermann"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Franz Joseph Haydn"
+    }
+  ],
+  "works": [
+    {
+      "title": "Trío para piano, violín y violonchelo en si bemol mayor K 502",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Cuarteto de cuerda núm. 37 en do mayor H III: 45 op 50 núm. 2",
+      "composerName": "Franz Joseph Haydn"
+    }
+  ],
+  "eras": [
+    "classical"
+  ],
   "formats": [
     "chamber"
   ],
@@ -28,10 +74,10 @@
     {
       "sourceId": "src_escuela_superior_musica_reina_sofia",
       "url": "https://www.escuelasuperiordemusicareinasofia.es/evento/ciclo-da-camera-grupos-de-cuerdas",
-      "checkedAt": "2026-09-15",
+      "checkedAt": "2026-09-22",
       "externalId": "83049"
     }
   ],
   "primarySourceId": "src_escuela_superior_musica_reina_sofia",
-  "lastVerifiedAt": "2026-09-15"
+  "lastVerifiedAt": "2026-09-22"
 }

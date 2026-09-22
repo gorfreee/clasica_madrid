@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_mercados_en_crescendo_orquesta_camerata_musicalis_saint_saens_el_carnaval_de_los_animales",
+  "slug": "mercados-en-crescendo-orquesta-camerata-musicalis-saint-saens-el-carnaval-de-los-animales",
+  "title": "Mercados en Crescendo. Orquesta Camerata Musicalis. Saint-Saëns, El Carnaval de los Animales",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_mercados_en_crescendo_orquesta_camerata_musicalis_saint_saens_el_carnaval_de_los_animales_01",
+      "date": "2026-11-15",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Camerata Musicalis"
+    },
+    {
+      "name": "Edgar Martín Jiménez",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/mercados-en-crescendo-orquesta-camerata-musicalis-saint-saens-el-carnaval-de-los-animales",
+      "checkedAt": "2026-09-22",
+      "externalId": "mercados-en-crescendo-orquesta-camerata-musicalis-saint-saens-el-carnaval-de-los-animales"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-22"
+}

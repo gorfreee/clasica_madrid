@@ -30,6 +30,9 @@
     },
     {
       "name": "Paula Belzunegui"
+    },
+    {
+      "name": "Trío Helix"
     }
   ],
   "composers": [
@@ -68,11 +71,11 @@
   "citations": [
     {
       "sourceId": "src_fundacion_juan_march",
-      "url": "https://www.march.es/es/madrid/concierto/helix-trio",
-      "checkedAt": "2026-09-18",
-      "externalId": "/es/madrid/concierto/helix-trio"
+      "url": "https://www.march.es/es/madrid/concierto/trio-helix",
+      "checkedAt": "2026-09-22",
+      "externalId": "/es/madrid/concierto/trio-helix"
     }
   ],
   "primarySourceId": "src_fundacion_juan_march",
-  "lastVerifiedAt": "2026-09-18"
+  "lastVerifiedAt": "2026-09-22"
 }

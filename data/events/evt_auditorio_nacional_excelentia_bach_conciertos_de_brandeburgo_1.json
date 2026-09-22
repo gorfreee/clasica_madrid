@@ -53,15 +53,15 @@
     "chamber"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-bach-conciertos-de-brandeburgo-1",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-22",
       "externalId": "excelentia-bach-conciertos-de-brandeburgo-1"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-22"
 }
