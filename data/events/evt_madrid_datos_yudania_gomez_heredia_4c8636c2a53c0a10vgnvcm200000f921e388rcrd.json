@@ -28,21 +28,6 @@
       "name": "Johann Sebastian Bach"
     },
     {
-      "name": "Fischer"
-    },
-    {
-      "name": "Seixas"
-    },
-    {
-      "name": "Sowande"
-    },
-    {
-      "name": "Yudania Gómez Heredia"
-    },
-    {
-      "name": "Dieterich Buxtehude"
-    },
-    {
       "name": "Johann Caspar Ferdinand Fischer"
     },
     {
@@ -53,12 +38,15 @@
     },
     {
       "name": "Fela Sowande"
+    },
+    {
+      "name": "Yudania Gómez Heredia"
     }
   ],
   "works": [
     {
       "title": "Toccata en re menor BuxWV 155",
-      "composerName": "Dieterich Buxtehude"
+      "composerName": "Dietrich Buxtehude"
     },
     {
       "title": "Preludio y fuga en do mayor BWV 547",
@@ -93,7 +81,9 @@
     }
   ],
   "eras": [
-    "baroque"
+    "baroque",
+    "twentieth",
+    "contemporary"
   ],
   "formats": [
     "recital",

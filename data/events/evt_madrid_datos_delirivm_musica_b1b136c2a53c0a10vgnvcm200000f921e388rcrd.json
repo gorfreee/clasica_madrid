@@ -51,9 +51,8 @@
     "baroque"
   ],
   "formats": [
-    "organ",
-    "early-music",
-    "chamber"
+    "chamber",
+    "early-music"
   ],
   "kind": "alternative",
   "access": "free",

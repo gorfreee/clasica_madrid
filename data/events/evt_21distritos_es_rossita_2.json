@@ -28,7 +28,7 @@
   ],
   "composers": [
     {
-      "name": "Amadeu Vives"
+      "name": "Amadeo Vives"
     },
     {
       "name": "Claude Debussy"
@@ -49,7 +49,8 @@
     "twentieth"
   ],
   "formats": [
-    "opera"
+    "opera",
+    "zarzuela"
   ],
   "kind": "alternative",
   "access": "free",

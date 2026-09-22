@@ -25,7 +25,7 @@
       "name": "Jean-Baptiste Lully"
     },
     {
-      "name": "Pallavicino"
+      "name": "Carlo Pallavicino"
     },
     {
       "name": "Jean-Philippe Rameau"
@@ -38,9 +38,6 @@
     },
     {
       "name": "Jean-Marie Leclair"
-    },
-    {
-      "name": "Carlo Pallavicino"
     }
   ],
   "works": [
@@ -74,8 +71,6 @@
   ],
   "formats": [
     "chamber",
-    "recital",
-    "organ",
     "early-music"
   ],
   "kind": "alternative",

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_carmen_massanet_53d38c0d513c0a10vgnvcm200000f921e388rcrd",
+  "slug": "carmen-massanet",
+  "title": "Carmen Massanet",
+  "status": "scheduled",
+  "venueId": "ven_jardin_bulevar_pena_gorbea",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_carmen_massanet_53d38c0d513c0a10vgnvcm200000f921e388rcrd_01",
+      "date": "2026-10-17",
+      "time": "20:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Carmen Massanet"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "opera",
+    "zarzuela",
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/portales/munimadrid/es/Inicio/Mayores/Actividades-y-eventos/Carmen-Massanet?vgnextchannel=124931d3b28fe410VgnVCM1000000b205a0aRCRD&vgnextfmt=default&vgnextoid=53d38c0d513c0a10VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-09-22"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-09-22"
+}

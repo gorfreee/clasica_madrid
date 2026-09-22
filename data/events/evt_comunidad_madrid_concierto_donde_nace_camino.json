@@ -31,33 +31,6 @@
   ],
   "composers": [
     {
-      "name": "Encina"
-    },
-    {
-      "name": "Sanz"
-    },
-    {
-      "name": "Selma"
-    },
-    {
-      "name": "Salaverde"
-    },
-    {
-      "name": "Murcia"
-    },
-    {
-      "name": "Pandolfi Mealli"
-    },
-    {
-      "name": "Antonio de Cabezón"
-    },
-    {
-      "name": "Francisco Correa de Arauxo"
-    },
-    {
-      "name": "Ruiz de Ribayaz"
-    },
-    {
       "name": "Juan del Encina"
     },
     {
@@ -74,6 +47,12 @@
     },
     {
       "name": "Giovanni Antonio Pandolfi Mealli"
+    },
+    {
+      "name": "Antonio de Cabezón"
+    },
+    {
+      "name": "Francisco Correa de Arauxo"
     },
     {
       "name": "Lucas Ruiz de Ribayaz"
@@ -137,7 +116,6 @@
     }
   ],
   "eras": [
-    "early",
     "renaissance",
     "baroque"
   ],

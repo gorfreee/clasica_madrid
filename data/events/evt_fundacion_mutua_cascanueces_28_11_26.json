@@ -34,7 +34,9 @@
   "eras": [
     "romantic"
   ],
-  "formats": [],
+  "formats": [
+    "other"
+  ],
   "kind": "established",
   "access": "paid",
   "citations": [

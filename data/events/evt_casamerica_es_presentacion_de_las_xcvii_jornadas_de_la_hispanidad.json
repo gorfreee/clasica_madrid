@@ -4,7 +4,7 @@
   "slug": "concierto-de-la-orquesta-de-guitarras-de-madrid",
   "title": "Concierto de la Orquesta de Guitarras de Madrid",
   "status": "scheduled",
-  "venueId": "ven_casa_de_america_anfiteatro_gabriela_mistral",
+  "venueId": "ven_casa_de_america_auditorio_gabriela_mistral",
   "organizerIds": [],
   "seriesId": null,
   "occurrences": [
@@ -95,9 +95,9 @@
     "twentieth"
   ],
   "formats": [
-    "symphonic"
+    "other"
   ],
-  "kind": "alternative",
+  "kind": "established",
   "access": "free",
   "citations": [
     {
