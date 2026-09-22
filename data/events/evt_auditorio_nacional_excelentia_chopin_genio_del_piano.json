@@ -56,15 +56,15 @@
     "symphonic"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-chopin-genio-del-piano",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-22",
       "externalId": "excelentia-chopin-genio-del-piano"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-22"
 }

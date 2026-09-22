@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_mercados_en_crescendo_orquesta_camerata_musicalis_vivaldi_gloria",
+  "slug": "mercados-en-crescendo-orquesta-camerata-musicalis-vivaldi-gloria",
+  "title": "Mercados en Crescendo. Orquesta Camerata Musicalis. Vivaldi, Gloria",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_mercados_en_crescendo_orquesta_camerata_musicalis_vivaldi_gloria_01",
+      "date": "2027-04-04",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Camerata Musicalis"
+    },
+    {
+      "name": "Edgar Martín Jiménez",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/mercados-en-crescendo-orquesta-camerata-musicalis-vivaldi-gloria",
+      "checkedAt": "2026-09-22",
+      "externalId": "mercados-en-crescendo-orquesta-camerata-musicalis-vivaldi-gloria"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-22"
+}

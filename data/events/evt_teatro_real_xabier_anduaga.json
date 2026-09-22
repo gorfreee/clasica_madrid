@@ -30,7 +30,42 @@
       "name": "Jules Massenet"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "«Ah, mes amis, quel jour de féte!»"
+    },
+    {
+      "title": "«Tombe degli avi miei»"
+    },
+    {
+      "title": "«Spirto gentil»"
+    },
+    {
+      "title": "Obertura"
+    },
+    {
+      "title": "«Una furtiva lagrima»"
+    },
+    {
+      "title": "«La donna è mobile»"
+    },
+    {
+      "title": "«Je crois entendre encore»"
+    },
+    {
+      "title": "«L’amour! L’amour!... Ah! Lève-toi, soleil!»"
+    },
+    {
+      "title": "Pavane pour une infante défunte",
+      "composerName": "M 19"
+    },
+    {
+      "title": "«Pour me rapprocher de Marie»"
+    },
+    {
+      "title": "«Pourquoi me réveiller?»"
+    }
+  ],
   "eras": [
     "romantic",
     "classical"
@@ -45,10 +80,10 @@
     {
       "sourceId": "src_teatro_real",
       "url": "https://www.teatroreal.es/es/espectaculo/xabier-anduaga",
-      "checkedAt": "2026-09-09",
+      "checkedAt": "2026-09-22",
       "externalId": "xabier-anduaga"
     }
   ],
   "primarySourceId": "src_teatro_real",
-  "lastVerifiedAt": "2026-09-09"
+  "lastVerifiedAt": "2026-09-22"
 }

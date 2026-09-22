@@ -37,6 +37,9 @@
     },
     {
       "name": "Francisco Corselli"
+    },
+    {
+      "name": "Difuntos"
     }
   ],
   "works": [
@@ -66,10 +69,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/uam-musica-por-la-paz-barroco-iberico-italiano",
-      "checkedAt": "2026-09-18",
+      "checkedAt": "2026-09-22",
       "externalId": "uam-musica-por-la-paz-barroco-iberico-italiano"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-18"
+  "lastVerifiedAt": "2026-09-22"
 }

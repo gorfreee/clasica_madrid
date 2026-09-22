@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_mercados_en_crescendo_orquesta_camerata_musicalis_mozart_sinfonia_41_jupiter",
+  "slug": "mercados-en-crescendo-orquesta-camerata-musicalis-mozart-sinfonia-41-jupiter",
+  "title": "Mercados en Crescendo. Orquesta Camerata Musicalis. Mozart, Sinfonía 41 Júpiter",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_mercados_en_crescendo_orquesta_camerata_musicalis_mozart_sinfonia_41_jupiter_01",
+      "date": "2026-10-18",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Camerata Musicalis"
+    },
+    {
+      "name": "Edgar Martín Jiménez",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sinfonía Nº 41 \"Júpiter\"",
+      "composerName": "Wolfgang Amadeus Mozart"
+    }
+  ],
+  "eras": [
+    "classical"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/mercados-en-crescendo-orquesta-camerata-musicalis-mozart-sinfonia-41-jupiter",
+      "checkedAt": "2026-09-22",
+      "externalId": "mercados-en-crescendo-orquesta-camerata-musicalis-mozart-sinfonia-41-jupiter"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-22"
+}

@@ -68,6 +68,27 @@
     },
     {
       "name": "Juan del Encina"
+    },
+    {
+      "name": "Madrid"
+    },
+    {
+      "name": "Libro II"
+    },
+    {
+      "name": "Roma"
+    },
+    {
+      "name": "Medinaceli"
+    },
+    {
+      "name": "Sevilla"
+    },
+    {
+      "name": "Alcalá de Henares"
+    },
+    {
+      "name": "Musical de Palacio"
     }
   ],
   "works": [
@@ -144,10 +165,10 @@
     {
       "sourceId": "src_fundacion_juan_march",
       "url": "https://www.march.es/es/madrid/concierto/ensemble-barbaroco",
-      "checkedAt": "2026-09-18",
+      "checkedAt": "2026-09-22",
       "externalId": "/es/madrid/concierto/ensemble-barbaroco"
     }
   ],
   "primarySourceId": "src_fundacion_juan_march",
-  "lastVerifiedAt": "2026-09-18"
+  "lastVerifiedAt": "2026-09-22"
 }

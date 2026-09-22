@@ -178,15 +178,15 @@
     "chamber"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/uam",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-22",
       "externalId": "uam"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-22"
 }

@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_mercados_en_crescendo_orquesta_camerata_musicalis_falla_chopin_granados_debussy",
+  "slug": "mercados-en-crescendo-orquesta-camerata-musicalis-falla-chopin-granados-debussy",
+  "title": "Mercados en Crescendo. Orquesta Camerata Musicalis. Falla, Chopin, Granados, Debussy",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_mercados_en_crescendo_orquesta_camerata_musicalis_falla_chopin_granados_debussy_01",
+      "date": "2027-02-21",
+      "time": "11:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Recital de"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/mercados-en-crescendo-orquesta-camerata-musicalis-falla-chopin-granados-debussy",
+      "checkedAt": "2026-09-22",
+      "externalId": "mercados-en-crescendo-orquesta-camerata-musicalis-falla-chopin-granados-debussy"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-22"
+}
