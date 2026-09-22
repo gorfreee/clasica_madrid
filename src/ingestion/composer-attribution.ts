@@ -1,3 +1,4 @@
+import { CONTEXTUAL_COMPOSER_RELATIONS } from './contextual-composer-relations.ts';
 import { collapseWhitespace } from './html.ts';
 import {
   composerIdentityKeys,
@@ -91,8 +92,7 @@ const NON_COMPOSER_ROLES = [
 ] as const;
 
 const CONTEXTUAL_PREFIXES = [
-  'homenaje a', 'en homenaje a', 'inspirado en', 'inspirada en',
-  'basado en', 'basada en', 'sobre un tema de', 'un tema de', 'tema de',
+  ...CONTEXTUAL_COMPOSER_RELATIONS,
   'libreto de', 'libreto', 'texto de', 'texto del', 'letra de',
   'poema de', 'poesia de', 'version de', 'adaptacion de',
   'realizadas por', 'realizado por', 'transcripcion de', 'transcripciones de',
@@ -316,6 +316,8 @@ function parseUnknownWorkDeAuthor(line: string): { title: string; composerName: 
     const rawTitle = collapseWhitespace(line.slice(0, match.index));
     const rawAuthor = collapseWhitespace(stripTrailingWorkAnnotation(line.slice(match.index + match[0].length)));
     if (!rawTitle || !rawAuthor) continue;
+    // "Obra conservada en Cancionero Musical de Palacio" names a source, not a person.
+    if (/\bconservad[oa]s?\s+en\b/iu.test(rawTitle)) continue;
     if (/(?<!\d):\s+\S/.test(rawTitle)) continue;
     if (TITLE_CONTEXTUAL_DE.test(`${rawTitle} `)) continue;
     if (CREDIT_LABEL_TITLE.test(rawTitle) || looksLikeEditorialMaterial(rawTitle)) continue;

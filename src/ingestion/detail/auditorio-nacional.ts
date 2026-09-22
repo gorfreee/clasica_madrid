@@ -531,7 +531,7 @@ function collapseProgram(lines: string[]): string | undefined {
   const text = lines
     .map((line) => stripEditorialNoteMarkers(line))
     .filter((line) => line && !isEditorialNoteLegend(line))
-    .join('. ');
+    .join('\n');
   return text || undefined;
 }
 

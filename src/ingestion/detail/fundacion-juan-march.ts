@@ -1,5 +1,5 @@
 import { parseObservedDateTime, parseObservedTime, parseSpanishCalendarDate } from '../dates.ts';
-import { decodeHtmlEntities, stripTags } from '../html.ts';
+import { decodeHtmlEntities, flattenHtmlBlocks, stripTags } from '../html.ts';
 import { normalizeComposerList, normalizePersonList, normalizeWorkList, type ObservedFactPatch } from '../observed.ts';
 import { normalizeUrl } from '../urls.ts';
 import type { RawEvent, RawOccurrence } from '../types.ts';
@@ -86,7 +86,7 @@ export function parseMarchDetail(event: RawEvent, body: string): ObservedFactPat
     description: text(first.description),
     organizerText: text(object(first.organizer).name),
     categoryText: format ? stripTags(format) : undefined,
-    programText: program ? stripTags(program) || undefined : undefined,
+    programText: program ? flattenHtmlBlocks(program) || undefined : undefined,
     performers,
     composers: normalizeComposerList(composers),
     works: normalizeWorkList(works),

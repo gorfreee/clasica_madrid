@@ -129,7 +129,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
         extracted = await measureSourcePhase(obs, source.id, 'extraction', () =>
           extractSource(source, options.now, window, sourceGet, reportDiscard));
       } catch (error) {
-        if (!(error instanceof IncompleteListingError) || error.events.length === 0) throw error;
+        if (!(error instanceof IncompleteListingError)) throw error;
         extracted = error.events;
         listingIncomplete = true;
       } finally {

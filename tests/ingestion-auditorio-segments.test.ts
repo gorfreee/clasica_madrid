@@ -23,6 +23,12 @@ describe('segmentación performer/programa del Auditorio', () => {
       ['Beatrice Rana, piano', 'Programa', 'Johann Sebastian Bach', 'Concierto italiano'],
     ]);
     expect(segments.performerLines).toEqual(['Beatrice Rana, piano']);
+    expect(parseAuditorioPersonLine('Beatrice Rana, piano')).toEqual({
+      name: 'Beatrice Rana',
+      roleText: 'piano',
+    });
+    expect(parseAuditorioPersonLine('Recital de, piano')).toBeUndefined();
+    expect(parseAuditorioPersonCredits('Camerata Musicalis').some((person) => person.name === 'Recital de')).toBe(false);
     expect(segments.programLines[0]).toBe('Programa');
   });
 

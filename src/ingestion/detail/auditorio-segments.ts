@@ -55,7 +55,7 @@ const MUSICAL_PAREN =
   /\b(?:m[uú]sica|ballet|poema|versi[oó]n|arr\.?|orquesta|sinf[oó]nic|piano|coro)\b/i;
 
 const FORM_ONLY =
-  /^(?:concierto|concerto|sinfon[ií]a|symphony|sonata|suite|quinteto|cuarteto|tr[ií]o|obertura|ouverture|r[eé]quiem|misa|missa|toccata|fuga|fugue|preludio|pr[eé]lude|nocturne|mazurka|scherzo|impromptu|variaciones|variations|cantata|oratorio|fantas[ií]a|romance|rhapsod(?:y|ie)?|rapsodia|divertimento|polonesa|polonaise)$/i;
+  /^(?:concierto|concerto|sinfon[ií]a|symphony|sonata|suite|quinteto|cuarteto|tr[ií]o|obertura|ouverture|r[eé]quiem|misa|missa|toccata|fuga|fugue|preludio|pr[eé]lude|nocturne|mazurka|scherzo|impromptu|variaciones|variations|cantata|oratorio|fantas[ií]a|romance|rhapsod(?:y|ie)?|rapsodia|divertimento|polonesa|polonaise|recital(?:es)?)$/i;
 
 const PARENTHETICAL_ROLE = new RegExp(`^(.+?)\\s*\\((${ROLE_TOKEN})\\)$`, 'i');
 
@@ -890,6 +890,9 @@ function looksLikeUnlabeledPerson(text: string): boolean {
     return false;
   }
   const words = cleaned.split(/\s+/).filter(Boolean);
+  // "Recital de" is a programme format, not a person. FORM_ONLY stays out of
+  // WORK_GENRE so the same token does not open the repertoire frontier.
+  if (words.some((word) => FORM_ONLY.test(word))) return false;
   if (words.length < 2 || words.length > 6) return false;
   return words.every(
     (word) => NAME_PARTICLE.test(word) || /^[\p{Lu}\p{Lt}][\p{L}.’-]*$/u.test(word),

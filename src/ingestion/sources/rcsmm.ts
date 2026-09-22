@@ -9,6 +9,7 @@ import { inferScheduleFromText } from '../detail/schedule.ts';
 import { decodeHtmlEntities, flattenHtmlBlocks, stripTags } from '../html.ts';
 import { emptyObservedLists, normalizePersonList, type ObservedPerson } from '../observed.ts';
 import {
+  IncompleteListingError,
   reportAdapterDiscard,
   type AdapterContext,
   type RawEvent,
@@ -217,18 +218,54 @@ export function rcsmmPerformers(programText: string | undefined): ObservedPerson
   return normalizePersonList(performers);
 }
 
+function isOfficialEventsShell(body: string): boolean {
+  return /<body\b[^>]*class=["'][^"']*\bpath-eventos\b[^"']*["']/i.test(body)
+    && /<h1\b[^>]*>\s*Eventos\s*<\/h1>/i.test(body);
+}
+
+/**
+ * Page 0 can be an official shell whose event view is missing. That is not an
+ * empty agenda: articles, a pager, another Views container, or a node id mean
+ * the structure changed and must fail visibly.
+ */
+function isUnverifiableEventsShell(body: string): boolean {
+  if (eventArticles(body).length > 0) return false;
+  if (findPager(body)) return false;
+  return !hasAlternateEventStructure(body);
+}
+
+function hasAlternateEventStructure(body: string): boolean {
+  if (/\bdata-history-node-id\s*=/i.test(body)) return true;
+  const ids = [...body.matchAll(/\bid=["'](views-bootstrap-eventos-[^"']+)["']/gi)]
+    .map((match) => match[1] ?? '');
+  return ids.some((id) => id !== 'views-bootstrap-eventos-attachment-1');
+}
+
 function parseEventsPage(
   body: string,
   pageUrl: string,
   pageIndex: number,
   ctx: AdapterContext,
 ): ParsedPage {
-  if (!/<body\b[^>]*class=["'][^"']*\bpath-eventos\b[^"']*["']/i.test(body)
-    || !/<h1\b[^>]*>\s*Eventos\s*<\/h1>/i.test(body)) {
+  if (!isOfficialEventsShell(body)) {
     throw new Error(`${SOURCE_ID}: no se reconoce la agenda oficial`);
   }
   const pageListing = findElementById(body, 'div', 'views-bootstrap-eventos-page-1');
-  if (!pageListing) throw new Error(`${SOURCE_ID}: falta el contenedor principal de eventos`);
+  if (!pageListing) {
+    if (/views-bootstrap-eventos-page-1/i.test(body)) {
+      throw new Error(`${SOURCE_ID}: HTML truncado`);
+    }
+    if (pageIndex > 0) {
+      throw new Error(`${SOURCE_ID}: falta el contenedor principal de eventos`);
+    }
+    if (!isUnverifiableEventsShell(body)) {
+      throw new Error(`${SOURCE_ID}: la estructura de eventos no es reconocible`);
+    }
+    throw new IncompleteListingError(
+      `${SOURCE_ID}: la agenda oficial no permite verificar la cobertura`,
+      [],
+    );
+  }
   const attachment = findElementById(body, 'div', 'views-bootstrap-eventos-attachment-1');
   const pageArticles = eventArticles(pageListing.inner);
   const attachmentArticles = attachment ? eventArticles(attachment.inner) : [];
