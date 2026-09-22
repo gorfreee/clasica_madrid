@@ -1,5 +1,10 @@
 import { isDateInWindow, parseObservedTime } from '../dates.ts';
 import {
+  openBrowserSession,
+  recordedBrowserSession,
+  type BrowserDocumentSession,
+} from '../browser-fetch.ts';
+import {
   externalIdFromUrl,
   findElementByClass,
   findElementsByClass,
@@ -9,10 +14,32 @@ import {
   parseFundacionMutuaDetail,
 } from '../detail/fundacion-mutua.ts';
 import { stripTags } from '../html.ts';
+import {
+  isRecoverableTransportError,
+  ListingAttemptsError,
+  listingAttemptsFromError,
+} from '../listing-retry.ts';
 import { emptyObservedLists } from '../observed.ts';
 import type { AdapterContext, RawEvent, SourceAdapter } from '../types.ts';
 
 const SOURCE_ID = 'fundacion-mutua';
+export const FUNDACION_MUTUA_LISTING_READY_SELECTOR = '#mainContainer .event-panel';
+export const FUNDACION_MUTUA_DETAIL_READY_SELECTOR = '#mainContainer .events-item .event-links';
+
+type OpenBrowserSession = () => Promise<BrowserDocumentSession>;
+let openSession: OpenBrowserSession = openProductionBrowserSession;
+
+function openProductionBrowserSession(): Promise<BrowserDocumentSession> {
+  if (process.env.VITEST === 'true') {
+    throw new Error(`${SOURCE_ID}: el fallback de navegador no está inyectado en test`);
+  }
+  return openBrowserSession();
+}
+
+/** Test-only injection. Production always uses a real Chrome session. */
+export function setFundacionMutuaBrowserSessionForTests(factory?: OpenBrowserSession): void {
+  openSession = factory ?? openProductionBrowserSession;
+}
 
 export const fundacionMutuaAdapter: SourceAdapter = {
   id: SOURCE_ID,
@@ -21,11 +48,90 @@ export const fundacionMutuaAdapter: SourceAdapter = {
     if (!url) throw new Error(`${SOURCE_ID}: falta el listado oficial de conciertos`);
     return [url];
   },
+  fetchListing: fetchFundacionMutuaListing,
   extract(body, url, ctx) {
     return parseFundacionMutuaListing(body, url, ctx);
   },
   hydrate: parseFundacionMutuaDetail,
+  fetchDetail: fetchFundacionMutuaDetail,
+  endHydration: closeFundacionMutuaDetailSession,
 };
+
+/**
+ * Try the official page directly once. A recoverable transport block falls
+ * back to an isolated Chrome session that is always closed before parsing.
+ */
+export async function fetchFundacionMutuaListing(
+  url: string,
+  ctx: AdapterContext,
+): Promise<string> {
+  try {
+    return await ctx.get(url);
+  } catch (error) {
+    if (!isRecoverableTransportError(error)) throw error;
+    let session: BrowserDocumentSession | undefined;
+    try {
+      session = recordedBrowserSession(await openSession(), SOURCE_ID);
+      return await session.get(url, { waitForSelector: FUNDACION_MUTUA_LISTING_READY_SELECTOR });
+    } catch (browserError) {
+      throw new ListingAttemptsError(SOURCE_ID, [
+        ...listingAttemptsFromError('html-archive', error).map((attempt) => ({
+          ...attempt,
+          transport: attempt.transport ?? 'direct' as const,
+        })),
+        ...listingAttemptsFromError('html-archive', browserError).map((attempt) => ({
+          ...attempt,
+          transport: 'browser' as const,
+        })),
+      ]);
+    } finally {
+      await session?.close();
+    }
+  }
+}
+
+/**
+ * Detail pages also try direct HTTP first. Only blocked details share a lazy
+ * Chrome session, which the hydration loop closes through `endHydration`.
+ */
+export async function fetchFundacionMutuaDetail(
+  url: string,
+  ctx: AdapterContext,
+): Promise<string> {
+  try {
+    return await ctx.get(url);
+  } catch (error) {
+    if (!isRecoverableTransportError(error)) throw error;
+    const session = await openSharedDetailSession();
+    return session.get(url, { waitForSelector: FUNDACION_MUTUA_DETAIL_READY_SELECTOR });
+  }
+}
+
+let detailSession: BrowserDocumentSession | undefined;
+let detailSessionPending: Promise<BrowserDocumentSession> | undefined;
+
+async function openSharedDetailSession(): Promise<BrowserDocumentSession> {
+  if (detailSession) return detailSession;
+  if (!detailSessionPending) {
+    detailSessionPending = openSession()
+      .then((raw) => {
+        detailSession = recordedBrowserSession(raw, SOURCE_ID);
+        return detailSession;
+      })
+      .catch((error: unknown) => {
+        detailSessionPending = undefined;
+        throw error;
+      });
+  }
+  return detailSessionPending;
+}
+
+export async function closeFundacionMutuaDetailSession(): Promise<void> {
+  const session = detailSession;
+  detailSession = undefined;
+  detailSessionPending = undefined;
+  await session?.close();
+}
 
 export function parseFundacionMutuaListing(
   html: string,

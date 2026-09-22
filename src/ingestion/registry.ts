@@ -405,7 +405,6 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
     urls: ['https://www.fundacionmutua.es/cultura/conciertos/'],
     adapterId: fundacionMutuaAdapter.id,
     catalogSourceId: 'src_fundacion_mutua_madrilena',
-    useFetchRelay: true,
     seedSource: {
       schemaVersion: 1,
       id: 'src_fundacion_mutua_madrilena',

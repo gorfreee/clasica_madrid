@@ -1,8 +1,9 @@
 import { mkdtemp, readFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { mergeCandidateBatch } from '../src/ingestion/batch.ts';
+import { takeBrowserFetchAttempts } from '../src/ingestion/browser-fetch.ts';
 import { classify } from '../src/ingestion/classification/classify.ts';
 import {
   fundacionMutuaEventUrl,
@@ -10,11 +11,22 @@ import {
   parseFundacionMutuaDate,
   parseFundacionMutuaDetail,
 } from '../src/ingestion/detail/fundacion-mutua.ts';
-import { runIngest } from '../src/ingestion/pipeline.ts';
-import { getSourceDefinition } from '../src/ingestion/registry.ts';
+import { hydrateEvents } from '../src/ingestion/hydrate.ts';
+import { HttpError } from '../src/ingestion/http.ts';
+import { ListingAttemptsError } from '../src/ingestion/listing-retry.ts';
 import {
+  RUN_MANIFEST_FILE,
+  startObservability,
+  type IngestRunManifest,
+} from '../src/ingestion/observability.ts';
+import { runIngest } from '../src/ingestion/pipeline.ts';
+import { fetchRelayHosts, getSourceDefinition } from '../src/ingestion/registry.ts';
+import {
+  FUNDACION_MUTUA_DETAIL_READY_SELECTOR,
+  FUNDACION_MUTUA_LISTING_READY_SELECTOR,
   fundacionMutuaAdapter as adapter,
   parseFundacionMutuaListing,
+  setFundacionMutuaBrowserSessionForTests,
 } from '../src/ingestion/sources/fundacion-mutua.ts';
 import type { AdapterContext } from '../src/ingestion/types.ts';
 import { matchVenue } from '../src/ingestion/venues.ts';
@@ -36,19 +48,27 @@ const ctx: AdapterContext = {
   },
 };
 
+afterEach(async () => {
+  await adapter.endHydration?.();
+  setFundacionMutuaBrowserSessionForTests();
+  takeBrowserFetchAttempts(adapter.id);
+});
+
 describe('Fundación Mutua listing and detail', () => {
-  it('registers the official complete listing behind the fetch relay', () => {
+  it('registers the official complete listing on direct transport', () => {
     expect(source).toMatchObject({
       id: 'fundacion-mutua',
       urls: ['https://www.fundacionmutua.es/cultura/conciertos/'],
       catalogSourceId: 'src_fundacion_mutua_madrilena',
-      useFetchRelay: true,
       seedSource: {
         name: 'Fundación Mutua Madrileña',
         kind: 'official',
         url: 'https://www.fundacionmutua.es/',
       },
     });
+    expect(source.useFetchRelay).toBeFalsy();
+    expect(source.fetchTransport).toBeUndefined();
+    expect(fetchRelayHosts()).not.toContain('www.fundacionmutua.es');
     expect(source.skipDefaultSync).toBeFalsy();
     expect(adapter.requiresDetailSchedule).toBeFalsy();
     expect(listingUrl).toBe('https://www.fundacionmutua.es/cultura/conciertos/');
@@ -148,6 +168,300 @@ describe('Fundación Mutua listing and detail', () => {
       'https://www.fundacionmutua.es@evil.example/cultura/conciertos/clasicos/test/',
     )).toBeUndefined();
     expect(fundacionMutuaEventUrl(listingUrl)).toBeUndefined();
+  });
+});
+
+describe('Fundación Mutua browser transport', () => {
+  it('uses successful direct HTTP for the listing without opening Chrome', async () => {
+    const html = await fixture('listing-gerhard.html');
+    let opened = 0;
+    setFundacionMutuaBrowserSessionForTests(async () => {
+      opened += 1;
+      throw new Error('no debía abrir el navegador');
+    });
+
+    await expect(adapter.fetchListing!(listingUrl, {
+      ...ctx,
+      get: async (url) => {
+        expect(url).toBe(listingUrl);
+        return html;
+      },
+    })).resolves.toBe(html);
+    expect(opened).toBe(0);
+  });
+
+  it('falls back from HTTP 403 to Chrome and waits for the listing selector', async () => {
+    const html = await fixture('listing-gerhard.html');
+    const browserUrls: string[] = [];
+    let closed = 0;
+    setFundacionMutuaBrowserSessionForTests(async () => ({
+      async get(url, options) {
+        browserUrls.push(url);
+        expect(options.waitForSelector).toBe(FUNDACION_MUTUA_LISTING_READY_SELECTOR);
+        return html;
+      },
+      async close() {
+        closed += 1;
+      },
+    }));
+
+    const body = await adapter.fetchListing!(listingUrl, {
+      ...ctx,
+      get: async (url) => {
+        throw new HttpError(403, url);
+      },
+    });
+    expect(browserUrls).toEqual([listingUrl]);
+    expect(closed).toBe(1);
+    expect(parseFundacionMutuaListing(body, listingUrl, ctx)).toHaveLength(1);
+  });
+
+  it('uses the same fallback for another recoverable transport failure', async () => {
+    const html = await fixture('listing-gerhard.html');
+    let browserGets = 0;
+    setFundacionMutuaBrowserSessionForTests(async () => ({
+      async get() {
+        browserGets += 1;
+        return html;
+      },
+      async close() {},
+    }));
+
+    await expect(adapter.fetchListing!(listingUrl, {
+      ...ctx,
+      get: async () => {
+        throw new Error('fetch failed');
+      },
+    })).resolves.toBe(html);
+    expect(browserGets).toBe(1);
+  });
+
+  it('does not open Chrome for HTTP 404 or structurally invalid HTTP 200 HTML', async () => {
+    let opened = 0;
+    setFundacionMutuaBrowserSessionForTests(async () => {
+      opened += 1;
+      throw new Error('no debía abrir el navegador');
+    });
+
+    await expect(adapter.fetchListing!(listingUrl, {
+      ...ctx,
+      get: async (url) => {
+        throw new HttpError(404, url);
+      },
+    })).rejects.toMatchObject({ status: 404 });
+
+    const invalid = '<html><body>estructura nueva</body></html>';
+    const body = await adapter.fetchListing!(listingUrl, { ...ctx, get: async () => invalid });
+    expect(() => adapter.extract(body, listingUrl, ctx)).toThrow(/falta el listado oficial/);
+    expect(opened).toBe(0);
+  });
+
+  it('reports both direct and browser attempts and closes a failed listing session', async () => {
+    let closed = 0;
+    setFundacionMutuaBrowserSessionForTests(async () => ({
+      async get() {
+        throw Object.assign(new Error('Chrome bloqueado'), { status: 503 });
+      },
+      async close() {
+        closed += 1;
+      },
+    }));
+
+    await expect(adapter.fetchListing!(listingUrl, {
+      ...ctx,
+      get: async (url) => {
+        throw new HttpError(403, url);
+      },
+    })).rejects.toSatisfy((error: unknown) => {
+      expect(error).toBeInstanceOf(ListingAttemptsError);
+      const message = error instanceof Error ? error.message : String(error);
+      expect(message).toMatch(/html-archive direct → HTTP 403/);
+      expect(message).toMatch(/html-archive browser → HTTP 503/);
+      return true;
+    });
+    expect(closed).toBe(1);
+  });
+
+  it('closes the listing session before a browser document reaches structural parsing', async () => {
+    let closed = 0;
+    setFundacionMutuaBrowserSessionForTests(async () => ({
+      async get() {
+        return '<html><body>estructura nueva</body></html>';
+      },
+      async close() {
+        closed += 1;
+      },
+    }));
+
+    const body = await adapter.fetchListing!(listingUrl, {
+      ...ctx,
+      get: async (url) => {
+        throw new HttpError(403, url);
+      },
+    });
+    expect(closed).toBe(1);
+    expect(() => adapter.extract(body, listingUrl, ctx)).toThrow(/falta el listado oficial/);
+  });
+
+  it('uses direct HTTP for a detail without opening Chrome', async () => {
+    const detail = await fixture('detail-gerhard.html');
+    let opened = 0;
+    setFundacionMutuaBrowserSessionForTests(async () => {
+      opened += 1;
+      throw new Error('no debía abrir el navegador');
+    });
+
+    await expect(adapter.fetchDetail!('https://www.fundacionmutua.es/detail/', {
+      ...ctx,
+      get: async () => detail,
+    })).resolves.toBe(detail);
+    expect(opened).toBe(0);
+  });
+
+  it('hydrates a 403 detail through Chrome with the stable detail selector', async () => {
+    const [event] = parseFundacionMutuaListing(
+      await fixture('listing-gerhard.html'),
+      listingUrl,
+      ctx,
+    );
+    const detail = await fixture('detail-gerhard.html');
+    let closed = 0;
+    setFundacionMutuaBrowserSessionForTests(async () => ({
+      async get(url, options) {
+        expect(url).toBe(event!.sourceUrl);
+        expect(options.waitForSelector).toBe(FUNDACION_MUTUA_DETAIL_READY_SELECTOR);
+        return detail;
+      },
+      async close() {
+        closed += 1;
+      },
+    }));
+
+    const [hydrated] = await hydrateEvents([event!], adapter, {
+      ...ctx,
+      get: async (url) => {
+        throw new HttpError(403, url);
+      },
+    });
+    expect(hydrated?.hydration?.status).toBe('succeeded');
+    expect(hydrated?.observed.composers).toHaveLength(3);
+    expect(closed).toBe(1);
+  });
+
+  it('reuses one lazy detail session and endHydration clears it for the next run', async () => {
+    const browserUrls: string[] = [];
+    let opened = 0;
+    let closed = 0;
+    setFundacionMutuaBrowserSessionForTests(async () => {
+      opened += 1;
+      return {
+        async get(url, options) {
+          browserUrls.push(url);
+          expect(options.waitForSelector).toBe(FUNDACION_MUTUA_DETAIL_READY_SELECTOR);
+          return '<html></html>';
+        },
+        async close() {
+          closed += 1;
+        },
+      };
+    });
+    const blockedCtx = {
+      ...ctx,
+      get: async (url: string) => {
+        throw new HttpError(403, url);
+      },
+    };
+
+    await adapter.fetchDetail!('https://www.fundacionmutua.es/detail/one/', blockedCtx);
+    await adapter.fetchDetail!('https://www.fundacionmutua.es/detail/two/', blockedCtx);
+    expect(opened).toBe(1);
+    expect(browserUrls).toHaveLength(2);
+    await adapter.endHydration?.();
+    expect(closed).toBe(1);
+
+    await adapter.fetchDetail!('https://www.fundacionmutua.es/detail/three/', blockedCtx);
+    expect(opened).toBe(2);
+    await adapter.endHydration?.();
+    expect(closed).toBe(2);
+  });
+
+  it('keeps listing facts when Chrome fails for one blocked detail', async () => {
+    const [event] = parseFundacionMutuaListing(
+      await fixture('listing-gerhard.html'),
+      listingUrl,
+      ctx,
+    );
+    let closed = 0;
+    setFundacionMutuaBrowserSessionForTests(async () => ({
+      async get() {
+        throw new Error('tiempo agotado esperando la ficha');
+      },
+      async close() {
+        closed += 1;
+      },
+    }));
+
+    const [failed] = await hydrateEvents([event!], adapter, {
+      ...ctx,
+      get: async (url) => {
+        throw new HttpError(403, url);
+      },
+    });
+    expect(failed?.hydration?.status).toBe('failed');
+    expect(failed?.observed).toEqual(event!.observed);
+    expect(failed?.observed.occurrences).toEqual([{ raw: '28-10-2026 19:00 h.', date: '2026-10-28', time: '19:00' }]);
+    expect(closed).toBe(1);
+  });
+
+  it('records direct 403s and browser fallbacks without changing the editorial result', async () => {
+    const listing = await fixture('listing-gerhard.html');
+    const detail = await fixture('detail-gerhard.html');
+    let sessions = 0;
+    setFundacionMutuaBrowserSessionForTests(async () => {
+      sessions += 1;
+      return {
+        async get(url) {
+          return url === listingUrl ? listing : detail;
+        },
+        async close() {},
+      };
+    });
+    const obsDir = await mkdtemp(path.join(os.tmpdir(), 'fundacion-mutua-browser-obs-'));
+    const observability = startObservability({
+      directory: obsDir,
+      mode: 'dry-run',
+      sources: [source.id],
+      window: TEST_WINDOW,
+    })!;
+    const result = await runIngest({
+      now: TEST_NOW,
+      dryRun: true,
+      catalog: emptyCatalog(),
+      window: TEST_WINDOW,
+      sourceIds: [source.id],
+      dataDir: await mkdtemp(path.join(os.tmpdir(), 'fundacion-mutua-browser-data-')),
+      observability,
+      get: async (url) => {
+        throw new HttpError(403, url);
+      },
+    });
+    observability.complete();
+    observability.close();
+
+    const manifest = JSON.parse(
+      await readFile(path.join(obsDir, RUN_MANIFEST_FILE), 'utf8'),
+    ) as IngestRunManifest;
+    const timing = manifest.timings?.sources[source.id];
+    expect(sessions).toBe(2);
+    expect(timing?.http.directRequests).toBe(2);
+    expect(timing?.http.browserRequests).toBe(2);
+    expect(timing?.http.browserFallbacks).toBe(2);
+    expect(timing?.http.statusCounts['403']).toBe(2);
+    expect(timing?.listingTransport).toBe('browser');
+    expect(timing?.hydrationSucceeded).toBe(1);
+    expect(result.summary.sourcesFailed).toEqual([]);
+    expect(result.rawEvents[0]?.observed.composers).toHaveLength(3);
+    expect(result.summary.candidates).toBe(1);
   });
 });
 
