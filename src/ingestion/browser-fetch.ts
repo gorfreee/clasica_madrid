@@ -1,6 +1,10 @@
+import { stripTags } from './html.ts';
 import { isSiteGroundChallenge } from './listing-retry.ts';
 
 export const DEFAULT_BROWSER_TIMEOUT_MS = 45_000;
+const DOCUMENT_SAMPLE_MAX_CHARS = 320;
+const DOCUMENT_TITLE_MAX_CHARS = 160;
+const DOCUMENT_URL_MAX_CHARS = 500;
 
 export type BrowserFetchAttempt = {
   url: string;
@@ -151,18 +155,23 @@ async function navigateAndWait(
     await page.waitForSelector(selector, { timeout: timeoutMs, state: 'attached' });
   } catch (error) {
     const html = await page.content().catch(() => '');
-    if (isCaptchaUrl(page.url()) || isSiteGroundChallenge(html) || isInteractiveCaptcha(html)) {
-      throw challengeError('se recibió una pantalla de desafío SiteGround (captcha) en el navegador');
-    }
-    if (isPlaywrightTimeout(error)) {
-      throw new Error(`tiempo agotado esperando ${selector} en ${url}`);
-    }
-    throw error;
+    const diagnosis = diagnoseBrowserDocument(page, html, url);
+    const challenge = detectBrowserChallenge(html, diagnosis.finalUrl);
+    if (challenge) throw challengeError(formatChallengeDiagnosis(challenge, diagnosis));
+    const prefix = isPlaywrightTimeout(error)
+      ? `browser: tiempo agotado; selector ${JSON.stringify(selector)} ausente`
+      : `browser: fallo esperando selector ${JSON.stringify(selector)}`;
+    throw new Error(`${prefix}; ${formatDocumentDiagnosis(diagnosis, true)}`);
   }
 
   const html = await page.content();
-  if (isCaptchaUrl(page.url()) || isSiteGroundChallenge(html) || isInteractiveCaptcha(html)) {
-    throw challengeError('se recibió HTML de desafío SiteGround (captcha) en el navegador');
+  const finalUrl = currentDiagnosticUrl(page, url);
+  const challenge = detectBrowserChallenge(html, finalUrl);
+  if (challenge) {
+    throw challengeError(formatChallengeDiagnosis(
+      challenge,
+      diagnoseBrowserDocument(page, html, url),
+    ));
   }
   return html;
 }
@@ -175,8 +184,135 @@ function isCaptchaUrl(url: string): boolean {
   }
 }
 
-function isInteractiveCaptcha(html: string): boolean {
-  return /<iframe\b[^>]*sgcaptcha/i.test(html) || /\bverify you are human\b/i.test(html);
+type BrowserChallenge = {
+  provider: 'SiteGround' | 'Cloudflare' | 'interactivo';
+  markers: string[];
+};
+
+type BrowserDocumentDiagnosis = {
+  finalUrl: string;
+  title: string;
+  htmlChars: number;
+  sample: string;
+};
+
+function detectBrowserChallenge(html: string, finalUrl: string): BrowserChallenge | undefined {
+  const siteGroundMarkers: string[] = [];
+  if (isCaptchaUrl(finalUrl)) siteGroundMarkers.push('sgcaptcha-url');
+  if (isSiteGroundChallenge(html)) siteGroundMarkers.push('sgcaptcha-html');
+  if (/<iframe\b[^>]*sgcaptcha/i.test(html)) siteGroundMarkers.push('sgcaptcha-iframe');
+  if (siteGroundMarkers.length > 0) {
+    return { provider: 'SiteGround', markers: siteGroundMarkers };
+  }
+
+  const cloudflare = detectCloudflareChallenge(html);
+  if (cloudflare.length > 0) return { provider: 'Cloudflare', markers: cloudflare };
+
+  if (/\bverify(?:ing)? you are human\b/i.test(html)) {
+    return { provider: 'interactivo', markers: ['verify-human'] };
+  }
+  return undefined;
+}
+
+/** Require corroborating Cloudflare challenge signals, not just the vendor name. */
+function detectCloudflareChallenge(html: string): string[] {
+  const title = documentTitle(html);
+  const markers: string[] = [];
+  const contentMarkers: string[] = [];
+  const infrastructureMarkers: string[] = [];
+
+  if (/^just a moment(?:\.{3}|…)?$/i.test(title)) contentMarkers.push('title:just-a-moment');
+  if (/attention required!\s*\|\s*cloudflare/i.test(title)) contentMarkers.push('title:attention-required');
+  if (/\bchecking your browser\b/i.test(html)) contentMarkers.push('checking-browser');
+  if (/\benable javascript and cookies to continue\b/i.test(html)) contentMarkers.push('enable-js-cookies');
+  if (/\bplease enable javascript and cookies to continue\b/i.test(html)) contentMarkers.push('please-enable-js-cookies');
+
+  if (/\bcf-chl-[a-z0-9_-]*/i.test(html)) infrastructureMarkers.push('cf-chl');
+  if (/\/cdn-cgi\/challenge-platform\//i.test(html)) infrastructureMarkers.push('challenge-platform');
+  if (/\bchallenges\.cloudflare\.com\b/i.test(html)) infrastructureMarkers.push('challenges.cloudflare.com');
+  if (/\bcf-turnstile\b/i.test(html)) infrastructureMarkers.push('cf-turnstile');
+
+  markers.push(...contentMarkers, ...infrastructureMarkers);
+  const decisiveTitle = contentMarkers.includes('title:attention-required');
+  if (decisiveTitle || (contentMarkers.length > 0 && infrastructureMarkers.length > 0)) {
+    return markers;
+  }
+  return [];
+}
+
+function diagnoseBrowserDocument(
+  page: IngestBrowserPage,
+  html: string,
+  requestedUrl: string,
+): BrowserDocumentDiagnosis {
+  return {
+    finalUrl: currentDiagnosticUrl(page, requestedUrl),
+    title: limitedText(documentTitle(html), DOCUMENT_TITLE_MAX_CHARS),
+    htmlChars: html.length,
+    sample: documentTextSample(html),
+  };
+}
+
+function currentDiagnosticUrl(page: IngestBrowserPage, requestedUrl: string): string {
+  let finalUrl = requestedUrl;
+  try {
+    finalUrl = page.url() || requestedUrl;
+  } catch {
+    // Keep the requested URL when Playwright cannot report the current page.
+  }
+  return safeDiagnosticUrl(finalUrl);
+}
+
+function documentTitle(html: string): string {
+  const match = /<title\b[^>]*>([\s\S]*?)<\/title>/i.exec(html);
+  return match?.[1] ? stripTags(match[1]) : '';
+}
+
+function documentTextSample(html: string): string {
+  const safeHtml = html
+    .replace(/<!--([\s\S]*?)-->/g, ' ')
+    .replace(/<(?:script|style|template|svg|noscript|form)\b[^>]*>[\s\S]*?<\/(?:script|style|template|svg|noscript|form)>/gi, ' ')
+    .replace(/<(?:input|textarea|select|button)\b[^>]*>[\s\S]*?<\/(?:textarea|select|button)>/gi, ' ')
+    .replace(/<(?:input|textarea|select|button)\b[^>]*\/?>/gi, ' ');
+  const text = stripTags(safeHtml)
+    .replace(/\b(token|api[_ -]?key|authorization|password|secret)\s*[:=]\s*\S+/gi, '$1=[redacted]');
+  return limitedText(text, DOCUMENT_SAMPLE_MAX_CHARS);
+}
+
+function limitedText(value: string, maxChars: number): string {
+  const normalized = value.replace(/[\u0000-\u001f\u007f]+/g, ' ').replace(/\s+/g, ' ').trim();
+  if (normalized.length <= maxChars) return normalized;
+  return `${normalized.slice(0, maxChars - 1).trimEnd()}…`;
+}
+
+function safeDiagnosticUrl(value: string): string {
+  try {
+    const parsed = new URL(value);
+    parsed.username = '';
+    parsed.password = '';
+    parsed.search = '';
+    parsed.hash = '';
+    return limitedText(parsed.toString(), DOCUMENT_URL_MAX_CHARS);
+  } catch {
+    return limitedText(value.split(/[?#]/, 1)[0] ?? '', DOCUMENT_URL_MAX_CHARS);
+  }
+}
+
+function formatChallengeDiagnosis(
+  challenge: BrowserChallenge,
+  diagnosis: BrowserDocumentDiagnosis,
+): string {
+  return `browser: challenge ${challenge.provider} detectado; ${formatDocumentDiagnosis(diagnosis, false)}; markers=${challenge.markers.join(',')}`;
+}
+
+function formatDocumentDiagnosis(diagnosis: BrowserDocumentDiagnosis, includeSample: boolean): string {
+  const fields = [
+    `finalUrl=${diagnosis.finalUrl}`,
+    `title=${JSON.stringify(diagnosis.title)}`,
+    `htmlChars=${diagnosis.htmlChars}`,
+  ];
+  if (includeSample && diagnosis.sample) fields.push(`sample=${JSON.stringify(diagnosis.sample)}`);
+  return fields.join('; ');
 }
 
 function challengeError(message: string): Error & { status: number } {

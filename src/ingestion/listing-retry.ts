@@ -73,7 +73,19 @@ export function listingAttemptsFromError(surface: string, error: unknown): Listi
 
 function formatListingAttempt(attempt: ListingAttempt): string {
   const via = attempt.transport ? ` ${attempt.transport}` : '';
-  if (attempt.status !== undefined) return `${attempt.surface}${via} → HTTP ${attempt.status}`;
+  if (attempt.status !== undefined) {
+    const status = `HTTP ${attempt.status}`;
+    const detail = attempt.message.trim();
+    if (
+      attempt.transport === 'browser'
+      && attempt.status === 202
+      && detail
+      && detail.toLowerCase() !== status.toLowerCase()
+    ) {
+      return `${attempt.surface}${via} → ${status} (${detail})`;
+    }
+    return `${attempt.surface}${via} → ${status}`;
+  }
   return `${attempt.surface}${via} → ${attempt.message}`;
 }
 

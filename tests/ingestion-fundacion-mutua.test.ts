@@ -3,7 +3,11 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { mergeCandidateBatch } from '../src/ingestion/batch.ts';
-import { takeBrowserFetchAttempts } from '../src/ingestion/browser-fetch.ts';
+import {
+  openBrowserSession,
+  setBrowserLaunchForTests,
+  takeBrowserFetchAttempts,
+} from '../src/ingestion/browser-fetch.ts';
 import { classify } from '../src/ingestion/classification/classify.ts';
 import {
   fundacionMutuaEventUrl,
@@ -51,8 +55,52 @@ const ctx: AdapterContext = {
 afterEach(async () => {
   await adapter.endHydration?.();
   setFundacionMutuaBrowserSessionForTests();
+  setBrowserLaunchForTests();
   takeBrowserFetchAttempts(adapter.id);
 });
+
+function installCloudflareChallengeBrowser() {
+  const closed = { browser: false, context: false };
+  setBrowserLaunchForTests(async () => ({
+    async newContext() {
+      return {
+        async newPage() {
+          let currentUrl = 'about:blank';
+          return {
+            async goto(url) {
+              currentUrl = url;
+            },
+            async waitForSelector() {
+              throw Object.assign(new Error('Timeout 45000ms exceeded'), { name: 'TimeoutError' });
+            },
+            async content() {
+              return `
+                <html>
+                  <head>
+                    <title>Just a moment...</title>
+                    <script src="/cdn-cgi/challenge-platform/h/g/orchestrate/chl_page/v1"></script>
+                  </head>
+                  <body>Checking your browser...</body>
+                </html>
+              `;
+            },
+            url() {
+              return currentUrl;
+            },
+          };
+        },
+        async close() {
+          closed.context = true;
+        },
+      };
+    },
+    async close() {
+      closed.browser = true;
+    },
+  }));
+  setFundacionMutuaBrowserSessionForTests(openBrowserSession);
+  return closed;
+}
 
 describe('Fundación Mutua listing and detail', () => {
   it('registers the official complete listing on direct transport', () => {
@@ -280,6 +328,29 @@ describe('Fundación Mutua browser transport', () => {
       return true;
     });
     expect(closed).toBe(1);
+  });
+
+  it('combines the direct 403 with a clearly diagnosed Cloudflare browser challenge', async () => {
+    const closed = installCloudflareChallengeBrowser();
+    await expect(adapter.fetchListing!(listingUrl, {
+      ...ctx,
+      get: async (url) => {
+        throw new HttpError(403, url);
+      },
+    })).rejects.toSatisfy((error: unknown) => {
+      expect(error).toBeInstanceOf(ListingAttemptsError);
+      const message = error instanceof Error ? error.message : String(error);
+      expect(message).toMatch(/html-archive direct → HTTP 403/);
+      expect(message).toMatch(/html-archive browser → HTTP 202/);
+      expect(message).toMatch(/challenge Cloudflare detectado/);
+      expect(message).toMatch(/title="Just a moment\.\.\."/);
+      return true;
+    });
+    expect(closed.context).toBe(true);
+    expect(closed.browser).toBe(true);
+    const attempts = takeBrowserFetchAttempts(adapter.id);
+    expect(attempts[0]?.challenge).toBe(true);
+    expect(attempts[0]?.timeout).toBeUndefined();
   });
 
   it('closes the listing session before a browser document reaches structural parsing', async () => {
@@ -559,5 +630,51 @@ describe('Fundación Mutua pipeline safety', () => {
       expect.objectContaining({ sourceId: source.id }),
     ]);
     expect(result.summary.possiblyMissing).toBe(0);
+  });
+
+  it('fails safely with zero events when Chrome receives a Cloudflare challenge', async () => {
+    const closed = installCloudflareChallengeBrowser();
+    const obsDir = await mkdtemp(path.join(os.tmpdir(), 'fundacion-mutua-cloudflare-obs-'));
+    const observability = startObservability({
+      directory: obsDir,
+      mode: 'dry-run',
+      sources: [source.id],
+      window: TEST_WINDOW,
+    })!;
+    const result = await runIngest({
+      now: TEST_NOW,
+      dryRun: true,
+      catalog: emptyCatalog(),
+      window: TEST_WINDOW,
+      sourceIds: [source.id],
+      dataDir: await mkdtemp(path.join(os.tmpdir(), 'fundacion-mutua-cloudflare-')),
+      observability,
+      get: async (url) => {
+        throw new HttpError(403, url);
+      },
+    });
+    observability.complete();
+    observability.close();
+
+    expect(result.summary.sourcesFailed).toEqual([
+      expect.objectContaining({
+        sourceId: source.id,
+        message: expect.stringMatching(/direct → HTTP 403.*browser → HTTP 202.*Cloudflare/s),
+      }),
+    ]);
+    expect(result.rawEvents).toHaveLength(0);
+    expect(result.summary.candidates).toBe(0);
+    expect(result.summary.possiblyMissing).toBe(0);
+    expect(closed.context).toBe(true);
+    expect(closed.browser).toBe(true);
+    const manifest = JSON.parse(
+      await readFile(path.join(obsDir, RUN_MANIFEST_FILE), 'utf8'),
+    ) as IngestRunManifest;
+    const timing = manifest.timings?.sources[source.id];
+    expect(timing?.listingTransport).toBe('browser');
+    expect(timing?.http.statusCounts['403']).toBe(1);
+    expect(timing?.http.statusCounts['202']).toBe(1);
+    expect(timing?.http.challengeCount).toBe(1);
+    expect(timing?.http.timeoutCount).toBe(0);
   });
 });
