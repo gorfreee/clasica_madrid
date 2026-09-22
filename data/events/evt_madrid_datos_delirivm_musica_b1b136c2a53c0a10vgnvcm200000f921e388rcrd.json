@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_delirivm_musica_b1b136c2a53c0a10vgnvcm200000f921e388rcrd",
+  "slug": "delirivm-musica-handel-all-italiana",
+  "title": "Delirivm Música — Händel all'Italiana",
+  "status": "scheduled",
+  "venueId": "ven_parroquia_santa_maria_la_antigua",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_delirivm_musica_b1b136c2a53c0a10vgnvcm200000f921e388rcrd_01",
+      "date": "2026-10-03",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Delirivm Música"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Georg Friedrich Händel"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata a trío en fa mayor HWV 389, op. 2 n.º 4",
+      "composerName": "Georg Friedrich Händel"
+    },
+    {
+      "title": "Sonata en sol menor HWV 364a, op. 1 n.º 6",
+      "composerName": "Georg Friedrich Händel"
+    },
+    {
+      "title": "Sonata a trío en do menor HWV 386a, op. 2 n.º 1a",
+      "composerName": "Georg Friedrich Händel"
+    },
+    {
+      "title": "Sonata en sol menor HWV 360, op. 1 n.º 2",
+      "composerName": "Georg Friedrich Händel"
+    },
+    {
+      "title": "Sonata a trío en la mayor HWV 396, op. 5 n.º 1",
+      "composerName": "Georg Friedrich Händel"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "organ",
+    "early-music",
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Vicalvaro/Actividades-y-eventos/Delirivm-Musica?vgnextchannel=497b48e063f28010VgnVCM100000dc0ca8c0RCRD&vgnextfmt=default&vgnextoid=b1b136c2a53c0a10VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-09-22"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-09-22"
+}

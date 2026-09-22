@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_21distritos_es_rossita_2",
+  "slug": "rossita",
+  "title": "Rossita",
+  "status": "scheduled",
+  "venueId": "ven_nuevas_dependencias_de_la_casa_del_reloj",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_21distritos_es_rossita_2_01",
+      "date": "2026-11-07",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Rossita Company"
+    },
+    {
+      "name": "Mar Vives"
+    },
+    {
+      "name": "Marc Laliga"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Amadeu Vives"
+    },
+    {
+      "name": "Claude Debussy"
+    },
+    {
+      "name": "Francis Poulenc"
+    },
+    {
+      "name": "Giacomo Puccini"
+    },
+    {
+      "name": "George Gershwin"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "opera"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_21distritos_es",
+      "url": "https://21distritos.es/evento/rossita-2",
+      "checkedAt": "2026-09-22"
+    }
+  ],
+  "primarySourceId": "src_21distritos_es",
+  "lastVerifiedAt": "2026-09-22"
+}

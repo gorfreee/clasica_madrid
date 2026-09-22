@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_casamerica_es_presentacion_de_las_xcvii_jornadas_de_la_hispanidad",
+  "slug": "concierto-de-la-orquesta-de-guitarras-de-madrid",
+  "title": "Concierto de la Orquesta de Guitarras de Madrid",
+  "status": "scheduled",
+  "venueId": "ven_casa_de_america_anfiteatro_gabriela_mistral",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_casamerica_es_presentacion_de_las_xcvii_jornadas_de_la_hispanidad_01",
+      "date": "2026-09-25",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta de Guitarras de Madrid"
+    },
+    {
+      "name": "Jorge Aguilera"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Luigi Boccherini"
+    },
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "M. Houghton"
+    },
+    {
+      "name": "Carlos Guastavino"
+    },
+    {
+      "name": "Ángel Cabral"
+    },
+    {
+      "name": "G. Tortora"
+    },
+    {
+      "name": "Ernesto Lecuona"
+    },
+    {
+      "name": "Federico Moreno Torroba"
+    },
+    {
+      "name": "Manuel de Falla"
+    }
+  ],
+  "works": [
+    {
+      "title": "Introducción y Fandango",
+      "composerName": "Luigi Boccherini"
+    },
+    {
+      "title": "Pequeña serenata nocturna",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Tango (Dance Suite)",
+      "composerName": "M. Houghton"
+    },
+    {
+      "title": "Fuga sobre el Arroz con leche",
+      "composerName": "Carlos Guastavino"
+    },
+    {
+      "title": "Que nadie sepa mi sufrir",
+      "composerName": "Ángel Cabral"
+    },
+    {
+      "title": "Tarantella n.º 1",
+      "composerName": "G. Tortora"
+    },
+    {
+      "title": "Suite Andalucía",
+      "composerName": "Ernesto Lecuona"
+    },
+    {
+      "title": "Estampas",
+      "composerName": "Federico Moreno Torroba"
+    },
+    {
+      "title": "Danza del Molinero",
+      "composerName": "Manuel de Falla"
+    }
+  ],
+  "eras": [
+    "classical",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_casamerica_es",
+      "url": "https://www.casamerica.es/index.php/historia/presentacion-de-las-xcvii-jornadas-de-la-hispanidad",
+      "checkedAt": "2026-09-22"
+    }
+  ],
+  "primarySourceId": "src_casamerica_es",
+  "lastVerifiedAt": "2026-09-22"
+}
