@@ -84,7 +84,9 @@ test.describe('compartir en fichas', () => {
     const html = await page.content();
     expect(html).not.toContain('eu.i.posthog.com');
     expect(html).not.toContain('eu-assets.i.posthog.com');
+    expect(html).not.toContain('e.clasicamadrid.com');
     expect(html).not.toContain('array.js');
+    expect(html).not.toContain('posthog.init');
     expect(await page.evaluate(() => 'posthog' in window)).toBe(false);
   });
 
