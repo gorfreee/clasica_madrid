@@ -117,7 +117,7 @@ describe('Fundación Mutua listing and detail', () => {
     expect(source.useFetchRelay).toBeFalsy();
     expect(source.fetchTransport).toBeUndefined();
     expect(fetchRelayHosts()).not.toContain('www.fundacionmutua.es');
-    expect(source.skipDefaultSync).toBeFalsy();
+    expect(source.skipDefaultSync).toBe(true);
     expect(adapter.requiresDetailSchedule).toBeFalsy();
     expect(listingUrl).toBe('https://www.fundacionmutua.es/cultura/conciertos/');
   });

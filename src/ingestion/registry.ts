@@ -405,6 +405,11 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
     urls: ['https://www.fundacionmutua.es/cultura/conciertos/'],
     adapterId: fundacionMutuaAdapter.id,
     catalogSourceId: 'src_fundacion_mutua_madrilena',
+    // Temporarily excluded from scheduled/default syncs: direct HTTP, the
+    // relay and Chrome all receive a persistent Cloudflare challenge in
+    // GitHub Actions (confirmed by run 35749261325). Keep explicit source
+    // runs available to requalify transport before re-enabling it here.
+    skipDefaultSync: true,
     seedSource: {
       schemaVersion: 1,
       id: 'src_fundacion_mutua_madrilena',
