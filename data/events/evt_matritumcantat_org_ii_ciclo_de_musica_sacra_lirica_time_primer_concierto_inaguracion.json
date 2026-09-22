@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_matritumcantat_org_ii_ciclo_de_musica_sacra_lirica_time_primer_concierto_inaguracion",
+  "slug": "ii-ciclo-de-musica-sacra-lirica-time-primer-concierto-de-inauguracion",
+  "title": "II Ciclo de Música Sacra Lírica Time — Primer concierto de inauguración",
+  "status": "scheduled",
+  "venueId": "ven_iglesia_san_antonio_alemanes",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_matritumcantat_org_ii_ciclo_de_musica_sacra_lirica_time_primer_concierto_inaguracion_01",
+      "date": "2026-10-17",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta y Coro Matritum Cantat"
+    },
+    {
+      "name": "Liana Aguilar"
+    },
+    {
+      "name": "Ryan Borges"
+    },
+    {
+      "name": "Javier Blanco"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Franz Joseph Haydn"
+    },
+    {
+      "name": "Gabriel Fauré"
+    }
+  ],
+  "works": [
+    {
+      "title": "Missa brevis Sancti Joannis de Deo",
+      "composerName": "Franz Joseph Haydn"
+    },
+    {
+      "title": "Réquiem en re menor, op. 48",
+      "composerName": "Gabriel Fauré"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_matritumcantat_org",
+      "url": "https://www.matritumcantat.org/eventos/ii-ciclo-de-musica-sacra-lirica-time-primer-concierto-inaguracion",
+      "checkedAt": "2026-09-22"
+    }
+  ],
+  "primarySourceId": "src_matritumcantat_org",
+  "lastVerifiedAt": "2026-09-22"
+}

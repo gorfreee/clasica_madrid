@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_comunidad_madrid_concierto_donde_nace_camino",
+  "slug": "donde-nace-el-camino",
+  "title": "Donde nace el camino",
+  "status": "scheduled",
+  "venueId": "ven_casa_museo_lope_de_vega",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_comunidad_madrid_concierto_donde_nace_camino_01",
+      "date": "2026-10-06",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Echo et Dulce"
+    },
+    {
+      "name": "Tamar Lalo"
+    },
+    {
+      "name": "Nacho Laguna"
+    },
+    {
+      "name": "Calia Álvarez"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Juan del Encina"
+    },
+    {
+      "name": "Diego Ortiz"
+    },
+    {
+      "name": "Gaspar Sanz"
+    },
+    {
+      "name": "Bartolomé de Selma y Salaverde"
+    },
+    {
+      "name": "Santiago de Murcia"
+    },
+    {
+      "name": "Giovanni Antonio Pandolfi Mealli"
+    },
+    {
+      "name": "Antonio de Cabezón"
+    },
+    {
+      "name": "Francisco Correa de Arauxo"
+    },
+    {
+      "name": "Lucas Ruiz de Ribayaz"
+    }
+  ],
+  "works": [
+    {
+      "title": "Con amores, la mi madre",
+      "composerName": "Juan del Encina"
+    },
+    {
+      "title": "Durme, durme"
+    },
+    {
+      "title": "La Spagna",
+      "composerName": "Diego Ortiz"
+    },
+    {
+      "title": "Recercada octava sobre tenores italianos",
+      "composerName": "Diego Ortiz"
+    },
+    {
+      "title": "Españoletas",
+      "composerName": "Gaspar Sanz"
+    },
+    {
+      "title": "Canarios",
+      "composerName": "Gaspar Sanz"
+    },
+    {
+      "title": "Folías",
+      "composerName": "Gaspar Sanz"
+    },
+    {
+      "title": "Canzona III",
+      "composerName": "Bartolomé de Selma y Salaverde"
+    },
+    {
+      "title": "Vestiva i colli",
+      "composerName": "Bartolomé de Selma y Salaverde"
+    },
+    {
+      "title": "Jácaras",
+      "composerName": "Santiago de Murcia"
+    },
+    {
+      "title": "Sonata n.º 4 La Biancuccia",
+      "composerName": "Giovanni Antonio Pandolfi Mealli"
+    },
+    {
+      "title": "Pavana con su glosa",
+      "composerName": "Antonio de Cabezón"
+    },
+    {
+      "title": "Todo el mundo en general",
+      "composerName": "Francisco Correa de Arauxo"
+    },
+    {
+      "title": "Tarantela",
+      "composerName": "Lucas Ruiz de Ribayaz"
+    }
+  ],
+  "eras": [
+    "renaissance",
+    "baroque"
+  ],
+  "formats": [
+    "early-music"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_comunidad_madrid",
+      "url": "https://www.comunidad.madrid/actividades/2026/concierto-donde-nace-camino",
+      "checkedAt": "2026-09-22"
+    }
+  ],
+  "primarySourceId": "src_comunidad_madrid",
+  "lastVerifiedAt": "2026-09-22"
+}

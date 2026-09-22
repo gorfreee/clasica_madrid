@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_mutua_03_10_26",
+  "slug": "andrey-yaroshinsky",
+  "title": "Andrey Yaroshinsky",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_mutua_madrilena",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_mutua_03_10_26_01",
+      "date": "2026-10-03",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Andrey Yaroshinsky"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Robert Schumann"
+    },
+    {
+      "name": "Frédéric Chopin"
+    },
+    {
+      "name": "Franz Liszt"
+    },
+    {
+      "name": "Serguéi Rachmaninov"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata en do mayor K. 545",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Escenas de niños, op. 15",
+      "composerName": "Robert Schumann"
+    },
+    {
+      "title": "Vals op. 64 n.º 1",
+      "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "Vals op. 64 n.º 2",
+      "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "Scherzo n.º 3, op. 39",
+      "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "Rapsodia húngara n.º 2, con cadencia de Rachmaninov",
+      "composerName": "Franz Liszt"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_mutua_madrilena",
+      "url": "https://www.fundacionmutua.es/cultura/conciertos/clasicos/03-10-26",
+      "checkedAt": "2026-09-22"
+    }
+  ],
+  "primarySourceId": "src_fundacion_mutua_madrilena",
+  "lastVerifiedAt": "2026-09-22"
+}

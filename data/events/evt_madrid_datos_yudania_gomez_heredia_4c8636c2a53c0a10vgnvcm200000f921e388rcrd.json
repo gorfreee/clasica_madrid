@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_yudania_gomez_heredia_4c8636c2a53c0a10vgnvcm200000f921e388rcrd",
+  "slug": "yudania-gomez-heredia",
+  "title": "Yudania Gómez Heredia",
+  "status": "scheduled",
+  "venueId": "ven_parroquia_santa_maria_la_antigua",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_yudania_gomez_heredia_4c8636c2a53c0a10vgnvcm200000f921e388rcrd_01",
+      "date": "2026-10-17",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Yudania Gómez Heredia"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Dietrich Buxtehude"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Johann Caspar Ferdinand Fischer"
+    },
+    {
+      "name": "Carlos de Seixas"
+    },
+    {
+      "name": "Domenico Scarlatti"
+    },
+    {
+      "name": "Fela Sowande"
+    },
+    {
+      "name": "Yudania Gómez Heredia"
+    }
+  ],
+  "works": [
+    {
+      "title": "Toccata en re menor BuxWV 155",
+      "composerName": "Dietrich Buxtehude"
+    },
+    {
+      "title": "Preludio y fuga en do mayor BWV 547",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Passacaglia en re menor de Urania",
+      "composerName": "Johann Caspar Ferdinand Fischer"
+    },
+    {
+      "title": "Toccata n.º 33 en la menor",
+      "composerName": "Carlos de Seixas"
+    },
+    {
+      "title": "Fuga del gato",
+      "composerName": "Domenico Scarlatti"
+    },
+    {
+      "title": "Sonata en do mayor"
+    },
+    {
+      "title": "Ritornello sobre Wer nun den lieben Gott lässt walten",
+      "composerName": "Yudania Gómez Heredia"
+    },
+    {
+      "title": "Jubilate",
+      "composerName": "Fela Sowande"
+    },
+    {
+      "title": "Improvisación sobre tema libre",
+      "composerName": "Yudania Gómez Heredia"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "recital",
+    "organ",
+    "early-music"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Publicaciones/Listado-de-Publicaciones/Yudania-Gomez-Heredia?vgnextchannel=f1aebadb6b997010VgnVCM100000dc0ca8c0RCRD&vgnextfmt=default&vgnextoid=4c8636c2a53c0a10VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-09-22"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-09-22"
+}

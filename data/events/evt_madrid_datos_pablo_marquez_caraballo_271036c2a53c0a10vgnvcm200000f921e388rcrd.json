@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_pablo_marquez_caraballo_271036c2a53c0a10vgnvcm200000f921e388rcrd",
+  "slug": "pablo-marquez-caraballo",
+  "title": "Pablo Márquez Caraballo",
+  "status": "scheduled",
+  "venueId": "ven_parroquia_santa_maria_la_antigua",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_pablo_marquez_caraballo_271036c2a53c0a10vgnvcm200000f921e388rcrd_01",
+      "date": "2026-09-26",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Pablo Márquez Caraballo"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Joan Cabanilles"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Antonio Vivaldi"
+    }
+  ],
+  "works": [
+    {
+      "title": "Tiento lleno de 1.º tono de todas manos (E-Bbc M386/23)",
+      "composerName": "Joan Cabanilles"
+    },
+    {
+      "title": "Tiento lleno de 1.º tono (M386/14)",
+      "composerName": "Joan Cabanilles"
+    },
+    {
+      "title": "Tiento de 3.º tono (M386/12)",
+      "composerName": "Joan Cabanilles"
+    },
+    {
+      "title": "Tiento de 8.º tono de contras (M386/36)",
+      "composerName": "Joan Cabanilles"
+    },
+    {
+      "title": "Concierto en re menor BWV 596, sobre el RV 565 de Vivaldi",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "An Wasserflüssen Babylon BWV 653",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Preludio y fuga en re mayor BWV 532",
+      "composerName": "Johann Sebastian Bach"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "recital",
+    "organ",
+    "early-music"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Publicaciones/Listado-de-Publicaciones/Pablo-Marquez-Caraballo?vgnextchannel=f1aebadb6b997010VgnVCM100000dc0ca8c0RCRD&vgnextfmt=default&vgnextoid=271036c2a53c0a10VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-09-22"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-09-22"
+}

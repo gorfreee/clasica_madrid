@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_mutua_judith_jauregui_cuarteto_gerhard_28_10_26",
+  "slug": "judith-jauregui-y-cuarteto-gerhard",
+  "title": "Judith Jáuregui y Cuarteto Gerhard",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_mutua_madrilena",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_mutua_judith_jauregui_cuarteto_gerhard_28_10_26_01",
+      "date": "2026-10-28",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Judith Jáuregui"
+    },
+    {
+      "name": "Cuarteto Gerhard"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Franz Liszt"
+    },
+    {
+      "name": "Piotr Ilich Chaikovski"
+    },
+    {
+      "name": "Amy Beach"
+    }
+  ],
+  "works": [
+    {
+      "title": "Consolaciones S. 172",
+      "composerName": "Franz Liszt"
+    },
+    {
+      "title": "Cuarteto de cuerda n.º 1 en re mayor, op. 11",
+      "composerName": "Piotr Ilich Chaikovski"
+    },
+    {
+      "title": "Quinteto con piano en fa sostenido menor, op. 67",
+      "composerName": "Amy Beach"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "chamber",
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_mutua_madrilena",
+      "url": "https://www.fundacionmutua.es/cultura/conciertos/clasicos/Judith_Jauregui_Cuarteto_Gerhard_28-10-26",
+      "checkedAt": "2026-09-22"
+    }
+  ],
+  "primarySourceId": "src_fundacion_mutua_madrilena",
+  "lastVerifiedAt": "2026-09-22"
+}

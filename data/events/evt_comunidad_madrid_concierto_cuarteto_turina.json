@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_comunidad_madrid_concierto_cuarteto_turina",
+  "slug": "concierto-cuarteto-turina",
+  "title": "Concierto Cuarteto Turina",
+  "status": "scheduled",
+  "venueId": "ven_real_academia_espanola",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_comunidad_madrid_concierto_cuarteto_turina_01",
+      "date": "2026-10-05",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Christian Cassanova"
+    },
+    {
+      "name": "Dario Montero"
+    },
+    {
+      "name": "Benjamín Verbruggen"
+    },
+    {
+      "name": "Antonio Pérez"
+    },
+    {
+      "name": "Cuarteto Turina"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Isaac Albéniz"
+    },
+    {
+      "name": "Joaquín Turina"
+    },
+    {
+      "name": "Manuel de Falla"
+    },
+    {
+      "name": "Astor Piazzolla"
+    },
+    {
+      "name": "Aldemaro Romero"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_comunidad_madrid",
+      "url": "https://www.comunidad.madrid/actividades/2026/concierto-cuarteto-turina",
+      "checkedAt": "2026-09-22"
+    }
+  ],
+  "primarySourceId": "src_comunidad_madrid",
+  "lastVerifiedAt": "2026-09-22"
+}

@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_condeduque_cristina_montes",
+  "slug": "cristina-montes",
+  "title": "Cristina Montes",
+  "status": "scheduled",
+  "venueId": "ven_condeduque_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_condeduque_cristina_montes_01",
+      "date": "2026-12-16",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Cristina Montes"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Jesús Guridi"
+    },
+    {
+      "name": "Gabriel Fauré"
+    },
+    {
+      "name": "Gabriel Erkoreka"
+    },
+    {
+      "name": "Laura Vega"
+    },
+    {
+      "name": "Salvador Brotons"
+    },
+    {
+      "name": "Gerardo Gombau"
+    }
+  ],
+  "works": [
+    {
+      "title": "Viejo zortzico",
+      "composerName": "Jesús Guridi"
+    },
+    {
+      "title": "Impromptu, op. 86",
+      "composerName": "Gabriel Fauré"
+    },
+    {
+      "title": "Kora",
+      "composerName": "Gabriel Erkoreka"
+    },
+    {
+      "title": "La noche que me cubre…",
+      "composerName": "Laura Vega"
+    },
+    {
+      "title": "Allegro spiritoso de Sonata para arpa",
+      "composerName": "Salvador Brotons"
+    },
+    {
+      "title": "Apunte bético",
+      "composerName": "Gerardo Gombau"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_condeduque",
+      "url": "https://www.condeduquemadrid.es/actividades/cristina-montes",
+      "checkedAt": "2026-09-22"
+    }
+  ],
+  "primarySourceId": "src_condeduque",
+  "lastVerifiedAt": "2026-09-22"
+}

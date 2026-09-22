@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_mutua_cascanueces_28_11_26",
+  "slug": "el-cascanueces-2",
+  "title": "El Cascanueces",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_mutua_madrilena",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_mutua_cascanueces_28_11_26_01",
+      "date": "2026-11-28",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ferro Escénico"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Piotr Ilich Chaikovski"
+    }
+  ],
+  "works": [
+    {
+      "title": "El Cascanueces",
+      "composerName": "Piotr Ilich Chaikovski"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "other"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_mutua_madrilena",
+      "url": "https://www.fundacionmutua.es/cultura/conciertos/clasicos/Cascanueces_28-11-26",
+      "checkedAt": "2026-09-22"
+    }
+  ],
+  "primarySourceId": "src_fundacion_mutua_madrilena",
+  "lastVerifiedAt": "2026-09-22"
+}

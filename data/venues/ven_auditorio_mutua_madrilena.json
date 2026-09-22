@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_auditorio_mutua_madrilena",
+  "slug": "auditorio-mutua-madrilena",
+  "name": "Auditorio Mutua Madrileña",
+  "municipality": "Madrid",
+  "area": "madrid",
+  "address": "Paseo de Eduardo Dato, 20, 28010 Madrid",
+  "url": "https://www.fundacionmutua.es/cultura/conciertos/",
+  "lastVerifiedAt": "2026-09-22"
+}

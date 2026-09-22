@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_orquesta_de_camara_santa_cecilia_3ec336c2a53c0a10vgnvcm200000f921e388rcrd",
+  "slug": "orquesta-de-camara-santa-cecilia",
+  "title": "Orquesta de Cámara Santa Cecilia",
+  "status": "scheduled",
+  "venueId": "ven_parroquia_santa_maria_la_antigua",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_orquesta_de_camara_santa_cecilia_3ec336c2a53c0a10vgnvcm200000f921e388rcrd_01",
+      "date": "2026-10-10",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta de Cámara Santa Cecilia"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Jean-Baptiste Lully"
+    },
+    {
+      "name": "Carlo Pallavicino"
+    },
+    {
+      "name": "Jean-Philippe Rameau"
+    },
+    {
+      "name": "Henry Purcell"
+    },
+    {
+      "name": "Georg Friedrich Händel"
+    },
+    {
+      "name": "Jean-Marie Leclair"
+    }
+  ],
+  "works": [
+    {
+      "title": "Armide: obertura y passacaille",
+      "composerName": "Jean-Baptiste Lully"
+    },
+    {
+      "title": "L'Antiope: Vieni, corri, volami in braccio",
+      "composerName": "Carlo Pallavicino"
+    },
+    {
+      "title": "Six concerts transcrits en sextuor: movimientos de los conciertos primero y tercero",
+      "composerName": "Jean-Philippe Rameau"
+    },
+    {
+      "title": "Dido and Aeneas: Dido's Lament",
+      "composerName": "Henry Purcell"
+    },
+    {
+      "title": "Rinaldo: Lascia ch'io pianga",
+      "composerName": "Georg Friedrich Händel"
+    },
+    {
+      "title": "Concierto para violín en la menor, op. 7 n.º 5",
+      "composerName": "Jean-Marie Leclair"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "chamber",
+    "early-music"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Moratalaz/Orquesta-de-Camara-Santa-Cecilia?vgnextchannel=7cb0ca5d5fb96010VgnVCM100000dc0ca8c0RCRD&vgnextfmt=default&vgnextoid=3ec336c2a53c0a10VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-09-22"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-09-22"
+}
