@@ -15,11 +15,12 @@ type Props = {
   text: string;
   path: string;
   contentType: ShareContentType;
+  eventId?: string;
   /** Optically align the label with a neighbouring CTA that has its own padding. */
   align?: 'utility' | 'beside-cta';
 };
 
-const { title, text, path, contentType, align = 'utility' } = Astro.props;
+const { title, text, path, contentType, eventId, align = 'utility' } = Astro.props;
 const fallbackWhatsapp = whatsappShareHref(text, attributedShareUrl(SITE_ORIGIN, path, 'whatsapp'));
 ---
 
@@ -30,6 +31,7 @@ const fallbackWhatsapp = whatsappShareHref(text, attributedShareUrl(SITE_ORIGIN,
   data-share-text={text}
   data-share-path={path}
   data-share-content-type={contentType}
+  data-share-event-id={eventId}
 >
   <summary class="share-action__trigger" role="button">
     <span class="share-action__icon" aria-hidden="true">

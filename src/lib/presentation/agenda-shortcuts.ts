@@ -5,8 +5,9 @@ import {
 import { isMadridWeekendRange, madridWeekendRange } from '../domain/dates.ts';
 import { AGENDA_PATH } from './urls.ts';
 import { freeAgendaSignalLabel, weekendAgendaShortcutLabel } from './labels.ts';
+import type { AgendaShortcutId } from './agenda-shortcut-id.ts';
 
-export type AgendaShortcutId = 'weekend' | 'free';
+export { isAgendaShortcutId, type AgendaShortcutId } from './agenda-shortcut-id.ts';
 
 export type AgendaShortcutModel = {
   id: AgendaShortcutId;
@@ -21,10 +22,6 @@ export type ActiveFilterChip = {
   label: string;
   value: string;
 };
-
-export function isAgendaShortcutId(value: string | undefined): value is AgendaShortcutId {
-  return value === 'weekend' || value === 'free';
-}
 
 export function filtersToAgendaHref(filters: AgendaFilters): string {
   const query = filtersToSearchParams(filters).toString();

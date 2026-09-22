@@ -40,6 +40,7 @@ export type VenuePageModel = {
   title: string;
   description: string;
   canonicalPath: string;
+  id: string;
   name: string;
   slug: string;
   municipality: string;
@@ -113,6 +114,7 @@ export function buildVenuePageModel(
         ? `Próximos conciertos de música clásica en ${place}.`
         : `Conciertos de música clásica en ${place}.`,
     canonicalPath: venuePath(venue.slug),
+    id: venue.id,
     name: pageName,
     slug: venue.slug,
     municipality: principal.municipality,

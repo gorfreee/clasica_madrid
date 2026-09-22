@@ -16,6 +16,7 @@ const { address, variant = 'compact' } = Astro.props;
   target="_blank"
   rel="noopener noreferrer"
   aria-label={address.accessibleLabel}
+  data-directions="google_maps"
 >
   <span class="place-address__pin" aria-hidden="true">
     <svg viewBox="0 0 24 24" focusable="false">
@@ -29,6 +30,11 @@ const { address, variant = 'compact' } = Astro.props;
   </span>
   <ExternalMark />
 </a>
+
+<script>
+  import { initDirectionsTracking } from '../lib/analytics/browser.ts';
+  initDirectionsTracking();
+</script>
 
 <style>
   .place-address {

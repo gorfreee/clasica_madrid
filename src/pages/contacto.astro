@@ -128,6 +128,8 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
 </Layout>
 
 <script>
+  import { trackContactSubmitted } from '../lib/analytics/product.ts';
+
   type TurnstileOptions = {
     sitekey: string;
     action: string;
@@ -257,6 +259,12 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
 
         if (!response.ok || !result?.ok) throw new Error('contact-request-failed');
 
+        const topic = new FormData(form).get('motivo');
+        try {
+          trackContactSubmitted({ topic: typeof topic === 'string' ? topic : undefined });
+        } catch {
+          // A failed analytics call must not turn a successful send into an error.
+        }
         form.reset();
         setStatus('Gracias. Tu mensaje se ha enviado.', 'success');
       } catch {

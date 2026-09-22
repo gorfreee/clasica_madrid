@@ -66,7 +66,11 @@ describe('configuración cookieless', () => {
     expect(script).toContain('"person_profiles":"never"');
     expect(script).toContain('"advanced_disable_flags":true');
     expect(script).toContain('"capture_pageview":true');
+    expect(script).toContain('__cmPosthogConfig.before_send=');
+    expect(script).toContain('analytics-page');
     expect(script).not.toContain('history_change');
+    expect(script).not.toMatch(/\.capture\(\s*["']\$pageview["']/);
+    expect(script).not.toMatch(/localStorage|sessionStorage|document\.cookie/);
     expect(script).not.toMatch(/posthog\.identify\s*\(/);
     expect(script).not.toMatch(/posthog\.alias\s*\(/);
     expect(script).toContain('posthog.init(');

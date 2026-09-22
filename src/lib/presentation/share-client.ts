@@ -1,4 +1,5 @@
 import { captureContentShared } from '../analytics/capture.ts';
+import { trackShareClicked } from '../analytics/product.ts';
 import { shareCopiedLabel, shareCopyFailedLabel } from './labels.ts';
 import {
   attributedShareUrl,
@@ -130,6 +131,14 @@ function trackShare(root: HTMLElement, method: ShareMethod): void {
     method,
     content_type: contentType,
     path: canonicalSharePath(root.dataset.sharePath ?? ''),
+  });
+  if (contentType !== 'event') return;
+  const eventId = root.dataset.shareEventId;
+  if (!eventId) return;
+  trackShareClicked({
+    event_id: eventId,
+    event_title: root.dataset.shareTitle,
+    channel: method,
   });
 }
 

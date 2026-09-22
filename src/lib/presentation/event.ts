@@ -64,7 +64,9 @@ export type EventPageModel = {
   documentTitle: string;
   description: string;
   canonicalPath: string;
+  id: string;
   slug: string;
+  venueId: string;
   statusLabel: string;
   isPast: boolean;
   venueName: string;
@@ -153,7 +155,9 @@ export function toEventPageModel(resolved: ResolvedEvent, clock: Clock = systemC
     documentTitle: eventDocumentTitle(event.title, rootVenue.name),
     description,
     canonicalPath: eventPath(event.slug),
+    id: event.id,
     slug: event.slug,
+    venueId: rootVenue.id,
     statusLabel: eventStatusLabel(event.status),
     isPast,
     venueName: rootVenue.name,

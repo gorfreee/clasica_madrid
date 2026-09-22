@@ -4,13 +4,21 @@ import AgendaItem from './AgendaItem.astro';
 
 type Props = {
   days: AgendaDayModel[];
+  /** Static result lists opt into end-of-list analytics. The home agenda does not. */
+  resultsSurface?: 'agenda' | 'venues' | 'venue';
+  quickFilter?: string;
 };
 
-const { days } = Astro.props;
+const { days, resultsSurface, quickFilter } = Astro.props;
 ---
 {/* Contrato UI interno: [data-agenda-list] y [data-agenda-day] los usa agenda-client.ts. */}
 
-<div class="agenda" data-agenda-list>
+<div
+  class="agenda"
+  data-agenda-list
+  data-results-surface={resultsSurface}
+  data-quick-filter={quickFilter}
+>
   {
     days.map((day, index) => {
       const startsMonth = index === 0 || days[index - 1]?.monthKey !== day.monthKey;
@@ -48,3 +56,8 @@ const { days } = Astro.props;
     })
   }
 </div>
+
+<script>
+  import { initMarkedResultsLists } from '../lib/analytics/list-end.ts';
+  initMarkedResultsLists();
+</script>

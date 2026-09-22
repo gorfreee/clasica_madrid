@@ -37,6 +37,14 @@
  * the extra concerts appear below instead of jumping to the end.
  */
 import {
+  activeQuickFilter,
+  countActiveAgendaFilters,
+  planAgendaAnalytics,
+  type AgendaInteraction,
+} from '../analytics/agenda-actions.ts';
+import { emitAgendaAnalytics } from '../analytics/product.ts';
+import { syncResultsEnd } from '../analytics/list-end.ts';
+import {
   canonicalVenueFilter,
   hasActiveFilters,
   parseAgendaFilters,
@@ -72,6 +80,18 @@ type AgendaRuntime = {
 };
 
 let runtime: AgendaRuntime | null = null;
+
+/**
+ * Set only for a deliberate control. Init and `popstate` leave it null so
+ * restoring the URL does not look like a new filter action.
+ */
+let pendingAgendaAnalytics: {
+  interaction: AgendaInteraction;
+  previous: AgendaFilters;
+  resultsBefore: number;
+} | null = null;
+
+let lastAgendaMatchCount = 0;
 
 const SEARCH_PLACEHOLDER_WIDE_MQ = '(min-width: 901px)';
 
@@ -163,6 +183,7 @@ export function initAgendaFilters(): void {
   form?.addEventListener('submit', (event) => {
     event.preventDefault();
     const params = formDataToParams(new FormData(form));
+    noteAgendaAction({ kind: 'submit' });
     void applyFromUrl(params.toString() ? `/?${params.toString()}` : '/', { push: true, requireFull: Boolean(params.toString()) });
   });
   form?.querySelector<HTMLElement>('[data-agenda-shortcuts]')?.addEventListener('click', (event) => {
@@ -178,11 +199,13 @@ export function initAgendaFilters(): void {
     const href = isAgendaShortcutId(shortcut)
       ? filtersToAgendaHref(next)
       : link.getAttribute('href') || '/';
+    if (isAgendaShortcutId(shortcut)) noteAgendaAction({ kind: 'shortcut', shortcut });
     void applyFromUrl(href, { push: true, requireFull: hasActiveFilters(next) });
   });
   clear?.addEventListener('click', (event) => {
     event.preventDefault();
     form?.reset();
+    noteAgendaAction({ kind: 'clear-all' });
     void applyFromUrl('/', { push: true, requireFull: false });
   });
   activeFilters?.addEventListener('click', (event) => {
@@ -195,6 +218,7 @@ export function initAgendaFilters(): void {
       if (field instanceof HTMLInputElement || field instanceof HTMLSelectElement) field.value = '';
     }
     const params = formDataToParams(new FormData(form));
+    noteAgendaAction({ kind: 'remove', fields: names });
     void applyFromUrl(params.toString() ? `/?${params.toString()}` : '/', {
       push: true,
       requireFull: Boolean(params.toString()),
@@ -212,6 +236,7 @@ export function initAgendaFilters(): void {
     });
   });
   window.addEventListener('popstate', () => {
+    pendingAgendaAnalytics = null;
     const filters = parseAgendaFilters(new URLSearchParams(window.location.search));
     void applyFromUrl(window.location.pathname + window.location.search, {
       push: false,
@@ -267,6 +292,7 @@ async function applyFromUrl(
   if (options.requireFull) {
     const ok = await ensureFullAgendaLoaded();
     if (!ok) {
+      pendingAgendaAnalytics = null;
       if (options.push) return;
       showFailedFilterState(href);
       return;
@@ -277,9 +303,15 @@ async function applyFromUrl(
 }
 
 function apply(): void {
-  if (!runtime) return;
+  if (!runtime) {
+    pendingAgendaAnalytics = null;
+    return;
+  }
   const list = runtime.root.querySelector('[data-agenda-list]');
-  if (!list) return;
+  if (!list) {
+    pendingAgendaAnalytics = null;
+    return;
+  }
 
   const parsed = parseAgendaFilters(new URLSearchParams(window.location.search));
   const venue = canonicalVenueFilter(runtime.items, parsed.venue);
@@ -326,6 +358,12 @@ function apply(): void {
     runtime.count.textContent = occurrenceCountLabel(displayed);
     runtime.count.hidden = active && matching.size === 0;
   }
+  publishAgendaAnalytics(parsed, matching.size);
+  syncAgendaResultsEnd(list, {
+    truncated,
+    filters: parsed,
+    resultsCount: matching.size,
+  });
   if (runtime.noResults) runtime.noResults.hidden = matching.size > 0;
   if (runtime.clear) runtime.clear.hidden = !active;
   syncMoreControls(truncated);
@@ -514,6 +552,54 @@ function formDataToParams(data: FormData): URLSearchParams {
     if (typeof value === 'string' && value.trim()) params.set(key, value.trim());
   }
   return params;
+}
+
+function noteAgendaAction(interaction: AgendaInteraction): void {
+  pendingAgendaAnalytics = {
+    interaction,
+    previous: parseAgendaFilters(new URLSearchParams(window.location.search)),
+    resultsBefore: lastAgendaMatchCount,
+  };
+}
+
+function publishAgendaAnalytics(filters: AgendaFilters, resultsCount: number): void {
+  const pending = pendingAgendaAnalytics;
+  pendingAgendaAnalytics = null;
+  lastAgendaMatchCount = resultsCount;
+  if (!pending) return;
+  try {
+    emitAgendaAnalytics(
+      planAgendaAnalytics({
+        reason: 'user',
+        interaction: pending.interaction,
+        previous: pending.previous,
+        next: filters,
+        resultsBefore: pending.resultsBefore,
+        resultsCount,
+      }),
+    );
+  } catch {
+    // A failed plan must not stop the agenda from updating.
+  }
+}
+
+function syncAgendaResultsEnd(
+  list: Element,
+  state: { truncated: boolean; filters: AgendaFilters; resultsCount: number },
+): void {
+  if (!(list instanceof HTMLElement)) return;
+  const now = new Date();
+  syncResultsEnd(list, {
+    enabled: !state.truncated && state.resultsCount > 0,
+    observation: {
+      surface: 'agenda',
+      results_count: state.resultsCount,
+      active_filter_count: countActiveAgendaFilters(state.filters, now),
+      has_search_query: Boolean(state.filters.q),
+      quick_filter: activeQuickFilter(state.filters, now),
+      stateKey: new URLSearchParams(window.location.search).toString(),
+    },
+  });
 }
 
 function syncForm(form: HTMLFormElement | null, filters: AgendaFilters): void {

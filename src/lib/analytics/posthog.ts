@@ -1,4 +1,5 @@
 import { serializeJsonForScript } from '../util/json-script.ts';
+import { pageviewBeforeSendSource } from './page.ts';
 
 export const POSTHOG_API_HOST = 'https://eu.i.posthog.com';
 export const POSTHOG_UI_HOST = 'https://eu.posthog.com';
@@ -42,6 +43,10 @@ export type PosthogInitConfig = {
  * `advanced_disable_flags` omite `/flags` porque no usamos flags, encuestas ni
  * configuración remota. `cookieless_mode: 'always'` es lo que impide cookies,
  * localStorage y sessionStorage; no hace falta cambiar `persistence` a `memory`.
+ *
+ * El bootstrap añade `before_send` aparte de este objeto: copia el contexto de
+ * `#analytics-page` solo en `$pageview` y `$pageleave`. No registra super
+ * properties ni dispara un segundo pageview.
  */
 export function posthogInitConfig(): PosthogInitConfig {
   return {
@@ -80,5 +85,5 @@ export function readPosthogToken(value: string | undefined | null): string | nul
 export function posthogBootstrapScript(value: string | undefined | null): string {
   const token = readPosthogToken(value);
   if (!token) return '';
-  return `if (!window.posthog || !window.posthog.__SV) {${POSTHOG_SNIPPET}posthog.init(${serializeJsonForScript(token)}, ${serializeJsonForScript(posthogInitConfig())});}`;
+  return `if (!window.posthog || !window.posthog.__SV) {${POSTHOG_SNIPPET}var __cmPosthogConfig=${serializeJsonForScript(posthogInitConfig())};__cmPosthogConfig.before_send=${pageviewBeforeSendSource()};posthog.init(${serializeJsonForScript(token)}, __cmPosthogConfig);}`;
 }

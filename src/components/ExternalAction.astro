@@ -9,9 +9,11 @@ type Props = {
   description?: string;
   /** Drops the standalone top margin when the CTA sits in a shared actions row. */
   grouped?: boolean;
+  /** Stable outbound taxonomy. Omitted links are not product-conversion events. */
+  outbound?: 'tickets' | 'source' | 'official_site' | 'organizer' | 'other';
 };
 
-const { href, label, accessibleLabel, variant, description, grouped = false } = Astro.props;
+const { href, label, accessibleLabel, variant, description, grouped = false, outbound } = Astro.props;
 ---
 
 <a
@@ -20,6 +22,7 @@ const { href, label, accessibleLabel, variant, description, grouped = false } = 
   target="_blank"
   rel="noopener noreferrer"
   aria-label={accessibleLabel}
+  data-outbound={outbound}
 >
   {
     variant === 'utility' && (
