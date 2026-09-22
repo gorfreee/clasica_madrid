@@ -13,6 +13,7 @@ import {
 } from '../lib/presentation/constants.ts';
 import { buildSocialImageMetadata } from '../lib/presentation/social.ts';
 import { publicUrl } from '../lib/presentation/urls.ts';
+import { buildPageAnalytics, type PageAnalyticsOverrides } from '../lib/analytics/page.ts';
 import { serializeJsonForScript } from '../lib/util/json-script.ts';
 
 type Props = {
@@ -23,6 +24,8 @@ type Props = {
   jsonLd?: Record<string, unknown>[] | Record<string, unknown>;
   socialImage?: string;
   socialImageAlt?: string;
+  /** Semantic page context copied onto the existing PostHog pageview. */
+  analytics?: PageAnalyticsOverrides;
 };
 
 const {
@@ -33,9 +36,11 @@ const {
   jsonLd,
   socialImage,
   socialImageAlt,
+  analytics,
 } = Astro.props;
 
 const pageTitle = pageDocumentTitle(title);
+const pageAnalytics = serializeJsonForScript(buildPageAnalytics(canonicalPath, analytics));
 const canonical = indexable ? publicUrl(canonicalPath) : null;
 const jsonLdScript = jsonLd ? serializeJsonForScript(jsonLd) : null;
 const social = buildSocialImageMetadata(socialImage, socialImageAlt);
@@ -85,6 +90,7 @@ const social = buildSocialImageMetadata(socialImage, socialImageAlt);
       <slot />
     </main>
     <Footer />
+    <script id="analytics-page" type="application/json" is:inline set:html={pageAnalytics} />
     <PostHogAnalytics />
   </body>
 </html>

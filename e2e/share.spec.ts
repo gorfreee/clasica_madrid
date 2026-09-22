@@ -53,9 +53,10 @@ async function installShareAnalytics(page: Page) {
 }
 
 async function contentSharedCalls(page: Page) {
-  return page.evaluate(
+  const calls = await page.evaluate(
     () => (window as unknown as { __contentShared: ContentSharedCall[] }).__contentShared,
   );
+  return calls.filter((call) => call.event === 'content_shared');
 }
 
 test.describe('compartir en fichas', () => {
@@ -181,6 +182,24 @@ test.describe('compartir en fichas', () => {
       {
         event: 'content_shared',
         properties: { method: 'native_share', content_type: 'event', path: expected.path },
+      },
+    ]);
+    const analytics = JSON.parse((await page.locator('#analytics-page').textContent()) ?? '{}') as {
+      event_id?: string;
+    };
+    const productShares = await page.evaluate(
+      () =>
+        (window as unknown as { __contentShared: { event: string; properties: Record<string, string> }[] })
+          .__contentShared,
+    );
+    expect(productShares.filter((call) => call.event === 'share_clicked')).toEqual([
+      {
+        event: 'share_clicked',
+        properties: {
+          event_id: analytics.event_id,
+          event_title: expected.title,
+          channel: 'native_share',
+        },
       },
     ]);
   });

@@ -37,6 +37,7 @@ Scripts live in `package.json`. Use those names rather than duplicating flags he
 | Discovery: agent playbook | `docs/run-discovery-agent.md` |
 | Discovery: search hints | `docs/discovery-search-hints.md` |
 | Editorial classification policy | `docs/classification-policy.md` |
+| Product analytics | `docs/analytics.md` |
 | Historical notes | `docs/archive/` |
 
 `docs/archive/` is not current requirements unless a task asks to research prior decisions. See `docs/archive/README.md` for the authority hierarchy when a historical note contradicts current docs or code. Do not copy volatile implementation details from the repo into general documents; link to the executable source of truth instead.

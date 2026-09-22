@@ -4,6 +4,7 @@ import ExternalAction from '../../components/ExternalAction.astro';
 import Eyebrow from '../../components/Eyebrow.astro';
 import PlaceAddress from '../../components/PlaceAddress.astro';
 import ShareAction from '../../components/ShareAction.astro';
+import { daysUntilEvent, isFreeAccess } from '../../lib/analytics/page.ts';
 import { formatSourceCitationMeta } from '../../lib/presentation/labels.ts';
 import { buildEventShare } from '../../lib/presentation/share.ts';
 import { loadEventPage, loadEventStaticPaths } from '../../lib/presentation/site.ts';
@@ -30,6 +31,18 @@ if (model.slug !== slug) {
   return Astro.redirect(model.canonicalPath, 301);
 }
 const featured = model.featuredOccurrence;
+const analytics = {
+  page_type: 'event' as const,
+  event_id: model.id,
+  event_title: model.title,
+  venue_id: model.venueId,
+  venue_name: model.venueName,
+  access: model.access.id,
+  is_free: isFreeAccess(model.access.id),
+  format: model.formats[0]?.id,
+  era: model.eras[0]?.id,
+  days_until_event: daysUntilEvent(model.featuredOccurrence?.date),
+};
 const share = buildEventShare({
   title: model.title,
   venueName: model.venueName,
@@ -38,7 +51,7 @@ const share = buildEventShare({
 });
 ---
 
-<Layout title={model.documentTitle} description={model.description} canonicalPath={model.canonicalPath} jsonLd={model.jsonLd}>
+<Layout title={model.documentTitle} description={model.description} canonicalPath={model.canonicalPath} jsonLd={model.jsonLd} analytics={analytics}>
   <article class="detail event-detail">
     <header class="page-hero page-hero--detail">
       <Eyebrow label="Agenda" href={AGENDA_PATH} />
@@ -82,6 +95,7 @@ const share = buildEventShare({
             label={model.sourceAction.label}
             description={model.sourceAction.description}
             accessibleLabel={model.sourceAction.accessibleLabel}
+            outbound={model.sourceAction.isOfficial ? 'tickets' : 'source'}
           />
         )
       }
@@ -90,6 +104,7 @@ const share = buildEventShare({
         text={share.text}
         path={share.path}
         contentType="event"
+        eventId={model.id}
         align={model.sourceAction ? 'beside-cta' : 'utility'}
       />
     </div>
@@ -176,7 +191,11 @@ const share = buildEventShare({
         {
           model.sources.map((source) => (
             <li>
-              <a href={source.url} rel="noopener noreferrer">
+              <a
+                href={source.url}
+                rel="noopener noreferrer"
+                data-outbound={source.kindId === 'official' ? 'official_site' : 'source'}
+              >
                 {source.name}
               </a>
               <span>
@@ -194,4 +213,8 @@ const share = buildEventShare({
     </section>
     {model.isPast && <p class="past-notice">Este evento ya ha tenido lugar. Conservamos la ficha como parte del archivo</p>}
   </article>
+  <script>
+    import { initEventAnalytics } from '../../lib/analytics/browser.ts';
+    initEventAnalytics();
+  </script>
 </Layout>

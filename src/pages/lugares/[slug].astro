@@ -29,7 +29,13 @@ const share = buildVenueShare({
 });
 ---
 
-<Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath} jsonLd={model.jsonLd}>
+<Layout
+  title={model.title}
+  description={model.description}
+  canonicalPath={model.canonicalPath}
+  jsonLd={model.jsonLd}
+  analytics={{ page_type: 'venue', venue_id: model.id, venue_name: model.name }}
+>
   <article class="detail venue-detail">
     <header class="page-hero page-hero--detail">
       <Eyebrow label="Lugares" href={VENUES_INDEX_PATH} />
@@ -62,11 +68,17 @@ const share = buildVenueShare({
         model.upcoming.length === 0 ? (
           <p class="quiet-state">No hay conciertos próximos publicados en este espacio</p>
         ) : (
-          <div class="agenda-day__list">
+          <div class="agenda-day__list" data-results-surface="venue">
             {model.upcoming.map((item) => <AgendaItem item={item} />)}
           </div>
         )
       }
     </section>
   </article>
+  <script>
+    import { initVenueAnalytics } from '../../lib/analytics/browser.ts';
+    import { initMarkedResultsLists } from '../../lib/analytics/list-end.ts';
+    initVenueAnalytics();
+    initMarkedResultsLists();
+  </script>
 </Layout>

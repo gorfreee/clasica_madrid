@@ -4,6 +4,7 @@ import AgendaList from '../../components/AgendaList.astro';
 import EmptyState from '../../components/EmptyState.astro';
 import Eyebrow from '../../components/Eyebrow.astro';
 import PageHero from '../../components/PageHero.astro';
+import { landingQuickFilter } from '../../lib/analytics/page.ts';
 import { loadAgendaLandingPage, listAgendaLandingSlugs } from '../../lib/presentation/site.ts';
 import { AGENDA_PATH } from '../../lib/presentation/urls.ts';
 
@@ -21,7 +22,13 @@ if (!model) {
 }
 ---
 
-<Layout title={model.title} description={model.description} canonicalPath={model.canonicalPath} jsonLd={model.jsonLd}>
+<Layout
+  title={model.title}
+  description={model.description}
+  canonicalPath={model.canonicalPath}
+  jsonLd={model.jsonLd}
+  analytics={{ page_type: 'agenda_landing', landing_slug: model.slug }}
+>
   <PageHero motif="agenda">
     <Eyebrow label="Agenda" href={AGENDA_PATH} />
     <h1>{model.heading}</h1>
@@ -32,7 +39,7 @@ if (!model) {
     model.days.length === 0 ? (
       <EmptyState title={model.emptyTitle} body={model.emptyBody} />
     ) : (
-      <AgendaList days={model.days} />
+      <AgendaList days={model.days} resultsSurface="agenda" quickFilter={landingQuickFilter(model.slug)} />
     )
   }
 </Layout>

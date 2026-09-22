@@ -8,7 +8,29 @@ export type ContentSharedProperties = {
   path: string;
 };
 
-type AnalyticsCapture = (event: string, properties: ContentSharedProperties) => void;
+/** Values PostHog can store without nested objects. Callers must already drop PII. */
+export type AnalyticsValue = string | number | boolean;
+
+export type AnalyticsProperties = Record<string, AnalyticsValue>;
+
+export type AnalyticsCapture = (event: string, properties: AnalyticsProperties) => void;
+
+/**
+ * Sends one custom event. Missing PostHog, a missing token, or a thrown
+ * capture become a no-op. The call is synchronous and is never awaited.
+ */
+export function captureAnalytics(
+  event: string,
+  properties: AnalyticsProperties,
+  capture: AnalyticsCapture | null = defaultCapture(),
+): void {
+  if (!capture) return;
+  try {
+    capture(event, properties);
+  } catch {
+    // Analytics must not affect the user action.
+  }
+}
 
 /**
  * Records a completed share. Missing PostHog, a missing token, or a thrown
@@ -18,19 +40,18 @@ export function captureContentShared(
   properties: ContentSharedProperties,
   capture: AnalyticsCapture | null = defaultCapture(),
 ): void {
-  if (!capture) return;
-  try {
-    capture(CONTENT_SHARED_EVENT, {
+  captureAnalytics(
+    CONTENT_SHARED_EVENT,
+    {
       method: properties.method,
       content_type: properties.content_type,
       path: properties.path,
-    });
-  } catch {
-    // Analytics must not affect the share action.
-  }
+    },
+    capture,
+  );
 }
 
-function defaultCapture(): AnalyticsCapture | null {
+export function defaultCapture(): AnalyticsCapture | null {
   if (typeof window === 'undefined') return null;
   const posthog = (window as Window & { posthog?: { capture?: unknown } }).posthog;
   if (!posthog || typeof posthog.capture !== 'function') return null;
@@ -38,4 +59,15 @@ function defaultCapture(): AnalyticsCapture | null {
   return (event, properties) => {
     capture(event, properties);
   };
+}
+
+/** Drops `undefined` so optional analytics fields stay out of the payload. `false` and `0` stay. */
+export function definedProperties(
+  properties: Record<string, AnalyticsValue | undefined>,
+): AnalyticsProperties {
+  const defined: AnalyticsProperties = {};
+  for (const [key, value] of Object.entries(properties)) {
+    if (value !== undefined) defined[key] = value;
+  }
+  return defined;
 }
