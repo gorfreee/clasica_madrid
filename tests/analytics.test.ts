@@ -37,7 +37,10 @@ import {
   trackResultListExhausted,
   trackSearchPerformed,
   trackShareClicked,
+  trackWhatsAppChannelClicked,
+  WHATSAPP_CHANNEL_CLICKED,
 } from '../src/lib/analytics/product.ts';
+import { WHATSAPP_CHANNEL_URL } from '../src/lib/presentation/constants.ts';
 import { CONTACT_REASONS } from '../functions/api/contacto.ts';
 import { isAgendaShortcutId } from '../src/lib/presentation/agenda-shortcut-id.ts';
 import { venueResultsEndForSearch } from '../src/lib/presentation/venue-search-client.ts';
@@ -612,6 +615,26 @@ describe('contacto y compartir', () => {
         properties: { event_id: 'evt_carmen', event_title: 'Carmen', channel: 'whatsapp' },
       },
     ]);
+  });
+});
+
+describe('canal de WhatsApp', () => {
+  it('registra las dos ubicaciones con el tipo de página sin incluir la URL', () => {
+    const { calls, capture } = recorder();
+    trackWhatsAppChannelClicked({ placement: 'footer', page_type: 'agenda' }, capture);
+    trackWhatsAppChannelClicked({ placement: 'about', page_type: 'about' }, capture);
+    expect(calls).toEqual([
+      { event: WHATSAPP_CHANNEL_CLICKED, properties: { placement: 'footer', page_type: 'agenda' } },
+      { event: WHATSAPP_CHANNEL_CLICKED, properties: { placement: 'about', page_type: 'about' } },
+    ]);
+    expect(JSON.stringify(calls)).not.toContain(WHATSAPP_CHANNEL_URL);
+  });
+
+  it('no falla si PostHog no está disponible o si capture falla', () => {
+    expect(() => trackWhatsAppChannelClicked({ placement: 'footer', page_type: 'event' }, null)).not.toThrow();
+    expect(() => trackWhatsAppChannelClicked({ placement: 'about', page_type: 'about' }, () => {
+      throw new Error('PostHog no disponible');
+    })).not.toThrow();
   });
 });
 

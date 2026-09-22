@@ -26,6 +26,52 @@ function named(calls: AnalyticsCall[], event: string): AnalyticsCall[] {
 }
 
 test.describe('analítica de producto', () => {
+  test('el footer registra el clic en el canal desde la agenda sin navegar la página', async ({ page }) => {
+    await installAnalytics(page);
+    await page.context().route('https://whatsapp.com/**', (route) => route.fulfill({ status: 200, body: 'Canal de prueba' }));
+    await page.goto('/');
+    const link = page.locator('.site-footer [data-whatsapp-channel="footer"]');
+    await expect(link).toHaveAttribute('href', 'https://whatsapp.com/channel/0029VbDMlLw5Ejy6w8hyme2J');
+    await expect(link).toHaveAttribute('target', '_blank');
+    await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    await expect(link).toHaveAccessibleName(/Seguir el canal de Clásica Madrid en WhatsApp/);
+    const [popup] = await Promise.all([page.waitForEvent('popup'), link.click()]);
+    await popup.close();
+    expect(page.url()).toMatch(/localhost:4321\/$/);
+    expect(named(await analyticsCalls(page), 'whatsapp_channel_clicked')).toEqual([
+      { event: 'whatsapp_channel_clicked', properties: { placement: 'footer', page_type: 'agenda' } },
+    ]);
+  });
+
+  test('Acerca de registra su ubicación y conserva el contexto de página', async ({ page }) => {
+    await installAnalytics(page);
+    await page.context().route('https://whatsapp.com/**', (route) => route.fulfill({ status: 200, body: 'Canal de prueba' }));
+    await page.goto('/acerca-de/');
+    const block = page.getByRole('region', { name: 'Clásica Madrid, también en WhatsApp' });
+    await expect(block).toBeVisible();
+    const link = block.getByRole('link', { name: /Seguir el canal de Clásica Madrid en WhatsApp/ });
+    await expect(link).toHaveAttribute('href', 'https://whatsapp.com/channel/0029VbDMlLw5Ejy6w8hyme2J');
+    const [popup] = await Promise.all([page.waitForEvent('popup'), link.click()]);
+    await popup.close();
+    expect(named(await analyticsCalls(page), 'whatsapp_channel_clicked')).toEqual([
+      { event: 'whatsapp_channel_clicked', properties: { placement: 'about', page_type: 'about' } },
+    ]);
+  });
+
+  test('el canal mantiene foco visible y no provoca desbordamiento en escritorio o móvil', async ({ page }) => {
+    for (const width of [1280, 390, 320]) {
+      await page.setViewportSize({ width, height: 850 });
+      for (const path of ['/', '/acerca-de/']) {
+        await page.goto(path);
+        const link = page.locator('[data-whatsapp-channel="footer"]');
+        await link.focus();
+        await expect(link).toBeFocused();
+        expect(await link.evaluate((node) => getComputedStyle(node).outlineStyle)).not.toBe('none');
+        expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+      }
+    }
+  });
+
   test('la agenda no emite filtros al cargar y la búsqueda espera al envío', async ({ page }) => {
     await installAnalytics(page);
     await page.goto('/?access=free');

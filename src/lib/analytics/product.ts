@@ -9,6 +9,7 @@ import {
 } from './capture.ts';
 import type { AgendaAnalyticsAction } from './agenda-actions.ts';
 import type { NavigationOrigin } from './origin.ts';
+import type { PageType } from './page.ts';
 
 export const SEARCH_PERFORMED = 'search_performed';
 export const FILTER_CHANGED = 'filter_changed';
@@ -21,6 +22,14 @@ export const DIRECTIONS_CLICKED = 'directions_clicked';
 export const RESULT_LIST_EXHAUSTED = 'result_list_exhausted';
 export const SHARE_CLICKED = 'share_clicked';
 export const CONTACT_SUBMITTED = 'contact_submitted';
+export const WHATSAPP_CHANNEL_CLICKED = 'whatsapp_channel_clicked';
+
+export const WHATSAPP_CHANNEL_PLACEMENTS = ['footer', 'about'] as const;
+export type WhatsAppChannelPlacement = (typeof WHATSAPP_CHANNEL_PLACEMENTS)[number];
+
+export function isWhatsAppChannelPlacement(value: string | undefined): value is WhatsAppChannelPlacement {
+  return typeof value === 'string' && (WHATSAPP_CHANNEL_PLACEMENTS as readonly string[]).includes(value);
+}
 
 export const ANALYTICS_SURFACES = ['agenda', 'venues', 'venue', 'contact'] as const;
 export type AnalyticsSurface = (typeof ANALYTICS_SURFACES)[number];
@@ -252,6 +261,16 @@ export function trackShareClicked(
     }),
     capture,
   );
+}
+
+export function trackWhatsAppChannelClicked(
+  input: { placement: WhatsAppChannelPlacement; page_type: PageType },
+  capture: AnalyticsCapture | null = defaultCapture(),
+): void {
+  captureAnalytics(WHATSAPP_CHANNEL_CLICKED, {
+    placement: input.placement,
+    page_type: input.page_type,
+  }, capture);
 }
 
 /**

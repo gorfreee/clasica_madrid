@@ -1,0 +1,62 @@
+---
+import { WHATSAPP_CHANNEL_URL } from '../lib/presentation/constants.ts';
+import type { WhatsAppChannelPlacement } from '../lib/analytics/product.ts';
+
+type Props = { placement: WhatsAppChannelPlacement };
+const { placement } = Astro.props;
+const Wrapper = placement === 'about' ? 'section' : 'div';
+---
+
+<Wrapper class:list={['channel', `channel--${placement}`]} aria-labelledby={placement === 'about' ? 'channel-about-title' : undefined}>
+  {placement === 'about' && <h2 id="channel-about-title">Clásica Madrid, también en WhatsApp</h2>}
+  <div class="channel__body">
+    {placement === 'about' && <p>Recibe conciertos, novedades y selecciones de la agenda directamente en WhatsApp.</p>}
+    <a
+      class="channel__link"
+      href={WHATSAPP_CHANNEL_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      data-whatsapp-channel={placement}
+      aria-label="Seguir el canal de Clásica Madrid en WhatsApp (se abre en otra pestaña)"
+    >
+      <svg class="channel__icon" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+        <path fill="currentColor" d="M16 .8A15.2 15.2 0 0 0 2.9 23.7L.8 31.2l7.7-2A15.2 15.2 0 1 0 16 .8Zm0 27.6a12.3 12.3 0 0 1-6.3-1.7l-.5-.3-4.6 1.2 1.2-4.5-.3-.5A12.4 12.4 0 1 1 16 28.4Zm6.8-9.3c-.4-.2-2.2-1.1-2.6-1.2-.3-.1-.6-.2-.8.2-.3.4-1 1.2-1.3 1.5-.2.3-.5.3-.9.1-2.2-1.1-3.7-2-5.2-4.6-.4-.7.4-.6 1.1-2.1.1-.3 0-.5 0-.7l-1.2-2.8c-.3-.7-.6-.6-.8-.6h-.7c-.3 0-.7.1-1 .5-.3.4-1.3 1.3-1.3 3.1s1.3 3.6 1.5 3.8c.2.2 2.6 4 6.3 5.6 2.3 1 3.2 1.1 4.3.9 1.3-.2 2.2-1.1 2.5-2.1.3-1 .3-1.9.2-2.1-.1-.2-.3-.3-.7-.5Z" />
+      </svg>
+      <span class="channel__copy">
+        <span class="channel__title">{placement === 'about' ? 'Seguir el canal' : 'Síguenos en WhatsApp'} <span aria-hidden="true">↗</span></span>
+        {placement === 'footer' && <span class="channel__subtitle">Conciertos y novedades de Clásica Madrid</span>}
+      </span>
+    </a>
+  </div>
+</Wrapper>
+
+<script>
+  import { initWhatsAppChannelTracking } from '../lib/analytics/browser.ts';
+  initWhatsAppChannelTracking();
+</script>
+
+<style>
+  .channel__link { display: inline-flex; align-items: flex-start; gap: .65rem; color: inherit; text-align: left; text-decoration: none; }
+  .channel__icon { display: block; width: 1.25rem; height: 1.25rem; flex: 0 0 auto; color: #128c7e; }
+  .channel__copy { display: grid; gap: .2rem; }
+  .channel__title { font-size: .85rem; font-weight: 700; line-height: 1.2; }
+  .channel__link:hover .channel__title { text-decoration: underline; text-underline-offset: .2em; }
+  .channel__subtitle { color: var(--muted); font-size: .72rem; line-height: 1.3; }
+  .channel--footer { text-align: left; }
+  .channel--about {
+    display: grid;
+    grid-template-columns: minmax(13rem, .55fr) minmax(0, 1fr);
+    gap: 3rem;
+    max-width: 58rem;
+    margin-top: 3rem;
+    padding: 1.5rem 0 2rem;
+    border-top: 1px solid var(--line);
+  }
+  .channel--about h2 { margin: 0; font-size: clamp(1.2rem, 2.2vw, 1.65rem); font-weight: 800; letter-spacing: var(--type-tracking-heading); line-height: 1.1; }
+  .channel--about p { max-width: 34rem; margin: 0 0 1.25rem; color: var(--muted); line-height: 1.55; }
+  .channel--about .channel__link { align-items: center; }
+  .channel--about .channel__title { font-size: .9rem; font-weight: 800; }
+  @media (max-width: 620px) {
+    .channel--about { grid-template-columns: 1fr; gap: 1rem; margin-top: 2rem; }
+  }
+</style>
