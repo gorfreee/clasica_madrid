@@ -5,11 +5,13 @@ import {
   destinationDomain,
   isDestinationType,
   isDirectionsProvider,
+  isWhatsAppChannelPlacement,
   onOutboundClick,
   trackDirectionsClicked,
   trackEventOpened,
   trackOutboundEventClick,
   trackVenueOpened,
+  trackWhatsAppChannelClicked,
 } from './product.ts';
 
 const claims = new Set<string>();
@@ -95,6 +97,25 @@ export function initDirectionsTracking(root: ParentNode = document): void {
           venue_name: page?.venue_name,
           origin: inferNavigationOrigin(document.referrer, window.location.href),
           provider: isDirectionsProvider(provider) ? provider : 'google_maps',
+        });
+      });
+    });
+  }
+}
+
+/** Shared by both CTA placements; a repeated initialization cannot add duplicate listeners. */
+export function initWhatsAppChannelTracking(root: ParentNode = document): void {
+  for (const link of root.querySelectorAll<HTMLAnchorElement>('a[data-whatsapp-channel]')) {
+    if (link.dataset.whatsappBound === 'true') continue;
+    link.dataset.whatsappBound = 'true';
+    link.addEventListener('click', () => {
+      onOutboundClick(() => {
+        const placement = link.dataset.whatsappChannel;
+        const page = readPageAnalytics();
+        if (!page || !isWhatsAppChannelPlacement(placement)) return;
+        trackWhatsAppChannelClicked({
+          placement,
+          page_type: page.page_type,
         });
       });
     });

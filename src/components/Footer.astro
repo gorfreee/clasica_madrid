@@ -1,6 +1,7 @@
 ---
 import { SITE_NAME } from '../lib/presentation/constants.ts';
 import LogoSymbol from './LogoSymbol.astro';
+import WhatsAppChannelLink from './WhatsAppChannelLink.astro';
 ---
 
 <footer class="site-footer">
@@ -9,6 +10,7 @@ import LogoSymbol from './LogoSymbol.astro';
   </a>
   <p class="site-footer__statement">Toda la clásica<br />Todo Madrid</p>
   <div class="site-footer__meta">
+    <WhatsAppChannelLink placement="footer" />
     <p class="site-footer__note">© {SITE_NAME}</p>
   </div>
 </footer>
