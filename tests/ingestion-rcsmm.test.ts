@@ -17,9 +17,9 @@ import {
   rcsmmPerformers,
   rcsmmVenueFromTitle,
 } from '../src/ingestion/sources/rcsmm.ts';
-import type { AdapterContext, RawEvent } from '../src/ingestion/types.ts';
+import { IncompleteListingError, type AdapterContext, type RawEvent } from '../src/ingestion/types.ts';
 import { matchVenue } from '../src/ingestion/venues.ts';
-import { TEST_NOW, TEST_WINDOW } from './helpers.ts';
+import { makeEvent, TEST_NOW, TEST_WINDOW } from './helpers.ts';
 
 const source = getSourceDefinition(adapter.id);
 const listingUrl = adapter.resolveFetchUrls(source, TEST_NOW, TEST_WINDOW)[0]!;
@@ -202,10 +202,10 @@ describe('agenda del Real Conservatorio Superior de Música de Madrid', () => {
     const listing = await fixture('listing.html');
     await expect(adapter.extract('<h1>Eventos</h1>', listingUrl, context())).rejects.toThrow(/agenda oficial/);
     await expect(adapter.extract(
-      '<body class="path-eventos"><h1>Eventos</h1></body>',
+      '<body class="path-eventos"><h1>Agenda</h1></body>',
       listingUrl,
       context(),
-    )).rejects.toThrow(/contenedor principal/);
+    )).rejects.toThrow(/agenda oficial/);
     await expect(adapter.extract(listing.replace('</article>', ''), listingUrl, context()))
       .rejects.toThrow(/truncado/);
     await expect(adapter.extract(
@@ -218,6 +218,95 @@ describe('agenda del Real Conservatorio Superior de Música de Madrid', () => {
       '<ul class="pagination"><span aria-current="page">1</span><a href="https://evil.example/eventos?page=1">2</a></ul></body>',
     );
     await expect(adapter.extract(badPager, listingUrl, context())).rejects.toThrow(/paginación/);
+  });
+
+  it('distingue agenda vacía, cobertura no verificable y estructura peligrosa', async () => {
+    expect(await adapter.extract(page(''), listingUrl, context())).toEqual([]);
+
+    const shell = '<body class="path-eventos"><h1>Eventos</h1><p>Consulta la agenda.</p></body>';
+    const shellResult = adapter.extract(shell, listingUrl, context());
+    await expect(shellResult).rejects.toBeInstanceOf(IncompleteListingError);
+    const shellError = await shellResult.catch((error: unknown) => error);
+    expect(shellError).toBeInstanceOf(IncompleteListingError);
+    if (!(shellError instanceof IncompleteListingError)) throw shellError;
+    expect(shellError.events).toEqual([]);
+
+    const article = eventArticle('9', '/fuera', 'Concierto fuera del contenedor en el RCSMM', '18', '19:00');
+    await expect(adapter.extract(
+      `<body class="path-eventos"><h1>Eventos</h1>${article}</body>`,
+      listingUrl,
+      context(),
+    )).rejects.toThrow(/estructura de eventos/);
+    await expect(adapter.extract(
+      '<body class="path-eventos"><h1>Eventos</h1><ul class="pagination"><span aria-current="page">1</span></ul></body>',
+      listingUrl,
+      context(),
+    )).rejects.toThrow(/estructura de eventos/);
+    await expect(adapter.extract(
+      '<body class="path-eventos"><h1>Eventos</h1><div id="views-bootstrap-eventos-page-2"></div></body>',
+      listingUrl,
+      context(),
+    )).rejects.toThrow(/estructura de eventos/);
+    await expect(adapter.extract(
+      '<body class="path-eventos"><h1>Eventos</h1><div id="views-bootstrap-eventos-page-1"',
+      listingUrl,
+      context(),
+    )).rejects.toThrow(/truncado/);
+
+    const first = page(
+      eventArticle('1', '/evento-uno', 'Concierto en el RCSMM', '18', '19:00'),
+      '',
+      '<ul class="pagination"><span aria-current="page">1</span><a href="/eventos?page=1">2</a></ul>',
+    );
+    const secondShell = '<body class="path-eventos"><h1>Eventos</h1></body>';
+    await expect(adapter.extract(first, listingUrl, context(async () => secondShell)))
+      .rejects.toThrow(/contenedor principal/);
+    await expect(adapter.extract(
+      first,
+      listingUrl,
+      context(async () => page('', '', '<ul class="pagination"><a href="/eventos">1</a><span aria-current="page">2</span></ul>')),
+    )).rejects.toThrow(/vacía/);
+  });
+
+  it('un shell no verificable no marca desaparecido un evento RCSMM ya publicado', async () => {
+    const shell = '<body class="path-eventos"><h1>Eventos</h1></body>';
+    const published = makeEvent({
+      id: 'evt_rcsmm_publicado',
+      slug: 'concierto-rcsmm-publicado',
+      title: 'Concierto ya publicado',
+      venueId: 'ven_rcsmm',
+      organizerIds: [],
+      seriesId: null,
+      primarySourceId: source.catalogSourceId,
+      citations: [{
+        sourceId: source.catalogSourceId,
+        url: 'https://rcsmm.eu/concierto-publicado',
+        checkedAt: '2026-08-20',
+      }],
+    });
+    const catalog = emptyCatalog();
+    catalog.events = [published];
+    catalog.sources = [source.seedSource];
+    const before = JSON.stringify(catalog);
+    const run = await runIngest({
+      now: TEST_NOW,
+      dryRun: true,
+      catalog,
+      window: TEST_WINDOW,
+      sourceIds: [source.id],
+      dataDir: await mkdtemp(path.join(os.tmpdir(), 'rcsmm-shell-')),
+      get: async (url) => {
+        if (url === listingUrl) return shell;
+        throw new Error(`URL inesperada: ${url}`);
+      },
+    });
+    expect(run.rawEvents).toEqual([]);
+    expect(run.summary.sourcesFailed).toEqual([]);
+    expect(run.summary.disappearanceSuppressedSources).toEqual([source.id]);
+    expect(run.summary.possiblyMissing).toBe(0);
+    expect(run.possiblyMissing).toEqual([]);
+    expect(JSON.stringify(catalog)).toBe(before);
+    expect(catalog.events.map((event) => event.id)).toEqual(['evt_rcsmm_publicado']);
   });
 
   it('acepta el vacío estructural inequívoco de la vista, pero no una segunda página vacía', async () => {

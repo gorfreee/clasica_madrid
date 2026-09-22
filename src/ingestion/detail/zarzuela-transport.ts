@@ -1,5 +1,6 @@
 /** Shared Zarzuela origin pacing. This module must not import `http.ts` or the registry. */
 
+import { isTransientListingError } from '../listing-retry.ts';
 import type { HydrationMeta } from '../types.ts';
 
 export const ZARZUELA_GAP_MS = 2_750;
@@ -85,6 +86,19 @@ function httpStatus(error: unknown): number | undefined {
   return typeof error.status === 'number' ? error.status : undefined;
 }
 
+/**
+ * Listing retry for this origin. A numeric status stays on Zarzuela's own set
+ * (includes 403; does not adopt the narrower shared status list). A timeout or
+ * `fetch failed` from `http.ts` has no status and uses the shared transient
+ * predicate, so the timeout regex is not copied here.
+ * Structural parse errors are not transient.
+ */
+export function isZarzuelaTransientListingError(error: unknown): boolean {
+  const status = httpStatus(error);
+  if (status !== undefined) return ZARZUELA_RETRYABLE.has(status);
+  return isTransientListingError(error);
+}
+
 function httpRetryAfter(error: unknown): string | null {
   if (!error || typeof error !== 'object' || !('retryAfter' in error)) return null;
   const value = error.retryAfter;
@@ -165,10 +179,9 @@ export function createZarzuelaListingGet(get: (url: string) => Promise<string>, 
         return body;
       } catch (error) {
         lastError = error;
-        const status = httpStatus(error);
         const retryAfter = zarzuelaRetryAfterMs(httpRetryAfter(error), session.now());
         if (retryAfter > ZARZUELA_MAX_RETRY_WAIT_MS) throw error;
-        const retryable = status !== undefined && ZARZUELA_RETRYABLE.has(status);
+        const retryable = isZarzuelaTransientListingError(error);
         session.nextRequestAt = session.now() + (retryable ? blockDelay(session, attempt, retryAfter) : ZARZUELA_GAP_MS);
         if (!retryable || attempt === ZARZUELA_MAX_ATTEMPTS_PER_URL - 1) throw error;
       }

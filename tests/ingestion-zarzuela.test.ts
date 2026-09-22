@@ -17,7 +17,7 @@ import { normalizeRawEvent, observedFactsFromNormalized } from '../src/ingestion
 import { toCandidate } from '../src/ingestion/to-candidate.ts';
 import { IncompleteListingError, type AdapterContext, type RawEvent } from '../src/ingestion/types.ts';
 import { HttpError } from '../src/ingestion/http.ts';
-import { resetZarzuelaOriginSessions, setZarzuelaClock } from '../src/ingestion/detail/zarzuela-transport.ts';
+import { ZARZUELA_MAX_ATTEMPTS_PER_URL, resetZarzuelaOriginSessions, setZarzuelaClock } from '../src/ingestion/detail/zarzuela-transport.ts';
 import { matchVenue, unpublishedMatchedVenue } from '../src/ingestion/venues.ts';
 import { TEST_NOW, TEST_WINDOW, makeEvent, makeVenue } from './helpers.ts';
 
@@ -143,6 +143,121 @@ describe('descubrimiento K2 de Zarzuela', () => {
     expect(run.summary.sourcesFailed).toEqual([]);
     expect(run.summary.disappearanceSuppressedSources).toEqual([source.id]);
     expect(run.rawEvents.map((event) => event.observed.title)).toEqual(['La verbena de la Paloma']);
+  });
+
+  it('un timeout sin status en una sección reintenta, conserva eventos y suprime desapariciones', async () => {
+    vi.useFakeTimers();
+    const home = [
+      '<a href="/es/temporada/lirica-2026-2027">Lírica</a>',
+      '<a href="/es/temporada/danza-2026-2027">Danza</a>',
+    ].join('');
+    const lirica = `<h2 class="first">Lírica</h2><ul class="listadoObras"><li><h3><a href="${raw().sourceUrl}">La verbena de la Paloma</a></h3><p class="entradilla">Martes, 29 de septiembre de 2026</p></li></ul>`;
+    const attempts = new Map<string, number>();
+    const published = makeEvent({
+      id: 'evt_zarzuela_publicado',
+      slug: 'obra-zarzuela-publicada',
+      title: 'Obra ya publicada',
+      venueId: 'ven_teatro_zarzuela',
+      organizerIds: [],
+      seriesId: null,
+      primarySourceId: source.catalogSourceId,
+      citations: [{
+        sourceId: source.catalogSourceId,
+        url: `${base}/es/temporada/danza-2026-2027/obra-ausente`,
+        checkedAt: '2026-08-20',
+      }],
+    });
+    const catalog = emptyCatalog();
+    catalog.events = [published];
+    catalog.sources = [source.seedSource];
+    const before = JSON.stringify(catalog);
+    const run = await advance(runIngest({
+      now: TEST_NOW,
+      dryRun: true,
+      catalog,
+      sourceIds: [source.id],
+      dataDir: await mkdtemp(path.join(os.tmpdir(), 'zarzuela-timeout-')),
+      get: async (url) => {
+        const pathname = new URL(url).pathname;
+        attempts.set(pathname, (attempts.get(pathname) ?? 0) + 1);
+        if (url === `${base}/es/` || url === `${base}/es`) return home;
+        if (/\/temporada\/danza-2026-2027\/?$/.test(pathname)) {
+          throw new Error(`tiempo agotado al pedir ${url}`);
+        }
+        if (/\/temporada\/lirica-2026-2027\/?$/.test(pathname)) return lirica;
+        return fixture('detail-verbena');
+      },
+    }));
+    expect(attempts.get('/es/temporada/danza-2026-2027')).toBe(ZARZUELA_MAX_ATTEMPTS_PER_URL);
+    expect(run.summary.sourcesFailed).toEqual([]);
+    expect(run.summary.disappearanceSuppressedSources).toEqual([source.id]);
+    expect(run.summary.possiblyMissing).toBe(0);
+    expect(run.possiblyMissing).toEqual([]);
+    expect(run.rawEvents.map((event) => event.observed.title)).toEqual(['La verbena de la Paloma']);
+    expect(JSON.stringify(catalog)).toBe(before);
+    expect(catalog.events.map((event) => event.id)).toEqual(['evt_zarzuela_publicado']);
+  });
+
+  it('si todas las secciones agotan el tiempo, la fuente falla', async () => {
+    vi.useFakeTimers();
+    const home = [
+      '<a href="/es/temporada/lirica-2026-2027">Lírica</a>',
+      '<a href="/es/temporada/danza-2026-2027">Danza</a>',
+    ].join('');
+    const attempts = new Map<string, number>();
+    const run = await advance(runIngest({
+      now: TEST_NOW,
+      dryRun: true,
+      catalog: emptyCatalog(),
+      sourceIds: [source.id],
+      dataDir: await mkdtemp(path.join(os.tmpdir(), 'zarzuela-timeout-all-')),
+      get: async (url) => {
+        const pathname = new URL(url).pathname;
+        attempts.set(pathname, (attempts.get(pathname) ?? 0) + 1);
+        if (url === `${base}/es/` || url === `${base}/es`) return home;
+        throw new Error(`tiempo agotado al pedir ${url}`);
+      },
+    }));
+    expect(attempts.get('/es/temporada/lirica-2026-2027')).toBe(ZARZUELA_MAX_ATTEMPTS_PER_URL);
+    expect(attempts.get('/es/temporada/danza-2026-2027')).toBe(ZARZUELA_MAX_ATTEMPTS_PER_URL);
+    expect(run.summary.sourcesFailed.map((failure) => failure.sourceId)).toEqual([source.id]);
+    expect(run.summary.sourcesFailed[0]?.message).toMatch(/tiempo agotado/);
+    expect(run.summary.disappearanceSuppressedSources).toEqual([]);
+    expect(run.rawEvents).toEqual([]);
+    expect(run.summary.healthReasons?.join(' ') ?? '').toMatch(/source-failed/);
+  });
+
+  it('un HTML de listado estructuralmente inesperado falla la fuente y no se degrada a parcial', async () => {
+    vi.useFakeTimers();
+    const home = [
+      '<a href="/es/temporada/lirica-2026-2027">Lírica</a>',
+      '<a href="/es/temporada/danza-2026-2027">Danza</a>',
+    ].join('');
+    const lirica = `<h2 class="first">Lírica</h2><ul class="listadoObras"><li><h3><a href="${raw().sourceUrl}">La verbena de la Paloma</a></h3><p class="entradilla">Martes, 29 de septiembre de 2026</p></li></ul>`;
+    const attempts = new Map<string, number>();
+    const run = await advance(runIngest({
+      now: TEST_NOW,
+      dryRun: true,
+      catalog: emptyCatalog(),
+      sourceIds: [source.id],
+      dataDir: await mkdtemp(path.join(os.tmpdir(), 'zarzuela-structural-')),
+      get: async (url) => {
+        const pathname = new URL(url).pathname;
+        attempts.set(pathname, (attempts.get(pathname) ?? 0) + 1);
+        if (url === `${base}/es/` || url === `${base}/es`) return home;
+        if (/\/temporada\/lirica-2026-2027\/?$/.test(pathname)) return lirica;
+        if (/\/temporada\/danza-2026-2027\/?$/.test(pathname)) {
+          return '<ul class="listadoObras"><article>Obra</article></ul>';
+        }
+        return fixture('detail-verbena');
+      },
+    }));
+    expect(attempts.get('/es/temporada/danza-2026-2027')).toBe(1);
+    expect(run.summary.sourcesFailed.map((failure) => failure.sourceId)).toEqual([source.id]);
+    expect(run.summary.sourcesFailed[0]?.message).toMatch(/no vacío/);
+    expect(run.summary.disappearanceSuppressedSources).toEqual([]);
+    expect(run.rawEvents).toEqual([]);
+    expect(run.summary.healthReasons?.join(' ') ?? '').toMatch(/source-failed/);
   });
 });
 

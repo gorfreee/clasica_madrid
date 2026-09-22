@@ -374,12 +374,44 @@ describe('composer knowledge base', () => {
     ).toEqual([]);
     expect(findKnownComposersInText('Pieza basada en Mozart e inspirada en Bach')).toEqual([]);
     expect(findKnownComposersInText('Un homenaje a Rameau en clave contemporánea')).toEqual([]);
+    expect(findKnownComposersInText(
+      'Dedicado a la música española del S. XIX heredera de José Lidón, donde tendrá un lugar especial la madrileña Isabel Prota y Carmena.',
+    )).toEqual([]);
+    expect(findKnownComposersInText('Música de José Lidón').map((item) => item.canonicalName)).toEqual(['José Lidón']);
     expect(findKnownComposersInText('Bach: Suite. Mozart: Concierto.')).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ canonicalName: 'Johann Sebastian Bach' }),
         expect.objectContaining({ canonicalName: 'Wolfgang Amadeus Mozart' }),
       ]),
     );
+  });
+
+  it('heredera de no otorga eligibility ni época; una atribución explícita sí', () => {
+    const contextual = facts({
+      title: 'Saskia Roures y Francisco Gil',
+      programText: 'Dedicado a la música española del S. XIX heredera de José Lidón, donde tendrá un lugar especial la madrileña Isabel Prota y Carmena.',
+    });
+    expect(classify(contextual).eligibility.ruleId).not.toBe('known-classical-composer');
+    expect(classify(contextual).eligibility.value).not.toBe('include');
+    expect(resolveEras(contextual).value).not.toContain('classical');
+
+    const musicOf = facts({ programText: 'Música de José Lidón.' });
+    expect(classify(musicOf).eligibility).toMatchObject({
+      value: 'include', method: 'knowledge', ruleId: 'known-classical-composer',
+    });
+    expect(resolveEras(musicOf).value).toEqual(['classical']);
+
+    const colon = facts({ programText: 'José Lidón: Sonata para órgano.' });
+    expect(classify(colon).eligibility).toMatchObject({
+      value: 'include', ruleId: 'known-classical-composer',
+    });
+    expect(resolveEras(colon).value).toEqual(['classical']);
+
+    const structured = facts({ composers: [{ name: 'José Lidón' }] });
+    expect(classify(structured).eligibility).toMatchObject({
+      value: 'include', ruleId: 'known-classical-composer',
+    });
+    expect(classify(structured).eras?.value).toEqual(['classical']);
   });
 
   it('reconoce el repertorio español añadido desde programa y composers[]', () => {

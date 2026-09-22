@@ -6,6 +6,7 @@ import { parseMadridDatosDetail } from '../src/ingestion/detail/madrid-datos.ts'
 import { parseTeatroRealDetail } from '../src/ingestion/detail/teatro-real.ts';
 import { resolveAccess } from '../src/ingestion/classification/access.ts';
 import { matchComposer } from '../src/ingestion/knowledge/composers.ts';
+import { enrichNormalizedEvent } from '../src/ingestion/enrich-normalized.ts';
 import { normalizeRawEvent } from '../src/ingestion/normalize.ts';
 import { emptyObservedLists } from '../src/ingestion/observed.ts';
 
@@ -282,7 +283,7 @@ describe('parser de ficha Auditorio Nacional', () => {
     expect(facts.performers).toEqual([{ name: 'Beatrice Rana', roleText: 'piano' }]);
     expect(names.some((name) => /bach|clementi|schumann|chopin|paganini/i.test(name))).toBe(false);
     expect(names.some((name) => /pause|préambule|pierrot|allegro|programa/i.test(name))).toBe(false);
-    expect(facts.programText).toMatch(/^Programa\./);
+    expect(facts.programText?.split('\n')[0]).toBe('Programa');
     expect(facts.programText).not.toMatch(/Beatrice Rana/);
     expect(facts.programText).toMatch(/Carnaval/);
     expect(facts.programText).toMatch(/Pause/);
@@ -306,6 +307,80 @@ describe('parser de ficha Auditorio Nacional', () => {
         composerName: 'Robert Schumann',
       },
     ]);
+  });
+
+  it('Recital de, piano no es un intérprete; un crédito de persona sí', () => {
+    const html = `
+      <article>
+        <h1>Camerata Musicalis. Falla, Chopin, Granados, Debussy</h1>
+        <div class="content">
+          <h4>Recital de, piano<br />Beatrice Rana, piano<br />Camerata Musicalis</h4>
+        </div>
+        <div class="rightcolumn">
+          <label class="rightColumn__item__label">Sala:</label>
+          <span class="rightColumn__item__text">Sala de Cámara</span>
+        </div>
+      </article>
+    `;
+    const facts = parseAuditorioNacionalDetail(html);
+    const names = facts.performers?.map((item) => item.name) ?? [];
+    expect(names).not.toContain('Recital de');
+    expect(facts.performers).toEqual(expect.arrayContaining([
+      { name: 'Beatrice Rana', roleText: 'piano' },
+    ]));
+    expect(names.some((name) => /camerata/i.test(name))).toBe(true);
+  });
+
+  it('conserva las líneas del programa y no promociona Difuntos', () => {
+    const html = `
+      <article>
+        <h1>UAM. Música por la Paz. Barroco Ibérico Italiano</h1>
+        <div class="content">
+          <h4>
+            Programa<br />
+            Primera Parte<br />
+            Benedetto Marcello (1686 - 1739)<br />
+            Concierto para oboe en re menor, S.Z799<br />
+            Antonio Vivaldi (1678-1741)<br />
+            Concierto para flautino en Do mayor RV 443<br />
+            Segunda Parte<br />
+            Francesco Corselli (1705-1778)<br />
+            Invitatorio de Difuntos
+          </h4>
+        </div>
+        <div class="rightcolumn">
+          <label class="rightColumn__item__label">Sala:</label>
+          <span class="rightColumn__item__text">Sala Sinfónica</span>
+        </div>
+      </article>
+    `;
+    const facts = parseAuditorioNacionalDetail(html);
+    expect(facts.programText?.split('\n')).toEqual(expect.arrayContaining([
+      'Benedetto Marcello (1686 - 1739)',
+      'Antonio Vivaldi (1678-1741)',
+      'Francesco Corselli (1705-1778)',
+      'Invitatorio de Difuntos',
+    ]));
+    expect(facts.programText).not.toMatch(/Corselli\. Invitatorio/);
+    const normalized = normalizeRawEvent({
+      sourceId: 'auditorio-nacional',
+      sourceUrl: 'https://auditorionacional.inaem.gob.es/es/programacion/uam-barroco-iberico',
+      observed: {
+        title: 'UAM. Música por la Paz. Barroco Ibérico Italiano',
+        occurrences: [{ date: '2026-09-15', time: '19:30' }],
+        performers: facts.performers ?? [],
+        composers: facts.composers ?? [],
+        works: facts.works ?? [],
+        ...(facts.programText ? { programText: facts.programText } : {}),
+      },
+    });
+    expect(normalized).toBeTruthy();
+    const names = enrichNormalizedEvent(normalized!).composers.map((item) => item.name);
+    expect(names.some((name) => /Marcello/.test(name))).toBe(true);
+    expect(names.some((name) => /Vivaldi/.test(name))).toBe(true);
+    expect(names.some((name) => /Corselli/.test(name))).toBe(true);
+    expect(names).not.toContain('Difuntos');
+    expect(facts.works?.some((work) => work.composerName === 'Difuntos')).toBe(false);
   });
 
   it('Excelentia Tres Tenores: roles entre paréntesis son elenco; las arias no se inventan como obras', async () => {
@@ -1496,6 +1571,25 @@ describe('parser de ficha Teatro Real', () => {
       'J. Feliciano',
       'F. Sinatra',
     ]);
+  });
+
+  it('un paréntesis de catálogo no es compositor y un nombre entre paréntesis sí', () => {
+    const html = `
+      <article>
+        <h1>Xabier Anduaga</h1>
+        <ul>
+          <li>Sleigh Ride (L. Anderson)</li>
+          <li>Pavane pour une infante défunte (M 19)</li>
+        </ul>
+      </article>
+    `;
+    const facts = parseTeatroRealDetail(html);
+    expect(facts.works).toEqual([
+      { title: 'Sleigh Ride', composerName: 'L. Anderson' },
+      { title: 'Pavane pour une infante défunte (M 19)' },
+    ]);
+    expect(facts.composers?.map((item) => item.name)).toEqual(['L. Anderson']);
+    expect(facts.works?.some((work) => work.composerName === 'M 19')).toBe(false);
   });
 
   it('en una ficha Drupal conserva el programa como texto y no adivina obras de un párrafo suelto', () => {

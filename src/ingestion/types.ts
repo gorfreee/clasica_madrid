@@ -237,7 +237,12 @@ export type SourceAdapter = {
   expand?(event: RawEvent, body: string): RawEvent[] | undefined;
 };
 
-/** Listing produced usable events, but coverage of that source is incomplete. */
+/**
+ * Listing coverage is incomplete. `events` may be empty when the source shell
+ * is recognizable but does not prove a completely empty agenda. The pipeline
+ * keeps these observations and suppresses disappearances for that source.
+ * A structural failure must remain a normal Error so the source fails visibly.
+ */
 export class IncompleteListingError extends Error {
   constructor(
     message: string,

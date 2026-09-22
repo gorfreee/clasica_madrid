@@ -12,6 +12,8 @@ import { mergeCandidateBatch } from '../src/ingestion/batch.ts';
 import { emptyCatalog, type Catalog } from '../src/lib/domain/catalog.ts';
 import type { AdapterContext, RawEvent } from '../src/ingestion/types.ts';
 import { getText, HttpError } from '../src/ingestion/http.ts';
+import { enrichNormalizedEvent } from '../src/ingestion/enrich-normalized.ts';
+import { normalizeRawEvent } from '../src/ingestion/normalize.ts';
 import { TEST_NOW, TEST_WINDOW } from './helpers.ts';
 
 const base = 'https://www.march.es/es/madrid';
@@ -131,6 +133,69 @@ describe('March JSON-LD hydration', () => {
       title: 'Suite nº 5 en Mi menor (The Little Consort)',
       composerName: 'Juan Cebrián (c. s.XVI)',
     });
+  });
+
+  it('conserva las líneas del programa Barbaroco y no promociona lugares ni títulos bibliográficos', async () => {
+    const original = '<ol class="segmentos"><li><em class="bloque-interpretativo">I</em><ol class="interpretaciones"><li><ol class="lista-nexo compositores"><li><strong>Franz Schubert</strong> (1797-1828)</li></ol><ol class="obras"><li>Variación sobre un vals de Diabelli, D 718 </li><li>Tres piezas para piano, D 946 </li></ol></li></ol></li><li><em class="bloque-interpretativo">II</em><ol class="interpretaciones"><li><ol class="lista-nexo compositores"><li><strong>Ludwig van Beethoven</strong> (1770-1827)</li></ol><ol class="obras"><li>Variaciones sobre un vals de Diabelli Op. 120 </li></ol></li></ol></li></ol>';
+    const program = [
+      '<ol class="segmentos"><li><ol class="interpretaciones">',
+      '<li><ol class="lista-nexo compositores"><li><strong>Francisco Guerrero</strong> (1528-1599)</li></ol><ol class="obras"><li>Si la noche haze escura (Cancionero de Uppsala, Venecia, 1556)</li></ol></li>',
+      '<li><ol class="lista-nexo compositores"><li><strong>Antonio de Cabezón</strong> (1510-1566)</li></ol><ol class="obras"><li>Pavana con su glosa (Libro de Cifra Nueva, Alcalá de Henares, 1557)</li><li>Oh, desdichado de mí (Cancionero de Palacio, Madrid c. 1500)</li></ol></li>',
+      '<li><ol class="lista-nexo compositores"><li><strong>Diego Ortiz</strong> (1510-1576)</li></ol><ol class="obras"><li>Recercada primera sobre el canto llano (Tratado de Glosas, Libro II, Roma, 1553)</li></ol></li>',
+      '<li><ol class="lista-nexo compositores"><li><strong>Francisco de la Torre</strong></li></ol><ol class="obras"><li>Pámpano verde (Cancionero de Palacio)</li></ol></li>',
+      '<li><ol class="lista-nexo compositores"><li><strong>Juan Cebrián (c. s.XVI)</strong></li></ol><ol class="obras"><li>Lágrimas de mi consuelo (Cancionero de Medinaceli, Medinaceli, s. XVI)</li></ol></li>',
+      '<li><ol class="lista-nexo compositores"><li><strong>Miguel de Fuenllana</strong></li></ol><ol class="obras"><li>De Antequera sale el Moro (Orphénica Lyra, Sevilla, 1554)</li></ol></li>',
+      '<li><ol class="lista-nexo compositores"><li><strong>Juan del Encina</strong> (1468-1529)</li></ol><ol class="obras"><li>Ay, triste que vengo (Cancionero de Palacio, Madrid, c. 1500)</li></ol></li>',
+      '</ol></li></ol>',
+      '<p>1 Obra conservada en Cancionero Musical de Palacio</p>',
+    ].join('');
+    const html = (await fixture('detail-formas')).replace(original, program);
+    const patch = parseMarchDetail(
+      raw('beethoven-schubert-sombras-cruzadas-iii-formas-libertad'),
+      html,
+    );
+    expect(patch.programText).toContain('\n');
+    expect(patch.programText).toContain('Cancionero de Medinaceli');
+    expect(patch.programText).toContain('Libro de Cifra Nueva, Alcalá de Henares');
+    expect(patch.programText).toContain('Orphénica Lyra, Sevilla');
+    expect(patch.programText).not.toMatch(/Guerrero \(1528-1599\) Si la noche/);
+    expect(patch.composers?.map((item) => item.name)).toEqual([
+      'Francisco Guerrero',
+      'Antonio de Cabezón',
+      'Diego Ortiz',
+      'Francisco de la Torre',
+      'Juan Cebrián (c. s.XVI)',
+      'Miguel de Fuenllana',
+      'Juan del Encina',
+    ]);
+    const normalized = normalizeRawEvent({
+      sourceId: source.id,
+      sourceUrl: `${base}/concierto/beethoven-schubert-sombras-cruzadas-iii-formas-libertad`,
+      observed: {
+        title: 'Ensemble Barbaroco',
+        occurrences: patch.occurrences ?? [],
+        performers: patch.performers ?? [],
+        composers: patch.composers ?? [],
+        works: patch.works ?? [],
+        ...(patch.programText ? { programText: patch.programText } : {}),
+      },
+    });
+    expect(normalized).toBeTruthy();
+    const names = enrichNormalizedEvent(normalized!).composers.map((item) => item.name);
+    for (const kept of ['Francisco Guerrero', 'Antonio de Cabezón', 'Diego Ortiz', 'Juan del Encina']) {
+      expect(names).toContain(kept);
+    }
+    for (const rejected of [
+      'Madrid',
+      'Libro II',
+      'Roma',
+      'Medinaceli',
+      'Sevilla',
+      'Alcalá de Henares',
+      'Musical de Palacio',
+    ]) {
+      expect(names).not.toContain(rejected);
+    }
   });
 
   it('rejects one malformed session, mismatched canonical URL, mixed statuses and non-Madrid/online events', async () => {

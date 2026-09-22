@@ -1,5 +1,6 @@
 import { explicitAccessText } from './access-evidence.ts';
 import { stripLeadingComposerCreditLabel } from '../composer-name.ts';
+import { looksLikeCatalogOnlyLine } from '../observed-cleanup.ts';
 import { allCaptures, collapseWhitespace, firstMatch, splitBreaks, stripTags } from '../html.ts';
 import { inferScheduleFromText } from './schedule.ts';
 import {
@@ -334,9 +335,12 @@ function parsePersonLine(text: string): ObservedPerson {
 }
 
 function parseTitleComposerWork(text: string): ObservedWork {
-  const parens = /^(.+?)\s+\(([^)]+)\)\s*$/.exec(text);
-  if (parens?.[1] && parens[2]) return { title: parens[1].trim(), composerName: parens[2].trim() };
-  return { title: text.trim() };
+  const trimmed = text.trim();
+  const parens = /^(.+?)\s+\(([^)]+)\)\s*$/.exec(trimmed);
+  if (parens?.[1] && parens[2] && !looksLikeCatalogOnlyLine(parens[2])) {
+    return { title: parens[1].trim(), composerName: parens[2].trim() };
+  }
+  return { title: trimmed };
 }
 
 function looksLikeProse(text: string): boolean {

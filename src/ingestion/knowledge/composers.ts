@@ -1,4 +1,5 @@
 import type { Era } from '../../lib/schemas/taxonomies.ts';
+import { CONTEXTUAL_COMPOSER_RELATIONS } from '../contextual-composer-relations.ts';
 
 /**
  * Musical knowledge base v1.
@@ -2565,17 +2566,7 @@ export function findKnownComposersInText(text: string): ComposerKnowledge[] {
   return found;
 }
 
-const CONTEXTUAL_COMPOSER_PREFIXES = [
-  'tema de',
-  'un tema de',
-  'sobre un tema de',
-  'basado en',
-  'basada en',
-  'inspirado en',
-  'inspirada en',
-  'homenaje a',
-  'en homenaje a',
-];
+const CONTEXTUAL_COMPOSER_PREFIXES = CONTEXTUAL_COMPOSER_RELATIONS;
 
 const INSTITUTION_COMPOSER_PREFIXES = [
   'cim',

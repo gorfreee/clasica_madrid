@@ -273,6 +273,19 @@ describe('líneas de programa WORK de COMPOSER', () => {
       attributedProgrammeComposers('Pieza basada en Mozart e inspirada en Bach').map((item) => item.name),
     ).toEqual([]);
     expect(
+      attributedProgrammeComposers(
+        'Dedicado a la música española del S. XIX heredera de José Lidón, donde tendrá un lugar especial la madrileña Isabel Prota y Carmena.',
+      ).map((item) => item.name),
+    ).toEqual([]);
+    expect(attributedProgrammeComposers('Un homenaje a Rameau').map((item) => item.name)).toEqual([]);
+    expect(attributedProgrammeComposers('Música de José Lidón').map((item) => item.name)).toEqual(['José Lidón']);
+    expect(attributedProgrammeComposers('José Lidón: Sonata para órgano').map((item) => item.name)).toEqual([
+      'José Lidón',
+    ]);
+    expect(
+      attributedProgrammeComposers('1 Obra conservada en Cancionero Musical de Palacio').map((item) => item.name),
+    ).toEqual([]);
+    expect(
       extractAttributedComposerNames(
         'La flautista ha estrenado una obra de Robert Carl y trabajó con Katherine Hoover.',
       ).map((item) => item.name),

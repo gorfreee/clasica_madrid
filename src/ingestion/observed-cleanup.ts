@@ -16,7 +16,7 @@ const CATALOG =
   /\b(?:bwv|hwv|hob\.?|buxwv|swwv|rct|k\.?\s*\d|kv\.?\s*\d|op\.?\s*\d|opus\s+\d|g\.\s*\d|h\.?\s*\d{2,})\b/i;
 const MOVEMENT = /^(?:x{0,3}(?:ix|iv|v?i{0,3})|[1-9]\d*)\.\s*\S+/i;
 const CATALOG_ONLY =
-  /^(?:(?:op(?:us)?|bwv|hwv|hob\.?|k(?:v)?\.?|woo)\s*\.?\s*\d+[a-z]?)(?:\s*\([^)]*\d{3,4}[^)]*\))?\s*$/i;
+  /^(?:(?:op(?:us)?|bwv|hwv|hob\.?|k(?:v)?\.?|woo|m\.?)\s*\.?\s*\d+[a-z]?)(?:\s*\([^)]*\d{3,4}[^)]*\))?\s*$/i;
 const WORK_GENRE =
   /\b(?:concierto|concerto|sinfon[ií]a|symphony|sonata|suite|quinteto|cuarteto|cuartet|tr[ií]o|obertura|ouverture|r[eé]quiem|misa|missa|invitatorio|toccata|fuga|fugue|preludio|pr[eé]lude|nocturne|mazurka|scherzo|impromptu|variaciones|variations|cantata|oratorio|fantas[ií]a|romance|divertimento|polonesa|polonaise|cancionero)\b/i;
 const MONTH =
