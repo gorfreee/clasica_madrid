@@ -887,14 +887,13 @@ describe('Real Hermandad del Refugio no cambia el transporte de otras fuentes', 
       'auditorionacional.inaem.gob.es',
       'cndm.inaem.gob.es',
       'teatrodelazarzuela.inaem.gob.es',
-      'www.fundacionmutua.es',
       'www.march.es',
     ]);
     expect(getSourceDefinition('fundacion-juan-march').useFetchRelay).toBe(true);
     expect(getSourceDefinition('teatro-zarzuela').useFetchRelay).toBe(true);
     expect(getSourceDefinition('auditorio-nacional').useFetchRelay).toBe(true);
     expect(getSourceDefinition('cndm').useFetchRelay).toBe(true);
-    expect(getSourceDefinition('fundacion-mutua').useFetchRelay).toBe(true);
+    expect(getSourceDefinition('fundacion-mutua').useFetchRelay).toBeFalsy();
     expect(getSourceDefinition('real-hermandad-refugio').useFetchRelay).toBeFalsy();
   });
 });

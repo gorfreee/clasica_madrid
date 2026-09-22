@@ -176,13 +176,11 @@ describe('getText fetch relay', () => {
       'teatro-zarzuela',
       'fundacion-juan-march',
       'cndm',
-      'fundacion-mutua',
     ]);
     expect(fetchRelayHosts()).toEqual([
       'auditorionacional.inaem.gob.es',
       'cndm.inaem.gob.es',
       'teatrodelazarzuela.inaem.gob.es',
-      'www.fundacionmutua.es',
       'www.march.es',
     ]);
     expect(fetchTransportForHost('realhermandaddelrefugio.org')).toBe('direct');
@@ -190,7 +188,7 @@ describe('getText fetch relay', () => {
     expect(fetchTransportForHost('teatrodelazarzuela.inaem.gob.es')).toBe('relay');
     expect(fetchTransportForHost('auditorionacional.inaem.gob.es')).toBe('relay');
     expect(fetchTransportForHost('cndm.inaem.gob.es')).toBe('relay');
-    expect(fetchTransportForHost('www.fundacionmutua.es')).toBe('relay');
+    expect(fetchTransportForHost('www.fundacionmutua.es')).toBe('direct');
     expect(fetchTransportForHost('www.teatroreal.es')).toBe('direct');
     expect(getSourceDefinition('auditorio-nacional').useFetchRelay).toBe(true);
     expect(resolveFetchRelay(auditorioListing, relayEnv)?.requestUrl).toContain(
