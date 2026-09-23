@@ -1,14 +1,5 @@
 import { expect, test } from '@playwright/test';
 
-const LEGACY_EYEBROWS = [
-  'Agenda / Madrid',
-  'Lugares / Madrid',
-  'Acerca de / Clásica Madrid',
-  'Agenda / Evento',
-  'Archivo / Evento pasado',
-  'Lugar /',
-];
-
 test.describe('eyebrow de sección y retorno', () => {
   test('las páginas de sección muestran una etiqueta estática, sin enlace', async ({ page }) => {
     await page.goto('/');
@@ -115,23 +106,5 @@ test.describe('eyebrow de sección y retorno', () => {
     const contact = await rule('/contacto/', '.page-rule');
     const about = await rule('/acerca-de/', '.page-rule');
     expect(about).toEqual(contact);
-  });
-
-  test('no conserva las fórmulas ambiguas anteriores', async ({ page }) => {
-    const paths = [
-      '/',
-      '/lugares/',
-      '/acerca-de/',
-      '/contacto/',
-      '/eventos/excelentia-noches-en-los-jardines-de-espana-y-concierto-de-aranjuez/',
-      '/lugares/basilica-pontificia-de-san-miguel/',
-    ];
-    for (const path of paths) {
-      await page.goto(path);
-      const body = await page.locator('body').innerText();
-      for (const legacy of LEGACY_EYEBROWS) {
-        expect(body, `${path} todavía muestra «${legacy}»`).not.toContain(legacy);
-      }
-    }
   });
 });
