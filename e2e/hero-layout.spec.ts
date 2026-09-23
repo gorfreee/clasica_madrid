@@ -1,6 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
 
-const INDEX_ROUTES = ['/', '/agenda/gratis/', '/agenda/fin-de-semana/', '/lugares/'] as const;
+// The agenda landings use the same hero layout as `/` and are also covered
+// by the motif and landing-specific browser tests.
+const INDEX_ROUTES = ['/', '/lugares/'] as const;
 const DETAIL_ROUTES = [
   '/eventos/cuarteto-cosmos/',
   '/eventos/xxviii-festival-internacional-de-musica-contemporanea-de-madrid-coma-26-orquesta-sinfonica-de-la-universidad-complutense/',
