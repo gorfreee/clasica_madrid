@@ -22,6 +22,7 @@ export const VENUE_OPENED = 'venue_opened';
 export const DIRECTIONS_CLICKED = 'directions_clicked';
 export const RESULT_LIST_EXHAUSTED = 'result_list_exhausted';
 export const SHARE_CLICKED = 'share_clicked';
+export const CALENDAR_ADD_CLICKED = 'calendar_add_clicked';
 export const CONTACT_SUBMITTED = 'contact_submitted';
 export const EVENT_FEEDBACK_CLICKED = 'event_feedback_clicked';
 export const WHATSAPP_CHANNEL_CLICKED = 'whatsapp_channel_clicked';
@@ -41,6 +42,13 @@ export type AnalyticsSurface = (typeof ANALYTICS_SURFACES)[number];
 
 export const DESTINATION_TYPES = ['tickets', 'source', 'official_site', 'organizer', 'other'] as const;
 export type DestinationType = (typeof DESTINATION_TYPES)[number];
+
+export const CALENDAR_ADD_METHODS = ['google_calendar', 'ics'] as const;
+export type CalendarAddMethod = (typeof CALENDAR_ADD_METHODS)[number];
+
+export function isCalendarAddMethod(value: string | undefined): value is CalendarAddMethod {
+  return value === 'google_calendar' || value === 'ics';
+}
 
 export const DIRECTIONS_PROVIDERS = ['google_maps'] as const;
 export type DirectionsProvider = (typeof DIRECTIONS_PROVIDERS)[number];
@@ -263,6 +271,34 @@ export function trackShareClicked(
       event_id: input.event_id,
       event_title: limitTitle(input.event_title),
       channel: input.channel,
+    }),
+    capture,
+  );
+}
+
+/**
+ * Fires only when a calendar method is chosen. The payload is built field by
+ * field so a wider object cannot carry the description, address, or ICS body.
+ */
+export function trackCalendarAddClicked(
+  input: {
+    event_id: string;
+    event_title?: string;
+    occurrence_id: string;
+    method: CalendarAddMethod;
+    has_confirmed_time: boolean;
+  },
+  capture: AnalyticsCapture | null = defaultCapture(),
+): void {
+  if (!input.event_id || !input.occurrence_id || !isCalendarAddMethod(input.method)) return;
+  captureAnalytics(
+    CALENDAR_ADD_CLICKED,
+    definedProperties({
+      event_id: input.event_id,
+      event_title: limitTitle(input.event_title),
+      occurrence_id: input.occurrence_id,
+      method: input.method,
+      has_confirmed_time: input.has_confirmed_time,
     }),
     capture,
   );

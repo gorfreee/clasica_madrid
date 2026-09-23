@@ -120,6 +120,15 @@ export function madridDateTimeIso(date: string, time: string | null): string {
   return `${date}T${time}:00${offset}`;
 }
 
+/**
+ * Madrid civil time to an absolute instant.
+ *
+ * A unique civil time round-trips. During the autumn overlap the later
+ * instant is kept (CET, after the clock falls back). A spring-gap time does
+ * not exist: the solver lands on the post-transition wall clock with the same
+ * minute (02:30 → 03:30) and does not throw. Calendar export keeps that
+ * deterministic instant instead of a second offset table.
+ */
 export function fromMadridLocal(date: string, time: string): Date {
   const desired = `${date}T${time}`;
   let ms = Date.parse(`${date}T${time}:00.000Z`);

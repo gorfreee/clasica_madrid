@@ -1,14 +1,15 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import ExternalAction from '../../components/ExternalAction.astro';
-import Eyebrow from '../../components/Eyebrow.astro';
-import PlaceAddress from '../../components/PlaceAddress.astro';
-import ShareAction from '../../components/ShareAction.astro';
-import { daysUntilEvent, isFreeAccess } from '../../lib/analytics/page.ts';
-import { formatSourceCitationMeta } from '../../lib/presentation/labels.ts';
-import { buildEventShare } from '../../lib/presentation/share.ts';
-import { loadEventPage, loadEventStaticPaths } from '../../lib/presentation/site.ts';
-import { AGENDA_PATH, eventFeedbackPath, eventPath } from '../../lib/presentation/urls.ts';
+import Layout from '../../../layouts/Layout.astro';
+import CalendarAction from '../../../components/CalendarAction.astro';
+import ExternalAction from '../../../components/ExternalAction.astro';
+import Eyebrow from '../../../components/Eyebrow.astro';
+import PlaceAddress from '../../../components/PlaceAddress.astro';
+import ShareAction from '../../../components/ShareAction.astro';
+import { daysUntilEvent, isFreeAccess } from '../../../lib/analytics/page.ts';
+import { formatSourceCitationMeta } from '../../../lib/presentation/labels.ts';
+import { buildEventShare } from '../../../lib/presentation/share.ts';
+import { loadEventPage, loadEventStaticPaths } from '../../../lib/presentation/site.ts';
+import { AGENDA_PATH, eventFeedbackPath, eventPath } from '../../../lib/presentation/urls.ts';
 
 export async function getStaticPaths() {
   const paths = await loadEventStaticPaths();
@@ -96,6 +97,14 @@ const share = buildEventShare({
             description={model.sourceAction.description}
             accessibleLabel={model.sourceAction.accessibleLabel}
             outbound={model.sourceAction.isOfficial ? 'tickets' : 'source'}
+          />
+        )
+      }
+      {
+        model.calendar && (
+          <CalendarAction
+            action={model.calendar}
+            align={model.sourceAction ? 'beside-cta' : 'utility'}
           />
         )
       }
@@ -217,7 +226,7 @@ const share = buildEventShare({
     {model.isPast && <p class="past-notice">Este evento ya ha tenido lugar. Conservamos la ficha como parte del archivo</p>}
   </article>
   <script>
-    import { initEventAnalytics } from '../../lib/analytics/browser.ts';
+    import { initEventAnalytics } from '../../../lib/analytics/browser.ts';
     initEventAnalytics();
   </script>
 </Layout>

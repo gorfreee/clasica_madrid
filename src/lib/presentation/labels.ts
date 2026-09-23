@@ -77,6 +77,20 @@ export const eventOriginalSourceActionLabel = 'Ver fuente original';
 export const eventSourceActionDescription = 'Consulta precios, disponibilidad y posibles cambios';
 export const venueOfficialWebLabel = 'Web oficial';
 
+export const calendarActionLabel = 'Añadir al calendario';
+export const calendarGoogleLabel = 'Google Calendar';
+export const calendarIcsLabel = 'Apple, Outlook y otras apps (.ics)';
+export const calendarChooseOccurrenceLabel = 'Elige una función';
+export const calendarTimeUnconfirmedLabel = 'Hora por confirmar';
+
+export function calendarGoogleAccessibleLabel(when: string): string {
+  return `Añadir a ${calendarGoogleLabel}: ${when}. ${opensInNewTabLabel}`;
+}
+
+export function calendarIcsAccessibleLabel(when: string): string {
+  return `Añadir a ${calendarIcsLabel}: ${when}`;
+}
+
 export const shareActionLabel = 'Compartir';
 export const shareWhatsappLabel = 'WhatsApp';
 export const shareCopyLinkLabel = 'Copiar enlace';

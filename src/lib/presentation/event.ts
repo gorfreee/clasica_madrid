@@ -27,6 +27,7 @@ import {
 } from './labels.ts';
 import type { Occurrence } from '../schemas/event.ts';
 import type { SourceKind } from '../schemas/taxonomies.ts';
+import { buildCalendarAction, calendarSourceFromResolved, type CalendarActionModel } from './calendar.ts';
 import { buildEventSourceAction, type EventSourceActionModel } from './external-action.ts';
 import { buildMusicEventJsonLd } from './json-ld.ts';
 import { buildPlaceAddress, type PlaceAddressModel } from './place-address.ts';
@@ -90,6 +91,7 @@ export type EventPageModel = {
   featuredOccurrence: EventOccurrenceModel | null;
   sources: EventSourceModel[];
   sourceAction: EventSourceActionModel | null;
+  calendar: CalendarActionModel | null;
   lastVerifiedAt: string;
   jsonLd: Record<string, unknown>[];
 };
@@ -193,6 +195,7 @@ export function toEventPageModel(resolved: ResolvedEvent, clock: Clock = systemC
       : null,
     sources,
     sourceAction: buildEventSourceAction(sources),
+    calendar: buildCalendarAction(calendarSourceFromResolved(resolved), now),
     lastVerifiedAt: event.lastVerifiedAt,
     jsonLd: buildMusicEventJsonLd(resolved),
   };

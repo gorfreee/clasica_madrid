@@ -31,6 +31,14 @@ export function eventUrl(slug: string): string {
   return publicUrl(eventPath(slug));
 }
 
+/**
+ * Prerendered iCalendar file for one occurrence. The filename is part of the
+ * path, so it must not gain the trailing slash used by HTML pages.
+ */
+export function eventOccurrenceIcsPath(slug: string, occurrenceId: string): string {
+  return `/eventos/${slug}/${occurrenceId}.ics`;
+}
+
 export function venuePath(slug: string): string {
   return publicPath(`/lugares/${slug}`);
 }
