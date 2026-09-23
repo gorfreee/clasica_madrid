@@ -26,6 +26,58 @@ import { AGENDA_PATH, eventPath, venuePath } from './urls.ts';
 
 export const INITIAL_AGENDA_OCCURRENCE_LIMIT = 150;
 
+/** Running total the home agenda's inline channel note aims to follow. */
+export const AGENDA_INLINE_CHANNEL_TARGET = 10;
+
+/** Preferred span around the target. A day is never split to land inside it. */
+export const AGENDA_INLINE_CHANNEL_MIN = 8;
+export const AGENDA_INLINE_CHANNEL_MAX = 12;
+
+/**
+ * Day index after which the home agenda renders its inline channel note.
+ * `null` when the list is too short for that note to sit between days.
+ *
+ * Counts complete days only. A boundary inside 8–12 occurrences is always
+ * closer to 10 than one outside that span, so it wins when a day ends there.
+ * Otherwise the closest boundary that has already reached 8 occurrences is
+ * used. Equal distances keep the earlier day. The last day is not a
+ * candidate: the agenda has to continue after the note.
+ */
+export function agendaInlineChannelBreak(
+  days: readonly { items: readonly unknown[] }[],
+): number | null {
+  const cumulative: number[] = [];
+  let total = 0;
+  for (const day of days) {
+    total += day.items.length;
+    cumulative.push(total);
+  }
+
+  const boundaries: { index: number; count: number }[] = [];
+  for (let index = 0; index < cumulative.length - 1; index += 1) {
+    const count = cumulative[index] ?? 0;
+    if (count <= 0 || total <= count) continue;
+    boundaries.push({ index, count });
+  }
+
+  const inBand = boundaries.filter(
+    (boundary) =>
+      boundary.count >= AGENDA_INLINE_CHANNEL_MIN && boundary.count <= AGENDA_INLINE_CHANNEL_MAX,
+  );
+  const pool =
+    inBand.length > 0
+      ? inBand
+      : boundaries.filter((boundary) => boundary.count >= AGENDA_INLINE_CHANNEL_MIN);
+  if (pool.length === 0) return null;
+
+  let best = pool[0]!;
+  for (const boundary of pool.slice(1)) {
+    const distance = Math.abs(boundary.count - AGENDA_INLINE_CHANNEL_TARGET);
+    if (distance < Math.abs(best.count - AGENDA_INLINE_CHANNEL_TARGET)) best = boundary;
+  }
+  return best.index;
+}
+
 export type TaxonomyOption = {
   id: string;
   label: string;

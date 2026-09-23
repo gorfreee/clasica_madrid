@@ -16,7 +16,7 @@ const model = await loadFullAgendaFragment();
     <title>Agenda completa</title>
   </head>
   <body>
-    <AgendaList days={model.days} />
+    <AgendaList days={model.days} inlineChannel />
     <script
       id="agenda-filter-data"
       type="application/json"
