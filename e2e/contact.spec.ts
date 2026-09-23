@@ -57,6 +57,22 @@ test.describe('página de contacto', () => {
     );
   });
 
+  test('nombre y email quedan alineados en escritorio', async ({ page }) => {
+    await stubTurnstile(page);
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/contacto/');
+
+    for (const width of [1280, 800]) {
+      await page.setViewportSize({ width, height: 800 });
+      const name = await page.getByLabel('Nombre (opcional)').boundingBox();
+      const email = await page.getByLabel('Email (opcional)').boundingBox();
+      expect(name).toBeTruthy();
+      expect(email).toBeTruthy();
+      expect(Math.abs(name!.y - email!.y)).toBeLessThan(1);
+      expect(Math.abs(name!.height - email!.height)).toBeLessThan(1);
+    }
+  });
+
   test('no desborda en móvil', async ({ page }) => {
     await stubTurnstile(page);
     await page.setViewportSize({ width: 320, height: 700 });
