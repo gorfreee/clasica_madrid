@@ -6,3 +6,8 @@
 
 /_agenda/*
   X-Robots-Tag: noindex
+
+/eventos/*/*.ics
+  Content-Type: text/calendar; charset=utf-8
+  Content-Disposition: attachment
+  X-Robots-Tag: noindex

@@ -12,6 +12,8 @@ export async function serializeSitemapItem(item: SitemapItem): Promise<SitemapIt
 }
 
 export function sitemapPageFilter(page: string): boolean {
+  const raw = rawPathname(page);
+  if (/\.ics\/?$/.test(raw)) return false;
   const path = pathnameOf(page);
   if (path.startsWith('/404') || path.startsWith('/_agenda')) return false;
   if (path.startsWith('/agenda/')) {
@@ -63,6 +65,14 @@ export function sitemapLastmodMap(catalog: Catalog, now = new Date()): Map<strin
     map.set(path, lastmod);
   }
   return map;
+}
+
+function rawPathname(url: string): string {
+  try {
+    return new URL(url).pathname;
+  } catch {
+    return url.split('?')[0] ?? url;
+  }
 }
 
 function pathnameOf(url: string): string {

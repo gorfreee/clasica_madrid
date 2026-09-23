@@ -32,6 +32,9 @@ import {
   QUICK_FILTER_SELECTED,
   RESULT_LIST_EXHAUSTED,
   SEARCH_PERFORMED,
+  CALENDAR_ADD_CLICKED,
+  isCalendarAddMethod,
+  trackCalendarAddClicked,
   trackContactSubmitted,
   trackOutboundEventClick,
   trackResultListExhausted,
@@ -617,6 +620,102 @@ describe('contacto y compartir', () => {
         properties: { event_id: 'evt_carmen', event_title: 'Carmen', channel: 'whatsapp' },
       },
     ]);
+  });
+});
+
+describe('añadir al calendario', () => {
+  it('calendar_add_clicked identifica la función y el método, sin la cita', () => {
+    const { calls, capture } = recorder();
+    trackCalendarAddClicked(
+      {
+        event_id: 'evt_carmen',
+        event_title: 'Carmen',
+        occurrence_id: 'occ_carmen_1',
+        method: 'google_calendar',
+        has_confirmed_time: true,
+        description: 'Consulta la ficha',
+        location: 'Calle Mayor 1',
+        url: 'https://clasicamadrid.com/eventos/carmen/?utm_source=google_calendar',
+        ics: 'BEGIN:VCALENDAR',
+      } as {
+        event_id: string;
+        event_title: string;
+        occurrence_id: string;
+        method: 'google_calendar';
+        has_confirmed_time: boolean;
+      },
+      capture,
+    );
+    trackCalendarAddClicked(
+      {
+        event_id: 'evt_organo',
+        event_title: 'Recital de órgano',
+        occurrence_id: 'occ_organo_1',
+        method: 'ics',
+        has_confirmed_time: false,
+      },
+      capture,
+    );
+    expect(calls).toEqual([
+      {
+        event: CALENDAR_ADD_CLICKED,
+        properties: {
+          event_id: 'evt_carmen',
+          event_title: 'Carmen',
+          occurrence_id: 'occ_carmen_1',
+          method: 'google_calendar',
+          has_confirmed_time: true,
+        },
+      },
+      {
+        event: CALENDAR_ADD_CLICKED,
+        properties: {
+          event_id: 'evt_organo',
+          event_title: 'Recital de órgano',
+          occurrence_id: 'occ_organo_1',
+          method: 'ics',
+          has_confirmed_time: false,
+        },
+      },
+    ]);
+    const payload = JSON.stringify(calls);
+    expect(payload).not.toContain('Calle Mayor');
+    expect(payload).not.toContain('utm_source');
+    expect(payload).not.toContain('BEGIN:VCALENDAR');
+    expect(payload).not.toContain('Consulta la ficha');
+    expect(isCalendarAddMethod('yahoo')).toBe(false);
+    expect(
+      trackCalendarAddClicked(
+        {
+          event_id: 'evt_carmen',
+          occurrence_id: 'occ_carmen_1',
+          method: 'yahoo' as 'ics',
+          has_confirmed_time: true,
+        },
+        capture,
+      ),
+    ).toBeUndefined();
+    expect(calls).toHaveLength(2);
+  });
+
+  it('no falla si PostHog no está o si capture lanza', () => {
+    const input = {
+      event_id: 'evt_carmen',
+      occurrence_id: 'occ_carmen_1',
+      method: 'ics' as const,
+      has_confirmed_time: true,
+    };
+    expect(() => trackCalendarAddClicked(input, null)).not.toThrow();
+    expect(() =>
+      trackCalendarAddClicked(input, () => {
+        throw new Error('PostHog no disponible');
+      }),
+    ).not.toThrow();
+    expect(() =>
+      trackCalendarAddClicked({ ...input, event_id: '', occurrence_id: 'occ_carmen_1' }, () => {
+        throw new Error('no debería llamarse');
+      }),
+    ).not.toThrow();
   });
 });
 

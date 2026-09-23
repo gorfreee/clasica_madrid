@@ -1,0 +1,320 @@
+---
+import ExternalMark from './ExternalMark.astro';
+import type { CalendarActionModel } from '../lib/presentation/calendar.ts';
+import {
+  calendarActionLabel,
+  calendarChooseOccurrenceLabel,
+  calendarGoogleAccessibleLabel,
+  calendarGoogleLabel,
+  calendarIcsAccessibleLabel,
+  calendarIcsLabel,
+} from '../lib/presentation/labels.ts';
+
+type Props = {
+  action: CalendarActionModel;
+  /** Optically align the label with a neighbouring CTA that has its own padding. */
+  align?: 'utility' | 'beside-cta';
+};
+
+const { action, align = 'utility' } = Astro.props;
+const chooseId = `calendar-choose-${action.eventId}`;
+const several = action.occurrences.length > 1;
+const only = action.occurrences[0];
+---
+
+<details
+  class:list={['calendar-action', { 'calendar-action--beside-cta': align === 'beside-cta' }]}
+  data-calendar
+  data-calendar-event-id={action.eventId}
+  data-calendar-event-title={action.eventTitle}
+>
+  <summary class="calendar-action__trigger" role="button">
+    <span class="calendar-action__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" focusable="false">
+        <rect x="4" y="5" width="16" height="15" rx="1.5"></rect>
+        <path d="M8 3.5v3.5"></path>
+        <path d="M16 3.5v3.5"></path>
+        <path d="M4 10h16"></path>
+      </svg>
+    </span>
+    <span class="calendar-action__label">{calendarActionLabel}</span>
+  </summary>
+  <div class="calendar-action__menu" data-calendar-menu>
+    {
+      several ? (
+        <>
+          <p class="calendar-action__hint" id={chooseId}>
+            {calendarChooseOccurrenceLabel}
+          </p>
+          <div class="calendar-action__dates" role="group" aria-labelledby={chooseId}>
+            {action.occurrences.map((occurrence) => (
+              <details class="calendar-action__date" name={chooseId} data-calendar-date>
+                <summary class="calendar-action__option calendar-action__option--date" role="button">
+                  <span>{occurrence.dateLabel}</span>
+                  <strong>{occurrence.timeLabel}</strong>
+                </summary>
+                <div class="calendar-action__providers">
+                  <a
+                    class="calendar-action__option"
+                    href={occurrence.googleHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={calendarGoogleAccessibleLabel(occurrence.whenLabel)}
+                    data-calendar-method="google_calendar"
+                    data-occurrence-id={occurrence.id}
+                    data-confirmed-time={occurrence.hasConfirmedTime ? 'true' : 'false'}
+                  >
+                    <span>{calendarGoogleLabel}</span>
+                    <ExternalMark />
+                  </a>
+                  <a
+                    class="calendar-action__option"
+                    href={occurrence.icsPath}
+                    download={`${occurrence.id}.ics`}
+                    aria-label={calendarIcsAccessibleLabel(occurrence.whenLabel)}
+                    data-calendar-method="ics"
+                    data-occurrence-id={occurrence.id}
+                    data-confirmed-time={occurrence.hasConfirmedTime ? 'true' : 'false'}
+                  >
+                    {calendarIcsLabel}
+                  </a>
+                </div>
+              </details>
+            ))}
+          </div>
+        </>
+      ) : only && (
+        <>
+          <p class="calendar-action__when">{only.whenLabel}</p>
+          <a
+            class="calendar-action__option"
+            href={only.googleHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={calendarGoogleAccessibleLabel(only.whenLabel)}
+            data-calendar-method="google_calendar"
+            data-occurrence-id={only.id}
+            data-confirmed-time={only.hasConfirmedTime ? 'true' : 'false'}
+          >
+            <span>{calendarGoogleLabel}</span>
+            <ExternalMark />
+          </a>
+          <a
+            class="calendar-action__option"
+            href={only.icsPath}
+            download={`${only.id}.ics`}
+            aria-label={calendarIcsAccessibleLabel(only.whenLabel)}
+            data-calendar-method="ics"
+            data-occurrence-id={only.id}
+            data-confirmed-time={only.hasConfirmedTime ? 'true' : 'false'}
+          >
+            {calendarIcsLabel}
+          </a>
+        </>
+      )
+    }
+  </div>
+</details>
+
+<script>
+  import { initCalendarActions } from '../lib/presentation/calendar-client.ts';
+  initCalendarActions();
+</script>
+
+<style>
+  .calendar-action {
+    position: relative;
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  .calendar-action__trigger {
+    display: flex;
+    align-items: flex-start;
+    gap: .42rem;
+    width: fit-content;
+    max-width: 100%;
+    min-height: 2.75rem;
+    margin: 0;
+    padding: .18rem 0;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font-size: .94rem;
+    font-weight: 600;
+    line-height: 1.35;
+    list-style: none;
+    cursor: pointer;
+    transition: color 140ms ease;
+  }
+
+  .calendar-action__trigger::-webkit-details-marker,
+  .calendar-action__option--date::-webkit-details-marker {
+    display: none;
+  }
+
+  .calendar-action__trigger::marker,
+  .calendar-action__option--date::marker {
+    content: "";
+  }
+
+  .calendar-action__trigger:hover,
+  .calendar-action__trigger:focus-visible,
+  .calendar-action[open] > .calendar-action__trigger {
+    color: var(--blue);
+  }
+
+  .calendar-action__trigger:focus-visible,
+  .calendar-action__option--date:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 4px;
+  }
+
+  .calendar-action--beside-cta .calendar-action__trigger {
+    padding-top: .85rem;
+  }
+
+  .calendar-action__icon {
+    display: block;
+    flex: 0 0 auto;
+    width: .95rem;
+    height: .95rem;
+    margin-top: .08rem;
+  }
+
+  .calendar-action__icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.7;
+  }
+
+  .calendar-action__label {
+    overflow-wrap: anywhere;
+    text-decoration-line: underline;
+    text-decoration-color: transparent;
+    text-decoration-thickness: 1px;
+    text-underline-offset: .16em;
+    transition: text-decoration-color 140ms ease;
+  }
+
+  .calendar-action__trigger:hover .calendar-action__label,
+  .calendar-action__trigger:focus-visible .calendar-action__label,
+  .calendar-action[open] > .calendar-action__trigger .calendar-action__label {
+    text-decoration-color: currentColor;
+  }
+
+  .calendar-action__menu {
+    position: absolute;
+    z-index: 5;
+    top: calc(100% + .2rem);
+    left: 0;
+    right: auto;
+    box-sizing: border-box;
+    width: max-content;
+    min-width: min(16rem, calc(100vw - 1rem));
+    max-width: min(22rem, calc(100vw - 1rem));
+    max-height: min(24rem, calc(100vh - 1rem));
+    margin: 0;
+    padding: .25rem 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    border: 1px solid var(--line);
+    background: var(--paper-light);
+  }
+
+  .calendar-action__menu.is-align-end {
+    left: auto;
+    right: 0;
+  }
+
+  .calendar-action__menu.is-align-above {
+    top: auto;
+    bottom: calc(100% + .2rem);
+  }
+
+  .calendar-action__hint,
+  .calendar-action__when {
+    margin: 0;
+    padding: .45rem .9rem .35rem;
+    color: var(--muted);
+    font-size: .75rem;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .calendar-action__dates {
+    margin: 0;
+    padding: 0;
+  }
+
+  .calendar-action__date {
+    border-top: 1px solid var(--line);
+  }
+
+  .calendar-action__option {
+    display: flex;
+    align-items: flex-start;
+    gap: .35rem;
+    width: 100%;
+    min-height: 2.75rem;
+    margin: 0;
+    padding: .7rem .9rem;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-size: .94rem;
+    font-weight: 600;
+    line-height: 1.35;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+  }
+
+  .calendar-action__option--date {
+    flex-direction: column;
+    gap: .12rem;
+    list-style: none;
+  }
+
+  .calendar-action__option--date strong {
+    color: var(--blue);
+    font-size: .82rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .calendar-action__date[open] > .calendar-action__option--date {
+    color: var(--blue);
+  }
+
+  .calendar-action__providers {
+    margin: 0 .55rem .35rem;
+    border-left: 2px solid var(--line);
+  }
+
+  .calendar-action__option:hover,
+  .calendar-action__option:focus-visible {
+    color: var(--blue);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: .16em;
+  }
+
+  .calendar-action__option:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: -2px;
+  }
+
+  @media (max-width: 620px) {
+    .calendar-action--beside-cta .calendar-action__trigger {
+      padding-top: .18rem;
+    }
+  }
+</style>
