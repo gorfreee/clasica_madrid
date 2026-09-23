@@ -2,9 +2,12 @@ import { expect, test } from '@playwright/test';
 
 const indexPages = [
   { path: '/', variant: 'agenda', hero: '.page-hero--agenda' },
+  { path: '/lugares/', variant: 'venues', hero: '.page-hero--venues' },
+] as const;
+
+const landingPages = [
   { path: '/agenda/gratis/', variant: 'agenda', hero: '.page-hero--agenda' },
   { path: '/agenda/fin-de-semana/', variant: 'agenda', hero: '.page-hero--agenda' },
-  { path: '/lugares/', variant: 'venues', hero: '.page-hero--venues' },
 ] as const;
 
 const pagesWithoutMotif = [
@@ -28,7 +31,9 @@ for (const viewport of viewports) {
   test.describe(`motivos de hero a ${viewport.name}px`, () => {
     test.use({ viewport: { width: viewport.width, height: viewport.height } });
 
-    for (const pageCase of indexPages) {
+    // The landings share the agenda hero; check each route at a mobile width
+    // while covering the two distinct hero variants at every breakpoint.
+    for (const pageCase of [...indexPages, ...(viewport.width === 412 ? landingPages : [])]) {
       test(`${pageCase.variant} en ${pageCase.path} conserva la composición y no desborda`, async ({ page }) => {
         await page.goto(pageCase.path);
 
