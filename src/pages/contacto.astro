@@ -39,19 +39,24 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
             type="text"
             autocomplete="name"
             maxlength="100"
+            placeholder="Tu nombre"
           />
         </div>
 
         <div class="contact-form__field">
-          <label for="contact-email">Email</label>
+          <label for="contact-email">Email <span>(opcional)</span></label>
           <input
             id="contact-email"
             name="email"
             type="email"
             autocomplete="email"
             maxlength="254"
-            required
+            placeholder="tu@email.com"
+            aria-describedby="contact-email-help"
           />
+          <p id="contact-email-help" class="contact-form__help">
+            Si quieres recibir una respuesta, déjanos tu email.
+          </p>
         </div>
 
         <div class="contact-form__field">
@@ -73,6 +78,7 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
             rows="8"
             maxlength="5000"
             required
+            placeholder="Cuéntanos en qué podemos ayudarte…"
           ></textarea>
         </div>
 
@@ -361,6 +367,12 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
     resize: vertical;
   }
 
+  .contact-form input::placeholder,
+  .contact-form textarea::placeholder {
+    color: var(--muted);
+    opacity: 1;
+  }
+
   .contact-form input:focus,
   .contact-form select:focus,
   .contact-form textarea:focus {
@@ -380,6 +392,7 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
     min-height: 4.1rem;
   }
 
+  .contact-form__help,
   .contact-form__privacy,
   .contact-form__status,
   .contact-form__noscript {
