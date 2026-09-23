@@ -955,7 +955,7 @@ a.eyebrow:focus-visible {
 .source-list a { font-weight: 800; }
 .source-list span, .verified { color: var(--muted); }
 .verified { margin: 1rem 0 0; }
-.verified.source-feedback { margin-top: .35rem; }
+.verified.source-feedback { margin-top: .35rem; font-size: .9rem; }
 .verified.source-feedback a {
   text-decoration-line: underline;
   text-decoration-thickness: 1px;

@@ -33,7 +33,7 @@ test.describe('aviso de corrección en la ficha', () => {
     const fuentes = page.locator('section.sources');
     const link = fuentes.getByRole('link', { name: 'Avísanos', exact: true });
     await expect(page.getByRole('link', { name: 'Avísanos', exact: true })).toHaveCount(1);
-    await expect(fuentes.locator('.source-feedback')).toHaveText('¿Ves algún error o cambio? Avísanos.');
+    await expect(fuentes.locator('.source-feedback')).toHaveText('¿Ves algún error o cambio? Avísanos');
     await expect(link).toHaveAttribute('data-event-feedback', 'after_sources');
 
     const href = await link.getAttribute('href');
@@ -65,6 +65,18 @@ test.describe('aviso de corrección en la ficha', () => {
     ]);
     expect(verifiedBox && feedbackBox && shareBox && ctaBox).toBeTruthy();
     expect(feedbackBox!.y).toBeGreaterThan(verifiedBox!.y + verifiedBox!.height - 1);
+    const typeSize = await page.evaluate(() => {
+      const verified = getComputedStyle(document.querySelector('.sources .verified:not(.source-feedback)')!);
+      const feedback = getComputedStyle(document.querySelector('.sources .source-feedback')!);
+      const body = getComputedStyle(document.body);
+      return {
+        verified: parseFloat(verified.fontSize),
+        feedback: parseFloat(feedback.fontSize),
+        body: parseFloat(body.fontSize),
+      };
+    });
+    expect(typeSize.feedback).toBeGreaterThan(typeSize.verified);
+    expect(typeSize.feedback).toBeLessThan(typeSize.body);
     expect(feedbackBox!.y).toBeGreaterThan(shareBox!.y);
     expect(feedbackBox!.y).toBeGreaterThan(ctaBox!.y);
     await expect(page.locator('.event-actions').getByRole('link', { name: 'Avísanos' })).toHaveCount(0);
