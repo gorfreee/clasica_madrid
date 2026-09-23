@@ -35,6 +35,11 @@ function googleLinks(page: Page) {
   return page.locator('[data-calendar-method="google_calendar"]');
 }
 
+/** Une las continuaciones RFC 5545 (`CRLF` + espacio) para leer propiedades plegadas. */
+function unfoldIcs(value: string): string {
+  return value.replaceAll('\r\n ', '').replaceAll('\r\n\t', '');
+}
+
 test.describe('añadir al calendario', () => {
   test('una función enlaza Google y el .ics sin competir con las entradas', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
@@ -98,19 +103,23 @@ test.describe('añadir al calendario', () => {
     expect(response.ok()).toBe(true);
     const body = (await response.body()).toString('utf8');
     expect(body.replaceAll('\r\n', '')).not.toContain('\n');
-    expect(body).toContain('BEGIN:VCALENDAR');
-    expect(body).toContain(`UID:${SINGLE_OCCURRENCE}@clasicamadrid.com`);
-    expect(body).toContain('DTSTART:20270306T183000Z');
-    expect(body).not.toContain('DTEND');
-    expect(body).not.toContain('<');
-    expect(body).not.toContain('&amp;');
-    expect(body).not.toContain('undefined');
-    expect(body).not.toContain('null');
-    expect(body).toContain('utm_source=ics');
-    expect(body).toContain('utm_medium=calendar');
-    expect(body).toContain('Príncipe de Vergara');
-    expect(body).not.toContain('Clásica Madrid\r\n');
-    expect(body).toContain('SUMMARY:Excelentia. Vivaldi & Paganini');
+    for (const line of body.split('\r\n')) {
+      expect(Buffer.byteLength(line, 'utf8')).toBeLessThanOrEqual(75);
+    }
+    const unfolded = unfoldIcs(body);
+    expect(unfolded).toContain('BEGIN:VCALENDAR');
+    expect(unfolded).toContain(`UID:${SINGLE_OCCURRENCE}@clasicamadrid.com`);
+    expect(unfolded).toContain('DTSTART:20270306T183000Z');
+    expect(unfolded).not.toContain('DTEND');
+    expect(unfolded).not.toContain('<');
+    expect(unfolded).not.toContain('&amp;');
+    expect(unfolded).not.toContain('undefined');
+    expect(unfolded).not.toContain('null');
+    expect(unfolded).toContain('utm_source=ics');
+    expect(unfolded).toContain('utm_medium=calendar');
+    expect(unfolded).toContain('Príncipe de Vergara');
+    expect(unfolded).toContain('SUMMARY:Excelentia. Vivaldi & Paganini');
+    expect(unfolded.split('\r\n').find((line) => line.startsWith('SUMMARY:'))).not.toContain('Clásica Madrid');
 
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(SINGLE);
