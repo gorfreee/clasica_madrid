@@ -892,6 +892,11 @@ a.eyebrow:focus-visible {
 .source-list span, .verified { color: var(--muted); }
 .verified { margin: 1rem 0 0; }
 .verified.source-feedback { margin-top: .35rem; }
+.verified.source-feedback a {
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: .15em;
+}
 .venue-detail__practical {
   position: relative;
   z-index: 1;
