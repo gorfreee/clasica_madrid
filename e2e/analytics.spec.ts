@@ -304,7 +304,7 @@ test.describe('analítica de producto', () => {
     expect(context.page_type).toBe('contact');
 
     await page.getByLabel('Nombre (opcional)').fill('Ana');
-    await page.getByLabel('Email', { exact: true }).fill('ana@example.com');
+    await page.getByLabel('Email (opcional)').fill('ana@example.com');
     await page.getByLabel('Motivo').selectOption('Corrección');
     await page.getByRole('textbox', { name: 'Mensaje', exact: true }).fill('Hay una hora incorrecta.');
     await page.getByRole('button', { name: 'Enviar mensaje' }).click();
@@ -407,7 +407,7 @@ test.describe('analítica de producto', () => {
     );
     await expect(page.getByLabel('Motivo')).toHaveValue('Corrección');
     await page.getByLabel('Nombre (opcional)').fill('Ana');
-    await page.getByLabel('Email', { exact: true }).fill('ana@example.com');
+    await page.getByLabel('Email (opcional)').fill('ana@example.com');
     await page.getByRole('textbox', { name: 'Mensaje', exact: true }).fill('Hay una hora incorrecta.');
     await page.getByRole('button', { name: 'Enviar mensaje' }).click();
     await expect(page.getByRole('status')).toContainText('No hemos podido enviar');

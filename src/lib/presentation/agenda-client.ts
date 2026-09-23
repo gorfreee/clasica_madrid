@@ -20,6 +20,9 @@
  * - `[data-upcoming-count]` — total upcoming occurrences at build time
  * - `[data-agenda-list]` — occurrence list
  * - `[data-agenda-day]` — day group (hidden when every child is hidden)
+ * - `[data-agenda-channel]` — optional inline channel note between days.
+ *   Hidden while filters are active. Rendered by `AgendaList`, not rebuilt
+ *   after the full-agenda fetch.
  * - `[data-occurrence-id]` — occurrence article; value is occurrenceId
  * - `[data-result-count]` — live result count (always over the full catalog)
  * - `[data-no-results]` — empty-filter state
@@ -42,6 +45,7 @@ import {
   planAgendaAnalytics,
   type AgendaInteraction,
 } from '../analytics/agenda-actions.ts';
+import { initWhatsAppChannelTracking } from '../analytics/browser.ts';
 import { emitAgendaAnalytics } from '../analytics/product.ts';
 import { syncResultsEnd } from '../analytics/list-end.ts';
 import {
@@ -352,6 +356,8 @@ function apply(): void {
     }
     marker.hidden = !hasVisibleDay;
   }
+  const channel = list.querySelector<HTMLElement>('[data-agenda-channel]');
+  if (channel) channel.hidden = active;
 
   if (runtime.count) {
     const displayed = active ? matching.size : runtime.upcomingTotal;
@@ -467,6 +473,7 @@ async function loadFullAgenda(state: AgendaRuntime): Promise<boolean> {
     // the viewport down (scroll anchoring keeps that button in place).
     if (state.userExpanded) preservingAgendaViewport(state.root, insertFullList);
     else insertFullList();
+    initWhatsAppChannelTracking(imported);
     state.dataNode.textContent = JSON.stringify(parsed.items);
     state.items = parsed.items;
     state.fullLoaded = true;

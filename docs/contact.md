@@ -5,6 +5,12 @@ same-origin a `functions/api/contacto.ts`, una Cloudflare Pages Function sin
 persistencia. La Function valida el payload, verifica Turnstile y llama directamente
 a la REST API de Cloudflare Email Service.
 
+El email del visitante es opcional. Si falta, o solo contiene espacios, el mensaje
+se envía igual y la llamada a Email Service no incluye `reply_to`. Un email no vacío
+con formato inválido se rechaza y no se envía. Cuando el email es válido, ese valor
+se usa como `reply_to` y aparece en el cuerpo del aviso; no se sustituye por una
+dirección ficticia.
+
 La recepción directa de `hola@clasicamadrid.com` se configura fuera de esta repo con
 Cloudflare Email Routing.
 

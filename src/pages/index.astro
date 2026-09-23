@@ -42,7 +42,7 @@ const model = await loadAgendaPage(Astro.url);
           data-upcoming-count={model.upcomingCount}
           data-agenda-complete={model.hasMoreOccurrences ? undefined : ''}
         >
-          <AgendaList days={model.days} />
+          <AgendaList days={model.days} inlineChannel />
           {
             model.hasMoreOccurrences && (
               <div class="agenda-more" data-agenda-more>

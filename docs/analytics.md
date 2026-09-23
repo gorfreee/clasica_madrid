@@ -80,13 +80,18 @@ está, la llamada no hace nada y no se espera.
 | `directions_clicked` | Clic en la dirección, que abre Google Maps. No hay un botón «Cómo llegar» | `venue_id`, `venue_name`, `origin`, `provider` (`google_maps`) | Intención de asistencia |
 | `result_list_exhausted` | El final visible de una lista, una vez por estado de resultados ya estabilizado. Otro filtro o búsqueda puede volver a contarlo. En Lugares, las teclas intermedias no son un estado | `surface`, `results_count`, `active_filter_count`, `has_search_query`, `quick_filter` | Si la gente recorre la lista |
 | `share_clicked` | Compartir una ficha de concierto (nativo, WhatsApp o enlace copiado) | `event_id`, `event_title`, `channel` | Difusión de un concierto |
-| `whatsapp_channel_clicked` | Clic en el enlace al canal oficial de WhatsApp desde el footer o Acerca de | `placement` (`footer` o `about`), `page_type` (contexto de la página actual) | Medir interés por el canal y atribuir el clic a la ubicación del CTA |
+| `whatsapp_channel_clicked` | Clic en el enlace al canal oficial de WhatsApp | `placement` (`footer`, `about` o `agenda_inline`), `page_type` (contexto de la página actual) | Medir interés por el canal y atribuir el clic a la superficie del CTA |
 | `event_feedback_clicked` | Clic en «Avísanos», al final de Fuentes en una ficha de concierto. No espera a PostHog ni retrasa la ida a `/contacto/` | `event_id`, `event_title` si existe, `placement` (`after_sources`) | Aviso de un error o cambio en la ficha, sin datos personales |
 | `contact_submitted` | El `POST /api/contacto` respondió bien. No al pulsar el botón | `surface` (`contact`), `topic` si el motivo es uno de los cuatro valores del formulario. Si el envío conserva un contexto válido de ficha, también `origin` (`event_feedback`) y `event_id` | Contacto útil, sin datos personales |
 | `content_shared` | Ya existía. Sigue registrando el compartir de conciertos y de lugares | `method`, `content_type`, `path` | Atribución del enlace compartido, también en lugares |
 
 `whatsapp_channel_clicked` mide el clic de salida hacia WhatsApp. No implica que
-la persona haya terminado siguiendo el canal.
+la persona haya terminado siguiendo el canal. `placement` nombra la superficie
+estable: `footer` en el pie, `about` en Acerca de y `agenda_inline` en la nota
+editorial de la agenda de la portada. Ese último valor no codifica un número de
+conciertos ni una posición fija; si el corte entre días cambia, el `placement`
+sigue igual. La nota solo está en `/`. No se envía la URL del canal y no hay un
+evento de impresión.
 
 `event_feedback_clicked` mide el clic en «Avísanos». No implica que el mensaje
 se haya enviado: eso sigue siendo `contact_submitted`, y solo después de un

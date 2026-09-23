@@ -29,7 +29,7 @@ export const WHATSAPP_CHANNEL_CLICKED = 'whatsapp_channel_clicked';
 export const EVENT_FEEDBACK_PLACEMENTS = ['after_sources'] as const;
 export type EventFeedbackPlacement = (typeof EVENT_FEEDBACK_PLACEMENTS)[number];
 
-export const WHATSAPP_CHANNEL_PLACEMENTS = ['footer', 'about'] as const;
+export const WHATSAPP_CHANNEL_PLACEMENTS = ['footer', 'about', 'agenda_inline'] as const;
 export type WhatsAppChannelPlacement = (typeof WHATSAPP_CHANNEL_PLACEMENTS)[number];
 
 export function isWhatsAppChannelPlacement(value: string | undefined): value is WhatsAppChannelPlacement {

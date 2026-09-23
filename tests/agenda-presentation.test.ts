@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  agendaInlineChannelBreak,
   agendaItemPeopleLine,
   agendaItemSignal,
   buildAgendaPageModel,
@@ -80,6 +81,65 @@ function largeUpcomingCatalog(
   }
   return makeCatalog({ venues, events });
 }
+
+function daysWithCounts(counts: number[]): { items: unknown[] }[] {
+  return counts.map((count) => ({ items: Array.from({ length: count }, () => ({})) }));
+}
+
+function occurrencesBeforeBreak(counts: number[], index: number): number {
+  return counts.slice(0, index + 1).reduce((sum, count) => sum + count, 0);
+}
+
+describe('nota de WhatsApp en la agenda', () => {
+  it('elige el día completo más cercano a 10 y no parte un día', () => {
+    const early = daysWithCounts([3, 3, 3, 5, 2]);
+    expect(agendaInlineChannelBreak(early)).toBe(2);
+    expect(occurrencesBeforeBreak([3, 3, 3, 5, 2], 2)).toBe(9);
+
+    const later = daysWithCounts([4, 3, 4, 2]);
+    expect(agendaInlineChannelBreak(later)).toBe(2);
+    expect(occurrencesBeforeBreak([4, 3, 4, 2], 2)).toBe(11);
+  });
+
+  it('si 8 y 12 empatan, se queda con el corte anterior', () => {
+    expect(agendaInlineChannelBreak(daysWithCounts([8, 4, 3]))).toBe(0);
+    expect(occurrencesBeforeBreak([8, 4, 3], 0)).toBe(8);
+  });
+
+  it('un día vacío no cuenta y no adelanta el corte', () => {
+    expect(agendaInlineChannelBreak(daysWithCounts([0, 3, 3, 3, 5, 2]))).toBe(3);
+    expect(occurrencesBeforeBreak([0, 3, 3, 3, 5, 2], 3)).toBe(9);
+  });
+
+  it('si ningún día cae entre 8 y 12, usa el límite completo que ya llegó a 8', () => {
+    expect(agendaInlineChannelBreak(daysWithCounts([6, 8, 12]))).toBe(1);
+    expect(occurrencesBeforeBreak([6, 8, 12], 1)).toBe(14);
+    expect(agendaInlineChannelBreak(daysWithCounts([7, 6, 4]))).toBe(1);
+    expect(occurrencesBeforeBreak([7, 6, 4], 1)).toBe(13);
+  });
+
+  it('no muestra la nota si no cabe entre días con suficientes conciertos', () => {
+    expect(agendaInlineChannelBreak(daysWithCounts([2, 2, 1]))).toBeNull();
+    expect(agendaInlineChannelBreak(daysWithCounts([20]))).toBeNull();
+    expect(agendaInlineChannelBreak(daysWithCounts([9]))).toBeNull();
+    expect(agendaInlineChannelBreak([])).toBeNull();
+  });
+
+  it('el recorte inicial y la agenda completa comparten el mismo corte', () => {
+    const catalog = largeUpcomingCatalog(160, { extraOnCutoff: 3 });
+    const home = buildAgendaPageModel(catalog, new URL('https://clasicamadrid.com/'), testClock);
+    const full = buildFullAgendaFragmentModel(catalog, testClock);
+    const homeBreak = agendaInlineChannelBreak(home.days);
+    const fullBreak = agendaInlineChannelBreak(full.days);
+    expect(homeBreak).not.toBeNull();
+    expect(fullBreak).toBe(homeBreak);
+    const seen = home.days.slice(0, (homeBreak ?? 0) + 1).reduce((sum, day) => sum + day.items.length, 0);
+    expect(seen).toBeGreaterThanOrEqual(8);
+    expect(seen).toBeLessThanOrEqual(12);
+    const fullSeen = full.days.slice(0, (fullBreak ?? 0) + 1).reduce((sum, day) => sum + day.items.length, 0);
+    expect(fullSeen).toBe(seen);
+  });
+});
 
 describe('selección inicial de la agenda', () => {
   it('devuelve todo el catálogo cuando no supera el límite', () => {

@@ -31,27 +31,34 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
         method="post"
         data-contact-form
       >
-        <div class="contact-form__field">
-          <label for="contact-name">Nombre <span>(opcional)</span></label>
-          <input
-            id="contact-name"
-            name="nombre"
-            type="text"
-            autocomplete="name"
-            maxlength="100"
-          />
-        </div>
+        <div class="contact-form__pair">
+          <div class="contact-form__field">
+            <label for="contact-name">Nombre <span>(opcional)</span></label>
+            <input
+              id="contact-name"
+              name="nombre"
+              type="text"
+              autocomplete="name"
+              maxlength="100"
+              placeholder="Tu nombre"
+            />
+          </div>
 
-        <div class="contact-form__field">
-          <label for="contact-email">Email</label>
-          <input
-            id="contact-email"
-            name="email"
-            type="email"
-            autocomplete="email"
-            maxlength="254"
-            required
-          />
+          <div class="contact-form__field">
+            <label for="contact-email">Email <span>(opcional)</span></label>
+            <input
+              id="contact-email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              maxlength="254"
+              placeholder="tu@email.com"
+              aria-describedby="contact-email-help"
+            />
+            <p id="contact-email-help" class="contact-form__help">
+              Si quieres recibir una respuesta, déjanos tu email.
+            </p>
+          </div>
         </div>
 
         <div class="contact-form__field">
@@ -65,7 +72,7 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
           </select>
         </div>
 
-        <div class="contact-form__field">
+        <div class="contact-form__field contact-form__field--wide">
           <label for="contact-message">Mensaje</label>
           <textarea
             id="contact-message"
@@ -73,6 +80,7 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
             rows="8"
             maxlength="5000"
             required
+            placeholder="Cuéntanos en qué podemos ayudarte…"
           ></textarea>
         </div>
 
@@ -332,12 +340,17 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
     margin-top: 2rem;
   }
 
+  .contact-form__pair {
+    display: contents;
+  }
+
   .contact-form__field {
     display: grid;
+    align-content: start;
     gap: .5rem;
   }
 
-  .contact-form__field:nth-of-type(4),
+  .contact-form__field--wide,
   .contact-form__turnstile,
   .contact-form__privacy,
   .contact-form__actions,
@@ -383,6 +396,12 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
     resize: vertical;
   }
 
+  .contact-form input::placeholder,
+  .contact-form textarea::placeholder {
+    color: var(--muted);
+    opacity: 1;
+  }
+
   .contact-form input:focus,
   .contact-form select:focus,
   .contact-form textarea:focus {
@@ -402,6 +421,7 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
     min-height: 4.1rem;
   }
 
+  .contact-form__help,
   .contact-form__privacy,
   .contact-form__status,
   .contact-form__noscript {
@@ -469,10 +489,25 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
     }
   }
 
+  @media (min-width: 621px) {
+    .contact-form__pair {
+      display: grid;
+      grid-column: 1 / -1;
+      grid-template-columns: subgrid;
+      grid-template-rows: auto auto auto;
+      row-gap: .5rem;
+    }
+
+    .contact-form__pair > .contact-form__field {
+      grid-template-rows: subgrid;
+      grid-row: span 3;
+      gap: 0;
+    }
+  }
+
   @media (max-width: 620px) {
     .contact-form { grid-template-columns: 1fr; gap: 1.15rem; }
     .contact-form__field,
-    .contact-form__field:nth-of-type(4),
     .contact-form__turnstile,
     .contact-form__privacy,
     .contact-form__actions,
