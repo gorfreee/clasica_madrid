@@ -1621,12 +1621,40 @@ describe('parser de ficha Teatro Real', () => {
     expect(facts.description).toMatch(/orquesta sinfónica/);
     expect(facts.programText).toMatch(/Sleigh Ride/);
     expect(facts.performers).toEqual([
-      { name: 'ORQUESTA CLÁSICA SANTA CECILIA' },
+      { name: 'ORQUESTA CLÁSICA SANTA CECILIA', roleText: 'orquesta' },
       { name: 'Kynan Johns', roleText: 'director' },
       { name: 'Francesco Castoro', roleText: 'tenor' },
     ]);
     expect(facts.works).toEqual([]);
     expect(facts.composers).toEqual([]);
+  });
+
+  it('extrae el reparto actual cuando Teatro Real publica cada crédito en un párrafo', () => {
+    const html = `
+      <div class="wrap-content-hero">
+        <h4>Conciertos</h4>
+        <h1>Xabier Anduaga</h1>
+      </div>
+      <div class="back-image"></div>
+      <section class="text-intro-show">
+        <div class="wrap-text-free collapsible-mobile">
+          <p>Arias de óperas de Giuseppe Verdi, Gaetano Donizetti, Charles Gounod y Jules Massenet.</p>
+          <hr />
+          <p><strong>Xabier Anduaga</strong>, tenor</p>
+          <p><strong>Julio García Vico</strong>, dirección musical</p>
+          <p><strong>Orquesta Titular del Teatro Real</strong></p>
+          <hr />
+          <p><strong>Programa musical</strong></p>
+          <div class="text-collapsible-cover"></div>
+        </div>
+      </section>
+    `;
+    const facts = parseTeatroRealDetail(html);
+    expect(facts.performers).toEqual([
+      { name: 'Xabier Anduaga', roleText: 'tenor' },
+      { name: 'Julio García Vico', roleText: 'dirección musical' },
+      { name: 'Orquesta Titular del Teatro Real', roleText: 'orquesta' },
+    ]);
   });
 
   it('si la ficha pospone el concierto, usa la fecha nueva y no la original', () => {

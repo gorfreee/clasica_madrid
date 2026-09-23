@@ -24,6 +24,12 @@ export type EventIdentityAlias = {
  */
 export const EVENT_IDENTITY_ALIASES: readonly EventIdentityAlias[] = [
   {
+    eventId: 'evt_auditorio_nacional_orcam_sinfonico_11_final_del_viaje',
+    catalogSourceId: 'src_fundacion_orcam',
+    externalId: '4861',
+    url: 'https://fundacionorcam.org/conciertos/2026-27/final-del-viaje/',
+  },
+  {
     eventId: 'evt_excelentia_chaikovsky_sibelius_20260930',
     catalogSourceId: 'src_auditorio_nacional',
     externalId: 'excelentia-violin-chaikovsky-y-sinfonia-2-sibelius',

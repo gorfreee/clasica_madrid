@@ -11,7 +11,7 @@ import { runIngest } from '../src/ingestion/pipeline.ts';
 import { mergeCandidateBatch } from '../src/ingestion/batch.ts';
 import { matchEventIdentity, newObservationKeys } from '../src/ingestion/identity.ts';
 import { emptyCatalog, type Catalog } from '../src/lib/domain/catalog.ts';
-import type { AdapterContext } from '../src/ingestion/types.ts';
+import type { AdapterContext, AdapterDiscardReport } from '../src/ingestion/types.ts';
 import { TEST_NOW, TEST_WINDOW } from './helpers.ts';
 
 const source = getSourceDefinition(adapter.id);
@@ -33,10 +33,22 @@ async function smallListing() {
 
 describe('ORCAM official calendar', () => {
   it('reads the entire calendar with stable CMS IDs, real local dates and only observed facts', async () => {
-    const events = await adapter.extract(await fixture('listing'), listingUrl, ctx);
-    expect(events).toHaveLength(18);
+    const discards: AdapterDiscardReport[] = [];
+    const events = await adapter.extract(await fixture('listing'), listingUrl, {
+      ...ctx,
+      reportDiscard: (discard) => discards.push(discard),
+    });
+    expect(events).toHaveLength(17);
     expect(events.every((e) => e.sourceUrl.startsWith('https://fundacionorcam.org/conciertos/2026-27/'))).toBe(true);
-    expect(new Set(events.map((e) => e.externalId)).size).toBe(18);
+    expect(new Set(events.map((e) => e.externalId)).size).toBe(17);
+    expect(events.some((event) => event.externalId === '4861')).toBe(false);
+    expect(discards).toEqual([
+      expect.objectContaining({
+        externalId: '4861',
+        reason: 'stale-conflicting-schedule',
+        title: 'Final del viaje',
+      }),
+    ]);
     const first = events.find((e) => e.externalId === '4840')!;
     expect(first.observed).toMatchObject({ title: 'La creación de un todo', categoryText: 'Ciclo Sinfónico, Proyecto Educativo', occurrences: [], composers: [], performers: [], works: [] });
     expect(first.listingDateText).toBe('6 octubre 2026 · 19:30h');
@@ -235,6 +247,44 @@ describe('ORCAM pipeline safety', () => {
       kind: 'matched',
       method: 'externalId',
       event: { id: 'evt_auditorio_nacional_orcam_sinfonico_13_geometrias_sonoras' },
+    });
+  });
+
+  it('absorbs ORCAM 4861 into the canonical Auditorio event without accepting its stale date', async () => {
+    const catalog = emptyCatalog();
+    catalog.events = [
+      JSON.parse(
+        await readFile(
+          path.join(
+            import.meta.dirname,
+            '..',
+            'data',
+            'events',
+            'evt_auditorio_nacional_orcam_sinfonico_11_final_del_viaje.json',
+          ),
+          'utf8',
+        ),
+      ),
+    ];
+    const events = await adapter.extract(await fixture('listing'), listingUrl, ctx);
+    expect(events.some((event) => event.externalId === '4861')).toBe(false);
+
+    const identity = matchEventIdentity(
+      catalog,
+      {
+        sourceUrl: 'https://fundacionorcam.org/conciertos/2026-27/final-del-viaje/',
+        externalId: '4861',
+        title: 'Final del viaje',
+        occurrences: [{ date: '2027-05-10', time: '19:30' }],
+      },
+      {
+        catalogSourceId: source.catalogSourceId,
+        venueId: 'ven_auditorio_nacional_sala_sinfonica',
+      },
+    );
+    expect(identity).toMatchObject({
+      kind: 'matched',
+      event: { id: 'evt_auditorio_nacional_orcam_sinfonico_11_final_del_viaje' },
     });
   });
 

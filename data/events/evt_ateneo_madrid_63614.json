@@ -32,17 +32,19 @@
     }
   ],
   "eras": [],
-  "formats": [],
+  "formats": [
+    "recital"
+  ],
   "kind": "alternative",
   "access": "unknown",
   "citations": [
     {
       "sourceId": "src_ateneo_madrid",
       "url": "https://ateneodemadrid.com/evento/de-cadiz-a-la-habana",
-      "checkedAt": "2026-09-15",
+      "checkedAt": "2026-09-23",
       "externalId": "63614"
     }
   ],
   "primarySourceId": "src_ateneo_madrid",
-  "lastVerifiedAt": "2026-09-15"
+  "lastVerifiedAt": "2026-09-23"
 }
