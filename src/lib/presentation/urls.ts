@@ -1,3 +1,4 @@
+import { EVENT_FEEDBACK_MOTIVO, EVENT_FEEDBACK_ORIGIN } from '../contact/event-feedback.ts';
 import { SITE_ORIGIN } from './constants.ts';
 
 /**
@@ -50,6 +51,21 @@ export const AGENDA_PATH = '/';
 export const VENUES_INDEX_PATH = publicPath('/lugares');
 export const ABOUT_PATH = publicPath('/acerca-de');
 export const CONTACT_PATH = publicPath('/contacto');
+
+/**
+ * Abre el formulario de contacto para avisar de un error en una ficha.
+ * La query solo lleva identificadores públicos del catálogo.
+ */
+export function eventFeedbackPath(eventId: string, eventSlug: string): string {
+  const params = new URLSearchParams({
+    motivo: EVENT_FEEDBACK_MOTIVO,
+    event_id: eventId,
+    event_slug: eventSlug,
+    origin: EVENT_FEEDBACK_ORIGIN,
+  });
+  return `${CONTACT_PATH}?${params.toString()}`;
+}
+
 /** Internal prerendered fragment with the full upcoming agenda. Not in the sitemap. */
 export const FULL_AGENDA_FRAGMENT_PATH = publicPath('/_agenda/completa');
 

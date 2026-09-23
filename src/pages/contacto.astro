@@ -137,6 +137,15 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
 
 <script>
   import { trackContactSubmitted } from '../lib/analytics/product.ts';
+  import { parseEventFeedbackSearch } from '../lib/contact/event-feedback.ts';
+
+  const eventFeedback = (() => {
+    try {
+      return parseEventFeedbackSearch(window.location.search);
+    } catch {
+      return null;
+    }
+  })();
 
   type TurnstileOptions = {
     sitekey: string;
@@ -170,6 +179,10 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
   if (form && submit && status && tokenInput && turnstileContainer) {
     let sending = false;
     let widgetId: string | undefined;
+    const reason = form.querySelector<HTMLSelectElement>('#contact-reason');
+    if (eventFeedback && reason?.querySelector('option[value="Corrección"]')) {
+      reason.value = 'Corrección';
+    }
 
     const setStatus = (message: string, kind: 'idle' | 'success' | 'error' = 'idle') => {
       status.textContent = message;
@@ -253,6 +266,11 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
         for (const [key, value] of new FormData(form)) {
           if (typeof value === 'string') body.append(key, value);
         }
+        if (eventFeedback) {
+          body.set('origin', eventFeedback.origin);
+          body.set('event_id', eventFeedback.eventId);
+          body.set('event_slug', eventFeedback.eventSlug);
+        }
 
         const response = await fetch(form.action, {
           method: 'POST',
@@ -269,7 +287,11 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
 
         const topic = new FormData(form).get('motivo');
         try {
-          trackContactSubmitted({ topic: typeof topic === 'string' ? topic : undefined });
+          trackContactSubmitted({
+            topic: typeof topic === 'string' ? topic : undefined,
+            origin: eventFeedback?.origin,
+            event_id: eventFeedback?.eventId,
+          });
         } catch {
           // A failed analytics call must not turn a successful send into an error.
         }

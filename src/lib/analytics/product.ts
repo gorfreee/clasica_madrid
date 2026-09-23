@@ -1,3 +1,4 @@
+import { cleanEventId, EVENT_FEEDBACK_ORIGIN } from '../contact/event-feedback.ts';
 import type { AccessMode, Format } from '../schemas/taxonomies.ts';
 import type { ShareMethod } from '../presentation/share.ts';
 import {
@@ -23,7 +24,11 @@ export const RESULT_LIST_EXHAUSTED = 'result_list_exhausted';
 export const SHARE_CLICKED = 'share_clicked';
 export const CALENDAR_ADD_CLICKED = 'calendar_add_clicked';
 export const CONTACT_SUBMITTED = 'contact_submitted';
+export const EVENT_FEEDBACK_CLICKED = 'event_feedback_clicked';
 export const WHATSAPP_CHANNEL_CLICKED = 'whatsapp_channel_clicked';
+
+export const EVENT_FEEDBACK_PLACEMENTS = ['after_sources'] as const;
+export type EventFeedbackPlacement = (typeof EVENT_FEEDBACK_PLACEMENTS)[number];
 
 export const WHATSAPP_CHANNEL_PLACEMENTS = ['footer', 'about', 'agenda_inline'] as const;
 export type WhatsAppChannelPlacement = (typeof WHATSAPP_CHANNEL_PLACEMENTS)[number];
@@ -299,6 +304,27 @@ export function trackCalendarAddClicked(
   );
 }
 
+/**
+ * Clic en «Avísanos» dentro de Fuentes. No incluye la URL ni datos personales.
+ * Un `placement` desconocido no emite el evento.
+ */
+export function trackEventFeedbackClicked(
+  input: { event_id?: string; event_title?: string; placement?: string },
+  capture: AnalyticsCapture | null = defaultCapture(),
+): void {
+  const eventId = cleanEventId(input.event_id);
+  if (!eventId || !isEventFeedbackPlacement(input.placement)) return;
+  captureAnalytics(
+    EVENT_FEEDBACK_CLICKED,
+    definedProperties({
+      event_id: eventId,
+      event_title: limitTitle(input.event_title),
+      placement: input.placement,
+    }),
+    capture,
+  );
+}
+
 export function trackWhatsAppChannelClicked(
   input: { placement: WhatsAppChannelPlacement; page_type: PageType },
   capture: AnalyticsCapture | null = defaultCapture(),
@@ -312,17 +338,22 @@ export function trackWhatsAppChannelClicked(
 /**
  * Successful contact submit only. The payload is built field by field so a
  * wider object passed by mistake cannot carry name, email, or message.
+ * `origin` y `event_id` solo se añaden juntos, y solo con un contexto de ficha válido.
  */
 export function trackContactSubmitted(
-  input: { topic?: string },
+  input: { topic?: string; origin?: string; event_id?: string },
   capture: AnalyticsCapture | null = defaultCapture(),
 ): void {
   const topic = isContactTopic(input.topic) ? input.topic : undefined;
+  const eventId = cleanEventId(input.event_id);
+  const origin = input.origin === EVENT_FEEDBACK_ORIGIN && eventId ? EVENT_FEEDBACK_ORIGIN : undefined;
   captureAnalytics(
     CONTACT_SUBMITTED,
     definedProperties({
       surface: 'contact',
       topic,
+      origin,
+      event_id: origin ? eventId : undefined,
     }),
     capture,
   );
@@ -330,6 +361,10 @@ export function trackContactSubmitted(
 
 export function isContactTopic(value: string | undefined): value is ContactTopic {
   return typeof value === 'string' && (CONTACT_TOPICS as readonly string[]).includes(value);
+}
+
+export function isEventFeedbackPlacement(value: string | undefined): value is EventFeedbackPlacement {
+  return typeof value === 'string' && (EVENT_FEEDBACK_PLACEMENTS as readonly string[]).includes(value);
 }
 
 export function destinationDomain(href: string): string | undefined {

@@ -82,7 +82,8 @@ está, la llamada no hace nada y no se espera.
 | `share_clicked` | Compartir una ficha de concierto (nativo, WhatsApp o enlace copiado) | `event_id`, `event_title`, `channel` | Difusión de un concierto |
 | `calendar_add_clicked` | Elige Google Calendar o el archivo .ics. No al abrir el menú ni al escoger la fecha | `event_id`, `event_title`, `occurrence_id`, `method` (`google_calendar` o `ics`), `has_confirmed_time` | Guardar una función concreta |
 | `whatsapp_channel_clicked` | Clic en el enlace al canal oficial de WhatsApp | `placement` (`footer`, `about` o `agenda_inline`), `page_type` (contexto de la página actual) | Medir interés por el canal y atribuir el clic a la superficie del CTA |
-| `contact_submitted` | El `POST /api/contacto` respondió bien. No al pulsar el botón | `surface` (`contact`), `topic` si el motivo es uno de los cuatro valores del formulario | Contacto útil, sin datos personales |
+| `event_feedback_clicked` | Clic en «Avísanos», al final de Fuentes en una ficha de concierto. No espera a PostHog ni retrasa la ida a `/contacto/` | `event_id`, `event_title` si existe, `placement` (`after_sources`) | Aviso de un error o cambio en la ficha, sin datos personales |
+| `contact_submitted` | El `POST /api/contacto` respondió bien. No al pulsar el botón | `surface` (`contact`), `topic` si el motivo es uno de los cuatro valores del formulario. Si el envío conserva un contexto válido de ficha, también `origin` (`event_feedback`) y `event_id` | Contacto útil, sin datos personales |
 | `content_shared` | Ya existía. Sigue registrando el compartir de conciertos y de lugares | `method`, `content_type`, `path` | Atribución del enlace compartido, también en lugares |
 
 `calendar_add_clicked` no incluye la descripción, la dirección, la URL ni el contenido del .ics. El retorno desde el calendario se lee en el pageview: la cita guarda `utm_source=google_calendar` o `utm_source=ics` con `utm_medium=calendar`. Esas query no están en el canonical, el sitemap ni la navegación interna. No es una suscripción: importar el archivo no actualiza la cita si el concierto cambia después.
@@ -94,6 +95,14 @@ editorial de la agenda de la portada. Ese último valor no codifica un número d
 conciertos ni una posición fija; si el corte entre días cambia, el `placement`
 sigue igual. La nota solo está en `/`. No se envía la URL del canal y no hay un
 evento de impresión.
+
+`event_feedback_clicked` mide el clic en «Avísanos». No implica que el mensaje
+se haya enviado: eso sigue siendo `contact_submitted`, y solo después de un
+`POST /api/contacto` correcto. Un contacto abierto directamente, o con una query
+incompleta o manipulada, no lleva `origin` ni `event_id`. Esas dos propiedades
+salen juntas y solo si el id tiene forma `evt_…`. El nombre, el email y el
+mensaje no entran en el evento. `event_id` aquí es el identificador público del
+catálogo, no una persona.
 
 `destination_type` sale de la interfaz real: `tickets` es el botón «Entradas e
 información oficial»; `source` es «Ver fuente original» o una cita no oficial;
@@ -138,6 +147,8 @@ y [configuración del SDK](https://posthog.com/docs/libraries/js/config).
 ## Privacidad
 
 No enviar emails, nombres, mensajes, tokens, IPs ni URLs externas con query.
+Tampoco la URL de `/contacto/` con su query: el clic de aviso lleva `event_id`
+y `placement`, no el enlace completo.
 La query del buscador de agenda y de lugares sí: es la búsqueda del producto.
 No usar cookies, `localStorage`, `sessionStorage` ni un id propio para analítica.
 No llamar a `posthog.identify()` para visitas anónimas.

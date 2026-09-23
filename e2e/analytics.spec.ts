@@ -329,4 +329,113 @@ test.describe('analítica de producto', () => {
     expect(JSON.stringify(submitted)).not.toContain('hora incorrecta');
     expect(JSON.stringify(submitted)).not.toContain('Ana');
   });
+
+  test('Avisarnos emite un único event_feedback_clicked', async ({ page }) => {
+    await page.addInitScript(() => {
+      const key = '__cm_analytics_test';
+      Object.defineProperty(window, 'posthog', {
+        configurable: true,
+        value: {
+          capture(event, properties) {
+            const calls = JSON.parse(sessionStorage.getItem(key) || '[]');
+            calls.push({ event, properties: { ...properties } });
+            sessionStorage.setItem(key, JSON.stringify(calls));
+          },
+        },
+      });
+    });
+
+    await page.goto('/eventos/andromeda-y-perseo-publico-general/');
+    await page.getByRole('link', { name: 'Avísanos', exact: true }).click();
+    await expect(page).toHaveURL(/\/contacto\/\?motivo=correccion&event_id=evt_andromeda_perseo_publico_2026/);
+    await expect(page.getByLabel('Motivo')).toHaveValue('Corrección');
+    await expect(page.getByRole('textbox', { name: 'Mensaje', exact: true })).toHaveValue('');
+
+    const calls = (await page.evaluate(() => {
+      return JSON.parse(sessionStorage.getItem('__cm_analytics_test') || '[]');
+    })) as AnalyticsCall[];
+    const clicked = calls.filter((call) => call.event === 'event_feedback_clicked');
+    expect(clicked).toHaveLength(1);
+    expect(clicked[0]?.properties).toEqual({
+      event_id: 'evt_andromeda_perseo_publico_2026',
+      event_title: 'Andrómeda y Perseo',
+      placement: 'after_sources',
+    });
+    const serialized = JSON.stringify(clicked);
+    expect(serialized).not.toContain('motivo=');
+    expect(serialized).not.toContain('http');
+    expect(serialized).not.toContain('@');
+  });
+
+  test('el aviso navega a contacto aunque PostHog falle', async ({ page }) => {
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    await page.addInitScript(() => {
+      Object.defineProperty(window, 'posthog', {
+        configurable: true,
+        value: {
+          capture() {
+            throw new Error('analytics down');
+          },
+        },
+      });
+    });
+    await page.goto('/eventos/andromeda-y-perseo-publico-general/');
+    await page.getByRole('link', { name: 'Avísanos', exact: true }).click();
+    await expect(page).toHaveURL(/\/contacto\/\?motivo=correccion/);
+    await expect(page.getByLabel('Motivo')).toHaveValue('Corrección');
+    expect(errors).toEqual([]);
+  });
+
+  test('un envío desde una ficha añade origin y event_id solo si el POST tiene éxito', async ({ page }) => {
+    await installAnalytics(page);
+    await page.route('https://challenges.cloudflare.com/turnstile/v0/api.js**', async (route) => {
+      await route.fulfill({
+        contentType: 'application/javascript',
+        body: `(() => { let callback; window.turnstile = { render(_el, options) { callback = options.callback; setTimeout(() => callback('e2e-token'), 0); return 'w'; }, reset() { setTimeout(() => callback && callback('e2e-token-2'), 0); } }; })();`,
+      });
+    });
+    await page.route('**/api/contacto', async (route) => {
+      await route.fulfill({
+        status: 502,
+        contentType: 'application/json',
+        body: JSON.stringify({ ok: false }),
+      });
+    });
+    await page.goto(
+      '/contacto/?motivo=correccion&event_id=evt_andromeda_perseo_publico_2026&event_slug=andromeda-y-perseo-publico-general&origin=event_feedback',
+    );
+    await expect(page.getByLabel('Motivo')).toHaveValue('Corrección');
+    await page.getByLabel('Nombre (opcional)').fill('Ana');
+    await page.getByLabel('Email (opcional)').fill('ana@example.com');
+    await page.getByRole('textbox', { name: 'Mensaje', exact: true }).fill('Hay una hora incorrecta.');
+    await page.getByRole('button', { name: 'Enviar mensaje' }).click();
+    await expect(page.getByRole('status')).toContainText('No hemos podido enviar');
+    expect(named(await analyticsCalls(page), 'contact_submitted')).toEqual([]);
+
+    await page.route('**/api/contacto', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ ok: true }),
+      });
+    });
+    const submit = page.getByRole('button', { name: 'Enviar mensaje' });
+    await expect(submit).toBeEnabled();
+    await submit.click();
+    await expect(page.getByRole('status')).toHaveText('Gracias. Tu mensaje se ha enviado.');
+    const submitted = named(await analyticsCalls(page), 'contact_submitted');
+    expect(submitted).toHaveLength(1);
+    expect(submitted[0]?.properties).toEqual({
+      surface: 'contact',
+      topic: 'Corrección',
+      origin: 'event_feedback',
+      event_id: 'evt_andromeda_perseo_publico_2026',
+    });
+    const serialized = JSON.stringify(submitted);
+    expect(serialized).not.toContain('ana@');
+    expect(serialized).not.toContain('hora incorrecta');
+    expect(serialized).not.toContain('Ana');
+    expect(serialized).not.toContain('andromeda-y-perseo');
+  });
 });
