@@ -81,11 +81,20 @@ está, la llamada no hace nada y no se espera.
 | `result_list_exhausted` | El final visible de una lista, una vez por estado de resultados ya estabilizado. Otro filtro o búsqueda puede volver a contarlo. En Lugares, las teclas intermedias no son un estado | `surface`, `results_count`, `active_filter_count`, `has_search_query`, `quick_filter` | Si la gente recorre la lista |
 | `share_clicked` | Compartir una ficha de concierto (nativo, WhatsApp o enlace copiado) | `event_id`, `event_title`, `channel` | Difusión de un concierto |
 | `whatsapp_channel_clicked` | Clic en el enlace al canal oficial de WhatsApp desde el footer o Acerca de | `placement` (`footer` o `about`), `page_type` (contexto de la página actual) | Medir interés por el canal y atribuir el clic a la ubicación del CTA |
-| `contact_submitted` | El `POST /api/contacto` respondió bien. No al pulsar el botón | `surface` (`contact`), `topic` si el motivo es uno de los cuatro valores del formulario | Contacto útil, sin datos personales |
+| `event_feedback_clicked` | Clic en «Avísanos», al final de Fuentes en una ficha de concierto. No espera a PostHog ni retrasa la ida a `/contacto/` | `event_id`, `event_title` si existe, `placement` (`after_sources`) | Aviso de un error o cambio en la ficha, sin datos personales |
+| `contact_submitted` | El `POST /api/contacto` respondió bien. No al pulsar el botón | `surface` (`contact`), `topic` si el motivo es uno de los cuatro valores del formulario. Si el envío conserva un contexto válido de ficha, también `origin` (`event_feedback`) y `event_id` | Contacto útil, sin datos personales |
 | `content_shared` | Ya existía. Sigue registrando el compartir de conciertos y de lugares | `method`, `content_type`, `path` | Atribución del enlace compartido, también en lugares |
 
 `whatsapp_channel_clicked` mide el clic de salida hacia WhatsApp. No implica que
 la persona haya terminado siguiendo el canal.
+
+`event_feedback_clicked` mide el clic en «Avísanos». No implica que el mensaje
+se haya enviado: eso sigue siendo `contact_submitted`, y solo después de un
+`POST /api/contacto` correcto. Un contacto abierto directamente, o con una query
+incompleta o manipulada, no lleva `origin` ni `event_id`. Esas dos propiedades
+salen juntas y solo si el id tiene forma `evt_…`. El nombre, el email y el
+mensaje no entran en el evento. `event_id` aquí es el identificador público del
+catálogo, no una persona.
 
 `destination_type` sale de la interfaz real: `tickets` es el botón «Entradas e
 información oficial»; `source` es «Ver fuente original» o una cita no oficial;
@@ -130,6 +139,8 @@ y [configuración del SDK](https://posthog.com/docs/libraries/js/config).
 ## Privacidad
 
 No enviar emails, nombres, mensajes, tokens, IPs ni URLs externas con query.
+Tampoco la URL de `/contacto/` con su query: el clic de aviso lleva `event_id`
+y `placement`, no el enlace completo.
 La query del buscador de agenda y de lugares sí: es la búsqueda del producto.
 No usar cookies, `localStorage`, `sessionStorage` ni un id propio para analítica.
 No llamar a `posthog.identify()` para visitas anónimas.

@@ -8,6 +8,7 @@ import {
   isWhatsAppChannelPlacement,
   onOutboundClick,
   trackDirectionsClicked,
+  trackEventFeedbackClicked,
   trackEventOpened,
   trackOutboundEventClick,
   trackVenueOpened,
@@ -59,6 +60,7 @@ export function publishVenueOpened(
 export function initEventAnalytics(): void {
   publishEventOpened(readPageAnalytics(), document.referrer, window.location.href);
   bindOutboundLinks(document);
+  bindEventFeedbackLinks(document);
 }
 
 export function initVenueAnalytics(): void {
@@ -78,6 +80,25 @@ export function bindOutboundLinks(root: ParentNode): void {
           ...eventFacts(page, inferNavigationOrigin(document.referrer, window.location.href)),
           destination_type: destinationType,
           destination_domain: destinationDomain(link.href),
+        });
+      });
+    });
+  }
+}
+
+/** «Avísanos» en Fuentes. El clic no espera a PostHog ni cancela la navegación. */
+export function bindEventFeedbackLinks(root: ParentNode): void {
+  for (const link of root.querySelectorAll<HTMLAnchorElement>('a[data-event-feedback]')) {
+    if (link.dataset.eventFeedbackBound === 'true') continue;
+    link.dataset.eventFeedbackBound = 'true';
+    link.addEventListener('click', () => {
+      onOutboundClick(() => {
+        const page = readPageAnalytics();
+        if (!page?.event_id) return;
+        trackEventFeedbackClicked({
+          event_id: page.event_id,
+          event_title: page.event_title,
+          placement: link.dataset.eventFeedback,
         });
       });
     });

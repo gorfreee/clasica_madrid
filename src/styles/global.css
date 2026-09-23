@@ -891,6 +891,7 @@ a.eyebrow:focus-visible {
 .source-list a { font-weight: 800; }
 .source-list span, .verified { color: var(--muted); }
 .verified { margin: 1rem 0 0; }
+.verified.source-feedback { margin-top: .35rem; }
 .venue-detail__practical {
   position: relative;
   z-index: 1;

@@ -1,3 +1,5 @@
+import { parseEventFeedbackContext, type EventFeedbackContext } from '../../src/lib/contact/event-feedback.ts';
+
 const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 const CLOUDFLARE_API_ROOT = 'https://api.cloudflare.com/client/v4';
 const DEFAULT_CONTACT_FROM_ADDRESS = 'hola@clasicamadrid.com';
@@ -31,6 +33,7 @@ type ContactPayload = {
   motivo: ContactReason;
   mensaje: string;
   turnstileToken: string;
+  feedback: EventFeedbackContext | null;
 };
 
 type FetchLike = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
@@ -167,6 +170,11 @@ function validatePayload(
       motivo: motivo as ContactReason,
       mensaje,
       turnstileToken,
+      feedback: parseEventFeedbackContext({
+        origin: params.get('origin'),
+        eventId: params.get('event_id'),
+        eventSlug: params.get('event_slug'),
+      }),
     },
   };
 }
@@ -250,6 +258,7 @@ async function sendContactEmail(
     `Motivo: ${payload.motivo}`,
     ...(payload.nombre ? [`Nombre: ${payload.nombre}`] : []),
     `Email: ${payload.email}`,
+    ...eventFeedbackLines(payload.feedback),
     '',
     'Mensaje:',
     payload.mensaje,
@@ -306,6 +315,16 @@ async function safeJson<T>(response: Response): Promise<T | null> {
   } catch {
     return null;
   }
+}
+
+/** Texto fijo más id y path ya validados. No refleja cabeceras ni URLs arbitrarias. */
+function eventFeedbackLines(feedback: EventFeedbackContext | null): string[] {
+  if (!feedback) return [];
+  return [
+    'Origen: Corrección de ficha de evento',
+    `Evento ID: ${feedback.eventId}`,
+    `Ficha: ${feedback.eventPath}`,
+  ];
 }
 
 function invalidPayload(message: string): Response {

@@ -24,6 +24,7 @@ import {
   CONTACT_SUBMITTED,
   CONTACT_TOPICS,
   destinationDomain,
+  EVENT_FEEDBACK_CLICKED,
   EVENT_OPENED,
   FILTER_CHANGED,
   FILTER_CLEARED,
@@ -33,6 +34,7 @@ import {
   RESULT_LIST_EXHAUSTED,
   SEARCH_PERFORMED,
   trackContactSubmitted,
+  trackEventFeedbackClicked,
   trackOutboundEventClick,
   trackResultListExhausted,
   trackSearchPerformed,
@@ -597,6 +599,89 @@ describe('contacto y compartir', () => {
     expect(JSON.stringify(calls)).not.toContain('ada@');
     expect(JSON.stringify(calls)).not.toContain('hola');
     expect(JSON.stringify(calls)).not.toContain('Ada');
+  });
+
+  it('contact_submitted añade el contexto de ficha solo si id y origen son válidos', () => {
+    const { calls, capture } = recorder();
+    trackContactSubmitted(
+      {
+        topic: 'Corrección',
+        origin: 'event_feedback',
+        event_id: 'evt_carmen',
+        email: 'ada@example.com',
+        mensaje: 'La hora está mal',
+        nombre: 'Ada',
+      } as { topic: string; origin: string; event_id: string },
+      capture,
+    );
+    trackContactSubmitted(
+      {
+        topic: 'Otro',
+        origin: 'https://evil.example',
+        event_id: 'evt_carmen\nBcc: evil@example.com',
+      },
+      capture,
+    );
+    trackContactSubmitted({ topic: 'Colaboración', origin: 'event_feedback' }, capture);
+    expect(calls).toEqual([
+      {
+        event: CONTACT_SUBMITTED,
+        properties: {
+          surface: 'contact',
+          topic: 'Corrección',
+          origin: 'event_feedback',
+          event_id: 'evt_carmen',
+        },
+      },
+      { event: CONTACT_SUBMITTED, properties: { surface: 'contact', topic: 'Otro' } },
+      { event: CONTACT_SUBMITTED, properties: { surface: 'contact', topic: 'Colaboración' } },
+    ]);
+    expect(JSON.stringify(calls)).not.toContain('ada@');
+    expect(JSON.stringify(calls)).not.toContain('La hora');
+    expect(JSON.stringify(calls)).not.toContain('Ada');
+    expect(JSON.stringify(calls)).not.toContain('evil');
+    expect(JSON.stringify(calls)).not.toContain('Bcc');
+  });
+
+  it('event_feedback_clicked identifica la ficha y el lugar del enlace, sin la URL', () => {
+    const { calls, capture } = recorder();
+    trackEventFeedbackClicked(
+      {
+        event_id: 'evt_carmen',
+        event_title: 'Carmen',
+        placement: 'after_sources',
+        email: 'ada@example.com',
+        href: 'https://clasicamadrid.com/contacto/?motivo=correccion&email=ada@example.com',
+      } as { event_id: string; event_title: string; placement: string },
+      capture,
+    );
+    trackEventFeedbackClicked({ event_id: 'no-es-un-id', placement: 'after_sources' }, capture);
+    trackEventFeedbackClicked({ event_id: 'evt_carmen', placement: 'hero' }, capture);
+    expect(calls).toEqual([
+      {
+        event: EVENT_FEEDBACK_CLICKED,
+        properties: { event_id: 'evt_carmen', event_title: 'Carmen', placement: 'after_sources' },
+      },
+    ]);
+    expect(JSON.stringify(calls)).not.toContain('ada@');
+    expect(JSON.stringify(calls)).not.toContain('contacto');
+    expect(JSON.stringify(calls)).not.toContain('http');
+  });
+
+  it('el clic de aviso no lanza si PostHog falla', () => {
+    expect(() =>
+      trackEventFeedbackClicked(
+        { event_id: 'evt_carmen', event_title: 'Carmen', placement: 'after_sources' },
+        () => {
+          throw new Error('PostHog no disponible');
+        },
+      ),
+    ).not.toThrow();
+    expect(() =>
+      onOutboundClick(() => {
+        throw new Error('PostHog no disponible');
+      }),
+    ).not.toThrow();
   });
 
   it('share_clicked identifica el evento y el canal, sin el texto compartido', () => {

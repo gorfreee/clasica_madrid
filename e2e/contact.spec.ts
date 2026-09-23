@@ -122,6 +122,75 @@ test.describe('página de contacto', () => {
     await expect(submit).toBeEnabled();
   });
 
+  test('al llegar desde una ficha selecciona Corrección y conserva el contexto', async ({ page }) => {
+    await stubTurnstile(page);
+    let posted = '';
+    await page.route('**/api/contacto', async (route) => {
+      posted = route.request().postData() ?? '';
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ ok: true, message: 'Gracias. Tu mensaje se ha enviado.' }),
+      });
+    });
+    await page.goto(
+      '/contacto/?motivo=correccion&event_id=evt_andromeda_perseo_publico_2026&event_slug=andromeda-y-perseo-publico-general&origin=event_feedback',
+    );
+
+    await expect(page.getByLabel('Motivo')).toHaveValue('Corrección');
+    await expect(page.getByRole('textbox', { name: 'Mensaje', exact: true })).toHaveValue('');
+    await expect(page.getByLabel('Nombre (opcional)')).toHaveValue('');
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      'href',
+      'https://clasicamadrid.com/contacto/',
+    );
+
+    await page.getByLabel('Email', { exact: true }).fill('ana@example.com');
+    await page.getByRole('textbox', { name: 'Mensaje', exact: true }).fill('La hora publicada no coincide.');
+    await page.getByRole('button', { name: 'Enviar mensaje' }).click();
+    await expect(page.getByRole('status')).toHaveText('Gracias. Tu mensaje se ha enviado.');
+
+    const body = new URLSearchParams(posted);
+    expect(body.get('motivo')).toBe('Corrección');
+    expect(body.get('origin')).toBe('event_feedback');
+    expect(body.get('event_id')).toBe('evt_andromeda_perseo_publico_2026');
+    expect(body.get('event_slug')).toBe('andromeda-y-perseo-publico-general');
+    expect(body.get('mensaje')).toBe('La hora publicada no coincide.');
+    expect(body.get('email')).toBe('ana@example.com');
+    expect(posted).not.toContain('Andr');
+  });
+
+  test('un acceso directo no preselecciona Corrección', async ({ page }) => {
+    await stubTurnstile(page);
+    await page.goto('/contacto/');
+    await expect(page.getByLabel('Motivo')).toHaveValue('');
+    await expect(page.getByRole('textbox', { name: 'Mensaje', exact: true })).toHaveValue('');
+  });
+
+  test('una query incompleta o manipulada deja el formulario usable', async ({ page }) => {
+    await stubTurnstile(page);
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    const searches = [
+      '?motivo=correccion',
+      '?origin=event_feedback',
+      '?origin=event_feedback&event_id=evt_ok&event_slug=../etc/passwd',
+      '?origin=event_feedback&event_id=evt_ok%0ABcc:%20evil@example.com&event_slug=recital',
+      '?origin=newsletter&event_id=evt_ok&event_slug=recital&motivo=correccion',
+      `?origin=event_feedback&event_id=evt_${'a'.repeat(200)}&event_slug=recital`,
+      '?origin=event_feedback&event_id=evt_ok&event_slug=https://evil.example/eventos/x',
+    ];
+
+    for (const search of searches) {
+      await page.goto(`/contacto/${search}`);
+      await expect(page.getByRole('heading', { level: 1, name: 'Envíanos un mensaje' })).toBeVisible();
+      await expect(page.getByLabel('Motivo')).toHaveValue('');
+      await expect(page.getByRole('textbox', { name: 'Mensaje', exact: true })).toHaveValue('');
+      await expect(page.getByLabel('Email', { exact: true })).toBeEditable();
+    }
+    expect(errors).toEqual([]);
+  });
+
   test('muestra un error útil y permite reintentar con un token nuevo', async ({ page }) => {
     await stubTurnstile(page);
     await page.route('**/api/contacto', async (route) => {
