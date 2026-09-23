@@ -146,7 +146,7 @@ function validatePayload(
   const turnstileToken = normalizedField(params, 'cf-turnstile-response');
 
   if (nombre.length > 100) return { ok: false, message: 'El nombre es demasiado largo.' };
-  if (!email || email.length > 254 || !isValidEmail(email)) {
+  if (email.length > 254 || (email !== '' && !isValidEmail(email))) {
     return { ok: false, message: 'Introduce un email válido.' };
   }
   if (!CONTACT_REASONS.includes(motivo as ContactReason)) {
@@ -249,7 +249,7 @@ async function sendContactEmail(
   const text = [
     `Motivo: ${payload.motivo}`,
     ...(payload.nombre ? [`Nombre: ${payload.nombre}`] : []),
-    `Email: ${payload.email}`,
+    ...(payload.email ? [`Email: ${payload.email}`] : []),
     '',
     'Mensaje:',
     payload.mensaje,
@@ -270,7 +270,7 @@ async function sendContactEmail(
           address: config.from,
           name: CONTACT_FROM_NAME,
         },
-        reply_to: payload.email,
+        ...(payload.email ? { reply_to: payload.email } : {}),
         subject: `[Clásica Madrid] ${payload.motivo}`,
         text,
       }),

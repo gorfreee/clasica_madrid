@@ -83,7 +83,30 @@ describe('Cloudflare Pages Function de contacto', () => {
       name: 'Clásica Madrid',
     });
     expect(email.text).toContain('Nombre: Ana');
+    expect(email.text).toContain('Email: ana@example.com');
     expect(email.text).toContain('La hora publicada debería ser las 19:30.');
+  });
+
+  it.each(['', '   '])('acepta un email ausente (%j) y omite Reply-To', async (email) => {
+    const fetchImpl = successfulExternalFetch();
+    const response = await handleContactRequest(
+      requestWith({ ...validFields, email }),
+      env,
+      { fetchImpl },
+    );
+
+    expect(response.status).toBe(200);
+    const sent = JSON.parse(String(fetchImpl.mock.calls[1]?.[1]?.body));
+    expect(sent).not.toHaveProperty('reply_to');
+    expect(sent.text).not.toContain('Email:');
+    expect(sent.text).not.toContain('@');
+    expect(sent.text).toContain('Mensaje:');
+    expect(sent.text).toContain(validFields.mensaje);
+    expect(sent.to).toEqual([env.CONTACT_RECIPIENT]);
+    expect(sent.from).toEqual({
+      address: 'hola@clasicamadrid.com',
+      name: 'Clásica Madrid',
+    });
   });
 
   it('ignora from, to y subject enviados por el visitante', async () => {
