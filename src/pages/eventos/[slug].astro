@@ -8,7 +8,7 @@ import { daysUntilEvent, isFreeAccess } from '../../lib/analytics/page.ts';
 import { formatSourceCitationMeta } from '../../lib/presentation/labels.ts';
 import { buildEventShare } from '../../lib/presentation/share.ts';
 import { loadEventPage, loadEventStaticPaths } from '../../lib/presentation/site.ts';
-import { AGENDA_PATH, eventPath } from '../../lib/presentation/urls.ts';
+import { AGENDA_PATH, eventFeedbackPath, eventPath } from '../../lib/presentation/urls.ts';
 
 export async function getStaticPaths() {
   const paths = await loadEventStaticPaths();
@@ -210,6 +210,9 @@ const share = buildEventShare({
         }
       </ul>
       <p class="verified">Última verificación: {model.lastVerifiedAt}</p>
+      <p class="verified source-feedback">
+        ¿Ves algún error o cambio? <a href={eventFeedbackPath(model.id, model.slug)} data-event-feedback="after_sources">Avísanos</a>
+      </p>
     </section>
     {model.isPast && <p class="past-notice">Este evento ya ha tenido lugar. Conservamos la ficha como parte del archivo</p>}
   </article>

@@ -14,6 +14,20 @@ dirección ficticia.
 La recepción directa de `hola@clasicamadrid.com` se configura fuera de esta repo con
 Cloudflare Email Routing.
 
+## Corrección desde una ficha
+
+Al final de Fuentes, «Avísanos» abre `/contacto/` con `motivo=correccion`,
+`event_id`, `event_slug` y `origin=event_feedback`. La página sigue siendo
+estática: el navegador lee esa query y, solo si el contexto es válido, selecciona
+el motivo existente `Corrección` y reenvía el id y el slug en el `POST`. El
+mensaje queda vacío.
+
+La Function añade al email `Origen`, `Evento ID` y `Ficha` (`/eventos/{slug}/`)
+cuando `origin` es `event_feedback` y el id y el slug tienen el formato del
+catálogo. Un contexto ausente, demasiado largo o manipulado se ignora: el
+formulario se envía igual y el email no incluye esas líneas. No se aceptan URLs
+arbitrarias ni saltos de línea en esos campos.
+
 ## Configuración de Cloudflare Pages
 
 Variable disponible durante el build:

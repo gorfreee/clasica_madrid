@@ -85,6 +85,9 @@ describe('Cloudflare Pages Function de contacto', () => {
     expect(email.text).toContain('Nombre: Ana');
     expect(email.text).toContain('Email: ana@example.com');
     expect(email.text).toContain('La hora publicada debería ser las 19:30.');
+    expect(email.text).not.toContain('Origen:');
+    expect(email.text).not.toContain('Evento ID:');
+    expect(email.text).not.toContain('Ficha:');
   });
 
   it.each(['', '   '])('acepta un email ausente (%j) y omite Reply-To', async (email) => {
@@ -253,6 +256,98 @@ describe('Cloudflare Pages Function de contacto', () => {
     expect(body).not.toContain(env.CONTACT_RECIPIENT!);
     expect(body).not.toContain(env.TURNSTILE_SECRET_KEY!);
     expect(body).not.toContain(env.CLOUDFLARE_EMAIL_API_TOKEN!);
+  });
+
+  it('añade al email el contexto válido de una ficha, sin convertir el path en URL', async () => {
+    const fetchImpl = successfulExternalFetch();
+    const response = await handleContactRequest(
+      requestWith({
+        ...validFields,
+        origin: 'event_feedback',
+        event_id: 'evt_andromeda_perseo_publico_2026',
+        event_slug: 'andromeda-y-perseo-publico-general',
+        event_url: 'https://evil.example/phish',
+        ficha: 'https://evil.example/eventos/x/',
+      }),
+      env,
+      { fetchImpl },
+    );
+
+    expect(response.status).toBe(200);
+    const email = JSON.parse(String(fetchImpl.mock.calls[1]?.[1]?.body));
+    expect(email.subject).toBe('[Clásica Madrid] Corrección');
+    expect(email.reply_to).toBe('ana@example.com');
+    expect(email.text).toBe(
+      [
+        'Motivo: Corrección',
+        'Nombre: Ana',
+        'Email: ana@example.com',
+        'Origen: Corrección de ficha de evento',
+        'Evento ID: evt_andromeda_perseo_publico_2026',
+        'Ficha: /eventos/andromeda-y-perseo-publico-general/',
+        '',
+        'Mensaje:',
+        'La hora publicada debería ser las 19:30.',
+      ].join('\n'),
+    );
+    expect(email.text).not.toContain('http');
+    expect(JSON.stringify(email)).not.toContain('evil.example');
+  });
+
+  it.each([
+    ['origin desconocido', { origin: 'newsletter', event_id: 'evt_ok', event_slug: 'recital' }],
+    ['id que no es de evento', { origin: 'event_feedback', event_id: 'ven_auditorio', event_slug: 'recital' }],
+    ['id demasiado largo', { origin: 'event_feedback', event_id: `evt_${'a'.repeat(120)}`, event_slug: 'recital' }],
+    ['slug demasiado largo', { origin: 'event_feedback', event_id: 'evt_ok', event_slug: 'a'.repeat(121) }],
+    ['id con salto de línea', { origin: 'event_feedback', event_id: 'evt_ok\r\nBcc: evil@example.com', event_slug: 'recital' }],
+    ['slug con salto de línea', { origin: 'event_feedback', event_id: 'evt_ok', event_slug: 'recital\nhttps://evil.example' }],
+    ['path arbitrario', { origin: 'event_feedback', event_id: 'evt_ok', event_slug: 'https://evil.example/eventos/x' }],
+    ['slug con barras', { origin: 'event_feedback', event_id: 'evt_ok', event_slug: '../etc/passwd' }],
+    ['sin contexto', {}],
+  ])('ignora un contexto de ficha no confiable (%s) y envía el contacto normal', async (_label, extra) => {
+    const fetchImpl = successfulExternalFetch();
+    const response = await handleContactRequest(requestWith({ ...validFields, ...extra }), env, { fetchImpl });
+
+    expect(response.status).toBe(200);
+    const email = JSON.parse(String(fetchImpl.mock.calls[1]?.[1]?.body));
+    expect(email.subject).toBe('[Clásica Madrid] Corrección');
+    expect(email.text).toBe(
+      [
+        'Motivo: Corrección',
+        'Nombre: Ana',
+        'Email: ana@example.com',
+        '',
+        'Mensaje:',
+        'La hora publicada debería ser las 19:30.',
+      ].join('\n'),
+    );
+    expect(JSON.stringify(email)).not.toContain('evil');
+    expect(JSON.stringify(email)).not.toContain('Bcc');
+    expect(JSON.stringify(email)).not.toContain('passwd');
+  });
+
+  it('acepta un id y un slug en el límite de 120 caracteres', async () => {
+    const fetchImpl = successfulExternalFetch();
+    const eventId = `evt_${'a'.repeat(116)}`;
+    const eventSlug = 'a'.repeat(120);
+    expect(eventId).toHaveLength(120);
+    expect(eventSlug).toHaveLength(120);
+
+    const response = await handleContactRequest(
+      requestWith({
+        ...validFields,
+        origin: 'event_feedback',
+        event_id: eventId,
+        event_slug: eventSlug,
+      }),
+      env,
+      { fetchImpl },
+    );
+
+    expect(response.status).toBe(200);
+    const email = JSON.parse(String(fetchImpl.mock.calls[1]?.[1]?.body));
+    expect(email.text).toContain(`Evento ID: ${eventId}`);
+    expect(email.text).toContain(`Ficha: /eventos/${eventSlug}/`);
   });
 
   it('acepta únicamente POST con formulario urlencoded', async () => {
