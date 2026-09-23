@@ -53,6 +53,7 @@
   --line: #aaa9a2;
   --blue: #3346ff;
   --coral: #ff5a3d;
+  --free: #2f6b4f;
   --font-sans: "Archivo", "Archivo Fallback: Arial", "Archivo Fallback: Roboto", Arial, Roboto, sans-serif;
   --font-display: var(--font-sans);
   --type-tracking-display: -.055em;
@@ -690,18 +691,11 @@ a.eyebrow:focus-visible {
 }
 .agenda-item__format { min-width: 0; max-width: 100%; }
 .agenda-item__free {
-  display: inline-flex;
-  align-items: center;
-  gap: .35rem;
-  color: var(--ink);
-}
-.agenda-item__free::before {
-  content: "";
-  width: .45rem;
-  height: .45rem;
-  border-radius: 50%;
-  background: var(--coral);
-  flex: 0 0 auto;
+  color: var(--free);
+  font-size: var(--type-size-meta);
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .empty-state {
