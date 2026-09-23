@@ -39,6 +39,8 @@ import {
   trackShareClicked,
   trackWhatsAppChannelClicked,
   WHATSAPP_CHANNEL_CLICKED,
+  WHATSAPP_CHANNEL_PLACEMENTS,
+  isWhatsAppChannelPlacement,
 } from '../src/lib/analytics/product.ts';
 import { WHATSAPP_CHANNEL_URL } from '../src/lib/presentation/constants.ts';
 import { CONTACT_REASONS } from '../functions/api/contacto.ts';
@@ -628,6 +630,21 @@ describe('canal de WhatsApp', () => {
       { event: WHATSAPP_CHANNEL_CLICKED, properties: { placement: 'about', page_type: 'about' } },
     ]);
     expect(JSON.stringify(calls)).not.toContain(WHATSAPP_CHANNEL_URL);
+  });
+
+  it('agenda_inline es una ubicación válida y no envía la URL del canal', () => {
+    expect(WHATSAPP_CHANNEL_PLACEMENTS).toContain('agenda_inline');
+    expect(isWhatsAppChannelPlacement('agenda_inline')).toBe(true);
+    const { calls, capture } = recorder();
+    trackWhatsAppChannelClicked({ placement: 'agenda_inline', page_type: 'agenda' }, capture);
+    expect(calls).toEqual([
+      {
+        event: WHATSAPP_CHANNEL_CLICKED,
+        properties: { placement: 'agenda_inline', page_type: 'agenda' },
+      },
+    ]);
+    expect(JSON.stringify(calls)).not.toContain(WHATSAPP_CHANNEL_URL);
+    expect(JSON.stringify(calls)).not.toMatch(/after_10|agenda_after_10|position_10/);
   });
 
   it('no falla si PostHog no está disponible o si capture falla', () => {

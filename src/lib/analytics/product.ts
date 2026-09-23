@@ -24,7 +24,7 @@ export const SHARE_CLICKED = 'share_clicked';
 export const CONTACT_SUBMITTED = 'contact_submitted';
 export const WHATSAPP_CHANNEL_CLICKED = 'whatsapp_channel_clicked';
 
-export const WHATSAPP_CHANNEL_PLACEMENTS = ['footer', 'about'] as const;
+export const WHATSAPP_CHANNEL_PLACEMENTS = ['footer', 'about', 'agenda_inline'] as const;
 export type WhatsAppChannelPlacement = (typeof WHATSAPP_CHANNEL_PLACEMENTS)[number];
 
 export function isWhatsAppChannelPlacement(value: string | undefined): value is WhatsAppChannelPlacement {

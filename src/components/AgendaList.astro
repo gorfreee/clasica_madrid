@@ -1,15 +1,22 @@
 ---
-import type { AgendaDayModel } from '../lib/presentation/agenda.ts';
+import { agendaInlineChannelBreak, type AgendaDayModel } from '../lib/presentation/agenda.ts';
 import AgendaItem from './AgendaItem.astro';
+import WhatsAppChannelLink from './WhatsAppChannelLink.astro';
 
 type Props = {
   days: AgendaDayModel[];
   /** Static result lists opt into end-of-list analytics. The home agenda does not. */
   resultsSurface?: 'agenda' | 'venues' | 'venue';
   quickFilter?: string;
+  /**
+   * Home agenda and the full-agenda fragment only. Landings stay quiet.
+   * The break is the same in both lists because it falls in the shared prefix.
+   */
+  inlineChannel?: boolean;
 };
 
-const { days, resultsSurface, quickFilter } = Astro.props;
+const { days, resultsSurface, quickFilter, inlineChannel = false } = Astro.props;
+const channelAfterDay = inlineChannel ? agendaInlineChannelBreak(days) : null;
 ---
 {/* Contrato UI interno: [data-agenda-list] y [data-agenda-day] los usa agenda-client.ts. */}
 
@@ -51,6 +58,7 @@ const { days, resultsSurface, quickFilter } = Astro.props;
               </div>
             )}
           </section>
+          {channelAfterDay === index && <WhatsAppChannelLink placement="agenda_inline" />}
         </>
       );
     })

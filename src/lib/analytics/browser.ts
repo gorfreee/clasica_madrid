@@ -103,7 +103,7 @@ export function initDirectionsTracking(root: ParentNode = document): void {
   }
 }
 
-/** Shared by both CTA placements; a repeated initialization cannot add duplicate listeners. */
+/** Shared by every channel placement. A repeated call cannot add duplicate listeners. */
 export function initWhatsAppChannelTracking(root: ParentNode = document): void {
   for (const link of root.querySelectorAll<HTMLAnchorElement>('a[data-whatsapp-channel]')) {
     if (link.dataset.whatsappBound === 'true') continue;

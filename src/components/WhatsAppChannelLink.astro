@@ -4,28 +4,45 @@ import type { WhatsAppChannelPlacement } from '../lib/analytics/product.ts';
 
 type Props = { placement: WhatsAppChannelPlacement };
 const { placement } = Astro.props;
-const Wrapper = placement === 'about' ? 'section' : 'div';
+const isAbout = placement === 'about';
+const isAgenda = placement === 'agenda_inline';
+const Wrapper = isAbout ? 'section' : isAgenda ? 'aside' : 'div';
 ---
 
-<Wrapper class:list={['channel', `channel--${placement}`]} aria-labelledby={placement === 'about' ? 'channel-about-title' : undefined}>
-  {placement === 'about' && <h2 id="channel-about-title">Clásica Madrid, también en WhatsApp</h2>}
-  <div class="channel__body">
-    {placement === 'about' && <p>Recibe conciertos, novedades y selecciones de la agenda directamente en WhatsApp.</p>}
+<Wrapper
+  class:list={[isAgenda ? 'agenda-channel' : 'channel', !isAgenda && `channel--${placement}`]}
+  data-agenda-channel={isAgenda ? '' : undefined}
+  aria-labelledby={isAbout ? 'channel-about-title' : isAgenda ? 'agenda-channel-title' : undefined}
+>
+  {isAbout && <h2 id="channel-about-title">Clásica Madrid, también en WhatsApp</h2>}
+  {isAgenda && <p class="agenda-channel__kicker" id="agenda-channel-title">Clásica Madrid en WhatsApp</p>}
+  <div class={isAgenda ? 'agenda-channel__body' : 'channel__body'}>
+    {isAbout && <p>Recibe conciertos, novedades y selecciones de la agenda directamente en WhatsApp.</p>}
+    {isAgenda && (
+      <>
+        <p class="agenda-channel__lead">Sigue la agenda también desde WhatsApp</p>
+        <p class="agenda-channel__note">Conciertos, novedades y selecciones de Clásica Madrid</p>
+      </>
+    )}
     <a
-      class="channel__link"
+      class={isAgenda ? 'agenda-channel__link' : 'channel__link'}
       href={WHATSAPP_CHANNEL_URL}
       target="_blank"
       rel="noopener noreferrer"
       data-whatsapp-channel={placement}
       aria-label="Seguir el canal de Clásica Madrid en WhatsApp (se abre en otra pestaña)"
     >
-      <svg class="channel__icon" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+      <svg class={isAgenda ? 'agenda-channel__icon' : 'channel__icon'} viewBox="0 0 32 32" aria-hidden="true" focusable="false">
         <path fill="currentColor" d="M16 .8A15.2 15.2 0 0 0 2.9 23.7L.8 31.2l7.7-2A15.2 15.2 0 1 0 16 .8Zm0 27.6a12.3 12.3 0 0 1-6.3-1.7l-.5-.3-4.6 1.2 1.2-4.5-.3-.5A12.4 12.4 0 1 1 16 28.4Zm6.8-9.3c-.4-.2-2.2-1.1-2.6-1.2-.3-.1-.6-.2-.8.2-.3.4-1 1.2-1.3 1.5-.2.3-.5.3-.9.1-2.2-1.1-3.7-2-5.2-4.6-.4-.7.4-.6 1.1-2.1.1-.3 0-.5 0-.7l-1.2-2.8c-.3-.7-.6-.6-.8-.6h-.7c-.3 0-.7.1-1 .5-.3.4-1.3 1.3-1.3 3.1s1.3 3.6 1.5 3.8c.2.2 2.6 4 6.3 5.6 2.3 1 3.2 1.1 4.3.9 1.3-.2 2.2-1.1 2.5-2.1.3-1 .3-1.9.2-2.1-.1-.2-.3-.3-.7-.5Z" />
       </svg>
-      <span class="channel__copy">
-        <span class="channel__title">{placement === 'about' ? 'Seguir el canal' : 'Síguenos en WhatsApp'} <span aria-hidden="true">↗</span></span>
-        {placement === 'footer' && <span class="channel__subtitle">Conciertos y novedades de Clásica Madrid</span>}
-      </span>
+      {isAgenda ? (
+        <span class="agenda-channel__cta">Seguir el canal <span aria-hidden="true">↗</span></span>
+      ) : (
+        <span class="channel__copy">
+          <span class="channel__title">{isAbout ? 'Seguir el canal' : 'Síguenos en WhatsApp'} <span aria-hidden="true">↗</span></span>
+          {placement === 'footer' && <span class="channel__subtitle">Conciertos y novedades de Clásica Madrid</span>}
+        </span>
+      )}
     </a>
   </div>
 </Wrapper>
