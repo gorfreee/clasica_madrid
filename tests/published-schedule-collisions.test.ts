@@ -132,12 +132,26 @@ describe('catálogo publicado tras la limpieza de duplicados de hueco exclusivo'
     const casaVacas = collisions.filter((item) => item.venueId === 'ven_casa_vacas_retiro');
     expect(casaVacas).toEqual([]);
 
+    expect(catalog.events.some((event) => event.id === 'evt_fundacion_orcam_4861')).toBe(false);
+    const finalDelViaje = catalog.events.find(
+      (event) => event.id === 'evt_auditorio_nacional_orcam_sinfonico_11_final_del_viaje',
+    );
+    expect(finalDelViaje).toMatchObject({
+      slug: 'final-del-viaje',
+      slugAliases: ['orcam-sinfonico-11-final-del-viaje'],
+      title: 'Final del viaje',
+      occurrences: [expect.objectContaining({ date: '2027-05-10', time: '19:30' })],
+      primarySourceId: 'src_auditorio_nacional',
+    });
+    expect(finalDelViaje?.citations.map((item) => item.sourceId)).toEqual([
+      'src_auditorio_nacional',
+      'src_fundacion_orcam',
+    ]);
     const kavakosOrcam = collisions.find((item) =>
       item.eventIds.includes('evt_auditorio_nacional_fundacion_scherzo_leonidas_kavakos_y_enrico_pace')
-      && item.eventIds.includes('evt_fundacion_orcam_4861'),
+      && item.eventIds.includes('evt_auditorio_nacional_orcam_sinfonico_11_final_del_viaje'),
     );
-    expect(kavakosOrcam?.kind).toBe('conflict');
-    expect(kavakosOrcam).toMatchObject({ date: '2027-05-11', time: '19:30' });
+    expect(kavakosOrcam).toBeUndefined();
 
     expect(catalog.events.some((event) => event.id === 'evt_fundacion_orcam_4865')).toBe(false);
     const geometrias = catalog.events.find(

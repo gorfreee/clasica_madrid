@@ -13,7 +13,7 @@
     {
       "id": "occ_schubert_otra_mirada_20260927_01",
       "date": "2026-09-27",
-      "time": null,
+      "time": "18:30",
       "status": "scheduled"
     }
   ],
@@ -43,7 +43,7 @@
       "role": "soloist"
     },
     {
-      "name": "Rosario Martínez",
+      "name": "Manuel Angulo",
       "role": "soloist"
     },
     {
@@ -80,9 +80,14 @@
     {
       "sourceId": "src_fundacion_canal",
       "url": "https://www.fundacioncanal.com/ciclo-musica-camara/",
-      "checkedAt": "2026-08-28"
+      "checkedAt": "2026-09-23"
+    },
+    {
+      "sourceId": "src_apropa_cultura",
+      "url": "https://www.apropacultura.org/es/evento/schubert-desde-otra-mirada",
+      "checkedAt": "2026-09-23"
     }
   ],
   "primarySourceId": "src_fundacion_canal",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-23"
 }

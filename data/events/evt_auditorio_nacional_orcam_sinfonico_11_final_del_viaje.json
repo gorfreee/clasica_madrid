@@ -1,8 +1,11 @@
 {
   "schemaVersion": 1,
   "id": "evt_auditorio_nacional_orcam_sinfonico_11_final_del_viaje",
-  "slug": "orcam-sinfonico-11-final-del-viaje",
-  "title": "ORCAM. Sinfónico 11. Final del Viaje",
+  "slug": "final-del-viaje",
+  "slugAliases": [
+    "orcam-sinfonico-11-final-del-viaje"
+  ],
+  "title": "Final del viaje",
   "status": "scheduled",
   "venueId": "ven_auditorio_nacional_sala_sinfonica",
   "organizerIds": [],
@@ -17,13 +20,16 @@
   ],
   "performers": [
     {
-      "name": "Orquesta Sinfónica de Tenerife"
+      "name": "Orquesta Sinfónica de Tenerife",
+      "role": "orchestra"
     },
     {
-      "name": "Coro de la Comunidad de Madrid"
+      "name": "Coro de la Comunidad de Madrid",
+      "role": "choir"
     },
     {
-      "name": "Javier Carmena, Director Coro"
+      "name": "Javier Carmena",
+      "role": "conductor"
     },
     {
       "name": "Pablo González",
@@ -73,10 +79,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-sinfonico-11-final-del-viaje",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-23",
       "externalId": "orcam-sinfonico-11-final-del-viaje"
+    },
+    {
+      "sourceId": "src_fundacion_orcam",
+      "url": "https://fundacionorcam.org/temporada-2026-27/",
+      "checkedAt": "2026-09-23",
+      "externalId": "4861"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-23"
 }

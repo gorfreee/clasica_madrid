@@ -59,7 +59,7 @@ function parseProduction(html: string): ObservedFactPatch {
   const description = paragraphs[0]?.text;
   const peopleParagraph = paragraphs.find(looksLikeCastParagraph);
   const introPerformers = peopleParagraph
-    ? splitBreaks(peopleParagraph.html).map(parsePersonLine)
+    ? introCreditLines(peopleParagraph.html).map(parseIntroPersonLine)
     : [];
   const performers = normalizePersonList([
     ...parseMusicalTeam(html),
@@ -334,6 +334,15 @@ function parsePersonLine(text: string): ObservedPerson {
   return { name: cleaned };
 }
 
+function parseIntroPersonLine(text: string): ObservedPerson {
+  const person = parsePersonLine(text);
+  if (person.roleText) return person;
+  const name = normalizeText(person.name);
+  if (/^orquesta\b/.test(name)) return { ...person, roleText: 'orquesta' };
+  if (/^coro\b/.test(name)) return { ...person, roleText: 'coro' };
+  return person;
+}
+
 function parseTitleComposerWork(text: string): ObservedWork {
   const trimmed = text.trim();
   const parens = /^(.+?)\s+\(([^)]+)\)\s*$/.exec(trimmed);
@@ -347,8 +356,19 @@ function looksLikeProse(text: string): boolean {
   return /[.!?]/.test(text) || text.length > 80;
 }
 
-function looksLikeCastParagraph(paragraph: { text: string }): boolean {
-  return /director\s*:/i.test(paragraph.text);
+function looksLikeCastParagraph(paragraph: { html: string }): boolean {
+  const lines = introCreditLines(paragraph.html);
+  if (lines.length < 2) return false;
+  return lines.some((line) =>
+    /(?:^director\s*:|,\s*(?:direcci[oó]n musical|director(?:a)?(?:\s+musical)?|soprano|mezzosoprano|contralto|tenor|bar[íi]tono|bajo)\b|^(?:orquesta|coro)\b)/i.test(line),
+  );
+}
+
+function introCreditLines(html: string): string[] {
+  const paragraphs = allCaptures(html, /<p\b[^>]*>([\s\S]*?)<\/p>/gi)
+    .map((part) => stripTags(part))
+    .filter(Boolean);
+  return paragraphs.length > 1 ? paragraphs : splitBreaks(html);
 }
 
 function splitIntroParagraphs(html: string): Array<{ html: string; text: string }> {
@@ -423,4 +443,3 @@ function canonicalRetiroRoomVenueText(value: string | undefined): string | undef
   }
   return undefined;
 }
-
