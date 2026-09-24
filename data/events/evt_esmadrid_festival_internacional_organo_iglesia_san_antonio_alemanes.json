@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_esmadrid_festival_internacional_organo_iglesia_san_antonio_alemanes",
+  "slug": "festival-internacional-de-organo-2026-francisco-javier-lopez",
+  "title": "Festival Internacional de Órgano 2026 — Francisco Javier López",
+  "status": "scheduled",
+  "venueId": "ven_iglesia_san_antonio_alemanes",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_esmadrid_festival_internacional_organo_iglesia_san_antonio_alemanes_01",
+      "date": "2026-11-07",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Francisco Javier López"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "organ",
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_esmadrid",
+      "url": "https://www.esmadrid.com/agenda/festival-internacional-organo-iglesia-san-antonio-alemanes",
+      "checkedAt": "2026-09-24"
+    }
+  ],
+  "primarySourceId": "src_esmadrid",
+  "lastVerifiedAt": "2026-09-24"
+}
