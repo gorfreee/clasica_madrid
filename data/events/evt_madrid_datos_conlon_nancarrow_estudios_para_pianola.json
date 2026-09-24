@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_conlon_nancarrow_estudios_para_pianola",
+  "slug": "conlon-nancarrow-estudios-para-pianola",
+  "title": "Conlon Nancarrow — Estudios para pianola",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_6013703",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_conlon_nancarrow_estudios_para_pianola_01",
+      "date": "2026-12-12",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Conlon Nancarrow"
+    }
+  ],
+  "works": [
+    {
+      "title": "Estudios para pianola",
+      "composerName": "Conlon Nancarrow"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/portales/munimadrid/es/Inicio/Actualidad/Noticias/CentroCentro-explora-nuevos-territorios-sonoros-con-cinco-propuestas-internacionales-en-su-programacion-musical-de-otono/?vgnextchannel=a12149fa40ec9410VgnVCM100000171f5a0aRCRD&vgnextfmt=default&vgnextoid=36760247f6660a10VgnVCM100000891ecb1aRCRD",
+      "checkedAt": "2026-09-24"
+    },
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Todas-las-noticias/Los-ciclos-musicales-de-CentroCentro-regresan-en-2026-con-18-nuevos-conciertos/?vgnextchannel=e40362215c483510VgnVCM2000001f4a900aRCRD&vgnextfmt=default&vgnextoid=4f979eec5e54b910VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-09-24"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-09-24"
+}
