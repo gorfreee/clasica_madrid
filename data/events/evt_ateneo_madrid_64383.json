@@ -23,9 +23,15 @@
       "name": "Ignacio Prego"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    }
+  ],
   "works": [],
-  "eras": [],
+  "eras": [
+    "baroque"
+  ],
   "formats": [
     "early-music",
     "chamber"

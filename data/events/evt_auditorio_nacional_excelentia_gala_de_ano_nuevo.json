@@ -35,13 +35,100 @@
   ],
   "composers": [
     {
-      "name": "“My Way”"
+      "name": "Gioachino Rossini"
+    },
+    {
+      "name": "Gaetano Donizetti"
+    },
+    {
+      "name": "Giacomo Puccini"
+    },
+    {
+      "name": "Giuseppe Verdi"
+    },
+    {
+      "name": "Luigi Denza"
+    },
+    {
+      "name": "Ernesto De Curtis"
+    },
+    {
+      "name": "Salvatore Cardillo"
+    },
+    {
+      "name": "Eduardo di Capua"
+    },
+    {
+      "name": "Andrew Lloyd Webber"
+    },
+    {
+      "name": "Paul Simon"
     }
   ],
   "works": [
     {
-      "title": "Claude François / Jacques Revaux / Paul Anka",
-      "composerName": "“My Way”"
+      "title": "Obertura de “La gazza ladra”",
+      "composerName": "Gioachino Rossini"
+    },
+    {
+      "title": "“Una furtiva lagrima” · L’elisir d’amore",
+      "composerName": "Gaetano Donizetti"
+    },
+    {
+      "title": "“E lucevan le stelle” · Tosca",
+      "composerName": "Giacomo Puccini"
+    },
+    {
+      "title": "“O figli… Ah! La paterna mano” · Macbeth",
+      "composerName": "Giuseppe Verdi"
+    },
+    {
+      "title": "“Questa o quella” · Rigoletto",
+      "composerName": "Giuseppe Verdi"
+    },
+    {
+      "title": "Obertura “Don Pasquale”",
+      "composerName": "Gaetano Donizetti"
+    },
+    {
+      "title": "“Funiculì, Funiculà”",
+      "composerName": "Luigi Denza"
+    },
+    {
+      "title": "“Torna a Surriento”",
+      "composerName": "Ernesto De Curtis"
+    },
+    {
+      "title": "“Core ’ngrato”",
+      "composerName": "Salvatore Cardillo"
+    },
+    {
+      "title": "“I’ te vurria vasà”",
+      "composerName": "Ernesto De Curtis"
+    },
+    {
+      "title": "“’O sole mio”",
+      "composerName": "Eduardo di Capua"
+    },
+    {
+      "title": "“Memory” · Cats",
+      "composerName": "Andrew Lloyd Webber"
+    },
+    {
+      "title": "“Con te partirò”"
+    },
+    {
+      "title": "“Amigos para siempre”"
+    },
+    {
+      "title": "“The Sound of Silence”",
+      "composerName": "Paul Simon"
+    },
+    {
+      "title": "“My Way”"
+    },
+    {
+      "title": "“New York, New York”"
     }
   ],
   "eras": [
