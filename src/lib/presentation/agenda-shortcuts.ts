@@ -14,7 +14,6 @@ export type AgendaShortcutModel = {
   label: string;
   href: string;
   active: boolean;
-  emphasis?: boolean;
 };
 
 export type ActiveFilterChip = {
@@ -71,7 +70,6 @@ export function buildAgendaShortcuts(filters: AgendaFilters, now = new Date()): 
       label: freeAgendaSignalLabel,
       href: filtersToAgendaHref(toggleAgendaShortcut(filters, 'free', now)),
       active: isAgendaShortcutActive(filters, 'free', now),
-      emphasis: true,
     },
   ];
 }

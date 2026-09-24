@@ -38,12 +38,12 @@ const { model } = Astro.props;
       <nav class="shortcuts" aria-label="Accesos rápidos de agenda" data-agenda-shortcuts>
         {model.shortcuts.map((shortcut) => (
           <a
-            class:list={["shortcut", { "shortcut--emphasis": shortcut.emphasis }]}
+            class="shortcut"
             href={shortcut.href}
             data-agenda-shortcut={shortcut.id}
             aria-pressed={shortcut.active ? 'true' : 'false'}
           >
-            {shortcut.label}
+            {shortcut.id === 'free' ? <span class="free-signal">{shortcut.label}</span> : shortcut.label}
           </a>
         ))}
       </nav>
