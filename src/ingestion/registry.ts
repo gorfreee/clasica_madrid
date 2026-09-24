@@ -25,6 +25,7 @@ import { talaProduccionesAdapter } from './sources/tala-producciones.ts';
 import { fundacionMutuaAdapter } from './sources/fundacion-mutua.ts';
 import { coroCamaraMadridAdapter } from './sources/coro-camara-madrid.ts';
 import { residenciaEstudiantesAdapter } from './sources/residencia-estudiantes.ts';
+import { condeduqueAdapter } from './sources/condeduque.ts';
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
@@ -53,6 +54,7 @@ const ADAPTERS: Record<string, SourceAdapter> = {
   [fundacionMutuaAdapter.id]: fundacionMutuaAdapter,
   [coroCamaraMadridAdapter.id]: coroCamaraMadridAdapter,
   [residenciaEstudiantesAdapter.id]: residenciaEstudiantesAdapter,
+  [condeduqueAdapter.id]: condeduqueAdapter,
 };
 
 const srcAuditorio: Source = {
@@ -451,6 +453,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Residencia de Estudiantes',
       kind: 'official',
       url: 'https://residenciadeestudiantes.com/',
+    },
+  },
+  {
+    id: 'condeduque',
+    name: 'Contemporánea Condeduque',
+    urls: ['https://www.condeduquemadrid.es/programacion/musica'],
+    adapterId: condeduqueAdapter.id,
+    catalogSourceId: 'src_condeduque',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_condeduque',
+      slug: 'contemporanea-condeduque',
+      name: 'Contemporánea Condeduque',
+      kind: 'official',
+      url: 'https://www.condeduquemadrid.es/',
     },
   },
 ];
