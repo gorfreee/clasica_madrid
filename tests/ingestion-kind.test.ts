@@ -68,6 +68,16 @@ describe('kind — circuito del venue, no calidad', () => {
     expect(kindOf('Fundación Juan March Auditorio').value).toBe('established');
   });
 
+  it('el Teatro de Condeduque es circuito establecido por su id, no sólo por la palabra Teatro', () => {
+    const result = resolveKind(facts({ title: 'Concierto', venueText: 'Teatro' }), {
+      id: 'ven_condeduque_teatro',
+      name: 'Contemporánea Condeduque — Teatro',
+    });
+    expect(result.value).toBe('established');
+    expect(result.method).toBe('knowledge');
+    expect(result.ruleId).toBe('established-circuit');
+  });
+
   it('iglesia, parroquia o basílica → alternative', () => {
     expect(kindOf('Iglesia de San Ginés').value).toBe('alternative');
     expect(kindOf('Parroquia de Santa María').value).toBe('alternative');

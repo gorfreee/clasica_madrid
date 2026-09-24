@@ -12,6 +12,8 @@ import { emptyCatalog } from '../src/lib/domain/catalog.ts';
 import type { Venue } from '../src/lib/schemas/index.ts';
 import type { Event } from '../src/lib/schemas/index.ts';
 import { matchVenue } from '../src/ingestion/venues.ts';
+import { canonicalizeComposerName } from '../src/ingestion/composer-name.ts';
+import { resolvePerformerRole } from '../src/ingestion/classification/performer-role.ts';
 import type { AdapterContext } from '../src/ingestion/types.ts';
 
 const source = getSourceDefinition('condeduque');
@@ -123,7 +125,127 @@ describe('Condeduque official music programme', () => {
     expect(failed.summary.disappearanceSuppressedSources).toContain(source.id);
     expect(failed.summary.possiblyMissing).toBe(0);
   });
+
+  it('resuelve Teatro sólo para Condeduque y mantiene Auditorio', async () => {
+    const teatro = JSON.parse(await readFile(path.join(import.meta.dirname, '../data/venues/ven_condeduque_teatro.json'), 'utf8')) as Venue;
+    const auditorio = JSON.parse(await readFile(path.join(import.meta.dirname, '../data/venues/ven_condeduque_auditorio.json'), 'utf8')) as Venue;
+    const catalog = { ...emptyCatalog(), venues: [teatro, auditorio] };
+    expect(matchVenue({ venueText: 'Teatro', sourceId: source.id }, catalog)?.venue.id).toBe('ven_condeduque_teatro');
+    expect(matchVenue({ venueText: 'Teatro', sourceId: 'otra-fuente' }, catalog)).toBeUndefined();
+    expect(matchVenue({ venueText: 'Teatro' }, catalog)).toBeUndefined();
+    expect(matchVenue({ venueText: 'Auditorio', sourceId: source.id }, catalog)?.venue.id).toBe('ven_condeduque_auditorio');
+  });
+
+  it('estructura la ficha artística y el programa de Elisa y Naruhiko sin promover el instrumento a solista', async () => {
+    const elisa = adapter.hydrate!(rawDetail(
+      'ELISA URRESTARAZU Y CORNELIA LENZIN',
+      'https://www.condeduquemadrid.es/actividades/elisa-urrestarazu-y-cornelia-lenzin',
+      'Miércoles 17 de febrero de 2027',
+    ), await fixture('elisa-urrestarazu-y-cornelia-lenzin.html'), ctx);
+    expect(elisa.performers).toEqual([
+      { name: 'Elisa Urrestarazu', roleText: 'saxo' },
+      { name: 'Cornelia Lenzin', roleText: 'piano' },
+    ]);
+    expect(elisa.performers?.every((person) => resolvePerformerRole(person.roleText) === undefined)).toBe(true);
+    expect(canonicalWorks(elisa.works)).toEqual([
+      ['Claude Debussy', 'Rapsodia'],
+      ['Jesús Torres', 'Silentium Amoris'],
+      ['Gabriel Erkoreka', 'Duduk I'],
+      ['Inés Badalo', 'Antophila'],
+      ['Mayu Hirano', 'Narcisse en eaux troubles'],
+      ['Ana Beyron', 'Obra de estreno'],
+    ]);
+    expect(elisa.programText).toContain('CLAUDE DEBUSSY');
+    expect(elisa.programText).toContain('Obra de estreno');
+
+    const naruhiko = adapter.hydrate!(rawDetail(
+      'NARUHIKO KAWAGUCHI',
+      'https://www.condeduquemadrid.es/actividades/naruhiko-kawaguchi',
+      'Miércoles 31 de marzo 2027',
+    ), await fixture('naruhiko-kawaguchi.html'), ctx);
+    expect(naruhiko.performers).toEqual([{ name: 'Naruhiko Kawaguchi', roleText: 'pianoforte' }]);
+    expect(resolvePerformerRole(naruhiko.performers?.[0]?.roleText)).toBeUndefined();
+    expect(canonicalWorks(naruhiko.works)).toEqual([
+      ['Isidora Zegers', 'Contradanza La Mercedes'],
+      ['Manuel de Gamarra', 'Sonata en la menor'],
+      ['Sebastián de Albero', 'Sonata núm. 11 en re menor'],
+      ['Sebastián de Albero', 'Sonata núm. 12 en re mayor'],
+      ['Juan Crisóstomo de Arriaga', 'Romance en sol mayor'],
+      ['Mariana Martínez', 'Sonata en sol mayor'],
+      ['Manuel Blasco de Nebra', 'Sonata op. 1 n.º 1'],
+      ['Fernando Sor', 'La naïve'],
+      ['Fernando Sor', 'La coquette'],
+      ['Fernando Sor', 'La champagnarde'],
+      ['Félix Máximo López', 'Variaciones del fandango español al fortepiano'],
+      ['Mateo Albéniz', 'Sonata en re mayor'],
+    ]);
+    expect(naruhiko.programText).toContain('ISIDORA ZEGERS');
+  });
+
+  it('hidrata Fuga en el Teatro y llega a candidato sin salto estructural de venue', async () => {
+    const page = await fixture('listing-fuga.html');
+    const detail = await fixture('janusz-orlik-polish-cello-quartet-fuga.html');
+    const event = adapter.extract(page, listingUrl, ctx)[0]!;
+    const patch = adapter.hydrate!(event, detail, ctx);
+    expect(patch.occurrences).toEqual([{ raw: 'Jueves 29 de abril 2027 20 h', date: '2027-04-29', time: '20:00' }]);
+    expect(patch.venueText).toBe('Teatro');
+    expect(patch.performers?.some((person) => person.name === 'Polish Cello Quartet')).toBe(true);
+    expect(patch.performers?.some((person) => /iluminaci|vestuario|bailar/i.test(`${person.name} ${person.roleText ?? ''}`))).toBe(false);
+    expect(canonicalNames(patch.composers)).toEqual(expect.arrayContaining(['Artur Zagajewski', 'Johann Sebastian Bach']));
+    expect(patch.works?.some((work) => work.composerName === 'Artur Zagajewski' && /canzona/i.test(work.title))).toBe(true);
+    expect(patch.works?.some((work) => work.composerName === 'Johann Sebastian Bach' && /kunst der fuge|contrapunctus/i.test(work.title))).toBe(true);
+    expect(patch.programText).toMatch(/Zagajewski/i);
+    expect(patch.programText).toMatch(/Bach/i);
+
+    const teatro = JSON.parse(await readFile(path.join(import.meta.dirname, '../data/venues/ven_condeduque_teatro.json'), 'utf8')) as Venue;
+    const parent = JSON.parse(await readFile(path.join(import.meta.dirname, '../data/venues/ven_condeduque.json'), 'utf8')) as Venue;
+    const run = await runIngest({
+      now: ctx.now,
+      window: ctx.window,
+      dryRun: true,
+      sourceIds: [source.id],
+      dataDir: await mkdtemp(path.join(os.tmpdir(), 'condeduque-fuga-')),
+      catalog: { ...emptyCatalog(), venues: [parent, teatro] },
+      get: async (url: string) => {
+        if (url === listingUrl) return page;
+        if (url.endsWith('/actividades/janusz-orlik-polish-cello-quartet-fuga')) return detail;
+        throw new Error(`unexpected URL ${url}`);
+      },
+    });
+    expect(run.decisions.filter((item) => item.structuralSkip?.reason === 'lugar no reconocido')).toEqual([]);
+    expect(run.summary.candidates).toBe(1);
+    expect(run.candidates[0]?.event.venueId).toBe('ven_condeduque_teatro');
+    expect(run.candidates[0]?.event.occurrences).toEqual([
+      expect.objectContaining({ date: '2027-04-29', time: '20:00' }),
+    ]);
+    expect(run.candidates[0]?.event.performers).toEqual(expect.arrayContaining([
+      expect.objectContaining({ name: 'Polish Cello Quartet' }),
+    ]));
+    expect(run.candidates[0]?.event.composers.map((item) => item.name)).toEqual(
+      expect.arrayContaining(['Artur Zagajewski', 'Johann Sebastian Bach']),
+    );
+  });
 });
+
+function rawDetail(title: string, sourceUrl: string, listingDateText: string) {
+  return {
+    sourceId: source.id,
+    sourceUrl,
+    listingDateText,
+    observed: { title, occurrences: [], performers: [], composers: [], works: [] },
+  };
+}
+
+function canonicalNames(items: Array<{ name: string }> | undefined): string[] {
+  return (items ?? []).map((item) => canonicalizeComposerName(item.name) ?? item.name);
+}
+
+function canonicalWorks(items: Array<{ title: string; composerName?: string }> | undefined): Array<[string, string]> {
+  return (items ?? []).map((item) => [
+    canonicalizeComposerName(item.composerName ?? '') ?? item.composerName ?? '',
+    item.title,
+  ]);
+}
 
 // Intentionally synchronous for a parse-error assertion against the captured official fixture.
 function awaitString(name: string): string {
