@@ -19,6 +19,9 @@
     {
       "name": "Philippe Herreweghe",
       "role": "conductor"
+    },
+    {
+      "name": "Collegium Vocale Gent"
     }
   ],
   "composers": [
@@ -45,16 +48,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-collegium-vocale-gent-1",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-24",
       "externalId": "cndm-collegium-vocale-gent-1"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23829",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-24",
       "externalId": "23829"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-24"
 }

@@ -18,6 +18,9 @@
   "performers": [
     {
       "name": "Juan Portilla"
+    },
+    {
+      "name": "Delirivm Musica"
     }
   ],
   "composers": [
@@ -61,16 +64,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-delirivm-musica",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-24",
       "externalId": "cndm-delirivm-musica"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23825",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-24",
       "externalId": "23825"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-24"
 }

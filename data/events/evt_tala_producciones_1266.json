@@ -61,10 +61,16 @@
     {
       "sourceId": "src_tala_producciones_es",
       "url": "https://www.tala-producciones.es/salon-del-ateneo/sentieri-selvaggi-pasado-y-presente",
-      "checkedAt": "2026-09-21",
+      "checkedAt": "2026-09-24",
       "externalId": "1266"
+    },
+    {
+      "sourceId": "src_ateneo_madrid",
+      "url": "https://ateneodemadrid.com/evento/ciclo-el-salon-del-ateneo-sentieri-selvaggi-pasado-y-presente",
+      "checkedAt": "2026-09-24",
+      "externalId": "64539"
     }
   ],
   "primarySourceId": "src_tala_producciones_es",
-  "lastVerifiedAt": "2026-09-21"
+  "lastVerifiedAt": "2026-09-24"
 }

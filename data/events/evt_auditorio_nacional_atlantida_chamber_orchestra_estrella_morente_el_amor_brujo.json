@@ -36,6 +36,9 @@
     },
     {
       "name": "Manuel de Falla"
+    },
+    {
+      "name": "Don Boyso"
     }
   ],
   "works": [
@@ -64,10 +67,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/atlantida-chamber-orchestra-estrella-morente-el-amor-brujo",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-24",
       "externalId": "atlantida-chamber-orchestra-estrella-morente-el-amor-brujo"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-24"
 }

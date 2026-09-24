@@ -30,6 +30,9 @@
   "composers": [
     {
       "name": "C. Monteverdi"
+    },
+    {
+      "name": "Claudio Monteverdi"
     }
   ],
   "works": [
@@ -51,10 +54,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/impacta-orfeo-de-monteverdi",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-24",
       "externalId": "impacta-orfeo-de-monteverdi"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-24"
 }

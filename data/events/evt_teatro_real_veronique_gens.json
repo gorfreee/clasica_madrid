@@ -15,7 +15,18 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Veronique Gens"
+    },
+    {
+      "name": "Louis-Noël Bestion de Camboulas",
+      "role": "conductor"
+    },
+    {
+      "name": "Ensemble Les Surprises"
+    }
+  ],
   "composers": [
     {
       "name": "Jean-Philippe Rameau"
@@ -47,10 +58,10 @@
     {
       "sourceId": "src_teatro_real",
       "url": "https://www.teatroreal.es/es/espectaculo/veronique-gens",
-      "checkedAt": "2026-09-09",
+      "checkedAt": "2026-09-24",
       "externalId": "veronique-gens"
     }
   ],
   "primarySourceId": "src_teatro_real",
-  "lastVerifiedAt": "2026-09-09"
+  "lastVerifiedAt": "2026-09-24"
 }

@@ -36,6 +36,9 @@
     },
     {
       "name": "Giacomo Puccini"
+    },
+    {
+      "name": "I. Adagio"
     }
   ],
   "works": [
@@ -65,10 +68,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/atlantida-chamber-orchestra-mischa-maisky-el-nuevo-mundo",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-24",
       "externalId": "atlantida-chamber-orchestra-mischa-maisky-el-nuevo-mundo"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-24"
 }

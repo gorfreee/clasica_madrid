@@ -53,6 +53,9 @@
     },
     {
       "name": "Felix Mendelssohn-Bartholdy"
+    },
+    {
+      "name": "Felix Mendelssohn"
     }
   ],
   "works": [
@@ -113,10 +116,10 @@
     {
       "sourceId": "src_fundacion_juan_march",
       "url": "https://www.march.es/es/madrid/concierto/ossians-dream",
-      "checkedAt": "2026-09-18",
+      "checkedAt": "2026-09-24",
       "externalId": "/es/madrid/concierto/ossians-dream"
     }
   ],
   "primarySourceId": "src_fundacion_juan_march",
-  "lastVerifiedAt": "2026-09-18"
+  "lastVerifiedAt": "2026-09-24"
 }

@@ -28,6 +28,9 @@
     },
     {
       "name": "Nadia Boulanger"
+    },
+    {
+      "name": "Lili"
     }
   ],
   "works": [],
@@ -43,10 +46,10 @@
     {
       "sourceId": "src_fundacionpiumosso_com",
       "url": "https://www.fundacionpiumosso.com/evento/duo-mujeres-compositoras-del-clasico-a-lo-conceptual",
-      "checkedAt": "2026-09-22",
+      "checkedAt": "2026-09-24",
       "externalId": "2236"
     }
   ],
   "primarySourceId": "src_fundacionpiumosso_com",
-  "lastVerifiedAt": "2026-09-22"
+  "lastVerifiedAt": "2026-09-24"
 }

@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_real_academia_bellas_artes_bose_pastor_duo",
+  "slug": "bose-pastor-duo",
+  "title": "Bose Pastor – Duo",
+  "status": "scheduled",
+  "venueId": "ven_real_academia_bellas_artes_salon_actos",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_real_academia_bellas_artes_bose_pastor_duo_01",
+      "date": "2026-10-19",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Pia Bose"
+    },
+    {
+      "name": "Antonio Pastor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Franz Liszt"
+    },
+    {
+      "name": "Camille Saint-Saëns"
+    },
+    {
+      "name": "Ígor Stravinski"
+    }
+  ],
+  "works": [
+    {
+      "title": "Les Préludes",
+      "composerName": "Franz Liszt"
+    },
+    {
+      "title": "Danse macabre",
+      "composerName": "Camille Saint-Saëns"
+    },
+    {
+      "title": "Le Sacre du printemps",
+      "composerName": "Ígor Stravinski"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_real_academia_bellas_artes_san_fernando",
+      "url": "https://www.realacademiabellasartessanfernando.com/actividades/conciertos/bose-pastor-duo",
+      "checkedAt": "2026-09-24",
+      "externalId": "bose-pastor-duo"
+    }
+  ],
+  "primarySourceId": "src_real_academia_bellas_artes_san_fernando",
+  "lastVerifiedAt": "2026-09-24"
+}

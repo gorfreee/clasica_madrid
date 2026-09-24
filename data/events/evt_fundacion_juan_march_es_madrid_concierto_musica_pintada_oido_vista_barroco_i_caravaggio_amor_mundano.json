@@ -105,17 +105,20 @@
     "renaissance",
     "baroque"
   ],
-  "formats": [],
+  "formats": [
+    "choral",
+    "early-music"
+  ],
   "kind": "established",
   "access": "free",
   "citations": [
     {
       "sourceId": "src_fundacion_juan_march",
       "url": "https://www.march.es/es/madrid/concierto/musica-pintada-oido-vista-barroco-i-caravaggio-amor-mundano",
-      "checkedAt": "2026-09-18",
+      "checkedAt": "2026-09-24",
       "externalId": "/es/madrid/concierto/musica-pintada-oido-vista-barroco-i-caravaggio-amor-mundano"
     }
   ],
   "primarySourceId": "src_fundacion_juan_march",
-  "lastVerifiedAt": "2026-09-18"
+  "lastVerifiedAt": "2026-09-24"
 }

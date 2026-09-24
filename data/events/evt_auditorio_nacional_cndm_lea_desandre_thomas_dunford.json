@@ -50,6 +50,12 @@
     },
     {
       "name": "Jacques Offenbach"
+    },
+    {
+      "name": "Reynaldo Hahn"
+    },
+    {
+      "name": "Erik Satie"
     }
   ],
   "works": [
@@ -160,7 +166,7 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-lea-desandre-thomas-dunford",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-24",
       "externalId": "cndm-lea-desandre-thomas-dunford"
     },
     {
@@ -171,5 +177,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-24"
 }

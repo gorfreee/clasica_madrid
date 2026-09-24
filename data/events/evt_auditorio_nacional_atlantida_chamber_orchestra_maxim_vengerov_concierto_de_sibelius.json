@@ -36,6 +36,9 @@
     },
     {
       "name": "Antonín Dvořák"
+    },
+    {
+      "name": "Mijaíl Glinka"
     }
   ],
   "works": [
@@ -65,10 +68,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/atlantida-chamber-orchestra-maxim-vengerov-concierto-de-sibelius",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-09-24",
       "externalId": "atlantida-chamber-orchestra-maxim-vengerov-concierto-de-sibelius"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-09-24"
 }

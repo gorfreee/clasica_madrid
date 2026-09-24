@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_gala_de_ano_nuevo",
+  "slug": "excelentia-gala-de-ano-nuevo",
+  "title": "Excelentia. Gala de Año Nuevo",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_gala_de_ano_nuevo_01",
+      "date": "2027-01-02",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Clásica Santa Cecilia"
+    },
+    {
+      "name": "José Luis López Antón",
+      "role": "conductor"
+    },
+    {
+      "name": "Francesco Castoro"
+    },
+    {
+      "name": "Eduardo Sandoval"
+    },
+    {
+      "name": "Miguel Borrallo"
+    }
+  ],
+  "composers": [
+    {
+      "name": "“My Way”"
+    }
+  ],
+  "works": [
+    {
+      "title": "Claude François / Jacques Revaux / Paul Anka",
+      "composerName": "“My Way”"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-gala-de-ano-nuevo",
+      "checkedAt": "2026-09-24",
+      "externalId": "excelentia-gala-de-ano-nuevo"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-09-24"
+}

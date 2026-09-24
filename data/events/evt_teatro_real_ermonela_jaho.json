@@ -15,7 +15,26 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Ermonela Jaho"
+    },
+    {
+      "name": "Léo Vermot Desroches"
+    },
+    {
+      "name": "Francesco Cilluffo",
+      "role": "conductor"
+    },
+    {
+      "name": "José Luis Basso",
+      "role": "choir"
+    },
+    {
+      "name": "Coro y Orquesta Titulares del Teatro Real",
+      "role": "choir"
+    }
+  ],
   "composers": [
     {
       "name": "Jules Massenet"
@@ -45,10 +64,10 @@
     {
       "sourceId": "src_teatro_real",
       "url": "https://www.teatroreal.es/es/espectaculo/ermonela-jaho",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-24",
       "externalId": "ermonela-jaho"
     }
   ],
   "primarySourceId": "src_teatro_real",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-24"
 }
