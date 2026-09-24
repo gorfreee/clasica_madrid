@@ -159,12 +159,12 @@ const nav = headerNavigation(Astro.url.pathname);
   }
 
   .nav-link:hover {
-    color: var(--coral);
+    color: var(--color-accent);
   }
 
   .nav-link[aria-current='page']::after,
   .nav-link[aria-current='true']::after {
-    background: var(--coral);
+    background: var(--color-accent);
   }
 
   .nav-trigger {
@@ -197,8 +197,8 @@ const nav = headerNavigation(Astro.url.pathname);
     right: .25rem;
     min-width: 11.75rem;
     padding: .35rem;
-    border: 1px solid #44443f;
-    box-shadow: 0 .8rem 2rem rgb(0 0 0 / 24%);
+    border: 1px solid var(--color-header-border);
+    box-shadow: 0 .8rem 2rem var(--color-shadow);
   }
 
   .nav-popover a {
@@ -209,11 +209,11 @@ const nav = headerNavigation(Astro.url.pathname);
 
   .nav-popover a:hover,
   .nav-popover a[aria-current='page'] {
-    background: #242421;
+    background: var(--color-header-hover);
   }
 
   .nav-popover a[aria-current='page'] {
-    color: var(--coral);
+    color: var(--color-accent);
   }
 
   @media (max-width: 620px) {
@@ -236,7 +236,7 @@ const nav = headerNavigation(Astro.url.pathname);
     }
 
     .nav-link[aria-current='page'] {
-      color: var(--coral);
+      color: var(--color-accent);
     }
 
     .nav-link::after {
@@ -251,13 +251,13 @@ const nav = headerNavigation(Astro.url.pathname);
     .nav-panel {
       padding-top: .2rem;
       padding-bottom: .35rem;
-      border-top-color: #353531;
+      border-top-color: var(--color-header-divider);
     }
 
     .nav-panel a {
       min-height: 2.9rem;
       padding: .95rem .15rem;
-      border-bottom: 1px solid #2d2d29;
+      border-bottom: 1px solid var(--color-header-rule);
       letter-spacing: .09em;
     }
 
@@ -268,7 +268,7 @@ const nav = headerNavigation(Astro.url.pathname);
     .nav-panel a:hover,
     .nav-panel a[aria-current='page'] {
       background: transparent;
-      color: var(--coral);
+      color: var(--color-accent);
     }
   }
 </style>

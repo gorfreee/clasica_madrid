@@ -139,7 +139,7 @@ const only = action.occurrences[0];
     padding: .18rem 0;
     border: 0;
     background: transparent;
-    color: var(--muted);
+    color: var(--color-text-muted);
     font-size: .94rem;
     font-weight: 600;
     line-height: 1.35;
@@ -161,12 +161,12 @@ const only = action.occurrences[0];
   .calendar-action__trigger:hover,
   .calendar-action__trigger:focus-visible,
   .calendar-action[open] > .calendar-action__trigger {
-    color: var(--blue);
+    color: var(--color-brand);
   }
 
   .calendar-action__trigger:focus-visible,
   .calendar-action__option--date:focus-visible {
-    outline: 2px solid var(--blue);
+    outline: 2px solid var(--color-brand);
     outline-offset: 4px;
   }
 
@@ -223,8 +223,8 @@ const only = action.occurrences[0];
     padding: .25rem 0;
     overflow: auto;
     overscroll-behavior: contain;
-    border: 1px solid var(--line);
-    background: var(--paper-light);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
   }
 
   .calendar-action__menu.is-align-end {
@@ -241,7 +241,7 @@ const only = action.occurrences[0];
   .calendar-action__when {
     margin: 0;
     padding: .45rem .9rem .35rem;
-    color: var(--muted);
+    color: var(--color-text-muted);
     font-size: .75rem;
     font-weight: 600;
     line-height: 1.35;
@@ -253,7 +253,7 @@ const only = action.occurrences[0];
   }
 
   .calendar-action__date {
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--color-border);
   }
 
   .calendar-action__option {
@@ -266,7 +266,7 @@ const only = action.occurrences[0];
     padding: .7rem .9rem;
     border: 0;
     background: transparent;
-    color: var(--ink);
+    color: var(--color-text);
     font: inherit;
     font-size: .94rem;
     font-weight: 600;
@@ -284,31 +284,31 @@ const only = action.occurrences[0];
   }
 
   .calendar-action__option--date strong {
-    color: var(--blue);
+    color: var(--color-brand);
     font-size: .82rem;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
   }
 
   .calendar-action__date[open] > .calendar-action__option--date {
-    color: var(--blue);
+    color: var(--color-brand);
   }
 
   .calendar-action__providers {
     margin: 0 .55rem .35rem;
-    border-left: 2px solid var(--line);
+    border-left: 2px solid var(--color-border);
   }
 
   .calendar-action__option:hover,
   .calendar-action__option:focus-visible {
-    color: var(--blue);
+    color: var(--color-brand);
     text-decoration: underline;
     text-decoration-thickness: 1px;
     text-underline-offset: .16em;
   }
 
   .calendar-action__option:focus-visible {
-    outline: 2px solid var(--blue);
+    outline: 2px solid var(--color-brand);
     outline-offset: -2px;
   }
 

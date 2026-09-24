@@ -368,7 +368,7 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
   }
 
   .contact-form label span {
-    color: var(--muted);
+    color: var(--color-text-muted);
     font-weight: 600;
   }
 
@@ -377,10 +377,10 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
   .contact-form textarea {
     width: 100%;
     min-width: 0;
-    border: 1px solid var(--ink);
+    border: 1px solid var(--color-text);
     border-radius: 0;
-    background: var(--paper-light);
-    color: var(--ink);
+    background: var(--color-surface);
+    color: var(--color-text);
   }
 
   .contact-form input,
@@ -398,14 +398,14 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
 
   .contact-form input::placeholder,
   .contact-form textarea::placeholder {
-    color: var(--muted);
+    color: var(--color-text-muted);
     opacity: 1;
   }
 
   .contact-form input:focus,
   .contact-form select:focus,
   .contact-form textarea:focus {
-    border-color: var(--blue);
+    border-color: var(--color-brand);
   }
 
   .contact-form__trap {
@@ -426,7 +426,7 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
   .contact-form__status,
   .contact-form__noscript {
     margin: 0;
-    color: var(--muted);
+    color: var(--color-text-muted);
     font-size: .82rem;
     line-height: 1.5;
   }
@@ -443,8 +443,8 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
     padding: .8rem 1.2rem;
     border: 0;
     border-radius: 0;
-    background: var(--ink);
-    color: var(--paper-light);
+    background: var(--color-text);
+    color: var(--color-surface);
     font-size: .8rem;
     font-weight: 800;
     letter-spacing: var(--type-tracking-label);
@@ -452,27 +452,27 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
     cursor: pointer;
   }
 
-  .contact-form__actions button:hover:not(:disabled) { background: var(--blue); }
+  .contact-form__actions button:hover:not(:disabled) { background: var(--color-brand); }
   .contact-form__actions button:disabled { cursor: not-allowed; opacity: .52; }
-  .contact-form__status[data-status='success'] { color: #176235; font-weight: 700; }
-  .contact-form__status[data-status='error'] { color: #9c2919; font-weight: 700; }
+  .contact-form__status[data-status='success'] { color: var(--color-success); font-weight: 700; }
+  .contact-form__status[data-status='error'] { color: var(--color-error); font-weight: 700; }
 
   .contact-direct {
     padding: 2.25rem 0 1rem 2.5rem;
-    border-left: 1px solid var(--ink);
+    border-left: 1px solid var(--color-text);
   }
 
-  .contact-direct__label { color: var(--blue); }
+  .contact-direct__label { color: var(--color-brand); }
   .contact-direct h2 { margin-top: .8rem; }
   .contact-direct > p:not(.contact-direct__label) {
     margin: 1.25rem 0 .6rem;
-    color: var(--muted);
+    color: var(--color-text-muted);
     line-height: 1.5;
   }
 
   .contact-direct__email {
     display: inline-block;
-    color: var(--blue);
+    color: var(--color-brand);
     font-size: clamp(1rem, 2vw, 1.2rem);
     font-weight: 800;
     overflow-wrap: anywhere;
@@ -484,7 +484,7 @@ const turnstileSiteKey = resolveTurnstileSiteKey({
     .contact-direct {
       margin-top: 2.5rem;
       padding: 2rem 0 0;
-      border-top: 1px solid var(--ink);
+      border-top: 1px solid var(--color-text);
       border-left: 0;
     }
   }
