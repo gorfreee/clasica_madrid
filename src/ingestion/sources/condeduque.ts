@@ -1,7 +1,12 @@
 import { parseObservedTime, parseSpanishCalendarDate } from '../dates.ts';
-import { decodeHtmlEntities, flattenHtmlBlocks, stripTags } from '../html.ts';
-import { emptyObservedLists } from '../observed.ts';
-import type { ObservedFactPatch } from '../observed.ts';
+import { collapseWhitespace, decodeHtmlEntities, flattenHtmlBlocks, stripTags } from '../html.ts';
+import {
+  emptyObservedLists,
+  normalizeComposerList,
+  normalizePersonList,
+  normalizeWorkList,
+} from '../observed.ts';
+import type { ObservedFactPatch, ObservedPerson, ObservedWork } from '../observed.ts';
 import type { RawEvent, RawOccurrence, SourceAdapter } from '../types.ts';
 
 const ID = 'condeduque';
@@ -106,9 +111,11 @@ export function parseCondeDuqueDetail(event: RawEvent, body: string): ObservedFa
   const info = /<details\b[^>]*class="[^"]*\bfield--group-info\b[^"]*"/i.exec(body);
   const copy = info ? balancedDiv(body.slice(info.index), /<div\b[^>]*class="[^"]*\bfield--name-body\b[^"]*"[^>]*>/i) : undefined;
   const description = copy ? flattenHtmlBlocks(copy).slice(0, 5000) : undefined;
-  const programText = description?.split(/\nPrograma\n/i)[1];
+  const programText = programTextFrom(description);
+  const program = copy ? programEntries(copy) : { composers: [], works: [] };
   const credits = field(body, 'credits');
   const categoryText = credits ? flattenHtmlBlocks(credits).split('\n').find((line) => /^ESTILO\s*:?\s*.+/i.test(line)) : undefined;
+  const performers = performersFromCredits(credits);
   return {
     occurrences,
     ...(venueText ? { venueText } : {}),
@@ -116,7 +123,181 @@ export function parseCondeDuqueDetail(event: RawEvent, body: string): ObservedFa
     ...(description ? { description } : {}),
     ...(programText ? { programText } : {}),
     ...(categoryText ? { categoryText } : {}),
+    ...(performers.length > 0 ? { performers } : {}),
+    ...(program.composers.length > 0 ? { composers: program.composers } : {}),
+    ...(program.works.length > 0 ? { works: program.works } : {}),
   };
+}
+
+/** `Programa` and `Programa:` are the same editorial heading. */
+function programTextFrom(description: string | undefined): string | undefined {
+  if (!description) return undefined;
+  const parts = description.split(/\nPrograma:?\n/i);
+  if (parts.length < 2) return undefined;
+  const text = parts.slice(1).join('\n').trim();
+  return text || undefined;
+}
+
+const NON_MUSICAL_CREDIT =
+  /\b(?:iluminaci[oó]n|vestuario|coreograf[ií]a|concepto|producci[oó]n|management|bailarines?|dise[nñ]o|escenograf[ií]a|dramaturg)/i;
+const SECTION_LABEL = /^(?:pa[ií]s|formato|estilo|p[úu]blico)\b/i;
+const COMMISSION_NOTE = /\.\s*(?:ayuda\s*\/\s*encargo|encargo)\b[\s\S]*$/i;
+const PROGRAM_STOP = /^(?:produce|co-produce|coproduce|colabora)\b/i;
+
+function performersFromCredits(credits: string | undefined): ObservedPerson[] {
+  if (!credits) return [];
+  const lines = flattenHtmlBlocks(credits).split('\n');
+  const start = lines.findIndex((line) => /^FORMACI[ÓO]N\b/i.test(line));
+  if (start < 0) return [];
+  const people: ObservedPerson[] = [];
+  for (const raw of lines.slice(start)) {
+    const line = raw.replace(/^FORMACI[ÓO]N\s*/i, '').trim();
+    if (!line) continue;
+    if (SECTION_LABEL.test(line)) break;
+    people.push(...formationLine(line));
+  }
+  return normalizePersonList(people);
+}
+
+function formationLine(line: string): ObservedPerson[] {
+  if (line.length > 180) return [];
+  const colon = line.indexOf(':');
+  if (colon > 0 && colon < 80) {
+    const ensemble = collapseWhitespace(line.slice(0, colon));
+    const parts = line.slice(colon + 1).split(',').map((part) => collapseWhitespace(part)).filter(Boolean);
+    const role = parts.length > 1 && looksLikeCreditRole(parts[parts.length - 1]!) ? parts.pop() : undefined;
+    if ((role && NON_MUSICAL_CREDIT.test(role)) || NON_MUSICAL_CREDIT.test(ensemble)) return [];
+    const credited = [
+      ...(ensemble ? [{ name: ensemble, ...(role ? { roleText: role } : {}) }] : []),
+      ...parts.filter((name) => !NON_MUSICAL_CREDIT.test(name)).map((name) => ({
+        name,
+        ...(role ? { roleText: role } : {}),
+      })),
+    ];
+    return credited;
+  }
+  const parts = line.split(',').map((part) => collapseWhitespace(part)).filter(Boolean);
+  if (parts.length < 2) return [];
+  const role = parts[parts.length - 1]!;
+  if (!looksLikeCreditRole(role) || NON_MUSICAL_CREDIT.test(parts.slice(1).join(', '))) return [];
+  return parts.slice(0, -1).map((name) => ({ name, roleText: role }));
+}
+
+function looksLikeCreditRole(text: string): boolean {
+  return text.length > 0 && text.length <= 48 && !/\d/.test(text);
+}
+
+function programEntries(
+  copy: string,
+): { composers: ReturnType<typeof normalizeComposerList>; works: ObservedWork[] } {
+  const prose = flattenHtmlBlocks(copy);
+  const section = programSectionHtml(copy);
+  if (!section) return { composers: [], works: [] };
+  const works: ObservedWork[] = [];
+  for (const chunk of section.split(/<br\s*\/?>|<\/p>\s*<p\b[^>]*>/gi)) {
+    const plain = stripTags(chunk);
+    if (!plain) continue;
+    if (PROGRAM_STOP.test(plain)) break;
+    const parsed = composerWorksFromChunk(chunk, prose);
+    if (!parsed) continue;
+    works.push(...parsed);
+  }
+  const normalized = normalizeWorkList(works);
+  return {
+    composers: normalizeComposerList(normalized.flatMap((work) => (
+      work.composerName ? [{ name: work.composerName }] : []
+    ))),
+    works: normalized,
+  };
+}
+
+function programSectionHtml(copy: string): string | undefined {
+  const start = /<strong>\s*Programa\s*:?\s*<\/strong>/i.exec(copy);
+  if (!start) return undefined;
+  const slice = copy.slice(start.index + start[0].length);
+  const end = /<strong>\s*(?:Produce|Co-Produce|Colabora)\b/i.exec(slice);
+  return end ? slice.slice(0, end.index) : slice;
+}
+
+function composerWorksFromChunk(chunk: string, prose: string): ObservedWork[] | undefined {
+  const strong = /^\s*(?:<[^>]+>\s*)*<strong>([\s\S]*?)<\/strong>/i.exec(chunk);
+  let composer: string | undefined;
+  let restHtml = chunk;
+  let plainRest = '';
+  if (strong?.[1]) {
+    composer = collapseWhitespace(stripTags(strong[1]));
+    restHtml = chunk.slice((strong.index ?? 0) + strong[0].length);
+    plainRest = stripTags(restHtml);
+  } else {
+    const caps = leadingEditorialName(stripTags(chunk));
+    if (!caps) return undefined;
+    composer = caps.name;
+    plainRest = caps.rest;
+  }
+  if (!composer || PROGRAM_STOP.test(composer) || /^programa\b/i.test(composer)) return undefined;
+  const resolved = expandInitialComposer(composer, prose);
+  const titles = workTitles(restHtml, plainRest);
+  if (titles.length === 0) return undefined;
+  return titles.map((title) => ({ title, composerName: resolved }));
+}
+
+/** Condeduque prints the composer in capitals and the work title after it. */
+function leadingEditorialName(plain: string): { name: string; rest: string } | undefined {
+  const tokens = plain.split(/\s+/).filter(Boolean);
+  const nameTokens: string[] = [];
+  for (const token of tokens) {
+    const core = token.replace(/^[«"“'(\[]+|[»"”')\],.;:]+$/g, '');
+    if (!core || !isEditorialCaps(core)) break;
+    nameTokens.push(token.replace(/[,:;]+$/g, ''));
+  }
+  if (nameTokens.length < 2) return undefined;
+  const name = nameTokens.join(' ');
+  const at = plain.indexOf(name);
+  const rest = at >= 0 ? plain.slice(at + name.length).trim() : '';
+  if (!rest) return undefined;
+  return { name, rest };
+}
+
+function isEditorialCaps(token: string): boolean {
+  return token === token.toLocaleUpperCase('es') && /\p{Lu}/u.test(token) && !/\p{Ll}/u.test(token);
+}
+
+function workTitles(restHtml: string, plainRest: string): string[] {
+  const italic = [...restHtml.matchAll(/<em\b[^>]*>([\s\S]*?)<\/em>/gi)]
+    .map((match) => collapseWhitespace(stripTags(match[1] ?? '')))
+    .filter((title) => title && !/^[-–—.;,]+$/u.test(title));
+  if (italic.length > 0) return italic;
+  const plain = collapseWhitespace(plainRest).replace(COMMISSION_NOTE, '').replace(/[.;,\s]+$/g, '').trim();
+  return plain ? [plain] : [];
+}
+
+/**
+ * `A. Zagajewski` stays abbreviated unless this same ficha prints exactly one
+ * fuller name with the same initials and surname.
+ */
+function expandInitialComposer(name: string, prose: string): string {
+  const cleaned = collapseWhitespace(name);
+  const match = /^((?:\p{Lu}\.\s*){1,3})(\p{Lu}[\p{L}’'-]+)$/u.exec(cleaned);
+  if (!match?.[1] || !match[2] || !prose) return cleaned;
+  const initials = [...match[1].matchAll(/\p{Lu}/gu)].map((item) => item[0]!);
+  const surname = match[2];
+  const re = new RegExp(
+    String.raw`\b((?:\p{Lu}[\p{Ll}’'-]+\s+){${initials.length}}${escapeRegExp(surname)})\b`,
+    'gu',
+  );
+  const found = new Set<string>();
+  for (const hit of prose.matchAll(re)) {
+    const full = collapseWhitespace(hit[1] ?? '');
+    const given = full.slice(0, full.length - surname.length).trim().split(/\s+/);
+    if (given.length === initials.length && given.every((part, index) => part.startsWith(initials[index]!))) {
+      found.add(full);
+    }
+  }
+  return found.size === 1 ? [...found][0]! : cleaned;
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function clock(raw: string): string | undefined {

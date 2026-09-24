@@ -45,6 +45,7 @@ const ESTABLISHED_VENUE_IDS = new Set([
   'ven_circulo_bellas_artes_sala_columnas',
   'ven_condeduque',
   'ven_condeduque_auditorio',
+  'ven_condeduque_teatro',
   'ven_museo_reina_sofia',
   'ven_museo_reina_sofia_auditorio_400',
   'ven_museo_prado',

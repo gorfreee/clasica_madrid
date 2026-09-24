@@ -173,7 +173,7 @@ Derivación preferida a partir de hechos:
 | órgano | `organ` (a menudo + `recital`) |
 | ópera | `opera` — categoría oficial «Ópera», título que nombra el evento como ópera (gala, temporada, micróperas, arias de ópera, ópera en N actos) o ficha de detalle (dramma lirico, actos). La mera palabra «ópera» en un título más largo no basta ni debe congelar el format. |
 | zarzuela | `zarzuela` |
-| Lied / mélodie con canto y piano | `lied` + `recital` |
+| Lied / mélodie con canto y piano | `lied` + `recital`. Es señal fuerte cuando el título, la categoría o el ciclo anuncian el recital, ciclo o programa como lied, lieder o mélodie. Una aparición sólo en `programText`, sobre todo en el título de una obra, es como mucho un indicio débil: no congela el formato. |
 | música antigua / historicamente informada | `early-music` (combinable) |
 | coro + orquesta | `choral` + `symphonic` |
 | identidad no encaja o es híbrida no clasificable | `other` o vacío |

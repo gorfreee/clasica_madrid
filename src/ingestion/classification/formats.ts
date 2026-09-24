@@ -142,11 +142,12 @@ function collectFormatHits(facts: ObservedFacts): FormatHit[] {
     });
   }
   if (isLiedFormat(evidence)) {
+    const announced = identityAnnouncesLied(evidence.identity);
     hits.push({
       format: 'lied',
       ruleId: 'lied-format',
-      evidence: facts.title,
-      strength: 'strong',
+      evidence: announced ? facts.title || facts.categoryText || facts.seriesText || '' : facts.programText ?? '',
+      strength: announced ? 'strong' : 'weak',
     });
   }
   return hits;
@@ -398,12 +399,29 @@ function hasEarlyMusicPhrase(fields: string[]): boolean {
   return EARLY_MUSIC_PHRASES.some((phrase) => evidenceHasPhrase(fields, phrase));
 }
 
+/**
+ * A recital, cycle or programme announced as lied / lieder / mélodie is strong.
+ * The same word inside `programText` — typically one work title — is only a
+ * weak hint. Taxonomy may replace it; it must not freeze the concert format.
+ */
 function isLiedFormat(evidence: FormatEvidence): boolean {
-  const eventFields = [evidence.identity, evidence.program];
+  return identityAnnouncesLied(evidence.identity) || programHintsLied(evidence.program);
+}
+
+function identityAnnouncesLied(identity: string): boolean {
+  return namesLiedGenre(identity);
+}
+
+function programHintsLied(program: string): boolean {
+  return namesLiedGenre(program);
+}
+
+function namesLiedGenre(text: string): boolean {
   return (
-    evidenceHasWord(eventFields, 'lied') ||
-    evidenceHasWord(eventFields, 'lieder') ||
-    evidenceHasWord(eventFields, 'melodie')
+    hasWord(text, 'lied') ||
+    hasWord(text, 'lieder') ||
+    hasWord(text, 'melodie') ||
+    hasWord(text, 'melodies')
   );
 }
 

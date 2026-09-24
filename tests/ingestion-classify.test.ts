@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { classify, resolveAccess, resolveEras, resolveFormats, resolveKind } from '../src/ingestion/classification/classify.ts';
+import { classifyObserved } from '../src/ingestion/classification/enrich.ts';
+import { strongFormatValues } from '../src/ingestion/classification/formats.ts';
+import type { AiClassifier } from '../src/ingestion/classification/ai.ts';
 import {
   hasClassicalVocalEnsembleAnchor,
   hasObservedClassicalAcademicAnchor,
@@ -1096,6 +1099,7 @@ describe('eligibility — conflictos y fallback', () => {
     expect(lied.eligibility.value).toBe('include');
     expect(lied.eligibility.ruleId).toBe('classical-concert-series');
     expect(lied.formats.value).toContain('lied');
+    expect(lied.formats.strength).toBe('strong');
 
     const liceo = classify(
       facts({
@@ -1105,6 +1109,54 @@ describe('eligibility — conflictos y fallback', () => {
     );
     expect(liceo.eligibility.value).toBe('include');
     expect(liceo.eligibility.ruleId).toBe('classical-concert-series');
+  });
+
+  it('una obra titulada Mélodie italienne no congela el concierto como lied fuerte', async () => {
+    const programText = [
+      'Manuel de Falla (1876-1946)',
+      'Danza de La vida breve (1904)',
+      'Maurice Ravel (1875-1937)',
+      'Canciones populares para canto y piano sobre textos populares (1910)',
+      '1. Chanson espagnole',
+      '2. Chanson française',
+      '3. Mélodie italienne',
+      '4. Chanson hébraïque',
+      'Sonata n.º 1 Sonate postuma para violín y piano (1897)',
+    ].join('\n');
+    const observed = facts({
+      title: 'Amistad e influencia mutua',
+      seriesText: 'Música vs. Espacios',
+      performers: [{ name: 'Ars Combinatoria' }],
+      composers: [{ name: 'Manuel de Falla' }, { name: 'Maurice Ravel' }],
+      programText,
+      works: [{ title: 'Mélodie italienne', composerName: 'Maurice Ravel' }],
+    });
+    expect(strongFormatValues(observed)).not.toContain('lied');
+    const formats = resolveFormats(observed);
+    expect(formats.value.includes('lied') ? formats.strength : 'absent').not.toBe('strong');
+    const ai: AiClassifier = {
+      async classify(_facts, context) {
+        if (context?.purpose === 'taxonomy') {
+          return {
+            formats: ['chamber'],
+            eras: ['twentieth'],
+            evidence: ['Mélodie italienne'],
+          };
+        }
+        return { candidates: [] };
+      },
+    };
+    const classified = await classifyObserved(observed, { ai });
+    expect(classified.formats.value).toContain('chamber');
+    expect(classified.formats.value).not.toContain('lied');
+
+    const announced = classify(facts({
+      title: 'Récital de mélodies',
+      categoryText: 'Ciclo de Lieder',
+      performers: [{ name: 'Soprano', roleText: 'soprano' }, { name: 'Piano', roleText: 'piano' }],
+    }));
+    expect(announced.formats.value).toContain('lied');
+    expect(announced.formats.strength).toBe('strong');
   });
 
   it('incluye ciclos del Auditorio cuyo título lleva el nombre de la serie', () => {

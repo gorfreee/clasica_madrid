@@ -717,6 +717,8 @@ export const KNOWN_VENUES: KnownVenue[] = [
 const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
   condeduque: {
     auditorio: 'ven_condeduque_auditorio',
+    // The ficha prints the bare hall name. "Teatro" is ambiguous outside this source.
+    teatro: 'ven_condeduque_teatro',
   },
   'fundacion-juan-march': {
     'fundacion juan march madrid': 'ven_fundacion_juan_march_auditorio',
