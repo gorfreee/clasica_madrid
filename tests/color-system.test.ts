@@ -32,8 +32,10 @@ describe('sistema de color', () => {
     expect(css.match(/#0055A0/g)).toEqual(['#0055A0']);
     expect(css).toContain('color-mix(in srgb, var(--color-brand) 6%, transparent)');
     expect(css).toContain('color-mix(in srgb, var(--color-brand) 10%, transparent)');
-    expect(css).toContain('var(--color-brand-wash)');
-    expect(css).toContain('var(--color-brand-tint)');
+    const styles = `${css}\n${readFileSync(path.join(root, 'src/styles/agenda-toolbar.css'), 'utf8')}`;
+    expect(styles).toContain('var(--color-brand-wash)');
+    expect(styles).toContain('var(--color-brand-tint)');
+    expect(styles).not.toMatch(RETIRED_BLUE);
   });
 
   it('mantiene BRAND_BLUE, el manifest y los SVG alineados con el azul oficial', () => {
