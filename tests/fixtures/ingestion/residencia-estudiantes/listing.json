@@ -1,0 +1,156 @@
+{
+  "active_items": [
+    {
+      "ID": 30832,
+      "slug": "critica-ambulante",
+      "title": "Crítica ambulante",
+      "date": "2026-09-24 19:00:00",
+      "excerpt": "de Isidoro Valcárcel Medina",
+      "type_terms": [
+        {
+          "id": 4,
+          "name": "Coloquio",
+          "color": "#da3c00",
+          "lang": "es"
+        },
+        {
+          "id": 35,
+          "name": "Presentación",
+          "color": "#da3c00",
+          "lang": "es"
+        }
+      ]
+    },
+    {
+      "ID": 28878,
+      "slug": "la-ciencia-ante-los-desastres-naturales",
+      "title": "La ciencia ante los desastres naturales",
+      "date": "2026-09-25 18:00:00",
+      "excerpt": "La Noche Europea de los Investigadores 2026",
+      "type_terms": [
+        {
+          "id": 4,
+          "name": "Coloquio",
+          "color": "#da3c00",
+          "lang": "es"
+        }
+      ]
+    },
+    {
+      "ID": 28629,
+      "slug": "manuel-de-falla-y-garcia-lorca-su-encuentro-en-granada",
+      "title": "Manuel de Falla y García Lorca. Su encuentro en Granada",
+      "date": "2026-09-27 19:00:00",
+      "excerpt": "Stefano Russomanno · Ciclo <i>Música vs. Espacios</i>",
+      "type_terms": [
+        {
+          "id": 13,
+          "name": "Conferencia",
+          "color": "#da3c00",
+          "lang": "es"
+        }
+      ]
+    },
+    {
+      "ID": 28630,
+      "slug": "les-apaches-amistad-e-influencia-mutua",
+      "title": "Les Apaches. Amistad e influencia mutua",
+      "date": "2026-10-25 19:00:00",
+      "excerpt": "Ars Combinatoria · Ciclo <i>Música vs. Espacios</i>",
+      "type_terms": [
+        {
+          "id": 9,
+          "name": "Concierto",
+          "color": "#3838bd",
+          "lang": "es"
+        }
+      ]
+    }
+  ],
+  "active_events": [
+    {
+      "ID": 30832,
+      "slug": "critica-ambulante",
+      "title": "Crítica ambulante",
+      "date": "2026-09-24 19:00:00",
+      "excerpt": "de Isidoro Valcárcel Medina",
+      "type_terms": [
+        {
+          "id": 4,
+          "name": "Coloquio",
+          "color": "#da3c00",
+          "lang": "es"
+        },
+        {
+          "id": 35,
+          "name": "Presentación",
+          "color": "#da3c00",
+          "lang": "es"
+        }
+      ]
+    },
+    {
+      "ID": 28878,
+      "slug": "la-ciencia-ante-los-desastres-naturales",
+      "title": "La ciencia ante los desastres naturales",
+      "date": "2026-09-25 18:00:00",
+      "excerpt": "La Noche Europea de los Investigadores 2026",
+      "type_terms": [
+        {
+          "id": 4,
+          "name": "Coloquio",
+          "color": "#da3c00",
+          "lang": "es"
+        }
+      ]
+    },
+    {
+      "ID": 28629,
+      "slug": "manuel-de-falla-y-garcia-lorca-su-encuentro-en-granada",
+      "title": "Manuel de Falla y García Lorca. Su encuentro en Granada",
+      "date": "2026-09-27 19:00:00",
+      "excerpt": "Stefano Russomanno · Ciclo <i>Música vs. Espacios</i>",
+      "type_terms": [
+        {
+          "id": 13,
+          "name": "Conferencia",
+          "color": "#da3c00",
+          "lang": "es"
+        }
+      ]
+    },
+    {
+      "ID": 28630,
+      "slug": "les-apaches-amistad-e-influencia-mutua",
+      "title": "Les Apaches. Amistad e influencia mutua",
+      "date": "2026-10-25 19:00:00",
+      "excerpt": "Ars Combinatoria · Ciclo <i>Música vs. Espacios</i>",
+      "type_terms": [
+        {
+          "id": 9,
+          "name": "Concierto",
+          "color": "#3838bd",
+          "lang": "es"
+        }
+      ]
+    }
+  ],
+  "ile_events": [
+    {
+      "ID": 29919,
+      "slug": "insectos-un-nuevo-alimento",
+      "title": "Insectos: ¿un nuevo alimento?",
+      "date": "2026-09-25 19:00:00",
+      "excerpt": "María Monsalve Pérez · La Noche Europea de los Investigadores 2026",
+      "type_terms": [
+        {
+          "id": 13,
+          "name": "Conferencia",
+          "color": "#da3c00",
+          "lang": "es"
+        }
+      ]
+    }
+  ],
+  "external_events": false
+}

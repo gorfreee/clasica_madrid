@@ -24,6 +24,7 @@ import { rcsmmAdapter } from './sources/rcsmm.ts';
 import { talaProduccionesAdapter } from './sources/tala-producciones.ts';
 import { fundacionMutuaAdapter } from './sources/fundacion-mutua.ts';
 import { coroCamaraMadridAdapter } from './sources/coro-camara-madrid.ts';
+import { residenciaEstudiantesAdapter } from './sources/residencia-estudiantes.ts';
 import { condeduqueAdapter } from './sources/condeduque.ts';
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
@@ -52,6 +53,7 @@ const ADAPTERS: Record<string, SourceAdapter> = {
   [talaProduccionesAdapter.id]: talaProduccionesAdapter,
   [fundacionMutuaAdapter.id]: fundacionMutuaAdapter,
   [coroCamaraMadridAdapter.id]: coroCamaraMadridAdapter,
+  [residenciaEstudiantesAdapter.id]: residenciaEstudiantesAdapter,
   [condeduqueAdapter.id]: condeduqueAdapter,
 };
 
@@ -436,6 +438,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Coro de Cámara de Madrid',
       kind: 'official',
       url: 'https://www.corodecamarademadrid.com/',
+    },
+  },
+  {
+    id: 'residencia-estudiantes',
+    name: 'Residencia de Estudiantes',
+    urls: ['https://residenciadeestudiantes.com/actividades/'],
+    adapterId: residenciaEstudiantesAdapter.id,
+    catalogSourceId: 'src_residencia_estudiantes',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_residencia_estudiantes',
+      slug: 'residencia-de-estudiantes',
+      name: 'Residencia de Estudiantes',
+      kind: 'official',
+      url: 'https://residenciadeestudiantes.com/',
     },
   },
   {
