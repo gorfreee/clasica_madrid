@@ -691,6 +691,9 @@ export const KNOWN_VENUES: KnownVenue[] = [
  * Generic hall names such as "Sala Principal" must never be global aliases.
  */
 const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
+  condeduque: {
+    auditorio: 'ven_condeduque_auditorio',
+  },
   'fundacion-juan-march': {
     'fundacion juan march madrid': 'ven_fundacion_juan_march_auditorio',
   },
