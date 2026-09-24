@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_residencia_estudiantes_28630",
+  "slug": "les-apaches-amistad-e-influencia-mutua",
+  "title": "Les Apaches. Amistad e influencia mutua",
+  "status": "scheduled",
+  "venueId": "ven_residencia_estudiantes",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_residencia_estudiantes_28630_01",
+      "date": "2026-10-25",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ars Combinatoria"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Manuel de Falla"
+    },
+    {
+      "name": "Maurice Ravel"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_residencia_estudiantes",
+      "url": "https://residenciadeestudiantes.com/actividades/les-apaches-amistad-e-influencia-mutua",
+      "checkedAt": "2026-09-24",
+      "externalId": "28630"
+    }
+  ],
+  "primarySourceId": "src_residencia_estudiantes",
+  "lastVerifiedAt": "2026-09-24"
+}

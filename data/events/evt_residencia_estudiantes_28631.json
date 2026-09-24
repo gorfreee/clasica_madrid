@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_residencia_estudiantes_28631",
+  "slug": "el-triunfo-de-la-idea-lugares-de-expresividad",
+  "title": "El triunfo de la idea. Lugares de expresividad",
+  "status": "scheduled",
+  "venueId": "ven_residencia_estudiantes",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_residencia_estudiantes_28631_01",
+      "date": "2026-11-29",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ars Combinatoria"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Manuel de Falla"
+    },
+    {
+      "name": "Sofia Gubaidulina"
+    },
+    {
+      "name": "Luciano Berio"
+    },
+    {
+      "name": "Canco Villarabid"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_residencia_estudiantes",
+      "url": "https://residenciadeestudiantes.com/actividades/el-triunfo-de-la-idea-lugares-de-expresividad",
+      "checkedAt": "2026-09-24",
+      "externalId": "28631"
+    }
+  ],
+  "primarySourceId": "src_residencia_estudiantes",
+  "lastVerifiedAt": "2026-09-24"
+}
