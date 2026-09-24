@@ -17,6 +17,30 @@ const MADRID: { municipality: string; area: Area } = {
 
 export const KNOWN_VENUES: KnownVenue[] = [
   {
+    keys: ['residencia de estudiantes'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_residencia_estudiantes',
+      slug: 'residencia-de-estudiantes',
+      name: 'Residencia de Estudiantes',
+      ...MADRID,
+      address: 'Calle del Pinar, 21-23, 28006 Madrid',
+      url: 'https://residenciadeestudiantes.com/',
+    },
+  },
+  {
+    keys: ['institucion libre de ensenanza'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_institucion_libre_ensenanza',
+      slug: 'institucion-libre-de-ensenanza',
+      name: 'Institución Libre de Enseñanza',
+      ...MADRID,
+      address: 'Paseo del General Martínez Campos, 14, 28010 Madrid',
+      url: 'https://www.fundacionginer.org/',
+    },
+  },
+  {
     keys: ['teatro monumental', 'teatro monumental de madrid'],
     venue: {
       schemaVersion: 1,
