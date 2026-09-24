@@ -1,0 +1,81 @@
+{
+  "data": {
+    "ID": 28630,
+    "slug": "les-apaches-amistad-e-influencia-mutua",
+    "title": "Les Apaches. Amistad e influencia mutua",
+    "event_date": "2026-10-25 19:00:00",
+    "type_terms": [
+      {
+        "id": 9,
+        "name": "Concierto",
+        "color": "#3838bd",
+        "lang": "es"
+      }
+    ],
+    "details": [
+      {
+        "section_name": "Información",
+        "info": [
+          {
+            "title": "Lugar",
+            "content": "<p>Residencia de Estudiantes</p>\n",
+            "bottom_line": "Salón de actos"
+          },
+          {
+            "title": "Ciclo",
+            "content": "<p><a href=\"https://www.residenciadeestudiantes.com/ciclo/musica-vs-espacios\">Música vs. Espacios</a></p>\n",
+            "bottom_line": ""
+          },
+          {
+            "title": "Línea de programación",
+            "content": "<p><a href=\"https://www.residenciadeestudiantes.com/lineas-de-programacion/musica-en-la-residencia\">Música en la Residencia</a></p>\n",
+            "bottom_line": ""
+          },
+          {
+            "title": "Aforo limitado",
+            "content": "<p>Imprescindible reserva previa</p>\n",
+            "bottom_line": "Las reservas se abrirán el 19 de octubre"
+          }
+        ]
+      },
+      {
+        "section_name": "Concierto",
+        "info": [
+          {
+            "title": "Interpretado por",
+            "content": "<p>Ars Combinatoria</p>\n",
+            "bottom_line": ""
+          },
+          {
+            "title": "Obras de",
+            "content": "<p>Manuel de Falla<br />\nMaurice Ravel</p>\n",
+            "bottom_line": ""
+          },
+          {
+            "title": "Dirigido por",
+            "content": "<p>Canco López</p>\n",
+            "bottom_line": ""
+          }
+        ]
+      }
+    ],
+    "description": [
+      {
+        "subtitle": "",
+        "title": "",
+        "text": "<blockquote><p>«Error funesto es decir que hay que comprender la música para gozar de ella. La música no se hace, ni debe jamás hacerse para que se comprenda, sino para que se sienta».</p>\n<p style=\"text-align: right;\">Manuel de Falla</p>\n</blockquote>\n"
+      },
+      {
+        "subtitle": "Conmemoración de los 150 años del nacimiento y los 80 del fallecimiento de Manuel de Falla (1876-1946)",
+        "title": "",
+        "text": "<p>La Residencia de Estudiantes y Arsactus organizan la VIII edición del ciclo <em>Música vs. Espacios</em>, que incluirá una conferencia de Stefano Russomanno, en la que analiza la alianza artística en Granada entre Manuel de Falla y Federico García Lorca, el presente concierto, donde Ars Combinatoria nos sitúa a Falla en el París de comienzos de siglo, en el entorno del colectivo Les Apaches que lideró Maurice Ravel y donde la depuración formal y la transformación de lo popular en lenguaje culto definieron una modernidad compartida, y un segundo concierto también interpretado por Ars Combinatoria: <em>El triunfo de la idea. Lugares de expresividad</em> (29 de noviembre).</p>\n<p>Música, poesía y creación contemporánea dialogan en un homenaje vivo al legado de Falla, explorando su influencia en la modernidad española desde la amistad creadora, el diálogo internacional y la vigencia de su pensamiento musical.</p>\n"
+      },
+      {
+        "subtitle": "Programa",
+        "title": "",
+        "text": "<p style=\"text-align: center;\">Manuel de Falla (1876-1946)<br />\nDanza de <em>La vida breve</em> (1904)<br />\nDanza n.º 1 para violín y piano</p>\n<p style=\"text-align: center;\">Maurice Ravel (1875-1937)<br />\nCanciones populares para canto y piano sobre textos populares (1910)<br />\n1. Chanson espagnole<br />\n2. Chanson française<br />\n3. Mélodie italienne<br />\n4. Chanson hébraïque</p>\n<p style=\"text-align: center;\">Manuel de Falla (1876-1946)<br />\nCanción de <em>El amor brujo</em> (1920)<br />\nCanción del amor dolido para voz y piano</p>\n<p style=\"text-align: center;\">Maurice Ravel (1875-1937)<br />\nSonata n.º 1 <em>Sonate postuma</em> para violín y piano (1897)</p>\n<p style=\"text-align: center;\">Manuel de Falla (1876-1946)<br />\nSiete canciones populares españolas para canto y piano sobre textos populares (1914)<br />\n1. El paño moruno<br />\n2. Seguidilla murciana<br />\n3. Asturiana<br />\n4. Jota<br />\n5. Nana<br />\n6. Canción<br />\n7. Polo</p>\n"
+      }
+    ],
+    "allows_free_entrance": false
+  }
+}
