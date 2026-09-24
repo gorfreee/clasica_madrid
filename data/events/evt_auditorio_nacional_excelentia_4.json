@@ -22,10 +22,10 @@
   ],
   "composers": [
     {
-      "name": "L. Boccherini"
+      "name": "Luigi Boccherini"
     },
     {
-      "name": "P. Sarasate"
+      "name": "Pablo de Sarasate"
     },
     {
       "name": "Manuel de Falla"
@@ -37,23 +37,17 @@
       "name": "Enrique Granados"
     },
     {
-      "name": "Luigi Boccherini"
-    },
-    {
-      "name": "Pablo de Sarasate"
-    },
-    {
       "name": "Isaac Albéniz"
     }
   ],
   "works": [
     {
       "title": "Música nocturna de las calles de Madrid",
-      "composerName": "L. Boccherini"
+      "composerName": "Luigi Boccherini"
     },
     {
       "title": "Romanza andaluza",
-      "composerName": "P. Sarasate"
+      "composerName": "Pablo de Sarasate"
     },
     {
       "title": "Siete canciones populares españolas",
@@ -61,7 +55,7 @@
     },
     {
       "title": "Fandango",
-      "composerName": "L. Boccherini"
+      "composerName": "Luigi Boccherini"
     },
     {
       "title": "El bateo",
@@ -77,11 +71,11 @@
     },
     {
       "title": "Carmen Fantasy",
-      "composerName": "P. Sarasate"
+      "composerName": "Pablo de Sarasate"
     },
     {
       "title": "Aires gitanos",
-      "composerName": "P. Sarasate"
+      "composerName": "Pablo de Sarasate"
     }
   ],
   "eras": [

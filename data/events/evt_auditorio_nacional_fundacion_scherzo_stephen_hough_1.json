@@ -31,7 +31,13 @@
       "name": "Robert Schumann"
     },
     {
-      "name": "Richard M. Sherman / Stephen Hough"
+      "name": "Karlheinz Stockhausen"
+    },
+    {
+      "name": "Richard M. Sherman"
+    },
+    {
+      "name": "Stephen Hough"
     }
   ],
   "works": [
@@ -40,8 +46,8 @@
       "composerName": "Arnold Schoenberg"
     },
     {
-      "title": "Karlheinz Stockhausen — Klavierstück III",
-      "composerName": "Arnold Schoenberg"
+      "title": "Klavierstück III",
+      "composerName": "Karlheinz Stockhausen"
     },
     {
       "title": "Bagatela en re mayor, Op. 119 n.º 10",
@@ -57,7 +63,7 @@
     },
     {
       "title": "Mary Poppins Suite",
-      "composerName": "Richard M. Sherman / Stephen Hough"
+      "composerName": "Richard M. Sherman"
     }
   ],
   "eras": [

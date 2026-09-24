@@ -35,7 +35,13 @@
   ],
   "composers": [
     {
-      "name": "A. Petrovic"
+      "name": "Albena Petrovic"
+    },
+    {
+      "name": "He Zhanhao"
+    },
+    {
+      "name": "Chen Gang"
     },
     {
       "name": "Johannes Brahms"
@@ -44,18 +50,14 @@
   "works": [
     {
       "title": "Obra a determinar (estreno absoluto)",
-      "composerName": "A. Petrovic"
+      "composerName": "Albena Petrovic"
     },
     {
-      "title": "He Zhanhao / Chen Gang",
-      "composerName": "A. Petrovic"
+      "title": "Butterfly Lovers’ Violin Concerto",
+      "composerName": "He Zhanhao"
     },
     {
-      "title": "Ein deutsches Requiem, Op. 45",
-      "composerName": "Johannes Brahms"
-    },
-    {
-      "title": "(Un Réquiem Alemán)",
+      "title": "Ein deutsches Requiem, op. 45",
       "composerName": "Johannes Brahms"
     }
   ],

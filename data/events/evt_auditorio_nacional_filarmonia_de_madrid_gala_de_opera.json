@@ -36,17 +36,8 @@
       "role": "conductor"
     }
   ],
-  "composers": [
-    {
-      "name": "Participativos Filarmonía"
-    }
-  ],
-  "works": [
-    {
-      "title": "Pascual Osa, Director Musical",
-      "composerName": "Participativos Filarmonía"
-    }
-  ],
+  "composers": [],
+  "works": [],
   "eras": [
     "romantic"
   ],

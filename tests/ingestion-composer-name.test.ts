@@ -105,8 +105,26 @@ describe('canonicalizeComposerName', () => {
 
   it('usa el canonicalName de COMPOSERS ante transliteración y diacríticos', () => {
     expect(canonicalizeComposerName('Sergei Rachmaninoff')).toBe('Serguéi Rajmáninov');
+    expect(canonicalizeComposerName('Serguéi Rachmaninov')).toBe('Serguéi Rajmáninov');
     expect(canonicalizeComposerName('Pyotr Ilyich Tchaikovsky')).toBe('Piotr Ilich Chaikovski');
+    expect(canonicalizeComposerName('P.I.Tchaikovsky')).toBe('Piotr Ilich Chaikovski');
     expect(canonicalizeComposerName('Antonin Dvorak')).toBe('Antonín Dvořák');
+  });
+
+  it.each([
+    ['L. Boccherini', 'Luigi Boccherini'],
+    ['P. Sarasate', 'Pablo de Sarasate'],
+    ['C. de Morales', 'Cristóbal de Morales'],
+    ['J. Desprez', 'Josquin des Prez'],
+    ['G.P. da Palestrina', 'Giovanni Pierluigi da Palestrina'],
+    ['H. Villa-Lobos', 'Heitor Villa-Lobos'],
+    ['Í. Stravinsky', 'Ígor Stravinski'],
+    ['Fanny Mendelssohn-Hensel', 'Fanny Hensel'],
+    ['Felix Mendelssohn-Bartholdy', 'Felix Mendelssohn'],
+    ['Manuel M. Ponce', 'Manuel Ponce'],
+    ['Luys Milan', 'Luis de Milán'],
+  ])('converge la abreviatura publicada %s', (input, expected) => {
+    expect(canonicalizeComposerName(input)).toBe(expected);
   });
 
   it.each([

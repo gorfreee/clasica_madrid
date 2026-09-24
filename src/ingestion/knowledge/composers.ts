@@ -26,7 +26,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Josquin des Prez',
-    aliases: ['Josquin des Prez', 'Josquin Desprez', 'Josquin'],
+    aliases: ['Josquin des Prez', 'Josquin Desprez', 'J. Desprez', 'Josquin'],
     eras: ['renaissance'],
   },
   {
@@ -36,12 +36,12 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Cristóbal de Morales',
-    aliases: ['Cristóbal de Morales'],
+    aliases: ['Cristóbal de Morales', 'C. de Morales'],
     eras: ['renaissance'],
   },
   {
     canonicalName: 'Luis de Milán',
-    aliases: ['Luis de Milán', 'Luys de Milán'],
+    aliases: ['Luis de Milán', 'Luys de Milán', 'Luys Milan', 'L. de Milán'],
     eras: ['renaissance'],
   },
   {
@@ -127,7 +127,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Giovanni Pierluigi da Palestrina',
-    aliases: ['Giovanni Pierluigi da Palestrina', 'Palestrina'],
+    aliases: ['Giovanni Pierluigi da Palestrina', 'G.P. da Palestrina', 'G. P. da Palestrina', 'Palestrina'],
     eras: ['renaissance'],
   },
   {
@@ -209,7 +209,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Luigi Boccherini',
-    aliases: ['Luigi Boccherini', 'Boccherini'],
+    aliases: ['Luigi Boccherini', 'L. Boccherini', 'Boccherini'],
     eras: ['classical'],
   },
   {
@@ -229,7 +229,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Felix Mendelssohn',
-    aliases: ['Felix Mendelssohn', 'Mendelssohn'],
+    aliases: ['Felix Mendelssohn', 'Felix Mendelssohn-Bartholdy', 'Mendelssohn'],
     eras: ['romantic'],
   },
   {
@@ -299,6 +299,8 @@ export const COMPOSERS: ComposerKnowledge[] = [
       'Piotr Ilich Chaikovsky',
       'Piotr Ilich Tchaikovsky',
       'Piotr I. Tchaikovsky',
+      'P.I.Tchaikovsky',
+      'P. I. Tchaikovsky',
       'Pyotr Ilyich Tchaikovsky',
       'Tchaikovsky',
       'Tchaikovski',
@@ -375,6 +377,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
       'Rachmaninov',
       'Rachmáninov',
       'Rajmáninov',
+      'Serguéi Rachmaninov',
     ],
     eras: ['romantic'],
   },
@@ -450,7 +453,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Lili Boulanger',
-    aliases: ['Lili Boulanger'],
+    aliases: ['Lili Boulanger', 'L. Boulanger'],
     eras: ['twentieth'],
   },
   {
@@ -465,7 +468,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Ígor Stravinski',
-    aliases: ['Ígor Stravinski', 'Igor Stravinsky', 'Igor Stravinski', 'Stravinski', 'Stravinsky'],
+    aliases: ['Ígor Stravinski', 'Igor Stravinsky', 'Igor Stravinski', 'Í. Stravinsky', 'Stravinski', 'Stravinsky'],
     eras: ['twentieth'],
   },
   {
@@ -789,7 +792,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Nicolas Gombert',
-    aliases: ['Nicolas Gombert', 'Gombert'],
+    aliases: ['Nicolas Gombert', 'N. Gombert', 'Gombert'],
     eras: ['renaissance'],
   },
   {
@@ -814,7 +817,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Diego Ortiz',
-    aliases: ['Diego Ortiz'],
+    aliases: ['Diego Ortiz', 'D. Ortiz'],
     eras: ['renaissance'],
   },
   {
@@ -824,12 +827,12 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Juan del Encina',
-    aliases: ['Juan del Encina', 'Juan del Enzina'],
+    aliases: ['Juan del Encina', 'J. del Encina', 'Juan del Enzina'],
     eras: ['renaissance'],
   },
   {
     canonicalName: 'Mateo Flecha',
-    aliases: ['Mateo Flecha'],
+    aliases: ['Mateo Flecha', 'Mateo Flecha el Viejo', 'M. Flecha el Viejo'],
     eras: ['renaissance'],
   },
   {
@@ -1186,7 +1189,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Fanny Hensel',
-    aliases: ['Fanny Hensel', 'Fanny Hensel-Mendelssohn', 'Fanny Mendelssohn'],
+    aliases: ['Fanny Hensel', 'Fanny Hensel-Mendelssohn', 'Fanny Mendelssohn', 'Fanny Mendelssohn-Hensel'],
     eras: ['romantic'],
   },
   {
@@ -1500,7 +1503,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Pablo de Sarasate',
-    aliases: ['Pablo de Sarasate', 'Pablo Sarasate', 'Sarasate'],
+    aliases: ['Pablo de Sarasate', 'Pablo Sarasate', 'P. Sarasate', 'P. de Sarasate', 'Sarasate'],
     eras: ['romantic'],
   },
   {
@@ -1575,7 +1578,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Joaquín Turina',
-    aliases: ['Joaquín Turina', 'Joaquin Turina', 'J. Turina'],
+    aliases: ['Joaquín Turina', 'Joaquin Turina', 'J. Turina', 'J.Turina'],
     eras: ['twentieth'],
   },
   {
@@ -1665,12 +1668,12 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Manuel Ponce',
-    aliases: ['Manuel Ponce', 'M. Ponce'],
+    aliases: ['Manuel Ponce', 'Manuel María Ponce', 'Manuel M. Ponce', 'M. Ponce'],
     eras: ['twentieth'],
   },
   {
     canonicalName: 'Heitor Villa-Lobos',
-    aliases: ['Heitor Villa-Lobos', 'Villa-Lobos'],
+    aliases: ['Heitor Villa-Lobos', 'H. Villa-Lobos', 'Villa-Lobos'],
     eras: ['twentieth'],
   },
   {

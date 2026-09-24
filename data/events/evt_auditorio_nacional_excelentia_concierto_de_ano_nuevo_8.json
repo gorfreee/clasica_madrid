@@ -35,9 +35,6 @@
       "name": "Johann Strauss II"
     },
     {
-      "name": "J. Strauss"
-    },
-    {
       "name": "Otto Nicolai"
     },
     {
@@ -48,6 +45,9 @@
     },
     {
       "name": "Jacques Offenbach"
+    },
+    {
+      "name": "Johann Strauss I"
     }
   ],
   "works": [
@@ -65,7 +65,7 @@
     },
     {
       "title": "“Banditen Galopp”, op.378",
-      "composerName": "J. Strauss"
+      "composerName": "Johann Strauss II"
     },
     {
       "title": "Las alegres comadres de Windsor, obertura",
@@ -109,15 +109,15 @@
     },
     {
       "title": "Tik -Tak, Polka",
-      "composerName": "J. Strauss"
+      "composerName": "Johann Strauss II"
     },
     {
       "title": "El Danubio azul",
-      "composerName": "J. Strauss"
+      "composerName": "Johann Strauss II"
     },
     {
       "title": "Marcha Radetzky",
-      "composerName": "J. Strauss"
+      "composerName": "Johann Strauss I"
     }
   ],
   "eras": [
