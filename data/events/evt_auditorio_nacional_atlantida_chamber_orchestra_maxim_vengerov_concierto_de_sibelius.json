@@ -29,22 +29,19 @@
   ],
   "composers": [
     {
-      "name": "Ruslán y Ludmila"
+      "name": "Mijaíl Glinka"
     },
     {
       "name": "Jean Sibelius"
     },
     {
       "name": "Antonín Dvořák"
-    },
-    {
-      "name": "Mijaíl Glinka"
     }
   ],
   "works": [
     {
-      "title": "Obertura",
-      "composerName": "Ruslán y Ludmila"
+      "title": "Ruslán y Ludmila: Obertura",
+      "composerName": "Mijaíl Glinka"
     },
     {
       "title": "Concierto para violín en Re menor, Op. 47",

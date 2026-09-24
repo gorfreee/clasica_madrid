@@ -17,14 +17,28 @@
   ],
   "performers": [
     {
-      "name": "Sociedad Coral Excelentia de Madrid"
+      "name": "Sociedad Coral Excelentia de Madrid",
+      "role": "choir"
     },
     {
       "name": "Orquesta Clásica Santa Cecilia",
       "role": "orchestra"
     },
     {
-      "name": "Director, Kynan Johns Ruth Terán, Soprano Eduardo Sandoval, Tenor Olga Syniakova, mezzo David Cervera"
+      "name": "Kynan Johns",
+      "role": "conductor"
+    },
+    {
+      "name": "Ruth Terán"
+    },
+    {
+      "name": "Eduardo Sandoval"
+    },
+    {
+      "name": "Olga Syniakova"
+    },
+    {
+      "name": "David Cervera"
     }
   ],
   "composers": [

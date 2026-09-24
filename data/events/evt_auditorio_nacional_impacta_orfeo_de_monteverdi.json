@@ -29,16 +29,13 @@
   ],
   "composers": [
     {
-      "name": "C. Monteverdi"
-    },
-    {
       "name": "Claudio Monteverdi"
     }
   ],
   "works": [
     {
       "title": "Orfeo (versión semiescénica)",
-      "composerName": "C. Monteverdi"
+      "composerName": "Claudio Monteverdi"
     }
   ],
   "eras": [

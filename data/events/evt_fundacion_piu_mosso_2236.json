@@ -15,7 +15,14 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Pilar L. Fernández-Sacristán"
+    },
+    {
+      "name": "Eduardo Frías"
+    }
+  ],
   "composers": [
     {
       "name": "Cécile Chaminade"
@@ -30,10 +37,25 @@
       "name": "Nadia Boulanger"
     },
     {
-      "name": "Lili"
+      "name": "Lili Boulanger"
+    },
+    {
+      "name": "Rosa María Rodríguez"
+    },
+    {
+      "name": "Katherine Hoover"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "Serenata a las estrellas",
+      "composerName": "Cécile Chaminade"
+    },
+    {
+      "title": "Romance",
+      "composerName": "Amy Beach"
+    }
+  ],
   "eras": [
     "romantic"
   ],
