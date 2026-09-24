@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_condeduque_janusz_orlik_polish_cello_quartet_fuga",
+  "slug": "janusz-orlik-polish-cello-quartet-fuga",
+  "title": "Janusz Orlik & Polish Cello Quartet «Fuga»",
+  "status": "scheduled",
+  "venueId": "ven_condeduque_teatro",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_condeduque_janusz_orlik_polish_cello_quartet_fuga_01",
+      "date": "2027-04-29",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Polish Cello Quartet",
+      "role": "ensemble"
+    },
+    {
+      "name": "Janusz Orlik"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Artur Zagajewski"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sculpture (from the way of the cross)",
+      "composerName": "Artur Zagajewski"
+    },
+    {
+      "title": "Canzona",
+      "composerName": "Artur Zagajewski"
+    },
+    {
+      "title": "Die Kunst der Fuge, BWV 1080: Contrapunctus I, III, V, X",
+      "composerName": "Johann Sebastian Bach"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "contemporary"
+  ],
+  "formats": [
+    "chamber",
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_condeduque",
+      "url": "https://www.condeduquemadrid.es/actividades/janusz-orlik-polish-cello-quartet-fuga",
+      "checkedAt": "2026-09-24"
+    }
+  ],
+  "primarySourceId": "src_condeduque",
+  "lastVerifiedAt": "2026-09-24"
+}
