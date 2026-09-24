@@ -52,7 +52,7 @@
       "name": "Fanny Mendelssohn-Hensel"
     },
     {
-      "name": "Felix Mendelssohn-Bartholdy"
+      "name": "Felix Mendelssohn"
     }
   ],
   "works": [
@@ -66,7 +66,7 @@
     },
     {
       "title": "Obertura a Die erste Walpurgisnacht, op. 60 (arreglo de Ossian’s Dream)",
-      "composerName": "Felix Mendelssohn-Bartholdy"
+      "composerName": "Felix Mendelssohn"
     },
     {
       "title": "Andante espressivo , de Trío con piano en Re menor, op. 11",
@@ -113,10 +113,10 @@
     {
       "sourceId": "src_fundacion_juan_march",
       "url": "https://www.march.es/es/madrid/concierto/ossians-dream",
-      "checkedAt": "2026-09-18",
+      "checkedAt": "2026-09-24",
       "externalId": "/es/madrid/concierto/ossians-dream"
     }
   ],
   "primarySourceId": "src_fundacion_juan_march",
-  "lastVerifiedAt": "2026-09-18"
+  "lastVerifiedAt": "2026-09-24"
 }

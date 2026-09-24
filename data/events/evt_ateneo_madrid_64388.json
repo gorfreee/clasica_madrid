@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_ateneo_madrid_64388",
+  "slug": "enfin-l-amour-silva-de-sirenas-festival-encuentro-de-musica-antigua-de-madrid",
+  "title": "Enfin l’amour – Silva de Sirenas Festival. Encuentro de Música Antigua de Madrid",
+  "status": "scheduled",
+  "venueId": "ven_ateneo_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_ateneo_madrid_64388_01",
+      "date": "2026-10-18",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "La Violondrina"
+    },
+    {
+      "name": "Diego Fernández"
+    },
+    {
+      "name": "Bárbara Kusa"
+    },
+    {
+      "name": "Guillermo Peñalver"
+    },
+    {
+      "name": "María Saturno"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "early-music"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_ateneo_madrid",
+      "url": "https://ateneodemadrid.com/evento/enfin-lamour-silva-de-sirenas-festival-encuentro-de-musica-antigua-de-madrid",
+      "checkedAt": "2026-09-24",
+      "externalId": "64388"
+    }
+  ],
+  "primarySourceId": "src_ateneo_madrid",
+  "lastVerifiedAt": "2026-09-24"
+}

@@ -15,7 +15,21 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Anna Prohaska"
+    },
+    {
+      "name": "CocoRosie"
+    },
+    {
+      "name": "Elena Schwarz",
+      "role": "conductor"
+    },
+    {
+      "name": "Klangforum Wien"
+    }
+  ],
   "composers": [
     {
       "name": "Kurt Weill"
@@ -37,10 +51,10 @@
     {
       "sourceId": "src_teatro_real",
       "url": "https://www.teatroreal.es/es/espectaculo/lotte-lulu-lenya",
-      "checkedAt": "2026-09-14",
+      "checkedAt": "2026-09-24",
       "externalId": "lotte-lulu-lenya"
     }
   ],
   "primarySourceId": "src_teatro_real",
-  "lastVerifiedAt": "2026-09-14"
+  "lastVerifiedAt": "2026-09-24"
 }

@@ -50,6 +50,15 @@
     },
     {
       "name": "Jacques Offenbach"
+    },
+    {
+      "name": "Reynaldo Hahn"
+    },
+    {
+      "name": "Erik Satie"
+    },
+    {
+      "name": "Barbara"
     }
   ],
   "works": [
@@ -59,15 +68,19 @@
     },
     {
       "title": "Néère, de Études latines (1900)",
-      "composerName": "Honoré d’Ambruys"
+      "composerName": "Reynaldo Hahn"
+    },
+    {
+      "title": "À Chloris (1913)",
+      "composerName": "Reynaldo Hahn"
     },
     {
       "title": "Gnossienne n.º 1 (1890)",
-      "composerName": "Françoise Hardy"
+      "composerName": "Erik Satie"
     },
     {
       "title": "Gymnopédie n.º 1 (1887)",
-      "composerName": "Françoise Hardy"
+      "composerName": "Erik Satie"
     },
     {
       "title": "Celle qui fait tout mon tourment, H 450 ( Recueil d’airs sérieux et à boire, 1695)",
@@ -122,12 +135,8 @@
       "composerName": "Claude Debussy"
     },
     {
-      "title": "Barbara (1930-1997)",
-      "composerName": "Claude Debussy"
-    },
-    {
       "title": "Dis, quand reviendras-tu? (1962)",
-      "composerName": "Claude Debussy"
+      "composerName": "Barbara"
     },
     {
       "title": "‘Amours divins’, de La belle Hélène (1864)",
@@ -148,6 +157,7 @@
   ],
   "eras": [
     "baroque",
+    "romantic",
     "twentieth"
   ],
   "formats": [
@@ -160,7 +170,7 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-lea-desandre-thomas-dunford",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-24",
       "externalId": "cndm-lea-desandre-thomas-dunford"
     },
     {
@@ -171,5 +181,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-24"
 }

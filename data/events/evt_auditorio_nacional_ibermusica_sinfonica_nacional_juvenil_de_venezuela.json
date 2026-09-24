@@ -23,10 +23,15 @@
       "name": "Gustavo Dudamel"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Dmitri Shostakóvich"
+    }
+  ],
   "works": [
     {
-      "title": "Sinfonía nº 7 en Do Mayor, op. 60 “Leningrado”"
+      "title": "Sinfonía nº 7 en Do Mayor, op. 60 “Leningrado”",
+      "composerName": "Dmitri Shostakóvich"
     }
   ],
   "eras": [
@@ -41,10 +46,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-sinfonica-nacional-juvenil-de-venezuela",
-      "checkedAt": "2026-09-14",
+      "checkedAt": "2026-09-24",
       "externalId": "ibermusica-sinfonica-nacional-juvenil-de-venezuela"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-14"
+  "lastVerifiedAt": "2026-09-24"
 }

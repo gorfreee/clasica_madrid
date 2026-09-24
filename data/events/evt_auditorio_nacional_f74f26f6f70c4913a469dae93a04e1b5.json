@@ -44,10 +44,7 @@
   ],
   "composers": [
     {
-      "name": "Lohengrin"
-    },
-    {
-      "name": "Parsifal"
+      "name": "Richard Wagner"
     },
     {
       "name": "Gustav Mahler"
@@ -55,12 +52,12 @@
   ],
   "works": [
     {
-      "title": "preludio del acto I",
-      "composerName": "Lohengrin"
+      "title": "Lohengrin: preludio del acto I",
+      "composerName": "Richard Wagner"
     },
     {
-      "title": "preludio del acto III y Encantamiento del Viernes Santo",
-      "composerName": "Parsifal"
+      "title": "Parsifal: preludio del acto III y Encantamiento del Viernes Santo",
+      "composerName": "Richard Wagner"
     },
     {
       "title": "La canción de la Tierra",
@@ -81,10 +78,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-06-1",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-24",
       "externalId": "f74f26f6f70c4913a469dae93a04e1b5"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-24"
 }

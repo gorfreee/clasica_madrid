@@ -105,17 +105,19 @@
   "eras": [
     "baroque"
   ],
-  "formats": [],
+  "formats": [
+    "chamber"
+  ],
   "kind": "established",
   "access": "free",
   "citations": [
     {
       "sourceId": "src_fundacion_juan_march",
       "url": "https://www.march.es/es/madrid/concierto/vestigium",
-      "checkedAt": "2026-09-18",
+      "checkedAt": "2026-09-24",
       "externalId": "/es/madrid/concierto/vestigium"
     }
   ],
   "primarySourceId": "src_fundacion_juan_march",
-  "lastVerifiedAt": "2026-09-18"
+  "lastVerifiedAt": "2026-09-24"
 }

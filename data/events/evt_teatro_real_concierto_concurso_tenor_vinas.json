@@ -15,7 +15,16 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Josep Planells",
+      "role": "conductor"
+    },
+    {
+      "name": "Orquesta Titular del Teatro Real",
+      "role": "orchestra"
+    }
+  ],
   "composers": [],
   "works": [],
   "eras": [
@@ -34,10 +43,10 @@
     {
       "sourceId": "src_teatro_real",
       "url": "https://www.teatroreal.es/es/espectaculo/concierto-concurso-tenor-vinas",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-24",
       "externalId": "concierto-concurso-tenor-vinas"
     }
   ],
   "primarySourceId": "src_teatro_real",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-24"
 }
