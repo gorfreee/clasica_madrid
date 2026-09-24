@@ -1,6 +1,10 @@
 import { explicitAccessText } from './access-evidence.ts';
 import { stripLeadingComposerCreditLabel } from '../composer-name.ts';
-import { looksLikeCatalogOnlyLine } from '../observed-cleanup.ts';
+import {
+  isObviousNonPerformer,
+  looksLikeCatalogOnlyLine,
+  looksLikeEnsembleName,
+} from '../observed-cleanup.ts';
 import { allCaptures, collapseWhitespace, firstMatch, splitBreaks, stripTags } from '../html.ts';
 import { inferScheduleFromText } from './schedule.ts';
 import {
@@ -59,7 +63,8 @@ function parseProduction(html: string): ObservedFactPatch {
   const description = paragraphs[0]?.text;
   const peopleParagraph = paragraphs.find(looksLikeCastParagraph);
   const introPerformers = peopleParagraph
-    ? introCreditLines(peopleParagraph.html).map(parseIntroPersonLine)
+    ? introCreditLines(peopleParagraph.html).flatMap((line) =>
+      splitInlineIntroCredits(line).filter(isMusicalIntroCredit).map(parseIntroPersonLine))
     : [];
   const performers = normalizePersonList([
     ...parseMusicalTeam(html),
@@ -338,9 +343,51 @@ function parseIntroPersonLine(text: string): ObservedPerson {
   const person = parsePersonLine(text);
   if (person.roleText) return person;
   const name = normalizeText(person.name);
+  const mixedEnsemble =
+    (/\bcoro\b/.test(name) && /\borquesta\b/.test(name)) ||
+    (/\bchoir\b/.test(name) && /\borchestra\b/.test(name));
+  if (mixedEnsemble) return person;
   if (/^orquesta\b/.test(name)) return { ...person, roleText: 'orquesta' };
   if (/^coro\b/.test(name)) return { ...person, roleText: 'coro' };
   return person;
+}
+
+function splitInlineIntroCredits(line: string): string[] {
+  const expanded = line.replace(
+    /\s+(?=(?!(?:Soprano|Tenor|Mezzo)\b)\p{Lu}[\p{L}'’-]+\s+\p{Lu}[\p{L}'’-]+,\s*(?:[Ss]oprano|[Mm]ezzosoprano|[Mm]ezzo|[Tt]enor|[Bb]ajo|[Bb]ar[ií]tono)\b)/gu,
+    '; ',
+  );
+  return expanded.split(/\s*;\s*/).flatMap((part) => {
+    part = part.replace(/^Director,\s*/iu, 'Director: ');
+    const director = /^(?:director|direcci[oó]n(?: musical)?)[,:]\s*(\p{Lu}[\p{L}'’-]+\s+\p{Lu}[\p{L}'’-]+)(?=\s|$)/iu.exec(part);
+    if (!director?.[1] || director[0].length === part.length) return [part];
+    return [director[0], part.slice(director[0].length).trim()].filter(Boolean);
+  });
+}
+
+function isMusicalIntroCredit(line: string): boolean {
+  const person = parseIntroPersonLine(line);
+  if (/^(?:orquesta|coro)\b/i.test(person.name)) return true;
+  if (!person.roleText) return looksLikeUnlabelledMusicalIntroCredit(person.name);
+  if (/[.!?]\s|\d/.test(person.name)) return false;
+  if (!/^[\p{Lu}][\p{L}'’-]+(?:\s+[\p{Lu}][\p{L}'’-]+){1,5}$/u.test(person.name)) return false;
+  return /^(?:director(?:a)?|direcci[oó]n(?: musical| del coro| de coro)?|soprano|mezzosoprano|mezzo|tenor|bajo|bar[ií]tono|contralto|viol[ií]n|piano)$/i.test(person.roleText);
+}
+
+function looksLikeUnlabelledMusicalIntroCredit(name: string): boolean {
+  const cleaned = collapseWhitespace(name);
+  if (!cleaned || cleaned.length > 80 || /\d|[.!?;:]/u.test(cleaned)) return false;
+  if (isObviousNonPerformer(cleaned)) return false;
+  if (/^(?:m[úu]sica|libreto|texto|letra|estrenad[ao]|dramma|programa|producci[oó]n|presentad[oa]|sala|teatro|auditorio|precio)\b/iu.test(cleaned)) {
+    return false;
+  }
+  if (looksLikeEnsembleName(cleaned)) return true;
+  const words = cleaned.split(/\s+/).filter(Boolean);
+  if (words.length < 2 || words.length > 6) return false;
+  return words.every((word, index) => {
+    if (index > 0 && /^(?:de|del|la|las|los|y|e)$/iu.test(word)) return true;
+    return /^\p{Lu}[\p{L}'’.-]*$/u.test(word) || /^[A-ZÁÉÍÓÚÜÑ]{2,}$/u.test(word);
+  });
 }
 
 function parseTitleComposerWork(text: string): ObservedWork {

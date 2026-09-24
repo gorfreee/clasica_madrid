@@ -113,7 +113,7 @@ function parseLabeledCredits(block: string, fallbackRole: string | undefined): O
       people.push(...parsed.map((person) => withPerformerLabelRole(person, fallbackRole)));
       continue;
     }
-    if (fallbackRole && looksLikePersonName(segment)) {
+    if (looksLikePersonName(segment) && !/\s*[-–—]\s*/u.test(segment)) {
       people.push({ name: segment, roleText: fallbackRole });
     }
   }
@@ -136,6 +136,9 @@ function isSecondaryCreditRole(roleText: string | undefined): boolean {
 
 function splitPerformerSegments(block: string): string[] {
   return block
+    // Ateneo sometimes renders all credits as one uninterrupted text node.
+    // Split only at a following full name with an explicit musical role.
+    .replace(/\s+(?=\p{Lu}[\p{L}'’-]+(?:\s+(?:(?:del|de|la)\s+)?\p{Lu}[\p{L}'’-]+){1,3}\s*[-–—]\s*(?:soprano|altos?|tenor|bajo|clarinete|piano|acorde[oó]n|viol[ií]n|direcci[oó]n)\b)/gu, '; ')
     .split(/\s*;\s*/)
     .flatMap((part) => {
       const asRole = parseNameRoleCredit(part);
@@ -177,4 +180,3 @@ function looksLikePersonName(value: string): boolean {
   if (/[:/]/.test(name) || KNOWN_ROLE.test(name)) return false;
   return /[\p{L}]{2,}/u.test(name) && !/^\d+$/.test(name);
 }
-

@@ -19,6 +19,8 @@ export function resolvePerformerRole(roleText: string | undefined): PerformerRol
   if (!text) return undefined;
 
   if (isMusicalConductorRole(text)) return 'conductor';
+  if ((hasWord(text, 'coro') || hasWord(text, 'choir')) &&
+      (hasWord(text, 'orquesta') || hasWord(text, 'orchestra'))) return undefined;
   if (hasWord(text, 'orquesta') || hasWord(text, 'orquestra') || hasWord(text, 'orchestra')) {
     if (hasWord(text, 'gerente') || hasWord(text, 'manager')) return undefined;
     return 'orchestra';
@@ -53,6 +55,8 @@ function hasExplicitEnsembleDirection(text: string): boolean {
     hasPhrase(text, 'director de orquestra') ||
     hasPhrase(text, 'director de orchestra') ||
     hasPhrase(text, 'director del coro') ||
+    hasPhrase(text, 'direccion del coro') ||
+    hasPhrase(text, 'direccion de coro') ||
     hasPhrase(text, 'directora del coro') ||
     hasPhrase(text, 'director de coro') ||
     hasPhrase(text, 'directora de coro') ||

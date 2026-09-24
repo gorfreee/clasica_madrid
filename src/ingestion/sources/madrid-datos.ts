@@ -64,8 +64,17 @@ export const madridDatosAdapter: SourceAdapter = {
     try {
       parsed = JSON.parse(body);
     } catch (error) {
-      const detail = error instanceof Error ? error.message : 'JSON inválido';
-      throw new Error(`madrid-datos: JSON inválido (${detail})`);
+      try {
+        // The municipal JSON-LD occasionally contains literal control characters
+        // in quoted descriptions. Repair only that JSON violation, then let the
+        // ordinary parser reject any other corruption.
+        const repaired = escapeJsonStringControls(body);
+        if (repaired === body) throw error;
+        parsed = JSON.parse(repaired);
+      } catch (recoveryError) {
+        const detail = recoveryError instanceof Error ? recoveryError.message : 'JSON inválido';
+        throw new Error(`madrid-datos: JSON inválido (${detail})`);
+      }
     }
     if (!parsed || typeof parsed !== 'object' || !('@graph' in parsed)) {
       throw new Error('madrid-datos: se esperaba un documento JSON-LD con @graph');
@@ -88,6 +97,29 @@ export const madridDatosAdapter: SourceAdapter = {
     return constrainMadridDatosPatch(event, parseMadridDatosDetail(body));
   },
 };
+
+export function escapeJsonStringControls(body: string): string {
+  let quoted = false;
+  let escaped = false;
+  let repaired = '';
+  for (const char of body) {
+    if (quoted && escaped) {
+      repaired += char;
+      escaped = false;
+    } else if (quoted && char === '\\') {
+      repaired += char;
+      escaped = true;
+    } else if (char === '"') {
+      repaired += char;
+      quoted = !quoted;
+    } else if (quoted && char.charCodeAt(0) < 0x20) {
+      repaired += `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`;
+    } else {
+      repaired += char;
+    }
+  }
+  return repaired;
+}
 
 function toRawEvent(value: unknown, ctx: AdapterContext): RawEvent | undefined {
   if (!value || typeof value !== 'object') return undefined;

@@ -527,6 +527,18 @@ describe('hidratación musical de la ficha Reina Sofía', () => {
     expect(patch.works).toEqual([]);
   });
 
+  it('prioriza el apellido completo observado en la ficha ante la variante corta del título', async () => {
+    const body = (await fixture('detail-83051.html')).replace('violonchelista <strong>Luis Aracama</strong>', 'violonchelista <strong>Luis Aracama Alonso</strong>');
+    const event = listingEvent({
+      sourceUrl: 'https://www.escuelasuperiordemusicareinasofia.es/evento/orquesta-sinfonica-freixenet-director-josep-pons-violonchelo-luis-aracama',
+      externalId: '83051',
+      observed: { title: 'Orquesta Sinfónica Freixenet. Director: Josep Pons / Violonchelo: Luis Aracama',
+        occurrences: [{ raw: '01/10/2026 19:30', date: '2026-10-01', time: '19:30' }], ...emptyObservedLists() },
+    });
+    expect(parseReinaSofiaDetail(event, body).performers?.map((person) => person.name)).toContain('Luis Aracama Alonso');
+    expect(parseReinaSofiaDetail(event, body).performers?.map((person) => person.name)).not.toContain('Luis Aracama');
+  });
+
   it('tolera la ausencia del bloque de programa y falla si falta la estructura esencial', async () => {
     expect(parseReinaSofiaProgram('<div class="elementor-shortcode"></div>')).toEqual({
       composers: [],

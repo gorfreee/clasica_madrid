@@ -608,7 +608,8 @@ function secondaryTalkDoesNotOverrideConcert(
 }
 
 function nonPerformanceCategory(category: string): boolean {
-  return NON_PERFORMANCE_LABELS.some((label) => hasWord(category, label));
+  return NON_PERFORMANCE_LABELS.some((label) => hasWord(category, label) || hasWord(category, `${label}s`)
+    || (label === 'taller' && hasWord(category, 'talleres')));
 }
 
 function titleStartsWithNonPerformance(title: string): boolean {
@@ -1409,7 +1410,11 @@ function knownClassicalNames(facts: ObservedFacts): string[] {
     const hit = matchComposer(name);
     if (hit) matched.push(hit.canonicalName);
   }
-  const editorial = [facts.programText, facts.description, facts.title, facts.seriesText]
+  const description = facts.description?.replace(
+    /[»”"]\s*,?\s*(?:de|by\s+)?[\p{Lu}][\p{L}’'-]+\s+[\p{Lu}][\p{L}’'-]+(?=[.;]|$)/gu,
+    '',
+  );
+  const editorial = [facts.programText, description, facts.title, facts.seriesText]
     .filter(Boolean)
     .join('\n');
   for (const item of findKnownComposersInText(editorial)) {

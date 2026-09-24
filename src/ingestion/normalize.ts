@@ -95,11 +95,22 @@ export function normalizeRawEvent(raw: RawEvent): NormalizedEvent | undefined {
     categoryText: optionalText(raw.observed.categoryText),
     programText: optionalProgramText(raw.observed.programText),
     performers: normalizePersonList(raw.observed.performers),
-    composers: normalizeComposerList(raw.observed.composers),
-    works: normalizeWorkList(raw.observed.works),
+    composers: normalizeComposerList(raw.observed.composers.map((item) => ({ name: canonicalObservedVariant(item.name) }))),
+    works: normalizeWorkList(raw.observed.works.map((item) => ({
+      ...item, ...(item.composerName ? { composerName: canonicalObservedVariant(item.composerName) } : {}),
+    }))),
     ...(raw.proposedVenue ? { proposedVenue: raw.proposedVenue } : {}),
     ...(raw.foundVia ? { foundVia: raw.foundVia } : {}),
   };
+}
+
+/** Exact official-source spellings resolved at the observation boundary. These
+ * must not change global catalog validation of already published records. */
+function canonicalObservedVariant(name: string): string {
+  const spelling = collapseWhitespace(name);
+  if (/^C\.\s*Monteverdi$/iu.test(spelling)) return 'Claudio Monteverdi';
+  if (/^Felix Mendelssohn-Bartholdy$/iu.test(spelling)) return 'Felix Mendelssohn';
+  return name;
 }
 
 /**

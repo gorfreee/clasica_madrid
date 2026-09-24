@@ -184,7 +184,7 @@ export function parseRcsmmOccurrence(
   if (!parseObservedDateTime(date)) return undefined;
   const rawDate = `${dayText.trim()} ${monthText.trim()} ${yearText.trim()}`;
   if (timeText === undefined) return { raw: rawDate, date };
-  const time = parseObservedTime(timeText);
+  const time = parseObservedTime(timeText.trim().replace(/\s*h\.?$/iu, ''));
   return time ? { raw: `${rawDate} ${timeText.trim()}`, date, time } : undefined;
 }
 
@@ -257,6 +257,25 @@ function parseEventsPage(
     }
     if (pageIndex > 0) {
       throw new Error(`${SOURCE_ID}: falta el contenedor principal de eventos`);
+    }
+    const attachment = findElementById(body, 'div', 'views-bootstrap-eventos-attachment-1');
+    // The current official /eventos page serves only its featured Drupal view.
+    // Featured entries are useful observations but do not prove full coverage.
+    if (attachment && eventArticles(attachment.inner).length > 0 && !findPager(body)) {
+      const articles = eventArticles(attachment.inner);
+      throw new IncompleteListingError(
+        `${SOURCE_ID}: sólo se ve el bloque destacado; cobertura total no verificable`,
+        articles.flatMap((article) => {
+          const event = parseEventArticle(article, pageUrl, ctx);
+          if (!event) return [];
+          const occurrences = event.observed.occurrences.filter(
+            (occurrence) => occurrence.date && isDateInWindow(occurrence.date, ctx.window),
+          );
+          return occurrences.length > 0
+            ? [{ ...event, observed: { ...event.observed, occurrences } }]
+            : [];
+        }),
+      );
     }
     if (!isUnverifiableEventsShell(body)) {
       throw new Error(`${SOURCE_ID}: la estructura de eventos no es reconocible`);

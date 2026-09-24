@@ -303,6 +303,9 @@ export function parseComposerColonWork(
   const composerName = named[1].trim();
   const title = named[2].trim();
   if (!composerName || !title) return undefined;
+  // A quoted title followed by several slash-separated authors is a work
+  // credit, never a composer heading (e.g. “My Way” — three authors).
+  if (/^[«“"'‘]/u.test(composerName) || /\s+\/\s+/.test(title)) return undefined;
   if (hasExplicitPerformerSignal(composerName) || looksLikeRoleOnlyLine(composerName)) return undefined;
   if (WORK_GENRE.test(composerName) || STRONG_CATALOG.test(composerName)) return undefined;
   if (composerName.length > 80 || /\d/.test(composerName)) return undefined;

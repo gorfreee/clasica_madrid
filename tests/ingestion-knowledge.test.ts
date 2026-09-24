@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import type { Era } from '../src/lib/schemas/taxonomies.ts';
 import { classify, resolveEras } from '../src/ingestion/classification/classify.ts';
+import { resolveEligibility } from '../src/ingestion/classification/eligibility.ts';
+import { resolveFormats } from '../src/ingestion/classification/formats.ts';
 import { findKnownComposersInText, matchComposer, matchComposerPrefix, buildIndex } from '../src/ingestion/knowledge/composers.ts';
 import {
   isObviousNonPerformer,
@@ -31,6 +33,19 @@ function expectCanonicalNames(text: string, expected: string[]): void {
 }
 
 describe('composer knowledge base', () => {
+  it('una descripción editorial de géneros y una cita no constituyen repertorio de Viola Romántica', () => {
+    const observed = facts({
+      title: 'VIOLA ROMÁNTICA', categoryText: 'Las Noches del Monumental',
+      description: 'Concebido para grupo de violas, este programa transita por el bolero, tango, chanson, zarzuela, ópera y música de cine. «La música puede dar nombre a lo innombrable» , Leonard Bernstein.',
+    });
+    expect(resolveEligibility(observed).value).not.toBe('include');
+    expect(resolveFormats(observed).value).toEqual([]);
+    expect(resolveEras(observed).value).toEqual([]);
+  });
+  it('no confunde a una ponente de apellido coincidente con el compositor', () => {
+    expectCanonicalNames('Presenta: Isabel Peñalosa.', []);
+    expectCanonicalNames('Obras de Peñalosa', ['Francisco de Peñalosa']);
+  });
   it('resuelve Bach, Mozart y Mahler a las épocas canónicas', () => {
     expect(matchComposer('Johann Sebastian Bach')?.eras).toEqual(['baroque']);
     expect(matchComposer('J. S. Bach')?.eras).toEqual(['baroque']);

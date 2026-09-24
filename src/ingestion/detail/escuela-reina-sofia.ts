@@ -234,9 +234,20 @@ function collapseSameNamePeople(people: ObservedPerson[]): ObservedPerson[] {
   const byName = new Map<string, ObservedPerson>();
   for (const person of people) {
     const key = person.name.toLocaleLowerCase('es');
-    const existing = byName.get(key);
+    const variant = [...byName.keys()].find((other) => {
+      const shorter = key.length < other.length ? key : other;
+      const longer = key.length < other.length ? other : key;
+      return shorter.split(/\s+/).length === 2 && longer.startsWith(`${shorter} `) &&
+        longer.split(/\s+/).length === 3;
+    });
+    const existing = byName.get(variant ?? key);
     if (!existing) {
       byName.set(key, person);
+      continue;
+    }
+    if (variant && key.length > variant.length) {
+      byName.delete(variant);
+      byName.set(key, { ...person, roleText: person.roleText ?? existing.roleText });
       continue;
     }
     if (!existing.roleText && person.roleText) byName.set(key, person);

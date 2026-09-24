@@ -56,6 +56,15 @@ function detailFor(event: RawEvent): string {
 }
 
 describe('agenda del Real Conservatorio Superior de Música de Madrid', () => {
+  it('reconoce el listado oficial actual servido sólo en el attachment y conserva la cobertura', async () => {
+    const partial = await adapter.extract(await fixture('listing-attachment-only-2026.html'), listingUrl, context()).catch((error: unknown) => error);
+    expect(partial).toBeInstanceOf(IncompleteListingError);
+    if (!(partial instanceof IncompleteListingError)) throw partial;
+    expect(partial.events.map((event) => [event.externalId, event.observed.occurrences[0]?.date])).toEqual([
+      ['2563', '2026-09-26'], ['2564', '2026-11-21'],
+    ]);
+    await expect(adapter.extract('<body class="path-eventos"><h1>Eventos</h1><div id="views-bootstrap-eventos-attachment-1"></div></body>', listingUrl, context())).rejects.toThrow(IncompleteListingError);
+  });
   it('registra la fuente oficial y usa el listado HTML canónico', () => {
     expect(source).toMatchObject({
       id: 'rcsmm',

@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { auditorioNacionalAdapter } from '../src/ingestion/sources/auditorio-nacional.ts';
-import { madridDatosAdapter } from '../src/ingestion/sources/madrid-datos.ts';
+import { escapeJsonStringControls, madridDatosAdapter } from '../src/ingestion/sources/madrid-datos.ts';
 import { teatroRealAdapter } from '../src/ingestion/sources/teatro-real.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { TEST_NOW, TEST_WINDOW } from './helpers.ts';
@@ -10,6 +10,29 @@ import type { AdapterContext, AdapterDiscardReport } from '../src/ingestion/type
 import { normalizeRawEvent } from '../src/ingestion/normalize.ts';
 
 const fixtures = path.join(import.meta.dirname, 'fixtures', 'ingestion');
+
+describe('recuperación JSON-LD municipal', () => {
+  it('escapa únicamente controles literales dentro de strings y conserva escapes válidos', () => {
+    const body = '{"@graph":[],"note":"línea\nseguida\u0000 y \\n literal y \\\\n"}';
+    expect(JSON.parse(escapeJsonStringControls(body))).toEqual({
+      '@graph': [], note: 'línea\nseguida\u0000 y \n literal y \\n',
+    });
+    expect(escapeJsonStringControls('{\n"@graph": []\n}')).toBe('{\n"@graph": []\n}');
+    expect(madridDatosAdapter.extract('{"@graph":[],"note":"a\nb"}', 'https://datos.madrid.es/agenda.json', ctx('madrid-datos'))).toEqual([]);
+    expect(() => madridDatosAdapter.extract('{"@graph": [garbage]}', 'https://datos.madrid.es/agenda.json', ctx('madrid-datos'))).toThrow(/JSON inválido/);
+  });
+});
+
+it('normaliza variantes canónicas de la observación antes de reconciliar sin alterar fichas históricas', () => {
+  const normalized = normalizeRawEvent({
+    sourceId: 'auditorio-nacional', sourceUrl: 'https://example.test/monteverdi',
+    observed: { title: 'Programa', occurrences: [{ raw: '2026-09-24 19:00', date: '2026-09-24', time: '19:00' }],
+      performers: [], composers: [{ name: 'C. Monteverdi' }, { name: 'Felix Mendelssohn-Bartholdy' }],
+      works: [{ title: 'L’Orfeo', composerName: 'C. Monteverdi' }] },
+  });
+  expect(normalized?.composers).toEqual([{ name: 'Claudio Monteverdi' }, { name: 'Felix Mendelssohn' }]);
+  expect(normalized?.works[0]?.composerName).toBe('Claudio Monteverdi');
+});
 
 function ctx(sourceId: string, reportDiscard?: (discard: AdapterDiscardReport) => void): AdapterContext {
   return {

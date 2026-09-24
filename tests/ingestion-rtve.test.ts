@@ -69,6 +69,17 @@ describe('RTVE / Monumental discovery', () => {
 });
 
 describe('RTVE / Monumental ficha', () => {
+  it('conserva la prosa editorial fuera del programa y separa una lista explícita de violistas', async () => {
+    const base = await fixture('detail-symphonic');
+    const prose = 'Una propuesta entre bolero, tango, chanson, zarzuela, ópera y música de cine. «La música puede dar nombre a lo innombrable», Leonard Bernstein.';
+    const html = base.replace(/<div>Johannes Brahms \(1833-1897\)<\/div>[\s\S]*?<div style="padding-left: 40px;"><strong>Carol García<\/strong>, mezzosoprano<\/div>/, `<p>${prose}</p><p>María Cámara, Álvaro Gallego, Alicia García-Arroba, Vicent Nogués, Paula Romero y Blanca Sellers (Grupo de violas de Orquesta y Coro de RTVE).</p>`);
+    const patch = parseRtveDetail(await sample(), html);
+    expect(patch.description).toContain('Leonard Bernstein');
+    expect(patch.programText).toBeUndefined();
+    expect(patch.performers?.map((item) => item.name)).toEqual(expect.arrayContaining([
+      'María Cámara', 'Álvaro Gallego', 'Alicia García-Arroba', 'Vicent Nogués', 'Paula Romero', 'Blanca Sellers',
+    ]));
+  });
   it('reads complete local schedules and price facts, leaving musical interpretation to the pipeline', async () => {
     const patch = parseRtveDetail(await sample(), await fixture('detail-symphonic'));
     expect(patch.occurrences).toEqual([
@@ -101,7 +112,7 @@ describe('RTVE / Monumental ficha', () => {
     const patch = parseRtveDetail(await sample(slug), await fixture(`detail-${slug}`));
     expect(patch.occurrences).toHaveLength(1);
     expect(patch.occurrences![0]?.time).toMatch(/^\d{2}:\d{2}$/);
-    if (slug === 'traffic-strings') expect(patch.programText).toBeUndefined();
+    if (slug === 'traffic-strings' || slug === 'siempre-abba') expect(patch.programText).toBeUndefined();
     else expect(patch.programText).toBeTruthy();
     expect(patch.programText ?? '').not.toContain('Comprar entradas');
     const canonical = canonicalizePerformerList(patch.performers ?? []);
