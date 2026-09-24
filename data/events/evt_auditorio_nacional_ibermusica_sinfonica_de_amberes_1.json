@@ -28,13 +28,16 @@
   ],
   "composers": [
     {
-      "name": "STRAUSS Till Eulenspiegel"
+      "name": "Richard Strauss"
+    },
+    {
+      "name": "Max Bruch"
     }
   ],
   "works": [
     {
-      "title": "STRAUSS Danza de los siete velos op.54 (de Salomé)",
-      "composerName": "STRAUSS Till Eulenspiegel"
+      "title": "Danza de los siete velos, op. 54 (de Salomé)",
+      "composerName": "Richard Strauss"
     },
     {
       "title": "Concierto para violín núm. 1",

@@ -28,75 +28,95 @@
   ],
   "composers": [
     {
-      "name": "Danzas del Mundo"
+      "name": "Johann Strauss II"
     },
     {
       "name": "Antonín Dvořák"
     },
     {
-      "name": "Johann Strauss II"
+      "name": "Edvard Grieg"
+    },
+    {
+      "name": "Astor Piazzolla"
+    },
+    {
+      "name": "Johannes Brahms"
+    },
+    {
+      "name": "Camille Saint-Saëns"
+    },
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Léo Delibes"
+    },
+    {
+      "name": "Béla Bartók"
+    },
+    {
+      "name": "Manuel de Falla"
+    },
+    {
+      "name": "Dmitri Shostakóvich"
     }
   ],
   "works": [
     {
-      "title": "Programa (selección)",
-      "composerName": "Danzas del Mundo"
-    },
-    {
-      "title": "Johann Strauss II –Rosas del Sur, op. 388",
-      "composerName": "Danzas del Mundo"
+      "title": "Rosas del Sur, op. 388",
+      "composerName": "Johann Strauss II"
     },
     {
       "title": "Danza eslava, op. 46 n.º 8",
       "composerName": "Antonín Dvořák"
     },
     {
-      "title": "Edvard Grieg – Danza de Anitra (de Peer Gynt)",
-      "composerName": "Antonín Dvořák"
+      "title": "Danza de Anitra (de Peer Gynt)",
+      "composerName": "Edvard Grieg"
     },
     {
-      "title": "Astor Piazzolla – Oblivion",
-      "composerName": "Antonín Dvořák"
+      "title": "Oblivion",
+      "composerName": "Astor Piazzolla"
     },
     {
-      "title": "Johannes Brahms – Danza húngara n.º 5",
-      "composerName": "Antonín Dvořák"
+      "title": "Danza húngara n.º 5",
+      "composerName": "Johannes Brahms"
     },
     {
-      "title": "Camille Saint-Saëns –Danza macabra, op. 40",
-      "composerName": "Antonín Dvořák"
+      "title": "Danza macabra, op. 40",
+      "composerName": "Camille Saint-Saëns"
     },
     {
-      "title": "Wolfgang A. Mozart –Rondo alla turca, KV 331 (versión orquestal)",
-      "composerName": "Antonín Dvořák"
+      "title": "Rondo alla turca, KV 331 (versión orquestal)",
+      "composerName": "Wolfgang Amadeus Mozart"
     },
     {
-      "title": "Johann Strauss II –Voces de primavera, op. 410 (soprano y orquesta)",
-      "composerName": "Antonín Dvořák"
+      "title": "Voces de primavera, op. 410 (soprano y orquesta)",
+      "composerName": "Johann Strauss II"
     },
     {
-      "title": "Léo Delibes – Las hijas de Cádiz (aria para soprano y orquesta)",
-      "composerName": "Antonín Dvořák"
+      "title": "Las hijas de Cádiz (aria para soprano y orquesta)",
+      "composerName": "Léo Delibes"
     },
     {
-      "title": "Béla Bartók – Danzas populares rumanas, Sz. 56",
-      "composerName": "Antonín Dvořák"
+      "title": "Danzas populares rumanas, Sz. 56",
+      "composerName": "Béla Bartók"
     },
     {
-      "title": "Manuel de Falla – Danza española n.º 1 (de La vida breve)",
-      "composerName": "Antonín Dvořák"
+      "title": "Danza española n.º 1 (de La vida breve)",
+      "composerName": "Manuel de Falla"
     },
     {
       "title": "Csárdás de la ópera Ritter Pásmán, op. 441",
       "composerName": "Johann Strauss II"
     },
     {
-      "title": "Astor Piazzolla –Libertango",
-      "composerName": "Johann Strauss II"
+      "title": "Libertango",
+      "composerName": "Astor Piazzolla"
     },
     {
-      "title": "Dmitri Shostakóvich – Vals n.º 2",
-      "composerName": "Johann Strauss II"
+      "title": "Vals n.º 2",
+      "composerName": "Dmitri Shostakóvich"
     }
   ],
   "eras": [

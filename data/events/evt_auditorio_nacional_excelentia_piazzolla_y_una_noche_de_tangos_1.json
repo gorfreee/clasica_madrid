@@ -22,20 +22,20 @@
   ],
   "composers": [
     {
-      "name": "Piazzolla"
+      "name": "Astor Piazzolla"
     },
     {
-      "name": "Matos Rodríguez"
+      "name": "Gerardo Matos Rodríguez"
     }
   ],
   "works": [
     {
       "title": "Chant et fugue",
-      "composerName": "Piazzolla"
+      "composerName": "Astor Piazzolla"
     },
     {
       "title": "La cumparsita",
-      "composerName": "Matos Rodríguez"
+      "composerName": "Gerardo Matos Rodríguez"
     }
   ],
   "eras": [

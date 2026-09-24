@@ -49,7 +49,13 @@
   ],
   "composers": [
     {
-      "name": "Benjamin Britten , Henry Purcell , John Dowland"
+      "name": "Benjamin Britten"
+    },
+    {
+      "name": "Henry Purcell"
+    },
+    {
+      "name": "John Dowland"
     }
   ],
   "works": [],

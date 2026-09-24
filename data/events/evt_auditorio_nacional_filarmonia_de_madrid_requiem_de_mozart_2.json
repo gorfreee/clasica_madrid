@@ -48,17 +48,13 @@
   ],
   "composers": [
     {
-      "name": "Participativos Filarmonía"
+      "name": "Wolfgang Amadeus Mozart"
     }
   ],
   "works": [
     {
-      "title": "Pascual Osa, Director Musical",
-      "composerName": "Participativos Filarmonía"
-    },
-    {
-      "title": "Misa de Réquiem en re menor, K. 626 (W. A. Mozart)",
-      "composerName": "Participativos Filarmonía"
+      "title": "Misa de Réquiem en re menor, K. 626",
+      "composerName": "Wolfgang Amadeus Mozart"
     }
   ],
   "eras": [

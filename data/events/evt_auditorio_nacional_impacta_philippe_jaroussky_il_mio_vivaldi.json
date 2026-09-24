@@ -25,13 +25,17 @@
   ],
   "composers": [
     {
-      "name": "Nisi Dominus, A. Vivaldi"
+      "name": "Antonio Vivaldi"
     }
   ],
   "works": [
     {
+      "title": "Nisi Dominus",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
       "title": "Selección de arias de ópera",
-      "composerName": "Nisi Dominus, A. Vivaldi"
+      "composerName": "Antonio Vivaldi"
     }
   ],
   "eras": [
