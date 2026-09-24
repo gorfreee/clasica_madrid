@@ -15,9 +15,62 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
-  "works": [],
+  "performers": [
+    {
+      "name": "Elisa Urrestarazu",
+      "role": "soloist"
+    },
+    {
+      "name": "Cornelia Lenzin",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Claude Debussy"
+    },
+    {
+      "name": "Jesús Torres"
+    },
+    {
+      "name": "Gabriel Erkoreka"
+    },
+    {
+      "name": "Inés Badalo"
+    },
+    {
+      "name": "Mayu Hirano"
+    },
+    {
+      "name": "Ana Beyron"
+    }
+  ],
+  "works": [
+    {
+      "title": "Rapsodia",
+      "composerName": "Claude Debussy"
+    },
+    {
+      "title": "Silentium Amoris",
+      "composerName": "Jesús Torres"
+    },
+    {
+      "title": "Duduk I",
+      "composerName": "Gabriel Erkoreka"
+    },
+    {
+      "title": "Antophila",
+      "composerName": "Inés Badalo"
+    },
+    {
+      "title": "Narcisse en eaux troubles",
+      "composerName": "Mayu Hirano"
+    },
+    {
+      "title": "Obra de estreno",
+      "composerName": "Ana Beyron"
+    }
+  ],
   "eras": [
     "twentieth",
     "contemporary"

@@ -15,9 +15,91 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
-  "works": [],
+  "performers": [
+    {
+      "name": "Naruhiko Kawaguchi",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Isidora Zegers"
+    },
+    {
+      "name": "Manuel de Gamarra"
+    },
+    {
+      "name": "Sebastián de Albero"
+    },
+    {
+      "name": "Juan Crisóstomo de Arriaga"
+    },
+    {
+      "name": "Mariana Martínez"
+    },
+    {
+      "name": "Manuel Blasco de Nebra"
+    },
+    {
+      "name": "Fernando Sor"
+    },
+    {
+      "name": "Félix Máximo López"
+    },
+    {
+      "name": "Mateo Albéniz"
+    }
+  ],
+  "works": [
+    {
+      "title": "Contradanza La Mercedes",
+      "composerName": "Isidora Zegers"
+    },
+    {
+      "title": "Sonata en la menor",
+      "composerName": "Manuel de Gamarra"
+    },
+    {
+      "title": "Sonata núm. 11 en re menor",
+      "composerName": "Sebastián de Albero"
+    },
+    {
+      "title": "Sonata núm. 12 en re mayor",
+      "composerName": "Sebastián de Albero"
+    },
+    {
+      "title": "Romance en sol mayor",
+      "composerName": "Juan Crisóstomo de Arriaga"
+    },
+    {
+      "title": "Sonata en sol mayor",
+      "composerName": "Mariana Martínez"
+    },
+    {
+      "title": "Sonata op. 1 n.º 1",
+      "composerName": "Manuel Blasco de Nebra"
+    },
+    {
+      "title": "La naïve",
+      "composerName": "Fernando Sor"
+    },
+    {
+      "title": "La coquette",
+      "composerName": "Fernando Sor"
+    },
+    {
+      "title": "La champagnarde",
+      "composerName": "Fernando Sor"
+    },
+    {
+      "title": "Variaciones del fandango español al fortepiano",
+      "composerName": "Félix Máximo López"
+    },
+    {
+      "title": "Sonata en re mayor",
+      "composerName": "Mateo Albéniz"
+    }
+  ],
   "eras": [
     "baroque",
     "classical",
