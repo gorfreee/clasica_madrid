@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_condeduque_elisa_urrestarazu_y_cornelia_lenzin",
+  "slug": "elisa-urrestarazu-y-cornelia-lenzin",
+  "title": "Elisa Urrestarazu y Cornelia Lenzin",
+  "status": "scheduled",
+  "venueId": "ven_condeduque_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_condeduque_elisa_urrestarazu_y_cornelia_lenzin_01",
+      "date": "2027-02-17",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_condeduque",
+      "url": "https://www.condeduquemadrid.es/actividades/elisa-urrestarazu-y-cornelia-lenzin",
+      "checkedAt": "2026-09-24"
+    }
+  ],
+  "primarySourceId": "src_condeduque",
+  "lastVerifiedAt": "2026-09-24"
+}

@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_residencia_estudiantes_30619",
+  "slug": "la-belleza-escondida",
+  "title": "La belleza escondida",
+  "status": "scheduled",
+  "venueId": "ven_residencia_estudiantes",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_residencia_estudiantes_30619_01",
+      "date": "2026-12-02",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Reynaldo Hahn"
+    },
+    {
+      "name": "Gabriel Fauré"
+    },
+    {
+      "name": "Claude Debussy"
+    },
+    {
+      "name": "Henri Duparc"
+    },
+    {
+      "name": "Richard Wagner"
+    },
+    {
+      "name": "Isaac Albéniz"
+    },
+    {
+      "name": "Enrique Granados"
+    },
+    {
+      "name": "Manuel de Falla"
+    },
+    {
+      "name": "Frederic Mompou"
+    },
+    {
+      "name": "Joaquín Turina"
+    },
+    {
+      "name": "Borja Mariño"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_residencia_estudiantes",
+      "url": "https://residenciadeestudiantes.com/actividades/la-belleza-escondida",
+      "checkedAt": "2026-09-24",
+      "externalId": "30619"
+    }
+  ],
+  "primarySourceId": "src_residencia_estudiantes",
+  "lastVerifiedAt": "2026-09-24"
+}
