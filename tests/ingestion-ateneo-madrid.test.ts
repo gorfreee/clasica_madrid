@@ -40,6 +40,17 @@ const ctx: AdapterContext = {
 };
 
 describe('Ateneo de Madrid REST listing', () => {
+  it('separa créditos continuos del Crossover y conserva el ensemble de Intemperie', () => {
+    const description = 'Intérpretes: Rebeca Cardiel – soprano Sandra Cotarelo – soprano María Martín – altos Paz Martínez – altos Fran Braojos – tenor Emiliano Cano -tenor Simón Millán – bajo Vicente Martínez – bajo Salvador Salvador – clarinete Isabel Puente – piano Oliver del Val – acordeón Rodrigo Guerrero – dirección Cátedra Mayor. 19:30.';
+    expect(ateneoPerformers(description).map((person) => person.name)).toEqual([
+      'Rebeca Cardiel', 'Sandra Cotarelo', 'María Martín', 'Paz Martínez',
+      'Fran Braojos', 'Emiliano Cano', 'Simón Millán', 'Vicente Martínez',
+      'Salvador Salvador', 'Isabel Puente', 'Oliver del Val', 'Rodrigo Guerrero',
+    ]);
+    expect(ateneoPerformers('Intérpretes: The Ministers of Pastime, Nacho Ramal – violín y dirección. Cátedra Mayor.').map((person) => person.name)).toEqual([
+      'The Ministers of Pastime', 'Nacho Ramal',
+    ]);
+  });
   it('registers the official API and scopes its query to the ingest window', () => {
     expect(source).toMatchObject({
       id: 'ateneo-madrid',

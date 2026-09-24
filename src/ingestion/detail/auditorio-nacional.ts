@@ -254,6 +254,14 @@ function groupWorksByComposer(lines: string[]): { works: ObservedWork[]; extraCo
     if (looksLikeProductionNote(line) || looksLikeTextCredit(line) || looksLikeNonWorkCredit(line)) {
       continue;
     }
+    // A dated song title beginning with an article/preposition remains within
+    // the current composer group even though its date resembles a birth year.
+    if (composerName && /^(?:À|A|El|La|Le|Les|The)\s+.+\(\d{4}\)$/.test(line) &&
+        !parseExplicitTitleAuthorWork(line)) {
+      works.push({ title: line, composerName });
+      justOpenedComposer = false;
+      continue;
+    }
     if (isCastLineInsideProgram(line)) continue;
 
     const obras = consumeObrasDeList(lines, index);
@@ -275,6 +283,29 @@ function groupWorksByComposer(lines: string[]): { works: ObservedWork[]; extraCo
     }
     if (appendContinuationIfLinked(works, line)) continue;
 
+    const life = /^(\p{Lu}[\p{L}’'-]+)\s+\((\d{4})[-–](\d{4})\)$/u.exec(line);
+    if (life && Number(life[3]) - Number(life[2]) >= 20 &&
+        lines[index + 1] && looksLikeWorkLine(lines[index + 1]!)) {
+      composerName = line;
+      openWithoutComposer = false;
+      justOpenedComposer = true;
+      continue;
+    }
+
+    // Within a composer heading, a colon can separate a work and its movement
+    // (Ruslán y Ludmila: Obertura). Only an independently identifiable composer
+    // may override that heading with `Composer: Work`.
+    const colon = /^(.+?):\s+(.+)$/.exec(line);
+    if (composerName && colon?.[1] && colon[2] &&
+        !matchComposer(colon[1]) && !hasComposerYears(colon[1]) &&
+        !/^(?:\p{Lu}\.){1,3}\s*\p{Lu}/u.test(colon[1])) {
+      if (looksLikeWorkLine(line)) {
+        works.push({ title: line, composerName });
+        justOpenedComposer = false;
+      }
+      continue;
+    }
+
     const attributed =
       parseWorkThenPersonCredit(line)?.work ??
       parseComposerYearWork(line) ??
@@ -286,7 +317,11 @@ function groupWorksByComposer(lines: string[]): { works: ObservedWork[]; extraCo
         continue;
       }
       works.push(attributed);
-      closeHeading();
+      if (composerName && attributed.composerName === composerName) {
+        justOpenedComposer = false;
+      } else {
+        closeHeading();
+      }
       continue;
     }
 

@@ -59,7 +59,8 @@ function parseProduction(html: string): ObservedFactPatch {
   const description = paragraphs[0]?.text;
   const peopleParagraph = paragraphs.find(looksLikeCastParagraph);
   const introPerformers = peopleParagraph
-    ? introCreditLines(peopleParagraph.html).map(parseIntroPersonLine)
+    ? introCreditLines(peopleParagraph.html).flatMap((line) =>
+      splitInlineIntroCredits(line).filter(isMusicalIntroCredit).map(parseIntroPersonLine))
     : [];
   const performers = normalizePersonList([
     ...parseMusicalTeam(html),
@@ -341,6 +342,27 @@ function parseIntroPersonLine(text: string): ObservedPerson {
   if (/^orquesta\b/.test(name)) return { ...person, roleText: 'orquesta' };
   if (/^coro\b/.test(name)) return { ...person, roleText: 'coro' };
   return person;
+}
+
+function splitInlineIntroCredits(line: string): string[] {
+  const expanded = line.replace(
+    /\s+(?=(?!(?:Soprano|Tenor|Mezzo)\b)\p{Lu}[\p{L}'’-]+\s+\p{Lu}[\p{L}'’-]+,\s*(?:[Ss]oprano|[Mm]ezzosoprano|[Mm]ezzo|[Tt]enor|[Bb]ajo|[Bb]ar[ií]tono)\b)/gu,
+    '; ',
+  );
+  return expanded.split(/\s*;\s*/).flatMap((part) => {
+    part = part.replace(/^Director,\s*/iu, 'Director: ');
+    const director = /^(?:director|direcci[oó]n(?: musical)?)[,:]\s*(\p{Lu}[\p{L}'’-]+\s+\p{Lu}[\p{L}'’-]+)(?=\s|$)/iu.exec(part);
+    if (!director?.[1] || director[0].length === part.length) return [part];
+    return [director[0], part.slice(director[0].length).trim()].filter(Boolean);
+  });
+}
+
+function isMusicalIntroCredit(line: string): boolean {
+  const person = parseIntroPersonLine(line);
+  if (/^(?:orquesta|coro)\b/i.test(person.name)) return true;
+  if (!person.roleText || /[.!?]\s|\d/.test(person.name)) return false;
+  if (!/^[\p{Lu}][\p{L}'’-]+(?:\s+[\p{Lu}][\p{L}'’-]+){1,5}$/u.test(person.name)) return false;
+  return /^(?:director(?:a)?|direcci[oó]n musical|soprano|mezzosoprano|mezzo|tenor|bajo|bar[ií]tono|contralto|viol[ií]n|piano)$/i.test(person.roleText);
 }
 
 function parseTitleComposerWork(text: string): ObservedWork {

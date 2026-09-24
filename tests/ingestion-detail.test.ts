@@ -9,10 +9,37 @@ import { matchComposer } from '../src/ingestion/knowledge/composers.ts';
 import { enrichNormalizedEvent } from '../src/ingestion/enrich-normalized.ts';
 import { normalizeRawEvent } from '../src/ingestion/normalize.ts';
 import { emptyObservedLists } from '../src/ingestion/observed.ts';
+import { resolvePerformerRole } from '../src/ingestion/classification/performer-role.ts';
 
 const detailDir = path.join(import.meta.dirname, 'fixtures', 'ingestion', 'detail');
 
 describe('parser de ficha Auditorio Nacional', () => {
+  it('mantiene el heading para obras con dos puntos y no invierte títulos con varios autores', () => {
+    const html = `<article><h1>Programa</h1><div class="content"><h4>Programa:<br />Mijaíl Glinka (1804–1857)<br />Ruslán y Ludmila: Obertura<br />Richard Wagner<br />Lohengrin: preludio del acto I<br />Parsifal: preludio<br />“My Way” — Claude François / Jacques Revaux / Paul Anka</h4></div><div class="rightcolumn"><label class="rightColumn__item__label">Sala:</label><span class="rightColumn__item__text">Sala Sinfónica</span></div></article>`;
+    const patch = parseAuditorioNacionalDetail(html);
+    expect(patch.works).toEqual(expect.arrayContaining([
+      { title: 'Ruslán y Ludmila: Obertura', composerName: 'Mijaíl Glinka (1804–1857)' },
+      { title: 'Lohengrin: preludio del acto I', composerName: 'Richard Wagner' },
+      { title: 'Parsifal: preludio', composerName: 'Richard Wagner' },
+    ]));
+    expect(patch.composers?.map((item) => item.name)).not.toContain('“My Way”');
+  });
+  it('cierra el heading anterior cuando empiezan Reynaldo Hahn y Barbara', () => {
+    const html = `<article><h1>CNDM. Lea Desandre & Thomas Dunford</h1><div class="content"><h4>Honoré d’Ambruys (1660-1702)<br />Le doux silence de nos bois<br />Reynaldo Hahn (1874-1947)<br />Néère, de Études latines (1900)<br />À Chloris (1913)<br />Erik Satie (1866-1925)<br />Gnossienne n.º 1<br />Claude Debussy (1862-1918)<br />Pelléas et Mélisande<br />Barbara (1930-1997)<br />Dis, quand reviendras-tu? (1962)</h4></div><div class="rightcolumn"><label class="rightColumn__item__label">Sala:</label><span class="rightColumn__item__text">Sala de Cámara</span></div></article>`;
+    const patch = parseAuditorioNacionalDetail(html);
+    expect(patch.works).toEqual(expect.arrayContaining([
+      { title: 'Néère, de Études latines (1900)', composerName: 'Reynaldo Hahn (1874-1947)' },
+      { title: 'À Chloris (1913)', composerName: 'Reynaldo Hahn (1874-1947)' },
+      { title: 'Gnossienne n.º 1', composerName: 'Erik Satie (1866-1925)' },
+      { title: 'Dis, quand reviendras-tu? (1962)', composerName: 'Barbara (1930-1997)' },
+    ]));
+  });
+  it('mantiene a Joseph Jongen entre headings con obras fechadas', () => {
+    const html = `<article><h1>CNDM. Cindy Castillo</h1><div class="content"><h4>César Franck (1822-1890)<br />Prière, op. 20 (1860-1862)<br />Joseph Jongen (1873-1953)<br />Toccata en re bemol mayor, op. 104 (1937)<br />Jean-Pierre Deleuze (1954)<br />La neige tombe, de Quatre haïku, para órgano, n.º 3 (2004)</h4></div><div class="rightcolumn"><label class="rightColumn__item__label">Sala:</label><span class="rightColumn__item__text">Sala Sinfónica</span></div></article>`;
+    expect(parseAuditorioNacionalDetail(html).works).toEqual(expect.arrayContaining([
+      { title: 'Toccata en re bemol mayor, op. 104 (1937)', composerName: 'Joseph Jongen (1873-1953)' },
+    ]));
+  });
   it('extrae performers, obras, compositores, sala y precios del excerpt', async () => {
     const html = await readFile(path.join(detailDir, 'auditorio-ocne-sinfonico-01.excerpt.html'), 'utf8');
     const facts = parseAuditorioNacionalDetail(html);
@@ -1544,6 +1571,21 @@ describe('parser de ficha Auditorio Nacional', () => {
 });
 
 describe('parser de ficha Teatro Real', () => {
+  it('la dirección coral es dirección musical y una entidad mixta conserva rol ambiguo', () => {
+    expect(resolvePerformerRole('dirección del coro')).toBe('conductor');
+    expect(resolvePerformerRole('director del coro')).toBe('conductor');
+    expect(resolvePerformerRole('Coro y Orquesta')).toBeUndefined();
+  });
+  it('rechaza sinopsis de Gioconda como reparto y separa solistas inline de la Novena', () => {
+    const html = (intro: string) => `<div class="wrap-content-hero"><h4>Ópera</h4></div><div class="back-image"></div><section class="text-intro-show"><div class="wrap-text-free"><p>Programa musical.</p><hr />${intro}<div class="text-collapsible-cover"></div></div></section>`;
+    const gioconda = parseTeatroRealDetail(html('<p>Dramma lirico en cuatro actos.</p><p>Estrenada en el Teatro Alla Scala de Milán el 8 de abril de 1876.</p><p>Estrenada el 7 de febrero de 1884 en el Teatro Real.</p><p>Música de Amilcare Ponchielli.</p>'));
+    expect(gioconda.performers).toEqual([]);
+    expect(gioconda.composers).toEqual([{ name: 'Amilcare Ponchielli' }]);
+    const novena = parseTeatroRealDetail(html('<p>SOCIEDAD CORAL EXCELENTIA DE MADRID<br />ORQUESTA CLÁSICA SANTA CECILIA<br />Director, Kynan Johns Ruth Terán, Soprano Eduardo Sandoval, Tenor Olga Syniakova, mezzo David Cervera, bajo</p>'));
+    expect(novena.performers?.map((item) => item.name)).toEqual(expect.arrayContaining([
+      'Kynan Johns', 'Ruth Terán', 'Eduardo Sandoval', 'Olga Syniakova', 'David Cervera',
+    ]));
+  });
   it('extrae descripción, categoría, performers, programa y obras del excerpt', async () => {
     const html = await readFile(path.join(detailDir, 'teatro-real-concierto-navidad.excerpt.html'), 'utf8');
     const facts = parseTeatroRealDetail(html);

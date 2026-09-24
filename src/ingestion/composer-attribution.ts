@@ -95,6 +95,7 @@ const CONTEXTUAL_PREFIXES = [
   ...CONTEXTUAL_COMPOSER_RELATIONS,
   'libreto de', 'libreto', 'texto de', 'texto del', 'letra de',
   'poema de', 'poesia de', 'version de', 'adaptacion de',
+  'transcripcion para piano solo de', 'transcripcion para piano de',
   'realizadas por', 'realizado por', 'transcripcion de', 'transcripciones de',
   'arreglo de', 'arreglos de', 'orquestacion de',
   'trabajo con', 'colaboro con', 'estudio con', 'alumno de', 'alumna de',
@@ -178,6 +179,7 @@ export function attributedProgrammeComposers(
     }
     const name = collapseWhitespace(stripTrailingBiographicalYears(span.name) || span.name);
     if (span.frame === 'colon-name-work') continue;
+    if (span.frame === 'work-de' && !matchComposer(name) && name.split(/\s+/).length === 1) continue;
     if (!looksLikePromotableUnknownName(name, span.evidence, span.frame)) continue;
     const key = foldName(name);
     if (!key || seen.has(key)) continue;
@@ -429,6 +431,10 @@ function fromNameWorkSeparators(
     const separator = match[2] ?? '';
     const right = collapseWhitespace(match[3] ?? '');
     if (!left || !right) continue;
+    // Honorific and institutional heads cannot be composer credits simply
+    // because a dash is followed by repertoire-looking text.
+    if (/^(?:don|do[ñn]a)\s+/iu.test(left) || /\b(?:cultura|cultural|ministerio)\b/iu.test(left)) continue;
+    if (/^[«“"'‘]/u.test(left) || /\s+\/\s+/.test(right)) continue;
     const evidence = collapseWhitespace(match[0] ?? '');
     const frame: AttributionFrame = /:/.test(separator) ? 'colon-name-work' : 'dash-name-work';
     if (isAttributionFrameLeft(left)) {
@@ -643,12 +649,19 @@ function clipLabelledList(raw: string): string {
 }
 
 function splitNameList(value: string): string[] {
-  return collapseWhitespace(value)
+  const parts = collapseWhitespace(value)
     .replace(/[.;:]+$/u, '')
     .split(NAME_LIST_SPLIT)
     .map((part) => collapseWhitespace(part))
     .map((part) => stripTrailingBiographicalYears(part) || part)
     .filter((part) => part.length >= 3 && part.length <= 80);
+  // In a coordinated name such as "Lili y Nadia Boulanger", the shared
+  // surname belongs to both people. Only complete known identities are used.
+  if (parts.length === 2 && /^\p{Lu}[\p{L}'’-]+$/u.test(parts[0] ?? '')) {
+    const surname = parts[1]?.split(/\s+/).slice(1).join(' ');
+    if (surname && matchComposer(`${parts[0]} ${surname}`)) parts[0] = `${parts[0]} ${surname}`;
+  }
+  return parts;
 }
 
 function composersMentionedInNameSlot(slot: string): ComposerKnowledge[] {

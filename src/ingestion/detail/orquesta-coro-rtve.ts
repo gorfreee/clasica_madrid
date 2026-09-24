@@ -56,15 +56,18 @@ export function parseRtveDetail(event: RawEvent, body: string): ObservedFactPatc
     throw new Error('orquesta-coro-rtve: contenido completo no reconocible');
   }
   const content = (full[0] ?? contents[0]!).replace(/<h2\b[^>]*class=["']sr-only["'][^>]*>[\s\S]*?<\/h2>|<a\b[^>]*class=["'][^"']*\bread-(?:less|more)\b[^"']*["'][^>]*>[\s\S]*?<\/a>|<button\b[^>]*>[\s\S]*?<\/button>/gi, '');
-  const programText = stripTags(content) || undefined;
+  const description = stripTags(content) || undefined;
+  const lines = flattenHtmlBlocks(content).split('\n').map((line) => line.trim()).filter(Boolean);
+  const programStart = lines.findIndex(isRtveProgramFrontier);
+  const programText = programStart >= 0 ? lines.slice(programStart).join(' ') : undefined;
   return {
     occurrences: [...occurrences.values()].sort((a, b) => `${a.date}T${a.time}`.localeCompare(`${b.date}T${b.time}`)),
     // This is the theatre's own on-site catalogue (linked by RTVE), not the
     // broadcaster's nationwide concert/news calendar. No touring venue inference.
     venueText: 'Teatro Monumental',
     accessText: [...prices].join('; ') || undefined,
-    description: programText,
-    programText,
+    description,
+    ...(programText ? { programText } : {}),
     performers: extractRtvePerformers(content),
     // Composers and works stay with the common pipeline: names in the programme
     // are preserved as text rather than guessed from bold type.
@@ -108,6 +111,12 @@ function isRtveProgramFrontier(line: string): boolean {
 
 function parseRtveCreditLine(line: string, inProgram: boolean): ObservedPerson[] {
   if (/^todos los cantantes$/i.test(line)) return [];
+
+  const namedGroup = /^(?:[\p{Lu}][\p{L}'’-]+\s+[\p{Lu}][\p{L}'’-]+(?:,\s*|\s+y\s+)){2,}[\p{Lu}][\p{L}'’-]+\s+[\p{Lu}][\p{L}'’-]+\s*\([^)]*\)\.?$/u.exec(line);
+  if (namedGroup) {
+    return line.replace(/\s*\([^)]*\)\.?$/u, '')
+      .split(/,\s*|\s+y\s+/u).map((name) => ({ name: name.trim() }));
+  }
 
   const paired = parseRtvePairedRoleCredits(line);
   if (paired) return paired;

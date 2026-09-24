@@ -2591,6 +2591,9 @@ function unguardedAliasSpans(
   for (const match of haystack.matchAll(pattern)) {
     const start = match[0].startsWith(' ') ? match.index! + 1 : match.index!;
     if (isGuardedComposerContext(haystack.slice(0, start))) continue;
+    // A short surname in a presentation credit can belong to a different
+    // named person; preserve the alias for genuine repertoire mentions.
+    if (!phrase.includes(' ') && /\b(?:presenta|interviene|modera|ponente)\s+\w+\s+$/u.test(haystack.slice(0, start))) continue;
     spans.push({ start, end: start + phrase.length });
   }
   return spans;

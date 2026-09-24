@@ -87,6 +87,9 @@ export function looksLikeComposerLine(text: string): boolean {
   if (rejectedComposerHeading(trimmed)) return false;
   const stripped = stripTrailingBiographicalYears(trimmed);
   if (matchComposer(stripped)) return true;
+  // A titled song with a single composition year is not a biographical
+  // heading (À Chloris (1913)); lifespan ranges remain valid headings.
+  if (/^(?:À|A|El|La|Le|Les|The)\s+\p{Lu}[\p{L}’'-]+\s+\(\d{4}\)$/u.test(trimmed)) return false;
   // Unknown authors: clear personal-name syntax plus biographical years.
   // Negative checks already ran — this fallback cannot bypass them.
   return hasComposerLifespanAnnotation(trimmed) && looksLikeBiographicalComposerName(stripped, trimmed);
@@ -385,4 +388,3 @@ function isPersonNameWord(word: string): boolean {
   if (unquoted !== word && unquoted) return isPersonNameWord(unquoted);
   return /^[\p{Lu}\p{Lt}][\p{L}.’-]*$/u.test(word);
 }
-

@@ -7,6 +7,17 @@ import {
 } from '../src/ingestion/composer-attribution.ts';
 
 describe('atribución de compositores al programa actual', () => {
+  it('no convierte movimientos, títulos, instituciones ni créditos de transcripción en compositores', () => {
+    for (const line of ['I. Adagio — movimiento', 'Don Boyso — Suite de danza', 'Polaco de Cultura — Sinfonía', 'La Vida Breve — Danza', 'Miroirs — Une barque sur l’océan', '“My Way” — Claude François / Jacques Revaux / Paul Anka']) {
+      expect(attributedProgrammeComposers(line).map((item) => item.name)).not.toContain(line.split(' — ')[0]);
+    }
+    expect(attributedProgrammeComposers('transcripción para piano solo de Franz Liszt')).toEqual([]);
+    expect(attributedProgrammeComposers('Sonata para piano de Zamora')).toEqual([]);
+    expect(attributedProgrammeComposers('Obras de Lili y Nadia Boulanger').map((item) => item.name)).toEqual([
+      'Lili Boulanger', 'Nadia Boulanger',
+    ]);
+    expect(attributedProgrammeComposers('Obras de Bach, Moszkowski y Mozart').map((item) => item.name)).toContain('Moszkowski');
+  });
   it('reconoce Obras de, Música de, Compositor: y Name — obra', () => {
     const obras =
       'Obras de Josquin des Prez, Juan del Encina, Francisco Guerrero y Antonio de Cabezón';
@@ -190,12 +201,12 @@ describe('líneas de programa WORK de COMPOSER', () => {
     ).toEqual(['Johan de Meij']);
   });
 
-  it('acepta un apellido único sólo en un marco fuerte de obra', () => {
+  it('no atribuye un apellido desconocido sólo por WORK de X', () => {
     expect(
       attributedProgrammeComposers(
         'Concierto para Contrabajo en fa sostenido menor op. 3 de Koussevitzky',
       ).map((item) => item.name),
-    ).toEqual(['Koussevitzky']);
+    ).toEqual([]);
     expect(attributedProgrammeComposers('Obras de Moszkowski').map((item) => item.name)).toEqual([]);
   });
 
@@ -314,7 +325,7 @@ describe('líneas de programa WORK de COMPOSER', () => {
           'Sinfonía nº38 “Praga” de W. A. Mozart',
         ].join('\n'),
       ).map((item) => item.name),
-    ).toEqual(['Alberto Hijón Domarco', 'Felix Mendelssohn', 'Koussevitzky', 'Wolfgang Amadeus Mozart']);
+    ).toEqual(['Alberto Hijón Domarco', 'Felix Mendelssohn', 'Wolfgang Amadeus Mozart']);
 
     expect(attributedProgrammeComposers(BRASS_BAND_PROGRAM).map((item) => item.name)).toEqual([
       'Gioachino Rossini',
@@ -398,9 +409,7 @@ describe('regresiones de atribución débil (PR #253)', () => {
       'Enrique de Andrés Martínez',
     ]);
     expect(composerNames('Sinfonía nº 1 “The Lord of the Rings” de Johan de Meij')).toEqual(['Johan de Meij']);
-    expect(composerNames('Concierto para Contrabajo en fa sostenido menor op. 3 de Koussevitzky')).toEqual([
-      'Koussevitzky',
-    ]);
+    expect(composerNames('Concierto para Contrabajo en fa sostenido menor op. 3 de Koussevitzky')).toEqual([]);
     expect(composerNames('Maddalena Casulana — Morir non può il mio cuore')).toEqual(['Maddalena Casulana']);
   });
 });
