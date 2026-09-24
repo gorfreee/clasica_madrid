@@ -1585,6 +1585,15 @@ describe('parser de ficha Teatro Real', () => {
     expect(novena.performers?.map((item) => item.name)).toEqual(expect.arrayContaining([
       'Kynan Johns', 'Ruth Terán', 'Eduardo Sandoval', 'Olga Syniakova', 'David Cervera',
     ]));
+
+    const mixed = parseTeatroRealDetail(html('<p>Coro y Orquesta Titulares del Teatro Real</p><p>José Luis Basso, dirección del coro</p><p>Klangforum Wien</p><p>Ensemble Les Surprises</p>'));
+    const mixedEntity = mixed.performers?.find((item) => item.name === 'Coro y Orquesta Titulares del Teatro Real');
+    expect(mixedEntity?.roleText).toBeUndefined();
+    expect(mixed.performers).toEqual(expect.arrayContaining([
+      { name: 'José Luis Basso', roleText: 'dirección del coro' },
+      { name: 'Klangforum Wien' },
+      { name: 'Ensemble Les Surprises' },
+    ]));
   });
   it('extrae descripción, categoría, performers, programa y obras del excerpt', async () => {
     const html = await readFile(path.join(detailDir, 'teatro-real-concierto-navidad.excerpt.html'), 'utf8');

@@ -7,9 +7,16 @@ import {
 } from '../src/ingestion/composer-attribution.ts';
 
 describe('atribución de compositores al programa actual', () => {
-  it('no convierte movimientos, títulos, instituciones ni créditos de transcripción en compositores', () => {
-    for (const line of ['I. Adagio — movimiento', 'Don Boyso — Suite de danza', 'Polaco de Cultura — Sinfonía', 'La Vida Breve — Danza', 'Miroirs — Une barque sur l’océan', '“My Way” — Claude François / Jacques Revaux / Paul Anka']) {
-      expect(attributedProgrammeComposers(line).map((item) => item.name)).not.toContain(line.split(' — ')[0]);
+  it('no convierte los falsos positivos literales del run #301 en compositores', () => {
+    for (const line of [
+      'I. Adagio – Allegro molto',
+      'XI. Romance de Don Boyso',
+      '"Danza española nº1" de La Vida Breve',
+      'Concierto en colaboración con el Instituto Polaco de Cultura',
+      'Miroirs — Une barque sur l’océan',
+      '“My Way” — Claude François / Jacques Revaux / Paul Anka',
+    ]) {
+      expect(attributedProgrammeComposers(line)).toEqual([]);
     }
     expect(attributedProgrammeComposers('transcripción para piano solo de Franz Liszt')).toEqual([]);
     expect(attributedProgrammeComposers('Sonata para piano de Zamora')).toEqual([]);

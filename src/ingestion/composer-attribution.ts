@@ -16,6 +16,7 @@ import {
   looksLikeComposerLine,
   looksLikeEnsembleName,
   looksLikeInstrumentOnly,
+  looksLikeMovementLine,
   looksLikeNonWorkCredit,
   looksLikeTextCredit,
   looksLikeUnequivocalWorkLine,
@@ -109,6 +110,9 @@ const INLINE_NON_MUSIC_CREDIT =
   /\s+(?=libreto\b|texto(?:\s+del)?\b|letra\b|versi[oó]n\b|adaptaci[oó]n\b|premio\b)/i;
 const TITLE_CONTEXTUAL_DE =
   /(?:tema|un tema|sobre un tema|basad[oa]|inspirad[oa]|homenaje)\s+$/iu;
+/** Prose/institutional constructions where the final "de X" is not authorship. */
+const WORK_DE_EDITORIAL_CONTEXT =
+  /\b(?:colaboraci[oó]n\s+con|instituto|fundaci[oó]n|centro\s+cultural|ministerio)\b/iu;
 const CREDIT_LABEL_TITLE =
   /^(?:libreto|texto(?:\s+del)?|letra|poema|poes[ií]a|versi[oó]n|adaptaci[oó]n|transcripci[oó]n(?:es)?|arreglos?|orquestaci[oó]n)\b/i;
 const PERFORMER_LINE =
@@ -301,9 +305,14 @@ function parseQuotedWorkDeAuthor(line: string): { title: string; composerName: s
   if (!title || !composerName) return undefined;
   if (clearlyNonComposerContext(composerName, line)) return undefined;
   if (looksLikeEditorialMaterial(composerName) || looksLikeWorkTitle(composerName)) return undefined;
-  if (!matchComposer(composerName) && !looksLikePromotableUnknownName(composerName, line)) return undefined;
+  const known = matchComposer(composerName);
   const words = composerName.split(/\s+/).filter(Boolean);
-  if (words.filter((word) => !NAME_PARTICLE.test(word)).length < 2 && !matchComposer(composerName)) {
+  // In the ambiguous quoted "WORK de X" frame, an unknown capitalized phrase
+  // beginning with an article is more likely to be another work title
+  // ("La Vida Breve") than a person. Known composers remain admissible.
+  if (!known && LEADING_ARTICLE.test(words[0] ?? '')) return undefined;
+  if (!known && !looksLikePromotableUnknownName(composerName, line)) return undefined;
+  if (words.filter((word) => !NAME_PARTICLE.test(word)).length < 2 && !known) {
     return undefined;
   }
   return { title, composerName };
@@ -322,6 +331,8 @@ function parseUnknownWorkDeAuthor(line: string): { title: string; composerName: 
     if (/\bconservad[oa]s?\s+en\b/iu.test(rawTitle)) continue;
     if (/(?<!\d):\s+\S/.test(rawTitle)) continue;
     if (TITLE_CONTEXTUAL_DE.test(`${rawTitle} `)) continue;
+    if (looksLikeMovementLine(rawTitle)) continue;
+    if (WORK_DE_EDITORIAL_CONTEXT.test(rawTitle)) continue;
     if (CREDIT_LABEL_TITLE.test(rawTitle) || looksLikeEditorialMaterial(rawTitle)) continue;
     if (looksLikeEditorialMaterial(rawAuthor) || looksLikeWorkTitle(rawAuthor)) continue;
 
@@ -435,6 +446,7 @@ function fromNameWorkSeparators(
     // because a dash is followed by repertoire-looking text.
     if (/^(?:don|do[ñn]a)\s+/iu.test(left) || /\b(?:cultura|cultural|ministerio)\b/iu.test(left)) continue;
     if (/^[«“"'‘]/u.test(left) || /\s+\/\s+/.test(right)) continue;
+    if (looksLikeMovementLine(left)) continue;
     const evidence = collapseWhitespace(match[0] ?? '');
     const frame: AttributionFrame = /:/.test(separator) ? 'colon-name-work' : 'dash-name-work';
     if (isAttributionFrameLeft(left)) {
