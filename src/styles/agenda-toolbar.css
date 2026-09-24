@@ -36,23 +36,23 @@
   justify-content: center;
   min-width: 0;
   padding: .62rem .82rem;
-  border: 1px solid var(--line);
-  background: rgba(250, 249, 245, .45);
-  color: var(--ink);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-veil);
+  color: var(--color-text);
   font-size: .72rem;
   letter-spacing: .07em;
   -webkit-tap-highlight-color: transparent;
 }
 
 .filters .shortcut[aria-pressed="true"] {
-  border-color: var(--ink);
-  background: var(--paper-light);
-  box-shadow: inset 0 -2px 0 var(--blue);
+  border-color: var(--color-text);
+  background: var(--color-surface);
+  box-shadow: inset 0 -2px 0 var(--color-brand);
 }
 
 .filters .shortcut--emphasis {
   gap: .45rem;
-  background: rgba(250, 249, 245, .45);
+  background: var(--color-surface-veil);
 }
 
 .filters .shortcut--emphasis::after {
@@ -61,7 +61,7 @@
   height: .38rem;
   flex: 0 0 auto;
   border-radius: 50%;
-  background: var(--coral);
+  background: var(--color-accent);
 }
 
 .filters .filters__toggle {
@@ -72,7 +72,7 @@
   gap: .45rem;
   min-height: 2.35rem;
   padding: .58rem .78rem;
-  border: 1px solid var(--line);
+  border: 1px solid var(--color-border);
   border-radius: 0;
   background: transparent;
   color: inherit;
@@ -86,28 +86,28 @@
 }
 
 .filters .filters__toggle[aria-expanded="true"] {
-  border-color: var(--ink);
-  background: var(--ink);
-  color: var(--paper-light);
+  border-color: var(--color-text);
+  background: var(--color-text);
+  color: var(--color-surface);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .filters .shortcut:hover {
-    border-color: var(--ink);
-    background: var(--ink);
-    color: var(--paper-light);
+    border-color: var(--color-text);
+    background: var(--color-text);
+    color: var(--color-surface);
   }
 
   .filters .shortcut[aria-pressed="true"]:hover {
-    background: var(--ink);
-    color: var(--paper-light);
-    box-shadow: inset 0 -2px 0 var(--coral);
+    background: var(--color-text);
+    color: var(--color-surface);
+    box-shadow: inset 0 -2px 0 var(--color-accent);
   }
 
   .filters .filters__toggle:hover {
-    border-color: var(--ink);
-    background: var(--ink);
-    color: var(--paper-light);
+    border-color: var(--color-text);
+    background: var(--color-text);
+    color: var(--color-surface);
   }
 }
 
@@ -115,29 +115,29 @@
    so the ink fill cannot stick, including against the global .shortcut:hover. */
 @media (hover: none), (pointer: coarse) {
   .filters .shortcut:hover {
-    border-color: var(--line);
-    background: rgba(250, 249, 245, .45);
-    color: var(--ink);
+    border-color: var(--color-border);
+    background: var(--color-surface-veil);
+    color: var(--color-text);
     box-shadow: none;
   }
 
   .filters .shortcut[aria-pressed="true"]:hover {
-    border-color: var(--ink);
-    background: var(--paper-light);
-    color: var(--ink);
-    box-shadow: inset 0 -2px 0 var(--blue);
+    border-color: var(--color-text);
+    background: var(--color-surface);
+    color: var(--color-text);
+    box-shadow: inset 0 -2px 0 var(--color-brand);
   }
 
   .filters .filters__toggle:hover {
-    border-color: var(--line);
+    border-color: var(--color-border);
     background: transparent;
     color: inherit;
   }
 
   .filters .filters__toggle[aria-expanded="true"]:hover {
-    border-color: var(--ink);
-    background: var(--ink);
-    color: var(--paper-light);
+    border-color: var(--color-text);
+    background: var(--color-text);
+    color: var(--color-surface);
   }
 }
 
@@ -166,7 +166,7 @@
   margin-top: .7rem;
   padding: 1.25rem;
   border: 0;
-  background: rgba(250, 249, 245, .72);
+  background: var(--color-surface-panel);
 }
 
 .filters .filters__grid {
@@ -175,13 +175,13 @@
 
 .filters .field input,
 .filters .field select {
-  border-color: var(--line);
-  background: var(--paper-light);
+  border-color: var(--color-border);
+  background: var(--color-surface);
 }
 
 .filters .field input:focus,
 .filters .field select:focus {
-  border-color: var(--ink);
+  border-color: var(--color-text);
 }
 
 .filters .filters__actions {
@@ -194,7 +194,7 @@
 
 .filters .result-count {
   margin: 0 0 0 auto;
-  color: var(--muted);
+  color: var(--color-text-muted);
   font-size: .75rem;
   font-weight: 700;
   letter-spacing: .035em;
@@ -216,27 +216,27 @@
 .filters .active-filter {
   padding: .42rem .62rem;
   border: 0;
-  background: rgba(51, 70, 255, .1);
+  background: var(--color-brand-tint);
   font-size: .72rem;
 }
 
 .filters .active-filter:hover,
 .filters .active-filter:focus-visible {
-  background: var(--blue);
-  color: var(--paper-light);
+  background: var(--color-brand);
+  color: var(--color-surface);
 }
 
 .filters .filters__clear {
   flex: 0 0 auto;
   margin-top: .72rem;
-  color: var(--muted);
+  color: var(--color-text-muted);
   font-size: .75rem;
   font-weight: 700;
   text-underline-offset: .18em;
 }
 
 .filters .filters__clear:hover {
-  color: var(--ink);
+  color: var(--color-text);
 }
 
 .agenda-root .agenda > .month-marker:first-child {

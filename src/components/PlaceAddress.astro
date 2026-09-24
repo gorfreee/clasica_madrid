@@ -44,7 +44,7 @@ const { address, variant = 'compact' } = Astro.props;
     width: fit-content;
     max-width: 100%;
     padding: .18rem 0;
-    color: var(--muted);
+    color: var(--color-text-muted);
     font-weight: 600;
     line-height: 1.35;
     text-decoration: none;
@@ -52,13 +52,13 @@ const { address, variant = 'compact' } = Astro.props;
   }
 
   .place-address:hover {
-    color: var(--blue);
+    color: var(--color-brand);
     text-decoration: none;
   }
 
   .place-address:focus-visible {
-    color: var(--blue);
-    outline: 2px solid var(--blue);
+    color: var(--color-brand);
+    outline: 2px solid var(--color-brand);
     outline-offset: 4px;
     text-decoration: none;
   }
