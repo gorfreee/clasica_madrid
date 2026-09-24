@@ -23,6 +23,7 @@ import { escuelaReinaSofiaAdapter } from './sources/escuela-reina-sofia.ts';
 import { rcsmmAdapter } from './sources/rcsmm.ts';
 import { talaProduccionesAdapter } from './sources/tala-producciones.ts';
 import { fundacionMutuaAdapter } from './sources/fundacion-mutua.ts';
+import { coroCamaraMadridAdapter } from './sources/coro-camara-madrid.ts';
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
@@ -49,6 +50,7 @@ const ADAPTERS: Record<string, SourceAdapter> = {
   [rcsmmAdapter.id]: rcsmmAdapter,
   [talaProduccionesAdapter.id]: talaProduccionesAdapter,
   [fundacionMutuaAdapter.id]: fundacionMutuaAdapter,
+  [coroCamaraMadridAdapter.id]: coroCamaraMadridAdapter,
 };
 
 const srcAuditorio: Source = {
@@ -417,6 +419,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Fundación Mutua Madrileña',
       kind: 'official',
       url: 'https://www.fundacionmutua.es/',
+    },
+  },
+  {
+    id: 'coro-camara-madrid',
+    name: 'Coro de Cámara de Madrid',
+    urls: ['https://www.corodecamarademadrid.com/agenda/'],
+    adapterId: coroCamaraMadridAdapter.id,
+    catalogSourceId: 'src_corodecamarademadrid_com',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_corodecamarademadrid_com',
+      slug: 'coro-de-camara-de-madrid',
+      name: 'Coro de Cámara de Madrid',
+      kind: 'official',
+      url: 'https://www.corodecamarademadrid.com/',
     },
   },
 ];

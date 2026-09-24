@@ -133,6 +133,15 @@ async function fixtureGet(url: string): Promise<string> {
   if (url === 'https://www.fundacionmutua.es/cultura/conciertos/') {
     return readFile(path.join(fixtures, 'fundacion-mutua/listing-empty.html'), 'utf8');
   }
+  if (url.includes('corodecamarademadrid.com/wp-json/wp/v2/pages')) {
+    return JSON.stringify([{
+      id: 57,
+      slug: 'agenda',
+      link: 'https://www.corodecamarademadrid.com/agenda/',
+      title: { rendered: 'AGENDA 2026-2027' },
+      content: { rendered: '<p>No hay conciertos programados.</p>', protected: false },
+    }]);
+  }
   throw new Error(`URL de test no mapeada: ${url}`);
 }
 
@@ -240,7 +249,7 @@ describe('aislamiento de fallos por fuente', () => {
       'patrimonio-nacional',
       'escuela-reina-sofia',
     ]);
-    expect(run.summary.sourcesSucceeded).toEqual(['auditorio-nacional', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes', 'fundacion-goethe', 'madrid-a-tempo', 'ateneo-madrid', 'rcsmm', 'tala-producciones']);
+    expect(run.summary.sourcesSucceeded).toEqual(['auditorio-nacional', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes', 'fundacion-goethe', 'madrid-a-tempo', 'ateneo-madrid', 'rcsmm', 'tala-producciones', 'coro-camara-madrid']);
     expect(run.rawEvents.length).toBeGreaterThan(0);
     expect(run.rawEvents.some((event) => event.sourceId === 'teatro-real')).toBe(false);
     expect(run.summary.written).toEqual([]);
@@ -260,7 +269,7 @@ describe('aislamiento de fallos por fuente', () => {
     });
     expect(run.summary.sourcesSucceeded).toEqual([]);
     expect(run.summary.sourcesFailed.map((item) => item.sourceId)).toEqual([
-      'auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes', 'fundacion-goethe', 'madrid-a-tempo', 'patrimonio-nacional', 'ateneo-madrid', 'escuela-reina-sofia', 'rcsmm', 'tala-producciones',
+      'auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes', 'fundacion-goethe', 'madrid-a-tempo', 'patrimonio-nacional', 'ateneo-madrid', 'escuela-reina-sofia', 'rcsmm', 'tala-producciones', 'coro-camara-madrid',
     ]);
     expect(run.summary.written).toEqual([]);
     expect(run.apply.report.ok).toBe(true);
