@@ -291,7 +291,8 @@ describe('fixture en borrador', () => {
     });
     const map = blogLastmodsFromDirectory(path.join(root, 'src/content/blog'));
     expect([...map.keys()]).not.toContain('/blog/fixture-sistema-editorial/');
-    expect(map.has('/blog/')).toBe(false);
+    expect(map.get('/blog/')).toBe('2026-09-25');
+    expect(map.get('/blog/temporada-teatro-real-2026-2027/')).toBe('2026-09-25');
   });
 
   it('lee un artículo publicado desde un directorio y usa su updatedAt', () => {
