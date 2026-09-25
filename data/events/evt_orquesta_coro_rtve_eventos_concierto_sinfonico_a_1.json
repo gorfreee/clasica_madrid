@@ -44,12 +44,22 @@
       "name": "Gustav Mahler"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "Im Herbst, op. 104",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "Sinfonía núm. 2 en do menor, «Resurrección»",
+      "composerName": "Gustav Mahler"
+    }
+  ],
   "eras": [
     "romantic"
   ],
   "formats": [
-    "symphonic"
+    "symphonic",
+    "choral"
   ],
   "kind": "established",
   "access": "paid",
@@ -57,10 +67,10 @@
     {
       "sourceId": "src_orquesta_coro_rtve",
       "url": "https://www.teatromonumental.es/eventos/concierto-sinfonico-a-1",
-      "checkedAt": "2026-09-09",
+      "checkedAt": "2026-09-25",
       "externalId": "/eventos/concierto-sinfonico-a-1/"
     }
   ],
   "primarySourceId": "src_orquesta_coro_rtve",
-  "lastVerifiedAt": "2026-09-09"
+  "lastVerifiedAt": "2026-09-25"
 }

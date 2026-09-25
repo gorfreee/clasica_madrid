@@ -645,6 +645,11 @@ export const COMPOSERS: ComposerKnowledge[] = [
     eras: ['twentieth'],
   },
   {
+    canonicalName: 'Chabuca Granda',
+    aliases: ['Chabuca Granda', 'María Isabel Granda', 'Maria Isabel Granda'],
+    eras: ['twentieth'],
+  },
+  {
     canonicalName: 'Luis Gianneo',
     aliases: ['Luis Gianneo'],
     eras: ['twentieth'],
@@ -1522,6 +1527,11 @@ export const COMPOSERS: ComposerKnowledge[] = [
     eras: ['romantic'],
   },
   {
+    canonicalName: 'Pedro Miguel Marqués',
+    aliases: ['Pedro Miguel Marqués', 'Pedro Miguel Marques', 'Miguel Marqués', 'Miguel Marques'],
+    eras: ['romantic'],
+  },
+  {
     canonicalName: 'Federico Chueca',
     aliases: ['Federico Chueca', 'F. Chueca'],
     eras: ['romantic'],
@@ -1692,6 +1702,11 @@ export const COMPOSERS: ComposerKnowledge[] = [
     eras: ['twentieth'],
   },
   {
+    canonicalName: 'Ángel Barrios',
+    aliases: ['Ángel Barrios', 'Angel Barrios'],
+    eras: ['twentieth'],
+  },
+  {
     canonicalName: 'Abel Fleury',
     aliases: ['Abel Fleury'],
     eras: ['twentieth'],
@@ -1729,6 +1744,11 @@ export const COMPOSERS: ComposerKnowledge[] = [
   {
     canonicalName: 'Amadeo Vives',
     aliases: ['Amadeo Vives'],
+    eras: ['twentieth'],
+  },
+  {
+    canonicalName: 'Leopoldo Magenti',
+    aliases: ['Leopoldo Magenti'],
     eras: ['twentieth'],
   },
   {
@@ -2164,6 +2184,11 @@ export const COMPOSERS: ComposerKnowledge[] = [
   {
     canonicalName: 'Alberto Posadas',
     aliases: ['Alberto Posadas'],
+    eras: ['contemporary'],
+  },
+  {
+    canonicalName: 'Joan Valent',
+    aliases: ['Joan Valent'],
     eras: ['contemporary'],
   },
   {

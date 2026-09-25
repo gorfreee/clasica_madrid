@@ -44,6 +44,9 @@
   ],
   "composers": [
     {
+      "name": "Umberto Giordano"
+    },
+    {
       "name": "Georges Bizet"
     },
     {
@@ -62,14 +65,106 @@
       "name": "Jacques Offenbach"
     },
     {
+      "name": "Pedro Miguel Marqués"
+    },
+    {
+      "name": "Amadeo Vives"
+    },
+    {
+      "name": "José Serrano"
+    },
+    {
+      "name": "Pablo Sorozábal"
+    },
+    {
       "name": "Federico Moreno Torroba"
+    },
+    {
+      "name": "Leopoldo Magenti"
+    },
+    {
+      "name": "Jacinto Guerrero"
+    },
+    {
+      "name": "Francisco Alonso"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "La mamma morta (Andrea Chénier)",
+      "composerName": "Umberto Giordano"
+    },
+    {
+      "title": "Come un bel dì di maggio (Andrea Chénier)",
+      "composerName": "Umberto Giordano"
+    },
+    {
+      "title": "Au fond du temple saint (Les pêcheurs de perles)",
+      "composerName": "Georges Bizet"
+    },
+    {
+      "title": "Mi chiamano Mimì (La bohème)",
+      "composerName": "Giacomo Puccini"
+    },
+    {
+      "title": "Già nella notte densa (Otello)",
+      "composerName": "Giuseppe Verdi"
+    },
+    {
+      "title": "Son io, mio Carlo… Per me giunto… Io morrò (Don Carlo)",
+      "composerName": "Giuseppe Verdi"
+    },
+    {
+      "title": "O mio Fernando (La favorita)",
+      "composerName": "Gaetano Donizetti"
+    },
+    {
+      "title": "È la solita storia (L'arlesiana)",
+      "composerName": "Francesco Cilea"
+    },
+    {
+      "title": "Barcarolle (Les contes d'Hoffmann)",
+      "composerName": "Jacques Offenbach"
+    },
+    {
+      "title": "Lágrimas mías (El anillo de hierro)",
+      "composerName": "Pedro Miguel Marqués"
+    },
+    {
+      "title": "Por el humo se sabe dónde está el fuego (Doña Francisquita)",
+      "composerName": "Amadeo Vives"
+    },
+    {
+      "title": "Qué te importa que no venga (Los claveles)",
+      "composerName": "José Serrano"
+    },
+    {
+      "title": "No puede ser (La tabernera del puerto)",
+      "composerName": "Pablo Sorozábal"
+    },
+    {
+      "title": "Cállate, corazón (Luisa Fernanda)",
+      "composerName": "Federico Moreno Torroba"
+    },
+    {
+      "title": "Qué feliz mi vida (La labradora)",
+      "composerName": "Leopoldo Magenti"
+    },
+    {
+      "title": "Mi aldea (Los gavilanes)",
+      "composerName": "Jacinto Guerrero"
+    },
+    {
+      "title": "Por la calle de Alcalá (Las Leandras)",
+      "composerName": "Francisco Alonso"
+    }
+  ],
   "eras": [
-    "romantic"
+    "romantic",
+    "twentieth"
   ],
   "formats": [
+    "opera",
     "zarzuela",
     "symphonic"
   ],
@@ -79,10 +174,10 @@
     {
       "sourceId": "src_orquesta_coro_rtve",
       "url": "https://www.teatromonumental.es/eventos/gala-de-opera-zarzuela",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-09-25",
       "externalId": "/eventos/gala-de-opera-zarzuela/"
     }
   ],
   "primarySourceId": "src_orquesta_coro_rtve",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-09-25"
 }
