@@ -37,6 +37,7 @@ Scripts live in `package.json`. Use those names rather than duplicating flags he
 | Discovery: agent playbook | `docs/run-discovery-agent.md` |
 | Discovery: search hints | `docs/discovery-search-hints.md` |
 | Editorial classification policy | `docs/classification-policy.md` |
+| Blog | `docs/blog.md` |
 | Product analytics | `docs/analytics.md` |
 | Historical notes | `docs/archive/` |
 

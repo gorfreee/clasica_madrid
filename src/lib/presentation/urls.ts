@@ -51,6 +51,15 @@ export const AGENDA_PATH = '/';
 export const VENUES_INDEX_PATH = publicPath('/lugares');
 export const ABOUT_PATH = publicPath('/acerca-de');
 export const CONTACT_PATH = publicPath('/contacto');
+export const BLOG_PATH = publicPath('/blog');
+
+export function blogPostPath(slug: string): string {
+  return publicPath(`/blog/${slug}`);
+}
+
+export function blogPostUrl(slug: string): string {
+  return publicUrl(blogPostPath(slug));
+}
 
 /**
  * Abre el formulario de contacto para avisar de un error en una ficha.

@@ -95,7 +95,7 @@ test.describe('página de contacto', () => {
     await expect(more).toHaveAttribute('aria-current', 'true');
     await more.click();
     const panel = page.locator('#nav-more-panel');
-    await expect(panel.getByRole('link')).toHaveText(['Contacto', 'Acerca de']);
+    await expect(panel.getByRole('link')).toHaveText(['Blog', 'Contacto', 'Acerca de']);
     await expect(panel.getByRole('link', { name: 'Contacto' })).toHaveAttribute(
       'aria-current',
       'page',
@@ -109,7 +109,7 @@ test.describe('página de contacto', () => {
 
     await page.getByRole('button', { name: 'Menú de secciones' }).click();
     const panel = page.locator('#nav-mobile-panel');
-    await expect(panel.getByRole('link')).toHaveText(['Lugares', 'Contacto', 'Acerca de']);
+    await expect(panel.getByRole('link')).toHaveText(['Lugares', 'Blog', 'Contacto', 'Acerca de']);
     await expect(panel.getByRole('link', { name: 'Contacto' })).toHaveAttribute(
       'aria-current',
       'page',

@@ -1,0 +1,58 @@
+---
+import AgendaItem from '../AgendaItem.astro';
+import { upcomingEventsForArticle } from '../../lib/presentation/blog-catalog.ts';
+import { getPublishedCatalog } from '../../lib/presentation/site.ts';
+
+type Props = {
+  /** Public venue slug. Omit it to use the whole upcoming agenda. */
+  venue?: string;
+  limit?: number;
+};
+
+const block = upcomingEventsForArticle(await getPublishedCatalog(), {
+  venueSlug: Astro.props.venue,
+  limit: Astro.props.limit,
+});
+---
+
+<section class="article-events" aria-labelledby={block.headingId}>
+  <h2 id={block.headingId}>{block.heading}</h2>
+  {
+    block.items.length === 0 ? (
+      <p class="article-events__empty">{block.emptyLabel}</p>
+    ) : (
+      <div class="article-events__list">
+        {block.items.map((item) => (
+          <AgendaItem item={item} />
+        ))}
+      </div>
+    )
+  }
+</section>
+
+<style>
+  .article-events {
+    margin: 2rem 0 1.5rem;
+  }
+
+  .article-events__empty {
+    margin: .8rem 0 0;
+    color: var(--color-text-muted);
+  }
+
+  .article-events__list {
+    margin-top: .8rem;
+    border-top: 1px solid var(--color-text);
+  }
+
+  .article-events :global(.agenda-item) {
+    grid-template-columns: 4.6rem minmax(0, 1fr);
+    grid-template-areas: 'when main' '. venue' '. signal';
+    min-height: 0;
+  }
+
+  .article-events :global(.agenda-item__venue),
+  .article-events :global(.agenda-item__signal) {
+    border-top: 1px solid var(--color-border);
+  }
+</style>
