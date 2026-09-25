@@ -32,10 +32,34 @@ test.describe('blog', () => {
     expect(jsonLd).toContain('CollectionPage');
     const analytics = await page.locator('#analytics-page').evaluate((node) => node.textContent ?? '');
     expect(analytics).toContain('"page_type":"blog"');
-    await expect(page.getByText('Todavía no hay artículos publicados')).toBeVisible();
+    await expect(page.getByRole('link', { name: /Temporada 2026–27 del Teatro Real/ }).first()).toHaveAttribute(
+      'href',
+      '/blog/temporada-teatro-real-2026-2027/',
+    );
+    await expect(page.getByText('Todavía no hay artículos publicados')).toHaveCount(0);
     await expect(page.getByText('fixture-sistema-editorial')).toHaveCount(0);
     await expect(page.getByText('Pieza de prueba del sistema editorial')).toHaveCount(0);
     await expect(page).not.toHaveURL(/fixture-sistema-editorial/);
+  });
+
+  test('la guía del Teatro Real presenta todas las propuestas y cabe en móvil y escritorio', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/blog/temporada-teatro-real-2026-2027/');
+
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Temporada 2026–27 del Teatro Real');
+    await expect(page.locator('article img')).toHaveCount(46);
+    await expect(page.locator('article a[href^="/eventos/"]')).toHaveCount(46);
+    expect(await page.locator('article img:not([alt])').count()).toBe(0);
+    expect(await page.locator('article img[loading="lazy"]').count()).toBe(45);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(
+      await page.evaluate(() => document.documentElement.clientWidth),
+    );
+
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await expect(page.locator('.toc--desktop')).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(
+      await page.evaluate(() => document.documentElement.clientWidth),
+    );
   });
 
   test('no desborda en móvil y Blog queda activo en Más y en el menú', async ({ page }) => {
@@ -68,6 +92,7 @@ test.describe('blog', () => {
   test('el sitemap incluye /blog/ y omite el borrador', async ({ request }) => {
     const xml = await sitemapXml(request);
     expect(xml).toContain('https://clasicamadrid.com/blog/');
+    expect(xml).toContain('https://clasicamadrid.com/blog/temporada-teatro-real-2026-2027/');
     expect(xml).not.toContain('fixture-sistema-editorial');
   });
 
