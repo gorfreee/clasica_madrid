@@ -1,0 +1,28 @@
+---
+import type { TocItem } from '../../lib/presentation/blog.ts';
+
+type Props = {
+  items: TocItem[];
+};
+
+const { items } = Astro.props;
+---
+
+<ol>
+  {
+    items.map((item) => (
+      <li>
+        <a href={`#${item.slug}`}>{item.text}</a>
+        {item.children.length > 0 && (
+          <ol class="toc__children">
+            {item.children.map((child) => (
+              <li>
+                <a href={`#${child.slug}`}>{child.text}</a>
+              </li>
+            ))}
+          </ol>
+        )}
+      </li>
+    ))
+  }
+</ol>

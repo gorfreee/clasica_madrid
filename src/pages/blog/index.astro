@@ -1,0 +1,111 @@
+---
+import { Image } from 'astro:assets';
+import EmptyState from '../../components/EmptyState.astro';
+import Eyebrow from '../../components/Eyebrow.astro';
+import { loadBlogEntries } from '../../lib/blog/load.ts';
+import { buildBlogIndexModel, toBlogPostMeta } from '../../lib/presentation/blog.ts';
+import Layout from '../../layouts/Layout.astro';
+import '../../styles/blog-index.css';
+
+const entries = await loadBlogEntries();
+const byId = new Map(entries.map((entry) => [entry.id, entry]));
+const model = buildBlogIndexModel(entries.map((entry) => toBlogPostMeta(entry)));
+
+function mediaFor(id: string) {
+  const entry = byId.get(id);
+  if (!entry) throw new Error(`Falta la imagen de ${id}`);
+  return { src: entry.data.heroImage, alt: entry.data.heroAlt };
+}
+---
+
+<Layout
+  title={model.title}
+  description={model.description}
+  canonicalPath={model.canonicalPath}
+  jsonLd={model.jsonLd}
+  analytics={{ page_type: 'blog' }}
+>
+  <div class="blog-index">
+    <header class="page-hero blog-hero">
+      <Eyebrow label="Blog" />
+      <h1>
+        <span>Historias para</span>
+        <span>escuchar Madrid</span>
+      </h1>
+      <p class="lede">{model.lede}</p>
+    </header>
+
+    {
+      model.isEmpty ? (
+        <div class="blog-index__empty">
+          <EmptyState
+            title="Todavía no hay artículos publicados"
+            body="Cuando haya textos listos, temporadas, salas y guías aparecerán aquí"
+          />
+        </div>
+      ) : (
+        <>
+          {model.featured && (
+            <article class="blog-feature">
+              <a href={model.featured.href}>
+                <div class="blog-feature__media">
+                  <Image
+                    src={mediaFor(model.featured.id).src}
+                    alt={mediaFor(model.featured.id).alt}
+                    widths={[480, 768, 1200]}
+                    sizes="(max-width: 760px) 100vw, 42rem"
+                    loading="eager"
+                    fetchpriority="high"
+                    decoding="async"
+                  />
+                </div>
+                <div class="blog-feature__copy">
+                  <p class="blog-kicker">
+                    <span>{model.featured.kindLabel}</span>
+                    <time datetime={model.featured.publishedAt}>{model.featured.publishedLabel}</time>
+                  </p>
+                  <h2>{model.featured.title}</h2>
+                  <p>{model.featured.description}</p>
+                </div>
+              </a>
+            </article>
+          )}
+
+          {
+            model.posts.length > 0 && (
+              <section class="blog-list-section" aria-label={model.featured ? 'Más artículos' : 'Artículos'}>
+                {model.featured && <p class="blog-list-section__label">Más artículos</p>}
+                <ul class="blog-list">
+                  {model.posts.map((post) => (
+                    <li class="blog-card">
+                      <a href={post.href}>
+                        <div class="blog-card__media">
+                          <Image
+                            src={mediaFor(post.id).src}
+                            alt={mediaFor(post.id).alt}
+                            widths={[320, 640]}
+                            sizes="(max-width: 760px) 100vw, 9.5rem"
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        </div>
+                        <div>
+                          <p class="blog-kicker">
+                            <span>{post.kindLabel}</span>
+                            <time datetime={post.publishedAt}>{post.publishedLabel}</time>
+                          </p>
+                          <h2>{post.title}</h2>
+                          <p>{post.description}</p>
+                        </div>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )
+          }
+        </>
+      )
+    }
+  </div>
+</Layout>

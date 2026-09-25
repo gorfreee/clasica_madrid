@@ -1,0 +1,65 @@
+---
+import { articleCtaModel, type ArticleCtaKind } from '../../lib/presentation/blog.ts';
+
+type Props = {
+  kind: ArticleCtaKind;
+  href?: string;
+  title?: string;
+  text?: string;
+};
+
+const model = articleCtaModel(Astro.props);
+---
+
+<aside class="article-cta">
+  <p class="article-cta__kicker">{model.kicker}</p>
+  <p class="article-cta__title">{model.title}</p>
+  {model.text && <p class="article-cta__text">{model.text}</p>}
+  <a
+    class="button-link article-cta__link"
+    href={model.href}
+    data-whatsapp-channel={model.whatsapp ? 'article' : undefined}
+    target={model.external ? '_blank' : undefined}
+    rel={model.external ? 'noopener noreferrer' : undefined}
+    aria-label={model.whatsapp ? 'Seguir el canal de Clásica Madrid en WhatsApp (se abre en otra pestaña)' : undefined}
+  >
+    {model.linkLabel}
+  </a>
+</aside>
+
+<style>
+  .article-cta {
+    margin: 1.8rem 0;
+    padding: 1.1rem 0 1.2rem;
+    border-top: 1px solid var(--color-text);
+    border-bottom: 1px solid var(--color-text);
+  }
+
+  .article-cta__kicker {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+
+  .article-cta__title {
+    margin: .35rem 0 0;
+    font-size: 1.28rem;
+    font-weight: 800;
+    letter-spacing: var(--type-tracking-heading);
+    line-height: 1.15;
+  }
+
+  .article-cta__text {
+    max-width: 36rem;
+    margin: .45rem 0 0;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+  }
+
+  .article-cta__link {
+    margin-top: .95rem;
+  }
+</style>

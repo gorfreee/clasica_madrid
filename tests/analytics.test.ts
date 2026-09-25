@@ -74,6 +74,8 @@ describe('page context', () => {
     expect(inferPageType('/lugares/teatro-real/')).toBe('venue');
     expect(inferPageType('/acerca-de/')).toBe('about');
     expect(inferPageType('/contacto/')).toBe('contact');
+    expect(inferPageType('/blog/')).toBe('blog');
+    expect(inferPageType('/blog/cualquier-articulo')).toBe('article');
     expect(inferPageType('/no-existe/')).toBe('other');
   });
 
@@ -104,6 +106,23 @@ describe('page context', () => {
       days_until_event: 0,
     });
     expect(buildPageAnalytics('/', { access: 'nope', format: 'nope' })).toEqual({ page_type: 'agenda' });
+    expect(
+      buildPageAnalytics('/blog/pieza/', {
+        page_type: 'article',
+        article_slug: 'pieza',
+        article_kind: 'guia',
+      }),
+    ).toEqual({
+      page_type: 'article',
+      article_slug: 'pieza',
+      article_kind: 'guia',
+    });
+    expect(
+      buildPageAnalytics('/blog/pieza/', {
+        article_slug: 'Pieza mal',
+        article_kind: 'ensayo',
+      }),
+    ).toEqual({ page_type: 'article' });
   });
 
   it('enriquece $pageview y $pageleave sin duplicarlos ni pegar el contexto a otros eventos', () => {
@@ -818,7 +837,9 @@ describe('canal de WhatsApp', () => {
 
   it('agenda_inline es una ubicación válida y no envía la URL del canal', () => {
     expect(WHATSAPP_CHANNEL_PLACEMENTS).toContain('agenda_inline');
+    expect(WHATSAPP_CHANNEL_PLACEMENTS).toContain('article');
     expect(isWhatsAppChannelPlacement('agenda_inline')).toBe(true);
+    expect(isWhatsAppChannelPlacement('article')).toBe(true);
     const { calls, capture } = recorder();
     trackWhatsAppChannelClicked({ placement: 'agenda_inline', page_type: 'agenda' }, capture);
     expect(calls).toEqual([

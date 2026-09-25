@@ -3,6 +3,7 @@ import type { Catalog } from '../domain/catalog.ts';
 import { loadPublishedCatalog } from '../repository/load.ts';
 import { eventPublicSlugs } from '../domain/queries.ts';
 import { agendaLandingLastmods, isAgendaLandingSlug } from './agenda-landings.ts';
+import { blogContentDir, blogLastmodsFromDirectory } from '../blog/files.ts';
 import { eventPath, publicPath, venuePath, VENUES_INDEX_PATH } from './urls.ts';
 
 export async function serializeSitemapItem(item: SitemapItem): Promise<SitemapItem> {
@@ -24,7 +25,13 @@ export function sitemapPageFilter(page: string): boolean {
 }
 
 async function lastmodByPath(): Promise<Map<string, string>> {
-  cachedLastmods ??= sitemapLastmodMap(await loadPublishedCatalog());
+  if (!cachedLastmods) {
+    const map = sitemapLastmodMap(await loadPublishedCatalog());
+    for (const [path, lastmod] of blogLastmodsFromDirectory(blogContentDir())) {
+      map.set(path, lastmod);
+    }
+    cachedLastmods = map;
+  }
   return cachedLastmods;
 }
 

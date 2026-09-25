@@ -54,9 +54,12 @@ propiedades.
 | `venue` | `/lugares/{slug}/` |
 | `about` | `/acerca-de/` |
 | `contact` | `/contacto/` |
+| `blog` | `/blog/` |
+| `article` | `/blog/{slug}/` |
 | `not_found` | 404 |
 | `other` | cualquier otra ruta |
 
+En un artículo, solo `article_slug` y `article_kind`. No se envía el título, la entradilla ni el cuerpo.
 En una ficha de evento, cuando el dato existe: `event_id`, `event_title`,
 `venue_id`, `venue_name`, `access`, `is_free` (solo si el acceso es `free` o
 `paid`), `format` y `era` (el primer valor canónico) y `days_until_event`.
@@ -81,7 +84,7 @@ está, la llamada no hace nada y no se espera.
 | `result_list_exhausted` | El final visible de una lista, una vez por estado de resultados ya estabilizado. Otro filtro o búsqueda puede volver a contarlo. En Lugares, las teclas intermedias no son un estado | `surface`, `results_count`, `active_filter_count`, `has_search_query`, `quick_filter` | Si la gente recorre la lista |
 | `share_clicked` | Compartir una ficha de concierto (nativo, WhatsApp o enlace copiado) | `event_id`, `event_title`, `channel` | Difusión de un concierto |
 | `calendar_add_clicked` | Elige Google Calendar o el archivo .ics. No al abrir el menú ni al escoger la fecha | `event_id`, `event_title`, `occurrence_id`, `method` (`google_calendar` o `ics`), `has_confirmed_time` | Guardar una función concreta |
-| `whatsapp_channel_clicked` | Clic en el enlace al canal oficial de WhatsApp | `placement` (`footer`, `about` o `agenda_inline`), `page_type` (contexto de la página actual) | Medir interés por el canal y atribuir el clic a la superficie del CTA |
+| `whatsapp_channel_clicked` | Clic en el enlace al canal oficial de WhatsApp | `placement` (`footer`, `about`, `agenda_inline` o `article`), `page_type` (contexto de la página actual) | Medir interés por el canal y atribuir el clic a la superficie del CTA |
 | `event_feedback_clicked` | Clic en «Avísanos», al final de Fuentes en una ficha de concierto. No espera a PostHog ni retrasa la ida a `/contacto/` | `event_id`, `event_title` si existe, `placement` (`after_sources`) | Aviso de un error o cambio en la ficha, sin datos personales |
 | `contact_submitted` | El `POST /api/contacto` respondió bien. No al pulsar el botón | `surface` (`contact`), `topic` si el motivo es uno de los cuatro valores del formulario. Si el envío conserva un contexto válido de ficha, también `origin` (`event_feedback`) y `event_id` | Contacto útil, sin datos personales |
 | `content_shared` | Ya existía. Sigue registrando el compartir de conciertos y de lugares | `method`, `content_type`, `path` | Atribución del enlace compartido, también en lugares |
@@ -90,8 +93,8 @@ está, la llamada no hace nada y no se espera.
 
 `whatsapp_channel_clicked` mide el clic de salida hacia WhatsApp. No implica que
 la persona haya terminado siguiendo el canal. `placement` nombra la superficie
-estable: `footer` en el pie, `about` en Acerca de y `agenda_inline` en la nota
-editorial de la agenda de la portada. Ese último valor no codifica un número de
+estable: `footer` en el pie, `about` en Acerca de, `agenda_inline` en la nota
+editorial de la agenda de la portada y `article` en una llamada del blog. Ese último valor no codifica un número de
 conciertos ni una posición fija; si el corte entre días cambia, el `placement`
 sigue igual. La nota solo está en `/`. No se envía la URL del canal y no hay un
 evento de impresión.

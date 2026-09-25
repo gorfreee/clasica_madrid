@@ -1,0 +1,55 @@
+---
+import { relatedVenueCard } from '../../lib/presentation/blog-catalog.ts';
+import { getPublishedCatalog } from '../../lib/presentation/site.ts';
+
+type Props = {
+  slug: string;
+};
+
+const card = relatedVenueCard(await getPublishedCatalog(), Astro.props.slug);
+---
+
+<aside class="related-venue" aria-label={card.name}>
+  <p class="related-venue__kicker">Lugar</p>
+  <p class="related-venue__name"><a href={card.href}>{card.name}</a></p>
+  <p class="related-venue__summary">{card.summary}</p>
+</aside>
+
+<style>
+  .related-venue {
+    margin: 1.8rem 0;
+    padding: 1rem 0 1.1rem;
+    border-top: 2px solid var(--color-text);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .related-venue__kicker {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+
+  .related-venue__name {
+    margin: .3rem 0 0;
+    font-size: clamp(1.4rem, 2.4vw, 1.85rem);
+    font-weight: 800;
+    letter-spacing: var(--type-tracking-heading);
+    line-height: 1.05;
+  }
+
+  .related-venue__name a {
+    text-decoration: none;
+  }
+
+  .related-venue__name a:hover {
+    color: var(--color-accent);
+  }
+
+  .related-venue__summary {
+    margin: .45rem 0 0;
+    color: var(--color-text-muted);
+  }
+</style>

@@ -1,4 +1,4 @@
-import { ABOUT_PATH, AGENDA_PATH, CONTACT_PATH, VENUES_INDEX_PATH } from './urls.ts';
+import { ABOUT_PATH, AGENDA_PATH, BLOG_PATH, CONTACT_PATH, VENUES_INDEX_PATH } from './urls.ts';
 
 export type NavItemDefinition = {
   href: string;
@@ -50,6 +50,11 @@ export const PRIMARY_NAV: readonly NavItemDefinition[] = [
 
 /** Secondary pages grouped under «Más» on desktop and the mobile menu. */
 export const SECONDARY_NAV: readonly NavItemDefinition[] = [
+  {
+    href: BLOG_PATH,
+    label: 'Blog',
+    currentWhen: (path) => path === '/blog' || path.startsWith('/blog/'),
+  },
   {
     href: CONTACT_PATH,
     label: 'Contacto',

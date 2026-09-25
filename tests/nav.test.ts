@@ -36,10 +36,11 @@ describe('navegación del encabezado', () => {
     expect(nav.agenda.label).toBe('Agenda');
     expect(PRIMARY_NAV.map((item) => item.label)).toEqual(['Lugares']);
     expect(nav.desktopLinks.map((link) => link.label)).toEqual(['Lugares']);
-    expect(SECONDARY_NAV.map((item) => item.label)).toEqual(['Contacto', 'Acerca de']);
-    expect(nav.secondaryLinks.map((link) => link.label)).toEqual(['Contacto', 'Acerca de']);
+    expect(SECONDARY_NAV.map((item) => item.label)).toEqual(['Blog', 'Contacto', 'Acerca de']);
+    expect(nav.secondaryLinks.map((link) => link.label)).toEqual(['Blog', 'Contacto', 'Acerca de']);
     expect(nav.mobileMenuLinks.map((link) => link.label)).toEqual([
       'Lugares',
+      'Blog',
       'Contacto',
       'Acerca de',
     ]);
@@ -53,6 +54,7 @@ describe('navegación del encabezado', () => {
       expect(nav.agenda).toMatchObject({ href: '/', label: 'Agenda', current: false });
       expect(nav.desktopLinks.map((link) => link.href)).toEqual(['/lugares/']);
       expect(nav.secondaryLinks.map((link) => link.href)).toEqual([
+        '/blog/',
         '/contacto/',
         '/acerca-de/',
       ]);
@@ -64,27 +66,30 @@ describe('navegación del encabezado', () => {
     expect(nav.agenda.current).toBe(false);
     expect(nav.desktopLinks[0]?.current).toBe(false);
     expect(nav.secondaryLinks).toEqual([
+      { href: '/blog/', label: 'Blog', current: false },
       { href: '/contacto/', label: 'Contacto', current: false },
       { href: '/acerca-de/', label: 'Acerca de', current: true },
     ]);
     expect(nav.moreCurrent).toBe(true);
-    expect(nav.mobileMenuLinks[2]?.current).toBe(true);
+    expect(nav.mobileMenuLinks[3]?.current).toBe(true);
   });
 
   it('coloca Acerca de al final del menú y marca Contacto como activa', () => {
     const nav = headerNavigation('/contacto/');
-    expect(SECONDARY_NAV.map((item) => item.href)).toEqual(['/contacto/', '/acerca-de/']);
+    expect(SECONDARY_NAV.map((item) => item.href)).toEqual(['/blog/', '/contacto/', '/acerca-de/']);
     expect(nav.secondaryLinks).toEqual([
+      { href: '/blog/', label: 'Blog', current: false },
       { href: '/contacto/', label: 'Contacto', current: true },
       { href: '/acerca-de/', label: 'Acerca de', current: false },
     ]);
     expect(nav.moreCurrent).toBe(true);
     expect(nav.mobileMenuLinks.map((link) => link.label)).toEqual([
       'Lugares',
+      'Blog',
       'Contacto',
       'Acerca de',
     ]);
-    expect(nav.mobileMenuLinks[1]?.current).toBe(true);
+    expect(nav.mobileMenuLinks[2]?.current).toBe(true);
   });
 
   it('agrupa varias páginas secundarias en Más y en el menú móvil', () => {
@@ -103,6 +108,18 @@ describe('navegación del encabezado', () => {
       'Recursos',
     ]);
     expect(nav.agenda.current).toBe(false);
+  });
+
+  it('marca Blog como activo en el índice y en un artículo', () => {
+    for (const path of ['/blog/', '/blog/cualquier-articulo/']) {
+      const nav = headerNavigation(path);
+      expect(nav.agenda.current).toBe(false);
+      expect(nav.desktopLinks[0]?.current).toBe(false);
+      expect(nav.moreCurrent).toBe(true);
+      expect(nav.secondaryLinks[0]).toEqual({ href: '/blog/', label: 'Blog', current: true });
+      expect(nav.mobileMenuLinks.find((link) => link.label === 'Blog')?.current).toBe(true);
+    }
+    expect(headerNavigation('/lugares/').secondaryLinks[0]?.current).toBe(false);
   });
 
   it('no arrastra Más como activo en Agenda o Lugares', () => {

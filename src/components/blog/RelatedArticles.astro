@@ -1,0 +1,134 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+export type RelatedArticleItem = {
+  href: string;
+  title: string;
+  description: string;
+  kindLabel: string;
+  publishedAt: string;
+  publishedLabel: string;
+  image: ImageMetadata;
+  imageAlt: string;
+};
+
+type Props = {
+  items: RelatedArticleItem[];
+};
+
+const { items } = Astro.props;
+---
+
+{
+  items.length > 0 && (
+    <section class="related-articles" aria-labelledby="articulos-relacionados">
+      <h2 id="articulos-relacionados">También en el blog</h2>
+      <ul>
+        {items.map((item) => (
+          <li>
+            <a href={item.href}>
+              <span class="related-articles__media">
+                <Image
+                  src={item.image}
+                  alt={item.imageAlt}
+                  widths={[320, 640]}
+                  sizes="(max-width: 720px) 100vw, 16rem"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </span>
+              <span class="related-articles__copy">
+                <span class="related-articles__kicker">
+                  {item.kindLabel}
+                  <time datetime={item.publishedAt}>{item.publishedLabel}</time>
+                </span>
+                <span class="related-articles__title">{item.title}</span>
+                <span class="related-articles__dek">{item.description}</span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+<style>
+  .related-articles h2 {
+    margin: 0;
+    font-size: clamp(1.6rem, 3vw, 2.1rem);
+    font-weight: 800;
+    letter-spacing: var(--type-tracking-heading);
+    line-height: 1.05;
+  }
+
+  .related-articles ul {
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 2px solid var(--color-text);
+  }
+
+  .related-articles a {
+    display: grid;
+    grid-template-columns: 8.5rem minmax(0, 1fr);
+    gap: .9rem 1.1rem;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--color-text);
+    text-decoration: none;
+  }
+
+  .related-articles__media {
+    display: block;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    background: var(--color-brand-tint);
+  }
+
+  .related-articles__media :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .related-articles__kicker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .3rem .65rem;
+    color: var(--color-text-muted);
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+
+  .related-articles__title {
+    display: block;
+    margin-top: .3rem;
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: var(--type-tracking-heading);
+    line-height: 1.1;
+  }
+
+  .related-articles__dek {
+    display: block;
+    margin-top: .35rem;
+    color: var(--color-text-muted);
+    font-size: .92rem;
+    line-height: 1.4;
+  }
+
+  .related-articles a:hover .related-articles__title {
+    color: var(--color-accent);
+  }
+
+  @media (max-width: 620px) {
+    .related-articles a {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,6 +1,8 @@
 import type { AccessMode, Era, Format } from '../schemas/taxonomies.ts';
 import { ACCESS_MODES, ERAS, FORMATS } from '../schemas/taxonomies.ts';
 import { madridToday } from '../domain/dates.ts';
+import type { BlogKind } from '../blog/schema.ts';
+import { BLOG_KINDS } from '../blog/schema.ts';
 import type { AgendaShortcutId } from '../presentation/agenda-shortcut-id.ts';
 
 export const ANALYTICS_PAGE_ELEMENT_ID = 'analytics-page';
@@ -21,6 +23,8 @@ export const PAGE_ANALYTICS_KEYS = [
   'era',
   'days_until_event',
   'landing_slug',
+  'article_slug',
+  'article_kind',
 ] as const;
 
 export type PageAnalyticsKey = (typeof PAGE_ANALYTICS_KEYS)[number];
@@ -33,6 +37,8 @@ export const PAGE_TYPES = [
   'venue',
   'about',
   'contact',
+  'blog',
+  'article',
   'not_found',
   'other',
 ] as const;
@@ -51,6 +57,8 @@ export type PageAnalytics = {
   era?: Era;
   days_until_event?: number;
   landing_slug?: string;
+  article_slug?: string;
+  article_kind?: BlogKind;
 };
 
 /** Inputs are validated before they reach PostHog. Taxonomy ids arrive as plain strings. */
@@ -66,6 +74,8 @@ export type PageAnalyticsOverrides = {
   era?: string;
   days_until_event?: number;
   landing_slug?: string;
+  article_slug?: string;
+  article_kind?: string;
 };
 
 const MAX_TITLE = 180;
@@ -81,6 +91,8 @@ export function inferPageType(canonicalPath: string): PageType {
   if (normalized.startsWith('/lugares/')) return 'venue';
   if (normalized === '/acerca-de/') return 'about';
   if (normalized === '/contacto/') return 'contact';
+  if (normalized === '/blog/') return 'blog';
+  if (normalized.startsWith('/blog/')) return 'article';
   return 'other';
 }
 
@@ -104,6 +116,8 @@ export function buildPageAnalytics(
   const format = isFormat(overrides.format) ? overrides.format : undefined;
   const era = isEra(overrides.era) ? overrides.era : undefined;
   const landing = cleanSlug(overrides.landing_slug);
+  const articleSlug = cleanArticleSlug(overrides.article_slug);
+  const articleKind = cleanArticleKind(overrides.article_kind);
   if (eventId) page.event_id = eventId;
   if (eventTitle) page.event_title = eventTitle;
   if (venueId) page.venue_id = venueId;
@@ -116,6 +130,8 @@ export function buildPageAnalytics(
     page.days_until_event = Math.trunc(overrides.days_until_event);
   }
   if (landing) page.landing_slug = landing;
+  if (articleSlug) page.article_slug = articleSlug;
+  if (articleKind) page.article_kind = articleKind;
   return page;
 }
 
@@ -201,6 +217,18 @@ function cleanSlug(value: unknown): string | undefined {
   const trimmed = value.trim();
   if (!trimmed || trimmed.length > MAX_SLUG || !/^[a-z0-9-]+$/.test(trimmed)) return undefined;
   return trimmed;
+}
+
+function cleanArticleSlug(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  const trimmed = value.trim();
+  if (!trimmed || trimmed.length > 120 || !/^[a-z0-9-]+$/.test(trimmed)) return undefined;
+  return trimmed;
+}
+
+function cleanArticleKind(value: unknown): BlogKind | undefined {
+  if (typeof value !== 'string' || !(BLOG_KINDS as readonly string[]).includes(value)) return undefined;
+  return value as BlogKind;
 }
 
 function limitText(value: unknown, max: number): string | undefined {

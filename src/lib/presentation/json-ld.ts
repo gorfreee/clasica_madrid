@@ -5,7 +5,7 @@ import type { Venue } from '../schemas/venue.ts';
 import { DEFAULT_DESCRIPTION, SITE_NAME } from './constants.ts';
 import { musicEventSchemaStatus } from './event-status.ts';
 import { formatLabels } from './labels.ts';
-import { AGENDA_PATH, eventUrl, publicUrl, venueUrl, VENUES_INDEX_PATH } from './urls.ts';
+import { ABOUT_PATH, AGENDA_PATH, BLOG_PATH, eventUrl, publicAssetUrl, publicUrl, venueUrl, VENUES_INDEX_PATH } from './urls.ts';
 
 export function buildCollectionPageJsonLd(params: {
   name: string;
@@ -50,6 +50,50 @@ export function buildWebsiteJsonLd(): Record<string, unknown> {
       url,
     },
   };
+}
+
+export function buildBlogPostingJsonLd(input: {
+  title: string;
+  description: string;
+  path: string;
+  publishedAt: string;
+  updatedAt?: string;
+  image: string;
+}): Record<string, unknown>[] {
+  const url = publicUrl(input.path);
+  const image = input.image.startsWith('http') ? input.image : publicAssetUrl(input.image);
+  return [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: input.title,
+      description: input.description,
+      url,
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': url,
+      },
+      datePublished: input.publishedAt,
+      dateModified: input.updatedAt ?? input.publishedAt,
+      inLanguage: 'es-ES',
+      author: {
+        '@type': 'Organization',
+        name: SITE_NAME,
+        url: publicUrl(ABOUT_PATH),
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: SITE_NAME,
+        url: publicUrl(AGENDA_PATH),
+      },
+      image: [image],
+    },
+    breadcrumbList([
+      { name: 'Agenda', url: publicUrl(AGENDA_PATH) },
+      { name: 'Blog', url: publicUrl(BLOG_PATH) },
+      { name: input.title, url },
+    ]),
+  ];
 }
 
 export function buildVenueJsonLd(venue: Venue, principal: Venue = venue): Record<string, unknown>[] {

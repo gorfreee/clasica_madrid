@@ -17,6 +17,7 @@ const pagesWithoutMotif = [
   '/lugares/teatro-real/',
   '/acerca-de/',
   '/contacto/',
+  '/blog/',
 ] as const;
 
 const viewports = [
