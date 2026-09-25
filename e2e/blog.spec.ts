@@ -28,8 +28,10 @@ test.describe('blog', () => {
     );
     await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /.+/);
     await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content', 'website');
-    await expect(page.locator('script[type="application/ld+json"]')).toContainText('CollectionPage');
-    await expect(page.locator('#analytics-page')).toContainText('"page_type":"blog"');
+    const jsonLd = await page.locator('script[type="application/ld+json"]').evaluate((node) => node.textContent ?? '');
+    expect(jsonLd).toContain('CollectionPage');
+    const analytics = await page.locator('#analytics-page').evaluate((node) => node.textContent ?? '');
+    expect(analytics).toContain('"page_type":"blog"');
     await expect(page.getByText('Todavía no hay artículos publicados')).toBeVisible();
     await expect(page.getByText('fixture-sistema-editorial')).toHaveCount(0);
     await expect(page.getByText('Pieza de prueba del sistema editorial')).toHaveCount(0);
