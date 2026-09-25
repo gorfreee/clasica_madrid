@@ -338,6 +338,13 @@ describe('composer knowledge base', () => {
     ['Alberto Posadas', 'Alberto Posadas', 'contemporary'],
     ['Agustín Barrios', 'Agustín Barrios', 'twentieth'],
     ['Mangoré', 'Agustín Barrios', 'twentieth'],
+    ['Ángel Barrios', 'Ángel Barrios', 'twentieth'],
+    ['Angel Barrios', 'Ángel Barrios', 'twentieth'],
+    ['Joan Valent', 'Joan Valent', 'contemporary'],
+    ['Pedro Miguel Marqués', 'Pedro Miguel Marqués', 'romantic'],
+    ['Miguel Marqués', 'Pedro Miguel Marqués', 'romantic'],
+    ['Leopoldo Magenti', 'Leopoldo Magenti', 'twentieth'],
+    ['Chabuca Granda', 'Chabuca Granda', 'twentieth'],
   ])('reconoce %s sin ampliar la época ni atribuir otro compositor', (name, canonicalName, era) => {
     expect(matchComposer(name)).toMatchObject({ canonicalName, eras: [era] });
     expect(findKnownComposersInText(`Programa: ${name}; obra anunciada.`).map((item) => item.canonicalName))

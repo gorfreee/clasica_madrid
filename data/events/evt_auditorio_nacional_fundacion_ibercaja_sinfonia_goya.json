@@ -27,9 +27,20 @@
       "name": "Sabina Puértolas"
     }
   ],
-  "composers": [],
-  "works": [],
-  "eras": [],
+  "composers": [
+    {
+      "name": "Joan Valent"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sinfonía «Goya»",
+      "composerName": "Joan Valent"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
   "formats": [
     "symphonic"
   ],
@@ -39,10 +50,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/fundacion-ibercaja-sinfonia-goya",
-      "checkedAt": "2026-09-14",
+      "checkedAt": "2026-09-25",
       "externalId": "fundacion-ibercaja-sinfonia-goya"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-14"
+  "lastVerifiedAt": "2026-09-25"
 }
