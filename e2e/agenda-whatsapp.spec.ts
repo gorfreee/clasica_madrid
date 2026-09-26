@@ -118,6 +118,14 @@ test.describe('canal de WhatsApp en la agenda', () => {
     await page.goto('/');
 
     const inline = page.locator('[data-whatsapp-channel="agenda_inline"]');
+    await inline.scrollIntoViewIfNeeded();
+    await expect.poll(async () => {
+      return (await analyticsCalls(page)).filter((call) => call.event === 'whatsapp_channel_viewed').length;
+    }).toBe(1);
+    expect((await analyticsCalls(page)).filter((call) => call.event === 'whatsapp_channel_viewed')).toEqual([
+      { event: 'whatsapp_channel_viewed', properties: { placement: 'agenda_inline', page_type: 'agenda' } },
+    ]);
+
     const [inlinePopup] = await Promise.all([page.waitForEvent('popup'), inline.click()]);
     await inlinePopup.close();
 
