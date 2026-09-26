@@ -82,9 +82,11 @@
   "eras": [
     "renaissance",
     "baroque",
-    "twentieth"
+    "twentieth",
+    "contemporary"
   ],
   "formats": [
+    "chamber",
     "early-music"
   ],
   "kind": "alternative",
