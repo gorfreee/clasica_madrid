@@ -15,10 +15,44 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
-  "works": [],
-  "eras": [],
+  "performers": [
+    {
+      "name": "Orquesta y Coro de la Comunidad de Madrid"
+    },
+    {
+      "name": "Pequeños Cantores de la ORCAM",
+      "role": "choir"
+    },
+    {
+      "name": "Jennifer Johnston"
+    },
+    {
+      "name": "Ana González",
+      "role": "conductor"
+    },
+    {
+      "name": "Javier Carmena",
+      "role": "conductor"
+    },
+    {
+      "name": "Alondra de la Parra",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Gustav Mahler"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sinfonía n.º 3",
+      "composerName": "Gustav Mahler"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
   "formats": [
     "symphonic",
     "choral"

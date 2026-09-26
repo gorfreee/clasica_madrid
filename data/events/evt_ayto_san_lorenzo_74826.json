@@ -15,10 +15,60 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
-  "works": [],
-  "eras": [],
+  "performers": [
+    {
+      "name": "Pedro Alberto Sánchez",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Pablo Bruna"
+    },
+    {
+      "name": "Dieterich Buxtehude"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Eduardo Torres"
+    },
+    {
+      "name": "Miguel Manzano"
+    }
+  ],
+  "works": [
+    {
+      "title": "Tiento sobre la Letanía de la Virgen",
+      "composerName": "Pablo Bruna"
+    },
+    {
+      "title": "Coral «Herr Christ, der einig Gottes Sohn», BuxWV 192",
+      "composerName": "Dieterich Buxtehude"
+    },
+    {
+      "title": "Passacaglia y Fuga en do menor, BWV 582",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Impresión Teresiana",
+      "composerName": "Eduardo Torres"
+    },
+    {
+      "title": "In modo antico",
+      "composerName": "Eduardo Torres"
+    },
+    {
+      "title": "Cinco Glosas a una Loa para gran órgano",
+      "composerName": "Miguel Manzano"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "twentieth",
+    "contemporary"
+  ],
   "formats": [
     "organ",
     "recital"
