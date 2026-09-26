@@ -62,7 +62,8 @@
     }
   ],
   "eras": [
-    "classical"
+    "classical",
+    "romantic"
   ],
   "formats": [
     "chamber",
