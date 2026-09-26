@@ -38,6 +38,7 @@ Scripts live in `package.json`. Use those names rather than duplicating flags he
 | Discovery: search hints | `docs/discovery-search-hints.md` |
 | Editorial classification policy | `docs/classification-policy.md` |
 | Blog | `docs/blog.md` |
+| Blog: crear un artículo | `docs/create-blog-post.md` |
 | Product analytics | `docs/analytics.md` |
 | Historical notes | `docs/archive/` |
 

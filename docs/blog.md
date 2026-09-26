@@ -2,6 +2,8 @@
 
 El blog es contenido editorial estático. Vive en el repositorio, se valida en el build y sale prerenderizado con el resto del sitio. No hay CMS, buscador, páginas de etiquetas ni de categorías.
 
+Para crear un nuevo artículo de principio a fin, sigue `docs/create-blog-post.md`. Este documento sigue siendo la referencia técnica del sistema editorial.
+
 Un archivo con `draft: true` no genera URL, no sale en `/blog/`, no entra en el sitemap y no se usa como artículo relacionado.
 
 ## Dónde crear un artículo
