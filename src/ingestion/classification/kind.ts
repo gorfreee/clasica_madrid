@@ -55,6 +55,8 @@ const ESTABLISHED_VENUE_IDS = new Set([
   'ven_casa_de_america',
   'ven_casa_de_america_auditorio_gabriela_mistral',
   'ven_sala_manuel_falla_sgae',
+  'ven_real_coliseo_carlos_iii',
+  'ven_teatro_auditorio_escorial',
 ]);
 
 /**
@@ -84,6 +86,7 @@ const ALTERNATIVE_VENUE_IDS = new Set([
   'ven_palacio_real_madrid_capilla_real',
   'ven_palacio_real_madrid_salon_columnas',
   'ven_hinves_pianos',
+  'ven_basilica_monasterio_san_lorenzo_escorial',
 ]);
 
 /**

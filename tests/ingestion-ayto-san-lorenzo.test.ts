@@ -8,6 +8,7 @@ import { hydrateEvents } from '../src/ingestion/hydrate.ts';
 import { matchVenue } from '../src/ingestion/venues.ts';
 import { emptyCatalog } from '../src/lib/domain/catalog.ts';
 import { runIngest } from '../src/ingestion/pipeline.ts';
+import { attentionKinds } from '../src/ingestion/outcome.ts';
 import type { AdapterContext } from '../src/ingestion/types.ts';
 
 const source = getSourceDefinition(adapter.id);
@@ -120,5 +121,49 @@ describe('Ayuntamiento de San Lorenzo de El Escorial', () => {
     expect(first.summary.written).toEqual([]);
     expect(first.possiblyMissing).toEqual([]);
     expect(fetchMock).toHaveBeenCalledTimes(3);
+    const organCandidate = first.candidates.find((item) => item.event.citations[0]?.url.includes('concierto-de-organo-pedro'));
+    expect(organCandidate?.event.performers).toEqual([{ name: 'Pedro Alberto Sánchez' }]);
+    expect(organCandidate?.event.composers.map((item) => item.name)).toEqual([
+      'Pablo Bruna', 'Dieterich Buxtehude', 'Johann Sebastian Bach', 'Eduardo Torres', 'Miguel Manzano',
+    ]);
+    expect(organCandidate?.event.works).toHaveLength(6);
+    expect(organCandidate?.event.eras).toContain('baroque');
+    expect(organCandidate?.event.eras.length).toBeGreaterThan(0);
+    expect(organCandidate?.event.kind).toBe('alternative');
+    const organDecision = first.decisions.find((item) => item.externalId === '74826');
+    expect(organDecision?.eligibility?.method).not.toBe('ai');
+    expect(attentionKinds(organDecision!)).not.toContain('unresolved-taxonomy');
+  });
+
+  it('extrae el programa etiquetado y el crédito de órgano, sin la biografía ni las notas', async () => {
+    const { events } = await paged();
+    const organ = events.find((item) => item.externalId === '74826')!;
+    const patch = parseDetail(organ, await fixture('detail.html'));
+    expect(patch.performers).toEqual([{ name: 'PEDRO ALBERTO SÁNCHEZ', roleText: 'órgano' }]);
+    expect(patch.composers?.map((item) => item.name)).toEqual([
+      'Pablo Bruna', 'Dieterich Buxtehude', 'Johann Sebastian Bach', 'Eduardo Torres', 'Miguel Manzano',
+    ]);
+    expect(patch.works).toEqual([
+      { title: 'Tiento sobre la Letanía de la Virgen', composerName: 'Pablo Bruna' },
+      { title: 'Coral «Herr Christ, der einig Gottes Sohn», BuxWV 192', composerName: 'Dieterich Buxtehude' },
+      { title: 'Passacaglia y Fuga en do menor, BWV 582', composerName: 'Johann Sebastian Bach' },
+      { title: 'Impresión Teresiana', composerName: 'Eduardo Torres' },
+      { title: 'In modo antico', composerName: 'Eduardo Torres' },
+      { title: 'Cinco Glosas a una Loa para gran órgano', composerName: 'Miguel Manzano' },
+    ]);
+    expect(patch.programText).toMatch(/BuxWV 192/);
+    expect(patch.programText).toMatch(/BWV 582/);
+    expect(patch.programText).not.toMatch(/NOTAS AL PROGRAMA|Natural de Salamanca|ciego de Daroca|Anselmo Serna/);
+    expect(patch.description).toMatch(/Natural de Salamanca/);
+    expect(patch.performers?.map((item) => item.name)).not.toEqual(expect.arrayContaining([
+      'Anselmo Serna', 'Ottorino Baldassarri', 'Monserrat Torrent',
+    ]));
+    const withNote = (await fixture('detail.html')).replace(
+      'NOTAS AL PROGRAMA</strong></p>',
+      'NOTAS AL PROGRAMA</strong></p><p><strong>Sinfonía</strong> de Johannes Brahms (1833–1897)</p><p>Estudió con Anselmo Serna, organista del monasterio.</p>',
+    );
+    const guarded = parseDetail(organ, withNote);
+    expect(guarded.composers?.map((item) => item.name)).not.toContain('Johannes Brahms');
+    expect(guarded.performers?.map((item) => item.name)).toEqual(['PEDRO ALBERTO SÁNCHEZ']);
   });
 });

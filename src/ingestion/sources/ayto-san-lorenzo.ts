@@ -1,8 +1,14 @@
 import { isRealIsoDate } from '../../lib/util/iso-date.ts';
 import { flattenHtmlBlocks, stripTags } from '../html.ts';
 import { explicitAccessText } from '../detail/access-evidence.ts';
-import { emptyObservedLists } from '../observed.ts';
-import type { ObservedFactPatch } from '../observed.ts';
+import { stripTrailingBiographicalYears } from '../knowledge/composers.ts';
+import {
+  composersFromWorks,
+  emptyObservedLists,
+  normalizePersonList,
+  normalizeWorkList,
+} from '../observed.ts';
+import type { ObservedFactPatch, ObservedPerson, ObservedWork } from '../observed.ts';
 import type { RawEvent, RawOccurrence, SourceAdapter } from '../types.ts';
 
 const ID = 'ayto-san-lorenzo';
@@ -178,9 +184,15 @@ export function parseDetail(event: RawEvent, body: string): ObservedFactPatch {
   const description = /<div\b[^>]*class="[^"]*\bmec-single-event-description\b[^>]*>([\s\S]*?)<\/div>/i.exec(body)?.[1];
   const copy = description && flattenHtmlBlocks(description).slice(0, 5000);
   const accessText = explicitAccessText(copy?.match(/(?:entrada gratuita|acceso libre|entrada libre|\bgratis\b)[^\n.]*/i)?.[0]);
+  const program = description ? programFromMunicipalDescription(description) : undefined;
+  const performers = description ? explicitPerformerCredits(description) : [];
   const patch: ObservedFactPatch = {
     ...(copy ? { description: copy } : {}),
     ...(accessText ? { accessText } : {}),
+    ...(program?.programText ? { programText: program.programText } : {}),
+    ...(performers.length > 0 ? { performers } : {}),
+    ...(program && program.composers.length > 0 ? { composers: program.composers } : {}),
+    ...(program && program.works.length > 0 ? { works: program.works } : {}),
   };
   // A detail page only describes the selected/default occurrence. Never
   // apply its time to other dates in a recurring event.
@@ -194,4 +206,65 @@ export function parseDetail(event: RawEvent, body: string): ObservedFactPatch {
     if (time) patch.occurrences = [{ raw: `${date} ${time}`, date, time: time.padStart(5, '0') }];
   }
   return patch;
+}
+
+const PROGRAM_STOP =
+  /<strong>\s*(?:NOTAS(?:\s+AL\s+PROGRAMA)?|BIOGRAF[IÍ]A|INT[EÉ]RPRETES)\b/i;
+const WORK_CREDIT = /<strong>([^<]*)<\/strong>\s*de\s*([^<]+)/gi;
+const PERFORMER_CREDIT =
+  /^(\p{Lu}[\p{L}.'’-]*(?:\s+(?:de|del|la|las|los|y|e|da|di|van|von)|\s+\p{Lu}[\p{L}.'’-]*){1,6}),\s*(\p{L}[\p{L} .'-]{1,40})$/u;
+
+/**
+ * The municipal MEC ficha publishes one labelled programme list and then
+ * notes plus a biography. Only the list between those headings is repertoire.
+ * A later page without that boundary is left unstructured.
+ */
+function programFromMunicipalDescription(html: string): {
+  programText?: string;
+  composers: ReturnType<typeof composersFromWorks>;
+  works: ObservedWork[];
+} | undefined {
+  const start = html.search(/<strong>\s*PROGRAMA\s*<\/strong>/i);
+  if (start < 0) return undefined;
+  const rest = html.slice(start);
+  const stopAt = rest.search(PROGRAM_STOP);
+  if (stopAt <= 0) return undefined;
+  const block = rest.slice(0, stopAt);
+  const works: ObservedWork[] = [];
+  WORK_CREDIT.lastIndex = 0;
+  for (const match of block.matchAll(WORK_CREDIT)) {
+    const title = stripTags(match[1] ?? '');
+    const composerName = cleanProgrammeComposer(match[2] ?? '');
+    if (!title || !composerName) continue;
+    works.push({ title, composerName });
+  }
+  const normalized = normalizeWorkList(works);
+  if (normalized.length === 0) return undefined;
+  const programText = flattenHtmlBlocks(block)
+    .replace(/^PROGRAMA\s*/i, '')
+    .trim();
+  return {
+    ...(programText ? { programText } : {}),
+    composers: composersFromWorks(normalized),
+    works: normalized,
+  };
+}
+
+function cleanProgrammeComposer(raw: string): string {
+  const clipped = stripTags(raw).replace(/\s*\[.*$/u, '').trim();
+  return stripTrailingBiographicalYears(clipped).replace(/[.,;:]+$/u, '').trim();
+}
+
+/** A whole paragraph that is itself `Nombre, rol`. Prose and notes are not credits. */
+function explicitPerformerCredits(html: string): ObservedPerson[] {
+  const people: ObservedPerson[] = [];
+  for (const paragraph of html.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)) {
+    const text = stripTags(paragraph[1] ?? '');
+    const match = PERFORMER_CREDIT.exec(text);
+    if (!match?.[1] || !match[2]) continue;
+    const roleText = match[2].trim();
+    if (roleText.split(/\s+/).length > 4) continue;
+    people.push({ name: match[1], roleText });
+  }
+  return normalizePersonList(people);
 }
