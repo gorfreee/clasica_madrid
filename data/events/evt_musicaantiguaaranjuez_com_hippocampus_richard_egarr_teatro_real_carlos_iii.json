@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_musicaantiguaaranjuez_com_hippocampus_richard_egarr_teatro_real_carlos_iii",
+  "slug": "hippocampus-richard-egarr-grand-concertos-in-seven-parts",
+  "title": "Hippocampus & Richard Egarr — Grand concertos in seven parts",
+  "status": "scheduled",
+  "venueId": "ven_teatro_real_carlos_iii",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_musicaantiguaaranjuez_com_hippocampus_richard_egarr_teatro_real_carlos_iii_01",
+      "date": "2026-10-31",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Hippocampus"
+    },
+    {
+      "name": "Richard Egarr"
+    },
+    {
+      "name": "Guillermo Santonja"
+    },
+    {
+      "name": "Lidia Fernández"
+    },
+    {
+      "name": "Paula Pérez"
+    },
+    {
+      "name": "Sergio Suárez"
+    },
+    {
+      "name": "Irene Martínez Sevilla"
+    },
+    {
+      "name": "Ana Hernández"
+    },
+    {
+      "name": "José Manuel Navarro"
+    },
+    {
+      "name": "Helena Reguera"
+    },
+    {
+      "name": "Ruth Verona"
+    },
+    {
+      "name": "María Alejandra Saturno"
+    },
+    {
+      "name": "Pablo Martín Caminero"
+    },
+    {
+      "name": "Alberto Martínez Molina"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Arcangelo Corelli"
+    },
+    {
+      "name": "Georg Friedrich Händel"
+    },
+    {
+      "name": "Charles Avison"
+    },
+    {
+      "name": "Domenico Scarlatti"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concerto grosso en fa mayor, op. 6 n.º 2",
+      "composerName": "Arcangelo Corelli"
+    },
+    {
+      "title": "Concerto grosso en la menor, op. 6 n.º 4, HWV 322",
+      "composerName": "Georg Friedrich Händel"
+    },
+    {
+      "title": "Concerto grosso en re menor, n.º 3 (a partir de Scarlatti)",
+      "composerName": "Charles Avison"
+    },
+    {
+      "title": "Concerto grosso en si bemol mayor, op. 6 n.º 7, HWV 325",
+      "composerName": "Georg Friedrich Händel"
+    },
+    {
+      "title": "Concerto grosso en re mayor, op. 6 n.º 1",
+      "composerName": "Arcangelo Corelli"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "early-music"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_musicaantiguaaranjuez_com",
+      "url": "https://musicaantiguaaranjuez.com/evento/hippocampus-richard-egarr-teatro-real-carlos-iii",
+      "checkedAt": "2026-09-26"
+    }
+  ],
+  "primarySourceId": "src_musicaantiguaaranjuez_com",
+  "lastVerifiedAt": "2026-09-26"
+}
