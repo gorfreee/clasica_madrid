@@ -36,6 +36,10 @@ test.describe('blog', () => {
       'href',
       '/blog/temporada-teatro-real-2026-2027/',
     );
+    await expect(page.getByRole('link', { name: /Los órganos históricos de Madrid/ }).first()).toHaveAttribute(
+      'href',
+      '/blog/organos-historicos-madrid-donde-escucharlos/',
+    );
     await expect(page.getByText('Todavía no hay artículos publicados')).toHaveCount(0);
     await expect(page.getByText('fixture-sistema-editorial')).toHaveCount(0);
     await expect(page.getByText('Pieza de prueba del sistema editorial')).toHaveCount(0);
@@ -47,10 +51,29 @@ test.describe('blog', () => {
     await page.goto('/blog/temporada-teatro-real-2026-2027/');
 
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Temporada 2026–27 del Teatro Real');
-    await expect(page.locator('article img')).toHaveCount(46);
+    await expect(page.locator('.article-hero img, .article-prose img')).toHaveCount(46);
     await expect(page.locator('article a[href^="/eventos/"]')).toHaveCount(46);
     expect(await page.locator('article img:not([alt])').count()).toBe(0);
-    expect(await page.locator('article img[loading="lazy"]').count()).toBe(45);
+    expect(await page.locator('.article-prose img[loading="lazy"]').count()).toBe(45);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(
+      await page.evaluate(() => document.documentElement.clientWidth),
+    );
+
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await expect(page.locator('.toc--desktop')).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(
+      await page.evaluate(() => document.documentElement.clientWidth),
+    );
+  });
+
+  test('la guía de órganos carga sus imágenes y cabe en móvil y escritorio', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/blog/organos-historicos-madrid-donde-escucharlos/');
+
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Los órganos históricos de Madrid y dónde escucharlos');
+    await expect(page.locator('.article-hero img, .article-prose img')).toHaveCount(8);
+    await expect(page.locator('.article-prose img[loading="lazy"]')).toHaveCount(7);
+    expect(await page.locator('article img:not([alt])').count()).toBe(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(
       await page.evaluate(() => document.documentElement.clientWidth),
     );
@@ -93,6 +116,7 @@ test.describe('blog', () => {
     const xml = await sitemapXml(request);
     expect(xml).toContain('https://clasicamadrid.com/blog/');
     expect(xml).toContain('https://clasicamadrid.com/blog/temporada-teatro-real-2026-2027/');
+    expect(xml).toContain('https://clasicamadrid.com/blog/organos-historicos-madrid-donde-escucharlos/');
     expect(xml).not.toContain('fixture-sistema-editorial');
   });
 
