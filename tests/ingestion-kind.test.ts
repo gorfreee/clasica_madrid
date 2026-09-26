@@ -98,6 +98,42 @@ describe('kind — circuito del venue, no calidad', () => {
     expect(kindOf('Puente de Toledo').value).toBe('alternative');
   });
 
+  it('Real Coliseo Carlos III es circuito establecido por su id', () => {
+    const result = resolveKind(facts({ title: 'Concierto', venueText: 'Real Coliseo Carlos III' }), {
+      id: 'ven_real_coliseo_carlos_iii',
+      name: 'Real Coliseo Carlos III',
+    });
+    expect(result.value).toBe('established');
+    expect(result.method).toBe('knowledge');
+    expect(result.ruleId).toBe('established-circuit');
+    expect(kindOf('Real Coliseo Carlos III').value).toBe('established');
+  });
+
+  it('Teatro Auditorio de San Lorenzo de El Escorial es established por nombre y por id', () => {
+    expect(kindOf('Teatro Auditorio de San Lorenzo de El Escorial').value).toBe('established');
+    const result = resolveKind(facts({ title: 'Concierto' }), {
+      id: 'ven_teatro_auditorio_escorial',
+      name: 'Teatro Auditorio de San Lorenzo de El Escorial',
+    });
+    expect(result.value).toBe('established');
+    expect(result.method).toBe('knowledge');
+  });
+
+  it('la Basílica del Real Monasterio sigue siendo alternative', () => {
+    const result = resolveKind(
+      facts({
+        title: 'Concierto de órgano: Pedro Alberto Sánchez',
+        performers: [{ name: 'Pedro Alberto Sánchez', roleText: 'órgano' }],
+      }),
+      {
+        id: 'ven_basilica_monasterio_san_lorenzo_escorial',
+        name: 'Basílica del Real Monasterio de San Lorenzo de El Escorial',
+      },
+    );
+    expect(result.value).toBe('alternative');
+    expect(kindOf('Basílica del Real Monasterio de San Lorenzo de El Escorial').value).toBe('alternative');
+  });
+
   it('una orquesta internacional en una iglesia sigue siendo alternative', () => {
     const result = resolveKind(
       facts({
