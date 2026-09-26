@@ -40,6 +40,9 @@ test.describe('blog', () => {
       'href',
       '/blog/organos-historicos-madrid-donde-escucharlos/',
     );
+    await expect(page.locator('.blog-index time')).toHaveCount(0);
+    await expect(page.locator('.blog-kicker').first()).toHaveText('Temporada');
+    await expect(page.getByText('Más artículos')).toHaveCount(0);
     await expect(page.getByText('Todavía no hay artículos publicados')).toHaveCount(0);
     await expect(page.getByText('fixture-sistema-editorial')).toHaveCount(0);
     await expect(page.getByText('Pieza de prueba del sistema editorial')).toHaveCount(0);
