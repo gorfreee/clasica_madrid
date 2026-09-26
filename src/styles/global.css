@@ -580,7 +580,7 @@ a.eyebrow:focus-visible {
   display: grid;
   grid-template-columns: 12.75rem minmax(0, 1fr);
   border-bottom: 2px solid var(--color-text);
-  background: transparent;
+  background: var(--color-brand-wash);
 }
 .agenda-channel__kicker {
   margin: 0;
@@ -597,6 +597,7 @@ a.eyebrow:focus-visible {
   hyphens: none;
 }
 .agenda-channel__body {
+  position: relative;
   display: grid;
   align-content: start;
   gap: .28rem;
@@ -628,6 +629,11 @@ a.eyebrow:focus-visible {
   font-weight: 800;
   line-height: 1.2;
   text-decoration: none;
+}
+.agenda-channel__link::before {
+  content: "";
+  position: absolute;
+  inset: 0;
 }
 .agenda-channel__link:hover .agenda-channel__cta {
   text-decoration: underline;

@@ -84,6 +84,7 @@ está, la llamada no hace nada y no se espera.
 | `result_list_exhausted` | El final visible de una lista, una vez por estado de resultados ya estabilizado. Otro filtro o búsqueda puede volver a contarlo. En Lugares, las teclas intermedias no son un estado | `surface`, `results_count`, `active_filter_count`, `has_search_query`, `quick_filter` | Si la gente recorre la lista |
 | `share_clicked` | Compartir una ficha de concierto (nativo, WhatsApp o enlace copiado) | `event_id`, `event_title`, `channel` | Difusión de un concierto |
 | `calendar_add_clicked` | Elige Google Calendar o el archivo .ics. No al abrir el menú ni al escoger la fecha | `event_id`, `event_title`, `occurrence_id`, `method` (`google_calendar` o `ics`), `has_confirmed_time` | Guardar una función concreta |
+| `whatsapp_channel_viewed` | Al menos el 50% del enlace al canal entra en el viewport. Se emite una sola vez por `placement` y carga de página | `placement` (`footer`, `about`, `agenda_inline` o `article`), `page_type` (contexto de la página actual) | Denominador real para medir el CTR de cada CTA sin confundir pageviews con impresiones |
 | `whatsapp_channel_clicked` | Clic en el enlace al canal oficial de WhatsApp | `placement` (`footer`, `about`, `agenda_inline` o `article`), `page_type` (contexto de la página actual) | Medir interés por el canal y atribuir el clic a la superficie del CTA |
 | `event_feedback_clicked` | Clic en «Avísanos», al final de Fuentes en una ficha de concierto. No espera a PostHog ni retrasa la ida a `/contacto/` | `event_id`, `event_title` si existe, `placement` (`after_sources`) | Aviso de un error o cambio en la ficha, sin datos personales |
 | `contact_submitted` | El `POST /api/contacto` respondió bien. No al pulsar el botón | `surface` (`contact`), `topic` si el motivo es uno de los cuatro valores del formulario. Si el envío conserva un contexto válido de ficha, también `origin` (`event_feedback`) y `event_id` | Contacto útil, sin datos personales |
@@ -91,13 +92,16 @@ está, la llamada no hace nada y no se espera.
 
 `calendar_add_clicked` no incluye la descripción, la dirección, la URL ni el contenido del .ics. El retorno desde el calendario se lee en el pageview: la cita guarda `utm_source=google_calendar` o `utm_source=ics` con `utm_medium=calendar`. Esas query no están en el canonical, el sitemap ni la navegación interna. No es una suscripción: importar el archivo no actualiza la cita si el concierto cambia después.
 
-`whatsapp_channel_clicked` mide el clic de salida hacia WhatsApp. No implica que
-la persona haya terminado siguiendo el canal. `placement` nombra la superficie
-estable: `footer` en el pie, `about` en Acerca de, `agenda_inline` en la nota
-editorial de la agenda de la portada y `article` en una llamada del blog. Ese último valor no codifica un número de
-conciertos ni una posición fija; si el corte entre días cambia, el `placement`
-sigue igual. La nota solo está en `/`. No se envía la URL del canal y no hay un
-evento de impresión.
+`whatsapp_channel_viewed` es el denominador de exposición: se emite cuando al menos
+la mitad del enlace entra en el viewport y, aunque el DOM de la agenda se sustituya,
+como máximo una vez por `placement` durante esa carga. Usa `IntersectionObserver`,
+no listeners de scroll. `whatsapp_channel_clicked` mide el clic de salida hacia
+WhatsApp y no implica que la persona haya terminado siguiendo el canal. `placement`
+nombra la superficie estable: `footer` en el pie, `about` en Acerca de,
+`agenda_inline` en la nota editorial de la portada y `article` en la llamada final
+del blog. No codifica un número de conciertos ni una posición fija. La nota inline
+solo está en `/` y desaparece con filtros activos. Ninguno de los dos eventos envía
+la URL del canal.
 
 `event_feedback_clicked` mide el clic en «Avísanos». No implica que el mensaje
 se haya enviado: eso sigue siendo `contact_submitted`, y solo después de un

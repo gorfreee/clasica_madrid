@@ -94,7 +94,7 @@ Están disponibles en el MDX sin importarlos.
 | `Callout` | `title` opcional y el texto dentro. Una sola forma visual. |
 | `Quote` | Cita. `attribution` opcional. |
 | `YouTubeEmbed` | `id` de 11 caracteres y `title`. Muestra una miniatura; el iframe de `youtube-nocookie.com` solo se carga al pulsar reproducir. |
-| `ArticleCTA` | `kind="whatsapp"`, `kind="agenda"` o `kind="internal"` con `href` interno y `title`. |
+| `ArticleCTA` | `kind="whatsapp"`, `kind="agenda"` o `kind="internal"` con `href` interno y `title`. La plantilla pública ya añade un CTA de WhatsApp al final de cada artículo. |
 | `UpcomingEvents` | Conciertos futuros del catálogo. `venue` es el slug del lugar; `limit` por defecto es 6 y como máximo 12. Sin `venue`, usa la agenda general. Si no hay conciertos, deja una frase y no rompe la página. |
 | `RelatedVenue` | `slug` de un lugar. El nombre, la URL y el resumen salen del catálogo. |
 
@@ -111,13 +111,14 @@ Texto de la cita.
 
 <YouTubeEmbed id="xxxxxxxxxxx" title="Título del vídeo" />
 
-<ArticleCTA kind="whatsapp" />
 <ArticleCTA kind="agenda" />
 <ArticleCTA kind="internal" href="/lugares/teatro-real/" title="Teatro Real" />
 
 <UpcomingEvents venue="teatro-real" limit={6} />
 <RelatedVenue slug="teatro-real" />
 ```
+
+La plantilla añade automáticamente un único CTA de WhatsApp al terminar el cuerpo editorial, antes de los artículos relacionados. No hace falta insertarlo manualmente en un artículo normal.
 
 `UpcomingEvents` acepta hoy el slug de un lugar. Compositor u otros filtros pueden añadirse después sobre la misma idea; no existen todavía.
 

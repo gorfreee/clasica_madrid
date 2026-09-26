@@ -58,6 +58,28 @@ test.describe('analítica de producto', () => {
     ]);
   });
 
+  test('cada artículo termina con un único CTA medible de WhatsApp', async ({ page }) => {
+    await installAnalytics(page);
+    await page.context().route('https://whatsapp.com/**', (route) => route.fulfill({ status: 200, body: 'Canal de prueba' }));
+    await page.goto('/blog/temporada-teatro-real-2026-2027/');
+
+    const link = page.locator('[data-whatsapp-channel="article"]');
+    await expect(link).toHaveCount(1);
+    await expect(link).toHaveAccessibleName(/Seguir el canal de Clásica Madrid en WhatsApp/);
+    await link.scrollIntoViewIfNeeded();
+
+    await expect.poll(async () => named(await analyticsCalls(page), 'whatsapp_channel_viewed').length).toBe(1);
+    expect(named(await analyticsCalls(page), 'whatsapp_channel_viewed')).toEqual([
+      { event: 'whatsapp_channel_viewed', properties: { placement: 'article', page_type: 'article' } },
+    ]);
+
+    const [popup] = await Promise.all([page.waitForEvent('popup'), link.click()]);
+    await popup.close();
+    expect(named(await analyticsCalls(page), 'whatsapp_channel_clicked')).toEqual([
+      { event: 'whatsapp_channel_clicked', properties: { placement: 'article', page_type: 'article' } },
+    ]);
+  });
+
   test('el canal mantiene foco visible y no provoca desbordamiento en escritorio o móvil', async ({ page }) => {
     for (const width of [1280, 390, 320]) {
       await page.setViewportSize({ width, height: 850 });

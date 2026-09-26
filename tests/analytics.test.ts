@@ -43,7 +43,9 @@ import {
   trackSearchPerformed,
   trackShareClicked,
   trackWhatsAppChannelClicked,
+  trackWhatsAppChannelViewed,
   WHATSAPP_CHANNEL_CLICKED,
+  WHATSAPP_CHANNEL_VIEWED,
   WHATSAPP_CHANNEL_PLACEMENTS,
   isWhatsAppChannelPlacement,
 } from '../src/lib/analytics/product.ts';
@@ -835,6 +837,17 @@ describe('canal de WhatsApp', () => {
     expect(JSON.stringify(calls)).not.toContain(WHATSAPP_CHANNEL_URL);
   });
 
+  it('registra impresiones con el mismo payload mínimo que el clic', () => {
+    const { calls, capture } = recorder();
+    trackWhatsAppChannelViewed({ placement: 'agenda_inline', page_type: 'agenda' }, capture);
+    trackWhatsAppChannelViewed({ placement: 'article', page_type: 'article' }, capture);
+    expect(calls).toEqual([
+      { event: WHATSAPP_CHANNEL_VIEWED, properties: { placement: 'agenda_inline', page_type: 'agenda' } },
+      { event: WHATSAPP_CHANNEL_VIEWED, properties: { placement: 'article', page_type: 'article' } },
+    ]);
+    expect(JSON.stringify(calls)).not.toContain(WHATSAPP_CHANNEL_URL);
+  });
+
   it('agenda_inline es una ubicación válida y no envía la URL del canal', () => {
     expect(WHATSAPP_CHANNEL_PLACEMENTS).toContain('agenda_inline');
     expect(WHATSAPP_CHANNEL_PLACEMENTS).toContain('article');
@@ -854,7 +867,11 @@ describe('canal de WhatsApp', () => {
 
   it('no falla si PostHog no está disponible o si capture falla', () => {
     expect(() => trackWhatsAppChannelClicked({ placement: 'footer', page_type: 'event' }, null)).not.toThrow();
+    expect(() => trackWhatsAppChannelViewed({ placement: 'article', page_type: 'article' }, null)).not.toThrow();
     expect(() => trackWhatsAppChannelClicked({ placement: 'about', page_type: 'about' }, () => {
+      throw new Error('PostHog no disponible');
+    })).not.toThrow();
+    expect(() => trackWhatsAppChannelViewed({ placement: 'footer', page_type: 'event' }, () => {
       throw new Error('PostHog no disponible');
     })).not.toThrow();
   });

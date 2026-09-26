@@ -13,9 +13,11 @@ import {
   trackOutboundEventClick,
   trackVenueOpened,
   trackWhatsAppChannelClicked,
+  trackWhatsAppChannelViewed,
 } from './product.ts';
 
 const claims = new Set<string>();
+let whatsAppChannelObserver: IntersectionObserver | null = null;
 
 /** In-memory guard for one document. A second call from hydration does not emit again. */
 export function claimOnce(gate: Set<string>, key: string): boolean {
@@ -124,9 +126,10 @@ export function initDirectionsTracking(root: ParentNode = document): void {
   }
 }
 
-/** Shared by every channel placement. A repeated call cannot add duplicate listeners. */
+/** Shared by every channel placement. Repeated calls cannot duplicate listeners or impressions. */
 export function initWhatsAppChannelTracking(root: ParentNode = document): void {
   for (const link of root.querySelectorAll<HTMLAnchorElement>('a[data-whatsapp-channel]')) {
+    observeWhatsAppChannelLink(link);
     if (link.dataset.whatsappBound === 'true') continue;
     link.dataset.whatsappBound = 'true';
     link.addEventListener('click', () => {
@@ -141,6 +144,38 @@ export function initWhatsAppChannelTracking(root: ParentNode = document): void {
       });
     });
   }
+}
+
+function observeWhatsAppChannelLink(link: HTMLAnchorElement): void {
+  if (link.dataset.whatsappObserved === 'true' || typeof IntersectionObserver === 'undefined') return;
+  link.dataset.whatsappObserved = 'true';
+
+  whatsAppChannelObserver ??= new IntersectionObserver(
+    (entries, observer) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting || entry.intersectionRatio < 0.5) continue;
+        if (!(entry.target instanceof HTMLAnchorElement)) {
+          observer.unobserve(entry.target);
+          continue;
+        }
+
+        const placement = entry.target.dataset.whatsappChannel;
+        const page = readPageAnalytics();
+        if (!page || !isWhatsAppChannelPlacement(placement)) continue;
+
+        if (claimOnce(claims, `whatsapp_channel_viewed:${placement}`)) {
+          trackWhatsAppChannelViewed({
+            placement,
+            page_type: page.page_type,
+          });
+        }
+        observer.unobserve(entry.target);
+      }
+    },
+    { threshold: 0.5 },
+  );
+
+  whatsAppChannelObserver.observe(link);
 }
 
 function eventFacts(page: PageAnalytics, origin: NavigationOrigin): {

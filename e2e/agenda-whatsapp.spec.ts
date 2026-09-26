@@ -118,6 +118,14 @@ test.describe('canal de WhatsApp en la agenda', () => {
     await page.goto('/');
 
     const inline = page.locator('[data-whatsapp-channel="agenda_inline"]');
+    await inline.scrollIntoViewIfNeeded();
+    await expect.poll(async () => {
+      return (await analyticsCalls(page)).filter((call) => call.event === 'whatsapp_channel_viewed').length;
+    }).toBe(1);
+    expect((await analyticsCalls(page)).filter((call) => call.event === 'whatsapp_channel_viewed')).toEqual([
+      { event: 'whatsapp_channel_viewed', properties: { placement: 'agenda_inline', page_type: 'agenda' } },
+    ]);
+
     const [inlinePopup] = await Promise.all([page.waitForEvent('popup'), inline.click()]);
     await inlinePopup.close();
 
@@ -133,9 +141,14 @@ test.describe('canal de WhatsApp en la agenda', () => {
     expect(JSON.stringify(calls)).not.toContain(WHATSAPP_CHANNEL_URL);
   });
 
-  test('los filtros ocultan la nota y la agenda completa no la duplica', async ({ page }) => {
+  test('los filtros ocultan la nota, la agenda completa no la duplica ni repite su impresión', async ({ page }) => {
+    await installAnalytics(page);
     await page.goto('/');
     const before = await channelPlacement(page);
+    await page.locator('[data-whatsapp-channel="agenda_inline"]').scrollIntoViewIfNeeded();
+    await expect.poll(async () => {
+      return (await analyticsCalls(page)).filter((call) => call.event === 'whatsapp_channel_viewed').length;
+    }).toBe(1);
     expect(before?.before).toBeGreaterThanOrEqual(8);
     await expect(page.locator('[data-agenda-channel]')).toBeVisible();
 
@@ -161,6 +174,10 @@ test.describe('canal de WhatsApp en la agenda', () => {
     await expect(page.locator('[data-agenda-channel]')).toBeVisible();
     expect((await channelPlacement(page))?.before).toBe(before?.before);
     expect((await channelPlacement(page))?.insideDayList).toBe(false);
+    await page.locator('[data-whatsapp-channel="agenda_inline"]').scrollIntoViewIfNeeded();
+    await expect.poll(async () => {
+      return (await analyticsCalls(page)).filter((call) => call.event === 'whatsapp_channel_viewed').length;
+    }).toBe(1);
   });
 
   test('una búsqueda que descarga la agenda completa deja una sola nota oculta', async ({ page }) => {
