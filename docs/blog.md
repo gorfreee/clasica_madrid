@@ -118,7 +118,9 @@ Texto de la cita.
 <RelatedVenue slug="teatro-real" />
 ```
 
-La plantilla añade automáticamente un único CTA de WhatsApp al terminar el cuerpo editorial, antes de los artículos relacionados. No hace falta insertarlo manualmente en un artículo normal.\n\n`UpcomingEvents` acepta hoy el slug de un lugar. Compositor u otros filtros pueden añadirse después sobre la misma idea; no existen todavía.
+La plantilla añade automáticamente un único CTA de WhatsApp al terminar el cuerpo editorial, antes de los artículos relacionados. No hace falta insertarlo manualmente en un artículo normal.
+
+`UpcomingEvents` acepta hoy el slug de un lugar. Compositor u otros filtros pueden añadirse después sobre la misma idea; no existen todavía.
 
 Los artículos relacionados se calculan solos al final de la ficha, a partir de `relatedVenues`, `tags` y `kind`. No hace falta insertarlos. Un borrador nunca aparece ahí.
 
