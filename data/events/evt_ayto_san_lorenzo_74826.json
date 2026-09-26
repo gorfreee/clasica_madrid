@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_ayto_san_lorenzo_74826",
+  "slug": "concierto-de-organo-pedro-alberto-sanchez",
+  "title": "Concierto de órgano: Pedro Alberto Sánchez",
+  "status": "scheduled",
+  "venueId": "ven_basilica_monasterio_san_lorenzo_escorial",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_ayto_san_lorenzo_74826_01",
+      "date": "2026-10-09",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "organ",
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_ayto_san_lorenzo",
+      "url": "https://www.aytosanlorenzo.es/agenda-eventos/concierto-de-organo-pedro-alberto-sanchez",
+      "checkedAt": "2026-09-26",
+      "externalId": "74826"
+    }
+  ],
+  "primarySourceId": "src_ayto_san_lorenzo",
+  "lastVerifiedAt": "2026-09-26"
+}
