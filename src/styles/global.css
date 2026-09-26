@@ -770,9 +770,9 @@ a.eyebrow:focus-visible {
 }
 .agenda-item__format { min-width: 0; max-width: 100%; }
 .free-signal {
-  font-size: var(--type-size-meta);
+  /* Inherit size and tracking from the shortcut or the format label.
+     A private size with tracking reset reads as a different face. */
   font-weight: 800;
-  letter-spacing: 0;
   line-height: 1;
   text-transform: uppercase;
   padding: 0 .34em .16em;
