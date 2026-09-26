@@ -26,6 +26,7 @@ import { fundacionMutuaAdapter } from './sources/fundacion-mutua.ts';
 import { coroCamaraMadridAdapter } from './sources/coro-camara-madrid.ts';
 import { residenciaEstudiantesAdapter } from './sources/residencia-estudiantes.ts';
 import { condeduqueAdapter } from './sources/condeduque.ts';
+import { aytoSanLorenzoAdapter } from './sources/ayto-san-lorenzo.ts';
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
@@ -55,6 +56,7 @@ const ADAPTERS: Record<string, SourceAdapter> = {
   [coroCamaraMadridAdapter.id]: coroCamaraMadridAdapter,
   [residenciaEstudiantesAdapter.id]: residenciaEstudiantesAdapter,
   [condeduqueAdapter.id]: condeduqueAdapter,
+  [aytoSanLorenzoAdapter.id]: aytoSanLorenzoAdapter,
 };
 
 const srcAuditorio: Source = {
@@ -468,6 +470,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Contemporánea Condeduque',
       kind: 'official',
       url: 'https://www.condeduquemadrid.es/',
+    },
+  },
+  {
+    id: 'ayto-san-lorenzo',
+    name: 'Ayuntamiento de San Lorenzo de El Escorial',
+    urls: ['https://www.aytosanlorenzo.es/eventos/'],
+    adapterId: aytoSanLorenzoAdapter.id,
+    catalogSourceId: 'src_ayto_san_lorenzo',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_ayto_san_lorenzo',
+      slug: 'ayuntamiento-san-lorenzo-el-escorial',
+      name: 'Ayuntamiento de San Lorenzo de El Escorial',
+      kind: 'official',
+      url: 'https://www.aytosanlorenzo.es/',
     },
   },
 ];

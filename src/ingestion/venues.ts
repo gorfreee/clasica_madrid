@@ -708,6 +708,45 @@ export const KNOWN_VENUES: KnownVenue[] = [
       url: 'https://rcsmm.eu/',
     },
   },
+  {
+    keys: ['real coliseo carlos iii'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_real_coliseo_carlos_iii',
+      slug: 'real-coliseo-carlos-iii',
+      name: 'Real Coliseo Carlos III',
+      municipality: 'San Lorenzo de El Escorial',
+      area: 'nearby',
+      address: 'Calle Floridablanca, 20, 28200 San Lorenzo de El Escorial',
+      url: 'https://www.comunidad.madrid/centros/real-coliseo-carlos-iii-san-lorenzo-escorial',
+    },
+  },
+  {
+    keys: ['basilica del real monasterio san lorenzo de el escorial'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_basilica_monasterio_san_lorenzo_escorial',
+      slug: 'basilica-monasterio-san-lorenzo-escorial',
+      name: 'Basílica del Real Monasterio de San Lorenzo de El Escorial',
+      municipality: 'San Lorenzo de El Escorial',
+      area: 'nearby',
+      address: 'Avenida de Juan de Borbón y Battenberg, s/n, 28200 San Lorenzo de El Escorial',
+      url: 'https://www.patrimonionacional.es/visita/real-monasterio-de-san-lorenzo-de-el-escorial/espacios/basilica',
+    },
+  },
+  {
+    keys: ['casa de cultura de san lorenzo de el escorial'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_casa_cultura_san_lorenzo_escorial',
+      slug: 'casa-cultura-san-lorenzo-escorial',
+      name: 'Casa de Cultura de San Lorenzo de El Escorial',
+      municipality: 'San Lorenzo de El Escorial',
+      area: 'nearby',
+      address: 'Calle Floridablanca, 3, 28200 San Lorenzo de El Escorial',
+      url: 'https://www.aytosanlorenzo.es/servicios/casa-de-cultura/',
+    },
+  },
 ];
 
 /**
@@ -715,6 +754,9 @@ export const KNOWN_VENUES: KnownVenue[] = [
  * Generic hall names such as "Sala Principal" must never be global aliases.
  */
 const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
+  'ayto-san-lorenzo': {
+    'casa de cultura': 'ven_casa_cultura_san_lorenzo_escorial',
+  },
   condeduque: {
     auditorio: 'ven_condeduque_auditorio',
     // The ficha prints the bare hall name. "Teatro" is ambiguous outside this source.
