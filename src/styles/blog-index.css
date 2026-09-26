@@ -103,10 +103,10 @@
 
 .blog-card a {
   display: grid;
-  grid-template-columns: 12.75rem minmax(0, 1fr);
-  gap: .2rem 1.65rem;
+  grid-template-columns: minmax(14rem, 20rem) minmax(0, 1fr);
+  gap: 1.15rem 1.85rem;
   align-items: center;
-  padding: 1.45rem 0;
+  padding: 1.65rem 0 1.75rem;
   text-decoration: none;
 }
 
@@ -119,7 +119,7 @@
 }
 
 .blog-card h2 {
-  font-size: clamp(1.22rem, 1.7vw, 1.5rem);
+  font-size: clamp(1.35rem, 2vw, 1.75rem);
 }
 
 .blog-card__copy p:last-child {
@@ -141,9 +141,9 @@
   }
 
   .blog-card a {
-    grid-template-columns: 7.5rem minmax(0, 1fr);
-    gap: .15rem 1rem;
+    grid-template-columns: 1fr;
+    gap: .8rem;
     align-items: start;
-    padding: 1.2rem 0;
+    padding: 1.35rem 0 1.15rem;
   }
 }
