@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { emptyCatalog } from '../src/lib/domain/catalog.ts';
 import { mergeCandidateBatch } from '../src/ingestion/batch.ts';
 import { runIngest } from '../src/ingestion/pipeline.ts';
+import { attentionKinds } from '../src/ingestion/outcome.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { eventUrl, teatroAuditorioEscorialAdapter as adapter } from '../src/ingestion/sources/teatro-auditorio-escorial.ts';
 import { matchVenue } from '../src/ingestion/venues.ts';
@@ -114,5 +115,73 @@ describe('Teatro Auditorio El Escorial', () => {
     expect(failure.summary.detailHydrationFailed).toBe(1);
     expect(failure.summary.disappearanceSuppressedSources).toContain(source.id);
     expect(failure.summary.possiblyMissing).toBe(0);
+    const mahler = first.candidates.find((item) => item.event.slug === 'la-tercera-de-mahler' || item.event.title.toLowerCase().includes('mahler'));
+    expect(mahler?.event.composers).toEqual([{ name: 'Gustav Mahler' }]);
+    expect(mahler?.event.works).toEqual([{ title: 'Tercera Sinfonía', composerName: 'Gustav Mahler' }]);
+    expect(mahler?.event.eras).toEqual(['romantic']);
+    expect(mahler?.event.performers).toEqual([
+      { name: 'Orquesta y Coro de la Comunidad de Madrid' },
+      { name: 'Pequeños Cantores de la ORCAM' },
+      { name: 'Jennifer Johnston' },
+      { name: 'Ana González', role: 'conductor' },
+      { name: 'Javier Carmena', role: 'conductor' },
+      { name: 'Alondra de la Parra', role: 'conductor' },
+    ]);
+    const mahlerDecision = first.decisions.find((item) => item.externalId === '10994');
+    expect(attentionKinds(mahlerDecision!)).not.toContain('unresolved-taxonomy');
+    const cruz = first.decisions.find((item) => item.externalId === '10709');
+    expect(cruz?.publishable).toBe(false);
+    expect(cruz?.eligibility?.value).toBe('uncertain');
+    expect(cruz?.normalized?.composers).toEqual([]);
+    expect(cruz?.normalized?.works).toEqual([]);
+    expect(cruz?.normalized?.performers?.map((item) => item.name)).toEqual([
+      'Manuel Jurado', 'Orquesta Sinfónica Carlos Cruz Diez',
+    ]);
+  });
+
+  it('estructura Mahler y el reparto, y no inventa repertorio para Carlos Cruz-Díez', async () => {
+    const events = await samples();
+    const mahler = events.find((item) => item.externalId === '10994')!;
+    const mahlerPatch = adapter.hydrate!(mahler, await fixture('detail-10994.html'), context);
+    expect(mahlerPatch.composers).toEqual([{ name: 'Gustav Mahler' }]);
+    expect(mahlerPatch.works).toEqual([{ title: 'Tercera Sinfonía', composerName: 'Gustav Mahler' }]);
+    expect(mahlerPatch.programText).toBe('Tercera Sinfonía de Gustav Mahler');
+    expect(mahlerPatch.programText).not.toMatch(/universo|masas revolucionarias/);
+    expect(mahlerPatch.description).toMatch(/universo/);
+    expect(mahlerPatch.performers).toEqual([
+      { name: 'Orquesta y Coro de la Comunidad de Madrid' },
+      { name: 'Pequeños Cantores de la ORCAM' },
+      { name: 'Jennifer Johnston', roleText: 'MEZZOSOPRANO' },
+      { name: 'Ana González', roleText: 'DIRECTORA PEQUEÑOS CANTORES' },
+      { name: 'Javier Carmena', roleText: 'DIRECTOR CORO' },
+      { name: 'Alondra de la Parra', roleText: 'DIRECTORA' },
+    ]);
+    const cruz = events.find((item) => item.externalId === '10709')!;
+    const cruzBody = await fixture('detail-10709.html');
+    const cruzPatch = adapter.hydrate!(cruz, cruzBody, context);
+    expect(cruzPatch.performers).toEqual([
+      { name: 'Manuel Jurado', roleText: 'Director y fundador' },
+      { name: 'Orquesta Sinfónica Carlos Cruz Diez' },
+    ]);
+    expect(cruzPatch.composers).toBeUndefined();
+    expect(cruzPatch.works).toBeUndefined();
+    expect(cruzPatch.programText).toBeUndefined();
+    const contaminated = cruzBody.replace(
+      'excelencia artística.</p>',
+      'excelencia artística. Sinfonía de Johannes Brahms. Estudió con Anselmo Serna, organista.</p>',
+    );
+    const guarded = adapter.hydrate!(cruz, contaminated, context);
+    expect(guarded.composers).toBeUndefined();
+    expect(guarded.works).toBeUndefined();
+    expect(guarded.programText).toBeUndefined();
+    expect(guarded.performers?.map((item) => item.name)).toEqual([
+      'Manuel Jurado', 'Orquesta Sinfónica Carlos Cruz Diez',
+    ]);
+    const unrelated = `${cruzBody}<div class="relacionados"><p>Sinfonía de Ludwig van Beethoven</p><p>Ana González, DIRECTORA</p></div>`;
+    const isolated = adapter.hydrate!(cruz, unrelated, context);
+    expect(isolated.composers).toBeUndefined();
+    expect(isolated.performers?.map((item) => item.name)).toEqual([
+      'Manuel Jurado', 'Orquesta Sinfónica Carlos Cruz Diez',
+    ]);
   });
 });

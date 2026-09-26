@@ -1,8 +1,14 @@
 import { parseObservedDateTime, parseObservedTime } from '../dates.ts';
 import { flattenHtmlBlocks, stripTags } from '../html.ts';
 import { createListingGet } from '../listing-retry.ts';
-import { emptyObservedLists } from '../observed.ts';
-import type { ObservedFactPatch } from '../observed.ts';
+import { looksLikeUnequivocalWorkLine, parseExplicitTitleAuthorWork } from '../observed-cleanup.ts';
+import {
+  composersFromWorks,
+  emptyObservedLists,
+  normalizePersonList,
+  normalizeWorkList,
+} from '../observed.ts';
+import type { ObservedFactPatch, ObservedPerson, ObservedWork } from '../observed.ts';
 import type { RawEvent, RawOccurrence, SourceAdapter, SourceDefinition } from '../types.ts';
 import type { IngestWindow } from '../dates.ts';
 
@@ -145,13 +151,105 @@ export function parseEscorialDetail(event: RawEvent, body: string): ObservedFact
   const cast = /<div class="tab-content" id="tabs1-reparto">([\s\S]*?)<!-- tabfotos -->/i.exec(body)?.[1];
   const description = [info && flattenHtmlBlocks(info), cast && flattenHtmlBlocks(cast)]
     .filter(Boolean).join('\n').slice(0, 5000);
+  const program = programmeFromInfo(info);
+  const performers = performersFromCast(cast);
   return {
     occurrences,
     // The building and address are identified by the official site; the room is only given for some shows.
     venueText: 'Teatro Auditorio de San Lorenzo de El Escorial',
     ...(accessText ? { accessText } : {}),
     ...(description ? { description } : {}),
+    ...(program?.programText ? { programText: program.programText } : {}),
+    ...(performers.length > 0 ? { performers } : {}),
+    ...(program && program.composers.length > 0 ? { composers: program.composers } : {}),
+    ...(program && program.works.length > 0 ? { works: program.works } : {}),
   };
+}
+
+const CAST_NAME =
+  String.raw`\p{Lu}[\p{L}.'’\-]*(?:\s+(?:de|del|la|las|los|y|e|da|di|van|von)|\s+\p{Lu}[\p{L}.'’\-]*){0,8}`;
+const CAST_WITH_ROLE = new RegExp(String.raw`^(${CAST_NAME})\s*\(([^)]+)\)\s+y\s+(?:la |el |los |las )?(.+)$`, 'iu');
+const CAST_COMMA = new RegExp(String.raw`^(${CAST_NAME}),\s*([^,]+)$`, 'u');
+const CAST_ROLE =
+  /^(?:directora?(?:\s+\p{L}+){0,4}|direcci[oó]n(?:\s+musical)?|mezzosoprano|soprano|tenor|bar[ií]tono|bajo|contralto|contratenor|[oó]rgano|organista|piano|pianista|viol[ií]n|violinista|viola|violonchelo|chelo|cello|flauta|oboe|clarinete|fagot|trompa|trompeta|guitarra|arpa|clave|coros?|orquesta)$/iu;
+const INFO_IS_NOTES = /\bnotas al programa\b|\bbiograf[ií]a\b/i;
+
+/**
+ * `tabs1-info` is often a biography or programme note. Only a clause that is
+ * itself `título de compositor` is repertoire. The surrounding essay is not
+ * `programText`. A tab that labels itself as notes or biography contributes none.
+ */
+function programmeFromInfo(html: string | undefined): {
+  programText?: string;
+  composers: ReturnType<typeof composersFromWorks>;
+  works: ObservedWork[];
+} | undefined {
+  if (!html) return undefined;
+  const text = flattenHtmlBlocks(html);
+  if (!text || INFO_IS_NOTES.test(text)) return undefined;
+  const works: ObservedWork[] = [];
+  for (const clause of text.split(/\s*[—–]\s*|(?<=[.!?])\s+/u)) {
+    const cleaned = clause.replace(/\s+/g, ' ').trim();
+    if (!cleaned || cleaned.length > 180) continue;
+    const parsed = parseExplicitTitleAuthorWork(cleaned);
+    const title = parsed && editorialWorkTitle(parsed.title);
+    if (!parsed || !title || !clauseIsExactWorkCredit(cleaned, title, parsed.composerName)) continue;
+    works.push({ title, composerName: parsed.composerName });
+  }
+  const normalized = normalizeWorkList(works);
+  if (normalized.length === 0) return undefined;
+  return {
+    programText: normalized
+      .map((work) => work.composerName ? `${work.title} de ${work.composerName}` : work.title)
+      .join('\n'),
+    composers: composersFromWorks(normalized),
+    works: normalized,
+  };
+}
+
+function clauseIsExactWorkCredit(clause: string, title: string, composerName: string): boolean {
+  const reduced = clause
+    .replace(/^(?:(?:el|la|los|las|un|una)\s+)+/iu, '')
+    .replace(/^(?:\p{Ll}+(?:\s+\p{Ll}+)*)\s+/u, '')
+    .trim();
+  return reduced === `${title} de ${composerName}`;
+}
+
+function editorialWorkTitle(title: string): string | undefined {
+  const trimmed = title
+    .replace(/^(?:(?:el|la|los|las|un|una)\s+)+/iu, '')
+    .replace(/^(?:\p{Ll}+(?:\s+\p{Ll}+)*)\s+/u, '')
+    .trim();
+  if (!trimmed || trimmed.length > 80 || isBareGenreTitle(trimmed) || !looksLikeUnequivocalWorkLine(trimmed)) {
+    return undefined;
+  }
+  return trimmed;
+}
+
+function isBareGenreTitle(title: string): boolean {
+  return /^(?:sinfon[ií]a|symphony|concierto|concerto|sonata|suite|r[eé]quiem|misa|obertura|cantata|oratorio)$/i.test(title.trim());
+}
+
+/** `tabs1-reparto` only. Related events and the info essay are not a cast. */
+function performersFromCast(html: string | undefined): ObservedPerson[] {
+  if (!html) return [];
+  const people: ObservedPerson[] = [];
+  for (const line of flattenHtmlBlocks(html).split('\n')) {
+    if (/^int[eé]rpretes?:?$/i.test(line) || /https?:|€/.test(line)) continue;
+    const joined = CAST_WITH_ROLE.exec(line);
+    if (joined?.[1] && joined[2] && joined[3]) {
+      people.push({ name: joined[1].trim(), roleText: joined[2].trim() }, { name: joined[3].trim() });
+      continue;
+    }
+    const credit = CAST_COMMA.exec(line);
+    if (credit?.[1] && credit[2] && CAST_ROLE.test(credit[2].trim())) {
+      people.push({ name: credit[1].trim(), roleText: credit[2].trim() });
+      continue;
+    }
+    if (line.includes(',') || /[.!?]/.test(line) || line.length > 80) continue;
+    people.push({ name: line });
+  }
+  return normalizePersonList(people);
 }
 
 function section(body: string, title: string): string | undefined {
