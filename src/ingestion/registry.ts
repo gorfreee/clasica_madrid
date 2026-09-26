@@ -26,6 +26,7 @@ import { fundacionMutuaAdapter } from './sources/fundacion-mutua.ts';
 import { coroCamaraMadridAdapter } from './sources/coro-camara-madrid.ts';
 import { residenciaEstudiantesAdapter } from './sources/residencia-estudiantes.ts';
 import { condeduqueAdapter } from './sources/condeduque.ts';
+import { teatroAuditorioEscorialAdapter } from './sources/teatro-auditorio-escorial.ts';
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
@@ -55,6 +56,7 @@ const ADAPTERS: Record<string, SourceAdapter> = {
   [coroCamaraMadridAdapter.id]: coroCamaraMadridAdapter,
   [residenciaEstudiantesAdapter.id]: residenciaEstudiantesAdapter,
   [condeduqueAdapter.id]: condeduqueAdapter,
+  [teatroAuditorioEscorialAdapter.id]: teatroAuditorioEscorialAdapter,
 };
 
 const srcAuditorio: Source = {
@@ -468,6 +470,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Contemporánea Condeduque',
       kind: 'official',
       url: 'https://www.condeduquemadrid.es/',
+    },
+  },
+  {
+    id: 'teatro-auditorio-escorial',
+    name: 'Teatro Auditorio de San Lorenzo de El Escorial',
+    urls: ['https://www.teatroauditorioescorial.es/wp-json/tribe/events/v1/events'],
+    adapterId: teatroAuditorioEscorialAdapter.id,
+    catalogSourceId: 'src_teatro_auditorio_escorial',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_teatro_auditorio_escorial',
+      slug: 'teatro-auditorio-escorial',
+      name: 'Teatro Auditorio de San Lorenzo de El Escorial',
+      kind: 'official',
+      url: 'https://www.teatroauditorioescorial.es/',
     },
   },
 ];

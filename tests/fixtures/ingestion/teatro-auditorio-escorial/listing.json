@@ -1,0 +1,60 @@
+{
+  "events": [
+    {
+      "id": 10709,
+      "status": "publish",
+      "title": "ORQUESTA SINFÓNICA CARLOS CRUZ DÍEZ",
+      "url": "https://www.teatroauditorioescorial.es/espectaculo/orquesta-sinfonica-carlos-cruz-diez/",
+      "start_date": "2026-10-10 00:00:00",
+      "end_date": "2026-10-10 23:59:59",
+      "all_day": true,
+      "categories": [
+        {
+          "name": "Azul",
+          "slug": "azul"
+        },
+        {
+          "name": "Conciertos",
+          "slug": "conciertos"
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel"
+        },
+        {
+          "name": "Naranja",
+          "slug": "naranja"
+        }
+      ]
+    },
+    {
+      "id": 10994,
+      "status": "publish",
+      "title": "LA TERCERA DE  MAHLER",
+      "url": "https://www.teatroauditorioescorial.es/espectaculo/la-tercera-de-mahler/",
+      "start_date": "2026-10-16 00:00:00",
+      "end_date": "2026-10-16 23:59:59",
+      "all_day": true,
+      "categories": [
+        {
+          "name": "Azul",
+          "slug": "azul"
+        },
+        {
+          "name": "Conciertos",
+          "slug": "conciertos"
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel"
+        },
+        {
+          "name": "Naranja",
+          "slug": "naranja"
+        }
+      ]
+    }
+  ],
+  "total": 2,
+  "total_pages": 1
+}

@@ -251,7 +251,7 @@ describe('aislamiento de fallos por fuente', () => {
       'residencia-estudiantes',
       'condeduque',
     ]);
-    expect(run.summary.sourcesSucceeded).toEqual(['auditorio-nacional', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes', 'fundacion-goethe', 'madrid-a-tempo', 'ateneo-madrid', 'rcsmm', 'tala-producciones', 'coro-camara-madrid']);
+    expect(run.summary.sourcesSucceeded).toEqual(['auditorio-nacional', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes', 'fundacion-goethe', 'madrid-a-tempo', 'ateneo-madrid', 'rcsmm', 'tala-producciones', 'coro-camara-madrid', 'teatro-auditorio-escorial']);
     expect(run.rawEvents.length).toBeGreaterThan(0);
     expect(run.rawEvents.some((event) => event.sourceId === 'teatro-real')).toBe(false);
     expect(run.summary.written).toEqual([]);
@@ -271,7 +271,7 @@ describe('aislamiento de fallos por fuente', () => {
     });
     expect(run.summary.sourcesSucceeded).toEqual([]);
     expect(run.summary.sourcesFailed.map((item) => item.sourceId)).toEqual([
-      'auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes', 'fundacion-goethe', 'madrid-a-tempo', 'patrimonio-nacional', 'ateneo-madrid', 'escuela-reina-sofia', 'rcsmm', 'tala-producciones', 'coro-camara-madrid', 'residencia-estudiantes', 'condeduque',
+      'auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes', 'fundacion-goethe', 'madrid-a-tempo', 'patrimonio-nacional', 'ateneo-madrid', 'escuela-reina-sofia', 'rcsmm', 'tala-producciones', 'coro-camara-madrid', 'residencia-estudiantes', 'condeduque', 'teatro-auditorio-escorial',
     ]);
     expect(run.summary.written).toEqual([]);
     expect(run.apply.report.ok).toBe(true);
