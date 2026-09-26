@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_musicaantiguaaranjuez_com_sara_ruiz_bellemont_trio_paseo_jardin_isla",
+  "slug": "sara-ruiz-la-bellemont-le-jeu-parlant",
+  "title": "Sara Ruiz & La Bellemont — Le jeu parlant",
+  "status": "scheduled",
+  "venueId": "ven_capilla_del_palacio_real_de_aranjuez",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_musicaantiguaaranjuez_com_sara_ruiz_bellemont_trio_paseo_jardin_isla_01",
+      "date": "2026-10-11",
+      "time": "11:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Sara Ruiz"
+    },
+    {
+      "name": "Rafael Muñoz"
+    },
+    {
+      "name": "Laura Puerto"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Marin Marais"
+    },
+    {
+      "name": "François Couperin"
+    }
+  ],
+  "works": [
+    {
+      "title": "Suite en la menor",
+      "composerName": "Marin Marais"
+    },
+    {
+      "title": "Les Bergeries",
+      "composerName": "François Couperin"
+    },
+    {
+      "title": "Suite en mi menor",
+      "composerName": "François Couperin"
+    },
+    {
+      "title": "Le Labyrinth",
+      "composerName": "Marin Marais"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "early-music",
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_musicaantiguaaranjuez_com",
+      "url": "https://musicaantiguaaranjuez.com/evento/sara-ruiz-bellemont-trio-paseo-jardin-isla",
+      "checkedAt": "2026-09-26"
+    }
+  ],
+  "primarySourceId": "src_musicaantiguaaranjuez_com",
+  "lastVerifiedAt": "2026-09-26"
+}

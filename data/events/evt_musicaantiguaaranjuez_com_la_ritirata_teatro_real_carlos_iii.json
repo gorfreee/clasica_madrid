@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_musicaantiguaaranjuez_com_la_ritirata_teatro_real_carlos_iii",
+  "slug": "la-ritirata-bicentenario-de-j-c-de-arriaga",
+  "title": "La Ritirata — Bicentenario de J. C. de Arriaga",
+  "status": "scheduled",
+  "venueId": "ven_teatro_real_carlos_iii",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_musicaantiguaaranjuez_com_la_ritirata_teatro_real_carlos_iii_01",
+      "date": "2026-11-01",
+      "time": "12:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "La Ritirata"
+    },
+    {
+      "name": "Josetxu Obregón"
+    },
+    {
+      "name": "Hiro Kurosaki"
+    },
+    {
+      "name": "Miriam Hontana"
+    },
+    {
+      "name": "Daniel Lorenzo"
+    },
+    {
+      "name": "Giulio Tanasini"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Luigi Boccherini"
+    },
+    {
+      "name": "Juan Crisóstomo de Arriaga"
+    }
+  ],
+  "works": [
+    {
+      "title": "Quinteto de cuerda en si bemol mayor, G. 337",
+      "composerName": "Luigi Boccherini"
+    },
+    {
+      "title": "Minueto del Trío n.º 2 en sol mayor, G. 102",
+      "composerName": "Luigi Boccherini"
+    },
+    {
+      "title": "Cuarteto de cuerda n.º 2 en la mayor",
+      "composerName": "Juan Crisóstomo de Arriaga"
+    },
+    {
+      "title": "Quinteto de cuerda n.º 77 en re mayor «Fandango», G. 341, op. 40/2",
+      "composerName": "Luigi Boccherini"
+    }
+  ],
+  "eras": [
+    "classical"
+  ],
+  "formats": [
+    "early-music"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_musicaantiguaaranjuez_com",
+      "url": "https://musicaantiguaaranjuez.com/evento/la-ritirata-teatro-real-carlos-iii",
+      "checkedAt": "2026-09-26"
+    }
+  ],
+  "primarySourceId": "src_musicaantiguaaranjuez_com",
+  "lastVerifiedAt": "2026-09-26"
+}

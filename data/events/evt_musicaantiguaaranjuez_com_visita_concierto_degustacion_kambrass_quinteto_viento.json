@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_musicaantiguaaranjuez_com_visita_concierto_degustacion_kambrass_quinteto_viento",
+  "slug": "kambrass-transfoliacion-metamorfosis-de-la-folia",
+  "title": "KamBrass — Transfoliación: Metamorfosis de la folía",
+  "status": "scheduled",
+  "venueId": "ven_bodega_de_carlos_iii_real_cortijo_de_san_isidro",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_musicaantiguaaranjuez_com_visita_concierto_degustacion_kambrass_quinteto_viento_01",
+      "date": "2026-10-25",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Iñigo Ocón"
+    },
+    {
+      "name": "Joan Pàmies"
+    },
+    {
+      "name": "Maria Servera"
+    },
+    {
+      "name": "Xavier Gil Batet"
+    },
+    {
+      "name": "Oriol Reverter"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Jan Bach"
+    },
+    {
+      "name": "Juan del Encina"
+    },
+    {
+      "name": "Jean-Baptiste Lully"
+    },
+    {
+      "name": "Manuel de Falla"
+    },
+    {
+      "name": "Garazi Zabaleta"
+    }
+  ],
+  "works": [
+    {
+      "title": "Foliations (tema y variaciones)",
+      "composerName": "Jan Bach"
+    },
+    {
+      "title": "Hoy comamos y bebamos",
+      "composerName": "Juan del Encina"
+    },
+    {
+      "title": "Les Folies d’Espagne",
+      "composerName": "Jean-Baptiste Lully"
+    },
+    {
+      "title": "Danza n.º 1 de La vida breve",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Danza ritual del fuego de El amor brujo",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Danza del molinero de El sombrero de tres picos",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "Oxímoron",
+      "composerName": "Garazi Zabaleta"
+    }
+  ],
+  "eras": [
+    "renaissance",
+    "baroque",
+    "twentieth"
+  ],
+  "formats": [
+    "early-music"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_musicaantiguaaranjuez_com",
+      "url": "https://musicaantiguaaranjuez.com/evento/visita-concierto-degustacion-kambrass-quinteto-viento",
+      "checkedAt": "2026-09-26"
+    }
+  ],
+  "primarySourceId": "src_musicaantiguaaranjuez_com",
+  "lastVerifiedAt": "2026-09-26"
+}

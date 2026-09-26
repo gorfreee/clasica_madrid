@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_musicaantiguaaranjuez_com_manuel_ruiz_contratenor_iliber_ensemble_capilla_palacio",
+  "slug": "manuel-ruiz-iliber-ensemble-heroe-desvelado",
+  "title": "Manuel Ruiz & Íliber Ensemble — Héroe desvelado",
+  "status": "scheduled",
+  "venueId": "ven_capilla_del_palacio_real_de_aranjuez",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_musicaantiguaaranjuez_com_manuel_ruiz_contratenor_iliber_ensemble_capilla_palacio_01",
+      "date": "2026-11-08",
+      "time": "12:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Manuel Ruiz"
+    },
+    {
+      "name": "Íliber Ensemble"
+    },
+    {
+      "name": "Darío Tamayo",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Georg Muffat"
+    },
+    {
+      "name": "Georg Friedrich Händel"
+    },
+    {
+      "name": "Johann Adolf Hasse"
+    },
+    {
+      "name": "Giuseppe Antonio Brescianello"
+    },
+    {
+      "name": "Antonio Vivaldi"
+    },
+    {
+      "name": "Giovanni Legrenzi"
+    },
+    {
+      "name": "Alessandro Scarlatti"
+    }
+  ],
+  "works": [
+    {
+      "title": "Florilegium secundum: Nobilis Juventus, obertura",
+      "composerName": "Georg Muffat"
+    },
+    {
+      "title": "Rinaldo, HWV 7b: «Cara sposa»",
+      "composerName": "Georg Friedrich Händel"
+    },
+    {
+      "title": "Artaserse: «Pallido il sole»",
+      "composerName": "Johann Adolf Hasse"
+    },
+    {
+      "title": "Sinfonia n.º 5 en fa mayor, op. 1 n.º 5",
+      "composerName": "Giuseppe Antonio Brescianello"
+    },
+    {
+      "title": "Giulio Cesare in Egitto, HWV 17: «Dall’ondoso periglio», «Aure, deh, per pietà», «Empio, dirò, tu sei!»",
+      "composerName": "Georg Friedrich Händel"
+    },
+    {
+      "title": "Il Giustino, RV 717: «Vedrò con mio diletto»",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "La Cetra, op. 11: Sonata prima à 4",
+      "composerName": "Giovanni Legrenzi"
+    },
+    {
+      "title": "La Giuditta: «Dormi, o fulmine di guerra»",
+      "composerName": "Alessandro Scarlatti"
+    },
+    {
+      "title": "Orlando, HWV 31: «Ah! Stigie larve», «Vaghe pupille»",
+      "composerName": "Georg Friedrich Händel"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "early-music",
+    "chamber",
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_musicaantiguaaranjuez_com",
+      "url": "https://musicaantiguaaranjuez.com/evento/manuel-ruiz-contratenor-iliber-ensemble-capilla-palacio",
+      "checkedAt": "2026-09-26"
+    }
+  ],
+  "primarySourceId": "src_musicaantiguaaranjuez_com",
+  "lastVerifiedAt": "2026-09-26"
+}

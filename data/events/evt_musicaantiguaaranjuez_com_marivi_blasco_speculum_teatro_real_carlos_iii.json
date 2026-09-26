@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_musicaantiguaaranjuez_com_marivi_blasco_speculum_teatro_real_carlos_iii",
+  "slug": "marivi-blasco-speculum-azul-de-prusia-los-viajes-de-charles-burney",
+  "title": "Mariví Blasco & Speculum — Azul de Prusia, los viajes de Charles Burney",
+  "status": "scheduled",
+  "venueId": "ven_teatro_real_carlos_iii",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_musicaantiguaaranjuez_com_marivi_blasco_speculum_teatro_real_carlos_iii_01",
+      "date": "2026-10-24",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Speculum"
+    },
+    {
+      "name": "Mariví Blasco"
+    },
+    {
+      "name": "Ramiro Morales"
+    },
+    {
+      "name": "José Manuel Navarro"
+    },
+    {
+      "name": "María Alejandra Saturno"
+    },
+    {
+      "name": "Ernesto Schmied"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antonio Lotti"
+    },
+    {
+      "name": "Georg Philipp Telemann"
+    },
+    {
+      "name": "Carl Philipp Emanuel Bach"
+    },
+    {
+      "name": "Franz Joseph Haydn"
+    },
+    {
+      "name": "Charles Burney"
+    },
+    {
+      "name": "Georg Friedrich Händel"
+    },
+    {
+      "name": "Giovanni Battista Martini"
+    }
+  ],
+  "works": [
+    {
+      "title": "Eccho Quartetto",
+      "composerName": "Antonio Lotti"
+    },
+    {
+      "title": "Cantata Zerknirsche du mein blödes Herze",
+      "composerName": "Georg Philipp Telemann"
+    },
+    {
+      "title": "Triosonata en si menor, H 567",
+      "composerName": "Carl Philipp Emanuel Bach"
+    },
+    {
+      "title": "Adagio, Hob. III/6",
+      "composerName": "Franz Joseph Haydn"
+    },
+    {
+      "title": "The despairing Shepherd, cantata for the Temple of Apollo",
+      "composerName": "Charles Burney"
+    },
+    {
+      "title": "Sonata con voce Tu fedel, tu costante",
+      "composerName": "Georg Friedrich Händel"
+    },
+    {
+      "title": "Lux Aeterna",
+      "composerName": "Giovanni Battista Martini"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "classical"
+  ],
+  "formats": [
+    "early-music"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_musicaantiguaaranjuez_com",
+      "url": "https://musicaantiguaaranjuez.com/evento/marivi-blasco-speculum-teatro-real-carlos-iii",
+      "checkedAt": "2026-09-26"
+    }
+  ],
+  "primarySourceId": "src_musicaantiguaaranjuez_com",
+  "lastVerifiedAt": "2026-09-26"
+}

@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_musicaantiguaaranjuez_com_orquesta_barroca_sevilla",
+  "slug": "orquesta-barroca-de-sevilla-concerti-da-camera-de-vivaldi",
+  "title": "Orquesta Barroca de Sevilla — Concerti da Camera de Vivaldi",
+  "status": "scheduled",
+  "venueId": "ven_capilla_del_palacio_real_de_aranjuez",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_musicaantiguaaranjuez_com_orquesta_barroca_sevilla_01",
+      "date": "2026-10-17",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Barroca de Sevilla"
+    },
+    {
+      "name": "Pedro Castro"
+    },
+    {
+      "name": "Rafael Ruibérriz de Torres"
+    },
+    {
+      "name": "Fumiko Morie"
+    },
+    {
+      "name": "Alberto Grazzi"
+    },
+    {
+      "name": "Mercedes Ruiz"
+    },
+    {
+      "name": "Ventura Rico"
+    },
+    {
+      "name": "Alejandro Casal"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antonio Vivaldi"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto en do mayor, RV 88",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "Concierto en re mayor, RV 84",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "Concierto en re mayor «Il Gardellino», RV 90",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "Concierto en re menor, RV 92",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "Concierto en sol mayor, RV 107",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "Concierto en fa mayor «Tempesta di Mare», RV 98",
+      "composerName": "Antonio Vivaldi"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "symphonic",
+    "early-music"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_musicaantiguaaranjuez_com",
+      "url": "https://musicaantiguaaranjuez.com/evento/orquesta-barroca-sevilla",
+      "checkedAt": "2026-09-26"
+    }
+  ],
+  "primarySourceId": "src_musicaantiguaaranjuez_com",
+  "lastVerifiedAt": "2026-09-26"
+}
