@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_auditorio_escorial_10709",
+  "slug": "orquesta-sinfonica-carlos-cruz-diez-raices-sinfonicas",
+  "title": "Orquesta Sinfónica Carlos Cruz-Díez: Raíces Sinfónicas",
+  "status": "scheduled",
+  "venueId": "ven_teatro_auditorio_escorial",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_auditorio_escorial_10709_01",
+      "date": "2026-10-10",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Sinfónica Carlos Cruz-Díez"
+    },
+    {
+      "name": "Manuel Jurado",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_teatro_auditorio_escorial",
+      "url": "https://www.teatroauditorioescorial.es/espectaculo/orquesta-sinfonica-carlos-cruz-diez",
+      "checkedAt": "2026-09-26",
+      "externalId": "10709"
+    },
+    {
+      "sourceId": "src_comunidad_madrid",
+      "url": "https://www.comunidad.madrid/actividades/2026/concierto-orquesta-sinfonica-carlos-cruz-diez-raices-sinfonicas",
+      "checkedAt": "2026-09-26"
+    }
+  ],
+  "primarySourceId": "src_teatro_auditorio_escorial",
+  "lastVerifiedAt": "2026-09-26"
+}

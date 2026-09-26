@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_ayto_san_lorenzo_74826",
+  "slug": "concierto-de-organo-pedro-alberto-sanchez",
+  "title": "Concierto de órgano: Pedro Alberto Sánchez",
+  "status": "scheduled",
+  "venueId": "ven_basilica_monasterio_san_lorenzo_escorial",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_ayto_san_lorenzo_74826_01",
+      "date": "2026-10-09",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Pedro Alberto Sánchez"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Pablo Bruna"
+    },
+    {
+      "name": "Dieterich Buxtehude"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Eduardo Torres"
+    },
+    {
+      "name": "Miguel Manzano"
+    }
+  ],
+  "works": [
+    {
+      "title": "Tiento sobre la Letanía de la Virgen",
+      "composerName": "Pablo Bruna"
+    },
+    {
+      "title": "Coral «Herr Christ, der einig Gottes Sohn», BuxWV 192",
+      "composerName": "Dieterich Buxtehude"
+    },
+    {
+      "title": "Passacaglia y Fuga en do menor, BWV 582",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Impresión Teresiana",
+      "composerName": "Eduardo Torres"
+    },
+    {
+      "title": "In modo antico",
+      "composerName": "Eduardo Torres"
+    },
+    {
+      "title": "Cinco Glosas a una Loa para gran órgano",
+      "composerName": "Miguel Manzano"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "organ",
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_ayto_san_lorenzo",
+      "url": "https://www.aytosanlorenzo.es/agenda-eventos/concierto-de-organo-pedro-alberto-sanchez",
+      "checkedAt": "2026-09-26",
+      "externalId": "74826"
+    }
+  ],
+  "primarySourceId": "src_ayto_san_lorenzo",
+  "lastVerifiedAt": "2026-09-26"
+}

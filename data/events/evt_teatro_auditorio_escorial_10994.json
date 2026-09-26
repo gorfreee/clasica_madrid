@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_auditorio_escorial_10994",
+  "slug": "la-tercera-de-mahler",
+  "title": "La Tercera de Mahler",
+  "status": "scheduled",
+  "venueId": "ven_teatro_auditorio_escorial",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_auditorio_escorial_10994_01",
+      "date": "2026-10-16",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta y Coro de la Comunidad de Madrid"
+    },
+    {
+      "name": "Pequeños Cantores de la ORCAM"
+    },
+    {
+      "name": "Jennifer Johnston"
+    },
+    {
+      "name": "Ana González",
+      "role": "conductor"
+    },
+    {
+      "name": "Javier Carmena",
+      "role": "conductor"
+    },
+    {
+      "name": "Alondra de la Parra",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Gustav Mahler"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sinfonía n.º 3",
+      "composerName": "Gustav Mahler"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_teatro_auditorio_escorial",
+      "url": "https://www.teatroauditorioescorial.es/espectaculo/la-tercera-de-mahler",
+      "checkedAt": "2026-09-26",
+      "externalId": "10994"
+    }
+  ],
+  "primarySourceId": "src_teatro_auditorio_escorial",
+  "lastVerifiedAt": "2026-09-26"
+}

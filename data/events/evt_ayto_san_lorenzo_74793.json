@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_ayto_san_lorenzo_74793",
+  "slug": "concierto-alonso-en-clave-dieciochesca-arreglos-de-manuel-tevar",
+  "title": "Concierto: Alonso en clave dieciochesca. Arreglos de Manuel Tévar",
+  "status": "scheduled",
+  "venueId": "ven_real_coliseo_carlos_iii",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_ayto_san_lorenzo_74793_01",
+      "date": "2026-10-02",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Atlántida Chamber Orchestra"
+    },
+    {
+      "name": "Sahel Jiménez"
+    },
+    {
+      "name": "Irene Ces"
+    },
+    {
+      "name": "Carlos G. Berlinches"
+    },
+    {
+      "name": "Eder Assunçao"
+    },
+    {
+      "name": "Ana Medina"
+    },
+    {
+      "name": "Ana Magán"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Francisco Alonso"
+    }
+  ],
+  "works": [
+    {
+      "title": "La Calesera",
+      "composerName": "Francisco Alonso"
+    },
+    {
+      "title": "La Carmañola",
+      "composerName": "Francisco Alonso"
+    },
+    {
+      "title": "La Castañuela",
+      "composerName": "Francisco Alonso"
+    },
+    {
+      "title": "El Gallo",
+      "composerName": "Francisco Alonso"
+    },
+    {
+      "title": "La Zapaterita",
+      "composerName": "Francisco Alonso"
+    },
+    {
+      "title": "Las Guapas",
+      "composerName": "Francisco Alonso"
+    },
+    {
+      "title": "La Reina del Directorio",
+      "composerName": "Francisco Alonso"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "chamber",
+    "zarzuela"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayto_san_lorenzo",
+      "url": "https://www.aytosanlorenzo.es/agenda-eventos/concierto-alonso-en-clave-dieciochesca-arreglos-de-manuel-tevar",
+      "checkedAt": "2026-09-26",
+      "externalId": "74793"
+    },
+    {
+      "sourceId": "src_comunidad_madrid",
+      "url": "https://www.comunidad.madrid/actividades/2026/musica-hispanidad-2026-alonso-clave-dieciochesca",
+      "checkedAt": "2026-09-26"
+    }
+  ],
+  "primarySourceId": "src_ayto_san_lorenzo",
+  "lastVerifiedAt": "2026-09-26"
+}
