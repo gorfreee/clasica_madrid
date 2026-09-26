@@ -17,6 +17,19 @@ const MADRID: { municipality: string; area: Area } = {
 
 export const KNOWN_VENUES: KnownVenue[] = [
   {
+    keys: ['teatro auditorio de san lorenzo de el escorial', 'teatro auditorio escorial'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_teatro_auditorio_escorial',
+      slug: 'teatro-auditorio-de-san-lorenzo-de-el-escorial',
+      name: 'Teatro Auditorio de San Lorenzo de El Escorial',
+      municipality: 'San Lorenzo de El Escorial',
+      area: 'nearby',
+      address: 'Parque Felipe II, s/n, 28200 San Lorenzo de El Escorial',
+      url: 'https://www.teatroauditorioescorial.es/',
+    },
+  },
+  {
     keys: ['residencia de estudiantes'],
     venue: {
       schemaVersion: 1,
