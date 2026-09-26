@@ -26,6 +26,7 @@ export const CALENDAR_ADD_CLICKED = 'calendar_add_clicked';
 export const CONTACT_SUBMITTED = 'contact_submitted';
 export const EVENT_FEEDBACK_CLICKED = 'event_feedback_clicked';
 export const WHATSAPP_CHANNEL_CLICKED = 'whatsapp_channel_clicked';
+export const WHATSAPP_CHANNEL_VIEWED = 'whatsapp_channel_viewed';
 
 export const EVENT_FEEDBACK_PLACEMENTS = ['after_sources'] as const;
 export type EventFeedbackPlacement = (typeof EVENT_FEEDBACK_PLACEMENTS)[number];
@@ -330,6 +331,16 @@ export function trackWhatsAppChannelClicked(
   capture: AnalyticsCapture | null = defaultCapture(),
 ): void {
   captureAnalytics(WHATSAPP_CHANNEL_CLICKED, {
+    placement: input.placement,
+    page_type: input.page_type,
+  }, capture);
+}
+
+export function trackWhatsAppChannelViewed(
+  input: { placement: WhatsAppChannelPlacement; page_type: PageType },
+  capture: AnalyticsCapture | null = defaultCapture(),
+): void {
+  captureAnalytics(WHATSAPP_CHANNEL_VIEWED, {
     placement: input.placement,
     page_type: input.page_type,
   }, capture);
