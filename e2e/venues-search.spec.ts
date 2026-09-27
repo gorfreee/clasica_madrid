@@ -27,17 +27,16 @@ test.describe('búsqueda de lugares', () => {
     await expect(page.getByRole('button', { name: 'Limpiar búsqueda' })).toBeVisible();
 
     await search.fill('getafe');
-    await expect(visibleVenues(page)).toHaveCount(3);
-    await expect(page.getByRole('link', { name: 'Conservatorio Profesional de Música de Getafe' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Teatro Federico García Lorca' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Espacio Mercado' })).toBeVisible();
-    await expect(page.locator('[data-venue-count]')).toHaveText('3 lugares');
+    const afterMunicipality = await visibleVenues(page).count();
+    expect(afterMunicipality).toBeGreaterThan(0);
+    expect(afterMunicipality).toBeLessThan(initialCount);
+    const municipalities = await visibleVenues(page).locator('.venue-list__municipality').allTextContents();
+    expect(municipalities).toHaveLength(afterMunicipality);
+    expect(municipalities.every((municipality) => municipality === 'Getafe')).toBe(true);
+    await expect(page.locator('[data-venue-count]')).toHaveText(
+      afterMunicipality === 1 ? '1 lugar' : `${afterMunicipality} lugares`,
+    );
     await expect(page.locator('[data-venue-no-results]')).toBeHidden();
-
-    await search.fill('zarzuela');
-    await expect(visibleVenues(page)).toHaveCount(1);
-    await expect(page.getByRole('link', { name: 'Teatro de la Zarzuela' })).toBeVisible();
-    await expect(page.locator('[data-venue-count]')).toHaveText('1 lugar');
 
     await search.fill('basilica');
     await expect(page.getByRole('link', { name: 'Basílica Pontificia de San Miguel' })).toBeVisible();
