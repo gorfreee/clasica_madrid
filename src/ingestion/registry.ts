@@ -30,6 +30,7 @@ import { aytoSanLorenzoAdapter } from './sources/ayto-san-lorenzo.ts';
 import { teatroAuditorioEscorialAdapter } from './sources/teatro-auditorio-escorial.ts';
 import { culturalcalaAdapter } from './sources/culturalcala.ts';
 import { orquestaCiudadGetafeAdapter } from './sources/orquesta-ciudad-getafe.ts';
+import { fundacionCulturalLasRozasAdapter } from './sources/fundacion-cultural-las-rozas.ts';
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
@@ -63,6 +64,7 @@ const ADAPTERS: Record<string, SourceAdapter> = {
   [teatroAuditorioEscorialAdapter.id]: teatroAuditorioEscorialAdapter,
   [culturalcalaAdapter.id]: culturalcalaAdapter,
   [orquestaCiudadGetafeAdapter.id]: orquestaCiudadGetafeAdapter,
+  [fundacionCulturalLasRozasAdapter.id]: fundacionCulturalLasRozasAdapter,
 };
 
 const srcAuditorio: Source = {
@@ -536,6 +538,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Orquesta Sinfónica Ciudad de Getafe',
       kind: 'official',
       url: 'https://orquestaciudaddegetafe.com/',
+    },
+  },
+  {
+    id: 'fundacion-cultural-las-rozas',
+    name: 'Fundación Cultural Las Rozas',
+    urls: ['https://fundacionculturalasrozas.org/agenda/'],
+    adapterId: fundacionCulturalLasRozasAdapter.id,
+    catalogSourceId: 'src_fundacion_cultural_las_rozas',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_fundacion_cultural_las_rozas',
+      slug: 'fundacion-cultural-las-rozas',
+      name: 'Fundación Cultural Las Rozas',
+      kind: 'official',
+      url: 'https://fundacionculturalasrozas.org/',
     },
   },
 ];
