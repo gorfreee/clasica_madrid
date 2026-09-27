@@ -3,6 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { mergeCandidateBatch } from '../src/ingestion/batch.ts';
+import { classify } from '../src/ingestion/classification/classify.ts';
 import { emptyCatalog } from '../src/lib/domain/catalog.ts';
 import { runIngest } from '../src/ingestion/pipeline.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
@@ -133,5 +134,157 @@ describe('Orquesta Sinfónica Ciudad de Getafe', () => {
     });
     expect(second.summary.newEvents).toBe(0);
     expect(second.summary.possiblyMissing).toBe(0);
+  });
+
+  it('extrae créditos y repertorio que no caben en «obra — compositor»', async () => {
+    const read = (name: string) => fixture(name);
+    const detail = async (name: string, href: string) => {
+      const event = parseGetafeDetail(await read(name), href, ctx(get));
+      expect(event).toBeDefined();
+      return event!;
+    };
+    const puccini = await detail(
+      'puccini-en-concierto.html',
+      'https://orquestaciudaddegetafe.com/js_events/puccini-en-concierto/',
+    );
+    expect(puccini.observed.performers).toEqual([
+      { name: 'Coral Polifónica de Getafe', roleText: 'coro' },
+      { name: 'Orquesta Sinfónica Ciudad de Getafe', roleText: 'orquesta' },
+      { name: 'Celia Alcedo', roleText: 'soprano' },
+      { name: 'Enrique Ferrer', roleText: 'tenor' },
+      { name: 'Antonio Torres', roleText: 'barítono' },
+      { name: 'Carlos Díez Martín', roleText: 'director titular' },
+    ]);
+    expect(puccini.observed.works.map((work) => work.title)).toEqual([
+      'Le Villi', 'La Bohème', 'Tosca', 'Madama Butterfly', 'Turandot', 'Gianni Schicchi', 'Suor Angelica',
+    ]);
+    expect(puccini.observed.composers).toEqual([{ name: 'Giacomo Puccini' }]);
+    expect(puccini.observed.works.every((work) => work.composerName === 'Giacomo Puccini')).toBe(true);
+    const pucciniClass = classify(puccini.observed);
+    expect(pucciniClass.eligibility.value).toBe('include');
+    expect(pucciniClass.eras?.value).toEqual(['romantic']);
+    expect(pucciniClass.formats?.value).toEqual(expect.arrayContaining(['opera', 'choral', 'symphonic']));
+
+    const vivaldi = await detail(
+      'vivaldi-imprescindible.html',
+      'https://orquestaciudaddegetafe.com/js_events/vivaldi-imprescindible/',
+    );
+    expect(vivaldi.observed.performers).toEqual([
+      { name: 'Sandro Peñalver', roleText: 'violín I' },
+      { name: 'Rubén Redondo', roleText: 'violín II' },
+      { name: 'Elena Muñoz-Quirós', roleText: 'viola' },
+      { name: 'Peregrín Caldés', roleText: 'violonchelo' },
+      { name: 'Sergio Fuentes', roleText: 'violín solista' },
+      { name: 'Strings lab' },
+    ]);
+    expect(vivaldi.observed.works).toEqual([
+      { title: 'Las Cuatro Estaciones', composerName: 'Antonio Vivaldi' },
+    ]);
+    const vivaldiClass = classify(vivaldi.observed);
+    expect(vivaldiClass.eras?.value).toEqual(['baroque']);
+    expect(vivaldiClass.formats?.value).toContain('chamber');
+
+    const europa = await detail('lirico.html', lirico);
+    expect(europa.observed.performers).toEqual(expect.arrayContaining([
+      { name: 'Dúo Brisalia', roleText: 'dúo' },
+      { name: 'Sofía Gutierrez', roleText: 'soprano' },
+      { name: 'María Argüeso Vega', roleText: 'pianista' },
+    ]));
+    expect(europa.observed.works).toEqual([]);
+    expect(europa.observed.composers.map((item) => item.name)).toEqual([
+      'Bernstein', 'Obradors', 'Lecuona', 'Mozart', 'Verdi', 'María Rodrigo', 'Gonzalo Roig',
+    ]);
+
+    const viena = await detail(
+      'de-viena-a-getafe-c2b7-concierto-de-ano-nuevo.html',
+      'https://orquestaciudaddegetafe.com/js_events/de-viena-a-getafe-%c2%b7-concierto-de-ano-nuevo/',
+    );
+    expect(viena.observed.performers).toEqual([
+      { name: 'Carlos Díez Martín', roleText: 'director titular' },
+    ]);
+    expect(viena.observed.works).toEqual([
+      { title: 'Carnaval, obertura', composerName: 'Antonín Dvořák' },
+      { title: 'Karelia Suite', composerName: 'J.Sibelius' },
+    ]);
+    expect(viena.observed.works.some((work) => /valses y polkas/i.test(work.title))).toBe(false);
+
+    const beethoven = await detail(
+      'beethoven-inmortal.html',
+      'https://orquestaciudaddegetafe.com/js_events/beethoven-inmortal/',
+    );
+    expect(beethoven.observed.performers).toEqual([
+      { name: 'Carlos Díez Martín', roleText: 'director titular' },
+      { name: 'David Martínez', roleText: 'violín' },
+    ]);
+    expect(beethoven.observed.works.map((work) => work.composerName)).toEqual([
+      'Ludwig van Beethoven', 'Ludwig van Beethoven', 'Ludwig van Beethoven',
+    ]);
+
+    const ecosEvent = await detail('ecos.html', ecos);
+    expect(ecosEvent.observed.performers).toEqual([
+      { name: 'Francisco Fierro', roleText: 'piano' },
+      { name: 'Carlos Díez Martín', roleText: 'director titular' },
+    ]);
+
+    const elegancia = await detail(
+      'la-elegancia-de-la-cuerda.html',
+      'https://orquestaciudaddegetafe.com/js_events/la-elegancia-de-la-cuerda/',
+    );
+    expect(elegancia.observed.performers).toEqual([
+      { name: 'Bauti Carmena Mateos', roleText: 'director invitado' },
+      { name: 'Jaime Enguídanos', roleText: 'marimba' },
+    ]);
+
+    const grandeza = await detail(
+      'la-grandeza-del-romanticismo-aleman.html',
+      'https://orquestaciudaddegetafe.com/js_events/la-grandeza-del-romanticismo-aleman/',
+    );
+    expect(grandeza.observed.performers).toEqual([
+      { name: 'Miguel Romea', roleText: 'director invitado' },
+      { name: 'Aitor Ochoa', roleText: 'trombón' },
+    ]);
+    expect(grandeza.observed.works).toEqual(expect.arrayContaining([
+      { title: 'Obertura Oberon', composerName: 'C.M.Weber' },
+    ]));
+
+    const shakespeare = await detail(
+      'shakespeare-y-la-sinfonia-romantica.html',
+      'https://orquestaciudaddegetafe.com/js_events/shakespeare-y-la-sinfonia-romantica/',
+    );
+    expect(shakespeare.observed.performers).toEqual([
+      { name: 'Carlos Díez Martín', roleText: 'director titular' },
+    ]);
+    expect(shakespeare.observed.works.map((work) => work.title)).toEqual([
+      'Sueño de una noche de verano',
+      'Sinfonía n.º 2 en do mayor, Op. 61',
+    ]);
+
+    const gran = await detail(
+      'el-gran-concierto.html',
+      'https://orquestaciudaddegetafe.com/js_events/el-gran-concierto/',
+    );
+    expect(gran.observed.performers).toEqual([
+      { name: 'Carlos Díez Martín', roleText: 'director titular' },
+    ]);
+    expect(gran.observed.works).toEqual([
+      { title: 'Sinfonía n.º 5 en do sostenido menor', composerName: 'Gustav Mahler' },
+    ]);
+
+    const cuba = await detail(
+      'clasicos-con-c-de-cuba.html',
+      'https://orquestaciudaddegetafe.com/js_events/clasicos-con-c-de-cuba/',
+    );
+    expect(cuba.observed.performers.map((person) => person.name)).toEqual([
+      'Víctor Loarces', 'Alberto Raya', 'Pedro Quirico', 'Miguel Ruiz', 'Insolit Quartet',
+    ]);
+    expect(classify(cuba.observed).eligibility.value).not.toBe('include');
+
+    const homenaje = await detail(
+      'homenaje-a-los-grandes.html',
+      'https://orquestaciudaddegetafe.com/js_events/homenaje-a-los-grandes/',
+    );
+    expect(homenaje.observed.composers).toEqual([]);
+    expect(homenaje.observed.works).toEqual([]);
+    expect(classify(homenaje.observed).eligibility.value).not.toBe('include');
   });
 });

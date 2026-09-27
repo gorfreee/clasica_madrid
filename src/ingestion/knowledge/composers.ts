@@ -353,7 +353,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Jean Sibelius',
-    aliases: ['Jean Sibelius', 'Sibelius'],
+    aliases: ['Jean Sibelius', 'J. Sibelius', 'J.Sibelius', 'Sibelius'],
     eras: ['romantic'],
   },
   {
@@ -1179,7 +1179,15 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Carl Maria von Weber',
-    aliases: ['Carl Maria von Weber', 'C. M. von Weber', 'C.M. von Weber'],
+    aliases: [
+      'Carl Maria von Weber',
+      'C. M. von Weber',
+      'C.M. von Weber',
+      'C. M. Weber',
+      'C.M. Weber',
+      'C.M.Weber',
+      'CM Weber',
+    ],
     eras: ['romantic'],
   },
   {

@@ -1,6 +1,6 @@
 import { isRealIsoDate } from '../../lib/util/iso-date.ts';
 import { collapseWhitespace, decodeHtmlEntities, stripTags } from '../html.ts';
-import { emptyObservedLists } from '../observed.ts';
+import { emptyObservedLists, normalizePersonList, type ObservedFactPatch, type ObservedPerson } from '../observed.ts';
 import { IncompleteListingError, type AdapterContext, type RawEvent, type SourceAdapter } from '../types.ts';
 
 const ID = 'culturalcala';
@@ -17,6 +17,9 @@ export const culturalcalaAdapter: SourceAdapter = {
     return [LISTING];
   },
   extract: parseCulturalcalaListing,
+  hydrate(event, body) {
+    return parseCulturalcalaDetail(event, body);
+  },
 };
 
 function officialEventUrl(value: unknown): string | undefined {
@@ -65,7 +68,8 @@ function parseCard(card: string, id: string, recurrence: string): RawEvent {
   const venue = location && typeof location === 'object' && !Array.isArray(location)
     ? (location as Record<string, unknown>).name : undefined;
   const venueText = typeof venue === 'string' ? collapseWhitespace(decodeHtmlEntities(venue)) : '';
-  const description = typeof data.description === 'string' ? stripTags(data.description).slice(0, 5000) : '';
+  const descriptionHtml = typeof data.description === 'string' ? data.description : '';
+  const facts = factsFromDescription(descriptionHtml, venueText);
   const price = /<h3\b[^>]*>\s*Precios\s*<\/h3>\s*<div\b[^>]*class=["'][^"']*\bevo_custom_content\b[^"']*["'][^>]*>([\s\S]*?)<\/div>/i.exec(card)?.[1];
   const accessText = price ? stripTags(price).slice(0, 1000) : '';
   const status = data.eventStatus;
@@ -78,13 +82,173 @@ function parseCard(card: string, id: string, recurrence: string): RawEvent {
     ...(status === 'https://schema.org/EventCancelled' ? { eventStatus: 'cancelled' as const } :
       status === 'https://schema.org/EventPostponed' ? { eventStatus: 'postponed' as const } : {}),
     observed: {
-      title, categoryText: 'Música y Danza',
+      title,
+      ...(facts.categoryText ? { categoryText: facts.categoryText } : {}),
       ...(venueText ? { venueText } : {}),
-      ...(description ? { description } : {}),
+      ...(facts.description ? { description: facts.description } : {}),
+      ...(facts.programText ? { programText: facts.programText } : {}),
       ...(accessText ? { accessText } : {}),
-      occurrences: [startDate(data.startDate)], ...emptyObservedLists(),
+      occurrences: [startDate(data.startDate)],
+      ...emptyObservedLists(),
+      performers: facts.performers,
     },
   };
+}
+
+/**
+ * The EventON calendar type is always "Música y Danza". The ficha publishes a
+ * specific category in the preformatted header, immediately before the venue
+ * line. Listing JSON-LD already carries that header; the detail page is the
+ * authoritative copy when hydration succeeds.
+ */
+export function parseCulturalcalaDetail(event: RawEvent, body: string): ObservedFactPatch {
+  const canonical = canonicalHref(body);
+  if (!canonical || officialEventUrl(canonical) !== event.sourceUrl) {
+    throw new Error(`${ID}: ficha distinta de ${event.sourceUrl}`);
+  }
+  const data = eventJsonLd(body, event.sourceUrl);
+  if (!data) throw new Error(`${ID}: ficha sin el evento ${event.sourceUrl}`);
+  const descriptionHtml = typeof data.description === 'string' ? data.description : '';
+  if (!descriptionHtml) throw new Error(`${ID}: ficha sin descripción`);
+  const location = Array.isArray(data.location) ? data.location[0] : data.location;
+  const venue = location && typeof location === 'object' && !Array.isArray(location)
+    ? (location as Record<string, unknown>).name : undefined;
+  const venueText = typeof venue === 'string' ? collapseWhitespace(decodeHtmlEntities(venue)) : '';
+  const facts = factsFromDescription(descriptionHtml, venueText);
+  return {
+    ...(facts.categoryText ? { categoryText: facts.categoryText } : {}),
+    ...(venueText ? { venueText } : {}),
+    ...(facts.description ? { description: facts.description } : {}),
+    ...(facts.programText ? { programText: facts.programText } : {}),
+    performers: facts.performers,
+  };
+}
+
+function canonicalHref(body: string): string | undefined {
+  const tag = /<link\b[^>]*rel=["']canonical["'][^>]*>/i.exec(body)?.[0];
+  return tag && /href=["']([^"']+)["']/i.exec(tag)?.[1];
+}
+
+function eventJsonLd(body: string, sourceUrl: string): Record<string, unknown> | undefined {
+  for (const script of body.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)) {
+    let value: unknown;
+    try { value = JSON.parse(script[1]!); } catch { continue; }
+    if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
+    const record = value as Record<string, unknown>;
+    if (record['@type'] !== 'Event' || officialEventUrl(record.url) !== sourceUrl) continue;
+    return record;
+  }
+  return undefined;
+}
+
+function factsFromDescription(descriptionHtml: string, venueName: string): {
+  categoryText?: string;
+  description?: string;
+  programText?: string;
+  performers: ObservedPerson[];
+} {
+  const description = descriptionHtml ? stripTags(descriptionHtml).slice(0, 5000) : '';
+  const pre = /<pre\b[^>]*>([\s\S]*?)<\/pre>/i.exec(descriptionHtml)?.[1] ?? '';
+  const preLines = preLinesOf(pre);
+  return {
+    categoryText: categoryBeforeVenue(preLines, venueName),
+    ...(description ? { description } : {}),
+    programText: programmeParagraphs(descriptionHtml),
+    performers: performersFromPre(preLines),
+  };
+}
+
+function preLinesOf(preHtml: string): string[] {
+  return preHtml
+    .replace(/<br\s*\/?>/gi, '\n')
+    .split('\n')
+    .map((line) => collapseWhitespace(stripTags(line)))
+    .filter(Boolean);
+}
+
+function categoryBeforeVenue(lines: string[], venueName: string): string | undefined {
+  const index = lines.findIndex((line) => isVenueLine(line, venueName));
+  if (index <= 0) return undefined;
+  for (let cursor = index - 1; cursor >= 0; cursor -= 1) {
+    const line = lines[cursor]!;
+    if (isDateLine(line)) continue;
+    return isCategoryLabel(line) ? line : undefined;
+  }
+  return undefined;
+}
+
+function isVenueLine(line: string, venueName: string): boolean {
+  const foldedLine = fold(line);
+  const foldedVenue = fold(venueName);
+  if (foldedVenue && foldedLine.includes(foldedVenue)) return true;
+  const token = foldedVenue.split(' ').find((word) => word.length >= 6);
+  if (token && foldedLine.includes(token)) return true;
+  return /(?:teatro|corral|auditorio|gilitos|sal[oó]n)/i.test(line) &&
+    /[/|]|\bcalle\b|\bplaza\b/i.test(line);
+}
+
+function isCategoryLabel(line: string): boolean {
+  if (line.length < 3 || line.length > 60 || line.split(/\s+/).length > 8) return false;
+  if (/\d|https?:|www\.|\./.test(line)) return false;
+  if (isDateLine(line) || CREDIT_LABEL.test(line)) return false;
+  return true;
+}
+
+function isDateLine(line: string): boolean {
+  return /\b(?:lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo)\b/i.test(line) ||
+    /\bde\s+(?:enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)\b/i.test(line);
+}
+
+const CREDIT_LABEL =
+  /^(?:int[eé]rpretes?|bailarines?|producci[oó]n|produce|distribuci[oó]n|direcci[oó]n|precio|duraci[oó]n)\b/i;
+const CAST_LABEL = /^(int[eé]rpretes?|bailarines?)\s*:\s*(.+)$/i;
+const SKIP_LABEL = /^(?:producci[oó]n|produce|distribuci[oó]n|direcci[oó]n|precio|duraci[oó]n)\s*:/i;
+const PAREN_ROLE =
+  /^(?:soprano|mezzosoprano|contralto|tenor|bar[ií]tono|bajo|piano|pianista|viol[ií]n|violinista|viola|violonchelo|chelo|flauta|clarinete|guitarra|clave|director|directora|bailar[ií]n|bailarina)$/i;
+
+function performersFromPre(lines: string[]): ObservedPerson[] {
+  const people: ObservedPerson[] = [];
+  const prose: string[] = [];
+  for (const line of lines) {
+    const cast = CAST_LABEL.exec(line);
+    if (cast) {
+      const roleText = /^bailarines?$/i.test(cast[1]!) ? 'bailarín' : undefined;
+      for (const name of cast[2]!.split(',')) {
+        const cleaned = name.trim().replace(/[.\s]+$/u, '');
+        if (cleaned) people.push(roleText ? { name: cleaned, roleText } : { name: cleaned });
+      }
+      continue;
+    }
+    if (SKIP_LABEL.test(line)) continue;
+    prose.push(line);
+  }
+  const text = prose.join(' ');
+  for (const match of text.matchAll(/(\p{Lu}[\p{L}'’-]*(?:\s+\p{Lu}[\p{L}'’-]*){0,4})\s*\(([^)]{2,40})\)/gu)) {
+    const name = match[1]!.trim();
+    const roleText = match[2]!.trim();
+    if (PAREN_ROLE.test(foldRole(roleText))) people.push({ name, roleText });
+  }
+  for (const match of text.matchAll(/\bal\s+(piano|viol[ií]n|viola|violonchelo|clave|guitarra|flauta)\s+por\s+(\p{Lu}[\p{L}'’-]*(?:\s+\p{Lu}[\p{L}'’-]*){0,4})/giu)) {
+    people.push({ name: match[2]!.trim().replace(/[.\s]+$/u, ''), roleText: match[1]!.trim() });
+  }
+  return normalizePersonList(people);
+}
+
+function programmeParagraphs(html: string): string | undefined {
+  const withoutPre = html.replace(/<pre\b[^>]*>[\s\S]*?<\/pre>/gi, ' ');
+  const paragraphs = [...withoutPre.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)]
+    .map((match) => stripTags(match[1] ?? ''))
+    .filter((text) => /arias de [oó]pera|romanzas de zarzuela|fragmentos de [oó]peras?|\bobras de\b/i.test(text));
+  const text = paragraphs.join('\n').slice(0, 2500);
+  return text || undefined;
+}
+
+function fold(value: string): string {
+  return value.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+}
+
+function foldRole(value: string): string {
+  return fold(value).trim();
 }
 
 function addEvent(events: Map<string, RawEvent>, item: RawEvent): void {
