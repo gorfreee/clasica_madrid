@@ -1,0 +1,90 @@
+---
+import { WHATSAPP_CHANNEL_URL } from '../lib/presentation/constants.ts';
+---
+
+<a
+  class="floating-channel"
+  href={WHATSAPP_CHANNEL_URL}
+  target="_blank"
+  rel="noopener noreferrer"
+  data-whatsapp-channel="floating"
+  aria-label="Seguir el canal de Clásica Madrid en WhatsApp (se abre en otra pestaña)"
+>
+  <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+    <path fill="currentColor" d="M16 .8A15.2 15.2 0 0 0 2.9 23.7L.8 31.2l7.7-2A15.2 15.2 0 1 0 16 .8Zm0 27.6a12.3 12.3 0 0 1-6.3-1.7l-.5-.3-4.6 1.2 1.2-4.5-.3-.5A12.4 12.4 0 1 1 16 28.4Zm6.8-9.3c-.4-.2-2.2-1.1-2.6-1.2-.3-.1-.6-.2-.8.2-.3.4-1 1.2-1.3 1.5-.2.3-.5.3-.9.1-2.2-1.1-3.7-2-5.2-4.6-.4-.7.4-.6 1.1-2.1.1-.3 0-.5 0-.7l-1.2-2.8c-.3-.7-.6-.6-.8-.6h-.7c-.3 0-.7.1-1 .5-.3.4-1.3 1.3-1.3 3.1s1.3 3.6 1.5 3.8c.2.2 2.6 4 6.3 5.6 2.3 1 3.2 1.1 4.3.9 1.3-.2 2.2-1.1 2.5-2.1.3-1 .3-1.9.2-2.1-.1-.2-.3-.3-.7-.5Z" />
+  </svg>
+  <span class="floating-channel__hint" aria-hidden="true">Síguenos en WhatsApp</span>
+</a>
+
+<script>
+  import { initWhatsAppChannelTracking } from '../lib/analytics/browser.ts';
+
+  initWhatsAppChannelTracking();
+
+  // The footer already offers this link. Hide the floating copy while the footer is visible.
+  const link = document.querySelector<HTMLAnchorElement>('.floating-channel');
+  const footer = document.querySelector<HTMLElement>('.site-footer');
+  if (link && footer && typeof IntersectionObserver !== 'undefined') {
+    new IntersectionObserver(([entry]) => {
+      link.hidden = entry.isIntersecting;
+    }).observe(footer);
+  }
+</script>
+
+<style>
+  .floating-channel {
+    position: fixed;
+    z-index: 19;
+    right: 1.5rem;
+    bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+    display: grid;
+    place-items: center;
+    width: 3.75rem;
+    height: 3.75rem;
+    border: 3px solid var(--color-surface);
+    border-radius: 50%;
+    background: var(--color-whatsapp);
+    box-shadow: 0 5px 18px var(--color-shadow);
+    color: #fff;
+    text-decoration: none;
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+  .floating-channel svg { width: 1.9rem; height: 1.9rem; }
+  .floating-channel:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 22px var(--color-shadow);
+  }
+  .floating-channel__hint {
+    position: absolute;
+    right: calc(100% + .8rem);
+    padding: .55rem .75rem;
+    border: 1px solid var(--color-border);
+    border-radius: .45rem;
+    background: var(--color-surface);
+    box-shadow: 0 3px 12px rgb(0 0 0 / 12%);
+    color: var(--color-text);
+    font-size: .8rem;
+    font-weight: 700;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(.25rem);
+    transition: opacity .18s ease, transform .18s ease;
+  }
+  @media (hover: hover) {
+    .floating-channel:hover .floating-channel__hint,
+    .floating-channel:focus-visible .floating-channel__hint { opacity: 1; transform: none; }
+  }
+  @media (max-width: 620px) {
+    .floating-channel {
+      right: 1rem;
+      bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+      width: 3.5rem;
+      height: 3.5rem;
+    }
+    .floating-channel__hint { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .floating-channel, .floating-channel__hint { transition: none; }
+  }
+</style>

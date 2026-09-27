@@ -26,6 +26,40 @@ function named(calls: AnalyticsCall[], event: string): AnalyticsCall[] {
 }
 
 test.describe('analítica de producto', () => {
+  test('el acceso flotante abre el canal y registra un clic e impresión propios en móvil y escritorio', async ({ page }) => {
+    await installAnalytics(page);
+    await page.context().route('https://whatsapp.com/**', (route) => route.fulfill({ status: 200, body: 'Canal de prueba' }));
+    for (const width of [1280, 390, 320]) {
+      await page.setViewportSize({ width, height: 760 });
+      await page.goto('/');
+      const link = page.locator('[data-whatsapp-channel="floating"]');
+      await expect(link).toBeVisible();
+      await expect(link).toHaveCSS('position', 'fixed');
+      await expect(link).toHaveAttribute('href', 'https://whatsapp.com/channel/0029VbDMlLw5Ejy6w8hyme2J');
+      await expect(link).toHaveAccessibleName(/Seguir el canal de Clásica Madrid en WhatsApp/);
+      const box = await link.boundingBox();
+      expect(box).not.toBeNull();
+      expect(box!.x + box!.width).toBeLessThan(width);
+      expect(box!.y + box!.height).toBeLessThan(760);
+      await expect.poll(async () => named(await analyticsCalls(page), 'whatsapp_channel_viewed')
+        .filter((call) => call.properties.placement === 'floating').length).toBe(1);
+      await link.focus();
+      expect(await link.evaluate((node) => getComputedStyle(node).outlineStyle)).not.toBe('none');
+      const [popup] = await Promise.all([page.waitForEvent('popup'), link.click()]);
+      await popup.close();
+      expect(named(await analyticsCalls(page), 'whatsapp_channel_clicked')).toEqual([
+        { event: 'whatsapp_channel_clicked', properties: { placement: 'floating', page_type: 'agenda' } },
+      ]);
+      await page.locator('.site-footer').scrollIntoViewIfNeeded();
+      await expect(link).toBeHidden();
+      await expect(page.locator('[data-whatsapp-channel="footer"]')).toBeVisible();
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await expect(link).toBeVisible();
+      expect(named(await analyticsCalls(page), 'whatsapp_channel_viewed')
+        .filter((call) => call.properties.placement === 'floating')).toHaveLength(1);
+    }
+  });
+
   test('el footer registra el clic en el canal desde la agenda sin navegar la página', async ({ page }) => {
     await installAnalytics(page);
     await page.context().route('https://whatsapp.com/**', (route) => route.fulfill({ status: 200, body: 'Canal de prueba' }));

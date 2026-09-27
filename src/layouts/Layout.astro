@@ -3,6 +3,7 @@ import '../styles/global.css';
 import archivoFontUrl from '../assets/fonts/archivo-latin-ext-wght.woff2?url';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import FloatingWhatsAppChannel from '../components/FloatingWhatsAppChannel.astro';
 import PostHogAnalytics from '../components/PostHogAnalytics.astro';
 import {
   BRAND_BLUE,
@@ -107,6 +108,7 @@ const social = buildSocialImageMetadata(socialImage, socialImageAlt);
       <slot />
     </main>
     <Footer />
+    <FloatingWhatsAppChannel />
     <script id="analytics-page" type="application/json" is:inline set:html={pageAnalytics} />
     <PostHogAnalytics />
   </body>
