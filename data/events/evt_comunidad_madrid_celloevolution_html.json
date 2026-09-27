@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_comunidad_madrid_celloevolution_html",
+  "slug": "celloevolution-josetxu-obregon",
+  "title": "Celloevolution — Josetxu Obregón",
+  "status": "scheduled",
+  "venueId": "ven_teatro_real_carlos_iii",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_comunidad_madrid_celloevolution_html_01",
+      "date": "2026-12-19",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Josetxu Obregón"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Gabrielli"
+    },
+    {
+      "name": "Supriano"
+    },
+    {
+      "name": "Vitali"
+    },
+    {
+      "name": "Galli"
+    },
+    {
+      "name": "Dall’ Abaco"
+    },
+    {
+      "name": "Domenico Gabrielli"
+    },
+    {
+      "name": "Giulio de Ruvo"
+    },
+    {
+      "name": "Francesco Paolo Supriano"
+    },
+    {
+      "name": "Giovanni Battista Vitali"
+    },
+    {
+      "name": "Domenico Galli"
+    },
+    {
+      "name": "Giuseppe Maria Dall'Abaco"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "recital",
+    "early-music"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_comunidad_madrid",
+      "url": "https://www.madrid.org/clas_artes/red/celloevolution.html",
+      "checkedAt": "2026-09-27"
+    }
+  ],
+  "primarySourceId": "src_comunidad_madrid",
+  "lastVerifiedAt": "2026-09-27"
+}

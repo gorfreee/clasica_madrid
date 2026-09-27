@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_comunidad_madrid_musica_hispanidad_2026_oceano_musica_espana_estados_unidos_250_anos_dialogo_traves_piano",
+  "slug": "un-oceano-de-musica-espana-y-estados-unidos-250-anos-de-dialogo-a-traves-del-piano",
+  "title": "Un océano de música: España y Estados Unidos, 250 años de diálogo a través del piano",
+  "status": "scheduled",
+  "venueId": "ven_real_coliseo_carlos_iii",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_comunidad_madrid_musica_hispanidad_2026_oceano_musica_espana_estados_unidos_250_anos_dialogo_traves_piano_01",
+      "date": "2026-10-09",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Marta Espinós"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antonio Soler"
+    },
+    {
+      "name": "William Brown"
+    },
+    {
+      "name": "Arthur Farwell"
+    },
+    {
+      "name": "Amy Beach"
+    },
+    {
+      "name": "Robert Xavier Rodríguez"
+    },
+    {
+      "name": "Aaron Copland"
+    },
+    {
+      "name": "George Gershwin"
+    },
+    {
+      "name": "William Bolcom"
+    },
+    {
+      "name": "Isaac Albéniz"
+    },
+    {
+      "name": "Manuel de Falla"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata en do sostenido menor R. 20",
+      "composerName": "Antonio Soler"
+    },
+    {
+      "title": "Sonata en modo dórico R. 48",
+      "composerName": "Antonio Soler"
+    },
+    {
+      "title": "Rondó en sol mayor",
+      "composerName": "William Brown"
+    },
+    {
+      "title": "American Indian Melodies, op. 11",
+      "composerName": "Arthur Farwell"
+    },
+    {
+      "title": "Young Birches",
+      "composerName": "Amy Beach"
+    },
+    {
+      "title": "A Humming-bird",
+      "composerName": "Amy Beach"
+    },
+    {
+      "title": "La maja desnuda y vestida y otra vez desnuda",
+      "composerName": "Robert Xavier Rodríguez"
+    },
+    {
+      "title": "Four Piano Blues: I. Freely Poetic",
+      "composerName": "Aaron Copland"
+    },
+    {
+      "title": "Summertime",
+      "composerName": "George Gershwin"
+    },
+    {
+      "title": "The Serpent’s Kiss",
+      "composerName": "William Bolcom"
+    },
+    {
+      "title": "Sevilla (Sevillanas), Suite española op. 47",
+      "composerName": "Isaac Albéniz"
+    },
+    {
+      "title": "Danza ritual del fuego (El amor brujo)",
+      "composerName": "Manuel de Falla"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "classical",
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_comunidad_madrid",
+      "url": "https://www.comunidad.madrid/actividades/2026/musica-hispanidad-2026-oceano-musica-espana-estados-unidos-250-anos-dialogo-traves-piano",
+      "checkedAt": "2026-09-27"
+    }
+  ],
+  "primarySourceId": "src_comunidad_madrid",
+  "lastVerifiedAt": "2026-09-27"
+}
