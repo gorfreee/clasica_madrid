@@ -143,7 +143,7 @@ export function canonicalizeEventTitle(title: string): string {
  */
 export function stripTrailingPeriod(value: string): string {
   let current = value.trimEnd();
-  while (/(?<!\\.)\\.$/u.test(current)) {
+  while (/(?<!\.)\.$/u.test(current)) {
     const without = current.slice(0, -1).trimEnd();
     if (preservedForm(without)) return current;
     current = without;
