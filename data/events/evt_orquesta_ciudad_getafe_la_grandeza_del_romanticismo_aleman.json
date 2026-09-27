@@ -1,12 +1,14 @@
 {
   "schemaVersion": 1,
+  "status": "scheduled",
+  "organizerIds": [],
+  "seriesId": null,
+  "access": "paid",
+  "lastVerifiedAt": "2026-09-27",
   "id": "evt_orquesta_ciudad_getafe_la_grandeza_del_romanticismo_aleman",
   "slug": "la-grandeza-del-romanticismo-aleman",
   "title": "La Grandeza del Romanticismo Alemán",
-  "status": "scheduled",
   "venueId": "ven_teatro_federico_garcia_lorca_getafe",
-  "organizerIds": [],
-  "seriesId": null,
   "occurrences": [
     {
       "id": "occ_orquesta_ciudad_getafe_la_grandeza_del_romanticismo_aleman_01",
@@ -15,10 +17,19 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Miguel Romea",
+      "role": "conductor"
+    },
+    {
+      "name": "Aitor Ochoa",
+      "role": "soloist"
+    }
+  ],
   "composers": [
     {
-      "name": "C.M.Weber"
+      "name": "Carl Maria von Weber"
     },
     {
       "name": "Ferdinand David"
@@ -30,7 +41,7 @@
   "works": [
     {
       "title": "Obertura Oberon",
-      "composerName": "C.M.Weber"
+      "composerName": "Carl Maria von Weber"
     },
     {
       "title": "Concertino para trombón y orquesta",
@@ -48,7 +59,6 @@
     "symphonic"
   ],
   "kind": "established",
-  "access": "paid",
   "citations": [
     {
       "sourceId": "src_orquesta_ciudad_getafe",
@@ -57,6 +67,5 @@
       "externalId": "la-grandeza-del-romanticismo-aleman"
     }
   ],
-  "primarySourceId": "src_orquesta_ciudad_getafe",
-  "lastVerifiedAt": "2026-09-27"
+  "primarySourceId": "src_orquesta_ciudad_getafe"
 }

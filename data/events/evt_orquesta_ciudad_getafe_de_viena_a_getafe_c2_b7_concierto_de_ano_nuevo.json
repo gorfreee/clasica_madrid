@@ -1,12 +1,14 @@
 {
   "schemaVersion": 1,
+  "status": "scheduled",
+  "organizerIds": [],
+  "seriesId": null,
+  "access": "paid",
+  "lastVerifiedAt": "2026-09-27",
   "id": "evt_orquesta_ciudad_getafe_de_viena_a_getafe_c2_b7_concierto_de_ano_nuevo",
   "slug": "de-viena-a-getafe-concierto-de-ano-nuevo",
   "title": "De Viena a Getafe · Concierto de Año Nuevo",
-  "status": "scheduled",
   "venueId": "ven_teatro_federico_garcia_lorca_getafe",
-  "organizerIds": [],
-  "seriesId": null,
   "occurrences": [
     {
       "id": "occ_orquesta_ciudad_getafe_de_viena_a_getafe_c2_b7_concierto_de_ano_nuevo_01",
@@ -15,16 +17,28 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Carlos Díez Martín",
+      "role": "conductor"
+    }
+  ],
   "composers": [
     {
       "name": "Antonín Dvořák"
+    },
+    {
+      "name": "Jean Sibelius"
     }
   ],
   "works": [
     {
       "title": "Carnaval, obertura",
       "composerName": "Antonín Dvořák"
+    },
+    {
+      "title": "Karelia Suite",
+      "composerName": "Jean Sibelius"
     }
   ],
   "eras": [
@@ -34,7 +48,6 @@
     "symphonic"
   ],
   "kind": "established",
-  "access": "paid",
   "citations": [
     {
       "sourceId": "src_orquesta_ciudad_getafe",
@@ -43,6 +56,5 @@
       "externalId": "de-viena-a-getafe-%c2%b7-concierto-de-ano-nuevo"
     }
   ],
-  "primarySourceId": "src_orquesta_ciudad_getafe",
-  "lastVerifiedAt": "2026-09-27"
+  "primarySourceId": "src_orquesta_ciudad_getafe"
 }

@@ -1,12 +1,14 @@
 {
   "schemaVersion": 1,
+  "status": "scheduled",
+  "organizerIds": [],
+  "seriesId": null,
+  "access": "paid",
+  "lastVerifiedAt": "2026-09-27",
   "id": "evt_orquesta_ciudad_getafe_el_gran_concierto",
   "slug": "el-gran-concierto",
   "title": "El Gran Concierto",
-  "status": "scheduled",
   "venueId": "ven_teatro_federico_garcia_lorca_getafe",
-  "organizerIds": [],
-  "seriesId": null,
   "occurrences": [
     {
       "id": "occ_orquesta_ciudad_getafe_el_gran_concierto_01",
@@ -15,7 +17,12 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Carlos Díez Martín",
+      "role": "conductor"
+    }
+  ],
   "composers": [
     {
       "name": "Gustav Mahler"
@@ -34,7 +41,6 @@
     "symphonic"
   ],
   "kind": "established",
-  "access": "paid",
   "citations": [
     {
       "sourceId": "src_orquesta_ciudad_getafe",
@@ -43,6 +49,5 @@
       "externalId": "el-gran-concierto"
     }
   ],
-  "primarySourceId": "src_orquesta_ciudad_getafe",
-  "lastVerifiedAt": "2026-09-27"
+  "primarySourceId": "src_orquesta_ciudad_getafe"
 }

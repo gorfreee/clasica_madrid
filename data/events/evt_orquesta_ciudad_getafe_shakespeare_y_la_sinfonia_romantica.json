@@ -1,12 +1,14 @@
 {
   "schemaVersion": 1,
+  "status": "scheduled",
+  "organizerIds": [],
+  "seriesId": null,
+  "access": "paid",
+  "lastVerifiedAt": "2026-09-27",
   "id": "evt_orquesta_ciudad_getafe_shakespeare_y_la_sinfonia_romantica",
   "slug": "shakespeare-y-la-sinfonia-romantica",
   "title": "Shakespeare y la Sinfonía Romántica",
-  "status": "scheduled",
   "venueId": "ven_teatro_federico_garcia_lorca_getafe",
-  "organizerIds": [],
-  "seriesId": null,
   "occurrences": [
     {
       "id": "occ_orquesta_ciudad_getafe_shakespeare_y_la_sinfonia_romantica_01",
@@ -15,7 +17,12 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Carlos Díez Martín",
+      "role": "conductor"
+    }
+  ],
   "composers": [
     {
       "name": "Felix Mendelssohn"
@@ -41,7 +48,6 @@
     "symphonic"
   ],
   "kind": "established",
-  "access": "paid",
   "citations": [
     {
       "sourceId": "src_orquesta_ciudad_getafe",
@@ -50,6 +56,5 @@
       "externalId": "shakespeare-y-la-sinfonia-romantica"
     }
   ],
-  "primarySourceId": "src_orquesta_ciudad_getafe",
-  "lastVerifiedAt": "2026-09-27"
+  "primarySourceId": "src_orquesta_ciudad_getafe"
 }

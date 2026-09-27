@@ -1,12 +1,14 @@
 {
   "schemaVersion": 1,
+  "status": "scheduled",
+  "organizerIds": [],
+  "seriesId": null,
+  "access": "paid",
+  "lastVerifiedAt": "2026-09-27",
   "id": "evt_orquesta_ciudad_getafe_vivaldi_imprescindible",
   "slug": "vivaldi-imprescindible",
   "title": "Vivaldi Imprescindible",
-  "status": "scheduled",
   "venueId": "ven_espacio_mercado_getafe",
-  "organizerIds": [],
-  "seriesId": null,
   "occurrences": [
     {
       "id": "occ_orquesta_ciudad_getafe_vivaldi_imprescindible_01",
@@ -15,15 +17,46 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
-  "works": [],
-  "eras": [],
+  "performers": [
+    {
+      "name": "Strings Lab",
+      "role": "ensemble"
+    },
+    {
+      "name": "Sandro Peñalver"
+    },
+    {
+      "name": "Rubén Redondo"
+    },
+    {
+      "name": "Elena Muñoz-Quirós"
+    },
+    {
+      "name": "Peregrín Caldés"
+    },
+    {
+      "name": "Sergio Fuentes",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antonio Vivaldi"
+    }
+  ],
+  "works": [
+    {
+      "title": "Las cuatro estaciones",
+      "composerName": "Antonio Vivaldi"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
   "formats": [
     "chamber"
   ],
   "kind": "alternative",
-  "access": "paid",
   "citations": [
     {
       "sourceId": "src_orquesta_ciudad_getafe",
@@ -32,6 +65,5 @@
       "externalId": "vivaldi-imprescindible"
     }
   ],
-  "primarySourceId": "src_orquesta_ciudad_getafe",
-  "lastVerifiedAt": "2026-09-27"
+  "primarySourceId": "src_orquesta_ciudad_getafe"
 }
