@@ -17,6 +17,32 @@ const MADRID: { municipality: string; area: Area } = {
 
 export const KNOWN_VENUES: KnownVenue[] = [
   {
+    keys: ['auditorio joaquin rodrigo'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_auditorio_joaquin_rodrigo_las_rozas',
+      slug: 'auditorio-joaquin-rodrigo-las-rozas',
+      name: 'Auditorio Joaquín Rodrigo',
+      municipality: 'Las Rozas de Madrid',
+      area: 'nearby',
+      address: 'Avenida del Polideportivo, 18, Las Rozas de Madrid',
+      url: 'https://www.lasrozas.es/contacto/direcciones-y-telefonos/FichaAuditorio',
+    },
+  },
+  {
+    keys: ['c.c. perez de la riva', 'centro cultural perez de la riva'],
+    venue: {
+      schemaVersion: 1,
+      id: 'ven_centro_cultural_perez_de_la_riva',
+      slug: 'centro-cultural-perez-de-la-riva',
+      name: 'Centro Cultural Pérez de la Riva',
+      municipality: 'Las Rozas de Madrid',
+      area: 'nearby',
+      address: 'Calle Principado de Asturias, 28, Las Rozas de Madrid',
+      url: 'https://www.lasrozas.es/contacto/direcciones-y-telefonos/FichaCentroCulturalPerezdelaRiva',
+    },
+  },
+  {
     keys: ['teatro auditorio de san lorenzo de el escorial', 'teatro auditorio escorial'],
     venue: {
       schemaVersion: 1,
