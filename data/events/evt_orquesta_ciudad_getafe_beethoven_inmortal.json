@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "status": "scheduled",
+  "organizerIds": [],
+  "seriesId": null,
+  "access": "paid",
+  "lastVerifiedAt": "2026-09-27",
+  "id": "evt_orquesta_ciudad_getafe_beethoven_inmortal",
+  "slug": "beethoven-inmortal",
+  "title": "Beethoven Inmortal",
+  "venueId": "ven_teatro_federico_garcia_lorca_getafe",
+  "occurrences": [
+    {
+      "id": "occ_orquesta_ciudad_getafe_beethoven_inmortal_01",
+      "date": "2027-02-14",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Carlos Díez Martín",
+      "role": "conductor"
+    },
+    {
+      "name": "David Martínez",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    }
+  ],
+  "works": [
+    {
+      "title": "Obertura Las criaturas de Prometeo",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Concierto para violín en re mayor, Op. 61",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Sinfonía n.º 7 en la mayor, Op. 92",
+      "composerName": "Ludwig van Beethoven"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "citations": [
+    {
+      "sourceId": "src_orquesta_ciudad_getafe",
+      "url": "https://orquestaciudaddegetafe.com/js_events/beethoven-inmortal",
+      "checkedAt": "2026-09-27",
+      "externalId": "beethoven-inmortal"
+    }
+  ],
+  "primarySourceId": "src_orquesta_ciudad_getafe"
+}

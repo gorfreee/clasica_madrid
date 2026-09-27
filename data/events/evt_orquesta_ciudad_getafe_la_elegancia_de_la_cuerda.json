@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "status": "scheduled",
+  "organizerIds": [],
+  "seriesId": null,
+  "access": "paid",
+  "lastVerifiedAt": "2026-09-27",
+  "id": "evt_orquesta_ciudad_getafe_la_elegancia_de_la_cuerda",
+  "slug": "la-elegancia-de-la-cuerda",
+  "title": "La Elegancia de la Cuerda",
+  "venueId": "ven_teatro_federico_garcia_lorca_getafe",
+  "occurrences": [
+    {
+      "id": "occ_orquesta_ciudad_getafe_la_elegancia_de_la_cuerda_01",
+      "date": "2026-11-28",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Bauti Carmena Mateos",
+      "role": "conductor"
+    },
+    {
+      "name": "Jaime Enguídanos",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Ney Rosauro"
+    },
+    {
+      "name": "Benjamin Britten"
+    },
+    {
+      "name": "Antonín Dvořák"
+    }
+  ],
+  "works": [
+    {
+      "title": "Eine kleine Nachtmusik",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Concierto para marimba y orquesta",
+      "composerName": "Ney Rosauro"
+    },
+    {
+      "title": "Simple Symphony",
+      "composerName": "Benjamin Britten"
+    },
+    {
+      "title": "Serenata para cuerdas en mi mayor, Op. 22",
+      "composerName": "Antonín Dvořák"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "citations": [
+    {
+      "sourceId": "src_orquesta_ciudad_getafe",
+      "url": "https://orquestaciudaddegetafe.com/js_events/la-elegancia-de-la-cuerda",
+      "checkedAt": "2026-09-27",
+      "externalId": "la-elegancia-de-la-cuerda"
+    }
+  ],
+  "primarySourceId": "src_orquesta_ciudad_getafe"
+}

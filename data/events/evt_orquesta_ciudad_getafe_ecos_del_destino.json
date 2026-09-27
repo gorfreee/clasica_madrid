@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "status": "scheduled",
+  "organizerIds": [],
+  "seriesId": null,
+  "access": "paid",
+  "lastVerifiedAt": "2026-09-27",
+  "id": "evt_orquesta_ciudad_getafe_ecos_del_destino",
+  "slug": "ecos-del-destino",
+  "title": "Ecos del Destino",
+  "venueId": "ven_teatro_federico_garcia_lorca_getafe",
+  "occurrences": [
+    {
+      "id": "occ_orquesta_ciudad_getafe_ecos_del_destino_01",
+      "date": "2026-10-17",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Carlos Díez Martín",
+      "role": "conductor"
+    },
+    {
+      "name": "Francisco Fierro",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Serguéi Rajmáninov"
+    },
+    {
+      "name": "Piotr Ilich Chaikovski"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para piano n.º 2 en do menor, Op. 18",
+      "composerName": "Serguéi Rajmáninov"
+    },
+    {
+      "title": "Sinfonía n.º 5 en mi menor, Op. 64",
+      "composerName": "Piotr Ilich Chaikovski"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "citations": [
+    {
+      "sourceId": "src_orquesta_ciudad_getafe",
+      "url": "https://orquestaciudaddegetafe.com/js_events/ecos-del-destino",
+      "checkedAt": "2026-09-27",
+      "externalId": "ecos-del-destino"
+    }
+  ],
+  "primarySourceId": "src_orquesta_ciudad_getafe"
+}

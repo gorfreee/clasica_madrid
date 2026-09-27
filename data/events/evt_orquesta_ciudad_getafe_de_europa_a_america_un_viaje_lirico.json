@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "status": "scheduled",
+  "organizerIds": [],
+  "seriesId": null,
+  "access": "paid",
+  "lastVerifiedAt": "2026-09-27",
+  "id": "evt_orquesta_ciudad_getafe_de_europa_a_america_un_viaje_lirico",
+  "slug": "de-europa-a-america-un-viaje-lirico",
+  "title": "De Europa a América: un viaje lírico",
+  "venueId": "ven_espacio_mercado_getafe",
+  "occurrences": [
+    {
+      "id": "occ_orquesta_ciudad_getafe_de_europa_a_america_un_viaje_lirico_01",
+      "date": "2026-11-08",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Dúo Brisalia",
+      "role": "ensemble"
+    },
+    {
+      "name": "Sofía Gutierrez",
+      "role": "soloist"
+    },
+    {
+      "name": "María Argüeso Vega",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Leonard Bernstein"
+    },
+    {
+      "name": "Fernando Obradors"
+    },
+    {
+      "name": "Ernesto Lecuona"
+    },
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Giuseppe Verdi"
+    },
+    {
+      "name": "María Rodrigo"
+    },
+    {
+      "name": "Gonzalo Roig"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "recital",
+    "opera",
+    "zarzuela"
+  ],
+  "kind": "alternative",
+  "citations": [
+    {
+      "sourceId": "src_orquesta_ciudad_getafe",
+      "url": "https://orquestaciudaddegetafe.com/js_events/de-europa-a-america-un-viaje-lirico",
+      "checkedAt": "2026-09-27",
+      "externalId": "de-europa-a-america-un-viaje-lirico"
+    }
+  ],
+  "primarySourceId": "src_orquesta_ciudad_getafe"
+}

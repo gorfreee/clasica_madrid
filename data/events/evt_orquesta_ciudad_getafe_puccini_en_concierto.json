@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "status": "scheduled",
+  "organizerIds": [],
+  "seriesId": null,
+  "access": "paid",
+  "lastVerifiedAt": "2026-09-27",
+  "id": "evt_orquesta_ciudad_getafe_puccini_en_concierto",
+  "slug": "puccini-en-concierto",
+  "title": "Puccini en Concierto",
+  "venueId": "ven_teatro_federico_garcia_lorca_getafe",
+  "occurrences": [
+    {
+      "id": "occ_orquesta_ciudad_getafe_puccini_en_concierto_01",
+      "date": "2027-06-05",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coral Polifónica de Getafe",
+      "role": "choir"
+    },
+    {
+      "name": "Orquesta Sinfónica Ciudad de Getafe",
+      "role": "orchestra"
+    },
+    {
+      "name": "Celia Alcedo",
+      "role": "soloist"
+    },
+    {
+      "name": "Enrique Ferrer",
+      "role": "soloist"
+    },
+    {
+      "name": "Antonio Torres",
+      "role": "soloist"
+    },
+    {
+      "name": "Carlos Díez Martín",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Giacomo Puccini"
+    }
+  ],
+  "works": [
+    {
+      "title": "Le Villi",
+      "composerName": "Giacomo Puccini"
+    },
+    {
+      "title": "La bohème",
+      "composerName": "Giacomo Puccini"
+    },
+    {
+      "title": "Tosca",
+      "composerName": "Giacomo Puccini"
+    },
+    {
+      "title": "Madama Butterfly",
+      "composerName": "Giacomo Puccini"
+    },
+    {
+      "title": "Turandot",
+      "composerName": "Giacomo Puccini"
+    },
+    {
+      "title": "Gianni Schicchi",
+      "composerName": "Giacomo Puccini"
+    },
+    {
+      "title": "Suor Angelica",
+      "composerName": "Giacomo Puccini"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic",
+    "choral",
+    "opera"
+  ],
+  "kind": "established",
+  "citations": [
+    {
+      "sourceId": "src_orquesta_ciudad_getafe",
+      "url": "https://orquestaciudaddegetafe.com/js_events/puccini-en-concierto",
+      "checkedAt": "2026-09-27",
+      "externalId": "puccini-en-concierto"
+    }
+  ],
+  "primarySourceId": "src_orquesta_ciudad_getafe"
+}
