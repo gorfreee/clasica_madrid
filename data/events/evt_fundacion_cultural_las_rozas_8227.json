@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_cultural_las_rozas_8227",
+  "slug": "casta-diva",
+  "title": "Casta Diva",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_joaquin_rodrigo_las_rozas",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_cultural_las_rozas_8227_01",
+      "date": "2026-11-28",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital",
+    "opera"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_cultural_las_rozas",
+      "url": "https://fundacionculturalasrozas.org/agenda/casta-diva",
+      "checkedAt": "2026-09-27",
+      "externalId": "8227"
+    }
+  ],
+  "primarySourceId": "src_fundacion_cultural_las_rozas",
+  "lastVerifiedAt": "2026-09-27"
+}

@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_cultural_las_rozas_8419",
+  "slug": "concierto-apertura-cipce",
+  "title": "Concierto apertura CIPCE",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_joaquin_rodrigo_las_rozas",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_cultural_las_rozas_8419_01",
+      "date": "2026-10-31",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_cultural_las_rozas",
+      "url": "https://fundacionculturalasrozas.org/agenda/concierto-apertura-del-26o-certamen-internacional-de-piano-compositores-de-espana-cipce",
+      "checkedAt": "2026-09-27",
+      "externalId": "8419"
+    }
+  ],
+  "primarySourceId": "src_fundacion_cultural_las_rozas",
+  "lastVerifiedAt": "2026-09-27"
+}
