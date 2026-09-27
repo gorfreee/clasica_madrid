@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_cultural_las_rozas_8250",
+  "slug": "gala-de-navidad",
+  "title": "Gala de Navidad.",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_joaquin_rodrigo_las_rozas",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_cultural_las_rozas_8250_01",
+      "date": "2026-12-19",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "symphonic",
+    "opera"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_cultural_las_rozas",
+      "url": "https://fundacionculturalasrozas.org/agenda/gala-de-navidad-montserrat-marti-caballe-bianca-tognocchi",
+      "checkedAt": "2026-09-27",
+      "externalId": "8250"
+    }
+  ],
+  "primarySourceId": "src_fundacion_cultural_las_rozas",
+  "lastVerifiedAt": "2026-09-27"
+}
