@@ -28,6 +28,7 @@ import { residenciaEstudiantesAdapter } from './sources/residencia-estudiantes.t
 import { condeduqueAdapter } from './sources/condeduque.ts';
 import { aytoSanLorenzoAdapter } from './sources/ayto-san-lorenzo.ts';
 import { teatroAuditorioEscorialAdapter } from './sources/teatro-auditorio-escorial.ts';
+import { culturalcalaAdapter } from './sources/culturalcala.ts';
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
@@ -59,6 +60,7 @@ const ADAPTERS: Record<string, SourceAdapter> = {
   [condeduqueAdapter.id]: condeduqueAdapter,
   [aytoSanLorenzoAdapter.id]: aytoSanLorenzoAdapter,
   [teatroAuditorioEscorialAdapter.id]: teatroAuditorioEscorialAdapter,
+  [culturalcalaAdapter.id]: culturalcalaAdapter,
 };
 
 const srcAuditorio: Source = {
@@ -502,6 +504,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Teatro Auditorio de San Lorenzo de El Escorial',
       kind: 'official',
       url: 'https://www.teatroauditorioescorial.es/',
+    },
+  },
+  {
+    id: 'culturalcala',
+    name: 'CulturAlcalá',
+    urls: ['https://culturalcala.es/musica-y-danza/'],
+    adapterId: culturalcalaAdapter.id,
+    catalogSourceId: 'src_culturalcala',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_culturalcala',
+      slug: 'culturalcala',
+      name: 'CulturAlcalá',
+      kind: 'official',
+      url: 'https://culturalcala.es/',
     },
   },
 ];
