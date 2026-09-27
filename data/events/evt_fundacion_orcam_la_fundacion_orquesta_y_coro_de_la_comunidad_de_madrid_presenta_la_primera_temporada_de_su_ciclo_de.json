@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_orcam_la_fundacion_orquesta_y_coro_de_la_comunidad_de_madrid_presenta_la_primera_temporada_de_su_ciclo_de",
+  "slug": "cierre-del-ciclo-de-conciertos-orcam-en-san-lorenzo-de-el-escorial",
+  "title": "Cierre del Ciclo de Conciertos ORCAM en San Lorenzo de El Escorial",
+  "status": "scheduled",
+  "venueId": "ven_teatro_auditorio_escorial",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_orcam_la_fundacion_orquesta_y_coro_de_la_comunidad_de_madrid_presenta_la_primera_temporada_de_su_ciclo_de",
+      "date": "2026-12-22",
+      "time": null,
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta de la Comunidad de Madrid",
+      "role": "orchestra"
+    },
+    {
+      "name": "Iván López Reynoso",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_orcam",
+      "url": "https://fundacionorcam.org/la-fundacion-orquesta-y-coro-de-la-comunidad-de-madrid-presenta-la-primera-temporada-de-su-ciclo-de-conciertos-en-el-teatro-auditorio-san-lorenzo-de-el-escorial/",
+      "checkedAt": "2026-09-27"
+    }
+  ],
+  "primarySourceId": "src_fundacion_orcam",
+  "lastVerifiedAt": "2026-09-27"
+}

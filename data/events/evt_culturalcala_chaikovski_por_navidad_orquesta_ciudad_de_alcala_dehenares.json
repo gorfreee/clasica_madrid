@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_culturalcala_chaikovski_por_navidad_orquesta_ciudad_de_alcala_dehenares",
+  "slug": "chaikovski-por-navidad",
+  "title": "Chaikovski por Navidad",
+  "status": "scheduled",
+  "venueId": "ven_teatro_salon_cervantes_alcala",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_culturalcala_chaikovski_por_navidad_orquesta_ciudad_de_alcala_dehenares_01",
+      "date": "2026-12-13",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Ciudad de Alcalá",
+      "role": "orchestra"
+    },
+    {
+      "name": "Vicente Ariño"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Piotr Ilich Chaikovski"
+    }
+  ],
+  "works": [
+    {
+      "title": "El cascanueces",
+      "composerName": "Piotr Ilich Chaikovski"
+    },
+    {
+      "title": "La bella durmiente",
+      "composerName": "Piotr Ilich Chaikovski"
+    },
+    {
+      "title": "El lago de los cisnes",
+      "composerName": "Piotr Ilich Chaikovski"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_culturalcala",
+      "url": "https://www.giglon.com/evento/chaikovski-por-navidad---orquesta-ciudad-de-alcala-dehenares",
+      "checkedAt": "2026-09-27"
+    }
+  ],
+  "primarySourceId": "src_culturalcala",
+  "lastVerifiedAt": "2026-09-27"
+}

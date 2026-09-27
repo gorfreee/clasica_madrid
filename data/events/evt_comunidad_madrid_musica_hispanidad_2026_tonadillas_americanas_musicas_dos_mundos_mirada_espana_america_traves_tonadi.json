@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_comunidad_madrid_musica_hispanidad_2026_tonadillas_americanas_musicas_dos_mundos_mirada_espana_america_traves_tonadi",
+  "slug": "tonadillas-americanas-musicas-entre-dos-mundos",
+  "title": "Tonadillas americanas: músicas entre dos mundos",
+  "status": "scheduled",
+  "venueId": "ven_real_coliseo_carlos_iii",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_comunidad_madrid_musica_hispanidad_2026_tonadillas_americanas_musicas_dos_mundos_mirada_espana_america_traves_tonadi",
+      "date": "2026-10-10",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Camerata Antonio Soler",
+      "role": "ensemble"
+    },
+    {
+      "name": "Gustavo Sánchez"
+    },
+    {
+      "name": "Laura León"
+    },
+    {
+      "name": "Catherin Meza"
+    },
+    {
+      "name": "Carlos Silva"
+    },
+    {
+      "name": "Roi Pérez"
+    },
+    {
+      "name": "Manuel Muñoz"
+    },
+    {
+      "name": "Kevin Merchán"
+    },
+    {
+      "name": "Ángela Lobato"
+    },
+    {
+      "name": "Ramón Mascarós"
+    },
+    {
+      "name": "José Manuel Cuadrado"
+    },
+    {
+      "name": "Guillermo Beltrán"
+    },
+    {
+      "name": "Víctor Cosío"
+    },
+    {
+      "name": "Vicent Serra"
+    },
+    {
+      "name": "Fernando Serrano"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Blas de Laserna"
+    },
+    {
+      "name": "Luis Misón"
+    },
+    {
+      "name": "David Pérez"
+    },
+    {
+      "name": "Antonio Guerrero"
+    }
+  ],
+  "works": [
+    {
+      "title": "Aplaudamos del sol y del inca sus glorias (La conquista del Perú)",
+      "composerName": "Blas de Laserna"
+    },
+    {
+      "title": "El sacrificio de indios",
+      "composerName": "Luis Misón"
+    },
+    {
+      "title": "Sinfonía en si bemol: I. Allegro",
+      "composerName": "Luis Misón"
+    },
+    {
+      "title": "Hernán Cortés sobre Méjico"
+    },
+    {
+      "title": "Sinfonía La tempestad del mar",
+      "composerName": "David Pérez"
+    },
+    {
+      "title": "La Habana"
+    },
+    {
+      "title": "Tonada del Cachumbo y Tonada del Macaquiño",
+      "composerName": "Antonio Guerrero"
+    },
+    {
+      "title": "Los cómicos indianos",
+      "composerName": "Blas de Laserna"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "classical"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_comunidad_madrid",
+      "url": "https://www.comunidad.madrid/actividades/2026/musica-hispanidad-2026-tonadillas-americanas-musicas-dos-mundos-mirada-espana-america-traves-tonadilla-escenica-siglo-xviii",
+      "checkedAt": "2026-09-27"
+    }
+  ],
+  "primarySourceId": "src_comunidad_madrid",
+  "lastVerifiedAt": "2026-09-27"
+}

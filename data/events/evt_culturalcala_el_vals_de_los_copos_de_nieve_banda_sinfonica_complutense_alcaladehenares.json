@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_culturalcala_el_vals_de_los_copos_de_nieve_banda_sinfonica_complutense_alcaladehenares",
+  "slug": "el-vals-de-los-copos-de-nieve",
+  "title": "El vals de los copos de nieve",
+  "status": "scheduled",
+  "venueId": "ven_teatro_salon_cervantes_alcala",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_culturalcala_el_vals_de_los_copos_de_nieve_banda_sinfonica_complutense_alcaladehenares_01",
+      "date": "2026-12-20",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Banda Sinfónica Complutense"
+    },
+    {
+      "name": "Marcos Gómez Bachiller"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Rossano Galante"
+    },
+    {
+      "name": "Dmitri Shostakóvich"
+    },
+    {
+      "name": "Ted Huggens"
+    }
+  ],
+  "works": [
+    {
+      "title": "Afterlife",
+      "composerName": "Rossano Galante"
+    },
+    {
+      "title": "Jazz Suite n.º 2",
+      "composerName": "Dmitri Shostakóvich"
+    },
+    {
+      "title": "Bolero de Noël"
+    },
+    {
+      "title": "Christmas Prelude"
+    },
+    {
+      "title": "The Happy Cyclist",
+      "composerName": "Ted Huggens"
+    },
+    {
+      "title": "The Best of Village People"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_culturalcala",
+      "url": "https://www.giglon.com/evento/el-vals-de-los-copos-de-nieve---banda-sinfonica-complutense-alcaladehenares",
+      "checkedAt": "2026-09-27"
+    }
+  ],
+  "primarySourceId": "src_culturalcala",
+  "lastVerifiedAt": "2026-09-27"
+}
