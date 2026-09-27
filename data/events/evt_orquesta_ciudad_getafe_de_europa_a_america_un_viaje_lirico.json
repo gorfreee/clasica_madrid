@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_orquesta_ciudad_getafe_de_europa_a_america_un_viaje_lirico",
+  "slug": "de-europa-a-america-un-viaje-lirico",
+  "title": "De Europa a América: un viaje lírico",
+  "status": "scheduled",
+  "venueId": "ven_espacio_mercado_getafe",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_orquesta_ciudad_getafe_de_europa_a_america_un_viaje_lirico_01",
+      "date": "2026-11-08",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital",
+    "opera",
+    "zarzuela"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_orquesta_ciudad_getafe",
+      "url": "https://orquestaciudaddegetafe.com/js_events/de-europa-a-america-un-viaje-lirico",
+      "checkedAt": "2026-09-27",
+      "externalId": "de-europa-a-america-un-viaje-lirico"
+    }
+  ],
+  "primarySourceId": "src_orquesta_ciudad_getafe",
+  "lastVerifiedAt": "2026-09-27"
+}

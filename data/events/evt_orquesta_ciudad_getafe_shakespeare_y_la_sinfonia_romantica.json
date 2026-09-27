@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_orquesta_ciudad_getafe_shakespeare_y_la_sinfonia_romantica",
+  "slug": "shakespeare-y-la-sinfonia-romantica",
+  "title": "Shakespeare y la Sinfonía Romántica",
+  "status": "scheduled",
+  "venueId": "ven_teatro_federico_garcia_lorca_getafe",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_orquesta_ciudad_getafe_shakespeare_y_la_sinfonia_romantica_01",
+      "date": "2027-04-10",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Felix Mendelssohn"
+    },
+    {
+      "name": "Robert Schumann"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sueño de una noche de verano",
+      "composerName": "Felix Mendelssohn"
+    },
+    {
+      "title": "Sinfonía n.º 2 en do mayor, Op. 61",
+      "composerName": "Robert Schumann"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_orquesta_ciudad_getafe",
+      "url": "https://orquestaciudaddegetafe.com/js_events/shakespeare-y-la-sinfonia-romantica",
+      "checkedAt": "2026-09-27",
+      "externalId": "shakespeare-y-la-sinfonia-romantica"
+    }
+  ],
+  "primarySourceId": "src_orquesta_ciudad_getafe",
+  "lastVerifiedAt": "2026-09-27"
+}

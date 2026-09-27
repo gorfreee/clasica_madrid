@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_orquesta_ciudad_getafe_de_viena_a_getafe_c2_b7_concierto_de_ano_nuevo",
+  "slug": "de-viena-a-getafe-concierto-de-ano-nuevo",
+  "title": "De Viena a Getafe · Concierto de Año Nuevo",
+  "status": "scheduled",
+  "venueId": "ven_teatro_federico_garcia_lorca_getafe",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_orquesta_ciudad_getafe_de_viena_a_getafe_c2_b7_concierto_de_ano_nuevo_01",
+      "date": "2027-01-02",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Antonín Dvořák"
+    }
+  ],
+  "works": [
+    {
+      "title": "Carnaval, obertura",
+      "composerName": "Antonín Dvořák"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_orquesta_ciudad_getafe",
+      "url": "https://orquestaciudaddegetafe.com/js_events/de-viena-a-getafe-%c2%b7-concierto-de-ano-nuevo",
+      "checkedAt": "2026-09-27",
+      "externalId": "de-viena-a-getafe-%c2%b7-concierto-de-ano-nuevo"
+    }
+  ],
+  "primarySourceId": "src_orquesta_ciudad_getafe",
+  "lastVerifiedAt": "2026-09-27"
+}

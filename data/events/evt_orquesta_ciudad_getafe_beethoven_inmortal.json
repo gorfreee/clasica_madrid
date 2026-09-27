@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_orquesta_ciudad_getafe_beethoven_inmortal",
+  "slug": "beethoven-inmortal",
+  "title": "Beethoven Inmortal",
+  "status": "scheduled",
+  "venueId": "ven_teatro_federico_garcia_lorca_getafe",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_orquesta_ciudad_getafe_beethoven_inmortal_01",
+      "date": "2027-02-14",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    }
+  ],
+  "works": [
+    {
+      "title": "Obertura Las criaturas de Prometeo",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Concierto para violín en re mayor, Op. 61",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Sinfonía n.º 7 en la mayor, Op. 92",
+      "composerName": "Ludwig van Beethoven"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_orquesta_ciudad_getafe",
+      "url": "https://orquestaciudaddegetafe.com/js_events/beethoven-inmortal",
+      "checkedAt": "2026-09-27",
+      "externalId": "beethoven-inmortal"
+    }
+  ],
+  "primarySourceId": "src_orquesta_ciudad_getafe",
+  "lastVerifiedAt": "2026-09-27"
+}

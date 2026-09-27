@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_orquesta_ciudad_getafe_el_gran_concierto",
+  "slug": "el-gran-concierto",
+  "title": "El Gran Concierto",
+  "status": "scheduled",
+  "venueId": "ven_teatro_federico_garcia_lorca_getafe",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_orquesta_ciudad_getafe_el_gran_concierto_01",
+      "date": "2027-05-09",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Gustav Mahler"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sinfonía n.º 5 en do sostenido menor",
+      "composerName": "Gustav Mahler"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_orquesta_ciudad_getafe",
+      "url": "https://orquestaciudaddegetafe.com/js_events/el-gran-concierto",
+      "checkedAt": "2026-09-27",
+      "externalId": "el-gran-concierto"
+    }
+  ],
+  "primarySourceId": "src_orquesta_ciudad_getafe",
+  "lastVerifiedAt": "2026-09-27"
+}
