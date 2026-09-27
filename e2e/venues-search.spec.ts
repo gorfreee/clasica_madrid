@@ -27,9 +27,15 @@ test.describe('búsqueda de lugares', () => {
     await expect(page.getByRole('button', { name: 'Limpiar búsqueda' })).toBeVisible();
 
     await search.fill('getafe');
-    await expect(visibleVenues(page)).toHaveCount(1);
-    await expect(visibleVenues(page)).toContainText('Getafe');
-    await expect(page.locator('[data-venue-count]')).toHaveText('1 lugar');
+    const afterMunicipality = await visibleVenues(page).count();
+    expect(afterMunicipality).toBeGreaterThan(0);
+    expect(afterMunicipality).toBeLessThan(initialCount);
+    const municipalities = await visibleVenues(page).locator('.venue-list__municipality').allTextContents();
+    expect(municipalities).toHaveLength(afterMunicipality);
+    expect(municipalities.every((municipality) => municipality === 'Getafe')).toBe(true);
+    await expect(page.locator('[data-venue-count]')).toHaveText(
+      afterMunicipality === 1 ? '1 lugar' : `${afterMunicipality} lugares`,
+    );
     await expect(page.locator('[data-venue-no-results]')).toBeHidden();
 
     await search.fill('basilica');

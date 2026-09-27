@@ -29,6 +29,7 @@ import { condeduqueAdapter } from './sources/condeduque.ts';
 import { aytoSanLorenzoAdapter } from './sources/ayto-san-lorenzo.ts';
 import { teatroAuditorioEscorialAdapter } from './sources/teatro-auditorio-escorial.ts';
 import { culturalcalaAdapter } from './sources/culturalcala.ts';
+import { orquestaCiudadGetafeAdapter } from './sources/orquesta-ciudad-getafe.ts';
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
@@ -61,6 +62,7 @@ const ADAPTERS: Record<string, SourceAdapter> = {
   [aytoSanLorenzoAdapter.id]: aytoSanLorenzoAdapter,
   [teatroAuditorioEscorialAdapter.id]: teatroAuditorioEscorialAdapter,
   [culturalcalaAdapter.id]: culturalcalaAdapter,
+  [orquestaCiudadGetafeAdapter.id]: orquestaCiudadGetafeAdapter,
 };
 
 const srcAuditorio: Source = {
@@ -519,6 +521,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'CulturAlcalá',
       kind: 'official',
       url: 'https://culturalcala.es/',
+    },
+  },
+  {
+    id: 'orquesta-ciudad-getafe',
+    name: 'Orquesta Sinfónica Ciudad de Getafe',
+    urls: ['https://orquestaciudaddegetafe.com/wp-sitemap.xml'],
+    adapterId: orquestaCiudadGetafeAdapter.id,
+    catalogSourceId: 'src_orquesta_ciudad_getafe',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_orquesta_ciudad_getafe',
+      slug: 'orquesta-sinfonica-ciudad-de-getafe',
+      name: 'Orquesta Sinfónica Ciudad de Getafe',
+      kind: 'official',
+      url: 'https://orquestaciudaddegetafe.com/',
     },
   },
 ];
