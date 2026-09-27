@@ -7,3 +7,13 @@ con fecha, hora, lugar, acceso y descripción; se eliminó la navegación y el f
 - https://orquestaciudaddegetafe.com/wp-sitemap-posts-js_events-1.xml
 - https://orquestaciudaddegetafe.com/js_events/ecos-del-destino/
 - https://orquestaciudaddegetafe.com/js_events/de-europa-a-america-un-viaje-lirico/
+- https://orquestaciudaddegetafe.com/js_events/puccini-en-concierto/
+- https://orquestaciudaddegetafe.com/js_events/vivaldi-imprescindible/
+- https://orquestaciudaddegetafe.com/js_events/de-viena-a-getafe-%c2%b7-concierto-de-ano-nuevo/
+- https://orquestaciudaddegetafe.com/js_events/beethoven-inmortal/
+- https://orquestaciudaddegetafe.com/js_events/la-elegancia-de-la-cuerda/
+- https://orquestaciudaddegetafe.com/js_events/la-grandeza-del-romanticismo-aleman/
+- https://orquestaciudaddegetafe.com/js_events/shakespeare-y-la-sinfonia-romantica/
+- https://orquestaciudaddegetafe.com/js_events/el-gran-concierto/
+- https://orquestaciudaddegetafe.com/js_events/clasicos-con-c-de-cuba/
+- https://orquestaciudaddegetafe.com/js_events/homenaje-a-los-grandes/

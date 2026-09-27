@@ -109,6 +109,18 @@ describe('kind — circuito del venue, no calidad', () => {
     expect(kindOf('Real Coliseo Carlos III').value).toBe('established');
   });
 
+  it('el Corral de Comedias de Alcalá es established por su id, no por la palabra corral', () => {
+    const result = resolveKind(facts({ title: 'Concierto', venueText: 'Corral de Comedias' }), {
+      id: 'ven_corral_comedias_alcala',
+      name: 'Corral de Comedias',
+    });
+    expect(result.value).toBe('established');
+    expect(result.method).toBe('knowledge');
+    expect(result.ruleId).toBe('established-circuit');
+    expect(kindOf('Corral de Comedias').value).toBe('alternative');
+    expect(kindOf('Centro Cultural').value).toBe('alternative');
+  });
+
   it('Teatro Auditorio de San Lorenzo de El Escorial es established por nombre y por id', () => {
     expect(kindOf('Teatro Auditorio de San Lorenzo de El Escorial').value).toBe('established');
     const result = resolveKind(facts({ title: 'Concierto' }), {

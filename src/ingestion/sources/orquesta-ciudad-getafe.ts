@@ -2,7 +2,18 @@ import { isRealIsoDate } from '../../lib/util/iso-date.ts';
 import { isDateInWindow, parseObservedTime } from '../dates.ts';
 import { explicitAccessText } from '../detail/access-evidence.ts';
 import { collapseWhitespace, flattenHtmlBlocks, stripTags } from '../html.ts';
-import { composersFromWorks, emptyObservedLists, normalizeWorkList } from '../observed.ts';
+import { matchComposer, matchComposerPrefix } from '../knowledge/composers.ts';
+import { looksLikeWorkLine } from '../observed-cleanup.ts';
+import {
+  composersFromWorks,
+  emptyObservedLists,
+  normalizeComposerList,
+  normalizePersonList,
+  normalizeWorkList,
+  type ObservedComposer,
+  type ObservedPerson,
+  type ObservedWork,
+} from '../observed.ts';
 import type { AdapterContext, RawEvent, SourceAdapter } from '../types.ts';
 
 const ID = 'orquesta-ciudad-getafe';
@@ -109,12 +120,7 @@ export function parseGetafeDetail(body: string, url: string, ctx: AdapterContext
   const accessText = explicitAccessText(cost && collapseWhitespace(cost));
   const descriptionHtml = /<div class="swp_event_content"[^>]*>([\s\S]*?)<\/div>/i.exec(eventBlock)?.[1];
   const description = descriptionHtml && flattenHtmlBlocks(descriptionHtml).slice(0, 4000);
-  const programHtml = descriptionHtml && /<h3\b[^>]*>\s*(?:<[^>]+>)*\s*Programa\s*(?:<\/[^>]+>)*\s*<\/h3>([\s\S]*?)(?:<hr\b|<h3\b|$)/i.exec(descriptionHtml)?.[1];
-  const programText = programHtml && flattenHtmlBlocks(programHtml).slice(0, 2500);
-  const works = normalizeWorkList((programText ?? '').split('\n').flatMap((line) => {
-    const match = /^(.{3,150}?)\s+[—–]\s+([\p{L} .'-]{5,80})$/u.exec(line.trim());
-    return match ? [{ title: match[1]!.trim(), composerName: match[2]!.trim() }] : [];
-  }));
+  const musical = musicalFacts(descriptionHtml);
   const subtitle = /<h2\b[^>]*title_full_color[^\"]*"[^>]*>([\s\S]*?)<\/h2>/i.exec(body)?.[1];
   const seriesText = stripTags(subtitle ?? '');
   return {
@@ -126,12 +132,234 @@ export function parseGetafeDetail(body: string, url: string, ctx: AdapterContext
       title, venueText,
       ...(seriesText ? { seriesText } : {}),
       ...(description ? { description } : {}),
-      ...(programText ? { programText } : {}),
+      ...(musical.programText ? { programText: musical.programText } : {}),
       ...(accessText ? { accessText } : {}),
       occurrences: [{ raw: `${printed}${time ? ` ${time}` : ''}`, date, ...(time ? { time } : {}) }],
       ...emptyObservedLists(),
-      works,
-      composers: composersFromWorks(works),
+      performers: musical.performers,
+      works: musical.works,
+      composers: musical.composers,
     },
   };
+}
+
+const PROGRAM_HEADING = /<h3\b[^>]*>\s*(?:<[^>]+>)*\s*Programa\s*(?:<\/[^>]+>)*\s*<\/h3>([\s\S]*?)(?:<hr\b|<h3\b|$)/i;
+const DASH_WORK = /^(.{3,150}?)\s+[—–]\s+([\p{L} .'-]{5,80})$/u;
+const CREDIT_ROLE =
+  'director(?:a)?(?:\\s+titular|\\s+invitad[oa])?|soprano|mezzosoprano|contralto|tenor|bar[ií]tono|bajo|piano|pianista|viol[ií]n(?:\\s+(?:[IV]+|solista))?|viola|violonchelo|chelo|marimba|tromb[oó]n|flauta(?:\\s+travesera)?|clarinete(?:\\s+bajo)?';
+const CREDIT_LINE = new RegExp(
+  `^(\\p{Lu}[\\p{L}'’.-]*(?:\\s+\\p{Lu}[\\p{L}'’.-]*){0,5})\\s*,\\s*(${CREDIT_ROLE})$`,
+  'iu',
+);
+const WORK_WORD =
+  /\b(?:concierto|sinfon[ií]a|obertura|suite|selecci[oó]n|fragmentos|vals(?:es)?|polkas?)\b/i;
+
+function musicalFacts(descriptionHtml: string | undefined): {
+  programText?: string;
+  performers: ObservedPerson[];
+  works: ObservedWork[];
+  composers: ObservedComposer[];
+} {
+  if (!descriptionHtml) return { performers: [], works: [], composers: [] };
+  const programHtml = PROGRAM_HEADING.exec(descriptionHtml)?.[1];
+  const flat = flattenHtmlBlocks(descriptionHtml);
+  const programFlat = programHtml ? flattenHtmlBlocks(programHtml) : '';
+  const programText = (programHtml ? programFlat : flat).slice(0, 2500);
+  const programLines = programFlat ? programFlat.split('\n') : [];
+  const allLines = flat.split('\n');
+  const performers: ObservedPerson[] = [];
+  const works: ObservedWork[] = [];
+  const proseComposers: ObservedComposer[] = [];
+
+  for (const line of programLines) {
+    const dash = DASH_WORK.exec(line.trim());
+    if (dash) {
+      works.push({ title: dash[1]!.trim(), composerName: dash[2]!.trim() });
+      continue;
+    }
+    const fragments = operaFragments(line);
+    if (fragments) {
+      works.push(...fragments);
+      continue;
+    }
+    const ensemble = programmeEnsemble(line);
+    if (ensemble) {
+      performers.push(ensemble);
+      continue;
+    }
+    const trailing = trailingComposerWork(line);
+    if (trailing) works.push(trailing);
+  }
+
+  for (const line of allLines) {
+    const credit = creditFromLine(line);
+    if (credit) performers.push(credit);
+  }
+
+  if (!programHtml) {
+    for (let index = 0; index < allLines.length; index += 1) {
+      const line = allLines[index]!;
+      const clause = formationClause(line);
+      if (clause) {
+        performers.push(...parentheticalCast(clause), ...labelledCast(clause));
+        const ensemble = ensembleHeading(allLines, index);
+        if (ensemble) performers.push(ensemble);
+      } else {
+        const named = namedEnsembleHeading(allLines, index);
+        if (named) performers.push(named);
+      }
+      proseComposers.push(...composersFromObrasDe(line));
+      works.push(...titleDeComposer(line));
+    }
+  }
+
+  const lyricComposer = operaticComposer(flat);
+  if (lyricComposer) {
+    for (const work of works) {
+      if (!work.composerName && FRAGMENT_TITLES.has(foldKey(work.title))) work.composerName = lyricComposer;
+    }
+  }
+
+  const normalizedWorks = normalizeWorkList(works);
+  return {
+    ...(programText ? { programText } : {}),
+    performers: normalizePersonList(performers),
+    works: normalizedWorks,
+    composers: normalizeComposerList([...composersFromWorks(normalizedWorks), ...proseComposers]),
+  };
+}
+
+const FRAGMENT_TITLES = new Set([
+  'le villi', 'la boheme', 'tosca', 'madama butterfly', 'turandot', 'gianni schicchi', 'suor angelica',
+]);
+
+function operaFragments(line: string): ObservedWork[] | undefined {
+  const match = /^Selecci[oó]n de fragmentos de [oó]peras como (.+)$/i.exec(line.trim());
+  if (!match) return undefined;
+  return match[1]!.split(/\s*,\s*/).flatMap((part) => {
+    const title = canonicalizeOperaTitle(part.trim());
+    return title ? [{ title }] : [];
+  });
+}
+
+function canonicalizeOperaTitle(title: string): string {
+  if (/^madame butterfly$/i.test(title)) return 'Madama Butterfly';
+  return title;
+}
+
+function programmeEnsemble(line: string): ObservedPerson | undefined {
+  const trimmed = line.trim();
+  if (trimmed.length > 80 || WORK_WORD.test(trimmed)) return undefined;
+  if (/^coral\b/i.test(trimmed)) return { name: trimmed, roleText: 'coro' };
+  if (/^orquesta\b/i.test(trimmed)) return { name: trimmed, roleText: 'orquesta' };
+  return undefined;
+}
+
+function trailingComposerWork(line: string): ObservedWork | undefined {
+  const trimmed = line.trim();
+  if (!trimmed || /[—–,]/.test(trimmed) || /\.\s/.test(trimmed) || trimmed.split(/\s+/).length > 8) return undefined;
+  const tokens = trimmed.split(/\s+/);
+  for (let count = Math.min(3, tokens.length - 1); count >= 1; count -= 1) {
+    const composerName = tokens.slice(-count).join(' ');
+    if (!matchComposer(composerName)) continue;
+    const title = tokens.slice(0, -count).join(' ');
+    if (!title || !looksLikeWorkLine(title)) continue;
+    return { title, composerName };
+  }
+  return undefined;
+}
+
+function creditFromLine(line: string): ObservedPerson | undefined {
+  const cleaned = line.trim().replace(/\s*\([^)]*\)\s*$/u, '').replace(/[.\s]+$/u, '');
+  const match = CREDIT_LINE.exec(cleaned);
+  if (!match) return undefined;
+  const name = match[1]!.trim();
+  if (WORK_WORD.test(name) || /\d/.test(name)) return undefined;
+  return { name, roleText: match[2]!.trim() };
+}
+
+function formationClause(line: string): string | undefined {
+  const start = line.search(/formado por\b/i);
+  if (start < 0) return undefined;
+  const rest = line.slice(start);
+  const stop = /\)\s+(?!(?:y|e|o|u)\b)(?=[a-záéíóúñ])|\.\s/iu.exec(rest);
+  return stop ? rest.slice(0, stop.index + 1) : rest;
+}
+
+function parentheticalCast(clause: string): ObservedPerson[] {
+  const people: ObservedPerson[] = [];
+  for (const match of clause.matchAll(/(\p{Lu}[\p{L}'’.-]*(?:\s+\p{Lu}[\p{L}'’.-]*){0,4})\s*\(([^)]{2,40})\)/gu)) {
+    const name = match[1]!.replace(/^(?:y|e)\s+/i, '').trim();
+    const roleText = match[2]!.trim();
+    if (name && !WORK_WORD.test(name)) people.push({ name, roleText });
+  }
+  return people;
+}
+
+function labelledCast(clause: string): ObservedPerson[] {
+  const people: ObservedPerson[] = [];
+  const pattern = /(?:la|el)\s+(soprano|tenor|bar[ií]tono|pianista|piano)\s+(\p{Lu}[\p{L}'’.-]*(?:\s+(?!y\b|e\b)\p{Lu}[\p{L}'’.-]*){0,3})/giu;
+  for (const match of clause.matchAll(pattern)) {
+    people.push({ name: match[2]!.trim(), roleText: match[1]!.trim() });
+  }
+  return people;
+}
+
+function ensembleHeading(lines: string[], index: number): ObservedPerson | undefined {
+  const previous = previousLine(lines, index);
+  if (!previous || previous.length > 40 || /^espacio mercado$/i.test(previous)) return undefined;
+  if (!/^(?:d[uú]o|tr[ií]o|cuarteto|quinteto|orquesta|coral|strings\s+lab)\b/i.test(previous)) return undefined;
+  const roleText = /^d[uú]o\b/i.test(previous) ? 'dúo' : undefined;
+  return roleText ? { name: previous, roleText } : { name: previous };
+}
+
+function namedEnsembleHeading(lines: string[], index: number): ObservedPerson | undefined {
+  const line = lines[index]!;
+  const next = lines[index + 1];
+  if (!next || line.length > 40 || line.length < 3 || /^espacio mercado$/i.test(line)) return undefined;
+  if (creditFromLine(line) || WORK_WORD.test(line)) return undefined;
+  if (!next.startsWith(line)) return undefined;
+  if (/^(?:d[uú]o|tr[ií]o|cuarteto|quinteto|orquesta|coral|strings\s+lab)\b/i.test(line)) return undefined;
+  return { name: line };
+}
+
+function previousLine(lines: string[], index: number): string | undefined {
+  for (let cursor = index - 1; cursor >= 0; cursor -= 1) {
+    const line = lines[cursor]?.trim();
+    if (line) return line;
+  }
+  return undefined;
+}
+
+function composersFromObrasDe(line: string): ObservedComposer[] {
+  const match = /\bobras de\s+([^.]*)/i.exec(line);
+  if (!match) return [];
+  return match[1]!.split(/\s*,\s*|\s+y\s+/u).flatMap((part) => {
+    const name = part.trim().replace(/[.\s]+$/u, '');
+    if (!name || name.split(/\s+/).length > 4 || !/^\p{Lu}/u.test(name) || WORK_WORD.test(name)) return [];
+    return [{ name }];
+  });
+}
+
+function titleDeComposer(line: string): ObservedWork[] {
+  const works: ObservedWork[] = [];
+  const pattern = /\b((?:Las|La|Le|El|Los|Les)\s+\p{Lu}[\p{L}'’.-]+(?:\s+\p{Lu}[\p{L}'’.-]+){0,5})\s+de\s+(\p{Lu}[\p{L}'’.-]+(?:\s+\p{Lu}[\p{L}'’.-]+){0,3})/gu;
+  for (const match of line.matchAll(pattern)) {
+    const title = match[1]!.trim();
+    const prefix = matchComposerPrefix(match[2]!.trim());
+    if (!prefix || !looksLikeWorkLine(title)) continue;
+    works.push({ title, composerName: prefix.matchedText });
+  }
+  return works;
+}
+
+function operaticComposer(text: string): string | undefined {
+  const match = /oper[ií]stico de\s+(\p{L}[\p{L} .''’-]{2,80})/iu.exec(text);
+  if (!match) return undefined;
+  const prefix = matchComposerPrefix(match[1]!.trim());
+  return prefix?.matchedText;
+}
+
+function foldKey(value: string): string {
+  return value.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 }

@@ -1112,7 +1112,61 @@ function explicitClassicalConcertDeclaration(facts: ObservedFacts): Inclusion | 
 
 function describedClassicalPerformance(facts: ObservedFacts, _haystack: string): boolean {
   return (
-    describedLyricPerformance(facts) || describedConcertWithUnequivocalClassicalRepertoire(facts)
+    describedLyricPerformance(facts) ||
+    describedConcertWithUnequivocalClassicalRepertoire(facts) ||
+    lyricConcertWithExplicitCast(facts)
+  );
+}
+
+/**
+ * A concert/recital whose own ficha shows, together, a live performance,
+ * explicit vocal or instrumental performers, and unequivocal opera and/or
+ * zarzuela repertoire. Formation, a classical instrument or an evocative title
+ * is not enough. Not a mixed-programme block: a coprincipal exclusion still
+ * stays uncertain.
+ */
+function lyricConcertWithExplicitCast(facts: ObservedFacts): boolean {
+  const programme = eventProgrammeText(facts);
+  if (!hasUnequivocalLyricProgramme(programme)) return false;
+  const title = fieldFolded(facts.title);
+  const category = fieldFolded(facts.categoryText);
+  if (!hasConcertOrRecitalWord(programme) && !hasConcertOrRecitalIdentity(facts, title, category)) {
+    return false;
+  }
+  return facts.performers.some((item) => isExplicitVocalOrInstrumentRole(item.roleText));
+}
+
+function hasUnequivocalLyricProgramme(programme: string): boolean {
+  if (!programme) return false;
+  if (hasPhrase(programme, 'arias de opera') || hasPhrase(programme, 'romanzas de zarzuela')) return true;
+  if (hasPhrase(programme, 'fragmentos de operas') || hasPhrase(programme, 'fragmentos de opera')) return true;
+  if (hasPhrase(programme, 'temas de zarzuela')) return true;
+  return (
+    hasWord(programme, 'opera') &&
+    hasWord(programme, 'zarzuela') &&
+    hasConcertOrRecitalWord(programme)
+  );
+}
+
+function isExplicitVocalOrInstrumentRole(roleText: string | undefined): boolean {
+  if (lyricVocalFamily(roleText)) return true;
+  const role = fieldFolded(roleText);
+  if (!role) return false;
+  return (
+    hasWord(role, 'piano') ||
+    hasWord(role, 'pianista') ||
+    hasWord(role, 'violin') ||
+    hasWord(role, 'violinista') ||
+    hasWord(role, 'viola') ||
+    hasWord(role, 'violonchelo') ||
+    hasWord(role, 'chelo') ||
+    hasWord(role, 'cello') ||
+    hasWord(role, 'flauta') ||
+    hasWord(role, 'clarinete') ||
+    hasWord(role, 'marimba') ||
+    hasWord(role, 'trombon') ||
+    hasWord(role, 'guitarra') ||
+    hasWord(role, 'clave')
   );
 }
 

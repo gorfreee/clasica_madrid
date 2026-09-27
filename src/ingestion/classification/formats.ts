@@ -162,6 +162,14 @@ function operaStrength(facts: ObservedFacts): 'strong' | 'weak' {
   const category = fieldFolded(facts.categoryText);
   const title = fieldFolded(facts.title);
   if (isOperaCategory(category) || titleIdentifiesOperaEvent(title)) return 'strong';
+  const program = fieldFolded(facts.programText);
+  if (
+    hasPhrase(program, 'arias de opera') ||
+    hasPhrase(program, 'fragmentos de operas') ||
+    hasPhrase(program, 'fragmentos de opera')
+  ) {
+    return 'strong';
+  }
   return 'weak';
 }
 
@@ -169,6 +177,8 @@ function zarzuelaStrength(facts: ObservedFacts): 'strong' | 'weak' {
   const category = fieldFolded(facts.categoryText);
   const title = fieldFolded(facts.title);
   if (hasWord(category, 'zarzuela') || hasWord(title, 'zarzuela')) return 'strong';
+  const program = fieldFolded(facts.programText);
+  if (hasPhrase(program, 'romanzas de zarzuela') || hasPhrase(program, 'temas de zarzuela')) return 'strong';
   return 'weak';
 }
 
@@ -193,8 +203,12 @@ function chamberStrength(facts: ObservedFacts, evidence: FormatEvidence): 'stron
   const category = fieldFolded(facts.categoryText);
   if (isMusicalChamberCategory(category, evidence.identity)) return 'strong';
   if (hasStrongChamberFormation(evidence.identity)) return 'strong';
+  if (hasPhrase(evidence.program, 'formato de camara')) return 'strong';
   if (evidence.performers.some((text) => hasStrongChamberFormation(text))) return 'strong';
   if (facts.performers.some((item) => hasWord(fieldFolded(item.roleText), 'cuarteto'))) return 'strong';
+  if (facts.performers.some((item) => hasPhrase(fieldFolded(`${item.name} ${item.roleText ?? ''}`), 'quinteto de cuerda'))) {
+    return 'strong';
+  }
   if (facts.performers.some((item) => hasPhrase(fieldFolded(item.name), 'chamber orchestra'))) {
     return 'strong';
   }
@@ -242,6 +256,8 @@ function isOperaFormat(facts: ObservedFacts, evidence: FormatEvidence): boolean 
   const genreFields = genreFieldsOf(evidence);
   return (
     evidenceHasPhrase(genreFields, 'arias de opera') ||
+    evidenceHasPhrase(genreFields, 'fragmentos de operas') ||
+    evidenceHasPhrase(genreFields, 'fragmentos de opera') ||
     evidenceHasPhrase(genreFields, 'dramma lirico') ||
     evidenceHasPhrase(genreFields, 'opera en') ||
     (evidenceHasWord(genreFields, 'opera') && evidenceHasWord(genreFields, 'actos'))
@@ -331,8 +347,12 @@ function isChamberFormat(facts: ObservedFacts, evidence: FormatEvidence): boolea
   const category = fieldFolded(facts.categoryText);
   if (isMusicalChamberCategory(category, evidence.identity)) return true;
   if (hasChamberFormation(evidence.identity)) return true;
+  if (hasPhrase(evidence.program, 'formato de camara')) return true;
   if (evidence.performers.some((text) => hasChamberFormation(text))) return true;
   if (facts.performers.some((item) => hasWord(fieldFolded(item.roleText), 'cuarteto'))) return true;
+  if (facts.performers.some((item) => hasPhrase(fieldFolded(`${item.name} ${item.roleText ?? ''}`), 'quinteto de cuerda'))) {
+    return true;
+  }
   return facts.performers.some((item) => hasPhrase(fieldFolded(item.name), 'chamber orchestra'));
 }
 

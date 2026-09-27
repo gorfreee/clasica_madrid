@@ -57,6 +57,9 @@ const ESTABLISHED_VENUE_IDS = new Set([
   'ven_sala_manuel_falla_sgae',
   'ven_real_coliseo_carlos_iii',
   'ven_teatro_auditorio_escorial',
+  // Teatro público de Alcalá, programado por la Fundación Teatro de La Abadía.
+  // El nombre no contiene «teatro» ni «auditorio»; no generalizar a cualquier corral.
+  'ven_corral_comedias_alcala',
 ]);
 
 /**
