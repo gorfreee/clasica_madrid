@@ -45,7 +45,7 @@ import { WHATSAPP_CHANNEL_URL } from '../lib/presentation/constants.ts';
     border-radius: 50%;
     background: var(--color-whatsapp);
     box-shadow: 0 5px 18px var(--color-shadow);
-    color: #fff;
+    color: var(--color-on-whatsapp);
     text-decoration: none;
     transition: transform .18s ease, box-shadow .18s ease;
   }
@@ -61,7 +61,7 @@ import { WHATSAPP_CHANNEL_URL } from '../lib/presentation/constants.ts';
     border: 1px solid var(--color-border);
     border-radius: .45rem;
     background: var(--color-surface);
-    box-shadow: 0 3px 12px rgb(0 0 0 / 12%);
+    box-shadow: 0 3px 12px color-mix(in srgb, var(--color-text) 12%, transparent);
     color: var(--color-text);
     font-size: .8rem;
     font-weight: 700;
