@@ -826,13 +826,15 @@ describe('añadir al calendario', () => {
 });
 
 describe('canal de WhatsApp', () => {
-  it('registra las dos ubicaciones con el tipo de página sin incluir la URL', () => {
+  it('registra la ubicación flotante con el tipo de página sin incluir la URL', () => {
     const { calls, capture } = recorder();
     trackWhatsAppChannelClicked({ placement: 'footer', page_type: 'agenda' }, capture);
     trackWhatsAppChannelClicked({ placement: 'about', page_type: 'about' }, capture);
+    trackWhatsAppChannelClicked({ placement: 'floating', page_type: 'venue' }, capture);
     expect(calls).toEqual([
       { event: WHATSAPP_CHANNEL_CLICKED, properties: { placement: 'footer', page_type: 'agenda' } },
       { event: WHATSAPP_CHANNEL_CLICKED, properties: { placement: 'about', page_type: 'about' } },
+      { event: WHATSAPP_CHANNEL_CLICKED, properties: { placement: 'floating', page_type: 'venue' } },
     ]);
     expect(JSON.stringify(calls)).not.toContain(WHATSAPP_CHANNEL_URL);
   });
@@ -853,6 +855,7 @@ describe('canal de WhatsApp', () => {
     expect(WHATSAPP_CHANNEL_PLACEMENTS).toContain('article');
     expect(isWhatsAppChannelPlacement('agenda_inline')).toBe(true);
     expect(isWhatsAppChannelPlacement('article')).toBe(true);
+    expect(isWhatsAppChannelPlacement('floating')).toBe(true);
     const { calls, capture } = recorder();
     trackWhatsAppChannelClicked({ placement: 'agenda_inline', page_type: 'agenda' }, capture);
     expect(calls).toEqual([
