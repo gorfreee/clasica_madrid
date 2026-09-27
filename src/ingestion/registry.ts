@@ -28,6 +28,7 @@ import { residenciaEstudiantesAdapter } from './sources/residencia-estudiantes.t
 import { condeduqueAdapter } from './sources/condeduque.ts';
 import { aytoSanLorenzoAdapter } from './sources/ayto-san-lorenzo.ts';
 import { teatroAuditorioEscorialAdapter } from './sources/teatro-auditorio-escorial.ts';
+import { orquestaCiudadGetafeAdapter } from './sources/orquesta-ciudad-getafe.ts';
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
@@ -59,6 +60,7 @@ const ADAPTERS: Record<string, SourceAdapter> = {
   [condeduqueAdapter.id]: condeduqueAdapter,
   [aytoSanLorenzoAdapter.id]: aytoSanLorenzoAdapter,
   [teatroAuditorioEscorialAdapter.id]: teatroAuditorioEscorialAdapter,
+  [orquestaCiudadGetafeAdapter.id]: orquestaCiudadGetafeAdapter,
 };
 
 const srcAuditorio: Source = {
@@ -502,6 +504,21 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Teatro Auditorio de San Lorenzo de El Escorial',
       kind: 'official',
       url: 'https://www.teatroauditorioescorial.es/',
+    },
+  },
+  {
+    id: 'orquesta-ciudad-getafe',
+    name: 'Orquesta Sinfónica Ciudad de Getafe',
+    urls: ['https://orquestaciudaddegetafe.com/wp-sitemap.xml'],
+    adapterId: orquestaCiudadGetafeAdapter.id,
+    catalogSourceId: 'src_orquesta_ciudad_getafe',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_orquesta_ciudad_getafe',
+      slug: 'orquesta-sinfonica-ciudad-de-getafe',
+      name: 'Orquesta Sinfónica Ciudad de Getafe',
+      kind: 'official',
+      url: 'https://orquestaciudaddegetafe.com/',
     },
   },
 ];
