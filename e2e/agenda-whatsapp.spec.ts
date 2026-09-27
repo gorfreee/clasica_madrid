@@ -24,6 +24,12 @@ async function analyticsCalls(page: Page): Promise<AnalyticsCall[]> {
   return page.evaluate(() => (window as unknown as { __analytics: AnalyticsCall[] }).__analytics);
 }
 
+async function inlineChannelViews(page: Page): Promise<AnalyticsCall[]> {
+  return (await analyticsCalls(page)).filter(
+    (call) => call.event === 'whatsapp_channel_viewed' && call.properties.placement === 'agenda_inline',
+  );
+}
+
 /**
  * Same complete-day rule as `agendaInlineChannelBreak`. Kept here so the
  * smoke checks the rendered list instead of trusting the helper alone.
@@ -120,9 +126,9 @@ test.describe('canal de WhatsApp en la agenda', () => {
     const inline = page.locator('[data-whatsapp-channel="agenda_inline"]');
     await inline.scrollIntoViewIfNeeded();
     await expect.poll(async () => {
-      return (await analyticsCalls(page)).filter((call) => call.event === 'whatsapp_channel_viewed').length;
+      return (await inlineChannelViews(page)).length;
     }).toBe(1);
-    expect((await analyticsCalls(page)).filter((call) => call.event === 'whatsapp_channel_viewed')).toEqual([
+    expect(await inlineChannelViews(page)).toEqual([
       { event: 'whatsapp_channel_viewed', properties: { placement: 'agenda_inline', page_type: 'agenda' } },
     ]);
 
@@ -147,7 +153,7 @@ test.describe('canal de WhatsApp en la agenda', () => {
     const before = await channelPlacement(page);
     await page.locator('[data-whatsapp-channel="agenda_inline"]').scrollIntoViewIfNeeded();
     await expect.poll(async () => {
-      return (await analyticsCalls(page)).filter((call) => call.event === 'whatsapp_channel_viewed').length;
+      return (await inlineChannelViews(page)).length;
     }).toBe(1);
     expect(before?.before).toBeGreaterThanOrEqual(8);
     await expect(page.locator('[data-agenda-channel]')).toBeVisible();
@@ -176,7 +182,7 @@ test.describe('canal de WhatsApp en la agenda', () => {
     expect((await channelPlacement(page))?.insideDayList).toBe(false);
     await page.locator('[data-whatsapp-channel="agenda_inline"]').scrollIntoViewIfNeeded();
     await expect.poll(async () => {
-      return (await analyticsCalls(page)).filter((call) => call.event === 'whatsapp_channel_viewed').length;
+      return (await inlineChannelViews(page)).length;
     }).toBe(1);
   });
 

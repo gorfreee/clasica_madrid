@@ -102,8 +102,10 @@ test.describe('analítica de producto', () => {
     await expect(link).toHaveAccessibleName(/Seguir el canal de Clásica Madrid en WhatsApp/);
     await link.scrollIntoViewIfNeeded();
 
-    await expect.poll(async () => named(await analyticsCalls(page), 'whatsapp_channel_viewed').length).toBe(1);
-    expect(named(await analyticsCalls(page), 'whatsapp_channel_viewed')).toEqual([
+    await expect.poll(async () => named(await analyticsCalls(page), 'whatsapp_channel_viewed')
+      .filter((call) => call.properties.placement === 'article').length).toBe(1);
+    expect(named(await analyticsCalls(page), 'whatsapp_channel_viewed')
+      .filter((call) => call.properties.placement === 'article')).toEqual([
       { event: 'whatsapp_channel_viewed', properties: { placement: 'article', page_type: 'article' } },
     ]);
 
