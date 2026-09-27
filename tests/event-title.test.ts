@@ -10,6 +10,7 @@ import {
 } from '../src/ingestion/event-title.ts';
 import { mergeExistingEvent, proposalFromObservation } from '../src/ingestion/merge.ts';
 import { toCandidate } from '../src/ingestion/to-candidate.ts';
+import { applyCandidateBatch } from '../src/ingestion/batch.ts';
 import { newObservationKeys } from '../src/ingestion/identity.ts';
 import { normalizeText } from '../src/lib/domain/normalize.ts';
 import { defaultDataDir } from '../src/lib/repository/fs.ts';
@@ -174,6 +175,8 @@ describe('canonicalizeEventTitle', () => {
     );
     expect(canonicalizeEventTitle('CNDM.')).toBe('CNDM.');
     expect(canonicalizeEventTitle('CNDM. Jean Rondeau')).toBe('CNDM. Jean Rondeau');
+    expect(canonicalizeEventTitle('Gala de Navidad. .')).toBe('Gala de Navidad');
+    expect(canonicalizeEventTitle('CNDM. .')).toBe('CNDM.');
   });
 
   it('no trata CORO ni MISA como siglas', () => {
@@ -329,6 +332,44 @@ describe('publicación canónica', () => {
     expect(built.candidate?.event.title).toBe('Josu de Solaun, piano');
     expect(built.candidate?.event.id).toBe('evt_teatro_real_solaun');
     expect(built.candidate?.event.slug).toBe('josu-de-solaun-piano');
+  });
+
+  it('toCandidate publica de forma idempotente un título con puntuación terminal defectuosa', () => {
+    const source = getSourceDefinition('teatro-real');
+    const catalog = teatroCatalog();
+    const built = toCandidate(
+      observed({ title: 'Gala de Navidad. .', externalId: 'gala-navidad' }),
+      source,
+      catalog,
+      TEST_NOW,
+      new Set(),
+      new Set(),
+      includeClassification(),
+    );
+    expect(built.candidate?.event.title).toBe('Gala de Navidad');
+    expect(canonicalizeEventTitle(built.candidate!.event.title)).toBe('Gala de Navidad');
+  });
+
+  it('applyCandidateBatch bloquea un candidato que aún no cumple canonical-casing', async () => {
+    const source = getSourceDefinition('teatro-real');
+    const catalog = teatroCatalog();
+    const built = toCandidate(
+      observed({ title: 'Gala de Navidad', externalId: 'gala-navidad-invalid' }),
+      source,
+      catalog,
+      TEST_NOW,
+      new Set(),
+      new Set(),
+      includeClassification(),
+    );
+    const candidate = structuredClone(built.candidate!);
+    candidate.event.title = 'Gala de Navidad.';
+    const result = await applyCandidateBatch(catalog, [candidate], '/virtual/data', { dryRun: true });
+    expect(result.report.ok).toBe(false);
+    expect(result.report.issues).toContainEqual(
+      expect.objectContaining({ code: 'canonical-casing' }),
+    );
+    expect(result.written).toEqual([]);
   });
 
   it('toCandidate publica el performer canónico a partir de ALL CAPS', () => {

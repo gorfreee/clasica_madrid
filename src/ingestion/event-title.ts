@@ -142,10 +142,13 @@ export function canonicalizeEventTitle(title: string): string {
  * preserved acronyms, and do not touch ellipses.
  */
 export function stripTrailingPeriod(value: string): string {
-  if (!/(?<!\.)\.$/u.test(value)) return value;
-  const without = value.slice(0, -1);
-  if (preservedForm(without)) return value;
-  return without;
+  let current = value.trimEnd();
+  while (/(?<!\.)\.$/u.test(current)) {
+    const without = current.slice(0, -1).trimEnd();
+    if (preservedForm(without)) return current;
+    current = without;
+  }
+  return current;
 }
 
 export function canonicalizePerformerName(name: string): string {
