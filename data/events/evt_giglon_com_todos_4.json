@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_giglon_com_todos_4",
+  "slug": "la-flauta-magica",
+  "title": "La flauta mágica",
+  "status": "scheduled",
+  "venueId": "ven_teatro_auditorio_ciudad_de_alcobendas",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_giglon_com_todos_4_01",
+      "date": "2026-11-07",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ópera 2001"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    }
+  ],
+  "works": [
+    {
+      "title": "La flauta mágica",
+      "composerName": "Wolfgang Amadeus Mozart"
+    }
+  ],
+  "eras": [
+    "classical"
+  ],
+  "formats": [
+    "opera"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_giglon_com",
+      "url": "https://www.giglon.com/todos?idEvent=la-flauta-magica-alcobendas",
+      "checkedAt": "2026-09-28"
+    }
+  ],
+  "primarySourceId": "src_giglon_com",
+  "lastVerifiedAt": "2026-09-28"
+}
