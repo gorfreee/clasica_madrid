@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_escenamostoles_com_madama_butterfly",
+  "slug": "madama-butterfly",
+  "title": "Madama Butterfly",
+  "status": "scheduled",
+  "venueId": "ven_teatro_del_bosque",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_escenamostoles_com_madama_butterfly_01",
+      "date": "2026-10-25",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Diana Rosa Cárdenas"
+    },
+    {
+      "name": "Sergio Escobar"
+    },
+    {
+      "name": "Jorge Tello"
+    },
+    {
+      "name": "David Cervera"
+    },
+    {
+      "name": "Pablo Rossi"
+    },
+    {
+      "name": "Víctor Jiménez"
+    },
+    {
+      "name": "Tatiana Jeisu"
+    },
+    {
+      "name": "Laura de la Fuente"
+    },
+    {
+      "name": "Nicolae Dohutaru",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Giacomo Puccini"
+    }
+  ],
+  "works": [
+    {
+      "title": "Madama Butterfly",
+      "composerName": "Giacomo Puccini"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "opera"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_escenamostoles_com",
+      "url": "https://escenamostoles.com/madama-butterfly",
+      "checkedAt": "2026-09-29"
+    }
+  ],
+  "primarySourceId": "src_escenamostoles_com",
+  "lastVerifiedAt": "2026-09-29"
+}

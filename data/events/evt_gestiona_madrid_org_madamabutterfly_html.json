@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_gestiona_madrid_org_madamabutterfly_html",
+  "slug": "madama-butterfly-2",
+  "title": "Madama Butterfly",
+  "status": "scheduled",
+  "venueId": "ven_teatro_municipal_buero_vallejo",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_gestiona_madrid_org_madamabutterfly_html_01",
+      "date": "2026-10-10",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Inmaculada Laín / Guiomar Cantó"
+    },
+    {
+      "name": "Carla Sampedro / Rita Raposo"
+    },
+    {
+      "name": "Moisés Morín / Pablo Sánchez"
+    },
+    {
+      "name": "Andrés del Pino"
+    },
+    {
+      "name": "Rodolfo Albero"
+    },
+    {
+      "name": "Jose Bardají / Armando del Hoyo"
+    },
+    {
+      "name": "Iván Basteiros"
+    },
+    {
+      "name": "Rubén Sainz"
+    },
+    {
+      "name": "Carmen Gavilán"
+    },
+    {
+      "name": "Aisha Zenit"
+    },
+    {
+      "name": "Sara Mitchell / Prado Álvarez"
+    },
+    {
+      "name": "Belinda Oñate"
+    },
+    {
+      "name": "Iván Martí",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Giacomo Puccini"
+    }
+  ],
+  "works": [
+    {
+      "title": "Madama Butterfly",
+      "composerName": "Giacomo Puccini"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "opera"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_gestiona_madrid_org",
+      "url": "https://gestiona.madrid.org/clas_artes/red/madamabutterfly.html",
+      "checkedAt": "2026-09-29"
+    }
+  ],
+  "primarySourceId": "src_gestiona_madrid_org",
+  "lastVerifiedAt": "2026-09-29"
+}

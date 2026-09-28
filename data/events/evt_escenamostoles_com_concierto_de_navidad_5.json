@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_escenamostoles_com_concierto_de_navidad_5",
+  "slug": "concierto-de-navidad",
+  "title": "Concierto de Navidad",
+  "status": "scheduled",
+  "venueId": "ven_teatro_del_bosque",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_escenamostoles_com_concierto_de_navidad_5_01",
+      "date": "2026-12-17",
+      "time": "20:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_escenamostoles_com_concierto_de_navidad_5_02",
+      "date": "2026-12-18",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Conservatorio Profesional de Música Rodolfo Halffter"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "symphonic",
+    "choral",
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_escenamostoles_com",
+      "url": "https://escenamostoles.com/concierto-de-navidad-5/",
+      "checkedAt": "2026-09-29"
+    }
+  ],
+  "primarySourceId": "src_escenamostoles_com",
+  "lastVerifiedAt": "2026-09-29"
+}
