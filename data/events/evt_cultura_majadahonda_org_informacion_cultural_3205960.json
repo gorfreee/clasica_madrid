@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cultura_majadahonda_org_informacion_cultural_3205960",
+  "slug": "opera-para-ninos-y-ninas-guillermo-tell",
+  "title": "Ópera para niños y niñas: Guillermo Tell",
+  "status": "scheduled",
+  "venueId": "ven_casa_de_la_cultura_carmen_conde",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cultura_majadahonda_org_informacion_cultural_3205960_01",
+      "date": "2026-10-04",
+      "time": "17:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Carlos Crooke / David Sentinella"
+    },
+    {
+      "name": "Marina Houdgson / Gemma Burgos"
+    },
+    {
+      "name": "Ángel Walter / Israel Trujillo"
+    },
+    {
+      "name": "Helena Garrardo / Cristina Irala"
+    },
+    {
+      "name": "Joseba Priego / Nico Colon"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Gioachino Rossini"
+    }
+  ],
+  "works": [
+    {
+      "title": "Guillermo Tell",
+      "composerName": "Gioachino Rossini"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "opera"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_cultura_majadahonda_org",
+      "url": "https://cultura.majadahonda.org/informacion-cultural?p_p_id=CalendarSuite_INSTANCE_STa3SHI1sEeH&p_p_lifecycle=0&p_p_mode=view&p_p_state=normal&p_r_p_calendarBookingId=3205960&p_r_p_calendarPath=%2Fhtml%2Fsuite%2Fdisplays%2Fdetail.jsp",
+      "checkedAt": "2026-09-28"
+    }
+  ],
+  "primarySourceId": "src_cultura_majadahonda_org",
+  "lastVerifiedAt": "2026-09-28"
+}

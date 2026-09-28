@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cultura_pozuelodealarcon_org_concierto_de_navidad_banda_sinfonica_la_lira_de_pozuelo_duende_de_espana",
+  "slug": "concierto-de-navidad-duende-de-espana",
+  "title": "Concierto de Navidad: Duende de España",
+  "status": "scheduled",
+  "venueId": "ven_teatro_mira",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cultura_pozuelodealarcon_org_concierto_de_navidad_banda_sinfonica_la_lira_de_pozuelo_duende_de_espana_01",
+      "date": "2026-12-19",
+      "time": "19:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_cultura_pozuelodealarcon_org_concierto_de_navidad_banda_sinfonica_la_lira_de_pozuelo_duende_de_espana_02",
+      "date": "2026-12-20",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Banda Sinfónica La Lira de Pozuelo"
+    },
+    {
+      "name": "Maxi Santos (director)"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Luis Serrano Alarcón"
+    }
+  ],
+  "works": [],
+  "eras": [],
+  "formats": [],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_cultura_pozuelodealarcon_org",
+      "url": "https://cultura.pozuelodealarcon.org/agenda/concierto-de-navidad-banda-sinfonica-la-lira-de-pozuelo-duende-de-espana",
+      "checkedAt": "2026-09-28"
+    }
+  ],
+  "primarySourceId": "src_cultura_pozuelodealarcon_org",
+  "lastVerifiedAt": "2026-09-28"
+}

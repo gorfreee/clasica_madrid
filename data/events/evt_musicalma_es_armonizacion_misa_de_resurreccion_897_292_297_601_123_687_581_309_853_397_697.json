@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_musicalma_es_armonizacion_misa_de_resurreccion_897_292_297_601_123_687_581_309_853_397_697",
+  "slug": "requiem-en-re-menor-k-626-de-mozart",
+  "title": "Réquiem en re menor, K. 626 de Mozart",
+  "status": "scheduled",
+  "venueId": "ven_iglesia_de_san_juan_evangelista",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_musicalma_es_armonizacion_misa_de_resurreccion_897_292_297_601_123_687_581_309_853_397_697_01",
+      "date": "2026-11-01",
+      "time": null,
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro y Orquesta MusicAlma"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    }
+  ],
+  "works": [
+    {
+      "title": "Réquiem en re menor, K. 626",
+      "composerName": "Wolfgang Amadeus Mozart"
+    }
+  ],
+  "eras": [
+    "classical"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_musicalma_es",
+      "url": "https://www.musicalma.es/evento/armonizacion-misa-de-resurreccion-897-292-297-601-123-687-581-309-853-397-697",
+      "checkedAt": "2026-09-28"
+    }
+  ],
+  "primarySourceId": "src_musicalma_es",
+  "lastVerifiedAt": "2026-09-28"
+}
