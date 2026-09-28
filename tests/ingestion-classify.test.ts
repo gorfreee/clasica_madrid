@@ -147,6 +147,23 @@ describe('eligibility — exclusiones de identidad', () => {
     ).toBe('exclude');
   });
 
+  it('no convierte una zambomba navideña coral-sinfónica en flamenco por el título', () => {
+    const result = classify(
+      facts({
+        title: 'Zambombas y panderetas en sinfónico',
+        description:
+          'Concierto navideño de tres coros acompañados por orquesta sinfónica con villancicos tradicionales en arreglos sinfónicos contemporáneos.',
+        performers: [
+          { name: 'Coro Infantil Villa de Las Rozas', roleText: 'coro' },
+          { name: 'Coro Juvenil Villa de Las Rozas', roleText: 'coro' },
+          { name: 'Coro de Adultos Villa de Las Rozas', roleText: 'coro' },
+        ],
+      }),
+    );
+    expect(result.eligibility.value).not.toBe('exclude');
+    expect(result.eligibility.ruleId).not.toBe('flamenco-identity');
+  });
+
   it('no excluye por flamenco la escuela franco-flamenca ni el Códice de Chigi', () => {
     const chigi = classify(
       facts({

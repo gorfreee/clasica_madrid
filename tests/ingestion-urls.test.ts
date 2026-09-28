@@ -163,6 +163,22 @@ describe('urlEventIdentity', () => {
     expect(urlEventIdentity(left)).not.toBe(urlEventIdentity(right));
     expect(urlPathIdentity(left)).toBe(urlPathIdentity(right));
   });
+
+  it('usa idEvent de Giglon en vez del path genérico todos', () => {
+    const url =
+      'https://www.giglon.com/todos?idEvent=concierto-orquesta-sinfonica-i-de-la-escuela-superior-de-musica-forum-musik';
+    expect(sourceUrlKind(url)).toBe('event-detail');
+    expect(urlEventIdentity(url)).toBe(
+      'concierto-orquesta-sinfonica-i-de-la-escuela-superior-de-musica-forum-musik',
+    );
+  });
+
+  it('usa el id numérico del evento CalendarSuite y no el id de instancia del portlet', () => {
+    const url =
+      'https://transparencia.ssreyes.org/es/web/la-plaza-de-sanse/agenda/-/calendarsuite/event/concierto-de-ano-nuevo-como-nunca-/10071535/vBxusUciXi0M';
+    expect(sourceUrlKind(url)).toBe('event-detail');
+    expect(urlEventIdentity(url)).toBe('10071535');
+  });
 });
 
 describe('normalización de URLs en hechos', () => {

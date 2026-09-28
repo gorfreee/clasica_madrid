@@ -278,7 +278,9 @@ function flamencoIdentity(
  */
 function hasMusicalFlamencoIdentity(facts: ObservedFacts, haystack: string): boolean {
   if (hasPhrase(haystack, 'paco de lucia')) return true;
-  if (hasPhrase(haystack, 'zambomba')) return true;
+  // "Zambomba" is also the literal Christmas instrument; by itself it is not
+  // sufficient evidence of flamenco (e.g. a choral-symphonic carol concert).
+  if (hasPhrase(haystack, 'zambomba') && /flamenc/.test(haystack)) return true;
   if (hasPhrase(haystack, 'jovenes flamencos') || hasPhrase(haystack, 'joven flamenco')) return true;
   if (hasPhrase(haystack, 'guitarra flamenca')) return true;
   if (hasPhrase(haystack, 'cante flamenco') || hasPhrase(haystack, 'baile flamenco')) return true;

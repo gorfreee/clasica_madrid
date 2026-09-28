@@ -41,6 +41,8 @@ export function urlPathIdentity(url: string): string {
 export function urlEventIdentity(url: string): string {
   try {
     const parsed = new URL(normalizeUrl(url));
+    const calendarSuiteId = calendarSuiteEventIdentity(parsed);
+    if (calendarSuiteId) return calendarSuiteId;
     const pathId = urlPathIdentity(url);
     const queryId = queryIdentityFrom(parsed);
     if (!queryId) return pathId;
@@ -147,6 +149,7 @@ const IDENTITY_QUERY_KEYS = new Set([
   'evento',
   'guid',
   'id',
+  'idevent',
   'nid',
   'node',
   'slug',
@@ -206,6 +209,14 @@ const GENERIC_SCRIPT_SEGMENTS = new Set([
   'show',
   'view',
 ]);
+
+function calendarSuiteEventIdentity(url: URL): string | undefined {
+  const segments = url.pathname.split('/').filter(Boolean);
+  const suiteIndex = segments.findIndex((segment) => foldPathSegment(segment) === 'calendarsuite');
+  if (suiteIndex < 0 || foldPathSegment(segments[suiteIndex + 1] ?? '') !== 'event') return undefined;
+  const id = segments[suiteIndex + 3]?.trim();
+  return id && /^\d{5,}$/.test(id) ? id : undefined;
+}
 
 export function sourceUrlKind(url: string): SourceUrlKind {
   try {
