@@ -1489,9 +1489,12 @@ function knownClassicalNames(facts: ObservedFacts): string[] {
     const hit = matchComposer(name);
     if (hit) matched.push(hit.canonicalName);
   }
-  const description = facts.description?.replace(
-    /[»”"]\s*,?\s*(?:de|by\s+)?[\p{Lu}][\p{L}’'-]+\s+[\p{Lu}][\p{L}’'-]+(?=[.;]|$)/gu,
-    '',
+  const description = stripNonRepertoireEntityNames(
+    facts.description?.replace(
+      /[»”"]\s*,?\s*(?:de|by\s+)?[\p{Lu}][\p{L}’'-]+\s+[\p{Lu}][\p{L}’'-]+(?=[.;]|$)/gu,
+      '',
+    ),
+    facts,
   );
   const educationalBrandWithoutRepertoire =
     names.length === 0 &&
@@ -1511,7 +1514,7 @@ function knownClassicalNames(facts: ObservedFacts): string[] {
   const editorial = [
     facts.programText,
     educationalBrandWithoutRepertoire ? undefined : description,
-    educationalBrandWithoutRepertoire ? undefined : facts.title,
+    educationalBrandWithoutRepertoire ? undefined : stripNonRepertoireEntityNames(facts.title, facts),
     educationalBrandWithoutRepertoire ? undefined : facts.seriesText,
   ]
     .filter(Boolean)
@@ -1520,6 +1523,28 @@ function knownClassicalNames(facts: ObservedFacts): string[] {
     matched.push(item.canonicalName);
   }
   return [...new Set(matched)];
+}
+
+function stripNonRepertoireEntityNames(
+  text: string | undefined,
+  facts: ObservedFacts,
+): string | undefined {
+  if (!text) return text;
+  const entityNames = [
+    ...facts.performers.map((item) => item.name),
+    facts.organizerText,
+    facts.venueText,
+  ]
+    .filter((value): value is string => Boolean(value?.trim()))
+    .sort((left, right) => right.length - left.length);
+
+  let cleaned = text;
+  for (const entityName of entityNames) {
+    const name = entityName.trim();
+    if (name.length < 4) continue;
+    cleaned = cleaned.replaceAll(name, ' ');
+  }
+  return cleaned;
 }
 
 function hasFlamencoPalo(haystack: string): boolean {
