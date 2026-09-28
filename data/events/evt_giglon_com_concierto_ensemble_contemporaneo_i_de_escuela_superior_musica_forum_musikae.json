@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "evt_giglon_com_todos",
+  "id": "evt_giglon_com_concierto_ensemble_contemporaneo_i_de_escuela_superior_musica_forum_musikae",
   "slug": "concierto-ensemble-contemporaneo-i-de-la-escuela-superior-de-musica-forum-musikae",
   "title": "Concierto Ensemble Contemporáneo I de la Escuela Superior de Música Forum Musikae",
   "status": "scheduled",
@@ -9,7 +9,7 @@
   "seriesId": null,
   "occurrences": [
     {
-      "id": "occ_giglon_com_todos_01",
+      "id": "occ_giglon_com_concierto_ensemble_contemporaneo_i_de_escuela_superior_musica_forum_musikae_01",
       "date": "2026-12-12",
       "time": "19:00",
       "status": "scheduled"

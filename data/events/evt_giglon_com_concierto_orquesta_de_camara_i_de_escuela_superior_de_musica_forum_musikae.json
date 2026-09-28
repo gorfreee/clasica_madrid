@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "evt_giglon_com_todos_3",
+  "id": "evt_giglon_com_concierto_orquesta_de_camara_i_de_escuela_superior_de_musica_forum_musikae",
   "slug": "concierto-orquesta-de-camara-i-de-la-escuela-superior-de-musica-forum-musikae",
   "title": "Concierto Orquesta de Cámara I de la Escuela Superior de Música Forum Musikae",
   "status": "scheduled",
@@ -9,7 +9,7 @@
   "seriesId": null,
   "occurrences": [
     {
-      "id": "occ_giglon_com_todos_3_01",
+      "id": "occ_giglon_com_concierto_orquesta_de_camara_i_de_escuela_superior_de_musica_forum_musikae_01",
       "date": "2026-10-10",
       "time": "19:00",
       "status": "scheduled"

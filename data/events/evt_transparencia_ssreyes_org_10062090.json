@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "evt_transparencia_ssreyes_org_vbxusucixi0m_3",
+  "id": "evt_transparencia_ssreyes_org_10062090",
   "slug": "opera-madama-butterfly",
   "title": "Ópera: Madama Butterfly",
   "status": "scheduled",
@@ -9,7 +9,7 @@
   "seriesId": null,
   "occurrences": [
     {
-      "id": "occ_transparencia_ssreyes_org_vbxusucixi0m_3_01",
+      "id": "occ_transparencia_ssreyes_org_10062090_01",
       "date": "2026-11-14",
       "time": "20:00",
       "status": "scheduled"

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "evt_giglon_com_todos_4",
+  "id": "evt_giglon_com_la_flauta_magica_alcobendas",
   "slug": "la-flauta-magica",
   "title": "La flauta mágica",
   "status": "scheduled",
@@ -9,7 +9,7 @@
   "seriesId": null,
   "occurrences": [
     {
-      "id": "occ_giglon_com_todos_4_01",
+      "id": "occ_giglon_com_la_flauta_magica_alcobendas_01",
       "date": "2026-11-07",
       "time": "19:00",
       "status": "scheduled"

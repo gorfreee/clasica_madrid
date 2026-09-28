@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "evt_giglon_com_todos_2",
+  "id": "evt_giglon_com_concierto_orquesta_sinfonica_i_de_la_escuela_superior_de_musica_forum_musik",
   "slug": "concierto-orquesta-sinfonica-i-de-la-escuela-superior-de-musica-forum-musikae",
   "title": "Concierto Orquesta Sinfónica I de la Escuela Superior de Música Forum Musikae",
   "status": "scheduled",
@@ -9,7 +9,7 @@
   "seriesId": null,
   "occurrences": [
     {
-      "id": "occ_giglon_com_todos_2_01",
+      "id": "occ_giglon_com_concierto_orquesta_sinfonica_i_de_la_escuela_superior_de_musica_forum_musik_01",
       "date": "2026-11-21",
       "time": "19:00",
       "status": "scheduled"
