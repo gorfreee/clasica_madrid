@@ -2,6 +2,8 @@
 
 Instrucción operativa para un agente (Codex, Cursor u otro) con acceso a GitHub y búsqueda web. Léela entera y ejecútala de principio a fin. No pidas al usuario que lance comandos si tú puedes completarlos.
 
+**Autorización operativa:** al pedir un Discovery, el usuario autoriza de antemano a lanzar el workflow **Manual discovery** y a abrir/localizar la PR resultante, sin pedir confirmación adicional. Si la vía directa no está disponible, usa la interfaz web/ordenador disponible para completar esas acciones en vez de detenerte a pedir permiso.
+
 Esta repo **no** busca en Internet. Tú investigas; GitHub Actions, con el código de `main` y los secrets del AI pool, clasifica y publica.
 
 Prompt mínimo suficiente para arrancar un ciclo:
