@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_silvadesirenas_com_delirivmmusica",
+  "slug": "handel-all-italiana-sonatas-da-chiesa",
+  "title": "Handel All'Italiana. Sonatas da chiesa",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_de_tres_cantos",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_silvadesirenas_com_delirivmmusica_01",
+      "date": "2026-11-07",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Beatriz Amezúa"
+    },
+    {
+      "name": "Rocío López"
+    },
+    {
+      "name": "Diego Fernández"
+    },
+    {
+      "name": "Juan Portilla"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Georg Friedrich Händel"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata a trío en fa mayor HWV 389, Op. 2 n.º 4",
+      "composerName": "Georg Friedrich Händel"
+    },
+    {
+      "title": "Sonata en sol menor HWV 364a, Op. 1 n.º 6",
+      "composerName": "Georg Friedrich Händel"
+    },
+    {
+      "title": "Sonata a trío en do menor HWV 386a, Op. 2 n.º 1a",
+      "composerName": "Georg Friedrich Händel"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "early-music"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_silvadesirenas_com",
+      "url": "https://www.silvadesirenas.com/delirivmmusica",
+      "checkedAt": "2026-09-29"
+    }
+  ],
+  "primarySourceId": "src_silvadesirenas_com",
+  "lastVerifiedAt": "2026-09-29"
+}
