@@ -2288,3 +2288,19 @@ describe('access', () => {
     expect(resolveAccess('entradas').value).toBe('unknown');
   });
 });
+
+describe('eligibility — institutional composer names', () => {
+  it('no usa Rodolfo Halffter como repertorio cuando sólo nombra al conservatorio', () => {
+    const result = classify(
+      facts({
+        title: 'Concierto de Navidad',
+        description:
+          'El Conservatorio Profesional de Música Rodolfo Halffter reúne a sus coros, bandas y orquestas en el Teatro del Bosque.',
+        organizerText: 'Conservatorio Profesional de Música Rodolfo Halffter',
+        performers: [{ name: 'Conservatorio Profesional de Música Rodolfo Halffter' }],
+      }),
+    );
+
+    expect(result.eligibility.ruleId).not.toBe('known-classical-composer');
+  });
+});
