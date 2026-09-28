@@ -97,6 +97,7 @@ const LISTING_PATH_SEGMENTS = new Set([
   'eventos',
   'events',
   'home',
+  'images',
   'index',
   'inicio',
   'listing',
