@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_transparencia_ssreyes_org_10071535",
+  "slug": "concierto-de-ano-nuevo-como-nunca",
+  "title": "Concierto de año nuevo ¡como nunca!",
+  "status": "scheduled",
+  "venueId": "ven_teatro_auditorio_municipal_adolfo_marsillach",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_transparencia_ssreyes_org_10071535_01",
+      "date": "2027-01-02",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Sinfónica Camerata Musicalis",
+      "role": "orchestra"
+    },
+    {
+      "name": "Edgar Martín",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Camille Saint-Saëns"
+    },
+    {
+      "name": "Leopold Mozart"
+    },
+    {
+      "name": "Leroy Anderson"
+    },
+    {
+      "name": "Gioachino Rossini"
+    },
+    {
+      "name": "Johann Strauss"
+    },
+    {
+      "name": "Robert Schumann"
+    },
+    {
+      "name": "Georges Bizet"
+    },
+    {
+      "name": "Isaac Albéniz"
+    },
+    {
+      "name": "Federico Chueca"
+    }
+  ],
+  "works": [
+    {
+      "title": "El león de El carnaval de los animales",
+      "composerName": "Camille Saint-Saëns"
+    },
+    {
+      "title": "El paseo en trineo",
+      "composerName": "Leopold Mozart"
+    },
+    {
+      "title": "La máquina de escribir",
+      "composerName": "Leroy Anderson"
+    },
+    {
+      "title": "La sinfonía de los juguetes"
+    },
+    {
+      "title": "Pizzicato Polka",
+      "composerName": "Johann Strauss"
+    },
+    {
+      "title": "Carmen",
+      "composerName": "Georges Bizet"
+    },
+    {
+      "title": "El bateo",
+      "composerName": "Federico Chueca"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_transparencia_ssreyes_org",
+      "url": "https://transparencia.ssreyes.org/es/web/la-plaza-de-sanse/agenda/-/calendarsuite/event/concierto-de-ano-nuevo-como-nunca-/10071535/vBxusUciXi0M",
+      "checkedAt": "2026-09-28"
+    }
+  ],
+  "primarySourceId": "src_transparencia_ssreyes_org",
+  "lastVerifiedAt": "2026-09-28"
+}

@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_giglon_com_gran_concierto_de_fin_de_ano_alcobendas",
+  "slug": "gran-concierto-de-fin-de-ano",
+  "title": "Gran Concierto de Fin de Año",
+  "status": "scheduled",
+  "venueId": "ven_teatro_auditorio_ciudad_de_alcobendas",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_giglon_com_gran_concierto_de_fin_de_ano_alcobendas_01",
+      "date": "2026-12-26",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Bianca Tognocchi",
+      "role": "soloist"
+    },
+    {
+      "name": "Luis Santana",
+      "role": "soloist"
+    },
+    {
+      "name": "Orquesta Madrid Sinfónica Décimo Arte",
+      "role": "orchestra"
+    },
+    {
+      "name": "Alberto García López",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Piotr Ilich Chaikovski"
+    },
+    {
+      "name": "Giacomo Puccini"
+    },
+    {
+      "name": "Gioachino Rossini"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic",
+    "opera"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_giglon_com",
+      "url": "https://www.giglon.com/todos?idEvent=gran-concierto-de-fin-de-ano-alcobendas",
+      "checkedAt": "2026-09-28"
+    }
+  ],
+  "primarySourceId": "src_giglon_com",
+  "lastVerifiedAt": "2026-09-28"
+}

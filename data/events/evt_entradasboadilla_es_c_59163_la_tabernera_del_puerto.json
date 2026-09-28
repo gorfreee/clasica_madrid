@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_entradasboadilla_es_c_59163_la_tabernera_del_puerto",
+  "slug": "la-tabernera-del-puerto",
+  "title": "La tabernera del puerto",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_municipal_raphael",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_entradasboadilla_es_c_59163_la_tabernera_del_puerto_01",
+      "date": "2026-10-17",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Compañía Teatral Clásicos de la Lírica"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Pablo Sorozábal"
+    }
+  ],
+  "works": [
+    {
+      "title": "La tabernera del puerto",
+      "composerName": "Pablo Sorozábal"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "zarzuela"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_entradasboadilla_es",
+      "url": "https://entradasboadilla.es/evento/c_59163-la-tabernera-del-puerto",
+      "checkedAt": "2026-09-28"
+    }
+  ],
+  "primarySourceId": "src_entradasboadilla_es",
+  "lastVerifiedAt": "2026-09-28"
+}
