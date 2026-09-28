@@ -111,6 +111,7 @@ const LISTING_PATH_SEGMENTS = new Set([
   'resultados',
   'search',
   'temporada',
+  'todos',
 ]);
 
 /**
