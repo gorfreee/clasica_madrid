@@ -198,3 +198,13 @@ describe('normalización de URLs en hechos', () => {
     expect(normalizeRawEvent(raw)?.sourceUrl).toBe('https://www.teatroreal.es/es/espectaculo/bayreuth');
   });
 });
+
+describe('sourceUrlKind — Discovery regressions', () => {
+  it('trata el programa multimedia de Móstoles como listing, no como ficha individual', () => {
+    expect(
+      sourceUrlKind(
+        'https://www.mostoles.es/mostoles/cm/culturaenmostoles/images?idMmedia=1486150',
+      ),
+    ).toBe('listing');
+  });
+});
