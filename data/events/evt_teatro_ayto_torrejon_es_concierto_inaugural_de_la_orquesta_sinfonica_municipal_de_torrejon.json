@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_ayto_torrejon_es_concierto_inaugural_de_la_orquesta_sinfonica_municipal_de_torrejon",
+  "slug": "concierto-inaugural-de-la-orquesta-sinfonica-municipal-de-torrejon",
+  "title": "Concierto inaugural de la Orquesta Sinfónica Municipal de Torrejón",
+  "status": "scheduled",
+  "venueId": "ven_teatro_municipal_jose_maria_rodero",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_ayto_torrejon_es_concierto_inaugural_de_la_orquesta_sinfonica_municipal_de_torrejon_01",
+      "date": "2026-10-09",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Sinfónica Municipal de Torrejón de Ardoz"
+    },
+    {
+      "name": "Julio Maroto (director)"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_teatro_ayto_torrejon_es",
+      "url": "https://teatro.ayto-torrejon.es/eventos/teatro/concierto-inaugural-de-la-orquesta-sinfonica-municipal-de-torrejon",
+      "checkedAt": "2026-09-28"
+    }
+  ],
+  "primarySourceId": "src_teatro_ayto_torrejon_es",
+  "lastVerifiedAt": "2026-09-28"
+}

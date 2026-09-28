@@ -278,7 +278,9 @@ function flamencoIdentity(
  */
 function hasMusicalFlamencoIdentity(facts: ObservedFacts, haystack: string): boolean {
   if (hasPhrase(haystack, 'paco de lucia')) return true;
-  if (hasPhrase(haystack, 'zambomba')) return true;
+  // "Zambomba" is also the literal Christmas instrument; by itself it is not
+  // sufficient evidence of flamenco (e.g. a choral-symphonic carol concert).
+  if (hasPhrase(haystack, 'zambomba') && /flamenc/.test(haystack)) return true;
   if (hasPhrase(haystack, 'jovenes flamencos') || hasPhrase(haystack, 'joven flamenco')) return true;
   if (hasPhrase(haystack, 'guitarra flamenca')) return true;
   if (hasPhrase(haystack, 'cante flamenco') || hasPhrase(haystack, 'baile flamenco')) return true;
@@ -406,6 +408,8 @@ function isLiveMusicalPerformer(item: { name: string; roleText?: string }): bool
     hasWord(name, 'filarmonia') ||
     hasWord(name, 'filarmonica') ||
     hasWord(name, 'philharmonic') ||
+    hasPhrase(name, 'banda sinfonica') ||
+    hasPhrase(name, 'banda de musica') ||
     hasWord(name, 'coro') ||
     hasWord(role, 'orquesta') ||
     hasWord(role, 'orchestra') ||
@@ -804,10 +808,14 @@ function filmMusicIdentity(facts: ObservedFacts, haystack: string): Exclusion | 
     hasPhrase(haystack, 'ennio morricone') ||
     hasPhrase(haystack, 'film symphony') ||
     hasPhrase(haystack, 'royal film concert');
+  const program = fieldFolded(facts.programText);
   const classicalBlock =
     knownClassicalNames(facts).length > 0 ||
     hasPhrase(haystack, 'musica clasica') ||
-    hasPhrase(haystack, 'grandes obras de la musica clasica');
+    hasPhrase(haystack, 'grandes obras de la musica clasica') ||
+    hasWord(program, 'opera') ||
+    hasWord(program, 'operas') ||
+    hasWord(program, 'zarzuela');
   if (classicalBlock && !namedFilmIdentity) {
     return exclusion('film-music-identity', evidence, false, true);
   }
@@ -846,8 +854,20 @@ function popularMusicIdentity(
     return exclusion('popular-music-identity', [...new Set(strong)], true);
   }
   if (adjacent.length === 0) return undefined;
-  const classical = knownClassicalNames(facts).length > 0;
+  const classical =
+    knownClassicalNames(facts).length > 0 ||
+    hasExplicitClassicalEraCue(description, program);
   return exclusion('popular-music-identity', [...new Set(adjacent)], !classical, classical);
+}
+
+function hasExplicitClassicalEraCue(description: string, program: string): boolean {
+  const body = `${description} ${program}`.trim();
+  return (
+    hasWord(body, 'renacimiento') ||
+    hasWord(body, 'barroco') ||
+    hasWord(body, 'clasicismo') ||
+    hasWord(body, 'romanticismo')
+  );
 }
 
 function popularProgramHit(text: string): boolean {
@@ -1140,7 +1160,11 @@ function hasUnequivocalLyricProgramme(programme: string): boolean {
   if (!programme) return false;
   if (hasPhrase(programme, 'arias de opera') || hasPhrase(programme, 'romanzas de zarzuela')) return true;
   if (hasPhrase(programme, 'fragmentos de operas') || hasPhrase(programme, 'fragmentos de opera')) return true;
-  if (hasPhrase(programme, 'temas de zarzuela')) return true;
+  if (
+    hasPhrase(programme, 'temas de zarzuela') ||
+    hasPhrase(programme, 'piezas de zarzuela') ||
+    hasPhrase(programme, 'selecciones de zarzuela')
+  ) return true;
   return (
     hasWord(programme, 'opera') &&
     hasWord(programme, 'zarzuela') &&
@@ -1256,6 +1280,7 @@ function hasConcertEnsembleNoun(programme: string): boolean {
 function hasUnequivocalClassicalRepertoireOfThisEvent(facts: ObservedFacts): boolean {
   const programme = eventProgrammeText(facts);
   if (!programme) return false;
+  if (hasUnequivocalLyricProgramme(programme)) return true;
   const vienneseForms =
     (hasWord(programme, 'valses') || hasWord(programme, 'vals') || hasWord(programme, 'walzer')) &&
     (hasWord(programme, 'mazurkas') ||
@@ -1468,7 +1493,27 @@ function knownClassicalNames(facts: ObservedFacts): string[] {
     /[»”"]\s*,?\s*(?:de|by\s+)?[\p{Lu}][\p{L}’'-]+\s+[\p{Lu}][\p{L}’'-]+(?=[.;]|$)/gu,
     '',
   );
-  const editorial = [facts.programText, description, facts.title, facts.seriesText]
+  const educationalBrandWithoutRepertoire =
+    names.length === 0 &&
+    !facts.programText?.trim() &&
+    Boolean(
+      description &&
+      (
+        hasPhrase(fieldFolded(description), 'programa educativo') ||
+        hasPhrase(fieldFolded(description), 'titulo identifica el programa')
+      ) &&
+      (
+        hasPhrase(fieldFolded(description), 'no declara obras') ||
+        hasPhrase(fieldFolded(description), 'no incluye obras') ||
+        hasPhrase(fieldFolded(description), 'sin obras de')
+      )
+    );
+  const editorial = [
+    facts.programText,
+    educationalBrandWithoutRepertoire ? undefined : description,
+    educationalBrandWithoutRepertoire ? undefined : facts.title,
+    educationalBrandWithoutRepertoire ? undefined : facts.seriesText,
+  ]
     .filter(Boolean)
     .join('\n');
   for (const item of findKnownComposersInText(editorial)) {

@@ -18,6 +18,63 @@ function facts(overrides: Partial<ObservedFacts> & Pick<ObservedFacts, 'title'>)
   };
 }
 
+
+describe('eligibility — regresiones de Discovery', () => {
+  it('no convierte el nombre de un programa educativo en repertorio de Mozart', () => {
+    const result = classify(
+      facts({
+        title: 'Mozart para Bebés: Contamos y Cantamos la Navidad',
+        categoryText: 'Música para bebés',
+        description:
+          'Concierto familiar de villancicos y música navideña de diversos lugares del mundo. El título identifica el programa educativo Mozart para Bebés; el anuncio no declara obras de Mozart.',
+      }),
+    );
+
+    expect(result.eligibility.value).toBe('uncertain');
+    expect(result.eligibility.ruleId).not.toBe('known-classical-composer');
+  });
+
+  it('reconoce piezas de zarzuela interpretadas por banda como bloque clásico del concierto', () => {
+    const result = classify(
+      facts({
+        title: 'Concierto de Navidad: Duende de España',
+        categoryText: 'Concierto de Navidad',
+        performers: [{ name: 'Banda Sinfónica La Lira de Pozuelo' }],
+        programText: 'Obras de Luis Serrano Alarcón, piezas de zarzuela y villancicos populares.',
+      }),
+    );
+
+    expect(result.eligibility.value).toBe('include');
+    expect(result.eligibility.ruleId).toBe('described-classical-repertoire');
+  });
+
+  it('deja como incierto un programa mixto de bandas sonoras y selecciones de ópera', () => {
+    const result = classify(
+      facts({
+        title: 'Concierto XX aniversario de la Unión Musical de Pozuelo',
+        programText: 'Bandas sonoras, pasodobles y selecciones de óperas entre otros.',
+      }),
+    );
+
+    expect(result.eligibility.value).toBe('uncertain');
+    expect(result.eligibility.ruleId).toBe('classical-and-nonclassical-coprincipal');
+  });
+
+  it('deja como incierto un recital que declara un arco del Renacimiento al pop', () => {
+    const result = classify(
+      facts({
+        title: 'Concierto conmemorativo del XX aniversario del Coro Garoé de Majadahonda',
+        description:
+          'Recital de diversos estilos, desde el Renacimiento hasta el pop contemporáneo, pasando por bolero y música iberoamericana.',
+        performers: [{ name: 'Coro Garoé' }],
+      }),
+    );
+
+    expect(result.eligibility.value).toBe('uncertain');
+    expect(result.eligibility.ruleId).toBe('classical-and-nonclassical-coprincipal');
+  });
+});
+
 describe('eligibility — exclusiones de identidad', () => {
   it('excluye jazz como identidad principal, no por el venue', () => {
     const result = classify(
@@ -88,6 +145,23 @@ describe('eligibility — exclusiones de identidad', () => {
         }),
       ).eligibility.value,
     ).toBe('exclude');
+  });
+
+  it('no convierte una zambomba navideña coral-sinfónica en flamenco por el título', () => {
+    const result = classify(
+      facts({
+        title: 'Zambombas y panderetas en sinfónico',
+        description:
+          'Concierto navideño de tres coros acompañados por orquesta sinfónica con villancicos tradicionales en arreglos sinfónicos contemporáneos.',
+        performers: [
+          { name: 'Coro Infantil Villa de Las Rozas', roleText: 'coro' },
+          { name: 'Coro Juvenil Villa de Las Rozas', roleText: 'coro' },
+          { name: 'Coro de Adultos Villa de Las Rozas', roleText: 'coro' },
+        ],
+      }),
+    );
+    expect(result.eligibility.value).not.toBe('exclude');
+    expect(result.eligibility.ruleId).not.toBe('flamenco-identity');
   });
 
   it('no excluye por flamenco la escuela franco-flamenca ni el Códice de Chigi', () => {
