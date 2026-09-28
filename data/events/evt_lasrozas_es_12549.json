@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_lasrozas_es_12549",
+  "slug": "concierto-fiesta-nacional",
+  "title": "Concierto Fiesta Nacional",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_joaquin_rodrigo_las_rozas",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_lasrozas_es_12549_01",
+      "date": "2026-10-22",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Unidad de Música de la Guardia Civil",
+      "role": "ensemble"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "zarzuela",
+    "other"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_lasrozas_es",
+      "url": "https://www.lasrozas.es/node/12549",
+      "checkedAt": "2026-09-28",
+      "externalId": "12549"
+    }
+  ],
+  "primarySourceId": "src_lasrozas_es",
+  "lastVerifiedAt": "2026-09-28"
+}

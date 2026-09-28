@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_lasrozas_es_12607",
+  "slug": "zambombas-y-panderetas-en-sinfonico",
+  "title": "Zambombas y panderetas en sinfónico — Coro Villa de Las Rozas 45º aniversario",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_joaquin_rodrigo_las_rozas",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_lasrozas_es_12607_01",
+      "date": "2026-12-12",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro Infantil Villa de Las Rozas",
+      "role": "choir"
+    },
+    {
+      "name": "Coro Juvenil Villa de Las Rozas",
+      "role": "choir"
+    },
+    {
+      "name": "Coro de Adultos Villa de Las Rozas",
+      "role": "choir"
+    }
+  ],
+  "composers": [],
+  "works": [
+    {
+      "title": "Campana sobre campana"
+    },
+    {
+      "title": "El pequeño tamborilero"
+    },
+    {
+      "title": "Adeste fideles"
+    },
+    {
+      "title": "Los peces en el río"
+    }
+  ],
+  "eras": [],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_lasrozas_es",
+      "url": "https://www.lasrozas.es/node/12607",
+      "checkedAt": "2026-09-28",
+      "externalId": "12607"
+    }
+  ],
+  "primarySourceId": "src_lasrozas_es",
+  "lastVerifiedAt": "2026-09-28"
+}

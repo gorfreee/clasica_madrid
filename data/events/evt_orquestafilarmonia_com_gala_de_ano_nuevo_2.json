@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_orquestafilarmonia_com_gala_de_ano_nuevo_2",
+  "slug": "gala-de-ano-nuevo-de-las-rozas",
+  "title": "Gala de Año Nuevo de Las Rozas",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_joaquin_rodrigo_las_rozas",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_orquestafilarmonia_com_gala_de_ano_nuevo_2_01",
+      "date": "2027-01-02",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Filarmonía",
+      "role": "orchestra"
+    },
+    {
+      "name": "Compañía JAC de Ballet",
+      "role": "other"
+    },
+    {
+      "name": "Pascual Osa",
+      "role": "conductor"
+    },
+    {
+      "name": "José Antonio Checa",
+      "role": "other"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_orquestafilarmonia_com",
+      "url": "https://www.orquestafilarmonia.com/concierto/gala-de-ano-nuevo-2/",
+      "checkedAt": "2026-09-28"
+    }
+  ],
+  "primarySourceId": "src_orquestafilarmonia_com",
+  "lastVerifiedAt": "2026-09-28"
+}
