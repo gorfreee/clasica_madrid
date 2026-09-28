@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cultura_pozuelodealarcon_org_bolet_c3_adn_20mira_20teatro_20_20octubre_202026_20_20enero_202027_pdf",
+  "slug": "la-flauta-magica",
+  "title": "La flauta mágica",
+  "status": "scheduled",
+  "venueId": "ven_teatro_mira",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cultura_pozuelodealarcon_org_bolet_c3_adn_20mira_20teatro_20_20octubre_202026_20_20enero_202027_pdf_01",
+      "date": "2026-10-31",
+      "time": "19:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_cultura_pozuelodealarcon_org_bolet_c3_adn_20mira_20teatro_20_20octubre_202026_20_20enero_202027_pdf_02",
+      "date": "2026-11-01",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ópera 2001 (solistas, orquesta y coros)"
+    },
+    {
+      "name": "Marlène Assayag"
+    },
+    {
+      "name": "Lucie Chartin"
+    },
+    {
+      "name": "Jiwon Song"
+    },
+    {
+      "name": "Dmytro Voronov"
+    },
+    {
+      "name": "Francesca Bruni"
+    },
+    {
+      "name": "Yeonjoo Park"
+    },
+    {
+      "name": "Haruo Kawakami"
+    },
+    {
+      "name": "Yuri Makhrov"
+    },
+    {
+      "name": "Olivier Gourdy"
+    },
+    {
+      "name": "Viacheslav Strelkov"
+    },
+    {
+      "name": "Mar Esteve Rodrigo"
+    },
+    {
+      "name": "Martin Mázik (dirección musical)"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    }
+  ],
+  "works": [
+    {
+      "title": "La flauta mágica",
+      "composerName": "Wolfgang Amadeus Mozart"
+    }
+  ],
+  "eras": [
+    "classical"
+  ],
+  "formats": [
+    "opera"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_cultura_pozuelodealarcon_org",
+      "url": "https://cultura.pozuelodealarcon.org/sites/default/files/2026-09/Bolet%C3%ADn%20MIRA%20Teatro%20-%20octubre%202026%20-%20enero%202027.pdf",
+      "checkedAt": "2026-09-28"
+    }
+  ],
+  "primarySourceId": "src_cultura_pozuelodealarcon_org",
+  "lastVerifiedAt": "2026-09-28"
+}
