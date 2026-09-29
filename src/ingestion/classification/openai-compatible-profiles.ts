@@ -157,11 +157,10 @@ const ZAI_FLASH: OpenAiCompatibleModelProfile = {
 };
 
 const CLOUDFLARE_PROMPT: OpenAiCompatibleModelProfile = {
-  // Workers AI JSON Mode allowlist (checked 2026-09-12) does not include
-  // these two models. Their OpenAI schema lists response_format, but a 400
-  // would disable the route for the rest of the run. Keep prompt + local
-  // schema validation. `max_tokens` is deprecated on these model pages in
-  // favour of `max_completion_tokens`.
+  // Workers AI JSON Mode allowlist (checked 2026-09-29) does not include
+  // these GLM/Gemma IDs. Keep prompt + local schema validation.
+  // `max_tokens` is deprecated on these model pages in favour of
+  // `max_completion_tokens`.
   responseFormat: 'none',
   jsonSchemaStrict: false,
   tokenParameter: 'max_completion_tokens',
@@ -169,6 +168,18 @@ const CLOUDFLARE_PROMPT: OpenAiCompatibleModelProfile = {
     reasoning_effort: null,
     chat_template_kwargs: { enable_thinking: false },
   },
+};
+
+/**
+ * Workers AI GPT-OSS 20B is also outside the documented JSON Mode allowlist,
+ * but its OpenAI-compatible schema uses `max_tokens` and does not document the
+ * GLM/Gemma-specific thinking switches. Keep the request conservative.
+ */
+const CLOUDFLARE_GPT_OSS_PROMPT: OpenAiCompatibleModelProfile = {
+  responseFormat: 'none',
+  jsonSchemaStrict: false,
+  tokenParameter: 'max_tokens',
+  extraBody: {},
 };
 
 /**
@@ -250,6 +261,21 @@ const OPENROUTER_JSON_SCHEMA: OpenAiCompatibleModelProfile = {
   extraBody: { provider: { require_parameters: true }, ...REASONING_NONE },
 };
 
+/**
+ * Nemotron 3 Super Free exposes structured outputs but its current catalog
+ * advertises low/medium reasoning efforts rather than `none`. Use the lowest
+ * documented effort instead of sending an unsupported disable value.
+ */
+const OPENROUTER_JSON_SCHEMA_LOW_REASONING: OpenAiCompatibleModelProfile = {
+  responseFormat: 'json-schema',
+  jsonSchemaStrict: false,
+  tokenParameter: 'max_tokens',
+  extraBody: {
+    provider: { require_parameters: true },
+    reasoning: { effort: 'low' },
+  },
+};
+
 /** OpenRouter IDs without documented `response_format`. */
 const OPENROUTER_PROMPT: OpenAiCompatibleModelProfile = {
   responseFormat: 'none',
@@ -298,11 +324,12 @@ export const MISTRAL_JSON_SCHEMA_MODELS = new Set([
   'ministral-3b-2512',
 ]);
 
-const ZAI_FLASH_MODELS = new Set(['glm-4.7-flash', 'glm-4.5-flash']);
+const ZAI_FLASH_MODELS = new Set(['glm-4.7-flash', 'glm-4.6v-flash', 'glm-4.5-flash']);
 const CLOUDFLARE_PROMPT_MODELS = new Set([
   '@cf/zai-org/glm-4.7-flash',
   '@cf/google/gemma-4-26b-a4b-it',
 ]);
+const CLOUDFLARE_GPT_OSS_MODELS = new Set(['@cf/openai/gpt-oss-20b']);
 const VERCEL_LING_FLASH_VL_MODELS = new Set(['inclusionai/ling-3.0-flash-vl-free']);
 const KILO_MODEL_PROFILES: Record<string, OpenAiCompatibleModelProfile> = {
   'nex-agi/nex-n2.5-mini:free': KILO_JSON_SCHEMA,
@@ -313,10 +340,12 @@ const KILO_MODEL_PROFILES: Record<string, OpenAiCompatibleModelProfile> = {
 };
 const OPENROUTER_MODEL_PROFILES: Record<string, OpenAiCompatibleModelProfile> = {
   'google/gemma-4-26b-a4b-it:free': OPENROUTER_JSON_OBJECT,
+  'google/gemma-4-31b-it:free': OPENROUTER_JSON_OBJECT,
+  'nvidia/nemotron-3-super-120b-a12b:free': OPENROUTER_JSON_SCHEMA_LOW_REASONING,
+  'poolside/laguna-xs-2.1:free': OPENROUTER_PROMPT,
+  /** Retired/default-off profiles are kept only for explicit diagnostics. */
   'nex-agi/nex-n2.5-mini:free': OPENROUTER_JSON_SCHEMA,
   'inclusionai/ling-3.0-flash-vl:free': OPENROUTER_PROMPT,
-  'poolside/laguna-xs-2.1:free': OPENROUTER_PROMPT,
-  /** Quarantined (404 on 2026-09-15). Profile kept for diagnosis via OPENROUTER_MODELS. */
   'openai/gpt-oss-20b:free': OPENROUTER_JSON_SCHEMA,
 };
 
@@ -340,9 +369,9 @@ export function openaiCompatibleModelProfile(
     case 'zai':
       return ZAI_FLASH_MODELS.has(name) ? ZAI_FLASH : JSON_OBJECT;
     case 'cloudflare':
-      return CLOUDFLARE_PROMPT_MODELS.has(name)
-        ? CLOUDFLARE_PROMPT
-        : { responseFormat: 'none', jsonSchemaStrict: false, tokenParameter: 'max_completion_tokens', extraBody: {} };
+      if (CLOUDFLARE_PROMPT_MODELS.has(name)) return CLOUDFLARE_PROMPT;
+      if (CLOUDFLARE_GPT_OSS_MODELS.has(name)) return CLOUDFLARE_GPT_OSS_PROMPT;
+      return { responseFormat: 'none', jsonSchemaStrict: false, tokenParameter: 'max_completion_tokens', extraBody: {} };
     case 'vercel':
       return VERCEL_LING_FLASH_VL_MODELS.has(name) ? VERCEL_LING_FLASH_VL : JSON_OBJECT;
     case 'kilo':
