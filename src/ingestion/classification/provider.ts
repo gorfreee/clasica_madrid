@@ -370,6 +370,21 @@ function inspectFreeProvider(
   try {
     const routes = routesForFreeProvider(provider, env, zeroCost);
     if (!routes.length) {
+      // An intentionally empty default allowlist is not an operational failure.
+      // Vercel currently has no stable zero-cost route after Ling Free ended.
+      // Explicit VERCEL_MODELS still fail allowlist validation above.
+      if (
+        provider === 'vercel'
+        && VERCEL_ZERO_COST_MODELS.length === 0
+        && VERCEL_QUARANTINED_MODELS.length === 0
+      ) {
+        return {
+          provider,
+          status: 'ready',
+          reason: 'provider sin routes activas por política zero-cost',
+          routes: [],
+        };
+      }
       return {
         provider,
         status: 'empty',
