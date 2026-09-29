@@ -23,7 +23,9 @@
     "ai:qualify": "tsx src/cli/qualify-ai-route.ts",
     "export:excel": "tsx src/cli/export-excel.ts",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "architecture:render": "node scripts/render-architecture.mjs",
+    "architecture:check": "node scripts/render-architecture.mjs --check"
   },
   "dependencies": {
     "@astrojs/mdx": "^8.0.2",

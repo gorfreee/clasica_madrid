@@ -1,0 +1,20 @@
+# Prompt para actualizar la arquitectura
+
+Trabaja sobre el `main` actual de `gorfreee/clasica_madrid`. Abre una rama independiente para actualizar sólo la documentación visual de arquitectura.
+
+El diagrama describe la arquitectura. La arquitectura del producto nunca debe modificarse sólo para hacer que coincida con el diagrama.
+
+1. Sincroniza `main` y lee `AGENTS.md`, `PROJECT_CONTEXT.md`, `README.md`, `ARCHITECTURE.md`, `docs/architecture/README.md`, `docs/ingestion.md`, `docs/ingestion-v3-plan.md`, `docs/ai-providers.md`, `docs/contact.md` y `docs/run-discovery-agent.md`.
+2. Inspecciona el sistema realmente implementado: registry, adapters, transportes y fallbacks, pipeline, IA, identidad/reconcile, schemas/validation/batch/health, repository/domain/presentation, páginas/componentes, analytics, functions, infra, workflows, configuración Astro y package.json. La evolución pendiente no es arquitectura existente. Sigue responsabilidades, llamadas y condiciones hasta sus implementaciones.
+3. Compara ese sistema con `docs/architecture/architecture.json`. Actualiza únicamente los hechos que hayan cambiado y el commit de evidencia. Conserva IDs, semántica, composición y vistas cuando sigan siendo válidos. No inventes componentes ni arregles problemas funcionales en esta PR.
+4. Mantén el nivel conceptual: muchas fuentes, registry/adapters, acceso auxiliar, Discovery externo con batch manual, pipeline común, pool de IA multi-provider de coste cero, quality gates, Git como catálogo canónico, PR/CI/merge condicionado, aplicación estática por capas, Pages, usuarios y auxiliares. Refleja las condiciones reales de publicación y la diferencia entre harvesting y Discovery. No represente Discovery como crawler programado si sigue sin existir.
+5. Evita números de eventos, lugares, adapters, modelos o tests que puedan caducar. No conviertas la oferta vigente de proveedores en una afirmación gratuita permanente: representa la política y guardias verificables del código.
+6. Verifica todos los `sources` contra el commit actual, incluidos consumidores/escritores y workflows. Nombra explícitamente las configuraciones externas al repo cuando corresponda. No apuntes a rutas antiguas que sólo existían en la PR #70.
+7. Lee el pin y las opciones de `toolchain.json` y `scripts/render-architecture.mjs`. El grafo se mantiene sólo en `architecture.json`; no edites HTML/SVG/GIF a mano. Archify 3 eliminó las vistas guiadas: conserva el pin actual salvo que el cambio de renderer esté justificado y preserve esas capacidades.
+8. Ejecuta `npm run architecture:render`. Usa `ARCHIFY_ROOT` para un checkout del pin o deja que el script lo prepare; usa `ARCHIFY_CHROME` si necesitas Chrome del sistema. Necesitas Chromium y ffmpeg, pero ninguna key de IA ni secret del producto.
+9. Ejecuta `npm run architecture:check`. El manifest debe recoger la especificación, renderer/toolchain, commit, fecha y hashes de los tres artefactos. No retoques hashes a mano para dar por bueno un artefacto antiguo. La generación no debe integrarse en la CI normal ni afectar al deploy.
+10. Haz revisión perceptual real del HTML light/dark, vistas y navegación, SVG y GIF: README de ~830 px, escritorio de 1440 px y pantalla grande. Comprueba etiquetas, contraste, clipping, overflow y conexiones; inspecciona varios frames y la transición del loop. Corrige la especificación o renderer y regenera si hace falta. Conserva la geometría estable y el tamaño del GIF razonable.
+11. Actualiza el README principal sólo si es necesario para mantener la imagen protagonista y sus enlaces. No dupliques la documentación técnica allí. Actualiza la documentación de generación si el mecanismo cambia.
+12. Ejecuta las validaciones razonables del repo que puedan verse afectadas. Revisa el diff: sin cambios a data, producto, ingestión, analytics, infraestructura o workflows productivos. Haz commits limpios y abre una PR contra `main`, con preview, cambios arquitectónicos representados, regeneración y validaciones. No merges la PR.
+
+Si el sistema cambió mientras trabajabas, reevalúa sólo la parte afectada contra el `main` nuevo; no reescribas el producto para facilitar el dibujo.
