@@ -717,15 +717,48 @@ describe('payload HTTP por provider/modelo', () => {
       KILO_API_KEY: 'kilo-key', KILO_FREE_TIER_CONFIRMED: 'true',
       OPENROUTER_API_KEY: 'openrouter-key', OPENROUTER_FREE_TIER_CONFIRMED: 'true',
     });
-    expect(identityByRoute(routes, 'mistral:ministral-3b-2512')).toMatchObject({
+    expect(identityByRoute(routes, 'groq:openai/gpt-oss-120b')).toMatchObject({
       responseFormat: 'json-schema',
       jsonSchemaStrict: true,
-      extraBody: { service_tier: 'standard_only' },
+      tokenParameter: 'max_tokens',
+      extraBody: { include_reasoning: false, reasoning_effort: 'low' },
+      promptOutputContract: false,
+    });
+    expect(identityByRoute(routes, 'groq:openai/gpt-oss-20b')).toMatchObject({
+      responseFormat: 'json-schema',
+      jsonSchemaStrict: true,
+      extraBody: { include_reasoning: false, reasoning_effort: 'low' },
+    });
+    expect(identityByRoute(routes, 'groq:qwen/qwen3.8-27b')).toMatchObject({
+      responseFormat: 'json-schema',
+      jsonSchemaStrict: false,
+      extraBody: { reasoning_effort: 'none' },
+    });
+    for (const model of ['ministral-14b-2512', 'ministral-8b-2512', 'ministral-3b-2512'] as const) {
+      expect(identityByRoute(routes, `mistral:${model}`)).toMatchObject({
+        responseFormat: 'json-schema',
+        jsonSchemaStrict: true,
+        extraBody: { service_tier: 'standard_only' },
+      });
+    }
+    expect(identityByRoute(routes, 'zai:glm-4.7-flash')).toMatchObject({
+      responseFormat: 'json-object',
+      extraBody: { thinking: { type: 'disabled' } },
+      promptOutputContract: true,
     });
     expect(identityByRoute(routes, 'zai:glm-4.6v-flash')).toMatchObject({
       responseFormat: 'json-object',
       extraBody: { thinking: { type: 'disabled' } },
       promptOutputContract: true,
+    });
+    expect(identityByRoute(routes, 'cloudflare:@cf/zai-org/glm-4.7-flash')).toMatchObject({
+      responseFormat: 'none',
+      tokenParameter: 'max_completion_tokens',
+      promptOutputContract: true,
+      extraBody: {
+        reasoning_effort: null,
+        chat_template_kwargs: { enable_thinking: false },
+      },
     });
     expect(identityByRoute(routes, 'cloudflare:@cf/openai/gpt-oss-20b')).toMatchObject({
       responseFormat: 'none',
@@ -735,14 +768,18 @@ describe('payload HTTP por provider/modelo', () => {
     });
     expect(identityByRoute(routes, 'kilo:poolside/laguna-xs-2.1:free')).toMatchObject({
       responseFormat: 'none',
+      extraBody: { reasoning: { effort: 'none' } },
       promptOutputContract: true,
     });
-    expect(identityByRoute(routes, 'openrouter:google/gemma-4-31b-it:free')).toMatchObject({
-      responseFormat: 'json-object',
-      tokenParameter: 'max_tokens',
-      extraBody: { provider: { require_parameters: true }, reasoning: { effort: 'none' } },
-      promptOutputContract: true,
-    });
+    for (const model of ['google/gemma-4-26b-a4b-it:free', 'google/gemma-4-31b-it:free'] as const) {
+      expect(identityByRoute(routes, `openrouter:${model}`)).toMatchObject({
+        responseFormat: 'json-object',
+        jsonSchemaStrict: false,
+        tokenParameter: 'max_tokens',
+        extraBody: { provider: { require_parameters: true }, reasoning: { effort: 'none' } },
+        promptOutputContract: true,
+      });
+    }
   });
 });
 
