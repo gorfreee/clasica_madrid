@@ -97,8 +97,10 @@ export const KILO_QUARANTINED_MODELS = [] as const;
 /**
  * Re-checked 2026-09-29 against GET https://openrouter.ai/api/v1/models.
  * New defaults are only explicit `:free` IDs with $0 pricing and no published
- * expiration date. Nex N2.5 Mini has ended its free availability and is
- * removed. Ling 3.0 Flash VL returned an explicit free-unavailable 404 while
+ * expiration date and no explicit trial terms. Nex N2.5 Mini has ended its
+ * free availability and is removed. NVIDIA Nemotron 3 Super Free is omitted
+ * because its free endpoint is governed by NVIDIA API Trial Terms. Ling 3.0
+ * Flash VL returned an explicit free-unavailable 404 while
  * the public catalog still lagged, so it remains diagnostic-only.
  * `openrouter/free` is excluded because the resolved model is not guaranteed.
  */
@@ -106,7 +108,6 @@ export const OPENROUTER_ZERO_COST_MODELS = [
   'google/gemma-4-26b-a4b-it:free',
   'poolside/laguna-xs-2.1:free',
   'google/gemma-4-31b-it:free',
-  'nvidia/nemotron-3-super-120b-a12b:free',
 ] as const;
 export const OPENROUTER_QUARANTINED_MODELS = [
   'openai/gpt-oss-20b:free',
