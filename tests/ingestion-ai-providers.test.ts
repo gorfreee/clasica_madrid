@@ -1037,8 +1037,11 @@ describe('perfiles HTTP declarativos', () => {
     expect(isTransientDirectFailure(new AiTransportError('daily', {
       kind: 'rate-limit', status: 429, quotaExhausted: true, pressure: 'daily',
     }))).toBe(false);
-    expect([...KILO_QUARANTINED_MODELS]).toEqual(['dots-studio/dots-3-note-preview:free']);
-    expect([...OPENROUTER_QUARANTINED_MODELS]).toEqual(['openai/gpt-oss-20b:free']);
+    expect([...KILO_QUARANTINED_MODELS]).toEqual([]);
+    expect([...OPENROUTER_QUARANTINED_MODELS]).toEqual([
+      'openai/gpt-oss-20b:free',
+      'inclusionai/ling-3.0-flash-vl:free',
+    ]);
   });
 
   it('reconoce rate-limit de Mistral/Z.AI sin tratar 400/401 como cuota', () => {
