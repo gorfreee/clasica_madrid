@@ -16,7 +16,7 @@ import {
 } from '../src/lib/presentation/constants.ts';
 import { buildEventPageModel } from '../src/lib/presentation/event.ts';
 import { buildSocialImageMetadata } from '../src/lib/presentation/social.ts';
-import { sitemapLastmodMap, sitemapPageFilter } from '../src/lib/presentation/sitemap.ts';
+import { serializeSitemapItem, sitemapLastmodMap, sitemapPageFilter } from '../src/lib/presentation/sitemap.ts';
 import {
   eventPath,
   publicAssetUrl,
@@ -256,7 +256,7 @@ describe('títulos y canonicals de ficha', () => {
 });
 
 describe('JSON-LD de presentación', () => {
-  it('añade @id, description, offers y Person para solistas', () => {
+  it('añade @id, description, gratuidad y Person para solistas sin inventar ofertas', () => {
     const page = buildEventPageModel(richCatalog(), 'recital-de-organo', testClock);
     const [event] = musicEvents(page?.jsonLd ?? []);
     expect(event?.['@id']).toBe('https://clasicamadrid.com/eventos/recital-de-organo/#occ_organo_1');
@@ -264,27 +264,20 @@ describe('JSON-LD de presentación', () => {
     expect(event?.description).toMatch(/Órgano/);
     expect(event?.description).toMatch(/Ana Ruiz/);
     expect(event?.isAccessibleForFree).toBe(true);
-    expect(event?.offers).toMatchObject({
-      '@type': 'Offer',
-      url: 'https://example.org/san-manuel/organo',
-      price: 0,
-      priceCurrency: 'EUR',
-    });
+    expect(event).not.toHaveProperty('offers');
     expect(event?.performer).toEqual([{ '@type': 'Person', name: 'Ana Ruiz' }]);
     expect(page?.jsonLd.some((item) => item['@type'] === 'BreadcrumbList')).toBe(true);
   });
 
-  it('tipa orquesta y coro como PerformingGroup y enlaza la oferta oficial', () => {
+  it('tipa orquesta y coro como PerformingGroup sin convertir la fuente oficial en oferta', () => {
     const page = buildEventPageModel(richCatalog(), 'carmen', testClock);
     const [event] = musicEvents(page?.jsonLd ?? []);
     expect(event?.performer).toEqual([
       { '@type': 'PerformingGroup', name: 'Coro del Teatro' },
       { '@type': 'PerformingGroup', name: 'Orquesta titular' },
     ]);
-    expect(event?.offers).toEqual({
-      '@type': 'Offer',
-      url: 'https://www.auditorionacional.mcu.es/eventos/carmen',
-    });
+    expect(event?.isAccessibleForFree).toBe(false);
+    expect(event).not.toHaveProperty('offers');
   });
 
   it('describe el lugar con MusicVenue y migas', () => {
@@ -330,10 +323,30 @@ describe('sitemap', () => {
     expect(map.get('/agenda/fin-de-semana/')).toBe('2026-09-01');
   });
 
-  it('incluye lastmod del slug histórico de un evento consolidado', () => {
+  it('conserva lastmod del slug canónico y excluye el slug histórico de un evento consolidado', () => {
     const catalog = richCatalog();
     catalog.events[0] = { ...catalog.events[0]!, slugAliases: ['carmen-antigua'] };
     const map = sitemapLastmodMap(catalog);
-    expect(map.get('/eventos/carmen-antigua/')).toBe(catalog.events[0]?.lastVerifiedAt);
+    expect(map.get('/eventos/carmen/')).toBe(catalog.events[0]?.lastVerifiedAt);
+    expect(map.has('/eventos/carmen-antigua/')).toBe(false);
+  });
+
+  it('serializa los eventos publicados con lastmod y omite todos sus redirects históricos', async () => {
+    const catalog = await loadCatalogFromDir(defaultDataDir());
+    const aliasedEvents = catalog.events.filter((event) => event.slugAliases?.length);
+    expect(aliasedEvents.length).toBeGreaterThan(0);
+    for (const event of aliasedEvents) {
+      const canonical = { url: publicUrl(eventPath(event.slug)) };
+      expect(await serializeSitemapItem(canonical)).toEqual({
+        ...canonical,
+        lastmod: event.lastVerifiedAt,
+      });
+      for (const alias of event.slugAliases ?? []) {
+        expect(await serializeSitemapItem({ url: publicUrl(eventPath(alias)) })).toBeUndefined();
+      }
+    }
+    expect(await serializeSitemapItem({ url: publicUrl('/contacto/') })).toEqual({
+      url: publicUrl('/contacto/'),
+    });
   });
 });

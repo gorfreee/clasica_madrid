@@ -62,3 +62,37 @@ describe('estados Schema.org de MusicEvent', () => {
     expect(events[0]?.startDate).toBe('2026-09-15T19:30:00+02:00');
   });
 });
+
+describe('acceso y ofertas de MusicEvent', () => {
+  it.each(['free', 'paid', 'unknown'] as const)(
+    'no convierte una citación informativa en Offer para acceso %s',
+    (access) => {
+      const event = makeEvent({ access });
+      const page = buildEventPageModel(makeCatalog({ events: [event] }), event.slug, testClock);
+      const events = musicEvents(page?.jsonLd);
+      expect(events).toHaveLength(event.occurrences.length);
+      for (const item of events) {
+        expect(item).not.toHaveProperty('offers');
+        if (access === 'unknown') {
+          expect(item).not.toHaveProperty('isAccessibleForFree');
+        } else {
+          expect(item.isAccessibleForFree).toBe(access === 'free');
+        }
+      }
+      expect(JSON.parse(JSON.stringify(page?.jsonLd))).toEqual(page?.jsonLd);
+    },
+  );
+
+  it('no infiere ticketing del dominio, la ruta ni del acceso de pago', () => {
+    const event = makeEvent({
+      access: 'paid',
+      citations: [{
+        sourceId: 'src_auditorio',
+        url: 'https://tickets.example.org/comprar-entradas/matinees',
+        checkedAt: '2026-08-20',
+      }],
+    });
+    const page = buildEventPageModel(makeCatalog({ events: [event] }), event.slug, testClock);
+    expect(musicEvents(page?.jsonLd)[0]).not.toHaveProperty('offers');
+  });
+});

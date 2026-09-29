@@ -1,13 +1,16 @@
 import type { SitemapItem } from '@astrojs/sitemap';
 import type { Catalog } from '../domain/catalog.ts';
 import { loadPublishedCatalog } from '../repository/load.ts';
-import { eventPublicSlugs } from '../domain/queries.ts';
 import { agendaLandingLastmods, isAgendaLandingSlug } from './agenda-landings.ts';
 import { blogContentDir, blogLastmodsFromDirectory } from '../blog/files.ts';
 import { eventPath, publicPath, venuePath, VENUES_INDEX_PATH } from './urls.ts';
 
-export async function serializeSitemapItem(item: SitemapItem): Promise<SitemapItem> {
-  const lastmod = (await lastmodByPath()).get(pathnameOf(item.url));
+export async function serializeSitemapItem(item: SitemapItem): Promise<SitemapItem | undefined> {
+  const path = pathnameOf(item.url);
+  const lastmod = (await lastmodByPath()).get(path);
+  // Astro also discovers historical redirect routes. Returning undefined
+  // omits them from every sitemap; only canonical event paths have lastmod.
+  if (path.startsWith('/eventos/') && !lastmod) return undefined;
   if (!lastmod) return item;
   return { ...item, lastmod };
 }
@@ -60,9 +63,7 @@ export function sitemapLastmodMap(catalog: Catalog, now = new Date()): Map<strin
     bump(event.venueId);
     const parentId = venuesById.get(event.venueId)?.parentVenueId;
     if (parentId) bump(parentId);
-    for (const slug of eventPublicSlugs(event)) {
-      map.set(eventPath(slug), event.lastVerifiedAt);
-    }
+    map.set(eventPath(event.slug), event.lastVerifiedAt);
   }
   for (const venue of catalog.venues) {
     const lastmod = maxDate([venue.lastVerifiedAt, latestByVenue.get(venue.id)]);
