@@ -122,7 +122,7 @@ export function buildVenueJsonLd(venue: Venue, principal: Venue = venue): Record
 }
 
 export function buildMusicEventJsonLd(resolved: ResolvedEvent): Record<string, unknown>[] {
-  const { event, organizers, series, primaryCitation } = resolved;
+  const { event, organizers, series } = resolved;
   const pageUrl = eventUrl(event.slug);
   const location = jsonLdLocation(resolved);
   const description = buildMusicEventDescription(event);
@@ -144,7 +144,8 @@ export function buildMusicEventJsonLd(resolved: ResolvedEvent): Record<string, u
       if (description) data.description = description;
       if (event.access === 'free') data.isAccessibleForFree = true;
       if (event.access === 'paid') data.isAccessibleForFree = false;
-      data.offers = buildOffers(event, primaryCitation.url);
+      // Citations establish provenance, not ticket availability. Only restore
+      // offers when the model provides an explicit, verified ticket URL.
       if (organizers.length > 0) {
         data.organizer = organizers.map((organizer) => ({
           '@type': 'Organization',
@@ -220,18 +221,6 @@ function jsonLdPerformer(performer: Performer): Record<string, unknown> {
     '@type': person ? 'Person' : 'PerformingGroup',
     name: performer.name,
   };
-}
-
-function buildOffers(event: Event, officialUrl: string): Record<string, unknown> {
-  const offers: Record<string, unknown> = {
-    '@type': 'Offer',
-    url: officialUrl,
-  };
-  if (event.access === 'free') {
-    offers.price = 0;
-    offers.priceCurrency = 'EUR';
-  }
-  return offers;
 }
 
 function buildMusicEventDescription(event: Event): string | undefined {

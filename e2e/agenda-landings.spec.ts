@@ -1,4 +1,7 @@
 import { expect, test } from '@playwright/test';
+import { defaultDataDir } from '../src/lib/repository/fs.ts';
+import { loadCatalogFromDir } from '../src/lib/repository/load.ts';
+import { eventPath, publicUrl } from '../src/lib/presentation/urls.ts';
 
 async function sitemapXml(request: { get: (url: string) => Promise<{ ok: () => boolean; text: () => Promise<string> }> }) {
   const index = await request.get('/sitemap-index.xml');
@@ -15,6 +18,70 @@ async function sitemapXml(request: { get: (url: string) => Promise<{ ok: () => b
   );
   return parts.join('\n');
 }
+
+test.describe('SEO de eventos', () => {
+  test('el sitemap conserva canonicals y lastmod, sin redirects históricos', async ({ request }) => {
+    const catalog = await loadCatalogFromDir(defaultDataDir());
+    const xml = await sitemapXml(request);
+    const entries = new Map([...xml.matchAll(/<url>(.*?)<\/url>/gs)].map((match) => [
+      match[1]!.match(/<loc>([^<]+)<\/loc>/)?.[1],
+      match[1]!.match(/<lastmod>([^<]+)<\/lastmod>/)?.[1],
+    ]));
+    const index = await request.get('/sitemap-index.xml');
+    const indexXml = await index.text();
+    for (const event of catalog.events) {
+      const canonical = publicUrl(eventPath(event.slug));
+      expect(entries.get(canonical)?.slice(0, 10), event.slug).toBe(event.lastVerifiedAt);
+      for (const alias of event.slugAliases ?? []) {
+        const url = publicUrl(eventPath(alias));
+        expect(entries.has(url), alias).toBe(false);
+        expect(indexXml).not.toContain(url);
+      }
+    }
+  });
+
+  test('los aliases siguen redirigiendo a sus fichas canónicas indexables', async ({ page }) => {
+    const catalog = await loadCatalogFromDir(defaultDataDir());
+    const aliasedEvents = catalog.events.filter((event) => event.slugAliases?.length);
+    expect(aliasedEvents.length).toBeGreaterThan(0);
+    for (const event of aliasedEvents) {
+      for (const alias of event.slugAliases ?? []) {
+        await page.goto(eventPath(alias));
+        await expect(page).toHaveURL(eventPath(event.slug));
+        await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+          'href', publicUrl(eventPath(event.slug)),
+        );
+        await expect(page.locator('meta[name="robots"][content*="noindex"]')).toHaveCount(0);
+      }
+    }
+  });
+
+  for (const access of ['free', 'paid', 'unknown'] as const) {
+    test(`una ficha ${access} conserva MusicEvent válido, canonical y acceso sin Offer`, async ({ page }) => {
+      const catalog = await loadCatalogFromDir(defaultDataDir());
+      const event = catalog.events.find((event) => event.access === access);
+      expect(event).toBeDefined();
+      await page.goto(eventPath(event!.slug));
+      await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+        'href', publicUrl(eventPath(event!.slug)),
+      );
+      await expect(page.locator('meta[name="robots"][content*="noindex"]')).toHaveCount(0);
+      const jsonLd = await page.locator('script[type="application/ld+json"]').allTextContents();
+      const items = jsonLd.flatMap((text) => JSON.parse(text)) as Record<string, unknown>[];
+      const musicEvents = items.filter((item) => item['@type'] === 'MusicEvent');
+      expect(musicEvents).toHaveLength(event!.occurrences.length);
+      for (const item of musicEvents) {
+        expect(item.url).toBe(publicUrl(eventPath(event!.slug)));
+        expect(item).not.toHaveProperty('offers');
+        if (access === 'unknown') {
+          expect(item).not.toHaveProperty('isAccessibleForFree');
+        } else {
+          expect(item.isAccessibleForFree).toBe(access === 'free');
+        }
+      }
+    });
+  }
+});
 
 test.describe('landings SEO de agenda', () => {
   test('gratis e fin-de-semana son páginas indexables con canonical propio', async ({ page }) => {
