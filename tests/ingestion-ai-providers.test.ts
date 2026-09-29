@@ -356,13 +356,21 @@ describe('factory multi-provider zero cost', () => {
 
     const vercelInspection = inspectFreePoolFromEnv({
       AI_ZERO_COST_ONLY: 'true',
-      VERCEL_AI_GATEWAY_API_KEY: 'vercel-key',
-      VERCEL_FREE_TIER_CONFIRMED: 'true',
     }).providers.find((item) => item.provider === 'vercel');
     expect(vercelInspection).toMatchObject({
       status: 'ready',
       routes: [],
       reason: 'provider sin routes activas por política zero-cost',
+    });
+
+    const explicitVercelWithoutCredentials = inspectFreePoolFromEnv({
+      AI_ZERO_COST_ONLY: 'true',
+      VERCEL_MODELS: 'inclusionai/ling-3.0-flash-vl-free',
+    }).providers.find((item) => item.provider === 'vercel');
+    expect(explicitVercelWithoutCredentials).toMatchObject({
+      status: 'unconfigured',
+      reason: 'falta VERCEL_AI_GATEWAY_API_KEY',
+      routes: [],
     });
 
     const routes = createFreeRoutesFromEnv({
