@@ -145,7 +145,7 @@ describe('CLI, fixtures y descubrimiento', () => {
     expect(byProvider.mistral).toMatchObject({ status: 'unconfigured', reason: 'falta MISTRAL_API_KEY' });
     expect(byProvider.zai).toMatchObject({ status: 'unconfigured', reason: 'falta ZAI_API_KEY' });
     expect(byProvider.cloudflare).toMatchObject({ status: 'unconfigured', reason: 'falta CLOUDFLARE_API_TOKEN' });
-    expect(byProvider.vercel).toMatchObject({ status: 'unconfigured', reason: 'falta VERCEL_AI_GATEWAY_API_KEY' });
+    expect(byProvider.vercel).toMatchObject({ status: 'ready', reason: 'provider sin routes activas por política zero-cost', routes: [] });
     expect(byProvider.kilo).toMatchObject({ status: 'unconfigured', reason: 'falta KILO_API_KEY' });
     expect(byProvider.openrouter).toMatchObject({ status: 'unconfigured', reason: 'falta OPENROUTER_API_KEY' });
   });
@@ -871,7 +871,7 @@ describe('salud HEALTHY/DEGRADED/FAIL y resumen por provider', () => {
     ]);
     expect(result.markdown).toContain('## Provider health');
     expect(result.markdown).toContain('Vercel\n  HEALTHY: 1\n  DEGRADED: 0\n  FAIL: 0');
-    expect(result.markdown).toContain('Kilo\n  HEALTHY: 0\n  DEGRADED: 1\n  FAIL: 0\n  QUARANTINED: 0');
+    expect(result.markdown).toContain('Kilo\n  HEALTHY: 0\n  DEGRADED: 1\n  FAIL: 0\n\nOpenRouter');
     expect(result.markdown).toContain('OpenRouter\n  HEALTHY: 0\n  DEGRADED: 0\n  FAIL: 1\n  QUARANTINED: 2');
     expect(result.markdown).toContain('## Route diagnostics');
     expect(result.json.routes[0]?.purposeResults[0]?.attempts).toBe(1);
