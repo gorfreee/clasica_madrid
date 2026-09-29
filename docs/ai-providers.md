@@ -45,7 +45,7 @@ Los defaults del pool, en orden, son:
 6. Cloudflare Workers AI: `@cf/zai-org/glm-4.7-flash`, `@cf/google/gemma-4-26b-a4b-it`, `@cf/openai/gpt-oss-20b`;
 7. Z.AI: `glm-4.7-flash`, `glm-4.6v-flash`, `glm-4.5-flash`;
 8. Kilo: `poolside/laguna-xs-2.1:free`;
-9. OpenRouter: `google/gemma-4-26b-a4b-it:free`, `poolside/laguna-xs-2.1:free`, `google/gemma-4-31b-it:free`, `nvidia/nemotron-3-super-120b-a12b:free`.
+9. OpenRouter: `google/gemma-4-26b-a4b-it:free`, `poolside/laguna-xs-2.1:free`, `google/gemma-4-31b-it:free`.
 
 Vercel conserva la integración, pero desde 2026-09-29 no tiene ninguna route por defecto: `inclusionai/ling-3.0-flash-vl-free` responde 404 indicando que terminó su free tier. No se sustituye por el ID de pago ni por crédito promocional.
 
@@ -102,7 +102,6 @@ Las tareas del pool piden JSON corto. Cada route declara sus capacidades en `ope
 | `cloudflare:@cf/openai/gpt-oss-20b` | sin `response_format` | no se envían flags GLM/Gemma | `max_tokens` | Profile separado para no mandar parámetros no documentados. |
 | `kilo:poolside/laguna-xs-2.1:free` | sin `response_format` | `reasoning.effort=none` | `max_tokens` | Única route Kilo activa. |
 | OpenRouter Gemma 4 26B / 31B Free | `json_object` | `reasoning.effort=none` | `max_tokens` | `provider.require_parameters=true`. |
-| `openrouter:nvidia/nemotron-3-super-120b-a12b:free` | `json_schema`, `strict: false` | `reasoning.effort=low` | `max_tokens` | El catálogo documenta low/medium, no `none`; usamos el mínimo soportado. |
 | `openrouter:poolside/laguna-xs-2.1:free` | sin `response_format` | `reasoning.effort=none` | `max_tokens` | Prompt + validación local. |
 | OpenRouter quarantined | conserva el profile histórico | según cada ID | `max_tokens` | Sólo diagnóstico explícito; no participa en el default. |
 
@@ -142,10 +141,11 @@ Allowlist activa:
 
 - `google/gemma-4-26b-a4b-it:free`;
 - `poolside/laguna-xs-2.1:free`;
-- `google/gemma-4-31b-it:free`;
-- `nvidia/nemotron-3-super-120b-a12b:free`.
+- `google/gemma-4-31b-it:free`.
 
-Los dos modelos añadidos en esta revisión tenían pricing input/output $0 y `expiration_date: null` en el catálogo live, sin aviso de promoción temporal conocido. Esto es el criterio de entrada, no una promesa de permanencia: el smoke seguirá detectando cualquier cambio posterior.
+Gemma 4 31B Free se añade porque OpenRouter lo publica como endpoint gratuito sin aviso de promoción temporal conocido. Esto es el criterio de entrada, no una promesa de permanencia: el smoke seguirá detectando cualquier cambio posterior.
+
+Se evaluó `nvidia/nemotron-3-super-120b-a12b:free`, pero **se excluye**: aunque OpenRouter lo presenta a precio $0, la propia página del endpoint remite a los NVIDIA API Trial Terms. Bajo la política estable-only del proyecto, "trial" es suficiente para no incorporarlo.
 
 Retirado del default:
 
@@ -160,7 +160,7 @@ Quarantined:
 
 La cuenta mantiene el límite agregado documentado de modelos gratuitos ya modelado por el proyecto: `providerRpd=1000` y `providerMinIntervalMs=3_200`. El saldo pagado nunca autoriza una route de pago.
 
-Guardrail recomendado: reflejar la allowlist activa del código (`google/gemma-4-26b-a4b-it:free`, `poolside/laguna-xs-2.1:free`, `google/gemma-4-31b-it:free`, `nvidia/nemotron-3-super-120b-a12b:free`).
+Guardrail recomendado: reflejar la allowlist activa del código (`google/gemma-4-26b-a4b-it:free`, `poolside/laguna-xs-2.1:free`, `google/gemma-4-31b-it:free`).
 
 Un HTTP 402 se clasifica como `unavailable`; 401/403 como `auth`; 429 como presión/rate-limit. Nunca se reescribe un ID free al sibling pagado.
 
@@ -208,7 +208,6 @@ npm run ai:smoke -- --route cloudflare:@cf/zai-org/glm-4.7-flash
 npm run ai:smoke -- --route cloudflare:@cf/openai/gpt-oss-20b
 npm run ai:smoke -- --route kilo:poolside/laguna-xs-2.1:free
 npm run ai:smoke -- --route openrouter:google/gemma-4-31b-it:free
-npm run ai:smoke -- --route openrouter:nvidia/nemotron-3-super-120b-a12b:free
 
 # una sola route, las cuatro tasks
 npm run ai:smoke -- --route groq:openai/gpt-oss-120b --all-purposes
@@ -385,5 +384,5 @@ Las keys ausentes dejan fuera su provider sin romper la ingestión. Gemini sigue
 - OpenRouter Guardrails: <https://openrouter.ai/docs/guides/features/guardrails>
 - Gemma 4 26B A4B Free: <https://openrouter.ai/google/gemma-4-26b-a4b-it:free>
 - Gemma 4 31B Free: <https://openrouter.ai/google/gemma-4-31b-it:free>
-- Nemotron 3 Super 120B A12B Free: <https://openrouter.ai/nvidia/nemotron-3-super-120b-a12b:free>
+- Nemotron 3 Super 120B A12B Free (evaluado y excluido por NVIDIA API Trial Terms): <https://openrouter.ai/nvidia/nemotron-3-super-120b-a12b:free>
 - GPT-OSS 20B (ID de pago; la variante `:free` no está en el catálogo): <https://openrouter.ai/openai/gpt-oss-20b>
