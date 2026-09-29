@@ -198,7 +198,7 @@ function parseComposerDashWork(text: string): ObservedWork {
 function worksFromProgramLines(lines: string[]): { works: ObservedWork[]; extraComposers: ObservedComposer[] } {
   const usable = lines
     .map((line) => stripEditorialNoteMarkers(line))
-    .filter((line) => line && !isEditorialNoteLegend(line));
+    .filter((line) => line && !isEditorialNoteLegend(line) && !isEditionMetadataLine(line));
   if (usable.length === 0) return { works: [], extraComposers: [] };
   const grouped = groupWorksByComposer(usable);
   if (grouped.works.length > 0 || grouped.extraComposers.length > 0) {
@@ -434,9 +434,15 @@ function appendContinuationIfLinked(works: ObservedWork[], line: string): boolea
   return appendToLastWork(works, line);
 }
 
+function isEditionMetadataLine(line: string): boolean {
+  return /^\(?\s*edici[oó]n(?:\s+n\.?)?\s*\d+\s*(?:[.ºª°])?\s*\)?$/iu.test(
+    line.trim(),
+  );
+}
+
 function repertoireProgramLines(lines: string[]): string[] {
   return lines.filter((line) => {
-    if (looksLikeScheduleNotice(line)) return false;
+    if (looksLikeScheduleNotice(line) || isEditionMetadataLine(line)) return false;
     if (looksLikeProductionNote(line) || looksLikeTextCredit(line)) return false;
     if (looksLikeUnequivocalWorkLine(line) || parseExplicitTitleAuthorWork(line)) return true;
     if (parseWorkThenPersonCredit(line) || parseComposerColonWork(line) || parseComposerYearWork(line)) {

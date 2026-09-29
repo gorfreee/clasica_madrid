@@ -36,9 +36,6 @@
   ],
   "works": [
     {
-      "title": "(Edición 37°)"
-    },
-    {
       "title": "Sinfonía n.° 9 en re menor “Coral”, op. 125",
       "composerName": "Ludwig van Beethoven"
     }
@@ -58,10 +55,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/orquesta-sinfonica-de-madrid-juanjo-mena-6",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-09-29",
       "externalId": "orquesta-sinfonica-de-madrid-juanjo-mena-6"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-30"
+  "lastVerifiedAt": "2026-09-29"
 }

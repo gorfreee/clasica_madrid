@@ -44,7 +44,20 @@
       "name": "Richard Strauss"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "Concierto para piano en La menor, Op. 54",
+      "composerName": "Robert Schumann"
+    },
+    {
+      "title": "Obertura trágica, Op. 81",
+      "composerName": "Johannes Brahms"
+    },
+    {
+      "title": "El caballero de la rosa (suite)",
+      "composerName": "Richard Strauss"
+    }
+  ],
   "eras": [
     "romantic"
   ],
@@ -57,10 +70,10 @@
     {
       "sourceId": "src_orquesta_coro_rtve",
       "url": "https://www.teatromonumental.es/eventos/concierto-sinfonico-a-3",
-      "checkedAt": "2026-09-09",
+      "checkedAt": "2026-09-29",
       "externalId": "/eventos/concierto-sinfonico-a-3/"
     }
   ],
   "primarySourceId": "src_orquesta_coro_rtve",
-  "lastVerifiedAt": "2026-09-09"
+  "lastVerifiedAt": "2026-09-29"
 }

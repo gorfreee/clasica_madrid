@@ -46,7 +46,12 @@
       "name": "Alberto Carretero"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "Poeta en Nueva York",
+      "composerName": "Alberto Carretero"
+    }
+  ],
   "eras": [
     "contemporary"
   ],
@@ -60,10 +65,10 @@
     {
       "sourceId": "src_teatro_zarzuela",
       "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/teatro-musical-de-camara-2026-2027/poeta-en-nueva-york",
-      "checkedAt": "2026-09-25",
+      "checkedAt": "2026-09-29",
       "externalId": "/es/temporada/teatro-musical-de-camara-2026-2027/poeta-en-nueva-york"
     }
   ],
   "primarySourceId": "src_teatro_zarzuela",
-  "lastVerifiedAt": "2026-09-25"
+  "lastVerifiedAt": "2026-09-29"
 }
