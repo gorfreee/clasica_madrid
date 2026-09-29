@@ -334,7 +334,6 @@ describe('factory multi-provider zero cost', () => {
       'google/gemma-4-26b-a4b-it:free',
       'poolside/laguna-xs-2.1:free',
       'google/gemma-4-31b-it:free',
-      'nvidia/nemotron-3-super-120b-a12b:free',
     ]);
     expect([...OPENROUTER_QUARANTINED_MODELS]).toEqual([
       'openai/gpt-oss-20b:free',
@@ -610,24 +609,6 @@ describe('payload HTTP por provider/modelo', () => {
     }
   });
 
-  it('OpenRouter Nemotron 3 Super usa json_schema y reasoning mínimo documentado', async () => {
-    const body = await captureBody('openrouter', 'nvidia/nemotron-3-super-120b-a12b:free');
-    expect(body).toMatchObject({
-      model: 'nvidia/nemotron-3-super-120b-a12b:free',
-      max_tokens: 100,
-      provider: { require_parameters: true },
-      reasoning: { effort: 'low' },
-      response_format: {
-        type: 'json_schema',
-        json_schema: {
-          name: 'clasica_eligibility',
-          strict: false,
-          schema: request.schema,
-        },
-      },
-    });
-  });
-
   it('OpenRouter GPT-OSS Free (quarantined) conserva json_schema y require_parameters', async () => {
     const body = await captureBody('openrouter', 'openai/gpt-oss-20b:free');
     expect(body).toMatchObject({
@@ -762,12 +743,6 @@ describe('payload HTTP por provider/modelo', () => {
       extraBody: { provider: { require_parameters: true }, reasoning: { effort: 'none' } },
       promptOutputContract: true,
     });
-    expect(identityByRoute(routes, 'openrouter:nvidia/nemotron-3-super-120b-a12b:free')).toMatchObject({
-      responseFormat: 'json-schema',
-      jsonSchemaStrict: false,
-      extraBody: { provider: { require_parameters: true }, reasoning: { effort: 'low' } },
-      promptOutputContract: false,
-    });
   });
 });
 
@@ -782,7 +757,6 @@ describe('schema-in-prompt para routes sin json_schema', () => {
       ['qwen/qwen3.8-27b', 'groq'],
       ['ministral-14b-2512', 'mistral'],
       ['ministral-3b-2512', 'mistral'],
-      ['nvidia/nemotron-3-super-120b-a12b:free', 'openrouter'],
       ['openai/gpt-oss-20b:free', 'openrouter'],
     ] as const) {
       const body = buildOpenAiCompatibleRequestBody(model, editorial, {
