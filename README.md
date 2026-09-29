@@ -4,6 +4,19 @@ Agenda pública de conciertos y eventos de música clásica en Madrid y su entor
 
 El producto y su alcance están en [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md). Las decisiones de arquitectura están en [`ARCHITECTURE.md`](ARCHITECTURE.md). Este README cubre cómo trabajar con el código y los datos.
 
+<p align="center">
+  <a href="./docs/architecture/architecture.svg">
+    <img src="./docs/architecture/architecture.gif" alt="Arquitectura de Clásica Madrid: fuentes y Discovery, pipeline con IA acotada y quality gates, catálogo Git, PR y CI, Astro y Cloudflare Pages" width="100%" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="./docs/architecture/architecture.html">HTML interactivo (descargar y abrir)</a> ·
+  <a href="./docs/architecture/architecture.svg">SVG completo</a> ·
+  <a href="./ARCHITECTURE.md">Documentación técnica</a> ·
+  <a href="./docs/architecture/README.md">Regenerar</a>
+</p>
+
 ## Requisitos
 
 - Node 22+ (véase `engines` en `package.json`)
