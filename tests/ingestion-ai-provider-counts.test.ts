@@ -33,7 +33,7 @@ const POOL_ENV = {
 } as const;
 
 const POOL_PROVIDERS = [
-  'gemini', 'groq', 'mistral', 'cloudflare', 'vercel', 'zai', 'kilo', 'openrouter',
+  'gemini', 'groq', 'mistral', 'cloudflare', 'zai', 'kilo', 'openrouter',
 ] as const;
 
 describe('completeProviderCounts', () => {
@@ -95,7 +95,7 @@ describe('completeProviderCounts', () => {
       POOL_PROVIDERS.map(route),
       'colon',
       'ninguno',
-    )).toBe('gemini: 32, groq: 0, mistral: 0, cloudflare: 0, vercel: 0, zai: 2, kilo: 0, openrouter: 0');
+    )).toBe('gemini: 32, groq: 0, mistral: 0, cloudflare: 0, zai: 2, kilo: 0, openrouter: 0');
     expect(formatProviderCountList({}, [], 'colon', 'ninguno')).toBe('ninguno');
   });
 });
@@ -108,15 +108,15 @@ describe('summaries de providers IA', () => {
       routes: POOL_PROVIDERS.map((provider) => summaryRoute(provider)),
     }));
     expect(text).toContain(
-      'requests por provider: gemini=32, groq=6, mistral=15, cloudflare=2, vercel=0, zai=2, kilo=0, openrouter=0',
+      'requests por provider: gemini=32, groq=6, mistral=15, cloudflare=2, zai=2, kilo=0, openrouter=0',
     );
     expect(text).toContain(
-      'clasificaciones por provider: gemini=30, groq=0, mistral=10, cloudflare=0, vercel=0, zai=0, kilo=0, openrouter=0',
+      'clasificaciones por provider: gemini=30, groq=0, mistral=10, cloudflare=0, zai=0, kilo=0, openrouter=0',
     );
     expect(text).not.toContain('openai=');
   });
 
-  it('un pool con Vercel, Kilo y OpenRouter configurados pero sin requests los muestra a 0', () => {
+  it('un pool con Vercel inactivo y Kilo/OpenRouter configurados muestra sólo routes activas a 0', () => {
     const classifier = new AiPoolClassifier({
       routes: createFreeRoutesFromEnv(POOL_ENV),
       random: () => 0,
@@ -129,10 +129,10 @@ describe('summaries de providers IA', () => {
         routes: stats.routes,
       }));
       expect(text).toContain(
-        'requests por provider: gemini=0, groq=0, mistral=0, cloudflare=0, vercel=0, zai=0, kilo=0, openrouter=0',
+        'requests por provider: gemini=0, groq=0, mistral=0, cloudflare=0, zai=0, kilo=0, openrouter=0',
       );
       expect(text).toContain(
-        'clasificaciones por provider: gemini=0, groq=0, mistral=0, cloudflare=0, vercel=0, zai=0, kilo=0, openrouter=0',
+        'clasificaciones por provider: gemini=0, groq=0, mistral=0, cloudflare=0, zai=0, kilo=0, openrouter=0',
       );
       expect([...new Set(stats.routes.map((item) => item.provider))]).toEqual([...POOL_PROVIDERS]);
     } finally {
@@ -149,9 +149,9 @@ describe('summaries de providers IA', () => {
     const automation = formatAutomationSummary(report, 'https://example.test/run/1');
     const discovery = formatDiscoveryAutomationSummary(report, 'https://example.test/run/1');
     const expectedRequests =
-      'gemini: 32, groq: 6, mistral: 15, cloudflare: 2, vercel: 0, zai: 2, kilo: 0, openrouter: 0';
+      'gemini: 32, groq: 6, mistral: 15, cloudflare: 2, zai: 2, kilo: 0, openrouter: 0';
     const expectedClassifications =
-      'gemini: 30, groq: 0, mistral: 10, cloudflare: 0, vercel: 0, zai: 0, kilo: 0, openrouter: 0';
+      'gemini: 30, groq: 0, mistral: 10, cloudflare: 0, zai: 0, kilo: 0, openrouter: 0';
     expect(automation).toContain(`| IA: requests por provider | ${expectedRequests} |`);
     expect(automation).toContain(`| IA: clasificaciones por provider | ${expectedClassifications} |`);
     expect(discovery).toContain(`| IA: requests por provider | ${expectedRequests} |`);
