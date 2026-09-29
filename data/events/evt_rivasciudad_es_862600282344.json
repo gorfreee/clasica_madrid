@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_rivasciudad_es_862600282344",
+  "slug": "un-americano-en-paris",
+  "title": "Un americano en París",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_pilar_bardem",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_rivasciudad_es_862600282344_01",
+      "date": "2026-10-03",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Sinfónica de Rivas Alma Mahler",
+      "role": "orchestra"
+    },
+    {
+      "name": "Jorge García Cuenllas",
+      "role": "conductor"
+    },
+    {
+      "name": "Noelia Rodiles"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Florence Price"
+    },
+    {
+      "name": "George Gershwin"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sinfonía n.º 1",
+      "composerName": "Florence Price"
+    },
+    {
+      "title": "Rhapsody in blue",
+      "composerName": "George Gershwin"
+    },
+    {
+      "title": "Un americano en París",
+      "composerName": "George Gershwin"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_rivasciudad_es",
+      "url": "https://www.rivasciudad.es/evento/cultura/2026/07/31/sinfonia-de-rivas-un-americano-en-paris/862600282344",
+      "checkedAt": "2026-09-29"
+    }
+  ],
+  "primarySourceId": "src_rivasciudad_es",
+  "lastVerifiedAt": "2026-09-29"
+}
