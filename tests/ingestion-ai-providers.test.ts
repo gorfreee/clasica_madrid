@@ -355,6 +355,17 @@ describe('factory multi-provider zero cost', () => {
       AI_ZERO_COST_ONLY: 'true', OPENROUTER_API_KEY: 'openrouter-key',
     })).toEqual([]);
 
+    const vercelInspection = inspectFreePoolFromEnv({
+      AI_ZERO_COST_ONLY: 'true',
+      VERCEL_AI_GATEWAY_API_KEY: 'vercel-key',
+      VERCEL_FREE_TIER_CONFIRMED: 'true',
+    }).providers.find((item) => item.provider === 'vercel');
+    expect(vercelInspection).toMatchObject({
+      status: 'ready',
+      routes: [],
+      reason: 'provider sin routes activas por política zero-cost',
+    });
+
     const routes = createFreeRoutesFromEnv({
       AI_ZERO_COST_ONLY: 'true',
       VERCEL_AI_GATEWAY_API_KEY: 'vercel-key', VERCEL_FREE_TIER_CONFIRMED: 'true',
