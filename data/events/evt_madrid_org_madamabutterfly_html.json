@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_org_madamabutterfly_html",
+  "slug": "madama-butterfly-3",
+  "title": "Madama Butterfly",
+  "status": "scheduled",
+  "venueId": "ven_teatro_jacinto_benavente",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_org_madamabutterfly_html_01",
+      "date": "2026-11-07",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Camerata Lírica de España"
+    },
+    {
+      "name": "Iván Martí",
+      "role": "conductor"
+    },
+    {
+      "name": "Inmaculada Laín"
+    },
+    {
+      "name": "Guiomar Cantó"
+    },
+    {
+      "name": "Carla Sampedro"
+    },
+    {
+      "name": "Rita Raposo"
+    },
+    {
+      "name": "Moisés Morín"
+    },
+    {
+      "name": "Pablo Sánchez"
+    },
+    {
+      "name": "Andrés del Pino"
+    },
+    {
+      "name": "Rodolfo Albero"
+    },
+    {
+      "name": "Jose Bardají"
+    },
+    {
+      "name": "Armando del Hoyo"
+    },
+    {
+      "name": "Iván Basteiros"
+    },
+    {
+      "name": "Rubén Sainz"
+    },
+    {
+      "name": "Carmen Gavilán"
+    },
+    {
+      "name": "Aisha Zenit"
+    },
+    {
+      "name": "Sara Mitchell"
+    },
+    {
+      "name": "Prado Álvarez"
+    },
+    {
+      "name": "Belinda Oñate"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Giacomo Puccini"
+    }
+  ],
+  "works": [
+    {
+      "title": "Madama Butterfly",
+      "composerName": "Giacomo Puccini"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "opera"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_madrid_org",
+      "url": "https://www.madrid.org/clas_artes/red/madamabutterfly.html",
+      "checkedAt": "2026-09-29"
+    }
+  ],
+  "primarySourceId": "src_madrid_org",
+  "lastVerifiedAt": "2026-09-29"
+}

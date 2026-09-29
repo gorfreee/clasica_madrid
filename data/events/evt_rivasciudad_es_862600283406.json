@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_rivasciudad_es_862600283406",
+  "slug": "amor-brujo",
+  "title": "Amor brujo",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_pilar_bardem",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_rivasciudad_es_862600283406_01",
+      "date": "2026-11-07",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Sinfónica de Rivas Alma Mahler",
+      "role": "orchestra"
+    },
+    {
+      "name": "Lucía Marín",
+      "role": "conductor"
+    },
+    {
+      "name": "Mariola Membrives"
+    },
+    {
+      "name": "Carla Prado"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Laura Vega"
+    },
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Manuel de Falla"
+    }
+  ],
+  "works": [
+    {
+      "title": "Más allá de los mundos",
+      "composerName": "Laura Vega"
+    },
+    {
+      "title": "Sinfonía n.º 41 (Júpiter)",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "El amor brujo (versión de 1925)",
+      "composerName": "Manuel de Falla"
+    }
+  ],
+  "eras": [
+    "classical",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_rivasciudad_es",
+      "url": "https://www.rivasciudad.es/noticias/cultura/2026/09/06/mozart-falla-o-gershwin-abono-para-tres-conciertos-de-la-sinfonica-de-rivas/862600283406",
+      "checkedAt": "2026-09-29"
+    }
+  ],
+  "primarySourceId": "src_rivasciudad_es",
+  "lastVerifiedAt": "2026-09-29"
+}
