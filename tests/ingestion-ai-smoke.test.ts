@@ -127,8 +127,11 @@ describe('CLI, fixtures y descubrimiento', () => {
     expect(discovered.routes.map((route) => route.routeId)).not.toContain('kilo:dots-studio/dots-3-note-preview:free');
     expect(discovered.routes.map((route) => route.routeId)).not.toContain('openrouter:openai/gpt-oss-20b:free');
     expect(discovered.routes.map((route) => route.routeId)).not.toContain('openrouter:openai/gpt-oss-20b');
-    expect(KILO_QUARANTINED_MODELS).toEqual(['dots-studio/dots-3-note-preview:free']);
-    expect(OPENROUTER_QUARANTINED_MODELS).toEqual(['openai/gpt-oss-20b:free']);
+    expect(KILO_QUARANTINED_MODELS).toEqual([]);
+    expect(OPENROUTER_QUARANTINED_MODELS).toEqual([
+      'openai/gpt-oss-20b:free',
+      'inclusionai/ling-3.0-flash-vl:free',
+    ]);
   });
 
   it('informa proveedores esperados sin credenciales en vez de ocultarlos', () => {
