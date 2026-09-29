@@ -124,7 +124,7 @@ describe('factory multi-provider zero cost', () => {
       ['mistral', 'unconfigured'],
       ['cloudflare', 'unconfigured'],
       ['zai', 'error'],
-      ['vercel', 'unconfigured'],
+      ['vercel', 'ready'],
       ['kilo', 'unconfigured'],
       ['openrouter', 'unconfigured'],
     ]);
