@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_red_es_es_madama_butterfly_5",
+  "slug": "madama-butterfly-4",
+  "title": "Madama Butterfly",
+  "status": "scheduled",
+  "venueId": "ven_teatro_casa_de_la_cultura_de_collado_villalba",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_red_es_es_madama_butterfly_5_01",
+      "date": "2026-11-21",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Camerata Lírica de España"
+    },
+    {
+      "name": "Iván Martí",
+      "role": "conductor"
+    },
+    {
+      "name": "Aisha Zenit"
+    },
+    {
+      "name": "Andrés del Pino"
+    },
+    {
+      "name": "Guiomar Cantó"
+    },
+    {
+      "name": "Lucía Casanueva"
+    },
+    {
+      "name": "Pablo Sánchez"
+    },
+    {
+      "name": "Rita Raposo"
+    },
+    {
+      "name": "Sergio Kuhlmann"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Giacomo Puccini"
+    }
+  ],
+  "works": [
+    {
+      "title": "Madama Butterfly",
+      "composerName": "Giacomo Puccini"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "opera"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_red_es_es",
+      "url": "https://www.red-es.es/obra/madama-butterfly-5",
+      "checkedAt": "2026-09-29"
+    }
+  ],
+  "primarySourceId": "src_red_es_es",
+  "lastVerifiedAt": "2026-09-29"
+}
