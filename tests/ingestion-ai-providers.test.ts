@@ -760,8 +760,6 @@ describe('payload HTTP por provider/modelo', () => {
   });
 });
 
-describe('schema-in-prompt para routes sin json_schema', () => {});
-
 describe('schema-in-prompt para routes sin json_schema', () => {
   const observed = { title: 'Concierto de Bach', performers: [], composers: [], works: [] };
 
