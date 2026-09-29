@@ -866,13 +866,13 @@ describe('salud HEALTHY/DEGRADED/FAIL y resumen por provider', () => {
 
     expect(summarizeProviders(result.routes)).toEqual([
       { provider: 'vercel', HEALTHY: 1, DEGRADED: 0, FAIL: 0, quarantined: 0 },
-      { provider: 'kilo', HEALTHY: 0, DEGRADED: 1, FAIL: 0, quarantined: 1 },
-      { provider: 'openrouter', HEALTHY: 0, DEGRADED: 0, FAIL: 1, quarantined: 1 },
+      { provider: 'kilo', HEALTHY: 0, DEGRADED: 1, FAIL: 0, quarantined: 0 },
+      { provider: 'openrouter', HEALTHY: 0, DEGRADED: 0, FAIL: 1, quarantined: 2 },
     ]);
     expect(result.markdown).toContain('## Provider health');
     expect(result.markdown).toContain('Vercel\n  HEALTHY: 1\n  DEGRADED: 0\n  FAIL: 0');
-    expect(result.markdown).toContain('Kilo\n  HEALTHY: 0\n  DEGRADED: 1\n  FAIL: 0\n  QUARANTINED: 1');
-    expect(result.markdown).toContain('OpenRouter\n  HEALTHY: 0\n  DEGRADED: 0\n  FAIL: 1\n  QUARANTINED: 1');
+    expect(result.markdown).toContain('Kilo\n  HEALTHY: 0\n  DEGRADED: 1\n  FAIL: 0\n  QUARANTINED: 0');
+    expect(result.markdown).toContain('OpenRouter\n  HEALTHY: 0\n  DEGRADED: 0\n  FAIL: 1\n  QUARANTINED: 2');
     expect(result.markdown).toContain('## Route diagnostics');
     expect(result.json.routes[0]?.purposeResults[0]?.attempts).toBe(1);
     expect(result.json.routes[1]?.purposeResults[0]?.attempts).toBe(2);
