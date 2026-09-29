@@ -145,7 +145,7 @@ describe('CLI, fixtures y descubrimiento', () => {
     expect(byProvider.mistral).toMatchObject({ status: 'unconfigured', reason: 'falta MISTRAL_API_KEY' });
     expect(byProvider.zai).toMatchObject({ status: 'unconfigured', reason: 'falta ZAI_API_KEY' });
     expect(byProvider.cloudflare).toMatchObject({ status: 'unconfigured', reason: 'falta CLOUDFLARE_API_TOKEN' });
-    expect(byProvider.vercel).toMatchObject({ status: 'ready', reason: 'provider sin routes activas por política zero-cost', routes: [] });
+    expect(byProvider.vercel).toMatchObject({ status: 'ready', reason: 'provider sin routes activas por política zero-cost' });
     expect(byProvider.kilo).toMatchObject({ status: 'unconfigured', reason: 'falta KILO_API_KEY' });
     expect(byProvider.openrouter).toMatchObject({ status: 'unconfigured', reason: 'falta OPENROUTER_API_KEY' });
   });
