@@ -3,34 +3,39 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const smokePath = path.join(import.meta.dirname, '..', '.github', 'workflows', 'ai-live-smoke.yml');
-const routeSmokePath = path.join(import.meta.dirname, '..', '.github', 'workflows', 'ai-smoke.yml');
 const ingestionPath = path.join(import.meta.dirname, '..', '.github', 'workflows', 'ingestion.yml');
 const ciPath = path.join(import.meta.dirname, '..', '.github', 'workflows', 'ci.yml');
 
 describe('workflow AI live smoke test', () => {
-  it('sólo se lanza a mano, reutiliza secrets de ingestión y ejecuta ai:smoke:all', async () => {
+  it('es manual, read-only y permite probar todo el pool o una route concreta', async () => {
     const yaml = await readFile(smokePath, 'utf8');
-    const routeYaml = await readFile(routeSmokePath, 'utf8');
     const ingestion = await readFile(ingestionPath, 'utf8');
     const ci = await readFile(ciPath, 'utf8');
 
     expect(yaml).toContain('name: AI live smoke test');
     expect(yaml).toContain('workflow_dispatch:');
-    expect(yaml).toContain('all_purposes:');
-    expect(yaml).toContain('default: false');
+    expect(yaml).toContain('route:');
+    expect(yaml).toContain('description: "Route exacta provider:model. Vacío = todas las routes del pool"');
+    expect(yaml).toContain('purpose:');
+    expect(yaml).toContain('- composer-extraction');
+    expect(yaml).toContain('- access-classification');
+    expect(yaml).toContain('- taxonomy');
+    expect(yaml).toContain('- all');
     expect(yaml).not.toMatch(/^\s+pull_request:/m);
     expect(yaml).not.toMatch(/^\s+push:/m);
     expect(yaml).not.toMatch(/^\s+schedule:/m);
+    expect(yaml).toMatch(/contents: read/);
+    expect(yaml).not.toMatch(/contents: write/);
+    expect(yaml).not.toMatch(/pull-requests: write/);
 
     expect(yaml).toContain("AI_ZERO_COST_ONLY: 'true'");
     expect(yaml).toContain("AI_CACHE: 'off'");
     expect(yaml).toContain('timeout-minutes: 15');
     expect(yaml).not.toContain('AI_STATE_DIR');
-    expect(routeYaml).not.toContain('AI_STATE_DIR');
-    expect(routeYaml).toContain('--report-dir');
-    expect(routeYaml).toContain('ai-smoke-report.md');
-    expect(routeYaml).toMatch(/if:\s*always\(\)/);
-    expect(yaml).toContain('npm run ai:smoke:all');
+    expect(yaml).toContain('if [[ -n "${ROUTE:-}" ]]');
+    expect(yaml).toContain('npm run ai:smoke -- --route "$ROUTE"');
+    expect(yaml).toContain('npm run ai:smoke:all -- "${args[@]}"');
+    expect(yaml).toContain('--purpose "$PURPOSE"');
     expect(yaml).toContain('--all-purposes');
     expect(yaml).toContain('--report-dir');
     expect(yaml).toContain('GITHUB_STEP_SUMMARY');
@@ -41,6 +46,8 @@ describe('workflow AI live smoke test', () => {
     expect(yaml).toContain('Fail if smoke failed');
     expect(yaml).toContain('actions/upload-artifact@');
     expect(yaml).not.toContain('ingest:sync');
+    expect(yaml).not.toContain('gh pr create');
+    expect(yaml).not.toContain('git commit');
     expect(yaml).not.toContain('data/**');
 
     const required = [

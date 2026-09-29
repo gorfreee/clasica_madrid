@@ -305,8 +305,7 @@ OpenRouter
 
 En GitHub hay workflows manuales (`workflow_dispatch`, `contents: read`, mismos secrets/`vars` que la ingestión). No publican datos:
 
-- **AI route smoke** — una route exacta (`provider:model`) y un purpose (o `all`).
-- **AI live smoke test** — `npm run ai:smoke:all`, con el input `all_purposes`.
+- **AI live smoke test** — único workflow de smoke. `route` vacío prueba todo el pool; una route exacta (`provider:model`) aísla ese modelo. `purpose` permite elegir una task concreta o `all`.
 - **AI live qualification** — `npm run ai:qualify`, benchmark de calidad (sección siguiente).
 
 ## Qualification benchmark
@@ -355,7 +354,7 @@ Workflow manual: **AI live qualification** (`.github/workflows/ai-live-qualifica
 13. Añadir el secret `KILO_API_KEY` y `KILO_FREE_TIER_CONFIRMED=true`.
 14. Añadir el secret `OPENROUTER_API_KEY` y `OPENROUTER_FREE_TIER_CONFIRMED=true`. Opcional pero recomendado: Guardrail de OpenRouter con la misma allowlist que el código.
 15. No hace falta crear `VERCEL_MODELS` / `KILO_MODELS` / `OPENROUTER_MODELS` ni overrides de límites: los defaults viven en el código.
-16. Ejecutar `npm run ai:smoke:all` (y `--all-purposes` si cambian las tasks), o una route concreta con `npm run ai:smoke -- --route …` / el workflow **AI route smoke**. El workflow **AI live smoke test** cubre el barrido completo. Un HTTP smoke en verde **no** promociona estas routes por delante de Gemini/Groq/Mistral/Z.AI/Cloudflare.
+16. Ejecutar `npm run ai:smoke:all` (y `--all-purposes` si cambian las tasks), una route concreta con `npm run ai:smoke -- --route …`, o usar el workflow **AI live smoke test**: `route` vacío cubre el barrido completo y `provider:model` aísla una route. Un HTTP smoke en verde **no** promociona estas routes por delante de Gemini/Groq/Mistral/Z.AI/Cloudflare.
 17. Ejecutar **AI live qualification** (`npm run ai:qualify -- --providers vercel,kilo,openrouter`) contra el mismo dataset de producción antes de reordenar el pool.
 18. Lanzar un `workflow_dispatch` en `dry-run` antes del primer publish.
 
