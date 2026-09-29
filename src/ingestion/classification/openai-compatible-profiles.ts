@@ -261,21 +261,6 @@ const OPENROUTER_JSON_SCHEMA: OpenAiCompatibleModelProfile = {
   extraBody: { provider: { require_parameters: true }, ...REASONING_NONE },
 };
 
-/**
- * Nemotron 3 Super Free exposes structured outputs but its current catalog
- * advertises low/medium reasoning efforts rather than `none`. Use the lowest
- * documented effort instead of sending an unsupported disable value.
- */
-const OPENROUTER_JSON_SCHEMA_LOW_REASONING: OpenAiCompatibleModelProfile = {
-  responseFormat: 'json-schema',
-  jsonSchemaStrict: false,
-  tokenParameter: 'max_tokens',
-  extraBody: {
-    provider: { require_parameters: true },
-    reasoning: { effort: 'low' },
-  },
-};
-
 /** OpenRouter IDs without documented `response_format`. */
 const OPENROUTER_PROMPT: OpenAiCompatibleModelProfile = {
   responseFormat: 'none',
@@ -341,7 +326,6 @@ const KILO_MODEL_PROFILES: Record<string, OpenAiCompatibleModelProfile> = {
 const OPENROUTER_MODEL_PROFILES: Record<string, OpenAiCompatibleModelProfile> = {
   'google/gemma-4-26b-a4b-it:free': OPENROUTER_JSON_OBJECT,
   'google/gemma-4-31b-it:free': OPENROUTER_JSON_OBJECT,
-  'nvidia/nemotron-3-super-120b-a12b:free': OPENROUTER_JSON_SCHEMA_LOW_REASONING,
   'poolside/laguna-xs-2.1:free': OPENROUTER_PROMPT,
   /** Retired/default-off profiles are kept only for explicit diagnostics. */
   'nex-agi/nex-n2.5-mini:free': OPENROUTER_JSON_SCHEMA,
