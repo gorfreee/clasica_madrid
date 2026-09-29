@@ -136,42 +136,6 @@ describe('workflow de ingestión: artifact de observabilidad', () => {
   });
 });
 
-describe('workflow manual de smoke de IA', () => {
-  const smokePath = path.join(import.meta.dirname, '..', '.github', 'workflows', 'ai-smoke.yml');
-
-  it('es workflow_dispatch read-only, sin ingest ni PR', async () => {
-    const yaml = await readFile(smokePath, 'utf8');
-    expect(yaml).toMatch(/on:\s*\n\s*workflow_dispatch:/);
-    expect(yaml).toMatch(/contents: read/);
-    expect(yaml).not.toMatch(/contents: write/);
-    expect(yaml).not.toMatch(/pull-requests: write/);
-    expect(yaml).not.toMatch(/ingest:sync/);
-    expect(yaml).not.toMatch(/gh pr create/);
-    expect(yaml).not.toMatch(/git commit/);
-    expect(yaml).not.toMatch(/data\/events/);
-  });
-
-  it('reutiliza el CLI de smoke con zero-cost y cache desactivada', async () => {
-    const yaml = await readFile(smokePath, 'utf8');
-    expect(yaml).toContain('npm run ai:smoke --');
-    expect(yaml).toContain('--route');
-    expect(yaml).toMatch(/AI_ZERO_COST_ONLY: 'true'/);
-    expect(yaml).toMatch(/AI_CACHE: 'off'/);
-    expect(yaml).toContain('${{ inputs.route }}');
-  });
-
-  it('usa secrets reales; vars de modelos/límites son overrides opcionales', async () => {
-    const yaml = await readFile(smokePath, 'utf8');
-    expect(yaml).toContain('MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}');
-    expect(yaml).toContain('ZAI_API_KEY: ${{ secrets.ZAI_API_KEY }}');
-    expect(yaml).toContain('MISTRAL_MODELS: ${{ vars.MISTRAL_MODELS }}');
-    expect(yaml).toContain('ZAI_MAX_CONCURRENT: ${{ vars.ZAI_MAX_CONCURRENT }}');
-    expect(yaml).not.toMatch(/MISTRAL_MODELS:\s*['\"]?ministral/);
-    expect(yaml).not.toMatch(/ZAI_MAX_CONCURRENT:\s*['\"]?\d+/);
-    expect(yaml).not.toMatch(/MISTRAL_MODEL_TPM:\s*['\"]?ministral/);
-  });
-});
-
 function section(yaml: string, name: string): string {
   const marker = `- name: ${name}`;
   const start = yaml.indexOf(marker);

@@ -1,15 +1,27 @@
 name: AI live smoke test
 
-# Direct one-shot checks of every configured AI pool route. Manual only: this
-# consumes real provider quota and must never run on push, PR, or a schedule.
+# Direct one-shot checks of the configured AI pool. The same manual workflow
+# can test every route or isolate one provider:model. It consumes real provider
+# quota and must never run on push, PR, or a schedule.
 
 on:
   workflow_dispatch:
     inputs:
-      all_purposes:
-        description: Una llamada directa por route × purpose (eligibility, composer, access, taxonomy)
-        type: boolean
-        default: false
+      route:
+        description: "Route exacta provider:model. Vacío = todas las routes del pool"
+        type: string
+        required: false
+      purpose:
+        description: Purpose a probar
+        type: choice
+        options:
+          - eligibility
+          - composer-extraction
+          - access-classification
+          - taxonomy
+          - all
+        default: eligibility
+        required: true
 
 permissions:
   contents: read
@@ -20,7 +32,7 @@ concurrency:
 
 jobs:
   smoke:
-    name: Direct one-shot smoke for every AI route
+    name: Direct one-shot smoke for AI routes
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -119,7 +131,8 @@ jobs:
       - name: Run AI live smoke
         id: smoke
         env:
-          ALL_PURPOSES: ${{ inputs.all_purposes }}
+          ROUTE: ${{ inputs.route }}
+          PURPOSE: ${{ inputs.purpose }}
           REPORT_DIR: ${{ runner.temp }}/ai-smoke-report
         shell: bash
         run: |
@@ -127,11 +140,25 @@ jobs:
           set -uo pipefail
           mkdir -p "$REPORT_DIR"
           args=(--report-dir "$REPORT_DIR" --summary "$GITHUB_STEP_SUMMARY")
-          if [[ "${ALL_PURPOSES:-}" == "true" ]]; then
+          if [[ "$PURPOSE" == "all" ]]; then
             args+=(--all-purposes)
+          else
+            args+=(--purpose "$PURPOSE")
           fi
-          npm run ai:smoke:all -- "${args[@]}"
-          status=$?
+
+          if [[ -n "${ROUTE:-}" ]]; then
+            if [[ ! "$ROUTE" =~ ^[a-z0-9._-]+:.+$ ]]; then
+              echo "route debe ser provider:model, p. ej. mistral:ministral-14b-2512" >&2
+              status=1
+            else
+              npm run ai:smoke -- --route "$ROUTE" "${args[@]}"
+              status=$?
+            fi
+          else
+            npm run ai:smoke:all -- "${args[@]}"
+            status=$?
+          fi
+
           echo "exit_code=$status" >> "$GITHUB_OUTPUT"
           echo "report_dir=$REPORT_DIR" >> "$GITHUB_OUTPUT"
           exit 0
