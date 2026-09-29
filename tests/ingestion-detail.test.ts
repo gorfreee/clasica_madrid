@@ -883,6 +883,21 @@ describe('parser de ficha Auditorio Nacional', () => {
     ]);
   });
 
+  it('no convierte un ordinal de edición del concierto en una obra', () => {
+    const facts = parseAuditorioNacionalDetail(
+      auditorioPage('Orquesta Sinfónica de Madrid. Thomas Dausgaard', [
+        'Orquesta Sinfónica de Madrid<br />Thomas Dausgaard, director',
+        'CONCIERTO DE SANTA CECILIA<br />(Edición 41°)<br />Ludwig van Beethoven<br />Sinfonía n.° 2 en re mayor, op. 36<br />Robert Schumann<br />Sinfonía n.° 2 en do mayor, op. 61',
+      ]),
+    );
+
+    expect(facts.works).toEqual([
+      { title: 'Sinfonía n.° 2 en re mayor, op. 36', composerName: 'Ludwig van Beethoven' },
+      { title: 'Sinfonía n.° 2 en do mayor, op. 61', composerName: 'Robert Schumann' },
+    ]);
+    expect(facts.programText).not.toMatch(/Edición 41/);
+  });
+
   it('no inventa performers, composers ni works si la ficha no los declara', () => {
     const facts = parseAuditorioNacionalDetail(
       '<article><h1>OCNE. Sinfónico 01</h1><p>Concierto de temporada.</p></article>',

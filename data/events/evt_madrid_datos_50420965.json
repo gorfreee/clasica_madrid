@@ -21,6 +21,9 @@
       "name": "Ernesto Lecuona"
     },
     {
+      "name": "M. Sandoval"
+    },
+    {
       "name": "Carlos Gardel"
     },
     {
@@ -49,7 +52,8 @@
       "composerName": "Ernesto Lecuona"
     },
     {
-      "title": "Pregúntale a las estrellas"
+      "title": "Pregúntale a las estrellas",
+      "composerName": "M. Sandoval"
     },
     {
       "title": "El día que me quieras",
@@ -96,10 +100,10 @@
     {
       "sourceId": "src_ayuntamiento_madrid",
       "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=35833893f4ba0a10VgnVCM200000f921e388RCRD",
-      "checkedAt": "2026-09-25",
+      "checkedAt": "2026-09-29",
       "externalId": "50420965"
     }
   ],
   "primarySourceId": "src_ayuntamiento_madrid",
-  "lastVerifiedAt": "2026-09-25"
+  "lastVerifiedAt": "2026-09-29"
 }
