@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "evt_madrid_org_madamabutterfly_html",
+  "id": "evt_gestiona_madrid_org_madamabutterfly_html_2",
   "slug": "madama-butterfly-3",
   "title": "Madama Butterfly",
   "status": "scheduled",
@@ -9,7 +9,7 @@
   "seriesId": null,
   "occurrences": [
     {
-      "id": "occ_madrid_org_madamabutterfly_html_01",
+      "id": "occ_gestiona_madrid_org_madamabutterfly_html_2_01",
       "date": "2026-11-07",
       "time": "19:00",
       "status": "scheduled"
@@ -96,11 +96,11 @@
   "access": "unknown",
   "citations": [
     {
-      "sourceId": "src_madrid_org",
+      "sourceId": "src_gestiona_madrid_org",
       "url": "https://www.madrid.org/clas_artes/red/madamabutterfly.html",
       "checkedAt": "2026-09-29"
     }
   ],
-  "primarySourceId": "src_madrid_org",
+  "primarySourceId": "src_gestiona_madrid_org",
   "lastVerifiedAt": "2026-09-29"
 }

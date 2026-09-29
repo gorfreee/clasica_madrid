@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_agrupacionliricamatritense_org_los_gavilanes_2026_11_28_teatro_josep_carreras",
+  "slug": "los-gavilanes-2",
+  "title": "Los Gavilanes",
+  "status": "scheduled",
+  "venueId": "ven_teatro_josep_carreras",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_agrupacionliricamatritense_org_los_gavilanes_2026_11_28_teatro_josep_carreras_01",
+      "date": "2026-11-28",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Agrupación Lírica Matritense"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Jacinto Guerrero"
+    }
+  ],
+  "works": [
+    {
+      "title": "Los gavilanes",
+      "composerName": "Jacinto Guerrero"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "zarzuela"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_agrupacionliricamatritense_org",
+      "url": "https://www.agrupacionliricamatritense.org/actuaciones/2026/",
+      "checkedAt": "2026-09-29"
+    }
+  ],
+  "primarySourceId": "src_agrupacionliricamatritense_org",
+  "lastVerifiedAt": "2026-09-29"
+}
