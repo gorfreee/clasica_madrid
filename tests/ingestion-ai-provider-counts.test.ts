@@ -33,7 +33,7 @@ const POOL_ENV = {
 } as const;
 
 const POOL_PROVIDERS = [
-  'gemini', 'groq', 'mistral', 'cloudflare', 'vercel', 'zai', 'kilo', 'openrouter',
+  'gemini', 'groq', 'mistral', 'cloudflare', 'zai', 'kilo', 'openrouter',
 ] as const;
 
 describe('completeProviderCounts', () => {
@@ -116,7 +116,7 @@ describe('summaries de providers IA', () => {
     expect(text).not.toContain('openai=');
   });
 
-  it('un pool con Vercel, Kilo y OpenRouter configurados pero sin requests los muestra a 0', () => {
+  it('un pool con Vercel inactivo y Kilo/OpenRouter configurados muestra sólo routes activas a 0', () => {
     const classifier = new AiPoolClassifier({
       routes: createFreeRoutesFromEnv(POOL_ENV),
       random: () => 0,
@@ -129,10 +129,10 @@ describe('summaries de providers IA', () => {
         routes: stats.routes,
       }));
       expect(text).toContain(
-        'requests por provider: gemini=0, groq=0, mistral=0, cloudflare=0, vercel=0, zai=0, kilo=0, openrouter=0',
+        'requests por provider: gemini=0, groq=0, mistral=0, cloudflare=0, zai=0, kilo=0, openrouter=0',
       );
       expect(text).toContain(
-        'clasificaciones por provider: gemini=0, groq=0, mistral=0, cloudflare=0, vercel=0, zai=0, kilo=0, openrouter=0',
+        'clasificaciones por provider: gemini=0, groq=0, mistral=0, cloudflare=0, zai=0, kilo=0, openrouter=0',
       );
       expect([...new Set(stats.routes.map((item) => item.provider))]).toEqual([...POOL_PROVIDERS]);
     } finally {
