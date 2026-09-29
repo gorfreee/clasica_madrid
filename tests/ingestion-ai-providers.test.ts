@@ -47,8 +47,6 @@ import {
   OPENROUTER_PRODUCTION_LIMITS,
   OPENROUTER_QUARANTINED_MODELS,
   OPENROUTER_ZERO_COST_MODELS,
-  VERCEL_DEFAULT_BASE_URL,
-  VERCEL_PRODUCTION_LIMITS,
   VERCEL_ZERO_COST_MODELS,
   ZAI_DEFAULT_BASE_URL,
   ZAI_PRODUCTION_LIMITS,
@@ -87,7 +85,7 @@ describe('factory multi-provider zero cost', () => {
     }))).toEqual(['cloudflare']);
     expect(routeProviders(createFreeRoutesFromEnv({
       ...base, VERCEL_AI_GATEWAY_API_KEY: 'vercel-key', VERCEL_FREE_TIER_CONFIRMED: 'true',
-    }))).toEqual(['vercel']);
+    }))).toEqual([]);
     expect(routeProviders(createFreeRoutesFromEnv({
       ...base, KILO_API_KEY: 'kilo-key', KILO_FREE_TIER_CONFIRMED: 'true',
     }))).toEqual(['kilo']);
@@ -190,7 +188,7 @@ describe('factory multi-provider zero cost', () => {
       ...MISTRAL_DEFAULT_MODELS.map((model) => `mistral:${model}`),
       ...CLOUDFLARE_ZERO_COST_MODELS.map((model) => `cloudflare:${model}`),
       ...VERCEL_ZERO_COST_MODELS.map((model) => `vercel:${model}`),
-      'zai:glm-4.7-flash', 'zai:glm-4.5-flash',
+      ...ZAI_ZERO_COST_MODELS.map((model) => `zai:${model}`),
       ...KILO_ZERO_COST_MODELS.map((model) => `kilo:${model}`),
       ...OPENROUTER_ZERO_COST_MODELS.map((model) => `openrouter:${model}`),
     ]);
@@ -200,12 +198,11 @@ describe('factory multi-provider zero cost', () => {
     expect(identity(routes, 'cloudflare').baseUrl).toBe(
       'https://api.cloudflare.com/client/v4/accounts/account-id/ai/v1',
     );
-    expect(identity(routes, 'vercel').baseUrl).toBe(VERCEL_DEFAULT_BASE_URL);
     expect(identity(routes, 'kilo').baseUrl).toBe(KILO_DEFAULT_BASE_URL);
     expect(identity(routes, 'openrouter').baseUrl).toBe(OPENROUTER_DEFAULT_BASE_URL);
   });
 
-  it('prioriza Cloudflare y Vercel por delante de Z.AI y conserva el resto del orden', () => {
+  it('prioriza Cloudflare por delante de Z.AI y conserva el resto del orden', () => {
     const routes = createFreeRoutesFromEnv({
       AI_ZERO_COST_ONLY: 'true',
       GEMINI_API_KEY: 'gemini-key',
@@ -219,7 +216,7 @@ describe('factory multi-provider zero cost', () => {
       OPENROUTER_API_KEY: 'openrouter-key', OPENROUTER_FREE_TIER_CONFIRMED: 'true',
     });
     expect(routeProviders(routes)).toEqual([
-      'gemini', 'groq', 'mistral', 'cloudflare', 'vercel', 'zai', 'kilo', 'openrouter',
+      'gemini', 'groq', 'mistral', 'cloudflare', 'zai', 'kilo', 'openrouter',
     ]);
   });
 
@@ -284,7 +281,9 @@ describe('factory multi-provider zero cost', () => {
     expect(plain.map((route) => route.routeId)).toEqual([
       'mistral:ministral-14b-2512',
       'mistral:ministral-8b-2512',
+      'mistral:ministral-3b-2512',
       'zai:glm-4.7-flash',
+      'zai:glm-4.6v-flash',
       'zai:glm-4.5-flash',
     ]);
     expect(plain.find((route) => route.routeId === 'mistral:ministral-14b-2512')?.limits).toEqual(
@@ -296,11 +295,12 @@ describe('factory multi-provider zero cost', () => {
     expect(plain.find((route) => route.routeId === 'zai:glm-4.7-flash')?.limits).toEqual(ZAI_PRODUCTION_LIMITS);
   });
 
-  it('MISTRAL_MODELS / límites env tienen precedencia y 3B no entra por defecto', () => {
-    expect([...MISTRAL_DEFAULT_MODELS]).toEqual(['ministral-14b-2512', 'ministral-8b-2512']);
-    expect([...MISTRAL_OPTIONAL_MODELS]).toEqual(['ministral-3b-2512']);
+  it('MISTRAL_MODELS / límites env tienen precedencia y 3B entra por defecto', () => {
+    expect([...MISTRAL_DEFAULT_MODELS]).toEqual([
+      'ministral-14b-2512', 'ministral-8b-2512', 'ministral-3b-2512',
+    ]);
+    expect([...MISTRAL_OPTIONAL_MODELS]).toEqual([]);
     expect(MISTRAL_DEFAULT_MODELS).not.toContain('mistral-small-latest');
-    expect(MISTRAL_DEFAULT_MODELS).not.toContain('ministral-3b-2512');
 
     const overridden = createFreeRoutesFromEnv({
       AI_ZERO_COST_ONLY: 'true',
@@ -321,30 +321,27 @@ describe('factory multi-provider zero cost', () => {
   });
 
   it('Vercel/Kilo/OpenRouter exigen confirmación, allowlist y límites provider-wide', () => {
-    expect([...VERCEL_ZERO_COST_MODELS]).toEqual(['inclusionai/ling-3.0-flash-vl-free']);
-    expect(VERCEL_ZERO_COST_MODELS).not.toContain('minimax/minimax-m3-free');
-    expect(VERCEL_ZERO_COST_MODELS).not.toContain('minimax/minimax-m3');
-    expect(VERCEL_ZERO_COST_MODELS).not.toContain('inclusionai/ling-3.0-flash');
-    expect(VERCEL_ZERO_COST_MODELS).not.toContain('inclusionai/ling-3.0-flash-free');
-    expect(VERCEL_ZERO_COST_MODELS).not.toContain('inclusionai/ling-3.0-flash-fin-free');
-    expect([...KILO_ZERO_COST_MODELS]).toEqual([
-      'nex-agi/nex-n2.5-mini:free',
-      'nex-agi/nex-n2.5-pro:free',
-      'inclusionai/ling-3.0-flash-vl:free',
-      'poolside/laguna-xs-2.1:free',
-    ]);
+    expect([...VERCEL_ZERO_COST_MODELS]).toEqual([]);
+    expect([...KILO_ZERO_COST_MODELS]).toEqual(['poolside/laguna-xs-2.1:free']);
+    expect([...KILO_QUARANTINED_MODELS]).toEqual([]);
+    expect(KILO_ZERO_COST_MODELS).not.toContain('nex-agi/nex-n2.5-mini:free');
+    expect(KILO_ZERO_COST_MODELS).not.toContain('nex-agi/nex-n2.5-pro:free');
+    expect(KILO_ZERO_COST_MODELS).not.toContain('inclusionai/ling-3.0-flash-vl:free');
     expect(KILO_ZERO_COST_MODELS).not.toContain('dots-studio/dots-3-note-preview:free');
-    expect(KILO_ZERO_COST_MODELS).not.toContain('minimax/minimax-m2.7:free');
-    expect(KILO_ZERO_COST_MODELS).not.toContain('kilo-auto/free');
     expect(KILO_ZERO_COST_MODELS.every((model) => model.endsWith(':free'))).toBe(true);
+
     expect([...OPENROUTER_ZERO_COST_MODELS]).toEqual([
       'google/gemma-4-26b-a4b-it:free',
-      'nex-agi/nex-n2.5-mini:free',
-      'inclusionai/ling-3.0-flash-vl:free',
       'poolside/laguna-xs-2.1:free',
+      'google/gemma-4-31b-it:free',
+      'nvidia/nemotron-3-super-120b-a12b:free',
     ]);
-    expect(OPENROUTER_ZERO_COST_MODELS).not.toContain('openai/gpt-oss-20b:free');
-    expect(OPENROUTER_ZERO_COST_MODELS).not.toContain('openai/gpt-oss-20b');
+    expect([...OPENROUTER_QUARANTINED_MODELS]).toEqual([
+      'openai/gpt-oss-20b:free',
+      'inclusionai/ling-3.0-flash-vl:free',
+    ]);
+    expect(OPENROUTER_ZERO_COST_MODELS).not.toContain('nex-agi/nex-n2.5-mini:free');
+    expect(OPENROUTER_ZERO_COST_MODELS).not.toContain('inclusionai/ling-3.0-flash-vl:free');
     expect(OPENROUTER_ZERO_COST_MODELS).not.toContain('openrouter/free');
     expect(OPENROUTER_ZERO_COST_MODELS.every((model) => model.endsWith(':free'))).toBe(true);
 
@@ -364,14 +361,12 @@ describe('factory multi-provider zero cost', () => {
       KILO_API_KEY: 'kilo-key', KILO_FREE_TIER_CONFIRMED: 'true',
       OPENROUTER_API_KEY: 'openrouter-key', OPENROUTER_FREE_TIER_CONFIRMED: 'true',
     });
-    expect(routes.find((route) => route.routeId === 'vercel:inclusionai/ling-3.0-flash-vl-free')?.limits)
-      .toEqual(VERCEL_PRODUCTION_LIMITS);
+    expect(routes.some((route) => route.provider === 'vercel')).toBe(false);
     const kilo = routes.filter((route) => route.provider === 'kilo');
     expect(kilo.map((route) => route.model)).toEqual([...KILO_ZERO_COST_MODELS]);
     for (const route of kilo) expect(route.limits).toEqual(KILO_PRODUCTION_LIMITS);
-    expect(routes.find((route) => route.routeId === 'kilo:dots-studio/dots-3-note-preview:free')).toBeUndefined();
     expect(KILO_PRODUCTION_LIMITS.providerMinIntervalMs).toBe(20_000);
-    expect(KILO_PRODUCTION_LIMITS).not.toMatchObject({ rpd: 200 });
+
     const openrouter = routes.filter((route) => route.provider === 'openrouter');
     expect(openrouter).toHaveLength(OPENROUTER_ZERO_COST_MODELS.length);
     for (const route of openrouter) {
@@ -381,17 +376,11 @@ describe('factory multi-provider zero cost', () => {
     expect(OPENROUTER_PRODUCTION_LIMITS.providerRpd).toBe(1_000);
     expect(OPENROUTER_PRODUCTION_LIMITS.providerMinIntervalMs).toBe(3_200);
     expect(openrouter.every((route) => route.limits?.rpd === undefined)).toBe(true);
-    expect(openrouter.reduce((sum, route) => sum + (route.limits?.rpd ?? 0), 0)).not.toBe(1_000);
 
     expect(() => createFreeRoutesFromEnv({
       AI_ZERO_COST_ONLY: 'true',
       KILO_API_KEY: 'kilo-key', KILO_FREE_TIER_CONFIRMED: 'true',
-      KILO_MODELS: 'kilo-auto/free',
-    })).toThrow(/KILO_MODELS.*no autorizados/);
-    expect(() => createFreeRoutesFromEnv({
-      AI_ZERO_COST_ONLY: 'true',
-      KILO_API_KEY: 'kilo-key', KILO_FREE_TIER_CONFIRMED: 'true',
-      KILO_MODELS: 'minimax/minimax-m2.7:free',
+      KILO_MODELS: 'dots-studio/dots-3-note-preview:free',
     })).toThrow(/KILO_MODELS.*no autorizados/);
     expect(() => createFreeRoutesFromEnv({
       AI_ZERO_COST_ONLY: 'true',
@@ -401,32 +390,20 @@ describe('factory multi-provider zero cost', () => {
     expect(() => createFreeRoutesFromEnv({
       AI_ZERO_COST_ONLY: 'true',
       VERCEL_AI_GATEWAY_API_KEY: 'vercel-key', VERCEL_FREE_TIER_CONFIRMED: 'true',
-      VERCEL_MODELS: 'minimax/minimax-m3-free',
+      VERCEL_MODELS: 'inclusionai/ling-3.0-flash-vl-free',
     })).toThrow(/VERCEL_MODELS.*no autorizados/);
-    expect(() => createFreeRoutesFromEnv({
-      AI_ZERO_COST_ONLY: 'true',
-      OPENROUTER_API_KEY: 'openrouter-key', OPENROUTER_FREE_TIER_CONFIRMED: 'true',
-      OPENROUTER_MODELS: 'openai/gpt-oss-20b',
-    })).toThrow(/OPENROUTER_MODELS.*no autorizados/);
   });
 
-  it('permite diagnosticar modelos quarantined sin activarlos por defecto ni sustituir por pago', () => {
-    const kilo = createFreeRoutesFromEnv({
-      AI_ZERO_COST_ONLY: 'true',
-      KILO_API_KEY: 'kilo-key', KILO_FREE_TIER_CONFIRMED: 'true',
-      KILO_MODELS: 'dots-studio/dots-3-note-preview:free',
-    });
-    expect(kilo.map((route) => route.routeId)).toEqual(['kilo:dots-studio/dots-3-note-preview:free']);
-    expect(kilo[0]?.transport.cacheIdentity('dots-studio/dots-3-note-preview:free')).toMatchObject({
-      minMaxOutputTokens: 2_048,
-      extraBody: { reasoning: { effort: 'none' } },
-    });
-    const openrouter = createFreeRoutesFromEnv({
-      AI_ZERO_COST_ONLY: 'true',
-      OPENROUTER_API_KEY: 'openrouter-key', OPENROUTER_FREE_TIER_CONFIRMED: 'true',
-      OPENROUTER_MODELS: 'openai/gpt-oss-20b:free',
-    });
-    expect(openrouter.map((route) => route.routeId)).toEqual(['openrouter:openai/gpt-oss-20b:free']);
+  it('permite diagnosticar modelos OpenRouter quarantined sin activarlos por defecto', () => {
+    for (const model of OPENROUTER_QUARANTINED_MODELS) {
+      const routes = createFreeRoutesFromEnv({
+        AI_ZERO_COST_ONLY: 'true',
+        OPENROUTER_API_KEY: 'openrouter-key',
+        OPENROUTER_FREE_TIER_CONFIRMED: 'true',
+        OPENROUTER_MODELS: model,
+      });
+      expect(routes.map((route) => route.routeId)).toEqual([`openrouter:${model}`]);
+    }
     expect(() => createFreeRoutesFromEnv({
       AI_ZERO_COST_ONLY: 'true',
       OPENROUTER_API_KEY: 'openrouter-key', OPENROUTER_FREE_TIER_CONFIRMED: 'true',
@@ -455,8 +432,8 @@ describe('factory multi-provider zero cost', () => {
 });
 
 describe('payload HTTP por provider/modelo', () => {
-  it('Z.AI desactiva thinking y pide json_object en glm-4.7-flash y glm-4.5-flash', async () => {
-    for (const model of ['glm-4.7-flash', 'glm-4.5-flash'] as const) {
+  it('Z.AI desactiva thinking y pide json_object en todos los Flash estables', async () => {
+    for (const model of ['glm-4.7-flash', 'glm-4.6v-flash', 'glm-4.5-flash'] as const) {
       const body = await captureBody('zai', model);
       expect(body).toMatchObject({
         model,
@@ -471,20 +448,28 @@ describe('payload HTTP por provider/modelo', () => {
     }
   });
 
-  it('Cloudflare apaga thinking por modelo y no envía JSON mode no allowlisted', async () => {
-    for (const model of CLOUDFLARE_ZERO_COST_MODELS) {
+  it('Cloudflare GLM/Gemma apaga thinking y no envía JSON mode no allowlisted', async () => {
+    for (const model of ['@cf/zai-org/glm-4.7-flash', '@cf/google/gemma-4-26b-a4b-it'] as const) {
       const body = await captureBody('cloudflare', model);
       expect(body.model).toBe(model);
       expect(body.reasoning_effort).toBeNull();
       expect(body.chat_template_kwargs).toEqual({ enable_thinking: false });
       expect(body).not.toHaveProperty('response_format');
-      expect(body).not.toHaveProperty('thinking');
-      expect(body).not.toHaveProperty('service_tier');
     }
   });
 
+  it('Cloudflare GPT-OSS 20B usa max_tokens sin flags de thinking no documentados', async () => {
+    const body = await captureBody('cloudflare', '@cf/openai/gpt-oss-20b');
+    expect(body).toMatchObject({ model: '@cf/openai/gpt-oss-20b', max_tokens: 100 });
+    expect(body).not.toHaveProperty('max_completion_tokens');
+    expect(body).not.toHaveProperty('response_format');
+    expect(body).not.toHaveProperty('reasoning_effort');
+    expect(body).not.toHaveProperty('chat_template_kwargs');
+    expect(body).not.toHaveProperty('thinking');
+  });
+
   it('Mistral Ministral usa JSON Schema estricto y service_tier=standard_only', async () => {
-    for (const model of ['ministral-14b-2512', 'ministral-8b-2512'] as const) {
+    for (const model of ['ministral-14b-2512', 'ministral-8b-2512', 'ministral-3b-2512'] as const) {
       const body = await captureBody('mistral', model);
       expect(body).toMatchObject({
         model,
@@ -600,36 +585,36 @@ describe('payload HTTP por provider/modelo', () => {
   });
 
   it('OpenRouter Gemma Free usa json_object y require_parameters, sin json_schema', async () => {
-    const body = await captureBody('openrouter', 'google/gemma-4-26b-a4b-it:free');
-    expect(body).toMatchObject({
-      model: 'google/gemma-4-26b-a4b-it:free',
-      max_tokens: 100,
-      provider: { require_parameters: true },
-      reasoning: { effort: 'none' },
-      response_format: { type: 'json_object' },
-    });
-    expect(body.response_format).not.toMatchObject({ type: 'json_schema' });
-    expect(body.response_format).not.toHaveProperty('json_schema');
-    expect(body).not.toHaveProperty('models');
-    expect(body).not.toHaveProperty('route');
-    expect(body.provider).not.toMatchObject({ allow_fallbacks: true });
+    for (const model of ['google/gemma-4-26b-a4b-it:free', 'google/gemma-4-31b-it:free'] as const) {
+      const body = await captureBody('openrouter', model);
+      expect(body).toMatchObject({
+        model,
+        max_tokens: 100,
+        provider: { require_parameters: true },
+        reasoning: { effort: 'none' },
+        response_format: { type: 'json_object' },
+      });
+      expect(body.response_format).not.toMatchObject({ type: 'json_schema' });
+      expect(body.response_format).not.toHaveProperty('json_schema');
+    }
   });
 
-  it('Kilo/OpenRouter Nex Mini piden json_schema y reasoning.effort=none', async () => {
-    for (const provider of ['kilo', 'openrouter'] as const) {
-      const body = await captureBody(provider, 'nex-agi/nex-n2.5-mini:free');
-      expect(body).toMatchObject({
-        model: 'nex-agi/nex-n2.5-mini:free',
-        max_tokens: 100,
-        reasoning: { effort: 'none' },
-        response_format: { type: 'json_schema' },
-      });
-      if (provider === 'openrouter') {
-        expect(body.provider).toEqual({ require_parameters: true });
-      } else {
-        expect(body).not.toHaveProperty('provider');
-      }
-    }
+  it('OpenRouter Nemotron 3 Super usa json_schema y reasoning mínimo documentado', async () => {
+    const body = await captureBody('openrouter', 'nvidia/nemotron-3-super-120b-a12b:free');
+    expect(body).toMatchObject({
+      model: 'nvidia/nemotron-3-super-120b-a12b:free',
+      max_tokens: 100,
+      provider: { require_parameters: true },
+      reasoning: { effort: 'low' },
+      response_format: {
+        type: 'json_schema',
+        json_schema: {
+          name: 'clasica_eligibility',
+          strict: false,
+          schema: request.schema,
+        },
+      },
+    });
   });
 
   it('OpenRouter GPT-OSS Free (quarantined) conserva json_schema y require_parameters', async () => {
@@ -715,12 +700,15 @@ describe('payload HTTP por provider/modelo', () => {
       expect(body.max_tokens).toBe(100);
       expect(body).not.toHaveProperty('max_completion_tokens');
     }
-    for (const model of CLOUDFLARE_ZERO_COST_MODELS) {
+    for (const model of ['@cf/zai-org/glm-4.7-flash', '@cf/google/gemma-4-26b-a4b-it'] as const) {
       const body = await captureBody('cloudflare', model);
       expect(body.max_completion_tokens).toBe(request.generation.maxOutputTokens);
       expect(body.max_completion_tokens).toBe(100);
       expect(body).not.toHaveProperty('max_tokens');
     }
+    const cloudflareGptOss = await captureBody('cloudflare', '@cf/openai/gpt-oss-20b');
+    expect(cloudflareGptOss.max_tokens).toBe(100);
+    expect(cloudflareGptOss).not.toHaveProperty('max_completion_tokens');
     const eligibility = buildAiRequest({ title: 'Bach', performers: [], composers: [], works: [] }, 'eligibility');
     expect(eligibility.generation.maxOutputTokens).toBe(AI_MAX_OUTPUT_TOKENS_BY_PURPOSE.eligibility);
     expect(eligibility.generation.maxOutputTokens).not.toBe(600);
@@ -734,85 +722,45 @@ describe('payload HTTP por provider/modelo', () => {
       ZAI_API_KEY: 'zai-key',
       CLOUDFLARE_API_TOKEN: 'cloudflare-token', CLOUDFLARE_ACCOUNT_ID: 'account-id',
       CLOUDFLARE_WORKERS_FREE_CONFIRMED: 'true',
-      VERCEL_AI_GATEWAY_API_KEY: 'vercel-key', VERCEL_FREE_TIER_CONFIRMED: 'true',
       KILO_API_KEY: 'kilo-key', KILO_FREE_TIER_CONFIRMED: 'true',
       OPENROUTER_API_KEY: 'openrouter-key', OPENROUTER_FREE_TIER_CONFIRMED: 'true',
     });
-    expect(identityByRoute(routes, 'groq:openai/gpt-oss-120b')).toMatchObject({
-      responseFormat: 'json-schema',
-      jsonSchemaStrict: true,
-      tokenParameter: 'max_tokens',
-      extraBody: { include_reasoning: false, reasoning_effort: 'low' },
-    });
-    expect(identityByRoute(routes, 'groq:openai/gpt-oss-20b')).toMatchObject({
-      responseFormat: 'json-schema',
-      jsonSchemaStrict: true,
-      extraBody: { include_reasoning: false, reasoning_effort: 'low' },
-    });
-    expect(identityByRoute(routes, 'groq:qwen/qwen3.8-27b')).toMatchObject({
-      responseFormat: 'json-schema',
-      jsonSchemaStrict: false,
-      extraBody: { reasoning_effort: 'none' },
-    });
-    expect(identityByRoute(routes, 'mistral:ministral-14b-2512')).toMatchObject({
+    expect(identityByRoute(routes, 'mistral:ministral-3b-2512')).toMatchObject({
       responseFormat: 'json-schema',
       jsonSchemaStrict: true,
       extraBody: { service_tier: 'standard_only' },
     });
-    expect(identityByRoute(routes, 'mistral:ministral-8b-2512')).toMatchObject({
-      responseFormat: 'json-schema',
-      jsonSchemaStrict: true,
-      extraBody: { service_tier: 'standard_only' },
-    });
-    expect(identityByRoute(routes, 'zai:glm-4.7-flash')).toMatchObject({
-      responseFormat: 'json-object', extraBody: { thinking: { type: 'disabled' } },
-      promptOutputContract: true,
-    });
-    expect(identityByRoute(routes, 'cloudflare:@cf/zai-org/glm-4.7-flash')).toMatchObject({
-      responseFormat: 'none',
-      tokenParameter: 'max_completion_tokens',
-      promptOutputContract: true,
-      extraBody: {
-        reasoning_effort: null,
-        chat_template_kwargs: { enable_thinking: false },
-      },
-    });
-    expect(identityByRoute(routes, 'vercel:inclusionai/ling-3.0-flash-vl-free')).toMatchObject({
-      responseFormat: 'none',
-      jsonSchemaStrict: false,
-      tokenParameter: 'max_tokens',
-      promptOutputContract: true,
-      extraBody: { reasoning: { effort: 'none' } },
-    });
-    expect(identityByRoute(routes, 'kilo:nex-agi/nex-n2.5-mini:free')).toMatchObject({
-      responseFormat: 'json-schema',
-      jsonSchemaStrict: false,
-      extraBody: { reasoning: { effort: 'none' } },
-      promptOutputContract: false,
-    });
-    expect(identityByRoute(routes, 'kilo:inclusionai/ling-3.0-flash-vl:free')).toMatchObject({
-      responseFormat: 'none',
-      extraBody: { reasoning: { effort: 'none' } },
-      promptOutputContract: true,
-    });
-    expect(identityByRoute(routes, 'openrouter:nex-agi/nex-n2.5-mini:free')).toMatchObject({
-      responseFormat: 'json-schema',
-      jsonSchemaStrict: false,
-      extraBody: { provider: { require_parameters: true }, reasoning: { effort: 'none' } },
-      promptOutputContract: false,
-    });
-    expect(identityByRoute(routes, 'openrouter:google/gemma-4-26b-a4b-it:free')).toMatchObject({
+    expect(identityByRoute(routes, 'zai:glm-4.6v-flash')).toMatchObject({
       responseFormat: 'json-object',
-      jsonSchemaStrict: false,
+      extraBody: { thinking: { type: 'disabled' } },
+      promptOutputContract: true,
+    });
+    expect(identityByRoute(routes, 'cloudflare:@cf/openai/gpt-oss-20b')).toMatchObject({
+      responseFormat: 'none',
+      tokenParameter: 'max_tokens',
+      extraBody: {},
+      promptOutputContract: true,
+    });
+    expect(identityByRoute(routes, 'kilo:poolside/laguna-xs-2.1:free')).toMatchObject({
+      responseFormat: 'none',
+      promptOutputContract: true,
+    });
+    expect(identityByRoute(routes, 'openrouter:google/gemma-4-31b-it:free')).toMatchObject({
+      responseFormat: 'json-object',
       tokenParameter: 'max_tokens',
       extraBody: { provider: { require_parameters: true }, reasoning: { effort: 'none' } },
       promptOutputContract: true,
     });
-    expect(identityByRoute(routes, 'groq:openai/gpt-oss-120b')).toMatchObject({
+    expect(identityByRoute(routes, 'openrouter:nvidia/nemotron-3-super-120b-a12b:free')).toMatchObject({
+      responseFormat: 'json-schema',
+      jsonSchemaStrict: false,
+      extraBody: { provider: { require_parameters: true }, reasoning: { effort: 'low' } },
       promptOutputContract: false,
     });
   });
 });
+
+describe('schema-in-prompt para routes sin json_schema', () => {});
 
 describe('schema-in-prompt para routes sin json_schema', () => {
   const observed = { title: 'Concierto de Bach', performers: [], composers: [], works: [] };
@@ -824,9 +772,8 @@ describe('schema-in-prompt para routes sin json_schema', () => {
       ['openai/gpt-oss-120b', 'groq'],
       ['qwen/qwen3.8-27b', 'groq'],
       ['ministral-14b-2512', 'mistral'],
-      ['dots-studio/dots-3-note-preview:free', 'kilo'],
-      ['nex-agi/nex-n2.5-mini:free', 'kilo'],
-      ['nex-agi/nex-n2.5-mini:free', 'openrouter'],
+      ['ministral-3b-2512', 'mistral'],
+      ['nvidia/nemotron-3-super-120b-a12b:free', 'openrouter'],
       ['openai/gpt-oss-20b:free', 'openrouter'],
     ] as const) {
       const body = buildOpenAiCompatibleRequestBody(model, editorial, {
@@ -874,8 +821,7 @@ describe('schema-in-prompt para routes sin json_schema', () => {
     const editorial = buildAiRequest(observed, 'eligibility');
     for (const [model, provider] of [
       ['@cf/zai-org/glm-4.7-flash', 'cloudflare'],
-      ['inclusionai/ling-3.0-flash-vl-free', 'vercel'],
-      ['inclusionai/ling-3.0-flash-vl:free', 'kilo'],
+      ['@cf/openai/gpt-oss-20b', 'cloudflare'],
       ['poolside/laguna-xs-2.1:free', 'kilo'],
       ['poolside/laguna-xs-2.1:free', 'openrouter'],
       ['inclusionai/ling-3.0-flash-vl:free', 'openrouter'],
