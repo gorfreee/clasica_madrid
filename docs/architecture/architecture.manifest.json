@@ -3,32 +3,32 @@
   "diagramSchemaVersion": 1,
   "architectureRevision": "3e70647ecf5a8ec9aecea9579a07f0a02f024ded",
   "generationBaseCommit": "3e70647ecf5a8ec9aecea9579a07f0a02f024ded",
-  "generatedAt": "2026-09-29T19:44:54.979Z",
+  "generatedAt": "2026-09-29T20:30:53.727Z",
   "archify": {
     "version": "2.17.0-dev.1",
     "repository": "https://github.com/tt-a1i/archify.git",
     "revision": "629155a47cd5b487cb5a6e322b2ca71998698aaf"
   },
   "inputs": {
-    "docs/architecture/architecture.json": "7b17aeb17db65df777833ce0806b1710aa6e06f2dd0fae5fd121bf0568d6fa7c",
-    "docs/architecture/toolchain.json": "4e94fda896ca2a8491a10464af9a53812aa9c84b7d9e23d9c81011b2e4a34247",
-    "scripts/render-architecture.mjs": "c117c0a3e327e9128a53c210f49ed0abc3de5dffdf7faca286c68d6df4d4b476"
+    "docs/architecture/architecture.json": "f6cc1e223d0a4c7cfbd61d68dc75cddc56c457618b16fabcfaa723cf0ce889cd",
+    "docs/architecture/toolchain.json": "f7ee399af8f9a1ca8a2e3c5479ccaa5565d7158c3b8a231193921366fea2da51",
+    "scripts/render-architecture.mjs": "4c114104aafb228e7d0e7364fb3e62ae0ab19959d928340c1606b2d5758e522d"
   },
   "artifacts": [
     {
       "path": "docs/architecture/architecture.html",
-      "sha256": "bdabb60c4d36fd30747a68ee9d9e23c3634d6b8a319b5bb486440eaccb439c10",
-      "bytes": 869890
+      "sha256": "c15c94dd284ab1984cb486f610c196d7f01778944576e679cc8fc55cd6f27910",
+      "bytes": 867515
     },
     {
       "path": "docs/architecture/architecture.svg",
-      "sha256": "b2158117c19acb46898754e4e62679635bc308dc46e39f913cc16eb780cab578",
-      "bytes": 177398
+      "sha256": "758101f810ac8e976e3cfd4788fa2dd2041feacc5e61503b265736c295a9203e",
+      "bytes": 176463
     },
     {
       "path": "docs/architecture/architecture.gif",
-      "sha256": "c5b5cca4fe2e7a7ff4adf192bc1763e12b544c594449c65c6e95e1b06d5bb0ef",
-      "bytes": 1334395
+      "sha256": "fe942213594e6d22a28054f743ebcca8250c664803558b939216fd3590bbd009",
+      "bytes": 1171509
     }
   ],
   "gif": {

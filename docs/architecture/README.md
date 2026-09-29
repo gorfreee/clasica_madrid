@@ -44,3 +44,5 @@ El check tarda poco y sólo necesita Node + Git. Puede ejecutarse manualmente en
 Usa [UPDATE_PROMPT.md](UPDATE_PROMPT.md) para una actualización posterior. El diagrama agrupa fases del pipeline: quality gates incluye reconciliación y validación del lote; el health de ejecución determina después si se abre PR, draft o se solicita auto-merge. Discovery nunca solicita auto-merge. Los scripts de adquisición, IA y workflows no forman parte del runtime público.
 
 El Cron Worker de rebuild y Email Routing están documentados como configuración externa al repo; no se afirma que su implementación esté versionada aquí. El formulario sí llama a **Email Service**. El catálogo JSON se escribe primero en una rama propuesta y sólo llega al catálogo de `main` tras merge; el sitio público no consulta una base de datos.
+
+Los perímetros distinguen GitHub (Actions y repositorio), Cloudflare (build, Pages y Fetch Relay), navegador y servicios externos. HTTP/Chrome se ejecutan en el runner; el Fetch Relay es un Worker en Cloudflare. El contacto se integra en Pages y el rebuild diario se representa con una flecha de retorno al build de Astro, sin cajas adicionales.

@@ -13,6 +13,7 @@
   "svgTypography": {
     "label": 14,
     "context": 10,
-    "fine": 8
+    "fine": 8,
+    "boundary": 13
   }
 }

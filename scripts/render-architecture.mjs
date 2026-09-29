@@ -74,7 +74,8 @@ try {
   const typography = toolchain.svgTypography;
   svg = svg.replace(/(<text[^>]*data-node-label=""[^>]*font-size=")\d+(")/g, `$1${typography.label}$2`)
     .replace(/(<text[^>]*data-detail="context"[^>]*font-size=")\d+(")/g, `$1${typography.context}$2`)
-    .replace(/(<text[^>]*data-detail="fine"[^>]*font-size=")\d+(")/g, `$1${typography.fine}$2`);
+    .replace(/(<text[^>]*data-detail="fine"[^>]*font-size=")\d+(")/g, `$1${typography.fine}$2`)
+    .replace(/(<text[^>]*data-boundary-label=""[^>]*font-size=")[\d.]+(")/g, `$1${typography.boundary}$2`);
   svg = svg.replace(/[ \t]+$/gm, '').trimEnd() + '\n';
   await writeFile(`${dir}/architecture.svg`, svg);
   const stages = [
@@ -89,7 +90,7 @@ try {
     ['app', 'Astro · del catálogo a páginas estáticas'],
     ['pages', 'Cloudflare Pages · servir artefactos estáticos'],
     ['users', 'Una agenda pública rápida y explorable'],
-    ['contact', 'Contacto, analytics y rebuild · sistemas auxiliares'],
+    ['transport', 'Cloudflare · relay auxiliar y rebuild diario'],
   ];
   for (const [id] of stages) if (!spec.components.some(n => n.id === id)) throw new Error(`Unknown animation node ${id}`);
   const vb = svg.match(/viewBox="([^"]+)"/)[1].split(/\s+/).map(Number);
@@ -108,7 +109,7 @@ try {
     const pulse = active ? Math.sin(Math.PI * (position - index)) ** 2 : 0;
     const stage = stages[index];
     await page.evaluate(({ active, stage, pulse }) => {
-      const extras = stage?.[0] === 'contact' ? ['contact','analytics','rebuild','transport','actions'] : [stage?.[0]];
+      const extras = stage?.[0] === 'transport' ? ['transport','pages','app','analytics'] : [stage?.[0]];
       for (const el of document.querySelectorAll('[data-node-id]')) {
         const match = extras.includes(el.getAttribute('data-node-id'));
         el.style.opacity = String(active ? match ? 0.83 + 0.17 * pulse : 0.83 : 0.83);
