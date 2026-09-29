@@ -58,63 +58,60 @@ export const GROQ_DEFAULT_MODELS = [
  *
  * `mistral-small-latest` is a mutable alias whose current backing model only
  * had 20_000 TPM / 1 RPS here. Production uses explicit Ministral IDs instead.
- * `ministral-3b-2512` remains a possible future fallback but is not enabled
- * by default while 14B/8B have enough capacity.
+ * `ministral-3b-2512` is GA and participates in the same account-level Free
+ * mode as the existing 14B/8B routes; it is not a time-limited promotion.
  */
-export const MISTRAL_DEFAULT_MODELS = ['ministral-14b-2512', 'ministral-8b-2512'] as const;
-export const MISTRAL_OPTIONAL_MODELS = ['ministral-3b-2512'] as const;
-export const ZAI_ZERO_COST_MODELS = ['glm-4.7-flash', 'glm-4.5-flash'] as const;
+export const MISTRAL_DEFAULT_MODELS = [
+  'ministral-14b-2512',
+  'ministral-8b-2512',
+  'ministral-3b-2512',
+] as const;
+export const MISTRAL_OPTIONAL_MODELS = [] as const;
+export const ZAI_ZERO_COST_MODELS = ['glm-4.7-flash', 'glm-4.6v-flash', 'glm-4.5-flash'] as const;
 export const CLOUDFLARE_ZERO_COST_MODELS = [
   '@cf/zai-org/glm-4.7-flash',
   '@cf/google/gemma-4-26b-a4b-it',
+  '@cf/openai/gpt-oss-20b',
 ] as const;
 /**
- * Verified 2026-09-15 against GET https://ai-gateway.vercel.sh/v1/models/{id}:
- * `inclusionai/ling-3.0-flash-vl-free` is tagged free with pricing 0/0.
- * `inclusionai/ling-3.0-flash-free` 404s. The paid ID `inclusionai/ling-3.0-flash`
- * is $0.06/$0.18 and is never substituted.
- * `inclusionai/ling-3.0-flash-fin` / `-fin-free` are a promo through 2026-09-25
- * that then bills or errors — omitted.
- * `minimax/minimax-m3` still prices input/output above $0 despite a $0 table
- * row; `minimax/minimax-m3-free` 404s. Do not substitute the paid ID.
- * `poolside/laguna-s-2.1-free` is $0 but a large coding agent — omitted.
+ * Re-checked 2026-09-29 after the live smoke:
+ * `inclusionai/ling-3.0-flash-vl-free` now returns 404 with an explicit
+ * "free tier has ended" message. No paid sibling is ever substituted.
+ * Vercel therefore has no default route until a non-promotional $0 model is
+ * documented and verified.
  */
-export const VERCEL_ZERO_COST_MODELS = ['inclusionai/ling-3.0-flash-vl-free'] as const;
+export const VERCEL_ZERO_COST_MODELS = [] as const;
 export const VERCEL_QUARANTINED_MODELS = [] as const;
 /**
- * Verified 2026-09-15 against GET https://api.kilo.ai/api/gateway/models.
- * Active defaults are explicit `:free` IDs with prompt/completion 0, no
- * expiration, and a fit for short JSON classification/extraction.
- * `dots-studio/dots-3-note-preview:free` remains free today but expires
- * 2026-09-30 and previously exhausted the output budget on reasoning — it
- * stays in the allowlist for diagnosis, not in the default pool.
- * Absent from the live catalog (do not substitute paid IDs):
- * `inclusionai/ling-3.0-flash:free`, `tencent/hy3:free`,
- * `inclusionai/ling-2.6-flash:free`, `google/gemma-4-26b-a4b-it:free`,
- * `minimax/minimax-m3:free`, `minimax/minimax-m2.7:free`.
- * `kilo-auto/free` is excluded: dynamic routing, mapping changes server-side.
+ * Re-checked 2026-09-29 against the live smoke/catalog.
+ * Nex N2.5 Mini/Pro and Ling 3.0 Flash VL now 404 and are removed rather than
+ * silently falling back to paid siblings. Dots3 is intentionally removed from
+ * even the diagnostic allowlist because its documented free window ends
+ * 2026-09-30. No new Kilo model is added: Kilo documents free availability as
+ * dynamic/promotional, which does not meet the stable-default policy.
  */
 export const KILO_ZERO_COST_MODELS = [
-  'nex-agi/nex-n2.5-mini:free',
-  'nex-agi/nex-n2.5-pro:free',
-  'inclusionai/ling-3.0-flash-vl:free',
   'poolside/laguna-xs-2.1:free',
 ] as const;
-export const KILO_QUARANTINED_MODELS = ['dots-studio/dots-3-note-preview:free'] as const;
+export const KILO_QUARANTINED_MODELS = [] as const;
 /**
- * Verified 2026-09-15 against GET https://openrouter.ai/api/v1/models.
- * `openai/gpt-oss-20b:free` is absent (404). The paid `openai/gpt-oss-20b`
- * is never substituted. `inclusionai/ling-3.0-tiny:free` is absent.
- * `openrouter/free` is excluded: the resolved model is not guaranteed.
- * `liquid/lfm-2.5-2.6b:free` has mandatory reasoning — omitted.
+ * Re-checked 2026-09-29 against GET https://openrouter.ai/api/v1/models.
+ * New defaults are only explicit `:free` IDs with $0 pricing and no published
+ * expiration date. Nex N2.5 Mini has ended its free availability and is
+ * removed. Ling 3.0 Flash VL returned an explicit free-unavailable 404 while
+ * the public catalog still lagged, so it remains diagnostic-only.
+ * `openrouter/free` is excluded because the resolved model is not guaranteed.
  */
 export const OPENROUTER_ZERO_COST_MODELS = [
   'google/gemma-4-26b-a4b-it:free',
-  'nex-agi/nex-n2.5-mini:free',
-  'inclusionai/ling-3.0-flash-vl:free',
   'poolside/laguna-xs-2.1:free',
+  'google/gemma-4-31b-it:free',
+  'nvidia/nemotron-3-super-120b-a12b:free',
 ] as const;
-export const OPENROUTER_QUARANTINED_MODELS = ['openai/gpt-oss-20b:free'] as const;
+export const OPENROUTER_QUARANTINED_MODELS = [
+  'openai/gpt-oss-20b:free',
+  'inclusionai/ling-3.0-flash-vl:free',
+] as const;
 
 const GROQ_FREE_LIMITS: AiRouteLimits = { rpm: 30, tpm: 8_000, rpd: 1_000 };
 /**
