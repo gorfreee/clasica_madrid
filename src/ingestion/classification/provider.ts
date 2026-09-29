@@ -328,6 +328,11 @@ export function freeProviderUnconfiguredReason(
       if (!isTrue(env.CLOUDFLARE_WORKERS_FREE_CONFIRMED)) return 'falta CLOUDFLARE_WORKERS_FREE_CONFIRMED=true';
       return undefined;
     case 'vercel':
+      if (
+        !env.VERCEL_MODELS?.trim()
+        && VERCEL_ZERO_COST_MODELS.length === 0
+        && VERCEL_QUARANTINED_MODELS.length === 0
+      ) return undefined;
       if (!env.VERCEL_AI_GATEWAY_API_KEY?.trim()) return 'falta VERCEL_AI_GATEWAY_API_KEY';
       if (!isTrue(env.VERCEL_FREE_TIER_CONFIRMED)) return 'falta VERCEL_FREE_TIER_CONFIRMED=true';
       return undefined;
