@@ -27,12 +27,16 @@ const share = buildVenueShare({
   municipality: model.municipality,
   path: model.canonicalPath,
 });
+const showArchive = model.upcoming.length === 0 && model.hasHistory;
+const programmeTitleId = showArchive ? 'anteriores-titulo' : 'proximos-titulo';
+const programme = showArchive ? model.previous : model.upcoming.map((item) => ({ ...item, statusLabel: null }));
 ---
 
 <Layout
   title={model.title}
   description={model.description}
   canonicalPath={model.canonicalPath}
+  indexable={model.indexable}
   jsonLd={model.jsonLd}
   analytics={{ page_type: 'venue', venue_id: model.id, venue_name: model.name }}
 >
@@ -60,16 +64,16 @@ const share = buildVenueShare({
       </div>
     </header>
 
-    <section class="detail-section venue-programme" aria-labelledby="proximos-titulo">
+    <section class="detail-section venue-programme" aria-labelledby={programmeTitleId}>
       <div class="section-heading">
-        <h2 id="proximos-titulo">Próximos conciertos</h2>
+        <h2 id={programmeTitleId}>{showArchive ? 'Conciertos anteriores' : 'Próximos conciertos'}</h2>
       </div>
       {
-        model.upcoming.length === 0 ? (
+        programme.length === 0 ? (
           <p class="quiet-state">No hay conciertos próximos publicados en este espacio</p>
         ) : (
           <div class="agenda-day__list" data-results-surface="venue">
-            {model.upcoming.map((item) => <AgendaItem item={item} />)}
+            {programme.map((item) => <AgendaItem item={item} statusLabel={item.statusLabel} />)}
           </div>
         )
       }

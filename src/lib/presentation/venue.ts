@@ -1,17 +1,21 @@
 import type { Catalog } from '../domain/catalog.ts';
 import {
   findVenueBySlug,
-  listUpcomingOccurrences,
+  isScheduledUpcoming,
+  isUpcomingOccurrence,
   listVenuesWithUpcoming,
   familyVenueIds,
   isChildVenue,
   rootVenue,
+  resolveEvent,
+  sortOccurrences,
   type Clock,
+  type ResolvedOccurrence,
   systemClock,
 } from '../domain/index.ts';
 import { isMadridMunicipality } from '../domain/normalize.ts';
 import type { Venue } from '../schemas/venue.ts';
-import { areaLabels } from './labels.ts';
+import { areaLabels, eventStatusLabel, occurrenceStatusLabels } from './labels.ts';
 import { buildVenueJsonLd } from './json-ld.ts';
 import { toAgendaItem, type AgendaItemModel } from './agenda.ts';
 import { buildVenueOfficialWebAction, type VenueOfficialWebModel } from './external-action.ts';
@@ -51,8 +55,13 @@ export type VenuePageModel = {
   url: string | null;
   officialWeb: VenueOfficialWebModel | null;
   upcoming: AgendaItemModel[];
+  previous: (AgendaItemModel & { statusLabel: string | null })[];
+  hasHistory: boolean;
+  indexable: boolean;
   jsonLd: Record<string, unknown>[];
 };
+
+export const VENUE_HISTORY_LIMIT = 20;
 
 export type VenuesIndexModel = {
   title: string;
@@ -96,9 +105,35 @@ export function buildVenuePageModel(
   const venue = findVenueBySlug(catalog, slug);
   if (!venue) return null;
   const scopeIds = isChildVenue(venue) ? new Set([venue.id]) : familyVenueIds(venue, catalog);
-  const upcoming = listUpcomingOccurrences(catalog, clock)
-    .filter((item) => scopeIds.has(item.resolved.venue.id))
-    .map(toAgendaItem);
+  const now = clock.now();
+  const scheduled: ResolvedOccurrence[] = [];
+  const historical: ResolvedOccurrence[] = [];
+  for (const event of catalog.events) {
+    if (!scopeIds.has(event.venueId)) continue;
+    const resolved = resolveEvent(event, catalog);
+    for (const occurrence of event.occurrences) {
+      if (event.status === 'scheduled' && isScheduledUpcoming(occurrence, now)) {
+        scheduled.push({ resolved, occurrence });
+      } else if (!isUpcomingOccurrence(occurrence.date, occurrence.time, now)) {
+        historical.push({ resolved, occurrence });
+      }
+    }
+  }
+  const upcoming = sortOccurrences(scheduled).map(toAgendaItem);
+  const hasHistory = historical.length > 0;
+  // The archive is a fallback for spaces with no upcoming programme. Keep
+  // cancelled/postponed records, with their status, rather than lose history.
+  const previous = upcoming.length > 0 ? [] : sortOccurrences(historical)
+    .reverse()
+    .slice(0, VENUE_HISTORY_LIMIT)
+    .map((item) => ({
+      ...toAgendaItem(item),
+      statusLabel: item.resolved.event.status !== 'scheduled'
+        ? eventStatusLabel(item.resolved.event.status)
+        : item.occurrence.status !== 'scheduled'
+          ? occurrenceStatusLabels[item.occurrence.status]
+          : null,
+    }));
   const principal = rootVenue(venue, catalog);
   const place = isMadridMunicipality(principal.municipality)
     ? principal.name
@@ -129,6 +164,9 @@ export function buildVenuePageModel(
     url,
     officialWeb: buildVenueOfficialWebAction(url),
     upcoming,
+    previous,
+    hasHistory,
+    indexable: upcoming.length > 0 || hasHistory,
     jsonLd: buildVenueJsonLd(venue, principal),
   };
 }

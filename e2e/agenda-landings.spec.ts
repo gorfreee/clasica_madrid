@@ -20,7 +20,7 @@ async function sitemapXml(request: { get: (url: string) => Promise<{ ok: () => b
 }
 
 test.describe('SEO de eventos', () => {
-  test('el sitemap conserva canonicals y lastmod, sin redirects históricos', async ({ request }) => {
+  test('el sitemap conserva canonicals sin lastmod ni redirects históricos', async ({ request }) => {
     const catalog = await loadCatalogFromDir(defaultDataDir());
     const xml = await sitemapXml(request);
     const entries = new Map([...xml.matchAll(/<url>(.*?)<\/url>/gs)].map((match) => [
@@ -31,7 +31,8 @@ test.describe('SEO de eventos', () => {
     const indexXml = await index.text();
     for (const event of catalog.events) {
       const canonical = publicUrl(eventPath(event.slug));
-      expect(entries.get(canonical)?.slice(0, 10), event.slug).toBe(event.lastVerifiedAt);
+      expect(entries.has(canonical), event.slug).toBe(true);
+      expect(entries.get(canonical), event.slug).toBeUndefined();
       for (const alias of event.slugAliases ?? []) {
         const url = publicUrl(eventPath(alias));
         expect(entries.has(url), alias).toBe(false);
