@@ -549,7 +549,10 @@ function syncShortcuts(form: HTMLFormElement | null, filters: AgendaFilters, now
     const shortcut = link.dataset.agendaShortcut;
     if (!isAgendaShortcutId(shortcut)) continue;
     link.setAttribute('aria-pressed', isAgendaShortcutActive(filters, shortcut, now) ? 'true' : 'false');
-    link.setAttribute('href', filtersToAgendaHref(toggleAgendaShortcut(filters, shortcut, now)));
+    const nextFilters = toggleAgendaShortcut(filters, shortcut, now);
+    link.setAttribute('href', filtersToAgendaHref(nextFilters));
+    if (hasActiveFilters(nextFilters)) link.setAttribute('rel', 'nofollow');
+    else link.removeAttribute('rel');
   }
 }
 

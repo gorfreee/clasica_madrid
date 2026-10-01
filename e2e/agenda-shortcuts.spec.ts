@@ -58,6 +58,19 @@ test.describe('atajos rápidos de la agenda', () => {
     await expectPressed(page, 'free', true);
   });
 
+  test('nofollow sigue el destino filtrado y se retira al volver a la home limpia', async ({ page }) => {
+    await page.goto('/');
+    await shortcut(page, 'free').click();
+    await expectPressed(page, 'free', true);
+    await expect(shortcut(page, 'free')).toHaveAttribute('href', '/');
+    await expect(shortcut(page, 'free')).not.toHaveAttribute('rel', /nofollow/);
+    await expect(shortcut(page, 'weekend')).toHaveAttribute('rel', 'nofollow');
+    await shortcut(page, 'free').click();
+    await expectPressed(page, 'free', false);
+    await expect(shortcut(page, 'free')).toHaveAttribute('href', '/?access=free');
+    await expect(shortcut(page, 'free')).toHaveAttribute('rel', 'nofollow');
+  });
+
   test('activar y desactivar Gratis conserva Fin de semana y el resto de filtros', async ({ page }) => {
     const weekend = madridWeekendRange();
     await page.goto(`/?q=bach&from=${weekend.from}&to=${weekend.to}`);
