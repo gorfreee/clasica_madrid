@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_real_academia_bellas_artes_concierto_hispanidad_2",
+  "slug": "concierto-de-la-hispanidad",
+  "title": "Concierto de la Hispanidad",
+  "status": "scheduled",
+  "venueId": "ven_real_academia_bellas_artes_salon_actos",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_real_academia_bellas_artes_concierto_hispanidad_2_01",
+      "date": "2026-10-15",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Pilar Jurado"
+    },
+    {
+      "name": "Jorge Robaina"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Manuel de Falla"
+    },
+    {
+      "name": "Carlos Guastavino"
+    },
+    {
+      "name": "Antón García Abril"
+    },
+    {
+      "name": "Marlos Nobre"
+    },
+    {
+      "name": "Luis de Pablo"
+    },
+    {
+      "name": "Tomás Marco"
+    },
+    {
+      "name": "José Luis Turina"
+    },
+    {
+      "name": "José María Sánchez-Verdú"
+    },
+    {
+      "name": "Gabriela Ortiz"
+    },
+    {
+      "name": "Pilar Jurado"
+    }
+  ],
+  "works": [
+    {
+      "title": "Siete canciones populares españolas",
+      "composerName": "Manuel de Falla"
+    },
+    {
+      "title": "La rosa y el sauce",
+      "composerName": "Carlos Guastavino"
+    },
+    {
+      "title": "Un ramo de rosas me dio la mañana",
+      "composerName": "Antón García Abril"
+    },
+    {
+      "title": "Três Canções Negras",
+      "composerName": "Marlos Nobre"
+    },
+    {
+      "title": "Surcar vemos",
+      "composerName": "Luis de Pablo"
+    },
+    {
+      "title": "Sonidos y perfumes, Claudio Aquiles",
+      "composerName": "Tomás Marco"
+    },
+    {
+      "title": "Soneto quasi una Fantasía",
+      "composerName": "José Luis Turina"
+    },
+    {
+      "title": "El buscador caminante",
+      "composerName": "José María Sánchez-Verdú"
+    },
+    {
+      "title": "Canciones de agua",
+      "composerName": "Gabriela Ortiz"
+    },
+    {
+      "title": "Lux Hispaniae",
+      "composerName": "Pilar Jurado"
+    }
+  ],
+  "eras": [
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_real_academia_bellas_artes_san_fernando",
+      "url": "https://www.realacademiabellasartessanfernando.com/actividades/conciertos/concierto-hispanidad-2",
+      "checkedAt": "2026-10-01",
+      "externalId": "concierto-hispanidad-2"
+    }
+  ],
+  "primarySourceId": "src_real_academia_bellas_artes_san_fernando",
+  "lastVerifiedAt": "2026-10-01"
+}

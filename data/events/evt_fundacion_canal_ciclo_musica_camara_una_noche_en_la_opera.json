@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_canal_ciclo_musica_camara_una_noche_en_la_opera",
+  "slug": "una-noche-en-la-opera",
+  "title": "Una noche en la ópera",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_fundacion_canal",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_canal_ciclo_musica_camara_una_noche_en_la_opera_01",
+      "date": "2026-10-25",
+      "time": null,
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Maite Raga"
+    },
+    {
+      "name": "Mª José Muñoz"
+    },
+    {
+      "name": "Graham Jackson"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "chamber",
+    "other"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_canal",
+      "url": "https://www.fundacioncanal.com/ciclo-musica-camara/una-noche-en-la-opera",
+      "checkedAt": "2026-10-01",
+      "externalId": "/ciclo-musica-camara/una-noche-en-la-opera"
+    }
+  ],
+  "primarySourceId": "src_fundacion_canal",
+  "lastVerifiedAt": "2026-10-01"
+}

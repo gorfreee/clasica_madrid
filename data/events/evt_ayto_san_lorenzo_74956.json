@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_ayto_san_lorenzo_74956",
+  "slug": "recital-de-zarzuela-tarde-misteriosa-coros-cuartetos-trios-y-duos",
+  "title": "Recital de Zarzuela: «Tarde Misteriosa». Coros, cuartetos, tríos y dúos",
+  "status": "scheduled",
+  "venueId": "ven_casa_cultura_san_lorenzo_escorial",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_ayto_san_lorenzo_74956_01",
+      "date": "2026-10-10",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "zarzuela",
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_ayto_san_lorenzo",
+      "url": "https://www.aytosanlorenzo.es/agenda-eventos/recital-de-zarzuela-tarde-misteriosa-coros-cuartetos-trios-y-duos",
+      "checkedAt": "2026-10-01",
+      "externalId": "74956"
+    }
+  ],
+  "primarySourceId": "src_ayto_san_lorenzo",
+  "lastVerifiedAt": "2026-10-01"
+}

@@ -79,8 +79,14 @@
       "sourceId": "src_amcc_es",
       "url": "https://amcc.es/coma/coma26/oct-03-ana-troncoso-y-nacho-ojeda",
       "checkedAt": "2026-09-20"
+    },
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=d0938dfacaf8c910VgnVCM100000891ecb1aRCRD",
+      "checkedAt": "2026-10-01",
+      "externalId": "50235439"
     }
   ],
   "primarySourceId": "src_amcc_es",
-  "lastVerifiedAt": "2026-09-20"
+  "lastVerifiedAt": "2026-10-01"
 }

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50434707",
+  "slug": "ambedo-quartet-haydn-y-el-arte-del-cuarteto-de-cuerda",
+  "title": "Ambedo Quartet: Haydn y el arte del cuarteto de cuerda",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_6779450",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50434707_01",
+      "date": "2026-10-02",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Raúl Campos"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Franz Joseph Haydn"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "classical"
+  ],
+  "formats": [
+    "chamber",
+    "early-music"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=48260c117ebe0a10VgnVCM100000891ecb1aRCRD",
+      "checkedAt": "2026-10-01",
+      "externalId": "50434707"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-10-01"
+}

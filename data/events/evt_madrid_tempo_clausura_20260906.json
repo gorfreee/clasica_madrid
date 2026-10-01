@@ -15,8 +15,8 @@
   "occurrences": [
     {
       "id": "occ_madrid_tempo_clausura_20260906_01",
-      "date": "2026-09-06",
-      "time": "12:00",
+      "date": "2026-10-08",
+      "time": "19:00",
       "status": "scheduled"
     }
   ],
@@ -38,10 +38,10 @@
     {
       "sourceId": "src_ayuntamiento_madrid",
       "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=5e05cff3cf74c910VgnVCM100000891ecb1aRCRD",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-01",
       "externalId": "50221891"
     }
   ],
   "primarySourceId": "src_madrid_a_tempo",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-01"
 }

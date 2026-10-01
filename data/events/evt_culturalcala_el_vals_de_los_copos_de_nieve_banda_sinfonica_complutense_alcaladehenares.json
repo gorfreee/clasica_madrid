@@ -68,10 +68,11 @@
   "citations": [
     {
       "sourceId": "src_culturalcala",
-      "url": "https://www.giglon.com/evento/el-vals-de-los-copos-de-nieve---banda-sinfonica-complutense-alcaladehenares",
-      "checkedAt": "2026-09-27"
+      "url": "https://culturalcala.es/item_event/el-vals-de-los-copos-de-nieve",
+      "checkedAt": "2026-10-01",
+      "externalId": "56622"
     }
   ],
   "primarySourceId": "src_culturalcala",
-  "lastVerifiedAt": "2026-09-27"
+  "lastVerifiedAt": "2026-10-01"
 }

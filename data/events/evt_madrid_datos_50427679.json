@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50427679",
+  "slug": "concierto-de-otono",
+  "title": "Concierto de Otoño",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_1942",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50427679_01",
+      "date": "2026-10-24",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Charles Gounod"
+    },
+    {
+      "name": "Edvard Grieg"
+    },
+    {
+      "name": "Gustav Holst"
+    },
+    {
+      "name": "Serguéi Prokófiev"
+    },
+    {
+      "name": "Montescos"
+    },
+    {
+      "name": "Paul Barker"
+    },
+    {
+      "name": "Rick Stitzel"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=bfcf37f66e3c0a10VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-10-01",
+      "externalId": "50427679"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-10-01"
+}

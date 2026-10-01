@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50429626",
+  "slug": "concierto-de-la-orquesta-de-guitarras-de-madrid-xxxx-festival-internacional-andres-segovia",
+  "title": "Concierto de la Orquesta de Guitarras de Madrid. XXXX Festival Internacional Andrés Segovia",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_2112",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50429626_01",
+      "date": "2026-10-25",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Lopes Scottish Medley"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "baroque",
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=04c3b3d0bc8c0a10VgnVCM100000891ecb1aRCRD",
+      "checkedAt": "2026-10-01",
+      "externalId": "50429626"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-10-01"
+}

@@ -96,9 +96,10 @@
     {
       "sourceId": "src_ayuntamiento_madrid",
       "url": "https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Publicaciones/Listado-de-Publicaciones/Yudania-Gomez-Heredia?vgnextchannel=f1aebadb6b997010VgnVCM100000dc0ca8c0RCRD&vgnextfmt=default&vgnextoid=4c8636c2a53c0a10VgnVCM200000f921e388RCRD",
-      "checkedAt": "2026-09-22"
+      "checkedAt": "2026-10-01",
+      "externalId": "50427305"
     }
   ],
   "primarySourceId": "src_ayuntamiento_madrid",
-  "lastVerifiedAt": "2026-09-22"
+  "lastVerifiedAt": "2026-10-01"
 }

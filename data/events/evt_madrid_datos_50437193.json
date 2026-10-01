@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50437193",
+  "slug": "espana-pintoresca",
+  "title": "España Pintoresca",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_1935",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50437193_01",
+      "date": "2026-10-17",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "chamber",
+    "lied",
+    "other"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=388a3b08e51f0a10VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-10-01",
+      "externalId": "50437193"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-10-01"
+}

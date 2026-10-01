@@ -41,6 +41,9 @@
     },
     {
       "name": "Louise Bertin"
+    },
+    {
+      "name": "Franz Liszt"
     }
   ],
   "works": [
@@ -97,10 +100,10 @@
     {
       "sourceId": "src_fundacion_juan_march",
       "url": "https://www.march.es/es/madrid/concierto/brenda-poupard-anne-louise-bourion",
-      "checkedAt": "2026-09-18",
+      "checkedAt": "2026-10-01",
       "externalId": "/es/madrid/concierto/brenda-poupard-anne-louise-bourion"
     }
   ],
   "primarySourceId": "src_fundacion_juan_march",
-  "lastVerifiedAt": "2026-09-18"
+  "lastVerifiedAt": "2026-10-01"
 }

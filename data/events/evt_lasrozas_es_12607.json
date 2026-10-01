@@ -57,8 +57,14 @@
       "url": "https://www.lasrozas.es/node/12607",
       "checkedAt": "2026-09-28",
       "externalId": "12607"
+    },
+    {
+      "sourceId": "src_fundacion_cultural_las_rozas",
+      "url": "https://fundacionculturalasrozas.org/agenda/zambombas-y-panderetas-en-sinfonico",
+      "checkedAt": "2026-10-01",
+      "externalId": "8301"
     }
   ],
   "primarySourceId": "src_lasrozas_es",
-  "lastVerifiedAt": "2026-09-28"
+  "lastVerifiedAt": "2026-10-01"
 }

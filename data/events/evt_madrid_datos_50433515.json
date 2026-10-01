@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50433515",
+  "slug": "musica-cuarteto-lyra-presenta-melodias-bohemias",
+  "title": "MÚSICA. Cuarteto Lyra, presenta 'Melodías bohemias'",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_5989871",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50433515_01",
+      "date": "2026-10-16",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Jean Sibelius"
+    },
+    {
+      "name": "Antonín Dvořák"
+    },
+    {
+      "name": "Bridge"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=d8d92c1b317e0a10VgnVCM100000891ecb1aRCRD",
+      "checkedAt": "2026-10-01",
+      "externalId": "50433515"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-10-01"
+}

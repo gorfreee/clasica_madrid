@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_orquesta_coro_rtve_eventos_4o_concierto_bsmm_vientos_con_mucho_duende",
+  "slug": "4-concierto-bsmm-vientos-con-mucho-duende",
+  "title": "4º Concierto Bsmm “Vientos con Mucho Duende”",
+  "status": "scheduled",
+  "venueId": "ven_teatro_monumental",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_orquesta_coro_rtve_eventos_4o_concierto_bsmm_vientos_con_mucho_duende_01",
+      "date": "2026-11-17",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Carlos Garcés",
+      "role": "conductor"
+    },
+    {
+      "name": "Belén Vega"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_orquesta_coro_rtve",
+      "url": "https://www.teatromonumental.es/eventos/4o-concierto-bsmm-vientos-con-mucho-duende",
+      "checkedAt": "2026-10-01",
+      "externalId": "/eventos/4o-concierto-bsmm-vientos-con-mucho-duende/"
+    }
+  ],
+  "primarySourceId": "src_orquesta_coro_rtve",
+  "lastVerifiedAt": "2026-10-01"
+}

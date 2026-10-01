@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50429527",
+  "slug": "ii-ciclo-de-musica-clasica-del-caribe-a-la-patagonia",
+  "title": "II Ciclo de Música Clásica. Del Caribe a la Patagonia",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_4703422",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50429527_01",
+      "date": "2026-10-31",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [
+    {
+      "title": "Se equivocó la paloma (poesía de Alberti)"
+    },
+    {
+      "title": "Piececitos de niño (poesía de Gabriela Mistral)"
+    },
+    {
+      "title": "La Misión"
+    }
+  ],
+  "eras": [],
+  "formats": [
+    "recital",
+    "lied",
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=f5041268ba8c0a10VgnVCM100000891ecb1aRCRD",
+      "checkedAt": "2026-10-01",
+      "externalId": "50429527"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-10-01"
+}

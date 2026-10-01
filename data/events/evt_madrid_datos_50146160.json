@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50146160",
+  "slug": "madrid-a-tempo",
+  "title": "Madrid a Tempo",
+  "status": "scheduled",
+  "venueId": "ven_casa_vacas_retiro",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50146160_01",
+      "date": "2026-10-04",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=5619832f37fba910VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-10-01",
+      "externalId": "50146160"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-10-01"
+}

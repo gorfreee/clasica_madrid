@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_piu_mosso_2197",
+  "slug": "orquesta-sinfonica-de-getafe-concierto-numero-2-de-s-rachmaninov",
+  "title": "Orquesta Sinfónica de Getafe. Concierto Número 2 de S. Rachmaninov",
+  "status": "scheduled",
+  "venueId": "ven_teatro_federico_garcia_lorca_getafe",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_piu_mosso_2197_01",
+      "date": "2026-10-17",
+      "time": "08:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_fundacionpiumosso_com",
+      "url": "https://www.fundacionpiumosso.com/evento/orquesta-sinfonica-de-getafe-concierto-numero-2-de-s-rachmaninov",
+      "checkedAt": "2026-10-01",
+      "externalId": "2197"
+    }
+  ],
+  "primarySourceId": "src_fundacionpiumosso_com",
+  "lastVerifiedAt": "2026-10-01"
+}

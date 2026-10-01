@@ -69,16 +69,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-tiempo-de-camara",
-      "checkedAt": "2026-08-31",
+      "checkedAt": "2026-10-01",
       "externalId": "orcam-tiempo-de-camara"
     },
     {
       "sourceId": "src_fundacion_orcam",
       "url": "https://fundacionorcam.org/conciertos/2026-27/esencias-de-villancicos",
-      "checkedAt": "2026-08-31",
+      "checkedAt": "2026-10-01",
       "externalId": "4868"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-31"
+  "lastVerifiedAt": "2026-10-01"
 }

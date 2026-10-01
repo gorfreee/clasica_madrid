@@ -72,16 +72,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-sinfonico-2-coreografias-sinfonicas",
-      "checkedAt": "2026-08-31",
+      "checkedAt": "2026-10-01",
       "externalId": "orcam-sinfonico-2-coreografias-sinfonicas"
     },
     {
       "sourceId": "src_fundacion_orcam",
       "url": "https://fundacionorcam.org/conciertos/2026-27/coreografias-sinfonicas",
-      "checkedAt": "2026-08-31",
+      "checkedAt": "2026-10-01",
       "externalId": "4842"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-08-31"
+  "lastVerifiedAt": "2026-10-01"
 }

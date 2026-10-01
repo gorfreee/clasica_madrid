@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_orquesta_coro_rtve_eventos_2o_concierto_bsmm_esencia_iberica",
+  "slug": "2-concierto-bsmm-esencia-iberica",
+  "title": "2º Concierto Bsmm “Esencia Ibérica”",
+  "status": "scheduled",
+  "venueId": "ven_teatro_monumental",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_orquesta_coro_rtve_eventos_2o_concierto_bsmm_esencia_iberica_01",
+      "date": "2026-10-20",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Enrique García Asensio",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_orquesta_coro_rtve",
+      "url": "https://www.teatromonumental.es/eventos/2o-concierto-bsmm-esencia-iberica",
+      "checkedAt": "2026-10-01",
+      "externalId": "/eventos/2o-concierto-bsmm-esencia-iberica/"
+    }
+  ],
+  "primarySourceId": "src_orquesta_coro_rtve",
+  "lastVerifiedAt": "2026-10-01"
+}
