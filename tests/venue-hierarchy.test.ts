@@ -18,7 +18,7 @@ import {
 import { toEventExportRow } from '../src/lib/export/catalog-workbook.ts';
 import { buildAgendaPageModel } from '../src/lib/presentation/agenda.ts';
 import { buildEventPageModel } from '../src/lib/presentation/event.ts';
-import { sitemapLastmodMap } from '../src/lib/presentation/sitemap.ts';
+import { sitemapCatalogPaths } from '../src/lib/presentation/sitemap.ts';
 import { buildVenuePageModel, buildVenuesIndexModel, listVenuePageSlugs } from '../src/lib/presentation/venue.ts';
 import { matchVenue, unpublishedMatchedVenue, unpublishedParentVenue } from '../src/ingestion/venues.ts';
 import type { Catalog } from '../src/lib/domain/catalog.ts';
@@ -419,9 +419,9 @@ describe('jerarquía de lugares — ingestión, JSON-LD y sitemap', () => {
     expect(page?.jsonLd[0]).not.toHaveProperty('containedInPlace');
   });
 
-  it('el sitemap conserva las URLs de padre e hijos y agrega lastmod del padre', () => {
-    const map = sitemapLastmodMap(hierarchyCatalog());
-    expect(map.get('/lugares/auditorio-nacional/')).toBe('2026-08-25');
+  it('el sitemap conserva las URLs indexables de padre e hijos', () => {
+    const map = sitemapCatalogPaths(hierarchyCatalog(), testClock);
+    expect(map.has('/lugares/auditorio-nacional/')).toBe(true);
     expect(map.has('/lugares/auditorio-nacional-sala-sinfonica/')).toBe(true);
     expect(map.has('/lugares/auditorio-nacional-sala-camara/')).toBe(true);
   });

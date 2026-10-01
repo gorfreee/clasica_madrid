@@ -3,7 +3,6 @@ import {
   filterOccurrences,
   formatMadridDate,
   listUpcomingOccurrences,
-  madridToday,
   madridWeekendRange,
   systemClock,
   type AgendaFilters,
@@ -118,21 +117,6 @@ export function buildAgendaLandingPageModel(
   };
 }
 
-export function agendaLandingLastmods(catalog: Catalog, now = new Date()): Map<string, string> {
-  const map = new Map<string, string>();
-  const upcoming = listUpcomingOccurrences(catalog, { now: () => now });
-  const latestEvent = maxDate(catalog.events.map((event) => event.lastVerifiedAt));
-  const today = madridToday(now);
-  for (const slug of AGENDA_LANDING_SLUGS) {
-    const matched = filterOccurrences(upcoming, agendaLandingFilters(slug, now));
-    const dates = matched.map((item) => item.resolved.event.lastVerifiedAt);
-    if (slug === 'fin-de-semana') dates.push(today);
-    const lastmod = maxDate([...dates, latestEvent]);
-    if (lastmod) map.set(agendaLandingPath(slug), lastmod);
-  }
-  return map;
-}
-
 export function formatWeekendRangeLabel(range: { from: string; to: string }): string {
   if (range.from === range.to) return formatMadridDate(range.from);
   return `${formatMadridDate(range.from)} al ${formatMadridDate(range.to)}`;
@@ -146,9 +130,4 @@ function weekendCopy(now: Date, kind: 'intro' | 'empty'): string {
     return `Programación de música clásica en Madrid y alrededores ${span}`;
   }
   return `No hay conciertos de música clásica en la agenda ${span}. Cuando se publiquen, aparecerán aquí`;
-}
-
-function maxDate(values: (string | undefined)[]): string | undefined {
-  const dates = values.filter((value): value is string => Boolean(value)).sort();
-  return dates.at(-1);
 }

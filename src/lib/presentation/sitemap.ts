@@ -1,18 +1,26 @@
 import type { SitemapItem } from '@astrojs/sitemap';
 import type { Catalog } from '../domain/catalog.ts';
+import { systemClock, type Clock } from '../domain/dates.ts';
 import { loadPublishedCatalog } from '../repository/load.ts';
-import { agendaLandingLastmods, isAgendaLandingSlug } from './agenda-landings.ts';
+import { isAgendaLandingSlug } from './agenda-landings.ts';
 import { blogContentDir, blogLastmodsFromDirectory } from '../blog/files.ts';
+import { buildVenuePageModel } from './venue.ts';
 import { eventPath, publicPath, venuePath, VENUES_INDEX_PATH } from './urls.ts';
 
 export async function serializeSitemapItem(item: SitemapItem): Promise<SitemapItem | undefined> {
   const path = pathnameOf(item.url);
-  const lastmod = (await lastmodByPath()).get(path);
-  // Astro also discovers historical redirect routes. Returning undefined
-  // omits them from every sitemap; only canonical event paths have lastmod.
-  if (path.startsWith('/eventos/') && !lastmod) return undefined;
-  if (!lastmod) return item;
-  return { ...item, lastmod };
+  const { catalogPaths, blogLastmods } = await sitemapMetadata();
+  // Canonical identity and venue indexability are explicit rules, independent
+  // of modification dates. Astro also discovers historical redirect routes.
+  if (isCatalogDetailPath(path) && !catalogPaths.has(path)) return undefined;
+  if (isCatalogPagePath(path)) {
+    // Verification dates (and the build clock) are not material modifications.
+    // There is currently no reliable lastmod for catalog-derived pages.
+    const { lastmod: _lastmod, ...withoutLastmod } = item;
+    return withoutLastmod;
+  }
+  const lastmod = blogLastmods.get(path);
+  return lastmod ? { ...item, lastmod } : item;
 }
 
 export function sitemapPageFilter(page: string): boolean {
@@ -27,52 +35,37 @@ export function sitemapPageFilter(page: string): boolean {
   return true;
 }
 
-async function lastmodByPath(): Promise<Map<string, string>> {
-  if (!cachedLastmods) {
-    const map = sitemapLastmodMap(await loadPublishedCatalog());
-    for (const [path, lastmod] of blogLastmodsFromDirectory(blogContentDir())) {
-      map.set(path, lastmod);
+/** All canonical events, plus only venues whose public scope has programme/history. */
+export function sitemapCatalogPaths(catalog: Catalog, clock: Clock = systemClock): Set<string> {
+  const paths = new Set(catalog.events.map((event) => eventPath(event.slug)));
+  for (const venue of catalog.venues) {
+    if (buildVenuePageModel(catalog, venue.slug, clock)?.indexable) {
+      paths.add(venuePath(venue.slug));
     }
-    cachedLastmods = map;
   }
-  return cachedLastmods;
+  return paths;
 }
 
-let cachedLastmods: Map<string, string> | undefined;
+async function sitemapMetadata() {
+  // Memoize the promise too: sitemap serialization can run concurrently.
+  cachedMetadata ??= loadPublishedCatalog().then((catalog) => ({
+    catalogPaths: sitemapCatalogPaths(catalog),
+    blogLastmods: blogLastmodsFromDirectory(blogContentDir()),
+  }));
+  return cachedMetadata;
+}
 
-export function sitemapLastmodMap(catalog: Catalog, now = new Date()): Map<string, string> {
-  const map = new Map<string, string>();
-  const eventDates = catalog.events.map((event) => event.lastVerifiedAt);
-  const venueDates = catalog.venues
-    .map((venue) => venue.lastVerifiedAt)
-    .filter((value): value is string => Boolean(value));
-  const latestEvent = maxDate(eventDates);
-  if (latestEvent) map.set('/', latestEvent);
-  const lugaresLastmod = maxDate([...venueDates, ...eventDates]);
-  if (lugaresLastmod) map.set(VENUES_INDEX_PATH, lugaresLastmod);
+let cachedMetadata: Promise<{
+  catalogPaths: Set<string>;
+  blogLastmods: Map<string, string>;
+}> | undefined;
 
-  const latestByVenue = new Map<string, string>();
-  const venuesById = new Map(catalog.venues.map((venue) => [venue.id, venue]));
-  for (const event of catalog.events) {
-    const bump = (venueId: string) => {
-      const current = latestByVenue.get(venueId);
-      if (!current || event.lastVerifiedAt > current) {
-        latestByVenue.set(venueId, event.lastVerifiedAt);
-      }
-    };
-    bump(event.venueId);
-    const parentId = venuesById.get(event.venueId)?.parentVenueId;
-    if (parentId) bump(parentId);
-    map.set(eventPath(event.slug), event.lastVerifiedAt);
-  }
-  for (const venue of catalog.venues) {
-    const lastmod = maxDate([venue.lastVerifiedAt, latestByVenue.get(venue.id)]);
-    if (lastmod) map.set(venuePath(venue.slug), lastmod);
-  }
-  for (const [path, lastmod] of agendaLandingLastmods(catalog, now)) {
-    map.set(path, lastmod);
-  }
-  return map;
+function isCatalogDetailPath(path: string): boolean {
+  return path.startsWith('/eventos/') || (path.startsWith('/lugares/') && path !== VENUES_INDEX_PATH);
+}
+
+function isCatalogPagePath(path: string): boolean {
+  return path === '/' || path === VENUES_INDEX_PATH || isCatalogDetailPath(path) || path.startsWith('/agenda/');
 }
 
 function rawPathname(url: string): string {
@@ -84,14 +77,5 @@ function rawPathname(url: string): string {
 }
 
 function pathnameOf(url: string): string {
-  try {
-    return publicPath(new URL(url).pathname);
-  } catch {
-    return publicPath(url);
-  }
-}
-
-function maxDate(values: (string | undefined)[]): string | undefined {
-  const dates = values.filter((value): value is string => Boolean(value)).sort();
-  return dates.at(-1);
+  return publicPath(rawPathname(url));
 }

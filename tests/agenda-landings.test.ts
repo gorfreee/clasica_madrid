@@ -5,7 +5,6 @@ import { filterOccurrences, listUpcomingOccurrences, parseAgendaFilters } from '
 import {
   AGENDA_LANDING_SLUGS,
   agendaLandingFilters,
-  agendaLandingLastmods,
   buildAgendaLandingPageModel,
   formatWeekendRangeLabel,
   isAgendaLandingSlug,
@@ -22,7 +21,7 @@ import {
   toggleAgendaShortcut,
 } from '../src/lib/presentation/agenda-shortcuts.ts';
 import { pageDocumentTitle, SITE_NAME } from '../src/lib/presentation/constants.ts';
-import { sitemapLastmodMap, sitemapPageFilter } from '../src/lib/presentation/sitemap.ts';
+import { sitemapPageFilter } from '../src/lib/presentation/sitemap.ts';
 import { agendaLandingPath } from '../src/lib/presentation/urls.ts';
 import { makeCatalog, makeEvent, richCatalog, testClock } from './helpers.ts';
 
@@ -261,19 +260,6 @@ describe('sitemap de landings', () => {
     expect(sitemapPageFilter('https://clasicamadrid.com/agenda/opera/')).toBe(false);
     expect(sitemapPageFilter('https://clasicamadrid.com/agenda/hoy/')).toBe(false);
     expect(sitemapPageFilter('https://clasicamadrid.com/?access=free')).toBe(true);
-    const map = sitemapLastmodMap(richCatalog(), testClock.now());
-    expect(map.get('/agenda/gratis/')).toBeTruthy();
-    expect(map.get('/agenda/fin-de-semana/')).toBe('2026-09-01');
-    expect([...map.keys()].some((path) => path.includes('?'))).toBe(false);
-    expect(map.has('/agenda/opera/')).toBe(false);
-  });
-
-  it('el lastmod de gratis usa lastVerifiedAt de las ocurrencias free próximas', () => {
-    const catalog = weekendCatalog();
-    const friday = madridInstant('2026-09-18T10:00:00+02:00');
-    const lastmods = agendaLandingLastmods(catalog, friday);
-    expect(lastmods.get('/agenda/gratis/')).toBe('2026-09-13');
-    expect(lastmods.get('/agenda/fin-de-semana/')).toBe('2026-09-18');
   });
 });
 

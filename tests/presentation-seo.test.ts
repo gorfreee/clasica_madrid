@@ -16,7 +16,7 @@ import {
 } from '../src/lib/presentation/constants.ts';
 import { buildEventPageModel } from '../src/lib/presentation/event.ts';
 import { buildSocialImageMetadata } from '../src/lib/presentation/social.ts';
-import { serializeSitemapItem, sitemapLastmodMap, sitemapPageFilter } from '../src/lib/presentation/sitemap.ts';
+import { serializeSitemapItem, sitemapCatalogPaths, sitemapPageFilter } from '../src/lib/presentation/sitemap.ts';
 import {
   eventPath,
   publicAssetUrl,
@@ -28,6 +28,7 @@ import {
 import { buildVenuePageModel, buildVenuesIndexModel } from '../src/lib/presentation/venue.ts';
 import { defaultDataDir } from '../src/lib/repository/fs.ts';
 import { loadCatalogFromDir } from '../src/lib/repository/load.ts';
+import { blogContentDir, blogLastmodsFromDirectory } from '../src/lib/blog/files.ts';
 import { makeCatalog, makeVenue, richCatalog, testClock } from './helpers.ts';
 
 function musicEvents(jsonLd: Record<string, unknown>[]) {
@@ -314,33 +315,23 @@ describe('sitemap', () => {
     expect(sitemapPageFilter('https://clasicamadrid.com/agenda/opera/')).toBe(false);
   });
 
-  it('añade lastmod a partir de lastVerifiedAt', () => {
-    const map = sitemapLastmodMap(richCatalog(), testClock.now());
-    expect(map.get('/eventos/carmen/')).toBe('2026-08-20');
-    expect(map.get('/')).toBe('2026-08-21');
-    expect(map.get('/lugares/auditorio-nacional/')).toBe('2026-08-20');
-    expect(map.get('/agenda/gratis/')).toBe('2026-08-21');
-    expect(map.get('/agenda/fin-de-semana/')).toBe('2026-09-01');
-  });
-
-  it('conserva lastmod del slug canónico y excluye el slug histórico de un evento consolidado', () => {
+  it('incluye eventos canónicos sin depender de lastVerifiedAt y excluye aliases', () => {
     const catalog = richCatalog();
     catalog.events[0] = { ...catalog.events[0]!, slugAliases: ['carmen-antigua'] };
-    const map = sitemapLastmodMap(catalog);
-    expect(map.get('/eventos/carmen/')).toBe(catalog.events[0]?.lastVerifiedAt);
-    expect(map.has('/eventos/carmen-antigua/')).toBe(false);
+    const paths = sitemapCatalogPaths(catalog, testClock);
+    expect(paths.has('/eventos/carmen/')).toBe(true);
+    expect(paths.has('/eventos/concierto-de-verano/')).toBe(true);
+    expect(paths.has('/eventos/carmen-antigua/')).toBe(false);
   });
 
-  it('serializa los eventos publicados con lastmod y omite todos sus redirects históricos', async () => {
+  it('serializa los eventos publicados sin lastmod y omite todos sus redirects históricos', async () => {
     const catalog = await loadCatalogFromDir(defaultDataDir());
     const aliasedEvents = catalog.events.filter((event) => event.slugAliases?.length);
     expect(aliasedEvents.length).toBeGreaterThan(0);
     for (const event of aliasedEvents) {
       const canonical = { url: publicUrl(eventPath(event.slug)) };
-      expect(await serializeSitemapItem(canonical)).toEqual({
-        ...canonical,
-        lastmod: event.lastVerifiedAt,
-      });
+      expect(await serializeSitemapItem(canonical)).toEqual(canonical);
+      expect(await serializeSitemapItem({ ...canonical, lastmod: event.lastVerifiedAt })).toEqual(canonical);
       for (const alias of event.slugAliases ?? []) {
         expect(await serializeSitemapItem({ url: publicUrl(eventPath(alias)) })).toBeUndefined();
       }
@@ -348,5 +339,30 @@ describe('sitemap', () => {
     expect(await serializeSitemapItem({ url: publicUrl('/contacto/') })).toEqual({
       url: publicUrl('/contacto/'),
     });
+  });
+
+  it('omite lastmod en home, lugares y landings aunque reciba una fecha de verificación', async () => {
+    for (const path of ['/', '/lugares/', '/agenda/gratis/', '/agenda/fin-de-semana/']) {
+      const url = publicUrl(path);
+      expect(await serializeSitemapItem({ url, lastmod: '2026-09-30' })).toEqual({ url });
+    }
+  });
+
+  it('serializa lugares según indexabilidad explícita, sin lastmod', async () => {
+    const catalog = await loadCatalogFromDir(defaultDataDir());
+    for (const venue of catalog.venues) {
+      const model = buildVenuePageModel(catalog, venue.slug)!;
+      const item = { url: publicUrl(model.canonicalPath), lastmod: '2026-09-30' };
+      expect(await serializeSitemapItem(item), venue.slug).toEqual(model.indexable ? { url: item.url } : undefined);
+    }
+  });
+
+  it('conserva las fechas publicadas/actualizadas del blog al serializar', async () => {
+    const lastmods = blogLastmodsFromDirectory(blogContentDir());
+    expect(lastmods.size).toBeGreaterThan(0);
+    for (const [path, lastmod] of lastmods) {
+      const url = publicUrl(path);
+      expect(await serializeSitemapItem({ url })).toEqual({ url, lastmod });
+    }
   });
 });

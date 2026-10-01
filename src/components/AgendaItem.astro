@@ -4,9 +4,11 @@ import { agendaItemPeopleLine, agendaItemSignal, type AgendaItemModel } from '..
 type Props = {
   item: AgendaItemModel;
   showDate?: boolean;
+  /** Historical venue archives may include cancelled/postponed records. */
+  statusLabel?: string | null;
 };
 
-const { item, showDate = true } = Astro.props;
+const { item, showDate = true, statusLabel = null } = Astro.props;
 const timeLabel = item.time ?? 'Hora por confirmar';
 const people = agendaItemPeopleLine(item);
 const signal = agendaItemSignal(item);
@@ -28,6 +30,7 @@ const signal = agendaItemSignal(item);
     {item.showMunicipality && <span> / {item.municipality}</span>}
   </p>
   <p class="agenda-item__signal">
+    {statusLabel && <span>{statusLabel}</span>}
     <span class="agenda-item__format">{signal.formatLabel}</span>
     {signal.freeLabel && <span class="agenda-item__free free-signal">{signal.freeLabel}</span>}
   </p>
