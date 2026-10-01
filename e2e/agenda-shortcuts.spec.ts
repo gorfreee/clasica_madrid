@@ -18,6 +18,8 @@ test.describe('atajos rápidos de la agenda', () => {
     const weekend = madridWeekendRange();
     await page.goto('/');
     await expect(shortcut(page, 'free')).toHaveAttribute('href', '/?access=free');
+    await expect(shortcut(page, 'free')).toHaveAttribute('rel', 'nofollow');
+    await expect(shortcut(page, 'weekend')).toHaveAttribute('rel', 'nofollow');
     await expect(shortcut(page, 'weekend')).toHaveAttribute(
       'href',
       `/?from=${weekend.from}&to=${weekend.to}`,
@@ -40,6 +42,8 @@ test.describe('atajos rápidos de la agenda', () => {
     expect(searchParams(page).get('to')).toBe(weekend.to);
     await expectPressed(page, 'weekend', true);
     await expectPressed(page, 'free', true);
+    await expect(shortcut(page, 'free')).toHaveAttribute('rel', 'nofollow');
+    await expect(shortcut(page, 'weekend')).toHaveAttribute('rel', 'nofollow');
     await expect(page.locator('[data-active-filters] [data-remove-filter="from,to"]')).toContainText('Fin de semana');
     await expect(page.locator('[data-active-filters] [data-remove-filter="from"]')).toHaveCount(0);
     await expect(page.locator('[data-active-filters] [data-remove-filter="to"]')).toHaveCount(0);
@@ -52,6 +56,19 @@ test.describe('atajos rápidos de la agenda', () => {
     expect(searchParams(page).has('to')).toBe(false);
     await expectPressed(page, 'weekend', false);
     await expectPressed(page, 'free', true);
+  });
+
+  test('nofollow sigue el destino filtrado y se retira al volver a la home limpia', async ({ page }) => {
+    await page.goto('/');
+    await shortcut(page, 'free').click();
+    await expectPressed(page, 'free', true);
+    await expect(shortcut(page, 'free')).toHaveAttribute('href', '/');
+    await expect(shortcut(page, 'free')).not.toHaveAttribute('rel', /nofollow/);
+    await expect(shortcut(page, 'weekend')).toHaveAttribute('rel', 'nofollow');
+    await shortcut(page, 'free').click();
+    await expectPressed(page, 'free', false);
+    await expect(shortcut(page, 'free')).toHaveAttribute('href', '/?access=free');
+    await expect(shortcut(page, 'free')).toHaveAttribute('rel', 'nofollow');
   });
 
   test('activar y desactivar Gratis conserva Fin de semana y el resto de filtros', async ({ page }) => {
