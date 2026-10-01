@@ -14,7 +14,7 @@ export function relevantOccurrence(resolved: ResolvedEvent, now: Date): Occurren
   const occurrences = resolved.event.occurrences;
   return nextUpcomingOccurrence(occurrences, now)
     ?? occurrences.filter((item) => item.status === 'scheduled')
-      .sort((a, b) => compareDateTime(a.date, a.time, b.date, b.time)).at(-1)
+      .sort((a, b) => a.date.localeCompare(b.date) || (a.time ?? '').localeCompare(b.time ?? '')).at(-1)
     ?? [...occurrences].sort((a, b) => compareDateTime(a.date, a.time, b.date, b.time)).at(-1);
 }
 

@@ -111,6 +111,15 @@ describe('diferenciación factual de fichas', () => {
     }
   });
 
+  it('alinea la metadata histórica con la función destacada cuando hay horas desconocidas', () => {
+    const event = repeatedEvent('evt_a', '2026-07-01', null);
+    event.occurrences.push({ id: 'occ_known', date: '2026-07-01', time: '20:00', status: 'scheduled' });
+    const page = buildEventPageModel(makeCatalog({ events: [event, repeatedEvent('evt_b', '2026-07-01', '18:00')] }), event.slug, testClock)!;
+    expect(page.featuredOccurrence?.time).toBe('20:00');
+    expect(page.documentTitle).toContain('1 jul 2026 · 20:00');
+    expect(page.description).toContain('1 de julio de 2026 a las 20:00');
+  });
+
   it('el catálogo publicado elimina títulos idénticos cuando sus datos permiten distinguirlos', async () => {
     const catalog = await loadCatalogFromDir(defaultDataDir());
     const events = listCanonicalEvents(catalog);
