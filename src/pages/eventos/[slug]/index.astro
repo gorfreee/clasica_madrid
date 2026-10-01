@@ -1,5 +1,6 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
+import AgendaItem from '../../../components/AgendaItem.astro';
 import CalendarAction from '../../../components/CalendarAction.astro';
 import ExternalAction from '../../../components/ExternalAction.astro';
 import Eyebrow from '../../../components/Eyebrow.astro';
@@ -224,9 +225,32 @@ const share = buildEventShare({
       </p>
     </section>
     {model.isPast && <p class="past-notice">Este evento ya ha tenido lugar. Conservamos la ficha como parte del archivo</p>}
+    {
+      model.relatedConcerts.length > 0 && (
+        <section class="detail-section related-concerts" aria-labelledby="relacionados-titulo">
+          <div class="section-heading"><h2 id="relacionados-titulo">Más conciertos en {model.venueName}</h2></div>
+          <div class="related-concerts__list">
+            {model.relatedConcerts.map((item) => <AgendaItem item={item} />)}
+          </div>
+        </section>
+      )
+    }
   </article>
   <script>
     import { initEventAnalytics } from '../../../lib/analytics/browser.ts';
     initEventAnalytics();
   </script>
 </Layout>
+
+<style>
+  .related-concerts__list { border-top: 1px solid var(--color-text); }
+  .related-concerts :global(.agenda-item) {
+    grid-template-columns: 4.6rem minmax(0, 1fr);
+    grid-template-areas: 'when main' '. venue' '. signal';
+    min-height: 0;
+  }
+  .related-concerts :global(.agenda-item__venue),
+  .related-concerts :global(.agenda-item__signal) {
+    border-top: 1px solid var(--color-border);
+  }
+</style>

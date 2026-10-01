@@ -9,6 +9,7 @@ import {
   eventPublicSlugs,
   findEventBySlug,
   listCanonicalEvents,
+  listUpcomingOccurrences,
   type Clock,
   systemClock,
 } from '../domain/index.ts';
@@ -32,6 +33,10 @@ import { buildEventSourceAction, type EventSourceActionModel } from './external-
 import { buildMusicEventJsonLd } from './json-ld.ts';
 import { buildPlaceAddress, type PlaceAddressModel } from './place-address.ts';
 import { eventPath, venuePath } from './urls.ts';
+import { toAgendaItem, type AgendaItemModel } from './agenda.ts';
+import { buildEventDescription, buildEventDocumentTitles, eventDocumentTitle, relevantOccurrence } from './event-seo.ts';
+
+export { eventDocumentTitle } from './event-seo.ts';
 
 export { musicEventSchemaStatus } from './event-status.ts';
 
@@ -94,6 +99,7 @@ export type EventPageModel = {
   calendar: CalendarActionModel | null;
   lastVerifiedAt: string;
   jsonLd: Record<string, unknown>[];
+  relatedConcerts: AgendaItemModel[];
 };
 
 export function listEventPageSlugs(catalog: Catalog): string[] {
@@ -124,7 +130,24 @@ export function buildEventPageModel(
 ): EventPageModel | null {
   const resolved = findEventBySlug(catalog, slug);
   if (!resolved) return null;
-  return toEventPageModel(resolved, clock);
+  const now = clock.now();
+  const fixedClock = { now: () => now };
+  const model = toEventPageModel(resolved, fixedClock);
+  const baseTitle = model.documentTitle;
+  const titlePeers = listCanonicalEvents(catalog).filter((item) =>
+    eventDocumentTitle(item.event.title, item.rootVenue.name) === baseTitle);
+  model.documentTitle = buildEventDocumentTitles(titlePeers, now).get(resolved.event.id)
+    ?? model.documentTitle;
+  const seen = new Set([resolved.event.id]);
+  model.relatedConcerts = listUpcomingOccurrences(catalog, fixedClock)
+    .filter((item) => {
+      if (item.resolved.rootVenue.id !== resolved.rootVenue.id || seen.has(item.resolved.event.id)) return false;
+      seen.add(item.resolved.event.id);
+      return true;
+    })
+    .slice(0, 3)
+    .map(toAgendaItem);
+  return model;
 }
 
 export function toEventPageModel(resolved: ResolvedEvent, clock: Clock = systemClock): EventPageModel {
@@ -132,7 +155,7 @@ export function toEventPageModel(resolved: ResolvedEvent, clock: Clock = systemC
   const now = clock.now();
   const next = nextUpcomingOccurrence(event.occurrences, now);
   const isPast = event.status === 'scheduled' && !hasUpcomingOccurrence(event.occurrences, now);
-  const description = buildEventDescription(resolved, next, isPast);
+  const description = buildEventDescription(resolved, relevantOccurrence(resolved, now));
   const occurrences = event.occurrences
     .slice()
     .sort((a, b) => a.date.localeCompare(b.date) || (a.time ?? '').localeCompare(b.time ?? ''))
@@ -198,6 +221,7 @@ export function toEventPageModel(resolved: ResolvedEvent, clock: Clock = systemC
     calendar: buildCalendarAction(calendarSourceFromResolved(resolved), now),
     lastVerifiedAt: event.lastVerifiedAt,
     jsonLd: buildMusicEventJsonLd(resolved),
+    relatedConcerts: [],
   };
 }
 
@@ -248,24 +272,4 @@ function lastScheduledOccurrence(occurrences: Occurrence[]): Occurrence | undefi
     .filter((occurrence) => occurrence.status === 'scheduled')
     .sort((a, b) => a.date.localeCompare(b.date) || (a.time ?? '').localeCompare(b.time ?? ''))
     .at(-1);
-}
-
-export function eventDocumentTitle(title: string, venueName: string): string {
-  return title.includes(venueName) ? title : `${title} · ${venueName}`;
-}
-
-function buildEventDescription(resolved: ResolvedEvent, next?: Occurrence, isPast = false): string {
-  const whenOccurrence = next ?? (isPast ? lastScheduledOccurrence(resolved.event.occurrences) : undefined);
-  const when = whenOccurrence
-    ? `${formatMadridDate(whenOccurrence.date)}${whenOccurrence.time ? ` a las ${whenOccurrence.time}` : ''}`
-    : null;
-  const parts = [resolved.event.title, resolved.rootVenue.name];
-  if (!isMadridMunicipality(resolved.rootVenue.municipality)) {
-    parts.push(resolved.rootVenue.municipality);
-  }
-  if (when) parts.push(when);
-  const format = resolved.event.formats.map((id) => formatLabels[id]).join(', ');
-  if (format) parts.push(format);
-  if (resolved.event.access === 'free') parts.push('Entrada gratuita');
-  return `${parts.join('. ')}.`;
 }

@@ -18,7 +18,8 @@ async function expectNoHorizontalOverflow(page: Page) {
 }
 
 async function headingNames(page: Page) {
-  const names = await page.getByRole('heading', { level: 2 }).allInnerTexts();
+  // Optional contextual navigation follows the ficha's factual sections.
+  const names = await page.locator('.detail-section:not(.related-concerts)').getByRole('heading', { level: 2 }).allInnerTexts();
   return names.map((name) => name.replace(/\s+/g, ' ').trim());
 }
 
