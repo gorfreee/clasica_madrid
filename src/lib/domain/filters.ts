@@ -19,6 +19,17 @@ export type AgendaFilters = {
   q?: string;
 };
 
+/** Recognized URL keys, in the existing serialization order. Shared with Pages. */
+export const AGENDA_FILTER_KEYS = [
+  'q', 'from', 'to', 'area', 'municipality', 'access',
+  'format', 'era', 'kind', 'venue', 'composer',
+] as const satisfies ReadonlyArray<keyof AgendaFilters>;
+
+/** Presence matters for SEO, even when the client ignores an empty/invalid value. */
+export function hasAgendaFilterParams(params: URLSearchParams): boolean {
+  return AGENDA_FILTER_KEYS.some((key) => params.has(key));
+}
+
 /** Shape the static agenda page can serialize for client-side URL filters. */
 export type FilterableOccurrence = {
   occurrenceId: string;
@@ -57,29 +68,30 @@ export function canonicalVenueFilter(
 
 export function parseAgendaFilters(params: URLSearchParams): AgendaFilters {
   const filters: AgendaFilters = {};
-  const from = params.get('from');
-  const to = params.get('to');
+  const get = (key: (typeof AGENDA_FILTER_KEYS)[number]) => params.get(key);
+  const from = get('from');
+  const to = get('to');
   if (from && isRealIsoDate(from)) filters.from = from;
   if (to && isRealIsoDate(to)) filters.to = to;
-  const area = params.get('area');
+  const area = get('area');
   if (area && (AREAS as readonly string[]).includes(area)) filters.area = area as Area;
-  const municipality = params.get('municipality')?.trim();
+  const municipality = get('municipality')?.trim();
   if (municipality) filters.municipality = municipality;
-  const access = params.get('access');
+  const access = get('access');
   if (access && (ACCESS_MODES as readonly string[]).includes(access)) {
     filters.access = access as AccessMode;
   }
-  const format = params.get('format');
+  const format = get('format');
   if (format && (FORMATS as readonly string[]).includes(format)) filters.format = format as Format;
-  const era = params.get('era');
+  const era = get('era');
   if (era && (ERAS as readonly string[]).includes(era)) filters.era = era as Era;
-  const kind = params.get('kind');
+  const kind = get('kind');
   if (kind && (EVENT_KINDS as readonly string[]).includes(kind)) filters.kind = kind as EventKind;
-  const venue = params.get('venue')?.trim();
+  const venue = get('venue')?.trim();
   if (venue) filters.venue = venue;
-  const composer = params.get('composer')?.trim();
+  const composer = get('composer')?.trim();
   if (composer) filters.composer = composer;
-  const q = params.get('q')?.trim();
+  const q = get('q')?.trim();
   if (q) filters.q = q;
   return filters;
 }
@@ -180,20 +192,8 @@ export function matchesFilters(item: FilterableOccurrence, filters: AgendaFilter
 
 export function filtersToSearchParams(filters: AgendaFilters): URLSearchParams {
   const params = new URLSearchParams();
-  const entries: [keyof AgendaFilters, string | undefined][] = [
-    ['q', filters.q],
-    ['from', filters.from],
-    ['to', filters.to],
-    ['area', filters.area],
-    ['municipality', filters.municipality],
-    ['access', filters.access],
-    ['format', filters.format],
-    ['era', filters.era],
-    ['kind', filters.kind],
-    ['venue', filters.venue],
-    ['composer', filters.composer],
-  ];
-  for (const [key, value] of entries) {
+  for (const key of AGENDA_FILTER_KEYS) {
+    const value = filters[key];
     if (value) params.set(key, value);
   }
   return params;

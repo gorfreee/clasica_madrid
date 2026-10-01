@@ -18,6 +18,8 @@ test.describe('atajos rápidos de la agenda', () => {
     const weekend = madridWeekendRange();
     await page.goto('/');
     await expect(shortcut(page, 'free')).toHaveAttribute('href', '/?access=free');
+    await expect(shortcut(page, 'free')).toHaveAttribute('rel', 'nofollow');
+    await expect(shortcut(page, 'weekend')).toHaveAttribute('rel', 'nofollow');
     await expect(shortcut(page, 'weekend')).toHaveAttribute(
       'href',
       `/?from=${weekend.from}&to=${weekend.to}`,
@@ -40,6 +42,8 @@ test.describe('atajos rápidos de la agenda', () => {
     expect(searchParams(page).get('to')).toBe(weekend.to);
     await expectPressed(page, 'weekend', true);
     await expectPressed(page, 'free', true);
+    await expect(shortcut(page, 'free')).toHaveAttribute('rel', 'nofollow');
+    await expect(shortcut(page, 'weekend')).toHaveAttribute('rel', 'nofollow');
     await expect(page.locator('[data-active-filters] [data-remove-filter="from,to"]')).toContainText('Fin de semana');
     await expect(page.locator('[data-active-filters] [data-remove-filter="from"]')).toHaveCount(0);
     await expect(page.locator('[data-active-filters] [data-remove-filter="to"]')).toHaveCount(0);
