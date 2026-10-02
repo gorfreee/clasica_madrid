@@ -10,8 +10,8 @@
   "occurrences": [
     {
       "id": "occ_madrid_datos_50146209_01",
-      "date": "2026-10-31",
-      "time": "12:00",
+      "date": "2026-09-17",
+      "time": "19:00",
       "status": "scheduled"
     }
   ],
@@ -30,10 +30,10 @@
     {
       "sourceId": "src_ayuntamiento_madrid",
       "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=d2f4832f37fba910VgnVCM200000f921e388RCRD",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-08-30",
       "externalId": "50146209"
     }
   ],
   "primarySourceId": "src_ayuntamiento_madrid",
-  "lastVerifiedAt": "2026-10-01"
+  "lastVerifiedAt": "2026-08-30"
 }

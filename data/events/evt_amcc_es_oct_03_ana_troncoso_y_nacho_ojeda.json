@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "id": "evt_amcc_es_oct_03_ana_troncoso_y_nacho_ojeda",
-  "slug": "coma-26-ana-troncoso-y-nacho-ojeda",
-  "title": "COMA’26: Ana Troncoso y Nacho Ojeda",
+  "slug": "coma-26-monica-muz-y-nacho-ojeda",
+  "title": "COMA’26: Mónica Muz y Nacho Ojeda",
   "status": "scheduled",
   "venueId": "ven_casa_vacas_retiro",
   "organizerIds": [],
@@ -17,7 +17,7 @@
   ],
   "performers": [
     {
-      "name": "Ana Troncoso"
+      "name": "Mónica Muz"
     },
     {
       "name": "Nacho Ojeda"
@@ -83,10 +83,13 @@
     {
       "sourceId": "src_ayuntamiento_madrid",
       "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=d0938dfacaf8c910VgnVCM100000891ecb1aRCRD",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-10-02",
       "externalId": "50235439"
     }
   ],
-  "primarySourceId": "src_amcc_es",
-  "lastVerifiedAt": "2026-10-01"
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-10-02",
+  "slugAliases": [
+    "coma-26-ana-troncoso-y-nacho-ojeda"
+  ]
 }
