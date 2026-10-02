@@ -32,7 +32,7 @@ Los informes [before.json](before.json) y [after.json](after.json) contienen dec
 ## Validación
 
 - Base: **139 archivos / 2.651 unit tests** correctos.
-- Rama: **139 archivos / 2.672 unit tests** correctos, incluidos golden determinista y golden con IA fake; unsafe publications **0**.
+- Rama: **139 archivos / 2.674 unit tests** correctos, incluidos golden determinista y golden con IA fake; unsafe publications **0**.
 - `npm run check`: **0 errores, 0 warnings**, 2 hints preexistentes.
 - `npm run build`: correcto, **931 páginas**.
 - `node --import tsx src/cli/validate-data.ts`: catálogo válido.

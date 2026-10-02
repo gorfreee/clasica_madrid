@@ -2631,9 +2631,10 @@ function isPersonalSurnameMention(
   const repertoire = /\b(?:obras?|musica|repertorio|programa|composiciones?|piezas?)\s+(?:de\s+)?[^.;\n]*$/i.test(clause)
     || /\b(?:concierto|sinfonia|sonata|misa|suite|cantata)\b[^;\n]*\bde\s+(?:[A-Z]\.\s*)?$/i.test(before);
   const previousName = /\b([A-Z][a-z]+|[A-Z]{2,})\s+$/u.exec(before)?.[1];
-  const nextName = /^\s+([A-Z][a-z]+|[A-Z]{2,})\b/u.exec(after)?.[1];
+  const nextName = /^[ \t]+([A-Z][a-z]+|[A-Z]{2,})\b/u.exec(after)?.[1];
   if (previousName && !matchComposer(previousName) && !/^(?:de|el|la|por|con|y|obras?|musica|repertorio|programa|piezas?)$/i.test(previousName)) return true;
-  if (nextName && !matchComposer(nextName)) return true;
+  const programWorkHeading = context === 'program' && /^(?:misa|motete|cantata|sonata|sinfonia|suite|concierto|nocturno)$/i.test(nextName ?? '');
+  if (nextName && !matchComposer(nextName) && !programWorkHeading) return true;
   if (context === 'narrative') {
     // Prose needs a musical attribution or a composer/work heading. Bare
     // aliases remain useful in programText, where the field already is repertoire.

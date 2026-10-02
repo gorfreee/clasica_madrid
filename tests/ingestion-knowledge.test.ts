@@ -139,7 +139,7 @@ describe('composer knowledge base', () => {
     expect(findKnownComposersInText('Obras de Bach interpretadas por Francisco Iribarren').map((item) => item.canonicalName)).toEqual(['Johann Sebastian Bach']);
   });
 
-  it.each(['Obras de Iribarren', 'Iribarren: Misa', 'Juan Francés de Iribarren', 'Obras de Juan Francés de Iribarren'])('conserva la referencia musical %s', (text) => {
+  it.each(['Obras de Iribarren', 'Iribarren: Misa', 'Iribarren\nMisa', 'Iribarren Misa', 'Juan Francés de Iribarren', 'Obras de Juan Francés de Iribarren'])('conserva la referencia musical %s', (text) => {
     expect(findKnownComposersInText(text).map((item) => item.canonicalName)).toEqual(['Juan Francés de Iribarren']);
     expect(classify(facts({ programText: text })).eligibility.ruleId).toBe('known-classical-composer');
   });
