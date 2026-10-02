@@ -60,7 +60,7 @@ async function listingItem(id: string): Promise<string> {
 describe('Real Hermandad del Refugio listing', () => {
   it('usa el archivo oficial de conciertos como superficie primaria', async () => {
     expect(listingUrl).toBe(REFUGIO_CONCERT_ARCHIVE_URL);
-    expect(adapter.requiresDetailSchedule).toBeFalsy();
+    expect(adapter.requiresDetailSchedule).toBe(true);
     expect(adapter.hydrate).toBe(parseRefugioDetail);
     expect(adapter.fetchDetail).toBeTypeOf('function');
     expect(source.useFetchRelay).toBeFalsy();
@@ -635,7 +635,7 @@ describe('Real Hermandad del Refugio HTML archive', () => {
       const message = error instanceof Error ? error.message : String(error);
       expect(message).toMatch(/html-archive direct → HTTP 202/);
       expect(message).toMatch(/html-archive browser/);
-      expect(message).not.toMatch(/wp-rest/);
+      expect(message).toMatch(/wp-rest direct → HTTP 202/);
       expect(message).not.toMatch(/Bearer|cookie|token|INGEST_FETCH_RELAY/i);
       return true;
     });

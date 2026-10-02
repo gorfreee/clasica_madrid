@@ -64,13 +64,15 @@ const CONCERT_CATEGORY_ID = 47;
  * fields (fecha, hora, lugar, precio). Follow `data-pages` up to MAX_PAGES.
  *
  * Transport is one conventional HTTP GET, then a real Chrome session if that
- * hop is an undelivered page (HTTP 202 / SG-Captcha). REST is not part of
- * the production path. Archive cards already carry a usable calendar;
+ * hop is an undelivered page (HTTP 202 / SG-Captcha). If both HTML transports are blocked, official WP REST is read with
+ * envelope totals and strict pagination/category/identity validation. Archive cards already carry a usable calendar;
  * fichas are hydrated for the full description used in classification.
  * A ficha failure keeps listing facts and does not fail the source.
  */
 export const realHermandadRefugioAdapter: SourceAdapter = {
   id: 'real-hermandad-refugio',
+  requiresDetailSchedule: true,
+  requiresScheduleHydration: (event) => event.listingSurface === 'wp-rest',
   resolveFetchUrls(source: SourceDefinition): string[] {
     const base = source.urls[0];
     if (!base) throw new Error('real-hermandad-refugio: falta la URL del archivo de conciertos');
@@ -88,6 +90,15 @@ export const realHermandadRefugioAdapter: SourceAdapter = {
         throw new Error('real-hermandad-refugio: se recibió HTML de desafío SiteGround (captcha) en lugar del archivo de conciertos');
       }
       return eventsFromHtmlArchive(body, ctx);
+    }
+    let envelope: unknown;
+    try { envelope = JSON.parse(body); } catch { /* parseWpList supplies the diagnostic */ }
+    if (envelope && typeof envelope === 'object' && !Array.isArray(envelope) && 'refugioRestItems' in envelope) {
+      const result = envelope as { refugioRestItems: unknown; total: unknown };
+      if (!Array.isArray(result.refugioRestItems) || result.total !== result.refugioRestItems.length) {
+        throw new Error('real-hermandad-refugio: REST parcial');
+      }
+      return validatedRestEvents(result.refugioRestItems, ctx);
     }
     const first = parseWpList(body);
     const pages = [first];
@@ -134,20 +145,26 @@ export async function fetchRefugioListing(
   try {
     return await readArchivePages(archiveUrl, get);
   } catch (error) {
+    if (error instanceof Error && /archivo oficial vacío sin totales/.test(error.message)) {
+      try { return await readRefugioRestPages(get); } catch (restError) {
+        throw new ListingAttemptsError('real-hermandad-refugio', [
+          ...listingAttemptsFromError('html-archive', error), ...listingAttemptsFromError('wp-rest', restError),
+        ]);
+      }
+    }
     if (!isUndeliveredListing(error)) throw error;
     try {
       return await readArchivePagesWithBrowser(archiveUrl);
     } catch (browserError) {
-      throw new ListingAttemptsError('real-hermandad-refugio', [
-        ...listingAttemptsFromError('html-archive', error).map((attempt) => ({
-          ...attempt,
-          transport: attempt.transport ?? 'direct',
-        })),
-        ...listingAttemptsFromError('html-archive', browserError).map((attempt) => ({
-          ...attempt,
-          transport: 'browser' as const,
-        })),
-      ]);
+      try {
+        return await readRefugioRestPages(get);
+      } catch (restError) {
+        throw new ListingAttemptsError('real-hermandad-refugio', [
+          ...listingAttemptsFromError('html-archive', error).map((attempt) => ({ ...attempt, transport: attempt.transport ?? 'direct' as const })),
+          ...listingAttemptsFromError('html-archive', browserError).map((attempt) => ({ ...attempt, transport: 'browser' as const })),
+          ...listingAttemptsFromError('wp-rest', restError).map((attempt) => ({ ...attempt, transport: 'direct' as const })),
+        ]);
+      }
     }
   }
 }
@@ -185,6 +202,9 @@ async function readArchivePages(
 
 function assertArchiveDocument(body: string): void {
   assertRefugioHtml(body, 'el archivo de conciertos');
+  if (/jet-listing-not-found/.test(body) && /<title>Conciertos\b/i.test(body) && !/data-pages=["']\d+["']/.test(body)) {
+    throw new Error('real-hermandad-refugio: archivo oficial vacío sin totales; requiere corroboración REST');
+  }
 }
 
 function assertDetailDocument(body: string): void {
@@ -370,4 +390,66 @@ function asId(value: unknown): string | undefined {
   if (typeof value === 'number' && Number.isSafeInteger(value) && value > 0) return String(value);
   if (typeof value === 'string' && /^\d+$/.test(value.trim())) return value.trim();
   return undefined;
+}
+
+/** WP's official `_envelope` exposes totals through the existing text transport. */
+export async function readRefugioRestPages(get: (url: string) => Promise<string>): Promise<string> {
+  let total: number | undefined;
+  let pages: number | undefined;
+  const items: unknown[] = [];
+  for (let page = 1; page <= (pages ?? 1); page += 1) {
+    const url = new URL(refugioRestListingUrl(page));
+    url.searchParams.set('_envelope', '1');
+    url.searchParams.set('orderby', 'id');
+    url.searchParams.set('order', 'asc');
+    const body = await get(url.href);
+    const html = unexpectedHtmlInsteadOfJson('real-hermandad-refugio', body);
+    if (html) throw new Error(html);
+    const result = JSON.parse(body) as { status?: unknown; headers?: Record<string, unknown>; body?: unknown };
+    if (!result || result.status !== 200 || !Array.isArray(result.body) || !result.headers) {
+      throw new Error('real-hermandad-refugio: respuesta REST sin envelope válido');
+    }
+    const headers = Object.fromEntries(Object.entries(result.headers).map(([key, value]) => [key.toLowerCase(), value]));
+    const n = Number(headers['x-wp-total']);
+    const p = Number(headers['x-wp-totalpages']);
+    if (headers['x-wp-total'] === undefined || headers['x-wp-totalpages'] === undefined
+      || !Number.isSafeInteger(n) || n < 0 || !Number.isSafeInteger(p) || p < 0
+      || p !== Math.ceil(n / REFUGIO_PER_PAGE) || p > REFUGIO_MAX_PAGES) {
+      throw new Error('real-hermandad-refugio: totales/paginación REST no verificables');
+    }
+    if (total !== undefined && (n !== total || p !== pages)) {
+      throw new Error('real-hermandad-refugio: cobertura REST cambió durante la paginación');
+    }
+    total = n;
+    pages = p;
+    const expected = Math.min(REFUGIO_PER_PAGE, Math.max(0, n - (page - 1) * REFUGIO_PER_PAGE));
+    if (result.body.length !== expected) throw new Error('real-hermandad-refugio: REST parcial');
+    items.push(...result.body);
+  }
+  if (items.length !== total) throw new Error('real-hermandad-refugio: REST parcial');
+  validateRestIdentities(items);
+  return JSON.stringify({ refugioRestItems: items, total });
+}
+
+function validateRestIdentities(items: unknown[]): void {
+  const ids = new Set<string>();
+  const urls = new Set<string>();
+  for (const value of items) {
+    if (!value || typeof value !== 'object') throw new Error('real-hermandad-refugio: fila REST inválida');
+    const item = value as WpListItem;
+    const id = asId(item.id);
+    const url = typeof item.link === 'string' ? refugioEventUrl(item.link) : undefined;
+    if (!id || !url || !renderedText(item.title) || item.status !== 'publish'
+      || !Array.isArray(item['categoria-eventos']) || !item['categoria-eventos'].includes(CONCERT_CATEGORY_ID)) {
+      throw new Error('real-hermandad-refugio: REST con categoría/identidad inválida');
+    }
+    if (ids.has(id) || urls.has(url)) throw new Error('real-hermandad-refugio: evento duplicado en REST');
+    ids.add(id);
+    urls.add(url);
+  }
+}
+
+function validatedRestEvents(items: unknown[], ctx: AdapterContext): RawEvent[] {
+  validateRestIdentities(items);
+  return items.map((item) => toRawEvent(item, ctx)!).sort((a, b) => a.sourceUrl.localeCompare(b.sourceUrl));
 }

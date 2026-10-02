@@ -35,7 +35,7 @@ type ScheduleContext = {
 
 /** Enumerated dates, explicit ficha ranges with times, never listing-range fabrication. */
 export function parseZarzuelaSchedule(html: string, options: ZarzuelaScheduleOptions = {}): RawOccurrence[] {
-  const primaryRaw = decodeScheduleHtml(html);
+  const primaryRaw = stripBroadcastFootnotes(decodeScheduleHtml(html));
   const hintRaw = options.hintHtml ? decodeScheduleHtml(options.hintHtml) : '';
   const primary = performanceSchedule(primaryRaw);
   const hint = scheduleLikeText(performanceSchedule(hintRaw));
@@ -305,4 +305,11 @@ function uniqueExplicitMonthYear(text: string): { monthName: string; year: numbe
   const years = new Set(dated.map((group) => Number(group[3])));
   if (months.size !== 1 || years.size !== 1) return undefined;
   return { monthName: dated[0]![2]!, year: Number(dated[0]![3]) };
+}
+
+/** Date markers link to an editorial broadcast note, never another performance. */
+function stripBroadcastFootnotes(text: string): string {
+  const note = /\*\s*La funci[oó]n del \d{1,2} de (?:enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre) se emitir[aá], en directo, a trav[eé]s de Radio Cl[aá]sica\.?/gi;
+  if (!note.test(text)) return text;
+  return text.replace(note, '').replace(/(?<=\d)\*(?=\s|,)/g, '').replace(/Â(?=\s)/g, '');
 }

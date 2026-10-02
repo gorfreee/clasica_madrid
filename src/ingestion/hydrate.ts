@@ -56,6 +56,9 @@ export async function hydrateEvents(
         }
         const body = response.body;
         const patch = parseDetail(event, body, ctx);
+        if (zarzuelaGet && patch.occurrences === undefined) {
+          meta = { ...meta, reason: 'detail-no-calendar', message: 'ficha K2 válida sin calendario propio; se conservan fechas explícitas del listing' };
+        }
         const hydratedEvent = withHydration(applyDetailPatch(event, patch), meta);
         const expanded = adapter.expand?.(hydratedEvent, body);
         if (expanded && expanded.length > 1) {
@@ -142,7 +145,8 @@ function withHydration(event: RawEvent, hydration: HydrationMeta): RawEvent {
 /** No successes, or at least three unavailable fichas covering half the scope. */
 export function requiredHydrationCoverage(events: RawEvent[]) {
   const required = events.filter((event) => event.hydration?.reason !== 'outside-window');
-  const succeeded = required.filter((event) => event.hydration?.status === 'succeeded').length;
+  const succeeded = required.filter((event) => event.hydration?.status === 'succeeded'
+    && (event.hydration.reason !== 'detail-no-calendar' || event.observed.occurrences.some((o) => o.date))).length;
   const unavailable = required.length - succeeded;
   return {
     required: required.length, succeeded, unavailable,

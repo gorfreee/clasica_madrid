@@ -1,0 +1,36 @@
+name: Source resilience live validation
+on:
+  push:
+    branches: [fix/zarzuela-refugio-source-resilience]
+permissions:
+  contents: read
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      INGEST_FETCH_RELAY_URL: ${{ vars.INGEST_FETCH_RELAY_URL }}
+      INGEST_FETCH_RELAY_TOKEN: ${{ secrets.INGEST_FETCH_RELAY_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Baseline and changed sources (dry-run only)
+        shell: bash
+        run: |
+          git fetch origin c88fcde041a8e5d4e480a2c6c9ea73891fbb86a6
+          git worktree add --detach /tmp/baseline c88fcde041a8e5d4e480a2c6c9ea73891fbb86a6
+          ln -s "$GITHUB_WORKSPACE/node_modules" /tmp/baseline/node_modules
+          mkdir -p evidence
+          for source in teatro-zarzuela real-hermandad-refugio; do
+            (cd /tmp/baseline && node --import tsx src/cli/ingest.ts source "$source" --dry-run --from 2026-10-01 --to 2027-07-31 --report "$GITHUB_WORKSPACE/evidence/$source-before/report.json") > "evidence/$source-before.log" 2>&1 || true
+            node --import tsx src/cli/ingest.ts source "$source" --dry-run --from 2026-10-01 --to 2027-07-31 --report "evidence/$source-after/report.json" > "evidence/$source-after.log" 2>&1 || true
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: source-resilience-evidence
+          path: evidence/

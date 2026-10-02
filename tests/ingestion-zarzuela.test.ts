@@ -448,8 +448,8 @@ describe('fichas y horarios de Zarzuela', () => {
 
   it('reconoce la ficha K2 sin Fechas y Horarios y no inventa un calendario', async () => {
     const html = await fixture('detail-missing-schedule');
-    expect(() => parseZarzuelaDetail(raw(), html)).toThrow(ZarzuelaStructuralSkipError);
-    expect(() => parseZarzuelaDetail(raw(), html)).toThrow(/sin Fechas y Horarios/);
+    expect(parseZarzuelaDetail(raw(), html).occurrences).toBeUndefined();
+    expect(parseZarzuelaDetail(raw(), html).description).toContain('Música');
     expect(() => parseZarzuelaDetail(raw(), '<html>error</html>')).toThrow(/K2/);
   });
 
