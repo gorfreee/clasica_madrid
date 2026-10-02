@@ -17,29 +17,66 @@
   ],
   "performers": [
     {
+      "name": "Banda Sinfónica Municipal de Madrid",
+      "role": "orchestra"
+    },
+    {
       "name": "Carlos Garcés",
       "role": "conductor"
     },
     {
-      "name": "Belén Vega"
+      "name": "Belén Vega",
+      "role": "soloist"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Rafael Mullor"
+    },
+    {
+      "name": "Rodney Newton"
+    },
+    {
+      "name": "Luis Serrano Alarcón"
+    },
+    {
+      "name": "Manuel de Falla"
+    }
+  ],
+  "works": [
+    {
+      "title": "Danza Colorista — Ballet",
+      "composerName": "Rafael Mullor"
+    },
+    {
+      "title": "Four Spanish Impressions",
+      "composerName": "Rodney Newton"
+    },
+    {
+      "title": "Duende",
+      "composerName": "Luis Serrano Alarcón"
+    },
+    {
+      "title": "El amor brujo",
+      "composerName": "Manuel de Falla"
+    }
+  ],
   "eras": [
     "twentieth"
   ],
-  "formats": [],
+  "formats": [
+    "symphonic"
+  ],
   "kind": "established",
   "access": "paid",
   "citations": [
     {
       "sourceId": "src_orquesta_coro_rtve",
       "url": "https://www.teatromonumental.es/eventos/4o-concierto-bsmm-vientos-con-mucho-duende",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-10-02",
       "externalId": "/eventos/4o-concierto-bsmm-vientos-con-mucho-duende/"
     }
   ],
   "primarySourceId": "src_orquesta_coro_rtve",
-  "lastVerifiedAt": "2026-10-01"
+  "lastVerifiedAt": "2026-10-02"
 }

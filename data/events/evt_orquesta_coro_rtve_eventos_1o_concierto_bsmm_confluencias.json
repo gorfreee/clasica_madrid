@@ -17,12 +17,50 @@
   ],
   "performers": [
     {
+      "name": "Banda Sinfónica Municipal de Madrid",
+      "role": "orchestra"
+    },
+    {
       "name": "Carlos Garcés",
       "role": "conductor"
+    },
+    {
+      "name": "Javier Eguillor",
+      "role": "soloist"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "James Barnes"
+    },
+    {
+      "name": "Óscar Navarro"
+    },
+    {
+      "name": "Stephen Melillo"
+    },
+    {
+      "name": "Gustav Mahler"
+    }
+  ],
+  "works": [
+    {
+      "title": "Fantasy Variations sobre un tema de Paganini",
+      "composerName": "James Barnes"
+    },
+    {
+      "title": "Concierto para timbales y banda «Storm of Strikes»",
+      "composerName": "Óscar Navarro"
+    },
+    {
+      "title": "GoodSpeed",
+      "composerName": "Stephen Melillo"
+    },
+    {
+      "title": "Sinfonía n.º 1 «Titán» — 4.º movimiento",
+      "composerName": "Gustav Mahler"
+    }
+  ],
   "eras": [
     "romantic"
   ],
@@ -35,10 +73,10 @@
     {
       "sourceId": "src_orquesta_coro_rtve",
       "url": "https://www.teatromonumental.es/eventos/1o-concierto-bsmm-confluencias",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-10-02",
       "externalId": "/eventos/1o-concierto-bsmm-confluencias/"
     }
   ],
   "primarySourceId": "src_orquesta_coro_rtve",
-  "lastVerifiedAt": "2026-10-01"
+  "lastVerifiedAt": "2026-10-02"
 }

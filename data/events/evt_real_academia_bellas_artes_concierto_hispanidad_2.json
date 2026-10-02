@@ -17,10 +17,12 @@
   ],
   "performers": [
     {
-      "name": "Pilar Jurado"
+      "name": "Pilar Jurado",
+      "role": "soloist"
     },
     {
-      "name": "Jorge Robaina"
+      "name": "Jorge Robaina",
+      "role": "soloist"
     }
   ],
   "composers": [
@@ -110,10 +112,10 @@
     {
       "sourceId": "src_real_academia_bellas_artes_san_fernando",
       "url": "https://www.realacademiabellasartessanfernando.com/actividades/conciertos/concierto-hispanidad-2",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-10-02",
       "externalId": "concierto-hispanidad-2"
     }
   ],
   "primarySourceId": "src_real_academia_bellas_artes_san_fernando",
-  "lastVerifiedAt": "2026-10-01"
+  "lastVerifiedAt": "2026-10-02"
 }

@@ -17,12 +17,39 @@
   ],
   "performers": [
     {
+      "name": "Banda Sinfónica Municipal de Madrid",
+      "role": "orchestra"
+    },
+    {
       "name": "Enrique García Asensio",
       "role": "conductor"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Joaquín Turina"
+    },
+    {
+      "name": "Francisco Bort Ramón"
+    },
+    {
+      "name": "Manuel de Falla"
+    }
+  ],
+  "works": [
+    {
+      "title": "La procesión del Rocío",
+      "composerName": "Joaquín Turina"
+    },
+    {
+      "title": "Variaciones Irónicas",
+      "composerName": "Francisco Bort Ramón"
+    },
+    {
+      "title": "El sombrero de tres picos",
+      "composerName": "Manuel de Falla"
+    }
+  ],
   "eras": [
     "twentieth"
   ],
@@ -35,10 +62,10 @@
     {
       "sourceId": "src_orquesta_coro_rtve",
       "url": "https://www.teatromonumental.es/eventos/2o-concierto-bsmm-esencia-iberica",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-10-02",
       "externalId": "/eventos/2o-concierto-bsmm-esencia-iberica/"
     }
   ],
   "primarySourceId": "src_orquesta_coro_rtve",
-  "lastVerifiedAt": "2026-10-01"
+  "lastVerifiedAt": "2026-10-02"
 }

@@ -17,12 +17,39 @@
   ],
   "performers": [
     {
+      "name": "Banda Sinfónica Municipal de Madrid",
+      "role": "orchestra"
+    },
+    {
       "name": "Sergio Casas",
       "role": "conductor"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Maurice Ravel"
+    },
+    {
+      "name": "Mickey Nicolas"
+    },
+    {
+      "name": "Modest Músorgski"
+    }
+  ],
+  "works": [
+    {
+      "title": "Alborada del gracioso",
+      "composerName": "Maurice Ravel"
+    },
+    {
+      "title": "Listening to Paris",
+      "composerName": "Mickey Nicolas"
+    },
+    {
+      "title": "Cuadros de una exposición",
+      "composerName": "Modest Músorgski"
+    }
+  ],
   "eras": [
     "romantic",
     "twentieth"
@@ -36,10 +63,10 @@
     {
       "sourceId": "src_orquesta_coro_rtve",
       "url": "https://www.teatromonumental.es/eventos/5o-concierto-bsmm-paris-musica-y-color",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-10-02",
       "externalId": "/eventos/5o-concierto-bsmm-paris-musica-y-color/"
     }
   ],
   "primarySourceId": "src_orquesta_coro_rtve",
-  "lastVerifiedAt": "2026-10-01"
+  "lastVerifiedAt": "2026-10-02"
 }
