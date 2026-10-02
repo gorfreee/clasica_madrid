@@ -26,7 +26,7 @@ export class ListingAttemptsError extends Error {
 }
 
 export function isSiteGroundChallenge(body: string): boolean {
-  return /\/\.well-known\/sgcaptcha\/|\bsgcaptcha\b/i.test(body);
+  return /\/\.well-known\/(?:sgcaptcha|captcha)\/|\bsgcaptcha\b|Robot Challenge Screen/i.test(body);
 }
 
 /** JSON listings must not treat a captcha/error page as a parseable document. */

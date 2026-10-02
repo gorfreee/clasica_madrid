@@ -260,7 +260,7 @@ describe('Real Hermandad del Refugio HTML inesperado y fallback de navegador', (
     expect(run.summary.sourcesFailed[0]?.sourceId).toBe('real-hermandad-refugio');
     expect(run.summary.sourcesFailed[0]?.message).toMatch(/html-archive/);
     expect(run.summary.sourcesFailed[0]?.message).toMatch(/browser/);
-    expect(run.summary.sourcesFailed[0]?.message).not.toMatch(/wp-rest/);
+    expect(run.summary.sourcesFailed[0]?.message).toMatch(/wp-rest/);
     expect(run.rawEvents).toEqual([]);
   });
 });

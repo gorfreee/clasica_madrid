@@ -1,6 +1,7 @@
 import { flattenHtmlBlocks, stripTags } from '../html.ts';
 import { normalizeComposerList, normalizePersonList, type ObservedFactPatch, type ObservedPerson } from '../observed.ts';
 import type { RawEvent } from '../types.ts';
+import { normalizeUrl } from '../urls.ts';
 import { inferScheduleFromText } from './schedule.ts';
 import { parseZarzuelaSchedule } from './zarzuela-schedule.ts';
 
@@ -23,7 +24,11 @@ export function parseZarzuelaDetail(event: RawEvent, body: string): ObservedFact
   }
   const titleEnd = /<h3\b[^>]*class=["']titulo["'][^>]*>[\s\S]*?<\/h3>/i.exec(content);
   const sections = [...content.matchAll(/<div\b[^>]*class=["']encabezado-bloque["'][^>]*>\s*<h3[^>]*>([\s\S]*?)<\/h3>\s*<\/div>/gi)];
-  if (!titleEnd) throw new Error('teatro-zarzuela: ficha sin título o secciones');
+  const canonical = /<link\b(?=[^>]*rel=["']canonical["'])[^>]*href=["']([^"']+)["']/i.exec(body)?.[1];
+  if (canonical && normalizeUrl(canonical) !== normalizeUrl(event.sourceUrl)) {
+    throw new Error('teatro-zarzuela: URL canónica distinta del listado');
+  }
+  if (!titleEnd || !stripTags(titleEnd[0])) throw new Error('teatro-zarzuela: ficha sin título o secciones');
   const introHtml = content.slice(titleEnd.index + titleEnd[0].length, sections[0]?.index ?? content.length)
     .split('<!-- BOTONES COMPRA')[0]!;
   const section = (name: RegExp): string => {
@@ -57,11 +62,11 @@ export function parseZarzuelaDetail(event: RawEvent, body: string): ObservedFact
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     if (!hasScheduleSection && /ausentes o ambiguas|falta el año|no enumeradas/.test(message)) {
-      throw new ZarzuelaStructuralSkipError(
-        'teatro-zarzuela: ficha K2 sin Fechas y Horarios ni calendario explícito',
-      );
+      // Valid K2 detail contributes facts without claiming a calendar.
+      // Coverage is still incomplete unless the listing carries actual dates.
+      occurrences = undefined;
     }
-    throw error;
+    else throw error;
   }
   const performers: ObservedPerson[] = [];
   for (const pair of (artistic || introHtml).matchAll(/<dt\b[^>]*>([\s\S]*?)<\/dt>\s*<dd\b[^>]*>([\s\S]*?)<\/dd>/gi)) {

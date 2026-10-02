@@ -30,7 +30,7 @@ export type HydrationMeta = {
   status: HydrationStatus;
   detailUrl?: string;
   message?: string;
-  reason?: 'outside-window' | 'circuit-open' | 'request-failed' | 'parse-failed' | 'structural-skip';
+  reason?: 'outside-window' | 'circuit-open' | 'request-failed' | 'parse-failed' | 'structural-skip' | 'detail-no-calendar';
   requestAttempts?: number;
   httpStatuses?: number[];
   retryDelaysMs?: number[];
@@ -195,6 +195,8 @@ export type SourceAdapter = {
   id: string;
   /** Listing cannot supply a complete schedule; incomplete hydration suppresses disappearances. */
   requiresDetailSchedule?: boolean;
+  /** Only these observations depend on detail for usable calendar coverage. */
+  requiresScheduleHydration?(event: RawEvent): boolean;
   /** URLs to fetch for this source given the current clock and ingest window. */
   resolveFetchUrls(source: SourceDefinition, now: Date, window: IngestWindow): string[];
   /**
