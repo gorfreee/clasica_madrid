@@ -18,11 +18,11 @@
   "performers": [
     {
       "name": "Celeste Classic",
-      "role": "ensemble"
+      "role": "orchestra"
     },
     {
       "name": "Celeste 21",
-      "role": "ensemble"
+      "role": "orchestra"
     }
   ],
   "composers": [
@@ -78,7 +78,9 @@
     "romantic",
     "twentieth"
   ],
-  "formats": [],
+  "formats": [
+    "symphonic"
+  ],
   "kind": "alternative",
   "access": "free",
   "citations": [
