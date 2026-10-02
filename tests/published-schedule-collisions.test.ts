@@ -222,10 +222,12 @@ describe('catálogo publicado tras la limpieza de duplicados de hueco exclusivo'
     });
   });
 
-  it('reconoce la siguiente observación municipal 50221891 sobre la clausura de Madrid a Tempo', async () => {
+  it('desambigua el externalId municipal 50221891 reutilizado por fecha', async () => {
     const catalog = await loadCatalogFromDir(defaultDataDir());
-    const match = matchEventIdentity(catalog, {
-      sourceUrl: 'https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=5e05cff3cf74c910VgnVCM100000891ecb1aRCRD',
+    const sourceUrl = 'https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=5e05cff3cf74c910VgnVCM100000891ecb1aRCRD';
+
+    const historical = matchEventIdentity(catalog, {
+      sourceUrl,
       externalId: '50221891',
       title: 'II Festival Internacional de Piano',
       occurrences: [{ date: '2026-09-06', time: '12:00' }],
@@ -236,11 +238,44 @@ describe('catálogo publicado tras la limpieza de duplicados de hueco exclusivo'
       catalogSourceId: madridDatos.catalogSourceId,
       venueId: 'ven_casa_vacas_retiro',
     });
-    expect(match).toMatchObject({
-      kind: 'matched',
+    expect(historical).toMatchObject({
+      kind: 'matched-many',
       method: 'externalId',
-      event: { id: 'evt_madrid_tempo_clausura_20260906' },
     });
+    if (historical.kind === 'matched-many') {
+      expect(historical.assigned.find((item) => item.event.id === 'evt_madrid_tempo_clausura_20260906')?.occurrences)
+        .toEqual([{ date: '2026-09-06', time: '12:00' }]);
+      expect(historical.assigned.find((item) => item.event.id === 'evt_madrid_datos_dialogos_en_el_aire_20261008')?.occurrences)
+        .toEqual([]);
+    }
+
+    const current = matchEventIdentity(catalog, {
+      sourceUrl,
+      externalId: '50221891',
+      title: 'Diálogos en el aire',
+      occurrences: [{ date: '2026-10-08', time: '19:00' }],
+      performers: [
+        { name: 'Grupo Trivento' },
+        { name: 'Pepe Gallego' },
+        { name: 'Víctor Bruna' },
+        { name: 'Franz Baciero' },
+      ],
+      composers: [],
+      works: [],
+    }, {
+      catalogSourceId: madridDatos.catalogSourceId,
+      venueId: 'ven_casa_vacas_retiro',
+    });
+    expect(current).toMatchObject({
+      kind: 'matched-many',
+      method: 'externalId',
+    });
+    if (current.kind === 'matched-many') {
+      expect(current.assigned.find((item) => item.event.id === 'evt_madrid_datos_dialogos_en_el_aire_20261008')?.occurrences)
+        .toEqual([{ date: '2026-10-08', time: '19:00' }]);
+      expect(current.assigned.find((item) => item.event.id === 'evt_madrid_tempo_clausura_20260906')?.occurrences)
+        .toEqual([]);
+    }
   });
 
   it('reconoce la siguiente observación Più Mosso 2187 sobre el Festival Alicia de Larrocha', async () => {
