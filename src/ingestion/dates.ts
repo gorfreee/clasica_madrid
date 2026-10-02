@@ -258,6 +258,16 @@ export function collapseOccurrences(
   return result;
 }
 
+/** A detail replacement owns the calendar; listing-only corroboration cannot extend it. */
+export function mergeObservedCalendars(
+  base: { occurrences: ParsedDateTime[]; dateFromDetail?: boolean },
+  incoming: { occurrences: ParsedDateTime[]; dateFromDetail?: boolean },
+): Array<{ date: string; time: string | null }> {
+  if (base.dateFromDetail && !incoming.dateFromDetail) return collapseOccurrences(base.occurrences);
+  if (incoming.dateFromDetail && !base.dateFromDetail) return collapseOccurrences(incoming.occurrences);
+  return collapseOccurrences([...base.occurrences, ...incoming.occurrences]);
+}
+
 function isRealClockTime(hour: string, minute: string, second: string): boolean {
   const h = Number(hour);
   const m = Number(minute);

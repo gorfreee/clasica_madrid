@@ -10,6 +10,10 @@ import { matchEventIdentity, type EventIdentityAlias } from '../src/ingestion/id
 import { reconcileHarvest, type HarvestObservation } from '../src/ingestion/reconcile.ts';
 import type { ClassificationResult } from '../src/ingestion/classification/types.ts';
 import type { NormalizedEvent } from '../src/ingestion/normalize.ts';
+import { normalizeRawEvent } from '../src/ingestion/normalize.ts';
+import { classify } from '../src/ingestion/classification/classify.ts';
+import { hydrateEvents } from '../src/ingestion/hydrate.ts';
+import { auditorioNacionalAdapter } from '../src/ingestion/sources/auditorio-nacional.ts';
 import type { RawEvent } from '../src/ingestion/types.ts';
 import { mergeExistingEvent, proposalFromObservation } from '../src/ingestion/merge.ts';
 import { runIngest } from '../src/ingestion/pipeline.ts';
@@ -21,6 +25,77 @@ import { makeEvent, makeSource, makeVenue, TEST_NOW } from './helpers.ts';
 
 const fixtures = path.join(import.meta.dirname, 'fixtures', 'ingestion');
 const ocneDetailPath = path.join(fixtures, 'detail', 'auditorio-ocne-sinfonico-01.excerpt.html');
+
+describe('Hannigan detail calendar authority (PR #351)', () => {
+  it.each([false, true])('new Candidates preserve the detail replacement during overlay (reverse=%s)', async (reverse) => {
+    const source = getSourceDefinition('auditorio-nacional');
+    const window = { from: '2026-10-01', to: '2027-07-31' };
+    const url = 'https://auditorionacional.inaem.gob.es/es/programacion/cndm-barbara-hannigan-bertrand-chamayou';
+    const ctx = { source, now: TEST_NOW, window, get: async () => readFile(path.join(fixtures, 'detail/auditorio-hannigan.excerpt.html'), 'utf8') };
+    const [listing] = await auditorioNacionalAdapter.extract(JSON.stringify(['2026-10-23', '2027-04-11'].map((date) => ({
+      title: 'CNDM. Barbara Hannigan & Bertrand Chamayou', url, className: 'camara', start: `${date}T19:30:00+02:00`,
+      description: 'Obras de Olivier Messiaen',
+    }))), source.urls[0]!, ctx);
+    const [hydrated] = await hydrateEvents([listing!], auditorioNacionalAdapter, ctx);
+    const items = reverse ? [listing!, hydrated!] : [hydrated!, listing!];
+    const result = reconcileHarvest({ catalog: emptyCatalog(), now: TEST_NOW, window, observations: items.map((raw, index) => ({
+      index, raw, source, event: normalizeRawEvent(raw)!, classification: classify(raw.observed), aiAttempted: false,
+    })) });
+    expect(result.candidates).toHaveLength(1);
+    expect(result.candidates[0]!.event.occurrences).toEqual([expect.objectContaining({ date: '2027-04-11', time: '19:30', status: 'scheduled' })]);
+  });
+
+  it.each([['auditorio-nacional', 'cndm'], ['cndm', 'auditorio-nacional']])('does not restore October after CNDM hydration fails, order %s / %s', async (first, second) => {
+    const title = 'CNDM. Barbara Hannigan & Bertrand Chamayou';
+    const url = 'https://auditorionacional.inaem.gob.es/es/programacion/cndm-barbara-hannigan-bertrand-chamayou';
+    const auditorio = getSourceDefinition('auditorio-nacional');
+    const cndm = getSourceDefinition('cndm');
+    const catalog = emptyCatalog();
+    catalog.sources = [auditorio.seedSource, cndm.seedSource];
+    catalog.venues = [makeVenue({ id: 'ven_auditorio_nacional_sala_camara', slug: 'auditorio-nacional-sala-camara', name: 'Auditorio Nacional — Sala de Cámara' })];
+    catalog.events = [makeEvent({
+      id: 'evt_auditorio_nacional_24018', title: 'Barbara Hannigan & Bertrand Chamayou',
+      venueId: catalog.venues[0]!.id, organizerIds: [], seriesId: null,
+      occurrences: [{ id: 'occ_hannigan', date: '2027-04-11', time: '19:30', status: 'scheduled' }],
+      citations: [
+        { sourceId: auditorio.catalogSourceId, url, externalId: '3458720415294d028ad8af92e3777416', checkedAt: '2026-09-01' },
+        { sourceId: cndm.catalogSourceId, url: 'https://cndm.inaem.gob.es/node/23814', externalId: '23814', checkedAt: '2026-09-01' },
+      ], primarySourceId: auditorio.catalogSourceId,
+    })];
+    const window = { from: '2026-10-01', to: '2027-07-31' };
+    const cndmMonth = (month: string) => {
+      const year = Number(month.slice(0, 4));
+      const number = Number(month.slice(4));
+      const names = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+      const days = new Date(Date.UTC(year, number, 0)).getUTCDate();
+      const cells = Array.from({ length: days }, (_, index) => {
+        const date = `${year}-${String(number).padStart(2, '0')}-${String(index + 1).padStart(2, '0')}`;
+        const card = date === '2026-10-23' ? '<div class="item"><div class="view-item"><div class="big-calendar__event"><a href="/node/23814">[APLAZADO] BARBARA HANNIGAN &amp; BERTRAND CHAMAYOU</a><br>19:30 - Auditorio Nacional (Cámara) | Madrid</div></div></div>' : '';
+        return `<td id="events_calendar-${date}-0" date-date="${date}"><div class="inner">${card}</div></td>`;
+      }).join('');
+      return `<div class="big-calendar"><header><h3>${names[number - 1]} ${year}</h3></header><div class="calendar-calendar"><table><tr>${cells}</tr></table></div></div>`;
+    };
+    const run = await runIngest({
+      now: TEST_NOW, window, dryRun: true, catalog, sourceIds: [first!, second!],
+      dataDir: await mkdtemp(path.join(os.tmpdir(), 'hannigan-authority-')),
+      get: async (requested) => {
+        if (requested === url) return readFile(path.join(fixtures, 'detail/auditorio-hannigan.excerpt.html'), 'utf8');
+        if (requested.includes('front-page-events.json')) return JSON.stringify(['2026-10-23', '2027-04-11'].map((date, index) => ({ title, url, className: 'camara', start: `${date}T19:30:00+02:00`, id: `3458720415294d028ad8af92e3777416-${index}` })));
+        if (requested.endsWith('/node/23814')) throw new Error('tiempo agotado al pedir la ficha CNDM');
+        const month = /\/eventos\/(\d{6})$/.exec(requested)?.[1];
+        if (month) return cndmMonth(month);
+        throw new Error(`URL inesperada: ${requested}`);
+      },
+    });
+    const hydrated = run.rawEvents.find((item) => item.sourceId === auditorio.id)!;
+    expect(hydrated.dateFromDetail).toBe(true);
+    expect(hydrated.observed.occurrences).toEqual([expect.objectContaining({ date: '2027-04-11', time: '19:30' })]);
+    expect(run.rawEvents.find((item) => item.sourceId === cndm.id)?.hydration?.status).toBe('failed');
+    const candidate = run.decisions.find((item) => item.sourceId === auditorio.id)?.candidate;
+    expect(candidate?.occurrences).toEqual([{ date: '2027-04-11', time: '19:30', status: 'scheduled' }]);
+    expect(run.summary.crossSourceCorroborations).toBe(1);
+  });
+});
 
 type ListingItem = {
   title: string;

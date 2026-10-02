@@ -130,6 +130,30 @@ describe('composer knowledge base', () => {
     expect(matchComposer('Bach Family Tribute')).toBeUndefined();
   });
 
+  it.each(['Francisco Delgado-Iribarren', 'Francisco Iribarren', 'FRANCISCO IRIBARREN',  'Intervienen: Daniel Pérez, Francisco Delgado-Iribarren, María Crespo', 'Modera: Iribarren'])('no confunde el crédito personal %s con repertorio', (text) => {
+    expect(findKnownComposersInText(text)).toEqual([]);
+    expect(classify(facts({ description: text })).eligibility.ruleId).not.toBe('known-classical-composer');
+  });
+
+  it('keeps genuine repertoire while rejecting a different named person in the same sentence', () => {
+    expect(findKnownComposersInText('Obras de Bach interpretadas por Francisco Iribarren').map((item) => item.canonicalName)).toEqual(['Johann Sebastian Bach']);
+  });
+
+  it.each(['Obras de Iribarren', 'Iribarren: Misa', 'Iribarren\nMisa', 'Iribarren Misa', 'Juan Francés de Iribarren', 'Obras de Juan Francés de Iribarren'])('conserva la referencia musical %s', (text) => {
+    expect(findKnownComposersInText(text).map((item) => item.canonicalName)).toEqual(['Juan Francés de Iribarren']);
+    expect(classify(facts({ programText: text })).eligibility.ruleId).toBe('known-classical-composer');
+  });
+
+  it('requires repertoire context for a bare surname in narrative fields, but accepts a program list', () => {
+    expect(classify(facts({ description: 'Participa Iribarren' })).eligibility.value).toBe('uncertain');
+    expect(classify(facts({ title: 'Iribarren' })).eligibility.value).toBe('uncertain');
+    expect(classify(facts({ programText: 'Iribarren; Bach; Mozart' })).eligibility.ruleId).toBe('known-classical-composer');
+    for (const text of ['Obras de Iribarren', 'Iribarren: Misa', 'Juan Francés de Iribarren']) {
+      expect(classify(facts({ description: text })).eligibility.ruleId).toBe('known-classical-composer');
+      expect(classify(facts({ title: text })).eligibility.ruleId).toBe('known-classical-composer');
+    }
+  });
+
   it.each<[string, string, Era]>([
     ['Guillaume de Machaut', 'Guillaume de Machaut', 'early'],
     ['Josquin des Prez', 'Josquin des Prez', 'renaissance'],

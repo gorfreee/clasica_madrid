@@ -20,7 +20,7 @@ import { enrichNormalizedEvent } from '../src/ingestion/enrich-normalized.ts';
 import { normalizeRawEvent, observedFactsFromNormalized } from '../src/ingestion/normalize.ts';
 import { toCandidate } from '../src/ingestion/to-candidate.ts';
 import type { AdapterContext, AdapterDiscardReport, RawEvent } from '../src/ingestion/types.ts';
-import { TEST_NOW, TEST_WINDOW, makeEvent } from './helpers.ts';
+import { TEST_NOW, TEST_WINDOW, makeEvent, makeVenue } from './helpers.ts';
 
 const source = getSourceDefinition(adapter.id);
 const listingUrl = source.urls[0]!;
@@ -103,7 +103,8 @@ describe('Fundación Più Mosso listing', () => {
     const getafe = events.find((event) => event.externalId === '2197')!;
     expect(getafe.observed.venueText).toBe('Teatro Federico García Lorca');
     expect(getafe.observed.categoryText).toBeUndefined();
-    expect(getafe.observed.occurrences[0]).toMatchObject({ date: '2026-10-17', time: '08:00' });
+    expect(getafe.observed.occurrences[0]).toMatchObject({ date: '2026-10-17' });
+    expect(getafe.observed.occurrences[0]?.time).toBeUndefined();
 
     expect(source.skipDefaultSync).toBeFalsy();
     expect(source.useFetchRelay).toBeFalsy();
@@ -257,8 +258,8 @@ describe('Fundación Più Mosso ficha', () => {
     );
     expect(event.externalId).toBe('2195');
     const patch = parsePiumossoDetail(event, await fixture('detail-festival'));
-    expect(patch.occurrences).toEqual([{ raw: '2026-10-10 08:00 - 17:00', date: '2026-10-10' }]);
-    expect(patch.occurrences?.[0]?.time).toBeUndefined();
+    expect(patch.occurrences).toEqual([{ raw: '2026-10-10 08:00 - 17:00', date: '2026-10-10', time: null }]);
+    expect(patch.occurrences?.[0]?.time).toBeNull();
     expect(patch.venueText).toBe('Centro Cultural "Casa de Vacas"');
     expect(patch.description).toBeUndefined();
 
@@ -465,6 +466,51 @@ describe('Fundación Più Mosso programText', () => {
 });
 
 describe('Fundación Più Mosso pending information', () => {
+  it('2197 discards the technical 08:00–17:00 clock without pending copy', async () => {
+    const event = await sample('2197');
+    expect(event.observed.occurrences[0]).toMatchObject({ date: '2026-10-17' });
+    expect(event.observed.occurrences[0]?.time).toBeUndefined();
+    const patch = parsePiumossoDetail(event, await fixture('detail-getafe'));
+    expect(patch.occurrences?.[0]?.time).toBeNull();
+    const [hydrated] = await hydrateEvents([event], adapter, { ...ctx, get: pages });
+    expect(hydrated?.hydration?.status).toBe('succeeded');
+    expect(hydrated?.observed.occurrences[0]?.time).toBeUndefined();
+    expect(normalizeRawEvent(hydrated!)?.occurrences).toEqual([{ date: '2026-10-17', time: null }]);
+  });
+
+  it('detail clears an unverified listing clock rather than inheriting it', async () => {
+    const event = await sample('2197');
+    event.observed.occurrences[0]!.time = '08:00';
+    const [hydrated] = await hydrateEvents([event], adapter, { ...ctx, get: pages });
+    expect(hydrated?.observed.occurrences[0]?.time).toBeUndefined();
+  });
+
+  it('publishes 2197 with an unknown time through the complete pipeline', async () => {
+    const catalog = emptyCatalog();
+    catalog.sources = [source.seedSource];
+    catalog.venues = [makeVenue({
+      id: 'ven_teatro_federico_garcia_lorca_getafe', slug: 'teatro-federico-garcia-lorca-getafe',
+      name: 'Teatro Federico García Lorca', municipality: 'Getafe', area: 'nearby', address: 'C. Ramon y Cajal, 22',
+    })];
+    const run = await runIngest({
+      now: TEST_NOW, window: { from: '2026-10-01', to: '2027-07-31' }, catalog, dryRun: true,
+      sourceIds: [source.id], dataDir: await mkdtemp(path.join(os.tmpdir(), 'piumosso-2197-')), get: pages,
+    });
+    expect(run.summary.sourcesFailed).toEqual([]);
+    const candidate = run.candidates.find((item) => item.event.citations.some((citation) => citation.externalId === '2197'));
+    expect(candidate?.event.occurrences).toEqual([expect.objectContaining({ date: '2026-10-17', time: null, status: 'scheduled' })]);
+  });
+
+  it('retains a genuine 08:00 start outside the technical slot', async () => {
+    const listing = (await fixture('listing')).replaceAll('2026-10-17T17:00:00', '2026-10-17T09:00:00');
+    const event = (await adapter.extract(listing, listingUrl, ctx)).find((item) => item.externalId === '2197')!;
+    expect(event.observed.occurrences[0]?.time).toBe('08:00');
+    const [hydrated] = await hydrateEvents([event], adapter, {
+      ...ctx, get: async () => (await fixture('detail-getafe')).replace('08:00 - 17:00', '08:00 - 09:00'),
+    });
+    expect(normalizeRawEvent(hydrated!)?.occurrences[0]?.time).toBe('08:00');
+  });
+
   it('does not extract a slot whose title is the only pending-information signal', async () => {
     const title = 'Festival Alicia de Larrocha en la Casa de Vacas - Esperando Información';
     const { events, discards } = await extractListed(
@@ -526,8 +572,8 @@ describe('Fundación Più Mosso pending information', () => {
     );
     const listingEvent = await festivalListingEvent();
     const patch = parsePiumossoDetail(listingEvent, await fixture('detail-festival'));
-    expect(patch.occurrences?.[0]?.time).toBeUndefined();
-    expect(patch.occurrences).toEqual([{ raw: '2026-10-10 08:00 - 17:00', date: '2026-10-10' }]);
+    expect(patch.occurrences?.[0]?.time).toBeNull();
+    expect(patch.occurrences).toEqual([{ raw: '2026-10-10 08:00 - 17:00', date: '2026-10-10', time: null }]);
 
     const run = await runIngest({
       now: TEST_NOW,

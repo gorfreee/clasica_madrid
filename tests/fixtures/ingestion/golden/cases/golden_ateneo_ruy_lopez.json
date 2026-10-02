@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "caseId": "golden_ateneo_ruy_lopez",
+  "origin": "published-catalog",
+  "sourceId": "ateneo-madrid",
+  "sourceUrl": "https://ateneodemadrid.com/evento/ruy-lopez-de-segura-la-cara-oculta-del-tablero",
+  "listingTitle": "Ruy López de Segura: La cara oculta del tablero",
+  "observed": {
+    "title": "Ruy López de Segura: La cara oculta del tablero",
+    "performers": [],
+    "composers": [],
+    "works": [],
+    "description": "Presentación del libro.\nAgrupaciones Agustín Argüelles y Ángel Garma. Intervienen: Daniel Gragera – coautor, Francisco de Asís, Gragera – coautor, Francisco Delgado-Iribarren, María Crespo. Belén González Nistal Mayorga – retratista, Juan Carlos Fernández Calderón. Presenta: José Antonio\nGarcía Regueiro, Belén Rico García. Modera: Juan López . Sala Pérez Galdós. 19:00.",
+    "categoryText": "Presentación del libro",
+    "venueText": "Sala Pérez Galdós",
+    "seriesText": "Presentación del libro"
+  },
+  "expected": {
+    "eligibility": "exclude",
+    "formats": [],
+    "eras": [],
+    "access": "unknown"
+  },
+  "reason": "Presentación de libro: Francisco Delgado-Iribarren es un participante, no repertorio de Juan Francés de Iribarren.",
+  "checkedAt": "2026-10-01"
+}
