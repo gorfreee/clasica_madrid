@@ -30,6 +30,7 @@ import type { NormalizedEvent } from './normalize.ts';
 import { resolveCatalogSource } from './registry.ts';
 import { collapseOccurrences, defaultIngestWindow, type IngestWindow } from './dates.ts';
 import { shouldPersistEventUpdate } from './material-diff.ts';
+import { compareRecyclableIdentity, sourceIdentityCanRecycle } from './source-identity-policy.ts';
 import { newEventPublicationSkip, toCandidate } from './to-candidate.ts';
 import type { RawEvent, PipelineSource } from './types.ts';
 import { matchVenue, unpublishedMatchedVenue } from './venues.ts';
@@ -331,6 +332,7 @@ function applySharedSourceObservation(
   if (match.kind !== 'matched-many') return;
 
   const cancelled = item.proposal.status === 'cancelled';
+  const cancelAll = cancelled && !match.scopeCancellationToAssignments;
   const eventIds: string[] = [];
   const diffs: string[] = [];
   const diagnostics: string[] = [];
@@ -338,13 +340,13 @@ function applySharedSourceObservation(
   let firstCandidate: Candidate | undefined;
 
   for (const assignment of match.assigned) {
-    if (!cancelled && assignment.occurrences.length === 0) continue;
+    if (!cancelAll && assignment.occurrences.length === 0) continue;
     const existing = assignment.event;
     seenEventIds.add(existing.id);
     eventIds.push(existing.id);
     const proposal: EventProposal = {
       ...item.proposal,
-      occurrences: cancelled ? item.proposal.occurrences : assignment.occurrences,
+      occurrences: cancelAll ? item.proposal.occurrences : assignment.occurrences,
     };
     const merged = mergeExistingEvent(existing, proposal, now);
     const action = persistAction(existing, merged.event);
@@ -609,6 +611,15 @@ function groupBy<T>(items: T[], keyOf: (item: T) => string): Map<string, T[]> {
 }
 
 function groupConflict(group: PreparedItem[]): string | undefined {
+  for (const [index, item] of group.entries()) {
+    for (const other of group.slice(index + 1)) {
+      if (!sourceIdentityCanRecycle(item.observation.source.catalogSourceId) &&
+        !sourceIdentityCanRecycle(other.observation.source.catalogSourceId)) continue;
+      if (compareRecyclableIdentity(item.observation.event, other.observation.event, item.venueId, other.venueId) === 'incompatible') {
+        return 'source-identity-conflict: observaciones incompatibles de una identidad reciclable';
+      }
+    }
+  }
   let proposal = group[0]?.proposal;
   if (!proposal) return undefined;
   for (const item of group.slice(1)) {
