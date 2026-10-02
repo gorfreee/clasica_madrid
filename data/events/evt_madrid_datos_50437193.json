@@ -16,14 +16,28 @@
     }
   ],
   "performers": [],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Federico García Lorca"
+    },
+    {
+      "name": "Manuel de Falla"
+    }
+  ],
+  "works": [
+    {
+      "title": "Canciones españolas antiguas",
+      "composerName": "Federico García Lorca"
+    },
+    {
+      "title": "El amor brujo",
+      "composerName": "Manuel de Falla"
+    }
+  ],
   "eras": [
     "twentieth"
   ],
   "formats": [
-    "chamber",
-    "lied",
     "other"
   ],
   "kind": "alternative",
@@ -32,10 +46,10 @@
     {
       "sourceId": "src_ayuntamiento_madrid",
       "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=388a3b08e51f0a10VgnVCM200000f921e388RCRD",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-10-02",
       "externalId": "50437193"
     }
   ],
   "primarySourceId": "src_ayuntamiento_madrid",
-  "lastVerifiedAt": "2026-10-01"
+  "lastVerifiedAt": "2026-10-02"
 }

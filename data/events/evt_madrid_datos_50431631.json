@@ -15,8 +15,37 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
+  "performers": [
+    {
+      "name": "Iliana Sánchez",
+      "role": "soloist"
+    },
+    {
+      "name": "Natalia Belenova",
+      "role": "soloist"
+    },
+    {
+      "name": "Andrea Szamek",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Franz Liszt"
+    },
+    {
+      "name": "Antonín Dvořák"
+    },
+    {
+      "name": "Franz Lehár"
+    },
+    {
+      "name": "Béla Bartók"
+    },
+    {
+      "name": "Richard Strauss"
+    }
+  ],
   "works": [],
   "eras": [
     "romantic",
@@ -31,10 +60,10 @@
     {
       "sourceId": "src_ayuntamiento_madrid",
       "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=991af9752d2d0a10VgnVCM100000891ecb1aRCRD",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-10-02",
       "externalId": "50431631"
     }
   ],
   "primarySourceId": "src_ayuntamiento_madrid",
-  "lastVerifiedAt": "2026-10-01"
+  "lastVerifiedAt": "2026-10-02"
 }

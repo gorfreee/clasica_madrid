@@ -17,7 +17,20 @@
   ],
   "performers": [
     {
+      "name": "Ambedo Quartet",
+      "role": "ensemble"
+    },
+    {
       "name": "Raúl Campos"
+    },
+    {
+      "name": "Alexis Garita"
+    },
+    {
+      "name": "Jaume Pueyo"
+    },
+    {
+      "name": "Carlos Vila"
     }
   ],
   "composers": [
@@ -39,10 +52,10 @@
     {
       "sourceId": "src_ayuntamiento_madrid",
       "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=48260c117ebe0a10VgnVCM100000891ecb1aRCRD",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-10-02",
       "externalId": "50434707"
     }
   ],
   "primarySourceId": "src_ayuntamiento_madrid",
-  "lastVerifiedAt": "2026-10-01"
+  "lastVerifiedAt": "2026-10-02"
 }

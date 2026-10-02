@@ -15,16 +15,49 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
-  "works": [],
+  "performers": [
+    {
+      "name": "Sapere Aude",
+      "role": "ensemble"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Joaquín Turina"
+    },
+    {
+      "name": "Federico García Lorca"
+    },
+    {
+      "name": "Enrique Granados"
+    },
+    {
+      "name": "Manuel de Falla"
+    }
+  ],
+  "works": [
+    {
+      "title": "La oración del torero",
+      "composerName": "Joaquín Turina"
+    },
+    {
+      "title": "Canciones españolas antiguas",
+      "composerName": "Federico García Lorca"
+    },
+    {
+      "title": "Intermezzo de Goyescas",
+      "composerName": "Enrique Granados"
+    },
+    {
+      "title": "El amor brujo",
+      "composerName": "Manuel de Falla"
+    }
+  ],
   "eras": [
     "romantic",
     "twentieth"
   ],
   "formats": [
-    "symphonic",
-    "lied",
     "other"
   ],
   "kind": "alternative",
@@ -33,10 +66,10 @@
     {
       "sourceId": "src_ayuntamiento_madrid",
       "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=36e45c51a57e0a10VgnVCM200000f921e388RCRD",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-10-02",
       "externalId": "50433607"
     }
   ],
   "primarySourceId": "src_ayuntamiento_madrid",
-  "lastVerifiedAt": "2026-10-01"
+  "lastVerifiedAt": "2026-10-02"
 }

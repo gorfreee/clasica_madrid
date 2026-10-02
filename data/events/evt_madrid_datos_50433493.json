@@ -15,7 +15,16 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Maribel Literas",
+      "role": "soloist"
+    },
+    {
+      "name": "Raúl de Frutos",
+      "role": "soloist"
+    }
+  ],
   "composers": [
     {
       "name": "Fernando Sor"
@@ -33,6 +42,9 @@
       "name": "Claude Debussy"
     },
     {
+      "name": "Ernesto Nazareth"
+    },
+    {
       "name": "Adrián Politi"
     }
   ],
@@ -42,17 +54,19 @@
     "romantic",
     "twentieth"
   ],
-  "formats": [],
+  "formats": [
+    "chamber"
+  ],
   "kind": "alternative",
   "access": "free",
   "citations": [
     {
       "sourceId": "src_ayuntamiento_madrid",
       "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=aa6f78c4107e0a10VgnVCM100000891ecb1aRCRD",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-10-02",
       "externalId": "50433493"
     }
   ],
   "primarySourceId": "src_ayuntamiento_madrid",
-  "lastVerifiedAt": "2026-10-01"
+  "lastVerifiedAt": "2026-10-02"
 }
