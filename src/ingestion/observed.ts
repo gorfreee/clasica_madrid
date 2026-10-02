@@ -55,7 +55,8 @@ export type ObservedFacts = z.infer<typeof observedFactsSchema>;
 export type DetailOccurrence = {
   raw: string;
   date?: string;
-  time?: string;
+  /** null explicitly rejects a listing clock; undefined may inherit it. */
+  time?: string | null;
 };
 
 export type ObservedEventStatus = 'scheduled' | 'cancelled' | 'postponed';

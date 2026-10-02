@@ -2581,13 +2581,30 @@ type ComposerMentionHit = {
  * Skips names inside institutions/centres and contextual mentions
  * (tema de, basado en, inspirado en, homenaje a).
  */
-export function findKnownComposersInText(text: string): ComposerKnowledge[] {
+export function findKnownComposersInText(
+  text: string,
+  context: 'program' | 'narrative' = 'program',
+): ComposerKnowledge[] {
   const folded = foldName(text);
   if (!folded) return [];
+  // Retain punctuation/case alongside the folded index: word boundaries alone
+  // cannot distinguish Delgado-Iribarren from a repertoire reference.
+  const surface = text.normalize('NFD').replace(/\p{M}/gu, '');
+  const tokens = [...surface.matchAll(/[a-z0-9]+/gi)];
+  const offsets = new Map<number, { start: number; end: number }>();
+  let offset = 0;
+  for (const token of tokens) {
+    offsets.set(offset, { start: token.index!, end: token.index! + token[0].length });
+    offset += token[0].length + 1;
+  }
   const hits: ComposerMentionHit[] = [];
   for (const [needle, knowledge] of INDEX.byFolded) {
     if (needle.length < 4) continue;
     for (const span of unguardedAliasSpans(folded, needle)) {
+      if (!needle.includes(' ')) {
+        const position = offsets.get(span.start);
+        if (position && isPersonalSurnameMention(surface, position.start, position.end, context)) continue;
+      }
       hits.push({ start: span.start, end: span.end, knowledge });
     }
   }
@@ -2600,6 +2617,29 @@ export function findKnownComposersInText(text: string): ComposerKnowledge[] {
     found.push(hit.knowledge);
   }
   return found;
+}
+
+function isPersonalSurnameMention(
+  text: string, start: number, end: number, context: 'program' | 'narrative',
+): boolean {
+  const before = text.slice(0, start);
+  const after = text.slice(end);
+  // A compound surname is one person, even if its second half is an alias.
+  if (/[\p{L}]['’\-]$/u.test(before) || /^['’\-][\p{L}]/u.test(after)) return true;
+  const clause = before.split(/[.;\n]/).at(-1) ?? '';
+  if (/\b(?:presenta|presentan|interviene|intervienen|modera|moderan|ponente|coautor|retratista|autor del libro)\b/i.test(clause)) return true;
+  const repertoire = /\b(?:obras?|musica|repertorio|programa|composiciones?|piezas?)\s+(?:de\s+)?[^.;\n]*$/i.test(clause)
+    || /\b(?:concierto|sinfonia|sonata|misa|suite|cantata)\b[^;\n]*\bde\s+(?:[A-Z]\.\s*)?$/i.test(before);
+  const previousName = /\b([A-Z][a-z]+|[A-Z]{2,})\s+$/u.exec(before)?.[1];
+  const nextName = /^\s+([A-Z][a-z]+|[A-Z]{2,})\b/u.exec(after)?.[1];
+  if (previousName && !matchComposer(previousName) && !/^(?:de|el|la|por|con|y|obras?|musica|repertorio|programa|piezas?)$/i.test(previousName)) return true;
+  if (nextName && !matchComposer(nextName)) return true;
+  if (context === 'narrative') {
+    // Prose needs a musical attribution or a composer/work heading. Bare
+    // aliases remain useful in programText, where the field already is repertoire.
+    return !repertoire && !/^\s*:/.test(after);
+  }
+  return false;
 }
 
 const CONTEXTUAL_COMPOSER_PREFIXES = CONTEXTUAL_COMPOSER_RELATIONS;

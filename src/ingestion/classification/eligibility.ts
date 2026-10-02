@@ -540,6 +540,9 @@ function workshopIdentity(
   program: string,
 ): Exclusion | undefined {
   const evidence = facts.categoryText ?? facts.title;
+  if (/^presentacion (?:del|de un|de) libro$/.test(category)) {
+    return exclusion('non-performance-activity', [evidence], true);
+  }
   if (nonPerformanceCategory(category)) {
     return exclusion('non-performance-activity', [evidence], true);
   }
@@ -1511,16 +1514,17 @@ function knownClassicalNames(facts: ObservedFacts): string[] {
         hasPhrase(fieldFolded(description), 'sin obras de')
       )
     );
+  for (const item of findKnownComposersInText(facts.programText ?? '', 'program')) {
+    matched.push(item.canonicalName);
+  }
   const editorial = [
-    facts.programText,
     educationalBrandWithoutRepertoire ? undefined : description,
     educationalBrandWithoutRepertoire ? undefined : stripNonRepertoireEntityNames(facts.title, facts),
     educationalBrandWithoutRepertoire ? undefined : facts.seriesText,
-  ]
-    .filter(Boolean)
-    .join('\n');
-  for (const item of findKnownComposersInText(editorial)) {
-    matched.push(item.canonicalName);
+  ];
+  for (const text of editorial) {
+    if (!text) continue;
+    for (const item of findKnownComposersInText(text, 'narrative')) matched.push(item.canonicalName);
   }
   return [...new Set(matched)];
 }

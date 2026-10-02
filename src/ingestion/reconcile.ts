@@ -28,7 +28,7 @@ import {
 } from './merge.ts';
 import type { NormalizedEvent } from './normalize.ts';
 import { resolveCatalogSource } from './registry.ts';
-import { collapseOccurrences, defaultIngestWindow, type IngestWindow } from './dates.ts';
+import { mergeObservedCalendars, defaultIngestWindow, type IngestWindow } from './dates.ts';
 import { shouldPersistEventUpdate } from './material-diff.ts';
 import { newEventPublicationSkip, toCandidate } from './to-candidate.ts';
 import type { RawEvent, PipelineSource } from './types.ts';
@@ -708,7 +708,7 @@ function overlayNormalizedFacts(base: NormalizedEvent, incoming: NormalizedEvent
     ...base,
     title: incoming.title || base.title,
     description: incoming.description ?? base.description,
-    occurrences: collapseOccurrences([...base.occurrences, ...incoming.occurrences]),
+    occurrences: mergeObservedCalendars(base, incoming),
     dateFromDetail: base.dateFromDetail || incoming.dateFromDetail,
     eventStatus: incoming.eventStatus ?? base.eventStatus,
     // Keep the primary observation's hall label. CNDM's "Auditorio Nacional

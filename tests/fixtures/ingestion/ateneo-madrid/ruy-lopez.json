@@ -1,0 +1,44 @@
+{
+  "events": [
+    {
+      "id": 64667,
+      "status": "publish",
+      "url": "https://ateneodemadrid.com/evento/ruy-lopez-de-segura-la-cara-oculta-del-tablero/",
+      "title": "Ruy López de Segura: La cara oculta del tablero",
+      "description": "<p><strong>Presentación del libro.</strong></p>\n<p><a href=\"https://ateneodemadrid.com/wp-content/uploads/2026/09/22.10.2026-Libro-Ruy-Lopez-scaled.jpg\"><img loading=\"lazy\" decoding=\"async\" class=\"alignnone wp-image-64612 size-full\" src=\"https://ateneodemadrid.com/wp-content/uploads/2026/09/22.10.2026-Libro-Ruy-Lopez-scaled.jpg\" alt=\"\" width=\"1811\" height=\"2560\" srcset=\"https://ateneodemadrid.com/wp-content/uploads/2026/09/22.10.2026-Libro-Ruy-Lopez-scaled.jpg 1811w, https://ateneodemadrid.com/wp-content/uploads/2026/09/22.10.2026-Libro-Ruy-Lopez-212x300.jpg 212w, https://ateneodemadrid.com/wp-content/uploads/2026/09/22.10.2026-Libro-Ruy-Lopez-724x1024.jpg 724w, https://ateneodemadrid.com/wp-content/uploads/2026/09/22.10.2026-Libro-Ruy-Lopez-768x1086.jpg 768w, https://ateneodemadrid.com/wp-content/uploads/2026/09/22.10.2026-Libro-Ruy-Lopez-1086x1536.jpg 1086w, https://ateneodemadrid.com/wp-content/uploads/2026/09/22.10.2026-Libro-Ruy-Lopez-1449x2048.jpg 1449w, https://ateneodemadrid.com/wp-content/uploads/2026/09/22.10.2026-Libro-Ruy-Lopez-1568x2217.jpg 1568w\" sizes=\"(max-width: 1811px) 100vw, 1811px\" /></a></p>\n<p><strong>Agrupaciones Agustín Argüelles y Ángel Garma. Intervienen: Daniel Gragera &#8211; coautor, Francisco de Asís, Gragera &#8211; coautor, Francisco Delgado-Iribarren, María Crespo. Belén González Nistal Mayorga &#8211; retratista, Juan Carlos Fernández Calderón. Presenta: José Antonio<br />\nGarcía Regueiro, Belén Rico García. Modera: Juan López</strong><strong>. Sala Pérez Galdós. 19:00.</strong></p>",
+      "all_day": false,
+      "start_date": "2026-10-22 19:00:00",
+      "end_date": "2026-10-22 19:00:00",
+      "timezone": "Europe/Madrid",
+      "cost": "",
+      "cost_details": {
+        "currency_symbol": "€",
+        "currency_code": "EUR",
+        "currency_position": "prefix",
+        "values": []
+      },
+      "categories": [
+        {
+          "name": "Presentación del libro",
+          "slug": "presentacion-del-libro",
+          "term_group": 0,
+          "term_taxonomy_id": 16,
+          "taxonomy": "tribe_events_cat",
+          "description": "",
+          "parent": 0,
+          "count": 841,
+          "filter": "raw",
+          "id": 16,
+          "urls": {
+            "self": "https://ateneodemadrid.com/wp-json/tribe/events/v1/categories/16",
+            "collection": "https://ateneodemadrid.com/wp-json/tribe/events/v1/categories"
+          }
+        }
+      ],
+      "venue": [],
+      "organizer": []
+    }
+  ],
+  "total": 1,
+  "total_pages": 1
+}

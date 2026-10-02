@@ -1,7 +1,7 @@
 import { parseObservedDateTime, parseObservedTime } from '../dates.ts';
 import { explicitAccessText } from './access-evidence.ts';
 import { collapseWhitespace, decodeHtmlEntities, flattenHtmlBlocks, stripTags } from '../html.ts';
-import { emptyObservedLists, type ObservedFactPatch } from '../observed.ts';
+import { emptyObservedLists, type DetailOccurrence, type ObservedFactPatch } from '../observed.ts';
 import { normalizeUrl } from '../urls.ts';
 import { reportAdapterDiscard, type AdapterContext, type RawEvent, type RawOccurrence } from '../types.ts';
 
@@ -121,12 +121,13 @@ export function parsePiumossoDetail(event: RawEvent, body: string): ObservedFact
   if (!parsedDate) throw new Error('fundacion-piu-mosso: fecha de ficha no reconocible');
   const descriptionHtml = fichaDescriptionHtml(body);
   const pendingSchedule = isPendingEventInfo(listingTitle) || isPendingEventInfo(descriptionHtml);
-  const time = pendingSchedule ? undefined : parseStartClock(timeText);
-  if (timeText && !pendingSchedule && !time) throw new Error('fundacion-piu-mosso: hora de ficha no reconocible');
-  const occurrence: RawOccurrence = {
+  const technicalSlot = isTechnicalClockRange(timeText);
+  const time = pendingSchedule || technicalSlot ? null : parseStartClock(timeText);
+  if (timeText && !pendingSchedule && !technicalSlot && !time) throw new Error('fundacion-piu-mosso: hora de ficha no reconocible');
+  const occurrence: DetailOccurrence = {
     raw: timeText ? `${dateTitle} ${timeText}` : dateTitle,
     date: parsedDate.date,
-    ...(time ? { time } : {}),
+    ...(time !== undefined ? { time } : {}),
   };
 
   const venueText = stripTags(
@@ -309,10 +310,11 @@ function occurrenceFromLd(
   if (!start) throw new Error('fundacion-piu-mosso: fecha de listado no reconocible');
   const end = endDate ? parseObservedDateTime(endDate) : undefined;
   const allDay = start.time === '00:00' && end?.date === start.date && (end.time === '23:59' || end.time === '00:00');
+  const technicalSlot = start.time === '08:00' && end?.date === start.date && end.time === '17:00';
   return {
     raw: startDate,
     date: start.date,
-    ...(start.time && !allDay && !pendingSchedule ? { time: start.time } : {}),
+    ...(start.time && !allDay && !pendingSchedule && !technicalSlot ? { time: start.time } : {}),
   };
 }
 
@@ -320,6 +322,11 @@ function parseStartClock(text: string): string | undefined {
   const match = /(\d{1,2})[:.](\d{2})/.exec(text);
   if (!match) return undefined;
   return parseObservedTime(`${match[1]!.padStart(2, '0')}:${match[2]}`) ?? undefined;
+}
+
+/** TEC defaults are not independent concert-time evidence, even with a real title. */
+function isTechnicalClockRange(text: string): boolean {
+  return /^0?8[:.]00\s*[-–—]\s*17[:.]00$/.test(text.trim());
 }
 
 function cardCost(card: string): string | undefined {

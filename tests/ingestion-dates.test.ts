@@ -10,6 +10,7 @@ import {
   seasonIngestWindow,
   nextSeasonEnd,
   isDateInHarvestScope,
+  mergeObservedCalendars,
 } from '../src/ingestion/dates.ts';
 import { inferScheduleFromText } from '../src/ingestion/detail/schedule.ts';
 import { normalizeRawEvent } from '../src/ingestion/normalize.ts';
@@ -18,6 +19,16 @@ import { TEST_NOW } from './helpers.ts';
 import type { RawEvent } from '../src/ingestion/types.ts';
 
 describe('parseo de fechas y horas', () => {
+  it('detail calendar replacement wins over listing-only corroboration in either order', () => {
+    const listing = { occurrences: [{ date: '2026-10-23', time: '19:30' }, { date: '2027-04-11', time: '19:30' }] };
+    const detail = { occurrences: [{ date: '2027-04-11', time: '19:30' }], dateFromDetail: true };
+    expect(mergeObservedCalendars(detail, listing)).toEqual(detail.occurrences);
+    expect(mergeObservedCalendars(listing, detail)).toEqual(detail.occurrences);
+    expect(mergeObservedCalendars({ ...detail, dateFromDetail: false }, listing)).toEqual(listing.occurrences);
+    // Independently detailed performances keep the existing union semantics.
+    expect(mergeObservedCalendars(detail, { ...listing, dateFromDetail: true })).toEqual(listing.occurrences);
+  });
+
   it('entiende ISO con offset de Madrid', () => {
     expect(parseObservedDateTime('2026-09-18T19:30:00+02:00')).toEqual({
       date: '2026-09-18',

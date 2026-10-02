@@ -129,7 +129,7 @@ function preferOccurrences(
     replaced: true,
     occurrences: explicit.flatMap((item) =>
       item.date
-        ? [{ raw: item.raw, date: item.date, time: item.time ?? listingTime }]
+        ? [{ raw: item.raw, date: item.date, time: item.time === null ? undefined : item.time ?? listingTime }]
         : [],
     ),
   };

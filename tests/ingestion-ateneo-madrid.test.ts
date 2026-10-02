@@ -389,6 +389,21 @@ describe('Ateneo de Madrid pipeline safety', () => {
 });
 
 describe('Ateneo de Madrid regression cases', () => {
+  it('never publishes Ruy López from a participant surname (PR #351)', async () => {
+    const run = await runIngest({
+      now: TEST_NOW, window: TEST_WINDOW, dryRun: true, catalog: emptyCatalog(),
+      sourceIds: [source.id], dataDir: await mkdtemp(path.join(os.tmpdir(), 'ateneo-ruy-')),
+      get: async () => fixture('ruy-lopez.json'),
+    });
+    expect(run.summary.sourcesFailed).toEqual([]);
+    expect(run.rawEvents).toHaveLength(1);
+    const eligibility = classify(run.rawEvents[0]!.observed).eligibility;
+    expect(eligibility.value).toBe('exclude');
+    expect(eligibility.ruleId).not.toBe('known-classical-composer');
+    expect(run.candidates).toEqual([]);
+    expect(run.summary.newEvents).toBe(0);
+  });
+
   const regression = (name: string) =>
     readFile(path.join(import.meta.dirname, 'fixtures/ingestion/ateneo-madrid', name), 'utf8');
 

@@ -20,7 +20,7 @@ import {
 import { canonicalizeEventTitle, canonicalizePerformerName } from './event-title.ts';
 import { publicationOccurrences } from './to-candidate.ts';
 import { normalizeUrl, urlsEquivalent } from './urls.ts';
-import type { IngestWindow } from './dates.ts';
+import { mergeObservedCalendars, type IngestWindow } from './dates.ts';
 
 export type EventProposal = {
   title: string;
@@ -96,7 +96,7 @@ export function mergeProposals(base: EventProposal, incoming: EventProposal): Ev
     status: incoming.status ?? base.status,
     venueId: incoming.venueId ?? base.venueId,
     venue: incoming.venue ?? base.venue,
-    occurrences: unionOccurrences(base.occurrences, incoming.occurrences),
+    occurrences: mergeObservedCalendars(base, incoming),
     performers: preferNonEmpty(base.performers, incoming.performers),
     composers: preferNonEmpty(base.composers, incoming.composers),
     works: preferNonEmpty(base.works, incoming.works),
@@ -404,21 +404,6 @@ function preferOptionalArray<T>(existing: T[] | undefined, incoming: T[] | undef
   if (incoming && incoming.length > 0) return incoming;
   if (existing && existing.length > 0) return existing;
   return incoming ?? existing;
-}
-
-function unionOccurrences(
-  left: Array<{ date: string; time: string | null }>,
-  right: Array<{ date: string; time: string | null }>,
-): Array<{ date: string; time: string | null }> {
-  const seen = new Set<string>();
-  const result: Array<{ date: string; time: string | null }> = [];
-  for (const item of [...left, ...right]) {
-    const key = `${item.date}|${item.time ?? ''}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    result.push(item);
-  }
-  return result.sort(compareOccurrence);
 }
 
 function mergeOccurrences(existing: Event, proposal: EventProposal, status: Event['status']): Occurrence[] {
