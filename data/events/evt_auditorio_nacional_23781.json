@@ -23,9 +23,6 @@
   "composers": [
     {
       "name": "Ludwig van Beethoven"
-    },
-    {
-      "name": "Ludwig van Universo Beethoven"
     }
   ],
   "works": [
@@ -61,10 +58,10 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23781",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-02",
       "externalId": "23781"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-10-01"
+  "lastVerifiedAt": "2026-10-02"
 }

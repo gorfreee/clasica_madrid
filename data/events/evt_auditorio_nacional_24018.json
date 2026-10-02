@@ -9,12 +9,6 @@
   "seriesId": null,
   "occurrences": [
     {
-      "id": "occ_auditorio_nacional_24018_02",
-      "date": "2026-10-23",
-      "time": "19:30",
-      "status": "scheduled"
-    },
-    {
       "id": "occ_auditorio_nacional_24018_01",
       "date": "2027-04-11",
       "time": "19:30",
@@ -70,22 +64,22 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-barbara-hannigan-bertrand-chamayou",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-10-02",
       "externalId": "3458720415294d028ad8af92e3777416"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23814",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-10-02",
       "externalId": "23814"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/24018",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-02",
       "externalId": "24018"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-10-01"
+  "lastVerifiedAt": "2026-10-02"
 }
