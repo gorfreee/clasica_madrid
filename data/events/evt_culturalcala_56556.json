@@ -17,10 +17,12 @@
   ],
   "performers": [
     {
-      "name": "Alexandra Zamfira"
+      "name": "Alexandra Zamfira",
+      "role": "soloist"
     },
     {
-      "name": "Carolina Hernández"
+      "name": "Carolina Hernández",
+      "role": "soloist"
     }
   ],
   "composers": [],
@@ -36,10 +38,10 @@
     {
       "sourceId": "src_culturalcala",
       "url": "https://culturalcala.es/item_event/opera-insieme",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-10-02",
       "externalId": "56556"
     }
   ],
   "primarySourceId": "src_culturalcala",
-  "lastVerifiedAt": "2026-10-01"
+  "lastVerifiedAt": "2026-10-02"
 }

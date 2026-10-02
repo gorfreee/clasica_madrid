@@ -17,23 +17,58 @@
   ],
   "performers": [
     {
-      "name": "Maite Raga"
+      "name": "Maite Raga",
+      "role": "soloist"
     },
     {
-      "name": "Mª José Muñoz"
+      "name": "Mª José Muñoz",
+      "role": "soloist"
     },
     {
-      "name": "Graham Jackson"
+      "name": "Graham Jackson",
+      "role": "soloist"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Franz Doppler"
+    },
+    {
+      "name": "Karl Doppler"
+    },
+    {
+      "name": "Ernesto Köhler"
+    },
+    {
+      "name": "Georges Bizet"
+    },
+    {
+      "name": "François Borne"
+    }
+  ],
+  "works": [
+    {
+      "title": "Rigoletto Fantasie (dúo concertante), op. 38",
+      "composerName": "Franz Doppler"
+    },
+    {
+      "title": "Concert Duett sobre una melodía de Franz Schubert, op. 67",
+      "composerName": "Ernesto Köhler"
+    },
+    {
+      "title": "Valse di Bravura, op. 33",
+      "composerName": "Franz Doppler"
+    },
+    {
+      "title": "Fantasía sobre Carmen",
+      "composerName": "François Borne"
+    }
+  ],
   "eras": [
     "romantic"
   ],
   "formats": [
-    "chamber",
-    "other"
+    "chamber"
   ],
   "kind": "established",
   "access": "paid",
@@ -41,10 +76,10 @@
     {
       "sourceId": "src_fundacion_canal",
       "url": "https://www.fundacioncanal.com/ciclo-musica-camara/una-noche-en-la-opera",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-10-02",
       "externalId": "/ciclo-musica-camara/una-noche-en-la-opera"
     }
   ],
   "primarySourceId": "src_fundacion_canal",
-  "lastVerifiedAt": "2026-10-01"
+  "lastVerifiedAt": "2026-10-02"
 }

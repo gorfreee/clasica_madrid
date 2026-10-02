@@ -15,10 +15,25 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
+  "performers": [
+    {
+      "name": "Jorge Nava",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Serguéi Prokófiev"
+    }
+  ],
   "works": [],
-  "eras": [],
+  "eras": [
+    "classical",
+    "twentieth"
+  ],
   "formats": [
     "recital"
   ],
@@ -28,10 +43,10 @@
     {
       "sourceId": "src_ayuntamiento_madrid",
       "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=5619832f37fba910VgnVCM200000f921e388RCRD",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-10-02",
       "externalId": "50146160"
     }
   ],
   "primarySourceId": "src_ayuntamiento_madrid",
-  "lastVerifiedAt": "2026-10-01"
+  "lastVerifiedAt": "2026-10-02"
 }

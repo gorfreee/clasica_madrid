@@ -15,10 +15,93 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
-  "works": [],
-  "eras": [],
+  "performers": [
+    {
+      "name": "Alma Lírica",
+      "role": "ensemble"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Francisco Asenjo Barbieri"
+    },
+    {
+      "name": "Jacinto Guerrero"
+    },
+    {
+      "name": "Federico Moreno Torroba"
+    },
+    {
+      "name": "Pablo Sorozábal"
+    },
+    {
+      "name": "Amadeo Vives"
+    },
+    {
+      "name": "Federico Chueca"
+    },
+    {
+      "name": "Manuel Penella Moreno"
+    }
+  ],
+  "works": [
+    {
+      "title": "«Este es el sitio…» (terceto de El barberillo de Lavapiés)",
+      "composerName": "Francisco Asenjo Barbieri"
+    },
+    {
+      "title": "Coro de Espigadoras (La rosa del azafrán)",
+      "composerName": "Jacinto Guerrero"
+    },
+    {
+      "title": "Vidal y Vareadores (Luisa Fernanda)",
+      "composerName": "Federico Moreno Torroba"
+    },
+    {
+      "title": "Dúo de Paloma y Lamparilla «No hay que quitar los hilvanes» (El barberillo de Lavapiés)",
+      "composerName": "Francisco Asenjo Barbieri"
+    },
+    {
+      "title": "Dúo de Ascensión y Joaquín «Hace tiempo que vengo al taller» (La del manojo de rosas)",
+      "composerName": "Pablo Sorozábal"
+    },
+    {
+      "title": "Chotis (La chulapona)",
+      "composerName": "Federico Moreno Torroba"
+    },
+    {
+      "title": "Canción del sembrador (La rosa del azafrán)",
+      "composerName": "Jacinto Guerrero"
+    },
+    {
+      "title": "«Cuánto tiempo sin verte…» (Luisa Fernanda)",
+      "composerName": "Federico Moreno Torroba"
+    },
+    {
+      "title": "Coro de Románticos (Doña Francisquita)",
+      "composerName": "Amadeo Vives"
+    },
+    {
+      "title": "Couplet de Virginio y dúo de Visita y Virginio (El bateo)",
+      "composerName": "Federico Chueca"
+    },
+    {
+      "title": "Jota de los Ratas (La Gran Vía)",
+      "composerName": "Federico Chueca"
+    },
+    {
+      "title": "Dúo de El gato montés",
+      "composerName": "Manuel Penella Moreno"
+    },
+    {
+      "title": "Cuarteto «El sombrero hasta las cejas» y Caleseras de Lavapiés (El barberillo de Lavapiés)",
+      "composerName": "Francisco Asenjo Barbieri"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
   "formats": [
     "zarzuela",
     "recital"
@@ -29,10 +112,10 @@
     {
       "sourceId": "src_ayto_san_lorenzo",
       "url": "https://www.aytosanlorenzo.es/agenda-eventos/recital-de-zarzuela-tarde-misteriosa-coros-cuartetos-trios-y-duos",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-10-02",
       "externalId": "74956"
     }
   ],
   "primarySourceId": "src_ayto_san_lorenzo",
-  "lastVerifiedAt": "2026-10-01"
+  "lastVerifiedAt": "2026-10-02"
 }
