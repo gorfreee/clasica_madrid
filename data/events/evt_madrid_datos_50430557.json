@@ -15,22 +15,27 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Jasminum Ensemble",
+      "role": "ensemble"
+    }
+  ],
   "composers": [
     {
-      "name": "Bernstein"
+      "name": "Leonard Bernstein"
     },
     {
       "name": "Manuel de Falla"
     },
     {
-      "name": "Medaglia"
+      "name": "Júlio Medaglia"
     },
     {
       "name": "Antonín Dvořák"
     },
     {
-      "name": "Piazzolla"
+      "name": "Astor Piazzolla"
     }
   ],
   "works": [],
@@ -47,10 +52,10 @@
     {
       "sourceId": "src_ayuntamiento_madrid",
       "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=13d4b13703dc0a10VgnVCM100000891ecb1aRCRD",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-10-02",
       "externalId": "50430557"
     }
   ],
   "primarySourceId": "src_ayuntamiento_madrid",
-  "lastVerifiedAt": "2026-10-01"
+  "lastVerifiedAt": "2026-10-02"
 }

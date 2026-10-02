@@ -15,13 +15,93 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [
+  "performers": [
     {
-      "name": "Lopes Scottish Medley"
+      "name": "Orquesta de Guitarras de Madrid",
+      "role": "ensemble"
+    },
+    {
+      "name": "Jorge Aguilera",
+      "role": "conductor"
     }
   ],
-  "works": [],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Luigi Boccherini"
+    },
+    {
+      "name": "Edson Lopes"
+    },
+    {
+      "name": "Carlos Guastavino"
+    },
+    {
+      "name": "Mark Houghton"
+    },
+    {
+      "name": "Giorgio Tortora"
+    },
+    {
+      "name": "Ernesto Lecuona"
+    },
+    {
+      "name": "Francisco Alonso"
+    },
+    {
+      "name": "Federico Moreno Torroba"
+    }
+  ],
+  "works": [
+    {
+      "title": "Suite Orquestal nº 2",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Pequeña serenata nocturna",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Introducción y Fandango",
+      "composerName": "Luigi Boccherini"
+    },
+    {
+      "title": "Cantábile",
+      "composerName": "Edson Lopes"
+    },
+    {
+      "title": "Scottish Medley"
+    },
+    {
+      "title": "Fuga (sobre un tema popular argentino, Arroz con leche)",
+      "composerName": "Carlos Guastavino"
+    },
+    {
+      "title": "Tango Dance Suite",
+      "composerName": "Mark Houghton"
+    },
+    {
+      "title": "Tarantella nº 1",
+      "composerName": "Giorgio Tortora"
+    },
+    {
+      "title": "Suite Andalucía (Andalucía, Malagueña)",
+      "composerName": "Ernesto Lecuona"
+    },
+    {
+      "title": "La Calesera (Pasacalle)",
+      "composerName": "Francisco Alonso"
+    },
+    {
+      "title": "Cuatro estampas (Camino del Molino, La boda, Remanso, Juegos Infantiles)",
+      "composerName": "Federico Moreno Torroba"
+    }
+  ],
   "eras": [
     "baroque",
     "classical",
@@ -37,10 +117,10 @@
     {
       "sourceId": "src_ayuntamiento_madrid",
       "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=04c3b3d0bc8c0a10VgnVCM100000891ecb1aRCRD",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-10-02",
       "externalId": "50429626"
     }
   ],
   "primarySourceId": "src_ayuntamiento_madrid",
-  "lastVerifiedAt": "2026-10-01"
+  "lastVerifiedAt": "2026-10-02"
 }

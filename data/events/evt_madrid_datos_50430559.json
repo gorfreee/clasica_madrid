@@ -15,7 +15,12 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Orquesta Maestro Bernardo Martínez",
+      "role": "orchestra"
+    }
+  ],
   "composers": [
     {
       "name": "Alfonso X el Sabio"
@@ -27,7 +32,7 @@
       "name": "Isaac Albéniz"
     },
     {
-      "name": "Granados"
+      "name": "Enrique Granados"
     },
     {
       "name": "Salvador Bacarisse"
@@ -48,10 +53,10 @@
     {
       "sourceId": "src_ayuntamiento_madrid",
       "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=b5680355f3dc0a10VgnVCM100000891ecb1aRCRD",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-10-02",
       "externalId": "50430559"
     }
   ],
   "primarySourceId": "src_ayuntamiento_madrid",
-  "lastVerifiedAt": "2026-10-01"
+  "lastVerifiedAt": "2026-10-02"
 }

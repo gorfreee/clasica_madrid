@@ -15,7 +15,16 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Celeste Classic",
+      "role": "ensemble"
+    },
+    {
+      "name": "Celeste 21",
+      "role": "ensemble"
+    }
+  ],
   "composers": [
     {
       "name": "Wolfgang Amadeus Mozart"
@@ -36,16 +45,34 @@
       "name": "Serguéi Prokófiev"
     },
     {
-      "name": "Montescos"
-    },
-    {
       "name": "Paul Barker"
     },
     {
       "name": "Rick Stitzel"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "Pequeña serenata nocturna",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Sinfonía nº 8",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "La mañana",
+      "composerName": "Edvard Grieg"
+    },
+    {
+      "title": "Júpiter (Los Planetas)",
+      "composerName": "Gustav Holst"
+    },
+    {
+      "title": "Capuletos y Montescos",
+      "composerName": "Serguéi Prokófiev"
+    }
+  ],
   "eras": [
     "classical",
     "romantic",
@@ -58,10 +85,10 @@
     {
       "sourceId": "src_ayuntamiento_madrid",
       "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=bfcf37f66e3c0a10VgnVCM200000f921e388RCRD",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-10-02",
       "externalId": "50427679"
     }
   ],
   "primarySourceId": "src_ayuntamiento_madrid",
-  "lastVerifiedAt": "2026-10-01"
+  "lastVerifiedAt": "2026-10-02"
 }
