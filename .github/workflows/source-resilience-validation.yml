@@ -18,6 +18,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm run validate
+      - run: npm test
+      - run: npm run check
+      - run: npm run build
+      - run: npm run test:e2e
       - name: Baseline and changed sources (dry-run only)
         shell: bash
         run: |
