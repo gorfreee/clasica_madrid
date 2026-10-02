@@ -4,6 +4,7 @@ import { normalizeText } from '../lib/domain/normalize.ts';
 import type { Event } from '../lib/schemas/index.ts';
 import { compareMusicalFacts, musicalFactsFrom } from './musical-identity.ts';
 import { normalizeUrl, urlIdentifiesSingleEvent, urlsEquivalent } from './urls.ts';
+import { compareRecyclableIdentity, sourceIdentityCanRecycle } from './source-identity-policy.ts';
 
 export type IdentityMethod = 'externalId' | 'url' | 'alias' | 'strong' | 'slot';
 
@@ -48,12 +49,6 @@ export const EVENT_IDENTITY_ALIASES: readonly EventIdentityAlias[] = [
     url: 'https://www.madridatempo.com/post/ii-festival-internacional-de-piano-madrid-a-tempo-concierto-de-inauguración',
   },
   {
-    eventId: 'evt_madrid_tempo_clausura_20260906',
-    catalogSourceId: 'src_ayuntamiento_madrid',
-    externalId: '50221891',
-    url: 'https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=5e05cff3cf74c910VgnVCM100000891ecb1aRCRD',
-  },
-  {
     eventId: 'evt_madrid_datos_50265531',
     catalogSourceId: 'src_fundacionpiumosso_com',
     externalId: '2187',
@@ -69,6 +64,8 @@ export type IdentityFacts = {
   performers?: Array<{ name: string; role?: string }>;
   composers?: Array<{ name: string }>;
   works?: Array<{ title: string; composerName?: string }>;
+  dateFromDetail?: boolean;
+  eventStatus?: 'scheduled' | 'cancelled' | 'postponed';
 };
 
 export type SharedSourceAssignment = {
@@ -84,6 +81,8 @@ export type IdentityMatch =
       events: Event[];
       method: IdentityMethod;
       assigned: SharedSourceAssignment[];
+      /** Recycled identities cannot cancel all historical owners of a URL. */
+      scopeCancellationToAssignments?: boolean;
     }
   | { kind: 'ambiguous'; events: Event[]; methods: IdentityMethod[]; reason: string };
 
@@ -144,10 +143,60 @@ export function matchEventIdentity(
     }
   }
 
-  const precise = collapseHits(hits, observed);
+  const guarded = guardRecyclableHits(hits, observed, options);
+  if (guarded.kind === 'ambiguous') return guarded;
+  const precise = collapseHits(guarded.hits, observed);
+  if (precise.kind === 'matched-many' && guarded.recyclable) {
+    return { ...precise, scopeCancellationToAssignments: true };
+  }
   if (precise.kind !== 'unmatched') return precise;
   if (options.allowSlot === false) return { kind: 'unmatched' };
   return matchExclusiveSlot(catalog, observed, options.venueId);
+}
+
+function guardRecyclableHits(
+  hits: Array<{ event: Event; method: IdentityMethod }>,
+  observed: IdentityFacts,
+  options: { catalogSourceId: string; venueId?: string },
+): { kind: 'filtered'; hits: typeof hits; recyclable: boolean } | Extract<IdentityMatch, { kind: 'ambiguous' }> {
+  const accepted: typeof hits = [];
+  const reviews: typeof hits = [];
+  const guardedIds = new Set<string>();
+  for (const hit of hits) {
+    // URL identity can cross sources (e.g. Discovery): use the provenance of
+    // the matching citation too, rather than just the incoming source.
+    const recyclable = sourceIdentityCanRecycle(options.catalogSourceId) || hit.event.citations.some((citation) =>
+      sourceIdentityCanRecycle(citation.sourceId) && urlsEquivalent(citation.url, observed.sourceUrl),
+    );
+    if (!recyclable) { accepted.push(hit); continue; }
+    guardedIds.add(hit.event.id);
+    const verdict = compareRecyclableIdentity(observed, hit.event, options.venueId, hit.event.venueId);
+    if (verdict === 'compatible') accepted.push(hit);
+    if (verdict === 'review') reviews.push(hit);
+  }
+  // Prefer a current calendar owner to plausible reprogramming of another
+  // edition with the same title/music and recycled ID. Never suppress a
+  // competing precise hit from a stable source.
+  const ownsObservedDate = (event: Event) => observed.occurrences.some((incoming) =>
+    event.occurrences.some((previous) => incoming.date === previous.date),
+  );
+  const hasCalendarOwner = accepted.some((hit) => guardedIds.has(hit.event.id) && ownsObservedDate(hit.event));
+  const compatible = hasCalendarOwner
+    ? accepted.filter((hit) => !guardedIds.has(hit.event.id) || ownsObservedDate(hit.event))
+    : accepted;
+  const unresolved = hasCalendarOwner
+    ? reviews.filter((hit) => ownsObservedDate(hit.event))
+    : reviews;
+  if (unresolved.length > 0) {
+    const plausible = [...new Map([...compatible, ...unresolved].map((hit) => [hit.event.id, hit])).values()];
+    return {
+      kind: 'ambiguous',
+      events: plausible.map((hit) => hit.event),
+      methods: plausible.map((hit) => hit.method),
+      reason: `source-identity-review: falta evidencia de continuidad/reprogramación (${plausible.map((hit) => hit.event.id).join(', ')})`,
+    };
+  }
+  return { kind: 'filtered', hits: compatible, recyclable: guardedIds.size > 0 };
 }
 
 export function eventMatchesExternalId(event: Event, catalogSourceId: string, externalId: string): boolean {
@@ -187,8 +236,10 @@ export function newObservationKeys(
   const keys: string[] = [];
   const url = normalizeUrl(observed.sourceUrl);
   const dated = observed.occurrences.filter((item) => item.date);
+  const recyclable = sourceIdentityCanRecycle(catalogSourceId);
   const urlKey = (suffix: string) =>
-    observed.externalId ? `${suffix}:ext:${observed.externalId}` : suffix;
+    (observed.externalId ? `${suffix}:ext:${observed.externalId}` : suffix) +
+    (recyclable ? `:facts:${normalizeText(observed.title)}:${dated.map((item) => `${item.date}:${item.time ?? ''}`).join('|')}` : '');
   if (urlIdentifiesSingleEvent(url)) {
     if (dated.length === 0) {
       keys.push(urlKey(`url:${url}`));
@@ -219,7 +270,7 @@ export function newObservationKeys(
       }
     }
   }
-  if (observed.externalId) {
+  if (observed.externalId && !recyclable) {
     keys.push(`ext:${catalogSourceId}:${observed.externalId}`);
   }
   if (venueId) {

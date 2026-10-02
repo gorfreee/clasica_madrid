@@ -207,3 +207,47 @@ describe('madrid-datos: actuación música fuera del kos Musica', () => {
     expect(missing.map((item) => item.eventId).sort()).toEqual(['evt_madrid_datos_ausente', 'evt_ocne_existente']);
   });
 });
+
+describe('madrid-datos: pipeline completo con fichas municipales recicladas', () => {
+  it('genera y aplica dos nuevas identidades desde los históricos sin sobrescribirlos', async () => {
+    const { loadCatalogFromDir } = await import('../src/lib/repository/load.ts');
+    const { defaultDataDir } = await import('../src/lib/repository/fs.ts');
+    const { buildIngestReport } = await import('../src/ingestion/report.ts');
+    const published = await loadCatalogFromDir(defaultDataDir());
+    const historicalIds = ['evt_madrid_tempo_clausura_20260906', 'evt_madrid_datos_50146209'];
+    const catalog = { ...published, events: published.events.filter((event) => historicalIds.includes(event.id)) };
+    const before = structuredClone(catalog.events);
+    const current = ['evt_madrid_datos_dialogos_en_el_aire_20261008', 'evt_amcc_es_oct_31_alberto_pico_soriano']
+      .map((id) => published.events.find((event) => event.id === id)!);
+    const listing = JSON.stringify({ '@graph': current.map((event) => {
+      const citation = event.citations.find((item) => item.sourceId === 'src_ayuntamiento_madrid')!;
+      const occurrence = event.occurrences[0]!;
+      return {
+        '@type': 'https://datos.madrid.es/egob/kos/actividades/Musica',
+        id: citation.externalId,
+        title: event.title,
+        description: 'Concierto de música clásica.',
+        dtstart: `${occurrence.date} ${occurrence.time}:00.0`,
+        time: occurrence.time,
+        link: citation.url,
+        'event-location': 'Centro Cultural Casa de Vacas (Retiro)',
+        free: 1,
+      };
+    }) });
+    const run = await runIngest({
+      dataDir: await tempDataDir(), catalog, now: TEST_NOW, dryRun: true,
+      sourceIds: ['madrid-datos'], window: { from: '2026-09-01', to: '2026-10-31' },
+      get: async (url) => url.includes('agenda-eventos-culturales-100') ? listing : '<article><p>Concierto de música clásica.</p></article>',
+    });
+    expect(run.summary).toMatchObject({ newEvents: 2, updatedEvents: 0, ambiguous: 0, sourcesFailed: [] });
+    expect(run.apply.report.ok).toBe(true);
+    const report = buildIngestReport(run, TEST_NOW);
+    for (const entry of report.events) {
+      expect(entry.identity?.action).toBe('new');
+      expect(historicalIds).not.toContain(entry.identity?.eventId);
+    }
+    expect(run.apply.proposed.events.filter((event) => historicalIds.includes(event.id))).toEqual(before);
+    expect(run.apply.proposed.events).toHaveLength(4);
+    expect(run.apply.written).toEqual([]);
+  });
+});

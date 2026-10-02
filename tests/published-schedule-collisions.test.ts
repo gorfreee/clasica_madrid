@@ -239,15 +239,10 @@ describe('catálogo publicado tras la limpieza de duplicados de hueco exclusivo'
       venueId: 'ven_casa_vacas_retiro',
     });
     expect(historical).toMatchObject({
-      kind: 'matched-many',
+      kind: 'matched',
       method: 'externalId',
     });
-    if (historical.kind === 'matched-many') {
-      expect(historical.assigned.find((item) => item.event.id === 'evt_madrid_tempo_clausura_20260906')?.occurrences)
-        .toEqual([{ date: '2026-09-06', time: '12:00' }]);
-      expect(historical.assigned.find((item) => item.event.id === 'evt_madrid_datos_dialogos_en_el_aire_20261008')?.occurrences)
-        .toEqual([]);
-    }
+    expect(historical.kind === 'matched' && historical.event.id).toBe('evt_madrid_tempo_clausura_20260906');
 
     const current = matchEventIdentity(catalog, {
       sourceUrl,
@@ -267,15 +262,10 @@ describe('catálogo publicado tras la limpieza de duplicados de hueco exclusivo'
       venueId: 'ven_casa_vacas_retiro',
     });
     expect(current).toMatchObject({
-      kind: 'matched-many',
+      kind: 'matched',
       method: 'externalId',
     });
-    if (current.kind === 'matched-many') {
-      expect(current.assigned.find((item) => item.event.id === 'evt_madrid_datos_dialogos_en_el_aire_20261008')?.occurrences)
-        .toEqual([{ date: '2026-10-08', time: '19:00' }]);
-      expect(current.assigned.find((item) => item.event.id === 'evt_madrid_tempo_clausura_20260906')?.occurrences)
-        .toEqual([]);
-    }
+    expect(current.kind === 'matched' && current.event.id).toBe('evt_madrid_datos_dialogos_en_el_aire_20261008');
   });
 
   it('reconoce la siguiente observación Più Mosso 2187 sobre el Festival Alicia de Larrocha', async () => {
