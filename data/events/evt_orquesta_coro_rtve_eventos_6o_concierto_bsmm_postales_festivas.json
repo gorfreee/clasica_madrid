@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_orquesta_coro_rtve_eventos_6o_concierto_bsmm_postales_festivas",
+  "slug": "6-concierto-bsmm-postales-festivas",
+  "title": "6º Concierto Bsmm “Postales Festivas”",
+  "status": "scheduled",
+  "venueId": "ven_teatro_monumental",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_orquesta_coro_rtve_eventos_6o_concierto_bsmm_postales_festivas_01",
+      "date": "2026-12-15",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Banda Sinfónica Municipal de Madrid",
+      "role": "orchestra"
+    },
+    {
+      "name": "Carlos Garcés",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ximo Tarín-Micó"
+    },
+    {
+      "name": "J. Vicent Egea"
+    },
+    {
+      "name": "Ottorino Respighi"
+    }
+  ],
+  "works": [
+    {
+      "title": "Suite del ballet «Arrels»",
+      "composerName": "Ximo Tarín-Micó"
+    },
+    {
+      "title": "Poema Sanférmico",
+      "composerName": "J. Vicent Egea"
+    },
+    {
+      "title": "Fiestas Romanas",
+      "composerName": "Ottorino Respighi"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_orquesta_coro_rtve",
+      "url": "https://www.teatromonumental.es/eventos/6o-concierto-bsmm-postales-festivas",
+      "checkedAt": "2026-10-02",
+      "externalId": "/eventos/6o-concierto-bsmm-postales-festivas/"
+    }
+  ],
+  "primarySourceId": "src_orquesta_coro_rtve",
+  "lastVerifiedAt": "2026-10-02"
+}

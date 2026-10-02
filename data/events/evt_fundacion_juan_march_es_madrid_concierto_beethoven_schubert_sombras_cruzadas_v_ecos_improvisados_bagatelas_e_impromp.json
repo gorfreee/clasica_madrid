@@ -18,6 +18,12 @@
   "performers": [
     {
       "name": "Imogen Cooper"
+    },
+    {
+      "name": "Clara Corrales"
+    },
+    {
+      "name": "Irene de Juan"
     }
   ],
   "composers": [
@@ -99,10 +105,10 @@
     {
       "sourceId": "src_fundacion_juan_march",
       "url": "https://www.march.es/es/madrid/concierto/beethoven-schubert-sombras-cruzadas-v-ecos-improvisados-bagatelas-e-impromptus",
-      "checkedAt": "2026-08-31",
+      "checkedAt": "2026-10-01",
       "externalId": "/es/madrid/concierto/beethoven-schubert-sombras-cruzadas-v-ecos-improvisados-bagatelas-e-impromptus"
     }
   ],
   "primarySourceId": "src_fundacion_juan_march",
-  "lastVerifiedAt": "2026-08-31"
+  "lastVerifiedAt": "2026-10-01"
 }

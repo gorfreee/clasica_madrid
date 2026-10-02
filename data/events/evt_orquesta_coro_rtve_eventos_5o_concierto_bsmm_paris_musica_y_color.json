@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_orquesta_coro_rtve_eventos_5o_concierto_bsmm_paris_musica_y_color",
+  "slug": "5-concierto-bsmm-paris-musica-y-color",
+  "title": "5º Concierto Bsmm “París: Música y Color”",
+  "status": "scheduled",
+  "venueId": "ven_teatro_monumental",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_orquesta_coro_rtve_eventos_5o_concierto_bsmm_paris_musica_y_color_01",
+      "date": "2026-12-01",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Banda Sinfónica Municipal de Madrid",
+      "role": "orchestra"
+    },
+    {
+      "name": "Sergio Casas",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Maurice Ravel"
+    },
+    {
+      "name": "Mickey Nicolas"
+    },
+    {
+      "name": "Modest Mussorgski"
+    }
+  ],
+  "works": [
+    {
+      "title": "Alborada del gracioso",
+      "composerName": "Maurice Ravel"
+    },
+    {
+      "title": "Listening to Paris",
+      "composerName": "Mickey Nicolas"
+    },
+    {
+      "title": "Cuadros de una exposición",
+      "composerName": "Modest Mussorgski"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_orquesta_coro_rtve",
+      "url": "https://www.teatromonumental.es/eventos/5o-concierto-bsmm-paris-musica-y-color",
+      "checkedAt": "2026-10-02",
+      "externalId": "/eventos/5o-concierto-bsmm-paris-musica-y-color/"
+    }
+  ],
+  "primarySourceId": "src_orquesta_coro_rtve",
+  "lastVerifiedAt": "2026-10-02"
+}

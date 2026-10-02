@@ -4,7 +4,7 @@
   "organizerIds": [],
   "seriesId": null,
   "access": "paid",
-  "lastVerifiedAt": "2026-09-27",
+  "lastVerifiedAt": "2026-10-02",
   "id": "evt_orquesta_ciudad_getafe_ecos_del_destino",
   "slug": "ecos-del-destino",
   "title": "Ecos del Destino",
@@ -58,6 +58,12 @@
       "url": "https://orquestaciudaddegetafe.com/js_events/ecos-del-destino",
       "checkedAt": "2026-09-27",
       "externalId": "ecos-del-destino"
+    },
+    {
+      "sourceId": "src_fundacionpiumosso_com",
+      "url": "https://www.fundacionpiumosso.com/evento/orquesta-sinfonica-de-getafe-concierto-numero-2-de-s-rachmaninov",
+      "checkedAt": "2026-10-02",
+      "externalId": "2197"
     }
   ],
   "primarySourceId": "src_orquesta_ciudad_getafe"

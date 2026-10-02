@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_orquesta_coro_rtve_eventos_3o_concierto_bsmm_in_memoriam",
+  "slug": "3-concierto-bsmm-in-memoriam",
+  "title": "3º Concierto Bsmm “In Memoriam”",
+  "status": "scheduled",
+  "venueId": "ven_teatro_monumental",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_orquesta_coro_rtve_eventos_3o_concierto_bsmm_in_memoriam_01",
+      "date": "2026-11-03",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Banda Sinfónica Municipal de Madrid",
+      "role": "orchestra"
+    },
+    {
+      "name": "Carlos Garcés",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Hector Berlioz"
+    },
+    {
+      "name": "Alexandre Kosmicki"
+    },
+    {
+      "name": "Camille Saint-Saëns"
+    },
+    {
+      "name": "James Barnes"
+    }
+  ],
+  "works": [
+    {
+      "title": "Marcha Húngara de «La condenación de Fausto»",
+      "composerName": "Hector Berlioz"
+    },
+    {
+      "title": "Danse Satanique",
+      "composerName": "Alexandre Kosmicki"
+    },
+    {
+      "title": "Danza macabra",
+      "composerName": "Camille Saint-Saëns"
+    },
+    {
+      "title": "Sinfonía n.º 3 «Trágica»",
+      "composerName": "James Barnes"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_orquesta_coro_rtve",
+      "url": "https://www.teatromonumental.es/eventos/3o-concierto-bsmm-in-memoriam",
+      "checkedAt": "2026-10-02",
+      "externalId": "/eventos/3o-concierto-bsmm-in-memoriam/"
+    }
+  ],
+  "primarySourceId": "src_orquesta_coro_rtve",
+  "lastVerifiedAt": "2026-10-02"
+}

@@ -79,9 +79,10 @@
     {
       "sourceId": "src_ayuntamiento_madrid",
       "url": "https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Moratalaz/Orquesta-de-Camara-Santa-Cecilia?vgnextchannel=7cb0ca5d5fb96010VgnVCM100000dc0ca8c0RCRD&vgnextfmt=default&vgnextoid=3ec336c2a53c0a10VgnVCM200000f921e388RCRD",
-      "checkedAt": "2026-09-22"
+      "checkedAt": "2026-10-01",
+      "externalId": "50427303"
     }
   ],
   "primarySourceId": "src_ayuntamiento_madrid",
-  "lastVerifiedAt": "2026-09-22"
+  "lastVerifiedAt": "2026-10-01"
 }

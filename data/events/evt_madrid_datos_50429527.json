@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50429527",
+  "slug": "ii-ciclo-de-musica-clasica-del-caribe-a-la-patagonia",
+  "title": "II Ciclo de Música Clásica. Del Caribe a la Patagonia",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_4703422",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50429527_01",
+      "date": "2026-10-31",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Reyes Moraleda",
+      "role": "soloist"
+    },
+    {
+      "name": "Javier Checa",
+      "role": "soloist"
+    },
+    {
+      "name": "Dania Rodríguez",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ernesto Lecuona"
+    },
+    {
+      "name": "M. Sandoval"
+    },
+    {
+      "name": "María Grever"
+    },
+    {
+      "name": "Carlos Gardel"
+    },
+    {
+      "name": "Heitor Villa-Lobos"
+    },
+    {
+      "name": "Carlos Guastavino"
+    },
+    {
+      "name": "Ennio Morricone"
+    },
+    {
+      "name": "Jayme Ovalle"
+    },
+    {
+      "name": "Chabuca Granda"
+    },
+    {
+      "name": "Alberto Ginastera"
+    },
+    {
+      "name": "Astor Piazzolla"
+    },
+    {
+      "name": "Ariel Ramírez"
+    }
+  ],
+  "works": [
+    {
+      "title": "Romanza María la O",
+      "composerName": "Ernesto Lecuona"
+    },
+    {
+      "title": "Por eso te quiero",
+      "composerName": "Ernesto Lecuona"
+    },
+    {
+      "title": "Pregúntale a las estrellas",
+      "composerName": "M. Sandoval"
+    },
+    {
+      "title": "Júrame",
+      "composerName": "María Grever"
+    },
+    {
+      "title": "El día que me quieras",
+      "composerName": "Carlos Gardel"
+    },
+    {
+      "title": "Por una cabeza",
+      "composerName": "Carlos Gardel"
+    },
+    {
+      "title": "Bachianas Brasileiras",
+      "composerName": "Heitor Villa-Lobos"
+    },
+    {
+      "title": "Se equivocó la paloma (poesía de Alberti)",
+      "composerName": "Carlos Guastavino"
+    },
+    {
+      "title": "Piececitos de niño (poesía de Gabriela Mistral)",
+      "composerName": "Carlos Guastavino"
+    },
+    {
+      "title": "La Misión",
+      "composerName": "Ennio Morricone"
+    },
+    {
+      "title": "Azulão",
+      "composerName": "Jayme Ovalle"
+    },
+    {
+      "title": "Fina Estampa",
+      "composerName": "Chabuca Granda"
+    },
+    {
+      "title": "Canción al árbol del olvido",
+      "composerName": "Alberto Ginastera"
+    },
+    {
+      "title": "Oblivion",
+      "composerName": "Astor Piazzolla"
+    },
+    {
+      "title": "Alfonsina y el mar",
+      "composerName": "Ariel Ramírez"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=f5041268ba8c0a10VgnVCM100000891ecb1aRCRD",
+      "checkedAt": "2026-10-02",
+      "externalId": "50429527"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-10-02"
+}

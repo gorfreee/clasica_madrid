@@ -19,6 +19,12 @@
     {
       "name": "Esteban Urzelai",
       "role": "conductor"
+    },
+    {
+      "name": "Daniel Oyarzabal"
+    },
+    {
+      "name": "Suhar Korua"
     }
   ],
   "composers": [
@@ -89,7 +95,7 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-daniel-oyarzabal-suhar-korua",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-10-01",
       "externalId": "cndm-daniel-oyarzabal-suhar-korua"
     },
     {
@@ -100,5 +106,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-10-01"
 }

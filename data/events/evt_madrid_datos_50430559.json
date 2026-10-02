@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50430559",
+  "slug": "orquesta-maestro-bernardo-martinez",
+  "title": "Orquesta Maestro Bernardo Martínez",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_4703628",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50430559_01",
+      "date": "2026-10-24",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Maestro Bernardo Martínez",
+      "role": "orchestra"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Alfonso X el Sabio"
+    },
+    {
+      "name": "Lucas Ruiz de Ribayaz"
+    },
+    {
+      "name": "Isaac Albéniz"
+    },
+    {
+      "name": "Enrique Granados"
+    },
+    {
+      "name": "Salvador Bacarisse"
+    },
+    {
+      "name": "Joaquín Malats"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "early",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=b5680355f3dc0a10VgnVCM100000891ecb1aRCRD",
+      "checkedAt": "2026-10-02",
+      "externalId": "50430559"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-10-02"
+}

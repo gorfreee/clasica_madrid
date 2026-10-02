@@ -36,8 +36,51 @@
       "role": "conductor"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Giuseppe Verdi"
+    },
+    {
+      "name": "Giacomo Puccini"
+    },
+    {
+      "name": "Antonín Dvořák"
+    }
+  ],
+  "works": [
+    {
+      "title": "La forza del destino",
+      "composerName": "Giuseppe Verdi"
+    },
+    {
+      "title": "Otello",
+      "composerName": "Giuseppe Verdi"
+    },
+    {
+      "title": "Tosca",
+      "composerName": "Giacomo Puccini"
+    },
+    {
+      "title": "Rusalka",
+      "composerName": "Antonín Dvořák"
+    },
+    {
+      "title": "Macbeth",
+      "composerName": "Giuseppe Verdi"
+    },
+    {
+      "title": "La Bohème",
+      "composerName": "Giacomo Puccini"
+    },
+    {
+      "title": "La traviata",
+      "composerName": "Giuseppe Verdi"
+    },
+    {
+      "title": "Turandot",
+      "composerName": "Giacomo Puccini"
+    }
+  ],
   "eras": [
     "romantic"
   ],
@@ -50,10 +93,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/filarmonia-de-madrid-gala-de-opera",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-10-01",
       "externalId": "filarmonia-de-madrid-gala-de-opera"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-10-01"
 }

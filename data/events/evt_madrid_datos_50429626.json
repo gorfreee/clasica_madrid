@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50429626",
+  "slug": "concierto-de-la-orquesta-de-guitarras-de-madrid-xxxx-festival-internacional-andres-segovia",
+  "title": "Concierto de la Orquesta de Guitarras de Madrid. XXXX Festival Internacional Andrés Segovia",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_2112",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50429626_01",
+      "date": "2026-10-25",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta de Guitarras de Madrid",
+      "role": "ensemble"
+    },
+    {
+      "name": "Jorge Aguilera",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Luigi Boccherini"
+    },
+    {
+      "name": "Edson Lopes"
+    },
+    {
+      "name": "Carlos Guastavino"
+    },
+    {
+      "name": "Mark Houghton"
+    },
+    {
+      "name": "Giorgio Tortora"
+    },
+    {
+      "name": "Ernesto Lecuona"
+    },
+    {
+      "name": "Francisco Alonso"
+    },
+    {
+      "name": "Federico Moreno Torroba"
+    }
+  ],
+  "works": [
+    {
+      "title": "Suite Orquestal nº 2",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Pequeña serenata nocturna",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Introducción y Fandango",
+      "composerName": "Luigi Boccherini"
+    },
+    {
+      "title": "Cantábile",
+      "composerName": "Edson Lopes"
+    },
+    {
+      "title": "Scottish Medley"
+    },
+    {
+      "title": "Fuga (sobre un tema popular argentino, Arroz con leche)",
+      "composerName": "Carlos Guastavino"
+    },
+    {
+      "title": "Tango Dance Suite",
+      "composerName": "Mark Houghton"
+    },
+    {
+      "title": "Tarantella nº 1",
+      "composerName": "Giorgio Tortora"
+    },
+    {
+      "title": "Suite Andalucía (Andalucía, Malagueña)",
+      "composerName": "Ernesto Lecuona"
+    },
+    {
+      "title": "La Calesera (Pasacalle)",
+      "composerName": "Francisco Alonso"
+    },
+    {
+      "title": "Cuatro estampas (Camino del Molino, La boda, Remanso, Juegos Infantiles)",
+      "composerName": "Federico Moreno Torroba"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=04c3b3d0bc8c0a10VgnVCM100000891ecb1aRCRD",
+      "checkedAt": "2026-10-02",
+      "externalId": "50429626"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-10-02"
+}

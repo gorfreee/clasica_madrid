@@ -52,16 +52,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-cuarteto-schumann",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-10-01",
       "externalId": "cndm-cuarteto-schumann"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23781",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-02",
       "externalId": "23781"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-10-02"
 }

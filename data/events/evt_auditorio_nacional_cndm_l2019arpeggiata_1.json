@@ -50,6 +50,9 @@
     },
     {
       "name": "Simón Díaz"
+    },
+    {
+      "name": "Ignacio ‘Indio’ Figueredo"
     }
   ],
   "works": [
@@ -141,7 +144,7 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-l2019arpeggiata-1",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-01",
       "externalId": "cndm-l2019arpeggiata-1"
     },
     {
@@ -152,5 +155,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-01"
 }

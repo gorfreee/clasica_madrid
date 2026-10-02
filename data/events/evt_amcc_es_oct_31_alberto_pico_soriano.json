@@ -66,8 +66,14 @@
       "sourceId": "src_amcc_es",
       "url": "https://amcc.es/coma/coma26/oct-31-alberto-pico-soriano",
       "checkedAt": "2026-09-20"
+    },
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=d2f4832f37fba910VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-10-02",
+      "externalId": "50146209"
     }
   ],
   "primarySourceId": "src_amcc_es",
-  "lastVerifiedAt": "2026-09-20"
+  "lastVerifiedAt": "2026-10-02"
 }

@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50430899",
+  "slug": "latitudes",
+  "title": "Latitudes",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_114978",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50430899_01",
+      "date": "2026-10-03",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Diego Santiago",
+      "role": "soloist"
+    },
+    {
+      "name": "Adrián Baratech",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Leo Brouwer"
+    },
+    {
+      "name": "Rodolfo Hernández"
+    },
+    {
+      "name": "Manuel Ponce"
+    },
+    {
+      "name": "Jaime Romero"
+    },
+    {
+      "name": "Paulo Bellinati"
+    },
+    {
+      "name": "Jurg Kindle"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=88a987b7bcdc0a10VgnVCM100000891ecb1aRCRD",
+      "checkedAt": "2026-10-02",
+      "externalId": "50430899"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-10-02"
+}

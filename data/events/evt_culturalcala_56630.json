@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_culturalcala_56630",
+  "slug": "estrellas-de-navidad-concierto-de-fin-de-ano",
+  "title": "Estrellas de Navidad. Concierto de Fin de Año",
+  "status": "scheduled",
+  "venueId": "ven_teatro_salon_cervantes_alcala",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_culturalcala_56630_01",
+      "date": "2026-12-30",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Camerata Complutense",
+      "role": "orchestra"
+    },
+    {
+      "name": "Javier Roa",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Niels W. Gade"
+    },
+    {
+      "name": "Alexander Glazunov"
+    },
+    {
+      "name": "Franz Joseph Haydn"
+    }
+  ],
+  "works": [
+    {
+      "title": "Christmas Eve (Nochebuena)",
+      "composerName": "Niels W. Gade"
+    },
+    {
+      "title": "Concierto para saxofón alto y orquesta",
+      "composerName": "Alexander Glazunov"
+    },
+    {
+      "title": "Sinfonía de los juguetes",
+      "composerName": "Franz Joseph Haydn"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "classical"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_culturalcala",
+      "url": "https://culturalcala.es/item_event/estrellas-de-navidad-concierto-de-fin-de-ano",
+      "checkedAt": "2026-10-02",
+      "externalId": "56630"
+    }
+  ],
+  "primarySourceId": "src_culturalcala",
+  "lastVerifiedAt": "2026-10-02"
+}
