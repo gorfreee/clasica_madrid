@@ -58,16 +58,18 @@ const CONCERT_CATEGORY_ID = 47;
 
 /**
  * Official concert taxonomy archive `/categoria-eventos/conciertos/` is the
- * only harvest surface. `/conciertos/` is an Elementor listing with infinite
+ * primary harvest surface. `/conciertos/` is an Elementor listing with infinite
  * scroll (`posts_per_page: 4`) and is not complete. JetEngine prints future
  * concerts with canonical ficha URLs, `data-post-id`, `data-pages`, and card
  * fields (fecha, hora, lugar, precio). Follow `data-pages` up to MAX_PAGES.
  *
  * Transport is one conventional HTTP GET, then a real Chrome session if that
- * hop is an undelivered page (HTTP 202 / SG-Captcha). If both HTML transports are blocked, official WP REST is read with
- * envelope totals and strict pagination/category/identity validation. Archive cards already carry a usable calendar;
+ * hop is an undelivered page (HTTP 202 / SG-Captcha). If both are blocked,
+ * official WP REST supplies identities with verified totals and pagination.
+ * Archive cards already carry a usable calendar;
  * fichas are hydrated for the full description used in classification.
- * A ficha failure keeps listing facts and does not fail the source.
+ * A ficha failure keeps listing facts. REST observations require detail
+ * calendar coverage; a severe gap remains a source failure.
  */
 export const realHermandadRefugioAdapter: SourceAdapter = {
   id: 'real-hermandad-refugio',
@@ -388,7 +390,7 @@ function asNonEmptyString(value: unknown): string | undefined {
 
 function asId(value: unknown): string | undefined {
   if (typeof value === 'number' && Number.isSafeInteger(value) && value > 0) return String(value);
-  if (typeof value === 'string' && /^\d+$/.test(value.trim())) return value.trim();
+  if (typeof value === 'string' && /^\d+$/.test(value.trim()) && Number.isSafeInteger(Number(value)) && Number(value) > 0) return String(Number(value));
   return undefined;
 }
 
@@ -410,10 +412,9 @@ export async function readRefugioRestPages(get: (url: string) => Promise<string>
       throw new Error('real-hermandad-refugio: respuesta REST sin envelope válido');
     }
     const headers = Object.fromEntries(Object.entries(result.headers).map(([key, value]) => [key.toLowerCase(), value]));
-    const n = Number(headers['x-wp-total']);
-    const p = Number(headers['x-wp-totalpages']);
-    if (headers['x-wp-total'] === undefined || headers['x-wp-totalpages'] === undefined
-      || !Number.isSafeInteger(n) || n < 0 || !Number.isSafeInteger(p) || p < 0
+    const n = wpCount(headers['x-wp-total']);
+    const p = wpCount(headers['x-wp-totalpages']);
+    if (n === undefined || p === undefined
       || p !== Math.ceil(n / REFUGIO_PER_PAGE) || p > REFUGIO_MAX_PAGES) {
       throw new Error('real-hermandad-refugio: totales/paginación REST no verificables');
     }
@@ -452,4 +453,10 @@ function validateRestIdentities(items: unknown[]): void {
 function validatedRestEvents(items: unknown[], ctx: AdapterContext): RawEvent[] {
   validateRestIdentities(items);
   return items.map((item) => toRawEvent(item, ctx)!).sort((a, b) => a.sourceUrl.localeCompare(b.sourceUrl));
+}
+
+function wpCount(value: unknown): number | undefined {
+  if ((typeof value !== 'string' && typeof value !== 'number') || !/^\d+$/.test(String(value))) return undefined;
+  const n = Number(value);
+  return Number.isSafeInteger(n) && n >= 0 ? n : undefined;
 }

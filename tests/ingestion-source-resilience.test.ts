@@ -1,4 +1,9 @@
-import { readFile } from 'node:fs/promises';
+import { readFile, mkdtemp } from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import { runIngest } from '../src/ingestion/pipeline.ts';
+import { emptyCatalog } from '../src/lib/domain/catalog.ts';
+import { makeEvent, makeVenue } from './helpers.ts';
 import { describe, expect, it, vi } from 'vitest';
 import { parseZarzuelaDetail } from '../src/ingestion/detail/teatro-zarzuela.ts';
 import { parseZarzuelaSchedule } from '../src/ingestion/detail/zarzuela-schedule.ts';
@@ -29,9 +34,18 @@ describe('Zarzuela LIVE 2026-10-02: fechas con notas de emisión', () => {
     expect(patch.occurrences?.[0]?.date).toBe(first);
     expect(patch.occurrences?.at(-1)?.date).toBe(last);
     expect(new Set(patch.occurrences?.map((o) => `${o.date} ${o.time}`)).size).toBe(count);
-    for (const o of patch.occurrences ?? []) {
-      expect(o.time).toBe(slug === 'el-duo-de-la-africana' ? o.time : new Date(`${o.date}T12:00:00Z`).getUTCDay() === 0 ? '18:00' : '19:30');
-    }
+    const dates: Record<string, string[]> = {
+      'el-barbarillo-de-lavapies': [9,10,11,12,13,16,17,18,19,20,23,24,25].map((d) => `2027-06-${String(d).padStart(2, '0')}`),
+      'la-bruja': [11,12,13,14,17,18,19,20,21,23,24,27,28].map((d) => `2027-03-${d}`),
+      'la-verbena-de-la-paloma': ['2026-09-23','2026-09-24','2026-09-25','2026-09-26','2026-09-27','2026-09-30','2026-10-01','2026-10-02','2026-10-03','2026-10-04'],
+      'las-trece-rosas-rojas': ['2026-11-25','2026-11-26','2026-11-27','2026-11-28','2026-11-29','2026-12-02'],
+      'los-gavilanes': ['2027-01-28','2027-01-29','2027-01-30','2027-01-31','2027-02-04','2027-02-05','2027-02-06','2027-02-07','2027-02-10','2027-02-11','2027-02-12','2027-02-13'],
+      'venus-y-adonis': ['2027-05-05','2027-05-07','2027-05-08','2027-05-09'],
+    };
+    const expected = slug === 'el-duo-de-la-africana'
+      ? ['2027-04-10 12:00','2027-04-10 19:30','2027-04-16 19:30','2027-04-17 12:00','2027-04-17 19:30']
+      : dates[slug]!.map((date) => `${date} ${new Date(`${date}T12:00:00Z`).getUTCDay() === 0 ? '18:00' : '19:30'}`);
+    expect(patch.occurrences?.map((o) => `${o.date} ${o.time}`)).toEqual(expected);
   });
   it('no acepta asteriscos o notas desconocidas como calendario', () => {
     expect(() => parseZarzuelaSchedule('<p>1* de octubre de 2026 19:30 horas * excepto festivos</p>')).toThrow();
@@ -79,6 +93,44 @@ describe('Refugio REST oficial con cobertura verificable', () => {
       expect(events[0]?.observed.occurrences).toEqual([]);
       expect(closed).toBe(true);
     } finally { setRefugioBrowserSessionForTests(); }
+  });
+  it('un archivo oficial vacío sin totales exige corroboración REST y no inventa fechas', async () => {
+    const source = getSourceDefinition('real-hermandad-refugio');
+    const body = await realHermandadRefugioAdapter.fetchListing!(source.urls[0]!, {
+      source, now: new Date('2026-10-02'), window: { from: '2026-10-01', to: '2027-07-31' },
+      get: async (url) => url.includes('/wp-json/') ? envelope([item(1)], 1) : '<title>Conciertos &#8211; Real Hermandad del Refugio</title><div class="jet-listing-not-found jet-listing-grid__items">No hay eventos</div>',
+    });
+    expect(JSON.parse(body).total).toBe(1);
+  });
+  it('REST parcial o fichas captcha no degradan ni borran el catálogo publicado', async () => {
+    const source = getSourceDefinition('real-hermandad-refugio');
+    const catalog = emptyCatalog();
+    catalog.sources = [source.seedSource];
+    catalog.venues = [makeVenue()];
+    catalog.events = [makeEvent({
+      primarySourceId: source.catalogSourceId,
+      citations: [{ sourceId: source.catalogSourceId, url: item(1).link, externalId: '1', checkedAt: '2026-09-01' }],
+      occurrences: [{ id: 'occ_preserved', date: '2026-10-03', time: '20:00', status: 'scheduled' }],
+    })];
+    const before = JSON.stringify(catalog);
+    setRefugioBrowserSessionForTests(async () => ({ get: async () => '<title>Robot Challenge Screen</title>', close: async () => {} }));
+    try {
+      for (const partial of [false, true]) {
+        const run = await runIngest({ catalog, dataDir: await mkdtemp(path.join(os.tmpdir(), 'refugio-safe-')), dryRun: true,
+          sourceIds: [source.id], now: new Date('2026-10-02'), window: { from: '2026-10-01', to: '2027-07-31' },
+          get: async (url) => {
+            if (url.includes('/wp-json/')) return envelope([item(1)], partial ? 2 : 1);
+            throw new HttpError(202, url);
+          },
+        });
+        expect(run.summary.sourcesFailed).toHaveLength(1);
+        expect(run.summary.possiblyMissing).toBe(0);
+        expect(run.apply.proposed.events).toEqual(catalog.events);
+        expect(run.summary.written).toEqual([]);
+        if (!partial) expect(run.summary.sourcesFailed[0]?.stage).toBe('hydration');
+      }
+      expect(JSON.stringify(catalog)).toBe(before);
+    } finally { await realHermandadRefugioAdapter.endHydration?.(); setRefugioBrowserSessionForTests(); }
   });
   it('reconoce el captcha observado en producción', () => {
     expect(isSiteGroundChallenge('<form action="/.well-known/captcha/"></form>')).toBe(true);

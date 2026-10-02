@@ -1,0 +1,1066 @@
+{
+  "baseCommit": "c88fcde041a8e5d4e480a2c6c9ea73891fbb86a6",
+  "originalRun": 36877015486,
+  "window": {
+    "from": "2026-10-01",
+    "to": "2027-07-31"
+  },
+  "generatedAt": "2026-10-02T11:37:02.930Z",
+  "environment": "local Linux Node 24; live HTTP, dry-run, no AI",
+  "zarzuela": {
+    "before": {
+      "window": {
+        "from": "2026-10-01",
+        "to": "2027-07-31"
+      },
+      "health": "degraded",
+      "autoMergeEligible": true,
+      "healthReasons": [
+        "hydration-failed",
+        "unresolved-taxonomy"
+      ],
+      "sourcesAttempted": [
+        "teatro-zarzuela"
+      ],
+      "sourcesSucceeded": [
+        "teatro-zarzuela"
+      ],
+      "sourcesFailed": [],
+      "rawEvents": 40,
+      "skippedUnusable": 10,
+      "eligibility": {
+        "include": 19,
+        "exclude": 5,
+        "uncertain": 6
+      },
+      "ai": {
+        "attempted": 0,
+        "resolved": 0,
+        "unresolved": 0,
+        "include": 0,
+        "exclude": 0,
+        "uncertain": 0,
+        "invalidOutput": 0,
+        "malformedOutput": 0,
+        "incomplete": 0,
+        "rateLimited": 0,
+        "timeout": 0,
+        "error": 0,
+        "taxonomyAttempted": 0,
+        "taxonomyFilled": 0,
+        "httpRequests": 0,
+        "retries": 0,
+        "modelFallbacks": 0,
+        "logicalCalls": 0,
+        "sameRouteRetries": 0,
+        "httpFallbacks": 0,
+        "fallbackCalls": 0,
+        "circuitOpenRoutes": 0,
+        "requestsByModel": {},
+        "classificationsByModel": {},
+        "requestsByRoute": {},
+        "classificationsByRoute": {},
+        "requestsByProvider": {},
+        "classificationsByProvider": {},
+        "requestsByPurpose": {},
+        "failuresByKind": {},
+        "rateLimits": 0,
+        "quotaExhausted": 0,
+        "concurrencyPressure": 0,
+        "pressureByKind": {},
+        "concurrencyPressureByRoute": {},
+        "concurrencyPressureByProvider": {},
+        "rateLimitsByRoute": {},
+        "rateLimitsByProvider": {},
+        "routes": [],
+        "cacheHits": 0,
+        "deferred": 0,
+        "inputTokensByModel": {},
+        "dailyRequestsByModel": {},
+        "inputTokensByRoute": {},
+        "outputTokensByRoute": {},
+        "thoughtTokensByRoute": {},
+        "dailyRequestsByRoute": {},
+        "byPurpose": {
+          "eligibility": {
+            "attempted": 0,
+            "resolved": 0,
+            "unresolved": 0,
+            "errors": 0
+          },
+          "composer-extraction": {
+            "attempted": 0,
+            "resolved": 0,
+            "unresolved": 0,
+            "errors": 0
+          },
+          "access-classification": {
+            "attempted": 0,
+            "resolved": 0,
+            "unresolved": 0,
+            "errors": 0
+          },
+          "taxonomy": {
+            "attempted": 0,
+            "resolved": 0,
+            "unresolved": 0,
+            "errors": 0
+          }
+        }
+      },
+      "quality": {
+        "composers": {
+          "populated": 11,
+          "unresolved": 8,
+          "unresolvedNoProgramEvidence": 8
+        },
+        "eras": {
+          "populated": 16,
+          "unresolved": 3
+        },
+        "formats": {
+          "populated": 19,
+          "unresolved": 0
+        },
+        "access": {
+          "free": 1,
+          "paid": 14,
+          "unresolved": 4,
+          "unresolvedNoEvidence": 4,
+          "unresolvedWithEvidence": 0
+        }
+      },
+      "candidates": 0,
+      "newEvents": 0,
+      "updatedEvents": 0,
+      "unchangedEvents": 19,
+      "ambiguous": 0,
+      "possiblyMissing": 0,
+      "batchDuplicates": 0,
+      "crossSourceCorroborations": 0,
+      "written": [],
+      "dryRun": true,
+      "detailHydrationAttempted": 39,
+      "detailHydrationSucceeded": 32,
+      "detailHydrationFailed": 7,
+      "detailHydrationSkippedOutsideWindow": 1,
+      "detailHydrationSkippedCircuitOpen": 0,
+      "disappearanceSuppressedSources": [
+        "teatro-zarzuela"
+      ],
+      "adapterDiscards": {
+        "total": 0,
+        "bySource": {},
+        "byReason": {}
+      }
+    },
+    "after": {
+      "window": {
+        "from": "2026-10-01",
+        "to": "2027-07-31"
+      },
+      "health": "degraded",
+      "autoMergeEligible": true,
+      "healthReasons": [
+        "unresolved-taxonomy"
+      ],
+      "sourcesAttempted": [
+        "teatro-zarzuela"
+      ],
+      "sourcesSucceeded": [
+        "teatro-zarzuela"
+      ],
+      "sourcesFailed": [],
+      "rawEvents": 40,
+      "skippedUnusable": 3,
+      "eligibility": {
+        "include": 26,
+        "exclude": 5,
+        "uncertain": 6
+      },
+      "ai": {
+        "attempted": 0,
+        "resolved": 0,
+        "unresolved": 0,
+        "include": 0,
+        "exclude": 0,
+        "uncertain": 0,
+        "invalidOutput": 0,
+        "malformedOutput": 0,
+        "incomplete": 0,
+        "rateLimited": 0,
+        "timeout": 0,
+        "error": 0,
+        "taxonomyAttempted": 0,
+        "taxonomyFilled": 0,
+        "httpRequests": 0,
+        "retries": 0,
+        "modelFallbacks": 0,
+        "logicalCalls": 0,
+        "sameRouteRetries": 0,
+        "httpFallbacks": 0,
+        "fallbackCalls": 0,
+        "circuitOpenRoutes": 0,
+        "requestsByModel": {},
+        "classificationsByModel": {},
+        "requestsByRoute": {},
+        "classificationsByRoute": {},
+        "requestsByProvider": {},
+        "classificationsByProvider": {},
+        "requestsByPurpose": {},
+        "failuresByKind": {},
+        "rateLimits": 0,
+        "quotaExhausted": 0,
+        "concurrencyPressure": 0,
+        "pressureByKind": {},
+        "concurrencyPressureByRoute": {},
+        "concurrencyPressureByProvider": {},
+        "rateLimitsByRoute": {},
+        "rateLimitsByProvider": {},
+        "routes": [],
+        "cacheHits": 0,
+        "deferred": 0,
+        "inputTokensByModel": {},
+        "dailyRequestsByModel": {},
+        "inputTokensByRoute": {},
+        "outputTokensByRoute": {},
+        "thoughtTokensByRoute": {},
+        "dailyRequestsByRoute": {},
+        "byPurpose": {
+          "eligibility": {
+            "attempted": 0,
+            "resolved": 0,
+            "unresolved": 0,
+            "errors": 0
+          },
+          "composer-extraction": {
+            "attempted": 0,
+            "resolved": 0,
+            "unresolved": 0,
+            "errors": 0
+          },
+          "access-classification": {
+            "attempted": 0,
+            "resolved": 0,
+            "unresolved": 0,
+            "errors": 0
+          },
+          "taxonomy": {
+            "attempted": 0,
+            "resolved": 0,
+            "unresolved": 0,
+            "errors": 0
+          }
+        }
+      },
+      "quality": {
+        "composers": {
+          "populated": 18,
+          "unresolved": 8,
+          "unresolvedNoProgramEvidence": 8
+        },
+        "eras": {
+          "populated": 23,
+          "unresolved": 3
+        },
+        "formats": {
+          "populated": 26,
+          "unresolved": 0
+        },
+        "access": {
+          "free": 1,
+          "paid": 21,
+          "unresolved": 4,
+          "unresolvedNoEvidence": 4,
+          "unresolvedWithEvidence": 0
+        }
+      },
+      "candidates": 2,
+      "newEvents": 0,
+      "updatedEvents": 2,
+      "unchangedEvents": 25,
+      "ambiguous": 0,
+      "possiblyMissing": 0,
+      "batchDuplicates": 0,
+      "crossSourceCorroborations": 0,
+      "written": [],
+      "dryRun": true,
+      "detailHydrationAttempted": 39,
+      "detailHydrationSucceeded": 39,
+      "detailHydrationFailed": 0,
+      "detailHydrationSkippedOutsideWindow": 1,
+      "detailHydrationSkippedCircuitOpen": 0,
+      "disappearanceSuppressedSources": [
+        "teatro-zarzuela"
+      ],
+      "adapterDiscards": {
+        "total": 0,
+        "bySource": {},
+        "byReason": {}
+      }
+    },
+    "sevenDetails": [
+      {
+        "title": "El barberillo de Lavapiés",
+        "sourceUrl": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/el-barbarillo-de-lavapies",
+        "beforeHydration": {
+          "status": "failed",
+          "detailUrl": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/el-barbarillo-de-lavapies",
+          "requestAttempts": 1,
+          "httpStatuses": [],
+          "retryDelaysMs": [],
+          "reason": "parse-failed",
+          "message": "teatro-zarzuela: fechas no enumeradas o estructura inesperada"
+        },
+        "afterHydration": {
+          "status": "succeeded",
+          "detailUrl": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/el-barbarillo-de-lavapies",
+          "requestAttempts": 1,
+          "httpStatuses": [],
+          "retryDelaysMs": []
+        },
+        "occurrences": [
+          {
+            "raw": "9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 23, 24 y 25. 19:30 horas (domingos, a las 18:00 horas) .",
+            "date": "2027-06-09",
+            "time": "19:30"
+          },
+          {
+            "raw": "9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 23, 24 y 25. 19:30 horas (domingos, a las 18:00 horas) .",
+            "date": "2027-06-10",
+            "time": "19:30"
+          },
+          {
+            "raw": "9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 23, 24 y 25. 19:30 horas (domingos, a las 18:00 horas) .",
+            "date": "2027-06-11",
+            "time": "19:30"
+          },
+          {
+            "raw": "9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 23, 24 y 25. 19:30 horas (domingos, a las 18:00 horas) .",
+            "date": "2027-06-12",
+            "time": "19:30"
+          },
+          {
+            "raw": "9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 23, 24 y 25. 19:30 horas (domingos, a las 18:00 horas) .",
+            "date": "2027-06-13",
+            "time": "18:00"
+          },
+          {
+            "raw": "9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 23, 24 y 25. 19:30 horas (domingos, a las 18:00 horas) .",
+            "date": "2027-06-16",
+            "time": "19:30"
+          },
+          {
+            "raw": "9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 23, 24 y 25. 19:30 horas (domingos, a las 18:00 horas) .",
+            "date": "2027-06-17",
+            "time": "19:30"
+          },
+          {
+            "raw": "9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 23, 24 y 25. 19:30 horas (domingos, a las 18:00 horas) .",
+            "date": "2027-06-18",
+            "time": "19:30"
+          },
+          {
+            "raw": "9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 23, 24 y 25. 19:30 horas (domingos, a las 18:00 horas) .",
+            "date": "2027-06-19",
+            "time": "19:30"
+          },
+          {
+            "raw": "9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 23, 24 y 25. 19:30 horas (domingos, a las 18:00 horas) .",
+            "date": "2027-06-20",
+            "time": "18:00"
+          },
+          {
+            "raw": "9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 23, 24 y 25. 19:30 horas (domingos, a las 18:00 horas) .",
+            "date": "2027-06-23",
+            "time": "19:30"
+          },
+          {
+            "raw": "9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 23, 24 y 25. 19:30 horas (domingos, a las 18:00 horas) .",
+            "date": "2027-06-24",
+            "time": "19:30"
+          },
+          {
+            "raw": "9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 23, 24 y 25. 19:30 horas (domingos, a las 18:00 horas) .",
+            "date": "2027-06-25",
+            "time": "19:30"
+          }
+        ]
+      },
+      {
+        "title": "El dúo de «La africana»",
+        "sourceUrl": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/el-duo-de-la-africana",
+        "beforeHydration": {
+          "status": "failed",
+          "detailUrl": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/el-duo-de-la-africana",
+          "requestAttempts": 1,
+          "httpStatuses": [],
+          "retryDelaysMs": [],
+          "reason": "parse-failed",
+          "message": "teatro-zarzuela: fechas no enumeradas o estructura inesperada"
+        },
+        "afterHydration": {
+          "status": "succeeded",
+          "detailUrl": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/el-duo-de-la-africana",
+          "requestAttempts": 1,
+          "httpStatuses": [],
+          "retryDelaysMs": []
+        },
+        "occurrences": [
+          {
+            "raw": "10 y 17 de abril de 2027 - 12:00h y 19:30h.",
+            "date": "2027-04-10",
+            "time": "12:00"
+          },
+          {
+            "raw": "10 y 17 de abril de 2027 - 12:00h y 19:30h.",
+            "date": "2027-04-10",
+            "time": "19:30"
+          },
+          {
+            "raw": "16 de abril 2027 - 19:30h",
+            "date": "2027-04-16",
+            "time": "19:30"
+          },
+          {
+            "raw": "10 y 17 de abril de 2027 - 12:00h y 19:30h.",
+            "date": "2027-04-17",
+            "time": "12:00"
+          },
+          {
+            "raw": "10 y 17 de abril de 2027 - 12:00h y 19:30h.",
+            "date": "2027-04-17",
+            "time": "19:30"
+          }
+        ]
+      },
+      {
+        "title": "La bruja",
+        "sourceUrl": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/la-bruja",
+        "beforeHydration": {
+          "status": "failed",
+          "detailUrl": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/la-bruja",
+          "requestAttempts": 1,
+          "httpStatuses": [],
+          "retryDelaysMs": [],
+          "reason": "parse-failed",
+          "message": "teatro-zarzuela: fechas no enumeradas o estructura inesperada"
+        },
+        "afterHydration": {
+          "status": "succeeded",
+          "detailUrl": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/la-bruja",
+          "requestAttempts": 1,
+          "httpStatuses": [],
+          "retryDelaysMs": []
+        },
+        "occurrences": [
+          {
+            "raw": "11, 12, 13, 14, 17, 18, 19, 20, 21, 23, 24, 27 y 28 de marzo de 2027. 19:30 horas (domingos, a las 18:00 horas) .",
+            "date": "2027-03-11",
+            "time": "19:30"
+          },
+          {
+            "raw": "11, 12, 13, 14, 17, 18, 19, 20, 21, 23, 24, 27 y 28 de marzo de 2027. 19:30 horas (domingos, a las 18:00 horas) .",
+            "date": "2027-03-12",
+            "time": "19:30"
+          },
+          {
+            "raw": "11, 12, 13, 14, 17, 18, 19, 20, 21, 23, 24, 27 y 28 de marzo de 2027. 19:30 horas (domingos, a las 18:00 horas) .",
+            "date": "2027-03-13",
+            "time": "19:30"
+          },
+          {
+            "raw": "11, 12, 13, 14, 17, 18, 19, 20, 21, 23, 24, 27 y 28 de marzo de 2027. 19:30 horas (domingos, a las 18:00 horas) .",
+            "date": "2027-03-14",
+            "time": "18:00"
+          },
+          {
+            "raw": "11, 12, 13, 14, 17, 18, 19, 20, 21, 23, 24, 27 y 28 de marzo de 2027. 19:30 horas (domingos, a las 18:00 horas) .",
+            "date": "2027-03-17",
+            "time": "19:30"
+          },
+          {
+            "raw": "11, 12, 13, 14, 17, 18, 19, 20, 21, 23, 24, 27 y 28 de marzo de 2027. 19:30 horas (domingos, a las 18:00 horas) .",
+            "date": "2027-03-18",
+            "time": "19:30"
+          },
+          {
+            "raw": "11, 12, 13, 14, 17, 18, 19, 20, 21, 23, 24, 27 y 28 de marzo de 2027. 19:30 horas (domingos, a las 18:00 horas) .",
+            "date": "2027-03-19",
+            "time": "19:30"
+          },
+          {
+            "raw": "11, 12, 13, 14, 17, 18, 19, 20, 21, 23, 24, 27 y 28 de marzo de 2027. 19:30 horas (domingos, a las 18:00 horas) .",
+            "date": "2027-03-20",
+            "time": "19:30"
+          },
+          {
+            "raw": "11, 12, 13, 14, 17, 18, 19, 20, 21, 23, 24, 27 y 28 de marzo de 2027. 19:30 horas (domingos, a las 18:00 horas) .",
+            "date": "2027-03-21",
+            "time": "18:00"
+          },
+          {
+            "raw": "11, 12, 13, 14, 17, 18, 19, 20, 21, 23, 24, 27 y 28 de marzo de 2027. 19:30 horas (domingos, a las 18:00 horas) .",
+            "date": "2027-03-23",
+            "time": "19:30"
+          },
+          {
+            "raw": "11, 12, 13, 14, 17, 18, 19, 20, 21, 23, 24, 27 y 28 de marzo de 2027. 19:30 horas (domingos, a las 18:00 horas) .",
+            "date": "2027-03-24",
+            "time": "19:30"
+          },
+          {
+            "raw": "11, 12, 13, 14, 17, 18, 19, 20, 21, 23, 24, 27 y 28 de marzo de 2027. 19:30 horas (domingos, a las 18:00 horas) .",
+            "date": "2027-03-27",
+            "time": "19:30"
+          },
+          {
+            "raw": "11, 12, 13, 14, 17, 18, 19, 20, 21, 23, 24, 27 y 28 de marzo de 2027. 19:30 horas (domingos, a las 18:00 horas) .",
+            "date": "2027-03-28",
+            "time": "18:00"
+          }
+        ]
+      },
+      {
+        "title": "La verbena de la Paloma",
+        "sourceUrl": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/la-verbena-de-la-paloma",
+        "beforeHydration": {
+          "status": "failed",
+          "detailUrl": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/la-verbena-de-la-paloma",
+          "requestAttempts": 1,
+          "httpStatuses": [],
+          "retryDelaysMs": [],
+          "reason": "parse-failed",
+          "message": "teatro-zarzuela: fechas no enumeradas o estructura inesperada"
+        },
+        "afterHydration": {
+          "status": "succeeded",
+          "detailUrl": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/la-verbena-de-la-paloma",
+          "requestAttempts": 1,
+          "httpStatuses": [],
+          "retryDelaysMs": []
+        },
+        "occurrences": [
+          {
+            "raw": "23, 24, 25, 26, 27, 30 de septiembre y 1, 2, 3 y 4 de octubre de 2026. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2026-09-23",
+            "time": "19:30"
+          },
+          {
+            "raw": "23, 24, 25, 26, 27, 30 de septiembre y 1, 2, 3 y 4 de octubre de 2026. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2026-09-24",
+            "time": "19:30"
+          },
+          {
+            "raw": "23, 24, 25, 26, 27, 30 de septiembre y 1, 2, 3 y 4 de octubre de 2026. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2026-09-25",
+            "time": "19:30"
+          },
+          {
+            "raw": "23, 24, 25, 26, 27, 30 de septiembre y 1, 2, 3 y 4 de octubre de 2026. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2026-09-26",
+            "time": "19:30"
+          },
+          {
+            "raw": "23, 24, 25, 26, 27, 30 de septiembre y 1, 2, 3 y 4 de octubre de 2026. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2026-09-27",
+            "time": "18:00"
+          },
+          {
+            "raw": "23, 24, 25, 26, 27, 30 de septiembre y 1, 2, 3 y 4 de octubre de 2026. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2026-09-30",
+            "time": "19:30"
+          },
+          {
+            "raw": "23, 24, 25, 26, 27, 30 de septiembre y 1, 2, 3 y 4 de octubre de 2026. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2026-10-01",
+            "time": "19:30"
+          },
+          {
+            "raw": "23, 24, 25, 26, 27, 30 de septiembre y 1, 2, 3 y 4 de octubre de 2026. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2026-10-02",
+            "time": "19:30"
+          },
+          {
+            "raw": "23, 24, 25, 26, 27, 30 de septiembre y 1, 2, 3 y 4 de octubre de 2026. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2026-10-03",
+            "time": "19:30"
+          },
+          {
+            "raw": "23, 24, 25, 26, 27, 30 de septiembre y 1, 2, 3 y 4 de octubre de 2026. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2026-10-04",
+            "time": "18:00"
+          }
+        ]
+      },
+      {
+        "title": "Las trece rosas rojas",
+        "sourceUrl": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/las-trece-rosas-rojas",
+        "beforeHydration": {
+          "status": "failed",
+          "detailUrl": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/las-trece-rosas-rojas",
+          "requestAttempts": 1,
+          "httpStatuses": [],
+          "retryDelaysMs": [],
+          "reason": "parse-failed",
+          "message": "teatro-zarzuela: fechas no enumeradas o estructura inesperada"
+        },
+        "afterHydration": {
+          "status": "succeeded",
+          "detailUrl": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/las-trece-rosas-rojas",
+          "requestAttempts": 1,
+          "httpStatuses": [],
+          "retryDelaysMs": []
+        },
+        "occurrences": [
+          {
+            "raw": "25, 26, 27, 28, y 29 de noviembre; 2 de diciembre de 2026. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2026-11-25",
+            "time": "19:30"
+          },
+          {
+            "raw": "25, 26, 27, 28, y 29 de noviembre; 2 de diciembre de 2026. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2026-11-26",
+            "time": "19:30"
+          },
+          {
+            "raw": "25, 26, 27, 28, y 29 de noviembre; 2 de diciembre de 2026. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2026-11-27",
+            "time": "19:30"
+          },
+          {
+            "raw": "25, 26, 27, 28, y 29 de noviembre; 2 de diciembre de 2026. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2026-11-28",
+            "time": "19:30"
+          },
+          {
+            "raw": "25, 26, 27, 28, y 29 de noviembre; 2 de diciembre de 2026. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2026-11-29",
+            "time": "18:00"
+          },
+          {
+            "raw": "25, 26, 27, 28, y 29 de noviembre; 2 de diciembre de 2026. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2026-12-02",
+            "time": "19:30"
+          }
+        ]
+      },
+      {
+        "title": "Los gavilanes",
+        "sourceUrl": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/los-gavilanes",
+        "beforeHydration": {
+          "status": "failed",
+          "detailUrl": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/los-gavilanes",
+          "requestAttempts": 1,
+          "httpStatuses": [],
+          "retryDelaysMs": [],
+          "reason": "parse-failed",
+          "message": "teatro-zarzuela: fechas no enumeradas o estructura inesperada"
+        },
+        "afterHydration": {
+          "status": "succeeded",
+          "detailUrl": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/los-gavilanes",
+          "requestAttempts": 1,
+          "httpStatuses": [],
+          "retryDelaysMs": []
+        },
+        "occurrences": [
+          {
+            "raw": "28, 29, 30, 31 de enero y 4, 5, 6, 7, 10, 11, 12 y 13 de febrero de 2027. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2027-01-28",
+            "time": "19:30"
+          },
+          {
+            "raw": "28, 29, 30, 31 de enero y 4, 5, 6, 7, 10, 11, 12 y 13 de febrero de 2027. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2027-01-29",
+            "time": "19:30"
+          },
+          {
+            "raw": "28, 29, 30, 31 de enero y 4, 5, 6, 7, 10, 11, 12 y 13 de febrero de 2027. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2027-01-30",
+            "time": "19:30"
+          },
+          {
+            "raw": "28, 29, 30, 31 de enero y 4, 5, 6, 7, 10, 11, 12 y 13 de febrero de 2027. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2027-01-31",
+            "time": "18:00"
+          },
+          {
+            "raw": "28, 29, 30, 31 de enero y 4, 5, 6, 7, 10, 11, 12 y 13 de febrero de 2027. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2027-02-04",
+            "time": "19:30"
+          },
+          {
+            "raw": "28, 29, 30, 31 de enero y 4, 5, 6, 7, 10, 11, 12 y 13 de febrero de 2027. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2027-02-05",
+            "time": "19:30"
+          },
+          {
+            "raw": "28, 29, 30, 31 de enero y 4, 5, 6, 7, 10, 11, 12 y 13 de febrero de 2027. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2027-02-06",
+            "time": "19:30"
+          },
+          {
+            "raw": "28, 29, 30, 31 de enero y 4, 5, 6, 7, 10, 11, 12 y 13 de febrero de 2027. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2027-02-07",
+            "time": "18:00"
+          },
+          {
+            "raw": "28, 29, 30, 31 de enero y 4, 5, 6, 7, 10, 11, 12 y 13 de febrero de 2027. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2027-02-10",
+            "time": "19:30"
+          },
+          {
+            "raw": "28, 29, 30, 31 de enero y 4, 5, 6, 7, 10, 11, 12 y 13 de febrero de 2027. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2027-02-11",
+            "time": "19:30"
+          },
+          {
+            "raw": "28, 29, 30, 31 de enero y 4, 5, 6, 7, 10, 11, 12 y 13 de febrero de 2027. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2027-02-12",
+            "time": "19:30"
+          },
+          {
+            "raw": "28, 29, 30, 31 de enero y 4, 5, 6, 7, 10, 11, 12 y 13 de febrero de 2027. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2027-02-13",
+            "time": "19:30"
+          }
+        ]
+      },
+      {
+        "title": "Venus y Adonis",
+        "sourceUrl": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/venus-y-adonis",
+        "beforeHydration": {
+          "status": "failed",
+          "detailUrl": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/venus-y-adonis",
+          "requestAttempts": 1,
+          "httpStatuses": [],
+          "retryDelaysMs": [],
+          "reason": "parse-failed",
+          "message": "teatro-zarzuela: fechas no enumeradas o estructura inesperada"
+        },
+        "afterHydration": {
+          "status": "succeeded",
+          "detailUrl": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/lirica-2026-2027/venus-y-adonis",
+          "requestAttempts": 1,
+          "httpStatuses": [],
+          "retryDelaysMs": []
+        },
+        "occurrences": [
+          {
+            "raw": "5, 7, 8 y 9 de mayo de 2027. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2027-05-05",
+            "time": "19:30"
+          },
+          {
+            "raw": "5, 7, 8 y 9 de mayo de 2027. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2027-05-07",
+            "time": "19:30"
+          },
+          {
+            "raw": "5, 7, 8 y 9 de mayo de 2027. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2027-05-08",
+            "time": "19:30"
+          },
+          {
+            "raw": "5, 7, 8 y 9 de mayo de 2027. 19:30 horas (domingos, a las 18:00 horas).",
+            "date": "2027-05-09",
+            "time": "18:00"
+          }
+        ]
+      }
+    ]
+  },
+  "refugio": {
+    "before": {
+      "window": {
+        "from": "2026-10-01",
+        "to": "2027-07-31"
+      },
+      "health": "fatal",
+      "autoMergeEligible": false,
+      "healthReasons": [
+        "no-sources-succeeded",
+        "source-failed:real-hermandad-refugio"
+      ],
+      "sourcesAttempted": [
+        "real-hermandad-refugio"
+      ],
+      "sourcesSucceeded": [],
+      "sourcesFailed": [
+        {
+          "sourceId": "real-hermandad-refugio",
+          "message": "real-hermandad-refugio: archivo de conciertos sin paginación reconocible"
+        }
+      ],
+      "rawEvents": 0,
+      "skippedUnusable": 0,
+      "eligibility": {
+        "include": 0,
+        "exclude": 0,
+        "uncertain": 0
+      },
+      "ai": {
+        "attempted": 0,
+        "resolved": 0,
+        "unresolved": 0,
+        "include": 0,
+        "exclude": 0,
+        "uncertain": 0,
+        "invalidOutput": 0,
+        "malformedOutput": 0,
+        "incomplete": 0,
+        "rateLimited": 0,
+        "timeout": 0,
+        "error": 0,
+        "taxonomyAttempted": 0,
+        "taxonomyFilled": 0,
+        "httpRequests": 0,
+        "retries": 0,
+        "modelFallbacks": 0,
+        "logicalCalls": 0,
+        "sameRouteRetries": 0,
+        "httpFallbacks": 0,
+        "fallbackCalls": 0,
+        "circuitOpenRoutes": 0,
+        "requestsByModel": {},
+        "classificationsByModel": {},
+        "requestsByRoute": {},
+        "classificationsByRoute": {},
+        "requestsByProvider": {},
+        "classificationsByProvider": {},
+        "requestsByPurpose": {},
+        "failuresByKind": {},
+        "rateLimits": 0,
+        "quotaExhausted": 0,
+        "concurrencyPressure": 0,
+        "pressureByKind": {},
+        "concurrencyPressureByRoute": {},
+        "concurrencyPressureByProvider": {},
+        "rateLimitsByRoute": {},
+        "rateLimitsByProvider": {},
+        "routes": [],
+        "cacheHits": 0,
+        "deferred": 0,
+        "inputTokensByModel": {},
+        "dailyRequestsByModel": {},
+        "inputTokensByRoute": {},
+        "outputTokensByRoute": {},
+        "thoughtTokensByRoute": {},
+        "dailyRequestsByRoute": {},
+        "byPurpose": {
+          "eligibility": {
+            "attempted": 0,
+            "resolved": 0,
+            "unresolved": 0,
+            "errors": 0
+          },
+          "composer-extraction": {
+            "attempted": 0,
+            "resolved": 0,
+            "unresolved": 0,
+            "errors": 0
+          },
+          "access-classification": {
+            "attempted": 0,
+            "resolved": 0,
+            "unresolved": 0,
+            "errors": 0
+          },
+          "taxonomy": {
+            "attempted": 0,
+            "resolved": 0,
+            "unresolved": 0,
+            "errors": 0
+          }
+        }
+      },
+      "quality": {
+        "composers": {
+          "populated": 0,
+          "unresolved": 0,
+          "unresolvedNoProgramEvidence": 0
+        },
+        "eras": {
+          "populated": 0,
+          "unresolved": 0
+        },
+        "formats": {
+          "populated": 0,
+          "unresolved": 0
+        },
+        "access": {
+          "free": 0,
+          "paid": 0,
+          "unresolved": 0,
+          "unresolvedNoEvidence": 0,
+          "unresolvedWithEvidence": 0
+        }
+      },
+      "candidates": 0,
+      "newEvents": 0,
+      "updatedEvents": 0,
+      "unchangedEvents": 0,
+      "ambiguous": 0,
+      "possiblyMissing": 0,
+      "batchDuplicates": 0,
+      "crossSourceCorroborations": 0,
+      "written": [],
+      "dryRun": true,
+      "detailHydrationAttempted": 0,
+      "detailHydrationSucceeded": 0,
+      "detailHydrationFailed": 0,
+      "detailHydrationSkippedOutsideWindow": 0,
+      "detailHydrationSkippedCircuitOpen": 0,
+      "disappearanceSuppressedSources": [],
+      "adapterDiscards": {
+        "total": 0,
+        "bySource": {},
+        "byReason": {}
+      }
+    },
+    "after": {
+      "window": {
+        "from": "2026-10-01",
+        "to": "2027-07-31"
+      },
+      "health": "degraded",
+      "autoMergeEligible": true,
+      "healthReasons": [
+        "unresolved-taxonomy"
+      ],
+      "sourcesAttempted": [
+        "real-hermandad-refugio"
+      ],
+      "sourcesSucceeded": [
+        "real-hermandad-refugio"
+      ],
+      "sourcesFailed": [],
+      "rawEvents": 32,
+      "skippedUnusable": 29,
+      "eligibility": {
+        "include": 0,
+        "exclude": 0,
+        "uncertain": 3
+      },
+      "ai": {
+        "attempted": 0,
+        "resolved": 0,
+        "unresolved": 0,
+        "include": 0,
+        "exclude": 0,
+        "uncertain": 0,
+        "invalidOutput": 0,
+        "malformedOutput": 0,
+        "incomplete": 0,
+        "rateLimited": 0,
+        "timeout": 0,
+        "error": 0,
+        "taxonomyAttempted": 0,
+        "taxonomyFilled": 0,
+        "httpRequests": 0,
+        "retries": 0,
+        "modelFallbacks": 0,
+        "logicalCalls": 0,
+        "sameRouteRetries": 0,
+        "httpFallbacks": 0,
+        "fallbackCalls": 0,
+        "circuitOpenRoutes": 0,
+        "requestsByModel": {},
+        "classificationsByModel": {},
+        "requestsByRoute": {},
+        "classificationsByRoute": {},
+        "requestsByProvider": {},
+        "classificationsByProvider": {},
+        "requestsByPurpose": {},
+        "failuresByKind": {},
+        "rateLimits": 0,
+        "quotaExhausted": 0,
+        "concurrencyPressure": 0,
+        "pressureByKind": {},
+        "concurrencyPressureByRoute": {},
+        "concurrencyPressureByProvider": {},
+        "rateLimitsByRoute": {},
+        "rateLimitsByProvider": {},
+        "routes": [],
+        "cacheHits": 0,
+        "deferred": 0,
+        "inputTokensByModel": {},
+        "dailyRequestsByModel": {},
+        "inputTokensByRoute": {},
+        "outputTokensByRoute": {},
+        "thoughtTokensByRoute": {},
+        "dailyRequestsByRoute": {},
+        "byPurpose": {
+          "eligibility": {
+            "attempted": 0,
+            "resolved": 0,
+            "unresolved": 0,
+            "errors": 0
+          },
+          "composer-extraction": {
+            "attempted": 0,
+            "resolved": 0,
+            "unresolved": 0,
+            "errors": 0
+          },
+          "access-classification": {
+            "attempted": 0,
+            "resolved": 0,
+            "unresolved": 0,
+            "errors": 0
+          },
+          "taxonomy": {
+            "attempted": 0,
+            "resolved": 0,
+            "unresolved": 0,
+            "errors": 0
+          }
+        }
+      },
+      "quality": {
+        "composers": {
+          "populated": 0,
+          "unresolved": 3,
+          "unresolvedNoProgramEvidence": 3
+        },
+        "eras": {
+          "populated": 0,
+          "unresolved": 3
+        },
+        "formats": {
+          "populated": 3,
+          "unresolved": 0
+        },
+        "access": {
+          "free": 0,
+          "paid": 3,
+          "unresolved": 0,
+          "unresolvedNoEvidence": 0,
+          "unresolvedWithEvidence": 0
+        }
+      },
+      "candidates": 0,
+      "newEvents": 0,
+      "updatedEvents": 0,
+      "unchangedEvents": 3,
+      "ambiguous": 0,
+      "possiblyMissing": 0,
+      "batchDuplicates": 0,
+      "crossSourceCorroborations": 0,
+      "written": [],
+      "dryRun": true,
+      "detailHydrationAttempted": 32,
+      "detailHydrationSucceeded": 32,
+      "detailHydrationFailed": 0,
+      "detailHydrationSkippedOutsideWindow": 0,
+      "detailHydrationSkippedCircuitOpen": 0,
+      "disappearanceSuppressedSources": [],
+      "adapterDiscards": {
+        "total": 0,
+        "bySource": {},
+        "byReason": {}
+      }
+    }
+  }
+}
