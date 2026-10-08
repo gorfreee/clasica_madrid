@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_gestiona_madrid_org_madamabutterfly_alpedrete_20261114",
+  "slug": "madama-butterfly-alpedrete",
+  "title": "Madama Butterfly",
+  "status": "scheduled",
+  "venueId": "ven_centro_cultural_alpedrete",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_gestiona_madrid_org_madamabutterfly_alpedrete_20261114_01",
+      "date": "2026-11-14",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Camerata Lírica de España",
+      "role": "ensemble"
+    },
+    {
+      "name": "Iván Martí",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Giacomo Puccini"
+    }
+  ],
+  "works": [
+    {
+      "title": "Madama Butterfly",
+      "composerName": "Giacomo Puccini"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "opera"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_gestiona_madrid_org",
+      "url": "https://www.madrid.org/clas_artes/red/alpedrete.html",
+      "checkedAt": "2026-10-08"
+    },
+    {
+      "sourceId": "src_gestiona_madrid_org",
+      "url": "https://www.madrid.org/clas_artes/red/madamabutterfly.html",
+      "checkedAt": "2026-10-08"
+    }
+  ],
+  "primarySourceId": "src_gestiona_madrid_org",
+  "lastVerifiedAt": "2026-10-08"
+}
