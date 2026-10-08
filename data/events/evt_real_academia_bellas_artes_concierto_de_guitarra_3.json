@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_real_academia_bellas_artes_concierto_de_guitarra_3",
+  "slug": "festival-internacional-de-guitarra-joaquin-rodrigo-io-yamada",
+  "title": "Festival Internacional de Guitarra «Joaquín Rodrigo» — Io Yamada",
+  "status": "scheduled",
+  "venueId": "ven_real_academia_bellas_artes_salon_actos",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_real_academia_bellas_artes_concierto_de_guitarra_3_01",
+      "date": "2026-10-21",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Io Yamada"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Fernando Sor"
+    },
+    {
+      "name": "Joaquín Rodrigo"
+    },
+    {
+      "name": "Francisco Tárrega"
+    },
+    {
+      "name": "José Luis Turina"
+    },
+    {
+      "name": "Federico Moreno Torroba"
+    }
+  ],
+  "works": [
+    {
+      "title": "Fantasie Villageoise, Op. 52",
+      "composerName": "Fernando Sor"
+    },
+    {
+      "title": "Sonata Giocosa",
+      "composerName": "Joaquín Rodrigo"
+    },
+    {
+      "title": "Fantasia su Motivi della «La Traviata»",
+      "composerName": "Francisco Tárrega"
+    },
+    {
+      "title": "Preludio de Torre quebrada",
+      "composerName": "José Luis Turina"
+    },
+    {
+      "title": "Sonatina para Guitarra",
+      "composerName": "Federico Moreno Torroba"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_real_academia_bellas_artes_san_fernando",
+      "url": "https://www.realacademiabellasartessanfernando.com/actividades/conciertos/concierto-de-guitarra-3",
+      "checkedAt": "2026-10-08",
+      "externalId": "concierto-de-guitarra-3"
+    }
+  ],
+  "primarySourceId": "src_real_academia_bellas_artes_san_fernando",
+  "lastVerifiedAt": "2026-10-08"
+}

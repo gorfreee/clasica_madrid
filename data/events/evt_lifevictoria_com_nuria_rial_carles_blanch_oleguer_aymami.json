@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_lifevictoria_com_nuria_rial_carles_blanch_oleguer_aymami",
+  "slug": "viajando-por-la-cancion-antes-del-lied",
+  "title": "Viajando por la canción antes del Lied",
+  "status": "scheduled",
+  "venueId": "ven_museo_nacional_thyssen_bornemisza",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_lifevictoria_com_nuria_rial_carles_blanch_oleguer_aymami_01",
+      "date": "2026-10-10",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Núria Rial"
+    },
+    {
+      "name": "Carles Blanch"
+    },
+    {
+      "name": "Oleguer Aymamí"
+    },
+    {
+      "name": "David Mayoral"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Clément Janequin"
+    },
+    {
+      "name": "Josquin des Prez"
+    },
+    {
+      "name": "Clemens non Papa"
+    },
+    {
+      "name": "Jacob Arcadelt"
+    },
+    {
+      "name": "Luys de Narváez"
+    },
+    {
+      "name": "Philip van Wilder"
+    },
+    {
+      "name": "Claude Gervaise"
+    },
+    {
+      "name": "Diego Ortiz"
+    },
+    {
+      "name": "Juan Vásquez"
+    },
+    {
+      "name": "Jehan Chardavoine"
+    },
+    {
+      "name": "Guillaume Costeley"
+    },
+    {
+      "name": "Esteban Daza"
+    },
+    {
+      "name": "Alonso Mudarra"
+    },
+    {
+      "name": "Gaspar Sanz"
+    },
+    {
+      "name": "José Marín"
+    }
+  ],
+  "works": [
+    {
+      "title": "Il estoit une fillette",
+      "composerName": "Clément Janequin"
+    },
+    {
+      "title": "Mille regretz",
+      "composerName": "Josquin des Prez"
+    },
+    {
+      "title": "Au joli bois",
+      "composerName": "Clemens non Papa"
+    },
+    {
+      "title": "Entre vous filles de quinze ans",
+      "composerName": "Clemens non Papa"
+    },
+    {
+      "title": "O felici occhi miei",
+      "composerName": "Jacob Arcadelt"
+    },
+    {
+      "title": "Mille regretz (La canción del emperador)",
+      "composerName": "Luys de Narváez"
+    },
+    {
+      "title": "Douleur me bat",
+      "composerName": "Josquin des Prez"
+    },
+    {
+      "title": "Recercada sobre O felici occhi miei",
+      "composerName": "Diego Ortiz"
+    },
+    {
+      "title": "Ricercada seconda sopra Spagna",
+      "composerName": "Diego Ortiz"
+    },
+    {
+      "title": "En la fuente del Rosel",
+      "composerName": "Juan Vásquez"
+    },
+    {
+      "title": "Mignonne, allons voir si la rose",
+      "composerName": "Jehan Chardavoine"
+    },
+    {
+      "title": "Mignonne, allons voir si la rose",
+      "composerName": "Guillaume Costeley"
+    },
+    {
+      "title": "Gritos dava la morenica",
+      "composerName": "Esteban Daza"
+    },
+    {
+      "title": "Isabel, perdiste la tu faxa",
+      "composerName": "Alonso Mudarra"
+    },
+    {
+      "title": "Mariçápalos",
+      "composerName": "Gaspar Sanz"
+    },
+    {
+      "title": "Jácaras",
+      "composerName": "Gaspar Sanz"
+    },
+    {
+      "title": "Niña, como en tus mudanzas",
+      "composerName": "José Marín"
+    }
+  ],
+  "eras": [
+    "renaissance",
+    "baroque"
+  ],
+  "formats": [
+    "lied"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_lifevictoria_com",
+      "url": "https://www.lifevictoria.com/es/event/nuria-rial-carles-blanch-oleguer-aymami",
+      "checkedAt": "2026-10-08"
+    }
+  ],
+  "primarySourceId": "src_lifevictoria_com",
+  "lastVerifiedAt": "2026-10-08"
+}
