@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_musae_es_alejandro_gomez_pareja_musae_2027_01_16_museo_arqueologico_nacional",
+  "slug": "alejandro-gomez-pareja-musae",
+  "title": "Alejandro Gómez Pareja — MusaE",
+  "status": "scheduled",
+  "venueId": "ven_museo_arqueologico_nacional",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_musae_es_alejandro_gomez_pareja_musae_2027_01_16_museo_arqueologico_nacional_01",
+      "date": "2027-01-16",
+      "time": "17:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_musae_es_alejandro_gomez_pareja_musae_2027_01_16_museo_arqueologico_nacional_02",
+      "date": "2027-01-16",
+      "time": "18:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_musae_es_alejandro_gomez_pareja_musae_2027_01_16_museo_arqueologico_nacional_03",
+      "date": "2027-01-16",
+      "time": "18:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_musae_es_alejandro_gomez_pareja_musae_2027_01_16_museo_arqueologico_nacional_04",
+      "date": "2027-01-16",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Alejandro Gómez Pareja"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "François Couperin"
+    },
+    {
+      "name": "Carl Philipp Emanuel Bach"
+    },
+    {
+      "name": "Luigi Boccherini"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "baroque",
+    "classical"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_musae_es",
+      "url": "https://www.musae.es/programacion.html",
+      "checkedAt": "2026-10-08"
+    }
+  ],
+  "primarySourceId": "src_musae_es",
+  "lastVerifiedAt": "2026-10-08"
+}
