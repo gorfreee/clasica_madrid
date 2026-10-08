@@ -34,6 +34,61 @@ import { runDiscoveryIngest } from '../src/ingestion/pipeline.ts';
 
 const PROGRAMME = 'Maddalena Casulana — Morir non può il mio cuore';
 
+describe('early era grounding', () => {
+  const silangan = {
+    title: 'Philippines: Silangan Chamber Guitar Ensemble',
+    categoryText: 'Concierto',
+    performers: [{ name: 'Silangan Chamber Guitar Ensemble', roleText: 'ensemble de guitarras' }],
+    composers: [{ name: 'Isaac Albéniz' }, { name: 'Leo Nebrija' }],
+    works: [{ title: 'Granada', composerName: 'Isaac Albéniz' }, { title: 'Hele-Hele Medley', composerName: 'Leo Nebrija' }],
+  };
+
+  it('rechaza early añadido a repertorio moderno aunque el nombre citado sea literal', async () => {
+    const ai = spyAi(async () => ({ formats: ['chamber'], eras: ['early', 'romantic'], evidence: ['Leo Nebrija'] }));
+    const result = await classifyObserved(silangan, { ai });
+    expect(result.eras?.value).toEqual(['romantic']);
+  });
+
+  it('no inventa otra época al rechazar el único early sin respaldo', async () => {
+    const ai = spyAi(async (_facts, context) => context?.purpose === 'eligibility'
+      ? { eligibility: 'include', formats: ['recital'], evidence: ['Concierto de música clásica'] }
+      : { formats: ['recital'], eras: ['early'], evidence: ['Autora sin conocimiento'] });
+    const result = await classifyObserved(facts({
+      title: 'Concierto de música clásica', performers: [{ name: 'Solista', roleText: 'piano' }],
+      composers: [{ name: 'Autora sin conocimiento' }], works: [],
+    }), { ai });
+    expect(result.eras?.value).toEqual([]);
+  });
+
+  it('conserva early con repertorio medieval explícito y un autor observado', async () => {
+    const ai = spyAi(async (_facts, context) => context?.purpose === 'eligibility'
+      ? { eligibility: 'include', formats: ['recital'], evidence: ['Concierto de música clásica'] }
+      : { formats: ['recital'], eras: ['early'], evidence: ['Autora sin conocimiento'] });
+    const result = await classifyObserved(facts({
+      title: 'Concierto de música clásica', programText: 'Repertorio medieval de Autora sin conocimiento',
+      composers: [{ name: 'Autora sin conocimiento' }], works: [],
+    }), { ai });
+    expect(result.eras?.value).toEqual(['early']);
+  });
+
+  it('no confunde early-music barroca con la época medieval', async () => {
+    const ai = spyAi(async () => ({ formats: ['early-music'], eras: ['early', 'baroque'], evidence: ['Johann Sebastian Bach'] }));
+    const result = await classifyObserved({
+      ...silangan, programText: 'Early-music: Johann Sebastian Bach y Autora sin conocimiento',
+      composers: [{ name: 'Johann Sebastian Bach' }, { name: 'Autora sin conocimiento' }], works: [],
+    }, { ai });
+    expect(result.eras?.value).toEqual(['baroque']);
+  });
+
+  it('conserva la época medieval determinada por un compositor conocido', async () => {
+    const ai = spyAi(async () => ({ formats: ['chamber'], eras: ['early'], evidence: ['Autora sin conocimiento'] }));
+    const result = await classifyObserved({
+      ...silangan, composers: [{ name: 'Guillaume de Machaut' }, { name: 'Autora sin conocimiento' }], works: [],
+    }, { ai });
+    expect(result.eras?.value).toEqual(['early']);
+  });
+});
+
 function facts(overrides: Partial<ObservedFacts> = {}): ObservedFacts {
   return {
     title: 'OCNE. Sinfónico 01',
