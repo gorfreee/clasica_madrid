@@ -9,6 +9,21 @@ test('el footer lleva a la sección de apoyo con foco visible y sin desbordamien
     const footerLink = page.getByRole('contentinfo').getByRole('link', { name: 'Apoya el proyecto' });
     await footerLink.focus();
     expect(await footerLink.evaluate((node) => getComputedStyle(node).outlineStyle)).not.toBe('none');
+    const channel = page.locator('.site-footer [data-whatsapp-channel="footer"]');
+    const supportBox = (await footerLink.boundingBox())!;
+    const channelBox = (await channel.boundingBox())!;
+    expect(Math.abs(supportBox.y - channelBox.y)).toBeLessThan(1);
+    expect(channelBox.height).toBeGreaterThanOrEqual(44);
+    expect(channelBox.x + channelBox.width).toBeLessThan(supportBox.x);
+    const brandBox = (await page.locator('.site-footer__brand').boundingBox())!;
+    const markBox = (await page.locator('.site-footer__mark').boundingBox())!;
+    const statementBox = (await page.locator('.site-footer__statement').boundingBox())!;
+    expect(Math.abs(markBox.y + markBox.height / 2 - statementBox.y - statementBox.height / 2)).toBeLessThan(1);
+    if (width > 760) {
+      expect(Math.abs(brandBox.y + brandBox.height / 2 - supportBox.y - supportBox.height / 2)).toBeLessThan(1);
+    } else {
+      expect(brandBox.y + brandBox.height).toBeLessThan(channelBox.y);
+    }
     await footerLink.click();
     await expect(page).toHaveURL(/\/acerca-de\/#apoya$/);
     await expect(page.getByRole('region', { name: 'Que ningún concierto se quede fuera' })).toBeInViewport();
