@@ -27,6 +27,7 @@ export const CONTACT_SUBMITTED = 'contact_submitted';
 export const EVENT_FEEDBACK_CLICKED = 'event_feedback_clicked';
 export const WHATSAPP_CHANNEL_CLICKED = 'whatsapp_channel_clicked';
 export const WHATSAPP_CHANNEL_VIEWED = 'whatsapp_channel_viewed';
+export const DONATION_CLICKED = 'donation_clicked';
 
 export const EVENT_FEEDBACK_PLACEMENTS = ['after_sources'] as const;
 export type EventFeedbackPlacement = (typeof EVENT_FEEDBACK_PLACEMENTS)[number];
@@ -333,6 +334,18 @@ export function trackWhatsAppChannelClicked(
   captureAnalytics(WHATSAPP_CHANNEL_CLICKED, {
     placement: input.placement,
     page_type: input.page_type,
+  }, capture);
+}
+
+/** Outbound intent only; a click does not confirm a completed donation. */
+export function trackDonationClicked(
+  input: { placement: 'about'; page_type: PageType },
+  capture: AnalyticsCapture | null = defaultCapture(),
+): void {
+  captureAnalytics(DONATION_CLICKED, {
+    placement: input.placement,
+    page_type: input.page_type,
+    provider: 'stripe',
   }, capture);
 }
 

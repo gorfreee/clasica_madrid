@@ -2,6 +2,7 @@
 import { SITE_NAME } from '../lib/presentation/constants.ts';
 import LogoSymbol from './LogoSymbol.astro';
 import WhatsAppChannelLink from './WhatsAppChannelLink.astro';
+import { ABOUT_PATH } from '../lib/presentation/urls.ts';
 ---
 
 <footer class="site-footer">
@@ -11,6 +12,25 @@ import WhatsAppChannelLink from './WhatsAppChannelLink.astro';
   <p class="site-footer__statement">Toda la clásica<br />Todo Madrid</p>
   <div class="site-footer__meta">
     <WhatsAppChannelLink placement="footer" />
+    <a class="site-footer__support" href={`${ABOUT_PATH}#apoya`}>Apoya el proyecto <span aria-hidden="true">↗</span></a>
     <p class="site-footer__note">© {SITE_NAME}</p>
   </div>
 </footer>
+
+<style>
+  .site-footer__support {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    min-height: 2.75rem;
+    color: var(--color-brand);
+    font-size: .85rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .site-footer__support:hover {
+    text-decoration: underline;
+    text-underline-offset: .2em;
+  }
+</style>
