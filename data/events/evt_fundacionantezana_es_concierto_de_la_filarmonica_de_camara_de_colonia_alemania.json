@@ -23,15 +23,18 @@
       "name": "Sergey Didorenko"
     },
     {
-      "name": "nemenja Mihailovic"
+      "name": "Nemanja Mihailović"
     },
     {
-      "name": "Dmitrif Gornovskij"
+      "name": "Dmitrij Gornowskij"
     }
   ],
   "composers": [
     {
       "name": "Antonio Vivaldi"
+    },
+    {
+      "name": "Franz Joseph Haydn"
     },
     {
       "name": "Wolfgang Amadeus Mozart"
@@ -45,11 +48,12 @@
   ],
   "works": [
     {
-      "title": "La Tempesta di Mari, Op. 8, nº 5",
+      "title": "Concierto para violín «La tempesta di mare», op. 8, n.º 5",
       "composerName": "Antonio Vivaldi"
     },
     {
-      "title": "Concierto nº 1 en do mayor para violonchelo y cuerdas"
+      "title": "Concierto nº 1 en do mayor para violonchelo y cuerdas",
+      "composerName": "Franz Joseph Haydn"
     },
     {
       "title": "Concierto en si bemol mayor para fagot y orquesta KV 191",
