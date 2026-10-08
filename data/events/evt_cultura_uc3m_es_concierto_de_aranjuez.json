@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cultura_uc3m_es_concierto_de_aranjuez",
+  "slug": "concierto-de-aranjuez-orquesta-uc3m",
+  "title": "Concierto de Aranjuez – Orquesta UC3M",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_uc3m",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cultura_uc3m_es_concierto_de_aranjuez_01",
+      "date": "2026-10-30",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta UC3M"
+    },
+    {
+      "name": "Manuel Coves",
+      "role": "conductor"
+    },
+    {
+      "name": "Alejandro Hurtado"
+    },
+    {
+      "name": "Alberto Juárez"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Luigi Boccherini"
+    },
+    {
+      "name": "L. Berio"
+    },
+    {
+      "name": "Joaquín Rodrigo"
+    },
+    {
+      "name": "N. Rimski-Korsakov"
+    }
+  ],
+  "works": [
+    {
+      "title": "Ritirata notturna di Madrid di L. Boccherini",
+      "composerName": "L. Berio"
+    },
+    {
+      "title": "Concierto de Aranjuez",
+      "composerName": "Joaquín Rodrigo"
+    },
+    {
+      "title": "Capricho Español Op. 34",
+      "composerName": "N. Rimski-Korsakov"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_cultura_uc3m_es",
+      "url": "https://cultura.uc3m.es/eventos/concierto-de-aranjuez",
+      "checkedAt": "2026-10-08"
+    }
+  ],
+  "primarySourceId": "src_cultura_uc3m_es",
+  "lastVerifiedAt": "2026-10-08"
+}

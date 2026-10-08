@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "id": "src_cultura_uc3m_es",
+  "slug": "uc3m-cultura",
+  "name": "UC3M Cultura",
+  "kind": "secondary",
+  "url": "https://cultura.uc3m.es/"
+}
