@@ -1171,8 +1171,8 @@ describe('taxonomy AI — alternativas exclusivas vs formaciones combinadas', ()
 describe('taxonomy AI prompt', () => {
   const prompt = AI_TAXONOMY_SYSTEM_PROMPT;
 
-  it('is version 10 so results are distinguishable from earlier taxonomy prompts', () => {
-    expect(AI_TAXONOMY_PROMPT_VERSION).toBe(10);
+  it('is version 11 so results are distinguishable from earlier taxonomy prompts', () => {
+    expect(AI_TAXONOMY_PROMPT_VERSION).toBe(11);
   });
 
   it('asks for a format when observed facts support a musical inference', () => {

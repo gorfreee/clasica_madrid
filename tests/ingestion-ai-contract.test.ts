@@ -98,7 +98,7 @@ describe('contratos por purpose — ningún mega-schema', () => {
     expect(AI_REQUEST_CONTRACT_VERSION).toBe(4);
     expect(AI_EVIDENCE_MAX_ITEMS).toBe(4);
     expect(AI_CLASSIFIER_PROMPT_VERSION).toBe(15);
-    expect(AI_TAXONOMY_PROMPT_VERSION).toBe(10);
+    expect(AI_TAXONOMY_PROMPT_VERSION).toBe(11);
 
     expect(AI_ELIGIBILITY_JSON_SCHEMA.additionalProperties).toBe(false);
     expect(AI_ELIGIBILITY_JSON_SCHEMA.required).toEqual(['eligibility', 'formats', 'evidence']);

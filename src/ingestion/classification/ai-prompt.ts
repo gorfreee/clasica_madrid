@@ -3,7 +3,7 @@ import { compactJson, projectObservedForPurpose } from './ai-input.ts';
 import type { AiCallPurpose } from './ai.ts';
 
 export const AI_CLASSIFIER_PROMPT_VERSION = 15 as const;
-export const AI_TAXONOMY_PROMPT_VERSION = 10 as const;
+export const AI_TAXONOMY_PROMPT_VERSION = 11 as const;
 export const AI_ACCESS_PROMPT_VERSION = 3 as const;
 export const AI_COMPOSER_PROMPT_VERSION = 4 as const;
 
@@ -120,6 +120,9 @@ Tarea: asignar formats y, si los hechos lo permiten, eras.
 Vocabulario:
 - formats: symphonic, chamber, recital, choral, organ, early-music, opera, zarzuela, lied, other
 - eras: early, renaissance, baroque, classical, romantic, twentieth, contemporary
+
+early significa repertorio medieval o anterior al Renacimiento. NO significa early-music (que también abarca Renacimiento y Barroco), música tradicional/folk, instrumentos antiguos ni primeras obras de un compositor. Un arreglo moderno de una melodía tradicional no demuestra repertorio medieval.
+Una referencia histórica como «la canción antes del Lied» no anuncia repertorio de Lied: clasifica el programa y la formación realmente observados.
 
 Reglas:
 - no inventes performers, instrumentos, composers, works, fechas, venue, repertorio ni hechos ausentes;
