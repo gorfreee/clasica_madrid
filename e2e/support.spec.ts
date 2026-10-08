@@ -9,15 +9,22 @@ test('el footer lleva a la sección de apoyo con foco visible y sin desbordamien
     const footerLink = page.getByRole('contentinfo').getByRole('link', { name: 'Apoya el proyecto' });
     await footerLink.focus();
     expect(await footerLink.evaluate((node) => getComputedStyle(node).outlineStyle)).not.toBe('none');
-    const channel = page.locator('.site-footer [data-whatsapp-channel="footer"]');
-    const supportBox = (await footerLink.boundingBox())!;
-    const channelBox = (await channel.boundingBox())!;
+    const { supportBox, channelBox, brandBox, markBox, statementBox } = await page.locator('.site-footer').evaluate((footer) => {
+      const bounds = (selector: string) => {
+        const rect = footer.querySelector(selector)!.getBoundingClientRect();
+        return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+      };
+      return {
+        supportBox: bounds('.site-footer__support'),
+        channelBox: bounds('[data-whatsapp-channel="footer"]'),
+        brandBox: bounds('.site-footer__brand'),
+        markBox: bounds('.site-footer__mark'),
+        statementBox: bounds('.site-footer__statement'),
+      };
+    });
     expect(Math.abs(supportBox.y - channelBox.y)).toBeLessThan(1);
     expect(channelBox.height).toBeGreaterThanOrEqual(44);
     expect(channelBox.x + channelBox.width).toBeLessThan(supportBox.x);
-    const brandBox = (await page.locator('.site-footer__brand').boundingBox())!;
-    const markBox = (await page.locator('.site-footer__mark').boundingBox())!;
-    const statementBox = (await page.locator('.site-footer__statement').boundingBox())!;
     expect(Math.abs(markBox.y + markBox.height / 2 - statementBox.y - statementBox.height / 2)).toBeLessThan(1);
     if (width > 760) {
       expect(Math.abs(brandBox.y + brandBox.height / 2 - supportBox.y - supportBox.height / 2)).toBeLessThan(1);
