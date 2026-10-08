@@ -495,6 +495,9 @@ function isNamedWorkEvent(facts: ObservedFacts): boolean {
 function isOrchestraPerformer(item: ObservedPerson): boolean {
   const role = fieldFolded(item.roleText);
   const name = fieldFolded(item.name);
+  // A guitar orchestra is a guitar ensemble, not evidence of symphonic format.
+  // Even an adapter-provided generic "orquesta" role must not override its name.
+  if (isGuitarOrchestra(name) && !hasSymphonicEventWord(name)) return false;
   if (isOrchestraMembersLabel(name) || isOrchestraMembersLabel(role)) return false;
   if (isChamberOrchestraName(name) && !hasSymphonicEventWord(name)) return false;
   if (isOrchestraRole(role)) return true;
@@ -512,9 +515,14 @@ function isOrchestraRole(role: string): boolean {
 
 function hasOrchestraFormation(text: string): boolean {
   if (!text) return false;
+  if (isGuitarOrchestra(text) && !hasSymphonicEventWord(text)) return false;
   if (isOrchestraMembersLabel(text)) return false;
   if (isChamberOrchestraName(text) && !hasSymphonicEventWord(text)) return false;
   return hasWord(text, 'orquesta') || hasWord(text, 'orquestra') || hasWord(text, 'orchestra');
+}
+
+function isGuitarOrchestra(text: string): boolean {
+  return /\b(?:orquesta|orquestra) de guitarras\b|\bguitar orchestra\b/.test(text);
 }
 
 function isOrchestraMembersLabel(text: string): boolean {
