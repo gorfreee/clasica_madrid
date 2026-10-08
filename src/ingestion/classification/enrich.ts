@@ -32,7 +32,7 @@ import {
 } from './ai-metadata.ts';
 import { rejectSpeculativeAiFormats } from './format-alternatives.ts';
 import { evaluateEligibilityAi, musicalEvidenceIsGrounded } from './eligibility-grounding.ts';
-import { strongFormatValues } from './formats.ts';
+import { onlyHistoricalLiedReference, strongFormatValues } from './formats.ts';
 import { orderedUniqueEras } from './eras.ts';
 import {
   formatsNeedAi,
@@ -358,7 +358,11 @@ function keepResolvedEras(
   const deterministic = current ?? resolveEras(facts);
   const unmatched = observedComposersWithoutEraKnowledge(facts);
   const strength = resolutionStrength(deterministic);
-  const proposed = aiEras && aiEras.length > 0 ? orderedUniqueEras(aiEras) : [];
+  // `early` is medieval/pre-Renaissance repertoire, not a synonym for
+  // early-music, traditional music or an old instrument. A grounded composer
+  // name alone does not substantiate this particularly ambiguous label.
+  const supportedEras = aiEras?.filter((era) => era !== 'early' || hasEarlyRepertoireAnchor(facts));
+  const proposed = supportedEras && supportedEras.length > 0 ? orderedUniqueEras(supportedEras) : [];
   const acceptable = proposed.length > 0 && eraAiMayApply(facts, evidence);
 
   if (strength === 'strong' && unmatched.length === 0) return deterministic;
@@ -395,6 +399,14 @@ function eraAiMayApply(facts: ObservedFacts, evidence: string[]): boolean {
   return musicalEvidenceIsGrounded(facts, evidence) && hasObservedRepertoireForEras(facts);
 }
 
+function hasEarlyRepertoireAnchor(facts: ObservedFacts): boolean {
+  if (resolveEras(facts).value.includes('early')) return true;
+  const repertoire = [facts.programText, ...facts.works.map((work) => work.title)]
+    .filter(Boolean).join('\n');
+  return /\b(?:medieval|pre[- ]?renaissance|prerrenacentista|pre[- ]?renacentista|ars nova|ars antiqua)\b/i
+    .test(repertoire);
+}
+
 /**
  * Strong deterministic formats stay. Weak heuristics may be replaced by
  * grounded AI formats; strong hits in a mixed set are retained as a floor.
@@ -412,6 +424,7 @@ function keepResolvedFormats(
 
   const sanitized = aiValue && aiValue.length > 0
     ? rejectSpeculativeAiFormats(uniqueKeepOrder(aiValue), facts)
+        .filter((format) => format !== 'lied' || !onlyHistoricalLiedReference(facts))
     : [];
   const grounded = musicalEvidenceIsGrounded(facts, evidence);
 

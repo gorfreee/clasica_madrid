@@ -1185,6 +1185,21 @@ describe('eligibility — conflictos y fallback', () => {
     expect(liceo.eligibility.ruleId).toBe('classical-concert-series');
   });
 
+  it('la canción antes del Lied no anuncia el género Lied', async () => {
+    const observed = facts({
+      title: 'Viajando por la canción antes del Lied',
+      categoryText: 'Concierto de música antigua',
+      composers: [{ name: 'Josquin des Prez' }, { name: 'Gaspar Sanz' }],
+      works: [{ title: 'Mille regretz', composerName: 'Josquin des Prez' }],
+    });
+    expect(resolveFormats(observed).value).toEqual(['early-music']);
+    const ai: AiClassifier = {
+      async classify() { return { formats: ['lied', 'early-music'], eras: ['renaissance'], evidence: ['Josquin des Prez'] }; },
+    };
+    expect((await classifyObserved(observed, { ai })).formats.value).not.toContain('lied');
+    expect(resolveFormats({ ...observed, programText: 'Segunda parte: Lieder de Schubert' }).value).toContain('lied');
+  });
+
   it('una obra titulada Mélodie italienne no congela el concierto como lied fuerte', async () => {
     const programText = [
       'Manuel de Falla (1876-1946)',

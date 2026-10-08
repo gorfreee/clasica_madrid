@@ -437,12 +437,22 @@ function programHintsLied(program: string): boolean {
 }
 
 function namesLiedGenre(text: string): boolean {
+  // A programme about the song *before* Lied explicitly places its repertoire
+  // outside that genre. Other positive genre mentions in the field still count.
+  text = text.replace(/\b(?:antes (?:del?|de los)|before(?: the)?)\s+lied(?:er)?\b/g, '');
   return (
     hasWord(text, 'lied') ||
     hasWord(text, 'lieder') ||
     hasWord(text, 'melodie') ||
     hasWord(text, 'melodies')
   );
+}
+
+export function onlyHistoricalLiedReference(facts: ObservedFacts): boolean {
+  const evidence = formatEvidence(facts);
+  const musicalFields = `${evidence.identity} ${evidence.program}`;
+  return /\b(?:antes (?:del?|de los)|before(?: the)?)\s+lied(?:er)?\b/.test(musicalFields)
+    && !namesLiedGenre(musicalFields);
 }
 
 function organEvidence(facts: ObservedFacts): string {
