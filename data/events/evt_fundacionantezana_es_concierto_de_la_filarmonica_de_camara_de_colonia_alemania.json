@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacionantezana_es_concierto_de_la_filarmonica_de_camara_de_colonia_alemania",
+  "slug": "concierto-de-la-filarmonica-de-camara-de-colonia-alemania",
+  "title": "Concierto de la Filarmónica de Cámara de Colonia (Alemania)",
+  "status": "scheduled",
+  "venueId": "ven_iglesia_del_hospital_de_antezana",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacionantezana_es_concierto_de_la_filarmonica_de_camara_de_colonia_alemania_01",
+      "date": "2026-10-18",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Filarmónica de Cámara de Colonia"
+    },
+    {
+      "name": "Sergey Didorenko"
+    },
+    {
+      "name": "nemenja Mihailovic"
+    },
+    {
+      "name": "Dmitrif Gornovskij"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antonio Vivaldi"
+    },
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Giacomo Puccini"
+    },
+    {
+      "name": "Pablo de Sarasate"
+    }
+  ],
+  "works": [
+    {
+      "title": "La Tempesta di Mari, Op. 8, nº 5",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "Concierto nº 1 en do mayor para violonchelo y cuerdas"
+    },
+    {
+      "title": "Concierto en si bemol mayor para fagot y orquesta KV 191",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Crisantemi",
+      "composerName": "Giacomo Puccini"
+    },
+    {
+      "title": "Habanera Op. 21, nº 2",
+      "composerName": "Pablo de Sarasate"
+    },
+    {
+      "title": "Romanza andaluza Op. 22",
+      "composerName": "Pablo de Sarasate"
+    },
+    {
+      "title": "Zapateado Op. 23 nº 2",
+      "composerName": "Pablo de Sarasate"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_fundacionantezana_es",
+      "url": "https://www.fundacionantezana.es/events/concierto-de-la-filarmonica-de-camara-de-colonia-alemania",
+      "checkedAt": "2026-10-08"
+    }
+  ],
+  "primarySourceId": "src_fundacionantezana_es",
+  "lastVerifiedAt": "2026-10-08"
+}
