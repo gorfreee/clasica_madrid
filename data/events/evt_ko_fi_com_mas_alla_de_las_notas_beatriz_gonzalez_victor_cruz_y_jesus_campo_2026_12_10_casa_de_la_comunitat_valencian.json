@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_ko_fi_com_mas_alla_de_las_notas_beatriz_gonzalez_victor_cruz_y_jesus_campo_2026_12_10_casa_de_la_comunitat_valencian",
+  "slug": "mas-alla-de-las-notas-beatriz-gonzalez-victor-cruz-y-jesus-campo",
+  "title": "Más Allá de las Notas — Beatriz González, Víctor Cruz y Jesús Campo",
+  "status": "scheduled",
+  "venueId": "ven_casa_de_la_comunitat_valenciana_en_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_ko_fi_com_mas_alla_de_las_notas_beatriz_gonzalez_victor_cruz_y_jesus_campo_2026_12_10_casa_de_la_comunitat_valencian",
+      "date": "2026-12-10",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Beatriz González"
+    },
+    {
+      "name": "Víctor Cruz"
+    },
+    {
+      "name": "Jesús Campo"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_ko_fi_com",
+      "url": "https://ko-fi.com/s/3370de7ce8",
+      "checkedAt": "2026-10-08"
+    }
+  ],
+  "primarySourceId": "src_ko_fi_com",
+  "lastVerifiedAt": "2026-10-08"
+}
