@@ -352,7 +352,7 @@ function ateneoOccurrences(
 
 /** The editorial copy often repeats the room and public start time. */
 function venueLineTime(description: string | undefined): { raw: string; time: string } | undefined {
-  const match = /\b(?:Cátedra Mayor|Cacharrería|Sala (?:Pérez Galdós|Ramón y Cajal|Ciudad (?:de )?Úbeda|Laffón|Anselma))\b[\s,.–—-]*([0-2]?\d:[0-5]\d)\s*h?\b/i
+  const match = /\b(?:Cátedra Mayor|Ca(?:ch|h)arrería|Sala (?:Pérez Galdós|Ramón y Cajal|Ciudad (?:de )?Úbeda|Laffón|Anselma))\b[\s,.–—-]*([0-2]?\d:[0-5]\d)\s*h?\b/i
     .exec(description ?? '');
   const time = match?.[1] ? parseObservedTime(match[1]) : null;
   if (!time || !match?.[0]) return undefined;
@@ -385,7 +385,7 @@ function venueName(value: unknown): string | undefined {
 }
 
 function ateneoVenueFromText(title: string, description: string | undefined): string | undefined {
-  const match = /\b(Cátedra Mayor|Cacharrería|Sala (?:Pérez Galdós|Ramón y Cajal|Ciudad (?:de )?Úbeda|Laffón|Anselma))\b/i
+  const match = /\b(Cátedra Mayor|Ca(?:ch|h)arrería|Sala (?:Pérez Galdós|Ramón y Cajal|Ciudad (?:de )?Úbeda|Laffón|Anselma))\b/i
     .exec(description ?? '');
   if (match?.[1]) return match[1];
   if (/\bSal[oó]n del Ateneo\b/i.test(`${title} ${description ?? ''}`)) return 'Ateneo de Madrid';
