@@ -1197,6 +1197,8 @@ describe('eligibility — conflictos y fallback', () => {
       async classify() { return { formats: ['lied', 'early-music'], eras: ['renaissance'], evidence: ['Josquin des Prez'] }; },
     };
     expect((await classifyObserved(observed, { ai })).formats.value).not.toContain('lied');
+    const inferred = await classifyObserved({ ...observed, categoryText: 'Concierto' }, { ai });
+    expect(inferred.formats.value).toEqual(['early-music']);
     expect(resolveFormats({ ...observed, programText: 'Segunda parte: Lieder de Schubert' }).value).toContain('lied');
   });
 
