@@ -73,6 +73,7 @@ está, la llamada no hace nada y no se espera.
 
 | Evento | Cuándo se dispara | Propiedades | Finalidad |
 |---|---|---|---|
+| `donation_clicked` | Clic en «Apoyar Clásica Madrid» en Acerca de. No espera a la analítica ni cambia la navegación | `placement` (`about`), `page_type`, `provider` (`stripe`) | Intención de apoyar el proyecto |
 | `search_performed` | Agenda: al enviar el buscador si la query cambió. Lugares: cuando la query se estabiliza (400 ms), no en cada tecla | `surface`, `query`, `results_count`, `active_filter_count` en la agenda | Qué se busca y si hubo resultados, incluidos los ceros |
 | `filter_changed` | La persona aplica un filtro de la agenda. No en la carga ni al usar un atajo | `surface`, `filter_key`, `filter_value`, `selected`, `results_count`, `active_filter_count` | Qué filtros se usan y cuáles dejan la lista vacía |
 | `quick_filter_selected` | Activa «Fin de semana» (`weekend`) o «Gratis» (`free`) | `surface`, `quick_filter`, `results_count`, `active_filter_count` | Atajos, con id estable y no con el texto visible |
@@ -152,6 +153,10 @@ Web analytics). Sin ese ajuste, los eventos cookieless se ignoran. Es
 configuración del proyecto de PostHog, no del código de Astro. La referencia
 está en la documentación de PostHog sobre [recogida de datos](https://posthog.com/docs/privacy/data-collection)
 y [configuración del SDK](https://posthog.com/docs/libraries/js/config).
+
+`donation_clicked` mide únicamente el clic de salida hacia Stripe, no una aportación
+completada. No envía importes, datos de pago ni la URL del checkout. El enlace del
+footer lleva a `/acerca-de/#apoya`; no abre el checkout directamente.
 
 ## Privacidad
 

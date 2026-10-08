@@ -8,6 +8,7 @@ import {
   isWhatsAppChannelPlacement,
   onOutboundClick,
   trackDirectionsClicked,
+  trackDonationClicked,
   trackEventFeedbackClicked,
   trackEventOpened,
   trackOutboundEventClick,
@@ -121,6 +122,21 @@ export function initDirectionsTracking(root: ParentNode = document): void {
           origin: inferNavigationOrigin(document.referrer, window.location.href),
           provider: isDirectionsProvider(provider) ? provider : 'google_maps',
         });
+      });
+    });
+  }
+}
+
+/** Native link navigation works independently of analytics. */
+export function initDonationTracking(root: ParentNode = document): void {
+  for (const link of root.querySelectorAll<HTMLAnchorElement>('a[data-donation="about"]')) {
+    if (link.dataset.donationBound === 'true') continue;
+    link.dataset.donationBound = 'true';
+    link.addEventListener('click', () => {
+      onOutboundClick(() => {
+        const page = readPageAnalytics();
+        if (!page) return;
+        trackDonationClicked({ placement: 'about', page_type: page.page_type });
       });
     });
   }

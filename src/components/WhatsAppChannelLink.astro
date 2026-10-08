@@ -39,8 +39,7 @@ const Wrapper = isAbout ? 'section' : isAgenda ? 'aside' : 'div';
         <span class="agenda-channel__cta">Seguir en WhatsApp <span aria-hidden="true">↗</span></span>
       ) : (
         <span class="channel__copy">
-          <span class="channel__title">{isAbout ? 'Seguir el canal' : 'Síguenos en WhatsApp'} <span aria-hidden="true">↗</span></span>
-          {placement === 'footer' && <span class="channel__subtitle">Conciertos y novedades de Clásica Madrid</span>}
+          <span class="channel__title">{isAbout ? 'Seguir el canal' : placement === 'footer' ? 'WhatsApp' : 'Síguenos en WhatsApp'} <span aria-hidden="true">↗</span></span>
         </span>
       )}
     </a>
@@ -58,9 +57,9 @@ const Wrapper = isAbout ? 'section' : isAgenda ? 'aside' : 'div';
   .channel__copy { display: grid; gap: .2rem; }
   .channel__title { font-size: .85rem; font-weight: 700; line-height: 1.2; }
   .channel__link:hover .channel__title { text-decoration: underline; text-underline-offset: .2em; }
-  .channel__subtitle { color: var(--color-text-muted); font-size: .72rem; line-height: 1.3; }
   .channel--footer { text-align: left; }
   .channel--footer .channel__link { min-height: 2.75rem; align-items: center; }
+  .channel--footer .channel__title { line-height: 1.25; white-space: nowrap; }
   .channel--about {
     display: grid;
     grid-template-columns: minmax(13rem, .55fr) minmax(0, 1fr);

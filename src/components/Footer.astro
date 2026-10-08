@@ -2,15 +2,115 @@
 import { SITE_NAME } from '../lib/presentation/constants.ts';
 import LogoSymbol from './LogoSymbol.astro';
 import WhatsAppChannelLink from './WhatsAppChannelLink.astro';
+import { ABOUT_PATH } from '../lib/presentation/urls.ts';
 ---
 
 <footer class="site-footer">
-  <a class="site-footer__mark" href="#top" aria-label={`${SITE_NAME}, volver al comienzo`}>
-    <LogoSymbol />
-  </a>
-  <p class="site-footer__statement">Toda la clásica<br />Todo Madrid</p>
-  <div class="site-footer__meta">
-    <WhatsAppChannelLink placement="footer" />
-    <p class="site-footer__note">© {SITE_NAME}</p>
+  <div class="site-footer__brand">
+    <a class="site-footer__mark" href="#top" aria-label={`${SITE_NAME}, volver al comienzo`}>
+      <LogoSymbol />
+    </a>
+    <p class="site-footer__statement">Toda la clásica<br />Todo Madrid</p>
   </div>
+  <nav class="site-footer__actions" aria-label="Comunidad y apoyo">
+    <WhatsAppChannelLink placement="footer" />
+    <a class="site-footer__support" href={`${ABOUT_PATH}#apoya`}>Apoya el proyecto <span aria-hidden="true">→</span></a>
+  </nav>
+  <p class="site-footer__note">© {SITE_NAME}</p>
 </footer>
+
+<style>
+  .site-footer {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 3rem;
+    row-gap: 1.75rem;
+    padding: 2rem 0 2.25rem;
+    border-top: 2px solid var(--color-text);
+  }
+
+  .site-footer__brand {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    min-width: 0;
+  }
+
+  .site-footer__mark {
+    display: block;
+    flex: 0 0 auto;
+    width: 4rem;
+    color: var(--color-brand);
+    text-decoration: none;
+  }
+
+  .site-footer__mark :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+    fill: currentColor;
+  }
+
+  .site-footer__statement {
+    margin: 0;
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    font-weight: 800;
+    letter-spacing: var(--type-tracking-heading);
+    line-height: 1.05;
+  }
+
+  .site-footer__actions {
+    display: flex;
+    align-items: center;
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+  }
+
+  .site-footer__support {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    min-height: 2.75rem;
+    color: var(--color-text);
+    font-size: .85rem;
+    font-weight: 700;
+    line-height: 1.25;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .site-footer__support:hover {
+    text-decoration: underline;
+    text-underline-offset: .2em;
+  }
+
+  .site-footer__note {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    font-size: .72rem;
+  }
+
+  @media (max-width: 760px) {
+    .site-footer {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: 1.25rem;
+      padding-bottom: 1.75rem;
+    }
+
+    .site-footer__brand {
+      gap: 1.25rem;
+    }
+
+    .site-footer__mark {
+      width: 3.25rem;
+    }
+
+    .site-footer__actions {
+      justify-content: space-between;
+      gap: 1rem;
+    }
+  }
+</style>

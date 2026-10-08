@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import Eyebrow from '../components/Eyebrow.astro';
 import WhatsAppChannelLink from '../components/WhatsAppChannelLink.astro';
+import { DONATION_URL } from '../lib/presentation/constants.ts';
 import { ABOUT_PATH } from '../lib/presentation/urls.ts';
 ---
 
@@ -30,9 +31,43 @@ import { ABOUT_PATH } from '../lib/presentation/urls.ts';
         </p>
       </div>
     </section>
+    <section id="apoya" class="about-support" aria-labelledby="support-title">
+      <div class="about-support__heading">
+        <p class="about-support__label">Apoya el proyecto</p>
+        <h2 id="support-title">Que ningún concierto se quede fuera</h2>
+      </div>
+      <div class="about-support__body">
+        <p>
+          Reunir tantas fuentes, comprobar la información y descubrir conciertos menos visibles
+          requiere tiempo y trabajo. Si Clásica Madrid te ayuda a encontrar música que quieres
+          escuchar, puedes contribuir a que la agenda siga creciendo.
+        </p>
+        <p>
+          Tu aportación ayuda a mantener la web, mejorar la información y llegar a más espacios
+          y conciertos.
+        </p>
+        <a
+          class="about-support__button"
+          href={DONATION_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-donation="about"
+          aria-label="Apoyar Clásica Madrid en Stripe (se abre en otra pestaña)"
+        >
+          Apoyar Clásica Madrid <span aria-hidden="true">↗</span>
+        </a>
+        <p class="about-support__note">Aportación voluntaria · Pago a través de Stripe</p>
+        <p class="about-support__thanks">Gracias por ayudar a que más música encuentre su público.</p>
+      </div>
+    </section>
     <WhatsAppChannelLink placement="about" />
   </div>
 </Layout>
+
+<script>
+  import { initDonationTracking } from '../lib/analytics/browser.ts';
+  initDonationTracking();
+</script>
 
 <style>
   .about-copy {
@@ -66,10 +101,85 @@ import { ABOUT_PATH } from '../lib/presentation/urls.ts';
     margin-top: 1.35rem;
   }
 
+  .about-support {
+    display: grid;
+    grid-template-columns: minmax(13rem, .55fr) minmax(0, 1fr);
+    gap: 3rem;
+    max-width: 58rem;
+    margin-top: 2rem;
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+    border-top: 3px solid var(--color-accent);
+    background: var(--color-surface);
+    scroll-margin-top: 2rem;
+  }
+
+  .about-support__label {
+    margin: 0 0 .85rem;
+    color: var(--color-brand);
+    font-size: var(--type-size-label);
+    font-weight: 800;
+    letter-spacing: var(--type-tracking-label);
+    text-transform: uppercase;
+  }
+
+  .about-support h2 {
+    margin: 0;
+    font-size: clamp(1.4rem, 2.5vw, 1.9rem);
+    font-weight: 800;
+    letter-spacing: var(--type-tracking-heading);
+    line-height: 1.1;
+  }
+
+  .about-support__body > p {
+    margin: 0 0 1rem;
+    color: var(--color-text-muted);
+    line-height: 1.55;
+  }
+
+  .about-support__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .75rem;
+    min-height: 3rem;
+    margin-top: .5rem;
+    padding: .85rem 1.15rem;
+    background: var(--color-brand);
+    color: var(--color-surface);
+    font-size: .9rem;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .about-support__button:hover {
+    background: var(--color-text);
+    text-decoration: none;
+  }
+
+  .about-support__body > .about-support__note {
+    margin: .75rem 0 1.25rem;
+    font-size: var(--type-size-meta);
+  }
+
+  .about-support__body > .about-support__thanks {
+    margin-bottom: 0;
+    font-size: .85rem;
+  }
+
   @media (max-width: 620px) {
     .about-copy {
       grid-template-columns: 1fr;
       gap: 1.4rem;
+    }
+
+    .about-support {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+      padding: 1.5rem 1.25rem;
+    }
+
+    .about-support__button {
+      width: 100%;
     }
   }
 </style>
