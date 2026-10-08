@@ -57,7 +57,7 @@ test('el enlace de apoyo funciona sin JavaScript', async ({ browser }) => {
   const page = await context.newPage();
   await page.goto('http://localhost:4321/acerca-de/#apoya');
   const [popup] = await Promise.all([
-    page.waitForEvent('popup'),
+    context.waitForEvent('page'),
     page.getByRole('link', { name: /Apoyar Clásica Madrid en Stripe/ }).click(),
   ]);
   await expect(popup).toHaveURL(donationUrl);
