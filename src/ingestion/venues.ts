@@ -866,6 +866,11 @@ const SOURCE_VENUE_KEYS: Record<string, Record<string, string>> = {
   'ateneo-madrid': {
     'catedra mayor': 'ven_ateneo_madrid',
     cacharreria: 'ven_ateneo_madrid',
+    'la cacharreria': 'ven_ateneo_madrid',
+    'sala la cacharreria': 'ven_ateneo_madrid',
+    caharreria: 'ven_ateneo_madrid',
+    'la caharreria': 'ven_ateneo_madrid',
+    'sala la caharreria': 'ven_ateneo_madrid',
     'sala perez galdos': 'ven_ateneo_madrid',
     'sala ramon y cajal': 'ven_ateneo_madrid',
     'sala ciudad ubeda': 'ven_ateneo_madrid',

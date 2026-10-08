@@ -10,6 +10,7 @@ import { parseDiscoveryBatch, type DiscoveryBatch, type DiscoveryObservation } f
 import { matchEventIdentity } from '../src/ingestion/identity.ts';
 import { fallbackEventIdentity } from '../src/ingestion/observed-identity.ts';
 import { runDiscoveryIngest } from '../src/ingestion/pipeline.ts';
+import { sourceUrlKind } from '../src/ingestion/urls.ts';
 import { makeEvent, makeVenue, TEST_NOW } from './helpers.ts';
 
 const LISTING_URL = 'https://coro.example/agenda';
@@ -95,6 +96,38 @@ async function runDiscovery(
 }
 
 describe('identidad frente a URLs genéricas de listing', () => {
+  it.each([
+    'https://revistatierrasanta.com/el-organo-vuelve-a-sonar-en-la-basilica-de-san-francisco-el-grande/',
+    'https://ko-fi.com/s/3370de7ce8',
+    'https://www.cultura.gob.es/mtraje/eu/actividades/artes/musica/musae.html',
+  ])('persiste y reconcilia cuatro conciertos de la colección %s sin perder archivos', async (url) => {
+    expect(sourceUrlKind(url)).toBe('listing');
+    expect(sourceUrlKind(`${url}?utm_source=scout`)).toBe('listing');
+    const batch = batchOf(...['08', '15', '22', '29'].map((day, index) => listingObservation({
+      title: `Concierto de órgano ${index + 1}`,
+      date: `2026-10-${day}`,
+      url,
+    })));
+    const { dir, run } = await runDiscovery(batch, emptyCatalog(), { dryRun: false });
+    expect(run.summary.newEvents).toBe(4);
+    const persisted = await loadCatalogFromDir(dir);
+    expect(persisted.events).toHaveLength(4);
+    expect(new Set(persisted.events.map((event) => event.id)).size).toBe(4);
+    expect(persisted.events.map((event) => event.occurrences[0]!.date).sort()).toEqual([
+      '2026-10-08', '2026-10-15', '2026-10-22', '2026-10-29',
+    ]);
+    const replay = await runDiscovery(batch, persisted, { dryRun: false, dataDir: dir });
+    expect(replay.run.summary.newEvents).toBe(0);
+    expect(replay.run.summary.unchangedEvents).toBe(4);
+    expect((await loadCatalogFromDir(dir)).events).toEqual(persisted.events);
+  });
+
+  it('no convierte otras fichas de esos hosts en colecciones', () => {
+    expect(sourceUrlKind('https://revistatierrasanta.com/recital-de-organo-nicolas-berndt')).toBe('event-detail');
+    expect(sourceUrlKind('https://ko-fi.com/s/concierto-unico')).toBe('event-detail');
+    expect(sourceUrlKind('https://www.cultura.gob.es/mtraje/actividades/concierto-de-guitarra.html')).toBe('event-detail');
+  });
+
   it('misma URL genérica + eventos diferentes no se fusionan', async () => {
     const first = batchOf(listingObservation({ title: 'Dido y Eneas', date: '2026-10-24' }));
     const { dir, run: created } = await runDiscovery(first, emptyCatalog(), { dryRun: false });

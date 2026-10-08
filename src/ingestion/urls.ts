@@ -72,6 +72,17 @@ export function urlEventIdentity(url: string): string {
  */
 export type SourceUrlKind = 'event-detail' | 'listing';
 
+/** Reviewed collection pages whose article/product slugs look like fichas.
+ * They publish several concerts, so the URL is evidence, not event identity.
+ * Keep this exact: other articles, shop items and museum fichas retain their
+ * existing identity policy. Published event ids/slugs are never rewritten.
+ */
+const REVIEWED_MULTI_EVENT_PAGES = new Set([
+  'https://revistatierrasanta.com/el-organo-vuelve-a-sonar-en-la-basilica-de-san-francisco-el-grande',
+  'https://ko-fi.com/s/3370de7ce8',
+  'https://www.cultura.gob.es/mtraje/eu/actividades/artes/musica/musae.html',
+]);
+
 const UUID_SEGMENT =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -223,6 +234,9 @@ function calendarSuiteEventIdentity(url: URL): string | undefined {
 export function sourceUrlKind(url: string): SourceUrlKind {
   try {
     const parsed = new URL(normalizeUrl(url));
+    const page = new URL(parsed);
+    page.search = '';
+    if (REVIEWED_MULTI_EVENT_PAGES.has(page.href)) return 'listing';
     if (madridVgnextoid(url) || hasIdentifyingQuery(parsed)) return 'event-detail';
     const segments = parsed.pathname.split('/').filter(Boolean).map(foldPathSegment).filter(Boolean);
     if (segments.length === 0) return 'listing';

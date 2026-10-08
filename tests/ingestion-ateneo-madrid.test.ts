@@ -40,6 +40,27 @@ const ctx: AdapterContext = {
 };
 
 describe('Ateneo de Madrid REST listing', () => {
+  it.each(['Cacharrería', 'Caharrería'])('reconoce Sala La %s como Ateneo y conserva la hora editorial', async (room) => {
+    const page = JSON.parse(await fixture('listing.json'));
+    page.events = [{
+      ...page.events[1],
+      id: 64422,
+      title: 'Hilos de fósforo y luna. El piano de la Edad de Plata',
+      url: 'https://ateneodemadrid.com/evento/hilos-de-fosforo-y-luna-el-piano-de-la-edad-de-plata-ciclo-el-vino-de-las-luces/',
+      description: `<p>Paula Ríos, piano. Sala La ${room}. 12:00h.</p>`,
+      start_date: '2026-10-18 13:00:00',
+      end_date: '2026-10-18 13:00:00',
+    }];
+    page.total = 1;
+    const events = await adapter.extract(JSON.stringify(page), listingUrl, ctx);
+    expect(events).toHaveLength(1);
+    expect(events[0]!.observed.venueText).toBe(room);
+    expect(events[0]!.observed.occurrences[0]!.time).toBe('12:00');
+    for (const venueText of [room, `La ${room}`, `Sala La ${room}`]) {
+      expect(matchVenue({ venueText, sourceId: source.id }, emptyCatalog())?.venue.id).toBe('ven_ateneo_madrid');
+    }
+  });
+
   it('separa créditos continuos del Crossover y conserva el ensemble de Intemperie', () => {
     const description = 'Intérpretes: Rebeca Cardiel – soprano Sandra Cotarelo – soprano María Martín – altos Paz Martínez – altos Fran Braojos – tenor Emiliano Cano -tenor Simón Millán – bajo Vicente Martínez – bajo Salvador Salvador – clarinete Isabel Puente – piano Oliver del Val – acordeón Rodrigo Guerrero – dirección Cátedra Mayor. 19:30.';
     expect(ateneoPerformers(description).map((person) => person.name)).toEqual([
