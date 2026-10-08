@@ -35,33 +35,33 @@
       "name": "Luigi Boccherini"
     },
     {
-      "name": "L. Berio"
+      "name": "Luciano Berio"
     },
     {
       "name": "Joaquín Rodrigo"
     },
     {
-      "name": "N. Rimski-Korsakov"
+      "name": "Nikolai Rimsky-Korsakov"
     }
   ],
   "works": [
     {
-      "title": "Ritirata notturna di Madrid di L. Boccherini",
-      "composerName": "L. Berio"
+      "title": "Ritirata notturna di Madrid (Boccherini, versión de Luciano Berio)",
+      "composerName": "Luciano Berio"
     },
     {
       "title": "Concierto de Aranjuez",
       "composerName": "Joaquín Rodrigo"
     },
     {
-      "title": "Capricho Español Op. 34",
-      "composerName": "N. Rimski-Korsakov"
+      "title": "Capricho español, op. 34",
+      "composerName": "Nikolai Rimsky-Korsakov"
     }
   ],
   "eras": [
+    "classical",
     "romantic",
-    "twentieth",
-    "contemporary"
+    "twentieth"
   ],
   "formats": [
     "symphonic"
