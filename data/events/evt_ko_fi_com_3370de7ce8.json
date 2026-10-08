@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_ko_fi_com_3370de7ce8",
+  "slug": "mas-alla-de-las-notas-violeta-gil-y-maria-valverde",
+  "title": "Más Allá de las Notas — Violeta Gil y María Valverde",
+  "status": "scheduled",
+  "venueId": "ven_casa_de_la_comunitat_valenciana_en_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_ko_fi_com_3370de7ce8_01",
+      "date": "2026-10-08",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Violeta Gil"
+    },
+    {
+      "name": "María Valverde"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Claude Debussy"
+    },
+    {
+      "name": "Paul Taffanel"
+    },
+    {
+      "name": "Philippe Gaubert"
+    },
+    {
+      "name": "Joachim Andersen"
+    },
+    {
+      "name": "Violeta Gil"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_ko_fi_com",
+      "url": "https://ko-fi.com/s/3370de7ce8",
+      "checkedAt": "2026-10-08"
+    }
+  ],
+  "primarySourceId": "src_ko_fi_com",
+  "lastVerifiedAt": "2026-10-08"
+}

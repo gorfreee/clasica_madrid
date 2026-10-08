@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_musae_es_mz_duo_musae_2027_01_23_museo_de_america",
+  "slug": "mz-duo-musae",
+  "title": "MZ Dúo — MusaE",
+  "status": "scheduled",
+  "venueId": "ven_museo_de_america",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_musae_es_mz_duo_musae_2027_01_23_museo_de_america_01",
+      "date": "2027-01-23",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Iñigo Mikeleiz Berrade"
+    },
+    {
+      "name": "David Zucchi"
+    }
+  ],
+  "composers": [
+    {
+      "name": "George Gershwin"
+    },
+    {
+      "name": "Pixinguinha"
+    },
+    {
+      "name": "Chiquinha Gonzaga"
+    },
+    {
+      "name": "Zequinha de Abreu"
+    },
+    {
+      "name": "Antoine Gérin-Lajoie"
+    },
+    {
+      "name": "Astor Piazzolla"
+    },
+    {
+      "name": "Violeta Parra"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_musae_es",
+      "url": "https://www.musae.es/programacion.html",
+      "checkedAt": "2026-10-08"
+    }
+  ],
+  "primarySourceId": "src_musae_es",
+  "lastVerifiedAt": "2026-10-08"
+}

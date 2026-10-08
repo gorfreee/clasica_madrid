@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_revistatierrasanta_com_el_organo_vuelve_a_sonar_en_la_basilica_de_san_francisco_el_grande",
+  "slug": "iv-ciclo-de-organo-de-la-obra-pia-nicolas-berndt",
+  "title": "IV Ciclo de Órgano de la Obra Pía — Nicolas Berndt",
+  "status": "scheduled",
+  "venueId": "ven_real_basilica_de_san_francisco_el_grande",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_revistatierrasanta_com_el_organo_vuelve_a_sonar_en_la_basilica_de_san_francisco_el_grande_01",
+      "date": "2026-10-08",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Nicolas Berndt"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "organ"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_revistatierrasanta_com",
+      "url": "https://revistatierrasanta.com/el-organo-vuelve-a-sonar-en-la-basilica-de-san-francisco-el-grande",
+      "checkedAt": "2026-10-08"
+    }
+  ],
+  "primarySourceId": "src_revistatierrasanta_com",
+  "lastVerifiedAt": "2026-10-08"
+}
