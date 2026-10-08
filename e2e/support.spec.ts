@@ -56,10 +56,15 @@ test('el enlace de apoyo funciona sin JavaScript', async ({ browser }) => {
   await context.route('https://donate.stripe.com/**', (route) => route.fulfill({ body: 'Checkout de prueba' }));
   const page = await context.newPage();
   await page.goto('http://localhost:4321/acerca-de/#apoya');
+  const action = page.getByRole('link', { name: /Apoyar Clásica Madrid en Stripe/ });
+  await expect(action).toBeVisible();
+  await action.focus();
+  await expect(action).toBeFocused();
   const [popup] = await Promise.all([
     context.waitForEvent('page'),
-    page.getByRole('link', { name: /Apoyar Clásica Madrid en Stripe/ }).click(),
+    action.press('Enter'),
   ]);
   await expect(popup).toHaveURL(donationUrl);
+  await expect(page).toHaveURL(/\/acerca-de\/#apoya$/);
   await context.close();
 });
