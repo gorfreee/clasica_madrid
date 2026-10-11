@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_real_academia_bellas_artes_concierto_valeria_zorina_leonor_salinero",
+  "slug": "valeria-zorina-violin-y-leonor-salinero-piano",
+  "title": "Valeria Zorina (violín) y Leonor Salinero (piano)",
+  "status": "scheduled",
+  "venueId": "ven_real_academia_bellas_artes_salon_actos",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_real_academia_bellas_artes_concierto_valeria_zorina_leonor_salinero_01",
+      "date": "2026-10-22",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Valeria Zorina"
+    },
+    {
+      "name": "Leonor Salinero"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Joseph Joachim"
+    },
+    {
+      "name": "José Luis Turina"
+    },
+    {
+      "name": "Tomás Marco Aragón"
+    },
+    {
+      "name": "Eduardo Lorenzo Prieto"
+    },
+    {
+      "name": "Johannes Brahms"
+    }
+  ],
+  "works": [
+    {
+      "title": "Romanza",
+      "composerName": "Joseph Joachim"
+    },
+    {
+      "title": "Dos cuadros de Marc Chagall",
+      "composerName": "José Luis Turina"
+    },
+    {
+      "title": "Partita del Obradoiro",
+      "composerName": "Tomás Marco Aragón"
+    },
+    {
+      "title": "Luogo sospeso sull’ acqua",
+      "composerName": "Eduardo Lorenzo Prieto"
+    },
+    {
+      "title": "Sonata",
+      "composerName": "Johannes Brahms"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_real_academia_bellas_artes_san_fernando",
+      "url": "https://www.realacademiabellasartessanfernando.com/actividades/conciertos/concierto-valeria-zorina-leonor-salinero",
+      "checkedAt": "2026-10-11",
+      "externalId": "concierto-valeria-zorina-leonor-salinero"
+    }
+  ],
+  "primarySourceId": "src_real_academia_bellas_artes_san_fernando",
+  "lastVerifiedAt": "2026-10-11"
+}

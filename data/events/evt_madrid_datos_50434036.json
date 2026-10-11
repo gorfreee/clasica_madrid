@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50434036",
+  "slug": "musica-coral-para-la-memoria-el-color-y-el-transito",
+  "title": "Música coral para la memoria, el color y el tránsito",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_1947",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50434036_01",
+      "date": "2026-10-30",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "classical"
+  ],
+  "formats": [],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=8639080a5b7e0a10VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-10-11",
+      "externalId": "50434036"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-10-11"
+}

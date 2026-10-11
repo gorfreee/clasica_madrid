@@ -50,7 +50,7 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-neopercusion",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-10-11",
       "externalId": "cndm-neopercusion"
     },
     {
@@ -61,5 +61,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-10-11"
 }

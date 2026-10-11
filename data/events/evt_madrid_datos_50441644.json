@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50441644",
+  "slug": "concierto-requiem-de-brahms",
+  "title": "Concierto: Réquiem de Brahms",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_10189992",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50441644_01",
+      "date": "2026-10-29",
+      "time": "12:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=0a94b0bec9a01a10VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-10-11",
+      "externalId": "50441644"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-10-11"
+}

@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_gala_lirica_por_cris_contra_el_cancer",
+  "slug": "gala-lirica-por-cris-contra-el-cancer",
+  "title": "Gala Lírica por CRIS Contra el Cáncer",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_gala_lirica_por_cris_contra_el_cancer_01",
+      "date": "2026-11-04",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta y coro Matritum Cantat"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "baroque",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/gala-lirica-por-cris-contra-el-cancer",
+      "checkedAt": "2026-10-11",
+      "externalId": "gala-lirica-por-cris-contra-el-cancer"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-10-11"
+}

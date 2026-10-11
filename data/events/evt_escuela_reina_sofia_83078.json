@@ -15,10 +15,67 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
-  "works": [],
-  "eras": [],
+  "performers": [
+    {
+      "name": "Cuarteto Citadelle"
+    },
+    {
+      "name": "Pauline Solange Eliane Boudon"
+    },
+    {
+      "name": "Meiko Nakahira"
+    },
+    {
+      "name": "Raphaël Garac"
+    },
+    {
+      "name": "Paolo Nicolas Schena"
+    },
+    {
+      "name": "Cuarteto Ineo"
+    },
+    {
+      "name": "Liubov Kalmykova"
+    },
+    {
+      "name": "Nadezda Kalmykova"
+    },
+    {
+      "name": "Patrizia Batik"
+    },
+    {
+      "name": "Constantin Paul Siepermann"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Felix Mendelssohn"
+    },
+    {
+      "name": "Johannes Brahms"
+    }
+  ],
+  "works": [
+    {
+      "title": "Cuarteto de cuerda en re menor K 421",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Cuarteto de cuerda núm. 2 en la menor op 13",
+      "composerName": "Felix Mendelssohn"
+    },
+    {
+      "title": "Cuarteto de cuerda en do menor op 51 núm. 1",
+      "composerName": "Johannes Brahms"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
   "formats": [
     "chamber"
   ],
@@ -28,10 +85,10 @@
     {
       "sourceId": "src_escuela_superior_musica_reina_sofia",
       "url": "https://www.escuelasuperiordemusicareinasofia.es/evento/ciclo-da-camera-grupos-de-cuerdas-3",
-      "checkedAt": "2026-09-15",
+      "checkedAt": "2026-10-11",
       "externalId": "83078"
     }
   ],
   "primarySourceId": "src_escuela_superior_musica_reina_sofia",
-  "lastVerifiedAt": "2026-09-15"
+  "lastVerifiedAt": "2026-10-11"
 }

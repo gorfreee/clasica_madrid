@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50446608",
+  "slug": "concierto-de-piano",
+  "title": "Concierto de piano",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_1920",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50446608_01",
+      "date": "2026-10-23",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "José Luis Bernaldo de Quirós"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=4d623c89adc11a10VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-10-11",
+      "externalId": "50446608"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-10-11"
+}

@@ -58,16 +58,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-sinfonico-6-memoria-de-un-mundo",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-10-11",
       "externalId": "orcam-sinfonico-6-memoria-de-un-mundo"
     },
     {
       "sourceId": "src_fundacion_orcam",
       "url": "https://fundacionorcam.org/conciertos/2026-27/memoria-de-un-mundo",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-11",
       "externalId": "4851"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-10-11"
 }

@@ -68,7 +68,7 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-les-accents-2",
-      "checkedAt": "2026-08-30",
+      "checkedAt": "2026-10-11",
       "externalId": "cndm-les-accents-2"
     },
     {
@@ -79,5 +79,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-03"
+  "lastVerifiedAt": "2026-10-11"
 }

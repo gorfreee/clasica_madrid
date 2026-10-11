@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50434182",
+  "slug": "musica-opera-bastian-y-bastiana-de-w-a-mozart",
+  "title": "Música: 'Ópera Bastián y Bastiana'. De W.A. Mozart",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_5498725",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50434182_01",
+      "date": "2026-10-25",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "classical"
+  ],
+  "formats": [
+    "opera"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=e0399fed3d7e0a10VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-10-11",
+      "externalId": "50434182"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-10-11"
+}

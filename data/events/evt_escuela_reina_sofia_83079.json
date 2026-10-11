@@ -15,10 +15,47 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
-  "works": [],
-  "eras": [],
+  "performers": [
+    {
+      "name": "Cuarteto Citadelle"
+    },
+    {
+      "name": "Cuarteto Ast"
+    },
+    {
+      "name": "Min Ju Park"
+    },
+    {
+      "name": "Sungmoon Kim"
+    },
+    {
+      "name": "Semin Yim"
+    },
+    {
+      "name": "Eunju Cheung"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Anton Webern"
+    },
+    {
+      "name": "Franz Schubert"
+    }
+  ],
+  "works": [
+    {
+      "title": "5 Movimientos para cuarteto de cuerda op 5",
+      "composerName": "Anton Webern"
+    },
+    {
+      "title": "Cuarteto de cuerda en re menor D 810 \"La muerte y la doncella\"",
+      "composerName": "Franz Schubert"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
   "formats": [
     "chamber"
   ],
@@ -28,10 +65,10 @@
     {
       "sourceId": "src_escuela_superior_musica_reina_sofia",
       "url": "https://www.escuelasuperiordemusicareinasofia.es/evento/ciclo-da-camera-grupos-de-cuerdas-4",
-      "checkedAt": "2026-09-15",
+      "checkedAt": "2026-10-11",
       "externalId": "83079"
     }
   ],
   "primarySourceId": "src_escuela_superior_musica_reina_sofia",
-  "lastVerifiedAt": "2026-09-15"
+  "lastVerifiedAt": "2026-10-11"
 }
