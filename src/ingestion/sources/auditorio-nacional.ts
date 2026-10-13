@@ -1,3 +1,4 @@
+import { sourceConflict } from '../detail/conflicts.ts';
 import { parseAuditorioNacionalDetail } from '../detail/auditorio-nacional.ts';
 import { parseObservedDateTime, type IngestWindow } from '../dates.ts';
 import { emptyObservedLists } from '../observed.ts';
@@ -56,8 +57,16 @@ export const auditorioNacionalAdapter: SourceAdapter = {
     }
     return events.sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
   },
-  hydrate(_event, body) {
-    return parseAuditorioNacionalDetail(body);
+  hydrate(event, body) {
+    const patch = parseAuditorioNacionalDetail(body);
+    if (patch.occurrences?.length && !patch.eventStatus && event.observed.occurrences.length) {
+      const listingDates = [...new Set(event.observed.occurrences.flatMap(o => o.date ? [o.date] : []))].sort();
+      const detailDates = [...new Set(patch.occurrences.flatMap(o => o.date ? [o.date] : []))].sort();
+      const dateConflict = JSON.stringify(listingDates) !== JSON.stringify(detailDates);
+      const timeConflict = patch.occurrences.some(o => o.date && o.time && event.observed.occurrences.some(listed => listed.date === o.date && listed.time && listed.time !== o.time));
+      if (dateConflict || timeConflict) throw sourceConflict('auditorio-nacional: calendario de ficha distinto del listado', dateConflict ? 'date' : 'time', [{ surface: 'listing:FullCalendar', value: JSON.stringify(event.observed.occurrences) }, { surface: 'detail:rightcolumn', value: JSON.stringify(patch.occurrences) }]);
+    }
+    return patch;
   },
 };
 

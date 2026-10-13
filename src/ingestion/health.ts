@@ -11,6 +11,8 @@ export type IngestHealthInput = {
   batchDuplicates: number;
   possiblyMissing: number;
   hydrationFailed: number;
+  /** Contradictory official surfaces require review even if other events are publishable. */
+  sourceConflicts?: number;
   unresolvedTaxonomy: number;
   /** Explicit composer-like mentions left unresolved/partial after extraction. */
   unresolvedComposers?: number;
@@ -65,6 +67,7 @@ export function evaluateIngestHealth(input: IngestHealthInput): {
   if (input.batchDuplicates > 0) findings.push({ reason: 'batch-duplicates', health: 'review' });
 
   if (input.possiblyMissing > 0) findings.push({ reason: 'possibly-missing', health: 'degraded' });
+  if ((input.sourceConflicts ?? 0) > 0) findings.push({ reason: 'source-conflict', health: 'review' });
   if (input.hydrationFailed > 0) findings.push({ reason: 'hydration-failed', health: 'degraded' });
   if (input.ai.uncertain > 0) findings.push({ reason: 'ai-uncertain', health: 'degraded' });
   if (input.ai.rateLimited > 0) findings.push({ reason: 'ai-rate-limited', health: 'degraded' });

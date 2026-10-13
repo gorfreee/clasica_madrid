@@ -55,6 +55,7 @@ export type NormalizedEvent = {
 };
 
 export function normalizeSkipReason(raw: RawEvent): string | undefined {
+  if (raw.hydration?.reason === 'source-conflict') return `fuente oficial contradictoria: ${raw.hydration.message ?? 'requiere revisión'}`;
   if (raw.hydration?.reason === 'structural-skip') {
     return raw.hydration.message ?? 'estructura no publicable';
   }
@@ -67,6 +68,9 @@ export function normalizeSkipReason(raw: RawEvent): string | undefined {
 }
 
 export function normalizeRawEvent(raw: RawEvent): NormalizedEvent | undefined {
+  // Failed hydration ordinarily keeps listing facts. Contradictory official
+  // evidence is different: do not silently publish the disputed listing.
+  if (raw.hydration?.reason === 'source-conflict') return undefined;
   const title = collapseWhitespace(decodeHtmlEntities(raw.observed.title));
   if (!title) return undefined;
   const occurrences = collapseOccurrences(

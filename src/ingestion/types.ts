@@ -1,3 +1,4 @@
+import type { HydrationDiscrepancy } from './detail/conflicts.ts';
 import type { Area, Source } from '../lib/schemas/index.ts';
 import type { IngestHealth } from './health.ts';
 import type { ObservedFactPatch, ObservedFacts } from './observed.ts';
@@ -30,7 +31,8 @@ export type HydrationMeta = {
   status: HydrationStatus;
   detailUrl?: string;
   message?: string;
-  reason?: 'outside-window' | 'circuit-open' | 'request-failed' | 'parse-failed' | 'structural-skip' | 'detail-no-calendar';
+  reason?: 'outside-window' | 'circuit-open' | 'request-failed' | 'parse-failed' | 'structural-skip' | 'detail-no-calendar' | 'source-conflict';
+  discrepancies?: HydrationDiscrepancy[];
   requestAttempts?: number;
   httpStatuses?: number[];
   retryDelaysMs?: number[];

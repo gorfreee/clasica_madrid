@@ -1,3 +1,4 @@
+import { HydrationConflictError, type HydrationDiscrepancy } from './detail/conflicts.ts';
 import { mergeObserved, type ObservedFactPatch } from './observed.ts';
 import { normalizeUrl } from './urls.ts';
 import { ZarzuelaStructuralSkipError } from './detail/teatro-zarzuela.ts';
@@ -59,6 +60,8 @@ export async function hydrateEvents(
         if (zarzuelaGet && patch.occurrences === undefined) {
           meta = { ...meta, reason: 'detail-no-calendar', message: 'ficha K2 válida sin calendario propio; se conservan fechas explícitas del listing' };
         }
+        const discrepancies = scheduleDiscrepancies(event.observed.occurrences, patch.occurrences);
+        if (discrepancies.length) meta = { ...meta, discrepancies };
         const hydratedEvent = withHydration(applyDetailPatch(event, patch), meta);
         const expanded = adapter.expand?.(hydratedEvent, body);
         if (expanded && expanded.length > 1) {
@@ -74,6 +77,10 @@ export async function hydrateEvents(
             reason: 'structural-skip',
             message: error.message,
           }));
+          continue;
+        }
+        if (error instanceof HydrationConflictError) {
+          hydrated.push(withHydration(event, { ...meta, status: 'failed', reason: 'source-conflict', message: error.message, discrepancies: error.discrepancies }));
           continue;
         }
         const message = error instanceof Error ? error.message : String(error);
@@ -127,12 +134,11 @@ function preferOccurrences(
   if (explicit.length === 0) {
     return { occurrences: listing, replaced: false };
   }
-  const listingTime = listing[0]?.time;
   return {
     replaced: true,
     occurrences: explicit.flatMap((item) =>
       item.date
-        ? [{ raw: item.raw, date: item.date, time: item.time === null ? undefined : item.time ?? listingTime }]
+        ? [{ raw: item.raw, date: item.date, time: item.time === null ? undefined : item.time ?? uniqueListingTime(listing, item.date) }]
         : [],
     ),
   };
@@ -153,4 +159,32 @@ export function requiredHydrationCoverage(events: RawEvent[]) {
     incomplete: unavailable > 0,
     severe: unavailable > 0 && (succeeded === 0 || (unavailable >= 3 && unavailable * 2 >= required.length)),
   };
+}
+
+/** A clock may only survive for its own date, and only if unambiguous. */
+function uniqueListingTime(listing: RawOccurrence[], date: string): string | undefined {
+  const sameDate = listing.filter(item => item.date === date);
+  const times = new Set(sameDate.map(item => item.time));
+  return times.size === 1 ? sameDate[0]?.time : undefined;
+}
+
+/** Detail is the existing authoritative replacement policy; record what changed.
+ * Adapters with contradictory authoritative surfaces throw HydrationConflictError instead. */
+function scheduleDiscrepancies(listing: RawOccurrence[], detail: ObservedFactPatch['occurrences']): HydrationDiscrepancy[] {
+  const explicit = (detail ?? []).filter(item => item.date);
+  if (!listing.length || !explicit.length) return [];
+  const oldDates = [...new Set(listing.flatMap(item => item.date ? [item.date] : []))].sort();
+  const newDates = [...new Set(explicit.flatMap(item => item.date ? [item.date] : []))].sort();
+  const discrepancies: HydrationDiscrepancy[] = [];
+  if (oldDates.length && JSON.stringify(oldDates) !== JSON.stringify(newDates)) {
+    discrepancies.push({ field: 'date', evidence: [{ surface: 'listing', value: JSON.stringify(listing) }, { surface: 'detail', value: JSON.stringify(explicit) }], resolution: 'detail-preferred' });
+  }
+  for (const date of newDates) {
+    const before = [...new Set(listing.filter(item => item.date === date).flatMap(item => item.time ? [item.time] : []))].sort();
+    const after = [...new Set(explicit.filter(item => item.date === date).flatMap(item => item.time ? [item.time] : []))].sort();
+    if (before.length && after.length && JSON.stringify(before) !== JSON.stringify(after)) {
+      discrepancies.push({ field: 'time', evidence: [{ surface: 'listing', value: `${date}: ${before.join(', ')}` }, { surface: 'detail', value: `${date}: ${after.join(', ')}` }], resolution: 'detail-preferred' });
+    }
+  }
+  return discrepancies;
 }

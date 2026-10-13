@@ -248,7 +248,7 @@ export function buildEventDecision(input: DecisionInput): IngestEventDecision {
   if (input.candidate) decision.candidate = snapshotCandidate(input.candidate);
   decision.observed = snapshotObservedFacts(input.raw);
   if (input.normalizedEvent) decision.normalized = snapshotNormalizedFacts(input.normalizedEvent);
-  if (input.listing && (input.raw.hydration?.status ?? 'not-requested') === 'succeeded') {
+  if (input.listing && (input.raw.hydration?.status ?? 'not-requested') !== 'not-requested') {
     decision.listing = snapshotObservedFacts(input.listing);
   }
 

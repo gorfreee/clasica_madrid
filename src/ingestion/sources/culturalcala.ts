@@ -1,3 +1,5 @@
+import { parseSpanishCalendarDate } from '../dates.ts';
+import { sourceConflict } from '../detail/conflicts.ts';
 import { isRealIsoDate } from '../../lib/util/iso-date.ts';
 import { collapseWhitespace, decodeHtmlEntities, stripTags } from '../html.ts';
 import { emptyObservedLists, normalizePersonList, type ObservedFactPatch, type ObservedPerson } from '../observed.ts';
@@ -110,6 +112,10 @@ export function parseCulturalcalaDetail(event: RawEvent, body: string): Observed
   if (!data) throw new Error(`${ID}: ficha sin el evento ${event.sourceUrl}`);
   const descriptionHtml = typeof data.description === 'string' ? data.description : '';
   if (!descriptionHtml) throw new Error(`${ID}: ficha sin descripción`);
+  const header = explicitHeaderDates(descriptionHtml);
+  if (header && event.observed.occurrences.some(o => o.date && !header.dates.includes(o.date))) {
+    throw sourceConflict(`${ID}: recurrencias del listado contradicen las fechas explícitas de la ficha`, 'date', [{ surface: 'listing:EventON', value: JSON.stringify(event.observed.occurrences) }, { surface: 'detail:editorial-header', value: header.raw }]);
+  }
   const location = Array.isArray(data.location) ? data.location[0] : data.location;
   const venue = location && typeof location === 'object' && !Array.isArray(location)
     ? (location as Record<string, unknown>).name : undefined;
@@ -306,4 +312,22 @@ export function parseCulturalcalaListing(body: string, url: string, ctx: Adapter
     throw new IncompleteListingError(`${ID}: calendario sólo cubre ${from}–${to}; desapariciones no evaluables`, events);
   }
   return events;
+}
+
+/** Only an explicit year-bearing date header inside the ficha's pre block.
+ * Ranges and prose are not enumerated into performances. */
+function explicitHeaderDates(description: string): { raw: string; dates: string[] } | undefined {
+  const pre = /<pre\b[^>]*>([\s\S]*?)<\/pre>/i.exec(description)?.[1];
+  const raw = pre && preLinesOf(pre).find(line => /\b20\d{2}\b/.test(line) && isDateLine(line));
+  if (!raw || /\b(?:del|al)\b/i.test(raw)) return undefined;
+  const text = raw.toLowerCase().replace(/\b(?:lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo)\b/gi, '');
+  const dates: string[] = [];
+  for (const match of text.matchAll(/((?:\d{1,2}\s*(?:,|y)?\s*)+)(?:de\s+)?(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)\s+(?:de\s+)?(20\d{2})/gi)) {
+    for (const day of match[1]!.matchAll(/\d{1,2}/g)) {
+      const date = parseSpanishCalendarDate(`${day[0]} de ${match[2]} de ${match[3]}`);
+      if (!date) return undefined;
+      dates.push(date);
+    }
+  }
+  return dates.length ? { raw, dates: [...new Set(dates)] } : undefined;
 }

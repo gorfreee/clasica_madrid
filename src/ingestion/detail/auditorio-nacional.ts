@@ -1,3 +1,4 @@
+import { parseObservedDateTime } from '../dates.ts';
 import { allCaptures, firstMatch, splitBreaks, stripTags } from '../html.ts';
 import { inferScheduleFromText } from './schedule.ts';
 import {
@@ -86,6 +87,7 @@ function parseProduction(html: string): ObservedFactPatch {
   const segments = segmentAuditorioBlocks(blocks);
   const allLines = [...segments.noticeLines, ...segments.performerLines, ...segments.programLines];
   const schedule = inferScheduleFromText(allLines.join('. '));
+  const calendar = auditorioDetailCalendar(html);
   const performers = normalizePersonList([
     ...segments.performerLines.flatMap((line) => parseAuditorioPersonCredits(line)),
     ...segments.programLines.flatMap((line) =>
@@ -113,7 +115,7 @@ function parseProduction(html: string): ObservedFactPatch {
     ...(venueText ? { venueText } : {}),
     ...(accessText ? { accessText } : {}),
     ...(schedule.eventStatus ? { eventStatus: schedule.eventStatus } : {}),
-    ...(schedule.occurrences ? { occurrences: schedule.occurrences } : {}),
+    ...(schedule.occurrences ? { occurrences: schedule.occurrences } : calendar ? { occurrences: calendar } : {}),
     performers,
     works,
     composers: composersForProgram(works, extraComposers),
@@ -583,4 +585,20 @@ function sliceBetween(html: string, start: string, end: string): string | undefi
   const endAt = html.indexOf(end, from);
   if (endAt === -1) return html.slice(from);
   return html.slice(from, endAt);
+}
+
+/** Only the event's right column hour spans are schedule facts. Footer clocks are not. */
+function auditorioDetailCalendar(html: string): NonNullable<ObservedFactPatch['occurrences']> | undefined {
+  const start = html.indexOf('<div class="rightcolumn">');
+  if (start < 0) return undefined;
+  const column = html.slice(start).split('</article>')[0]!;
+  const clocks = [...column.matchAll(/<span\b[^>]*class="[^"]*\bhour\b[^"]*"[^>]*>([\s\S]*?)<\/span>/gi)];
+  if (!clocks.length) return undefined;
+  const occurrences = clocks.map(match => {
+    const raw = stripTags(match[1]!);
+    const parsed = parseObservedDateTime(raw);
+    if (!parsed?.date || !parsed.time) throw new Error('auditorio-nacional: calendario de ficha ilegible');
+    return { raw, date: parsed.date, time: parsed.time };
+  });
+  return occurrences.filter((item, index) => occurrences.findIndex(other => other.date === item.date && other.time === item.time) === index);
 }
