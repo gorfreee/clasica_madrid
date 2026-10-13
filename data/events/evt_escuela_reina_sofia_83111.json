@@ -17,15 +17,53 @@
   ],
   "performers": [
     {
-      "name": "Daisy Noton"
+      "name": "Emma-Iona Gherganu"
     },
     {
-      "name": "Flavio Castellanos"
+      "name": "Luis Arias Fernández"
+    },
+    {
+      "name": "Flavio Castellanos Lozano"
+    },
+    {
+      "name": "Samuel Tirado Villaescusa"
     }
   ],
-  "composers": [],
-  "works": [],
-  "eras": [],
+  "composers": [
+    {
+      "name": "Otar Taktakishvili"
+    },
+    {
+      "name": "Philippe Gaubert"
+    },
+    {
+      "name": "Francis Poulenc"
+    },
+    {
+      "name": "Louis Cahuzac"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sonata para flauta y piano",
+      "composerName": "Otar Taktakishvili"
+    },
+    {
+      "title": "Fantasía para flauta y piano",
+      "composerName": "Philippe Gaubert"
+    },
+    {
+      "title": "Sonata para clarinete y piano FP 184",
+      "composerName": "Francis Poulenc"
+    },
+    {
+      "title": "Cantilène para clarinete y piano",
+      "composerName": "Louis Cahuzac"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
   "formats": [
     "chamber",
     "recital"
@@ -36,10 +74,10 @@
     {
       "sourceId": "src_escuela_superior_musica_reina_sofia",
       "url": "https://www.escuelasuperiordemusicareinasofia.es/evento/solistas-del-siglo-xxi-caracter-y-ficciones-de-la-danza-concierto-de-flauta-y-clarinete",
-      "checkedAt": "2026-09-15",
+      "checkedAt": "2026-10-11",
       "externalId": "83111"
     }
   ],
   "primarySourceId": "src_escuela_superior_musica_reina_sofia",
-  "lastVerifiedAt": "2026-09-15"
+  "lastVerifiedAt": "2026-10-11"
 }

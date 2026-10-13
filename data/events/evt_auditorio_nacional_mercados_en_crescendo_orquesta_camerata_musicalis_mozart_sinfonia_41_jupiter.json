@@ -11,7 +11,7 @@
     {
       "id": "occ_auditorio_nacional_mercados_en_crescendo_orquesta_camerata_musicalis_mozart_sinfonia_41_jupiter_01",
       "date": "2026-10-18",
-      "time": "11:30",
+      "time": "12:00",
       "status": "scheduled"
     }
   ],
@@ -47,10 +47,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/mercados-en-crescendo-orquesta-camerata-musicalis-mozart-sinfonia-41-jupiter",
-      "checkedAt": "2026-09-22",
+      "checkedAt": "2026-10-11",
       "externalId": "mercados-en-crescendo-orquesta-camerata-musicalis-mozart-sinfonia-41-jupiter"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-22"
+  "lastVerifiedAt": "2026-10-11"
 }

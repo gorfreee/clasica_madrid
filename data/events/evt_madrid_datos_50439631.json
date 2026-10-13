@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50439631",
+  "slug": "como-si-fuera-la-ultima-vez",
+  "title": "Como si fuera la última vez",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_1953",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50439631_01",
+      "date": "2026-10-30",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Grupo Saúco"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "opera",
+    "zarzuela",
+    "other"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=eba802bc2b7f0a10VgnVCM100000891ecb1aRCRD",
+      "checkedAt": "2026-10-11",
+      "externalId": "50439631"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-10-11"
+}

@@ -33,8 +33,38 @@
       "role": "other"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Johann Strauss II"
+    },
+    {
+      "name": "Franz von Suppé"
+    },
+    {
+      "name": "Jacques Offenbach"
+    },
+    {
+      "name": "Franz Lehár"
+    }
+  ],
+  "works": [
+    {
+      "title": "Vals del Emperador (Kaiser-Walzer)",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Marcha española",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "Accelerationen",
+      "composerName": "Johann Strauss II"
+    },
+    {
+      "title": "El bello Danubio azul",
+      "composerName": "Johann Strauss II"
+    }
+  ],
   "eras": [
     "romantic"
   ],
@@ -42,14 +72,20 @@
     "symphonic"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_orquestafilarmonia_com",
       "url": "https://www.orquestafilarmonia.com/concierto/gala-de-ano-nuevo-2/",
       "checkedAt": "2026-09-28"
+    },
+    {
+      "sourceId": "src_fundacion_cultural_las_rozas",
+      "url": "https://fundacionculturalasrozas.org/agenda/concierto-de-ano-nuevo/",
+      "checkedAt": "2026-10-11",
+      "externalId": "9196"
     }
   ],
   "primarySourceId": "src_orquestafilarmonia_com",
-  "lastVerifiedAt": "2026-09-28"
+  "lastVerifiedAt": "2026-10-11"
 }

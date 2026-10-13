@@ -37,7 +37,28 @@
       "name": "György Ligeti"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "Suite en mi menor, RCT 2 (arreglo de Kebyart)",
+      "composerName": "Jean-Philippe Rameau"
+    },
+    {
+      "title": "Prélude, Fugue et Variation, op. 18 (arreglo de Kebyart)",
+      "composerName": "César Franck"
+    },
+    {
+      "title": "Preludio y fuga en do sostenido menor, BWV 849 (arreglo de Kebyart)",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Fantasía en fa menor, D. 940 (arreglo de Kebyart)",
+      "composerName": "Franz Schubert"
+    },
+    {
+      "title": "Seis bagatelas (arreglo de Kebyart)",
+      "composerName": "György Ligeti"
+    }
+  ],
   "eras": [
     "baroque",
     "romantic",
@@ -47,15 +68,21 @@
     "chamber"
   ],
   "kind": "alternative",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_tala_producciones_es",
       "url": "https://www.tala-producciones.es/salon-del-ateneo/kebyart-quartet-punto-di-fuga",
       "checkedAt": "2026-09-21",
       "externalId": "1246"
+    },
+    {
+      "sourceId": "src_ateneo_madrid",
+      "url": "https://ateneodemadrid.com/evento/ciclo-el-salon-del-ateneo-kebyart-quartet-punto-di-fuga",
+      "checkedAt": "2026-10-11",
+      "externalId": "64491"
     }
   ],
   "primarySourceId": "src_tala_producciones_es",
-  "lastVerifiedAt": "2026-09-21"
+  "lastVerifiedAt": "2026-10-11"
 }

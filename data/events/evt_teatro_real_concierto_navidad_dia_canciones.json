@@ -35,11 +35,11 @@
   "citations": [
     {
       "sourceId": "src_teatro_real",
-      "url": "https://www.teatroreal.es/es/espectaculo/concierto-navidad-dia-canciones",
-      "checkedAt": "2026-09-09",
-      "externalId": "concierto-navidad-dia-canciones"
+      "url": "https://www.teatroreal.es/es/espectaculo/concierto-navidad",
+      "checkedAt": "2026-10-11",
+      "externalId": "concierto-navidad"
     }
   ],
   "primarySourceId": "src_teatro_real",
-  "lastVerifiedAt": "2026-09-09"
+  "lastVerifiedAt": "2026-10-11"
 }

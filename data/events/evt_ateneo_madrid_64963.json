@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_ateneo_madrid_64963",
+  "slug": "josue-fonseca-ganador-concurso-internacional-guitarra-clasica-angel-g-pinero-2025",
+  "title": "Josué Fonseca. Ganador concurso internacional guitarra clásica Ángel G. Piñero 2025",
+  "status": "scheduled",
+  "venueId": "ven_ateneo_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_ateneo_madrid_64963_01",
+      "date": "2026-10-17",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Josué Fonseca"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_ateneo_madrid",
+      "url": "https://ateneodemadrid.com/evento/josue-fonseca-ganador-concurso-internacional-guitarra-clasica-angel-g-pinero-2025",
+      "checkedAt": "2026-10-11",
+      "externalId": "64963"
+    }
+  ],
+  "primarySourceId": "src_ateneo_madrid",
+  "lastVerifiedAt": "2026-10-11"
+}

@@ -78,17 +78,20 @@
     "romantic",
     "twentieth"
   ],
-  "formats": [],
+  "formats": [
+    "lied",
+    "recital"
+  ],
   "kind": "alternative",
   "access": "free",
   "citations": [
     {
       "sourceId": "src_ayuntamiento_madrid",
       "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=8db43893f4ba0a10VgnVCM200000f921e388RCRD",
-      "checkedAt": "2026-09-18",
+      "checkedAt": "2026-10-11",
       "externalId": "50420968"
     }
   ],
   "primarySourceId": "src_ayuntamiento_madrid",
-  "lastVerifiedAt": "2026-09-18"
+  "lastVerifiedAt": "2026-10-11"
 }

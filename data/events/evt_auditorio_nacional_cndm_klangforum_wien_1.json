@@ -54,7 +54,7 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-klangforum-wien-1",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-10-11",
       "externalId": "cndm-klangforum-wien-1"
     },
     {
@@ -65,5 +65,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-06"
+  "lastVerifiedAt": "2026-10-11"
 }
