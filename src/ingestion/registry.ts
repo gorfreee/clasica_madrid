@@ -241,6 +241,7 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
     adapterId: cndmAdapter.id,
     catalogSourceId: 'src_cndm',
     useFetchRelay: true,
+    fetchTransport: 'relay-then-direct',
     seedSource: {
       schemaVersion: 1,
       id: 'src_cndm',
@@ -581,7 +582,7 @@ export function fetchRelayHosts(sources: readonly SourceDefinition[] = SOURCE_RE
 export function fetchTransportForHost(
   hostname: string,
   sources: readonly SourceDefinition[] = SOURCE_REGISTRY,
-): 'direct' | 'relay' | 'direct-then-relay' {
+): 'direct' | 'relay' | 'direct-then-relay' | 'relay-then-direct' {
   const host = hostname.toLowerCase().replace(/\.$/, '');
   for (const source of sources) {
     const strategy = source.fetchTransport ?? (source.useFetchRelay ? 'relay' : 'direct');
@@ -600,7 +601,8 @@ export function fetchTransportForHost(
 function usesFetchRelay(source: SourceDefinition): boolean {
   return Boolean(source.useFetchRelay)
     || source.fetchTransport === 'relay'
-    || source.fetchTransport === 'direct-then-relay';
+    || source.fetchTransport === 'direct-then-relay'
+    || source.fetchTransport === 'relay-then-direct';
 }
 
 export function getSourceDefinition(id: string): SourceDefinition {
