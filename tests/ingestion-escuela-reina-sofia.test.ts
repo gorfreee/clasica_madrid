@@ -473,9 +473,9 @@ describe('hidratación musical de la ficha Reina Sofía', () => {
       { name: 'Uladzislau Khandohi', roleText: 'pianista' },
     ]);
     expect(patch.composers?.map((item) => item.name)).toEqual(expect.arrayContaining([
-      'Chopin',
-      'Liszt',
-      'Rachmaninov',
+      'Frédéric Chopin',
+      'Franz Liszt',
+      'Serguéi Rajmáninov',
     ]));
     expect(patch.works).toEqual([]);
   });
@@ -522,7 +522,7 @@ describe('hidratación musical de la ficha Reina Sofía', () => {
       { name: 'Josep Pons', roleText: 'Director' },
       { name: 'Luis Aracama', roleText: 'Violonchelo' },
     ]);
-    expect(patch.composers?.map((item) => item.name)).toEqual(expect.arrayContaining(['Dvořák', 'Brahms']));
+    expect(patch.composers?.map((item) => item.name)).toEqual(expect.arrayContaining(['Antonín Dvořák', 'Johannes Brahms']));
     expect(patch.programText).toBeUndefined();
     expect(patch.works).toEqual([]);
   });

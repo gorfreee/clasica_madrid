@@ -1,3 +1,4 @@
+import { decodeHtmlEntities } from './html.ts';
 import { normalizeText } from '../lib/domain/normalize.ts';
 import { matchComposer } from './knowledge/composers.ts';
 
@@ -23,6 +24,7 @@ export type SlotVerdict =
 
 const TITLE_PREFIXES: RegExp[] = [
   /^\[(?:aplazado|cancelado)\]\s*/iu,
+  /^[«“"']?Ciclo\s+El\s+Sal[oó]n\s+del\s+Ateneo[»”"']?\.\s*/iu,
   /^CNDM\.\s*/iu,
   /^ORCAM\.\s+(?:Sinfónico|Tiempo de Cámara)\s+\d+\.\s*/iu,
   /^OCNE\.\s+(?:Sinfónico|Satélite)\s+\d+\.\s*/iu,
@@ -62,27 +64,24 @@ export function compareMusicalFacts(left: MusicalFacts, right: MusicalFacts): Sl
   if (composerHits.length > 0) reasons.push(`compositor: ${composerHits[0]}`);
   if (titlePhraseHits.length > 0) reasons.push(`título: ${titlePhraseHits[0]}`);
 
+  const leftTitle = normalizeText(stripTitlePrefixes(left.title));
+  const rightTitle = normalizeText(stripTitlePrefixes(right.title));
+  const sameDistinctiveTitle = leftTitle === rightTitle && distinctiveIdentityTitle(leftTitle);
+  // Sharing a work does not identify concerts with explicitly different casts.
+  const performerConflict = bothDistinctAndDisjoint(a.performers, b.performers, namesCompatible);
+  if (performerConflict && ((!workHits.length && !sameDistinctiveTitle) || (left.performers.length && right.performers.length))) {
+    return { kind: 'conflict', reasons: [`intérpretes incompatibles: ${summarize(a.performers)} vs ${summarize(b.performers)}`] };
+  }
   if (workHits.length > 0) return { kind: 'match', reasons };
-
   const workConflict = bothDistinctAndDisjoint(a.works, b.works, worksCompatible);
   if (workConflict) {
-    return {
-      kind: 'conflict',
-      reasons: [`obras incompatibles: ${summarize(a.works)} vs ${summarize(b.works)}`],
-    };
+    return { kind: 'conflict', reasons: [`obras incompatibles: ${summarize(a.works)} vs ${summarize(b.works)}`] };
   }
-
   if (performerHits.length > 0) return { kind: 'match', reasons };
   if (composerHits.length > 0 && titlePhraseHits.length > 0) return { kind: 'match', reasons };
-
-  const performerConflict = bothDistinctAndDisjoint(a.performers, b.performers, namesCompatible);
-  if (performerConflict) {
-    return {
-      kind: 'conflict',
-      reasons: [`intérpretes incompatibles: ${summarize(a.performers)} vs ${summarize(b.performers)}`],
-    };
+  if (sameDistinctiveTitle) {
+    return { kind: 'match', reasons: [...reasons, `título idéntico: ${leftTitle}`] };
   }
-
   return { kind: 'insufficient' };
 }
 
@@ -122,7 +121,7 @@ function collectSignals(facts: MusicalFacts): Signals {
   ].filter((item): item is WorkSignal => Boolean(item));
   const performers = unique([
     ...facts.performers.map((item) => item.name).filter((name) => !isOrganizerName(name)),
-    ...fromTitle.performers,
+    ...(facts.performers.length ? [] : fromTitle.performers),
   ]);
   const composers = unique([
     ...facts.composers.map((item) => item.name),
@@ -143,11 +142,13 @@ function titleSignals(title: string): {
   composers: string[];
   phrases: string[];
 } {
-  let remaining = title.trim();
+  let remaining = decodeHtmlEntities(title).trim();
   for (const prefix of TITLE_PREFIXES) remaining = remaining.replace(prefix, '');
 
+  const ensembleHead = remaining.split(/\s+[–—-]\s+/u)[0]!;
+  const namedEnsemble = looksLikeEnsembleCredit(ensembleHead) ? ensembleHead : undefined;
   const works: WorkSignal[] = [];
-  const quoted = remaining.matchAll(/["«“”']([^"«»“”']{3,})["»”']/gu);
+  const quoted = remaining.matchAll(/["«“”'‘]([^"«»“”'‘’]{3,})["»”'’]/gu);
   for (const match of quoted) {
     const signal = workSignal(match[1]!, undefined);
     if (signal) works.push(signal);
@@ -162,7 +163,7 @@ function titleSignals(title: string): {
   }
 
   const labeled = extractRoleLabeledCredits(remaining);
-  const performers: string[] = labeled.performers.map((item) => item.name);
+  const performers: string[] = [...labeled.performers.map((item) => item.name), ...(namedEnsemble ? [namedEnsemble] : [])];
   remaining = labeled.remainder;
 
   const [head, tail] = splitOnce(remaining, ':');
@@ -181,7 +182,7 @@ function titleSignals(title: string): {
     if (!trimmed || isOrganizerName(trimmed) || nameEndsWithRoleLabel(trimmed)) continue;
     if (looksLikeWorkPhrase(trimmed)) {
       const signal = workSignal(trimmed, composers[0]);
-      if (signal) works.push(signal);
+      if (signal && !signalGeneric(signal)) works.push(signal);
       continue;
     }
     if (looksLikeEnsembleCredit(trimmed) || (looksLikeArtistTitle(trimmed) && performers.length === 0)) {
@@ -315,7 +316,7 @@ function isRecitalOrConcertPhrase(value: string): boolean {
 }
 
 function looksLikeEnsembleCredit(value: string): boolean {
-  return /\b(orquesta|orquestra|orchestra|coro|choir|ensemble|cuarteto|quinteto|agrupaci[oó]n)\b/iu.test(
+  return /\b(orquesta|orquestra|orchestra|coro|choir|ensemble|cuarteto|quartet|quinteto|agrupaci[oó]n)\b/iu.test(
     value,
   );
 }
@@ -358,6 +359,7 @@ function workSignal(title: string, composerName?: string): WorkSignal | undefine
   if (!folded) return undefined;
   const catalogs = catalogNumbers(title);
   const core = stripWorkDecorations(folded);
+  if (catalogs.length === 0 && /^(?:concierto|gala|recital)(?: de)? (?:ano nuevo|navidad|otono|primavera|verano|invierno)$/u.test(core)) return undefined;
   if (!core && catalogs.length === 0) return undefined;
   return {
     core,
@@ -368,7 +370,9 @@ function workSignal(title: string, composerName?: string): WorkSignal | undefine
 }
 
 function worksCompatible(left: WorkSignal, right: WorkSignal): boolean {
+  if (left.composer && right.composer && !composersCompatible(left.composer, right.composer)) return false;
   if (left.catalogs.some((item) => right.catalogs.includes(item))) return true;
+  if (left.catalogs.length && right.catalogs.length) return false;
   if (!left.core || !right.core) return false;
   if (left.core === right.core) {
     if (!signalGeneric(left) && !signalGeneric(right)) return true;
@@ -391,8 +395,8 @@ function composersCompatible(left: string, right: string): boolean {
 }
 
 function namesCompatible(left: string, right: string): boolean {
-  const a = normalizeText(left);
-  const b = normalizeText(right);
+  const a = normalizeText(decodeHtmlEntities(left));
+  const b = normalizeText(decodeHtmlEntities(right));
   if (!a || !b) return false;
   if (a === b) return true;
   if (a.replace(/\s+/g, '') === b.replace(/\s+/g, '')) return true;
@@ -473,7 +477,7 @@ function distinctivePhrases(title: string): string[] {
 }
 
 function stripTitlePrefixes(title: string): string {
-  let remaining = title.trim();
+  let remaining = decodeHtmlEntities(title).trim();
   for (const prefix of TITLE_PREFIXES) remaining = remaining.replace(prefix, '');
   return remaining;
 }
@@ -510,10 +514,17 @@ function isOrganizerName(name: string): boolean {
   return tokens.length > 0 && tokens.every((token) => ORGANIZER_TOKENS.has(token));
 }
 
+function distinctiveIdentityTitle(title: string): boolean {
+  const content = title.split(' ').filter((word) => !STOPWORDS.has(word));
+  const generic = new Set([...GENERIC_WORK_WORDS, ...ORGANIZER_TOKENS,
+    'musica', 'clasica', 'classical', 'navidad', 'ano', 'nuevo', 'otono', 'primavera', 'verano', 'invierno']);
+  return content.length >= 2 && content.some((word) => !generic.has(word));
+}
+
 function isWeakName(value: string): boolean {
   const tokens = normalizeText(value).split(' ').filter((token) => token && !STOPWORDS.has(token));
   if (tokens.length === 0) return true;
-  if (tokens.every((token) => ORGANIZER_TOKENS.has(token) || GENERIC_WORK_WORDS.has(token))) return true;
+  if (tokens.every((token) => ORGANIZER_TOKENS.has(token) || GENERIC_WORK_WORDS.has(token) || ['musica', 'clasica', 'classical', 'ano', 'nuevo', 'navidad', 'otono', 'primavera', 'verano', 'invierno'].includes(token))) return true;
   return tokens.join(' ').length < 5;
 }
 

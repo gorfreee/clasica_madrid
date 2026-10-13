@@ -5,6 +5,8 @@ import { emptyObservedLists } from '../observed.ts';
 import type { ObservedFactPatch } from '../observed.ts';
 import { IncompleteListingError, type AdapterContext, type RawEvent, type RawOccurrence, type SourceAdapter } from '../types.ts';
 
+import { extractExplicitPerformanceCredits } from '../performance-credits.ts';
+
 const ID = 'fundacion-cultural-las-rozas';
 const ROOT = 'https://fundacionculturalasrozas.org';
 const LISTING = `${ROOT}/agenda/`;
@@ -170,6 +172,7 @@ export function parseLasRozasDetail(event: RawEvent, body: string): ObservedFact
     throw new Error(`${ID}: ficha con horario distinto del listado`);
   }
   return {
+    ...(description ? { performers: extractExplicitPerformanceCredits(stripTags(description)) } : {}),
     ...(description && stripTags(description) ? { description: stripTags(description).slice(0, 5000) } : {}),
     ...(venue && stripTags(venue) ? { venueText: stripTags(venue) } : {}),
     ...(price && stripTags(price) ? { accessText: `Precio: ${stripTags(price)}` } : {}),

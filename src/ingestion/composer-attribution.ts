@@ -242,7 +242,7 @@ function fromLabelledCredits(text: string): AttributedComposerName[] {
         for (const name of repertoire) found.push({ name, evidence: listEvidence || evidence, frame: 'labelled-credit' });
         continue;
       }
-      for (const name of splitNameList(rawList)) {
+      for (const name of contiguousCreditNames(rawList)) {
         found.push({ name, evidence, frame: 'labelled-credit' });
       }
     }
@@ -652,6 +652,33 @@ function strongWorkDeComposerSurname(evidence: string, name: string): boolean {
   const title = source.replace(pattern, '');
   if (BARE_WORK_LABEL.test(title)) return false;
   return looksLikeUnequivocalWorkLine(title) || looksLikeWorkTitle(title);
+}
+
+/** Stop at the first prose/work fragment: a later capitalized token cannot
+ * re-enter the author list after its attribution frame has ended. */
+function contiguousCreditNames(raw: string): string[] {
+  const names: string[] = [];
+  for (const name of splitNameList(raw)) {
+    if (!matchComposer(name) && !looksLikePersonNameSlot(name) &&
+        !/^\p{Lu}[\p{L}’'-]{3,}$/u.test(name)) break;
+    names.push(name);
+  }
+  return names;
+}
+
+/** A structured work's explicit author owns the entire title. Names inside
+ * that title (source material, characters, dedications) are not new credits. */
+export function outsideAttributedWorkTitles(
+  text: string,
+  works: readonly { title: string; composerName?: string }[],
+): string {
+  let remainder = text;
+  for (const work of works) {
+    if (!work.composerName) continue;
+    const pattern = escapeRegExp(work.title).replace(/\s+/g, '\\s+');
+    remainder = remainder.replace(new RegExp(pattern, 'giu'), ' ');
+  }
+  return remainder;
 }
 
 function clipLabelledList(raw: string): string {

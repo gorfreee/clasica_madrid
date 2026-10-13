@@ -1492,6 +1492,10 @@ function knownClassicalNames(facts: ObservedFacts): string[] {
     const hit = matchComposer(name);
     if (hit) matched.push(hit.canonicalName);
   }
+  // Explicit work attribution is the authoritative repertoire surface.
+  // Historical references inside the commentary or a work title cannot add
+  // different authors to the classification evidence.
+  if (facts.works.some((work) => work.composerName) && matched.length) return [...new Set(matched)];
   const description = stripNonRepertoireEntityNames(
     facts.description?.replace(
       /[»”"]\s*,?\s*(?:de|by\s+)?[\p{Lu}][\p{L}’'-]+\s+[\p{Lu}][\p{L}’'-]+(?=[.;]|$)/gu,

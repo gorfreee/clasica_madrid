@@ -53,6 +53,16 @@ La decisión se basa principalmente en **qué repertorio se interpreta y cuál e
 
 La presencia de orquesta, instrumentos clásicos, sala clásica, músicos de formación clásica o arreglos sinfónicos **no convierte** un evento en música clásica.
 
+Los nombres de edificios, calles e instituciones no acreditan repertorio, incluso
+cuando aparecen dentro de `description`, `title` o `programText` (p. ej. «Auditorio
+Joaquín Rodrigo» o «Escuela Municipal de Música Joaquín Rodrigo»). Un crédito
+musical explícito posterior sí se evalúa por separado. Cuando hay obras con
+atribución estructurada, sus autores son la evidencia musical de referencia:
+los nombres mencionados dentro del título de una obra o en comentarios históricos
+no añaden autores al programa. La extracción determinista y la validación de
+candidatos de IA comparten esta separación.
+
+
 ---
 
 ## 1. Eligibility (tri-state interno)

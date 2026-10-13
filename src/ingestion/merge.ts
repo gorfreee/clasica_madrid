@@ -496,9 +496,8 @@ function withOccurrenceStatus(occurrence: Occurrence, cancelled: boolean): Occur
 
 /**
  * Union citations without mixing identity across sources.
- * Same source + equivalent URL (or the same source with a later observation)
- * collapses to one citation. Two sources may keep two citations even when they
- * happen to share a URL.
+ * Only the same source + equivalent URL collapses to one citation. Distinct
+ * URLs from one source and references from other sources retain their provenance.
  */
 export function mergeCitationLists(existing: Citation[], incoming: Citation[]): Citation[] {
   const result = [...existing];
@@ -506,15 +505,14 @@ export function mergeCitationLists(existing: Citation[], incoming: Citation[]): 
     const index = result.findIndex(
       (item) => item.sourceId === citation.sourceId && urlsEquivalent(item.url, citation.url),
     );
-    const sameSource = index < 0 ? result.findIndex((item) => item.sourceId === citation.sourceId) : index;
-    if (sameSource < 0) {
+    if (index < 0) {
       result.push(citation);
       continue;
     }
-    const current = result[sameSource]!;
-    result[sameSource] = {
+    const current = result[index]!;
+    result[index] = {
       sourceId: current.sourceId,
-      url: urlsEquivalent(current.url, citation.url) ? current.url : citation.url || current.url,
+      url: current.url,
       checkedAt: citation.checkedAt || current.checkedAt,
       ...(citation.externalId || current.externalId
         ? { externalId: citation.externalId ?? current.externalId }

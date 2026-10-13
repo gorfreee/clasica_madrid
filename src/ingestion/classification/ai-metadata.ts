@@ -1,6 +1,7 @@
 import { canonicalizeComposerName, publishedComposerIdentity } from '../composer-name.ts';
 import {
   clearlyNonComposerContext,
+  outsideAttributedWorkTitles,
   extractAttributedComposerNames,
   findAttributedKnownComposers,
   isComposerMentionAttributed,
@@ -52,6 +53,7 @@ export function hasComposerCueEvidence(programme: string): boolean {
  * lists have not already resolved. Conservative: an empty result means no AI.
  */
 export function unresolvedComposerLikeMentions(programme: string, facts: ObservedFacts): string[] {
+  programme = outsideAttributedWorkTitles(programme, facts.works);
   const resolved = identityKeySet([
     ...facts.composers.map((item) => item.name),
     ...facts.works.flatMap((work) => (work.composerName ? [work.composerName] : [])),
@@ -100,7 +102,7 @@ export function validateAiComposerCandidates(
   candidates: readonly AiComposerCandidate[],
   facts: ObservedFacts,
 ): { composers: ObservedComposer[]; evidence: string[] } {
-  const programme = facts.programText ?? '';
+  const programme = outsideAttributedWorkTitles(facts.programText ?? '', facts.works);
   const performerKeys = new Set(facts.performers.flatMap((person) => composerIdentityKeys(person.name)));
   const seen = new Set<string>();
   const composers: ObservedComposer[] = [];

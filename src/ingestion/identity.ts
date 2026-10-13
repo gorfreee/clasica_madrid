@@ -382,6 +382,7 @@ function slotConflictLabel(venueId: string, observed: IdentityFacts): string {
 
 function eventMatchesStrong(event: Event, observed: IdentityFacts, venueId: string, catalogSourceId: string): boolean {
   if (event.venueId !== venueId) return false;
+  if (compareMusicalFacts({ ...musicalFactsFrom(event), title: '' }, { ...musicalFactsFrom(observed), title: '' }).kind === 'conflict') return false;
   if (normalizeText(event.title) !== normalizeText(observed.title)) {
     const equivalent = [
       [orcamIdentityTitle(observed.title, catalogSourceId), orcamIdentityTitle(event.title, event.primarySourceId)],
@@ -447,7 +448,7 @@ function ateneoIdentityTitle(title: string, catalogSourceId: string): string | u
     'src_tala_producciones_es',
   ].includes(catalogSourceId)) return undefined;
   const comparable = title
-    .replace(/^Ciclo\s+El\s+Sal[oó]n\s+del\s+Ateneo\.\s*/iu, '')
+    .replace(/^[«“"']?Ciclo\s+El\s+Sal[oó]n\s+del\s+Ateneo[»”"']?\.\s*/iu, '')
     .replace(/^Concierto\s+/iu, '')
     .replace(/\s+piano\s*[-–—]\s*/iu, '. ');
   return normalizeText(comparable) || undefined;
