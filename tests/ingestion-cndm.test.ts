@@ -178,7 +178,7 @@ describe('CNDM official monthly calendar', () => {
     expect(() => parseCndmMonthListing(html, 'https://evil.example/eventos/202610', source.id)).toThrow(/URL mensual/);
   });
 
-  it('un 503 de un mes conserva los demás y no tumba la fuente', async () => {
+  it('un 503 persistente conserva los demás y registra cobertura incompleta', async () => {
     const october = monthListing('202610', {
       4: [card('23799', 'LES MUSICIENS DU LOUVRE', '19:00', 'Auditorio Nacional (Sinfónica) | Madrid')],
     });
@@ -226,7 +226,8 @@ describe('CNDM official monthly calendar', () => {
         throw new Error(`URL no mapeada: ${url}`);
       },
     });
-    expect(ingest.summary.sourcesFailed).toEqual([]);
+    expect(ingest.summary.sourcesFailed).toEqual([expect.objectContaining({ sourceId: source.id, message: expect.stringContaining('meses no disponibles') })]);
+    expect(ingest.summary.autoMergeEligible).toBe(false);
     expect(ingest.summary.disappearanceSuppressedSources).toEqual([source.id]);
     expect(ingest.rawEvents.map((event) => event.observed.title)).toEqual(['CUARTETO VIAJERO']);
   });
@@ -267,7 +268,8 @@ describe('CNDM official monthly calendar', () => {
     expect(requested.some((url) => /^https:\/\/cndm\.inaem\.gob\.es\/?$/.test(url))).toBe(false);
     expect(requested).toContain(octoberUrl);
     expect(requested).toContain('https://cndm.inaem.gob.es/eventos/202611');
-    expect(ingest.summary.sourcesFailed).toEqual([]);
+    expect(ingest.summary.sourcesFailed).toEqual([expect.objectContaining({ sourceId: source.id, message: expect.stringContaining('meses no disponibles') })]);
+    expect(ingest.summary.autoMergeEligible).toBe(false);
     expect(ingest.summary.disappearanceSuppressedSources).toEqual([source.id]);
     expect(ingest.rawEvents.map((event) => event.observed.title)).toEqual(['CUARTETO VIAJERO']);
   });

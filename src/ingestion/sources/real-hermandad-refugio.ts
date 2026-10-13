@@ -12,6 +12,7 @@ import {
 } from '../detail/real-hermandad-refugio.ts';
 import { decodeHtmlEntities, stripTags } from '../html.ts';
 import {
+  createListingGet,
   isRecoverableTransportError,
   isSiteGroundChallenge,
   ListingAttemptsError,
@@ -23,7 +24,9 @@ import type { AdapterContext, RawEvent, SourceAdapter, SourceDefinition } from '
 
 export const REFUGIO_PER_PAGE = 50;
 export const REFUGIO_MAX_PAGES = 20;
-export const REFUGIO_ARCHIVE_READY_SELECTOR = '.jet-listing-grid__items[data-pages]';
+// JetEngine omits data-pages on a rendered empty archive. REST still has to
+// corroborate coverage; this selector only avoids a pointless browser timeout.
+export const REFUGIO_ARCHIVE_READY_SELECTOR = '.jet-listing-grid__items[data-pages], .jet-listing-not-found';
 export const REFUGIO_DETAIL_READY_SELECTOR = '[data-elementor-type="single-post"]';
 export { REFUGIO_CONCERT_ARCHIVE_URL };
 export const REFUGIO_REST_COLLECTION_URL = 'https://realhermandaddelrefugio.org/wp-json/wp/v2/calendario-eventos';
@@ -396,6 +399,7 @@ function asId(value: unknown): string | undefined {
 
 /** WP's official `_envelope` exposes totals through the existing text transport. */
 export async function readRefugioRestPages(get: (url: string) => Promise<string>): Promise<string> {
+  const getPage = createListingGet(get);
   let total: number | undefined;
   let pages: number | undefined;
   const items: unknown[] = [];
@@ -404,7 +408,7 @@ export async function readRefugioRestPages(get: (url: string) => Promise<string>
     url.searchParams.set('_envelope', '1');
     url.searchParams.set('orderby', 'id');
     url.searchParams.set('order', 'asc');
-    const body = await get(url.href);
+    const body = await getPage(url.href);
     const html = unexpectedHtmlInsteadOfJson('real-hermandad-refugio', body);
     if (html) throw new Error(html);
     const result = JSON.parse(body) as { status?: unknown; headers?: Record<string, unknown>; body?: unknown };

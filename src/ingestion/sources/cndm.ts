@@ -1,5 +1,6 @@
 import { addIsoDays, parseObservedTime, type IngestWindow } from '../dates.ts';
 import { cndmDiv, cndmDivs, cndmEventUrl, parseCndmDetail } from '../detail/cndm.ts';
+import { createListingGet } from '../listing-retry.ts';
 import { stripTags } from '../html.ts';
 import { emptyObservedLists } from '../observed.ts';
 import { IncompleteListingError, reportAdapterDiscard, type AdapterContext, type RawEvent, type RawOccurrence, type SourceAdapter } from '../types.ts';
@@ -59,13 +60,14 @@ export const cndmAdapter: SourceAdapter = {
       }
     };
 
+    const get = createListingGet(ctx.get);
     for (const monthUrl of urls) {
       try {
-        const html = monthUrl === url ? body : await ctx.get(monthUrl);
+        const html = monthUrl === url ? body : await get(monthUrl);
         absorb(html, monthUrl);
       } catch (error) {
         if (!isIsolatedCndmMonthFailure(error)) throw error;
-        failedMonths.push(monthUrl);
+        failedMonths.push(`${monthUrl}: ${error instanceof Error ? error.message : String(error)}`);
         lastIsolated = error;
       }
     }
