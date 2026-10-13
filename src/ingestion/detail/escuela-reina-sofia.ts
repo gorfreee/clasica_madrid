@@ -1,5 +1,6 @@
+import { attributedProgrammeComposers } from '../composer-attribution.ts';
 import { decodeHtmlEntities, flattenHtmlBlocks, stripTags } from '../html.ts';
-import { findKnownComposersInText, matchComposer } from '../knowledge/composers.ts';
+import { matchComposer } from '../knowledge/composers.ts';
 import { extractRoleLabeledCredits } from '../musical-identity.ts';
 import {
   isEditorialNoteLegend,
@@ -57,14 +58,13 @@ export function parseReinaSofiaDetail(event: RawEvent, body: string): ObservedFa
   const descriptionPeople = description ? parseDescriptionPerformers(description) : [];
   const performers = collapseSameNamePeople(normalizePersonList([
     ...program.performers,
-    ...titlePeople,
-    ...descriptionPeople,
+    ...(program.performers.length ? [] : [...titlePeople, ...descriptionPeople]),
   ]));
   const works = program.works;
   const composers = normalizeComposerList([
     ...program.composers,
     ...composersFromWorks(works),
-    ...(description ? composersFromOfficialProse(description) : []),
+    ...(!works.length && description ? composersFromOfficialProse(description) : []),
   ]);
 
   return {
@@ -89,7 +89,7 @@ export function reinaSofiaSeriesText(title: string): string | undefined {
 export function reinaSofiaTitlePerformers(title: string): ObservedPerson[] {
   const labeled = extractRoleLabeledCredits(title);
   const people: ObservedPerson[] = labeled.performers.map((item) => ({ name: item.name, roleText: item.roleText }));
-  const remainder = labeled.remainder.replace(/[.:]\s*$/u, '').trim();
+  const remainder = labeled.remainder.split(/:\s*|\s+[–—]\s+/u)[0]!.replace(/[.:]\s*$/u, '').trim();
   if (remainder && looksLikeEnsembleName(remainder)) {
     people.unshift({ name: remainder });
   }
@@ -160,12 +160,13 @@ function parseProgramaItem(inner: string): {
 
     if (bold && looksLikeCatalogComposerHeading(text)) {
       composerName = text;
-      composers.push({ name: text });
+      // Only an actual work under this heading proves authorship.
       continue;
     }
 
     if (composerName && looksLikeWorkLine(text)) {
       works.push({ title: text, composerName });
+      composers.push({ name: composerName });
     }
   }
 
@@ -173,11 +174,11 @@ function parseProgramaItem(inner: string): {
 }
 
 function parseIndentedPerformer(text: string): ObservedPerson | undefined {
-  const match = /^(.+?),\s*([^,]+)$/u.exec(text);
+  const match = /^(.+),\s*([^,]+)$/u.exec(text);
   if (!match) return looksLikeEnsembleName(text) ? { name: text } : undefined;
-  const name = match[1]!.trim();
+  const name = reversedCatalogName(match[1]!.trim());
   const roleText = match[2]!.trim();
-  if (!name || looksLikeProgramHeader(name)) return undefined;
+  if (!name || looksLikeProgramHeader(name) || !/^(?:viol[ií]n|viola|violonchelo|violoncelo|piano|flauta|clarinete|oboe|fagot|trompa|trompeta|tromb[oó]n|tuba|arpa|guitarra|contrabajo|percusi[oó]n|soprano|tenor|bar[ií]tono|bajo|mezzosoprano|direcci[oó]n|director|concertino|[oó]rgano|clave)$/iu.test(roleText)) return undefined;
   return { name, ...(roleText ? { roleText } : {}) };
 }
 
@@ -262,12 +263,9 @@ function collapseSameNamePeople(people: ObservedPerson[]): ObservedPerson[] {
  * declares (Chopin, Dvořák, …) are observed facts.
  */
 function composersFromOfficialProse(description: string): ObservedComposer[] {
-  return findKnownComposersInText(description).map((item) => {
-    const spelling = item.aliases.find((alias) =>
-      description.toLocaleLowerCase('es').includes(alias.toLocaleLowerCase('es')),
-    );
-    return { name: spelling ?? item.canonicalName };
-  });
+  const workCredits = [...description.matchAll(/((?:(?:\p{Lu}[\p{L}]+)\s+)?(?:Concierto|Sinfon[ií]a|Sonata|Suite|Cuarteto|Fantas[ií]a)[^.;\n]{0,100}?\s+de\s+[^,.;\n]+)/giu)]
+    .flatMap((match) => attributedProgrammeComposers(match[1]!));
+  return normalizeComposerList([...attributedProgrammeComposers(description), ...workCredits]);
 }
 
 function isInstrumentRole(value: string): boolean {

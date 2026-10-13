@@ -1,4 +1,7 @@
-import { allCaptures, collapseWhitespace, firstMatch, stripTags } from '../html.ts';
+import { allCaptures, collapseWhitespace, firstMatch, stripTags, flattenHtmlBlocks } from '../html.ts';
+import { matchComposer } from '../knowledge/composers.ts';
+import { looksLikeComposerLine, looksLikeInstrumentOnly, looksLikeMovementLine, looksLikeProgramHeader, looksLikeUnequivocalWorkLine } from '../observed-cleanup.ts';
+import { extractExplicitPerformanceCredits } from '../performance-credits.ts';
 import {
   normalizeComposerList,
   normalizePersonList,
@@ -56,12 +59,17 @@ function parseExcerpt(html: string): ObservedFactPatch {
 function factsFromEditorial(editorialHtml: string, pageHtml: string): ObservedFactPatch {
   const paragraphs = editorialParagraphs(editorialHtml);
   const description = joinEditorial(paragraphs);
-  const programText = description;
-  const performers = normalizePersonList(paragraphs.flatMap((paragraph) => performersFromEditorial(paragraph)));
+  const structuredProgram = parseHeadingProgram(editorialHtml);
+  const programText = structuredProgram.programText ?? description;
+  const performers = normalizePersonList([
+    ...paragraphs.flatMap((paragraph) => performersFromEditorial(paragraph)),
+    ...allCaptures(editorialHtml, /<(?:p|li)\b[^>]*>([\s\S]*?)<\/(?:p|li)>/gi)
+      .flatMap((block) => extractExplicitPerformanceCredits(stripTags(block))),
+  ]);
   const composers = normalizeComposerList(
-    paragraphs.flatMap((paragraph) => composersFromEditorial(paragraph)),
+    [...structuredProgram.composers, ...paragraphs.flatMap((paragraph) => composersFromEditorial(paragraph))],
   );
-  const works = worksFromEditorial(editorialHtml);
+  const works = structuredProgram.programText ? structuredProgram.works : worksFromEditorial(editorialHtml);
   const seriesText =
     jumbotronText(editorialHtml) ?? labeledHeadingText(pageHtml, 'Ciclo|Serie');
   const organizerText = labeledHeadingText(pageHtml, 'Organizaci(?:[oó]|&oacute;)n');
@@ -75,6 +83,46 @@ function factsFromEditorial(editorialHtml: string, pageHtml: string): ObservedFa
     composers: composers.length > 0 ? composers : composersFromWorks(works),
     works,
   };
+}
+
+/** Ordered programme after an explicit heading. List markup may contain
+ * composer headings, sub-concert headings, or credits rather than works. */
+function parseHeadingProgram(html: string): {
+  programText?: string; composers: ObservedComposer[]; works: ObservedWork[];
+} {
+  const heading = /<p\b[^>]*>\s*(?:<strong>)?\s*Programa\s*:?(?:<\/strong>)?\s*<\/p>/iu.exec(html);
+  if (!heading) return { composers: [], works: [] };
+  const programme = html.slice(heading.index + heading[0].length);
+  const composers: ObservedComposer[] = [];
+  const works: ObservedWork[] = [];
+  let composerName: string | undefined;
+  for (const block of programme.matchAll(/<(p|li)\b[^>]*>([\s\S]*?)<\/\1>/giu)) {
+    const text = flattenHtmlBlocks(block[2]!);
+    if (!text) continue;
+    if (block[1]!.toLowerCase() === 'li') {
+      if (looksLikeProgramHeader(text) || /^(?:primer|segundo|tercer|cuarto) concierto$/iu.test(text)) continue;
+      const known = matchComposer(text);
+      const fullName = /^(?:\p{Lu}[\p{L}’'.-]+)(?:\s+(?:de|del|van|von|\p{Lu}[\p{L}’'.-]+)){1,5}$/u.test(text);
+      if (known || (fullName && !looksLikeUnequivocalWorkLine(text))) {
+        composerName = text;
+        continue;
+      }
+    }
+    if (!composerName) continue;
+    if (looksLikeInstrumentOnly(text) || isAdministrativeLine(text) ||
+        extractExplicitPerformanceCredits(`${composerName}, ${text}`).length) {
+      composerName = undefined;
+      continue;
+    }
+    const lines = text.split('\n').filter((line) =>
+      !looksLikeMovementLine(line) && !looksLikeProgramHeader(line),
+    );
+    if (!lines.length) continue;
+    works.push({ title: lines.join(': '), composerName });
+    composers.push({ name: composerName });
+  }
+  return { programText: flattenHtmlBlocks(programme) || undefined,
+    composers: normalizeComposerList(composers), works: normalizeWorkList(works) };
 }
 
 function editorialParagraphs(html: string): string[] {
@@ -146,7 +194,9 @@ function composersFromEditorial(text: string): ObservedComposer[] {
 function worksFromEditorial(html: string): ObservedWork[] {
   const items = allCaptures(html, /<li\b[^>]*>([\s\S]*?)<\/li>/gi)
     .map((part) => stripTags(part))
-    .filter((text) => text && !isAdministrativeLine(text) && !looksLikeProse(text));
+    .filter((text) => text && !isAdministrativeLine(text) && !looksLikeProse(text) &&
+      !looksLikeComposerLine(text) && !/^(?:primer|segundo|tercer|cuarto) concierto$/iu.test(text) &&
+      extractExplicitPerformanceCredits(text).length === 0);
   return normalizeWorkList(items.map((title) => ({ title })));
 }
 

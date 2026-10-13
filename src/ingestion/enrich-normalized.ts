@@ -1,4 +1,4 @@
-import { attributedProgrammeComposers } from './composer-attribution.ts';
+import { attributedProgrammeComposers, outsideAttributedWorkTitles } from './composer-attribution.ts';
 import {
   identityKeySet,
   matchesIdentitySet,
@@ -35,7 +35,7 @@ function enrichComposers(event: NormalizedEvent): ObservedComposer[] {
   ]);
   const performerKeys = identityKeySet(event.performers.map((person) => person.name));
   const fromProgram = event.programText
-    ? programComposers(event.programText, structured, performerKeys)
+    ? programComposers(outsideAttributedWorkTitles(event.programText, event.works), structured, performerKeys)
     : [];
 
   if (structured.length > 0) {

@@ -481,6 +481,8 @@ describe('CNDM pipeline and cross-source identity', () => {
       id: 'evt_existing_cndm_musiciens',
       slug: 'cndm-les-musiciens-du-louvre',
       title: 'CNDM. Les Musiciens du Louvre',
+      // A thin published record, not the helpers' unrelated OCNE/Beethoven programme.
+      performers: [], composers: [], works: [],
       venueId: 'ven_auditorio_nacional_sala_sinfonica',
       occurrences: [{ id: 'occ_existing_01', date: '2026-10-04', time: '19:00', status: 'scheduled' }],
       citations: [{

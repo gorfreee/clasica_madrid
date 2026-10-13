@@ -2472,6 +2472,9 @@ type ComposerIndex = {
 };
 
 const INDEX: ComposerIndex = buildIndex(COMPOSERS);
+const COMPOSER_NAME_TOKENS = new Set(COMPOSERS.flatMap((composer) =>
+  composer.aliases.flatMap((alias) => foldName(alias).split(' ')),
+));
 const CANONICAL_SURNAME_COUNTS = new Map<string, number>();
 for (const composer of COMPOSERS) {
   const words = foldName(composer.canonicalName).split(' ').filter(Boolean);
@@ -2601,6 +2604,8 @@ export function findKnownComposersInText(
   for (const [needle, knowledge] of INDEX.byFolded) {
     if (needle.length < 4) continue;
     for (const span of unguardedAliasSpans(folded, needle)) {
+      const entityPosition = offsets.get(span.start);
+      if (entityPosition && isInstitutionNamePrefix(surface.slice(0, entityPosition.start))) continue;
       if (!needle.includes(' ')) {
         const position = offsets.get(span.start);
         if (position && isPersonalSurnameMention(surface, position.start, position.end, context)) continue;
@@ -2617,6 +2622,19 @@ export function findKnownComposersInText(
     found.push(hit.knowledge);
   }
   return found;
+}
+
+/** Preserve surface case so intervening narrative verbs end an entity name.
+ * This also protects short aliases inside a longer named institution. */
+function isInstitutionNamePrefix(prefix: string): boolean {
+  const clause = prefix.split(/[.;:\n]/u).at(-1) ?? '';
+  const heads = [...clause.matchAll(/\b(?:auditorio|teatro|sala|calle|avenida|paseo|plaza|biblioteca|escuela|conservatorio|instituto|fundacion|centro)\b/giu)];
+  const head = heads.at(-1);
+  if (!head) return false;
+  const suffix = clause.slice(head.index! + head[0].length).replace(/[«»“”"']/gu, ' ').trim();
+  const words = suffix.split(/\s+/u).filter(Boolean);
+  if (words.length > 10) return false;
+  return words.every((word) => /^(?:municipal|superior|profesional|nacional|real|cultural|de|del|la|las|los|musica|danza)$/iu.test(word) || /^\p{Lu}[\p{L}’'.-]*$/u.test(word) || COMPOSER_NAME_TOKENS.has(foldName(word)));
 }
 
 function isPersonalSurnameMention(
@@ -2657,6 +2675,7 @@ const INSTITUTION_COMPOSER_PREFIXES = [
   'instituto',
   'fundacion',
   'fundacio',
+  'auditorio', 'teatro', 'sala', 'calle', 'avenida', 'paseo', 'plaza', 'biblioteca',
 ];
 
 function unguardedAliasSpans(

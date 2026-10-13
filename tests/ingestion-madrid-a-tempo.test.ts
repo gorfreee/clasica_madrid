@@ -404,13 +404,14 @@ describe('Madrid a Tempo pipeline safety', () => {
       slug: 'madrid-a-tempo-concierto-inauguracion',
       title: 'Madrid a Tempo: Concierto de inauguración',
     });
-    expect(result.candidates[0]?.event.citations[0]).toMatchObject({
+    expect(result.candidates[0]?.event.citations).toEqual(expect.arrayContaining([expect.objectContaining({
       sourceId: source.catalogSourceId,
       url: normalizeUrl(
         'https://www.madridatempo.com/post/ii-festival-internacional-de-piano-madrid-a-tempo-concierto-de-inauguración',
       ),
       externalId: 'cc99d72e-7aa5-4eea-b32c-8eb17a8dce00',
-    });
+    })]));
+    expect(result.candidates[0]?.event.citations).toHaveLength(2);
     const repeated = await run(mergeCandidateBatch(catalog, result.candidates).catalog);
     expect(repeated.summary.newEvents).toBe(0);
     expect(repeated.summary.updatedEvents).toBe(0);
