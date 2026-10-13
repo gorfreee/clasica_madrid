@@ -99,9 +99,14 @@ function readArticles(html: string, sourceId: string): RawEvent[] {
     const id = /\bdata-event-id="(\d+)"/.exec(attributes)?.[1];
     const href = /\bhref="([^"]+)"/.exec(attributes)?.[1];
     const title = stripTags(heading?.[2] ?? '');
-    const link = href && eventLink(href);
+    // MEC's time query can be an opaque Unix occurrence key. The visible
+    // card clock is the official local start; do not convert that key by timezone.
+    const timeText = stripTags(/<div\b[^>]*class="[^"]*\bmec-event-time\b[^>]*>([\s\S]*?)<\/div>/i.exec(article[0])?.[1] ?? '');
+    const visibleTime = /^([01]?\d|2[0-3]):([0-5]\d)(?:\s*-\s*(?:[01]?\d|2[0-3]):[0-5]\d)?$/.exec(timeText);
+    const clock = visibleTime ? `${visibleTime[1]!.padStart(2, '0')}:${visibleTime[2]}` : undefined;
+    const link = href && eventLink(href, clock);
     if (!id || !title || !link) throw new Error(`${ID}: tarjeta sin identidad, fecha o título`);
-    const venueText = stripTags(/<span\b[^>]*class="[^"]*\bmec-event-loc-place\b[^>]*>([\s\S]*?)<\/span>/i.exec(article[0])?.[1] ?? '');
+    const venueText = stripTags(/<(span|div)\b[^>]*class="[^"]*\bmec-event-loc-place\b[^>]*>([\s\S]*?)<\/\1>/i.exec(article[0])?.[2] ?? '');
     return {
       sourceId, sourceUrl: link.url, externalId: id,
       listingDateText: link.occurrence.date,
@@ -113,7 +118,7 @@ function readArticles(html: string, sourceId: string): RawEvent[] {
   });
 }
 
-function eventLink(href: string): { url: string; occurrence: RawOccurrence } | undefined {
+function eventLink(href: string, visibleTime?: string): { url: string; occurrence: RawOccurrence } | undefined {
   try {
     const parsed = new URL(href.replace(/&amp;/g, '&'));
     if (parsed.protocol !== 'https:' || parsed.hostname !== 'www.aytosanlorenzo.es' ||
@@ -121,8 +126,11 @@ function eventLink(href: string): { url: string; occurrence: RawOccurrence } | u
         !/^\/agenda-eventos\/[a-z0-9-]+\/$/.test(parsed.pathname)) return undefined;
     const date = parsed.searchParams.get('occurrence');
     if (!date || !isRealIsoDate(date)) return undefined;
-    const time = parsed.searchParams.get('time');
-    if (time && !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) return undefined;
+    const key = parsed.searchParams.get('time');
+    const clockKey = key && /^([01]\d|2[0-3]):[0-5]\d$/.test(key) ? key : undefined;
+    if (key && !clockKey && !/^[1-9]\d{9}$/.test(key)) return undefined;
+    if (clockKey && visibleTime && clockKey !== visibleTime) return undefined;
+    const time = clockKey ?? visibleTime;
     return {
       url: `${ORIGIN}${parsed.pathname}`,
       occurrence: { raw: time ? `${date} ${time}` : date, date, ...(time ? { time } : {}) },
