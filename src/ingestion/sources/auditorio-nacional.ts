@@ -63,7 +63,11 @@ export const auditorioNacionalAdapter: SourceAdapter = {
       const listingDates = [...new Set(event.observed.occurrences.flatMap(o => o.date ? [o.date] : []))].sort();
       const detailDates = [...new Set(patch.occurrences.flatMap(o => o.date ? [o.date] : []))].sort();
       const dateConflict = JSON.stringify(listingDates) !== JSON.stringify(detailDates);
-      const timeConflict = patch.occurrences.some(o => o.date && o.time && event.observed.occurrences.some(listed => listed.date === o.date && listed.time && listed.time !== o.time));
+      const timeConflict = detailDates.some(date => {
+        const before = [...new Set(event.observed.occurrences.filter(o => o.date === date).flatMap(o => o.time ? [o.time] : []))].sort();
+        const after = [...new Set(patch.occurrences!.filter(o => o.date === date).flatMap(o => o.time ? [o.time] : []))].sort();
+        return before.length > 0 && after.length > 0 && JSON.stringify(before) !== JSON.stringify(after);
+      });
       if (dateConflict || timeConflict) throw sourceConflict('auditorio-nacional: calendario de ficha distinto del listado', dateConflict ? 'date' : 'time', [{ surface: 'listing:FullCalendar', value: JSON.stringify(event.observed.occurrences) }, { surface: 'detail:rightcolumn', value: JSON.stringify(patch.occurrences) }]);
     }
     return patch;

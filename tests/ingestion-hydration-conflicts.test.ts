@@ -46,6 +46,18 @@ describe('official schedule and identity contradictions', () => {
     expect(await hydrateEvents([raw], auditorio, ctx)).toEqual([first]);
   });
 
+  it('compares complete clock sets for a double session on the same date', async () => {
+    const { raw, detail, ctx } = await jupiter();
+    const second = { raw: '2026-10-18T18:00:00+02:00', date: '2026-10-18', time: '18:00' };
+    const double = { ...raw, observed: { ...raw.observed, occurrences: [...raw.observed.occurrences, second] } };
+    const withSecond = detail.replace(/(<span class="hour pat-localmoment"[^>]*>[^<]+<\/span>)/, '$1<span class="hour pat-localmoment">2026-10-18T18:00:00+02:00</span>');
+    const [valid] = await hydrateEvents([double], auditorio, { ...ctx, get: async () => withSecond });
+    expect(valid?.hydration.status).toBe('succeeded');
+    expect(valid?.observed.occurrences.map(o => o.time)).toEqual(['12:00', '18:00']);
+    const [conflicting] = await hydrateEvents([double], auditorio, ctx);
+    expect(conflicting?.hydration.reason).toBe('source-conflict');
+  });
+
   it('withholds the historical 11:30 versus 12:00 case and retains both facts in the report', async () => {
     const { listing, detail, raw } = await jupiter();
     const source = getSourceDefinition(auditorio.id);
