@@ -15,13 +15,38 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Nova Cámera Orquesta"
+    },
+    {
+      "name": "Eugenio Uñón"
+    },
+    {
+      "name": "Flores Chaviano"
+    },
+    {
+      "name": "J. A. García Fuertes"
+    },
+    {
+      "name": "Meng Su"
+    }
+  ],
   "composers": [
     {
       "name": "Joaquín Rodrigo"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "Fantasía para un gentilhombre",
+      "composerName": "Joaquín Rodrigo"
+    },
+    {
+      "title": "Concierto de Aranjuez",
+      "composerName": "Joaquín Rodrigo"
+    }
+  ],
   "eras": [
     "twentieth"
   ],

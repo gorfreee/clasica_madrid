@@ -15,11 +15,17 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Josué Fonseca"
+    }
+  ],
   "composers": [],
   "works": [],
   "eras": [],
-  "formats": [],
+  "formats": [
+    "recital"
+  ],
   "kind": "alternative",
   "access": "unknown",
   "citations": [

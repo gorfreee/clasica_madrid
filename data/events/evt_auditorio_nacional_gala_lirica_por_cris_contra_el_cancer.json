@@ -20,14 +20,27 @@
       "name": "Orquesta y coro Matritum Cantat"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Giacomo Puccini"
+    },
+    {
+      "name": "Giuseppe Verdi"
+    },
+    {
+      "name": "Vincenzo Bellini"
+    },
+    {
+      "name": "Antonio Vivaldi"
+    }
+  ],
   "works": [],
   "eras": [
     "baroque",
     "romantic"
   ],
   "formats": [
-    "symphonic",
+    "opera",
     "choral"
   ],
   "kind": "established",

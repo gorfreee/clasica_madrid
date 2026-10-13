@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "id": "evt_madrid_datos_50441644",
-  "slug": "concierto-requiem-de-brahms",
-  "title": "Concierto: Réquiem de Brahms",
+  "slug": "ensayo-abierto-requiem-de-brahms",
+  "title": "Ensayo abierto: Réquiem de Brahms (solo orquesta)",
   "status": "scheduled",
   "venueId": "ven_md_fac_10189992",
   "organizerIds": [],
@@ -15,9 +15,22 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
-  "works": [],
+  "performers": [
+    {
+      "name": "Orquesta Filarmónica Española"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johannes Brahms"
+    }
+  ],
+  "works": [
+    {
+      "title": "Réquiem de Brahms",
+      "composerName": "Johannes Brahms"
+    }
+  ],
   "eras": [
     "romantic"
   ],

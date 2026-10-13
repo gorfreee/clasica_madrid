@@ -15,7 +15,11 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Paula Ríos"
+    }
+  ],
   "composers": [],
   "works": [],
   "eras": [],
@@ -23,7 +27,7 @@
     "recital"
   ],
   "kind": "alternative",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_ateneo_madrid",

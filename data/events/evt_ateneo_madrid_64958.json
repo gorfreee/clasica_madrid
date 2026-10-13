@@ -15,7 +15,11 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Quinteto 1909"
+    }
+  ],
   "composers": [],
   "works": [],
   "eras": [],

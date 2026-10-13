@@ -15,7 +15,14 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Filip Mišković"
+    },
+    {
+      "name": "María Esther Guzmán"
+    }
+  ],
   "composers": [],
   "works": [],
   "eras": [],

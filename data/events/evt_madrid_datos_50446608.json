@@ -20,8 +20,20 @@
       "name": "José Luis Bernaldo de Quirós"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Robert Schumann"
+    },
+    {
+      "name": "Isaac Albéniz"
+    }
+  ],
+  "works": [
+    {
+      "title": "Suite española",
+      "composerName": "Isaac Albéniz"
+    }
+  ],
   "eras": [
     "romantic"
   ],
