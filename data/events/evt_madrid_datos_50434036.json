@@ -15,13 +15,31 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
-  "works": [],
+  "performers": [
+    {
+      "name": "El Coro!"
+    },
+    {
+      "name": "Ángel Chirinos"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    }
+  ],
+  "works": [
+    {
+      "title": "Ave verum corpus",
+      "composerName": "Wolfgang Amadeus Mozart"
+    }
+  ],
   "eras": [
     "classical"
   ],
-  "formats": [],
+  "formats": [
+    "choral"
+  ],
   "kind": "alternative",
   "access": "free",
   "citations": [

@@ -21,7 +21,12 @@
       "name": "Wolfgang Amadeus Mozart"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "Bastián y Bastiana",
+      "composerName": "Wolfgang Amadeus Mozart"
+    }
+  ],
   "eras": [
     "classical"
   ],
