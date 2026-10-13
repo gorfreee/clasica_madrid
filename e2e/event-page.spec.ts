@@ -8,6 +8,7 @@ const LONG_VENUE = '/eventos/coma-26-trio-fernandez-apellaniz/';
 const LONG_TITLE =
   '/eventos/xxviii-festival-internacional-de-musica-contemporanea-de-madrid-coma-26-orquesta-sinfonica-de-la-universidad-complutense/';
 const PAST_EVENT = '/eventos/recital-de-piano/';
+const VENUE_FACT_LABEL = /^Lugar$/;
 
 async function expectNoHorizontalOverflow(page: Page) {
   const widths = await page.evaluate(() => ({
@@ -103,6 +104,23 @@ test.describe('aviso de corrección en la ficha', () => {
 });
 
 test.describe('jerarquía de la ficha de evento', () => {
+  for (const whenLabel of ['Próxima función', 'Tuvo lugar']) {
+    test(`selecciona solo Lugar cuando la fecha se etiqueta «${whenLabel}»`, async ({ page }) => {
+      // Both static build states must work regardless of today's date.
+      await page.setContent(`
+        <dl class="event-facts">
+          <div class="event-facts__when"><dt>${whenLabel}</dt><dd>Fecha del concierto</dd></div>
+          <div class="event-facts__venue"><dt>Lugar</dt><dd>Teatro de la Zarzuela</dd></div>
+        </dl>
+      `);
+
+      const venueLabel = page.locator('.event-facts').locator('dt', { hasText: VENUE_FACT_LABEL });
+      await expect(venueLabel).toHaveCount(1);
+      await expect(venueLabel).toHaveText('Lugar');
+      await expect(venueLabel).toBeVisible();
+    });
+  }
+
   test('ordena las secciones y deja el acceso fuera del bloque práctico', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto(FULL_EVENT);
@@ -118,8 +136,8 @@ test.describe('jerarquía de la ficha de evento', () => {
 
     const facts = page.locator('.event-facts');
     await expect(facts.locator('dt').first()).toHaveText(/^(Próxima función|Tuvo lugar)$/);
-    await expect(facts.locator('dt', { hasText: 'Lugar' })).toBeVisible();
-    await expect(facts.locator('dt', { hasText: 'Acceso' })).toHaveCount(0);
+    await expect(facts.locator('dt', { hasText: VENUE_FACT_LABEL })).toBeVisible();
+    await expect(facts.locator('dt', { hasText: /^Acceso$/ })).toHaveCount(0);
 
     const about = page.locator('section').filter({
       has: page.getByRole('heading', { name: 'Sobre el concierto', level: 2 }),
@@ -176,11 +194,11 @@ test.describe('jerarquía de la ficha de evento', () => {
     await expect(page.getByRole('heading', { name: 'Programa', level: 2 })).toHaveCount(0);
 
     await page.goto(UNKNOWN_ACCESS);
-    await expect(page.locator('dt', { hasText: 'Acceso' })).toHaveCount(0);
+    await expect(page.locator('dt', { hasText: /^Acceso$/ })).toHaveCount(0);
     await expect(page.getByRole('heading', { name: 'Sobre el concierto', level: 2 })).toBeVisible();
 
     await page.goto(WITH_SPACE);
-    await expect(page.locator('.event-facts').locator('dt', { hasText: 'Sala' })).toBeVisible();
+    await expect(page.locator('.event-facts').locator('dt', { hasText: /^Sala$/ })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Compositores', level: 2 })).toHaveCount(0);
     await expect(page.getByRole('heading', { name: 'Intérpretes', level: 2 })).toHaveCount(0);
     await expect(page.getByRole('heading', { name: 'Programa', level: 2 })).toHaveCount(0);
