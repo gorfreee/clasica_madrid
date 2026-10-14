@@ -23,9 +23,35 @@
     {
       "name": "Pedro Bonet",
       "role": "conductor"
+    },
+    {
+      "name": "Celia Alcedo",
+      "role": "soloist"
     }
   ],
-  "composers": [],
+  "composers": [
+    {
+      "name": "Juan Pérez Bocanegra"
+    },
+    {
+      "name": "Domenico Zipoli"
+    },
+    {
+      "name": "André Cardinal Destouches"
+    },
+    {
+      "name": "Santiago de Murcia"
+    },
+    {
+      "name": "Teodorico Pedrini"
+    },
+    {
+      "name": "Carlos Galán"
+    },
+    {
+      "name": "Baltasar Jaime Martínez Compañón"
+    }
+  ],
   "works": [],
   "eras": [],
   "formats": [
