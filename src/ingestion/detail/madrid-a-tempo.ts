@@ -84,19 +84,58 @@ export function parseMadridFeed(body: string, pageUrl: string): {
   next: boolean;
   page: number;
   pageSize: number;
+  nextCursor?: string;
 } {
   const warmup = parseJsonObject(findScript(body, 'wix-warmup-data'), 'warmup');
+  if (Object.keys(warmup).length === 0) throw new MadridEmptyWarmupError();
   const feed = findBlogFeed(warmup);
   if (feed.page !== madridListingPage(pageUrl)) {
     throw new Error('madrid-a-tempo: paginación no secuencial');
   }
-  const pageData = asRecord(asRecord(asRecord(feed.payload).feedResponse).postFeedPage);
-  const postsWrap = asRecord(pageData.posts);
+  const response = asRecord(feed.payload.feedResponse, 'madrid-a-tempo: falta feedResponse');
+  const pageData = asRecord(response.postFeedPage, 'madrid-a-tempo: falta postFeedPage');
+  const postsWrap = asRecord(pageData.posts, 'madrid-a-tempo: falta postFeedPage.posts');
   const posts = asArray(postsWrap.posts).map((item, index) => readPost(item, index));
+  const paging = asRecord(postsWrap.pagingMetaData, 'madrid-a-tempo: falta posts.pagingMetaData');
+  if (paging.count !== posts.length || posts.length > feed.pageSize) {
+    throw new Error('madrid-a-tempo: posts incompletos o count inconsistente');
+  }
+  if (paging.offset !== (feed.page - 1) * feed.pageSize) {
+    throw new Error('madrid-a-tempo: offset de paginación inconsistente');
+  }
+  if (!Number.isInteger(paging.total) || (paging.total as number) < 0) {
+    throw new Error('madrid-a-tempo: total de paginación inválido');
+  }
+  if (paging.cursors !== undefined && !isRecord(paging.cursors)) {
+    throw new Error('madrid-a-tempo: cursors inválidos');
+  }
+  const cursors = paging.cursors as Record<string, unknown> | undefined;
+  if (cursors?.next !== undefined && typeof cursors.next !== 'string') {
+    throw new Error('madrid-a-tempo: cursor next inválido');
+  }
+  // With skipCount Wix reports total=0 even for a nonempty feed. A positive
+  // total, when supplied, must agree with the advertised continuation.
+  const end = (paging.offset as number) + posts.length;
+  if ((paging.total as number) > 0 && ((paging.total as number) < end ||
+    hasNextCursor(postsWrap) !== (end < (paging.total as number)))) {
+    throw new Error('madrid-a-tempo: total y continuación inconsistentes');
+  }
   if (posts.length === 0 && hasNextCursor(postsWrap)) {
     throw new Error('madrid-a-tempo: lista vacía con paginación');
   }
-  return { posts, next: hasNextCursor(postsWrap), page: feed.page, pageSize: feed.pageSize };
+  if (posts.length === 0 && feed.page > 1) {
+    throw new Error('madrid-a-tempo: página anunciada sin posts');
+  }
+  return { posts, next: hasNextCursor(postsWrap), page: feed.page, pageSize: feed.pageSize,
+    ...(asString(cursors?.next) ? { nextCursor: asString(cursors?.next) } : {}) };
+}
+
+/** Observed Wix SSR shell: HTTP 200, but no apps or feed were rendered. */
+export class MadridEmptyWarmupError extends Error {
+  constructor() {
+    super('madrid-a-tempo: wix-warmup-data vacío (SSR sin feed)');
+    this.name = 'MadridEmptyWarmupError';
+  }
 }
 
 export function parseMadridDetail(event: RawEvent, body: string): ObservedFactPatch {
@@ -213,6 +252,11 @@ function readPost(value: unknown, index: number): MadridPost {
   if (!id || !title || (!link && !path) || !slug) {
     throw new Error(`madrid-a-tempo: tarjeta incompleta (${index})`);
   }
+  const linkUrl = link ? madridPostUrl(link) : undefined;
+  const pathUrl = path ? madridPostUrl(path, `https://${HOST}/`) : undefined;
+  if ((link && !linkUrl) || (path && !pathUrl) || (linkUrl && pathUrl && linkUrl !== pathUrl)) {
+    throw new Error(`madrid-a-tempo: URL oficial inválida o inconsistente (${index})`);
+  }
   return { id, title, excerpt, link, path, slug };
 }
 
@@ -221,25 +265,35 @@ function findBlogFeed(warmup: Record<string, unknown>): {
   pageSize: number;
   payload: Record<string, unknown>;
 } {
-  const apps = asRecord(warmup.appsWarmupData);
-  for (const app of Object.values(apps)) {
-    if (!isRecord(app)) continue;
-    for (const [key, raw] of Object.entries(app)) {
-      if (!key.startsWith('feed-page-')) continue;
-      const payload = typeof raw === 'string' ? parseJsonObject(raw, 'feed') : asRecord(raw);
-      const pageData = asRecord(
-        asRecord(payload.feedResponse).postFeedPage,
-        'madrid-a-tempo: falta el listado de conciertos',
-      );
-      asRecord(pageData.posts, 'madrid-a-tempo: falta el listado de conciertos');
-      const page = Number(/"page"\s*:\s*(\d+)/.exec(key)?.[1] ?? '1');
-      const pageSize = Number(/"pageSize"\s*:\s*(\d+)/.exec(key)?.[1] ?? '20');
-      if (!Number.isInteger(page) || page < 1 || !Number.isInteger(pageSize) || pageSize < 1) {
-        throw new Error('madrid-a-tempo: paginación no reconocible');
-      }
-      return { page, pageSize, payload };
+  const apps = asRecord(warmup.appsWarmupData, 'madrid-a-tempo: falta appsWarmupData');
+  const app = asRecord(apps[BLOG_APP_ID], 'madrid-a-tempo: falta la app oficial Wix Blog');
+  const feeds: Array<{ page: number; pageSize: number; payload: Record<string, unknown> }> = [];
+  for (const [key, raw] of Object.entries(app)) {
+    if (!key.startsWith('feed-page-')) continue;
+    // The key embeds a request object, not a fixed serialization. Never
+    // default a missing page to 1 or pick a regex match from another field.
+    const request = parseJsonObject(key.slice(key.indexOf('{')), 'request del feed');
+    const feed = asRecord(request.feed, 'madrid-a-tempo: falta request.feed');
+    const metadata = asRecord(request.metadata, 'madrid-a-tempo: falta request.metadata');
+    if (feed.type !== 'ALL_POSTS') continue;
+    const page = feed.page;
+    const pageSize = feed.pageSize;
+    if (typeof page !== 'number' || !Number.isInteger(page) || page < 1 ||
+        typeof pageSize !== 'number' || !Number.isInteger(pageSize) || pageSize < 1 ||
+        metadata.page !== page || metadata.pageSize !== pageSize || metadata.type !== feed.type) {
+      throw new Error('madrid-a-tempo: request y metadata de paginación inconsistentes');
     }
+    const payload = typeof raw === 'string' ? parseJsonObject(raw, 'feed')
+      : asRecord(raw, 'madrid-a-tempo: payload del feed inválido');
+    const pageData = asRecord(
+      asRecord(payload.feedResponse, 'madrid-a-tempo: falta feedResponse').postFeedPage,
+      'madrid-a-tempo: falta postFeedPage',
+    );
+    asRecord(pageData.posts, 'madrid-a-tempo: falta postFeedPage.posts');
+    feeds.push({ page, pageSize, payload });
   }
+  if (feeds.length > 1) throw new Error('madrid-a-tempo: varios feeds ALL_POSTS ambiguos');
+  if (feeds[0]) return feeds[0];
   throw new Error('madrid-a-tempo: falta el listado de conciertos');
 }
 
@@ -423,7 +477,7 @@ function asRecord(value: unknown, message = 'madrid-a-tempo: estructura inespera
 }
 
 function asArray(value: unknown): unknown[] {
-  if (!Array.isArray(value)) throw new Error('madrid-a-tempo: falta el listado de conciertos');
+  if (!Array.isArray(value)) throw new Error('madrid-a-tempo: postFeedPage.posts.posts no es un array');
   return value;
 }
 

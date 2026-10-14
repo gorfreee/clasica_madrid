@@ -7,6 +7,7 @@ import {
   madridListingUrl,
   madridPostUrl,
   parseMadridDetail,
+  parseMadridFeed,
   parseMadridSchedule,
 } from '../src/ingestion/detail/madrid-a-tempo.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
@@ -17,7 +18,7 @@ import { mergeCandidateBatch } from '../src/ingestion/batch.ts';
 import { matchVenue } from '../src/ingestion/venues.ts';
 import { emptyObservedLists } from '../src/ingestion/observed.ts';
 import { emptyCatalog, type Catalog } from '../src/lib/domain/catalog.ts';
-import type { AdapterContext, RawEvent } from '../src/ingestion/types.ts';
+import { IncompleteListingError, type AdapterContext, type RawEvent } from '../src/ingestion/types.ts';
 import { normalizeUrl } from '../src/ingestion/urls.ts';
 import { TEST_NOW, TEST_WINDOW, makeEvent } from './helpers.ts';
 
@@ -58,6 +59,25 @@ async function sample(externalId = 'cc99d72e-7aa5-4eea-b32c-8eb17a8dce00') {
   return (await adapter.extract(await fixture('listing-sample'), listingUrl, ctx)).find(
     (event) => event.externalId === externalId,
   )!;
+}
+
+type FixturePayload = { feedResponse: { postFeedPage: { posts: {
+  posts: Array<Record<string, unknown>>;
+  pagingMetaData: { count: number; offset: number; total: number; cursors?: { next?: string; previous?: string } };
+} } } };
+
+function changeFeed(html: string, change: (payload: FixturePayload, request: {
+  feed: Record<string, unknown>; metadata: Record<string, unknown>;
+}) => void): string {
+  const warmup = JSON.parse(/id="wix-warmup-data">([\s\S]*?)<\/script>/.exec(html)![1]!);
+  const blog = warmup.appsWarmupData['14bcded7-0066-7c35-14d7-466cb3f09103'];
+  const key = Object.keys(blog).find((key) => key.startsWith('feed-page-'))!;
+  const payload = JSON.parse(blog[key]);
+  const request = JSON.parse(key.slice(key.indexOf('{')));
+  change(payload, request);
+  delete blog[key];
+  blog[key.slice(0, key.indexOf('{')) + JSON.stringify(request)] = JSON.stringify(payload);
+  return `<script id="wix-warmup-data">${JSON.stringify(warmup)}</script>`;
 }
 
 function listedPost(input: { sourceUrl: string; externalId: string; title: string }): RawEvent {
@@ -185,6 +205,159 @@ describe('Madrid a Tempo listing', () => {
       'https://www.madridatempo.com/proximos-conciertos',
     );
     expect(madridListingUrl('https://www.madridatempo.com/conciertos', listingUrl)).toBeUndefined();
+  });
+});
+
+describe('Madrid a Tempo real Wix SSR regression (2026-10-14)', () => {
+  const liveUrl = (page: number) => page === 1 ? listingUrl : `${listingUrl}/page/${page}`;
+  const liveContext: AdapterContext = {
+    ...ctx,
+    // Include historical posts to verify every official identity and URL.
+    window: { from: '2000-01-01', to: '2027-07-31' },
+    get: async (url) => fixture(`live-20261014-page${new URL(url).pathname.split('/').at(-1)}`),
+  };
+
+  it('reads all five real pages, 87 posts, stable identities and official URLs, deterministically', async () => {
+    const fetched: string[] = [];
+    const html = await fixture('live-20261014-page1');
+    const events = await adapter.extract(html, listingUrl, {
+      ...liveContext, get: async (url) => { fetched.push(url); return liveContext.get(url); },
+    });
+    expect(fetched).toEqual([2, 3, 4, 5].map(liveUrl));
+    const posts = (await Promise.all([1, 2, 3, 4, 5].map(async (page) =>
+      parseMadridFeed(await fixture(`live-20261014-page${page}`), liveUrl(page)).posts))).flat();
+    expect(posts).toHaveLength(87);
+    expect(new Set(posts.map((post) => post.id)).size).toBe(87);
+    const byId = new Map(posts.map((post) => [post.id, post]));
+    for (const event of events) {
+      const post = byId.get(event.externalId!)!;
+      expect(post).toBeDefined();
+      expect(event.sourceUrl).toBe(madridPostUrl(post.link ?? post.path!, listingUrl));
+    }
+    expect(new Set(events.map((event) => event.sourceUrl)).size).toBe(events.length);
+    expect(await adapter.extract(html, listingUrl, liveContext)).toEqual(events);
+  });
+
+  it('recovers the actual empty HTTP-200 SSR shell once and validates the recovered page', async () => {
+    const fetched: string[] = [];
+    const baseline = await adapter.extract(await fixture('live-20261014-page1'), listingUrl, liveContext);
+    const events = await adapter.extract(await fixture('live-20261014-page1'), listingUrl, {
+      ...liveContext,
+      get: async (url) => {
+        fetched.push(url);
+        if (url === page2Url) return fixture('live-20261014-page2-empty-ssr');
+        return liveContext.get(url);
+      },
+    });
+    expect(fetched).toEqual([page2Url, `${page2Url}?cm_listing_retry=1`, ...[3, 4, 5].map(liveUrl)]);
+    expect(events).toEqual(baseline);
+  });
+
+  it('does not mistake empty warmup, malformed HTML or partial JSON for a valid empty feed', async () => {
+    for (const html of [await fixture('live-20261014-page2-empty-ssr'), '<html>error</html>',
+      '<script id="wix-warmup-data">{"appsWarmupData":{}}</script>']) {
+      expect(() => parseMadridFeed(html, page2Url)).toThrow(/madrid-a-tempo/);
+    }
+    const get = async () => '<html>HTTP 200 error template</html>';
+    await expect(adapter.extract(await get(), listingUrl, { ...ctx, get })).rejects.toThrow(listingUrl);
+  });
+
+  it('preserves previous validated pages after exhausted SSR recovery, without claiming coverage', async () => {
+    const html = await fixture('live-20261014-page1');
+    const firstOnly = changeFeed(html, (p) => { delete p.feedResponse.postFeedPage.posts.pagingMetaData.cursors; });
+    const expected = await adapter.extract(firstOnly, listingUrl, liveContext);
+    const fetched: string[] = [];
+    const error = await adapter.extract(html, listingUrl, {
+      ...liveContext, get: async (url) => { fetched.push(url); return fixture('live-20261014-page2-empty-ssr'); },
+    }).catch((error: unknown) => error);
+    expect(error).toBeInstanceOf(IncompleteListingError);
+    expect((error as IncompleteListingError).message).toContain(page2Url);
+    expect((error as IncompleteListingError).message).toMatch(/SSR sin feed.*recuperación inválida/);
+    expect((error as IncompleteListingError).events).toEqual(expected);
+    expect(fetched).toHaveLength(2);
+  });
+
+  it('rejects a wrong page returned by the SSR recovery request', async () => {
+    const shell = await fixture('live-20261014-page2-empty-ssr');
+    await expect(adapter.extract(await fixture('live-20261014-page1'), listingUrl, {
+      ...liveContext, get: async (url) => url.includes('?') ? fixture('live-20261014-page1') : shell,
+    })).rejects.toThrow(/page\/2.*paginación no secuencial/);
+  });
+
+  it('reads semantic feed parameters independent of JSON field order and whitespace', async () => {
+    const html = await fixture('listing-sample');
+    const changed = changeFeed(html, (_p, request) => {
+      request.feed = Object.fromEntries(Object.entries(request.feed).reverse());
+      request.metadata = Object.fromEntries(Object.entries(request.metadata).reverse());
+    });
+    expect(await adapter.extract(changed, listingUrl, ctx)).toEqual(await adapter.extract(html, listingUrl, ctx));
+  });
+
+  it('rejects incomplete counts, offsets, metadata, missing pagination, ambiguous feeds and invalid URLs', async () => {
+    const html = await fixture('live-20261014-page1');
+    const cases: Array<[(p: FixturePayload, r: { feed: Record<string, unknown>; metadata: Record<string, unknown> }) => void, RegExp]> = [
+      [(p) => { p.feedResponse.postFeedPage.posts.posts.pop(); }, /count/],
+      [(p) => { p.feedResponse.postFeedPage.posts.pagingMetaData.offset = 20; }, /offset/],
+      [(_p, r) => { r.metadata.page = 2; }, /metadata/],
+      [(_p, r) => { delete r.feed.page; }, /metadata/],
+      [(p) => { p.feedResponse.postFeedPage.posts.pagingMetaData.total = 1; }, /total/],
+      [(p) => { p.feedResponse.postFeedPage.posts.posts[0]!.link = 'https://example.org/post/x'; }, /URL oficial/],
+    ];
+    for (const [change, message] of cases) {
+      await expect(adapter.extract(changeFeed(html, change), listingUrl, liveContext)).rejects.toThrow(message);
+    }
+    await expect(adapter.extract(html.replaceAll('pagingMetaData', 'missingPaging'), listingUrl, liveContext))
+      .rejects.toThrow(/pagingMetaData/);
+    const warmup = JSON.parse(/id="wix-warmup-data">([\s\S]*?)<\/script>/.exec(html)![1]!);
+    const blog = warmup.appsWarmupData['14bcded7-0066-7c35-14d7-466cb3f09103'];
+    const key = Object.keys(blog)[0]!;
+    blog[key.replace('TPASection_kwm90pe0', 'another-component')] = blog[key];
+    await expect(adapter.extract(`<script id="wix-warmup-data">${JSON.stringify(warmup)}</script>`, listingUrl, liveContext))
+      .rejects.toThrow(/ambiguos/);
+  });
+
+  it('detects duplicate ids and URLs even when all the affected posts are outside the window', async () => {
+    const first = await fixture('live-20261014-page1');
+    const previous = parseMadridFeed(first, listingUrl).posts[0]!;
+    for (const change of [
+      (post: Record<string, unknown>) => { post.id = previous.id; },
+      (post: Record<string, unknown>) => { post.url = { path: previous.path }; post.link = previous.link; },
+    ]) {
+      const page2 = changeFeed(await fixture('live-20261014-page2'), (p) => change(p.feedResponse.postFeedPage.posts.posts[0]!));
+      await expect(adapter.extract(first, listingUrl, { ...ctx, window: { from: '2100-01-01', to: '2100-12-31' },
+        get: async () => page2,
+      })).rejects.toThrow(/page\/2.*duplicado/);
+    }
+  });
+
+  it('detects repeated cursors and changing page sizes', async () => {
+    const first = await fixture('live-20261014-page1');
+    const cursor = parseMadridFeed(first, listingUrl).nextCursor!;
+    for (const [change, message] of [
+      [(p: FixturePayload) => { p.feedResponse.postFeedPage.posts.pagingMetaData.cursors!.next = cursor; }, /cursor.*repetido/],
+      [(p: FixturePayload, r: { feed: Record<string, unknown>; metadata: Record<string, unknown> }) => {
+        r.feed.pageSize = 21; r.metadata.pageSize = 21; p.feedResponse.postFeedPage.posts.pagingMetaData.offset = 21;
+      }, /pageSize cambia/],
+    ] as const) {
+      const page2 = changeFeed(await fixture('live-20261014-page2'), change);
+      await expect(adapter.extract(first, listingUrl, { ...liveContext, get: async () => page2 })).rejects.toThrow(message);
+    }
+  });
+
+  it('stops at the page limit without fetching page 21', async () => {
+    const html = await fixture('live-20261014-page1');
+    const pageHtml = (page: number) => changeFeed(html, (p, r) => {
+      r.feed.page = page; r.metadata.page = page; r.feed.pageSize = 1; r.metadata.pageSize = 1;
+      const wrap = p.feedResponse.postFeedPage.posts;
+      wrap.posts = [{ ...wrap.posts[0], id: `synthetic-page-${page}`, url: { path: `/post/synthetic-page-${page}` }, link: undefined }];
+      wrap.pagingMetaData = { count: 1, offset: page - 1, total: 0, cursors: { next: `synthetic-cursor-${page}` } };
+    });
+    const fetched: string[] = [];
+    await expect(adapter.extract(pageHtml(1), listingUrl, { ...liveContext, get: async (url) => {
+      fetched.push(url); return pageHtml(Number(new URL(url).pathname.split('/').at(-1)));
+    } })).rejects.toThrow(/demasiadas páginas \(20\)/);
+    expect(fetched).toHaveLength(19);
+    expect(fetched.at(-1)).toBe(liveUrl(20));
   });
 });
 
@@ -355,6 +528,49 @@ describe('Madrid a Tempo pipeline safety', () => {
     expect(second.summary.updatedEvents).toBe(0);
     expect(second.summary.unchangedEvents).toBe(1);
     expect(second.summary.possiblyMissing).toBe(0);
+  });
+
+  it('retains and hydrates validated observations after an incomplete later page, suppressing disappearances', async () => {
+    const published = mergeCandidateBatch(emptyCatalog(), (await run()).candidates).catalog;
+    const paginated = changeFeed(await fixture('listing-sample'), (p) => {
+      p.feedResponse.postFeedPage.posts.pagingMetaData.cursors = { next: 'synthetic-next' };
+    });
+    const partial = await runIngest({
+      now: TEST_NOW, dryRun: true, catalog: published, window: TEST_WINDOW, sourceIds: [source.id],
+      dataDir: await mkdtemp(path.join(os.tmpdir(), 'madrid-tempo-partial-')),
+      get: async (url) => {
+        if (url === listingUrl) return paginated;
+        if (url.startsWith(page2Url)) return fixture('live-20261014-page2-empty-ssr');
+        return pages(url);
+      },
+    });
+    expect(partial.summary.sourcesFailed).toEqual([expect.objectContaining({
+      sourceId: source.id, message: expect.stringContaining(page2Url),
+    })]);
+    expect(partial.summary.disappearanceSuppressedSources).toContain(source.id);
+    expect(partial.summary.possiblyMissing).toBe(0);
+    expect(partial.summary.unchangedEvents).toBe(1);
+    expect(partial.summary.newEvents).toBe(0);
+    expect(partial.summary.updatedEvents).toBe(0);
+  });
+
+  it('recovers the first-page SSR shell without altering publication or idempotence', async () => {
+    const published = mergeCandidateBatch(emptyCatalog(), (await run()).candidates).catalog;
+    const recovered = await runIngest({
+      now: TEST_NOW, dryRun: true, catalog: published, window: TEST_WINDOW, sourceIds: [source.id],
+      dataDir: await mkdtemp(path.join(os.tmpdir(), 'madrid-tempo-recovered-')),
+      get: async (url) => {
+        if (url === listingUrl) return fixture('live-20261014-page2-empty-ssr');
+        if (url === `${listingUrl}?cm_listing_retry=1`) return fixture('listing');
+        return pages(url);
+      },
+    });
+    expect(recovered.summary.sourcesFailed).toEqual([]);
+    expect(recovered.summary.disappearanceSuppressedSources).not.toContain(source.id);
+    expect(recovered.summary.unchangedEvents).toBe(1);
+    expect(recovered.summary.newEvents).toBe(0);
+    expect(recovered.summary.updatedEvents).toBe(0);
+    expect(recovered.summary.possiblyMissing).toBe(0);
   });
 
   it('matches the already published inauguration without duplicating or renaming it', async () => {
