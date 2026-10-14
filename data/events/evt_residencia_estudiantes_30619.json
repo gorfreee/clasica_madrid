@@ -15,7 +15,11 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Borja Mariño"
+    }
+  ],
   "composers": [
     {
       "name": "Reynaldo Hahn"
@@ -65,10 +69,10 @@
     {
       "sourceId": "src_residencia_estudiantes",
       "url": "https://residenciadeestudiantes.com/actividades/la-belleza-escondida",
-      "checkedAt": "2026-09-24",
+      "checkedAt": "2026-10-14",
       "externalId": "30619"
     }
   ],
   "primarySourceId": "src_residencia_estudiantes",
-  "lastVerifiedAt": "2026-09-24"
+  "lastVerifiedAt": "2026-10-14"
 }

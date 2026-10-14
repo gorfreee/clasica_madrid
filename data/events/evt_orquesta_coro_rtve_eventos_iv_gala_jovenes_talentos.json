@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_orquesta_coro_rtve_eventos_iv_gala_jovenes_talentos",
+  "slug": "iv-gala-jovenes-talentos",
+  "title": "IV Gala Jóvenes Talentos",
+  "status": "scheduled",
+  "venueId": "ven_teatro_monumental",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_orquesta_coro_rtve_eventos_iv_gala_jovenes_talentos_01",
+      "date": "2026-12-11",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Sinfónica RTVE"
+    },
+    {
+      "name": "Daniela Musca",
+      "role": "conductor"
+    },
+    {
+      "name": "David Lara"
+    },
+    {
+      "name": "Viecente Benedicto"
+    },
+    {
+      "name": "Alexandra Pichurina"
+    },
+    {
+      "name": "Bruno Hock Merino"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_orquesta_coro_rtve",
+      "url": "https://www.teatromonumental.es/eventos/iv-gala-jovenes-talentos",
+      "checkedAt": "2026-10-14",
+      "externalId": "/eventos/iv-gala-jovenes-talentos/"
+    }
+  ],
+  "primarySourceId": "src_orquesta_coro_rtve",
+  "lastVerifiedAt": "2026-10-14"
+}

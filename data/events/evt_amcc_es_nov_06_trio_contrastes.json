@@ -92,8 +92,14 @@
       "sourceId": "src_amcc_es",
       "url": "https://amcc.es/coma/coma26/nov-06-trio-contrastes",
       "checkedAt": "2026-09-20"
+    },
+    {
+      "sourceId": "src_real_academia_bellas_artes_san_fernando",
+      "url": "https://www.realacademiabellasartessanfernando.com/actividades/conciertos/coma26-2",
+      "checkedAt": "2026-10-14",
+      "externalId": "coma26-2"
     }
   ],
   "primarySourceId": "src_amcc_es",
-  "lastVerifiedAt": "2026-09-20"
+  "lastVerifiedAt": "2026-10-14"
 }

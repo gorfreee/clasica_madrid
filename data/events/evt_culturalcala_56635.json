@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_culturalcala_56635",
+  "slug": "una-celebracion-de-la-tradicion-vienesa",
+  "title": "Una Celebración de la Tradición Vienesa",
+  "status": "scheduled",
+  "venueId": "ven_teatro_salon_cervantes_alcala",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_culturalcala_56635_01",
+      "date": "2027-01-03",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_culturalcala",
+      "url": "https://culturalcala.es/item_event/una-celebracion-de-la-tradicion-vienesa",
+      "checkedAt": "2026-10-14",
+      "externalId": "56635"
+    }
+  ],
+  "primarySourceId": "src_culturalcala",
+  "lastVerifiedAt": "2026-10-14"
+}
