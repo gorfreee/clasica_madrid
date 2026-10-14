@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_patrimonio_nacional_jorge_garcia_martin_concierto_didactico_de_organo_774996",
+  "slug": "jorge-garcia-martin-concierto-didactico-de-organo",
+  "title": "Jorge García Martín — Concierto didáctico de órgano",
+  "status": "scheduled",
+  "venueId": "ven_palacio_real_madrid_capilla_real",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_patrimonio_nacional_jorge_garcia_martin_concierto_didactico_de_organo_774996_01",
+      "date": "2026-11-21",
+      "time": "09:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_patrimonio_nacional_jorge_garcia_martin_concierto_didactico_de_organo_774996_02",
+      "date": "2026-11-21",
+      "time": "11:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_patrimonio_nacional_jorge_garcia_martin_concierto_didactico_de_organo_774996_03",
+      "date": "2026-11-21",
+      "time": "13:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Jorge García Martín"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "organ"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_patrimonio_nacional",
+      "url": "https://tickets.patrimonionacional.es/es/tickets/jorge-garcia-martin-concierto-didactico-de-organo-774996",
+      "checkedAt": "2026-10-14"
+    }
+  ],
+  "primarySourceId": "src_patrimonio_nacional",
+  "lastVerifiedAt": "2026-10-14"
+}

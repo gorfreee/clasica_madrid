@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_parroquiadesangines_es_musica_y_palabra_en_navidad_concierto_de_organo",
+  "slug": "musica-y-palabra-en-navidad-concierto-de-organo",
+  "title": "Música y Palabra en Navidad: Concierto de órgano",
+  "status": "scheduled",
+  "venueId": "ven_parroquia_de_san_gines",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_parroquiadesangines_es_musica_y_palabra_en_navidad_concierto_de_organo_01",
+      "date": "2027-01-03",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "organ"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_parroquiadesangines_es",
+      "url": "https://www.parroquiadesangines.es/event/musica-y-palabra-en-navidad-concierto-de-organo",
+      "checkedAt": "2026-10-14"
+    }
+  ],
+  "primarySourceId": "src_parroquiadesangines_es",
+  "lastVerifiedAt": "2026-10-14"
+}

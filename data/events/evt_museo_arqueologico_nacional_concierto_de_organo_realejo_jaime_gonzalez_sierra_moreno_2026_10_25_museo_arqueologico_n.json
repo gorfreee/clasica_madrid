@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_museo_arqueologico_nacional_concierto_de_organo_realejo_jaime_gonzalez_sierra_moreno_2026_10_25_museo_arqueologico_n",
+  "slug": "concierto-de-organo-realejo-jaime-gonzalez-sierra-moreno",
+  "title": "Concierto de órgano realejo — Jaime González-Sierra Moreno",
+  "status": "scheduled",
+  "venueId": "ven_man_salas_nobles",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_museo_arqueologico_nacional_concierto_de_organo_realejo_jaime_gonzalez_sierra_moreno_2026_10_25_museo_arqueologico_n",
+      "date": "2026-10-25",
+      "time": "13:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Jaime González-Sierra Moreno"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "organ",
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_museo_arqueologico_nacional",
+      "url": "https://www.man.es/man/actividades/musica-teatro/conciertos-organo.html",
+      "checkedAt": "2026-10-14"
+    }
+  ],
+  "primarySourceId": "src_museo_arqueologico_nacional",
+  "lastVerifiedAt": "2026-10-14"
+}
