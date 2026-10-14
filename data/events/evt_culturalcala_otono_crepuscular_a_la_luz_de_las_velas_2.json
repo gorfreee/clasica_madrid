@@ -9,12 +9,6 @@
   "seriesId": null,
   "occurrences": [
     {
-      "id": "occ_culturalcala_otono_crepuscular_a_la_luz_de_las_velas_2_01",
-      "date": "2026-11-13",
-      "time": "21:00",
-      "status": "scheduled"
-    },
-    {
       "id": "occ_culturalcala_otono_crepuscular_a_la_luz_de_las_velas_2_02",
       "date": "2026-11-14",
       "time": "21:00",
@@ -34,10 +28,13 @@
       "name": "Wolfgang Amadeus Mozart"
     },
     {
+      "name": "Joaquín Turina"
+    },
+    {
       "name": "Beeftink"
     },
     {
-      "name": "Piazzolla"
+      "name": "Astor Piazzolla"
     }
   ],
   "works": [
@@ -50,7 +47,8 @@
       "composerName": "Wolfgang Amadeus Mozart"
     },
     {
-      "title": "Escena Andaluza: Crepúsculo Serenata"
+      "title": "Escena Andaluza: Crepúsculo Serenata",
+      "composerName": "Joaquín Turina"
     },
     {
       "title": "Squirrel",
@@ -58,7 +56,7 @@
     },
     {
       "title": "Otoño",
-      "composerName": "Piazzolla"
+      "composerName": "Astor Piazzolla"
     }
   ],
   "eras": [
@@ -75,6 +73,11 @@
     {
       "sourceId": "src_culturalcala",
       "url": "https://culturalcala.es/item_event/otono-crepuscular-a-la-luz-de-las-velas-2",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "sourceId": "src_giglon_com",
+      "url": "https://www.giglon.com/evento/otono-crepuscular-a-la-luz-de-las-velas-sapere-aude-alcala-de-henares",
       "checkedAt": "2026-10-14"
     }
   ],

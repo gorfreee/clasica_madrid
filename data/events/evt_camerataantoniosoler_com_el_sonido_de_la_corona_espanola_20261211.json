@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_camerataantoniosoler_com_el_sonido_de_la_corona_espanola_20261211",
+  "slug": "el-sonido-de-la-corona-espanola-camerata-antonio-soler",
+  "title": "El sonido de la Corona Española — Camerata Antonio Soler",
+  "status": "scheduled",
+  "venueId": "ven_real_coliseo_carlos_iii",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_camerataantoniosoler_com_el_sonido_de_la_corona_espanola_20261211_01",
+      "date": "2026-12-11",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Camerata Antonio Soler",
+      "role": "ensemble"
+    },
+    {
+      "name": "Gustavo Sánchez",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "chamber",
+    "early-music"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_camerataantoniosoler_com",
+      "url": "https://www.camerataantoniosoler.com/proximos-eventos/",
+      "checkedAt": "2026-10-14"
+    }
+  ],
+  "primarySourceId": "src_camerataantoniosoler_com",
+  "lastVerifiedAt": "2026-10-14"
+}

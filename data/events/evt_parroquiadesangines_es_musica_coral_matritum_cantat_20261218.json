@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_parroquiadesangines_es_musica_coral_matritum_cantat_20261218",
+  "slug": "musica-coral-en-adviento-navidad-matritum-cantat",
+  "title": "Música coral en Adviento-Navidad — Coro Matritum Cantat",
+  "status": "scheduled",
+  "venueId": "ven_parroquia_de_san_gines",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_parroquiadesangines_es_musica_coral_matritum_cantat_20261218_01",
+      "date": "2026-12-18",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro Matritum Cantat",
+      "role": "choir"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_parroquiadesangines_es",
+      "url": "https://www.parroquiadesangines.es/event/musica-coral-en-navidad-coro-matritum-cantat/",
+      "checkedAt": "2026-10-14"
+    }
+  ],
+  "primarySourceId": "src_parroquiadesangines_es",
+  "lastVerifiedAt": "2026-10-14"
+}

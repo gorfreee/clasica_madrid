@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cultura_pozuelodealarcon_org_santa_cecilia_sonidos_de_gala_ospal_20261122",
+  "slug": "concierto-de-santa-cecilia-sonidos-de-gala-ospal",
+  "title": "Concierto de Santa Cecilia: Sonidos de gala — OSPAL",
+  "status": "scheduled",
+  "venueId": "ven_teatro_mira",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cultura_pozuelodealarcon_org_santa_cecilia_sonidos_de_gala_ospal_20261122_01",
+      "date": "2026-11-22",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Sinfónica de Pozuelo de Alarcón",
+      "role": "orchestra"
+    },
+    {
+      "name": "Javier Hermossa Sánchez",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_cultura_pozuelodealarcon_org",
+      "url": "https://cultura.pozuelodealarcon.org/agenda/concierto-de-santa-cecilia-sonidos-de-gala-orquesta-sinfonica-de-pozuelo-de-alarcon-ospal",
+      "checkedAt": "2026-10-14"
+    }
+  ],
+  "primarySourceId": "src_cultura_pozuelodealarcon_org",
+  "lastVerifiedAt": "2026-10-14"
+}
