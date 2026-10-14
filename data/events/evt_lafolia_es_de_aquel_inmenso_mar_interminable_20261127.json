@@ -47,13 +47,12 @@
     },
     {
       "name": "Carlos Galán"
-    },
-    {
-      "name": "Baltasar Jaime Martínez Compañón"
     }
   ],
   "works": [],
-  "eras": [],
+  "eras": [
+    "baroque"
+  ],
   "formats": [
     "early-music",
     "chamber"
