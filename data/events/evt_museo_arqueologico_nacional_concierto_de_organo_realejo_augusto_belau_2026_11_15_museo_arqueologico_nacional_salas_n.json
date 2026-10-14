@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_museo_arqueologico_nacional_concierto_de_organo_realejo_augusto_belau_2026_11_15_museo_arqueologico_nacional_salas_n",
+  "slug": "concierto-de-organo-realejo-augusto-belau",
+  "title": "Concierto de órgano realejo — Augusto Belau",
+  "status": "scheduled",
+  "venueId": "ven_man_salas_nobles",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_museo_arqueologico_nacional_concierto_de_organo_realejo_augusto_belau_2026_11_15_museo_arqueologico_nacional_salas_n",
+      "date": "2026-11-15",
+      "time": "13:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Augusto Belau"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "organ"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_museo_arqueologico_nacional",
+      "url": "https://www.man.es/man/actividades/musica-teatro/conciertos-organo.html",
+      "checkedAt": "2026-10-14"
+    }
+  ],
+  "primarySourceId": "src_museo_arqueologico_nacional",
+  "lastVerifiedAt": "2026-10-14"
+}

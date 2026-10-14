@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_museo_arqueologico_nacional_concierto_de_organo_realejo_celia_miranda_2026_11_01_museo_arqueologico_nacional_salas_n",
+  "slug": "concierto-de-organo-realejo-celia-miranda",
+  "title": "Concierto de órgano realejo — Celia Miranda",
+  "status": "scheduled",
+  "venueId": "ven_man_salas_nobles",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_museo_arqueologico_nacional_concierto_de_organo_realejo_celia_miranda_2026_11_01_museo_arqueologico_nacional_salas_n",
+      "date": "2026-11-01",
+      "time": "13:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Celia Miranda"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "organ"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_museo_arqueologico_nacional",
+      "url": "https://www.man.es/man/actividades/musica-teatro/conciertos-organo.html",
+      "checkedAt": "2026-10-14"
+    }
+  ],
+  "primarySourceId": "src_museo_arqueologico_nacional",
+  "lastVerifiedAt": "2026-10-14"
+}
