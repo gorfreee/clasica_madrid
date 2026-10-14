@@ -1,3 +1,4 @@
+import type { HydrationDiscrepancy } from './detail/conflicts.ts';
 import { z } from 'zod';
 import { collapseWhitespace } from './html.ts';
 import {
@@ -68,6 +69,8 @@ export type ObservedEventStatus = 'scheduled' | 'cancelled' | 'postponed';
 export type ObservedFactPatch = Partial<Omit<ObservedFacts, 'title'>> & {
   occurrences?: DetailOccurrence[];
   eventStatus?: ObservedEventStatus;
+  /** Diagnostic only; mergeObserved never copies this into observed/classification facts. */
+  hydrationDiscrepancies?: HydrationDiscrepancy[];
 };
 
 export function emptyObservedLists(): Pick<ObservedFacts, 'performers' | 'composers' | 'works'> {

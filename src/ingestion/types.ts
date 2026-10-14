@@ -60,6 +60,8 @@ export type RawEvent = {
   observed: RawObserved;
   /** Exact listing text, used only as a conservative hydration/window hint. */
   listingDateText?: string;
+  /** Escorial TEC evidence; only that adapter interprets its all-day envelope. */
+  escorialCalendar?: { allDay: boolean; start: string; end: string };
   /**
    * Diagnostic only: which official listing surface produced this observation.
    * Never written to `data/**`.

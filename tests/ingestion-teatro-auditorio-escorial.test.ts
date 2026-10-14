@@ -5,6 +5,8 @@ import { describe, expect, it } from 'vitest';
 import { emptyCatalog } from '../src/lib/domain/catalog.ts';
 import { mergeCandidateBatch } from '../src/ingestion/batch.ts';
 import { runIngest } from '../src/ingestion/pipeline.ts';
+import { hydrateEvents } from '../src/ingestion/hydrate.ts';
+import { normalizeRawEvent } from '../src/ingestion/normalize.ts';
 import { attentionKinds } from '../src/ingestion/outcome.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
 import { eventUrl, teatroAuditorioEscorialAdapter as adapter } from '../src/ingestion/sources/teatro-auditorio-escorial.ts';
@@ -184,4 +186,111 @@ describe('Teatro Auditorio El Escorial', () => {
       'Manuel Jurado', 'Orquesta Sinfónica Carlos Cruz Diez',
     ]);
   });
+
+  it('recovers the live all-day Mahler envelope and keeps its original surfaces in hydration diagnostics', async () => {
+    const events = await adapter.extract(await fixture('listing-20261014.json'), listingUrl, context);
+    const mahler = events.find(e => e.externalId === '10994')!;
+    const [result] = await hydrateEvents([mahler], adapter, { ...context, get: async () => fixture('mahler-20261014.html') });
+    expect(result?.hydration).toMatchObject({ status: 'succeeded', discrepancies: [{ field: 'time', resolution: 'detail-preferred' }] });
+    expect(result?.observed.occurrences).toEqual([{ raw: '16 de octubre, 19:00 horas', date: '2026-10-16', time: '19:00' }]);
+    expect(result?.hydration.discrepancies?.[0]?.evidence).toEqual(expect.arrayContaining([
+      { surface: 'detail:itemprop-startDate', value: '2026-10-16T00:00:00+02:00' },
+      { surface: 'detail:postid', value: '10994' },
+      { surface: 'listing:API-all_day', value: JSON.stringify(mahler.escorialCalendar) },
+    ]));
+    expect(result?.observed).not.toHaveProperty('hydrationDiscrepancies');
+    expect(normalizeRawEvent(result!)?.occurrences[0]?.time).toBe('19:00');
+  });
+
+  it('requires the complete same-day all_day envelope and independently matching identity before interpreting midnight', async () => {
+    const events = await adapter.extract(await fixture('listing-20261014.json'), listingUrl, context);
+    const mahler = events.find(e => e.externalId === '10994')!;
+    const body = await fixture('mahler-20261014.html');
+    for (const calendar of [undefined,
+      { ...mahler.escorialCalendar!, allDay: false },
+      { ...mahler.escorialCalendar!, end: '2026-10-17 23:59:59' },
+      { ...mahler.escorialCalendar!, start: '2026-10-16 12:00:00' },
+    ]) {
+      const [failed] = await hydrateEvents([{ ...mahler, escorialCalendar: calendar }], adapter, { ...context, get: async () => body });
+      expect(failed?.hydration).toMatchObject({ status: 'failed', reason: 'source-conflict' });
+    }
+    for (const changed of [
+      body.replace('postid-10994', 'postid-11018'),
+      body.replace('/events/10994', '/events/11018'),
+      body.replace('2026-10-16T23:59:59', '2026-10-17T23:59:59'),
+      body.replace('<body', '<not-body'),
+      body.replaceAll('2026-10-16T00:00:00', '2026-10-16T00:00:05'),
+      body.replace('2026-10-16T23:59:59+02:00', '2026-10-16T23:59:59+01:00'),
+    ]) expect(() => adapter.hydrate!(mahler, changed, context)).toThrow(/contradictori|identificador|identidad|estructurado/);
+  });
+
+  it('preserves legitimate midnight sessions, unambiguous hours, and date-only schedules without inventing a clock', async () => {
+    const events = await adapter.extract(await fixture('listing-20261014.json'), listingUrl, context);
+    const mahler = events.find(e => e.externalId === '10994')!;
+    const body = await fixture('mahler-20261014.html');
+    const midnight = { ...mahler, escorialCalendar: { ...mahler.escorialCalendar!, allDay: false },
+      observed: { ...mahler.observed, occurrences: [{ raw: '2026-10-16 00:00:00', date: '2026-10-16', time: '00:00' }] } };
+    expect(adapter.hydrate!(midnight, body.replace('16 de octubre, 19:00 horas', '16 de octubre, 00:00 horas'), context).occurrences?.[0]?.time).toBe('00:00');
+    expect(adapter.hydrate!(mahler, body.replace('16 de octubre, 19:00 horas', '16 de octubre'), context).occurrences?.[0]).not.toHaveProperty('time');
+    const dated = body.replaceAll('2026-10-16T00:00:00+02:00', '2026-10-16');
+    expect(adapter.hydrate!(mahler, dated, context).occurrences?.[0]?.time).toBe('19:00');
+    const exact = { ...mahler, escorialCalendar: { ...mahler.escorialCalendar!, allDay: false },
+      observed: { ...mahler.observed, occurrences: [{ raw: '2026-10-16 19:00:00', date: '2026-10-16', time: '19:00' }] } };
+    expect(adapter.hydrate!(exact, body.replaceAll('2026-10-16T00:00:00', '2026-10-16T19:00:00'), context).occurrences?.[0]?.time).toBe('19:00');
+    expect(() => adapter.hydrate!(mahler, body.replaceAll('2026-10-16T00:00:00', '2026-10-16T12:00:00'), context)).toThrow(/contradictorios/);
+    expect(() => adapter.hydrate!(exact, body, context)).toThrow(/contradictorios/);
+    expect(() => adapter.hydrate!(exact, body.replace('16 de octubre, 19:00 horas', '16 de octubre'), context)).toThrow(/distinta del listado/);
+    expect(() => adapter.hydrate!(mahler, body.replace('16 de octubre,', '16 de octubre 2027,'), context)).toThrow(/fecha/);
+  });
+
+  it('retains Navidad despite matching official IDs and never hydrates another event even with a forged canonical/title', async () => {
+    const events = await adapter.extract(await fixture('listing-20261014.json'), listingUrl, context);
+    const navidad = events.find(e => e.externalId === '11018')!;
+    const mahler = events.find(e => e.externalId === '10994')!;
+    const body = await fixture('navidad-20261014.html');
+    const [failed] = await hydrateEvents([navidad], adapter, { ...context, get: async () => body });
+    expect(failed?.hydration).toMatchObject({ status: 'failed', reason: 'source-conflict' });
+    expect(failed?.hydration.discrepancies?.[0]?.evidence).toEqual(expect.arrayContaining([
+      { surface: 'detail:postid', value: '11018' }, { surface: 'detail:TEC-id', value: '11018' },
+    ]));
+    expect(normalizeRawEvent(failed!)).toBeUndefined();
+    const corrected = body.replace('rel="canonical" href="https://www.teatroauditorioescorial.es/espectaculo/la-tercera-de-mahler/', 'rel="canonical" href="https://www.teatroauditorioescorial.es/espectaculo/concierto-de-navidad-3/');
+    const [clockConflict] = await hydrateEvents([{ ...navidad, listingDateText: '2026-12-22' }], adapter, { ...context, get: async () => corrected });
+    expect(clockConflict?.hydration).toMatchObject({ status: 'failed', reason: 'source-conflict', discrepancies: [{ field: 'time', resolution: 'withheld' }] });
+    const wrong = body.replaceAll('CONCIERTO DE NAVIDAD', 'LA TERCERA DE  MAHLER');
+    const [other] = await hydrateEvents([mahler], adapter, { ...context, get: async () => wrong });
+    expect(other?.hydration).toMatchObject({ status: 'failed', reason: 'source-conflict', discrepancies: [{ field: 'identity' }] });
+    expect(normalizeRawEvent(other!)).toBeUndefined();
+  });
+
+  it('keeps incomplete coverage and disappearance suppression after recovering only Mahler', async () => {
+    const listing = await fixture('listing-20261014.json');
+    const base = emptyCatalog();
+    const options = { now: new Date('2026-10-14T08:00:00Z'), window: { from: '2026-10-14', to: '2027-02-11' },
+      dryRun: true, sourceIds: [source.id], dataDir: await mkdtemp(path.join(os.tmpdir(), 'escorial-live-')),
+      get: async (url: string) => url.includes('/wp-json/') ? listing : fixture(url.endsWith('la-tercera-de-mahler') ? 'mahler-20261014.html' : 'navidad-20261014.html') };
+    const first = await runIngest({ ...options, catalog: base });
+    expect(first.candidates).toHaveLength(1);
+    expect(first.summary.detailHydrationSucceeded).toBe(1);
+    expect(first.summary.detailHydrationFailed).toBe(1);
+    expect(first.summary.autoMergeEligible).toBe(false);
+    expect(first.summary.disappearanceSuppressedSources).toContain(source.id);
+    expect(first.summary.written).toEqual([]);
+    expect(first.decisions.find(e => e.externalId === '11018')?.candidateGenerated).toBe(false);
+    const mahler = first.decisions.find(e => e.externalId === '10994')!;
+    expect(mahler.hydration.discrepancies).toHaveLength(1);
+    expect(mahler.listing?.occurrences[0]?.time).toBeUndefined();
+    expect(mahler.observed?.occurrences[0]?.time).toBe('19:00');
+    const catalog = mergeCandidateBatch(base, first.candidates).catalog;
+    const published = catalog.events[0]!;
+    catalog.events.push({ ...published, id: 'evt_escorial_missing_fixture', slug: 'escorial-missing-fixture',
+      title: 'Concierto ausente del listado',
+      occurrences: [{ id: 'occ_escorial_missing_fixture', date: '2026-11-01', time: '19:00', status: 'scheduled' }],
+      citations: [{ sourceId: source.catalogSourceId, url: 'https://www.teatroauditorioescorial.es/espectaculo/missing-fixture', checkedAt: '2026-10-13', externalId: '999999' }],
+    });
+    const again = await runIngest({ ...options, catalog });
+    expect(again.summary.newEvents).toBe(0);
+    expect(again.possiblyMissing).toEqual([]);
+  });
+
 });

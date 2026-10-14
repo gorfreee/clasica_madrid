@@ -1,4 +1,4 @@
-import { sourceConflict } from '../detail/conflicts.ts';
+import { sourceConflict, type HydrationDiscrepancy } from '../detail/conflicts.ts';
 import { parseObservedDateTime, parseObservedTime } from '../dates.ts';
 import { flattenHtmlBlocks, stripTags } from '../html.ts';
 import { createListingGet } from '../listing-retry.ts';
@@ -81,6 +81,7 @@ export const teatroAuditorioEscorialAdapter: SourceAdapter = {
       const singleDay = start.date === end.date;
       return {
         sourceId: ctx.source.id, sourceUrl, externalId,
+        escorialCalendar: { allDay: dateOnly, start: entry.start_date as string, end: entry.end_date as string },
         listingDateText: singleDay ? start.date : `${start.date} / ${end.date}`,
         observed: {
           title,
@@ -124,9 +125,20 @@ export function eventUrl(href: string): string | undefined {
 export function parseEscorialDetail(event: RawEvent, body: string): ObservedFactPatch {
   const canonical = /<link\b(?=[^>]*rel=["']canonical["'])[^>]*href=["']([^"']+)["']/i.exec(body)?.[1];
   if (!canonical || !/<div class="single-event"/i.test(body)) throw new Error(`${ID}: ficha sin identidad canónica`);
-  if (eventUrl(canonical) !== event.sourceUrl) throw sourceConflict(`${ID}: ficha sin identidad canónica coincidente`, 'identity', [{ surface: 'listing:url', value: event.sourceUrl }, { surface: 'detail:canonical', value: canonical }]);
+  const identity = detailIdentity(event, body);
+  if (eventUrl(canonical) !== event.sourceUrl) {
+    const visibleSchedule = section(body, 'Fechas y Horarios');
+    throw sourceConflict(`${ID}: ficha sin identidad canónica coincidente`, 'identity', [
+      { surface: 'listing:url', value: event.sourceUrl },
+      { surface: 'detail:canonical', value: canonical },
+      ...identity.evidence,
+      ...(event.escorialCalendar ? [{ surface: 'listing:API-calendar', value: JSON.stringify(event.escorialCalendar) }] : []),
+      ...(visibleSchedule ? [{ surface: 'detail:Fechas y Horarios', value: flattenHtmlBlocks(visibleSchedule) }] : []),
+    ]);
+  }
   const title = stripTags(/<h1\b[^>]*itemprop=["']name["'][^>]*>([\s\S]*?)<\/h1\s*>/i.exec(body)?.[1] ?? '');
-  if (title !== event.observed.title) throw new Error(`${ID}: título de ficha distinto`);
+  if (title !== event.observed.title) throw sourceConflict(`${ID}: título de ficha distinto`, 'identity', [{ surface: 'listing:title', value: event.observed.title }, { surface: 'detail:h1', value: title }]);
+  if (identity.contradictory) throw sourceConflict(`${ID}: identificadores de ficha contradictorios`, 'identity', identity.evidence);
   const schedule = section(body, 'Fechas y Horarios');
   if (!schedule) throw new Error(`${ID}: ficha sin calendario`);
   const lines = flattenHtmlBlocks(schedule).split('\n');
@@ -138,7 +150,8 @@ export function parseEscorialDetail(event: RawEvent, body: string): ObservedFact
   const date = /\b(\d{1,2})\s+de\s+(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)\b/i.exec(dateLine[0]!);
   const month = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
     .findIndex((name) => name === date?.[2]?.toLowerCase()) + 1;
-  if (!date || !month || Number(date[1]) !== Number(expected.slice(-2)) || month !== Number(expected.slice(5, 7))) {
+  const visibleYear = /\b(20\d{2})\b/.exec(dateLine[0]!)?.[1];
+  if (!date || !month || (visibleYear && visibleYear !== expected.slice(0, 4)) || Number(date[1]) !== Number(expected.slice(-2)) || month !== Number(expected.slice(5, 7))) {
     throw sourceConflict(`${ID}: fecha de ficha distinta del listado`, 'date', [{ surface: 'listing', value: expected }, { surface: 'detail:Fechas y Horarios', value: dateLine[0]! }]);
   }
   const times = [...dateLine[0]!.matchAll(/\b(\d{1,2}):([0-5]\d)\s*horas?\b/gi)];
@@ -147,13 +160,49 @@ export function parseEscorialDetail(event: RawEvent, body: string): ObservedFact
   if (times.length && !time) throw new Error(`${ID}: hora inválida`);
   const structured = /<p\b(?=[^>]*itemprop=["']startDate["'])[^>]*content=["']([^"']+)["']/i.exec(body)?.[1];
   const structuredDate = structured ? parseObservedDateTime(structured) : undefined;
-  if (structuredDate && (structuredDate.date !== expected || (time && structuredDate.time && structuredDate.time !== time))) {
+  if (structured && !structuredDate) throw new Error(`${ID}: fecha estructurada ilegible`);
+  const schemaDate = identity.schema && parseObservedDateTime(String(identity.schema.startDate));
+  if (identity.schema && (!schemaDate || schemaDate.date !== expected ||
+      (structuredDate && (schemaDate.date !== structuredDate.date || schemaDate.time !== structuredDate.time)))) {
+    throw sourceConflict(`${ID}: schema y calendario de ficha contradictorios`, schemaDate?.date !== expected ? 'date' : 'time', [
+      { surface: 'listing:date', value: expected },
+      { surface: 'detail:schema-startDate', value: String(identity.schema.startDate) },
+      ...(structured ? [{ surface: 'detail:itemprop-startDate', value: structured }] : []),
+    ]);
+  }
+  const dateOnlyEnvelope = structuredDate?.time === '00:00' && identity.verified &&
+    event.escorialCalendar?.allDay === true &&
+    event.escorialCalendar.start === `${expected} 00:00:00` &&
+    event.escorialCalendar.end === `${expected} 23:59:59` &&
+    structuredDate.date === expected &&
+    identity.schema?.startDate === structured &&
+    !!structured && /^\d{4}-\d{2}-\d{2}T00:00:00(?:[+-]\d{2}:\d{2}|Z)$/.test(structured) &&
+    identity.schema?.endDate === structured.replace('T00:00:00', 'T23:59:59');
+  if (!structuredDate && schemaDate?.time && time && schemaDate.time !== time) {
+    throw sourceConflict(`${ID}: schema y hora visible contradictorios`, 'time', [
+      { surface: 'detail:schema-startDate', value: String(identity.schema!.startDate) },
+      { surface: 'detail:Fechas y Horarios', value: dateLine[0]! },
+    ]);
+  }
+  if (structuredDate && (structuredDate.date !== expected || (time && structuredDate.time && structuredDate.time !== time && !dateOnlyEnvelope))) {
     throw sourceConflict(`${ID}: calendario estructurado y visible contradictorios`, structuredDate.date !== expected ? 'date' : 'time', [{ surface: 'detail:itemprop-startDate', value: structured! }, { surface: 'detail:Fechas y Horarios', value: dateLine[0]! }]);
   }
-  if (time && event.observed.occurrences.some(o => o.date === expected && o.time && o.time !== time)) {
-    throw sourceConflict(`${ID}: hora de ficha distinta del listado`, 'time', [{ surface: 'listing:API', value: JSON.stringify(event.observed.occurrences) }, { surface: 'detail:Fechas y Horarios', value: dateLine[0]! }]);
+  const clock = time ?? (!dateOnlyEnvelope ? structuredDate?.time ?? schemaDate?.time : undefined);
+  if (clock && event.observed.occurrences.some(o => o.date === expected && o.time && o.time !== clock)) {
+    throw sourceConflict(`${ID}: hora de ficha distinta del listado`, 'time', [{ surface: 'listing:API', value: JSON.stringify(event.observed.occurrences) }, { surface: 'detail:Fechas y Horarios', value: dateLine[0]! },
+      ...(structured ? [{ surface: 'detail:itemprop-startDate', value: structured }] : []),
+    ]);
   }
-  const occurrences: RawOccurrence[] = [{ raw: dateLine[0]!, date: expected, ...(time ? { time } : {}) }];
+  const hydrationDiscrepancies: HydrationDiscrepancy[] = dateOnlyEnvelope && time !== '00:00' ? [{
+    field: 'time', resolution: 'detail-preferred', evidence: [
+      { surface: 'listing:API-all_day', value: JSON.stringify(event.escorialCalendar) },
+      ...identity.evidence,
+      { surface: 'detail:itemprop-startDate', value: structured! },
+      { surface: 'detail:interpretation', value: 'TEC all_day + same-day 00:00:00–23:59:59 envelope: date without clock' },
+      { surface: 'detail:Fechas y Horarios', value: dateLine[0]! },
+    ],
+  }] : [];
+  const occurrences: RawOccurrence[] = [{ raw: dateLine[0]!, date: expected, ...(clock ? { time: clock } : {}) }];
   const prices = section(body, 'Precios y Descuentos');
   const accessText = prices && flattenHtmlBlocks(prices).slice(0, 1200);
   const info = /<div class="tab-content" id="tabs1-info">([\s\S]*?)<\/div>/i.exec(body)?.[1];
@@ -164,6 +213,7 @@ export function parseEscorialDetail(event: RawEvent, body: string): ObservedFact
   const performers = performersFromCast(cast);
   return {
     occurrences,
+    ...(hydrationDiscrepancies.length ? { hydrationDiscrepancies } : {}),
     // The building and address are identified by the official site; the room is only given for some shows.
     venueText: 'Teatro Auditorio de San Lorenzo de El Escorial',
     ...(accessText ? { accessText } : {}),
@@ -173,6 +223,32 @@ export function parseEscorialDetail(event: RawEvent, body: string): ObservedFact
     ...(program && program.composers.length > 0 ? { composers: program.composers } : {}),
     ...(program && program.works.length > 0 ? { works: program.works } : {}),
   };
+}
+
+/** Independent official identifiers diagnose a bad canonical; they do not override it. */
+function detailIdentity(event: RawEvent, body: string) {
+  const postId = /<body\b[^>]*class=["'][^"']*\bpostid-(\d+)\b/i.exec(body)?.[1];
+  const apiId = /<link\b[^>]*href=["']https:\/\/www\.teatroauditorioescorial\.es\/wp-json\/tribe\/events\/v1\/events\/(\d+)["']/i.exec(body)?.[1];
+  const schemas: Record<string, unknown>[] = [];
+  for (const match of body.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)) {
+    try {
+      const parsed: unknown = JSON.parse(match[1]!);
+      const nodes = Array.isArray(parsed) ? parsed : [parsed];
+      for (const node of nodes) if (node && typeof node === 'object' && node['@type'] === 'Event') schemas.push(node);
+    } catch { throw new Error(`${ID}: schema ilegible`); }
+  }
+  const schema = schemas.length === 1 ? schemas[0] : undefined;
+  const evidence = [
+    { surface: 'listing:API-id', value: event.externalId ?? '' },
+    ...(postId ? [{ surface: 'detail:postid', value: postId }] : []),
+    ...(apiId ? [{ surface: 'detail:TEC-id', value: apiId }] : []),
+    ...schemas.map(node => ({ surface: 'detail:schema-identity', value: JSON.stringify(node) })),
+  ];
+  const contradictory = Boolean((postId && postId !== event.externalId) || (apiId && apiId !== event.externalId) ||
+    schemas.length > 1 || (schema && (typeof schema.url !== 'string' || eventUrl(schema.url) !== event.sourceUrl ||
+      typeof schema.name !== 'string' || stripTags(schema.name) !== event.observed.title)));
+  return { evidence, schema, contradictory,
+    verified: !contradictory && !!event.externalId && postId === event.externalId && apiId === event.externalId && !!schema };
 }
 
 const CAST_NAME =

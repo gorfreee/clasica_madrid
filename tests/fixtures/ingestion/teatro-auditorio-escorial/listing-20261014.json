@@ -1,0 +1,192 @@
+{
+  "events": [
+    {
+      "id": 10994,
+      "status": "publish",
+      "title": "LA TERCERA DE  MAHLER",
+      "url": "https://www.teatroauditorioescorial.es/espectaculo/la-tercera-de-mahler/",
+      "start_date": "2026-10-16 00:00:00",
+      "end_date": "2026-10-16 23:59:59",
+      "all_day": true,
+      "categories": [
+        {
+          "name": "Azul",
+          "slug": "azul",
+          "term_group": 0,
+          "term_taxonomy_id": 47,
+          "taxonomy": "tribe_events_cat",
+          "description": "",
+          "parent": 0,
+          "count": 219,
+          "filter": "raw",
+          "id": 47,
+          "urls": {
+            "self": "https://www.teatroauditorioescorial.es/wp-json/tribe/events/v1/categories/47",
+            "collection": "https://www.teatroauditorioescorial.es/wp-json/tribe/events/v1/categories"
+          }
+        },
+        {
+          "name": "Conciertos",
+          "slug": "conciertos",
+          "term_group": 0,
+          "term_taxonomy_id": 37,
+          "taxonomy": "tribe_events_cat",
+          "description": "",
+          "parent": 0,
+          "count": 302,
+          "filter": "raw",
+          "id": 37,
+          "urls": {
+            "self": "https://www.teatroauditorioescorial.es/wp-json/tribe/events/v1/categories/37",
+            "collection": "https://www.teatroauditorioescorial.es/wp-json/tribe/events/v1/categories"
+          }
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "term_group": 0,
+          "term_taxonomy_id": 25,
+          "taxonomy": "tribe_events_cat",
+          "description": "",
+          "parent": 0,
+          "count": 408,
+          "filter": "raw",
+          "id": 25,
+          "urls": {
+            "self": "https://www.teatroauditorioescorial.es/wp-json/tribe/events/v1/categories/25",
+            "collection": "https://www.teatroauditorioescorial.es/wp-json/tribe/events/v1/categories"
+          }
+        },
+        {
+          "name": "Naranja",
+          "slug": "naranja",
+          "term_group": 0,
+          "term_taxonomy_id": 44,
+          "taxonomy": "tribe_events_cat",
+          "description": "",
+          "parent": 0,
+          "count": 100,
+          "filter": "raw",
+          "id": 44,
+          "urls": {
+            "self": "https://www.teatroauditorioescorial.es/wp-json/tribe/events/v1/categories/44",
+            "collection": "https://www.teatroauditorioescorial.es/wp-json/tribe/events/v1/categories"
+          }
+        }
+      ],
+      "start_date_details": {
+        "year": "2026",
+        "month": "10",
+        "day": "16",
+        "hour": "00",
+        "minutes": "00",
+        "seconds": "00"
+      },
+      "end_date_details": {
+        "year": "2026",
+        "month": "10",
+        "day": "16",
+        "hour": "23",
+        "minutes": "59",
+        "seconds": "59"
+      },
+      "timezone": "",
+      "utc_start_date": null
+    },
+    {
+      "id": 11018,
+      "status": "publish",
+      "title": "CONCIERTO DE NAVIDAD",
+      "url": "https://www.teatroauditorioescorial.es/espectaculo/concierto-de-navidad-3/",
+      "start_date": "2026-12-22 12:00:00",
+      "end_date": "2026-12-23 11:59:59",
+      "all_day": true,
+      "categories": [
+        {
+          "name": "Azul",
+          "slug": "azul",
+          "term_group": 0,
+          "term_taxonomy_id": 47,
+          "taxonomy": "tribe_events_cat",
+          "description": "",
+          "parent": 0,
+          "count": 219,
+          "filter": "raw",
+          "id": 47,
+          "urls": {
+            "self": "https://www.teatroauditorioescorial.es/wp-json/tribe/events/v1/categories/47",
+            "collection": "https://www.teatroauditorioescorial.es/wp-json/tribe/events/v1/categories"
+          }
+        },
+        {
+          "name": "Conciertos",
+          "slug": "conciertos",
+          "term_group": 0,
+          "term_taxonomy_id": 37,
+          "taxonomy": "tribe_events_cat",
+          "description": "",
+          "parent": 0,
+          "count": 302,
+          "filter": "raw",
+          "id": 37,
+          "urls": {
+            "self": "https://www.teatroauditorioescorial.es/wp-json/tribe/events/v1/categories/37",
+            "collection": "https://www.teatroauditorioescorial.es/wp-json/tribe/events/v1/categories"
+          }
+        },
+        {
+          "name": "En Cartel",
+          "slug": "en-cartel",
+          "term_group": 0,
+          "term_taxonomy_id": 25,
+          "taxonomy": "tribe_events_cat",
+          "description": "",
+          "parent": 0,
+          "count": 408,
+          "filter": "raw",
+          "id": 25,
+          "urls": {
+            "self": "https://www.teatroauditorioescorial.es/wp-json/tribe/events/v1/categories/25",
+            "collection": "https://www.teatroauditorioescorial.es/wp-json/tribe/events/v1/categories"
+          }
+        },
+        {
+          "name": "Naranja",
+          "slug": "naranja",
+          "term_group": 0,
+          "term_taxonomy_id": 44,
+          "taxonomy": "tribe_events_cat",
+          "description": "",
+          "parent": 0,
+          "count": 100,
+          "filter": "raw",
+          "id": 44,
+          "urls": {
+            "self": "https://www.teatroauditorioescorial.es/wp-json/tribe/events/v1/categories/44",
+            "collection": "https://www.teatroauditorioescorial.es/wp-json/tribe/events/v1/categories"
+          }
+        }
+      ],
+      "start_date_details": {
+        "year": "2026",
+        "month": "12",
+        "day": "22",
+        "hour": "12",
+        "minutes": "00",
+        "seconds": "00"
+      },
+      "end_date_details": {
+        "year": "2026",
+        "month": "12",
+        "day": "23",
+        "hour": "11",
+        "minutes": "59",
+        "seconds": "59"
+      },
+      "timezone": "Europe/Madrid",
+      "utc_start_date": "2026-12-22 11:00:00"
+    }
+  ],
+  "total": 2,
+  "total_pages": 1
+}
