@@ -99,7 +99,7 @@ describe('official schedule and identity contradictions', () => {
     const body = await fixture('navidad.html');
     const raw = { ...event(escorial.id, 'https://www.teatroauditorioescorial.es/espectaculo/concierto-de-navidad-3', 'CONCIERTO DE NAVIDAD', [{ raw: '2026-12-22 12:00', date: '2026-12-22', time: '12:00' }]), externalId: '11018', listingDateText: '2026-12-22' };
     const [failed] = await hydrateEvents([raw], escorial, context(escorial, body));
-    expect(failed?.hydration).toMatchObject({ reason: 'source-conflict', discrepancies: [{ field: 'identity', resolution: 'withheld', evidence: [{ value: raw.sourceUrl }, { value: 'https://www.teatroauditorioescorial.es/espectaculo/la-tercera-de-mahler/' }] }] });
+    expect(failed?.hydration).toMatchObject({ reason: 'source-conflict', discrepancies: [{ field: 'identity', resolution: 'withheld', evidence: expect.arrayContaining([{ surface: 'listing:url', value: raw.sourceUrl }, { surface: 'detail:canonical', value: 'https://www.teatroauditorioescorial.es/espectaculo/la-tercera-de-mahler/' }]) }] });
     expect(normalizeRawEvent(failed!)).toBeUndefined();
     // Fixing one published source defect would still leave startDate=12:00
     // contradicting the visible Fechas y Horarios=19:00.
@@ -150,6 +150,18 @@ describe('official schedule and identity contradictions', () => {
     const [hydrated] = await hydrateEvents([raw], adapter, context(auditorio, ''));
     expect(hydrated?.hydration.discrepancies).toMatchObject([{ field: 'date', resolution: 'detail-preferred', evidence: [{ value: expect.stringContaining('2026-10-18') }, { value: expect.stringContaining('2026-10-19') }] }]);
     expect(hydrated?.observed.occurrences[0]?.time).toBeUndefined();
+  });
+
+  it('preserves adapter evidence alongside shared schedule diagnostics without leaking either to observed facts', async () => {
+    const raw = event(auditorio.id, 'https://example.test/show', 'Fixture', [{ raw: '18 oct 12:00', date: '2026-10-18', time: '12:00' }]);
+    const diagnostic = { field: 'identity' as const, resolution: 'detail-preferred' as const,
+      evidence: [{ surface: 'fixture:verified-id', value: '123' }] };
+    const adapter: SourceAdapter = { id: 'test', resolveFetchUrls: () => [], extract: () => [], hydrate: () => ({
+      occurrences: [{ raw: '19 oct', date: '2026-10-19' }], hydrationDiscrepancies: [diagnostic],
+    }) };
+    const [hydrated] = await hydrateEvents([raw], adapter, context(auditorio, ''));
+    expect(hydrated?.hydration.discrepancies).toMatchObject([diagnostic, { field: 'date', resolution: 'detail-preferred' }]);
+    expect(hydrated?.observed).not.toHaveProperty('hydrationDiscrepancies');
   });
 
   it('CBA typographic room aliases agree, while a missing room or genuinely different room still fails', async () => {

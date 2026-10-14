@@ -60,7 +60,7 @@ export async function hydrateEvents(
         if (zarzuelaGet && patch.occurrences === undefined) {
           meta = { ...meta, reason: 'detail-no-calendar', message: 'ficha K2 válida sin calendario propio; se conservan fechas explícitas del listing' };
         }
-        const discrepancies = scheduleDiscrepancies(event.observed.occurrences, patch.occurrences);
+        const discrepancies = [...(patch.hydrationDiscrepancies ?? []), ...scheduleDiscrepancies(event.observed.occurrences, patch.occurrences)];
         if (discrepancies.length) meta = { ...meta, discrepancies };
         const hydratedEvent = withHydration(applyDetailPatch(event, patch), meta);
         const expanded = adapter.expand?.(hydratedEvent, body);
