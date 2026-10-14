@@ -45,6 +45,8 @@ export type MergedEvent = {
   diffs: string[];
   /** Incoming values that were not applied to published canonical/enrichment fields. */
   diagnostics: string[];
+  /** The published event is returned untouched when occurrence IDs cannot be assigned. */
+  ambiguousReason?: string;
 };
 
 export function proposalFromObservation(
@@ -134,6 +136,8 @@ export function mergeProposals(base: EventProposal, incoming: EventProposal): Ev
  * Typographic title equivalents are not a disagreement.
  */
 export function mergeExistingEvent(existing: Event, proposal: EventProposal, now: Date): MergedEvent {
+  const ambiguousReason = occurrenceMergeConflict(existing, proposal);
+  if (ambiguousReason) return { event: existing, diffs: [], diagnostics: [ambiguousReason], ambiguousReason };
   const verified = madridToday(now);
   const status = mergeStatus(existing.status, proposal.status);
   const occurrences = mergeOccurrences(existing, proposal, status);
@@ -404,6 +408,25 @@ function preferOptionalArray<T>(existing: T[] | undefined, incoming: T[] | undef
   if (incoming && incoming.length > 0) return incoming;
   if (existing && existing.length > 0) return existing;
   return incoming ?? existing;
+}
+
+/** A published unknown occurrence owns an ID; several new times cannot tell us which one. */
+export function occurrenceMergeConflict(existing: Event, proposal: EventProposal): string | undefined {
+  if (proposal.occurrences.length === 0) return undefined;
+  for (const current of existing.occurrences) {
+    if (current.time !== null) continue;
+    const observedTimes = proposal.occurrences
+      .filter(item => item.date === current.date && item.time !== null).map(item => item.time);
+    const times = new Set([...existing.occurrences, ...proposal.occurrences]
+      .filter(item => item.date === current.date && item.time !== null).map(item => item.time));
+    const replacingSingle = existing.occurrences.length === 1 && proposal.dateFromDetail &&
+      !proposal.occurrences.some(item => item.date === current.date);
+    if ((observedTimes.length > 0 && times.size > 1) ||
+      (replacingSingle && resolveOccurrencePrecision(proposal.occurrences).length > 1)) {
+      return `schedule-review: no se puede asignar ${current.id} sin hora a varias sesiones acreditadas`;
+    }
+  }
+  return undefined;
 }
 
 function mergeOccurrences(existing: Event, proposal: EventProposal, status: Event['status']): Occurrence[] {

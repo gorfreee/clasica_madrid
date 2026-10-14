@@ -30,7 +30,7 @@ describe('parseo de fechas y horas', () => {
     expect(resolveOccurrencePrecision(resolveOccurrencePrecision(items))).toEqual([{ date, time: '19:30' }]);
     const multiple = [...items, { date, time: '17:00' }];
     expect(resolveOccurrencePrecision(multiple)).toEqual([
-      { date, time: null }, { date, time: '17:00' }, { date, time: '19:30' },
+      { date, time: '17:00' }, { date, time: '19:30' },
     ]);
   });
 
@@ -41,7 +41,7 @@ describe('parseo de fechas y horas', () => {
       .toEqual([{ date: '2027-04-11', time: '19:30' }]);
     expect(resolveOccurrencePrecision(items, [
       { date: '2027-04-11', time: '17:00' }, { date: '2027-04-11', time: '19:30' },
-    ])).toEqual(items);
+    ])).toEqual([]);
   });
 
   it('detail calendar replacement wins over listing-only corroboration in either order', () => {

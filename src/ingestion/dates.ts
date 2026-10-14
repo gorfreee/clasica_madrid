@@ -262,7 +262,7 @@ export function collapseOccurrences(
 /**
  * Resolve precision only at publication, after all calendars have been merged.
  * A date-only observation corroborates a single explicit time on that date.
- * With several times it stays unknown: choosing a session would be arbitrary.
+ * With several times it only corroborates the date; it is not an extra session.
  * `corroboration` can supply precision, but cannot add dates or performances.
  * Resolving during a pairwise fold would lose the unknown observation before
  * a later calendar supplies a second time, making the result order-dependent.
@@ -278,10 +278,11 @@ export function resolveOccurrencePrecision(
     times.add(item.time);
     timesByDate.set(item.date, times);
   }
-  return collapseOccurrences(items.map(item => {
+  return collapseOccurrences(items.flatMap(item => {
     const times = timesByDate.get(item.date);
-    if (item.time !== null || times?.size !== 1) return item;
-    return { date: item.date, time: [...times][0]! };
+    if (item.time !== null || !times?.size) return [item];
+    if (times.size > 1) return [];
+    return [{ date: item.date, time: [...times][0]! }];
   }));
 }
 
