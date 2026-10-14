@@ -15,7 +15,14 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Coral de Moncada"
+    },
+    {
+      "name": "Coro Padre Antonio Soler"
+    }
+  ],
   "composers": [],
   "works": [],
   "eras": [],

@@ -15,12 +15,27 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
+  "performers": [
+    {
+      "name": "Philip Roy Santiago"
+    },
+    {
+      "name": "Cristina Castro"
+    },
+    {
+      "name": "Rosalía Juarranz"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Serguéi Prokófiev"
+    }
+  ],
   "works": [],
-  "eras": [],
+  "eras": [
+    "twentieth"
+  ],
   "formats": [
-    "zarzuela",
     "other"
   ],
   "kind": "established",

@@ -15,11 +15,36 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
+  "performers": [
+    {
+      "name": "Sinfonietta de la Joven Orquesta Allegro Vivace (JOAV)"
+    },
+    {
+      "name": "Coque Jiménez",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Strauss II"
+    },
+    {
+      "name": "Johann Strauss I"
+    },
+    {
+      "name": "Josef Strauss"
+    },
+    {
+      "name": "Franz von Suppé"
+    }
+  ],
   "works": [],
-  "eras": [],
-  "formats": [],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
   "kind": "established",
   "access": "paid",
   "citations": [
