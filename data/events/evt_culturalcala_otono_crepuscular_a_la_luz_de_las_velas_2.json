@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_culturalcala_otono_crepuscular_a_la_luz_de_las_velas_2",
+  "slug": "otono-crepuscular-a-la-luz-de-las-velas",
+  "title": "Otoño crepuscular a la luz de las velas",
+  "status": "scheduled",
+  "venueId": "ven_iglesia_del_hospital_de_antezana",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_culturalcala_otono_crepuscular_a_la_luz_de_las_velas_2_02",
+      "date": "2026-11-14",
+      "time": "21:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Sapere Aude Ensemble de Juventudes Musicales de Alcalá"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antonio Vivaldi"
+    },
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Joaquín Turina"
+    },
+    {
+      "name": "Beeftink"
+    },
+    {
+      "name": "Astor Piazzolla"
+    }
+  ],
+  "works": [
+    {
+      "title": "Otoño",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "La Reina de la Noche",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Escena Andaluza: Crepúsculo Serenata",
+      "composerName": "Joaquín Turina"
+    },
+    {
+      "title": "Squirrel",
+      "composerName": "Beeftink"
+    },
+    {
+      "title": "Otoño",
+      "composerName": "Astor Piazzolla"
+    }
+  ],
+  "eras": [
+    "baroque",
+    "classical",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_culturalcala",
+      "url": "https://culturalcala.es/item_event/otono-crepuscular-a-la-luz-de-las-velas-2",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "sourceId": "src_giglon_com",
+      "url": "https://www.giglon.com/evento/otono-crepuscular-a-la-luz-de-las-velas-sapere-aude-alcala-de-henares",
+      "checkedAt": "2026-10-14"
+    }
+  ],
+  "primarySourceId": "src_culturalcala",
+  "lastVerifiedAt": "2026-10-14"
+}

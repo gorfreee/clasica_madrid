@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_museo_arqueologico_nacional_concierto_de_organo_realejo_oscar_rodriguez_pastora_2026_11_22_museo_arqueologico_nacion",
+  "slug": "concierto-de-organo-realejo-oscar-rodriguez-pastora",
+  "title": "Concierto de órgano realejo — Óscar Rodriguez Pastora",
+  "status": "scheduled",
+  "venueId": "ven_man_salas_nobles",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_museo_arqueologico_nacional_concierto_de_organo_realejo_oscar_rodriguez_pastora_2026_11_22_museo_arqueologico_nacion",
+      "date": "2026-11-22",
+      "time": "13:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Óscar Rodriguez Pastora"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "organ"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_museo_arqueologico_nacional",
+      "url": "https://www.man.es/man/actividades/musica-teatro/conciertos-organo.html",
+      "checkedAt": "2026-10-14"
+    }
+  ],
+  "primarySourceId": "src_museo_arqueologico_nacional",
+  "lastVerifiedAt": "2026-10-14"
+}

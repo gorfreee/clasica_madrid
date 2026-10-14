@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_orquesta_ciudad_getafe_clasicos_con_c_de_cuba_20270124",
+  "slug": "clasicos-con-c-de-cuba-insolit-quartet",
+  "title": "Clásicos con C de Cuba — Insolit Quartet",
+  "status": "scheduled",
+  "venueId": "ven_espacio_mercado_getafe",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_orquesta_ciudad_getafe_clasicos_con_c_de_cuba_20270124_01",
+      "date": "2027-01-24",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Insolit Quartet",
+      "role": "ensemble"
+    },
+    {
+      "name": "Víctor Loarces"
+    },
+    {
+      "name": "Alberto Raya"
+    },
+    {
+      "name": "Pedro Quirico"
+    },
+    {
+      "name": "Miguel Ruiz"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_orquesta_ciudad_getafe",
+      "url": "https://orquestaciudaddegetafe.com/js_events/clasicos-con-c-de-cuba/",
+      "checkedAt": "2026-10-14"
+    }
+  ],
+  "primarySourceId": "src_orquesta_ciudad_getafe",
+  "lastVerifiedAt": "2026-10-14"
+}

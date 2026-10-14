@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_nuevo_teatro_alcala",
+  "slug": "nuevo-teatro-alcala",
+  "name": "Nuevo Teatro Alcalá",
+  "municipality": "Madrid",
+  "area": "madrid",
+  "address": "Calle de Jorge Juan, 62, 28009 Madrid",
+  "url": "https://atgtickets.es/",
+  "lastVerifiedAt": "2026-10-14"
+}

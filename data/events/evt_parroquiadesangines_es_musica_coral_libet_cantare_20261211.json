@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_parroquiadesangines_es_musica_coral_libet_cantare_20261211",
+  "slug": "musica-coral-en-adviento-navidad-libet-cantare",
+  "title": "Música coral en Adviento-Navidad — Coro Libet Cantare",
+  "status": "scheduled",
+  "venueId": "ven_parroquia_de_san_gines",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_parroquiadesangines_es_musica_coral_libet_cantare_20261211_01",
+      "date": "2026-12-11",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro Libet Cantare de Madrid",
+      "role": "choir"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_parroquiadesangines_es",
+      "url": "https://www.parroquiadesangines.es/event/musica-coral-en-navidad-coro-libet-cantare-de-madrid/",
+      "checkedAt": "2026-10-14"
+    }
+  ],
+  "primarySourceId": "src_parroquiadesangines_es",
+  "lastVerifiedAt": "2026-10-14"
+}

@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_ayuntamiento_madrid_mom_friedenscamerata_luis_mazorra_20261016",
+  "slug": "madrid-otra-mirada-friedenscamerata-luis-mazorra",
+  "title": "MOM 2026 — Concierto instrumental de Friedenscamerata con Luis Mazorra",
+  "status": "scheduled",
+  "venueId": "ven_friedenskirche_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_ayuntamiento_madrid_mom_friedenscamerata_luis_mazorra_20261016_01",
+      "date": "2026-10-16",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Friedenscamerata",
+      "role": "ensemble"
+    },
+    {
+      "name": "Luis Mazorra"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://patrimonioypaisaje.madrid.es/portales/monumenta/es/En-portada/Madrid-Otra-Mirada-2026/?vgnextchannel=e89c3cb702aa4510VgnVCM1000008a4a900aRCRD&vgnextfmt=default&vgnextoid=ebe99ee3c03d0a10VgnVCM100000891ecb1aRCRD",
+      "checkedAt": "2026-10-14"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-10-14"
+}
