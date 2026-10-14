@@ -22,13 +22,18 @@ export const culturalcalaAdapter: SourceAdapter = {
   },
 };
 
-function officialEventUrl(value: unknown): string | undefined {
+function officialEventUrl(value: unknown, recurrence?: string): string | undefined {
   if (typeof value !== 'string') return undefined;
   try {
     const url = new URL(value);
     if (url.protocol !== 'https:' || url.hostname !== 'culturalcala.es' || url.port ||
-        url.username || url.password || url.search || url.hash || !EVENT.test(url.pathname)) return undefined;
-    return url.href;
+        url.username || url.password || url.search || url.hash) return undefined;
+    if (EVENT.test(url.pathname)) return url.href;
+    // EventON exposes each recurrence under a variant of the same ficha URL.
+    // Accept only the suffix printed for this exact card's recurrence identity.
+    const variant = /^(\/item_event\/[a-z0-9-]+\/)var\/ri-(\d+)\.l-L1$/.exec(url.pathname);
+    if (!variant || recurrence === undefined || variant[2] !== recurrence) return undefined;
+    return `${ORIGIN}${variant[1]}`;
   } catch { return undefined; }
 }
 
@@ -59,7 +64,7 @@ function parseCard(card: string, id: string, recurrence: string): RawEvent {
     throw new Error(`${ID}: datos de evento inválidos`);
   }
   const data = value as Record<string, unknown>;
-  const url = officialEventUrl(data.url);
+  const url = officialEventUrl(data.url, recurrence);
   const title = typeof data.name === 'string' ? collapseWhitespace(decodeHtmlEntities(data.name)) : '';
   if (data['@type'] !== 'Event' || data['@id'] !== `event_${id}_${recurrence}` || !url || !title) {
     throw new Error(`${ID}: identidad o URL de tarjeta inválida`);
