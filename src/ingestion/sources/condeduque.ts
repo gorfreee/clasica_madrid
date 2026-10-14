@@ -1,3 +1,4 @@
+import { sourceConflict } from '../detail/conflicts.ts';
 import { parseObservedTime, parseSpanishCalendarDate } from '../dates.ts';
 import { collapseWhitespace, decodeHtmlEntities, flattenHtmlBlocks, stripTags } from '../html.ts';
 import {
@@ -81,7 +82,8 @@ export function parseCondeDuqueDetail(event: RawEvent, body: string): ObservedFa
   const heading = stripTags(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i.exec(body)?.[1] ?? '');
   if (!heading || heading !== event.observed.title) throw new Error(`${ID}: título de ficha distinto`);
   const dateText = stripTags(fieldItem(body, 'friendly-date') ?? '');
-  if (!dateText || dateText !== event.listingDateText) throw new Error(`${ID}: calendario distinto del listado`);
+  if (!dateText) throw new Error(`${ID}: ficha sin fecha`);
+  if (dateText !== event.listingDateText) throw sourceConflict(`${ID}: calendario distinto del listado`, 'date', [{ surface: 'listing', value: event.listingDateText ?? '' }, { surface: 'detail:friendly-date', value: dateText }]);
   const dates = calendarDates(dateText);
   if (dates.length === 0) throw new Error(`${ID}: fecha de ficha ilegible`);
   const timetable = flattenHtmlBlocks(fieldItem(body, 'timetable') ?? '');
@@ -96,7 +98,7 @@ export function parseCondeDuqueDetail(event: RawEvent, body: string): ObservedFa
       const day = /\b(\d{1,2})\s+(?:de\s+)?(?:enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)\b/i.exec(line)?.[1];
       const time = clock(line);
       if (!day || !time || Number(day) !== Number(dates[index]!.slice(-2))) {
-        throw new Error(`${ID}: horario contradictorio o no verificable`);
+        throw sourceConflict(`${ID}: horario contradictorio o no verificable`, 'date', [{ surface: 'detail:friendly-date', value: dateText }, { surface: 'detail:timetable', value: timetable }]);
       }
       return { raw: line, date: dates[index]!, time };
     });

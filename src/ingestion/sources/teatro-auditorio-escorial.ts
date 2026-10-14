@@ -1,3 +1,4 @@
+import { sourceConflict } from '../detail/conflicts.ts';
 import { parseObservedDateTime, parseObservedTime } from '../dates.ts';
 import { flattenHtmlBlocks, stripTags } from '../html.ts';
 import { createListingGet } from '../listing-retry.ts';
@@ -122,8 +123,8 @@ export function eventUrl(href: string): string | undefined {
 
 export function parseEscorialDetail(event: RawEvent, body: string): ObservedFactPatch {
   const canonical = /<link\b(?=[^>]*rel=["']canonical["'])[^>]*href=["']([^"']+)["']/i.exec(body)?.[1];
-  if (!canonical || eventUrl(canonical) !== event.sourceUrl ||
-      !/<div class="single-event"/i.test(body)) throw new Error(`${ID}: ficha sin identidad canónica`);
+  if (!canonical || !/<div class="single-event"/i.test(body)) throw new Error(`${ID}: ficha sin identidad canónica`);
+  if (eventUrl(canonical) !== event.sourceUrl) throw sourceConflict(`${ID}: ficha sin identidad canónica coincidente`, 'identity', [{ surface: 'listing:url', value: event.sourceUrl }, { surface: 'detail:canonical', value: canonical }]);
   const title = stripTags(/<h1\b[^>]*itemprop=["']name["'][^>]*>([\s\S]*?)<\/h1\s*>/i.exec(body)?.[1] ?? '');
   if (title !== event.observed.title) throw new Error(`${ID}: título de ficha distinto`);
   const schedule = section(body, 'Fechas y Horarios');
@@ -138,12 +139,20 @@ export function parseEscorialDetail(event: RawEvent, body: string): ObservedFact
   const month = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
     .findIndex((name) => name === date?.[2]?.toLowerCase()) + 1;
   if (!date || !month || Number(date[1]) !== Number(expected.slice(-2)) || month !== Number(expected.slice(5, 7))) {
-    throw new Error(`${ID}: fecha de ficha distinta del listado`);
+    throw sourceConflict(`${ID}: fecha de ficha distinta del listado`, 'date', [{ surface: 'listing', value: expected }, { surface: 'detail:Fechas y Horarios', value: dateLine[0]! }]);
   }
   const times = [...dateLine[0]!.matchAll(/\b(\d{1,2}):([0-5]\d)\s*horas?\b/gi)];
   if (times.length > 1) throw new Error(`${ID}: horarios ambiguos`);
   const time = times[0] && parseObservedTime(`${times[0][1]}:${times[0][2]}`);
   if (times.length && !time) throw new Error(`${ID}: hora inválida`);
+  const structured = /<p\b(?=[^>]*itemprop=["']startDate["'])[^>]*content=["']([^"']+)["']/i.exec(body)?.[1];
+  const structuredDate = structured ? parseObservedDateTime(structured) : undefined;
+  if (structuredDate && (structuredDate.date !== expected || (time && structuredDate.time && structuredDate.time !== time))) {
+    throw sourceConflict(`${ID}: calendario estructurado y visible contradictorios`, structuredDate.date !== expected ? 'date' : 'time', [{ surface: 'detail:itemprop-startDate', value: structured! }, { surface: 'detail:Fechas y Horarios', value: dateLine[0]! }]);
+  }
+  if (time && event.observed.occurrences.some(o => o.date === expected && o.time && o.time !== time)) {
+    throw sourceConflict(`${ID}: hora de ficha distinta del listado`, 'time', [{ surface: 'listing:API', value: JSON.stringify(event.observed.occurrences) }, { surface: 'detail:Fechas y Horarios', value: dateLine[0]! }]);
+  }
   const occurrences: RawOccurrence[] = [{ raw: dateLine[0]!, date: expected, ...(time ? { time } : {}) }];
   const prices = section(body, 'Precios y Descuentos');
   const accessText = prices && flattenHtmlBlocks(prices).slice(0, 1200);

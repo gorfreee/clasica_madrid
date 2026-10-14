@@ -1,3 +1,4 @@
+import { sourceConflict } from './conflicts.ts';
 import { parseObservedDateTime, parseObservedTime } from '../dates.ts';
 import { decodeHtmlEntities, stripTags } from '../html.ts';
 import { looksLikeEnsembleName } from '../observed-cleanup.ts';
@@ -35,7 +36,7 @@ export function parseCbaDetail(event: RawEvent, body: string): ObservedFactPatch
   const sala = fields.get('Sala') ?? '';
   const occurrence = cbaOccurrence(dateText, timeText);
   const espacio = espacioName(body);
-  if (espacio && sala && espacio !== sala) throw new Error('circulo-bellas-artes: sala y espacio no coinciden');
+  if (espacio && sala && venueLabel(espacio) !== venueLabel(sala)) throw sourceConflict('circulo-bellas-artes: sala y espacio no coinciden', 'venue', [{ surface: 'detail:Sala', value: sala }, { surface: 'detail:espacio', value: espacio }]);
   const program = parseProgram(body);
   if (!occurrence) {
     // Ranges and opening hours are observed activities, not a broken template.
@@ -243,4 +244,9 @@ export function performersFromCbaTitle(title: string): ObservedPerson[] {
   if (!person.roleText) return [];
   if (looksLikeEnsembleName(person.name)) return [];
   return normalizePersonList([person]);
+}
+
+/** Typography alone is not a different physical room; no fuzzy venue matching. */
+function venueLabel(value: string): string {
+  return value.replace(/[«»“”"']/g, '').replace(/\s+/g, ' ').trim();
 }

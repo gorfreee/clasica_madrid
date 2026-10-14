@@ -203,7 +203,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
       obs?.recordObservation({ raw, listing: listing ?? raw, normalized: prepareNormalizedEvent(raw) });
     }
     rawEvents.push(...hydrated);
-    if (listingIncomplete || coverage?.incomplete) disappearanceSuppressedSources.push(source.id);
+    if (listingIncomplete || coverage?.incomplete || hydrated.some(raw => raw.hydration?.reason === 'source-conflict')) disappearanceSuppressedSources.push(source.id);
     if (failure) {
       failures.push(failure);
       obs?.recordSourceFailure(source.id, failure.message);
@@ -521,6 +521,7 @@ async function ingestPreparedEvents(
     batchDuplicates: reconciled.stats.batchDuplicates,
     possiblyMissing: possiblyMissing.length,
     hydrationFailed: hydration.failed,
+    sourceConflicts: rawEvents.filter(raw => raw.hydration?.reason === 'source-conflict').length,
     unresolvedTaxonomy,
     unresolvedComposers,
     ai: aiUsage,

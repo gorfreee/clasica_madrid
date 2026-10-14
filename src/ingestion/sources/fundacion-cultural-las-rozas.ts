@@ -1,3 +1,4 @@
+import { sourceConflict } from '../detail/conflicts.ts';
 import { isRealIsoDate } from '../../lib/util/iso-date.ts';
 import { madridToday } from '../../lib/domain/dates.ts';
 import { collapseWhitespace, stripTags } from '../html.ts';
@@ -157,8 +158,9 @@ export function parseLasRozasDetail(event: RawEvent, body: string): ObservedFact
     throw new Error(`${ID}: ficha sin identidad canónica`);
   }
   const dateText = /data-id="09f5817"[\s\S]*?<p\b[^>]*elementor-heading-title[^>]*>([^<]+)<\/p>/i.exec(body)?.[1];
-  if (!dateText || collapseWhitespace(dateText) !== event.listingDateText) {
-    throw new Error(`${ID}: ficha con fecha distinta del listado`);
+  if (!dateText) throw new Error(`${ID}: ficha sin fecha`);
+  if (collapseWhitespace(dateText) !== event.listingDateText) {
+    throw sourceConflict(`${ID}: ficha con fecha distinta del listado`, 'date', [{ surface: 'listing', value: event.listingDateText ?? '' }, { surface: 'detail:date', value: dateText }]);
   }
   const description = /data-id="6b5b5ad"[\s\S]*?<div class="elementor-widget-container">([\s\S]*?)<\/div>/i.exec(body)?.[1];
   const venue = /data-id="f3958c2"[\s\S]*?<span class="jet-listing-dynamic-terms__link">([^<]+)<\/span>/i.exec(body)?.[1];
@@ -169,7 +171,7 @@ export function parseLasRozasDetail(event: RawEvent, body: string): ObservedFact
   if (detailTimes.length && listingTimes.length &&
       JSON.stringify(detailTimes.length === 1 && listingTimes.length > 1
         ? Array(listingTimes.length).fill(detailTimes[0]) : detailTimes) !== JSON.stringify(listingTimes)) {
-    throw new Error(`${ID}: ficha con horario distinto del listado`);
+    throw sourceConflict(`${ID}: ficha con horario distinto del listado`, 'time', [{ surface: 'listing', value: JSON.stringify(event.observed.occurrences) }, { surface: 'detail:Horarios', value: times ?? '' }]);
   }
   return {
     ...(description ? { performers: extractExplicitPerformanceCredits(stripTags(description)) } : {}),
