@@ -133,9 +133,10 @@ export type SourceDefinition = PipelineSource & {
    * How `getText` reaches this source's hosts. Unset means `relay` when
    * `useFetchRelay` is set, otherwise `direct`. `direct-then-relay` tries
    * the origin first and uses the Worker only after a recoverable block.
-   * March, Zarzuela, Auditorio and CNDM stay on `relay`.
+   * March, Zarzuela and Auditorio stay on `relay`. CNDM uses
+   * `relay-then-direct`: one direct origin attempt after a recoverable relay failure.
    */
-  fetchTransport?: 'direct' | 'relay' | 'direct-then-relay';
+  fetchTransport?: 'direct' | 'relay' | 'direct-then-relay' | 'relay-then-direct';
 };
 
 /**

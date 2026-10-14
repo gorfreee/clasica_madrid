@@ -102,7 +102,7 @@ export type FetchRelayTarget = {
  * `direct-then-relay` try the origin first and use the Worker only after a
  * recoverable block (202/403/408/429/5xx/timeout/fetch-failed). Callers keep
  * passing the official source URL; this function never rewrites it into a
- * workers.dev address. Error statuses are never retried on relay-only hosts,
+ * workers.dev address. CNDM uses relay-then-direct after a recoverable relay failure. Error statuses are never retried on relay-only hosts,
  * and a 403 on a direct-only host is never sent to the relay.
  *
  * Native fetch does not persist Set-Cookie across redirects. www.march.es
@@ -118,13 +118,16 @@ export type FetchRelayTarget = {
  * browser `Cookie`/`Set-Cookie`.
  */
 export async function getText(url: string, timeoutMs = 30_000, env: NodeJS.ProcessEnv = process.env): Promise<string> {
+  if (transportStrategy(url) === 'relay-then-direct') {
+    return await readRelayThenDirect(url, timeoutMs, env);
+  }
   if (transportStrategy(url) === 'direct-then-relay') {
     return await readDirectThenRelay(url, timeoutMs, env);
   }
   return await readOnce(url, timeoutMs, env);
 }
 
-function transportStrategy(url: string): 'direct' | 'relay' | 'direct-then-relay' {
+function transportStrategy(url: string): 'direct' | 'relay' | 'direct-then-relay' | 'relay-then-direct' {
   const parsed = parseHttpUrl(url);
   return parsed ? fetchTransportForHost(parsed.hostname) : 'direct';
 }
@@ -431,4 +434,31 @@ function setCookieValues(response: Response): string[] {
   }
   const single = response.headers.get('set-cookie');
   return single ? [single] : [];
+}
+
+/** CNDM: a relay-wide outage must not be confused with an unavailable origin.
+ * Configuration errors and non-recoverable statuses remain failures. */
+async function readRelayThenDirect(url: string, timeoutMs: number, env: NodeJS.ProcessEnv): Promise<string> {
+  const relay = resolveFetchRelay(url, env);
+  if (!relay) return readOnce(url, timeoutMs, env);
+  const relayStartedAtMs = performance.now();
+  try {
+    const body = await withTimeout(timeoutMs, signal => readViaRelay(url, relay, signal));
+    recordAttempt({ url, transport: 'relay', startedAtMs: relayStartedAtMs, retry: false });
+    return body;
+  } catch (error) {
+    const failure = wrapAbort(url, error);
+    recordAttempt({ url, transport: 'relay', startedAtMs: relayStartedAtMs, retry: false, error: failure });
+    if (!isRecoverableTransportError(failure)) throw failure;
+    const directStartedAtMs = performance.now();
+    try {
+      const body = await withTimeout(timeoutMs, signal => readFollowingRedirects(url, signal));
+      recordAttempt({ url, transport: 'direct', startedAtMs: directStartedAtMs, retry: true });
+      return body;
+    } catch (directError) {
+      const wrapped = wrapAbort(url, directError);
+      recordAttempt({ url, transport: 'direct', startedAtMs: directStartedAtMs, retry: true, error: wrapped });
+      throw new TransportAttemptsError(url, [toTransportAttempt('relay', failure), toTransportAttempt('direct', wrapped)]);
+    }
+  }
 }

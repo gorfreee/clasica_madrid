@@ -310,7 +310,7 @@ describe('agenda del Real Conservatorio Superior de Música de Madrid', () => {
       },
     });
     expect(run.rawEvents).toEqual([]);
-    expect(run.summary.sourcesFailed).toEqual([]);
+    expect(run.summary.sourcesFailed).toEqual([expect.objectContaining({ sourceId: source.id, message: expect.any(String) })]);
     expect(run.summary.disappearanceSuppressedSources).toEqual([source.id]);
     expect(run.summary.possiblyMissing).toBe(0);
     expect(run.possiblyMissing).toEqual([]);

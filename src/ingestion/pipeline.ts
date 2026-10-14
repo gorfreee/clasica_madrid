@@ -125,6 +125,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
     try {
       let extracted: RawEvent[];
       let listingIncomplete = false;
+      let listingFailure: SourceFailure | undefined;
       try {
         extracted = await measureSourcePhase(obs, source.id, 'extraction', () =>
           extractSource(source, options.now, window, sourceGet, reportDiscard));
@@ -132,6 +133,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
         if (!(error instanceof IncompleteListingError)) throw error;
         extracted = error.events;
         listingIncomplete = true;
+        listingFailure = { sourceId: source.id, message: error.message };
       } finally {
         flushBrowserFetchAttempts(source.id, obs);
       }
@@ -148,7 +150,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
             message: `cobertura de hydration incompleta: ${coverage.succeeded}/${coverage.required} fichas necesarias; desapariciones no evaluables`,
           }
         : undefined;
-      return { source, extracted, hydrated, listingIncomplete, coverage, failure, adapterDiscards };
+      return { source, extracted, hydrated, listingIncomplete, coverage, failure: failure ?? listingFailure, adapterDiscards };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       flushBrowserFetchAttempts(source.id, obs);
@@ -185,7 +187,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
       hydrationRecoveries,
       status: failure ? 'failed' : 'ok',
       usesHydration: Boolean(adapter.hydrate),
-      hydrationReached: !listingError,
+      hydrationReached: hydrated.length > 0 || !listingError,
       listingError,
       listingFallback,
       adapterDiscards: result.adapterDiscards.length,

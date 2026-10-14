@@ -247,8 +247,8 @@ describe('agenda del Coro de Cámara de Madrid', () => {
         return fixture();
       },
     });
-    expect(run.summary.sourcesSucceeded).toEqual([source.id]);
-    expect(run.summary.sourcesFailed).toEqual([]);
+    expect(run.summary.sourcesSucceeded).toEqual([]);
+    expect(run.summary.sourcesFailed).toEqual([expect.objectContaining({ sourceId: source.id, message: expect.any(String) })]);
     expect(run.summary.disappearanceSuppressedSources).toEqual([source.id]);
     expect(run.summary.possiblyMissing).toBe(0);
     expect(run.summary.newEvents).toBe(0);

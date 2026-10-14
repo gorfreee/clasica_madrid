@@ -140,7 +140,7 @@ describe('descubrimiento K2 de Zarzuela', () => {
       },
     });
     const run = await advance(ingestPending);
-    expect(run.summary.sourcesFailed).toEqual([]);
+    expect(run.summary.sourcesFailed).toEqual([expect.objectContaining({ sourceId: source.id, message: expect.any(String) })]);
     expect(run.summary.disappearanceSuppressedSources).toEqual([source.id]);
     expect(run.rawEvents.map((event) => event.observed.title)).toEqual(['La verbena de la Paloma']);
   });
@@ -189,7 +189,7 @@ describe('descubrimiento K2 de Zarzuela', () => {
       },
     }));
     expect(attempts.get('/es/temporada/danza-2026-2027')).toBe(ZARZUELA_MAX_ATTEMPTS_PER_URL);
-    expect(run.summary.sourcesFailed).toEqual([]);
+    expect(run.summary.sourcesFailed).toEqual([expect.objectContaining({ sourceId: source.id, message: expect.any(String) })]);
     expect(run.summary.disappearanceSuppressedSources).toEqual([source.id]);
     expect(run.summary.possiblyMissing).toBe(0);
     expect(run.possiblyMissing).toEqual([]);
