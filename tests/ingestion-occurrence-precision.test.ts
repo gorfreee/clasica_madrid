@@ -101,6 +101,27 @@ describe('precisión conservadora de ocurrencias', () => {
 });
 
 describe('regresión Production ingestion 38532659060', () => {
+  it('una cancelación 1→N no necesita asignar horarios a los IDs publicados', () => {
+    const catalog = hanniganCatalog();
+    catalog.events = [
+      { ...fixture.published, occurrences: fixture.published.occurrences.map(occ => ({ ...occ, time: null })) },
+      { ...fixture.published, id: 'evt_hannigan_other', slug: 'hannigan-other', occurrences: [
+        { id: 'occ_hannigan_other', date: '2027-04-12', time: '19:30', status: 'scheduled' },
+      ] },
+    ];
+    const raw = withTimes(fixture.observations[0]!, ['17:00', '19:30']);
+    raw.observed.eventStatus = 'cancelled';
+    raw.eventStatus = 'cancelled';
+    const result = reconcileRaw(catalog, [raw]);
+    expect(result.stats.ambiguous).toBe(0);
+    expect(result.candidates).toHaveLength(2);
+    for (const candidate of result.candidates) {
+      expect(candidate.event.status).toBe('cancelled');
+      const previous = catalog.events.find(event => event.id === candidate.event.id)!;
+      expect(candidate.event.occurrences).toEqual(previous.occurrences.map(occ => ({ ...occ, status: 'cancelled' })));
+    }
+  });
+
   it.each(permutations([0, 1, 2]))('dos sesiones publicadas y corroboración sin hora no crean una tercera, orden %j', async (...order) => {
     const catalog = hanniganCatalog();
     catalog.events[0] = { ...fixture.published, occurrences: [

@@ -332,9 +332,12 @@ function applySharedSourceObservation(
   const match = item.identity;
   if (match.kind !== 'matched-many') return;
 
-  const conflict = match.assigned.map(assignment => occurrenceMergeConflict(assignment.event, {
-    ...item.proposal, occurrences: assignment.occurrences,
-  })).find(Boolean);
+  // Cancellation proposals have no incoming calendar and do not reassign IDs.
+  const conflict = item.proposal.occurrences.length === 0
+    ? undefined
+    : match.assigned.map(assignment => occurrenceMergeConflict(assignment.event, {
+        ...item.proposal, occurrences: assignment.occurrences,
+      })).find(Boolean);
   if (conflict) {
     for (const event of match.events) seenEventIds.add(event.id);
     stats.ambiguous += 1;
