@@ -11,6 +11,8 @@ import {
   nextSeasonEnd,
   isDateInHarvestScope,
   mergeObservedCalendars,
+  collapseOccurrences,
+  resolveOccurrencePrecision,
 } from '../src/ingestion/dates.ts';
 import { inferScheduleFromText } from '../src/ingestion/detail/schedule.ts';
 import { normalizeRawEvent } from '../src/ingestion/normalize.ts';
@@ -19,6 +21,29 @@ import { TEST_NOW } from './helpers.ts';
 import type { RawEvent } from '../src/ingestion/types.ts';
 
 describe('parseo de fechas y horas', () => {
+  it('resuelve sin hora y hora explícita sólo al cerrar el calendario completo', () => {
+    const date = '2027-04-11';
+    const items = [{ date, time: null }, { date, time: '19:30' }];
+    expect(collapseOccurrences(items)).toEqual(items);
+    expect(resolveOccurrencePrecision(items)).toEqual([{ date, time: '19:30' }]);
+    expect(resolveOccurrencePrecision([...items].reverse())).toEqual([{ date, time: '19:30' }]);
+    expect(resolveOccurrencePrecision(resolveOccurrencePrecision(items))).toEqual([{ date, time: '19:30' }]);
+    const multiple = [...items, { date, time: '17:00' }];
+    expect(resolveOccurrencePrecision(multiple)).toEqual([
+      { date, time: null }, { date, time: '17:00' }, { date, time: '19:30' },
+    ]);
+  });
+
+  it('la corroboración aporta precisión sólo para la misma fecha, nunca nuevas sesiones', () => {
+    const items = [{ date: '2027-04-11', time: null }];
+    expect(resolveOccurrencePrecision(items, [{ date: '2026-10-23', time: '19:30' }])).toEqual(items);
+    expect(resolveOccurrencePrecision(items, [{ date: '2027-04-11', time: '19:30' }]))
+      .toEqual([{ date: '2027-04-11', time: '19:30' }]);
+    expect(resolveOccurrencePrecision(items, [
+      { date: '2027-04-11', time: '17:00' }, { date: '2027-04-11', time: '19:30' },
+    ])).toEqual(items);
+  });
+
   it('detail calendar replacement wins over listing-only corroboration in either order', () => {
     const listing = { occurrences: [{ date: '2026-10-23', time: '19:30' }, { date: '2027-04-11', time: '19:30' }] };
     const detail = { occurrences: [{ date: '2027-04-11', time: '19:30' }], dateFromDetail: true };
