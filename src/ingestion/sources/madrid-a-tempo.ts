@@ -1,12 +1,14 @@
 import {
   extractMadridListing,
+  MadridEmptyWarmupError,
   madridListingPage,
   madridListingUrl,
   madridNextListingUrl,
+  madridPostUrl,
   parseMadridDetail,
   parseMadridFeed,
 } from '../detail/madrid-a-tempo.ts';
-import type { AdapterContext, RawEvent, SourceAdapter } from '../types.ts';
+import { IncompleteListingError, type AdapterContext, type RawEvent, type SourceAdapter } from '../types.ts';
 
 const MAX_PAGES = 20;
 
@@ -26,32 +28,79 @@ export const madridATempoAdapter: SourceAdapter = {
     const events = new Map<string, RawEvent>();
     let pageUrl = url;
     let pageBody = body;
+    let pageSize: number | undefined;
+    const identities = new Set<string>();
+    const urls = new Set<string>();
+    const cursors = new Set<string>();
     for (let page = 1; page <= MAX_PAGES; page += 1) {
-      if (madridListingPage(pageUrl) !== page) {
-        throw new Error('madrid-a-tempo: paginación no secuencial');
+      try {
+        if (madridListingPage(pageUrl) !== page) {
+          throw new Error('madrid-a-tempo: paginación no secuencial');
+        }
+        let parsed: ReturnType<typeof parseMadridFeed>;
+        try {
+          parsed = parseMadridFeed(pageBody, pageUrl);
+        } catch (error) {
+          if (!(error instanceof MadridEmptyWarmupError)) throw error;
+          // ctx.get memoizes URLs. Use one deterministic cache-busting request
+          // for the observed empty SSR shell, then validate the same feed/page.
+          const retryUrl = new URL(pageUrl);
+          retryUrl.searchParams.set('cm_listing_retry', '1');
+          pageBody = await nextPage(retryUrl.href, ctx, events);
+          try {
+            parsed = parseMadridFeed(pageBody, pageUrl);
+          } catch (retryError) {
+            throw new IncompleteListingError(
+              `madrid-a-tempo: SSR sin feed; recuperación inválida: ${errorMessage(retryError)}`,
+              sortEvents(events),
+            );
+          }
+        }
+        if (parsed.page !== page) throw new Error('madrid-a-tempo: paginación no secuencial');
+        if (pageSize !== undefined && pageSize !== parsed.pageSize) {
+          throw new Error('madrid-a-tempo: pageSize cambia entre páginas');
+        }
+        pageSize = parsed.pageSize;
+        if (parsed.nextCursor && cursors.has(parsed.nextCursor)) {
+          throw new Error('madrid-a-tempo: cursor de continuación repetido');
+        }
+        if (parsed.nextCursor) cursors.add(parsed.nextCursor);
+        // Check every post, including historical posts discarded by the window:
+        // a repeated page must never masquerade as successful empty coverage.
+        for (const post of parsed.posts) {
+          const postUrl = madridPostUrl(post.link ?? post.path!, 'https://www.madridatempo.com/')!;
+          if (identities.has(post.id) || urls.has(postUrl)) {
+            throw new Error(`madrid-a-tempo: evento duplicado entre páginas (${post.id}; ${postUrl})`);
+          }
+          identities.add(post.id);
+          urls.add(postUrl);
+        }
+        for (const event of extractMadridListing(pageBody, pageUrl, ctx)) {
+          absorb(events, event);
+        }
+        if (!parsed.next) return sortEvents(events);
+        if (page === MAX_PAGES) throw new Error(`madrid-a-tempo: demasiadas páginas (${MAX_PAGES})`);
+        pageUrl = madridNextListingUrl(pageUrl);
+        pageBody = await nextPage(pageUrl, ctx, events);
+      } catch (error) {
+        const message = `${pageUrl}: ${errorMessage(error)}`;
+        if (error instanceof IncompleteListingError) throw new IncompleteListingError(message, error.events);
+        throw new Error(message);
       }
-      const parsed = parseMadridFeed(pageBody, pageUrl);
-      if (parsed.page !== page) throw new Error('madrid-a-tempo: paginación no secuencial');
-      for (const event of extractMadridListing(pageBody, pageUrl, ctx)) {
-        absorb(events, event);
-      }
-      if (!parsed.next) return sortEvents(events);
-      pageUrl = madridNextListingUrl(pageUrl);
-      pageBody = await nextPage(pageUrl, ctx);
     }
     throw new Error(`madrid-a-tempo: demasiadas páginas (${MAX_PAGES})`);
   },
   hydrate: parseMadridDetail,
 };
 
-async function nextPage(url: string, ctx: AdapterContext): Promise<string> {
+async function nextPage(url: string, ctx: AdapterContext, events: Map<string, RawEvent>): Promise<string> {
   try {
     return await ctx.get(url);
   } catch (error) {
-    if (isNotFound(error)) {
-      throw new Error('madrid-a-tempo: paginación incompleta');
-    }
-    throw error;
+    throw new IncompleteListingError(
+      `madrid-a-tempo: paginación incompleta (${url}): ${errorMessage(error)}`,
+      sortEvents(events),
+    );
   }
 }
 
@@ -76,6 +125,6 @@ function sortEvents(events: Map<string, RawEvent>): RawEvent[] {
   return [...events.values()].sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
 }
 
-function isNotFound(error: unknown): boolean {
-  return typeof error === 'object' && error !== null && 'status' in error && error.status === 404;
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
