@@ -11,7 +11,7 @@ import { normalizeUrl } from './urls.ts';
 import type { NormalizedEvent } from './normalize.ts';
 import type { PipelineSource } from './types.ts';
 import { hasSufficientNewVenueLocation, isSufficientProposedVenue, matchVenue, unpublishedMatchedVenue, unpublishedParentVenue } from './venues.ts';
-import { defaultIngestWindow, isDateInHarvestScope, type IngestWindow } from './dates.ts';
+import { defaultIngestWindow, isDateInHarvestScope, resolveOccurrencePrecision, type IngestWindow } from './dates.ts';
 import { ID_PREFIX } from '../lib/schemas/taxonomies.ts';
 import { SOURCE_REGISTRY, resolveCatalogSource } from './registry.ts';
 import { canonicalizeComposerList, canonicalizeWorkList } from './composer-name.ts';
@@ -50,7 +50,7 @@ export function toCandidate(
   if (event.eventStatus === 'cancelled') {
     return { skippedReason: 'cancelado' };
   }
-  const publishableOccurrences = publicationOccurrences(event, now, { window });
+  const publishableOccurrences = resolveOccurrencePrecision(publicationOccurrences(event, now, { window }));
   if (publishableOccurrences.length === 0) {
     return { skippedReason: emptyScheduleSkipReason(event, now) };
   }

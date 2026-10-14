@@ -20,6 +20,7 @@ import {
   materialProposalConflict,
   mergeCitationLists,
   mergeExistingEvent,
+  occurrenceMergeConflict,
   mergeProposals,
   proposalFromObservation,
   scheduleChangeOf,
@@ -270,7 +271,11 @@ function applyExistingGroup(
   if (!existing) return;
   seenEventIds.add(existing.id);
 
-  const conflict = groupConflict(group);
+  let proposal = group[0]!.proposal;
+  for (const item of group.slice(1)) {
+    proposal = mergeProposals(proposal, item.proposal);
+  }
+  const conflict = groupConflict(group, existing) ?? occurrenceMergeConflict(existing, proposal);
   if (conflict) {
     stats.ambiguous += group.length;
     recordGroupedObservations(group, stats, { conflicting: true });
@@ -290,10 +295,6 @@ function applyExistingGroup(
     return;
   }
 
-  let proposal = group[0]!.proposal;
-  for (const item of group.slice(1)) {
-    proposal = mergeProposals(proposal, item.proposal);
-  }
   const merged = mergeExistingEvent(existing, proposal, now);
   const action = persistAction(existing, merged.event);
   if (action === 'unchanged') stats.unchangedEvents += 1;
@@ -330,6 +331,23 @@ function applySharedSourceObservation(
 ): void {
   const match = item.identity;
   if (match.kind !== 'matched-many') return;
+
+  // Cancellation proposals have no incoming calendar and do not reassign IDs.
+  const conflict = item.proposal.occurrences.length === 0
+    ? undefined
+    : match.assigned.map(assignment => occurrenceMergeConflict(assignment.event, {
+        ...item.proposal, occurrences: assignment.occurrences,
+      })).find(Boolean);
+  if (conflict) {
+    for (const event of match.events) seenEventIds.add(event.id);
+    stats.ambiguous += 1;
+    byIndex.set(item.observation.index, {
+      action: 'ambiguous', method: match.method, ambiguousReason: conflict,
+      eventId: match.events[0]?.id, eventIds: match.events.map(event => event.id),
+      publishable: false, candidateGenerated: false,
+    });
+    return;
+  }
 
   const cancelled = item.proposal.status === 'cancelled';
   const cancelAll = cancelled && !match.scopeCancellationToAssignments;
@@ -610,7 +628,9 @@ function groupBy<T>(items: T[], keyOf: (item: T) => string): Map<string, T[]> {
   return groups;
 }
 
-function groupConflict(group: PreparedItem[]): string | undefined {
+function groupConflict(group: PreparedItem[], existing?: Event): string | undefined {
+  const scheduleConflict = crossSourceScheduleConflict(group, existing);
+  if (scheduleConflict) return scheduleConflict;
   for (const [index, item] of group.entries()) {
     for (const other of group.slice(index + 1)) {
       if (!sourceIdentityCanRecycle(item.observation.source.catalogSourceId) &&
@@ -626,6 +646,30 @@ function groupConflict(group: PreparedItem[]): string | undefined {
     const conflict = materialProposalConflict(proposal, item.proposal);
     if (conflict) return conflict;
     proposal = mergeProposals(proposal, item.proposal);
+  }
+  return undefined;
+}
+
+/** Different source clocks are not evidence of additional performances. */
+function crossSourceScheduleConflict(group: PreparedItem[], existing?: Event): string | undefined {
+  const authoritative = group.some(item => item.proposal.dateFromDetail)
+    ? group.filter(item => item.proposal.dateFromDetail) : group;
+  const dates = [...new Set(authoritative.flatMap(item => item.proposal.occurrences.map(occ => occ.date)))].sort();
+  for (const date of dates) {
+    const calendars = authoritative.map(item => ({
+      sourceId: item.observation.source.catalogSourceId,
+      times: new Set(item.proposal.occurrences
+        .filter(occ => occ.date === date && occ.time !== null).map(occ => occ.time!)),
+    })).filter(item => item.times.size > 0);
+    const times = new Set(calendars.flatMap(item => [...item.times]));
+    if (times.size < 2 || new Set(calendars.map(item => item.sourceId)).size < 2) continue;
+    const publishedTimes = new Set(existing?.occurrences
+      .filter(occ => occ.date === date && occ.time !== null).map(occ => occ.time) ?? []);
+    // One calendar (or already-published explicit sessions) must attest the
+    // complete set. A date-only observation cannot establish that correspondence.
+    if ([publishedTimes, ...calendars.map(item => item.times)]
+      .some(calendar => [...times].every(time => calendar.has(time)))) continue;
+    return `schedule-conflict: horarios de fuentes distintas sin calendario que acredite las sesiones (${date}: ${[...times].sort().join(', ')})`;
   }
   return undefined;
 }

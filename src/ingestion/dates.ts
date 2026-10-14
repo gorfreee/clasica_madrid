@@ -240,6 +240,7 @@ export function parseObservedTime(raw: string): string | null {
   return `${match[1].padStart(2, '0')}:${match[2]}`;
 }
 
+/** Exact union of evidence. Keep unknown times until the whole group is available. */
 export function collapseOccurrences(
   items: ParsedDateTime[],
 ): Array<{ date: string; time: string | null }> {
@@ -256,6 +257,33 @@ export function collapseOccurrences(
     result.push(item);
   }
   return result;
+}
+
+/**
+ * Resolve precision only at publication, after all calendars have been merged.
+ * A date-only observation corroborates a single explicit time on that date.
+ * With several times it only corroborates the date; it is not an extra session.
+ * `corroboration` can supply precision, but cannot add dates or performances.
+ * Resolving during a pairwise fold would lose the unknown observation before
+ * a later calendar supplies a second time, making the result order-dependent.
+ */
+export function resolveOccurrencePrecision(
+  items: ParsedDateTime[],
+  corroboration: ParsedDateTime[] = [],
+): ParsedDateTime[] {
+  const timesByDate = new Map<string, Set<string>>();
+  for (const item of [...items, ...corroboration]) {
+    if (item.time === null) continue;
+    const times = timesByDate.get(item.date) ?? new Set<string>();
+    times.add(item.time);
+    timesByDate.set(item.date, times);
+  }
+  return collapseOccurrences(items.flatMap(item => {
+    const times = timesByDate.get(item.date);
+    if (item.time !== null || !times?.size) return [item];
+    if (times.size > 1) return [];
+    return [{ date: item.date, time: [...times][0]! }];
+  }));
 }
 
 /** A detail replacement owns the calendar; listing-only corroboration cannot extend it. */
