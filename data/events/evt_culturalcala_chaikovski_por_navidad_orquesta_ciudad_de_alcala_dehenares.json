@@ -56,8 +56,14 @@
       "sourceId": "src_culturalcala",
       "url": "https://www.giglon.com/evento/chaikovski-por-navidad---orquesta-ciudad-de-alcala-dehenares",
       "checkedAt": "2026-09-27"
+    },
+    {
+      "sourceId": "src_culturalcala",
+      "url": "https://culturalcala.es/item_event/chaikovski-por-navidad",
+      "checkedAt": "2026-10-14",
+      "externalId": "56636"
     }
   ],
   "primarySourceId": "src_culturalcala",
-  "lastVerifiedAt": "2026-09-27"
+  "lastVerifiedAt": "2026-10-14"
 }
