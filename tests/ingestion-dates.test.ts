@@ -85,7 +85,7 @@ describe('parseo de fechas y horas', () => {
 
   it('infiere aplazamiento y cancelación desde el texto de la ficha', () => {
     const postponed = inferScheduleFromText('CONCIERTO APLAZADO. AL 11 de ABRIL de 2027');
-    expect(postponed.eventStatus).toBe('scheduled');
+    expect(postponed.eventStatus).toBe('postponed');
     expect(postponed.occurrences?.[0]?.date).toBe('2027-04-11');
 
     const cancelled = inferScheduleFromText('CONCIERTO CANCELADO. No se celebrará.');
