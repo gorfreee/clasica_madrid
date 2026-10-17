@@ -264,7 +264,7 @@ describe('corroboración cross-source vs duplicados del lote', () => {
       observations: [
         observation(0, auditorio, auditorioFacts({
           occurrences: [{ date: movedDate, time: '19:30' }],
-          eventStatus: 'scheduled', // Parsed postponement with a new detail date.
+          eventStatus: 'postponed', // Explicit source notice; the new date will publish as scheduled.
           dateFromDetail: true,
         })),
       ],
