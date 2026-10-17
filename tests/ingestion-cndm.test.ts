@@ -330,7 +330,7 @@ describe('CNDM detail hydration', () => {
   it('uses an explicit postponement date without inventing a clock on the new date', async () => {
     const event = rawEvent('23814', '[APLAZADO] BARBARA HANNIGAN & BERTRAND CHAMAYOU', '2026-10-23', '19:30', 'Auditorio Nacional (Cámara) | Madrid');
     const patch = parseCndmDetail(event, await fixture('detail-postponed'));
-    expect(patch.eventStatus).toBe('scheduled');
+    expect(patch.eventStatus).toBe('postponed');
     expect(patch.occurrences).toEqual([
       expect.objectContaining({ date: '2027-04-11' }),
     ]);
@@ -339,6 +339,7 @@ describe('CNDM detail hydration', () => {
       expect.objectContaining({ date: '2027-04-11', time: undefined }),
     ]);
     expect(hydrated?.dateFromDetail).toBe(true);
+    expect(hydrated?.eventStatus).toBe('postponed');
   });
 
   it('accepts an explicitly unlocated activity without inventing a venue', async () => {
