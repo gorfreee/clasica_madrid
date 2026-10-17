@@ -101,7 +101,7 @@ describe('precisión conservadora de ocurrencias', () => {
 });
 
 describe('regresión Production ingestion 38532659060', () => {
-  it('una cancelación 1→N no necesita asignar horarios a los IDs publicados', () => {
+  it('una cancelación 1→N conserva el ID de la fecha acreditada sin cancelar otra función', () => {
     const catalog = hanniganCatalog();
     catalog.events = [
       { ...fixture.published, occurrences: fixture.published.occurrences.map(occ => ({ ...occ, time: null })) },
@@ -114,12 +114,14 @@ describe('regresión Production ingestion 38532659060', () => {
     raw.eventStatus = 'cancelled';
     const result = reconcileRaw(catalog, [raw]);
     expect(result.stats.ambiguous).toBe(0);
-    expect(result.candidates).toHaveLength(2);
-    for (const candidate of result.candidates) {
-      expect(candidate.event.status).toBe('cancelled');
-      const previous = catalog.events.find(event => event.id === candidate.event.id)!;
-      expect(candidate.event.occurrences).toEqual(previous.occurrences.map(occ => ({ ...occ, status: 'cancelled' })));
-    }
+    expect(result.candidates).toHaveLength(1);
+    const [candidate] = result.candidates;
+    expect(candidate!.event.id).toBe(fixture.published.id);
+    expect(candidate!.event.status).toBe('cancelled');
+    const previous = catalog.events[0]!;
+    expect(candidate!.event.occurrences).toEqual(previous.occurrences.map(occ => ({ ...occ, status: 'cancelled' })));
+    expect(catalog.events[1]!.status).toBe('scheduled');
+    expect(result.publicationPlan).toEqual([{ eventId: previous.id, action: 'updated' }]);
   });
 
   it.each(permutations([0, 1, 2]))('dos sesiones publicadas y corroboración sin hora no crean una tercera, orden %j', async (...order) => {
