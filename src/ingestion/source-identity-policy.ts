@@ -78,11 +78,10 @@ export function compareSourceIdentity(
     distinctiveTitle(observed.title) === distinctiveTitle(existing.title);
   const continuity = sameTitle || explicitMusic.kind === 'match' ||
     music.kind === 'match';
-  // Adapters set scheduled + dateFromDetail only after parsing an explicit
-  // postponement with a replacement date (detail/schedule.ts, detail/cndm.ts).
+  // dateFromDetail means the detail supplied a calendar, not that another
+  // published performance was rescheduled. Require actual postponement evidence.
   const postponed = observed.eventStatus === 'postponed' || existing.status === 'postponed' ||
-    /^\[(?:aplazado|pospuesto)\]/iu.test(observed.title) ||
-    (observed.dateFromDetail && observed.eventStatus === 'scheduled');
+    /^\[(?:aplazado|pospuesto)\]/iu.test(observed.title);
   // A postponement plus contradictory programming may be a programme
   // change; it is not proof of a second independent concert.
   if (postponed && (explicitMusic.kind === 'conflict' ||
@@ -91,7 +90,19 @@ export function compareSourceIdentity(
   // Programming/cast changes in the same slot may be a correction. Never
   // overwrite automatically or invent another concert in that slot.
   if (explicitMusic.kind === 'conflict') return hasDates && !sameSlot ? 'incompatible' : 'review';
-  if (observed.eventStatus === 'cancelled' && continuity && sameVenue) return 'compatible';
+  // A cancellation is event-wide. Never apply it to a different session
+  // sharing a URL/title or to just one date of a multi-session event.
+  // A date-only notice is not enough to select among same-day sessions.
+  if (observed.eventStatus === 'cancelled') {
+    const coversPublishedSchedule = existing.occurrences.length > 0 &&
+      existing.occurrences.every(previous => observed.occurrences.some(incoming =>
+        incoming.date === previous.date && (
+          incoming.time === previous.time ||
+          (incoming.time == null && existing.occurrences.filter(item => item.date === previous.date).length === 1)
+        ),
+      ));
+    if (!sameVenue || !coversPublishedSchedule) return 'review';
+  }
   if (differentVenue) {
     if (continuity && postponed) return 'compatible';
     return hasDates && !sameDate ? 'incompatible' : 'review';
