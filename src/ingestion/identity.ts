@@ -4,7 +4,7 @@ import { normalizeText } from '../lib/domain/normalize.ts';
 import type { Event } from '../lib/schemas/index.ts';
 import { compareMusicalFacts, musicalFactsFrom } from './musical-identity.ts';
 import { normalizeUrl, urlIdentifiesSingleEvent, urlsEquivalent } from './urls.ts';
-import { compareRecyclableIdentity, sourceIdentityCanRecycle } from './source-identity-policy.ts';
+import { compareRecyclableIdentity, compareSourceIdentity, sourceIdentityCanRecycle } from './source-identity-policy.ts';
 
 export type IdentityMethod = 'externalId' | 'url' | 'alias' | 'strong' | 'slot';
 
@@ -143,7 +143,7 @@ export function matchEventIdentity(
     }
   }
 
-  const guarded = guardRecyclableHits(hits, observed, options);
+  const guarded = guardSourceHits(hits, observed, options, catalog);
   if (guarded.kind === 'ambiguous') return guarded;
   const precise = collapseHits(guarded.hits, observed);
   if (precise.kind === 'matched-many' && guarded.recyclable) {
@@ -154,29 +154,56 @@ export function matchEventIdentity(
   return matchExclusiveSlot(catalog, observed, options.venueId);
 }
 
-function guardRecyclableHits(
+function guardSourceHits(
   hits: Array<{ event: Event; method: IdentityMethod }>,
   observed: IdentityFacts,
   options: { catalogSourceId: string; venueId?: string },
+  catalog: Catalog,
 ): { kind: 'filtered'; hits: typeof hits; recyclable: boolean } | Extract<IdentityMatch, { kind: 'ambiguous' }> {
   const accepted: typeof hits = [];
   const reviews: typeof hits = [];
+  const rejected: typeof hits = [];
   const guardedIds = new Set<string>();
+  let recyclableSource = false;
   for (const hit of hits) {
     // URL identity can cross sources (e.g. Discovery): use the provenance of
     // the matching citation too, rather than just the incoming source.
     const recyclable = sourceIdentityCanRecycle(options.catalogSourceId) || hit.event.citations.some((citation) =>
       sourceIdentityCanRecycle(citation.sourceId) && urlsEquivalent(citation.url, observed.sourceUrl),
     );
-    if (!recyclable) { accepted.push(hit); continue; }
+    // Reviewed aliases retain their explicit mapping, except for known
+    // recyclable sources. Strong/slot hits already require independent facts.
+    if (!recyclable && hit.method !== 'url' && hit.method !== 'externalId') {
+      accepted.push(hit); continue;
+    }
+    recyclableSource ||= recyclable;
+    // Even for cancellations, an attested calendar owner must win over an
+    // unrelated older performance that happens to share the source identity.
     guardedIds.add(hit.event.id);
-    const verdict = compareRecyclableIdentity(observed, hit.event, options.venueId, hit.event.venueId);
+    const verdict = (recyclable ? compareRecyclableIdentity : compareSourceIdentity)(
+      observed, hit.event, options.venueId,
+      // Refining a published building to an explicit child room is not a
+      // relocation. Sibling rooms remain distinct venues.
+      catalog.venues.find(venue => venue.id === options.venueId)?.parentVenueId === hit.event.venueId
+        ? options.venueId : hit.event.venueId,
+    );
     if (verdict === 'compatible') accepted.push(hit);
     if (verdict === 'review') reviews.push(hit);
+    if (verdict === 'incompatible' && !recyclable) rejected.push(hit);
+  }
+  // A stale external ID competing with an independent strong match remains
+  // an explicit conflict, as before; do not silently repair published history.
+  const hasCurrentExternalOwner = accepted.some(hit => hit.method === 'externalId');
+  const competingIds = rejected.filter(hit => !hasCurrentExternalOwner && hit.method === 'externalId' &&
+    accepted.some(other => other.method === 'strong' && other.event.id !== hit.event.id));
+  if (competingIds.length > 0) {
+    const conflict = collapseHits([...competingIds, ...accepted.filter(hit => hit.method === 'strong')], observed);
+    if (conflict.kind === 'ambiguous') return conflict;
   }
   // Prefer a current calendar owner to plausible reprogramming of another
   // edition with the same title/music and recycled ID. Never suppress a
-  // competing precise hit from a stable source.
+  // competing precise hit. General detail URLs also prefer an attested
+  // calendar owner over a merely plausible historical reprogramming.
   const ownsObservedDate = (event: Event) => observed.occurrences.some((incoming) =>
     event.occurrences.some((previous) => incoming.date === previous.date),
   );
@@ -188,15 +215,20 @@ function guardRecyclableHits(
     ? reviews.filter((hit) => ownsObservedDate(hit.event))
     : reviews;
   if (unresolved.length > 0) {
-    const plausible = [...new Map([...compatible, ...unresolved].map((hit) => [hit.event.id, hit])).values()];
+    const byId = new Map<string, (typeof hits)[number]>();
+    for (const hit of [...compatible, ...unresolved]) {
+      const current = byId.get(hit.event.id);
+      if (!current || METHOD_RANK[hit.method] < METHOD_RANK[current.method]) byId.set(hit.event.id, hit);
+    }
+    const plausible = [...byId.values()];
     return {
       kind: 'ambiguous',
       events: plausible.map((hit) => hit.event),
       methods: plausible.map((hit) => hit.method),
-      reason: `source-identity-review: falta evidencia de continuidad/reprogramación (${plausible.map((hit) => hit.event.id).join(', ')})`,
+      reason: `source-identity-review: varios eventos plausibles o falta evidencia de continuidad/reprogramación (${plausible.map((hit) => hit.event.id).join(', ')})`,
     };
   }
-  return { kind: 'filtered', hits: compatible, recyclable: guardedIds.size > 0 };
+  return { kind: 'filtered', hits: compatible, recyclable: recyclableSource };
 }
 
 export function eventMatchesExternalId(event: Event, catalogSourceId: string, externalId: string): boolean {
@@ -226,6 +258,19 @@ export function eventMatchesUrl(
     }
     return true;
   });
+}
+
+/** Source hints shared by two observations, with the same provenance rules
+ * used against published citations. This is not an equivalence verdict. */
+export function sharesObservedSourceIdentity(
+  left: IdentityFacts, leftSourceId: string,
+  right: IdentityFacts, rightSourceId: string,
+): boolean {
+  if (leftSourceId === rightSourceId && left.externalId && right.externalId) {
+    return left.externalId === right.externalId;
+  }
+  return urlIdentifiesSingleEvent(left.sourceUrl) && urlIdentifiesSingleEvent(right.sourceUrl) &&
+    urlsEquivalent(left.sourceUrl, right.sourceUrl);
 }
 
 export function newObservationKeys(
@@ -269,9 +314,6 @@ export function newObservationKeys(
         );
       }
     }
-  }
-  if (observed.externalId && !recyclable) {
-    keys.push(`ext:${catalogSourceId}:${observed.externalId}`);
   }
   if (venueId) {
     const title = normalizeText(observed.title);

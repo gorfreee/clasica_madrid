@@ -20,7 +20,7 @@ import { mergeCandidateBatch } from '../src/ingestion/batch.ts';
 import { emptyCatalog, type Catalog } from '../src/lib/domain/catalog.ts';
 import { IncompleteListingError, type AdapterContext, type RawEvent } from '../src/ingestion/types.ts';
 import { HttpError } from '../src/ingestion/http.ts';
-import { makeEvent, TEST_NOW } from './helpers.ts';
+import { makeEvent, makeVenue, TEST_NOW } from './helpers.ts';
 
 const source = getSourceDefinition(adapter.id);
 const fixture = (name: string) =>
@@ -330,7 +330,7 @@ describe('CNDM detail hydration', () => {
   it('uses an explicit postponement date without inventing a clock on the new date', async () => {
     const event = rawEvent('23814', '[APLAZADO] BARBARA HANNIGAN & BERTRAND CHAMAYOU', '2026-10-23', '19:30', 'Auditorio Nacional (Cámara) | Madrid');
     const patch = parseCndmDetail(event, await fixture('detail-postponed'));
-    expect(patch.eventStatus).toBe('scheduled');
+    expect(patch.eventStatus).toBe('postponed');
     expect(patch.occurrences).toEqual([
       expect.objectContaining({ date: '2027-04-11' }),
     ]);
@@ -339,6 +339,7 @@ describe('CNDM detail hydration', () => {
       expect.objectContaining({ date: '2027-04-11', time: undefined }),
     ]);
     expect(hydrated?.dateFromDetail).toBe(true);
+    expect(hydrated?.eventStatus).toBe('postponed');
   });
 
   it('accepts an explicitly unlocated activity without inventing a venue', async () => {
@@ -480,7 +481,7 @@ describe('CNDM pipeline and cross-source identity', () => {
   it('adds CNDM provenance to an Auditorio event without duplicating or renaming it', async () => {
     const auditorio = getSourceDefinition('auditorio-nacional');
     const existing = makeEvent({
-      id: 'evt_existing_cndm_musiciens',
+      id: 'evt_existing_cndm_musiciens', organizerIds: [], seriesId: null,
       slug: 'cndm-les-musiciens-du-louvre',
       title: 'CNDM. Les Musiciens du Louvre',
       // A thin published record, not the helpers' unrelated OCNE/Beethoven programme.
@@ -494,7 +495,7 @@ describe('CNDM pipeline and cross-source identity', () => {
       }],
       primarySourceId: auditorio.catalogSourceId,
     });
-    const catalog = { ...emptyCatalog(), sources: [auditorio.seedSource], events: [existing] };
+    const catalog = { ...emptyCatalog(), sources: [auditorio.seedSource], venues: [makeVenue()], events: [existing] };
     const result = await run(catalog);
     expect(result.summary.newEvents).toBe(0);
     expect(result.summary.updatedEvents).toBe(1);

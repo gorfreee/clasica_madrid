@@ -567,6 +567,7 @@ describe('Real Academia pipeline safety', () => {
           id: 'evt_paraisos_nocturnos_20260930',
           slug: 'paraisos-nocturnos-nectar-project-music',
           title: 'Paraísos nocturnos',
+          performers: [], composers: [], works: [],
           venueId: 'ven_real_academia_bellas_artes_salon_actos',
           organizerIds: [],
           seriesId: null,

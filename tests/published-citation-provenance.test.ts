@@ -171,13 +171,14 @@ describe('provenance source-aware de citations publicadas', () => {
     expect(citationOf(schager, cndm.catalogSourceId)).toMatchObject({ externalId: '23792' });
   });
 
-  it('reconoce una observación futura de Auditorio por externalId aunque cambie la fecha', async () => {
+  it('reconoce una observación futura de Auditorio por externalId con reprogramación explícita', async () => {
     const catalog = await loadCatalogFromDir(defaultDataDir());
     const published = requireEvent(catalog, 'evt_auditorio_nacional_23769');
     const match = matchEventIdentity(catalog, {
       sourceUrl: 'https://auditorionacional.inaem.gob.es/es/programacion/cndm-leticia-moreno-orquesta-de-camara-simon-bolivar',
       externalId: 'cndm-leticia-moreno-orquesta-de-camara-simon-bolivar',
       title: 'CNDM. Leticia Moreno & Orquesta de Cámara Simón Bolívar',
+      eventStatus: 'postponed',
       occurrences: [{ date: '2028-01-15', time: '21:00' }],
     }, {
       catalogSourceId: auditorio.catalogSourceId,
@@ -197,6 +198,7 @@ describe('provenance source-aware de citations publicadas', () => {
       sourceUrl: 'https://auditorionacional.inaem.gob.es/es/programacion/cndm-barbara-hannigan-bertrand-chamayou',
       externalId: '3458720415294d028ad8af92e3777416',
       title: 'CNDM. Barbara Hannigan & Bertrand Chamayou',
+      eventStatus: 'postponed',
       occurrences: [{ date: '2028-02-01', time: '19:30' }],
     }, {
       catalogSourceId: auditorio.catalogSourceId,

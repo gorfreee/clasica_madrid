@@ -13,7 +13,7 @@ import {
   writeIngestReport,
   type IngestEventDecision,
 } from '../src/ingestion/report.ts';
-import { makeEvent, makeSource, TEST_NOW } from './helpers.ts';
+import { makeEvent, makeSource, makeVenue, TEST_NOW } from './helpers.ts';
 
 const fixtures = path.join(import.meta.dirname, 'fixtures', 'ingestion');
 const ocneDetailPath = path.join(fixtures, 'detail', 'auditorio-ocne-sinfonico-01.excerpt.html');
@@ -515,6 +515,10 @@ describe('ingest event report', () => {
     const detail = await readFile(ocneDetailPath, 'utf8');
     const sourceUrl = 'https://auditorionacional.inaem.gob.es/es/programacion/ocne-sinfonico-01-1';
     const catalog = emptyCatalog();
+    catalog.venues.push(makeVenue(), makeVenue({
+      id: 'ven_auditorio_nacional_sala_sinfonica', slug: 'auditorio-nacional-sala-sinfonica',
+      name: 'Auditorio Nacional de Música — Sala Sinfónica', parentVenueId: 'ven_auditorio_nacional', spaceName: 'Sala Sinfónica',
+    }));
     catalog.sources.push(
       makeSource({
         id: 'src_auditorio_nacional',
@@ -528,6 +532,11 @@ describe('ingest event report', () => {
         id: 'evt_ocne_existente',
         slug: 'ocne-existente',
         title: 'OCNE ya publicado',
+        lastVerifiedAt: '2026-08-20',
+        organizerIds: [], seriesId: null,
+        performers: [], composers: [], works: [],
+        venueId: 'ven_auditorio_nacional_sala_sinfonica',
+        occurrences: [{ id: 'occ_ocne_existente', date: '2026-09-18', time: '19:30', status: 'scheduled' }],
         citations: [
           {
             sourceId: 'src_auditorio_nacional',

@@ -621,7 +621,7 @@ describe('toCandidate y deduplicación', () => {
     expect(built.candidate?.event.access).toBe('paid');
   });
 
-  it('detecta un duplicado por externalId y por URL equivalente', () => {
+  it('exige reconciliación explícita para otro ID con externalId o URL equivalente', () => {
     const catalog = teatroCatalog();
     catalog.events.push(
       teatroEvent({
@@ -657,7 +657,8 @@ describe('toCandidate y deduplicación', () => {
       },
     ]);
     expect(byExternal.newEvents).toBe(0);
-    expect(byExternal.unchangedEvents).toBe(1);
+    expect(byExternal.unchangedEvents).toBe(0);
+    expect(byExternal.issues).toEqual([expect.objectContaining({ code: 'publication-integrity' })]);
     expect(byExternal.filesToWrite).toEqual([]);
 
     const byUrl = mergeCandidateBatch(catalog, [
@@ -678,7 +679,8 @@ describe('toCandidate y deduplicación', () => {
       },
     ]);
     expect(byUrl.newEvents).toBe(0);
-    expect(byUrl.unchangedEvents).toBe(1);
+    expect(byUrl.unchangedEvents).toBe(0);
+    expect(byUrl.issues).toEqual([expect.objectContaining({ code: 'publication-integrity' })]);
     expect(byUrl.filesToWrite).toEqual([]);
   });
 });

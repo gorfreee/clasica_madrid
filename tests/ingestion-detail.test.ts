@@ -260,7 +260,7 @@ describe('parser de ficha Auditorio Nacional', () => {
       </article>
     `;
     const facts = parseAuditorioNacionalDetail(html);
-    expect(facts.eventStatus).toBe('scheduled');
+    expect(facts.eventStatus).toBe('postponed');
     expect(facts.occurrences).toEqual([
       { raw: expect.stringMatching(/11 de ABRIL de 2027/i), date: '2027-04-11' },
     ]);
@@ -275,7 +275,7 @@ describe('parser de ficha Auditorio Nacional', () => {
     const facts = parseAuditorioNacionalDetail(html);
     const names = facts.performers?.map((item) => item.name) ?? [];
 
-    expect(facts.eventStatus).toBe('scheduled');
+    expect(facts.eventStatus).toBe('postponed');
     expect(facts.occurrences).toEqual([
       { raw: expect.stringMatching(/11 de ABRIL de 2027/i), date: '2027-04-11' },
     ]);
@@ -1741,7 +1741,7 @@ describe('parser de ficha Teatro Real', () => {
       </section>
     `;
     const facts = parseTeatroRealDetail(html);
-    expect(facts.eventStatus).toBe('scheduled');
+    expect(facts.eventStatus).toBe('postponed');
     expect(facts.occurrences?.[0]?.date).toBe('2026-09-13');
   });
 
