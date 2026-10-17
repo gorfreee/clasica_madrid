@@ -177,7 +177,9 @@ function guardSourceHits(
       accepted.push(hit); continue;
     }
     recyclableSource ||= recyclable;
-    if (recyclable || observed.eventStatus !== 'cancelled') guardedIds.add(hit.event.id);
+    // Even for cancellations, an attested calendar owner must win over an
+    // unrelated older performance that happens to share the source identity.
+    guardedIds.add(hit.event.id);
     const verdict = (recyclable ? compareRecyclableIdentity : compareSourceIdentity)(
       observed, hit.event, options.venueId,
       // Refining a published building to an explicit child room is not a
