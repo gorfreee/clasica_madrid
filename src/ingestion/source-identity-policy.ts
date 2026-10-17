@@ -97,7 +97,7 @@ export function compareSourceIdentity(
     const coversPublishedSchedule = existing.occurrences.length > 0 &&
       existing.occurrences.every(previous => observed.occurrences.some(incoming =>
         incoming.date === previous.date && (
-          incoming.time === previous.time ||
+          incoming.time === previous.time || previous.time == null ||
           (incoming.time == null && existing.occurrences.filter(item => item.date === previous.date).length === 1)
         ),
       ));
