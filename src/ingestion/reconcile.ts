@@ -15,6 +15,7 @@ import {
   matchEventIdentity,
   newObservationKeys,
   slotIdentityVerdict,
+  sharesObservedSourceIdentity,
 } from './identity.ts';
 import {
   materialProposalConflict,
@@ -31,7 +32,7 @@ import type { NormalizedEvent } from './normalize.ts';
 import { resolveCatalogSource } from './registry.ts';
 import { mergeObservedCalendars, defaultIngestWindow, type IngestWindow } from './dates.ts';
 import { shouldPersistEventUpdate } from './material-diff.ts';
-import { compareRecyclableIdentity, sourceIdentityCanRecycle } from './source-identity-policy.ts';
+import { compareRecyclableIdentity, compareSourceIdentity, sourceIdentityCanRecycle } from './source-identity-policy.ts';
 import { newEventPublicationSkip, toCandidate } from './to-candidate.ts';
 import type { RawEvent, PipelineSource } from './types.ts';
 import { matchVenue, unpublishedMatchedVenue } from './venues.ts';
@@ -77,7 +78,10 @@ export type ReconcileStats = {
   crossSourceCorroborations: number;
 };
 
+export type PublicationDecision = { eventId: string; action: 'new' | 'updated' | 'unchanged' };
+
 export type ReconcileResult = {
+  publicationPlan: PublicationDecision[];
   candidates: Candidate[];
   byIndex: Map<number, ObservationReconcile>;
   stats: ReconcileStats;
@@ -178,13 +182,38 @@ export function reconcileHarvest(options: {
     item.identity.kind === 'matched' ? item.identity.event.id : item.observation.index.toString(),
   );
   const candidates: Candidate[] = [];
+  const publicationPlan = new Map<string, PublicationDecision['action']>();
 
+  const countedBlockers = new Set<number>();
   for (const group of existingGroups.values()) {
-    applyExistingGroup(group, now, candidates, byIndex, stats, seenEventIds);
+    const target = group[0]!.identity;
+    const blockers = ambiguous.filter(item => item.identity.kind === 'ambiguous' &&
+      target.kind === 'matched' && item.identity.events.some(event => event.id === target.event.id));
+    if (blockers.length > 0) {
+      const blocker = blockers[0]!;
+      const reason = materialProposalConflict(group[0]!.proposal, blocker.proposal) ??
+        (blocker.identity.kind === 'ambiguous' ? blocker.identity.reason : 'source-identity-review');
+      stats.ambiguous += group.length;
+      recordGroupedObservations([...group, ...blockers.filter(item => !countedBlockers.has(item.observation.index))], stats, { conflicting: true });
+      for (const item of [...group, ...blockers]) {
+        countedBlockers.add(item.observation.index);
+        const identity = item.identity;
+        byIndex.set(item.observation.index, {
+          ...byIndex.get(item.observation.index),
+          action: 'ambiguous',
+          eventId: identity.kind === 'matched' ? identity.event.id : undefined,
+          ...(identity.kind === 'ambiguous' ? { eventIds: identity.events.map(event => event.id) } : {}),
+          method: identity.kind === 'matched' ? identity.method : undefined,
+          ambiguousReason: reason, publishable: false, candidateGenerated: false,
+        });
+      }
+      continue;
+    }
+    applyExistingGroup(group, now, candidates, byIndex, stats, seenEventIds, publicationPlan);
   }
 
   for (const item of shared) {
-    applySharedSourceObservation(item, now, candidates, byIndex, stats, seenEventIds);
+    applySharedSourceObservation(item, now, candidates, byIndex, stats, seenEventIds, publicationPlan);
   }
 
   const freshGroups = groupNewObservations(fresh, catalog);
@@ -206,7 +235,7 @@ export function reconcileHarvest(options: {
     }
   }
   for (const group of publishable) {
-    applyNewGroup(group, catalog, now, window, usedIds, usedSlugs, candidates, byIndex, stats);
+    applyNewGroup(group, catalog, now, window, usedIds, usedSlugs, candidates, byIndex, stats, publicationPlan);
   }
 
   // A new source can contribute only citations to existing events (ORCAM
@@ -225,7 +254,7 @@ export function reconcileHarvest(options: {
     }
   }
 
-  return { candidates, byIndex, stats, seenEventIds };
+  return { candidates, byIndex, stats, seenEventIds, publicationPlan: [...publicationPlan].map(([eventId, action]) => ({ eventId, action })) };
 }
 
 function prepareItem(
@@ -255,7 +284,7 @@ function prepareItem(
   return { observation, identity, venueId: venueMatch?.venue.id, venue: proposal.venue, proposal, skip };
 }
 
-function persistAction(existing: Event, incoming: Event): ReconcileAction {
+function persistAction(existing: Event, incoming: Event): 'updated' | 'unchanged' {
   return shouldPersistEventUpdate(existing, incoming) ? 'updated' : 'unchanged';
 }
 
@@ -266,6 +295,7 @@ function applyExistingGroup(
   byIndex: Map<number, ObservationReconcile>,
   stats: ReconcileStats,
   seenEventIds: Set<string>,
+  publicationPlan: Map<string, PublicationDecision['action']>,
 ): void {
   const existing = group[0]!.identity.kind === 'matched' ? group[0]!.identity.event : undefined;
   if (!existing) return;
@@ -297,6 +327,7 @@ function applyExistingGroup(
 
   const merged = mergeExistingEvent(existing, proposal, now);
   const action = persistAction(existing, merged.event);
+  publicationPlan.set(existing.id, action);
   if (action === 'unchanged') stats.unchangedEvents += 1;
   else stats.updatedEvents += 1;
   const grouped = recordGroupedObservations(group, stats);
@@ -328,6 +359,7 @@ function applySharedSourceObservation(
   byIndex: Map<number, ObservationReconcile>,
   stats: ReconcileStats,
   seenEventIds: Set<string>,
+  publicationPlan: Map<string, PublicationDecision['action']>,
 ): void {
   const match = item.identity;
   if (match.kind !== 'matched-many') return;
@@ -368,6 +400,7 @@ function applySharedSourceObservation(
     };
     const merged = mergeExistingEvent(existing, proposal, now);
     const action = persistAction(existing, merged.event);
+    publicationPlan.set(existing.id, action);
     if (action === 'unchanged') stats.unchangedEvents += 1;
     else {
       stats.updatedEvents += 1;
@@ -422,6 +455,7 @@ function applyNewGroup(
   candidates: Candidate[],
   byIndex: Map<number, ObservationReconcile>,
   stats: ReconcileStats,
+  publicationPlan: Map<string, PublicationDecision['action']>,
 ): void {
   const conflict = groupConflict(group);
   if (conflict) {
@@ -478,6 +512,7 @@ function applyNewGroup(
     group.flatMap((item) => item.proposal.citations),
   );
   candidates.push(candidate);
+  publicationPlan.set(candidate.event.id, 'new');
   stats.newEvents += 1;
   const grouped = recordGroupedObservations(group, stats);
 
@@ -509,18 +544,16 @@ function groupNewObservations(items: PreparedItem[], catalog: Catalog): Prepared
     if (a !== b) parent.set(a, b);
   };
 
-  const keyOwner = new Map<string, number>();
+  const keys = items.map(item => new Set(newObservationKeys(
+    item.observation.event, item.observation.source.catalogSourceId, item.venueId,
+  )));
   for (const [index, item] of items.entries()) {
     parent.set(index, index);
-    const keys = newObservationKeys(
-      item.observation.event,
-      item.observation.source.catalogSourceId,
-      item.venueId,
-    );
-    for (const key of keys) {
-      const owner = keyOwner.get(key);
-      if (owner === undefined) keyOwner.set(key, index);
-      else union(index, owner);
+    for (let otherIndex = 0; otherIndex < index; otherIndex += 1) {
+      const other = items[otherIndex]!;
+      const sharedSource = sharesPreparedSource(item, other);
+      if (sharedSource && preparedSourceVerdict(item, other) === 'incompatible' && !sharesPreparedSlot(item, other)) continue;
+      if (sharedSource || [...keys[index]!].some(key => keys[otherIndex]!.has(key))) union(index, otherIndex);
     }
   }
 
@@ -628,16 +661,27 @@ function groupBy<T>(items: T[], keyOf: (item: T) => string): Map<string, T[]> {
   return groups;
 }
 
+function sharesPreparedSource(left: PreparedItem, right: PreparedItem): boolean {
+  return sharesObservedSourceIdentity(left.observation.event, left.observation.source.catalogSourceId,
+    right.observation.event, right.observation.source.catalogSourceId);
+}
+
+function preparedSourceVerdict(left: PreparedItem, right: PreparedItem) {
+  const compare = sourceIdentityCanRecycle(left.observation.source.catalogSourceId) ||
+    sourceIdentityCanRecycle(right.observation.source.catalogSourceId)
+    ? compareRecyclableIdentity : compareSourceIdentity;
+  return compare(left.observation.event, right.observation.event, left.venueId, right.venueId);
+}
+
 function groupConflict(group: PreparedItem[], existing?: Event): string | undefined {
   const scheduleConflict = crossSourceScheduleConflict(group, existing);
   if (scheduleConflict) return scheduleConflict;
   for (const [index, item] of group.entries()) {
     for (const other of group.slice(index + 1)) {
-      if (!sourceIdentityCanRecycle(item.observation.source.catalogSourceId) &&
-        !sourceIdentityCanRecycle(other.observation.source.catalogSourceId)) continue;
-      if (compareRecyclableIdentity(item.observation.event, other.observation.event, item.venueId, other.venueId) === 'incompatible') {
-        return 'source-identity-conflict: observaciones incompatibles de una identidad reciclable';
-      }
+      if (!sharesPreparedSource(item, other)) continue;
+      const verdict = preparedSourceVerdict(item, other);
+      if (verdict === 'incompatible') return 'source-identity-conflict: observaciones incompatibles de una identidad de fuente';
+      if (verdict === 'review') return 'source-identity-review: observaciones sin evidencia suficiente de continuidad';
     }
   }
   let proposal = group[0]?.proposal;

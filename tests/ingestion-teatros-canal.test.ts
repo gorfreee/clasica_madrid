@@ -456,7 +456,7 @@ describe('Teatros del Canal pipeline safety', () => {
     expect(failed.summary.updatedEvents).toBe(0);
   });
 
-  it('matches already published COMA concerts by URL without duplicating them', async () => {
+  it('reconcilia COMA por sus hechos: conserva identidades, retiene salas contradictorias y publica conciertos nuevos', async () => {
     const published: Catalog = emptyCatalog();
     published.venues.push({
       schemaVersion: 1,
@@ -557,12 +557,22 @@ describe('Teatros del Canal pipeline safety', () => {
     const result = await run(published, false, { from: '2026-09-01', to: '2026-12-30' });
     expect(result.summary.sourcesFailed).toEqual([]);
     const comaUrl = 'https://www.teatroscanal.com/espectaculo/festival-coma-2026';
-    const publishedIds = new Set(published.events.map((event) => event.id));
-    expect(
-      result.candidates
-        .filter((item) => item.event.citations.some((citation) => citation.url === comaUrl))
-        .every((item) => publishedIds.has(item.event.id)),
-    ).toBe(true);
+    const comaCandidates = result.candidates.filter(item => item.event.citations.some(citation => citation.url === comaUrl));
+    expect(comaCandidates.map(item => item.event.id).sort()).toEqual([
+      'evt_coma_atlantida_20260922',
+      'evt_teatros_canal_71611_2026_10_06',
+      'evt_teatros_canal_71611_2026_10_13',
+      'evt_teatros_canal_71611_2026_10_27',
+    ]);
+    // These two historical fichas name Sala Verde; the official calendar
+    // now names Sala Roja / Sala Negra. A shared URL cannot authorize a move.
+    const held = result.decisions.filter(item => item.identity?.action === 'ambiguous');
+    expect(held.map(item => item.identity?.eventId).sort()).toEqual([
+      'evt_coma_coro_cam_20260926', 'evt_coma_spanish_brass_20260930',
+    ]);
+    expect(held.every(item => item.identity?.reason?.includes('source-identity-review'))).toBe(true);
+    expect(result.summary.health).toBe('review');
+    expect(result.apply.report.ok).toBe(true);
     const coma = result.rawEvents.filter((event) => event.sourceUrl.includes('festival-coma-2026'));
     expect(coma).toHaveLength(6);
     expect(coma.every((event) => event.observed.occurrences.length === 1)).toBe(true);

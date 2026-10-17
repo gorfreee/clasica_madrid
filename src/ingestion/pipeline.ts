@@ -473,6 +473,7 @@ async function ingestPreparedEvents(
   obs?.setStage('apply');
   const apply = await applyCandidateBatch(options.catalog, reconciled.candidates, options.dataDir, {
     dryRun: options.dryRun,
+    publicationPlan: reconciled.publicationPlan,
   }).catch((error: unknown) => attachFailureContext(error, { stage: 'apply' }));
 
   // Listings with detail-only schedules still prove presence when a ficha fails
@@ -514,6 +515,7 @@ async function ingestPreparedEvents(
   const sourcesAttempted = harvest ? harvest.attempted.map((source) => source.id) : sources.map((source) => source.id);
   const health = evaluateIngestHealth({
     batchOk: apply.report.ok,
+    fatalReasons: apply.report.issues.some(issue => issue.code === 'publication-integrity') ? ['publication-integrity'] : [],
     sourcesSucceeded: succeeded,
     sourcesFailed: failures,
     ambiguous: reconciled.stats.ambiguous,

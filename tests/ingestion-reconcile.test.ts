@@ -54,7 +54,9 @@ describe('Hannigan detail calendar authority (PR #351)', () => {
     catalog.sources = [auditorio.seedSource, cndm.seedSource];
     catalog.venues = [makeVenue({ id: 'ven_auditorio_nacional_sala_camara', slug: 'auditorio-nacional-sala-camara', name: 'Auditorio Nacional — Sala de Cámara' })];
     catalog.events = [makeEvent({
-      id: 'evt_auditorio_nacional_24018', title: 'Barbara Hannigan & Bertrand Chamayou',
+      id: 'evt_auditorio_nacional_24018', title: 'Barbara Hannigan & Bertrand Chamayou', lastVerifiedAt: '2026-09-01',
+      // This fixture is about calendar authority, not an OCNE/Beethoven programme.
+      performers: [], composers: [], works: [],
       venueId: catalog.venues[0]!.id, organizerIds: [], seriesId: null,
       occurrences: [{ id: 'occ_hannigan', date: '2027-04-11', time: '19:30', status: 'scheduled' }],
       citations: [
@@ -214,7 +216,7 @@ function publishedEvent(overrides: Parameters<typeof makeEvent>[0] = {}) {
 
 function baseCatalog(events = [publishedEvent()]): Catalog {
   const catalog = emptyCatalog();
-  catalog.venues.push(salaSinfonica());
+  catalog.venues.push(makeVenue(), salaSinfonica());
   catalog.sources.push(auditorioSource());
   catalog.events.push(...events);
   return catalog;
@@ -876,9 +878,10 @@ describe('pipeline — new, unchanged, updates', () => {
     expect(run.decisions[0]!.identity?.action).not.toBe('new');
   });
 
-  it('actualiza fecha/hora y venue sin crear otro evento', async () => {
+  it('actualiza fecha/hora y venue de un evento aplazado sin crear otro evento', async () => {
     const catalog = baseCatalog([
       publishedEvent({
+        status: 'postponed',
         occurrences: [{ id: 'occ_ocne_existente_01', date: '2026-09-10', time: '18:00', status: 'scheduled' }],
         venueId: 'ven_auditorio_nacional_sala_sinfonica',
       }),

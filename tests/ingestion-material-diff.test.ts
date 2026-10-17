@@ -328,6 +328,8 @@ describe('reverificación sin cambios materiales', () => {
     expect(written.citations[0].checkedAt).toBe(today);
   });
 
+  // A time correction on the same date isolates persistence from the gate
+  // for unproven rescheduling to another date (covered by listing identity).
   it('un cambio material antes de 30 días sigue escribiendo normalmente', async () => {
     const today = madridToday(TEST_NOW);
     const current = catalog(published(verifiedOn(addIsoDays(today, -10))));
@@ -339,14 +341,14 @@ describe('reverificación sin cambios materiales', () => {
       now: TEST_NOW,
       dryRun: false,
       sourceIds: ['auditorio-nacional'],
-      get: ocneGet(ocneListing('2026-09-20T21:00:00+02:00')),
+      get: ocneGet(ocneListing('2026-09-18T21:00:00+02:00')),
     });
 
     expect(run.summary.updatedEvents).toBe(1);
     expect(run.summary.written).toEqual(['events/evt_ocne_existente.json']);
     expect(run.decisions[0]?.fieldDiffs?.some((item) => item.startsWith('occurrences:'))).toBe(true);
     const written = JSON.parse(await readFile(path.join(dir, 'events', 'evt_ocne_existente.json'), 'utf8'));
-    expect(written.occurrences[0].date).toBe('2026-09-20');
+    expect(written.occurrences[0].date).toBe('2026-09-18');
     expect(written.occurrences[0].time).toBe('21:00');
     expect(written.lastVerifiedAt).toBe(today);
     expect(written.citations[0].checkedAt).toBe(today);
@@ -386,13 +388,13 @@ describe('reverificación sin cambios materiales', () => {
       now: later,
       dryRun: false,
       sourceIds: ['auditorio-nacional'],
-      get: ocneGet(ocneListing('2026-09-20T21:00:00+02:00')),
+      get: ocneGet(ocneListing('2026-09-18T21:00:00+02:00')),
     });
 
     expect(run.summary.updatedEvents).toBe(1);
     expect(run.summary.written).toEqual(['events/evt_ocne_existente.json']);
     const written = JSON.parse(await readFile(path.join(dir, 'events', 'evt_ocne_existente.json'), 'utf8'));
-    expect(written.occurrences[0].date).toBe('2026-09-20');
+    expect(written.occurrences[0].date).toBe('2026-09-18');
     expect(written.occurrences[0].time).toBe('21:00');
     expect(written.lastVerifiedAt).toBe('2026-09-11');
     expect(written.citations[0].checkedAt).toBe('2026-09-11');

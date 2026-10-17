@@ -17,6 +17,7 @@ import {
 import { shouldPersistEventUpdate } from './material-diff.ts';
 import { errorIssue, makeReport, type ValidationIssue, type ValidationReport } from '../lib/validation/report.ts';
 import { matchEventIdentity } from './identity.ts';
+import type { PublicationDecision } from './reconcile.ts';
 
 export type BatchApplyResult = {
   report: ValidationReport;
@@ -35,7 +36,11 @@ const ENTITY_LABEL: Record<string, string> = {
   source: 'fuente',
 };
 
-export function mergeCandidateBatch(existing: Catalog, candidates: Candidate[]): {
+/** Reconciled batches apply canonical IDs. Legacy callers without a plan may
+ * detect an identity collision, but must expose it instead of dropping it. */
+export function mergeCandidateBatch(existing: Catalog, candidates: Candidate[], options?: {
+  publicationPlan?: readonly PublicationDecision[];
+}): {
   catalog: Catalog;
   filesToWrite: FileToWrite[];
   issues: ValidationIssue[];
@@ -83,7 +88,7 @@ export function mergeCandidateBatch(existing: Catalog, candidates: Candidate[]):
 
     const current = catalog.events.find((item) => item.id === candidate.event.id);
     const citation = candidate.event.citations[0];
-    const identity = citation
+    const identity = !options?.publicationPlan && citation
       ? matchEventIdentity(catalog, {
           sourceUrl: citation.url,
           externalId: citation.externalId,
@@ -98,8 +103,10 @@ export function mergeCandidateBatch(existing: Catalog, candidates: Candidate[]):
           allowSlot: false,
         })
       : { kind: 'unmatched' as const };
-    if (!originalIds.has(candidate.event.id) && identity.kind === 'matched') {
-      unchangedEvents += 1;
+    if (!current && identity.kind !== 'unmatched') {
+      issues.push(errorIssue('publication-integrity',
+        `Candidato ${candidate.event.id} sin reconciliar: identidad ${identity.kind}; requiere reconciliación explícita`,
+        `events/${candidate.event.id}.json`));
       continue;
     }
     if (current && originalIds.has(candidate.event.id)) {
@@ -201,11 +208,13 @@ export async function applyCandidateBatch(
   existing: Catalog,
   candidates: Candidate[],
   dataDir: string,
-  options: { dryRun: boolean; io?: BatchIo },
+  options: { dryRun: boolean; io?: BatchIo; publicationPlan?: readonly PublicationDecision[] },
 ): Promise<BatchApplyResult> {
-  const merged = mergeCandidateBatch(existing, candidates);
+  const merged = mergeCandidateBatch(existing, candidates, options);
+  const filesToWrite = merged.filesToWrite.filter((file) => !isSameAsCatalog(existing, file));
   const issues = [
     ...merged.issues,
+    ...validatePublicationIntegrity(existing, candidates, merged.catalog, filesToWrite, options.publicationPlan),
     ...findReferenceIssues(merged.catalog),
     ...findDuplicateEvents(merged.catalog),
     ...findScheduleCollisionIssues(merged.catalog),
@@ -217,14 +226,13 @@ export async function applyCandidateBatch(
       report,
       proposed: merged.catalog,
       filesToWrite: [],
-      newEvents: merged.newEvents,
-      updatedEvents: merged.updatedEvents,
+      newEvents: 0,
+      updatedEvents: 0,
       unchangedEvents: merged.unchangedEvents,
       written: [],
     };
   }
 
-  const filesToWrite = merged.filesToWrite.filter((file) => !isSameAsCatalog(existing, file));
   if (options.dryRun || filesToWrite.length === 0) {
     return {
       report,
@@ -248,6 +256,63 @@ export async function applyCandidateBatch(
     unchangedEvents: merged.unchangedEvents,
     written,
   };
+}
+
+/** Check the reconciliation → candidate → write contract before any I/O.
+ * Unchanged decisions and grouped corroborations need no new file. Every
+ * material candidate must have exactly one write under its reconciled ID. */
+export function validatePublicationIntegrity(
+  existing: Catalog,
+  candidates: readonly Candidate[],
+  proposed: Catalog,
+  files: readonly FileToWrite[],
+  plan?: readonly PublicationDecision[],
+): ValidationIssue[] {
+  const issues: ValidationIssue[] = [];
+  const fail = (id: string, reason: string) => issues.push(errorIssue('publication-integrity',
+    `${id}: ${reason}`, `events/${id}.json`));
+  const candidateIds = new Set<string>();
+  for (const incoming of candidates) {
+    const parsed = candidateSchema.safeParse(incoming);
+    if (!parsed.success) continue; // mergeCandidateBatch reports schema failures.
+    const candidate = parsed.data;
+    const id = candidate.event.id;
+    if (candidateIds.has(id)) fail(id, 'varios candidatos para el mismo ID');
+    candidateIds.add(id);
+    const current = existing.events.find(event => event.id === id);
+    const material = !current || shouldPersistEventUpdate(current, candidate.event);
+    const target = proposed.events.find(event => event.id === id);
+    if (!target || shouldPersistEventUpdate(target, candidate.event)) fail(id, 'candidato ausente o distinto en el catálogo propuesto');
+    const writes = files.filter(file => file.relativePath === `events/${id}.json`);
+    if (writes.length !== (material ? 1 : 0)) fail(id, 'número de escrituras incompatible con el cambio material');
+    if (writes.some(file => shouldPersistEventUpdate(file.value as Event, candidate.event))) fail(id, 'contenido de escritura distinto del candidato');
+  }
+  for (const file of files.filter(file => file.relativePath.startsWith('events/'))) {
+    const id = (file.value as Event).id;
+    if (!candidateIds.has(id)) fail(id, 'escritura sin candidato');
+  }
+  if (!plan) return issues;
+  const expectedCandidates = new Set<string>();
+  for (const decision of plan) {
+    const id = decision.eventId;
+    const before = existing.events.some(event => event.id === id);
+    if (!proposed.events.some(event => event.id === id)) fail(id, `decisión ${decision.action} sin destino persistible`);
+    if (decision.action === 'new' && before) fail(id, 'alta reconciliada sobre un ID publicado');
+    if (decision.action !== 'new' && !before) fail(id, 'actualización/corroboración sin ID publicado');
+    const candidate = candidates.find(candidate => candidate.event.id === id);
+    const previous = existing.events.find(event => event.id === id);
+    if (decision.action === 'updated' && candidate && previous && !shouldPersistEventUpdate(previous, candidate.event)) {
+      fail(id, 'actualización reconciliada sin cambio persistible');
+    }
+    const target = proposed.events.find(event => event.id === id);
+    if (decision.action === 'unchanged' && previous && target && shouldPersistEventUpdate(previous, target)) {
+      fail(id, 'corroboración sin cambios que altera el evento publicado');
+    }
+    if (decision.action !== 'unchanged') expectedCandidates.add(id);
+  }
+  for (const id of expectedCandidates) if (!candidateIds.has(id)) fail(id, 'decisión material sin candidato');
+  for (const id of candidateIds) if (!expectedCandidates.has(id)) fail(id, 'candidato sin decisión material de reconciliación');
+  return issues;
 }
 
 /**

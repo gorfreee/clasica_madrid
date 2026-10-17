@@ -1,7 +1,9 @@
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import * as batchModule from '../src/ingestion/batch.ts';
+import { buildIngestReport } from '../src/ingestion/report.ts';
 import { emptyCatalog, type Catalog } from '../src/lib/domain/catalog.ts';
 import { ENTITY_COLLECTIONS } from '../src/lib/repository/types.ts';
 import { loadCatalogFromDir } from '../src/lib/repository/load.ts';
@@ -121,6 +123,124 @@ describe('identidad frente a URLs genéricas de listing', () => {
     expect(replay.run.summary.newEvents).toBe(0);
     expect(replay.run.summary.unchangedEvents).toBe(4);
     expect((await loadCatalogFromDir(dir)).events).toEqual(persisted.events);
+  });
+
+  it.each([false, true])('una ficha no registrada conserva dos conciertos independientes (ejecuciones separadas: %s)', async (separateRuns) => {
+    const url = 'https://coro.example/noticia-del-coro-2026';
+    expect(sourceUrlKind(url)).toBe('event-detail');
+    const first = listingObservation({ title: 'Credo RV 591', date: '2026-10-23', time: '20:15', url });
+    const second = listingObservation({ title: 'Credo RV 591', date: '2026-10-24', time: '16:45', url });
+    second.venue = { ...churchVenue(), name: 'Residencia Santa Lucía', address: 'Calle Mayor, 20, Madrid' };
+    second.event.venueText = 'Residencia Santa Lucía';
+    const { dir, run } = await runDiscovery(batchOf(...(separateRuns ? [first] : [first, second])), emptyCatalog(), { dryRun: false });
+    const next = separateRuns
+      ? (await runDiscovery(batchOf(second), await loadCatalogFromDir(dir), { dryRun: false, dataDir: dir })).run
+      : run;
+    expect(next.apply.report.ok).toBe(true);
+    expect(next.summary.newEvents).toBe(separateRuns ? 1 : 2);
+    expect(next.apply.unchangedEvents).toBe(0);
+    const persisted = await loadCatalogFromDir(dir);
+    expect(persisted.events).toHaveLength(2);
+    expect(next.summary.written.filter(file => file.startsWith('events/'))).toHaveLength(separateRuns ? 1 : 2);
+    const replay = await runDiscovery(batchOf(first, second), persisted, { dryRun: false, dataDir: dir });
+    expect(replay.run.summary).toMatchObject({ newEvents: 0, updatedEvents: 0, unchangedEvents: 2, ambiguous: 0, written: [] });
+    expect((await loadCatalogFromDir(dir)).events).toEqual(persisted.events);
+  });
+
+  it.each([undefined, 'articulo-anual'])('GSD exacto: conserva ambas sedes y sus archivos con externalId %s', async externalId => {
+    const url = 'https://www.fundaciongsd.org/2026/02/18/actuaciones-del-coro-fundacion-gsd-2026/';
+    const first = listingObservation({ title: 'Coro Fundación GSD — Credo RV 591', date: '2026-10-23', time: '20:15', url });
+    const second = listingObservation({ title: 'Coro Fundación GSD — Concierto Velada', date: '2026-10-24', time: '16:45', url });
+    first.venue = { ...churchVenue(), name: 'Parroquia Santa Ana y la Esperanza', address: 'Calle de la Cañada, 35, Madrid' };
+    second.venue = { ...churchVenue(), name: 'Residencia Fundación Santa Lucía', address: 'Calle Santa Lucía, 10, Madrid' };
+    for (const item of [first, second]) {
+      item.event.venueText = item.venue!.name;
+      item.event.externalId = externalId;
+      item.event.composers = [{ name: 'Antonio Vivaldi' }];
+      item.event.works = [{ title: 'Credo RV 591', composerName: 'Antonio Vivaldi' }];
+      item.event.performers = [{ name: 'Coro Fundación GSD' }];
+    }
+    const { dir, run } = await runDiscovery(batchOf(first, second), emptyCatalog(), { dryRun: false });
+    expect(run.apply.report.ok).toBe(true);
+    expect(run.summary).toMatchObject({ newEvents: 2, updatedEvents: 0, unchangedEvents: 0, ambiguous: 0 });
+    const persisted = await loadCatalogFromDir(dir);
+    expect(persisted.events).toHaveLength(2);
+    expect(persisted.events.flatMap(event => event.occurrences.map(({ date, time }) => ({ date, time }))).sort((a, b) => a.date.localeCompare(b.date))).toEqual([
+      { date: '2026-10-23', time: '20:15' }, { date: '2026-10-24', time: '16:45' },
+    ]);
+    expect(new Set(persisted.events.map(event => event.venueId)).size).toBe(2);
+    const replay = await runDiscovery(batchOf(first, second), persisted, { dryRun: false, dataDir: dir });
+    expect(replay.run.summary).toMatchObject({ newEvents: 0, updatedEvents: 0, unchangedEvents: 2, written: [] });
+  });
+
+  it.each([false, true])('retiene una posible reprogramación sin evidencia (mismo lote: %s)', async sameBatch => {
+    const url = 'https://coro.example/recital-purcell';
+    const first = listingObservation({ title: 'Dido y Eneas', date: '2026-10-23', url });
+    const moved = listingObservation({ title: 'Dido y Eneas', date: '2026-11-23', url });
+    const { dir, run: created } = await runDiscovery(batchOf(...(sameBatch ? [first, moved] : [first])), emptyCatalog(), { dryRun: false });
+    const before = await loadCatalogFromDir(dir);
+    const held = sameBatch ? created : (await runDiscovery(batchOf(moved), before, { dataDir: dir, dryRun: false })).run;
+    expect(held.summary).toMatchObject({ newEvents: 0, updatedEvents: 0, unchangedEvents: 0, ambiguous: sameBatch ? 2 : 1, health: 'review', autoMergeEligible: false, written: [] });
+    expect(held.decisions.every(decision => decision.identity?.reason?.includes('source-identity-review'))).toBe(true);
+    expect(held.candidates).toEqual([]);
+    expect((await loadCatalogFromDir(dir)).events).toEqual(before.events);
+  });
+
+  it('un externalId reciclado en una fuente no registrada no consume otro concierto', async () => {
+    const first = listingObservation({ title: 'Dido y Eneas', date: '2026-10-23', url: 'https://coro.example/ficha-1' });
+    const second = listingObservation({ title: 'El Mesías', date: '2026-11-23', url: 'https://coro.example/ficha-2' });
+    first.event.externalId = second.event.externalId = '1234';
+    second.event.composers = [{ name: 'Georg Friedrich Händel' }];
+    second.event.works = [{ title: 'El Mesías HWV 56', composerName: 'Georg Friedrich Händel' }];
+    const { dir, run } = await runDiscovery(batchOf(first), emptyCatalog(), { dryRun: false });
+    expect(run.summary.newEvents).toBe(1);
+    const published = await loadCatalogFromDir(dir);
+    const next = await runDiscovery(batchOf(second), published, { dryRun: false, dataDir: dir });
+    expect(next.run.summary).toMatchObject({ newEvents: 1, updatedEvents: 0, unchangedEvents: 0 });
+    expect((await loadCatalogFromDir(dir)).events).toHaveLength(2);
+    expect(next.run.apply.proposed.events.find(event => event.id === published.events[0]!.id)).toEqual(published.events[0]);
+  });
+
+  it('un calendario conjunto acredita varias funciones y conserva sus IDs al reingerir', async () => {
+    const item = listingObservation({ title: 'Dido y Eneas', date: '2026-10-23', url: 'https://coro.example/dido-eneas' });
+    item.event.occurrences.push({ raw: '24 octubre 21:00', date: '2026-10-24', time: '21:00' });
+    const { dir, run } = await runDiscovery(batchOf(item), emptyCatalog(), { dryRun: false });
+    expect(run.summary.newEvents).toBe(1);
+    const published = await loadCatalogFromDir(dir);
+    expect(published.events[0]!.occurrences).toHaveLength(2);
+    const next = await runDiscovery(batchOf(item), published, { dryRun: false, dataDir: dir });
+    expect(next.run.summary).toMatchObject({ newEvents: 0, updatedEvents: 0, unchangedEvents: 1, written: [] });
+    expect((await loadCatalogFromDir(dir)).events).toEqual(published.events);
+  });
+
+  it('la misma actuación observada por dos fuentes corrobora y conserva sus citas', async () => {
+    const first = listingObservation({ title: 'Dido y Eneas', date: '2026-10-23', url: 'https://coro.example/dido-eneas' });
+    const second = structuredClone(first);
+    second.source = { ...second.source, name: 'Organizador asociado', homepage: 'https://asociado.example/' };
+    const { dir, run } = await runDiscovery(batchOf(first, second), emptyCatalog(), { dryRun: false });
+    expect(run.summary).toMatchObject({ newEvents: 1, crossSourceCorroborations: 1, batchDuplicates: 0, ambiguous: 0 });
+    const published = await loadCatalogFromDir(dir);
+    expect(published.events).toHaveLength(1);
+    expect(published.events[0]!.citations).toHaveLength(2);
+  });
+
+  it('una supresión entre reconciliación y aplicación deja health fatal y diagnóstico auditable', async () => {
+    const original = batchModule.applyCandidateBatch;
+    const spy = vi.spyOn(batchModule, 'applyCandidateBatch').mockImplementationOnce((catalog, candidates, dir, options) =>
+      original(catalog, candidates.slice(0, 1), dir, options));
+    try {
+      const { dir, run } = await runDiscovery(batchOf(
+        listingObservation({ title: 'Dido y Eneas', date: '2026-10-23' }),
+        listingObservation({ title: 'Acis y Galatea', date: '2026-11-23' }),
+      ), emptyCatalog(), { dryRun: false });
+      expect(run.candidates).toHaveLength(2);
+      expect(run.summary).toMatchObject({ health: 'fatal', autoMergeEligible: false, newEvents: 0, updatedEvents: 0, unchangedEvents: 0, written: [] });
+      expect(run.summary.healthReasons).toContain('publication-integrity');
+      expect(run.decisions.filter(decision => decision.identity?.action === 'new')).toHaveLength(2);
+      expect((await loadCatalogFromDir(dir)).events).toEqual([]);
+      const report = buildIngestReport(run, TEST_NOW);
+      expect(report.publicationIssues).toContainEqual(expect.objectContaining({ code: 'publication-integrity', path: expect.stringContaining(run.candidates[1]!.event.id) }));
+    } finally { spy.mockRestore(); }
   });
 
   it('no convierte otras fichas de esos hosts en colecciones', () => {
@@ -255,7 +375,7 @@ describe('identidad frente a URLs genéricas de listing', () => {
       {
         sourceUrl: DETAIL_URL,
         title: 'Dido y Eneas',
-        occurrences: [{ date: '2026-10-24', time: '19:30' }],
+        occurrences: [{ date: '2026-12-01', time: '12:00' }],
       },
       { catalogSourceId: 'src_coro_example', venueId: 'ven_iglesia_de_san_jose' },
     );

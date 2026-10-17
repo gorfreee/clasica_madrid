@@ -242,7 +242,7 @@ describe('corroboración cross-source vs duplicados del lote', () => {
     expect(event.primarySourceId).toBe(orcam.catalogSourceId);
   });
 
-  it('un segundo run de la source primaria hace match por externalId aunque cambie la fecha', () => {
+  it('una reprogramación explícita de la source primaria conserva el externalId', () => {
     const created = reconcileHarvest({
       catalog: hallCatalog(),
       now: TEST_NOW,
@@ -264,6 +264,7 @@ describe('corroboración cross-source vs duplicados del lote', () => {
       observations: [
         observation(0, auditorio, auditorioFacts({
           occurrences: [{ date: movedDate, time: '19:30' }],
+          eventStatus: 'scheduled', // Parsed postponement with a new detail date.
           dateFromDetail: true,
         })),
       ],

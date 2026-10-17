@@ -433,7 +433,7 @@ describe('Real Hermandad del Refugio pipeline safety', () => {
       makeEvent({
         id: 'evt_historia_musica_espanola_20260924',
         slug: 'recorrido-historia-musica-espanola',
-        title: 'Un Recorrido por la Historia de la Música Española. Concierto Benéfico.',
+        title: 'Un Recorrido por la Historia de la Música Española. Concierto Benéfico',
         venueId: 'ven_iglesia_san_antonio_alemanes',
         organizerIds: [],
         seriesId: null,
@@ -718,6 +718,9 @@ describe('Real Hermandad del Refugio HTML archive', () => {
         id: `evt_rest_${event.externalId}`,
         slug: `rest-${event.externalId}`,
         title: event.observed.title,
+        performers: [], composers: [], works: [],
+        // REST snapshot has no calendar: use the same explicit test slot on both sides.
+        occurrences: [{ id: `occ_rest_${event.externalId}`, date: '2026-09-24', time: '19:30', status: 'scheduled' }],
         venueId: 'ven_iglesia_san_antonio_alemanes',
         organizerIds: [],
         seriesId: null,
@@ -760,6 +763,8 @@ describe('Real Hermandad del Refugio HTML archive', () => {
       id: 'evt_rest_url_only',
       slug: 'rest-url-only',
       title: rest.observed.title,
+      performers: [], composers: [], works: [],
+      occurrences: [{ id: 'occ_rest_url', date: '2026-09-24', time: '19:30', status: 'scheduled' }],
       venueId: 'ven_iglesia_san_antonio_alemanes',
       organizerIds: [],
       seriesId: null,

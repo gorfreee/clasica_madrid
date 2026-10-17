@@ -20,7 +20,7 @@ import { mergeCandidateBatch } from '../src/ingestion/batch.ts';
 import { emptyCatalog, type Catalog } from '../src/lib/domain/catalog.ts';
 import { IncompleteListingError, type AdapterContext, type RawEvent } from '../src/ingestion/types.ts';
 import { HttpError } from '../src/ingestion/http.ts';
-import { makeEvent, TEST_NOW } from './helpers.ts';
+import { makeEvent, makeVenue, TEST_NOW } from './helpers.ts';
 
 const source = getSourceDefinition(adapter.id);
 const fixture = (name: string) =>
@@ -480,7 +480,7 @@ describe('CNDM pipeline and cross-source identity', () => {
   it('adds CNDM provenance to an Auditorio event without duplicating or renaming it', async () => {
     const auditorio = getSourceDefinition('auditorio-nacional');
     const existing = makeEvent({
-      id: 'evt_existing_cndm_musiciens',
+      id: 'evt_existing_cndm_musiciens', organizerIds: [], seriesId: null,
       slug: 'cndm-les-musiciens-du-louvre',
       title: 'CNDM. Les Musiciens du Louvre',
       // A thin published record, not the helpers' unrelated OCNE/Beethoven programme.
@@ -494,7 +494,7 @@ describe('CNDM pipeline and cross-source identity', () => {
       }],
       primarySourceId: auditorio.catalogSourceId,
     });
-    const catalog = { ...emptyCatalog(), sources: [auditorio.seedSource], events: [existing] };
+    const catalog = { ...emptyCatalog(), sources: [auditorio.seedSource], venues: [makeVenue()], events: [existing] };
     const result = await run(catalog);
     expect(result.summary.newEvents).toBe(0);
     expect(result.summary.updatedEvents).toBe(1);

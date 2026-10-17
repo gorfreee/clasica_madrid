@@ -1,3 +1,5 @@
+import type { BatchApplyResult } from './batch.ts';
+import type { ValidationIssue } from '../lib/validation/report.ts';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -196,6 +198,8 @@ export type IngestReport = {
    */
   adapterDiscards?: AdapterDiscard[];
   failure?: IngestFailureInfo;
+  /** Unexpected losses between reconciliation and publication, with canonical IDs. */
+  publicationIssues?: ValidationIssue[];
 };
 
 export type DecisionInput = {
@@ -282,6 +286,7 @@ export function buildEventDecision(input: DecisionInput): IngestEventDecision {
 export function buildIngestReport(
   run: {
     summary: IngestRunSummary;
+    apply?: Pick<BatchApplyResult, 'report'>;
     decisions: IngestEventDecision[];
     possiblyMissing?: PossiblyMissingEvent[];
     adapterDiscards?: AdapterDiscard[];
@@ -300,6 +305,8 @@ export function buildIngestReport(
     events: run.decisions,
     possiblyMissing: run.possiblyMissing ?? [],
   };
+  const publicationIssues = run.apply?.report.issues.filter(issue => issue.code === 'publication-integrity') ?? [];
+  if (publicationIssues.length > 0) report.publicationIssues = publicationIssues;
   if (run.adapterDiscards && run.adapterDiscards.length > 0) {
     report.adapterDiscards = run.adapterDiscards;
   }
