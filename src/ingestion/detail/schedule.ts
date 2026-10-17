@@ -37,8 +37,10 @@ export function inferScheduleFromText(text: string): DetailSchedule {
   if (POSTPONED.test(trimmed) || /\baplazad|\bpospuest/i.test(trimmed)) {
     const date = parsePostponementDate(trimmed);
     if (date) {
+      // Preserve explicit postponement evidence for identity; the publication
+      // layer still uses scheduled when a replacement date is confirmed.
       return {
-        eventStatus: 'scheduled',
+        eventStatus: 'postponed',
         occurrences: [{ raw: trimmed, date }],
       };
     }
