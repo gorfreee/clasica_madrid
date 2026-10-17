@@ -19,6 +19,80 @@ function candidates(): Candidate[] {
 }
 
 describe('contrato de reconciliación y persistencia', () => {
+
+  it('la fecha normal del detalle no acredita un traslado; el aviso explícito de aplazamiento sí', () => {
+    const catalog = makeCatalog();
+    const published = makeEvent({
+      id: 'evt_shared_23', slug: 'shared-23', title: 'Credo RV 591',
+      occurrences: [{ id: 'occ_shared_23', date: '2026-10-23', time: '20:15', status: 'scheduled' }],
+      citations: [{ sourceId: catalog.events[0]!.primarySourceId, url: 'https://coro.example/concierto-anual', checkedAt: '2026-10-16' }],
+    });
+    catalog.events = [published];
+    const facts = {
+      sourceUrl: published.citations[0]!.url, title: published.title,
+      occurrences: [{ date: '2026-10-24', time: '16:45' }],
+      performers: published.performers, composers: published.composers, works: published.works,
+      dateFromDetail: true, eventStatus: 'scheduled' as const,
+    };
+    const options = { catalogSourceId: published.primarySourceId, venueId: 'ven_santa_lucia_otra_sede' };
+    expect(matchEventIdentity(catalog, facts, options)).toMatchObject({ kind: 'unmatched' });
+    const { eventStatus: _status, ...withoutStatus } = facts;
+    expect(matchEventIdentity(catalog, withoutStatus, options)).toMatchObject({ kind: 'unmatched' });
+    expect(matchEventIdentity(catalog, { ...facts, eventStatus: 'postponed' }, options))
+      .toMatchObject({ kind: 'matched', event: { id: published.id } });
+  });
+
+  it('una cancelación de otra fecha no cancela al propietario anterior de la URL, aunque conserve la sede', () => {
+    const catalog = makeCatalog();
+    const first = makeEvent({
+      id: 'evt_shared_23', slug: 'shared-23', title: 'Credo RV 591',
+      occurrences: [{ id: 'occ_shared_23', date: '2026-10-23', time: '20:15', status: 'scheduled' }],
+      citations: [{ sourceId: catalog.events[0]!.primarySourceId, url: 'https://coro.example/concierto-anual', checkedAt: '2026-10-16' }],
+    });
+    catalog.events = [first];
+    const notice = {
+      sourceUrl: first.citations[0]!.url, title: first.title,
+      occurrences: [{ date: '2026-10-24', time: '16:45' }],
+      performers: first.performers, composers: first.composers, works: first.works,
+      eventStatus: 'cancelled' as const,
+    };
+    const options = { catalogSourceId: first.primarySourceId, venueId: first.venueId };
+    expect(matchEventIdentity(catalog, notice, options)).toMatchObject({ kind: 'ambiguous' });
+    expect(catalog.events[0]!.status).toBe('scheduled');
+    const second = {
+      ...first, id: 'evt_shared_24', slug: 'shared-24',
+      occurrences: [{ id: 'occ_shared_24', date: '2026-10-24', time: '16:45', status: 'scheduled' as const }],
+    };
+    catalog.events.push(second);
+    expect(matchEventIdentity(catalog, notice, options))
+      .toMatchObject({ kind: 'matched', event: { id: second.id } });
+  });
+
+  it('una cancelación parcial no cancela todas las funciones publicadas bajo una misma ficha', () => {
+    const catalog = makeCatalog();
+    const published = makeEvent({
+      id: 'evt_shared_series', slug: 'shared-series', title: 'Credo RV 591',
+      occurrences: [
+        { id: 'occ_shared_23', date: '2026-10-23', time: '20:15', status: 'scheduled' },
+        { id: 'occ_shared_24', date: '2026-10-24', time: '16:45', status: 'scheduled' },
+      ],
+      citations: [{ sourceId: catalog.events[0]!.primarySourceId, url: 'https://coro.example/concierto-anual', checkedAt: '2026-10-16' }],
+    });
+    catalog.events = [published];
+    const options = { catalogSourceId: published.primarySourceId, venueId: published.venueId };
+    const facts = {
+      sourceUrl: published.citations[0]!.url, title: published.title,
+      occurrences: [{ date: '2026-10-24', time: '16:45' }],
+      performers: published.performers, composers: published.composers, works: published.works,
+      eventStatus: 'cancelled' as const,
+    };
+    expect(matchEventIdentity(catalog, facts, options)).toMatchObject({ kind: 'ambiguous' });
+    expect(matchEventIdentity(catalog, { ...facts, occurrences: [
+      { date: '2026-10-23', time: '20:15' },
+      { date: '2026-10-24', time: '16:45' },
+    ] }, options)).toMatchObject({ kind: 'matched', event: { id: published.id } });
+  });
+
   it('un aplazamiento con programación contradictoria se revisa, sin inventar un segundo concierto', () => {
     const catalog = makeCatalog();
     const published = catalog.events[0]!;
