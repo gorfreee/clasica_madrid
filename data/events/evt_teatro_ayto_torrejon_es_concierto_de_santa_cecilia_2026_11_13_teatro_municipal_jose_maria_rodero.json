@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_ayto_torrejon_es_concierto_de_santa_cecilia_2026_11_13_teatro_municipal_jose_maria_rodero",
+  "slug": "concierto-de-santa-cecilia",
+  "title": "Concierto de Santa Cecilia",
+  "status": "scheduled",
+  "venueId": "ven_teatro_municipal_jose_maria_rodero",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_ayto_torrejon_es_concierto_de_santa_cecilia_2026_11_13_teatro_municipal_jose_maria_rodero_01",
+      "date": "2026-11-13",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Banda Municipal de Música de Torrejón de Ardoz"
+    },
+    {
+      "name": "Julio Maroto"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_teatro_ayto_torrejon_es",
+      "url": "https://www.ayto-torrejon.es/sites/default/files/PROGRAMACION%20TEATRO%20OCT-NOV-DIC.%202026.pdf",
+      "checkedAt": "2026-10-17"
+    }
+  ],
+  "primarySourceId": "src_teatro_ayto_torrejon_es",
+  "lastVerifiedAt": "2026-10-17"
+}
