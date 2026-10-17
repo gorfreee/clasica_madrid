@@ -6,7 +6,7 @@
   "status": "scheduled",
   "venueId": "ven_teatro_municipal_jose_maria_rodero",
   "organizerIds": [],
-  "seriesId": null,
+  "seriesId": "ser_los_viernes_son_nuestros_torrejon_2026",
   "occurrences": [
     {
       "id": "occ_teatro_ayto_torrejon_es_concierto_de_santa_cecilia_2026_11_13_teatro_municipal_jose_maria_rodero_01",

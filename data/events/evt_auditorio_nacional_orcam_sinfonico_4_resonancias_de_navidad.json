@@ -17,16 +17,28 @@
   ],
   "performers": [
     {
-      "name": "Orquesta y Coro de la Comunidad de Madrid"
+      "name": "Orquesta de la Comunidad de Madrid",
+      "role": "orchestra"
     },
     {
-      "name": "Pequeños Cantores de la ORCAM"
+      "name": "Coro de la Comunidad de Madrid",
+      "role": "choir"
     },
     {
-      "name": "Juan de la Rubia"
+      "name": "Pequeños Cantores de la ORCAM",
+      "role": "choir"
     },
     {
-      "name": "Javier Carmena, Director Coro"
+      "name": "Juan de la Rubia",
+      "role": "soloist"
+    },
+    {
+      "name": "Ana González",
+      "role": "conductor"
+    },
+    {
+      "name": "Javier Carmena",
+      "role": "conductor"
     },
     {
       "name": "Iván López-Reynoso",
@@ -59,10 +71,12 @@
     }
   ],
   "eras": [
-    "romantic"
+    "romantic",
+    "twentieth"
   ],
   "formats": [
     "symphonic",
+    "choral",
     "organ"
   ],
   "kind": "established",
@@ -71,16 +85,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-sinfonico-4-resonancias-de-navidad",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-10-17",
       "externalId": "orcam-sinfonico-4-resonancias-de-navidad"
     },
     {
       "sourceId": "src_fundacion_orcam",
       "url": "https://fundacionorcam.org/conciertos/2026-27/resonancias-de-navidad",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-10-17",
       "externalId": "4846"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-10-01"
+  "lastVerifiedAt": "2026-10-17"
 }
