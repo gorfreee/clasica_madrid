@@ -3,6 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { applyCandidateBatch, mergeCandidateBatch, validatePublicationIntegrity } from '../src/ingestion/batch.ts';
+import { matchEventIdentity } from '../src/ingestion/identity.ts';
 import type { Candidate } from '../src/lib/schemas/candidate.ts';
 import { makeCatalog, makeEvent } from './helpers.ts';
 
@@ -18,6 +19,21 @@ function candidates(): Candidate[] {
 }
 
 describe('contrato de reconciliación y persistencia', () => {
+  it('un aplazamiento con programación contradictoria se revisa, sin inventar un segundo concierto', () => {
+    const catalog = makeCatalog();
+    const published = catalog.events[0]!;
+    const match = matchEventIdentity(catalog, {
+      sourceUrl: published.citations[0]!.url,
+      title: published.title,
+      occurrences: [{ date: '2026-10-15', time: '19:30' }],
+      eventStatus: 'postponed',
+      performers: [{ name: 'Quartetto Nuovo' }],
+      works: [{ title: 'El Mesías HWV 56', composerName: 'Georg Friedrich Händel' }],
+    }, { catalogSourceId: published.primarySourceId, venueId: published.venueId });
+    expect(match).toMatchObject({ kind: 'ambiguous', reason: expect.stringContaining('source-identity-review') });
+    expect(catalog.events).toEqual([published]);
+  });
+
   it('bloquea atómicamente una supresión inesperada, sin contar altas ni unchanged ficticios', async () => {
     const catalog = makeCatalog({ events: [] });
     const pair = candidates();

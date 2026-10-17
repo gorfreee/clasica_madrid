@@ -83,6 +83,10 @@ export function compareSourceIdentity(
   const postponed = observed.eventStatus === 'postponed' || existing.status === 'postponed' ||
     /^\[(?:aplazado|pospuesto)\]/iu.test(observed.title) ||
     (observed.dateFromDetail && observed.eventStatus === 'scheduled');
+  // A postponement plus contradictory programming may be a programme
+  // change; it is not proof of a second independent concert.
+  if (postponed && (explicitMusic.kind === 'conflict' ||
+    (music.kind === 'conflict' && explicitMusic.kind !== 'match'))) return 'review';
   if (music.kind === 'conflict' && explicitMusic.kind !== 'match' && hasDates && !sameDate) return 'incompatible';
   // Programming/cast changes in the same slot may be a correction. Never
   // overwrite automatically or invent another concert in that slot.
