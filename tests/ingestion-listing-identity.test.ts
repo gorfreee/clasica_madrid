@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { emptyCatalog, type Catalog } from '../src/lib/domain/catalog.ts';
 import { ENTITY_COLLECTIONS } from '../src/lib/repository/types.ts';
 import { loadCatalogFromDir } from '../src/lib/repository/load.ts';
-import { serializeCanonical } from '../src/ingestion/batch.ts';
+import { mergeCandidateBatch, serializeCanonical } from '../src/ingestion/batch.ts';
 import { parseDiscoveryBatch, type DiscoveryBatch, type DiscoveryObservation } from '../src/ingestion/discovery.ts';
 import { matchEventIdentity } from '../src/ingestion/identity.ts';
 import { fallbackEventIdentity } from '../src/ingestion/observed-identity.ts';
@@ -100,6 +100,7 @@ describe('identidad frente a URLs genéricas de listing', () => {
     'https://revistatierrasanta.com/el-organo-vuelve-a-sonar-en-la-basilica-de-san-francisco-el-grande/',
     'https://ko-fi.com/s/3370de7ce8',
     'https://www.cultura.gob.es/mtraje/eu/actividades/artes/musica/musae.html',
+    'https://www.fundaciongsd.org/2026/02/18/actuaciones-del-coro-fundacion-gsd-2026',
   ])('persiste y reconcilia cuatro conciertos de la colección %s sin perder archivos', async (url) => {
     expect(sourceUrlKind(url)).toBe('listing');
     expect(sourceUrlKind(`${url}?utm_source=scout`)).toBe('listing');
@@ -126,6 +127,44 @@ describe('identidad frente a URLs genéricas de listing', () => {
     expect(sourceUrlKind('https://revistatierrasanta.com/recital-de-organo-nicolas-berndt')).toBe('event-detail');
     expect(sourceUrlKind('https://ko-fi.com/s/concierto-unico')).toBe('event-detail');
     expect(sourceUrlKind('https://www.cultura.gob.es/mtraje/actividades/concierto-de-guitarra.html')).toBe('event-detail');
+  });
+
+  it('GSD: dos actuaciones de la misma noticia con distinto día y sede sobreviven al merge y a un rerun', () => {
+    const citation = { sourceId: 'src_fundaciongsd_org', url: 'https://www.fundaciongsd.org/2026/02/18/actuaciones-del-coro-fundacion-gsd-2026', checkedAt: '2026-10-17' };
+    const first = makeEvent({
+      id: 'evt_fundaciongsd_org_actuaciones_del_coro_fundacion_gsd_2026',
+      slug: 'gsd-credo-en-santa-ana',
+      title: 'Coro Fundación GSD — Credo RV 591',
+      venueId: 'ven_parroquia_santa_ana_y_la_esperanza',
+      occurrences: [{ id: 'occ_gsd_01', date: '2026-10-23', time: '20:15', status: 'scheduled' }],
+      citations: [citation],
+      primarySourceId: 'src_fundaciongsd_org',
+    });
+    const second = makeEvent({
+      ...first,
+      id: 'evt_fundaciongsd_org_actuaciones_del_coro_fundacion_gsd_2026_2',
+      slug: 'gsd-concierto-velada-en-santa-lucia',
+      title: 'Coro Fundación GSD — Concierto Velada',
+      venueId: 'ven_residencia_fundacion_santa_lucia',
+      occurrences: [{ id: 'occ_gsd_02', date: '2026-10-24', time: '16:45', status: 'scheduled' }],
+    });
+    expect(sourceUrlKind(citation.url)).toBe('listing');
+    const result = mergeCandidateBatch(emptyCatalog(), [
+      { schemaVersion: 1, event: first },
+      { schemaVersion: 1, event: second },
+    ]);
+    expect(result.issues).toEqual([]);
+    expect(result.newEvents).toBe(2);
+    expect(result.unchangedEvents).toBe(0);
+    expect(result.catalog.events.map((event) => event.id)).toEqual([first.id, second.id]);
+    expect(result.filesToWrite.filter((file) => file.relativePath.startsWith('events/'))).toHaveLength(2);
+    const replay = mergeCandidateBatch(result.catalog, [
+      { schemaVersion: 1, event: first },
+      { schemaVersion: 1, event: second },
+    ]);
+    expect(replay.newEvents).toBe(0);
+    expect(replay.unchangedEvents).toBe(2);
+    expect(replay.filesToWrite).toEqual([]);
   });
 
   it('misma URL genérica + eventos diferentes no se fusionan', async () => {
