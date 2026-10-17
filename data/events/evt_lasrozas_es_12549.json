@@ -25,7 +25,6 @@
   "works": [],
   "eras": [],
   "formats": [
-    "zarzuela",
     "other"
   ],
   "kind": "established",
@@ -34,16 +33,16 @@
     {
       "sourceId": "src_lasrozas_es",
       "url": "https://www.lasrozas.es/node/12549",
-      "checkedAt": "2026-09-28",
+      "checkedAt": "2026-10-17",
       "externalId": "12549"
     },
     {
       "sourceId": "src_fundacion_cultural_las_rozas",
       "url": "https://fundacionculturalasrozas.org/agenda/concierto-fiesta-nacional-3",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-10-17",
       "externalId": "8253"
     }
   ],
   "primarySourceId": "src_lasrozas_es",
-  "lastVerifiedAt": "2026-10-01"
+  "lastVerifiedAt": "2026-10-17"
 }
