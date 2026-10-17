@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundaciongsd_org_ciclo_navidad_el_torito_20261212",
+  "slug": "coro-fundacion-gsd-ciclo-navidad-el-torito",
+  "title": "Coro Fundación GSD — Ciclo de Navidad (El Torito)",
+  "status": "scheduled",
+  "venueId": "ven_centro_cultural_el_torito",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundaciongsd_org_ciclo_navidad_el_torito_20261212_01",
+      "date": "2026-12-12",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro Fundación GSD",
+      "role": "choir"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundaciongsd_org",
+      "url": "https://www.fundaciongsd.org/2026/02/18/actuaciones-del-coro-fundacion-gsd-2026",
+      "checkedAt": "2026-10-17"
+    }
+  ],
+  "primarySourceId": "src_fundaciongsd_org",
+  "lastVerifiedAt": "2026-10-17"
+}

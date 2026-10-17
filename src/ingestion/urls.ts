@@ -81,6 +81,7 @@ const REVIEWED_MULTI_EVENT_PAGES = new Set([
   'https://revistatierrasanta.com/el-organo-vuelve-a-sonar-en-la-basilica-de-san-francisco-el-grande',
   'https://ko-fi.com/s/3370de7ce8',
   'https://www.cultura.gob.es/mtraje/eu/actividades/artes/musica/musae.html',
+  'https://www.fundaciongsd.org/2026/02/18/actuaciones-del-coro-fundacion-gsd-2026',
 ]);
 
 const UUID_SEGMENT =

@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatrocalderonmadrid_com_joep_beving_20270202",
+  "slug": "joep-beving-en-concierto",
+  "title": "Joep Beving — recital de piano",
+  "status": "scheduled",
+  "venueId": "ven_teatro_calderon_de_madrid",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatrocalderonmadrid_com_joep_beving_20270202_01",
+      "date": "2027-02-02",
+      "time": "21:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Joep Beving",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Joep Beving"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_teatrocalderonmadrid_com",
+      "url": "https://teatrocalderonmadrid.com/es/joep-beving",
+      "checkedAt": "2026-10-17"
+    }
+  ],
+  "primarySourceId": "src_teatrocalderonmadrid_com",
+  "lastVerifiedAt": "2026-10-17"
+}
