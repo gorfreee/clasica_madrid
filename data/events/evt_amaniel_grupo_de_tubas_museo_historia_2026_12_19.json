@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_amaniel_grupo_de_tubas_museo_historia_2026_12_19",
+  "slug": "amaniel-grupo-de-tubas-museo-historia-2026-12-19",
+  "title": "Grupo de Tubas del Conservatorio Amaniel",
+  "status": "scheduled",
+  "venueId": "ven_museo_de_historia_de_madrid",
+  "organizerIds": [
+    "org_conservatorio_profesional_musica_amaniel"
+  ],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_amaniel_grupo_de_tubas_museo_historia_2026_12_19_01",
+      "date": "2026-12-19",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Grupo de Tubas del CPM Amaniel",
+      "role": "ensemble"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_cpm_amaniel",
+      "url": "https://docs.google.com/document/d/1Hd9P835kLLtYEZugZqhD8PAfQ4CqLrBu/edit",
+      "checkedAt": "2026-10-17"
+    }
+  ],
+  "primarySourceId": "src_cpm_amaniel",
+  "lastVerifiedAt": "2026-10-17"
+}
