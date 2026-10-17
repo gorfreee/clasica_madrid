@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_amaniel_coro_y_banda_ep_montserrat_2026_12_15",
+  "slug": "amaniel-coro-y-banda-ep-montserrat-2026-12-15",
+  "title": "Coro y Banda EP — Conservatorio Amaniel",
+  "status": "scheduled",
+  "venueId": "ven_iglesia_nuestra_senora_montserrat_madrid",
+  "organizerIds": [
+    "org_conservatorio_profesional_musica_amaniel"
+  ],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_amaniel_coro_y_banda_ep_montserrat_2026_12_15_01",
+      "date": "2026-12-15",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro y Banda de Enseñanzas Profesionales del CPM Amaniel",
+      "role": "ensemble"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "choral",
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_cpm_amaniel",
+      "url": "https://docs.google.com/document/d/1Hd9P835kLLtYEZugZqhD8PAfQ4CqLrBu/edit",
+      "checkedAt": "2026-10-17"
+    },
+    {
+      "sourceId": "src_cpm_amaniel",
+      "url": "https://site.educa.madrid.org/cpm.amaniel.madrid/index.php/agenda/",
+      "checkedAt": "2026-10-17"
+    }
+  ],
+  "primarySourceId": "src_cpm_amaniel",
+  "lastVerifiedAt": "2026-10-17"
+}
