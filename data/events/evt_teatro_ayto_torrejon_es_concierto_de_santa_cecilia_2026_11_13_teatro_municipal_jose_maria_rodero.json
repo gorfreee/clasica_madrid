@@ -17,10 +17,12 @@
   ],
   "performers": [
     {
-      "name": "Banda Municipal de Música de Torrejón de Ardoz"
+      "name": "Banda Municipal de Música de Torrejón de Ardoz",
+      "role": "ensemble"
     },
     {
-      "name": "Julio Maroto"
+      "name": "Julio Maroto",
+      "role": "conductor"
     }
   ],
   "composers": [],

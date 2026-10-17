@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "evt_fundacion_orcam_la_fundacion_orquesta_y_coro_de_la_comunidad_de_madrid_presenta_la_primera_temporada_de_su_ciclo_de",
   "slug": "cierre-del-ciclo-de-conciertos-orcam-en-san-lorenzo-de-el-escorial",
-  "title": "Cierre del Ciclo de Conciertos ORCAM en San Lorenzo de El Escorial",
+  "title": "Concierto de Navidad",
   "status": "scheduled",
   "venueId": "ven_teatro_auditorio_escorial",
   "organizerIds": [],
@@ -11,7 +11,7 @@
     {
       "id": "occ_fundacion_orcam_la_fundacion_orquesta_y_coro_de_la_comunidad_de_madrid_presenta_la_primera_temporada_de_su_ciclo_de",
       "date": "2026-12-22",
-      "time": null,
+      "time": "19:00",
       "status": "scheduled"
     }
   ],
@@ -21,15 +21,63 @@
       "role": "orchestra"
     },
     {
-      "name": "Iván López Reynoso",
+      "name": "Coro de la Comunidad de Madrid",
+      "role": "choir"
+    },
+    {
+      "name": "Pequeños Cantores de la ORCAM",
+      "role": "choir"
+    },
+    {
+      "name": "Juan de la Rubia",
+      "role": "soloist"
+    },
+    {
+      "name": "Ana González",
+      "role": "conductor"
+    },
+    {
+      "name": "Javier Carmena",
+      "role": "conductor"
+    },
+    {
+      "name": "Iván López-Reynoso",
       "role": "conductor"
     }
   ],
-  "composers": [],
-  "works": [],
-  "eras": [],
+  "composers": [
+    {
+      "name": "Gabriel Fauré"
+    },
+    {
+      "name": "Arthur Honegger"
+    },
+    {
+      "name": "Camille Saint-Saëns"
+    }
+  ],
+  "works": [
+    {
+      "title": "Cántico de Jean Racine, op. 11",
+      "composerName": "Gabriel Fauré"
+    },
+    {
+      "title": "Una Cantata de Navidad",
+      "composerName": "Arthur Honegger"
+    },
+    {
+      "title": "Sinfonía n.º 3, en do menor",
+      "composerName": "Camille Saint-Saëns"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
   "formats": [
-    "symphonic"
+    "symphonic",
+    "choral",
+    "organ"
   ],
   "kind": "established",
   "access": "unknown",
@@ -38,8 +86,13 @@
       "sourceId": "src_fundacion_orcam",
       "url": "https://fundacionorcam.org/la-fundacion-orquesta-y-coro-de-la-comunidad-de-madrid-presenta-la-primera-temporada-de-su-ciclo-de-conciertos-en-el-teatro-auditorio-san-lorenzo-de-el-escorial/",
       "checkedAt": "2026-09-27"
+    },
+    {
+      "sourceId": "src_fundacion_orcam",
+      "url": "https://fundacionorcam.org/conciertos/2026-27/concierto-de-navidad",
+      "checkedAt": "2026-10-17"
     }
   ],
   "primarySourceId": "src_fundacion_orcam",
-  "lastVerifiedAt": "2026-09-27"
+  "lastVerifiedAt": "2026-10-17"
 }

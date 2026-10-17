@@ -17,7 +17,8 @@
   ],
   "performers": [
     {
-      "name": "Maria Solozobova"
+      "name": "Maria Solozobova",
+      "role": "soloist"
     },
     {
       "name": "Atlántida Chamber Orchestra",
@@ -34,10 +35,6 @@
     }
   ],
   "works": [
-    {
-      "title": "Las Cuatro Estaciones, op. 8, n.º 1–4",
-      "composerName": "Antonio Vivaldi"
-    },
     {
       "title": "La Primavera, RV 269",
       "composerName": "Antonio Vivaldi"
