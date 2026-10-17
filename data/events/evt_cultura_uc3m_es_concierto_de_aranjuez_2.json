@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_cultura_uc3m_es_concierto_de_aranjuez_2",
+  "slug": "concierto-de-aranjuez-orquesta-uc3m-2",
+  "title": "Concierto de Aranjuez – Orquesta UC3M",
+  "status": "scheduled",
+  "venueId": "ven_centro_cultural_daoiz_y_velarde",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_cultura_uc3m_es_concierto_de_aranjuez_2_01",
+      "date": "2026-11-20",
+      "time": null,
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta UC3M",
+      "role": "orchestra"
+    },
+    {
+      "name": "Jerónimo Marín"
+    },
+    {
+      "name": "Sohta Nakabayashi"
+    },
+    {
+      "name": "Alberto Juárez"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Luigi Boccherini"
+    },
+    {
+      "name": "L. Berio"
+    },
+    {
+      "name": "Joaquín Rodrigo"
+    },
+    {
+      "name": "N. Rimski-Korsakov"
+    }
+  ],
+  "works": [
+    {
+      "title": "Ritirata notturna di Madrid di L. Boccherini",
+      "composerName": "L. Berio"
+    },
+    {
+      "title": "Concierto de Aranjuez",
+      "composerName": "Joaquín Rodrigo"
+    },
+    {
+      "title": "Capricho Español Op. 34",
+      "composerName": "N. Rimski-Korsakov"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_cultura_uc3m_es",
+      "url": "https://cultura.uc3m.es/eventos/concierto-de-aranjuez-2",
+      "checkedAt": "2026-10-17"
+    }
+  ],
+  "primarySourceId": "src_cultura_uc3m_es",
+  "lastVerifiedAt": "2026-10-17"
+}

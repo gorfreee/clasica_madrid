@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundaciongsd_org_actuaciones_del_coro_fundacion_gsd_2026",
+  "slug": "coro-fundacion-gsd-credo-rv-591-de-vivaldi-y-otras-obras",
+  "title": "Coro Fundación GSD — Credo RV 591 de Vivaldi y otras obras",
+  "status": "scheduled",
+  "venueId": "ven_parroquia_santa_ana_y_la_esperanza",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundaciongsd_org_actuaciones_del_coro_fundacion_gsd_2026_01",
+      "date": "2026-10-23",
+      "time": "20:15",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro Fundación GSD",
+      "role": "choir"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Antonio Vivaldi"
+    }
+  ],
+  "works": [
+    {
+      "title": "Credo RV 591",
+      "composerName": "Antonio Vivaldi"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundaciongsd_org",
+      "url": "https://www.fundaciongsd.org/2026/02/18/actuaciones-del-coro-fundacion-gsd-2026",
+      "checkedAt": "2026-10-17"
+    }
+  ],
+  "primarySourceId": "src_fundaciongsd_org",
+  "lastVerifiedAt": "2026-10-17"
+}
