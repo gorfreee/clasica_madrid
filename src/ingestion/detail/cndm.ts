@@ -280,7 +280,7 @@ function cndmSchedule(text: string): Pick<ObservedFactPatch, 'eventStatus' | 'oc
     const year = postponed[3]!.length === 2 ? `20${postponed[3]}` : postponed[3]!;
     const date = `${year}-${postponed[2]!.padStart(2, '0')}-${postponed[1]!.padStart(2, '0')}`;
     if (parseObservedDateTime(date)) {
-      return { eventStatus: 'scheduled', occurrences: [{ raw: postponed[0], date }] };
+      return { eventStatus: 'postponed', occurrences: [{ raw: postponed[0], date }] };
     }
     return { eventStatus: 'postponed' };
   }
