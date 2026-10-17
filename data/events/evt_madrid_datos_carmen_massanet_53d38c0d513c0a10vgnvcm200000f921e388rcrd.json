@@ -11,7 +11,7 @@
     {
       "id": "occ_madrid_datos_carmen_massanet_53d38c0d513c0a10vgnvcm200000f921e388rcrd_01",
       "date": "2026-10-17",
-      "time": "20:30",
+      "time": "20:00",
       "status": "scheduled"
     }
   ],
@@ -34,9 +34,9 @@
     {
       "sourceId": "src_ayuntamiento_madrid",
       "url": "https://www.madrid.es/portales/munimadrid/es/Inicio/Mayores/Actividades-y-eventos/Carmen-Massanet?vgnextchannel=124931d3b28fe410VgnVCM1000000b205a0aRCRD&vgnextfmt=default&vgnextoid=53d38c0d513c0a10VgnVCM200000f921e388RCRD",
-      "checkedAt": "2026-09-22"
+      "checkedAt": "2026-10-17"
     }
   ],
   "primarySourceId": "src_ayuntamiento_madrid",
-  "lastVerifiedAt": "2026-09-22"
+  "lastVerifiedAt": "2026-10-17"
 }
