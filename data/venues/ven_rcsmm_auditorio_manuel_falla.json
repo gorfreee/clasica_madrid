@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_rcsmm_auditorio_manuel_falla",
+  "slug": "rcsmm-auditorio-manuel-de-falla",
+  "name": "Real Conservatorio Superior de Música de Madrid — Auditorio Manuel de Falla",
+  "municipality": "Madrid",
+  "area": "madrid",
+  "url": "https://rcsmm.eu/",
+  "lastVerifiedAt": "2026-10-20",
+  "parentVenueId": "ven_rcsmm",
+  "spaceName": "Auditorio Manuel de Falla"
+}
