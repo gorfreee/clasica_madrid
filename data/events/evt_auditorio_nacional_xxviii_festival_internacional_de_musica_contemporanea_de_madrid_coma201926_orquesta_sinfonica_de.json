@@ -10,8 +10,8 @@
   "occurrences": [
     {
       "id": "occ_auditorio_nacional_xxviii_festival_internacional_de_musica_contemporanea_de_madrid_coma201926_orquesta_sinfonica_de",
-      "date": "2026-11-11",
-      "time": "19:30",
+      "date": "2026-11-14",
+      "time": "12:00",
       "status": "scheduled"
     }
   ],
@@ -74,10 +74,15 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/xxviii-festival-internacional-de-musica-contemporanea-de-madrid-coma201926-orquesta-sinfonica-de-la-universidad-complutense-de-madrid",
-      "checkedAt": "2026-10-14",
+      "checkedAt": "2026-10-20",
       "externalId": "4a109642fd4845adbe1183b60720a4e1"
+    },
+    {
+      "sourceId": "src_amcc_es",
+      "url": "https://amcc.es/wp-content/uploads/2026/10/programa-mano-COMA26V17.pdf",
+      "checkedAt": "2026-10-20"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-10-14"
+  "lastVerifiedAt": "2026-10-20"
 }

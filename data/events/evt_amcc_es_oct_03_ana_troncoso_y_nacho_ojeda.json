@@ -2,22 +2,22 @@
   "schemaVersion": 1,
   "id": "evt_amcc_es_oct_03_ana_troncoso_y_nacho_ojeda",
   "slug": "coma-26-monica-muz-y-nacho-ojeda",
-  "title": "COMA’26: Mónica Muz y Nacho Ojeda",
+  "title": "COMA’26: Ana Troncoso y Nacho Ojeda",
   "status": "scheduled",
-  "venueId": "ven_casa_vacas_retiro",
+  "venueId": "ven_rcsmm_auditorio_manuel_falla",
   "organizerIds": [],
   "seriesId": null,
   "occurrences": [
     {
       "id": "occ_amcc_es_oct_03_ana_troncoso_y_nacho_ojeda_01",
-      "date": "2026-10-03",
+      "date": "2026-11-21",
       "time": "12:00",
       "status": "scheduled"
     }
   ],
   "performers": [
     {
-      "name": "Mónica Muz"
+      "name": "Ana Troncoso"
     },
     {
       "name": "Nacho Ojeda"
@@ -77,18 +77,17 @@
   "citations": [
     {
       "sourceId": "src_amcc_es",
-      "url": "https://amcc.es/coma/coma26/oct-03-ana-troncoso-y-nacho-ojeda",
-      "checkedAt": "2026-09-20"
+      "url": "https://amcc.es/coma/coma26/nov-21-ana-troncoso-y-nacho-ojeda/",
+      "checkedAt": "2026-10-20"
     },
     {
-      "sourceId": "src_ayuntamiento_madrid",
-      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=d0938dfacaf8c910VgnVCM100000891ecb1aRCRD",
-      "checkedAt": "2026-10-02",
-      "externalId": "50235439"
+      "sourceId": "src_amcc_es",
+      "url": "https://amcc.es/wp-content/uploads/2026/10/programa-mano-COMA26V17.pdf",
+      "checkedAt": "2026-10-20"
     }
   ],
-  "primarySourceId": "src_ayuntamiento_madrid",
-  "lastVerifiedAt": "2026-10-02",
+  "primarySourceId": "src_amcc_es",
+  "lastVerifiedAt": "2026-10-20",
   "slugAliases": [
     "coma-26-ana-troncoso-y-nacho-ojeda"
   ]

@@ -10,8 +10,8 @@
   "occurrences": [
     {
       "id": "occ_amcc_es_oct_29_mario_perez_01",
-      "date": "2026-10-29",
-      "time": "19:30",
+      "date": "2026-11-17",
+      "time": "19:00",
       "status": "scheduled"
     }
   ],
@@ -77,10 +77,15 @@
   "citations": [
     {
       "sourceId": "src_amcc_es",
-      "url": "https://amcc.es/coma/coma26/oct-29-mario-perez",
-      "checkedAt": "2026-09-20"
+      "url": "https://amcc.es/coma/coma26/nov-17-mario-perez/",
+      "checkedAt": "2026-10-20"
+    },
+    {
+      "sourceId": "src_amcc_es",
+      "url": "https://amcc.es/wp-content/uploads/2026/10/programa-mano-COMA26V17.pdf",
+      "checkedAt": "2026-10-20"
     }
   ],
   "primarySourceId": "src_amcc_es",
-  "lastVerifiedAt": "2026-09-20"
+  "lastVerifiedAt": "2026-10-20"
 }
