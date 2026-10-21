@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_madrid_concierto_guitarra_iberoamericana_mexico_buenos_aires_ii_caracas_al_tango",
+  "slug": "guitarra-iberoamericana-de-mexico-a-buenos-aires-ii-de-caracas-al-tango",
+  "title": "Guitarra iberoamericana: de México a Buenos Aires (II): De Caracas al tango",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_madrid_concierto_guitarra_iberoamericana_mexico_buenos_aires_ii_caracas_al_tango_01",
+      "date": "2027-02-20",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "José María Gallardo del Rey"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Rodrigo Riera"
+    },
+    {
+      "name": "Antonio Lauro"
+    },
+    {
+      "name": "Astor Piazzolla"
+    },
+    {
+      "name": "João Pernambuco"
+    }
+  ],
+  "works": [
+    {
+      "title": "Cuatro piezas venezolanas",
+      "composerName": "Rodrigo Riera"
+    },
+    {
+      "title": "Choro",
+      "composerName": "Rodrigo Riera"
+    },
+    {
+      "title": "Suite venezolana",
+      "composerName": "Antonio Lauro"
+    },
+    {
+      "title": "Tres valses venezolanos",
+      "composerName": "Antonio Lauro"
+    },
+    {
+      "title": "Tres piezas del nuevo tango (versión del intérprete)",
+      "composerName": "Astor Piazzolla"
+    },
+    {
+      "title": "Sons de Carrilhões",
+      "composerName": "João Pernambuco"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/guitarra-iberoamericana-mexico-buenos-aires-ii-caracas-al-tango",
+      "checkedAt": "2026-10-21",
+      "externalId": "/es/madrid/concierto/guitarra-iberoamericana-mexico-buenos-aires-ii-caracas-al-tango"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-10-21"
+}

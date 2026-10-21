@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "evt_escuela_reina_sofia_83103",
   "slug": "interpretacion-historica-conjuntos-barrocos-2",
-  "title": "Interpretación Histórica: Conjuntos Barrocos",
+  "title": "De Vivaldi a Händel: Un viaje por el barroco europeo",
   "status": "scheduled",
   "venueId": "ven_escuela_superior_musica_reina_sofia_auditorio_sony",
   "organizerIds": [],
@@ -15,23 +15,152 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
-  "works": [],
-  "eras": [],
+  "performers": [
+    {
+      "name": "Conjuntos Barrocos del Programa de Interpretación Histórica Société Générale",
+      "role": "ensemble"
+    },
+    {
+      "name": "Paul Goodwin",
+      "role": "conductor"
+    },
+    {
+      "name": "Hannah Yunhee Song"
+    },
+    {
+      "name": "Gustavo Gil"
+    },
+    {
+      "name": "Mila Haydon"
+    },
+    {
+      "name": "Adriana Snape Bermejo"
+    },
+    {
+      "name": "Amalia Bosch Fernández"
+    },
+    {
+      "name": "Abel Gómez-Antequera Ábalos"
+    },
+    {
+      "name": "Darin Nikolaev Lambrev"
+    },
+    {
+      "name": "Canon Shibata"
+    },
+    {
+      "name": "Sanghyeok Park"
+    },
+    {
+      "name": "Daniela Estefanía Roberty Silva"
+    },
+    {
+      "name": "Christian Schubert"
+    },
+    {
+      "name": "Nedley Antonio Robles Jimenez"
+    },
+    {
+      "name": "Lucía Talavera Haya"
+    },
+    {
+      "name": "Héctor Teja Herrera"
+    },
+    {
+      "name": "Àlex Arroyo Luis"
+    },
+    {
+      "name": "Raphael Gisbertz"
+    },
+    {
+      "name": "María Domínguez Guevska"
+    },
+    {
+      "name": "Álvaro Lozano Cames"
+    },
+    {
+      "name": "Geonwoo Yi"
+    },
+    {
+      "name": "Isabeau Hansen"
+    },
+    {
+      "name": "Daniel Huertas Ferrer"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Georg Friedrich Händel"
+    },
+    {
+      "name": "Wilhelm Friedemann Bach"
+    },
+    {
+      "name": "Antonio Vivaldi"
+    },
+    {
+      "name": "Georg Philipp Telemann"
+    },
+    {
+      "name": "François Couperin"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto de Brandemburgo n.º 3 en sol mayor, BWV 1048",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Sonata en sol menor, HWV 387, op. 2 n.º 2 (versión para dos oboes y bajo continuo)",
+      "composerName": "Georg Friedrich Händel"
+    },
+    {
+      "title": "Dúo para dos violas n.º 3 en sol menor, F. 62",
+      "composerName": "Wilhelm Friedemann Bach"
+    },
+    {
+      "title": "Sonata en do mayor, BWV 1037 (autoría discutida)"
+    },
+    {
+      "title": "Second livre de pièces de clavecin: Neuvième ordre — Allemande à deux clavecins",
+      "composerName": "François Couperin"
+    },
+    {
+      "title": "Troisième livre de pièces de clavecin: Quatorzième ordre — La Julliet",
+      "composerName": "François Couperin"
+    },
+    {
+      "title": "Troisième livre de pièces de clavecin: Quinzième ordre — Muséte de Taverni",
+      "composerName": "François Couperin"
+    },
+    {
+      "title": "Cuarteto en sol mayor, TWV 43:G2, de Musique de table",
+      "composerName": "Georg Philipp Telemann"
+    },
+    {
+      "title": "Concierto para cuatro violines en si menor, RV 580, op. 3 n.º 10",
+      "composerName": "Antonio Vivaldi"
+    }
+  ],
+  "eras": [
+    "baroque"
+  ],
   "formats": [
     "early-music"
   ],
   "kind": "alternative",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_escuela_superior_musica_reina_sofia",
       "url": "https://www.escuelasuperiordemusicareinasofia.es/evento/interpretacion-historica-conjuntos-barrocos-2",
-      "checkedAt": "2026-09-15",
+      "checkedAt": "2026-10-21",
       "externalId": "83103"
     }
   ],
   "primarySourceId": "src_escuela_superior_musica_reina_sofia",
-  "lastVerifiedAt": "2026-09-15"
+  "lastVerifiedAt": "2026-10-21"
 }

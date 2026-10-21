@@ -17,10 +17,12 @@
   ],
   "performers": [
     {
-      "name": "Marianne Crebassa"
+      "name": "Julian Prégardien",
+      "role": "soloist"
     },
     {
-      "name": "Alphonse Cemin *"
+      "name": "Kristian Bezuidenhout",
+      "role": "soloist"
     }
   ],
   "composers": [
@@ -47,16 +49,16 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23796",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-21",
       "externalId": "23796"
     },
     {
       "sourceId": "src_teatro_zarzuela",
       "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/ciclo-de-lied-2026-2027/julian-pregardien",
-      "checkedAt": "2026-10-11",
+      "checkedAt": "2026-10-21",
       "externalId": "/es/temporada/ciclo-de-lied-2026-2027/julian-pregardien"
     }
   ],
   "primarySourceId": "src_cndm",
-  "lastVerifiedAt": "2026-10-11"
+  "lastVerifiedAt": "2026-10-21"
 }

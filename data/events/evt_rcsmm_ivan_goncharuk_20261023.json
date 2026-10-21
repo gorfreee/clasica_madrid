@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_rcsmm_ivan_goncharuk_20261023",
+  "slug": "recital-de-guitarra-a-cargo-de-ivan-goncharuk",
+  "title": "Recital de guitarra: Iván Goncharuk",
+  "status": "scheduled",
+  "venueId": "ven_rcsmm_auditorio_manuel_falla",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_rcsmm_ivan_goncharuk_20261023_01",
+      "date": "2026-10-23",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Iván Goncharuk",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Roland Dyens"
+    },
+    {
+      "name": "Eduardo Sainz de la Maza"
+    },
+    {
+      "name": "Joaquín Turina"
+    },
+    {
+      "name": "Mauro Giuliani"
+    },
+    {
+      "name": "Joaquín Malats"
+    },
+    {
+      "name": "Lennox Berkeley"
+    }
+  ],
+  "works": [
+    {
+      "title": "Saudade n.º 3",
+      "composerName": "Roland Dyens"
+    },
+    {
+      "title": "Homenaje a Toulouse-Lautrec",
+      "composerName": "Eduardo Sainz de la Maza"
+    },
+    {
+      "title": "Tango en skaï",
+      "composerName": "Roland Dyens"
+    },
+    {
+      "title": "Homenaje a Tárrega",
+      "composerName": "Joaquín Turina"
+    },
+    {
+      "title": "Rossiniana n.º 6, op. 124",
+      "composerName": "Mauro Giuliani"
+    },
+    {
+      "title": "Serenata española",
+      "composerName": "Joaquín Malats"
+    },
+    {
+      "title": "Sonatina, op. 51",
+      "composerName": "Lennox Berkeley"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_rcsmm",
+      "url": "https://rcsmm.eu/recital-guitarra-cargo-ivan-goncharuk",
+      "checkedAt": "2026-10-21",
+      "externalId": "2570"
+    },
+    {
+      "sourceId": "src_rcsmm",
+      "url": "https://rcsmm.eu/sites/default/files/upload-files/XI%20FESTIVAL%20DE%20J%C3%93VENES%20GUITARRISTAS%20Joaqu%C3%ADn%20Rodrigo%20-%20IV%C3%81N%20GONCHARUK%20(Programa).pdf",
+      "checkedAt": "2026-10-21"
+    }
+  ],
+  "primarySourceId": "src_rcsmm",
+  "lastVerifiedAt": "2026-10-21"
+}

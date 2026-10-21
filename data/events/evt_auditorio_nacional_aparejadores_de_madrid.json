@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_aparejadores_de_madrid",
+  "slug": "concierto-aparejadores-de-madrid",
+  "title": "Concierto Aparejadores de Madrid",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_aparejadores_de_madrid_01",
+      "date": "2026-11-19",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta y Coro Sinfónicos OJEM",
+      "role": "orchestra"
+    },
+    {
+      "name": "Adriana Tanus",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Edward Elgar"
+    },
+    {
+      "name": "Nikolai Rimsky-Korsakov"
+    },
+    {
+      "name": "Christopher Tin"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "baroque",
+    "romantic",
+    "contemporary"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/aparejadores-de-madrid",
+      "checkedAt": "2026-10-21",
+      "externalId": "aparejadores-de-madrid"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-10-21"
+}

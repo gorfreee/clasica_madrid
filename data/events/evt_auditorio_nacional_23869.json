@@ -50,16 +50,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-trio-arbos",
-      "checkedAt": "2026-09-18",
+      "checkedAt": "2026-10-21",
       "externalId": "cndm-trio-arbos"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23869",
-      "checkedAt": "2026-09-18",
+      "checkedAt": "2026-10-21",
       "externalId": "23869"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-18"
+  "lastVerifiedAt": "2026-10-21"
 }

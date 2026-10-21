@@ -32,6 +32,9 @@
     },
     {
       "name": "Serguéi Prokófiev"
+    },
+    {
+      "name": "Patricia Kopatchinskaja"
     }
   ],
   "works": [
@@ -44,12 +47,8 @@
       "composerName": "Fazıl Say"
     },
     {
-      "title": "PatKop (1977)",
-      "composerName": "Fazıl Say"
-    },
-    {
-      "title": "UniSolo, para violín y piano ** (2024)",
-      "composerName": "Fazıl Say"
+      "title": "UniSolo, para violín y piano",
+      "composerName": "Patricia Kopatchinskaja"
     },
     {
       "title": "Sonata para piano n.º 1 en fa menor, op. 1 (1907, rev. 1909)",
@@ -69,16 +68,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-patricia-kopatchinskaja-fazil-say-1",
-      "checkedAt": "2026-10-11",
+      "checkedAt": "2026-10-21",
       "externalId": "cndm-patricia-kopatchinskaja-fazil-say-1"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23864",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-21",
       "externalId": "23864"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-10-11"
+  "lastVerifiedAt": "2026-10-21"
 }

@@ -17,7 +17,12 @@
   ],
   "performers": [
     {
-      "name": "Carles Magraner"
+      "name": "Capella de Ministrers",
+      "role": "ensemble"
+    },
+    {
+      "name": "Carles Magraner",
+      "role": "conductor"
     }
   ],
   "composers": [
@@ -87,16 +92,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-capella-de-ministrers-2",
-      "checkedAt": "2026-10-11",
+      "checkedAt": "2026-10-21",
       "externalId": "cndm-capella-de-ministrers-2"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23833",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-21",
       "externalId": "23833"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-10-11"
+  "lastVerifiedAt": "2026-10-21"
 }

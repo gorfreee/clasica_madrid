@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_residencia_estudiantes_32405",
+  "slug": "ecce-finem",
+  "title": "Ecce finem",
+  "status": "scheduled",
+  "venueId": "ven_residencia_estudiantes_salon_actos",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_residencia_estudiantes_32405_01",
+      "date": "2026-11-22",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Vetus Carmina",
+      "role": "choir"
+    },
+    {
+      "name": "Arturo Moscoso",
+      "role": "conductor"
+    },
+    {
+      "name": "Madeleine Treilhou"
+    },
+    {
+      "name": "Sofía Chacón"
+    },
+    {
+      "name": "Iris Veestraeten"
+    },
+    {
+      "name": "Katelijne Malomgré"
+    },
+    {
+      "name": "Anna Dehaene"
+    },
+    {
+      "name": "Jan Van Elsacker"
+    },
+    {
+      "name": "Daniel Poncela"
+    },
+    {
+      "name": "Alejandro Barrientos-Rupérez"
+    },
+    {
+      "name": "Thomas Vandenabeele"
+    },
+    {
+      "name": "Marcos Molina"
+    },
+    {
+      "name": "Zep Heylen"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johannes Ockeghem"
+    },
+    {
+      "name": "Antoine Busnois"
+    },
+    {
+      "name": "Andrés Poncela"
+    },
+    {
+      "name": "Cristóbal de Morales"
+    },
+    {
+      "name": "Jakob Obrecht"
+    },
+    {
+      "name": "Tomás Luis de Victoria"
+    },
+    {
+      "name": "Nicolas Gombert"
+    }
+  ],
+  "works": [
+    {
+      "title": "Kyrie de Fors seulement",
+      "composerName": "Johannes Ockeghem"
+    },
+    {
+      "title": "Gloria de L’homme armé",
+      "composerName": "Antoine Busnois"
+    },
+    {
+      "title": "Lamentaciones alrededor del fuego: I. Nos; II. Los sueños se enredan en nuestras gargantas; III. Hacia un cielo sin nombre",
+      "composerName": "Andrés Poncela"
+    },
+    {
+      "title": "Zain. Candidiores nazarei",
+      "composerName": "Cristóbal de Morales"
+    },
+    {
+      "title": "Mille quingentis",
+      "composerName": "Jakob Obrecht"
+    },
+    {
+      "title": "Sanctus de Ascendens Christus",
+      "composerName": "Tomás Luis de Victoria"
+    },
+    {
+      "title": "Tribulatio cordis mei",
+      "composerName": "Nicolas Gombert"
+    }
+  ],
+  "eras": [
+    "renaissance",
+    "contemporary"
+  ],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_residencia_estudiantes",
+      "url": "https://residenciadeestudiantes.com/actividades/ecce-finem",
+      "checkedAt": "2026-10-21",
+      "externalId": "32405"
+    }
+  ],
+  "primarySourceId": "src_residencia_estudiantes",
+  "lastVerifiedAt": "2026-10-21"
+}

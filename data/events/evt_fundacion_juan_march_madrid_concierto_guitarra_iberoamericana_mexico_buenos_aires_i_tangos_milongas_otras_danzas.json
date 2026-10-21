@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_madrid_concierto_guitarra_iberoamericana_mexico_buenos_aires_i_tangos_milongas_otras_danzas",
+  "slug": "guitarra-iberoamericana-de-mexico-a-buenos-aires-i-tangos-milongas-y-otras-danzas",
+  "title": "Guitarra iberoamericana: de México a Buenos Aires (I): Tangos, milongas y otras danzas",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_madrid_concierto_guitarra_iberoamericana_mexico_buenos_aires_i_tangos_milongas_otras_danzas_01",
+      "date": "2027-02-13",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Anabel Montesinos"
+    }
+  ],
+  "composers": [
+    {
+      "name": "José Luis Merlin"
+    },
+    {
+      "name": "Astor Piazzolla"
+    },
+    {
+      "name": "Carlos Gardel"
+    },
+    {
+      "name": "Jorge Morel"
+    },
+    {
+      "name": "Ariel Ramírez"
+    },
+    {
+      "name": "Cacho Tirao"
+    },
+    {
+      "name": "Antonio Lauro"
+    },
+    {
+      "name": "Benito Canónico"
+    },
+    {
+      "name": "Pedro Elías Gutiérrez"
+    }
+  ],
+  "works": [
+    {
+      "title": "Suite del recuerdo",
+      "composerName": "José Luis Merlin"
+    },
+    {
+      "title": "Cinco piezas para guitarra",
+      "composerName": "Astor Piazzolla"
+    },
+    {
+      "title": "El día que me quieras",
+      "composerName": "Carlos Gardel"
+    },
+    {
+      "title": "Danza brasilera",
+      "composerName": "Jorge Morel"
+    },
+    {
+      "title": "Alfonsina y el mar",
+      "composerName": "Ariel Ramírez"
+    },
+    {
+      "title": "Balada para Martín Fierro",
+      "composerName": "Ariel Ramírez"
+    },
+    {
+      "title": "Milonga a Don Taco",
+      "composerName": "Cacho Tirao"
+    },
+    {
+      "title": "El Marabino (vals venezolano)",
+      "composerName": "Antonio Lauro"
+    },
+    {
+      "title": "Aire de Joropo (Totumo de Guarenas)",
+      "composerName": "Benito Canónico"
+    },
+    {
+      "title": "Alma Llanera",
+      "composerName": "Pedro Elías Gutiérrez"
+    }
+  ],
+  "eras": [
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/guitarra-iberoamericana-mexico-buenos-aires-i-tangos-milongas-otras-danzas",
+      "checkedAt": "2026-10-21",
+      "externalId": "/es/madrid/concierto/guitarra-iberoamericana-mexico-buenos-aires-i-tangos-milongas-otras-danzas"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-10-21"
+}

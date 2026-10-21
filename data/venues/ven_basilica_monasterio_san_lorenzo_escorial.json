@@ -7,5 +7,7 @@
   "area": "nearby",
   "address": "Avenida de Juan de Borbón y Battenberg, s/n, 28200 San Lorenzo de El Escorial",
   "url": "https://www.patrimonionacional.es/visita/real-monasterio-de-san-lorenzo-de-el-escorial/espacios/basilica",
-  "lastVerifiedAt": "2026-09-26"
+  "lastVerifiedAt": "2026-10-21",
+  "parentVenueId": "ven_real_monasterio_san_lorenzo_escorial",
+  "spaceName": "Basílica"
 }

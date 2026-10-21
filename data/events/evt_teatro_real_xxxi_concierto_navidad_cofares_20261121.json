@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatro_real_xxxi_concierto_navidad_cofares_20261121",
+  "slug": "xxxi-concierto-de-navidad",
+  "title": "XXXI Concierto de Navidad",
+  "status": "scheduled",
+  "venueId": "ven_teatro_real",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatro_real_xxxi_concierto_navidad_cofares_20261121_01",
+      "date": "2026-11-21",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Clásica Santa Cecilia",
+      "role": "orchestra"
+    },
+    {
+      "name": "Kynan Johns",
+      "role": "conductor"
+    },
+    {
+      "name": "Nicolas Varela",
+      "role": "soloist"
+    },
+    {
+      "name": "Délica",
+      "role": "ensemble"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Serguéi Rajmáninov"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto para piano n.º 3",
+      "composerName": "Serguéi Rajmáninov"
+    },
+    {
+      "title": "Somebody to Love"
+    },
+    {
+      "title": "Money, Money, Money; Gimme! Gimme! Gimme!; Mamma Mia"
+    },
+    {
+      "title": "Crazy Little Thing Called Love"
+    },
+    {
+      "title": "Come Together; Let It Be; Yesterday"
+    },
+    {
+      "title": "The Winner Takes It All"
+    },
+    {
+      "title": "Still Loving You"
+    },
+    {
+      "title": "Bohemian Rhapsody"
+    },
+    {
+      "title": "The Show Must Go On"
+    },
+    {
+      "title": "Hey Jude"
+    },
+    {
+      "title": "We Are the Champions"
+    },
+    {
+      "title": "Dancing Queen"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_teatro_real",
+      "url": "https://www.teatroreal.es/es/espectaculo/xxxi-concierto-navidad",
+      "checkedAt": "2026-10-21",
+      "externalId": "xxxi-concierto-navidad"
+    }
+  ],
+  "primarySourceId": "src_teatro_real",
+  "lastVerifiedAt": "2026-10-21"
+}

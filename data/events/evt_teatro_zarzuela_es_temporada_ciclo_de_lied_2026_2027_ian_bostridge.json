@@ -33,32 +33,24 @@
   ],
   "works": [
     {
-      "title": "Des Knaben Wunderhorn , selección (1892-1896, rev. 1899-1901)",
+      "title": "Lieder und Gesänge, vol. I: Frühlingsmorgen; Erinnerung",
       "composerName": "Gustav Mahler"
     },
     {
-      "title": "De Who are these children? , op. 84 (1969)",
+      "title": "Des Knaben Wunderhorn: Revelge; Des Antonius von Padua Fischpredigt; Wo die schönen Trompeten blasen; Der Tamboursg’sell",
+      "composerName": "Gustav Mahler"
+    },
+    {
+      "title": "Who are these children?, op. 84: Nightmare; Slaughter; Who are these children?; The children",
       "composerName": "Benjamin Britten"
     },
     {
-      "title": "A laddie’s sang, n.º 2",
+      "title": "Winter Words, op. 52",
       "composerName": "Benjamin Britten"
     },
     {
-      "title": "The children , n.º 11",
-      "composerName": "Benjamin Britten"
-    },
-    {
-      "title": "Slaughter , n.º 6",
-      "composerName": "Benjamin Britten"
-    },
-    {
-      "title": "Who are these children? , n.º 9",
-      "composerName": "Benjamin Britten"
-    },
-    {
-      "title": "Winter words , op. 52 (1953)",
-      "composerName": "Benjamin Britten"
+      "title": "Rückert-Lieder: Ich atmet’ einen linden Duft; Blicke mir nicht in die Lieder; Liebst du um Schönheit; Ich bin der Welt abhanden gekommen",
+      "composerName": "Gustav Mahler"
     }
   ],
   "eras": [
@@ -75,16 +67,16 @@
     {
       "sourceId": "src_teatro_zarzuela",
       "url": "https://teatrodelazarzuela.inaem.gob.es/es/temporada/ciclo-de-lied-2026-2027/ian-bostridge",
-      "checkedAt": "2026-10-11",
+      "checkedAt": "2026-10-21",
       "externalId": "/es/temporada/ciclo-de-lied-2026-2027/ian-bostridge"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23793",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-10-21",
       "externalId": "23793"
     }
   ],
   "primarySourceId": "src_teatro_zarzuela",
-  "lastVerifiedAt": "2026-10-11"
+  "lastVerifiedAt": "2026-10-21"
 }

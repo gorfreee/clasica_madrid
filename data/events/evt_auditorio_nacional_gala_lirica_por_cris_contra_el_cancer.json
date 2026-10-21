@@ -18,6 +18,22 @@
   "performers": [
     {
       "name": "Orquesta y coro Matritum Cantat"
+    },
+    {
+      "name": "Javier Blanco",
+      "role": "conductor"
+    },
+    {
+      "name": "Cristina Domínguez Sar"
+    },
+    {
+      "name": "Alain Damas"
+    },
+    {
+      "name": "Renato Dona"
+    },
+    {
+      "name": "Natasha Bellenova"
     }
   ],
   "composers": [
@@ -34,7 +50,48 @@
       "name": "Antonio Vivaldi"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "Suor Angelica: «Ave Maria»",
+      "composerName": "Giacomo Puccini"
+    },
+    {
+      "title": "Fedora: «Amor ti vieta»",
+      "composerName": "Umberto Giordano"
+    },
+    {
+      "title": "Tosca: «Vissi d'arte»",
+      "composerName": "Giacomo Puccini"
+    },
+    {
+      "title": "Tosca: «E lucevan le stelle»",
+      "composerName": "Giacomo Puccini"
+    },
+    {
+      "title": "Il trovatore: «Tacea la notte placida»",
+      "composerName": "Giuseppe Verdi"
+    },
+    {
+      "title": "«L'Inverno»",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "La forza del destino: «La Vergine degli Angeli»",
+      "composerName": "Giuseppe Verdi"
+    },
+    {
+      "title": "Turandot: «Nessun dorma»",
+      "composerName": "Giacomo Puccini"
+    },
+    {
+      "title": "Nabucco: «Va, pensiero»",
+      "composerName": "Giuseppe Verdi"
+    },
+    {
+      "title": "Il trovatore: «D'amor sull'ali rosee»",
+      "composerName": "Giuseppe Verdi"
+    }
+  ],
   "eras": [
     "baroque",
     "romantic"
@@ -49,10 +106,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/gala-lirica-por-cris-contra-el-cancer",
-      "checkedAt": "2026-10-11",
+      "checkedAt": "2026-10-21",
       "externalId": "gala-lirica-por-cris-contra-el-cancer"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-10-11"
+  "lastVerifiedAt": "2026-10-21"
 }

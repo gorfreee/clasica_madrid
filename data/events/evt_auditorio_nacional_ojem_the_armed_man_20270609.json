@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_ojem_the_armed_man_20270609",
+  "slug": "orquesta-juvenil-europea-de-madrid-the-armed-man-a-mass-for-peace",
+  "title": "Orquesta Juvenil Europea de Madrid. The Armed Man: A Mass For Peace",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_ojem_the_armed_man_20270609_01",
+      "date": "2027-06-09",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta Sinfónica OJEM",
+      "role": "orchestra"
+    },
+    {
+      "name": "Orquesta Junior LFM",
+      "role": "orchestra"
+    },
+    {
+      "name": "Escuela Coral OJEM",
+      "role": "choir"
+    },
+    {
+      "name": "Coros infantil y juvenil OJEM/LFM",
+      "role": "choir"
+    },
+    {
+      "name": "Adriana Tanus",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Karl Jenkins"
+    }
+  ],
+  "works": [
+    {
+      "title": "The Armed Man: A Mass for Peace",
+      "composerName": "Karl Jenkins"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/orquesta-juvenil-europea-de-madrid-the-armed-man-a-mass-for-peace",
+      "checkedAt": "2026-10-21",
+      "externalId": "orquesta-juvenil-europea-de-madrid-the-armed-man-a-mass-for-peace"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-10-21"
+}

@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_ateneo_madrid_65284",
+  "slug": "recital-del-pianista-jorge-nava",
+  "title": "Recital del pianista Jorge Nava",
+  "status": "scheduled",
+  "venueId": "ven_ateneo_madrid_catedra_mayor",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_ateneo_madrid_65284_01",
+      "date": "2026-10-22",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Jorge Nava",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Aramayona"
+    },
+    {
+      "name": "Franco"
+    },
+    {
+      "name": "Urteaga"
+    },
+    {
+      "name": "Theodor Kullak"
+    },
+    {
+      "name": "Félix Ibarrondo"
+    },
+    {
+      "name": "Modest Mussorgski"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ateneo_madrid",
+      "url": "https://ateneodemadrid.com/evento/recital-del-pianista-jorge-nava",
+      "checkedAt": "2026-10-21",
+      "externalId": "65284"
+    },
+    {
+      "sourceId": "src_ateneo_madrid",
+      "url": "https://ateneodemadrid.com/wp-content/uploads/2026/10/22.10.2026-Recital-del-pianista-Jorge-Nava.jpg",
+      "checkedAt": "2026-10-21"
+    }
+  ],
+  "primarySourceId": "src_ateneo_madrid",
+  "lastVerifiedAt": "2026-10-21"
+}

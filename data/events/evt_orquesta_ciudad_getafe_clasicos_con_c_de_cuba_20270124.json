@@ -45,9 +45,10 @@
     {
       "sourceId": "src_orquesta_ciudad_getafe",
       "url": "https://orquestaciudaddegetafe.com/js_events/clasicos-con-c-de-cuba/",
-      "checkedAt": "2026-10-14"
+      "checkedAt": "2026-10-21",
+      "externalId": "clasicos-con-c-de-cuba"
     }
   ],
   "primarySourceId": "src_orquesta_ciudad_getafe",
-  "lastVerifiedAt": "2026-10-14"
+  "lastVerifiedAt": "2026-10-21"
 }

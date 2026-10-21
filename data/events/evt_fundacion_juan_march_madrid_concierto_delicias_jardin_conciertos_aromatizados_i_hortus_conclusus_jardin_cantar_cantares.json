@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_madrid_concierto_delicias_jardin_conciertos_aromatizados_i_hortus_conclusus_jardin_cantar_cantares",
+  "slug": "las-delicias-del-jardin-conciertos-aromatizados-i-hortus-conclusus-el-jardin-en-el-cantar-de-los-cantares",
+  "title": "Las delicias del jardín: conciertos aromatizados (I): Hortus conclusus : el jardín en El cantar de los cantares",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_madrid_concierto_delicias_jardin_conciertos_aromatizados_i_hortus_conclusus_jardin_cantar_cantares_01",
+      "date": "2027-05-05",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Psallentes",
+      "role": "choir"
+    },
+    {
+      "name": "Hendrik Vanden Abeele",
+      "role": "conductor"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "early",
+    "renaissance"
+  ],
+  "formats": [
+    "choral",
+    "early-music"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/delicias-jardin-conciertos-aromatizados-i-hortus-conclusus-jardin-cantar-cantares",
+      "checkedAt": "2026-10-21",
+      "externalId": "/es/madrid/concierto/delicias-jardin-conciertos-aromatizados-i-hortus-conclusus-jardin-cantar-cantares"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-10-21"
+}
