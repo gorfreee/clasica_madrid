@@ -23,6 +23,69 @@
     {
       "name": "Paul Goodwin",
       "role": "conductor"
+    },
+    {
+      "name": "Hannah Yunhee Song"
+    },
+    {
+      "name": "Gustavo Gil"
+    },
+    {
+      "name": "Mila Haydon"
+    },
+    {
+      "name": "Adriana Snape Bermejo"
+    },
+    {
+      "name": "Amalia Bosch Fernández"
+    },
+    {
+      "name": "Abel Gómez-Antequera Ábalos"
+    },
+    {
+      "name": "Darin Nikolaev Lambrev"
+    },
+    {
+      "name": "Canon Shibata"
+    },
+    {
+      "name": "Sanghyeok Park"
+    },
+    {
+      "name": "Daniela Estefanía Roberty Silva"
+    },
+    {
+      "name": "Christian Schubert"
+    },
+    {
+      "name": "Nedley Antonio Robles Jimenez"
+    },
+    {
+      "name": "Lucía Talavera Haya"
+    },
+    {
+      "name": "Héctor Teja Herrera"
+    },
+    {
+      "name": "Àlex Arroyo Luis"
+    },
+    {
+      "name": "Raphael Gisbertz"
+    },
+    {
+      "name": "María Domínguez Guevska"
+    },
+    {
+      "name": "Álvaro Lozano Cames"
+    },
+    {
+      "name": "Geonwoo Yi"
+    },
+    {
+      "name": "Isabeau Hansen"
+    },
+    {
+      "name": "Daniel Huertas Ferrer"
     }
   ],
   "composers": [
@@ -51,23 +114,35 @@
       "composerName": "Johann Sebastian Bach"
     },
     {
-      "title": "Sonata en trío",
+      "title": "Sonata en sol menor, HWV 387, op. 2 n.º 2 (versión para dos oboes y bajo continuo)",
       "composerName": "Georg Friedrich Händel"
     },
     {
-      "title": "Dúo para dos violas",
+      "title": "Dúo para dos violas n.º 3 en sol menor, F. 62",
       "composerName": "Wilhelm Friedemann Bach"
     },
     {
-      "title": "Sonata para dos violines y clave (autoría discutida)"
+      "title": "Sonata en do mayor, BWV 1037 (autoría discutida)"
     },
     {
-      "title": "Concierto para cuatro violines, de L’estro armonico",
-      "composerName": "Antonio Vivaldi"
+      "title": "Second livre de pièces de clavecin: Neuvième ordre — Allemande à deux clavecins",
+      "composerName": "François Couperin"
     },
     {
-      "title": "Musique de table (selección)",
+      "title": "Troisième livre de pièces de clavecin: Quatorzième ordre — La Julliet",
+      "composerName": "François Couperin"
+    },
+    {
+      "title": "Troisième livre de pièces de clavecin: Quinzième ordre — Muséte de Taverni",
+      "composerName": "François Couperin"
+    },
+    {
+      "title": "Cuarteto en sol mayor, TWV 43:G2, de Musique de table",
       "composerName": "Georg Philipp Telemann"
+    },
+    {
+      "title": "Concierto para cuatro violines en si menor, RV 580, op. 3 n.º 10",
+      "composerName": "Antonio Vivaldi"
     }
   ],
   "eras": [
@@ -77,7 +152,7 @@
     "early-music"
   ],
   "kind": "alternative",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_escuela_superior_musica_reina_sofia",

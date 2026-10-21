@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_todo_chapi_20261025",
+  "slug": "todo-chapi",
+  "title": "Todo Chapí",
+  "status": "scheduled",
+  "venueId": "ven_centro_cultural_juan_genoves",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_todo_chapi_20261025_01",
+      "date": "2026-10-25",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Compañía Taller de Zarzuela",
+      "role": "ensemble"
+    },
+    {
+      "name": "Celia Laguna",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ruperto Chapí"
+    }
+  ],
+  "works": [
+    {
+      "title": "La bruja (fragmentos)",
+      "composerName": "Ruperto Chapí"
+    },
+    {
+      "title": "La revoltosa (fragmentos)",
+      "composerName": "Ruperto Chapí"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "zarzuela"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=232e80cfb4dc0a10VgnVCM100000891ecb1aRCRD",
+      "checkedAt": "2026-10-21",
+      "externalId": "50430598"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-10-21"
+}

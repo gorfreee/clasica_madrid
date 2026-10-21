@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_madrid_concierto_conciertos_familia_ii_cuarteto_cuerdas_hablan",
+  "slug": "conciertos-en-familia-ii-el-cuarteto-las-cuerdas-hablan",
+  "title": "Conciertos en familia (II): El cuarteto: las cuerdas hablan",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_madrid_concierto_conciertos_familia_ii_cuarteto_cuerdas_hablan_01",
+      "date": "2026-12-12",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Cuarteto Matrice",
+      "role": "ensemble"
+    },
+    {
+      "name": "Elina Sitnikava"
+    },
+    {
+      "name": "Alicia Navidad"
+    },
+    {
+      "name": "Ana Laura Iglesias"
+    },
+    {
+      "name": "Berta Herrero"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Franz Joseph Haydn"
+    },
+    {
+      "name": "Antonín Dvořák"
+    },
+    {
+      "name": "Florence Price"
+    },
+    {
+      "name": "Fanny Hensel"
+    },
+    {
+      "name": "Philip Glass"
+    },
+    {
+      "name": "Hans Zimmer"
+    },
+    {
+      "name": "Heitor Villa-Lobos"
+    },
+    {
+      "name": "Henryk Górecki"
+    },
+    {
+      "name": "Astor Piazzolla"
+    }
+  ],
+  "works": [
+    {
+      "title": "Allegro moderato , de Cuarteto en Re mayor, op. 64 nº 5, \"La alondra\"",
+      "composerName": "Franz Joseph Haydn"
+    },
+    {
+      "title": "Presto , de Cuarteto nº 30 en Mi bemol mayor, op. 33 nº 2, Hob. III:38, \"La broma\"",
+      "composerName": "Franz Joseph Haydn"
+    },
+    {
+      "title": "Allegro ma non troppo , de Cuarteto nº 12 en Fa mayor, op. 96 B179, “Americano”",
+      "composerName": "Antonín Dvořák"
+    },
+    {
+      "title": "Juba Dance: Allegro , de Cuarteto nº 2 en La menor",
+      "composerName": "Florence Price"
+    },
+    {
+      "title": "Allegreto , de Cuarteto en Mi bemol mayor, HelH 277",
+      "composerName": "Fanny Hensel"
+    },
+    {
+      "title": "I. 1957: Award Montage , de Cuarteto nº 3 \"Mishima\"",
+      "composerName": "Philip Glass"
+    },
+    {
+      "title": "Interstellar Main Theme (arreglo de Cuarteto Matrice)",
+      "composerName": "Hans Zimmer"
+    },
+    {
+      "title": "Scherzo: Allegro , de Cuarteto nº 2, op. 56, W 100",
+      "composerName": "Heitor Villa-Lobos"
+    },
+    {
+      "title": "Deciso , de Cuarteto nº 2, op. 64, \"Quasi una fantasía\"",
+      "composerName": "Henryk Górecki"
+    },
+    {
+      "title": "Four for tango",
+      "composerName": "Astor Piazzolla"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/conciertos-familia-ii-cuarteto-cuerdas-hablan",
+      "checkedAt": "2026-10-21",
+      "externalId": "/es/madrid/concierto/conciertos-familia-ii-cuarteto-cuerdas-hablan"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-10-21"
+}

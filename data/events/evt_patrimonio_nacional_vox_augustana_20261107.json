@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_patrimonio_nacional_vox_augustana_20261107",
+  "slug": "vuelve-a-caer-la-tarde-musica-coral",
+  "title": "Vuelve a caer la tarde - Música coral",
+  "status": "scheduled",
+  "venueId": "ven_real_basilica_nuestra_senora_atocha",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_patrimonio_nacional_vox_augustana_20261107_01",
+      "date": "2026-11-07",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro Vox Augustana",
+      "role": "choir"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Giovanni Pierluigi da Palestrina"
+    },
+    {
+      "name": "Josef Gabriel Rheinberger"
+    },
+    {
+      "name": "Carl Loewe"
+    },
+    {
+      "name": "Heinrich Schütz"
+    },
+    {
+      "name": "Günter Raphael"
+    },
+    {
+      "name": "Gioachino Rossini"
+    },
+    {
+      "name": "Camille Saint-Saëns"
+    },
+    {
+      "name": "Claudio Monteverdi"
+    },
+    {
+      "name": "Wastl Fanderl"
+    },
+    {
+      "name": "Vincent Clarke"
+    },
+    {
+      "name": "John Rutter"
+    },
+    {
+      "name": "Carl Orff"
+    }
+  ],
+  "works": [
+    {
+      "title": "Regina caeli",
+      "composerName": "Giovanni Pierluigi da Palestrina"
+    },
+    {
+      "title": "Missa St. Crucis, op. 151",
+      "composerName": "Josef Gabriel Rheinberger"
+    },
+    {
+      "title": "Schaffe in mir, Gott, ein reines Herze",
+      "composerName": "Carl Loewe"
+    },
+    {
+      "title": "Tröstet, tröstet mein Volk, SWV 382",
+      "composerName": "Heinrich Schütz"
+    },
+    {
+      "title": "Luz eterna",
+      "composerName": "Günter Raphael"
+    },
+    {
+      "title": "Sicut cervus",
+      "composerName": "Giovanni Pierluigi da Palestrina"
+    },
+    {
+      "title": "Toast pour le nouvel an",
+      "composerName": "Gioachino Rossini"
+    },
+    {
+      "title": "Abend wird es wieder (arreglo de Christian Meister)"
+    },
+    {
+      "title": "Calme des nuits, op. 68, n.º 1",
+      "composerName": "Camille Saint-Saëns"
+    },
+    {
+      "title": "Preist diesen Tag der Freude (versión de Carl Orff)",
+      "composerName": "Claudio Monteverdi"
+    },
+    {
+      "title": "Kimmt schö hoamli de Nacht",
+      "composerName": "Wastl Fanderl"
+    },
+    {
+      "title": "Solamente tú (arreglo de Søren Sigurd Barret)",
+      "composerName": "Vincent Clarke"
+    },
+    {
+      "title": "Five Childhood Lyrics: Monday’s Child; The Owl and the Pussy-Cat",
+      "composerName": "John Rutter"
+    }
+  ],
+  "eras": [
+    "renaissance",
+    "baroque",
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_patrimonio_nacional",
+      "url": "https://www.patrimonionacional.es/actualidad/concierto/2026/vuelve-caer-la-tarde-musica-coral-2026-11-07",
+      "checkedAt": "2026-10-21",
+      "externalId": "bb238a68-6b72-4947-8c32-e048800f7709"
+    }
+  ],
+  "primarySourceId": "src_patrimonio_nacional",
+  "lastVerifiedAt": "2026-10-21"
+}

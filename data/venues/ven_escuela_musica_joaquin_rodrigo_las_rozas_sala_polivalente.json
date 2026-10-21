@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_escuela_musica_joaquin_rodrigo_las_rozas_sala_polivalente",
+  "slug": "escuela-municipal-de-musica-joaquin-rodrigo-sala-polivalente",
+  "name": "Escuela Municipal de Música Joaquín Rodrigo — Sala Polivalente",
+  "municipality": "Las Rozas de Madrid",
+  "area": "nearby",
+  "address": "Calle Camino del Caño, 2, Las Rozas de Madrid",
+  "url": "https://fundacionculturalasrozas.org/formacion/escuela-municipal-musica-joaquin-rodrigo/",
+  "lastVerifiedAt": "2026-10-21",
+  "parentVenueId": "ven_escuela_musica_joaquin_rodrigo_las_rozas",
+  "spaceName": "Sala Polivalente"
+}

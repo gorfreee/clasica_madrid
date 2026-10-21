@@ -45,8 +45,14 @@
       "sourceId": "src_fundaciongsd_org",
       "url": "https://www.fundaciongsd.org/2026/02/18/actuaciones-del-coro-fundacion-gsd-2026",
       "checkedAt": "2026-10-17"
+    },
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=bc1bf49c597e0a10VgnVCM100000891ecb1aRCRD",
+      "checkedAt": "2026-10-21",
+      "externalId": "50433835"
     }
   ],
   "primarySourceId": "src_fundaciongsd_org",
-  "lastVerifiedAt": "2026-10-17"
+  "lastVerifiedAt": "2026-10-21"
 }

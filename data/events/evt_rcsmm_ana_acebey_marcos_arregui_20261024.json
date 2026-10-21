@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_rcsmm_ana_acebey_marcos_arregui_20261024",
+  "slug": "recital-de-guitarra-a-cargo-de-isabel-acebey-y-marcos-arregui",
+  "title": "Recital de guitarra: Ana Acebey y Marcos Arregui",
+  "status": "scheduled",
+  "venueId": "ven_rcsmm_auditorio_manuel_falla",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_rcsmm_ana_acebey_marcos_arregui_20261024_01",
+      "date": "2026-10-24",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ana Acebey",
+      "role": "soloist"
+    },
+    {
+      "name": "Marcos Arregui",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Federico Moreno Torroba"
+    },
+    {
+      "name": "José María Sánchez-Verdú"
+    },
+    {
+      "name": "Franz Schubert"
+    },
+    {
+      "name": "Joaquín Turina"
+    },
+    {
+      "name": "Regino Sainz de la Maza"
+    },
+    {
+      "name": "Antón García Abril"
+    }
+  ],
+  "works": [
+    {
+      "title": "Burgalesa",
+      "composerName": "Federico Moreno Torroba"
+    },
+    {
+      "title": "Kitab 1",
+      "composerName": "José María Sánchez-Verdú"
+    },
+    {
+      "title": "Lob der Thränen (arreglo de Johann Kaspar Mertz)",
+      "composerName": "Franz Schubert"
+    },
+    {
+      "title": "Fantasía sevillana, op. 29",
+      "composerName": "Joaquín Turina"
+    },
+    {
+      "title": "Puertas de Madrid: Puerta Cerrada; Puerta de Alcalá",
+      "composerName": "Federico Moreno Torroba"
+    },
+    {
+      "title": "La frontera de Dios",
+      "composerName": "Regino Sainz de la Maza"
+    },
+    {
+      "title": "Evocación II",
+      "composerName": "Antón García Abril"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_rcsmm",
+      "url": "https://rcsmm.eu/recital-guitarra-cargo-isabel-acebey-marcos-arregui",
+      "checkedAt": "2026-10-21",
+      "externalId": "2571"
+    },
+    {
+      "sourceId": "src_rcsmm",
+      "url": "https://rcsmm.eu/sites/default/files/upload-files/XI%20FESTIVAL%20DE%20J%C3%93VENES%20GUITARRISTAS%20Joaqu%C3%ADn%20Rodrigo%20-%20ANA%20ACEBEY%20Y%20MARCOS%20ARREGUI%20(Programa).pdf",
+      "checkedAt": "2026-10-21"
+    }
+  ],
+  "primarySourceId": "src_rcsmm",
+  "lastVerifiedAt": "2026-10-21"
+}

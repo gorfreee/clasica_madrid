@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_museo_historia_madrid_capilla",
+  "slug": "museo-historia-madrid-capilla",
+  "name": "Museo de Historia de Madrid — Capilla",
+  "municipality": "Madrid",
+  "area": "madrid",
+  "parentVenueId": "ven_museo_de_historia_de_madrid",
+  "spaceName": "Capilla",
+  "lastVerifiedAt": "2026-10-21"
+}

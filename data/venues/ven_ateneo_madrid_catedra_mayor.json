@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_ateneo_madrid_catedra_mayor",
+  "slug": "ateneo-madrid-catedra-mayor",
+  "name": "Ateneo de Madrid — Cátedra Mayor",
+  "municipality": "Madrid",
+  "area": "madrid",
+  "parentVenueId": "ven_ateneo_madrid",
+  "spaceName": "Cátedra Mayor",
+  "lastVerifiedAt": "2026-10-21"
+}
