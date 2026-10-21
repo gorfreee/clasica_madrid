@@ -64,8 +64,14 @@
       "url": "https://www.teatroreal.es/es/espectaculo/riccardo-primo-re-dinghilterra",
       "checkedAt": "2026-10-11",
       "externalId": "riccardo-primo-re-dinghilterra"
+    },
+    {
+      "sourceId": "src_teatro_real",
+      "url": "https://www.teatroreal.es/es/espectaculo/riccardo-primo",
+      "checkedAt": "2026-10-21",
+      "externalId": "riccardo-primo"
     }
   ],
   "primarySourceId": "src_teatro_real",
-  "lastVerifiedAt": "2026-10-11"
+  "lastVerifiedAt": "2026-10-21"
 }

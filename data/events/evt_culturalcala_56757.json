@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_culturalcala_56757",
+  "slug": "donde-no-se-pone-el-sol",
+  "title": "Donde No Se Pone el Sol",
+  "status": "scheduled",
+  "venueId": "ven_corral_comedias_alcala",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_culturalcala_56757_01",
+      "date": "2026-12-02",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "early-music",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_culturalcala",
+      "url": "https://culturalcala.es/item_event/donde-no-se-pone-el-sol-2",
+      "checkedAt": "2026-10-21",
+      "externalId": "56757"
+    }
+  ],
+  "primarySourceId": "src_culturalcala",
+  "lastVerifiedAt": "2026-10-21"
+}

@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_orquesta_juvenil_europea_de_madrid_scheherazade_the_black_knight",
+  "slug": "orquesta-juvenil-europea-de-madrid-scheherazade-the-black-knight",
+  "title": "Orquesta Juvenil Europea de Madrid. Scheherazade & The Black Knight",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_orquesta_juvenil_europea_de_madrid_scheherazade_the_black_knight_01",
+      "date": "2026-12-04",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Orquesta y Coro Sinfónicos OJEM"
+    },
+    {
+      "name": "Adriana Tanus",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "N. Rimsky-Korsakov"
+    },
+    {
+      "name": "E. Elgar"
+    }
+  ],
+  "works": [
+    {
+      "title": "\"Scheherazade\", op. 35",
+      "composerName": "N. Rimsky-Korsakov"
+    },
+    {
+      "title": "Suite sinfónica",
+      "composerName": "N. Rimsky-Korsakov"
+    },
+    {
+      "title": "\"The black knight\", op. 25",
+      "composerName": "E. Elgar"
+    },
+    {
+      "title": "Cantata para coro y orquesta",
+      "composerName": "E. Elgar"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/orquesta-juvenil-europea-de-madrid-scheherazade-the-black-knight",
+      "checkedAt": "2026-10-21",
+      "externalId": "orquesta-juvenil-europea-de-madrid-scheherazade-the-black-knight"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-10-21"
+}

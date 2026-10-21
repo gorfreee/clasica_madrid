@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_residencia_estudiantes_32261",
+  "slug": "una-ultima-sesion-joaquin-nin-castellanos-en-el-auditorium-de-la-residencia-de-estudiantes",
+  "title": "Una última sesión. Joaquín Nin Castellanos en el Auditórium de la Residencia de Estudiantes",
+  "status": "scheduled",
+  "venueId": "ven_residencia_estudiantes",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_residencia_estudiantes_32261_01",
+      "date": "2026-10-24",
+      "time": "11:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Ana Benavides"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Mateo Albéniz"
+    },
+    {
+      "name": "Antonio Soler"
+    },
+    {
+      "name": "Joaquín Nin Castellanos"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "baroque",
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_residencia_estudiantes",
+      "url": "https://residenciadeestudiantes.com/actividades/una-ultima-sesion-joaquin-nin-castellanos-en-el-auditorium-de-la-residencia-de-estudiantes",
+      "checkedAt": "2026-10-21",
+      "externalId": "32261"
+    }
+  ],
+  "primarySourceId": "src_residencia_estudiantes",
+  "lastVerifiedAt": "2026-10-21"
+}

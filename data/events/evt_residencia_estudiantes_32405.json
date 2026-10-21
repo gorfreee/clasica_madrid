@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_residencia_estudiantes_32405",
+  "slug": "ecce-finem",
+  "title": "Ecce finem",
+  "status": "scheduled",
+  "venueId": "ven_residencia_estudiantes",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_residencia_estudiantes_32405_01",
+      "date": "2026-11-22",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Vetus Carmina"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johannes Ockeghem"
+    },
+    {
+      "name": "Antoine Busnois"
+    },
+    {
+      "name": "Andrés Poncela"
+    },
+    {
+      "name": "Cristóbal de Morales"
+    },
+    {
+      "name": "Jakob Obrecht"
+    },
+    {
+      "name": "Tomás Luis de Victoria"
+    },
+    {
+      "name": "Nicolas Gombert"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "renaissance",
+    "contemporary"
+  ],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_residencia_estudiantes",
+      "url": "https://residenciadeestudiantes.com/actividades/ecce-finem",
+      "checkedAt": "2026-10-21",
+      "externalId": "32405"
+    }
+  ],
+  "primarySourceId": "src_residencia_estudiantes",
+  "lastVerifiedAt": "2026-10-21"
+}

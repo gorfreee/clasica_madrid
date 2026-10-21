@@ -13,6 +13,12 @@
       "date": "2026-11-11",
       "time": "19:30",
       "status": "scheduled"
+    },
+    {
+      "id": "occ_auditorio_nacional_ibermusica_filarmonica_checa_2_02",
+      "date": "2026-11-13",
+      "time": "22:30",
+      "status": "scheduled"
     }
   ],
   "performers": [
@@ -57,10 +63,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-filarmonica-checa-2",
-      "checkedAt": "2026-10-14",
-      "externalId": "ibermusica-filarmonica-checa-2"
+      "checkedAt": "2026-10-21",
+      "externalId": "02450a76451141628df2cbe9decdce5d"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-10-14"
+  "lastVerifiedAt": "2026-10-21"
 }
