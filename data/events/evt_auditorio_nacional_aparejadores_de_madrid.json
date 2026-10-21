@@ -17,7 +17,8 @@
   ],
   "performers": [
     {
-      "name": "Orquesta y Coro Sinfónicos OJEM"
+      "name": "Orquesta y Coro Sinfónicos OJEM",
+      "role": "orchestra"
     },
     {
       "name": "Adriana Tanus",
@@ -29,13 +30,7 @@
       "name": "Johann Sebastian Bach"
     },
     {
-      "name": "J. Elgar"
-    },
-    {
       "name": "Edward Elgar"
-    },
-    {
-      "name": "N. Rimski-Kórsakov"
     },
     {
       "name": "Nikolai Rimsky-Korsakov"

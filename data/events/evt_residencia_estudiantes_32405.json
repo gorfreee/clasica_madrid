@@ -17,7 +17,45 @@
   ],
   "performers": [
     {
-      "name": "Vetus Carmina"
+      "name": "Vetus Carmina",
+      "role": "choir"
+    },
+    {
+      "name": "Arturo Moscoso",
+      "role": "conductor"
+    },
+    {
+      "name": "Madeleine Treilhou"
+    },
+    {
+      "name": "Sofía Chacón"
+    },
+    {
+      "name": "Iris Veestraeten"
+    },
+    {
+      "name": "Katelijne Malomgré"
+    },
+    {
+      "name": "Anna Dehaene"
+    },
+    {
+      "name": "Jan Van Elsacker"
+    },
+    {
+      "name": "Daniel Poncela"
+    },
+    {
+      "name": "Alejandro Barrientos-Rupérez"
+    },
+    {
+      "name": "Thomas Vandenabeele"
+    },
+    {
+      "name": "Marcos Molina"
+    },
+    {
+      "name": "Zep Heylen"
     }
   ],
   "composers": [
@@ -43,7 +81,36 @@
       "name": "Nicolas Gombert"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "Kyrie de Fors seulement",
+      "composerName": "Johannes Ockeghem"
+    },
+    {
+      "title": "Gloria de L’homme armé",
+      "composerName": "Antoine Busnois"
+    },
+    {
+      "title": "Lamentaciones alrededor del fuego: I. Nos; II. Los sueños se enredan en nuestras gargantas; III. Hacia un cielo sin nombre",
+      "composerName": "Andrés Poncela"
+    },
+    {
+      "title": "Zain. Candidiores nazarei",
+      "composerName": "Cristóbal de Morales"
+    },
+    {
+      "title": "Mille quingentis",
+      "composerName": "Jakob Obrecht"
+    },
+    {
+      "title": "Sanctus de Ascendens Christus",
+      "composerName": "Tomás Luis de Victoria"
+    },
+    {
+      "title": "Tribulatio cordis mei",
+      "composerName": "Nicolas Gombert"
+    }
+  ],
   "eras": [
     "renaissance",
     "contemporary"

@@ -15,10 +15,34 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Coro di Core",
+      "role": "choir"
+    },
+    {
+      "name": "Íñigo Guibert",
+      "role": "conductor"
+    },
+    {
+      "name": "Marina Santiso",
+      "role": "soloist"
+    },
+    {
+      "name": "Marta Muñoz",
+      "role": "soloist"
+    },
+    {
+      "name": "Elena Montaña",
+      "role": "other"
+    }
+  ],
   "composers": [],
   "works": [],
-  "eras": [],
+  "eras": [
+    "renaissance",
+    "baroque"
+  ],
   "formats": [
     "early-music",
     "choral"

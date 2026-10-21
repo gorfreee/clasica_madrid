@@ -31,11 +31,7 @@
   ],
   "works": [
     {
-      "title": "\"Requiem en re menor, K626\"",
-      "composerName": "Wolfgang Amadeus Mozart"
-    },
-    {
-      "title": "& Oberturas",
+      "title": "Réquiem en re menor, K. 626",
       "composerName": "Wolfgang Amadeus Mozart"
     }
   ],
@@ -43,7 +39,8 @@
     "classical"
   ],
   "formats": [
-    "symphonic"
+    "symphonic",
+    "choral"
   ],
   "kind": "established",
   "access": "paid",

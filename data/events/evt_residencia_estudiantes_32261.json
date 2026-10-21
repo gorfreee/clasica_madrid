@@ -13,11 +13,26 @@
       "date": "2026-10-24",
       "time": "11:00",
       "status": "scheduled"
+    },
+    {
+      "id": "occ_residencia_estudiantes_32261_02",
+      "date": "2026-10-24",
+      "time": "12:10",
+      "status": "scheduled"
     }
   ],
   "performers": [
     {
-      "name": "Ana Benavides"
+      "name": "Ana Benavides",
+      "role": "soloist"
+    },
+    {
+      "name": "Izan García Baumbach",
+      "role": "other"
+    },
+    {
+      "name": "Samuel Lozano Iglesias",
+      "role": "other"
     }
   ],
   "composers": [
@@ -31,11 +46,27 @@
       "name": "Joaquín Nin Castellanos"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "Sonata en re",
+      "composerName": "Mateo Albéniz"
+    },
+    {
+      "title": "Sonata en re menor, R. 24",
+      "composerName": "Antonio Soler"
+    },
+    {
+      "title": "Estampa cubana",
+      "composerName": "Joaquín Nin Castellanos"
+    },
+    {
+      "title": "Primera danza (Música para un bailete)",
+      "composerName": "Joaquín Nin Castellanos"
+    }
+  ],
   "eras": [
-    "baroque",
     "classical",
-    "romantic"
+    "twentieth"
   ],
   "formats": [
     "recital"

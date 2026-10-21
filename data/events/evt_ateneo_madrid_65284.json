@@ -15,21 +15,54 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
+  "performers": [
+    {
+      "name": "Jorge Nava",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Aramayona"
+    },
+    {
+      "name": "Franco"
+    },
+    {
+      "name": "Urteaga"
+    },
+    {
+      "name": "Theodor Kullak"
+    },
+    {
+      "name": "Félix Ibarrondo"
+    },
+    {
+      "name": "Modest Mussorgski"
+    }
+  ],
   "works": [],
-  "eras": [],
+  "eras": [
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
   "formats": [
     "recital"
   ],
   "kind": "alternative",
-  "access": "unknown",
+  "access": "free",
   "citations": [
     {
       "sourceId": "src_ateneo_madrid",
       "url": "https://ateneodemadrid.com/evento/recital-del-pianista-jorge-nava",
       "checkedAt": "2026-10-21",
       "externalId": "65284"
+    },
+    {
+      "sourceId": "src_ateneo_madrid",
+      "url": "https://ateneodemadrid.com/wp-content/uploads/2026/10/22.10.2026-Recital-del-pianista-Jorge-Nava.jpg",
+      "checkedAt": "2026-10-21"
     }
   ],
   "primarySourceId": "src_ateneo_madrid",

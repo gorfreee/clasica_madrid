@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "evt_escuela_reina_sofia_83103",
   "slug": "interpretacion-historica-conjuntos-barrocos-2",
-  "title": "Interpretación Histórica: Conjuntos Barrocos",
+  "title": "De Vivaldi a Händel: Un viaje por el barroco europeo",
   "status": "scheduled",
   "venueId": "ven_escuela_superior_musica_reina_sofia_auditorio_sony",
   "organizerIds": [],
@@ -15,16 +15,61 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Conjuntos Barrocos del Programa de Interpretación Histórica Société Générale",
+      "role": "ensemble"
+    },
+    {
+      "name": "Paul Goodwin",
+      "role": "conductor"
+    }
+  ],
   "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    },
     {
       "name": "Georg Friedrich Händel"
     },
     {
-      "name": "Programa de Interpretación Histórica Société Générale"
+      "name": "Wilhelm Friedemann Bach"
+    },
+    {
+      "name": "Antonio Vivaldi"
+    },
+    {
+      "name": "Georg Philipp Telemann"
+    },
+    {
+      "name": "François Couperin"
     }
   ],
-  "works": [],
+  "works": [
+    {
+      "title": "Concierto de Brandemburgo n.º 3 en sol mayor, BWV 1048",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Sonata en trío",
+      "composerName": "Georg Friedrich Händel"
+    },
+    {
+      "title": "Dúo para dos violas",
+      "composerName": "Wilhelm Friedemann Bach"
+    },
+    {
+      "title": "Sonata para dos violines y clave (autoría discutida)"
+    },
+    {
+      "title": "Concierto para cuatro violines, de L’estro armonico",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "Musique de table (selección)",
+      "composerName": "Georg Philipp Telemann"
+    }
+  ],
   "eras": [
     "baroque"
   ],

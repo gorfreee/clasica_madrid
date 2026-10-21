@@ -26,28 +26,20 @@
   ],
   "composers": [
     {
-      "name": "N. Rimsky-Korsakov"
+      "name": "Nikolai Rimsky-Korsakov"
     },
     {
-      "name": "E. Elgar"
+      "name": "Edward Elgar"
     }
   ],
   "works": [
     {
-      "title": "\"Scheherazade\", op. 35",
-      "composerName": "N. Rimsky-Korsakov"
+      "title": "Scheherazade, op. 35 — suite sinfónica",
+      "composerName": "Nikolai Rimsky-Korsakov"
     },
     {
-      "title": "Suite sinfónica",
-      "composerName": "N. Rimsky-Korsakov"
-    },
-    {
-      "title": "\"The black knight\", op. 25",
-      "composerName": "E. Elgar"
-    },
-    {
-      "title": "Cantata para coro y orquesta",
-      "composerName": "E. Elgar"
+      "title": "The Black Knight, op. 25 — cantata para coro y orquesta",
+      "composerName": "Edward Elgar"
     }
   ],
   "eras": [

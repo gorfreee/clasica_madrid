@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "evt_escuela_reina_sofia_83102",
   "slug": "interpretacion-historica-conjuntos-barrocos",
-  "title": "Interpretación Histórica: Conjuntos Barrocos",
+  "title": "De Vivaldi a Händel: Un viaje por el barroco europeo",
   "status": "scheduled",
   "venueId": "ven_escuela_superior_musica_reina_sofia_auditorio_sony",
   "organizerIds": [],
@@ -15,9 +15,61 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
-  "works": [],
+  "performers": [
+    {
+      "name": "Conjuntos Barrocos del Programa de Interpretación Histórica Société Générale",
+      "role": "ensemble"
+    },
+    {
+      "name": "Paul Goodwin",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Georg Friedrich Händel"
+    },
+    {
+      "name": "Wilhelm Friedemann Bach"
+    },
+    {
+      "name": "Antonio Vivaldi"
+    },
+    {
+      "name": "Georg Philipp Telemann"
+    },
+    {
+      "name": "François Couperin"
+    }
+  ],
+  "works": [
+    {
+      "title": "Concierto de Brandemburgo n.º 3 en sol mayor, BWV 1048",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Sonata en trío",
+      "composerName": "Georg Friedrich Händel"
+    },
+    {
+      "title": "Dúo para dos violas",
+      "composerName": "Wilhelm Friedemann Bach"
+    },
+    {
+      "title": "Sonata para dos violines y clave (autoría discutida)"
+    },
+    {
+      "title": "Concierto para cuatro violines, de L’estro armonico",
+      "composerName": "Antonio Vivaldi"
+    },
+    {
+      "title": "Musique de table (selección)",
+      "composerName": "Georg Philipp Telemann"
+    }
+  ],
   "eras": [],
   "formats": [
     "early-music"
@@ -28,10 +80,10 @@
     {
       "sourceId": "src_escuela_superior_musica_reina_sofia",
       "url": "https://www.escuelasuperiordemusicareinasofia.es/evento/interpretacion-historica-conjuntos-barrocos",
-      "checkedAt": "2026-09-15",
+      "checkedAt": "2026-10-21",
       "externalId": "83102"
     }
   ],
   "primarySourceId": "src_escuela_superior_musica_reina_sofia",
-  "lastVerifiedAt": "2026-09-15"
+  "lastVerifiedAt": "2026-10-21"
 }
