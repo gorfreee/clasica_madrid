@@ -8,6 +8,9 @@ import {
   extractObrasDeComposers,
   extractStandaloneKnownComposers,
   hasExplicitPerformerSignal,
+  isBiographicalMononymHeading,
+  isLinkedWorkDescriptor,
+  isUnspecifiedRepertoireSupplement,
   looksLikeComposerNameList,
   looksLikeKnownComposerPairHeading,
   looksLikeNameListContinuation,
@@ -227,11 +230,18 @@ function groupWorksByComposer(lines: string[]): { works: ObservedWork[]; extraCo
   let composerName: string | undefined;
   let justOpenedComposer = false;
   let openWithoutComposer = false;
+  let linkedWork: ObservedWork | undefined;
+
+  const addWork = (work: ObservedWork) => {
+    works.push(work);
+    linkedWork = work;
+  };
 
   const closeHeading = () => {
     composerName = undefined;
     justOpenedComposer = false;
     openWithoutComposer = false;
+    linkedWork = undefined;
   };
 
   for (let index = 0; index < lines.length; index++) {
@@ -243,7 +253,7 @@ function groupWorksByComposer(lines: string[]): { works: ObservedWork[]; extraCo
     // Non-person labels (Anónimo, Tradicional de…, Varios autores) are not
     // publishable composerName values, but they are hard grouping boundaries.
     if (isNonPersonComposerAttribution(line)) {
-      composerName = undefined;
+      closeHeading();
       openWithoutComposer = true;
       justOpenedComposer = true;
       continue;
@@ -252,7 +262,10 @@ function groupWorksByComposer(lines: string[]): { works: ObservedWork[]; extraCo
       closeHeading();
       continue;
     }
-    if (looksLikeProgramHeader(line)) continue;
+    if (looksLikeProgramHeader(line)) {
+      linkedWork = undefined;
+      continue;
+    }
     if (looksLikeProductionNote(line) || looksLikeTextCredit(line) || looksLikeNonWorkCredit(line)) {
       continue;
     }
@@ -260,7 +273,7 @@ function groupWorksByComposer(lines: string[]): { works: ObservedWork[]; extraCo
     // the current composer group even though its date resembles a birth year.
     if (composerName && /^(?:À|A|El|La|Le|Les|The)\s+.+\(\d{4}\)$/.test(line) &&
         !parseExplicitTitleAuthorWork(line)) {
-      works.push({ title: line, composerName });
+      addWork({ title: line, composerName });
       justOpenedComposer = false;
       continue;
     }
@@ -279,18 +292,27 @@ function groupWorksByComposer(lines: string[]): { works: ObservedWork[]; extraCo
       continue;
     }
 
-    if (looksLikeCatalogOnlyLine(line)) {
-      appendToLastWork(works, line);
+    // Context transitions take precedence over punctuation/continuations.
+    // Otherwise a trailing comma can swallow even an explicit new author.
+    if (isStickyComposerHeading(line) || isBiographicalMononymHeading(line, lines[index + 1]) ||
+        ((composerName || openWithoutComposer) && !justOpenedComposer &&
+          canPairAsLookaheadComposer(line, lines[index + 1]))) {
+      closeHeading();
+      composerName = line;
+      justOpenedComposer = true;
       continue;
     }
-    if (appendContinuationIfLinked(works, line)) continue;
-
-    const life = /^(\p{Lu}[\p{L}’'-]+)\s+\((\d{4})[-–](\d{4})\)$/u.exec(line);
-    if (life && Number(life[3]) - Number(life[2]) >= 20 &&
-        lines[index + 1] && looksLikeWorkLine(lines[index + 1]!)) {
-      composerName = line;
-      openWithoutComposer = false;
-      justOpenedComposer = true;
+    if (looksLikeProgramSectionHeading(line) || isUnspecifiedRepertoireSupplement(line)) {
+      closeHeading();
+      openWithoutComposer = true;
+      continue;
+    }
+    if (looksLikeCatalogOnlyLine(line)) {
+      if (linkedWork) appendWorkFragment(linkedWork, line);
+      continue;
+    }
+    if (linkedWork && isLinkedWorkDescriptor(line, linkedWork.title)) {
+      linkedWork.title = `${linkedWork.title} — ${line}`;
       continue;
     }
 
@@ -302,7 +324,7 @@ function groupWorksByComposer(lines: string[]): { works: ObservedWork[]; extraCo
         !matchComposer(colon[1]) && !hasComposerYears(colon[1]) &&
         !/^(?:\p{Lu}\.){1,3}\s*\p{Lu}/u.test(colon[1])) {
       if (looksLikeWorkLine(line)) {
-        works.push({ title: line, composerName });
+        addWork({ title: line, composerName });
         justOpenedComposer = false;
       }
       continue;
@@ -318,48 +340,33 @@ function groupWorksByComposer(lines: string[]): { works: ObservedWork[]; extraCo
       if (titleStartsWithForeignComposer(attributed.title, attributed.composerName)) {
         continue;
       }
-      works.push(attributed);
       if (composerName && attributed.composerName === composerName) {
         justOpenedComposer = false;
       } else {
         closeHeading();
       }
+      addWork(attributed);
       continue;
     }
 
     const prefixWork = parseKnownComposerPrefixWork(line, lines[index + 1]);
     if (prefixWork) {
-      if (!titleStartsWithForeignComposer(prefixWork.title, prefixWork.composerName)) {
-        works.push({ title: prefixWork.title, composerName: prefixWork.composerName });
-      }
       closeHeading();
+      if (!titleStartsWithForeignComposer(prefixWork.title, prefixWork.composerName)) {
+        addWork({ title: prefixWork.title, composerName: prefixWork.composerName });
+      }
       if (prefixWork.consumedNext) index += 1;
       continue;
     }
 
     if (!composerName && !openWithoutComposer && looksLikeCatalogWorkLine(line) && looksLikeWorkLine(line)) {
-      works.push({ title: line });
+      addWork({ title: line });
       continue;
     }
     // `Name: Title` that we could not parse is not a work of the previous composer.
     if (looksLikeColonPair(line)) continue;
-    if (isStickyComposerHeading(line)) {
-      composerName = line;
-      openWithoutComposer = false;
-      justOpenedComposer = true;
-      continue;
-    }
-    if (
-      composerHasAttachedWork(works, composerName) &&
-      canPairAsLookaheadComposer(line, lines[index + 1])
-    ) {
-      composerName = line;
-      openWithoutComposer = false;
-      justOpenedComposer = true;
-      continue;
-    }
     if (looksLikeMovementLine(line)) continue;
-    if (looksLikeProgramSectionHeading(line)) continue;
+    if (linkedWork && appendContinuationIfLinked(linkedWork, line)) continue;
     if (composerName || openWithoutComposer) {
       if (composerName && titleBeginsWithExplicitComposer(line, composerName)) {
         closeHeading();
@@ -369,7 +376,7 @@ function groupWorksByComposer(lines: string[]): { works: ObservedWork[]; extraCo
       if (!looksLikeWorkLine(line)) continue;
       if (!/\s/.test(line) && !looksLikeUnequivocalWorkLine(line) && !justOpenedComposer) continue;
       if (titleStartsWithForeignComposer(line, composerName)) continue;
-      works.push(composerName ? { title: line, composerName } : { title: line });
+      addWork(composerName ? { title: line, composerName } : { title: line });
       justOpenedComposer = false;
     }
   }
@@ -412,9 +419,7 @@ function leadingComposerName(text: string): string | undefined {
   );
 }
 
-function appendToLastWork(works: ObservedWork[], fragment: string): boolean {
-  const last = works[works.length - 1];
-  if (!last) return false;
+function appendWorkFragment(last: ObservedWork, fragment: string): boolean {
   const addition = fragment.replace(/^[,.\s]+|[,.\s]+$/g, '').trim();
   if (!addition) return false;
   const base = last.title.replace(/[,\s]+$/u, '').trim();
@@ -422,9 +427,7 @@ function appendToLastWork(works: ObservedWork[], fragment: string): boolean {
   return true;
 }
 
-function appendContinuationIfLinked(works: ObservedWork[], line: string): boolean {
-  const last = works[works.length - 1];
-  if (!last) return false;
+function appendContinuationIfLinked(last: ObservedWork, line: string): boolean {
   const previous = last.title;
   const parenthetical = /^\([^)]+\)\s*$/u.test(line);
   const continues = /[,\-–—]$/u.test(previous) || parenthetical || /^[\p{Ll}]/u.test(line);
@@ -433,7 +436,7 @@ function appendContinuationIfLinked(works: ObservedWork[], line: string): boolea
     last.title = `${previous.replace(/[,\s]+$/u, '')} ${line}`.trim();
     return true;
   }
-  return appendToLastWork(works, line);
+  return appendWorkFragment(last, line);
 }
 
 function isEditionMetadataLine(line: string): boolean {
@@ -489,11 +492,6 @@ function looksLikeColonPair(line: string): boolean {
   return /^.+?:\s+\S/.test(line);
 }
 
-function composerHasAttachedWork(works: ObservedWork[], composerName: string | undefined): boolean {
-  if (!composerName) return false;
-  return works.some((work) => work.composerName === composerName);
-}
-
 function isStickyComposerHeading(text: string): boolean {
   if (looksLikePartHeader(text) || parseExplicitTitleAuthorWork(text)) return false;
   if (isNonPersonComposerAttribution(text) || looksLikeKnownComposerPairHeading(text)) return false;
@@ -541,7 +539,8 @@ function pairComposerWorks(lines: string[]): ObservedWork[] {
     const composerName = lines[index];
     const title = lines[index + 1];
     if (!composerName || !title) return [];
-    if (!canPairAsAuditorioComposer(composerName) || !looksLikeWorkLine(title)) return [];
+    if (!canPairAsAuditorioComposer(composerName) || !looksLikeWorkLine(title) ||
+        isUnspecifiedRepertoireSupplement(title)) return [];
     works.push({ title, composerName });
   }
   return works;

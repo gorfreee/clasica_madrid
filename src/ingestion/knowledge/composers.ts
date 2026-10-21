@@ -383,7 +383,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
   },
   {
     canonicalName: 'Edward Elgar',
-    aliases: ['Edward Elgar', 'Elgar'],
+    aliases: ['Edward Elgar', 'E. Elgar', 'Elgar'],
     eras: ['romantic'],
   },
   {
@@ -1401,6 +1401,7 @@ export const COMPOSERS: ComposerKnowledge[] = [
     canonicalName: 'Nikolai Rimsky-Korsakov',
     aliases: [
       'Nikolai Rimsky-Korsakov',
+      'N. Rimsky-Korsakov',
       'Nikolái Rimski-Kórsakov',
       'Nicolai Rimsky-Korsakov',
       'Rimsky-Korsakov',
@@ -2392,6 +2393,15 @@ export const COMPOSERS: ComposerKnowledge[] = [
   {
     canonicalName: 'Lera Auerbach',
     aliases: ['Lera Auerbach', 'Auerbach'],
+    eras: ['contemporary'],
+  },
+  {
+    // Official author identity: https://www.patriciakopatchinskaja.com/list-of-works
+    // (PatKop Compositions) and https://cndm.inaem.gob.es/node/23864 (UniSolo).
+    // The Auditorio uses PatKop (1977); preserve that observed credit and let
+    // the shared publication mechanism resolve the same composer identity.
+    canonicalName: 'Patricia Kopatchinskaja',
+    aliases: ['Patricia Kopatchinskaja', 'PatKop'],
     eras: ['contemporary'],
   },
   {
