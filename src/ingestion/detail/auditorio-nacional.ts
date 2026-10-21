@@ -85,9 +85,10 @@ function parseProduction(html: string): ObservedFactPatch {
     .filter((lines) => lines.length > 0);
 
   const segments = segmentAuditorioBlocks(blocks);
-  const allLines = [...segments.noticeLines, ...segments.performerLines, ...segments.programLines];
   const calendar = auditorioDetailCalendar(html);
-  const schedule = resolvePostponementSchedule(allLines.join('. '), calendar);
+  // Schedule continuations must retain their original order; segmenting the
+  // repertoire/cast first can move a standalone clock away from its notice.
+  const schedule = resolvePostponementSchedule(blocks.flat().join('. '), calendar);
   const performers = normalizePersonList([
     ...segments.performerLines.flatMap((line) => parseAuditorioPersonCredits(line)),
     ...segments.programLines.flatMap((line) =>

@@ -220,6 +220,13 @@ describe('unresolved schedules and legitimate multiple performances', () => {
     expect(run.candidates).toEqual([]);
     expect(run.decisions[0]!.hydration).toMatchObject({ reason: 'source-conflict' });
   });
+  it('preserves a notice clock on a separate line before segmenting cast/program', async () => {
+    const body = changedNotice(await fixture('checa'), 'CONCIERTO APLAZADO<br />al 13 de noviembre de 2026<br />a las 22:30H');
+    const withoutTargetCalendar = body.replaceAll('2026-11-13T22:30:00+01:00', '2026-11-11T19:30:00+01:00');
+    expect(parseAuditorioNacionalDetail(withoutTargetCalendar).occurrences).toMatchObject([expected[0]]);
+    const conflict = body.replaceAll('2026-11-13T22:30:00+01:00', '2026-11-13T21:00:00+01:00');
+    expect(() => parseAuditorioNacionalDetail(conflict)).toThrow(HydrationConflictError);
+  });
   it('uses only a unique clock on the replacement date if the notice has no time', async () => {
     const body = changedNotice(await fixture('checa'), 'CONCIERTO APLAZADO al 13 de noviembre');
     expect(parseAuditorioNacionalDetail(body).occurrences).toMatchObject([expected[0]]);
