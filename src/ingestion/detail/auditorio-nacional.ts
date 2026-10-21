@@ -1,6 +1,6 @@
 import { parseObservedDateTime } from '../dates.ts';
 import { allCaptures, firstMatch, splitBreaks, stripTags } from '../html.ts';
-import { inferScheduleFromText } from './schedule.ts';
+import { resolvePostponementSchedule } from './schedule.ts';
 import {
   canPairAsAuditorioComposer,
   canPairAsLookaheadComposer,
@@ -86,8 +86,8 @@ function parseProduction(html: string): ObservedFactPatch {
 
   const segments = segmentAuditorioBlocks(blocks);
   const allLines = [...segments.noticeLines, ...segments.performerLines, ...segments.programLines];
-  const schedule = inferScheduleFromText(allLines.join('. '));
   const calendar = auditorioDetailCalendar(html);
+  const schedule = resolvePostponementSchedule(allLines.join('. '), calendar);
   const performers = normalizePersonList([
     ...segments.performerLines.flatMap((line) => parseAuditorioPersonCredits(line)),
     ...segments.programLines.flatMap((line) =>
@@ -177,7 +177,7 @@ function parseExcerpt(html: string): ObservedFactPatch {
   ];
 
   const programText = programParts.length > 0 ? programParts.join('. ') : undefined;
-  const schedule = inferScheduleFromText([programText, ...leftover].filter(Boolean).join('. '));
+  const schedule = resolvePostponementSchedule([programText, ...leftover].filter(Boolean).join('. '));
 
   return {
     ...(venueText ? { venueText } : {}),
