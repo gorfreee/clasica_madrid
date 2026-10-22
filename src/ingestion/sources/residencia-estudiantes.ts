@@ -1,7 +1,7 @@
 import { isRealIsoDate } from '../../lib/util/iso-date.ts';
 import { collapseWhitespace, flattenHtmlBlocks, stripTags } from '../html.ts';
 import { stripTrailingBiographicalYears } from '../knowledge/composers.ts';
-import { looksLikeComposerLine, looksLikeMovementLine, looksLikeUnequivocalWorkLine, looksLikeWorkLine } from '../observed-cleanup.ts';
+import { looksLikeComposerLine, looksLikeMovementLine } from '../observed-cleanup.ts';
 import {
   composersFromWorks, emptyObservedLists, normalizeComposerList, normalizePersonList,
   normalizeWorkList, type ObservedFactPatch, type ObservedPerson, type ObservedWork,
@@ -271,22 +271,15 @@ function programWorks(html: string): ObservedWork[] {
     const heading = stripTags(lines[0] ?? '');
     if (!looksLikeComposerLine(heading) || lines.length < 2) continue;
     const composerName = stripTrailingBiographicalYears(heading);
-    // One attributed paragraph can contain several independent pieces.
-    // A numbered movement belongs to its parent, never to works[].
-    // Additional lines need italic title markup or unambiguous work wording.
-    const [firstTitle, ...following] = lines.slice(1);
-    const titleLines = [firstTitle!, ...following.filter((line) => {
-      const text = stripTags(line);
-      return !looksLikeMovementLine(text) && looksLikeWorkLine(text)
-        && (/<em\b/iu.test(line) || looksLikeUnequivocalWorkLine(text));
-    })];
-    for (const titleHtml of titleLines) {
-      const title = stripTags(titleHtml);
-      if (!looksLikeWorkLine(title)) continue;
-      const paired = /^\s*<em>([\s\S]+?)<\/em>\s+y\s+<em>([\s\S]+?)<\/em>\s*$/iu.exec(titleHtml);
-      const titles = paired ? [stripTags(paired[1]!), stripTags(paired[2]!)] : [title];
-      works.push(...titles.filter(Boolean).map((title) => ({ title, composerName })));
-    }
+    const [titleHtml, ...rest] = lines.slice(1);
+    // Numbered movements belong to the parent work; their full text remains
+    // available even when the same parent occurs repeatedly in the programme.
+    if (rest.some((line) => !looksLikeMovementLine(stripTags(line)))) continue;
+    const title = stripTags(titleHtml!);
+    if (looksLikeMovementLine(title)) continue;
+    const paired = /^\s*<em>([\s\S]+?)<\/em>\s+y\s+<em>([\s\S]+?)<\/em>\s*$/iu.exec(titleHtml!);
+    const titles = paired ? [stripTags(paired[1]!), stripTags(paired[2]!)] : [title];
+    works.push(...titles.filter(Boolean).map((title) => ({ title, composerName })));
   }
   return normalizeWorkList(works);
 }
