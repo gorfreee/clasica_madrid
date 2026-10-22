@@ -890,16 +890,63 @@ function popularProgramHit(text: string): boolean {
 
 /**
  * Observed classical/academic identity already recognised by the deterministic
- * policy, plus conservative interpretation phrases that are still not an
- * automatic include. Used as an AI include gate; does not invent new policy.
- * Formation-size words (quinteto, trío, dúo) are not an anchor.
+ * policy, plus attributed programmes and conservative interpretation phrases
+ * that still need AI interpretation. This gate neither grants deterministic
+ * inclusion nor establishes a substantial classical block in a mixed bill.
+ * Formation-size words (quinteto, trío, dúo) alone are not an anchor.
  */
 export function hasObservedClassicalAcademicAnchor(facts: ObservedFacts): boolean {
   const haystack = identityHaystack(facts);
   if (collectInclusions(facts, haystack).length > 0) return true;
   if (hasSubstantialClassicalBlock(facts)) return true;
   if (hasClassicalVocalEnsembleAnchor(facts)) return true;
+  if (hasAttributedClassicalProgrammeAnchor(facts)) return true;
   return hasConservativeClassicalInterpretationAnchor(facts);
+}
+
+/**
+ * An explicit work attribution does not need a local composer lookup to be
+ * interpretable. Require concert-work language plus independent musical
+ * specificity: multiple distinct tonal/catalogued works, or a specific work
+ * with chamber/historical programme context. A choral-orchestral mass can be
+ * identified without a key/catalogue. Author names, song lists and ensemble
+ * names alone never meet this threshold. Excluded identities still need the
+ * existing, stronger substantial-block policy; this anchor cannot rescue them.
+ */
+function hasAttributedClassicalProgrammeAnchor(facts: ObservedFacts): boolean {
+  const works = facts.works.filter((work) =>
+    work.composerName?.trim() && hasClassicalWorkSignal(fieldFolded(work.title)),
+  );
+  if (works.length === 0) return false;
+  // Structured titles are repertoire too, even when programText is absent.
+  const programmeFacts = {
+    ...facts,
+    programText: [facts.programText, ...facts.works.map((work) => work.title)].filter(Boolean).join('\n'),
+  };
+  if (collectExclusions(programmeFacts, identityHaystack(facts)).length > 0) return false;
+
+  const specificWorks = new Set(works.flatMap((work) => {
+    const title = fieldFolded(work.title);
+    const tonal = /\ben (?:do|re|mi|fa|sol|la|si)(?: (?:bemol|sostenido))? (?:mayor|menor)\b/.test(title);
+    const catalogued = /\b(?:op\.?|opus|bwv|hwv|rv|woo|hob|d|k|kv|sz|bb|swv)\s*[.:]?\s*\d+\b/.test(title);
+    return tonal || catalogued ? [`${foldName(work.composerName!)}|${foldName(work.title)}`] : [];
+  }));
+  if (specificWorks.size >= 2) return true;
+
+  // Musical programme/commentary, never venue or organizer, supplies the
+  // additional context for a single specific work.
+  const context = fieldFolded([facts.description, facts.programText].filter(Boolean).join('\n'));
+  if (specificWorks.size > 0 && (
+    hasPhrase(context, 'musica de camara') ||
+    hasPhrase(context, 'interpretacion historica') ||
+    hasPhrase(context, 'repertorio barroco') ||
+    hasPhrase(context, 'repertorio renacentista')
+  )) return true;
+
+  const program = fieldFolded(facts.programText);
+  return works.some((work) => hasWord(fieldFolded(work.title), 'misa')) &&
+    /\borquestas?\b/.test(program) && /\bsinfonic[ao]s?\b/.test(program) &&
+    /\b(?:coros?|coral)\b/.test(program);
 }
 
 /**
