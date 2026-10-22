@@ -47,11 +47,10 @@ export type EligibilityAiDecision =
 
 /**
  * Post-parse editorial gate. A schema-valid payload is not yet a certainty:
- * include/exclude need verbatim observed spans, and policy guardrails reuse
- * the deterministic classifier instead of inventing a block. An AI include
- * over insufficient-evidence also needs an observed classical/academic
- * anchor: grounded evidence that is only a formation-size word or an artist
- * name is not enough.
+ * include/exclude need verbatim observed spans. The substantial-block guard
+ * stays deterministic; the AI include anchor can additionally recognise an
+ * attributed classical programme absent from composer knowledge. Grounded
+ * evidence that is only a formation-size word or an artist name is not enough.
  */
 export function evaluateEligibilityAi(
   facts: ObservedFacts,
