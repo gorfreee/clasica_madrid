@@ -1,6 +1,11 @@
 import { isRealIsoDate } from '../../lib/util/iso-date.ts';
 import { collapseWhitespace, flattenHtmlBlocks, stripTags } from '../html.ts';
-import { emptyObservedLists, normalizeComposerList, normalizePersonList, type ObservedFactPatch } from '../observed.ts';
+import { stripTrailingBiographicalYears } from '../knowledge/composers.ts';
+import { looksLikeComposerLine, looksLikeMovementLine } from '../observed-cleanup.ts';
+import {
+  composersFromWorks, emptyObservedLists, normalizeComposerList, normalizePersonList,
+  normalizeWorkList, type ObservedFactPatch, type ObservedPerson, type ObservedWork,
+} from '../observed.ts';
 import { IncompleteListingError, type AdapterContext, type RawEvent, type SourceAdapter } from '../types.ts';
 
 const SOURCE_ID = 'residencia-estudiantes';
@@ -144,36 +149,136 @@ export function parseResidenciaDetail(event: RawEvent, body: string): ObservedFa
       .filter((name): name is string => typeof name === 'string').join(', ');
     if (category) patch.categoryText = category;
   }
+  const performers: ObservedPerson[] = [];
+  const composers: { name: string }[] = [];
+  const programs: string[] = [];
+  const works: ObservedWork[] = [];
+  const access: string[] = [];
+  const sessions = new Set<string>();
+  const addProgram = (html: string) => {
+    const text = flattenHtmlBlocks(html).trim();
+    if (text) programs.push(text);
+    works.push(...programWorks(html));
+  };
   const details = Array.isArray(detail.details) ? detail.details : [];
   for (const section of details) {
     const entries = record(section)?.info;
     if (!Array.isArray(entries)) continue;
+    // A blank title continues only the preceding credit in this section.
+    let credit: 'performer' | 'director' | 'collaborator' | 'composer' | undefined;
     for (const value of entries) {
       const entry = record(value);
-      const label = typeof entry?.title === 'string' ? entry.title.toLowerCase().trim() : '';
-      const content = typeof entry?.content === 'string' ? flattenHtmlBlocks(entry.content).trim() : '';
-      const bottom = typeof entry?.bottom_line === 'string' ? collapseWhitespace(entry.bottom_line) : '';
-      if (!content) continue;
-      if (label === 'lugar') patch.venueText = content;
-      else if (label === 'ciclo') patch.seriesText = content;
-      else if (label === 'interpretado por') {
-        patch.performers = normalizePersonList(content.split('\n').filter(Boolean).map((name) => ({ name })));
-      } else if (label === 'obras de') {
-        patch.composers = normalizeComposerList(content.split(/\n|,\s*|\s+y\s+/u)
-          .map((name) => name.trim()).filter(Boolean).map((name) => ({ name })));
-      } else if (label === 'programa') patch.programText = content;
-      else if (/^(entrada|acceso|precio|aforo)/.test(label)) {
-        patch.accessText = [content, bottom].filter(Boolean).join(' · ');
+      const label = labelText(entry?.title);
+      const content = htmlText(entry?.content);
+      const bottom = htmlText(entry?.bottom_line);
+      if (label) {
+        credit = /^(interpretado por|intérpretes?)$/.test(label) ? 'performer'
+          : label === 'dirigido por' ? 'director'
+          : label === 'con la colaboración de' ? 'collaborator'
+          : label === 'obras de' ? 'composer' : undefined;
+      }
+      // These are session headings for this ficha, not the clocks in their
+      // itinerary/reservation copy. Only event_date supplies the civil date.
+      const session = /^sesión(?: de concierto)? (\d{1,2}:[0-5]\d)(?: horas?| h)?(?: ·|$)/u.exec(label);
+      if (session) sessions.add(session[1]!);
+      if (credit === 'composer') {
+        composers.push(...(content || bottom).split(/\n|,\s*|\s+[ye]\s+/u)
+          .filter(Boolean).map((name) => ({ name })));
+      } else if (credit) {
+        performers.push(...creditPeople(content, bottom, credit));
+      } else if (label === 'lugar' && content) patch.venueText = content;
+      else if (label === 'ciclo' && content) patch.seriesText = content;
+      else if (label === 'programa' && typeof entry?.content === 'string') addProgram(entry.content);
+      if (/^(entrada|acceso|precio|aforo|sesión)/u.test(label) && (content || bottom)) {
+        access.push([content, bottom].filter(Boolean).join(' · '));
       }
     }
   }
   if (Array.isArray(detail.description)) {
     for (const section of detail.description) {
       const item = record(section);
-      if (typeof item?.subtitle === 'string' && /^programa$/i.test(item.subtitle.trim())
-        && typeof item.text === 'string') patch.programText = flattenHtmlBlocks(item.text).trim();
+      if (!item) continue;
+      if ((labelText(item.subtitle) === 'programa' || labelText(item.title) === 'programa')
+        && typeof item.text === 'string') addProgram(item.text);
+      // Deliberately narrow reference to THIS concert. Starting times of
+      // itineraries and reservation windows do not match this attribution.
+      for (const match of htmlText(item.text).matchAll(
+        /\b(?:presente|este) concierto en su sesión de las (\d{1,2}:[0-5]\d) horas\b/giu,
+      )) sessions.add(match[1]!);
     }
   }
+  if (patch.occurrences?.[0]) {
+    const date = patch.occurrences[0].date!;
+    const unique = new Map(patch.occurrences.map((item) => [item.time, item]));
+    for (const clock of sessions) {
+      const session = occurrence(`${date} ${clock.padStart(5, '0')}:00`);
+      unique.set(session.time, session);
+    }
+    patch.occurrences = [...unique.values()].sort((a, b) => a.time!.localeCompare(b.time!));
+  }
+  if (performers.length) patch.performers = normalizePersonList(performers);
+  if (works.length) patch.works = normalizeWorkList(works);
+  const authors = normalizeComposerList([...composers, ...composersFromWorks(patch.works ?? [])]);
+  if (authors.length) patch.composers = authors;
+  if (programs.length) patch.programText = [...new Set(programs)].join('\n\n');
+  if (access.length) patch.accessText = [...new Set(access)].join(' · ');
   if (!patch.accessText && detail.allows_free_entrance === true) patch.accessText = 'Entrada libre';
   return patch;
+}
+
+function htmlText(value: unknown): string {
+  return typeof value === 'string' ? flattenHtmlBlocks(value).trim() : '';
+}
+
+function labelText(value: unknown): string {
+  return collapseWhitespace(htmlText(value)).toLowerCase().replace(/\s*:\s*$/u, '');
+}
+
+function creditPeople(
+  content: string, bottom: string, credit: 'performer' | 'director' | 'collaborator',
+): ObservedPerson[] {
+  const people: ObservedPerson[] = [];
+  const defaultRole = credit === 'director' ? 'director'
+    : credit === 'collaborator' ? 'Con la colaboración de' : undefined;
+  for (const line of (content || bottom).split('\n').filter(Boolean)) {
+    // Choir voice lists occur in bottom_line with no content at all.
+    const voices = /^(.+?)\s*\((sopranos?|altos?|tenor(?:es)?|bajos?)\)$/iu.exec(line);
+    if (voices) {
+      for (const name of voices[1]!.split(/,\s*|\s+[ye]\s+/u)) {
+        people.push({ name, roleText: voices[2]! });
+      }
+      continue;
+    }
+    if (!content) continue;
+    // Scholarship metadata describes the participant, not their musical role.
+    // Retain only the explicit function from that bottom line.
+    const role = content && bottom
+      ? /\bnarrador(?:a)?\b/iu.exec(bottom)?.[0]
+        ?? (/^becari[oa]\b/iu.test(bottom) ? defaultRole : bottom)
+      : defaultRole;
+    people.push({ name: line, ...(role ? { roleText: role } : {}) });
+  }
+  return normalizePersonList(people);
+}
+
+/** The API's Programa uses one attributed paragraph per work/group. A
+ * composer heading plus paragraph/break boundaries is required. Unrecognized
+ * prose remains in programText; it never inherits the previous author. */
+function programWorks(html: string): ObservedWork[] {
+  const works: ObservedWork[] = [];
+  for (const paragraph of html.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/giu)) {
+    const lines = paragraph[1]!.split(/<br\s*\/?>/giu).map((line) => line.trim()).filter(Boolean);
+    const heading = stripTags(lines[0] ?? '');
+    if (!looksLikeComposerLine(heading) || lines.length < 2) continue;
+    const composerName = stripTrailingBiographicalYears(heading);
+    const [titleHtml, ...rest] = lines.slice(1);
+    // Numbered movements belong to the parent work; their full text remains
+    // available even when the same parent occurs repeatedly in the programme.
+    if (rest.some((line) => !looksLikeMovementLine(stripTags(line)))) continue;
+    const title = stripTags(titleHtml!);
+    const paired = /^\s*<em>([\s\S]+?)<\/em>\s+y\s+<em>([\s\S]+?)<\/em>\s*$/iu.exec(titleHtml!);
+    const titles = paired ? [stripTags(paired[1]!), stripTags(paired[2]!)] : [title];
+    works.push(...titles.filter(Boolean).map((title) => ({ title, composerName })));
+  }
+  return normalizeWorkList(works);
 }
