@@ -260,6 +260,14 @@ describe('unresolved schedules and legitimate multiple performances', () => {
       .replace('btn btn-primary btn-sm buy', 'btn btn-primary btn-sm aplazado');
     expect(() => parseAuditorioNacionalDetail(body)).toThrow(HydrationConflictError);
   });
+  it('rejects a replacement still labelled Aplazado even if its clock matches', async () => {
+    const body = (await fixture('checa'))
+      .replaceAll('2026-11-11T19:30:00+01:00', '2026-11-13T22:30:00+01:00');
+    expect(() => parseAuditorioNacionalDetail(body)).toThrow(HydrationConflictError);
+    const run = await ingest(0, body);
+    expect(run.candidates).toEqual([]);
+    expect(run.apply.filesToWrite).toEqual([]);
+  });
   it('moves a marked session to another time on the same day', async () => {
     const body = changedNotice(await fixture('checa'),
       'CONCIERTO APLAZADO al 11 de noviembre de 2026 a las 22:30H')
