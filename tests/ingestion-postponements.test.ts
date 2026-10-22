@@ -233,4 +233,51 @@ describe('unresolved schedules and legitimate multiple performances', () => {
     const noNewClock = body.replaceAll('2026-11-13T22:30:00+01:00', '2026-11-14T22:30:00+01:00');
     expect(() => parseAuditorioNacionalDetail(noNewClock)).toThrow(HydrationConflictError);
   });
+  it('withholds an unmarked old session instead of silently deleting it', async () => {
+    const body = (await fixture('checa')).replace('btn btn-primary btn-sm aplazado', 'btn btn-primary btn-sm unknown');
+    expect(() => parseAuditorioNacionalDetail(body)).toThrow(HydrationConflictError);
+    const run = await ingest(0, body);
+    expect(run.summary.health).toBe('review');
+    expect(run.candidates).toEqual([]);
+    expect(run.summary.written).toEqual([]);
+    expect(run.summary.disappearanceSuppressedSources).toContain(source.id);
+    expect(run.apply.filesToWrite).toEqual([]);
+  });
+  it('withholds a third, legitimate performance despite a labelled old session', async () => {
+    const body = (await fixture('checa')).replace('</article>',
+      '<div class="eventsession rightColumn__item"><div class="event-date">' +
+      '<span class="hour pat-localmoment">2026-11-16T19:30:00+01:00</span></div>' +
+      '<a class="btn btn-primary btn-sm buy">Comprar entradas</a></div></article>');
+    expect(() => parseAuditorioNacionalDetail(body)).toThrow(HydrationConflictError);
+    const run = await ingest(0, body);
+    expect(run.candidates).toEqual([]);
+    expect(run.summary.autoMergeEligible).toBe(false);
+    expect(run.apply.filesToWrite).toEqual([]);
+  });
+  it('refuses a marker attached to the replacement rather than the old session', async () => {
+    const body = (await fixture('checa'))
+      .replace('btn btn-primary btn-sm aplazado', 'btn btn-primary btn-sm unknown')
+      .replace('btn btn-primary btn-sm buy', 'btn btn-primary btn-sm aplazado');
+    expect(() => parseAuditorioNacionalDetail(body)).toThrow(HydrationConflictError);
+  });
+  it('moves a marked session to another time on the same day', async () => {
+    const body = changedNotice(await fixture('checa'),
+      'CONCIERTO APLAZADO al 11 de noviembre de 2026 a las 22:30H')
+      .replaceAll('2026-11-13T22:30:00+01:00', '2026-11-11T22:30:00+01:00');
+    expect(parseAuditorioNacionalDetail(body).occurrences).toMatchObject([
+      { date: '2026-11-11', time: '22:30' },
+    ]);
+    const existing = structuredClone(catalog);
+    existing.events = [existing.events[0]!];
+    existing.events[0]!.occurrences[0] = {
+      ...existing.events[0]!.occurrences[0]!, date: '2026-11-11', time: '19:30',
+    };
+    const feed = listing(0).replaceAll('2026-11-13T22:30:00+01:00', '2026-11-11T22:30:00+01:00');
+    const run = await ingest(0, body, existing, feed);
+    expect(run.apply.report.ok).toBe(true);
+    expect(run.apply.proposed.events[0]!.occurrences).toEqual([{
+      id: existing.events[0]!.occurrences[0]!.id,
+      date: '2026-11-11', time: '22:30', status: 'scheduled',
+    }]);
+  });
 });

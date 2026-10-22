@@ -59,23 +59,38 @@ export function inferScheduleFromText(text: string, contextDates: readonly strin
  */
 export function resolvePostponementSchedule(
   text: string, calendar: NonNullable<ObservedFactPatch['occurrences']> = [],
+  postponedSessions: readonly { date: string; time: string }[] = [],
 ): DetailSchedule {
   const schedule = inferScheduleFromText(text, calendar.flatMap(item => item.date ? [item.date] : []));
   if (schedule.eventStatus !== 'postponed') return schedule;
   const evidence = [
     { surface: 'detail:postponement-notice', value: text },
-    { surface: 'detail:calendar', value: JSON.stringify(calendar) },
+    { surface: 'detail:calendar', value: JSON.stringify({ occurrences: calendar, postponedSessions }) },
   ];
   const target = schedule.occurrences?.[0];
   const targeted = /(?:aplazad\w*|pospuest\w*)[\s\S]{0,80}?\bal\b/i.test(text);
   if (!targeted || !target?.date || CANCELLED.test(text)) {
     throw sourceConflict('aplazamiento sin fecha de reemplazo inequívoca', 'date', evidence);
   }
-  // More sessions cannot be silently removed by a singular notice with no
-  // old→new assignment. Leave such a multi-performance case for review.
-  const otherSessions = new Set(calendar.filter(item => item.date !== target.date).map(item => `${item.date}|${item.time ?? ''}`));
-  if (otherSessions.size > 1) throw sourceConflict('aplazamiento con varias funciones sin correspondencia acreditada', 'date', evidence);
-  const times = new Set(calendar.filter(item => item.date === target.date).flatMap(item => item.time ? [item.time] : []));
+  // An explicit, singular notice does not license dropping other performances.
+  // If several functions are involved, the generic occurrence ID merger cannot
+  // safely move one ID while preserving all others: withhold for review.
+  const keyOf = (item: { date: string; time?: string }) => `${item.date}|${item.time ?? ''}`;
+  const marked = new Set(postponedSessions.map(keyOf));
+  const markedInCalendar = calendar.filter(item => marked.has(keyOf(item)));
+  const active = calendar.filter(item => !marked.has(keyOf(item)));
+  const targetActive = active.filter(item => item.date === target.date);
+  const unrelated = active.filter(item => item.date !== target.date ||
+    (target.time !== undefined && item.time !== target.time));
+  if (marked.size > 1 || markedInCalendar.length !== marked.size || unrelated.length > 0 ||
+      (marked.size === 0 && calendar.some(item =>
+        item.date !== target.date || (target.time !== undefined && item.time !== target.time)))) {
+    throw sourceConflict('aplazamiento con funciones sin correspondencia acreditada', 'date', evidence);
+  }
+  if (marked.size > 0 && active.length > 1) {
+    throw sourceConflict('aplazamiento con varias funciones no asignables', 'date', evidence);
+  }
+  const times = new Set(targetActive.flatMap(item => item.time ? [item.time] : []));
   if (times.size > 1 || (target.time && times.size && !times.has(target.time))) {
     throw sourceConflict('hora del aplazamiento contradictoria con el calendario de ficha', 'time', evidence);
   }

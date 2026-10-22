@@ -986,6 +986,34 @@ export function canPairAsLookaheadComposer(text: string, next?: string): boolean
   return hasLookaheadWorkEvidence(following, cleaned);
 }
 
+/**
+ * A mononym absent from knowledge needs a biographical range (not just a
+ * possible composition year) and a following work. PatKop's single birth year
+ * is resolved through its documented shared alias, never a camel-case guess.
+ */
+export function isBiographicalMononymHeading(text: string, next?: string): boolean {
+  const match = /^(\p{Lu}[\p{L}’'-]+)\s+\((\d{4})\s*[-–—]\s*(\d{4})\)$/u.exec(text);
+  if (!match || Number(match[3]) - Number(match[2]) < 20) return false;
+  if (looksLikeUnequivocalWorkLine(text) || looksLikeAuditorioRepertoireLine(text)) return false;
+  return Boolean(next && looksLikeWorkLine(next) && !looksLikeMovementLine(next));
+}
+
+/**
+ * A generic form/instrumentation line can qualify the preceding named work.
+ * It cannot qualify a form-only title, nor cross a composer/section boundary;
+ * callers pass only the currently linked work. Suite/Cantata/Obertura alone
+ * remain legitimate titles, as do numbered, catalogued or dated forms.
+ */
+export function isLinkedWorkDescriptor(text: string, previousTitle: string): boolean {
+  if (!/^(?:suite\s+sinf[oó]nica|cantata\s+para\s+coro\s+y\s+orquesta)$/iu.test(text)) return false;
+  return /^(?:["“«]).+?["”»]/u.test(previousTitle) || looksLikeCatalogWorkLine(previousTitle);
+}
+
+/** An unspecified supplement is programme copy, not an identified work. */
+export function isUnspecifiedRepertoireSupplement(text: string): boolean {
+  return /^(?:&|y)\s+oberturas[.]?$/iu.test(text);
+}
+
 function hasLookaheadWorkEvidence(next: string, candidateComposer: string): boolean {
   if (looksLikeProgramHeader(next) || looksLikePartHeader(next) || looksLikeMovementLine(next)) {
     return false;
