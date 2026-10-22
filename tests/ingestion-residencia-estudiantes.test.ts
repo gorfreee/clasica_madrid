@@ -81,6 +81,16 @@ describe('Residencia de Estudiantes', () => {
       occurrences: [{ date: '2026-10-25', time: '19:00' }],
     });
     expect(parseResidenciaDetail(concert, detail).programText).toContain('La vida breve');
+    const originalWorks = parseResidenciaDetail(concert, detail).works;
+    // Existing source fixture: the two Falla paragraphs each contain
+    // two separate pieces, not a main work followed by a movement.
+    expect(originalWorks).toHaveLength(7);
+    expect(originalWorks).toContainEqual({
+      title: 'Danza n.º 1 para violín y piano', composerName: 'Manuel de Falla',
+    });
+    expect(originalWorks).toContainEqual({
+      title: 'Canción del amor dolido para voz y piano', composerName: 'Manuel de Falla',
+    });
     const together = JSON.parse(detail);
     const worksBy = together.data.details[1].info.find((item: { title: string }) => item.title === 'Obras de');
     worksBy.content = '<p>Manuel de Falla, Maurice Ravel y Gabriel Fauré</p>';
