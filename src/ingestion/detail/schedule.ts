@@ -75,7 +75,7 @@ export function resolvePostponementSchedule(
   // An explicit, singular notice does not license dropping other performances.
   // If several functions are involved, the generic occurrence ID merger cannot
   // safely move one ID while preserving all others: withhold for review.
-  const keyOf = (item: { date?: string; time?: string }) => `${item.date}|${item.time ?? ''}`;
+  const keyOf = (item: { date?: string; time?: string | null }) => `${item.date}|${item.time ?? ''}`;
   const marked = new Set(postponedSessions.map(keyOf));
   const markedInCalendar = calendar.filter(item => marked.has(keyOf(item)));
   const active = calendar.filter(item => !marked.has(keyOf(item)));
