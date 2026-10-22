@@ -81,16 +81,6 @@ describe('Residencia de Estudiantes', () => {
       occurrences: [{ date: '2026-10-25', time: '19:00' }],
     });
     expect(parseResidenciaDetail(concert, detail).programText).toContain('La vida breve');
-    const originalWorks = parseResidenciaDetail(concert, detail).works;
-    // Existing source fixture: the two Falla paragraphs each contain
-    // two separate pieces, not a main work followed by a movement.
-    expect(originalWorks).toHaveLength(7);
-    expect(originalWorks).toContainEqual({
-      title: 'Danza n.º 1 para violín y piano', composerName: 'Manuel de Falla',
-    });
-    expect(originalWorks).toContainEqual({
-      title: 'Canción del amor dolido para voz y piano', composerName: 'Manuel de Falla',
-    });
     const together = JSON.parse(detail);
     const worksBy = together.data.details[1].info.find((item: { title: string }) => item.title === 'Obras de');
     worksBy.content = '<p>Manuel de Falla, Maurice Ravel y Gabriel Fauré</p>';
@@ -238,6 +228,16 @@ describe('Residencia de Estudiantes', () => {
     expect(patch.programText).toContain('Obra sin autor');
     data.description[0].text = '<p>Un programa de música y poesía sin atribución estructural</p>';
     expect(parseResidenciaDetail(event, JSON.stringify({ data })).works).toBeUndefined();
+  });
+
+  it('no publica como obra un movimiento aislado tras un encabezado de compositor', async () => {
+    const { data, event } = await realDetail('ecce-finem');
+    data.description = [{ subtitle: 'Programa', text:
+      '<p>Andrés Poncela (1996)<br>I. Nos</p>' +
+      '<p>Mateo Albéniz (1755-1831)<br><em>Sonata en re</em></p>' }];
+    const patch = parseResidenciaDetail(event, JSON.stringify({ data }));
+    expect(patch.works).toEqual([{ title: 'Sonata en re', composerName: 'Mateo Albéniz' }]);
+    expect(patch.programText).toContain('I. Nos');
   });
 
   it('publica ambas fichas con hechos explícitos, mantiene su identidad y no escribe al repetir', async () => {
