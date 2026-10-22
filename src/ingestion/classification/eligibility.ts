@@ -480,7 +480,7 @@ function cinemaIdentity(facts: ObservedFacts, haystack: string): Exclusion | und
   const title = fieldFolded(facts.title);
   const category = fieldFolded(facts.categoryText);
   const principalScreening = /^(?:proyeccion(?:es)?\b|cine\s*:|cine (?:de verano|mudo|familiar|infantil)\b)/.test(title)
-    || /^(?:cine|proyeccion(?:es)?)(?:$|\s+(?:mudo|familiar|infantil|de |con ))/.test(category);
+    || /^(?:proyeccion(?:es)?\b|cine(?:$|\s+(?:mudo|familiar|infantil|de |con )))/.test(category);
   if (principalScreening) return exclusion('cinema-projection', evidence, true);
   if (hasConcertIdentityBesidesOrganRole(facts, haystack)) {
     return exclusion('cinema-projection', evidence, false, true);
@@ -1032,7 +1032,30 @@ export function hasSubstantialClassicalBlock(facts: ObservedFacts): boolean {
   );
   const textualBlock = explicitlyListedAuthors.length >= 2 &&
     (hasClassicalWorkSignal(programme) || /\b(?:arias?|romanzas?|opera|zarzuela)\b/.test(programme));
-  if (structuredBlock || textualBlock) return true;
+
+  // Short listings from concert series may give the performed repertoire as
+  // "Obras de X, Y, Z" in description, without individual works[]. The
+  // biography guard prevents an artist's career credits from becoming a block.
+  const liveDescription = narrativeClauses(facts.description ?? '')
+    .filter((clause) => !isBiographicalClause(clause)).join(' ');
+  const narrativeKnown = knownClassicalNames({
+    ...facts, composers: [], works: [], programText: undefined,
+    title: '', seriesText: undefined, description: liveDescription,
+  });
+  const describedProgrammeBlock = /\bobras de\b/.test(fieldFolded(liveDescription))
+    && narrativeKnown.length >= 2
+    && Boolean(classicalSeriesIdentity(facts))
+    && facts.performers.length > 0;
+
+  // Several independently identified sonatas are a substantial programme,
+  // even when the adapter describes them together under one composer.
+  const multipleConcertWorks = /\b(?:[2-9]|[1-9]\d+|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)\s+(?:sonatas?|suites?|cuartetos?|conciertos?|motetes?)\b/.test(programme);
+  const liveMusicians = facts.performers.some((person) =>
+    /\b(?:orquesta|orchestra|ensemble|cuarteto|quartet|filarmonica|solista)\b/.test(
+      fieldFolded([person.name, person.roleText].filter(Boolean).join(' ')),
+    ));
+  if (structuredBlock || textualBlock || describedProgrammeBlock ||
+    (multipleConcertWorks && known.length > 0 && liveMusicians)) return true;
   const haystack = identityHaystack(facts);
   // Organ accompaniment alone is not a block of classical repertoire.
   // A concert presenting improvisation over a film is a musical performance.
