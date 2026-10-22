@@ -100,4 +100,16 @@ describe('eligibility integration: principal activity and performed repertoire',
       expect(result.value).toBe('include');
     },
   );
+
+  it.each([
+    ['Queen of the Night', 'Mozart: Queen of the Night, aria de La flauta mágica.'],
+    ['Abba Pater', 'Obra sacra Abba Pater de repertorio coral.'],
+  ])('does not confuse the classical work %s with a pop-band identity', (title, programText) => {
+    const result = resolveEligibility(facts({
+      title, categoryText: 'Concierto de música clásica', programText,
+      composers: [{ name: 'Wolfgang Amadeus Mozart' }],
+    }));
+    expect(result.value).toBe('include');
+    expect(result.ruleId).not.toBe('popular-music-identity');
+  });
 });
