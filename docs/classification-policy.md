@@ -131,6 +131,10 @@ También es `include` cuando la ficha observa, **de este evento** y no de una bi
 
 Eso es evidencia válida sobre **ese evento**. No es una regla automática por source ni por venue. Un mismo ciclo puede contener actividades excluidas: cada evento se evalúa individualmente.
 
+Un programa con autores ausentes de la knowledge puede aportar **ancla para evaluar un `include` de IA** sin resolver por sí solo la elegibilidad. Se exige atribución explícita en `works[].composerName` y formas de obra de concierto, junto con concreción musical: al menos dos obras distintas con tonalidad o catálogo numerado; una obra así con contexto de programa de cámara o interpretación histórica; o una misa atribuida con orquesta sinfónica y coro acreditados en `programText`. Un autor desconocido, una lista de canciones, títulos como «Sonata»/«Cuarteto» sin más concreción, una formación o una sala no bastan. La estructura acredita un programa interpretable; la IA aún debe decidir su pertenencia al ámbito y citar evidencia literal válida. Sin IA, o si ésta mantiene `uncertain`, no hay publicación automática.
+
+Este umbral no se añade a las reglas de `include` determinista ni a las de **bloque clásico sustancial**. No rescata identidades excluidas ni resuelve coprincipalidad: se mantienen sus puertas actuales. Tampoco asigna `eras`; la cobertura de compositores y la taxonomía siguen siendo pasos separados.
+
 ### 1.4 Eventos mixtos
 
 Un evento mixto puede ser `include` si contiene un **bloque clásico sustancial, autónomo e identificable** y el evento global se presenta genuinamente como concierto musical clásico o sinfónico.

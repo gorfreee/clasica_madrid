@@ -468,7 +468,7 @@ function cinemaIdentity(facts: ObservedFacts, haystack: string): Exclusion | und
       const text = fieldFolded(clause);
       // A film activity needs an audiovisual action/context. Bare “cine” and
       // “proyección de su generación” do not describe a screening.
-      const action = /\b(?:proyeccion(?:es)? de (?!su |sus |una carrera|futuro)|proyeccion(?:es)? (?:cinematografica|con musica|con acompanamiento)|ciclo de cine|sesion de cine|cine familiar|cine infantil)\b/.test(text);
+      const action = /\b(?:proyeccion(?:es)? (?:de|del) (?!su |sus |la carrera|una carrera|su carrera|futuro|talento|su generacion)|proyeccion(?:es)? (?:cinematografica|con musica|con acompanamiento)|ciclo de cine|sesion de cine|cine (?:de verano|familiar|infantil|mudo)|pase (?:de|del) (?:la )?(?:pelicula|film|documental|cortometraje)|se proyecta(?:ra|n)? (?:la |el |un |una )?(?:pelicula|film|documental|cortometraje))\b/.test(text);
       // An improvisation's subject can be a silent film; that does not by
       // itself identify a screening. A literal projection action still does.
       const filmContext = field !== 'programText' && /\b(?:cine mudo|pelicula muda)\b/.test(text);
@@ -479,7 +479,7 @@ function cinemaIdentity(facts: ObservedFacts, haystack: string): Exclusion | und
   if (!evidence.length) return undefined;
   const title = fieldFolded(facts.title);
   const category = fieldFolded(facts.categoryText);
-  const principalScreening = /^(?:proyeccion(?:es)?\b|cine\s*:)/.test(title)
+  const principalScreening = /^(?:proyeccion(?:es)?\b|cine\s*:|cine (?:de verano|mudo|familiar|infantil)\b)/.test(title)
     || /^(?:cine|proyeccion(?:es)?)(?:$|\s+(?:mudo|familiar|infantil|de |con ))/.test(category);
   if (principalScreening) return exclusion('cinema-projection', evidence, true);
   if (hasConcertIdentityBesidesOrganRole(facts, haystack)) {
@@ -787,7 +787,9 @@ function activityText(value: string, facts: ObservedFacts): string {
 function filmMusicIdentity(facts: ObservedFacts): Exclusion | undefined {
   const evidence = repertoireExclusionEvidence(facts, (text, identity) =>
     /\b(?:bandas? sonoras?|musica (?:de|para el) cine|(?:coros|anos) de cine|film music)\b/.test(text)
-    || (identity && /\b(?:homenaje|tributo|especial|universo|lo mejor de)\b.*\b(?:hans zimmer|john williams|(?:ennio )?morricone)\b/.test(text)),
+    || (identity && /\b(?:homenaje|tributo|especial|universo|lo mejor de)\b.*\b(?:hans zimmer|john williams|(?:ennio )?morricone)\b/.test(text))
+    || (!identity && /\b(?:john williams|hans zimmer|ennio morricone)\b/.test(text)
+      && /\b(?:star wars|indiana jones|harry potter|interstellar|gladiator|la mision|the mission)\b/.test(text)),
   );
   if (!evidence.length) return undefined;
   const classicalCue = knownClassicalNames(facts).length > 0
@@ -823,7 +825,17 @@ function repertoireExclusionEvidence(
   facts: ObservedFacts,
   matches: (text: string, identity: boolean) => boolean,
 ): string[] {
-  return eligibilityTextFields(facts).flatMap(({ field, value }) => {
+  // Explicit repertoire titles and attributions are first-class observations.
+  // Do not use composers[] alone: composer credits without performed works are
+  // not a declaration that those compositions belong to this programme.
+  const fields = [
+    ...eligibilityTextFields(facts),
+    ...facts.works.filter((work) => work.title?.trim()).map((work) => ({
+      field: 'works' as const,
+      value: [work.composerName, work.title].filter(Boolean).join(': '),
+    })),
+  ];
+  return fields.flatMap(({ field, value }) => {
     const identity = field === 'title' || field === 'categoryText' || field === 'seriesText';
     return (identity ? [value] : narrativeClauses(value))
       .filter((clause) => !isBiographicalClause(clause)
@@ -868,7 +880,44 @@ export function hasObservedClassicalAcademicAnchor(facts: ObservedFacts): boolea
   if (collectInclusions(facts, haystack).length > 0) return true;
   if (hasSubstantialClassicalBlock(facts)) return true;
   if (hasClassicalVocalEnsembleAnchor(facts)) return true;
+  if (hasAttributedClassicalProgrammeAnchor(facts)) return true;
   return hasConservativeClassicalInterpretationAnchor(facts);
+}
+
+function hasAttributedClassicalProgrammeAnchor(facts: ObservedFacts): boolean {
+  const works = facts.works.filter((work) =>
+    work.composerName?.trim() && hasClassicalWorkSignal(fieldFolded(work.title)),
+  );
+  if (works.length === 0) return false;
+  // Structured titles are repertoire too, even when programText is absent.
+  const programmeFacts = {
+    ...facts,
+    programText: [facts.programText, ...facts.works.map((work) => work.title)].filter(Boolean).join('\n'),
+  };
+  if (collectExclusions(programmeFacts, identityHaystack(facts)).length > 0) return false;
+
+  const specificWorks = new Set(works.flatMap((work) => {
+    const title = fieldFolded(work.title);
+    const tonal = /\ben (?:do|re|mi|fa|sol|la|si)(?: (?:bemol|sostenido))? (?:mayor|menor)\b/.test(title);
+    const catalogued = /\b(?:op\.?|opus|bwv|hwv|rv|woo|hob|d|k|kv|sz|bb|swv)\s*[.:]?\s*\d+\b/.test(title);
+    return tonal || catalogued ? [`${foldName(work.composerName!)}|${foldName(work.title)}`] : [];
+  }));
+  if (specificWorks.size >= 2) return true;
+
+  // Musical programme/commentary, never venue or organizer, supplies the
+  // additional context for a single specific work.
+  const context = fieldFolded([facts.description, facts.programText].filter(Boolean).join('\n'));
+  if (specificWorks.size > 0 && (
+    hasPhrase(context, 'musica de camara') ||
+    hasPhrase(context, 'interpretacion historica') ||
+    hasPhrase(context, 'repertorio barroco') ||
+    hasPhrase(context, 'repertorio renacentista')
+  )) return true;
+
+  const program = fieldFolded(facts.programText);
+  return works.some((work) => hasWord(fieldFolded(work.title), 'misa')) &&
+    /\borquestas?\b/.test(program) && /\bsinfonic[ao]s?\b/.test(program) &&
+    /\b(?:coros?|coral)\b/.test(program);
 }
 
 /**
@@ -961,10 +1010,29 @@ function hasConservativeClassicalInterpretationAnchor(facts: ObservedFacts): boo
  */
 export function hasSubstantialClassicalBlock(facts: ObservedFacts): boolean {
   const known = knownClassicalNames(facts);
-  const programmeKnown = knownClassicalNames({ ...facts, title: '', description: undefined, seriesText: undefined });
-  // Several CV/history names are not a performed block. Narrative repertoire
-  // can still qualify through the explicit first-half/performance checks below.
-  if (programmeKnown.length >= 2) return true;
+  // Credits in composers[] do not prove these authors' music is played.
+  // Use repertoire surfaces (works[] or the actual programme), not biography,
+  // and require more than an isolated classical reference in a pop/film bill.
+  const programme = fieldFolded(facts.programText);
+  const repertoireFacts = { ...facts, composers: [], title: '', description: undefined, seriesText: undefined };
+  const programmeKnown = knownClassicalNames(repertoireFacts);
+  const classicalWorks = facts.works.filter((work) => Boolean(
+    work.title?.trim() && work.composerName && matchComposer(work.composerName),
+  ));
+  const otherWorks = facts.works.filter((work) => Boolean(
+    work.title?.trim() && (!work.composerName || !matchComposer(work.composerName)),
+  ));
+  const distinctClassicalWorks = new Set(classicalWorks.map((work) =>
+    `${foldName(work.composerName!)}|${foldName(work.title)}`,
+  ));
+  const structuredBlock = distinctClassicalWorks.size >= 2 && classicalWorks.length >= otherWorks.length;
+  const explicitlyListedAuthors = programmeKnown.filter((name) =>
+    hasPhrase(programme, foldName(name)) ||
+    hasWord(programme, foldName(name).split(' ').at(-1) ?? ''),
+  );
+  const textualBlock = explicitlyListedAuthors.length >= 2 &&
+    (hasClassicalWorkSignal(programme) || /\b(?:arias?|romanzas?|opera|zarzuela)\b/.test(programme));
+  if (structuredBlock || textualBlock) return true;
   const haystack = identityHaystack(facts);
   // Organ accompaniment alone is not a block of classical repertoire.
   // A concert presenting improvisation over a film is a musical performance.
@@ -975,8 +1043,12 @@ export function hasSubstantialClassicalBlock(facts: ObservedFacts): boolean {
   if (describedConcertWithUnequivocalClassicalRepertoire(facts)) return true;
   if (known.length === 0) return false;
   if (classicalFirstHalf(facts, known)) return true;
-  if (explicitListedClassicalWork(facts, known)) return true;
-  return listedWorkWithClassicalSignal(facts, known);
+  // A single isolated suite, quartet or composer in a pop/film bill is not
+  // evidence of an autonomous classical block. A complete long-form work can
+  // qualify only if its independent performance is explicit in the programme.
+  const completeWork = /\b(?:obra completa|interpretacion integra|version integra|sinfonia completa|opera completa)\b/.test(programme);
+  return completeWork && (explicitListedClassicalWork(facts, known) ||
+    listedWorkWithClassicalSignal(facts, known));
 }
 
 const CLASSICAL_WORK_NOUNS = [
