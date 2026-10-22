@@ -80,6 +80,13 @@ export function resolvePostponementSchedule(
   const markedInCalendar = calendar.filter(item => marked.has(keyOf(item)));
   const active = calendar.filter(item => !marked.has(keyOf(item)));
   const targetActive = active.filter(item => item.date === target.date);
+  // The alleged replacement must not itself be a session labelled Aplazado.
+  // With an unspecified replacement clock, a distinct unmarked session on
+  // that date can still provide the new time.
+  if (target.time ? marked.has(keyOf(target)) :
+      markedInCalendar.some(item => item.date === target.date) && targetActive.length === 0) {
+    throw sourceConflict('la fecha de reemplazo figura también como aplazada', 'date', evidence);
+  }
   const unrelated = active.filter(item => item.date !== target.date);
   if (marked.size > 1 || markedInCalendar.length !== marked.size || unrelated.length > 0 ||
       (marked.size === 0 && calendar.some(item => item.date !== target.date))) {
