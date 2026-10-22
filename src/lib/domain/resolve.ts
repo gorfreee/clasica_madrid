@@ -29,13 +29,28 @@ export type ResolvedOccurrence = {
   resolved: ResolvedEvent;
 };
 
-export function indexCatalog(catalog: Catalog) {
-  return {
+type CatalogIndex = {
+  venues: ReadonlyMap<string, Venue>;
+  organizers: ReadonlyMap<string, Organizer>;
+  series: ReadonlyMap<string, Series>;
+  sources: ReadonlyMap<string, Source>;
+};
+
+const indexes = new WeakMap<Catalog, CatalogIndex>();
+const resolvedCatalogs = new WeakMap<Catalog, readonly ResolvedEvent[]>();
+
+/** Catalogs are immutable snapshots once used by resolution / query APIs. */
+export function indexCatalog(catalog: Catalog): CatalogIndex {
+  const cached = indexes.get(catalog);
+  if (cached) return cached;
+  const index = {
     venues: byId(catalog.venues),
     organizers: byId(catalog.organizers),
     series: byId(catalog.series),
     sources: byId(catalog.sources),
   };
+  indexes.set(catalog, index);
+  return index;
 }
 
 export function resolveEvent(event: Event, catalog: Catalog): ResolvedEvent {
@@ -81,8 +96,13 @@ export function resolveEvent(event: Event, catalog: Catalog): ResolvedEvent {
   };
 }
 
-export function resolveCatalog(catalog: Catalog): ResolvedEvent[] {
-  return catalog.events.map((event) => resolveEvent(event, catalog));
+/** Shared read-only result; copy it before sorting or editing the array. */
+export function resolveCatalog(catalog: Catalog): readonly ResolvedEvent[] {
+  const cached = resolvedCatalogs.get(catalog);
+  if (cached) return cached;
+  const resolved = Object.freeze(catalog.events.map((event) => resolveEvent(event, catalog)));
+  resolvedCatalogs.set(catalog, resolved);
+  return resolved;
 }
 
 function byId<T extends { id: string }>(items: T[]): Map<string, T> {
