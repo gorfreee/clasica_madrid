@@ -803,7 +803,11 @@ function filmMusicIdentity(facts: ObservedFacts): Exclusion | undefined {
 
 function popularMusicIdentity(facts: ObservedFacts): Exclusion | undefined {
   const strong = repertoireExclusionEvidence(facts, (text, identity) =>
-    /\b(?:abba|queen|beatles|broadway)\b/.test(text)
+    // Queen of the Night is an operatic aria; Abba Pater is sacred Latin.
+    // Neither is evidence of the pop groups Queen/ABBA.
+    /\b(?:abba|queen|beatles|broadway)\b/.test(
+      text.replace(/\bqueen of (?:the )?night\b|\babba pater\b/g, ' '),
+    )
     || (identity && (hasWord(text, 'pop') || hasPhrase(text, 'musicales en concierto')))
     || hasPhrase(text, 'melodias populares') || hasPhrase(text, 'villancicos mas famosos'),
   );
@@ -1042,9 +1046,12 @@ export function hasSubstantialClassicalBlock(facts: ObservedFacts): boolean {
     ...facts, composers: [], works: [], programText: undefined,
     title: '', seriesText: undefined, description: liveDescription,
   });
+  const officialCycle = fieldFolded([facts.categoryText, facts.seriesText].filter(Boolean).join(' '));
+  const declaredChamberCycle = hasWord(officialCycle, 'ciclo') &&
+    hasPhrase(officialCycle, 'musica de camara');
   const describedProgrammeBlock = /\bobras de\b/.test(fieldFolded(liveDescription))
     && narrativeKnown.length >= 2
-    && Boolean(classicalSeriesIdentity(facts))
+    && (Boolean(classicalSeriesIdentity(facts)) || declaredChamberCycle)
     && facts.performers.length > 0;
 
   // Several independently identified sonatas are a substantial programme,
