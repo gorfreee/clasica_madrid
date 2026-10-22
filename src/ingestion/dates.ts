@@ -191,9 +191,8 @@ const SPANISH_CALENDAR_DATE = new RegExp(
   `(\\d{1,2})\\s+de\\s+(${MONTH_NAMES})\\s+(?:de\\s+)?(\\d{4})`,
   'i',
 );
-const POSTPONED_TO_DATE = new RegExp(
-  `(?:aplazad\\w*|pospuest\\w*)[\\s\\S]{0,80}?\\bal\\s+${SPANISH_CALENDAR_DATE.source}`,
-  'i',
+const OPTIONAL_YEAR_DATE = new RegExp(
+  `(\\d{1,2})\\s+de\\s+(${MONTH_NAMES})\\b(?:\\s+(?:de\\s+)?(\\d{4})\\b)?`, 'i',
 );
 
 /**
@@ -206,17 +205,53 @@ export function parseSpanishCalendarDate(raw: string): string | null {
 
 /**
  * New date of an explicit postponement (`pospuesto al …`, `APLAZADO. AL …`).
- * If several calendar dates appear, the target after `al` wins. If that cue
- * is missing and more than one date is present, return null (keep the listing).
+ * A missing year needs a unique matching day/month in the source calendar.
+ * Never infer it from the run clock, season, or an unrelated date in the page.
  */
-export function parsePostponementDate(raw: string): string | null {
+export function parsePostponementDate(raw: string, contextDates: readonly string[] = []): string | null {
+  return parsePostponementDateTime(raw, contextDates)?.date ?? null;
+}
+
+/** Keep the target date and its adjacent clock together, away from the old date. */
+export function parsePostponementDateTime(
+  raw: string, contextDates: readonly string[] = [],
+): { date: string; time?: string } | null {
   const text = foldSpanishDateText(raw);
-  const targeted = POSTPONED_TO_DATE.exec(text);
-  if (targeted) return calendarFromMatch(targeted);
-  const dates = [...text.matchAll(new RegExp(SPANISH_CALENDAR_DATE.source, 'gi'))]
-    .map((match) => calendarFromMatch(match))
-    .filter((item): item is string => Boolean(item));
-  return dates.length === 1 ? dates[0]! : null;
+  const cues = [...text.matchAll(/(?:aplazad\w*|pospuest\w*)[\s\S]{0,80}?\bal\s+/gi)];
+  const targets = cues.length
+    ? cues.map(cue => text.slice(cue.index + cue[0].length))
+    : [text];
+  const resolved: Array<{ date: string; time?: string }> = [];
+  for (const target of targets) {
+    const matches = [...target.matchAll(new RegExp(OPTIONAL_YEAR_DATE.source, 'gi'))];
+    const match = matches[0];
+    // A targeted but unreadable date must not fall back to the old date.
+    if (!match || (cues.length ? match.index !== 0 : matches.length !== 1)) return null;
+    let date = calendarFromMatch(match);
+    if (!match[3]) {
+      const month = SPANISH_MONTHS[match[2]!.toLowerCase()];
+      const suffix = `-${month}-${match[1]!.padStart(2, '0')}`;
+      const candidates = [...new Set(contextDates.filter(item => isRealIsoDate(item) && item.endsWith(suffix)))];
+      if (candidates.length !== 1) return null;
+      date = candidates[0]!;
+    }
+    if (!date) return null;
+    const tail = target.slice(match.index + match[0].length);
+    const clock = /^[\s,.]*(?:a\s+las?\s+)([^\s,;]+)/i.exec(tail);
+    // Extra targets/clocks in the same clause require review, including
+    // parenthesized alternatives. A later sentence may recall the old date.
+    const clause = tail.split(/[.!?]/, 1)[0]!;
+    if (OPTIONAL_YEAR_DATE.test(clause) || [...clause.matchAll(/\ba\s+las?\s+/gi)].length > 1) return null;
+    if (!clock) {
+      resolved.push({ date });
+      continue;
+    }
+    const time = parseObservedTime(clock[1]!.replace(/(?:h(?:oras?)?\.?)[.!?]?$/i, '').replace(/[.!?]$/, ''));
+    if (!time) return null;
+    resolved.push({ date, time });
+  }
+  const unique = new Map(resolved.map(item => [JSON.stringify(item), item]));
+  return unique.size === 1 ? [...unique.values()][0]! : null;
 }
 
 function foldSpanishDateText(raw: string): string {

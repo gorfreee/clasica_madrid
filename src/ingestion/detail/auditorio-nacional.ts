@@ -1,6 +1,6 @@
 import { parseObservedDateTime } from '../dates.ts';
 import { allCaptures, firstMatch, splitBreaks, stripTags } from '../html.ts';
-import { inferScheduleFromText } from './schedule.ts';
+import { resolvePostponementSchedule } from './schedule.ts';
 import {
   canPairAsAuditorioComposer,
   canPairAsLookaheadComposer,
@@ -88,9 +88,14 @@ function parseProduction(html: string): ObservedFactPatch {
     .filter((lines) => lines.length > 0);
 
   const segments = segmentAuditorioBlocks(blocks);
-  const allLines = [...segments.noticeLines, ...segments.performerLines, ...segments.programLines];
-  const schedule = inferScheduleFromText(allLines.join('. '));
   const calendar = auditorioDetailCalendar(html);
+  // A notice's date and clock need their original order (before segmentation).
+  // Explicit per-session status identifies which old slot was postponed.
+  const noticeText = blocks.flat().join('. ');
+  const schedule = resolvePostponementSchedule(
+    noticeText, calendar,
+    /\b(?:aplazad|pospuest)/i.test(noticeText) ? auditorioPostponedSessions(html) : [],
+  );
   const performers = normalizePersonList([
     ...segments.performerLines.flatMap((line) => parseAuditorioPersonCredits(line)),
     ...segments.programLines.flatMap((line) =>
@@ -180,7 +185,7 @@ function parseExcerpt(html: string): ObservedFactPatch {
   ];
 
   const programText = programParts.length > 0 ? programParts.join('. ') : undefined;
-  const schedule = inferScheduleFromText([programText, ...leftover].filter(Boolean).join('. '));
+  const schedule = resolvePostponementSchedule([programText, ...leftover].filter(Boolean).join('. '));
 
   return {
     ...(venueText ? { venueText } : {}),
@@ -600,4 +605,37 @@ function auditorioDetailCalendar(html: string): NonNullable<ObservedFactPatch['o
     return { raw, date: parsed.date, time: parsed.time };
   });
   return occurrences.filter((item, index) => occurrences.findIndex(other => other.date === item.date && other.time === item.time) === index);
+}
+
+/**
+ * Associate the Aplazado label with its own event-session div. A naive regex
+ * stopping at the first </div> would stop at event-date, before the button.
+ * No inference from an unmarked calendar entry is safe when multiple sessions
+ * share a ficha.
+ */
+function auditorioPostponedSessions(html: string): Array<{ date: string; time: string }> {
+  const start = html.indexOf('<div class="rightcolumn">');
+  if (start < 0) return [];
+  const column = html.slice(start).split('</article>')[0]!;
+  const postponed: Array<{ date: string; time: string }> = [];
+  const openings = /<div\b[^>]*class="[^"]*\beventsession\b[^"]*"[^>]*>/gi;
+  for (const opening of column.matchAll(openings)) {
+    const tags = /<\/?div\b[^>]*>/gi;
+    tags.lastIndex = opening.index;
+    let depth = 0;
+    let end = -1;
+    for (let tag = tags.exec(column); tag; tag = tags.exec(column)) {
+      depth += /^<\/div/i.test(tag[0]) ? -1 : 1;
+      if (depth === 0) { end = tags.lastIndex; break; }
+    }
+    if (end < 0) throw new Error('auditorio-nacional: bloque event-session sin cierre');
+    const session = column.slice(opening.index, end);
+    if (!/<a\b[^>]*class="[^"]*\baplazado\b[^"]*"/i.test(session)) continue;
+    const clocks = [...session.matchAll(/<span\b[^>]*class="[^"]*\bhour\b[^"]*"[^>]*>([\s\S]*?)<\/span>/gi)];
+    if (clocks.length !== 1) throw new Error('auditorio-nacional: sesión aplazada sin hora inequívoca');
+    const parsed = parseObservedDateTime(stripTags(clocks[0]![1]!));
+    if (!parsed?.date || !parsed.time) throw new Error('auditorio-nacional: sesión aplazada ilegible');
+    postponed.push({ date: parsed.date, time: parsed.time });
+  }
+  return postponed;
 }

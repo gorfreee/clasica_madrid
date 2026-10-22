@@ -1,0 +1,104 @@
+[
+  {
+    "name": "checa",
+    "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/ibermusica-filarmonica-checa-2",
+    "externalId": "02450a76451141628df2cbe9decdce5d",
+    "eventId": "evt_auditorio_nacional_ibermusica_filarmonica_checa_2",
+    "listing": {
+      "title": "Ibermúsica. Filarmónica Checa",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "2026-11-11T19:30:00+01:00",
+          "date": "2026-11-11",
+          "time": "19:30"
+        },
+        {
+          "raw": "2026-11-13T22:30:00+01:00",
+          "date": "2026-11-13",
+          "time": "22:30"
+        }
+      ],
+      "venueText": "Sala Sinfónica"
+    },
+    "before": {
+      "observedOccurrences": [
+        {
+          "raw": "2026-11-11T19:30:00+01:00",
+          "date": "2026-11-11",
+          "time": "19:30"
+        },
+        {
+          "raw": "2026-11-13T22:30:00+01:00",
+          "date": "2026-11-13",
+          "time": "22:30"
+        }
+      ],
+      "candidateOccurrences": [
+        {
+          "date": "2026-11-11",
+          "time": "19:30",
+          "status": "scheduled"
+        },
+        {
+          "date": "2026-11-13",
+          "time": "22:30",
+          "status": "scheduled"
+        }
+      ]
+    }
+  },
+  {
+    "name": "osucm",
+    "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/xxviii-festival-internacional-de-musica-contemporanea-de-madrid-coma201926-orquesta-sinfonica-de-la-universidad-complutense-de-madrid",
+    "externalId": "4a109642fd4845adbe1183b60720a4e1",
+    "eventId": "evt_auditorio_nacional_xxviii_festival_internacional_de_musica_contemporanea_de_madrid_coma201926_orquesta_sinfonica_de",
+    "listing": {
+      "title": "XXVIII Festival Internacional de Música Contemporánea de Madrid COMA’26. Orquesta Sinfónica de la Universidad Complutense de Madrid",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "2026-11-11T19:30:00+01:00",
+          "date": "2026-11-11",
+          "time": "19:30"
+        },
+        {
+          "raw": "2026-11-14T12:00:00+01:00",
+          "date": "2026-11-14",
+          "time": "12:00"
+        }
+      ],
+      "venueText": "Sala de Cámara"
+    },
+    "before": {
+      "observedOccurrences": [
+        {
+          "raw": "2026-11-11T19:30:00+01:00",
+          "date": "2026-11-11",
+          "time": "19:30"
+        },
+        {
+          "raw": "2026-11-14T12:00:00+01:00",
+          "date": "2026-11-14",
+          "time": "12:00"
+        }
+      ],
+      "candidateOccurrences": [
+        {
+          "date": "2026-11-11",
+          "time": "19:30",
+          "status": "scheduled"
+        },
+        {
+          "date": "2026-11-14",
+          "time": "12:00",
+          "status": "scheduled"
+        }
+      ]
+    }
+  }
+]
