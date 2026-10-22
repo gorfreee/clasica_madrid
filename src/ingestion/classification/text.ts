@@ -55,6 +55,24 @@ export function identityHaystack(facts: ObservedFacts): string {
   ]);
 }
 
+/** Named text surfaces for activity/repertoire rules; credits are not event identity.
+ * Keep the original field and literal value for diagnostic evidence.
+ */
+export function eligibilityTextFields(facts: ObservedFacts) {
+  return (['title', 'categoryText', 'seriesText', 'programText', 'description'] as const)
+    .flatMap((field) => facts[field] ? [{ field, value: facts[field]! }] : []);
+}
+
+/** Narrative clauses retain literal spans while keeping CV asides local. */
+export function narrativeClauses(value: string): string[] {
+  return value.split(/(?<=[.!?;])\s+|\n+/u).map((part) => part.trim()).filter(Boolean);
+}
+
+/** A CV/history clause is not a declaration about the programme of this event. */
+export function isBiographicalClause(value: string): boolean {
+  return /\b(?:debuto|ha (?:actuado|colaborado|trabajado|interpretado|impartido|dirigido|estudiado)|su carrera|su trayectoria|se formo|mayor proyeccion|en su juventud)\b/.test(foldText(value));
+}
+
 /**
  * Format evidence grouped by field, so generic formation words are not
  * matched in performer biographies sitting in `description`.

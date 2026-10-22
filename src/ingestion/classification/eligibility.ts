@@ -2,7 +2,10 @@ import { findKnownComposersInText, matchComposer } from '../knowledge/composers.
 import type { ObservedFacts } from '../observed.ts';
 import type { Eligibility } from './golden-case.ts';
 import { isOperaCategory, titleIdentifiesOperaEvent } from './opera.ts';
-import { fieldFolded, foldName, hasPhrase, hasWord, identityHaystack } from './text.ts';
+import {
+  eligibilityTextFields, fieldFolded, foldName, hasPhrase, hasWord,
+  identityHaystack, isBiographicalClause, narrativeClauses,
+} from './text.ts';
 import type { Resolution } from './types.ts';
 
 /** Deterministic mix: classical identity + excluded identity, no substantial classical block. */
@@ -39,14 +42,14 @@ export function resolveEligibility(facts: ObservedFacts): Resolution<Eligibility
         'include',
         inclusions[0]!.ruleId.startsWith('known-') ? 'knowledge' : 'rule',
         'mixed-program-classical-block',
-        [...flattenEvidence(inclusions), ...flattenEvidence(coprincipal)],
+        [...flattenEvidence(inclusions), ...classicalProgrammeEvidence(facts), ...flattenEvidence(coprincipal)],
       );
     }
     return resolution(
       'uncertain',
       'rule',
       CLASSICAL_AND_NONCLASSICAL_COPRINCIPAL_RULE_ID,
-      [...flattenEvidence(inclusions), ...flattenEvidence(coprincipal)],
+      [...flattenEvidence(inclusions), ...classicalProgrammeEvidence(facts), ...flattenEvidence(coprincipal)],
     );
   }
 
@@ -57,15 +60,16 @@ export function resolveEligibility(facts: ObservedFacts): Resolution<Eligibility
         'include',
         inclusions[0]!.ruleId.startsWith('known-') ? 'knowledge' : 'rule',
         'mixed-program-classical-block',
-        [...flattenEvidence(inclusions), ...flattenEvidence(hardExclude)],
+        [...flattenEvidence(inclusions), ...classicalProgrammeEvidence(facts), ...flattenEvidence(hardExclude)],
       );
     }
-    return resolution(
-      'uncertain',
-      'rule',
-      CLASSICAL_AND_NONCLASSICAL_COPRINCIPAL_RULE_ID,
-      [...flattenEvidence(inclusions), ...flattenEvidence(hardExclude)],
-    );
+    const principalRepertoire = hardExclude.filter((item) =>
+      item.ruleId === 'film-music-identity' || item.ruleId === 'popular-music-identity');
+    if (principalRepertoire.length) {
+      return resolution('exclude', 'rule', principalRepertoire[0]!.ruleId, flattenEvidence(principalRepertoire));
+    }
+    return resolution('uncertain', 'rule', CLASSICAL_AND_NONCLASSICAL_COPRINCIPAL_RULE_ID,
+      [...flattenEvidence(inclusions), ...flattenEvidence(hardExclude)]);
   }
   if (hardExclude.length > 0) {
     return resolution('exclude', 'rule', hardExclude[0]!.ruleId, flattenEvidence(hardExclude));
@@ -84,8 +88,6 @@ function collectExclusions(facts: ObservedFacts, haystack: string): Exclusion[] 
   const found: Exclusion[] = [];
   const category = fieldFolded(facts.categoryText);
   const title = fieldFolded(facts.title);
-  const description = fieldFolded(facts.description);
-  const program = fieldFolded(facts.programText);
 
   const dj = djIdentity(facts, haystack);
   if (dj) found.push(dj);
@@ -103,19 +105,19 @@ function collectExclusions(facts: ObservedFacts, haystack: string): Exclusion[] 
   const dance = danceIdentity(facts, category, title);
   if (dance) found.push(dance);
 
-  const cinema = cinemaIdentity(facts, category, title, description, haystack);
+  const cinema = cinemaIdentity(facts, haystack);
   if (cinema) found.push(cinema);
 
-  const workshop = workshopIdentity(facts, category, title, description, program);
+  const workshop = workshopIdentity(facts, category);
   if (workshop) found.push(workshop);
 
   const participatory = participatoryActivity(facts, title, haystack);
   if (participatory) found.push(participatory);
 
-  const film = filmMusicIdentity(facts, haystack);
+  const film = filmMusicIdentity(facts);
   if (film) found.push(film);
 
-  const pop = popularMusicIdentity(facts, title, description, program, haystack);
+  const pop = popularMusicIdentity(facts);
   if (pop) found.push(pop);
 
   return found;
@@ -457,32 +459,29 @@ function isDanceRole(roleText: string | undefined): boolean {
   );
 }
 
-function cinemaIdentity(
-  facts: ObservedFacts,
-  category: string,
-  title: string,
-  description: string,
-  haystack: string,
-): Exclusion | undefined {
-  if (
-    !(
-      hasWord(category, 'proyeccion') ||
-      hasPhrase(category, 'cine mudo') ||
-      hasBareCineScreeningWord(category) ||
-      hasPhrase(title, 'cineclasica') ||
-      hasPhrase(title, 'de cine') ||
-      hasBareCineScreeningWord(title) ||
-      hasWord(title, 'proyeccion') ||
-      hasPhrase(title, 'pelicula muda') ||
-      hasPhrase(description, 'proyeccion de') ||
-      hasPhrase(description, 'ciclo de cine') ||
-      hasPhrase(description, 'pelicula muda') ||
-      hasPhrase(description, 'cine mudo')
-    )
-  ) {
-    return undefined;
-  }
-  const evidence = [facts.categoryText ?? facts.title];
+function cinemaIdentity(facts: ObservedFacts, haystack: string): Exclusion | undefined {
+  const evidence = eligibilityTextFields(facts).flatMap(({ field, value }) => {
+    const identity = field === 'title' || field === 'categoryText' || field === 'seriesText';
+    const clauses = identity ? [value] : narrativeClauses(value);
+    return clauses.filter((clause) => {
+      if (!identity && isBiographicalClause(clause)) return false;
+      const text = fieldFolded(clause);
+      // A film activity needs an audiovisual action/context. Bare “cine” and
+      // “proyección de su generación” do not describe a screening.
+      const action = /\b(?:proyeccion(?:es)? (?:de|del) (?!su |sus |la carrera|una carrera|su carrera|futuro|talento|su generacion)|proyeccion(?:es)? (?:cinematografica|con musica|con acompanamiento)|ciclo de cine|sesion de cine|cine (?:de verano|familiar|infantil|mudo)|pase (?:de|del) (?:la )?(?:pelicula|film|documental|cortometraje)|se proyecta(?:ra|n)? (?:la |el |un |una )?(?:pelicula|film|documental|cortometraje))\b/.test(text);
+      // An improvisation's subject can be a silent film; that does not by
+      // itself identify a screening. A literal projection action still does.
+      const filmContext = field !== 'programText' && /\b(?:cine mudo|pelicula muda)\b/.test(text);
+      return action || filmContext
+        || (identity && (hasWord(text, 'cineclasica') || /^(?:cine\s*:|cine$|proyeccion(?:es)?$)/.test(text)));
+    }).map((clause) => `${field}: ${clause}`);
+  });
+  if (!evidence.length) return undefined;
+  const title = fieldFolded(facts.title);
+  const category = fieldFolded(facts.categoryText);
+  const principalScreening = /^(?:proyeccion(?:es)?\b|cine\s*:|cine (?:de verano|mudo|familiar|infantil)\b)/.test(title)
+    || /^(?:proyeccion(?:es)?\b|cine(?:$|\s+(?:mudo|familiar|infantil|de |con )))/.test(category);
+  if (principalScreening) return exclusion('cinema-projection', evidence, true);
   if (hasConcertIdentityBesidesOrganRole(facts, haystack)) {
     return exclusion('cinema-projection', evidence, false, true);
   }
@@ -532,19 +531,18 @@ function hasConcertIdentityBesidesOrganRole(facts: ObservedFacts, haystack: stri
 
 const NON_PERFORMANCE_LABELS = ['taller', 'conferencia', 'coloquio', 'charla'] as const;
 
-function workshopIdentity(
-  facts: ObservedFacts,
-  category: string,
-  title: string,
-  description: string,
-  program: string,
-): Exclusion | undefined {
-  const evidence = facts.categoryText ?? facts.title;
+function workshopIdentity(facts: ObservedFacts, category: string): Exclusion | undefined {
+  const evidence = eligibilityTextFields(facts)
+    .filter(({ value }) => nonPerformanceCategory(fieldFolded(activityText(value, facts))))
+    .map(({ field, value }) => `${field}: ${value}`);
+  const title = fieldFolded(activityText(facts.title, facts));
+  const description = fieldFolded(activityText(facts.description ?? '', facts));
+  const program = fieldFolded(activityText(facts.programText ?? '', facts));
   if (/^presentacion (?:del|de un|de) libro$/.test(category)) {
-    return exclusion('non-performance-activity', [evidence], true);
+    return exclusion('non-performance-activity', [`categoryText: ${facts.categoryText}`], true);
   }
   if (nonPerformanceCategory(category)) {
-    return exclusion('non-performance-activity', [evidence], true);
+    return exclusion('non-performance-activity', [`categoryText: ${facts.categoryText}`], true);
   }
 
   const titleIsActivity = titleIdentifiesNonPerformance(title);
@@ -557,11 +555,11 @@ function workshopIdentity(
   // mentions a concert as the subject ("Charla sobre el concierto de…").
   // A leading recital/concert with a later talk clause is secondary, not identity.
   if (titleIsActivity && !leadingPerformance) {
-    return exclusion('non-performance-activity', [facts.title], true);
+    return exclusion('non-performance-activity', [`title: ${facts.title}`], true);
   }
 
   if (bodyIsActivity && !concertIdentity) {
-    return exclusion('non-performance-activity', [evidence], true);
+    return exclusion('non-performance-activity', evidence, true);
   }
 
   // A real concert/recital that also mentions a talk or workshop keeps the
@@ -580,10 +578,10 @@ function workshopIdentity(
       return undefined;
     }
     if (knownClassicalNames(facts).length > 0) {
-      return exclusion('non-performance-activity', [evidence], false, true);
+      return exclusion('non-performance-activity', evidence, false, true);
     }
     if (titleIsActivity || bodyIsActivity) {
-      return exclusion('non-performance-activity', [evidence], true);
+      return exclusion('non-performance-activity', evidence, true);
     }
   }
   return undefined;
@@ -605,6 +603,7 @@ function secondaryTalkDoesNotOverrideConcert(
     hasPhrase(body, 'charla sobre el concierto') ||
     hasPhrase(body, 'charlas previas') ||
     hasPhrase(body, 'previas al ciclo de conciertos')
+    || /\bcoloquio\b.*\bal finalizar la representacion\b/.test(body)
   ) {
     return true;
   }
@@ -759,18 +758,6 @@ function classicalVocalEnsembleEvidence(facts: ObservedFacts): string[] {
     .map((item) => [item.name, item.roleText].filter(Boolean).join(', '));
 }
 
-/**
- * Bare "cine" names a screening. The art-form phrase "cine experimental", used
- * as an electroacoustic/audiovisual medium, is not a film-cycle identity.
- * "Ciclo de cine", "cine mudo" or "proyección" still are.
- */
-function hasBareCineScreeningWord(text: string): boolean {
-  if (!hasWord(text, 'cine')) return false;
-  const cineHits = text.match(/(?:^|[^a-z0-9])cine(?=[^a-z0-9]|$)/g) ?? [];
-  const experimentalHits = text.match(/\bcine experimental\b/g) ?? [];
-  return cineHits.length !== experimentalHits.length;
-}
-
 function participatoryActivity(
   facts: ObservedFacts,
   title: string,
@@ -790,77 +777,75 @@ function participatoryActivity(
   return undefined;
 }
 
-function filmMusicIdentity(facts: ObservedFacts, haystack: string): Exclusion | undefined {
-  const evidence: string[] = [];
-  if (hasPhrase(haystack, 'film symphony')) evidence.push('film symphony');
-  if (hasPhrase(haystack, 'bandas sonoras') || hasPhrase(haystack, 'banda sonora')) {
-    evidence.push('banda sonora');
-  }
-  if (hasPhrase(haystack, 'musica de cine') || hasPhrase(haystack, 'música de cine')) {
-    evidence.push('música de cine');
-  }
-  if (hasPhrase(haystack, 'hans zimmer')) evidence.push('Hans Zimmer');
-  if (hasPhrase(haystack, 'john williams')) evidence.push('John Williams');
-  if (hasPhrase(haystack, 'ennio morricone')) evidence.push('Ennio Morricone');
-  if (hasPhrase(haystack, 'royal film concert')) evidence.push('film concert orchestra');
-  if (evidence.length === 0) return undefined;
-
-  const namedFilmIdentity =
-    hasPhrase(haystack, 'hans zimmer') ||
-    hasPhrase(haystack, 'john williams') ||
-    hasPhrase(haystack, 'ennio morricone') ||
-    hasPhrase(haystack, 'film symphony') ||
-    hasPhrase(haystack, 'royal film concert');
-  const program = fieldFolded(facts.programText);
-  const classicalBlock =
-    knownClassicalNames(facts).length > 0 ||
-    hasPhrase(haystack, 'musica clasica') ||
-    hasPhrase(haystack, 'grandes obras de la musica clasica') ||
-    hasWord(program, 'opera') ||
-    hasWord(program, 'operas') ||
-    hasWord(program, 'zarzuela');
-  if (classicalBlock && !namedFilmIdentity) {
-    return exclusion('film-music-identity', evidence, false, true);
-  }
-  return exclusion('film-music-identity', evidence, true);
+/** Strip only the named company token, never a later workshop declaration. */
+function activityText(value: string, facts: ObservedFacts): string {
+  return (stripNonRepertoireEntityNames(value, facts) ?? '')
+    .replace(/\b(?:c[ií]a\.?|compa[nñ][ií]a|ensemble|grupo)\s+[«“"']?taller\b/giu, 'compañía')
+    .split(/(?<=[.!?;])\s+|\n+/u).filter((clause) => !isBiographicalClause(clause)).join(' ');
 }
 
-function popularMusicIdentity(
+function filmMusicIdentity(facts: ObservedFacts): Exclusion | undefined {
+  const evidence = repertoireExclusionEvidence(facts, (text, identity) =>
+    /\b(?:bandas? sonoras?|musica (?:de|para el) cine|(?:coros|anos) de cine|film music)\b/.test(text)
+    || (identity && /\b(?:homenaje|tributo|especial|universo|lo mejor de)\b.*\b(?:hans zimmer|john williams|(?:ennio )?morricone)\b/.test(text))
+    || (!identity && /\b(?:john williams|hans zimmer|ennio morricone)\b/.test(text)
+      && /\b(?:star wars|indiana jones|harry potter|interstellar|gladiator|la mision|the mission)\b/.test(text)),
+  );
+  if (!evidence.length) return undefined;
+  const classicalCue = knownClassicalNames(facts).length > 0
+    || eligibilityTextFields(facts).some(({ value }) => hasPhrase(fieldFolded(value), 'musica clasica'))
+    || /\b(?:opera|operas|zarzuela)\b/.test(fieldFolded(facts.programText))
+    || /\b(?:obertura|sinfonia|concierto|cuarteto)\s+(?:(?:n[.º°o]*|num(?:ero)?)[ .]*)?\d+\b/.test(fieldFolded(facts.programText));
+  const principal = repertoireExclusionEvidence(facts, (text, identity) => identity &&
+    /\b(?:homenaje|tributo|especial|gala)\b.*\b(?:bandas? sonoras?|hans zimmer|john williams|(?:ennio )?morricone)\b/.test(text));
+  return exclusion('film-music-identity', evidence, false, classicalCue && !principal.length);
+}
+
+function popularMusicIdentity(facts: ObservedFacts): Exclusion | undefined {
+  const strong = repertoireExclusionEvidence(facts, (text, identity) =>
+    // Queen of the Night is an operatic aria; Abba Pater is sacred Latin.
+    // Neither is evidence of the pop groups Queen/ABBA.
+    /\b(?:abba|queen|beatles|broadway)\b/.test(
+      text.replace(/\bqueen of (?:the )?night\b|\babba pater\b/g, ' '),
+    )
+    || (identity && (hasWord(text, 'pop') || hasPhrase(text, 'musicales en concierto')))
+    || hasPhrase(text, 'melodias populares') || hasPhrase(text, 'villancicos mas famosos'),
+  );
+  if (strong.length) {
+    // An explicitly separated first half must be assessed as a mixed bill,
+    // even when flattened credits prevent the composer extractor resolving it.
+    const firstHalf = classicalFirstHalf(facts, []);
+    return exclusion('popular-music-identity', strong, false, firstHalf);
+  }
+  const adjacent = repertoireExclusionEvidence(facts, (text) => hasWord(text, 'pop') || popularProgramHit(text));
+  if (!adjacent.length) return undefined;
+  const classical = knownClassicalNames(facts).length > 0
+    || hasExplicitClassicalEraCue(fieldFolded(facts.description), fieldFolded(facts.programText));
+  return exclusion('popular-music-identity', adjacent, false, classical);
+}
+
+/** Match within a field/clause, never across credits, organizers or CV sentences. */
+function repertoireExclusionEvidence(
   facts: ObservedFacts,
-  title: string,
-  description: string,
-  program: string,
-  haystack: string,
-): Exclusion | undefined {
-  const strong: string[] = [];
-  if (hasWord(title, 'pop')) strong.push('pop');
-  if (hasPhrase(title, 'grandes del pop')) strong.push('grandes del pop');
-  if (hasPhrase(title, 'musicales en concierto') || hasPhrase(haystack, 'broadway')) {
-    strong.push('Broadway / musical');
-  }
-  if (hasWord(title, 'abba') || hasWord(haystack, 'abba')) strong.push('ABBA');
-  if (hasWord(title, 'beatles')) strong.push('Beatles');
-  if (hasWord(title, 'queen') && (hasWord(title, 'pop') || hasWord(title, 'abba') || hasWord(title, 'beatles'))) {
-    strong.push('Queen');
-  }
-  if (hasPhrase(description, 'melodias populares') || hasPhrase(description, 'villancicos mas famosos')) {
-    strong.push('gala popular');
-  }
-
-  const adjacent: string[] = [];
-  if (hasWord(haystack, 'pop') && !hasWord(title, 'pop')) adjacent.push('pop');
-  if (popularProgramHit(program) || popularProgramHit(haystack)) {
-    adjacent.push('programa popular');
-  }
-
-  if (strong.length > 0) {
-    return exclusion('popular-music-identity', [...new Set(strong)], true);
-  }
-  if (adjacent.length === 0) return undefined;
-  const classical =
-    knownClassicalNames(facts).length > 0 ||
-    hasExplicitClassicalEraCue(description, program);
-  return exclusion('popular-music-identity', [...new Set(adjacent)], !classical, classical);
+  matches: (text: string, identity: boolean) => boolean,
+): string[] {
+  // Explicit repertoire titles and attributions are first-class observations.
+  // Do not use composers[] alone: composer credits without performed works are
+  // not a declaration that those compositions belong to this programme.
+  const fields = [
+    ...eligibilityTextFields(facts),
+    ...facts.works.filter((work) => work.title?.trim()).map((work) => ({
+      field: 'works' as const,
+      value: [work.composerName, work.title].filter(Boolean).join(': '),
+    })),
+  ];
+  return fields.flatMap(({ field, value }) => {
+    const identity = field === 'title' || field === 'categoryText' || field === 'seriesText';
+    return (identity ? [value] : narrativeClauses(value))
+      .filter((clause) => !isBiographicalClause(clause)
+        && matches(fieldFolded(stripNonRepertoireEntityNames(clause, facts)), identity))
+      .map((clause) => `${field}: ${clause}`);
+  });
 }
 
 function hasExplicitClassicalEraCue(description: string, program: string): boolean {
@@ -890,10 +875,9 @@ function popularProgramHit(text: string): boolean {
 
 /**
  * Observed classical/academic identity already recognised by the deterministic
- * policy, plus attributed programmes and conservative interpretation phrases
- * that still need AI interpretation. This gate neither grants deterministic
- * inclusion nor establishes a substantial classical block in a mixed bill.
- * Formation-size words (quinteto, trío, dúo) alone are not an anchor.
+ * policy, plus conservative interpretation phrases that are still not an
+ * automatic include. Used as an AI include gate; does not invent new policy.
+ * Formation-size words (quinteto, trío, dúo) are not an anchor.
  */
 export function hasObservedClassicalAcademicAnchor(facts: ObservedFacts): boolean {
   const haystack = identityHaystack(facts);
@@ -904,15 +888,6 @@ export function hasObservedClassicalAcademicAnchor(facts: ObservedFacts): boolea
   return hasConservativeClassicalInterpretationAnchor(facts);
 }
 
-/**
- * An explicit work attribution does not need a local composer lookup to be
- * interpretable. Require concert-work language plus independent musical
- * specificity: multiple distinct tonal/catalogued works, or a specific work
- * with chamber/historical programme context. A choral-orchestral mass can be
- * identified without a key/catalogue. Author names, song lists and ensemble
- * names alone never meet this threshold. Excluded identities still need the
- * existing, stronger substantial-block policy; this anchor cannot rescue them.
- */
 function hasAttributedClassicalProgrammeAnchor(facts: ObservedFacts): boolean {
   const works = facts.works.filter((work) =>
     work.composerName?.trim() && hasClassicalWorkSignal(fieldFolded(work.title)),
@@ -1039,13 +1014,71 @@ function hasConservativeClassicalInterpretationAnchor(facts: ObservedFacts): boo
  */
 export function hasSubstantialClassicalBlock(facts: ObservedFacts): boolean {
   const known = knownClassicalNames(facts);
-  if (known.length >= 2) return true;
-  if (liveOrganPerformance(facts, identityHaystack(facts))) return true;
+  // Credits in composers[] do not prove these authors' music is played.
+  // Use repertoire surfaces (works[] or the actual programme), not biography,
+  // and require more than an isolated classical reference in a pop/film bill.
+  const programme = fieldFolded(facts.programText);
+  const repertoireFacts = { ...facts, composers: [], title: '', description: undefined, seriesText: undefined };
+  const programmeKnown = knownClassicalNames(repertoireFacts);
+  const classicalWorks = facts.works.filter((work) => Boolean(
+    work.title?.trim() && work.composerName && matchComposer(work.composerName),
+  ));
+  const otherWorks = facts.works.filter((work) => Boolean(
+    work.title?.trim() && (!work.composerName || !matchComposer(work.composerName)),
+  ));
+  const distinctClassicalWorks = new Set(classicalWorks.map((work) =>
+    `${foldName(work.composerName!)}|${foldName(work.title)}`,
+  ));
+  const structuredBlock = distinctClassicalWorks.size >= 2 && classicalWorks.length >= otherWorks.length;
+  const explicitlyListedAuthors = programmeKnown.filter((name) =>
+    hasPhrase(programme, foldName(name)) ||
+    hasWord(programme, foldName(name).split(' ').at(-1) ?? ''),
+  );
+  const textualBlock = explicitlyListedAuthors.length >= 2 &&
+    (hasClassicalWorkSignal(programme) || /\b(?:arias?|romanzas?|opera|zarzuela)\b/.test(programme));
+
+  // Short listings from concert series may give the performed repertoire as
+  // "Obras de X, Y, Z" in description, without individual works[]. The
+  // biography guard prevents an artist's career credits from becoming a block.
+  const liveDescription = narrativeClauses(facts.description ?? '')
+    .filter((clause) => !isBiographicalClause(clause)).join(' ');
+  const narrativeKnown = knownClassicalNames({
+    ...facts, composers: [], works: [], programText: undefined,
+    title: '', seriesText: undefined, description: liveDescription,
+  });
+  const officialCycle = fieldFolded([facts.categoryText, facts.seriesText].filter(Boolean).join(' '));
+  const declaredChamberCycle = hasWord(officialCycle, 'ciclo') &&
+    hasPhrase(officialCycle, 'musica de camara');
+  const describedProgrammeBlock = /\bobras de\b/.test(fieldFolded(liveDescription))
+    && narrativeKnown.length >= 2
+    && (Boolean(classicalSeriesIdentity(facts)) || declaredChamberCycle)
+    && facts.performers.length > 0;
+
+  // Several independently identified sonatas are a substantial programme,
+  // even when the adapter describes them together under one composer.
+  const multipleConcertWorks = /\b(?:[2-9]|[1-9]\d+|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)\s+(?:sonatas?|suites?|cuartetos?|conciertos?|motetes?)\b/.test(programme);
+  const liveMusicians = facts.performers.some((person) =>
+    /\b(?:orquesta|orchestra|ensemble|cuarteto|quartet|filarmonica|solista)\b/.test(
+      fieldFolded([person.name, person.roleText].filter(Boolean).join(' ')),
+    ));
+  if (structuredBlock || textualBlock || describedProgrammeBlock ||
+    (multipleConcertWorks && known.length > 0 && liveMusicians)) return true;
+  const haystack = identityHaystack(facts);
+  // Organ accompaniment alone is not a block of classical repertoire.
+  // A concert presenting improvisation over a film is a musical performance.
+  if (liveOrganPerformance(facts, haystack)
+    && hasConcertIdentityBesidesOrganRole(facts, haystack)
+    && (hasPhrase(haystack, 'improvisaciones sobre')
+      || hasPhrase(haystack, 'improvisacion concebida'))) return true;
   if (describedConcertWithUnequivocalClassicalRepertoire(facts)) return true;
   if (known.length === 0) return false;
   if (classicalFirstHalf(facts, known)) return true;
-  if (explicitListedClassicalWork(facts, known)) return true;
-  return listedWorkWithClassicalSignal(facts, known);
+  // A single isolated suite, quartet or composer in a pop/film bill is not
+  // evidence of an autonomous classical block. A complete long-form work can
+  // qualify only if its independent performance is explicit in the programme.
+  const completeWork = /\b(?:obra completa|interpretacion integra|version integra|sinfonia completa|opera completa)\b/.test(programme);
+  return completeWork && (explicitListedClassicalWork(facts, known) ||
+    listedWorkWithClassicalSignal(facts, known));
 }
 
 const CLASSICAL_WORK_NOUNS = [
@@ -1271,7 +1304,7 @@ function describedConcertWithUnequivocalClassicalRepertoire(facts: ObservedFacts
 }
 
 function eventProgrammeText(facts: ObservedFacts): string {
-  return `${fieldFolded(facts.programText)} ${fieldFolded(facts.description)}`
+  return `${fieldFolded(facts.programText)} ${fieldFolded(narrativeClauses(facts.description ?? '').filter((clause) => !isBiographicalClause(clause)).join(' '))}`
     .replace(/\bteatro (?:de la )?zarzuela\b/g, '')
     .trim();
 }
@@ -1623,6 +1656,13 @@ function exclusion(
   coprincipal = false,
 ): Exclusion {
   return { ruleId, evidence: evidence.filter(Boolean), overridesClassical, coprincipal };
+}
+
+function classicalProgrammeEvidence(facts: ObservedFacts): string[] {
+  return [
+    ...(facts.programText ? [`programText: ${facts.programText}`] : []),
+    ...facts.works.map((work) => `works: ${[work.composerName, work.title].filter(Boolean).join(': ')}`),
+  ];
 }
 
 function flattenEvidence(items: Array<{ evidence: string[] }>): string[] {
