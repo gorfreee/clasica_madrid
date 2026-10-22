@@ -366,7 +366,7 @@ describe('eligibility — exclusiones de identidad', () => {
     ).not.toBe('include');
   });
 
-  it('sigue excluyendo pop con orquesta, cine, jazz, flamenco y ballet como identidad principal', () => {
+  it('valora el bloque clásico declarado en pop/cine y conserva la identidad principal de jazz, flamenco y ballet', () => {
     expect(
       classify(
         facts({
@@ -376,7 +376,7 @@ describe('eligibility — exclusiones de identidad', () => {
           performers: [{ name: 'Pop Orchestra', roleText: 'orquesta' }],
         }),
       ).eligibility,
-    ).toMatchObject({ value: 'exclude', ruleId: 'popular-music-identity' });
+    ).toMatchObject({ value: 'include', ruleId: 'mixed-program-classical-block' });
 
     expect(
       classify(
@@ -388,7 +388,7 @@ describe('eligibility — exclusiones de identidad', () => {
           performers: [{ name: 'Film Symphony Orchestra', roleText: 'orquesta' }],
         }),
       ).eligibility.ruleId,
-    ).toBe('film-music-identity');
+    ).toBe('mixed-program-classical-block');
 
     expect(
       classify(

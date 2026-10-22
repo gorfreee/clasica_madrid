@@ -1,0 +1,263 @@
+[
+  {
+    "sourceId": "auditorio-nacional",
+    "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/film-symphony-orchestra-clasictacular-3",
+    "observed": {
+      "title": "Film Symphony Orchestra. Clasictacular",
+      "performers": [
+        {
+          "name": "Constantino Martínez-Orts",
+          "roleText": "director"
+        }
+      ],
+      "composers": [],
+      "works": [],
+      "venueText": "Sala Sinfónica",
+      "accessText": "De 36 a 67 €",
+      "programText": "Film Symphony Orchestra\n\"Clasictacular\"\nBandas sonoras DANUBIO AZUL, EL LAGO DE LOS CISNES, CARMINA BURANA, EL VUELO DEL MOSCARDÓN, CARMEN, NESSUN DORMA, NABUCCO, LA TRAVIATA, PAVANA, DANZA HÚNGARA Nº5, MARCHA RADETZKY, EL CASCANUECES, OBERTURA 1812, ENTRE OTRAS."
+    },
+    "originalEligibility": {
+      "value": "exclude",
+      "method": "rule",
+      "ruleId": "film-music-identity",
+      "evidence": [
+        "film symphony",
+        "banda sonora"
+      ]
+    }
+  },
+  {
+    "sourceId": "auditorio-nacional",
+    "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/ocne-satelite-13-bernard-herrmann-no-solo-cine",
+    "observed": {
+      "title": "OCNE. Satélite 13. Bernard Herrmann, No Solo Cine",
+      "performers": [
+        {
+          "name": "Diverso Ensemble"
+        },
+        {
+          "name": "Kremena Gancheva"
+        },
+        {
+          "name": "Luminita Nenita"
+        },
+        {
+          "name": "Joaquín Arias"
+        },
+        {
+          "name": "Mireya Peñarroja"
+        },
+        {
+          "name": "Carlos J. Casadó"
+        }
+      ],
+      "composers": [],
+      "works": [],
+      "venueText": "Sala de Cámara",
+      "accessText": "12 €",
+      "programText": "Bernard Herrmann\nEchoes (1965), para cuarteto de cuerda\nSouvenirs de Voyage (1967), para quinteto con clarinete"
+    },
+    "originalEligibility": {
+      "value": "exclude",
+      "method": "rule",
+      "ruleId": "cinema-projection",
+      "evidence": [
+        "OCNE. Satélite 13. Bernard Herrmann, No Solo Cine"
+      ]
+    }
+  },
+  {
+    "sourceId": "teatro-real",
+    "sourceUrl": "https://www.teatroreal.es/es/espectaculo/xxxi-concierto-navidad",
+    "observed": {
+      "title": "XXXI Concierto de Navidad",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "description": "Presentado por: FUNDACIÓN COFARES",
+      "categoryText": "También en el Real",
+      "venueText": "Sala Principal",
+      "organizerText": "Fundación COFARES",
+      "programText": "Presentado por: FUNDACIÓN COFARES PROGRAMA MUSICAL DEL XXXI CONCIERTO DE NAVIDAD DE LA FUNDACIÓN COFARES Primera Parte Orquesta Clásica Santa Cecilia Director Kynan Johns Nicolas Varela, Piano Rachmaninov.- Concierto para piano núm 3 Segunda parte DÉLICA ABBA QUEEN BEATLES Queen - Somebody to love Abba - Money, money money; gimme, gimme,gimme; Mamma Mia Queen - Crazy little thing called love Beatles - Come together, Let it be Beatles - Yesterday Abba - The winner takes it all Scorpions - Still loving you Queen - Bohemian Rapsody Queen - Show must go on Beatles - Hey Jude Queen - We are the champions Abba - Dancing Queen"
+    },
+    "originalEligibility": {
+      "value": "exclude",
+      "method": "rule",
+      "ruleId": "popular-music-identity",
+      "evidence": [
+        "ABBA"
+      ]
+    }
+  },
+  {
+    "sourceId": "madrid-datos",
+    "sourceUrl": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=232e80cfb4dc0a10VgnVCM100000891ecb1aRCRD",
+    "observed": {
+      "title": "Todo Chapí",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "description": "175 ANIVERSARIO DE RUPERTO CHAPÍ. CÍA. TALLER DE ZARZUELA. La Compañía conmemora, con este espectáculo el 175 aniversario de Ruperto Chapí. El gran compositor nacido en Villena, Alicante, escribió zarzuelas muy populares, además de música de cámara y sinfónica. En el recital se interpretarán algunos fragmentos de sus más conocidas obras, tales como “La Bruja” o La Revoltosa”, entre otras. Ficha artística: Dirección escena: Carmen Gómez Montano. Dirección musical: Celia Laguna. Entrada gratuita previa reserva pinchando este enlace Se ruega máxima puntualidad. No se permitirá el acceso una vez comenzado el espectáculo.",
+      "venueText": "Centro Cultural Juan Genovés (Moncloa - Aravaca)",
+      "accessText": "free",
+      "programText": "175 ANIVERSARIO DE RUPERTO CHAPÍ. CÍA. TALLER DE ZARZUELA. La Compañía conmemora, con este espectáculo el 175 aniversario de Ruperto Chapí. El gran compositor nacido en Villena, Alicante, escribió zarzuelas muy populares, además de música de cámara y sinfónica. En el recital se interpretarán algunos fragmentos de sus más conocidas obras, tales como “La Bruja” o La Revoltosa”, entre otras. Ficha artística: Dirección escena: Carmen Gómez Montano. Dirección musical: Celia Laguna. Entrada gratuita previa reserva pinchando este enlace Se ruega máxima puntualidad. No se permitirá el acceso una vez comenzado el espectáculo."
+    },
+    "originalEligibility": {
+      "value": "exclude",
+      "method": "rule",
+      "ruleId": "non-performance-activity",
+      "evidence": [
+        "Todo Chapí"
+      ]
+    }
+  },
+  {
+    "sourceId": "teatros-canal",
+    "sourceUrl": "https://www.teatroscanal.com/espectaculo/estibaliz-martyn-sergio-kuhlmann-donde-nace-la-voz",
+    "observed": {
+      "title": "Estíbaliz Martyn | Sergio Kuhlmann",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "description": "Donde nace la voz es un viaje musical y escénico que recorre diferentes épocas, estilos y emociones a través de la voz y el piano. Este concierto celebra la capacidad de la música para emocionar, inspirar y conectar con públicos muy diversos y de todas las edades. Es una experiencia capaz de cautivar al espectador desde la primera nota y conducirlo por un apasionante viaje a través de distintos estilos, épocas y lenguajes musicales, donde la tradición, la emoción y la excelencia interpretativa se unen en un mismo escenario. La soprano española Estíbaliz Martyn y el pianista brasileño Sergio Kuhlmann invitan al espectador a descubrir un universo sonoro que une grandes arias de ópera, zarzuela, teatro musical, canciones de concierto y célebres bandas sonoras cinematográficas. Mediante un hilo conductor que enlaza cada obra y cada estilo, el concierto se transforma en una experiencia cercana, dinámica y evocadora, enriquecida por cambios de vestuario y recursos audiovisuales.",
+      "categoryText": "Música clásica – Soprano y piano. Con música de Verdi, Puccini, Morricone, Piazzolla, Gershwin, Chapí, Chopin…",
+      "venueText": "Sala Verde",
+      "accessText": "Desde 9 €",
+      "programText": "Estíbaliz Martyn, soprano Sergio Kuhlmann, piano Música clásica Países: España / Brasil Duración: 1 h 30 min (sin intermedio) Programa Lucio Quarantotto Con te partirò Giuseppe Verdi ( La Traviata ) Brindis de La Traviata (Libiamo ne’ lieti calici) Giacomo Puccini ( Gianni Schicchi ) O mio babbino caro Vicente Lleó La Corte del Faraón/ ¡Ay, Ba! (Paráfrase de Sergio Kuhlmann) Ruperto Chapí Zarzuela El Barberillo de Lavapiés: Como nací en la calle de la Paloma Ennio Morricone ( La Misión ) Nella Fantasia George Gershwin ( Porgy and Bess ) Summertime Frédéric Chopin Fantaisie-Impromptu Op. 66 Harold Arlen / Yip Harburg ( El Mago de Oz ) Somewhere Over the Rainbow Michael Nyman ( The Piano ) The Heart Asks Pleasure First Henry Mancini / Johnny Mercer ( Breakfast at Tiffany’s ) Moon River Tradicional rusa Mátushka Golúbushka Amadeo Vives Zarzuela La Generala: La Canción del Arlequín Astor Piazzolla Adiós Nonino . (Arreglo Sergio Kuhlmann) Giacomo Puccini ( Turandot ) Nessun Dorma Luiz Bonfá / Antônio Maria ( Black Orpheus ) Manhã de Carnaval . Arreglo Sergio Kuhlmann Cecilia Valdés, Gonzalo Roig Romanza de Cecilia Valdés"
+    },
+    "originalEligibility": {
+      "value": "exclude",
+      "method": "rule",
+      "ruleId": "film-music-identity",
+      "evidence": [
+        "banda sonora",
+        "Ennio Morricone"
+      ]
+    }
+  },
+  {
+    "sourceId": "condeduque",
+    "sourceUrl": "https://www.condeduquemadrid.es/actividades/lucia-iglesias-y-marcos-madrigal",
+    "observed": {
+      "title": "Lucia Iglesias y Marcos Madrigal",
+      "performers": [
+        {
+          "name": "Lucía Iglesias",
+          "roleText": "soprano"
+        },
+        {
+          "name": "Marcos Madrigal",
+          "roleText": "piano"
+        }
+      ],
+      "composers": [
+        {
+          "name": "GABRIEL PIERNÉ"
+        },
+        {
+          "name": "ALFRED VERNET"
+        },
+        {
+          "name": "HENRI HIRSCHMANN"
+        },
+        {
+          "name": "ALEXANDRE SCHANNE"
+        },
+        {
+          "name": "LUCIEN COLLIN"
+        },
+        {
+          "name": "HECTOR SALOMON A"
+        },
+        {
+          "name": "JULES MASSENET"
+        },
+        {
+          "name": "MONTSERRAT LLADÓ"
+        },
+        {
+          "name": "ENRIQUE GRANADOS"
+        },
+        {
+          "name": "ISAAC ALBÉNIZ"
+        },
+        {
+          "name": "MANUEL DE FALLA"
+        },
+        {
+          "name": "PABLO LUNA"
+        },
+        {
+          "name": "JOAQUÍN TURINA"
+        }
+      ],
+      "works": [
+        {
+          "title": "Mimì Pinson, Vingt mélodies",
+          "composerName": "GABRIEL PIERNÉ"
+        },
+        {
+          "title": "Mademoiselle Musette",
+          "composerName": "ALFRED VERNET"
+        },
+        {
+          "title": "La petite Bohème: Couplets de Mimì",
+          "composerName": "HENRI HIRSCHMANN"
+        },
+        {
+          "title": "Nuit d’hiver, Margot, Impromptu",
+          "composerName": "ALEXANDRE SCHANNE"
+        },
+        {
+          "title": "Le Retour de Musette: O temps heureux de nos amours",
+          "composerName": "LUCIEN COLLIN"
+        },
+        {
+          "title": "A ma cousine Angèle, Nouvelles Mélodies",
+          "composerName": "HECTOR SALOMON A"
+        },
+        {
+          "title": "La chanson de Musette",
+          "composerName": "JULES MASSENET"
+        },
+        {
+          "title": "Obra de estreno",
+          "composerName": "MONTSERRAT LLADÓ"
+        },
+        {
+          "title": "Escenas románticas: Sueños del poeta",
+          "composerName": "ENRIQUE GRANADOS"
+        },
+        {
+          "title": "Chanson de Barberine",
+          "composerName": "ISAAC ALBÉNIZ"
+        },
+        {
+          "title": "Séguedille, Trois mélodies",
+          "composerName": "MANUEL DE FALLA"
+        },
+        {
+          "title": "Musetta: Canción de Musetta",
+          "composerName": "PABLO LUNA"
+        },
+        {
+          "title": "V-Las locas por amor, Poema en forma de canciones",
+          "composerName": "JOAQUÍN TURINA"
+        }
+      ],
+      "description": "Lucía Iglesias es una de las jóvenes sopranos españolas con mayor proyección de su generación. Debutó profesionalmente en 2019 con La Cenerentola de Rossini en el circuito de Òpera a Catalunya, iniciando desde entonces una carrera ascendente que la ha llevado a actuar en destacados escenarios de España, Italia y Perú. Su temporada 2026-27 la espera con cuatro roles mozartianos y una ópera de Britten que la llevarán por los principales coliseos españoles. Destacan sus debuts en el Teatro Real, el Gran Teatre del Liceu y la Ópera de Tenerife.\nEntre sus roles más destacados figuran Adina ( L’elisir d’amore ), Susanna ( Le nozze di Figaro ), Nannetta ( Falstaff ), Musetta ( La Bohème ) y Clorinda ( La Cenerentola ), personajes en los que ha sido elogiada por su voz dúctil y luminosa, su carisma escénico y su refinado sentido teatral. Premiada en certámenes de gran prestigio como el Veronica Dunne International Singing Competition, el Clara Schumann Competition, el Concorso Spazio Musica, Compostela Lírica, Germans Pla o el Concurso Mirna Lacambra, Lucía Iglesias ha recibido consejos y clases magistrales de figuras de la talla de Lisette Oropesa, Mariella Devia, Nadine Sierra o Deborah Polaski, formándose principalmente con sus maestros Daniel Muñoz y Manuel Burgueras. Ha formado parte del programa Crescendo del Teatro Real, con el que también ha representado a la institución en diversos compromisos internacionales, consolidando su versatilidad y madurez artística.\nPrograma\nGABRIEL PIERNÉ Mimì Pinson, Vingt mélodies\nALFRED VERNET Mademoiselle Musette\nHENRI HIRSCHMANN La petite Bohème: Couplets de Mimì\nALEXANDRE SCHANNE Nuit d’hiver, Margot, Impromptu\nLUCIEN COLLIN Le Retour de Musette: O temps heureux de nos amours\nHECTOR SALOMON A ma cousine Angèle, Nouvelles Mélodies\nJULES MASSENET La chanson de Musette\nMONTSERRAT LLADÓ Obra de estreno. Ayuda/encargo Fundación Ibermúsica\nENRIQUE GRANADOS Escenas románticas: Sueños del poeta (piano solo)\nISAAC ALBÉNIZ Chanson de Barberine\nMANUEL DE FALLA Séguedille, Trois mélodies\nPABLO LUNA Musetta: Canción de Musetta\nJOAQUÍN TURINA V-Las locas por amor, Poema en forma de canciones",
+      "categoryText": "ESTILO Clásica",
+      "venueText": "Auditorio",
+      "accessText": "18 euros",
+      "programText": "GABRIEL PIERNÉ Mimì Pinson, Vingt mélodies\nALFRED VERNET Mademoiselle Musette\nHENRI HIRSCHMANN La petite Bohème: Couplets de Mimì\nALEXANDRE SCHANNE Nuit d’hiver, Margot, Impromptu\nLUCIEN COLLIN Le Retour de Musette: O temps heureux de nos amours\nHECTOR SALOMON A ma cousine Angèle, Nouvelles Mélodies\nJULES MASSENET La chanson de Musette\nMONTSERRAT LLADÓ Obra de estreno. Ayuda/encargo Fundación Ibermúsica\nENRIQUE GRANADOS Escenas románticas: Sueños del poeta (piano solo)\nISAAC ALBÉNIZ Chanson de Barberine\nMANUEL DE FALLA Séguedille, Trois mélodies\nPABLO LUNA Musetta: Canción de Musetta\nJOAQUÍN TURINA V-Las locas por amor, Poema en forma de canciones"
+    },
+    "originalEligibility": {
+      "value": "exclude",
+      "method": "rule",
+      "ruleId": "cinema-projection",
+      "evidence": [
+        "ESTILO Clásica"
+      ]
+    }
+  }
+]
