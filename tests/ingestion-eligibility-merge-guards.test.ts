@@ -48,7 +48,11 @@ describe('eligibility integration: principal activity and performed repertoire',
         { title: 'Sinfonía n.º 5', composerName: 'Ludwig van Beethoven' },
       ],
     }));
-    expect(result).toMatchObject({ value: 'exclude', ruleId: 'film-music-identity' });
+    // Both identities are observable, but one symphony is not automatically a
+    // substantial autonomous classical block; keep it for editorial review.
+    expect(result).toMatchObject({
+      value: 'uncertain', ruleId: 'classical-and-nonclassical-coprincipal',
+    });
     expect(result.evidence).toContain('works: John Williams: Star Wars');
   });
 
