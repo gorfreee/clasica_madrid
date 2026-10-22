@@ -80,11 +80,9 @@ export function resolvePostponementSchedule(
   const markedInCalendar = calendar.filter(item => marked.has(keyOf(item)));
   const active = calendar.filter(item => !marked.has(keyOf(item)));
   const targetActive = active.filter(item => item.date === target.date);
-  const unrelated = active.filter(item => item.date !== target.date ||
-    (target.time !== undefined && item.time !== target.time));
+  const unrelated = active.filter(item => item.date !== target.date);
   if (marked.size > 1 || markedInCalendar.length !== marked.size || unrelated.length > 0 ||
-      (marked.size === 0 && calendar.some(item =>
-        item.date !== target.date || (target.time !== undefined && item.time !== target.time)))) {
+      (marked.size === 0 && calendar.some(item => item.date !== target.date))) {
     throw sourceConflict('aplazamiento con funciones sin correspondencia acreditada', 'date', evidence);
   }
   if (marked.size > 0 && active.length > 1) {
