@@ -40,6 +40,23 @@ export { eventDocumentTitle } from './event-seo.ts';
 
 export { musicEventSchemaStatus } from './event-status.ts';
 
+const titlePeersByCatalog = new WeakMap<Catalog, Map<string, ResolvedEvent[]>>();
+
+function titlePeersFor(catalog: Catalog, baseTitle: string): ResolvedEvent[] {
+  let groups = titlePeersByCatalog.get(catalog);
+  if (!groups) {
+    groups = new Map();
+    for (const item of listCanonicalEvents(catalog)) {
+      const title = eventDocumentTitle(item.event.title, item.rootVenue.name);
+      const peers = groups.get(title) ?? [];
+      peers.push(item);
+      groups.set(title, peers);
+    }
+    titlePeersByCatalog.set(catalog, groups);
+  }
+  return groups.get(baseTitle) ?? [];
+}
+
 export type EventOccurrenceModel = {
   id: string;
   date: string;
@@ -134,8 +151,7 @@ export function buildEventPageModel(
   const fixedClock = { now: () => now };
   const model = toEventPageModel(resolved, fixedClock);
   const baseTitle = model.documentTitle;
-  const titlePeers = listCanonicalEvents(catalog).filter((item) =>
-    eventDocumentTitle(item.event.title, item.rootVenue.name) === baseTitle);
+  const titlePeers = titlePeersFor(catalog, baseTitle);
   model.documentTitle = buildEventDocumentTitles(titlePeers, now).get(resolved.event.id)
     ?? model.documentTitle;
   const seen = new Set([resolved.event.id]);
