@@ -1,0 +1,128 @@
+[
+  {
+    "runId": 38543811672,
+    "artifactId": 11884231732,
+    "archiveSha256": "2dd4f5f61810b273cc9cbb4f564f4eac979c15ebe2b443ba36fbf96f716239b7",
+    "observationLine": 1351,
+    "decisionLine": 1590,
+    "sourceId": "ateneo-madrid",
+    "sourceUrl": "https://ateneodemadrid.com/evento/javier-botella-the-art-of-love",
+    "externalId": "65372",
+    "observed": {
+      "title": "Javier Botella. «The Art of Love»",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "Cátedra Mayor. 13:00",
+          "date": "2026-11-07",
+          "time": "13:00"
+        }
+      ],
+      "description": "Venta de entradas ( aquí ). Socios, código de descuento en el Área del Socio.\nTHE ART OF LOVE\nPresentación oficial del nuevo álbum de Javier Botella\nJavier Botella presenta The Art of Love, un espectáculo concebido como un viaje emocional a través de algunas de las más bellas canciones de amor del Great American Songbook.\nAcompañado por el pianista Den Budnik, Javier Botella interpreta un repertorio de grandes clásicos que han permanecido vivos a través de generaciones, en una propuesta íntima, elegante y profundamente personal.\nMás que un concierto, The Art of Love es una experiencia escénica que explora distintas facetas del amor: el descubrimiento, la memoria, la pérdida y la esperanza. Un recorrido musical construido alrededor de autores como George Gershwin, Kurt Weill, Jimmy Van Heusen, Rube Bloom o Michel Legrand, interpretados desde una sensibilidad contemporánea y respetuosa con la tradición.\nEl espectáculo supone además la presentación oficial del álbum The Art of Love, grabado en Valencia durante 2026 y concebido como el proyecto más personal de Javier Botella hasta la fecha.\nArtistas: Javier Botella – voz\nDen Budnik – piano\nAarón Pozón – saxo\nRaúl Márquez – violín\nArturo Pueyo – clarinete\nJavier Martínez – trompeta\nMariana N. Villamandos – violonchelo\nCátedra Mayor. 13:00.",
+      "categoryText": "Concierto",
+      "venueText": "Cátedra Mayor"
+    },
+    "originalDecision": {
+      "publishable": true,
+      "candidateGenerated": true,
+      "classification": {
+        "eligibility": {
+          "value": "include",
+          "method": "knowledge",
+          "ruleId": "known-classical-composer",
+          "evidence": [
+            "George Gershwin",
+            "Kurt Weill"
+          ]
+        },
+        "formats": {
+          "value": [
+            "chamber"
+          ],
+          "method": "ai",
+          "ruleId": "ai-formats"
+        },
+        "eras": {
+          "value": [],
+          "method": "fallback",
+          "ruleId": "ai-eras-rejected"
+        },
+        "kind": {
+          "value": "alternative",
+          "method": "knowledge",
+          "ruleId": "alternative-space"
+        },
+        "access": {
+          "value": "unknown",
+          "method": "fallback",
+          "ruleId": "access-missing"
+        }
+      }
+    }
+  },
+  {
+    "runId": 39603845469,
+    "artifactId": 12348014102,
+    "archiveSha256": "77c6528965a89feec15dbdf480a887dc28383789205ad602551ab93c94ffcc93",
+    "observationLine": 1296,
+    "decisionLine": 1513,
+    "sourceId": "ateneo-madrid",
+    "sourceUrl": "https://ateneodemadrid.com/evento/javier-botella-the-art-of-love",
+    "externalId": "65372",
+    "observed": {
+      "title": "Javier Botella. «The Art of Love»",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "Cátedra Mayor. 13:00",
+          "date": "2026-11-07",
+          "time": "13:00"
+        }
+      ],
+      "description": "Venta de entradas ( aquí ). Socios, código de descuento en el Área del Socio.\nTHE ART OF LOVE\nPresentación oficial del nuevo álbum de Javier Botella\nJavier Botella presenta The Art of Love, un espectáculo concebido como un viaje emocional a través de algunas de las más bellas canciones de amor del Great American Songbook.\nAcompañado por el pianista Den Budnik, Javier Botella interpreta un repertorio de grandes clásicos que han permanecido vivos a través de generaciones, en una propuesta íntima, elegante y profundamente personal.\nMás que un concierto, The Art of Love es una experiencia escénica que explora distintas facetas del amor: el descubrimiento, la memoria, la pérdida y la esperanza. Un recorrido musical construido alrededor de autores como George Gershwin, Kurt Weill, Jimmy Van Heusen, Rube Bloom o Michel Legrand, interpretados desde una sensibilidad contemporánea y respetuosa con la tradición.\nEl espectáculo supone además la presentación oficial del álbum The Art of Love, grabado en Valencia durante 2026 y concebido como el proyecto más personal de Javier Botella hasta la fecha.\nArtistas: Javier Botella – voz\nDen Budnik – piano\nAarón Pozón – saxo\nRaúl Márquez – violín\nArturo Pueyo – clarinete\nJavier Martínez – trompeta\nMariana N. Villamandos – violonchelo\nCátedra Mayor. 13:00.",
+      "categoryText": "Concierto",
+      "venueText": "Cátedra Mayor"
+    },
+    "originalDecision": {
+      "publishable": true,
+      "candidateGenerated": true,
+      "classification": {
+        "eligibility": {
+          "value": "include",
+          "method": "knowledge",
+          "ruleId": "known-classical-composer",
+          "evidence": [
+            "George Gershwin",
+            "Kurt Weill"
+          ]
+        },
+        "formats": {
+          "value": [
+            "chamber"
+          ],
+          "method": "ai",
+          "ruleId": "ai-formats"
+        },
+        "eras": {
+          "value": [],
+          "method": "fallback",
+          "ruleId": "ai-eras-rejected"
+        },
+        "kind": {
+          "value": "alternative",
+          "method": "knowledge",
+          "ruleId": "alternative-space"
+        },
+        "access": {
+          "value": "unknown",
+          "method": "fallback",
+          "ruleId": "access-missing"
+        }
+      }
+    }
+  }
+]

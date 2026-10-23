@@ -4,7 +4,7 @@ import type { Eligibility } from './golden-case.ts';
 import { isOperaCategory, titleIdentifiesOperaEvent } from './opera.ts';
 import {
   eligibilityTextFields, fieldFolded, foldName, hasPhrase, hasWord,
-  identityHaystack, isBiographicalClause, narrativeClauses,
+  identityHaystack, isBiographicalClause, narrativeClauses, popularSongbookRepertoire,
 } from './text.ts';
 import type { Resolution } from './types.ts';
 
@@ -218,6 +218,9 @@ function jazzIdentity(
     return exclusion('jazz-identity', ['jazz'], true);
   }
   if (hasWord(body, 'jazz')) {
+    // Explicit standards/songbook repertoire has its own mixed-programme
+    // gate below; a secondary bare "jazz" must not dilute it to uncertain.
+    if (repertoireExclusionEvidence(facts, popularSongbookRepertoire).length) return undefined;
     return exclusion('jazz-identity', ['jazz'], false, true);
   }
   return undefined;
@@ -802,6 +805,7 @@ function filmMusicIdentity(facts: ObservedFacts): Exclusion | undefined {
 }
 
 function popularMusicIdentity(facts: ObservedFacts): Exclusion | undefined {
+  const songbook = repertoireExclusionEvidence(facts, popularSongbookRepertoire);
   const strong = repertoireExclusionEvidence(facts, (text, identity) =>
     // Queen of the Night is an operatic aria; Abba Pater is sacred Latin.
     // Neither is evidence of the pop groups Queen/ABBA.
@@ -811,11 +815,12 @@ function popularMusicIdentity(facts: ObservedFacts): Exclusion | undefined {
     || (identity && (hasWord(text, 'pop') || hasPhrase(text, 'musicales en concierto')))
     || hasPhrase(text, 'melodias populares') || hasPhrase(text, 'villancicos mas famosos'),
   );
-  if (strong.length) {
+  if (strong.length || songbook.length) {
     // An explicitly separated first half must be assessed as a mixed bill,
     // even when flattened credits prevent the composer extractor resolving it.
     const firstHalf = classicalFirstHalf(facts, []);
-    return exclusion('popular-music-identity', strong, false, firstHalf);
+    const contradictoryClassicalIdentity = songbook.length > 0 && Boolean(explicitClassicalConcertDeclaration(facts));
+    return exclusion('popular-music-identity', [...songbook, ...strong], false, firstHalf || contradictoryClassicalIdentity);
   }
   const adjacent = repertoireExclusionEvidence(facts, (text) => hasWord(text, 'pop') || popularProgramHit(text));
   if (!adjacent.length) return undefined;
@@ -1014,6 +1019,7 @@ function hasConservativeClassicalInterpretationAnchor(facts: ObservedFacts): boo
  */
 export function hasSubstantialClassicalBlock(facts: ObservedFacts): boolean {
   const known = knownClassicalNames(facts);
+  const songbook = repertoireExclusionEvidence(facts, popularSongbookRepertoire).length > 0;
   // Credits in composers[] do not prove these authors' music is played.
   // Use repertoire surfaces (works[] or the actual programme), not biography,
   // and require more than an isolated classical reference in a pop/film bill.
@@ -1021,11 +1027,10 @@ export function hasSubstantialClassicalBlock(facts: ObservedFacts): boolean {
   const repertoireFacts = { ...facts, composers: [], title: '', description: undefined, seriesText: undefined };
   const programmeKnown = knownClassicalNames(repertoireFacts);
   const classicalWorks = facts.works.filter((work) => Boolean(
-    work.title?.trim() && work.composerName && matchComposer(work.composerName),
+    work.title?.trim() && work.composerName && matchComposer(work.composerName)
+      && (!songbook || hasClassicalWorkSignal(fieldFolded(work.title), false)),
   ));
-  const otherWorks = facts.works.filter((work) => Boolean(
-    work.title?.trim() && (!work.composerName || !matchComposer(work.composerName)),
-  ));
+  const otherWorks = facts.works.filter((work) => work.title?.trim() && !classicalWorks.includes(work));
   const distinctClassicalWorks = new Set(classicalWorks.map((work) =>
     `${foldName(work.composerName!)}|${foldName(work.title)}`,
   ));
@@ -1035,7 +1040,7 @@ export function hasSubstantialClassicalBlock(facts: ObservedFacts): boolean {
     hasWord(programme, foldName(name).split(' ').at(-1) ?? ''),
   );
   const textualBlock = explicitlyListedAuthors.length >= 2 &&
-    (hasClassicalWorkSignal(programme) || /\b(?:arias?|romanzas?|opera|zarzuela)\b/.test(programme));
+    (hasClassicalWorkSignal(programme, !songbook) || /\b(?:arias?|romanzas?|opera|zarzuela)\b/.test(programme));
 
   // Short listings from concert series may give the performed repertoire as
   // "Obras de X, Y, Z" in description, without individual works[]. The
@@ -1136,9 +1141,14 @@ function listedWorkWithClassicalSignal(facts: ObservedFacts, known: string[]): b
   });
 }
 
-function hasClassicalWorkSignal(text: string): boolean {
+function hasClassicalWorkSignal(text: string, allowConcertHeading = true): boolean {
   if (!text) return false;
-  if (CLASSICAL_WORK_NOUNS.some((noun) => hasWord(text, noun))) return true;
+  if (CLASSICAL_WORK_NOUNS.some((noun) =>
+    (allowConcertHeading || !['concierto', 'conciertos'].includes(noun)) && hasWord(text, noun),
+  )) return true;
+  // In an explicitly popular bill, "concierto" can name the event itself.
+  // A numbered/instrumental concerto still supplies a performed-work signal.
+  if (!allowConcertHeading && /\bconcierto\s+(?:para\b|en\b|n[.º°o]*\s*\d|num(?:ero)?\.?\s*\d)/.test(text)) return true;
   return /\bbwv\b|\bhwv\b|\brv\b/.test(text);
 }
 
@@ -1180,6 +1190,8 @@ function classicalFirstHalf(facts: ObservedFacts, known: string[]): boolean {
   const rest = program.slice(start + 1);
   const end = rest.search(/segunda parte|2\.?\s*a\.?\s*parte|second half/);
   const block = end >= 0 ? program.slice(start, start + 1 + end) : program.slice(start);
+  if (repertoireExclusionEvidence(facts, popularSongbookRepertoire).length &&
+    !hasClassicalWorkSignal(block, false)) return false;
   if (findKnownComposersInText(block).length > 0) return true;
   return known.some((name) => hasPhrase(block, name));
 }

@@ -9,6 +9,10 @@ import {
   hasPhrase,
   hasWord,
   type FormatEvidence,
+  eligibilityTextFields,
+  isBiographicalClause,
+  narrativeClauses,
+  popularSongbookRepertoire,
 } from './text.ts';
 import { observedFormatChoiceIsUnresolved } from './format-alternatives.ts';
 import { isOperaCategory, titleIdentifiesOperaEvent } from './opera.ts';
@@ -346,6 +350,20 @@ function isSymphonicFormat(facts: ObservedFacts, evidence: FormatEvidence): bool
 function isChamberFormat(facts: ObservedFacts, evidence: FormatEvidence): boolean {
   const category = fieldFolded(facts.categoryText);
   if (isMusicalChamberCategory(category, evidence.identity)) return true;
+  // A small jazz/pop group is not classical chamber music. Keep explicit
+  // chamber evidence in a mixed programme, but do not infer it from size.
+  const popularEnsemble = eligibilityTextFields(facts).some(({ field, value }) => {
+    const identity = field === 'title' || field === 'categoryText' || field === 'seriesText';
+    return narrativeClauses(value).some((clause) => !isBiographicalClause(clause) && (
+      popularSongbookRepertoire(fieldFolded(clause), identity)
+      || (identity && hasWord(fieldFolded(clause), 'jazz'))
+      || /\b(?:concierto|recital|repertorio) de jazz\b/.test(fieldFolded(clause))
+    ));
+  }) || evidence.performers.some((text) => hasWord(text, 'jazz') || hasWord(text, 'swing'));
+  if (popularEnsemble) {
+    return [evidence.identity, ...evidence.performers].some(hasStrongChamberFormation)
+      || hasPhrase(evidence.program, 'formato de camara');
+  }
   if (hasChamberFormation(evidence.identity)) return true;
   if (hasPhrase(evidence.program, 'formato de camara')) return true;
   if (evidence.performers.some((text) => hasChamberFormation(text))) return true;

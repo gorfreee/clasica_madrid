@@ -91,6 +91,15 @@ Excluir cuando la identidad principal del evento sea una de estas:
 
 **Pop / rock / canción / música popular** arreglada para ensemble clásico. Orquesta, coro o cuerdas no cambian la decisión. Ejemplos: Fito Páez con cuerdas; ABBA, Queen o Beatles con orquesta; Pastora Soler; Jeanette; homenajes pop sinfónicos. La mera combinación de «su repertorio» / «la obra de» con octeto, cuerdas u orquesta, sin evidencia popular explícita, **no** es `exclude` determinista: también aparece en conciertos clásicos contemporáneos. En ese caso `uncertain` (fallback de IA) es preferible a un falso negativo.
 
+La identidad explícita de **Great American Songbook, estándares americanos/de jazz,
+cancionero americano o repertorio de swing** se evalúa como repertorio popular.
+Se exige identidad del evento o una declaración de repertorio interpretado; las
+palabras aisladas «songbook»/«swing», los créditos y las cláusulas biográficas no
+bastan. Gershwin o Weill en `composers[]`, o canciones atribuidas a ellos, no
+acreditan por sí solos un bloque académico. Un bloque clásico autónomo conserva
+la política de programas mixtos; una declaración clásica contradictoria sin ese
+bloque queda `uncertain`. Una pequeña formación de jazz no acredita `chamber`.
+
 **DJ / electrónica / crossover** cuyo repertorio principal no sea clásico, o cuya identidad sea el formato DJ aunque cite una obra clásica. Ejemplos: DJ Symphonic; Red Bull Symphonic; DJ + Vivaldi como producto crossover.
 
 **Música de cine** como contenido principal: John Williams, Hans Zimmer, Morricone, Film Symphony Orchestra, galas de bandas sonoras. Aunque la música sea orquestal.

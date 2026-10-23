@@ -73,6 +73,18 @@ export function isBiographicalClause(value: string): boolean {
   return /\b(?:debuto|ha (?:actuado|colaborado|trabajado|interpretado|impartido|dirigido|estudiado)|su carrera|su trayectoria|se formo|mayor proyeccion|en su juventud)\b/.test(foldText(value));
 }
 
+/** Explicit popular repertoire, not the bare words songbook/swing or an author. */
+export function popularSongbookRepertoire(text: string, identity: boolean): boolean {
+  const repertoire = /\b(?:great american songbook|cancionero (?:popular )?(?:norte)?americano|(?:estandares|standards) (?:americanos|de jazz))\b/;
+  if (identity && repertoire.test(text)) return true;
+  if (identity && /^(?:swing|jazz standards)$/.test(text.trim())) return true;
+  return (
+    /\b(?:canciones|temas|repertorio|seleccion|clasicos)\b[^.!?;\n]{0,70}\b(?:great american songbook|cancionero (?:popular )?(?:norte)?americano|(?:estandares|standards) (?:americanos|de jazz))\b/.test(text)
+    || /\b(?:interpreta(?:n|ra|ran)?|interpretacion de|recital de|concierto de|programa de|repertorio de|noche de|velada de)\s+(?:el |los |un |una |del? )?(?:great american songbook|cancionero (?:popular )?(?:norte)?americano|(?:estandares|standards) (?:americanos|de jazz)|swing)\b/.test(text)
+    || (!identity && /^(?:great american songbook|cancionero (?:popular )?(?:norte)?americano|(?:estandares|standards) (?:americanos|de jazz))\s*(?:[:.]|$)/.test(text))
+  );
+}
+
 /**
  * Format evidence grouped by field, so generic formation words are not
  * matched in performer biographies sitting in `description`.
