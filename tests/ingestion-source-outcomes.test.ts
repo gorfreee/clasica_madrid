@@ -229,6 +229,15 @@ describe('independent extraction, temporal coverage and hydration outcomes (#375
     expect(run.rawEvents.some(event => event.sourceId === id)).toBe(true);
   });
 
+  it('technical failure status is independent of the error message text', async () => {
+    const run = await runSource(choirId, async () => { throw new Error(''); });
+    expect(run.summary.sourceResults?.[choirId]).toMatchObject({
+      extraction: { status: 'failed', message: '' }, usable: false, disappearanceEligible: false,
+    });
+    expect(run.summary.autoMergeEligible).toBe(false);
+    expect(run.summary.healthReasons).toContain(`source-failed:${choirId}`);
+  });
+
   it('all stale or unknown with no current observations is fatal despite successful HTTP and parsing', async () => {
     const run = await runSource(choirId, async () => fixture('coro-camara-madrid/agenda.json'));
     expect(run.summary.sourcesSucceeded).toEqual([choirId]);

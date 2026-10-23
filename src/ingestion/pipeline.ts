@@ -180,7 +180,8 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
     for (const discard of result.adapterDiscards) obs?.recordAdapterDiscard(discard);
     const adapter = getAdapter(source.adapterId);
     const sourceHydration = countHydration(hydrated);
-    const listingError = result.listingFailure?.message ?? (failure && failure.stage !== 'hydration' ? failure.message : undefined);
+    const extractionFailure = result.listingFailure ?? (failure?.stage !== 'hydration' ? failure : undefined);
+    const listingError = extractionFailure?.message;
     const listingFallback = extracted.some((raw) => raw.listingSurface === 'wp-rest')
       ? 'wp-rest' as const
       : undefined;
@@ -198,8 +199,8 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
       || (temporalCoverage.status === 'unknown' && hasCurrentObservation);
     const sourceResult: SourceIngestResult = {
       extraction: {
-        status: listingIncomplete ? 'incomplete' : listingError ? 'failed' : 'succeeded',
-        ...(listingError ? { message: listingError } : {}),
+        status: listingIncomplete ? 'incomplete' : extractionFailure ? 'failed' : 'succeeded',
+        ...(extractionFailure ? { message: extractionFailure.message } : {}),
       },
       ...(temporalCoverage ? { temporalCoverage } : {}),
       extractedEvents: extracted.length,
@@ -222,7 +223,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
       hydrationRecoveries,
       status: failure ? 'failed' : 'ok',
       usesHydration: Boolean(adapter.hydrate),
-      hydrationReached: hydrated.length > 0 || !listingError,
+      hydrationReached: hydrated.length > 0 || !extractionFailure,
       listingError,
       listingFallback,
       adapterDiscards: result.adapterDiscards.length,
