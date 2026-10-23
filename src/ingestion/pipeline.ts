@@ -36,6 +36,8 @@ import type {
   RawEvent,
   SourceDefinition,
   SourceFailure,
+  SourceTemporalCoverage,
+  SourceIngestResult,
 } from './types.ts';
 import {
   emptyAdapterDiscardCounts,
@@ -92,6 +94,8 @@ type HarvestSourceResult = {
   extracted: RawEvent[];
   hydrated: RawEvent[];
   listingIncomplete: boolean;
+  listingFailure?: SourceFailure;
+  temporalCoverage?: SourceTemporalCoverage;
   coverage?: ReturnType<typeof requiredHydrationCoverage>;
   failure?: SourceFailure;
   adapterDiscards: AdapterDiscard[];
@@ -105,6 +109,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
   });
   const get = memoizeGet(options.get ?? getText);
   const failures: SourceFailure[] = [];
+  const sourceResults: Record<string, SourceIngestResult> = {};
   const succeeded: string[] = [];
   const disappearanceSuppressedSources: string[] = [];
   const rawEvents: RawEvent[] = [];
@@ -122,13 +127,20 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
     const reportDiscard = (discard: AdapterDiscardReport) => {
       adapterDiscards.push({ sourceId: source.id, ...discard });
     };
+    let temporalCoverage: SourceTemporalCoverage | undefined;
+    const reportTemporalCoverage = (coverage: SourceTemporalCoverage) => {
+      // The contract is source-wide. Combining independently bounded listings
+      // needs an adapter-level completeness proof, not a union of dates here.
+      if (temporalCoverage) throw new Error('Temporal coverage must be declared once per source');
+      temporalCoverage = coverage;
+    };
     try {
       let extracted: RawEvent[];
       let listingIncomplete = false;
       let listingFailure: SourceFailure | undefined;
       try {
         extracted = await measureSourcePhase(obs, source.id, 'extraction', () =>
-          extractSource(source, options.now, window, sourceGet, reportDiscard));
+          extractSource(source, options.now, window, sourceGet, reportDiscard, reportTemporalCoverage));
       } catch (error) {
         if (!(error instanceof IncompleteListingError)) throw error;
         extracted = error.events;
@@ -150,7 +162,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
             message: `cobertura de hydration incompleta: ${coverage.succeeded}/${coverage.required} fichas necesarias; desapariciones no evaluables`,
           }
         : undefined;
-      return { source, extracted, hydrated, listingIncomplete, coverage, failure: failure ?? listingFailure, adapterDiscards };
+      return { source, extracted, hydrated, listingIncomplete, listingFailure, temporalCoverage, coverage, failure: failure ?? listingFailure, adapterDiscards };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       flushBrowserFetchAttempts(source.id, obs);
@@ -163,25 +175,48 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
   // independent of source completion order.
   const adapterDiscards: AdapterDiscard[] = [];
   for (const result of harvestedSources) {
-    const { source, extracted, hydrated, listingIncomplete, coverage, failure } = result;
+    const { source, extracted, hydrated, listingIncomplete, temporalCoverage, coverage, failure } = result;
     adapterDiscards.push(...result.adapterDiscards);
     for (const discard of result.adapterDiscards) obs?.recordAdapterDiscard(discard);
     const adapter = getAdapter(source.adapterId);
     const sourceHydration = countHydration(hydrated);
-    const listingError = failure && failure.stage !== 'hydration' ? failure.message : undefined;
+    const listingError = result.listingFailure?.message ?? (failure && failure.stage !== 'hydration' ? failure.message : undefined);
     const listingFallback = extracted.some((raw) => raw.listingSurface === 'wp-rest')
       ? 'wp-rest' as const
       : undefined;
     const hydrationRecoveries = hydrated.filter((raw) =>
       raw.hydration?.status === 'succeeded' && (raw.hydration.httpStatuses?.length ?? 0) > 0
     ).length;
-    obs?.recordSourceStats({
-      sourceId: source.id,
+    const temporalComplete = !temporalCoverage || temporalCoverage.status === 'complete';
+    const conflicted = hydrated.some(raw => raw.hydration?.reason === 'source-conflict');
+    const hasCurrentObservation = hydrated.some(raw => raw.observed.occurrences.some(
+      occurrence => occurrence.date && occurrence.date >= window.from && occurrence.date <= window.to,
+    ));
+    const usableCoverage = !temporalCoverage || temporalCoverage.status === 'complete'
+      || (temporalCoverage.status === 'partial'
+        && temporalCoverage.interval.from <= window.to && temporalCoverage.interval.to >= window.from)
+      || (temporalCoverage.status === 'unknown' && hasCurrentObservation);
+    const sourceResult: SourceIngestResult = {
+      extraction: {
+        status: listingIncomplete ? 'incomplete' : listingError ? 'failed' : 'succeeded',
+        ...(listingError ? { message: listingError } : {}),
+      },
+      ...(temporalCoverage ? { temporalCoverage } : {}),
       extractedEvents: extracted.length,
       hydratedEvents: hydrated.length,
       hydrationAttempted: sourceHydration.attempted,
       hydrationSucceeded: sourceHydration.succeeded,
       hydrationFailed: sourceHydration.failed,
+      hydrationRequired: coverage?.required ?? 0,
+      hydrationIncomplete: coverage?.incomplete ?? false,
+      hydrationSevere: coverage?.severe ?? false,
+      disappearanceEligible: !failure && !listingIncomplete && !coverage?.incomplete && !conflicted && temporalComplete,
+      usable: !failure && usableCoverage,
+    };
+    sourceResults[source.id] = sourceResult;
+    obs?.recordSourceStats({
+      ...sourceResult,
+      sourceId: source.id,
       hydrationSkippedOutsideWindow: hydrated.filter((raw) => raw.hydration?.reason === 'outside-window').length,
       hydrationSkippedCircuitOpen: hydrated.filter((raw) => raw.hydration?.reason === 'circuit-open').length,
       hydrationRecoveries,
@@ -203,7 +238,9 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
       obs?.recordObservation({ raw, listing: listing ?? raw, normalized: prepareNormalizedEvent(raw) });
     }
     rawEvents.push(...hydrated);
-    if (listingIncomplete || coverage?.incomplete || hydrated.some(raw => raw.hydration?.reason === 'source-conflict')) disappearanceSuppressedSources.push(source.id);
+    // Full failures are already excluded through sourcesFailed; preserve the
+    // existing incomplete-source projection for report consumers.
+    if (listingIncomplete || coverage?.incomplete || conflicted || !temporalComplete) disappearanceSuppressedSources.push(source.id);
     if (failure) {
       failures.push(failure);
       obs?.recordSourceFailure(source.id, failure.message);
@@ -222,6 +259,7 @@ export async function runIngest(options: IngestOptions): Promise<IngestRun> {
       attempted: sources,
       succeeded,
       failed: failures,
+      sourceResults,
       disappearanceSuppressedSources,
       adapterDiscards,
     },
@@ -260,6 +298,7 @@ async function ingestPreparedEvents(
       attempted: SourceDefinition[];
       succeeded: string[];
       failed: SourceFailure[];
+      sourceResults: Record<string, SourceIngestResult>;
       disappearanceSuppressedSources: string[];
       adapterDiscards: AdapterDiscard[];
     };
@@ -518,6 +557,7 @@ async function ingestPreparedEvents(
     fatalReasons: apply.report.issues.some(issue => issue.code === 'publication-integrity') ? ['publication-integrity'] : [],
     sourcesSucceeded: succeeded,
     sourcesFailed: failures,
+    sourceResults: harvest?.sourceResults,
     ambiguous: reconciled.stats.ambiguous,
     classificationDrift,
     batchDuplicates: reconciled.stats.batchDuplicates,
@@ -537,6 +577,7 @@ async function ingestPreparedEvents(
     sourcesAttempted,
     sourcesSucceeded: succeeded,
     sourcesFailed: failures,
+    sourceResults: harvest?.sourceResults,
     rawEvents: rawEvents.length,
     skippedUnusable,
     eligibility,
@@ -617,11 +658,13 @@ export async function extractSource(
   window: IngestWindow,
   get: (url: string) => Promise<string>,
   reportDiscard?: (discard: AdapterDiscardReport) => void,
+  reportTemporalCoverage?: (coverage: SourceTemporalCoverage) => void,
 ): Promise<RawEvent[]> {
   const adapter = getAdapter(source.adapterId);
   const urls = adapter.resolveFetchUrls(source, now, window);
   const ctx: AdapterContext = { source, now, window, get };
   if (reportDiscard) ctx.reportDiscard = reportDiscard;
+  if (reportTemporalCoverage) ctx.reportTemporalCoverage = reportTemporalCoverage;
   const events: RawEvent[] = [];
   for (const url of urls) {
     const body = adapter.fetchListing

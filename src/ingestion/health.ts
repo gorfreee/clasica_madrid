@@ -1,10 +1,11 @@
-import type { IngestAiSummary } from './types.ts';
+import type { IngestAiSummary, SourceIngestResult } from './types.ts';
 
 export type IngestHealth = 'clean' | 'degraded' | 'review' | 'fatal';
 
 export type IngestHealthInput = {
   batchOk: boolean;
   sourcesSucceeded: readonly string[];
+  sourceResults?: Readonly<Record<string, SourceIngestResult>>;
   sourcesFailed: readonly { sourceId: string; stage?: 'hydration' }[];
   ambiguous: number;
   classificationDrift: number;
@@ -23,7 +24,8 @@ export type IngestHealthInput = {
   /** Extra fatal causes (unexpected exception, AI auth/config). */
   fatalReasons?: readonly string[];
   /**
-   * Harvest treats zero succeeded sources as fatal. Discovery imports may
+   * Harvest treats zero usable sources as fatal (legacy: zero succeeded).
+   * A stale season is technically successful but not usable. Discovery may
    * have an empty observation list; that is a no-op, not a harvest failure.
    */
   requireSourcesSucceeded?: boolean;
@@ -49,7 +51,10 @@ export function evaluateIngestHealth(input: IngestHealthInput): {
   const findings: HealthFinding[] = [];
 
   if (!input.batchOk) findings.push({ reason: 'invalid-batch', health: 'fatal' });
-  if (input.requireSourcesSucceeded !== false && input.sourcesSucceeded.length === 0) {
+  const usable = input.sourceResults
+    ? Object.values(input.sourceResults).some(result => result.usable)
+    : input.sourcesSucceeded.length > 0;
+  if (input.requireSourcesSucceeded !== false && !usable) {
     findings.push({ reason: 'no-sources-succeeded', health: 'fatal' });
   }
   for (const reason of input.fatalReasons ?? []) {
@@ -59,6 +64,21 @@ export function evaluateIngestHealth(input: IngestHealthInput): {
   for (const failed of input.sourcesFailed) {
     findings.push({ reason: `source-failed:${failed.sourceId}`, health: 'review' });
     if (failed.stage === 'hydration') findings.push({ reason: `source-hydration-incomplete:${failed.sourceId}`, health: 'review' });
+  }
+  for (const [sourceId, result] of Object.entries(input.sourceResults ?? {})) {
+    const status = result.temporalCoverage?.status;
+    if (status && status !== 'complete') {
+      findings.push({ reason: `source-coverage-${status}:${sourceId}`, health: 'degraded' });
+    }
+    // These guards do not depend on the legacy sourcesFailed projection.
+    if (result.extraction.status !== 'succeeded') {
+      const reason = `source-failed:${sourceId}`;
+      if (!findings.some(finding => finding.reason === reason)) findings.push({ reason, health: 'review' });
+    }
+    if (result.hydrationSevere) {
+      const reason = `source-hydration-incomplete:${sourceId}`;
+      if (!findings.some(finding => finding.reason === reason)) findings.push({ reason, health: 'review' });
+    }
   }
   if (input.ambiguous > 0) findings.push({ reason: 'ambiguous', health: 'review' });
   if (input.classificationDrift > 0) {

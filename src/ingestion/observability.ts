@@ -18,7 +18,7 @@ import {
   type IngestEventDecision,
   type IngestFailureInfo,
 } from './report.ts';
-import type { AdapterDiscard, RawEvent } from './types.ts';
+import type { AdapterDiscard, RawEvent, SourceIngestResult } from './types.ts';
 
 export const INGEST_RUN_MANIFEST_SCHEMA_VERSION = 1;
 export const INGEST_JOURNAL_SCHEMA_VERSION = 1;
@@ -56,7 +56,7 @@ export type IngestSourceHttpStats = {
   browserFallbacks: number;
 };
 
-export type IngestSourceTiming = {
+export type IngestSourceTiming = Partial<SourceIngestResult> & {
   extractionMs: number;
   hydrationMs: number;
   totalMs: number;
@@ -254,7 +254,7 @@ export class IngestObservability {
     }
   }
 
-  recordSourceStats(input: {
+  recordSourceStats(input: Partial<SourceIngestResult> & {
     sourceId: string;
     extractedEvents: number;
     hydratedEvents: number;
@@ -274,6 +274,10 @@ export class IngestObservability {
   }): void {
     this.guard(() => {
       const timing = this.sourceTiming(input.sourceId);
+      for (const key of ['extraction', 'temporalCoverage', 'hydrationRequired', 'hydrationIncomplete',
+        'hydrationSevere', 'disappearanceEligible', 'usable'] as const) {
+        if (input[key] !== undefined) Object.assign(timing, { [key]: input[key] });
+      }
       timing.extractedEvents = input.extractedEvents;
       timing.hydratedEvents = input.hydratedEvents;
       timing.hydrationAttempted = input.hydrationAttempted;

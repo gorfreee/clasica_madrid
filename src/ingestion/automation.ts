@@ -8,6 +8,8 @@ import {
 } from './diagnostics.ts';
 import type { IngestRunManifest, IngestSourceHttpStats, IngestSourceTiming } from './observability.ts';
 import type { IngestReport } from './report.ts';
+import type { IngestRunSummary } from './types.ts';
+import { temporalCoverageLabel } from './coverage.ts';
 
 /** GitHub GraphQL `createPullRequest` rejects bodies over this length. */
 export const GITHUB_PR_BODY_MAX_CHARS = 65_536;
@@ -72,6 +74,8 @@ export function formatAutomationPrBody(
     '',
     ...formatPrDraftNotice(report),
     formatPrOverview(report, view, metrics),
+    '',
+    formatSourceResults(report.summary),
     '',
     formatPrAttentionSample(view.attention),
     '',
@@ -152,6 +156,8 @@ function formatAutomationMarkdown(
     `## ${title}`,
     '',
     formatGlobalSummary(report, view),
+    '',
+    formatSourceResults(report.summary),
     '',
     formatSourceFunnel(view.funnels),
     '',
@@ -608,4 +614,27 @@ function cell(value: string): string {
 function linkCell(url: string | undefined): string {
   if (!url) return '';
   return cell(url);
+}
+
+/** Same typed results in PR and Job Summary, including runs without timings. */
+function formatSourceResults(summary: IngestRunSummary): string {
+  const entries = Object.entries(summary.sourceResults ?? {});
+  if (!entries.length) return '';
+  const group = (status: 'partial' | 'stale' | 'unknown') => entries
+    .filter(([, result]) => result.temporalCoverage?.status === status).map(([id]) => id);
+  const lines = [
+    '### Estado de fuentes', '',
+    `- Fallo técnico de extracción: ${boundedJoin(entries.filter(([, r]) => r.extraction.status !== 'succeeded').map(([id]) => id), 'ninguno')}`,
+    `- Cobertura parcial: ${boundedJoin(group('partial'), 'ninguna')}`,
+    `- Programación caducada (stale): ${boundedJoin(group('stale'), 'ninguna')}`,
+    `- Cobertura desconocida (unknown): ${boundedJoin(group('unknown'), 'ninguna')}`,
+    `- Errores de hidratación: ${boundedJoin(entries.filter(([, r]) => r.hydrationFailed > 0 || r.hydrationSevere).map(([id]) => id), 'ninguno')}`,
+    '',
+    '| Fuente | Extracción | Cobertura / intervalo acreditado | Extraídos | Fichas necesarias | Intentadas / correctas / fallidas | Hidratación severa | Desapariciones evaluables |',
+    '|---|---|---|---:|---:|---:|---|---|',
+  ];
+  for (const [id, r] of entries) {
+    lines.push(`| ${compactCell(id)} | ${r.extraction.status} | ${cell(temporalCoverageLabel(r.temporalCoverage))} | ${r.extractedEvents} | ${r.hydrationRequired} | ${r.hydrationAttempted} / ${r.hydrationSucceeded} / ${r.hydrationFailed} | ${r.hydrationSevere ? 'sí' : 'no'} | ${r.disappearanceEligible ? 'sí' : 'no'} |`);
+  }
+  return lines.join('\n');
 }

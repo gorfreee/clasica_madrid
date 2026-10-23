@@ -1,3 +1,4 @@
+import { temporalCoverageLabel } from './coverage.ts';
 import { formatProviderCountList } from './ai-provider-counts.ts';
 import { emptyIngestQualitySummary, type IngestAiRouteSummary, type IngestRunSummary } from './types.ts';
 
@@ -18,6 +19,8 @@ export function formatRunSummary(summary: IngestRunSummary): string {
     lines.push(`  - ${failure.sourceId}: ${failure.message}`);
   }
   lines.push(
+    ...Object.entries(summary.sourceResults ?? {}).map(([id, r]) =>
+      `Fuente ${id}: extracción ${r.extraction.status}; cobertura ${temporalCoverageLabel(r.temporalCoverage)}; extraídos ${r.extractedEvents}; fichas necesarias ${r.hydrationRequired}, intentadas/correctas/fallidas ${r.hydrationAttempted}/${r.hydrationSucceeded}/${r.hydrationFailed}; severa ${r.hydrationSevere}; desapariciones ${r.disappearanceEligible ? 'evaluables' : 'no evaluables'}`),
     `RawEvents encontrados: ${summary.rawEvents}`,
     `Hidratación de fichas: intentadas ${summary.detailHydrationAttempted}, correctas ${summary.detailHydrationSucceeded}, fallidas ${summary.detailHydrationFailed}`,
     `Fichas no solicitadas: fuera de ventana ${summary.detailHydrationSkippedOutsideWindow ?? 0}, circuito abierto ${summary.detailHydrationSkippedCircuitOpen ?? 0}`,

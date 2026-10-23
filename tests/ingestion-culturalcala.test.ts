@@ -13,7 +13,7 @@ import {
   parseCulturalcalaDetail,
   parseCulturalcalaListing,
 } from '../src/ingestion/sources/culturalcala.ts';
-import { IncompleteListingError, type AdapterContext } from '../src/ingestion/types.ts';
+import type { SourceTemporalCoverage, AdapterContext } from '../src/ingestion/types.ts';
 
 const source = getSourceDefinition(adapter.id);
 const now = new Date('2026-09-27T10:00:00Z');
@@ -108,15 +108,14 @@ describe('CulturAlcalá', () => {
     expect(() => parseCulturalcalaListing(empty, url, ctx)).toThrow(/vacío sin estado/);
   });
 
-  it('expone como incompleta una ventana fuera de los ocho meses publicados', async () => {
-    try { parseCulturalcalaListing(await fixture(), url, { ...ctx, window: { from: window.from, to: '2027-07-31' } }); }
-    catch (error) {
-      expect(error).toBeInstanceOf(IncompleteListingError);
-      expect((error as IncompleteListingError).events).toHaveLength(5);
-      expect((error as Error).message).toContain('2027-04-30');
-      return;
-    }
-    throw new Error('Se aceptó un calendario incompleto');
+  it('declara cobertura parcial sin convertirla en fallo de extracción', async () => {
+    let coverage: SourceTemporalCoverage | undefined;
+    const events = parseCulturalcalaListing(await fixture(), url, {
+      ...ctx, window: { from: window.from, to: '2027-07-31' },
+      reportTemporalCoverage: value => { coverage = value; },
+    });
+    expect(events).toHaveLength(5);
+    expect(coverage).toMatchObject({ status: 'partial', interval: { to: '2027-04-30' } });
   });
 
   it('recorre el pipeline con citas sin escribir datos durante el dry run', async () => {

@@ -1,15 +1,14 @@
+import { publishedIntervalCoverage } from '../coverage.ts';
 import { normalizeText } from '../../lib/domain/normalize.ts';
 import {
   isDateInWindow,
   parseObservedDateTime,
   parseObservedTime,
-  type IngestWindow,
 } from '../dates.ts';
 import { explicitAccessText } from '../detail/access-evidence.ts';
 import { collapseWhitespace, stripTags } from '../html.ts';
 import { emptyObservedLists, normalizePersonList, type ObservedPerson } from '../observed.ts';
 import {
-  IncompleteListingError,
   type AdapterContext,
   type RawEvent,
   type RawOccurrence,
@@ -133,9 +132,7 @@ export function parseCoroCamaraAgenda(
   const content = renderedField(page.content, false);
   if (content === undefined) throw new Error(`${SOURCE_ID}: agenda sin contenido HTML`);
   if (explicitEmptyAgenda(content)) {
-    if (!seasonOverlapsWindow(season, ctx.window)) {
-      throw staleSeasonError(season);
-    }
+    reportSeasonCoverage(season, ctx);
     return [];
   }
   const events = parseAgendaContent(content, sourceUrl, season);
@@ -143,9 +140,7 @@ export function parseCoroCamaraAgenda(
     throw new Error(`${SOURCE_ID}: calendario vacío sin estado vacío explícito`);
   }
 
-  if (!seasonOverlapsWindow(season, ctx.window)) {
-    throw staleSeasonError(season);
-  }
+  reportSeasonCoverage(season, ctx);
 
   return events.flatMap((event) => {
     const occurrences = event.observed.occurrences.filter(
@@ -344,17 +339,12 @@ function explicitEmptyAgenda(content: string): boolean {
   return /\bno hay (?:conciertos|actuaciones|eventos) programad[oa]s\b/u.test(text);
 }
 
-function seasonOverlapsWindow(season: Season, window: IngestWindow): boolean {
-  const from = `${season.startYear}-08-01`;
-  const to = `${season.endYear}-07-31`;
-  return from <= window.to && to >= window.from;
-}
-
-function staleSeasonError(season: Season): IncompleteListingError {
-  return new IncompleteListingError(
-    `${SOURCE_ID}: la temporada ${season.startYear}-${season.endYear} no cubre la ventana solicitada`,
-    [],
-  );
+function reportSeasonCoverage(season: Season, ctx: AdapterContext): void {
+  ctx.reportTemporalCoverage?.(publishedIntervalCoverage(
+    { from: `${season.startYear}-08-01`, to: `${season.endYear}-07-31` },
+    ctx.window,
+    `AGENDA ${season.startYear}-${season.endYear}`,
+  ));
 }
 
 function assertAgendaApiUrl(value: string, agendaBase: string | undefined): void {

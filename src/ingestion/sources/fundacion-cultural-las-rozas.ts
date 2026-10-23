@@ -4,7 +4,7 @@ import { madridToday } from '../../lib/domain/dates.ts';
 import { collapseWhitespace, stripTags } from '../html.ts';
 import { emptyObservedLists } from '../observed.ts';
 import type { ObservedFactPatch } from '../observed.ts';
-import { IncompleteListingError, type AdapterContext, type RawEvent, type RawOccurrence, type SourceAdapter } from '../types.ts';
+import type { AdapterContext, RawEvent, RawOccurrence, SourceAdapter } from '../types.ts';
 
 import { extractExplicitPerformanceCredits } from '../performance-credits.ts';
 
@@ -86,7 +86,6 @@ export function parseLasRozasListing(body: string, url: string, ctx: AdapterCont
   const currentMonth = Number(today.slice(5, 7));
   let year = currentYear;
   let lastMonth = 0;
-  let lastPublishedDate: string | undefined;
   for (let i = 0; i < cards.length; i++) {
     const match = cards[i]!;
     if (match[1] !== match[2]) throw new Error(`${ID}: identidad de tarjeta contradictoria`);
@@ -116,7 +115,6 @@ export function parseLasRozasListing(body: string, url: string, ctx: AdapterCont
       throw new Error(`${ID}: intervalo inválido: ${dateText}`);
     }
     const lastDate = last ? dateFor(last, year + (last.month < first.month ? 1 : 0)) : firstDate;
-    lastPublishedDate = lastDate;
     const times = timeParts(schedule);
     let occurrences: RawOccurrence[] = endpoints.length === 1
       ? (times.length ? times.map((time) => ({ raw: `${dateText} ${schedule}`, date: firstDate, time }))
@@ -143,11 +141,10 @@ export function parseLasRozasListing(body: string, url: string, ctx: AdapterCont
     throw new Error(`${ID}: agenda vacía sin estado vacío explícito`);
   }
   const events = [...output.values()];
-  // The active agenda has no stated end date. Do not claim that a future
-  // window is exhaustively covered merely because the last card is in December.
-  if (lastPublishedDate && ctx.window.to > lastPublishedDate) {
-    throw new IncompleteListingError(`${ID}: horizonte posterior a la última fecha publicada`, events);
-  }
+  // Valid navigation proves listing integrity, not its temporal exhaustiveness.
+  ctx.reportTemporalCoverage?.({
+    status: 'unknown', evidence: 'Agenda activa JetEngine sin horizonte temporal declarado',
+  });
   return events;
 }
 

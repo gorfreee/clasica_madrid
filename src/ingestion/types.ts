@@ -179,6 +179,28 @@ export function tallyAdapterDiscards(discards: readonly AdapterDiscard[]): Adapt
   return { total: discards.length, bySource, byReason };
 }
 
+/** Temporal evidence is independent of technical listing and detail success. */
+export type SourceTemporalCoverage =
+  | { status: 'complete' | 'partial' | 'stale'; interval: IngestWindow; evidence: string }
+  | { status: 'unknown'; evidence: string };
+
+/** Shared counters for report.json and run.json; never persisted to the catalog. */
+export type SourceIngestResult = {
+  extraction: { status: 'succeeded' | 'incomplete' | 'failed'; message?: string };
+  /** Absent for legacy adapters: retain their existing listing guarantees. */
+  temporalCoverage?: SourceTemporalCoverage;
+  extractedEvents: number;
+  hydratedEvents: number;
+  hydrationAttempted: number;
+  hydrationSucceeded: number;
+  hydrationFailed: number;
+  hydrationRequired: number;
+  hydrationIncomplete: boolean;
+  hydrationSevere: boolean;
+  disappearanceEligible: boolean;
+  usable: boolean;
+};
+
 export type AdapterContext = {
   source: SourceDefinition;
   now: Date;
@@ -190,6 +212,8 @@ export type AdapterContext = {
    * in-scope that is then dropped.
    */
   reportDiscard?: (discard: AdapterDiscardReport) => void;
+  /** Declare only after validating the entire listing. No event-date inference. */
+  reportTemporalCoverage?: (coverage: SourceTemporalCoverage) => void;
 };
 
 export function reportAdapterDiscard(ctx: AdapterContext, discard: AdapterDiscardReport): void {
@@ -248,6 +272,8 @@ export type SourceAdapter = {
  * Listing coverage is incomplete. `events` may be empty when the source shell
  * is recognizable but does not prove a completely empty agenda. The pipeline
  * keeps these observations and suppresses disappearances for that source.
+ * This remains a technical failure requiring review, even with recovered events.
+ * Temporal-only gaps use AdapterContext.reportTemporalCoverage after validation.
  * A structural failure must remain a normal Error so the source fails visibly.
  */
 export class IncompleteListingError extends Error {
@@ -439,6 +465,8 @@ export type IngestRunSummary = {
   sourcesAttempted: string[];
   sourcesSucceeded: string[];
   sourcesFailed: SourceFailure[];
+  /** Additive contract; older reports/discovery may omit harvest results. */
+  sourceResults?: Record<string, SourceIngestResult>;
   rawEvents: number;
   skippedUnusable: number;
   eligibility: {
