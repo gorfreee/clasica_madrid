@@ -30,7 +30,7 @@ Discovery v1: un comando determinista exporta un `DiscoveryContext` compacto par
 registry → extract → hydrate → normalize → deterministic enrich → identity → classify/enrich → publication gate → reconcile → validate → write
 ```
 
-- Un `IncompleteListingError` conserva las observaciones válidas y suprime desapariciones, pero también conserva el motivo en `sourcesFailed`; nunca certifica cobertura ni permite auto-merge. Si no queda ninguna fuente completa, el estado global es `fatal`.
+- Un `IncompleteListingError` sigue siendo un fallo técnico: conserva las observaciones válidas, suprime desapariciones y conserva el motivo en `sourcesFailed`; nunca permite auto-merge. La cobertura exclusivamente temporal se declara por separado, tras validar el listado (véase abajo). Sin fuentes realmente utilizables para la ventana, harvesting sigue siendo `fatal`, aunque haya respuestas HTTP correctas.
 - Un fallo de listing aísla esa fuente; el resto continúa. CNDM reintenta una vez cada mes ante errores transitorios antes de aislarlo; un mes no disponible mantiene URL y motivo HTTP en el diagnóstico. El calendario se valida incluso después de recuperar el transporte. Teatros Canal y Fundación Canal reintentan una vez el listing ante errores transitorios de transporte (`fetch failed`, timeout, HTTP 408/429/5xx). En Zarzuela, un fallo HTTP persistente de una sección de temporada no descarta las demás: se hidratan las secciones disponibles y no se evalúan desapariciones. Las fichas de lírica, teatro musical de cámara, danza y nuevos públicos se hidratan antes que conciertos y lied. Listing e hydration de Zarzuela comparten el pacing/cooldown del origen (`teatrodelazarzuela.inaem.gob.es`); el circuito cuenta fichas distintas que siguen bloqueadas tras la política de recuperación, no cada intento HTTP. Refugio lee primero el archivo oficial `/categoria-eventos/conciertos/` (directo, y el fetch relay sólo si ese hop se bloquea); las fichas enriquecen y un fallo de ficha no tumba un concierto cuyo calendario ya estaba en el listing.
 - Un fallo de ficha de detalle es local al evento: se conservan los hechos del listing. Refugio requiere cobertura de fichas para observaciones REST, que no exponen los campos JetEngine de fecha/lugar; un fallo suprime desapariciones y una cobertura severamente incompleta marca fallo de fuente. Las tarjetas HTML con calendario propio siguen siendo utilizables aunque falle su ficha.
 - Un adapter puede descartar un candidato ya reconocido (p. ej. Madrid Datos: recurrence no soportada, falta título/URL/id/fecha/lugar; CNDM: sede fuera de Madrid; Madrid a Tempo: fecha de listing anterior a la ventana). Esos descartes son diagnóstico (`adapterDiscards` en el summary, lista en `report.json` y, si hay observabilidad, journal `adapter-discard`): no cambian eligibility, health ni publicación. No se cuentan objetos fuera de ámbito (p. ej. exposiciones en Madrid Datos, índices de ciclo). La hora ausente en Madrid Datos ya no descarta: la occurrence conserva la fecha y `time` queda `null`.
@@ -58,6 +58,52 @@ registry → extract → hydrate → normalize → deterministic enrich → iden
 No están implementados (no los añadas salvo que una tarea pida esa capacidad): búsqueda web de discovery dentro del repo, scheduling de discovery, aprendizaje de sources ni reconciliación fuzzy. GitHub Actions no genera `DiscoveryContext` ni navega la web. El workflow manual **Manual discovery** sí consume un `DiscoveryBatch` ya producido por un agente, siempre con código de `main`.
 
 Las fuentes concretas, adapters, flags de CLI y detalles de matching viven en el código. No los dupliques aquí.
+
+## Resultados por fuente: extracción, cobertura e hidratación
+
+El contrato tipado vive en [`types.ts`](../src/ingestion/types.ts): `SourceTemporalCoverage` y `SourceIngestResult`. Los adapters pueden declarar **una vez por fuente**, mediante `ctx.reportTemporalCoverage`, los límites oficiales tras validar el listado entero. No se deducen estados del mensaje de error, del status HTTP ni de la última fecha de concierto. Los adapters que aún no declaran cobertura conservan sus garantías y bloqueos anteriores; no se reinterpretan sus `IncompleteListingError`.
+
+| Dimensión | Valores / evidencia |
+|---|---|
+| Extracción | `succeeded`, `incomplete` con observaciones recuperadas, `failed` técnico/estructural |
+| Cobertura | `complete`: intervalo que contiene toda la ventana; `partial`: intervalo delimitado que no la contiene; `stale`: intervalo terminado antes de la ventana; `unknown`: listado validado sin horizonte acreditado |
+| Hidratación | Contadores existentes de intentadas/correctas/fallidas, más fichas necesarias e incompletitud/severidad del calendario obligatorio |
+
+Coro de Cámara usa el encabezado oficial de temporada (agosto–julio); un mero solapamiento no certifica toda la ventana. Culturalcalá usa ambos parámetros de EventON (`focus_start_date_range` / `focus_end_date_range`); los fallos de detalle son independientes del horizonte del widget. Sus tarjetas requieren identidad y fecha válidas antes de hidratar. Fundación Cultural Las Rozas valida la estructura JetEngine y registra `unknown`: que exista una tarjeta posterior a la ventana tampoco demuestra exhaustividad. No se certifican intervalos en ausencia de evidencia.
+
+`disappearanceEligible` requiere integridad técnica, cobertura completa y ausencia de detalles necesarios fallidos/conflictos. En `partial`, `unknown` o `stale` se suprimen desapariciones de **toda la fuente**; no hay reconciliación temporal granular. `possiblyMissing` sigue siendo diagnóstico y nunca elimina ni cancela eventos. Los RawEvents recuperados continúan por el pipeline habitual y los conflictos siguen retenidos.
+
+| Resultado | Health mínimo / auto-merge |
+|---|---|
+| Extracción correcta y cobertura completa | Comportamiento anterior |
+| Sólo cobertura parcial/desconocida, con fuente utilizable | `degraded`; elegible si no hay otros bloqueos |
+| Temporada caducada | `degraded` si otras fuentes son utilizables; no cuenta como cobertura actual |
+| Fallo técnico de listing, incluso parcial | `review`; nunca auto-merge |
+| Calendario obligatorio severamente incompleto | `review`; nunca auto-merge |
+| Ninguna fuente utilizable | `fatal`; nunca auto-merge |
+
+Una fuente parcial es utilizable si su intervalo oficial intersecta la ventana (también un calendario vacío validado). Una fuente de horizonte desconocido necesita observaciones fechadas dentro de ventana. Los fallos técnicos/severos no cuentan como fuentes utilizables. Los demás bloqueos (`source-conflict`, identidad ambigua, `publication-integrity`, lote inválido) mantienen su precedencia.
+
+`report.json` contiene `summary.sourceResults[sourceId]`; `run.json` reutiliza esos mismos campos y contadores en `timings.sources[sourceId]`. Son adiciones opcionales a los contratos v1: los reports antiguos y Discovery siguen admitidos. Job Summary, PR automática y consola presentan extracción, cobertura/intervalo verificable y contadores por fuente, separando fallos técnicos de programación caducada o insuficiente. Ejemplo abreviado de Culturalcalá, con dos detalles fallidos:
+
+```json
+{
+  "extraction": { "status": "succeeded" },
+  "temporalCoverage": {
+    "status": "partial",
+    "interval": { "from": "2026-10-01", "to": "2027-05-31" },
+    "evidence": "EventON focus_start_date_range / focus_end_date_range"
+  },
+  "extractedEvents": 18,
+  "hydrationAttempted": 18,
+  "hydrationSucceeded": 16,
+  "hydrationFailed": 2,
+  "hydrationRequired": 0,
+  "hydrationSevere": false,
+  "disappearanceEligible": false,
+  "usable": true
+}
+```
 
 ## Cómo ejecutarlo
 

@@ -11,7 +11,7 @@ import {
   coroCamaraMadridAdapter as adapter,
   parseCoroCamaraOccurrence,
 } from '../src/ingestion/sources/coro-camara-madrid.ts';
-import { IncompleteListingError, type AdapterContext } from '../src/ingestion/types.ts';
+import type { SourceTemporalCoverage, AdapterContext } from '../src/ingestion/types.ts';
 import { makeEvent, makeVenue, TEST_NOW, TEST_WINDOW } from './helpers.ts';
 
 const source = getSourceDefinition(adapter.id);
@@ -191,15 +191,11 @@ describe('agenda del Coro de Cámara de Madrid', () => {
   });
 
   it('marca una temporada antigua como cobertura incompleta y protege possiblyMissing', async () => {
-    let staleError: unknown;
-    try {
-      adapter.extract(await fixture(), listingUrl, context(TEST_WINDOW));
-    } catch (error) {
-      staleError = error;
-    }
-    expect(staleError).toBeInstanceOf(IncompleteListingError);
-    if (!(staleError instanceof IncompleteListingError)) throw staleError;
-    expect(staleError.events).toEqual([]);
+    let coverage: SourceTemporalCoverage | undefined;
+    expect(adapter.extract(await fixture(), listingUrl, {
+      ...context(TEST_WINDOW), reportTemporalCoverage: value => { coverage = value; },
+    })).toEqual([]);
+    expect(coverage).toMatchObject({ status: 'stale', interval: { from: '2025-08-01', to: '2026-07-31' } });
 
     const venue = makeVenue({
       id: 'ven_iglesia_del_monasterio_de_la_purisima_concepcion',
@@ -247,8 +243,11 @@ describe('agenda del Coro de Cámara de Madrid', () => {
         return fixture();
       },
     });
-    expect(run.summary.sourcesSucceeded).toEqual([]);
-    expect(run.summary.sourcesFailed).toEqual([expect.objectContaining({ sourceId: source.id, message: expect.any(String) })]);
+    expect(run.summary.sourcesSucceeded).toEqual([source.id]);
+    expect(run.summary.sourcesFailed).toEqual([]);
+    expect(run.summary.health).toBe('fatal');
+    expect(run.summary.healthReasons).toContain('no-sources-succeeded');
+    expect(run.summary.healthReasons).toContain(`source-coverage-stale:${source.id}`);
     expect(run.summary.disappearanceSuppressedSources).toEqual([source.id]);
     expect(run.summary.possiblyMissing).toBe(0);
     expect(run.summary.newEvents).toBe(0);

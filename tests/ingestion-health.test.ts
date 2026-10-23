@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { evaluateIngestHealth } from '../src/ingestion/health.ts';
-import { emptyIngestAiSummary } from '../src/ingestion/types.ts';
+import { emptyIngestAiSummary, type SourceIngestResult } from '../src/ingestion/types.ts';
 
 const healthyAi = {
   uncertain: 0,
@@ -151,5 +151,51 @@ describe('evaluateIngestHealth', () => {
     expect(isolated.health).toBe('degraded');
     expect(isolated.autoMergeEligible).toBe(true);
     expect(isolated.healthReasons).toEqual(['ai-error', 'ai-invalid-output']);
+  });
+});
+
+const partialResult: SourceIngestResult = {
+  extraction: { status: 'succeeded' },
+  temporalCoverage: { status: 'partial', interval: { from: '2026-10-01', to: '2027-05-31' }, evidence: 'EventON bounds' },
+  extractedEvents: 18, hydratedEvents: 18, hydrationAttempted: 18, hydrationSucceeded: 16, hydrationFailed: 2,
+  hydrationRequired: 0, hydrationIncomplete: false, hydrationSevere: false,
+  disappearanceEligible: false, usable: true,
+};
+
+describe('coverage degradation never masks independent publication blockers', () => {
+  const sourceResults = { culturalcala: partialResult };
+  it('permits safe changes with only temporal degradation and local hydration failures', () => {
+    expect(evaluateIngestHealth({ ...base, sourceResults, hydrationFailed: 2 })).toMatchObject({
+      health: 'degraded', autoMergeEligible: true,
+      healthReasons: ['source-coverage-partial:culturalcala', 'hydration-failed'],
+    });
+  });
+  it.each([
+    { batchOk: false },
+    { fatalReasons: ['publication-integrity'] },
+    { ambiguous: 1 },
+    { sourceConflicts: 1 },
+    { sourcesFailed: [{ sourceId: 'transport-failed' }] },
+    { sourcesFailed: [{ sourceId: 'required-detail-failed', stage: 'hydration' as const }] },
+  ])('retains an existing blocker: %j', blocker => {
+    const result = evaluateIngestHealth({ ...base, sourceResults, ...blocker });
+    expect(['review', 'fatal']).toContain(result.health);
+    expect(result.autoMergeEligible).toBe(false);
+  });
+  it.each(['incomplete', 'failed'] as const)('typed extraction %s independently blocks even without a legacy failure entry', status => {
+    expect(evaluateIngestHealth({ ...base, sourceResults: {
+      healthy: partialResult, technical: { ...partialResult, extraction: { status }, usable: false },
+    } })).toMatchObject({ health: 'review', autoMergeEligible: false });
+  });
+  it('typed severe hydration independently blocks even without a legacy failure entry', () => {
+    expect(evaluateIngestHealth({ ...base, sourceResults: {
+      healthy: partialResult, severe: { ...partialResult, hydrationSevere: true, usable: false },
+    } })).toMatchObject({ health: 'review', autoMergeEligible: false });
+  });
+  it('stale extraction success is not a usable source for harvesting', () => {
+    expect(evaluateIngestHealth({ ...base, sourceResults: { stale: {
+      ...partialResult, temporalCoverage: { status: 'stale', interval: { from: '2025-08-01', to: '2026-07-31' }, evidence: 'official season' }, usable: false,
+    } } })).toMatchObject({ health: 'fatal', autoMergeEligible: false,
+      healthReasons: ['no-sources-succeeded', 'source-coverage-stale:stale'] });
   });
 });

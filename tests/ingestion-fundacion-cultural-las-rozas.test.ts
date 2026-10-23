@@ -10,7 +10,7 @@ import {
   parseLasRozasDetail,
   parseLasRozasListing,
 } from '../src/ingestion/sources/fundacion-cultural-las-rozas.ts';
-import { IncompleteListingError, type AdapterContext } from '../src/ingestion/types.ts';
+import type { SourceTemporalCoverage, AdapterContext } from '../src/ingestion/types.ts';
 
 const source = getSourceDefinition(adapter.id);
 const now = new Date('2026-09-27T10:00:00Z');
@@ -70,8 +70,12 @@ describe('Fundación Cultural Las Rozas', () => {
 
   it('protege desapariciones cuando la ventana supera lo publicado y ejecuta el pipeline sin escribir', async () => {
     const listing = await fixture('listing.html');
-    expect(() => parseLasRozasListing(listing, url, { ...ctx, window: { ...window, to: '2027-01-25' } }))
-      .toThrow(IncompleteListingError);
+    let coverage: SourceTemporalCoverage | undefined;
+    expect(parseLasRozasListing(listing, url, {
+      ...ctx, window: { ...window, to: '2027-01-25' },
+      reportTemporalCoverage: value => { coverage = value; },
+    })).toHaveLength(3);
+    expect(coverage?.status).toBe('unknown');
     const detail = await fixture('detail-carnaval.html');
     const result = await runIngest({
       now, window, dryRun: true, catalog: emptyCatalog(), sourceIds: [source.id],
@@ -92,16 +96,10 @@ describe('Fundación Cultural Las Rozas', () => {
 
   it('mantiene el año de la temporada anterior si la agenda sigue publicada en enero', async () => {
     const listing = await fixture('listing.html');
-    try {
-      parseLasRozasListing(listing, url, {
-        ...ctx, now: new Date('2027-01-10T10:00:00Z'),
-        window: { from: '2027-01-10', to: '2027-04-01' },
-      });
-    } catch (error) {
-      expect(error).toBeInstanceOf(IncompleteListingError);
-      expect((error as IncompleteListingError).events[0]?.observed.occurrences[0]?.date).toBe('2026-10-04');
-      return;
-    }
-    throw new Error('Se aceptó una agenda pasada como programación de 2027');
+    const events = parseLasRozasListing(listing, url, {
+      ...ctx, now: new Date('2027-01-10T10:00:00Z'),
+      window: { from: '2027-01-10', to: '2027-04-01' },
+    });
+    expect(events[0]?.observed.occurrences[0]?.date).toBe('2026-10-04');
   });
 });

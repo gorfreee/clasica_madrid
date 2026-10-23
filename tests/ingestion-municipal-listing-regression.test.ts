@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { aytoSanLorenzoAdapter as mec } from '../src/ingestion/sources/ayto-san-lorenzo.ts';
 import { culturalcalaAdapter as evo } from '../src/ingestion/sources/culturalcala.ts';
 import { getSourceDefinition } from '../src/ingestion/registry.ts';
-import { IncompleteListingError, type AdapterContext, type SourceAdapter } from '../src/ingestion/types.ts';
+import { type SourceTemporalCoverage, type AdapterContext, type SourceAdapter } from '../src/ingestion/types.ts';
 
 const fixture = (name: string) => readFile(new URL(`./fixtures/ingestion/municipal-listing-20261013/${name}.html`, import.meta.url), 'utf8');
 const ctx = (adapter: SourceAdapter): AdapterContext => ({
@@ -56,6 +56,11 @@ describe('municipal listing structures from run 38145788312', () => {
 
   it('does not certify a horizon extending beyond the official calendar', async () => {
     const body = await fixture('alcala');
-    expect(() => evo.extract(body, ctx(evo).source.urls[0]!, { ...ctx(evo), window: { from: '2026-10-13', to: '2027-07-31' } })).toThrow(IncompleteListingError);
+    let coverage: SourceTemporalCoverage | undefined;
+    expect(await evo.extract(body, ctx(evo).source.urls[0]!, {
+      ...ctx(evo), window: { from: '2026-10-13', to: '2027-07-31' },
+      reportTemporalCoverage: value => { coverage = value; },
+    })).toHaveLength(18);
+    expect(coverage).toMatchObject({ status: 'partial', interval: { to: '2027-05-31' } });
   });
 });

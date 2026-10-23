@@ -3,7 +3,8 @@ import { sourceConflict } from '../detail/conflicts.ts';
 import { isRealIsoDate } from '../../lib/util/iso-date.ts';
 import { collapseWhitespace, decodeHtmlEntities, stripTags } from '../html.ts';
 import { emptyObservedLists, normalizePersonList, type ObservedFactPatch, type ObservedPerson } from '../observed.ts';
-import { IncompleteListingError, type AdapterContext, type RawEvent, type SourceAdapter } from '../types.ts';
+import { publishedIntervalCoverage } from '../coverage.ts';
+import type { AdapterContext, RawEvent, SourceAdapter } from '../types.ts';
 
 const ID = 'culturalcala';
 const ORIGIN = 'https://culturalcala.es';
@@ -313,9 +314,9 @@ export function parseCulturalcalaListing(body: string, url: string, ctx: Adapter
   if (!events.length && !/\b(?:eventon_no_events|evo_no_events)\b/.test(list)) {
     throw new Error(`${ID}: calendario vacío sin estado vacío explícito`);
   }
-  if (ctx.window.from < from || ctx.window.to > to) {
-    throw new IncompleteListingError(`${ID}: calendario sólo cubre ${from}–${to}; desapariciones no evaluables`, events);
-  }
+  ctx.reportTemporalCoverage?.(publishedIntervalCoverage(
+    { from, to }, ctx.window, 'EventON focus_start_date_range / focus_end_date_range',
+  ));
   return events;
 }
 
