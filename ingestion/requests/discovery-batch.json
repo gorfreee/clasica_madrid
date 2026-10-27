@@ -1,0 +1,1549 @@
+{
+  "schemaVersion": 1,
+  "observations": [
+    {
+      "source": {
+        "url": "https://madridsinfonica.com/evento/resurgir-2/",
+        "name": "Madrid Sinfónica MSDA",
+        "homepage": "https://madridsinfonica.com/",
+        "kind": "official"
+      },
+      "event": {
+        "title": "RESURGIR",
+        "performers": [
+          {
+            "name": "Madrid Sinfónica MSDA"
+          },
+          {
+            "name": "Alonso Cano",
+            "roleText": "barítono"
+          },
+          {
+            "name": "Coro Semicírculo de la ETSII (UPM)"
+          },
+          {
+            "name": "Alberto G. López",
+            "roleText": "director"
+          }
+        ],
+        "composers": [
+          {
+            "name": "Ludwig van Beethoven"
+          },
+          {
+            "name": "Carl Orff"
+          }
+        ],
+        "works": [
+          {
+            "title": "Sinfonía núm. 3 en mi bemol mayor, op. 55, «Heroica»",
+            "composerName": "Ludwig van Beethoven"
+          },
+          {
+            "title": "Carmina Burana (selección)",
+            "composerName": "Carl Orff"
+          }
+        ],
+        "venueText": "Teatro Monumental",
+        "occurrences": [
+          {
+            "raw": "31 de octubre de 2026 · 12:00 h · Teatro Monumental",
+            "date": "2026-10-31",
+            "time": "12:00"
+          }
+        ],
+        "description": "Concierto especial en conmemoración de Todos los Santos. Primera parte: Sinfonía n.º 3 «Heroica» de Beethoven. Segunda parte: selección de Carmina Burana de Carl Orff.",
+        "accessText": "Comprar entradas",
+        "organizerText": "Madrid Sinfónica MSDA",
+        "programText": "I. Ludwig van Beethoven: Sinfonía núm. 3 en mi bemol mayor, op. 55, «Heroica»: Allegro con brio; Marcia funebre. Adagio assai; Scherzo. Allegro vivace – Trio; Finale. Allegro molto. II. Carl Orff: Carmina Burana (selección)."
+      },
+      "foundVia": "https://madridsinfonica.com/"
+    },
+    {
+      "source": {
+        "url": "https://madridsinfonica.com/evento/espana-sinfonica/",
+        "name": "Madrid Sinfónica MSDA",
+        "homepage": "https://madridsinfonica.com/",
+        "kind": "official"
+      },
+      "event": {
+        "title": "ESPAÑA SINFÓNICA",
+        "performers": [
+          {
+            "name": "Madrid Sinfónica MSDA"
+          }
+        ],
+        "composers": [
+          {
+            "name": "Manuel de Falla"
+          },
+          {
+            "name": "Gustavo Gill"
+          },
+          {
+            "name": "Carlos Danés"
+          }
+        ],
+        "works": [
+          {
+            "title": "El amor brujo",
+            "composerName": "Manuel de Falla"
+          },
+          {
+            "title": "Cantar de los Cantares",
+            "composerName": "Gustavo Gill"
+          },
+          {
+            "title": "Retratos de España",
+            "composerName": "Carlos Danés"
+          }
+        ],
+        "venueText": "Teatro Monumental",
+        "occurrences": [
+          {
+            "raw": "28 de noviembre de 2026 · 12:00 h · Teatro Monumental",
+            "date": "2026-11-28",
+            "time": "12:00"
+          }
+        ],
+        "description": "De Falla a la creación contemporánea. Tres obras, dos estrenos y distintas miradas sobre España.",
+        "accessText": "Comprar entradas",
+        "organizerText": "Madrid Sinfónica MSDA",
+        "programText": "El amor brujo · Manuel de Falla. Cantar de los Cantares · Gustavo Gill. Retratos de España · Carlos Danés."
+      },
+      "foundVia": "https://madridsinfonica.com/"
+    },
+    {
+      "source": {
+        "url": "https://madridsinfonica.com/evento/concierto-de-navidad/",
+        "name": "Madrid Sinfónica MSDA",
+        "homepage": "https://madridsinfonica.com/",
+        "kind": "official"
+      },
+      "event": {
+        "title": "CONCIERTO DE NAVIDAD",
+        "performers": [
+          {
+            "name": "Madrid Sinfónica MSDA"
+          }
+        ],
+        "composers": [
+          {
+            "name": "Piotr Ilich Tchaikovsky"
+          }
+        ],
+        "works": [
+          {
+            "title": "El Lago de los Cisnes (selección)",
+            "composerName": "Piotr Ilich Tchaikovsky"
+          },
+          {
+            "title": "La Bella Durmiente (selección)",
+            "composerName": "Piotr Ilich Tchaikovsky"
+          },
+          {
+            "title": "El Cascanueces (selección)",
+            "composerName": "Piotr Ilich Tchaikovsky"
+          }
+        ],
+        "venueText": "Auditorio Nacional de Música",
+        "occurrences": [
+          {
+            "raw": "diciembre 29, 2026 · 19:30 h · Auditorio Nacional",
+            "date": "2026-12-29",
+            "time": "19:30"
+          }
+        ],
+        "description": "Programa orquestal con una selección de los tres grandes ballets de Tchaikovsky y una segunda parte con valses y polcas de la familia Strauss. La ficha no especifica sala.",
+        "accessText": "Comprar entradas",
+        "organizerText": "Madrid Sinfónica MSDA",
+        "programText": "Selección de El Lago de los Cisnes, La Bella Durmiente y El Cascanueces, de Piotr Ilich Tchaikovsky. Segunda parte: selección de valses y polcas de la familia Strauss."
+      },
+      "foundVia": "https://madridsinfonica.com/"
+    },
+    {
+      "source": {
+        "url": "https://corotomasluisdevictoria.com/proximos-conciertos/varios/",
+        "name": "Coro Tomás Luis de Victoria",
+        "homepage": "https://corotomasluisdevictoria.com/",
+        "kind": "official"
+      },
+      "event": {
+        "title": "Concierto XXX Aniversario del Coro Tomás Luis de Victoria",
+        "performers": [
+          {
+            "name": "Coro Tomás Luis de Victoria"
+          },
+          {
+            "name": "Antonio Peces Gómez",
+            "roleText": "director"
+          }
+        ],
+        "composers": [
+          {
+            "name": "Tomás Luis de Victoria"
+          },
+          {
+            "name": "John Dowland"
+          },
+          {
+            "name": "Anónimo"
+          },
+          {
+            "name": "A. Bruckner"
+          },
+          {
+            "name": "C. Monteverdi"
+          },
+          {
+            "name": "J. S. Bach"
+          },
+          {
+            "name": "Orlando di Lasso"
+          },
+          {
+            "name": "J. Rheinberger"
+          }
+        ],
+        "works": [
+          {
+            "title": "Tradiderunt me",
+            "composerName": "Tomás Luis de Victoria"
+          },
+          {
+            "title": "What if I never speede",
+            "composerName": "John Dowland"
+          },
+          {
+            "title": "Con qué la lavaré",
+            "composerName": "Anónimo"
+          },
+          {
+            "title": "Super flumina Babilonys",
+            "composerName": "Tomás Luis de Victoria"
+          },
+          {
+            "title": "Locus iste",
+            "composerName": "A. Bruckner"
+          },
+          {
+            "title": "Ecco mormorar l’onde",
+            "composerName": "C. Monteverdi"
+          },
+          {
+            "title": "Jesu meine freude",
+            "composerName": "J. S. Bach"
+          },
+          {
+            "title": "Quel volto",
+            "composerName": "Orlando di Lasso"
+          },
+          {
+            "title": "Incipit oratio",
+            "composerName": "Tomás Luis de Victoria"
+          },
+          {
+            "title": "Taedet animam meam",
+            "composerName": "Tomás Luis de Victoria"
+          },
+          {
+            "title": "Abendlied",
+            "composerName": "J. Rheinberger"
+          },
+          {
+            "title": "Christus factus est",
+            "composerName": "A. Bruckner"
+          }
+        ],
+        "venueText": "Parroquia del Santo Cristo del Olivar",
+        "occurrences": [
+          {
+            "raw": "2026 · Parroquia del Santo Cristo del Olivar · Día 12 de diciembre, 20:45 h",
+            "date": "2026-12-12",
+            "time": "20:45"
+          }
+        ],
+        "description": "Concierto coral a capella del XXX aniversario. El programa específico de 12 de diciembre está publicado en la ficha del aniversario; se consultó también el dosier oficial enlazado.",
+        "programText": "Tradiderunt me – Tomás Luis de Victoria; What if I never speede – John Dowland; Con qué la lavaré – Anónimo; Super flumina Babilonys – Tomás Luis de Victoria; Locus iste – A. Bruckner; Ecco mormorar l’onde – C. Monteverdi; Jesu meine freude – J. S. Bach; Quel volto – Orlando di Lasso; Incipit oratio – Tomás Luis de Victoria; Taedet animam meam – Tomás Luis de Victoria; Abendlied – J. Rheinberger; Christus factus est – A. Bruckner",
+        "seriesText": "XXX Aniversario del Coro Tomás Luis de Victoria"
+      },
+      "venue": {
+        "name": "Parroquia del Santo Cristo del Olivar",
+        "municipality": "Madrid",
+        "area": "madrid",
+        "address": "Calle de los Cañizares, 4, Madrid",
+        "url": "https://corotomasluisdevictoria.com/proximos-conciertos/varios/"
+      },
+      "foundVia": "https://corotomasluisdevictoria.com/30o-aniversario-del-coro/varios/"
+    },
+    {
+      "source": {
+        "url": "https://teatrolara.com/programacion/pequeno-mozart",
+        "name": "Teatro Lara",
+        "homepage": "https://teatrolara.com/",
+        "kind": "official"
+      },
+      "event": {
+        "title": "El pequeño Mozart",
+        "performers": [
+          {
+            "name": "Marta García-Patos",
+            "roleText": "violín"
+          },
+          {
+            "name": "Adrián Alises",
+            "roleText": "violín"
+          },
+          {
+            "name": "Alejandro Lobo",
+            "roleText": "viola"
+          },
+          {
+            "name": "Claudia Vicente",
+            "roleText": "violonchelo"
+          },
+          {
+            "name": "Rafael García",
+            "roleText": "contrabajo"
+          },
+          {
+            "name": "Edgar Martín",
+            "roleText": "Mozart; director"
+          }
+        ],
+        "composers": [
+          {
+            "name": "Wolfgang Amadeus Mozart"
+          }
+        ],
+        "works": [],
+        "venueText": "Teatro Lara — Sala Cándido Lara",
+        "occurrences": [
+          {
+            "raw": "NOV 22 · 12:00 – 13:10; agenda de Camerata: 22 Noviembre 2026",
+            "date": "2026-11-22",
+            "time": "12:00"
+          },
+          {
+            "raw": "DIC 27 · 12:00 – 13:10; agenda de Camerata: 27 Diciembre 2026",
+            "date": "2026-12-27",
+            "time": "12:00"
+          },
+          {
+            "raw": "Agenda de Camerata Musicalis: 24 Enero 2027 · El Pequeño Mozart · 12:00 h · Teatro Lara (Sala Cándido Lara)",
+            "date": "2027-01-24",
+            "time": "12:00"
+          }
+        ],
+        "description": "Concierto teatralizado familiar con interpretación en directo por un quinteto de cuerdas de algunas de las composiciones más famosas de Wolfgang Amadeus Mozart. Duración: 70 minutos.",
+        "accessText": "Comprar entradas. Los niños hasta 2 años que no ocupen butaca tienen entrada gratuita."
+      },
+      "venue": {
+        "name": "Teatro Lara — Sala Cándido Lara",
+        "municipality": "Madrid",
+        "area": "madrid",
+        "address": "Calle Corredera Baja de San Pablo, 15, 28004 Madrid",
+        "url": "https://teatrolara.com/programacion-teatro-lara"
+      },
+      "foundVia": "https://cameratamusicalis.com/conciertos/"
+    },
+    {
+      "source": {
+        "url": "https://teatrolara.com/programacion/capitan-beethoven",
+        "name": "Teatro Lara",
+        "homepage": "https://teatrolara.com/",
+        "kind": "official"
+      },
+      "event": {
+        "title": "Capitán Beethoven",
+        "performers": [
+          {
+            "name": "Marta García-Patos",
+            "roleText": "violín"
+          },
+          {
+            "name": "Adrián Alises",
+            "roleText": "violín"
+          },
+          {
+            "name": "Alejandro Lobo",
+            "roleText": "viola"
+          },
+          {
+            "name": "Claudia Vicente",
+            "roleText": "violonchelo"
+          },
+          {
+            "name": "Rafael García",
+            "roleText": "contrabajo"
+          },
+          {
+            "name": "Edgar Martín",
+            "roleText": "Beethoven; director"
+          }
+        ],
+        "composers": [
+          {
+            "name": "Ludwig van Beethoven"
+          }
+        ],
+        "works": [
+          {
+            "title": "Quinta Sinfonía (fragmentos)",
+            "composerName": "Ludwig van Beethoven"
+          },
+          {
+            "title": "Oda a la Alegría / Novena Sinfonía (fragmentos)",
+            "composerName": "Ludwig van Beethoven"
+          }
+        ],
+        "venueText": "Teatro Lara — Sala Cándido Lara",
+        "occurrences": [
+          {
+            "raw": "DIC 20 · 12:00 – 13:15; agenda de Camerata: 20 Diciembre 2026",
+            "date": "2026-12-20",
+            "time": "12:00"
+          },
+          {
+            "raw": "ENE 03 · 12:00 – 13:15; agenda de Camerata: 3 Enero 2027",
+            "date": "2027-01-03",
+            "time": "12:00"
+          },
+          {
+            "raw": "FEB 07 · 12:00 – 13:15; agenda de Camerata: 7 Febrero 2027",
+            "date": "2027-02-07",
+            "time": "12:00"
+          }
+        ],
+        "description": "Concierto teatralizado familiar que acerca la vida y obra de Beethoven. Formación: dos violines, viola, violonchelo, contrabajo y director-actor. Duración: 75 minutos.",
+        "accessText": "Comprar entradas",
+        "programText": "Desde la Quinta Sinfonía hasta la Oda a la Alegría; canto final con la Novena Sinfonía."
+      },
+      "venue": {
+        "name": "Teatro Lara — Sala Cándido Lara",
+        "municipality": "Madrid",
+        "area": "madrid",
+        "address": "Calle Corredera Baja de San Pablo, 15, 28004 Madrid",
+        "url": "https://teatrolara.com/programacion-teatro-lara"
+      },
+      "foundVia": "https://cameratamusicalis.com/conciertos/"
+    },
+    {
+      "source": {
+        "url": "https://www.eventbrite.es/e/petite-messe-solennelle-g-rossini-tickets-2003777776269",
+        "name": "Sociedad Coral de Madrid — Eventbrite",
+        "homepage": "https://www.eventbrite.es/o/121893221300",
+        "kind": "official"
+      },
+      "event": {
+        "title": "Petite Messe Solennelle - G. Rossini",
+        "performers": [
+          {
+            "name": "Sara Matarranz",
+            "roleText": "soprano"
+          },
+          {
+            "name": "Laura Cobos",
+            "roleText": "alto"
+          },
+          {
+            "name": "Alain Damas",
+            "roleText": "tenor"
+          },
+          {
+            "name": "Isidro Anaya",
+            "roleText": "bajo"
+          },
+          {
+            "name": "Manuel Pachecho",
+            "roleText": "piano"
+          },
+          {
+            "name": "Jesús Mozo",
+            "roleText": "acordeón"
+          },
+          {
+            "name": "Coro de la Sociedad Coral de Madrid"
+          },
+          {
+            "name": "José Mena Polo",
+            "roleText": "director"
+          }
+        ],
+        "composers": [
+          {
+            "name": "Gioachino Rossini"
+          }
+        ],
+        "works": [
+          {
+            "title": "Petite Messe Solennelle",
+            "composerName": "Gioachino Rossini"
+          }
+        ],
+        "venueText": "Iglesia de la Universidad Pontificia Comillas",
+        "occurrences": [
+          {
+            "raw": "November 27, 2026 at 7:30 PM (CET)",
+            "date": "2026-11-27",
+            "time": "19:30"
+          }
+        ],
+        "description": "Petite Messe Solennelle de Rossini en versión para piano y acordeón. Con el Coro de la Sociedad Coral de Madrid y coralistas del proyecto participativo.",
+        "organizerText": "Sociedad Coral de Madrid",
+        "accessText": "Get tickets"
+      },
+      "venue": {
+        "name": "Iglesia de la Universidad Pontificia Comillas",
+        "municipality": "Madrid",
+        "area": "madrid",
+        "address": "Calle Alberto Aguilera, 23, 28015 Madrid",
+        "url": "https://www.eventbrite.es/e/petite-messe-solennelle-g-rossini-tickets-2003777776269"
+      },
+      "foundVia": "https://josemenapolo.es/performances/"
+    },
+    {
+      "source": {
+        "url": "https://docs.google.com/document/d/1Hd9P835kLLtYEZugZqhD8PAfQ4CqLrBu/edit",
+        "name": "Conservatorio Profesional de Música Amaniel",
+        "homepage": "https://site.educa.madrid.org/cpm.amaniel.madrid/",
+        "kind": "official"
+      },
+      "event": {
+        "title": "Concierto de Santa Cecilia",
+        "performers": [],
+        "composers": [],
+        "works": [],
+        "venueText": "IES Lope de Vega",
+        "occurrences": [
+          {
+            "raw": "18:00 Concierto de Santa Cecilia IES Lope de Vega",
+            "date": "2026-11-19",
+            "time": "18:00"
+          }
+        ],
+        "description": "Calendario de Audiciones y Actividades 2026 / 2027, documento oficial enlazado desde la agenda del conservatorio. 18:00 Concierto de Santa Cecilia IES Lope de Vega",
+        "organizerText": "Conservatorio Profesional de Música Amaniel",
+        "categoryText": "Concierto"
+      },
+      "venue": {
+        "name": "IES Lope de Vega",
+        "municipality": "Madrid",
+        "area": "madrid",
+        "address": "Calle San Bernardo, 70, 28015 Madrid",
+        "url": "https://www.educa.madrid.org/ies.lopedevega.madrid"
+      },
+      "foundVia": "https://site.educa.madrid.org/cpm.amaniel.madrid/index.php/agenda/"
+    },
+    {
+      "source": {
+        "url": "https://docs.google.com/document/d/1Hd9P835kLLtYEZugZqhD8PAfQ4CqLrBu/edit",
+        "name": "Conservatorio Profesional de Música Amaniel",
+        "homepage": "https://site.educa.madrid.org/cpm.amaniel.madrid/",
+        "kind": "official"
+      },
+      "event": {
+        "title": "Audición de Percusión",
+        "performers": [],
+        "composers": [],
+        "works": [],
+        "venueText": "Conservatorio Profesional de Música Amaniel — Salón de Actos",
+        "occurrences": [
+          {
+            "raw": "17.30-21.30 SActos Audición de Percusión Estela Blázquez-Antonio Picó",
+            "date": "2026-12-03",
+            "time": "17:30"
+          }
+        ],
+        "description": "Calendario de Audiciones y Actividades 2026 / 2027, documento oficial enlazado desde la agenda del conservatorio. 17.30-21.30 SActos Audición de Percusión Estela Blázquez-Antonio Picó",
+        "organizerText": "Conservatorio Profesional de Música Amaniel",
+        "categoryText": "Audición"
+      },
+      "foundVia": "https://site.educa.madrid.org/cpm.amaniel.madrid/index.php/agenda/"
+    },
+    {
+      "source": {
+        "url": "https://docs.google.com/document/d/1Hd9P835kLLtYEZugZqhD8PAfQ4CqLrBu/edit",
+        "name": "Conservatorio Profesional de Música Amaniel",
+        "homepage": "https://site.educa.madrid.org/cpm.amaniel.madrid/",
+        "kind": "official"
+      },
+      "event": {
+        "title": "Audición de Cámara",
+        "performers": [],
+        "composers": [],
+        "works": [],
+        "venueText": "Conservatorio Profesional de Música Amaniel — Salón de Actos",
+        "occurrences": [
+          {
+            "raw": "19:30-21:30 SActos Audición Cámara",
+            "date": "2026-12-16",
+            "time": "19:30"
+          }
+        ],
+        "description": "Calendario de Audiciones y Actividades 2026 / 2027, documento oficial enlazado desde la agenda del conservatorio. 19:30-21:30 SActos Audición Cámara",
+        "organizerText": "Conservatorio Profesional de Música Amaniel",
+        "categoryText": "Audición"
+      },
+      "foundVia": "https://site.educa.madrid.org/cpm.amaniel.madrid/index.php/agenda/"
+    },
+    {
+      "source": {
+        "url": "https://docs.google.com/document/d/1Hd9P835kLLtYEZugZqhD8PAfQ4CqLrBu/edit",
+        "name": "Conservatorio Profesional de Música Amaniel",
+        "homepage": "https://site.educa.madrid.org/cpm.amaniel.madrid/",
+        "kind": "official"
+      },
+      "event": {
+        "title": "Audición de Cámara",
+        "performers": [],
+        "composers": [],
+        "works": [],
+        "venueText": "Conservatorio Profesional de Música Amaniel — Sala de Cámara",
+        "occurrences": [
+          {
+            "raw": "15:30-18:00 Sala de Cámara Audición de Cámara",
+            "date": "2026-12-17",
+            "time": "15:30"
+          }
+        ],
+        "description": "Calendario de Audiciones y Actividades 2026 / 2027, documento oficial enlazado desde la agenda del conservatorio. 15:30-18:00 Sala de Cámara Audición de Cámara",
+        "organizerText": "Conservatorio Profesional de Música Amaniel",
+        "categoryText": "Audición"
+      },
+      "venue": {
+        "name": "Conservatorio Profesional de Música Amaniel — Sala de Cámara",
+        "municipality": "Madrid",
+        "area": "madrid",
+        "address": "Calle Amaniel, 2, 28015 Madrid",
+        "url": "https://site.educa.madrid.org/cpm.amaniel.madrid/index.php/contacto/"
+      },
+      "foundVia": "https://site.educa.madrid.org/cpm.amaniel.madrid/index.php/agenda/"
+    },
+    {
+      "source": {
+        "url": "https://docs.google.com/document/d/1Hd9P835kLLtYEZugZqhD8PAfQ4CqLrBu/edit",
+        "name": "Conservatorio Profesional de Música Amaniel",
+        "homepage": "https://site.educa.madrid.org/cpm.amaniel.madrid/",
+        "kind": "official"
+      },
+      "event": {
+        "title": "Audición de Cámara",
+        "performers": [],
+        "composers": [],
+        "works": [],
+        "venueText": "Conservatorio Profesional de Música Amaniel — Sala de Cámara",
+        "occurrences": [
+          {
+            "raw": "15:30-17:30 Sala de Cámara Audición de Cámara",
+            "date": "2026-12-18",
+            "time": "15:30"
+          }
+        ],
+        "description": "Calendario de Audiciones y Actividades 2026 / 2027, documento oficial enlazado desde la agenda del conservatorio. 15:30-17:30 Sala de Cámara Audición de Cámara",
+        "organizerText": "Conservatorio Profesional de Música Amaniel",
+        "categoryText": "Audición"
+      },
+      "venue": {
+        "name": "Conservatorio Profesional de Música Amaniel — Sala de Cámara",
+        "municipality": "Madrid",
+        "area": "madrid",
+        "address": "Calle Amaniel, 2, 28015 Madrid",
+        "url": "https://site.educa.madrid.org/cpm.amaniel.madrid/index.php/contacto/"
+      },
+      "foundVia": "https://site.educa.madrid.org/cpm.amaniel.madrid/index.php/agenda/"
+    },
+    {
+      "source": {
+        "url": "https://docs.google.com/document/d/1Hd9P835kLLtYEZugZqhD8PAfQ4CqLrBu/edit",
+        "name": "Conservatorio Profesional de Música Amaniel",
+        "homepage": "https://site.educa.madrid.org/cpm.amaniel.madrid/",
+        "kind": "official"
+      },
+      "event": {
+        "title": "Concierto de Orquestas",
+        "performers": [],
+        "composers": [],
+        "works": [],
+        "venueText": "Conservatorio Profesional de Música Amaniel — Salón de Actos",
+        "occurrences": [
+          {
+            "raw": "SActos Concierto de Orquestas",
+            "date": "2026-12-21"
+          }
+        ],
+        "description": "Calendario de Audiciones y Actividades 2026 / 2027, documento oficial enlazado desde la agenda del conservatorio. SActos Concierto de Orquestas",
+        "organizerText": "Conservatorio Profesional de Música Amaniel",
+        "categoryText": "Concierto"
+      },
+      "foundVia": "https://site.educa.madrid.org/cpm.amaniel.madrid/index.php/agenda/"
+    },
+    {
+      "source": {
+        "url": "https://docs.google.com/document/d/1Hd9P835kLLtYEZugZqhD8PAfQ4CqLrBu/edit",
+        "name": "Conservatorio Profesional de Música Amaniel",
+        "homepage": "https://site.educa.madrid.org/cpm.amaniel.madrid/",
+        "kind": "official"
+      },
+      "event": {
+        "title": "Concierto de Inauguración de la Sala de Cámara",
+        "performers": [],
+        "composers": [],
+        "works": [],
+        "venueText": "Conservatorio Profesional de Música Amaniel — Sala de Cámara",
+        "occurrences": [
+          {
+            "raw": "18:30 Sala de Cámara Concierto de Inauguración de la Sala de Cámara",
+            "date": "2027-01-27",
+            "time": "18:30"
+          }
+        ],
+        "description": "Calendario de Audiciones y Actividades 2026 / 2027, documento oficial enlazado desde la agenda del conservatorio. 18:30 Sala de Cámara Concierto de Inauguración de la Sala de Cámara",
+        "organizerText": "Conservatorio Profesional de Música Amaniel",
+        "categoryText": "Concierto"
+      },
+      "venue": {
+        "name": "Conservatorio Profesional de Música Amaniel — Sala de Cámara",
+        "municipality": "Madrid",
+        "area": "madrid",
+        "address": "Calle Amaniel, 2, 28015 Madrid",
+        "url": "https://site.educa.madrid.org/cpm.amaniel.madrid/index.php/contacto/"
+      },
+      "foundVia": "https://site.educa.madrid.org/cpm.amaniel.madrid/index.php/agenda/"
+    },
+    {
+      "source": {
+        "url": "https://docs.google.com/document/d/1Hd9P835kLLtYEZugZqhD8PAfQ4CqLrBu/edit",
+        "name": "Conservatorio Profesional de Música Amaniel",
+        "homepage": "https://site.educa.madrid.org/cpm.amaniel.madrid/",
+        "kind": "official"
+      },
+      "event": {
+        "title": "Música de Cámara en el Museo de Historia de Madrid",
+        "performers": [],
+        "composers": [],
+        "works": [],
+        "venueText": "Museo de Historia de Madrid",
+        "occurrences": [
+          {
+            "raw": "12.00 MÚSICA DE CÁMARA EN EL MUSEO DE HISTORIA DE MADRID",
+            "date": "2027-01-30",
+            "time": "12:00"
+          }
+        ],
+        "description": "Calendario de Audiciones y Actividades 2026 / 2027, documento oficial enlazado desde la agenda del conservatorio. 12.00 MÚSICA DE CÁMARA EN EL MUSEO DE HISTORIA DE MADRID",
+        "organizerText": "Conservatorio Profesional de Música Amaniel",
+        "categoryText": "Concierto"
+      },
+      "foundVia": "https://site.educa.madrid.org/cpm.amaniel.madrid/index.php/agenda/"
+    },
+    {
+      "source": {
+        "url": "https://docs.google.com/document/d/1Hd9P835kLLtYEZugZqhD8PAfQ4CqLrBu/edit",
+        "name": "Conservatorio Profesional de Música Amaniel",
+        "homepage": "https://site.educa.madrid.org/cpm.amaniel.madrid/",
+        "kind": "official"
+      },
+      "event": {
+        "title": "Audición Piano Complementario",
+        "performers": [],
+        "composers": [],
+        "works": [],
+        "venueText": "Conservatorio Profesional de Música Amaniel — Salón de Actos",
+        "occurrences": [
+          {
+            "raw": "15:30-21:30 SActos Audición Piano COMPLEMENTARIO",
+            "date": "2027-02-03",
+            "time": "15:30"
+          }
+        ],
+        "description": "Calendario de Audiciones y Actividades 2026 / 2027, documento oficial enlazado desde la agenda del conservatorio. 15:30-21:30 SActos Audición Piano COMPLEMENTARIO",
+        "organizerText": "Conservatorio Profesional de Música Amaniel",
+        "categoryText": "Audición"
+      },
+      "foundVia": "https://site.educa.madrid.org/cpm.amaniel.madrid/index.php/agenda/"
+    },
+    {
+      "source": {
+        "url": "https://docs.google.com/document/d/1Hd9P835kLLtYEZugZqhD8PAfQ4CqLrBu/edit",
+        "name": "Conservatorio Profesional de Música Amaniel",
+        "homepage": "https://site.educa.madrid.org/cpm.amaniel.madrid/",
+        "kind": "official"
+      },
+      "event": {
+        "title": "Concierto de Cámara",
+        "performers": [],
+        "composers": [],
+        "works": [],
+        "venueText": "Museo Casa de la Moneda — Auditorio",
+        "occurrences": [
+          {
+            "raw": "19:00 REAL CASA DE LA MONEDA Concierto de Cámara",
+            "date": "2027-02-10",
+            "time": "19:00"
+          }
+        ],
+        "description": "Calendario de Audiciones y Actividades 2026 / 2027, documento oficial enlazado desde la agenda del conservatorio. 19:00 REAL CASA DE LA MONEDA Concierto de Cámara",
+        "organizerText": "Conservatorio Profesional de Música Amaniel",
+        "categoryText": "Concierto"
+      },
+      "foundVia": "https://site.educa.madrid.org/cpm.amaniel.madrid/index.php/agenda/"
+    },
+    {
+      "source": {
+        "url": "https://docs.google.com/document/d/1Hd9P835kLLtYEZugZqhD8PAfQ4CqLrBu/edit",
+        "name": "Conservatorio Profesional de Música Amaniel",
+        "homepage": "https://site.educa.madrid.org/cpm.amaniel.madrid/",
+        "kind": "official"
+      },
+      "event": {
+        "title": "Audición de Cámara",
+        "performers": [],
+        "composers": [],
+        "works": [],
+        "venueText": "Conservatorio Profesional de Música Amaniel — Sala de Cámara",
+        "occurrences": [
+          {
+            "raw": "17:30-19:30 Sala de Cámara Audición de Cámara",
+            "date": "2027-02-16",
+            "time": "17:30"
+          }
+        ],
+        "description": "Calendario de Audiciones y Actividades 2026 / 2027, documento oficial enlazado desde la agenda del conservatorio. 17:30-19:30 Sala de Cámara Audición de Cámara",
+        "organizerText": "Conservatorio Profesional de Música Amaniel",
+        "categoryText": "Audición"
+      },
+      "venue": {
+        "name": "Conservatorio Profesional de Música Amaniel — Sala de Cámara",
+        "municipality": "Madrid",
+        "area": "madrid",
+        "address": "Calle Amaniel, 2, 28015 Madrid",
+        "url": "https://site.educa.madrid.org/cpm.amaniel.madrid/index.php/contacto/"
+      },
+      "foundVia": "https://site.educa.madrid.org/cpm.amaniel.madrid/index.php/agenda/"
+    },
+    {
+      "source": {
+        "url": "https://docs.google.com/document/d/1Hd9P835kLLtYEZugZqhD8PAfQ4CqLrBu/edit",
+        "name": "Conservatorio Profesional de Música Amaniel",
+        "homepage": "https://site.educa.madrid.org/cpm.amaniel.madrid/",
+        "kind": "official"
+      },
+      "event": {
+        "title": "Audición de Cámara",
+        "performers": [],
+        "composers": [],
+        "works": [],
+        "venueText": "Conservatorio Profesional de Música Amaniel — Sala de Cámara",
+        "occurrences": [
+          {
+            "raw": "19:30-21:30 Sala de Cámara Audición de Cámara",
+            "date": "2027-02-17",
+            "time": "19:30"
+          }
+        ],
+        "description": "Calendario de Audiciones y Actividades 2026 / 2027, documento oficial enlazado desde la agenda del conservatorio. 19:30-21:30 Sala de Cámara Audición de Cámara",
+        "organizerText": "Conservatorio Profesional de Música Amaniel",
+        "categoryText": "Audición"
+      },
+      "venue": {
+        "name": "Conservatorio Profesional de Música Amaniel — Sala de Cámara",
+        "municipality": "Madrid",
+        "area": "madrid",
+        "address": "Calle Amaniel, 2, 28015 Madrid",
+        "url": "https://site.educa.madrid.org/cpm.amaniel.madrid/index.php/contacto/"
+      },
+      "foundVia": "https://site.educa.madrid.org/cpm.amaniel.madrid/index.php/agenda/"
+    },
+    {
+      "source": {
+        "url": "https://docs.google.com/document/d/1Hd9P835kLLtYEZugZqhD8PAfQ4CqLrBu/edit",
+        "name": "Conservatorio Profesional de Música Amaniel",
+        "homepage": "https://site.educa.madrid.org/cpm.amaniel.madrid/",
+        "kind": "official"
+      },
+      "event": {
+        "title": "Concierto de la Encina",
+        "performers": [
+          {
+            "name": "Sofía Navarro",
+            "roleText": "violín"
+          },
+          {
+            "name": "Ángel Martín del Burgo",
+            "roleText": "piano"
+          }
+        ],
+        "composers": [],
+        "works": [],
+        "venueText": "Conservatorio Profesional de Música Amaniel — Salón de Actos",
+        "occurrences": [
+          {
+            "raw": "19.30 Salón de Actos CONCIERTO DE LA ENCINA Sofía Navarro, violín y Ángel Martín del Burgo, piano",
+            "date": "2027-02-18",
+            "time": "19:30"
+          }
+        ],
+        "description": "Calendario de Audiciones y Actividades 2026 / 2027, documento oficial enlazado desde la agenda del conservatorio. 19.30 Salón de Actos CONCIERTO DE LA ENCINA Sofía Navarro, violín y Ángel Martín del Burgo, piano",
+        "organizerText": "Conservatorio Profesional de Música Amaniel",
+        "categoryText": "Concierto",
+        "seriesText": "Conciertos de la Encina"
+      },
+      "foundVia": "https://site.educa.madrid.org/cpm.amaniel.madrid/index.php/agenda/"
+    },
+    {
+      "source": {
+        "url": "https://docs.google.com/document/d/1Hd9P835kLLtYEZugZqhD8PAfQ4CqLrBu/edit",
+        "name": "Conservatorio Profesional de Música Amaniel",
+        "homepage": "https://site.educa.madrid.org/cpm.amaniel.madrid/",
+        "kind": "official"
+      },
+      "event": {
+        "title": "Audición de Cámara",
+        "performers": [],
+        "composers": [],
+        "works": [],
+        "venueText": "Conservatorio Profesional de Música Amaniel — Salón de Actos",
+        "occurrences": [
+          {
+            "raw": "15:30-17:30 SActos Audición de cámara",
+            "date": "2027-02-18",
+            "time": "15:30"
+          }
+        ],
+        "description": "Calendario de Audiciones y Actividades 2026 / 2027, documento oficial enlazado desde la agenda del conservatorio. 15:30-17:30 SActos Audición de cámara",
+        "organizerText": "Conservatorio Profesional de Música Amaniel",
+        "categoryText": "Audición"
+      },
+      "foundVia": "https://site.educa.madrid.org/cpm.amaniel.madrid/index.php/agenda/"
+    },
+    {
+      "source": {
+        "url": "https://docs.google.com/document/d/1Hd9P835kLLtYEZugZqhD8PAfQ4CqLrBu/edit",
+        "name": "Conservatorio Profesional de Música Amaniel",
+        "homepage": "https://site.educa.madrid.org/cpm.amaniel.madrid/",
+        "kind": "official"
+      },
+      "event": {
+        "title": "Música de Cámara en el Museo de Historia de Madrid",
+        "performers": [],
+        "composers": [],
+        "works": [],
+        "venueText": "Museo de Historia de Madrid",
+        "occurrences": [
+          {
+            "raw": "12.00 MÚSICA DE CÁMARA EN EL MUSEO DE HISTORIA DE MADRID",
+            "date": "2027-02-20",
+            "time": "12:00"
+          }
+        ],
+        "description": "Calendario de Audiciones y Actividades 2026 / 2027, documento oficial enlazado desde la agenda del conservatorio. 12.00 MÚSICA DE CÁMARA EN EL MUSEO DE HISTORIA DE MADRID",
+        "organizerText": "Conservatorio Profesional de Música Amaniel",
+        "categoryText": "Concierto"
+      },
+      "foundVia": "https://site.educa.madrid.org/cpm.amaniel.madrid/index.php/agenda/"
+    },
+    {
+      "source": {
+        "url": "https://alianzacoral.org/event/parroquia-nuestra-senora-del-pilar-campamento/",
+        "name": "Alianza Coral Madrileña",
+        "homepage": "https://alianzacoral.org/",
+        "kind": "official"
+      },
+      "event": {
+        "title": "Parroquia Nuestra Señora del Pilar (Campamento)",
+        "performers": [],
+        "composers": [],
+        "works": [],
+        "venueText": "Parroquia Nuestra Señora del Pilar (Campamento)",
+        "occurrences": [
+          {
+            "raw": "2026-11-14 · 19:30",
+            "date": "2026-11-14",
+            "time": "19:30"
+          }
+        ],
+        "description": "Ficha oficial con fecha, hora y recinto; no publica repertorio ni formación participante.",
+        "organizerText": "Alianza Coral Madrileña",
+        "categoryText": "Conciertos"
+      },
+      "venue": {
+        "name": "Parroquia Nuestra Señora del Pilar (Campamento)",
+        "municipality": "Madrid",
+        "area": "madrid",
+        "address": "Pl. de Patricio Martínez, 5, 28024 Madrid",
+        "url": "https://alianzacoral.org/event/parroquia-nuestra-senora-del-pilar-campamento/"
+      },
+      "foundVia": "https://alianzacoral.org/events/lista/?tribe-bar-date=2026-10-27"
+    },
+    {
+      "source": {
+        "url": "https://alianzacoral.org/event/concierto-navidad-parroquia-nuestra-senora-del-pilar-barrio-salamanca/",
+        "name": "Alianza Coral Madrileña",
+        "homepage": "https://alianzacoral.org/",
+        "kind": "official"
+      },
+      "event": {
+        "title": "Concierto Navidad Parroquia Nuestra Señora del Pilar (Barrio Salamanca)",
+        "performers": [],
+        "composers": [],
+        "works": [],
+        "venueText": "Parroquia Nuestra Señora del Pilar (Bº Salamanca)",
+        "occurrences": [
+          {
+            "raw": "2026-12-16 · 19:00",
+            "date": "2026-12-16",
+            "time": "19:00"
+          }
+        ],
+        "description": "Ficha oficial con fecha, hora y recinto; no publica repertorio ni formación participante.",
+        "organizerText": "Alianza Coral Madrileña",
+        "categoryText": "Conciertos"
+      },
+      "venue": {
+        "name": "Parroquia Nuestra Señora del Pilar (Bº Salamanca)",
+        "municipality": "Madrid",
+        "area": "madrid",
+        "address": "Calle de Juan Bravo, 40 BIS, 28006 Madrid",
+        "url": "https://alianzacoral.org/event/concierto-navidad-parroquia-nuestra-senora-del-pilar-barrio-salamanca/"
+      },
+      "foundVia": "https://alianzacoral.org/events/lista/?tribe-bar-date=2026-10-27"
+    },
+    {
+      "source": {
+        "url": "https://alianzacoral.org/event/concierto-navidad-basilica-ns-de-atocha-retiro/",
+        "name": "Alianza Coral Madrileña",
+        "homepage": "https://alianzacoral.org/",
+        "kind": "official"
+      },
+      "event": {
+        "title": "Concierto Navidad Basílica NS de Atocha (Retiro)",
+        "performers": [],
+        "composers": [],
+        "works": [],
+        "venueText": "Real Basílica de Nuestra Señora de Atocha",
+        "occurrences": [
+          {
+            "raw": "2026-12-20 · 18:00",
+            "date": "2026-12-20",
+            "time": "18:00"
+          }
+        ],
+        "description": "Ficha oficial con fecha, hora y recinto; no publica repertorio ni formación participante.",
+        "organizerText": "Alianza Coral Madrileña",
+        "categoryText": "Conciertos"
+      },
+      "foundVia": "https://alianzacoral.org/events/lista/?tribe-bar-date=2026-10-27"
+    },
+    {
+      "source": {
+        "url": "https://alianzacoral.org/event/concierto-navidad-basilica-concepcion-de-ns-barrio-salamanca/",
+        "name": "Alianza Coral Madrileña",
+        "homepage": "https://alianzacoral.org/",
+        "kind": "official"
+      },
+      "event": {
+        "title": "Concierto Navidad Basílica Concepción de NS (Barrio Salamanca)",
+        "performers": [],
+        "composers": [],
+        "works": [],
+        "venueText": "Basílica de la Concepción de Nuestra Señora",
+        "occurrences": [
+          {
+            "raw": "2026-12-23 · 20:00",
+            "date": "2026-12-23",
+            "time": "20:00"
+          }
+        ],
+        "description": "Ficha oficial con fecha, hora y recinto; no publica repertorio ni formación participante.",
+        "organizerText": "Alianza Coral Madrileña",
+        "categoryText": "Conciertos"
+      },
+      "venue": {
+        "name": "Basílica de la Concepción de Nuestra Señora",
+        "municipality": "Madrid",
+        "area": "madrid",
+        "address": "Calle Goya, 26, 28001 Madrid",
+        "url": "https://alianzacoral.org/event/concierto-navidad-basilica-concepcion-de-ns-barrio-salamanca/"
+      },
+      "foundVia": "https://alianzacoral.org/events/lista/?tribe-bar-date=2026-10-27"
+    },
+    {
+      "source": {
+        "url": "https://alianzacoral.org/event/concierto-centro-cultural-casa-de-vacas-retiro/",
+        "name": "Alianza Coral Madrileña",
+        "homepage": "https://alianzacoral.org/",
+        "kind": "official"
+      },
+      "event": {
+        "title": "Concierto Centro Cultural Casa de Vacas (Retiro)",
+        "performers": [],
+        "composers": [],
+        "works": [],
+        "venueText": "Centro Cultural Casa de Vacas",
+        "occurrences": [
+          {
+            "raw": "2026-12-27 · 12:00",
+            "date": "2026-12-27",
+            "time": "12:00"
+          }
+        ],
+        "description": "Ficha oficial con fecha, hora y recinto; no publica repertorio ni formación participante.",
+        "organizerText": "Alianza Coral Madrileña",
+        "categoryText": "Conciertos"
+      },
+      "foundVia": "https://alianzacoral.org/events/lista/?tribe-bar-date=2026-10-27"
+    },
+    {
+      "source": {
+        "url": "https://www.polifonicagetafe.es/conciertos-2/",
+        "name": "Coral Polifónica de Getafe",
+        "homepage": "https://www.polifonicagetafe.es/",
+        "kind": "official"
+      },
+      "event": {
+        "title": "Concierto de Navidad",
+        "performers": [
+          {
+            "name": "Coral Polifónica de Getafe"
+          }
+        ],
+        "composers": [
+          {
+            "name": "Antonio Vivaldi"
+          }
+        ],
+        "works": [
+          {
+            "title": "Gloria, RV 589",
+            "composerName": "Antonio Vivaldi"
+          },
+          {
+            "title": "Villancicos populares"
+          }
+        ],
+        "venueText": "Catedral de Santa María Magdalena de Getafe",
+        "occurrences": [
+          {
+            "raw": "19 diciembre 2026. Concierto de Navidad. Lugar: Catedral Santa María Magdalena de Getafe",
+            "date": "2026-12-19"
+          }
+        ],
+        "description": "Concierto de Navidad de la Coral Polifónica de Getafe. La agenda no anuncia hora.",
+        "programText": "Gloria (RV 589) — Antonio Vivaldi. Villancicos populares."
+      },
+      "venue": {
+        "name": "Catedral de Santa María Magdalena de Getafe",
+        "municipality": "Getafe",
+        "area": "nearby",
+        "address": "Plaza de la Magdalena, s/n, Getafe",
+        "url": "https://www.madrid.org/monumentoscercanias/catedral-santa-m-magdalena.html"
+      }
+    },
+    {
+      "source": {
+        "url": "https://www.polifonicagetafe.es/conciertos-2/",
+        "name": "Coral Polifónica de Getafe",
+        "homepage": "https://www.polifonicagetafe.es/",
+        "kind": "official"
+      },
+      "event": {
+        "title": "Concierto benéfico de Navidad de la Guardia Civil",
+        "performers": [
+          {
+            "name": "Coral Polifónica de Getafe"
+          }
+        ],
+        "composers": [
+          {
+            "name": "Vangelis"
+          },
+          {
+            "name": "Carl Orff"
+          },
+          {
+            "name": "Óscar Navarro"
+          }
+        ],
+        "works": [
+          {
+            "title": "1492: Conquest of Paradiese",
+            "composerName": "Vangelis"
+          },
+          {
+            "title": "Carmina Burana (selección)",
+            "composerName": "Carl Orff"
+          },
+          {
+            "title": "El ilustre marino",
+            "composerName": "Óscar Navarro"
+          },
+          {
+            "title": "Villancicos populares (fuera de programa)"
+          }
+        ],
+        "venueText": "Auditorio Nacional de Música — Sala Sinfónica",
+        "occurrences": [
+          {
+            "raw": "16 diciembre 2026. Concierto benéfico de Navidad de la Guardia Civil. Auditorio Nacional – Sala Sinfónica",
+            "date": "2026-12-16"
+          }
+        ],
+        "description": "La Coral Polifónica de Getafe anuncia su participación. La agenda no indica la hora.",
+        "programText": "1492: Conquest of Paradiese — Vangelis. Carmina Burana (selección) — Carl Orff: O Fortuna; Ecce gratum; Were diu werlt alle min; In taberna quando sumus; Amor volat undique; Ave formosissima; O Fortuna. El ilustre marino — Óscar Navarro. Fuera de programa: villancicos populares."
+      }
+    }
+  ],
+  "research": {
+    "schemaVersion": 1,
+    "investigatedCategories": [
+      "agendas oficiales y distritos",
+      "21 DISTRITOS",
+      "museos estatales",
+      "festivales multidisciplinares",
+      "iglesias/parroquias",
+      "órgano",
+      "coros",
+      "conservatorios/escuelas",
+      "universidades y colegios mayores",
+      "fundaciones",
+      "institutos culturales",
+      "páginas de intérpretes",
+      "orquestas y ensembles",
+      "conciertos familiares",
+      "recitales y cámara"
+    ],
+    "leads": [
+      {
+        "kind": "search",
+        "query": "Madrid conciertos noviembre diciembre 2026 iglesia órgano coro recital"
+      },
+      {
+        "kind": "search",
+        "query": "Madrid concierto enero febrero 2027 fundación museo recital"
+      },
+      {
+        "kind": "search",
+        "query": "Madrid octubre 2026 27 31 concierto iglesia"
+      },
+      {
+        "kind": "search",
+        "query": "Madrid noviembre 2026 recital conservatorio colegio mayor"
+      },
+      {
+        "kind": "search",
+        "query": "Madrid febrero 2027 concierto instituto"
+      },
+      {
+        "kind": "search",
+        "query": "Madrid enero 2027 recital colegio"
+      },
+      {
+        "kind": "search",
+        "query": "Madrid noviembre 2026 oratorio coro"
+      },
+      {
+        "kind": "search",
+        "query": "Madrid diciembre 2026 barroco iglesia"
+      },
+      {
+        "kind": "search",
+        "query": "site.cultura.gob.es 2026 noviembre conciertos"
+      },
+      {
+        "kind": "search",
+        "query": "site.ucm.es 2026 noviembre concierto música"
+      },
+      {
+        "kind": "search",
+        "query": "site.cultura.uc3m.es 2026 noviembre música"
+      },
+      {
+        "kind": "search",
+        "query": "site.iicmadrid.esteri.it 2026 concerto"
+      },
+      {
+        "kind": "search",
+        "query": "site.goethe.de/madrid 2026 concierto"
+      },
+      {
+        "kind": "search",
+        "query": "Madrid noviembre 2026 lied"
+      },
+      {
+        "kind": "search",
+        "query": "Madrid noviembre 2026 Schola concierto"
+      },
+      {
+        "kind": "search",
+        "query": "Madrid enero 2027 camerata conciertos"
+      },
+      {
+        "kind": "lead",
+        "query": "https://www.esmadrid.com/calendario-eventos-madrid"
+      },
+      {
+        "kind": "lead",
+        "query": "https://21distritos.es/programacion/"
+      },
+      {
+        "kind": "lead",
+        "query": "https://www.musae.es/programacion.html"
+      },
+      {
+        "kind": "lead",
+        "query": "https://site.educa.madrid.org/cpm.amaniel.madrid/index.php/agenda/"
+      },
+      {
+        "kind": "lead",
+        "query": "https://madridsinfonica.com/"
+      },
+      {
+        "kind": "lead",
+        "query": "https://corotomasluisdevictoria.com/proximos-conciertos/varios/"
+      },
+      {
+        "kind": "lead",
+        "query": "https://cameratamusicalis.com/conciertos/"
+      },
+      {
+        "kind": "lead",
+        "query": "https://josemenapolo.es/performances/"
+      },
+      {
+        "kind": "lead",
+        "query": "https://alianzacoral.org/events/lista/?tribe-bar-date=2026-10-27"
+      },
+      {
+        "kind": "lead",
+        "query": "https://www.polifonicagetafe.es/conciertos-2/"
+      }
+    ],
+    "candidatesReviewedApprox": 160,
+    "submittedToBatch": 29,
+    "exclusions": [
+      {
+        "reason": "already-covered",
+        "count": 34,
+        "examples": [
+          "CaixaForum: Guillermo Willis, Duo Doré, A-Delta Trio",
+          "Mercados en Crescendo: tres conciertos de la ventana",
+          "Amaniel: siete conciertos; San Ginés: órgano y coros de Adviento"
+        ]
+      },
+      {
+        "reason": "harvested-source",
+        "count": 8,
+        "notes": "Sólo coincidencias encontradas incidentalmente; sin rebarrer agendas con adapter."
+      },
+      {
+        "reason": "non-classical",
+        "count": 43,
+        "examples": [
+          "21 DISTRITOS: talleres, danza y conciertos de jazz/raíz",
+          "MSDA: Star Wars y Halloween con identidad cinematográfica",
+          "Polifónica de Getafe: musicales; Alianza: dos conciertos góspel"
+        ]
+      },
+      {
+        "reason": "out-of-window",
+        "count": 25,
+        "examples": [
+          "Olivar de Castillejo: programación de verano",
+          "Música Antigua / Andrés Segovia: funciones anteriores al 27 de octubre",
+          "Fechas posteriores al 24 de febrero en agendas de temporada"
+        ]
+      },
+      {
+        "reason": "out-of-geographic-scope",
+        "count": 5,
+        "examples": [
+          "Coro TLV en Brunete",
+          "Agenda de Silvia Márquez fuera de Madrid"
+        ]
+      },
+      {
+        "reason": "insufficient-evidence",
+        "count": 8,
+        "examples": [
+          "Coro TLV: 29 noviembre sin recinto",
+          "Amaniel: Auditorio Casa de Campo sin sala/localización inequívoca",
+          "MusaE: detalle completo de temporada no recuperable (429/503)"
+        ]
+      },
+      {
+        "reason": "duplicate-lead",
+        "count": 6,
+        "notes": "Noticias y agendas que repiten el mismo anuncio."
+      },
+      {
+        "reason": "other",
+        "count": 2,
+        "examples": [
+          "Actuación de hospital y boda privada"
+        ]
+      }
+    ],
+    "officialDetailReviewed": "all",
+    "searchPasses": [
+      {
+        "kind": "high-recall",
+        "approaches": [
+          "Turismo Madrid y agenda cultural municipal",
+          "21 DISTRITOS: los 21 anuncios disponibles y carga adicional sin tarjetas ocultas",
+          "Comunidad de Madrid y museos estatales / MusaE",
+          "programación cultural UC3M"
+        ]
+      },
+      {
+        "kind": "long-tail",
+        "approaches": [
+          "San Ginés, San Antonio y órgano",
+          "Amaniel y su calendario oficial enlazado",
+          "coros y asociaciones corales",
+          "universidades y colegios mayores",
+          "fundaciones e institutos culturales italiano y Goethe"
+        ]
+      },
+      {
+        "kind": "music-vocabulary",
+        "approaches": [
+          "recital, cámara, cuarteto y trío",
+          "órgano, coral, coro y oratorio",
+          "réquiem, cantata, lied y barroco",
+          "búsquedas por enero y febrero 2027 además de otoño/Navidad"
+        ]
+      },
+      {
+        "kind": "recovery",
+        "approaches": [
+          "webs propias de Madrid Sinfónica y Camerata Musicalis",
+          "Teatro Lara: Mozart y Beethoven para familias",
+          "Coro Tomás Luis de Victoria: programa de aniversario y dosier PDF",
+          "José Mena Polo y ticket oficial del organizador",
+          "Alianza Coral y Coral Polifónica de Getafe",
+          "CentroCentro: VANG y LIMO"
+        ],
+        "notes": "Añadida tras el alto solapamiento inicial y sólo tres conciertos nuevos confirmados. Produjo nuevas observaciones en varias fuentes sin adapter."
+      }
+    ],
+    "listingReviews": [
+      {
+        "url": "https://21distritos.es/programacion/",
+        "inWindowCandidatesSeen": 21,
+        "submitted": 0,
+        "alreadyCovered": 1,
+        "excluded": 20,
+        "unresolved": 0,
+        "notes": "Todo el listado disponible: Rossita ya cubierto; jazz/raíz, talleres y otras artes fuera. El botón Cargar más sólo revela tarjetas ajax-hidden y el HTML no contiene ninguna."
+      },
+      {
+        "url": "https://docs.google.com/document/d/1Hd9P835kLLtYEZugZqhD8PAfQ4CqLrBu/edit",
+        "inWindowCandidatesSeen": 28,
+        "submitted": 15,
+        "alreadyCovered": 7,
+        "excluded": 5,
+        "unresolved": 1,
+        "notes": "Ventana completa del calendario oficial: conciertos y audiciones extraídos individualmente. Excluidos ensayos, SOMOS 6º e intercambio sin concierto anunciado. Casa de Campo sin sala precisa queda pendiente."
+      },
+      {
+        "url": "https://madridsinfonica.com/",
+        "inWindowCandidatesSeen": 5,
+        "submitted": 3,
+        "alreadyCovered": 0,
+        "excluded": 2,
+        "unresolved": 0,
+        "notes": "Resurgir, España Sinfónica y Navidad enviados con detalle; Halloween y Star Wars con identidad principal cinematográfica fuera."
+      },
+      {
+        "url": "https://cameratamusicalis.com/conciertos/",
+        "inWindowCandidatesSeen": 10,
+        "submitted": 6,
+        "alreadyCovered": 4,
+        "excluded": 0,
+        "unresolved": 0,
+        "notes": "Seis funciones familiares agrupadas en dos observaciones; cuatro conciertos del Auditorio Nacional ya cubiertos. Se leyó la ficha de cada producción familiar en Teatro Lara."
+      },
+      {
+        "url": "https://corotomasluisdevictoria.com/proximos-conciertos/varios/",
+        "inWindowCandidatesSeen": 3,
+        "submitted": 1,
+        "alreadyCovered": 0,
+        "excluded": 1,
+        "unresolved": 1,
+        "notes": "12 diciembre Cristo del Olivar enviado; Brunete fuera del alcance próximo. La ficha de aniversario menciona además 29 noviembre sin sede: pendiente. Programa completo de 12 diciembre y dosier consultados."
+      },
+      {
+        "url": "https://alianzacoral.org/events/lista/?tribe-bar-date=2026-10-27",
+        "inWindowCandidatesSeen": 7,
+        "submitted": 5,
+        "alreadyCovered": 0,
+        "excluded": 2,
+        "unresolved": 0,
+        "notes": "Los siete anuncios de la colección. Cinco fichas de concierto sin repertorio ni intérpretes enviados fielmente al clasificador; dos conciertos explícitamente góspel fuera."
+      },
+      {
+        "url": "https://www.polifonicagetafe.es/conciertos-2/",
+        "inWindowCandidatesSeen": 8,
+        "submitted": 2,
+        "alreadyCovered": 0,
+        "excluded": 4,
+        "unresolved": 2,
+        "notes": "Navidad con Gloria RV 589 y Guardia Civil con selección de Carmina Burana enviados sin inventar hora. Musicales, boda y hospital fuera; pregón y gala AECC sin programa quedan pendientes."
+      },
+      {
+        "url": "https://mercadosencrescendo.com/",
+        "inWindowCandidatesSeen": 3,
+        "submitted": 0,
+        "alreadyCovered": 3,
+        "excluded": 0,
+        "unresolved": 0,
+        "notes": "Saint-Saëns 15 noviembre, Haydn/Mozart 31 enero y recital 21 febrero ya publicados; restantes fechas fuera de ventana."
+      },
+      {
+        "url": "https://caixaforum.org/ca/madrid/p/microconcerts-madrid",
+        "inWindowCandidatesSeen": 5,
+        "submitted": 0,
+        "alreadyCovered": 3,
+        "excluded": 2,
+        "unresolved": 0,
+        "notes": "Willis, Duo Doré y A-Delta Trio cubiertos. Pilsza Trio (jazz) e Iovis (capas de directo sin repertorio clásico declarado) no enviados."
+      },
+      {
+        "url": "https://cultura.uc3m.es/mec-category/musica/",
+        "inWindowCandidatesSeen": 2,
+        "submitted": 0,
+        "alreadyCovered": 2,
+        "excluded": 0,
+        "unresolved": 0,
+        "notes": "Concierto de Aranjuez: 30 octubre Leganés y 20 noviembre Daoíz y Velarde ya cubiertos."
+      },
+      {
+        "url": "https://www.parroquiadesangines.es/events/mes/2026-12/",
+        "inWindowCandidatesSeen": 9,
+        "submitted": 0,
+        "alreadyCovered": 3,
+        "excluded": 6,
+        "unresolved": 0,
+        "notes": "Sólo candidatos musicales del mes: órgano 6 diciembre y coros 11/18 ya cubiertos. Seis celebraciones litúrgicas sin programa concertístico distinto no enviadas; resto de agenda no musical."
+      },
+      {
+        "url": "https://iicmadrid.esteri.it/es/gli_eventi/calendario/",
+        "inWindowCandidatesSeen": 4,
+        "submitted": 0,
+        "alreadyCovered": 0,
+        "excluded": 4,
+        "unresolved": 0,
+        "notes": "Dos exposiciones, visitas a palacio y ciclo de encuentros, sin concierto interpretativo anunciado en el listado completo."
+      }
+    ],
+    "windowMonthsSearched": [
+      "2026-10",
+      "2026-11",
+      "2026-12",
+      "2027-01",
+      "2027-02"
+    ],
+    "notes": "Partida: main 780bab6753aec2730984e42bf2edd0da0c114e33; contexto fresco de 401 eventos, ventana 27/10/2026–24/02/2027. Recuentos aproximados y categorías excluidas no sustituyen clasificación del pipeline. Amaniel usa documento oficial multievento como evidencia (no inventa externalId); posibles ambigüedades de identidad se revisarán en Actions. Rossini: ticket publicado por Sociedad Coral anuncia 19:30; agenda del director conserva 19:00. Tres fichas MSDA completas; no se infiere sala del concierto de Navidad. Alianza y audiciones sin programa se entregan sin completar hechos. Para TLV se siguió el dosier oficial válido terminado en -1.pdf tras 404 del enlace antiguo. Sin barridos redundantes de adapters; cero cambios manuales en data/**."
+  }
+}
