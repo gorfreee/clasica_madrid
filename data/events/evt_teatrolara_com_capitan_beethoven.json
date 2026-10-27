@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatrolara_com_capitan_beethoven",
+  "slug": "capitan-beethoven",
+  "title": "Capitán Beethoven",
+  "status": "scheduled",
+  "venueId": "ven_teatro_lara_sala_candido_lara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatrolara_com_capitan_beethoven_01",
+      "date": "2026-12-20",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatrolara_com_capitan_beethoven_02",
+      "date": "2027-01-03",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatrolara_com_capitan_beethoven_03",
+      "date": "2027-02-07",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Marta García-Patos"
+    },
+    {
+      "name": "Adrián Alises"
+    },
+    {
+      "name": "Alejandro Lobo"
+    },
+    {
+      "name": "Claudia Vicente"
+    },
+    {
+      "name": "Rafael García"
+    },
+    {
+      "name": "Edgar Martín",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    }
+  ],
+  "works": [
+    {
+      "title": "Quinta Sinfonía (fragmentos)",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Oda a la Alegría / Novena Sinfonía (fragmentos)",
+      "composerName": "Ludwig van Beethoven"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_teatrolara_com",
+      "url": "https://teatrolara.com/programacion/capitan-beethoven",
+      "checkedAt": "2026-10-27"
+    }
+  ],
+  "primarySourceId": "src_teatrolara_com",
+  "lastVerifiedAt": "2026-10-27"
+}
