@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madridsinfonica_com_resurgir_2",
+  "slug": "resurgir",
+  "title": "Resurgir",
+  "status": "scheduled",
+  "venueId": "ven_teatro_monumental",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madridsinfonica_com_resurgir_2_01",
+      "date": "2026-10-31",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Madrid Sinfónica MSDA"
+    },
+    {
+      "name": "Alonso Cano"
+    },
+    {
+      "name": "Coro Semicírculo de la ETSII (UPM)"
+    },
+    {
+      "name": "Alberto G. López",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Carl Orff"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sinfonía núm. 3 en mi bemol mayor, op. 55, «Heroica»",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Carmina Burana (selección)",
+      "composerName": "Carl Orff"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_madridsinfonica_com",
+      "url": "https://madridsinfonica.com/evento/resurgir-2",
+      "checkedAt": "2026-10-27"
+    }
+  ],
+  "primarySourceId": "src_madridsinfonica_com",
+  "lastVerifiedAt": "2026-10-27"
+}

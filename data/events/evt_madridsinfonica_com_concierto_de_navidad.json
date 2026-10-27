@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madridsinfonica_com_concierto_de_navidad",
+  "slug": "concierto-de-navidad-2",
+  "title": "Concierto de Navidad",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madridsinfonica_com_concierto_de_navidad_01",
+      "date": "2026-12-29",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Madrid Sinfónica MSDA"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Piotr Ilich Chaikovski"
+    }
+  ],
+  "works": [
+    {
+      "title": "El Lago de los Cisnes (selección)",
+      "composerName": "Piotr Ilich Chaikovski"
+    },
+    {
+      "title": "La Bella Durmiente (selección)",
+      "composerName": "Piotr Ilich Chaikovski"
+    },
+    {
+      "title": "El Cascanueces (selección)",
+      "composerName": "Piotr Ilich Chaikovski"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "symphonic"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_madridsinfonica_com",
+      "url": "https://madridsinfonica.com/evento/concierto-de-navidad",
+      "checkedAt": "2026-10-27"
+    }
+  ],
+  "primarySourceId": "src_madridsinfonica_com",
+  "lastVerifiedAt": "2026-10-27"
+}
