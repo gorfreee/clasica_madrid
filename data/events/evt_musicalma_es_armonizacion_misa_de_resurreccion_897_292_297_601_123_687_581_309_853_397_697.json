@@ -10,7 +10,7 @@
   "occurrences": [
     {
       "id": "occ_musicalma_es_armonizacion_misa_de_resurreccion_897_292_297_601_123_687_581_309_853_397_697_01",
-      "date": "2026-11-01",
+      "date": "2027-02-06",
       "time": "17:00",
       "status": "scheduled"
     }
@@ -44,9 +44,9 @@
     {
       "sourceId": "src_musicalma_es",
       "url": "https://www.musicalma.es/evento/armonizacion-misa-de-resurreccion-897-292-297-601-123-687-581-309-853-397-697",
-      "checkedAt": "2026-09-28"
+      "checkedAt": "2026-10-27"
     }
   ],
   "primarySourceId": "src_musicalma_es",
-  "lastVerifiedAt": "2026-09-28"
+  "lastVerifiedAt": "2026-10-27"
 }

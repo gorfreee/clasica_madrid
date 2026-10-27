@@ -11,7 +11,7 @@
     {
       "id": "occ_amcc_es_nov_05_ismael_arroyo_y_eduardo_moreno_01",
       "date": "2026-11-05",
-      "time": "19:00",
+      "time": "19:30",
       "status": "scheduled"
     }
   ],
@@ -82,9 +82,14 @@
     {
       "sourceId": "src_amcc_es",
       "url": "https://amcc.es/coma/coma26/nov-05-ismael-arroyo-y-eduardo-moreno",
-      "checkedAt": "2026-09-20"
+      "checkedAt": "2026-10-27"
+    },
+    {
+      "sourceId": "src_amcc_es",
+      "url": "https://amcc.es/wp-content/uploads/2026/10/programa-mano-COMA26V18.pdf",
+      "checkedAt": "2026-10-27"
     }
   ],
   "primarySourceId": "src_amcc_es",
-  "lastVerifiedAt": "2026-09-20"
+  "lastVerifiedAt": "2026-10-27"
 }
