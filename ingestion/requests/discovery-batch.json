@@ -335,8 +335,8 @@
             "time": "12:00"
           }
         ],
-        "description": "Concierto teatralizado familiar con interpretación en directo por un quinteto de cuerdas de algunas de las composiciones más famosas de Wolfgang Amadeus Mozart. Duración: 70 minutos.",
-        "accessText": "Comprar entradas. Los niños hasta 2 años que no ocupen butaca tienen entrada gratuita."
+        "description": "Concierto teatralizado familiar con interpretación en directo por un quinteto de cuerdas de algunas de las composiciones más famosas de Wolfgang Amadeus Mozart. Duración: 70 minutos. Condición infantil publicada: los niños hasta 2 años que no ocupen butaca tienen entrada gratuita.",
+        "accessText": "COMPRAR ENTRADAS"
       },
       "venue": {
         "name": "Teatro Lara — Sala Cándido Lara",
@@ -1457,12 +1457,12 @@
       },
       {
         "url": "https://cameratamusicalis.com/conciertos/",
-        "inWindowCandidatesSeen": 10,
-        "submitted": 6,
+        "inWindowCandidatesSeen": 6,
+        "submitted": 2,
         "alreadyCovered": 4,
         "excluded": 0,
         "unresolved": 0,
-        "notes": "Seis funciones familiares agrupadas en dos observaciones; cuatro conciertos del Auditorio Nacional ya cubiertos. Se leyó la ficha de cada producción familiar en Teatro Lara."
+        "notes": "Dos producciones familiares (seis funciones) enviadas en dos observaciones; cuatro conciertos distintos del Auditorio ya cubiertos. Fichas completas de ambas producciones familiares consultadas."
       },
       {
         "url": "https://corotomasluisdevictoria.com/proximos-conciertos/varios/",
@@ -1544,6 +1544,6 @@
       "2027-01",
       "2027-02"
     ],
-    "notes": "Partida: main 780bab6753aec2730984e42bf2edd0da0c114e33; contexto fresco de 401 eventos, ventana 27/10/2026–24/02/2027. Recuentos aproximados y categorías excluidas no sustituyen clasificación del pipeline. Amaniel usa documento oficial multievento como evidencia (no inventa externalId); posibles ambigüedades de identidad se revisarán en Actions. Rossini: ticket publicado por Sociedad Coral anuncia 19:30; agenda del director conserva 19:00. Tres fichas MSDA completas; no se infiere sala del concierto de Navidad. Alianza y audiciones sin programa se entregan sin completar hechos. Para TLV se siguió el dosier oficial válido terminado en -1.pdf tras 404 del enlace antiguo. Sin barridos redundantes de adapters; cero cambios manuales en data/**."
+    "notes": "Partida: main 780bab6753aec2730984e42bf2edd0da0c114e33; contexto fresco de 401 eventos, ventana 27/10/2026–24/02/2027. Recuentos aproximados y categorías excluidas no sustituyen clasificación del pipeline. Amaniel usa documento oficial multievento como evidencia (no inventa externalId); posibles ambigüedades de identidad se revisarán en Actions. Rossini: ticket publicado por Sociedad Coral anuncia 19:30; agenda del director conserva 19:00. Acceso general del Teatro Lara: COMPRAR ENTRADAS; la excepción infantil se conserva en descripción. Tres fichas MSDA completas; no se infiere sala del concierto de Navidad. Alianza y audiciones sin programa se entregan sin completar hechos. Para TLV se siguió el dosier oficial válido terminado en -1.pdf tras 404 del enlace antiguo. Sin barridos redundantes de adapters; cero cambios manuales en data/**."
   }
 }
