@@ -5,7 +5,9 @@
   "title": "España Sinfónica",
   "status": "scheduled",
   "venueId": "ven_teatro_monumental",
-  "organizerIds": [],
+  "organizerIds": [
+    "org_madrid_sinfonica_msda"
+  ],
   "seriesId": null,
   "occurrences": [
     {
@@ -17,7 +19,8 @@
   ],
   "performers": [
     {
-      "name": "Madrid Sinfónica MSDA"
+      "name": "Madrid Sinfónica MSDA",
+      "role": "orchestra"
     }
   ],
   "composers": [
@@ -58,9 +61,9 @@
     {
       "sourceId": "src_madridsinfonica_com",
       "url": "https://madridsinfonica.com/evento/espana-sinfonica",
-      "checkedAt": "2026-10-27"
+      "checkedAt": "2026-10-29"
     }
   ],
   "primarySourceId": "src_madridsinfonica_com",
-  "lastVerifiedAt": "2026-10-27"
+  "lastVerifiedAt": "2026-10-29"
 }

@@ -5,7 +5,9 @@
   "title": "Petite Messe Solennelle - G. Rossini",
   "status": "scheduled",
   "venueId": "ven_iglesia_de_la_universidad_pontificia_comillas",
-  "organizerIds": [],
+  "organizerIds": [
+    "org_sociedad_coral_de_madrid"
+  ],
   "seriesId": null,
   "occurrences": [
     {
@@ -17,25 +19,32 @@
   ],
   "performers": [
     {
-      "name": "Sara Matarranz"
+      "name": "Sara Matarranz",
+      "role": "soloist"
     },
     {
-      "name": "Laura Cobos"
+      "name": "Laura Cobos",
+      "role": "soloist"
     },
     {
-      "name": "Alain Damas"
+      "name": "Alain Damas",
+      "role": "soloist"
     },
     {
-      "name": "Isidro Anaya"
+      "name": "Isidro Anaya",
+      "role": "soloist"
     },
     {
-      "name": "Manuel Pachecho"
+      "name": "Manuel Pachecho",
+      "role": "soloist"
     },
     {
-      "name": "Jesús Mozo"
+      "name": "Jesús Mozo",
+      "role": "soloist"
     },
     {
-      "name": "Coro de la Sociedad Coral de Madrid"
+      "name": "Coro de la Sociedad Coral de Madrid",
+      "role": "choir"
     },
     {
       "name": "José Mena Polo",
@@ -65,9 +74,10 @@
     {
       "sourceId": "src_eventbrite_es_2",
       "url": "https://www.eventbrite.es/e/petite-messe-solennelle-g-rossini-tickets-2003777776269",
-      "checkedAt": "2026-10-27"
+      "checkedAt": "2026-10-29",
+      "externalId": "2003777776269"
     }
   ],
   "primarySourceId": "src_eventbrite_es_2",
-  "lastVerifiedAt": "2026-10-27"
+  "lastVerifiedAt": "2026-10-29"
 }

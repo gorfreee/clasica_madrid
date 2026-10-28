@@ -66,9 +66,14 @@
     {
       "sourceId": "src_teatrolara_com",
       "url": "https://teatrolara.com/programacion/pequeno-mozart",
-      "checkedAt": "2026-10-27"
+      "checkedAt": "2026-10-29"
+    },
+    {
+      "sourceId": "src_cameratamusicalis_com",
+      "url": "https://cameratamusicalis.com/conciertos/",
+      "checkedAt": "2026-10-29"
     }
   ],
   "primarySourceId": "src_teatrolara_com",
-  "lastVerifiedAt": "2026-10-27"
+  "lastVerifiedAt": "2026-10-29"
 }

@@ -4,8 +4,10 @@
   "slug": "concierto-de-navidad-2",
   "title": "Concierto de Navidad",
   "status": "scheduled",
-  "venueId": "ven_auditorio_nacional",
-  "organizerIds": [],
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [
+    "org_madrid_sinfonica_msda"
+  ],
   "seriesId": null,
   "occurrences": [
     {
@@ -17,7 +19,8 @@
   ],
   "performers": [
     {
-      "name": "Madrid Sinfónica MSDA"
+      "name": "Madrid Sinfónica MSDA",
+      "role": "orchestra"
     }
   ],
   "composers": [
@@ -37,6 +40,9 @@
     {
       "title": "El Cascanueces (selección)",
       "composerName": "Piotr Ilich Chaikovski"
+    },
+    {
+      "title": "Valses y polcas de la familia Strauss (selección)"
     }
   ],
   "eras": [
@@ -51,9 +57,14 @@
     {
       "sourceId": "src_madridsinfonica_com",
       "url": "https://madridsinfonica.com/evento/concierto-de-navidad",
-      "checkedAt": "2026-10-27"
+      "checkedAt": "2026-10-29"
+    },
+    {
+      "sourceId": "src_madridsinfonica_com",
+      "url": "https://madridsinfonica.koobin.com/es/concierto-navidad-20261229-1930",
+      "checkedAt": "2026-10-29"
     }
   ],
   "primarySourceId": "src_madridsinfonica_com",
-  "lastVerifiedAt": "2026-10-27"
+  "lastVerifiedAt": "2026-10-29"
 }

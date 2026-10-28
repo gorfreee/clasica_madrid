@@ -5,7 +5,9 @@
   "title": "Resurgir",
   "status": "scheduled",
   "venueId": "ven_teatro_monumental",
-  "organizerIds": [],
+  "organizerIds": [
+    "org_madrid_sinfonica_msda"
+  ],
   "seriesId": null,
   "occurrences": [
     {
@@ -17,13 +19,16 @@
   ],
   "performers": [
     {
-      "name": "Madrid Sinfónica MSDA"
+      "name": "Madrid Sinfónica MSDA",
+      "role": "orchestra"
     },
     {
-      "name": "Alonso Cano"
+      "name": "Alonso Cano",
+      "role": "soloist"
     },
     {
-      "name": "Coro Semicírculo de la ETSII (UPM)"
+      "name": "Coro Semicírculo de la ETSII (UPM)",
+      "role": "choir"
     },
     {
       "name": "Alberto G. López",
@@ -54,6 +59,7 @@
     "twentieth"
   ],
   "formats": [
+    "symphonic",
     "choral"
   ],
   "kind": "established",
@@ -62,9 +68,9 @@
     {
       "sourceId": "src_madridsinfonica_com",
       "url": "https://madridsinfonica.com/evento/resurgir-2",
-      "checkedAt": "2026-10-27"
+      "checkedAt": "2026-10-29"
     }
   ],
   "primarySourceId": "src_madridsinfonica_com",
-  "lastVerifiedAt": "2026-10-27"
+  "lastVerifiedAt": "2026-10-29"
 }

@@ -5,7 +5,9 @@
   "title": "Concierto XXX Aniversario del Coro Tomás Luis de Victoria",
   "status": "scheduled",
   "venueId": "ven_parroquia_del_santo_cristo_del_olivar",
-  "organizerIds": [],
+  "organizerIds": [
+    "org_coro_tomas_luis_de_victoria"
+  ],
   "seriesId": null,
   "occurrences": [
     {
@@ -17,7 +19,8 @@
   ],
   "performers": [
     {
-      "name": "Coro Tomás Luis de Victoria"
+      "name": "Coro Tomás Luis de Victoria",
+      "role": "choir"
     },
     {
       "name": "Antonio Peces Gómez",
@@ -44,7 +47,7 @@
       "name": "Orlande de Lassus"
     },
     {
-      "name": "J. Rheinberger"
+      "name": "Josef Gabriel Rheinberger"
     }
   ],
   "works": [
@@ -89,7 +92,7 @@
     },
     {
       "title": "Abendlied",
-      "composerName": "J. Rheinberger"
+      "composerName": "Josef Gabriel Rheinberger"
     },
     {
       "title": "Christus factus est",
@@ -110,9 +113,14 @@
     {
       "sourceId": "src_corotomasluisdevictoria_com",
       "url": "https://corotomasluisdevictoria.com/proximos-conciertos/varios",
-      "checkedAt": "2026-10-27"
+      "checkedAt": "2026-10-29"
+    },
+    {
+      "sourceId": "src_corotomasluisdevictoria_com",
+      "url": "https://corotomasluisdevictoria.com/xxx-aniversario-del-coro/varios/",
+      "checkedAt": "2026-10-29"
     }
   ],
   "primarySourceId": "src_corotomasluisdevictoria_com",
-  "lastVerifiedAt": "2026-10-27"
+  "lastVerifiedAt": "2026-10-29"
 }

@@ -5,7 +5,9 @@
   "title": "Concierto benéfico de Navidad de la Guardia Civil",
   "status": "scheduled",
   "venueId": "ven_auditorio_nacional_sala_sinfonica",
-  "organizerIds": [],
+  "organizerIds": [
+    "org_coral_polifonica_de_getafe"
+  ],
   "seriesId": null,
   "occurrences": [
     {
@@ -17,7 +19,8 @@
   ],
   "performers": [
     {
-      "name": "Coral Polifónica de Getafe"
+      "name": "Coral Polifónica de Getafe",
+      "role": "choir"
     }
   ],
   "composers": [
@@ -33,7 +36,7 @@
   ],
   "works": [
     {
-      "title": "1492: Conquest of Paradiese",
+      "title": "1492: Conquest of Paradise",
       "composerName": "Vangelis"
     },
     {
@@ -49,7 +52,8 @@
     }
   ],
   "eras": [
-    "twentieth"
+    "twentieth",
+    "contemporary"
   ],
   "formats": [
     "choral"
@@ -60,9 +64,9 @@
     {
       "sourceId": "src_polifonicagetafe_es",
       "url": "https://www.polifonicagetafe.es/conciertos-2",
-      "checkedAt": "2026-10-27"
+      "checkedAt": "2026-10-29"
     }
   ],
   "primarySourceId": "src_polifonicagetafe_es",
-  "lastVerifiedAt": "2026-10-27"
+  "lastVerifiedAt": "2026-10-29"
 }

@@ -5,7 +5,9 @@
   "title": "Concierto de Navidad",
   "status": "scheduled",
   "venueId": "ven_catedral_de_santa_maria_magdalena_de_getafe",
-  "organizerIds": [],
+  "organizerIds": [
+    "org_coral_polifonica_de_getafe"
+  ],
   "seriesId": null,
   "occurrences": [
     {
@@ -17,7 +19,8 @@
   ],
   "performers": [
     {
-      "name": "Coral Polifónica de Getafe"
+      "name": "Coral Polifónica de Getafe",
+      "role": "choir"
     }
   ],
   "composers": [
@@ -46,9 +49,9 @@
     {
       "sourceId": "src_polifonicagetafe_es",
       "url": "https://www.polifonicagetafe.es/conciertos-2",
-      "checkedAt": "2026-10-27"
+      "checkedAt": "2026-10-29"
     }
   ],
   "primarySourceId": "src_polifonicagetafe_es",
-  "lastVerifiedAt": "2026-10-27"
+  "lastVerifiedAt": "2026-10-29"
 }
