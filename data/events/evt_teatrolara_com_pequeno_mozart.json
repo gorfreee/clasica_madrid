@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_teatrolara_com_pequeno_mozart",
+  "slug": "el-pequeno-mozart",
+  "title": "El pequeño Mozart",
+  "status": "scheduled",
+  "venueId": "ven_teatro_lara_sala_candido_lara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_teatrolara_com_pequeno_mozart_01",
+      "date": "2026-11-22",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatrolara_com_pequeno_mozart_02",
+      "date": "2026-12-27",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatrolara_com_pequeno_mozart_03",
+      "date": "2027-01-24",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Marta García-Patos"
+    },
+    {
+      "name": "Adrián Alises"
+    },
+    {
+      "name": "Alejandro Lobo"
+    },
+    {
+      "name": "Claudia Vicente"
+    },
+    {
+      "name": "Rafael García"
+    },
+    {
+      "name": "Edgar Martín",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "classical"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_teatrolara_com",
+      "url": "https://teatrolara.com/programacion/pequeno-mozart",
+      "checkedAt": "2026-10-29"
+    },
+    {
+      "sourceId": "src_cameratamusicalis_com",
+      "url": "https://cameratamusicalis.com/conciertos/",
+      "checkedAt": "2026-10-29"
+    }
+  ],
+  "primarySourceId": "src_teatrolara_com",
+  "lastVerifiedAt": "2026-10-29"
+}

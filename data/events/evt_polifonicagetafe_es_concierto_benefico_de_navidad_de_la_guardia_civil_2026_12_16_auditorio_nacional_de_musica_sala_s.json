@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_polifonicagetafe_es_concierto_benefico_de_navidad_de_la_guardia_civil_2026_12_16_auditorio_nacional_de_musica_sala_s",
+  "slug": "concierto-benefico-de-navidad-de-la-guardia-civil",
+  "title": "Concierto benéfico de Navidad de la Guardia Civil",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [
+    "org_coral_polifonica_de_getafe"
+  ],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_polifonicagetafe_es_concierto_benefico_de_navidad_de_la_guardia_civil_2026_12_16_auditorio_nacional_de_musica_sala_s",
+      "date": "2026-12-16",
+      "time": null,
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coral Polifónica de Getafe",
+      "role": "choir"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Vangelis"
+    },
+    {
+      "name": "Carl Orff"
+    },
+    {
+      "name": "Óscar Navarro"
+    }
+  ],
+  "works": [
+    {
+      "title": "1492: Conquest of Paradise",
+      "composerName": "Vangelis"
+    },
+    {
+      "title": "Carmina Burana (selección)",
+      "composerName": "Carl Orff"
+    },
+    {
+      "title": "El ilustre marino",
+      "composerName": "Óscar Navarro"
+    },
+    {
+      "title": "Villancicos populares (fuera de programa)"
+    }
+  ],
+  "eras": [
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "choral"
+  ],
+  "kind": "established",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_polifonicagetafe_es",
+      "url": "https://www.polifonicagetafe.es/conciertos-2",
+      "checkedAt": "2026-10-29"
+    }
+  ],
+  "primarySourceId": "src_polifonicagetafe_es",
+  "lastVerifiedAt": "2026-10-29"
+}

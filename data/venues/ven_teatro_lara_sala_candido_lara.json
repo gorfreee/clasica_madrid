@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "ven_teatro_lara_sala_candido_lara",
+  "slug": "teatro-lara-sala-candido-lara",
+  "name": "Teatro Lara — Sala Cándido Lara",
+  "municipality": "Madrid",
+  "area": "madrid",
+  "address": "Calle Corredera Baja de San Pablo, 15, 28004 Madrid",
+  "url": "https://teatrolara.com/programacion-teatro-lara",
+  "lastVerifiedAt": "2026-10-29",
+  "parentVenueId": "ven_teatro_lara",
+  "spaceName": "Sala Cándido Lara"
+}

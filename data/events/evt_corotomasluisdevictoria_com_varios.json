@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_corotomasluisdevictoria_com_varios",
+  "slug": "concierto-xxx-aniversario-del-coro-tomas-luis-de-victoria",
+  "title": "Concierto XXX Aniversario del Coro Tomás Luis de Victoria",
+  "status": "scheduled",
+  "venueId": "ven_parroquia_del_santo_cristo_del_olivar",
+  "organizerIds": [
+    "org_coro_tomas_luis_de_victoria"
+  ],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_corotomasluisdevictoria_com_varios_01",
+      "date": "2026-12-12",
+      "time": "20:45",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coro Tomás Luis de Victoria",
+      "role": "choir"
+    },
+    {
+      "name": "Antonio Peces Gómez",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Tomás Luis de Victoria"
+    },
+    {
+      "name": "John Dowland"
+    },
+    {
+      "name": "Anton Bruckner"
+    },
+    {
+      "name": "Claudio Monteverdi"
+    },
+    {
+      "name": "Johann Sebastian Bach"
+    },
+    {
+      "name": "Orlande de Lassus"
+    },
+    {
+      "name": "Josef Gabriel Rheinberger"
+    }
+  ],
+  "works": [
+    {
+      "title": "Tradiderunt me",
+      "composerName": "Tomás Luis de Victoria"
+    },
+    {
+      "title": "What if I never speede",
+      "composerName": "John Dowland"
+    },
+    {
+      "title": "Con qué la lavaré"
+    },
+    {
+      "title": "Super flumina Babilonys",
+      "composerName": "Tomás Luis de Victoria"
+    },
+    {
+      "title": "Locus iste",
+      "composerName": "Anton Bruckner"
+    },
+    {
+      "title": "Ecco mormorar l’onde",
+      "composerName": "Claudio Monteverdi"
+    },
+    {
+      "title": "Jesu meine freude",
+      "composerName": "Johann Sebastian Bach"
+    },
+    {
+      "title": "Quel volto",
+      "composerName": "Orlande de Lassus"
+    },
+    {
+      "title": "Incipit oratio",
+      "composerName": "Tomás Luis de Victoria"
+    },
+    {
+      "title": "Taedet animam meam",
+      "composerName": "Tomás Luis de Victoria"
+    },
+    {
+      "title": "Abendlied",
+      "composerName": "Josef Gabriel Rheinberger"
+    },
+    {
+      "title": "Christus factus est",
+      "composerName": "Anton Bruckner"
+    }
+  ],
+  "eras": [
+    "renaissance",
+    "baroque",
+    "romantic"
+  ],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_corotomasluisdevictoria_com",
+      "url": "https://corotomasluisdevictoria.com/proximos-conciertos/varios",
+      "checkedAt": "2026-10-29"
+    },
+    {
+      "sourceId": "src_corotomasluisdevictoria_com",
+      "url": "https://corotomasluisdevictoria.com/xxx-aniversario-del-coro/varios/",
+      "checkedAt": "2026-10-29"
+    }
+  ],
+  "primarySourceId": "src_corotomasluisdevictoria_com",
+  "lastVerifiedAt": "2026-10-29"
+}
