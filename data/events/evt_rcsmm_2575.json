@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_rcsmm_2575",
+  "slug": "compositoras-en-clase-de-piano",
+  "title": "Compositoras en clase de piano",
+  "status": "scheduled",
+  "venueId": "ven_rcsmm_auditorio_manuel_falla",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_rcsmm_2575_01",
+      "date": "2026-11-05",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Yami CruzMontero",
+      "role": "soloist"
+    },
+    {
+      "name": "Karla Martínez",
+      "role": "soloist"
+    },
+    {
+      "name": "Teresa Catalán",
+      "role": "other"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_rcsmm",
+      "url": "https://rcsmm.eu/compositoras-clase-piano",
+      "checkedAt": "2026-11-01",
+      "externalId": "2575"
+    },
+    {
+      "sourceId": "src_rcsmm",
+      "url": "https://rcsmm.eu/sites/default/files/2026-10/4_0.jpg",
+      "checkedAt": "2026-11-01"
+    }
+  ],
+  "primarySourceId": "src_rcsmm",
+  "lastVerifiedAt": "2026-11-01"
+}

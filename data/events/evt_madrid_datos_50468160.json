@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50468160",
+  "slug": "mujeres-en-la-musica-capo-dastro-lopez-vazquez",
+  "title": "Mujeres en la música",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_6017747",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50468160_01",
+      "date": "2026-11-07",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Capo d’Astro",
+      "role": "ensemble"
+    },
+    {
+      "name": "Pilar Garay",
+      "role": "soloist"
+    },
+    {
+      "name": "Santi de la Fuente",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Safo"
+    },
+    {
+      "name": "Barbara Strozzi"
+    },
+    {
+      "name": "Pauline Viardot"
+    },
+    {
+      "name": "Ethel Smyth"
+    },
+    {
+      "name": "Chabuca Granda"
+    },
+    {
+      "name": "Violeta Parra"
+    },
+    {
+      "name": "Mari Trini"
+    },
+    {
+      "name": "Aurora Beltrán"
+    },
+    {
+      "name": "Rozalén"
+    }
+  ],
+  "works": [],
+  "eras": [],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=6014a14e0c181a10VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-11-01",
+      "externalId": "50468160"
+    },
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=7a13cabb7654e910VgnVCM100000891ecb1aRCRD",
+      "checkedAt": "2026-11-01"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-11-01"
+}

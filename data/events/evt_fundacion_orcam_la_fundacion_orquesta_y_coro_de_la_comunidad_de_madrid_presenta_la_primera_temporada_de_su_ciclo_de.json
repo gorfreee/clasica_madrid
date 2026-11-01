@@ -80,7 +80,7 @@
     "organ"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_fundacion_orcam",
@@ -92,8 +92,14 @@
       "url": "https://fundacionorcam.org/conciertos/2026-27/concierto-de-navidad",
       "checkedAt": "2026-10-21",
       "externalId": "4945"
+    },
+    {
+      "sourceId": "src_teatro_auditorio_escorial",
+      "url": "https://www.teatroauditorioescorial.es/espectaculo/concierto-de-navidad-3/",
+      "externalId": "11018",
+      "checkedAt": "2026-11-01"
     }
   ],
   "primarySourceId": "src_fundacion_orcam",
-  "lastVerifiedAt": "2026-10-21"
+  "lastVerifiedAt": "2026-11-01"
 }

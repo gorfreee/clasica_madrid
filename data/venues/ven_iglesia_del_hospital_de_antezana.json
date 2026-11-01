@@ -7,5 +7,7 @@
   "area": "nearby",
   "address": "Calle Mayor, 46, Alcalá de Henares",
   "url": "https://www.fundacionantezana.es/iglesia-y-culto/",
-  "lastVerifiedAt": "2026-10-08"
+  "lastVerifiedAt": "2026-11-01",
+  "parentVenueId": "ven_hospital_de_antezana",
+  "spaceName": "Iglesia"
 }

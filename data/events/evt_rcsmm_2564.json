@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_rcsmm_2564",
+  "slug": "bobby-mitchell-recital-de-piano",
+  "title": "Recital de Piano a cargo de Bobby Mitchell",
+  "status": "scheduled",
+  "venueId": "ven_rcsmm_auditorio_manuel_falla",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_rcsmm_2564_01",
+      "date": "2026-11-21",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Bobby Mitchell",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Felix Mendelssohn"
+    },
+    {
+      "name": "César Franck"
+    },
+    {
+      "name": "Robert Schumann"
+    }
+  ],
+  "works": [
+    {
+      "title": "Selección de Canciones sin palabras",
+      "composerName": "Felix Mendelssohn"
+    },
+    {
+      "title": "Coral, preludio y fuga",
+      "composerName": "César Franck"
+    },
+    {
+      "title": "Danzas de los Davidsbündler",
+      "composerName": "Robert Schumann"
+    }
+  ],
+  "eras": [
+    "romantic"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_rcsmm",
+      "url": "https://rcsmm.eu/recital-piano-cargo-bobby-mitchell",
+      "checkedAt": "2026-11-01",
+      "externalId": "2564"
+    },
+    {
+      "sourceId": "src_rcsmm",
+      "url": "https://rcsmm.eu/sites/default/files/2026-09/1_0.jpg",
+      "checkedAt": "2026-11-01"
+    }
+  ],
+  "primarySourceId": "src_rcsmm",
+  "lastVerifiedAt": "2026-11-01"
+}
