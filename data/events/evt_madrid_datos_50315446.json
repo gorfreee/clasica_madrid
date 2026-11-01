@@ -15,23 +15,53 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
-  "works": [
+  "performers": [
     {
-      "title": "COMPAÑÍA / GRUPO: Capo d'Astro"
+      "name": "Capo d’Astro",
+      "role": "ensemble"
     },
     {
-      "title": "GÉNERO: Clásico / Popular"
+      "name": "Pilar Garay",
+      "role": "soloist"
     },
     {
-      "title": "PÚBLICO: Adulto"
+      "name": "Santi de la Fuente",
+      "role": "soloist"
     }
   ],
+  "composers": [
+    {
+      "name": "Safo"
+    },
+    {
+      "name": "Barbara Strozzi"
+    },
+    {
+      "name": "Pauline Viardot"
+    },
+    {
+      "name": "Ethel Smyth"
+    },
+    {
+      "name": "Chabuca Granda"
+    },
+    {
+      "name": "Violeta Parra"
+    },
+    {
+      "name": "Mari Trini"
+    },
+    {
+      "name": "Aurora Beltrán"
+    },
+    {
+      "name": "Rozalén"
+    }
+  ],
+  "works": [],
   "eras": [],
   "formats": [
-    "lied",
-    "other"
+    "recital"
   ],
   "kind": "alternative",
   "access": "free",

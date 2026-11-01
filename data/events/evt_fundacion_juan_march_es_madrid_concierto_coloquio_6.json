@@ -117,7 +117,9 @@
     "classical",
     "romantic"
   ],
-  "formats": [],
+  "formats": [
+    "chamber"
+  ],
   "kind": "established",
   "access": "free",
   "citations": [

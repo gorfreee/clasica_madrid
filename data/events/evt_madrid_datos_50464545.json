@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "evt_madrid_datos_50464545",
   "slug": "manuel-de-falla-el-genio-discreto",
-  "title": "Manuel de falla el genio discreto",
+  "title": "Manuel de Falla, el genio discreto",
   "status": "scheduled",
   "venueId": "ven_md_fac_1909",
   "organizerIds": [],
@@ -15,10 +15,15 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
+  "performers": [
+    {
+      "name": "Diverlírica",
+      "role": "ensemble"
+    }
+  ],
   "composers": [
     {
-      "name": "Canción"
+      "name": "Manuel de Falla"
     }
   ],
   "works": [],
@@ -26,8 +31,7 @@
     "twentieth"
   ],
   "formats": [
-    "recital",
-    "other"
+    "recital"
   ],
   "kind": "alternative",
   "access": "free",

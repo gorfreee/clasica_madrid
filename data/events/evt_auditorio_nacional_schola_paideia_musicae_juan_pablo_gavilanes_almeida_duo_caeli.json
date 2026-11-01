@@ -17,7 +17,16 @@
   ],
   "performers": [
     {
-      "name": "Juan Pablo Gavilanes Almeida"
+      "name": "Juan Pablo Gavilanes Almeida",
+      "role": "soloist"
+    },
+    {
+      "name": "Valeria Sacoto",
+      "role": "soloist"
+    },
+    {
+      "name": "Dúo Cæli",
+      "role": "ensemble"
     }
   ],
   "composers": [
@@ -32,10 +41,6 @@
     }
   ],
   "works": [
-    {
-      "title": "Préludes",
-      "composerName": "Claude Debussy"
-    },
     {
       "title": "Ce qu'a vu le vent d'ouest: Animé et tumultueux",
       "composerName": "Claude Debussy"
@@ -70,6 +75,7 @@
     "twentieth"
   ],
   "formats": [
+    "recital",
     "chamber"
   ],
   "kind": "established",

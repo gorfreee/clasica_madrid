@@ -17,10 +17,12 @@
   ],
   "performers": [
     {
-      "name": "Délica Chamber Orchestra"
+      "name": "Délica Chamber Orchestra",
+      "role": "orchestra"
     },
     {
-      "name": "Gleb Koroleff"
+      "name": "Gleb Koroleff",
+      "role": "soloist"
     }
   ],
   "composers": [
@@ -33,8 +35,20 @@
   ],
   "works": [
     {
+      "title": "Nuvole Bianche",
+      "composerName": "Ludovico Einaudi"
+    },
+    {
       "title": "In un’altra vita",
       "composerName": "Ludovico Einaudi"
+    },
+    {
+      "title": "Chi Mai",
+      "composerName": "Ennio Morricone"
+    },
+    {
+      "title": "Cinema Paradiso",
+      "composerName": "Ennio Morricone"
     },
     {
       "title": "Fairytale",
@@ -46,6 +60,10 @@
     },
     {
       "title": "Gabriel’s oboe",
+      "composerName": "Ennio Morricone"
+    },
+    {
+      "title": "La Califfa",
       "composerName": "Ennio Morricone"
     },
     {

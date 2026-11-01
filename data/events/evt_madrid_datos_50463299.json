@@ -15,11 +15,13 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [
+  "performers": [
     {
-      "name": "Capellán"
-    },
+      "name": "José Rafael Capellán Fernández",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
     {
       "name": "Ludwig van Beethoven"
     },
@@ -28,12 +30,16 @@
     },
     {
       "name": "Franz Schubert"
+    },
+    {
+      "name": "José Rafael Capellán Fernández"
     }
   ],
   "works": [],
   "eras": [
     "classical",
-    "romantic"
+    "romantic",
+    "contemporary"
   ],
   "formats": [
     "recital"

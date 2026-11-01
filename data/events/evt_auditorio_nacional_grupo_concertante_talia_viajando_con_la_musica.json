@@ -27,7 +27,28 @@
   "composers": [],
   "works": [
     {
-      "title": "Un americano en París, Pinos de Roma, España, Lawrence de Arabia, Indiana Jones. La Conga del fuego nuevo, Baba Yetu, En las estepas del Asia central"
+      "title": "Un americano en París"
+    },
+    {
+      "title": "Pinos de Roma"
+    },
+    {
+      "title": "España"
+    },
+    {
+      "title": "Lawrence de Arabia"
+    },
+    {
+      "title": "Indiana Jones"
+    },
+    {
+      "title": "La Conga del fuego nuevo"
+    },
+    {
+      "title": "Baba Yetu"
+    },
+    {
+      "title": "En las estepas del Asia central"
     }
   ],
   "eras": [

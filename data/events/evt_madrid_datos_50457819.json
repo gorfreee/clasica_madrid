@@ -17,11 +17,37 @@
   ],
   "performers": [
     {
-      "name": "Alberto Joya"
+      "name": "Marta Toba",
+      "role": "soloist"
+    },
+    {
+      "name": "Alberto Joya",
+      "role": "soloist"
+    },
+    {
+      "name": "Gema Barón",
+      "role": "other"
+    },
+    {
+      "name": "Carlos Huedo",
+      "role": "other"
     }
   ],
   "composers": [],
-  "works": [],
+  "works": [
+    {
+      "title": "La romanza de Los claveles"
+    },
+    {
+      "title": "El barberillo de Lavapiés"
+    },
+    {
+      "title": "Habanera de Carmen"
+    },
+    {
+      "title": "El café de Chinitas"
+    }
+  ],
   "eras": [],
   "formats": [
     "zarzuela"

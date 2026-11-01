@@ -41,9 +41,6 @@
     },
     {
       "name": "Eleanor Alberga"
-    },
-    {
-      "name": "McIntosh’s Lament"
     }
   ],
   "works": [
@@ -73,7 +70,8 @@
     }
   ],
   "eras": [
-    "twentieth"
+    "twentieth",
+    "contemporary"
   ],
   "formats": [
     "chamber"

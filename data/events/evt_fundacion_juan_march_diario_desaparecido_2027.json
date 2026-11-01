@@ -25,23 +25,11 @@
     {
       "id": "occ_fundacion_juan_march_diario_desaparecido_2027_03",
       "date": "2027-04-03",
-      "time": "12:00",
-      "status": "scheduled"
-    },
-    {
-      "id": "occ_fundacion_juan_march_diario_desaparecido_2027_05",
-      "date": "2027-04-03",
       "time": "18:30",
       "status": "scheduled"
     },
     {
       "id": "occ_fundacion_juan_march_diario_desaparecido_2027_04",
-      "date": "2027-04-04",
-      "time": "12:00",
-      "status": "scheduled"
-    },
-    {
-      "id": "occ_fundacion_juan_march_diario_desaparecido_2027_06",
       "date": "2027-04-04",
       "time": "18:30",
       "status": "scheduled"
@@ -67,12 +55,6 @@
     {
       "name": "Ensemble del Ballet del Teatro Nacional de Brno",
       "role": "other"
-    },
-    {
-      "name": "Tomás Muñoz"
-    },
-    {
-      "name": "Mário Radačovský"
     },
     {
       "name": "Lorenzo Meseguer"

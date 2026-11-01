@@ -20,12 +20,72 @@
       "name": "Coral Real Capilla de Aranjuez"
     }
   ],
-  "composers": [],
-  "works": [],
-  "eras": [
-    "renaissance"
+  "composers": [
+    {
+      "name": "Giovanni Pierluigi da Palestrina"
+    },
+    {
+      "name": "Michael Praetorius"
+    },
+    {
+      "name": "Josef Rheinberger"
+    },
+    {
+      "name": "John Leavitt"
+    },
+    {
+      "name": "Robert Shaw"
+    },
+    {
+      "name": "Kirby Shaw"
+    },
+    {
+      "name": "John Rutter"
+    }
   ],
-  "formats": [],
+  "works": [
+    {
+      "title": "Sicut cervus",
+      "composerName": "Giovanni Pierluigi da Palestrina"
+    },
+    {
+      "title": "Es ist ein Ros’ entsprungen",
+      "composerName": "Michael Praetorius"
+    },
+    {
+      "title": "Puer natus in Bethlehem, op. 118 n.º 6",
+      "composerName": "Josef Rheinberger"
+    },
+    {
+      "title": "Missa Festiva",
+      "composerName": "John Leavitt"
+    },
+    {
+      "title": "Mary Had a Baby (arr. A. Parker)",
+      "composerName": "Robert Shaw"
+    },
+    {
+      "title": "The First Noel",
+      "composerName": "Kirby Shaw"
+    },
+    {
+      "title": "Christmas Lullaby",
+      "composerName": "John Rutter"
+    },
+    {
+      "title": "Angel’s Carol",
+      "composerName": "John Rutter"
+    }
+  ],
+  "eras": [
+    "renaissance",
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "choral"
+  ],
   "kind": "alternative",
   "access": "free",
   "citations": [

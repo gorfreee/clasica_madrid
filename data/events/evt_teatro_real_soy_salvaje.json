@@ -45,15 +45,49 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
+  "performers": [
+    {
+      "name": "La Maquiné",
+      "role": "ensemble"
+    },
+    {
+      "name": "Ángela Cáceres",
+      "role": "other"
+    },
+    {
+      "name": "Noé Lifona",
+      "role": "other"
+    },
+    {
+      "name": "Jorge Camacho",
+      "role": "soloist"
+    },
+    {
+      "name": "María Ángeles Ayala",
+      "role": "soloist"
+    },
+    {
+      "name": "Manuel Rallo",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "György Ligeti"
+    },
+    {
+      "name": "Claude Debussy"
+    },
+    {
+      "name": "Béla Bartók"
+    }
+  ],
   "works": [],
   "eras": [
     "twentieth"
   ],
   "formats": [
-    "chamber",
-    "other"
+    "chamber"
   ],
   "kind": "established",
   "access": "paid",

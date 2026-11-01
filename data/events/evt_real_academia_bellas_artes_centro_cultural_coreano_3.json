@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "evt_real_academia_bellas_artes_centro_cultural_coreano_3",
   "slug": "corea-2026-ciclo-de-musica-clasica",
-  "title": "Corea 2026. Ciclo de Música Clásica",
+  "title": "Wald Ensemble — Corea 2026. Ciclo de Música Clásica",
   "status": "scheduled",
   "venueId": "ven_real_academia_bellas_artes_salon_actos",
   "organizerIds": [],
@@ -17,25 +17,32 @@
   ],
   "performers": [
     {
-      "name": "Kyungeun Lee"
+      "name": "Wald Ensemble",
+      "role": "ensemble"
     },
     {
-      "name": "Sewon Cho"
+      "name": "Kyungeun Lee",
+      "role": "soloist"
     },
     {
-      "name": "Sejune Kim"
+      "name": "Sewon Cho",
+      "role": "soloist"
     },
     {
-      "name": "Kangryun Nam"
+      "name": "Sejune Kim",
+      "role": "soloist"
     },
     {
-      "name": "Jeehye Bae"
+      "name": "Kangryun Nam",
+      "role": "soloist"
     },
     {
-      "name": "Yura Park"
+      "name": "Jeehye Bae",
+      "role": "soloist"
     },
     {
-      "name": "José Luis García del Busto."
+      "name": "Yura Park",
+      "role": "soloist"
     }
   ],
   "composers": [
@@ -51,31 +58,28 @@
   ],
   "works": [
     {
-      "title": "Sevilla",
+      "title": "Sevilla (n.º 3 de la Suite española), arr. Eom Kihwan",
       "composerName": "Isaac Albéniz"
     },
     {
-      "title": "Souvenir de Florence, Op. 70",
+      "title": "Souvenir de Florence, op. 70",
       "composerName": "Piotr Ilich Chaikovski"
     },
     {
-      "title": "Verklärte Nacht, Op. 4",
+      "title": "Verklärte Nacht, op. 4",
       "composerName": "Arnold Schoenberg"
     },
     {
-      "title": "Canto folclórico tradicional coreano",
-      "composerName": "Arnold Schoenberg"
-    },
-    {
-      "title": "Miryang Arirang",
-      "composerName": "Arnold Schoenberg"
+      "title": "Miryang Arirang (canto folclórico tradicional coreano), arr. Eom Kihwan"
     }
   ],
   "eras": [
     "romantic",
     "twentieth"
   ],
-  "formats": [],
+  "formats": [
+    "chamber"
+  ],
   "kind": "alternative",
   "access": "free",
   "citations": [

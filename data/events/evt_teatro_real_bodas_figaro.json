@@ -9,12 +9,6 @@
   "seriesId": null,
   "occurrences": [
     {
-      "id": "occ_teatro_real_bodas_figaro_14",
-      "date": "2026-11-09",
-      "time": "19:30",
-      "status": "scheduled"
-    },
-    {
       "id": "occ_teatro_real_bodas_figaro_01",
       "date": "2026-11-10",
       "time": "19:30",
@@ -22,7 +16,7 @@
     },
     {
       "id": "occ_teatro_real_bodas_figaro_02",
-      "date": "2026-11-11",
+      "date": "2026-11-09",
       "time": "19:30",
       "status": "scheduled"
     },

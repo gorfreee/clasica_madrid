@@ -17,18 +17,24 @@
   ],
   "performers": [
     {
-      "name": "Sofía Gutiérrez-Tobar"
+      "name": "Brisalia",
+      "role": "ensemble"
     },
     {
-      "name": "María Argüeso Vega"
+      "name": "Sofía Gutiérrez-Tobar",
+      "role": "soloist"
+    },
+    {
+      "name": "María Argüeso Vega",
+      "role": "soloist"
     }
   ],
   "composers": [
     {
-      "name": "R. Gerhard"
+      "name": "Roberto Gerhard"
     },
     {
-      "name": "F. Obradors"
+      "name": "Fernando Obradors"
     },
     {
       "name": "Joaquín Turina"
@@ -39,8 +45,7 @@
     "twentieth"
   ],
   "formats": [
-    "chamber",
-    "lied",
+    "recital",
     "zarzuela"
   ],
   "kind": "established",

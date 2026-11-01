@@ -20,8 +20,123 @@
       "name": "Escolanía de El Escorial"
     }
   ],
-  "composers": [],
-  "works": [],
+  "composers": [
+    {
+      "name": "Arvo Pärt"
+    },
+    {
+      "name": "Gabriel Fauré"
+    },
+    {
+      "name": "Camille Saint-Saëns"
+    },
+    {
+      "name": "Josef Rheinberger"
+    },
+    {
+      "name": "Benito Lauret"
+    },
+    {
+      "name": "E. Pettman - John R. Howell"
+    },
+    {
+      "name": "Luis Antonio Escobar"
+    },
+    {
+      "name": "Ola Gjeilo"
+    },
+    {
+      "name": "Peter Warlock"
+    },
+    {
+      "name": "Bob Chilcott"
+    },
+    {
+      "name": "Ernest Cervera"
+    },
+    {
+      "name": "Herbert Bittrich"
+    },
+    {
+      "name": "Becki Slage Mayo - Lynn Shaw Bailey"
+    },
+    {
+      "name": "Vicente Emilio Sojo"
+    }
+  ],
+  "works": [
+    {
+      "title": "Vater unser",
+      "composerName": "Arvo Pärt"
+    },
+    {
+      "title": "Maria Mater Gratiae",
+      "composerName": "Gabriel Fauré"
+    },
+    {
+      "title": "Ave Maria",
+      "composerName": "Camille Saint-Saëns"
+    },
+    {
+      "title": "Puer natus in Bethlehem",
+      "composerName": "Josef Rheinberger"
+    },
+    {
+      "title": "Il est né le divin Enfant",
+      "composerName": "Gabriel Fauré"
+    },
+    {
+      "title": "Esta noche caballeros (Asturias)",
+      "composerName": "Benito Lauret"
+    },
+    {
+      "title": "Birjina gaztetto (The Angel Gabriel)",
+      "composerName": "E. Pettman - John R. Howell"
+    },
+    {
+      "title": "Velo ¡qué bonito! (Colombia)",
+      "composerName": "Luis Antonio Escobar"
+    },
+    {
+      "title": "Tundra",
+      "composerName": "Ola Gjeilo"
+    },
+    {
+      "title": "Noël d´enfants",
+      "composerName": "Gabriel Fauré"
+    },
+    {
+      "title": "Lullaby my Jesus",
+      "composerName": "Peter Warlock"
+    },
+    {
+      "title": "El rorro (México)"
+    },
+    {
+      "title": "Mid-winter",
+      "composerName": "Bob Chilcott"
+    },
+    {
+      "title": "En Belén tocan a fuego (Burgos)",
+      "composerName": "Ernest Cervera"
+    },
+    {
+      "title": "Ecce Novum Gaudium",
+      "composerName": "Ola Gjeilo"
+    },
+    {
+      "title": "Festejo de Navidad (Perú)",
+      "composerName": "Herbert Bittrich"
+    },
+    {
+      "title": "Jazzy Jingle Bells Waltz",
+      "composerName": "Becki Slage Mayo - Lynn Shaw Bailey"
+    },
+    {
+      "title": "Alegres pregonan.(Venezuela)",
+      "composerName": "Vicente Emilio Sojo"
+    }
+  ],
   "eras": [
     "romantic",
     "contemporary"

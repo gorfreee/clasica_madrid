@@ -15,12 +15,110 @@
       "status": "scheduled"
     }
   ],
-  "performers": [],
-  "composers": [],
-  "works": [],
+  "performers": [
+    {
+      "name": "Reyes Moraleda",
+      "role": "soloist"
+    },
+    {
+      "name": "Javier Checa",
+      "role": "soloist"
+    },
+    {
+      "name": "Dania Rodríguez",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Franz Schubert"
+    },
+    {
+      "name": "Giulio Caccini"
+    },
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Giuseppe Verdi"
+    },
+    {
+      "name": "Charles Gounod"
+    },
+    {
+      "name": "Fermín María Álvarez"
+    },
+    {
+      "name": "Modest Mussorgski"
+    },
+    {
+      "name": "Francesco Paolo Tosti"
+    },
+    {
+      "name": "Pietro Mascagni"
+    },
+    {
+      "name": "William Gómez"
+    },
+    {
+      "name": "Michał Lorenc"
+    }
+  ],
+  "works": [
+    {
+      "title": "Ave María, op. 52",
+      "composerName": "Franz Schubert"
+    },
+    {
+      "title": "Ave María",
+      "composerName": "Giulio Caccini"
+    },
+    {
+      "title": "O Sanctissima!",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Ave María. Preghiera de Desdémona (Otello)",
+      "composerName": "Giuseppe Verdi"
+    },
+    {
+      "title": "Ave María",
+      "composerName": "Charles Gounod"
+    },
+    {
+      "title": "Repentir",
+      "composerName": "Charles Gounod"
+    },
+    {
+      "title": "Plegaria",
+      "composerName": "Fermín María Álvarez"
+    },
+    {
+      "title": "Molitva (Oración)",
+      "composerName": "Modest Mussorgski"
+    },
+    {
+      "title": "Ridonami la calma",
+      "composerName": "Francesco Paolo Tosti"
+    },
+    {
+      "title": "Ave María (música del intermezzo de Cavalleria rusticana)",
+      "composerName": "Pietro Mascagni"
+    },
+    {
+      "title": "Ave María",
+      "composerName": "William Gómez"
+    },
+    {
+      "title": "Ave María",
+      "composerName": "Michał Lorenc"
+    }
+  ],
   "eras": [
     "classical",
-    "romantic"
+    "romantic",
+    "twentieth",
+    "contemporary"
   ],
   "formats": [
     "recital",
