@@ -1,3 +1,4 @@
+import type { CalendarEvidence } from './calendar-evidence.ts';
 import { canonicalizeArtificiallyUppercase } from './event-title.ts';
 import { canonicalizeComposerName } from './composer-name.ts';
 import { collapseWhitespace, decodeHtmlEntities } from './html.ts';
@@ -34,6 +35,7 @@ export type NormalizedEvent = {
   occurrences: NormalizedOccurrence[];
   /** Detail page replaced the listing date with an explicit new date. */
   dateFromDetail?: boolean;
+  calendarEvidence?: CalendarEvidence;
   eventStatus?: 'scheduled' | 'cancelled' | 'postponed';
   venueText?: string;
   /** Source facility id when the adapter observed one. Not a catalog venue id. */
@@ -90,6 +92,7 @@ export function normalizeRawEvent(raw: RawEvent): NormalizedEvent | undefined {
     title,
     description: optionalText(raw.observed.description),
     occurrences,
+    ...(raw.calendarEvidence ? { calendarEvidence: raw.calendarEvidence } : {}),
     ...(raw.dateFromDetail ? { dateFromDetail: true } : {}),
     ...(raw.eventStatus ? { eventStatus: raw.eventStatus } : {}),
     venueText: optionalText(raw.observed.venueText),

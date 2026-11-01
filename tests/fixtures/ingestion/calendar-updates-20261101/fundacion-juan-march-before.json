@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_diario_desaparecido_2027",
+  "slug": "diario-de-un-desaparecido-de-leos-janacek",
+  "title": "Diario de un desaparecido de Leoš Janáček",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [
+    "org_fundacion_juan_march"
+  ],
+  "seriesId": "ser_teatro_musical_camara",
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_diario_desaparecido_2027_01",
+      "date": "2027-03-31",
+      "time": "18:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_fundacion_juan_march_diario_desaparecido_2027_02",
+      "date": "2027-04-02",
+      "time": "18:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_fundacion_juan_march_diario_desaparecido_2027_03",
+      "date": "2027-04-03",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_fundacion_juan_march_diario_desaparecido_2027_04",
+      "date": "2027-04-04",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Borja Mariño",
+      "role": "conductor"
+    },
+    {
+      "name": "Michał Jopek",
+      "role": "soloist"
+    },
+    {
+      "name": "Cristina Faus",
+      "role": "soloist"
+    },
+    {
+      "name": "Cuarteto Seikilos",
+      "role": "ensemble"
+    },
+    {
+      "name": "Ensemble del Ballet del Teatro Nacional de Brno",
+      "role": "other"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Leoš Janáček"
+    }
+  ],
+  "works": [
+    {
+      "title": "Cuarteto de cuerda n.º 2 «Cartas íntimas», JW VII/13",
+      "composerName": "Leoš Janáček"
+    },
+    {
+      "title": "Álbum para Kamila Stösslová, JW VIII/33",
+      "composerName": "Leoš Janáček"
+    },
+    {
+      "title": "Diario de un desaparecido, JW V/12",
+      "composerName": "Leoš Janáček"
+    }
+  ],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "lied",
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/diario-desaparecido-leos-janacek",
+      "checkedAt": "2026-10-21",
+      "externalId": "/es/madrid/concierto/diario-desaparecido-leos-janacek"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-10-21"
+}

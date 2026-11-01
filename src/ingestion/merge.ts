@@ -1,3 +1,5 @@
+import type { CalendarEvidence } from './calendar-evidence.ts';
+import { planCalendar, combineCalendarEvidence, calendarObservationConflict } from './calendar-evidence.ts';
 import { madridToday } from '../lib/domain/dates.ts';
 import { normalizeText } from '../lib/domain/normalize.ts';
 import { canonicalValuesEqual } from '../lib/validation/promote.ts';
@@ -37,6 +39,7 @@ export type EventProposal = {
   access?: Event['access'];
   citations: Citation[];
   dateFromDetail?: boolean;
+  calendarEvidence?: CalendarEvidence;
   eventStatus?: NormalizedEvent['eventStatus'];
 };
 
@@ -74,11 +77,14 @@ export function proposalFromObservation(
     title: canonicalizeEventTitle(event.title),
     status: observedStatus(event),
     venueId: options.venueId,
-    occurrences: observedSchedule(event, options.now, options.window),
+    occurrences: event.calendarEvidence
+      ? event.occurrences.filter(o => o.date >= verified)
+      : observedSchedule(event, options.now, options.window),
     performers: canonicalizePerformerList(event.performers),
     composers: canonicalizeComposerList(event.composers),
     works: canonicalizeWorkList(event.works),
     citations: [citation],
+    ...(event.calendarEvidence ? { calendarEvidence: event.calendarEvidence } : {}),
     ...(event.dateFromDetail ? { dateFromDetail: true } : {}),
     ...(event.eventStatus ? { eventStatus: event.eventStatus } : {}),
   };
@@ -107,6 +113,7 @@ export function mergeProposals(base: EventProposal, incoming: EventProposal): Ev
     kind: incoming.kind ?? base.kind,
     access: mergeAccess(base.access, incoming.access),
     citations: mergeCitationLists(base.citations, incoming.citations),
+    calendarEvidence: combineCalendarEvidence(base.calendarEvidence, incoming.calendarEvidence),
     dateFromDetail: base.dateFromDetail || incoming.dateFromDetail,
     eventStatus: incoming.eventStatus ?? base.eventStatus,
   };
@@ -136,11 +143,12 @@ export function mergeProposals(base: EventProposal, incoming: EventProposal): Ev
  * Typographic title equivalents are not a disagreement.
  */
 export function mergeExistingEvent(existing: Event, proposal: EventProposal, now: Date): MergedEvent {
-  const ambiguousReason = occurrenceMergeConflict(existing, proposal);
+  const planned = proposal.calendarEvidence ? planCalendar(existing.occurrences, proposal.occurrences, proposal.calendarEvidence, existing.id, madridToday(now)) : undefined;
+  const ambiguousReason = planned?.reason ?? occurrenceMergeConflict(existing, proposal);
   if (ambiguousReason) return { event: existing, diffs: [], diagnostics: [ambiguousReason], ambiguousReason };
   const verified = madridToday(now);
   const status = mergeStatus(existing.status, proposal.status);
-  const occurrences = mergeOccurrences(existing, proposal, status);
+  const occurrences = planned?.occurrences?.map(item => withOccurrenceStatus(item, status === 'cancelled')) ?? mergeOccurrences(existing, proposal, status);
   const title = mergePublishedTitle(existing.title, proposal.title);
   const kind = mergePublishedKind(existing.kind, proposal.kind);
   const eras = mergePublishedTaxonomy('eras', existing.eras, proposal.eras);
@@ -211,7 +219,7 @@ export function materialProposalConflict(left: EventProposal, right: EventPropos
   if (statuses.includes('cancelled') && statuses.some((status) => status && status !== 'cancelled')) {
     return 'status conflict: cancelled vs active';
   }
-  return undefined;
+  return calendarObservationConflict(left, right);
 }
 
 export function withCandidateEvent(event: Event, venue?: Venue): Candidate {
@@ -226,11 +234,7 @@ export function scheduleChangeOf(
 ): 'cancelled' | 'postponed' | undefined {
   if (event.eventStatus === 'cancelled') return 'cancelled';
   if (event.eventStatus === 'postponed') return 'postponed';
-  if (event.dateFromDetail && previous) {
-    const previousDate = previous.occurrences[0]?.date;
-    const nextDate = event.occurrences[0]?.date;
-    if (previousDate && nextDate && previousDate !== nextDate) return 'postponed';
-  }
+  if (event.calendarEvidence?.changes?.length && previous) return 'postponed';
   return undefined;
 }
 
@@ -436,7 +440,8 @@ function mergeOccurrences(existing: Event, proposal: EventProposal, status: Even
     return existing.occurrences.map((item) => withOccurrenceStatus(item, cancelled));
   }
 
-  if (existing.occurrences.length === 1 && incoming.length === 1) {
+  if (existing.occurrences.length === 1 && incoming.length === 1 &&
+      (existing.status === 'postponed' || proposal.eventStatus === 'postponed')) {
     const current = existing.occurrences[0]!;
     const next = incoming[0]!;
     return [

@@ -399,8 +399,8 @@ describe('identificadores municipales reciclables: continuidad de hechos, no ide
   });
 
   it.each([
-    { occurrences: [{ date: '2026-10-08', time: '19:30' }] },
-    { occurrences: [{ date: '2026-10-09', time: '19:00' }], dateFromDetail: true },
+    { occurrences: [{ date: '2026-10-08', time: '19:30' }], calendarEvidence: { changes: [{ from: { date: '2026-10-08' }, to: { date: '2026-10-08', time: '19:30' } }], evidence: 'explicit clock correction' } },
+    { occurrences: [{ date: '2026-10-09', time: '19:00' }], dateFromDetail: true, calendarEvidence: { changes: [{ from: { date: '2026-10-08' }, to: { date: '2026-10-09', time: '19:00' } }], evidence: 'explicit move' } },
     { occurrences: [{ date: '2026-10-10', time: '19:00' }], eventStatus: 'postponed' as const, dateFromDetail: true },
   ])('mantiene una corrección/reprogramación legítima sin duplicar: %j', async (overrides) => {
     const { catalog, dialogos } = await recycledMadridFixture();
@@ -414,7 +414,7 @@ describe('identificadores municipales reciclables: continuidad de hechos, no ide
 
   it('requiere evidencia para trasladar un título compatible a otra fecha', async () => {
     const { catalog, dialogos } = await recycledMadridFixture();
-    const incoming = municipalObservation(dialogos, { occurrences: [{ date: '2026-11-08', time: '19:00' }] });
+    const incoming = municipalObservation(dialogos, { occurrences: [{ date: '2026-11-08', time: '19:00' }], dateFromDetail: true });
     const result = reconcileHarvest({ catalog: { ...catalog, events: [dialogos] }, now: TEST_NOW, window: WINDOW, observations: [observation(0, madrid, incoming)] });
     expect(result.stats).toMatchObject({ newEvents: 0, updatedEvents: 0, ambiguous: 1 });
     expect(result.candidates).toEqual([]);
@@ -461,7 +461,7 @@ describe('identificadores municipales reciclables: continuidad de hechos, no ide
 
   it('admite continuidad musical en una reprogramación con título editorial diferente', async () => {
     const { catalog, pico } = await recycledMadridFixture();
-    const incoming = municipalObservation(pico, { title: "XXVIII Festival Internacional COMA'26", dateFromDetail: true, occurrences: [{ date: '2026-11-02', time: '12:00' }] });
+    const incoming = municipalObservation(pico, { title: "XXVIII Festival Internacional COMA'26", dateFromDetail: true, calendarEvidence: { changes: [{ from: { date: pico.occurrences[0]!.date }, to: { date: '2026-11-02', time: '12:00' } }], evidence: 'explicit rescheduling' }, occurrences: [{ date: '2026-11-02', time: '12:00' }] });
     const result = reconcileHarvest({ catalog: { ...catalog, events: [pico] }, now: TEST_NOW, window: WINDOW, observations: [observation(0, madrid, incoming)] });
     expect(result.stats).toMatchObject({ newEvents: 0, updatedEvents: 1, ambiguous: 0 });
     expect(result.candidates[0]!.event.id).toBe(pico.id);

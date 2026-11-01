@@ -122,6 +122,7 @@ export function applyDetailPatch(event: RawEvent, patch: ObservedFactPatch): Raw
     ...event,
     observed: { ...event.observed, ...facts, occurrences: merged.occurrences },
     dateFromDetail: merged.replaced,
+    ...(patch.calendarEvidence ? { calendarEvidence: patch.calendarEvidence } : {}),
     ...(patch.eventStatus ? { eventStatus: patch.eventStatus } : {}),
   };
 }

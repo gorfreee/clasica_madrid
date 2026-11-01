@@ -1,3 +1,4 @@
+import type { CalendarEvidence } from './calendar-evidence.ts';
 import type { Catalog } from '../lib/domain/catalog.ts';
 import { isExclusiveScheduleVenueId } from '../lib/domain/venues.ts';
 import { normalizeText } from '../lib/domain/normalize.ts';
@@ -65,6 +66,7 @@ export type IdentityFacts = {
   composers?: Array<{ name: string }>;
   works?: Array<{ title: string; composerName?: string }>;
   dateFromDetail?: boolean;
+  calendarEvidence?: CalendarEvidence;
   eventStatus?: 'scheduled' | 'cancelled' | 'postponed';
 };
 

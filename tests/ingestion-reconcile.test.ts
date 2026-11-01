@@ -45,7 +45,7 @@ describe('Hannigan detail calendar authority (PR #351)', () => {
     expect(result.candidates[0]!.event.occurrences).toEqual([expect.objectContaining({ date: '2027-04-11', time: '19:30', status: 'scheduled' })]);
   });
 
-  it.each([['auditorio-nacional', 'cndm'], ['cndm', 'auditorio-nacional']])('does not restore October after CNDM hydration fails, order %s / %s', async (first, second) => {
+  it.each([['auditorio-nacional', 'cndm'], ['cndm', 'auditorio-nacional']])('withholds discrepant October/April calendars after CNDM hydration fails, order %s / %s', async (first, second) => {
     const title = 'CNDM. Barbara Hannigan & Bertrand Chamayou';
     const url = 'https://auditorionacional.inaem.gob.es/es/programacion/cndm-barbara-hannigan-bertrand-chamayou';
     const auditorio = getSourceDefinition('auditorio-nacional');
@@ -94,8 +94,10 @@ describe('Hannigan detail calendar authority (PR #351)', () => {
     expect(hydrated.observed.occurrences).toEqual([expect.objectContaining({ date: '2027-04-11', time: '19:30' })]);
     expect(run.rawEvents.find((item) => item.sourceId === cndm.id)?.hydration?.status).toBe('failed');
     const candidate = run.decisions.find((item) => item.sourceId === auditorio.id)?.candidate;
-    expect(candidate?.occurrences).toEqual([{ date: '2027-04-11', time: '19:30', status: 'scheduled' }]);
-    expect(run.summary.crossSourceCorroborations).toBe(1);
+    expect(candidate).toBeUndefined();
+    expect(run.summary.ambiguous).toBe(2);
+    expect(run.apply.filesToWrite).toEqual([]);
+    expect(run.apply.proposed.events).toEqual(catalog.events);
   });
 });
 
@@ -731,6 +733,7 @@ describe('merge conservador', () => {
         sourceUrl: 'https://www.auditorionacional.mcu.es/eventos/matinees',
         title: 'Matinées de otoño (oficial)',
         occurrences: [{ date: '2026-09-16', time: '20:00' }],
+        calendarEvidence: { changes: [{ from: { date: '2026-09-15' }, to: { date: '2026-09-16', time: '20:00' } }], evidence: 'explicit correction' },
         performers: [],
         composers: [],
         works: [],

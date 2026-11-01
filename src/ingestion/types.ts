@@ -1,3 +1,4 @@
+import type { CalendarEvidence } from './calendar-evidence.ts';
 import type { HydrationDiscrepancy } from './detail/conflicts.ts';
 import type { Area, Source } from '../lib/schemas/index.ts';
 import type { IngestHealth } from './health.ts';
@@ -74,6 +75,7 @@ export type RawEvent = {
    * because it falls outside the listing discovery window.
    */
   dateFromDetail?: boolean;
+  calendarEvidence?: CalendarEvidence;
   /** Explicit schedule status from the detail page, when the ficha states one. */
   eventStatus?: 'scheduled' | 'cancelled' | 'postponed';
   /**

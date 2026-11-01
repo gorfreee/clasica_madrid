@@ -1,3 +1,5 @@
+import { planCalendar, combineCalendarEvidence } from './calendar-evidence.ts';
+import { madridToday } from '../lib/domain/dates.ts';
 import { isExclusiveScheduleVenueId } from '../lib/domain/venues.ts';
 import type { Catalog } from '../lib/domain/catalog.ts';
 import { eventPublicSlugs } from '../lib/domain/queries.ts';
@@ -305,7 +307,7 @@ function applyExistingGroup(
   for (const item of group.slice(1)) {
     proposal = mergeProposals(proposal, item.proposal);
   }
-  const conflict = groupConflict(group, existing) ?? occurrenceMergeConflict(existing, proposal);
+  const conflict = groupConflict(group, existing) ?? planCalendar(existing.occurrences, proposal.occurrences, proposal.calendarEvidence, existing.id, madridToday(now)).reason ?? occurrenceMergeConflict(existing, proposal);
   if (conflict) {
     stats.ambiguous += group.length;
     recordGroupedObservations(group, stats, { conflicting: true });
@@ -368,7 +370,7 @@ function applySharedSourceObservation(
   const conflict = item.proposal.occurrences.length === 0
     ? undefined
     : match.assigned.map(assignment => occurrenceMergeConflict(assignment.event, {
-        ...item.proposal, occurrences: assignment.occurrences,
+        ...item.proposal, calendarEvidence: undefined, occurrences: assignment.occurrences,
       })).find(Boolean);
   if (conflict) {
     for (const event of match.events) seenEventIds.add(event.id);
@@ -396,6 +398,7 @@ function applySharedSourceObservation(
     eventIds.push(existing.id);
     const proposal: EventProposal = {
       ...item.proposal,
+      calendarEvidence: undefined, // A 1→N identity does not convey event-wide replacement authority.
       occurrences: cancelAll ? item.proposal.occurrences : assignment.occurrences,
     };
     const merged = mergeExistingEvent(existing, proposal, now);
@@ -696,8 +699,7 @@ function groupConflict(group: PreparedItem[], existing?: Event): string | undefi
 
 /** Different source clocks are not evidence of additional performances. */
 function crossSourceScheduleConflict(group: PreparedItem[], existing?: Event): string | undefined {
-  const authoritative = group.some(item => item.proposal.dateFromDetail)
-    ? group.filter(item => item.proposal.dateFromDetail) : group;
+  const authoritative = group;
   const dates = [...new Set(authoritative.flatMap(item => item.proposal.occurrences.map(occ => occ.date)))].sort();
   for (const date of dates) {
     const calendars = authoritative.map(item => ({
@@ -714,6 +716,16 @@ function crossSourceScheduleConflict(group: PreparedItem[], existing?: Event): s
     if ([publishedTimes, ...calendars.map(item => item.times)]
       .some(calendar => [...times].every(time => calendar.has(time)))) continue;
     return `schedule-conflict: horarios de fuentes distintas sin calendario que acredite las sesiones (${date}: ${[...times].sort().join(', ')})`;
+  }
+  if (new Set(group.map(item => item.observation.source.catalogSourceId)).size > 1) {
+    const sessions = group.flatMap(item => item.proposal.occurrences);
+    // Dates from complementary source fragments are not automatically extra performances.
+    // One observed or already-published calendar must attest the whole union. Unknown clocks only corroborate.
+    const covers = (calendar: EventProposal['occurrences']) => sessions.every(session =>
+      calendar.some(s => s.date === session.date && (session.time === null || s.time === session.time)));
+    if (!group.some(item => covers(item.proposal.occurrences)) && !covers(existing?.occurrences ?? [])) {
+      return 'schedule-conflict: fuentes con calendarios distintos sin una observación que acredite el conjunto';
+    }
   }
   return undefined;
 }
@@ -808,6 +820,7 @@ function overlayNormalizedFacts(base: NormalizedEvent, incoming: NormalizedEvent
     title: incoming.title || base.title,
     description: incoming.description ?? base.description,
     occurrences: mergeObservedCalendars(base, incoming),
+    calendarEvidence: combineCalendarEvidence(base.calendarEvidence, incoming.calendarEvidence),
     dateFromDetail: base.dateFromDetail || incoming.dateFromDetail,
     eventStatus: incoming.eventStatus ?? base.eventStatus,
     // Keep the primary observation's hall label. CNDM's "Auditorio Nacional
