@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50467101",
+  "slug": "iii-ciclo-de-musica-clasica-el-ave-maria-ayer-hoy-y-siempre",
+  "title": "III Ciclo de Música Clásica. El Ave María ayer, hoy y siempre",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_4703422",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50467101_01",
+      "date": "2026-11-13",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "recital",
+    "lied"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=777bc4c0a5d71a10VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-11-01",
+      "externalId": "50467101"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-11-01"
+}

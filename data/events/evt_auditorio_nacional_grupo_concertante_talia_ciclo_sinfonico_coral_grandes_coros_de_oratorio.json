@@ -28,7 +28,11 @@
     }
   ],
   "composers": [],
-  "works": [],
+  "works": [
+    {
+      "title": "El Mesias, Paulus, La Pasión, Las estaciones…"
+    }
+  ],
   "eras": [
     "baroque",
     "classical",
@@ -44,10 +48,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/grupo-concertante-talia-ciclo-sinfonico-coral-grandes-coros-de-oratorio",
-      "checkedAt": "2026-10-11",
+      "checkedAt": "2026-11-01",
       "externalId": "grupo-concertante-talia-ciclo-sinfonico-coral-grandes-coros-de-oratorio"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-10-11"
+  "lastVerifiedAt": "2026-11-01"
 }

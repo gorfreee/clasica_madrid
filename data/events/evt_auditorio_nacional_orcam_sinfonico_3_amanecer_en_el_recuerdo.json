@@ -57,21 +57,21 @@
     "symphonic"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-sinfonico-3-amanecer-en-el-recuerdo",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-11-01",
       "externalId": "orcam-sinfonico-3-amanecer-en-el-recuerdo"
     },
     {
       "sourceId": "src_fundacion_orcam",
       "url": "https://fundacionorcam.org/conciertos/2026-27/amanecer-en-el-recuerdo",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-11-01",
       "externalId": "4844"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-10-01"
+  "lastVerifiedAt": "2026-11-01"
 }

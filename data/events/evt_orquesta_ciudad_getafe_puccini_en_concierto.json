@@ -1,14 +1,12 @@
 {
   "schemaVersion": 1,
-  "status": "scheduled",
-  "organizerIds": [],
-  "seriesId": null,
-  "access": "paid",
-  "lastVerifiedAt": "2026-09-27",
   "id": "evt_orquesta_ciudad_getafe_puccini_en_concierto",
   "slug": "puccini-en-concierto",
   "title": "Puccini en Concierto",
+  "status": "scheduled",
   "venueId": "ven_teatro_federico_garcia_lorca_getafe",
+  "organizerIds": [],
+  "seriesId": null,
   "occurrences": [
     {
       "id": "occ_orquesta_ciudad_getafe_puccini_en_concierto_01",
@@ -87,13 +85,15 @@
     "opera"
   ],
   "kind": "established",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_orquesta_ciudad_getafe",
       "url": "https://orquestaciudaddegetafe.com/js_events/puccini-en-concierto",
-      "checkedAt": "2026-09-27",
+      "checkedAt": "2026-11-01",
       "externalId": "puccini-en-concierto"
     }
   ],
-  "primarySourceId": "src_orquesta_ciudad_getafe"
+  "primarySourceId": "src_orquesta_ciudad_getafe",
+  "lastVerifiedAt": "2026-11-01"
 }

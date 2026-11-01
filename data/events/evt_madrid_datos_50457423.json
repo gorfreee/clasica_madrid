@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50457423",
+  "slug": "voces-de-espana",
+  "title": "Voces de España",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_11832607",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50457423_01",
+      "date": "2026-11-27",
+      "time": "19:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Sofía Gutiérrez-Tobar"
+    },
+    {
+      "name": "María Argüeso Vega"
+    }
+  ],
+  "composers": [
+    {
+      "name": "R. Gerhard"
+    },
+    {
+      "name": "F. Obradors"
+    },
+    {
+      "name": "Joaquín Turina"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "twentieth"
+  ],
+  "formats": [
+    "chamber",
+    "lied",
+    "zarzuela"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=fbc24483c4461a10VgnVCM200000f921e388RCRD",
+      "checkedAt": "2026-11-01",
+      "externalId": "50457423"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-11-01"
+}

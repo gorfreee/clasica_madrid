@@ -69,16 +69,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-obni",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-11-01",
       "externalId": "cndm-obni"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23826",
-      "checkedAt": "2026-09-03",
+      "checkedAt": "2026-11-01",
       "externalId": "23826"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-10-01"
+  "lastVerifiedAt": "2026-11-01"
 }

@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_fundacion_juan_march_es_madrid_concierto_pop_folk_cuarteto_cuerda_i",
+  "slug": "pop-y-folk-en-cuarteto-de-cuerda-i",
+  "title": "Pop y folk en cuarteto de cuerda (I)",
+  "status": "scheduled",
+  "venueId": "ven_fundacion_juan_march_auditorio",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_fundacion_juan_march_es_madrid_concierto_pop_folk_cuarteto_cuerda_i_01",
+      "date": "2027-01-13",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Cuarteto Signum"
+    },
+    {
+      "name": "Florian Donderer"
+    },
+    {
+      "name": "Annette Walther"
+    },
+    {
+      "name": "Xandi van Dijk"
+    },
+    {
+      "name": "Thomas Schmitz"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ray Davies"
+    },
+    {
+      "name": "Hugo Wolf"
+    },
+    {
+      "name": "Priaulx Rainier"
+    },
+    {
+      "name": "Mokale Koapeng"
+    },
+    {
+      "name": "Thomas Adès"
+    },
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Leoš Janáček"
+    },
+    {
+      "name": "Led Zeppelin"
+    },
+    {
+      "name": "Jack Bruce"
+    },
+    {
+      "name": "Eric Clapton"
+    },
+    {
+      "name": "Franz Joseph Haydn"
+    },
+    {
+      "name": "Ígor Stravinski"
+    },
+    {
+      "name": "Béla Bartók"
+    },
+    {
+      "name": "Paul McCartney"
+    },
+    {
+      "name": "Erwin Schulhoff"
+    },
+    {
+      "name": "Radiohead"
+    }
+  ],
+  "works": [
+    {
+      "title": "You Really Got Me (arreglo de Matthij Van Dijk)",
+      "composerName": "Ray Davies"
+    },
+    {
+      "title": "Serenata italiana",
+      "composerName": "Hugo Wolf"
+    },
+    {
+      "title": "Presto spiritoso , de Cuarteto de cuerda",
+      "composerName": "Priaulx Rainier"
+    },
+    {
+      "title": "Komeng",
+      "composerName": "Mokale Koapeng"
+    },
+    {
+      "title": "Et… Tango mortale , de Arcadiana, op. 12 nº 4",
+      "composerName": "Thomas Adès"
+    },
+    {
+      "title": "Presto , de Cuarteto de cuerda nº 3 en Re mayor, op. 18",
+      "composerName": "Ludwig van Beethoven"
+    },
+    {
+      "title": "Con moto - Vivo - Andante , de Cuarteto nº 1, \"Sonata Kreutzer\", JW VII/8",
+      "composerName": "Leoš Janáček"
+    },
+    {
+      "title": "Heartbreaker (arreglo de Matthij Van Dijk)",
+      "composerName": "Led Zeppelin"
+    },
+    {
+      "title": "Sunshine of Your Love (arreglo de Matthij Van Dijk)"
+    },
+    {
+      "title": "Menuet alla Zingarese , de Cuarteto de cuerda en Re mayor, op. 20 nº 4, Hob.III:34",
+      "composerName": "Franz Joseph Haydn"
+    },
+    {
+      "title": "I , de Tres piezas para cuarteto de cuerda, K019",
+      "composerName": "Ígor Stravinski"
+    },
+    {
+      "title": "Allegro molto , de Cuarteto de cuerda nº 4, BB 95",
+      "composerName": "Béla Bartók"
+    },
+    {
+      "title": "Blackbird (arreglo de Matthij Van Dijk)",
+      "composerName": "Paul McCartney"
+    },
+    {
+      "title": "Cinco piezas para cuarteto de cuerda",
+      "composerName": "Erwin Schulhoff"
+    },
+    {
+      "title": "Paranoid Android",
+      "composerName": "Radiohead"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic",
+    "twentieth",
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_fundacion_juan_march",
+      "url": "https://www.march.es/es/madrid/concierto/pop-folk-cuarteto-cuerda-i",
+      "checkedAt": "2026-11-01",
+      "externalId": "/es/madrid/concierto/pop-folk-cuarteto-cuerda-i"
+    }
+  ],
+  "primarySourceId": "src_fundacion_juan_march",
+  "lastVerifiedAt": "2026-11-01"
+}

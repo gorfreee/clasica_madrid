@@ -1,14 +1,12 @@
 {
   "schemaVersion": 1,
-  "status": "scheduled",
-  "organizerIds": [],
-  "seriesId": null,
-  "access": "paid",
-  "lastVerifiedAt": "2026-10-02",
   "id": "evt_orquesta_ciudad_getafe_ecos_del_destino",
   "slug": "ecos-del-destino",
   "title": "Ecos del Destino",
+  "status": "scheduled",
   "venueId": "ven_teatro_federico_garcia_lorca_getafe",
+  "organizerIds": [],
+  "seriesId": null,
   "occurrences": [
     {
       "id": "occ_orquesta_ciudad_getafe_ecos_del_destino_01",
@@ -52,6 +50,7 @@
     "symphonic"
   ],
   "kind": "established",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_orquesta_ciudad_getafe",
@@ -62,9 +61,10 @@
     {
       "sourceId": "src_fundacionpiumosso_com",
       "url": "https://www.fundacionpiumosso.com/evento/orquesta-sinfonica-de-getafe-concierto-numero-2-de-s-rachmaninov",
-      "checkedAt": "2026-10-02",
+      "checkedAt": "2026-11-01",
       "externalId": "2197"
     }
   ],
-  "primarySourceId": "src_orquesta_ciudad_getafe"
+  "primarySourceId": "src_orquesta_ciudad_getafe",
+  "lastVerifiedAt": "2026-11-01"
 }

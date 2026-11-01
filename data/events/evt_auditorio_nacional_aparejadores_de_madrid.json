@@ -37,6 +37,12 @@
     },
     {
       "name": "Christopher Tin"
+    },
+    {
+      "name": "J. Elgar"
+    },
+    {
+      "name": "N. Rimski-Kórsakov"
     }
   ],
   "works": [],
@@ -55,10 +61,10 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/aparejadores-de-madrid",
-      "checkedAt": "2026-10-21",
+      "checkedAt": "2026-11-01",
       "externalId": "aparejadores-de-madrid"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-10-21"
+  "lastVerifiedAt": "2026-11-01"
 }

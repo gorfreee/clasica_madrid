@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_patrimonio_nacional_0f274668_1ee4_426b_bd48_8015b2a9b49e",
+  "slug": "natus-est-concierto-de-navidad-aranjuez-2026",
+  "title": "\"Natus est\" - Concierto de Navidad Aranjuez 2026",
+  "status": "scheduled",
+  "venueId": "ven_capilla_del_palacio_real_de_aranjuez",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_patrimonio_nacional_0f274668_1ee4_426b_bd48_8015b2a9b49e_01",
+      "date": "2026-12-19",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Coral Real Capilla de Aranjuez"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "renaissance"
+  ],
+  "formats": [],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_patrimonio_nacional",
+      "url": "https://www.patrimonionacional.es/actualidad/concierto/2026/natus-est-concierto-de-navidad-aranjuez-2026-2026-12-19",
+      "checkedAt": "2026-11-01",
+      "externalId": "0f274668-1ee4-426b-bd48-8015b2a9b49e"
+    }
+  ],
+  "primarySourceId": "src_patrimonio_nacional",
+  "lastVerifiedAt": "2026-11-01"
+}

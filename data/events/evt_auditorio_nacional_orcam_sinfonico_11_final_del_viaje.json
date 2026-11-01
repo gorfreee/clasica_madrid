@@ -79,7 +79,7 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/orcam-sinfonico-11-final-del-viaje",
-      "checkedAt": "2026-09-23",
+      "checkedAt": "2026-11-01",
       "externalId": "orcam-sinfonico-11-final-del-viaje"
     },
     {
@@ -90,5 +90,5 @@
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-23"
+  "lastVerifiedAt": "2026-11-01"
 }

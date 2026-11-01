@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_excelentia_homenaje_a_morricone_y_ludovico_einaudi_1",
+  "slug": "excelentia-homenaje-a-morricone-y-ludovico-einaudi",
+  "title": "Excelentia. Homenaje a Morricone y Ludovico Einaudi",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_excelentia_homenaje_a_morricone_y_ludovico_einaudi_1_01",
+      "date": "2027-02-12",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Délica Chamber Orchestra"
+    },
+    {
+      "name": "Gleb Koroleff"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ludovico Einaudi"
+    },
+    {
+      "name": "Ennio Morricone"
+    }
+  ],
+  "works": [
+    {
+      "title": "In un’altra vita",
+      "composerName": "Ludovico Einaudi"
+    },
+    {
+      "title": "Fairytale",
+      "composerName": "Ludovico Einaudi"
+    },
+    {
+      "title": "Oltremare",
+      "composerName": "Ludovico Einaudi"
+    },
+    {
+      "title": "Gabriel’s oboe",
+      "composerName": "Ennio Morricone"
+    },
+    {
+      "title": "Elegy for the Arctic",
+      "composerName": "Ludovico Einaudi"
+    },
+    {
+      "title": "Indaco",
+      "composerName": "Ludovico Einaudi"
+    },
+    {
+      "title": "The Ecstasy of gold",
+      "composerName": "Ennio Morricone"
+    },
+    {
+      "title": "Primavera",
+      "composerName": "Ludovico Einaudi"
+    },
+    {
+      "title": "Run",
+      "composerName": "Ludovico Einaudi"
+    },
+    {
+      "title": "Divenire",
+      "composerName": "Ludovico Einaudi"
+    }
+  ],
+  "eras": [
+    "contemporary"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/excelentia-homenaje-a-morricone-y-ludovico-einaudi-1",
+      "checkedAt": "2026-11-01",
+      "externalId": "excelentia-homenaje-a-morricone-y-ludovico-einaudi-1"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-11-01"
+}

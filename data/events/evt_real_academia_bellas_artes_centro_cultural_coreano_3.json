@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_real_academia_bellas_artes_centro_cultural_coreano_3",
+  "slug": "corea-2026-ciclo-de-musica-clasica",
+  "title": "Corea 2026. Ciclo de Música Clásica",
+  "status": "scheduled",
+  "venueId": "ven_real_academia_bellas_artes_salon_actos",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_real_academia_bellas_artes_centro_cultural_coreano_3_01",
+      "date": "2026-11-20",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Kyungeun Lee"
+    },
+    {
+      "name": "Sewon Cho"
+    },
+    {
+      "name": "Sejune Kim"
+    },
+    {
+      "name": "Kangryun Nam"
+    },
+    {
+      "name": "Jeehye Bae"
+    },
+    {
+      "name": "Yura Park"
+    },
+    {
+      "name": "José Luis García del Busto."
+    }
+  ],
+  "composers": [
+    {
+      "name": "Isaac Albéniz"
+    },
+    {
+      "name": "Piotr Ilich Chaikovski"
+    },
+    {
+      "name": "Arnold Schoenberg"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sevilla",
+      "composerName": "Isaac Albéniz"
+    },
+    {
+      "title": "Souvenir de Florence, Op. 70",
+      "composerName": "Piotr Ilich Chaikovski"
+    },
+    {
+      "title": "Verklärte Nacht, Op. 4",
+      "composerName": "Arnold Schoenberg"
+    },
+    {
+      "title": "Canto folclórico tradicional coreano",
+      "composerName": "Arnold Schoenberg"
+    },
+    {
+      "title": "Miryang Arirang",
+      "composerName": "Arnold Schoenberg"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_real_academia_bellas_artes_san_fernando",
+      "url": "https://www.realacademiabellasartessanfernando.com/actividades/conciertos/centro-cultural-coreano-3",
+      "checkedAt": "2026-11-01",
+      "externalId": "centro-cultural-coreano-3"
+    }
+  ],
+  "primarySourceId": "src_real_academia_bellas_artes_san_fernando",
+  "lastVerifiedAt": "2026-11-01"
+}

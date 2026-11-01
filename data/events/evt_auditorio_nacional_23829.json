@@ -48,16 +48,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-collegium-vocale-gent-1",
-      "checkedAt": "2026-09-24",
+      "checkedAt": "2026-11-01",
       "externalId": "cndm-collegium-vocale-gent-1"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23829",
-      "checkedAt": "2026-09-24",
+      "checkedAt": "2026-11-01",
       "externalId": "23829"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-24"
+  "lastVerifiedAt": "2026-11-01"
 }

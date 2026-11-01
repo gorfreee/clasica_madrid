@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_patrimonio_nacional_cb1333b8_a158_49d5_856c_dd27c209905b",
+  "slug": "concierto-de-navidad-escorial-2026",
+  "title": "Concierto de Navidad Escorial 2026",
+  "status": "scheduled",
+  "venueId": "ven_basilica_monasterio_san_lorenzo_escorial",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_patrimonio_nacional_cb1333b8_a158_49d5_856c_dd27c209905b_01",
+      "date": "2026-12-19",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Escolanía de El Escorial"
+    }
+  ],
+  "composers": [],
+  "works": [],
+  "eras": [
+    "romantic",
+    "contemporary"
+  ],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_patrimonio_nacional",
+      "url": "https://www.patrimonionacional.es/actualidad/concierto/2026/concierto-de-navidad-escorial-2026-2026-12-19",
+      "checkedAt": "2026-11-01",
+      "externalId": "cb1333b8-a158-49d5-856c-dd27c209905b"
+    }
+  ],
+  "primarySourceId": "src_patrimonio_nacional",
+  "lastVerifiedAt": "2026-11-01"
+}

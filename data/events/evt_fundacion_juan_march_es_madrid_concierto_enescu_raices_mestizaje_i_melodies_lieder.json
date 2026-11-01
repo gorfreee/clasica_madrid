@@ -21,6 +21,12 @@
     },
     {
       "name": "Josu de Solaun"
+    },
+    {
+      "name": "Clara Sánchez"
+    },
+    {
+      "name": "Maria Pop"
     }
   ],
   "composers": [
@@ -137,10 +143,10 @@
     {
       "sourceId": "src_fundacion_juan_march",
       "url": "https://www.march.es/es/madrid/concierto/enescu-raices-mestizaje-i-melodies-lieder",
-      "checkedAt": "2026-10-21",
+      "checkedAt": "2026-11-01",
       "externalId": "/es/madrid/concierto/enescu-raices-mestizaje-i-melodies-lieder"
     }
   ],
   "primarySourceId": "src_fundacion_juan_march",
-  "lastVerifiedAt": "2026-10-21"
+  "lastVerifiedAt": "2026-11-01"
 }

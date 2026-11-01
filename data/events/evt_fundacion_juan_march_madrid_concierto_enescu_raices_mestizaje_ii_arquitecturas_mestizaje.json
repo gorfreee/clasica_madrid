@@ -35,6 +35,9 @@
     },
     {
       "name": "Jesús Miralles"
+    },
+    {
+      "name": "Clara Sánchez"
     }
   ],
   "composers": [
@@ -68,10 +71,10 @@
     {
       "sourceId": "src_fundacion_juan_march",
       "url": "https://www.march.es/es/madrid/concierto/enescu-raices-mestizaje-ii-arquitecturas-mestizaje",
-      "checkedAt": "2026-10-21",
+      "checkedAt": "2026-11-01",
       "externalId": "/es/madrid/concierto/enescu-raices-mestizaje-ii-arquitecturas-mestizaje"
     }
   ],
   "primarySourceId": "src_fundacion_juan_march",
-  "lastVerifiedAt": "2026-10-21"
+  "lastVerifiedAt": "2026-11-01"
 }

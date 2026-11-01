@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50315446",
+  "slug": "concierto-didactico-mujeres-en-la-musica",
+  "title": "Concierto didáctico: Mujeres en la música",
+  "status": "scheduled",
+  "venueId": "ven_centro_cultural_nicolas_salmeron",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50315446_01",
+      "date": "2026-11-08",
+      "time": "18:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [],
+  "composers": [],
+  "works": [
+    {
+      "title": "COMPAÑÍA / GRUPO: Capo d'Astro"
+    },
+    {
+      "title": "GÉNERO: Clásico / Popular"
+    },
+    {
+      "title": "PÚBLICO: Adulto"
+    }
+  ],
+  "eras": [],
+  "formats": [
+    "lied",
+    "other"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=7a13cabb7654e910VgnVCM100000891ecb1aRCRD",
+      "checkedAt": "2026-11-01",
+      "externalId": "50315446"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-11-01"
+}
