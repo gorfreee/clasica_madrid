@@ -213,7 +213,7 @@ describe('independent extraction, temporal coverage and hydration outcomes (#375
     });
   });
 
-  it.each(['cndm', 'teatro-zarzuela', 'madrid-a-tempo', 'rcsmm', 'residencia-estudiantes'])('legacy technical IncompleteListingError from %s still blocks with a healthy source', async id => {
+  it.each(['cndm', 'teatro-zarzuela', 'madrid-a-tempo', 'rcsmm', 'residencia-estudiantes', 'escuela-reina-sofia', 'ayto-san-lorenzo'])('legacy technical IncompleteListingError from %s still blocks with a healthy source', async id => {
     const healthy = await alcalaPages();
     const recovered: RawEvent = { ...healthy.raw[0]!, sourceId: id };
     // Inject precisely the existing exception contract; adapters' transport

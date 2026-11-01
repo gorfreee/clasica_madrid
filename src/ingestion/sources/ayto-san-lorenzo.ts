@@ -9,7 +9,7 @@ import {
   normalizeWorkList,
 } from '../observed.ts';
 import type { ObservedFactPatch, ObservedPerson, ObservedWork } from '../observed.ts';
-import type { RawEvent, RawOccurrence, SourceAdapter } from '../types.ts';
+import { IncompleteListingError, type RawEvent, type RawOccurrence, type SourceAdapter } from '../types.ts';
 
 const ID = 'ayto-san-lorenzo';
 const ORIGIN = 'https://www.aytosanlorenzo.es';
@@ -31,33 +31,48 @@ export const aytoSanLorenzoAdapter: SourceAdapter = {
     // events. Its "Ver más" button uses this POST endpoint and these exact
     // shortcode attributes, which are published in the page itself.
     const config = listConfig(body);
+    const view = divById(body, `mec_skin_${config.id}`);
     let page: Page = {
-      events: readArticles(listHtml(body, config.id), ctx.source.id),
+      events: readArticles(listHtml(view, config.id), ctx.source.id),
       endDate: config.endDate,
       offset: config.offset,
-      hasMore: /mec-load-more-button/.test(body),
+      hasMore: /class="[^"]*\bmec-load-more-button\b/.test(view),
     };
-    if (page.events.length === 0 && !/mec-skin-list-no-events-container/.test(body)) {
+    if (page.events.length === 0 && !explicitEmptyList(view, config.id)) {
       throw new Error(`${ID}: listado vacío sin estado explícito`);
     }
-    const combined = new Map<string, RawEvent>();
+    let combined = new Map<string, RawEvent>();
+    for (const event of page.events) addEvent(combined, event);
     for (let number = 1; number <= MAX_PAGES; number += 1) {
-      for (const event of page.events) addEvent(combined, event);
       if (!page.hasMore || page.endDate > ctx.window.to) return [...combined.values()];
       if (number === MAX_PAGES) break;
-      const next = await loadMore(config.atts, page.endDate, page.offset, page.endDate.slice(0, 4) + page.endDate.slice(5, 7));
-      if (next.count === 0) {
-        if (next.hasMore) throw new Error(`${ID}: paginación estancada`);
-        return [...combined.values()];
+      try {
+        const next = await loadMore(config.atts, page.endDate, page.offset, page.endDate.slice(0, 4) + page.endDate.slice(5, 7));
+        if (next.count === 0) {
+          if (next.hasMore) throw new Error(`${ID}: paginación estancada`);
+          if (/<article\b/i.test(next.html)) throw new Error(`${ID}: recuento de página incoherente`);
+          return [...combined.values()];
+        }
+        const events = readArticles(next.html, ctx.source.id);
+        if (events.length !== next.count) throw new Error(`${ID}: recuento de página incoherente`);
+        if (next.endDate < page.endDate || (next.endDate === page.endDate && next.offset === page.offset)) {
+          throw new Error(`${ID}: paginación sin progreso`);
+        }
+        // Validate the whole page before committing it to recovered progress.
+        const nextCombined = new Map([...combined].map(([key, event]) => [key, {
+          ...event, observed: { ...event.observed, occurrences: [...event.observed.occurrences] },
+        }]));
+        for (const event of events) addEvent(nextCombined, event);
+        combined = nextCombined;
+        page = { events, endDate: next.endDate, offset: next.offset, hasMore: next.hasMore };
+      } catch (error) {
+        throw new IncompleteListingError(
+          `${ID}: página posterior ${number + 1}: ${error instanceof Error ? error.message : String(error)}`,
+          [...combined.values()],
+        );
       }
-      const events = readArticles(next.html, ctx.source.id);
-      if (events.length !== next.count) throw new Error(`${ID}: recuento de página incoherente`);
-      if (next.endDate < page.endDate || (next.endDate === page.endDate && next.offset === page.offset)) {
-        throw new Error(`${ID}: paginación sin progreso`);
-      }
-      page = { events, endDate: next.endDate, offset: next.offset, hasMore: next.hasMore };
     }
-    throw new Error(`${ID}: límite de paginación, cobertura no verificable`);
+    throw new IncompleteListingError(`${ID}: límite de paginación, cobertura no verificable`, [...combined.values()]);
   },
   hydrate: parseDetail,
 };
@@ -81,10 +96,30 @@ function listConfig(body: string): { id: string; atts: string; endDate: string; 
 }
 
 function listHtml(body: string, id: string): string {
-  const start = body.indexOf(`id="mec_skin_events_${id}"`);
-  const end = body.indexOf(`id="mec_skin_no_events_${id}"`, start);
-  if (start < 0 || end < start) throw new Error(`${ID}: bloque de lista truncado`);
-  return body.slice(start, end);
+  return divById(body, `mec_skin_events_${id}`);
+}
+
+/** Bound every signal to the configured MEC view, never a neighbouring skin. */
+function divById(body: string, id: string): string {
+  const opening = new RegExp(`<div\\b[^>]*\\bid="${id}"[^>]*>`, 'g');
+  const matches = [...body.matchAll(opening)];
+  if (matches.length !== 1) throw new Error(`${ID}: bloque de lista truncado o ambiguo`);
+  const start = matches[0]!.index!;
+  const tokens = /<\/?div\b[^>]*>/gi;
+  tokens.lastIndex = start;
+  let depth = 0;
+  for (let token = tokens.exec(body); token; token = tokens.exec(body)) {
+    depth += /^<div\b/i.test(token[0]) ? 1 : -1;
+    if (depth === 0) return body.slice(start, tokens.lastIndex);
+  }
+  throw new Error(`${ID}: bloque de lista truncado`);
+}
+
+function explicitEmptyList(view: string, id: string): boolean {
+  if (!view.includes(`id="mec_skin_no_events_${id}"`)) return false;
+  const empty = divById(view, `mec_skin_no_events_${id}`);
+  return /^<div\b[^>]*class="[^"]*\bmec-skin-list-no-events-container\b/i.test(empty)
+    && /^¡?No hay eventos!$/i.test(stripTags(empty));
 }
 
 function readArticles(html: string, sourceId: string): RawEvent[] {
@@ -120,10 +155,9 @@ function readArticles(html: string, sourceId: string): RawEvent[] {
 
 function eventLink(href: string, visibleTime?: string): { url: string; occurrence: RawOccurrence } | undefined {
   try {
+    const canonical = eventUrl(href);
+    if (!canonical) return undefined;
     const parsed = new URL(href.replace(/&amp;/g, '&'));
-    if (parsed.protocol !== 'https:' || parsed.hostname !== 'www.aytosanlorenzo.es' ||
-        parsed.port || parsed.username || parsed.password ||
-        !/^\/agenda-eventos\/[a-z0-9-]+\/$/.test(parsed.pathname)) return undefined;
     const date = parsed.searchParams.get('occurrence');
     if (!date || !isRealIsoDate(date)) return undefined;
     const key = parsed.searchParams.get('time');
@@ -132,9 +166,27 @@ function eventLink(href: string, visibleTime?: string): { url: string; occurrenc
     if (clockKey && visibleTime && clockKey !== visibleTime) return undefined;
     const time = clockKey ?? visibleTime;
     return {
-      url: `${ORIGIN}${parsed.pathname}`,
+      url: canonical,
       occurrence: { raw: time ? `${date} ${time}` : date, date, ...(time ? { time } : {}) },
     };
+  } catch { return undefined; }
+}
+
+/** Validate the raw path before WHATWG URL resolution can remove dot segments. */
+function eventUrl(href: string): string | undefined {
+  try {
+    if (/[\\\s\p{Cc}]/u.test(href)) return undefined;
+    const rawPath = /^https:\/\/[^/?#]+(\/[^?#]*)/i.exec(href)?.[1];
+    const slug = rawPath && /^\/agenda-eventos\/([^/]+)\/$/.exec(rawPath)?.[1];
+    if (!slug) return undefined;
+    const decoded = decodeURIComponent(slug).normalize('NFC');
+    // WordPress slugs may contain Unicode letters and symbols (including emoji).
+    // One decoding only: '%' rejects double-encoded separators/traversal too.
+    if (!/^[\p{L}\p{M}\p{N}\p{S}_-]+$/u.test(decoded)) return undefined;
+    const url = new URL(href.replace(/&amp;/g, '&'));
+    if (url.protocol !== 'https:' || url.hostname !== 'www.aytosanlorenzo.es' ||
+        url.port || url.username || url.password) return undefined;
+    return `${ORIGIN}/agenda-eventos/${encodeURIComponent(decoded)}/`;
   } catch { return undefined; }
 }
 
@@ -183,8 +235,8 @@ async function loadMore(atts: string, endDate: string, offset: string, divider: 
 
 export function parseDetail(event: RawEvent, body: string): ObservedFactPatch {
   const canonical = /<link\b(?=[^>]*rel="canonical")[^>]*href="([^"]+)"/i.exec(body)?.[1];
-  const url = canonical && new URL(canonical);
-  if (!url || `${url.origin}${url.pathname}` !== event.sourceUrl || !/\bmec-single-event\b/.test(body)) {
+  const url = canonical && eventUrl(canonical);
+  if (!url || url !== event.sourceUrl || !/\bmec-single-event\b/.test(body)) {
     throw new Error(`${ID}: ficha sin identidad canónica`);
   }
   const title = stripTags(/<h1\b[^>]*class="[^"]*\bmec-single-title\b[^>]*>([\s\S]*?)<\/h1>/i.exec(body)?.[1] ?? '');

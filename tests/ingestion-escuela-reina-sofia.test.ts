@@ -19,7 +19,7 @@ import {
   reinaSofiaDetailApiUrl,
   reinaSofiaEventUrl,
 } from '../src/ingestion/sources/escuela-reina-sofia.ts';
-import type { AdapterContext, RawEvent } from '../src/ingestion/types.ts';
+import { IncompleteListingError, type AdapterContext, type RawEvent } from '../src/ingestion/types.ts';
 import { matchVenue, unpublishedParentVenue } from '../src/ingestion/venues.ts';
 import { makeEvent, TEST_NOW, TEST_WINDOW } from './helpers.ts';
 
@@ -602,5 +602,82 @@ describe('hidratación musical de la ficha Reina Sofía', () => {
     });
     expect(jazz.eligibility.value).toBe('exclude');
     expect(jazz.eligibility.ruleId).toBe('jazz-identity');
+  });
+});
+
+describe('recuperación de cobertura de Reina Sofía (#396)', () => {
+  async function incomplete(pending: Promise<RawEvent[]>) {
+    const error = await pending.catch(error => error);
+    expect(error).toBeInstanceOf(IncompleteListingError);
+    return error as IncompleteListingError;
+  }
+
+  it('conserva las seis tarjetas reales sin inventar cobertura por la paginación vacía', async () => {
+    const body = await fixture('listing-20261101.html');
+    const context = await adapterContext(undefined, { from: '2026-11-01', to: '2027-07-31' });
+    const error = await incomplete(adapter.extract(body, listingUrl, context));
+    expect(error.message).toMatch(/paginación sin página actual única.*cobertura no verificable/);
+    expect(error.events).toHaveLength(6);
+    expect(error.events.every(event => event.externalId && event.sourceUrl && event.observed.occurrences[0]?.date)).toBe(true);
+    const again = await incomplete(adapter.extract(body, listingUrl, context));
+    expect(again.events).toEqual(error.events);
+  });
+
+  it.each(['HTTP 503', 'truncado', 'contador', 'actual'])('retiene páginas anteriores ante %s posterior', async mode => {
+    const first = await fixture('page-1.html');
+    const second = await fixture('page-2.html');
+    const context = await adapterContext();
+    context.get = async () => {
+      if (mode === 'HTTP 503') throw Error('HTTP 503');
+      if (mode === 'truncado') return second.slice(0, second.indexOf('</div>'));
+      if (mode === 'contador') return second.replace('href="/agenda/"', 'href="/agenda/page/3/"');
+      return second.replace('aria-current="page">2', 'aria-current="page">3');
+    };
+    const error = await incomplete(adapter.extract(first, listingUrl, context));
+    expect(error.message).toContain(page2Url);
+    expect(error.events.length).toBeGreaterThanOrEqual(9);
+    expect(error.events.some(event => event.externalId === '83063')).toBe(true);
+    expect(new Set(error.events.map(event => event.externalId)).size).toBe(error.events.length);
+  });
+
+  it('conserva el fallo técnico en harvesting/health y no diagnostica desapariciones; es idempotente', async () => {
+    const body = await fixture('listing-20261101.html');
+    const context = await adapterContext(undefined, { from: '2026-11-01', to: '2027-07-31' });
+    const recovered = (await incomplete(adapter.extract(body, listingUrl, context))).events;
+    const absent = makeEvent({
+      id: 'evt_absent_reina', slug: 'absent-reina', title: 'Concierto ausente',
+      organizerIds: [], seriesId: null, primarySourceId: source.catalogSourceId,
+      occurrences: [{ id: 'occ_absent_reina', date: '2026-12-20', time: '19:30', status: 'scheduled' }],
+      citations: [{ sourceId: source.catalogSourceId, url: 'https://www.escuelasuperiordemusicareinasofia.es/evento/ausente', checkedAt: '2026-10-01' }],
+    });
+    const catalog = { ...emptyCatalog(), sources: [source.seedSource], events: [absent] };
+    const before = JSON.stringify(catalog);
+    const options = {
+      now: new Date('2026-11-01T12:00:00Z'), dryRun: true, catalog, window: context.window,
+      sourceIds: [source.id], dataDir: await mkdtemp(path.join(os.tmpdir(), 'reina-partial-')),
+      get: async (url: string) => {
+        if (url === listingUrl) return body;
+        const raw = recovered.find(event => `${event.sourceUrl}/` === url);
+        if (!raw) throw Error(`URL inesperada: ${url}`);
+        return syntheticDetailHtml(raw, '<p>Concierto de música clásica. Ludwig van Beethoven.</p>');
+      },
+    };
+    const first = await runIngest(options);
+    expect(first.rawEvents).toHaveLength(6);
+    expect(first.summary.sourceResults?.[source.id]).toMatchObject({
+      extraction: { status: 'incomplete', message: expect.stringContaining('paginación') },
+      disappearanceEligible: false, extractedEvents: 6,
+    });
+    expect(first.summary.sourceResults?.[source.id]?.temporalCoverage).toBeUndefined();
+    expect(first.summary.sourcesFailed).toEqual([{ sourceId: source.id, message: expect.stringContaining('paginación') }]);
+    expect(first.summary.healthReasons).toContain(`source-failed:${source.id}`);
+    expect(first.summary.autoMergeEligible).toBe(false);
+    expect(first.candidates.length).toBeGreaterThan(0);
+    expect(first.possiblyMissing).toEqual([]);
+    expect(first.summary.written).toEqual([]);
+    expect(JSON.stringify(catalog)).toBe(before);
+    const again = await runIngest(options);
+    expect(again.candidates).toEqual(first.candidates);
+    expect(again.summary).toEqual(first.summary);
   });
 });
