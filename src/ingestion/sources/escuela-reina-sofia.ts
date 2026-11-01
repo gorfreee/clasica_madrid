@@ -14,6 +14,7 @@ import { inferScheduleFromText } from '../detail/schedule.ts';
 import { decodeHtmlEntities, stripTags } from '../html.ts';
 import { emptyObservedLists } from '../observed.ts';
 import {
+  IncompleteListingError,
   reportAdapterDiscard,
   type AdapterContext,
   type RawEvent,
@@ -61,33 +62,25 @@ export const escuelaReinaSofiaAdapter: SourceAdapter = {
     const pages = [first];
     for (let pageNumber = 2; pageNumber <= first.totalPages; pageNumber += 1) {
       const pageUrl = reinaSofiaAgendaPageUrl(url, pageNumber);
-      assertAgendaPageUrl(pageUrl, pageNumber);
-      const page = parseAgendaPage(await ctx.get(pageUrl), pageUrl, pageNumber, ctx);
-      assertCoverage(page, first, pageNumber);
-      pages.push(page);
-    }
-
-    const events = pages.flatMap((page) => page.events);
-    const recognizedItems = pages.reduce((total, page) => total + page.itemCount, 0);
-    if (recognizedItems > 0 && events.length === 0) {
-      throw new Error(`${SOURCE_ID}: la agenda no contiene eventos con título, URL, fecha y hora`);
-    }
-
-    const seenIds = new Set<string>();
-    const seenUrls = new Set<string>();
-    for (const event of events) {
-      if (seenUrls.has(event.sourceUrl) || (event.externalId && seenIds.has(event.externalId))) {
-        throw new Error(`${SOURCE_ID}: evento duplicado`);
+      try {
+        assertAgendaPageUrl(pageUrl, pageNumber);
+        const page = parseAgendaPage(await ctx.get(pageUrl), pageUrl, pageNumber, ctx);
+        assertCoverage(page, first, pageNumber);
+        // Validate identity across pages before accepting the next page.
+        validatedEvents([...pages.flatMap((item) => item.events), ...page.events], ctx);
+        pages.push(page);
+      } catch (error) {
+        // Never discard already validated pages because a later request failed.
+        // A structurally invalid page contributes no observations.
+        const recovered = pages.flatMap((page) => page.events);
+        if (error instanceof IncompleteListingError) recovered.push(...error.events);
+        throw new IncompleteListingError(
+          `${SOURCE_ID}: ${pageUrl}: ${error instanceof Error ? error.message : String(error)}`,
+          validatedEvents(recovered, ctx),
+        );
       }
-      seenUrls.add(event.sourceUrl);
-      if (event.externalId) seenIds.add(event.externalId);
     }
-
-    return events
-      .filter((event) => event.observed.occurrences.some(
-        (occurrence) => occurrence.date && isDateInWindow(occurrence.date, ctx.window),
-      ))
-      .sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
+    return validatedEvents(pages.flatMap((page) => page.events), ctx);
   },
   fetchDetail(url, ctx) {
     const canonical = reinaSofiaEventUrl(url);
@@ -209,17 +202,29 @@ function parseAgendaPage(
     return { events: [], itemCount: 0, currentPage: 1, totalPages: 0, explicitEmpty: true };
   }
 
-  const pagination = findDivByClass(body, 'evnt-encuentro-paginaiton-block');
-  if (!pagination) throw new Error(`${SOURCE_ID}: falta la cobertura de paginación`);
-  const { currentPage, totalPages } = parsePagination(pagination.inner, pageUrl);
-  if (currentPage !== expectedPage) {
-    throw new Error(`${SOURCE_ID}: página actual inesperada (${currentPage}/${expectedPage})`);
-  }
-
   const events = cards.flatMap((card) => {
     const event = parseCard(card, pageUrl, ctx);
     return event ? [event] : [];
   });
+  // Cards are independently usable even when navigation cannot prove coverage.
+  // An empty pagination block has no authoritative total; do not infer one page
+  // from its emptiness or from a small card count (the live SSR has six cards).
+  const recovered = validatedEvents(events, ctx);
+  let currentPage: number;
+  let totalPages: number;
+  try {
+    const pagination = findDivByClass(body, 'evnt-encuentro-paginaiton-block');
+    if (!pagination) throw new Error(`${SOURCE_ID}: falta la cobertura de paginación`);
+    ({ currentPage, totalPages } = parsePagination(pagination.inner, pageUrl));
+    if (currentPage !== expectedPage) {
+      throw new Error(`${SOURCE_ID}: página actual inesperada (${currentPage}/${expectedPage})`);
+    }
+  } catch (error) {
+    throw new IncompleteListingError(
+      `${error instanceof Error ? error.message : String(error)}; cobertura no verificable, desapariciones no evaluables`,
+      recovered,
+    );
+  }
   return {
     events,
     itemCount: cards.length,
@@ -227,6 +232,24 @@ function parseAgendaPage(
     totalPages,
     explicitEmpty: false,
   };
+}
+
+function validatedEvents(events: RawEvent[], ctx: AdapterContext): RawEvent[] {
+  if (events.length === 0) {
+    throw new Error(`${SOURCE_ID}: la agenda no contiene eventos con título, URL, fecha y hora`);
+  }
+  const ids = new Set<string>();
+  const urls = new Set<string>();
+  for (const event of events) {
+    if (urls.has(event.sourceUrl) || (event.externalId && ids.has(event.externalId))) {
+      throw new Error(`${SOURCE_ID}: evento duplicado`);
+    }
+    urls.add(event.sourceUrl);
+    if (event.externalId) ids.add(event.externalId);
+  }
+  return events.filter(event => event.observed.occurrences.some(
+    occurrence => occurrence.date && isDateInWindow(occurrence.date, ctx.window),
+  )).sort((left, right) => left.sourceUrl.localeCompare(right.sourceUrl));
 }
 
 function assertCoverage(page: AgendaPage, first: AgendaPage, pageNumber: number): void {
