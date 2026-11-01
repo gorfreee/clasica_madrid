@@ -1,0 +1,565 @@
+[
+  {
+    "schemaVersion": 1,
+    "kind": "observation",
+    "sourceId": "teatro-real",
+    "sourceUrl": "https://www.teatroreal.es/es/espectaculo/bodas-figaro",
+    "title": "Las bodas de Fígaro",
+    "hydration": {
+      "status": "succeeded",
+      "detailUrl": "https://www.teatroreal.es/es/espectaculo/bodas-figaro"
+    },
+    "observed": {
+      "title": "Las bodas de Fígaro",
+      "performers": [
+        {
+          "name": "Stefano Montanari",
+          "roleText": "director"
+        },
+        {
+          "name": "José Luis Basso",
+          "roleText": "director"
+        },
+        {
+          "name": "Coro y Orquesta Titulares del Teatro Real",
+          "roleText": "Coro y Orquesta"
+        },
+        {
+          "name": "Mattia Olivieri",
+          "roleText": "El Conde de Almaviva"
+        },
+        {
+          "name": "Carles Pachon",
+          "roleText": "El Conde de Almaviva"
+        },
+        {
+          "name": "Olga Kulchynska",
+          "roleText": "La condesa de Almaviva"
+        },
+        {
+          "name": "Elsa Dreisig",
+          "roleText": "La condesa de Almaviva"
+        },
+        {
+          "name": "Sara Blanch",
+          "roleText": "Susanna"
+        },
+        {
+          "name": "Sabina Puértolas",
+          "roleText": "Susanna"
+        },
+        {
+          "name": "Luca Micheletti",
+          "roleText": "Figaro"
+        },
+        {
+          "name": "Germán Olvera",
+          "roleText": "Figaro"
+        },
+        {
+          "name": "Cecilia Molinari",
+          "roleText": "Cherubino"
+        },
+        {
+          "name": "Lucía Caihuela",
+          "roleText": "Cherubino"
+        },
+        {
+          "name": "Raquel Lojendio",
+          "roleText": "Marcellina"
+        },
+        {
+          "name": "Gianluca Buratto",
+          "roleText": "Bartolo"
+        },
+        {
+          "name": "Juan Sancho",
+          "roleText": "Basilio"
+        },
+        {
+          "name": "Pablo García-López",
+          "roleText": "Don Curzio"
+        },
+        {
+          "name": "Lucía Martín Cartón",
+          "roleText": "Barbarina"
+        },
+        {
+          "name": "Lucía Iglesias",
+          "roleText": "Barbarina"
+        },
+        {
+          "name": "Riccardo Novaro",
+          "roleText": "Antonio"
+        }
+      ],
+      "composers": [
+        {
+          "name": "Wolfgang Amadeus Mozart"
+        }
+      ],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "2026-11-09T19:30",
+          "date": "2026-11-09",
+          "time": "19:30"
+        },
+        {
+          "raw": "2026-11-10T19:30",
+          "date": "2026-11-10",
+          "time": "19:30"
+        },
+        {
+          "raw": "2026-11-12T19:30",
+          "date": "2026-11-12",
+          "time": "19:30"
+        },
+        {
+          "raw": "2026-11-15T18:00",
+          "date": "2026-11-15",
+          "time": "18:00"
+        },
+        {
+          "raw": "2026-11-16T19:30",
+          "date": "2026-11-16",
+          "time": "19:30"
+        },
+        {
+          "raw": "2026-11-17T19:30",
+          "date": "2026-11-17",
+          "time": "19:30"
+        },
+        {
+          "raw": "2026-11-18T19:30",
+          "date": "2026-11-18",
+          "time": "19:30"
+        },
+        {
+          "raw": "2026-11-20T19:30",
+          "date": "2026-11-20",
+          "time": "19:30"
+        },
+        {
+          "raw": "2026-11-21T19:30",
+          "date": "2026-11-21",
+          "time": "19:30"
+        },
+        {
+          "raw": "2026-11-22T18:00",
+          "date": "2026-11-22",
+          "time": "18:00"
+        },
+        {
+          "raw": "2026-11-24T19:30",
+          "date": "2026-11-24",
+          "time": "19:30"
+        },
+        {
+          "raw": "2026-11-26T19:30",
+          "date": "2026-11-26",
+          "time": "19:30"
+        },
+        {
+          "raw": "2026-11-27T19:30",
+          "date": "2026-11-27",
+          "time": "19:30"
+        }
+      ],
+      "description": "Considerada una de las grandes obras maestras de la ópera, Las bodas de Fígaro es la primera colaboración entre Mozart y su libretista Lorenzo Da Ponte ( Don Giovanni , Las bodas de Fígaro , Così fan tutte ). El canadiense Robert Carsen dirige escénicamente por primera vez esta ópera, una nueva producción donde la filosofía y los abusos de poder se mezclan con la comedia. Dando vida a los personajes estarán las voces de Mattia Olivieri, Carles Pachon, Olga Kuchynska, Elsa Dreisig, Sara Blanch, Sabina Puértolas, Luca Micheletti, Germán Olivera, Cecilia Molinari, Lucía Cahiuela, entre otros y la dirección musical de Stefano Montanari.",
+      "categoryText": "Ópera",
+      "venueText": "Sala Principal",
+      "organizerText": "09 nov, 26 - 27 nov, 26",
+      "accessText": "Desde 19 euros",
+      "programText": "Considerada una de las grandes obras maestras de la ópera, Las bodas de Fígaro es la primera colaboración entre Mozart y su libretista Lorenzo Da Ponte ( Don Giovanni , Las bodas de Fígaro , Così fan tutte ). El canadiense Robert Carsen dirige escénicamente por primera vez esta ópera, una nueva producción donde la filosofía y los abusos de poder se mezclan con la comedia. Dando vida a los personajes estarán las voces de Mattia Olivieri, Carles Pachon, Olga Kuchynska, Elsa Dreisig, Sara Blanch, Sabina Puértolas, Luca Micheletti, Germán Olivera, Cecilia Molinari, Lucía Cahiuela, entre otros y la dirección musical de Stefano Montanari. Opera buffa en cuatro actos, KV 492. Música de Wolfgang Amadeus Mozart (1756-1791). Libreto de Lorenzo da Ponte, basado en la comedia La folle journée, ou Le mariage de Figaro (1784) de Pierre-Augustin de Beaumarchais. Nueva producción del Teatro Real, en coproducción con la Metropolitan Opera de Nueva York. Estrenada en el Burgtheater de Viena el 1 de mayo de 1786. Estrenada en el Teatro Real el 12 de febrero de 1903. AVISO IMPORTANTE La representación de Las bodas de Fígaro prevista inicialmente para el 11 de noviembre se adelantará al 9 de noviembre a las 19:30 h . Esta reprogramación se realiza debido a la coincidencia con la huelga general. Su entrada o tarjeta de abonado será válida para acceder al teatro en la nueva fecha y su butaca será la misma, por lo que no será necesario realizar ningún trámite ni canje de entrada . En caso de que no le fuera posible asistir en esta nueva fecha, puede optar por una de las siguientes alternativas: • Cambio gratuito a otra función de Las bodas de Fígaro (en la misma zona y sujeto a disponibilidad de aforo) • Devolución del importe de su localidad. Para gestionar cualquiera de estas dos opciones, por favor contacte con el equipo de atención al cliente o al abonado hasta las 14:00 h del miércoles 4 de noviembre , en los siguientes teléfonos: Público general: 900 24 48 48 · Abonados: 900 86 13 52 También se podrá realizar la gestión presencialmente en las taquillas del teatro. Horario de atención telefónica y taquilla: de lunes a viernes laborables de 10:00 a 18:30 h. Agradecemos de antemano su comprensión y lamentamos los inconvenientes."
+    },
+    "externalId": "bodas-figaro",
+    "listing": {
+      "title": "Las bodas de Fígaro",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "2026-11-09T19:30",
+          "date": "2026-11-09",
+          "time": "19:30"
+        },
+        {
+          "raw": "2026-11-10T19:30",
+          "date": "2026-11-10",
+          "time": "19:30"
+        },
+        {
+          "raw": "2026-11-12T19:30",
+          "date": "2026-11-12",
+          "time": "19:30"
+        },
+        {
+          "raw": "2026-11-15T18:00",
+          "date": "2026-11-15",
+          "time": "18:00"
+        },
+        {
+          "raw": "2026-11-16T19:30",
+          "date": "2026-11-16",
+          "time": "19:30"
+        },
+        {
+          "raw": "2026-11-17T19:30",
+          "date": "2026-11-17",
+          "time": "19:30"
+        },
+        {
+          "raw": "2026-11-18T19:30",
+          "date": "2026-11-18",
+          "time": "19:30"
+        },
+        {
+          "raw": "2026-11-20T19:30",
+          "date": "2026-11-20",
+          "time": "19:30"
+        },
+        {
+          "raw": "2026-11-21T19:30",
+          "date": "2026-11-21",
+          "time": "19:30"
+        },
+        {
+          "raw": "2026-11-22T18:00",
+          "date": "2026-11-22",
+          "time": "18:00"
+        },
+        {
+          "raw": "2026-11-24T19:30",
+          "date": "2026-11-24",
+          "time": "19:30"
+        },
+        {
+          "raw": "2026-11-26T19:30",
+          "date": "2026-11-26",
+          "time": "19:30"
+        },
+        {
+          "raw": "2026-11-27T19:30",
+          "date": "2026-11-27",
+          "time": "19:30"
+        }
+      ],
+      "categoryText": "Ópera",
+      "venueText": "Teatro Real"
+    },
+    "normalized": {
+      "title": "Las bodas de Fígaro",
+      "performers": [
+        {
+          "name": "Stefano Montanari",
+          "roleText": "director"
+        },
+        {
+          "name": "José Luis Basso",
+          "roleText": "director"
+        },
+        {
+          "name": "Coro y Orquesta Titulares del Teatro Real",
+          "roleText": "Coro y Orquesta"
+        },
+        {
+          "name": "Mattia Olivieri",
+          "roleText": "El Conde de Almaviva"
+        },
+        {
+          "name": "Carles Pachon",
+          "roleText": "El Conde de Almaviva"
+        },
+        {
+          "name": "Olga Kulchynska",
+          "roleText": "La condesa de Almaviva"
+        },
+        {
+          "name": "Elsa Dreisig",
+          "roleText": "La condesa de Almaviva"
+        },
+        {
+          "name": "Sara Blanch",
+          "roleText": "Susanna"
+        },
+        {
+          "name": "Sabina Puértolas",
+          "roleText": "Susanna"
+        },
+        {
+          "name": "Luca Micheletti",
+          "roleText": "Figaro"
+        },
+        {
+          "name": "Germán Olvera",
+          "roleText": "Figaro"
+        },
+        {
+          "name": "Cecilia Molinari",
+          "roleText": "Cherubino"
+        },
+        {
+          "name": "Lucía Caihuela",
+          "roleText": "Cherubino"
+        },
+        {
+          "name": "Raquel Lojendio",
+          "roleText": "Marcellina"
+        },
+        {
+          "name": "Gianluca Buratto",
+          "roleText": "Bartolo"
+        },
+        {
+          "name": "Juan Sancho",
+          "roleText": "Basilio"
+        },
+        {
+          "name": "Pablo García-López",
+          "roleText": "Don Curzio"
+        },
+        {
+          "name": "Lucía Martín Cartón",
+          "roleText": "Barbarina"
+        },
+        {
+          "name": "Lucía Iglesias",
+          "roleText": "Barbarina"
+        },
+        {
+          "name": "Riccardo Novaro",
+          "roleText": "Antonio"
+        }
+      ],
+      "composers": [
+        {
+          "name": "Wolfgang Amadeus Mozart"
+        }
+      ],
+      "works": [],
+      "occurrences": [
+        {
+          "date": "2026-11-09",
+          "time": "19:30"
+        },
+        {
+          "date": "2026-11-10",
+          "time": "19:30"
+        },
+        {
+          "date": "2026-11-12",
+          "time": "19:30"
+        },
+        {
+          "date": "2026-11-15",
+          "time": "18:00"
+        },
+        {
+          "date": "2026-11-16",
+          "time": "19:30"
+        },
+        {
+          "date": "2026-11-17",
+          "time": "19:30"
+        },
+        {
+          "date": "2026-11-18",
+          "time": "19:30"
+        },
+        {
+          "date": "2026-11-20",
+          "time": "19:30"
+        },
+        {
+          "date": "2026-11-21",
+          "time": "19:30"
+        },
+        {
+          "date": "2026-11-22",
+          "time": "18:00"
+        },
+        {
+          "date": "2026-11-24",
+          "time": "19:30"
+        },
+        {
+          "date": "2026-11-26",
+          "time": "19:30"
+        },
+        {
+          "date": "2026-11-27",
+          "time": "19:30"
+        }
+      ],
+      "description": "Considerada una de las grandes obras maestras de la ópera, Las bodas de Fígaro es la primera colaboración entre Mozart y su libretista Lorenzo Da Ponte ( Don Giovanni , Las bodas de Fígaro , Così fan tutte ). El canadiense Robert Carsen dirige escénicamente por primera vez esta ópera, una nueva producción donde la filosofía y los abusos de poder se mezclan con la comedia. Dando vida a los personajes estarán las voces de Mattia Olivieri, Carles Pachon, Olga Kuchynska, Elsa Dreisig, Sara Blanch, Sabina Puértolas, Luca Micheletti, Germán Olivera, Cecilia Molinari, Lucía Cahiuela, entre otros y la dirección musical de Stefano Montanari.",
+      "categoryText": "Ópera",
+      "venueText": "Sala Principal",
+      "organizerText": "09 nov, 26 - 27 nov, 26",
+      "accessText": "Desde 19 euros",
+      "programText": "Considerada una de las grandes obras maestras de la ópera, Las bodas de Fígaro es la primera colaboración entre Mozart y su libretista Lorenzo Da Ponte ( Don Giovanni , Las bodas de Fígaro , Così fan tutte ). El canadiense Robert Carsen dirige escénicamente por primera vez esta ópera, una nueva producción donde la filosofía y los abusos de poder se mezclan con la comedia. Dando vida a los personajes estarán las voces de Mattia Olivieri, Carles Pachon, Olga Kuchynska, Elsa Dreisig, Sara Blanch, Sabina Puértolas, Luca Micheletti, Germán Olivera, Cecilia Molinari, Lucía Cahiuela, entre otros y la dirección musical de Stefano Montanari. Opera buffa en cuatro actos, KV 492. Música de Wolfgang Amadeus Mozart (1756-1791). Libreto de Lorenzo da Ponte, basado en la comedia La folle journée, ou Le mariage de Figaro (1784) de Pierre-Augustin de Beaumarchais. Nueva producción del Teatro Real, en coproducción con la Metropolitan Opera de Nueva York. Estrenada en el Burgtheater de Viena el 1 de mayo de 1786. Estrenada en el Teatro Real el 12 de febrero de 1903. AVISO IMPORTANTE La representación de Las bodas de Fígaro prevista inicialmente para el 11 de noviembre se adelantará al 9 de noviembre a las 19:30 h . Esta reprogramación se realiza debido a la coincidencia con la huelga general. Su entrada o tarjeta de abonado será válida para acceder al teatro en la nueva fecha y su butaca será la misma, por lo que no será necesario realizar ningún trámite ni canje de entrada . En caso de que no le fuera posible asistir en esta nueva fecha, puede optar por una de las siguientes alternativas: • Cambio gratuito a otra función de Las bodas de Fígaro (en la misma zona y sujeto a disponibilidad de aforo) • Devolución del importe de su localidad. Para gestionar cualquiera de estas dos opciones, por favor contacte con el equipo de atención al cliente o al abonado hasta las 14:00 h del miércoles 4 de noviembre , en los siguientes teléfonos: Público general: 900 24 48 48 · Abonados: 900 86 13 52 También se podrá realizar la gestión presencialmente en las taquillas del teatro. Horario de atención telefónica y taquilla: de lunes a viernes laborables de 10:00 a 18:30 h. Agradecemos de antemano su comprensión y lamentamos los inconvenientes."
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "kind": "observation",
+    "sourceId": "fundacion-juan-march",
+    "sourceUrl": "https://www.march.es/es/madrid/concierto/diario-desaparecido-leos-janacek",
+    "title": "Diario de un desaparecido de Leoš Janáček",
+    "hydration": {
+      "status": "succeeded",
+      "detailUrl": "https://www.march.es/es/madrid/concierto/diario-desaparecido-leos-janacek"
+    },
+    "observed": {
+      "title": "Diario de un desaparecido de Leoš Janáček",
+      "performers": [
+        {
+          "name": "Borja Mariño"
+        },
+        {
+          "name": "Tomás Muñoz"
+        },
+        {
+          "name": "Mário Radačovský"
+        },
+        {
+          "name": "Michał Jopek"
+        },
+        {
+          "name": "Cristina Faus"
+        },
+        {
+          "name": "Ensemble del Ballet del Teatro Nacional de Brno"
+        },
+        {
+          "name": "Cuarteto Seikilos"
+        },
+        {
+          "name": "Lorenzo Meseguer"
+        },
+        {
+          "name": "Iván Görnemann"
+        },
+        {
+          "name": "Pablo Quintanilla"
+        },
+        {
+          "name": "Adrián Vázquez"
+        }
+      ],
+      "composers": [],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "miércoles 31 de marzo 2027, 18:30h",
+          "date": "2027-03-31",
+          "time": "18:30"
+        },
+        {
+          "raw": "viernes 2 de abril 2027, 18:30h",
+          "date": "2027-04-02",
+          "time": "18:30"
+        },
+        {
+          "raw": "sábado 3 de abril 2027, 18:30h",
+          "date": "2027-04-03",
+          "time": "18:30"
+        },
+        {
+          "raw": "domingo 4 de abril 2027, 18:30h",
+          "date": "2027-04-04",
+          "time": "18:30"
+        }
+      ],
+      "description": "Leoš Janáček concibió su ciclo de canciones Diario de un desaparecido con una marcada intencionalidad escénica. Estrenado en 1921 en Brno —epicentro vital de su última etapa creativa—, comparte con su Cuarteto nº 2 “Cartas íntimas”, un mismo trasfondo autobiográfico: ambas obras nacen de la intensa relación platónica que mantuvo con Kamila Stösslová, casi cuarenta años más joven que él. A la poderosa narración del Diario se suma así una partitura instrumental que, aun sin palabras, sugiere una trama latente, aquí trasladada escénicamente por medio de la coreografía. La música entrelaza lo cantado y lo sugerido en un relato continuo que convierte en drama íntimo la escritura privada del diario y la correspondencia entre los amantes. Este proyecto hispano-checo supone, además, la primera coproducción del formato Teatro Musical de Cámara con otra institución europea.",
+      "categoryText": "Teatro Musical de Cámara",
+      "venueText": "Fundación Juan March | Madrid",
+      "organizerText": "Fundación Juan March | Madrid",
+      "accessText": "entrada libre y gratuita",
+      "programText": "Leo&scaron; Janáček (1854-1928)\nCuarteto de cuerda n&ordm; 2 &ldquo;Cartas íntimas&rdquo; , JW VII/13\nÁlbum para Kamila Stösslová , JW VIII/33\nDiario de un desaparecido , JW V/12\nCiclo de canciones de Leo&scaron; Janáček (1854-1928), basado en poemas de Ozef Kalda (1871-1921)\nEstrenado en versión de concierto en el Teatro Reduta de Brno el 18 de abril de 1921 y en versión escénica en Liubliana el 28 de octubre de 1926\nNueva producción de la Fundacion Juan March, el Auditorio de Tenerife y el Ballet del Teatro Nacional de Brno, con la colaboración del Centro Checo Madrid",
+      "eventStatus": "scheduled"
+    },
+    "externalId": "/es/madrid/concierto/diario-desaparecido-leos-janacek",
+    "listing": {
+      "title": "Diario de un desaparecido de Leoš Janáček",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [],
+      "description": "Borja Mariño, Tomás Muñoz y Mário Radačovský",
+      "categoryText": "Teatro musical de Cámara",
+      "accessText": "entrada libre y gratuita"
+    },
+    "normalized": {
+      "title": "Diario de un desaparecido de Leoš Janáček",
+      "performers": [
+        {
+          "name": "Borja Mariño"
+        },
+        {
+          "name": "Tomás Muñoz"
+        },
+        {
+          "name": "Mário Radačovský"
+        },
+        {
+          "name": "Michał Jopek"
+        },
+        {
+          "name": "Cristina Faus"
+        },
+        {
+          "name": "Ensemble del Ballet del Teatro Nacional de Brno"
+        },
+        {
+          "name": "Cuarteto Seikilos"
+        },
+        {
+          "name": "Lorenzo Meseguer"
+        },
+        {
+          "name": "Iván Görnemann"
+        },
+        {
+          "name": "Pablo Quintanilla"
+        },
+        {
+          "name": "Adrián Vázquez"
+        }
+      ],
+      "composers": [
+        {
+          "name": "Leoš Janáček"
+        }
+      ],
+      "works": [],
+      "occurrences": [
+        {
+          "date": "2027-03-31",
+          "time": "18:30"
+        },
+        {
+          "date": "2027-04-02",
+          "time": "18:30"
+        },
+        {
+          "date": "2027-04-03",
+          "time": "18:30"
+        },
+        {
+          "date": "2027-04-04",
+          "time": "18:30"
+        }
+      ],
+      "description": "Leoš Janáček concibió su ciclo de canciones Diario de un desaparecido con una marcada intencionalidad escénica. Estrenado en 1921 en Brno —epicentro vital de su última etapa creativa—, comparte con su Cuarteto nº 2 “Cartas íntimas”, un mismo trasfondo autobiográfico: ambas obras nacen de la intensa relación platónica que mantuvo con Kamila Stösslová, casi cuarenta años más joven que él. A la poderosa narración del Diario se suma así una partitura instrumental que, aun sin palabras, sugiere una trama latente, aquí trasladada escénicamente por medio de la coreografía. La música entrelaza lo cantado y lo sugerido en un relato continuo que convierte en drama íntimo la escritura privada del diario y la correspondencia entre los amantes. Este proyecto hispano-checo supone, además, la primera coproducción del formato Teatro Musical de Cámara con otra institución europea.",
+      "categoryText": "Teatro Musical de Cámara",
+      "venueText": "Fundación Juan March | Madrid",
+      "organizerText": "Fundación Juan March | Madrid",
+      "accessText": "entrada libre y gratuita",
+      "programText": "Leo&scaron; Janáček (1854-1928)\nCuarteto de cuerda n&ordm; 2 &ldquo;Cartas íntimas&rdquo; , JW VII/13\nÁlbum para Kamila Stösslová , JW VIII/33\nDiario de un desaparecido , JW V/12\nCiclo de canciones de Leo&scaron; Janáček (1854-1928), basado en poemas de Ozef Kalda (1871-1921)\nEstrenado en versión de concierto en el Teatro Reduta de Brno el 18 de abril de 1921 y en versión escénica en Liubliana el 28 de octubre de 1926\nNueva producción de la Fundacion Juan March, el Auditorio de Tenerife y el Ballet del Teatro Nacional de Brno, con la colaboración del Centro Checo Madrid",
+      "dateFromDetail": true,
+      "eventStatus": "scheduled"
+    }
+  }
+]

@@ -81,6 +81,8 @@ export function parseMarchDetail(event: RawEvent, body: string): ObservedFactPat
   const format = /Formato:\s*(?:<[^>]+>\s*)*([^<\n]+)/i.exec(body)?.[1];
   return {
     occurrences: schedule,
+    calendarEvidence: { complete: { from: schedule[0]!.date!, to: schedule.at(-1)!.date! },
+      evidence: 'p-acto__fechas íntegro corroborado por todas las funciones JSON-LD de la URL canónica' },
     venueText: [...venues][0],
     eventStatus: [...statuses][0],
     description: text(first.description),

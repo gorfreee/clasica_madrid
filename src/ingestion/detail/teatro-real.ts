@@ -1,3 +1,4 @@
+import { teatroRealCalendar } from './teatro-real-calendar.ts';
 import { explicitAccessText } from './access-evidence.ts';
 import { stripLeadingComposerCreditLabel } from '../composer-name.ts';
 import {
@@ -95,6 +96,7 @@ function parseProduction(html: string): ObservedFactPatch {
     ...(programText ? { programText } : {}),
     ...(schedule.eventStatus ? { eventStatus: schedule.eventStatus } : {}),
     ...(schedule.occurrences ? { occurrences: schedule.occurrences } : {}),
+    ...teatroRealCalendar(html, introHtml),
     performers,
     works,
     composers: normalizeComposerList([

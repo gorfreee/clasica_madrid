@@ -221,7 +221,7 @@ describe('materialEventDiffs', () => {
   it('un cambio material sí se escribe con los timestamps actuales', () => {
     const merged = mergeExistingEvent(
       published(),
-      proposal({ occurrences: [{ date: '2026-09-20', time: '21:00' }] }),
+      proposal({ occurrences: [{ date: '2026-09-20', time: '21:00' }], calendarEvidence: { changes: [{ from: { date: '2026-09-18' }, to: { date: '2026-09-20', time: '21:00' } }], evidence: 'explicit correction' } }),
       TEST_NOW,
     );
     expect(merged.diffs.some((item) => item.startsWith('occurrences:'))).toBe(true);
@@ -328,8 +328,8 @@ describe('reverificación sin cambios materiales', () => {
     expect(written.citations[0].checkedAt).toBe(today);
   });
 
-  // A time correction on the same date isolates persistence from the gate
-  // for unproven rescheduling to another date (covered by listing identity).
+  // A newly observed second session is material; a partial listing cannot
+  // authorize removal of the already published clock.
   it('un cambio material antes de 30 días sigue escribiendo normalmente', async () => {
     const today = madridToday(TEST_NOW);
     const current = catalog(published(verifiedOn(addIsoDays(today, -10))));
@@ -349,7 +349,7 @@ describe('reverificación sin cambios materiales', () => {
     expect(run.decisions[0]?.fieldDiffs?.some((item) => item.startsWith('occurrences:'))).toBe(true);
     const written = JSON.parse(await readFile(path.join(dir, 'events', 'evt_ocne_existente.json'), 'utf8'));
     expect(written.occurrences[0].date).toBe('2026-09-18');
-    expect(written.occurrences[0].time).toBe('21:00');
+    expect(written.occurrences.map((s: { time: string }) => s.time)).toEqual(['19:30', '21:00']);
     expect(written.lastVerifiedAt).toBe(today);
     expect(written.citations[0].checkedAt).toBe(today);
   });
@@ -395,7 +395,7 @@ describe('reverificación sin cambios materiales', () => {
     expect(run.summary.written).toEqual(['events/evt_ocne_existente.json']);
     const written = JSON.parse(await readFile(path.join(dir, 'events', 'evt_ocne_existente.json'), 'utf8'));
     expect(written.occurrences[0].date).toBe('2026-09-18');
-    expect(written.occurrences[0].time).toBe('21:00');
+    expect(written.occurrences.map((s: { time: string }) => s.time)).toEqual(['19:30', '21:00']);
     expect(written.lastVerifiedAt).toBe('2026-09-11');
     expect(written.citations[0].checkedAt).toBe('2026-09-11');
   });

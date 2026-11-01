@@ -36,7 +36,7 @@ export function compareRecyclableIdentity(
   const sameTitle = Boolean(observedTitle) && observedTitle === existingTitle;
   const continuity = sameTitle || explicitMusic.kind === 'match' ||
     (Boolean(observedTitle && existingTitle) && music.kind === 'match');
-  const reprogrammed = observed.dateFromDetail || observed.eventStatus === 'postponed' || existing.status === 'postponed';
+  const reprogrammed = hasApplicableCalendarChange(observed, existing) || observed.eventStatus === 'postponed' || existing.status === 'postponed';
   if (observedVenueId && existingVenueId && observedVenueId !== existingVenueId) {
     return continuity && reprogrammed ? 'compatible' : 'incompatible';
   }
@@ -80,7 +80,7 @@ export function compareSourceIdentity(
     music.kind === 'match';
   // dateFromDetail means the detail supplied a calendar, not that another
   // published performance was rescheduled. Require actual postponement evidence.
-  const postponed = observed.eventStatus === 'postponed' || existing.status === 'postponed' ||
+  const postponed = hasApplicableCalendarChange(observed, existing) || observed.eventStatus === 'postponed' || existing.status === 'postponed' ||
     /^\[(?:aplazado|pospuesto)\]/iu.test(observed.title);
   // A postponement plus contradictory programming may be a programme
   // change; it is not proof of a second independent concert.
@@ -122,4 +122,14 @@ function distinctiveTitle(title: string): string {
     'de', 'del', 'el', 'la', 'en', 'y', 'piano', 'festival', 'ciclo',
   ].includes(token) && !/^\d+$/.test(token));
   return tokens.length > 0 ? folded : '';
+}
+
+/** A notice about another occurrence cannot prove continuity of a recycled URL. */
+function hasApplicableCalendarChange(
+  observed: IdentityFacts, existing: Pick<IdentityFacts, 'occurrences'>,
+): boolean {
+  return Boolean(observed.calendarEvidence?.changes?.some(change => existing.occurrences.some(session =>
+    (session.date === change.from.date && (!change.from.time || session.time === change.from.time)) ||
+    (session.date === change.to.date && session.time === change.to.time),
+  )));
 }

@@ -44,14 +44,14 @@ describe('parseo de fechas y horas', () => {
     ])).toEqual([]);
   });
 
-  it('detail calendar replacement wins over listing-only corroboration in either order', () => {
+  it('dateFromDetail alone is partial; only scoped calendar evidence suppresses sessions', () => {
     const listing = { occurrences: [{ date: '2026-10-23', time: '19:30' }, { date: '2027-04-11', time: '19:30' }] };
     const detail = { occurrences: [{ date: '2027-04-11', time: '19:30' }], dateFromDetail: true };
-    expect(mergeObservedCalendars(detail, listing)).toEqual(detail.occurrences);
-    expect(mergeObservedCalendars(listing, detail)).toEqual(detail.occurrences);
-    expect(mergeObservedCalendars({ ...detail, dateFromDetail: false }, listing)).toEqual(listing.occurrences);
-    // Independently detailed performances keep the existing union semantics.
-    expect(mergeObservedCalendars(detail, { ...listing, dateFromDetail: true })).toEqual(listing.occurrences);
+    expect(mergeObservedCalendars(detail, listing)).toEqual(listing.occurrences);
+    expect(mergeObservedCalendars(listing, detail)).toEqual(listing.occurrences);
+    const complete = { ...detail, calendarEvidence: { complete: { from: '2026-10-01', to: '2027-04-11' }, evidence: 'validated calendar' } };
+    expect(mergeObservedCalendars(complete, listing)).toEqual(detail.occurrences);
+    expect(mergeObservedCalendars(listing, complete)).toEqual(detail.occurrences);
   });
 
   it('entiende ISO con offset de Madrid', () => {

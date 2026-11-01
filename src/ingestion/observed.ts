@@ -1,3 +1,4 @@
+import type { CalendarEvidence } from './calendar-evidence.ts';
 import type { HydrationDiscrepancy } from './detail/conflicts.ts';
 import { z } from 'zod';
 import { collapseWhitespace } from './html.ts';
@@ -71,6 +72,7 @@ export type ObservedFactPatch = Partial<Omit<ObservedFacts, 'title'>> & {
   eventStatus?: ObservedEventStatus;
   /** Diagnostic only; mergeObserved never copies this into observed/classification facts. */
   hydrationDiscrepancies?: HydrationDiscrepancy[];
+  calendarEvidence?: CalendarEvidence;
 };
 
 export function emptyObservedLists(): Pick<ObservedFacts, 'performers' | 'composers' | 'works'> {
