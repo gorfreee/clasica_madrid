@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_madrid_datos_50463299",
+  "slug": "ecos-de-mi-alma",
+  "title": "Ecos de mi alma",
+  "status": "scheduled",
+  "venueId": "ven_md_fac_64851",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_madrid_datos_50463299_01",
+      "date": "2026-11-22",
+      "time": "18:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "José Rafael Capellán Fernández",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Ludwig van Beethoven"
+    },
+    {
+      "name": "Frédéric Chopin"
+    },
+    {
+      "name": "Franz Schubert"
+    },
+    {
+      "name": "José Rafael Capellán Fernández"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "classical",
+    "romantic",
+    "contemporary"
+  ],
+  "formats": [
+    "recital"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_ayuntamiento_madrid",
+      "url": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=0ba3e56a59771a10VgnVCM100000891ecb1aRCRD",
+      "checkedAt": "2026-11-01",
+      "externalId": "50463299"
+    }
+  ],
+  "primarySourceId": "src_ayuntamiento_madrid",
+  "lastVerifiedAt": "2026-11-01"
+}

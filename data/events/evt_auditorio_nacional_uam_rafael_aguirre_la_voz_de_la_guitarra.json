@@ -103,15 +103,15 @@
     "recital"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/uam-rafael-aguirre-la-voz-de-la-guitarra",
-      "checkedAt": "2026-09-24",
+      "checkedAt": "2026-11-01",
       "externalId": "uam-rafael-aguirre-la-voz-de-la-guitarra"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-24"
+  "lastVerifiedAt": "2026-11-01"
 }

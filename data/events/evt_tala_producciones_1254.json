@@ -46,16 +46,16 @@
     {
       "sourceId": "src_tala_producciones_es",
       "url": "https://www.tala-producciones.es/salon-del-ateneo/quartetto-goldberg-volta",
-      "checkedAt": "2026-09-24",
+      "checkedAt": "2026-11-01",
       "externalId": "1254"
     },
     {
       "sourceId": "src_ateneo_madrid",
       "url": "https://ateneodemadrid.com/evento/ciclo-el-salon-del-ateneo-quartetto-goldberg-volta",
-      "checkedAt": "2026-09-24",
+      "checkedAt": "2026-11-01",
       "externalId": "64493"
     }
   ],
   "primarySourceId": "src_tala_producciones_es",
-  "lastVerifiedAt": "2026-09-24"
+  "lastVerifiedAt": "2026-11-01"
 }

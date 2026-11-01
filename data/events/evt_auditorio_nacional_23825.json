@@ -64,16 +64,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-delirivm-musica",
-      "checkedAt": "2026-09-24",
+      "checkedAt": "2026-11-01",
       "externalId": "cndm-delirivm-musica"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23825",
-      "checkedAt": "2026-09-24",
+      "checkedAt": "2026-11-01",
       "externalId": "23825"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-09-24"
+  "lastVerifiedAt": "2026-11-01"
 }

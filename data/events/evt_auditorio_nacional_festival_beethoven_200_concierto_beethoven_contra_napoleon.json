@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_festival_beethoven_200_concierto_beethoven_contra_napoleon",
+  "slug": "festival-beethoven-200-concierto-beethoven-contra-napoleon",
+  "title": "Festival Beethoven 200. Concierto Beethoven Contra Napoleón",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_sinfonica",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_festival_beethoven_200_concierto_beethoven_contra_napoleon_01",
+      "date": "2026-11-28",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Beethoven Orquesta"
+    },
+    {
+      "name": "Ramón Torrelledó",
+      "role": "conductor"
+    },
+    {
+      "name": "Estíbaliz Martín"
+    },
+    {
+      "name": "María Luisa Corbacho"
+    },
+    {
+      "name": "Víctor Jiménez"
+    },
+    {
+      "name": "Alejandro von Bürem"
+    },
+    {
+      "name": "Coro participativo"
+    },
+    {
+      "name": "Emilio Gutiérrez Caba",
+      "role": "other"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "name": "Ludwig van Beethoven"
+    }
+  ],
+  "works": [
+    {
+      "title": "Requiem",
+      "composerName": "Wolfgang Amadeus Mozart"
+    },
+    {
+      "title": "Sinfonía 3 \"Eroica\"",
+      "composerName": "Ludwig van Beethoven"
+    }
+  ],
+  "eras": [
+    "classical",
+    "romantic"
+  ],
+  "formats": [
+    "symphonic",
+    "choral"
+  ],
+  "kind": "established",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/festival-beethoven-200-concierto-beethoven-contra-napoleon",
+      "checkedAt": "2026-11-01",
+      "externalId": "festival-beethoven-200-concierto-beethoven-contra-napoleon"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-11-01"
+}

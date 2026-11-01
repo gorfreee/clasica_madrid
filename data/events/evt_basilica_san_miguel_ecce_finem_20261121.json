@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_basilica_san_miguel_ecce_finem_20261121",
+  "slug": "ecce-finem-vetus-carmina-basilica-san-miguel",
+  "title": "Ecce finem — Vetus Carmina",
+  "status": "scheduled",
+  "venueId": "ven_basilica_pontificia_san_miguel",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_basilica_san_miguel_ecce_finem_20261121_01",
+      "date": "2026-11-21",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Vetus Carmina",
+      "role": "choir"
+    },
+    {
+      "name": "Arturo Moscoso",
+      "role": "conductor"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Tomás Luis de Victoria"
+    },
+    {
+      "name": "Jacob Obrecht"
+    },
+    {
+      "name": "Antoine Busnois"
+    },
+    {
+      "name": "Cristóbal de Morales"
+    },
+    {
+      "name": "Nicolas Gombert"
+    },
+    {
+      "name": "Francisco Guerrero"
+    },
+    {
+      "name": "Johannes Ockeghem"
+    },
+    {
+      "name": "Andrés Poncela"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "renaissance",
+    "contemporary"
+  ],
+  "formats": [
+    "choral"
+  ],
+  "kind": "alternative",
+  "access": "unknown",
+  "citations": [
+    {
+      "sourceId": "src_basilica_san_miguel",
+      "url": "https://basilicadesanmiguel.org/actividad/concierto-ecce-finem",
+      "checkedAt": "2026-11-01",
+      "externalId": "4871"
+    },
+    {
+      "sourceId": "src_basilica_san_miguel",
+      "url": "https://basilicadesanmiguel.org/wp-content/uploads/2026/10/CONCIERTO-ECCE-FINEM.jpg",
+      "checkedAt": "2026-11-01"
+    }
+  ],
+  "primarySourceId": "src_basilica_san_miguel",
+  "lastVerifiedAt": "2026-11-01"
+}

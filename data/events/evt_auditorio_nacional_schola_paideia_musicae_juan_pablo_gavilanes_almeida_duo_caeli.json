@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_auditorio_nacional_schola_paideia_musicae_juan_pablo_gavilanes_almeida_duo_caeli",
+  "slug": "schola-paideia-musicae-juan-pablo-gavilanes-almeida-duo-c-li",
+  "title": "Schola Paideia Musicae. Juan Pablo Gavilanes Almeida & Dúo Cæli",
+  "status": "scheduled",
+  "venueId": "ven_auditorio_nacional_sala_camara",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_auditorio_nacional_schola_paideia_musicae_juan_pablo_gavilanes_almeida_duo_caeli_01",
+      "date": "2026-11-18",
+      "time": "19:30",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Juan Pablo Gavilanes Almeida",
+      "role": "soloist"
+    },
+    {
+      "name": "Valeria Sacoto",
+      "role": "soloist"
+    },
+    {
+      "name": "Dúo Cæli",
+      "role": "ensemble"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Claude Debussy"
+    },
+    {
+      "name": "Frédéric Chopin"
+    },
+    {
+      "name": "Serguéi Rajmáninov"
+    }
+  ],
+  "works": [
+    {
+      "title": "Ce qu'a vu le vent d'ouest: Animé et tumultueux",
+      "composerName": "Claude Debussy"
+    },
+    {
+      "title": "La cathédrale engloutie: Profondément calme",
+      "composerName": "Claude Debussy"
+    },
+    {
+      "title": "La sérénade interrompue : Modérément animé",
+      "composerName": "Claude Debussy"
+    },
+    {
+      "title": "Mazurka Op.67, N.4 en la menor",
+      "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "Mazurka Op.17, N.4 en la menor",
+      "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "Scherzo Op.20, N.1 en si menor",
+      "composerName": "Frédéric Chopin"
+    },
+    {
+      "title": "Fantasie—Tableaux para dos pianos, Op. 5",
+      "composerName": "Serguéi Rajmáninov"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "recital",
+    "chamber"
+  ],
+  "kind": "established",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_auditorio_nacional",
+      "url": "https://auditorionacional.inaem.gob.es/es/programacion/schola-paideia-musicae-juan-pablo-gavilanes-almeida-duo-caeli",
+      "checkedAt": "2026-11-01",
+      "externalId": "schola-paideia-musicae-juan-pablo-gavilanes-almeida-duo-caeli"
+    }
+  ],
+  "primarySourceId": "src_auditorio_nacional",
+  "lastVerifiedAt": "2026-11-01"
+}

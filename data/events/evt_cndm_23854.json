@@ -19,12 +19,30 @@
   "composers": [
     {
       "name": "Mauricio Sotelo"
+    },
+    {
+      "name": "Unsuk Chin"
+    },
+    {
+      "name": "Claude Debussy"
     }
   ],
   "works": [
     {
-      "title": "Virgen de las nubes, para voz (cantaor) y cuarteto de cuerda ** (2026)",
+      "title": "Audéeis, para voz (cantaor) y cuarteto de cuerda (2004)",
       "composerName": "Mauricio Sotelo"
+    },
+    {
+      "title": "ParaMetaString (1996)",
+      "composerName": "Unsuk Chin"
+    },
+    {
+      "title": "Virgen de las nubes, para voz (cantaor) y cuarteto de cuerda (2026)",
+      "composerName": "Mauricio Sotelo"
+    },
+    {
+      "title": "Cuarteto de cuerda en sol menor, op. 10 (1893)",
+      "composerName": "Claude Debussy"
     }
   ],
   "eras": [
@@ -39,10 +57,10 @@
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23854",
-      "checkedAt": "2026-10-14",
+      "checkedAt": "2026-11-01",
       "externalId": "23854"
     }
   ],
   "primarySourceId": "src_cndm",
-  "lastVerifiedAt": "2026-10-14"
+  "lastVerifiedAt": "2026-11-01"
 }

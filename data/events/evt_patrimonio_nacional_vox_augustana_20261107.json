@@ -128,10 +128,16 @@
     {
       "sourceId": "src_patrimonio_nacional",
       "url": "https://www.patrimonionacional.es/actualidad/concierto/2026/vuelve-caer-la-tarde-musica-coral-2026-11-07",
-      "checkedAt": "2026-10-21",
+      "checkedAt": "2026-11-01",
       "externalId": "bb238a68-6b72-4947-8c32-e048800f7709"
+    },
+    {
+      "sourceId": "src_fundacion_goethe",
+      "url": "https://www.fundaciongoethe.org/es/eventos/vox-augustana-basilica-atocha-madrid-2026",
+      "checkedAt": "2026-11-01",
+      "externalId": "vox-augustana-basilica-atocha-madrid-2026"
     }
   ],
   "primarySourceId": "src_patrimonio_nacional",
-  "lastVerifiedAt": "2026-10-21"
+  "lastVerifiedAt": "2026-11-01"
 }

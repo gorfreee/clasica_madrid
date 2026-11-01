@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_real_academia_bellas_artes_centro_cultural_coreano_3",
+  "slug": "corea-2026-ciclo-de-musica-clasica",
+  "title": "Wald Ensemble — Corea 2026. Ciclo de Música Clásica",
+  "status": "scheduled",
+  "venueId": "ven_real_academia_bellas_artes_salon_actos",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_real_academia_bellas_artes_centro_cultural_coreano_3_01",
+      "date": "2026-11-20",
+      "time": "12:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Wald Ensemble",
+      "role": "ensemble"
+    },
+    {
+      "name": "Kyungeun Lee",
+      "role": "soloist"
+    },
+    {
+      "name": "Sewon Cho",
+      "role": "soloist"
+    },
+    {
+      "name": "Sejune Kim",
+      "role": "soloist"
+    },
+    {
+      "name": "Kangryun Nam",
+      "role": "soloist"
+    },
+    {
+      "name": "Jeehye Bae",
+      "role": "soloist"
+    },
+    {
+      "name": "Yura Park",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Isaac Albéniz"
+    },
+    {
+      "name": "Piotr Ilich Chaikovski"
+    },
+    {
+      "name": "Arnold Schoenberg"
+    }
+  ],
+  "works": [
+    {
+      "title": "Sevilla (n.º 3 de la Suite española), arr. Eom Kihwan",
+      "composerName": "Isaac Albéniz"
+    },
+    {
+      "title": "Souvenir de Florence, op. 70",
+      "composerName": "Piotr Ilich Chaikovski"
+    },
+    {
+      "title": "Verklärte Nacht, op. 4",
+      "composerName": "Arnold Schoenberg"
+    },
+    {
+      "title": "Miryang Arirang (canto folclórico tradicional coreano), arr. Eom Kihwan"
+    }
+  ],
+  "eras": [
+    "romantic",
+    "twentieth"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "free",
+  "citations": [
+    {
+      "sourceId": "src_real_academia_bellas_artes_san_fernando",
+      "url": "https://www.realacademiabellasartessanfernando.com/actividades/conciertos/centro-cultural-coreano-3",
+      "checkedAt": "2026-11-01",
+      "externalId": "centro-cultural-coreano-3"
+    }
+  ],
+  "primarySourceId": "src_real_academia_bellas_artes_san_fernando",
+  "lastVerifiedAt": "2026-11-01"
+}

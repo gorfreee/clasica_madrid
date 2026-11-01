@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "id": "evt_culturalcala_56960",
+  "slug": "duos-de-palacio-gil-de-galvez-alejandro-manzano",
+  "title": "Dúos de Palacio",
+  "status": "scheduled",
+  "venueId": "ven_hospital_de_antezana",
+  "organizerIds": [],
+  "seriesId": null,
+  "occurrences": [
+    {
+      "id": "occ_culturalcala_56960_01",
+      "date": "2026-11-21",
+      "time": "20:00",
+      "status": "scheduled"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Gil de Gálvez",
+      "role": "soloist"
+    },
+    {
+      "name": "Alejandro Manzano",
+      "role": "soloist"
+    }
+  ],
+  "composers": [
+    {
+      "name": "Herrando"
+    },
+    {
+      "name": "Cañada"
+    },
+    {
+      "name": "Libón"
+    }
+  ],
+  "works": [],
+  "eras": [
+    "classical"
+  ],
+  "formats": [
+    "chamber"
+  ],
+  "kind": "alternative",
+  "access": "paid",
+  "citations": [
+    {
+      "sourceId": "src_culturalcala",
+      "url": "https://culturalcala.es/item_event/duos-de-palacio-2/",
+      "checkedAt": "2026-11-01",
+      "externalId": "56960"
+    }
+  ],
+  "primarySourceId": "src_culturalcala",
+  "lastVerifiedAt": "2026-11-01"
+}

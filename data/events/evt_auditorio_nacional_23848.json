@@ -95,16 +95,16 @@
     {
       "sourceId": "src_auditorio_nacional",
       "url": "https://auditorionacional.inaem.gob.es/es/programacion/cndm-daniel-oyarzabal-suhar-korua",
-      "checkedAt": "2026-10-01",
+      "checkedAt": "2026-11-01",
       "externalId": "cndm-daniel-oyarzabal-suhar-korua"
     },
     {
       "sourceId": "src_cndm",
       "url": "https://cndm.inaem.gob.es/node/23848",
-      "checkedAt": "2026-09-06",
+      "checkedAt": "2026-11-01",
       "externalId": "23848"
     }
   ],
   "primarySourceId": "src_auditorio_nacional",
-  "lastVerifiedAt": "2026-10-01"
+  "lastVerifiedAt": "2026-11-01"
 }

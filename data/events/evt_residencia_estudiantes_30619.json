@@ -18,6 +18,9 @@
   "performers": [
     {
       "name": "Borja Mariño"
+    },
+    {
+      "name": "Catalina Moncada"
     }
   ],
   "composers": [
@@ -69,10 +72,10 @@
     {
       "sourceId": "src_residencia_estudiantes",
       "url": "https://residenciadeestudiantes.com/actividades/la-belleza-escondida",
-      "checkedAt": "2026-10-14",
+      "checkedAt": "2026-11-01",
       "externalId": "30619"
     }
   ],
   "primarySourceId": "src_residencia_estudiantes",
-  "lastVerifiedAt": "2026-10-14"
+  "lastVerifiedAt": "2026-11-01"
 }

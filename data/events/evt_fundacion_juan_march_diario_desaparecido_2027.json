@@ -25,13 +25,13 @@
     {
       "id": "occ_fundacion_juan_march_diario_desaparecido_2027_03",
       "date": "2027-04-03",
-      "time": "12:00",
+      "time": "18:30",
       "status": "scheduled"
     },
     {
       "id": "occ_fundacion_juan_march_diario_desaparecido_2027_04",
       "date": "2027-04-04",
-      "time": "12:00",
+      "time": "18:30",
       "status": "scheduled"
     }
   ],
@@ -55,6 +55,18 @@
     {
       "name": "Ensemble del Ballet del Teatro Nacional de Brno",
       "role": "other"
+    },
+    {
+      "name": "Lorenzo Meseguer"
+    },
+    {
+      "name": "Iván Görnemann"
+    },
+    {
+      "name": "Pablo Quintanilla"
+    },
+    {
+      "name": "Adrián Vázquez"
     }
   ],
   "composers": [
@@ -89,10 +101,10 @@
     {
       "sourceId": "src_fundacion_juan_march",
       "url": "https://www.march.es/es/madrid/concierto/diario-desaparecido-leos-janacek",
-      "checkedAt": "2026-10-21",
+      "checkedAt": "2026-11-01",
       "externalId": "/es/madrid/concierto/diario-desaparecido-leos-janacek"
     }
   ],
   "primarySourceId": "src_fundacion_juan_march",
-  "lastVerifiedAt": "2026-10-21"
+  "lastVerifiedAt": "2026-11-01"
 }
