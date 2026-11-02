@@ -1,7 +1,7 @@
 import { canonicalizeComposerName, publishedComposerIdentity } from '../composer-name.ts';
 import {
   clearlyNonComposerContext,
-  outsideAttributedWorkTitles,
+  maskObservedWorkTitles,
   extractAttributedComposerNames,
   findAttributedKnownComposers,
   isComposerMentionAttributed,
@@ -53,7 +53,7 @@ export function hasComposerCueEvidence(programme: string): boolean {
  * lists have not already resolved. Conservative: an empty result means no AI.
  */
 export function unresolvedComposerLikeMentions(programme: string, facts: ObservedFacts): string[] {
-  programme = outsideAttributedWorkTitles(programme, facts.works);
+  programme = maskObservedWorkTitles(programme, facts.works);
   const resolved = identityKeySet([
     ...facts.composers.map((item) => item.name),
     ...facts.works.flatMap((work) => (work.composerName ? [work.composerName] : [])),
@@ -102,7 +102,8 @@ export function validateAiComposerCandidates(
   candidates: readonly AiComposerCandidate[],
   facts: ObservedFacts,
 ): { composers: ObservedComposer[]; evidence: string[] } {
-  const programme = outsideAttributedWorkTitles(facts.programText ?? '', facts.works);
+  const sourceProgramme = facts.programText ?? '';
+  const programme = maskObservedWorkTitles(sourceProgramme, facts.works);
   const performerKeys = new Set(facts.performers.flatMap((person) => composerIdentityKeys(person.name)));
   const seen = new Set<string>();
   const composers: ObservedComposer[] = [];
@@ -110,13 +111,16 @@ export function validateAiComposerCandidates(
 
   for (const candidate of candidates) {
     const sourceName = collapseWhitespace(candidate.name);
-    const sourceEvidence = collapseWhitespace(candidate.evidence);
+    const sourceEvidence = candidate.evidence.trim();
     if (!sourceName || !sourceEvidence) continue;
-    if (!containsNormalizedSpan(programme, sourceEvidence)) continue;
-    if (!candidateNameAppears(sourceName, sourceEvidence, programme)) continue;
+    if (!containsNormalizedSpan(sourceProgramme, sourceEvidence)) continue;
+    if (!candidateNameAppears(sourceName, sourceEvidence, sourceProgramme)) continue;
     if (composerIdentityKeys(sourceName).some((key) => performerKeys.has(key))) continue;
     if (clearlyNonComposerContext(sourceName, sourceEvidence)) continue;
-    if (!isComposerMentionAttributed(sourceName, sourceEvidence)) continue;
+    if (!isComposerMentionAttributed(sourceName, maskObservedWorkTitles(sourceEvidence, facts.works))) continue;
+    // A clipped literal span cannot erase the surrounding poet/genre/title
+    // context. Require an attribution in the complete observed programme too.
+    if (!isComposerMentionAttributed(sourceName, programme)) continue;
 
     const name = canonicalizeComposerName(sourceName);
     if (!name) continue;
@@ -124,7 +128,7 @@ export function validateAiComposerCandidates(
     if (!identity || seen.has(identity)) continue;
     seen.add(identity);
     composers.push({ name });
-    evidence.push(sourceEvidence);
+    evidence.push(collapseWhitespace(sourceEvidence));
   }
 
   return { composers, evidence };

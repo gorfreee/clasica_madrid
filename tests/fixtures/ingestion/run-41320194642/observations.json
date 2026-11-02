@@ -1,0 +1,469 @@
+[
+  {
+    "sourceId": "madrid-datos",
+    "sourceUrl": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=3330bad251871a10VgnVCM100000891ecb1aRCRD",
+    "externalId": "50464545",
+    "observed": {
+      "title": "Manuel de falla el genio discreto",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "2026-11-22 18:00:00.0",
+          "date": "2026-11-22",
+          "time": "18:00"
+        }
+      ],
+      "description": "Compañía. Diverlírica En 2026 se celebra el 150 Aniversario de su nacimiento. Compositor dúctil que se movió en los diferentes estilos Ballet, Ópera, Zarzuela, Música de Cámara y Canción… En este recital daremos muestra de su ductilidad que lo convirtió en el gran genio de la Música Clásica española. Todos los públicos. 60 min.",
+      "venueText": "Centro Sociocultural Maestro Alonso (Salamanca)",
+      "accessText": "free",
+      "programText": "Compañía. Diverlírica En 2026 se celebra el 150 Aniversario de su nacimiento. Compositor dúctil que se movió en los diferentes estilos Ballet, Ópera, Zarzuela, Música de Cámara y Canción… En este recital daremos muestra de su ductilidad que lo convirtió en el gran genio de la Música Clásica española. Todos los públicos. 60 min.",
+      "venueFacilityId": "1909"
+    },
+    "listing": {
+      "title": "Manuel de falla el genio discreto",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "2026-11-22 18:00:00.0",
+          "date": "2026-11-22",
+          "time": "18:00"
+        }
+      ],
+      "description": "Compañía. Diverlírica En 2026 se celebra el 150 Aniversario de su nacimiento. Compositor dúctil que se movió en los diferentes estilos Ballet, Ópera, Zarzuela, Música de Cámara y Canción… En este recital daremos muestra de su ductilidad que lo convirtió en el gran genio de la Música Clásica española. Todos los públicos. 60 min.",
+      "venueText": "Centro Sociocultural Maestro Alonso (Salamanca)",
+      "accessText": "free",
+      "venueFacilityId": "1909"
+    }
+  },
+  {
+    "sourceId": "madrid-datos",
+    "sourceUrl": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=7a13cabb7654e910VgnVCM100000891ecb1aRCRD",
+    "externalId": "50315446",
+    "observed": {
+      "title": "Concierto didáctico: Mujeres en la música",
+      "performers": [],
+      "composers": [],
+      "works": [
+        {
+          "title": "COMPAÑÍA / GRUPO: Capo d'Astro"
+        },
+        {
+          "title": "GÉNERO: Clásico / Popular"
+        },
+        {
+          "title": "PÚBLICO: Adulto"
+        }
+      ],
+      "occurrences": [
+        {
+          "raw": "2026-11-08 18:00:00.0",
+          "date": "2026-11-08",
+          "time": "18:00"
+        }
+      ],
+      "description": "COMPAÑÍA / GRUPO: Capo d'Astro GÉNERO: Clásico / Popular PÚBLICO: Adulto   Entrada libre hasta completar aforo.      Una mirada hacia la historia de la música en femenino con la intención de visibilizar la contribución y la creación de las mujeres dentro del mundo de la música. Un compromiso de Capo d’Astro con la igualdad y contra la violencia machista.    Concierto didáctico. En la primera parte, autoras del mundo clásico (Safo, Barbara Strozzi, Pauline Viardot, Ethel Smyth…); en la segunda, canción popular (Chabuca Granda, Violeta Parra, Mari Trini, Aurora Beltrán, Rozalén).    Voz y guitarra: Pilar Garay y Santi de la Fuente.",
+      "venueText": "Centro Cultural Nicolás Salmerón (Chamartín)",
+      "accessText": "free",
+      "venueFacilityId": "1932"
+    },
+    "listing": {
+      "title": "Concierto didáctico: Mujeres en la música",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "2026-11-08 18:00:00.0",
+          "date": "2026-11-08",
+          "time": "18:00"
+        }
+      ],
+      "description": "COMPAÑÍA / GRUPO: Capo d'Astro GÉNERO: Clásico / Popular PÚBLICO: Adulto   Entrada libre hasta completar aforo.      Una mirada hacia la historia de la música en femenino con la intención de visibilizar la contribución y la creación de las mujeres dentro del mundo de la música. Un compromiso de Capo d’Astro con la igualdad y contra la violencia machista.    Concierto didáctico. En la primera parte, autoras del mundo clásico (Safo, Barbara Strozzi, Pauline Viardot, Ethel Smyth…); en la segunda, canción popular (Chabuca Granda, Violeta Parra, Mari Trini, Aurora Beltrán, Rozalén).    Voz y guitarra: Pilar Garay y Santi de la Fuente.",
+      "venueText": "Centro Cultural Nicolás Salmerón (Chamartín)",
+      "accessText": "free",
+      "venueFacilityId": "1932"
+    }
+  },
+  {
+    "sourceId": "madrid-datos",
+    "sourceUrl": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=b40eec3503861a10VgnVCM200000f921e388RCRD",
+    "externalId": "50457938",
+    "observed": {
+      "title": "Con zarzuela y recitando",
+      "performers": [
+        {
+          "name": "Daniel Huerta",
+          "roleText": "tenor"
+        },
+        {
+          "name": "Mathew Crawford",
+          "roleText": "piano"
+        }
+      ],
+      "composers": [
+        {
+          "name": "Moreno Torroba"
+        },
+        {
+          "name": "Guillermo Fernández Shaw"
+        }
+      ],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "2026-11-13 19:00:00.0",
+          "date": "2026-11-13",
+          "time": "19:00"
+        }
+      ],
+      "description": "MÚSICA. ZARZUELA. KASKIVANIA TEATRO.    Un espectáculo diferente que une zarzuela, teatro y poesía. Tres artistas que suben al escenario para entretener y emocionar. Se interpretarán números musicales célebres cuidadosamente seleccionados de compositores como Sorozábal, Barbieri, Guridi, Moreno Torroba y Bretón, junto a poemas de Lope de Vega y Guillermo Fernández Shaw.   Ficha artística: Mariel Peralta, actriz. Daniel Huerta, tenor. Mathew Crawford, piano.    Entrada gratuita previa reserva pinchando este enlace  Se ruega máxima puntualidad. No se permitirá el acceso una vez comenzado el espectáculo.",
+      "venueText": "Centro Cultural Julio Cortázar (Moncloa - Aravaca)",
+      "accessText": "free",
+      "programText": "MÚSICA. ZARZUELA. KASKIVANIA TEATRO. Un espectáculo diferente que une zarzuela, teatro y poesía. Tres artistas que suben al escenario para entretener y emocionar. Se interpretarán números musicales célebres cuidadosamente seleccionados de compositores como Sorozábal, Barbieri, Guridi, Moreno Torroba y Bretón, junto a poemas de Lope de Vega y Guillermo Fernández Shaw. Ficha artística: Mariel Peralta, actriz. Daniel Huerta, tenor. Mathew Crawford, piano. Entrada gratuita previa reserva pinchando este enlace Se ruega máxima puntualidad. No se permitirá el acceso una vez comenzado el espectáculo.",
+      "venueFacilityId": "1911"
+    },
+    "listing": {
+      "title": "Con zarzuela y recitando",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "2026-11-13 19:00:00.0",
+          "date": "2026-11-13",
+          "time": "19:00"
+        }
+      ],
+      "description": "MÚSICA. ZARZUELA. KASKIVANIA TEATRO.    Un espectáculo diferente que une zarzuela, teatro y poesía. Tres artistas que suben al escenario para entretener y emocionar. Se interpretarán números musicales célebres cuidadosamente seleccionados de compositores como Sorozábal, Barbieri, Guridi, Moreno Torroba y Bretón, junto a poemas de Lope de Vega y Guillermo Fernández Shaw.   Ficha artística: Mariel Peralta, actriz. Daniel Huerta, tenor. Mathew Crawford, piano.    Entrada gratuita previa reserva pinchando este enlace  Se ruega máxima puntualidad. No se permitirá el acceso una vez comenzado el espectáculo.",
+      "venueText": "Centro Cultural Julio Cortázar (Moncloa - Aravaca)",
+      "accessText": "free",
+      "venueFacilityId": "1911"
+    }
+  },
+  {
+    "sourceId": "fundacion-juan-march",
+    "sourceUrl": "https://www.march.es/es/madrid/concierto/pop-folk-cuarteto-cuerda-ii",
+    "externalId": "/es/madrid/concierto/pop-folk-cuarteto-cuerda-ii",
+    "observed": {
+      "title": "Pop y folk en cuarteto de cuerda (II)",
+      "performers": [
+        {
+          "name": "Cuarteto Maxwell"
+        },
+        {
+          "name": "Colin Scobie"
+        },
+        {
+          "name": "George Smith"
+        },
+        {
+          "name": "Elliott Perks"
+        },
+        {
+          "name": "Duncan Strachan"
+        }
+      ],
+      "composers": [
+        {
+          "name": "Norman MacDonald"
+        },
+        {
+          "name": "Sergey Prokofiev"
+        },
+        {
+          "name": "Eleanor Alberga"
+        }
+      ],
+      "works": [
+        {
+          "title": "Os Mutorum (Antifonario de Inchcolm)"
+        },
+        {
+          "title": "Fisherrow - The Noose and Ghillies (popular escocesa)"
+        },
+        {
+          "title": "Meg McRae – Father John MacMillan of Barra (marchas escocesas)",
+          "composerName": "Norman MacDonald"
+        },
+        {
+          "title": "Cuarteto nº 2 en Fa mayor, op. 92, “Sobre temas kabardinos”",
+          "composerName": "Sergey Prokofiev"
+        },
+        {
+          "title": "Cuarteto nº 4",
+          "composerName": "Eleanor Alberga"
+        },
+        {
+          "title": "Haripol"
+        },
+        {
+          "title": "McIntosh’s Lament – Auld Foula – Oot and In Da Harbour (Popurrí de danzas escocesas y de las islas Shetland)"
+        }
+      ],
+      "occurrences": [
+        {
+          "raw": "miércoles 20 de enero 2027, 18:30h",
+          "date": "2027-01-20",
+          "time": "18:30"
+        }
+      ],
+      "description": "Integrado en el ciclo Pop y folk en cuarteto de cuerda, este concierto propone una escucha que contrapone la tradición oral a la composición actual. La música folclórica escocesa no escrita convive con dos obras de los siglos XX y XXI que sitúan las relaciones, no siempre sencillas, entre tradición, identidad y creación en el foco: desde la incorporación de materiales kabardianos hasta la afirmación de una libertad creativa que desborda cualquier identificación de origen y lenguaje musical.",
+      "categoryText": "Concierto",
+      "venueText": "Fundación Juan March | Madrid",
+      "organizerText": "Fundación Juan March | Madrid",
+      "accessText": "entrada libre y gratuita",
+      "programText": "I\nAnónimo\nOs Mutorum (Antifonario de Inchcolm)\nFisherrow - The Noose and Ghillies (popular escocesa)\nNorman MacDonald (1891-1958)\nMeg McRae – Father John MacMillan of Barra (marchas escocesas)\nSergey Prokofiev (1891-1953)\nCuarteto nº 2 en Fa mayor, op. 92, “Sobre temas kabardinos”\nII\nEleanor Alberga (1949)\nCuarteto nº 4\nCuarteto Maxwell\nHaripol\nMcIntosh’s Lament – Auld Foula – Oot and In Da Harbour (Popurrí de danzas escocesas y de las islas Shetland)",
+      "eventStatus": "scheduled"
+    },
+    "listing": {
+      "title": "Pop y folk en cuarteto de cuerda (II)",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [],
+      "description": "Cuarteto Maxwell",
+      "categoryText": "Concierto",
+      "accessText": "entrada libre y gratuita"
+    }
+  },
+  {
+    "sourceId": "cndm",
+    "sourceUrl": "https://cndm.inaem.gob.es/node/23854",
+    "externalId": "23854",
+    "observed": {
+      "title": "CUARTETO DIOTIMA & ARCÁNGEL",
+      "performers": [],
+      "composers": [
+        {
+          "name": "M. Sotelo"
+        }
+      ],
+      "works": [
+        {
+          "title": "Virgen de las nubes, para voz (cantaor) y cuarteto de cuerda (2026)",
+          "composerName": "M. Sotelo"
+        },
+        {
+          "title": "Cuarteto de cuerda en sol menor , op. 10 (1893) de",
+          "composerName": "M. Sotelo"
+        }
+      ],
+      "occurrences": [
+        {
+          "raw": "19:30 Febrero/27 Lun22",
+          "date": "2027-02-22",
+          "time": "19:30"
+        }
+      ],
+      "description": "El ciclo Series 20/21 del Centro Nacional de Difusión Musical (CNDM) reúne al Cuarteto Diotima y al cantaor Arcángel en un programa que explora el encuentro entre la creación contemporánea y la tradición flamenca a través de la música de Mauricio Sotelo. La velada recupera Audéeis , obra para voz y cuarteto de cuerda compuesta en 2004, y sitúa junto a ella ParaMetaString , de Unsuk Chin, compositora residente de la temporada 26/27 del CNDM, una pieza que amplía las posibilidades expresivas de la formación camerística desde una perspectiva contemporánea. El concierto incorpora además el estreno absoluto de Virgen de las nubes , nueva obra de Mauricio Sotelo para voz (cantaor) y cuarteto de cuerda, concebida para Arcángel y el Cuarteto Diotima.",
+      "venueText": "Museo Reina Sofía (A400) | Madrid",
+      "seriesText": "Series 20/21",
+      "accessText": "Entrada libre",
+      "programText": "Mauricio Sotelo (1961) Audéeis , para voz (cantaor) y cuarteto de cuerda (2004) Unsuk Chin (1961) ParaMetaString (1996) M. Sotelo Virgen de las nubes, para voz (cantaor) y cuarteto de cuerda ** (2026) Claude Debussy (1862-1918) Cuarteto de cuerda en sol menor , op. 10 (1893) de ** Estreno en España"
+    },
+    "listing": {
+      "title": "CUARTETO DIOTIMA & ARCÁNGEL",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [
+        {
+          "raw": "2027-02-22 19:30",
+          "date": "2027-02-22",
+          "time": "19:30"
+        }
+      ],
+      "venueText": "Museo Reina Sofía (A400) | Madrid"
+    }
+  },
+  {
+    "sourceId": "real-academia-bellas-artes",
+    "sourceUrl": "https://www.realacademiabellasartessanfernando.com/actividades/conciertos/centro-cultural-coreano-3/",
+    "externalId": "centro-cultural-coreano-3",
+    "observed": {
+      "title": "Corea 2026. Ciclo de Música Clásica",
+      "performers": [
+        {
+          "name": "Kyungeun Lee",
+          "roleText": "violín"
+        },
+        {
+          "name": "Sewon Cho",
+          "roleText": "violín"
+        },
+        {
+          "name": "Sejune Kim",
+          "roleText": "viola"
+        },
+        {
+          "name": "Kangryun Nam",
+          "roleText": "viola"
+        },
+        {
+          "name": "Jeehye Bae",
+          "roleText": "violonchelo"
+        },
+        {
+          "name": "Yura Park",
+          "roleText": "violonchelo"
+        },
+        {
+          "name": "José Luis García del Busto.",
+          "roleText": "Musicólogo y académico de la Sección de Música de la RABASF"
+        }
+      ],
+      "composers": [
+        {
+          "name": "Isaac Albéniz"
+        },
+        {
+          "name": "Piotr Ilich Tchaikovsky"
+        },
+        {
+          "name": "Arnold Schoenberg"
+        }
+      ],
+      "works": [
+        {
+          "title": "Sevilla",
+          "composerName": "Isaac Albéniz"
+        },
+        {
+          "title": "Souvenir de Florence, Op. 70",
+          "composerName": "Piotr Ilich Tchaikovsky"
+        },
+        {
+          "title": "Verklärte Nacht, Op. 4",
+          "composerName": "Arnold Schoenberg"
+        },
+        {
+          "title": "Canto folclórico tradicional coreano",
+          "composerName": "Arnold Schoenberg"
+        },
+        {
+          "title": "Miryang Arirang",
+          "composerName": "Arnold Schoenberg"
+        }
+      ],
+      "occurrences": [
+        {
+          "raw": "20 de noviembre de 2026 12:00 horas",
+          "date": "2026-11-20",
+          "time": "12:00"
+        }
+      ],
+      "description": "El Centro Cultural Coreano en España y la Academia clausuran la programación musical conjunta de 2026 con un concierto a cargo del grupo de música clásica Wald Ensemble.",
+      "categoryText": "Concierto",
+      "venueText": "Salón de actos",
+      "seriesText": "Wald Ensemble",
+      "accessText": "Reserva online de entradas gratuitas hasta completar aforo a partir de las 10 h del viernes 13 de noviembre. Normas de acceso a conciertos en el Salón de actos Si, hecha la reserva, no va a poder asistir, rogamos proceda a cancelarla para dar oportunidad de acceso a otras personas.",
+      "programText": "Isaac Albéniz (1860-1909)\nSevilla (nº 3 de la Suite española ) (arr. Eom Kihwan)\nPiotr Ilich Tchaikovsky (1840-1893)\nSouvenir de Florence, Op. 70\nArnold Schoenberg (1874-1951)\nVerklärte Nacht, Op. 4\nCanto folclórico tradicional coreano\nMiryang Arirang (arr. Eom Kihwan)"
+    },
+    "listing": {
+      "title": "Corea 2026. Ciclo de Música Clásica",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [],
+      "categoryText": "Concierto",
+      "seriesText": "Wald Ensemble"
+    }
+  },
+  {
+    "sourceId": "real-academia-bellas-artes",
+    "sourceUrl": "https://www.realacademiabellasartessanfernando.com/actividades/conciertos/centro-cultural-coreano-3/",
+    "externalId": "centro-cultural-coreano-3",
+    "observed": {
+      "title": "Corea 2026. Ciclo de Música Clásica",
+      "performers": [
+        {
+          "name": "Kyungeun Lee",
+          "roleText": "violín"
+        },
+        {
+          "name": "Sewon Cho",
+          "roleText": "violín"
+        },
+        {
+          "name": "Sejune Kim",
+          "roleText": "viola"
+        },
+        {
+          "name": "Kangryun Nam",
+          "roleText": "viola"
+        },
+        {
+          "name": "Jeehye Bae",
+          "roleText": "violonchelo"
+        },
+        {
+          "name": "Yura Park",
+          "roleText": "violonchelo"
+        },
+        {
+          "name": "José Luis García del Busto.",
+          "roleText": "Musicólogo y académico de la Sección de Música de la RABASF"
+        }
+      ],
+      "composers": [
+        {
+          "name": "Isaac Albéniz"
+        },
+        {
+          "name": "Piotr Ilich Tchaikovsky"
+        },
+        {
+          "name": "Arnold Schoenberg"
+        }
+      ],
+      "works": [
+        {
+          "title": "Sevilla",
+          "composerName": "Isaac Albéniz"
+        },
+        {
+          "title": "Souvenir de Florence, Op. 70",
+          "composerName": "Piotr Ilich Tchaikovsky"
+        },
+        {
+          "title": "Verklärte Nacht, Op. 4",
+          "composerName": "Arnold Schoenberg"
+        },
+        {
+          "title": "Canto folclórico tradicional coreano",
+          "composerName": "Arnold Schoenberg"
+        },
+        {
+          "title": "Miryang Arirang",
+          "composerName": "Arnold Schoenberg"
+        }
+      ],
+      "occurrences": [
+        {
+          "raw": "20 de noviembre de 2026 12:00 horas",
+          "date": "2026-11-20",
+          "time": "12:00"
+        }
+      ],
+      "description": "El Centro Cultural Coreano en España y la Academia clausuran la programación musical conjunta de 2026 con un concierto a cargo del grupo de música clásica Wald Ensemble.",
+      "categoryText": "Concierto",
+      "venueText": "Salón de actos",
+      "seriesText": "Wald Ensemble",
+      "accessText": "Reserva online de entradas gratuitas hasta completar aforo a partir de las 10 h del viernes 13 de noviembre. Normas de acceso a conciertos en el Salón de actos Si, hecha la reserva, no va a poder asistir, rogamos proceda a cancelarla para dar oportunidad de acceso a otras personas.",
+      "programText": "Isaac Albéniz (1860-1909)\nSevilla (nº 3 de la Suite española ) (arr. Eom Kihwan)\nPiotr Ilich Tchaikovsky (1840-1893)\nSouvenir de Florence, Op. 70\nArnold Schoenberg (1874-1951)\nVerklärte Nacht, Op. 4\nCanto folclórico tradicional coreano\nMiryang Arirang (arr. Eom Kihwan)"
+    },
+    "listing": {
+      "title": "Corea 2026. Ciclo de Música Clásica",
+      "performers": [],
+      "composers": [],
+      "works": [],
+      "occurrences": [],
+      "categoryText": "Concierto",
+      "seriesText": "Wald Ensemble"
+    }
+  }
+]

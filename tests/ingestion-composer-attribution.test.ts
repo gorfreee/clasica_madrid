@@ -470,3 +470,20 @@ describe('listas explícitas Obras de (apellidos desconocidos)', () => {
     expect(composerNames('Obras de música clásica y contemporánea')).toEqual([]);
   });
 });
+
+describe('local credit context regressions from #396', () => {
+  it('does not reopen a list after genre descriptors or poets', () => {
+    expect(attributedProgrammeComposers('Música de Cámara y Canción…')).toEqual([]);
+    expect(attributedProgrammeComposers('Música de cámara, Canción y Ballet.')).toEqual([]);
+    expect(attributedProgrammeComposers('Compositores como Ana de los Ríos y J. R. Desconocido, junto a poemas de Lope de Vega y Guillermo Fernández Shaw.'))
+      .toEqual([{ name: 'Ana de los Ríos' }, { name: 'J. R. Desconocido' }]);
+    expect(attributedProgrammeComposers('Obras de Bach, Pérez y Mozart.').map((c) => c.name)).toContain('Pérez');
+  });
+  it('does not make a poet a globally forbidden identity', () => {
+    const programme = 'Libreto de Arrigo Boito.\nMúsica de Arrigo Boito.\nPoema de Ana de los Ríos.\nCompositor: Ana de los Ríos.';
+    expect(attributedProgrammeComposers(programme).map((c) => c.name)).toEqual(['Arrigo Boito', 'Ana de los Ríos']);
+    expect(isComposerMentionAttributed('Ana de los Ríos', programme)).toBe(true);
+    expect(isComposerMentionAttributed('Ana de los Ríos', 'Poema de Ana de los Ríos.')).toBe(false);
+    for (const label of ['Poemas', 'Poesías', 'Textos']) expect(attributedProgrammeComposers(`${label} de Arrigo Boito`)).toEqual([]);
+  });
+});

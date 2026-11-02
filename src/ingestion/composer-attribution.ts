@@ -18,6 +18,7 @@ import {
   looksLikeInstrumentOnly,
   looksLikeMovementLine,
   looksLikeNonWorkCredit,
+  isUnreliableComposerName,
   looksLikeTextCredit,
   looksLikeUnequivocalWorkLine,
   parseExplicitTitleAuthorWork,
@@ -63,7 +64,7 @@ const NAME_WORK_SEPARATOR =
   /(?:^|[\n;]|[.!?]\s)([^\n;]{2,80}?)(\s+(?:—|–|\s-\s)|\s*(?<!\d):(?!\d))\s+([^\n]+?)(?=\.(?:\s+\p{Lu})|$)/gmu;
 const COMPOSER_LABEL = /\bcompositor(?:a|es)?\s*:\s*([^.\n]+)/giu;
 const AUTORES_COMO =
-  /\b(?:autores?|compositores?)\b(?:(?![.]).){0,80}?\bcomo\s+(.+?)(?:\s*,\s*cuyas|\s*,\s*que|\.|$)/giu;
+  /\b(?:autores?|compositores?)\b(?:(?![.]).){0,80}?\bcomo\s+([^\n]+?)(?:\s*,\s*cuyas|\s*,\s*que|$)/gimu;
 const SENTENCE_AFTER_WORD = /(?<=\p{L}{2,}|\))[.…](?=\s+\p{Lu})/u;
 const ATTRIBUTION_FRAME_LEFT =
   /\b(?:obras?|m[uú]sica|composici[oó]n(?:es)?|compositores?|autores?)\s+(?:de|del|:)\s*$/iu;
@@ -83,6 +84,7 @@ const ENSEMBLE_TAIL =
 const LEADING_ARTICLE = /^(?:el|la|los|las|le|les|the|a|an|un|una|der|die|das)$/i;
 const BARE_ARTICLE = /^(?:el|la|los|las)$/i;
 const CATALOG = /\b(?:bwv|hwv|hob\.?|op\.?\s*\d|opus\s+\d|d\s*\d{2,}|k\.?\s*\d|kv\.?\s*\d)\b/i;
+const MASKED_WORK_TITLE = '[obra observada]';
 
 const NON_COMPOSER_ROLES = [
   'director', 'directora', 'director musical', 'direccion musical', 'solista',
@@ -94,8 +96,8 @@ const NON_COMPOSER_ROLES = [
 
 const CONTEXTUAL_PREFIXES = [
   ...CONTEXTUAL_COMPOSER_RELATIONS,
-  'libreto de', 'libreto', 'texto de', 'texto del', 'letra de',
-  'poema de', 'poesia de', 'version de', 'adaptacion de',
+  'libreto de', 'libreto', 'texto de', 'texto del', 'textos de', 'letra de',
+  'poema de', 'poemas de', 'poesia de', 'poesias de', 'version de', 'adaptacion de',
   'transcripcion para piano solo de', 'transcripcion para piano de',
   'realizadas por', 'realizado por', 'transcripcion de', 'transcripciones de',
   'arreglo de', 'arreglos de', 'orquestacion de',
@@ -107,14 +109,14 @@ const CONTEXTUAL_PREFIXES = [
 const CAREER_WORK_PREFIX =
   /(?:^| )(?:(?:ha|habia|habiendo) )?(?:estreno|estrenado|interpreto|interpretado|encargo|encargado)(?: una| varias)?$/u;
 const INLINE_NON_MUSIC_CREDIT =
-  /\s+(?=libreto\b|texto(?:\s+del)?\b|letra\b|versi[oó]n\b|adaptaci[oó]n\b|premio\b)/i;
+  /(?:,?\s+(?:junto\s+a\s+)?)(?=libreto\b|textos?\b|letra\b|poemas?\b|poes[ií]a\b|versi[oó]n\b|adaptaci[oó]n\b|premio\b)/i;
 const TITLE_CONTEXTUAL_DE =
   /(?:tema|un tema|sobre un tema|basad[oa]|inspirad[oa]|homenaje)\s+$/iu;
 /** Prose/institutional constructions where the final "de X" is not authorship. */
 const WORK_DE_EDITORIAL_CONTEXT =
   /\b(?:colaboraci[oó]n\s+con|instituto|fundaci[oó]n|centro\s+cultural|ministerio)\b/iu;
 const CREDIT_LABEL_TITLE =
-  /^(?:libreto|texto(?:\s+del)?|letra|poema|poes[ií]a|versi[oó]n|adaptaci[oó]n|transcripci[oó]n(?:es)?|arreglos?|orquestaci[oó]n)\b/i;
+  /^(?:libreto|textos?(?:\s+del)?|letra|poemas?|poes[ií]as?|versi[oó]n|adaptaci[oó]n|transcripci[oó]n(?:es)?|arreglos?|orquestaci[oó]n)\b/i;
 const PERFORMER_LINE =
   /^(?:solistas?|directora?|director\s*\/\s*concertino|actor(?:\s+y\s+solista)?|int[ée]rpretes?)\s*:/i;
 const WORK_ANNOTATION =
@@ -199,7 +201,9 @@ export function attributedProgrammeComposers(
  * aside is not enough even if the same name exists in the knowledge base.
  */
 export function isComposerMentionAttributed(name: string, evidence: string): boolean {
-  const sourceEvidence = collapseWhitespace(evidence);
+  // Preserve block/line boundaries: flattening would join a musical credit
+  // to a later libretto/poem and manufacture a new WORK de AUTHOR reading.
+  const sourceEvidence = evidence.trim();
   if (!name.trim() || !sourceEvidence) return false;
   if (clearlyNonComposerContext(name, sourceEvidence)) return false;
   return attributedProgrammeComposers(sourceEvidence).some((item) => sameComposerMention(name, item.name));
@@ -208,19 +212,26 @@ export function isComposerMentionAttributed(name: string, evidence: string): boo
 export function clearlyNonComposerContext(name: string, evidence: string): boolean {
   const foldedEvidence = foldName(evidence);
   const aliases = matchComposer(name)?.aliases ?? [name];
+  let contextual = false;
   for (const alias of aliases) {
     const foldedAlias = foldName(alias);
     if (!foldedAlias) continue;
     const padded = ` ${foldedEvidence} `;
-    const index = padded.indexOf(` ${foldedAlias} `);
-    if (index < 0) continue;
-    const before = foldedEvidence.slice(0, Math.max(0, index)).trimEnd();
-    if (CONTEXTUAL_PREFIXES.some((prefix) => before.endsWith(foldName(prefix)))) return true;
-    if (CAREER_WORK_PREFIX.test(before)) return true;
-    const after = foldedEvidence.slice(index + foldedAlias.length).trimStart();
-    if (NON_COMPOSER_ROLES.some((role) => after === foldName(role))) return true;
+    let start = 0;
+    while (start < padded.length) {
+      const index = padded.indexOf(` ${foldedAlias} `, start);
+      if (index < 0) break;
+      start = index + foldedAlias.length + 1;
+      const before = foldedEvidence.slice(0, Math.max(0, index)).trimEnd();
+      const after = foldedEvidence.slice(index + foldedAlias.length).trimStart();
+      const nonMusical = CONTEXTUAL_PREFIXES.some((prefix) => before.endsWith(foldName(prefix))) ||
+        CAREER_WORK_PREFIX.test(before) || NON_COMPOSER_ROLES.some((role) => after === foldName(role));
+      // Role evidence belongs to this mention, never to the person globally.
+      if (!nonMusical) return false;
+      contextual = true;
+    }
   }
-  return false;
+  return contextual;
 }
 
 function fromLabelledCredits(text: string): AttributedComposerName[] {
@@ -232,6 +243,10 @@ function fromLabelledCredits(text: string): AttributedComposerName[] {
       const rawList = clipLabelledList(
         extendLabelledListAcrossLines(text, matchEnd, match[1] ?? ''),
       );
+      // “Música de Cámara y Canción” describes genres, not author slots.
+      // Reject the frame at its head so a later capitalized genre cannot
+      // re-enter it as an unknown surname.
+      if (pattern === MUSICA_CREDIT && /^(?:c[aá]mara|canci[oó]n|ballet|[oó]pera|zarzuela|cine)\b/iu.test(rawList)) continue;
       const evidence = collapseWhitespace(rawList) || collapseWhitespace(match[0] ?? '');
       if (!rawList.trim() || !evidence) continue;
       if (careerPrefixBefore(text, match.index ?? 0)) continue;
@@ -266,7 +281,10 @@ function fromWorkDeComposer(
       continue;
     }
     if (isLabelledCreditLine(line)) continue;
-    const parsed = parseWorkDeComposerLine(line);
+    // A later sentence labelled as libretto/poetry is a different credit.
+    // Do not split arbitrary dots: they also belong to initials and movements.
+    const musicalPart = line.split(/[.;]\s+(?=(?:libreto|textos?|letra|poemas?|poes[ií]a|arreglos?)\s+(?:de|del|:))/iu)[0] ?? line;
+    const parsed = parseWorkDeComposerLine(musicalPart);
     if (!parsed) continue;
     found.push({
       name: parsed.composerName,
@@ -529,7 +547,7 @@ function fromComposerHeadings(text: string): AttributedComposerName[] {
   for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index]!;
     const next = lines[index + 1];
-    if (!next || !looksLikeUnequivocalWorkLine(next)) continue;
+    if (!next || (!looksLikeUnequivocalWorkLine(next) && !next.includes(MASKED_WORK_TITLE))) continue;
     if (!looksLikeComposerLine(line) && !matchComposer(stripTrailingBiographicalYears(line))) continue;
     const name = stripTrailingBiographicalYears(line) || line;
     found.push({ name, evidence: `${line} ${next}`, frame: 'composer-heading' });
@@ -574,7 +592,7 @@ function looksLikePromotableUnknownName(
   evidence: string,
   frame?: AttributionFrame,
 ): boolean {
-  if (!name || isPerformerRole(name) || looksLikeWorkTitle(name)) return false;
+  if (!name || isUnreliableComposerName(name) || isPerformerRole(name) || looksLikeWorkTitle(name)) return false;
   if (looksLikeEditorialMaterial(name) || looksLikeInstrumentOnly(name) || looksLikeEnsembleName(name)) {
     return false;
   }
@@ -666,17 +684,19 @@ function contiguousCreditNames(raw: string): string[] {
   return names;
 }
 
-/** A structured work's explicit author owns the entire title. Names inside
- * that title (source material, characters, dedications) are not new credits. */
-export function outsideAttributedWorkTitles(
+/** Structured titles, including anonymous works, are not author slots.
+ * Keep a work-shaped marker so explicit credits outside the title survive
+ * (`TITLE de AUTHOR`, `AUTHOR — TITLE`) without reparsing its internal dashes.
+ * The marker is internal to attribution, never published as source evidence. */
+export function maskObservedWorkTitles(
   text: string,
   works: readonly { title: string; composerName?: string }[],
 ): string {
   let remainder = text;
   for (const work of works) {
-    if (!work.composerName) continue;
+    if (!work.title.trim()) continue;
     const pattern = escapeRegExp(work.title).replace(/\s+/g, '\\s+');
-    remainder = remainder.replace(new RegExp(pattern, 'giu'), ' ');
+    remainder = remainder.replace(new RegExp(pattern, 'giu'), MASKED_WORK_TITLE);
   }
   return remainder;
 }
