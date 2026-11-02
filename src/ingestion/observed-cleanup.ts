@@ -43,7 +43,7 @@ const CREDIT_SECTION_LABEL =
 const NON_WORK_CREDIT =
   /^(?:arr\.|arreglos?|orquestaci[oó]n(?:es)?|orchestrations?|orch\.|transcripci[oó]n(?:es)?|versi[oó]n(?:es)?|adaptaci[oó]n(?:es)?)\s*(?:de\s+|:\s*)?\S/i;
 const NON_COMPOSER_CREDIT_NAME =
-  /^(?:transcripci[oó]n(?:es)?|arreglos?|orquestaci[oó]n(?:es)?|versi[oó]n(?:es)?|adaptaci[oó]n(?:es)?|libreto|texto(?:\s+del)?|letra|poema|poes[ií]a)\s+(?:de|del|:)\b/i;
+  /^(?:transcripci[oó]n(?:es)?|arreglos?|orquestaci[oó]n(?:es)?|versi[oó]n(?:es)?|adaptaci[oó]n(?:es)?|libreto|textos?(?:\s+del)?|letra|poemas?|poes[ií]as?)\s+(?:de|del|:)\b/i;
 const INITIALS_AUTHOR = /^(?:[\p{Lu}\p{Lt}]\.\s*){1,3}[\p{L}’'-]+$/u;
 const CONTEXTUAL_DE_PREFIX = /(?:tema|un tema|sobre un tema|basad[oa]|inspirad[oa]|homenaje)\s+$/iu;
 const NAME_PARTICLE = /^(?:de|del|van|von|di|da|el|la|los|las)$/i;
@@ -98,6 +98,7 @@ export function looksLikeComposerLine(text: string): boolean {
 export function looksLikeWorkLine(text: string): boolean {
   const trimmed = text.trim();
   if (!trimmed || looksLikeProgramHeader(trimmed)) return false;
+  if (looksLikeAdministrativeMetadata(trimmed) || looksLikeRepertoireDescriptor(trimmed)) return false;
   if (isNonPersonComposerAttribution(trimmed) || isEditorialNoteLegend(trimmed)) return false;
   if (
     looksLikeProductionNote(trimmed) ||
@@ -111,6 +112,18 @@ export function looksLikeWorkLine(text: string): boolean {
     return false;
   }
   return true;
+}
+
+/** Labels of event fields, not titles (a title containing these words is fine). */
+export function looksLikeAdministrativeMetadata(text: string): boolean {
+  return /^(?:compa[ñn][ií]a(?:\s*\/\s*grupo)?|grupo|g[eé]nero|p[uú]blico|edad recomendada|duraci[oó]n)\s*:/iu.test(text.trim());
+}
+
+/** A repertoire origin/genre heading opens no personal authorship. */
+export function looksLikeRepertoireDescriptor(text: string): boolean {
+  const trimmed = text.trim();
+  return isNonPersonComposerAttribution(trimmed) ||
+    /^(?:(?:canto|canci[oó]n|m[uú]sica|repertorio)\s+)?(?:folcl[oó]ric[oa]\s+)?tradicional(?:\s+\p{L}+){0,3}[:.]?$/iu.test(trimmed);
 }
 
 export function looksLikeProgramHeader(text: string): boolean {
@@ -205,6 +218,7 @@ export function looksLikeNonWorkCredit(text: string): boolean {
     .replace(/^\*+\s*/, '');
   if (!trimmed) return false;
   if (looksLikeTextCredit(trimmed)) return true;
+  if (/^.+?,\s*(?:poeta|libretista|arreglista|arranger)\s*\.?$/iu.test(trimmed)) return true;
   return NON_WORK_CREDIT.test(trimmed) || NON_COMPOSER_CREDIT_NAME.test(trimmed);
 }
 
@@ -288,6 +302,7 @@ export function isUnreliableComposerName(text: string): boolean {
   const trimmed = text.trim();
   if (!trimmed || looksLikeProgramHeader(trimmed)) return true;
   if (isNonPersonComposerAttribution(trimmed)) return true;
+  if (looksLikeAdministrativeMetadata(trimmed) || looksLikeRepertoireDescriptor(trimmed)) return true;
   if (/^obras de\b/i.test(trimmed)) return true;
   if (/\b(?:obras?|m[uú]sica)\s+(?:de|del|:)\s*$/i.test(trimmed)) return true;
   if (/^(?:y|e)\s+/i.test(trimmed)) return true;

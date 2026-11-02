@@ -6,6 +6,9 @@ import {
   looksLikeEnsembleName,
   looksLikeMovementLine,
   looksLikeNonWorkCredit,
+  looksLikeAdministrativeMetadata,
+  looksLikeRepertoireDescriptor,
+  looksLikeUnequivocalWorkLine,
   looksLikeWorkLine,
 } from '../observed-cleanup.ts';
 import {
@@ -252,6 +255,8 @@ function parseProgram(html: string): {
   const composers: { name: string }[] = [];
   const works: { title: string; composerName?: string }[] = [];
   let composerName: string | undefined;
+  let unattributedRepertoire = false;
+  let awaitingWork = false;
   // Gutenberg may put several composer+work blocks in one <p>, split by <br>,
   // or one composer per paragraph. Walk every segment in order so a later
   // heading updates the active composer instead of inheriting the previous one.
@@ -260,15 +265,37 @@ function parseProgram(html: string): {
     const raw = paragraph[1]!;
     if (!stripTags(raw)) continue;
     for (const segment of programmeSegments(raw)) {
+      const text = stripTags(segment);
+      if (looksLikeRepertoireDescriptor(text)) {
+        composerName = undefined;
+        unattributedRepertoire = true;
+        awaitingWork = true;
+        continue;
+      }
       const heading = composerHeadingFromSegment(segment);
       if (heading) {
         composerName = heading;
+        unattributedRepertoire = false;
+        awaitingWork = true;
         composers.push({ name: heading });
         continue;
       }
-      if (!composerName) continue;
+      if (looksLikeMovementLine(text) && !/<em\b/i.test(segment)) continue;
+      // An unrecognized bold heading or a credit terminates the previous
+      // composer's block. Keep the fact in programText, not as their work.
+      if (looksLikeNonWorkCredit(text) || looksLikeAdministrativeMetadata(text) ||
+          (/<strong\b/i.test(segment) && !/<em\b/i.test(segment)) ||
+          (!awaitingWork && !/<em\b/i.test(segment) && !/[«“"]/.test(text) &&
+            !looksLikeUnequivocalWorkLine(text) && !/\([^)]*\)/u.test(text))) {
+        composerName = undefined;
+        unattributedRepertoire = false;
+        awaitingWork = false;
+        continue;
+      }
+      if (!composerName && !unattributedRepertoire) continue;
       for (const title of programmeTitlesFromLine(segment)) {
-        works.push({ title, composerName });
+        works.push({ title, ...(composerName ? { composerName } : {}) });
+        awaitingWork = false;
       }
     }
   }

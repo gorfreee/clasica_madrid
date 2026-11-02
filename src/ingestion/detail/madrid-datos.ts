@@ -1,6 +1,7 @@
 import { allCaptures, collapseWhitespace, firstMatch, stripTags, flattenHtmlBlocks } from '../html.ts';
 import { matchComposer } from '../knowledge/composers.ts';
-import { looksLikeComposerLine, looksLikeInstrumentOnly, looksLikeMovementLine, looksLikeProgramHeader, looksLikeUnequivocalWorkLine } from '../observed-cleanup.ts';
+import { attributedProgrammeComposers } from '../composer-attribution.ts';
+import { looksLikeAdministrativeMetadata, looksLikeComposerLine, looksLikeInstrumentOnly, looksLikeMovementLine, looksLikeProgramHeader, looksLikeUnequivocalWorkLine } from '../observed-cleanup.ts';
 import { extractExplicitPerformanceCredits } from '../performance-credits.ts';
 import {
   normalizeComposerList,
@@ -102,14 +103,14 @@ function parseHeadingProgram(html: string): {
     if (block[1]!.toLowerCase() === 'li') {
       if (looksLikeProgramHeader(text) || /^(?:primer|segundo|tercer|cuarto) concierto$/iu.test(text)) continue;
       const known = matchComposer(text);
-      const fullName = /^(?:\p{Lu}[\p{L}’'.-]+)(?:\s+(?:de|del|van|von|\p{Lu}[\p{L}’'.-]+)){1,5}$/u.test(text);
+      const fullName = /^(?:\p{Lu}[\p{L}’'.-]*)(?:\s+(?:de|del|la|las|los|van|von|\p{Lu}[\p{L}’'.-]*)){1,7}$/u.test(text);
       if (known || (fullName && !looksLikeUnequivocalWorkLine(text))) {
         composerName = text;
         continue;
       }
     }
     if (!composerName) continue;
-    if (looksLikeInstrumentOnly(text) || isAdministrativeLine(text) ||
+    if (looksLikeInstrumentOnly(text) || isAdministrativeLine(text) || looksLikeAdministrativeMetadata(text) ||
         extractExplicitPerformanceCredits(`${composerName}, ${text}`).length) {
       composerName = undefined;
       continue;
@@ -176,25 +177,17 @@ function performersFromEditorial(text: string): ObservedPerson[] {
 }
 
 function composersFromEditorial(text: string): ObservedComposer[] {
-  if (!text) return [];
-  const names: string[] = [];
-
-  const como =
-    /\b(?:autores?|compositores?)\b(?:(?![.]).){0,80}?\bcomo\s+(.+?)(?:\s*,\s*cuyas|\s*,\s*que|\.|$)/iu.exec(
-      text,
-    );
-  if (como?.[1]) names.push(...splitPersonList(como[1]));
-
-  const labeled = /\bcompositor(?:a|es)?\s*:\s*([^.\n]+)/iu.exec(text);
-  if (labeled?.[1]) names.push(...splitPersonList(labeled[1]));
-
-  return normalizeComposerList(names.map((name) => ({ name })));
+  // This surface also contains biographies, venues and collaborators. Admit
+  // only the municipal prose credit frames; share their list interpretation
+  // with enrichment instead of independently parsing coordinated names.
+  if (!/\b(?:autores?|compositores?)\b[^.]{0,80}\bcomo\s+|\bcompositor(?:a|es)?\s*:/iu.test(text)) return [];
+  return attributedProgrammeComposers(text);
 }
 
 function worksFromEditorial(html: string): ObservedWork[] {
   const items = allCaptures(html, /<li\b[^>]*>([\s\S]*?)<\/li>/gi)
     .map((part) => stripTags(part))
-    .filter((text) => text && !isAdministrativeLine(text) && !looksLikeProse(text) &&
+    .filter((text) => text && !isAdministrativeLine(text) && !looksLikeAdministrativeMetadata(text) && !looksLikeProse(text) &&
       !looksLikeComposerLine(text) && !/^(?:primer|segundo|tercer|cuarto) concierto$/iu.test(text) &&
       extractExplicitPerformanceCredits(text).length === 0);
   return normalizeWorkList(items.map((title) => ({ title })));

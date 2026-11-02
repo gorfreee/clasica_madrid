@@ -532,3 +532,14 @@ describe('catálogo publicado: Jean Rondeau 18 vs 19', () => {
     expect(structured?.works.length).toBeGreaterThan(0);
   });
 });
+
+describe('structured unattributed work titles', () => {
+  it.each(['McIntosh’s Lament – Auld Foula – Oot and In Da Harbour', 'HARRY POTTER — James O’Neill', 'John Williams – Song of Dawn'])('does not promote a name inside %s', (title) => {
+    const enriched = enrichNormalizedEvent(event({ title: 'Recital', works: [{ title }], programText: title }));
+    expect(enriched.composers).toEqual([]);
+    expect(enriched.works).toEqual([{ title }]);
+  });
+  it.each(['Ana de los Ríos — Sonata sin autor', 'Sonata sin autor de Ana de los Ríos', 'Música de Ana de los Ríos.\nSonata sin autor'])('retains explicit credits outside the title: %s', (programText) => {
+    expect(enrichNormalizedEvent(event({ works: [{ title: 'Sonata sin autor' }], programText })).composers).toEqual([{ name: 'Ana de los Ríos' }]);
+  });
+});

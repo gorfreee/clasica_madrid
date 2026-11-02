@@ -833,3 +833,48 @@ describe('pipeline y budget compartido', () => {
     expect(run.summary.healthReasons).toContain('unresolved-composers');
   });
 });
+
+describe('AI cannot erase local attribution context', () => {
+  function composerAi(candidates: Array<{ name: string; evidence: string }>) {
+    return spyAi(async (_observed, context) => context?.purpose === 'composer-extraction'
+      ? { candidates } : { formats: ['symphonic'], eras: [] });
+  }
+  it('rejects a literal clipped credit whose surrounding text is non-musical', () => {
+    const observed = facts({ composers: [], works: [], programText: 'Libreto de Obras de Ana de los Ríos.' });
+    expect(validateAiComposerCandidates([{ name: 'Ana de los Ríos', evidence: 'Obras de Ana de los Ríos' }], observed).composers).toEqual([]);
+  });
+  it('retains explicit authorship even if another mention credits the same person as a poet', () => {
+    const observed = facts({ composers: [], works: [], programText: 'Poema de Ana de los Ríos.\nMúsica de Ana de los Ríos.' });
+    expect(validateAiComposerCandidates([{ name: 'Ana de los Ríos', evidence: 'Música de Ana de los Ríos' }], observed).composers).toEqual([{ name: 'Ana de los Ríos' }]);
+  });
+  it('accepts an explicit credit outside an unattributed structured title, with real source evidence', () => {
+    const observed = facts({ composers: [], works: [{ title: 'Sonata sin autor' }], programText: 'Ana de los Ríos — Sonata sin autor' });
+    expect(validateAiComposerCandidates([{ name: 'Ana de los Ríos', evidence: observed.programText! }], observed))
+      .toEqual({ composers: [{ name: 'Ana de los Ríos' }], evidence: [observed.programText] });
+  });
+  it('fake fallback completes an unresolved composer without reintroducing title, genre or poet candidates', async () => {
+    const title = 'McIntosh’s Lament – Auld Foula – Oot and In Da Harbour';
+    const observed = facts({ title: 'Concierto de música clásica', categoryText: 'Música clásica', composers: [], works: [{ title }], programText: [
+      PROGRAMME, title, 'Música de Cámara y Canción.',
+      'Compositores como Sorozábal y Barbieri, junto a poemas de Lope de Vega y Guillermo Fernández Shaw.',
+      'Libreto de Obras de Ana de los Ríos.',
+    ].join('\n') });
+    const ai = composerAi([
+      { name: 'Maddalena Casulana', evidence: PROGRAMME },
+      { name: 'McIntosh’s Lament', evidence: title },
+      { name: 'Canción', evidence: 'Música de Cámara y Canción' },
+      { name: 'Guillermo Fernández Shaw', evidence: 'Compositores como Sorozábal y Barbieri, junto a poemas de Lope de Vega y Guillermo Fernández Shaw.' },
+      { name: 'Ana de los Ríos', evidence: 'Obras de Ana de los Ríos' },
+    ]);
+    const result = await classifyObserved(observed, { ai });
+    expect(ai.purposes).toContain('composer-extraction');
+    expect(result.composers?.value).toEqual([{ name: 'Maddalena Casulana' }]);
+  });
+});
+
+describe('same-line source context', () => {
+  it('does not borrow an earlier work to turn a later libretto into a composer credit', () => {
+    const observed = facts({ composers: [], works: [], programText: 'Bach — Suite. Libreto de Obras de Ana de los Ríos.' });
+    expect(validateAiComposerCandidates([{ name: 'Ana de los Ríos', evidence: 'Obras de Ana de los Ríos' }], observed).composers).toEqual([]);
+  });
+});
