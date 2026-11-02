@@ -543,3 +543,12 @@ describe('structured unattributed work titles', () => {
     expect(enrichNormalizedEvent(event({ works: [{ title: 'Sonata sin autor' }], programText })).composers).toEqual([{ name: 'Ana de los Ríos' }]);
   });
 });
+
+describe('explicit headings outside structured titles', () => {
+  it('keeps a known or biographically attributed composer above an unattributed work', () => {
+    for (const heading of ['J. S. Bach', 'Ana Torres (1987)']) {
+      const enriched = enrichNormalizedEvent(event({ works: [{ title: 'SONATA – O’NEILL' }], programText: `${heading}\nSONATA – O’NEILL` }));
+      expect(enriched.composers).toEqual([{ name: heading === 'J. S. Bach' ? 'Johann Sebastian Bach' : 'Ana Torres' }]);
+    }
+  });
+});

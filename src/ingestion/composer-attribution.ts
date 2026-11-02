@@ -84,6 +84,7 @@ const ENSEMBLE_TAIL =
 const LEADING_ARTICLE = /^(?:el|la|los|las|le|les|the|a|an|un|una|der|die|das)$/i;
 const BARE_ARTICLE = /^(?:el|la|los|las)$/i;
 const CATALOG = /\b(?:bwv|hwv|hob\.?|op\.?\s*\d|opus\s+\d|d\s*\d{2,}|k\.?\s*\d|kv\.?\s*\d)\b/i;
+const MASKED_WORK_TITLE = '[obra observada]';
 
 const NON_COMPOSER_ROLES = [
   'director', 'directora', 'director musical', 'direccion musical', 'solista',
@@ -546,7 +547,7 @@ function fromComposerHeadings(text: string): AttributedComposerName[] {
   for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index]!;
     const next = lines[index + 1];
-    if (!next || !looksLikeUnequivocalWorkLine(next)) continue;
+    if (!next || (!looksLikeUnequivocalWorkLine(next) && !next.includes(MASKED_WORK_TITLE))) continue;
     if (!looksLikeComposerLine(line) && !matchComposer(stripTrailingBiographicalYears(line))) continue;
     const name = stripTrailingBiographicalYears(line) || line;
     found.push({ name, evidence: `${line} ${next}`, frame: 'composer-heading' });
@@ -695,7 +696,7 @@ export function maskObservedWorkTitles(
   for (const work of works) {
     if (!work.title.trim()) continue;
     const pattern = escapeRegExp(work.title).replace(/\s+/g, '\\s+');
-    remainder = remainder.replace(new RegExp(pattern, 'giu'), '[obra observada]');
+    remainder = remainder.replace(new RegExp(pattern, 'giu'), MASKED_WORK_TITLE);
   }
   return remainder;
 }

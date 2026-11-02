@@ -111,7 +111,7 @@ export function validateAiComposerCandidates(
 
   for (const candidate of candidates) {
     const sourceName = collapseWhitespace(candidate.name);
-    const sourceEvidence = collapseWhitespace(candidate.evidence);
+    const sourceEvidence = candidate.evidence.trim();
     if (!sourceName || !sourceEvidence) continue;
     if (!containsNormalizedSpan(sourceProgramme, sourceEvidence)) continue;
     if (!candidateNameAppears(sourceName, sourceEvidence, sourceProgramme)) continue;
@@ -128,7 +128,7 @@ export function validateAiComposerCandidates(
     if (!identity || seen.has(identity)) continue;
     seen.add(identity);
     composers.push({ name });
-    evidence.push(sourceEvidence);
+    evidence.push(collapseWhitespace(sourceEvidence));
   }
 
   return { composers, evidence };

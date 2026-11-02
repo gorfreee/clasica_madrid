@@ -878,3 +878,13 @@ describe('same-line source context', () => {
     expect(validateAiComposerCandidates([{ name: 'Ana de los Ríos', evidence: 'Obras de Ana de los Ríos' }], observed).composers).toEqual([]);
   });
 });
+
+describe('structured titles with explicit composer headings', () => {
+  it('preserves line structure in genuine AI evidence and publishes only literal evidence', () => {
+    const programme = 'Ana Torres (1987)\nSONATA – O’NEILL';
+    const observed = facts({ composers: [], works: [{ title: 'SONATA – O’NEILL' }], programText: programme });
+    expect(composerAiHasUsableEvidence(observed)).toBe(true);
+    expect(validateAiComposerCandidates([{ name: 'Ana Torres', evidence: programme }], observed))
+      .toEqual({ composers: [{ name: 'Ana Torres' }], evidence: ['Ana Torres (1987) SONATA – O’NEILL'] });
+  });
+});
