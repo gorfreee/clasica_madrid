@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "id": "src_tienda_madrid_destino_com",
+  "slug": "entradas-madrid-destino",
+  "name": "Venta oficial de entradas de Madrid Destino",
+  "kind": "official",
+  "url": "https://tienda.madrid-destino.com/"
+}
