@@ -11,7 +11,7 @@
     {
       "id": "occ_residencia_estudiantes_32405_01",
       "date": "2026-11-22",
-      "time": "19:00",
+      "time": "18:00",
       "status": "scheduled"
     }
   ],
@@ -124,10 +124,10 @@
     {
       "sourceId": "src_residencia_estudiantes",
       "url": "https://residenciadeestudiantes.com/actividades/ecce-finem",
-      "checkedAt": "2026-10-21",
+      "checkedAt": "2026-11-10",
       "externalId": "32405"
     }
   ],
   "primarySourceId": "src_residencia_estudiantes",
-  "lastVerifiedAt": "2026-10-21"
+  "lastVerifiedAt": "2026-11-10"
 }
