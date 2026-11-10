@@ -25,6 +25,30 @@
       "date": "2027-01-24",
       "time": "12:00",
       "status": "scheduled"
+    },
+    {
+      "id": "occ_teatrolara_com_pequeno_mozart_04",
+      "date": "2027-02-28",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatrolara_com_pequeno_mozart_05",
+      "date": "2027-03-14",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatrolara_com_pequeno_mozart_06",
+      "date": "2027-04-11",
+      "time": "12:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "occ_teatrolara_com_pequeno_mozart_07",
+      "date": "2027-05-09",
+      "time": "12:00",
+      "status": "scheduled"
     }
   ],
   "performers": [
@@ -66,14 +90,14 @@
     {
       "sourceId": "src_teatrolara_com",
       "url": "https://teatrolara.com/programacion/pequeno-mozart",
-      "checkedAt": "2026-10-29"
+      "checkedAt": "2026-11-10"
     },
     {
       "sourceId": "src_cameratamusicalis_com",
       "url": "https://cameratamusicalis.com/conciertos/",
-      "checkedAt": "2026-10-29"
+      "checkedAt": "2026-11-10"
     }
   ],
   "primarySourceId": "src_teatrolara_com",
-  "lastVerifiedAt": "2026-10-29"
+  "lastVerifiedAt": "2026-11-10"
 }

@@ -85,15 +85,15 @@
     "symphonic"
   ],
   "kind": "established",
-  "access": "unknown",
+  "access": "paid",
   "citations": [
     {
       "sourceId": "src_teatro_real",
       "url": "https://www.teatroreal.es/es/espectaculo/xxxi-concierto-navidad",
-      "checkedAt": "2026-10-21",
+      "checkedAt": "2026-11-10",
       "externalId": "xxxi-concierto-navidad"
     }
   ],
   "primarySourceId": "src_teatro_real",
-  "lastVerifiedAt": "2026-10-21"
+  "lastVerifiedAt": "2026-11-10"
 }
