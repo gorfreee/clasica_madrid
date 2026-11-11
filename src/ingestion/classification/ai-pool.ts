@@ -743,9 +743,8 @@ export class AiPoolClassifier implements AiClassifier {
   }
 
   private providerDailyRequests(provider: string, now: number): number {
-    return this.routes
-      .filter((route) => route.provider === provider)
-      .reduce((sum, route) => sum + this.state.route(route.routeId, now, route.reset).requests, 0);
+    const reset = this.routes.find((route) => route.provider === provider && route.reset)?.reset;
+    return this.state.providerDailyRequests(provider, now, reset);
   }
 
   private providerCap(

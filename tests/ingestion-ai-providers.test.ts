@@ -35,14 +35,13 @@ import {
   CLOUDFLARE_ZERO_COST_MODELS,
   GROQ_DEFAULT_BASE_URL,
   GROQ_DEFAULT_MODELS,
-  KILO_DEFAULT_BASE_URL,
   KILO_PRODUCTION_LIMITS,
   KILO_QUARANTINED_MODELS,
   KILO_ZERO_COST_MODELS,
   MISTRAL_DEFAULT_BASE_URL,
+  MISTRAL_PRODUCTION_MODEL_LIMITS,
   MISTRAL_DEFAULT_MODELS,
   MISTRAL_OPTIONAL_MODELS,
-  MISTRAL_PRODUCTION_MODEL_LIMITS,
   OPENROUTER_DEFAULT_BASE_URL,
   OPENROUTER_PRODUCTION_LIMITS,
   OPENROUTER_QUARANTINED_MODELS,
@@ -88,7 +87,7 @@ describe('factory multi-provider zero cost', () => {
     }))).toEqual([]);
     expect(routeProviders(createFreeRoutesFromEnv({
       ...base, KILO_API_KEY: 'kilo-key', KILO_FREE_TIER_CONFIRMED: 'true',
-    }))).toEqual(['kilo']);
+    }))).toEqual([]);
     expect(routeProviders(createFreeRoutesFromEnv({
       ...base, OPENROUTER_API_KEY: 'openrouter-key', OPENROUTER_FREE_TIER_CONFIRMED: 'true',
     }))).toEqual(['openrouter']);
@@ -124,8 +123,8 @@ describe('factory multi-provider zero cost', () => {
       ['mistral', 'unconfigured'],
       ['cloudflare', 'unconfigured'],
       ['zai', 'error'],
-      ['vercel', 'ready'],
-      ['kilo', 'unconfigured'],
+      ['vercel', 'disabled'],
+      ['kilo', 'disabled'],
       ['openrouter', 'unconfigured'],
     ]);
     expect(inspection.providers.find((item) => item.provider === 'groq')?.reason).toMatch(/GROQ_FREE_TIER_CONFIRMED/);
@@ -198,7 +197,7 @@ describe('factory multi-provider zero cost', () => {
     expect(identity(routes, 'cloudflare').baseUrl).toBe(
       'https://api.cloudflare.com/client/v4/accounts/account-id/ai/v1',
     );
-    expect(identity(routes, 'kilo').baseUrl).toBe(KILO_DEFAULT_BASE_URL);
+    expect(routes.some((route) => route.provider === 'kilo')).toBe(false);
     expect(identity(routes, 'openrouter').baseUrl).toBe(OPENROUTER_DEFAULT_BASE_URL);
   });
 
@@ -216,7 +215,7 @@ describe('factory multi-provider zero cost', () => {
       OPENROUTER_API_KEY: 'openrouter-key', OPENROUTER_FREE_TIER_CONFIRMED: 'true',
     });
     expect(routeProviders(routes)).toEqual([
-      'gemini', 'groq', 'mistral', 'cloudflare', 'zai', 'kilo', 'openrouter',
+      'gemini', 'groq', 'mistral', 'cloudflare', 'zai', 'openrouter',
     ]);
   });
 
@@ -322,7 +321,7 @@ describe('factory multi-provider zero cost', () => {
 
   it('Vercel/Kilo/OpenRouter exigen confirmación, allowlist y límites provider-wide', () => {
     expect([...VERCEL_ZERO_COST_MODELS]).toEqual([]);
-    expect([...KILO_ZERO_COST_MODELS]).toEqual(['poolside/laguna-xs-2.1:free']);
+    expect([...KILO_ZERO_COST_MODELS]).toEqual([]);
     expect([...KILO_QUARANTINED_MODELS]).toEqual([]);
     expect(KILO_ZERO_COST_MODELS).not.toContain('nex-agi/nex-n2.5-mini:free');
     expect(KILO_ZERO_COST_MODELS).not.toContain('nex-agi/nex-n2.5-pro:free');
@@ -332,7 +331,6 @@ describe('factory multi-provider zero cost', () => {
 
     expect([...OPENROUTER_ZERO_COST_MODELS]).toEqual([
       'google/gemma-4-26b-a4b-it:free',
-      'poolside/laguna-xs-2.1:free',
       'google/gemma-4-31b-it:free',
     ]);
     expect([...OPENROUTER_QUARANTINED_MODELS]).toEqual([
@@ -358,7 +356,7 @@ describe('factory multi-provider zero cost', () => {
       AI_ZERO_COST_ONLY: 'true',
     }).providers.find((item) => item.provider === 'vercel');
     expect(vercelInspection).toMatchObject({
-      status: 'ready',
+      status: 'disabled',
       routes: [],
       reason: 'provider sin routes activas por política zero-cost',
     });
@@ -608,7 +606,7 @@ describe('payload HTTP por provider/modelo', () => {
       expect(body).toMatchObject({
         model,
         max_tokens: 100,
-        provider: { require_parameters: true },
+        provider: { require_parameters: true, max_price: { prompt: 0, completion: 0, request: 0 } },
         reasoning: { effort: 'none' },
         response_format: { type: 'json_object' },
       });
@@ -622,7 +620,7 @@ describe('payload HTTP por provider/modelo', () => {
     expect(body).toMatchObject({
       model: 'openai/gpt-oss-20b:free',
       max_tokens: 100,
-      provider: { require_parameters: true },
+      provider: { require_parameters: true, max_price: { prompt: 0, completion: 0, request: 0 } },
       reasoning: { effort: 'none' },
       response_format: {
         type: 'json_schema',
@@ -774,17 +772,12 @@ describe('payload HTTP por provider/modelo', () => {
       extraBody: {},
       promptOutputContract: true,
     });
-    expect(identityByRoute(routes, 'kilo:poolside/laguna-xs-2.1:free')).toMatchObject({
-      responseFormat: 'none',
-      extraBody: { reasoning: { effort: 'none' } },
-      promptOutputContract: true,
-    });
     for (const model of ['google/gemma-4-26b-a4b-it:free', 'google/gemma-4-31b-it:free'] as const) {
       expect(identityByRoute(routes, `openrouter:${model}`)).toMatchObject({
         responseFormat: 'json-object',
         jsonSchemaStrict: false,
         tokenParameter: 'max_tokens',
-        extraBody: { provider: { require_parameters: true }, reasoning: { effort: 'none' } },
+        extraBody: { provider: { require_parameters: true, max_price: { prompt: 0, completion: 0, request: 0 } }, reasoning: { effort: 'none' } },
         promptOutputContract: true,
       });
     }
@@ -840,7 +833,7 @@ describe('schema-in-prompt para routes sin json_schema', () => {
       expect(messages[0]?.content).toContain('"include"|"exclude"|"uncertain"');
       expect(messages[1]?.content).toBe(editorial.user);
       if (provider === 'openrouter') {
-        expect(body.provider).toEqual({ require_parameters: true });
+        expect(body.provider).toEqual({ require_parameters: true, max_price: { prompt: 0, completion: 0, request: 0 } });
       }
     }
   });
@@ -1005,19 +998,19 @@ describe('perfiles HTTP declarativos', () => {
       responseFormat: 'none',
       jsonSchemaStrict: false,
       tokenParameter: 'max_tokens',
-      extraBody: { provider: { require_parameters: true }, reasoning: { effort: 'none' } },
+      extraBody: { provider: { require_parameters: true, max_price: { prompt: 0, completion: 0, request: 0 } }, reasoning: { effort: 'none' } },
     });
     expect(openaiCompatibleModelProfile('openrouter', 'openai/gpt-oss-20b:free')).toEqual({
       responseFormat: 'json-schema',
       jsonSchemaStrict: false,
       tokenParameter: 'max_tokens',
-      extraBody: { provider: { require_parameters: true }, reasoning: { effort: 'none' } },
+      extraBody: { provider: { require_parameters: true, max_price: { prompt: 0, completion: 0, request: 0 } }, reasoning: { effort: 'none' } },
     });
     expect(openaiCompatibleModelProfile('openrouter', 'google/gemma-4-26b-a4b-it:free')).toEqual({
       responseFormat: 'json-object',
       jsonSchemaStrict: false,
       tokenParameter: 'max_tokens',
-      extraBody: { provider: { require_parameters: true }, reasoning: { effort: 'none' } },
+      extraBody: { provider: { require_parameters: true, max_price: { prompt: 0, completion: 0, request: 0 } }, reasoning: { effort: 'none' } },
     });
   });
 
@@ -1505,3 +1498,94 @@ function identityByRoute(routes: ReturnType<typeof createFreeRoutesFromEnv>, rou
   const route = routes.find((item) => item.routeId === routeId)!;
   return route.transport.cacheIdentity(route.model) as Record<string, unknown>;
 }
+
+describe('regresiones auditoría zero-cost 2026-11-11', () => {
+  it('reactiva Mistral confirmado en el pool, selección explícita y ruta fijada', () => {
+    const env = {
+      AI_ZERO_COST_ONLY: 'true', MISTRAL_API_KEY: 'mistral-key',
+      MISTRAL_FREE_MODE_CONFIRMED: 'true',
+    };
+    expect(createFreeRoutesFromEnv(env).map((route) => route.model)).toEqual([...MISTRAL_DEFAULT_MODELS]);
+    for (const selection of [{ AI_PROVIDER: 'mistral' }, { AI_ROUTE: 'mistral:ministral-14b-2512' }]) {
+      const classifier = createAiClassifierFromEnv({ ...env, ...selection }) as AiPoolClassifier;
+      try {
+        expect(classifier.routes.length).toBeGreaterThan(0);
+        expect(classifier.routes.every((route) => route.provider === 'mistral')).toBe(true);
+      } finally {
+        classifier.close();
+      }
+    }
+    expect(inspectFreePoolFromEnv(env).providers.find((p) => p.provider === 'mistral'))
+      .toMatchObject({ status: 'ready' });
+    const unconfirmed = { ...env, MISTRAL_FREE_MODE_CONFIRMED: 'false' };
+    expect(createFreeRoutesFromEnv(unconfirmed)).toEqual([]);
+    expect(createAiClassifierFromEnv({ ...unconfirmed, AI_PROVIDER: 'mistral' })).toBeUndefined();
+    expect(() => createAiClassifierFromEnv({ ...unconfirmed, AI_ROUTE: 'mistral:ministral-14b-2512' }))
+      .toThrow(/no configurada/);
+  });
+
+  it('todos los modelos OpenRouter aprobados conservan el techo $0 en el payload HTTP final', async () => {
+    for (const model of [...OPENROUTER_ZERO_COST_MODELS, ...OPENROUTER_QUARANTINED_MODELS]) {
+      const body = await captureBody('openrouter', model);
+      expect(body.model).toBe(model);
+      expect(model.endsWith(':free')).toBe(true);
+      expect(body.provider).toEqual({
+        require_parameters: true,
+        max_price: { prompt: 0, completion: 0, request: 0 },
+      });
+      expect(body).not.toHaveProperty('models');
+      expect(body).not.toHaveProperty('plugins');
+    }
+  });
+
+  it('rechaza Laguna retirado por env y por ruta fijada, en ambos gateways', () => {
+    for (const provider of ['kilo', 'openrouter'] as const) {
+      const prefix = provider.toUpperCase();
+      const env = {
+        AI_ZERO_COST_ONLY: 'true', [`${prefix}_API_KEY`]: 'gateway-key',
+        [`${prefix}_FREE_TIER_CONFIRMED`]: 'true',
+      };
+      const model = 'poolside/laguna-xs-2.1:free';
+      expect(() => createFreeRoutesFromEnv({ ...env, [`${prefix}_MODELS`]: model }))
+        .toThrow(/no autorizados/);
+      expect(() => createAiClassifierFromEnv({ ...env, AI_ROUTE: `${provider}:${model}` }))
+        .toThrow(/no autorizados/);
+    }
+  });
+
+  it('Kilo vacío es disabled sin credenciales; una selección explícita conserva los errores', () => {
+    const base = { AI_ZERO_COST_ONLY: 'true' };
+    expect(inspectFreePoolFromEnv(base).providers.find((p) => p.provider === 'kilo'))
+      .toMatchObject({ status: 'disabled', routes: [] });
+    expect(inspectFreePoolFromEnv({ ...base, KILO_MODELS: 'poolside/laguna-xs-2.1:free' })
+      .providers.find((p) => p.provider === 'kilo')).toMatchObject({ status: 'unconfigured' });
+    expect(inspectFreePoolFromEnv({ ...base, KILO_API_KEY: 'key', KILO_FREE_TIER_CONFIRMED: 'true',
+      KILO_MODELS: 'poolside/laguna-xs-2.1:free' }).providers.find((p) => p.provider === 'kilo'))
+      .toMatchObject({ status: 'error' });
+  });
+
+  it.each([
+    [undefined, 1000], ['1000', 1000], ['2000', 1000], ['50', 50], ['20', 20], ['0', 0],
+  ])('limita la cuota compartida confirmada RPD=%s a %s', (rpd, expected) => {
+    const routes = createFreeRoutesFromEnv({
+      AI_ZERO_COST_ONLY: 'true', OPENROUTER_API_KEY: 'key', OPENROUTER_FREE_TIER_CONFIRMED: 'true',
+      OPENROUTER_RPD: rpd,
+    });
+    expect(routes).toHaveLength(2);
+    expect(routes.every((route) => route.limits?.providerRpd === expected)).toBe(true);
+    expect(routes.every((route) => route.limits?.providerMinIntervalMs === 3200)).toBe(true);
+  });
+});
+
+describe('Retry-After en errores compatibles recuperables', () => {
+  it.each(['30', 'Wed, 11 Nov 2026 12:00:30 GMT'])('conserva Retry-After=%s en un HTTP 503 real', async (retryAfter) => {
+    const transport = new OpenAiCompatibleTransport({
+      provider: 'groq', baseUrl: GROQ_DEFAULT_BASE_URL, apiKey: 'provider-key',
+      now: () => Date.parse('2026-11-11T12:00:00Z'),
+      fetch: async () => new Response('overloaded', { status: 503, headers: { 'Retry-After': retryAfter } }),
+    });
+    await expect(transport.request({ model: 'openai/gpt-oss-20b', request, signal, timeoutMs: 1000 }))
+      .rejects.toMatchObject({ kind: 'transport', status: 503, retryable: true,
+        retryAfterMs: 30_000, rateLimit: { retryAfterMs: 30_000 } });
+  });
+});

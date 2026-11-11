@@ -4,7 +4,7 @@ import path from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AiRateLimitedError, AiUnusableOutputError, type AiCallPurpose } from '../src/ingestion/classification/ai.ts';
 import { AiPoolClassifier, type AiPoolClassifierOptions } from '../src/ingestion/classification/ai-pool.ts';
-import { AiPoolState } from '../src/ingestion/classification/ai-state.ts';
+import { AiPoolState, UTC_DAILY_RESET } from '../src/ingestion/classification/ai-state.ts';
 import {
   AiTransportError, makeRoute, type AiRoute, type AiTransport,
   type AiTransportCall, type AiTransportResult,
@@ -377,3 +377,19 @@ function immediateClock() {
   let now = Date.parse('2026-09-10T12:00:00Z');
   return { now: () => now, sleep: async (ms: number) => { now += ms; } };
 }
+
+
+describe('cuota compartida persistida por provider', () => {
+  it('incluye modelos retirados del mismo día, separa providers y respeta el reset UTC', () => {
+    const state = new AiPoolState();
+    const now = Date.parse('2026-11-11T23:59:00Z');
+    state.route('openrouter:retired:free', now, UTC_DAILY_RESET).requests = 3;
+    state.route('openrouter:active:free', now, UTC_DAILY_RESET).requests = 2;
+    state.route('openrouter-other:model', now, UTC_DAILY_RESET).requests = 100;
+    expect(state.providerDailyRequests('openrouter', now, UTC_DAILY_RESET)).toBe(5);
+    expect(state.providerDailyRequests('openrouter', now + 60_000, UTC_DAILY_RESET)).toBe(0);
+    state.route('openrouter:active:free', now + 60_000, UTC_DAILY_RESET).requests = 1;
+    expect(state.providerDailyRequests('openrouter', now + 60_000, UTC_DAILY_RESET)).toBe(1);
+    state.close();
+  });
+});

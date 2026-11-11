@@ -371,6 +371,26 @@ describe('presión genérica por route y provider', () => {
     expect((daily['openrouter:a'] ?? 0) + (daily['openrouter:b'] ?? 0)).toBe(2);
   });
 
+  it('cuenta intentos fallidos de una route retirada contra la cuota compartida', async () => {
+    const stateDir = mkdtempSync(path.join(os.tmpdir(), 'clasica-ai-retired-quota-'));
+    directories.push(stateDir);
+    const clock = immediateClock();
+    const failed = vi.fn(async () => { throw new AiTransportError('404', { kind: 'unavailable', status: 404 }); });
+    const oldPool = pool([
+      route('openrouter', 'retired:free', fakeTransport('openrouter', failed), { providerRpd: 2 }),
+    ], { stateDir, clock, maxRetries: 0 });
+    await expect(oldPool.classify(observed(1))).rejects.toThrow();
+    expect(failed).toHaveBeenCalledOnce();
+    oldPool.close();
+    const send = vi.fn(async () => ({ value: { eligibility: 'include' } }));
+    const newPool = pool([
+      route('openrouter', 'active:free', fakeTransport('openrouter', send), { providerRpd: 2 }),
+    ], { stateDir, clock, maxRetries: 0 });
+    await expect(newPool.classify(observed(2))).resolves.toEqual({ eligibility: 'include' });
+    await expect(newPool.classify(observed(3))).rejects.toBeInstanceOf(AiRateLimitedError);
+    expect(send).toHaveBeenCalledOnce();
+  });
+
   it('minIntervalMs 0 no deshabilita la route', async () => {
     const send = vi.fn(async () => ({ value: { eligibility: 'include' } }));
     const classifier = pool([

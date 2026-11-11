@@ -17,9 +17,9 @@ import {
   CLOUDFLARE_ZERO_COST_MODELS,
   GROQ_DEFAULT_MODELS,
   inspectFreePoolFromEnv,
+  MISTRAL_DEFAULT_MODELS,
   KILO_QUARANTINED_MODELS,
   KILO_ZERO_COST_MODELS,
-  MISTRAL_DEFAULT_MODELS,
   OPENROUTER_QUARANTINED_MODELS,
   OPENROUTER_ZERO_COST_MODELS,
   VERCEL_ZERO_COST_MODELS,
@@ -145,8 +145,8 @@ describe('CLI, fixtures y descubrimiento', () => {
     expect(byProvider.mistral).toMatchObject({ status: 'unconfigured', reason: 'falta MISTRAL_API_KEY' });
     expect(byProvider.zai).toMatchObject({ status: 'unconfigured', reason: 'falta ZAI_API_KEY' });
     expect(byProvider.cloudflare).toMatchObject({ status: 'unconfigured', reason: 'falta CLOUDFLARE_API_TOKEN' });
-    expect(byProvider.vercel).toMatchObject({ status: 'ready', reason: 'provider sin routes activas por política zero-cost' });
-    expect(byProvider.kilo).toMatchObject({ status: 'unconfigured', reason: 'falta KILO_API_KEY' });
+    expect(byProvider.vercel).toMatchObject({ status: 'disabled', reason: 'provider sin routes activas por política zero-cost' });
+    expect(byProvider.kilo).toMatchObject({ status: 'disabled', reason: 'provider sin routes activas por política zero-cost' });
     expect(byProvider.openrouter).toMatchObject({ status: 'unconfigured', reason: 'falta OPENROUTER_API_KEY' });
   });
 });
@@ -221,7 +221,7 @@ describe('runner directo one-shot', () => {
     ]);
   });
 
-  it('provider-busy reintenta una vez y no usa scheduler ni fallback interno', async () => {
+  it('provider-busy con espera larga difiere el retry y no oculta otras routes', async () => {
     const counts = new Map<string, number>();
     const routes = [
       fakeRoute('zai:busy', async () => {
@@ -238,12 +238,12 @@ describe('runner directo one-shot', () => {
       }),
     ];
     const result = await runBasic(routes, { sleep: async () => {} });
-    expect(Object.fromEntries(counts)).toEqual({ busy: 2, ok: 1 });
-    expect(result.requests).toBe(3);
+    expect(Object.fromEntries(counts)).toEqual({ busy: 1, ok: 1 });
+    expect(result.requests).toBe(2);
     expect(result.routes.map((route) => route.purposeResults[0]?.outcome)).toEqual([
       'PROVIDER_BUSY', 'PASS',
     ]);
-    expect(result.routes[0]?.purposeResults[0]?.httpStatus).toBe(429);
+    expect(result.routes[0]?.purposeResults[0]).toMatchObject({ httpStatus: 429, attempts: 1, retryDeferredMs: 60_000 });
     expect(result.routes[0]?.health).toBe('DEGRADED');
     expect(result.routes[1]?.health).toBe('HEALTHY');
   });
@@ -513,7 +513,7 @@ describe('concurrencia, pacing y diagnóstico', () => {
     expect(result.markdown).toContain('| Health |');
     expect(result.json.overall).toBe('FAIL');
     expect(result.json.requests).toBe(8);
-    expect(result.json.schemaVersion).toBe(2);
+    expect(result.json.schemaVersion).toBe(3);
   });
 
   it('conserva HTTP status, provider code y mensaje útil sin secretos', async () => {
@@ -677,7 +677,7 @@ describe('timeout SLOW, output limit y reportes', () => {
       throw new AiTransportError('timeout after 30000ms', { kind: 'timeout' });
     })], { now: () => now, sleep: async () => {} });
     expect(timedOut.routes[0]?.purposeResults[0]).toMatchObject({
-      outcome: 'TIMEOUT', success: false, latencyMs: 30_000, attempts: 2, health: 'DEGRADED',
+      outcome: 'TIMEOUT', success: false, latencyMs: 60_000, lastAttemptLatencyMs: 30_000, totalElapsedMs: 60_000, attempts: 2, health: 'DEGRADED',
     });
   });
 
@@ -800,7 +800,7 @@ describe('timeout SLOW, output limit y reportes', () => {
       expect(failMd).toContain('Resultado global: **FAIL**');
       expect(passMd).toContain('Resultado global: **PASS**');
       expect(failJson).toMatchObject({
-        schemaVersion: 2, commitSha: 'abc1234', overall: 'FAIL',
+        schemaVersion: 3, commitSha: 'abc1234', overall: 'FAIL',
       });
       expect(failJson.providerSummaries).toEqual([
         { provider: 'groq', HEALTHY: 0, DEGRADED: 0, FAIL: 1, quarantined: 0 },
@@ -877,5 +877,94 @@ describe('salud HEALTHY/DEGRADED/FAIL y resumen por provider', () => {
     expect(result.json.routes[0]?.purposeResults[0]?.attempts).toBe(1);
     expect(result.json.routes[1]?.purposeResults[0]?.attempts).toBe(2);
     expect(result.report).toContain('attempts 2');
+  });
+});
+
+describe('auditoría smoke: tiempos y política de providers', () => {
+  it.each([429, 503])('respeta guía HTTP %s y mide todos los intentos más espera', async (status) => {
+    let now = 0;
+    let calls = 0;
+    const waits: number[] = [];
+    const result = await runBasic([fakeRoute('groq:retry', async (call) => {
+      calls += 1;
+      now += calls === 1 ? 200 : 300;
+      if (calls === 1) throw new AiTransportError('temporary overload', {
+        kind: status === 429 ? 'rate-limit' : 'transport', status, retryable: true,
+        rateLimit: { retryAfterMs: 30_000 },
+      });
+      return { value: validOutput(call.request.purpose) };
+    })], { now: () => now, sleep: async (ms) => { waits.push(ms); now += ms; } });
+    expect(waits).toEqual([30_000]);
+    expect(calls).toBe(2);
+    expect(result.requests).toBe(2);
+    expect(result.routes[0]?.purposeResults[0]).toMatchObject({
+      attempts: 2, lastAttemptLatencyMs: 300, totalElapsedMs: 30_500, latencyMs: 30_500,
+      outcome: 'SLOW', success: true,
+    });
+    expect(result.routes[0]?.latencyMs).toBe(30_500);
+    expect(result.json.routes[0]?.purposeResults[0]?.totalElapsedMs).toBe(30_500);
+    expect(result.markdown).toContain('Last attempt');
+    expect(result.markdown).toContain('30.5 s');
+  });
+
+  it('mantiene el retry y la latencia legacy de Gemini con guía de 30 segundos', async () => {
+    let now = 0;
+    let calls = 0;
+    const waits: number[] = [];
+    const result = await runBasic([fakeRoute('gemini:unchanged', async (call) => {
+      now += 200;
+      if (++calls === 1) throw new AiTransportError('busy', {
+        kind: 'transport', status: 503, retryable: true, retryAfterMs: 30_000,
+      });
+      return { value: validOutput(call.request.purpose) };
+    })], { now: () => now, sleep: async (ms) => { waits.push(ms); now += ms; } });
+    expect(waits).toEqual([1500]);
+    expect(result.routes[0]?.purposeResults[0]).toMatchObject({
+      attempts: 2, latencyMs: 200, lastAttemptLatencyMs: 200, totalElapsedMs: 1900,
+    });
+  });
+
+  it('sin guía usa el backoff mínimo y mantiene el pacing tras el retry', async () => {
+    let now = 0;
+    let calls = 0;
+    const starts: number[] = [];
+    const route = fakeRoute('openrouter:retry', async (call) => {
+      starts.push(now);
+      now += 100;
+      if (++calls === 1) throw new AiTransportError('temporary', { kind: 'transport', status: 503 });
+      return { value: validOutput(call.request.purpose) };
+    }, { providerMinIntervalMs: 3200 });
+    const result = await runAllPurposes([route], { now: () => now, sleep: async (ms) => { now += ms; } });
+    expect(starts.slice(0, 3)).toEqual([0, 3200, 6400]);
+    expect(result.requests).toBe(5);
+  });
+
+  it('una espera diferida también evita peticiones prematuras de otros purposes', async () => {
+    let calls = 0;
+    const result = await runAllPurposes([fakeRoute('groq:deferred', async () => {
+      calls++;
+      throw new AiTransportError('busy', { kind: 'rate-limit', retryAfterMs: 60_000 });
+    })], { sleep: async () => { throw new Error('must not wait beyond the retry budget'); } });
+    expect(calls).toBe(1);
+    expect(result.requests).toBe(1);
+    expect(result.routes[0]?.health).toBe('DEGRADED');
+    expect(result.routes[0]?.purposeResults.map((r) => [r.outcome, r.attempts])).toEqual([
+      ['RATE_LIMIT', 1], ['BLOCKED', 0], ['BLOCKED', 0], ['BLOCKED', 0],
+    ]);
+  });
+
+  it('all-routes muestra providers suspendidos sin FAIL artificial ni HTTP a ellos', async () => {
+    const result = await runAiSmoke({
+      env: { ...ALL_FREE_ENV }, fixtures, allRoutes: true,
+      discover: () => ({ routes: [fakeRoute('groq:ok', async (call) => ({ value: validOutput(call.request.purpose) }))],
+        providers: [{ provider: 'kilo', status: 'disabled', reason: 'sin modelos aprobados', routeIds: [] },
+          { provider: 'vercel', status: 'disabled', reason: 'sin modelos aprobados', routeIds: [] }] }),
+    });
+    expect(result.overall).toBe('PASS');
+    expect(result.missing).toBe(0);
+    expect(result.requests).toBe(1);
+    expect(result.json.disabledProviders).toHaveLength(2);
+    expect(result.markdown).toContain('## Disabled providers');
+    expect(result.markdown).toContain('sin modelos aprobados');
   });
 });

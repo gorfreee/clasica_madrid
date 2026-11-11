@@ -68,6 +68,8 @@ export const AI_SMOKE_SLOW_THRESHOLD_MS = 15_000;
 /** One extra HTTP only for clearly transient failures. */
 export const AI_SMOKE_TRANSIENT_RETRY_MAX = 1;
 export const AI_SMOKE_TRANSIENT_RETRY_BACKOFF_MS = 1_500;
+/** Maximum non-Gemini retry wait; longer guidance is reported without an early retry. */
+export const AI_SMOKE_MAX_RETRY_WAIT_MS = 30_000;
 
 /** Exhaustive labels; a new `AI_CALL_PURPOSES` entry must add a column name. */
 export const AI_SMOKE_PURPOSE_COLUMNS = {
@@ -210,6 +212,9 @@ export type AiSmokePurposeResult = {
   semanticValid: boolean;
   requestMade: boolean;
   latencyMs: number;
+  lastAttemptLatencyMs?: number;
+  totalElapsedMs?: number;
+  retryDeferredMs?: number;
   attempts: number;
   httpStatus?: number;
   providerStatus?: string;
@@ -246,6 +251,7 @@ export type AiSmokeRouteResult = {
 export type AiSmokeRunResult = {
   routes: AiSmokeRouteResult[];
   missingProviders: AiSmokeProviderStatus[];
+  disabledProviders: AiSmokeProviderStatus[];
   tested: number;
   passed: number;
   partial: number;
@@ -425,7 +431,8 @@ export async function runAiSmoke(options: AiSmokeRunOptions): Promise<AiSmokeRun
   const commitSha = options.commitSha ?? process.env.GITHUB_SHA;
 
   const discovery = discover(env);
-  const missingProviders = discovery.providers.filter((item) => item.status !== 'ready');
+  const missingProviders = discovery.providers.filter((item) => item.status !== 'ready' && item.status !== 'disabled');
+  const disabledProviders = discovery.providers.filter((item) => item.status === 'disabled');
   const selected = selectRoutes(discovery, options);
   const routes = new Array<AiSmokeRouteResult>(selected.length);
   const groups = new Map<string, Array<{ index: number; route: AiSmokeRoute }>>();
@@ -479,6 +486,7 @@ export async function runAiSmoke(options: AiSmokeRunOptions): Promise<AiSmokeRun
   const reportInput = {
     routes,
     missingProviders: options.allRoutes ? missingProviders : [],
+    disabledProviders: options.allRoutes ? disabledProviders : [],
     purposes,
     tested,
     passed,
@@ -504,6 +512,7 @@ export async function runAiSmoke(options: AiSmokeRunOptions): Promise<AiSmokeRun
   return {
     routes,
     missingProviders: options.allRoutes ? missingProviders : [],
+    disabledProviders: options.allRoutes ? disabledProviders : [],
     tested,
     passed,
     partial,
@@ -555,6 +564,7 @@ export async function runAiRouteSmoke(options: {
 export function formatAiSmokeReport(input: {
   routes: AiSmokeRouteResult[];
   missingProviders: AiSmokeProviderStatus[];
+  disabledProviders?: AiSmokeProviderStatus[];
   purposes: AiCallPurpose[];
   tested: number;
   passed: number;
@@ -624,8 +634,9 @@ async function smokeOneRoute(input: {
         sleep: input.sleep,
         timeoutMs: input.timeoutMs,
         slowThresholdMs: input.slowThresholdMs,
+        pacer: input.pacer,
       });
-      if (BLOCKING_STATUSES.has(result.outcome)) blockedBy = result;
+      if (BLOCKING_STATUSES.has(result.outcome) || result.retryDeferredMs !== undefined) blockedBy = result;
     }
     purposeResults.push(result);
     logJson(input.log, result, input.env);
@@ -657,48 +668,56 @@ async function directOneShot(input: {
   sleep: (ms: number) => Promise<void>;
   timeoutMs: number;
   slowThresholdMs: number;
+  pacer: ProviderPacer;
 }): Promise<AiSmokePurposeResult> {
   const request = buildAiRequest(input.fixture.observed, input.fixture.purpose);
   const requestedMaxOutputTokens = effectiveMaxOutputTokens(
     request.generation.maxOutputTokens,
     openaiCompatibleModelProfile(input.route.provider, input.route.model),
   );
+  const started = input.now();
   const maxAttempts = 1 + AI_SMOKE_TRANSIENT_RETRY_MAX;
   let attempts = 0;
+  let retryDeferredMs: number | undefined;
   let called: Awaited<ReturnType<typeof callAiRouteDirect>> | undefined;
   while (attempts < maxAttempts) {
     attempts += 1;
+    const attemptStarted = input.now();
     called = await callAiRouteDirect({
-      route: input.route,
-      request,
-      timeoutMs: input.timeoutMs,
-      now: input.now,
+      route: input.route, request, timeoutMs: input.timeoutMs, now: input.now,
     });
     if (called.ok || attempts >= maxAttempts || !isTransientDirectFailure(called.error)) break;
-    await input.sleep(AI_SMOKE_TRANSIENT_RETRY_BACKOFF_MS);
+    // Preserve Gemini's existing retry behavior as requested by the owner.
+    if (input.route.provider === 'gemini') {
+      await input.sleep(AI_SMOKE_TRANSIENT_RETRY_BACKOFF_MS);
+      continue;
+    }
+    const error = called.error;
+    const guidance = error instanceof AiTransportError
+      ? [error.retryAfterMs, error.rateLimit?.retryAfterMs, error.rateLimit?.resetAfterMs]
+      : [];
+    const pacingRemainingMs = Math.max(paceIntervalMs(input.route.limits),
+      input.route.limits?.providerMinIntervalMs ?? 0) - (input.now() - attemptStarted);
+    const waitMs = Math.max(AI_SMOKE_TRANSIENT_RETRY_BACKOFF_MS, pacingRemainingMs,
+      ...guidance.filter((ms): ms is number => ms !== undefined && Number.isFinite(ms) && ms >= 0));
+    if (waitMs > AI_SMOKE_MAX_RETRY_WAIT_MS) {
+      retryDeferredMs = waitMs;
+      break;
+    }
+    await input.sleep(waitMs);
+    // Reuse route/provider pacing for retry starts and subsequent purposes.
+    await input.pacer.wait(input.route);
   }
   if (!called) throw new Error('IA smoke: intento vacío');
-  if (!called.ok) {
-    return resultFromError(
-      input.route,
-      input.fixture.purpose,
-      called.error,
-      input.env,
-      called.latencyMs,
-      requestedMaxOutputTokens,
-      attempts,
-    );
-  }
-  return resultFromTransport(
-    input.route,
-    input.fixture,
-    called.transport,
-    called.latencyMs,
-    requestedMaxOutputTokens,
-    input.slowThresholdMs,
-    input.env,
-    attempts,
-  );
+  const totalElapsedMs = Math.max(0, Math.round(input.now() - started));
+  const latencyMs = input.route.provider === 'gemini' ? called.latencyMs : totalElapsedMs;
+  const result = !called.ok
+    ? resultFromError(input.route, input.fixture.purpose, called.error, input.env,
+      latencyMs, requestedMaxOutputTokens, attempts)
+    : resultFromTransport(input.route, input.fixture, called.transport,
+      latencyMs, requestedMaxOutputTokens, input.slowThresholdMs, input.env, attempts);
+  return { ...result, lastAttemptLatencyMs: called.latencyMs, totalElapsedMs,
+    ...(retryDeferredMs === undefined ? {} : { retryDeferredMs }) };
 }
 
 function resultFromTransport(
@@ -941,7 +960,7 @@ function blockedPurpose(
     requestMade: false,
     latencyMs: 0,
     attempts: 0,
-    health: 'FAIL',
+    health: blocker.retryDeferredMs === undefined ? 'FAIL' : 'DEGRADED',
     blockedBy: blocker.outcome,
     cause: 'blocked',
     requestedMaxOutputTokens: maxOutputTokensForPurpose(purpose),
