@@ -141,9 +141,6 @@ export type SourceDefinition = PipelineSource & {
    * the origin first and uses the Worker only after a recoverable block.
    * March, Zarzuela and Auditorio stay on `relay`. CNDM uses
    * `relay-then-direct`: one direct origin attempt after a recoverable relay failure.
-   * Teatros del Canal and Teatro Auditorio Escorial use `direct-then-relay`:
-   * GitHub Actions received HTTP 403 on the official TEC listing while other
-   * networks received 200. The relay is only the second hop.
    */
   fetchTransport?: 'direct' | 'relay' | 'direct-then-relay' | 'relay-then-direct';
 };

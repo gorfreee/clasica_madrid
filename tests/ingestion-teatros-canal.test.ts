@@ -51,8 +51,7 @@ describe('Teatros del Canal discovery', () => {
     expect(goldberg.observed.occurrences[0]?.time).toBeUndefined();
 
     expect(source.skipDefaultSync).toBeFalsy();
-    expect(source.useFetchRelay).toBe(true);
-    expect(source.fetchTransport).toBe('direct-then-relay');
+    expect(source.useFetchRelay).toBeFalsy();
   });
 
   it('uses the ingest window on the TEC query and does not treat midnight as a concert time', () => {

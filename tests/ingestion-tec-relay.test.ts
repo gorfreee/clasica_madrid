@@ -28,70 +28,69 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('transporte TEC direct-then-relay', () => {
-  it('limita el fallback a los dos hosts y conserva las URLs oficiales', () => {
-    expect(canal).toMatchObject({
-      useFetchRelay: true,
-      fetchTransport: 'direct-then-relay',
-      urls: ['https://www.teatroscanal.com/wp-json/tribe/events/v1/events'],
-    });
-    expect(escorial).toMatchObject({
-      useFetchRelay: true,
-      fetchTransport: 'direct-then-relay',
-      urls: ['https://www.teatroauditorioescorial.es/wp-json/tribe/events/v1/events'],
-    });
-    expect(fetchTransportForHost('www.teatroscanal.com')).toBe('direct-then-relay');
-    expect(fetchTransportForHost('www.teatroauditorioescorial.es')).toBe('direct-then-relay');
-    expect(fetchTransportForHost('www.fundacioncanal.com')).toBe('direct');
-    expect(fetchTransportForHost('www.teatroreal.es')).toBe('direct');
-    expect(fetchTransportForHost('www.march.es')).toBe('relay');
+describe('transporte TEC sin relay no demostrado', () => {
+  it('mantiene el origen oficial en directo y no desvía un 403 al relay', async () => {
+    expect(canal.useFetchRelay).toBeFalsy();
+    expect(canal.fetchTransport).toBeUndefined();
+    expect(escorial.useFetchRelay).toBeFalsy();
+    expect(escorial.fetchTransport).toBeUndefined();
+    expect(fetchTransportForHost('www.teatroscanal.com')).toBe('direct');
+    expect(fetchTransportForHost('www.teatroauditorioescorial.es')).toBe('direct');
     expect(new URL(canalListing).origin).toBe('https://www.teatroscanal.com');
     expect(new URL(escorialListing).origin).toBe('https://www.teatroauditorioescorial.es');
+    expect(new URL(canalListing).pathname).toBe('/wp-json/tribe/events/v1/events');
+    expect(new URL(escorialListing).pathname).toBe('/wp-json/tribe/events/v1/events');
     expect(new URL(canalListing).searchParams.get('categories')).toBe('musica');
     expect(new URL(escorialListing).searchParams.get('categories')).toBe('conciertos');
+
+    for (const listing of [canalListing, escorialListing]) {
+      const hops = installFetch(() => textResponse('no', 403));
+      await expect(getText(listing, 5_000, relayEnv)).rejects.toMatchObject({
+        status: 403,
+        message: `HTTP 403 al pedir ${listing}`,
+      });
+      expect(hops).toEqual([
+        expect.objectContaining({
+          transport: 'direct',
+          url: listing,
+          accept: JSON_DOCUMENT_ACCEPT,
+        }),
+      ]);
+      expect(hops[0]?.accept).not.toMatch(/text\/html|\*\//);
+      resetOriginCookieJar();
+    }
   });
 
-  it('recupera un 403 directo con el JSON oficial y recorre la paginación declarada', async () => {
+  it('pagina el JSON oficial en el mismo origen cuando el directo responde 200', async () => {
     for (const source of [
       {
         id: 'teatros-canal' as const,
         listing: canalListing,
-        page: (id: number, slug: string) => canalEvent(id, slug),
+        event: (id: number, slug: string) => canalEvent(id, slug),
       },
       {
         id: 'teatro-auditorio-escorial' as const,
         listing: escorialListing,
-        page: (id: number, slug: string) => escorialEvent(id, slug),
+        event: (id: number, slug: string) => escorialEvent(id, slug),
       },
     ]) {
-      const page1 = calendar([source.page(1, 'uno')], 2, 2);
-      const page2 = calendar([source.page(2, 'dos')], 2, 2);
       const hops = installFetch((official) => {
         const page = new URL(official).searchParams.get('page');
-        if (page === '1') return jsonResponse(page1);
-        if (page === '2') return jsonResponse(page2);
-        return jsonResponse(BLOCK_HTML, 404, 'text/html');
-      }, { directStatus: 403 });
-
+        const event = page === '2' ? source.event(2, 'dos') : source.event(1, 'uno');
+        return textResponse(calendar([event], 2, 2), 200, 'application/json');
+      });
       const events = await extractSource(
         getSourceDefinition(source.id),
         TEST_NOW,
         TEST_WINDOW,
         (url) => getText(url, 5_000, relayEnv),
       );
-
       expect(events.map((event) => event.externalId).sort()).toEqual(['1', '2']);
       expect(events.every((event) => event.sourceUrl.startsWith(new URL(source.listing).origin))).toBe(true);
-      expect(JSON.stringify(events)).not.toContain('relay.example');
+      expect(JSON.stringify(events)).not.toContain(relayOrigin);
       expect(JSON.stringify(events)).not.toContain(token);
-      expect(hops.map((hop) => `${hop.transport}:${new URL(hop.url).searchParams.get('page')}`)).toEqual([
-        'direct:1',
-        'relay:1',
-        'direct:2',
-        'relay:2',
-      ]);
-      expect(hops.filter((hop) => hop.transport === 'direct').every((hop) => hop.accept === JSON_DOCUMENT_ACCEPT)).toBe(true);
-      expect(hops.filter((hop) => hop.transport === 'relay').every((hop) => hop.contentType === 'application/json')).toBe(true);
+      expect(hops.map((hop) => hop.transport)).toEqual(['direct', 'direct']);
+      expect(hops.map((hop) => new URL(hop.url).searchParams.get('page'))).toEqual(['1', '2']);
       for (const hop of hops) {
         const url = new URL(hop.url);
         expect(url.origin).toBe(new URL(source.listing).origin);
@@ -99,61 +98,21 @@ describe('transporte TEC direct-then-relay', () => {
         expect(url.searchParams.get('categories')).toBe(new URL(source.listing).searchParams.get('categories'));
         expect(url.searchParams.get('start_date')).toBe(new URL(source.listing).searchParams.get('start_date'));
         expect(url.searchParams.get('end_date')).toBe(new URL(source.listing).searchParams.get('end_date'));
+        expect(hop.contentType).toBe('application/json');
       }
       resetOriginCookieJar();
     }
   });
 
-  it('no envía un 403 de otro host al relay', async () => {
-    const other = 'https://www.fundacioncanal.com/ciclo-musica-camara/';
-    const hops = installFetch(() => jsonResponse('ok', 403, 'text/html'), { directStatus: 403 });
-    await expect(getText(other, 5_000, relayEnv)).rejects.toMatchObject({
-      status: 403,
-      message: `HTTP 403 al pedir ${other}`,
-    });
-    expect(hops).toEqual([expect.objectContaining({ transport: 'direct', url: other })]);
-  });
-
-  it('un 403 sin relay configurado sigue siendo fallo y no agenda vacía', async () => {
-    const hops = installFetch(() => jsonResponse('no', 403, 'text/html'), { directStatus: 403 });
-    await expect(getText(canalListing, 5_000, {})).rejects.toMatchObject({ status: 403 });
-    expect(hops).toHaveLength(1);
-    const run = await ingestWithTransport('teatros-canal', () => getText(canalListing, 5_000, {}), { directStatus: 403 });
-    expect(run.summary.sourcesFailed).toEqual([
-      expect.objectContaining({ sourceId: 'teatros-canal', message: expect.stringMatching(/HTTP 403/) }),
-    ]);
-    expect(run.summary.possiblyMissing).toBe(0);
-    expect(run.rawEvents).toEqual([]);
-    expect(run.summary.autoMergeEligible).toBe(false);
-    expect(run.summary.healthReasons).toContain('source-failed:teatros-canal');
-  });
-
-  it('si fallan los dos transportes conserva source-failed y no marca desapariciones', async () => {
-    const hops = installFetch(() => jsonResponse('no', 403, 'text/html'), { directStatus: 403 });
-    await expect(getText(canalListing, 5_000, relayEnv)).rejects.toMatchObject({
-      attempts: [
-        { transport: 'direct', status: 403 },
-        { transport: 'relay', status: 403 },
-      ],
-    });
-    expect(hops).toHaveLength(2);
-    try {
-      await getText(escorialListing, 5_000, relayEnv);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      expect(message).toMatch(/direct → HTTP 403/);
-      expect(message).toMatch(/relay → HTTP 403/);
-      expect(message).not.toContain(token);
-      expect(message).not.toContain(relayOrigin);
-    }
-
+  it('un 403 persistente conserva source-failed y no marca desapariciones', async () => {
+    installFetch(() => textResponse('no', 403));
     const run = await runIngest({
       now: TEST_NOW,
       window: TEST_WINDOW,
       dryRun: true,
       catalog: catalogWithFutureEvents(),
       sourceIds: ['teatros-canal', 'teatro-auditorio-escorial'],
-      dataDir: await mkdtemp(path.join(os.tmpdir(), 'tec-both-fail-')),
+      dataDir: await mkdtemp(path.join(os.tmpdir(), 'tec-403-')),
       get: (url) => getText(url, 5_000, relayEnv),
     });
     expect(run.summary.sourcesSucceeded).toEqual([]);
@@ -173,26 +132,20 @@ describe('transporte TEC direct-then-relay', () => {
   });
 
   it('no acepta HTML de bloqueo con status 200 o 202 como agenda vacía', async () => {
-    const html200 = installFetch(() => jsonResponse(BLOCK_HTML, 200, 'text/html'));
-    const blocked200 = await ingestWithTransport('teatros-canal', (url) => getText(url, 5_000, relayEnv));
-    expect(html200.every((hop) => hop.transport === 'direct')).toBe(true);
-    expect(html200.some((hop) => hop.transport === 'relay')).toBe(false);
+    const html200 = installFetch(() => textResponse(BLOCK_HTML, 200, 'text/html'));
+    const blocked200 = await ingest('teatros-canal', (url) => getText(url, 5_000, relayEnv));
+    expect(html200.every((hop) => hop.transport === 'direct' && hop.contentType === 'text/html')).toBe(true);
     expect(blocked200.summary.sourcesFailed[0]?.message).toMatch(/JSON inválido/);
     expect(blocked200.summary.possiblyMissing).toBe(0);
     expect(blocked200.rawEvents).toEqual([]);
     expect(blocked200.summary.autoMergeEligible).toBe(false);
     resetOriginCookieJar();
 
-    const html202 = installFetch(
-      () => jsonResponse(BLOCK_HTML, 202, 'text/html'),
-      { directStatus: 202 },
-    );
-    const blocked202 = await ingestWithTransport('teatro-auditorio-escorial', (url) => getText(url, 5_000, relayEnv));
-    expect(html202.filter((hop) => hop.transport === 'direct').length).toBe(2);
-    expect(html202.filter((hop) => hop.transport === 'relay').length).toBe(2);
-    expect(html202.every((hop) => hop.contentType === 'text/html')).toBe(true);
+    const html202 = installFetch(() => textResponse(BLOCK_HTML, 202, 'text/html'));
+    const blocked202 = await ingest('teatro-auditorio-escorial', (url) => getText(url, 5_000, relayEnv));
+    expect(html202.length).toBe(2);
+    expect(html202.every((hop) => hop.transport === 'direct' && hop.contentType === 'text/html')).toBe(true);
     expect(blocked202.summary.sourcesFailed[0]?.message).toMatch(/HTTP 202/);
-    expect(blocked202.summary.sourcesFailed[0]?.message).not.toMatch(/JSON ilegible|agenda vacía/);
     expect(blocked202.summary.possiblyMissing).toBe(0);
     expect(blocked202.rawEvents).toEqual([]);
     expect(blocked202.summary.healthReasons).toContain('source-failed:teatro-auditorio-escorial');
@@ -234,27 +187,16 @@ type Hop = {
   contentType?: string;
 };
 
-function installFetch(
-  respond: (officialUrl: string) => Response,
-  options?: { directStatus?: number },
-): Hop[] {
+function installFetch(respond: (officialUrl: string) => Response): Hop[] {
   const hops: Hop[] = [];
   const fetch = vi.fn(async (input: string, init?: RequestInit) => {
     const raw = String(input);
-    const viaRelay = raw.startsWith(relayOrigin);
-    const official = viaRelay ? new URL(raw).searchParams.get('url') ?? '' : raw;
-    if (viaRelay) {
-      expect(header(init, 'authorization')).toBe(`Bearer ${token}`);
-      expect(official.startsWith('https://')).toBe(true);
-    } else {
-      expect(header(init, 'authorization')).toBeUndefined();
-    }
-    const response = options?.directStatus !== undefined && !viaRelay
-      ? jsonResponse('no', options.directStatus, 'text/html')
-      : respond(official);
+    expect(raw.startsWith(relayOrigin)).toBe(false);
+    expect(header(init, 'authorization')).toBeUndefined();
+    const response = respond(raw);
     hops.push({
-      transport: viaRelay ? 'relay' : 'direct',
-      url: official,
+      transport: 'direct',
+      url: raw,
       accept: header(init, 'accept'),
       contentType: response.headers.get('content-type') ?? undefined,
     });
@@ -264,7 +206,7 @@ function installFetch(
   return hops;
 }
 
-function jsonResponse(body: string, status = 200, contentType = 'application/json'): Response {
+function textResponse(body: string, status = 200, contentType = 'text/plain'): Response {
   return new Response(body, { status, headers: { 'content-type': contentType } });
 }
 
@@ -296,12 +238,7 @@ function futureEvent(sourceId: string, catalogSourceId: string, url: string) {
   });
 }
 
-async function ingestWithTransport(
-  sourceId: 'teatros-canal' | 'teatro-auditorio-escorial',
-  get: (url: string) => Promise<string>,
-  options?: { directStatus?: number },
-) {
-  if (options) installFetch(() => jsonResponse('unused'), options);
+async function ingest(sourceId: 'teatros-canal' | 'teatro-auditorio-escorial', get: (url: string) => Promise<string>) {
   const catalog = emptyCatalog();
   catalog.venues.push(makeVenue());
   const source = getSourceDefinition(sourceId);

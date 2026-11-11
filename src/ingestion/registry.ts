@@ -188,8 +188,6 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
     urls: ['https://www.teatroscanal.com/wp-json/tribe/events/v1/events'],
     adapterId: teatrosCanalAdapter.id,
     catalogSourceId: 'src_teatros_canal',
-    useFetchRelay: true,
-    fetchTransport: 'direct-then-relay',
     seedSource: {
       schemaVersion: 1,
       id: 'src_teatros_canal',
@@ -504,8 +502,6 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
     urls: ['https://www.teatroauditorioescorial.es/wp-json/tribe/events/v1/events'],
     adapterId: teatroAuditorioEscorialAdapter.id,
     catalogSourceId: 'src_teatro_auditorio_escorial',
-    useFetchRelay: true,
-    fetchTransport: 'direct-then-relay',
     seedSource: {
       schemaVersion: 1,
       id: 'src_teatro_auditorio_escorial',

@@ -2,10 +2,7 @@
 
 GitHub-hosted runners cannot reach some official sources reliably (today:
 `www.march.es`, `teatrodelazarzuela.inaem.gob.es` and `auditorionacional.inaem.gob.es`
-may return HTTP 403/503; `www.teatroscanal.com` and `www.teatroauditorioescorial.es`
-returned HTTP 403 from Actions on the TEC listing while other networks returned 200).
-Those two hosts try the origin first and use this Worker only after a recoverable
-block. This Worker is a GET-only,
+may return HTTP 403/503). This Worker is a GET-only,
 authenticated fetch relay so ingestion can keep running in GitHub Actions
 while adapters still see official URLs.
 
