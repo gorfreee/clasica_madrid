@@ -387,6 +387,8 @@ function httpError(
     kind: 'transport',
     ...identity,
     retryable: status === 408 || status >= 500,
+    retryAfterMs: rateLimit.retryAfterMs ?? rateLimit.resetAfterMs,
+    rateLimit,
   });
 }
 

@@ -164,7 +164,7 @@ export async function runAiQualify(options: AiQualifyArgs & {
   const purposes = uniquePurposes(fixtures);
   const discover = options.discover ?? discoverAiSmokeTargets;
   const discovery = discover(env);
-  const missingProviders = discovery.providers.filter((item) => item.status !== 'ready');
+  const missingProviders = discovery.providers.filter((item) => item.status !== 'ready' && item.status !== 'disabled');
   const selected = selectQualifyRoutes(discovery, options);
 
   const routeSummaries = new Array<QualifyRouteSummary>(selected.length);

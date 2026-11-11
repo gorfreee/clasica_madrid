@@ -19,7 +19,7 @@ import {
 } from '../src/ingestion/classification/ai-transport.ts';
 import { observedFormatChoiceIsUnresolved } from '../src/ingestion/classification/format-alternatives.ts';
 import { GEMINI_DEFAULT_MODELS, GeminiClassifier } from '../src/ingestion/classification/gemini.ts';
-import { createFreeRoutesFromEnv, MISTRAL_DEFAULT_MODELS, MISTRAL_PRODUCTION_MODEL_LIMITS, ZAI_PRODUCTION_LIMITS } from '../src/ingestion/classification/provider.ts';
+import { createFreeRoutesFromEnv, ZAI_PRODUCTION_LIMITS } from '../src/ingestion/classification/provider.ts';
 import type { ObservedFacts } from '../src/ingestion/observed.ts';
 
 const facts: ObservedFacts = {
@@ -371,6 +371,26 @@ describe('presión genérica por route y provider', () => {
     expect((daily['openrouter:a'] ?? 0) + (daily['openrouter:b'] ?? 0)).toBe(2);
   });
 
+  it('cuenta intentos fallidos de una route retirada contra la cuota compartida', async () => {
+    const stateDir = mkdtempSync(path.join(os.tmpdir(), 'clasica-ai-retired-quota-'));
+    directories.push(stateDir);
+    const clock = immediateClock();
+    const failed = vi.fn(async () => { throw new AiTransportError('404', { kind: 'unavailable', status: 404 }); });
+    const oldPool = pool([
+      route('openrouter', 'retired:free', fakeTransport('openrouter', failed), { providerRpd: 2 }),
+    ], { stateDir, clock, maxRetries: 0 });
+    await expect(oldPool.classify(observed(1))).rejects.toThrow();
+    expect(failed).toHaveBeenCalledOnce();
+    oldPool.close();
+    const send = vi.fn(async () => ({ value: { eligibility: 'include' } }));
+    const newPool = pool([
+      route('openrouter', 'active:free', fakeTransport('openrouter', send), { providerRpd: 2 }),
+    ], { stateDir, clock, maxRetries: 0 });
+    await expect(newPool.classify(observed(2))).resolves.toEqual({ eligibility: 'include' });
+    await expect(newPool.classify(observed(3))).rejects.toBeInstanceOf(AiRateLimitedError);
+    expect(send).toHaveBeenCalledOnce();
+  });
+
   it('minIntervalMs 0 no deshabilita la route', async () => {
     const send = vi.fn(async () => ({ value: { eligibility: 'include' } }));
     const classifier = pool([
@@ -583,10 +603,7 @@ describe('env de presión backwards-compatible', () => {
       maxConcurrent: 1, providerMaxConcurrent: 3, providerMinIntervalMs: 250, rpm: 30,
     });
     expect(groqQwen?.limits).toMatchObject({ maxConcurrent: 2, providerMaxConcurrent: 3 });
-    expect(mistral?.limits).toMatchObject({
-      maxConcurrent: 2, minIntervalMs: 1500, providerMaxConcurrent: 1, providerMinIntervalMs: 1500,
-      tpm: MISTRAL_PRODUCTION_MODEL_LIMITS['ministral-14b-2512']!.tpm,
-    });
+    expect(mistral).toBeUndefined();
     expect(zai?.limits).toMatchObject({ minIntervalMs: 400, providerMaxConcurrent: 2 });
     expect(routes.find((item) => item.routeId === 'zai:glm-4.5-flash')?.limits).toMatchObject({
       providerMaxConcurrent: 2,
@@ -602,22 +619,14 @@ describe('env de presión backwards-compatible', () => {
     expect(unset.find((item) => item.routeId === 'groq:openai/gpt-oss-120b')?.limits).toEqual({
       rpm: 30, tpm: 8_000, rpd: 1_000,
     });
-    expect(unset.map((item) => item.routeId).filter((id) => id.startsWith('mistral:'))).toEqual(
-      MISTRAL_DEFAULT_MODELS.map((model) => `mistral:${model}`),
-    );
-    expect(unset.find((item) => item.routeId === 'mistral:ministral-14b-2512')?.limits).toEqual(
-      MISTRAL_PRODUCTION_MODEL_LIMITS['ministral-14b-2512'],
-    );
-    expect(unset.find((item) => item.routeId === 'mistral:ministral-8b-2512')?.limits).toEqual(
-      MISTRAL_PRODUCTION_MODEL_LIMITS['ministral-8b-2512'],
-    );
+    expect(unset.filter((route) => route.provider === 'mistral')).toEqual([]);
     expect(unset.find((item) => item.routeId === 'zai:glm-4.7-flash')?.limits).toEqual(ZAI_PRODUCTION_LIMITS);
     expect(unset.find((item) => item.routeId === 'cloudflare:@cf/zai-org/glm-4.7-flash')?.limits).toBeUndefined();
 
     expect(() => createFreeRoutesFromEnv({ ...confirmed, GROQ_MAX_CONCURRENT: '-1' }))
       .toThrow(/GROQ_MAX_CONCURRENT: entero fuera de rango/);
     expect(() => createFreeRoutesFromEnv({ ...confirmed, MISTRAL_MIN_INTERVAL_MS: '1.5' }))
-      .toThrow(/MISTRAL_MIN_INTERVAL_MS: entero fuera de rango/);
+      .not.toThrow();
     expect(() => createFreeRoutesFromEnv({
       ...confirmed, ZAI_MODEL_MAX_CONCURRENT: 'glm-4.7-flash',
     })).toThrow(/ZAI_MODEL_MAX_CONCURRENT: se esperan pares modelo:entero/);

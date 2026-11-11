@@ -24,7 +24,7 @@ const FREE_ROUTE_BUILD_ORDER = [
   'gemini', 'groq', 'mistral', 'cloudflare', 'vercel', 'zai', 'kilo', 'openrouter',
 ] as const satisfies readonly AiFreeProvider[];
 
-export type FreeProviderInspectionStatus = 'ready' | 'unconfigured' | 'empty' | 'error';
+export type FreeProviderInspectionStatus = 'ready' | 'disabled' | 'unconfigured' | 'empty' | 'error';
 
 export type FreeProviderInspection = {
   provider: AiFreeProvider;
@@ -51,16 +51,9 @@ export const GROQ_DEFAULT_MODELS = [
   'qwen/qwen3.8-27b',
   'openai/gpt-oss-20b',
 ] as const;
-/**
- * Versioned production defaults for THIS Clásica Madrid Mistral organization.
- * Verified against the account dashboard in September 2026. These are not
- * universal Mistral quotas: another workspace can have different TPM/RPS.
- *
- * `mistral-small-latest` is a mutable alias whose current backing model only
- * had 20_000 TPM / 1 RPS here. Production uses explicit Ministral IDs instead.
- * `ministral-3b-2512` is GA and participates in the same account-level Free
- * mode as the existing 14B/8B routes; it is not a time-limited promotion.
- */
+/** Historical model profiles; Mistral is suspended from the zero-cost pool. */
+export const MISTRAL_ZERO_COST_SUSPENSION =
+  'Mistral suspendido: acceso API gratuito y ausencia de PAYG no verificados (revisión 2026-11-11)';
 export const MISTRAL_DEFAULT_MODELS = [
   'ministral-14b-2512',
   'ministral-8b-2512',
@@ -82,17 +75,8 @@ export const CLOUDFLARE_ZERO_COST_MODELS = [
  */
 export const VERCEL_ZERO_COST_MODELS = [] as const;
 export const VERCEL_QUARANTINED_MODELS = [] as const;
-/**
- * Re-checked 2026-09-29 against the live smoke/catalog.
- * Nex N2.5 Mini/Pro and Ling 3.0 Flash VL now 404 and are removed rather than
- * silently falling back to paid siblings. Dots3 is intentionally removed from
- * even the diagnostic allowlist because its documented free window ends
- * 2026-09-30. No new Kilo model is added: Kilo documents free availability as
- * dynamic/promotional, which does not meet the stable-default policy.
- */
-export const KILO_ZERO_COST_MODELS = [
-  'poolside/laguna-xs-2.1:free',
-] as const;
+/** Laguna returned model-not-found in run 42885832706; no approved replacement. */
+export const KILO_ZERO_COST_MODELS = [] as const;
 export const KILO_QUARANTINED_MODELS = [] as const;
 /**
  * Re-checked 2026-09-29 against GET https://openrouter.ai/api/v1/models.
@@ -106,7 +90,6 @@ export const KILO_QUARANTINED_MODELS = [] as const;
  */
 export const OPENROUTER_ZERO_COST_MODELS = [
   'google/gemma-4-26b-a4b-it:free',
-  'poolside/laguna-xs-2.1:free',
   'google/gemma-4-31b-it:free',
 ] as const;
 export const OPENROUTER_QUARANTINED_MODELS = [
@@ -116,8 +99,8 @@ export const OPENROUTER_QUARANTINED_MODELS = [
 
 const GROQ_FREE_LIMITS: AiRouteLimits = { rpm: 30, tpm: 8_000, rpd: 1_000 };
 /**
- * Conservative production caps for the verified Clásica Madrid Mistral account
- * (September 2026). Real dashboard values were:
+ * Historical caps from the Clásica Madrid Mistral account (September 2026).
+ * Inactive while Mistral is suspended; reverify before reactivation. Values were:
  * - ministral-14b-2512: 937_500 TPM / 0.50 RPS
  * - ministral-8b-2512: 625_000 TPM / 3.13 RPS
  * minIntervalMs is slightly above 1000/RPS so we do not sit on the request
@@ -147,16 +130,10 @@ export const KILO_PRODUCTION_LIMITS: AiRouteLimits = {
   providerMaxConcurrent: 1,
   providerMinIntervalMs: 20_000,
 };
-/**
- * OpenRouter free-model caps for accounts with ≥ $10 purchased credits:
- * 1_000 RPD + 20 RPM, shared across `:free` models. providerRpd=1000 is the
- * aggregate, not 1000 per route. 3200 ms ≈ 18.75 RPM, a conservative margin
- * below the documented 20 RPM (3000 ms would sit on that limit).
- * Paid balance is never an authorized route.
- */
+/** Shared free-model caps. Higher account allowance requires fresh confirmation. */
 export const OPENROUTER_PRODUCTION_LIMITS: AiRouteLimits = {
   providerMinIntervalMs: 3_200,
-  providerRpd: 1_000,
+  providerRpd: 50,
 };
 const DEFAULT_STATE_DIR = fileURLToPath(new URL('../../../.local/ai/', import.meta.url));
 
@@ -246,6 +223,7 @@ export type AiEnv = GeminiConfigEnv & {
   OPENROUTER_MAX_CONCURRENT?: string;
   OPENROUTER_MIN_INTERVAL_MS?: string;
   OPENROUTER_RPD?: string;
+  OPENROUTER_HIGHER_FREE_LIMIT_CONFIRMED?: string;
 };
 
 /** New production providers only participate in an explicit fail-closed zero-cost pool. */
@@ -337,6 +315,7 @@ export function freeProviderUnconfiguredReason(
       if (!isTrue(env.VERCEL_FREE_TIER_CONFIRMED)) return 'falta VERCEL_FREE_TIER_CONFIRMED=true';
       return undefined;
     case 'kilo':
+      if (!env.KILO_MODELS?.trim() && KILO_ZERO_COST_MODELS.length === 0) return undefined;
       if (!env.KILO_API_KEY?.trim()) return 'falta KILO_API_KEY';
       if (!isTrue(env.KILO_FREE_TIER_CONFIRMED)) return 'falta KILO_FREE_TIER_CONFIRMED=true';
       return undefined;
@@ -369,6 +348,9 @@ function inspectFreeProvider(
   env: AiEnv,
   zeroCost: boolean,
 ): FreeProviderInspection {
+  if (provider === 'mistral') {
+    return { provider, status: 'disabled', reason: MISTRAL_ZERO_COST_SUSPENSION, routes: [] };
+  }
   const unconfigured = freeProviderUnconfiguredReason(provider, env);
   if (unconfigured) {
     return { provider, status: 'unconfigured', reason: unconfigured, routes: [] };
@@ -376,20 +358,13 @@ function inspectFreeProvider(
   try {
     const routes = routesForFreeProvider(provider, env, zeroCost);
     if (!routes.length) {
-      // An intentionally empty default allowlist is not an operational failure.
-      // Vercel currently has no stable zero-cost route after Ling Free ended.
-      // Explicit VERCEL_MODELS still fail allowlist validation above.
       if (
-        provider === 'vercel'
-        && VERCEL_ZERO_COST_MODELS.length === 0
-        && VERCEL_QUARANTINED_MODELS.length === 0
+        (provider === 'vercel' && !env.VERCEL_MODELS?.trim()
+          && VERCEL_ZERO_COST_MODELS.length === 0 && VERCEL_QUARANTINED_MODELS.length === 0)
+        || (provider === 'kilo' && !env.KILO_MODELS?.trim()
+          && KILO_ZERO_COST_MODELS.length === 0 && KILO_QUARANTINED_MODELS.length === 0)
       ) {
-        return {
-          provider,
-          status: 'ready',
-          reason: 'provider sin routes activas por política zero-cost',
-          routes: [],
-        };
+        return { provider, status: 'disabled', reason: 'provider sin routes activas por política zero-cost', routes: [] };
       }
       return {
         provider,
@@ -425,14 +400,8 @@ function routesForFreeProvider(provider: AiFreeProvider, env: AiEnv, zeroCost: b
         limits: providerLimitMaps(env, 'GROQ'),
       });
     case 'mistral':
-      return compatibleProviderRoutes('mistral', {
-        key: env.MISTRAL_API_KEY,
-        confirmed: env.MISTRAL_FREE_MODE_CONFIRMED,
-        models: modelList(env.MISTRAL_MODELS, MISTRAL_DEFAULT_MODELS),
-        baseUrl: MISTRAL_DEFAULT_BASE_URL,
-        limits: providerLimitMaps(env, 'MISTRAL'),
-        modelDefaults: MISTRAL_PRODUCTION_MODEL_LIMITS,
-      });
+      // A legacy Free-mode flag cannot prove current API billing entitlement.
+      return [];
     case 'zai':
       return zaiFreeRoutes(env, zeroCost);
     case 'cloudflare':
@@ -471,7 +440,7 @@ function routesForFreeProvider(provider: AiFreeProvider, env: AiEnv, zeroCost: b
         allowed: [...OPENROUTER_ZERO_COST_MODELS, ...OPENROUTER_QUARANTINED_MODELS],
         baseUrl: OPENROUTER_DEFAULT_BASE_URL,
         defaultLimits: OPENROUTER_PRODUCTION_LIMITS,
-        limits: providerLimitMaps(env, 'OPENROUTER'),
+        limits: openrouterLimitMaps(env),
       });
   }
 }
@@ -665,6 +634,13 @@ function providerLimitMaps(env: AiEnv, prefix: LimitPrefix): LimitMaps {
     providerMinIntervalMs: parseNonnegativeInteger(envValue(env, `${prefix}_MIN_INTERVAL_MS`), `${prefix}_MIN_INTERVAL_MS`),
     providerRpd: parseNonnegativeInteger(envValue(env, `${prefix}_RPD`), `${prefix}_RPD`),
   };
+}
+
+function openrouterLimitMaps(env: AiEnv): LimitMaps {
+  const maps = providerLimitMaps(env, 'OPENROUTER');
+  const ceiling = isTrue(env.OPENROUTER_HIGHER_FREE_LIMIT_CONFIRMED) ? 1_000 : 50;
+  // Clamp stale overrides as well as defaults; account allowance is shared.
+  return { ...maps, providerRpd: Math.min(maps.providerRpd ?? ceiling, ceiling) };
 }
 
 function envValue(env: AiEnv, name: string): string | undefined {

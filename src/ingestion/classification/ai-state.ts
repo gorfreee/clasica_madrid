@@ -116,6 +116,15 @@ export class AiPoolState {
     return Object.fromEntries(routes.map((route) => [route.routeId, this.route(route.routeId, now, route.reset).requests]));
   }
 
+  /** Shared quota includes current-day requests to routes removed from configuration. */
+  providerDailyRequests(provider: string, now: number, reset?: AiQuotaResetPolicy): number {
+    this.initialize();
+    const day = reset?.day(now) ?? 'persistent';
+    return Object.entries(this.state.routes)
+      .filter(([routeId, state]) => routeId.startsWith(`${provider}:`) && state.day === day)
+      .reduce((sum, [, state]) => sum + state.requests, 0);
+  }
+
   cached(key: string, purpose: AiCallPurpose): unknown | undefined {
     this.initialize();
     const entry = this.directory ? this.readCacheFile(key) : this.memoryCache.get(key);

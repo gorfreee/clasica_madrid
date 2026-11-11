@@ -18,7 +18,7 @@ const PURPOSE_COLUMNS = {
   taxonomy: 'Taxonomy',
 } as const satisfies Record<AiCallPurpose, string>;
 
-export const AI_SMOKE_REPORT_SCHEMA_VERSION = 2;
+export const AI_SMOKE_REPORT_SCHEMA_VERSION = 3;
 export const AI_SMOKE_REPORT_MD = 'ai-smoke-report.md';
 export const AI_SMOKE_REPORT_JSON = 'ai-smoke-report.json';
 
@@ -41,6 +41,7 @@ export type AiSmokeReportJson = {
   providerSummaries: AiSmokeProviderSummary[];
   routes: AiSmokeRouteResult[];
   missingProviders: AiSmokeProviderStatus[];
+  disabledProviders?: AiSmokeProviderStatus[];
 };
 
 export function buildAiSmokeReportJson(input: {
@@ -60,6 +61,7 @@ export function buildAiSmokeReportJson(input: {
   purposes: AiCallPurpose[];
   routes: AiSmokeRouteResult[];
   missingProviders: AiSmokeProviderStatus[];
+  disabledProviders?: AiSmokeProviderStatus[];
   providerSummaries?: AiSmokeProviderSummary[];
 }): AiSmokeReportJson {
   return {
@@ -81,12 +83,14 @@ export function buildAiSmokeReportJson(input: {
     providerSummaries: input.providerSummaries ?? [],
     routes: input.routes,
     missingProviders: input.missingProviders,
+    disabledProviders: input.disabledProviders ?? [],
   };
 }
 
 export function formatAiSmokeMarkdown(input: {
   routes: AiSmokeRouteResult[];
   missingProviders: AiSmokeProviderStatus[];
+  disabledProviders?: AiSmokeProviderStatus[];
   purposes: AiCallPurpose[];
   tested: number;
   passed: number;
@@ -116,6 +120,11 @@ export function formatAiSmokeMarkdown(input: {
     '',
     formatDiagnosticsTable(input.routes),
   ];
+
+  if (input.disabledProviders?.length) {
+    lines.push('', '## Disabled providers', '');
+    for (const item of input.disabledProviders) lines.push(`- \`${item.provider}\` — ${item.reason ?? item.status}`);
+  }
 
   if (input.missingProviders.length) {
     lines.push('', '## Unconfigured providers', '');
@@ -240,7 +249,7 @@ function formatDiagnosticsTable(routes: AiSmokeRouteResult[]): string {
   if (!routes.length) return '';
   const header = [
     'Provider', 'Model', 'Health', 'Result', 'Latency', 'Attempts',
-    'HTTP', 'Category', 'Finish', 'Out tok', 'Think tok',
+    'Last attempt', 'Total elapsed', 'Retry deferred', 'HTTP', 'Category', 'Finish', 'Out tok', 'Think tok',
   ];
   const separator = header.map(() => '---');
   const rows = routes.map((route) => {
@@ -252,6 +261,9 @@ function formatDiagnosticsTable(routes: AiSmokeRouteResult[]): string {
       escapeCell(route.result),
       escapeCell(formatLatency(route.latencyMs)),
       escapeCell(String(route.purposeResults.reduce((sum, item) => sum + item.attempts, 0))),
+      escapeCell(cell?.lastAttemptLatencyMs === undefined ? '-' : formatLatency(cell.lastAttemptLatencyMs)),
+      escapeCell(formatLatency(route.purposeResults.reduce((sum, item) => sum + (item.totalElapsedMs ?? item.latencyMs), 0))),
+      escapeCell(cell?.retryDeferredMs === undefined ? '-' : formatLatency(cell.retryDeferredMs)),
       escapeCell(cell?.httpStatus !== undefined ? String(cell.httpStatus) : '-'),
       escapeCell(cell?.outcome ?? '-'),
       escapeCell(cell?.finishReason ?? '-'),
@@ -298,6 +310,9 @@ function formatFailureDetail(result: AiSmokePurposeResult): string {
   const details = [
     `\`${result.routeId}\` / ${result.purpose}: **${result.outcome}** (${result.health})`,
     `attempts ${result.attempts}`,
+    result.lastAttemptLatencyMs === undefined ? undefined : `last attempt ${formatLatency(result.lastAttemptLatencyMs)}`,
+    result.totalElapsedMs === undefined ? undefined : `total elapsed ${formatLatency(result.totalElapsedMs)}`,
+    result.retryDeferredMs === undefined ? undefined : `retry deferred: required wait ${formatLatency(result.retryDeferredMs)}`,
     result.httpStatus !== undefined ? `HTTP ${result.httpStatus}` : undefined,
     result.providerErrorCode ? `code ${result.providerErrorCode}` : undefined,
     result.providerStatus ? `status ${result.providerStatus}` : undefined,
