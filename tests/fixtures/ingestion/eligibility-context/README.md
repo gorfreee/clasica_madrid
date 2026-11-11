@@ -21,7 +21,7 @@ Contraste del 22/10/2026 con las fuentes oficiales enlazadas en #384:
 | [Lucía Iglesias / Marcos Madrigal](https://www.condeduquemadrid.es/actividades/lucia-iglesias-y-marcos-madrigal) | «mayor proyección de su generación» es biografía; programa de mélodies, piano y zarzuela | exclude → include |
 | [Todo Chapí](https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=232e80cfb4dc0a10VgnVCM100000891ecb1aRCRD) | Cía. Taller de Zarzuela es la compañía; recital de fragmentos de Chapí | exclude → include |
 | [FSO / Clasictacular](https://auditorionacional.inaem.gob.es/es/programacion/film-symphony-orchestra-clasictacular-3) | Obras clásicas enumeradas; la propia fuente las rotula «Bandas sonoras» | exclude → uncertain |
-| [Cofares](https://www.teatroreal.es/es/espectaculo/xxxi-concierto-navidad) | Primera parte completa: Rachmaninov, Concierto para piano núm. 3; segunda parte: ABBA/Queen/Beatles | exclude → uncertain |
+| [Cofares](https://www.teatroreal.es/es/espectaculo/xxxi-concierto-navidad) | Primera parte completa: Rachmaninov, Concierto para piano núm. 3; segunda parte: ABBA/Queen/Beatles | exclude → include |
 | [Donde nace la voz](https://www.teatroscanal.com/espectaculo/estibaliz-martyn-sergio-kuhlmann-donde-nace-la-voz/) | Bloque clásico/lírico con Verdi, Puccini, Chapí, Chopin y Vives, además de cine y canción | exclude → include |
 
 Auditorio se contrastó descargando su HTML; Condeduque, Real y Canal mediante las
@@ -37,14 +37,22 @@ descargado sí contiene los programas anteriores.
 - **FSO:** la fuente contradice sus propios títulos de obras. Una forma instrumental numerada aporta contraevidencia suficiente para revisión, no conocimiento
   nuevo que identifique todo el programa como clásico. Hace falta reconocimiento
   general de obras/repertorio o una fuente adicional correctamente hidratada.
-- **Cofares:** `Piano Rachmaninov.- Concierto…` quedó aplanado en una sola cadena.
-  La salvaguarda de apellidos personales interpreta `Piano Rachmaninov` como un
-  nombre y no resuelve al compositor. La primera parte evita el exclude, pero
-  las reglas todavía no acreditan el include. Una variante diagnóstica añade
-  únicamente el compositor observado a `composers[]` y demuestra que la política
-  de mixtos sí lo incluye. La reparación general de límites entre créditos y
-  programa pertenece a extracción/normalización, no a excepciones de eligibility.
+- **Cofares:** en el run 39603845469, `Piano Rachmaninov.- Concierto…` no se
+  leía como compositor: la salvaguarda de apellidos tomaba `Piano` por nombre
+  de pila y la primera parte sólo evitaba el exclude. El run 43056214891
+  (`run-43056214891.json`) repite esa grafía y terminaba en
+  `ai-coprincipal-without-classical-block`. Un rol de intérprete seguido de la
+  obra de concierto ya no es un nombre de persona; un nombre de pila, o el rol
+  sin obra, sigue sin acreditar compositor. La segunda parte popular no se
+  publica sola.
 
 No se relaja el grounding de IA: un span inventado se rechaza y la
 coprincipalidad sin bloque clásico resuelto no puede convertirse en include por
 una respuesta de IA. Tampoco se reabren los excludes deterministas.
+
+El programa de Janáček del run 43056214891 se evalúa conservando sus entradas
+y encabezados de compositor. Para este camino de bloque clásico se exigen dos
+títulos y dos referencias de catálogo distintos, atribuidos explícitamente a
+compositores conocidos. Una referencia repetida en una nota, una línea con dos
+números o una mención incidental del apellido no acreditan dos obras. Las
+variantes negativas de los tests son controles sintéticos, no nuevas capturas.

@@ -139,6 +139,13 @@ describe('composer knowledge base', () => {
     expect(findKnownComposersInText('Obras de Bach interpretadas por Francisco Iribarren').map((item) => item.canonicalName)).toEqual(['Johann Sebastian Bach']);
   });
 
+  it('no toma el rol Piano por nombre de pila cuando sigue una obra de concierto', () => {
+    expect(findKnownComposersInText('Nicolas Varela, Piano Rachmaninov')).toEqual([]);
+    expect(findKnownComposersInText('Ana Rachmaninov.- Concierto para piano núm 3')).toEqual([]);
+    expect(findKnownComposersInText('Nicolas Varela, Piano Rachmaninov.- Concierto para piano núm 3')
+      .map((item) => item.canonicalName)).toEqual(['Serguéi Rajmáninov']);
+  });
+
   it.each(['Obras de Iribarren', 'Iribarren: Misa', 'Iribarren\nMisa', 'Iribarren Misa', 'Juan Francés de Iribarren', 'Obras de Juan Francés de Iribarren'])('conserva la referencia musical %s', (text) => {
     expect(findKnownComposersInText(text).map((item) => item.canonicalName)).toEqual(['Juan Francés de Iribarren']);
     expect(classify(facts({ programText: text })).eligibility.ruleId).toBe('known-classical-composer');

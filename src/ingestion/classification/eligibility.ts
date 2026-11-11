@@ -1,4 +1,5 @@
-import { findKnownComposersInText, matchComposer } from '../knowledge/composers.ts';
+import { findKnownComposersInText, matchComposer, stripTrailingBiographicalYears } from '../knowledge/composers.ts';
+import { decodeHtmlEntities } from '../html.ts';
 import type { ObservedFacts } from '../observed.ts';
 import type { Eligibility } from './golden-case.ts';
 import { isOperaCategory, titleIdentifiesOperaEvent } from './opera.ts';
@@ -416,12 +417,22 @@ function isLiveMusicalPerformer(item: { name: string; roleText?: string }): bool
     hasPhrase(name, 'banda sinfonica') ||
     hasPhrase(name, 'banda de musica') ||
     hasWord(name, 'coro') ||
+    // A named quartet, quintet or trio is the musical cast. A dance company
+    // that also contains "ensemble" or "ballet" already returned false above.
+    hasWord(name, 'cuarteto') ||
+    hasWord(name, 'quinteto') ||
+    hasWord(name, 'trio') ||
+    hasWord(name, 'quartet') ||
+    hasWord(name, 'quintet') ||
     hasWord(role, 'orquesta') ||
     hasWord(role, 'orchestra') ||
     hasWord(role, 'orquestra') ||
     hasWord(role, 'ensemble') ||
     hasWord(role, 'coro') ||
     hasWord(role, 'choir') ||
+    hasWord(role, 'cuarteto') ||
+    hasWord(role, 'quinteto') ||
+    hasWord(role, 'trio') ||
     hasWord(role, 'piano') ||
     hasWord(role, 'violin') ||
     hasWord(role, 'viola') ||
@@ -1061,13 +1072,18 @@ export function hasSubstantialClassicalBlock(facts: ObservedFacts): boolean {
 
   // Several independently identified sonatas are a substantial programme,
   // even when the adapter describes them together under one composer.
-  const multipleConcertWorks = /\b(?:[2-9]|[1-9]\d+|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)\s+(?:sonatas?|suites?|cuartetos?|conciertos?|motetes?)\b/.test(programme);
+  const multipleConcertWorks = /(?<![\w/])(?:[2-9]|[1-9]\d+|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)\s+(?:sonatas?|suites?|cuartetos?|conciertos?|motetes?)\b/.test(programme);
   const liveMusicians = facts.performers.some((person) =>
     /\b(?:orquesta|orchestra|ensemble|cuarteto|quartet|filarmonica|solista)\b/.test(
       fieldFolded([person.name, person.roleText].filter(Boolean).join(' ')),
     ));
   if (structuredBlock || textualBlock || describedProgrammeBlock ||
     (multipleConcertWorks && known.length > 0 && liveMusicians)) return true;
+  // Several catalogued works listed in the programme are that programme.
+  // One citation, or the same listing beside pop, film, jazz, flamenco or
+  // songbook repertoire, is not. A separated classical half stays on
+  // classicalFirstHalf, including when this gate declines.
+  if (listedCataloguedProgramme(facts, known)) return true;
   const haystack = identityHaystack(facts);
   // Organ accompaniment alone is not a block of classical repertoire.
   // A concert presenting improvisation over a film is a musical performance.
@@ -1116,6 +1132,70 @@ const CLASSICAL_WORK_NOUNS = [
   'motete',
   'magnificat',
 ];
+
+/**
+ * The programme itself lists at least two catalogued works of a known
+ * composer. Dance sharing the bill does not remove that listing. Pop, film,
+ * jazz, flamenco, DJ and songbook repertoire does: an arrangement or a
+ * citation inside that bill is not an autonomous block.
+ */
+function listedCataloguedProgramme(facts: ObservedFacts, known: string[]): boolean {
+  if (known.length === 0) return false;
+  if (excludedRepertoireSharesTheBill(facts)) return false;
+  // Keep entry boundaries: folding the whole field would turn an editorial
+  // repetition of a catalogue number into a second performed work.
+  const entries = decodeHtmlEntities(facts.programText ?? '').split(/\n+|;\s*|(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚ])/u);
+  const titles = new Set<string>();
+  const catalogs = new Set<string>();
+  let composer: string | undefined;
+  for (const entry of entries) {
+    let line = entry.trim();
+    const heading = matchComposer(stripTrailingBiographicalYears(line.replace(/:\s*$/, '')));
+    if (heading) {
+      composer = heading.canonicalName;
+      continue;
+    }
+    const colon = line.indexOf(':');
+    if (colon >= 0) {
+      // An explicit author starts a new group. Unknown authors and labels
+      // cannot borrow the preceding composer's attribution.
+      composer = matchComposer(stripTrailingBiographicalYears(line.slice(0, colon).trim()))?.canonicalName;
+      line = line.slice(colon + 1).trim();
+    }
+    if (!composer) continue;
+    const folded = fieldFolded(line);
+    const references = [...folded.matchAll(/\b(?:opus|op|bwv|hwv|rv|jw|woo|hob|kv|sz|swv)\.?\s*(?:[ivxlcdm]+\s*\/\s*)?\d+(?:[a-z]|\/\d+)?/g)];
+    if (references.length !== 1) {
+      composer = undefined;
+      continue;
+    }
+    const reference = references[0]!;
+    const title = folded.slice(0, reference.index).replace(/[\s,.:–—-]+$/, '');
+    const suffix = folded.slice(reference.index + reference[0].length);
+    if (!/\p{L}/u.test(title) || !/^[\s.,]*(?:\(\d{4}(?:-\d{2,4})?\))?[\s.,]*$/.test(suffix)) continue;
+    if (/^(?:notas?|referencias?|vease|catalogo|comentarios?|ejemplos?|estrenad|nueva produccion|ciclo de canciones)\b/.test(title)) continue;
+    const titleKey = `${composer}|${foldName(title)}`;
+    const catalogKey = `${composer}|${reference[0].replace(/opus/, 'op').replace(/[.\s]/g, '')}`;
+    if (titles.has(titleKey) || catalogs.has(catalogKey)) continue;
+    titles.add(titleKey);
+    catalogs.add(catalogKey);
+  }
+  return titles.size >= 2;
+}
+
+function excludedRepertoireSharesTheBill(facts: ObservedFacts): boolean {
+  if (repertoireExclusionEvidence(facts, popularSongbookRepertoire).length > 0) return true;
+  if (repertoireExclusionEvidence(facts, (text) =>
+    /\b(?:abba|queen|beatles|broadway)\b/.test(
+      text.replace(/\bqueen of (?:the )?night\b|\babba pater\b/g, ' '),
+    )
+    || /\b(?:bandas? sonoras?|musica (?:de|para el) cine|film music)\b/.test(text)
+    || /\b(?:homenaje|tributo)\b.*\b(?:hans zimmer|john williams|ennio morricone)\b/.test(text)
+  ).length > 0) return true;
+  const haystack = identityHaystack(facts);
+  if (hasWord(haystack, 'jazz') || hasWord(haystack, 'dj')) return true;
+  return hasMusicalFlamencoIdentity(facts, haystack);
+}
 
 function explicitListedClassicalWork(facts: ObservedFacts, known: string[]): boolean {
   const program = fieldFolded(facts.programText);
