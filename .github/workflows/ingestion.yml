@@ -641,6 +641,7 @@ jobs:
             const quota = path.join(stateDir, 'quota.json');
             if (exists(quota) && isSymlink(quota)) return 'symlink';
             const quotaFile = exists(quota) && lstatSync(quota).isFile();
+            let hasFiles = quotaFile;
             for (const kind of ['cache', 'pending']) {
               const folder = path.join(stateDir, kind);
               if (!exists(folder)) continue;
@@ -649,10 +650,10 @@ jobs:
               for (const file of files) {
                 const name = path.basename(file);
                 if (name === 'run.lock' || name.endsWith('.tmp')) continue;
-                return 'files';
+                hasFiles = true;
               }
             }
-            return quotaFile ? 'files' : 'empty';
+            return hasFiles ? 'files' : 'empty';
           }
 
           if (!initialized()) finish(false, 'not-initialized');

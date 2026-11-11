@@ -253,6 +253,24 @@ function scenarios(): Scenario[] {
       expectConclusion: 'success',
       forbidSecret: true,
     },
+    ...(['success', 'failure', 'cancelled'] as const).flatMap((outcome): Scenario[] =>
+      ['pending/linked.json', 'pending/nested/linked.json', 'pending/linked-directory'].map((entry) => ({
+        name: `cache normal y symlink en ${entry}, ingesta ${outcome}`,
+        force: { ingest: outcome },
+        manifest: completed,
+        prepare: (dir, outside) => {
+          writePool(dir, 2);
+          const secret = path.join(outside, 'secret.env');
+          writeFileSync(secret, `${SECRET}\n`);
+          mkdirSync(path.dirname(path.join(dir, entry)), { recursive: true });
+          symlinkSync(entry.endsWith('directory') ? outside : secret, path.join(dir, entry));
+        },
+        expectReason: 'untrusted',
+        expectSaveStep: false,
+        expectConclusion: outcome,
+        forbidSecret: true,
+      })),
+    ),
     {
       name: 'el fallo del guardado no oculta el del catálogo',
       force: { ingest: 'failure' },
