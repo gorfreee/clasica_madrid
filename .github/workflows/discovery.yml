@@ -152,12 +152,17 @@ jobs:
           cache: npm
 
       - name: Restore persistent AI pool state
-        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        id: ai_pool_restore
+        uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5
         with:
           path: |
             .local/ai/quota.json
             .local/ai/cache/**
             .local/ai/pending/**
+            !.local/ai/run.lock
+            !.local/ai/**/run.lock
+            !.local/ai/*.tmp
+            !.local/ai/**/*.tmp
           key: ingestion-ai-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
             ingestion-ai-${{ runner.os }}-
@@ -203,6 +208,7 @@ jobs:
             --github-output "$GITHUB_OUTPUT"
 
       - name: Run discovery ingest
+        id: ingest
         env:
           FROM_DATE: ${{ steps.config.outputs.from }}
           TO_DATE: ${{ steps.config.outputs.to }}
@@ -403,3 +409,156 @@ jobs:
               echo "Se creó como draft por health review."
             fi
           } >> "$GITHUB_STEP_SUMMARY"
+
+      # La acción combinada actions/cache solo guarda su post-step si el job acaba en success().
+      # Restore y save van separados para conservar un árbol válido tras un fallo de catálogo.
+      - name: Decide whether to save persistent AI pool state
+        id: ai_pool_save
+        if: always()
+        env:
+          RUN_OUTCOME: ${{ steps.ingest.outcome }}
+          RUN_MANIFEST: ${{ env.OBS_DIR }}/run.json
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          case "${RUN_OUTCOME:-}" in
+            success|failure|cancelled) ;;
+            *)
+              {
+                echo "save=false"
+                echo "reason=not-initialized"
+              } >> "$GITHUB_OUTPUT"
+              echo "Estado persistente del pool de IA: not-initialized"
+              exit 0
+              ;;
+          esac
+
+          node --import tsx --input-type=module <<'NODE'
+          import { appendFileSync, lstatSync, readdirSync, readFileSync } from 'node:fs';
+          import path from 'node:path';
+          import { AiPoolState } from './src/ingestion/classification/ai-state.ts';
+
+          const outcome = process.env.RUN_OUTCOME ?? '';
+          const manifestPath = process.env.RUN_MANIFEST ?? '';
+          const stateDir = process.env.AI_STATE_DIR ?? '';
+          const output = process.env.GITHUB_OUTPUT ?? '';
+
+          function finish(save, reason) {
+            if (!output) throw new Error('GITHUB_OUTPUT no está definido');
+            appendFileSync(output, `save=${save ? 'true' : 'false'}\nreason=${reason}\n`);
+            console.log(`Estado persistente del pool de IA: ${reason}`);
+            process.exit(0);
+          }
+
+          const pastInit = new Set(['extraction', 'classification', 'reconciliation', 'apply', 'completed']);
+
+          function initialized() {
+            if (outcome === 'success') return true;
+            if (outcome !== 'failure' && outcome !== 'cancelled') return false;
+            try {
+              const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+              if (!manifest || typeof manifest !== 'object' || Array.isArray(manifest)) return false;
+              if (manifest.status === 'completed') return true;
+              return typeof manifest.lastStage === 'string' && pastInit.has(manifest.lastStage);
+            } catch {
+              return false;
+            }
+          }
+
+          function exists(entry) {
+            try {
+              lstatSync(entry);
+              return true;
+            } catch {
+              return false;
+            }
+          }
+
+          function isSymlink(entry) {
+            try {
+              return lstatSync(entry).isSymbolicLink();
+            } catch {
+              return false;
+            }
+          }
+
+          function walk(dir) {
+            if (isSymlink(dir)) return 'symlink';
+            const files = [];
+            const stack = [dir];
+            while (stack.length) {
+              const current = stack.pop();
+              let entries;
+              try {
+                entries = readdirSync(current, { withFileTypes: true });
+              } catch (error) {
+                const detail = error instanceof Error ? error.message : String(error);
+                throw new Error(`No se pudo leer ${current}: ${detail}`);
+              }
+              for (const entry of entries) {
+                const full = path.join(current, entry.name);
+                if (entry.isSymbolicLink()) return 'symlink';
+                if (entry.isDirectory()) stack.push(full);
+                else if (entry.isFile()) files.push(full);
+              }
+            }
+            return files;
+          }
+
+          function persistable() {
+            if (!stateDir || isSymlink(stateDir)) return isSymlink(stateDir) ? 'symlink' : 'empty';
+            const quota = path.join(stateDir, 'quota.json');
+            if (exists(quota) && isSymlink(quota)) return 'symlink';
+            const quotaFile = exists(quota) && lstatSync(quota).isFile();
+            for (const kind of ['cache', 'pending']) {
+              const folder = path.join(stateDir, kind);
+              if (!exists(folder)) continue;
+              const files = walk(folder);
+              if (files === 'symlink') return 'symlink';
+              for (const file of files) {
+                const name = path.basename(file);
+                if (name === 'run.lock' || name.endsWith('.tmp')) continue;
+                return 'files';
+              }
+            }
+            return quotaFile ? 'files' : 'empty';
+          }
+
+          if (!initialized()) finish(false, 'not-initialized');
+          if (!stateDir || !exists(stateDir)) finish(false, 'empty');
+          if (exists(path.join(stateDir, 'run.lock'))) finish(false, 'lock-present');
+
+          const tree = persistable();
+          if (tree === 'symlink') finish(false, 'untrusted');
+          if (tree === 'empty') finish(false, 'empty');
+
+          const state = new AiPoolState(stateDir);
+          let corrupt = false;
+          try {
+            state.initialize();
+          } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            if (message.includes('quota.json no es válido')) corrupt = true;
+            else throw error;
+          } finally {
+            state.close();
+          }
+          if (exists(path.join(stateDir, 'run.lock'))) {
+            throw new Error('AiPoolState.close() dejó run.lock; no se guarda el árbol');
+          }
+          finish(!corrupt, corrupt ? 'corrupt' : 'valid');
+          NODE
+      - name: Save persistent AI pool state
+        if: always() && steps.ai_pool_save.outputs.save == 'true'
+        uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: |
+            .local/ai/quota.json
+            .local/ai/cache/**
+            .local/ai/pending/**
+            !.local/ai/run.lock
+            !.local/ai/**/run.lock
+            !.local/ai/*.tmp
+            !.local/ai/**/*.tmp
+          key: ingestion-ai-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
