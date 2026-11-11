@@ -245,6 +245,12 @@ describe('ORCAM ficha hydration', () => {
     },
   );
 
+  it('preserves an explicit composer with biographical years and an arrangement credit', async () => {
+    const event = (await adapter.extract(await fixture('listing-20261111'), listingUrl, ctx)).find((item) => item.externalId === '4960')!;
+    const html = (await fixture('detail-navidad-retiro')).replace('Camille Saint-Saëns / Arr. Gwyn Arch', 'Camille Saint-Saëns (1835-1921) / Arr. Gwyn Arch');
+    expect(parseOrcamDetail(event, html).works).toContainEqual({ title: 'El cisne', composerName: 'Camille Saint-Saëns' });
+  });
+
   it('fails the other template locally when a session has no time or the building is missing', async () => {
     const event = (await adapter.extract(await fixture('listing-20261111'), listingUrl, ctx)).find((item) => item.externalId === '4960')!;
     const html = await fixture('detail-navidad-retiro');

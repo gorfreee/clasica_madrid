@@ -152,8 +152,9 @@ function orcamComposerCredit(credit: string): string | undefined {
   const author = credit.split(/\s*(?:\/|[–—]|\()\s*(?=arr\.?\s|arreglos?\b|adaptaci[oó]n\b)/iu)[0]!
     .replace(/^atribuido\s+a\s+/iu, '').trim();
   if (/^(?:villancicos?|canciones?|obras?|piezas?)(?:\s+(?:vari[oa]s?|populares?|tradicional(?:es)?))?$/iu.test(author)) return undefined;
-  if (/^(?:arr\.?|arreglos?|adaptaci[oó]n)\s/iu.test(author) || /[\/()]|\barr\./iu.test(author)) return undefined;
-  return canonicalizeComposerName(author);
+  if (/^(?:arr\.?|arreglos?|adaptaci[oó]n)\s/iu.test(author)) return undefined;
+  const name = canonicalizeComposerName(author);
+  return name && !/[\/()]|\barr\./iu.test(name) ? name : undefined;
 }
 
 /** A single explicitly dated local performance; no range/year/time inference. */
