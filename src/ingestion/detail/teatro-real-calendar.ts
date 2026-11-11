@@ -4,11 +4,16 @@ import { stripTags } from '../html.ts';
 import type { ObservedFactPatch } from '../observed.ts';
 import { sourceConflict } from './conflicts.ts';
 
+/** A performance change. The adverb "adelante" ("mirando hacia adelante") is not one. */
+const scheduleModification = /\b(?:adelant(?!e\b)|reprogram|previst[ao]s?\s+inicialmente)/iu;
+const advanceStem = /\badelant(?!e\b)/iu;
+
 /** Teatro Real's singular advance notice, interpreted against its functions table.
- * Deliberately source-specific: this is not another generic postponement rule. */
+ * Deliberately source-specific: this is not another generic postponement rule.
+ * The strict parser starts only for real modification wording; an ambiguous notice is still withheld. */
 export function teatroRealCalendar(html: string, intro: string): ObservedFactPatch {
   const notices = [...intro.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)]
-    .map(m => stripTags(m[1]!)).filter(p => /\badelant|\breprogram|previst[ao]s? inicialmente/iu.test(p));
+    .map(m => stripTags(m[1]!)).filter(p => scheduleModification.test(p));
   if (!notices.length) return {};
   const block = /<section\b[^>]*class="functions-show"[^>]*>([\s\S]*?)<\/section>/i.exec(html)?.[1];
   const fail = (message: string): never => { throw sourceConflict(message, 'date', [
@@ -26,13 +31,13 @@ export function teatroRealCalendar(html: string, intro: string): ObservedFactPat
     return { raw: `${raw} ${time}`, date, time };
   });
   const unique = [...new Map(occurrences.map(s => [`${s.date}|${s.time}`, s])).values()];
-  const matching = notices.filter(p => /\badelant/iu.test(p));
+  const matching = notices.filter(p => advanceStem.test(p));
   if (matching.length !== 1) return fail('aviso de adelanto incompleto o múltiple');
   const sentence = matching[0]!.split(/\.\s/)[0]!.trim();
   const match = /^La representación de (.+?) prevista inicialmente para el (\d{1,2} de [a-záéíóú]+(?: de \d{4})?) se adelantará al (\d{1,2} de [a-záéíóú]+(?: de \d{4})?) a las (\d{1,2}:\d{2})\s*h\.?$/iu.exec(sentence);
   const title = stripTags(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i.exec(html)?.[1] ?? '');
   if (!match || normalizeText(match[1]!) !== normalizeText(title) ||
-      (matching[0]!.match(/\badelant/giu)?.length ?? 0) !== 1 || notices.some(p => p !== matching[0])) return fail('aviso sin correspondencia singular inequívoca');
+      [...matching[0]!.matchAll(new RegExp(advanceStem.source, 'giu'))].length !== 1 || notices.some(p => p !== matching[0])) return fail('aviso sin correspondencia singular inequívoca');
   const dated = (text: string) => {
     if (/\d{4}/.test(text)) return parseSpanishCalendarDate(text);
     const years = [...new Set(unique.map(s => s.date.slice(0, 4)))];
