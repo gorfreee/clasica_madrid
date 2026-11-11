@@ -3,6 +3,7 @@ import { explicitAccessText } from './access-evidence.ts';
 import { decodeHtmlEntities, stripTags } from '../html.ts';
 import { normalizeComposerList, normalizePersonList, normalizeWorkList, type ObservedComposer, type ObservedFactPatch, type ObservedWork } from '../observed.ts';
 import { normalizeUrl } from '../urls.ts';
+import { canonicalizeComposerName } from '../composer-name.ts';
 import type { RawEvent, RawOccurrence } from '../types.ts';
 
 /** The public concert CPT has no REST endpoint or Event JSON-LD. These are
@@ -137,12 +138,22 @@ function programmeFromCredits(program: string): { composers: ObservedComposer[];
     const strong = /<strong\b[^>]*>([\s\S]*?)<\/strong>/i.exec(para[1]!);
     if (!strong) continue;
     const title = stripTags(para[1]!.slice(0, strong.index));
-    const composerName = stripTags(strong[1]!);
+    const credit = stripTags(strong[1]!);
     const after = stripTags(para[1]!.slice(strong.index + strong[0].length));
-    if (!title || !composerName || after) continue;
-    works.push({ title, composerName });
+    if (!title || !credit || after) continue;
+    const composerName = orcamComposerCredit(credit);
+    works.push({ title, ...(composerName ? { composerName } : {}) });
   }
-  return { composers: works.map((work) => ({ name: work.composerName! })), works };
+  return { composers: works.flatMap((work) => work.composerName ? [{ name: work.composerName }] : []), works };
+}
+
+/** Arrangers and repertoire labels remain in programText, never person identities. */
+function orcamComposerCredit(credit: string): string | undefined {
+  const author = credit.split(/\s*(?:\/|[–—]|\()\s*(?=arr\.?\s|arreglos?\b|adaptaci[oó]n\b)/iu)[0]!
+    .replace(/^atribuido\s+a\s+/iu, '').trim();
+  if (/^(?:villancicos?|canciones?|obras?|piezas?)(?:\s+(?:vari[oa]s?|populares?|tradicional(?:es)?))?$/iu.test(author)) return undefined;
+  if (/^(?:arr\.?|arreglos?|adaptaci[oó]n)\s/iu.test(author) || /[\/()]|\barr\./iu.test(author)) return undefined;
+  return canonicalizeComposerName(author);
 }
 
 /** A single explicitly dated local performance; no range/year/time inference. */

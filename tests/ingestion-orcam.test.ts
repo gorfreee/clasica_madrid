@@ -218,20 +218,32 @@ describe('ORCAM ficha hydration', () => {
       { title: 'Can you hear me?', composerName: 'Bob Chilcott' },
       { title: 'Trees', composerName: 'Ēriks Ešenvalds' },
       { title: 'Los números', composerName: 'Ana González' },
-      { title: 'El cisne', composerName: 'Camille Saint-Saëns / Arr. Gwyn Arch' },
+      { title: 'El cisne', composerName: 'Camille Saint-Saëns' },
       { title: 'La pelota', composerName: 'Joan Rigol' },
       { title: 'Calipso', composerName: 'Albert Hernández' },
-      { title: 'Menudo menú!', composerName: 'Karl Friedrich Zöllner / Arr. Aurelio González' },
-      { title: 'Vamos a dar un concierto', composerName: 'Atribuido a Wolfgang Amadeus Mozart' },
+      { title: 'Menudo menú!', composerName: 'Karl Friedrich Zöllner' },
+      { title: 'Vamos a dar un concierto', composerName: 'Wolfgang Amadeus Mozart' },
       { title: 'Plink, plank, plunk', composerName: 'Leroy Anderson' },
-      { title: 'The Pink Panther', composerName: 'Henry Mancini / Arr. Jay Althouse' },
-      { title: 'Navidad', composerName: 'Villancicos varios' },
-      { title: 'Ro mi niño', composerName: 'Silvestre Peñas Echeverría / Arr. Ana González' },
+      { title: 'The Pink Panther', composerName: 'Henry Mancini' },
+      { title: 'Navidad' },
+      { title: 'Ro mi niño', composerName: 'Silvestre Peñas Echeverría' },
     ]);
     expect(patch.composers?.map((composer) => composer.name)).not.toContain('UN DÍA EN CANCIONES');
+    expect(patch.programText).toContain('Arr. Gwyn Arch');
+    expect(patch.programText).toContain('Villancicos varios');
     expect(patch.description).toMatch(/Real Teatro de Retiro/);
     expect(patch.accessText).toBeUndefined();
   });
+
+  it.each(['Arr. Gwyn Arch', 'Camille Saint-Saëns / Gwyn Arch', 'Villancicos varios', 'Obras varias', 'Anónimo', 'Tradicional'])(
+    'keeps the work without inventing a composer from %s', async (credit) => {
+      const event = (await adapter.extract(await fixture('listing-20261111'), listingUrl, ctx)).find((item) => item.externalId === '4960')!;
+      const html = (await fixture('detail-navidad-retiro')).replace('Camille Saint-Saëns / Arr. Gwyn Arch', credit);
+      const patch = parseOrcamDetail(event, html);
+      expect(patch.works).toContainEqual({ title: 'El cisne' });
+      expect(patch.composers?.map((composer) => composer.name)).not.toContain(credit);
+    },
+  );
 
   it('fails the other template locally when a session has no time or the building is missing', async () => {
     const event = (await adapter.extract(await fixture('listing-20261111'), listingUrl, ctx)).find((item) => item.externalId === '4960')!;
@@ -538,21 +550,35 @@ describe('ORCAM pipeline safety', () => {
     const catalog = emptyCatalog();
     catalog.events = [published, absent];
     catalog.sources = [source.seedSource];
+    const get = async (url: string) => {
+      if (url === listingUrl) return listing;
+      if (url.includes('concierto-de-navidad-un-dia-de-canciones')) return fixture('detail-navidad-retiro');
+      return fixture('detail-symphonic');
+    };
     const succeeded = await runIngest({
       now: TEST_NOW, dryRun: true, catalog, sourceIds: [source.id],
       dataDir: await mkdtemp(path.join(os.tmpdir(), 'orcam-navidad-')),
-      get: async (url) => {
-        if (url === listingUrl) return listing;
-        if (url.includes('concierto-de-navidad-un-dia-de-canciones')) return fixture('detail-navidad-retiro');
-        return fixture('detail-symphonic');
-      },
+      get,
     });
     const kept = succeeded.candidates.find((candidate) => candidate.event.id === published.id);
+    expect(kept?.event.composers.map((composer) => composer.name)).not.toContain('Villancicos varios');
+    expect(kept?.event.composers.some((composer) => /Arr\.|\//.test(composer.name))).toBe(false);
+    expect(kept?.event.works).toContainEqual({ title: 'Navidad' });
+    expect(kept?.event.works).toContainEqual({ title: 'El cisne', composerName: 'Camille Saint-Saëns' });
+    expect(kept?.event.works).toContainEqual({ title: 'Ro mi niño', composerName: 'Silvestre Peñas Echeverría' });
     expect(kept?.event.occurrences.map((item) => ({ id: item.id, date: item.date, time: item.time }))).toEqual([
       { id: 'occ_fundacion_orcam_navidad_un_dia_01', date: '2026-12-05', time: '17:00' },
       { id: 'occ_fundacion_orcam_navidad_un_dia_02', date: '2026-12-06', time: '12:00' },
     ]);
     expect(succeeded.possiblyMissing.map((item) => item.eventId)).toEqual([absent.id]);
+    const repeated = await runIngest({
+      now: TEST_NOW, dryRun: true,
+      catalog: mergeCandidateBatch(catalog, succeeded.candidates).catalog,
+      sourceIds: [source.id], dataDir: await mkdtemp(path.join(os.tmpdir(), 'orcam-repeat-')), get,
+    });
+    expect(repeated.summary.newEvents).toBe(0);
+    expect(repeated.summary.updatedEvents).toBe(0);
+    expect(repeated.summary.unchangedEvents).toBe(2);
 
     const failed = await runIngest({
       now: TEST_NOW, dryRun: true, catalog, sourceIds: [source.id],
