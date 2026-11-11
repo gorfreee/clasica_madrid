@@ -11,6 +11,7 @@ import { runIngest } from '../src/ingestion/pipeline.ts';
 import { mergeCandidateBatch } from '../src/ingestion/batch.ts';
 import { matchEventIdentity, newObservationKeys } from '../src/ingestion/identity.ts';
 import { emptyCatalog, type Catalog } from '../src/lib/domain/catalog.ts';
+import type { Event } from '../src/lib/schemas/index.ts';
 import type { AdapterContext, AdapterDiscardReport } from '../src/ingestion/types.ts';
 import { TEST_NOW, TEST_WINDOW } from './helpers.ts';
 
@@ -73,6 +74,49 @@ describe('ORCAM official calendar', () => {
     expect(() => adapter.extract(html.replace('loop-grid.post">', 'loop-grid.post"><a rel="next" href="?page=2">Next</a>'), listingUrl, ctx)).toThrow(/paginado/);
     const card = /<div data-elementor-type="loop-item"[\s\S]*<\/div><\/div><\/main>/.exec(html)![0];
     expect(() => adapter.extract(html.replace(card, '</div></main>'), listingUrl, ctx)).toThrow(/cobertura/);
+  });
+
+  it('keeps the 11 Nov calendar when one card is a same-month range without a time', async () => {
+    const discards: AdapterDiscardReport[] = [];
+    const events = await adapter.extract(await fixture('listing-20261111'), listingUrl, {
+      ...ctx,
+      reportDiscard: (discard) => discards.push(discard),
+    });
+    expect(events).toHaveLength(16);
+    expect(events.every((event) => event.observed.occurrences.length === 0)).toBe(true);
+    expect(new Set(events.map((event) => event.externalId)).size).toBe(16);
+    expect(events.some((event) => event.externalId === '4861')).toBe(false);
+    expect(discards).toEqual([
+      expect.objectContaining({
+        externalId: '4861',
+        reason: 'stale-conflicting-schedule',
+        title: 'Final del viaje',
+      }),
+    ]);
+    const navidad = events.find((event) => event.externalId === '4960')!;
+    expect(navidad.observed).toMatchObject({
+      title: 'Concierto de Navidad: Un día en canciones',
+      categoryText: 'Proyecto Educativo',
+      occurrences: [],
+    });
+    expect(navidad.listingDateText).toBe('5 y 6 de diciembre de 2026');
+    expect(navidad.observed.venueText).toBeUndefined();
+    expect(events.filter((event) => event.externalId !== '4960').every((event) => /\d{1,2}:\d{2}h$/.test(event.listingDateText ?? ''))).toBe(true);
+  });
+
+  it('does not drop a real card or split a range to force the month counts', async () => {
+    const html = await fixture('listing-20261111');
+    const december = '&quot;value&quot;:&quot;2026-12-01&quot;,&quot;label&quot;:&quot;2026-12-01&quot;,&quot;count&quot;:4';
+    for (const count of [3, 5]) {
+      expect(() => adapter.extract(html.replace(december, december.replace('count&quot;:4', `count&quot;:${count}`)), listingUrl, ctx)).toThrow(/cobertura/);
+    }
+    for (const heading of ['31 y 32 de diciembre de 2026', '30 de noviembre y 1 de diciembre de 2026', '6 diciembre 2026']) {
+      expect(() => adapter.extract(html.replace('5 y 6 de diciembre de 2026', heading), listingUrl, ctx)).toThrow(/tarjeta incompleta/);
+    }
+    expect(() => adapter.extract(html.replace('loop-grid.post">', 'loop-grid.post"><a rel="next" href="?page=2">Next</a>'), listingUrl, ctx)).toThrow(/paginado/);
+    expect(() => adapter.extract(html.replace('e-load-more-spinner', 'e-load-more-anchor'), listingUrl, ctx)).toThrow(/paginado/);
+    const dated = await smallListing();
+    expect(() => adapter.extract(dated.replace(/<p\b[^>]*>\s*· 19:30h\s*<\/p>/, ''), listingUrl, ctx)).toThrow(/tarjeta incompleta/);
   });
 
   it('accepts a verified empty calendar and ignores unrelated navigation', () => {
@@ -151,6 +195,57 @@ describe('ORCAM ficha hydration', () => {
     expect(christmas.works!.every((w) => w.composerName)).toBe(true);
   });
 
+  it('reads explicit sessions, the building and the credits from the other template', async () => {
+    const event = (await adapter.extract(await fixture('listing-20261111'), listingUrl, ctx)).find((item) => item.externalId === '4960')!;
+    const patch = parseOrcamDetail(event, await fixture('detail-navidad-retiro'));
+    expect(patch.venueText).toBe('Real Teatro de Retiro');
+    expect(patch.occurrences).toEqual([
+      { raw: 'Sábado 5 de diciembre de 2026, 17:00 horas', date: '2026-12-05', time: '17:00' },
+      { raw: 'Domingo 6 de diciembre de 2026, 12:00 horas', date: '2026-12-06', time: '12:00' },
+    ]);
+    expect(patch.calendarEvidence).toEqual({
+      complete: { from: '2026-12-05', to: '2026-12-06' },
+      evidence: 'sesiones explícitas del widget de calendario de la ficha',
+    });
+    expect(patch.performers).toEqual([
+      { name: 'Pequeños Cantores de la ORCAM' },
+      { name: 'Álvaro Martín', roleText: 'PIANISTA Y ASISTENTE' },
+      { name: 'Ana Hernández', roleText: 'CONCEPTO ESCÉNICO Y NARRACIÓN' },
+      { name: 'Ana González', roleText: 'DIRECTORA' },
+    ]);
+    expect(patch.works).toEqual([
+      { title: 'El perro de San Roque', composerName: 'David Azurza' },
+      { title: 'Can you hear me?', composerName: 'Bob Chilcott' },
+      { title: 'Trees', composerName: 'Ēriks Ešenvalds' },
+      { title: 'Los números', composerName: 'Ana González' },
+      { title: 'El cisne', composerName: 'Camille Saint-Saëns / Arr. Gwyn Arch' },
+      { title: 'La pelota', composerName: 'Joan Rigol' },
+      { title: 'Calipso', composerName: 'Albert Hernández' },
+      { title: 'Menudo menú!', composerName: 'Karl Friedrich Zöllner / Arr. Aurelio González' },
+      { title: 'Vamos a dar un concierto', composerName: 'Atribuido a Wolfgang Amadeus Mozart' },
+      { title: 'Plink, plank, plunk', composerName: 'Leroy Anderson' },
+      { title: 'The Pink Panther', composerName: 'Henry Mancini / Arr. Jay Althouse' },
+      { title: 'Navidad', composerName: 'Villancicos varios' },
+      { title: 'Ro mi niño', composerName: 'Silvestre Peñas Echeverría / Arr. Ana González' },
+    ]);
+    expect(patch.composers?.map((composer) => composer.name)).not.toContain('UN DÍA EN CANCIONES');
+    expect(patch.description).toMatch(/Real Teatro de Retiro/);
+    expect(patch.accessText).toBeUndefined();
+  });
+
+  it('fails the other template locally when a session has no time or the building is missing', async () => {
+    const event = (await adapter.extract(await fixture('listing-20261111'), listingUrl, ctx)).find((item) => item.externalId === '4960')!;
+    const html = await fixture('detail-navidad-retiro');
+    expect(() => parseOrcamDetail(event, html.replace('17:00 horas', 'horas'))).toThrow(/sesión explícita/);
+    expect(() => parseOrcamDetail(event, html.replace('Sábado 5', 'Viernes 5'))).toThrow(/día de la semana/);
+    expect(() => parseOrcamDetail(event, html.replace('data-id="5f3fcfb"', 'data-id="changed"'))).toThrow(/sede/);
+    expect(() => parseOrcamDetail(event, html.replace('data-id="a80013c"', 'data-id="changed"'))).toThrow(/sesiones explícitas/);
+    const classic = await fixture('detail-symphonic');
+    const symphonic = await sample();
+    const sessions = '<div data-id="a80013c"><p>Sábado 5 de diciembre de 2026, 17:00 horas</p></div>';
+    expect(() => parseOrcamDetail(symphonic, classic.replace('</div></body>', `${sessions}</div></body>`))).toThrow(/mezcla plantillas/);
+  });
+
   it('fails locally for wrong identity, missing venue, malformed dates or multiple schedules', async () => {
     const event = await sample();
     const html = await fixture('detail-symphonic');
@@ -164,6 +259,79 @@ describe('ORCAM ficha hydration', () => {
     expect(failed?.observed).toEqual(event.observed);
   });
 });
+
+async function loopCard(name: string, id: string): Promise<string> {
+  const html = await fixture(name);
+  const marker = html.indexOf(`e-loop-item-${id}`);
+  const start = html.lastIndexOf('<div', marker);
+  const slice = html.slice(start);
+  const inner = orcamDiv(slice, /<div\b[^>]*data-elementor-type=["']loop-item["'][^>]*>/i)!;
+  const open = slice.slice(0, slice.indexOf('>') + 1);
+  return `${open}${inner}</div>`;
+}
+
+function listingWith(cards: string[], months: { value: string; count: number }[]): string {
+  const counts = JSON.stringify({ urlName: 'fecha', values: [], options: months }).replaceAll('"', '&quot;');
+  return `<main><h1>Próximos conciertos</h1><div data-search-filter-settings="${counts}"></div><div data-widget_type="loop-grid.post">${cards.join('')}</div></main>`;
+}
+
+async function pairedListing(): Promise<string> {
+  return listingWith(
+    [await loopCard('listing', '4840'), await loopCard('listing-20261111', '4960')],
+    [{ value: '2026-10-01', count: 1 }, { value: '2026-12-01', count: 1 }],
+  );
+}
+
+function navidadEvent(): Event {
+  return {
+    schemaVersion: 1,
+    id: 'evt_fundacion_orcam_navidad_un_dia',
+    slug: 'concierto-de-navidad-un-dia-en-canciones',
+    title: 'Concierto de Navidad: Un día en canciones',
+    status: 'scheduled',
+    venueId: 'ven_real_teatro_retiro',
+    organizerIds: [],
+    seriesId: null,
+    occurrences: [
+      { id: 'occ_fundacion_orcam_navidad_un_dia_01', date: '2026-12-05', time: '17:00', status: 'scheduled' },
+      { id: 'occ_fundacion_orcam_navidad_un_dia_02', date: '2026-12-06', time: '12:00', status: 'scheduled' },
+    ],
+    performers: [],
+    composers: [],
+    works: [],
+    eras: ['contemporary'],
+    formats: ['choral'],
+    kind: 'established',
+    access: 'unknown',
+    citations: [{
+      sourceId: source.catalogSourceId,
+      url: 'https://fundacionorcam.org/conciertos/2026-27/concierto-de-navidad-un-dia-de-canciones/',
+      checkedAt: '2026-09-01',
+      externalId: '4960',
+    }],
+    primarySourceId: source.catalogSourceId,
+    lastVerifiedAt: '2026-09-01',
+  };
+}
+
+/** Catalog stub used only to prove a failed ficha cannot mark an unseen concert missing. */
+function absentOrcamEvent(): Event {
+  return {
+    ...navidadEvent(),
+    id: 'evt_fundacion_orcam_control_ausente',
+    slug: 'control-ausente',
+    title: 'Control ausente',
+    occurrences: [
+      { id: 'occ_fundacion_orcam_control_ausente_01', date: '2026-12-20', time: '19:00', status: 'scheduled' },
+    ],
+    citations: [{
+      sourceId: source.catalogSourceId,
+      url: 'https://fundacionorcam.org/conciertos/2026-27/control-ausente/',
+      checkedAt: '2026-09-01',
+      externalId: '9990',
+    }],
+  };
+}
 
 function withTicketsWidget(html: string, label: string): string {
   const widget =
@@ -361,5 +529,51 @@ describe('ORCAM pipeline safety', () => {
     expect(result.candidates).toHaveLength(1);
     expect(result.candidates[0]?.event.citations).toHaveLength(2);
     expect(result.apply.proposed.sources.map((s) => s.id).sort()).toEqual(['src_auditorio_nacional', source.catalogSourceId].sort());
+  });
+
+  it('keeps published session ids and does not drop the other concert when one ficha fails', async () => {
+    const listing = await pairedListing();
+    const published = navidadEvent();
+    const absent = absentOrcamEvent();
+    const catalog = emptyCatalog();
+    catalog.events = [published, absent];
+    catalog.sources = [source.seedSource];
+    const succeeded = await runIngest({
+      now: TEST_NOW, dryRun: true, catalog, sourceIds: [source.id],
+      dataDir: await mkdtemp(path.join(os.tmpdir(), 'orcam-navidad-')),
+      get: async (url) => {
+        if (url === listingUrl) return listing;
+        if (url.includes('concierto-de-navidad-un-dia-de-canciones')) return fixture('detail-navidad-retiro');
+        return fixture('detail-symphonic');
+      },
+    });
+    const kept = succeeded.candidates.find((candidate) => candidate.event.id === published.id);
+    expect(kept?.event.occurrences.map((item) => ({ id: item.id, date: item.date, time: item.time }))).toEqual([
+      { id: 'occ_fundacion_orcam_navidad_un_dia_01', date: '2026-12-05', time: '17:00' },
+      { id: 'occ_fundacion_orcam_navidad_un_dia_02', date: '2026-12-06', time: '12:00' },
+    ]);
+    expect(succeeded.possiblyMissing.map((item) => item.eventId)).toEqual([absent.id]);
+
+    const failed = await runIngest({
+      now: TEST_NOW, dryRun: true, catalog, sourceIds: [source.id],
+      dataDir: await mkdtemp(path.join(os.tmpdir(), 'orcam-navidad-fail-')),
+      get: async (url) => {
+        if (url === listingUrl) return listing;
+        if (url.includes('concierto-de-navidad-un-dia-de-canciones')) throw new Error('HTTP 500');
+        return fixture('detail-symphonic');
+      },
+    });
+    expect(failed.summary.sourcesFailed).toEqual([]);
+    expect(failed.summary.detailHydrationFailed).toBe(1);
+    expect(failed.summary.sourceResults?.[source.id]?.hydrationFailed).toBe(1);
+    expect(failed.summary.disappearanceSuppressedSources).toEqual([source.id]);
+    expect(failed.summary.possiblyMissing).toBe(0);
+    expect(failed.candidates.some((candidate) => candidate.event.citations.some((citation) => citation.externalId === '4840'))).toBe(true);
+    expect(failed.candidates.some((candidate) => candidate.event.id === published.id)).toBe(false);
+    expect(published.occurrences.map((item) => item.id)).toEqual([
+      'occ_fundacion_orcam_navidad_un_dia_01',
+      'occ_fundacion_orcam_navidad_un_dia_02',
+    ]);
+    expect(absent.occurrences[0]?.date).toBe('2026-12-20');
   });
 });
