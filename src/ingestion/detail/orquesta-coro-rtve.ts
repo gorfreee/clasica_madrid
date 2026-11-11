@@ -25,27 +25,31 @@ export function parseRtveDetail(event: RawEvent, body: string): ObservedFactPatc
   }
   const occurrences = new Map<string, RawOccurrence>();
   const prices = new Set<string>();
-  const sections = rtveBlocks(article, 'section', 'box-info');
+  const sections = rtveCalendarSections(article);
   if (!sections.length) throw new Error('orquesta-coro-rtve: calendario de ficha vacío');
   const dateLabels = [...article.matchAll(/<strong\b[^>]*>\s*Fecha:\s*<\/strong>/gi)].length;
   if (dateLabels !== sections.length) throw new Error('orquesta-coro-rtve: cobertura incompleta del calendario de ficha');
-  for (const section of sections) {
-    const fields = new Map<string, string>();
-    for (const p of section.matchAll(/<p\b[^>]*>\s*<strong\b[^>]*>([\s\S]*?)<\/strong>([\s\S]*?)<\/p>/gi)) {
-      const key = stripTags(p[1]!);
-      if (fields.has(key)) throw new Error('orquesta-coro-rtve: campo de función repetido');
-      fields.set(key, stripTags(p[2]!));
+  const blocks = sections.map(rtvePerformanceBlock);
+  const timed = blocks.filter((block) => block.time);
+  for (const block of blocks) {
+    if (block.time) continue;
+    // A blank hour is not evidence of a session. Keep the explicit clock only
+    // when this row is the same ticketed performance, or a purchase link that
+    // does not name a performance of its own, beside exactly one clock that
+    // day. Never copy that clock onto the blank row, and never drop any other
+    // incomplete block: the whole ficha still fails.
+    if (!rtveBlankHourCorroborated(block, timed)) {
+      throw new Error('orquesta-coro-rtve: hora de función no reconocible');
     }
-    const dateText = fields.get('Fecha:') ?? '';
-    const timeText = fields.get('Hora:') ?? '';
-    const date = rtveDate(dateText);
-    const time = /^\d{1,2}:\d{2}$/.test(timeText) && parseObservedTime(timeText);
-    // Fail the whole ficha if even one performance is malformed: a partial
-    // schedule must never replace the complete published calendar.
-    if (!time) throw new Error('orquesta-coro-rtve: hora de función no reconocible');
-    occurrences.set(`${date}T${time}`, { raw: `${dateText} ${timeText}`, date, time });
-    const price = fields.get('Precio desde:');
-    if (price) prices.add(`Precio desde: ${price}`);
+  }
+  for (const block of timed) {
+    if (!block.time) continue;
+    occurrences.set(`${block.date}T${block.time}`, {
+      raw: `${block.dateText} ${block.timeText}`, date: block.date, time: block.time,
+    });
+  }
+  for (const block of blocks) {
+    if (block.price) prices.add(`Precio desde: ${block.price}`);
   }
   const contents = rtveBlocks(article, 'section', 'box-content');
   if (contents.length !== 1) throw new Error('orquesta-coro-rtve: falta el contenido del evento');
@@ -153,6 +157,113 @@ function parseRtveSingleRoleCredit(name: string, role: string): ObservedPerson |
 function looksLikeRtveCreditEnsemble(line: string): boolean {
   if (looksLikeEnsembleName(line)) return true;
   return /^(?:bailarines?\b.+|compa[ñn][ií]a\s+de\b.+)$/i.test(line);
+}
+
+type RtveCalendarBlock = {
+  dateText: string;
+  timeText: string;
+  date: string;
+  time?: string;
+  price?: string;
+  ticketEventId?: string;
+};
+
+function rtvePerformanceBlock(section: { inner: string; after: string }): RtveCalendarBlock {
+  const fields = new Map<string, string>();
+  for (const p of section.inner.matchAll(/<p\b[^>]*>\s*<strong\b[^>]*>([\s\S]*?)<\/strong>([\s\S]*?)<\/p>/gi)) {
+    const key = stripTags(p[1]!);
+    if (fields.has(key)) throw new Error('orquesta-coro-rtve: campo de función repetido');
+    fields.set(key, stripTags(p[2]!));
+  }
+  const dateText = fields.get('Fecha:') ?? '';
+  if (!fields.has('Hora:')) throw new Error('orquesta-coro-rtve: hora de función no reconocible');
+  const timeText = fields.get('Hora:') ?? '';
+  const date = rtveDate(dateText);
+  const clock = timeText.trim();
+  let time: string | undefined;
+  if (clock) {
+    const parsed = /^\d{1,2}:\d{2}$/.test(clock) && parseObservedTime(clock);
+    if (!parsed) throw new Error('orquesta-coro-rtve: hora de función no reconocible');
+    time = parsed;
+  }
+  const price = fields.get('Precio desde:');
+  const ticketEventId = rtveTicketEventId(section.after);
+  return {
+    dateText,
+    timeText: clock,
+    date,
+    ...(time ? { time } : {}),
+    ...(price ? { price } : {}),
+    ...(ticketEventId ? { ticketEventId } : {}),
+  };
+}
+
+/**
+ * Blank hour beside exactly one explicit performance on that same date.
+ * The same positive product id repeats that performance.
+ * A negative or zero ticket id does not name a performance.
+ * A matching date, a different price, a clock from another day, or any other
+ * ticket token does not qualify and does not receive the explicit hour.
+ */
+function rtveBlankHourCorroborated(block: RtveCalendarBlock, timed: RtveCalendarBlock[]): boolean {
+  if (block.time || block.timeText || !block.ticketEventId) return false;
+  const sameDay = timed.filter((item) => item.date === block.date && item.time);
+  if (isPositiveTicketEventId(block.ticketEventId)) {
+    return sameDay.filter((item) => item.ticketEventId === block.ticketEventId).length === 1;
+  }
+  // Only a negative or zero ticket id is a purchase row without a performance.
+  // Any other token stays unresolved.
+  if (!/^(?:0|-\d+)$/.test(block.ticketEventId)) return false;
+  return sameDay.length === 1 && isPositiveTicketEventId(sameDay[0]?.ticketEventId);
+}
+
+function isPositiveTicketEventId(id: string | undefined): id is string {
+  return !!id && /^[1-9]\d*$/.test(id);
+}
+
+function rtveTicketEventId(html: string): string | undefined {
+  for (const anchor of html.matchAll(/<a\b[^>]*>/gi)) {
+    if (!/\bcomprar_boton\b/.test(anchor[0])) continue;
+    const href = /\bhref=["']([^"']+)["']/i.exec(anchor[0])?.[1];
+    if (!href) return undefined;
+    try {
+      const id = new URL(decodeHtmlEntities(href), 'https://www.teatromonumental.es').searchParams.get('event');
+      return id?.trim() || undefined;
+    } catch {
+      return undefined;
+    }
+  }
+  return undefined;
+}
+
+/** box-info sections plus the purchase controls that follow each one. */
+function rtveCalendarSections(html: string): { inner: string; after: string }[] {
+  const blocks: { inner: string; after: string }[] = [];
+  for (const start of html.matchAll(/<section\b[^>]*>/gi)) {
+    const classes = /\bclass=["']([^"']*)["']/i.exec(start[0])?.[1]?.split(/\s+/) ?? [];
+    if (!classes.includes('box-info')) continue;
+    const openEnd = start.index + start[0].length;
+    let depth = 1;
+    let close = -1;
+    let closeTagLength = 0;
+    for (const end of html.slice(openEnd).matchAll(/<\/?section\b[^>]*>/gi)) {
+      depth += /^<\//.test(end[0]) ? -1 : 1;
+      if (!depth) {
+        close = openEnd + end.index;
+        closeTagLength = end[0].length;
+        break;
+      }
+    }
+    if (close < 0) throw new Error('orquesta-coro-rtve: bloque HTML incompleto');
+    const afterStart = close + closeTagLength;
+    const rest = html.slice(afterStart);
+    const next = rest.search(/<section\b[^>]*\bbox-(?:info|content)\b/i);
+    blocks.push({
+      inner: html.slice(openEnd, close),
+      after: rest.slice(0, next < 0 ? rest.length : next),
+    });
+  }
+  return blocks;
 }
 
 export function rtveDate(text: string): string {

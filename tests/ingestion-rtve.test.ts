@@ -191,6 +191,63 @@ describe('RTVE / Monumental ficha', () => {
     expect(patch.programText).toContain('Gustav Mahler');
   });
 
+  it('keeps the explicit JOAV sessions and does not fill the blank pack hour', async () => {
+    const listing = await fixture('listing-joav-pack');
+    const events = await adapter.extract(listing, listingUrl, ctx);
+    expect(events.map((event) => [event.externalId, event.listingDateText, event.observed.title])).toEqual([
+      ['/eventos/i-camaraton-sinfonico-de-la-joav/', '22.11.2026; 22.11.2026', 'I CAMARATÓN SINFÓNICO DE LA JOAV'],
+      ['/eventos/la-7-a-de-beethoven-necko-vidal/', '22.11.2026; 22.11.2026', 'LA 7.ª DE BEETHOVEN & NECKO VIDAL'],
+    ]);
+    const camaraton = parseRtveDetail(events[0]!, await fixture('detail-i-camaraton-sinfonico-de-la-joav'));
+    expect(camaraton.occurrences).toEqual([{ raw: '22.11.2026 11:30', date: '2026-11-22', time: '11:30' }]);
+    expect(camaraton.accessText).toBe('Precio desde: 12€; Precio desde: 27€');
+    const beethoven = parseRtveDetail(events[1]!, await fixture('detail-la-7-a-de-beethoven-necko-vidal'));
+    expect(beethoven.occurrences).toEqual([{ raw: '22.11.2026 19:00', date: '2026-11-22', time: '19:00' }]);
+    expect(beethoven.accessText).toBe('Precio desde: 22€; Precio desde: 27€');
+    expect(beethoven.description).toContain('11:30');
+    expect(beethoven.occurrences?.some((item) => item.time === '11:30')).toBe(false);
+  });
+
+  it('accepts a blank hour only when the same ticketed performance is already explicit', async () => {
+    const base = await fixture('detail-symphonic');
+    const ticket = (id: string) => `href="https://teatromonumental.entradas.com/webshop/webticket/shop?event=${id}"`;
+    const withIds = (ids: string[]) => {
+      let index = 0;
+      return base.replace(/href="#"/g, () => ticket(ids[index++] ?? ids.at(-1)!));
+    };
+    const secondBlock = (date: string, time: string, price: string) =>
+      `<p><strong>Fecha:</strong> ${date}</p>\n                        <p><strong>Hora:</strong> ${time}</p>\n                        <p><strong>Precio desde:</strong> ${price}</p>`;
+    const rewriteSecond = (html: string, date: string, time: string, price: string) => html.replace(
+      secondBlock('09.10.2026', '19:30', '20€'),
+      secondBlock(date, time, price),
+    );
+    const event = await sample();
+    const duplicate = rewriteSecond(withIds(['444', '444']), '08.10.2026', '', '35€');
+    const patch = parseRtveDetail(event, duplicate);
+    expect(patch.occurrences).toEqual([{ raw: '08.10.2026 19:30', date: '2026-10-08', time: '19:30' }]);
+    expect(patch.accessText).toBe('Precio desde: 20€; Precio desde: 35€');
+
+    const packOnly = rewriteSecond(withIds(['444', '-9']), '08.10.2026', '', '35€');
+    expect(parseRtveDetail(event, packOnly).occurrences).toEqual([
+      { raw: '08.10.2026 19:30', date: '2026-10-08', time: '19:30' },
+    ]);
+
+    const sameDateWithoutTicket = rewriteSecond(base, '08.10.2026', '', '35€');
+    const otherDay = rewriteSecond(withIds(['444', '444']), '10.10.2026', '', '35€');
+    const otherDayPack = rewriteSecond(withIds(['444', '-9']), '10.10.2026', '', '35€');
+    const noClock = withIds(['444', '444']).replaceAll('Hora:</strong> 19:30', 'Hora:</strong> ');
+    const otherProduct = rewriteSecond(withIds(['444', '445']), '08.10.2026', '', '35€');
+    const unnamedProduct = rewriteSecond(withIds(['444', 'pack']), '08.10.2026', '', '35€');
+    const twoClocks = rewriteSecond(withIds(['444', '445']), '08.10.2026', '12:00', '20€').replace(
+      '<section class="box-content">',
+      `<section class="box-info mb30"><p><strong>Fecha:</strong> 08.10.2026</p><p><strong>Hora:</strong> </p><p><strong>Precio desde:</strong> 35€</p></section><div class="box-cta mb30"><a ${ticket('-9')} class="btn btn-monumental comprar_boton">Comprar entradas</a></div><section class="box-content">`,
+    );
+    for (const broken of [
+      sameDateWithoutTicket, otherDay, otherDayPack, noClock, otherProduct, unnamedProduct, twoClocks,
+      withIds(['444', '445']).replace('19:30', '29:30'),
+    ]) expect(() => parseRtveDetail(event, broken)).toThrow(/orquesta-coro-rtve: hora de función no reconocible/);
+  });
+
   it('fails locally on wrong identity or any malformed performance; retains no publishable listing schedule', async () => {
     const event = await sample();
     const html = await fixture('detail-symphonic');
@@ -239,6 +296,32 @@ describe('RTVE pipeline safety', () => {
     expect(event.performers.map((item) => item.name)).toEqual([
       ...new Set(event.performers.map((item) => item.name)),
     ]);
+  });
+
+  it('publishes the explicit sessions when a blank pack row shares one date, then remains idempotent', async () => {
+    const listing = await smallListing();
+    const detail = (await fixture('detail-symphonic'))
+      .replace('href="#"', 'href="https://teatromonumental.entradas.com/webshop/webticket/shop?event=444"')
+      .replace(
+        '<section class="box-content">',
+        '<section class="box-info mb30"><p><strong>Fecha:</strong> 08.10.2026</p><p><strong>Hora:</strong> </p><p><strong>Precio desde:</strong> 35€</p></section><div class="box-cta mb30"><a href="https://teatromonumental.entradas.com/webshop/webticket/shop?event=-9" class="btn btn-monumental comprar_boton">Comprar entradas</a></div><section class="box-content">',
+      );
+    const run = async (catalog: Catalog = emptyCatalog()) => runIngest({
+      now: TEST_NOW, dryRun: true, catalog, window: TEST_WINDOW, sourceIds: [source.id],
+      dataDir: await mkdtemp(path.join(os.tmpdir(), 'rtve-test-')),
+      get: async (url) => url === listingUrl ? listing : detail,
+    });
+    const first = await run();
+    expect(first.summary.sourcesFailed).toEqual([]);
+    expect(first.summary.candidates).toBe(1);
+    const catalog = mergeCandidateBatch(emptyCatalog(), first.candidates).catalog;
+    expect(catalog.events[0]?.occurrences.map((item) => [item.date, item.time])).toEqual([
+      ['2026-10-08', '19:30'],
+      ['2026-10-09', '19:30'],
+    ]);
+    expect(catalog.events[0]?.access).toBe('paid');
+    const second = await run(catalog);
+    expect(second.summary).toMatchObject({ newEvents: 0, updatedEvents: 0, unchangedEvents: 1, possiblyMissing: 0, batchDuplicates: 0, written: [] });
   });
 
   it('publishes a classical concert with both dates, seeds provenance and venue, then remains idempotent', async () => {
