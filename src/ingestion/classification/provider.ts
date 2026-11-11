@@ -51,9 +51,7 @@ export const GROQ_DEFAULT_MODELS = [
   'qwen/qwen3.8-27b',
   'openai/gpt-oss-20b',
 ] as const;
-/** Historical model profiles; Mistral is suspended from the zero-cost pool. */
-export const MISTRAL_ZERO_COST_SUSPENSION =
-  'Mistral suspendido: acceso API gratuito y ausencia de PAYG no verificados (revisión 2026-11-11)';
+/** Free API access reconfirmed by the account owner on 2026-11-11. */
 export const MISTRAL_DEFAULT_MODELS = [
   'ministral-14b-2512',
   'ministral-8b-2512',
@@ -99,8 +97,9 @@ export const OPENROUTER_QUARANTINED_MODELS = [
 
 const GROQ_FREE_LIMITS: AiRouteLimits = { rpm: 30, tpm: 8_000, rpd: 1_000 };
 /**
- * Historical caps from the Clásica Madrid Mistral account (September 2026).
- * Inactive while Mistral is suspended; reverify before reactivation. Values were:
+ * Caps from the Clásica Madrid Mistral account (September 2026).
+ * These are historical quotas, not a new quota measurement. Free API access
+ * was reconfirmed by the account owner on 2026-11-11.
  * - ministral-14b-2512: 937_500 TPM / 0.50 RPS
  * - ministral-8b-2512: 625_000 TPM / 3.13 RPS
  * minIntervalMs is slightly above 1000/RPS so we do not sit on the request
@@ -130,10 +129,10 @@ export const KILO_PRODUCTION_LIMITS: AiRouteLimits = {
   providerMaxConcurrent: 1,
   providerMinIntervalMs: 20_000,
 };
-/** Shared free-model caps. Higher account allowance requires fresh confirmation. */
+/** Shared free-model caps; $10 purchase confirmed by the owner on 2026-11-11. */
 export const OPENROUTER_PRODUCTION_LIMITS: AiRouteLimits = {
   providerMinIntervalMs: 3_200,
-  providerRpd: 50,
+  providerRpd: 1_000,
 };
 const DEFAULT_STATE_DIR = fileURLToPath(new URL('../../../.local/ai/', import.meta.url));
 
@@ -223,7 +222,6 @@ export type AiEnv = GeminiConfigEnv & {
   OPENROUTER_MAX_CONCURRENT?: string;
   OPENROUTER_MIN_INTERVAL_MS?: string;
   OPENROUTER_RPD?: string;
-  OPENROUTER_HIGHER_FREE_LIMIT_CONFIRMED?: string;
 };
 
 /** New production providers only participate in an explicit fail-closed zero-cost pool. */
@@ -348,9 +346,6 @@ function inspectFreeProvider(
   env: AiEnv,
   zeroCost: boolean,
 ): FreeProviderInspection {
-  if (provider === 'mistral') {
-    return { provider, status: 'disabled', reason: MISTRAL_ZERO_COST_SUSPENSION, routes: [] };
-  }
   const unconfigured = freeProviderUnconfiguredReason(provider, env);
   if (unconfigured) {
     return { provider, status: 'unconfigured', reason: unconfigured, routes: [] };
@@ -400,8 +395,14 @@ function routesForFreeProvider(provider: AiFreeProvider, env: AiEnv, zeroCost: b
         limits: providerLimitMaps(env, 'GROQ'),
       });
     case 'mistral':
-      // A legacy Free-mode flag cannot prove current API billing entitlement.
-      return [];
+      return compatibleProviderRoutes('mistral', {
+        key: env.MISTRAL_API_KEY,
+        confirmed: env.MISTRAL_FREE_MODE_CONFIRMED,
+        models: modelList(env.MISTRAL_MODELS, MISTRAL_DEFAULT_MODELS),
+        baseUrl: MISTRAL_DEFAULT_BASE_URL,
+        limits: providerLimitMaps(env, 'MISTRAL'),
+        modelDefaults: MISTRAL_PRODUCTION_MODEL_LIMITS,
+      });
     case 'zai':
       return zaiFreeRoutes(env, zeroCost);
     case 'cloudflare':
@@ -638,8 +639,8 @@ function providerLimitMaps(env: AiEnv, prefix: LimitPrefix): LimitMaps {
 
 function openrouterLimitMaps(env: AiEnv): LimitMaps {
   const maps = providerLimitMaps(env, 'OPENROUTER');
-  const ceiling = isTrue(env.OPENROUTER_HIGHER_FREE_LIMIT_CONFIRMED) ? 1_000 : 50;
-  // Clamp stale overrides as well as defaults; account allowance is shared.
+  const ceiling = OPENROUTER_PRODUCTION_LIMITS.providerRpd!;
+  // The account owner confirmed the higher free allowance; overrides may lower it.
   return { ...maps, providerRpd: Math.min(maps.providerRpd ?? ceiling, ceiling) };
 }
 

@@ -235,6 +235,13 @@ const KILO_PROMPT: OpenAiCompatibleModelProfile = {
   extraBody: { ...REASONING_NONE },
 };
 
+// Apply the same zero-cost ceiling to production and diagnostic OpenRouter profiles.
+// https://openrouter.ai/docs/guides/routing/provider-selection#max-price
+const OPENROUTER_FREE_PROVIDER = {
+  require_parameters: true,
+  max_price: { prompt: 0, completion: 0, request: 0 },
+} as const;
+
 /**
  * OpenRouter Gemma 4 26B A4B Free: JSON object mode is documented; JSON Schema
  * enforcement is not. `provider.require_parameters` still restricts routing to
@@ -246,7 +253,7 @@ const OPENROUTER_JSON_OBJECT: OpenAiCompatibleModelProfile = {
   responseFormat: 'json-object',
   jsonSchemaStrict: false,
   tokenParameter: 'max_tokens',
-  extraBody: { provider: { require_parameters: true }, ...REASONING_NONE },
+  extraBody: { provider: OPENROUTER_FREE_PROVIDER, ...REASONING_NONE },
 };
 
 /**
@@ -258,7 +265,7 @@ const OPENROUTER_JSON_SCHEMA: OpenAiCompatibleModelProfile = {
   responseFormat: 'json-schema',
   jsonSchemaStrict: false,
   tokenParameter: 'max_tokens',
-  extraBody: { provider: { require_parameters: true }, ...REASONING_NONE },
+  extraBody: { provider: OPENROUTER_FREE_PROVIDER, ...REASONING_NONE },
 };
 
 /** OpenRouter IDs without documented `response_format`. */
@@ -266,7 +273,7 @@ const OPENROUTER_PROMPT: OpenAiCompatibleModelProfile = {
   responseFormat: 'none',
   jsonSchemaStrict: false,
   tokenParameter: 'max_tokens',
-  extraBody: { provider: { require_parameters: true }, ...REASONING_NONE },
+  extraBody: { provider: OPENROUTER_FREE_PROVIDER, ...REASONING_NONE },
 };
 
 /**

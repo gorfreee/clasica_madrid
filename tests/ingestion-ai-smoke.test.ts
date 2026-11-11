@@ -17,6 +17,7 @@ import {
   CLOUDFLARE_ZERO_COST_MODELS,
   GROQ_DEFAULT_MODELS,
   inspectFreePoolFromEnv,
+  MISTRAL_DEFAULT_MODELS,
   KILO_QUARANTINED_MODELS,
   KILO_ZERO_COST_MODELS,
   OPENROUTER_QUARANTINED_MODELS,
@@ -114,6 +115,7 @@ describe('CLI, fixtures y descubrimiento', () => {
     expect(discovered.routes.map((route) => route.routeId)).toEqual([
       ...GEMINI_DEFAULT_MODELS.map((model) => `gemini:${model}`),
       ...GROQ_DEFAULT_MODELS.map((model) => `groq:${model}`),
+      ...MISTRAL_DEFAULT_MODELS.map((model) => `mistral:${model}`),
       ...CLOUDFLARE_ZERO_COST_MODELS.map((model) => `cloudflare:${model}`),
       ...VERCEL_ZERO_COST_MODELS.map((model) => `vercel:${model}`),
       ...ZAI_ZERO_COST_MODELS.map((model) => `zai:${model}`),
@@ -140,7 +142,7 @@ describe('CLI, fixtures y descubrimiento', () => {
     const byProvider = Object.fromEntries(discovered.providers.map((item) => [item.provider, item]));
     expect(byProvider.gemini?.status).toBe('ready');
     expect(byProvider.groq).toMatchObject({ status: 'unconfigured', reason: 'falta GROQ_API_KEY' });
-    expect(byProvider.mistral).toMatchObject({ status: 'disabled', reason: expect.stringContaining('Mistral suspendido') });
+    expect(byProvider.mistral).toMatchObject({ status: 'unconfigured', reason: 'falta MISTRAL_API_KEY' });
     expect(byProvider.zai).toMatchObject({ status: 'unconfigured', reason: 'falta ZAI_API_KEY' });
     expect(byProvider.cloudflare).toMatchObject({ status: 'unconfigured', reason: 'falta CLOUDFLARE_API_TOKEN' });
     expect(byProvider.vercel).toMatchObject({ status: 'disabled', reason: 'provider sin routes activas por política zero-cost' });
@@ -956,13 +958,13 @@ describe('auditoría smoke: tiempos y política de providers', () => {
       env: { ...ALL_FREE_ENV }, fixtures, allRoutes: true,
       discover: () => ({ routes: [fakeRoute('groq:ok', async (call) => ({ value: validOutput(call.request.purpose) }))],
         providers: [{ provider: 'kilo', status: 'disabled', reason: 'sin modelos aprobados', routeIds: [] },
-          { provider: 'mistral', status: 'disabled', reason: 'billing no verificado', routeIds: [] }] }),
+          { provider: 'vercel', status: 'disabled', reason: 'sin modelos aprobados', routeIds: [] }] }),
     });
     expect(result.overall).toBe('PASS');
     expect(result.missing).toBe(0);
     expect(result.requests).toBe(1);
     expect(result.json.disabledProviders).toHaveLength(2);
     expect(result.markdown).toContain('## Disabled providers');
-    expect(result.markdown).toContain('billing no verificado');
+    expect(result.markdown).toContain('sin modelos aprobados');
   });
 });

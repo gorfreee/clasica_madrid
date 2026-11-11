@@ -1,6 +1,6 @@
 # Pool de IA gratuito
 
-Producción usa un pool ordenado de routes `provider:model`. Gemini conserva la prioridad inicial; Groq, Cloudflare Workers AI, Z.AI y OpenRouter aportan capacidad adicional. Mistral está suspendido por facturación no verificada; Kilo y Vercel no tienen modelos aprobados activos. La primera respuesta que supera el schema del purpose termina la llamada. No hay voting, consensus ni llamadas duplicadas tras un resultado válido.
+Producción usa un pool ordenado de routes `provider:model`. Gemini conserva la prioridad inicial; Groq, Mistral, Cloudflare Workers AI, Z.AI y OpenRouter aportan capacidad adicional. Kilo y Vercel no tienen modelos aprobados activos. La primera respuesta que supera el schema del purpose termina la llamada. No hay voting, consensus ni llamadas duplicadas tras un resultado válido.
 
 ## Garantía operativa de coste cero
 
@@ -8,7 +8,7 @@ El workflow declara `AI_ZERO_COST_ONLY=true`. Con esa política:
 
 - OpenAI queda fuera del pool de producción y sólo se conserva como integración manual legacy;
 - Groq exige `GROQ_FREE_TIER_CONFIRMED=true` además de su key;
-- Mistral está suspendido en el factory de coste cero, incluso con `MISTRAL_FREE_MODE_CONFIRMED=true`, overrides o una route fijada; véase la revisión de facturación más abajo;
+- Mistral exige `MISTRAL_FREE_MODE_CONFIRMED=true` además de su key; el titular ha reconfirmado el acceso API de coste cero para esta cuenta;
 - Z.AI sólo admite `glm-4.7-flash` y `glm-4.5-flash`;
 - Cloudflare sólo admite la allowlist versionada, exige `CLOUDFLARE_WORKERS_FREE_CONFIRMED=true` y llama directamente a Workers AI, nunca a AI Gateway;
 - Vercel exige `VERCEL_FREE_TIER_CONFIRMED=true` y sólo IDs de la allowlist con precio documentado $0. El crédito promocional de $5 **no** forma parte de esta garantía;
@@ -41,7 +41,7 @@ Los defaults del pool, en orden, son:
 2. `groq:openai/gpt-oss-120b`;
 3. `groq:qwen/qwen3.8-27b`;
 4. `groq:openai/gpt-oss-20b`;
-5. Mistral: suspendido; sin routes;
+5. Mistral: `ministral-14b-2512`, `ministral-8b-2512`, `ministral-3b-2512`;
 6. Cloudflare Workers AI: `@cf/zai-org/glm-4.7-flash`, `@cf/google/gemma-4-26b-a4b-it`, `@cf/openai/gpt-oss-20b`;
 7. Z.AI: `glm-4.7-flash`, `glm-4.6v-flash`, `glm-4.5-flash`;
 8. Kilo: sin modelos aprobados;
@@ -60,15 +60,11 @@ La política para **nuevas** incorporaciones es conservadora: sólo se añaden m
 
 Cada lista puede reordenarse con `*_MODELS`. Unset significa «usar el default versionado en Git». En zero-cost mode, Z.AI, Cloudflare, Gemini, Vercel, Kilo y OpenRouter rechazan IDs fuera de su allowlist.
 
-### Mistral: suspensión por facturación (2026-11-11)
+### Mistral: acceso gratuito confirmado (2026-11-11)
 
-La [documentación actual de uso y límites](https://docs.mistral.ai/admin/billing-usage/usage-limits) indica que Free mode no incluye API y que usarla requiere activar facturación/PAYG. El [quickstart](https://docs.mistral.ai/getting-started/quickstarts/studio/activate-and-generate-api-key) conserva instrucciones sobre Free mode, mientras [Subscriptions](https://docs.mistral.ai/admin/billing-usage/subscriptions) describe presupuestos incluidos y PAYG. Esta información pública no demuestra el contrato de esta organización. El HTTP 200 del smoke tampoco demuestra ausencia de cargos.
+El titular ha confirmado que esta cuenta ofrece acceso API de coste cero y carece de un método de pago. Esta confirmación de cuenta permite mantener Mistral en el pool con su guardia existente `MISTRAL_FREE_MODE_CONFIRMED=true`, también para selección explícita y routes fijadas. La documentación general del proveedor y un HTTP 200 no sustituyen esta confirmación específica.
 
-Por eso el factory devuelve cero routes Mistral, sin intentar HTTP, y la inspección declara `disabled` con el motivo. La confirmación antigua no reactiva el proveedor. Se conservan los perfiles de transporte y los límites históricos de septiembre para una futura revisión; no son límites actuales verificados ni capacidad activa del pool.
-
-Antes de reactivar mediante una PR hay que verificar en **la organización que posee la key**: plan/contrato aplicable al API, estado de PAYG y recarga automática, presupuesto realmente gratuito (no créditos comprados o temporales), corte duro al agotarlo y uso/costes correspondientes al smoke del 10-11-2026. No publicar keys, datos de pago ni facturas completas. Si el API exige facturación pagada, mantenerlo fuera del pool. Revalidar también los límites de cuenta; no reutilizar las cuotas de septiembre sin evidencia actual.
-
-Esta PR no accede al dashboard ni certifica cargos históricos: establece una protección conservadora mientras esa evidencia no esté disponible. La contrapartida es perder temporalmente tres rutas de fallback funcionales.
+Se conservan los tres modelos Ministral, sus perfiles y los límites versionados de septiembre, con overrides por entorno y tratamiento normal de los rate limits observados. La confirmación de coste cero no constituye una nueva medición de cuotas. Si cambia el plan o se añade facturación, hay que revisar la confirmación antes de continuar usando la key. No se incorporan modelos nuevos ni se activa PAYG.
 
 Z.AI mantiene `providerMaxConcurrent=1` porque el código `1302` representa presión de concurrencia, no cuota diaria ni clave inválida. Cloudflare no recibe RPM/RPD inventados; comparte la asignación gratuita de Workers AI. Kilo mantiene su límite compartido conservador y OpenRouter mantiene sus límites agregados de modelos `:free`.
 
@@ -96,11 +92,11 @@ Las tareas del pool piden JSON corto. Cada route declara sus capacidades en `ope
 | Gemini Flash / Gemma configurados | schema del purpose en Interactions API | según el profile Gemini existente | `max_output_tokens` | Sin cambios en esta revisión. |
 | Groq GPT-OSS 20B/120B | `json_schema`, `strict: true` | `reasoning_effort: low`, output reasoning oculto | `max_tokens` | Constrained decoding documentado. |
 | `groq:qwen/qwen3.8-27b` | `json_schema`, `strict: false` | `reasoning_effort: none` | `max_tokens` | Best-effort conservador. |
-| Mistral `ministral-14b-2512`, `8b`, `3b` | `json_schema`, `strict: true` | no se envía | `max_tokens` | Perfil histórico suspendido; `service_tier=standard_only`. |
+| Mistral `ministral-14b-2512`, `8b`, `3b` | `json_schema`, `strict: true` | no se envía | `max_tokens` | `service_tier=standard_only`. |
 | Z.AI `glm-4.7-flash`, `glm-4.6v-flash`, `glm-4.5-flash` | `json_object` | `thinking.type=disabled` | `max_tokens` | JSON mode + validación local. |
 | Cloudflare GLM/Gemma | sin `response_format` | thinking desactivado con los flags documentados para esos IDs | `max_completion_tokens` | Prompt + validación local; no están en la allowlist oficial de JSON Mode. |
 | `cloudflare:@cf/openai/gpt-oss-20b` | sin `response_format` | no se envían flags GLM/Gemma | `max_tokens` | Profile separado para no mandar parámetros no documentados. |
-| OpenRouter Gemma 4 26B / 31B Free | `json_object` | `reasoning.effort=none` | `max_tokens` | `provider.require_parameters=true`. |
+| OpenRouter Gemma 4 26B / 31B Free | `json_object` | `reasoning.effort=none` | `max_tokens` | `provider.require_parameters=true` y techo de precio $0. |
 | OpenRouter quarantined | conserva el profile histórico | según cada ID | `max_tokens` | Sólo diagnóstico explícito; no participa en el default. |
 
 
@@ -155,9 +151,11 @@ Quarantined:
 
 `openrouter/free`, IDs sin `:free`, fallback automático a variantes pagadas y BYOK siguen excluidos. El body usa `provider: { require_parameters: true }` para restringir el routing a endpoints que aceptan los parámetros enviados.
 
-Los [límites oficiales](https://openrouter.ai/pricing) son 20 RPM y 50 RPD compartidos entre modelos `:free`; 1.000 RPD requieren el historial de compra de créditos aplicable. Los intentos fallidos también cuentan. Sin evidencia de esa cuenta, el default es `providerRpd=50` y `providerMinIntervalMs=3_200`.
+Los [límites oficiales](https://openrouter.ai/pricing) son 20 RPM y 50 RPD compartidos entre modelos `:free`; 1.000 RPD requieren el historial de compra de créditos aplicable. Los intentos fallidos también cuentan. El titular confirmó el 11-11-2026 que la cuenta cumple ese requisito: el default es `providerRpd=1_000` y `providerMinIntervalMs=3_200`. El saldo comprado no es un presupuesto de gasto.
 
-`OPENROUTER_HIGHER_FREE_LIMIT_CONFIRMED=true` sólo debe activarse tras verificar el historial/allowance de la cuenta propietaria de la key. Entonces el techo agregado pasa a 1.000; no autoriza comprar créditos ni usar modelos pagados. `OPENROUTER_RPD` permite reducir el límite (incluido 0), pero queda limitado al techo confirmado: un override antiguo de 1.000 sin esta nueva confirmación se recorta a 50. Los contadores persistidos se conservan y suman por provider, incluso si desaparece una route. El smoke/qualification directo sigue sin compartir ese ledger productivo: también consume la cuota real de la cuenta.
+`OPENROUTER_RPD` permite reducir el límite (incluido 0), pero nunca supera el techo compartido de 1.000. No hace falta una segunda confirmación por entorno para esta cuenta ya confirmada. Para otra cuenta sin el historial requerido, reducirlo a 50 antes de usar su key. Los contadores persistidos se conservan y suman por provider, incluso si desaparece una route. El smoke/qualification directo sigue sin compartir ese ledger productivo: también consume la cuota real de la cuenta.
+
+Cada perfil OpenRouter aprobado añade `provider.max_price: { prompt: 0, completion: 0, request: 0 }`, junto con `require_parameters=true`. Este [filtro oficial de precio](https://openrouter.ai/docs/guides/routing/provider-selection#max-price) excluye endpoints con coste de tokens o por petición, además de la allowlist de IDs `:free`. Si no hay un endpoint gratuito compatible, la llamada falla y el pool usa sus otros fallbacks gratuitos; nunca elimina el techo de precio ni prueba el ID pagado.
 
 Guardrail recomendado: reflejar la allowlist activa del código (`google/gemma-4-26b-a4b-it:free`, `google/gemma-4-31b-it:free`).
 
@@ -311,7 +309,7 @@ Workflow manual: **AI live qualification** (`.github/workflows/ai-live-qualifica
 1. Añadir el secret `GROQ_API_KEY`.
 2. Confirmar en Groq que la organización sigue en Free tier.
 3. Añadir la repository/environment variable `GROQ_FREE_TIER_CONFIRMED=true`.
-4. Mantener Mistral suspendido hasta completar la verificación de facturación descrita arriba. La key y confirmación antiguas no autorizan llamadas. No hace falta borrar credenciales para aplicar esta protección.
+4. Conservar el secret `MISTRAL_API_KEY` y la variable `MISTRAL_FREE_MODE_CONFIRMED=true` para la cuenta cuyo acceso gratuito ha confirmado el titular. No activar PAYG.
 7. Confirmar que siguen existiendo los secrets `CLOUDFLARE_API_TOKEN` y `CLOUDFLARE_ACCOUNT_ID`.
 8. No crear nuevas credenciales Cloudflare.
 9. Añadir únicamente `CLOUDFLARE_WORKERS_FREE_CONFIRMED=true` como repository/environment variable, tras confirmar Workers Free.
@@ -319,7 +317,7 @@ Workflow manual: **AI live qualification** (`.github/workflows/ai-live-qualifica
 11. Verificar que `ZAI_MODELS` sólo contiene modelos explícitamente gratuitos; por defecto no hace falta crear esta variable.
 12. Vercel no necesita credenciales para el pool por defecto mientras `VERCEL_ZERO_COST_MODELS` esté vacío; si se conservan, el crédito promocional de $5 sigue sin autorizar modelos de pago.
 13. Kilo no necesita credenciales mientras no tenga modelos aprobados. Retirar `KILO_MODELS` si aún selecciona Laguna; una selección explícita retirada se rechaza.
-14. Añadir el secret `OPENROUTER_API_KEY` y `OPENROUTER_FREE_TIER_CONFIRMED=true`. Retirar Laguna de cualquier `OPENROUTER_MODELS` explícito y del guardrail externo. Mantener el techo de 50 RPD salvo verificación actual y confirmación del nivel superior. Opcional pero recomendado: Guardrail de OpenRouter con la misma allowlist que el código.
+14. Añadir el secret `OPENROUTER_API_KEY` y `OPENROUTER_FREE_TIER_CONFIRMED=true`. Retirar Laguna de cualquier `OPENROUTER_MODELS` explícito y del guardrail externo. El default compartido es 1.000 RPD para esta cuenta confirmada, con techo de precio $0 por request. Opcional pero recomendado: Guardrail de OpenRouter con la misma allowlist que el código.
 15. No hace falta crear `VERCEL_MODELS` / `KILO_MODELS` / `OPENROUTER_MODELS` ni overrides de límites: los defaults viven en el código.
 16. Ejecutar `npm run ai:smoke:all` (y `--all-purposes` si cambian las tasks), una route concreta con `npm run ai:smoke -- --route …`, o usar el workflow **AI live smoke test**: `route` vacío cubre el barrido completo y `provider:model` aísla una route. Un HTTP smoke en verde **no** modifica las prioridades del pool.
 17. Ejecutar **AI live qualification** (`npm run ai:qualify -- --providers kilo,openrouter`) contra el mismo dataset de producción antes de reordenar esas rutas (Kilo no tiene modelos activos).
