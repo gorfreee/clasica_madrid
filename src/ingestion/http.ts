@@ -102,7 +102,8 @@ export type FetchRelayTarget = {
  * `direct-then-relay` try the origin first and use the Worker only after a
  * recoverable block (202/403/408/429/5xx/timeout/fetch-failed). Callers keep
  * passing the official source URL; this function never rewrites it into a
- * workers.dev address. CNDM uses relay-then-direct after a recoverable relay failure. Error statuses are never retried on relay-only hosts,
+ * workers.dev address. CNDM uses relay-then-direct after a recoverable relay failure.
+ * Teatros Canal and Teatro Auditorio Escorial use direct-then-relay. Error statuses are never retried on relay-only hosts,
  * and a 403 on a direct-only host is never sent to the relay.
  *
  * Native fetch does not persist Set-Cookie across redirects. www.march.es

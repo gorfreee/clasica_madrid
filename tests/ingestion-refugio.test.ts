@@ -893,6 +893,8 @@ describe('Real Hermandad del Refugio no cambia el transporte de otras fuentes', 
       'cndm.inaem.gob.es',
       'teatrodelazarzuela.inaem.gob.es',
       'www.march.es',
+      'www.teatroauditorioescorial.es',
+      'www.teatroscanal.com',
     ]);
     expect(getSourceDefinition('fundacion-juan-march').useFetchRelay).toBe(true);
     expect(getSourceDefinition('teatro-zarzuela').useFetchRelay).toBe(true);
