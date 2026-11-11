@@ -231,7 +231,7 @@ El artifact `discovery-run-<run_id>-<attempt>` incluye el batch exacto, `batch-m
 - repository variable `INGEST_FETCH_RELAY_URL`: URL del Worker (no es sensible). El pipeline sólo la usa para fuentes con `useFetchRelay` en el registry. Ausentes, el resto de fuentes no cambia; las fuentes con `useFetchRelay` fallan de forma visible, también dentro del `all` programado;
 - repository variable `INGESTION_AUTO_MERGE_ENABLED`: kill switch global; sólo el valor exacto `true` habilita auto-merge.
 
-El state persistente recupera `quota.json`, `cache/**` y `pending/**` mediante `actions/cache`. Cada run guarda una key inmutable y restaura la más reciente, incluido el prefijo legacy de Gemini durante la transición; `run.lock` nunca se persiste. Cada ejecución sube un artifact de observabilidad (`ingestion-run-<run_id>-<attempt>`) con retención de 90 días, incluso si la ingestión falla. Ese bundle no se commitea. El estado persistente del pool (`.local/ai/`) no forma parte del artifact.
+El state persistente recupera `quota.json`, `cache/**` y `pending/**` con `actions/cache/restore` y los guarda con `actions/cache/save` (el mismo commit fijado de `actions/cache` v5). No usa la acción combinada: su post-step sólo corre con `success()`, y un fallo de validación o de publicación del catálogo se dejaba sin guardar cuotas, caché ni pendientes de esa run. Cada ejecución usa una key inmutable (`ingestion-ai-<os>-<run_id>-<attempt>`) y restaura la más reciente de ese prefijo, incluido el legacy `ingestion-gemini-`. El guardado también corre tras ese fallo si el pool llegó a inicializarse y el árbol es válido; no persiste `run.lock`, temporales ni credenciales, no sube un `quota.json` inválido y no reinicia contadores. Si el propio guardado falla, el paso falla y el error original sigue visible. No reconstruye el estado que una run anterior ya perdió cuando ese post-step se omitió. El detalle ejecutable está en [`.github/workflows/ingestion.yml`](../.github/workflows/ingestion.yml) y [`.github/workflows/discovery.yml`](../.github/workflows/discovery.yml). Cada ejecución sube un artifact de observabilidad (`ingestion-run-<run_id>-<attempt>`) con retención de 90 días, incluso si la ingestión falla. Ese bundle no se commitea. El estado persistente del pool (`.local/ai/`) no forma parte del artifact.
 
 ### Dónde está una run
 
@@ -281,7 +281,7 @@ La trazabilidad por evento en `report.json` sigue `listing → observed → norm
 | Qué | Dónde | Para qué |
 |---|---|---|
 | Artifact de la run | Actions artifact, 90 días | Entender esa ejecución |
-| `quota.json`, `cache/**`, `pending/**` | `.local/ai/` vía `actions/cache` | Operar el pool de IA en la siguiente run |
+| `quota.json`, `cache/**`, `pending/**` | `.local/ai/` vía `actions/cache/restore` y `actions/cache/save` | Operar el pool de IA en la siguiente run |
 
 No conviertas el state del pool en historial de runs ni lo metas en el artifact.
 
@@ -294,7 +294,7 @@ No conviertas el state del pool en historial de runs ni lo metas en el artifact.
 - `clean` / `degraded`: con cambios crea una PR normal. El scheduled solicita auto-merge si el kill switch está activo; el manual publish necesita además `auto_merge=true`;
 - antes de solicitar squash auto-merge, el workflow espera la ejecución `pull_request` real de `ci.yml` para el SHA publicado y exige que termine verde.
 
-Ante un fallo, empieza por el Job Summary y el artifact de observabilidad. Si el push de `data/**` llegó al remoto pero `gh pr create` falló, el Job Summary deja branch, commit y un recetario de recuperación manual; no se crea una segunda PR automática si ya hay una de ingestión abierta. Si hay una PR de ingestión abierta, revísala y fusiónala o ciérrala antes de reintentar. Si el token expiró, rota `INGESTION_BOT_TOKEN`. Si el state restaurado está corrupto, no reinicies contadores a ciegas: conserva o recupera `quota.json`, o espera al siguiente reset diario antes de retirar el cache afectado. Un rerun es seguro porque no reutiliza `run.lock` y la reconciliación filtra reverificaciones sin cambios materiales.
+Ante un fallo, empieza por el Job Summary y el artifact de observabilidad. Si el push de `data/**` llegó al remoto pero `gh pr create` falló, el Job Summary deja branch, commit y un recetario de recuperación manual; no se crea una segunda PR automática si ya hay una de ingestión abierta. Si hay una PR de ingestión abierta, revísala y fusiónala o ciérrala antes de reintentar. Si el token expiró, rota `INGESTION_BOT_TOKEN`. Si el state restaurado está corrupto, no reinicies contadores a ciegas: conserva o recupera `quota.json`, o espera al siguiente reset diario antes de retirar el cache afectado. Si esta run inicializó el pool y el árbol sigue siendo válido, el workflow lo guarda aunque después falle la validación o la publicación. Un `quota.json` inválido o un `run.lock` presente no se suben y no se ponen a cero. El estado que una run anterior no llegó a guardar no está en el artifact. Un rerun es seguro porque no reutiliza `run.lock` y la reconciliación filtra reverificaciones sin cambios materiales.
 
 ## Candidatos JSON (legacy)
 

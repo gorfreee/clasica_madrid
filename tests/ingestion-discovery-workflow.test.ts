@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { assertAiPoolCacheCoherence, assertPersistentAiPoolCache } from './ai-pool-cache-workflow.ts';
 
 const workflowPath = path.join(import.meta.dirname, '..', '.github', 'workflows', 'discovery.yml');
 const ingestionPath = path.join(import.meta.dirname, '..', '.github', 'workflows', 'ingestion.yml');
@@ -38,7 +39,8 @@ describe('workflow Manual discovery', () => {
     expect(yaml).toContain('group: ingestion-production');
     expect(yaml).toContain('ingestion-ai-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}');
     expect(yaml).toContain('ingestion-gemini-${{ runner.os }}-');
-    expect(yaml).not.toContain('run.lock');
+    expect(yaml).toContain('actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5');
+    expect(yaml).toContain('actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5');
 
     for (const name of [
       'GEMINI_API_KEY',
@@ -138,6 +140,11 @@ describe('workflow Manual discovery', () => {
     });
     expect(Object.keys(discoveryPool).sort()).not.toEqual(Object.keys(productionFuture).sort());
   });
+
+  it('separa restore y save del estado de IA igual que Production ingestion', () => {
+    assertPersistentAiPoolCache(workflowPath);
+    assertAiPoolCacheCoherence(ingestionPath, workflowPath);
+  }, 120_000);
 });
 
 function section(yaml: string, name: string): string {

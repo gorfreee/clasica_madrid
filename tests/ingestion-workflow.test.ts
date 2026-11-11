@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { assertAiPoolCacheCoherence, assertPersistentAiPoolCache } from './ai-pool-cache-workflow.ts';
 
 const workflowPath = path.join(import.meta.dirname, '..', '.github', 'workflows', 'ingestion.yml');
 
@@ -37,7 +38,8 @@ describe('workflow de ingestión: artifact de observabilidad', () => {
     expect(aiState).toContain('.local/ai/cache/**');
     expect(aiState).toContain('.local/ai/pending/**');
     expect(aiState).toContain('ingestion-gemini-${{ runner.os }}-');
-    expect(aiState).not.toContain('run.lock');
+    expect(aiState).toContain('actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5');
+    expect(aiState).not.toMatch(/uses:\s*actions\/cache@/);
     expect(yaml).toContain('AI_PROVIDER: pool');
     expect(yaml).toContain("AI_ZERO_COST_ONLY: 'true'");
     expect(yaml).toContain('AI_STATE_DIR: ${{ github.workspace }}/.local/ai');
@@ -133,6 +135,15 @@ describe('workflow de ingestión: artifact de observabilidad', () => {
     expect(yaml).not.toMatch(/CLOUDFLARE_MIN_INTERVAL_MS:\s*['\"]?\d+/);
     expect(yaml).not.toMatch(/MISTRAL_MODELS:\s*['\"]?ministral/);
     expect(yaml).not.toMatch(/ZAI_MODELS:\s*['\"]?glm/);
+  });
+
+  it('separa restore y save del estado de IA y ejecuta la condición real', () => {
+    assertPersistentAiPoolCache(workflowPath);
+  }, 120_000);
+
+  it('mantiene el mismo contrato de cache que Manual discovery', async () => {
+    const discoveryPath = path.join(import.meta.dirname, '..', '.github', 'workflows', 'discovery.yml');
+    assertAiPoolCacheCoherence(workflowPath, discoveryPath);
   });
 });
 
