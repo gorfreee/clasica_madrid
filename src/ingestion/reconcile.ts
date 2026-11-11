@@ -16,6 +16,7 @@ import {
   exclusiveSlotKeys,
   matchEventIdentity,
   newObservationKeys,
+  preservePreciseVenue,
   slotIdentityVerdict,
   sharesObservedSourceIdentity,
 } from './identity.ts';
@@ -268,22 +269,26 @@ function prepareItem(
 ): PreparedItem {
   const event = observation.event;
   const venueMatch = matchVenue(venueHint(event), catalog);
+  const observedVenueId = venueMatch?.venue.id;
   const identity = matchEventIdentity(catalog, event, {
     catalogSourceId: observation.source.catalogSourceId,
-    venueId: venueMatch?.venue.id,
+    venueId: observedVenueId,
     aliases,
   });
+  const venueId = identity.kind === 'matched'
+    ? preservePreciseVenue(observedVenueId, identity.event.venueId, catalog.venues)
+    : observedVenueId;
   const skip =
     identity.kind === 'unmatched' ? newEventPublicationSkip(event, catalog, now, window) : undefined;
   const proposal = proposalFromObservation(event, {
     catalogSourceId: resolveCatalogSource(observation.source, catalog).id,
     now,
     window,
-    venueId: venueMatch?.venue.id,
-    venue: unpublishedMatchedVenue(venueMatch, catalog),
+    venueId,
+    venue: venueId === observedVenueId ? unpublishedMatchedVenue(venueMatch, catalog) : undefined,
     classification: observation.classification,
   });
-  return { observation, identity, venueId: venueMatch?.venue.id, venue: proposal.venue, proposal, skip };
+  return { observation, identity, venueId, venue: proposal.venue, proposal, skip };
 }
 
 function persistAction(existing: Event, incoming: Event): 'updated' | 'unchanged' {

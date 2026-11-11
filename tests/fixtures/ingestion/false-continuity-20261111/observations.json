@@ -1,0 +1,50 @@
+{
+  "ojem": {
+    "sourceId": "auditorio-nacional",
+    "sourceUrl": "https://auditorionacional.inaem.gob.es/es/programacion/orquesta-juvenil-europea-de-madrid-the-armed-man-a-mass-for-peace",
+    "externalId": "orquesta-juvenil-europea-de-madrid-the-armed-man-a-mass-for-peace",
+    "title": "Orquesta Juvenil Europea de Madrid. The Armed Man: A Mass For Peace",
+    "venueText": "Sala Sinfónica",
+    "occurrences": [{ "date": "2027-06-09", "time": "19:30" }],
+    "performers": [{ "name": "Adriana Tanus", "roleText": "director" }],
+    "composers": [{ "name": "K. Jenkins" }],
+    "works": [{ "title": "\"The armed man: una misa para la paz\"", "composerName": "K. Jenkins" }],
+    "publishedId": "evt_auditorio_nacional_ojem_the_armed_man_20270609"
+  },
+  "basilica": {
+    "sourceId": "basilica-san-miguel",
+    "sourceUrl": "https://basilicadesanmiguel.org/actividad/concierto-ecce-finem",
+    "externalId": "4871",
+    "title": "Concierto ECCE FINEM",
+    "occurrences": [{ "date": "2026-11-21", "time": "19:30" }],
+    "performers": [],
+    "composers": [],
+    "works": [],
+    "publishedId": "evt_basilica_san_miguel_ecce_finem_20261121"
+  },
+  "residencia": {
+    "sourceId": "residencia-estudiantes",
+    "sourceUrl": "https://residenciadeestudiantes.com/actividades/ecce-finem",
+    "externalId": "32405",
+    "title": "Ecce finem",
+    "venueText": "Residencia de Estudiantes",
+    "occurrences": [{ "date": "2026-11-22", "time": "18:00" }],
+    "performers": [{ "name": "Vetus Carmina" }],
+    "composers": [{ "name": "Johannes Ockeghem" }],
+    "works": [{ "title": "Kyrie: Fors seulement (c. 1470)", "composerName": "Johannes Ockeghem" }, { "title": "Lamentaciones alrededor del fuego (2026)", "composerName": "Andrés Poncela" }],
+    "publishedId": "evt_residencia_estudiantes_32405"
+  },
+  "larrochaNovember": {
+    "sourceId": "madrid-datos",
+    "sourceUrl": "https://www.madrid.es/sites/v/index.jsp?vgnextchannel=ca9671ee4a9eb410VgnVCM100000171f5a0aRCRD&vgnextoid=a8d5e042bd42d910VgnVCM200000f921e388RCRD",
+    "externalId": "50265531",
+    "title": "IV Edición Festival Alicia de Larrocha",
+    "venueText": "Centro Cultural Casa de Vacas (Retiro)",
+    "venueFacilityId": "1945",
+    "occurrences": [{ "date": "2026-11-14", "time": "19:00" }],
+    "performers": [],
+    "composers": [],
+    "works": [{ "title": "Alumnos del profesor Francisco Fierro" }],
+    "publishedId": "evt_madrid_datos_50265531"
+  }
+}

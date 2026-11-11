@@ -12,16 +12,35 @@ export function sourceIdentityCanRecycle(catalogSourceId: string): boolean {
 export type SourceIdentityVerdict = 'compatible' | 'incompatible' | 'review';
 
 /**
+ * How the observed place sits against the published one.
+ * `absent` is a missing id, not a different building.
+ * `refinement` is a child room of a published building.
+ * `coarser` is the building of a published room.
+ * `sibling` rooms share a parent and stay distinct.
+ */
+export type VenueRelation = 'same' | 'absent' | 'refinement' | 'coarser' | 'sibling' | 'unrelated';
+
+export function venueRelationFromIds(
+  observedVenueId?: string,
+  existingVenueId?: string,
+): VenueRelation {
+  if (!observedVenueId || !existingVenueId) return 'absent';
+  return observedVenueId === existingVenueId ? 'same' : 'unrelated';
+}
+
+/**
  * A source identifier is a candidate lookup, not proof of event continuity.
  * The same venue and slot can corroborate thin/category-only titles. Across
  * dates, require distinctive title/musical continuity AND observed evidence
  * of a correction/postponement. Missing facts are not contradictions.
+ * A coarser building is not a relocation of its published room.
  */
 export function compareRecyclableIdentity(
   observed: IdentityFacts,
   existing: Pick<IdentityFacts, 'title' | 'occurrences' | 'performers' | 'composers' | 'works'> & { status?: string },
   observedVenueId?: string,
   existingVenueId?: string,
+  relation: VenueRelation = venueRelationFromIds(observedVenueId, existingVenueId),
 ): SourceIdentityVerdict {
   const music = compareMusicalFacts(musicalFactsFrom(observed), musicalFactsFrom(existing));
   // Slot comparison also extracts names from titles. Category/editorial
@@ -37,10 +56,10 @@ export function compareRecyclableIdentity(
   const continuity = sameTitle || explicitMusic.kind === 'match' ||
     (Boolean(observedTitle && existingTitle) && music.kind === 'match');
   const reprogrammed = hasApplicableCalendarChange(observed, existing) || observed.eventStatus === 'postponed' || existing.status === 'postponed';
-  if (observedVenueId && existingVenueId && observedVenueId !== existingVenueId) {
+  if (relation === 'sibling' || relation === 'unrelated') {
     return continuity && reprogrammed ? 'compatible' : 'incompatible';
   }
-  const sameVenue = Boolean(observedVenueId && observedVenueId === existingVenueId);
+  const sameVenue = relation === 'same' || relation === 'refinement';
   const sameSlot = observed.occurrences.length > 0 && observed.occurrences.every((incoming) => existing.occurrences.some((previous) =>
     incoming.date === previous.date && (!incoming.time || !previous.time || incoming.time === previous.time),
   ));
@@ -61,14 +80,15 @@ export function compareSourceIdentity(
   existing: Parameters<typeof compareRecyclableIdentity>[1],
   observedVenueId?: string,
   existingVenueId?: string,
+  relation: VenueRelation = venueRelationFromIds(observedVenueId, existingVenueId),
 ): SourceIdentityVerdict {
   const explicitMusic = compareMusicalFacts(
     { ...musicalFactsFrom(observed), title: '' },
     { ...musicalFactsFrom(existing), title: '' },
   );
   const music = compareMusicalFacts(musicalFactsFrom(observed), musicalFactsFrom(existing));
-  const sameVenue = Boolean(observedVenueId && observedVenueId === existingVenueId);
-  const differentVenue = Boolean(observedVenueId && existingVenueId && observedVenueId !== existingVenueId);
+  const samePlace = relation === 'same' || relation === 'refinement';
+  const differentPlace = relation === 'sibling' || relation === 'unrelated';
   const sameDate = observed.occurrences.some(a => existing.occurrences.some(b => a.date === b.date));
   const sameSlot = observed.occurrences.some(a => existing.occurrences.some(b =>
     a.date === b.date && (!a.time || !b.time || a.time === b.time),
@@ -77,7 +97,9 @@ export function compareSourceIdentity(
   const sameTitle = Boolean(distinctiveTitle(observed.title)) &&
     distinctiveTitle(observed.title) === distinctiveTitle(existing.title);
   const continuity = sameTitle || explicitMusic.kind === 'match' ||
-    music.kind === 'match';
+    music.kind === 'match' ||
+    (explicitMusic.kind !== 'conflict' && music.kind !== 'conflict' &&
+      editorialTitlesCompatible(observed.title, existing.title));
   // dateFromDetail means the detail supplied a calendar, not that another
   // published performance was rescheduled. Require actual postponement evidence.
   const postponed = hasApplicableCalendarChange(observed, existing) || observed.eventStatus === 'postponed' || existing.status === 'postponed' ||
@@ -101,17 +123,51 @@ export function compareSourceIdentity(
           (incoming.time == null && existing.occurrences.filter(item => item.date === previous.date).length === 1)
         ),
       ));
-    if (!sameVenue || !coversPublishedSchedule) return 'review';
+    if (!samePlace || !coversPublishedSchedule) return 'review';
   }
-  if (differentVenue) {
+  // The building names the same concert as its published room when the
+  // music and the slot agree. It is not a move, and it does not identify
+  // a sibling room. A different day, or a cancellation, stays in review.
+  if (relation === 'coarser') {
+    const musicalContinuity = explicitMusic.kind === 'match' || music.kind === 'match';
+    if (musicalContinuity && sameSlot && observed.eventStatus !== 'cancelled') return 'compatible';
+    return 'review';
+  }
+  if (differentPlace) {
     if (continuity && postponed) return 'compatible';
     return hasDates && !sameDate ? 'incompatible' : 'review';
   }
-  if (sameVenue && sameSlot) return 'compatible';
+  if (samePlace && sameSlot) return 'compatible';
   if (continuity && (sameDate || postponed)) return 'compatible';
   // Different editorial titles without explicit incompatible music are not
   // enough to distinguish a new event from a correction.
   return 'review';
+}
+
+const EDITORIAL_TITLE_PREFIX = /^(?:concierto|recital|gala|actuacion)\s+/u;
+const EDITORIAL_TITLE_GLUE = new Set([
+  'a', 'de', 'del', 'el', 'en', 'la', 'las', 'los', 'para', 'the', 'un', 'una', 'y',
+]);
+
+/**
+ * «Concierto ECCE FINEM» and «Ecce finem — Vetus Carmina» share an editorial
+ * name. A generic label, or a single leftover token, does not.
+ */
+function editorialTitlesCompatible(left: string, right: string): boolean {
+  const a = editorialTitleCore(left);
+  const b = editorialTitleCore(right);
+  if (!a || !b) return false;
+  if (a === b) return true;
+  const [shorter, longer] = a.length <= b.length ? [a, b] : [b, a];
+  return longer.startsWith(`${shorter} `);
+}
+
+function editorialTitleCore(title: string): string {
+  const folded = normalizeText(title.replace(/^\[(?:aplazado|cancelado|pospuesto)\]\s*/iu, ''));
+  const tokens = folded.replace(EDITORIAL_TITLE_PREFIX, '').split(' ').filter((token) =>
+    token && !EDITORIAL_TITLE_GLUE.has(token) && !/^\d+$/.test(token));
+  if (tokens.length < 2) return '';
+  return tokens.join(' ');
 }
 
 function distinctiveTitle(title: string): string {

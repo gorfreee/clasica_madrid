@@ -49,6 +49,18 @@ const GENERIC_WORK_WORDS = new Set([
 const CATALOG_NUMBER =
   /\b(bwv|wwv|hwv|rwv|rv|k(?:v)?|hob|d|op(?:us)?|woo|sz|bb)\s*\.?\s*([a-z]?\s*\d+[a-z]?(?:\s*[:/]\s*\d+)?)/giu;
 
+/**
+ * Identidades revisadas contra el catálogo. No es un traductor ni un
+ * comparador aproximado: cualquier otra grafía sigue siendo distinta.
+ */
+const VERIFIED_COMPOSER_FORMS: readonly (readonly [string, string])[] = [
+  ['k jenkins', 'karl jenkins'],
+];
+
+const VERIFIED_WORK_CORES: readonly (readonly [string, string])[] = [
+  ['the armed man a mass for peace', 'the armed man una misa para la paz'],
+];
+
 export function compareMusicalFacts(left: MusicalFacts, right: MusicalFacts): SlotVerdict {
   const a = collectSignals(left);
   const b = collectSignals(right);
@@ -73,7 +85,11 @@ export function compareMusicalFacts(left: MusicalFacts, right: MusicalFacts): Sl
     return { kind: 'conflict', reasons: [`intérpretes incompatibles: ${summarize(a.performers)} vs ${summarize(b.performers)}`] };
   }
   if (workHits.length > 0) return { kind: 'match', reasons };
-  const workConflict = bothDistinctAndDisjoint(a.works, b.works, worksCompatible);
+  const workConflict = bothDistinctAndDisjoint(
+    worksForContradiction(left, a),
+    worksForContradiction(right, b),
+    worksCompatible,
+  );
   if (workConflict) {
     return { kind: 'conflict', reasons: [`obras incompatibles: ${summarize(a.works)} vs ${summarize(b.works)}`] };
   }
@@ -374,6 +390,7 @@ function worksCompatible(left: WorkSignal, right: WorkSignal): boolean {
   if (left.catalogs.some((item) => right.catalogs.includes(item))) return true;
   if (left.catalogs.length && right.catalogs.length) return false;
   if (!left.core || !right.core) return false;
+  if (verifiedPair(left.core, right.core, VERIFIED_WORK_CORES)) return true;
   if (left.core === right.core) {
     if (!signalGeneric(left) && !signalGeneric(right)) return true;
     return composersCompatible(left.composer ?? '', right.composer ?? '');
@@ -388,6 +405,9 @@ function worksCompatible(left: WorkSignal, right: WorkSignal): boolean {
 
 function composersCompatible(left: string, right: string): boolean {
   if (!left || !right) return false;
+  if (verifiedPair(normalizeText(stripYears(left)), normalizeText(stripYears(right)), VERIFIED_COMPOSER_FORMS)) {
+    return true;
+  }
   const knownLeft = matchComposer(left);
   const knownRight = matchComposer(right);
   if (knownLeft && knownRight) return knownLeft.canonicalName === knownRight.canonicalName;
@@ -428,6 +448,34 @@ function givenNamesCompatible(left: string[], right: string[]): boolean {
     if (other.length === 1 && token.startsWith(other)) return true;
     return false;
   });
+}
+
+/**
+ * «Concierto ECCE FINEM» nombra el evento. No es una obra que contradiga
+ * el repertorio publicado. «Concierto para…», un número de catálogo o un
+ * opus sí lo son.
+ */
+function isEditorialConcertTitle(title: string): boolean {
+  const folded = normalizeText(stripTitlePrefixes(title));
+  if (!/^(?:concierto|recital|gala|actuacion)\b/u.test(folded)) return false;
+  if (/^concierto\s+(?:para|en|n|no|num|op|opus)\b/u.test(folded)) return false;
+  if (catalogNumbers(title).length > 0) return false;
+  return true;
+}
+
+/** A title-only editorial label is absence, not an explicit programme. */
+function worksForContradiction(facts: MusicalFacts, signals: Signals): WorkSignal[] {
+  if (facts.works.length === 0 && isEditorialConcertTitle(facts.title)) return [];
+  return signals.works;
+}
+
+function verifiedPair(
+  left: string,
+  right: string,
+  pairs: readonly (readonly [string, string])[],
+): boolean {
+  if (!left || !right || left === right) return false;
+  return pairs.some(([a, b]) => (left === a && right === b) || (left === b && right === a));
 }
 
 function bothDistinctAndDisjoint<T>(
