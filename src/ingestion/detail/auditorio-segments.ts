@@ -68,13 +68,37 @@ const MOVEMENT_TEMPO =
 const STRONG_CATALOG =
   /\b(?:bwv|hwv|hob\.?|buxwv|swwv|rct|k\.?\s*\d|kv\.?\s*\d|op\.?\s*\d|opus\s+\d|g\.\s*\d|h\.?\s*\d{2,}|n[úu]m\.?\s*\d)\b/i;
 
+const ADMINISTRATIVE_HEADING = /^aviso importante[:.\s]*$/i;
+const ADMINISTRATIVE_APOLOGY = /^rogamos disculpen las molestias[.!?\s]*$/i;
+const STRIKE_NOTICE_OPENING = /^(?:ante|debido a) la huelga\b/i;
+
 const WORK_GENRE =
   /\b(?:concierto|concerto|sinfon[ií]a|symphony|sonata|suite|quinteto|cuarteto|cuartet|tr[ií]o|obertura|ouverture|r[eé]quiem|misa|missa|toccata|fuga|fugue|preludio|pr[eé]lude|nocturne|mazurka|scherzo|impromptu|variaciones|variations|cantata|oratorio|fantas[ií]a|romance|rhapsod|rapsodia|divertimento|polonesa|polonaise|cancionero)\b/i;
 
 const NAME_PARTICLE = /^(?:de|del|van|von|di|da|el|la|los|las)$/i;
 
 /**
+ * Administrative copy that must leave the programme before cast/repertoire
+ * segmentation. Postponement and cancellation lines stay notices. A catalogue
+ * or instrumentation title that merely shares the vocabulary does not.
+ * "Voces Huelgas" is not "huelga": the strike cue is a word, not a substring.
+ */
+export function looksLikeAuditorioAdministrativeNotice(text: string): boolean {
+  const cleaned = cleanLine(text);
+  if (!cleaned) return false;
+  if (looksLikeScheduleNotice(cleaned)) return true;
+  if (STRONG_CATALOG.test(cleaned) || looksLikeWorkInstrumentation(cleaned)) return false;
+  if (ADMINISTRATIVE_HEADING.test(cleaned) || ADMINISTRATIVE_APOLOGY.test(cleaned)) return true;
+  if (!STRIKE_NOTICE_OPENING.test(cleaned)) return false;
+  // The opening alone is not enough: a title may begin the same way.
+  // The run and the 11 Nov fichas also name the concert, the unions or the refund.
+  return /\b(?:concierto|sindical|cancelad|inaem|promotor|localidad|devoluci)/i.test(cleaned);
+}
+
+/**
  * Split Auditorio Nacional h4 lines into notice / cast / program.
+ * Administrative notices are removed before any repertoire frontier, so a
+ * strike warning cannot pull the following cast into the programme.
  * Consecutive blocks may all be cast; only a program header or musical evidence
  * opens the repertoire. Later blocks never leak back into the cast after that.
  * When the frontier is unclear, omit unlabeled names — precision over a full cast.
@@ -86,8 +110,8 @@ export function segmentAuditorioBlocks(blocks: string[][]): AuditorioSegments {
   for (const block of blocks) {
     const lines = block.map(cleanLine).filter(Boolean);
     if (lines.length === 0) continue;
-    const notices = lines.filter((line) => looksLikeScheduleNotice(line));
-    const content = lines.filter((line) => !looksLikeScheduleNotice(line));
+    const notices = lines.filter((line) => looksLikeAuditorioAdministrativeNotice(line));
+    const content = lines.filter((line) => !looksLikeAuditorioAdministrativeNotice(line));
     noticeLines.push(...notices);
     if (content.length > 0) contentBlocks.push(content);
   }
@@ -234,7 +258,7 @@ function parseSingleAuditorioPerson(
 ): { name: string; roleText?: string } | undefined {
   const cleaned = cleanLine(text);
   if (!cleaned) return undefined;
-  if (looksLikeScheduleNotice(cleaned) || looksLikeProgramHeader(cleaned)) return undefined;
+  if (looksLikeAuditorioAdministrativeNotice(cleaned) || looksLikeProgramHeader(cleaned)) return undefined;
   if (looksLikeRoleOnlyLine(cleaned) || isNonPersonComposerAttribution(cleaned)) return undefined;
   if (
     looksLikeMovementLine(cleaned) ||
@@ -640,7 +664,7 @@ export function looksLikeAuditorioRepertoireLine(text: string): boolean {
   if (!cleaned) return false;
   if (looksLikeProgramHeader(cleaned) || looksLikeRoleOnlyLine(cleaned)) return false;
   if (
-    looksLikeScheduleNotice(cleaned) ||
+    looksLikeAuditorioAdministrativeNotice(cleaned) ||
     looksLikeProductionNote(cleaned) ||
     looksLikeTextCredit(cleaned) ||
     looksLikeNonWorkCredit(cleaned)
@@ -845,7 +869,11 @@ function isComposerHeading(line: string): boolean {
 
 function looksLikeStrongWorkLine(text: string): boolean {
   const trimmed = text.trim();
-  if (!trimmed || looksLikeScheduleNotice(trimmed) || hasExplicitPerformerSignal(trimmed)) {
+  if (
+    !trimmed ||
+    looksLikeAuditorioAdministrativeNotice(trimmed) ||
+    hasExplicitPerformerSignal(trimmed)
+  ) {
     return false;
   }
   if (looksLikeRoleOnlyLine(trimmed) || looksLikeNonWorkCredit(trimmed)) return false;
@@ -859,6 +887,7 @@ function looksLikeStrongWorkLine(text: string): boolean {
 function looksLikeWorkishLine(text: string): boolean {
   const trimmed = text.trim();
   if (!trimmed) return false;
+  if (looksLikeAuditorioAdministrativeNotice(trimmed)) return false;
   if (hasExplicitPerformerSignal(trimmed) || looksLikeNonWorkCredit(trimmed)) return false;
   if (looksLikeRoleOnlyLine(trimmed) || looksLikeScheduleNotice(trimmed)) return false;
   if (ROLE_SUFFIX.test(trimmed) && !looksLikeWorkInstrumentation(trimmed) && !STRONG_CATALOG.test(trimmed)) {

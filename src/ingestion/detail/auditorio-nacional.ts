@@ -11,6 +11,7 @@ import {
   isBiographicalMononymHeading,
   isLinkedWorkDescriptor,
   isUnspecifiedRepertoireSupplement,
+  looksLikeAuditorioAdministrativeNotice,
   looksLikeComposerNameList,
   looksLikeKnownComposerPairHeading,
   looksLikeNameListContinuation,
@@ -37,7 +38,6 @@ import {
   looksLikeProductionNote,
   looksLikeProgramHeader,
   looksLikeProgramLabel,
-  looksLikeScheduleNotice,
   looksLikeTextCredit,
   looksLikeUnequivocalWorkLine,
   looksLikeWorkLine,
@@ -89,7 +89,10 @@ function parseProduction(html: string): ObservedFactPatch {
 
   const segments = segmentAuditorioBlocks(blocks);
   const calendar = auditorioDetailCalendar(html);
-  // A notice's date and clock need their original order (before segmentation).
+  // Notices are segmented out of the programme first, but the calendar still
+  // reads every h4 line in document order. A postponement date and clock have
+  // to stay in that original sequence; a strike warning stays evidence and
+  // does not become a work.
   // Explicit per-session status identifies which old slot was postponed.
   const noticeText = blocks.flat().join('. ');
   const schedule = resolvePostponementSchedule(
@@ -208,7 +211,13 @@ function parseComposerDashWork(text: string): ObservedWork {
 function worksFromProgramLines(lines: string[]): { works: ObservedWork[]; extraComposers: ObservedComposer[] } {
   const usable = lines
     .map((line) => stripEditorialNoteMarkers(line))
-    .filter((line) => line && !isEditorialNoteLegend(line) && !isEditionMetadataLine(line));
+    .filter(
+      (line) =>
+        line &&
+        !isEditorialNoteLegend(line) &&
+        !isEditionMetadataLine(line) &&
+        !looksLikeAuditorioAdministrativeNotice(line),
+    );
   if (usable.length === 0) return { works: [], extraComposers: [] };
   const grouped = groupWorksByComposer(usable);
   if (grouped.works.length > 0 || grouped.extraComposers.length > 0) {
@@ -452,7 +461,7 @@ function isEditionMetadataLine(line: string): boolean {
 
 function repertoireProgramLines(lines: string[]): string[] {
   return lines.filter((line) => {
-    if (looksLikeScheduleNotice(line) || isEditionMetadataLine(line)) return false;
+    if (looksLikeAuditorioAdministrativeNotice(line) || isEditionMetadataLine(line)) return false;
     if (looksLikeProductionNote(line) || looksLikeTextCredit(line)) return false;
     if (looksLikeUnequivocalWorkLine(line) || parseExplicitTitleAuthorWork(line)) return true;
     if (parseWorkThenPersonCredit(line) || parseComposerColonWork(line) || parseComposerYearWork(line)) {
