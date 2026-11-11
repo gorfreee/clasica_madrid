@@ -89,6 +89,7 @@ const ALTERNATIVE_VENUE_IDS = new Set([
   'ven_palacio_real_madrid_capilla_real',
   'ven_palacio_real_madrid_salon_columnas',
   'ven_hinves_pianos',
+  'ven_shigeru_kawai_center',
   'ven_basilica_monasterio_san_lorenzo_escorial',
 ]);
 

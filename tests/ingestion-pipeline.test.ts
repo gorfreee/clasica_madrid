@@ -60,7 +60,13 @@ async function fileExists(filePath: string): Promise<boolean> {
   }
 }
 
+function emptyEutherpeListing(): string {
+  const cells = Array.from({ length: 30 }, (_, index) => `<div class="collection-item-5"><div class="dia"><a href="#" class="link-10">${index + 1}</a></div></div>`).join('');
+  return `<html data-wf-domain="www.fundacioneutherpe.com"><body><h1>Ciclo en Shigeru Kawai Center, Madrid 2027</h1><div class="bloque-meses"><div class="w-slide"><div class="link-calendario-b">Septiembre / 2026</div><div class="calendario">${cells}</div></div></div><div class="collection-list-wrapper w-dyn-list"><div class="w-dyn-empty"></div></div></body></html>`;
+}
+
 async function fixtureGet(url: string): Promise<string> {
+  if (url === 'https://www.fundacioneutherpe.com/programacion-shigeru-kawai-madrid') return emptyEutherpeListing();
   if (url === 'https://www.circulobellasartes.com/eventos/') {
     return '<body class="archive category category-eventos category-63 fl-theme-builder-archive-categoria-evento-es"><h1>Eventos</h1><div class="fl-post-grid" itemscope="itemscope" itemtype="https://schema.org/Collection"></div><a class="fl-button" href="pasado/"><span class="fl-button-text">Ver el histórico de Eventos</span></a></body>';
   }
@@ -255,7 +261,7 @@ describe('aislamiento de fallos por fuente', () => {
       'orquesta-ciudad-getafe',
       'fundacion-cultural-las-rozas',
     ]);
-    expect(run.summary.sourcesSucceeded).toEqual(['auditorio-nacional', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes', 'fundacion-goethe', 'madrid-a-tempo', 'ateneo-madrid', 'rcsmm', 'tala-producciones', 'coro-camara-madrid', 'teatro-auditorio-escorial']);
+    expect(run.summary.sourcesSucceeded).toEqual(['auditorio-nacional', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes', 'fundacion-goethe', 'madrid-a-tempo', 'ateneo-madrid', 'rcsmm', 'tala-producciones', 'coro-camara-madrid', 'teatro-auditorio-escorial', 'fundacion-eutherpe']);
     expect(run.rawEvents.length).toBeGreaterThan(0);
     expect(run.rawEvents.some((event) => event.sourceId === 'teatro-real')).toBe(false);
     expect(run.summary.written).toEqual([]);
@@ -275,7 +281,7 @@ describe('aislamiento de fallos por fuente', () => {
     });
     expect(run.summary.sourcesSucceeded).toEqual([]);
     expect(run.summary.sourcesFailed.map((item) => item.sourceId)).toEqual([
-      'auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes', 'fundacion-goethe', 'madrid-a-tempo', 'patrimonio-nacional', 'ateneo-madrid', 'escuela-reina-sofia', 'rcsmm', 'tala-producciones', 'coro-camara-madrid', 'residencia-estudiantes', 'condeduque', 'ayto-san-lorenzo', 'teatro-auditorio-escorial', 'culturalcala', 'orquesta-ciudad-getafe', 'fundacion-cultural-las-rozas',
+      'auditorio-nacional', 'teatro-real', 'madrid-datos', 'teatro-zarzuela', 'fundacion-juan-march', 'fundacion-orcam', 'orquesta-coro-rtve', 'teatros-canal', 'fundacion-canal', 'circulo-bellas-artes', 'cndm', 'basilica-san-miguel', 'fundacion-piu-mosso', 'real-hermandad-refugio', 'real-academia-bellas-artes', 'fundacion-goethe', 'madrid-a-tempo', 'patrimonio-nacional', 'ateneo-madrid', 'escuela-reina-sofia', 'rcsmm', 'tala-producciones', 'coro-camara-madrid', 'residencia-estudiantes', 'condeduque', 'ayto-san-lorenzo', 'teatro-auditorio-escorial', 'culturalcala', 'orquesta-ciudad-getafe', 'fundacion-cultural-las-rozas', 'fundacion-eutherpe',
     ]);
     expect(run.summary.written).toEqual([]);
     expect(run.apply.report.ok).toBe(true);

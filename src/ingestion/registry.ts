@@ -1,3 +1,4 @@
+import { fundacionEutherpeAdapter } from './sources/fundacion-eutherpe.ts';
 import type { Catalog } from '../lib/domain/catalog.ts';
 import type { Source } from '../lib/schemas/index.ts';
 import { auditorioNacionalAdapter } from './sources/auditorio-nacional.ts';
@@ -34,6 +35,7 @@ import { fundacionCulturalLasRozasAdapter } from './sources/fundacion-cultural-l
 import type { PipelineSource, SourceAdapter, SourceDefinition } from './types.ts';
 
 const ADAPTERS: Record<string, SourceAdapter> = {
+  [fundacionEutherpeAdapter.id]: fundacionEutherpeAdapter,
   [orquestaCoroRtveAdapter.id]: orquestaCoroRtveAdapter,
   [fundacionCanalAdapter.id]: fundacionCanalAdapter,
   [circuloBellasArtesAdapter.id]: circuloBellasArtesAdapter,
@@ -554,6 +556,23 @@ export const SOURCE_REGISTRY: SourceDefinition[] = [
       name: 'Fundación Cultural Las Rozas',
       kind: 'official',
       url: 'https://fundacionculturalasrozas.org/',
+    },
+  },
+  {
+    id: 'fundacion-eutherpe',
+    name: 'Fundación Eutherpe',
+    urls: [
+      'https://www.fundacioneutherpe.com/programacion-shigeru-kawai-madrid',
+    ],
+    adapterId: fundacionEutherpeAdapter.id,
+    catalogSourceId: 'src_fundacion_eutherpe',
+    seedSource: {
+      schemaVersion: 1,
+      id: 'src_fundacion_eutherpe',
+      slug: 'fundacion-eutherpe',
+      name: 'Fundación Eutherpe',
+      kind: 'official',
+      url: 'https://www.fundacioneutherpe.com/',
     },
   },
 ];
